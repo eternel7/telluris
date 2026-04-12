@@ -524,7 +524,8 @@ function findPath(start, target, mover) {
 
         for (const nb of neighbors) {
             if (nb.r < 0 || nb.r >= ROWS || nb.c < 0 || nb.c >= COLS) continue;
-            if (map[nb.r][nb.c] === 1) continue;
+            if (map[nb.r][nb.c] === 1) continue; // Mur : toujours bloqué
+            if (map[nb.r][nb.c] === 2) continue; // Porte fermée : bloqué pour le calcul de chemin direct
             if (closedList.has(`${nb.r},${nb.c}`)) continue;
 
             const occ = entityAt(nb.r, nb.c);
@@ -566,7 +567,23 @@ function renderAll() {
 
       const t = map[r][c];
       if (t === 1) cell.classList.add('wall');
-      else if (t === 2) { cell.classList.add('door'); cell.innerHTML = '<span style="font-size:18px;opacity:0.7">🚪</span>'; }
+      else if (t === 2) { 
+	    cell.classList.add('door'); 
+	    cell.innerHTML = '<span style="font-size:18px;opacity:0.9">🚪</span>';
+		//Highlight visuel si porte adjancente et assez de point d'action
+        const dist = Math.abs(r - player.row) + Math.abs(c - player.col);
+        if (dist === 1 && player.ap >= 1) {
+            cell.style.boxShadow = "inset 0 0 10px var(--gold)";
+        }
+	  } else if (t === 3) { 
+	    cell.classList.add('door'); 
+	    cell.innerHTML = '<span style="font-size:18px;opacity:0.3">🚪</span>';
+		//Highlight visuel si porte adjancente et assez de point d'action
+        const dist = Math.abs(r - player.row) + Math.abs(c - player.col);
+        if (dist === 1 && player.ap >= 1) {
+            cell.style.boxShadow = "inset 0 0 10px var(--gold)";
+        }
+	  }
 
       // Highlights
       if (selectedEntity && selectedEntity.type === 'player' && t !== 1 && player.ap > 0) {
@@ -659,14 +676,43 @@ function onCellClick(r, c) {
   }
 
   if (!selectedEntity || selectedEntity !== player) return;
-
+  
+  // ouverture d'une porte
+  var dorState = map[r][c];
+  if (mode === 'move' && (dorState === 2 || dorState === 3)) {
+    const dist = Math.abs(r - player.row) + Math.abs(c - player.col);
+    if (dist === 1) { // Adjacente
+      if (player.ap >= 1) {	  
+        if(dorState === 2) {
+		    map[r][c] = 3; // La porte devient une porte ouverte 
+		    addLog(`🚪 Aldric ouvre la porte.`, 'move');
+        } else if(dorState === 3) {
+		    map[r][c] = 2; // La porte devient une porte fermee 
+		    addLog(`🚪 Aldric ferme la porte.`, 'move');
+        }
+        player.ap--;
+        renderAll(); updateUI();
+        if (player.ap <= 0) {
+		  setTimeout(endPlayerTurn, 600);
+		  return;
+		}
+      } else {
+        addLog(`Pas assez de PA pour manipuler la porte !`, '');
+		return;
+      }
+    } else if(dorState === 2) {
+      addLog(`Trop loin pour ouvrir cette porte.`, '');
+    }
+    return;
+  }
+  
   // Move
   if (mode === 'move') {
     const d = Math.abs(r - player.row) + Math.abs(c - player.col);
     if (map[r][c] !== 1 && !entityAt(r, c) && d <= player.mvt) {
 	  if (player.ap <= 0) { 
-	  addLog('Plus d\'actions pour se déplacer !', ''); 
-	  setTimeout(endPlayerTurn, 600); return; 
+	    addLog('Plus d\'actions pour se déplacer !', ''); 
+	    setTimeout(endPlayerTurn, 600); return; 
 	  }
       player.row = r; player.col = c;
       addLog(`⚔ Aldric se déplace en [${r},${c}].`, 'move');
