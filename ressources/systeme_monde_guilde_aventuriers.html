@@ -1,0 +1,161 @@
+
+<style>
+.zone-label { font-size: 11px; }
+.ring { fill: none; stroke-width: 0.5; }
+</style>
+<svg width="100%" viewBox="0 0 680 620" role="img">
+  <title>Système monde — cités-états, guilde et gradient de danger</title>
+  <desc>Schéma concentrique du gradient de danger depuis la cité-état, avec les rangs de la guilde et l'infrastructure routière.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════
+       PARTIE GAUCHE : gradient concentrique de danger
+       Centre à x=210, y=290
+  ════════════════════════════════════════════════ -->
+
+  <!-- Zone 5 : Terres sauvages (la plus grande) -->
+  <circle cx="210" cy="290" r="200" fill="#F09595" opacity="0.18"/>
+  <!-- Zone 4 : Borderlands -->
+  <circle cx="210" cy="290" r="155" fill="#FAC775" opacity="0.22"/>
+  <!-- Zone 3 : Campagne -->
+  <circle cx="210" cy="290" r="115" fill="#C0DD97" opacity="0.28"/>
+  <!-- Zone 2 : Faubourgs -->
+  <circle cx="210" cy="290" r="78" fill="#9FE1CB" opacity="0.35"/>
+  <!-- Zone 1 : Cité-état (noyau) -->
+  <circle cx="210" cy="290" r="44" fill="#CECBF6" opacity="0.7"/>
+
+  <!-- Anneaux de délimitation -->
+  <circle cx="210" cy="290" r="200" class="ring" stroke="#E24B4A" opacity="0.35"/>
+  <circle cx="210" cy="290" r="155" class="ring" stroke="#BA7517" opacity="0.4"/>
+  <circle cx="210" cy="290" r="115" class="ring" stroke="#3B6D11" opacity="0.4"/>
+  <circle cx="210" cy="290" r="78"  class="ring" stroke="#0F6E56" opacity="0.45"/>
+  <circle cx="210" cy="290" r="44"  class="ring" stroke="#534AB7" opacity="0.6"/>
+
+  <!-- Cité centrale -->
+  <rect x="196" y="276" width="28" height="28" rx="4" fill="#7F77DD" opacity="0.9"/>
+  <text class="th" x="210" y="297" text-anchor="middle" style="font-size:11px;fill:#26215C">🏰</text>
+
+  <!-- Routes rayonnantes (4 axes) -->
+  <line x1="210" y1="246" x2="210" y2="95"  stroke="#888780" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6"/>
+  <line x1="210" y1="334" x2="210" y2="488" stroke="#888780" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6"/>
+  <line x1="166" y1="290" x2="12"  y2="290" stroke="#888780" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6"/>
+  <line x1="254" y1="290" x2="408" y2="290" stroke="#888780" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6"/>
+
+  <!-- Auberges fortes sur les routes -->
+  <rect x="202" y="174" width="16" height="12" rx="2" fill="#5F5E5A" opacity="0.75"/>
+  <text class="ts" x="210" y="170" text-anchor="middle" style="font-size:9px;fill:var(--color-text-secondary)">Auberge</text>
+  <rect x="202" y="384" width="16" height="12" rx="2" fill="#5F5E5A" opacity="0.75"/>
+  <rect x="90"  y="284" width="16" height="12" rx="2" fill="#5F5E5A" opacity="0.75"/>
+  <rect x="322" y="284" width="16" height="12" rx="2" fill="#5F5E5A" opacity="0.75"/>
+
+  <!-- Village -->
+  <circle cx="148" cy="232" r="7" fill="#639922" opacity="0.8"/>
+  <text class="ts" x="138" y="222" text-anchor="middle" style="font-size:9px;fill:var(--color-text-secondary)">Village</text>
+  <circle cx="275" cy="348" r="7" fill="#639922" opacity="0.8"/>
+
+  <!-- Hameau -->
+  <circle cx="110" cy="195" r="4" fill="#3B6D11" opacity="0.7"/>
+  <text class="ts" x="100" y="186" text-anchor="middle" style="font-size:9px;fill:var(--color-text-secondary)">Hameau</text>
+  <circle cx="310" cy="210" r="4" fill="#3B6D11" opacity="0.7"/>
+
+  <!-- Donjon -->
+  <polygon points="155,360 162,373 148,373" fill="#791F1F" opacity="0.85"/>
+  <text class="ts" x="155" y="384" text-anchor="middle" style="font-size:9px;fill:#A32D2D">Donjon</text>
+
+  <!-- Labels des zones (droite du cercle) -->
+  <text class="ts" x="418" y="294" style="font-size:10px;fill:var(--color-text-secondary)">← Terres sauvages (SSS)</text>
+  <text class="ts" x="368" y="260" style="font-size:10px;fill:#BA7517">← Borderlands (A–S)</text>
+  <text class="ts" x="328" y="234" style="font-size:10px;fill:#3B6D11">← Campagne (C–B)</text>
+  <text class="ts" x="290" y="218" style="font-size:10px;fill:#0F6E56">← Faubourgs (F–D)</text>
+  <text class="ts" x="256" y="210" style="font-size:10px;fill:#534AB7">← Cité</text>
+
+  <!-- Titre zone gauche -->
+  <text class="th" x="210" y="510" text-anchor="middle" style="font-size:12px;fill:var(--color-text-primary)">Gradient de danger</text>
+  <text class="ts" x="210" y="526" text-anchor="middle">depuis la cité-état</text>
+
+  <!-- ══════════════════════════════════════════════
+       SÉPARATEUR
+  ════════════════════════════════════════════════ -->
+  <line x1="430" y1="30" x2="430" y2="590" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+
+  <!-- ══════════════════════════════════════════════
+       PARTIE DROITE : Tableau des rangs de la Guilde
+  ════════════════════════════════════════════════ -->
+  <text class="th" x="555" y="52" text-anchor="middle">Rangs de la Guilde</text>
+  <text class="ts" x="555" y="68" text-anchor="middle">des Aventuriers</text>
+
+  <!-- Colonnes header -->
+  <rect x="440" y="78" width="230" height="22" rx="4" fill="var(--color-background-secondary)"/>
+  <text class="ts" x="478" y="93" text-anchor="middle" style="font-weight:500">Rang</text>
+  <text class="ts" x="540" y="93" text-anchor="middle" style="font-weight:500">Niveaux</text>
+  <text class="ts" x="610" y="93" text-anchor="middle" style="font-weight:500">Quêtes</text>
+
+  <!-- Lignes des rangs -->
+  <!-- Cuivre -->
+  <rect x="440" y="102" width="230" height="32" rx="4" fill="#F5C4B3" opacity="0.5"/>
+  <text class="ts" x="478" y="122" text-anchor="middle" style="fill:#993C1D;font-weight:500">⬡ Cuivre</text>
+  <text class="ts" x="540" y="122" text-anchor="middle">3 – 6</text>
+  <text class="ts" x="610" y="122" text-anchor="middle">F · E · D</text>
+
+  <!-- Fer -->
+  <rect x="440" y="136" width="230" height="32" rx="4" fill="#D3D1C7" opacity="0.55"/>
+  <text class="ts" x="478" y="156" text-anchor="middle" style="fill:#444441;font-weight:500">⬡ Fer</text>
+  <text class="ts" x="540" y="156" text-anchor="middle">6 – 9</text>
+  <text class="ts" x="610" y="156" text-anchor="middle">D · C · B</text>
+
+  <!-- Argent -->
+  <rect x="440" y="170" width="230" height="32" rx="4" fill="#B5D4F4" opacity="0.5"/>
+  <text class="ts" x="478" y="190" text-anchor="middle" style="fill:#185FA5;font-weight:500">⬡ Argent</text>
+  <text class="ts" x="540" y="190" text-anchor="middle">9 – 12</text>
+  <text class="ts" x="610" y="190" text-anchor="middle">C · B · A</text>
+
+  <!-- Or -->
+  <rect x="440" y="204" width="230" height="32" rx="4" fill="#FAC775" opacity="0.45"/>
+  <text class="ts" x="478" y="224" text-anchor="middle" style="fill:#854F0B;font-weight:500">⬡ Or</text>
+  <text class="ts" x="540" y="224" text-anchor="middle">13 – 16</text>
+  <text class="ts" x="610" y="224" text-anchor="middle">B · A · S</text>
+
+  <!-- Platine -->
+  <rect x="440" y="238" width="230" height="32" rx="4" fill="#9FE1CB" opacity="0.45"/>
+  <text class="ts" x="478" y="258" text-anchor="middle" style="fill:#085041;font-weight:500">⬡ Platine</text>
+  <text class="ts" x="540" y="258" text-anchor="middle">17 – 20</text>
+  <text class="ts" x="610" y="258" text-anchor="middle">A · S · SS</text>
+
+  <!-- Mythril -->
+  <rect x="440" y="272" width="230" height="32" rx="4" fill="#CECBF6" opacity="0.5"/>
+  <text class="ts" x="478" y="292" text-anchor="middle" style="fill:#3C3489;font-weight:500">⬡ Mythril</text>
+  <text class="ts" x="540" y="292" text-anchor="middle">21 – 24</text>
+  <text class="ts" x="610" y="292" text-anchor="middle">S · SS · SSS</text>
+
+  <!-- Orichalcum -->
+  <rect x="440" y="306" width="230" height="32" rx="4" fill="#F7C1C1" opacity="0.45"/>
+  <text class="ts" x="478" y="326" text-anchor="middle" style="fill:#791F1F;font-weight:500">⬡ Orichalcum</text>
+  <text class="ts" x="540" y="326" text-anchor="middle">25 – 27</text>
+  <text class="ts" x="610" y="326" text-anchor="middle">SS · SSS</text>
+
+  <!-- Adamantite -->
+  <rect x="440" y="340" width="230" height="36" rx="4" fill="#2C2C2A" opacity="0.75"/>
+  <text class="ts" x="478" y="362" text-anchor="middle" style="fill:#D3D1C7;font-weight:500">⬡ Adamantite</text>
+  <text class="ts" x="540" y="362" text-anchor="middle" style="fill:#D3D1C7">28 – 31</text>
+  <text class="ts" x="610" y="362" text-anchor="middle" style="fill:#FAC775">SSS · SSS+</text>
+
+  <!-- Note SSS+ -->
+  <rect x="440" y="388" width="230" height="52" rx="6" fill="var(--color-background-secondary)"/>
+  <text class="ts" x="555" y="406" text-anchor="middle" style="fill:#E24B4A;font-weight:500">⚠ Quête SSS+</text>
+  <text class="ts" x="555" y="422" text-anchor="middle">Survie de la cité-état</text>
+  <text class="ts" x="555" y="438" text-anchor="middle">Toute la guilde mobilisée</text>
+
+  <!-- Admission -->
+  <rect x="440" y="454" width="230" height="66" rx="6" fill="var(--color-background-secondary)"/>
+  <text class="ts" x="555" y="472" text-anchor="middle" style="font-weight:500">Admission à la Guilde</text>
+  <text class="ts" x="555" y="490" text-anchor="middle">Épreuve de valeur requise</text>
+  <text class="ts" x="555" y="508" text-anchor="middle">Premières quêtes hors remparts</text>
+  <text class="ts" x="555" y="524" text-anchor="middle">Parrain aventurier conseillé</text>
+
+  <!-- Titre général -->
+  <text class="th" x="340" y="590" text-anchor="middle" style="font-size:11px;fill:var(--color-text-secondary)">Monde Terra Fantasia — Cités-États sur géographie terrestre réelle</text>
+</svg>

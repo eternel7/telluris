@@ -1,0 +1,872 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --stone: #1a1612;
+    --stone2: #231f1a;
+    --stone3: #2e2820;
+    --parch: #c8a96e;
+    --parch2: #e8c987;
+    --gold: #c9922a;
+    --gold2: #f0c04a;
+    --blood: #8b1a1a;
+    --blood2: #c0392b;
+    --steel: #7a8fa0;
+    --steel2: #a8bfcc;
+    --moss: #4a6741;
+    --moss2: #6a9460;
+    --shadow: rgba(0,0,0,0.7);
+    --cell: 52px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--stone);
+    font-family: 'Crimson Pro', Georgia, serif;
+    color: var(--parch);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── LAYOUT ── */
+  .arena {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    grid-template-rows: auto 1fr auto;
+    gap: 0;
+    min-height: 100vh;
+    padding: 12px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 10px 0 8px;
+    border-bottom: 1px solid var(--gold);
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    letter-spacing: 4px;
+    color: var(--gold2);
+    text-shadow: 0 0 20px rgba(201,146,42,0.4);
+  }
+  .header p { font-size: 11px; color: var(--steel); letter-spacing: 2px; margin-top: 2px; font-style: italic; }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--stone2);
+    border: 1px solid rgba(201,146,42,0.25);
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    border-bottom: 1px solid rgba(201,146,42,0.2);
+    padding-bottom: 5px;
+    text-align: center;
+  }
+
+  /* ── STAT BARS ── */
+  .stat-row { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--steel2); letter-spacing: 1px; }
+  .stat-label span:last-child { color: var(--parch2); font-weight: 600; }
+  .bar-bg { background: var(--stone3); height: 6px; border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+  .bar-hp { background: linear-gradient(90deg, var(--blood), var(--blood2)); }
+  .bar-ac { background: linear-gradient(90deg, #445, var(--steel)); }
+  .bar-str { background: linear-gradient(90deg, #8b4513, #cd853f); }
+  .bar-agi { background: linear-gradient(90deg, var(--moss), var(--moss2)); }
+
+  /* ── CHARACTER CARD ── */
+  .char-name {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--parch2);
+    text-align: center;
+    line-height: 1.2;
+  }
+  .char-voc {
+    font-size: 10px;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 2px;
+  }
+  .char-race {
+    font-size: 9px;
+    color: var(--steel);
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* ── GRID ── */
+  .grid-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    position: relative;
+  }
+
+  .dungeon-grid {
+    display: grid;
+    grid-template-columns: repeat(12, var(--cell));
+    grid-template-rows: repeat(9, var(--cell));
+    gap: 1px;
+    background: #0d0a07;
+    border: 2px solid rgba(201,146,42,0.3);
+    box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 60px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .cell {
+    width: var(--cell);
+    height: var(--cell);
+    background: var(--stone2);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+  .cell:hover { background: #3a3228; }
+  .cell.wall {
+    background: #0f0c09;
+    cursor: default;
+    background-image:
+      linear-gradient(45deg, #1a1410 25%, transparent 25%),
+      linear-gradient(-45deg, #1a1410 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #1a1410 75%),
+      linear-gradient(-45deg, transparent 75%, #1a1410 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+  }
+  .cell.wall:hover { background-color: #0f0c09; }
+  .cell.reachable { background: rgba(74,103,65,0.35); }
+  .cell.reachable:hover { background: rgba(74,103,65,0.6); }
+  .cell.attackable { background: rgba(139,26,26,0.35); }
+  .cell.attackable:hover { background: rgba(139,26,26,0.6); cursor: crosshair; }
+  .cell.selected { background: rgba(201,146,42,0.2); box-shadow: inset 0 0 0 1px var(--gold); }
+  .cell.door { background: #3a2a15; cursor: pointer; }
+
+  /* Pieces */
+  .piece {
+    font-size: 26px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+    z-index: 2;
+    transition: transform 0.2s;
+    pointer-events: none;
+  }
+  .piece.player { filter: drop-shadow(0 0 6px rgba(240,192,74,0.8)); }
+  .piece.enemy  { filter: drop-shadow(0 0 5px rgba(192,57,43,0.8)); }
+  .piece.selected-anim { animation: pulse 0.8s ease-in-out infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+  /* HP bar on cell */
+  .cell-hp {
+    position: absolute;
+    bottom: 2px;
+    left: 3px;
+    right: 3px;
+    height: 3px;
+    background: #111;
+    border-radius: 1px;
+    overflow: hidden;
+    z-index: 3;
+  }
+  .cell-hp-fill { height: 100%; transition: width 0.3s; }
+  .cell-hp-fill.player { background: var(--blood2); }
+  .cell-hp-fill.enemy  { background: var(--blood); }
+
+  /* Initiative badge */
+  .initiative-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 8px;
+    font-family: 'Cinzel', serif;
+    color: var(--gold2);
+    z-index: 4;
+    opacity: 0.8;
+  }
+
+  /* ── LOG ── */
+  .log {
+    grid-column: 1 / -1;
+    background: var(--stone2);
+    border: 1px solid rgba(201,146,42,0.2);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-top: 10px;
+    max-height: 90px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--steel2);
+    font-style: italic;
+  }
+  .log::-webkit-scrollbar { width: 4px; }
+  .log::-webkit-scrollbar-track { background: var(--stone); }
+  .log::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+  .log-entry { color: var(--steel2); }
+  .log-entry.hit { color: var(--parch2); }
+  .log-entry.kill { color: var(--blood2); font-weight: 600; font-style: normal; }
+  .log-entry.move { color: var(--moss2); }
+  .log-entry.turn { color: var(--gold); font-style: normal; letter-spacing: 1px; }
+
+  /* ── BUTTONS ── */
+  .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 5px 8px;
+    border: 1px solid rgba(201,146,42,0.4);
+    background: transparent;
+    color: var(--parch);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    flex: 1;
+  }
+  .btn:hover { background: rgba(201,146,42,0.15); color: var(--gold2); border-color: var(--gold); }
+  .btn:active { transform: scale(0.97); }
+  .btn.active { background: rgba(201,146,42,0.25); border-color: var(--gold2); color: var(--gold2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── PHASE INDICATOR ── */
+  .phase-row {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin: 4px 0;
+  }
+  .phase-dot {
+    font-size: 8px;
+    letter-spacing: 1px;
+    padding: 3px 6px;
+    border-radius: 10px;
+    border: 1px solid rgba(201,146,42,0.2);
+    color: var(--steel);
+  }
+  .phase-dot.active { background: rgba(201,146,42,0.2); color: var(--gold2); border-color: var(--gold); }
+
+  /* ── ENEMY LIST ── */
+  .enemy-entry {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 3px;
+    background: var(--stone3);
+    font-size: 10px;
+  }
+  .enemy-icon { font-size: 16px; }
+  .enemy-info { flex: 1; }
+  .enemy-name { color: var(--parch); font-size: 10px; }
+  .enemy-hp-bar { background: #111; height: 3px; border-radius: 1px; margin-top: 2px; }
+  .enemy-hp-fill { height: 100%; background: var(--blood); border-radius: 1px; transition: width 0.3s; }
+
+  /* Floating damage */
+  .dmg-float {
+    position: fixed;
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--blood2);
+    text-shadow: 0 0 10px rgba(192,57,43,0.8);
+    pointer-events: none;
+    z-index: 1000;
+    animation: floatUp 1.2s ease-out forwards;
+  }
+  .dmg-float.miss { color: var(--steel); font-size: 14px; }
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    60%  { opacity: 1; transform: translateY(-40px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-70px) scale(0.8); }
+  }
+
+  /* Overlay */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 500;
+    display: none;
+  }
+  .overlay.show { display: flex; }
+  .overlay-box {
+    background: var(--stone2);
+    border: 2px solid var(--gold);
+    padding: 30px 40px;
+    text-align: center;
+    border-radius: 4px;
+  }
+  .overlay-box h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 24px;
+    color: var(--gold2);
+    margin-bottom: 10px;
+  }
+  .overlay-box p { font-size: 13px; color: var(--steel2); margin-bottom: 20px; font-style: italic; }
+
+  /* Coord indicator */
+  .coord-hint {
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 9px;
+    color: var(--steel);
+    letter-spacing: 1px;
+    font-family: 'Cinzel', serif;
+  }
+</style>
+
+<div class="arena">
+  <!-- HEADER -->
+  <div class="header">
+    <h1>TELLURIS — COMBAT TACTIQUE</h1>
+    <p>tour par tour · grille de donjon · vocation guerrier</p>
+  </div>
+
+  <!-- LEFT PANEL : PLAYER -->
+  <div class="panel" id="player-panel">
+    <div class="panel-title">AVENTURIER</div>
+    <div class="char-name">Aldric von Brunn</div>
+    <div class="char-voc">⚔ GUERRIER · NIV.3</div>
+    <div class="char-race">Humain · Rang Cuivre</div>
+    <div class="stat-row">
+      <div class="stat-label"><span>PV</span><span id="p-hp-label">18 / 18</span></div>
+      <div class="bar-bg"><div class="bar-fill bar-hp" id="p-hp-bar" style="width:100%"></div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-label"><span>Force</span><span id="p-str">4</span></div>
+      <div class="bar-bg"><div class="bar-fill bar-str" style="width:80%"></div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-label"><span>Agilité</span><span id="p-agi">3</span></div>
+      <div class="bar-bg"><div class="bar-fill bar-agi" style="width:60%"></div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-label"><span>PA (Armure)</span><span>2</span></div>
+      <div class="bar-bg"><div class="bar-fill bar-ac" style="width:40%"></div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-label"><span>Actions</span><span id="p-ap">2 / 2</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="p-ap-bar" style="width:100%;background:var(--gold)"></div></div>
+    </div>
+    <div class="panel-title" style="margin-top:4px">APTITUDES</div>
+    <div style="font-size:9px;color:var(--steel2);line-height:1.6">
+      ⚔ Science de la parade<br>
+      🛡 Armes blanches niv.5<br>
+      🏃 Dépl. 4 cases/tour<br>
+      👁 Ligne de vue active
+    </div>
+    <div class="panel-title" style="margin-top:4px">ÉQUIPEMENT</div>
+    <div style="font-size:9px;color:var(--steel2);line-height:1.7">
+      🗡 Épée simple (+1 F)<br>
+      🛡 Écu (+1 PA, +4 parade)<br>
+      🧥 Cuirasse (PA 4, Ag-2)
+    </div>
+  </div>
+
+  <!-- CENTER : GRID -->
+  <div class="grid-wrap">
+    <div class="coord-hint" id="coord-hint">Sélectionne le guerrier ⚔ pour commencer</div>
+    <div class="dungeon-grid" id="grid"></div>
+  </div>
+
+  <!-- RIGHT PANEL : ENEMIES + ACTIONS -->
+  <div class="panel">
+    <div class="panel-title">ENNEMIS</div>
+    <div id="enemy-list"></div>
+
+    <div class="panel-title" style="margin-top:6px">PHASE</div>
+    <div class="phase-row" id="phase-row">
+      <div class="phase-dot active" id="ph-move">DÉPL.</div>
+      <div class="phase-dot" id="ph-attack">ATTAQUE</div>
+      <div class="phase-dot" id="ph-enemy">ENNEMI</div>
+    </div>
+
+    <div class="panel-title" style="margin-top:4px">ACTIONS</div>
+    <div class="btn-row">
+      <button class="btn active" id="btn-move" onclick="setMode('move')">🏃 DÉPL.</button>
+      <button class="btn" id="btn-attack" onclick="setMode('attack')">⚔ ATT.</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-defend" onclick="doDefend()">🛡 DÉFENSE</button>
+      <button class="btn" id="btn-pass" onclick="endPlayerTurn()">⏭ PASSER</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="resetGame()" style="flex:1;border-color:var(--blood)">↺ RESET</button>
+    </div>
+
+    <div class="panel-title" style="margin-top:4px">TOUR</div>
+    <div id="turn-counter" style="text-align:center;font-family:'Cinzel',serif;font-size:18px;color:var(--gold2)">1</div>
+    <div id="turn-who" style="text-align:center;font-size:9px;color:var(--steel);letter-spacing:2px">JOUEUR</div>
+
+    <div class="panel-title" style="margin-top:4px">RÉSUMÉ</div>
+    <div id="combat-summary" style="font-size:9px;color:var(--steel2);line-height:1.8">
+      Kills : <span id="stat-kills">0</span><br>
+      Dégâts infligés : <span id="stat-dmg">0</span><br>
+      Dégâts reçus : <span id="stat-rec">0</span><br>
+      Tours joués : <span id="stat-turns">1</span>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="log" id="log">
+    <div class="log-entry turn">— DÉBUT DU COMBAT — Aldric von Brunn entre dans le donjon...</div>
+    <div class="log-entry">Clique sur ⚔ pour sélectionner le guerrier, puis sur une case verte pour te déplacer.</div>
+  </div>
+</div>
+
+<!-- OVERLAY WIN/LOSE -->
+<div class="overlay" id="overlay">
+  <div class="overlay-box">
+    <h2 id="overlay-title">VICTOIRE</h2>
+    <p id="overlay-msg">Tous les ennemis ont été vaincus.</p>
+    <button class="btn" onclick="resetGame();document.getElementById('overlay').classList.remove('show')" style="margin-top:10px;padding:8px 20px">↺ REJOUER</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONSTANTES
+const COLS = 12, ROWS = 9;
+const ATK_RANGE = 1;
+
+// ═══════════════════════════════════════════════════════════
+// CARTE DU DONJON (0=sol, 1=mur, 2=porte)
+const MAP_TEMPLATE = [
+  [1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,0,0,0,2,0,0,0,0,0,1],
+  [1,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,0,0,0,1,1,2,1,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,2,1,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,1,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1],
+];
+
+// ═══════════════════════════════════════════════════════════
+// ÉTAT DU JEU
+let map, entities, player, selectedEntity, mode, turnCount;
+let stats = { kills:0, dmg:0, rec:0 };
+let enemyIdCounter = 0;
+
+function initEnemies() {
+  return [
+    { id: ++enemyIdCounter, type:'enemy', icon:'💀', name:'Squelette', mvt : 2, cc : 3, rc : 1, hp:8, maxHp:8, ac:1, str:2, agi:2, ap:1, maxAp:1, row:2, col:9, alive:true },
+    { id: ++enemyIdCounter, type:'enemy', icon:'🐀', name:'Rat géant', mvt : 4, cc : 4, rc : 0,  hp:5, maxHp:5, ac:0, str:2, agi:4, ap:2, maxAp:2, row:5, col:9, alive:true },
+    { id: ++enemyIdCounter, type:'enemy', icon:'💀', name:'Squelette', mvt : 2, cc : 3, rc : 1, hp:8, maxHp:8, ac:1, str:2, agi:2, ap:1, maxAp:1, row:7, col:8, alive:true },
+  ];
+}
+
+function resetGame() {
+  map = MAP_TEMPLATE.map(r => [...r]);
+  enemyIdCounter = 0;
+  const enemies = initEnemies();
+  player = { id:0, type:'player', icon:'⚔', name:'Aldric', mvt : 3,  cc : 5, rc : 2, hp:18, maxHp:18, ac:4, str:5, agi:3, ap:2, maxAp:2, row:2, col:1, alive:true, defending:false };
+  entities = [player, ...enemies];
+  selectedEntity = null;
+  mode = 'move';
+  turnCount = 1;
+  stats = { kills:0, dmg:0, rec:0 };
+  renderAll();
+  updateUI();
+  setMode('move');
+  addLog('— DÉBUT DU COMBAT — Aldric von Brunn entre dans le donjon...', 'turn');
+  addLog('Clique sur ⚔ pour sélectionner le guerrier.', '');
+}
+// ═══════════════════════════════════════════════════════════
+// DEPLACEMENT
+function findPath(start, target) {
+    const openList = [];
+    const closedList = new Set();
+    
+    const startNode = { 
+        r: start.row, c: start.col, 
+        g: 0, h: Math.abs(target.r - start.r) + Math.abs(target.c - start.c),
+        parent: null 
+    };
+    startNode.f = startNode.g + startNode.h;
+    openList.push(startNode);
+
+    while (openList.length > 0) {
+        // Prendre le nœud avec le plus petit F
+        openList.sort((a, b) => a.f - b.f);
+        const current = openList.shift();
+        
+        if (current.r === target.r && current.c === target.c) return current;
+
+        closedList.add(`${current.r},${current.c}`);
+
+        const neighbors = [
+            {r: current.r-1, c: current.c}, {r: current.r+1, c: current.c},
+            {r: current.r, c: current.c-1}, {r: current.r, c: current.c+1}
+        ];
+
+        for (const neighbor of neighbors) {
+            if (neighbor.r < 0 || neighbor.r >= ROWS || neighbor.c < 0 || neighbor.c >= COLS) continue;
+            if (map[neighbor.r][neighbor.c] === 1 || closedList.has(`${neighbor.r},${neighbor.c}`)) continue;
+            
+            // On ignore les cases occupées par des ennemis pour le déplacement
+            const ent = entityAt(neighbor.r, neighbor.c);
+            if (ent && ent !== player) continue;
+
+            const gScore = current.g + 1;
+            let node = openList.find(n => n.r === neighbor.r && n.c === neighbor.c);
+
+            if (!node) {
+                node = { 
+                    r: neighbor.r, c: neighbor.c, 
+                    g: gScore, h: Math.abs(target.r - neighbor.r) + Math.abs(target.c - neighbor.c),
+                    parent: current 
+                };
+                node.f = node.g + node.h;
+                openList.push(node);
+            } else if (gScore < node.g) {
+                node.g = gScore;
+                node.f = node.g + node.h;
+                node.parent = current;
+            }
+        }
+    }
+    return null; // Aucun chemin trouvé
+}
+// ═══════════════════════════════════════════════════════════
+// RENDU GRILLE
+function renderAll() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.r = r; cell.dataset.c = c;
+
+      const t = map[r][c];
+      if (t === 1) cell.classList.add('wall');
+      else if (t === 2) { cell.classList.add('door'); cell.innerHTML = '<span style="font-size:18px;opacity:0.7">🚪</span>'; }
+
+      // Highlights
+      if (selectedEntity && selectedEntity.type === 'player' && t !== 1 && player.ap > 0) {
+        if (mode === 'move') {
+		  // On vérifie si un chemin A* existe et si sa longueur (g) respecte la capacité de mouvement du player
+		  const pathNode = findPath(player, {r: r, c: c});
+		  if (pathNode && pathNode.g > 0 && pathNode.g <= player.mvt && !entityAt(r, c)) {
+			cell.classList.add('reachable');
+		  }
+        } else if (mode === 'attack') {
+          const dist = Math.max(Math.abs(r - player.row), Math.abs(c - player.col));
+          if (dist <= ATK_RANGE) {
+            const e = entityAt(r, c);
+            if (e && e.type === 'enemy' && e.alive) cell.classList.add('attackable');
+          }
+        }
+      }
+
+      // Entity
+      const ent = entityAt(r, c);
+      if (ent && ent.alive) {
+        const p = document.createElement('div');
+        p.className = 'piece ' + ent.type;
+        if (selectedEntity === ent) p.classList.add('selected-anim');
+        p.textContent = ent.icon;
+        cell.appendChild(p);
+
+        const hb = document.createElement('div');
+        hb.className = 'cell-hp';
+        const hf = document.createElement('div');
+        hf.className = 'cell-hp-fill ' + ent.type;
+        hf.style.width = Math.max(0, (ent.hp / ent.maxHp) * 100) + '%';
+        hb.appendChild(hf); cell.appendChild(hb);
+
+        if (ent.type === 'enemy') {
+          const ib = document.createElement('div');
+          ib.className = 'initiative-badge';
+          ib.textContent = ent.agi;
+          cell.appendChild(ib);
+        }
+      }
+      if (selectedEntity && entityAt(r,c) === selectedEntity) cell.classList.add('selected');
+
+      cell.addEventListener('click', () => onCellClick(r, c));
+      grid.appendChild(cell);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+function entityAt(r, c) {
+  return entities.find(e => e.alive && e.row === r && e.col === c) || null;
+}
+
+function chebyDist(a, b) { return Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col)); }
+
+function addLog(msg, cls='') {
+  const log = document.getElementById('log');
+  const div = document.createElement('div');
+  div.className = 'log-entry ' + cls;
+  div.textContent = msg;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function showDmg(r, c, val, miss=false) {
+  const grid = document.getElementById('grid');
+  const cell = grid.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+  if (!cell) return;
+  const rect = cell.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'dmg-float' + (miss ? ' miss' : '');
+  el.textContent = miss ? 'ESQUIVE' : '-' + val;
+  el.style.left = (rect.left + rect.width/2 - 20) + 'px';
+  el.style.top  = (rect.top - 10) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1300);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLICK HANDLER
+function onCellClick(r, c) {
+  const ent = entityAt(r, c);
+
+  // Select player
+  if (ent === player && player.alive) {
+    selectedEntity = player;
+    renderAll(); return;
+  }
+
+  if (!selectedEntity || selectedEntity !== player) return;
+
+  // Move
+  if (mode === 'move') {
+    const d = Math.abs(r - player.row) + Math.abs(c - player.col);
+    if (map[r][c] !== 1 && !entityAt(r, c) && d <= player.mvt) {
+	  if (player.ap <= 0) { 
+	  addLog('Plus d\'actions pour se déplacer !', ''); 
+	  setTimeout(endPlayerTurn, 600); return; 
+	  }
+      player.row = r; player.col = c;
+      addLog(`⚔ Aldric se déplace en [${r},${c}].`, 'move');
+	  player.ap--; // Consomme 1 PA
+      renderAll(); updateUI();
+	  // Si plus de PA après le mouvement, on finit le tour
+	  if (player.ap <= 0) {
+	    addLog('Plus d\'actions — fin du tour joueur.', '');
+	    setTimeout(endPlayerTurn, 600); return;
+	  }
+    }
+  }
+
+  // Attack
+  if (mode === 'attack') {
+    if (!ent || ent.type !== 'enemy' || !ent.alive) return;
+    const d = chebyDist(player, ent);
+    if (d > ATK_RANGE) return;
+    if (player.ap <= 0) { addLog('Plus d\'actions disponibles !', ''); setTimeout(endPlayerTurn, 600); return; }
+
+    // Résolution combat Légende : jet sous Armes blanches diff. Ag de l'ennemi
+    const roll = Math.floor(Math.random() * 10) + 1;
+    const needed = Math.max(2, Math.min(10, 6 + (ent.agi - player.cc)));
+    const hit = roll >= needed || roll === 10;
+
+    if (hit) {
+      const rawDmg = Math.floor(Math.random() * 10) + 1 + player.str - ent.ac;
+      const dmg = Math.max(1, rawDmg);
+      ent.hp = Math.max(0, ent.hp - dmg);
+      stats.dmg += dmg;
+      showDmg(ent.row, ent.col, dmg);
+      const crit = roll === 10;
+      addLog(`${crit?'✨ CRITIQUE — ':''}⚔ Aldric frappe ${ent.name} pour ${dmg} dégâts ! [jet ${roll} / besoin ${needed}+]`, crit ? 'hit' : 'hit');
+      if (ent.hp <= 0) {
+        ent.alive = false; stats.kills++;
+        addLog(`☠ ${ent.name} est vaincu !`, 'kill');
+        checkVictory();
+      }
+    } else {
+      showDmg(ent.row, ent.col, 0, true);
+      addLog(`⚔ Aldric manque ${ent.name}. [jet ${roll} / besoin ${needed}+]`, '');
+    }
+    player.ap--;
+    renderAll(); updateUI();
+	// Si plus de PA après le mouvement, on finit le tour
+    if (player.ap <= 0) {
+      addLog('Plus d\'actions — fin du tour joueur.', '');
+      setTimeout(endPlayerTurn, 600); return;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODE
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-move').classList.toggle('active', m==='move');
+  document.getElementById('btn-attack').classList.toggle('active', m==='attack');
+  renderAll();
+}
+
+function doDefend() {
+  player.defending = true;
+  addLog('🛡 Aldric se met en posture de défense (+2 PA ce tour).', '');
+  endPlayerTurn();
+}
+
+// ═══════════════════════════════════════════════════════════
+// FIN DE TOUR JOUEUR → TOUR ENNEMI
+function endPlayerTurn() {
+  selectedEntity = null;
+  setPhase('enemy');
+  renderAll();
+  setTimeout(enemyTurn, 700);
+}
+
+function enemyAttack(e, callback) {
+  addLog(`${e.icon} ${e.name} attaque ${e.ap} fois Aldric.`, '');
+  while(e.ap>0) {
+	  // Attaque
+	  const roll = Math.floor(Math.random() * 10) + 1;
+	  const needed = Math.max(2, Math.min(10, 6 + (player.agi - e.cc)));
+	  const hit = roll >= needed || roll === 10;
+	  if (hit) {
+		const pa = player.defending ? player.ac + 2 : player.ac;
+		const rawDmg = Math.floor(Math.random() * 10) + 1 + e.str - pa;
+		const dmg = Math.max(0, rawDmg);
+		player.hp = Math.max(0, player.hp - dmg);
+		stats.rec += dmg;
+		if (dmg > 0) showDmg(player.row, player.col, dmg);
+		addLog(`${e.icon} ${e.name} frappe Aldric pour ${dmg} dégâts ! [jet ${roll} / besoin ${needed}+]`, 'hit');
+		if (player.hp <= 0) { checkDefeat(); return; }
+	  } else {
+		addLog(`${e.icon} ${e.name} manque Aldric. [jet ${roll} / besoin ${needed}+]`, '');
+	  }
+	  e.ap--;
+  }
+  updateUI(); renderAll();
+  setTimeout(callback, 500);
+}
+
+function enemyTurn() {
+  const aliveEnemies = entities.filter(e => e.type==='enemy' && e.alive);
+  let idx = 0;
+  function nextEnemy() {
+    if (idx >= aliveEnemies.length) { startPlayerTurn(); return; }
+    const e = aliveEnemies[idx++];
+    // IA simple : se rapprocher du joueur, attaquer si adjacent
+    const d = chebyDist(e, player);
+    if (d <= 1) {
+	  enemyAttack(e, nextEnemy);
+    } else {
+      // Mouvement vers le joueur
+      const dr = Math.sign(player.row - e.row);
+      const dc = Math.sign(player.col - e.col);
+      let moved = false;
+      const tries = [[dr,dc],[dr,0],[0,dc]];
+      for (const [tr,tc] of tries) {
+        const nr = e.row+tr, nc = e.col+tc;
+        if (nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && map[nr][nc]!==1 && !entityAt(nr,nc)) {
+          e.row=nr; e.col=nc; moved=true; break;
+        }
+      }
+      if (moved) addLog(`${e.icon} ${e.name} se déplace.`, 'move');
+      renderAll();
+      setTimeout(nextEnemy, 400);
+    }
+  }
+  nextEnemy();
+}
+
+function startPlayerTurn() {
+  turnCount++;
+  player.ap = player.maxAp;
+  player.defending = false;
+  entities.filter(e=>e.type==='enemy'&&e.alive).forEach(e=>e.ap=e.maxAp);
+  selectedEntity = player;
+  setPhase('move');
+  setMode('move');
+  addLog(`— TOUR ${turnCount} — À toi de jouer !`, 'turn');
+  renderAll(); updateUI();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PHASE UI
+function setPhase(p) {
+  ['ph-move','ph-attack','ph-enemy'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  if (p==='move') document.getElementById('ph-move').classList.add('active');
+  else if (p==='attack') document.getElementById('ph-attack').classList.add('active');
+  else document.getElementById('ph-enemy').classList.add('active');
+
+  document.getElementById('turn-who').textContent = p==='enemy' ? 'ENNEMIS' : 'JOUEUR';
+}
+
+// ═══════════════════════════════════════════════════════════
+// UPDATE UI
+function updateUI() {
+  // Player HP
+  document.getElementById('p-hp-label').textContent = `${Math.max(0,player.hp)} / ${player.maxHp}`;
+  document.getElementById('p-hp-bar').style.width = Math.max(0,(player.hp/player.maxHp)*100) + '%';
+  document.getElementById('p-ap-label') && (document.getElementById('p-ap-label').textContent = `${player.ap}/${player.maxAp}`);
+  document.getElementById('p-ap').textContent = `${player.ap} / ${player.maxAp}`;
+  document.getElementById('p-ap-bar').style.width = (player.ap/player.maxAp*100)+'%';
+
+  // Turn
+  document.getElementById('turn-counter').textContent = turnCount;
+  document.getElementById('stat-kills').textContent = stats.kills;
+  document.getElementById('stat-dmg').textContent = stats.dmg;
+  document.getElementById('stat-rec').textContent = stats.rec;
+  document.getElementById('stat-turns').textContent = turnCount;
+
+  // Enemy list
+  const el = document.getElementById('enemy-list');
+  el.innerHTML = '';
+  entities.filter(e=>e.type==='enemy').forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'enemy-entry';
+    div.style.opacity = e.alive ? '1' : '0.4';
+    div.innerHTML = `<div class="enemy-icon">${e.icon}</div><div class="enemy-info"><div class="enemy-name">${e.name} ${e.alive?'':'☠'}</div><div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width:${Math.max(0,e.hp/e.maxHp*100)}%"></div></div><div style="font-size:8px;color:var(--steel);margin-top:1px">PV ${Math.max(0,e.hp)}/${e.maxHp} · Ag ${e.agi}</div></div>`;
+    el.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// VICTOIRE / DÉFAITE
+function checkVictory() {
+  if (entities.filter(e=>e.type==='enemy'&&e.alive).length === 0) {
+    setTimeout(() => {
+      document.getElementById('overlay-title').textContent = '⚔ VICTOIRE';
+      document.getElementById('overlay-msg').textContent = `Tous les ennemis ont été vaincus en ${turnCount} tours. Dégâts infligés : ${stats.dmg}.`;
+      document.getElementById('overlay').classList.add('show');
+    }, 800);
+  }
+}
+function checkDefeat() {
+  document.getElementById('overlay-title').textContent = '☠ DÉFAITE';
+  document.getElementById('overlay-msg').textContent = `Aldric von Brunn est tombé au combat. Il faut un temple pour le ressusciter...`;
+  document.getElementById('overlay').classList.add('show');
+  renderAll(); updateUI();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+resetGame();
+</script>
