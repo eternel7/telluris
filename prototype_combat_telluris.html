@@ -1,4 +1,3 @@
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
 
@@ -494,49 +493,54 @@ function resetGame() {
   addLog('Clique sur ⚔ pour sélectionner le guerrier.', '');
 }
 // ═══════════════════════════════════════════════════════════
-// DEPLACEMENT
-function findPath(start, target) {
+// DÉPLACEMENT — A* générique (mover optionnel pour éviter l'auto-blocage)
+// start  : entité qui se déplace  { row, col }
+// target : destination            { r, c }
+// mover  : entité en cours de déplacement (pour ne pas se bloquer elle-même)
+function findPath(start, target, mover) {
     const openList = [];
     const closedList = new Set();
-    
-    const startNode = { 
-        r: start.row, c: start.col, 
-        g: 0, h: Math.abs(target.r - start.r) + Math.abs(target.c - start.c),
-        parent: null 
+
+    const startNode = {
+        r: start.row, c: start.col,
+        g: 0, h: Math.abs(target.r - start.row) + Math.abs(target.c - start.col),
+        parent: null
     };
     startNode.f = startNode.g + startNode.h;
     openList.push(startNode);
 
     while (openList.length > 0) {
-        // Prendre le nœud avec le plus petit F
         openList.sort((a, b) => a.f - b.f);
         const current = openList.shift();
-        
+
         if (current.r === target.r && current.c === target.c) return current;
 
         closedList.add(`${current.r},${current.c}`);
 
         const neighbors = [
             {r: current.r-1, c: current.c}, {r: current.r+1, c: current.c},
-            {r: current.r, c: current.c-1}, {r: current.r, c: current.c+1}
+            {r: current.r,   c: current.c-1}, {r: current.r,   c: current.c+1}
         ];
 
-        for (const neighbor of neighbors) {
-            if (neighbor.r < 0 || neighbor.r >= ROWS || neighbor.c < 0 || neighbor.c >= COLS) continue;
-            if (map[neighbor.r][neighbor.c] === 1 || closedList.has(`${neighbor.r},${neighbor.c}`)) continue;
-            
-            // On ignore les cases occupées par des ennemis pour le déplacement
-            const ent = entityAt(neighbor.r, neighbor.c);
-            if (ent && ent !== player) continue;
+        for (const nb of neighbors) {
+            if (nb.r < 0 || nb.r >= ROWS || nb.c < 0 || nb.c >= COLS) continue;
+            if (map[nb.r][nb.c] === 1) continue;
+            if (closedList.has(`${nb.r},${nb.c}`)) continue;
+
+            const occ = entityAt(nb.r, nb.c);
+            const isDestination = (nb.r === target.r && nb.c === target.c);
+            const isSelf        = mover && occ === mover;
+            // Traversable si vide, si c'est la destination, ou si c'est le déplaceur lui-même
+            if (occ && !isDestination && !isSelf) continue;
 
             const gScore = current.g + 1;
-            let node = openList.find(n => n.r === neighbor.r && n.c === neighbor.c);
-
+            let node = openList.find(n => n.r === nb.r && n.c === nb.c);
             if (!node) {
-                node = { 
-                    r: neighbor.r, c: neighbor.c, 
-                    g: gScore, h: Math.abs(target.r - neighbor.r) + Math.abs(target.c - neighbor.c),
-                    parent: current 
+                node = {
+                    r: nb.r, c: nb.c,
+                    g: gScore,
+                    h: Math.abs(target.r - nb.r) + Math.abs(target.c - nb.c),
+                    parent: current
                 };
                 node.f = node.g + node.h;
                 openList.push(node);
@@ -547,7 +551,7 @@ function findPath(start, target) {
             }
         }
     }
-    return null; // Aucun chemin trouvé
+    return null;
 }
 // ═══════════════════════════════════════════════════════════
 // RENDU GRILLE
@@ -568,7 +572,7 @@ function renderAll() {
       if (selectedEntity && selectedEntity.type === 'player' && t !== 1 && player.ap > 0) {
         if (mode === 'move') {
 		  // On vérifie si un chemin A* existe et si sa longueur (g) respecte la capacité de mouvement du player
-		  const pathNode = findPath(player, {r: r, c: c});
+		  const pathNode = findPath(player, {r: r, c: c}, player);
 		  if (pathNode && pathNode.g > 0 && pathNode.g <= player.mvt && !entityAt(r, c)) {
 			cell.classList.add('reachable');
 		  }
@@ -775,18 +779,40 @@ function enemyTurn() {
     if (d <= 1) {
 	  enemyAttack(e, nextEnemy);
     } else {
-      // Mouvement vers le joueur
-      const dr = Math.sign(player.row - e.row);
-      const dc = Math.sign(player.col - e.col);
+      // Mouvement vers le joueur limité par e.mvt cases (A* pour le chemin réel)
+      // On cherche la case la plus proche du joueur accessible en e.mvt pas
+      const targetNode = findPath(e, { r: player.row, c: player.col }, e);
       let moved = false;
-      const tries = [[dr,dc],[dr,0],[0,dc]];
-      for (const [tr,tc] of tries) {
-        const nr = e.row+tr, nc = e.col+tc;
-        if (nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && map[nr][nc]!==1 && !entityAt(nr,nc)) {
-          e.row=nr; e.col=nc; moved=true; break;
+
+      if (targetNode) {
+        // Remonter le chemin pour trouver le nœud à exactement mvt pas
+        const path = [];
+        let node = targetNode;
+        while (node) { path.unshift(node); node = node.parent; }
+        // path[0] = position actuelle, path[1..] = cases suivantes
+        // On s'arrête au minimum entre mvt et l'avant-dernière case
+        // (on ne peut pas atterrir sur le joueur, on s'arrête juste avant)
+        const stopIdx = Math.min(e.mvt, path.length - 2); // -2 = ne pas entrer sur la case du joueur
+        if (stopIdx >= 1) {
+          const dest = path[stopIdx];
+          // Vérifier que la destination n'est pas occupée par une autre entité
+          if (!entityAt(dest.r, dest.c)) {
+            e.row = dest.r; e.col = dest.c;
+            moved = true;
+          } else {
+            // Case occupée : reculer jusqu'à trouver une case libre sur le chemin
+            for (let i = stopIdx - 1; i >= 1; i--) {
+              if (!entityAt(path[i].r, path[i].c)) {
+                e.row = path[i].r; e.col = path[i].c;
+                moved = true; break;
+              }
+            }
+          }
         }
       }
-      if (moved) addLog(`${e.icon} ${e.name} se déplace.`, 'move');
+
+      if (moved) addLog(`${e.icon} ${e.name} avance de ${e.mvt} case(s) vers Aldric.`, 'move');
+      else        addLog(`${e.icon} ${e.name} est bloqué.`, '');
       renderAll();
       setTimeout(nextEnemy, 400);
     }
