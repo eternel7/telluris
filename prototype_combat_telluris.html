@@ -449,7 +449,7 @@ const COLS = 12, ROWS = 9;
 const ATK_RANGE = 1;
 
 // ═══════════════════════════════════════════════════════════
-// CARTE DU DONJON (0=sol, 1=mur, 2=porte)
+// CARTE DU DONJON (0=sol, 1=mur, 2=porte fermee, 3 = porte ouverte)
 const MAP_TEMPLATE = [
   [1,1,1,1,1,1,1,1,1,1,1,1],
   [1,0,0,0,0,1,0,0,0,0,0,1],
@@ -731,7 +731,10 @@ function onCellClick(r, c) {
     if (!ent || ent.type !== 'enemy' || !ent.alive) return;
     const d = chebyDist(player, ent);
     if (d > ATK_RANGE) return;
-    if (player.ap <= 0) { addLog('Plus d\'actions disponibles !', ''); setTimeout(endPlayerTurn, 600); return; }
+    if (player.ap <= 0) { 
+		addLog('Plus d\'actions disponibles !', '');
+		setTimeout(endPlayerTurn, 600); return; 
+	}
 
     // Résolution combat Légende : jet sous Armes blanches diff. Ag de l'ennemi
     const roll = Math.floor(Math.random() * 10) + 1;
