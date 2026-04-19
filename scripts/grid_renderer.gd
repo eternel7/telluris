@@ -157,14 +157,12 @@ func _on_grid_changed() -> void:
 					lbl.text = "🚪"
 
 			if ent != null and ent.alive:
+				lbl.text = ent.icon
 				if ent.is_player:
-					lbl.text = "⚔"
 					lbl.add_theme_color_override("font_color", C_PLAYER_GLOW)
 				else:
-					# Nom court → emoji selon type
-					lbl.text = "💀" if "Squelette" in ent.entity_name else "🐀"
 					lbl.add_theme_color_override("font_color", C_ENEMY_GLOW)
-
+				
 				# Barre de PV
 				var ratio := float(ent.hp) / float(ent.max_hp)
 				hp_bar.visible = true

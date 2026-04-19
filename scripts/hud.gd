@@ -127,9 +127,10 @@ func _on_log_added(msg: String, category: String) -> void:
 
 # ── Game Over ─────────────────────────────────────────────────
 func _on_game_over(victory: bool, message: String) -> void:
-	%overlay_title.text = "⚔ VICTOIRE" if victory else "☠ DÉFAITE"
-	%overlay_msg.text   = message
-	%Overlay.visible    = true
+	%overlay_title.text       = "⚔ VICTOIRE" if victory else "☠ DÉFAITE"
+	%overlay_msg.text         = message
+	%Overlay.visible          = true
+	%VBoxContainer.visible    = false
 
 # ── Utilitaires UI ───────────────────────────────────────────
 func _set_phase_active(panel: Panel, active: bool) -> void:

@@ -25,6 +25,7 @@ extends Resource
 ## Position sur la grille
 @export var grid_row : int = 0
 @export var grid_col : int = 0
+@export var icon : String = "!"
 
 ## État
 @export var alive     : bool = true

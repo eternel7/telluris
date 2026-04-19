@@ -50,16 +50,16 @@ func reset_game() -> void:
 	player.is_player   = true
 	player.hp = 18; player.max_hp = 18
 	player.str = 5; player.agi = 3; player.ac = 4
-	player.cc  = 5; player.mvt = 3
+	player.cc  = 5; player.mvt = 2
 	player.ap  = 2; player.max_ap = 2
-	player.grid_row = 2; player.grid_col = 1
+	player.grid_row = 2; player.grid_col = 1; player.icon = "⚔"
 	player.alive    = true; player.defending = false
 	entities.append(player)
 
 	# Ennemis
-	var sk1 := _make_enemy("Squelette", 8, 2, 1, 3, 2, 1, 1,  2, 9)
-	var rat  := _make_enemy("Rat géant", 5, 2, 0, 4, 4, 2, 2,  5, 9)
-	var sk2  := _make_enemy("Squelette", 8, 2, 1, 3, 2, 1, 1,  7, 8)
+	var sk1 := _make_enemy("Squelette", 8, 2, 1, 3, 2, 1, 1,  2, 9, "💀")
+	var rat  := _make_enemy("Rat géant", 5, 2, 0, 4, 4, 2, 2,  5, 9, "🐀")
+	var sk2  := _make_enemy("Squelette", 8, 2, 1, 3, 2, 1, 1,  7, 8, "💀")
 	entities.append(sk1)
 	entities.append(rat)
 	entities.append(sk2)
@@ -73,14 +73,14 @@ func reset_game() -> void:
 
 func _make_enemy(ename:String, hp:int, strength:int, ac:int,
 				 cc:int, agi:int, ap:int, mvt:int,
-				 row:int, col:int) -> EntityData:
+				 row:int, col:int, icon:String) -> EntityData:
 	var e := EntityData.new()
 	e.entity_name = ename
 	e.is_player   = false
 	e.hp = hp; e.max_hp = hp
 	e.str = strength; e.ac = ac; e.cc = cc; e.agi = agi
 	e.ap = ap;  e.max_ap = ap; e.mvt = mvt
-	e.grid_row = row; e.grid_col = col
+	e.grid_row = row; e.grid_col = col; e.icon = icon
 	e.alive = true
 	return e
 
@@ -264,13 +264,16 @@ func _process_next_enemy() -> void:
 
 func _enemy_move(e: EntityData) -> void:
 	var path := combat_map.find_path_astar(e.grid_row,e.grid_col, player.grid_row, player.grid_col, e, player)
-	
-	if path.size() < 1:
+	var pathsize = path.size()
+	if pathsize < 1:
 		add_log("%s est bloqué." % e.entity_name, "")
 		return
 
 	# path[0] = position actuelle, on s'arrête avant la case du joueur (-2)
-	var stop_idx := mini(e.mvt, path.size() - 2)
+	var stop_idx := mini(e.mvt, pathsize - 1);
+	var possibleDest = path.back()
+	if possibleDest.x == player.grid_col && possibleDest.y == player.grid_row : 
+		stop_idx = mini(stop_idx, pathsize - 2)
 	if stop_idx < 1:
 		add_log("%s est bloqué." % e.entity_name, "")
 		return
