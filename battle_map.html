@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Battle Map - Rotation Initiale</title>
+    <title>Battle Map - 50vw Carré</title>
     <style>
-        :root { --step: 60px; }
+        :root { 
+            /* On définit le step par rapport à la largeur du viewport (50vw / 17 colonnes) */
+            --step: calc(50vw / 17); 
+        }
         body { margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111; touch-action: none; font-family: sans-serif; overflow: hidden; }
 
         .viewport {
             position: relative;
-            width: calc(var(--step) * 17);
-            height: calc(var(--step) * 9);
+            width: 50vw; 
+            height: calc(var(--step) * 9); /* Hauteur proportionnelle pour garder les cases carrées */
             background: #000;
             clip-path: polygon(0% 0%, 100% 0%, 100% 11.11%, 94.11% 11.11%, 94.11% 22.22%, 88.23% 22.22%, 88.23% 33.33%, 82.35% 33.33%, 82.35% 44.44%, 76.47% 44.44%, 76.47% 55.55%, 70.58% 55.55%, 70.58% 66.66%, 64.70% 66.66%, 64.70% 77.77%, 58.82% 77.77%, 58.82% 88.88%, 52.94% 88.88%, 52.94% 100%, 47.05% 100%, 47.05% 88.88%, 41.17% 88.88%, 41.17% 77.77%, 35.29% 77.77%, 35.29% 66.66%, 29.41% 66.66%, 29.41% 55.55%, 23.52% 55.55%, 23.52% 44.44%, 17.64% 44.44%, 17.64% 33.33%, 11.76% 33.33%, 11.76% 22.22%, 5.88% 22.22%, 5.88% 11.11%, 0% 11.11%);
         }
@@ -27,6 +30,8 @@
         #bg-image {
             position: absolute;
             display: block;
+            width: calc(var(--step) * 30); /* Force l'image à faire 30 cases de large */
+            height: calc(var(--step) * 30); /* Force l'image à faire 30 cases de haut */
             max-width: none;
             transition: transform 0.2s ease-out;
             will-change: transform;
@@ -92,13 +97,10 @@
 </div>
 
 <script>
-    // ==========================================
-    // CONFIGURATION DE DÉPART
-    // ==========================================
-    const startX = 2;        // Case de 1 à 30
-    const startY = 21;        // Case de 1 à 30
-    const startRotation = 3; // 0=0°, 1=90°, 2=180°, 3=270°
-    // ==========================================
+    // Configuration de départ
+    const startX = 2;        
+    const startY = 21;        
+    const startRotation = 3;  // 0=0°, 1=90°, 2=180°, 3=270°
 
     const pivot = document.getElementById('rotation-pivot');
     const img = document.getElementById('bg-image');
@@ -106,16 +108,28 @@
     let step = 0;
     let x = 0, y = 0, angle = 0;
 
-    img.onload = () => {
-        step = img.width / 30;
+    // Fonction pour recalculer le step si la fenêtre est redimensionnée
+    function updateStep() {
+        step = window.innerWidth * 0.5 / 17;
         document.documentElement.style.setProperty('--step', step + 'px');
+    }
+
+    img.onload = () => {
+        updateStep();
         resetPos();
     };
 
+    window.onresize = () => {
+        updateStep();
+        update();
+    };
+
     function resetPos() {
-        x = (img.width / 2) - (step * (startX - 0.5));
-        y = (img.height / 2) - (step * (startY - 0.5));
-        angle = startRotation * 90; // Conversion de l'index en degrés
+        // L'image fait 30 steps. 
+        const imgSize = step * 30;
+        x = (imgSize / 2) - (step * (startX - 0.5));
+        y = (imgSize / 2) - (step * (startY - 0.5));
+        angle = startRotation * 90;
         update();
     }
 
@@ -127,8 +141,9 @@
         let nextX = x + (worldDx * step);
         let nextY = y + (worldDy * step);
 
-        const limitX = (img.width / 2) - (step / 2);
-        const limitY = (img.height / 2) - (step / 2);
+        const imgSize = step * 30;
+        const limitX = (imgSize / 2) - (step / 2);
+        const limitY = (imgSize / 2) - (step / 2);
 
         if (Math.abs(nextX) <= limitX + 1) x = nextX;
         if (Math.abs(nextY) <= limitY + 1) y = nextY;
@@ -142,8 +157,9 @@
     }
 
     function update() {
+        const imgSize = step * 30;
         pivot.style.transform = `rotate(${angle}deg)`;
-        img.style.transform = `translate(${x - (img.width/2)}px, ${y - (img.height/2)}px)`;
+        img.style.transform = `translate(${x - (imgSize/2)}px, ${y - (imgSize/2)}px)`;
     }
 </script>
 </body>
