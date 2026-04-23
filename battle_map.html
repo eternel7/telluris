@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Battle Map - Rotation Initiale</title>
+    <style>
+        :root { --step: 60px; }
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111; touch-action: none; font-family: sans-serif; overflow: hidden; }
+
+        .viewport {
+            position: relative;
+            width: calc(var(--step) * 17);
+            height: calc(var(--step) * 9);
+            background: #000;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 11.11%, 94.11% 11.11%, 94.11% 22.22%, 88.23% 22.22%, 88.23% 33.33%, 82.35% 33.33%, 82.35% 44.44%, 76.47% 44.44%, 76.47% 55.55%, 70.58% 55.55%, 70.58% 66.66%, 64.70% 66.66%, 64.70% 77.77%, 58.82% 77.77%, 58.82% 88.88%, 52.94% 88.88%, 52.94% 100%, 47.05% 100%, 47.05% 88.88%, 41.17% 88.88%, 41.17% 77.77%, 35.29% 77.77%, 35.29% 66.66%, 29.41% 66.66%, 29.41% 55.55%, 23.52% 55.55%, 23.52% 44.44%, 17.64% 44.44%, 17.64% 33.33%, 11.76% 33.33%, 11.76% 22.22%, 5.88% 22.22%, 5.88% 11.11%, 0% 11.11%);
+        }
+
+        #rotation-pivot {
+            position: absolute;
+            bottom: calc(var(--step) * 1.5);
+            left: 50%;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        #bg-image {
+            position: absolute;
+            display: block;
+            max-width: none;
+            transition: transform 0.2s ease-out;
+            will-change: transform;
+        }
+
+        .token {
+            position: absolute;
+            bottom: var(--step); 
+            left: 50%;
+            width: var(--step); height: var(--step);
+            transform: translateX(-50%);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; pointer-events: none;
+        }
+        .token::after {
+            content: ''; width: 60%; height: 60%;
+            background: #ff4757; border-radius: 50%; border: 2px solid white;
+            box-shadow: 0 0 10px #ff4757;
+        }
+
+        .controls { display: grid; grid-template-columns: repeat(3, 50px); gap: 10px; margin-top: 30px; }
+        .btn { width: 50px; height: 50px; background: #222; border: 1px solid #444; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+        .btn:active { background: #444; }
+    </style>
+</head>
+<body>
+
+<div class="viewport">
+    <div id="rotation-pivot">
+        <img id="bg-image" src="https://lance1d20.wordpress.com/wp-content/uploads/2020/01/e88088b843332430a041c49c9afc0d04.jpg">
+    </div>
+    <div class="token"></div>
+</div>
+
+<div class="controls">
+    <button class="btn" onclick="move(1, 1)">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.6569 10H10M10 10V15.6569M10 10L18.364 18.364M20.8278 13.7568C21.3917 10.9096 20.5704 7.84251 18.364 5.63604C14.8492 2.12132 9.15076 2.12132 5.63604 5.63604C2.12132 9.15076 2.12132 14.8492 5.63604 18.364C7.84251 20.5704 10.9096 21.3917 13.7568 20.8278" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="btn" onclick="move(0, 1)">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="btn" onclick="move(-1, 1)">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 15.6569V10M14 10H8.34315M14 10L5.63604 18.364M10.2432 20.8278C13.0904 21.3917 16.1575 20.5704 18.364 18.364C21.8787 14.8492 21.8787 9.15076 18.364 5.63604C14.8492 2.12132 9.15076 2.12132 5.63604 5.63604C3.42957 7.84251 2.60828 10.9096 3.17216 13.7568" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="btn" onclick="move(1, 0)">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="btn" onclick="move(0, -1)">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="btn" onclick="move(-1, 0)">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="btn" onclick="rotate(1)">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.70711 13.2929C10.0976 13.6834 10.0976 14.3166 9.70711 14.7071C9.31658 15.0976 8.68342 15.0976 8.29289 14.7071L3.29289 9.70711C2.90237 9.31658 2.90237 8.68342 3.29289 8.29289L8.29289 3.29289C8.68342 2.90237 9.31658 2.90237 9.70711 3.29289C10.0976 3.68342 10.0976 4.31658 9.70711 4.70711L6.41421 8H16C17.3261 8 18.5979 8.52678 19.5355 9.46447C20.4732 10.4021 21 11.6739 21 13V20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20V13C19 12.2044 18.6839 11.4413 18.1213 10.8787C17.5587 10.3161 16.7957 10 16 10H6.41421L9.70711 13.2929Z" fill="#f1f1f1"/></svg>
+    </button>
+    <button class="btn" onclick="resetPos()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"/><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"/></svg>
+    </button>
+    <button class="btn" onclick="rotate(-1)">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.2929 13.2929C13.9024 13.6834 13.9024 14.3166 14.2929 14.7071C14.6834 15.0976 15.3166 15.0976 15.7071 14.7071L20.7071 9.70711C21.0976 9.31658 21.0976 8.68342 20.7071 8.29289L15.7071 3.29289C15.3166 2.90237 14.6834 2.90237 14.2929 3.29289C13.9024 3.68342 13.9024 4.31658 14.2929 4.70711L17.5858 8H8C6.67392 8 5.40215 8.52678 4.46447 9.46447C3.52678 10.4021 3 11.6739 3 13V20C3 20.5523 3.44771 21 4 21C4.55229 21 5 20.5523 5 20V13C5 12.2044 5.31607 11.4413 5.87868 10.8787C6.44129 10.3161 7.20435 10 8 10H17.5858L14.2929 13.2929Z" fill="#f1f1f1"/></svg>
+    </button>
+</div>
+
+<script>
+    // ==========================================
+    // CONFIGURATION DE DÉPART
+    // ==========================================
+    const startX = 2;        // Case de 1 à 30
+    const startY = 21;        // Case de 1 à 30
+    const startRotation = 3; // 0=0°, 1=90°, 2=180°, 3=270°
+    // ==========================================
+
+    const pivot = document.getElementById('rotation-pivot');
+    const img = document.getElementById('bg-image');
+    
+    let step = 0;
+    let x = 0, y = 0, angle = 0;
+
+    img.onload = () => {
+        step = img.width / 30;
+        document.documentElement.style.setProperty('--step', step + 'px');
+        resetPos();
+    };
+
+    function resetPos() {
+        x = (img.width / 2) - (step * (startX - 0.5));
+        y = (img.height / 2) - (step * (startY - 0.5));
+        angle = startRotation * 90; // Conversion de l'index en degrés
+        update();
+    }
+
+    function move(viewDx, viewDy) {
+        const rad = (angle * Math.PI) / 180;
+        const worldDx = viewDx * Math.cos(rad) + viewDy * Math.sin(rad);
+        const worldDy = -viewDx * Math.sin(rad) + viewDy * Math.cos(rad);
+
+        let nextX = x + (worldDx * step);
+        let nextY = y + (worldDy * step);
+
+        const limitX = (img.width / 2) - (step / 2);
+        const limitY = (img.height / 2) - (step / 2);
+
+        if (Math.abs(nextX) <= limitX + 1) x = nextX;
+        if (Math.abs(nextY) <= limitY + 1) y = nextY;
+
+        update();
+    }
+
+    function rotate(dir) {
+        angle += dir * 90;
+        update();
+    }
+
+    function update() {
+        pivot.style.transform = `rotate(${angle}deg)`;
+        img.style.transform = `translate(${x - (img.width/2)}px, ${y - (img.height/2)}px)`;
+    }
+</script>
+</body>
+</html>

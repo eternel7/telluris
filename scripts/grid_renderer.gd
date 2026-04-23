@@ -5,7 +5,7 @@
 extends Node
 
 # ── Couleurs (équivalent CSS variables) ──────────────────────
-const C_FLOOR       := Color(0.137, 0.122, 0.102)      # --stone2
+const C_FLOOR       := Color(0.0, 0.0, 0.0, 0.0)      # --stone2
 const C_WALL        := Color(0.059, 0.047, 0.035)      # mur sombre
 const C_DOOR        := Color(0.227, 0.165, 0.082)      # porte fermée
 const C_DOOR_OPEN   := Color(0.184, 0.133, 0.063, 0.6) # porte ouverte
@@ -21,9 +21,9 @@ const C_HP_PLAYER   := Color(0.753, 0.224, 0.169)      # barre PV joueur
 const C_HP_ENEMY    := Color(0.545, 0.102, 0.102)      # barre PV ennemi
 const C_HP_BG       := Color(0.067, 0.067, 0.067)      # fond barre PV
 
-const CELL_SIZE     : int = 52
-const COLS          : int = 12
-const ROWS          : int = 9
+const CELL_SIZE     : int = 136
+const COLS          : int = 27
+const ROWS          : int = 41
 
 # ── Références (à assigner depuis la scène) ──────────────────
 @export var manager_path : NodePath
@@ -122,8 +122,6 @@ func _on_grid_changed() -> void:
 			# ── Couleur de fond ──────────────────────────────
 			var bg_color : Color
 			match tile:
-				CombatMap.TILE_WALL:
-					bg_color = C_WALL
 				CombatMap.TILE_DOOR:
 					bg_color = C_DOOR
 				CombatMap.TILE_OPEN:

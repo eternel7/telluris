@@ -1,4 +1,6 @@
-<style>
+<html>
+	<head>
+		<style>
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
 
   :root {
@@ -49,12 +51,12 @@
   }
   .header h1 {
     font-family: 'Cinzel', serif;
-    font-size: 18px;
+    font-size: 24px;
     letter-spacing: 4px;
     color: var(--gold2);
     text-shadow: 0 0 20px rgba(201,146,42,0.4);
   }
-  .header p { font-size: 11px; color: var(--steel); letter-spacing: 2px; margin-top: 2px; font-style: italic; }
+  .header p { font-size: 16px; color: var(--steel); letter-spacing: 2px; margin-top: 2px; font-style: italic; }
 
   /* ── PANELS ── */
   .panel {
@@ -68,17 +70,26 @@
   }
   .panel-title {
     font-family: 'Cinzel', serif;
-    font-size: 10px;
+    font-size: 20px;
     letter-spacing: 3px;
     color: var(--gold);
     border-bottom: 1px solid rgba(201,146,42,0.2);
     padding-bottom: 5px;
     text-align: center;
   }
-
+  .panel-content {
+    font-size:16px;
+	color:var(--steel2);
+	line-height:1.6
+  }
+  .panel-turn-info {
+    text-align:center;
+	font-size: 19px;
+	letter-spacing:2px;
+  }
   /* ── STAT BARS ── */
   .stat-row { display: flex; flex-direction: column; gap: 2px; }
-  .stat-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--steel2); letter-spacing: 1px; }
+  .stat-label { display: flex; justify-content: space-between; font-size: 20px; color: var(--steel2); letter-spacing: 1px; }
   .stat-label span:last-child { color: var(--parch2); font-weight: 600; }
   .bar-bg { background: var(--stone3); height: 6px; border-radius: 2px; overflow: hidden; }
   .bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
@@ -90,19 +101,19 @@
   /* ── CHARACTER CARD ── */
   .char-name {
     font-family: 'Cinzel', serif;
-    font-size: 13px;
+    font-size: 23px;
     color: var(--parch2);
     text-align: center;
     line-height: 1.2;
   }
   .char-voc {
-    font-size: 10px;
+    font-size: 20px;
     color: var(--gold);
     text-align: center;
     letter-spacing: 2px;
   }
   .char-race {
-    font-size: 9px;
+    font-size: 19px;
     color: var(--steel);
     text-align: center;
     font-style: italic;
@@ -115,14 +126,19 @@
     justify-content: center;
     padding: 8px;
     position: relative;
+	max-width : 50%;
+	max-height : 75%;
+	overlay: auto;
+	margin: auto;
   }
 
   .dungeon-grid {
     display: grid;
-    grid-template-columns: repeat(12, var(--cell));
-    grid-template-rows: repeat(9, var(--cell));
+    grid-template-columns: repeat(22, var(--cell));
+    grid-template-rows: repeat(30, var(--cell));
     gap: 1px;
-    background: #0d0a07;
+    background-image: url('map02.jpg');
+	background-repeat: round;
     border: 2px solid rgba(201,146,42,0.3);
     box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 60px rgba(0,0,0,0.5);
     position: relative;
@@ -131,7 +147,7 @@
   .cell {
     width: var(--cell);
     height: var(--cell);
-    background: var(--stone2);
+    /*background: var(--stone2);*/
     cursor: pointer;
     position: relative;
     transition: background 0.15s;
@@ -142,20 +158,13 @@
   }
   .cell:hover { background: #3a3228; }
   .cell.wall {
-    background: #0f0c09;
+    background: rgba(25,25,25,0.25);
     cursor: default;
-    background-image:
-      linear-gradient(45deg, #1a1410 25%, transparent 25%),
-      linear-gradient(-45deg, #1a1410 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, #1a1410 75%),
-      linear-gradient(-45deg, transparent 75%, #1a1410 75%);
-    background-size: 8px 8px;
-    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
   }
-  .cell.wall:hover { background-color: #0f0c09; }
-  .cell.reachable { background: rgba(74,103,65,0.35); }
+  .cell.wall:hover { /*background-color: #0f0c09;*/ }
+  .cell.reachable { background: rgba(74,103,65,0.5); }
   .cell.reachable:hover { background: rgba(74,103,65,0.6); }
-  .cell.attackable { background: rgba(139,26,26,0.35); }
+  .cell.attackable { background: rgba(139,26,26,0.35);}
   .cell.attackable:hover { background: rgba(139,26,26,0.6); cursor: crosshair; }
   .cell.selected { background: rgba(201,146,42,0.2); box-shadow: inset 0 0 0 1px var(--gold); }
   .cell.door { background: #3a2a15; cursor: pointer; }
@@ -254,7 +263,7 @@
     margin: 4px 0;
   }
   .phase-dot {
-    font-size: 8px;
+    font-size: 18px;
     letter-spacing: 1px;
     padding: 3px 6px;
     border-radius: 10px;
@@ -271,12 +280,13 @@
     padding: 4px;
     border-radius: 3px;
     background: var(--stone3);
-    font-size: 10px;
+    font-size: 18px;
   }
-  .enemy-icon { font-size: 16px; }
+  .enemy-icon { font-size: 26px; }
   .enemy-info { flex: 1; }
-  .enemy-name { color: var(--parch); font-size: 10px; }
+  .enemy-name { color: var(--parch); font-size: 18px; }
   .enemy-hp-bar { background: #111; height: 3px; border-radius: 1px; margin-top: 2px; }
+  .enemy-attr {font-size:16px; color:var(--steel); margin-top:1px;}
   .enemy-hp-fill { height: 100%; background: var(--blood); border-radius: 1px; transition: width 0.3s; }
 
   /* Floating damage */
@@ -291,7 +301,7 @@
     z-index: 1000;
     animation: floatUp 1.2s ease-out forwards;
   }
-  .dmg-float.miss { color: var(--steel); font-size: 14px; }
+  .dmg-float.miss { color: var(--steel); font-size: 24px; }
   @keyframes floatUp {
     0%   { opacity: 1; transform: translateY(0) scale(1); }
     60%  { opacity: 1; transform: translateY(-40px) scale(1.2); }
@@ -320,20 +330,21 @@
     color: var(--gold2);
     margin-bottom: 10px;
   }
-  .overlay-box p { font-size: 13px; color: var(--steel2); margin-bottom: 20px; font-style: italic; }
+  .overlay-box p { font-size: 23px; color: var(--steel2); margin-bottom: 20px; font-style: italic; }
 
   /* Coord indicator */
   .coord-hint {
     position: absolute;
     top: -20px;
     left: 0;
-    font-size: 9px;
+    font-size: 19px;
     color: var(--steel);
     letter-spacing: 1px;
     font-family: 'Cinzel', serif;
   }
 </style>
-
+</head>
+	<body>
 <div class="arena">
   <!-- HEADER -->
   <div class="header">
@@ -368,23 +379,23 @@
       <div class="bar-bg"><div class="bar-fill" id="p-ap-bar" style="width:100%;background:var(--gold)"></div></div>
     </div>
     <div class="panel-title" style="margin-top:4px">APTITUDES</div>
-    <div style="font-size:9px;color:var(--steel2);line-height:1.6">
+    <div class="panel-content">
       ⚔ Science de la parade<br>
       🛡 Armes blanches niv.5<br>
       🏃 Dépl. 4 cases/tour<br>
       👁 Ligne de vue active
     </div>
     <div class="panel-title" style="margin-top:4px">ÉQUIPEMENT</div>
-    <div style="font-size:9px;color:var(--steel2);line-height:1.7">
+    <div class="panel-content">
       🗡 Épée simple (+1 F)<br>
       🛡 Écu (+1 PA, +4 parade)<br>
       🧥 Cuirasse (PA 4, Ag-2)
     </div>
   </div>
 
+  <div class="coord-hint" id="coord-hint">Sélectionne le guerrier ⚔ pour commencer</div>
   <!-- CENTER : GRID -->
   <div class="grid-wrap">
-    <div class="coord-hint" id="coord-hint">Sélectionne le guerrier ⚔ pour commencer</div>
     <div class="dungeon-grid" id="grid"></div>
   </div>
 
@@ -414,11 +425,11 @@
     </div>
 
     <div class="panel-title" style="margin-top:4px">TOUR</div>
-    <div id="turn-counter" style="text-align:center;font-family:'Cinzel',serif;font-size:18px;color:var(--gold2)">1</div>
-    <div id="turn-who" style="text-align:center;font-size:9px;color:var(--steel);letter-spacing:2px">JOUEUR</div>
+    <div class="panel-turn-info" id="turn-counter" style="color:var(--gold2)">1</div>
+    <div class="panel-turn-info" id="turn-who" style="color:var(--steel);">JOUEUR</div>
 
     <div class="panel-title" style="margin-top:4px">RÉSUMÉ</div>
-    <div id="combat-summary" style="font-size:9px;color:var(--steel2);line-height:1.8">
+    <div id="combat-summary" class="panel-content">
       Kills : <span id="stat-kills">0</span><br>
       Dégâts infligés : <span id="stat-dmg">0</span><br>
       Dégâts reçus : <span id="stat-rec">0</span><br>
@@ -445,21 +456,43 @@
 <script>
 // ═══════════════════════════════════════════════════════════
 // CONSTANTES
-const COLS = 12, ROWS = 9;
+const COLS = 22, ROWS = 30;
 const ATK_RANGE = 1;
 
 // ═══════════════════════════════════════════════════════════
 // CARTE DU DONJON (0=sol, 1=mur, 2=porte fermee, 3 = porte ouverte)
+
 const MAP_TEMPLATE = [
-  [1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,0,0,0,0,1,0,0,0,0,0,1],
-  [1,0,0,0,0,2,0,0,0,0,0,1],
-  [1,0,0,0,0,1,0,0,0,0,0,1],
-  [1,0,0,0,0,1,1,2,1,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,1],
-  [1,1,2,1,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,1,0,0,0,0,1],
-  [1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+  [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+  [1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,1],
+  [1,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1],
+  [1,1,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1],
+  [1,1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1],
+  [0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
+  [0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
+  [1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,0,0,1,1],
+  [1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1],
+  [1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0],
+  [1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,1,1,1,1,0],
+  [1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,1,0],
+  [1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,0],
+  [0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [1,1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0],
+  [1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,0],
+  [1,1,1,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,0],
+  [1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0],
+  [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,1,0,0,0,0,0,1,1,0,0,0,0,1,1,1,0,0,1,1,1],
+  [1,1,1,1,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1],
+  [1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1],
+  [1,1,1,1,0,0,0,0,1,1,0,0,0,0,1,1,1,1,1,1,1,1],
+  [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+  [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
+  [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1],
+  [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1],
+  [1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1]
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -480,7 +513,7 @@ function resetGame() {
   map = MAP_TEMPLATE.map(r => [...r]);
   enemyIdCounter = 0;
   const enemies = initEnemies();
-  player = { id:0, type:'player', icon:'⚔', name:'Aldric', mvt : 3,  cc : 5, rc : 2, hp:18, maxHp:18, ac:4, str:5, agi:3, ap:2, maxAp:2, row:2, col:1, alive:true, defending:false };
+  player = { id:0, type:'player', icon:'⚔', name:'Aldric', mvt : 3,  cc : 5, rc : 2, hp:18, maxHp:18, ac:4, str:5, agi:3, ap:2, maxAp:2, row:1, col:1, alive:true, defending:false };
   entities = [player, ...enemies];
   selectedEntity = null;
   mode = 'move';
@@ -918,7 +951,7 @@ function updateUI() {
     const div = document.createElement('div');
     div.className = 'enemy-entry';
     div.style.opacity = e.alive ? '1' : '0.4';
-    div.innerHTML = `<div class="enemy-icon">${e.icon}</div><div class="enemy-info"><div class="enemy-name">${e.name} ${e.alive?'':'☠'}</div><div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width:${Math.max(0,e.hp/e.maxHp*100)}%"></div></div><div style="font-size:8px;color:var(--steel);margin-top:1px">PV ${Math.max(0,e.hp)}/${e.maxHp} · Ag ${e.agi}</div></div>`;
+    div.innerHTML = `<div class="enemy-icon">${e.icon}</div><div class="enemy-info"><div class="enemy-name">${e.name} ${e.alive?'':'☠'}</div><div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width:${Math.max(0,e.hp/e.maxHp*100)}%"></div></div><div class="enemy-attr">PV ${Math.max(0,e.hp)}/${e.maxHp} · Ag ${e.agi}</div></div>`;
     el.appendChild(div);
   });
 }
@@ -945,3 +978,5 @@ function checkDefeat() {
 // INIT
 resetGame();
 </script>
+</body>
+</html>
