@@ -1,0 +1,11 @@
+services:
+  fastapi:
+    image: python:3.11-slim
+    container_name: fastapi-server
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "pip install fastapi uvicorn && uvicorn main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    restart: always
