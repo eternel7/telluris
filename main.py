@@ -9,6 +9,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/scripts", StaticFiles(directory="templates/scripts"), name="scripts")
 app.mount("/battle_maps", StaticFiles(directory="templates/resources/battle_maps"), name="battle_maps")
+app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
 
 @app.get("/")
 def read_root():
