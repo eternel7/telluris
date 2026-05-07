@@ -3,3 +3,5 @@
 /android/
 /.editorconfig
 /.gitattributes
+/Thumbs.db
+/templates/resources/battle_maps/Thumbs.db
