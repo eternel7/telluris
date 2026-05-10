@@ -20,6 +20,7 @@ const threshold = 30;
 function startGame() {
     document.getElementById('start-screen').style.display = 'none';
     document.querySelector('.viewport').style.visibility = 'visible';
+    document.querySelector('.ui-container').style.visibility = 'visible';
     document.querySelector('.controls').style.visibility = 'visible';
     resetPos();
 }
