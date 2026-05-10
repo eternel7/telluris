@@ -1,25 +1,32 @@
 services:
   fastapi:
     image: python:3.11-slim
+    env_file:
+      - .env
     container_name: fastapi-server
     working_dir: /app
     volumes:
       - .:/app
-    command: sh -c "pip install fastapi uvicorn Jinja2 couchdb2 && uvicorn main:app --host 0.0.0.0 --port 8000"
+    command: sh -c "pip install --no-cache-dir fastapi uvicorn Jinja2 couchdb2 && uvicorn main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
     restart: always
     depends_on:
-      - couchdb
+        couchdb:
+            condition: service_healthy
 
   couchdb:
     image: couchdb:3.3
+    env_file:
+      - .env
     container_name: couchdb-server
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=V7!qR2#nL9@xT4$k
     volumes:
-      - ./couchdb_data:/opt/couchdb/data
+      - /volume1/docker/couchdb_data:/opt/couchdb/data
     ports:
       - "5984:5984"
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5984"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

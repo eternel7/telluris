@@ -7,3 +7,4 @@
 /templates/resources/battle_maps/Thumbs.db
 /__pycache__
 Thumbs.db
+/.env
