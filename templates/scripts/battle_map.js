@@ -1,6 +1,8 @@
 // ─── Paramètres ────────────────────────────────────────────────────────────
 const MAX_HEIGHT = 10;
 const BLUR_DIST  = 8;
+const GRID_X_SIZE = 30;
+const GRID_Y_SIZE = 30;
 
 document.documentElement.style.setProperty('--max-height', MAX_HEIGHT);
 document.documentElement.style.setProperty('--blur-dist',  BLUR_DIST);
@@ -15,7 +17,6 @@ const pivot = document.getElementById('rotation-pivot');
 const img   = document.getElementById('bg-image');
 const zone  = document.getElementById('swipe-zone');
 let step = 0, touchStartX = 0, touchStartY = 0;
-const threshold = 30;
 
 function startGame() {
     document.getElementById('start-screen').style.display = 'none';
@@ -109,9 +110,9 @@ function move(viewDx, viewDy) {
     let nextX = gridX - worldDx; // On inverse car on déplace la carte, pas le token
     let nextY = gridY - worldDy;
 
-    // Limites (basées sur une image de 30x30 cases)
-    if (nextX >= 0.5 && nextX <= 30.5) gridX = nextX;
-    if (nextY >= 0.5 && nextY <= 30.5) gridY = nextY;
+    // Limites (basées sur une image de GRID_X_SIZExGRID_Y_SIZE cases)
+    if (nextX >= 0.5 && nextX <= GRID_X_SIZE + 0.5) gridX = nextX;
+    if (nextY >= 0.5 && nextY <= GRID_Y_SIZE + 0.5) gridY = nextY;
     
     update();
 }
@@ -123,15 +124,16 @@ function rotate(dir) {
 
 function update() {
     updateStep(); // Recalcule le step actuel
-    const imgSize = step * 30;
+    const imgXSize = step * GRID_X_SIZE;
+    const imgYSize = step * GRID_Y_SIZE;
     
     // Conversion des coordonnées logiques (gridX/Y) en pixels pour l'affichage
     // On centre l'image, puis on décale selon la position dans la grille
-    const pxX = (imgSize / 2) - (step * (gridX - 0.5));
-    const pxY = (imgSize / 2) - (step * (gridY - 0.5));
+    const pxX = (imgXSize / 2) - (step * (gridX - 0.5));
+    const pxY = (imgYSize / 2) - (step * (gridY - 0.5));
 
     pivot.style.transform = `rotate(${angle}deg)`;
-    img.style.transform = `translate(${pxX - (imgSize/2)}px, ${pxY - (imgSize/2)}px)`;
+    img.style.transform = `translate(${pxX - (imgXSize/2)}px, ${pxY - (imgYSize/2)}px)`;
 }
 
 // ─── Events ────────────────────────────────────────────────────────────────
@@ -149,8 +151,8 @@ zone.addEventListener('touchend', (e) => {
     let dx = e.changedTouches[0].screenX - touchStartX;
     let dy = e.changedTouches[0].screenY - touchStartY;
     if (Math.abs(dx) > Math.abs(dy)) {
-        if (Math.abs(dx) > threshold) move(dx > 0 ? 1 : -1, 0);
+        if (Math.abs(dx) > GRID_X_SIZE) move(dx > 0 ? 1 : -1, 0);
     } else {
-        if (Math.abs(dy) > threshold) move(0, dy < 0 ? -1 : 1);
+        if (Math.abs(dy) > GRID_Y_SIZE) move(0, dy < 0 ? -1 : 1);
     }
 }, {passive: true});

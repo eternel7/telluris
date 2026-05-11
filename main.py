@@ -1,7 +1,7 @@
 import os
 import couchdb2
 import urllib.parse
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -22,6 +22,7 @@ safe_password = urllib.parse.quote_plus(DB_PASSWORD)
 
 DB_URL = f"http://{DB_USER}:{safe_password}@couchdb:5984"
 server = couchdb2.Server(DB_URL)
+db = server["telluris"] 
 
 @app.get("/")
 def read_root():
@@ -55,12 +56,10 @@ async def read_page_former(request: Request):
 def test_couchdb_connection():
 	try:
 		version = server.version
-		databases = list(server)
 		
 		return {
 			"status": "connected",
-			"couchdb_version": version,
-			"databases": databases
+			"couchdb_version": version
 		}
 	except Exception as e:
 		return {"status": "error", "message": str(e)}
@@ -83,3 +82,27 @@ def setup_db():
 		return {"message": "Document créé", "id": doc.get('_id')}
 	except Exception as e:
 		return {"status": "error", "message": str(e)}
+		
+@app.get("/passage/{lieu_id}/{x}/{y}")
+def get_destination(lieu_id: str, x: int, y: int):
+	# La clé correspond à la structure [lieu_id, x, y] définie dans votre vue Map
+	target_key = {
+		"lieu": lieu_id,
+		"pos": [x, y]
+	}
+	
+	# Interrogation de la vue (design_doc/view_name)
+	results = db.view("reseau", "liens_cases", key=target_key)
+	
+	if not results:
+		raise HTTPException(status_code=404, detail="Aucun lien ici")
+	
+	# On retourne la liste complète des valeurs
+	destinations = [row.value for row in results]
+	
+	return {
+		"depart": {"lieu": lieu_id, "x": x, "y": y},
+		"destinations": destinations,
+		"count": len(destinations)
+	}
+	
