@@ -172,7 +172,7 @@
 
 <div class="viewport" id="swipe-zone">
 	<div id="rotation-pivot">
-		<img id="bg-image" src="{{ url_for('battle_maps', path='map0007.jpg') }}">
+		<img id="bg-image" src="{{ url_for('battle_maps', path=image) }}">
 	</div>
 	<div class="token"></div>
 </div>
@@ -238,10 +238,7 @@
 </div>
 <script>
     const SERVER_DATA = {
-        lieu: {{ lieu | tojson | safe }},
-        grid: {{ grid_data | tojson | safe }},
-        links: {{ links_data | tojson | safe }},
-        dims: {{ grid_dims | tojson | safe }}
+        lieu: {{ lieu | tojson | safe }}
     };
 </script>
 <script src="{{ url_for('scripts', path='battle_map.js') }}"></script>

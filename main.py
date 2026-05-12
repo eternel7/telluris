@@ -53,19 +53,16 @@ def read_page_lieu(request: Request, lieu_id: str):
 		context={
 			"title": titre,
 			"lieu": lieu_id,
-			"grid_data": grid_doc.get("cells"),
-			"links_data": [row.value for row in links],
-			"grid_dims": grid_doc.get("dimensions")
+			"image": grid_doc.get("image")
 		}
 	)
 	
 @app.get("/api/map-data/{lieu_id}")
 async def get_map_data(lieu_id: str):
     # Récupération des données CouchDB
-    grid_doc = db.get(f"grid:{lieu_id}")
+    grid_doc = db.get(lieu_id)
     links = db.view("reseau", "liens_cases", startkey=[lieu_id], endkey=[lieu_id, {}])
     return {
-		"titre": grid_doc.get("label")
         "grid":  grid_doc.get("cells"),
         "dims":  grid_doc.get("dimensions"),
         "links": [row.value for row in links]

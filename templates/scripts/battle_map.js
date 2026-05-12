@@ -1,34 +1,56 @@
 // ─── Paramètres ────────────────────────────────────────────────────────────
 const MAX_HEIGHT = 10;
 const BLUR_DIST  = 8;
-const GRID_X_SIZE = SERVER_DATA.dims.cols || 30;
-const GRID_Y_SIZE = SERVER_DATA.dims.rows || 30;
-const CURRENT_GRID = SERVER_DATA.grid;
-const CURRENT_LINKS = SERVER_DATA.links;
-const CURRENT_LOCATION = SERVER_DATA.lieu;
-// --- Bloc de Debugging ---
-console.group("Données Telluris Chargées");
-console.log("Dimensions de la carte :", GRID_X_SIZE, "x", GRID_Y_SIZE);
+var GRID_X_SIZE = 0;
+var GRID_Y_SIZE = 0;
+var CURRENT_GRID = [];
+var CURRENT_LINKS = [];
+var CURRENT_LOCATION = SERVER_DATA.lieu;
 
-if (CURRENT_LINKS && CURRENT_LINKS.length > 0) {
-    console.log(`Nombre de liens trouvés : ${CURRENT_LINKS.length}`);
-    
-    CURRENT_LINKS.forEach((link, index) => {
-        // On identifie le noeud qui correspond au lieu actuel (ex: lutecia)
-        // Note: Remplacez 'lutecia' par une variable si le lieu est dynamique
-        const depart = link.nodes.find(n => n.lieu === CURRENT_LOCATION);
-        const destination = link.nodes.find(n => n.lieu !== CURRENT_LOCATION);
+function initializeMap(data) {
+	// Initialisation de la carte avec les données reçues	
+	GRID_X_SIZE = data.dims.x;
+	GRID_Y_SIZE = data.dims.y;
+	CURRENT_GRID = data.grid;
+	CURRENT_LINKS = data.links;
+	// --- Bloc de Debugging ---
+	console.group("Données Telluris Chargées");
+	console.log("Dimensions de la carte :", GRID_X_SIZE, "x", GRID_Y_SIZE);
 
-        if (depart && destination) {
-            console.log(`Lien #${index + 1}:`);
-            console.log(`  - Départ (ici) : [${depart.pos[0]}, ${depart.pos[1]}]`);
-            console.log(`  - Vers : ${destination.lieu} en [${destination.pos[0]}, ${destination.pos[1]}]`);
-        }
-    });
-} else {
-    console.warn("Aucun lien (CURRENT_LINKS) n'a été récupéré.");
+	if (CURRENT_LINKS && CURRENT_LINKS.length > 0) {
+		console.log(`Nombre de liens trouvés : ${CURRENT_LINKS.length}`);
+		
+		CURRENT_LINKS.forEach((link, index) => {
+			// On identifie le noeud qui correspond au lieu actuel (ex: lutecia)
+			// Note: Remplacez 'lutecia' par une variable si le lieu est dynamique
+			const depart = link.nodes.find(n => n.lieu === CURRENT_LOCATION);
+			const destination = link.nodes.find(n => n.lieu !== CURRENT_LOCATION);
+
+			if (depart && destination) {
+				console.log(`Lien #${index + 1}:`);
+				console.log(`  - Départ (ici) : [${depart.pos[0]}, ${depart.pos[1]}]`);
+				console.log(`  - Vers : ${destination.lieu} en [${destination.pos[0]}, ${destination.pos[1]}]`);
+			}
+		});
+	} else {
+		console.warn("Aucun lien (CURRENT_LINKS) n'a été récupéré.");
+	}
+	console.groupEnd();
 }
-console.groupEnd();
+
+async function loadMapData(lieuId) {
+    try {
+        const response = await fetch(`/api/map-data/${lieuId}`);
+        const data = await response.json();
+        
+        initializeMap(data);
+    } catch (error) {
+        console.error("Erreur lors du chargement :", error);
+    }
+}
+
+// Appeler la fonction au démarrage
+loadMapData(CURRENT_LOCATION);
 
 document.documentElement.style.setProperty('--max-height', MAX_HEIGHT);
 document.documentElement.style.setProperty('--blur-dist',  BLUR_DIST);
@@ -133,13 +155,13 @@ function move(viewDx, viewDy) {
     const worldDx = viewDx * Math.cos(rad) + viewDy * Math.sin(rad);
     const worldDy = -viewDx * Math.sin(rad) + viewDy * Math.cos(rad);
     
-    let nextX = gridX - worldDx; // On inverse car on déplace la carte, pas le token
-    let nextY = gridY - worldDy;
+    let nextX = Math.round(gridX - worldDx); // On inverse car on déplace la carte, pas le token
+    let nextY = Math.round(gridY - worldDy);
 
     // Limites (basées sur une image de GRID_X_SIZExGRID_Y_SIZE cases)
     if (nextX >= 0.5 && nextX <= GRID_X_SIZE + 0.5) gridX = nextX;
     if (nextY >= 0.5 && nextY <= GRID_Y_SIZE + 0.5) gridY = nextY;
-    
+    console.log(`  - Position : [${gridX}, ${gridY}]`);
     update();
 }
 
