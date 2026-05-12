@@ -1,8 +1,34 @@
 // ─── Paramètres ────────────────────────────────────────────────────────────
 const MAX_HEIGHT = 10;
 const BLUR_DIST  = 8;
-const GRID_X_SIZE = 30;
-const GRID_Y_SIZE = 30;
+const GRID_X_SIZE = SERVER_DATA.dims.cols || 30;
+const GRID_Y_SIZE = SERVER_DATA.dims.rows || 30;
+const CURRENT_GRID = SERVER_DATA.grid;
+const CURRENT_LINKS = SERVER_DATA.links;
+const CURRENT_LOCATION = SERVER_DATA.lieu;
+// --- Bloc de Debugging ---
+console.group("Données Telluris Chargées");
+console.log("Dimensions de la carte :", GRID_X_SIZE, "x", GRID_Y_SIZE);
+
+if (CURRENT_LINKS && CURRENT_LINKS.length > 0) {
+    console.log(`Nombre de liens trouvés : ${CURRENT_LINKS.length}`);
+    
+    CURRENT_LINKS.forEach((link, index) => {
+        // On identifie le noeud qui correspond au lieu actuel (ex: lutecia)
+        // Note: Remplacez 'lutecia' par une variable si le lieu est dynamique
+        const depart = link.nodes.find(n => n.lieu === CURRENT_LOCATION);
+        const destination = link.nodes.find(n => n.lieu !== CURRENT_LOCATION);
+
+        if (depart && destination) {
+            console.log(`Lien #${index + 1}:`);
+            console.log(`  - Départ (ici) : [${depart.pos[0]}, ${depart.pos[1]}]`);
+            console.log(`  - Vers : ${destination.lieu} en [${destination.pos[0]}, ${destination.pos[1]}]`);
+        }
+    });
+} else {
+    console.warn("Aucun lien (CURRENT_LINKS) n'a été récupéré.");
+}
+console.groupEnd();
 
 document.documentElement.style.setProperty('--max-height', MAX_HEIGHT);
 document.documentElement.style.setProperty('--blur-dist',  BLUR_DIST);

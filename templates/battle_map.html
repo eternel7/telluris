@@ -236,6 +236,14 @@
 		<div class="enemy-item"><div class="enemy-icon"></div> Rat Géant</div>
 	</div>
 </div>
+<script>
+    const SERVER_DATA = {
+        lieu: {{ lieu | tojson | safe }},
+        grid: {{ grid_data | tojson | safe }},
+        links: {{ links_data | tojson | safe }},
+        dims: {{ grid_dims | tojson | safe }}
+    };
+</script>
 <script src="{{ url_for('scripts', path='battle_map.js') }}"></script>
 </body>
 </html>
