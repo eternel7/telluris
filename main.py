@@ -25,8 +25,20 @@ server = couchdb2.Server(DB_URL)
 db = server["telluris"] 
 
 @app.get("/")
-def read_root():
-	return {"status": "success", "message": "No woman don't cry"}
+def read_root(request: Request):
+	return templates.TemplateResponse(
+		request=request, 
+		name="home_telluris.html", 
+		context={"title": "Telluris"}
+	)
+	
+@app.get("/auth", response_class=HTMLResponse)
+async def read_page_auth(request: Request):
+	return templates.TemplateResponse(
+		request=request, 
+		name="auth_telluris.html", 
+		context={"title": "Authentification for Telluris"}
+	)
 	
 @app.get("/dev", response_class=HTMLResponse)
 async def read_page_dev(request: Request):

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Telluris</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+			background-image: url({{ url_for('icons', path='telluris_logo.png') }});
+			background-repeat: no-repeat;
+			background-position: center;
+			background-size: auto 100%;
+            font-family: sans-serif;
+            color: white;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 90%;
+            max-width: 400px;
+            background: rgba(34, 34, 34, 0.97);
+            border: 1px solid #444;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+			max-height: 95vh;
+			overflow-y: auto;
+        }
+		
+		.title-wrapper {
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  gap: 6px;
+		  margin-bottom: 30px;
+		}
+		
+		.title-rule {
+			width: 40px;
+			height: 0.5px;
+			background: #c9922a;
+			margin: 4px 0;
+		}
+
+		.title-main {
+			margin: 0;
+			font-family: Georgia, 'Times New Roman', serif;
+			font-size: 36px;
+			font-weight: 500;
+			letter-spacing: 0.35em;
+			color: #f0c04a;
+			text-transform: uppercase;
+		}
+
+		.title-sub {
+			margin: 0;
+			font-family: Georgia, 'Times New Roman', serif;
+			font-size: 11px;
+			font-weight: 400;
+			letter-spacing: 0.3em;
+			color: #8a7050;
+			font-style: italic;
+		}
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #ddd;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ff4757;
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background: #ff4757;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+            transition: transform 0.2s, background 0.3s;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .btn-auth:active {
+            transform: scale(0.98);
+        }
+
+        .btn-auth:hover {
+            background: #ff6b81;
+        }
+
+        .switch-mode {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .switch-mode a {
+            color: #ff4757;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .switch-mode a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden { display: none; }
+		@media (max-width: 600px) {
+			.auth-container { 
+				width: 100%;
+				border-radius: 0px;
+			}
+		}
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+		<div class="title-wrapper">
+			<div class="title-rule"></div>
+			<div class="title-main">Telluris</div>
+			<div id="auth-subtitle" class="title-sub">Héro en devenir</div>
+			<div class="title-rule"></div>
+		</div>
+        <!-- Formulaire de Connexion -->
+        <form id="signin-form">
+            <div class="form-group">
+                <label>Nom d'utilisateur</label>
+                <input type="text" placeholder="Ex: Aldric" required>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-auth">Se Connecter</button>
+        </form>
+
+        <!-- Formulaire d'Inscription (Caché) -->
+        <form id="signup-form" class="hidden">
+            <div class="form-group">
+                <label>Nom d'utilisateur</label>
+                <input type="text" placeholder="Votre pseudo" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" placeholder="votre@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" placeholder="Min. 8 caractères" required>
+            </div>
+            <button type="submit" class="btn-auth">Créer un compte</button>
+        </form>
+
+        <div class="switch-mode">
+            <span id="toggle-text">Pas encore de compte ?</span>
+            <a onclick="toggleAuth()" id="toggle-link">S'inscrire</a>
+        </div>
+    </div>
+
+    <script>
+        let isSignIn = true;
+
+        function toggleAuth() {
+            const signinForm = document.getElementById('signin-form');
+            const signupForm = document.getElementById('signup-form');
+            const subtitle = document.getElementById('auth-subtitle');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleLink = document.getElementById('toggle-link');
+
+            if (isSignIn) {
+                signinForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                subtitle.innerText = "Rejoindre l'aventure";
+                toggleText.innerText = "Déjà inscrit ?";
+                toggleLink.innerText = "Se connecter";
+            } else {
+                signupForm.classList.add('hidden');
+                signinForm.classList.remove('hidden');
+                subtitle.innerText = "Accéder à la Battle Map";
+                toggleText.innerText = "Pas encore de compte ?";
+                toggleLink.innerText = "S'inscrire";
+            }
+            isSignIn = !isSignIn;
+        }
+		
+		const tellurisSousLitres = [
+			"Là où s'arrêtent les cartes", "Ubi Chartae Finiunt",
+			"Au-delà des remparts", "Ultra Moenia",
+			"Le monde a un prix", "Mundus Pretium Habet",
+			"Le prix de la gloire", "Pretium Gloriae",
+			"Nul n'est héros chez soi", "Nemo Propheta in Patria",
+			"Chroniques des guildes", "Chronica Sodalitatum",
+			"L'ère des aventuriers", "Aetas Exploratorum",
+			"Sang & fortune", "Sanguis et Fortuna",
+			"Les confins de la terre", "Fines Terrae",
+			"Le monde dans les ténèbres", "Orbis in Tenebris"
+		];
+
+		// Sélectionne un élément au hasard
+		const randomSubtitle = tellurisSousLitres[Math.floor(Math.random() * tellurisSousLitres.length)];
+		
+		// Met à jour le texte dans la zone subtitle
+		document.getElementById('auth-subtitle').innerText = randomSubtitle;
+    </script>
+</body>
+</html>

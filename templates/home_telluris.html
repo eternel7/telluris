@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telluris — Ubi Chartae Finiunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:       #0e0b08;
+  --parch:     #f2e8d0;
+  --parch2:    #e8d9b8;
+  --parch3:    #d4c49a;
+  --gold:      #c9922a;
+  --gold2:     #f0c04a;
+  --gold3:     #e8a020;
+  --bronze:    #8d6334;
+  --green:     #253d29;
+  --green2:    #3a5c3e;
+  --shadow:    rgba(14,11,8,0.85);
+  --vignette:  rgba(14,11,8,0.6);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--parch);
+  font-family: 'IM Fell English', Georgia, serif;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── NOISE TEXTURE OVERLAY ───────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.5;
+}
+
+/* ── HERO ─────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+/* Fond carte du monde */
+.hero-map {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(37,61,41,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 120% 80% at 50% 50%, rgba(14,11,8,0.95) 0%, rgba(20,15,10,0.7) 60%, rgba(14,11,8,0.98) 100%);
+  z-index: 0;
+}
+
+/* Grille de carte hexagonale en arrière-plan */
+.hero-grid {
+  position: absolute;
+  inset: -10%;
+  opacity: 0.04;
+  background-image:
+    repeating-linear-gradient(60deg, var(--gold) 0px, var(--gold) 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(120deg, var(--gold) 0px, var(--gold) 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(0deg, var(--gold) 0px, var(--gold) 1px, transparent 1px, transparent 40px);
+  z-index: 0;
+  animation: gridDrift 80s linear infinite;
+}
+@keyframes gridDrift {
+  from { transform: translate(0,0); }
+  to   { transform: translate(40px, 23px); }
+}
+
+/* Vignette bords */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(14,11,8,0.92) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  animation: heroReveal 2s ease both;
+}
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Ornement haut */
+.ornament {
+  width: 180px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  position: relative;
+  margin-bottom: 20px;
+}
+.ornament::before {
+  content: '✦';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--gold);
+  font-size: 10px;
+  background: var(--ink);
+  padding: 0 6px;
+}
+
+/* Titre principal */
+.hero-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.6em;
+  color: var(--gold3);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  animation: heroReveal 2s 0.2s ease both;
+}
+
+.hero-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(52px, 10vw, 96px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--parch);
+  text-shadow:
+    0 0 60px rgba(201,146,42,0.3),
+    0 2px 4px rgba(0,0,0,0.8);
+  line-height: 1;
+  text-align: center;
+  animation: heroReveal 2s 0.4s ease both;
+}
+
+.hero-rule {
+  width: 60px;
+  height: 0.5px;
+  background: var(--gold);
+  margin: 18px 0;
+  animation: heroReveal 2s 0.6s ease both;
+}
+
+.hero-sub {
+  font-family: 'IM Fell English', serif;
+  font-size: 15px;
+  font-style: italic;
+  letter-spacing: 0.22em;
+  color: var(--parch3);
+  text-align: center;
+  animation: heroReveal 2s 0.8s ease both;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 16px;
+  margin-top: 48px;
+  animation: heroReveal 2s 1.2s ease both;
+}
+
+.btn-primary {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gold);
+  border: none;
+  padding: 14px 32px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--parch2);
+  background: transparent;
+  border: 0.5px solid rgba(201,146,42,0.4);
+  padding: 14px 32px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-secondary:hover {
+  border-color: var(--gold);
+  color: var(--gold2);
+  transform: translateY(-1px);
+}
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.4;
+  animation: scrollBob 2s ease-in-out infinite;
+}
+@keyframes scrollBob {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(6px); }
+}
+.scroll-hint span {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.scroll-hint-arrow {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+}
+
+/* ── NAV ──────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 48px;
+  background: linear-gradient(to bottom, rgba(14,11,8,0.9), transparent);
+}
+
+.nav-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  letter-spacing: 0.4em;
+  color: var(--gold2);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+.nav-links a {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--parch3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--gold2); }
+
+/* ── FEATURES ─────────────────────────────────────────────── */
+.section {
+  position: relative;
+  padding: 100px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.5em;
+  color: var(--gold);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 500;
+  color: var(--parch);
+  text-align: center;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+.section-divider {
+  width: 80px;
+  height: 0.5px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto 60px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.feature-card {
+  background: rgba(37,61,41,0.08);
+  border: 0.5px solid rgba(201,146,42,0.15);
+  padding: 36px 28px;
+  position: relative;
+  transition: background 0.3s, border-color 0.3s;
+}
+.feature-card:hover {
+  background: rgba(37,61,41,0.15);
+  border-color: rgba(201,146,42,0.35);
+}
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px;
+  height: 0;
+  background: var(--gold);
+  transition: height 0.3s;
+}
+.feature-card:hover::before { height: 100%; }
+
+.feature-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  display: block;
+  filter: sepia(0.5) saturate(0.8);
+}
+
+.feature-title {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: var(--gold2);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.feature-text {
+  font-family: 'IM Fell English', serif;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--parch3);
+  font-style: italic;
+}
+
+/* ── RANKS SECTION ───────────────────────────────────────── */
+.ranks-section {
+  background: rgba(37,61,41,0.06);
+  border-top: 0.5px solid rgba(201,146,42,0.1);
+  border-bottom: 0.5px solid rgba(201,146,42,0.1);
+  padding: 100px 48px;
+}
+
+.ranks-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.ranks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  margin-top: 0;
+}
+
+.rank-item {
+  padding: 20px 16px;
+  border: 0.5px solid rgba(201,146,42,0.1);
+  text-align: center;
+  transition: background 0.2s;
+}
+.rank-item:hover { background: rgba(201,146,42,0.06); }
+
+.rank-gem {
+  font-size: 22px;
+  display: block;
+  margin-bottom: 8px;
+  filter: sepia(0.4);
+}
+
+.rank-name {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--gold2);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.rank-levels {
+  font-family: 'IM Fell English', serif;
+  font-size: 12px;
+  color: var(--parch3);
+  font-style: italic;
+}
+
+/* ── WORLD SECTION ───────────────────────────────────────── */
+.world-section {
+  padding: 100px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.world-text .section-title { text-align: left; }
+.world-text .section-eyebrow { text-align: left; }
+.world-text .section-divider { margin: 0 0 32px; }
+
+.world-body {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--parch3);
+  margin-bottom: 20px;
+}
+
+.world-visual {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Globe SVG stylisé */
+.globe-wrap {
+  width: min(320px, 80vw);
+  height: min(320px, 80vw);
+  position: relative;
+}
+
+.globe-ring {
+  position: absolute;
+  inset: 0;
+  border: 0.5px solid rgba(201,146,42,0.25);
+  border-radius: 50%;
+  animation: spin 40s linear infinite;
+}
+.globe-ring:nth-child(2) {
+  inset: 10%;
+  border-color: rgba(201,146,42,0.15);
+  animation-duration: 28s;
+  animation-direction: reverse;
+}
+.globe-ring:nth-child(3) {
+  inset: 22%;
+  border-color: rgba(201,146,42,0.1);
+  animation-duration: 18s;
+}
+@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+.globe-center {
+  position: absolute;
+  inset: 30%;
+  background: rgba(37,61,41,0.3);
+  border: 0.5px solid rgba(201,146,42,0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.globe-symbol {
+  font-size: 48px;
+  filter: sepia(0.5) saturate(0.7);
+}
+
+/* Points orbitaux */
+.orbit-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: orbit var(--dur, 12s) linear infinite;
+  top: calc(50% - 3px);
+  left: calc(50% - 3px);
+  transform-origin: calc(-1 * var(--r, 140px)) 0;
+}
+@keyframes orbit {
+  from { transform: rotate(0) translateX(var(--r, 140px)); }
+  to   { transform: rotate(360deg) translateX(var(--r, 140px)); }
+}
+
+/* ── QUOTE ────────────────────────────────────────────────── */
+.quote-section {
+  border-top: 0.5px solid rgba(201,146,42,0.1);
+  border-bottom: 0.5px solid rgba(201,146,42,0.1);
+  padding: 80px 48px;
+  text-align: center;
+  background: rgba(14,11,8,0.4);
+}
+
+.quote-text {
+  font-family: 'IM Fell English', serif;
+  font-size: clamp(18px, 3vw, 26px);
+  font-style: italic;
+  color: var(--parch2);
+  max-width: 700px;
+  margin: 0 auto 20px;
+  line-height: 1.7;
+}
+
+.quote-source {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+footer {
+  padding: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 0.5px solid rgba(201,146,42,0.1);
+}
+
+.footer-logo {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 18px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+}
+
+.footer-sub {
+  font-family: 'IM Fell English', serif;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--parch3);
+  letter-spacing: 0.1em;
+}
+
+.footer-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+}
+.footer-links a {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--parch3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--gold); }
+
+/* ── SCROLL ANIMATIONS ───────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  .section { padding: 60px 24px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .ranks-grid { grid-template-columns: repeat(2, 1fr); }
+  .world-section { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
+  .world-visual { display: none; }
+  footer { flex-direction: column; gap: 20px; text-align: center; }
+  .footer-links { justify-content: center; }
+  .quote-section { padding: 60px 24px; }
+  .ranks-section { padding: 60px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Telluris</a>
+  <ul class="nav-links">
+    <li><a href="#monde">Le monde</a></li>
+    <li><a href="#guildes">Guildes</a></li>
+    <li><a href="#vocations">Vocations</a></li>
+    <li><a href="#jouer">Jouer</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-map"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-content">
+    <div class="ornament"></div>
+    <p class="hero-eyebrow">Charta Fantastica · Orbis Medii Aevi</p>
+    <h1 class="hero-title">Telluris</h1>
+    <div class="hero-rule"></div>
+    <p class="hero-sub">Ubi Chartae Finiunt</p>
+    <div class="hero-cta">
+      <a href="#jouer" class="btn-primary">Commencer l'aventure</a>
+      <a href="#monde" class="btn-secondary">Découvrir le monde</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Explorer</span>
+    <div class="scroll-hint-arrow"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="monde" class="section">
+  <p class="section-eyebrow reveal">Le monde de Telluris</p>
+  <h2 class="section-title reveal reveal-delay-1">Un monde vivant, au-delà des remparts</h2>
+  <div class="section-divider reveal reveal-delay-2"></div>
+
+  <div class="features-grid">
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">🗺</span>
+      <p class="feature-title">Géographie réelle</p>
+      <p class="feature-text">Telluris repose sur la cartographie du monde réel. De Gallia à Cathay, chaque cité-état occupe l'emplacement d'une grande métropole historique.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">⚔</span>
+      <p class="feature-title">Combat tactique</p>
+      <p class="feature-text">Affrontements au tour par tour sur grille carrée. Chaque action compte — déplacement, attaque, magie ou ouverture d'une porte.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <span class="feature-icon">🏰</span>
+      <p class="feature-title">Cités-états</p>
+      <p class="feature-text">Les grandes cités sont des forteresses souveraines. Plus on s'en éloigne, plus les dangers croissent. Les terres sauvages sont le domaine des légendes.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <span class="feature-icon">🔮</span>
+      <p class="feature-title">Magie à coût réel</p>
+      <p class="feature-text">Chaque sort consume des ressources physiques. Une boule de feu au soufre dévaste — mais le soufre a un prix. La puissance est un choix économique.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <span class="feature-icon">🧙</span>
+      <p class="feature-title">20 vocations</p>
+      <p class="feature-text">Guerrier, Nécromancien, Chaman, Ménestrel… Chaque vocation ouvre des chemins de progression uniques avec transitions entre classes.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <span class="feature-icon">🤝</span>
+      <p class="feature-title">Relations vivantes</p>
+      <p class="feature-text">Vos compagnons se souviennent. Amitié, loyauté, rivalité — chaque quête tisse des liens qui influencent les aventures futures.</p>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<div class="quote-section">
+  <p class="quote-text reveal">"Nul ne devient héros entre les remparts. La gloire attend là où les cartes deviennent blanches."</p>
+  <p class="quote-source reveal reveal-delay-1">Aldric von Brunn — Guerrier, Rang Or</p>
+</div>
+
+<!-- WORLD -->
+<section id="guildes">
+  <div class="world-section">
+    <div class="world-text">
+      <p class="section-eyebrow reveal">La Guilde des Aventuriers</p>
+      <h2 class="section-title reveal reveal-delay-1">Gravissez les rangs.<br>Forgez votre légende.</h2>
+      <div class="section-divider reveal reveal-delay-2"></div>
+      <p class="world-body reveal reveal-delay-2">La Guilde est le seul chemin légal vers la fortune pour les non-nobles. Du rang Cuivre aux sommets de l'Adamantite, chaque échelon ouvre des quêtes plus périlleuses — et des récompenses à la hauteur.</p>
+      <p class="world-body reveal reveal-delay-3">Les quêtes SSS+ engagent la survie entière d'une cité-état. Seuls les aventuriers légendaires osent les accepter.</p>
+    </div>
+    <div class="world-visual reveal reveal-delay-2">
+      <div class="globe-wrap">
+        <div class="globe-ring"></div>
+        <div class="globe-ring"></div>
+        <div class="globe-ring"></div>
+        <div class="globe-center">
+          <span class="globe-symbol">⚔</span>
+        </div>
+        <div class="orbit-dot" style="--r:148px; --dur:14s;"></div>
+        <div class="orbit-dot" style="--r:116px; --dur:9s; animation-delay:-3s;"></div>
+        <div class="orbit-dot" style="--r:148px; --dur:14s; animation-delay:-7s;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RANKS -->
+<section id="vocations" class="ranks-section">
+  <div class="ranks-inner">
+    <p class="section-eyebrow reveal">Progression</p>
+    <h2 class="section-title reveal reveal-delay-1">Les rangs de la Guilde</h2>
+    <div class="section-divider reveal reveal-delay-2"></div>
+
+    <div class="ranks-grid">
+      <div class="rank-item reveal reveal-delay-1">
+        <span class="rank-gem">🟤</span>
+        <span class="rank-name">Cuivre</span>
+        <span class="rank-levels">Niveaux 3 – 6</span>
+      </div>
+      <div class="rank-item reveal reveal-delay-2">
+        <span class="rank-gem">⚙</span>
+        <span class="rank-name">Fer</span>
+        <span class="rank-levels">Niveaux 6 – 9</span>
+      </div>
+      <div class="rank-item reveal reveal-delay-3">
+        <span class="rank-gem">🪙</span>
+        <span class="rank-name">Argent</span>
+        <span class="rank-levels">Niveaux 9 – 12</span>
+      </div>
+      <div class="rank-item reveal reveal-delay-4">
+        <span class="rank-gem">✨</span>
+        <span class="rank-name">Or</span>
+        <span class="rank-levels">Niveaux 13 – 16</span>
+      </div>
+      <div class="rank-item reveal reveal-delay-1">
+        <span class="rank-gem">💠</span>
+        <span class="rank-name">Platine</span>
+        <span class="rank-levels">Niveaux 17 – 20</span>
+      </div>
+      <div class="rank-item reveal reveal-delay-2">
+        <span class="rank-gem">🔷</span>
+        <span class="rank-name">Mythril</span>
+        <span class="rank-levels">Niveaux 21 – 24</span>
+      </div>
+      <div class="rank-item reveal reveal-delay-3">
+        <span class="rank-gem">🌟</span>
+        <span class="rank-name">Orichalcum</span>
+        <span class="rank-levels">Niveaux 25 – 27</span>
+      </div>
+      <div class="rank-item reveal reveal-delay-4">
+        <span class="rank-gem">⚫</span>
+        <span class="rank-name">Adamantite</span>
+        <span class="rank-levels">Niveaux 28 – 31</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="jouer" class="section" style="text-align:center">
+  <p class="section-eyebrow reveal">Votre aventure commence</p>
+  <h2 class="section-title reveal reveal-delay-1">Êtes-vous prêt à sortir des remparts ?</h2>
+  <div class="section-divider reveal reveal-delay-2"></div>
+  <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--parch3); max-width:500px; margin: 0 auto 40px; line-height:1.8; font-size:15px" class="reveal reveal-delay-2">
+    Rejoignez la Guilde. Accomplissez des quêtes. Forgez des alliances. Fondez peut-être votre propre cité-état. Telluris attend ceux qui osent.
+  </p>
+  <div style="display:flex; gap:16px; justify-content:center" class="reveal reveal-delay-3">
+    <a href="#" class="btn-primary">Jouer maintenant</a>
+    <a href="#" class="btn-secondary">Créer un compte</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <p class="footer-logo">Telluris</p>
+    <p class="footer-sub">Ubi Chartae Finiunt</p>
+  </div>
+  <ul class="footer-links">
+    <li><a href="#">Mentions légales</a></li>
+    <li><a href="#">Confidentialité</a></li>
+    <li><a href="#">Contact</a></li>
+    <li><a href="#">Presse</a></li>
+  </ul>
+</footer>
+
+<script>
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
