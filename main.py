@@ -29,15 +29,19 @@ def read_root(request: Request):
 	return templates.TemplateResponse(
 		request=request, 
 		name="home_telluris.html", 
-		context={"title": "Telluris"}
+		context={"title": "Ubi Chartae Finiunt"}
 	)
 	
 @app.get("/auth", response_class=HTMLResponse)
 async def read_page_auth(request: Request):
+	is_new = "new" in request.query_params
 	return templates.TemplateResponse(
 		request=request, 
 		name="auth_telluris.html", 
-		context={"title": "Authentification for Telluris"}
+		context={
+			"title": "Authentification",
+			"is_new": is_new
+		}
 	)
 	
 @app.get("/dev", response_class=HTMLResponse)
@@ -47,7 +51,7 @@ async def read_page_dev(request: Request):
 	return templates.TemplateResponse(
 		request=request, 
 		name="battle_map.html", 
-		context={"title": "Dev place for Telluris"}
+		context={"title": "Zone de combat"}
 	)
 	
 @app.get("/dev/{lieu_id}", response_class=HTMLResponse)

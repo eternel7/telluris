@@ -3,7 +3,8 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Telluris — Authentification</title>
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
@@ -28,7 +29,7 @@
 			background: radial-gradient(circle, #1a1612 0%, #0e0b08 100%);
 			font-family: 'IM Fell English', serif;
 			color: var(--parch);
-			overflow: hidden; /* Empêche le scroll vertical */
+			overflow: hidden;
 			padding: 20px;
 			box-sizing: border-box;
 		}
@@ -61,7 +62,7 @@
 			max-width: 420px;
 			background: var(--parch);
 			border: 2px solid var(--gold);
-			border-radius: 2px; /* Style papier découpé droit */
+			border-radius: 2px;
 			padding: 40px;
 			box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 100px rgba(141, 99, 52, 0.1);
 			text-align: center;
@@ -107,6 +108,7 @@
 		.form-group {
 			text-align: left;
 			margin-bottom: 20px;
+			position: relative;
 		}
 
 		label {
@@ -137,7 +139,28 @@
 			border-bottom: 2px solid var(--gold);
 		}
 
-		/* ── BOUTONS (Centrage Vertical Corrigé) ────────────────── */
+		/* ── ICONE DYNAMIQUE DU MOT DE PASSE ────────────────────── */
+		.pass-visual {
+			position: absolute;
+			right: 5px;
+			bottom: 10px;
+			font-size: 18px;
+			pointer-events: none;
+			transition: all 0.2s ease;
+			opacity: 0;
+		}
+		.pass-visual.visible {			
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			height: 26px;
+			width: 26px;
+			border-radius: 5px;
+			padding: 0px 5px;
+			opacity: 1;
+		}
+
+		/* ── BOUTONS ────────────────── */
 		.btn-auth {
 			width: 100%;
 			margin-top: 15px;
@@ -150,10 +173,10 @@
 			color: var(--parch);
 			background: var(--ink);
 			border: 1px solid var(--gold);
-			cursor: pointer;			
-			display: inline-flex;	/* Flex pour centrage vertical */
-			align-items: center;	 /* Centre verticalement le texte */
-			justify-content: center; /* Centre horizontalement le texte */
+			cursor: pointer;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
 			transition: all 0.3s ease;
 		}
 
@@ -224,30 +247,40 @@
 		<div class="logo">Telluris</div>
 		<div id="auth-subtitle" class="subtitle">Ubi Chartae Finiunt</div>
 		<div class="hero-rule"></div>
+{% if is_new %}
+		<form id="signin-form" class="hidden">
+{% else %}
 		<form id="signin-form">
+{% endif%}
 			<div class="form-group">
 				<label for="user-email" title="Email/courriel" >Sceau de correspondance</label>
 				<input type="text" id="user-email" placeholder="votre@parchemin.com" required>
 			</div>
 			<div class="form-group">
 				<label for="user-pass" title="Mot de passe" >Sceau Secret</label>
-				<input type="password" id="user-pass" placeholder="••••••••" required>
+				<input type="password" id="user-pass" class="pass-input" placeholder="••••••••" required>
+				<span class="pass-visual"></span>
 			</div>
 			<button type="submit" class="btn-auth">Entrer dans la cité</button>
 		</form>
-
+{% if is_new %}
+		<form id="signup-form">
+{% else %}
 		<form id="signup-form" class="hidden">
+{% endif%}
 			<div class="form-group">
 				<label for="new-email" title="Email/courriel" >Sceau de correspondance</label>
 				<input type="email" id="new-email" placeholder="votre@parchemin.com" required>
 			</div>
 			<div class="form-group">
 				<label for="new-pass" title="Mot de passe" >Sceau Secret</label>
-				<input type="password" id="new-pass" placeholder="Min. 8 caractères" required>
+				<input type="password" id="new-pass" class="pass-input" placeholder="Min. 8 caractères" required>
+				<span class="pass-visual"></span>
 			</div>
 			<div class="form-group">
 				<label for="new-pass2" title="Mot de passe - vérification" >Sceau Secret - vérification</label>
-				<input type="password" id="new-pass2" placeholder="Min. 8 caractères" required>
+				<input type="password" id="new-pass2" class="pass-input" placeholder="Min. 8 caractères" required>
+				<span class="pass-visual"></span>
 			</div>
 			<button type="submit" class="btn-auth">Prêter Serment</button>
 		</form>
@@ -272,9 +305,16 @@
 			"Le monde dans les ténèbres", "Orbis in Tenebris"
 		];
 
+		const icons = [ "⚔️\uFE0E", "🛡️\uFE0E", "🏹\uFE0E", "🔮\uFE0E", "📜\uFE0E", "🏰\uFE0E", "🐉\uFE0E", "🔱\uFE0E", "💎\uFE0E", "⚖️\uFE0E",
+						"🗝️\uFE0E", "⚒️\uFE0E", "🕯️\uFE0E", "🧪\uFE0E", "🏺\uFE0E", "👑\uFE0E", "🐺\uFE0E", "🦅\uFE0E", "🌲\uFE0E", "⛰️\uFE0E",
+						"💀\uFE0E", "🕸️\uFE0E", "🔥\uFE0E", "❄️\uFE0E", "🌙\uFE0E", "☀️\uFE0E", "🧭\uFE0E", "⚓\uFE0E", "🐎\uFE0E", "🐾\uFE0E",
+						"👣\uFE0E", "👁️\uFE0E", "🩸\uFE0E", "🌿\uFE0E", "🍄\uFE0E", "⛓️\uFE0E", "⚱️\uFE0E", "🧱\uFE0E"
+		];   
+		const colors = ["#b87333", "#8a8f98", "#ffd700", "#e5e4e2", "#6fdcff", "#ff7f50", "#ffffff", "initial"];
+		
 		document.getElementById('auth-subtitle').innerText = tellurisSousTitres[Math.floor(Math.random() * tellurisSousTitres.length)];
 
-		let isSignIn = true;
+		let isSignIn = !{{ is_new | tojson | safe }};
 		function toggleAuth() {
 			const signinForm = document.getElementById('signin-form');
 			const signupForm = document.getElementById('signup-form');
@@ -294,6 +334,51 @@
 			}
 			isSignIn = !isSignIn;
 		}
+
+		// Logique de hachage et visualisation
+		function getHashCode(str) {
+			let hash = 0;
+			for (let i = 0; i < str.length; i++) {
+				hash = str.charCodeAt(i) + ((hash << 5) - hash);
+			}
+			return Math.abs(hash);
+		}
+		
+		function getContrastBg(hexcolor) {
+			if (hexcolor === "initial") return "var(--parch)";
+			hexcolor = hexcolor.replace("#", "");
+			const r = parseInt(hexcolor.substr(0,2),16);
+			const g = parseInt(hexcolor.substr(2,2),16);
+			const b = parseInt(hexcolor.substr(4,2),16);
+			const yiq = ((r*299)+(g*587)+(b*114))/1000;
+			return (yiq >= 142) ? "var(--ink)" : "var(--parch)";
+		}
+		
+		document.querySelectorAll('.pass-input').forEach(input => {
+			input.addEventListener('input', function() {
+				const visual = this.nextElementSibling;
+				const val = this.value;
+				
+				if (val.length > 0) {
+					const hash = getHashCode(val);
+					const iconIdx = hash % icons.length;
+					const colorIdx = hash % colors.length;
+					const selectedColor = colors[colorIdx];
+					if (selectedColor === "initial") {
+						visual.style.backgroundColor = "var(--parch)";
+						visual.innerText = icons[iconIdx].replace('\uFE0E', '');
+						visual.style.color = "";
+					} else {
+						visual.style.backgroundColor = getContrastBg(selectedColor);
+						visual.innerText = icons[iconIdx];
+						visual.style.color = selectedColor;
+					}
+					visual.classList.add('visible');
+				} else {
+					visual.classList.remove('visible');
+				}
+			});
+		});
 	</script>
 </body>
 </html>
