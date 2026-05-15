@@ -409,12 +409,25 @@
 	.globe-center {
 		position: absolute;
 		inset: 30%;
-		background: rgba(37,61,41,0.3);
+		background:
+			radial-gradient(ellipse 80% 60% at 50% 40%, rgba(37,61,41,0.18) 0%, transparent 70%),
+			radial-gradient(ellipse 120% 80% at 50% 50%, rgba(14,11,8,0.95) 0%, rgba(20,15,10,0.7) 60%, rgba(14,11,8,0.98) 100%);
 		border: 0.5px solid rgba(201,146,42,0.4);
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+	.globe-center-map {
+		position: absolute;
+		opacity: 0.1;
+		inset: 0%;
+		border-radius: 50%;
+		background-image:
+			repeating-linear-gradient(60deg, var(--gold) 0px, var(--gold) 1px, transparent 1px, transparent 10px),
+			repeating-linear-gradient(120deg, var(--gold) 0px, var(--gold) 1px, transparent 1px, transparent 10px),
+			repeating-linear-gradient(0deg, var(--gold) 0px, var(--gold) 1px, transparent 1px, transparent 10px);
+		z-index: 0;
 	}
 
 	.globe-symbol {
@@ -424,18 +437,18 @@
 
 	.orbit-dot {
 		position: absolute;
-		width: 6px;
-		height: 6px;
+		width: var(--size, 0.5em);
+		height: var(--size, 0.5em);
 		background: var(--gold);
 		border-radius: 50%;
 		animation: orbit var(--dur, 12s) linear infinite;
-		top: calc(50% - 3px);
-		left: calc(50% - 3px);
-		transform-origin: calc(-1 * var(--r, 140px)) 0;
+		top: calc(50%);
+		left: calc(50%);
+		transform-origin: 0;
 	}
 	@keyframes orbit {
-		from { transform: rotate(0) translateX(var(--r, 140px)); }
-		to	 { transform: rotate(360deg) translateX(var(--r, 140px)); }
+		from { transform: rotate(0) translateX(var(--r, 148px)); }
+		to	 { transform: rotate(360deg) translateX(var(--r, 148px)); }
 	}
 
 	/* ── QUOTE ────────────────────────────────────────────────── */
@@ -581,7 +594,7 @@
 		<p class="quote-source reveal reveal-delay-1">Aldric von Brunn — Guerrier, Rang Or</p>
 	</div>
 
-	<section id="guildes">
+	<section id="guildes" aria-labelledby="guilde-title">
 		<div class="world-section">
 			<div class="world-text">
 				<p class="section-eyebrow reveal">La Guilde des Aventuriers</p>
@@ -597,10 +610,12 @@
 					<div class="globe-ring"></div>
 					<div class="globe-center">
 						<span class="globe-symbol" aria-hidden="true">⚔</span>
+						<div class="globe-center-map">
+						</div>
 					</div>
-					<div class="orbit-dot" style="--r:148px; --dur:14s;"></div>
-					<div class="orbit-dot" style="--r:116px; --dur:9s; animation-delay:-3s;"></div>
-					<div class="orbit-dot" style="--r:148px; --dur:14s; animation-delay:-7s;"></div>
+					<div class="orbit-dot" style="--r:110px; --dur:8s; --size: 0.9em;"></div>
+					<div class="orbit-dot" style="--r:160px; --dur:14s; --size: 0.7em; animation-delay:-3s;"></div>
+					<div class="orbit-dot" style="--r:80px; --dur:10s; --size: 0.5em; animation-delay:-7s;"></div>
 				</div>
 			</div>
 		</div>
