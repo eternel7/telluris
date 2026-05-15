@@ -8,71 +8,11 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
-	/* ── RESET & BASE ─────────────────────────────────────────── */
-	*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-	:root {
-		--ink:			 #0e0b08;
-		--parch:		 #f5edd8;
-		--parch2:		#eddfc0;
-		--parch3:		#ffffff; /* Ajusté pour contraste AA sur fond sombre */
-		--gold:			#d49d31; /* Un peu plus saturé pour le contraste */
-		--gold2:		 #f0c04a;
-		--gold3:		 #e8a020;
-		--bronze:		#8d6334;
-		--green:		 #253d29;
-		--green2:		#3a5c3e;
-		--shadow:		rgba(14,11,8,0.85);
-		--vignette:	rgba(14,11,8,0.6);
-	}
-
-	/* Accessibilité : Lien d'évitement */
-	.skip-link {
-		position: absolute;
-		top: -100px;
-		left: 0;
-		background: var(--gold);
-		color: var(--ink);
-		padding: 8px;
-		z-index: 1001;
-	}
-	.skip-link:focus { top: 0; }
-
-	/* Accessibilité : Focus visible */
-	a:focus, button:focus {
-		outline: 2px solid var(--gold2);
-		outline-offset: 4px;
-	}
-
-	html {
-		scroll-behavior: smooth;
-		overflow-x: hidden;
-		position: relative; 
-	}
-	body {
-		max-width: 100%;
-		background: var(--ink);
-		color: var(--parch);
-		font-family: 'IM Fell English', Georgia, serif;
-		overflow-x: hidden;
-		position: relative; 
-		cursor: default;
-	}
-
-	/* ── NOISE TEXTURE OVERLAY ───────────────────────────────── */
-	body::before {
-		content: '';
-		position: fixed;
-		top: 0; left: 0;
-		width: 100vw;
-		height: 100vh;
-		inset: 0;
-		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-		pointer-events: none;
-		z-index: 1000;
-		opacity: 0.5;
-	}
-
+	{% include "part-root-css.html" without context %}
+	{% include "part-footer-css.html" without context %}
+	{% include "part-nav-css.html" without context %}
+	{% include "part-accessibility-css.html" without context %}
+	
 	/* ── HERO ─────────────────────────────────────────────────── */
 	.hero {
 		position: relative;
@@ -270,43 +210,6 @@
 		height: 28px;
 		background: linear-gradient(to bottom, var(--gold), transparent);
 	}
-
-	/* ── NAV ──────────────────────────────────────────────────── */
-	nav {
-		position: fixed;
-		top: 0; left: 0; right: 0;
-		z-index: 100;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 20px 48px;
-		background: linear-gradient(to bottom, rgba(14,11,8,0.95), transparent);
-	}
-
-	.nav-logo {
-		font-family: 'Cinzel', serif;
-		font-size: 14px;
-		letter-spacing: 0.4em;
-		color: var(--gold2);
-		text-transform: uppercase;
-		text-decoration: none;
-	}
-
-	.nav-links {
-		display: flex;
-		gap: 36px;
-		list-style: none;
-	}
-	.nav-links a {
-		font-family: 'Cinzel', serif;
-		font-size: 12px;
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
-		color: var(--parch2);
-		text-decoration: none;
-		transition: color 0.2s;
-	}
-	.nav-links a:hover { color: var(--gold2); }
 
 	/* ── FEATURES ─────────────────────────────────────────────── */
 	.section {
@@ -562,8 +465,6 @@
 		text-transform: uppercase;
 	}
 	
-	{% include "part-footer-css.html" without context %}
-
 	/* ── SCROLL ANIMATIONS ───────────────────────────────────── */
 	.reveal {
 		opacity: 0;
@@ -589,8 +490,6 @@
 
 	/* ── RESPONSIVE ───────────────────────────────────────────── */
 	@media (max-width: 768px) {
-		nav { padding: 16px 24px; }
-		.nav-links { display: none; }
 		.section { padding: 60px 24px; }
 		.features-grid { grid-template-columns: 1fr; }
 		.ranks-grid { grid-template-columns: repeat(2, 1fr); }
@@ -611,7 +510,7 @@
 		<li><a href="#monde">Le monde</a></li>
 		<li><a href="#guildes">Guildes</a></li>
 		<li><a href="#vocations">Vocations</a></li>
-		<li><a href="#jouer">Jouer</a></li>
+		<li><a href="/auth">Jouer</a></li>
 	</ul>
 </nav>
 
@@ -627,7 +526,7 @@
 			<div class="hero-rule" role="presentation"></div>
 			<p class="hero-sub" lang="la">Ubi Chartae Finiunt</p>
 			<div class="hero-cta">
-				<a href="#jouer" class="btn-primary">Commencer l'aventure</a>
+				<a href="/auth" class="btn-primary">Commencer l'aventure</a>
 				<a href="#monde" class="btn-secondary">Découvrir le monde</a>
 			</div>
 		</div>
@@ -774,8 +673,10 @@
 
 <footer role="contentinfo">
 	<div>
-		<p class="footer-logo">Telluris</p>
-		<p class="footer-sub" lang="la">Ubi Chartae Finiunt</p>
+		<a href="#">
+			<p class="footer-logo">Telluris</p>
+			<p class="footer-sub" lang="la">Ubi Chartae Finiunt</p>
+		</a>
 	</div>
 	<ul class="footer-links">
 		<li><a href="#">Mentions légales</a></li>

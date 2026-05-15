@@ -1,0 +1,30 @@
+	@media (prefers-reduced-motion: reduce) {
+		body::before { display: none; }
+		* { transition: none !important; animation: none !important; }
+	}
+	/* Accessibilité : Lien d'évitement */
+	.skip-link {
+		position: absolute;
+		top: -100px;
+		left: 0;
+		background: var(--gold);
+		color: var(--ink);
+		padding: 8px;
+		z-index: 1001;
+	}
+	.skip-link:focus { top: 0; }
+
+	/* Accessibilité : Focus visible */
+	a {
+		text-decoration: none;
+	}
+	a:focus, button:focus {
+		outline: 2px solid var(--gold2);
+		outline-offset: 4px;
+	}
+	
+	/* ── ACCESSIBILITÉ : FOCUS & RÉDUCTION MOUVEMENT ────────── */
+	a:focus-visible, button:focus-visible, input:focus-visible {
+		outline: 3px solid var(--gold);
+		outline-offset: 4px;
+	}
