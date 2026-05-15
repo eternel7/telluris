@@ -1,164 +1,184 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telluris — Authentification</title>
-	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — Authentification</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&amp;family=Cinzel+Decorative:wght@400;700&amp;family=IM+Fell+English:ital@0;1&amp;display=swap" rel="stylesheet">
-    <style>
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+	<style>
 		:root {
 			--ink: #0e0b08;
-			--parch: #f2e8d0;
-			--parch2: #e8d9b8;
-			--parch3: #d4c49a;
+			--parch: #f5edd8;
+			--parch2: #eddfc0;
+			--parch3: #ddd0a8; /* Contraste optimisé pour AA */
 			--gold: #c9922a;
 			--gold2: #f0c04a;
-			--gold3: #e8a020;
 			--bronze: #8d6334;
-			--green: #253d29;
-			--green2: #3a5c3e;
-			--shadow: rgba(14, 11, 8, 0.85);
-			--vignette: rgba(14, 11, 8, 0.6);
 		}
 
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--ink);
-            /* Le fond reprend l'esthétique sombre de la home */
-            background: radial-gradient(circle, #1a1612 0%, #0e0b08 100%);
-            font-family: 'IM Fell English', serif;
-            color: var(--parch);
-            overflow: hidden;
-            padding: 20px;
-        }
-
-        .auth-container {
-            width: 100%;
-            max-width: 420px;
-            background: var(--parch);
-            border: 2px solid var(--gold);
-            border-radius: 2px; /* Style papier découpé droit */
-            padding: 40px;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 100px rgba(141, 99, 52, 0.1);
-            text-align: center;
-            position: relative;
-            color: var(--ink);
-        }
-
-		@keyframes heroReveal {
-		  from { opacity: 0; }
-		  to   { opacity: 1; }
+		/* ── BASE & SCROLL LOCK ─────────────────────────────────── */
+		body {
+			margin: 0;
+			height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background-color: var(--ink);
+			background: radial-gradient(circle, #1a1612 0%, #0e0b08 100%);
+			font-family: 'IM Fell English', serif;
+			color: var(--parch);
+			overflow: hidden; /* Empêche le scroll vertical */
+			padding: 20px;
+			box-sizing: border-box;
 		}
-        /* Effet de bordure décorative inspiré du style médiéval */
-        .auth-container::before {
-            content: '';
-            position: absolute;
-            top: 5px; left: 5px; right: 5px; bottom: 5px;
-            border: 1px solid var(--bronze);
-            pointer-events: none;
-            opacity: 0.5;
-        }
 
-        .logo {
-            font-family: 'Cinzel', serif;
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--ink);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 5px;
-        }
+		/* ── ACCESSIBILITÉ : FOCUS & RÉDUCTION MOUVEMENT ────────── */
+		a:focus-visible, button:focus-visible, input:focus-visible {
+			outline: 3px solid var(--gold);
+			outline-offset: 4px;
+		}
 
-        .subtitle {
-            font-family: 'Cinzel', serif;
-            color: var(--bronze);
-            font-size: 11px;
-            text-transform: uppercase;
-            margin-bottom: 35px;
-            letter-spacing: 1.5px;
-            font-weight: 700;
+		@media (prefers-reduced-motion: reduce) {
+			body::before { display: none; }
+			* { transition: none !important; animation: none !important; }
+		}
+
+		/* ── NOISE TEXTURE OVERLAY ──────────────────────────────── */
+		body::before {
+			content: "";
+			position: fixed;
+			top: 0; left: 0; width: 100%; height: 100%;
+			filter: url(#noiseFilter);
+			opacity: 0.12;
+			z-index: 1000;
+			pointer-events: none;
+		}
+
+		/* ── CONTAINER ──────────────────────────────────────────── */
+		.auth-container {
+			width: 100%;
+			max-width: 420px;
+			background: var(--parch);
+			border: 2px solid var(--gold);
+			border-radius: 2px; /* Style papier découpé droit */
+			padding: 40px;
+			box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 100px rgba(141, 99, 52, 0.1);
+			text-align: center;
+			position: relative;
+			color: var(--ink);
+			z-index: 1001;
+			max-height: 95vh;
+			overflow-y: auto;
+		}
+
+		.auth-container::before {
+			content: '';
+			position: absolute;
+			top: 5px; left: 5px; right: 5px; bottom: 5px;
+			border: 1px solid var(--bronze);
+			pointer-events: none;
+			opacity: 0.5;
+		}
+
+		.logo {
+			font-family: 'Cinzel Decorative', serif;
+			font-size: clamp(32px, 10vw, 60px);
+			font-weight: 700;
+			letter-spacing: 0.12em;
+			color: var(--ink);
+			text-shadow: 0 0 60px rgba(201, 146, 42, 0.3), 0 2px 4px rgba(0, 0, 0, 0.8);
+			margin-bottom: 5px;
+		}
+
+		.subtitle {
+			font-family: 'Cinzel', serif;
+			color: var(--bronze);
+			font-size: 12px;
+			text-transform: uppercase;
+			margin-bottom: 35px;
+			letter-spacing: 1.5px;
+			font-weight: 700;
 			animation: heroReveal 2s 0.6s ease both;
-        }
+			min-height: 1.2em;
+		}
 
-        .form-group {
-            text-align: left;
-            margin-bottom: 20px;
-        }
+		/* ── FORMULAIRE ─────────────────────────────────────────── */
+		.form-group {
+			text-align: left;
+			margin-bottom: 20px;
+		}
 
-        label {
-            display: block;
-            font-family: 'Cinzel', serif;
-            font-size: 10px;
-            color: var(--ink);
-            margin-bottom: 6px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
+		label {
+			display: block;
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			color: var(--ink);
+			margin-bottom: 6px;
+			font-weight: 700;
+			text-transform: uppercase;
+		}
 
-        input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.05);
-            border: none;
-            border-bottom: 1px solid var(--bronze);
-            padding: 10px 0;
-            color: var(--ink);
-            font-family: 'IM Fell English', serif;
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
+		input {
+			width: 100%;
+			background: rgba(0, 0, 0, 0.05);
+			border: none;
+			border-bottom: 1px solid var(--bronze);
+			padding: 10px 0;
+			color: var(--ink);
+			font-family: 'IM Fell English', serif;
+			font-size: 16px;
+			box-sizing: border-box;
+			transition: border-color 0.3s;
+		}
 
-        input:focus {
-            outline: none;
-            border-bottom: 2px solid var(--gold);
-        }
+		input:focus {
+			outline: none;
+			border-bottom: 2px solid var(--gold);
+		}
 
-        .btn-auth {
-            width: 100%;
-            margin-top: 15px;
-            padding: 14px;
-            font-family: 'Cinzel', serif;
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--parch);
-            background: var(--ink);
-            border: 1px solid var(--gold);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+		/* ── BOUTONS (Centrage Vertical Corrigé) ────────────────── */
+		.btn-auth {
+			width: 100%;
+			margin-top: 15px;
+			padding: 14px 20px;
+			font-family: 'Cinzel', serif;
+			font-size: 14px;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			color: var(--parch);
+			background: var(--ink);
+			border: 1px solid var(--gold);
+			cursor: pointer;			
+			display: inline-flex;	/* Flex pour centrage vertical */
+			align-items: center;	 /* Centre verticalement le texte */
+			justify-content: center; /* Centre horizontalement le texte */
+			transition: all 0.3s ease;
+		}
 
-        .btn-auth:hover {
-            background: var(--gold);
-            color: var(--ink);
-            box-shadow: 0 4px 15px rgba(201, 146, 42, 0.4);
-        }
+		.btn-auth:hover {
+			background: var(--gold);
+			color: var(--ink);
+			box-shadow: 0 4px 15px rgba(201, 146, 42, 0.4);
+		}
 
-        .switch-mode {
-            margin-top: 30px;
-            font-size: 14px;
-            font-style: italic;
-            color: var(--bronze);
-        }
+		.switch-mode {
+			margin-top: 30px;
+			font-size: 14px;
+			font-style: italic;
+			color: var(--bronze);
+		}
 
-        .switch-mode a {
-            font-family: 'Cinzel', serif;
-            color: var(--ink);
-            text-decoration: none;
-            font-weight: 700;
-            font-style: normal;
-            cursor: pointer;
-            margin-left: 5px;
-            font-size: 12px;
-        }
+		.switch-mode a {
+			font-family: 'Cinzel', serif;
+			color: var(--ink);
+			text-decoration: none;
+			font-weight: 700;
+			cursor: pointer;
+			margin-left: 5px;
+			font-size: 12px;
+		}
 		/* Ornement haut */
 		.ornament {
 		  width: 180px;
@@ -166,7 +186,6 @@
 		  background: linear-gradient(90deg, transparent, var(--gold), transparent);
 		  position: relative;
 		  margin: 0 auto 20px auto;
-		  animation: heroReveal 2s 0.6s ease both;
 		}
 		.ornament::before {
 		  content: '✦';
@@ -174,106 +193,107 @@
 		  top: 50%; left: 50%;
 		  transform: translate(-50%, -50%);
 		  color: var(--gold);
-		  font-size: 10px;
+		  font-size: 12px;
 		  background: var(--parch);
 		  padding: 0 6px;
-		}
-		
+		}		
 
 		.hero-rule {
 		  width: 60px;
 		  height: 0.5px;
 		  background: var(--gold);
 		  margin: 18px auto;
-		  animation: heroReveal 2s 0.6s ease both;
 		}
 		
-        .switch-mode a:hover {
-            color: var(--gold);
-        }
-
-        .hidden { display: none; }
-    </style>
+		.switch-mode a:hover {
+			color: var(--gold);
+		}
+		.hidden { display: none; }
+	</style>
 </head>
 <body>
 
-    <div class="auth-container">
+	<svg style="display:none">
+		<filter id="noiseFilter">
+			<feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch" />
+		</filter>
+	</svg>
+
+	<div class="auth-container">
 		<div class="ornament"></div>
-        <div class="logo">Telluris</div>
-        <div id="auth-subtitle" class="subtitle">Ubi Chartae Finiunt</div>
+		<div class="logo">Telluris</div>
+		<div id="auth-subtitle" class="subtitle">Ubi Chartae Finiunt</div>
 		<div class="hero-rule"></div>
-		
-        <form id="signin-form">
-            <div class="form-group">
-                <label>Nom d'utilisateur</label>
-                <input type="text" placeholder="Aldric von Brunn" required>
-            </div>
-            <div class="form-group">
-                <label>Sceau Secret</label>
-                <input type="password" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn-auth">Entrer dans la cité</button>
-        </form>
+		<form id="signin-form">
+			<div class="form-group">
+				<label for="user-email" title="Email/courriel" >Sceau de correspondance</label>
+				<input type="text" id="user-email" placeholder="votre@parchemin.com" required>
+			</div>
+			<div class="form-group">
+				<label for="user-pass" title="Mot de passe" >Sceau Secret</label>
+				<input type="password" id="user-pass" placeholder="••••••••" required>
+			</div>
+			<button type="submit" class="btn-auth">Entrer dans la cité</button>
+		</form>
 
-        <form id="signup-form" class="hidden">
-            <div class="form-group">
-                <label>Nom de voyageur</label>
-                <input type="text" placeholder="Votre nom" required>
-            </div>
-            <div class="form-group">
-                <label>Parchemin de contact (Email)</label>
-                <input type="email" placeholder="votre@epreuve.com" required>
-            </div>
-            <div class="form-group">
-                <label>Sceau Secret</label>
-                <input type="password" placeholder="Min. 8 caractères" required>
-            </div>
-            <button type="submit" class="btn-auth">Prêter Serment</button>
-        </form>
+		<form id="signup-form" class="hidden">
+			<div class="form-group">
+				<label for="new-email" title="Email/courriel" >Sceau de correspondance</label>
+				<input type="email" id="new-email" placeholder="votre@parchemin.com" required>
+			</div>
+			<div class="form-group">
+				<label for="new-pass" title="Mot de passe" >Sceau Secret</label>
+				<input type="password" id="new-pass" placeholder="Min. 8 caractères" required>
+			</div>
+			<div class="form-group">
+				<label for="new-pass2" title="Mot de passe - vérification" >Sceau Secret - vérification</label>
+				<input type="password" id="new-pass2" placeholder="Min. 8 caractères" required>
+			</div>
+			<button type="submit" class="btn-auth">Prêter Serment</button>
+		</form>
 
-        <div class="switch-mode">
-            <span id="toggle-text">Nouveau voyageur ?</span>
-            <a onclick="toggleAuth()" id="toggle-link">S'inscrire</a>
-        </div>
-    </div>
+		<div class="switch-mode">
+			<span id="toggle-text">Nouveau voyageur ?</span>
+			<a onclick="toggleAuth()" id="toggle-link" role="button" tabindex="0">S'inscrire</a>
+		</div>
+	</div>
 
-    <script>
-        let isSignIn = true;
-        const tellurisSousLitres = [
-            "Là où s'arrêtent les cartes", "Ubi Chartae Finiunt",
-            "Au-delà des remparts", "Ultra Moenia",
-            "Le monde a un prix", "Mundus Pretium Habet",
-            "Le prix de la gloire", "Pretium Gloriae",
-            "Nul n'est héros chez soi", "Nemo Propheta in Patria",
-            "Chroniques des guildes", "Chronica Sodalitatum",
-            "L'ère des aventuriers", "Aetas Exploratorum",
-            "Sang & fortune", "Sanguis et Fortuna",
-            "Les confins de la terre", "Fines Terrae",
-            "Le monde dans les ténèbres", "Orbis in Tenebris"
-        ];
+	<script>
+		const tellurisSousTitres = [
+			"Là où s'arrêtent les cartes", "Ubi Chartae Finiunt",
+			"Au-delà des remparts", "Ultra Moenia",
+			"Le monde a un prix", "Mundus Pretium Habet",
+			"Le prix de la gloire", "Pretium Gloriae",
+			"Nul n'est héros chez soi", "Nemo Propheta in Patria",
+			"Chroniques des guildes", "Chronica Sodalitatum",
+			"L'ère des aventuriers", "Aetas Exploratorum",
+			"Sang & fortune", "Sanguis et Fortuna",
+			"Les confins de la terre", "Fines Terrae",
+			"Le monde dans les ténèbres", "Orbis in Tenebris"
+		];
 
-        // Sous-titre aléatoire au chargement
-        document.getElementById('auth-subtitle').innerText = tellurisSousLitres[Math.floor(Math.random() * tellurisSousLitres.length)];
+		document.getElementById('auth-subtitle').innerText = tellurisSousTitres[Math.floor(Math.random() * tellurisSousTitres.length)];
 
-        function toggleAuth() {
-            const signinForm = document.getElementById('signin-form');
-            const signupForm = document.getElementById('signup-form');
-            const toggleText = document.getElementById('toggle-text');
-            const toggleLink = document.getElementById('toggle-link');
+		let isSignIn = true;
+		function toggleAuth() {
+			const signinForm = document.getElementById('signin-form');
+			const signupForm = document.getElementById('signup-form');
+			const toggleText = document.getElementById('toggle-text');
+			const toggleLink = document.getElementById('toggle-link');
 
-            if (isSignIn) {
-                signinForm.classList.add('hidden');
-                signupForm.classList.remove('hidden');
-                toggleText.innerText = "Déjà inscrit ?";
-                toggleLink.innerText = "Se connecter";
-            } else {
-                signupForm.classList.add('hidden');
-                signinForm.classList.remove('hidden');
-                toggleText.innerText = "Nouveau voyageur ?";
-                toggleLink.innerText = "S'inscrire";
-            }
-            isSignIn = !isSignIn;
-        }
-    </script>
+			if (isSignIn) {
+				signinForm.classList.add('hidden');
+				signupForm.classList.remove('hidden');
+				toggleText.innerText = "Déjà inscrit ?";
+				toggleLink.innerText = "Se connecter";
+			} else {
+				signupForm.classList.add('hidden');
+				signinForm.classList.remove('hidden');
+				toggleText.innerText = "Nouveau voyageur ?";
+				toggleLink.innerText = "S'inscrire";
+			}
+			isSignIn = !isSignIn;
+		}
+	</script>
 </body>
 </html>
