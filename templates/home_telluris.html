@@ -561,54 +561,8 @@
 		color: var(--gold2);
 		text-transform: uppercase;
 	}
-
-	/* ── FOOTER ───────────────────────────────────────────────── */
-	footer {
-		padding: 48px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		border-top: 0.5px solid rgba(201,146,42,0.1);
-	}
-
-	.footer-logo {
-		font-family: 'Cinzel Decorative', serif;
-		font-size: 18px;
-		color: var(--gold2);
-		letter-spacing: 0.1em;
-	}
-
-	.footer-sub {
-		font-family: 'IM Fell English', serif;
-		font-size: 12px;
-		font-style: italic;
-		color: var(--parch3);
-		letter-spacing: 0.1em;
-	}
-
-	.footer-links {
-		display: flex;
-		gap: 20px;
-		flex-wrap: wrap;
-		justify-content: center;
-		padding: 0 20px;
-		margin: 0;
-		list-style: none;
-	}
-	.footer-links a {
-		font-family: 'Cinzel', serif;
-		font-size: 12px;
-		letter-spacing: 0.2em;
-		text-transform: uppercase;
-		white-space: nowrap;
-		color: var(--parch3);
-		text-decoration: none;
-		transition: color 0.2s;
-		min-height: 44px; /* Accessibilité : taille cible */
-		display: inline-flex;
-		align-items: center;
-	}
-	.footer-links a:hover { color: var(--gold); }
+	
+	{% include "part-footer-css.html" without context %}
 
 	/* ── SCROLL ANIMATIONS ───────────────────────────────────── */
 	.reveal {
@@ -642,19 +596,6 @@
 		.ranks-grid { grid-template-columns: repeat(2, 1fr); }
 		.world-section { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
 		.world-visual { display: none; }
-		footer { 
-			flex-direction: column; 
-			gap: 20px; 
-			text-align: center;
-			padding: 40px 15px;
-		}
-		.footer-links { 
-			justify-content: center; 
-			gap: 15px 25px;
-		}
-		.footer-links a {
-			font-size: 12px;
-		}
 		.quote-section { padding: 60px 24px; }
 		.ranks-section { padding: 60px 24px; }
 	}
