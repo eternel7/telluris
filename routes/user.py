@@ -17,13 +17,6 @@ class LoginRequest(BaseModel):
 	email: str
 	password: str
 
-class UserOut(BaseModel):
-	token: str
-	user_id: str
-	username: str
-
-
-
 @user_router.post("/register")
 async def register_user(user: RegisterRequest, response: Response):
 	user_id = "user:"+user.email
@@ -41,6 +34,7 @@ async def register_user(user: RegisterRequest, response: Response):
 		"_id": user_id,
 		"username": user.username,
 		"email": user.email,
+		"type": "user",
 		"password": hashed_pw.decode(),
 		"token": token,
 		"characters": []
