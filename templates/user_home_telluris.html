@@ -11,7 +11,6 @@
 
 		{% include "part-root-css.html" without context %}
 		{% include "part-footer-css.html" without context %}
-		{% include "part-nav-css.html" without context %}
 		{% include "part-accessibility-css.html" without context %}
 		
 		/* ── BASE & SCROLL LOCK ─────────────────────────────────── */
@@ -22,18 +21,11 @@
 			padding: 20px;
 			box-sizing: border-box;
 		}
-		
-		/* ── CONTAINER ──────────────────────────────────────────── */
-		.auth-main {
-			position: relative;
+		#main-content {
 			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			padding: 2rem;
-			z-index: 0;
+			justify-content: center;			
 		}
-		.auth-container {
+		.user-container {
 			width: 100%;
 			max-width: 520px;
 			background: var(--parch);
@@ -47,7 +39,7 @@
 			z-index: 1;
 		}
 
-		.auth-container::before {
+		.user-container::before {
 			content: '';
 			position: absolute;
 			top: 5px; left: 5px; right: 5px; bottom: 5px;
@@ -55,10 +47,10 @@
 			pointer-events: none;
 			opacity: 0.5;
 		}
-
+		
 		.logo {
 			font-family: 'Cinzel Decorative', serif;
-			font-size: clamp(28px, 8vw, 60px);
+			font-size: 28px;
 			font-weight: 700;
 			letter-spacing: 0.12em;
 			color: var(--ink);
@@ -134,7 +126,7 @@
 		}
 
 		/* ── BOUTONS ────────────────── */
-		.btn-auth {
+		.btn {
 			width: 100%;
 			margin-top: 15px;
 			padding: 14px 20px;
@@ -153,28 +145,12 @@
 			transition: all 0.3s ease;
 		}
 
-		.btn-auth:hover, .btn-social:hover {
+		.btn:hover {
 			background: var(--gold);
 			color: var(--ink);
 			box-shadow: 0 4px 15px rgba(201, 146, 42, 0.4);
 		}
-		
-		.btn-social {
-			margin-top: 15px;
-			padding: 10px 15px;
-			font-family: 'Cinzel', serif;
-			font-size: 12px;
-			font-weight: 700;
-			letter-spacing: 2px;
-			color: var(--ink);
-			background: var(--parch);
-			border: 1px solid var(--gold);
-			cursor: pointer;
-			display: inline;
-			align-items: center;
-			transition: all 0.3s ease;
-		}
-		
+				
 		.switch-mode {
 			margin-top: 30px;
 			font-size: 14px;
@@ -216,20 +192,6 @@
 			background: var(--gold);
 			margin: 18px auto;
 		}
-		.social-auth {
-			margin: 18px auto;
-		}
-		.social-subtitle {
-			position: relative;
-			font-size: 14px;
-			font-style: italic;
-			color: var(--bronze);
-			min-height: 1.2em;
-			margin-bottom: 5px;
-		}
-		.social-icons {			
-			margin: 18px auto;
-		}
 		.switch-mode a:hover {
 			color: var(--gold);
 		}
@@ -238,9 +200,6 @@
 		@media (max-width: 768px) {
 			label {
 				font-size: 10px;
-			}
-			.btn-social {
-				display: inline-flex;
 			}
 		}
 	</style>
@@ -253,183 +212,24 @@
 	</svg>
 
 	<a href="#main-content" class="skip-link">Aller au contenu principal</a>
-
-	<nav role="navigation" aria-label="Menu principal">
-		<a href="/" class="nav-logo">Telluris</a>
-		<ul class="nav-links">
-			<li><a href="#monde">Le monde</a></li>
-			<li><a href="#guildes">Guildes</a></li>
-			<li><a href="#vocations">Vocations</a></li>
-			<li><a href="#jouer">Jouer</a></li>
-		</ul>
-	</nav>
-
 	<main id="main-content">
-		<section class="auth-main" aria-labelledby="authentication">
-		<div class="auth-container">
+		<section class="user-main" aria-labelledby="User">
+		<div class="user-container">
 			<div class="ornament"></div>
-			<div class="logo">Telluris</div>
-			<div id="auth-subtitle" class="subtitle">Ubi Chartae Finiunt</div>
+			<div class="logo">{{ user_doc["username"] }}</div>
+			<div id="user-subtitle" class="subtitle">{{ user_doc["email"] }}</div>
 			<div class="hero-rule"></div>
-	{% if is_new %}
-			<form id="signin-form" class="hidden">
-	{% else %}
-			<form id="signin-form">
-	{% endif%}
-				<div class="form-group">
-					<label for="user-email" title="Email/courriel" >Sceau de correspondance</label>
-					<input type="text" id="user-email" placeholder="votre@parchemin.com" required>
-				</div>
-				<div class="form-group">
-					<label for="user-pass" title="Mot de passe" >Sceau Secret</label>
-					<input type="password" id="user-pass" class="pass-input" placeholder="••••••••" required>
-					<span class="pass-visual"></span>
-				</div>
-				<button type="submit" class="btn-auth">Entrer dans la cité</button>
-				<div class="social-auth">
-					<div>
-						<p class="social-subtitle">Ou invoquer votre identité via</p>
-					</div>
-					<div class="social-icons">
-						<a href="/auth/google" class="btn-social" aria-label="Google">Google</a>
-						<a href="/auth/apple" class="btn-social" aria-label="Apple">Apple</a>
-						<a href="/auth/facebook" class="btn-social" aria-label="Facebook">Facebook</a>
-					</div>
-				</div>
-			</form>
-	{% if is_new %}
-			<form id="signup-form">
-	{% else %}
-			<form id="signup-form" class="hidden">
-	{% endif%}
-				<div class="form-group">
-					<label for="new-email" title="Email/courriel" >Sceau de correspondance</label>
-					<input type="email" id="new-email" placeholder="votre@parchemin.com" required>
-				</div>
-				<div class="form-group">
-					<label for="new-pass" title="Mot de passe" >Sceau Secret</label>
-					<input type="password" id="new-pass" class="pass-input" placeholder="Min. 8 caractères, min 1 majuscule, 1 chiffre, 1 symbole" required>
-					<span class="pass-visual"></span>
-				</div>
-				<div class="form-group">
-					<label for="new-pass2" title="Mot de passe - vérification" >Sceau Secret - vérification</label>
-					<input type="password" id="new-pass2" class="pass-input" placeholder="Min. 8 caractères, min 1 majuscule, 1 chiffre, 1 symbole" required>
-					<span class="pass-visual"></span>
-				</div>
-				<button type="submit" class="btn-auth">Prêter Serment</button>
-			</form>
 
-			<div class="switch-mode">
-				<span id="toggle-text">Nouveau voyageur ?</span>
-				<a onclick="toggleAuth()" id="toggle-link" role="button" tabindex="0">S'inscrire</a>
-			</div>
+			<form id="user-form">
+				<div class="form-group">
+					<label for="user-name" title="Nom" >Sceau d'identité</label>
+					<input type="text" id="player-name" placeholder="votre nom de joueur" value="{{ user_doc["username"] }}">
+				</div>
+			</form>
 		</div>
 		</section>
 	</main>
-
-	<footer role="contentinfo">
-		<div>
-			<a href="/">
-				<p class="footer-logo">Telluris</p>
-				<p class="footer-sub" lang="la">Ubi Chartae Finiunt</p>
-			</a>
-		</div>
-		<ul class="footer-links">
-			<li><a href="#">Mentions légales</a></li>
-			<li><a href="#">Confidentialité</a></li>
-			<li><a href="#">Contact</a></li>
-			<li><a href="#">Presse</a></li>
-		</ul>
-	</footer>
-
 	<script>
-		const tellurisSousTitres = [
-			"Là où s'arrêtent les cartes", "Ubi Chartae Finiunt",
-			"Au-delà des remparts", "Ultra Moenia",
-			"Le monde a un prix", "Mundus Pretium Habet",
-			"Le prix de la gloire", "Pretium Gloriae",
-			"Nul n'est héros chez soi", "Nemo Propheta in Patria",
-			"Chroniques des guildes", "Chronica Sodalitatum",
-			"L'ère des aventuriers", "Aetas Exploratorum",
-			"Sang & fortune", "Sanguis et Fortuna",
-			"Les confins de la terre", "Fines Terrae",
-			"Le monde dans les ténèbres", "Orbis in Tenebris"
-		];
-
-		const icons = [ "⚔️\uFE0E", "🛡️\uFE0E", "🏹\uFE0E", "🔮\uFE0E", "📜\uFE0E", "🏰\uFE0E", "🐉\uFE0E", "🔱\uFE0E", "💎\uFE0E", "⚖️\uFE0E",
-						"🗝️\uFE0E", "⚒️\uFE0E", "🕯️\uFE0E", "🧪\uFE0E", "🏺\uFE0E", "👑\uFE0E", "🐺\uFE0E", "🦅\uFE0E", "🌲\uFE0E", "⛰️\uFE0E",
-						"💀\uFE0E", "🕸️\uFE0E", "🔥\uFE0E", "❄️\uFE0E", "🌙\uFE0E", "☀️\uFE0E", "🧭\uFE0E", "⚓\uFE0E", "🐎\uFE0E", "🐾\uFE0E",
-						"👣\uFE0E", "👁️\uFE0E", "🩸\uFE0E", "🌿\uFE0E", "🍄\uFE0E", "⛓️\uFE0E", "⚱️\uFE0E", "🧱\uFE0E"
-		];	 
-		const colors = ["#b87333", "#8a8f98", "#ffd700", "#e5e4e2", "#6fdcff", "#ff7f50", "#ffffff", "initial"];
-		
-		document.getElementById('auth-subtitle').innerText = tellurisSousTitres[Math.floor(Math.random() * tellurisSousTitres.length)];
-
-		let isSignIn = !{{ is_new | tojson | safe }};
-		function toggleAuth() {
-			const signinForm = document.getElementById('signin-form');
-			const signupForm = document.getElementById('signup-form');
-			const toggleText = document.getElementById('toggle-text');
-			const toggleLink = document.getElementById('toggle-link');
-
-			if (isSignIn) {
-				signinForm.classList.add('hidden');
-				signupForm.classList.remove('hidden');
-				toggleText.innerText = "Déjà inscrit ?";
-				toggleLink.innerText = "Se connecter";
-			} else {
-				signupForm.classList.add('hidden');
-				signinForm.classList.remove('hidden');
-				toggleText.innerText = "Nouveau voyageur ?";
-				toggleLink.innerText = "S'inscrire";
-			}
-			isSignIn = !isSignIn;
-		}
-
-		// Logique de hachage et visualisation
-		function getHashCode(str) {
-			let hash = 0;
-			for (let i = 0; i < str.length; i++) {
-				hash = str.charCodeAt(i) + ((hash << 5) - hash);
-			}
-			return Math.abs(hash);
-		}
-		
-		function getContrastBg(hexcolor) {
-			if (hexcolor === "initial") return "var(--parch)";
-			hexcolor = hexcolor.replace("#", "");
-			const r = parseInt(hexcolor.substr(0,2),16);
-			const g = parseInt(hexcolor.substr(2,2),16);
-			const b = parseInt(hexcolor.substr(4,2),16);
-			const yiq = ((r*299)+(g*587)+(b*114))/1000;
-			return (yiq >= 142) ? "var(--ink)" : "var(--parch)";
-		}
-		
-		document.querySelectorAll('.pass-input').forEach(input => {
-			input.addEventListener('input', function() {
-				const visual = this.nextElementSibling;
-				const val = this.value;
-				
-				if (val.length > 0) {
-					const hash = getHashCode(val);
-					const iconIdx = hash % icons.length;
-					const colorIdx = hash % colors.length;
-					const selectedColor = colors[colorIdx];
-					if (selectedColor === "initial") {
-						visual.style.backgroundColor = "var(--parch)";
-						visual.innerText = icons[iconIdx].replace('\uFE0E', '');
-						visual.style.color = "";
-					} else {
-						visual.style.backgroundColor = getContrastBg(selectedColor);
-						visual.innerText = icons[iconIdx];
-						visual.style.color = selectedColor;
-					}
-					visual.classList.add('visible');
-				} else {
-					visual.classList.remove('visible');
-				}
-			});
-		});
 	</script>
 </body>
 </html>

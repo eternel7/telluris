@@ -309,18 +309,18 @@
 					<input type="email" id="new-email" placeholder="votre@parchemin.com" required>
 				</div>
 				<div class="form-group">
-					<label for="user-name" title="Nom" >Sceau d'identité</label>
-					<input type="text" id="user-name" placeholder="votre nom de joueur">
-				</div>
-				<div class="form-group">
 					<label for="new-pass" title="Mot de passe" >Sceau Secret*</label>
 					<input type="password" id="new-pass" class="pass-input" placeholder="Min. 8 caractères, min 1 majuscule, 1 chiffre, 1 symbole" required>
 					<span class="pass-visual"></span>
 				</div>
 				<div class="form-group">
-					<label for="new-pass2" title="Mot de passe - vérification" >Sceau de confirmation*</label>
+					<label for="new-pass2" title="Mot de passe - vérification" >Contre-sceau*</label>
 					<input type="password" id="new-pass2" class="pass-input" placeholder="Vérification du Sceau Secret" required>
 					<span class="pass-visual"></span>
+				</div>
+				<div class="form-group">
+					<label for="player-name" title="Nom" >Sceau d'identité</label>
+					<input type="text" id="player-name" placeholder="votre nom de joueur">
 				</div>
 				<button type="submit" class="btn-auth">Prêter Serment</button>
 			</form>
@@ -435,6 +435,67 @@
 					visual.classList.remove('visible');
 				}
 			});
+		});
+		const error_pwd_confirm =["Mauvaise confirmation du Sceau de Secret","Mauvais contre-sceau."];
+		var error_pwd_confirm_nb = 0;
+		document.getElementById('signup-form').addEventListener('submit', async (e) => {
+			e.preventDefault();
+			
+			const userData = {
+				email: document.getElementById('new-email').value,
+				username: document.getElementById('player-name').value,
+				password: document.getElementById('new-pass').value,
+				password_again: document.getElementById('new-pass2').value
+			};
+			if(userData.password === userData.password_again ) {
+				try {
+					const response = await fetch('api/register', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(userData)
+					});
+
+					if (response.ok) {
+						console.log(response);
+						window.location.href = "/embleme";
+					} else {
+						const error = await response.json();
+						console.log(error.detail)
+						alert("Erreur : " + error.detail);
+					}
+				} catch (err) {
+					console.error("Erreur de connexion", err);
+				}
+			} else {
+				alert(error_pwd_confirm[error_pwd_confirm_nb % 2]);
+				error_pwd_confirm_nb++;
+			}
+		});
+		
+		document.getElementById('signin-form').addEventListener('submit', async (e) => {
+			e.preventDefault();
+			
+			const userData = {
+				email: document.getElementById('user-email').value,
+				password: document.getElementById('user-pass').value
+			};
+			try {
+				const response = await fetch('api/login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(userData)
+				});
+
+				if (response.ok) {
+					window.location.href = "/embleme";
+				} else {
+					const error = await response.json();
+					console.log(error.detail)
+					alert("Erreur : " + error.detail);
+				}
+			} catch (err) {
+				console.error("Erreur de connexion", err);
+			}
 		});
 	</script>
 </body>

@@ -1,52 +1,65 @@
-from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi import FastAPI, HTTPException, APIRouter, Response
+from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
-import uuid
 from jose import jwt
-from db.config import db
+from db.config import db, SECRET_KEY, ALGORITHM
 
 user_router = APIRouter()
-SECRET_KEY = "17c94c78a181b6fd3fac8ccdbb43754b3a55a73fd47fcee0cf21ca59d2571f98-supersecret"
-ALGORITHM = "HS256"
 
 class RegisterRequest(BaseModel):
-    username: str
-    email: str
-    password: str
-    password_again: str
-    user_type: str
+	username: str
+	email: str
+	password: str
+	password_again: str
 
 class LoginRequest(BaseModel):
-    email: str
-    password: str
+	email: str
+	password: str
+
+class UserOut(BaseModel):
+	token: str
+	user_id: str
+	username: str
+
+
 
 @user_router.post("/register")
-async def register_user(user: RegisterRequest):
-    user_doc = db.get("user:"+user.email)
-    if user_doc:
-        raise HTTPException(status_code=400, detail="User already exists")
-	if password_again===password:
-		hashed_pw = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt())
-		user_id = str(uuid.uuid4())
-		token = jwt.encode({"user_id": user_id}, SECRET_KEY, algorithm=ALGORITHM)
+async def register_user(user: RegisterRequest, response: Response):
+	user_id = "user:"+user.email
+	user_doc = db.get(user_id)
+	if user_doc:
+		raise HTTPException(status_code=400, detail="L'utilisateur existe déjà")
+	
+	if user.password != user.password_again:
+		raise HTTPException(status_code=400, detail="Les mots de passe ne correspondent pas")
+	
+	hashed_pw = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt())
+	token = jwt.encode({"user_id": user_id}, SECRET_KEY, algorithm=ALGORITHM)
 
-		db.put({
-			"_id": "user:"+user.email,
-			"username": user.username,
-			"email": user.email,
-			"password": hashed_pw.decode(),
-			"token": token,
-		})
-
-    return {"token": token, "user_id": user_id, "username": user.username}
+	db.put({
+		"_id": user_id,
+		"username": user.username,
+		"email": user.email,
+		"password": hashed_pw.decode(),
+		"token": token,
+		"characters": []
+	})
+	content = {"token": token, "user_id": user_id, "username": user.username}
+	response = JSONResponse(content=content)
+	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
+	return response
 
 @user_router.post("/login")
-async def login_user(user: LoginRequest):
-    users_collection = db["users"]
-    found_user = users_collection.find_one({"email": user.email})
+async def login_user(user: LoginRequest, response: Response):
+	user_doc = db.get("user:"+user.email)
+	print("user_doc", user_doc, user)
 
-    if not found_user or not bcrypt.checkpw(user.password.encode(), found_user["password"].encode()):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+	if not user_doc or not bcrypt.checkpw(user.password.encode(), user_doc["password"].encode()):
+		raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    token = jwt.encode({"user_id": found_user["user_id"]}, SECRET_KEY, algorithm=ALGORITHM)
-    return {"token": token, "user_id": found_user["user_id"], "user_type": found_user["user_type"]}
+	token = jwt.encode({"user_id": user_doc["_id"]}, SECRET_KEY, algorithm=ALGORITHM)
+	content = {"token": token, "user_id":  user_doc["_id"], "username":  user_doc["username"]}
+	response = JSONResponse(content=content)
+	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
+	return  response
