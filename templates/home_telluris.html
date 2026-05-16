@@ -450,7 +450,129 @@
 		from { transform: rotate(0) translateX(var(--r, 148px)); }
 		to	 { transform: rotate(360deg) translateX(var(--r, 148px)); }
 	}
+	
+	/* ── VOCATIONS ────────────────────────────────────────────── */
+	.vocations-section {
+		padding: 100px 48px;
+		max-width: 1100px;
+		margin: 0 auto;
+	}
 
+	.vocations-tabs {
+		display: flex;
+		gap: 2px;
+		margin-bottom: 2px;
+		flex-wrap: wrap;
+	}
+
+	.voc-tab {
+		font-family: 'Cinzel', serif;
+		font-size: 12px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--parch);
+		background: transparent;
+		border: 0.5px solid rgba(201,146,42,0.15);
+		padding: 10px 20px;
+		cursor: pointer;
+		transition: background 0.2s, color 0.2s, border-color 0.2s;
+		flex: 1;
+		min-width: 100px;
+		text-align: center;
+	}
+	.voc-tab:hover {
+		background: rgba(201,146,42,0.08);
+		color: var(--parch2);
+		border-color: rgba(201,146,42,0.35);
+	}
+	.voc-tab.active {
+		background: rgba(201,146,42,0.12);
+		color: var(--gold2);
+		border-color: var(--gold);
+	}
+
+	.vocations-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 2px;
+	}
+
+	.voc-panel { display: none; }
+	.voc-panel.active { display: contents; }
+
+	.voc-card {
+		background: rgba(14,11,8,0.6);
+		border: 0.5px solid rgba(201,146,42,0.12);
+		padding: 28px 22px;
+		position: relative;
+		transition: background 0.25s, border-color 0.25s;
+		cursor: default;
+	}
+	.voc-card:hover {
+		background: rgba(37,61,41,0.18);
+		border-color: rgba(201,146,42,0.35);
+	}
+	.voc-card::after {
+		content: '';
+		position: absolute;
+		bottom: 0; left: 0; right: 0;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, var(--gold), transparent);
+		opacity: 0;
+		transition: opacity 0.25s;
+	}
+	.voc-card:hover::after { opacity: 0.5; }
+
+	.voc-icon {
+		font-size: 26px;
+		display: block;
+		margin-bottom: 12px;
+		filter: sepia(0.3);
+	}
+
+	.voc-name {
+		font-family: 'Cinzel', serif;
+		font-size: 14px;
+		letter-spacing: 0.1em;
+		color: var(--gold2);
+		text-transform: uppercase;
+		margin-bottom: 8px;
+		display: block;
+	}
+
+	.voc-desc {
+		font-family: 'IM Fell English', serif;
+		font-size: 16px;
+		font-style: italic;
+		line-height: 1.75;
+		color: var(--parch3);
+		margin-bottom: 12px;
+	}
+
+	.voc-transitions {
+		font-family: 'Cinzel', serif;
+		font-size: 12px;
+		letter-spacing: 0.12em;
+		color: var(--gold2);
+		text-transform: uppercase;
+		border-top: 0.5px solid rgba(201,146,42,0.15);
+		padding-top: 10px;
+		margin-top: 4px;
+	}
+	.voc-transitions span {
+		color: var(--parch3);
+		font-family: 'IM Fell English', serif;
+		font-size: 14px;
+		font-style: italic;
+		letter-spacing: 0;
+		text-transform: none;
+	}
+
+	@media (max-width: 768px) {
+		.vocations-section { padding: 60px 24px; }
+		.vocations-grid { grid-template-columns: repeat(1, 1fr); }
+		.voc-tab { font-size: 10px; padding: 8px 12px; }
+	}
 	/* ── QUOTE ────────────────────────────────────────────────── */
 	.quote-section {
 		border-top: 0.5px solid rgba(201,146,42,0.1);
@@ -564,7 +686,7 @@
 			<div class="feature-card reveal reveal-delay-2">
 				<span class="feature-icon" aria-hidden="true">⚔</span>
 				<p class="feature-title">Combat tactique</p>
-				<p class="feature-text">Affrontements au tour par tour sur grille carrée. Chaque action compte — déplacement, attaque, magie ou ouverture d'une porte.</p>
+				<p class="feature-text">Affrontements au tour par tour sur grille carrée. Chaque action compte : déplacement, attaque, magie ou ouverture d'une porte.</p>
 			</div>
 			<div class="feature-card reveal reveal-delay-3">
 				<span class="feature-icon" aria-hidden="true">🏰</span>
@@ -574,17 +696,17 @@
 			<div class="feature-card reveal reveal-delay-1">
 				<span class="feature-icon" aria-hidden="true">🔮</span>
 				<p class="feature-title">Magie à coût réel</p>
-				<p class="feature-text">Chaque sort consume des ressources physiques. Une boule de feu au soufre dévaste — mais le soufre a un prix. La puissance est un choix économique.</p>
+				<p class="feature-text">Chaque sort consume des ressources physiques. Une boule de feu au soufre est dévastatrice, mais le soufre a un prix. La puissance est un choix économique.</p>
 			</div>
 			<div class="feature-card reveal reveal-delay-2">
 				<span class="feature-icon" aria-hidden="true">🧙</span>
-				<p class="feature-title">20 vocations</p>
+				<p class="feature-title">Vocations diverses</p>
 				<p class="feature-text">Guerrier, Nécromancien, Chaman, Ménestrel… Chaque vocation ouvre des chemins de progression uniques avec transitions entre classes.</p>
 			</div>
 			<div class="feature-card reveal reveal-delay-3">
 				<span class="feature-icon" aria-hidden="true">🤝</span>
 				<p class="feature-title">Relations vivantes</p>
-				<p class="feature-text">Vos compagnons se souviennent. Amitié, loyauté, rivalité — chaque quête tisse des liens qui influencent les aventures futures.</p>
+				<p class="feature-text">Vos compagnons se souviennent. Amitié, loyauté, rivalité, chaque quête tisse des liens qui influencent les aventures futures.</p>
 			</div>
 		</div>
 	</section>
@@ -600,7 +722,7 @@
 				<p class="section-eyebrow reveal">La Guilde des Aventuriers</p>
 				<h2 class="section-title reveal reveal-delay-1">Gravissez les rangs.<br>Forgez votre légende.</h2>
 				<div class="section-divider reveal reveal-delay-2" role="presentation"></div>
-				<p class="world-body reveal reveal-delay-2">La Guilde est le seul chemin légal vers la fortune pour les non-nobles. Du rang Cuivre aux sommets de l'Adamantite, chaque échelon ouvre des quêtes plus périlleuses — et des récompenses à la hauteur.</p>
+				<p class="world-body reveal reveal-delay-2">La Guilde est le seul chemin légal vers la fortune pour les non-nobles. Du rang Cuivre aux sommets de l'Adamantite, chaque échelon ouvre des quêtes plus périlleuses et des récompenses à la hauteur.</p>
 				<p class="world-body reveal reveal-delay-3">Les quêtes SSS+ engagent la survie entière d'une cité-état. Seuls les aventuriers légendaires osent les accepter.</p>
 			</div>
 			<div class="world-visual reveal reveal-delay-2" role="presentation">
@@ -621,7 +743,7 @@
 		</div>
 	</section>
 
-	<section id="vocations" class="ranks-section" aria-labelledby="ranks-title">
+	<section id="ranks" class="ranks-section" aria-labelledby="ranks-title">
 		<div class="ranks-inner">
 			<p class="section-eyebrow reveal">Progression</p>
 			<h2 id="ranks-title" class="section-title reveal reveal-delay-1">Les rangs de la Guilde</h2>
@@ -639,7 +761,7 @@
 					<span class="rank-levels">Niveaux 6 – 9</span>
 				</div>
 				<div class="rank-item reveal reveal-delay-3">
-					<span class="rank-gem" aria-hidden="true">🪙</span>
+					<span class="rank-gem" aria-hidden="true">🔘</span>
 					<span class="rank-name">Argent - D</span>
 					<span class="rank-levels">Niveaux 9 – 12</span>
 				</div>
@@ -671,7 +793,165 @@
 			</div>
 		</div>
 	</section>
+	<!-- VOCATIONS -->
+	<section id="vocations" class="vocations-section" aria-labelledby="vocation-title">
+		<p class="section-eyebrow reveal">Les chemins de légende</p>
+		<h2 id="voc-title" class="section-title reveal reveal-delay-1">Les Vocations</h2>
+		<div class="section-divider reveal reveal-delay-2" role="presentation"></div>
 
+		<!-- Onglets par famille -->
+		<div class="vocations-tabs reveal reveal-delay-3" role="tablist" aria-label="Familles de vocations">
+		<button class="voc-tab active" role="tab" aria-selected="true"	aria-controls="panel-combat"	id="tab-combat"	onclick="switchTab('combat')">⚔ Combat</button>
+		<button class="voc-tab"				role="tab" aria-selected="false" aria-controls="panel-magie"	 id="tab-magie"	 onclick="switchTab('magie')">🔮 Magie</button>
+		<button class="voc-tab"				role="tab" aria-selected="false" aria-controls="panel-nature"	id="tab-nature"	onclick="switchTab('nature')">🌿 Nature</button>
+		<button class="voc-tab"				role="tab" aria-selected="false" aria-controls="panel-sacre"	 id="tab-sacre"	 onclick="switchTab('sacre')">✨ Sacré</button>
+		<button class="voc-tab"				role="tab" aria-selected="false" aria-controls="panel-ombre"	 id="tab-ombre"	 onclick="switchTab('ombre')">🌑 Ombre</button>
+		</div>
+
+		<div class="vocations-grid" role="tabpanel">
+
+		<!-- ── COMBAT ── -->
+		<div class="voc-panel active" id="panel-combat" aria-labelledby="tab-combat">
+			<article class="voc-card reveal reveal-delay-1">
+			<span class="voc-icon" aria-hidden="true">🗡</span>
+			<span class="voc-name">Guerrier</span>
+			<p class="voc-desc">Maître des armes blanches et de la mêlée. Robuste, polyvalent, le pilier de toute troupe en terrain hostile.</p>
+			<p class="voc-transitions">Transitions → <span>Paladin, Répurgateur, Templier</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-2">
+			<span class="voc-icon" aria-hidden="true">🪓</span>
+			<span class="voc-name">Barbare</span>
+			<p class="voc-desc">Guerrier des steppes et des forêts, mu par la rage. Sa furie en combat est une ressource aussi précieuse que dangereuse.</p>
+			<p class="voc-transitions">Transitions → <span>Druide, Forestier, Moine</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-3">
+			<span class="voc-icon" aria-hidden="true">🏹</span>
+			<span class="voc-name">Forestier</span>
+			<p class="voc-desc">Chasseur et éclaireur hors pair. Aucune zone sauvage ne lui résiste. Il connaît les routes que les cartes n'indiquent pas.</p>
+			<p class="voc-transitions">Transitions → <span>Barbare, Élémentaliste, Voleur</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-4">
+			<span class="voc-icon" aria-hidden="true">🤺</span>
+			<span class="voc-name">Duelliste</span>
+			<p class="voc-desc">Escrimeur élégant, spécialiste du combat singulier. Sa précision chirurgicale compense l'absence de robustesse.</p>
+			<p class="voc-transitions">Transitions → <span>Assassin, Illusionniste, Ménestrel</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-5">
+			<span class="voc-icon" aria-hidden="true">🥋</span>
+			<span class="voc-name">Moine</span>
+			<p class="voc-desc">Corps comme arme, esprit comme bouclier. Les moines canalisent une énergie intérieure rare que peu de mages comprennent.</p>
+			<p class="voc-transitions">Transitions → <span>Barbare, Druide, Chaman</span></p>
+			</article>
+		</div>
+
+		<!-- ── MAGIE ── -->
+		<div class="voc-panel" id="panel-magie" aria-labelledby="tab-magie">
+			<article class="voc-card reveal reveal-delay-1">
+			<span class="voc-icon" aria-hidden="true">🔥</span>
+			<span class="voc-name">Élémentaliste</span>
+			<p class="voc-desc">Maître des forces naturelles : feu, glace, foudre, terre. Ses sorts exigent des composants physiques : leur puissance est illimitée, leur coût aussi.</p>
+			<p class="voc-transitions">Transitions → <span>Druide, Forestier, Lettré</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-2">
+			<span class="voc-icon" aria-hidden="true">🔮</span>
+			<span class="voc-name">Mage de batailles</span>
+			<p class="voc-desc">La guerre est son laboratoire. Il renforce les armes, érige des boucliers arcaniques et libère de violentes explosions au plus près de ses ennemis.</p>
+			<p class="voc-transitions">Transitions → <span>Duelliste, Nécromancien, Templier, Démoniste</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-3">
+			<span class="voc-icon" aria-hidden="true">🎭</span>
+			<span class="voc-name">Illusionniste</span>
+			<p class="voc-desc">Manipulateur de perceptions, maître du mensonge visuel. Ses illusions peuvent détourner des armées entières sans verser une goutte de sang.</p>
+			<p class="voc-transitions">Transitions → <span>Assassin, Duelliste, Lettré</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-4">
+			<span class="voc-icon" aria-hidden="true">📜</span>
+			<span class="voc-name">Lettré</span>
+			<p class="voc-desc">Érudit insatiable, aucun domaine arcanique ne lui est étranger. À force d’étude et de patience, il devient une bibliothèque vivante capable de puiser dans des savoirs oubliés et des pouvoirs insoupçonnés.</p>
+			<p class="voc-transitions">Transitions → <span>Ménestrel, Moine, Prêtre</span></p>
+			</article>
+		</div>
+
+		<!-- ── NATURE ── -->
+		<div class="voc-panel" id="panel-nature" aria-labelledby="tab-nature">
+			<article class="voc-card reveal reveal-delay-1">
+			<span class="voc-icon" aria-hidden="true">🌳</span>
+			<span class="voc-name">Druide</span>
+			<p class="voc-desc">Gardien des cycles naturels. Sa magie élémentaire puise dans la terre et le vivant. Les animaux lui obéissent, les plantes l'écoutent.</p>
+			<p class="voc-transitions">Transitions → <span>Chaman, Élémentaliste, Forestier</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-2">
+			<span class="voc-icon" aria-hidden="true">🐺</span>
+			<span class="voc-name">Chaman</span>
+			<p class="voc-desc">Communique avec les esprits totems par des rituels ancestraux. Il peut se métamorphoser en Ours, Loup, Sanglier, Chat sauvage ou Faucon et puiser dans leurs attributs naturels.</p>
+			<p class="voc-transitions">Transitions → <span>Druide, Moine, Élémentaliste</span></p>
+			</article>
+		</div>
+
+		<!-- ── SACRÉ ── -->
+		<div class="voc-panel" id="panel-sacre" aria-labelledby="tab-sacre">
+			<article class="voc-card reveal reveal-delay-1">
+				<span class="voc-icon" aria-hidden="true">✝</span>
+				<span class="voc-name">Prêtre</span>
+				<p class="voc-desc">Guérisseur et soutien indispensable. Peut ressusciter les tombés au combat à condition d'avoir les ressources sacrées nécessaires.</p>
+				<p class="voc-transitions">Transitions → <span>Élémentaliste, Magicien de combat, Paladin, Démoniste</span></p>
+				</article>
+			<article class="voc-card reveal reveal-delay-2">
+				<span class="voc-icon" aria-hidden="true">🛡✝</span>
+				<span class="voc-name">Paladin</span>
+				<p class="voc-desc">Guerrier sacré mariant foi et acier. Ses auras protègent ses alliés tandis que sa lame brûle d'une lumière que les morts-vivants redoutent.</p>
+				<p class="voc-transitions">Transitions → <span>Guerrier, Prêtre, Templier</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-3">
+				<span class="voc-icon" aria-hidden="true">⚔✨</span>
+				<span class="voc-name">Templier</span>
+				<p class="voc-desc">Ordre militaire au service d'une cité-état. Mi-soldat mi-moine, le templier est l'épée de l'institution autant que celle des dieux guerriers.</p>
+				<p class="voc-transitions">Transitions → <span>Guerrier, Magicien de combat, Répurgateur</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-4">
+				<span class="voc-icon" aria-hidden="true">🔱</span>
+				<span class="voc-name">Répurgateur</span>
+				<p class="voc-desc">Pourfendeur des êtres maudits, il consacre son existence à l’extermination des morts-vivants et des démons. Chaque traque est menée avec un sang-froid inflexible et une précision méthodique.</p>
+				<p class="voc-transitions">Transitions → <span>Guerrier, Nécromancien, Paladin, Démoniste</span></p>
+			</article>
+		</div>
+
+		<!-- ── OMBRE ── -->
+		<div class="voc-panel" id="panel-ombre" aria-labelledby="tab-ombre">
+			<article class="voc-card reveal reveal-delay-1">
+				<span class="voc-icon" aria-hidden="true">💀</span>
+				<span class="voc-name">Nécromancien</span>
+				<p class="voc-desc">Maître de la magie noire et des morts. Invoque des serviteurs, draine la vie de ses ennemis. Ce sont les maîtres des invocations et peuvent lever à eux seuls de terribles armées pour défendre ou prendre une cité.</p>
+				<p class="voc-transitions">Transitions → <span>Moine, Prêtre, Répurgateur, Démoniste</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-2">
+				<span class="voc-icon" aria-hidden="true">🗡</span>
+				<span class="voc-name">Assassin</span>
+				<p class="voc-desc">L'ombre faite chair. Spécialiste de l'élimination silencieuse, des poisons et de l'infiltration. Une quête par un assassin ne laisse pas de témoins.</p>
+				<p class="voc-transitions">Transitions → <span>Duelliste, Nécromancien, Voleur, Démoniste</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-3">
+				<span class="voc-icon" aria-hidden="true">🔑</span>
+				<span class="voc-name">Voleur</span>
+				<p class="voc-desc">Doigts légers, esprit plus léger encore. Maître des serrures, des pièges et des marchés douteux. Son réseau d'informateurs vaut parfois une armée.</p>
+				<p class="voc-transitions">Transitions → <span>Assassin, Illusionniste, Ménestrel</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-4">
+				<span class="voc-icon" aria-hidden="true">🎶</span>
+				<span class="voc-name">Ménestrel</span>
+				<p class="voc-desc">Chanteur, espion, négociateur. Sa musique peut inspirer les alliés ou déstabiliser les ennemis. Ses chansons ouvrent des portes que les épées ne peuvent forcer.</p>
+				<p class="voc-transitions">Transitions → <span>Illusionniste, Lettré, Voleur</span></p>
+			</article>
+			<article class="voc-card reveal reveal-delay-5">
+				<span class="voc-icon" aria-hidden="true">😈</span>
+				<span class="voc-name">Démoniste</span>
+				<p class="voc-desc">Invocateur de créatures infernales, le Démoniste tire sa puissance des abysses. Chaque pacte conclu avec un démon consume une part de son âme et accroît sa puissance.</p>
+				<p class="voc-transitions">Transitions → <span>Nécromancien, Répurgateur, Illusionniste</span></p>
+			 </article>
+		</div>
+
+		</div>
+	</section>
 	<section id="jouer" class="section" style="text-align:center" aria-labelledby="cta-title">
 		<p class="section-eyebrow reveal">Votre aventure commence</p>
 		<h2 id="cta-title" class="section-title reveal reveal-delay-1">Êtes-vous prêt à sortir des remparts ?</h2>
@@ -712,6 +992,26 @@ const observer = new IntersectionObserver(entries => {
 	});
 }, { threshold: 0.12 });
 reveals.forEach(el => observer.observe(el));
+
+function switchTab(family) {
+	document.querySelectorAll('.voc-tab').forEach(t => {
+		t.classList.remove('active');
+		t.setAttribute('aria-selected', 'false');
+	});
+	document.querySelectorAll('.voc-panel').forEach(p => p.classList.remove('active'));
+
+	const tab	 = document.getElementById('tab-' + family);
+	const panel = document.getElementById('panel-' + family);
+	tab.classList.add('active');
+	tab.setAttribute('aria-selected', 'true');
+	panel.classList.add('active');
+
+	// Relancer les animations reveal sur les nouvelles cartes visibles
+	panel.querySelectorAll('.reveal').forEach(el => {
+		el.classList.remove('visible');
+		requestAnimationFrame(() => observer.observe(el));
+	});
+}
 </script>
 </body>
 </html>

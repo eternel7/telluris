@@ -35,7 +35,7 @@
 		}
 		.auth-container {
 			width: 100%;
-			max-width: 420px;
+			max-width: 520px;
 			background: var(--parch);
 			border: 2px solid var(--gold);
 			border-radius: 2px;
@@ -153,12 +153,28 @@
 			transition: all 0.3s ease;
 		}
 
-		.btn-auth:hover {
+		.btn-auth:hover, .btn-social:hover {
 			background: var(--gold);
 			color: var(--ink);
 			box-shadow: 0 4px 15px rgba(201, 146, 42, 0.4);
 		}
-
+		
+		.btn-social {
+			margin-top: 15px;
+			padding: 10px 15px;
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 2px;
+			color: var(--ink);
+			background: var(--parch);
+			border: 1px solid var(--gold);
+			cursor: pointer;
+			display: inline;
+			align-items: center;
+			transition: all 0.3s ease;
+		}
+		
 		.switch-mode {
 			margin-top: 30px;
 			font-size: 14px;
@@ -177,30 +193,43 @@
 		}
 		/* Ornement haut */
 		.ornament {
-		  width: 180px;
-		  height: 1px;
-		  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-		  position: relative;
-		  margin: 0 auto 20px auto;
+			width: 180px;
+			height: 1px;
+			background: linear-gradient(90deg, transparent, var(--gold), transparent);
+			position: relative;
+			margin: 0 auto 20px auto;
 		}
 		.ornament::before {
-		  content: '✦';
-		  position: absolute;
-		  top: 50%; left: 50%;
-		  transform: translate(-50%, -50%);
-		  color: var(--gold);
-		  font-size: 12px;
-		  background: var(--parch);
-		  padding: 0 6px;
+			content: '✦';
+			position: absolute;
+			top: 50%; left: 50%;
+			transform: translate(-50%, -50%);
+			color: var(--gold);
+			font-size: 12px;
+			background: var(--parch);
+			padding: 0 6px;
 		}		
 
 		.hero-rule {
-		  width: 60px;
-		  height: 0.5px;
-		  background: var(--gold);
-		  margin: 18px auto;
+			width: 60px;
+			height: 0.5px;
+			background: var(--gold);
+			margin: 18px auto;
 		}
-		
+		.social-auth {
+			margin: 18px auto;
+		}
+		.social-subtitle {
+			position: relative;
+			font-size: 14px;
+			font-style: italic;
+			color: var(--bronze);
+			min-height: 1.2em;
+			margin-bottom: 5px;
+		}
+		.social-icons {			
+			margin: 18px auto;
+		}
 		.switch-mode a:hover {
 			color: var(--gold);
 		}
@@ -209,7 +238,10 @@
 		@media (max-width: 768px) {
 			label {
 				font-size: 10px;
-				}
+			}
+			.btn-social {
+				display: inline-flex;
+			}
 		}
 	</style>
 </head>
@@ -254,6 +286,16 @@
 					<span class="pass-visual"></span>
 				</div>
 				<button type="submit" class="btn-auth">Entrer dans la cité</button>
+				<div class="social-auth">
+					<div>
+						<p class="social-subtitle">Ou invoquer votre identité via</p>
+					</div>
+					<div class="social-icons">
+						<a href="/auth/google" class="btn-social" aria-label="Google">Google</a>
+						<a href="/auth/apple" class="btn-social" aria-label="Apple">Apple</a>
+						<a href="/auth/facebook" class="btn-social" aria-label="Facebook">Facebook</a>
+					</div>
+				</div>
 			</form>
 	{% if is_new %}
 			<form id="signup-form">
@@ -266,12 +308,12 @@
 				</div>
 				<div class="form-group">
 					<label for="new-pass" title="Mot de passe" >Sceau Secret</label>
-					<input type="password" id="new-pass" class="pass-input" placeholder="Min. 8 caractères" required>
+					<input type="password" id="new-pass" class="pass-input" placeholder="Min. 8 caractères, min 1 majuscule, 1 chiffre, 1 symbole" required>
 					<span class="pass-visual"></span>
 				</div>
 				<div class="form-group">
 					<label for="new-pass2" title="Mot de passe - vérification" >Sceau Secret - vérification</label>
-					<input type="password" id="new-pass2" class="pass-input" placeholder="Min. 8 caractères" required>
+					<input type="password" id="new-pass2" class="pass-input" placeholder="Min. 8 caractères, min 1 majuscule, 1 chiffre, 1 symbole" required>
 					<span class="pass-visual"></span>
 				</div>
 				<button type="submit" class="btn-auth">Prêter Serment</button>
@@ -318,7 +360,7 @@
 						"🗝️\uFE0E", "⚒️\uFE0E", "🕯️\uFE0E", "🧪\uFE0E", "🏺\uFE0E", "👑\uFE0E", "🐺\uFE0E", "🦅\uFE0E", "🌲\uFE0E", "⛰️\uFE0E",
 						"💀\uFE0E", "🕸️\uFE0E", "🔥\uFE0E", "❄️\uFE0E", "🌙\uFE0E", "☀️\uFE0E", "🧭\uFE0E", "⚓\uFE0E", "🐎\uFE0E", "🐾\uFE0E",
 						"👣\uFE0E", "👁️\uFE0E", "🩸\uFE0E", "🌿\uFE0E", "🍄\uFE0E", "⛓️\uFE0E", "⚱️\uFE0E", "🧱\uFE0E"
-		];   
+		];	 
 		const colors = ["#b87333", "#8a8f98", "#ffd700", "#e5e4e2", "#6fdcff", "#ff7f50", "#ffffff", "initial"];
 		
 		document.getElementById('auth-subtitle').innerText = tellurisSousTitres[Math.floor(Math.random() * tellurisSousTitres.length)];
