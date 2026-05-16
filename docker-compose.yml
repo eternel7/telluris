@@ -7,7 +7,11 @@ services:
     working_dir: /app
     volumes:
       - .:/app
-    command: sh -c "pip install --no-cache-dir fastapi uvicorn Jinja2 couchdb2 && uvicorn main:app --host 0.0.0.0 --port 8000"
+    command: >
+      sh -c "apt-get update && 
+             apt-get install -y --no-install-recommends gcc python3-dev musl-dev && 
+             pip install --no-cache-dir fastapi uvicorn Jinja2 couchdb2 bcrypt python-jose[cryptography] && 
+             uvicorn main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
     restart: always

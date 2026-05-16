@@ -1,12 +1,21 @@
-import os
-import couchdb2
-import urllib.parse
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from routes.user import user_router
+from db.config import db
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, limit this to your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Definit ou se trouvent les fichiers HTML
 templates = Jinja2Templates(directory="templates")
@@ -14,15 +23,7 @@ app.mount("/scripts", StaticFiles(directory="templates/scripts"), name="scripts"
 app.mount("/battle_maps", StaticFiles(directory="templates/resources/battle_maps"), name="battle_maps")
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
 
-
-DB_PASSWORD = os.getenv("COUCHDB_PASSWORD", "password_par_defaut_Non_mais_tente_meme_pas")
-DB_USER = os.getenv("COUCHDB_USER", "admin_qui_pourra")
-
-safe_password = urllib.parse.quote_plus(DB_PASSWORD)
-
-DB_URL = f"http://{DB_USER}:{safe_password}@couchdb:5984"
-server = couchdb2.Server(DB_URL)
-db = server["telluris"] 
+#app.include_router(user_router, prefix="/api")
 
 @app.get("/")
 def read_root(request: Request):
@@ -43,7 +44,7 @@ async def read_page_auth(request: Request):
 			"is_new": is_new
 		}
 	)
-	
+
 @app.get("/dev", response_class=HTMLResponse)
 async def read_page_dev(request: Request):
 	grid_doc = db.get("grid:lutecia")
@@ -56,7 +57,7 @@ async def read_page_dev(request: Request):
 	
 @app.get("/dev/{lieu_id}", response_class=HTMLResponse)
 def read_page_lieu(request: Request, lieu_id: str):
-	grid_doc = db.get(lieu_id)
+	grid_doc = db.get("lieu:"+lieu_id)
 	links = db.view(
 		"reseau", 
 		"liens_cases", 

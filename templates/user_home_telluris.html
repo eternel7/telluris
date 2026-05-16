@@ -99,7 +99,6 @@
 			background: rgba(0, 0, 0, 0.05);
 			border: none;
 			border-bottom: 1px solid var(--bronze);
-			margin-bottom: 1px;
 			padding: 10px 0;
 			color: var(--ink);
 			font-family: 'IM Fell English', serif;
@@ -111,7 +110,6 @@
 		input:focus {
 			outline: none;
 			border-bottom: 2px solid var(--gold);
-			margin-bottom: 0px;
 		}
 
 		/* ── ICONE DYNAMIQUE DU MOT DE PASSE ────────────────────── */
@@ -305,21 +303,17 @@
 			<form id="signup-form" class="hidden">
 	{% endif%}
 				<div class="form-group">
-					<label for="new-email" title="Email/courriel" >Sceau de correspondance*</label>
+					<label for="new-email" title="Email/courriel" >Sceau de correspondance</label>
 					<input type="email" id="new-email" placeholder="votre@parchemin.com" required>
 				</div>
 				<div class="form-group">
-					<label for="user-name" title="Nom" >Sceau d'identité</label>
-					<input type="text" id="user-name" placeholder="votre nom de joueur">
-				</div>
-				<div class="form-group">
-					<label for="new-pass" title="Mot de passe" >Sceau Secret*</label>
+					<label for="new-pass" title="Mot de passe" >Sceau Secret</label>
 					<input type="password" id="new-pass" class="pass-input" placeholder="Min. 8 caractères, min 1 majuscule, 1 chiffre, 1 symbole" required>
 					<span class="pass-visual"></span>
 				</div>
 				<div class="form-group">
-					<label for="new-pass2" title="Mot de passe - vérification" >Sceau de confirmation*</label>
-					<input type="password" id="new-pass2" class="pass-input" placeholder="Vérification du Sceau Secret" required>
+					<label for="new-pass2" title="Mot de passe - vérification" >Sceau Secret - vérification</label>
+					<input type="password" id="new-pass2" class="pass-input" placeholder="Min. 8 caractères, min 1 majuscule, 1 chiffre, 1 symbole" required>
 					<span class="pass-visual"></span>
 				</div>
 				<button type="submit" class="btn-auth">Prêter Serment</button>
