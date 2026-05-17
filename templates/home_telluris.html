@@ -148,23 +148,25 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+		text-align: center;
 		font-family: 'Cinzel', serif;
 		font-size: 13px;
 		letter-spacing: 0.18em;
 		text-transform: uppercase;
-		padding: 14px 32px;
+		padding: 14px 25px;
 		cursor: pointer;
 		text-decoration: none;
 		min-height: 44px; /* Accessibilité : taille cible */
 	}
 	.btn-primary {
 		color: var(--ink);
-		background: var(--gold);
+		background: var(--gold2);
+		font-weight: bold;
 		border: none;
 		transition: background 0.2s, transform 0.15s;
 	}
-	.btn-primary:hover { 
-		background: var(--gold2); 
+	.btn-primary:hover {
+		background: var(--gold3);
 		transform: translateY(-1px); 
 	}
 	.btn-primary:active { transform: translateY(0); }
