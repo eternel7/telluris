@@ -10,24 +10,24 @@
 	<style>
 
 		{% include "part-root-css.html" without context %}
-		{% include "part-footer-css.html" without context %}
 		{% include "part-accessibility-css.html" without context %}
 		
 		/* ── BASE & SCROLL LOCK ─────────────────────────────────── */
 		body {
-			background-color: var(--ink);
-			background: radial-gradient(circle, #1a1612 0%, #0e0b08 100%);
-			overflow: hidden;
 			padding: 20px;
 			box-sizing: border-box;
 		}
+		
 		#main-content {
 			display: flex;
-			justify-content: center;			
+			justify-content: center;
+			flex-wrap: wrap;
+			align-content: center;
 		}
+		
 		.user-container {
-			width: 100%;
-			max-width: 520px;
+			width: 98%;
+			max-width: 800px;
 			background: var(--parch);
 			border: 2px solid var(--gold);
 			border-radius: 2px;
@@ -196,10 +196,208 @@
 			color: var(--gold);
 		}
 		.hidden { display: none; }
+		
+		/* ── PERSONNAGES ─────────────────────────────────────────── */
+		.section-label {
+			font-family: 'Cinzel', serif;
+			font-size: 10px;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.25em;
+			color: var(--bronze);
+			text-align: left;
+			margin: 28px 0 12px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		.section-label::after {
+			content: '';
+			flex: 1;
+			height: 0.5px;
+			background: linear-gradient(90deg, var(--bronze), transparent);
+			opacity: 0.4;
+		}
+		.char-list {
+			display: grid;
+			grid-column-gap: 6px;
+			grid-row-gap: 6px;
+		}
+		.char-card {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			padding: 12px 10px;
+			border: 0.5px solid rgba(141,99,52,0.3);
+			background: rgba(0,0,0,0.04);
+			cursor: pointer;
+			text-align: left;
+			text-decoration: none;
+			color: var(--ink);
+			transition: background 0.2s, border-color 0.2s;
+			position: relative;
+		}
+		.char-card:hover {
+			background: rgba(201,146,42,0.08);
+			border-color: var(--gold);
+		}
+		.char-card:focus-visible {
+			outline: 3px solid var(--gold);
+			outline-offset: 2px;
+		}
+		.char-card::after {
+			content: '›';
+			position: absolute;
+			right: 14px;
+			font-size: 20px;
+			color: var(--bronze);
+			opacity: 0.5;
+			transition: opacity 0.2s, right 0.2s;
+		}
+		.char-card:hover::after { opacity: 1; right: 10px; }
+		.char-data {
+			display: flex;
+			flex-direction: column;
+			border: 0.5px solid rgba(141,99,52,0.3);
+			background-color: var(--parch);
+			padding: 3px 8px;
+		}
+		.char-info { flex: 1; min-width: 0; }
+		.char-name {
+			font-family: 'Cinzel', serif;
+			font-size: 16px;
+			font-weight: 700;
+			color: var(--ink);
+			letter-spacing: 0.05em;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.char-meta, .char-rank {
+			font-family: 'IM Fell English', serif;
+			font-size: 14px;
+			letter-spacing: 0.15em;
+			color: var(--bronze);
+			margin-top: 2px;
+			flex-shrink: 0;
+			white-space: nowrap;
+		}
+		.char-card.char-create {
+			border-style: dashed;
+			border-color: rgba(141,99,52,0.25);
+		}
+		.char-card.char-create:hover {
+			background: rgba(201,146,42,0.06);
+			border-color: var(--gold);
+			border-style: solid;
+		}
+		.char-card.char-create .char-name {
+			color: var(--bronze);
+			font-weight: 400;
+			font-style: italic;
+		}
+		.char-icon img[src=""], .char-icon img:not([src]) {
+			display: none;
+		}
+		.char-icon:has(img[src=""])::before {
+			content: attr(data-initial);
+			font-family: 'Cinzel', serif;
+			font-size: 20px;
+			color: var(--bronze);
+			position: absolute;
+			inset: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.char-icon {
+			width: 10vw;
+			height: auto;
+			min-height: 200px;
+			flex-shrink: 0;
+			border: 1px solid rgba(141,99,52,0.4);
+			overflow: hidden;
+			position: relative;
+			background: rgba(0,0,0,0.1);
+		}
+		.char-icon img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: center top; /* cadre sur le visage */
+			display: block;
+			filter: sepia(0.15) contrast(1.05);
+			transition: filter 0.2s, transform 0.3s;
+		}
+		.char-icon::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(
+				to bottom,
+				transparent 60%,
+				rgba(141,99,52,0.25) 100%
+			);
+			pointer-events: none;
+		}
+		.char-create .char-icon {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 22px;
+			opacity: 0.7;
+			border-style: dashed;
+			background: var(--parch);
+		}
+		.char-card:hover .char-icon img {
+			filter: sepia(0) contrast(1.1);
+			transform: scale(1.06);
+		}
+		.char-data-create {
+			margin-right: 10px;
+		}
 		/* ── RESPONSIVE ───────────────────────────────────────────── */
 		@media (max-width: 768px) {
+			#main-content {
+				justify-content: center;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+			.user-main {
+				padding: 0px;
+			}
+			.user-container {
+				padding: 20px 10px;
+				width: 100%;
+			}
+			.user-container::before {
+				border: 0px;
+			}
 			label {
 				font-size: 10px;
+			}
+			.char-icon {
+				width: 100%; 
+				max-width: 50vw;
+				min-height: 150px;
+				margin: 0 auto;
+			}
+			.char-card {
+				flex-direction: column;
+				text-align: center;
+				align-items: center;
+				padding: 15px;
+			}
+			.char-card::after {
+				display: none;
+			}
+			.char-data {
+				width: 100%;
+				margin: 10px 0 0 0;
+				padding: 8px;
+			}
+			.char-data-create {
+				margin: 10px 0 0 0;
 			}
 		}
 	</style>
@@ -210,7 +408,6 @@
 			<feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch" />
 		</filter>
 	</svg>
-
 	<a href="#main-content" class="skip-link">Aller au contenu principal</a>
 	<main id="main-content">
 		<section class="user-main" aria-labelledby="User">
@@ -226,6 +423,65 @@
 					<input type="text" id="user-name" placeholder="votre nom de joueur" value="{{ user_doc["username"] }}">
 				</div>
 			</form>
+			<!-- ── PERSONNAGES ── -->
+			<p class="section-label">Personnages</p>
+
+			<nav class="char-list" aria-label="Liste des personnages">
+
+				<!-- Personnage 1 -->
+				<a href="#" class="char-card" aria-label="Jouer avec Aldric von Brunn, Guerrier niveau 8, rang Fer">
+					<div class="char-icon">
+						<img src="{{ url_for('characters', path='guerrier_m_white10.jpg') }}"
+							 alt="Portrait d'Aldric von Brunn, Guerrier">
+					</div>
+					<div class="char-data">
+					<div class="char-info">
+						<p class="char-name">Aldric von Brunn</p>
+						<p class="char-meta">Guerrier · Niveau 8</p>
+					</div>
+					<div class="char-rank">🔩 Fer</div>
+					</div>
+				</a>
+
+				<a href="#" class="char-card" aria-label="Jouer avec Saoirse, Druide niveau 5, rang Cuivre">
+					<div class="char-icon">
+						<img src="{{ url_for('characters', path='druide_f_asia01.jpg') }}"
+							 alt="Portrait de Saoirse, Druide">
+					</div>
+					<div class="char-data">
+					<div class="char-info">
+						<p class="char-name">Saoirse</p>
+						<p class="char-meta">Druide · Niveau 5</p>
+					</div>
+					<div class="char-rank">🟤 Cuivre</div>
+					</div>
+				</a>
+
+				<a href="#" class="char-card" aria-label="Jouer avec Mira al-Zahir, Illusionniste niveau 12, rang Argent">
+					<div class="char-icon">
+						<img src="{{ url_for('characters', path='illusionniste_f_white01.jpg') }}"
+							 alt="Portrait de Mira al-Zahir, Illusionniste">
+					</div>
+					<div class="char-data">
+					<div class="char-info">
+						<p class="char-name">Mira al-Zahir</p>
+						<p class="char-meta">Illusionniste · Niveau 12</p>
+					</div>
+					<div class="char-rank">🔘 Argent</div>
+					</div>
+				</a>
+
+				<!-- Création -->
+				<a href="#" class="char-card char-create" aria-label="Créer un nouveau personnage">
+					<div class="char-icon">✦</div>
+					<div class="char-data">
+					<div class="char-info">
+						<p class="char-name">Créer un personnage</p>
+						<p class="char-meta">Commencer une nouvelle aventure</p>
+					</div>
+					</div>
+				</a>
+			</nav>
 		</div>
 		</section>
 	</main>
