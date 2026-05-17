@@ -1,10 +1,11 @@
+import os
 from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from routes.user import user_router
 from jose import jwt, JWTError
+from routes.user import user_router
 from db.config import db, SECRET_KEY, ALGORITHM
 
 app = FastAPI()
@@ -23,7 +24,8 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/scripts", StaticFiles(directory="templates/scripts"), name="scripts")
 app.mount("/battle_maps", StaticFiles(directory="templates/resources/battle_maps"), name="battle_maps")
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
-app.mount("/characters", StaticFiles(directory="templates/resources/characters"), name="characters")
+CHARACTERS_IMAGES_PATH = "templates/resources/characters"
+app.mount("/characters", StaticFiles(directory=CHARACTERS_IMAGES_PATH), name="characters")
 
 app.include_router(user_router, prefix="/api")
 
@@ -65,13 +67,26 @@ async def get_embleme(request: Request):
 			
 		characters = ["Guerrier du Nord", "Mage d'Argent"] # Exemple
 		
+		# characters images : 
+		valid_extensions = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+		characters_images = []
+		if os.path.exists(CHARACTERS_IMAGES_PATH):
+			for filename in os.listdir(CHARACTERS_IMAGES_PATH):
+				full_path = os.path.join(CHARACTERS_IMAGES_PATH, filename)
+				if (os.path.isfile(full_path) and filename.lower().endswith(valid_extensions)):
+					file_url = request.url_for("characters", path=filename)
+					characters_images.append({
+						"name": filename,
+						"url": str(file_url)
+					})
 		return templates.TemplateResponse(
+			request=request,
 			name ="user_home_telluris.html",
-			request=request, 
 			context= {
 				"user_doc": user_doc,
 				"title": 'Your domain',
-				"characters": characters
+				"characters": characters,
+				"characters_images": characters_images
 			}
 		)
 

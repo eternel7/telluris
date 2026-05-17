@@ -261,6 +261,7 @@
 			border: 0.5px solid rgba(141,99,52,0.3);
 			background-color: var(--parch);
 			padding: 3px 8px;
+			margin: 0 15px 0 0;
 		}
 		.char-info { flex: 1; min-width: 0; }
 		.char-name {
@@ -313,7 +314,6 @@
 		.char-icon {
 			width: 10vw;
 			height: auto;
-			min-height: 200px;
 			flex-shrink: 0;
 			border: 1px solid rgba(141,99,52,0.4);
 			overflow: hidden;
@@ -353,9 +353,6 @@
 			filter: sepia(0) contrast(1.1);
 			transform: scale(1.06);
 		}
-		.char-data-create {
-			margin-right: 10px;
-		}
 		/* ── RESPONSIVE ───────────────────────────────────────────── */
 		@media (max-width: 768px) {
 			#main-content {
@@ -379,7 +376,6 @@
 			.char-icon {
 				width: 100%; 
 				max-width: 50vw;
-				min-height: 150px;
 				margin: 0 auto;
 			}
 			.char-card {
@@ -395,9 +391,6 @@
 				width: 100%;
 				margin: 10px 0 0 0;
 				padding: 8px;
-			}
-			.char-data-create {
-				margin: 10px 0 0 0;
 			}
 		}
 	</style>
@@ -473,7 +466,7 @@
 
 				<!-- Création -->
 				<a href="#" class="char-card char-create" aria-label="Créer un nouveau personnage">
-					<div class="char-icon">✦</div>
+					<div class="char-icon" style="min-height: 200px;">✦</div>
 					<div class="char-data">
 					<div class="char-info">
 						<p class="char-name">Créer un personnage</p>
@@ -482,6 +475,11 @@
 					</div>
 				</a>
 			</nav>
+			<ul class="hidden">
+				{% for images in characters_images %}
+				<li><img src="{{ url_for('characters', path=images.name) }}"></li>
+				{% endfor %}
+			</ul>
 		</div>
 		</section>
 	</main>

@@ -47,7 +47,6 @@ async def register_user(user: RegisterRequest, response: Response):
 @user_router.post("/login")
 async def login_user(user: LoginRequest, response: Response):
 	user_doc = db.get("user:"+user.email)
-	print("user_doc", user_doc, user)
 
 	if not user_doc or not bcrypt.checkpw(user.password.encode(), user_doc["password"].encode()):
 		raise HTTPException(status_code=400, detail="Invalid credentials")
