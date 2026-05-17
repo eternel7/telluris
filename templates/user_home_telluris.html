@@ -200,7 +200,7 @@
 		/* ── PERSONNAGES ─────────────────────────────────────────── */
 		.section-label {
 			font-family: 'Cinzel', serif;
-			font-size: 10px;
+			font-size: 12px;
 			font-weight: 700;
 			text-transform: uppercase;
 			letter-spacing: 0.25em;
@@ -353,6 +353,546 @@
 			filter: sepia(0) contrast(1.1);
 			transform: scale(1.06);
 		}
+		
+		/* ── WIZARD CRÉATION ──────────────────────────────────────── */
+		.wizard-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(14,11,8,0.92);
+			z-index: 2000;
+			overflow-y: auto;
+			padding: 20px;
+			align-items: flex-start;
+			justify-content: center;
+		}
+		.wizard-overlay.open { display: flex; }
+
+		.wizard-box {
+			width: 100%;
+			max-width: 680px;
+			background: var(--parch);
+			border: 2px solid var(--gold);
+			border-radius: 2px;
+			padding: 36px 40px;
+			position: relative;
+			color: var(--ink);
+			margin: auto;
+			box-shadow: 0 0 60px rgba(0,0,0,0.9);
+		}
+		.wizard-box::before {
+			content: '';
+			position: absolute;
+			top: 5px; left: 5px; right: 5px; bottom: 5px;
+			border: 1px solid var(--bronze);
+			pointer-events: none;
+			opacity: 0.4;
+		}
+
+		/* Barre de progression */
+		.wizard-progress {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			margin-bottom: 28px;
+		}
+		.wiz-step-dot {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 4px;
+			flex: 1;
+			max-width: 90px;
+		}
+		.wiz-step-dot .dot {
+			width: 28px; height: 28px;
+			border-radius: 50%;
+			border: 1.5px solid rgba(141,99,52,0.35);
+			background: rgba(0,0,0,0.05);
+			display: flex; align-items: center; justify-content: center;
+			font-family: 'Cinzel', serif;
+			font-size: 13px;
+			color: var(--bronze);
+			transition: all 0.3s;
+			flex-shrink: 0;
+		}
+		.wiz-step-dot .dot-label {
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: rgba(112,77,41,0.5);
+			text-align: center;
+			transition: color 0.3s;
+		}
+		.wiz-step-dot.active .dot {
+			background: var(--gold);
+			border-color: var(--gold);
+			color: var(--parch);
+			box-shadow: 0 0 10px rgba(201,146,42,0.4);
+		}
+		.wiz-step-dot.done .dot {
+			background: rgba(141,99,52,0.15);
+			border-color: var(--bronze);
+			color: var(--bronze);
+		}
+		.wiz-step-dot.active .dot-label { color: var(--bronze); }
+		.wiz-step-dot.done .dot-label	 { color: var(--bronze); opacity: 0.7; }
+		/* Ligne entre dots */
+		.wiz-step-line {
+			flex: 1;
+			height: 1px;
+			background: linear-gradient(90deg, var(--bronze), rgba(141,99,52,0.2));
+			opacity: 0.3;
+			margin-top: 14px;
+			max-width: 40px;
+		}
+
+		.wizard-title {
+			font-family: 'Cinzel', serif;
+			font-size: 15px;
+			font-weight: 700;
+			letter-spacing: 0.15em;
+			text-transform: uppercase;
+			color: var(--ink);
+			text-align: center;
+			margin-bottom: 6px;
+		}
+		.wizard-subtitle {
+			font-family: 'IM Fell English', serif;
+			font-size: 13px;
+			font-style: italic;
+			color: var(--bronze);
+			text-align: center;
+			margin-bottom: 24px;
+		}
+
+		/* Panneau d'étape */
+		.wiz-panel { display: none; }
+		.wiz-panel.active { display: block; }
+
+		/* ── ÉTAPE 1 : SEXE ── */
+		.sex-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+			margin-bottom: 8px;
+		}
+		.sex-btn {
+			border: 1.5px solid rgba(141,99,52,0.3);
+			background: transparent;
+			padding: 22px 16px;
+			cursor: pointer;
+			transition: all 0.2s;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 8px;
+			color: var(--ink);
+		}
+		.sex-btn:hover	{ background: rgba(201,146,42,0.07); border-color: var(--gold); }
+		.sex-btn.chosen { background: rgba(201,146,42,0.12); border-color: var(--gold); border-width: 2px; }
+		.sex-btn .sex-icon { font-size: 32px; line-height: 1; }
+		.sex-btn .sex-label {
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			letter-spacing: 0.15em;
+			text-transform: uppercase;
+			color: var(--ink);
+		}
+		.identity-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+		}
+
+		/* ── ÉTAPE 2 : RACE ── */
+		.race-grid {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: 8px;
+			margin-bottom: 16px;
+		}
+		.race-btn {
+			border: 1px solid rgba(141,99,52,0.25);
+			background: transparent;
+			padding: 12px 6px 10px;
+			cursor: pointer;
+			transition: all 0.2s;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 6px;
+			color: var(--ink);
+		}
+		.race-btn:hover	{ background: rgba(201,146,42,0.07); border-color: var(--gold); }
+		.race-btn.chosen { background: rgba(201,146,42,0.12); border-color: var(--gold); border-width: 1.5px; }
+		.race-btn .race-icon	{ font-size: 26px; line-height: 1; }
+		.race-btn .race-label {
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: var(--ink);
+			text-align: center;
+		}
+
+		/* Stats de race */
+		.race-stats {
+			display: none;
+			border: 0.5px solid rgba(141,99,52,0.3);
+			background: rgba(0,0,0,0.03);
+			padding: 14px 16px;
+			margin-bottom: 4px;
+		}
+		.race-stats.visible { display: block; }
+		.race-stats-title {
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			letter-spacing: 0.2em;
+			text-transform: uppercase;
+			color: var(--bronze);
+			margin-bottom: 10px;
+			text-align: center;
+		}
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 6px 10px;
+		}
+		.stat-item {
+			display: flex;
+			flex-direction: column;
+			gap: 3px;
+		}
+		.stat-name {
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: var(--bronze);
+		}
+		.stat-bar-wrap {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+		.stat-bar-bg {
+			flex: 1;
+			height: 5px;
+			background: rgba(0,0,0,0.1);
+			border-radius: 2px;
+			overflow: hidden;
+		}
+		.stat-bar-fill {
+			height: 100%;
+			background: linear-gradient(90deg, var(--bronze), var(--gold));
+			border-radius: 2px;
+			transition: width 0.4s ease;
+		}
+		.stat-val {
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			color: var(--ink);
+			min-width: 24px;
+			text-align: right;
+		}
+		.race-trait {
+			margin-top: 10px;
+			font-family: 'IM Fell English', serif;
+			font-size: 14px;
+			font-style: italic;
+			color: var(--bronze);
+			text-align: center;
+			border-top: 0.5px solid rgba(141,99,52,0.2);
+			padding-top: 8px;
+		}
+
+		/* ── ÉTAPE 3 : VOCATION ── */
+		.voc-grid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 8px;
+			max-height: 380px;
+			overflow-y: auto;
+			padding-right: 4px;
+			margin-bottom: 4px;
+		}
+		.voc-grid::-webkit-scrollbar { width: 4px; }
+		.voc-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+		.voc-grid::-webkit-scrollbar-thumb { background: var(--bronze); border-radius: 2px; }
+
+		.voc-btn {
+			border: 1px solid rgba(141,99,52,0.25);
+			background: transparent;
+			padding: 12px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			text-align: left;
+			color: var(--ink);
+			transition: all 0.2s;
+			position: relative;
+		}
+		.voc-btn:hover	{ background: rgba(201,146,42,0.07); border-color: var(--gold); }
+		.voc-btn.chosen { background: rgba(201,146,42,0.12); border-color: var(--gold); border-width: 1.5px; }
+		.voc-btn .voc-img-wrap {
+			width: 52px; height: 52px;
+			flex-shrink: 0;
+			border: 1px solid rgba(141,99,52,0.3);
+			overflow: hidden;
+			background: rgba(0,0,0,0.08);
+		}
+		.voc-btn .voc-img-wrap img {
+			width: 100%; height: 100%;
+			object-fit: cover;
+			object-position: center top;
+			filter: sepia(0.2) contrast(1.05);
+			transition: transform 0.3s;
+		}
+		.voc-btn:hover .voc-img-wrap img { transform: scale(1.08); }
+		.voc-btn .voc-txt { flex: 1; min-width: 0; }
+		.voc-btn .voc-title {
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			font-weight: 700;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--ink);
+			margin-bottom: 4px;
+		}
+		.voc-btn .voc-blurb {
+			font-family: 'IM Fell English', serif;
+			font-size: 12px;
+			font-style: italic;
+			color: var(--bronze);
+			line-height: 1.5;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+
+		/* ── ÉTAPE 4 : PORTRAIT ── */
+		.portrait-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 8px;
+			max-height: 380px;
+			overflow-y: auto;
+			padding-right: 4px;
+			margin-bottom: 4px;
+			align-items: start;
+		}
+		.portrait-grid::-webkit-scrollbar { width: 4px; }
+		.portrait-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+		.portrait-grid::-webkit-scrollbar-thumb { background: var(--bronze); border-radius: 2px; }
+
+		.portrait-btn {
+			border: 2px solid transparent;
+			background: transparent;
+			padding: 0;
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+			transition: border-color 0.2s;
+			aspect-ratio: 2/3;
+			display: block;
+			width: 100%;
+			padding-bottom: 150%; /* ratio 2:3 = 150% */
+			height: 0;
+		}
+		.portrait-btn img {
+			position: absolute;
+			inset: 0;
+			width: 100%; height: 100%;
+			object-fit: cover;
+			object-position: center top;
+			filter: sepia(0.1) contrast(1.05);
+			transition: transform 0.3s, filter 0.2s;
+			display: block;
+		}
+		.portrait-btn:hover img { transform: scale(1.05); filter: sepia(0) contrast(1.1); }
+		.portrait-btn.chosen { border-color: var(--gold); }
+		.portrait-btn.chosen::after {
+			content: '✓';
+			position: absolute;
+			top: 6px; right: 6px;
+			width: 22px; height: 22px;
+			background: var(--gold);
+			color: var(--ink);
+			font-size: 13px;
+			border-radius: 50%;
+			display: flex; align-items: center; justify-content: center;
+			font-family: 'Cinzel', serif;
+			font-weight: 700;
+		}
+		.portrait-priority-badge {
+			position: absolute;
+			bottom: 0; left: 0; right: 0;
+			background: linear-gradient(transparent, rgba(14,11,8,0.75) 50%);
+			padding: 16px 6px 4px;
+			font-family: 'Cinzel', serif;
+			font-size: 13px;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: var(--gold2);
+			text-align: center;
+		}
+
+		/* ── ÉTAPE 5 : CITE ── */
+		.cite-grid {
+			display: grid;
+			grid-template-columns: repeat(1, 1fr);
+			gap: 16px;
+			max-height: 380px;
+			overflow-y: auto;
+			padding-right: 4px;
+			margin-bottom: 4px;
+		}
+		.cite-grid::-webkit-scrollbar { width: 4px; }
+		.cite-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+		.cite-grid::-webkit-scrollbar-thumb { background: var(--bronze); border-radius: 2px; }
+
+		.cite-btn {
+			border: 1px solid rgba(141,99,52,0.25);
+			background: transparent;
+			padding: 12px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			text-align: left;
+			color: var(--ink);
+			transition: all 0.2s;
+			position: relative;
+		}
+		.cite-btn:hover	{ background: rgba(201,146,42,0.07); border-color: var(--gold); }
+		.cite-btn.chosen { background: rgba(201,146,42,0.12); border-color: var(--gold); border-width: 1.5px; }
+		.cite-btn.chosen::after {
+			content: '✓';
+			position: absolute;
+			top: 6px; right: 6px;
+			width: 22px; height: 22px;
+			background: var(--gold);
+			color: var(--ink);
+			font-size: 13px;
+			border-radius: 50%;
+			display: flex; align-items: center; justify-content: center;
+			font-family: 'Cinzel', serif;
+			font-weight: 700;
+		}
+		.cite-btn .cite-img-wrap {
+			width: 50vw;
+			max-width: 300px;
+			height: auto;
+			flex-shrink: 0;
+			border: 1px solid rgba(141,99,52,0.3);
+			overflow: hidden;
+			background: rgba(0,0,0,0.08);
+		}
+		.cite-btn .cite-img-wrap img {
+			width: 100%; height: 100%;
+			object-fit: cover;
+			object-position: center top;
+			filter: sepia(0.2) contrast(1.05);
+			transition: transform 3s;
+		}
+		.cite-btn:hover .cite-img-wrap img {
+			transform: scale(2); 
+		}
+		.cite-btn .cite-txt { flex: 1; min-width: 0; }
+		.cite-btn .cite-title {
+			font-family: 'Cinzel', serif;
+			font-size: 16px;
+			font-weight: 700;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--ink);
+			margin-bottom: 4px;
+		}
+		.cite-btn .cite-blurb {
+			font-family: 'IM Fell English', serif;
+			font-size: 14px;
+			font-style: italic;
+			color: var(--bronze);
+			line-height: 1.5;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+
+		/* Boutons nav wizard */
+		.wizard-nav {
+			display: flex;
+			gap: 10px;
+			margin-top: 24px;
+		}
+		.wiz-btn-prev {
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			letter-spacing: 0.15em;
+			text-transform: uppercase;
+			color: var(--bronze);
+			background: transparent;
+			border: 1px solid rgba(141,99,52,0.35);
+			padding: 12px 20px;
+			cursor: pointer;
+			transition: all 0.2s;
+			flex-shrink: 0;
+		}
+		.wiz-btn-prev:hover { border-color: var(--bronze); background: rgba(112,77,41,0.06); }
+		.wiz-btn-next {
+			flex: 1;
+			font-family: 'Cinzel', serif;
+			font-size: 13px;
+			font-weight: 700;
+			letter-spacing: 0.2em;
+			text-transform: uppercase;
+			color: var(--parch);
+			background: var(--ink);
+			border: 1px solid var(--gold);
+			padding: 13px 20px;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+		.wiz-btn-next:hover { background: var(--gold); color: var(--ink); }
+		.wiz-btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+		.wiz-btn-close {
+			position: absolute;
+			top: 14px; right: 14px;
+			background: transparent;
+			border: none;
+			font-size: 20px;
+			color: var(--bronze);
+			cursor: pointer;
+			padding: 4px 8px;
+			line-height: 1;
+			transition: color 0.2s;
+		}
+		.wiz-btn-close:hover { color: var(--ink); }
+
+		/* ── RESPONSIVE WIZARD ── */
+		@media (max-width: 600px) {
+			.wizard-box { padding: 50px 16px; }
+			.identity-grid { grid-template-columns: 1fr; }
+			.race-grid { grid-template-columns: repeat(3, 1fr); }
+			.voc-grid { grid-template-columns: 1fr; }
+			.portrait-grid { grid-template-columns: 1fr; }
+			.cite-grid { grid-template-columns: 1fr; }
+			.cite-btn { 
+				display: grid;
+				grid-template-columns: 1fr;
+				text-align: center;
+				justify-content: center;
+			}
+			.cite-btn .cite-img-wrap { 
+				width: auto; 
+			}
+			.wiz-step-dot .dot-label { display: none; }
+		}
 		/* ── RESPONSIVE ───────────────────────────────────────────── */
 		@media (max-width: 768px) {
 			#main-content {
@@ -475,15 +1015,480 @@
 					</div>
 				</a>
 			</nav>
-			<ul class="hidden">
-				{% for images in characters_images %}
-				<li><img src="{{ url_for('characters', path=images.name) }}"></li>
-				{% endfor %}
-			</ul>
 		</div>
 		</section>
 	</main>
+	<!-- ══════════════ WIZARD CRÉATION DE PERSONNAGE ══════════════ -->
+	<div class="wizard-overlay" id="wizard-overlay" role="dialog" aria-modal="true" aria-labelledby="wizard-heading">
+
+		<div class="wizard-box">
+			<button class="wiz-btn-close" onclick="closeWizard()" aria-label="Fermer">✕</button>
+
+			<!-- Barre de progression -->
+			<div class="wizard-progress" role="list" aria-label="Étapes de création">
+				<div class="wiz-step-dot active" id="dot-1" role="listitem">
+					<div class="dot">1</div>
+					<span class="dot-label">Identité</span>
+				</div>
+				<div class="wiz-step-line"></div>
+				<div class="wiz-step-dot" id="dot-2" role="listitem">
+					<div class="dot">2</div>
+					<span class="dot-label">Race</span>
+				</div>
+				<div class="wiz-step-line"></div>
+				<div class="wiz-step-dot" id="dot-3" role="listitem">
+					<div class="dot">3</div>
+					<span class="dot-label">Vocation</span>
+				</div>
+				<div class="wiz-step-line"></div>
+				<div class="wiz-step-dot" id="dot-4" role="listitem">
+					<div class="dot">4</div>
+					<span class="dot-label">Portrait</span>
+				</div>
+				<div class="wiz-step-line"></div>
+				<div class="wiz-step-dot" id="dot-5" role="listitem">
+					<div class="dot">5</div>
+					<span class="dot-label">Cité</span>
+				</div>
+			</div>
+
+			<div id="wizard-step-title">
+				<h2 class="wizard-title" id="wizard-heading">Forger votre légende</h2>
+				<p class="wizard-subtitle" id="wizard-subtitle">Commencez par choisir l'identité de votre aventurier</p>
+			</div>
+
+			<!-- ── ÉTAPE 1 : SEXE + NOM + PRÉNOM ── -->
+			<div class="wiz-panel active" id="panel-1">
+
+				<p style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--bronze);margin-bottom:10px">Genre</p>
+				<div class="sex-grid">
+					<button class="sex-btn" data-sex="F" onclick="chooseSex(this)" type="button">
+						<span class="sex-icon">♀</span>
+						<span class="sex-label">Féminin</span>
+					</button>
+					<button class="sex-btn" data-sex="M" onclick="chooseSex(this)" type="button">
+						<span class="sex-icon">♂</span>
+						<span class="sex-label">Masculin</span>
+					</button>
+				</div>
+
+				<div class="identity-grid" style="margin-top:18px">
+					<div class="form-group" style="margin-bottom:0">
+						<label for="char-prenom">Prénom</label>
+						<input type="text" id="char-prenom" placeholder="Aldric" autocomplete="off">
+					</div>
+					<div class="form-group" style="margin-bottom:0">
+						<label for="char-nom">Nom</label>
+						<input type="text" id="char-nom" placeholder="von Brunn" autocomplete="off">
+					</div>
+				</div>
+			</div>
+
+			<!-- ── ÉTAPE 2 : RACE ── -->
+			<div class="wiz-panel" id="panel-2">
+				<div class="race-grid" id="race-grid">
+					<!-- généré par JS -->
+				</div>
+				<div class="race-stats" id="race-stats">
+					<p class="race-stats-title" id="race-stats-title"></p>
+					<div class="stats-grid" id="stats-grid"></div>
+					<p class="race-trait" id="race-trait"></p>
+				</div>
+			</div>
+
+			<!-- ── ÉTAPE 3 : VOCATION ── -->
+			<div class="wiz-panel" id="panel-3">
+				<div class="voc-grid" id="voc-grid">
+					<!-- généré par JS -->
+				</div>
+			</div>
+
+			<!-- ── ÉTAPE 4 : PORTRAIT ── -->
+			<div class="wiz-panel" id="panel-4">
+				<div class="portrait-grid" id="portrait-grid">
+					<!-- généré par JS -->
+				</div>
+			</div>
+
+			<!-- ── ÉTAPE 5 : CITE ── -->
+			<div class="wiz-panel" id="panel-5">
+				<div class="cite-grid" id="cite-grid">
+					<!-- généré par JS -->
+				</div>
+			</div>
+
+			<!-- Navigation -->
+			<div class="wizard-nav">
+				<button class="wiz-btn-prev hidden" id="btn-prev" onclick="wizPrev()" type="button">← Retour</button>
+				<button class="wiz-btn-next" id="btn-next" onclick="wizNext()" type="button" disabled>Continuer →</button>
+			</div>
+		</div>
+	</div>
 	<script>
+	/* ══════════════════════════════════════════════════════════
+	   DONNÉES
+	══════════════════════════════════════════════════════════ */
+	const RACES = [
+		{
+			id: 'humain', label: 'Humain', icon: '👤',
+			stats: { V:5, F:5, R:5, Ag:6, Vol:7, Int:7 },
+			pm: '8D',
+			trait: 'Peut dépasser 1 maximum · 3 maxima autorisés'
+		},
+		{
+			id: 'elfe', label: 'Elfe', icon: '🧝',
+			stats: { V:5, F:5, R:4, Ag:8, Vol:8, Int:9 },
+			pm: '8D',
+			trait: '4 maxima autorisés · +1 Force de mouvement'
+		},
+		{
+			id: 'nain', label: 'Nain', icon: '⛏',
+			stats: { V:4, F:5, R:6, Ag:5, Vol:9, Int:8 },
+			pm: '7D',
+			trait: '+1 classe d\'armure · −1 Force de mouvement'
+		},
+		{
+			id: 'ogre', label: 'Ogre', icon: '👹',
+			stats: { V:3, F:7, R:7, Ag:4, Vol:6, Int:6 },
+			pm: '6D',
+			trait: 'Inspire la Peur (jusqu\'à 5) · −2 Force de mouvement'
+		},
+		{
+			id: 'hobbit', label: 'Hobbit', icon: '🌿',
+			stats: { V:5, F:4, R:4, Ag:8, Vol:10, Int:7 },
+			pm: '7D',
+			trait: 'Résistance totale naturelle 1'
+		},
+	];
+	
+	const RACES_PROXIMITY = {
+		"humain" : ["nain","elfe","ogre"],
+		"elfe": ["humain"],
+		"nain": ["humain","hobbit"],
+		"ogre": ["humain"],
+		"hobbit": ["nain"],
+	};
+	
+	const VOCATIONS = [
+		{ id:'guerrier',      label:'Guerrier',           icon:'⚔️',  img:'', blurb:'Maître des armes blanches. Robuste, polyvalent, le pilier de toute troupe.' },
+		{ id:'barbare',       label:'Barbare',            icon:'🪓',  img:'', blurb:'Guerrier des steppes, mu par la rage. Sa furie est une ressource redoutable.' },
+		{ id:'forestier',     label:'Forestier',          icon:'🏹',  img:'', blurb:'Chasseur et éclaireur hors pair. Il connaît les routes que les cartes n\'indiquent pas.' },
+		{ id:'duelliste',     label:'Duelliste',          icon:'🤺',  img:'', blurb:'Escrimeur élégant. Sa précision chirurgicale compense l\'absence de robustesse.' },
+		{ id:'moine',         label:'Moine',              icon:'🥋',  img:'', blurb:'Corps comme arme, esprit comme bouclier. Énergie intérieure rare.' },
+		{ id:'elementaliste', label:'Élémentaliste',      icon:'🔥',  img:'', blurb:'Maître du feu, glace, foudre. Ses sorts exigent des composants physiques puissants.' },
+		{ id:'mage',          label:'Magicien de combat', icon:'🌀',  img:'', blurb:'La magie au service de la guerre. Enchantements d\'armes, boucliers arcaniques.' },
+		{ id:'illusionniste', label:'Illusionniste',      icon:'🎭',  img:'', blurb:'Manipulateur de perceptions. Ses illusions peuvent détourner des armées.' },
+		{ id:'lettre',        label:'Lettré',             icon:'📜',  img:'', blurb:'Érudit universel capable d\'apprendre n\'importe quel type de magie.' },
+		{ id:'druide',        label:'Druide',             icon:'🌳',  img:'', blurb:'Gardien des cycles naturels. Les animaux lui obéissent, les plantes l\'écoutent.' },
+		{ id:'chaman',        label:'Chaman',             icon:'🐺',  img:'', blurb:'Se métamorphose en esprit totem — Ours, Loup, Sanglier, Chat sauvage ou Faucon.' },
+		{ id:'pretre',        label:'Prêtre',             icon:'✝',  img:'', blurb:'Guérisseur indispensable. Peut ressusciter les tombés au combat.' },
+		{ id:'paladin',       label:'Paladin',            icon:'🛡',  img:'', blurb:'Guerrier sacré. Sa lame brûle d\'une lumière que les morts-vivants redoutent.' },
+		{ id:'templier',      label:'Templier',           icon:'⚜️',  img:'', blurb:'Mi-soldat mi-moine. L\'épée de l\'institution autant que celle des dieux.' },
+		{ id:'repurgateur',   label:'Répurgateur',        icon:'🔱',  img:'', blurb:'Chasseur de créatures maudites. Spécialiste des morts-vivants et des démons.' },
+		{ id:'necromancien',  label:'Nécromancien',       icon:'💀',  img:'', blurb:'Maître de la magie noire. Sa voie ultime mène vers la Liche.' },
+		{ id:'assassin',      label:'Assassin',           icon:'🗡',  img:'', blurb:'L\'ombre faite chair. Spécialiste de l\'élimination silencieuse et des poisons.' },
+		{ id:'voleur',        label:'Voleur',             icon:'🔑',  img:'', blurb:'Doigts légers, esprit plus léger encore. Son réseau d\'informateurs vaut une armée.' },
+		{ id:'menestrel',     label:'Ménestrel',          icon:'🎶',  img:'', blurb:'Chanteur, espion, négociateur. Sa musique ouvre des portes que les épées ne peuvent forcer.' },
+		{ id:'demoniste',     label:'Démoniste',          icon:'😈',  img:'', blurb:'Invocateur de créatures infernales. Chaque pacte consume une part de son âme.' },
+	];
+	const VOCATIONS_PROXIMITY = {
+		"guerrier" : ["repurgateur","templier","barbare","duelliste"],
+		"barbare": ["guerrier"],
+		"forestier": ["guerrier"],
+		"duelliste": ["guerrier"],
+		"moine": [],
+		"elementaliste": ["mage","lettre","druide","chaman"],
+		"mage": ["illusionniste","elementaliste","lettre","chaman","druide"],
+		"illusionniste": ["mage","lettre"],
+		"lettre": ["mage","illusionniste"],
+		"druide": ["chaman","elementaliste"],
+		"chaman": ["druide","elementaliste"],
+		"pretre": [],
+		"paladin": ["templier"],
+		"templier": ["repurgateur","paladin"],
+		"repurgateur": ["guerrier"],
+		"necromancien": ["demoniste"],
+		"assassin": ["voleur"],
+		"voleur": ["assassin"],
+		"menestrel": [],
+		"demoniste": ["necromancien"],
+	};
+	// Pool de portraits — chaque portrait a: src, sex (M/F), voc (id vocation ou null), race (id race ou null)
+	const PORTRAITS = {{ characters_images | tojson | safe }}
+	
+	// cite de depart
+	const CITES = {{ towns_images | tojson | safe }}
+
+	/* ══════════════════════════════════════════════════════════
+	   ÉTAT
+	══════════════════════════════════════════════════════════ */
+	let wiz = { step:1, sex:null, race:null, voc:null, portrait:null, prenom:'', nom:'', cite:'' };
+	const TOTAL_STEPS = 5;
+
+	const STEP_META = [
+		{ title:'Forger votre légende',              subtitle:'Choisissez le genre, le prénom et le nom de votre aventurier.' },
+		{ title:'Choisir votre race',                subtitle:'Chaque race confère des aptitudes uniques et des limites propres.' },
+		{ title:'Choisir votre vocation',            subtitle:'La vocation définit votre style de combat et vos capacités.' },
+		{ title:'Choisir votre portrait',            subtitle:'Les portraits filtrés sur votre genre sont affichés en premier.' },
+		{ title:'Choisir votre cité de départ',      subtitle:'Les contrées inhospitalières de Telluris vous attendent.' },
+	];
+
+	/* ══════════════════════════════════════════════════════════
+	   WIZARD NAVIGATION
+	══════════════════════════════════════════════════════════ */
+	function openWizard() {
+		wiz = { step:1, sex:null, race:null, voc:null, portrait:null, prenom:'', nom:'' , cite:''};
+		document.getElementById('wizard-overlay').classList.add('open');
+		document.body.style.overflow = 'hidden';
+		renderStep(1);
+	}
+	function closeWizard() {
+		document.getElementById('wizard-overlay').classList.remove('open');
+		document.body.style.overflow = '';
+	}
+
+	function wizNext() {
+		if (wiz.step < TOTAL_STEPS) {
+			// Récupérer les champs texte avant de quitter étape 1
+			if (wiz.step === 1) {
+				wiz.prenom = document.getElementById('char-prenom').value.trim();
+				wiz.nom    = document.getElementById('char-nom').value.trim();
+			}
+			wiz.step++;
+			renderStep(wiz.step);
+		} else {
+			submitCharacter();
+		}
+	}
+	function wizPrev() {
+		if (wiz.step > 1) { wiz.step--; renderStep(wiz.step); }
+	}
+
+	function renderStep(step) {
+		// Panels
+		document.querySelectorAll('.wiz-panel').forEach(p => p.classList.remove('active'));
+		document.getElementById('panel-' + step).classList.add('active');
+
+		// Dots
+		for (let i = 1; i <= TOTAL_STEPS; i++) {
+			const dot = document.getElementById('dot-' + i);
+			dot.classList.remove('active', 'done');
+			if (i < step)  dot.classList.add('done');
+			if (i === step) dot.classList.add('active');
+		}
+
+		// Titres
+		const m = STEP_META[step - 1];
+		document.getElementById('wizard-heading').textContent  = m.title;
+		document.getElementById('wizard-subtitle').textContent = m.subtitle;
+
+		// Bouton précédent
+		document.getElementById('btn-prev').classList.toggle('hidden', step === 1);
+
+		// Construire le contenu dynamique des étapes
+		if (step === 2) buildRaceGrid();
+		if (step === 3) buildVocGrid();
+		if (step === 4) buildPortraitGrid();
+		if (step === 5) buildCiteGrid();
+
+		// Libellé bouton suivant
+		const btnNext = document.getElementById('btn-next');
+		btnNext.textContent = step === TOTAL_STEPS ? 'Créer ce personnage ✦' : 'Continuer →';
+
+		validateStep();
+	}
+
+	function validateStep() {
+		const btnNext = document.getElementById('btn-next');
+		let ok = false;
+		if (wiz.step === 1) {
+			const prenom = document.getElementById('char-prenom').value.trim();
+			const nom    = document.getElementById('char-nom').value.trim();
+			ok = wiz.sex !== null && prenom.length > 0 && nom.length > 0;
+		}
+		if (wiz.step === 2) ok = wiz.race !== null;
+		if (wiz.step === 3) ok = wiz.voc  !== null;
+		if (wiz.step === 4) ok = wiz.portrait !== null;
+		if (wiz.step === 5) ok = wiz.cite !== null;
+		btnNext.disabled = !ok;
+	}
+
+	/* ── Étape 1 : sexe ── */
+	function chooseSex(btn) {
+		document.querySelectorAll('.sex-btn').forEach(b => b.classList.remove('chosen'));
+		btn.classList.add('chosen');
+		wiz.sex = btn.dataset.sex;
+		validateStep();
+	}
+
+	/* ── Étape 2 : race ── */
+	function buildRaceGrid() {
+		const grid = document.getElementById('race-grid');
+		grid.innerHTML = RACES.map(r => `
+			<button class="race-btn ${wiz.race === r.id ? 'chosen' : ''}"
+					data-race="${r.id}" onclick="chooseRace(this)" type="button">
+				<span class="race-icon">${r.icon}</span>
+				<span class="race-label">${r.label}</span>
+			</button>`).join('');
+		if (wiz.race) showRaceStats(wiz.race);
+	}
+	function chooseRace(btn) {
+		document.querySelectorAll('.race-btn').forEach(b => b.classList.remove('chosen'));
+		btn.classList.add('chosen');
+		wiz.race = btn.dataset.race;
+		showRaceStats(wiz.race);
+		validateStep();
+	}
+	function showRaceStats(raceId) {
+		const race = RACES.find(r => r.id === raceId);
+		if (!race) return;
+		const box = document.getElementById('race-stats');
+		box.classList.add('visible');
+		document.getElementById('race-stats-title').textContent = race.label + ' — caractéristiques maximales';
+		const statNames = { V:'Vitesse', F:'Force', R:'Résistance', Ag:'Agilité', Vol:'Volonté', Int:'Intelligence' };
+		document.getElementById('stats-grid').innerHTML = Object.entries(race.stats).map(([k, v]) => `
+			<div class="stat-item">
+				<span class="stat-name">${statNames[k] || k}</span>
+				<div class="stat-bar-wrap">
+					<div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${(v/10)*100}%"></div></div>
+					<span class="stat-val">${v}</span>
+				</div>
+			</div>`).join('');
+		document.getElementById('race-trait').textContent = '✦ ' + race.trait + ' · PM : ' + race.pm;
+	}
+
+	/* ── Étape 3 : vocation ── */
+	function buildVocGrid() {
+		const grid = document.getElementById('voc-grid');
+		grid.innerHTML = VOCATIONS.map(v => `
+			<button class="voc-btn ${wiz.voc === v.id ? 'chosen' : ''}"
+					data-voc="${v.id}" onclick="chooseVoc(this)" type="button">
+				<div class="voc-img-wrap">
+				<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.05)">${v.icon}</div>
+				</div>
+				<div class="voc-txt">
+					<p class="voc-title">${v.label}</p>
+					<p class="voc-blurb">${v.blurb}</p>
+				</div>
+			</button>`).join('');
+	}
+	function chooseVoc(btn) {
+		document.querySelectorAll('.voc-btn').forEach(b => b.classList.remove('chosen'));
+		btn.classList.add('chosen');
+		wiz.voc = btn.dataset.voc;
+		validateStep();
+	}
+
+	/* ── Étape 4 : portrait ── */
+	function buildPortraitGrid() {
+		const sex = wiz.sex;
+		const voc = wiz.voc;
+		const race = wiz.race;
+		// Trier : exact match voc+race en premier, puis sex+voc, puis sex+race, puis sex seul
+		function score(p) {
+			if (p.sex !== sex) return -1;  // mauvais genre → exclu
+			let s = 0;
+			if (p.voc  === voc)  s += 10;
+			if (p.race === race) s += 5;
+			if (VOCATIONS_PROXIMITY[voc] && p.voc != voc) {
+				if(VOCATIONS_PROXIMITY[voc].includes(p.voc)) {
+					s += 2;
+				} else {
+					return -1;  // mauvaise vocation → exclu
+				}
+			}
+			if (RACES_PROXIMITY[race] && p.race != race) {
+				if(RACES_PROXIMITY[race].includes(p.race)) {
+					s += 1;
+				} else {
+					return -1;  // mauvaise race → exclu
+				}
+			}
+			return s;
+		}
+		const sorted = PORTRAITS
+			.map(p => ({ ...p, _score: score(p) }))
+			.filter(p => p._score >= 0)
+			.sort((a, b) => b._score - a._score);
+
+		const grid = document.getElementById('portrait-grid');
+		grid.innerHTML = sorted.map(p => {
+			const isChosen = wiz.portrait === p.src;
+			const badge    = p._score >= 15 ? 'Vocation & Race' : p._score >= 10 ? 'Vocation' : p._score >= 5 ? 'Race' : '';
+			return `
+			<button class="portrait-btn ${isChosen ? 'chosen' : ''}"
+					data-src="${p.url}" onclick="choosePortrait(this)" type="button"
+					aria-label="Portrait ${p.voc}">
+				<img src="${p.url}" alt="Portrait de personnage" loading="lazy">
+				${badge ? `<span class="portrait-priority-badge">${badge}</span>` : ''}
+			</button>`;
+		}).join('');
+
+		if (!sorted.length) {
+			grid.innerHTML = '<p style="font-family:\'IM Fell English\',serif;font-style:italic;color:var(--bronze);grid-column:1/-1;text-align:center;padding:20px">Aucun portrait disponible pour cette combinaison.</p>';
+		}
+	}
+	
+	function choosePortrait(btn) {
+		document.querySelectorAll('.portrait-btn').forEach(b => b.classList.remove('chosen'));
+		btn.classList.add('chosen');
+		wiz.portrait = btn.dataset.src;
+		validateStep();
+	}
+
+
+	/* ── Étape 5 : cite de depart ── */
+	function buildCiteGrid() {
+		const grid = document.getElementById('cite-grid');
+		grid.innerHTML = CITES.map(c => `
+			<button class="cite-btn ${wiz.cite === c.id ? 'chosen' : ''}"
+					data-cite="${c.id}" onclick="chooseCite(this)" type="button">
+				<div class="cite-img-wrap">
+				<img src="${c.url}" alt="${c.label}">
+				</div>
+				<div class="cite-txt">
+					<p class="cite-title">${c.label}</p>
+					<p class="cite-blurb">${c.blurb}</p>
+				</div>
+			</button>`).join('');
+	}
+	
+	function chooseCite(btn) {
+		document.querySelectorAll('.cite-btn').forEach(b => b.classList.remove('chosen'));
+		btn.classList.add('chosen');
+		wiz.cite = btn.dataset.cite;
+		validateStep();
+	}
+	
+	/* ── Soumission finale ── */
+	function submitCharacter() {
+		console.log('Nouveau personnage :', wiz);
+		// TODO : appel API POST /characters avec wiz comme payload
+		alert(`Personnage créé !\n${wiz.prenom} ${wiz.nom} ${wiz.portrait} ${wiz.cite} \n${RACES.find(r=>r.id===wiz.race)?.label} · ${VOCATIONS.find(v=>v.id===wiz.voc)?.label}`);
+		closeWizard();
+	}
+
+	/* ── Validation en temps réel étape 1 ── */
+	document.addEventListener('DOMContentLoaded', () => {
+		['char-prenom','char-nom'].forEach(id => {
+			document.getElementById(id)?.addEventListener('input', validateStep);
+		});
+	});
+
+	/* ── Ouvrir le wizard via la carte "Créer" ── */
+	document.querySelectorAll('.char-create').forEach(el => {
+		el.addEventListener('click', e => { e.preventDefault(); openWizard(); });
+	});
+
+	/* ── Fermer sur clic fond ── */
+	document.getElementById('wizard-overlay')?.addEventListener('click', e => {
+		if (e.target === document.getElementById('wizard-overlay')) closeWizard();
+	});
+
+	/* ── Fermer sur Échap ── */
+	document.addEventListener('keydown', e => {
+		if (e.key === 'Escape') closeWizard();
+	});
 	</script>
 </body>
 </html>
