@@ -960,8 +960,8 @@
 			<p class="section-label">Personnages</p>
 
 			<nav class="char-list" aria-label="Liste des personnages">
-
-				<!-- Personnage 1 -->
+				{% if  not user_doc["characters"] %}
+				<!-- Personnage test -->
 				<a href="#" class="char-card" aria-label="Jouer avec Aldric von Brunn, Guerrier niveau 8, rang Fer">
 					<div class="char-icon">
 						<img src="{{ url_for('characters', path='guerrier_m_white10.jpg') }}"
@@ -969,41 +969,29 @@
 					</div>
 					<div class="char-data">
 					<div class="char-info">
-						<p class="char-name">Aldric von Brunn</p>
+						<p class="char-name">Aldric von Brunn (test)</p>
 						<p class="char-meta">Guerrier · Niveau 8</p>
 					</div>
 					<div class="char-rank">🔩 Fer</div>
 					</div>
 				</a>
-
-				<a href="#" class="char-card" aria-label="Jouer avec Saoirse, Druide niveau 5, rang Cuivre">
-					<div class="char-icon">
-						<img src="{{ url_for('characters', path='druide_f_asia01.jpg') }}"
-							 alt="Portrait de Saoirse, Druide">
-					</div>
-					<div class="char-data">
-					<div class="char-info">
-						<p class="char-name">Saoirse</p>
-						<p class="char-meta">Druide · Niveau 5</p>
-					</div>
-					<div class="char-rank">🟤 Cuivre</div>
-					</div>
-				</a>
-
-				<a href="#" class="char-card" aria-label="Jouer avec Mira al-Zahir, Illusionniste niveau 12, rang Argent">
-					<div class="char-icon">
-						<img src="{{ url_for('characters', path='illusionniste_f_white01.jpg') }}"
-							 alt="Portrait de Mira al-Zahir, Illusionniste">
-					</div>
-					<div class="char-data">
-					<div class="char-info">
-						<p class="char-name">Mira al-Zahir</p>
-						<p class="char-meta">Illusionniste · Niveau 12</p>
-					</div>
-					<div class="char-rank">🔘 Argent</div>
-					</div>
-				</a>
-
+				{% else %}
+				{% for character in user_doc["characters"] -%}
+					<a href="#" class="char-card" aria-label="Jouer avec Mira al-Zahir, Illusionniste niveau 12, rang Argent">
+						<div class="char-icon">
+							<img src="{{ url_for('characters', path=character['portrait']) }}"
+								 alt="Portrait de {{ character['nom'] }} {{ character['prenom'] }}, {{ character['voc'] }}">
+						</div>
+						<div class="char-data">
+						<div class="char-info">
+							<p class="char-name">{{ character['nom'] }} {{ character['prenom'] }}</p>
+							<p class="char-meta">{{ character['voc'] }} · Niveau 12</p>
+						</div>
+						<div class="char-rank">🔘 Argent</div>
+						</div>
+					</a>
+				{% endfor %}
+				{% endif%}
 				<!-- Création -->
 				<a href="#" class="char-card char-create" aria-label="Créer un nouveau personnage">
 					<div class="char-icon" style="min-height: 200px;">✦</div>
@@ -1222,7 +1210,7 @@
 	/* ══════════════════════════════════════════════════════════
 	   ÉTAT
 	══════════════════════════════════════════════════════════ */
-	let wiz = { step:1, sex:null, race:null, voc:null, portrait:null, prenom:'', nom:'', cite:'' };
+	let wiz = { step:1, sex:null, race:null, voc:null, portrait:null, full_portrait:null, prenom:'', nom:'', cite:'' };
 	const TOTAL_STEPS = 5;
 
 	const STEP_META = [
@@ -1417,7 +1405,7 @@
 			const badge    = p._score >= 15 ? 'Vocation & Race' : p._score >= 10 ? 'Vocation' : p._score >= 5 ? 'Race' : '';
 			return `
 			<button class="portrait-btn ${isChosen ? 'chosen' : ''}"
-					data-src="${p.url}" onclick="choosePortrait(this)" type="button"
+					data-src="${p.name}" onclick="choosePortrait(this)" type="button"
 					aria-label="Portrait ${p.voc}">
 				<img src="${p.url}" alt="Portrait de personnage" loading="lazy">
 				${badge ? `<span class="portrait-priority-badge">${badge}</span>` : ''}
@@ -1461,10 +1449,26 @@
 	}
 	
 	/* ── Soumission finale ── */
-	function submitCharacter() {
+	async function submitCharacter() {
 		console.log('Nouveau personnage :', wiz);
-		// TODO : appel API POST /characters avec wiz comme payload
-		alert(`Personnage créé !\n${wiz.prenom} ${wiz.nom} ${wiz.portrait} ${wiz.cite} \n${RACES.find(r=>r.id===wiz.race)?.label} · ${VOCATIONS.find(v=>v.id===wiz.voc)?.label}`);
+		const characterData = wiz;
+		try {
+			const response = await fetch('api/character', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(characterData)
+			});
+
+			if (response.ok) {
+				console.log('done',response.json());
+			} else {
+				const error = await response.json();
+				console.log(error.detail)
+				alert("Erreur : " + error.detail);
+			}
+		} catch (err) {
+			console.error("Erreur de connexion", err);
+		}
 		closeWizard();
 	}
 

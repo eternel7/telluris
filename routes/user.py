@@ -1,10 +1,17 @@
-from fastapi import FastAPI, HTTPException, APIRouter, Response
+from typing import Annotated
+from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
 from jose import jwt
 from db.config import db, SECRET_KEY, ALGORITHM
+from utils.auth import get_current_user, create_access_token
 
+class User(BaseModel):
+    email: str
+    username: str | None = None
+    disabled: bool | None = None
+	
 user_router = APIRouter()
 
 class RegisterRequest(BaseModel):
@@ -12,10 +19,6 @@ class RegisterRequest(BaseModel):
 	email: str
 	password: str
 	password_again: str
-
-class LoginRequest(BaseModel):
-	email: str
-	password: str
 
 @user_router.post("/register")
 async def register_user(user: RegisterRequest, response: Response):
@@ -28,7 +31,7 @@ async def register_user(user: RegisterRequest, response: Response):
 		raise HTTPException(status_code=400, detail="Les mots de passe ne correspondent pas")
 	
 	hashed_pw = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt())
-	token = jwt.encode({"user_id": user_id}, SECRET_KEY, algorithm=ALGORITHM)
+	token = create_access_token({"user_id": user_id}) #jwt.encode({"user_id": user_id}, SECRET_KEY, algorithm=ALGORITHM)
 
 	db.put({
 		"_id": user_id,
@@ -44,6 +47,10 @@ async def register_user(user: RegisterRequest, response: Response):
 	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
 	return response
 
+class LoginRequest(BaseModel):
+	email: str
+	password: str
+	
 @user_router.post("/login")
 async def login_user(user: LoginRequest, response: Response):
 	user_doc = db.get("user:"+user.email)
@@ -51,8 +58,32 @@ async def login_user(user: LoginRequest, response: Response):
 	if not user_doc or not bcrypt.checkpw(user.password.encode(), user_doc["password"].encode()):
 		raise HTTPException(status_code=400, detail="Invalid credentials")
 
-	token = jwt.encode({"user_id": user_doc["_id"]}, SECRET_KEY, algorithm=ALGORITHM)
+	token = create_access_token({"user_id": user_doc["_id"]}) #jwt.encode({"user_id": user_doc["_id"]}, SECRET_KEY, algorithm=ALGORITHM)
 	content = {"token": token, "user_id":  user_doc["_id"], "username":  user_doc["username"]}
 	response = JSONResponse(content=content)
 	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
 	return  response
+	
+class CharacterRequest(BaseModel):
+	sex: str
+	race: str
+	voc: str
+	portrait: str
+	prenom: str
+	nom: str
+	cite: str
+	
+@user_router.post("/character")
+async def add_character(character: CharacterRequest, response: Response, current_user: Annotated[User, Depends(get_current_user)]):
+	print("current_user", current_user)
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+	
+	print("character", character)
+	if character:
+		character_dict = character.model_dump()
+		current_user["characters"].append(character_dict)
+		print("new current_user", current_user)
+		db.put(current_user)
+	
+	return current_user
