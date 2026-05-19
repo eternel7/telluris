@@ -70,7 +70,6 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 			if (os.path.isfile(full_path) and filename.lower().endswith(valid_extensions)):
 				file_url = request.url_for("characters", path=filename)
 				race = filename[filename.rfind("_")+1:-6]
-				race = "humain" if race in ['brown', 'black', 'white', 'asia'] else race
 				characters_images.append({
 					"name": filename,
 					"sex": "F" if "_f_" in filename else "M",
