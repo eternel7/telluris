@@ -54,10 +54,9 @@ class LoginRequest(BaseModel):
 @user_router.post("/login")
 async def login_user(user: LoginRequest, response: Response):
 	user_doc = db.get("user:"+user.email)
-
 	if not user_doc or not bcrypt.checkpw(user.password.encode(), user_doc["password"].encode()):
 		raise HTTPException(status_code=400, detail="Invalid credentials")
-
+		
 	token = create_access_token({"user_id": user_doc["_id"]}) #jwt.encode({"user_id": user_doc["_id"]}, SECRET_KEY, algorithm=ALGORITHM)
 	content = {"token": token, "user_id":  user_doc["_id"], "username":  user_doc["username"]}
 	response = JSONResponse(content=content)
@@ -75,15 +74,19 @@ class CharacterRequest(BaseModel):
 	
 @user_router.post("/character")
 async def add_character(character: CharacterRequest, response: Response, current_user: Annotated[User, Depends(get_current_user)]):
-	print("current_user", current_user)
 	if not current_user:
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	
-	print("character", character)
+	db_user = db.get(current_user["_id"])
+	if not db_user:
+		raise HTTPException(status_code=404, detail="User not found")
+		
+	if "characters" not in db_user:
+		db_user["characters"] = []
+		
 	if character:
 		character_dict = character.model_dump()
-		current_user["characters"].append(character_dict)
-		print("new current_user", current_user)
-		db.put(current_user)
+		db_user["characters"].append(character_dict)
+		db.put(db_user)
 	
-	return current_user
+	return db_user

@@ -7,7 +7,6 @@ from db.config import db, SECRET_KEY, ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = 240
 
 def create_access_token(data: dict):
-	print("create_access_token")
 	to_encode = data.copy()
 	expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 	to_encode.update({"exp": expire})
@@ -24,12 +23,14 @@ def get_current_user(request: Request):
 		# 2. Décoder le token pour obtenir le user_id
 		payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 		user_id: str = payload.get("user_id")
+		expire = payload.get("exp")
+		print(expire)
 		
 		user_doc = db.get(user_id)
 		if not user_doc or user_doc is None:
 			return None
 		
-		# clean up before send to client
+		# clean up before share to any other function
 		user_doc.pop("password", None)
 		user_doc.pop("token", None)
 		return user_doc
