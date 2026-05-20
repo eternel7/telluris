@@ -961,23 +961,6 @@
 
 			<nav class="char-list" aria-label="Liste des personnages">
 				<div id="characters-list" >
-				{% if user_doc["characters"] %}
-				{% for character in user_doc["characters"] -%}
-				<a href="#" class="char-card" aria-label="Jouer avec Mira al-Zahir, Illusionniste niveau 12, rang Argent">
-					<div class="char-icon">
-						<img src="{{ url_for('characters', path=character['portrait']) }}"
-							 alt="Portrait de {{ character['nom'] }} {{ character['prenom'] }}, {{ character['voc'] }}">
-					</div>
-					<div class="char-data">
-					<div class="char-info">
-						<p class="char-name">{{ character['nom'] }} {{ character['prenom'] }}</p>
-						<p class="char-meta">{{ character['voc'] }} · Niveau 12</p>
-					</div>
-					<div class="char-rank">🔘 Argent</div>
-					</div>
-				</a>
-				{% endfor %}
-				{% endif%}
 				</div>
 				<!-- Création -->
 				<a href="#" class="char-card char-create" aria-label="Créer un nouveau personnage">
@@ -1103,6 +1086,10 @@
 	/* ══════════════════════════════════════════════════════════
 	   DONNÉES
 	══════════════════════════════════════════════════════════ */
+	
+	// cite de depart
+	let CHARACTERS = {{ user_doc["characters"] | tojson | safe }}
+	
 	const RACES = [
 		{
 			id: 'humain', label: 'Humain', icon: '👤',
@@ -1114,19 +1101,19 @@
 			id: 'elfe', label: 'Elfe', icon: '🧝',
 			stats: { V:5, F:5, R:4, Ag:8, Vol:8, Int:9 },
 			pm: '8D',
-			trait: '4 maxima autorisés · +1 Force de mouvement'
+			trait: '4 maxima autorisés · +1 point de mouvement'
 		},
 		{
 			id: 'nain', label: 'Nain', icon: '⛏',
 			stats: { V:4, F:5, R:6, Ag:5, Vol:9, Int:8 },
 			pm: '7D',
-			trait: '+1 classe d\'armure · −1 Force de mouvement'
+			trait: '+1 classe d\'armure · −1 point de mouvement'
 		},
 		{
 			id: 'ogre', label: 'Ogre', icon: '👹',
 			stats: { V:3, F:7, R:7, Ag:4, Vol:6, Int:6 },
 			pm: '6D',
-			trait: 'Inspire la Peur (jusqu\'à 5) · −2 Force de mouvement'
+			trait: 'Inspire la Peur (jusqu\'à 5) · −2 points de mouvement'
 		},
 		{
 			id: 'hobbit', label: 'Hobbit', icon: '🌿',
@@ -1446,10 +1433,9 @@
 				body: JSON.stringify(characterData)
 			});
 
-			if (response.ok) {				
-				const data = await response.json();
-				console.log('done', data);
-				buildCharacterslist(data);
+			if (response.ok) {
+				CHARACTERS = await response.json();
+				buildCharacterslist();
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
@@ -1461,23 +1447,28 @@
 		closeWizard();
 	}
 	/*  mise a jour des characters */
-	function buildCharacterslist(CHARACTERS) {
+	function buildCharacterslist() {
 		const grid = document.getElementById('characters-list');
-		grid.innerHTML = CHARACTERS.map(c => `
-			<a href="#" class="char-card" aria-label="Jouer avec ${c.nom} ${c.prenom}, ${c.voc} niveau 12, rang Argent">
+		grid.innerHTML = CHARACTERS.map(c => {
+			const niveau = c.niveau ?? 0;
+			const rang = c.rang ?? 'Cuivre';
+			return `
+			<a href="#" class="char-card" aria-label="Jouer avec ${c.prenom} ${c.nom}, ${c.voc} niveau ${niveau}, rang ${rang}">
 				<div class="char-icon">
 					<img src="/characters/${c.portrait}"
-						 alt="Portrait de ${c.nom}  ${c.prenom}, ${c.voc}">
+						 alt="Portrait de ${c.prenom} ${c.nom}, ${c.voc}">
 					</div>
 					<div class="char-data">
 					<div class="char-info">
-						<p class="char-name"> ${c.nom} ${c.prenom}</p>
-						<p class="char-meta">${c.voc} · Niveau 12</p>
+						<p class="char-name"> ${c.prenom} ${c.nom}</p>
+						<p class="char-meta">${c.voc} · Niveau ${niveau}</p>
 					</div>
-					<div class="char-rank">🔘 Argent</div>
+					<div class="char-rank">🟤 ${rang}</div>
 					</div>
-				</a>`).join('');
+				</a>`;
+			}).join('');
 	}
+	buildCharacterslist();
 	/* ── Validation en temps réel étape 1 ── */
 	document.addEventListener('DOMContentLoaded', () => {
 		['char-prenom','char-nom'].forEach(id => {
