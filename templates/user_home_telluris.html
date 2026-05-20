@@ -960,38 +960,25 @@
 			<p class="section-label">Personnages</p>
 
 			<nav class="char-list" aria-label="Liste des personnages">
-				{% if  not user_doc["characters"] %}
-				<!-- Personnage test -->
-				<a href="#" class="char-card" aria-label="Jouer avec Aldric von Brunn, Guerrier niveau 8, rang Fer">
+				<div id="characters-list" >
+				{% if user_doc["characters"] %}
+				{% for character in user_doc["characters"] -%}
+				<a href="#" class="char-card" aria-label="Jouer avec Mira al-Zahir, Illusionniste niveau 12, rang Argent">
 					<div class="char-icon">
-						<img src="{{ url_for('characters', path='guerrier_m_white10.jpg') }}"
-							 alt="Portrait d'Aldric von Brunn, Guerrier">
+						<img src="{{ url_for('characters', path=character['portrait']) }}"
+							 alt="Portrait de {{ character['nom'] }} {{ character['prenom'] }}, {{ character['voc'] }}">
 					</div>
 					<div class="char-data">
 					<div class="char-info">
-						<p class="char-name">Aldric von Brunn (test)</p>
-						<p class="char-meta">Guerrier · Niveau 8</p>
+						<p class="char-name">{{ character['nom'] }} {{ character['prenom'] }}</p>
+						<p class="char-meta">{{ character['voc'] }} · Niveau 12</p>
 					</div>
-					<div class="char-rank">🔩 Fer</div>
+					<div class="char-rank">🔘 Argent</div>
 					</div>
 				</a>
-				{% else %}
-				{% for character in user_doc["characters"] -%}
-					<a href="#" class="char-card" aria-label="Jouer avec Mira al-Zahir, Illusionniste niveau 12, rang Argent">
-						<div class="char-icon">
-							<img src="{{ url_for('characters', path=character['portrait']) }}"
-								 alt="Portrait de {{ character['nom'] }} {{ character['prenom'] }}, {{ character['voc'] }}">
-						</div>
-						<div class="char-data">
-						<div class="char-info">
-							<p class="char-name">{{ character['nom'] }} {{ character['prenom'] }}</p>
-							<p class="char-meta">{{ character['voc'] }} · Niveau 12</p>
-						</div>
-						<div class="char-rank">🔘 Argent</div>
-						</div>
-					</a>
 				{% endfor %}
 				{% endif%}
+				</div>
 				<!-- Création -->
 				<a href="#" class="char-card char-create" aria-label="Créer un nouveau personnage">
 					<div class="char-icon" style="min-height: 200px;">✦</div>
@@ -1179,6 +1166,7 @@
 		{ id:'menestrel',     label:'Ménestrel',          icon:'🎶',  img:'', blurb:'Chanteur, espion, négociateur. Sa musique ouvre des portes que les épées ne peuvent forcer.' },
 		{ id:'demoniste',     label:'Démoniste',          icon:'😈',  img:'', blurb:'Invocateur de créatures infernales. Chaque pacte consume une part de son âme.' },
 	];
+	
 	const VOCATIONS_PROXIMITY = {
 		"guerrier" : ["repurgateur","templier","barbare","duelliste"],
 		"barbare": ["guerrier"],
@@ -1450,7 +1438,6 @@
 	
 	/* ── Soumission finale ── */
 	async function submitCharacter() {
-		console.log('Nouveau personnage :', wiz);
 		const characterData = wiz;
 		try {
 			const response = await fetch('api/character', {
@@ -1459,8 +1446,10 @@
 				body: JSON.stringify(characterData)
 			});
 
-			if (response.ok) {
-				console.log('done',response.json());
+			if (response.ok) {				
+				const data = await response.json();
+				console.log('done', data);
+				buildCharacterslist(data);
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
@@ -1471,7 +1460,24 @@
 		}
 		closeWizard();
 	}
-
+	/*  mise a jour des characters */
+	function buildCharacterslist(CHARACTERS) {
+		const grid = document.getElementById('characters-list');
+		grid.innerHTML = CHARACTERS.map(c => `
+			<a href="#" class="char-card" aria-label="Jouer avec ${c.nom} ${c.prenom}, ${c.voc} niveau 12, rang Argent">
+				<div class="char-icon">
+					<img src="/characters/${c.portrait}"
+						 alt="Portrait de ${c.nom}  ${c.prenom}, ${c.voc}">
+					</div>
+					<div class="char-data">
+					<div class="char-info">
+						<p class="char-name"> ${c.nom} ${c.prenom}</p>
+						<p class="char-meta">${c.voc} · Niveau 12</p>
+					</div>
+					<div class="char-rank">🔘 Argent</div>
+					</div>
+				</a>`).join('');
+	}
 	/* ── Validation en temps réel étape 1 ── */
 	document.addEventListener('DOMContentLoaded', () => {
 		['char-prenom','char-nom'].forEach(id => {
@@ -1488,6 +1494,7 @@
 	document.getElementById('wizard-overlay')?.addEventListener('click', e => {
 		if (e.target === document.getElementById('wizard-overlay')) closeWizard();
 	});
+	
 
 	/* ── Fermer sur Échap ── */
 	document.addEventListener('keydown', e => {

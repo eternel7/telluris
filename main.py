@@ -55,7 +55,6 @@ async def read_page_auth(request: Request):
 	
 @app.get("/embleme", response_class=HTMLResponse)
 async def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
-	print("current_user", current_user)
 	if not current_user:
 		return RedirectResponse(url="/auth", headers=request.headers)
 		

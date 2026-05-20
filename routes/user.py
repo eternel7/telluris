@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response
+from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
@@ -89,4 +89,12 @@ async def add_character(character: CharacterRequest, response: Response, current
 		db_user["characters"].append(character_dict)
 		db.put(db_user)
 	
-	return db_user
+	return db_user["characters"]
+	
+	
+@user_router.get("/user", response_class=JSONResponse)
+async def get_user(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	if not current_user:
+		return JSONResponse(content={})
+	
+	return JSONResponse(content=current_user)
