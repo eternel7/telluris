@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request
+from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
@@ -8,9 +8,9 @@ from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user, create_access_token
 
 class User(BaseModel):
-    email: str
-    username: str | None = None
-    disabled: bool | None = None
+		email: str
+		username: str | None = None
+		disabled: bool | None = None
 	
 user_router = APIRouter()
 
@@ -58,10 +58,10 @@ async def login_user(user: LoginRequest, response: Response):
 		raise HTTPException(status_code=400, detail="Invalid credentials")
 		
 	token = create_access_token({"user_id": user_doc["_id"]}) #jwt.encode({"user_id": user_doc["_id"]}, SECRET_KEY, algorithm=ALGORITHM)
-	content = {"token": token, "user_id":  user_doc["_id"], "username":  user_doc["username"]}
+	content = {"token": token, "user_id":	user_doc["_id"], "username":	user_doc["username"]}
 	response = JSONResponse(content=content)
 	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
-	return  response
+	return	response
 	
 class CharacterRequest(BaseModel):
 	sex: str
@@ -91,6 +91,47 @@ async def add_character(character: CharacterRequest, response: Response, current
 	
 	return db_user["characters"]
 	
+@user_router.delete("/character")
+async def delete_character(	
+	response: Response, 
+	current_user: Annotated[User, Depends(get_current_user)], 
+	characterinfo: dict = Body(...)):
+
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+	
+	db_user = db.get(current_user["_id"])
+	if not db_user:
+		raise HTTPException(status_code=404, detail="User not found")
+		
+	if "characters" not in db_user:
+		return []
+		
+	if characterinfo:
+		print("characterinfo", characterinfo)
+		index = characterinfo["id"]
+		if index < 0 or index >= len(db_user["characters"]):
+			raise HTTPException(status_code=404, detail="Character index out of range")
+			
+		characterToDelete = db_user["characters"][index]
+		print("characterToDelete", characterToDelete)
+		character = characterinfo["character"]
+		print("character client side", character)
+		if (
+		 characterToDelete["sex"] == character["sex"] and
+		 characterToDelete["voc"] == character["voc"] and
+		 characterToDelete["race"] == character["race"] and
+		 characterToDelete["nom"] == character["nom"] and
+		 characterToDelete["prenom"] == character["prenom"] and
+		 characterToDelete["portrait"] == character["portrait"]
+		 ):	
+			characterToDelete = db_user["characters"].pop(index)
+			print("deleted:", characterToDelete)
+			db.put(db_user)
+		else:
+			raise HTTPException(status_code=404, detail="Character not found")
+	
+	return db_user["characters"]	
 	
 @user_router.get("/user", response_class=JSONResponse)
 async def get_user(request: Request, current_user: Annotated[User, Depends(get_current_user)]):

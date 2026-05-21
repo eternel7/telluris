@@ -27,7 +27,7 @@
 		
 		.user-container {
 			width: 98%;
-			max-width: 800px;
+			max-width: clamp(800px, 90vw, 1400px);
 			background: var(--parch);
 			border: 2px solid var(--gold);
 			border-radius: 2px;
@@ -150,6 +150,12 @@
 			color: var(--ink);
 			box-shadow: 0 4px 15px rgba(201, 146, 42, 0.4);
 		}
+		
+		.btn:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			pointer-events: none;
+		}
 				
 		.switch-mode {
 			margin-top: 30px;
@@ -236,6 +242,9 @@
 			color: var(--ink);
 			transition: background 0.2s, border-color 0.2s;
 			position: relative;
+			-webkit-touch-callout: none !important;
+			-webkit-user-select: none !important;
+			user-select: none !important;
 		}
 		.char-card:hover {
 			background: rgba(201,146,42,0.08);
@@ -312,7 +321,7 @@
 			justify-content: center;
 		}
 		.char-icon {
-			width: 10vw;
+			width: 15vw;
 			height: auto;
 			flex-shrink: 0;
 			border: 1px solid rgba(141,99,52,0.4);
@@ -353,7 +362,35 @@
 			filter: sepia(0) contrast(1.1);
 			transform: scale(1.06);
 		}
-		
+		/* ── BOUTON SUPPRESSION PERSONNAGE ── */
+		.char-delete-btn {
+			display: none;
+			position: absolute;
+			top: 6px;
+			right: 6px;
+			width: 22px;
+			height: 22px;
+			background: var(--ink);
+			color: var(--parch);
+			border: 1px solid var(--bronze);
+			border-radius: 2px;
+			font-size: 11px;
+			line-height: 1;
+			cursor: pointer;
+			z-index: 10;
+			align-items: center;
+			justify-content: center;
+			transition: background 0.2s, color 0.2s;
+			padding: 0;
+		}
+		.char-card:hover .char-delete-btn {
+			display: flex;
+		}
+		.char-delete-btn:hover {
+			background: #8b1a1a;
+			border-color: #8b1a1a;
+			color: #fff;
+		}
 		/* ── WIZARD CRÉATION ──────────────────────────────────────── */
 		.wizard-overlay {
 			display: none;
@@ -893,6 +930,44 @@
 			}
 			.wiz-step-dot .dot-label { display: none; }
 		}
+		
+		.context-menu {
+			position: fixed;
+			z-index: 3000;
+			background: var(--parch);
+			border: 1px solid var(--gold);
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+			display: flex;
+			flex-direction: column;
+			padding: 4px 0;
+			min-width: 140px;
+		}
+		.context-menu.hidden {
+			display: none;
+		}
+		.menu-item {
+			background: transparent;
+			border: none;
+			padding: 10px 16px;
+			text-align: left;
+			font-family: 'Cinzel', serif;
+			font-size: 14px;
+			color: var(--ink);
+			cursor: pointer;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			transition: background 0.2s;
+		}
+		.menu-item:hover {
+			background: rgba(201, 146, 42, 0.15);
+		}
+		.menu-item.delete {
+			color: #a32a2a; /* Rouge pour la suppression */
+			border-top: 0.5px solid rgba(141, 99, 52, 0.2);
+		}
+		.menu-item.delete:hover {
+			background: rgba(163, 42, 42, 0.1);
+		}
 		/* ── RESPONSIVE ───────────────────────────────────────────── */
 		@media (max-width: 768px) {
 			#main-content {
@@ -925,6 +1000,9 @@
 				padding: 15px;
 			}
 			.char-card::after {
+				display: none;
+			}
+			.char-card:hover .char-delete-btn {
 				display: none;
 			}
 			.char-data {
@@ -1082,6 +1160,10 @@
 			</div>
 		</div>
 	</div>
+	<div id="custom-context-menu" class="context-menu hidden">
+		<button id="menu-opt-jouer" class="menu-item">▶ Jouer</button>
+		<button id="menu-opt-supprimer" class="menu-item delete">🗑 Supprimer</button>
+	</div>
 	<script>
 	/* ══════════════════════════════════════════════════════════
 	   DONNÉES
@@ -1166,7 +1248,7 @@
 		"lettre": ["mage","illusionniste"],
 		"druide": ["chaman","elementaliste"],
 		"chaman": ["druide","elementaliste"],
-		"pretre": [],
+		"pretre": ["mage"],
 		"paladin": ["templier"],
 		"templier": ["repurgateur","paladin"],
 		"repurgateur": ["guerrier"],
@@ -1351,18 +1433,18 @@
 		function score(p) {
 			if (p.sex !== sex) return -1;  // mauvais genre → exclu
 			let s = 0;
-			if (p.voc  === voc)  s += 10;
-			if (p.race === race) s += 5;
+			if (p.voc  === voc)  s += 5;
+			if (p.race === race) s += 10;
 			if (VOCATIONS_PROXIMITY[voc] && p.voc != voc) {
 				if(VOCATIONS_PROXIMITY[voc].includes(p.voc)) {
-					s += 2;
+					s += 1;
 				} else {
 					return -1;  // mauvaise vocation → exclu
 				}
 			}
 			if (RACES_PROXIMITY[race] && p.race != race) {
 				if(RACES_PROXIMITY[race].includes(p.race)) {
-					s += 1;
+					s += 3;
 				} else {
 					return -1;  // mauvaise race → exclu
 				}
@@ -1377,7 +1459,7 @@
 		const grid = document.getElementById('portrait-grid');
 		grid.innerHTML = sorted.map(p => {
 			const isChosen = wiz.portrait === p.src;
-			const badge    = p._score >= 15 ? 'Vocation & Race' : p._score >= 10 ? 'Vocation' : p._score >= 5 ? 'Race' : '';
+			const badge    = p._score >= 15 ? 'Vocation & Race' : p._score >= 10 ? 'Race' : p._score >= 5 ? 'Vocation' : '';
 			return `
 			<button class="portrait-btn ${isChosen ? 'chosen' : ''}"
 					data-src="${p.name}" onclick="choosePortrait(this)" type="button"
@@ -1425,6 +1507,9 @@
 	
 	/* ── Soumission finale ── */
 	async function submitCharacter() {
+		const submitBtn = document.getElementById('btn-next');
+		submitBtn.disabled = true;
+		
 		const characterData = wiz;
 		try {
 			const response = await fetch('api/character', {
@@ -1444,16 +1529,23 @@
 		} catch (err) {
 			console.error("Erreur de connexion", err);
 		}
+		submitBtn.disabled = false;
 		closeWizard();
 	}
 	/*  mise a jour des characters */
 	function buildCharacterslist() {
 		const grid = document.getElementById('characters-list');
-		grid.innerHTML = CHARACTERS.map(c => {
+		grid.innerHTML = CHARACTERS.map((c, index) => {
 			const niveau = c.niveau ?? 0;
 			const rang = c.rang ?? 'Cuivre';
 			return `
-			<a href="#" class="char-card" aria-label="Jouer avec ${c.prenom} ${c.nom}, ${c.voc} niveau ${niveau}, rang ${rang}">
+				<a href="#" class="char-card" 
+				   aria-label="Jouer avec ${c.prenom} ${c.nom}, ${c.voc} niveau ${niveau}, rang ${rang}"
+				   onclick="handleCharClick(event, ${index})">
+					<button class="char-delete-btn" 
+							onclick="handleDeleteClick(event, ${index})" 
+							aria-label="Supprimer ${c.prenom} ${c.nom}"
+							title="Supprimer ce personnage">✕</button>
 				<div class="char-icon">
 					<img src="/characters/${c.portrait}"
 						 alt="Portrait de ${c.prenom} ${c.nom}, ${c.voc}">
@@ -1469,6 +1561,15 @@
 			}).join('');
 	}
 	buildCharacterslist();
+	function handleCharClick(event, index) {
+		event.preventDefault();
+		jouer(CHARACTERS[index], index);
+	}
+	function handleDeleteClick(event, index) {
+		event.preventDefault();
+		event.stopPropagation(); // empêche le clic de remonter vers jouer()
+		supprimer(CHARACTERS[index], index);
+	}
 	/* ── Validation en temps réel étape 1 ── */
 	document.addEventListener('DOMContentLoaded', () => {
 		['char-prenom','char-nom'].forEach(id => {
@@ -1491,6 +1592,126 @@
 	document.addEventListener('keydown', e => {
 		if (e.key === 'Escape') closeWizard();
 	});
+	
+	/* appuie long sur personnage en mobile */
+	let currentCharacterData = null;
+	let currentCharacterIndex = null;
+
+	function initLongPressMenu() {
+		const menu = document.getElementById('custom-context-menu');
+		const dureeAppui = 700; // 0.7 seconde
+
+		// On cible le container parent pour gérer les éléments dynamiques
+		const container = document.getElementById('characters-list');
+		if (!container) return;
+
+		// Détection de l'appui long (touchstart)
+		container.addEventListener('touchstart', (e) => {
+			const card = e.target.closest('.char-card:not(.char-create)');
+			if (!card) return;
+
+			// Stockage des coordonnées pour placer le menu sous le doigt
+			const touch = e.touches[0];
+			const pageX = touch.clientX;
+			const pageY = touch.clientY;
+
+			card.dataset.timer = setTimeout(() => {
+				// Trouver l'index ou l'identité du personnage ciblé
+				const index = Array.from(container.querySelectorAll('.char-card:not(.char-create)')).indexOf(card);
+				currentCharacterIndex = index;
+				currentCharacterData = CHARACTERS[currentCharacterIndex]; // Récupère l'objet {nom, prenom, voc...}
+
+				// Affichage et positionnement du menu
+				menu.style.top = `${pageY}px`;
+				menu.style.left = `${pageX}px`;
+				menu.classList.remove('hidden');
+			}, dureeAppui);
+		});
+
+		// Annulations de l'appui long
+		container.addEventListener('touchend', (e) => {
+			const card = e.target.closest('.char-card');
+			if (card) clearTimeout(card.dataset.timer);
+		});
+
+		container.addEventListener('touchmove', (e) => {
+			const card = e.target.closest('.char-card');
+			if (card) clearTimeout(card.dataset.timer);
+		});
+
+		// Bloquer impérativement le menu système natif
+		container.addEventListener('contextmenu', (e) => {
+			if (e.target.closest('.char-card:not(.char-create)')) {
+				e.preventDefault();
+			}
+		});
+
+		// Fermer le menu si on clique ailleurs sur l'écran
+		document.addEventListener('click', (e) => {
+			if (!menu.contains(e.target)) {
+				menu.classList.add('hidden');
+			}
+		});
+	}
+
+	// ── ACTIONS DU MENU ──
+
+	// Bouton Jouer
+	document.getElementById('menu-opt-jouer').addEventListener('click', () => {
+		if (currentCharacterData) {
+			jouer(currentCharacterData, currentCharacterIndex);
+		}
+		document.getElementById('custom-context-menu').classList.add('hidden');
+	});
+
+	// Bouton Supprimer
+	document.getElementById('menu-opt-supprimer').addEventListener('click', () => {
+		if (currentCharacterData) {
+			supprimer(currentCharacterData, currentCharacterIndex);
+		}
+		document.getElementById('custom-context-menu').classList.add('hidden');
+	});
+
+
+	// ── VOS FONCTIONS DE DESTINATION ──
+
+	function jouer(character, cindex) {
+		console.log("Lancement du jeu avec :", character.prenom, character.nom);
+		alert(`Lancement de l'aventure pour ${character.prenom} (${character.voc}) !`);
+	}
+
+	async function supprimer(character, cindex) {
+		console.log("Demande de suppression pour :", character.prenom, character.nom);
+		const confirmation = confirm(`Voulez-vous vraiment effacer la légende de ${character.prenom} ${character.nom} ?`);
+		if (confirmation) {
+			// Logique de suppression cote client
+			CHARACTERS = CHARACTERS.filter(c => c !== character);
+			buildCharacterslist(); // Rafraîchit l'affichage HTML
+			
+			// Logique de suppression cote serveur
+			try {
+				const response = await fetch('api/character', {
+					method: 'DELETE',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id: cindex , character : character})
+				});
+				if (response.ok) {
+					// Rafraîchit l'affichage HTML
+					CHARACTERS = await response.json();
+					buildCharacterslist();
+				} else {
+					const error = await response.json();
+					console.log(error.detail)
+					alert("Erreur : " + error.detail);
+				}
+			} catch (err) {
+				console.error("Erreur de connexion", err);
+			}
+		}
+	}
+
+	// Lancer l'initialisation au démarrage
+	document.addEventListener('DOMContentLoaded', initLongPressMenu);
 	</script>
 </body>
 </html>
