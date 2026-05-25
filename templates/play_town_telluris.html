@@ -2,23 +2,29 @@
 <html lang="fr">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	<title>Battle Map - {{ title }}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
 	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
-		:root { 
+		:root {
+			--x: {{ position["x"] | tojson | safe }};
+			--y: {{ position["y"] | tojson | safe }};
+			--dim_x: {{ dim_x | tojson | safe }};
+			--dim_y: {{ dim_y | tojson | safe }};
 			--view-width: 100vw;
 			--step: calc(var(--view-width) / 17);
-			--max-height: 9;   
-			--blur-dist: 6;	
+			--dist-view: 10;
+		}
 		}
 
 		@media (min-width: 768px) {
 			:root { --view-width: 50vw; }
 		}
-
-		body { 
-			margin: 0;
+		
+        body {
+            margin: 0;
 			min-height: 100vh;
 			display: flex;
 			flex-direction: column;
@@ -30,71 +36,21 @@
 			overflow-y: auto;
 			padding: 20px 0;
 			box-sizing: border-box;
-		}
-
-		/* Écran de démarrage */
-		#start-screen {
-			background-image: url({{ url_for('icons', path='telluris_logo.png') }});
-			position: fixed;
-			top: 0; left: 0; width: 100%; height: 100%;
-			background-repeat: no-repeat;
-			background-position: center;
-			background-size: auto 100%;
-			z-index: 100;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-
-		#start-btn {
-			padding: 20px 40px;
-			font-size: 24px;
-			font-weight: bold;
-			color: white;
-			background: #ff4757;
-			border: none;
-			border-radius: 50px;
-			cursor: pointer;
-			box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
-			transition: transform 0.2s;
-		}
-
-		#start-btn:active { transform: scale(0.95); }
+        }
 
 		.viewport {
 			position: relative;
-			width: var(--view-width); 
-			height: calc(var(--step) * var(--max-height)); 
-			background: #000;
+			width: calc(var(--dim_x) * var(--dist-view)* 1px); 
+			height: calc(var(--dim_y) * var(--dist-view)* 1px); 
 			touch-action: none;
 			overflow: hidden;
-			visibility: hidden; /* Caché jusqu'au Start */
-		}
-
-		.viewport::after {
-			content: '';
-			position: absolute;
-			top: 0; left: 0; width: 100%; height: 100%;
-			backdrop-filter: blur(8px);
-			-webkit-backdrop-filter: blur(8px);
-			z-index: 5;
-			pointer-events: none;
-			background: rgba(0,0,0,0.1);
-		}
-
-		#rotation-pivot {
-			position: absolute;
-			bottom: calc(var(--step) * 1.5);
-			left: 50%;
-			transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-			will-change: transform;
 		}
 
 		#bg-image {
 			position: absolute;
 			display: block;
-			width: calc(var(--step) * 30);
-			height: calc(var(--step) * 30);
+			bottom: calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px);
+			left: calc((var(--dist-view)/2 - var(--x)) * var(--dim_x) * 1px);
 			max-width: none;
 			transition: transform 0.2s ease-out;
 			will-change: transform;
@@ -102,19 +58,19 @@
 
 		.token {
 			position: absolute;
-			bottom: var(--step); 
-			left: 50%;
-			width: var(--step); height: var(--step);
-			transform: translateX(-50%);
+			bottom: calc(var(--dim_y) * (var(--dist-view)/2 - 0.5) * 1px);
+			left: calc(var(--dim_x) * (var(--dist-view)/2 - 0.5) * 1px);
+			width: calc(var(--dim_x)/2 * 1px);
+			height: calc(var(--dim_y)/2 * 1px);
 			display: flex; align-items: center; justify-content: center;
 			z-index: 10; pointer-events: none;
 		}
 		.token::after {
-			content: ''; width: 60%; height: 60%;
-			background: #ff4757; border-radius: 50%; border: 2px solid white;
+			content: '';
+			background: #ff4757; border-radius: 50%; border: 2px solid red;
 			box-shadow: 0 0 10px #ff4757;
 		}
-		
+
 		.ui-container {
 			display: flex;
 			align-items: center;
@@ -123,7 +79,6 @@
 			margin-top: 20px;
 			width: 100%;
 			max-width: 1000px;
-			visibility: hidden;
 		}
 
 		/* Panneau de Gauche (Stats) */
@@ -139,7 +94,7 @@
 		.character-card
 		.char-name { font-weight: bold; color: #ff4757; font-size: 16px; margin-bottom: 2px; }
 		.char-class { color: #aaa; font-size: 10px; text-transform: uppercase; margin-bottom: 8px; }
-		
+
 		.stat-row { 
 			margin-bottom: 8px; 
 			display: flex; 
@@ -168,7 +123,7 @@
 		.pa { background: #ffa502; width: 100%; }
 
 		/* Panneau de Droite (Ennemis) */
-		.enemy-list {
+		.location-list {
 			flex: 1;
 			background: rgba(34, 34, 34, 0.9);
 			border: 1px solid #444;
@@ -176,20 +131,17 @@
 			padding: 10px;
 			color: white;
 		}
-		.enemy-list h4 { margin: 0 0 8px 0; font-size: 12px; color: #aaa; text-transform: uppercase; }
-		.enemy-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; }
-		.enemy-icon { width: 8px; height: 8px; background: #ff4757; border-radius: 50%; }
-		
+		.location-list h4 { margin: 0 0 8px 0; font-size: 12px; color: #aaa; text-transform: uppercase; }
+
 		.controls { 
 			display: grid; 
 			grid-template-columns: repeat(3, 50px); 
 			gap: 8px;
-			visibility: hidden; /* Caché jusqu'au Start */
 		}
 		.btn { width: 50px; height: 50px; background: #222; border: 1px solid #444; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-tap-highlight-color: transparent; }
 		.btn:active { background: #444; }
 		/* Mobile */
-		@media (max-width: 768px) {
+		@media (max-width: 600px) {
 			body { 
 				padding-top: 0px;
 			}
@@ -212,24 +164,17 @@
 				border-radius: 0 0 15px 15px; /* Arrondi seulement en bas */
 			}
 
-			.enemy-list {
+			.location-list {
 				order: 3;
 				width: 90%;
 				margin-top: 10px;
 			}
 		}
-	</style>
+    </style>
 </head>
 <body>
-
-<div id="start-screen">
-	<button id="start-btn" onclick="startGame()">START</button>
-</div>
-
 <div class="viewport" id="swipe-zone">
-	<div id="rotation-pivot">
-		<img id="bg-image" src="{{ url_for('battle_maps', path=image) }}">
-	</div>
+	<img id="bg-image" src="{{ url_for('towns', path=image) }}">
 	<div class="token"></div>
 </div>
 <div class="ui-container" id="ui-panel">
@@ -263,34 +208,29 @@
 		<button class="btn" onclick="move(1, 0)">
 			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 		</button>
-		<button class="btn" onclick="move(0, -1)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+		<button class="btn" onclick="resetPos()">
+			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"/><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"/></svg>
 		</button>
 		<button class="btn" onclick="move(-1, 0)">
 			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 		</button>
-		<button class="btn" onclick="rotate(1)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.70711 13.2929C10.0976 13.6834 10.0976 14.3166 9.70711 14.7071C9.31658 15.0976 8.68342 15.0976 8.29289 14.7071L3.29289 9.70711C2.90237 9.31658 2.90237 8.68342 3.29289 8.29289L8.29289 3.29289C8.68342 2.90237 9.31658 2.90237 9.70711 3.29289C10.0976 3.68342 10.0976 4.31658 9.70711 4.70711L6.41421 8H16C17.3261 8 18.5979 8.52678 19.5355 9.46447C20.4732 10.4021 21 11.6739 21 13V20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20V13C19 12.2044 18.6839 11.4413 18.1213 10.8787C17.5587 10.3161 16.7957 10 16 10H6.41421L9.70711 13.2929Z" fill="#f1f1f1"/></svg>
+		<button class="btn" onclick="move(-1, 1)">
+			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 7L7 17M7 17H17M7 17V7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 		</button>
-		<button class="btn" onclick="resetPos()">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"/><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"/></svg>
+		<button class="btn" onclick="move(0, -1)">
+			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 		</button>
-		<button class="btn" onclick="rotate(-1)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.2929 13.2929C13.9024 13.6834 13.9024 14.3166 14.2929 14.7071C14.6834 15.0976 15.3166 15.0976 15.7071 14.7071L20.7071 9.70711C21.0976 9.31658 21.0976 8.68342 20.7071 8.29289L15.7071 3.29289C15.3166 2.90237 14.6834 2.90237 14.2929 3.29289C13.9024 3.68342 13.9024 4.31658 14.2929 4.70711L17.5858 8H8C6.67392 8 5.40215 8.52678 4.46447 9.46447C3.52678 10.4021 3 11.6739 3 13V20C3 20.5523 3.44771 21 4 21C4.55229 21 5 20.5523 5 20V13C5 12.2044 5.31607 11.4413 5.87868 10.8787C6.44129 10.3161 7.20435 10 8 10H17.5858L14.2929 13.2929Z" fill="#f1f1f1"/></svg>
+		<button class="btn" onclick="move(-1, 1)">
+			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 7L17 17M17 17V7M17 17H7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 		</button>
 	</div>
-	<div class="enemy-list">
-		<h4>Ennemis</h4>
-		<div class="enemy-item"><div class="enemy-icon"></div> Squelette A</div>
-		<div class="enemy-item"><div class="enemy-icon"></div> Squelette B</div>
-		<div class="enemy-item"><div class="enemy-icon"></div> Rat Géant</div>
+	<div class="location-list">
+		<h4>Lieux</h4>
 	</div>
 </div>
 <script>
-    const SERVER_DATA = {
-        lieu: {{ lieu | tojson | safe }}
-    };
+	const LINKS = {{ links | tojson | safe }};
+	let position = {{ position | tojson | safe }};
 </script>
-<script src="{{ url_for('scripts', path='battle_map.js') }}"></script>
 </body>
 </html>

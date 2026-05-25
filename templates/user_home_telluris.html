@@ -366,19 +366,21 @@
 		.char-delete-btn {
 			display: none;
 			position: absolute;
-			top: 6px;
-			right: 6px;
+			top: -11px;
+			left: 6px;
 			width: 22px;
 			height: 22px;
 			background: var(--ink);
 			color: var(--parch);
-			border: 1px solid var(--bronze);
-			border-radius: 2px;
+			border: 2px solid var(--bronze);
+			border-radius: 50%;
 			font-size: 11px;
-			line-height: 1;
+			font-weight: bold;
+			line-height: 12px;
 			cursor: pointer;
 			z-index: 10;
 			align-items: center;
+			text-align: center;
 			justify-content: center;
 			transition: background 0.2s, color 0.2s;
 			padding: 0;
@@ -1042,7 +1044,7 @@
 				</div>
 				<!-- Création -->
 				<a href="#" class="char-card char-create" aria-label="Créer un nouveau personnage">
-					<div class="char-icon" style="min-height: 200px;">✦</div>
+					<div class="char-icon" style="aspect-ratio: 13/21;">✦</div>
 					<div class="char-data">
 					<div class="char-info">
 						<p class="char-name">Créer un personnage</p>
@@ -1170,99 +1172,21 @@
 	══════════════════════════════════════════════════════════ */
 	
 	// cite de depart
-	let CHARACTERS = {{ user_doc["characters"] | tojson | safe }}
+	let CHARACTERS = {{ user_doc["characters"] | tojson | safe }};
 	
-	const RACES = [
-		{
-			id: 'humain', label: 'Humain', icon: '👤',
-			stats: { V:5, F:5, R:5, Ag:6, Vol:7, Int:7 },
-			pm: '8D',
-			trait: 'Peut dépasser 1 maximum · 3 maxima autorisés'
-		},
-		{
-			id: 'elfe', label: 'Elfe', icon: '🧝',
-			stats: { V:5, F:5, R:4, Ag:8, Vol:8, Int:9 },
-			pm: '8D',
-			trait: '4 maxima autorisés · +1 point de mouvement'
-		},
-		{
-			id: 'nain', label: 'Nain', icon: '⛏',
-			stats: { V:4, F:5, R:6, Ag:5, Vol:9, Int:8 },
-			pm: '7D',
-			trait: '+1 classe d\'armure · −1 point de mouvement'
-		},
-		{
-			id: 'ogre', label: 'Ogre', icon: '👹',
-			stats: { V:3, F:7, R:7, Ag:4, Vol:6, Int:6 },
-			pm: '6D',
-			trait: 'Inspire la Peur (jusqu\'à 5) · −2 points de mouvement'
-		},
-		{
-			id: 'hobbit', label: 'Hobbit', icon: '🌿',
-			stats: { V:5, F:4, R:4, Ag:8, Vol:10, Int:7 },
-			pm: '7D',
-			trait: 'Résistance totale naturelle 1'
-		},
-	];
+	const RACES = {{ races["value"] | tojson | safe }};
 	
-	const RACES_PROXIMITY = {
-		"humain" : ["nain","elfe","ogre"],
-		"elfe": ["humain"],
-		"nain": ["humain","hobbit"],
-		"ogre": ["humain"],
-		"hobbit": ["nain"],
-	};
+	const RACES_PROXIMITY = {{ races_proximity["value"] | tojson | safe }};
 	
-	const VOCATIONS = [
-		{ id:'guerrier',      label:'Guerrier',           icon:'⚔️',  img:'', blurb:'Maître des armes blanches. Robuste, polyvalent, le pilier de toute troupe.' },
-		{ id:'barbare',       label:'Barbare',            icon:'🪓',  img:'', blurb:'Guerrier des steppes, mu par la rage. Sa furie est une ressource redoutable.' },
-		{ id:'forestier',     label:'Forestier',          icon:'🏹',  img:'', blurb:'Chasseur et éclaireur hors pair. Il connaît les routes que les cartes n\'indiquent pas.' },
-		{ id:'duelliste',     label:'Duelliste',          icon:'🤺',  img:'', blurb:'Escrimeur élégant. Sa précision chirurgicale compense l\'absence de robustesse.' },
-		{ id:'moine',         label:'Moine',              icon:'🥋',  img:'', blurb:'Corps comme arme, esprit comme bouclier. Énergie intérieure rare.' },
-		{ id:'elementaliste', label:'Élémentaliste',      icon:'🔥',  img:'', blurb:'Maître du feu, glace, foudre. Ses sorts exigent des composants physiques puissants.' },
-		{ id:'mage',          label:'Magicien de combat', icon:'🌀',  img:'', blurb:'La magie au service de la guerre. Enchantements d\'armes, boucliers arcaniques.' },
-		{ id:'illusionniste', label:'Illusionniste',      icon:'🎭',  img:'', blurb:'Manipulateur de perceptions. Ses illusions peuvent détourner des armées.' },
-		{ id:'lettre',        label:'Lettré',             icon:'📜',  img:'', blurb:'Érudit universel capable d\'apprendre n\'importe quel type de magie.' },
-		{ id:'druide',        label:'Druide',             icon:'🌳',  img:'', blurb:'Gardien des cycles naturels. Les animaux lui obéissent, les plantes l\'écoutent.' },
-		{ id:'chaman',        label:'Chaman',             icon:'🐺',  img:'', blurb:'Se métamorphose en esprit totem — Ours, Loup, Sanglier, Chat sauvage ou Faucon.' },
-		{ id:'pretre',        label:'Prêtre',             icon:'✝',  img:'', blurb:'Guérisseur indispensable. Peut ressusciter les tombés au combat.' },
-		{ id:'paladin',       label:'Paladin',            icon:'🛡',  img:'', blurb:'Guerrier sacré. Sa lame brûle d\'une lumière que les morts-vivants redoutent.' },
-		{ id:'templier',      label:'Templier',           icon:'⚜️',  img:'', blurb:'Mi-soldat mi-moine. L\'épée de l\'institution autant que celle des dieux.' },
-		{ id:'repurgateur',   label:'Répurgateur',        icon:'🔱',  img:'', blurb:'Chasseur de créatures maudites. Spécialiste des morts-vivants et des démons.' },
-		{ id:'necromancien',  label:'Nécromancien',       icon:'💀',  img:'', blurb:'Maître de la magie noire. Sa voie ultime mène vers la Liche.' },
-		{ id:'assassin',      label:'Assassin',           icon:'🗡',  img:'', blurb:'L\'ombre faite chair. Spécialiste de l\'élimination silencieuse et des poisons.' },
-		{ id:'voleur',        label:'Voleur',             icon:'🔑',  img:'', blurb:'Doigts légers, esprit plus léger encore. Son réseau d\'informateurs vaut une armée.' },
-		{ id:'menestrel',     label:'Ménestrel',          icon:'🎶',  img:'', blurb:'Chanteur, espion, négociateur. Sa musique ouvre des portes que les épées ne peuvent forcer.' },
-		{ id:'demoniste',     label:'Démoniste',          icon:'😈',  img:'', blurb:'Invocateur de créatures infernales. Chaque pacte consume une part de son âme.' },
-	];
+	const VOCATIONS = {{ vocations["value"] | tojson | safe }};
 	
-	const VOCATIONS_PROXIMITY = {
-		"guerrier" : ["repurgateur","templier","barbare","duelliste"],
-		"barbare": ["guerrier"],
-		"forestier": ["guerrier"],
-		"duelliste": ["guerrier"],
-		"moine": [],
-		"elementaliste": ["mage","lettre","druide","chaman"],
-		"mage": ["illusionniste","elementaliste","lettre","chaman","druide"],
-		"illusionniste": ["mage","lettre"],
-		"lettre": ["mage","illusionniste"],
-		"druide": ["chaman","elementaliste"],
-		"chaman": ["druide","elementaliste"],
-		"pretre": ["mage"],
-		"paladin": ["templier"],
-		"templier": ["repurgateur","paladin"],
-		"repurgateur": ["guerrier"],
-		"necromancien": ["demoniste"],
-		"assassin": ["voleur"],
-		"voleur": ["assassin"],
-		"menestrel": [],
-		"demoniste": ["necromancien"],
-	};
+	const VOCATIONS_PROXIMITY = {{ vocations_proximity["value"] | tojson | safe }};
+	
 	// Pool de portraits — chaque portrait a: src, sex (M/F), voc (id vocation ou null), race (id race ou null)
-	const PORTRAITS = {{ characters_images | tojson | safe }}
+	const PORTRAITS = {{ characters_images | tojson | safe }};
 	
 	// cite de depart
-	const CITES = {{ towns_images | tojson | safe }}
+	const CITES = {{ towns_images | tojson | safe }};
 
 	/* ══════════════════════════════════════════════════════════
 	   ÉTAT
@@ -1389,17 +1313,17 @@
 		if (!race) return;
 		const box = document.getElementById('race-stats');
 		box.classList.add('visible');
-		document.getElementById('race-stats-title').textContent = race.label + ' — caractéristiques maximales';
-		const statNames = { V:'Vitesse', F:'Force', R:'Résistance', Ag:'Agilité', Vol:'Volonté', Int:'Intelligence' };
+		document.getElementById('race-stats-title').textContent = race.label + ' — caractéristiques';
+		const statNames = { V:'Vitesse', F:'Force', R:'Résistance', Ag:'Agilité', Vol:'Volonté', Int:'Intelligence', PV:'Points de vie', PM:'Points de magie' };
 		document.getElementById('stats-grid').innerHTML = Object.entries(race.stats).map(([k, v]) => `
 			<div class="stat-item">
 				<span class="stat-name">${statNames[k] || k}</span>
 				<div class="stat-bar-wrap">
-					<div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${(v/10)*100}%"></div></div>
+					<div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${v}%"></div></div>
 					<span class="stat-val">${v}</span>
 				</div>
 			</div>`).join('');
-		document.getElementById('race-trait').textContent = '✦ ' + race.trait + ' · PM : ' + race.pm;
+		document.getElementById('race-trait').textContent = '✦ ' + race.trait;
 	}
 
 	/* ── Étape 3 : vocation ── */
@@ -1675,9 +1599,30 @@
 
 	// ── VOS FONCTIONS DE DESTINATION ──
 
-	function jouer(character, cindex) {
-		console.log("Lancement du jeu avec :", character.prenom, character.nom);
-		alert(`Lancement de l'aventure pour ${character.prenom} (${character.voc}) !`);
+	async function jouer(character, cindex) {
+		// Logique de selection cote serveur
+		try {
+			const response = await fetch('api/select_character', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ id: cindex , character : character})
+			});
+			if (response.ok) {
+				const rep = await response.json();
+				console.log(rep)
+				const urlInitiale = window.location.href;
+				const url = new URL(urlInitiale);
+				url.pathname = "/play";
+				//Afficher la page de jeu
+				window.location.href = url.toString();
+			} else {
+				const error = await response.json();
+				console.log(error.detail)
+				alert("Erreur : " + error.detail);
+			}
+		} catch (err) {
+			console.error("Erreur de connexion", err);
+		}
 	}
 
 	async function supprimer(character, cindex) {

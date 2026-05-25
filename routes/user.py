@@ -108,15 +108,12 @@ async def delete_character(
 		return []
 		
 	if characterinfo:
-		print("characterinfo", characterinfo)
 		index = characterinfo["id"]
 		if index < 0 or index >= len(db_user["characters"]):
 			raise HTTPException(status_code=404, detail="Character index out of range")
 			
 		characterToDelete = db_user["characters"][index]
-		print("characterToDelete", characterToDelete)
 		character = characterinfo["character"]
-		print("character client side", character)
 		if (
 		 characterToDelete["sex"] == character["sex"] and
 		 characterToDelete["voc"] == character["voc"] and
@@ -126,16 +123,45 @@ async def delete_character(
 		 characterToDelete["portrait"] == character["portrait"]
 		 ):	
 			characterToDelete = db_user["characters"].pop(index)
-			print("deleted:", characterToDelete)
+			print("deleted:", characterToDelete, " from user", current_user["_id"])
 			db.put(db_user)
 		else:
 			raise HTTPException(status_code=404, detail="Character not found")
 	
 	return db_user["characters"]	
 	
-@user_router.get("/user", response_class=JSONResponse)
-async def get_user(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
-	if not current_user:
-		return JSONResponse(content={})
+@user_router.post("/select_character")
+async def select_character(
+	response: Response, 
+	current_user: Annotated[User, Depends(get_current_user)], 
+	characterinfo: dict = Body(...)):
 	
-	return JSONResponse(content=current_user)
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+	
+	db_user = db.get(current_user["_id"])
+	if not db_user:
+		raise HTTPException(status_code=404, detail="User not found")
+		
+	if characterinfo:
+		index = characterinfo["id"]
+		if index < 0 or index >= len(db_user["characters"]):
+			raise HTTPException(status_code=404, detail="Character index out of range")
+			
+		characterToDelete = db_user["characters"][index]
+		character = characterinfo["character"]
+		if (
+		 characterToDelete["sex"] == character["sex"] and
+		 characterToDelete["voc"] == character["voc"] and
+		 characterToDelete["race"] == character["race"] and
+		 characterToDelete["nom"] == character["nom"] and
+		 characterToDelete["prenom"] == character["prenom"] and
+		 characterToDelete["portrait"] == character["portrait"]
+		 ):	
+			db_user["selected_character"] = index
+			db.put(db_user)
+			return db_user["characters"][index]
+		else:
+			raise HTTPException(status_code=404, detail="Character not found")
+	else:
+		raise HTTPException(status_code=404, detail="Character not found")

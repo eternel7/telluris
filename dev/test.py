@@ -7,21 +7,21 @@ from routes.user import user_router
 from jose import jwt, JWTError
 from db.config import db, SECRET_KEY, ALGORITHM
 
-	
 @app.get("/dev", response_class=HTMLResponse)
 async def read_page_dev(request: Request):
-	grid_doc = db.get("lieu:lutecia")
-	links = db.view("reseau", "liens_cases", key={"lieu": "lieu:lutecia"})
+	lieu = "lieu:route1";
+	grid_doc = db.get(lieu)
+	links = db.view("reseau", "liens_cases", key={"lieu": lieu})
 	return templates.TemplateResponse(
 		request=request, 
 		name="battle_map.html", 
 		context={
 			"title": "Zone de combat",
-			"lieu": "lutecia",
+			"lieu": "route",
 			"image": grid_doc.get("image"),
 			"links": [row.value for row in links]
 		}
-	)
+	)	
 	
 @app.get("/dev/{lieu_id}", response_class=HTMLResponse)
 def read_page_lieu(request: Request, lieu_id: str):

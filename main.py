@@ -2,10 +2,11 @@ import os
 from typing import Annotated
 from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from jose import jwt, JWTError
+from PIL import Image
 from routes.user import user_router, User
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
@@ -23,6 +24,8 @@ app.add_middleware(
 
 # Definit ou se trouvent les fichiers HTML
 templates = Jinja2Templates(directory="templates")
+templates.env.policies["json.dumps_kwargs"] = {"sort_keys": False}
+
 app.mount("/scripts", StaticFiles(directory="templates/scripts"), name="scripts")
 app.mount("/battle_maps", StaticFiles(directory="templates/resources/battle_maps"), name="battle_maps")
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
@@ -32,8 +35,8 @@ TOWNS_IMAGES_PATH = "templates/resources/towns"
 app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 
 app.include_router(user_router, prefix="/api")
-
-@app.get("/")
+	
+@app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
 	return templates.TemplateResponse(
 		request=request, 
@@ -57,9 +60,12 @@ async def read_page_auth(request: Request):
 async def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if not current_user:
 		return RedirectResponse(url="/auth", headers=request.headers)
-		
-	characters = ["Guerrier du Nord", "Mage d'Argent"] # Exemple
-
+	# rules :
+	races = db.get("rules:races")
+	races_proximity = db.get("rules:races_proximity")
+	vocations = db.get("rules:vocations")
+	vocations_proximity = db.get("rules:vocations_proximity")
+	
 	# characters images : 
 	valid_extensions = (".jpg", ".jpeg", ".png", ".webp", ".gif")
 	characters_images = []
@@ -80,25 +86,86 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 	towns_images = []
 	if os.path.exists(TOWNS_IMAGES_PATH):
 		for filename in os.listdir(TOWNS_IMAGES_PATH):
-			full_path = os.path.join(TOWNS_IMAGES_PATH, filename)
-			if (os.path.isfile(full_path) and filename.lower().endswith(valid_extensions) and filename[:]):
-				file_url = request.url_for("towns", path=filename)
-				name = filename[:filename.index("_")]
-				towns_images.append({
-					"id": "lieu:"+ name,
-					"label": name,
-					"blurb": name,
-					"filename": filename,
-					"url": str(file_url)
-				})
+			if "_start_" in filename:
+				full_path = os.path.join(TOWNS_IMAGES_PATH, filename)
+				if (os.path.isfile(full_path) and filename.lower().endswith(valid_extensions) and filename[:]):
+					file_url = request.url_for("towns", path=filename)
+					name = filename[:filename.index("_")]
+					towns_images.append({
+						"id": "lieu:"+ name,
+						"label": name,
+						"blurb": name,
+						"filename": filename,
+						"url": str(file_url)
+					})
 	return templates.TemplateResponse(
 		request=request,
 		name ="user_home_telluris.html",
 		context= {
 			"user_doc": current_user,
 			"title": 'Your domain',
-			"characters": characters,
+			"races" : races,
+			"races_proximity" : races_proximity,
+			"vocations" : vocations,
+			"vocations_proximity" : vocations_proximity,
 			"characters_images": characters_images,
 			"towns_images": towns_images
+		}
+	)
+	
+@app.get("/tableau/{x}/{y}")
+def get_tableau(x: int, y: int):
+    # Génère dynamiquement le tableau de 24 lignes et 43 colonnes
+    tableau = [[1] * x for _ in range(y)]
+	
+    return {
+			  "type": "lieu",
+			  "label": "La capitale Lutecia",
+			  "image": "lutecia.png",
+			  "dimensions": {
+				"x": x,
+				"y": y
+			  },
+			  "cells": tableau}
+	
+@app.get("/play", response_class=HTMLResponse)
+async def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	if not current_user:
+		return RedirectResponse(url="/auth", headers=request.headers)
+	
+	character_id = current_user["selected_character"]
+	character = current_user["characters"][character_id]
+	lieu = character.get("lieu",character["cite"])
+	grid_doc = db.get(lieu)
+	position = character.get("position", {"x" : 1 ,"y" : 1})
+	# Gestion des lieux accessibles
+	x = position["x"]
+	y = position["y"]
+	target_key = [ lieu, x, y ]
+	links = db.view("reseau", "liens_cases", key=target_key)
+	square = 30
+	# Gestion de la grille
+	dimensions = grid_doc["dimensions"]
+	image = grid_doc.get("image")
+	with Image.open(TOWNS_IMAGES_PATH+"/"+image) as img:
+		# Récupérer les dimensions (largeur, hauteur)
+		largeur, hauteur = img.size
+		print(f"Largeur : {largeur}px, Hauteur : {hauteur}px")
+		dim_x = round(largeur/dimensions["x"])
+		dim_y = round(hauteur/dimensions["y"])
+		print(f"dim_x : {dim_x}px, dim_y : {dim_y}px")
+		
+	return templates.TemplateResponse(
+		request=request,
+		name ="play_town_telluris.html",
+		context= {
+			"title": grid_doc.get("label"),
+			"lieu": lieu.split(":")[1],
+			"image": image,
+			"position": position,
+			"links": [row.value for row in links],
+			"dimensions": dimensions,
+			"dim_x": dim_x,
+			"dim_y": dim_y
 		}
 	)
