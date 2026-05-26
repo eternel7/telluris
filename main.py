@@ -129,12 +129,14 @@ def get_tableau(x: int, y: int):
 			  "cells": tableau}
 	
 @app.get("/play", response_class=HTMLResponse)
-async def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+async def get_playground(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if not current_user:
 		return RedirectResponse(url="/auth", headers=request.headers)
 	
 	character_id = current_user["selected_character"]
 	character = current_user["characters"][character_id]
+	vocations = db.get("rules:vocations")
+	vocation = next((v for v in vocations["value"] if v["id"] == character["voc"]), None)
 	lieu = character.get("lieu",character["cite"])
 	grid_doc = db.get(lieu)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
@@ -143,27 +145,32 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 	y = position["y"]
 	target_key = [ lieu, x, y ]
 	links = db.view("reseau", "liens_cases", key=target_key)
-	square = 30
 	# Gestion de la grille
 	dimensions = grid_doc["dimensions"]
 	image = grid_doc.get("image")
 	with Image.open(TOWNS_IMAGES_PATH+"/"+image) as img:
 		# Récupérer les dimensions (largeur, hauteur)
 		largeur, hauteur = img.size
-		print(f"Largeur : {largeur}px, Hauteur : {hauteur}px")
 		dim_x = round(largeur/dimensions["x"])
 		dim_y = round(hauteur/dimensions["y"])
-		print(f"dim_x : {dim_x}px, dim_y : {dim_y}px")
+	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["portrait"]) as portrait:
+		portrait_largeur, portrait_hauteur = portrait.size
 		
 	return templates.TemplateResponse(
 		request=request,
 		name ="play_town_telluris.html",
 		context= {
 			"title": grid_doc.get("label"),
+			"character": character,
+			"portrait_largeur": portrait_largeur,
+			"portrait_hauteur": portrait_hauteur,
+			"portrait_disp_largeur": 100,
+			"portrait_disp_hauteur": 100,
 			"lieu": lieu.split(":")[1],
 			"image": image,
 			"position": position,
 			"links": [row.value for row in links],
+			"vocation": vocation,
 			"dimensions": dimensions,
 			"dim_x": dim_x,
 			"dim_y": dim_y

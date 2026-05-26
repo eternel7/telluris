@@ -1461,7 +1461,7 @@
 		const grid = document.getElementById('characters-list');
 		grid.innerHTML = CHARACTERS.map((c, index) => {
 			const niveau = c.niveau ?? 0;
-			const rang = c.rang ?? 'Cuivre';
+			const rang = c.rang ?? 'aucun';
 			return `
 				<a href="#" class="char-card" 
 				   aria-label="Jouer avec ${c.prenom} ${c.nom}, ${c.voc} niveau ${niveau}, rang ${rang}"
