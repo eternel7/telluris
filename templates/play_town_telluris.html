@@ -366,6 +366,7 @@
 	const LINKS = {{ links | tojson | safe }};
 	const character = {{ character | tojson | safe }};
 	const vocation = {{ vocation | tojson | safe }};
+	const portrait_translate = {{ character.get("portrait_translate",0) | tojson | safe }};
 </script>
 <script>
 (() => {
@@ -406,11 +407,14 @@
 	}
  
 	function defaultOffset() {
+		if(portrait_translate!=0) {
+			return {x: portrait_translate["x"], y: portrait_translate["y"]};
+		}
 		return { x: (W - W1) / 2, y: 0 };
 	}
  
 	// ── Mode drag ────────────────────────────────────────────────
-	function setDragMode(on) {
+	async function setDragMode(on) {
 		dragMode = on;
 		vp.classList.toggle('drag-mode', on);
  
@@ -419,6 +423,27 @@
 		actionBtn.classList.toggle('save-mode', on);
 		actionBtn.title			 = on ? 'Figer la position' : 'Activer le déplacement';
 		actionBtn.ariaLabel	 = actionBtn.title;
+		if(!on && img.style.transform) {
+			const portraitData = {value: img.style.transform};
+			try {
+				const response = await fetch('api/update_character_portrait', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(portraitData)
+				});
+
+				if (response.ok) {
+					const resp = await response.json();
+					console.log("ok",resp);
+				} else {
+					const error = await response.json();
+					console.log(error.detail)
+					alert("Erreur : " + error.detail);
+				}
+			} catch (err) {
+				console.error("Erreur de connexion", err);
+			}
+		}
 	}
  
 	actionBtn.addEventListener('click', e => {
@@ -482,25 +507,62 @@
 	const TAP_THRESHOLD = 8;  // px — mouvement max pour considérer un tap
  
 	vp.addEventListener('touchstart', e => {
+		showOverlay();
+
+		const t = e.touches[0];
+
+		// Détecte si le doigt est sur le bouton (en tenant compte du scale)
+		const el = document.elementFromPoint(t.clientX, t.clientY);
+		touchOnBtn = (el === actionBtn || actionBtn.contains(el));
+
+		if (touchOnBtn) {
+		  // Laisse le navigateur générer le click synthétique sur le bouton
+		  return;
+		}
+
+		// Pas sur le bouton : démarre éventuellement un drag
 		if (!dragMode) return;
-		touch0 = e.touches[0];
+
+		touch0 = t;
+		touchMoved = false;
 		startOX = offsetX; startOY = offsetY;
-		e.preventDefault();
+		e.preventDefault();   // empêche le scroll natif
 	}, { passive: false });
  
 	vp.addEventListener('touchmove', e => {
-		if (!dragMode || !touch0) return;
+		if (!dragMode || !touch0 || touchOnBtn) return;
+		const t = e.touches[0];
+		const dx = t.clientX - touch0.clientX;
+		const dy = t.clientY - touch0.clientY;
+
+		if (!touchMoved && Math.hypot(dx, dy) < TAP_THRESHOLD) return;
+		touchMoved = true;
+		
 		const s = computeScale();
-		applyOffset(startOX - (e.touches[0].clientX - touch0.clientX) / s,
-								startOY - (e.touches[0].clientY - touch0.clientY) / s, false);
+		applyOffset(startOX - dx / s, startOY - dy / s, false);
 		e.preventDefault();
 	}, { passive: false });
  
-	vp.addEventListener('touchend', () => { touch0 = null; });
+	vp.addEventListener('touchend', e => {
+		// Tap sur le bouton : déclenche le toggle manuellement si le
+		// click synthétique n'est pas arrivé (cas de certains navigateurs
+		// quand le bouton est dans un conteneur avec overflow:hidden).
+		if (touchOnBtn && !touchMoved) {
+		  const t = e.changedTouches[0];
+		  const el = document.elementFromPoint(t.clientX, t.clientY);
+		  if (el === actionBtn || actionBtn.contains(el)) {
+			setDragMode(!dragMode);
+			e.preventDefault(); // évite le double-déclenchement avec click
+		  }
+		}
+		touch0 = null;
+		touchOnBtn = false;
+		touchMoved = false;
+	}, { passive: false });
  
 	// ── Responsive scale ─────────────────────────────────────────
 	function computeScale() {
-		const availW = window.innerWidth	- 40;
+		const availW = window.innerWidth  - 40;
 		const availH = window.innerHeight - 200;
 		return Math.max(0.1, Math.min(1, availW / W1, availH / H1));
 	}

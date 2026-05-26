@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Reques
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
+import re
 from jose import jwt
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user, create_access_token
@@ -165,3 +166,32 @@ async def select_character(
 			raise HTTPException(status_code=404, detail="Character not found")
 	else:
 		raise HTTPException(status_code=404, detail="Character not found")
+
+@user_router.post("/update_character_portrait")
+async def update_character_portrait(
+	response: Response, 
+	current_user: Annotated[User, Depends(get_current_user)], 
+	portrait_info: dict = Body(...)):
+	
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+	
+	db_user = db.get(current_user["_id"])
+	if not db_user:
+		raise HTTPException(status_code=404, detail="User not found")
+	
+	print("portrait_info",portrait_info)
+	if portrait_info:
+		match = re.search(r"translate\(-(\d+)px,\s*-(\d+)px\)", portrait_info["value"])
+		if match:
+			x = int(match.group(1))
+			y = int(match.group(2))
+			index = db_user["selected_character"]					
+			character_to_update = db_user["characters"][index]
+			character_to_update["portrait_translate"] = {"x": x, "y": y}
+			db.put(db_user)
+			return db_user["characters"][index]
+		else:
+			raise HTTPException(status_code=404, detail="Incorrect info for character portrait update")
+	else:
+		raise HTTPException(status_code=404, detail="No info for character portrait update")
