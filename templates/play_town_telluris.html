@@ -8,7 +8,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
-		:root {
+        :root {
 			--x: {{ position["x"] | tojson | safe }};
 			--y: {{ position["y"] | tojson | safe }};
 			--dim_x: {{ dim_x | tojson | safe }};
@@ -24,56 +24,150 @@
 			--accent: #c8a96e;
 			--text: #e8e4dc;
 			--muted: #666;
-		}
-		
-		body {
-			margin: 0;
-			min-height: 100vh;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			background: #111;
-			touch-action: pan-y;
-			font-family: sans-serif;
-			overflow-y: auto;
-			padding: 20px 0;
-			box-sizing: border-box;
-		}
+            --bg-color: #1a1a24;
+            --panel-bg: #2c2c38;
+            --border-color: #4a4a5a;
+            --accent-color: #ffd700;
+            --text-color: #e0e0e0;
+            --btn-bg: #3a3a4a;
+        }
 
-		.viewport {
-			position: relative;
-			width: calc(var(--dim_x) * var(--dist-view)* 1px); 
-			height: calc(var(--dim_y) * var(--dist-view)* 1px); 
-			touch-action: none;
-			overflow: hidden;
-		}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
 
-		#bg-image {
-			position: absolute;
-			display: block;
-			bottom: calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px);
-			left: calc((var(--dist-view)/2 - var(--x)) * var(--dim_x) * 1px);
-			max-width: none;
-			transition: transform 0.2s ease-out;
-			will-change: transform;
-		}
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
 
-		.token {
-			position: absolute;
-			bottom: calc(var(--dim_y) * (var(--dist-view)/2 - 0.5) * 1px);
-			left: calc(var(--dim_x) * (var(--dist-view)/2 - 0.5) * 1px);
-			width: calc(var(--dim_x)/2 * 1px);
-			height: calc(var(--dim_y)/2 * 1px);
-			display: flex; align-items: center; justify-content: center;
-			z-index: 10; pointer-events: none;
-		}
-		.token::after {
-			content: '';
-			background: #ff4757; border-radius: 50%; border: 2px solid red;
-			box-shadow: 0 0 10px #ff4757;
-		}
+        /* Container Principal */
+        .game-container {
+            display: grid;
+            grid-template-columns: 1.8fr 1.2fr;
+            grid-template-rows: auto 1fr auto;
+            grid-template-areas: 
+                "header header"
+                "map sidebar"
+				"char char"
+                "footer footer";
+            width: 100%;
+            max-width: 1100px;
+            height: 95vh;
+            border: 4px double var(--border-color);
+            background-color: var(--panel-bg);
+            gap: 10px;
+            padding: 10px;
+            overflow: hidden;
+        }
 
+        /* 2. DESCRIPTION DU LIEU */
+        .location-desc {
+            grid-area: header;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            text-align: center;
+        }
+        .location-desc h2 {
+            color: var(--accent-color);
+            font-size: 1.3rem;
+        }
+
+        /* CARTE (Gaucher) */
+        .map-area {
+            grid-area: map;
+            border: 2px solid var(--border-color);
+            background: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .grid-placeholder {
+            color: #444;
+            font-style: italic;
+        }
+
+        /* SIDEBAR DROITE - Anti-troncage */
+        .sidebar {
+            grid-area: sidebar;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        /* 1. PANNEAU DE DÉPLACEMENT */
+        .navigation-panel {
+            border: 2px solid var(--border-color);
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .panel-title {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            align-self: center;
+        }
+
+        /* 3. ACCÈS AUX SOUS-LIEUX */
+        .sub-locations-panel {
+            border: 2px solid var(--border-color);
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sub-locations-panel h3 {
+            font-size: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 3px;
+            margin-bottom: 8px;
+            color: var(--accent-color);
+        }
+        .sub-locations-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .sub-loc-btn {
+            width: 100%;
+            padding: 8px;
+            background: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sub-loc-btn:hover {
+            border-color: var(--accent-color);
+        }
+		/* 4. SECTION GESTION DU PERSONNAGE (Au-dessus du footer) */
+		.character-panel {
+            grid-area: char;
+            width: 100%;
+        }
 		.ui-container {
 			display: flex;
 			align-items: center;
@@ -83,8 +177,6 @@
 			width: 100%;
 			max-width: 1000px;
 		}
-
-		/* Panneau de Gauche (Stats) */
 		.character-card {
 			flex: 1;
 			background: rgba(34, 34, 34, 0.9);
@@ -241,6 +333,55 @@
 			padding: 10px;
 			color: white;
 		}
+        /* 5. GESTION (Footer) */
+        .management-footer {
+            grid-area: footer;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .manage-btn {
+            padding: 10px;
+            background: #222;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+		.viewport {
+			position: relative;
+			width: calc(var(--dim_x) * var(--dist-view)* 1px); 
+			height: calc(var(--dim_y) * var(--dist-view)* 1px); 
+			touch-action: none;
+			overflow: hidden;
+		}
+
+		#bg-image {
+			position: absolute;
+			display: block;
+			bottom: calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px);
+			left: calc((var(--dist-view)/2 - var(--x)) * var(--dim_x) * 1px);
+			max-width: none;
+			transition: transform 0.2s ease-out;
+			will-change: transform;
+		}
+
+		.token {
+			position: absolute;
+			bottom: calc(var(--dim_y) * (var(--dist-view)/2 - 0.5) * 1px);
+			left: calc(var(--dim_x) * (var(--dist-view)/2 - 0.5) * 1px);
+			width: calc(var(--dim_x)/2 * 1px);
+			height: calc(var(--dim_y)/2 * 1px);
+			display: flex; align-items: center; justify-content: center;
+			z-index: 10; pointer-events: none;
+		}
+		.token::after {
+			content: '';
+			background: #ff4757; border-radius: 50%; border: 2px solid red;
+			box-shadow: 0 0 10px #ff4757;
+		}
+
 		.location-list h4 { margin: 0 0 8px 0; font-size: 12px; color: #aaa; text-transform: uppercase; }
 
 		.controls { 
@@ -250,118 +391,168 @@
 		}
 		.btn { width: 50px; height: 50px; background: #222; border: 1px solid #444; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-tap-highlight-color: transparent; }
 		.btn:active { background: #444; }
-		/* Mobile */
-		@media (max-width: 600px) {
-			body { 
-				padding-top: 0px;
+		
+        /* RESPONSIVE : Mode Paysage mobile & écrans bas */
+        @media (max-height: 550px) and (min-width: 600px) {
+			.game-container{
+				height: auto;
+                overflow: visible;
 			}
-			.ui-container { 
-				flex-direction: column; 
-				align-items: center; 
-				gap: 10px;
-			}
-			.character-card {
-				order: 2; /* Place les stats sous les boutons */
-				width: 90%;
-				margin-top: 10px;
-			}
-			
+            .navigation-panel {
+				order: 1;
+                justify-content: center;
+            }
+            .sub-locations-panel {
+				order: 2;
+                flex-grow: 1;
+            }
+        }
+
+        /* RESPONSIVE : Mode Portrait Mobile */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .game-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+                grid-template-areas: 
+                    "header"
+                    "map"
+                    "sidebar"
+					"char"
+                    "footer";
+                height: auto;
+                overflow: visible;
+            }
+            .sidebar {
+                overflow: visible;
+            }
+            .navigation-panel {
+				order: 1;
+            }
+            .sub-locations-panel {
+				order: 2;
+                overflow: visible;
+            }
+            .map-area {
+                height: 250px;
+            }		
 			.controls {
-				order: 1; /* Les boutons montent en premier */
+				
 				background: rgba(34, 34, 34, 0.8); /* Fond léger pour marquer la zone */
 				padding: 5px;
 				margin: 0 auto;
 				border-radius: 0 0 15px 15px; /* Arrondi seulement en bas */
 			}
-
 			.location-list {
-				order: 3;
 				width: 90%;
 				margin-top: 10px;
 			}
-		}
-		</style>
+        }
+    </style>
 </head>
 <body>
-<div class="viewport" id="swipe-zone">
-	<img id="bg-image" src="{{ url_for('towns', path=image) }}">
-	<div class="token"></div>
-</div>
-<div class="ui-container" id="ui-panel">
-	<div class="character-card">
-		<div class="char-header">
-			<div id="scale-root" class="char-portrait">
-				<div class="viewport-wrapper" id="vp">
-				<img id="img"
-					src="{{ url_for('characters', path=character["portrait"]) }}"
-					alt="Image"
-					draggable="false">
-				<button id="action-btn" title="Activer le déplacement" aria-label="Activer le déplacement">
-					<!-- icône edit (crayon) -->
-					<svg class="icon" id="icon-edit" viewBox="0 0 24 24">
-					<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-					<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-					</svg>
-					<!-- icône save (disquette) -->
-					<svg class="icon" id="icon-save" viewBox="0 0 24 24" style="display:none">
-					<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-					<polyline points="17 21 17 13 7 13 7 21"/>
-					<polyline points="7 3 7 8 15 8"/>
-					</svg>
-				</button>
+    <div class="game-container">        
+        <header class="location-desc">
+            <h2>Périphérie - Portes de la Ville</h2>
+            <p>(Case X:{{position["x"] | tojson | safe}}, Y:{{position["y"] | tojson | safe}})</p>
+        </header>
+        <main class="map-area">
+            <div class="grid-placeholder">
+				<div class="viewport" id="swipe-zone">
+					<img id="bg-image" src="{{ url_for('towns', path=image) }}">
+					<div class="token"></div>
 				</div>
 			</div>
-			<div class="char-identity">
-				<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-				<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} · NIV.{{character.get("niveau",'0')}} - {{character["race"]}} · Rang {{character.get("rang",'aucun')}}</div>
+        </main>
+        <aside class="sidebar">
+            <section class="sub-locations-panel">
+                <h3>Lieux</h3>
+                <ul class="sub-locations-list">
+                    <li><button class="sub-loc-btn">➔ Corps de garde</button></li>
+                    <li><button class="sub-loc-btn">➔ Taverne du Chien</button></li>
+                    <li><button class="sub-loc-btn">➔ Étal du marchand</button></li>
+                </ul>
+            </section>
+            <section class="navigation-panel">
+				<div class="controls">
+					<button class="btn" onclick="move(1, 1)">
+						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.71 16.29L9.42 8H15a1 1 0 0 0 0-2H7.05a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1H7a1 1 0 0 0 1-1V9.45l8.26 8.26a1 1 0 0 0 1.42 0 1 1 0 0 0 .03-1.42z"/></svg>
+					</button>
+					<button class="btn" onclick="move(0, 1)">
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</button>
+					<button class="btn" onclick="move(-1, 1)">
+						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"/></svg>
+					</button>
+					<button class="btn" onclick="move(1, 0)">
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</button>
+					<button class="btn" onclick="resetPos()">
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"/><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"/></svg>
+					</button>
+					<button class="btn" onclick="move(-1, 0)">
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</button>
+					<button class="btn" onclick="move(-1, 1)">
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 7L7 17M7 17H17M7 17V7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</button>
+					<button class="btn" onclick="move(0, -1)">
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</button>
+					<button class="btn" onclick="move(-1, 1)">
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 7L17 17M17 17V7M17 17H7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</button>
+				</div>
+            </section>
+        </aside>
+		<section class="character-panel">
+		<div class="character-card">
+			<div class="char-header">
+				<div id="scale-root" class="char-portrait">
+					<div class="viewport-wrapper" id="vp">
+					<img id="img"
+						src="{{ url_for('characters', path=character["portrait"]) }}"
+						alt="Image"
+						draggable="false">
+					<button id="action-btn" title="Activer le déplacement" aria-label="Activer le déplacement">
+						<!-- icône edit (crayon) -->
+						<svg class="icon" id="icon-edit" viewBox="0 0 24 24">
+						<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+						<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+						</svg>
+						<!-- icône save (disquette) -->
+						<svg class="icon" id="icon-save" viewBox="0 0 24 24" style="display:none">
+						<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+						<polyline points="17 21 17 13 7 13 7 21"/>
+						<polyline points="7 3 7 8 15 8"/>
+						</svg>
+					</button>
+					</div>
+				</div>
+				<div class="char-identity">
+					<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
+					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} · NIV.{{character.get("niveau",'0')}} - {{character["race"]}} · Rang {{character.get("rang",'aucun')}}</div>
+				</div>
+			</div>
+			<div class="stat-row">
+				<span>PV</span><span class="stat-value">{{character.get("currentPV",character["PV"])}}/{{character["PV"]}}</span>
+				<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
+			</div>
+			<div class="stat-row">
+				<span>PM</span><span class="stat-value">{{character.get("currentPM",character["PM"])}}/{{character["PM"]}}</span>
+				<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
+			</div>
+			<div class="stat-row">
+				<span>Actions</span><span class="stat-value">2/2</span>
+				<div class="gauge-bg"><div class="gauge-fill pa"></div></div>
 			</div>
 		</div>
-		<div class="stat-row">
-			<span>PV</span><span class="stat-value">{{character.get("currentPV",character["PV"])}}/{{character["PV"]}}</span>
-			<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
-		</div>
-		<div class="stat-row">
-			<span>PM</span><span class="stat-value">{{character.get("currentPM",character["PM"])}}/{{character["PM"]}}</span>
-			<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
-		</div>
-		<div class="stat-row">
-			<span>Actions</span><span class="stat-value">2/2</span>
-			<div class="gauge-bg"><div class="gauge-fill pa"></div></div>
-		</div>
-	</div>
-	<div class="controls">
-		<button class="btn" onclick="move(1, 1)">
-			<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.71 16.29L9.42 8H15a1 1 0 0 0 0-2H7.05a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1H7a1 1 0 0 0 1-1V9.45l8.26 8.26a1 1 0 0 0 1.42 0 1 1 0 0 0 .03-1.42z"/></svg>
-		</button>
-		<button class="btn" onclick="move(0, 1)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-		</button>
-		<button class="btn" onclick="move(-1, 1)">
-			<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"/></svg>
-		</button>
-		<button class="btn" onclick="move(1, 0)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-		</button>
-		<button class="btn" onclick="resetPos()">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"/><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"/></svg>
-		</button>
-		<button class="btn" onclick="move(-1, 0)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-		</button>
-		<button class="btn" onclick="move(-1, 1)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 7L7 17M7 17H17M7 17V7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-		</button>
-		<button class="btn" onclick="move(0, -1)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-		</button>
-		<button class="btn" onclick="move(-1, 1)">
-			<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 7L17 17M17 17V7M17 17H7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-		</button>
-	</div>
-	<div class="location-list">
-		<h4>Lieux</h4>
-	</div>
-</div>
+		</section>
+        <footer class="management-footer">
+            <button class="manage-btn">👤 Personnage</button>
+            <button class="manage-btn">👥 Groupe</button>
+        </footer>
+
+    </div>
 <script>
 	const LINKS = {{ links | tojson | safe }};
 	const character = {{ character | tojson | safe }};
@@ -416,8 +607,7 @@
 	// ── Mode drag ────────────────────────────────────────────────
 	async function setDragMode(on) {
 		dragMode = on;
-		vp.classList.toggle('drag-mode', on);
- 
+		vp.classList.toggle('drag-mode', on); 
 		iconEdit.style.display = on ? 'none'	: '';
 		iconSave.style.display = on ? ''			: 'none';
 		actionBtn.classList.toggle('save-mode', on);
@@ -431,11 +621,7 @@
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(portraitData)
 				});
-
-				if (response.ok) {
-					const resp = await response.json();
-					console.log("ok",resp);
-				} else {
+				if (!response.ok) {
 					const error = await response.json();
 					console.log(error.detail)
 					alert("Erreur : " + error.detail);

@@ -182,10 +182,11 @@ async def update_character_portrait(
 	
 	print("portrait_info",portrait_info)
 	if portrait_info:
-		match = re.search(r"translate\(-(\d+)px,\s*-(\d+)px\)", portrait_info["value"])
+		match = re.search(r"translate\(-(\d+\.?\d*)px,\s*-(\d+\.?\d*)px\)", portrait_info["value"])
+		print("match",match)
 		if match:
-			x = int(match.group(1))
-			y = int(match.group(2))
+			x = float(match.group(1))
+			y = float(match.group(2))
 			index = db_user["selected_character"]					
 			character_to_update = db_user["characters"][index]
 			character_to_update["portrait_translate"] = {"x": x, "y": y}
