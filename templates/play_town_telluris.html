@@ -426,8 +426,8 @@
 <body>
     <div class="game-container">        
         <header class="location-desc">
-            <h2>Périphérie - Portes de la Ville</h2>
-            <p>(Case X:{{position["x"] | tojson | safe}}, Y:{{position["y"] | tojson | safe}})</p>
+            <h2>{{title}}</h2>
+            <p id="location-details">(Case X:{{position["x"] | tojson | safe}}, Y:{{position["y"] | tojson | safe}})</p>
         </header>
         <main class="map-area">
             <div class="grid-placeholder">
@@ -440,7 +440,7 @@
         <aside class="sidebar">
             <section class="sub-locations-panel">
                 <h3>Lieux</h3>
-                <ul class="sub-locations-list">
+                <ul id="sub-locations-list-id" class="sub-locations-list">
                     <li><button class="sub-loc-btn">➔ Corps de garde</button></li>
                     <li><button class="sub-loc-btn">➔ Taverne du Chien</button></li>
                     <li><button class="sub-loc-btn">➔ Étal du marchand</button></li>
@@ -448,31 +448,31 @@
             </section>
             <section class="navigation-panel">
 				<div class="controls">
-					<button class="btn" onclick="move(1, 1)">
+					<button class="btn" onclick="move(-1, 1)">
 						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.71 16.29L9.42 8H15a1 1 0 0 0 0-2H7.05a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1H7a1 1 0 0 0 1-1V9.45l8.26 8.26a1 1 0 0 0 1.42 0 1 1 0 0 0 .03-1.42z"></path></svg>
 					</button>
 					<button class="btn" onclick="move(0, 1)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="move(-1, 1)">
+					<button class="btn" onclick="move(1, 1)">
 						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"></path></svg>
 					</button>
-					<button class="btn" onclick="move(1, 0)">
+					<button class="btn" onclick="move(-1, 0)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="resetPos()">
+					<button class="btn" onclick="waitTurn()">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"></path><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"></path><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"></path><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"></path></svg>
 					</button>
-					<button class="btn" onclick="move(-1, 0)">
+					<button class="btn" onclick="move(1, 0)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="move(-1, 1)">
+					<button class="btn" onclick="move(-1, -1)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 7L7 17M7 17H17M7 17V7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
 					<button class="btn" onclick="move(0, -1)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="move(-1, 1)">
+					<button class="btn" onclick="move(1, -1)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 7L17 17M17 17V7M17 17H7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
 				</div>
@@ -528,10 +528,48 @@
 
     </div>
 <script>
-	const LINKS = {{ links | tojson | safe }};
-	const character = {{ character | tojson | safe }};
-	const vocation = {{ vocation | tojson | safe }};
 	const portrait_translate = {{ character.get("portrait_translate",0) | tojson | safe }};
+	
+	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
+	let LINKS = {{ links | tojson | safe }};
+	const root = document.documentElement;
+	async function move(viewDx, viewDy) {
+		const moveData = {x: viewDx, y: viewDy};
+		try {
+			const response = await fetch('api/move_character', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(moveData)
+			});
+			if (response.ok) {
+				rep = await response.json();
+				root.style.setProperty('--x', rep.position["x"]);
+				root.style.setProperty('--y', rep.position["y"]);
+				LINKS = rep.links;
+				POSITIONS = {"x" : rep.position["x"], "y": rep.position["y"]};
+				buildLocationslist();
+			} else {
+				const error = await response.json();
+				console.log(error.detail)
+				alert("Erreur : " + error.detail);
+			}
+		} catch (err) { console.error("Erreur de connexion", err); }
+	}
+	/* lieux accessibles */
+	function buildLocationslist() {
+		const sub_locations = document.getElementById('sub-locations-list-id');
+		sub_locations.innerHTML = LINKS.map(link => {
+			return link.nodes
+				.filter(l => l.lieu !== "lieu:{{lieu}}")
+				.map(l => `<li><button class="sub-loc-btn">➔ ${l.details.label}</button></li>`)
+				.join('');
+		}).join('') || `<li>Aucun</li>`;
+		const location = document.getElementById('location-details');
+		location.innerHTML = `(Case X:${POSITIONS.x}, Y:${POSITIONS.y})`;
+	}
+	buildLocationslist();
+	async function waitTurn(){
+	}
 </script>
 <script>
 (() => {
@@ -658,7 +696,7 @@
 	}
 	function applyScale() {
 		const s = computeScale();
-		scaleRoot.style.transform		= `scale(${s})`;
+		scaleRoot.style.transform	 = `scale(${s})`;
 		scaleRoot.style.marginBottom = `${(H1 * s - H1)}px`;
 	}
  

@@ -10,6 +10,7 @@ from PIL import Image
 from routes.user import user_router, User
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
+from utils.lieux import get_lieu_links
 
 app = FastAPI()
 
@@ -140,11 +141,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	lieu = character.get("lieu",character["cite"])
 	grid_doc = db.get(lieu)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
-	# Gestion des lieux accessibles
-	x = position["x"]
-	y = position["y"]
-	target_key = [ lieu, x, y ]
-	links = db.view("reseau", "liens_cases", key=target_key)
+	links = get_lieu_links(current_user)
 	# Gestion de la grille
 	dimensions = grid_doc["dimensions"]
 	image = grid_doc.get("image")
@@ -169,7 +166,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"lieu": lieu.split(":")[1],
 			"image": image,
 			"position": position,
-			"links": [row.value for row in links],
+			"links": links,
 			"vocation": vocation,
 			"dimensions": dimensions,
 			"dim_x": dim_x,

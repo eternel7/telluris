@@ -20,24 +20,19 @@ def get_current_user(request: Request):
 		return None
 
 	try:
-		# 2. Décoder le token pour obtenir le user_id
-		try:
-			payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-		except jwt.ExpiredSignatureError:
-			raise HTTPException(status_code=401, detail="Token expired")
-		except jwt.InvalidTokenError:
-			raise HTTPException(status_code=401, detail="Invalid token")
+		payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+	except jwt.ExpiredSignatureError:
+		return None # Token expired
+	except jwt.InvalidTokenError:
+		return None # Invalid token
 			
-		user_id: str = payload.get("user_id")
-		
-		user_doc = db.get(user_id)
-		if not user_doc or user_doc is None:
-			return None
-		
-		# clean up before share to any other function
-		user_doc.pop("password", None)
-		user_doc.pop("token", None)
-		return user_doc
-		
-	except JWTError:
+	user_id: str = payload.get("user_id")
+	
+	user_doc = db.get(user_id)
+	if not user_doc or user_doc is None:
 		return None
+	
+	# clean up before share to any other function
+	user_doc.pop("password", None)
+	user_doc.pop("token", None)
+	return user_doc

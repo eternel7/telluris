@@ -7,11 +7,12 @@ import re
 from jose import jwt
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user, create_access_token
+from utils.lieux import get_lieu_links
 
 class User(BaseModel):
-		email: str
-		username: str | None = None
-		disabled: bool | None = None
+	email: str
+	username: str | None = None
+	disabled: bool | None = None
 	
 user_router = APIRouter()
 
@@ -179,11 +180,9 @@ async def update_character_portrait(
 	db_user = db.get(current_user["_id"])
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
-	
-	print("portrait_info",portrait_info)
+
 	if portrait_info:
 		match = re.search(r"translate\(-(\d+\.?\d*)px,\s*-(\d+\.?\d*)px\)", portrait_info["value"])
-		print("match",match)
 		if match:
 			x = float(match.group(1))
 			y = float(match.group(2))
@@ -196,3 +195,33 @@ async def update_character_portrait(
 			raise HTTPException(status_code=404, detail="Incorrect info for character portrait update")
 	else:
 		raise HTTPException(status_code=404, detail="No info for character portrait update")
+
+@user_router.post("/move_character")
+async def move_character(
+	response: Response, 
+	current_user: Annotated[User, Depends(get_current_user)], 
+	move: dict = Body(...)):
+	
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+	
+	db_user = db.get(current_user["_id"])
+	if not db_user:
+		raise HTTPException(status_code=404, detail="User not found")
+
+	if (move and "x" in move and "y" in move
+			and isinstance(move["x"], int) and isinstance(move["y"], int)):
+		movex = (move["x"] > 0) - (move["x"] < 0) # -1 0 1
+		movey = (move["y"] > 0) - (move["y"] < 0) # -1 0 1
+		index = db_user["selected_character"]
+		character_to_update = db_user["characters"][index]
+		position = character_to_update["position"]
+		position["x"] += movex
+		position["y"] += movey
+		character_to_update["position"] = position
+		db.put(db_user)
+		target_key = [ character_to_update["lieu"], position["x"], position["y"] ]
+		links = get_lieu_links(current_user)
+		return {"position" : character_to_update["position"], "links" : links}
+	else:
+		raise HTTPException(status_code=404, detail="Incorrect movement info")
