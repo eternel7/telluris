@@ -180,21 +180,22 @@ async def update_character_portrait(
 	db_user = db.get(current_user["_id"])
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
-
 	if portrait_info:
 		match = re.search(r"translate\(-(\d+\.?\d*)px,\s*-(\d+\.?\d*)px\)", portrait_info["value"])
+		zoom = portrait_info["zoom"]
 		if match:
 			x = float(match.group(1))
 			y = float(match.group(2))
 			index = db_user["selected_character"]					
 			character_to_update = db_user["characters"][index]
 			character_to_update["portrait_translate"] = {"x": x, "y": y}
+			character_to_update["portrait_zoom"] = zoom
 			db.put(db_user)
 			return db_user["characters"][index]
 		else:
-			raise HTTPException(status_code=404, detail="Incorrect info for character portrait update")
+			raise HTTPException(status_code=406, detail="Incorrect info for character portrait update")
 	else:
-		raise HTTPException(status_code=404, detail="No info for character portrait update")
+		raise HTTPException(status_code=405, detail="No info for character portrait update")
 
 @user_router.post("/move_character")
 async def move_character(
@@ -208,20 +209,38 @@ async def move_character(
 	db_user = db.get(current_user["_id"])
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
-
-	if (move and "x" in move and "y" in move
-			and isinstance(move["x"], int) and isinstance(move["y"], int)):
-		movex = (move["x"] > 0) - (move["x"] < 0) # -1 0 1
-		movey = (move["y"] > 0) - (move["y"] < 0) # -1 0 1
+		
+	if move :
 		index = db_user["selected_character"]
 		character_to_update = db_user["characters"][index]
 		position = character_to_update["position"]
-		position["x"] += movex
-		position["y"] += movey
-		character_to_update["position"] = position
-		db.put(db_user)
-		target_key = [ character_to_update["lieu"], position["x"], position["y"] ]
-		links = get_lieu_links(current_user)
-		return {"position" : character_to_update["position"], "links" : links}
-	else:
-		raise HTTPException(status_code=404, detail="Incorrect movement info")
+		lieu_courant = character_to_update["lieu"]
+		if "link" in move:
+			links = get_lieu_links(current_user)
+			target_id = move["link"]
+			# 1. Trouver le bon lien par son _id
+			link = next((l for l in links if l["_id"] == target_id), None)
+
+			# 2. Trouver le nœud qui n'a PAS le lieu_id
+			if link:
+				node = next((n for n in link["nodes"] if n["lieu"] != lieu_courant), None)
+				if node:
+					print(node)
+					destination = node["lieu"]
+					destination_pos = {"x": node["pos"][0], "y": node["pos"][1] }
+					print("move to ", destination, destination_pos)
+					character_to_update["lieu"] = destination
+					character_to_update["position"] = destination_pos
+					db.put(db_user)
+					return {"moved" : 1}
+		elif ("x" in move and "y" in move
+			and isinstance(move["x"], int) and isinstance(move["y"], int)):
+			movex = (move["x"] > 0) - (move["x"] < 0) # -1 0 1
+			movey = (move["y"] > 0) - (move["y"] < 0) # -1 0 1
+			position["x"] += movex
+			position["y"] += movey
+			character_to_update["position"] = position
+			db.put(db_user)
+			links = get_lieu_links(current_user)
+			return {"position" : character_to_update["position"], "links" : links}
+	raise HTTPException(status_code=404, detail="Incorrect movement info")

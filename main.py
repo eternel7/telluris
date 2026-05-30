@@ -143,13 +143,19 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
 	# Gestion de la grille
-	dimensions = grid_doc["dimensions"]
+	dimensions = grid_doc.get("dimensions",None)
 	image = grid_doc.get("image")
+	
 	with Image.open(TOWNS_IMAGES_PATH+"/"+image) as img:
 		# Récupérer les dimensions (largeur, hauteur)
 		largeur, hauteur = img.size
-		dim_x = round(largeur/dimensions["x"])
-		dim_y = round(hauteur/dimensions["y"])
+		if dimensions:
+			dim_x = round(largeur/dimensions["x"])
+			dim_y = round(hauteur/dimensions["y"])
+		else:
+			dim_x = largeur
+			dim_y = hauteur
+		
 	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["portrait"]) as portrait:
 		portrait_largeur, portrait_hauteur = portrait.size
 		
@@ -163,7 +169,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"portrait_hauteur": portrait_hauteur,
 			"portrait_disp_largeur": 100,
 			"portrait_disp_hauteur": 100,
-			"lieu": lieu.split(":")[1],
+			"lieu": lieu,
 			"image": image,
 			"position": position,
 			"links": links,
