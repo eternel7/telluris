@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
 import re
+import uuid
 from jose import jwt
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user, create_access_token
@@ -59,23 +60,14 @@ async def login_user(user: LoginRequest, response: Response):
 	if not user_doc or not bcrypt.checkpw(user.password.encode(), user_doc["password"].encode()):
 		raise HTTPException(status_code=400, detail="Invalid credentials")
 		
-	token = create_access_token({"user_id": user_doc["_id"]}) #jwt.encode({"user_id": user_doc["_id"]}, SECRET_KEY, algorithm=ALGORITHM)
+	token = create_access_token({"user_id": user_doc["_id"]})
 	content = {"token": token, "user_id":	user_doc["_id"], "username":	user_doc["username"]}
 	response = JSONResponse(content=content)
 	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
 	return	response
 	
-class CharacterRequest(BaseModel):
-	sex: str
-	race: str
-	voc: str
-	portrait: str
-	prenom: str
-	nom: str
-	cite: str
-	
 @user_router.post("/character")
-async def add_character(character: CharacterRequest, response: Response, current_user: Annotated[User, Depends(get_current_user)]):
+async def add_character(response: Response, current_user: Annotated[User, Depends(get_current_user)], characterinfo: dict = Body(...),):
 	if not current_user:
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	
@@ -86,8 +78,37 @@ async def add_character(character: CharacterRequest, response: Response, current
 	if "characters" not in db_user:
 		db_user["characters"] = []
 		
-	if character:
-		character_dict = character.model_dump()
+	if (characterinfo and "bonusStats" in characterinfo):
+		caractUp = characterinfo["bonusStats"]
+		points_depenses = sum(
+			sum(i * 5 if key == "V" else i for i in range(1, bonus + 1))
+			for key, bonus in caractUp.items()
+		)
+		if points_depenses>10:
+			raise HTTPException(status_code=406, detail="Incorrect info for character creation, to much points spend.")
+		races = db.get("rules:races")
+		race = next((r for r in races["value"] if r["id"] == characterinfo["race"]), None)
+		caract = {
+			k: race['stats'].get(k, 0) + caractUp.get(k, 0)
+			for k in race['stats']
+		}
+		lieu = db.get(characterinfo["cite"])
+		position = lieu.get("default_position",{"x" : 0, "y" : 0})
+		unique_id = str(uuid.uuid4())
+		character_dict = {
+			'_id' : unique_id, 
+			'sex': characterinfo["sex"], 
+			'race': characterinfo["race"], 
+			'voc': characterinfo["voc"], 
+			'portrait': characterinfo["portrait"], 
+			'prenom': characterinfo["prenom"], 
+			'nom': characterinfo["nom"], 
+			'cite': characterinfo["cite"], 
+			'lieu': characterinfo["cite"],
+			'position': position,
+			'caracteristiques_standard': caract,
+			'caracteristiques_current': caract
+			}
 		db_user["characters"].append(character_dict)
 		db.put(db_user)
 	

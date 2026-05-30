@@ -583,16 +583,12 @@
 				</div>
 			</div>
 			<div class="stat-row">
-				<span>PV</span><span class="stat-value">{{character.get("currentPV",character["PV"])}}/{{character["PV"]}}</span>
+				<span>PV</span><span class="stat-value">{{character.get("currentPV",character["caracteristiques_current"]["PV"])}}/{{character["caracteristiques_standard"]["PV"]}}</span>
 				<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
 			</div>
 			<div class="stat-row">
-				<span>PM</span><span class="stat-value">{{character.get("currentPM",character["PM"])}}/{{character["PM"]}}</span>
+				<span>PM</span><span class="stat-value">{{character.get("currentPM",character["caracteristiques_current"]["PM"])}}/{{character["caracteristiques_standard"]["PM"]}}</span>
 				<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
-			</div>
-			<div class="stat-row">
-				<span>Actions</span><span class="stat-value">2/2</span>
-				<div class="gauge-bg"><div class="gauge-fill pa"></div></div>
 			</div>
 		</div>
 		</section>
@@ -650,8 +646,6 @@
 				.map(l => `<li><button class="sub-loc-btn" onclick="moveTo('${link._id}')">➔ ${l.details.label}</button></li>`)
 				.join('');
 		}).join('') || `<li>Aucun</li>`;
-		const location = document.getElementById('location-details');
-		location.innerHTML = `(Case X:${POSITIONS.x}, Y:${POSITIONS.y})`;
 	}
 	buildLocationslist();
 	async function waitTurn(){
