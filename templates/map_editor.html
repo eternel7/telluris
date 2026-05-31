@@ -5,696 +5,789 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Battlemap Grid Editor</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Share+Tech+Mono&display=swap');
+	@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Share+Tech+Mono&display=swap');
 
-  :root {
-    --bg: #0d0f14;
-    --panel: #141720;
-    --border: #2a3040;
-    --accent: #c8a84b;
-    --accent2: #4b8fc8;
-    --danger: #c84b4b;
-    --text: #d0d8e8;
-    --muted: #5a6478;
-    --grid-line: rgba(200, 168, 75, 0.3);
-    --cell-hover: rgba(200, 168, 75, 0.15);
-    --cell-select: rgba(75, 143, 200, 0.4);
-  }
+	:root {
+		--bg: #0d0f14;
+		--panel: #141720;
+		--border: #2a3040;
+		--accent: #c8a84b;
+		--accent2: #4b8fc8;
+		--danger: #c84b4b;
+		--text: #d0d8e8;
+		--muted: #5a6478;
+		--grid-line: rgba(200, 168, 75, 0.3);
+		--cell-hover: rgba(200, 168, 75, 0.15);
+		--cell-select: rgba(75, 143, 200, 0.4);
+	}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+	* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+	body {
+		background: var(--bg);
+		color: var(--text);
+		font-family: 'Share Tech Mono', monospace;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
 
-  header {
-    width: 100%;
-    padding: 18px 32px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
-  }
+	header {
+		width: 100%;
+		padding: 18px 32px;
+		border-bottom: 1px solid var(--border);
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+	}
 
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 1.3rem;
-    letter-spacing: 0.12em;
-    color: var(--accent);
-    text-shadow: 0 0 20px rgba(200,168,75,0.3);
-  }
+	header h1 {
+		font-family: 'Cinzel', serif;
+		font-size: 1.3rem;
+		letter-spacing: 0.12em;
+		color: var(--accent);
+		text-shadow: 0 0 20px rgba(200,168,75,0.3);
+	}
 
-  header span {
-    color: var(--muted);
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-  }
+	header span {
+		color: var(--muted);
+		font-size: 0.75rem;
+		letter-spacing: 0.08em;
+	}
 
-  .main {
-    display: flex;
-    gap: 0;
-    width: 100%;
-    max-width: 1400px;
-    padding: 24px;
-    gap: 20px;
-    align-items: flex-start;
-  }
+	.main {
+		display: flex;
+		gap: 0;
+		width: 100%;
+		max-width: 1400px;
+		padding: 24px;
+		gap: 20px;
+		align-items: flex-start;
+	}
 
-  /* --- LEFT PANEL --- */
-  .panel {
-    width: 260px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+	/* --- LEFT PANEL --- */
+	.panel {
+		width: 260px;
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
 
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px;
-  }
+	.card {
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		padding: 16px;
+	}
 
-  .card-title {
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    margin-bottom: 14px;
-    text-transform: uppercase;
-  }
+	.card-title {
+		font-family: 'Cinzel', serif;
+		font-size: 0.7rem;
+		letter-spacing: 0.15em;
+		color: var(--accent);
+		margin-bottom: 14px;
+		text-transform: uppercase;
+	}
 
-  label {
-    display: block;
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-bottom: 5px;
-    letter-spacing: 0.05em;
-  }
+	label {
+		display: block;
+		font-size: 0.72rem;
+		color: var(--muted);
+		margin-bottom: 5px;
+		letter-spacing: 0.05em;
+	}
 
-  input[type="file"] {
-    display: none;
-  }
+	input[type="file"] {
+		display: none;
+	}
 
-  .file-btn {
-    display: block;
-    width: 100%;
-    padding: 9px;
-    background: transparent;
-    border: 1px dashed var(--accent);
-    border-radius: 4px;
-    color: var(--accent);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.2s;
-    letter-spacing: 0.05em;
-  }
-  .file-btn:hover { background: rgba(200,168,75,0.08); }
+	.file-btn {
+		display: block;
+		width: 100%;
+		padding: 9px;
+		background: transparent;
+		border: 1px dashed var(--accent);
+		border-radius: 4px;
+		color: var(--accent);
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 0.75rem;
+		cursor: pointer;
+		text-align: center;
+		transition: background 0.2s;
+		letter-spacing: 0.05em;
+	}
+	.file-btn:hover { background: rgba(200,168,75,0.08); }
 
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+	.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 
-  input[type="number"] {
-    width: 100%;
-    background: #0d0f14;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.85rem;
-    padding: 7px 9px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  input[type="number"]:focus { border-color: var(--accent); }
+	input[type="number"] {
+		width: 100%;
+		background: #0d0f14;
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		color: var(--text);
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 0.85rem;
+		padding: 7px 9px;
+		outline: none;
+		transition: border-color 0.2s;
+	}
+	input[type="number"]:focus { border-color: var(--accent); }
 
-  .btn {
-    width: 100%;
-    padding: 9px;
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    background: rgba(200,168,75,0.08);
-    color: var(--accent);
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn:hover { background: rgba(200,168,75,0.18); box-shadow: 0 0 10px rgba(200,168,75,0.2); }
-  .btn.danger { border-color: var(--danger); color: var(--danger); background: transparent; }
-  .btn.danger:hover { background: rgba(200,75,75,0.1); }
+	.btn {
+		width: 100%;
+		padding: 9px;
+		border: 1px solid var(--accent);
+		border-radius: 4px;
+		background: rgba(200,168,75,0.08);
+		color: var(--accent);
+		font-family: 'Cinzel', serif;
+		font-size: 0.75rem;
+		letter-spacing: 0.1em;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	.btn:hover { background: rgba(200,168,75,0.18); box-shadow: 0 0 10px rgba(200,168,75,0.2); }
+	.btn.danger { border-color: var(--danger); color: var(--danger); background: transparent; }
+	.btn.danger:hover { background: rgba(200,75,75,0.1); }
 
-  /* Value selector */
-  .value-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin-bottom: 10px;
-  }
+	/* Value selector */
+	.value-grid {
+		display: grid;
+		grid-template-columns: repeat(5, 1fr);
+		gap: 6px;
+		margin-bottom: 10px;
+	}
 
-  .val-btn {
-    aspect-ratio: 1;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    background: #0d0f14;
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .val-btn:hover { border-color: var(--accent2); color: var(--accent2); }
-  .val-btn.active {
-    border-color: var(--accent2);
-    background: rgba(75,143,200,0.2);
-    color: var(--accent2);
-    box-shadow: 0 0 8px rgba(75,143,200,0.3);
-  }
+	.val-btn {
+		aspect-ratio: 1;
+		border-radius: 4px;
+		border: 1px solid var(--border);
+		background: #0d0f14;
+		color: var(--text);
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 0.85rem;
+		cursor: pointer;
+		transition: all 0.15s;
+		display: flex; align-items: center; justify-content: center;
+	}
+	.val-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+	.val-btn.active {
+		border-color: var(--accent2);
+		background: rgba(75,143,200,0.2);
+		color: var(--accent2);
+		box-shadow: 0 0 8px rgba(75,143,200,0.3);
+	}
 
-  .custom-val {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    margin-top: 4px;
-  }
-  .custom-val input {
-    flex: 1;
-    min-width: 0;
-  }
-  .custom-val button {
-    padding: 7px 10px;
-    border: 1px solid var(--accent2);
-    border-radius: 4px;
-    background: transparent;
-    color: var(--accent2);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    cursor: pointer;
-  }
-  .custom-val button:hover { background: rgba(75,143,200,0.15); }
+	.custom-val {
+		display: flex;
+		gap: 6px;
+		align-items: center;
+		margin-top: 4px;
+	}
+	.custom-val input {
+		flex: 1;
+		min-width: 0;
+	}
+	.custom-val button {
+		padding: 7px 10px;
+		border: 1px solid var(--accent2);
+		border-radius: 4px;
+		background: transparent;
+		color: var(--accent2);
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 0.75rem;
+		cursor: pointer;
+	}
+	.custom-val button:hover { background: rgba(75,143,200,0.15); }
 
-  /* Legend */
-  .legend {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    max-height: 140px;
-    overflow-y: auto;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.72rem;
-    color: var(--muted);
-  }
-  .legend-dot {
-    width: 12px; height: 12px;
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
+	/* Legend */
+	.legend {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+		max-height: 140px;
+		overflow-y: auto;
+	}
+	.legend-item {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.72rem;
+		color: var(--muted);
+	}
+	.legend-dot {
+		width: 12px; height: 12px;
+		border-radius: 2px;
+		flex-shrink: 0;
+	}
 
-  /* --- CANVAS AREA --- */
-  .canvas-wrap {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+	/* --- CANVAS AREA --- */
+	.canvas-wrap {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
 
-  #drop-zone {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;
-    color: var(--muted);
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
-    padding: 40px;
-    text-align: center;
-    flex-direction: column;
-    gap: 8px;
-  }
-  #drop-zone.hidden { display: none; }
-  #drop-zone .icon { font-size: 2rem; opacity: 0.3; }
+	#drop-zone {
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 200px;
+		color: var(--muted);
+		font-size: 0.85rem;
+		letter-spacing: 0.05em;
+		padding: 40px;
+		text-align: center;
+		flex-direction: column;
+		gap: 8px;
+	}
+	#drop-zone.hidden { display: none; }
+	#drop-zone .icon { font-size: 2rem; opacity: 0.3; }
 
-  .grid-container {
-    position: relative;
-    display: none;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-    user-select: none;
-  }
-  .grid-container.visible { display: block; }
+	.grid-container {
+		position: relative;
+		display: none;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		overflow: hidden;
+		user-select: none;
+	}
+	.grid-container.visible { display: block; }
 
-  #map-img {
-    display: block;
-    width: 100%;
-    height: auto;
-    pointer-events: none;
-  }
+	#map-img {
+		display: block;
+		width: 100%;
+		height: auto;
+		pointer-events: none;
+	}
 
-  #grid-canvas {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    cursor: crosshair;
-  }
+	#grid-canvas {
+		position: absolute;
+		top: 0; left: 0;
+		width: 100%; height: 100%;
+		cursor: crosshair;
+	}
 
-  /* JSON output */
-  .json-wrap {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-    display: none;
-  }
-  .json-wrap.visible { display: block; }
+	/* JSON output */
+	.json-wrap {
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		overflow: hidden;
+		display: none;
+	}
+	.json-wrap.visible { display: block; }
 
-  .json-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-  }
+	.json-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 10px 14px;
+		border-bottom: 1px solid var(--border);
+	}
 
-  .json-header span {
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    color: var(--accent);
-  }
+	.json-header span {
+		font-family: 'Cinzel', serif;
+		font-size: 0.7rem;
+		letter-spacing: 0.12em;
+		color: var(--accent);
+	}
 
-  .copy-btn {
-    padding: 5px 12px;
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    background: transparent;
-    color: var(--accent);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.05em;
-  }
-  .copy-btn:hover { background: rgba(200,168,75,0.15); }
-  .copy-btn.copied { border-color: #4bc87a; color: #4bc87a; }
+	.copy-btn {
+		padding: 5px 12px;
+		border: 1px solid var(--accent);
+		border-radius: 4px;
+		background: transparent;
+		color: var(--accent);
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 0.7rem;
+		cursor: pointer;
+		transition: all 0.2s;
+		letter-spacing: 0.05em;
+	}
+	.copy-btn:hover { background: rgba(200,168,75,0.15); }
+	.copy-btn.copied { border-color: #4bc87a; color: #4bc87a; }
 
-  #json-output {
-    display: block;
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    padding: 14px;
-    resize: vertical;
-    min-height: 80px;
-    max-height: 220px;
-    outline: none;
-    line-height: 1.5;
-  }
+	#json-output {
+		display: block;
+		width: 100%;
+		background: transparent;
+		border: none;
+		color: var(--text);
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 0.72rem;
+		padding: 14px;
+		resize: vertical;
+		min-height: 80px;
+		max-height: 220px;
+		outline: none;
+		line-height: 1.5;
+	}
 
-  /* Status bar */
-  .status-bar {
-    font-size: 0.68rem;
-    color: var(--muted);
-    padding: 4px 0;
-    letter-spacing: 0.05em;
-    min-height: 1.2em;
-  }
-  .status-bar span { color: var(--accent2); }
+	/* Status bar */
+	.status-bar {
+		font-size: 0.68rem;
+		color: var(--muted);
+		padding: 4px 0;
+		letter-spacing: 0.05em;
+		min-height: 1.2em;
+	}
+	.status-bar span { color: var(--accent2); }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: #0d0f14; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+	/* Scrollbar */
+	::-webkit-scrollbar { width: 5px; }
+	::-webkit-scrollbar-track { background: #0d0f14; }
+	::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>⚔ Battlemap Grid Editor</h1>
-  <span>— Éditeur de grille de déplacement</span>
+	<h1>⚔ Battlemap Grid Editor</h1>
+	<span>— Éditeur de grille de déplacement</span>
 </header>
 
 <div class="main">
 
-  <!-- LEFT PANEL -->
-  <div class="panel">
+	<!-- LEFT PANEL -->
+	<div class="panel">
 
-    <!-- Image & dimensions -->
-    <div class="card">
-      <div class="card-title">📁 Carte & Dimensions</div>
-      <label>Image de la battlemap</label>
-      <label class="file-btn" for="img-input">📂 Choisir une image</label>
-      <input type="file" id="img-input" accept="image/*">
+		<!-- Image & dimensions -->
+		<div class="card">
+			<div class="card-title">📁 Carte & Dimensions</div>
+			<label>Image de la battlemap</label>
+			<label class="file-btn" for="img-input">📂 Choisir une image</label>
+			<input type="file" id="img-input" accept="image/*">
 
-      <div style="margin-top:14px;" class="row2">
-        <div>
-          <label>Colonnes (X)</label>
-          <input type="number" id="grid-x" value="20" min="1" max="200">
-        </div>
-        <div>
-          <label>Lignes (Y)</label>
-          <input type="number" id="grid-y" value="20" min="1" max="200">
-        </div>
-      </div>
+			<div style="margin-top:14px;" class="row2">
+				<div>
+					<label>Colonnes (X)</label>
+					<input type="number" id="grid-x" value="20" min="1" max="200">
+				</div>
+				<div>
+					<label>Lignes (Y)</label>
+					<input type="number" id="grid-y" value="20" min="1" max="200">
+				</div>
+			</div>
 
-      <button class="btn" id="apply-btn">Générer la grille</button>
-    </div>
+			<button class="btn" id="apply-btn">Générer la grille</button>
+			<div style="margin-top:10px;">
+				<label>Importer un JSON existant</label>
+				<div style="display:flex;gap:6px;">
+				<textarea id="json-import" placeholder='[[1,0,1],[1,1,0]…]' rows="2"
+					style="flex:1;background:#0d0f14;border:1px solid var(--border);border-radius:4px;
+						 color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;
+						 padding:7px;resize:vertical;outline:none;"></textarea>
+				<button id="import-btn" style="padding:7px 10px;border:1px solid var(--accent2);
+					border-radius:4px;background:transparent;color:var(--accent2);
+					font-family:'Share Tech Mono',monospace;font-size:0.75rem;cursor:pointer;
+					align-self:flex-end;">OK</button>
+				</div>
+				<div id="import-error" style="color:#c84b4b;font-size:0.68rem;margin-top:4px;min-height:1em;"></div>
+			</div>
+		</div>
 
-    <!-- Value selector -->
-    <div class="card">
-      <div class="card-title">🎯 Valeur à peindre</div>
-      <div class="value-grid" id="val-grid">
-        <button class="val-btn" data-val="0">0</button>
-        <button class="val-btn active" data-val="1">1</button>
-        <button class="val-btn" data-val="2">2</button>
-        <button class="val-btn" data-val="3">3</button>
-        <button class="val-btn" data-val="5">5</button>
-        <button class="val-btn" data-val="9">∞</button>
-      </div>
-      <div class="custom-val">
-        <input type="number" id="custom-val-input" placeholder="autre…" min="0">
-        <button id="custom-val-btn">OK</button>
-      </div>
-    </div>
+		<!-- Value selector -->
+		<div class="card">
+			<div class="card-title">🎯 Valeur à peindre</div>
+			<div class="value-grid" id="val-grid">
+				<button class="val-btn" data-val="0">0</button>
+				<button class="val-btn active" data-val="1">1</button>
+				<button class="val-btn" data-val="2">2</button>
+				<button class="val-btn" data-val="3">3</button>
+				<button class="val-btn" data-val="5">5</button>
+				<button class="val-btn" data-val="9">∞</button>
+			</div>
+			<div class="custom-val">
+				<input type="number" id="custom-val-input" placeholder="autre…" min="0">
+				<button id="custom-val-btn">OK</button>
+			</div>
+		</div>
 
-    <!-- Légende couleurs -->
-    <div class="card">
-      <div class="card-title">🎨 Légende</div>
-      <div class="legend" id="legend"></div>
-    </div>
+		<!-- Légende couleurs -->
+		<div class="card">
+			<div class="card-title">🎨 Légende</div>
+			<div class="legend" id="legend"></div>
+		</div>
 
-    <!-- Actions -->
-    <div class="card">
-      <div class="card-title">⚡ Actions</div>
-      <button class="btn" id="fill-btn" style="margin-bottom:8px;">Tout remplir avec la valeur</button>
-      <button class="btn danger" id="reset-btn">Réinitialiser (tout à 1)</button>
-    </div>
+		<!-- Actions -->
+		<div class="card">
+			<div class="card-title">⚡ Actions</div>
+			<button class="btn" id="fill-btn" style="margin-bottom:8px;">Tout remplir avec la valeur</button>
+			<button class="btn danger" id="reset-btn">Réinitialiser (tout à 1)</button>
+		</div>
 
-  </div>
+	</div>
 
-  <!-- RIGHT: canvas + json -->
-  <div class="canvas-wrap">
+	<!-- RIGHT: canvas + json -->
+	<div class="canvas-wrap">
 
-    <div id="drop-zone">
-      <div class="icon">🗺</div>
-      <div>Chargez une image et générez la grille</div>
-    </div>
+		<div id="drop-zone">
+			<div class="icon">🗺</div>
+			<div>Chargez une image et générez la grille</div>
+		</div>
 
-    <div class="grid-container" id="grid-container">
-      <img id="map-img" src="" alt="battlemap">
-      <canvas id="grid-canvas"></canvas>
-    </div>
+		<div class="grid-container" id="grid-container">
+			<img id="map-img" src="" alt="battlemap">
+			<canvas id="grid-canvas"></canvas>
+		</div>
 
-    <div class="status-bar" id="status"></div>
+		<div class="status-bar" id="status"></div>
 
-    <div class="json-wrap" id="json-wrap">
-      <div class="json-header">
-        <span>JSON — Grille de déplacement</span>
-        <button class="copy-btn" id="copy-btn">Copier</button>
-      </div>
-      <textarea id="json-output" readonly spellcheck="false"></textarea>
-    </div>
+		<div class="json-wrap" id="json-wrap">
+			<div class="json-header">
+				<span>JSON — Grille de déplacement</span>
+				<button class="copy-btn" id="copy-btn">Copier</button>
+			</div>
+			<textarea id="json-output" readonly spellcheck="false"></textarea>
+		</div>
 
-  </div>
+	</div>
 </div>
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────────
-let grid = [];           // 2D array [y][x]
+let grid = [];					 // 2D array [y][x]
 let cols = 20, rows = 20;
 let selectedVal = 1;
 let isPainting = false;
-let paintMode = null;    // 'set'
+let paintMode = null;		// 'set'
 let imgLoaded = false;
+let hoverCell = null;		// {cx, cy} currently hovered
 
 // Color map for values
 const VALUE_COLORS = {
-  0: 'rgba(30,30,40,0.75)',
-  1: 'rgba(75,143,200,0.0)',   // transparent = libre
-  2: 'rgba(200,200,75,0.45)',
-  3: 'rgba(200,140,75,0.45)',
-  5: 'rgba(200,75,75,0.45)',
-  9: 'rgba(80,20,20,0.75)',
+	0: 'rgba(30,30,40,0.75)',
+	1: 'rgba(75,143,200,0.0)',	 // transparent = libre
+	2: 'rgba(200,200,75,0.45)',
+	3: 'rgba(200,140,75,0.45)',
+	5: 'rgba(200,75,75,0.45)',
+	9: 'rgba(80,20,20,0.75)',
 };
 const DEFAULT_COLOR = 'rgba(120,75,200,0.45)';
 
 function valColor(v) {
-  if (v === 1) return null; // don't draw anything for 1
-  return VALUE_COLORS[v] ?? DEFAULT_COLOR;
+	if (v === 1) return null; // don't draw anything for 1
+	return VALUE_COLORS[v] ?? DEFAULT_COLOR;
 }
 
 const LEGEND_LABELS = {
-  0: 'Inaccessible',
-  1: 'Libre (défaut)',
-  2: 'Terrain difficile ×2',
-  3: 'Terrain difficile ×3',
-  5: 'Terrain très difficile ×5',
-  9: 'Bloqué (∞)',
+	0: 'Inaccessible',
+	1: 'Libre (défaut)',
+	2: 'Terrain difficile ×2',
+	3: 'Terrain difficile ×3',
+	5: 'Terrain très difficile ×5',
+	9: 'Bloqué (∞)',
 };
 
 // ── ELEMENTS ───────────────────────────────────────────────────────────────
-const imgInput    = document.getElementById('img-input');
-const mapImg      = document.getElementById('map-img');
-const canvas      = document.getElementById('grid-canvas');
-const ctx         = canvas.getContext('2d');
-const gridCont    = document.getElementById('grid-container');
-const dropZone    = document.getElementById('drop-zone');
-const jsonWrap    = document.getElementById('json-wrap');
-const jsonOutput  = document.getElementById('json-output');
-const copyBtn     = document.getElementById('copy-btn');
-const applyBtn    = document.getElementById('apply-btn');
-const fillBtn     = document.getElementById('fill-btn');
-const resetBtn    = document.getElementById('reset-btn');
-const statusEl    = document.getElementById('status');
-const valGrid     = document.getElementById('val-grid');
+const imgInput		= document.getElementById('img-input');
+const mapImg			= document.getElementById('map-img');
+const canvas			= document.getElementById('grid-canvas');
+const ctx				 = canvas.getContext('2d');
+const gridCont		= document.getElementById('grid-container');
+const dropZone		= document.getElementById('drop-zone');
+const jsonWrap		= document.getElementById('json-wrap');
+const jsonOutput	= document.getElementById('json-output');
+const copyBtn		 = document.getElementById('copy-btn');
+const applyBtn		= document.getElementById('apply-btn');
+const fillBtn		 = document.getElementById('fill-btn');
+const resetBtn		= document.getElementById('reset-btn');
+const statusEl		= document.getElementById('status');
+const valGrid		 = document.getElementById('val-grid');
 const customInput = document.getElementById('custom-val-input');
-const customBtn   = document.getElementById('custom-val-btn');
-const legendEl    = document.getElementById('legend');
+const customBtn	 = document.getElementById('custom-val-btn');
+const legendEl		= document.getElementById('legend');
+const jsonImport   = document.getElementById('json-import');
+const importBtn    = document.getElementById('import-btn');
+const importError  = document.getElementById('import-error');
 
 // ── IMAGE LOAD ─────────────────────────────────────────────────────────────
 imgInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const url = URL.createObjectURL(file);
-  mapImg.onload = () => { imgLoaded = true; };
-  mapImg.src = url;
+	const file = e.target.files[0];
+	if (!file) return;
+	const url = URL.createObjectURL(file);
+	mapImg.onload = () => { imgLoaded = true; };
+	mapImg.src = url;
 });
 
 // ── GENERATE GRID ──────────────────────────────────────────────────────────
 applyBtn.addEventListener('click', () => {
-  cols = Math.max(1, Math.min(200, parseInt(document.getElementById('grid-x').value) || 20));
-  rows = Math.max(1, Math.min(200, parseInt(document.getElementById('grid-y').value) || 20));
+	cols = Math.max(1, Math.min(200, parseInt(document.getElementById('grid-x').value) || 20));
+	rows = Math.max(1, Math.min(200, parseInt(document.getElementById('grid-y').value) || 20));
 
-  // Init grid with 1s
-  grid = Array.from({length: rows}, () => Array(cols).fill(1));
+	// Init grid with 1s
+	grid = Array.from({length: rows}, () => Array(cols).fill(1));
 
-  if (!imgLoaded) {
-    // Show placeholder grey
-    mapImg.src = '';
-    dropZone.classList.add('hidden');
-    gridCont.classList.add('visible');
-    gridCont.style.aspectRatio = `${cols}/${rows}`;
-    mapImg.style.display = 'none';
-  } else {
-    dropZone.classList.add('hidden');
-    gridCont.classList.add('visible');
-    mapImg.style.display = 'block';
-  }
+	if (!imgLoaded) {
+		// Show placeholder grey
+		mapImg.src = '';
+		dropZone.classList.add('hidden');
+		gridCont.classList.add('visible');
+		gridCont.style.aspectRatio = `${cols}/${rows}`;
+		mapImg.style.display = 'none';
+	} else {
+		dropZone.classList.add('hidden');
+		gridCont.classList.add('visible');
+		mapImg.style.display = 'block';
+	}
 
-  jsonWrap.classList.add('visible');
-  renderGrid();
-  updateJSON();
-  setStatus(`Grille ${cols}×${rows} générée.`);
-  updateLegend();
+	jsonWrap.classList.add('visible');
+	renderGrid();
+	updateJSON();
+	setStatus(`Grille ${cols}×${rows} générée.`);
+	updateLegend();
 });
 
 // ── RENDER GRID ────────────────────────────────────────────────────────────
 function renderGrid() {
-  const W = gridCont.clientWidth;
-  const imgH = mapImg.naturalHeight || 1;
-  const imgW = mapImg.naturalWidth || cols;
-  const H = mapImg.src ? W * (imgH / imgW) : W * (rows / cols);
+	const W = gridCont.clientWidth;
+	const imgH = mapImg.naturalHeight || 1;
+	const imgW = mapImg.naturalWidth || cols;
+	const H = mapImg.src ? W * (imgH / imgW) : W * (rows / cols);
 
-  canvas.width  = W;
-  canvas.height = H;
+	canvas.width	= W;
+	canvas.height = H;
 
-  const cw = W / cols;
-  const ch = H / rows;
+	const cw = W / cols;
+	const ch = H / rows;
 
-  ctx.clearRect(0, 0, W, H);
+	ctx.clearRect(0, 0, W, H);
 
-  // Draw cell fills
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const v = grid[y][x];
-      const col = valColor(v);
-      if (col) {
-        ctx.fillStyle = col;
-        ctx.fillRect(x * cw, y * ch, cw, ch);
-      }
-    }
-  }
+	// Draw cell fills
+	for (let y = 0; y < rows; y++) {
+		for (let x = 0; x < cols; x++) {
+			const v = grid[y][x];
+			const col = valColor(v);
+			if (col) {
+				ctx.fillStyle = col;
+				ctx.fillRect(x * cw, y * ch, cw, ch);
+			}
+		}
+	}
 
-  // Draw grid lines
-  ctx.strokeStyle = 'rgba(200,168,75,0.25)';
-  ctx.lineWidth = 0.5;
-  for (let x = 0; x <= cols; x++) {
-    ctx.beginPath();
-    ctx.moveTo(x * cw, 0);
-    ctx.lineTo(x * cw, H);
-    ctx.stroke();
-  }
-  for (let y = 0; y <= rows; y++) {
-    ctx.beginPath();
-    ctx.moveTo(0, y * ch);
-    ctx.lineTo(W, y * ch);
-    ctx.stroke();
-  }
+	// Draw grid lines
+	ctx.strokeStyle = 'rgba(200,168,75,0.25)';
+	ctx.lineWidth = 0.5;
+	for (let x = 0; x <= cols; x++) {
+		ctx.beginPath();
+		ctx.moveTo(x * cw, 0);
+		ctx.lineTo(x * cw, H);
+		ctx.stroke();
+	}
+	for (let y = 0; y <= rows; y++) {
+		ctx.beginPath();
+		ctx.moveTo(0, y * ch);
+		ctx.lineTo(W, y * ch);
+		ctx.stroke();
+	}
+
+	// Draw hover highlight
+	if (hoverCell) {
+		const {cx, cy} = hoverCell;
+		const hx = cx * cw, hy = cy * ch;
+		// Fill with target color, brighter
+		const baseCol = valColor(selectedVal);
+		if (baseCol) {
+			ctx.fillStyle = baseCol.replace(/[\d.]+\)$/, '0.65)');
+		} else {
+			ctx.fillStyle = 'rgba(75,143,200,0.22)';
+		}
+		ctx.fillRect(hx, hy, cw, ch);
+		// Bright border
+		ctx.save();
+		ctx.shadowColor = selectedVal === 0 ? 'rgba(30,30,40,1)' : getHoverGlow();
+		ctx.shadowBlur = 10;
+		ctx.strokeStyle = getHoverGlow();
+		ctx.lineWidth = 2;
+		ctx.strokeRect(hx + 1, hy + 1, cw - 2, ch - 2);
+		ctx.restore();
+		// Value preview inside cell (only if cell is large enough)
+		if (cw > 18 && ch > 14) {
+			ctx.font = `bold ${Math.min(cw * 0.45, ch * 0.55, 14)}px "Share Tech Mono", monospace`;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillStyle = 'rgba(255,255,255,0.9)';
+			ctx.fillText(selectedVal === 9 ? '∞' : selectedVal, hx + cw / 2, hy + ch / 2);
+		}
+	}
+}
+
+function getHoverGlow() {
+	const colors = {
+		0: 'rgba(30,30,40,0.9)',
+		1: 'rgba(75,143,200,0.95)',
+		2: 'rgba(220,220,75,0.95)',
+		3: 'rgba(220,150,75,0.95)',
+		5: 'rgba(220,75,75,0.95)',
+		9: 'rgba(180,50,50,0.95)',
+	};
+	return colors[selectedVal] ?? 'rgba(160,100,220,0.95)';
 }
 
 function cellAt(e) {
-  const rect = canvas.getBoundingClientRect();
-  const px = (e.clientX - rect.left) / rect.width;
-  const py = (e.clientY - rect.top) / rect.height;
-  const cx = Math.floor(px * cols);
-  const cy = Math.floor(py * rows);
-  if (cx < 0 || cx >= cols || cy < 0 || cy >= rows) return null;
-  return {cx, cy};
+	const rect = canvas.getBoundingClientRect();
+	const px = (e.clientX - rect.left) / rect.width;
+	const py = (e.clientY - rect.top) / rect.height;
+	const cx = Math.floor(px * cols);
+	const cy = Math.floor(py * rows);
+	if (cx < 0 || cx >= cols || cy < 0 || cy >= rows) return null;
+	return {cx, cy};
 }
 
 function paint(e) {
-  const c = cellAt(e);
-  if (!c) return;
-  const {cx, cy} = c;
-  if (grid[cy][cx] !== selectedVal) {
-    grid[cy][cx] = selectedVal;
-    renderGrid();
-    updateJSON();
-    setStatus(`Cellule [${cx}, ${cy}] = ${selectedVal}`);
-  }
+	const c = cellAt(e);
+	if (!c) return;
+	const {cx, cy} = c;
+	if (grid[cy][cx] !== selectedVal) {
+		grid[cy][cx] = selectedVal;
+		renderGrid();
+		updateJSON();
+		setStatus(`Cellule [${cx}, ${cy}] = ${selectedVal}`);
+	}
 }
 
 canvas.addEventListener('mousedown', e => {
-  if (!grid.length) return;
-  isPainting = true;
-  paint(e);
+	if (!grid.length) return;
+	isPainting = true;
+	paint(e);
 });
 canvas.addEventListener('mousemove', e => {
-  if (!isPainting) {
-    const c = cellAt(e);
-    if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]}`);
-    return;
-  }
-  paint(e);
+	const c = cellAt(e);
+	const prev = hoverCell;
+	hoverCell = c;
+	// Re-render only if hover cell changed
+	if (grid.length && (!prev || !c || prev.cx !== c.cx || prev.cy !== c.cy)) {
+		renderGrid();
+	}
+	if (!isPainting) {
+		if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]}`);
+		return;
+	}
+	paint(e);
 });
-canvas.addEventListener('mouseup',    () => { isPainting = false; });
-canvas.addEventListener('mouseleave', () => { isPainting = false; });
+canvas.addEventListener('mouseup',		() => { isPainting = false; });
+canvas.addEventListener('mouseleave', () => { isPainting = false; hoverCell = null; if (grid.length) renderGrid(); });
 
 // Touch support
 canvas.addEventListener('touchstart', e => { e.preventDefault(); isPainting = true; paint(e.touches[0]); }, {passive:false});
-canvas.addEventListener('touchmove',  e => { e.preventDefault(); paint(e.touches[0]); }, {passive:false});
-canvas.addEventListener('touchend',   () => { isPainting = false; });
+canvas.addEventListener('touchmove',	e => { e.preventDefault(); paint(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchend',	 () => { isPainting = false; });
 
+// ── JSON IMPORT ────────────────────────────────────────────────────────────
+importBtn.addEventListener('click', () => {
+  importError.textContent = '';
+  let parsed;
+  try { parsed = JSON.parse(jsonImport.value.trim()); } catch {
+    importError.textContent = '✗ JSON invalide.'; return;
+  }
+  if (!Array.isArray(parsed) || !Array.isArray(parsed[0])) {
+    importError.textContent = '✗ Attendu : tableau 2D [[…],…]'; return;
+  }
+  const r = parsed.length;
+  const c = parsed[0].length;
+  if (parsed.some(row => !Array.isArray(row) || row.length !== c || row.some(v => typeof v !== 'number'))) {
+    importError.textContent = '✗ Toutes les lignes doivent avoir la même longueur et contenir des nombres.'; return;
+  }
+  rows = r; cols = c;
+  document.getElementById('grid-x').value = c;
+  document.getElementById('grid-y').value = r;
+  grid = parsed.map(row => [...row]);
+  dropZone.classList.add('hidden');
+  gridCont.classList.add('visible');
+  jsonWrap.classList.add('visible');
+  renderGrid(); updateJSON();
+  setStatus(`JSON importé — grille <span>${c}×${r}</span>`);
+  jsonImport.value = '';
+});
 // ── VALUE SELECTION ────────────────────────────────────────────────────────
 valGrid.addEventListener('click', e => {
-  const btn = e.target.closest('.val-btn');
-  if (!btn) return;
-  selectVal(parseInt(btn.dataset.val));
-  document.querySelectorAll('.val-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+	const btn = e.target.closest('.val-btn');
+	if (!btn) return;
+	selectVal(parseInt(btn.dataset.val));
+	document.querySelectorAll('.val-btn').forEach(b => b.classList.remove('active'));
+	btn.classList.add('active');
 });
 
 customBtn.addEventListener('click', () => {
-  const v = parseInt(customInput.value);
-  if (isNaN(v)) return;
-  selectVal(v);
-  document.querySelectorAll('.val-btn').forEach(b => b.classList.remove('active'));
+	const v = parseInt(customInput.value);
+	if (isNaN(v)) return;
+	selectVal(v);
+	document.querySelectorAll('.val-btn').forEach(b => b.classList.remove('active'));
 });
 
 function selectVal(v) {
-  selectedVal = v;
-  setStatus(`Valeur sélectionnée : <span>${v}</span>`);
+	selectedVal = v;
+	setStatus(`Valeur sélectionnée : <span>${v}</span>`);
+	if (grid.length) renderGrid();
 }
 
 // ── FILL / RESET ───────────────────────────────────────────────────────────
 fillBtn.addEventListener('click', () => {
-  if (!grid.length) return;
-  for (let y = 0; y < rows; y++)
-    for (let x = 0; x < cols; x++)
-      grid[y][x] = selectedVal;
-  renderGrid(); updateJSON();
-  setStatus(`Toute la grille remplie avec <span>${selectedVal}</span>`);
-  updateLegend();
+	if (!grid.length) return;
+	for (let y = 0; y < rows; y++)
+		for (let x = 0; x < cols; x++)
+			grid[y][x] = selectedVal;
+	renderGrid(); updateJSON();
+	setStatus(`Toute la grille remplie avec <span>${selectedVal}</span>`);
+	updateLegend();
 });
 
 resetBtn.addEventListener('click', () => {
-  if (!grid.length) return;
-  for (let y = 0; y < rows; y++)
-    for (let x = 0; x < cols; x++)
-      grid[y][x] = 1;
-  renderGrid(); updateJSON();
-  setStatus('Grille réinitialisée à 1.');
-  updateLegend();
+	if (!grid.length) return;
+	for (let y = 0; y < rows; y++)
+		for (let x = 0; x < cols; x++)
+			grid[y][x] = 1;
+	renderGrid(); updateJSON();
+	setStatus('Grille réinitialisée à 1.');
+	updateLegend();
 });
 
 // ── JSON ───────────────────────────────────────────────────────────────────
 function updateJSON() {
-  jsonOutput.value = JSON.stringify(grid);
-  updateLegend();
+	jsonOutput.value = JSON.stringify(grid);
+	updateLegend();
 }
 
 copyBtn.addEventListener('click', () => {
-  navigator.clipboard.writeText(jsonOutput.value).then(() => {
-    copyBtn.textContent = '✓ Copié !';
-    copyBtn.classList.add('copied');
-    setTimeout(() => { copyBtn.textContent = 'Copier'; copyBtn.classList.remove('copied'); }, 1800);
-  });
+	navigator.clipboard.writeText(jsonOutput.value).then(() => {
+		copyBtn.textContent = '✓ Copié !';
+		copyBtn.classList.add('copied');
+		setTimeout(() => { copyBtn.textContent = 'Copier'; copyBtn.classList.remove('copied'); }, 1800);
+	});
 });
 
 // ── LEGEND ────────────────────────────────────────────────────────────────
 function updateLegend() {
-  const usedVals = new Set();
-  for (let y = 0; y < rows; y++)
-    for (let x = 0; x < cols; x++)
-      usedVals.add(grid[y][x]);
+	const usedVals = new Set();
+	for (let y = 0; y < rows; y++)
+		for (let x = 0; x < cols; x++)
+			usedVals.add(grid[y][x]);
 
-  legendEl.innerHTML = '';
-  [...usedVals].sort((a,b) => a-b).forEach(v => {
-    const col = valColor(v) ?? 'rgba(75,143,200,0.4)';
-    const label = LEGEND_LABELS[v] ?? `Valeur ${v}`;
-    const item = document.createElement('div');
-    item.className = 'legend-item';
-    item.innerHTML = `<div class="legend-dot" style="background:${col === null ? 'rgba(75,143,200,0.25)' : col}; border:1px solid rgba(255,255,255,0.1)"></div><span>${v} — ${label}</span>`;
-    legendEl.appendChild(item);
-  });
+	legendEl.innerHTML = '';
+	[...usedVals].sort((a,b) => a-b).forEach(v => {
+		const col = valColor(v) ?? 'rgba(75,143,200,0.4)';
+		const label = LEGEND_LABELS[v] ?? `Valeur ${v}`;
+		const item = document.createElement('div');
+		item.className = 'legend-item';
+		item.innerHTML = `<div class="legend-dot" style="background:${col === null ? 'rgba(75,143,200,0.25)' : col}; border:1px solid rgba(255,255,255,0.1)"></div><span>${v} — ${label}</span>`;
+		legendEl.appendChild(item);
+	});
 }
 
 // ── STATUS ─────────────────────────────────────────────────────────────────
 function setStatus(html) {
-  statusEl.innerHTML = html;
+	statusEl.innerHTML = html;
 }
 
 // ── RESIZE ────────────────────────────────────────────────────────────────
