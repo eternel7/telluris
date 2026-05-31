@@ -45,6 +45,14 @@ def read_root(request: Request):
 		context={"title": "Ubi Chartae Finiunt"}
 	)
 	
+@app.get("/editor", response_class=HTMLResponse)
+def read_root(request: Request):
+	return templates.TemplateResponse(
+		request=request, 
+		name="map_editor.html", 
+		context={"title": "Ubi Chartae Finiunt"}
+	)
+	
 @app.get("/auth", response_class=HTMLResponse)
 async def read_page_auth(request: Request):
 	is_new = "new" in request.query_params
