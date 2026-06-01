@@ -10,7 +10,7 @@ from PIL import Image
 from routes.user import user_router, User
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
-from utils.lieux import get_lieu_links
+from utils.lieux import get_lieu_links, get_lieu_directions
 
 app = FastAPI()
 
@@ -50,7 +50,7 @@ def read_root(request: Request):
 	return templates.TemplateResponse(
 		request=request, 
 		name="map_editor.html", 
-		context={"title": "Ubi Chartae Finiunt"}
+		context={"title": "Map Grid Editor"}
 	)
 	
 @app.get("/auth", response_class=HTMLResponse)
@@ -153,7 +153,6 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Gestion de la grille
 	dimensions = grid_doc.get("dimensions",None)
 	image = grid_doc.get("image")
-	
 	with Image.open(TOWNS_IMAGES_PATH+"/"+image) as img:
 		# Récupérer les dimensions (largeur, hauteur)
 		largeur, hauteur = img.size
@@ -163,7 +162,9 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		else:
 			dim_x = largeur
 			dim_y = hauteur
-		
+
+	access = get_lieu_directions(current_user, grid_doc, position)
+	
 	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["portrait"]) as portrait:
 		portrait_largeur, portrait_hauteur = portrait.size
 		
@@ -184,6 +185,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"vocation": vocation,
 			"dimensions": dimensions,
 			"dim_x": dim_x,
-			"dim_y": dim_y
+			"dim_y": dim_y,
+			"access" : access
 		}
 	)

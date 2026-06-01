@@ -8,7 +8,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
-        :root {
+		:root {
 			--x: {{ position["x"] | tojson | safe }};
 			--y: {{ position["y"] | tojson | safe }};
 			--dim_x: {{ dim_x | tojson | safe }};
@@ -390,7 +390,7 @@
 		#bg-image {
 			position: absolute;
 			display: block;
-			bottom: calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px);
+			top: calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px);
 			left: calc((var(--dist-view)/2 - var(--x)) * var(--dim_x) * 1px);
 			max-width: none;
 			transition: transform 0.2s ease-out;
@@ -402,12 +402,16 @@
 		}
 		.token {
 			position: absolute;
-			bottom: calc(var(--dim_y) * (var(--dist-view)/2 - 0.5) * 1px);
-			left: calc(var(--dim_x) * (var(--dist-view)/2 - 0.5) * 1px);
+			top: calc(var(--dim_y) * (var(--dist-view)/2) * 1px);
+			left: calc(var(--dim_x) * (var(--dist-view)/2) * 1px);
 			width: calc(var(--dim_x) * 1px);
 			height: calc(var(--dim_y) * 1px);
 			display: flex; align-items: center; justify-content: center;
 			z-index: 10; pointer-events: none;
+			border-width: 3px;
+			border-style: solid;
+			border-color: red;
+			border-radius: 30%;
 		}
 		.token::after {
 			content: '';
@@ -422,7 +426,9 @@
 		}
 		.btn { width: 50px; height: 50px; background: #222; border: 1px solid #444; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-tap-highlight-color: transparent; }
 		.btn:active { background: #444; }
-		
+		.move_btn:disabled>svg {
+			display: none
+		}
         /* RESPONSIVE UNIQUE : Portable Paysage */
         @media (max-height: 600px) and (orientation: landscape) {
 			.game-container {
@@ -505,41 +511,41 @@
 			{% else %}
 			<img id="bg-image-fit" src="{{ url_for('towns', path=image) }}">
 			{% endif %}
-        </main>
-        <aside class="sidebar">
-            <section class="sub-locations-panel">
-                <h3>Lieux</h3>
-                <ul id="sub-locations-list-id" class="sub-locations-list">
-                </ul>
-            </section>			
+		</main>
+		<aside class="sidebar">
+			<section class="sub-locations-panel">
+				<h3>Lieux</h3>
+				<ul id="sub-locations-list-id" class="sub-locations-list">
+				</ul>
+			</section>
 			{% if dimensions %}
-            <section class="navigation-panel">
-				<div class="controls">
-					<button class="btn" onclick="move(-1, 1)">
+			<section class="navigation-panel">
+				<div class="controls" id="controls">
+					<button class="btn move_btn" id="move_1_1" onclick="move(-1, -1)">
 						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.71 16.29L9.42 8H15a1 1 0 0 0 0-2H7.05a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1H7a1 1 0 0 0 1-1V9.45l8.26 8.26a1 1 0 0 0 1.42 0 1 1 0 0 0 .03-1.42z"></path></svg>
 					</button>
-					<button class="btn" onclick="move(0, 1)">
+					<button class="btn move_btn" id="move0_1" onclick="move(0, -1)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="move(1, 1)">
+					<button class="btn move_btn" id="move1_1" onclick="move(1, -1)">
 						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"></path></svg>
 					</button>
-					<button class="btn" onclick="move(-1, 0)">
+					<button class="btn move_btn" id="move_10" onclick="move(-1, 0)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="waitTurn()">
+					<button class="btn move_btn" onclick="waitTurn()">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"></path><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"></path><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"></path><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"></path></svg>
 					</button>
-					<button class="btn" onclick="move(1, 0)">
+					<button class="btn move_btn" id="move10" onclick="move(1, 0)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="move(-1, -1)">
+					<button class="btn move_btn" id="move_11" onclick="move(-1, 1)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 7L7 17M7 17H17M7 17V7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="move(0, -1)">
+					<button class="btn move_btn" id="move01" onclick="move(0, 1)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
-					<button class="btn" onclick="move(1, -1)">
+					<button class="btn move_btn" id="move11" onclick="move(1, 1)">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 7L17 17M17 17V7M17 17H7" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 					</button>
 				</div>
@@ -601,6 +607,7 @@
 <script>	
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};
+	let ACCESS = {{ access | tojson | safe }};
 	const root = document.documentElement;
 	async function move(viewDx, viewDy) {
 		const moveData = {x: viewDx, y: viewDy};
@@ -616,7 +623,9 @@
 				root.style.setProperty('--y', rep.position["y"]);
 				LINKS = rep.links;
 				POSITIONS = {"x" : rep.position["x"], "y": rep.position["y"]};
+				ACCESS = rep.access;
 				buildLocationslist();
+				updateControls();
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
@@ -648,6 +657,29 @@
 		}).join('') || `<li>Aucun</li>`;
 	}
 	buildLocationslist();
+	function updateControls() {
+		const controls = document.getElementById('controls');
+		if(controls) {
+			const boutons = [
+				{ element: document.getElementById('move_1_1'), x: -1, y: -1 },
+				{ element: document.getElementById('move_10'),  x: -1, y: 0  },
+				{ element: document.getElementById('move_11'),  x: -1, y: 1  },
+				{ element: document.getElementById('move0_1'),  x: 0,  y: -1 },
+				{ element: document.getElementById('move01'),   x: 0,  y: 1  },
+				{ element: document.getElementById('move1_1'),  x: 1,  y: -1 },
+				{ element: document.getElementById('move10'),   x: 1,  y: 0  },
+				{ element: document.getElementById('move11'),   x: 1,  y: 1  }
+			];
+			boutons.forEach(({ element, x, y }) => {
+				if (element) {
+					const valeur = ACCESS[y + 1][x + 1];
+					// Désactive si la valeur n'est pas égale à 1
+					element.disabled = (valeur !== 1);
+				}
+			});
+		}
+	}
+	updateControls();
 	async function waitTurn(){
 	}
 	async function moveTo(linkId) {

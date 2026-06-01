@@ -26,3 +26,19 @@ def get_lieu_links(current_user: dict = Body(...)):
 			node["details"] = doc
 						
 	return connections
+
+def get_lieu_directions(current_user: dict = Body(...), lieu_doc: dict = Body(...), position: dict = Body(...)):
+	if not current_user:
+		return None
+	cells = lieu_doc.get("cells",None)
+	access = 1
+	if cells:
+		x = position["x"]
+		y = position["y"]
+		rows = len(cells)
+		cols = len(cells[0]) if rows > 0 else 0
+		access = [
+			[cells[r][c] if (0 <= r < rows and 0 <= c < cols) else -1 for c in range(x-1, x+2)]
+			for r in range(y-1, y+2)
+		]
+	return access

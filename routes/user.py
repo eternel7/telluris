@@ -8,7 +8,7 @@ import uuid
 from jose import jwt
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user, create_access_token
-from utils.lieux import get_lieu_links
+from utils.lieux import get_lieu_links, get_lieu_directions
 
 class User(BaseModel):
 	email: str
@@ -246,7 +246,6 @@ async def move_character(
 			if link:
 				node = next((n for n in link["nodes"] if n["lieu"] != lieu_courant), None)
 				if node:
-					print(node)
 					destination = node["lieu"]
 					destination_pos = {"x": node["pos"][0], "y": node["pos"][1] }
 					print("move to ", destination, destination_pos)
@@ -260,8 +259,13 @@ async def move_character(
 			movey = (move["y"] > 0) - (move["y"] < 0) # -1 0 1
 			position["x"] += movex
 			position["y"] += movey
-			character_to_update["position"] = position
-			db.put(db_user)
-			links = get_lieu_links(current_user)
-			return {"position" : character_to_update["position"], "links" : links}
+			if (lieu_doc and
+				position["x"]>=0 and position["y"]>=0
+				and position["x"]<=lieu_doc["dimensions"]["x"] and position["y"]<=lieu_doc["dimensions"]["y"]):
+				character_to_update["position"] = position
+				db.put(db_user)
+				links = get_lieu_links(current_user)
+				if lieu_doc:
+					access = get_lieu_directions(current_user, lieu_doc, position)
+					return {"position" : character_to_update["position"], "links" : links, "access" : access}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")

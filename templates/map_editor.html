@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Battlemap Grid Editor</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Share+Tech+Mono&display=swap');
 
@@ -14,7 +15,7 @@
 		--accent: #c8a84b;
 		--accent2: #4b8fc8;
 		--danger: #c84b4b;
-		--text: #d0d8e8;
+		--text: #fff;
 		--muted: #5a6478;
 		--grid-line: rgba(200, 168, 75, 0.3);
 		--cell-hover: rgba(200, 168, 75, 0.15);
@@ -492,25 +493,25 @@ const LEGEND_LABELS = {
 
 // ── ELEMENTS ───────────────────────────────────────────────────────────────
 const imgInput		= document.getElementById('img-input');
-const mapImg			= document.getElementById('map-img');
-const canvas			= document.getElementById('grid-canvas');
-const ctx				 = canvas.getContext('2d');
+const mapImg		= document.getElementById('map-img');
+const canvas		= document.getElementById('grid-canvas');
+const ctx			= canvas.getContext('2d');
 const gridCont		= document.getElementById('grid-container');
 const dropZone		= document.getElementById('drop-zone');
 const jsonWrap		= document.getElementById('json-wrap');
 const jsonOutput	= document.getElementById('json-output');
-const copyBtn		 = document.getElementById('copy-btn');
+const copyBtn		= document.getElementById('copy-btn');
 const applyBtn		= document.getElementById('apply-btn');
-const fillBtn		 = document.getElementById('fill-btn');
+const fillBtn		= document.getElementById('fill-btn');
 const resetBtn		= document.getElementById('reset-btn');
 const statusEl		= document.getElementById('status');
-const valGrid		 = document.getElementById('val-grid');
-const customInput = document.getElementById('custom-val-input');
-const customBtn	 = document.getElementById('custom-val-btn');
+const valGrid		= document.getElementById('val-grid');
+const customInput	= document.getElementById('custom-val-input');
+const customBtn		= document.getElementById('custom-val-btn');
 const legendEl		= document.getElementById('legend');
-const jsonImport   = document.getElementById('json-import');
-const importBtn    = document.getElementById('import-btn');
-const importError  = document.getElementById('import-error');
+const jsonImport	= document.getElementById('json-import');
+const importBtn		= document.getElementById('import-btn');
+const importError	= document.getElementById('import-error');
 
 // ── IMAGE LOAD ─────────────────────────────────────────────────────────────
 imgInput.addEventListener('change', e => {
