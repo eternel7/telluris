@@ -732,8 +732,8 @@
 	function imgH() { return H * zoomPct / 100; }
 
 	function applyOffset(x, y, animated) {
-		x = clamp(x, 0, Math.max(0, imgW() - W1));
-		y = clamp(y, 0, Math.max(0, imgH() - H1));
+		x = clamp(Math.abs(x), 0, Math.max(0, imgW() - W1));
+		y = clamp(Math.abs(y), 0, Math.max(0, imgH() - H1));
 		offsetX = x; offsetY = y;
 		img.classList.toggle('animate', !!animated);
 		img.style.width  = imgW() + 'px';

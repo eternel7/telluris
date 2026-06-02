@@ -10,7 +10,7 @@ from PIL import Image
 from routes.user import user_router, User
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
-from utils.lieux import get_lieu_links, get_lieu_directions
+from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 
 app = FastAPI()
 
@@ -36,6 +36,7 @@ TOWNS_IMAGES_PATH = "templates/resources/towns"
 app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 
 app.include_router(user_router, prefix="/api")
+app.include_router(lieu_router, prefix="/api")
 	
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
@@ -46,11 +47,20 @@ def read_root(request: Request):
 	)
 	
 @app.get("/editor", response_class=HTMLResponse)
-def read_root(request: Request):
+def read_root(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1 ):
+		return RedirectResponse(url="/auth", headers=request.headers)
+	
+	lieux = get_lieux_ids(current_user)
 	return templates.TemplateResponse(
 		request=request, 
 		name="map_editor.html", 
-		context={"title": "Map Grid Editor"}
+		context={
+			"title": "Map Grid Editor",
+			"lieux": lieux
+			}
 	)
 	
 @app.get("/auth", response_class=HTMLResponse)

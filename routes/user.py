@@ -201,13 +201,14 @@ async def update_character_portrait(
 	db_user = db.get(current_user["_id"])
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
+
 	if portrait_info:
-		match = re.search(r"translate\(-(\d+\.?\d*)px,\s*-(\d+\.?\d*)px\)", portrait_info["value"])
+		match = re.search(r"translate\((-?\d+\.?\d*)px,\s*(-?\d+\.?\d*)px\)", portrait_info["value"])
 		zoom = portrait_info["zoom"]
 		if match:
 			x = float(match.group(1))
 			y = float(match.group(2))
-			index = db_user["selected_character"]					
+			index = db_user["selected_character"]
 			character_to_update = db_user["characters"][index]
 			character_to_update["portrait_translate"] = {"x": x, "y": y}
 			character_to_update["portrait_zoom"] = zoom
@@ -236,6 +237,7 @@ async def move_character(
 		character_to_update = db_user["characters"][index]
 		position = character_to_update["position"]
 		lieu_courant = character_to_update["lieu"]
+		
 		if "link" in move:
 			links = get_lieu_links(current_user)
 			target_id = move["link"]
@@ -259,6 +261,7 @@ async def move_character(
 			movey = (move["y"] > 0) - (move["y"] < 0) # -1 0 1
 			position["x"] += movex
 			position["y"] += movey
+			lieu_doc = db.get(lieu_courant)
 			if (lieu_doc and
 				position["x"]>=0 and position["y"]>=0
 				and position["x"]<=lieu_doc["dimensions"]["x"] and position["y"]<=lieu_doc["dimensions"]["y"]):

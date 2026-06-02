@@ -12,4 +12,6 @@ safe_password = urllib.parse.quote_plus(DB_PASSWORD)
 
 DB_URL = f"http://{DB_USER}:{safe_password}@couchdb:5984"
 server = couchdb2.Server(DB_URL)
-db = server["telluris"] 
+db = server["telluris"]
+
+db.put_index(fields=["type"])

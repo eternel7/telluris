@@ -1,14 +1,25 @@
 from typing import Annotated
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
+from urllib.parse import unquote
 from pydantic import BaseModel
-from db.config import db, SECRET_KEY, ALGORITHM
-		
+from db.config import db
+from utils.auth import get_current_user
+
+class User(BaseModel):
+	email: str
+	username: str | None = None
+	disabled: bool | None = None
+	
+lieu_router = APIRouter()
+
 def get_lieu_links(current_user: dict = Body(...)):
 	if not current_user:
 		return None
+	
 	db_user = db.get(current_user["_id"])
 	if not db_user:
 		return None
+	
 	index = db_user["selected_character"]
 	character = db_user["characters"][index]
 	position = character["position"]
@@ -42,3 +53,50 @@ def get_lieu_directions(current_user: dict = Body(...), lieu_doc: dict = Body(..
 			for r in range(y-1, y+2)
 		]
 	return access
+
+def get_lieux_ids(current_user: dict = Body(...)):
+	if not current_user:
+		return None
+	selector = {
+		"type": "lieu",
+		"cells": {"$exists": True}
+	}
+	results = db.find(selector, fields=["_id","label","image"])
+	return results["docs"]
+
+@lieu_router.get("/lieu/{lieu_id}")
+async def get_lieu(
+	response: Response,
+	current_user: Annotated[User, Depends(get_current_user)],
+	lieu_id: str):
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1 ):
+		return None
+	
+	decoded_id = unquote(lieu_id)
+	try:
+		doc = db.get(decoded_id)
+
+		if not doc:
+			raise HTTPException(status_code=404, detail="Lieu introuvable")
+
+		return doc
+
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"Erreur CouchDB : {str(e)}")
+	
+@lieu_router.post("/update_cells")
+async def update_cells(
+	response: Response,
+	current_user: dict = Body(...), 
+	cells_info: dict = Body(...)):
+	
+	if ( not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1 ):
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+		
+	if cells_info :
+		print(cells_info)
+	raise HTTPException(status_code=404, detail="Incorrect location grid info")

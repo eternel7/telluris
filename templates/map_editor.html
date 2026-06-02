@@ -101,29 +101,22 @@
 		letter-spacing: 0.05em;
 	}
 
-	input[type="file"] {
-		display: none;
-	}
-
-	.file-btn {
-		display: block;
+	select {
 		width: 100%;
-		padding: 9px;
-		background: transparent;
-		border: 1px dashed var(--accent);
+		background: #0d0f14;
+		border: 1px solid var(--border);
 		border-radius: 4px;
-		color: var(--accent);
+		color: var(--text);
 		font-family: 'Share Tech Mono', monospace;
-		font-size: 0.75rem;
+		font-size: 0.85rem;
+		padding: 8px;
+		outline: none;
+		transition: border-color 0.2s;
 		cursor: pointer;
-		text-align: center;
-		transition: background 0.2s;
-		letter-spacing: 0.05em;
+		margin-bottom: 14px;
 	}
-	.file-btn:hover { background: rgba(200,168,75,0.08); }
-
-	.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-
+	select:focus { border-color: var(--accent); }
+	
 	input[type="number"] {
 		width: 100%;
 		background: #0d0f14;
@@ -365,37 +358,15 @@
 
 		<!-- Image & dimensions -->
 		<div class="card">
-			<div class="card-title">📁 Carte & Dimensions</div>
-			<label>Image de la battlemap</label>
-			<label class="file-btn" for="img-input">📂 Choisir une image</label>
-			<input type="file" id="img-input" accept="image/*">
-
-			<div style="margin-top:14px;" class="row2">
-				<div>
-					<label>Colonnes (X)</label>
-					<input type="number" id="grid-x" value="20" min="1" max="200">
-				</div>
-				<div>
-					<label>Lignes (Y)</label>
-					<input type="number" id="grid-y" value="20" min="1" max="200">
-				</div>
-			</div>
-
-			<button class="btn" id="apply-btn">Générer la grille</button>
-			<div style="margin-top:10px;">
-				<label>Importer un JSON existant</label>
-				<div style="display:flex;gap:6px;">
-				<textarea id="json-import" placeholder='[[1,0,1],[1,1,0]…]' rows="2"
-					style="flex:1;background:#0d0f14;border:1px solid var(--border);border-radius:4px;
-						 color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;
-						 padding:7px;resize:vertical;outline:none;"></textarea>
-				<button id="import-btn" style="padding:7px 10px;border:1px solid var(--accent2);
-					border-radius:4px;background:transparent;color:var(--accent2);
-					font-family:'Share Tech Mono',monospace;font-size:0.75rem;cursor:pointer;
-					align-self:flex-end;">OK</button>
-				</div>
-				<div id="import-error" style="color:#c84b4b;font-size:0.68rem;margin-top:4px;min-height:1em;"></div>
-			</div>
+			<div class="card-title">🗺️ Sélection du Lieu</div>
+			<label for="lieu-select">Choisir un lieu</label>
+			<select id="lieu-select">
+				<option value="" disabled selected>-- Choisir un lieu --</option>
+				{% for lieu in lieux %}
+				<option value="{{ lieu._id }}">{{ lieu.label }}</option>
+				{% endfor %}
+			</select>
+			<div id="load-error" style="color:#c84b4b;font-size:0.68rem;margin-top:4px;min-height:1em;"></div>
 		</div>
 
 		<!-- Value selector -->
@@ -465,6 +436,8 @@ let isPainting = false;
 let paintMode = null;		// 'set'
 let imgLoaded = false;
 let hoverCell = null;		// {cx, cy} currently hovered
+let currentRev = null;
+let debounceTimer = null;
 
 // Color map for values
 const VALUE_COLORS = {
@@ -492,7 +465,8 @@ const LEGEND_LABELS = {
 };
 
 // ── ELEMENTS ───────────────────────────────────────────────────────────────
-const imgInput		= document.getElementById('img-input');
+const lieuSelect	= document.getElementById('lieu-select');
+const loadError		= document.getElementById('load-error');
 const mapImg		= document.getElementById('map-img');
 const canvas		= document.getElementById('grid-canvas');
 const ctx			= canvas.getContext('2d');
@@ -501,7 +475,6 @@ const dropZone		= document.getElementById('drop-zone');
 const jsonWrap		= document.getElementById('json-wrap');
 const jsonOutput	= document.getElementById('json-output');
 const copyBtn		= document.getElementById('copy-btn');
-const applyBtn		= document.getElementById('apply-btn');
 const fillBtn		= document.getElementById('fill-btn');
 const resetBtn		= document.getElementById('reset-btn');
 const statusEl		= document.getElementById('status');
@@ -509,56 +482,81 @@ const valGrid		= document.getElementById('val-grid');
 const customInput	= document.getElementById('custom-val-input');
 const customBtn		= document.getElementById('custom-val-btn');
 const legendEl		= document.getElementById('legend');
-const jsonImport	= document.getElementById('json-import');
-const importBtn		= document.getElementById('import-btn');
-const importError	= document.getElementById('import-error');
 
-// ── IMAGE LOAD ─────────────────────────────────────────────────────────────
-imgInput.addEventListener('change', e => {
-	const file = e.target.files[0];
-	if (!file) return;
-	const url = URL.createObjectURL(file);
-	mapImg.onload = () => { imgLoaded = true; };
-	mapImg.src = url;
-});
+// ── GET LIEU & GENERATE GRID FROM SERVER ───────────────────────────────────
+lieuSelect.addEventListener('change', async (e) => {
+	const lieuId = e.target.value;
+	if (!lieuId) return;
 
-// ── GENERATE GRID ──────────────────────────────────────────────────────────
-applyBtn.addEventListener('click', () => {
-	cols = Math.max(1, Math.min(200, parseInt(document.getElementById('grid-x').value) || 20));
-	rows = Math.max(1, Math.min(200, parseInt(document.getElementById('grid-y').value) || 20));
+	loadError.textContent = '';
+	setStatus('Chargement du lieu...');
 
-	// Init grid with 1s
-	grid = Array.from({length: rows}, () => Array(cols).fill(1));
+	try {
+		const response = await fetch(`/api/lieu/${encodeURIComponent(lieuId)}`);
+		if (!response.ok) throw new Error('Erreur lors de la récupération du lieu');
+		
+		const lieuData = await response.json();
 
-	if (!imgLoaded) {
-		// Show placeholder grey
-		mapImg.src = '';
-		dropZone.classList.add('hidden');
-		gridCont.classList.add('visible');
-		gridCont.style.aspectRatio = `${cols}/${rows}`;
-		mapImg.style.display = 'none';
-	} else {
-		dropZone.classList.add('hidden');
-		gridCont.classList.add('visible');
-		mapImg.style.display = 'block';
+		if (!lieuData.dimensions || !lieuData.cells) {
+			throw new Error('Données incomplètes (cells ou dimensions manquantes)');
+		}
+		cols = 0;
+		rows = 0;
+		grid = [];
+		imgLoaded = false;
+		mapImg.removeAttribute('src');
+		const urlTowns = `{{ url_for('towns', path='') }}${lieuData.image}`;
+		const urlBattleMaps = `{{ url_for('battle_maps', path='') }}${lieuData.image}`;
+		mapImg.onload = () => {
+			imgLoaded = true;
+			cols = lieuData.dimensions.x;
+			rows = lieuData.dimensions.y;
+			currentRev = lieuData._rev;
+			grid = lieuData.cells.map(row => [...row]);
+			dropZone.classList.add('hidden');
+			gridCont.classList.add('visible');
+			mapImg.style.display = 'block';
+			jsonWrap.classList.add('visible');
+			requestAnimationFrame(() => {
+				renderGrid();
+				updateJSON();
+				setStatus(`Lieu <span>${lieuData.label}</span> (${cols}×${rows}) chargé - ${currentRev}.`);
+				updateLegend();
+			});
+		};
+
+		mapImg.onerror = () => {
+			if (mapImg.getAttribute('src') === urlTowns) {
+				setStatus(`Image non trouvée dans towns, tentative dans battle_maps...`);
+				mapImg.src = urlBattleMaps;
+			} else {
+				dropZone.classList.add('hidden');
+				gridCont.classList.add('visible');
+				gridCont.style.aspectRatio = `${cols}/${rows}`;
+				mapImg.style.display = 'none';
+				jsonWrap.classList.add('visible');
+				renderGrid();
+				updateJSON();
+				setStatus(`Lieu <span>${lieuData.label}</span> chargé (image manquante).`);
+			}
+		};
+
+		mapImg.src = urlTowns;
+
+	} catch (err) {
+		loadError.textContent = `✗ ${err.message}`;
+		setStatus('<span style="color:var(--danger)">Échec du chargement.</span>');
 	}
-
-	jsonWrap.classList.add('visible');
-	renderGrid();
-	updateJSON();
-	setStatus(`Grille ${cols}×${rows} générée.`);
-	updateLegend();
 });
 
 // ── RENDER GRID ────────────────────────────────────────────────────────────
 function renderGrid() {
 	const W = gridCont.clientWidth;
-	const imgH = mapImg.naturalHeight || 1;
-	const imgW = mapImg.naturalWidth || cols;
-	const H = mapImg.src ? W * (imgH / imgW) : W * (rows / cols);
+	const H = (imgLoaded && mapImg.offsetHeight > 0) ? mapImg.offsetHeight : W * (rows / cols);
 
 	canvas.width	= W;
 	canvas.height = H;
+	gridCont.style.height = H + 'px';
 
 	const cw = W / cols;
 	const ch = H / rows;
@@ -685,32 +683,6 @@ canvas.addEventListener('touchstart', e => { e.preventDefault(); isPainting = tr
 canvas.addEventListener('touchmove',	e => { e.preventDefault(); paint(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchend',	 () => { isPainting = false; });
 
-// ── JSON IMPORT ────────────────────────────────────────────────────────────
-importBtn.addEventListener('click', () => {
-  importError.textContent = '';
-  let parsed;
-  try { parsed = JSON.parse(jsonImport.value.trim()); } catch {
-    importError.textContent = '✗ JSON invalide.'; return;
-  }
-  if (!Array.isArray(parsed) || !Array.isArray(parsed[0])) {
-    importError.textContent = '✗ Attendu : tableau 2D [[…],…]'; return;
-  }
-  const r = parsed.length;
-  const c = parsed[0].length;
-  if (parsed.some(row => !Array.isArray(row) || row.length !== c || row.some(v => typeof v !== 'number'))) {
-    importError.textContent = '✗ Toutes les lignes doivent avoir la même longueur et contenir des nombres.'; return;
-  }
-  rows = r; cols = c;
-  document.getElementById('grid-x').value = c;
-  document.getElementById('grid-y').value = r;
-  grid = parsed.map(row => [...row]);
-  dropZone.classList.add('hidden');
-  gridCont.classList.add('visible');
-  jsonWrap.classList.add('visible');
-  renderGrid(); updateJSON();
-  setStatus(`JSON importé — grille <span>${c}×${r}</span>`);
-  jsonImport.value = '';
-});
 // ── VALUE SELECTION ────────────────────────────────────────────────────────
 valGrid.addEventListener('click', e => {
 	const btn = e.target.closest('.val-btn');
