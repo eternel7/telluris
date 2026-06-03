@@ -86,10 +86,10 @@ async def get_lieu(
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Erreur CouchDB : {str(e)}")
 	
-@lieu_router.post("/update_cells")
+@lieu_router.put("/update_cells")
 async def update_cells(
 	response: Response,
-	current_user: dict = Body(...), 
+	current_user: Annotated[User, Depends(get_current_user)],
 	cells_info: dict = Body(...)):
 	
 	if ( not current_user or
@@ -98,5 +98,12 @@ async def update_cells(
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 		
 	if cells_info :
-		print(cells_info)
+		print("cells_info",cells_info)
+		cells = cells_info["cells"]
+		lieu_id = cells_info["_id"]
+		lieu_doc = db.get(lieu_id)
+		if lieu_doc:
+			lieu_doc["cells"] = cells
+			db.put(lieu_doc)
+			return lieu_doc
 	raise HTTPException(status_code=404, detail="Incorrect location grid info")

@@ -429,7 +429,7 @@
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────────
-let grid = [];					 // 2D array [y][x]
+let grid = [];					// 2D array [y][x]
 let cols = 20, rows = 20;
 let selectedVal = 1;
 let isPainting = false;
@@ -437,16 +437,17 @@ let paintMode = null;		// 'set'
 let imgLoaded = false;
 let hoverCell = null;		// {cx, cy} currently hovered
 let currentRev = null;
+let currentLocId = null;
 let debounceTimer = null;
 
 // Color map for values
 const VALUE_COLORS = {
-	0: 'rgba(30,30,40,0.75)',
+	0: 'rgba(30,30,40,0.6)',
 	1: 'rgba(75,143,200,0.0)',	 // transparent = libre
-	2: 'rgba(200,200,75,0.45)',
-	3: 'rgba(200,140,75,0.45)',
-	5: 'rgba(200,75,75,0.45)',
-	9: 'rgba(80,20,20,0.75)',
+	2: 'rgba(200,200,75,0.35)',
+	3: 'rgba(200,140,75,0.35)',
+	5: 'rgba(200,75,75,0.35)',
+	9: 'rgba(80,20,20,0.6)',
 };
 const DEFAULT_COLOR = 'rgba(120,75,200,0.45)';
 
@@ -508,6 +509,7 @@ lieuSelect.addEventListener('change', async (e) => {
 		const urlTowns = `{{ url_for('towns', path='') }}${lieuData.image}`;
 		const urlBattleMaps = `{{ url_for('battle_maps', path='') }}${lieuData.image}`;
 		mapImg.onload = () => {
+			currentLocId = lieuId;
 			imgLoaded = true;
 			cols = lieuData.dimensions.x;
 			rows = lieuData.dimensions.y;
@@ -548,6 +550,40 @@ lieuSelect.addEventListener('change', async (e) => {
 		setStatus('<span style="color:var(--danger)">Échec du chargement.</span>');
 	}
 });
+
+async function sendGrid() {
+	const payload = {
+		_id: currentLocId,
+		_rev: currentRev,
+		cells: grid
+	};
+
+	try {
+		const res = await fetch('/api/update_cells', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
+		});
+
+		if (res.ok) {
+			const lieuData = await res.json();
+			currentRev = lieuData._rev; // CouchDB renvoie le nouveau _rev
+			setStatus(`Lieu <span>${lieuData.label}</span> (${cols}×${rows}) chargé - ${currentRev}.`);
+		} else if (res.status === 409) {
+			// Conflit : recharge le doc puis réessaie
+			await renderGrid();
+			scheduleGridSend();
+		}
+	} catch (err) {
+		loadError.textContent = `✗ ${err.message}`;
+		setStatus('<span style="color:var(--danger)">Échec de la mise à jour - ${currentRev}.</span>');
+	}
+}
+
+function scheduleGridSend() {
+	clearTimeout(debounceTimer);
+	debounceTimer = setTimeout(() => sendGrid(), 800);
+}
 
 // ── RENDER GRID ────────────────────────────────────────────────────────────
 function renderGrid() {
@@ -624,7 +660,7 @@ function renderGrid() {
 
 function getHoverGlow() {
 	const colors = {
-		0: 'rgba(30,30,40,0.9)',
+		0: 'rgba(30,30,40,0.5)',
 		1: 'rgba(75,143,200,0.95)',
 		2: 'rgba(220,220,75,0.95)',
 		3: 'rgba(220,150,75,0.95)',
@@ -652,7 +688,8 @@ function paint(e) {
 		grid[cy][cx] = selectedVal;
 		renderGrid();
 		updateJSON();
-		setStatus(`Cellule [${cx}, ${cy}] = ${selectedVal}`);
+		setStatus(`Cellule [${cx}, ${cy}] = ${selectedVal} - ${currentRev}.`);
+		scheduleGridSend();
 	}
 }
 
@@ -670,7 +707,7 @@ canvas.addEventListener('mousemove', e => {
 		renderGrid();
 	}
 	if (!isPainting) {
-		if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]}`);
+		if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]} - ${currentRev}.`);
 		return;
 	}
 	paint(e);
@@ -701,7 +738,7 @@ customBtn.addEventListener('click', () => {
 
 function selectVal(v) {
 	selectedVal = v;
-	setStatus(`Valeur sélectionnée : <span>${v}</span>`);
+	setStatus(`Valeur sélectionnée : <span>${v}</span> - ${currentRev}.`);
 	if (grid.length) renderGrid();
 }
 
@@ -712,7 +749,7 @@ fillBtn.addEventListener('click', () => {
 		for (let x = 0; x < cols; x++)
 			grid[y][x] = selectedVal;
 	renderGrid(); updateJSON();
-	setStatus(`Toute la grille remplie avec <span>${selectedVal}</span>`);
+	setStatus(`Toute la grille remplie avec <span>${selectedVal}</span> - ${currentRev}.`);
 	updateLegend();
 });
 
@@ -722,7 +759,7 @@ resetBtn.addEventListener('click', () => {
 		for (let x = 0; x < cols; x++)
 			grid[y][x] = 1;
 	renderGrid(); updateJSON();
-	setStatus('Grille réinitialisée à 1.');
+	setStatus('Grille réinitialisée à 1. - ${currentRev}.');
 	updateLegend();
 });
 
