@@ -98,7 +98,6 @@ async def update_cells(
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 		
 	if cells_info :
-		print("cells_info",cells_info)
 		cells = cells_info["cells"]
 		lieu_id = cells_info["_id"]
 		lieu_doc = db.get(lieu_id)
