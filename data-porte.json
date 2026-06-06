@@ -1,0 +1,90 @@
+{
+	"docs": [
+		{
+		  "_id": "lieu:auxerre_porte_douve_interieur03",
+		  "type": "lieu",
+		  "label": "Porte nord oeust d'Auxerre - interieur",
+		  "image": "porte_de_ville_pont_interieur03.png",
+		  "categorie": "Porte de rempart"
+		},
+		{
+		  "_id": "lieu:auxerre_porte_douve_exterieur03",
+		  "type": "lieu",
+		  "label": "Porte nord oeust d'Auxerre - exterieur",
+		  "image": "porte_de_ville_douves_exterieur01.png",
+		  "categorie": "Porte de rempart"
+		},
+		{
+		  "_id": "link:auxerre_porte_douve_interieur_exterieur03",
+		  "type": "connection",
+		  "nodes": [
+			{
+			  "lieu": "lieu:auxerre_porte_douve_exterieur03",
+			  "pos": [
+				0,
+				0
+			  ]
+			},
+			{
+			  "lieu": "lieu:auxerre_porte_douve_interieur03",
+			  "pos": [
+				0,
+				0
+			  ]
+			}
+		  ],
+		  "metadata": {
+			"type": "poste de garde",
+			"status": "ouvert"
+		  }
+		},
+		{
+		  "_id": "link:auxerre_poste_de_garde_tour_porte_douve_exterieur01",
+		  "type": "connection",
+		  "nodes": [
+			{
+			  "lieu": "lieu:auxerre",
+			  "pos": [
+				25,
+				11
+			  ]
+			},
+			{
+			  "lieu": "lieu:auxerre_porte_douve_exterieur03",
+			  "pos": [
+				0,
+				0
+			  ]
+			}
+		  ],
+		  "metadata": {
+			"type": "poste de garde",
+			"status": "ouvert"
+		  }
+		},
+		{
+		  "_id": "link:auxerre_poste_de_garde_tour_porte_douve_interieur01",
+		  "type": "connection",
+		  "nodes": [
+			{
+			  "lieu": "lieu:auxerre",
+			  "pos": [
+				27,
+				12
+			  ]
+			},
+			{
+			  "lieu": "lieu:auxerre_porte_douve_interieur03",
+			  "pos": [
+				0,
+				0
+			  ]
+			}
+		  ],
+		  "metadata": {
+			"type": "poste de garde",
+			"status": "ouvert"
+		  }
+		}
+	]
+}
