@@ -8,8 +8,9 @@ from fastapi.staticfiles import StaticFiles
 from jose import jwt, JWTError
 from PIL import Image
 from routers.user import user_router, User
-from db.config import db, SECRET_KEY, ALGORITHM
+from db.config import db, find_docs, get_doc, save_doc, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
+from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 
 app = FastAPI()
@@ -23,8 +24,8 @@ app.add_middleware(
 	allow_headers=["*"],
 )
 # Indexes voulus dans CouchDB
-db.put_index(fields=["type"], name="idx-tables")
-db.put_index(fields=["type", "user_id"], name="idx-tables-by-user")
+db.put_index(fields=["type"], name="idx-tables", ddoc="design_tables")
+db.put_index(fields=["type", "user_id"], name="idx-tables-by-user", ddoc="design_tables")
 
 # Definit ou se trouvent les fichiers HTML
 templates = Jinja2Templates(directory="templates")
@@ -88,7 +89,10 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 	vocations = db.get("rules:vocations")
 	vocations_proximity = db.get("rules:vocations_proximity")
 	
-	# characters images : 
+	# characters :
+	characters = get_user_characters(current_user)
+	
+	# characters available images : 
 	valid_extensions = (".jpg", ".jpeg", ".png", ".webp", ".gif")
 	characters_images = []
 	if os.path.exists(CHARACTERS_IMAGES_PATH):
@@ -125,6 +129,7 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 		name ="user_home_telluris.html",
 		context= {
 			"user_doc": current_user,
+			"characters": characters,
 			"title": 'Your domain',
 			"races" : races,
 			"races_proximity" : races_proximity,
@@ -155,12 +160,21 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	if not current_user:
 		return RedirectResponse(url="/auth", headers=request.headers)
 	
-	character_id = current_user["selected_character"]
-	character = current_user["characters"][character_id]
-	vocations = db.get("rules:vocations")
+	user_id = current_user["_id"]
+	db_user = get_doc(user_id)
+	if not db_user:
+		return RedirectResponse(url="/auth", headers=request.headers)
+	
+	# Selected character for current user
+	character = get_selected_character(current_user)
+	
+	if not character:
+		return RedirectResponse(url="/auth", headers=request.headers)
+		
+	vocations = get_doc("rules:vocations")
 	vocation = next((v for v in vocations["value"] if v["id"] == character["voc"]), None)
 	lieu = character.get("lieu",character["cite"])
-	grid_doc = db.get(lieu)
+	grid_doc = get_doc(lieu)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
 	# Gestion de la grille
@@ -178,7 +192,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 
 	access = get_lieu_directions(current_user, grid_doc, position)
 	
-	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["portrait"]) as portrait:
+	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["image"]) as portrait:
 		portrait_largeur, portrait_hauteur = portrait.size
 		
 	return templates.TemplateResponse(

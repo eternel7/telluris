@@ -2,7 +2,8 @@ from typing import Annotated
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from urllib.parse import unquote
 from pydantic import BaseModel
-from db.config import db
+from db.config import db, get_doc, save_doc
+from utils.characters import get_selected_character
 from utils.auth import get_current_user
 
 class User(BaseModel):
@@ -15,13 +16,10 @@ lieu_router = APIRouter()
 def get_lieu_links(current_user: dict = Body(...)):
 	if not current_user:
 		return None
-	
-	db_user = db.get(current_user["_id"])
-	if not db_user:
+		
+	character = get_selected_character(current_user)
+	if not character:
 		return None
-	
-	index = db_user["selected_character"]
-	character = db_user["characters"][index]
 	position = character["position"]
 	lieu = character["lieu"]
 	target_key = [ lieu, position["x"], position["y"] ]
@@ -30,7 +28,7 @@ def get_lieu_links(current_user: dict = Body(...)):
 	
 	for conn in connections:
 		for node in conn["nodes"]:
-			doc = db.get(node["lieu"])
+			doc = get_doc(node["lieu"])
 			doc.pop("cells",None)
 			doc.pop("_rev",None)
 			doc.pop("_id",None)
@@ -76,7 +74,7 @@ async def get_lieu(
 	
 	decoded_id = unquote(lieu_id)
 	try:
-		doc = db.get(decoded_id)
+		doc = get_doc(decoded_id)
 
 		if not doc:
 			raise HTTPException(status_code=404, detail="Lieu introuvable")
@@ -100,9 +98,9 @@ async def update_cells(
 	if cells_info :
 		cells = cells_info["cells"]
 		lieu_id = cells_info["_id"]
-		lieu_doc = db.get(lieu_id)
+		lieu_doc = get_doc(lieu_id)
 		if lieu_doc:
 			lieu_doc["cells"] = cells
-			db.put(lieu_doc)
+			save_doc(lieu_doc)
 			return lieu_doc
 	raise HTTPException(status_code=404, detail="Incorrect location grid info")

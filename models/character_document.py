@@ -30,7 +30,7 @@ class CharacterDocument(BaseModel):
     sexe:     str             # "M" | "F"
     race:     str             # "humain" | "elfe" | "nain" | "ogre" | "hobbit"
     vocation: str             # id de vocation
-    portrait: Optional[str] = None   # URL de l'image
+    image: Optional[str] = None   # URL de l'image
 
     # ── Progression ──────────────────────────────────────────────────
     niveau:    int = 1
@@ -115,7 +115,7 @@ EXAMPLE_DOCUMENT = {
     "sexe":   "M",
     "race":   "humain",
     "vocation": "guerrier",
-    "portrait": "/characters/guerrier_m_white10.jpg",
+    "image": "guerrier_m_white10.jpg",
     "niveau":  3,
     "xp_total": 45,
     "xp_libre":  5,

@@ -1178,14 +1178,10 @@
 	══════════════════════════════════════════════════════════ */
 	
 	// cite de depart
-	let CHARACTERS = {{ user_doc["characters"] | tojson | safe }};
-	
-	const RACES = {{ races["value"] | tojson | safe }};
-	
-	const RACES_PROXIMITY = {{ races_proximity["value"] | tojson | safe }};
-	
-	const VOCATIONS = {{ vocations["value"] | tojson | safe }};
-	
+	let CHARACTERS = {{ characters | tojson | safe }};	
+	const RACES = {{ races["value"] | tojson | safe }};	
+	const RACES_PROXIMITY = {{ races_proximity["value"] | tojson | safe }};	
+	const VOCATIONS = {{ vocations["value"] | tojson | safe }};	
 	const VOCATIONS_PROXIMITY = {{ vocations_proximity["value"] | tojson | safe }};
 	
 	// Pool de portraits — chaque portrait a: src, sex (M/F), voc (id vocation ou null), race (id race ou null)
@@ -1198,7 +1194,7 @@
 	   ÉTAT
 	══════════════════════════════════════════════════════════ */
 	const statNames = { V:'Vitesse', F:'Force', R:'Résistance', Ag:'Agilité', Vol:'Volonté', Int:'Intelligence', Cha:'Charisme', Ch:'Chance', PV:'Points de vie', PM:'Points de magie' };
-	let wiz = { step:1, sex:null, race:null, voc:null, portrait:null, full_portrait:null, prenom:'', nom:'', cite:'' ,
+	let wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'', cite:'' ,
 				bonusStats: { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, Cha: 0, Ch: 0, PV: 0, PM: 0 }};
 	const MAX_BONUS_POINTS = 10;
 	const TOTAL_STEPS = 5;
@@ -1215,7 +1211,7 @@
 	   WIZARD NAVIGATION
 	══════════════════════════════════════════════════════════ */
 	function openWizard() {
-		wiz = { step:1, sex:null, race:null, voc:null, portrait:null, prenom:'', nom:'' , cite:''};
+		wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'' , cite:''};
 		document.getElementById('wizard-overlay').classList.add('open');
 		document.body.style.overflow = 'hidden';
 		renderStep(1);
@@ -1472,7 +1468,7 @@
 
 		const grid = document.getElementById('portrait-grid');
 		grid.innerHTML = sorted.map(p => {
-			const isChosen = wiz.portrait === p.src;
+			const isChosen = wiz.image === p.src;
 			const badge    = p._score >= 15 ? 'Vocation & Race' : p._score >= 10 ? 'Race' : p._score >= 5 ? 'Vocation' : '';
 			return `
 			<button class="portrait-btn ${isChosen ? 'chosen' : ''}"
@@ -1491,7 +1487,7 @@
 	function choosePortrait(btn) {
 		document.querySelectorAll('.portrait-btn').forEach(b => b.classList.remove('chosen'));
 		btn.classList.add('chosen');
-		wiz.portrait = btn.dataset.src;
+		wiz.image = btn.dataset.src;
 		validateStep();
 	}
 
@@ -1561,7 +1557,7 @@
 							aria-label="Supprimer ${c.prenom} ${c.nom}"
 							title="Supprimer ce personnage">✕</button>
 				<div class="char-icon">
-					<img src="/characters/${c.portrait}"
+					<img src="/characters/${c.image}"
 						 alt="Portrait de ${c.prenom} ${c.nom}, ${c.voc}">
 					</div>
 					<div class="char-data">

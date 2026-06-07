@@ -61,7 +61,7 @@
 				"footer footer";
 			width: 100%;
 			max-width: 1100px;
-			height: 95vh;
+			min-height: 95vh;
 			border: 4px double var(--border-color);
 			background-color: var(--panel-bg);
 			gap: 10px;
@@ -562,13 +562,13 @@
 				<div id="scale-root" class="char-portrait">
 					<div class="viewport-wrapper" id="vp">
 					<img id="img"
-						src="{{ url_for('characters', path=character["portrait"]) }}"
+						src="{{ url_for('characters', path=character["image"]) }}"
 						alt="Image"
 						draggable="false">
 					<!-- Slider de zoom -->
 					<div id="zoom-bar">
 						<span class="z-icon">−</span>
-						<input id="zoom-slider" type="range" min="10" max="200" value="{{ character.get("portrait_zoom",100) | tojson | safe }}" step="5">
+						<input id="zoom-slider" type="range" min="10" max="120" value="{{ character.get("portrait_zoom",100) | tojson | safe }}" step="5">
 						<span class="z-icon">+</span>
 						<span id="zoom-val">{{ character.get("portrait_zoom",100) | tojson | safe }}%</span>
 					</div>

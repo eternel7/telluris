@@ -14,15 +14,24 @@ DB_URL = f"http://{DB_USER}:{safe_password}@couchdb:5984"
 server = couchdb2.Server(DB_URL)
 db = server["telluris"]
 
-async def get_doc(doc_id: str) -> dict | None:
+def get_doc(doc_id: str) -> dict | None:
 	try:
-		return await db.get(doc_id)
+		return db.get(doc_id)
 	except Exception:
 		return None
 
-async def save_doc(doc: dict) -> dict:
-	return await db.put(doc)
+def save_doc(doc: dict) -> dict:
+	try:
+		return db.put(doc)
+	except Exception:
+		return None
 
-async def find_docs(selector: dict, limit: int = 1000, fields: list[str] =["_id", "type"]) -> list[dict]:
-	result = await db.find(selector, limit=limit, fields=fields)
-	return result["docs"]
+def find_docs(selector: dict, fields: list[str] = None) -> list[dict]:
+	try:
+		if fields:
+			result = db.find(selector, fields=fields)
+		else:
+			result = db.find(selector)
+		return result["docs"]
+	except Exception:
+		return None
