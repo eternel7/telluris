@@ -6,7 +6,7 @@ import bcrypt
 import re
 import uuid
 from jose import jwt
-from db.config import db, SECRET_KEY, ALGORITHM
+from db.config import db, SECRET_KEY, ALGORITHM, save_doc, get_doc
 from utils.auth import get_current_user, create_access_token
 from utils.lieux import get_lieu_links, get_lieu_directions
 
@@ -75,9 +75,6 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
 		
-	if "characters" not in db_user:
-		db_user["characters"] = []
-		
 	if (characterinfo and "bonusStats" in characterinfo):
 		caractUp = characterinfo["bonusStats"]
 		points_depenses = sum(
@@ -94,9 +91,12 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 		}
 		lieu = db.get(characterinfo["cite"])
 		position = lieu.get("default_position",{"x" : 0, "y" : 0})
-		unique_id = str(uuid.uuid4())
+		user_id = db_user["_id"]
+		unique_id = "character:"+user_id+"_"+str(uuid.uuid4())
 		character_dict = {
-			'_id' : unique_id, 
+			'_id' : unique_id,
+			'user_id' : user_id,
+			'character' : "character",
 			'sex': characterinfo["sex"], 
 			'race': characterinfo["race"], 
 			'voc': characterinfo["voc"], 

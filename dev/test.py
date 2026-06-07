@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from routes.user import user_router
+from routers.user import user_router
 from jose import jwt, JWTError
 from db.config import db, SECRET_KEY, ALGORITHM
 

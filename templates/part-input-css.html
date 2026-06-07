@@ -1,0 +1,35 @@
+	/* ── FORMULAIRE ─────────────────────────────────────────── */
+	.form-group {
+		text-align: left;
+		margin-bottom: 20px;
+		position: relative;
+	}
+
+	label {
+		display: block;
+		font-family: 'Cinzel', serif;
+		font-size: 12px;
+		color: var(--ink);
+		margin-bottom: 6px;
+		font-weight: 700;
+		text-transform: uppercase;
+	}
+	/* ── INPUT FOCUS no Cumulative Layout Shift - CLS  ─────────────────────────────────────────── */
+	input {
+		width: 100%;
+		background: rgba(0, 0, 0, 0.05);
+		border: none;
+		border-bottom: 1px solid var(--bronze);
+		padding: 10px 0;
+		color: var(--ink);
+		font-family: 'IM Fell English', serif;
+		font-size: 16px;
+		box-sizing: border-box;
+		transition: border-color 0.3s;
+	}
+
+	input:focus {
+		outline: none;
+		box-shadow: 0 1px 0 0 var(--gold);
+		border-bottom: 1px solid var(--gold);
+	}

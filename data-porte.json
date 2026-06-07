@@ -4,14 +4,14 @@
 		  "_id": "lieu:auxerre_porte_douve_interieur03",
 		  "type": "lieu",
 		  "label": "Porte nord oeust d'Auxerre - interieur",
-		  "image": "porte_de_ville_pont_interieur03.png",
+		  "image": "porte_de_ville_pont_interieur10.png",
 		  "categorie": "Porte de rempart"
 		},
 		{
 		  "_id": "lieu:auxerre_porte_douve_exterieur03",
 		  "type": "lieu",
 		  "label": "Porte nord oeust d'Auxerre - exterieur",
-		  "image": "porte_de_ville_douves_exterieur01.png",
+		  "image": "porte_de_ville_douves_exterieur06.png",
 		  "categorie": "Porte de rempart"
 		},
 		{
@@ -39,7 +39,7 @@
 		  }
 		},
 		{
-		  "_id": "link:auxerre_poste_de_garde_tour_porte_douve_exterieur01",
+		  "_id": "link:auxerre_poste_de_garde_tour_porte_douve_exterieur03",
 		  "type": "connection",
 		  "nodes": [
 			{
@@ -63,7 +63,7 @@
 		  }
 		},
 		{
-		  "_id": "link:auxerre_poste_de_garde_tour_porte_douve_interieur01",
+		  "_id": "link:auxerre_poste_de_garde_tour_porte_douve_interieur03",
 		  "type": "connection",
 		  "nodes": [
 			{

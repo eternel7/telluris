@@ -13,6 +13,7 @@
 		{% include "part-footer-css.html" without context %}
 		{% include "part-nav-css.html" without context %}
 		{% include "part-accessibility-css.html" without context %}
+		{% include "part-input-css.html" without context %}
 		
 		/* ── BASE & SCROLL LOCK ─────────────────────────────────── */
 		body {
@@ -76,43 +77,6 @@
 			font-weight: 700;
 			animation: heroReveal 2s 0.6s ease both;
 			min-height: 1.2em;
-		}
-
-		/* ── FORMULAIRE ─────────────────────────────────────────── */
-		.form-group {
-			text-align: left;
-			margin-bottom: 20px;
-			position: relative;
-		}
-
-		label {
-			display: block;
-			font-family: 'Cinzel', serif;
-			font-size: 12px;
-			color: var(--ink);
-			margin-bottom: 6px;
-			font-weight: 700;
-			text-transform: uppercase;
-		}
-
-		input {
-			width: 100%;
-			background: rgba(0, 0, 0, 0.05);
-			border: none;
-			border-bottom: 1px solid var(--bronze);
-			margin-bottom: 1px;
-			padding: 10px 0;
-			color: var(--ink);
-			font-family: 'IM Fell English', serif;
-			font-size: 16px;
-			box-sizing: border-box;
-			transition: border-color 0.3s;
-		}
-
-		input:focus {
-			outline: none;
-			border-bottom: 2px solid var(--gold);
-			margin-bottom: 0px;
 		}
 
 		/* ── ICONE DYNAMIQUE DU MOT DE PASSE ────────────────────── */

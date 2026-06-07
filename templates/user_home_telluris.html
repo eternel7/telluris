@@ -11,11 +11,13 @@
 
 		{% include "part-root-css.html" without context %}
 		{% include "part-accessibility-css.html" without context %}
+		{% include "part-input-css.html" without context %}
 		
 		/* ── BASE & SCROLL LOCK ─────────────────────────────────── */
 		body {
 			padding: 20px;
 			box-sizing: border-box;
+			scrollbar-gutter: stable;
 		}
 		
 		#main-content {
@@ -67,41 +69,6 @@
 			font-weight: 700;
 			animation: heroReveal 2s 0.6s ease both;
 			min-height: 1.2em;
-		}
-
-		/* ── FORMULAIRE ─────────────────────────────────────────── */
-		.form-group {
-			text-align: left;
-			margin-bottom: 20px;
-			position: relative;
-		}
-
-		label {
-			display: block;
-			font-family: 'Cinzel', serif;
-			font-size: 12px;
-			color: var(--ink);
-			margin-bottom: 6px;
-			font-weight: 700;
-			text-transform: uppercase;
-		}
-
-		input {
-			width: 100%;
-			background: rgba(0, 0, 0, 0.05);
-			border: none;
-			border-bottom: 1px solid var(--bronze);
-			padding: 10px 0;
-			color: var(--ink);
-			font-family: 'IM Fell English', serif;
-			font-size: 16px;
-			box-sizing: border-box;
-			transition: border-color 0.3s;
-		}
-
-		input:focus {
-			outline: none;
-			border-bottom: 2px solid var(--gold);
 		}
 
 		/* ── ICONE DYNAMIQUE DU MOT DE PASSE ────────────────────── */
@@ -530,7 +497,7 @@
 			color: var(--ink);
 		}
 		.sex-btn:hover	{ background: rgba(201,146,42,0.07); border-color: var(--gold); }
-		.sex-btn.chosen { background: rgba(201,146,42,0.12); border-color: var(--gold); border-width: 2px; }
+		.sex-btn.chosen { background: rgba(201,146,42,0.12); border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold);}
 		.sex-btn .sex-icon { font-size: 32px; line-height: 1; }
 		.sex-btn .sex-label {
 			font-family: 'Cinzel', serif;
@@ -604,6 +571,9 @@
 			flex-direction: column;
 			gap: 3px;
 		}
+		.stat-item-2 {
+			grid-column: 1 / -1;
+		}
 		.stat-name {
 			font-family: 'Cinzel', serif;
 			font-size: 12px;
@@ -659,7 +629,7 @@
 			align-items:center; 
 			margin-left:5px;
 		}
-		.stat-point-bonus {
+		.stats-point-bonus {
 			font-family: 'Cinzel',serif; 
 			font-size: 12px;
 			min-width: 14px;
@@ -668,6 +638,8 @@
 			font-weight: bold;
 		}
 		.stat-btn-update {
+			height: 23px; /* impose button height when changing font-size to manage Cumulative Layout Shift - CLS */
+			width: 23px; /* impose button width when changing font-size to manage Cumulative Layout Shift - CLS */
 			padding:2px 6px;
 			margin:0; 
 			font-size:14px;
@@ -1225,9 +1197,9 @@
 	/* ══════════════════════════════════════════════════════════
 	   ÉTAT
 	══════════════════════════════════════════════════════════ */
-	const statNames = { V:'Vitesse', F:'Force', R:'Résistance', Ag:'Agilité', Vol:'Volonté', Int:'Intelligence', PV:'Points de vie', PM:'Points de magie' };
+	const statNames = { V:'Vitesse', F:'Force', R:'Résistance', Ag:'Agilité', Vol:'Volonté', Int:'Intelligence', Cha:'Charisme', Ch:'Chance', PV:'Points de vie', PM:'Points de magie' };
 	let wiz = { step:1, sex:null, race:null, voc:null, portrait:null, full_portrait:null, prenom:'', nom:'', cite:'' ,
-				bonusStats: { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, PV: 0, PM: 0 }};
+				bonusStats: { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, Cha: 0, Ch: 0, PV: 0, PM: 0 }};
 	const MAX_BONUS_POINTS = 10;
 	const TOTAL_STEPS = 5;
 
@@ -1358,7 +1330,7 @@
 		document.querySelectorAll('.race-btn').forEach(b => b.classList.remove('chosen'));
 		btn.classList.add('chosen');
 		wiz.race = btn.dataset.race;
-		wiz.bonusStats = { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, PV: 0, PM: 0 };
+		wiz.bonusStats = { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, Cha: 0, Ch: 0, PV: 0, PM: 0 };
 		showRaceStats(wiz.race);
 		validateStep();
 	}
@@ -1383,7 +1355,7 @@
                 const vMax = (totalVal < 10) ? 10 : (totalVal > 50) ? 200 : 100;
 
                 return `
-                    <div class="stat-item">
+                    <div class="stat-item ${ ['PV', 'PM'].includes(k) ? 'stat-item-2' : ''} ">
                         <span class="stat-name">${statNames[k] || k} <strong>${totalVal}</strong></span>
                         <div class="stat-bar-wrap">
                             <div class="stat-bar-bg">

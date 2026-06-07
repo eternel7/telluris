@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from jose import jwt, JWTError
 from PIL import Image
-from routes.user import user_router, User
+from routers.user import user_router, User
 from db.config import db, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
@@ -22,6 +22,9 @@ app.add_middleware(
 	allow_methods=["*"],
 	allow_headers=["*"],
 )
+# Indexes voulus dans CouchDB
+db.put_index(fields=["type"], name="idx-tables")
+db.put_index(fields=["type", "user_id"], name="idx-tables-by-user")
 
 # Definit ou se trouvent les fichiers HTML
 templates = Jinja2Templates(directory="templates")
