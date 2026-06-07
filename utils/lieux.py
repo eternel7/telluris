@@ -94,13 +94,15 @@ async def update_cells(
 		"admin" not in current_user or
 		current_user["admin"] != 1 ):
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
-		
+	
 	if cells_info :
 		cells = cells_info["cells"]
+		nav = cells_info["nav"]
 		lieu_id = cells_info["_id"]
 		lieu_doc = get_doc(lieu_id)
 		if lieu_doc:
 			lieu_doc["cells"] = cells
+			lieu_doc["nav"] = nav
 			save_doc(lieu_doc)
 			return lieu_doc
 	raise HTTPException(status_code=404, detail="Incorrect location grid info")
