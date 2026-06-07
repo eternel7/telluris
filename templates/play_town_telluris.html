@@ -612,6 +612,16 @@
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};
 	let ACCESS = {{ access | tojson | safe }};
+	const DIRS = {
+		HAUT:        1,   // 00000001
+		HAUT_DROITE: 2,   // 00000010
+		DROITE:      4,   // 00000100
+		BAS_DROITE:  8,   // 00001000
+		BAS:         16,  // 00010000
+		BAS_GAUCHE:  32,  // 00100000
+		GAUCHE:      64,  // 01000000
+		HAUT_GAUCHE: 128  // 10000000
+	};
 	const root = document.documentElement;
 	async function move(viewDx, viewDy) {
 		const moveData = {x: viewDx, y: viewDy};
@@ -665,20 +675,22 @@
 		const controls = document.getElementById('controls');
 		if(controls) {
 			const boutons = [
-				{ element: document.getElementById('move_1_1'), x: -1, y: -1 },
-				{ element: document.getElementById('move_10'),  x: -1, y: 0  },
-				{ element: document.getElementById('move_11'),  x: -1, y: 1  },
-				{ element: document.getElementById('move0_1'),  x: 0,  y: -1 },
-				{ element: document.getElementById('move01'),   x: 0,  y: 1  },
-				{ element: document.getElementById('move1_1'),  x: 1,  y: -1 },
-				{ element: document.getElementById('move10'),   x: 1,  y: 0  },
-				{ element: document.getElementById('move11'),   x: 1,  y: 1  }
+				{ element: document.getElementById('move_1_1'), x: -1, y: -1 , dir : DIRS.HAUT_GAUCHE},
+				{ element: document.getElementById('move_10'),  x: -1, y: 0  , dir : DIRS.GAUCHE},
+				{ element: document.getElementById('move_11'),  x: -1, y: 1  , dir : DIRS.BAS_GAUCHE},
+				{ element: document.getElementById('move01'),   x: 0,  y: 1  , dir : DIRS.BAS},
+				{ element: document.getElementById('move11'),   x: 1,  y: 1  , dir : DIRS.BAS_DROITE},
+				{ element: document.getElementById('move10'),   x: 1,  y: 0  , dir : DIRS.DROITE},
+				{ element: document.getElementById('move1_1'),  x: 1,  y: -1 , dir : DIRS.HAUT_DROITE},
+				{ element: document.getElementById('move0_1'),  x: 0,  y: -1 , dir : DIRS.HAUT}
 			];
-			boutons.forEach(({ element, x, y }) => {
+			let access = ACCESS.access;
+			let nav = ACCESS.nav;
+			boutons.forEach(({ element, x, y, dir }) => {
 				if (element) {
-					const valeur = ACCESS[y + 1][x + 1];
-					// Désactive si la valeur n'est pas égale à 1
-					element.disabled = (valeur !== 1);
+					const loc_access = access[y + 1][x + 1];
+					// access en fonction du type de lieu et des directions disponibles
+					element.disabled = (loc_access !== 1) || ((nav & dir) === 0);
 				}
 			});
 		}

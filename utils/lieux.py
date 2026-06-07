@@ -35,22 +35,57 @@ def get_lieu_links(current_user: dict = Body(...)):
 			node["details"] = doc
 						
 	return connections
+	
+# [bit, dx, dy, opposé]
+# 1: HAUT, 2: HAUT_DROITE, 4: DROITE, 8: BAS_DROITE, 16: BAS, 32: BAS_GAUCHE, 64: GAUCHE, 128: HAUT_GAUCHE
+VALID_MOVES = [
+	[1,   0, -1, 16],
+	[2,   1, -1, 32],
+	[4,   1,  0, 64],
+	[8,   1,  1, 128],
+	[16,  0,  1, 1],
+	[32, -1,  1, 2],
+	[64, -1,  0, 4],
+	[128, -1, -1, 8]
+]
 
+def get_final_mask(nav, x, y):
+	# Par défaut, 0 = aucune direction interdite
+	mask_actuel = nav.get(f"{x},{y}", 0)
+	final_mask = 0
+	
+	for bit, dx, dy, op_bit in VALID_MOVES:
+		# On vérifie si la direction est LIBRE (le bit d'interdiction est à 0)
+		if not (mask_actuel & bit):
+			# Vérifier si la case cible est aussi libre en entrée
+			mask_cible = nav.get(f"{x + dx},{y + dy}", 0)
+			if not (mask_cible & op_bit):
+				# Si les deux sont libres, on marque la direction comme DISPONIBLE
+				# (Le masque final reste un masque de directions autorisées)
+				final_mask |= bit
+				
+	return final_mask
+	
 def get_lieu_directions(current_user: dict = Body(...), lieu_doc: dict = Body(...), position: dict = Body(...)):
 	if not current_user:
 		return None
 	cells = lieu_doc.get("cells",None)
-	access = 1
+	nav = lieu_doc.get("nav", {})
+	access = 1 # full access
+	mask = 255 # full access
 	if cells:
 		x = position["x"]
 		y = position["y"]
+		mask = get_final_mask(nav, x, y)
+		print("mask", mask)
+		
 		rows = len(cells)
 		cols = len(cells[0]) if rows > 0 else 0
 		access = [
 			[cells[r][c] if (0 <= r < rows and 0 <= c < cols) else -1 for c in range(x-1, x+2)]
 			for r in range(y-1, y+2)
 		]
-	return access
+	return { "access": access, "nav" : mask }
 
 def get_lieux_ids(current_user: dict = Body(...)):
 	if not current_user:
