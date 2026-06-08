@@ -77,7 +77,6 @@ def get_lieu_directions(current_user: dict = Body(...), lieu_doc: dict = Body(..
 		x = position["x"]
 		y = position["y"]
 		mask = get_final_mask(nav, x, y)
-		print("mask", mask)
 		
 		rows = len(cells)
 		cols = len(cells[0]) if rows > 0 else 0

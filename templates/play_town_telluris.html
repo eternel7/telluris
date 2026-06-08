@@ -23,7 +23,7 @@
 			--border: #2a2a2a;
 			--accent: #c8a96e;
 			--text: #e8e4dc;
-			--muted: #666;
+			--muted: #c5c5c5;
 			--bg-color: #1a1a24;
 			--panel-bg: #2c2c38;
 			--border-color: #4a4a5a;
@@ -364,6 +364,178 @@
 		.pm { background: #2e86de; width: 50%; }
 		.pa { background: #ffa502; width: 100%; }
 
+		/* FICHE PERSONNAGE (overlay) */
+		#sheet-panel {
+			display: none;
+			position: absolute;
+			inset: 0;
+			z-index: 100;
+			background: var(--panel-bg);
+			flex-direction: column;
+			overflow: hidden;
+		}
+		.game-container {
+			position: relative;
+		}
+		.game-container.sheet-open #sheet-panel {
+			display: flex;
+		}
+		.sheet-tab-bar {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px;
+			padding: 8px;
+			background: rgba(0,0,0,0.4);
+			border-bottom: 2px solid var(--border-color);
+			flex-shrink: 0;
+		}
+		.sheet-tab-btn {
+			padding: 6px 10px;
+			background: var(--btn-bg);
+			border: 1px solid var(--border-color);
+			color: var(--text-color);
+			cursor: pointer;
+			font-size: 0.8rem;
+		}
+		.sheet-tab-btn.active {
+			border-color: var(--accent-color);
+			color: var(--accent-color);
+		}
+		.sheet-body {
+			flex: 1;
+			overflow-y: auto;
+			padding: 12px;
+		}
+		.sheet-pane {
+			display: none;
+		}
+		.sheet-pane.active {
+			display: block;
+		}
+		.sh-section {
+			font-size: 0.85rem;
+			color: var(--accent-color);
+			text-transform: uppercase;
+			border-bottom: 1px solid var(--border-color);
+			padding-bottom: 4px;
+			margin: 12px 0 8px;
+		}
+		.sh-base-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+			gap: 8px;
+		}
+		.sh-stat-box {
+			background: var(--btn-bg);
+			border: 1px solid var(--border-color);
+			padding: 8px;
+			text-align: center;
+		}
+		.sh-stat-lbl { font-size: 0.7rem; color: var(--muted); display: block; }
+		/* Style des valeurs et petits séparateurs */
+		.sh-stat-val {
+			font-size: 1.4rem;
+			font-weight: bold;
+			color: var(--accent-color);
+			margin: 4px 0;
+			font-family: 'Cinzel', serif; /* Donne un côté plus JDR que le monospace pour les scores */
+		}
+
+		.sh-stat-max-sep {
+			font-size: 0.75rem;
+			color: var(--muted);
+			font-weight: normal;
+			margin-left: 2px;
+		}
+
+		/* Conteneur de la jauge pour gérer le survol ou le positionnement */
+		.sh-stat-bar-wrapper {
+			width: 100%;
+			padding: 4px 0;
+		}
+
+		/* La jauge totale (représente le max de la race) */
+		.sh-stat-bar {
+			position: relative;
+			height: 6px;
+			background: #111116; /* Fond très sombre, presque noir */
+			border: 1px solid rgba(255, 255, 255, 0.05);
+			border-radius: 2px;
+			overflow: visible; /* Permet au pip de dépasser légèrement en hauteur */
+		}
+
+		/* Remplissage de la valeur actuelle (Style acier/or médiéval) */
+		.sh-stat-fill {
+			height: 100%;
+			background: linear-gradient(90deg, #8a7355 0%, var(--accent-color) 100%);
+			border-radius: 1px 0 0 1px;
+			box-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
+		}
+
+		/* Le repère (Pip) représentant le max actuel du personnage */
+		.sh-stat-pip {
+			position: absolute;
+			top: -3px; /* Dépasse légèrement en haut et en bas */
+			bottom: -3px;
+			width: 2px;
+			background-color: #e8e4dc; /* Couleur de texte claire pour trancher */
+			box-shadow: 0 0 3px #fff;
+			transform: translateX(-50%); /* Centre le trait pile sur le pourcentage */
+			z-index: 2;
+		}
+		.sh-derived-row {
+			display: flex;
+			justify-content: space-between;
+			padding: 5px 0;
+			border-bottom: 1px solid rgba(74,74,90,0.3);
+			font-size: 0.85rem;
+		}
+		.sh-derived-lbl { color: var(--muted); }
+		.sh-derived-val { font-weight: bold; color: var(--text-color); }
+		.sh-xp-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; font-size: 0.85rem; }
+		.sh-xp-bar { height: 8px; background: #111; border-radius: 4px; overflow: hidden; }
+		.sh-xp-fill { height: 100%; background: var(--accent-color); border-radius: 4px; }
+		.sh-finance-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+		.sh-finance { font-size: 0.9rem; }
+		.sh-finance .amt { font-weight: bold; color: var(--accent-color); }
+		.sh-slots-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+		.sh-slot { background: var(--btn-bg); border: 1px solid var(--border-color); padding: 6px 8px; font-size: 0.8rem; }
+		.sh-slot-lbl { color: var(--muted); font-size: 0.7rem; display: block; margin-bottom: 2px; }
+		.sh-slot-empty { color: var(--muted); font-style: italic; }
+		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.85rem; }
+		.sh-inv-qty { color: var(--muted); }
+		.sh-rarity { font-size: 0.7rem; padding: 2px 5px; border-radius: 3px; background: #333; }
+		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
+		.sh-skill-icon { font-size: 1.2rem; flex-shrink: 0; }
+		.sh-skill-info { flex: 1; }
+		.sh-skill-name { font-weight: bold; font-size: 0.9rem; margin-bottom: 2px; }
+		.sh-skill-desc { font-size: 0.75rem; color: var(--muted); }
+		.sh-skill-lvl { font-size: 0.75rem; color: var(--accent-color); flex-shrink: 0; }
+		.sh-relation { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
+		.sh-rel-portrait { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #333; border: 1px solid var(--border-color); flex-shrink: 0; }
+		.sh-rel-portrait img { width: 100%; height: 100%; object-fit: cover; }
+		.sh-rel-info { flex: 1; }
+		.sh-rel-name { font-weight: bold; font-size: 0.85rem; }
+		.sh-rel-class { font-size: 0.7rem; color: var(--muted); }
+		.sh-rel-score { font-weight: bold; font-size: 1rem; text-align: right; }
+		.sh-rel-score.pos { color: #2ed573; }
+		.sh-rel-score.neg { color: #ff4757; }
+		.sh-rel-score.neu { color: var(--muted); }
+		.sh-rel-lbl { font-size: 0.7rem; color: var(--muted); text-align: right; }
+		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
+		.sh-quest-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+		.sh-quest-rang { font-size: 0.7rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
+		.sh-quest-title { flex: 1; font-weight: bold; font-size: 0.9rem; }
+		.sh-quest-status { font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; }
+		.sh-quest-status.en-cours { background: rgba(46,133,213,0.3); color: #2e86de; }
+		.sh-quest-status.termine { background: rgba(46,213,115,0.2); color: #2ed573; }
+		.sh-quest-desc { font-size: 0.8rem; color: var(--muted); }
+		.sh-quest-reward { display: flex; gap: 8px; margin-top: 6px; font-size: 0.8rem; }
+		.sh-journal-entry { padding: 10px; background: var(--btn-bg); border-left: 3px solid var(--accent-color); margin-bottom: 8px; font-size: 0.85rem; }
+		.sh-journal-date { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
+		.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px; color: var(--muted); font-size: 0.9rem; }
+		.sh-empty-icon { font-size: 2rem; }
+
 		/* 5. GESTION (Footer) */
 		.management-footer {
 			grid-area: footer;
@@ -603,9 +775,194 @@
 		</div>
 		</section>
 		<footer class="management-footer">
-			<button class="manage-btn">👤 Personnage</button>
+			<button class="manage-btn" onclick="openSheet()">👤 Personnage</button>
 			<button class="manage-btn">👥 Groupe</button>
 		</footer>
+		<!-- ══ FICHE PERSONNAGE ══ -->
+		<div id="sheet-panel" role="dialog" aria-label="Fiche personnage">
+			<!-- Tab bar -->
+			<nav class="sheet-tab-bar" role="tablist">
+				<button class="sheet-tab-btn active" onclick="sheetTab('stats', this)"      role="tab" aria-selected="true">📊 Stats</button>
+				<button class="sheet-tab-btn"        onclick="sheetTab('inventaire', this)" role="tab">🎒 Inventaire</button>
+				<button class="sheet-tab-btn"        onclick="sheetTab('competences', this)" role="tab">⚡ Compétences</button>
+				<button class="sheet-tab-btn"        onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
+				<button class="sheet-tab-btn"        onclick="sheetTab('quetes', this)"     role="tab">📜 Quêtes</button>
+				<button class="sheet-tab-btn"        onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
+				<button id="close-sheet" class="sheet-tab-btn" style="margin-left:auto;color:#ff4757" onclick="closeSheet()" role="button">✕ Fermer</button>
+			</nav>
+			<div class="sheet-body">
+				<!-- ── STATS ── -->
+				<div class="sheet-pane active" id="sh-stats">
+					{% set xp_total   = character.get("xp_total", 0) %}
+					{% set xp_libre   = character.get("xp_libre", 0) %}
+					{% set xp_next    = (character.get("niveau",0)+1)*5 %}
+					<div class="sh-section">✦ Expérience</div>
+					<div style="background:var(--btn-bg);border:1px solid var(--border-color);padding:12px;margin-bottom:8px">
+						<div class="sh-xp-header">
+							<span>XP totale : <strong style="color:var(--accent-color)">{{ xp_total }}</strong></span>
+							<span style="color:#2ed573">Libre : {{ xp_libre }}</span>
+							<span style="color:var(--muted)">Prochain niv. : {{ xp_next }} XP</span>
+						</div>
+						<div class="sh-xp-bar">
+							<div class="sh-xp-fill" style="width:{{ [(xp_libre/xp_next*100)|int,100]|min if xp_next>0 else 0 }}%"></div>
+						</div>
+					</div>
+
+					<div class="sh-section">⚔ Caractéristiques de base</div>
+					<div class="sh-base-grid">
+						{% for code, nom in [("V","Vitesse"),("F","Force"),("R","Résistance"),("Ag","Agilité"),("Vol","Volonté"),("Int","Intelligence"),("Cha","Charisme"),("Ch","Chance")] %}
+						{% set val = character["caracteristiques_current"].get(code,0) %}
+						{% set max = character["caracteristiques_standard"].get(code,0) %}
+						{% set maxRace = race["stats_max"].get(code,1) %} {# Évite la division par zéro #}
+						
+						<div class="sh-stat-box">
+							<span class="sh-stat-lbl">{{ nom }}</span>
+							<div class="sh-stat-val">
+								{{ val }}<span class="sh-stat-max-sep">/{{ max }}</span>
+							</div>
+							<div class="sh-stat-bar-wrapper" title="Maximum de la race : {{ maxRace }}">
+								<div class="sh-stat-bar">
+									<div class="sh-stat-fill" style="width: {{ (val / maxRace * 100) | int }}%"></div>
+									<div class="sh-stat-pip" style="left: {{ (max / maxRace * 100) | int }}%"></div>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+
+					<div class="sh-section" style="margin-top:14px">🛡 Stats dérivées</div>
+					{% set d = character.get("derived_stats",{}) %}
+					{% for lbl, key, unit in [
+						("PV max","pv_max",""),("PM max","pm_max",""),
+						("Initiative","initiative",""),("Déplacement","deplacement"," cases"),
+						("Corps à corps","cc",""),("À distance","cd",""),
+						("Armure (PA)","pa",""),("Déf. magique","pm_def",""),
+						("Dégâts CàC","degats_cc",""),("Charge max","charge_max"," kg")
+					] %}
+					<div class="sh-derived-row">
+						<span class="sh-derived-lbl">{{ lbl }}</span>
+						<span class="sh-derived-val">{{ d.get(key,"—") }}{{ unit }}</span>
+					</div>
+					{% endfor %}
+				</div>
+
+				<!-- ── INVENTAIRE ── -->
+				<div class="sheet-pane" id="sh-inventaire">
+					<div class="sh-section">💰 Finances</div>
+					<div class="sh-finance-row">
+						<div class="sh-finance">🟡 <span class="amt">{{ character.get("or",0) }}</span> Or</div>
+						<div class="sh-finance">⚪ <span class="amt">{{ character.get("argent",0) }}</span> Argent</div>
+						<div class="sh-finance">🟤 <span class="amt">{{ character.get("cuivre",0) }}</span> Cuivre</div>
+					</div>
+					<div class="sh-section">🛡 Équipement</div>
+					{% set slots = character.get("slots",{}) %}
+					<div class="sh-slots-grid">
+					{% for key, nom in [("main_droite","Main droite"),("main_gauche","Main gauche"),("torse","Torse"),("tete","Tête"),("jambes","Jambes"),("pieds","Pieds"),("mains","Mains"),("anneau_1","Anneau 1"),("anneau_2","Anneau 2"),("cou","Cou")] %}
+					<div class="sh-slot">
+						<span class="sh-slot-lbl">{{ nom }}</span>
+						{% if slots.get(key) %}<span>{{ slots[key] }}</span>
+						{% else %}<span class="sh-slot-empty">— vide —</span>{% endif %}
+					</div>
+					{% endfor %}
+					</div>
+					<div class="sh-section" style="margin-top:14px">🎒 Sac</div>
+					{% set inv = character.get("inventaire",[]) %}
+					{% if inv %}
+						{% for item in inv %}
+						<div class="sh-inv-item">
+							<span>{{ item.get("icon","📦") if item is mapping else "📦" }}</span>
+							<span style="flex:1">{{ item.get("nom",item) if item is mapping else item }}</span>
+							<span class="sh-inv-qty">× {{ item.get("quantite",1) if item is mapping else 1 }}</span>
+							{% if item is mapping and item.get("rarete") %}<span class="sh-rarity {{ item.rarete }}">{{ item.rarete }}</span>{% endif %}
+						</div>
+						{% endfor %}
+					{% else %}<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Inventaire vide</div>{% endif %}
+				</div>
+
+				<!-- ── COMPETENCES ── -->
+				<div class="sheet-pane" id="sh-competences">
+					{% set comps = character.get("competences",[]) %}
+					{% if comps %}
+						{% for c in comps %}
+						<div class="sh-skill">
+							<span class="sh-skill-icon">{{ c.get("icon","⚡") }}</span>
+							<div class="sh-skill-info">
+								<div class="sh-skill-name">{{ c.get("nom","—") }}</div>
+								<div class="sh-skill-desc">{{ c.get("description","") }}</div>
+							</div>
+							{% if c.get("niveau") %}<span class="sh-skill-lvl">{{ c.niveau }}/5</span>{% endif %}
+						</div>
+						{% endfor %}
+					{% else %}<div class="sh-empty"><span class="sh-empty-icon">⚡</span>Aucune compétence apprise.</div>{% endif %}
+				</div>
+
+				<!-- ── RELATIONS ── -->
+				<div class="sheet-pane" id="sh-relations">
+					{% set rels = character.get("affinites_detail",[]) %}
+					{% if rels %}
+						{% for r in rels %}{% set sc = r.get("score",0) %}
+						<div class="sh-relation">
+							<div class="sh-rel-portrait">
+								{% if r.get("portrait") %}<img src="{{ r.portrait }}" alt="">
+								{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">{{ r.get("icon","👤") }}</div>{% endif %}
+							</div>
+							<div class="sh-rel-info">
+								<div class="sh-rel-name">{{ r.get("prenom","?") }} {{ r.get("nom","") }}</div>
+								<div class="sh-rel-class">{{ r.get("vocation","") }}</div>
+							</div>
+							<div>
+								<div class="sh-rel-score {% if sc>20 %}pos{% elif sc<-20 %}neg{% else %}neu{% endif %}">{% if sc>0 %}+{% endif %}{{ sc }}</div>
+								<div class="sh-rel-lbl">{% if sc>=80 %}Dévoué{% elif sc>=40 %}Ami{% elif sc>=10 %}Bienveillant{% elif sc>=-10 %}Neutre{% elif sc>=-40 %}Méfiant{% elif sc>=-80 %}Hostile{% else %}Ennemi{% endif %}</div>
+							</div>
+						</div>
+						{% endfor %}
+					{% else %}<div class="sh-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>{% endif %}
+				</div>
+
+				<!-- ── QUÊTES ── -->
+				<div class="sheet-pane" id="sh-quetes">
+					{% set qa = character.get("quetes_actives_detail",[]) %}
+					{% set qt = character.get("quetes_terminees_detail",[]) %}
+					{% if qa %}
+						<div class="sh-section">📜 Actives</div>
+						{% for q in qa %}
+						<div class="sh-quest {{ q.get('rang','F') }}">
+							<div class="sh-quest-hdr">
+								<span class="sh-quest-rang">{{ q.get("rang","F") }}</span>
+								<span class="sh-quest-title">{{ q.get("titre","—") }}</span>
+								<span class="sh-quest-status en-cours">En cours</span>
+							</div>
+							<div class="sh-quest-desc">{{ q.get("description","") }}</div>
+							{% if q.get("recompenses") %}<div class="sh-quest-reward">{% if q.recompenses.get("or") %}<span>🟡 {{ q.recompenses.or }} or</span>{% endif %}{% if q.recompenses.get("xp") %}<span>✨ {{ q.recompenses.xp }} XP</span>{% endif %}</div>{% endif %}
+						</div>
+						{% endfor %}
+					{% endif %}
+					{% if qt %}
+						<div class="sh-section" style="opacity:0.6">✓ Terminées ({{ qt|length }})</div>
+						{% for q in qt %}
+						<div class="sh-quest {{ q.get('rang','F') }}" style="opacity:0.5">
+							<div class="sh-quest-hdr"><span class="sh-quest-rang">{{ q.get("rang","F") }}</span><span class="sh-quest-title">{{ q.get("titre","—") }}</span><span class="sh-quest-status termine">Terminée</span></div>
+						</div>
+						{% endfor %}
+					{% endif %}
+					{% if not qa and not qt %}<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>{% endif %}
+				</div>
+
+				<!-- ── JOURNAL ── -->
+				<div class="sheet-pane" id="sh-journal">
+					{% set jnl = character.get("journal",[]) %}
+					{% if jnl %}
+						{% for e in jnl|reverse %}
+						<div class="sh-journal-entry">
+							<div class="sh-journal-date">{{ e.get("date","—") }}{% if e.get("lieu") %} · {{ e.lieu }}{% endif %}</div>
+							{{ e.get("texte","") }}
+						</div>
+						{% endfor %}
+					{% else %}<div class="sh-empty"><span class="sh-empty-icon">📖</span>Le journal est vide.</div>{% endif %}
+				</div>
+
+			</div><!-- /.sheet-body -->
+		</div><!-- /#sheet-panel -->
 
 	</div>
 <script>	
@@ -870,6 +1227,25 @@
 	const d = defaultOffset(); applyOffset(d.x, d.y, false); applyScale();
 	window.addEventListener('resize', applyScale);
 })();
-</script>
+
+	// ── FICHE PERSONNAGE ────────────────────────────────────────
+	function openSheet() {
+		document.querySelector('.game-container').classList.add('sheet-open');
+		sheetTab('stats', document.querySelector('.sheet-tab-btn'));
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	}
+	function closeSheet() {
+		document.querySelector('.game-container').classList.remove('sheet-open');
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+	function sheetTab(id, btn) {
+		document.querySelectorAll('.sheet-tab-btn').forEach(b => b.classList.remove('active'));
+		document.querySelectorAll('.sheet-pane').forEach(p => p.classList.remove('active'));
+		document.getElementById('sh-' + id).classList.add('active');
+		if (btn) btn.classList.add('active');
+	}
+	document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+	</script>
 </body>
 </html>

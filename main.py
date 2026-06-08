@@ -175,6 +175,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		
 	vocations = get_doc("rules:vocations")
 	vocation = next((v for v in vocations["value"] if v["id"] == character["voc"]), None)
+	races = get_doc("rules:races")
+	race = next((r for r in races["value"] if r["id"] == character["race"]), None)
 	lieu = character.get("lieu",character["cite"])
 	grid_doc = get_doc(lieu)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
@@ -212,6 +214,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"position": position,
 			"links": links,
 			"vocation": vocation,
+			"race": race,
 			"dimensions": dimensions,
 			"dim_x": dim_x,
 			"dim_y": dim_y,
