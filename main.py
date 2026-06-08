@@ -115,15 +115,17 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 			if "_start_" in filename:
 				full_path = os.path.join(TOWNS_IMAGES_PATH, filename)
 				if (os.path.isfile(full_path) and filename.lower().endswith(valid_extensions) and filename[:]):
-					file_url = request.url_for("towns", path=filename)
 					name = filename[:filename.index("_")]
-					towns_images.append({
-						"id": "lieu:"+ name,
-						"label": name,
-						"blurb": name,
-						"filename": filename,
-						"url": str(file_url)
-					})
+					lieu_id = "lieu:"+ name
+					if get_doc(lieu_id):
+						file_url = request.url_for("towns", path=filename)
+						towns_images.append({
+							"id": "lieu:"+ name,
+							"label": name,
+							"blurb": name,
+							"filename": filename,
+							"url": str(file_url)
+						})
 	return templates.TemplateResponse(
 		request=request,
 		name ="user_home_telluris.html",
