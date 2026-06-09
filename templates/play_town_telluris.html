@@ -808,7 +808,7 @@
 						</div>
 					</div>
 
-					<div class="sh-section">⚔ Caractéristiques de base</div>
+					<div class="sh-section">⚔ Caractéristiques</div>
 					<div class="sh-base-grid">
 						{% for code, nom in [("V","Vitesse"),("F","Force"),("R","Résistance"),("Ag","Agilité"),("Vol","Volonté"),("Int","Intelligence"),("Cha","Charisme"),("Ch","Chance")] %}
 						{% set val = character["caracteristiques_current"].get(code,0) %}
@@ -830,7 +830,7 @@
 						{% endfor %}
 					</div>
 
-					<div class="sh-section" style="margin-top:14px">🛡 Stats dérivées</div>
+					<div class="sh-section" style="margin-top:14px">🛡 Caractéristiques dérivées</div>
 					{% set d = character.get("derived_stats",{}) %}
 					{% for lbl, key, unit in [
 						("PV max","pv_max",""),("PM max","pm_max",""),

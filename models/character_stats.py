@@ -10,14 +10,14 @@ import math
 
 class BaseStats(BaseModel):
     """Caractéristiques de base saisies à la création / augmentées par XP."""
-    v:   int = Field(1, ge=1, le=10, description="Vitesse")
-    f:   int = Field(1, ge=1, le=10, description="Force")
-    r:   int = Field(1, ge=1, le=10, description="Résistance")
-    ag:  int = Field(1, ge=1, le=10, description="Agilité")
-    vol: int = Field(1, ge=1, le=10, description="Volonté")
-    int_: int = Field(1, ge=1, le=10, alias="int", description="Intelligence")
-    cha: int = Field(1, ge=1, le=10, description="Charisme")
-    ch:  int = Field(1, ge=1, le=10, description="Chance")
+    v:   int = Field(0, ge=0, description="Vitesse")
+    f:   int = Field(0, ge=0, description="Force")
+    r:   int = Field(0, ge=0, description="Résistance")
+    ag:  int = Field(0, ge=0, description="Agilité")
+    vol: int = Field(0, ge=0, description="Volonté")
+    int_: int = Field(0, ge=0, alias="int", description="Intelligence")
+    cha: int = Field(0, ge=0, description="Charisme")
+    ch:  int = Field(0, ge=0, description="Chance")
 
     model_config = {"populate_by_name": True}
 

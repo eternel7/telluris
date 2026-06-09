@@ -12,6 +12,7 @@ from db.config import db, find_docs, get_doc, save_doc, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
+from models.character_stats import compute_derived_stats, BaseStats
 
 app = FastAPI()
 
@@ -195,7 +196,25 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			dim_y = hauteur
 
 	access = get_lieu_directions(current_user, grid_doc, position)
-	
+
+	stats_cur = character.get("caracteristiques_current", {})
+	base = BaseStats(
+		v=stats_cur.get("V", 0),
+		f=stats_cur.get("F", 0),
+		r=stats_cur.get("R", 0),
+		ag=stats_cur.get("Ag", 0),
+		vol=stats_cur.get("Vol", 0),
+		int_=stats_cur.get("Int", 0),
+		cha=stats_cur.get("Cha", 0),
+		ch=stats_cur.get("Ch", 0),
+	)
+	derived = compute_derived_stats(
+		base=base,
+		niveau=character.get("niveau", 0),
+		vocation=character.get("voc", ""),
+	)
+	character["derived_stats"] = derived.model_dump()
+
 	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["image"]) as portrait:
 		portrait_largeur, portrait_hauteur = portrait.size
 		
