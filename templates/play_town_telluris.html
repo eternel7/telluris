@@ -660,6 +660,10 @@
 		.move_btn:disabled>svg {
 			display: none
 		}
+		#personnage {
+			display: none;
+		}
+
 		/* RESPONSIVE UNIQUE : Portable Paysage */
 		@media (max-height: 600px) and (orientation: landscape) {
 			.game-container {
@@ -689,6 +693,25 @@
 
 		/* RESPONSIVE : Mode Portrait Mobile */
 		@media (max-width: 768px) and (orientation: portrait) {
+			.sheet-layout {
+				flex-direction: column;
+			}
+			.sheet-left-col {
+				display: none;
+			}
+			#personnage {
+				display: inline;
+			}
+			.sheet-char-mini {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 10px;
+				background: rgba(34,34,34,0.9);
+				border-bottom: 2px solid var(--border-color);
+				flex-shrink: 0;
+				font-size: 12px;
+			}
 			.game-container {
 				grid-template-columns: 1fr;
 				grid-template-rows: auto auto auto auto;
@@ -857,7 +880,7 @@
 			</div>
 			<!-- Colonne droite : contenu -->
 			<div class="sheet-right-col">
-			<div class="character-card">
+			<div id="personnage" class="character-card">
 			<div class="char-header">
 				<div id="scale-root" class="char-portrait">
 					<div class="viewport-wrapper" id="vp">
