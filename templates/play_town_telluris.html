@@ -839,12 +839,13 @@
 					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} · NIV.{{character.get("niveau",'0')}} - {{character["race"]}} · Rang {{character.get("rang",'aucun')}}</div>
 				</div>
 			</div>
+			{% set d = character.get("derived_stats",{}) %}
 			<div class="stat-row">
-				<span>PV</span><span class="stat-value">{{character.get("currentPV",character["caracteristiques_current"]["PV"])}}/{{character["caracteristiques_standard"]["PV"]}}</span>
+				<span>PV</span><span class="stat-value">{{character.get("currentPV",character["caracteristiques_current"]["PV"])}}/{{d.get("pv_max","—")}}</span>
 				<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
 			</div>
 			<div class="stat-row">
-				<span>PM</span><span class="stat-value">{{character.get("currentPM",character["caracteristiques_current"]["PM"])}}/{{character["caracteristiques_standard"]["PM"]}}</span>
+				<span>PM</span><span class="stat-value">{{character.get("currentPM",character["caracteristiques_current"]["PM"])}}/{{d.get("pm_max","—")}}</span>
 				<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
 			</div>
 		</div>
@@ -866,11 +867,11 @@
 						<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
 						<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} · NIV.{{character.get("niveau",'0')}} - {{character["race"]}} · Rang {{character.get("rang",'aucun')}}</div>
 						<div class="stat-row" style="margin-top:8px">
-							<span>PV</span><span class="stat-value">{{character.get("currentPV",character["caracteristiques_current"]["PV"])}}/{{character["caracteristiques_standard"]["PV"]}}</span>
+							<span>PV</span><span class="stat-value">{{character["caracteristiques_current"]["PV"]}}/{{d.get("pv_max","—")}}</span>
 							<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
 						</div>
 						<div class="stat-row">
-							<span>PM</span><span class="stat-value">{{character.get("currentPM",character["caracteristiques_current"]["PM"])}}/{{character["caracteristiques_standard"]["PM"]}}</span>
+							<span>PM</span><span class="stat-value">{{character["caracteristiques_current"]["PM"]}}/{{d.get("pm_max","—")}}</span>
 							<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
 						</div>
 					</div>
@@ -913,11 +914,11 @@
 							</div>
 						</div>
 						<div class="stat-row">
-							<span>PV</span><span class="stat-value">{{character.get("currentPV",character["caracteristiques_current"]["PV"])}}/{{character["caracteristiques_standard"]["PV"]}}</span>
+							<span>PV</span><span class="stat-value">{{character["caracteristiques_current"]["PV"]}}/{{d.get("pv_max","—")}}</span>
 							<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
 						</div>
 						<div class="stat-row">
-							<span>PM</span><span class="stat-value">{{character.get("currentPM",character["caracteristiques_current"]["PM"])}}/{{character["caracteristiques_standard"]["PM"]}}</span>
+							<span>PM</span><span class="stat-value">{{character["caracteristiques_current"]["PM"]}}/{{d.get("pm_max","—")}}</span>
 							<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
 						</div>
 					</div>
@@ -972,7 +973,6 @@
 							</div>
 
 							<div class="sh-section" style="margin-top:14px">🛡 Caractéristiques dérivées</div>
-							{% set d = character.get("derived_stats",{}) %}
 							{% for lbl, key, unit in [
 								("PV max","pv_max",""),("PM max","pm_max",""),
 								("Initiative","initiative",""),("Déplacement","deplacement"," cases"),
