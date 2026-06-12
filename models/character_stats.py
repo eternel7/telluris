@@ -67,6 +67,7 @@ def compute_derived_stats(
     """
     Calcule toutes les stats dérivées à partir des stats de base,
     du niveau et de l'équipement.
+	"""
     # ── PV max ──────────────────────────────────────────────────────
     pv_max = (base.r * 3) + base.f + equipment.pv
 
