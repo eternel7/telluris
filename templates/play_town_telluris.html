@@ -36,7 +36,7 @@
 			box-sizing: border-box;
 			margin: 0;
 			padding: 0;
-			font-family: 'Courier New', Courier, monospace;
+			font-family: 'Cinzel', serif;
 		}
 
 		body {
@@ -59,7 +59,7 @@
 		}
 		.location-desc h2 {
 			color: var(--accent-color);
-			font-size: 1.3rem;
+			font-size: 1.4rem;
 		}
 
 		/* CARTE */
@@ -109,7 +109,7 @@
 			overflow: hidden;
 		}
 		.sub-locations-panel h3 {
-			font-size: 1rem;
+			font-size: 1.1rem;
 			border-bottom: 2px solid var(--border-color);
 			padding-bottom: 3px;
 			margin-bottom: 8px;
@@ -129,7 +129,7 @@
 			color: var(--text-color);
 			text-align: left;
 			cursor: pointer;
-			font-size: 0.9rem;
+			font-size: 1rem;
 			white-space: normal;
 		}
 		.sub-loc-btn:hover {
@@ -147,7 +147,7 @@
 			border-radius: 12px;
 			padding: 10px;
 			color: white;
-			font-size: 12px;
+			font-size: 13px;
 		}
 		.char-header {
 			display: flex;
@@ -267,7 +267,7 @@
 		}
 		#zoom-bar .z-icon {
 			color: var(--muted);
-			font-size: 10px;
+			font-size: 11px;
 			user-select: none;
 		}
 		#zoom-slider {
@@ -297,7 +297,7 @@
 			cursor: pointer;
 		}
 		#zoom-val {
-			font-size: 0.55rem;
+			font-size: 0.65rem;
 			color: var(--accent);
 			min-width: 20%;
 			text-align: right;
@@ -308,7 +308,7 @@
 			min-width: 0;
 		}
 		.char-name { font-weight: bold; color: #ff4757; font-size: 16px; margin-bottom: 2px; }
-		.char-class { color: #aaa; font-size: 10px; text-transform: uppercase; margin-bottom: 8px; }
+		.char-class { color: #aaa; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
 
 		.stat-row { 
 			margin-bottom: 8px; 
@@ -321,7 +321,6 @@
 		.stat-value {
 			font-weight: bold;
 			color: #eee;
-			font-family: monospace;
 		}
 		.gauge-bg { 
 			width: 100%; 
@@ -371,24 +370,53 @@
 		}
 		.sheet-tab-bar {
 			display: flex;
-			flex-wrap: wrap;
-			gap: 4px;
+			align-items: stretch;
 			padding: 2px;
 			background: rgba(0,0,0,0.4);
 			border-bottom: 2px solid var(--border-color);
 			flex-shrink: 0;
+			overflow: hidden;
 		}
+		.sheet-tabs-scroll {
+			display: flex;
+			gap: 4px;
+			overflow-x: auto;
+			flex: 1;
+			min-width: 0;
+			scrollbar-width: thin;
+			scrollbar-color: var(--border-color) transparent;
+		}
+		.sheet-tabs-scroll::-webkit-scrollbar { height: 3px; }
+		.sheet-tabs-scroll::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
 		.sheet-tab-btn {
 			padding: 6px 10px;
 			background: var(--btn-bg);
 			border: 1px solid var(--border-color);
 			color: var(--text-color);
 			cursor: pointer;
-			font-size: 0.8rem;
+			font-size: 0.85rem;
+			white-space: nowrap;
+			flex-shrink: 0;
 		}
 		.sheet-tab-btn.active {
 			border-color: var(--accent-color);
 			color: var(--accent-color);
+		}
+		#close-sheet {
+			flex-shrink: 0;
+			margin-left: 4px;
+			border-left: 2px solid var(--border-color);
+			position: relative;
+		}
+		#close-sheet::before {
+			content: '';
+			position: absolute;
+			right: 100%;
+			top: 0;
+			bottom: 0;
+			width: 20px;
+			background: linear-gradient(to right, transparent, rgba(0,0,0,0.55));
+			pointer-events: none;
 		}
 		.sheet-body {
 			padding: 12px;
@@ -400,7 +428,7 @@
 			display: block;
 		}
 		.sh-section {
-			font-size: 0.85rem;
+			font-size: 0.95rem;
 			color: var(--accent-color);
 			text-transform: uppercase;
 			border-bottom: 1px solid var(--border-color);
@@ -418,18 +446,17 @@
 			padding: 8px;
 			text-align: center;
 		}
-		.sh-stat-lbl { font-size: 0.7rem; color: var(--muted); display: block; }
+		.sh-stat-lbl { font-size: 0.8rem; color: var(--muted); display: block; }
 		/* Style des valeurs et petits séparateurs */
 		.sh-stat-val {
-			font-size: 1.4rem;
+			font-size: 1.5rem;
 			font-weight: bold;
 			color: var(--accent-color);
 			margin: 4px 0;
-			font-family: 'Cinzel', serif; /* Donne un côté plus JDR que le monospace pour les scores */
 		}
 
 		.sh-stat-max-sep {
-			font-size: 0.75rem;
+			font-size: 0.85rem;
 			color: var(--muted);
 			font-weight: normal;
 			margin-left: 2px;
@@ -475,53 +502,53 @@
 			justify-content: space-between;
 			padding: 5px 0;
 			border-bottom: 1px solid rgba(74,74,90,0.3);
-			font-size: 0.85rem;
+			font-size: 0.95rem;
 		}
 		.sh-derived-lbl { color: var(--muted); }
 		.sh-derived-val { font-weight: bold; color: var(--text-color); }
-		.sh-xp-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; font-size: 0.85rem; }
+		.sh-xp-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; font-size: 0.95rem; }
 		.sh-xp-bar { height: 8px; background: #111; border-radius: 4px; overflow: hidden; }
 		.sh-xp-fill { height: 100%; background: var(--accent-color); border-radius: 4px; }
 		.sh-finance-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-		.sh-finance { font-size: 0.9rem; }
+		.sh-finance { font-size: 1rem; }
 		.sh-finance .amt { font-weight: bold; color: var(--accent-color); }
 		.sh-slots-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-		.sh-slot { background: var(--btn-bg); border: 1px solid var(--border-color); padding: 6px 8px; font-size: 0.8rem; }
-		.sh-slot-lbl { color: var(--muted); font-size: 0.7rem; display: block; margin-bottom: 2px; }
+		.sh-slot { background: var(--btn-bg); border: 1px solid var(--border-color); padding: 6px 8px; font-size: 0.9rem; }
+		.sh-slot-lbl { color: var(--muted); font-size: 0.8rem; display: block; margin-bottom: 2px; }
 		.sh-slot-empty { color: var(--muted); font-style: italic; }
-		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.85rem; }
+		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.95rem; }
 		.sh-inv-qty { color: var(--muted); }
-		.sh-rarity { font-size: 0.7rem; padding: 2px 5px; border-radius: 3px; background: #333; }
+		.sh-rarity { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: #333; }
 		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
-		.sh-skill-icon { font-size: 1.2rem; flex-shrink: 0; }
+		.sh-skill-icon { font-size: 1.3rem; flex-shrink: 0; }
 		.sh-skill-info { flex: 1; }
-		.sh-skill-name { font-weight: bold; font-size: 0.9rem; margin-bottom: 2px; }
-		.sh-skill-desc { font-size: 0.75rem; color: var(--muted); }
-		.sh-skill-lvl { font-size: 0.75rem; color: var(--accent-color); flex-shrink: 0; }
+		.sh-skill-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; }
+		.sh-skill-desc { font-size: 0.85rem; color: var(--muted); }
+		.sh-skill-lvl { font-size: 0.85rem; color: var(--accent-color); flex-shrink: 0; }
 		.sh-relation { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
 		.sh-rel-portrait { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #333; border: 1px solid var(--border-color); flex-shrink: 0; }
 		.sh-rel-portrait img { width: 100%; height: 100%; object-fit: cover; }
 		.sh-rel-info { flex: 1; }
-		.sh-rel-name { font-weight: bold; font-size: 0.85rem; }
-		.sh-rel-class { font-size: 0.7rem; color: var(--muted); }
-		.sh-rel-score { font-weight: bold; font-size: 1rem; text-align: right; }
+		.sh-rel-name { font-weight: bold; font-size: 0.95rem; }
+		.sh-rel-class { font-size: 0.8rem; color: var(--muted); }
+		.sh-rel-score { font-weight: bold; font-size: 1.1rem; text-align: right; }
 		.sh-rel-score.pos { color: #2ed573; }
 		.sh-rel-score.neg { color: #ff4757; }
 		.sh-rel-score.neu { color: var(--muted); }
-		.sh-rel-lbl { font-size: 0.7rem; color: var(--muted); text-align: right; }
+		.sh-rel-lbl { font-size: 0.8rem; color: var(--muted); text-align: right; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
 		.sh-quest-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-		.sh-quest-rang { font-size: 0.7rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
-		.sh-quest-title { flex: 1; font-weight: bold; font-size: 0.9rem; }
-		.sh-quest-status { font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; }
+		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
+		.sh-quest-title { flex: 1; font-weight: bold; font-size: 1rem; }
+		.sh-quest-status { font-size: 0.8rem; padding: 2px 6px; border-radius: 3px; }
 		.sh-quest-status.en-cours { background: rgba(46,133,213,0.3); color: #2e86de; }
 		.sh-quest-status.termine { background: rgba(46,213,115,0.2); color: #2ed573; }
-		.sh-quest-desc { font-size: 0.8rem; color: var(--muted); }
-		.sh-quest-reward { display: flex; gap: 8px; margin-top: 6px; font-size: 0.8rem; }
-		.sh-journal-entry { padding: 10px; background: var(--btn-bg); border-left: 3px solid var(--accent-color); margin-bottom: 8px; font-size: 0.85rem; }
-		.sh-journal-date { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
-		.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px; color: var(--muted); font-size: 0.9rem; }
-		.sh-empty-icon { font-size: 2rem; }
+		.sh-quest-desc { font-size: 0.9rem; color: var(--muted); }
+		.sh-quest-reward { display: flex; gap: 8px; margin-top: 6px; font-size: 0.9rem; }
+		.sh-journal-entry { padding: 10px; background: var(--btn-bg); border-left: 3px solid var(--accent-color); margin-bottom: 8px; font-size: 0.95rem; }
+		.sh-journal-date { font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
+		.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px; color: var(--muted); font-size: 1rem; }
+		.sh-empty-icon { font-size: 2.1rem; }
 
 		/* ── Sheet panel layout ──────────────────────────────────── */
 		.sheet-layout {
@@ -558,7 +585,7 @@
 			padding: 10px;
 			border-top: 1px solid var(--border-color);
 			flex-shrink: 0;
-			font-size: 12px;
+			font-size: 13px;
 		}
 		.sheet-right-col {
 			flex: 1;
@@ -584,7 +611,7 @@
 				background: rgba(34,34,34,0.9);
 				border-bottom: 2px solid var(--border-color);
 				flex-shrink: 0;
-				font-size: 12px;
+				font-size: 13px;
 			}
 		}
 
@@ -706,7 +733,7 @@
 				background: rgba(34,34,34,0.9);
 				border-bottom: 2px solid var(--border-color);
 				flex-shrink: 0;
-				font-size: 12px;
+				font-size: 13px;
 			}
 			#game-container {
 				grid-template-columns: 1fr;
@@ -924,13 +951,15 @@
 					</div>
 					<!-- Tab bar -->
 					<nav class="sheet-tab-bar" role="tablist">
-						<button class="sheet-tab-btn active" onclick="sheetTab('stats', this)"      role="tab" aria-selected="true">📊 Stats</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('inventaire', this)" role="tab">🎒 Inventaire</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('competences', this)" role="tab">⚡ Compétences</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('quetes', this)"     role="tab">📜 Quêtes</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
-						<button id="close-sheet" class="sheet-tab-btn" style="margin-left:auto;color:#ff4757" onclick="closeSheet()" role="button">✕ Fermer</button>
+						<div class="sheet-tabs-scroll">
+							<button class="sheet-tab-btn active" onclick="sheetTab('stats', this)"      role="tab" aria-selected="true">📊 Stats</button>
+							<button class="sheet-tab-btn"        onclick="sheetTab('inventaire', this)" role="tab">🎒 Inventaire</button>
+							<button class="sheet-tab-btn"        onclick="sheetTab('competences', this)" role="tab">⚡ Compétences</button>
+							<button class="sheet-tab-btn"        onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
+							<button class="sheet-tab-btn"        onclick="sheetTab('quetes', this)"     role="tab">📜 Quêtes</button>
+							<button class="sheet-tab-btn"        onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
+						</div>
+						<button id="close-sheet" class="sheet-tab-btn" style="color:#ff4757" onclick="closeSheet()" role="button">✕ Fermer</button>
 					</nav>
 					<div class="sheet-body">
 						<!-- ── STATS ── -->
