@@ -12,7 +12,7 @@ from db.config import db, find_docs, get_doc, save_doc, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
-from models.character_stats import compute_derived_stats, BaseStats
+from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap
 
 app = FastAPI()
 
@@ -211,9 +211,24 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	derived = compute_derived_stats(
 		base=base,
 		niveau=character.get("niveau", 0),
-		vocation=character.get("voc", ""),
 	)
 	character["derived_stats"] = derived.model_dump()
+
+	nb_max = race.get("nb_max_accessibles", 3) if race else 3
+	stats_max_race = race.get("stats_max", {}) if race else {}
+	max_bonus = race.get("max_bonus") if race else None
+	max_bonus_used = character.get("max_bonus_used")
+	stat_caps = {
+		code: compute_stat_cap(
+			stat_key=code,
+			stats_max=stats_max_race,
+			nb_max_accessibles=nb_max,
+			current_stats=stats_cur,
+			max_bonus=max_bonus,
+			max_bonus_used=max_bonus_used,
+		)
+		for code in ["V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"]
+	}
 
 	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["image"]) as portrait:
 		portrait_largeur, portrait_hauteur = portrait.size
@@ -237,6 +252,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"dimensions": dimensions,
 			"dim_x": dim_x,
 			"dim_y": dim_y,
-			"access" : access
+			"access" : access,
+			"stat_caps": stat_caps,
 		}
 	)

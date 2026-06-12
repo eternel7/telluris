@@ -2,7 +2,8 @@
 
 import pytest
 from models.character_stats import (
-    BaseStats, EquipmentBonus, compute_derived_stats, VOCATION_BONUS
+    BaseStats, EquipmentBonus, DerivedStats,
+    compute_derived_stats, compute_xp_cost, compute_stat_cap,
 )
 
 
@@ -16,35 +17,36 @@ def make_base(**kwargs) -> BaseStats:
 
 def test_pv_max_formule():
     base = make_base(r=4, f=4)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier")
-    # R×3 + F×1 + voc(10) = 12+4+10 = 26
-    assert stats.pv_max == 26
+    stats = compute_derived_stats(base, niveau=1)
+    # R×3 + F = 12 + 4 = 16
+    assert stats.pv_max == 16
 
 def test_pv_max_avec_equipment():
     base = make_base(r=4, f=4)
     eq = EquipmentBonus(pv=5)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier", equipment=eq)
-    assert stats.pv_max == 31
+    stats = compute_derived_stats(base, niveau=1, equipment=eq)
+    assert stats.pv_max == 21
 
-def test_pv_scale_avec_niveau():
+def test_pv_stable_avec_niveau():
     base = make_base(r=4, f=4)
-    s1 = compute_derived_stats(base, niveau=1, vocation="guerrier")
-    s3 = compute_derived_stats(base, niveau=3, vocation="guerrier")
-    assert s3.pv_max > s1.pv_max
+    s1 = compute_derived_stats(base, niveau=1)
+    s3 = compute_derived_stats(base, niveau=3)
+    # Le niveau n'affecte pas PV
+    assert s1.pv_max == s3.pv_max
 
 
 # ── PM max ────────────────────────────────────────────────────────────────────
 
 def test_pm_max_mage():
     base = make_base(vol=6, int_=7)
-    stats = compute_derived_stats(base, niveau=1, vocation="elementaliste")
-    # Vol×2 + Int×2 + voc_pm(15) = 12+14+15 = 41
-    assert stats.pm_max == 41
+    stats = compute_derived_stats(base, niveau=1)
+    # Vol×2 + Int×2 = 12 + 14 = 26
+    assert stats.pm_max == 26
 
 def test_pm_max_guerrier_faible():
     base = make_base(vol=2, int_=2)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier")
-    # Vol×2 + Int×2 + voc_pm(0) = 4+4+0 = 8
+    stats = compute_derived_stats(base, niveau=1)
+    # Vol×2 + Int×2 = 4 + 4 = 8
     assert stats.pm_max == 8
 
 
@@ -52,41 +54,41 @@ def test_pm_max_guerrier_faible():
 
 def test_initiative():
     base = make_base(ag=5, v=3)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier")
+    stats = compute_derived_stats(base, niveau=1)
     assert stats.initiative == 8  # Ag + V
 
 def test_deplacement_min_1():
     base = make_base(v=1)
     eq = EquipmentBonus(malus_depl=5)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier", equipment=eq)
+    stats = compute_derived_stats(base, niveau=1, equipment=eq)
     assert stats.deplacement >= 1
 
-def test_cc_guerrier():
+def test_cc():
     base = make_base(f=5, ag=4)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier")
-    # F + Ag//2 + voc_cc(2) = 5+2+2 = 9
-    assert stats.cc == 9
+    stats = compute_derived_stats(base, niveau=1)
+    # F + Ag//2 = 5 + 2 = 7
+    assert stats.cc == 7
 
 def test_pa_avec_armure():
     base = make_base(r=4)
     eq = EquipmentBonus(pa=4)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier", equipment=eq)
-    # R//2 + voc_pa(1) + eq_pa(4) = 2+1+4 = 7
-    assert stats.pa == 7
+    stats = compute_derived_stats(base, niveau=1, equipment=eq)
+    # R//2 + eq_pa = 2 + 4 = 6
+    assert stats.pa == 6
 
 
 # ── Dégâts ────────────────────────────────────────────────────────────────────
 
 def test_degats_cc_format():
     base = make_base(f=5)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier")
+    stats = compute_derived_stats(base, niveau=1)
     assert "D" in stats.degats_cc
     assert stats.degats_cc.startswith("1D")
 
 def test_degats_cc_avec_bonus():
     base = make_base(f=5)
     eq = EquipmentBonus(degats_bonus=3)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier", equipment=eq)
+    stats = compute_derived_stats(base, niveau=1, equipment=eq)
     assert "+3" in stats.degats_cc
 
 
@@ -94,7 +96,7 @@ def test_degats_cc_avec_bonus():
 
 def test_charge_max():
     base = make_base(f=6)
-    stats = compute_derived_stats(base, niveau=1, vocation="guerrier")
+    stats = compute_derived_stats(base, niveau=1)
     assert stats.charge_max == 30  # F × 5
 
 
@@ -102,27 +104,79 @@ def test_charge_max():
 
 def test_xp_cout_niveau():
     base = make_base()
-    s1 = compute_derived_stats(base, niveau=1, vocation="guerrier")
-    s5 = compute_derived_stats(base, niveau=5, vocation="guerrier")
+    s1 = compute_derived_stats(base, niveau=1)
+    s5 = compute_derived_stats(base, niveau=5)
     assert s1.xp_cout_niv == 10   # (1+1) × 5
     assert s5.xp_cout_niv == 30   # (5+1) × 5
 
 
-# ── Vocation inconnue ─────────────────────────────────────────────────────────
+# ── compute_xp_cost ───────────────────────────────────────────────────────────
 
-def test_vocation_inconnue_fallback():
-    """Une vocation inconnue doit retourner des bonus nuls sans planter."""
-    base = make_base()
-    stats = compute_derived_stats(base, niveau=1, vocation="__inconnu__")
-    assert stats.pv_max > 0  # Toujours calculable
+def test_xp_cost_stat_normale():
+    # F: coeff=1, race_min=2, from=2 to=3 → (3-2)*1 = 1
+    assert compute_xp_cost("F", 2, 3, race_min=2) == 1
+
+def test_xp_cost_stat_normale_cumul():
+    # F: race_min=2, from=2 to=5
+    # N=2: (3-2)*1=1, N=3: (4-2)*1=2, N=4: (5-2)*1=3 → total=6
+    assert compute_xp_cost("F", 2, 5, race_min=2) == 6
+
+def test_xp_cost_vitesse():
+    # V: coeff=5, race_min=1, from=1 to=2 → (2-1)*5 = 5
+    assert compute_xp_cost("V", 1, 2, race_min=1) == 5
+
+def test_xp_cost_vitesse_cumul():
+    # V: coeff=5, race_min=1, from=1 to=3
+    # N=1: (2-1)*5=5, N=2: (3-1)*5=10 → total=15
+    assert compute_xp_cost("V", 1, 3, race_min=1) == 15
+
+def test_xp_cost_no_change():
+    assert compute_xp_cost("F", 5, 5, race_min=2) == 0
+
+def test_xp_cost_inverse_nul():
+    assert compute_xp_cost("F", 5, 3, race_min=2) == 0
 
 
-# ── Couverture toutes vocations ───────────────────────────────────────────────
+# ── compute_stat_cap ──────────────────────────────────────────────────────────
 
-@pytest.mark.parametrize("vocation", list(VOCATION_BONUS.keys()))
-def test_toutes_vocations(vocation):
-    base = make_base()
-    stats = compute_derived_stats(base, niveau=1, vocation=vocation)
-    assert stats.pv_max > 0
-    assert stats.pm_max >= 0
-    assert stats.deplacement >= 1
+STATS_MAX = {"V": 5, "F": 10, "R": 10, "Ag": 8, "Vol": 8, "Int": 8, "Cha": 8, "Ch": 8}
+NB_MAX = 3
+
+def test_cap_quota_libre():
+    # 0 stats au max → peut monter jusqu'à stats_max
+    current = {"V": 1, "F": 2, "R": 2, "Ag": 2, "Vol": 2, "Int": 2, "Cha": 2, "Ch": 2}
+    cap = compute_stat_cap("F", STATS_MAX, NB_MAX, current)
+    assert cap == 10
+
+def test_cap_quota_plein_stat_normale():
+    # 3 stats déjà au max → F est hors quota → sous-plafond 10-10=0
+    current = {"V": 1, "F": 5, "R": 10, "Ag": 8, "Vol": 8, "Int": 2, "Cha": 2, "Ch": 2}
+    cap = compute_stat_cap("F", STATS_MAX, NB_MAX, current)
+    assert cap == 0  # 10 - 10 = 0
+
+def test_cap_quota_plein_v():
+    # 3 stats au max → V est hors quota → sous-plafond 5-1=4
+    current = {"V": 1, "F": 5, "R": 10, "Ag": 8, "Vol": 8, "Int": 2, "Cha": 2, "Ch": 2}
+    cap = compute_stat_cap("V", STATS_MAX, NB_MAX, current)
+    assert cap == 4  # 5 - 1 = 4
+
+def test_cap_stat_deja_au_max():
+    # R est déjà à son max → son plafond reste stats_max
+    current = {"V": 1, "F": 10, "R": 10, "Ag": 8, "Vol": 2, "Int": 2, "Cha": 2, "Ch": 2}
+    cap = compute_stat_cap("R", STATS_MAX, NB_MAX, current)
+    assert cap == 10
+
+def test_cap_max_bonus_humain():
+    # Humain avec max_bonus, utilisé sur F
+    max_bonus = {"V": 1, "F": 10, "R": 10, "Ag": 10, "Vol": 10, "Int": 10, "Cha": 10, "Ch": 10}
+    current = {"V": 1, "F": 10, "R": 10, "Ag": 8, "Vol": 2, "Int": 2, "Cha": 2, "Ch": 2}
+    cap = compute_stat_cap("F", STATS_MAX, NB_MAX, current, max_bonus=max_bonus, max_bonus_used="F")
+    assert cap == 20  # 10 + 10
+
+def test_cap_max_bonus_non_utilise():
+    # Humain avec max_bonus mais utilisé sur une autre stat
+    max_bonus = {"V": 1, "F": 10, "R": 10, "Ag": 10, "Vol": 10, "Int": 10, "Cha": 10, "Ch": 10}
+    current = {"V": 1, "F": 5, "R": 10, "Ag": 8, "Vol": 8, "Int": 2, "Cha": 2, "Ch": 2}
+    cap = compute_stat_cap("F", STATS_MAX, NB_MAX, current, max_bonus=max_bonus, max_bonus_used="Vol")
+    # Quota plein (R, Ag, Vol au max) → sous-plafond pour F : 10-10=0
+    assert cap == 0

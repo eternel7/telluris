@@ -10,6 +10,10 @@ from db.config import db, SECRET_KEY, ALGORITHM, save_doc, get_doc
 from utils.auth import get_current_user, create_access_token
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions
+from models.character_stats import (
+	BaseStats, EquipmentBonus, compute_derived_stats,
+	compute_xp_cost, compute_stat_cap,
+)
 
 class User(BaseModel):
 	email: str
@@ -106,7 +110,6 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'cite': characterinfo["cite"], 
 			'lieu': characterinfo["cite"],
 			'position': position,
-			'caracteristiques_standard': caract,
 			'caracteristiques_current': caract
 			}
 		db.put(character_dict)
@@ -260,3 +263,106 @@ async def move_character(
 					access = get_lieu_directions(current_user, lieu_doc, position)
 					return {"position" : character_to_update["position"], "links" : links, "access" : access}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
+
+
+_VALID_STATS = {"V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"}
+
+@user_router.post("/spend_xp")
+async def spend_xp(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+
+	stat_key  = body.get("stat")
+	new_value = body.get("new_value")
+	use_bonus = body.get("use_max_bonus", False)
+
+	if stat_key not in _VALID_STATS or not isinstance(new_value, int):
+		raise HTTPException(status_code=422, detail="Paramètres invalides")
+
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	races = db.get("rules:races")
+	race  = next((r for r in races["value"] if r["id"] == character["race"]), None)
+	if not race:
+		raise HTTPException(status_code=404, detail="Race introuvable")
+
+	stats_max_race     = race.get("stats_max", {})
+	race_min           = race.get("stats", {}).get(stat_key, 0)
+	nb_max_accessibles = race.get("nb_max_accessibles", 3)
+	max_bonus          = race.get("max_bonus")
+	max_bonus_used     = character.get("max_bonus_used")
+
+	current_stats = character.get("caracteristiques_current", {})
+	current_val   = current_stats.get(stat_key, 0)
+
+	if new_value <= current_val:
+		raise HTTPException(status_code=422, detail="La nouvelle valeur doit être supérieure à la valeur actuelle")
+
+	# Calculer le plafond effectif (avant d'activer un éventuel bonus)
+	effective_bonus_used = max_bonus_used
+	if use_bonus:
+		if max_bonus_used is not None:
+			raise HTTPException(status_code=422, detail="Le bonus racial est déjà utilisé")
+		if not max_bonus:
+			raise HTTPException(status_code=422, detail="Cette race n'a pas de bonus de dépassement")
+		effective_bonus_used = stat_key
+
+	cap = compute_stat_cap(
+		stat_key=stat_key,
+		stats_max=stats_max_race,
+		nb_max_accessibles=nb_max_accessibles,
+		current_stats=current_stats,
+		max_bonus=max_bonus,
+		max_bonus_used=effective_bonus_used,
+	)
+
+	if new_value > cap:
+		raise HTTPException(status_code=422, detail=f"Plafond de {cap} atteint pour {stat_key}")
+
+	cost = compute_xp_cost(stat_key, current_val, new_value, race_min)
+	xp_libre = character.get("xp_libre", 0)
+	if xp_libre < cost:
+		raise HTTPException(status_code=422, detail=f"XP insuffisante (besoin {cost}, disponible {xp_libre})")
+
+	# Appliquer la montée de stat
+	character["caracteristiques_current"][stat_key] = new_value
+	character["xp_libre"] = xp_libre - cost
+	if use_bonus:
+		character["max_bonus_used"] = stat_key
+
+	db.put(character)
+
+	# Recalculer les stats dérivées et les nouveaux plafonds
+	stats_cur = character["caracteristiques_current"]
+	base = BaseStats(
+		v=stats_cur.get("V", 0), f=stats_cur.get("F", 0),
+		r=stats_cur.get("R", 0), ag=stats_cur.get("Ag", 0),
+		vol=stats_cur.get("Vol", 0), int_=stats_cur.get("Int", 0),
+		cha=stats_cur.get("Cha", 0), ch=stats_cur.get("Ch", 0),
+	)
+	derived = compute_derived_stats(base, niveau=character.get("niveau", 0))
+
+	new_caps = {
+		code: compute_stat_cap(
+			stat_key=code,
+			stats_max=stats_max_race,
+			nb_max_accessibles=nb_max_accessibles,
+			current_stats=stats_cur,
+			max_bonus=max_bonus,
+			max_bonus_used=character.get("max_bonus_used"),
+		)
+		for code in _VALID_STATS
+	}
+
+	return {
+		"stat":          stat_key,
+		"new_value":     new_value,
+		"xp_libre":      character["xp_libre"],
+		"stat_caps":     new_caps,
+		"derived_stats": derived.model_dump(),
+	}

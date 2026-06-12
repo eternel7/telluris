@@ -338,7 +338,7 @@
 		#game-container,#sheet-panel {
 			position: relative;
 			width: 100%;
-			max-width: 1100px;
+			max-width: 1210px;
 			min-height: 95vh;
 			border: 4px double var(--border-color);
 			background-color: var(--panel-bg);
@@ -549,6 +549,16 @@
 		.sh-journal-date { font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
 		.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px; color: var(--muted); font-size: 1rem; }
 		.sh-empty-icon { font-size: 2.1rem; }
+		.sh-xp-btn {
+			width: 100%; margin-top: 5px; padding: 3px 5px;
+			background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.25);
+			color: var(--accent-color); cursor: pointer; font-size: 0.8rem; text-align: center;
+		}
+		.sh-xp-btn:hover:not(:disabled) { background: rgba(255,215,0,0.22); border-color: var(--accent-color); }
+		.sh-xp-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+		.sh-xp-btn.subcap { border-color: rgba(197,197,197,0.2); color: var(--muted); }
+		.sh-stat-pip.subcap { background-color: var(--muted); box-shadow: 0 0 2px rgba(197,197,197,0.4); }
+		.sh-xp-cost { font-size: 0.75rem; }
 
 		/* ── Sheet panel layout ──────────────────────────────────── */
 		.sheet-layout {
@@ -868,11 +878,11 @@
 			</div>
 			{% set d = character.get("derived_stats",{}) %}
 			<div class="stat-row">
-				<span>PV</span><span class="stat-value">{{character.get("currentPV",character["caracteristiques_current"]["PV"])}}/{{d.get("pv_max","—")}}</span>
+				<span>PV</span><span class="stat-value">{{character.get("currentPV",character["caracteristiques_current"]["PV"])}}/<span id="stat-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 				<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
 			</div>
 			<div class="stat-row">
-				<span>PM</span><span class="stat-value">{{character.get("currentPM",character["caracteristiques_current"]["PM"])}}/{{d.get("pm_max","—")}}</span>
+				<span>PM</span><span class="stat-value">{{character.get("currentPM",character["caracteristiques_current"]["PM"])}}/<span id="stat-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
 				<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
 			</div>
 		</div>
@@ -894,11 +904,11 @@
 						<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
 						<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} · NIV.{{character.get("niveau",'0')}} - {{character["race"]}} · Rang {{character.get("rang",'aucun')}}</div>
 						<div class="stat-row" style="margin-top:8px">
-							<span>PV</span><span class="stat-value">{{character["caracteristiques_current"]["PV"]}}/{{d.get("pv_max","—")}}</span>
+							<span>PV</span><span class="stat-value">{{character["caracteristiques_current"]["PV"]}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 							<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
 						</div>
 						<div class="stat-row">
-							<span>PM</span><span class="stat-value">{{character["caracteristiques_current"]["PM"]}}/{{d.get("pm_max","—")}}</span>
+							<span>PM</span><span class="stat-value">{{character["caracteristiques_current"]["PM"]}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
 							<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
 						</div>
 					</div>
@@ -941,11 +951,11 @@
 							</div>
 						</div>
 						<div class="stat-row">
-							<span>PV</span><span class="stat-value">{{character["caracteristiques_current"]["PV"]}}/{{d.get("pv_max","—")}}</span>
+							<span>PV</span><span class="stat-value">{{character["caracteristiques_current"]["PV"]}}/<span id="stat-right-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 							<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
 						</div>
 						<div class="stat-row">
-							<span>PM</span><span class="stat-value">{{character["caracteristiques_current"]["PM"]}}/{{d.get("pm_max","—")}}</span>
+							<span>PM</span><span class="stat-value">{{character["caracteristiques_current"]["PM"]}}/<span id="stat-right-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
 							<div class="gauge-bg"><div class="gauge-fill pm"></div></div>
 						</div>
 					</div>
@@ -971,7 +981,7 @@
 							<div style="background:var(--btn-bg);border:1px solid var(--border-color);padding:12px;margin-bottom:8px">
 								<div class="sh-xp-header">
 									<span>XP totale : <strong style="color:var(--accent-color)">{{ xp_total }}</strong></span>
-									<span style="color:#2ed573">Libre : {{ xp_libre }}</span>
+									<span style="color:#2ed573">Libre : <span id="sh-xp-libre">{{ xp_libre }}</span></span>
 									<span style="color:var(--muted)">Prochain niv. : {{ xp_next }} XP</span>
 								</div>
 								<div class="sh-xp-bar">
@@ -982,21 +992,35 @@
 							<div class="sh-section">⚔ Caractéristiques</div>
 							<div class="sh-base-grid">
 								{% for code, nom in [("V","Vitesse"),("F","Force"),("R","Résistance"),("Ag","Agilité"),("Vol","Volonté"),("Int","Intelligence"),("Cha","Charisme"),("Ch","Chance")] %}
-								{% set val = character["caracteristiques_current"].get(code,0) %}
-								{% set max = character["caracteristiques_standard"].get(code,0) %}
-								{% set maxRace = race["stats_max"].get(code,1) %} {# Évite la division par zéro #}
-								
+								{% set val      = character["caracteristiques_current"].get(code,0) %}
+								{% set cap      = stat_caps.get(code, 0) %}
+								{% set maxRace  = race["stats_max"].get(code,1) %}
+								{% set race_min = race["stats"].get(code, 0) %}
+								{% set coeff    = 5 if code == "V" else 1 %}
+								{% set cost_next = [(val + 1 - race_min) * coeff, 0] | max %}
+								{% set at_cap        = val >= cap %}
+								{% set is_accessible = cap >= maxRace %}
+								{% set can_afford    = xp_libre >= cost_next %}
+
 								<div class="sh-stat-box">
 									<span class="sh-stat-lbl">{{ nom }}</span>
-									<div class="sh-stat-val">
-										{{ val }}<span class="sh-stat-max-sep">/{{ max }}</span>
+									<div class="sh-stat-val" id="sh-sv-{{ code }}">
+										{{ val }}<span class="sh-stat-max-sep">/{{ cap }}</span>
 									</div>
-									<div class="sh-stat-bar-wrapper" title="Maximum de la race : {{ maxRace }}">
+									<div class="sh-stat-bar-wrapper" title="Plafond : {{ cap }} · Max racial : {{ maxRace }}">
 										<div class="sh-stat-bar">
 											<div class="sh-stat-fill" style="width: {{ (val / maxRace * 100) | int }}%"></div>
-											<div class="sh-stat-pip" style="left: {{ (max / maxRace * 100) | int }}%"></div>
+											<div class="sh-stat-pip{% if not is_accessible %} subcap{% endif %}"
+												 style="left: {{ (cap / maxRace * 100) | int }}%"></div>
 										</div>
 									</div>
+									<button class="sh-xp-btn{% if not is_accessible %} subcap{% endif %}"
+											id="sh-btn-{{ code }}"
+											{% if at_cap or not can_afford %}disabled{% endif %}
+											{% if xp_libre == 0 %}style="display:none"{% endif %}
+											onclick="spendXp('{{ code }}')">
+										- <span class="sh-xp-cost">{{ cost_next }} XP</span>
+									</button>
 								</div>
 								{% endfor %}
 							</div>
@@ -1011,7 +1035,7 @@
 							] %}
 							<div class="sh-derived-row">
 								<span class="sh-derived-lbl">{{ lbl }}</span>
-								<span class="sh-derived-val">{{ d.get(key,"—") }}{{ unit }}</span>
+								<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ d.get(key,"—") }}{{ unit }}</span>
 							</div>
 							{% endfor %}
 						</div>
@@ -1421,6 +1445,82 @@
 		if (btn) btn.classList.add('active');
 	}
 	document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+	// ── Dépense d'XP ─────────────────────────────────────────────
+	const _RACE_MIN  = {{ race["stats"]     | tojson | safe }};
+	const _RACE_MAX  = {{ race["stats_max"] | tojson | safe }};
+	let _charStats   = {{ character["caracteristiques_current"] | tojson | safe }};
+	let _statCaps    = {{ stat_caps | tojson | safe }};
+	let _xpLibre     = {{ character.get("xp_libre", 0) | tojson | safe }};
+
+	function _xpCostNext(statKey) {
+		const cur     = _charStats[statKey] || 0;
+		const raceMin = _RACE_MIN[statKey]  || 0;
+		const coeff   = statKey === "V" ? 5 : 1;
+		return Math.max(0, (cur + 1 - raceMin) * coeff);
+	}
+
+	function _refreshStatBoxes() {
+		document.getElementById('sh-xp-libre').textContent = _xpLibre;
+		for (const code of ["V","F","R","Ag","Vol","Int","Cha","Ch"]) {
+			const val  = _charStats[code] || 0;
+			const cap  = _statCaps[code]  || 0;
+			const cost = _xpCostNext(code);
+			const isAccessible = cap >= (_RACE_MAX[code] || 0);
+
+			const svEl = document.getElementById('sh-sv-' + code);
+			if (svEl) {
+				const sep = svEl.querySelector('.sh-stat-max-sep');
+				svEl.childNodes[0].textContent = val;
+				if (sep) sep.textContent = '/' + cap;
+			}
+			const btn = document.getElementById('sh-btn-' + code);
+			if (btn) {
+				btn.style.display = _xpLibre > 0 ? '' : 'none';
+				btn.disabled = val >= cap || _xpLibre < cost;
+				btn.classList.toggle('subcap', !isAccessible);
+				const costEl = btn.querySelector('.sh-xp-cost');
+				if (costEl) costEl.textContent = cost + ' XP';
+			}
+		}
+	}
+
+	function _refreshDerivedStats(d) {
+		const units = {deplacement: ' cases', charge_max: ' kg'};
+		for (const key of ['pv_max','pm_max','initiative','deplacement','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
+			const el = document.getElementById('sh-drv-' + key);
+			if (el && d[key] !== undefined) el.textContent = d[key] + (units[key] || '');
+			const el2 = document.getElementById('stat-drv-' + key);
+			if (el2 && d[key] !== undefined) el2.textContent = d[key] + (units[key] || '');
+			const el3 = document.getElementById('stat-left-drv-' + key);
+			if (el3 && d[key] !== undefined) el3.textContent = d[key] + (units[key] || '');
+			const el4 = document.getElementById('stat-right-drv-' + key);
+			if (el4 && d[key] !== undefined) el4.textContent = d[key] + (units[key] || '');
+			
+		}
+	}
+
+	async function spendXp(statKey) {
+		const newVal = (_charStats[statKey] || 0) + 1;
+		const cost   = _xpCostNext(statKey);
+		if (_xpLibre < cost) { alert('XP insuffisante'); return; }
+
+		try {
+			const res = await fetch('api/spend_xp', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({stat: statKey, new_value: newVal})
+			});
+			const data = await res.json();
+			if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+
+			_charStats[statKey] = newVal;
+			_xpLibre  = data.xp_libre;
+			_statCaps = data.stat_caps;
+			_refreshStatBoxes();
+			_refreshDerivedStats(data.derived_stats);
+		} catch (err) { console.error('Erreur spend_xp', err); }
+	}
 
 	</script>
 </body>
