@@ -29,7 +29,7 @@ def get_selected_character(current_user: dict = Body(...)):
 	character_id = db_user["selected_character"]
 	character = get_doc(character_id)
 	
-	if not character["user_id"] == user_id:
+	if not character or not character["user_id"] == user_id:
 		return None
 	
 	return character

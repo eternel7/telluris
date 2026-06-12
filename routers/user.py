@@ -110,7 +110,8 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'cite': characterinfo["cite"], 
 			'lieu': characterinfo["cite"],
 			'position': position,
-			'caracteristiques_current': caract
+			'caracteristiques_current': caract,
+			'lieux_visites': [characterinfo["cite"]],
 			}
 		db.put(character_dict)
 	
@@ -240,19 +241,29 @@ async def move_character(
 				node = next((n for n in link["nodes"] if n["lieu"] != lieu_courant), None)
 				if node:
 					destination = node["lieu"]
-					destination_pos = {"x": node["pos"][0], "y": node["pos"][1] }
-					print("move to ", destination, destination_pos)
-					character_to_update["lieu"] = destination
-					character_to_update["position"] = destination_pos
-					db.put(character_to_update)
-					return {"moved" : 1}
+					lieu_doc = get_doc(destination)
+					if lieu_doc:
+						destination_pos = {"x": node["pos"][0], "y": node["pos"][1] }
+						print("move to ", destination, destination_pos)
+						character_to_update["lieu"] = destination
+						character_to_update["position"] = destination_pos
+						xp_gain = 0
+						lieux_visites = character_to_update.get("lieux_visites", [])
+						if destination not in lieux_visites:
+							lieux_visites.append(destination)
+							character_to_update["lieux_visites"] = lieux_visites
+							xp_gain = lieu_doc.get("xp_decouverte", 10)
+							character_to_update["xp_libre"] = character_to_update.get("xp_libre", 0) + xp_gain
+						db.put(character_to_update)
+						return {"moved": 1, "xp_gain": xp_gain}
+				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
 			movex = (move["x"] > 0) - (move["x"] < 0) # -1 0 1
 			movey = (move["y"] > 0) - (move["y"] < 0) # -1 0 1
 			position["x"] += movex
 			position["y"] += movey
-			lieu_doc = db.get(lieu_courant)
+			lieu_doc = get_doc(lieu_courant)
 			if (lieu_doc and
 				position["x"]>=0 and position["y"]>=0
 				and position["x"]<=lieu_doc["dimensions"]["x"] and position["y"]<=lieu_doc["dimensions"]["y"]):
@@ -286,7 +297,7 @@ async def spend_xp(
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 
-	races = db.get("rules:races")
+	races = get_doc("rules:races")
 	race  = next((r for r in races["value"] if r["id"] == character["race"]), None)
 	if not race:
 		raise HTTPException(status_code=404, detail="Race introuvable")

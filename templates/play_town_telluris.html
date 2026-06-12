@@ -1257,6 +1257,10 @@
 				body: JSON.stringify(moveData)
 			});
 			if (response.ok) {
+				const data = await response.json();
+				if (data.xp_gain > 0) {
+					sessionStorage.setItem('xp_gain_notif', data.xp_gain);
+				}
 				window.location.reload(true);
 			} else {
 				const error = await response.json();
@@ -1523,5 +1527,39 @@
 	}
 
 	</script>
+<style>
+	#toast {
+		position: fixed;
+		bottom: 2rem;
+		left: 50%;
+		transform: translateX(-50%) translateY(4rem);
+		background: #2c2c38;
+		border: 1px solid var(--accent);
+		color: var(--text);
+		padding: .6rem 1.4rem;
+		border-radius: 8px;
+		font-size: .9rem;
+		letter-spacing: .03em;
+		opacity: 0;
+		transition: opacity .4s, transform .4s;
+		pointer-events: none;
+		z-index: 9999;
+	}
+	#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+<div id="toast"></div>
+<script>
+	function showToast(msg) {
+		const t = document.getElementById('toast');
+		t.textContent = msg;
+		t.classList.add('show');
+		setTimeout(() => t.classList.remove('show'), 3500);
+	}
+	const _xpNotif = sessionStorage.getItem('xp_gain_notif');
+	if (_xpNotif) {
+		sessionStorage.removeItem('xp_gain_notif');
+		showToast('Nouveau lieu découvert ! +' + _xpNotif + ' XP');
+	}
+</script>
 </body>
 </html>
