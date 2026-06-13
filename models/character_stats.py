@@ -126,8 +126,8 @@ def compute_derived_stats(
 
 # ── Coefficients XP par stat ──────────────────────────────────────────────────
 
-# V coûte 5× plus cher, toutes les autres stats coûtent 1 par point au-dessus du min racial
-_XP_COEFF: dict[str, int] = {"V": 5}
+# V coûte 10× plus cher, toutes les autres stats coûtent 1 par point au-dessus du min racial
+XP_COEFF: dict[str, int] = {"V": 10}
 
 # Réduction du plafond pour les stats hors quota d'accessibilité
 # V perd 1 point, toutes les autres perdent 10 points sous le max racial
@@ -141,7 +141,7 @@ def compute_xp_cost(stat_key: str, from_val: int, to_val: int, race_min: int) ->
     """
     if to_val <= from_val:
         return 0
-    coeff = _XP_COEFF.get(stat_key, 1)
+    coeff = XP_COEFF.get(stat_key, 1)
     return sum((n + 1 - race_min) * coeff for n in range(from_val, to_val))
 
 
@@ -183,6 +183,15 @@ def compute_stat_cap(
     # Quota plein → sous-plafond
     reduction = _SUB_CAP_REDUCTION.get(stat_key, 10)
     return max(0, absolute_max - reduction)
+
+
+def compute_character_level(xp_total: int) -> int:
+    """Niveau personnage basé sur l'XP totale. Seuils : >10→1, >20→2, >40→3, … (×2 à chaque palier)."""
+    niveau, threshold = 0, 10
+    while xp_total > threshold:
+        niveau += 1
+        threshold *= 2
+    return niveau
 
 
 def _force_to_dice(f: int) -> int:

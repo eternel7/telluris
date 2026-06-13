@@ -4,6 +4,7 @@ import pytest
 from models.character_stats import (
     BaseStats, EquipmentBonus, DerivedStats,
     compute_derived_stats, compute_xp_cost, compute_stat_cap,
+    compute_character_level,
 )
 
 
@@ -100,6 +101,24 @@ def test_charge_max():
     assert stats.charge_max == 30  # F × 5
 
 
+# ── Niveau personnage ─────────────────────────────────────────────────────────
+
+def test_compute_character_level_zero():
+    assert compute_character_level(0)  == 0
+    assert compute_character_level(10) == 0
+
+def test_compute_character_level_un():
+    assert compute_character_level(11) == 1
+    assert compute_character_level(20) == 1
+
+def test_compute_character_level_deux():
+    assert compute_character_level(21) == 2
+    assert compute_character_level(40) == 2
+
+def test_compute_character_level_trois():
+    assert compute_character_level(41) == 3
+
+
 # ── XP ────────────────────────────────────────────────────────────────────────
 
 def test_xp_cout_niveau():
@@ -122,13 +141,13 @@ def test_xp_cost_stat_normale_cumul():
     assert compute_xp_cost("F", 2, 5, race_min=2) == 6
 
 def test_xp_cost_vitesse():
-    # V: coeff=5, race_min=1, from=1 to=2 → (2-1)*5 = 5
-    assert compute_xp_cost("V", 1, 2, race_min=1) == 5
+    # V: coeff=10, race_min=1, from=1 to=2 → (2-1)*10 = 10
+    assert compute_xp_cost("V", 1, 2, race_min=1) == 10
 
 def test_xp_cost_vitesse_cumul():
-    # V: coeff=5, race_min=1, from=1 to=3
-    # N=1: (2-1)*5=5, N=2: (3-1)*5=10 → total=15
-    assert compute_xp_cost("V", 1, 3, race_min=1) == 15
+    # V: coeff=10, race_min=1, from=1 to=3
+    # N=1: (2-1)*10=10, N=2: (3-1)*10=20 → total=30
+    assert compute_xp_cost("V", 1, 3, race_min=1) == 30
 
 def test_xp_cost_no_change():
     assert compute_xp_cost("F", 5, 5, race_min=2) == 0

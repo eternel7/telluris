@@ -12,7 +12,7 @@ from db.config import db, find_docs, get_doc, save_doc, SECRET_KEY, ALGORITHM
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
-from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap
+from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, XP_COEFF
 
 app = FastAPI()
 
@@ -139,7 +139,8 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 			"vocations" : vocations,
 			"vocations_proximity" : vocations_proximity,
 			"characters_images": characters_images,
-			"towns_images": towns_images
+			"towns_images": towns_images,
+			"xp_coeff": XP_COEFF,
 		}
 	)
 	
@@ -208,11 +209,13 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		cha=stats_cur.get("Cha", 0),
 		ch=stats_cur.get("Ch", 0),
 	)
+	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
 	derived = compute_derived_stats(
 		base=base,
-		niveau=character.get("niveau", 0),
+		niveau=voc_niveau,
 	)
 	character["derived_stats"] = derived.model_dump()
+	character["niveau"] = compute_character_level(character.get("xp_total", 0))
 
 	nb_max = race.get("nb_max_accessibles", 3) if race else 3
 	stats_max_race = race.get("stats_max", {}) if race else {}
@@ -254,5 +257,6 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"dim_y": dim_y,
 			"access" : access,
 			"stat_caps": stat_caps,
+			"xp_coeff": XP_COEFF,
 		}
 	)

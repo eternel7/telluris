@@ -1197,6 +1197,7 @@
 	let wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'', cite:'' ,
 				bonusStats: { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, Cha: 0, Ch: 0, PV: 0, PM: 0 }};
 	const MAX_BONUS_POINTS = 10;
+	const STAT_COEFF = {{ xp_coeff | tojson | safe }};
 	const TOTAL_STEPS = 5;
 
 	const STEP_META = [
@@ -1277,9 +1278,7 @@
 		const pointsDepenses = Object.entries(wiz.bonusStats || {}).reduce((total, [key, bonus]) => {
 			let cost = 0;
 			for (let i = 1; i <= bonus; i++) {
-				let stepCost = (race.stats[key] + i) - race.stats[key];
-				if (key === "V") stepCost *= 5;
-				cost += stepCost;
+				cost += i * (STAT_COEFF[key] || 1);
 			}
 			return total + cost;
 		}, 0);
@@ -1382,9 +1381,7 @@
 		const pointsDepenses = Object.entries(wiz.bonusStats).reduce((total, [key, bonus]) => {
 			let cost = 0;
 			for (let i = 1; i <= bonus; i++) {
-				let stepCost = (race.stats[key] + i) - race.stats[key];
-				if (key === "V") stepCost *= 5;
-				cost += stepCost;
+				cost += i * (STAT_COEFF[key] || 1);
 			}
 			return total + cost;
 		}, 0);
@@ -1394,8 +1391,7 @@
 			const targetBonus = currentBonus + 1;
 			const targetValue = baseValue + targetBonus;
 			
-			let costNextStep = targetValue - baseValue;
-			if (statKey === "V") costNextStep *= 5;
+			let costNextStep = (targetValue - baseValue) * (STAT_COEFF[statKey] || 1);
 
 			// Vérifie si on a le budget
 			if (pointsDepenses + costNextStep > MAX_BONUS_POINTS) return;

@@ -12,7 +12,7 @@ from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats,
-	compute_xp_cost, compute_stat_cap,
+	compute_xp_cost, compute_stat_cap, XP_COEFF,
 )
 
 class User(BaseModel):
@@ -83,7 +83,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 	if (characterinfo and "bonusStats" in characterinfo):
 		caractUp = characterinfo["bonusStats"]
 		points_depenses = sum(
-			sum(i * 5 if key == "V" else i for i in range(1, bonus + 1))
+			sum(i * XP_COEFF.get(key, 1) for i in range(1, bonus + 1))
 			for key, bonus in caractUp.items()
 		)
 		if points_depenses>10:
@@ -101,17 +101,20 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'_id' : unique_id,
 			'user_id' : user_id,
 			'type' : "character",
-			'sex': characterinfo["sex"], 
-			'race': characterinfo["race"], 
-			'voc': characterinfo["voc"], 
-			'image': characterinfo["image"], 
-			'prenom': characterinfo["prenom"], 
-			'nom': characterinfo["nom"], 
-			'cite': characterinfo["cite"], 
+			'sex': characterinfo["sex"],
+			'race': characterinfo["race"],
+			'voc': characterinfo["voc"],
+			'image': characterinfo["image"],
+			'prenom': characterinfo["prenom"],
+			'nom': characterinfo["nom"],
+			'cite': characterinfo["cite"],
 			'lieu': characterinfo["cite"],
 			'position': position,
 			'caracteristiques_current': caract,
 			'lieux_visites': [characterinfo["cite"]],
+			'xp_total': 0,
+			'xp_libre': 0,
+			'vocations_niveaux': {characterinfo["voc"]: 0},
 			}
 		db.put(character_dict)
 	
@@ -254,6 +257,8 @@ async def move_character(
 							character_to_update["lieux_visites"] = lieux_visites
 							xp_gain = lieu_doc.get("xp_decouverte", 10)
 							character_to_update["xp_libre"] = character_to_update.get("xp_libre", 0) + xp_gain
+							xp_total_new = character_to_update.get("xp_total", 0) + xp_gain
+							character_to_update["xp_total"] = xp_total_new
 						db.put(character_to_update)
 						return {"moved": 1, "xp_gain": xp_gain}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
@@ -356,7 +361,8 @@ async def spend_xp(
 		vol=stats_cur.get("Vol", 0), int_=stats_cur.get("Int", 0),
 		cha=stats_cur.get("Cha", 0), ch=stats_cur.get("Ch", 0),
 	)
-	derived = compute_derived_stats(base, niveau=character.get("niveau", 0))
+	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
+	derived = compute_derived_stats(base, niveau=voc_niveau)
 
 	new_caps = {
 		code: compute_stat_cap(
@@ -376,4 +382,36 @@ async def spend_xp(
 		"xp_libre":      character["xp_libre"],
 		"stat_caps":     new_caps,
 		"derived_stats": derived.model_dump(),
+	}
+
+
+@user_router.post("/spend_xp_vocation")
+async def spend_xp_vocation(
+	current_user: Annotated[User, Depends(get_current_user)],
+):
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	voc = character.get("voc", "")
+	vocations_niveaux = character.get("vocations_niveaux", {})
+	voc_niveau = vocations_niveaux.get(voc, 0)
+	cout = (voc_niveau + 1) * 5
+
+	xp_libre = character.get("xp_libre", 0)
+	if xp_libre < cout:
+		raise HTTPException(status_code=422, detail=f"XP insuffisante (besoin {cout}, disponible {xp_libre})")
+
+	vocations_niveaux[voc] = voc_niveau + 1
+	character["vocations_niveaux"] = vocations_niveaux
+	character["xp_libre"] = xp_libre - cout
+	db.put(character)
+
+	return {
+		"xp_libre":      character["xp_libre"],
+		"voc_niveau":    voc_niveau + 1,
+		"xp_cout_next":  (voc_niveau + 2) * 5,
 	}

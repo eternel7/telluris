@@ -873,7 +873,7 @@
 				</div>
 				<div class="char-identity">
 					<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} · NIV.{{character.get("niveau",'0')}} - {{character["race"]}} · Rang {{character.get("rang",'aucun')}}</div>
+					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}} - {{character["race"]}} Niv.{{character.get("niveau",'0')}} · Rang {{character.get("rang",'aucun')}}</div>
 				</div>
 			</div>
 			{% set d = character.get("derived_stats",{}) %}
@@ -902,7 +902,7 @@
 					</div>
 					<div class="sheet-left-info">
 						<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-						<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} · NIV.{{character.get("niveau",'0')}} - {{character["race"]}} · Rang {{character.get("rang",'aucun')}}</div>
+						<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}} - {{character["race"]}} Niv.{{character.get("niveau",'0')}} · Rang {{character.get("rang",'aucun')}}</div>
 						<div class="stat-row" style="margin-top:8px">
 							<span>PV</span><span class="stat-value">{{character["caracteristiques_current"]["PV"]}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 							<div class="gauge-bg"><div class="gauge-fill pv"></div></div>
@@ -947,7 +947,7 @@
 							</div>
 							<div class="char-identity">
 								<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-								<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} · NIV.{{character.get("niveau",'0')}} - {{character["race"]}} · Rang {{character.get("rang",'aucun')}}</div>
+								<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}} - {{character["race"]}} Niv.{{character.get("niveau",'0')}} · Rang {{character.get("rang",'aucun')}}</div>
 							</div>
 						</div>
 						<div class="stat-row">
@@ -974,18 +974,35 @@
 					<div class="sheet-body">
 						<!-- ── STATS ── -->
 						<div class="sheet-pane active" id="sh-stats">
-							{% set xp_total   = character.get("xp_total", 0) %}
-							{% set xp_libre   = character.get("xp_libre", 0) %}
-							{% set xp_next    = (character.get("niveau",0)+1)*5 %}
+							{% set xp_total    = character.get("xp_total", 0) %}
+							{% set xp_libre    = character.get("xp_libre", 0) %}
+							{% set niveau      = character.get("niveau", 0) %}
+							{% set xp_niv_next = 10 * (2 ** niveau) %}
+							{% set xp_niv_prev = (10 * (2 ** (niveau - 1))) if niveau > 0 else 0 %}
+							{% set xp_bar_pct  = [((xp_total - xp_niv_prev) / (xp_niv_next - xp_niv_prev) * 100)|int, 100]|min if xp_niv_next > xp_niv_prev else 100 %}
+							{% set voc_id      = character.get("voc", "") %}
+							{% set voc_niveau  = character.get("vocations_niveaux", {}).get(voc_id, 0) %}
+							{% set voc_cout    = (voc_niveau + 1) * 5 %}
 							<div class="sh-section">✦ Expérience</div>
 							<div style="background:var(--btn-bg);border:1px solid var(--border-color);padding:12px;margin-bottom:8px">
 								<div class="sh-xp-header">
 									<span>XP totale : <strong style="color:var(--accent-color)">{{ xp_total }}</strong></span>
 									<span style="color:#2ed573">Libre : <span id="sh-xp-libre">{{ xp_libre }}</span></span>
-									<span style="color:var(--muted)">Prochain niv. : {{ xp_next }} XP</span>
+								</div>
+								<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+									<span style="color:var(--muted);font-size:.85rem">Niv. personnage : <strong style="color:var(--text)">{{ niveau }}</strong></span>
+									<span style="color:var(--muted);font-size:.8rem">Prochain à {{ xp_niv_next }} XP total</span>
 								</div>
 								<div class="sh-xp-bar">
-									<div class="sh-xp-fill" style="width:{{ [(xp_libre/xp_next*100)|int,100]|min if xp_next>0 else 0 }}%"></div>
+									<div class="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
+								</div>
+								<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+									<span style="color:var(--muted);font-size:.85rem">Niv. {{ vocation["label"] }} : <strong id="sh-voc-niveau" style="color:var(--text)">{{ voc_niveau }}</strong></span>
+									<button class="sh-xp-btn" id="sh-btn-voc-niveau"
+											{% if xp_libre < voc_cout %}disabled{% endif %}
+											onclick="spendXpVocation()">
+										Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> XP
+									</button>
 								</div>
 							</div>
 
@@ -996,7 +1013,7 @@
 								{% set cap      = stat_caps.get(code, 0) %}
 								{% set maxRace  = race["stats_max"].get(code,1) %}
 								{% set race_min = race["stats"].get(code, 0) %}
-								{% set coeff    = 5 if code == "V" else 1 %}
+								{% set coeff    = xp_coeff.get(code, 1) %}
 								{% set cost_next = [(val + 1 - race_min) * coeff, 0] | max %}
 								{% set at_cap        = val >= cap %}
 								{% set is_accessible = cap >= maxRace %}
@@ -1456,11 +1473,13 @@
 	let _charStats   = {{ character["caracteristiques_current"] | tojson | safe }};
 	let _statCaps    = {{ stat_caps | tojson | safe }};
 	let _xpLibre     = {{ character.get("xp_libre", 0) | tojson | safe }};
+	let _vocNiveau   = {{ character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0) | tojson | safe }};
+	const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
 
 	function _xpCostNext(statKey) {
 		const cur     = _charStats[statKey] || 0;
 		const raceMin = _RACE_MIN[statKey]  || 0;
-		const coeff   = statKey === "V" ? 5 : 1;
+		const coeff   = _STAT_COEFF[statKey] || 1;
 		return Math.max(0, (cur + 1 - raceMin) * coeff);
 	}
 
@@ -1502,6 +1521,30 @@
 			if (el4 && d[key] !== undefined) el4.textContent = d[key] + (units[key] || '');
 			
 		}
+	}
+
+	async function spendXpVocation() {
+		const cout = (_vocNiveau + 1) * 5;
+		if (_xpLibre < cout) { alert('XP insuffisante'); return; }
+
+		try {
+			const res = await fetch('api/spend_xp_vocation', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+			});
+			const data = await res.json();
+			if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+
+			_vocNiveau = data.voc_niveau;
+			_xpLibre   = data.xp_libre;
+			const elNiv = document.getElementById('sh-voc-niveau');
+			if (elNiv) elNiv.textContent = _vocNiveau;
+			const elCout = document.getElementById('sh-voc-cout');
+			if (elCout) elCout.textContent = data.xp_cout_next;
+			const btn = document.getElementById('sh-btn-voc-niveau');
+			if (btn) btn.disabled = _xpLibre < data.xp_cout_next;
+			_refreshStatBoxes();
+		} catch (err) { console.error('Erreur spend_xp_vocation', err); }
 	}
 
 	async function spendXp(statKey) {
