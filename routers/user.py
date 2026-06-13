@@ -12,7 +12,7 @@ from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats,
-	compute_xp_cost, compute_stat_cap, XP_COEFF, XP_DECOUVERTE_LIEU
+	compute_xp_cost, compute_stat_cap, compute_character_level, XP_COEFF, XP_DECOUVERTE_LIEU
 )
 
 class User(BaseModel):
@@ -96,6 +96,9 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 		}
 		lieu = db.get(characterinfo["cite"])
 		position = lieu.get("default_position",{"x" : 0, "y" : 0})
+		vocations = db.get("rules:vocations")
+		vocation = next((v for v in vocations["value"] if v["id"] == characterinfo["voc"]), None)
+		inventaire_de_base = vocation.get("equipement_de_base", []) if vocation else []
 		unique_id = "character:" + user_id + "_" + str(uuid.uuid4())
 		character_dict = {
 			'_id' : unique_id,
@@ -115,6 +118,9 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'xp_total': 0,
 			'xp_libre': 0,
 			'vocations_niveaux': {characterinfo["voc"]: 0},
+			'inventaire': list(inventaire_de_base),
+			'slots': {s: None for s in ['main_droite', 'main_gauche', 'torse', 'tete', 'jambes', 'pieds', 'mains', 'anneau_1', 'anneau_2', 'cou']},
+			'equipment_bonus': {},
 			}
 		db.put(character_dict)
 	
@@ -251,6 +257,8 @@ async def move_character(
 						character_to_update["lieu"] = destination
 						character_to_update["position"] = destination_pos
 						xp_gain = 0
+						niveau_up = False
+						niveau_new = compute_character_level(character_to_update.get("xp_total", 0))
 						lieux_visites = character_to_update.get("lieux_visites", [])
 						if destination not in lieux_visites:
 							lieux_visites.append(destination)
@@ -259,8 +267,12 @@ async def move_character(
 							character_to_update["xp_libre"] = character_to_update.get("xp_libre", 0) + xp_gain
 							xp_total_new = character_to_update.get("xp_total", 0) + xp_gain
 							character_to_update["xp_total"] = xp_total_new
+							niveau_after = compute_character_level(xp_total_new)
+							if niveau_after > niveau_new:
+								niveau_up = True
+								niveau_new = niveau_after
 						db.put(character_to_update)
-						return {"moved": 1, "xp_gain": xp_gain}
+						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):

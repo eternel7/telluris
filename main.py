@@ -217,6 +217,17 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	character["derived_stats"] = derived.model_dump()
 	character["niveau"] = compute_character_level(character.get("xp_total", 0))
 
+	# Résolution inventaire : IDs → documents complets
+	character["inventaire"] = [
+		doc for item_id in character.get("inventaire", [])
+		if item_id and (doc := get_doc(item_id))
+	]
+	# Résolution slots : IDs → documents complets (None si vide)
+	character["slots"] = {
+		slot: get_doc(item_id) if item_id else None
+		for slot, item_id in character.get("slots", {}).items()
+	}
+
 	nb_max = race.get("nb_max_accessibles", 3) if race else 3
 	stats_max_race = race.get("stats_max", {}) if race else {}
 	max_bonus = race.get("max_bonus") if race else None

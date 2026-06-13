@@ -702,7 +702,7 @@
 		#bg-image-fit {
 			width : 56vw;
 			max-width : 700px;
-			max-height: stretch;
+			max-height: 735px;
 			object-fit: contain;
 		}
 		.token {
@@ -1150,7 +1150,7 @@
 							{% for key, nom in [("main_droite","Main droite"),("main_gauche","Main gauche"),("torse","Torse"),("tete","Tête"),("jambes","Jambes"),("pieds","Pieds"),("mains","Mains"),("anneau_1","Anneau 1"),("anneau_2","Anneau 2"),("cou","Cou")] %}
 							<div class="sh-slot">
 								<span class="sh-slot-lbl">{{ nom }}</span>
-								{% if slots.get(key) %}<span>{{ slots[key] }}</span>
+								{% if slots.get(key) %}<span>{{ slots[key]["nom"] if slots[key] is mapping else slots[key] }}</span>
 								{% else %}<span class="sh-slot-empty">— vide —</span>{% endif %}
 							</div>
 							{% endfor %}
@@ -1356,6 +1356,9 @@
 				const data = await response.json();
 				if (data.xp_gain > 0) {
 					sessionStorage.setItem('xp_gain_notif', data.xp_gain);
+				}
+				if (data.niveau_up) {
+					sessionStorage.setItem('niveau_up_notif', data.niveau);
 				}
 				window.location.reload(true);
 			} else {
@@ -1731,6 +1734,11 @@
 	if (_xpNotif) {
 		sessionStorage.removeItem('xp_gain_notif');
 		showToast('Nouveau lieu découvert ! +' + _xpNotif + ' XP');
+	}
+	const _niveauUpNotif = sessionStorage.getItem('niveau_up_notif');
+	if (_niveauUpNotif) {
+		sessionStorage.removeItem('niveau_up_notif');
+		showToast('Niveau ' + _niveauUpNotif + ' atteint !');
 	}
 </script>
 </body>
