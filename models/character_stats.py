@@ -4,6 +4,16 @@
 from pydantic import BaseModel, Field
 import math
 
+# ── Regle pour les XP ──────────────────────────────────────────────────
+XP_DECOUVERTE_LIEU: int = 1
+
+# V coûte 10× plus cher, toutes les autres stats coûtent 1 par point au-dessus du min racial
+XP_COEFF: dict[str, int] = {"V": 10}
+
+# Réduction du plafond pour les stats hors quota d'accessibilité
+# V perd 1 point, toutes les autres perdent 10 points sous le max racial
+_SUB_CAP_REDUCTION: dict[str, int] = {"V": 1}
+
 
 # ── Caractéristiques de base ──────────────────────────────────────────────────
 
@@ -57,7 +67,6 @@ class DerivedStats(BaseModel):
     # Divers
     charge_max:  int   # kg
     xp_cout_niv: int   # coût XP pour monter au prochain niveau
-
 
 def compute_derived_stats(
     base:      BaseStats,
@@ -123,17 +132,6 @@ def compute_derived_stats(
         xp_cout_niv=xp_cout_niv,
     )
 
-
-# ── Coefficients XP par stat ──────────────────────────────────────────────────
-
-# V coûte 10× plus cher, toutes les autres stats coûtent 1 par point au-dessus du min racial
-XP_COEFF: dict[str, int] = {"V": 10}
-
-# Réduction du plafond pour les stats hors quota d'accessibilité
-# V perd 1 point, toutes les autres perdent 10 points sous le max racial
-_SUB_CAP_REDUCTION: dict[str, int] = {"V": 1}
-
-
 def compute_xp_cost(stat_key: str, from_val: int, to_val: int, race_min: int) -> int:
     """
     Coût total en XP pour passer `stat_key` de `from_val` à `to_val`.
@@ -143,7 +141,6 @@ def compute_xp_cost(stat_key: str, from_val: int, to_val: int, race_min: int) ->
         return 0
     coeff = XP_COEFF.get(stat_key, 1)
     return sum((n + 1 - race_min) * coeff for n in range(from_val, to_val))
-
 
 def compute_stat_cap(
     stat_key:           str,

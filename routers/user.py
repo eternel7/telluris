@@ -12,7 +12,7 @@ from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats,
-	compute_xp_cost, compute_stat_cap, XP_COEFF,
+	compute_xp_cost, compute_stat_cap, XP_COEFF, XP_DECOUVERTE_LIEU
 )
 
 class User(BaseModel):
@@ -255,7 +255,7 @@ async def move_character(
 						if destination not in lieux_visites:
 							lieux_visites.append(destination)
 							character_to_update["lieux_visites"] = lieux_visites
-							xp_gain = lieu_doc.get("xp_decouverte", 10)
+							xp_gain = lieu_doc.get("xp_decouverte", XP_DECOUVERTE_LIEU)
 							character_to_update["xp_libre"] = character_to_update.get("xp_libre", 0) + xp_gain
 							xp_total_new = character_to_update.get("xp_total", 0) + xp_gain
 							character_to_update["xp_total"] = xp_total_new

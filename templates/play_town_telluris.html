@@ -737,7 +737,7 @@
 		#personnage {
 			display: none;
 		}
-		#voc-niveau {
+		.val-niveau {
 			display:flex;
 			justify-content:space-between;
 			align-items:center;
@@ -745,7 +745,7 @@
 			gap: 12px;
 			justify-content: flex-start;
 		}
-		#voc-niveau>span {
+		.val-niveau>span {
 			color:var(--muted);
 			font-size:.85rem;
 			white-space: nowrap;
@@ -1068,15 +1068,15 @@
 									<span>XP totale : <strong style="color:var(--accent-color)">{{ xp_total }}</strong></span>
 									<span style="color:#2ed573">Libre : <span id="sh-xp-libre">{{ xp_libre }}</span></span>
 								</div>
-								<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-									<span style="color:var(--muted);font-size:.85rem">Niv. personnage : <strong style="color:var(--text)">{{ niveau }}</strong></span>
-									<span style="color:var(--muted);font-size:.8rem">Prochain à {{ xp_niv_next }} XP total</span>
+								<div class="val-niveau">
+									<span>{{character["race"]}} Niv. : <strong style="color:var(--text)">{{ niveau }}</strong></span>
+									<span style="white-space: wrap;text-align:right;width: 100%;">Prochain à {{ xp_niv_next }} XP</span>
 								</div>
 								<div class="sh-xp-bar">
 									<div class="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
 								</div>
-								<div id="voc-niveau">
-									<span>Niv. {{ vocation["label"] }} : <strong id="sh-voc-niveau" style="color:var(--text)">{{ voc_niveau }}</strong></span>
+								<div class="val-niveau">
+									<span>{{ vocation["label"] }} Niv. : <strong id="sh-voc-niveau" style="color:var(--text)">{{ voc_niveau }}</strong></span>
 									<button class="sh-xp-btn" id="sh-btn-voc-niveau"
 											{% if xp_libre < voc_cout %}disabled{% endif %}
 											onclick="spendXpVocation()">
