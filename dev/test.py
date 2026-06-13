@@ -89,19 +89,6 @@ async def read_page_former(request: Request):
 		context={"title": "combat interface old"})
 		
 		
-@app.get("/test-db")
-def test_couchdb_connection():
-	try:
-		version = server.version
-		
-		return {
-			"status": "connected",
-			"couchdb_version": version
-		}
-	except Exception as e:
-		return {"status": "error", "message": str(e)}
-		
-		
 @app.get("/setup-db")
 def setup_db():
 	db_name = "test_db"

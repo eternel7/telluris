@@ -85,10 +85,10 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 	if not current_user:
 		return RedirectResponse(url="/auth", headers=request.headers)
 	# rules :
-	races = db.get("rules:races")
-	races_proximity = db.get("rules:races_proximity")
-	vocations = db.get("rules:vocations")
-	vocations_proximity = db.get("rules:vocations_proximity")
+	races = get_doc("rules:races")
+	races_proximity = get_doc("rules:races_proximity")
+	vocations = get_doc("rules:vocations")
+	vocations_proximity = get_doc("rules:vocations_proximity")
 	
 	# characters :
 	characters = get_user_characters(current_user)
@@ -271,3 +271,19 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"xp_coeff": XP_COEFF,
 		}
 	)
+	
+@app.get("/insert-bulck-db")
+async def insert_bulck_db():
+	try:
+		items = []
+		count: int = 0
+		for item in items:
+			#print(item["nom"])
+			#save_doc(item)
+			count += 1
+		return {
+			"status": "done",
+			"count": count
+		}
+	except Exception as e:
+		return {"status": "error", "message": str(e)}

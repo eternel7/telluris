@@ -94,6 +94,17 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			k: race['stats'].get(k, 0) + caractUp.get(k, 0)
 			for k in race['stats']
 		}
+		base = BaseStats(
+			v=caract.get("V", 0),
+			f=caract.get("F", 0),
+			r=caract.get("R", 0),
+			ag=caract.get("Ag", 0),
+			vol=caract.get("Vol", 0),
+			int_=caract.get("Int", 0),
+			cha=caract.get("Cha", 0),
+			ch=caract.get("Ch", 0),
+		)
+		derived = compute_derived_stats(base=base, niveau=0)
 		lieu = db.get(characterinfo["cite"])
 		position = lieu.get("default_position",{"x" : 0, "y" : 0})
 		vocations = db.get("rules:vocations")
@@ -114,6 +125,8 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'lieu': characterinfo["cite"],
 			'position': position,
 			'caracteristiques_current': caract,
+			'currentPV': derived.pv_max,
+			'currentPM': derived.pm_max,
 			'lieux_visites': [characterinfo["cite"]],
 			'xp_total': 0,
 			'xp_libre': 0,
