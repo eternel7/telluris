@@ -1,6 +1,6 @@
 <div class="char-identity">
 	<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-	<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}} - {{character["race"]}} Niv.{{character.get("niveau",'0')}} · Rang {{character.get("rang",'aucun')}}</div>
+	<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-{{card_id}}"  class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-{{card_id}}"  class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> · Rang {{character.get("rang",'aucun')}}</div>
 	<div class="char-vitals">
 		<span class="pv-val">PV {{_pv}}/<span id="stat-right-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 		<span class="pm-val">PM {{_pm}}/<span id="stat-right-drv-pm_max">{{d.get("pm_max","—")}}</span></span>

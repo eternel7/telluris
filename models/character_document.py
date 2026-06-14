@@ -35,7 +35,7 @@ class CharacterDocument(BaseModel):
     # ── Progression ──────────────────────────────────────────────────
     niveau:    int = 1
     xp_total:  int = 0        # XP accumulée depuis la création
-    xp_libre:  int = 0        # XP disponible à dépenser
+    attribute_points: int = 0  # Points d'attributs attribués à la montée de niveau
 
     # ── Caractéristiques de base ─────────────────────────────────────
     # Stockées telles quelles, les dérivées sont recalculées
@@ -118,7 +118,7 @@ EXAMPLE_DOCUMENT = {
     "image": "guerrier_m_white10.jpg",
     "niveau":  3,
     "xp_total": 45,
-    "xp_libre":  5,
+    "attribute_points": 5,
     "base_stats": {
         "v": 3, "f": 5, "r": 4, "ag": 3,
         "vol": 2, "int": 2, "cha": 3, "ch": 2

@@ -109,14 +109,14 @@ def test_compute_character_level_zero():
 
 def test_compute_character_level_un():
     assert compute_character_level(11) == 1
-    assert compute_character_level(20) == 1
+    assert compute_character_level(30) == 1
 
 def test_compute_character_level_deux():
-    assert compute_character_level(21) == 2
-    assert compute_character_level(40) == 2
+    assert compute_character_level(31) == 2
+    assert compute_character_level(90) == 2
 
 def test_compute_character_level_trois():
-    assert compute_character_level(41) == 3
+    assert compute_character_level(91) == 3
 
 
 # ── XP ────────────────────────────────────────────────────────────────────────

@@ -562,6 +562,42 @@
 		.sh-slot { background: var(--btn-bg); border: 1px solid var(--border-color); padding: 6px 8px; font-size: 0.9rem; }
 		.sh-slot-lbl { color: var(--muted); font-size: 0.8rem; display: block; margin-bottom: 2px; }
 		.sh-slot-empty { color: var(--muted); font-style: italic; }
+		/* Paperdoll équipement */
+		.sh-paperdoll {
+			position: relative;
+			width: 100%;
+			max-width: 340px;
+			margin: 0 auto;
+			user-select: none;
+		}
+		.sh-paperdoll-img {
+			width: 100%;
+			display: block;
+			pointer-events: none;
+		}
+		.sh-paperdoll .sh-slot {
+			position: absolute;
+			width: 25%;
+			height: 15%;
+			max-height: 45px;
+			padding: 2px 2px;
+			font-size: 0.8rem;
+			background: rgba(28, 28, 38, 0.88);
+			border: 1px solid var(--border-color);
+			box-sizing: border-box;
+			overflow: hidden;
+		}
+		.sh-paperdoll .sh-slot-lbl {
+			font-size: 0.7rem;
+			display: block;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.sh-paperdoll .sh-slot-empty {
+			font-size: 0.7rem;
+			opacity: 0.5;
+		}
 		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.95rem; }
 		.sh-inv-qty { color: var(--muted); }
 		.sh-rarity { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: #333; }
@@ -738,7 +774,7 @@
 		.btn { width: 50px; height: 50px; background: #222; border: 1px solid #444; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-tap-highlight-color: transparent; }
 		.btn:active { background: #444; }
 		.move_btn:disabled>svg {
-			display: none
+			display: none;
 		}
 		#personnage {
 			display: none;
@@ -755,6 +791,9 @@
 			color:var(--muted);
 			font-size:.85rem;
 			white-space: nowrap;
+		}
+		.niveau-nb {
+			color:var(--text)
 		}
 		#sh-btn-voc-niveau{
 			width: auto;
@@ -973,7 +1012,7 @@
 					</button>
 					</div>
 				</div>
-				{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm %}
+				{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm, card_id="sidebar" %}
 					{% include "part-character-identity.html" %}
 				{% endwith %}
 			</div>
@@ -1002,7 +1041,7 @@
 					</div>
 					<div class="sheet-left-info">
 						<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-						<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}} - {{character["race"]}} Niv.{{character.get("niveau",'0')}} · Rang {{character.get("rang",'aucun')}}</div>
+						<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> · Rang {{character.get("rang",'aucun')}}</div>
 						<div class="char-vitals" style="margin-top:8px">
 							<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 							<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
@@ -1049,7 +1088,7 @@
 								</button>
 								</div>
 							</div>
-							{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm %}
+							{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm, card_id="charac-sheet" %}
 								{% include "part-character-identity.html" %}
 							{% endwith %}
 						</div>
@@ -1070,31 +1109,32 @@
 						<!-- ── STATS ── -->
 						<div class="sheet-pane active" id="sh-stats">
 							{% set xp_total    = character.get("xp_total", 0) %}
-							{% set xp_libre    = character.get("xp_libre", 0) %}
+							{% set attribute_points = character.get("attribute_points", 0) %}
 							{% set niveau      = character.get("niveau", 0) %}
-							{% set xp_niv_next = 10 * (2 ** niveau) %}
-							{% set xp_niv_prev = (10 * (2 ** (niveau - 1))) if niveau > 0 else 0 %}
+							{% set xp_niv_next = 10 * (3 ** niveau) %}
+							{% set xp_niv_prev = (10 * (3 ** (niveau - 1))) if niveau > 0 else 0 %}
 							{% set xp_bar_pct  = [((xp_total - xp_niv_prev) / (xp_niv_next - xp_niv_prev) * 100)|int, 100]|min if xp_niv_next > xp_niv_prev else 100 %}
 							{% set voc_id      = character.get("voc", "") %}
 							{% set voc_niveau  = character.get("vocations_niveaux", {}).get(voc_id, 0) %}
-							{% set voc_cout    = (voc_niveau + 1) * 5 %}
+							{% set voc_cout    = (voc_niveau + 1) * xp_voc_coeff %}
 							<div class="sh-section">✦ Expérience</div>
 							<div style="background:var(--btn-bg);border:1px solid var(--border-color);padding:12px;margin-bottom:8px">
 								<div class="sh-xp-header">
 									<span>XP totale : <strong style="color:var(--accent-color)">{{ xp_total }}</strong></span>
-									<span style="color:#2ed573">Libre : <span id="sh-xp-libre">{{ xp_libre }}</span></span>
+									<span style="color:#2ed573">Points : <span id="sh-attribute-points">{{ attribute_points }}</span></span>
 								</div>
 								<div class="val-niveau">
-									<span>{{character["race"]}} Niv. : <strong style="color:var(--text)">{{ niveau }}</strong></span>
+									<span>{{character["race"]}} Niv. : <strong id="sh-race-niveau" class="race-niveau niveau-nb">{{ niveau }}</strong></span>
 									<span style="white-space: wrap;text-align:right;width: 100%;">Prochain à {{ xp_niv_next }} XP</span>
 								</div>
 								<div class="sh-xp-bar">
 									<div class="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
 								</div>
 								<div class="val-niveau">
-									<span>{{ vocation["label"] }} Niv. : <strong id="sh-voc-niveau" style="color:var(--text)">{{ voc_niveau }}</strong></span>
+									<span>{{ vocation["label"] }} Niv. : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{{ voc_niveau }}</strong></span>
 									<button class="sh-xp-btn" id="sh-btn-voc-niveau"
-											{% if xp_libre < voc_cout %}disabled{% endif %}
+											{% if attribute_points < voc_cout %}disabled{% endif %}
+											{% if attribute_points == 0 %}style="display:none"{% endif %}
 											onclick="spendXpVocation()">
 										Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> XP
 									</button>
@@ -1112,7 +1152,7 @@
 								{% set cost_next = [(val + 1 - race_min) * coeff, 0] | max %}
 								{% set at_cap        = val >= cap %}
 								{% set is_accessible = cap >= maxRace %}
-								{% set can_afford    = xp_libre >= cost_next %}
+								{% set can_afford    = attribute_points >= cost_next %}
 
 								<div class="sh-stat-box">
 									<span class="sh-stat-lbl">{{ nom }}</span>
@@ -1129,7 +1169,7 @@
 									<button class="sh-xp-btn{% if not is_accessible %} subcap{% endif %}"
 											id="sh-btn-{{ code }}"
 											{% if at_cap or not can_afford %}disabled{% endif %}
-											{% if xp_libre == 0 %}style="display:none"{% endif %}
+											{% if attribute_points == 0 %}style="display:none"{% endif %}
 											onclick="spendXp('{{ code }}')">
 										- <span class="sh-xp-cost">{{ cost_next }} XP</span>
 									</button>
@@ -1162,14 +1202,33 @@
 							</div>
 							<div class="sh-section">🛡 Équipement</div>
 							{% set slots = character.get("slots",{}) %}
-							<div class="sh-slots-grid">
-							{% for key, nom in [("main_droite","Main droite"),("main_gauche","Main gauche"),("torse","Torse"),("tete","Tête"),("jambes","Jambes"),("pieds","Pieds"),("mains","Mains"),("anneau_1","Anneau 1"),("anneau_2","Anneau 2"),("cou","Cou")] %}
-							<div class="sh-slot">
-								<span class="sh-slot-lbl">{{ nom }}</span>
-								{% if slots.get(key) %}<span>{{ slots[key]["nom"] if slots[key] is mapping else slots[key] }}</span>
-								{% else %}<span class="sh-slot-empty">— vide —</span>{% endif %}
-							</div>
-							{% endfor %}
+							{% set _equip_known = ["humain", "nain", "ogre"] %}
+							{% set _equip_race = character["race"] if character["race"] in _equip_known else "humain" %}
+							{% set _equip_sex = character.get("sex", "m").lower() %}
+							{% set _equip_img = "equipement_" + _equip_race + "_" + _equip_sex + ".png" %}
+							<div class="sh-paperdoll">
+								<img class="sh-paperdoll-img" src="{{ url_for('icons', path=_equip_img) }}" alt="Équipement">
+								{% for key, nom, sx, sy in [
+									("tete",        "Tête",     "38%", "0%"),
+									("torse",       "Torse",    "0%",  "25%"),
+									("mains",       "Mains",    "0%",  "45%"),
+									("pieds",       "Pieds",    "0%",  "70%"),
+									("cou",         "Cou",      "70%", "16%"),
+									("anneau_1",    "Anneau 1", "70%", "39%"),
+									("anneau_2",    "Anneau 2", "70%", "51%"),
+									("jambes",      "Jambes",   "38%", "60%"),
+									("main_droite", "Main D.",  "15%", "85%"),
+									("main_gauche", "Main G.",  "60%", "85%"),
+								] %}
+								<div class="sh-slot" style="left:{{ sx }};top:{{ sy }}">
+									<span class="sh-slot-lbl">{{ nom }}</span>
+									{% if slots.get(key) %}
+										<span>{{ slots[key]["nom"] if slots[key] is mapping else slots[key] }}</span>
+									{% else %}
+										<span class="sh-slot-empty">—</span>
+									{% endif %}
+								</div>
+								{% endfor %}
 							</div>
 							<div class="sh-section" style="margin-top:14px">🎒 Sac</div>
 							{% set inv = character.get("inventaire",[]) %}
@@ -1620,9 +1679,10 @@
 	const _RACE_MAX  = {{ race["stats_max"] | tojson | safe }};
 	let _charStats   = {{ character["caracteristiques_current"] | tojson | safe }};
 	let _statCaps    = {{ stat_caps | tojson | safe }};
-	let _xpLibre     = {{ character.get("xp_libre", 0) | tojson | safe }};
+	let _attributePoints = {{ character.get("attribute_points", 0) | tojson | safe }};
 	let _vocNiveau   = {{ character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0) | tojson | safe }};
 	const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
+	const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
 
 	function _xpCostNext(statKey) {
 		const cur     = _charStats[statKey] || 0;
@@ -1632,7 +1692,7 @@
 	}
 
 	function _refreshStatBoxes() {
-		document.getElementById('sh-xp-libre').textContent = _xpLibre;
+		document.getElementById('sh-attribute-points').textContent = _attributePoints;
 		for (const code of ["V","F","R","Ag","Vol","Int","Cha","Ch"]) {
 			const val  = _charStats[code] || 0;
 			const cap  = _statCaps[code]  || 0;
@@ -1647,12 +1707,18 @@
 			}
 			const btn = document.getElementById('sh-btn-' + code);
 			if (btn) {
-				btn.style.display = _xpLibre > 0 ? '' : 'none';
-				btn.disabled = val >= cap || _xpLibre < cost;
+				btn.style.display = _attributePoints > 0 ? '' : 'none';
+				btn.disabled = val >= cap || _attributePoints < cost;
 				btn.classList.toggle('subcap', !isAccessible);
 				const costEl = btn.querySelector('.sh-xp-cost');
 				if (costEl) costEl.textContent = cost + ' XP';
 			}
+		}
+		const btn = document.getElementById('sh-btn-voc-niveau');
+		if (btn) {
+			const cost_vocation = (_vocNiveau + 1) * _VOC_COEFF;
+			btn.style.display = (_attributePoints > 0 && _vocNiveau < 5) ? '' : 'none';
+			btn.disabled = _vocNiveau >= 5 || _attributePoints < cost_vocation;
 		}
 	}
 
@@ -1672,8 +1738,8 @@
 	}
 
 	async function spendXpVocation() {
-		const cout = (_vocNiveau + 1) * 5;
-		if (_xpLibre < cout) { alert('XP insuffisante'); return; }
+		const cout = (_vocNiveau + 1) * _VOC_COEFF;
+		if (_attributePoints < cout) { alert('Points insuffisants'); return; }
 
 		try {
 			const res = await fetch('api/spend_xp_vocation', {
@@ -1683,14 +1749,14 @@
 			const data = await res.json();
 			if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 
-			_vocNiveau = data.voc_niveau;
-			_xpLibre   = data.xp_libre;
-			const elNiv = document.getElementById('sh-voc-niveau');
-			if (elNiv) elNiv.textContent = _vocNiveau;
+			_vocNiveau       = data.voc_niveau;
+			_attributePoints = data.attribute_points;
+			const elementsNiv = document.querySelectorAll('.voc-niveau');
+			elementsNiv.forEach(el => {
+				el.textContent = _vocNiveau;
+			});
 			const elCout = document.getElementById('sh-voc-cout');
 			if (elCout) elCout.textContent = data.xp_cout_next;
-			const btn = document.getElementById('sh-btn-voc-niveau');
-			if (btn) btn.disabled = _xpLibre < data.xp_cout_next;
 			_refreshStatBoxes();
 		} catch (err) { console.error('Erreur spend_xp_vocation', err); }
 	}
@@ -1698,7 +1764,7 @@
 	async function spendXp(statKey) {
 		const newVal = (_charStats[statKey] || 0) + 1;
 		const cost   = _xpCostNext(statKey);
-		if (_xpLibre < cost) { alert('XP insuffisante'); return; }
+		if (_attributePoints < cost) { alert('Points insuffisants'); return; }
 
 		try {
 			const res = await fetch('api/spend_xp', {
@@ -1709,8 +1775,8 @@
 			const data = await res.json();
 			if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 
-			_charStats[statKey] = newVal;
-			_xpLibre  = data.xp_libre;
+			_charStats[statKey]  = newVal;
+			_attributePoints     = data.attribute_points;
 			_statCaps = data.stat_caps;
 			_refreshStatBoxes();
 			_refreshDerivedStats(data.derived_stats);

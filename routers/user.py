@@ -11,7 +11,7 @@ from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats,
-	compute_xp_cost, compute_stat_cap, compute_character_level, XP_COEFF, XP_DECOUVERTE_LIEU
+	compute_xp_cost, compute_stat_cap, compute_character_level, XP_COEFF, XP_DECOUVERTE_LIEU, XP_VOC_COEFF
 )
 
 class User(BaseModel):
@@ -128,7 +128,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'currentPM': derived.pm_max,
 			'lieux_visites': [characterinfo["cite"]],
 			'xp_total': 0,
-			'xp_libre': 0,
+			'attribute_points': 0,
 			'vocations_niveaux': {characterinfo["voc"]: 0},
 			'inventaire': list(inventaire_de_base),
 			'slots': {s: None for s in ['main_droite', 'main_gauche', 'torse', 'tete', 'jambes', 'pieds', 'mains', 'anneau_1', 'anneau_2', 'cou']},
@@ -276,12 +276,13 @@ async def move_character(
 							lieux_visites.append(destination)
 							character_to_update["lieux_visites"] = lieux_visites
 							xp_gain = lieu_doc.get("xp_decouverte", XP_DECOUVERTE_LIEU)
-							character_to_update["xp_libre"] = character_to_update.get("xp_libre", 0) + xp_gain
 							xp_total_new = character_to_update.get("xp_total", 0) + xp_gain
 							character_to_update["xp_total"] = xp_total_new
 							niveau_after = compute_character_level(xp_total_new)
 							if niveau_after > niveau_new:
 								niveau_up = True
+								for n in range(niveau_new + 1, niveau_after + 1):
+									character_to_update["attribute_points"] = character_to_update.get("attribute_points", 0) + n
 								niveau_new = niveau_after
 						save_doc(character_to_update)
 						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new}
@@ -365,13 +366,13 @@ async def spend_xp(
 		raise HTTPException(status_code=422, detail=f"Plafond de {cap} atteint pour {stat_key}")
 
 	cost = compute_xp_cost(stat_key, current_val, new_value, race_min)
-	xp_libre = character.get("xp_libre", 0)
-	if xp_libre < cost:
-		raise HTTPException(status_code=422, detail=f"XP insuffisante (besoin {cost}, disponible {xp_libre})")
+	attribute_points = character.get("attribute_points", 0)
+	if attribute_points < cost:
+		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cost}, disponible {attribute_points})")
 
 	# Appliquer la montée de stat
 	character["caracteristiques_current"][stat_key] = new_value
-	character["xp_libre"] = xp_libre - cost
+	character["attribute_points"] = attribute_points - cost
 	if use_bonus:
 		character["max_bonus_used"] = stat_key
 
@@ -403,7 +404,7 @@ async def spend_xp(
 	return {
 		"stat":          stat_key,
 		"new_value":     new_value,
-		"xp_libre":      character["xp_libre"],
+		"attribute_points": character["attribute_points"],
 		"stat_caps":     new_caps,
 		"derived_stats": derived.model_dump(),
 	}
@@ -423,19 +424,19 @@ async def spend_xp_vocation(
 	voc = character.get("voc", "")
 	vocations_niveaux = character.get("vocations_niveaux", {})
 	voc_niveau = vocations_niveaux.get(voc, 0)
-	cout = (voc_niveau + 1) * 5
+	cout = (voc_niveau + 1) * XP_VOC_COEFF
 
-	xp_libre = character.get("xp_libre", 0)
-	if xp_libre < cout:
-		raise HTTPException(status_code=422, detail=f"XP insuffisante (besoin {cout}, disponible {xp_libre})")
+	attribute_points = character.get("attribute_points", 0)
+	if attribute_points < cout:
+		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cout}, disponible {attribute_points})")
 
 	vocations_niveaux[voc] = voc_niveau + 1
 	character["vocations_niveaux"] = vocations_niveaux
-	character["xp_libre"] = xp_libre - cout
+	character["attribute_points"] = attribute_points - cout
 	save_doc(character)
 
 	return {
-		"xp_libre":      character["xp_libre"],
+		"attribute_points": character["attribute_points"],
 		"voc_niveau":    voc_niveau + 1,
 		"xp_cout_next":  (voc_niveau + 2) * 5,
 	}

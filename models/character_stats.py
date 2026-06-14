@@ -9,6 +9,7 @@ XP_DECOUVERTE_LIEU: int = 1
 
 # V coûte 10× plus cher, toutes les autres stats coûtent 1 par point au-dessus du min racial
 XP_COEFF: dict[str, int] = {"V": 10}
+XP_VOC_COEFF: int = 5
 
 # Réduction du plafond pour les stats hors quota d'accessibilité
 # V perd 1 point, toutes les autres perdent 10 points sous le max racial
@@ -183,11 +184,11 @@ def compute_stat_cap(
 
 
 def compute_character_level(xp_total: int) -> int:
-    """Niveau personnage basé sur l'XP totale. Seuils : >10→1, >20→2, >40→3, … (×2 à chaque palier)."""
+    """Niveau personnage basé sur l'XP totale. Seuils : >10→1, >30→2, >90→3, … (×3 à chaque palier)."""
     niveau, threshold = 0, 10
     while xp_total > threshold:
         niveau += 1
-        threshold *= 2
+        threshold *= 3
     return niveau
 
 

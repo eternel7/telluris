@@ -13,7 +13,7 @@ from db.config import find_docs, get_doc, save_doc
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
-from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, XP_COEFF
+from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, XP_COEFF, XP_VOC_COEFF
 
 app = FastAPI()
 
@@ -281,6 +281,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"access" : access,
 			"stat_caps": stat_caps,
 			"xp_coeff": XP_COEFF,
+			"xp_voc_coeff": XP_VOC_COEFF,
 		}
 	)
 	
