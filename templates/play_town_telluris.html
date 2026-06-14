@@ -59,7 +59,7 @@
 		}
 		.location-desc h2 {
 			color: var(--accent-color);
-			font-size: 1.4rem;
+			font-size: 1.1rem;
 		}
 
 		/* CARTE */
@@ -109,7 +109,7 @@
 			overflow: hidden;
 		}
 		.sub-locations-panel h3 {
-			font-size: 1.1rem;
+			font-size: 1rem;
 			border-bottom: 2px solid var(--border-color);
 			padding-bottom: 3px;
 			margin-bottom: 8px;
@@ -129,7 +129,7 @@
 			color: var(--text-color);
 			text-align: left;
 			cursor: pointer;
-			font-size: 1rem;
+			font-size: 0.9rem;
 			white-space: normal;
 		}
 		.sub-loc-btn:hover {
@@ -211,9 +211,14 @@
 			margin-top: 6px;
 			font-size: 12px;
 			flex-wrap: wrap;
+			max-width: 400px;
+			width: 100%;
 		}
 		.char-vitals .pv-val { color: #ff4757; }
 		.char-vitals .pm-val { color: #4a9eff; }
+		span.pm-val{
+			margin-left: auto;
+		}
 		.sheet-left-portrait { position: relative; }
 
 		.viewport-wrapper {
@@ -690,7 +695,7 @@
 			overflow: hidden;
 		}
 
-		#bg-image {
+		img#bg-image {
 			position: absolute;
 			display: block;
 			top: calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px);
@@ -699,9 +704,10 @@
 			transition: transform 0.2s ease-out;
 			will-change: transform;
 		}
-		#bg-image-fit {
+		img#bg-image-fit {
 			width : 56vw;
 			max-width : 700px;
+			height: stretch;
 			max-height: 735px;
 			object-fit: contain;
 		}
@@ -783,6 +789,25 @@
 				grid-area: char;
 				grid-column: 1 / 3;
 			}
+			.map-area {
+				height: stretch;
+				max-height: 300px;
+			}
+			.location-desc {
+				padding: 5px;
+			}
+			.location-desc h2 {
+				font-size: 0.9rem;
+			}
+			.sub-locations-panel h3 {
+				font-size: 0.85rem;
+			}
+			.sub-loc-btn {
+				font-size: 0.8rem;
+			}
+			.sh-section {
+				font-size: 0.9rem;
+			}
 		}
 
 		/* RESPONSIVE : Mode Portrait Mobile */
@@ -818,7 +843,7 @@
 				height: auto;
 				overflow: visible;
 			}
-			#bg-image-fit {
+			img#bg-image-fit {
 				width : 85vw;
 				max-width: min-content;
 			}
@@ -833,7 +858,8 @@
 				overflow: visible;
 			}
 			.map-area {
-				height: 250px;
+				height: stretch;
+				max-height: 465px;
 			}		
 			.controls {
 				background: rgba(34, 34, 34, 0.8);
@@ -914,11 +940,11 @@
 				<div id="scale-root" class="char-portrait">
 					<div class="viewport-wrapper" id="vp">
 					<div class="portrait-overlay-bars">
-						<div class="portrait-stat-bar pm-side">
-							<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
-						</div>
 						<div class="portrait-stat-bar pv-side">
 							<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
+						</div>
+						<div class="portrait-stat-bar pm-side">
+							<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
 						</div>
 					</div>
 					<img id="img"
@@ -947,14 +973,9 @@
 					</button>
 					</div>
 				</div>
-				<div class="char-identity">
-					<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}} - {{character["race"]}} Niv.{{character.get("niveau",'0')}} · Rang {{character.get("rang",'aucun')}}</div>
-					<div class="char-vitals">
-						<span class="pv-val">PV {{_pv}}/<span id="stat-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
-						<span class="pm-val">PM {{_pm}}/<span id="stat-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
-					</div>
-				</div>
+				{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm %}
+					{% include "part-character-identity.html" %}
+				{% endwith %}
 			</div>
 		</div>
 		</section>
@@ -970,11 +991,11 @@
 				<div class="sheet-left-col">
 					<div class="sheet-left-portrait">
 						<div class="portrait-overlay-bars">
-							<div class="portrait-stat-bar pm-side">
-								<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
-							</div>
 							<div class="portrait-stat-bar pv-side">
 								<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
+							</div>
+							<div class="portrait-stat-bar pm-side">
+								<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
 							</div>
 						</div>
 						<img src="{{ url_for('characters', path=character['image']) }}" alt="">
@@ -995,11 +1016,11 @@
 							<div id="scale-root2" class="char-portrait">
 								<div class="viewport-wrapper" id="vp2">
 								<div class="portrait-overlay-bars">
-									<div class="portrait-stat-bar pm-side">
-										<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
-									</div>
 									<div class="portrait-stat-bar pv-side">
 										<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
+									</div>
+									<div class="portrait-stat-bar pm-side">
+										<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
 									</div>
 								</div>
 								<img id="img-portrait"
@@ -1028,14 +1049,9 @@
 								</button>
 								</div>
 							</div>
-							<div class="char-identity">
-								<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-								<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}} - {{character["race"]}} Niv.{{character.get("niveau",'0')}} · Rang {{character.get("rang",'aucun')}}</div>
-								<div class="char-vitals">
-									<span class="pv-val">PV {{_pv}}/<span id="stat-right-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
-									<span class="pm-val">PM {{_pm}}/<span id="stat-right-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
-								</div>
-							</div>
+							{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm %}
+								{% include "part-character-identity.html" %}
+							{% endwith %}
 						</div>
 					</div>
 					<!-- Tab bar -->
