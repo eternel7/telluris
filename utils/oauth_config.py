@@ -5,24 +5,29 @@ import jwt
 from authlib.integrations.starlette_client import OAuth
 
 oauth = OAuth()
+ENABLED_PROVIDERS: set[str] = set()
 
-oauth.register(
-    name="google",
-    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    client_kwargs={"scope": "openid email profile"},
-)
+if os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"):
+    oauth.register(
+        name="google",
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_id=os.getenv("GOOGLE_CLIENT_ID"),
+        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        client_kwargs={"scope": "openid email profile"},
+    )
+    ENABLED_PROVIDERS.add("google")
 
-oauth.register(
-    name="facebook",
-    api_base_url="https://graph.facebook.com/v19.0/",
-    access_token_url="https://graph.facebook.com/v19.0/oauth/access_token",
-    authorize_url="https://www.facebook.com/v19.0/dialog/oauth",
-    client_id=os.getenv("FACEBOOK_CLIENT_ID"),
-    client_secret=os.getenv("FACEBOOK_CLIENT_SECRET"),
-    client_kwargs={"scope": "email public_profile"},
-)
+if os.getenv("FACEBOOK_CLIENT_ID") and os.getenv("FACEBOOK_CLIENT_SECRET"):
+    oauth.register(
+        name="facebook",
+        api_base_url="https://graph.facebook.com/v19.0/",
+        access_token_url="https://graph.facebook.com/v19.0/oauth/access_token",
+        authorize_url="https://www.facebook.com/v19.0/dialog/oauth",
+        client_id=os.getenv("FACEBOOK_CLIENT_ID"),
+        client_secret=os.getenv("FACEBOOK_CLIENT_SECRET"),
+        client_kwargs={"scope": "email public_profile"},
+    )
+    ENABLED_PROVIDERS.add("facebook")
 
 
 def generate_apple_client_secret() -> str | None:
@@ -56,3 +61,4 @@ if _apple_id and _apple_secret:
         client_secret=_apple_secret,
         client_kwargs={"scope": "openid email name"},
     )
+    ENABLED_PROVIDERS.add("apple")

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from db.config import get_doc, save_doc
 from utils.auth import create_access_token
-from utils.oauth_config import oauth, generate_apple_client_secret
+from utils.oauth_config import oauth, ENABLED_PROVIDERS, generate_apple_client_secret
 
 router = APIRouter()
 
@@ -53,12 +53,16 @@ def _auth_redirect(user_id: str) -> RedirectResponse:
 
 @router.get("/login/google")
 async def login_google(request: Request):
+    if "google" not in ENABLED_PROVIDERS:
+        return RedirectResponse(url="/auth")
     redirect_uri = request.url_for("auth_google")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
 @router.get("/auth/google", name="auth_google")
 async def auth_google(request: Request):
+    if "google" not in ENABLED_PROVIDERS:
+        return RedirectResponse(url="/auth")
     token = await oauth.google.authorize_access_token(request)
     userinfo = token["userinfo"]
     user_id = upsert_user(
@@ -75,12 +79,16 @@ async def auth_google(request: Request):
 
 @router.get("/login/facebook")
 async def login_facebook(request: Request):
+    if "facebook" not in ENABLED_PROVIDERS:
+        return RedirectResponse(url="/auth")
     redirect_uri = request.url_for("auth_facebook")
     return await oauth.facebook.authorize_redirect(request, redirect_uri)
 
 
 @router.get("/auth/facebook", name="auth_facebook")
 async def auth_facebook(request: Request):
+    if "facebook" not in ENABLED_PROVIDERS:
+        return RedirectResponse(url="/auth")
     token = await oauth.facebook.authorize_access_token(request)
     resp = await oauth.facebook.get("me?fields=id,name,email", token=token)
     profile = resp.json()
@@ -98,12 +106,16 @@ async def auth_facebook(request: Request):
 
 @router.get("/login/apple")
 async def login_apple(request: Request):
+    if "apple" not in ENABLED_PROVIDERS:
+        return RedirectResponse(url="/auth")
     redirect_uri = str(request.url_for("auth_apple"))
     return await oauth.apple.authorize_redirect(request, redirect_uri, response_mode="form_post")
 
 
 @router.post("/auth/apple", name="auth_apple")
 async def auth_apple(request: Request):
+    if "apple" not in ENABLED_PROVIDERS:
+        return RedirectResponse(url="/auth")
     # Apple regenerates the client_secret JWT per-request (ES256, valid 6 months max)
     client_secret = generate_apple_client_secret()
     token = await oauth.apple.authorize_access_token(request, client_secret=client_secret)
