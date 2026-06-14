@@ -598,9 +598,31 @@
 			font-size: 0.7rem;
 			opacity: 0.5;
 		}
-		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.95rem; }
+		.sh-paperdoll .sh-slot.occupied { border-color: var(--accent-color); }
+		.sh-paperdoll .sh-slot-name { font-size: 0.7rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.sh-paperdoll .sh-unequip-btn {
+			position: absolute; top: 1px; right: 1px;
+			width: 14px; height: 14px;
+			background: rgba(255,71,87,0.7); border: none; border-radius: 2px;
+			color: #fff; font-size: 10px; line-height: 14px; text-align: center;
+			padding: 0; cursor: pointer; z-index: 2;
+		}
+		.sh-paperdoll .sh-unequip-btn:hover { background: #ff4757; }
+		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.95rem; flex-wrap: wrap; }
 		.sh-inv-qty { color: var(--muted); }
 		.sh-rarity { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: #333; }
+		.sh-equip-row { display: flex; gap: 4px; margin-top: 4px; align-items: center; width: 100%; }
+		.sh-equip-sel {
+			flex: 1; min-width: 0;
+			background: var(--btn-bg); border: 1px solid var(--border-color);
+			color: var(--text-color); padding: 2px 4px; font-size: 0.8rem;
+		}
+		.sh-equip-btn {
+			padding: 2px 8px; background: rgba(255,215,0,0.08);
+			border: 1px solid rgba(255,215,0,0.3); color: var(--accent-color);
+			cursor: pointer; font-size: 0.8rem; white-space: nowrap;
+		}
+		.sh-equip-btn:hover { background: rgba(255,215,0,0.2); border-color: var(--accent-color); }
 		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
 		.sh-skill-icon { font-size: 1.3rem; flex-shrink: 0; }
 		.sh-skill-info { flex: 1; }
@@ -1202,46 +1224,34 @@
 							</div>
 							<div class="sh-section">🛡 Équipement</div>
 							{% set slots = character.get("slots",{}) %}
-							{% set _equip_known = ["humain", "nain", "ogre"] %}
-							{% set _equip_race = character["race"] if character["race"] in _equip_known else "humain" %}
+							{% set _equip_race = character["race"] %}
 							{% set _equip_sex = character.get("sex", "m").lower() %}
 							{% set _equip_img = "equipement_" + _equip_race + "_" + _equip_sex + ".png" %}
 							<div class="sh-paperdoll">
 								<img class="sh-paperdoll-img" src="{{ url_for('icons', path=_equip_img) }}" alt="Équipement">
 								{% for key, nom, sx, sy in [
-									("tete",        "Tête",     "38%", "0%"),
-									("torse",       "Torse",    "0%",  "25%"),
-									("mains",       "Mains",    "0%",  "45%"),
-									("pieds",       "Pieds",    "0%",  "70%"),
-									("cou",         "Cou",      "70%", "16%"),
-									("anneau_1",    "Anneau 1", "70%", "39%"),
-									("anneau_2",    "Anneau 2", "70%", "51%"),
-									("jambes",      "Jambes",   "38%", "60%"),
-									("main_droite", "Main D.",  "15%", "85%"),
-									("main_gauche", "Main G.",  "60%", "85%"),
+									("tete",        "Tête",     "0%",  "5%"),
+									("epaules",     "Epaules",  "0%",  "17%"),
+									("torse",       "Torse",    "0%",  "29%"),
+									("mains",       "Bras",     "0%",  "41%"),
+									("jambes",      "Jambes",   "0%",  "53%"),
+									("pieds",       "Pieds",    "0%",  "65%"),
+									("cou",         "Cou",      "70%", "5%"),
+									("anneau_1",    "Anneau 1", "70%", "29%"),
+									("anneau_2",    "Anneau 2", "70%", "41%"),
+									("ceinture",    "Ceinture", "70%", "53%"),
+									("main_droite", "Main D.",  "5%", "85%"),
+									("main_gauche", "Main G.",  "65%", "85%"),
 								] %}
-								<div class="sh-slot" style="left:{{ sx }};top:{{ sy }}">
+								<div class="sh-slot{% if slots.get(key) %} occupied{% endif %}" id="slot-{{ key }}" style="left:{{ sx }};top:{{ sy }}">
+									<button class="sh-unequip-btn" onclick="unequip('{{ key }}')" title="Déséquiper"{% if not slots.get(key) %} style="display:none"{% endif %}>×</button>
 									<span class="sh-slot-lbl">{{ nom }}</span>
-									{% if slots.get(key) %}
-										<span>{{ slots[key]["nom"] if slots[key] is mapping else slots[key] }}</span>
-									{% else %}
-										<span class="sh-slot-empty">—</span>
-									{% endif %}
+									<span class="sh-slot-name{% if not slots.get(key) %} sh-slot-empty{% endif %}">{% if slots.get(key) %}{{ slots[key]["nom"] if slots[key] is mapping else slots[key] }}{% else %}—{% endif %}</span>
 								</div>
 								{% endfor %}
 							</div>
 							<div class="sh-section" style="margin-top:14px">🎒 Sac</div>
-							{% set inv = character.get("inventaire",[]) %}
-							{% if inv %}
-								{% for item in inv %}
-								<div class="sh-inv-item">
-									<span>{{ item.get("icon","📦") if item is mapping else "📦" }}</span>
-									<span style="flex:1">{{ item.get("nom",item) if item is mapping else item }}</span>
-									<span class="sh-inv-qty">× {{ item.get("quantite",1) if item is mapping else 1 }}</span>
-									{% if item is mapping and item.get("rarete") %}<span class="sh-rarity {{ item.rarete }}">{{ item.rarete }}</span>{% endif %}
-								</div>
-								{% endfor %}
-							{% else %}<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Inventaire vide</div>{% endif %}
+							<div id="sh-inv-sac"></div>
 						</div>
 
 						<!-- ── COMPETENCES ── -->
@@ -1822,6 +1832,107 @@
 		sessionStorage.removeItem('niveau_up_notif');
 		showToast('Niveau ' + _niveauUpNotif + ' atteint !');
 	}
+</script>
+<script>
+// ── Équipement ──────────────────────────────────────────────────────────
+const SLOT_LABELS = {
+	tete: "Tête", cou: "Cou", torse: "Torse",
+	mains: "Bras", pieds: "Pieds",
+	anneau_1: "Anneau 1", anneau_2: "Anneau 2", ceinture: "Ceinture",
+	jambes: "Jambes", main_droite: "Main D.", main_gauche: "Main G."
+};
+
+let _inventaire = {{ character.get("inventaire", []) | tojson | safe }};
+let _slots      = {{ character.get("slots", {}) | tojson | safe }};
+
+function _refreshPaperdoll() {
+	for (const [slot, item] of Object.entries(_slots)) {
+		const el = document.getElementById('slot-' + slot);
+		if (!el) continue;
+		const nameEl    = el.querySelector('.sh-slot-name');
+		const unequipEl = el.querySelector('.sh-unequip-btn');
+		if (item) {
+			if (nameEl) { nameEl.textContent = item.nom || '?'; nameEl.className = 'sh-slot-name'; }
+			if (unequipEl) unequipEl.style.display = '';
+			el.classList.add('occupied');
+		} else {
+			if (nameEl) { nameEl.textContent = '—'; nameEl.className = 'sh-slot-name sh-slot-empty'; }
+			if (unequipEl) unequipEl.style.display = 'none';
+			el.classList.remove('occupied');
+		}
+	}
+}
+
+function _refreshInventaire() {
+	const sacEl = document.getElementById('sh-inv-sac');
+	if (!sacEl) return;
+	if (!_inventaire || !_inventaire.length) {
+		sacEl.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Inventaire vide</div>';
+		return;
+	}
+	sacEl.innerHTML = _inventaire.map(item => {
+		if (!item || typeof item !== 'object') return '';
+		const compat = (item.slots || []).filter(s => s in SLOT_LABELS);
+		let equipHtml = '';
+		if (compat.length) {
+			const selHtml = compat.length > 1
+				? `<select class="sh-equip-sel">${compat.map(s => `<option value="${s}">${SLOT_LABELS[s]}</option>`).join('')}</select>`
+				: `<span class="sh-equip-sel" data-slot="${compat[0]}" style="display:none"></span>`;
+			equipHtml = `<div class="sh-equip-row">${selHtml}<button class="sh-equip-btn" onclick="equipFromSac('${item._id}',this)">Équiper</button></div>`;
+		}
+		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
+		return `<div class="sh-inv-item">
+			<span>${item.icon || '📦'}</span>
+			<span style="flex:1">${item.nom || '—'}</span>
+			<span class="sh-inv-qty">× ${item.quantite || 1}</span>
+			${rarHtml}${equipHtml}
+		</div>`;
+	}).join('');
+}
+
+function equipFromSac(itemId, btn) {
+	const row    = btn.closest('.sh-equip-row');
+	const sel    = row.querySelector('select.sh-equip-sel');
+	const hidden = row.querySelector('span.sh-equip-sel');
+	const slot   = sel ? sel.value : (hidden ? hidden.dataset.slot : null);
+	if (slot) equip(itemId, slot);
+}
+
+async function equip(itemId, slot) {
+	try {
+		const res  = await fetch('api/equip', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({item_id: itemId, slot})
+		});
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		_slots      = data.slots;
+		_inventaire = data.inventaire;
+		_refreshPaperdoll();
+		_refreshInventaire();
+		_refreshDerivedStats(data.derived_stats);
+	} catch(err) { console.error('Erreur equip', err); }
+}
+
+async function unequip(slot) {
+	try {
+		const res  = await fetch('api/unequip', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({slot})
+		});
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		_slots      = data.slots;
+		_inventaire = data.inventaire;
+		_refreshPaperdoll();
+		_refreshInventaire();
+		_refreshDerivedStats(data.derived_stats);
+	} catch(err) { console.error('Erreur unequip', err); }
+}
+
+_refreshInventaire();
 </script>
 </body>
 </html>

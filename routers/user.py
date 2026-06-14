@@ -10,7 +10,7 @@ from utils.auth import get_current_user, create_access_token
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions
 from models.character_stats import (
-	BaseStats, EquipmentBonus, compute_derived_stats,
+	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
 	compute_xp_cost, compute_stat_cap, compute_character_level, XP_COEFF, XP_DECOUVERTE_LIEU, XP_VOC_COEFF
 )
 
@@ -131,7 +131,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'attribute_points': 0,
 			'vocations_niveaux': {characterinfo["voc"]: 0},
 			'inventaire': list(inventaire_de_base),
-			'slots': {s: None for s in ['main_droite', 'main_gauche', 'torse', 'tete', 'jambes', 'pieds', 'mains', 'anneau_1', 'anneau_2', 'cou']},
+			'slots': {s: None for s in ['main_droite', 'main_gauche', 'torse', 'tete', 'jambes', 'pieds', 'mains', 'anneau_1', 'anneau_2', 'cou', 'ceinture']},
 			'equipment_bonus': {},
 			}
 		save_doc(character_dict)
@@ -308,6 +308,40 @@ async def move_character(
 
 _VALID_STATS = {"V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"}
 
+_VALID_SLOTS = {
+    "main_droite", "main_gauche", "torse", "tete", "jambes",
+    "pieds", "mains", "anneau_1", "anneau_2", "cou", "ceinture",
+}
+
+def _recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
+    bonus = EquipmentBonus()
+    for item_id in slots.values():
+        if not item_id:
+            continue
+        item = get_doc(item_id)
+        if not item:
+            continue
+        bonus.pa           += item.get("bonus_pa", 0)
+        bonus.pv           += item.get("bonus_pv", 0)
+        bonus.pm           += item.get("bonus_pm", 0)
+        bonus.malus_depl   += item.get("bonus_malus_depl", 0)
+        bonus.cc_bonus     += item.get("bonus_cc", 0)
+        bonus.cd_bonus     += item.get("bonus_cd", 0)
+        bonus.degats_bonus += item.get("bonus_degats", 0)
+        bonus.initiative   += item.get("bonus_initiative", 0)
+    return bonus
+
+def _derived_from_character(character: dict, equipment: EquipmentBonus) -> DerivedStats:
+    stats = character["caracteristiques_current"]
+    base = BaseStats(
+        v=stats.get("V", 0), f=stats.get("F", 0),
+        r=stats.get("R", 0), ag=stats.get("Ag", 0),
+        vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
+        cha=stats.get("Cha", 0), ch=stats.get("Ch", 0),
+    )
+    voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
+    return compute_derived_stats(base, niveau=voc_niveau, equipment=equipment)
+
 @user_router.post("/spend_xp")
 async def spend_xp(
 	current_user: Annotated[User, Depends(get_current_user)],
@@ -407,6 +441,94 @@ async def spend_xp(
 		"attribute_points": character["attribute_points"],
 		"stat_caps":     new_caps,
 		"derived_stats": derived.model_dump(),
+	}
+
+
+@user_router.post("/equip")
+async def equip_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	item_id = body.get("item_id")
+	slot    = body.get("slot")
+
+	if not item_id or slot not in _VALID_SLOTS:
+		raise HTTPException(status_code=422, detail="Paramètres invalides")
+
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	inventaire = character.get("inventaire", [])
+	if item_id not in inventaire:
+		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
+
+	item = get_doc(item_id)
+	if not item:
+		raise HTTPException(status_code=404, detail="Objet introuvable")
+
+	if slot not in item.get("slots", []):
+		raise HTTPException(status_code=422, detail=f"Slot '{slot}' incompatible avec cet objet")
+
+	slots = character.get("slots", {})
+
+	displaced = slots.get(slot)
+	if displaced:
+		inventaire.append(displaced)
+
+	slots[slot] = item_id
+	inventaire.remove(item_id)
+	character["slots"]      = slots
+	character["inventaire"] = inventaire
+
+	eq_bonus = _recompute_equipment_bonus(slots)
+	character["equipment_bonus"] = eq_bonus.model_dump()
+	save_doc(character)
+
+	derived = _derived_from_character(character, eq_bonus)
+	return {
+		"slots":           {s: get_doc(v) if v else None for s, v in slots.items()},
+		"inventaire":      [get_doc(i) for i in inventaire if i],
+		"equipment_bonus": character["equipment_bonus"],
+		"derived_stats":   derived.model_dump(),
+	}
+
+
+@user_router.post("/unequip")
+async def unequip_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	slot = body.get("slot")
+
+	if slot not in _VALID_SLOTS:
+		raise HTTPException(status_code=422, detail="Slot invalide")
+
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	slots   = character.get("slots", {})
+	item_id = slots.get(slot)
+	if not item_id:
+		raise HTTPException(status_code=422, detail="Slot déjà vide")
+
+	inventaire = character.get("inventaire", [])
+	inventaire.append(item_id)
+	slots[slot] = None
+	character["slots"]      = slots
+	character["inventaire"] = inventaire
+
+	eq_bonus = _recompute_equipment_bonus(slots)
+	character["equipment_bonus"] = eq_bonus.model_dump()
+	save_doc(character)
+
+	derived = _derived_from_character(character, eq_bonus)
+	return {
+		"slots":           {s: get_doc(v) if v else None for s, v in slots.items()},
+		"inventaire":      [get_doc(i) for i in inventaire if i],
+		"equipment_bonus": character["equipment_bonus"],
+		"derived_stats":   derived.model_dump(),
 	}
 
 

@@ -102,13 +102,13 @@ def compute_derived_stats(
     # ── Défense magique ───────────────────────────────────────────────
     pm_def = (base.vol // 2) + (base.int_ // 4)
 
-    # ── Dégâts corps à corps ─────────────────────────────────────────
-    de_cc = _force_to_dice(base.f)
     bonus_degats = equipment.degats_bonus
+    # ── Dégâts corps à corps ─────────────────────────────────────────
+    de_cc = _caract_to_dice_(base.f)
     degats_cc = f"1D{de_cc}+{bonus_degats}" if bonus_degats else f"1D{de_cc}"
 
     # ── Dégâts à distance ─────────────────────────────────────────────
-    de_cd = _agility_to_dice(base.ag)
+    de_cd = _caract_to_dice_(base.ag)
     degats_cd = f"1D{de_cd}+{bonus_degats}" if bonus_degats else f"1D{de_cd}"
 
     # ── Charge max ────────────────────────────────────────────────────
@@ -192,20 +192,11 @@ def compute_character_level(xp_total: int) -> int:
     return niveau
 
 
-def _force_to_dice(f: int) -> int:
-    """Convertit la Force en valeur de dé standard."""
-    if f <= 2:  return 4
-    if f <= 4:  return 6
-    if f <= 6:  return 8
-    if f <= 8:  return 10
-    if f <= 9:  return 12
+def _caract_to_dice_(f: int) -> int:
+    """Convertit une caracteristique en valeur de dé standard."""
+    if f <= 20:  return 4
+    if f <= 40:  return 6
+    if f <= 60:  return 8
+    if f <= 80:  return 10
+    if f <= 90:  return 12
     return 20
-
-
-def _agility_to_dice(ag: int) -> int:
-    """Convertit l'Agilité en valeur de dé pour les dégâts à distance."""
-    if ag <= 3:  return 4
-    if ag <= 5:  return 6
-    if ag <= 7:  return 8
-    if ag <= 9:  return 10
-    return 12
