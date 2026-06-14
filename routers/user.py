@@ -5,8 +5,7 @@ from pydantic import BaseModel
 import bcrypt
 import re
 import uuid
-from jose import jwt
-from db.config import db, SECRET_KEY, ALGORITHM, save_doc, get_doc
+from db.config import save_doc, get_doc, delete_doc
 from utils.auth import get_current_user, create_access_token
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions
@@ -31,7 +30,7 @@ class RegisterRequest(BaseModel):
 @user_router.post("/register")
 async def register_user(user: RegisterRequest, response: Response):
 	user_id = "user:"+user.email
-	user_doc = db.get(user_id)
+	user_doc = get_doc(user_id)
 	if user_doc:
 		raise HTTPException(status_code=400, detail="L'utilisateur existe déjà")
 	
@@ -39,9 +38,9 @@ async def register_user(user: RegisterRequest, response: Response):
 		raise HTTPException(status_code=400, detail="Les mots de passe ne correspondent pas")
 	
 	hashed_pw = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt())
-	token = create_access_token({"user_id": user_id}) #jwt.encode({"user_id": user_id}, SECRET_KEY, algorithm=ALGORITHM)
+	token = create_access_token({"user_id": user_id})
 
-	db.put({
+	save_doc({
 		"_id": user_id,
 		"username": user.username,
 		"email": user.email,
@@ -60,7 +59,7 @@ class LoginRequest(BaseModel):
 	
 @user_router.post("/login")
 async def login_user(user: LoginRequest, response: Response):
-	user_doc = db.get("user:"+user.email)
+	user_doc = get_doc("user:"+user.email)
 	if not user_doc or not bcrypt.checkpw(user.password.encode(), user_doc["password"].encode()):
 		raise HTTPException(status_code=400, detail="Invalid credentials")
 		
@@ -76,7 +75,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	
 	user_id = current_user["_id"]
-	db_user = db.get(user_id)
+	db_user = get_doc(user_id)
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
 		
@@ -88,7 +87,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 		)
 		if points_depenses>10:
 			raise HTTPException(status_code=406, detail="Incorrect info for character creation, to much points spend.")
-		races = db.get("rules:races")
+		races = get_doc("rules:races")
 		race = next((r for r in races["value"] if r["id"] == characterinfo["race"]), None)
 		caract = {
 			k: race['stats'].get(k, 0) + caractUp.get(k, 0)
@@ -105,9 +104,9 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			ch=caract.get("Ch", 0),
 		)
 		derived = compute_derived_stats(base=base, niveau=0)
-		lieu = db.get(characterinfo["cite"])
+		lieu = get_doc(characterinfo["cite"])
 		position = lieu.get("default_position",{"x" : 0, "y" : 0})
-		vocations = db.get("rules:vocations")
+		vocations = get_doc("rules:vocations")
 		vocation = next((v for v in vocations["value"] if v["id"] == characterinfo["voc"]), None)
 		inventaire_de_base = vocation.get("equipement_de_base", []) if vocation else []
 		unique_id = "character:" + user_id + "_" + str(uuid.uuid4())
@@ -135,7 +134,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'slots': {s: None for s in ['main_droite', 'main_gauche', 'torse', 'tete', 'jambes', 'pieds', 'mains', 'anneau_1', 'anneau_2', 'cou']},
 			'equipment_bonus': {},
 			}
-		db.put(character_dict)
+		save_doc(character_dict)
 	
 	return get_user_characters(current_user)
 	
@@ -149,7 +148,7 @@ async def delete_character(
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	
 	current_user_id = current_user["_id"]
-	db_user = db.get(current_user_id)
+	db_user = get_doc(current_user_id)
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
 		
@@ -166,7 +165,7 @@ async def delete_character(
 			characterToDelete["nom"] == character["nom"] and
 			characterToDelete["prenom"] == character["prenom"]
 		 ):
-			db.delete(characterToDelete)
+			delete_doc(characterToDelete)
 		else:
 			raise HTTPException(status_code=404, detail="Character not found")
 	
@@ -182,7 +181,7 @@ async def select_character(
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	
 	current_user_id = current_user["_id"]
-	db_user = db.get(current_user_id)
+	db_user = get_doc(current_user_id)
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
 		
@@ -200,7 +199,7 @@ async def select_character(
 			characterSelected["prenom"] == character["prenom"]
 		 ):
 			db_user["selected_character"] = character_id
-			db.put(db_user)
+			save_doc(db_user)
 			return characterSelected
 		else:
 			raise HTTPException(status_code=404, detail="Character not found")
@@ -228,7 +227,7 @@ async def update_character_portrait(
 			y = float(match.group(2))
 			character_to_update["portrait_translate"] = {"x": x, "y": y}
 			character_to_update["portrait_zoom"] = zoom
-			db.put(character_to_update)
+			save_doc(character_to_update)
 			return character_to_update
 		else:
 			raise HTTPException(status_code=406, detail="Incorrect info for character portrait update")
@@ -284,7 +283,7 @@ async def move_character(
 							if niveau_after > niveau_new:
 								niveau_up = True
 								niveau_new = niveau_after
-						db.put(character_to_update)
+						save_doc(character_to_update)
 						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
@@ -298,7 +297,7 @@ async def move_character(
 				position["x"]>=0 and position["y"]>=0
 				and position["x"]<=lieu_doc["dimensions"]["x"] and position["y"]<=lieu_doc["dimensions"]["y"]):
 				character_to_update["position"] = position
-				db.put(character_to_update)
+				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
 				if lieu_doc:
 					access = get_lieu_directions(current_user, lieu_doc, position)
@@ -376,7 +375,7 @@ async def spend_xp(
 	if use_bonus:
 		character["max_bonus_used"] = stat_key
 
-	db.put(character)
+	save_doc(character)
 
 	# Recalculer les stats dérivées et les nouveaux plafonds
 	stats_cur = character["caracteristiques_current"]
@@ -433,7 +432,7 @@ async def spend_xp_vocation(
 	vocations_niveaux[voc] = voc_niveau + 1
 	character["vocations_niveaux"] = vocations_niveaux
 	character["xp_libre"] = xp_libre - cout
-	db.put(character)
+	save_doc(character)
 
 	return {
 		"xp_libre":      character["xp_libre"],

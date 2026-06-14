@@ -269,16 +269,24 @@
 					<span class="pass-visual"></span>
 				</div>
 				<button type="submit" class="btn-auth">Entrer dans la cité</button>
+				{% if is_google_auth or is_apple_auth or is_facebook_auth %}	
 				<div class="social-auth">
 					<div>
 						<p class="social-subtitle">Ou invoquer votre identité via</p>
 					</div>
 					<div class="social-icons">
-						<a href="/auth/google" class="btn-social" aria-label="Google">Google</a>
-						<a href="/auth/apple" class="btn-social" aria-label="Apple">Apple</a>
-						<a href="/auth/facebook" class="btn-social" aria-label="Facebook">Facebook</a>
+					{% if is_google_auth %}
+						<a href="/login/google" class="btn-social" aria-label="Google">Google</a>
+					{% endif %}
+					{% if is_apple_auth %}
+						<a href="/login/apple" class="btn-social" aria-label="Apple">Apple</a>
+					{% endif %}
+					{% if is_facebook_auth %}
+						<a href="/login/facebook" class="btn-social" aria-label="Facebook">Facebook</a>
 					</div>
+					{% endif %}
 				</div>
+				{% endif %}
 			</form>
 	{% if is_new %}
 			<form id="signup-form">

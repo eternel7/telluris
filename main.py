@@ -5,10 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from jose import jwt, JWTError
+from starlette.middleware.sessions import SessionMiddleware
 from PIL import Image
 from routers.user import user_router, User
-from db.config import db, find_docs, get_doc, save_doc, SECRET_KEY, ALGORITHM
+from routers.oauth import router as oauth_router
+from db.config import find_docs, get_doc, save_doc
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
@@ -24,9 +25,13 @@ app.add_middleware(
 	allow_methods=["*"],
 	allow_headers=["*"],
 )
-# Indexes voulus dans CouchDB
-db.put_index(fields=["type"], name="idx-tables", ddoc="design_tables")
-db.put_index(fields=["type", "user_id"], name="idx-tables-by-user", ddoc="design_tables")
+# SameSite=none required for Apple's cross-site POST callback; fine for Google/Facebook too
+app.add_middleware(
+	SessionMiddleware,
+	secret_key=os.getenv("SESSION_SECRET", os.getenv("SECRET_KEY")),
+	same_site="none",
+	https_only=False,
+)
 
 # Definit ou se trouvent les fichiers HTML
 templates = Jinja2Templates(directory="templates")
@@ -42,6 +47,7 @@ app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 
 app.include_router(user_router, prefix="/api")
 app.include_router(lieu_router, prefix="/api")
+app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
@@ -71,12 +77,18 @@ def read_root(request: Request, current_user: Annotated[User, Depends(get_curren
 @app.get("/auth", response_class=HTMLResponse)
 async def read_page_auth(request: Request):
 	is_new = "new" in request.query_params
+	is_google_auth = bool(os.getenv("GOOGLE_CLIENT_ID"))
+	is_apple_auth = bool(os.getenv("APPLE_CLIENT_ID"))
+	is_facebook_auth = bool(os.getenv("FACEBOOK_CLIENT_ID"))
 	return templates.TemplateResponse(
 		request=request, 
 		name="auth_telluris.html", 
 		context={
 			"title": "Authentification",
-			"is_new": is_new
+			"is_new": is_new,
+			"is_google_auth": is_google_auth,
+			"is_apple_auth": is_apple_auth,
+			"is_facebook_auth": is_facebook_auth
 		}
 	)
 	

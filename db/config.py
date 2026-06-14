@@ -14,6 +14,10 @@ DB_URL = f"http://{DB_USER}:{safe_password}@couchdb:5984"
 server = couchdb2.Server(DB_URL)
 db = server["telluris"]
 
+# Indexes voulus dans CouchDB
+db.put_index(fields=["type"], name="idx-tables", ddoc="design_tables")
+db.put_index(fields=["type", "user_id"], name="idx-tables-by-user", ddoc="design_tables")
+
 def get_doc(doc_id: str) -> dict | None:
 	try:
 		return db.get(doc_id)
@@ -33,5 +37,11 @@ def find_docs(selector: dict, fields: list[str] = None) -> list[dict]:
 		else:
 			result = db.find(selector)
 		return result["docs"]
+	except Exception:
+		return None
+		
+def delete_doc(doc: dict) -> None:
+	try:
+		return db.delete(doc)
 	except Exception:
 		return None
