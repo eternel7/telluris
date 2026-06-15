@@ -18,6 +18,7 @@ db = server["telluris"]
 db.put_index(fields=["type"], name="idx-tables", ddoc="design_tables")
 db.put_index(fields=["type", "user_id"], name="idx-tables-by-user", ddoc="design_tables")
 
+
 def get_doc(doc_id: str) -> dict | None:
 	try:
 		return db.get(doc_id)

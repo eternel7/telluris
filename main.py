@@ -9,6 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from PIL import Image
 from routers.user import user_router, User
 from routers.oauth import router as oauth_router
+from routers.zones import zones_router
 from db.config import find_docs, get_doc, save_doc
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
@@ -47,6 +48,7 @@ app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 
 app.include_router(user_router, prefix="/api")
 app.include_router(lieu_router, prefix="/api")
+app.include_router(zones_router, prefix="/api")
 app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)

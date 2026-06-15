@@ -1354,7 +1354,11 @@
 		HAUT_GAUCHE: 128  // 10000000
 	};
 	const root = document.documentElement;
+	let isMoving = false;
 	async function move(viewDx, viewDy) {
+		if (isMoving) return;
+		isMoving = true;
+		setMoveButtonsDisabled(true);
 		const moveData = {x: viewDx, y: viewDy};
 		try {
 			const response = await fetch('api/move_character', {
@@ -1371,12 +1375,17 @@
 				ACCESS = rep.access;
 				buildLocationslist();
 				updateControls();
+				if (rep.zone_event) { showZoneEvent(rep.zone_event); }
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
 				alert("Erreur : " + error.detail);
 			}
 		} catch (err) { console.error("Erreur de connexion", err); }
+		finally {
+			isMoving = false;
+			updateControls();
+		}
 	}
 	/* lieux accessibles */
 	function buildLocationslist() {
@@ -1402,6 +1411,12 @@
 		}).join('') || `<li>Aucun</li>`;
 	}
 	buildLocationslist();
+	function setMoveButtonsDisabled(disabled) {
+		['move_1_1','move_10','move_11','move01','move11','move10','move1_1','move0_1'].forEach(id => {
+			const el = document.getElementById(id);
+			if (el) el.disabled = disabled;
+		});
+	}
 	function updateControls() {
 		const controls = document.getElementById('controls');
 		if(controls) {
@@ -1444,6 +1459,9 @@
 				}
 				if (data.niveau_up) {
 					sessionStorage.setItem('niveau_up_notif', data.niveau);
+				}
+				if (data.zone_event && data.zone_event.type !== 'rien') {
+					sessionStorage.setItem('zone_event_notif', JSON.stringify(data.zone_event));
 				}
 				window.location.reload(true);
 			} else {
@@ -1831,6 +1849,19 @@
 	if (_niveauUpNotif) {
 		sessionStorage.removeItem('niveau_up_notif');
 		showToast('Niveau ' + _niveauUpNotif + ' atteint !');
+	}
+	const _zoneEvt = sessionStorage.getItem('zone_event_notif');
+	if (_zoneEvt) {
+		sessionStorage.removeItem('zone_event_notif');
+		showZoneEvent(JSON.parse(_zoneEvt));
+	}
+	function _zoneEventLabel(evt) {
+		const icons = { combat: '⚔', ressource: '🌿', pnj: '🧙', rien: '…' };
+		return (icons[evt.type] || '❓') + ' ' + ((evt.tags || []).join(', ') || evt.type);
+	}
+	function showZoneEvent(evt) {
+		if (!evt || evt.type === 'rien') return;
+		showToast(_zoneEventLabel(evt));
 	}
 </script>
 <script>

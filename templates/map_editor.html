@@ -435,6 +435,7 @@
 			<div class="mode-tabs">
 				<div class="mode-tab active" id="mode-terrain">Terrain</div>
 				<div class="mode-tab" id="mode-nav">Navigation</div>
+				<div class="mode-tab" id="mode-zones">Zones</div>
 			</div>
 
 			<!-- Panneau Terrain -->
@@ -451,6 +452,50 @@
 					<input type="number" id="custom-val-input" placeholder="autre…" min="0">
 					<button id="custom-val-btn">OK</button>
 				</div>
+			</div>
+
+			<!-- Panneau Zones -->
+			<div id="panel-zones" style="display:none;">
+				<label for="zone-select" style="font-size:.7rem;color:var(--accent);">Zone def</label>
+				<select id="zone-select" style="width:100%;margin-bottom:6px;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+					<option value="" disabled selected>-- Choisir une zone --</option>
+				</select>
+				<div style="display:flex;gap:6px;margin-bottom:6px;">
+					<div style="flex:1;">
+						<label style="font-size:.7rem;color:var(--accent);">X</label>
+						<input type="number" id="zone-x" value="0" min="0" style="width:100%;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+					</div>
+					<div style="flex:1;">
+						<label style="font-size:.7rem;color:var(--accent);">Y</label>
+						<input type="number" id="zone-y" value="0" min="0" style="width:100%;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+					</div>
+				</div>
+				<div style="display:flex;gap:6px;margin-bottom:6px;">
+					<div style="flex:1;">
+						<label style="font-size:.7rem;color:var(--accent);">Forme</label>
+						<select id="zone-forme" style="width:100%;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+							<option value="ellipse">Ellipse</option>
+							<option value="rectangle">Rectangle</option>
+						</select>
+					</div>
+					<div style="flex:1;">
+						<label style="font-size:.7rem;color:var(--accent);">Rotation (°)</label>
+						<input type="number" id="zone-rot" value="0" min="-180" max="180" style="width:100%;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+					</div>
+				</div>
+				<div style="display:flex;gap:6px;margin-bottom:8px;">
+					<div style="flex:1;">
+						<label style="font-size:.7rem;color:var(--accent);">Largeur (w)</label>
+						<input type="number" id="zone-w" value="10" min="1" style="width:100%;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+					</div>
+					<div style="flex:1;">
+						<label style="font-size:.7rem;color:var(--accent);">Hauteur (h)</label>
+						<input type="number" id="zone-h" value="8" min="1" style="width:100%;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+					</div>
+				</div>
+				<div style="font-size:.68rem;color:var(--accent-dim,#888);margin-bottom:6px;">Cliquer sur la grille pour placer la zone.</div>
+				<div id="zone-list" style="max-height:180px;overflow-y:auto;margin-bottom:8px;font-size:.68rem;"></div>
+				<button class="btn" id="save-zones-btn" style="width:100%;">💾 Sauvegarder les zones</button>
 			</div>
 
 			<!-- Panneau Navigation -->
@@ -576,11 +621,49 @@ const customBtn		= document.getElementById('custom-val-btn');
 const legendEl		= document.getElementById('legend');
 const modeTerrain	= document.getElementById('mode-terrain');
 const modeNav		= document.getElementById('mode-nav');
+const modeZones		= document.getElementById('mode-zones');
 const panelTerrain	= document.getElementById('panel-terrain');
 const panelNav		= document.getElementById('panel-nav');
+const panelZones	= document.getElementById('panel-zones');
 const dirGrid		= document.getElementById('dir-grid');
 const navInfo		= document.getElementById('nav-info');
 const navClearBtn	= document.getElementById('nav-clear-btn');
+const zoneSelect	= document.getElementById('zone-select');
+const zoneFormeEl	= document.getElementById('zone-forme');
+const zoneRotEl		= document.getElementById('zone-rot');
+const zoneWEl		= document.getElementById('zone-w');
+const zoneHEl		= document.getElementById('zone-h');
+const zoneXEl		= document.getElementById('zone-x');
+const zoneYEl		= document.getElementById('zone-y');
+const zoneListEl	= document.getElementById('zone-list');
+const saveZonesBtn	= document.getElementById('save-zones-btn');
+
+// ── ZONES STATE ────────────────────────────────────────────────────────────
+let zonesPlacements = [];    // zone_influences array for current lieu
+let zoneDefs = {};           // { "zone::id": { nom, ... } }
+let selectedZoneIdx = -1;    // index in zonesPlacements of selected placement
+
+const ZONE_COLORS = [
+	'rgba(255,80,80,0.35)',  'rgba(80,160,255,0.35)', 'rgba(80,255,120,0.35)',
+	'rgba(255,200,50,0.35)', 'rgba(200,80,255,0.35)', 'rgba(80,255,220,0.35)',
+];
+
+// Load zone defs on page load
+(async () => {
+	try {
+		const res = await fetch('/api/zones');
+		if (res.ok) {
+			const defs = await res.json();
+			(defs || []).forEach(d => {
+				zoneDefs[d._id] = d;
+				const opt = document.createElement('option');
+				opt.value = d._id;
+				opt.textContent = d.nom || d._id;
+				zoneSelect.appendChild(opt);
+			});
+		}
+	} catch (e) { console.warn('Zones non chargées', e); }
+})();
 
 // ── GET LIEU & GENERATE GRID FROM SERVER ───────────────────────────────────
 lieuSelect.addEventListener('change', async (e) => {
@@ -614,6 +697,9 @@ lieuSelect.addEventListener('change', async (e) => {
 			currentRev = lieuData._rev;
 			grid = lieuData.cells.map(row => [...row]);
 			nav = lieuData.nav ? { ...lieuData.nav } : {};
+			zonesPlacements = lieuData.zone_influences ? JSON.parse(JSON.stringify(lieuData.zone_influences)) : [];
+			selectedZoneIdx = -1;
+			renderZoneList();
 			dropZone.classList.add('hidden');
 			gridCont.classList.add('visible');
 			mapImg.style.display = 'block';
@@ -811,6 +897,44 @@ function renderGrid() {
 			seg(x0, y1-ch*u,	x0, y0,		  blocked(mask,'NW'));
 		}
 	}
+
+	// Draw zone overlays (always visible, highlighted in zones mode)
+	if (zonesPlacements.length > 0) {
+		zonesPlacements.forEach((p, idx) => {
+			const px = p.x * cw;
+			const py = p.y * ch;
+			const hw = (p.w / 2) * cw;
+			const hh = (p.h / 2) * ch;
+			const color = ZONE_COLORS[idx % ZONE_COLORS.length];
+			const isSelected = (editMode === 'zones' && idx === selectedZoneIdx);
+			ctx.save();
+			ctx.translate(px, py);
+			ctx.rotate((p.rot || 0) * Math.PI / 180);
+			ctx.fillStyle = isSelected ? color.replace('0.35', '0.55') : color;
+			ctx.strokeStyle = isSelected ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.45)';
+			ctx.lineWidth = isSelected ? 2 : 1;
+			ctx.beginPath();
+			if (p.forme === 'rectangle') {
+				ctx.rect(-hw, -hh, hw * 2, hh * 2);
+			} else {
+				ctx.ellipse(0, 0, hw, hh, 0, 0, Math.PI * 2);
+			}
+			ctx.fill();
+			ctx.stroke();
+			// Label
+			if (editMode === 'zones') {
+				const def = zoneDefs[p.zone];
+				const label = def ? def.nom : (p.zone || '?');
+				ctx.rotate(-(p.rot || 0) * Math.PI / 180); // un-rotate text
+				ctx.font = `bold ${Math.max(9, Math.min(cw * 0.8, 12))}px "Share Tech Mono", monospace`;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillStyle = 'rgba(255,255,255,0.85)';
+				ctx.fillText(label.length > 12 ? label.slice(0,11)+'…' : label, 0, 0);
+			}
+			ctx.restore();
+		});
+	}
 }
 
 function getHoverGlow() {
@@ -848,6 +972,24 @@ function paint(e) {
 			setStatus(`Cellule [${cx}, ${cy}] = ${selectedVal} - ${currentRev}.`);
 			scheduleGridSend();
 		}
+	} else if (editMode === 'zones') {
+		// Clic canvas = toujours placer une nouvelle zone
+		const zId = zoneSelect.value;
+		if (!zId) { setStatus('<span style="color:var(--danger)">Sélectionnez une zone def d\'abord.</span>'); return; }
+		const newPlacement = {
+			x: cx, y: cy,
+			w: parseInt(zoneWEl.value) || 10,
+			h: parseInt(zoneHEl.value) || 8,
+			rot: parseFloat(zoneRotEl.value) || 0,
+			forme: zoneFormeEl.value,
+			zone: zId,
+		};
+		zonesPlacements.push(newPlacement);
+		selectedZoneIdx = zonesPlacements.length - 1;
+		syncZoneInputs(selectedZoneIdx);
+		renderZoneList();
+		renderGrid();
+		setStatus(`Zone placée en [${cx}, ${cy}] — ${zonesPlacements.length} zone(s) au total.`);
 	} else {
 		// Mode nav : appliquer le masque courant des flèches à la cellule cliquée
 		const key = `${cx},${cy}`;
@@ -913,24 +1055,35 @@ function selectVal(v) {
 	if (grid.length) renderGrid();
 }
 // ── MODE TABS ──────────────────────────────────────────────────────────────
-modeTerrain.addEventListener('click', () => {
-	editMode = 'terrain';
-	modeTerrain.classList.add('active');
-	modeNav.classList.remove('active');
-	panelTerrain.style.display = '';
-	panelNav.style.display = 'none';
-	navSelectedCell = null;
+function setMode(mode) {
+	editMode = mode;
+	modeTerrain.classList.toggle('active', mode === 'terrain');
+	modeNav.classList.toggle('active', mode === 'nav');
+	modeZones.classList.toggle('active', mode === 'zones');
+	panelTerrain.style.display = mode === 'terrain' ? '' : 'none';
+	panelNav.style.display = mode === 'nav' ? '' : 'none';
+	panelZones.style.display = mode === 'zones' ? '' : 'none';
+	if (mode !== 'nav') navSelectedCell = null;
 	if (grid.length) renderGrid();
-});
+}
+modeTerrain.addEventListener('click', () => setMode('terrain'));
+modeNav.addEventListener('click', () => setMode('nav'));
+modeZones.addEventListener('click', () => setMode('zones'));
 
-modeNav.addEventListener('click', () => {
-	editMode = 'nav';
-	modeNav.classList.add('active');
-	modeTerrain.classList.remove('active');
-	panelTerrain.style.display = 'none';
-	panelNav.style.display = '';
-	if (grid.length) renderGrid();
-});
+// ── ZONE PROPERTY EDITORS ──────────────────────────────────────────────────
+function updateSelectedZone(key, value) {
+	if (selectedZoneIdx < 0 || selectedZoneIdx >= zonesPlacements.length) return;
+	zonesPlacements[selectedZoneIdx][key] = value;
+	renderZoneList();
+	renderGrid();
+}
+zoneXEl.addEventListener('input',    () => updateSelectedZone('x',    parseInt(zoneXEl.value)      || 0));
+zoneYEl.addEventListener('input',    () => updateSelectedZone('y',    parseInt(zoneYEl.value)      || 0));
+zoneWEl.addEventListener('input',    () => updateSelectedZone('w',    parseInt(zoneWEl.value)      || 1));
+zoneHEl.addEventListener('input',    () => updateSelectedZone('h',    parseInt(zoneHEl.value)      || 1));
+zoneRotEl.addEventListener('input',  () => updateSelectedZone('rot',  parseFloat(zoneRotEl.value)  || 0));
+zoneFormeEl.addEventListener('change', () => updateSelectedZone('forme', zoneFormeEl.value));
+zoneSelect.addEventListener('change', () => updateSelectedZone('zone', zoneSelect.value));
 
 // ── DIR BUTTONS ────────────────────────────────────────────────────────────
 function updateDirButtons(mask) {
@@ -1015,6 +1168,80 @@ function updateLegend() {
 		legendEl.appendChild(item);
 	});
 }
+
+// ── ZONES UI ───────────────────────────────────────────────────────────────
+function syncZoneInputs(idx) {
+	const p = zonesPlacements[idx];
+	if (!p) return;
+	zoneXEl.value    = p.x   ?? 0;
+	zoneYEl.value    = p.y   ?? 0;
+	zoneWEl.value    = p.w   ?? 10;
+	zoneHEl.value    = p.h   ?? 8;
+	zoneRotEl.value  = p.rot ?? 0;
+	zoneFormeEl.value = p.forme || 'ellipse';
+	if (p.zone) zoneSelect.value = p.zone;
+}
+
+function renderZoneList() {
+	if (!zoneListEl) return;
+	if (zonesPlacements.length === 0) {
+		zoneListEl.innerHTML = '<div style="color:#888;padding:4px;">Aucune zone placée.</div>';
+		return;
+	}
+	zoneListEl.innerHTML = zonesPlacements.map((p, i) => {
+		const def = zoneDefs[p.zone];
+		const nom = def ? def.nom : (p.zone || '?');
+		const color = ZONE_COLORS[i % ZONE_COLORS.length].replace('0.35', '0.8');
+		const isSel = i === selectedZoneIdx;
+		return `<div style="display:flex;align-items:center;gap:4px;padding:3px 2px;border-radius:3px;background:${isSel ? 'rgba(255,255,255,0.08)' : 'transparent'};" data-idx="${i}">
+			<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+			<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${nom}">${nom} (${p.forme}, ${p.w}×${p.h})</span>
+			<button onclick="deleteZone(${i})" style="background:none;border:none;color:#c84b4b;cursor:pointer;font-size:.9rem;padding:0 2px;" title="Supprimer">✕</button>
+		</div>`;
+	}).join('');
+	// Click row : sélectionner ou désélectionner
+	zoneListEl.querySelectorAll('[data-idx]').forEach(el => {
+		el.addEventListener('click', e => {
+			if (e.target.tagName === 'BUTTON') return;
+			const idx = parseInt(el.dataset.idx);
+			if (selectedZoneIdx === idx) {
+				selectedZoneIdx = -1; // désélectionner
+			} else {
+				selectedZoneIdx = idx;
+				syncZoneInputs(idx);
+			}
+			renderZoneList();
+			renderGrid();
+		});
+	});
+}
+
+function deleteZone(idx) {
+	zonesPlacements.splice(idx, 1);
+	if (selectedZoneIdx >= zonesPlacements.length) selectedZoneIdx = zonesPlacements.length - 1;
+	renderZoneList();
+	renderGrid();
+}
+
+saveZonesBtn.addEventListener('click', async () => {
+	if (!currentLocId) { setStatus('<span style="color:var(--danger)">Aucun lieu chargé.</span>'); return; }
+	try {
+		const res = await fetch(`/api/lieu/${encodeURIComponent(currentLocId)}/zone_influences`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ zone_influences: zonesPlacements }),
+		});
+		if (res.ok) {
+			const data = await res.json();
+			// Update local placements with computed bbox from server
+			zonesPlacements = data.zone_influences || zonesPlacements;
+			setStatus(`<span style="color:#80e580;">${data.saved} zone(s) sauvegardée(s).</span>`);
+		} else {
+			const err = await res.json();
+			setStatus(`<span style="color:var(--danger)">Erreur : ${err.detail}</span>`);
+		}
+	} catch (e) { setStatus('<span style="color:var(--danger)">Erreur réseau.</span>'); }
+});
 
 // ── STATUS ─────────────────────────────────────────────────────────────────
 function setStatus(html) {

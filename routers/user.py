@@ -9,6 +9,7 @@ from db.config import save_doc, get_doc, delete_doc
 from utils.auth import get_current_user, create_access_token
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions
+from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
 	compute_xp_cost, compute_stat_cap, compute_character_level, XP_COEFF, XP_DECOUVERTE_LIEU, XP_VOC_COEFF
@@ -285,7 +286,14 @@ async def move_character(
 									character_to_update["attribute_points"] = character_to_update.get("attribute_points", 0) + n
 								niveau_new = niveau_after
 						save_doc(character_to_update)
-						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new}
+						zone_event = None
+						if lieu_doc.get("zone_influences"):
+							zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
+							zone_event = resolve_zone_event(
+								destination_pos["x"], destination_pos["y"],
+								lieu_doc["zone_influences"], zone_defs
+							)
+						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -302,7 +310,14 @@ async def move_character(
 				links = get_lieu_links(current_user)
 				if lieu_doc:
 					access = get_lieu_directions(current_user, lieu_doc, position)
-					return {"position" : character_to_update["position"], "links" : links, "access" : access}
+					zone_event = None
+					if lieu_doc.get("zone_influences"):
+						zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
+						zone_event = resolve_zone_event(
+							position["x"], position["y"],
+							lieu_doc["zone_influences"], zone_defs
+						)
+					return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
