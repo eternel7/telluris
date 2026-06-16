@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+<style>
+	@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+	:root {
+		--bg: #0d0f14;
+		--panel: #141720;
+		--border: #2a3040;
+		--accent: #c8a84b;
+		--accent2: #4b8fc8;
+		--danger: #c84b4b;
+		--success: #4bc87a;
+		--text: #fff;
+		--muted: #e6e6e6;
+	}
+
+	* { box-sizing: border-box; margin: 0; padding: 0; }
+
+	body {
+		background: var(--bg);
+		color: var(--text);
+		font-family: 'Share Tech Mono', monospace;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	header {
+		width: 100%;
+		padding: 18px 32px;
+		border-bottom: 1px solid var(--border);
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+	}
+	header h1 {
+		font-family: 'Cinzel', serif;
+		font-size: 1.3rem;
+		letter-spacing: 0.12em;
+		color: var(--accent);
+		text-shadow: 0 0 20px rgba(200,168,75,0.3);
+	}
+	header span { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em; }
+
+	.main {
+		display: flex;
+		width: 100%;
+		max-width: 1400px;
+		padding: 24px;
+		gap: 20px;
+		align-items: flex-start;
+	}
+
+	/* ── LEFT PANEL ── */
+	.panel {
+		width: 260px;
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.card {
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		padding: 16px;
+	}
+	.card-title {
+		font-family: 'Cinzel', serif;
+		font-size: 0.7rem;
+		letter-spacing: 0.15em;
+		color: var(--accent);
+		margin-bottom: 14px;
+		text-transform: uppercase;
+	}
+
+	label {
+		display: block;
+		font-size: 0.72rem;
+		color: var(--muted);
+		margin-bottom: 5px;
+		letter-spacing: 0.05em;
+	}
+
+	select, input[type="text"], input[type="number"], textarea {
+		width: 100%;
+		background: #0d0f14;
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		color: var(--text);
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 0.85rem;
+		padding: 7px 9px;
+		outline: none;
+		transition: border-color 0.2s;
+		margin-bottom: 10px;
+	}
+	select { cursor: pointer; }
+	select:focus, input:focus, textarea:focus { border-color: var(--accent); }
+	textarea { resize: vertical; }
+
+	.btn {
+		width: 100%;
+		padding: 9px;
+		border: 1px solid var(--accent);
+		border-radius: 4px;
+		background: rgba(200,168,75,0.08);
+		color: var(--accent);
+		font-family: 'Cinzel', serif;
+		font-size: 0.75rem;
+		letter-spacing: 0.1em;
+		cursor: pointer;
+		transition: all 0.2s;
+		margin-bottom: 6px;
+	}
+	.btn:hover { background: rgba(200,168,75,0.18); box-shadow: 0 0 10px rgba(200,168,75,0.2); }
+	.btn.danger { border-color: var(--danger); color: var(--danger); background: transparent; }
+	.btn.danger:hover { background: rgba(200,75,75,0.1); }
+	.btn.success { border-color: var(--success); color: var(--success); background: transparent; }
+	.btn.success:hover { background: rgba(75,200,120,0.1); }
+
+	.mode-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+	.mode-tab {
+		flex: 1; padding: 5px;
+		border: 1px solid var(--border); border-radius: 4px;
+		background: #0d0f14; color: var(--muted);
+		font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+		cursor: pointer; text-align: center; transition: all 0.15s;
+	}
+	.mode-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,75,0.1); }
+
+	.img-preview-sm {
+		width: 48px; height: 48px;
+		object-fit: contain;
+		border: 1px solid var(--border); border-radius: 4px;
+		background: #0d0f14; margin-bottom: 10px;
+	}
+
+	/* ── RIGHT AREA ── */
+	.canvas-wrap {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	/* Preview */
+	.preview-card {
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		padding: 16px;
+		display: flex;
+		gap: 20px;
+		align-items: flex-start;
+	}
+	.preview-image-wrap {
+		flex-shrink: 0; width: 120px; height: 120px;
+		border: 1px solid var(--border); border-radius: 6px;
+		background: #0d0f14;
+		display: flex; align-items: center; justify-content: center;
+		overflow: hidden;
+	}
+	.preview-image-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+	.preview-image-wrap .no-img { font-size: 2.5rem; opacity: 0.3; }
+	.preview-info { flex: 1; min-width: 0; }
+	.preview-nom { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--accent); margin-bottom: 4px; }
+	.preview-id { font-size: 0.65rem; color: var(--muted); margin-bottom: 12px; opacity: 0.6; }
+
+	.preview-profil-row {
+		display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+	}
+	.preview-profil-row label { margin: 0; white-space: nowrap; font-size: 0.7rem; }
+	.preview-profil-row select { margin: 0; flex: 1; font-size: 0.75rem; padding: 4px 6px; }
+
+	/* Stats table */
+	.stats-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+	.stats-table th {
+		color: var(--accent); font-family: 'Cinzel', serif;
+		font-size: 0.65rem; letter-spacing: 0.1em;
+		border-bottom: 1px solid var(--border);
+		padding: 4px 6px; text-align: center;
+	}
+	.stats-table th:first-child { text-align: left; }
+	.stats-table td {
+		padding: 3px 6px; text-align: center;
+		border-bottom: 1px solid rgba(42,48,64,0.5);
+		color: var(--muted);
+	}
+	.stats-table td:first-child { color: var(--accent); font-family: 'Cinzel', serif; }
+	.stats-table .calc { color: var(--accent2); }
+
+	/* Profil preview */
+	.profil-grade-badge {
+		display: inline-block; padding: 3px 10px;
+		border-radius: 12px; border: 1px solid var(--accent);
+		color: var(--accent); font-size: 0.75rem;
+		font-family: 'Cinzel', serif; margin-bottom: 8px;
+	}
+	.skill-tag {
+		display: inline-block; padding: 2px 8px;
+		border: 1px solid var(--accent2); border-radius: 3px;
+		color: var(--accent2); font-size: 0.65rem; margin: 2px;
+	}
+
+	/* Stats edit card */
+	.stat-row {
+		display: grid;
+		grid-template-columns: 50px 1fr 1fr;
+		gap: 4px;
+		align-items: center;
+		margin-bottom: 4px;
+	}
+	.stat-row-label {
+		font-family: 'Cinzel', serif; font-size: 0.72rem;
+		color: var(--accent); text-align: right; padding-right: 6px;
+	}
+	.stat-row input[type="number"] { margin-bottom: 0; padding: 4px 6px; font-size: 0.8rem; text-align: center; }
+	.stat-col-header {
+		font-size: 0.65rem; color: var(--muted);
+		text-align: center; margin-bottom: 4px;
+	}
+
+	/* JSON */
+	.json-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+	.json-header {
+		display: flex; align-items: center; justify-content: space-between;
+		padding: 10px 14px; border-bottom: 1px solid var(--border);
+	}
+	.json-header span { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.12em; color: var(--accent); }
+	.copy-btn {
+		padding: 5px 12px; border: 1px solid var(--accent); border-radius: 4px;
+		background: transparent; color: var(--accent);
+		font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+		cursor: pointer; transition: all 0.2s;
+	}
+	.copy-btn:hover { background: rgba(200,168,75,0.15); }
+	.copy-btn.copied { border-color: var(--success); color: var(--success); }
+	#json-output {
+		display: block; width: 100%; background: transparent; border: none;
+		color: var(--text); font-family: 'Share Tech Mono', monospace;
+		font-size: 0.72rem; padding: 14px; resize: vertical;
+		min-height: 120px; max-height: 300px; outline: none; line-height: 1.5;
+	}
+
+	.status-bar { font-size: 0.68rem; color: var(--muted); padding: 4px 0; min-height: 1.2em; }
+	.status-bar span { color: var(--accent2); }
+
+	::-webkit-scrollbar { width: 5px; }
+	::-webkit-scrollbar-track { background: #0d0f14; }
+	::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+	<h1>📖 Bestiary Editor</h1>
+	<span>— Éditeur de Bestiaire</span>
+</header>
+
+<div class="main">
+
+	<!-- LEFT PANEL -->
+	<div class="panel">
+
+		<!-- Sélection + mode tabs -->
+		<div class="card">
+			<div class="card-title">🐉 Sélection</div>
+			<div class="mode-tabs">
+				<div class="mode-tab active" id="tab-especes">Espèces</div>
+				<div class="mode-tab" id="tab-profils">Profils</div>
+			</div>
+			<label id="select-label">Choisir une espèce</label>
+			<select id="doc-select">
+				<option value="" disabled selected>-- Choisir --</option>
+			</select>
+			<div id="load-error" style="color:var(--danger);font-size:0.68rem;margin-top:-6px;min-height:1em;"></div>
+		</div>
+
+		<!-- Formulaire Espèce -->
+		<div class="card" id="form-espece">
+			<div class="card-title">🦴 Espèce</div>
+			<label>Nom</label>
+			<input type="text" id="esp-nom" placeholder="ex: Gobelin">
+			<label>ID CouchDB</label>
+			<input type="text" id="esp-id" placeholder="espece:goblin">
+			<label>Image</label>
+			<select id="esp-image">
+				<option value="">-- Aucune --</option>
+			</select>
+			<img id="esp-img-preview" class="img-preview-sm" src="" alt="" style="display:none;">
+			<label>Description</label>
+			<textarea id="esp-desc" rows="2" placeholder="Description courte..."></textarea>
+			<label>Tags (séparés par des virgules)</label>
+			<input type="text" id="esp-tags" placeholder="hostile, forest, humanoid">
+			<div style="display:flex;gap:6px;margin-top:4px;">
+				<button class="btn success" id="btn-new-esp" style="margin:0;flex:1;">+ Nouveau</button>
+				<button class="btn" id="btn-save-esp" style="margin:0;flex:1;">💾 Sauver</button>
+			</div>
+			<button class="btn danger" id="btn-del-esp" style="margin-top:6px;">✕ Supprimer</button>
+		</div>
+
+		<!-- Formulaire Profil -->
+		<div class="card" id="form-profil" style="display:none;">
+			<div class="card-title">⚔ Profil de Grade</div>
+			<label>Nom</label>
+			<input type="text" id="pro-nom" placeholder="ex: Vétéran">
+			<label>ID CouchDB</label>
+			<input type="text" id="pro-id" placeholder="profil:veteran">
+			<label>Niveau (1–6)</label>
+			<input type="number" id="pro-niveau" value="1" min="1" max="6" step="1">
+			<label>Modificateurs de stats</label>
+			<div style="font-size:0.65rem;color:var(--muted);margin-bottom:6px;">Delta ajouté au min de l'espèce (laisser vide = 0)</div>
+			<div style="display:grid;grid-template-columns:50px 1fr 1fr;gap:4px;margin-bottom:4px;">
+				<div></div>
+				<div class="stat-col-header">+Min</div>
+				<div class="stat-col-header">+Max</div>
+			</div>
+			<div id="pro-modifier-rows"></div>
+			<label>Bonus skills (un par ligne)</label>
+			<textarea id="pro-skills" rows="3" placeholder="heavy_strike&#10;warcry"></textarea>
+			<label>Description</label>
+			<textarea id="pro-desc" rows="2" placeholder="Description..."></textarea>
+			<div style="display:flex;gap:6px;margin-top:4px;">
+				<button class="btn success" id="btn-new-pro" style="margin:0;flex:1;">+ Nouveau</button>
+				<button class="btn" id="btn-save-pro" style="margin:0;flex:1;">💾 Sauver</button>
+			</div>
+			<button class="btn danger" id="btn-del-pro" style="margin-top:6px;">✕ Supprimer</button>
+		</div>
+
+		<!-- Propriétés libres (espèces uniquement) -->
+		<div class="card" id="card-proprietes">
+			<div class="card-title">🔧 Propriétés libres</div>
+			<label style="font-size:0.65rem;opacity:0.7;">JSON — champs extensibles (loot_table, xp_reward…)</label>
+			<textarea id="esp-proprietes" rows="6" style="font-size:0.72rem;">{}</textarea>
+		</div>
+
+	</div>
+
+	<!-- RIGHT AREA -->
+	<div class="canvas-wrap">
+
+		<!-- Preview espèce -->
+		<div class="preview-card" id="preview-espece">
+			<div class="preview-image-wrap">
+				<div class="no-img" id="preview-no-img">🐉</div>
+				<img id="preview-img" src="" alt="" style="display:none;">
+			</div>
+			<div class="preview-info">
+				<div class="preview-nom" id="preview-nom">—</div>
+				<div class="preview-id" id="preview-id-txt"></div>
+				<div class="preview-profil-row">
+					<label>Profil :</label>
+					<select id="preview-profil-sel">
+						<option value="">— sans profil —</option>
+					</select>
+				</div>
+				<table class="stats-table">
+					<thead>
+						<tr>
+							<th style="text-align:left;">Stat</th>
+							<th>Min</th>
+							<th>Max</th>
+							<th class="calc" id="th-calc" style="display:none;">Calculé</th>
+						</tr>
+					</thead>
+					<tbody id="stats-tbody"></tbody>
+				</table>
+			</div>
+		</div>
+
+		<!-- Preview profil -->
+		<div class="preview-card" id="preview-profil" style="display:none;">
+			<div class="preview-info" style="width:100%;">
+				<div class="preview-nom" id="pro-preview-nom">—</div>
+				<div class="preview-id" id="pro-preview-id"></div>
+				<div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+					<div>
+						<span class="profil-grade-badge" id="pro-preview-niveau">Niveau —</span>
+					</div>
+					<div id="pro-preview-mods-wrap" style="display:none;">
+						<label style="margin-bottom:4px;">Modificateurs</label>
+						<table class="stats-table" style="font-size:0.7rem;">
+							<thead><tr><th style="text-align:left;">Stat</th><th>+Min</th><th>+Max</th></tr></thead>
+							<tbody id="pro-preview-mods-tbody"></tbody>
+						</table>
+					</div>
+					<div id="pro-preview-skills-wrap" style="display:none;">
+						<label style="margin-bottom:4px;">Bonus skills</label>
+						<div id="pro-preview-skills"></div>
+					</div>
+					<div id="pro-preview-desc-wrap" style="display:none;">
+						<label style="margin-bottom:4px;">Description</label>
+						<div style="font-size:0.78rem;color:var(--muted);" id="pro-preview-desc"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Stats editor card (espèces uniquement) -->
+		<div class="card" id="card-stats">
+			<div class="card-title">📊 Stats de base</div>
+			<div style="display:grid;grid-template-columns:50px 1fr 1fr;gap:4px;margin-bottom:4px;">
+				<div></div>
+				<div class="stat-col-header">Min</div>
+				<div class="stat-col-header">Max</div>
+			</div>
+			<div id="stat-rows"></div>
+		</div>
+
+		<!-- Status bar -->
+		<div class="status-bar" id="status"></div>
+
+		<!-- JSON output -->
+		<div class="json-wrap">
+			<div class="json-header">
+				<span>JSON — Document CouchDB</span>
+				<button class="copy-btn" id="copy-btn">Copier</button>
+			</div>
+			<textarea id="json-output" readonly spellcheck="false"></textarea>
+		</div>
+
+	</div>
+</div>
+
+<script>
+const MONSTERS_BASE = `{{ url_for('monsters', path='') }}`;
+const STATS = ['V', 'F', 'R', 'Ag', 'Vol', 'Int', 'Cha', 'Ch'];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let currentMode = 'especes';
+let currentDoc  = null;
+let especes     = [];
+let profils     = [];
+let images      = [];
+
+// ── ELEMENTS ──────────────────────────────────────────────────────────────
+const tabEspeces     = document.getElementById('tab-especes');
+const tabProfils     = document.getElementById('tab-profils');
+const docSelect      = document.getElementById('doc-select');
+const selectLabel    = document.getElementById('select-label');
+const loadError      = document.getElementById('load-error');
+const statusEl       = document.getElementById('status');
+const jsonOutput     = document.getElementById('json-output');
+const copyBtn        = document.getElementById('copy-btn');
+
+const formEspece     = document.getElementById('form-espece');
+const espNom         = document.getElementById('esp-nom');
+const espId          = document.getElementById('esp-id');
+const espImage       = document.getElementById('esp-image');
+const espImgPreview  = document.getElementById('esp-img-preview');
+const espDesc        = document.getElementById('esp-desc');
+const espTags        = document.getElementById('esp-tags');
+const espProprietes  = document.getElementById('esp-proprietes');
+const cardProprietes = document.getElementById('card-proprietes');
+
+const formProfil     = document.getElementById('form-profil');
+const proNom         = document.getElementById('pro-nom');
+const proId          = document.getElementById('pro-id');
+const proNiveau      = document.getElementById('pro-niveau');
+const proSkills      = document.getElementById('pro-skills');
+const proDesc        = document.getElementById('pro-desc');
+
+const previewEspece    = document.getElementById('preview-espece');
+const previewProfilEl  = document.getElementById('preview-profil');
+const previewImg       = document.getElementById('preview-img');
+const previewNoImg     = document.getElementById('preview-no-img');
+const previewNom       = document.getElementById('preview-nom');
+const previewIdTxt     = document.getElementById('preview-id-txt');
+const previewProfilSel = document.getElementById('preview-profil-sel');
+const statsTbody       = document.getElementById('stats-tbody');
+const thCalc           = document.getElementById('th-calc');
+const cardStats        = document.getElementById('card-stats');
+
+const proPreviewNom        = document.getElementById('pro-preview-nom');
+const proPreviewId         = document.getElementById('pro-preview-id');
+const proPreviewNiveau     = document.getElementById('pro-preview-niveau');
+const proPreviewModsWrap   = document.getElementById('pro-preview-mods-wrap');
+const proPreviewModsTbody  = document.getElementById('pro-preview-mods-tbody');
+const proPreviewSkillsWrap = document.getElementById('pro-preview-skills-wrap');
+const proPreviewSkills     = document.getElementById('pro-preview-skills');
+const proPreviewDescWrap   = document.getElementById('pro-preview-desc-wrap');
+const proPreviewDesc       = document.getElementById('pro-preview-desc');
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+buildStatRows();
+buildProModifierRows();
+
+(async () => {
+	const [esp, pro, imgs] = await Promise.all([
+		fetchJSON('/api/especes'),
+		fetchJSON('/api/profils'),
+		fetchJSON('/api/bestiaire/images'),
+	]);
+	especes = esp  || [];
+	profils = pro  || [];
+	images  = imgs || [];
+	populateSelect(especes);
+	populateImages();
+	populatePreviewProfilSelect();
+	updateJSON();
+	updatePreview();
+})();
+
+// ── FETCH ──────────────────────────────────────────────────────────────────
+async function fetchJSON(url, opts = {}) {
+	try {
+		const res = await fetch(url, opts);
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			setStatus(`<span style="color:var(--danger)">Erreur ${res.status} : ${err.detail || res.statusText}</span>`);
+			return null;
+		}
+		return await res.json();
+	} catch (e) {
+		setStatus(`<span style="color:var(--danger)">Erreur réseau : ${e.message}</span>`);
+		return null;
+	}
+}
+
+// ── MODE ───────────────────────────────────────────────────────────────────
+function setMode(mode) {
+	currentMode = mode;
+	currentDoc  = null;
+	tabEspeces.classList.toggle('active',   mode === 'especes');
+	tabProfils.classList.toggle('active',   mode === 'profils');
+	formEspece.style.display    = mode === 'especes' ? '' : 'none';
+	formProfil.style.display    = mode === 'profils' ? '' : 'none';
+	cardProprietes.style.display = mode === 'especes' ? '' : 'none';
+	cardStats.style.display     = mode === 'especes' ? '' : 'none';
+	previewEspece.style.display  = mode === 'especes' ? '' : 'none';
+	previewProfilEl.style.display = mode === 'profils' ? '' : 'none';
+	selectLabel.textContent = mode === 'especes' ? 'Choisir une espèce' : 'Choisir un profil';
+	populateSelect(mode === 'especes' ? especes : profils);
+	clearForm();
+}
+
+tabEspeces.addEventListener('click', () => setMode('especes'));
+tabProfils.addEventListener('click', () => setMode('profils'));
+
+// ── SELECT ─────────────────────────────────────────────────────────────────
+function populateSelect(docs) {
+	docSelect.innerHTML = '<option value="" disabled selected>-- Choisir --</option>';
+	docs.forEach(d => {
+		const opt = document.createElement('option');
+		opt.value = d._id;
+		opt.textContent = d.nom || d._id;
+		docSelect.appendChild(opt);
+	});
+}
+
+docSelect.addEventListener('change', async () => {
+	const id = docSelect.value;
+	if (!id) return;
+	const prefix = currentMode === 'especes' ? '/api/especes/' : '/api/profils/';
+	const doc = await fetchJSON(prefix + encodeURIComponent(id));
+	if (!doc) return;
+	currentDoc = doc;
+	populateForm(doc);
+	updateJSON();
+	updatePreview();
+});
+
+// ── IMAGES ─────────────────────────────────────────────────────────────────
+function populateImages() {
+	espImage.innerHTML = '<option value="">-- Aucune --</option>';
+	images.forEach(img => {
+		const opt = document.createElement('option');
+		opt.value = img;
+		opt.textContent = img;
+		espImage.appendChild(opt);
+	});
+}
+
+function populatePreviewProfilSelect() {
+	previewProfilSel.innerHTML = '<option value="">— sans profil —</option>';
+	profils.forEach(p => {
+		const opt = document.createElement('option');
+		opt.value = p._id;
+		opt.textContent = `${p.nom || p._id} (niv.${p.niveau || '?'})`;
+		previewProfilSel.appendChild(opt);
+	});
+}
+
+// ── FORM POPULATION ─────────────────────────────────────────────────────────
+function populateForm(doc) {
+	if (currentMode === 'especes') {
+		espNom.value   = doc.nom         || '';
+		espId.value    = doc._id         || '';
+		espImage.value = doc.image       || '';
+		updateImagePreview(doc.image);
+		espDesc.value  = doc.description || '';
+		espTags.value  = (doc.tags || []).join(', ');
+		espProprietes.value = JSON.stringify(doc.proprietes || {}, null, 2);
+		STATS.forEach(s => {
+			const stat = (doc.base_attributes || {})[s] || {};
+			const minEl = document.getElementById(`stat-min-${s}`);
+			const maxEl = document.getElementById(`stat-max-${s}`);
+			if (minEl) minEl.value = stat.min ?? '';
+			if (maxEl) maxEl.value = stat.max ?? '';
+		});
+	} else {
+		proNom.value    = doc.nom         || '';
+		proId.value     = doc._id         || '';
+		proNiveau.value = doc.niveau      ?? 1;
+		proSkills.value = (doc.bonus_skills || []).join('\n');
+		proDesc.value   = doc.description || '';
+		STATS.forEach(s => {
+			const mod  = (doc.attributs_modifier || {})[s] || {};
+			const minEl = document.getElementById(`pro-mod-min-${s}`);
+			const maxEl = document.getElementById(`pro-mod-max-${s}`);
+			if (minEl) minEl.value = mod.min ?? '';
+			if (maxEl) maxEl.value = mod.max ?? '';
+		});
+	}
+}
+
+function clearForm() {
+	if (currentMode === 'especes') {
+		espNom.value = ''; espId.value = ''; espImage.value = '';
+		espImgPreview.style.display = 'none';
+		espDesc.value = ''; espTags.value = '';
+		espProprietes.value = '{\n  "loot_table": [],\n  "xp_reward": 0\n}';
+		STATS.forEach(s => {
+			const minEl = document.getElementById(`stat-min-${s}`);
+			const maxEl = document.getElementById(`stat-max-${s}`);
+			if (minEl) minEl.value = '';
+			if (maxEl) maxEl.value = '';
+		});
+	} else {
+		proNom.value = ''; proId.value = '';
+		proNiveau.value = 1;
+		proSkills.value = ''; proDesc.value = '';
+		STATS.forEach(s => {
+			const minEl = document.getElementById(`pro-mod-min-${s}`);
+			const maxEl = document.getElementById(`pro-mod-max-${s}`);
+			if (minEl) minEl.value = '';
+			if (maxEl) maxEl.value = '';
+		});
+	}
+	docSelect.value = '';
+	updateJSON();
+	updatePreview();
+}
+
+// ── ID GENERATION ──────────────────────────────────────────────────────────
+function slugify(nom) {
+	return nom.toLowerCase()
+		.normalize('NFD').replace(/[̀-ͯ]/g, '')
+		.replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+}
+
+espNom.addEventListener('input', () => {
+	if (!currentDoc) espId.value = 'espece:' + slugify(espNom.value);
+	onEspeceChange();
+});
+proNom.addEventListener('input', () => {
+	if (!currentDoc) proId.value = 'profil:' + slugify(proNom.value);
+	onProfilChange();
+});
+
+[espId, espDesc, espTags, espProprietes].forEach(el => el.addEventListener('input', onEspeceChange));
+espImage.addEventListener('change', () => { updateImagePreview(espImage.value); onEspeceChange(); });
+[proId, proNiveau, proSkills, proDesc].forEach(el => el.addEventListener('input', onProfilChange));
+previewProfilSel.addEventListener('change', updatePreview);
+
+function onEspeceChange() { if (currentMode === 'especes') { updateJSON(); updatePreview(); } }
+function onProfilChange()  { if (currentMode === 'profils')  { updateJSON(); updatePreview(); } }
+
+// ── STAT ROWS ──────────────────────────────────────────────────────────────
+function buildStatRows() {
+	const container = document.getElementById('stat-rows');
+	container.innerHTML = '';
+	STATS.forEach(s => {
+		const row = document.createElement('div');
+		row.className = 'stat-row';
+		row.innerHTML = `
+			<div class="stat-row-label">${s}</div>
+			<input type="number" id="stat-min-${s}" placeholder="min" min="0" max="99">
+			<input type="number" id="stat-max-${s}" placeholder="max" min="0" max="99">
+		`;
+		container.appendChild(row);
+		row.querySelectorAll('input').forEach(inp => inp.addEventListener('input', onEspeceChange));
+	});
+}
+
+// ── PROFIL MODIFIER ROWS ──────────────────────────────────────────────────
+function buildProModifierRows() {
+	const container = document.getElementById('pro-modifier-rows');
+	container.innerHTML = '';
+	STATS.forEach(s => {
+		const row = document.createElement('div');
+		row.className = 'stat-row';
+		row.innerHTML = `
+			<div class="stat-row-label">${s}</div>
+			<input type="number" id="pro-mod-min-${s}" placeholder="0" min="0" max="99">
+			<input type="number" id="pro-mod-max-${s}" placeholder="0" min="0" max="99">
+		`;
+		container.appendChild(row);
+		row.querySelectorAll('input').forEach(inp => inp.addEventListener('input', onProfilChange));
+	});
+}
+
+// ── BUILD DOC FROM FORM ────────────────────────────────────────────────────
+function buildDocFromForm() {
+	if (currentMode === 'especes') {
+		const base_attributes = {};
+		STATS.forEach(s => {
+			const minEl = document.getElementById(`stat-min-${s}`);
+			const maxEl = document.getElementById(`stat-max-${s}`);
+			const minVal = parseInt(minEl?.value);
+			const maxVal = parseInt(maxEl?.value);
+			base_attributes[s] = {
+				min: isNaN(minVal) ? 0 : minVal,
+				max: isNaN(maxVal) ? 0 : maxVal,
+			};
+		});
+		let proprietes = {};
+		try { proprietes = JSON.parse(espProprietes.value || '{}'); } catch(e) {}
+		const doc = {
+			_id: espId.value.trim() || ('espece:' + slugify(espNom.value || 'nouveau')),
+			type: 'espece',
+			nom: espNom.value.trim(),
+			image: espImage.value || null,
+			description: espDesc.value.trim(),
+			base_attributes,
+			tags: espTags.value.split(',').map(t => t.trim()).filter(Boolean),
+			proprietes,
+		};
+		if (currentDoc?._rev) doc._rev = currentDoc._rev;
+		return doc;
+	} else {
+		const attributs_modifier = {};
+		STATS.forEach(s => {
+			const minEl = document.getElementById(`pro-mod-min-${s}`);
+			const maxEl = document.getElementById(`pro-mod-max-${s}`);
+			const minV  = parseInt(minEl?.value);
+			const maxV  = parseInt(maxEl?.value);
+			if (!isNaN(minV) || !isNaN(maxV)) {
+				attributs_modifier[s] = {
+					min: isNaN(minV) ? 0 : minV,
+					max: isNaN(maxV) ? 0 : maxV,
+				};
+			}
+		});
+		const skills = proSkills.value.split('\n').map(s => s.trim()).filter(Boolean);
+		const doc = {
+			_id: proId.value.trim() || ('profil:' + slugify(proNom.value || 'nouveau')),
+			type: 'profil',
+			niveau: parseInt(proNiveau.value) || 1,
+			nom: proNom.value.trim(),
+			description: proDesc.value.trim(),
+			attributs_modifier,
+			bonus_skills: skills,
+		};
+		if (currentDoc?._rev) doc._rev = currentDoc._rev;
+		return doc;
+	}
+}
+
+// ── JSON ───────────────────────────────────────────────────────────────────
+function updateJSON() {
+	jsonOutput.value = JSON.stringify(buildDocFromForm(), null, 2);
+}
+
+copyBtn.addEventListener('click', () => {
+	navigator.clipboard.writeText(jsonOutput.value).then(() => {
+		copyBtn.textContent = '✓ Copié !';
+		copyBtn.classList.add('copied');
+		setTimeout(() => { copyBtn.textContent = 'Copier'; copyBtn.classList.remove('copied'); }, 1800);
+	});
+});
+
+// ── IMAGE PREVIEW ──────────────────────────────────────────────────────────
+function updateImagePreview(filename) {
+	if (filename) {
+		espImgPreview.src = MONSTERS_BASE + filename;
+		espImgPreview.style.display = '';
+	} else {
+		espImgPreview.style.display = 'none';
+	}
+}
+
+// ── PREVIEW ────────────────────────────────────────────────────────────────
+function updatePreview() {
+	const doc = buildDocFromForm();
+	if (currentMode === 'especes') {
+		if (doc.image) {
+			previewImg.src = MONSTERS_BASE + doc.image;
+			previewImg.style.display = '';
+			previewNoImg.style.display = 'none';
+		} else {
+			previewImg.style.display = 'none';
+			previewNoImg.style.display = '';
+		}
+		previewNom.textContent   = doc.nom || '—';
+		previewIdTxt.textContent = doc._id || '';
+
+		const selId  = previewProfilSel.value;
+		const selPro = profils.find(p => p._id === selId);
+		const hasPro = !!selPro;
+		thCalc.style.display = hasPro ? '' : 'none';
+
+		statsTbody.innerHTML = STATS.map(s => {
+			const stat = (doc.base_attributes || {})[s] || {};
+			const minV = stat.min ?? '—';
+			const maxV = stat.max ?? '—';
+			let calcCell = '';
+			if (hasPro) {
+				const mod  = (selPro.attributs_modifier || {})[s] || {};
+				const dMin = mod.min ?? 0;
+				const dMax = mod.max ?? 0;
+				const cMin = (stat.min || 0) + dMin;
+				const cMax = Math.min((stat.min || 0) + dMax, stat.max || 0);
+				calcCell = `<td class="calc">${cMin}–${cMax}</td>`;
+			}
+			return `<tr><td>${s}</td><td>${minV}</td><td>${maxV}</td>${calcCell}</tr>`;
+		}).join('');
+	} else {
+		proPreviewNom.textContent    = doc.nom || '—';
+		proPreviewId.textContent     = doc._id || '';
+		proPreviewNiveau.textContent = `Niveau ${doc.niveau || '—'}`;
+		const mods = doc.attributs_modifier || {};
+		const modKeys = Object.keys(mods);
+		if (modKeys.length) {
+			proPreviewModsWrap.style.display = '';
+			proPreviewModsTbody.innerHTML = modKeys.map(s =>
+				`<tr><td>${s}</td><td>+${mods[s].min ?? 0}</td><td>+${mods[s].max ?? 0}</td></tr>`
+			).join('');
+		} else {
+			proPreviewModsWrap.style.display = 'none';
+		}
+		if (doc.bonus_skills && doc.bonus_skills.length) {
+			proPreviewSkillsWrap.style.display = '';
+			proPreviewSkills.innerHTML = doc.bonus_skills
+				.map(sk => `<span class="skill-tag">${sk}</span>`).join('');
+		} else {
+			proPreviewSkillsWrap.style.display = 'none';
+		}
+		if (doc.description) {
+			proPreviewDescWrap.style.display = '';
+			proPreviewDesc.textContent = doc.description;
+		} else {
+			proPreviewDescWrap.style.display = 'none';
+		}
+	}
+}
+
+// ── SAVE ───────────────────────────────────────────────────────────────────
+async function saveDoc() {
+	const doc   = buildDocFromForm();
+	const isUpdate = !!doc._rev;
+	const base  = currentMode === 'especes' ? '/api/especes' : '/api/profils';
+	const url   = isUpdate ? `${base}/${encodeURIComponent(doc._id)}` : base;
+	const method = isUpdate ? 'PUT' : 'POST';
+
+	const result = await fetchJSON(url, {
+		method,
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(doc),
+	});
+	if (!result) return;
+
+	currentDoc = result;
+	setStatus(`<span style="color:var(--success);">✓ ${doc.nom || doc._id} sauvegardé.</span>`);
+
+	// Refresh list
+	await refreshList();
+	docSelect.value = currentDoc._id;
+	updateJSON();
+}
+
+document.getElementById('btn-save-esp').addEventListener('click', saveDoc);
+document.getElementById('btn-save-pro').addEventListener('click', saveDoc);
+
+// ── NEW ────────────────────────────────────────────────────────────────────
+document.getElementById('btn-new-esp').addEventListener('click', () => {
+	currentDoc = null;
+	clearForm();
+	setStatus('Nouveau document espèce — remplissez et sauvegardez.');
+});
+document.getElementById('btn-new-pro').addEventListener('click', () => {
+	currentDoc = null;
+	clearForm();
+	setStatus('Nouveau profil — remplissez et sauvegardez.');
+});
+
+// ── DELETE ─────────────────────────────────────────────────────────────────
+async function deleteDoc() {
+	if (!currentDoc) return;
+	if (!confirm(`Supprimer "${currentDoc.nom || currentDoc._id}" ?`)) return;
+	const base   = currentMode === 'especes' ? '/api/especes' : '/api/profils';
+	const result = await fetchJSON(`${base}/${encodeURIComponent(currentDoc._id)}`, { method: 'DELETE' });
+	if (!result) return;
+	setStatus(`<span style="color:var(--danger);">✕ ${currentDoc._id} supprimé.</span>`);
+	currentDoc = null;
+	await refreshList();
+	clearForm();
+}
+
+document.getElementById('btn-del-esp').addEventListener('click', deleteDoc);
+document.getElementById('btn-del-pro').addEventListener('click', deleteDoc);
+
+// ── REFRESH LIST ──────────────────────────────────────────────────────────
+async function refreshList() {
+	if (currentMode === 'especes') {
+		especes = await fetchJSON('/api/especes') || [];
+		populateSelect(especes);
+	} else {
+		profils = await fetchJSON('/api/profils') || [];
+		populateSelect(profils);
+		populatePreviewProfilSelect();
+	}
+}
+
+// ── STATUS ─────────────────────────────────────────────────────────────────
+function setStatus(html) { statusEl.innerHTML = html; }
+</script>
+</body>
+</html>

@@ -689,6 +689,7 @@ lieuSelect.addEventListener('change', async (e) => {
 		mapImg.removeAttribute('src');
 		const urlTowns = `{{ url_for('towns', path='') }}${lieuData.image}`;
 		const urlBattleMaps = `{{ url_for('battle_maps', path='') }}${lieuData.image}`;
+		const urlMaps = `{{ url_for('maps', path='') }}${lieuData.image}`;
 		mapImg.onload = () => {
 			currentLocId = lieuId;
 			imgLoaded = true;
@@ -713,9 +714,13 @@ lieuSelect.addEventListener('change', async (e) => {
 		};
 
 		mapImg.onerror = () => {
-			if (mapImg.getAttribute('src') === urlTowns) {
+			const src = mapImg.getAttribute('src');
+			if (src === urlTowns) {
 				setStatus(`Image non trouvée dans towns, tentative dans battle_maps...`);
 				mapImg.src = urlBattleMaps;
+			} else if (src === urlBattleMaps) {
+				setStatus(`Image non trouvée dans battle_maps, tentative dans maps...`);
+				mapImg.src = urlMaps;
 			} else {
 				dropZone.classList.add('hidden');
 				gridCont.classList.add('visible');

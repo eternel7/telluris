@@ -10,6 +10,7 @@ from PIL import Image
 from routers.user import user_router, User
 from routers.oauth import router as oauth_router
 from routers.zones import zones_router
+from routers.bestiaire import bestiaire_router
 from db.config import find_docs, get_doc, save_doc
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
@@ -39,16 +40,20 @@ templates = Jinja2Templates(directory="templates")
 templates.env.policies["json.dumps_kwargs"] = {"sort_keys": False}
 
 app.mount("/scripts", StaticFiles(directory="templates/scripts"), name="scripts")
-app.mount("/battle_maps", StaticFiles(directory="templates/resources/battle_maps"), name="battle_maps")
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
 CHARACTERS_IMAGES_PATH = "templates/resources/characters"
 app.mount("/characters", StaticFiles(directory=CHARACTERS_IMAGES_PATH), name="characters")
+app.mount("/maps", StaticFiles(directory="templates/resources/maps"), name="maps")
+app.mount("/battle_maps", StaticFiles(directory="templates/resources/battle_maps"), name="battle_maps")
 TOWNS_IMAGES_PATH = "templates/resources/towns"
 app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
+MONSTERS_IMAGES_PATH = "templates/resources/monsters"
+app.mount("/monsters", StaticFiles(directory=MONSTERS_IMAGES_PATH), name="monsters")
 
 app.include_router(user_router, prefix="/api")
 app.include_router(lieu_router, prefix="/api")
 app.include_router(zones_router, prefix="/api")
+app.include_router(bestiaire_router, prefix="/api")
 app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
@@ -59,13 +64,24 @@ def read_root(request: Request):
 		context={"title": "Ubi Chartae Finiunt"}
 	)
 	
-@app.get("/editor", response_class=HTMLResponse)
+@app.get("/admin/bestiaire", response_class=HTMLResponse)
+def bestiaire_editor(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1):
+		return RedirectResponse(url="/auth", headers=request.headers)
+	return templates.TemplateResponse(
+		request=request,
+		name="bestiaire_editor.html",
+		context={"title": "Éditeur Bestiaire"}
+	)
+
+@app.get("/admin/editor", response_class=HTMLResponse)
 def read_root(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if (not current_user or
 		"admin" not in current_user or
 		current_user["admin"] != 1 ):
-		return RedirectResponse(url="/auth", headers=request.headers)
-	
+		return RedirectResponse(url="/auth", headers=request.headers)	
 	lieux = get_lieux_ids(current_user)
 	return templates.TemplateResponse(
 		request=request, 
