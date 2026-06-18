@@ -43,8 +43,10 @@ app.mount("/scripts", StaticFiles(directory="templates/scripts"), name="scripts"
 app.mount("/icons", StaticFiles(directory="templates/resources/icons"), name="icons")
 CHARACTERS_IMAGES_PATH = "templates/resources/characters"
 app.mount("/characters", StaticFiles(directory=CHARACTERS_IMAGES_PATH), name="characters")
-app.mount("/maps", StaticFiles(directory="templates/resources/maps"), name="maps")
-app.mount("/battle_maps", StaticFiles(directory="templates/resources/battle_maps"), name="battle_maps")
+BATTLE_MAPS_IMAGES_PATH = "templates/resources/battle_maps"
+app.mount("/battle_maps", StaticFiles(directory=BATTLE_MAPS_IMAGES_PATH), name="battle_maps")
+MAPS_IMAGES_PATH = "templates/resources/maps"
+app.mount("/maps", StaticFiles(directory=MAPS_IMAGES_PATH), name="maps")
 TOWNS_IMAGES_PATH = "templates/resources/towns"
 app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 MONSTERS_IMAGES_PATH = "templates/resources/monsters"
@@ -216,7 +218,18 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Gestion de la grille
 	dimensions = grid_doc.get("dimensions",None)
 	image = grid_doc.get("image")
-	with Image.open(TOWNS_IMAGES_PATH+"/"+image) as img:
+	if os.path.exists(os.path.join(TOWNS_IMAGES_PATH, image)):
+		image_path = os.path.join(TOWNS_IMAGES_PATH, image)
+		image_route = "towns"
+	elif os.path.exists(os.path.join(MAPS_IMAGES_PATH, image)):
+		image_path = os.path.join(MAPS_IMAGES_PATH, image)
+		image_route = "maps"
+	elif os.path.exists(os.path.join(BATTLE_MAPS_IMAGES_PATH, image)):
+		image_path = os.path.join(BATTLE_MAPS_IMAGES_PATH, image)
+		image_route = "battle_maps"
+	else:
+		raise HTTPException(status_code=404, detail=f"Image introuvable : {image}")
+	with Image.open(image_path) as img:
 		# Récupérer les dimensions (largeur, hauteur)
 		largeur, hauteur = img.size
 		if dimensions:
@@ -282,6 +295,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		name ="play_town_telluris.html",
 		context= {
 			"title": grid_doc.get("label"),
+			"image_route": image_route,
 			"character": character,
 			"portrait_largeur": portrait_largeur,
 			"portrait_hauteur": portrait_hauteur,

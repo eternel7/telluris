@@ -940,12 +940,12 @@
 			{% if dimensions %}
 			<div class="grid-placeholder">
 				<div class="viewport" id="swipe-zone">
-					<img id="bg-image" src="{{ url_for('towns', path=image) }}">
+					<img id="bg-image" src="{{ url_for(image_route, path=image) }}">
 					<div class="token"></div>
 				</div>
 			</div>
 			{% else %}
-			<img id="bg-image-fit" src="{{ url_for('towns', path=image) }}">
+			<img id="bg-image-fit" src="{{ url_for(image_route, path=image) }}">
 			{% endif %}
 		</main>
 		<aside class="sidebar">

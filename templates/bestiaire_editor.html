@@ -503,7 +503,7 @@ buildProModifierRows();
 		fetchJSON('/api/bestiaire/images'),
 	]);
 	especes = esp  || [];
-	profils = pro  || [];
+	profils = (pro || []).sort((a, b) => (a.niveau || 0) - (b.niveau || 0));
 	images  = imgs || [];
 	populateSelect(especes);
 	populateImages();
@@ -917,7 +917,7 @@ async function refreshList() {
 		especes = await fetchJSON('/api/especes') || [];
 		populateSelect(especes);
 	} else {
-		profils = await fetchJSON('/api/profils') || [];
+		profils = (await fetchJSON('/api/profils') || []).sort((a, b) => (a.niveau || 0) - (b.niveau || 0));
 		populateSelect(profils);
 		populatePreviewProfilSelect();
 	}
