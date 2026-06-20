@@ -252,9 +252,10 @@
 	}
 	.dir-grid {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: repeat(3, 40px);
 		gap: 5px;
 		margin-bottom: 10px;
+		justify-content: center;
 	}
 	.dir-btn {
 		aspect-ratio: 1;
@@ -379,62 +380,6 @@
 		top: 0; left: 0;
 		width: 100%; height: 100%;
 		cursor: crosshair;
-	}
-
-	/* JSON output */
-	.json-wrap {
-		background: var(--panel);
-		border: 1px solid var(--border);
-		border-radius: 6px;
-		overflow: hidden;
-		display: none;
-	}
-	.json-wrap.visible { display: block; }
-
-	.json-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 10px 14px;
-		border-bottom: 1px solid var(--border);
-	}
-
-	.json-header span {
-		font-family: 'Cinzel', serif;
-		font-size: 0.7rem;
-		letter-spacing: 0.12em;
-		color: var(--accent);
-	}
-
-	.copy-btn {
-		padding: 5px 12px;
-		border: 1px solid var(--accent);
-		border-radius: 4px;
-		background: transparent;
-		color: var(--accent);
-		font-family: 'Share Tech Mono', monospace;
-		font-size: 0.7rem;
-		cursor: pointer;
-		transition: all 0.2s;
-		letter-spacing: 0.05em;
-	}
-	.copy-btn:hover { background: rgba(200,168,75,0.15); }
-	.copy-btn.copied { border-color: #4bc87a; color: #4bc87a; }
-
-	#json-output {
-		display: block;
-		width: 100%;
-		background: transparent;
-		border: none;
-		color: var(--text);
-		font-family: 'Share Tech Mono', monospace;
-		font-size: 0.72rem;
-		padding: 14px;
-		resize: vertical;
-		min-height: 80px;
-		max-height: 220px;
-		outline: none;
-		line-height: 1.5;
 	}
 
 	/* Status bar */
@@ -581,23 +526,6 @@
 				</div>
 			</div>
 		</div>
-
-		<!-- Légende couleurs -->
-		<div class="card">
-			<div class="card-title">🎨 Légende</div>
-			<div class="legend" id="legend"></div>
-		</div>
-
-		<!-- Battle map -->
-		<div class="card">
-			<div class="card-title">📖 Informations</div>
-			<input type="text" id="bm-tags" placeholder="tags séparés par des virgules"
-				style="width:100%;box-sizing:border-box;font-size:0.8rem;padding:6px;">
-			<div class="nav-info" style="margin-top:4px;">Tags utilisés pour la sélection pondérée de la carte de combat.</div>
-			<label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;margin-bottom:8px;">
-				<input type="checkbox" id="bm-categorie"> Lieu de combat (battle map)
-			</label>
-		</div>
 	</div>
 
 	<!-- RIGHT: canvas + json -->
@@ -615,13 +543,23 @@
 
 		<div class="status-bar" id="status"></div>
 
-		<div class="json-wrap" id="json-wrap">
-			<div class="json-header">
-				<span>JSON — Grille de déplacement</span>
-				<button class="copy-btn" id="copy-btn">Copier</button>
-			</div>
-			<textarea id="json-output" readonly spellcheck="false"></textarea>
+		<!-- Battle map (sous l'image) -->
+		<div class="card">
+			<div class="card-title">⚔️ Battle map</div>
+			<input type="text" id="bm-tags" placeholder="tags séparés par des virgules"
+				style="width:100%;box-sizing:border-box;font-size:0.8rem;padding:6px;">
+			<div class="nav-info" style="margin-top:4px;">Tags utilisés pour la sélection pondérée de la carte de combat.</div>
+			<label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;margin-top:8px;">
+				<input type="checkbox" id="bm-categorie"> Lieu de combat (battle map)
+			</label>
 		</div>
+
+		<!-- Légende couleurs -->
+		<div class="card">
+			<div class="card-title">🎨 Légende</div>
+			<div class="legend" id="legend"></div>
+		</div>
+
 
 	</div>
 </div>
@@ -676,9 +614,6 @@ const canvas		= document.getElementById('grid-canvas');
 const ctx			= canvas.getContext('2d');
 const gridCont		= document.getElementById('grid-container');
 const dropZone		= document.getElementById('drop-zone');
-const jsonWrap		= document.getElementById('json-wrap');
-const jsonOutput	= document.getElementById('json-output');
-const copyBtn		= document.getElementById('copy-btn');
 const statusEl		= document.getElementById('status');
 const valGrid		= document.getElementById('val-grid');
 const customInput	= document.getElementById('custom-val-input');
@@ -793,6 +728,7 @@ lieuSelect.addEventListener('change', async (e) => {
 			grid = lieuData.cells.map(row => [...row]);
 			nav = lieuData.nav ? { ...lieuData.nav } : {};
 			document.getElementById('bm-categorie').checked = (lieuData.categorie === 'battle_map');
+			updateBattleMapTabs(lieuData.categorie === 'battle_map');
 			document.getElementById('bm-tags').value = (lieuData.tags || []).join(', ');
 			zonesPlacements = lieuData.zone_influences ? JSON.parse(JSON.stringify(lieuData.zone_influences)) : [];
 			selectedZoneIdx = -1;
@@ -802,10 +738,8 @@ lieuSelect.addEventListener('change', async (e) => {
 			dropZone.classList.add('hidden');
 			gridCont.classList.add('visible');
 			mapImg.style.display = 'block';
-			jsonWrap.classList.add('visible');
 			requestAnimationFrame(() => {
 				renderGrid();
-				updateJSON();
 				setStatus(`Lieu <span>${lieuData.label}</span> (${cols}×${rows}) chargé - ${currentRev}.`);
 				updateLegend();
 			});
@@ -824,9 +758,8 @@ lieuSelect.addEventListener('change', async (e) => {
 				gridCont.classList.add('visible');
 				gridCont.style.aspectRatio = `${cols}/${rows}`;
 				mapImg.style.display = 'none';
-				jsonWrap.classList.add('visible');
 				renderGrid();
-				updateJSON();
+				updateLegend();
 				setStatus(`Lieu <span>${lieuData.label}</span> chargé (image manquante).`);
 			}
 		};
@@ -877,8 +810,17 @@ function scheduleGridSend() {
 	debounceTimer = setTimeout(() => sendGrid(), 800);
 }
 
+// Battle map : masque les onglets Zones/Rencontres (un lieu de combat n'en a pas).
+// À l'activation → bascule en Terrain ; à la désactivation → réaffiche sans changer le mode.
+function updateBattleMapTabs(isBattle) {
+	modeZones.style.display = isBattle ? 'none' : '';
+	modeRencontres.style.display = isBattle ? 'none' : '';
+	if (isBattle) setMode('terrain');
+}
+
 // Métadonnées battle map : sauvegarder dès que la case ou les tags changent.
-document.getElementById('bm-categorie').addEventListener('change', () => {
+document.getElementById('bm-categorie').addEventListener('change', (e) => {
+	updateBattleMapTabs(e.target.checked);
 	if (currentLocId) scheduleGridSend();
 });
 document.getElementById('bm-tags').addEventListener('input', () => {
@@ -899,8 +841,13 @@ function renderGrid() {
 
 	ctx.clearRect(0, 0, W, H);
 
+	// terrain/nav → terrain + bordures nav (pas de zones) ;
+	// zones/rencontres → uniquement les zones (+ labels), ni terrain ni bordures nav.
+	const showTerrain = (editMode === 'terrain' || editMode === 'nav');
+	const showZones   = (editMode === 'zones' || editMode === 'rencontres');
+
 	// Draw cell fills
-	for (let y = 0; y < rows; y++) {
+	if (showTerrain) for (let y = 0; y < rows; y++) {
 		for (let x = 0; x < cols; x++) {
 			const v = grid[y][x];
 			const col = valColor(v);
@@ -928,7 +875,7 @@ function renderGrid() {
 	}
 
 	// Draw hover highlight
-	if (hoverCell) {
+	if (hoverCell && showTerrain) {
 		const {cx, cy} = hoverCell;
 		const hx = cx * cw, hy = cy * ch;
 		// Fill with target color, brighter
@@ -957,7 +904,7 @@ function renderGrid() {
 		}
 	}
 	// Draw nav exceptions
-	if (Object.keys(nav).length > 0) {
+	if (showTerrain && Object.keys(nav).length > 0) {
 		const DIRS = { N:0, NE:1, E:2, SE:3, S:4, SW:5, W:6, NW:7 };
 		const blocked = (mask, dir) => !!(mask & (1 << DIRS[dir]));
 
@@ -1012,8 +959,8 @@ function renderGrid() {
 		}
 	}
 
-	// Draw zone overlays (always visible, highlighted in zones mode)
-	if (zonesPlacements.length > 0) {
+	// Draw zone overlays — uniquement en mode zones/rencontres (avec labels)
+	if (showZones && zonesPlacements.length > 0) {
 		zonesPlacements.forEach((p, idx) => {
 			const px = p.x * cw;
 			const py = p.y * ch;
@@ -1035,8 +982,8 @@ function renderGrid() {
 			}
 			ctx.fill();
 			ctx.stroke();
-			// Label
-			if (editMode === 'zones') {
+			// Label (zones ET rencontres)
+			if (showZones) {
 				const def = zoneDefs[p.zone];
 				const label = def ? def.nom : (p.zone || '?');
 				ctx.rotate(-(p.rot || 0) * Math.PI / 180); // un-rotate text
@@ -1082,7 +1029,7 @@ function paint(e) {
 		if (grid[cy][cx] !== selectedVal) {
 			grid[cy][cx] = selectedVal;
 			renderGrid();
-			updateJSON();
+			updateLegend();
 			setStatus(`Cellule [${cx}, ${cy}] = ${selectedVal} - ${currentRev}.`);
 			scheduleGridSend();
 		}
@@ -1115,7 +1062,7 @@ function paint(e) {
 		navSelectedCell = {cx, cy};
 		navInfo.textContent = `[${cx},${cy}] ← mask=${navMask} (${navMask.toString(2).padStart(8,'0')})`;
 		renderGrid();
-		updateJSON();
+		updateLegend();
 		scheduleGridSend();
 	}
 }
@@ -1230,23 +1177,9 @@ navClearBtn.addEventListener('click', () => {
         const key = `${navSelectedCell.cx},${navSelectedCell.cy}`;
         delete nav[key];
         renderGrid();
-        updateJSON();
+        updateLegend();
         scheduleGridSend();
     }
-});
-
-// ── JSON ───────────────────────────────────────────────────────────────────
-function updateJSON() {
-	jsonOutput.value = JSON.stringify({ cells: grid, nav: nav });
-	updateLegend();
-}
-
-copyBtn.addEventListener('click', () => {
-	navigator.clipboard.writeText(jsonOutput.value).then(() => {
-		copyBtn.textContent = '✓ Copié !';
-		copyBtn.classList.add('copied');
-		setTimeout(() => { copyBtn.textContent = 'Copier'; copyBtn.classList.remove('copied'); }, 1800);
-	});
 });
 
 // ── LEGEND ────────────────────────────────────────────────────────────────
