@@ -85,6 +85,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
         "actions_max": 2,
         "cc": derived.cc,
         "cd": derived.cd,
+        "ag": base.ag,
         "pa": derived.pa,
         "degats_cc": derived.degats_cc,
         "degats_cd": derived.degats_cd,
@@ -128,6 +129,7 @@ def instantiate_monsters(
             "actions_restantes": 1,
             "actions_max": 1,
             "cc": derived.cc,
+            "ag": base_stats.ag,
             "pa": derived.pa,
             "degats_cc": derived.degats_cc,
             "initiative": derived.initiative,
@@ -184,6 +186,15 @@ def _get_monstre(combat_doc: dict, actor_id: str) -> dict | None:
     return None
 
 
+def _hit_threshold(attaquant_cc: int, defenseur_ag: int) -> int:
+    """Seuil de réussite sur un d100 (jet <= seuil = touché).
+
+    Jet sous CC, difficulté = Ag du défenseur : seuil = 50 + CC - Ag.
+    Donc CC == Ag → 50 %. Clampé à [5, 95] pour garder toujours une marge.
+    """
+    return max(5, min(95, 50 + attaquant_cc - defenseur_ag))
+
+
 def _check_victory(combat_doc: dict) -> None:
     if all(not m["vivant"] for m in combat_doc["monstres"]):
         xp = sum(m["xp_reward"] for m in combat_doc["monstres"])
@@ -199,8 +210,9 @@ def _check_victory(combat_doc: dict) -> None:
 
 def _do_monster_attack(combat_doc: dict, monstre: dict) -> None:
     joueur = combat_doc["joueurs"][0]
+    seuil = _hit_threshold(monstre["cc"], joueur.get("ag", 0))
     roll = random.randint(1, 100)
-    if roll <= monstre["cc"]:
+    if roll <= seuil:
         dmg = max(1, roll_dice(monstre["degats_cc"]) - joueur["pa"])
         joueur["currentPV"] = max(0, joueur["currentPV"] - dmg)
         combat_doc["log"].append({
@@ -222,7 +234,7 @@ def _do_monster_attack(combat_doc: dict, monstre: dict) -> None:
         combat_doc["log"].append({
             "tour": combat_doc["tour"],
             "acteur": monstre["nom"],
-            "texte": f"{monstre['nom']} rate son attaque ! (jet {roll} / CC {monstre['cc']})",
+            "texte": f"{monstre['nom']} rate son attaque ! (jet {roll} / seuil {seuil})",
         })
 
 
@@ -317,8 +329,9 @@ def resolve_action(
         if not monstre or not monstre["vivant"]:
             return {"error": "Cible invalide."}
 
+        seuil = _hit_threshold(joueur["cc"], monstre.get("ag", 0))
         roll = random.randint(1, 100)
-        if roll <= joueur["cc"]:
+        if roll <= seuil:
             dmg = max(1, roll_dice(joueur["degats_cc"]) - monstre["pa"])
             monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
             if monstre["currentPV"] <= 0:
@@ -342,9 +355,9 @@ def resolve_action(
             combat_doc["log"].append({
                 "tour": combat_doc["tour"],
                 "acteur": joueur["nom"],
-                "texte": f"{joueur['nom']} rate son attaque sur {monstre['nom']} ! (jet {roll} / CC {joueur['cc']})",
+                "texte": f"{joueur['nom']} rate son attaque sur {monstre['nom']} ! (jet {roll} / seuil {seuil})",
             })
-            result = {"hit": False, "roll": roll, "cc": joueur["cc"]}
+            result = {"hit": False, "roll": roll, "seuil": seuil}
 
         joueur["actions_restantes"] -= 1
         _check_victory(combat_doc)
