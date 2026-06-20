@@ -433,7 +433,7 @@ def _do_monster_attack(combat_doc: dict, monstre: dict) -> None:
     seuil = _hit_threshold(monstre["cc"], joueur.get("ag", 0))
     roll = random.randint(1, 100)
     if roll <= seuil:
-        dmg = max(1, roll_dice(monstre["degats_cc"]) - joueur["pa"] // 2)
+        dmg = max(1, roll_dice(monstre["degats_cc"]) - joueur["pa"])
         joueur["currentPV"] = max(0, joueur["currentPV"] - dmg)
         combat_doc["log"].append({
             "tour": combat_doc["tour"],
@@ -668,7 +668,7 @@ def resolve_action(
         seuil = _hit_threshold(joueur["cc"], monstre.get("ag", 0))
         roll = random.randint(1, 100)
         if roll <= seuil:
-            dmg = max(1, roll_dice(joueur["degats_cc"]) - monstre["pa"] // 2)
+            dmg = max(1, roll_dice(joueur["degats_cc"]) - monstre["pa"])
             monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
             if monstre["currentPV"] <= 0:
                 monstre["vivant"] = False

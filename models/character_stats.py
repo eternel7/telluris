@@ -97,7 +97,7 @@ def compute_derived_stats(
     cd = base.ag + (base.v // 2) + equipment.cd_bonus
 
     # ── Armure ───────────────────────────────────────────────────────
-    pa = (base.r // 2) + equipment.pa
+    pa = (base.r // 20) + equipment.pa
 
     # ── Défense magique ───────────────────────────────────────────────
     pm_def = (base.vol // 2) + (base.int_ // 4)
