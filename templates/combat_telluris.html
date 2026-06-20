@@ -75,6 +75,27 @@ body {
 	background: #2e86de; border-radius: 50%; border: 2px solid white;
 	box-shadow: 0 0 10px #2e86de;
 }
+/* Tokens monstres positionnés relativement au joueur (centré) */
+#tokens-layer { position: absolute; inset: 0; z-index: 9; pointer-events: none; }
+.monster-token {
+	position: absolute;
+	width: var(--step); height: var(--step);
+	transform: translateX(-50%);
+	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+	transition: left 0.25s ease, bottom 0.25s ease;
+	pointer-events: auto; cursor: pointer;
+}
+.monster-token .mt-portrait {
+	width: 70%; height: 70%; border-radius: 50%;
+	background: #4a1a1a center/cover no-repeat;
+	border: 2px solid #aa3333; box-shadow: 0 0 8px rgba(170,51,51,0.7);
+	display: flex; align-items: center; justify-content: center;
+	font-size: 13px; font-weight: bold; color: #ffaaaa;
+}
+.monster-token.adjacent .mt-portrait { border-color: #ffd700; box-shadow: 0 0 10px #ffd700; }
+.monster-token.dead { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+.monster-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
+.monster-token .mt-hp-fill { height: 100%; background: #ff4757; }
 
 /* ─── Tour Header ──────────────────────────────────────────────── */
 .tour-header {
@@ -167,6 +188,23 @@ body {
 .action-btn.attack-btn { border-color: #cc3333; color: #ff8080; }
 .action-btn.attack-btn:hover:not(:disabled) { background: #3a1a1a; }
 .action-btn.flee-btn   { border-color: #666; color: #999; }
+/* Flèches directionnelles — mêmes règles d'affichage que play_town */
+.controls {
+	display: grid; grid-template-columns: repeat(3, 50px);
+	gap: 8px; justify-content: center; margin: 0 auto;
+}
+.controls .btn {
+	width: 50px; height: 50px; background: #222; border: 1px solid #444;
+	border-radius: 12px; cursor: pointer; padding: 0;
+	display: flex; align-items: center; justify-content: center;
+	user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.controls .btn:hover:not(:disabled) { background: #333; }
+.controls .btn:active:not(:disabled) { background: #444; }
+.controls .btn > svg { width: 26px; height: 26px; }
+.move_btn:disabled > svg { display: none; }   /* direction indisponible → la flèche disparaît */
+.controls .btn:disabled { cursor: default; }
+.controls .btn.center:disabled { opacity: 0.35; }
 #target-row {
 	display: none; gap: 8px; align-items: center; justify-content: center;
 }
@@ -193,6 +231,8 @@ body {
 .log-entry.j-hit      { color: #7ec8ff; }
 .log-entry.m-hit      { color: #ff9090; }
 .log-entry.flee       { color: #999; font-style: italic; }
+.log-entry.move       { color: #8fae8f; font-style: italic; }
+.log-entry.miss       { color: #888; }
 
 /* ─── Enemy Panel ──────────────────────────────────────────────── */
 .enemy-list {
@@ -248,6 +288,7 @@ body {
 	<div id="rotation-pivot">
 		<img id="bg-image" src="{{ url_for('battle_maps', path=combat.map_image) }}" alt="Carte de combat">
 	</div>
+	<div id="tokens-layer"></div>
 	<div class="player-token"></div>
 </div>
 
@@ -317,9 +358,37 @@ body {
 	<!-- Centre : actions + log -->
 	<div class="combat-center">
 		<div class="action-bar">
+			<div class="controls" id="move-controls">
+				<button class="btn move_btn" data-sdx="-1" data-sdy="-1" onclick="doMove(-1,-1)">
+					<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.71 16.29L9.42 8H15a1 1 0 0 0 0-2H7.05a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1H7a1 1 0 0 0 1-1V9.45l8.26 8.26a1 1 0 0 0 1.42 0 1 1 0 0 0 .03-1.42z"/></svg>
+				</button>
+				<button class="btn move_btn" data-sdx="0" data-sdy="-1" onclick="doMove(0,-1)">
+					<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</button>
+				<button class="btn move_btn" data-sdx="1" data-sdy="-1" onclick="doMove(1,-1)">
+					<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"/></svg>
+				</button>
+				<button class="btn move_btn" data-sdx="-1" data-sdy="0" onclick="doMove(-1,0)">
+					<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</button>
+				<button class="btn center" id="btn-passer" onclick="doAction('passer', null)" title="Passer le tour">
+					<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"/><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"/></svg>
+				</button>
+				<button class="btn move_btn" data-sdx="1" data-sdy="0" onclick="doMove(1,0)">
+					<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</button>
+				<button class="btn move_btn rot-btn" data-sens="-1" onclick="doRotate(-1)" title="Pivoter à gauche (1 mvt)">
+					<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.70711 13.2929C10.0976 13.6834 10.0976 14.3166 9.70711 14.7071C9.31658 15.0976 8.68342 15.0976 8.29289 14.7071L3.29289 9.70711C2.90237 9.31658 2.90237 8.68342 3.29289 8.29289L8.29289 3.29289C8.68342 2.90237 9.31658 2.90237 9.70711 3.29289C10.0976 3.68342 10.0976 4.31658 9.70711 4.70711L6.41421 8H16C17.3261 8 18.5979 8.52678 19.5355 9.46447C20.4732 10.4021 21 11.6739 21 13V20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20V13C19 12.2044 18.6839 11.4413 18.1213 10.8787C17.5587 10.3161 16.7957 10 16 10H6.41421L9.70711 13.2929Z" fill="#f1f1f1"/></svg>
+				</button>
+				<button class="btn move_btn" data-sdx="0" data-sdy="1" onclick="doMove(0,1)">
+					<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</button>
+				<button class="btn move_btn rot-btn" data-sens="1" onclick="doRotate(1)" title="Pivoter à droite (1 mvt)">
+					<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.2929 13.2929C13.9024 13.6834 13.9024 14.3166 14.2929 14.7071C14.6834 15.0976 15.3166 15.0976 15.7071 14.7071L20.7071 9.70711C21.0976 9.31658 21.0976 8.68342 20.7071 8.29289L15.7071 3.29289C15.3166 2.90237 14.6834 2.90237 14.2929 3.29289C13.9024 3.68342 13.9024 4.31658 14.2929 4.70711L17.5858 8H8C6.67392 8 5.40215 8.52678 4.46447 9.46447C3.52678 10.4021 3 11.6739 3 13V20C3 20.5523 3.44771 21 4 21C4.55229 21 5 20.5523 5 20V13C5 12.2044 5.31607 11.4413 5.87868 10.8787C6.44129 10.3161 7.20435 10 8 10H17.5858L14.2929 13.2929Z" fill="#f1f1f1"/></svg>
+				</button>
+			</div>
 			<div class="btn-row">
 				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
-				<button class="action-btn" id="btn-passer" onclick="doAction('passer', null)">⏭ Passer</button>
 				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
 			</div>
 			<div id="target-row">
@@ -330,7 +399,7 @@ body {
 
 		<div class="combat-log" id="combat-log">
 			{% for entry in combat.log %}
-				<div class="log-entry {% if entry.acteur == 'Système' %}sys{% endif %}">{{ entry.texte }}</div>
+				<div class="log-entry {{ entry.kind or '' }}">{{ entry.texte }}</div>
 			{% endfor %}
 		</div>
 	</div>
@@ -378,6 +447,11 @@ const SERVER_DATA = {
 	log:                  {{ combat.log | tojson | safe }},
 	xp_gagnee:            {{ combat.xp_gagnee }},
 };
+
+// Grille de combat : statique pour toute la durée du combat (cells appartient au
+// lieu battle map, non dupliqué dans le doc combat) → résolue côté serveur et mise
+// en cache ici une fois. Les réponses d'action ne la renvoient pas.
+const GRID = {{ grid | tojson | safe }};
 
 let state    = JSON.parse(JSON.stringify(SERVER_DATA));
 let logLen   = state.log.length;
@@ -476,40 +550,156 @@ function updateInitiativeStrip(data) {
 	});
 }
 
-function appendLog(log) {
-	const container = document.getElementById('combat-log');
-	log.slice(logLen).forEach(entry => {
-		const div = document.createElement('div');
-		let cls = 'log-entry';
-		const t = entry.texte || '';
-		if (entry.acteur === 'Système')                            cls += ' sys';
-		else if (t.includes('élimine') || t.includes('à terre'))   cls += ' kill';
-		else if (t.includes('fuite') || t.includes('fuir'))        cls += ' flee';
-		else if (t.includes('touche') && entry.acteur === state.joueurs[0].nom) cls += ' j-hit';
-		else if (t.includes('touche'))                             cls += ' m-hit';
-		div.className   = cls;
-		div.textContent = t;
-		container.appendChild(div);
+// ─── Tokens & caméra iso ──────────────────────────────────────────
+// Modèle battle_map : le joueur reste fixe (face « haut »), le monde tourne.
+// `facing` (0/90/180/270) = orientation caméra. rot() ne gère que les multiples de 90°.
+function rot(x, y, deg) {
+	const a = ((deg % 360) + 360) % 360;
+	if (a === 90)  return [-y, x];
+	if (a === 180) return [-x, -y];
+	if (a === 270) return [y, -x];
+	return [x, y];
+}
+function facingDeg() { return state.joueurs[0].facing || 0; }
+// Écran → monde (pour envoyer un déplacement absolu) et monde → écran (pour le rendu).
+function screenToWorld(sdx, sdy) { return rot(sdx, sdy, facingDeg()); }
+function worldToScreen(wdx, wdy) { return rot(wdx, wdy, -facingDeg()); }
+
+function chebyToPlayer(m) {
+	const j = state.joueurs[0];
+	return Math.max(Math.abs(m.pos.x - j.pos.x), Math.abs(m.pos.y - j.pos.y));
+}
+
+function renderTokens() {
+	const layer = document.getElementById('tokens-layer');
+	const j = state.joueurs[0];
+	const portee = j.portee || 1;
+	layer.innerHTML = '';
+	state.monstres.forEach(m => {
+		if (!m.pos) return;
+		const adj = m.vivant && Math.max(Math.abs(m.pos.x - j.pos.x), Math.abs(m.pos.y - j.pos.y)) <= portee;
+		const [sx, sy] = worldToScreen(m.pos.x - j.pos.x, m.pos.y - j.pos.y);
+		const tok = document.createElement('div');
+		tok.className = 'monster-token' + (m.vivant ? '' : ' dead') + (adj ? ' adjacent' : '');
+		tok.style.left   = `calc(50% + var(--step) * ${sx})`;
+		tok.style.bottom = `calc(var(--step) * ${1 - sy})`;
+		const portrait = m.image
+			? `<div class="mt-portrait" style="background-image:url('/monsters/${m.image}')"></div>`
+			: `<div class="mt-portrait">${(m.nom || '?').charAt(0).toUpperCase()}</div>`;
+		tok.innerHTML = portrait +
+			`<div class="mt-hp"><div class="mt-hp-fill" style="width:${pct(m.currentPV, m.pv_max)}%"></div></div>`;
+		if (adj) tok.onclick = () => doAction('attaquer', m.id);
+		layer.appendChild(tok);
 	});
+}
+
+function updateCamera() {
+	const j = state.joueurs[0];
+	const dims = (GRID && GRID.dims) || { x: 13, y: 11 };
+	const [ox, oy] = worldToScreen((dims.x - 1) / 2 - j.pos.x, (dims.y - 1) / 2 - j.pos.y);
+	document.getElementById('bg-image').style.transform =
+		`translate(-50%, -50%) translate(calc(var(--step) * ${ox}), calc(var(--step) * ${oy})) rotate(${-facingDeg()}deg)`;
+}
+
+// ─── Log : colorisation par `kind` + révélation progressive ───────
+function logClass(entry) {
+	switch (entry.kind) {
+		case 'sys':  return 'sys';
+		case 'kill': return 'kill';
+		case 'flee': return 'flee';
+		case 'move': return 'move';
+		case 'miss': return 'miss';
+		case 'hit':  return entry.acteur === state.joueurs[0].nom ? 'j-hit' : 'm-hit';
+		default:     return '';
+	}
+}
+
+let logQueue  = [];
+let revealing = false;
+function enqueueLogs(log) {
+	logQueue.push(...log.slice(logLen));
 	logLen = log.length;
+	if (!revealing) revealNext();
+}
+function revealNext() {
+	if (!logQueue.length) { revealing = false; return; }
+	revealing = true;
+	const entry = logQueue.shift();
+	const container = document.getElementById('combat-log');
+	const div = document.createElement('div');
+	div.className = 'log-entry ' + logClass(entry);
+	div.textContent = entry.texte || '';
+	container.appendChild(div);
 	container.scrollTop = container.scrollHeight;
+	setTimeout(revealNext, 450);
+}
+
+function isPlayerTurn(data) {
+	const actor = data.ordre_initiative[data.acteur_courant_index];
+	return !!actor && actor.startsWith('joueur_');
+}
+
+function adjacentAliveMonsters() {
+	const portee = state.joueurs[0].portee || 1;
+	return state.monstres.filter(m => m.vivant && chebyToPlayer(m) <= portee);
+}
+
+// ── Disponibilité d'une direction : miroir exact de la validation serveur `deplacer`.
+function cellPassable(x, y) {
+	const g = GRID;
+	if (!g || !g.cells) return true;
+	if (x < 0 || x >= g.dims.x || y < 0 || y >= g.dims.y) return false;
+	const row = g.cells[y];
+	return !!row && row[x] >= 1;
+}
+function cellOccupied(x, y) {
+	const j = state.joueurs[0];
+	if (j.pos.x === x && j.pos.y === y) return true;
+	return state.monstres.some(m => m.vivant && m.pos && m.pos.x === x && m.pos.y === y);
+}
+function moveApUsedFor(j, cells) {
+	const dep = Math.max(1, j.deplacement || 1);
+	return Math.ceil(cells * j.actions_max / dep);
+}
+// Peut-on dépenser une case de déplacement ce tour (budget + AP) ? (indépendant de la direction)
+function canMoveBudget(data) {
+	const j = data.joueurs[0];
+	if (!(data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0)) return false;
+	if ((j.cells_moved || 0) >= (j.deplacement || 1)) return false;
+	const projected = (j.attaques || 0) + moveApUsedFor(j, (j.cells_moved || 0) + 1);
+	return projected <= j.actions_max;
+}
+// Disponibilité d'une flèche : direction écran → monde (selon l'orientation), puis case cible valide.
+function dirAvailable(data, sdx, sdy) {
+	if (!canMoveBudget(data)) return false;
+	const j = data.joueurs[0];
+	const [wx, wy] = screenToWorld(sdx, sdy);
+	const nx = j.pos.x + wx, ny = j.pos.y + wy;
+	return cellPassable(nx, ny) && !cellOccupied(nx, ny);
 }
 
 function updateButtons(data) {
-	const actor      = data.ordre_initiative[data.acteur_courant_index];
-	const isPlayer   = actor && actor.startsWith('joueur_');
-	const hasActions = data.joueurs[0].actions_restantes > 0;
-	const isActive   = data.status === 'active';
-	const canAct     = isActive && isPlayer && hasActions;
-	document.getElementById('btn-attaquer').disabled = !canAct;
-	document.getElementById('btn-passer').disabled   = !canAct;
+	const j        = data.joueurs[0];
+	const isPlayer = isPlayerTurn(data);
+	const isActive = data.status === 'active';
+	const canAct   = isActive && isPlayer && j.actions_restantes > 0;
+	// Chaque bouton est désactivé (→ son SVG disparaît) si l'action est indisponible.
+	// Flèches de rotation : dépend uniquement du budget ; flèches de déplacement : direction + case.
+	document.querySelectorAll('#move-controls .move_btn').forEach(b => {
+		b.disabled = b.classList.contains('rot-btn')
+			? !canMoveBudget(data)
+			: !dirAvailable(data, parseInt(b.dataset.sdx), parseInt(b.dataset.sdy));
+	});
+	document.getElementById('btn-passer').disabled   = !(isActive && isPlayer);
+	const noTarget = adjacentAliveMonsters().length === 0;
+	document.getElementById('btn-attaquer').disabled = !canAct || noTarget;
+	document.getElementById('btn-confirm').disabled  = !canAct || noTarget;
 	document.getElementById('btn-fuir').disabled     = !isActive || !isPlayer;
 }
 
 function refreshTargetSelect() {
-	const sel   = document.getElementById('target-select');
-	const alive = state.monstres.filter(m => m.vivant);
-	sel.innerHTML = alive.map(m =>
+	const sel = document.getElementById('target-select');
+	sel.innerHTML = adjacentAliveMonsters().map(m =>
 		`<option value="${m.id}">${m.nom} (${m.currentPV}/${m.pv_max})</option>`
 	).join('');
 }
@@ -520,7 +710,9 @@ function updateUI(data) {
 	data.monstres.forEach(m => updateEnemy(m));
 	document.getElementById('tour-num').textContent = data.tour;
 	updateInitiativeStrip(data);
-	appendLog(data.log);
+	renderTokens();
+	updateCamera();
+	enqueueLogs(data.log);
 	updateButtons(data);
 	refreshTargetSelect();
 	if (data.status !== 'active') {
@@ -529,11 +721,20 @@ function updateUI(data) {
 }
 
 // ─── Actions ─────────────────────────────────────────────────────
+// Les flèches sont en repère écran ; on convertit en déplacement monde selon l'orientation.
+function doMove(sdx, sdy) {
+	const [wx, wy] = screenToWorld(sdx, sdy);
+	doAction('deplacer', null, wx, wy);
+}
+function doRotate(sens) {
+	doAction('tourner', null, null, null, sens);
+}
+
 function triggerAttack() {
-	const alive = state.monstres.filter(m => m.vivant);
-	if (!alive.length) return;
-	if (alive.length === 1) {
-		doAction('attaquer', alive[0].id);
+	const adj = adjacentAliveMonsters();
+	if (!adj.length) return;
+	if (adj.length === 1) {
+		doAction('attaquer', adj[0].id);
 	} else {
 		refreshTargetSelect();
 		document.getElementById('target-row').style.display = 'flex';
@@ -548,18 +749,16 @@ function confirmAttack() {
 	doAction('attaquer', cibleId);
 }
 
-async function doAction(type, cibleId) {
+async function doAction(type, cibleId, dx = null, dy = null, sens = null) {
 	if (busy) return;
 	busy = true;
-	['btn-attaquer','btn-passer','btn-fuir'].forEach(id => {
-		const el = document.getElementById(id);
-		if (el) el.disabled = true;
-	});
+	document.querySelectorAll('#move-controls .btn, .action-btn')
+		.forEach(el => el.disabled = true);
 	try {
 		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/action`, {
 			method:  'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body:    JSON.stringify({ type, cible_id: cibleId }),
+			body:    JSON.stringify({ type, cible_id: cibleId, dx, dy, sens }),
 		});
 		if (res.ok) {
 			const data = await res.json();
@@ -576,6 +775,7 @@ async function doAction(type, cibleId) {
 		console.error('Erreur réseau:', e);
 	} finally {
 		busy = false;
+		updateButtons(state);
 	}
 }
 
@@ -590,6 +790,8 @@ function showEndOverlay(status, xp) {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────
+renderTokens();
+updateCamera();
 refreshTargetSelect();
 updateButtons(state);
 document.getElementById('combat-log').scrollTop = 9999;

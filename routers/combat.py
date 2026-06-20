@@ -7,7 +7,7 @@ from utils.auth import get_current_user
 from utils.characters import get_selected_character
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc,
-    resolve_first_turns, resolve_action, finalize_combat,
+    resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
 )
 
 combat_router = APIRouter()
@@ -22,6 +22,9 @@ class StartCombatRequest(BaseModel):
 class ActionRequest(BaseModel):
     type: str
     cible_id: str | None = None
+    dx: int | None = None
+    dy: int | None = None
+    sens: int | None = None
 
 
 @combat_router.post("/combat/start")
@@ -54,8 +57,12 @@ async def start_combat(
     if not monstres:
         raise HTTPException(status_code=500, detail="Impossible d'instancier les monstres")
 
-    map_image = random.choice(BATTLE_MAPS)
-    combat_doc = create_combat_doc(character, monstres, body.tags, map_image)
+    # Sélection pondérée d'une battle map (lieu) selon les tags de la zone + lieu de départ.
+    depart_lieu = get_doc(character.get("lieu")) if character.get("lieu") else None
+    battle_map = select_battle_map(body.tags, depart_lieu)
+    map_image = battle_map.get("image") if battle_map else random.choice(BATTLE_MAPS)
+    # Le combat référence le lieu battle map (cells non dupliqué) ; repli grille ouverte.
+    combat_doc = create_combat_doc(character, monstres, body.tags, map_image, battle_map=battle_map)
     resolve_first_turns(combat_doc)  # no-op if player goes first
     # Cas limite : les monstres terminent déjà le combat au 1er tour.
     if combat_doc["status"] != "active":
@@ -102,7 +109,7 @@ async def combat_action(
     if combat_doc["status"] != "active":
         raise HTTPException(status_code=400, detail="Ce combat est terminé")
 
-    action_result = resolve_action(combat_doc, body.type, body.cible_id)
+    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens)
 
     # Persist the combat state first (source of truth). couchdb2 met à jour le
     # _rev en place ; un échec (conflit 409) renvoie None → on prévient le client

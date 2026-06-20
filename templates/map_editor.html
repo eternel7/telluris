@@ -524,6 +524,17 @@
 			<div class="legend" id="legend"></div>
 		</div>
 
+		<!-- Battle map -->
+		<div class="card">
+			<div class="card-title">📖 Informations</div>
+			<input type="text" id="bm-tags" placeholder="tags séparés par des virgules"
+				style="width:100%;box-sizing:border-box;font-size:0.8rem;padding:6px;">
+			<div class="nav-info" style="margin-top:4px;">Tags utilisés pour la sélection pondérée de la carte de combat.</div>
+			<label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;margin-bottom:8px;">
+				<input type="checkbox" id="bm-categorie"> Lieu de combat (battle map)
+			</label>
+		</div>
+
 		<!-- Actions -->
 		<div class="card">
 			<div class="card-title">⚡ Actions</div>
@@ -698,6 +709,8 @@ lieuSelect.addEventListener('change', async (e) => {
 			currentRev = lieuData._rev;
 			grid = lieuData.cells.map(row => [...row]);
 			nav = lieuData.nav ? { ...lieuData.nav } : {};
+			document.getElementById('bm-categorie').checked = (lieuData.categorie === 'battle_map');
+			document.getElementById('bm-tags').value = (lieuData.tags || []).join(', ');
 			zonesPlacements = lieuData.zone_influences ? JSON.parse(JSON.stringify(lieuData.zone_influences)) : [];
 			selectedZoneIdx = -1;
 			renderZoneList();
@@ -746,7 +759,10 @@ async function sendGrid() {
 		_id: currentLocId,
 		_rev: currentRev,
 		cells: grid,
-		nav: nav
+		nav: nav,
+		categorie: document.getElementById('bm-categorie').checked ? 'battle_map' : '',
+		tags: document.getElementById('bm-tags').value
+			.split(',').map(t => t.trim()).filter(Boolean)
 	};
 
 	try {
@@ -775,6 +791,14 @@ function scheduleGridSend() {
 	clearTimeout(debounceTimer);
 	debounceTimer = setTimeout(() => sendGrid(), 800);
 }
+
+// Métadonnées battle map : sauvegarder dès que la case ou les tags changent.
+document.getElementById('bm-categorie').addEventListener('change', () => {
+	if (currentLocId) scheduleGridSend();
+});
+document.getElementById('bm-tags').addEventListener('input', () => {
+	if (currentLocId) scheduleGridSend();
+});
 
 // ── RENDER GRID ────────────────────────────────────────────────────────────
 function renderGrid() {

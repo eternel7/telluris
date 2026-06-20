@@ -1355,6 +1355,32 @@
 	};
 	const root = document.documentElement;
 	let isMoving = false;
+	// Rafraîchit toutes les jauges PV/PM (portrait, fiche) + textes, sans recharger.
+	// Générique : le PM sera pris en charge automatiquement dès sa régén serveur.
+	function updateVitals(v) {
+		if (!v) return;
+		const setBars = (side, cur, max) => {
+			const pct = max > 0 ? Math.min(Math.round(cur / max * 100), 100) : 0;
+			document.querySelectorAll(`.portrait-stat-bar.${side}-side .bar-fill`).forEach(el => {
+				el.style.height = pct + '%';
+				el.classList.toggle('is-overflow', cur > max);
+			});
+		};
+		const setVal = (cls, label, cur, max) => {
+			document.querySelectorAll(cls).forEach(el => {
+				if (el.firstChild && el.firstChild.nodeType === Node.TEXT_NODE) {
+					el.firstChild.nodeValue = `${label} ${cur}/`;
+				}
+				const span = el.querySelector('span');
+				if (span) span.textContent = max;
+			});
+		};
+		setBars('pv', v.currentPV, v.pv_max);
+		setBars('pm', v.currentPM, v.pm_max);
+		setVal('.pv-val', 'PV', v.currentPV, v.pv_max);
+		setVal('.pm-val', 'PM', v.currentPM, v.pm_max);
+	}
+
 	async function move(viewDx, viewDy) {
 		if (isMoving) return;
 		isMoving = true;
@@ -1375,6 +1401,7 @@
 				ACCESS = rep.access;
 				buildLocationslist();
 				updateControls();
+				updateVitals(rep.vitals);
 				if (rep.zone_event) {
 					if (rep.zone_event.type === 'combat') {
 						const cr = await fetch('/api/combat/start', {
@@ -1462,6 +1489,9 @@
 	}
 	updateControls();
 	async function waitTurn(){
+		// Attendre un tour : pas de déplacement, mais on rejoue la résolution serveur
+		// (événements de zone re-testés à la position courante + régén PV hors combat).
+		await move(0, 0);
 	}
 	async function moveTo(linkId) {
 		const moveData = {link: linkId};

@@ -1,4 +1,5 @@
 import re
+import math
 import random
 import uuid
 from db.config import get_doc, save_doc, find_docs
@@ -10,6 +11,192 @@ BATTLE_MAPS = [
     "map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
     "map0005.jpg", "map0006.jpg", "map0007.jpg", "abandonned_church01.webp",
 ]
+
+
+def _compute_actions_max(ag: int, v: int) -> int:
+    """Nombre d'actions par tour dérivé des stats : max(1, ceil(Ag/20 + V/5))."""
+    return max(1, math.ceil(ag / 20 + v / 5))
+
+
+# ── Grille de combat ─────────────────────────────────────────────────────────
+# Terrain cells[y][x] : -1 inaccessible, 0 inaccessible sauf vol, 1 accessible,
+# n>1 accessible sous condition. Le vol n'étant pas implémenté, seuil >= 1.
+DEFAULT_GRID_W = 13
+DEFAULT_GRID_H = 11
+
+
+def _open_grid(w: int = DEFAULT_GRID_W, h: int = DEFAULT_GRID_H) -> dict:
+    """Grille entièrement praticable (terrain ouvert, fallback sans battle map)."""
+    return {"dims": {"x": w, "y": h}, "cells": [[1] * w for _ in range(h)]}
+
+
+def _passable(cells: list, x: int, y: int) -> bool:
+    if not cells or y < 0 or y >= len(cells):
+        return False
+    row = cells[y]
+    if x < 0 or x >= len(row):
+        return False
+    return row[x] >= 1
+
+
+def _cheby(a: dict, b: dict) -> int:
+    return max(abs(a["pos"]["x"] - b["pos"]["x"]), abs(a["pos"]["y"] - b["pos"]["y"]))
+
+
+def _occupied_set(combat_doc: dict, exclude: dict | None = None) -> set:
+    """Ensemble des (x,y) occupés par des acteurs vivants (hors `exclude`)."""
+    occ = set()
+    for j in combat_doc["joueurs"]:
+        if j is not exclude and j.get("currentPV", 1) > 0:
+            occ.add((j["pos"]["x"], j["pos"]["y"]))
+    for m in combat_doc["monstres"]:
+        if m is not exclude and m["vivant"]:
+            occ.add((m["pos"]["x"], m["pos"]["y"]))
+    return occ
+
+
+def _occupied_at(combat_doc: dict, x: int, y: int) -> bool:
+    return (x, y) in _occupied_set(combat_doc)
+
+
+def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
+    """AP consommés pour `cells_moved` cases : ceil(cells * actions_max / deplacement)."""
+    dep = max(1, actor.get("deplacement", 1))
+    return math.ceil(cells_moved * actor["actions_max"] / dep)
+
+
+def _refresh_actions(actor: dict) -> None:
+    """Recalcule actions_restantes = actions_max - attaques - AP_déplacement."""
+    used = actor.get("attaques", 0) + _move_ap_used_for(actor, actor.get("cells_moved", 0))
+    actor["actions_restantes"] = max(0, actor["actions_max"] - used)
+
+
+def _reset_turn_budget(actor: dict) -> None:
+    """Réinitialise le budget d'un acteur en début de tour."""
+    actor["cells_moved"] = 0
+    actor["attaques"] = 0
+    actor["actions_restantes"] = actor["actions_max"]
+
+
+def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set) -> list | None:
+    """A* 4-directions (heuristique Manhattan). Porté du prototype client.
+
+    Bloque les cases non praticables (`cells <= 0`) et celles de `blocked`,
+    sauf la case d'arrivée (qui peut être occupée par la cible).
+    Retourne la liste [(x,y), ...] de start à goal inclus, ou None.
+    """
+    w, h = dims["x"], dims["y"]
+    sx, sy = start
+    gx, gy = goal
+    start_node = {"x": sx, "y": sy, "g": 0, "h": abs(gx - sx) + abs(gy - sy), "parent": None}
+    start_node["f"] = start_node["h"]
+    open_list = [start_node]
+    closed = set()
+
+    while open_list:
+        open_list.sort(key=lambda n: n["f"])
+        cur = open_list.pop(0)
+        if cur["x"] == gx and cur["y"] == gy:
+            path = []
+            node = cur
+            while node:
+                path.append((node["x"], node["y"]))
+                node = node["parent"]
+            return path[::-1]
+        closed.add((cur["x"], cur["y"]))
+        for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+            nx, ny = cur["x"] + dx, cur["y"] + dy
+            if nx < 0 or nx >= w or ny < 0 or ny >= h:
+                continue
+            if not _passable(cells, nx, ny):
+                continue
+            if (nx, ny) in closed:
+                continue
+            is_goal = (nx == gx and ny == gy)
+            if (nx, ny) in blocked and not is_goal:
+                continue
+            g = cur["g"] + 1
+            existing = next((n for n in open_list if n["x"] == nx and n["y"] == ny), None)
+            if existing is None:
+                node = {"x": nx, "y": ny, "g": g, "h": abs(gx - nx) + abs(gy - ny), "parent": cur}
+                node["f"] = node["g"] + node["h"]
+                open_list.append(node)
+            elif g < existing["g"]:
+                existing["g"] = g
+                existing["f"] = g + existing["h"]
+                existing["parent"] = cur
+    return None
+
+
+def _nearest_passable(cells: list, dims: dict, tx: int, ty: int, occupied: set) -> tuple:
+    """Case praticable et libre la plus proche de (tx, ty) par recherche en spirale."""
+    w, h = dims["x"], dims["y"]
+    tx = max(0, min(w - 1, tx))
+    ty = max(0, min(h - 1, ty))
+    for radius in range(0, max(w, h) + 1):
+        for dy in range(-radius, radius + 1):
+            for dx in range(-radius, radius + 1):
+                if max(abs(dx), abs(dy)) != radius:
+                    continue
+                x, y = tx + dx, ty + dy
+                if _passable(cells, x, y) and (x, y) not in occupied:
+                    return (x, y)
+    return (tx, ty)
+
+
+def _place_actors(combat_doc: dict, grid: dict) -> None:
+    """Place le joueur en bas-centre et les monstres répartis en haut de la grille."""
+    cells, dims = grid["cells"], grid["dims"]
+    w, h = dims["x"], dims["y"]
+    occupied: set = set()
+
+    joueur = combat_doc["joueurs"][0]
+    jx, jy = _nearest_passable(cells, dims, w // 2, h - 1, occupied)
+    joueur["pos"] = {"x": jx, "y": jy}
+    occupied.add((jx, jy))
+
+    monstres = combat_doc["monstres"]
+    n = len(monstres)
+    for i, m in enumerate(monstres):
+        tx = int((i + 1) * w / (n + 1))
+        mx, my = _nearest_passable(cells, dims, tx, 1, occupied)
+        m["pos"] = {"x": mx, "y": my}
+        occupied.add((mx, my))
+
+
+def select_battle_map(zone_tags: list, depart_lieu: dict | None) -> dict | None:
+    """Sélection pondérée d'un lieu battle map selon le recoupement de tags.
+
+    Poids = nb de tags communs entre la battle map et (tags zone ∪ tags lieu départ),
+    avec un minimum de 1 pour rester tirable. Retourne le lieu ou None si aucun.
+    """
+    candidates = [
+        b for b in (find_docs({"type": "lieu", "categorie": "battle_map"}) or [])
+        if b.get("cells")
+    ]
+    if not candidates:
+        return None
+    pool_tags = set(zone_tags or []) | set((depart_lieu or {}).get("tags", []))
+    weights = [max(1, len(set(b.get("tags", [])) & pool_tags)) for b in candidates]
+    return random.choices(candidates, weights=weights, k=1)[0]
+
+
+def get_combat_grid(combat_doc: dict) -> dict:
+    """Résout la grille {dims, cells} du combat.
+
+    `cells` n'est PAS dupliqué dans le doc combat : on référence le lieu battle map
+    (`battle_map_id`) et on lit sa grille à la demande. Repli sur une grille ouverte
+    (taille `grid_dims`) si aucun lieu. Tolère un ancien doc avec `grid` en ligne.
+    """
+    bm_id = combat_doc.get("battle_map_id")
+    if bm_id:
+        lieu = get_doc(bm_id)
+        if lieu and lieu.get("cells"):
+            return {"dims": lieu["dimensions"], "cells": lieu["cells"]}
+    if combat_doc.get("grid", {}).get("cells"):  # rétro-compat docs existants
+        return combat_doc["grid"]
+    dims = combat_doc.get("grid_dims") or {"x": DEFAULT_GRID_W, "y": DEFAULT_GRID_H}
+    return _open_grid(dims["x"], dims["y"])
 
 
 def roll_dice(notation: str) -> int:
@@ -81,8 +268,8 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
         "pv_max": derived.pv_max,
         "currentPM": character.get("currentPM", derived.pm_max),
         "pm_max": derived.pm_max,
-        "actions_restantes": 2,
-        "actions_max": 2,
+        "actions_restantes": _compute_actions_max(base.ag, base.v),
+        "actions_max": _compute_actions_max(base.ag, base.v),
         "cc": derived.cc,
         "cd": derived.cd,
         "ag": base.ag,
@@ -90,6 +277,12 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
         "degats_cc": derived.degats_cc,
         "degats_cd": derived.degats_cd,
         "initiative": derived.initiative,
+        "deplacement": derived.deplacement,
+        "portee": 1,
+        "pos": {"x": 0, "y": 0},
+        "facing": 0,
+        "cells_moved": 0,
+        "attaques": 0,
     }
 
 
@@ -116,7 +309,12 @@ def instantiate_monsters(
             profil_id = None
 
         derived = compute_derived_stats(base_stats, niveau=niveau)
-        xp_reward = espece.get("proprietes", {}).get("xp_reward", 5)
+        # XP dérivée de la difficulté : niveau du profil + somme des stats du monstre.
+        sum_stats = (
+            base_stats.v + base_stats.f + base_stats.r + base_stats.ag
+            + base_stats.vol + base_stats.int_ + base_stats.cha + base_stats.ch
+        )
+        xp_reward = max(1, niveau * 4 + sum_stats // 10)
 
         monstres.append({
             "id": f"monstre_{i}",
@@ -126,13 +324,18 @@ def instantiate_monsters(
             "image": espece.get("image", ""),
             "currentPV": max(1, derived.pv_max),
             "pv_max": max(1, derived.pv_max),
-            "actions_restantes": 1,
-            "actions_max": 1,
+            "actions_restantes": _compute_actions_max(base_stats.ag, base_stats.v),
+            "actions_max": _compute_actions_max(base_stats.ag, base_stats.v),
             "cc": derived.cc,
             "ag": base_stats.ag,
             "pa": derived.pa,
             "degats_cc": derived.degats_cc,
             "initiative": derived.initiative,
+            "deplacement": derived.deplacement,
+            "portee": 1,
+            "pos": {"x": 0, "y": 0},
+            "cells_moved": 0,
+            "attaques": 0,
             "vivant": True,
             "xp_reward": xp_reward,
         })
@@ -141,7 +344,8 @@ def instantiate_monsters(
 
 
 def create_combat_doc(
-    character: dict, monstres: list, zone_tags: list, map_image: str
+    character: dict, monstres: list, zone_tags: list, map_image: str,
+    battle_map: dict | None = None,
 ) -> dict:
     joueur = build_joueur_snapshot(character, joueur_index=0)
     joueurs = [joueur]
@@ -152,7 +356,7 @@ def create_combat_doc(
     ordre = [a[0] for a in all_actors]
 
     combat_id = f"combat:{uuid.uuid4().hex}"
-    return {
+    combat_doc = {
         "_id": combat_id,
         "type": "combat",
         "user_id": character["user_id"],
@@ -165,9 +369,19 @@ def create_combat_doc(
         "zone_tags": zone_tags,
         "joueurs": joueurs,
         "monstres": monstres,
-        "log": [{"tour": 1, "acteur": "Système", "texte": "Le combat commence !"}],
+        "log": [{"tour": 1, "acteur": "Système", "kind": "sys", "texte": "Le combat commence !"}],
         "xp_gagnee": 0,
     }
+    # On référence le lieu battle map (grille statique non dupliquée). `cells` est
+    # résolu à la demande via get_combat_grid(). Repli = grille ouverte.
+    if battle_map:
+        combat_doc["battle_map_id"] = battle_map["_id"]
+        grid = {"dims": battle_map["dimensions"], "cells": battle_map["cells"]}
+    else:
+        grid = _open_grid()
+        combat_doc["grid_dims"] = grid["dims"]
+    _place_actors(combat_doc, grid)
+    return combat_doc
 
 
 # ── Helpers internes ────────────────────────────────────────────────────────
@@ -195,6 +409,11 @@ def _hit_threshold(attaquant_cc: int, defenseur_ag: int) -> int:
     return max(5, min(95, 50 + attaquant_cc - defenseur_ag))
 
 
+def _flee_threshold(joueur_init: int, monstre_init_max: int) -> int:
+    """Seuil de fuite sur d100 : 50 + init joueur - meilleure init ennemie, clampé [5, 95]."""
+    return max(5, min(95, 50 + joueur_init - monstre_init_max))
+
+
 def _check_victory(combat_doc: dict) -> None:
     if all(not m["vivant"] for m in combat_doc["monstres"]):
         xp = sum(m["xp_reward"] for m in combat_doc["monstres"])
@@ -204,6 +423,7 @@ def _check_victory(combat_doc: dict) -> None:
         combat_doc["log"].append({
             "tour": combat_doc["tour"],
             "acteur": "Système",
+            "kind": "sys",
             "texte": f"Victoire ! {xp} XP gagnés.",
         })
 
@@ -213,11 +433,12 @@ def _do_monster_attack(combat_doc: dict, monstre: dict) -> None:
     seuil = _hit_threshold(monstre["cc"], joueur.get("ag", 0))
     roll = random.randint(1, 100)
     if roll <= seuil:
-        dmg = max(1, roll_dice(monstre["degats_cc"]) - joueur["pa"])
+        dmg = max(1, roll_dice(monstre["degats_cc"]) - joueur["pa"] // 2)
         joueur["currentPV"] = max(0, joueur["currentPV"] - dmg)
         combat_doc["log"].append({
             "tour": combat_doc["tour"],
             "acteur": monstre["nom"],
+            "kind": "hit",
             "texte": (
                 f"{monstre['nom']} touche {joueur['nom']} pour {dmg} dégâts ! "
                 f"(PV : {joueur['currentPV']}/{joueur['pv_max']})"
@@ -228,22 +449,75 @@ def _do_monster_attack(combat_doc: dict, monstre: dict) -> None:
             combat_doc["log"].append({
                 "tour": combat_doc["tour"],
                 "acteur": "Système",
+                "kind": "sys",
                 "texte": f"{joueur['nom']} est à terre !",
             })
     else:
         combat_doc["log"].append({
             "tour": combat_doc["tour"],
             "acteur": monstre["nom"],
+            "kind": "miss",
             "texte": f"{monstre['nom']} rate son attaque ! (jet {roll} / seuil {seuil})",
         })
 
 
-def _run_monster_turn(combat_doc: dict, monstre: dict) -> None:
-    """Execute all actions for a single monster, then advance acteur_courant_index."""
-    monstre["actions_restantes"] = monstre["actions_max"]
-    while monstre["actions_restantes"] > 0 and combat_doc["status"] == "active":
+def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: dict) -> bool:
+    """Avance le monstre d'une case vers le joueur via A*. Retourne True si déplacé."""
+    blocked = _occupied_set(combat_doc, exclude=monstre)
+    path = _find_path(
+        grid["cells"], grid["dims"],
+        (monstre["pos"]["x"], monstre["pos"]["y"]),
+        (joueur["pos"]["x"], joueur["pos"]["y"]),
+        blocked,
+    )
+    if not path or len(path) < 2:
+        return False
+    nxt = path[1]
+    # Ne pas entrer sur la case du joueur (cible) ni une case occupée.
+    if nxt == (joueur["pos"]["x"], joueur["pos"]["y"]) or nxt in blocked:
+        return False
+    # Vérifier qu'il reste assez d'AP pour ce pas (coût proportionnel).
+    projected = monstre["attaques"] + _move_ap_used_for(monstre, monstre["cells_moved"] + 1)
+    if projected > monstre["actions_max"]:
+        return False
+    monstre["pos"] = {"x": nxt[0], "y": nxt[1]}
+    monstre["cells_moved"] += 1
+    _refresh_actions(monstre)
+    return True
+
+
+def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
+    """Tour d'un monstre : se rapprocher du joueur (A*) puis attaquer si à portée."""
+    _reset_turn_budget(monstre)
+    joueur = combat_doc["joueurs"][0]
+    portee = monstre.get("portee", 1)
+
+    # Phase déplacement : avancer vers le joueur tant qu'éloigné et budget dispo.
+    steps = 0
+    safety = 0
+    while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
+           and _cheby(monstre, joueur) > portee
+           and monstre["cells_moved"] < monstre.get("deplacement", 1)
+           and safety < 100):
+        safety += 1
+        if not _monster_step_toward(combat_doc, monstre, joueur, grid):
+            break
+        steps += 1
+    if steps > 0:
+        combat_doc["log"].append({
+            "tour": combat_doc["tour"],
+            "acteur": monstre["nom"],
+            "kind": "move",
+            "texte": f"{monstre['nom']} avance vers {joueur['nom']} ({steps} case(s)).",
+        })
+
+    # Phase attaque : frapper tant qu'à portée et qu'il reste des actions.
+    while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
+           and _cheby(monstre, joueur) <= portee):
         _do_monster_attack(combat_doc, monstre)
-        monstre["actions_restantes"] -= 1
+        monstre["attaques"] += 1
+        _refresh_actions(monstre)
+
     idx = combat_doc["acteur_courant_index"] + 1
     if idx >= len(combat_doc["ordre_initiative"]):
         idx = 0
@@ -251,7 +525,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict) -> None:
     combat_doc["acteur_courant_index"] = idx
 
 
-def _resolve_until_player(combat_doc: dict, start_at_current: bool = False) -> None:
+def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool = False) -> None:
     """Run monster turns until it's a player's turn.
 
     start_at_current=True  : process the actor at acteur_courant_index first (combat init).
@@ -275,7 +549,7 @@ def _resolve_until_player(combat_doc: dict, start_at_current: bool = False) -> N
         if actor_id.startswith("joueur_"):
             joueur = _get_joueur(combat_doc, actor_id)
             if joueur:
-                joueur["actions_restantes"] = joueur["actions_max"]
+                _reset_turn_budget(joueur)
             break
         monstre = _get_monstre(combat_doc, actor_id)
         if not monstre or not monstre["vivant"]:
@@ -286,23 +560,24 @@ def _resolve_until_player(combat_doc: dict, start_at_current: bool = False) -> N
                 combat_doc["tour"] += 1
             combat_doc["acteur_courant_index"] = idx
             continue
-        _run_monster_turn(combat_doc, monstre)
+        _run_monster_turn(combat_doc, monstre, grid)
 
 
-def _advance_and_resolve(combat_doc: dict) -> None:
+def _advance_and_resolve(combat_doc: dict, grid: dict) -> None:
     """After a player action: advance past the player and resolve all monster turns."""
-    _resolve_until_player(combat_doc, start_at_current=False)
+    _resolve_until_player(combat_doc, grid, start_at_current=False)
 
 
 def resolve_first_turns(combat_doc: dict) -> None:
     """Called after combat creation: if monsters go first, resolve their turns."""
-    _resolve_until_player(combat_doc, start_at_current=True)
+    _resolve_until_player(combat_doc, get_combat_grid(combat_doc), start_at_current=True)
 
 
 # ── API publique ────────────────────────────────────────────────────────────
 
 def resolve_action(
-    combat_doc: dict, action_type: str, cible_id: str | None = None
+    combat_doc: dict, action_type: str, cible_id: str | None = None,
+    dx: int | None = None, dy: int | None = None, sens: int | None = None,
 ) -> dict:
     ordre = combat_doc["ordre_initiative"]
     actor_id = ordre[combat_doc["acteur_courant_index"]]
@@ -316,35 +591,98 @@ def resolve_action(
     if joueur["actions_restantes"] <= 0:
         return {"error": "Plus d'actions disponibles."}
 
+    portee = joueur.get("portee", 1)
+    grid = get_combat_grid(combat_doc)
     result: dict = {}
 
-    if action_type == "attaquer":
-        if not cible_id:
-            alive = [m for m in combat_doc["monstres"] if m["vivant"]]
-            if not alive:
-                return {"error": "Aucune cible disponible."}
-            cible_id = alive[0]["id"]
+    if action_type == "deplacer":
+        if dx is None or dy is None:
+            return {"error": "Direction manquante."}
+        dx = max(-1, min(1, int(dx)))
+        dy = max(-1, min(1, int(dy)))
+        if dx == 0 and dy == 0:
+            return {"error": "Direction nulle."}
 
-        monstre = _get_monstre(combat_doc, cible_id)
-        if not monstre or not monstre["vivant"]:
-            return {"error": "Cible invalide."}
+        dims, cells = grid["dims"], grid["cells"]
+        nx, ny = joueur["pos"]["x"] + dx, joueur["pos"]["y"] + dy
+        if nx < 0 or nx >= dims["x"] or ny < 0 or ny >= dims["y"]:
+            return {"error": "Hors de la zone."}
+        if not _passable(cells, nx, ny):
+            return {"error": "Terrain infranchissable."}
+        if _occupied_at(combat_doc, nx, ny):
+            return {"error": "Case occupée."}
+        if joueur["cells_moved"] >= joueur.get("deplacement", 1):
+            return {"error": "Budget de déplacement épuisé."}
+        projected = joueur["attaques"] + _move_ap_used_for(joueur, joueur["cells_moved"] + 1)
+        if projected > joueur["actions_max"]:
+            return {"error": "Plus d'actions pour se déplacer."}
+
+        joueur["pos"] = {"x": nx, "y": ny}
+        joueur["cells_moved"] += 1
+        _refresh_actions(joueur)
+        combat_doc["log"].append({
+            "tour": combat_doc["tour"],
+            "acteur": joueur["nom"],
+            "kind": "move",
+            "texte": f"{joueur['nom']} se déplace en [{nx},{ny}].",
+        })
+        result = {"moved": True, "pos": joueur["pos"]}
+
+    elif action_type == "tourner":
+        # Rotation ±90° (caméra). Coûte une case du budget de déplacement.
+        if sens not in (-1, 1):
+            return {"error": "Sens de rotation invalide."}
+        if joueur["cells_moved"] >= joueur.get("deplacement", 1):
+            return {"error": "Budget de déplacement épuisé."}
+        projected = joueur["attaques"] + _move_ap_used_for(joueur, joueur["cells_moved"] + 1)
+        if projected > joueur["actions_max"]:
+            return {"error": "Plus d'actions pour pivoter."}
+
+        joueur["facing"] = (joueur.get("facing", 0) + sens * 90) % 360
+        joueur["cells_moved"] += 1
+        _refresh_actions(joueur)
+        combat_doc["log"].append({
+            "tour": combat_doc["tour"],
+            "acteur": joueur["nom"],
+            "kind": "move",
+            "texte": f"{joueur['nom']} pivote ({'droite' if sens > 0 else 'gauche'}).",
+        })
+        result = {"turned": True, "facing": joueur["facing"]}
+
+    elif action_type == "attaquer":
+        alive = [m for m in combat_doc["monstres"] if m["vivant"]]
+        if not alive:
+            return {"error": "Aucune cible disponible."}
+        if cible_id:
+            monstre = _get_monstre(combat_doc, cible_id)
+            if not monstre or not monstre["vivant"]:
+                return {"error": "Cible invalide."}
+            if _cheby(joueur, monstre) > portee:
+                return {"error": "Cible hors de portée."}
+        else:
+            adjacents = [m for m in alive if _cheby(joueur, m) <= portee]
+            if not adjacents:
+                return {"error": "Aucune cible à portée. Rapprochez-vous."}
+            monstre = adjacents[0]
 
         seuil = _hit_threshold(joueur["cc"], monstre.get("ag", 0))
         roll = random.randint(1, 100)
         if roll <= seuil:
-            dmg = max(1, roll_dice(joueur["degats_cc"]) - monstre["pa"])
+            dmg = max(1, roll_dice(joueur["degats_cc"]) - monstre["pa"] // 2)
             monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
             if monstre["currentPV"] <= 0:
                 monstre["vivant"] = False
                 combat_doc["log"].append({
                     "tour": combat_doc["tour"],
                     "acteur": joueur["nom"],
+                    "kind": "kill",
                     "texte": f"{joueur['nom']} élimine {monstre['nom']} !",
                 })
             else:
                 combat_doc["log"].append({
                     "tour": combat_doc["tour"],
                     "acteur": joueur["nom"],
+                    "kind": "hit",
                     "texte": (
                         f"{joueur['nom']} touche {monstre['nom']} pour {dmg} dégâts ! "
                         f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
@@ -355,29 +693,38 @@ def resolve_action(
             combat_doc["log"].append({
                 "tour": combat_doc["tour"],
                 "acteur": joueur["nom"],
+                "kind": "miss",
                 "texte": f"{joueur['nom']} rate son attaque sur {monstre['nom']} ! (jet {roll} / seuil {seuil})",
             })
             result = {"hit": False, "roll": roll, "seuil": seuil}
 
-        joueur["actions_restantes"] -= 1
+        joueur["attaques"] += 1
+        _refresh_actions(joueur)
         _check_victory(combat_doc)
 
     elif action_type == "passer":
         combat_doc["log"].append({
             "tour": combat_doc["tour"],
             "acteur": joueur["nom"],
+            "kind": "sys",
             "texte": f"{joueur['nom']} passe son tour.",
         })
         joueur["actions_restantes"] = 0
         result = {"passed": True}
 
     elif action_type == "fuir":
+        init_max = max(
+            (m["initiative"] for m in combat_doc["monstres"] if m["vivant"]),
+            default=0,
+        )
+        seuil = _flee_threshold(joueur["initiative"], init_max)
         flee_roll = random.randint(1, 100)
-        if flee_roll <= 60:
+        if flee_roll <= seuil:
             combat_doc["status"] = "fuite"
             combat_doc["log"].append({
                 "tour": combat_doc["tour"],
                 "acteur": joueur["nom"],
+                "kind": "flee",
                 "texte": f"{joueur['nom']} prend la fuite !",
             })
             result = {"fled": True}
@@ -385,16 +732,17 @@ def resolve_action(
             combat_doc["log"].append({
                 "tour": combat_doc["tour"],
                 "acteur": joueur["nom"],
-                "texte": f"{joueur['nom']} tente de fuir mais échoue ! (jet {flee_roll}/60)",
+                "kind": "flee",
+                "texte": f"{joueur['nom']} tente de fuir mais échoue ! (jet {flee_roll}/{seuil})",
             })
             joueur["actions_restantes"] = 0
-            result = {"fled": False, "roll": flee_roll}
+            result = {"fled": False, "roll": flee_roll, "seuil": seuil}
 
     else:
         return {"error": f"Action inconnue : {action_type}"}
 
     if combat_doc["status"] == "active" and joueur["actions_restantes"] <= 0:
-        _advance_and_resolve(combat_doc)
+        _advance_and_resolve(combat_doc, grid)
 
     return result
 

@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Reques
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 import bcrypt
+import math
 import re
 import uuid
 from db.config import save_doc, get_doc, delete_doc
@@ -285,6 +286,7 @@ async def move_character(
 								for n in range(niveau_new + 1, niveau_after + 1):
 									character_to_update["attribute_points"] = character_to_update.get("attribute_points", 0) + n
 								niveau_new = niveau_after
+						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
 						zone_event = None
 						if lieu_doc.get("zone_influences"):
@@ -293,7 +295,7 @@ async def move_character(
 								destination_pos["x"], destination_pos["y"],
 								lieu_doc["zone_influences"], zone_defs
 							)
-						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event}
+						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update)}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -306,6 +308,7 @@ async def move_character(
 				position["x"]>=0 and position["y"]>=0
 				and position["x"]<=lieu_doc["dimensions"]["x"] and position["y"]<=lieu_doc["dimensions"]["y"]):
 				character_to_update["position"] = position
+				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
 				if lieu_doc:
@@ -317,7 +320,7 @@ async def move_character(
 							position["x"], position["y"],
 							lieu_doc["zone_influences"], zone_defs
 						)
-					return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event}
+					return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update)}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -356,6 +359,28 @@ def _derived_from_character(character: dict, equipment: EquipmentBonus) -> Deriv
     )
     voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
     return compute_derived_stats(base, niveau=voc_niveau, equipment=equipment)
+
+
+def _apply_world_turn_regen(character: dict) -> None:
+    """Régén PV à chaque tour de jeu hors combat : ceil(R/20) PV, plafonné à pv_max."""
+    eq = _recompute_equipment_bonus(character.get("slots", {}))
+    pv_max = _derived_from_character(character, eq).pv_max
+    r = character.get("caracteristiques_current", {}).get("R", 1)
+    regen = math.ceil(r / 20)
+    character["currentPV"] = min(pv_max, character.get("currentPV", pv_max) + regen)
+
+
+def _vitals_payload(character: dict) -> dict:
+    """PV/PM courants + max, pour rafraîchir les jauges côté client sans recharger."""
+    eq = _recompute_equipment_bonus(character.get("slots", {}))
+    derived = _derived_from_character(character, eq)
+    return {
+        "currentPV": character.get("currentPV", derived.pv_max),
+        "pv_max": derived.pv_max,
+        "currentPM": character.get("currentPM", derived.pm_max),
+        "pm_max": derived.pm_max,
+    }
+
 
 @user_router.post("/spend_xp")
 async def spend_xp(

@@ -137,6 +137,11 @@ async def update_cells(
 		if lieu_doc:
 			lieu_doc["cells"] = cells
 			lieu_doc["nav"] = nav
+			# Métadonnées battle map (optionnelles) : tags + catégorie pour la sélection pondérée.
+			if "tags" in cells_info:
+				lieu_doc["tags"] = cells_info["tags"]
+			if "categorie" in cells_info:
+				lieu_doc["categorie"] = cells_info["categorie"]
 			save_doc(lieu_doc)
 			return lieu_doc
 	raise HTTPException(status_code=404, detail="Incorrect location grid info")

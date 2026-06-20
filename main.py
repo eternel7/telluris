@@ -12,6 +12,7 @@ from routers.oauth import router as oauth_router
 from routers.zones import zones_router
 from routers.bestiaire import bestiaire_router
 from routers.combat import combat_router
+from utils.combat import get_combat_grid
 from db.config import find_docs, get_doc, save_doc, delete_doc
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
@@ -356,6 +357,7 @@ async def get_combat_page(
 			"title": "Combat",
 			"combat": combat_doc,
 			"character": character,
+			"grid": get_combat_grid(combat_doc),
 		},
 	)
 
