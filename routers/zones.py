@@ -85,3 +85,29 @@ async def update_lieu_zone_influences(
     lieu_doc["zone_influences"] = placements
     save_doc(lieu_doc)
     return {"saved": len(placements), "zone_influences": placements}
+
+
+@zones_router.put("/lieu/{lieu_id:path}/rencontres")
+async def update_lieu_rencontres(
+    lieu_id: str,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    body: dict = Body(...),
+):
+    """Espèces rencontrables sur le lieu. Chaque entrée : {espece, zones:[zone_def_id]}.
+
+    On ne référence que l'id de la zone-def (pas un placement) → toutes les instances
+    d'une même zone partagent les espèces applicables.
+    """
+    _require_admin(current_user)
+    lieu_doc = get_doc(unquote(lieu_id))
+    if not lieu_doc:
+        raise HTTPException(status_code=404, detail="Lieu not found")
+    rencontres = body.get("rencontres", [])
+    # Normalisation défensive.
+    clean = [
+        {"espece": r.get("espece"), "zones": list(r.get("zones", []))}
+        for r in rencontres if r.get("espece")
+    ]
+    lieu_doc["rencontres"] = clean
+    save_doc(lieu_doc)
+    return {"saved": len(clean), "rencontres": clean}

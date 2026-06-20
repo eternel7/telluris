@@ -70,11 +70,13 @@
 
 	/* --- LEFT PANEL --- */
 	.panel {
-		width: 260px;
+		max-width: 400px;
+		min-width: 250px;
+		width: 30vw;
 		flex-shrink: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 5px;
 	}
 
 	.card {
@@ -147,7 +149,15 @@
 	.btn:hover { background: rgba(200,168,75,0.18); box-shadow: 0 0 10px rgba(200,168,75,0.2); }
 	.btn.danger { border-color: var(--danger); color: var(--danger); background: transparent; }
 	.btn.danger:hover { background: rgba(200,75,75,0.1); }
-
+	.btn-inline {
+		width:auto;
+		padding-top: 2px;
+		padding-bottom: 2px;
+		height: 27px;
+		align-self: baseline;
+		margin-top: 0px;
+		margin-bottom: 0px;
+	}
 	/* Value selector */
 	.value-grid {
 		display: grid;
@@ -203,7 +213,25 @@
 		display: flex;
 		gap: 6px;
 		margin-bottom: 12px;
+		overflow-x: auto;
+		white-space: nowrap;
+		scrollbar-width: thin; /* Rend la barre plus fine */
+		scrollbar-color: #4d4d4d transparent;
 	}
+	/* Pour Chrome, Edge et Safari */
+	.mode-tabs::-webkit-scrollbar {
+		height: 6px; /* Ajustez la hauteur ici */
+	}
+
+	.mode-tabs::-webkit-scrollbar-thumb {
+		background: #4d4d4d; /* Couleur de la barre */
+		border-radius: 10px;
+	}
+
+	.mode-tabs::-webkit-scrollbar-track {
+		background: transparent; /* Couleur du fond de la barre */
+	}
+
 	.mode-tab {
 		flex: 1;
 		padding: 5px;
@@ -278,6 +306,27 @@
 		border-radius: 2px;
 		flex-shrink: 0;
 	}
+
+	/* Rencontres */
+	.renc-item {
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		padding: 6px;
+		margin-bottom: 6px;
+		background: #0d0f14;
+	}
+	.renc-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+	.renc-img { width: 22px; height: 22px; border-radius: 3px; object-fit: cover; flex-shrink: 0; background: #1c1c28; }
+	.renc-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+	.renc-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: .9rem; padding: 0 2px; }
+	.renc-zones { display: flex; flex-wrap: wrap; gap: 4px; }
+	.zchip {
+		font-size: .62rem; padding: 2px 6px; border-radius: 10px;
+		border: 1px solid var(--border); color: var(--muted);
+		cursor: pointer; user-select: none; transition: all .15s;
+	}
+	.zchip:hover { border-color: var(--accent2); }
+	.zchip.on { border-color: var(--accent); background: rgba(200,168,75,0.18); color: var(--accent); }
 
 	/* --- CANVAS AREA --- */
 	.canvas-wrap {
@@ -436,6 +485,7 @@
 				<div class="mode-tab active" id="mode-terrain">Terrain</div>
 				<div class="mode-tab" id="mode-nav">Navigation</div>
 				<div class="mode-tab" id="mode-zones">Zones</div>
+				<div class="mode-tab" id="mode-rencontres">Rencontres</div>
 			</div>
 
 			<!-- Panneau Terrain -->
@@ -498,6 +548,20 @@
 				<button class="btn" id="save-zones-btn" style="width:100%;">💾 Sauvegarder les zones</button>
 			</div>
 
+			<!-- Panneau Rencontres -->
+			<div id="panel-rencontres" style="display:none;">
+				<label for="espece-select" style="font-size:.7rem;color:var(--accent);">Espèce (bestiaire)</label>
+				<div style="display:flex;gap:6px;margin-bottom:8px;">
+					<select id="espece-select" style="flex:1;min-width:0;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+						<option value="" disabled selected>-- Choisir une espèce --</option>
+					</select>
+					<button class="btn btn-inline" id="add-espece-btn">+ Ajouter</button>
+				</div>
+				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Sur chaque espèce, cliquer les zones d'influence où elle apparaît (toutes les instances d'un même type partagent les espèces).</div>
+				<div id="rencontre-list" style="max-height:240px;overflow-y:auto;margin-bottom:8px;font-size:.68rem;"></div>
+				<button class="btn" id="save-rencontres-btn" style="width:100%;">💾 Sauvegarder les rencontres</button>
+			</div>
+
 			<!-- Panneau Navigation -->
 			<div id="panel-nav" style="display:none;">
 				<div class="dir-grid" id="dir-grid">
@@ -534,14 +598,6 @@
 				<input type="checkbox" id="bm-categorie"> Lieu de combat (battle map)
 			</label>
 		</div>
-
-		<!-- Actions -->
-		<div class="card">
-			<div class="card-title">⚡ Actions</div>
-			<button class="btn" id="fill-btn" style="margin-bottom:8px;">Tout remplir avec la valeur</button>
-			<button class="btn danger" id="reset-btn">Réinitialiser (tout à 1)</button>
-		</div>
-
 	</div>
 
 	<!-- RIGHT: canvas + json -->
@@ -623,8 +679,6 @@ const dropZone		= document.getElementById('drop-zone');
 const jsonWrap		= document.getElementById('json-wrap');
 const jsonOutput	= document.getElementById('json-output');
 const copyBtn		= document.getElementById('copy-btn');
-const fillBtn		= document.getElementById('fill-btn');
-const resetBtn		= document.getElementById('reset-btn');
 const statusEl		= document.getElementById('status');
 const valGrid		= document.getElementById('val-grid');
 const customInput	= document.getElementById('custom-val-input');
@@ -648,6 +702,12 @@ const zoneXEl		= document.getElementById('zone-x');
 const zoneYEl		= document.getElementById('zone-y');
 const zoneListEl	= document.getElementById('zone-list');
 const saveZonesBtn	= document.getElementById('save-zones-btn');
+const modeRencontres	= document.getElementById('mode-rencontres');
+const panelRencontres	= document.getElementById('panel-rencontres');
+const especeSelect		= document.getElementById('espece-select');
+const addEspeceBtn		= document.getElementById('add-espece-btn');
+const rencontreListEl	= document.getElementById('rencontre-list');
+const saveRencontresBtn	= document.getElementById('save-rencontres-btn');
 
 // ── ZONES STATE ────────────────────────────────────────────────────────────
 let zonesPlacements = [];    // zone_influences array for current lieu
@@ -674,6 +734,29 @@ const ZONE_COLORS = [
 			});
 		}
 	} catch (e) { console.warn('Zones non chargées', e); }
+})();
+
+// ── RENCONTRES STATE ─────────────────────────────────────────────────────────
+let especesDefs = {};   // { "espece:x": { nom, image, ... } }
+let rencontres = [];    // [ { espece: "espece:x", zones: ["zone::a", ...] } ]
+
+// Load espèces (bestiaire) on page load
+(async () => {
+	try {
+		const res = await fetch('/api/especes');
+		if (res.ok) {
+			const list = await res.json();
+			(list || [])
+				.sort((a, b) => (a.nom || a._id).localeCompare(b.nom || b._id))
+				.forEach(e => {
+					especesDefs[e._id] = e;
+					const opt = document.createElement('option');
+					opt.value = e._id;
+					opt.textContent = e.nom || e._id;
+					especeSelect.appendChild(opt);
+				});
+		}
+	} catch (e) { console.warn('Espèces non chargées', e); }
 })();
 
 // ── GET LIEU & GENERATE GRID FROM SERVER ───────────────────────────────────
@@ -714,6 +797,8 @@ lieuSelect.addEventListener('change', async (e) => {
 			zonesPlacements = lieuData.zone_influences ? JSON.parse(JSON.stringify(lieuData.zone_influences)) : [];
 			selectedZoneIdx = -1;
 			renderZoneList();
+			rencontres = lieuData.rencontres ? JSON.parse(JSON.stringify(lieuData.rencontres)) : [];
+			renderRencontreList();
 			dropZone.classList.add('hidden');
 			gridCont.classList.add('visible');
 			mapImg.style.display = 'block';
@@ -1019,7 +1104,7 @@ function paint(e) {
 		renderZoneList();
 		renderGrid();
 		setStatus(`Zone placée en [${cx}, ${cy}] — ${zonesPlacements.length} zone(s) au total.`);
-	} else {
+	} else if (editMode === 'nav') {
 		// Mode nav : appliquer le masque courant des flèches à la cellule cliquée
 		const key = `${cx},${cy}`;
 		if (navMask === 0) {
@@ -1089,15 +1174,19 @@ function setMode(mode) {
 	modeTerrain.classList.toggle('active', mode === 'terrain');
 	modeNav.classList.toggle('active', mode === 'nav');
 	modeZones.classList.toggle('active', mode === 'zones');
+	modeRencontres.classList.toggle('active', mode === 'rencontres');
 	panelTerrain.style.display = mode === 'terrain' ? '' : 'none';
 	panelNav.style.display = mode === 'nav' ? '' : 'none';
 	panelZones.style.display = mode === 'zones' ? '' : 'none';
+	panelRencontres.style.display = mode === 'rencontres' ? '' : 'none';
+	if (mode === 'rencontres') renderRencontreList();  // puces = zones réellement utilisées
 	if (mode !== 'nav') navSelectedCell = null;
 	if (grid.length) renderGrid();
 }
 modeTerrain.addEventListener('click', () => setMode('terrain'));
 modeNav.addEventListener('click', () => setMode('nav'));
 modeZones.addEventListener('click', () => setMode('zones'));
+modeRencontres.addEventListener('click', () => setMode('rencontres'));
 
 // ── ZONE PROPERTY EDITORS ──────────────────────────────────────────────────
 function updateSelectedZone(key, value) {
@@ -1144,26 +1233,6 @@ navClearBtn.addEventListener('click', () => {
         updateJSON();
         scheduleGridSend();
     }
-});
-// ── FILL / RESET ───────────────────────────────────────────────────────────
-fillBtn.addEventListener('click', () => {
-	if (!grid.length) return;
-	for (let y = 0; y < rows; y++)
-		for (let x = 0; x < cols; x++)
-			grid[y][x] = selectedVal;
-	renderGrid(); updateJSON();
-	setStatus(`Toute la grille remplie avec <span>${selectedVal}</span> - ${currentRev}.`);
-	updateLegend();
-});
-
-resetBtn.addEventListener('click', () => {
-	if (!grid.length) return;
-	for (let y = 0; y < rows; y++)
-		for (let x = 0; x < cols; x++)
-			grid[y][x] = 1;
-	renderGrid(); updateJSON();
-	setStatus('Grille réinitialisée à 1. - ${currentRev}.');
-	updateLegend();
 });
 
 // ── JSON ───────────────────────────────────────────────────────────────────
@@ -1265,6 +1334,94 @@ saveZonesBtn.addEventListener('click', async () => {
 			// Update local placements with computed bbox from server
 			zonesPlacements = data.zone_influences || zonesPlacements;
 			setStatus(`<span style="color:#80e580;">${data.saved} zone(s) sauvegardée(s).</span>`);
+		} else {
+			const err = await res.json();
+			setStatus(`<span style="color:var(--danger)">Erreur : ${err.detail}</span>`);
+		}
+	} catch (e) { setStatus('<span style="color:var(--danger)">Erreur réseau.</span>'); }
+});
+
+// ── RENCONTRES UI ────────────────────────────────────────────────────────────
+// Zone-defs réellement utilisées dans le lieu (référencées par un placement).
+function usedZoneDefs() {
+	const ids = [...new Set(zonesPlacements.map(p => p.zone).filter(Boolean))];
+	return ids.map(id => zoneDefs[id] || { _id: id, nom: id });
+}
+
+function renderRencontreList() {
+	if (!rencontreListEl) return;
+	if (rencontres.length === 0) {
+		rencontreListEl.innerHTML = '<div style="color:#888;padding:4px;">Aucune espèce.</div>';
+		return;
+	}
+	const zoneDefList = usedZoneDefs();
+	rencontreListEl.innerHTML = rencontres.map((r, i) => {
+		const e = especesDefs[r.espece];
+		const nom = e ? (e.nom || e._id) : r.espece;
+		const img = (e && e.image)
+			? `<img class="renc-img" src="{{ url_for('monsters', path='') }}${e.image}" alt="">`
+			: `<div class="renc-img"></div>`;
+		const chips = zoneDefList.length
+			? zoneDefList.map(z => {
+				const on = (r.zones || []).includes(z._id);
+				return `<span class="zchip ${on ? 'on' : ''}" data-ri="${i}" data-zid="${z._id}">${z.nom || z._id}</span>`;
+			}).join('')
+			: '<span style="color:#888;">Aucune zone d\'influence dans ce lieu.</span>';
+		return `<div class="renc-item">
+			<div class="renc-head">
+				${img}
+				<span class="renc-name" title="${nom}">${nom}</span>
+				<button class="renc-del" data-ri="${i}" title="Retirer">✕</button>
+			</div>
+			<div class="renc-zones">${chips}</div>
+		</div>`;
+	}).join('');
+
+	rencontreListEl.querySelectorAll('.renc-del').forEach(b => {
+		b.addEventListener('click', () => {
+			rencontres.splice(parseInt(b.dataset.ri), 1);
+			renderRencontreList();
+		});
+	});
+	rencontreListEl.querySelectorAll('.zchip[data-zid]').forEach(c => {
+		c.addEventListener('click', () => {
+			const r = rencontres[parseInt(c.dataset.ri)];
+			if (!r) return;
+			r.zones = r.zones || [];
+			const idx = r.zones.indexOf(c.dataset.zid);
+			if (idx >= 0) r.zones.splice(idx, 1);
+			else r.zones.push(c.dataset.zid);
+			renderRencontreList();
+		});
+	});
+}
+
+function addEspece() {
+	const id = especeSelect.value;
+	if (!id) return;
+	if (rencontres.some(r => r.espece === id)) {
+		setStatus('<span style="color:var(--danger)">Espèce déjà ajoutée.</span>');
+		return;
+	}
+	rencontres.push({ espece: id, zones: [] });
+	renderRencontreList();
+	setStatus(`Espèce ajoutée — ${rencontres.length} au total.`);
+}
+addEspeceBtn.addEventListener('click', addEspece);
+
+saveRencontresBtn.addEventListener('click', async () => {
+	if (!currentLocId) { setStatus('<span style="color:var(--danger)">Aucun lieu chargé.</span>'); return; }
+	try {
+		const res = await fetch(`/api/lieu/${encodeURIComponent(currentLocId)}/rencontres`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ rencontres }),
+		});
+		if (res.ok) {
+			const data = await res.json();
+			rencontres = data.rencontres || rencontres;
+			renderRencontreList();
+			setStatus(`<span style="color:#80e580;">${data.saved} espèce(s) sauvegardée(s).</span>`);
 		} else {
 			const err = await res.json();
 			setStatus(`<span style="color:var(--danger)">Erreur : ${err.detail}</span>`);
