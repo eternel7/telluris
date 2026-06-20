@@ -31,12 +31,12 @@ def save_doc(doc: dict) -> dict:
 	except Exception:
 		return None
 
-def find_docs(selector: dict, fields: list[str] = None) -> list[dict]:
+def find_docs(selector: dict, fields: list[str] = None, limit: int = 10_000) -> list[dict]:
 	try:
 		if fields:
-			result = db.find(selector, fields=fields)
+			result = db.find(selector, fields=fields, limit=limit)
 		else:
-			result = db.find(selector)
+			result = db.find(selector, limit=limit)
 		return result["docs"]
 	except Exception:
 		return None
