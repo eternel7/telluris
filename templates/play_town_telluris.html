@@ -1375,7 +1375,26 @@
 				ACCESS = rep.access;
 				buildLocationslist();
 				updateControls();
-				if (rep.zone_event) { showZoneEvent(rep.zone_event); }
+				if (rep.zone_event) {
+					if (rep.zone_event.type === 'combat') {
+						const cr = await fetch('/api/combat/start', {
+							method: 'POST',
+							headers: {'Content-Type': 'application/json'},
+							body: JSON.stringify({
+								tags: rep.zone_event.tags || [],
+								intensite: rep.zone_event.intensite || 0.5,
+								modificateurs: rep.zone_event.modificateurs || {}
+							})
+						});
+						if (cr.ok) {
+							const cd = await cr.json();
+							window.location.href = '/combat/' + cd.combat_id;
+							return;
+						}
+					} else {
+						showZoneEvent(rep.zone_event);
+					}
+				}
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
@@ -1460,7 +1479,22 @@
 				if (data.niveau_up) {
 					sessionStorage.setItem('niveau_up_notif', data.niveau);
 				}
-				if (data.zone_event && data.zone_event.type !== 'rien') {
+				if (data.zone_event && data.zone_event.type === 'combat') {
+					const cr = await fetch('/api/combat/start', {
+						method: 'POST',
+						headers: {'Content-Type': 'application/json'},
+						body: JSON.stringify({
+							tags: data.zone_event.tags || [],
+							intensite: data.zone_event.intensite || 0.5,
+							modificateurs: data.zone_event.modificateurs || {}
+						})
+					});
+					if (cr.ok) {
+						const cd = await cr.json();
+						window.location.href = '/combat/' + cd.combat_id;
+						return;
+					}
+				} else if (data.zone_event && data.zone_event.type !== 'rien') {
 					sessionStorage.setItem('zone_event_notif', JSON.stringify(data.zone_event));
 				}
 				window.location.reload(true);

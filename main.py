@@ -11,7 +11,8 @@ from routers.user import user_router, User
 from routers.oauth import router as oauth_router
 from routers.zones import zones_router
 from routers.bestiaire import bestiaire_router
-from db.config import find_docs, get_doc, save_doc
+from routers.combat import combat_router
+from db.config import find_docs, get_doc, save_doc, delete_doc
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
@@ -56,6 +57,7 @@ app.include_router(user_router, prefix="/api")
 app.include_router(lieu_router, prefix="/api")
 app.include_router(zones_router, prefix="/api")
 app.include_router(bestiaire_router, prefix="/api")
+app.include_router(combat_router, prefix="/api")
 app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
@@ -203,10 +205,20 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	
 	# Selected character for current user
 	character = get_selected_character(current_user)
-	
+
 	if not character:
 		return RedirectResponse(url="/auth", headers=request.headers)
-		
+
+	# Combats : on ne peut pas abandonner un combat actif en quittant la page.
+	# Un combat actif → on y retourne ; les combats terminés → nettoyage.
+	user_combats = find_docs({"type": "combat", "user_id": user_id}) or []
+	for c in user_combats:
+		if c.get("character_id") != character["_id"]:
+			continue
+		if c.get("status") == "active":
+			return RedirectResponse(url=f"/combat/{c['_id']}", headers=request.headers)
+		delete_doc(c)
+
 	vocations = get_doc("rules:vocations")
 	vocation = next((v for v in vocations["value"] if v["id"] == character["voc"]), None)
 	races = get_doc("rules:races")
@@ -317,6 +329,36 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		}
 	)
 	
+@app.get("/combat/{combat_id}", response_class=HTMLResponse)
+async def get_combat_page(
+	request: Request,
+	combat_id: str,
+	current_user: Annotated[User, Depends(get_current_user)],
+):
+	if not current_user:
+		return RedirectResponse(url="/auth", headers=request.headers)
+
+	combat_doc = get_doc(combat_id)
+	if not combat_doc or combat_doc.get("type") != "combat":
+		raise HTTPException(status_code=404, detail="Combat introuvable")
+
+	if combat_doc["user_id"] != current_user["_id"]:
+		return RedirectResponse(url="/play", headers=request.headers)
+
+	character = get_doc(combat_doc["character_id"])
+	if not character:
+		return RedirectResponse(url="/play", headers=request.headers)
+
+	return templates.TemplateResponse(
+		request=request,
+		name="combat_telluris.html",
+		context={
+			"title": "Combat",
+			"combat": combat_doc,
+			"character": character,
+		},
+	)
+
 @app.get("/insert-bulck-db")
 async def insert_bulck_db():
 	try:

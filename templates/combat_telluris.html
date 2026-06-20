@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Combat - {{ title }}</title>
+<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+<style>
+:root {
+	--view-width: 100vw;
+	--step: calc(var(--view-width) / 17);
+	--max-height: 7;
+	--blur-dist: 5;
+}
+@media (min-width: 768px) {
+	:root { --view-width: 50vw; }
+}
+
+* { box-sizing: border-box; }
+body {
+	margin: 0;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: #111;
+	font-family: sans-serif;
+	color: white;
+	padding-bottom: 30px;
+	touch-action: pan-y;
+}
+
+/* ─── Battle Map Viewport ──────────────────────────────────────── */
+.viewport {
+	position: relative;
+	width: var(--view-width);
+	height: calc(var(--step) * var(--max-height));
+	background: #000;
+	overflow: hidden;
+}
+.viewport::after {
+	content: '';
+	position: absolute;
+	top: 0; left: 0; width: 100%; height: 100%;
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	z-index: 5;
+	pointer-events: none;
+	background: rgba(0,0,0,0.1);
+}
+#rotation-pivot {
+	position: absolute;
+	bottom: calc(var(--step) * 1.5);
+	left: 50%;
+}
+#bg-image {
+	position: absolute;
+	display: block;
+	width: calc(var(--step) * 30);
+	height: calc(var(--step) * 30);
+	max-width: none;
+	transform: translate(-50%, -50%);
+}
+.player-token {
+	position: absolute;
+	bottom: var(--step);
+	left: 50%;
+	width: var(--step); height: var(--step);
+	transform: translateX(-50%);
+	display: flex; align-items: center; justify-content: center;
+	z-index: 10; pointer-events: none;
+}
+.player-token::after {
+	content: ''; width: 60%; height: 60%;
+	background: #2e86de; border-radius: 50%; border: 2px solid white;
+	box-shadow: 0 0 10px #2e86de;
+}
+
+/* ─── Tour Header ──────────────────────────────────────────────── */
+.tour-header {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 6px 14px;
+	background: rgba(34,34,34,0.9);
+	border: 1px solid #333;
+	border-radius: 8px;
+	width: 100%;
+	max-width: 1000px;
+	margin-top: 8px;
+}
+.tour-label { font-size: 13px; color: #aaa; text-transform: uppercase; white-space: nowrap; }
+.tour-label span { color: #fff; font-weight: bold; }
+#initiative-strip { display: flex; gap: 5px; flex-wrap: wrap; }
+.init-badge {
+	width: 28px; height: 28px; border-radius: 50%;
+	background: #333; border: 2px solid #555;
+	display: flex; align-items: center; justify-content: center;
+	font-size: 11px; font-weight: bold; color: #888;
+	transition: all 0.2s;
+}
+.init-badge.joueur  { background: #1a4a7a; border-color: #2e86de; color: #7ec8ff; }
+.init-badge.monstre { background: #4a1a1a; border-color: #aa3333; color: #ffaaaa; }
+.init-badge.active  { border-color: #ffd700; box-shadow: 0 0 8px #ffd700; transform: scale(1.2); }
+.init-badge.dead    { opacity: 0.3; }
+
+/* ─── Main UI ──────────────────────────────────────────────────── */
+.ui-container {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-top: 10px;
+	width: 100%;
+	max-width: 1000px;
+	padding: 0 10px;
+}
+
+/* ─── Joueur Card ──────────────────────────────────────────────── */
+.character-card {
+	flex: 0 0 155px;
+	background: rgba(34,34,34,0.9);
+	border: 1px solid #444;
+	border-radius: 12px;
+	padding: 10px;
+	font-size: 12px;
+}
+.char-name  { font-weight: bold; color: #2e86de; font-size: 14px; margin-bottom: 2px; }
+.char-class { color: #aaa; font-size: 10px; text-transform: uppercase; margin-bottom: 10px; }
+.stat-row   {
+	margin-bottom: 8px; display: flex;
+	flex-wrap: wrap; justify-content: space-between; align-items: center;
+}
+.stat-label { color: #aaa; font-size: 11px; }
+.stat-value { font-weight: bold; color: #eee; font-family: monospace; font-size: 11px; }
+.gauge-bg   {
+	width: 100%; height: 7px; background: #111;
+	border-radius: 4px; overflow: hidden; margin-top: 3px; flex-basis: 100%;
+}
+.gauge-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+.gauge-pv   { background: #ff4757; }
+.gauge-pm   { background: #2e86de; }
+.actions-pips { display: flex; gap: 4px; margin-top: 4px; }
+.pip       { width: 10px; height: 10px; border-radius: 50%; background: #ffa502; border: 1px solid #cc8400; }
+.pip.empty { background: #333; border-color: #555; }
+.char-mini-stats { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; font-size: 10px; color: #666; }
+
+/* ─── Combat Center ────────────────────────────────────────────── */
+.combat-center { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.action-bar {
+	background: rgba(34,34,34,0.9);
+	border: 1px solid #444; border-radius: 12px;
+	padding: 10px; display: flex; flex-direction: column; gap: 8px;
+}
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.action-btn {
+	padding: 9px 16px; font-size: 13px; font-weight: bold;
+	border: 1px solid #555; border-radius: 8px; cursor: pointer;
+	background: #2a2a2a; color: #eee;
+	transition: background 0.15s, transform 0.1s;
+	-webkit-tap-highlight-color: transparent;
+}
+.action-btn:hover:not(:disabled) { background: #3a3a3a; }
+.action-btn:active:not(:disabled) { transform: scale(0.97); }
+.action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.action-btn.attack-btn { border-color: #cc3333; color: #ff8080; }
+.action-btn.attack-btn:hover:not(:disabled) { background: #3a1a1a; }
+.action-btn.flee-btn   { border-color: #666; color: #999; }
+#target-row {
+	display: none; gap: 8px; align-items: center; justify-content: center;
+}
+#target-select {
+	flex: 1; max-width: 200px; padding: 6px 10px;
+	background: #1a1a1a; color: #eee;
+	border: 1px solid #555; border-radius: 6px; font-size: 13px;
+}
+
+.combat-log {
+	background: rgba(17,17,17,0.95);
+	border: 1px solid #333; border-radius: 10px;
+	padding: 8px 10px; height: 160px;
+	overflow-y: auto; display: flex; flex-direction: column;
+	gap: 2px; scroll-behavior: smooth;
+}
+.log-entry {
+	font-size: 12px; color: #bbb; padding: 2px 0;
+	border-bottom: 1px solid #1a1a1a; line-height: 1.4;
+}
+.log-entry:last-child { border-bottom: none; }
+.log-entry.sys        { color: #ffd700; font-style: italic; }
+.log-entry.kill       { color: #ff4757; font-weight: bold; }
+.log-entry.j-hit      { color: #7ec8ff; }
+.log-entry.m-hit      { color: #ff9090; }
+.log-entry.flee       { color: #999; font-style: italic; }
+
+/* ─── Enemy Panel ──────────────────────────────────────────────── */
+.enemy-list {
+	flex: 0 0 150px;
+	background: rgba(34,34,34,0.9);
+	border: 1px solid #444; border-radius: 12px;
+	padding: 10px; font-size: 12px;
+}
+.enemy-list h4  { margin: 0 0 8px 0; font-size: 11px; color: #aaa; text-transform: uppercase; }
+.enemy-item     { margin-bottom: 10px; opacity: 1; transition: opacity 0.3s; }
+.enemy-item.dead { opacity: 0.35; }
+.enemy-header   { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.enemy-dot      { width: 8px; height: 8px; background: #ff4757; border-radius: 50%; flex-shrink: 0; }
+.enemy-dot.dead { background: #555; }
+.enemy-name     { font-size: 12px; color: #eee; }
+.enemy-pv-text  { font-size: 10px; color: #888; margin-top: 2px; font-family: monospace; }
+
+/* ─── End Overlay ──────────────────────────────────────────────── */
+.end-overlay {
+	display: none; position: fixed;
+	top: 0; left: 0; width: 100%; height: 100%;
+	background: rgba(0,0,0,0.85);
+	z-index: 100; align-items: center; justify-content: center;
+}
+.end-overlay.visible { display: flex; }
+.end-card {
+	background: #1e1e1e; border: 1px solid #444;
+	border-radius: 16px; padding: 30px 40px; text-align: center; max-width: 320px;
+}
+.end-icon  { font-size: 52px; margin-bottom: 10px; }
+.end-title { font-size: 26px; font-weight: bold; margin-bottom: 8px; }
+.end-xp    { font-size: 18px; color: #ffd700; margin-bottom: 22px; min-height: 24px; }
+.end-btn {
+	padding: 12px 28px; background: #cc2233; color: white;
+	border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
+}
+.end-btn:hover { background: #aa1122; }
+
+/* ─── Mobile ───────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+	.ui-container { flex-direction: column; align-items: stretch; }
+	.character-card { flex: none; }
+	.enemy-list { flex: none; order: 3; }
+	.combat-center { order: 1; }
+	.character-card { order: 2; }
+}
+</style>
+</head>
+<body>
+
+<!-- Battle Map Viewport -->
+<div class="viewport" id="viewport">
+	<div id="rotation-pivot">
+		<img id="bg-image" src="{{ url_for('battle_maps', path=combat.map_image) }}" alt="Carte de combat">
+	</div>
+	<div class="player-token"></div>
+</div>
+
+<!-- Tour header + Initiative strip -->
+<div class="tour-header">
+	<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span></span>
+	<div id="initiative-strip">
+		{% for actor_id in combat.ordre_initiative %}
+			{% if actor_id.startswith('joueur_') %}
+				{% set badge_type = 'joueur' %}
+				{% set badge_label = combat.joueurs[0].nom[0] | upper %}
+				{% set badge_dead = '' %}
+			{% else %}
+				{% set badge_type = 'monstre' %}
+				{% set m_item = combat.monstres | selectattr('id', 'equalto', actor_id) | first %}
+				{% set badge_label = m_item.nom[0] | upper if m_item else '?' %}
+				{% set badge_dead = '' if (m_item and m_item.vivant) else ' dead' %}
+			{% endif %}
+			<div class="init-badge {{ badge_type }}{{ badge_dead }} {{ 'active' if loop.index0 == combat.acteur_courant_index else '' }}"
+			     id="badge-{{ actor_id }}">{{ badge_label }}</div>
+		{% endfor %}
+	</div>
+</div>
+
+<!-- Main UI -->
+<div class="ui-container">
+
+	<!-- Joueur -->
+	<div class="character-card">
+		<div class="char-name">{{ combat.joueurs[0].nom }}</div>
+		<div class="char-class">{{ combat.joueurs[0].voc }} · {{ combat.joueurs[0].race }}</div>
+
+		<div class="stat-row">
+			<span class="stat-label">PV</span>
+			<span class="stat-value" id="joueur-pv-text">{{ combat.joueurs[0].currentPV }}/{{ combat.joueurs[0].pv_max }}</span>
+			<div class="gauge-bg">
+				<div class="gauge-fill gauge-pv" id="joueur-pv-gauge"
+				     style="width:{{ (combat.joueurs[0].currentPV / combat.joueurs[0].pv_max * 100) | round if combat.joueurs[0].pv_max > 0 else 0 }}%"></div>
+			</div>
+		</div>
+
+		<div class="stat-row">
+			<span class="stat-label">PM</span>
+			<span class="stat-value" id="joueur-pm-text">{{ combat.joueurs[0].currentPM }}/{{ combat.joueurs[0].pm_max }}</span>
+			<div class="gauge-bg">
+				<div class="gauge-fill gauge-pm" id="joueur-pm-gauge"
+				     style="width:{{ (combat.joueurs[0].currentPM / combat.joueurs[0].pm_max * 100) | round if combat.joueurs[0].pm_max > 0 else 0 }}%"></div>
+			</div>
+		</div>
+
+		<div class="stat-row">
+			<span class="stat-label">Actions</span>
+			<div class="actions-pips" id="joueur-actions">
+				{% for i in range(combat.joueurs[0].actions_max) %}
+					<div class="pip {{ '' if i < combat.joueurs[0].actions_restantes else 'empty' }}"></div>
+				{% endfor %}
+			</div>
+		</div>
+
+		<div class="char-mini-stats">
+			<span>CC {{ combat.joueurs[0].cc }}</span>
+			<span>PA {{ combat.joueurs[0].pa }}</span>
+			<span>{{ combat.joueurs[0].degats_cc }}</span>
+		</div>
+	</div>
+
+	<!-- Centre : actions + log -->
+	<div class="combat-center">
+		<div class="action-bar">
+			<div class="btn-row">
+				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
+				<button class="action-btn" id="btn-passer" onclick="doAction('passer', null)">⏭ Passer</button>
+				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
+			</div>
+			<div id="target-row">
+				<select id="target-select"></select>
+				<button class="action-btn attack-btn" id="btn-confirm" onclick="confirmAttack()">✓ Confirmer</button>
+			</div>
+		</div>
+
+		<div class="combat-log" id="combat-log">
+			{% for entry in combat.log %}
+				<div class="log-entry {% if entry.acteur == 'Système' %}sys{% endif %}">{{ entry.texte }}</div>
+			{% endfor %}
+		</div>
+	</div>
+
+	<!-- Ennemis -->
+	<div class="enemy-list">
+		<h4>Ennemis</h4>
+		{% for m in combat.monstres %}
+		<div class="enemy-item {{ '' if m.vivant else 'dead' }}" id="enemy-{{ m.id }}">
+			<div class="enemy-header">
+				<div class="enemy-dot {{ '' if m.vivant else 'dead' }}" id="dot-{{ m.id }}"></div>
+				<span class="enemy-name">{{ m.nom }}</span>
+			</div>
+			<div class="gauge-bg">
+				<div class="gauge-fill" id="hp-{{ m.id }}"
+				     style="width:{{ (m.currentPV / m.pv_max * 100) | round if m.pv_max > 0 else 0 }}%; background:#ff4757;"></div>
+			</div>
+			<div class="enemy-pv-text" id="pvtext-{{ m.id }}">{{ m.currentPV }}/{{ m.pv_max }} PV</div>
+		</div>
+		{% endfor %}
+	</div>
+
+</div><!-- /ui-container -->
+
+<!-- End overlay -->
+<div id="end-overlay" class="end-overlay">
+	<div class="end-card">
+		<div class="end-icon" id="end-icon"></div>
+		<div class="end-title" id="end-title"></div>
+		<div class="end-xp" id="end-xp"></div>
+		<button class="end-btn" onclick="window.location.href='/play'">Retour à la carte</button>
+	</div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────
+const SERVER_DATA = {
+	combat_id:            {{ combat._id | tojson | safe }},
+	status:               {{ combat.status | tojson | safe }},
+	joueurs:              {{ combat.joueurs | tojson | safe }},
+	monstres:             {{ combat.monstres | tojson | safe }},
+	ordre_initiative:     {{ combat.ordre_initiative | tojson | safe }},
+	acteur_courant_index: {{ combat.acteur_courant_index }},
+	tour:                 {{ combat.tour }},
+	log:                  {{ combat.log | tojson | safe }},
+	xp_gagnee:            {{ combat.xp_gagnee }},
+};
+
+let state    = JSON.parse(JSON.stringify(SERVER_DATA));
+let logLen   = state.log.length;
+let busy     = false;
+
+// ─── Isometric Viewport Clip-paths ────────────────────────────────
+function buildViewportClipPath(mh) {
+	const s = 'var(--step)', pts = [];
+	for (let r = 0; r < mh; r++) {
+		const hw = (mh - 1 - r) * 2 + 0.5;
+		pts.push(`calc(50% + ${s} * ${hw}) calc(${s} * ${r})`);
+		if (r < mh - 1) {
+			const hwN = (mh - 1 - (r + 1)) * 2 + 0.5;
+			pts.push(`calc(50% + ${s} * ${hwN}) calc(${s} * ${r + 1})`);
+		}
+	}
+	pts.push(`calc(50% + ${s} * 0.5) 100%`, `calc(50% - ${s} * 0.5) 100%`);
+	for (let r = mh - 1; r >= 0; r--) {
+		const hw = (mh - 1 - r) * 2 + 0.5;
+		if (r < mh - 1) {
+			const hwN = (mh - 1 - (r + 1)) * 2 + 0.5;
+			pts.push(`calc(50% - ${s} * ${hwN}) calc(${s} * ${r + 1})`);
+		}
+		pts.push(`calc(50% - ${s} * ${hw}) calc(${s} * ${r})`);
+	}
+	return `polygon(${pts.join(', ')})`;
+}
+function buildBlurClipPath(mh, bd) {
+	const s = 'var(--step)', blurStart = mh - bd, inner = [];
+	const outer = `0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%`;
+	inner.push(
+		`calc(50% + ${s} * 0.5) calc(${s} * ${blurStart})`,
+		`calc(50% - ${s} * 0.5) calc(${s} * ${blurStart})`
+	);
+	for (let r = blurStart; r < mh; r++) {
+		const hw = 0.5 + (r - blurStart);
+		inner.push(
+			`calc(50% - ${s} * ${hw}) calc(${s} * ${r})`,
+			`calc(50% - ${s} * ${hw + 1}) calc(${s} * ${r + 1})`
+		);
+	}
+	const hwB = bd + 1.5;
+	inner.push(
+		`calc(50% - ${s} * ${hwB}) calc(${s} * ${mh})`,
+		`calc(50% + ${s} * ${hwB}) calc(${s} * ${mh})`
+	);
+	for (let r = mh - 1; r >= blurStart; r--) {
+		const hw = 0.5 + (r - blurStart);
+		inner.push(
+			`calc(50% + ${s} * ${hw + 1}) calc(${s} * ${r + 1})`,
+			`calc(50% + ${s} * ${hw}) calc(${s} * ${r})`
+		);
+	}
+	inner.push(`calc(50% + ${s} * 0.5) calc(${s} * ${blurStart})`);
+	return `polygon(${outer}, ${inner.join(', ')})`;
+}
+const _vpStyle = document.createElement('style');
+_vpStyle.textContent = `
+	.viewport        { clip-path: ${buildViewportClipPath(7)}; }
+	.viewport::after { clip-path: ${buildBlurClipPath(7, 5)}; }
+`;
+document.head.appendChild(_vpStyle);
+
+// ─── UI Helpers ───────────────────────────────────────────────────
+const pct = (cur, max) => max > 0 ? Math.round(cur / max * 100) : 0;
+
+function updateJoueur(j) {
+	document.getElementById('joueur-pv-gauge').style.width = pct(j.currentPV, j.pv_max) + '%';
+	document.getElementById('joueur-pv-text').textContent  = `${j.currentPV}/${j.pv_max}`;
+	document.getElementById('joueur-pm-gauge').style.width = pct(j.currentPM, j.pm_max) + '%';
+	document.getElementById('joueur-pm-text').textContent  = `${j.currentPM}/${j.pm_max}`;
+	const pipsEl = document.getElementById('joueur-actions');
+	pipsEl.innerHTML = Array.from({length: j.actions_max}, (_, i) =>
+		`<div class="pip${i < j.actions_restantes ? '' : ' empty'}"></div>`
+	).join('');
+}
+
+function updateEnemy(m) {
+	const item = document.getElementById(`enemy-${m.id}`);
+	if (!item) return;
+	item.className = `enemy-item${m.vivant ? '' : ' dead'}`;
+	document.getElementById(`dot-${m.id}`).className    = `enemy-dot${m.vivant ? '' : ' dead'}`;
+	document.getElementById(`hp-${m.id}`).style.width   = pct(m.currentPV, m.pv_max) + '%';
+	document.getElementById(`pvtext-${m.id}`).textContent = `${m.currentPV}/${m.pv_max} PV`;
+}
+
+function updateInitiativeStrip(data) {
+	data.ordre_initiative.forEach((id, i) => {
+		const el = document.getElementById(`badge-${id}`);
+		if (!el) return;
+		el.classList.toggle('active', i === data.acteur_courant_index);
+		if (id.startsWith('monstre_')) {
+			const m = data.monstres.find(x => x.id === id);
+			el.classList.toggle('dead', !!m && !m.vivant);
+		}
+	});
+}
+
+function appendLog(log) {
+	const container = document.getElementById('combat-log');
+	log.slice(logLen).forEach(entry => {
+		const div = document.createElement('div');
+		let cls = 'log-entry';
+		const t = entry.texte || '';
+		if (entry.acteur === 'Système')                            cls += ' sys';
+		else if (t.includes('élimine') || t.includes('à terre'))   cls += ' kill';
+		else if (t.includes('fuite') || t.includes('fuir'))        cls += ' flee';
+		else if (t.includes('touche') && entry.acteur === state.joueurs[0].nom) cls += ' j-hit';
+		else if (t.includes('touche'))                             cls += ' m-hit';
+		div.className   = cls;
+		div.textContent = t;
+		container.appendChild(div);
+	});
+	logLen = log.length;
+	container.scrollTop = container.scrollHeight;
+}
+
+function updateButtons(data) {
+	const actor      = data.ordre_initiative[data.acteur_courant_index];
+	const isPlayer   = actor && actor.startsWith('joueur_');
+	const hasActions = data.joueurs[0].actions_restantes > 0;
+	const isActive   = data.status === 'active';
+	const canAct     = isActive && isPlayer && hasActions;
+	document.getElementById('btn-attaquer').disabled = !canAct;
+	document.getElementById('btn-passer').disabled   = !canAct;
+	document.getElementById('btn-fuir').disabled     = !isActive || !isPlayer;
+}
+
+function refreshTargetSelect() {
+	const sel   = document.getElementById('target-select');
+	const alive = state.monstres.filter(m => m.vivant);
+	sel.innerHTML = alive.map(m =>
+		`<option value="${m.id}">${m.nom} (${m.currentPV}/${m.pv_max})</option>`
+	).join('');
+}
+
+function updateUI(data) {
+	state = data;
+	updateJoueur(data.joueurs[0]);
+	data.monstres.forEach(m => updateEnemy(m));
+	document.getElementById('tour-num').textContent = data.tour;
+	updateInitiativeStrip(data);
+	appendLog(data.log);
+	updateButtons(data);
+	refreshTargetSelect();
+	if (data.status !== 'active') {
+		setTimeout(() => showEndOverlay(data.status, data.xp_gagnee), 700);
+	}
+}
+
+// ─── Actions ─────────────────────────────────────────────────────
+function triggerAttack() {
+	const alive = state.monstres.filter(m => m.vivant);
+	if (!alive.length) return;
+	if (alive.length === 1) {
+		doAction('attaquer', alive[0].id);
+	} else {
+		refreshTargetSelect();
+		document.getElementById('target-row').style.display = 'flex';
+		document.getElementById('btn-attaquer').style.display = 'none';
+	}
+}
+
+function confirmAttack() {
+	const cibleId = document.getElementById('target-select').value;
+	document.getElementById('target-row').style.display = 'none';
+	document.getElementById('btn-attaquer').style.display = '';
+	doAction('attaquer', cibleId);
+}
+
+async function doAction(type, cibleId) {
+	if (busy) return;
+	busy = true;
+	['btn-attaquer','btn-passer','btn-fuir'].forEach(id => {
+		const el = document.getElementById(id);
+		if (el) el.disabled = true;
+	});
+	try {
+		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/action`, {
+			method:  'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body:    JSON.stringify({ type, cible_id: cibleId }),
+		});
+		if (res.ok) {
+			const data = await res.json();
+			updateUI(data.combat);
+		} else if (res.status === 409) {
+			// Conflit de sauvegarde : recharger l'état réel du combat depuis le serveur.
+			const fresh = await fetch(`/api/combat/${SERVER_DATA.combat_id}`);
+			if (fresh.ok) updateUI(await fresh.json());
+		} else {
+			const err = await res.json().catch(() => ({}));
+			console.error('Erreur action:', err.detail || res.status);
+		}
+	} catch (e) {
+		console.error('Erreur réseau:', e);
+	} finally {
+		busy = false;
+	}
+}
+
+// ─── End Overlay ──────────────────────────────────────────────────
+function showEndOverlay(status, xp) {
+	const icons  = { victoire: '🏆', defaite: '💀', fuite: '🏃' };
+	const titles = { victoire: 'Victoire !', defaite: 'Défaite...', fuite: 'Vous fuyez !' };
+	document.getElementById('end-icon').textContent  = icons[status]  || '❓';
+	document.getElementById('end-title').textContent = titles[status] || status;
+	document.getElementById('end-xp').textContent    = status === 'victoire' && xp > 0 ? `+${xp} XP` : '';
+	document.getElementById('end-overlay').classList.add('visible');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────
+refreshTargetSelect();
+updateButtons(state);
+document.getElementById('combat-log').scrollTop = 9999;
+if (state.status !== 'active') showEndOverlay(state.status, state.xp_gagnee);
+</script>
+</body>
+</html>
