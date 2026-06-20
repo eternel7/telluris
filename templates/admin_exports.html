@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--text: #fff;
+			--muted: #9aa3b2;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		.main { width: 100%; max-width: 720px; padding: 32px 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-title {
+			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		.dl-btn {
+			display: inline-flex; align-items: center; gap: 8px;
+			padding: 10px 18px; border: 1px solid var(--accent); border-radius: 6px;
+			background: rgba(200,168,75,0.1); color: var(--accent);
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+			text-decoration: none; cursor: pointer; transition: all 0.2s;
+		}
+		.dl-btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+	</style>
+</head>
+<body>
+	<header><h1>⇩ Exports — administration</h1></header>
+	<div class="main">
+		<div class="card">
+			<div class="card-title">Bestiaire</div>
+			<div class="card-desc">
+				Classeur Excel (.xlsx) du bestiaire : une feuille « Espèces »
+				(stats min/max, tags, propriétés). Généré à la volée depuis CouchDB.
+			</div>
+			<a class="dl-btn" href="{{ url_for('admin_export_bestiaire') }}">⬇ Télécharger le bestiaire</a>
+		</div>
+
+		<div class="card">
+			<div class="card-title">Dump CouchDB</div>
+			<div class="card-desc">
+				Export JSON des documents de la base <code>telluris</code> (design docs inclus),
+				avec leurs <code>_id</code>/<code>_rev</code>. Les documents <code>user:*</code>
+				sont <strong>exclus</strong>. Ré-importable via l'API CouchDB <code>_bulk_docs</code>.
+			</div>
+			<a class="dl-btn" href="{{ url_for('admin_export_couchdb') }}">⬇ Télécharger le dump (.json)</a>
+		</div>
+	</div>
+</body>
+</html>

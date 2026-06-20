@@ -1,3 +1,4 @@
+import os
 import random
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
@@ -5,12 +6,38 @@ from pydantic import BaseModel
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
 from utils.characters import get_selected_character
+from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
 )
 
 combat_router = APIRouter()
+
+TOWNS_IMAGES_PATH = "templates/resources/towns"
+TOWN_PROFIL_NIVEAU_MAX = 2  # Dans une ville, monstres de profil 1 à 2 max.
+
+
+def _is_town_lieu(lieu: dict | None) -> bool:
+    """Le lieu est-il associé à une image du dossier TOWNS ?"""
+    img = (lieu or {}).get("image")
+    return bool(img) and os.path.exists(os.path.join(TOWNS_IMAGES_PATH, img))
+
+
+def _active_zone_ids(lieu: dict, character: dict) -> set:
+    """Ids des zones-defs actives à la position du personnage dans le lieu."""
+    placements = lieu.get("zone_influences", [])
+    if not placements:
+        return set()
+    pos = character.get("position", {})
+    px, py = pos.get("x", 0), pos.get("y", 0)
+    zone_defs = load_zone_defs_for_lieu(lieu, get_doc)
+    actives = set()
+    for placement in placements:
+        zone_def = zone_defs.get(placement.get("zone"))
+        if zone_def and compute_zone_intensity(px, py, placement, zone_def) > 0.0:
+            actives.add(placement.get("zone"))
+    return actives
 
 
 class StartCombatRequest(BaseModel):
@@ -45,20 +72,39 @@ async def start_combat(
         if c.get("character_id") == character["_id"] and c.get("status") == "active":
             return {"combat_id": c["_id"]}
 
-    nb_monstres = max(1, round(body.intensite * 3))
-
-    especes = find_docs({"type": "espece"}) or []
-    profils = find_docs({"type": "profil"}) or []
-
-    if not especes:
+    especes_all = find_docs({"type": "espece"}) or []
+    profils_all = find_docs({"type": "profil"}) or []
+    if not especes_all:
         raise HTTPException(status_code=500, detail="Aucune espèce en base")
 
-    monstres = instantiate_monsters(especes, profils, nb_monstres, body.tags)
+    depart_lieu = get_doc(character.get("lieu")) if character.get("lieu") else None
+
+    # Espèces rencontrables = celles du lieu dont une zone concernée est active à la
+    # position du personnage (rencontres: [{espece, zones:[zone_def_id]}]).
+    actives = _active_zone_ids(depart_lieu, character) if depart_lieu else set()
+    rencontres = (depart_lieu or {}).get("rencontres", [])
+    espece_ids = {
+        r["espece"] for r in rencontres
+        if r.get("espece") and (set(r.get("zones", [])) & actives)
+    }
+    pool_especes = [e for e in especes_all if e["_id"] in espece_ids]
+
+    # Aucune espèce associée aux zones actives → pas de combat.
+    if not pool_especes:
+        return {"combat_id": None}
+
+    # Dans une ville (image TOWNS) : profils de niveau 1 à 2 max.
+    profils = profils_all
+    if _is_town_lieu(depart_lieu):
+        profils = [p for p in profils_all if p.get("niveau", 1) <= TOWN_PROFIL_NIVEAU_MAX]
+
+    nb_monstres = max(1, round(body.intensite * 3))
+    # Espèces déjà filtrées par zone → pas de re-filtrage par tags (zone_tags vide).
+    monstres = instantiate_monsters(pool_especes, profils, nb_monstres, [])
     if not monstres:
-        raise HTTPException(status_code=500, detail="Impossible d'instancier les monstres")
+        return {"combat_id": None}
 
     # Sélection pondérée d'une battle map (lieu) selon les tags de la zone + lieu de départ.
-    depart_lieu = get_doc(character.get("lieu")) if character.get("lieu") else None
     battle_map = select_battle_map(body.tags, depart_lieu)
     map_image = battle_map.get("image") if battle_map else random.choice(BATTLE_MAPS)
     # Le combat référence le lieu battle map (cells non dupliqué) ; repli grille ouverte.

@@ -1,6 +1,6 @@
 import os
 from typing import Annotated
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import FastAPI, Request, Depends, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -13,7 +13,7 @@ from routers.zones import zones_router
 from routers.bestiaire import bestiaire_router
 from routers.combat import combat_router
 from utils.combat import get_combat_grid
-from db.config import find_docs, get_doc, save_doc, delete_doc
+from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
@@ -89,14 +89,65 @@ def read_root(request: Request, current_user: Annotated[User, Depends(get_curren
 		return RedirectResponse(url="/auth", headers=request.headers)	
 	lieux = get_lieux_ids(current_user)
 	return templates.TemplateResponse(
-		request=request, 
-		name="map_editor.html", 
+		request=request,
+		name="map_editor.html",
 		context={
 			"title": "Map Grid Editor",
 			"lieux": lieux
 			}
 	)
-	
+
+def _require_admin_page(request: Request, current_user):
+	"""Retourne une RedirectResponse vers /auth si l'utilisateur n'est pas admin, sinon None."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		return RedirectResponse(url="/auth", headers=request.headers)
+	return None
+
+@app.get("/admin/exports", response_class=HTMLResponse)
+def admin_exports(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_exports.html",
+		context={"title": "Exports"}
+	)
+
+@app.get("/admin/exports/bestiaire")
+def admin_export_bestiaire(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	from dev.export_bestiaire import build_bestiaire_xlsx_bytes
+	data = build_bestiaire_xlsx_bytes()
+	return Response(
+		content=data,
+		media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		headers={"Content-Disposition": 'attachment; filename="bestiaire.xlsx"'},
+	)
+
+@app.get("/admin/exports/couchdb")
+def admin_export_couchdb(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	import json, datetime
+	# Exclut les documents utilisateurs (données sensibles : hash de mot de passe, etc.).
+	docs = [d for d in dump_all_docs() if not str(d.get("_id", "")).startswith("user:")]
+	now = datetime.datetime.utcnow()
+	payload = {
+		"db": "telluris",
+		"exported_at": now.isoformat() + "Z",
+		"doc_count": len(docs),
+		"docs": docs,
+	}
+	data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+	filename = f"telluris-dump-{now:%Y%m%d-%H%M%S}.json"
+	return Response(
+		content=data,
+		media_type="application/json",
+		headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+	)
+
 @app.get("/auth", response_class=HTMLResponse)
 async def read_page_auth(request: Request):
 	is_new = "new" in request.query_params

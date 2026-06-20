@@ -1415,8 +1415,10 @@
 						});
 						if (cr.ok) {
 							const cd = await cr.json();
-							window.location.href = '/combat/' + cd.combat_id;
-							return;
+							if (cd.combat_id) {
+								window.location.href = '/combat/' + cd.combat_id;
+								return;
+							}
 						}
 					} else {
 						showZoneEvent(rep.zone_event);
@@ -1521,8 +1523,10 @@
 					});
 					if (cr.ok) {
 						const cd = await cr.json();
-						window.location.href = '/combat/' + cd.combat_id;
-						return;
+						if (cd.combat_id) {
+							window.location.href = '/combat/' + cd.combat_id;
+							return;
+						}
 					}
 				} else if (data.zone_event && data.zone_event.type !== 'rien') {
 					sessionStorage.setItem('zone_event_notif', JSON.stringify(data.zone_event));

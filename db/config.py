@@ -46,3 +46,11 @@ def delete_doc(doc: dict) -> None:
 		return db.delete(doc)
 	except Exception:
 		return None
+
+def dump_all_docs() -> list[dict]:
+	"""Tous les documents de la base (dump complet, design docs inclus)."""
+	try:
+		return list(db)  # couchdb2 : itère sur _all_docs?include_docs=true
+	except Exception:
+		# Repli Mango « tout matcher » (n'inclut pas les _design).
+		return find_docs({"_id": {"$gt": None}}, limit=1_000_000) or []
