@@ -12,7 +12,7 @@ from routers.oauth import router as oauth_router
 from routers.zones import zones_router
 from routers.bestiaire import bestiaire_router
 from routers.combat import combat_router
-from utils.combat import get_combat_grid
+from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
@@ -262,14 +262,18 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		return RedirectResponse(url="/auth", headers=request.headers)
 
 	# Combats : on ne peut pas abandonner un combat actif en quittant la page.
-	# Un combat actif → on y retourne ; les combats terminés → nettoyage.
+	# Un combat actif → on y retourne ; les combats terminés → récompense (filet de
+	# sécurité, idempotent) puis nettoyage.
 	user_combats = find_docs({"type": "combat", "user_id": user_id}) or []
 	for c in user_combats:
 		if c.get("character_id") != character["_id"]:
 			continue
 		if c.get("status") == "active":
 			return RedirectResponse(url=f"/combat/{c['_id']}", headers=request.headers)
+		finalize_combat(c)  # filet de sécurité, idempotent
 		delete_doc(c)
+	# Relire le personnage frais juste avant le rendu : issue d'un combat 
+	character = get_doc(character["_id"]) or character
 
 	vocations = get_doc("rules:vocations")
 	vocation = next((v for v in vocations["value"] if v["id"] == character["voc"]), None)
@@ -378,9 +382,12 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"stat_caps": stat_caps,
 			"xp_coeff": XP_COEFF,
 			"xp_voc_coeff": XP_VOC_COEFF,
-		}
+		},
+		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
+		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.
+		headers={"Cache-Control": "no-store"},
 	)
-	
+
 @app.get("/combat/{combat_id}", response_class=HTMLResponse)
 async def get_combat_page(
 	request: Request,
@@ -410,6 +417,7 @@ async def get_combat_page(
 			"character": character,
 			"grid": get_combat_grid(combat_doc),
 		},
+		headers={"Cache-Control": "no-store"},
 	)
 
 @app.get("/insert-bulck-db")

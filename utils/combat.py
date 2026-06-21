@@ -801,35 +801,53 @@ def resolve_action(
     return result
 
 
-def finalize_combat(combat_doc: dict) -> None:
-    """Apply combat outcome to the character document in CouchDB.
+def finalize_combat(combat_doc: dict) -> bool:
+    """Applique l'issue du combat (XP/PV) au personnage en base.
 
-    Idempotent: the `recompense_appliquee` guard ensures XP/PV are never applied
-    twice if this is called again (e.g. on a retry).
+    Idempotent ET atomique : l'id du combat est enregistré dans
+    `character["combats_recompenses"]`, c.-à-d. DANS LE MÊME document que l'XP.
+    La récompense ne peut donc être appliquée qu'une seule fois, même si la
+    sauvegarde du doc combat échoue par ailleurs, et reste rattrapable (par /play)
+    si `combat_action` n'a pas pu la finaliser.
+
+    Retourne True si une récompense vient d'être appliquée et sauvegardée.
     """
-    if combat_doc.get("recompense_appliquee"):
-        return
+    status = combat_doc.get("status")
+    if status not in ("victoire", "defaite", "fuite"):
+        return False  # combat encore actif → rien à appliquer
 
     character = get_doc(combat_doc["character_id"])
     if not character:
-        return
+        return False
+
+    combat_id = combat_doc.get("_id")
+    rewarded = character.get("combats_recompenses", [])
+    if combat_id in rewarded:
+        combat_doc["recompense_appliquee"] = True  # déjà appliqué à ce personnage
+        return False
 
     joueur = combat_doc["joueurs"][0]
-    status = combat_doc["status"]
-
     if status == "victoire":
         character["currentPV"] = joueur["currentPV"]
         xp_before = character.get("xp_total", 0)
         character["xp_total"] = xp_before + combat_doc.get("xp_gagnee", 0)
         old_niveau = compute_character_level(xp_before)
         new_niveau = compute_character_level(character["xp_total"])
-        if new_niveau > old_niveau:
-            character["attribute_points"] = character.get("attribute_points", 0) + new_niveau
+        # +N points par niveau gagné (même règle que la montée de niveau monde).
+        for n in range(old_niveau + 1, new_niveau + 1):
+            character["attribute_points"] = character.get("attribute_points", 0) + n
     elif status == "defaite":
         character["currentPV"] = 1
     elif status == "fuite":
         character["currentPV"] = max(1, joueur["currentPV"])
 
-    # Mark before persisting the character so a re-entry won't double-apply.
+    # Idempotence atomique : on enregistre le combat dans le doc personnage,
+    # sauvegardé avec l'XP. Borné pour éviter une croissance illimitée.
+    rewarded.append(combat_id)
+    character["combats_recompenses"] = rewarded[-50:]
+
+    if save_doc(character) is None:
+        return False  # échec de sauvegarde → ne pas marquer, on réessaiera
+
     combat_doc["recompense_appliquee"] = True
-    save_doc(character)
+    return True
