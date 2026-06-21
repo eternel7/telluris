@@ -1,6 +1,6 @@
 import os
 from typing import Annotated
-from fastapi import FastAPI, Request, Depends, HTTPException, Response
+from fastapi import FastAPI, Request, Depends, HTTPException, Response, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -17,9 +17,18 @@ from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
-from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, XP_COEFF, XP_VOC_COEFF
+from models import character_stats
+from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def _charger_variables_monde() -> None:
+	"""Charge les variables de monde (rules:world_variables) au démarrage.
+	Fallback silencieux sur les valeurs par défaut du module si la DB/doc manque."""
+	load_world_variables()
+
 
 # Add CORS middleware
 app.add_middleware(
@@ -103,6 +112,17 @@ def _require_admin_page(request: Request, current_user):
 		return RedirectResponse(url="/auth", headers=request.headers)
 	return None
 
+@app.get("/admin", response_class=HTMLResponse)
+def admin_home(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_telluris.html",
+		context={"title": "Administration"}
+	)
+
 @app.get("/admin/exports", response_class=HTMLResponse)
 def admin_exports(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	redirect = _require_admin_page(request, current_user)
@@ -147,6 +167,48 @@ def admin_export_couchdb(request: Request, current_user: Annotated[User, Depends
 		media_type="application/json",
 		headers={"Content-Disposition": f'attachment; filename="{filename}"'},
 	)
+
+@app.get("/admin/world_variables")
+def admin_get_world_variables(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Renvoie les variables de monde actuellement appliquées en mémoire."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	return character_stats.current_world_variables()
+
+@app.put("/admin/world_variables")
+def admin_save_world_variables(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: dict = Body(...),
+):
+	"""Persiste les variables éditées dans le doc CouchDB rules:world_variables.
+	N'applique PAS les valeurs en mémoire : utiliser /reload pour les charger à chaud.
+
+	CouchDB exige le _rev courant pour mettre à jour un doc existant : on le lit
+	juste avant l'écriture et on l'attache (création sans _rev si le doc n'existe pas)."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+
+	doc_id = character_stats.WORLD_VARIABLES_DOC_ID
+
+	def _save_with_current_rev():
+		doc = {"_id": doc_id, "type": "rules", "value": payload}
+		existing = get_doc(doc_id)
+		print("existing",existing)
+		if existing and existing.get("_rev"):
+			doc["_rev"] = existing["_rev"]
+		return save_doc(doc)
+
+	saved = _save_with_current_rev()
+	if saved is None:
+		raise HTTPException(status_code=500, detail="Échec de la sauvegarde CouchDB (rules:world_variables).")
+	return {"saved": True, "id": doc_id, "value": payload}
+
+@app.post("/admin/world_variables/reload")
+def admin_reload_world_variables(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Recharge rules:world_variables depuis CouchDB à chaud (sans redéploiement)."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	return {"reloaded": True, "variables": load_world_variables()}
 
 @app.get("/auth", response_class=HTMLResponse)
 async def read_page_auth(request: Request):
@@ -226,7 +288,7 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 			"vocations_proximity" : vocations_proximity,
 			"characters_images": characters_images,
 			"towns_images": towns_images,
-			"xp_coeff": XP_COEFF,
+			"xp_coeff": character_stats.XP_COEFF,
 		}
 	)
 	
@@ -380,8 +442,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"dim_y": dim_y,
 			"access" : access,
 			"stat_caps": stat_caps,
-			"xp_coeff": XP_COEFF,
-			"xp_voc_coeff": XP_VOC_COEFF,
+			"xp_coeff": character_stats.XP_COEFF,
+			"xp_voc_coeff": character_stats.XP_VOC_COEFF,
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.

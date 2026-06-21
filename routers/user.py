@@ -8,12 +8,13 @@ import re
 import uuid
 from db.config import save_doc, get_doc, delete_doc
 from utils.auth import get_current_user, create_access_token
-from utils.characters import get_user_characters, get_selected_character
+from utils.characters import get_user_characters, get_selected_character, grant_xp
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
+from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
-	compute_xp_cost, compute_stat_cap, compute_character_level, XP_COEFF, XP_DECOUVERTE_LIEU, XP_VOC_COEFF
+	compute_xp_cost, compute_stat_cap, compute_character_level
 )
 
 class User(BaseModel):
@@ -84,7 +85,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 	if (characterinfo and "bonusStats" in characterinfo):
 		caractUp = characterinfo["bonusStats"]
 		points_depenses = sum(
-			sum(i * XP_COEFF.get(key, 1) for i in range(1, bonus + 1))
+			sum(i * character_stats.XP_COEFF.get(key, 1) for i in range(1, bonus + 1))
 			for key, bonus in caractUp.items()
 		)
 		if points_depenses>10:
@@ -277,15 +278,11 @@ async def move_character(
 						if destination not in lieux_visites:
 							lieux_visites.append(destination)
 							character_to_update["lieux_visites"] = lieux_visites
-							xp_gain = lieu_doc.get("xp_decouverte", XP_DECOUVERTE_LIEU)
-							xp_total_new = character_to_update.get("xp_total", 0) + xp_gain
-							character_to_update["xp_total"] = xp_total_new
-							niveau_after = compute_character_level(xp_total_new)
-							if niveau_after > niveau_new:
-								niveau_up = True
-								for n in range(niveau_new + 1, niveau_after + 1):
-									character_to_update["attribute_points"] = character_to_update.get("attribute_points", 0) + n
-								niveau_new = niveau_after
+							xp_gain = lieu_doc.get("xp_decouverte", character_stats.XP_DECOUVERTE_LIEU)
+							# XP + montée de niveau : règle partagée avec les combats.
+							info = grant_xp(character_to_update, xp_gain)
+							niveau_up = info["niveau_up"]
+							niveau_new = info["niveau_apres"]
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
 						zone_event = None
@@ -346,6 +343,9 @@ def _recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
         bonus.cc_bonus     += item.get("bonus_cc", 0)
         bonus.cd_bonus     += item.get("bonus_cd", 0)
         bonus.degats_bonus += item.get("bonus_degats", 0)
+        dice = item.get("bonus_degats_dice", "")
+        if dice:
+            bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
         bonus.initiative   += item.get("bonus_initiative", 0)
     return bonus
 
@@ -586,7 +586,7 @@ async def spend_xp_vocation(
 	voc = character.get("voc", "")
 	vocations_niveaux = character.get("vocations_niveaux", {})
 	voc_niveau = vocations_niveaux.get(voc, 0)
-	cout = (voc_niveau + 1) * XP_VOC_COEFF
+	cout = (voc_niveau + 1) * character_stats.XP_VOC_COEFF
 
 	attribute_points = character.get("attribute_points", 0)
 	if attribute_points < cout:

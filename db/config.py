@@ -26,8 +26,14 @@ def get_doc(doc_id: str) -> dict | None:
 		return None
 
 def save_doc(doc: dict) -> dict:
+	# couchdb2 : db.put() ne RETOURNE rien (None) en cas de succès — il mute `doc`
+	# en place (ajout/maj du _rev) — et LÈVE sur conflit (RevisionError) ou erreur.
+	# On renvoie donc `doc` (avec son _rev à jour) comme marqueur de succès truthy,
+	# et None uniquement si l'écriture a échoué, pour que les appelants puissent
+	# tester `save_doc(...) is None`.
 	try:
-		return db.put(doc)
+		db.put(doc)
+		return doc
 	except Exception:
 		return None
 

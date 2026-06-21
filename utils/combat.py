@@ -6,25 +6,8 @@ from db.config import get_doc, save_doc, find_docs
 from models.character_stats import (
     BaseStats, EquipmentBonus, compute_derived_stats
 )
-from utils.lieux import get_final_mask, VALID_MOVES
+from utils.lieux import nav_allows
 from utils.characters import grant_xp
-
-# (dx, dy) → bit de direction (cf. utils.lieux.VALID_MOVES) pour la validation nav.
-_DIR_BIT: dict = {(dx, dy): bit for bit, dx, dy, _op in VALID_MOVES}
-
-
-def _nav_allows(nav: dict, x: int, y: int, dx: int, dy: int) -> bool:
-    """La direction (dx, dy) depuis (x, y) est-elle autorisée par le masque nav ?
-
-    Même sémantique que play_town : `get_final_mask` renvoie les directions permises
-    (vérification bidirectionnelle source ↔ cible). nav vide → tout est permis.
-    """
-    if not nav:
-        return True
-    bit = _DIR_BIT.get((dx, dy))
-    if bit is None:
-        return False
-    return bool(get_final_mask(nav, x, y) & bit)
 
 BATTLE_MAPS = [
     "map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -132,7 +115,7 @@ def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
                 continue
             if not _passable(cells, nx, ny):
                 continue
-            if not _nav_allows(nav, cur["x"], cur["y"], dx, dy):
+            if not nav_allows(nav, cur["x"], cur["y"], dx, dy):
                 continue
             if (nx, ny) in closed:
                 continue
@@ -252,14 +235,21 @@ def get_combat_grid(combat_doc: dict) -> dict:
 
 
 def roll_dice(notation: str) -> int:
-    """Parse '1D6+3', '2D8', 'D4-1', etc. Returns at least 1."""
-    m = re.match(r"(\d*)D(\d+)([+-]\d+)?", notation.upper())
-    if not m:
-        return 1
-    n = int(m.group(1) or "1")
-    sides = int(m.group(2))
-    mod = int(m.group(3) or "0")
-    return max(1, sum(random.randint(1, sides) for _ in range(n)) + mod)
+    """Évalue une notation de dégâts et retourne au moins 1.
+
+    Gère les termes simples ('1D6+3', '2D8', 'D4-1') comme les expressions
+    composites issues des armes ('1D6+1D4+2', '1D8+1D6-1') : chaque terme 'nDm'
+    est lancé (signe pris en compte), puis les entiers isolés sont additionnés.
+    """
+    notation = notation.upper().replace(" ", "")
+    total = 0
+    for sign, n, sides in re.findall(r"([+-]?)(\d*)D(\d+)", notation):
+        rolled = sum(random.randint(1, int(sides)) for _ in range(int(n or "1")))
+        total += -rolled if sign == "-" else rolled
+    # Modificateurs plats : entiers signés restants une fois les dés retirés.
+    for mod in re.findall(r"[+-]?\d+", re.sub(r"[+-]?\d*D\d+", "", notation)):
+        total += int(mod)
+    return max(1, total)
 
 
 def roll_monster_stats(espece: dict, profil: dict) -> BaseStats:
@@ -304,6 +294,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
         pa=eq_raw.get("pa", 0), malus_depl=eq_raw.get("malus_depl", 0),
         cc_bonus=eq_raw.get("cc_bonus", 0), cd_bonus=eq_raw.get("cd_bonus", 0),
         degats_bonus=eq_raw.get("degats_bonus", 0),
+        degats_dice=eq_raw.get("degats_dice", ""),
         initiative=eq_raw.get("initiative", 0),
     )
     voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
@@ -662,7 +653,7 @@ def resolve_action(
             return {"error": "Hors de la zone."}
         if not _passable(cells, nx, ny):
             return {"error": "Terrain infranchissable."}
-        if not _nav_allows(grid.get("nav", {}), joueur["pos"]["x"], joueur["pos"]["y"], dx, dy):
+        if not nav_allows(grid.get("nav", {}), joueur["pos"]["x"], joueur["pos"]["y"], dx, dy):
             return {"error": "Direction bloquée."}
         if _occupied_at(combat_doc, nx, ny):
             return {"error": "Case occupée."}

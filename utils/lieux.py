@@ -64,8 +64,24 @@ def get_final_mask(nav, x, y):
 				# Si les deux sont libres, on marque la direction comme DISPONIBLE
 				# (Le masque final reste un masque de directions autorisées)
 				final_mask |= bit
-				
+
 	return final_mask
+
+# (dx, dy) → bit de direction (dérivé de VALID_MOVES).
+_DIR_BIT = {(dx, dy): bit for bit, dx, dy, _op in VALID_MOVES}
+
+def nav_allows(nav, x, y, dx, dy):
+	"""La direction (dx, dy) depuis (x, y) est-elle autorisée par le masque nav ?
+
+	Réutilise get_final_mask (vérification bidirectionnelle source ↔ cible).
+	nav vide → tout est permis. Miroir Python de navAllows() dans scripts/nav.js.
+	"""
+	if not nav:
+		return True
+	bit = _DIR_BIT.get((dx, dy))
+	if bit is None:
+		return False
+	return bool(get_final_mask(nav, x, y) & bit)
 	
 def get_lieu_directions(current_user: dict = Body(...), lieu_doc: dict = Body(...), position: dict = Body(...)):
 	if not current_user:

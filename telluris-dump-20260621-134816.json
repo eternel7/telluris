@@ -1,6 +1,6 @@
 {
   "db": "telluris",
-  "exported_at": "2026-06-21T05:57:49.283787Z",
+  "exported_at": "2026-06-21T13:48:16.877827Z",
   "doc_count": 428,
   "docs": [
     {
@@ -126,7 +126,7 @@
     },
     {
       "_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
-      "_rev": "1066-3d42d7cf6cfa2b63c3a7f1f2a91e2f4d",
+      "_rev": "1402-83355c4742eba96916ebac6680cdbc94",
       "user_id": "user:eternel7@gmail.com",
       "type": "character",
       "sex": "F",
@@ -138,14 +138,14 @@
       "cite": "lieu:auxerre",
       "lieu": "lieu:auxerre",
       "position": {
-        "x": 12,
+        "x": 13,
         "y": 10
       },
       "caracteristiques_current": {
         "V": 4,
         "F": 24,
         "R": 33,
-        "Ag": 11,
+        "Ag": 18,
         "Vol": 50,
         "Int": 30,
         "Cha": 20,
@@ -168,7 +168,7 @@
         "lieu:chemin_de_la_foret02",
         "lieu:france"
       ],
-      "xp_total": 22,
+      "xp_total": 94,
       "attribute_points": 0,
       "vocations_niveaux": {
         "barbare": 1
@@ -200,7 +200,15 @@
         "x": -95.9944,
         "y": -12.3735
       },
-      "portrait_zoom": 35
+      "portrait_zoom": 35,
+      "combats_recompenses": [
+        "combat:997f3206b235451eb1825076d97db9ed",
+        "combat:335c64b188c84ac684ddb53d5485d000",
+        "combat:0f7c0ce7250741e2a888e76468aefdf6",
+        "combat:543d7ce34d7848f99813371641021c1b",
+        "combat:a134cd4e42a84930989e7eb571c52e90",
+        "combat:1aded3a07e5b421c99dc9e68b22031ff"
+      ]
     },
     {
       "_id": "character:user:eternel7@gmail.com_1ddd3ad5-b8ad-4e34-8161-c1b9149c56e3",
@@ -929,383 +937,6 @@
         "y": -45.0
       },
       "portrait_zoom": 10
-    },
-    {
-      "_id": "combat:bde3551a002c4855895e3cea16072b13",
-      "_rev": "49-f8bae2cd7c1b6f1993775c0d73edaac8",
-      "type": "combat",
-      "user_id": "user:eternel7@gmail.com",
-      "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
-      "status": "active",
-      "tour": 28,
-      "ordre_initiative": [
-        "monstre_0",
-        "joueur_0"
-      ],
-      "acteur_courant_index": 1,
-      "map_image": "map0007.jpg",
-      "zone_tags": [
-        "voleur",
-        "faune_locale"
-      ],
-      "joueurs": [
-        {
-          "id": "joueur_0",
-          "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
-          "nom": "Stower",
-          "voc": "barbare",
-          "race": "nain",
-          "image": "barbare_f_nain05.jpg",
-          "currentPV": 123,
-          "pv_max": 123,
-          "currentPM": 160,
-          "pm_max": 160,
-          "actions_restantes": 2,
-          "actions_max": 2,
-          "cc": 30,
-          "cd": 13,
-          "ag": 11,
-          "pa": 1,
-          "degats_cc": "1D6",
-          "degats_cd": "1D4",
-          "initiative": 15,
-          "deplacement": 4,
-          "portee": 1,
-          "pos": {
-            "x": 9,
-            "y": 15
-          },
-          "facing": 270,
-          "cells_moved": 0,
-          "attaques": 0
-        }
-      ],
-      "monstres": [
-        {
-          "id": "monstre_0",
-          "nom": "Loup",
-          "espece_id": "espece:loup",
-          "profil_id": "profil:novice",
-          "image": "loup_transparent.png",
-          "currentPV": 94,
-          "pv_max": 94,
-          "actions_restantes": 3,
-          "actions_max": 3,
-          "cc": 42,
-          "ag": 35,
-          "pa": 1,
-          "degats_cc": "1D6",
-          "initiative": 39,
-          "deplacement": 4,
-          "portee": 1,
-          "pos": {
-            "x": 16,
-            "y": 0
-          },
-          "cells_moved": 0,
-          "attaques": 0,
-          "vivant": true,
-          "xp_reward": 16
-        }
-      ],
-      "log": [
-        {
-          "tour": 1,
-          "acteur": "Système",
-          "kind": "sys",
-          "texte": "Le combat commence !"
-        },
-        {
-          "tour": 1,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [15,28]."
-        },
-        {
-          "tour": 1,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [16,27]."
-        },
-        {
-          "tour": 1,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [17,27]."
-        },
-        {
-          "tour": 2,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [18,27]."
-        },
-        {
-          "tour": 2,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [19,26]."
-        },
-        {
-          "tour": 2,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [20,25]."
-        },
-        {
-          "tour": 3,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [20,24]."
-        },
-        {
-          "tour": 3,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [21,23]."
-        },
-        {
-          "tour": 3,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [21,22]."
-        },
-        {
-          "tour": 4,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [21,21]."
-        },
-        {
-          "tour": 4,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [21,20]."
-        },
-        {
-          "tour": 4,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [21,19]."
-        },
-        {
-          "tour": 5,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [20,18]."
-        },
-        {
-          "tour": 5,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [20,17]."
-        },
-        {
-          "tour": 5,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [19,16]."
-        },
-        {
-          "tour": 6,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [19,15]."
-        },
-        {
-          "tour": 6,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower pivote (gauche)."
-        },
-        {
-          "tour": 6,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [18,15]."
-        },
-        {
-          "tour": 7,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [17,15]."
-        },
-        {
-          "tour": 7,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [16,15]."
-        },
-        {
-          "tour": 7,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [15,15]."
-        },
-        {
-          "tour": 8,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [14,15]."
-        },
-        {
-          "tour": 8,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [13,15]."
-        },
-        {
-          "tour": 8,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [12,15]."
-        },
-        {
-          "tour": 9,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [11,15]."
-        },
-        {
-          "tour": 9,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [10,15]."
-        },
-        {
-          "tour": 9,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [9,15]."
-        },
-        {
-          "tour": 10,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [8,15]."
-        },
-        {
-          "tour": 10,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [7,15]."
-        },
-        {
-          "tour": 10,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [8,15]."
-        },
-        {
-          "tour": 11,
-          "acteur": "Stower",
-          "kind": "move",
-          "texte": "Stower se déplace en [9,15]."
-        },
-        {
-          "tour": 11,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 12,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 13,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 14,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 15,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 16,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 17,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 18,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 19,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 20,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 21,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 22,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 23,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 24,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 25,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 26,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        },
-        {
-          "tour": 27,
-          "acteur": "Stower",
-          "kind": "sys",
-          "texte": "Stower passe son tour."
-        }
-      ],
-      "xp_gagnee": 0,
-      "battle_map_id": "lieu:chemin2"
     },
     {
       "_id": "espece:aigle_geant",
@@ -8752,7 +8383,7 @@
     },
     {
       "_id": "item:Epee_courte",
-      "_rev": "2-f0d7c34015a7f8233d5c2f53a0928a9f",
+      "_rev": "3-f39d798616dc62022539abd15a771fb5",
       "type": "item",
       "nom": "Épée courte",
       "icon": "⚔️",
@@ -8763,6 +8394,7 @@
         "main_gauche"
       ],
       "bonus_cc": 1,
+      "bonus_degats": 5,
       "poids": 1.5
     },
     {
@@ -28208,7 +27840,7 @@
     },
     {
       "_id": "rules:races",
-      "_rev": "13-9179c75baf1b13aab13aef5cddbd5866",
+      "_rev": "14-21d30effe23eb298edf4edda1e70f485",
       "value": [
         {
           "id": "humain",
@@ -28281,7 +27913,7 @@
             "V": 4,
             "F": 20,
             "R": 30,
-            "Ag": 10,
+            "Ag": 15,
             "Vol": 50,
             "Int": 30,
             "Cha": 20,
@@ -28307,7 +27939,7 @@
             "V": 4,
             "F": 40,
             "R": 40,
-            "Ag": 10,
+            "Ag": 15,
             "Vol": 20,
             "Int": 20,
             "Cha": 10,
@@ -28317,7 +27949,7 @@
             "V": 7,
             "F": 70,
             "R": 70,
-            "Ag": 40,
+            "Ag": 45,
             "Vol": 60,
             "Int": 60,
             "Cha": 50,
@@ -28331,7 +27963,7 @@
           "icon": "🌿",
           "stats": {
             "V": 4,
-            "F": 10,
+            "F": 15,
             "R": 20,
             "Ag": 30,
             "Vol": 50,
@@ -28666,6 +28298,23 @@
         ]
       },
       "type": "rules"
+    },
+    {
+      "_id": "rules:world_variables",
+      "_rev": "11-642dce7d68ddbdf06a2f8ddc0a6bdfe8",
+      "type": "rules",
+      "value": {
+        "FACTEUR_DEGATS_ARMURE": 2,
+        "XP_DECOUVERTE_LIEU": 2,
+        "TOWN_PROFIL_NIVEAU_MAX": 2,
+        "XP_COEFF": {
+          "V": 10
+        },
+        "XP_VOC_COEFF": 5,
+        "SUB_CAP_REDUCTION": {
+          "V": 1
+        }
+      }
     },
     {
       "_id": "zone::coeur_capitale",

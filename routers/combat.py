@@ -11,11 +11,13 @@ from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
 )
+from models import character_stats
 
 combat_router = APIRouter()
 
 TOWNS_IMAGES_PATH = "templates/resources/towns"
-TOWN_PROFIL_NIVEAU_MAX = 2  # Dans une ville, monstres de profil 1 à 2 max.
+# TOWN_PROFIL_NIVEAU_MAX : variable de monde (rules:world_variables), lue via
+# character_stats.TOWN_PROFIL_NIVEAU_MAX pour rester vivante après un reload.
 
 
 def _is_town_lieu(lieu: dict | None) -> bool:
@@ -96,7 +98,7 @@ async def start_combat(
     # Dans une ville (image TOWNS) : profils de niveau 1 à 2 max.
     profils = profils_all
     if _is_town_lieu(depart_lieu):
-        profils = [p for p in profils_all if p.get("niveau", 1) <= TOWN_PROFIL_NIVEAU_MAX]
+        profils = [p for p in profils_all if p.get("niveau", 1) <= character_stats.TOWN_PROFIL_NIVEAU_MAX]
 
     nb_monstres = max(1, round(body.intensite * 3))
     # Espèces déjà filtrées par zone → pas de re-filtrage par tags (zone_tags vide).

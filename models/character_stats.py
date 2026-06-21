@@ -4,8 +4,33 @@
 from pydantic import BaseModel, Field
 import math
 
-# ── Regle pour les XP ──────────────────────────────────────────────────
+# ── Variables de monde (réglables sans redéploiement) ───────────────────
+# Les constantes ci-dessous sont les valeurs PAR DÉFAUT (fallback). Au démarrage,
+# `load_world_variables()` les écrase avec le doc CouchDB `rules:world_variables`
+# s'il existe (cf. plus bas). Ce module reste SANS dépendance DB au niveau import
+# (le chargeur importe db.config paresseusement) pour que les tests pure-Python
+# continuent de tourner.
+#
+# ⚠️ Toujours lire ces tunables via le module (`character_stats.XP_VOC_COEFF`),
+# jamais par `from character_stats import XP_VOC_COEFF` : le chargeur réassigne
+# les globales, donc une copie importée par valeur resterait figée.
+
+WORLD_VARIABLES_DOC_ID: str = "rules:world_variables"
+
+# Bouton de réglage central de la létalité. Modèle de résolution des dégâts :
+#   Dégâts = caract // FACTEUR + arme − (R_cible // FACTEUR)
+# où `caract` = F au corps à corps, Ag au tir. Les points d'armure (PA) suivent
+# la même règle : PA = R // FACTEUR. Baisser le facteur amplifie le poids des
+# caractéristiques brutes (bonus de dégâts ET armure plus gros) → les écarts de
+# stats décident plus vite l'issue ; l'augmenter rapproche le combat des seuls
+# dés + chances de toucher. C'est le levier pour régler le nombre de rounds.
+FACTEUR_DEGATS_ARMURE: int = 20
+
+# XP gagnée à la découverte d'un lieu (fallback si le lieu n'a pas de xp_decouverte).
 XP_DECOUVERTE_LIEU: int = 1
+
+# Dans une ville (lieu à image TOWNS), niveau de profil de monstre maximal rencontrable.
+TOWN_PROFIL_NIVEAU_MAX: int = 2
 
 # V coûte 10× plus cher, toutes les autres stats coûtent 1 par point au-dessus du min racial
 XP_COEFF: dict[str, int] = {"V": 10}
@@ -14,6 +39,56 @@ XP_VOC_COEFF: int = 5
 # Réduction du plafond pour les stats hors quota d'accessibilité
 # V perd 1 point, toutes les autres perdent 10 points sous le max racial
 _SUB_CAP_REDUCTION: dict[str, int] = {"V": 1}
+
+
+def current_world_variables() -> dict:
+    """Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
+    return {
+        "FACTEUR_DEGATS_ARMURE": FACTEUR_DEGATS_ARMURE,
+        "XP_DECOUVERTE_LIEU": XP_DECOUVERTE_LIEU,
+        "TOWN_PROFIL_NIVEAU_MAX": TOWN_PROFIL_NIVEAU_MAX,
+        "XP_COEFF": dict(XP_COEFF),
+        "XP_VOC_COEFF": XP_VOC_COEFF,
+        "SUB_CAP_REDUCTION": dict(_SUB_CAP_REDUCTION),
+    }
+
+
+def load_world_variables() -> dict:
+    """Charge `rules:world_variables` depuis CouchDB et écrase les valeurs par
+    défaut de ce module. À appeler une fois au démarrage de l'app (idempotent).
+
+    Fallback robuste : toute clé absente — ou DB injoignable, ou doc manquant —
+    conserve la valeur par défaut déjà en place. Format attendu du doc :
+
+        { "_id": "rules:world_variables", "type": "rules",
+          "value": { "FACTEUR_DEGATS_ARMURE": 20, "XP_DECOUVERTE_LIEU": 1,
+                     "XP_COEFF": {"V": 10}, "XP_VOC_COEFF": 5,
+                     "SUB_CAP_REDUCTION": {"V": 1} } }
+
+    Les dicts (XP_COEFF, SUB_CAP_REDUCTION) sont mutés en place pour rester vivants
+    côté importateurs ; les scalaires sont réassignés (à lire via le module).
+    Retourne le snapshot effectif.
+    """
+    global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF
+    try:
+        from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
+        doc = get_doc(WORLD_VARIABLES_DOC_ID)
+    except Exception:
+        doc = None
+    v = (doc or {}).get("value") or {}
+
+    FACTEUR_DEGATS_ARMURE  = int(v.get("FACTEUR_DEGATS_ARMURE", FACTEUR_DEGATS_ARMURE))
+    XP_DECOUVERTE_LIEU     = int(v.get("XP_DECOUVERTE_LIEU", XP_DECOUVERTE_LIEU))
+    TOWN_PROFIL_NIVEAU_MAX = int(v.get("TOWN_PROFIL_NIVEAU_MAX", TOWN_PROFIL_NIVEAU_MAX))
+    XP_VOC_COEFF           = int(v.get("XP_VOC_COEFF", XP_VOC_COEFF))
+    if isinstance(v.get("XP_COEFF"), dict):
+        XP_COEFF.clear()
+        XP_COEFF.update({k: int(x) for k, x in v["XP_COEFF"].items()})
+    if isinstance(v.get("SUB_CAP_REDUCTION"), dict):
+        _SUB_CAP_REDUCTION.clear()
+        _SUB_CAP_REDUCTION.update({k: int(x) for k, x in v["SUB_CAP_REDUCTION"].items()})
+
+    return current_world_variables()
 
 
 # ── Caractéristiques de base ──────────────────────────────────────────────────
@@ -42,7 +117,8 @@ class EquipmentBonus(BaseModel):
     malus_depl:    int = 0    # Malus de déplacement (armure lourde)
     cc_bonus:      int = 0    # Bonus attaque CàC (arme)
     cd_bonus:      int = 0    # Bonus attaque distance (arme)
-    degats_bonus:  int = 0    # Bonus dégâts (arme)
+    degats_bonus:  int = 0    # Bonus dégâts plat (arme) : +x
+    degats_dice:   str = ""   # Dés de dégâts additionnels (arme) : ex "1D4", "1D4+1D6"
     initiative:    int = 0    # Bonus initiative (objets)
 
 
@@ -97,19 +173,24 @@ def compute_derived_stats(
     cd = base.ag + (base.v // 2) + equipment.cd_bonus
 
     # ── Armure ───────────────────────────────────────────────────────
-    pa = (base.r // 20) + equipment.pa
+    pa = (base.r // FACTEUR_DEGATS_ARMURE) + equipment.pa
 
     # ── Défense magique ───────────────────────────────────────────────
     pm_def = (base.vol // 2) + (base.int_ // 4)
 
-    bonus_degats = equipment.degats_bonus
     # ── Dégâts corps à corps ─────────────────────────────────────────
-    de_cc = _caract_to_dice_(base.f)
-    degats_cc = f"1D{de_cc}+{bonus_degats}" if bonus_degats else f"1D{de_cc}"
+    # Bonus de puissance F//FACTEUR, miroir exact des PA = R//FACTEUR : deux builds
+    # de caractéristiques égales s'annulent, et ce sont les armes (+x / +1DX) qui
+    # font la différence de dégâts.
+    degats_cc = _format_damage(
+        _caract_to_dice_(base.f), base.f // FACTEUR_DEGATS_ARMURE, equipment
+    )
 
     # ── Dégâts à distance ─────────────────────────────────────────────
-    de_cd = _caract_to_dice_(base.ag)
-    degats_cd = f"1D{de_cd}+{bonus_degats}" if bonus_degats else f"1D{de_cd}"
+    # Même logique : la puissance du tir suit l'Ag (Ag//FACTEUR), miroir des PA.
+    degats_cd = _format_damage(
+        _caract_to_dice_(base.ag), base.ag // FACTEUR_DEGATS_ARMURE, equipment
+    )
 
     # ── Charge max ────────────────────────────────────────────────────
     charge_max = base.f * 5
@@ -190,6 +271,25 @@ def compute_character_level(xp_total: int) -> int:
         niveau += 1
         threshold *= 3
     return niveau
+
+
+def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus) -> str:
+    """Assemble la notation de dégâts : dé de base + dés d'arme + modificateur plat.
+
+    - `base_die`    : dé dérivé de la caractéristique (F au CàC, Ag au tir).
+    - `stat_bonus`  : bonus de puissance physique = caract // FACTEUR (miroir des PA).
+    - `equipment.degats_dice` : dés additionnels de l'arme (+1DX), concaténables.
+    - `equipment.degats_bonus`: modificateur plat de l'arme (+x).
+
+    Ex : F=24 sans arme → "1D6+1" ; avec une épée +1 et +1D4 → "1D6+1D4+2".
+    """
+    expr = f"1D{base_die}"
+    if equipment.degats_dice:
+        expr += f"+{equipment.degats_dice}"
+    flat = stat_bonus + equipment.degats_bonus
+    if flat:
+        expr += f"{flat:+d}"
+    return expr
 
 
 def _caract_to_dice_(f: int) -> int:

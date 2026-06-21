@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--danger: #c84b4b;
+			--success: #4bc87a;
+			--text: #fff;
+			--muted: #9aa3b2;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		.main { width: 100%; max-width: 720px; padding: 32px 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-title {
+			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		.section-label {
+			font-size: 0.7rem; letter-spacing: 0.18em; color: var(--muted);
+			text-transform: uppercase; margin: 26px 4px 10px; opacity: 0.8;
+		}
+		.section-label:first-child { margin-top: 0; }
+
+		textarea {
+			width: 100%; min-height: 220px; resize: vertical;
+			background: #0d0f14; border: 1px solid var(--border); border-radius: 6px;
+			color: var(--text); font-family: 'Share Tech Mono', monospace;
+			font-size: 0.8rem; line-height: 1.5; padding: 12px; outline: none;
+			transition: border-color 0.2s;
+		}
+		textarea:focus { border-color: var(--accent); }
+		textarea.invalid { border-color: var(--danger); }
+
+		.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+		.btn {
+			display: inline-flex; align-items: center; gap: 8px;
+			padding: 10px 18px; border-radius: 6px;
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+			text-decoration: none; cursor: pointer; transition: all 0.2s;
+			border: 1px solid var(--accent); background: rgba(200,168,75,0.1); color: var(--accent);
+		}
+		.btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+		.btn.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
+		.btn.secondary:hover { background: rgba(75,143,200,0.22); box-shadow: 0 0 12px rgba(75,143,200,0.25); }
+
+		.status { font-size: 0.78rem; margin-top: 12px; min-height: 1.2em; color: var(--muted); }
+		.status.ok { color: var(--success); }
+		.status.err { color: var(--danger); }
+
+		.dl-btn {
+			display: inline-flex; align-items: center; gap: 8px;
+			padding: 10px 18px; border: 1px solid var(--accent); border-radius: 6px;
+			background: rgba(200,168,75,0.1); color: var(--accent);
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+			text-decoration: none; cursor: pointer; transition: all 0.2s;
+		}
+		.dl-btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+
+		code { color: var(--accent2); }
+	</style>
+</head>
+<body>
+	<header><h1>⚙ Administration — Telluris</h1></header>
+	<div class="main">
+
+		<!-- ── Variables de monde (en premier) ───────────────────────────── -->
+		<div class="section-label">Variables de monde</div>
+		<div class="card">
+			<div class="card-title">🌍 rules:world_variables</div>
+			<div class="card-desc">
+				Variables d'équilibrage chargées depuis CouchDB (doc <code>rules:world_variables</code>),
+				avec repli sur les valeurs par défaut du code. Éditez le JSON ci-dessous puis
+				<strong>Save</strong> pour persister en base ; <strong>Reload</strong> applique le doc
+				à chaud (sans redéploiement) et rafraîchit l'affichage.
+			</div>
+			<textarea id="wv-editor" spellcheck="false" placeholder="{ ... }"></textarea>
+			<div class="btn-row">
+				<button class="btn" id="wv-save">💾 Save</button>
+				<button class="btn secondary" id="wv-reload">↻ Reload</button>
+			</div>
+			<div class="status" id="wv-status">Chargement…</div>
+		</div>
+
+		<!-- ── Autres outils d'administration ─────────────────────────────── -->
+		<div class="section-label">Autres outils</div>
+
+		<div class="card">
+			<div class="card-title">⇩ Exports</div>
+			<div class="card-desc">
+				Téléchargement du bestiaire (.xlsx) et du dump JSON complet de la base.
+			</div>
+			<a class="dl-btn" href="/admin/exports">→ Ouvrir les exports</a>
+		</div>
+
+		<div class="card">
+			<div class="card-title">📖 Éditeur de bestiaire</div>
+			<div class="card-desc">
+				Création / édition des espèces et des profils de grade (stats, tags, modificateurs).
+			</div>
+			<a class="dl-btn" href="/admin/bestiaire">→ Ouvrir l'éditeur de bestiaire</a>
+		</div>
+
+		<div class="card">
+			<div class="card-title">⚔ Éditeur de cartes</div>
+			<div class="card-desc">
+				Édition des grilles de déplacement, navigation, zones d'influence et rencontres.
+			</div>
+			<a class="dl-btn" href="/admin/editor">→ Ouvrir l'éditeur de cartes</a>
+		</div>
+
+	</div>
+
+<script>
+const editor   = document.getElementById('wv-editor');
+const statusEl = document.getElementById('wv-status');
+const saveBtn  = document.getElementById('wv-save');
+const reloadBtn = document.getElementById('wv-reload');
+
+function setStatus(msg, kind) {
+	statusEl.textContent = msg;
+	statusEl.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+// Affiche un objet variables dans l'éditeur (JSON indenté).
+function showVariables(vars) {
+	editor.value = JSON.stringify(vars, null, 2);
+	editor.classList.remove('invalid');
+}
+
+// Parse l'éditeur, signale une erreur de syntaxe le cas échéant.
+function parseEditor() {
+	try {
+		const obj = JSON.parse(editor.value);
+		editor.classList.remove('invalid');
+		return obj;
+	} catch (e) {
+		editor.classList.add('invalid');
+		setStatus('JSON invalide : ' + e.message, 'err');
+		return undefined;
+	}
+}
+
+// GET /admin/world_variables → valeurs effectives en mémoire.
+async function loadVariables() {
+	try {
+		const res = await fetch('/admin/world_variables');
+		if (!res.ok) { setStatus('Erreur de chargement (' + res.status + ').', 'err'); return; }
+		showVariables(await res.json());
+		setStatus('Variables effectives chargées.', 'ok');
+	} catch (e) {
+		setStatus('Erreur réseau : ' + e.message, 'err');
+	}
+}
+
+// PUT /admin/world_variables → persiste le doc CouchDB (sans appliquer en mémoire).
+saveBtn.addEventListener('click', async () => {
+	const obj = parseEditor();
+	if (obj === undefined) return;
+	setStatus('Sauvegarde…');
+	try {
+		const res = await fetch('/admin/world_variables', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(obj),
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			setStatus('Échec de la sauvegarde : ' + (err.detail || res.status), 'err');
+			return;
+		}
+		setStatus('✓ Sauvé en base. Cliquez Reload pour appliquer à chaud.', 'ok');
+	} catch (e) {
+		setStatus('Erreur réseau : ' + e.message, 'err');
+	}
+});
+
+// POST /admin/world_variables/reload → recharge depuis CouchDB en mémoire,
+// puis GET pour rafraîchir l'éditeur avec les valeurs effectives.
+reloadBtn.addEventListener('click', async () => {
+	setStatus('Rechargement…');
+	try {
+		const res = await fetch('/admin/world_variables/reload', { method: 'POST' });
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			setStatus('Échec du reload : ' + (err.detail || res.status), 'err');
+			return;
+		}
+		await loadVariables();
+		setStatus('✓ Variables rechargées et appliquées.', 'ok');
+	} catch (e) {
+		setStatus('Erreur réseau : ' + e.message, 'err');
+	}
+});
+
+loadVariables();
+</script>
+</body>
+</html>

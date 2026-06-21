@@ -98,17 +98,25 @@ def test_degats_cc_format():
 
 def test_degats_cc_die_value():
     # _caract_to_dice_ : ≤20→D4, ≤40→D6, ≤60→D8, ≤80→D10, ≤90→D12, sinon→D20
-    assert compute_derived_stats(make_base(f=20), niveau=1).degats_cc == "1D4"
-    assert compute_derived_stats(make_base(f=50), niveau=1).degats_cc == "1D8"
-    assert compute_derived_stats(make_base(f=100), niveau=1).degats_cc == "1D20"
+    # + bonus de puissance F//20 (miroir des PA = R//20).
+    assert compute_derived_stats(make_base(f=20), niveau=1).degats_cc == "1D4+1"
+    assert compute_derived_stats(make_base(f=50), niveau=1).degats_cc == "1D8+2"
+    assert compute_derived_stats(make_base(f=100), niveau=1).degats_cc == "1D20+5"
 
 def test_degats_cc_avec_bonus():
     base = make_base(f=50)
     eq = EquipmentBonus(degats_bonus=3)
     stats = compute_derived_stats(base, niveau=1, equipment=eq)
-    # F=50 → D8, + bonus 3
-    assert stats.degats_cc == "1D8+3"
-    assert "+3" in stats.degats_cc
+    # F=50 → D8, + puissance F//20 (=2) + bonus arme 3 = +5
+    assert stats.degats_cc == "1D8+5"
+    assert "+5" in stats.degats_cc
+
+def test_degats_cc_dice_arme():
+    # Une arme peut ajouter des dés (+1DX) en plus du modificateur plat.
+    base = make_base(f=24)  # D6, puissance F//20 = 1
+    eq = EquipmentBonus(degats_dice="1D4", degats_bonus=1)
+    stats = compute_derived_stats(base, niveau=1, equipment=eq)
+    assert stats.degats_cc == "1D6+1D4+2"
 
 
 # ── Charge ────────────────────────────────────────────────────────────────────
