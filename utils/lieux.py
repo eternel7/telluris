@@ -38,6 +38,7 @@ def get_lieu_links(current_user: dict = Body(...)):
 	
 # [bit, dx, dy, opposé]
 # 1: HAUT, 2: HAUT_DROITE, 4: DROITE, 8: BAS_DROITE, 16: BAS, 32: BAS_GAUCHE, 64: GAUCHE, 128: HAUT_GAUCHE
+# ⚠️ Validateur serveur autoritatif. Miroir client : templates/scripts/nav.js — garder synchro.
 VALID_MOVES = [
 	[1,   0, -1, 16],
 	[2,   1, -1, 32],

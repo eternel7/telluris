@@ -1339,20 +1339,12 @@
 				</div><!-- /.sheet-right-col -->
 			</div><!-- /.sheet-layout -->
 		</div><!-- /#sheet-panel -->
-<script>	
+<script src="{{ url_for('scripts', path='nav.js') }}"></script>
+<script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};
 	let ACCESS = {{ access | tojson | safe }};
-	const DIRS = {
-		HAUT:        1,   // 00000001
-		HAUT_DROITE: 2,   // 00000010
-		DROITE:      4,   // 00000100
-		BAS_DROITE:  8,   // 00001000
-		BAS:         16,  // 00010000
-		BAS_GAUCHE:  32,  // 00100000
-		GAUCHE:      64,  // 01000000
-		HAUT_GAUCHE: 128  // 10000000
-	};
+	// DIRS (et VALID_MOVES / getFinalMask / navAllows) proviennent de scripts/nav.js (partagé).
 	const root = document.documentElement;
 	let isMoving = false;
 	// Rafraîchit toutes les jauges PV/PM (portrait, fiche) + textes, sans recharger.

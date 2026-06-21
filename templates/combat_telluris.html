@@ -20,6 +20,11 @@
 		--step: calc(var(--view-width) / 17);
 		--max-height: 7;
 		--blur-dist: 5;
+		/* Taille de la grille en cases — écrasée au chargement depuis GRID.dims.
+		   L'image de fond doit couvrir exactement dims.x × dims.y cases pour
+		   que la case (x,y) corresponde au bon pixel (défaut = repli grille ouverte). */
+		--bg-w: 13;
+		--bg-h: 11;
 	}
 	@media (min-width: 768px) {
 		:root { --view-width: 50vw; }
@@ -65,8 +70,8 @@
 #bg-image {
 	position: absolute;
 	display: block;
-	width: calc(var(--step) * 30);
-	height: calc(var(--step) * 30);
+	width: calc(var(--step) * var(--bg-w));
+	height: calc(var(--step) * var(--bg-h));
 	max-width: none;
 	transform: translate(-50%, -50%);
 }
@@ -443,6 +448,7 @@
 	</div>
 </div>
 
+<script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 // ─── State ────────────────────────────────────────────────────────
 const SERVER_DATA = {
@@ -461,6 +467,13 @@ const SERVER_DATA = {
 // lieu battle map, non dupliqué dans le doc combat) → résolue côté serveur et mise
 // en cache ici une fois. Les réponses d'action ne la renvoient pas.
 const GRID = {{ grid | tojson | safe }};
+
+// L'image de fond couvre exactement dims.x × dims.y cases (sinon l'art ne s'aligne
+// plus avec les coordonnées de la grille). Piloté par GRID.dims, plus de 30 en dur.
+if (GRID && GRID.dims) {
+	document.documentElement.style.setProperty('--bg-w', GRID.dims.x);
+	document.documentElement.style.setProperty('--bg-h', GRID.dims.y);
+}
 
 let state    = JSON.parse(JSON.stringify(SERVER_DATA));
 let logLen   = state.log.length;
@@ -654,6 +667,7 @@ function adjacentAliveMonsters() {
 }
 
 // ── Disponibilité d'une direction : miroir exact de la validation serveur `deplacer`.
+// getFinalMask / navAllows / VALID_MOVES proviennent de scripts/nav.js (partagé).
 function cellPassable(x, y) {
 	const g = GRID;
 	if (!g || !g.cells) return true;
@@ -684,7 +698,8 @@ function dirAvailable(data, sdx, sdy) {
 	const j = data.joueurs[0];
 	const [wx, wy] = screenToWorld(sdx, sdy);
 	const nx = j.pos.x + wx, ny = j.pos.y + wy;
-	return cellPassable(nx, ny) && !cellOccupied(nx, ny);
+	return cellPassable(nx, ny) && !cellOccupied(nx, ny)
+		&& navAllows(GRID.nav, j.pos.x, j.pos.y, wx, wy);
 }
 
 function updateButtons(data) {

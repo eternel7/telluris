@@ -6,6 +6,24 @@ from db.config import get_doc, save_doc, find_docs
 from models.character_stats import (
     BaseStats, EquipmentBonus, compute_derived_stats, compute_character_level
 )
+from utils.lieux import get_final_mask, VALID_MOVES
+
+# (dx, dy) → bit de direction (cf. utils.lieux.VALID_MOVES) pour la validation nav.
+_DIR_BIT: dict = {(dx, dy): bit for bit, dx, dy, _op in VALID_MOVES}
+
+
+def _nav_allows(nav: dict, x: int, y: int, dx: int, dy: int) -> bool:
+    """La direction (dx, dy) depuis (x, y) est-elle autorisée par le masque nav ?
+
+    Même sémantique que play_town : `get_final_mask` renvoie les directions permises
+    (vérification bidirectionnelle source ↔ cible). nav vide → tout est permis.
+    """
+    if not nav:
+        return True
+    bit = _DIR_BIT.get((dx, dy))
+    if bit is None:
+        return False
+    return bool(get_final_mask(nav, x, y) & bit)
 
 BATTLE_MAPS = [
     "map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -78,13 +96,16 @@ def _reset_turn_budget(actor: dict) -> None:
     actor["actions_restantes"] = actor["actions_max"]
 
 
-def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set) -> list | None:
+def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
+               nav: dict | None = None) -> list | None:
     """A* 4-directions (heuristique Manhattan). Porté du prototype client.
 
-    Bloque les cases non praticables (`cells <= 0`) et celles de `blocked`,
-    sauf la case d'arrivée (qui peut être occupée par la cible).
+    Bloque les cases non praticables (`cells <= 0`), celles de `blocked` (sauf la case
+    d'arrivée, qui peut être occupée par la cible) et les directions interdites par
+    `nav` (mêmes restrictions que le joueur / play_town).
     Retourne la liste [(x,y), ...] de start à goal inclus, ou None.
     """
+    nav = nav or {}
     w, h = dims["x"], dims["y"]
     sx, sy = start
     gx, gy = goal
@@ -109,6 +130,8 @@ def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set)
             if nx < 0 or nx >= w or ny < 0 or ny >= h:
                 continue
             if not _passable(cells, nx, ny):
+                continue
+            if not _nav_allows(nav, cur["x"], cur["y"], dx, dy):
                 continue
             if (nx, ny) in closed:
                 continue
@@ -144,22 +167,40 @@ def _nearest_passable(cells: list, dims: dict, tx: int, ty: int, occupied: set) 
     return (tx, ty)
 
 
+# Arène de combat : les acteurs sont regroupés autour du joueur pour rester dans le
+# viewport iso (rayon ~7, cf. combat_telluris.html buildViewportClipPath(7)) et à
+# portée de marche, quelle que soit la taille de la battle map (jusqu'à 30×30+).
+VIEW_RADIUS: int = 7   # rayon visible du viewport iso
+SPAWN_DIST:  int = 4   # distance d'apparition des monstres, devant le joueur
+SPAWN_SPREAD: int = 2  # étalement horizontal entre monstres
+
+
 def _place_actors(combat_doc: dict, grid: dict) -> None:
-    """Place le joueur en bas-centre et les monstres répartis en haut de la grille."""
+    """Place le joueur en bas-centre (inséré du bord) et les monstres en arène devant lui.
+
+    Les monstres apparaissent à ~SPAWN_DIST cases devant le joueur, étalés autour de
+    son axe x — donc dans le champ de caméra et à quelques tours de marche, même sur
+    une grande carte. (Avant : monstres collés à y=1, hors champ sur les maps 30×30.)
+    """
     cells, dims = grid["cells"], grid["dims"]
     w, h = dims["x"], dims["y"]
     occupied: set = set()
 
+    # Joueur : bas-centre, mais inséré du bord pour que le viewport reste sur la carte.
+    inset = min(VIEW_RADIUS, h // 3)
     joueur = combat_doc["joueurs"][0]
-    jx, jy = _nearest_passable(cells, dims, w // 2, h - 1, occupied)
+    jx, jy = _nearest_passable(cells, dims, w // 2, h - 1 - inset, occupied)
     joueur["pos"] = {"x": jx, "y": jy}
     occupied.add((jx, jy))
 
+    # Monstres : devant le joueur (y plus petit = vers le haut, sens du regard initial),
+    # étalés symétriquement autour de jx.
     monstres = combat_doc["monstres"]
     n = len(monstres)
+    target_y = max(0, jy - SPAWN_DIST)
     for i, m in enumerate(monstres):
-        tx = int((i + 1) * w / (n + 1))
-        mx, my = _nearest_passable(cells, dims, tx, 1, occupied)
+        tx = jx + int(round((i - (n - 1) / 2) * SPAWN_SPREAD))
+        mx, my = _nearest_passable(cells, dims, tx, target_y, occupied)
         m["pos"] = {"x": mx, "y": my}
         occupied.add((mx, my))
 
@@ -182,21 +223,31 @@ def select_battle_map(zone_tags: list, depart_lieu: dict | None) -> dict | None:
 
 
 def get_combat_grid(combat_doc: dict) -> dict:
-    """Résout la grille {dims, cells} du combat.
+    """Résout la grille {dims, cells, nav} du combat.
 
-    `cells` n'est PAS dupliqué dans le doc combat : on référence le lieu battle map
-    (`battle_map_id`) et on lit sa grille à la demande. Repli sur une grille ouverte
-    (taille `grid_dims`) si aucun lieu. Tolère un ancien doc avec `grid` en ligne.
+    `cells`/`nav` ne sont PAS dupliqués dans le doc combat : on référence le lieu
+    battle map (`battle_map_id`) et on lit sa grille à la demande. `nav` = masque des
+    directions interdites par case (cf. utils.lieux.get_final_mask), comme play_town.
+    Repli sur une grille ouverte (taille `grid_dims`) si aucun lieu. Tolère un ancien
+    doc avec `grid` en ligne.
     """
     bm_id = combat_doc.get("battle_map_id")
     if bm_id:
         lieu = get_doc(bm_id)
         if lieu and lieu.get("cells"):
-            return {"dims": lieu["dimensions"], "cells": lieu["cells"]}
+            return {
+                "dims": lieu["dimensions"],
+                "cells": lieu["cells"],
+                "nav": lieu.get("nav", {}),
+            }
     if combat_doc.get("grid", {}).get("cells"):  # rétro-compat docs existants
-        return combat_doc["grid"]
+        grid = combat_doc["grid"]
+        grid.setdefault("nav", {})
+        return grid
     dims = combat_doc.get("grid_dims") or {"x": DEFAULT_GRID_W, "y": DEFAULT_GRID_H}
-    return _open_grid(dims["x"], dims["y"])
+    grid = _open_grid(dims["x"], dims["y"])
+    grid["nav"] = {}  # grille ouverte = aucune direction interdite
+    return grid
 
 
 def roll_dice(notation: str) -> int:
@@ -469,6 +520,7 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
         (monstre["pos"]["x"], monstre["pos"]["y"]),
         (joueur["pos"]["x"], joueur["pos"]["y"]),
         blocked,
+        grid.get("nav", {}),
     )
     if not path or len(path) < 2:
         return False
@@ -609,6 +661,8 @@ def resolve_action(
             return {"error": "Hors de la zone."}
         if not _passable(cells, nx, ny):
             return {"error": "Terrain infranchissable."}
+        if not _nav_allows(grid.get("nav", {}), joueur["pos"]["x"], joueur["pos"]["y"], dx, dy):
+            return {"error": "Direction bloquée."}
         if _occupied_at(combat_doc, nx, ny):
             return {"error": "Case occupée."}
         if joueur["cells_moved"] >= joueur.get("deplacement", 1):
