@@ -4,9 +4,10 @@ import random
 import uuid
 from db.config import get_doc, save_doc, find_docs
 from models.character_stats import (
-    BaseStats, EquipmentBonus, compute_derived_stats, compute_character_level
+    BaseStats, EquipmentBonus, compute_derived_stats
 )
 from utils.lieux import get_final_mask, VALID_MOVES
+from utils.characters import grant_xp
 
 # (dx, dy) → bit de direction (cf. utils.lieux.VALID_MOVES) pour la validation nav.
 _DIR_BIT: dict = {(dx, dy): bit for bit, dx, dy, _op in VALID_MOVES}
@@ -829,13 +830,8 @@ def finalize_combat(combat_doc: dict) -> bool:
     joueur = combat_doc["joueurs"][0]
     if status == "victoire":
         character["currentPV"] = joueur["currentPV"]
-        xp_before = character.get("xp_total", 0)
-        character["xp_total"] = xp_before + combat_doc.get("xp_gagnee", 0)
-        old_niveau = compute_character_level(xp_before)
-        new_niveau = compute_character_level(character["xp_total"])
-        # +N points par niveau gagné (même règle que la montée de niveau monde).
-        for n in range(old_niveau + 1, new_niveau + 1):
-            character["attribute_points"] = character.get("attribute_points", 0) + n
+        # XP + montée de niveau : règle partagée avec la découverte de lieux.
+        grant_xp(character, combat_doc.get("xp_gagnee", 0))
     elif status == "defaite":
         character["currentPV"] = 1
     elif status == "fuite":
