@@ -1,6 +1,6 @@
 {
   "db": "telluris",
-  "exported_at": "2026-06-21T13:48:16.877827Z",
+  "exported_at": "2026-06-21T16:14:51.268071Z",
   "doc_count": 428,
   "docs": [
     {
@@ -126,7 +126,7 @@
     },
     {
       "_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
-      "_rev": "1402-83355c4742eba96916ebac6680cdbc94",
+      "_rev": "1458-3d4baf84d23bd3bc2abdaf5db618c1f1",
       "user_id": "user:eternel7@gmail.com",
       "type": "character",
       "sex": "F",
@@ -138,7 +138,7 @@
       "cite": "lieu:auxerre",
       "lieu": "lieu:auxerre",
       "position": {
-        "x": 13,
+        "x": 23,
         "y": 10
       },
       "caracteristiques_current": {
@@ -151,7 +151,7 @@
         "Cha": 20,
         "Ch": 20
       },
-      "currentPV": 123,
+      "currentPV": 105,
       "currentPM": 160,
       "lieux_visites": [
         "lieu:auxerre",
@@ -168,7 +168,7 @@
         "lieu:chemin_de_la_foret02",
         "lieu:france"
       ],
-      "xp_total": 94,
+      "xp_total": 138,
       "attribute_points": 0,
       "vocations_niveaux": {
         "barbare": 1
@@ -207,7 +207,10 @@
         "combat:0f7c0ce7250741e2a888e76468aefdf6",
         "combat:543d7ce34d7848f99813371641021c1b",
         "combat:a134cd4e42a84930989e7eb571c52e90",
-        "combat:1aded3a07e5b421c99dc9e68b22031ff"
+        "combat:1aded3a07e5b421c99dc9e68b22031ff",
+        "combat:2658a757e258486c9ac1a072645a649f",
+        "combat:51a6ab4f4413424fa5ad8c902a4471bd",
+        "combat:a84d2051a31c4de4b3b03a0dbda8de25"
       ]
     },
     {
@@ -8383,7 +8386,7 @@
     },
     {
       "_id": "item:Epee_courte",
-      "_rev": "3-f39d798616dc62022539abd15a771fb5",
+      "_rev": "4-b489ed2bda04f08838bacee1da7862f4",
       "type": "item",
       "nom": "Épée courte",
       "icon": "⚔️",
@@ -9616,7 +9619,7 @@
     },
     {
       "_id": "lieu:auxerre",
-      "_rev": "438-69bd5c512234420cdbfd039c9f5e318e",
+      "_rev": "439-6d99b7d528fe11de4849eb3080f0602e",
       "type": "lieu",
       "label": "Auxerre",
       "image": "auxerre_start_city.png",
@@ -14899,7 +14902,12 @@
             "zone:riviere"
           ]
         }
-      ]
+      ],
+      "profil_weights": {
+        "profil:novice": 5,
+        "profil:apprenti": 1,
+        "profil:combattant": 1
+      }
     },
     {
       "_id": "lieu:auxerre_porte_douve_exterieur01",
@@ -16785,7 +16793,7 @@
     },
     {
       "_id": "lieu:france",
-      "_rev": "319-f494bacadf505be32457789165ff8e7b",
+      "_rev": "321-effd9dcf44349e617fb8cf30ae1b0858",
       "type": "lieu",
       "label": "France",
       "image": "france.png",
@@ -21620,7 +21628,36 @@
         }
       ],
       "tags": [],
-      "categorie": ""
+      "categorie": "",
+      "rencontres": [
+        {
+          "espece": "espece:aigle_geant",
+          "zones": [
+            "zone:montagne"
+          ]
+        },
+        {
+          "espece": "espece:araignee_geante",
+          "zones": [
+            "zone:foret_feuillus"
+          ]
+        },
+        {
+          "espece": "espece:chauve_souris",
+          "zones": [
+            "zone:foret_coniferes",
+            "zone:foret_feuillus"
+          ]
+        }
+      ],
+      "profil_weights": {
+        "profil:novice": 5,
+        "profil:apprenti": 4,
+        "profil:combattant": 3,
+        "profil:veteran": 2,
+        "profil:champion": 1,
+        "profil:mage": 1
+      }
     },
     {
       "_id": "lieu:lutecia",
@@ -28318,10 +28355,9 @@
     },
     {
       "_id": "zone::coeur_capitale",
-      "_rev": "1-4b9b2a8ece61059d7e424041010a0cce",
+      "_rev": "2-503de26e976e63e6256b233cbd7829d7",
       "type": "zone_influence",
       "nom": "Cœur de capitale",
-      "falloff": "quadratique",
       "intensite_max": 1,
       "table_evenements": [
         {
@@ -28375,10 +28411,9 @@
     },
     {
       "_id": "zone::coeur_cite",
-      "_rev": "1-74f5362fbe261aa913520a8aeb6c4095",
+      "_rev": "2-b0f54cb83e765a0f56e413281e8c7fc0",
       "type": "zone_influence",
       "nom": "Cœur de cité-état",
-      "falloff": "quadratique",
       "intensite_max": 0.9,
       "table_evenements": [
         {
@@ -28431,10 +28466,9 @@
     },
     {
       "_id": "zone::coeur_hameau",
-      "_rev": "1-0e18714b25a0c3e21f817a86309882cd",
+      "_rev": "3-a0863196f7cfcbb2c94dc85dbb897223",
       "type": "zone_influence",
       "nom": "Cœur de hameau",
-      "falloff": "step",
       "intensite_max": 0.5,
       "table_evenements": [
         {
@@ -28486,10 +28520,9 @@
     },
     {
       "_id": "zone::coeur_village",
-      "_rev": "1-dd065b092bd2a12778d84669e478c716",
+      "_rev": "2-3f68426f8b7b03fbc66002c31106fd3c",
       "type": "zone_influence",
       "nom": "Cœur de village",
-      "falloff": "quadratique",
       "intensite_max": 0.6,
       "table_evenements": [
         {
@@ -28541,10 +28574,9 @@
     },
     {
       "_id": "zone::coeur_ville",
-      "_rev": "1-afc48467c5dfd91e0e1631c2e5b49d5a",
+      "_rev": "3-df8b6c99d5f8d84da65a767d85f3b615",
       "type": "zone_influence",
       "nom": "Cœur de ville",
-      "falloff": "quadratique",
       "intensite_max": 0.8,
       "table_evenements": [
         {
@@ -28598,10 +28630,9 @@
     },
     {
       "_id": "zone::faubourg_hameau",
-      "_rev": "1-faa969bc6d646fc4e364088fc7d9e707",
+      "_rev": "2-747ee58808fee7201016304ea2a5197e",
       "type": "zone_influence",
       "nom": "Abords de hameau",
-      "falloff": "lineaire",
       "intensite_max": 0.3,
       "table_evenements": [
         {
@@ -28642,10 +28673,9 @@
     },
     {
       "_id": "zone::faubourg_village",
-      "_rev": "1-b5a87ce02b9720bee00ab3fe4e7e3af2",
+      "_rev": "2-fb81bb078b13e99b35aed640c592ef8a",
       "type": "zone_influence",
       "nom": "Faubourgs de village",
-      "falloff": "lineaire",
       "intensite_max": 0.35,
       "table_evenements": [
         {
@@ -28693,10 +28723,9 @@
     },
     {
       "_id": "zone::faubourg_ville",
-      "_rev": "1-9e976f69ba70f2b77a246ee26d6de8e5",
+      "_rev": "4-0dcc2a4573ed3d822349a0d0e176a8fe",
       "type": "zone_influence",
       "nom": "Faubourgs de ville",
-      "falloff": "lineaire",
       "intensite_max": 0.45,
       "table_evenements": [
         {
@@ -28748,10 +28777,9 @@
     },
     {
       "_id": "zone::quartier_bas_capitale",
-      "_rev": "1-2eef6f7c77e23a91358f90a24469a10f",
+      "_rev": "2-9f41fc0bba0a265350a539a83d18108b",
       "type": "zone_influence",
       "nom": "Bas-fonds de capitale",
-      "falloff": "lineaire",
       "intensite_max": 0.8,
       "table_evenements": [
         {
@@ -28811,10 +28839,9 @@
     },
     {
       "_id": "zone::quartier_bas_cite",
-      "_rev": "1-e55c32d6f58490b180eaa912fea0ec60",
+      "_rev": "3-1b332013f8a39fc018196fc67be8ee23",
       "type": "zone_influence",
       "nom": "Bas-quartiers de cité",
-      "falloff": "lineaire",
       "intensite_max": 0.7,
       "table_evenements": [
         {
@@ -28875,10 +28902,9 @@
     },
     {
       "_id": "zone::quartier_marchand_ville",
-      "_rev": "1-20e76d68b8b02d0101baa432810e67fd",
+      "_rev": "2-b153e06b8ecad7c46a0e215e25e5811b",
       "type": "zone_influence",
       "nom": "Quartier marchand",
-      "falloff": "lineaire",
       "intensite_max": 0.65,
       "table_evenements": [
         {
@@ -28926,10 +28952,9 @@
     },
     {
       "_id": "zone::quartier_noble_cite",
-      "_rev": "1-1601662ac8a25e4c8598a8f49a9c89f2",
+      "_rev": "2-f387a9d1e1f5932a02598742e0926e72",
       "type": "zone_influence",
       "nom": "Quartier noble",
-      "falloff": "step",
       "intensite_max": 0.85,
       "table_evenements": [
         {
@@ -28982,10 +29007,9 @@
     },
     {
       "_id": "zone::quartier_politique_capitale",
-      "_rev": "1-738cc2fe52b819c2d4f8bbf74170dc7b",
+      "_rev": "3-ee6a10c359e4a50b1d51a1f7b307e7f1",
       "type": "zone_influence",
       "nom": "Quartier politique et palais",
-      "falloff": "step",
       "intensite_max": 0.95,
       "table_evenements": [
         {
@@ -29035,10 +29059,9 @@
     },
     {
       "_id": "zone::remparts_capitale",
-      "_rev": "1-db8d3339c3c4498a6f93bb9276b50dbc",
+      "_rev": "2-4b8ab2f631f3fb0c4a6e4ee64ceecf19",
       "type": "zone_influence",
       "nom": "Remparts et fortifications de capitale",
-      "falloff": "step",
       "intensite_max": 0.9,
       "table_evenements": [
         {
@@ -29136,10 +29159,9 @@
     },
     {
       "_id": "zone:campement_bandit",
-      "_rev": "1-7f61a7c573d98865c1c60e218722deed",
+      "_rev": "2-2dc5b70e7df9f97a3019f503f840972a",
       "type": "zone_influence",
       "nom": "Campement de bandits",
-      "falloff": "quadratique",
       "intensite_max": 0.95,
       "table_evenements": [
         {
@@ -29181,10 +29203,9 @@
     },
     {
       "_id": "zone:faubourg",
-      "_rev": "2-d54e1e14e880ecfdecc00b5d9394f70e",
+      "_rev": "3-de1063cdc9b3649de899fe251ec5c4d5",
       "type": "zone_influence",
       "nom": "Faubourgs de cité",
-      "falloff": "lineaire",
       "intensite_max": 0.45,
       "table_evenements": [
         {
@@ -29234,10 +29255,9 @@
     },
     {
       "_id": "zone:foret_coniferes",
-      "_rev": "1-f338c66803958650e3d594db6c2409c4",
+      "_rev": "2-cb99d327888250f862e8ee968b141b4c",
       "type": "zone_influence",
       "nom": "Forêt de conifères",
-      "falloff": "lineaire",
       "intensite_max": 0.8,
       "table_evenements": [
         {
@@ -29276,10 +29296,9 @@
     },
     {
       "_id": "zone:foret_dense",
-      "_rev": "2-0508b01cfb52828a99d6a96ee04afab0",
+      "_rev": "4-6ad90d638d940c9dc9e1bc6224cca7a4",
       "type": "zone_influence",
       "nom": "Forêt dense",
-      "falloff": "lineaire",
       "intensite_max": 0.9,
       "table_evenements": [
         {
@@ -29317,10 +29336,9 @@
     },
     {
       "_id": "zone:foret_feuillus",
-      "_rev": "1-6e75b419abe9d7c13e26f071174a14d4",
+      "_rev": "2-ac19e40173400b37da5848915792ef78",
       "type": "zone_influence",
       "nom": "Forêt de feuillus",
-      "falloff": "lineaire",
       "intensite_max": 0.5,
       "table_evenements": [
         {
@@ -29360,10 +29378,9 @@
     },
     {
       "_id": "zone:foret_persistante",
-      "_rev": "1-bb2b174cc5ff9a6b84f5488a664e7558",
+      "_rev": "2-a7f252f03292591e69003ce57f868a06",
       "type": "zone_influence",
       "nom": "Forêt à feuilles persistantes",
-      "falloff": "lineaire",
       "intensite_max": 0.6,
       "table_evenements": [
         {
@@ -29402,10 +29419,9 @@
     },
     {
       "_id": "zone:foret_petrifiee",
-      "_rev": "1-f53dcd72ccef2616c696056d465a5cdd",
+      "_rev": "2-ff3665d8cb8fd46eb1d8a0319ba38af2",
       "type": "zone_influence",
       "nom": "Forêt pétrifiée",
-      "falloff": "lineaire",
       "intensite_max": 0.9,
       "table_evenements": [
         {
@@ -29445,10 +29461,9 @@
     },
     {
       "_id": "zone:foret_temperee_humide",
-      "_rev": "1-6c6bdebecafa2dfe63df9869cb98ec8f",
+      "_rev": "2-2c9caca831430e7e6c15fcc55b53be00",
       "type": "zone_influence",
       "nom": "Forêt tempérée humide",
-      "falloff": "lineaire",
       "intensite_max": 0.8,
       "table_evenements": [
         {
@@ -29488,10 +29503,9 @@
     },
     {
       "_id": "zone:jungle",
-      "_rev": "1-584c20ab82f45c76d68ec2236957be15",
+      "_rev": "2-c90997b4e9b070a713d3e14a05e00e80",
       "type": "zone_influence",
       "nom": "Jungle",
-      "falloff": "lineaire",
       "intensite_max": 0.95,
       "table_evenements": [
         {
@@ -29531,10 +29545,9 @@
     },
     {
       "_id": "zone:mangrove",
-      "_rev": "1-e7b9a85754c20c0fd24e92bf78a600e3",
+      "_rev": "2-46233efae803eb56cf51b74e921780b1",
       "type": "zone_influence",
       "nom": "Mangrove",
-      "falloff": "lineaire",
       "intensite_max": 0.75,
       "table_evenements": [
         {
@@ -29573,10 +29586,9 @@
     },
     {
       "_id": "zone:marais",
-      "_rev": "1-0c0e3cb2b280eb8c9266086c0116ab15",
+      "_rev": "2-beec343233ff0e455c2998cd4e1e9fb1",
       "type": "zone_influence",
       "nom": "Marais putride",
-      "falloff": "lineaire",
       "intensite_max": 0.85,
       "table_evenements": [
         {
@@ -29627,10 +29639,9 @@
     },
     {
       "_id": "zone:montagne",
-      "_rev": "1-0fc1f28e972374ce374c3d74c28b54a6",
+      "_rev": "2-fd8e8b22a6252a87422c224b050a544e",
       "type": "zone_influence",
       "nom": "Montagne escarpée",
-      "falloff": "lineaire",
       "intensite_max": 0.8,
       "table_evenements": [
         {
@@ -29681,10 +29692,9 @@
     },
     {
       "_id": "zone:plaine_ouverte",
-      "_rev": "1-5365cb1c28dd673fdd7c9b26f48cb0d7",
+      "_rev": "2-9f4b0faf1fb093a8d8d2e06a90ac9305",
       "type": "zone_influence",
       "nom": "Plaine ouverte",
-      "falloff": "lineaire",
       "intensite_max": 0.3,
       "table_evenements": [
         {
@@ -29733,10 +29743,9 @@
     },
     {
       "_id": "zone:riviere",
-      "_rev": "1-f86a1220f327123ede88b7ff9ca0fc55",
+      "_rev": "2-18fd8188adaa440959fc1edc79ce7e55",
       "type": "zone_influence",
       "nom": "Rivière et berges",
-      "falloff": "lineaire",
       "intensite_max": 0.5,
       "table_evenements": [
         {
@@ -29787,10 +29796,9 @@
     },
     {
       "_id": "zone:ruines_maudites",
-      "_rev": "1-b458b7f498d92012b2f7702d55083e34",
+      "_rev": "2-4fe7f2966159def1ff8863b8cce4b44d",
       "type": "zone_influence",
       "nom": "Ruines maudites",
-      "falloff": "quadratique",
       "intensite_max": 0.95,
       "table_evenements": [
         {
@@ -29841,10 +29849,9 @@
     },
     {
       "_id": "zone:taiga",
-      "_rev": "1-defd26fbb972d4f40b93c89906d7ec7b",
+      "_rev": "2-01e4cd473fba16bc38184ed9e58949eb",
       "type": "zone_influence",
       "nom": "Taïga",
-      "falloff": "lineaire",
       "intensite_max": 0.7,
       "table_evenements": [
         {
