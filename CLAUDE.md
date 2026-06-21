@@ -22,6 +22,15 @@ pytest tests/
 
 Tests only cover pure-Python stat computation (`models/character_stats.py`) and have no DB dependency.
 
+> **Environnement de l'agent : ni Python ni Docker ne sont accessibles en local.** Ne pas tenter de lancer `pytest`, `python`, `docker` ou `docker compose` depuis le shell — ça échoue toujours. Les tests et l'app se lancent côté utilisateur (dans le conteneur). Vérifier la logique par lecture/raisonnement et laisser l'utilisateur exécuter `pytest tests/` / `docker compose up`.
+
+## Inspecting live DB values
+
+La CouchDB live tourne sur un hôte distant, généralement NON joignable en local. Pour connaître les valeurs réelles des documents (races, espèces, profils, lieux, items…), lire le dump JSON committé à la racine : `telluris-dump-YYYYMMDD-HHmmss.json` (le timestamp change ; produit par l'export admin `GET /admin/exports/couchdb` / `db.config.dump_all_docs()`). C'est un objet `{"db","exported_at","doc_count","docs":[...]}` ; `docs` exclut les `user:*`. Repérer un doc via grep sur `"_id": "rules:races"`, etc.
+
+### Échelle des caractéristiques (×10, sauf V)
+7 des 8 caractéristiques ont été passées ×10 (F/R/Ag/Vol/Int/Cha/Ch ≈ 10-100). **La Vitesse (V) est restée sur l'échelle 1-10** (base raciale ~4-5, max ~7-8). C'est pourquoi `deplacement = V` et `_compute_actions_max(ag, v) = ceil(ag/20 + v/5)` restent corrects. Les formules dérivées qui divisent une stat ×10 utilisent des diviseurs ×10 (`pa = R//20`, seuils de dés `_caract_to_dice_` à 20/40/60/80/90).
+
 ## Architecture
 
 ```

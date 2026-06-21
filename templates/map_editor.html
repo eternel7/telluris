@@ -4,10 +4,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Telluris — {{ title }}</title>
-	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any"><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Share+Tech+Mono&display=swap');
-
+	
 	:root {
 		--bg: #0d0f14;
 		--panel: #141720;
@@ -20,6 +19,14 @@
 		--grid-line: rgba(200, 168, 75, 0.3);
 		--cell-hover: rgba(200, 168, 75, 0.15);
 		--cell-select: rgba(75, 143, 200, 0.4);
+		--ink:			#0e0b08;
+		--parch:		#f5edd8;
+		--parch2:		#eddfc0;
+		--parch3:		#ffffff;
+		--gold:			#8a651a;
+		--gold2:		#f0c04a;
+		--gold3:		#e8a020;
+		--bronze:		#704d29;
 	}
 
 	* { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,6 +41,25 @@
 		align-items: center;
 	}
 
+	/* ── INPUT FOCUS no Cumulative Layout Shift - CLS  ─────────────────────────────────────────── */
+	input {
+		background: rgba(0, 0, 0, 0.05);
+		border: none;
+		border-bottom: 1px solid var(--bronze);
+		padding: 10px 0;
+		color: var(--ink);
+		font-family: 'IM Fell English', serif;
+		font-size: 16px;
+		box-sizing: border-box;
+		transition: border-color 0.3s;
+	}
+
+	input:focus {
+		outline: none;
+		box-shadow: 0 1px 0 0 var(--gold);
+		border-bottom: 1px solid var(--gold);
+	}
+	
 	header {
 		width: 100%;
 		padding: 18px 32px;
