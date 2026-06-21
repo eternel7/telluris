@@ -1,6 +1,7 @@
 # tests/test_character_stats.py
 
 import pytest
+import models.character_stats as cs
 from models.character_stats import (
     BaseStats, EquipmentBonus, DerivedStats,
     compute_derived_stats, compute_xp_cost, compute_stat_cap,
@@ -117,6 +118,25 @@ def test_degats_cc_dice_arme():
     eq = EquipmentBonus(degats_dice="1D4", degats_bonus=1)
     stats = compute_derived_stats(base, niveau=1, equipment=eq)
     assert stats.degats_cc == "1D6+1D4+2"
+
+
+# ── Facteur dégâts / armure ───────────────────────────────────────────────────
+# FACTEUR_DEGATS_ARMURE pilote À LA FOIS l'armure (PA = R//FACTEUR) et le bonus de
+# puissance des dégâts (F//FACTEUR au CàC, Ag//FACTEUR au tir). Le baisser amplifie
+# les deux symétriquement.
+
+def test_facteur_defaut_20():
+    assert cs.FACTEUR_DEGATS_ARMURE == 20
+
+def test_facteur_pilote_pa_et_degats(monkeypatch):
+    base = make_base(f=40, r=40, ag=40)
+    # Défaut 20 : PA = 40//20 = 2 ; F//20 = 2 → D6+2 ; Ag//20 = 2 → D6+2 (CT)
+    d = compute_derived_stats(base, niveau=1)
+    assert (d.pa, d.degats_cc, d.degats_cd) == (2, "1D6+2", "1D6+2")
+    # Facteur 10 : tout double (PA = 4, bonus = 4)
+    monkeypatch.setattr(cs, "FACTEUR_DEGATS_ARMURE", 10)
+    d = compute_derived_stats(base, niveau=1)
+    assert (d.pa, d.degats_cc, d.degats_cd) == (4, "1D6+4", "1D6+4")
 
 
 # ── Charge ────────────────────────────────────────────────────────────────────
