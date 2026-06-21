@@ -1,8 +1,10 @@
 import os
+import json
+import logging
 from typing import Annotated
 from fastapi import FastAPI, Request, Depends, HTTPException, Response, Body
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -21,6 +23,14 @@ from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
 
 app = FastAPI()
+
+logger = logging.getLogger("telluris")
+if not logger.handlers:
+	_log_handler = logging.StreamHandler()
+	_log_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+	logger.addHandler(_log_handler)
+logger.setLevel(logging.INFO)
+logger.propagate = False
 
 
 @app.on_event("startup")
@@ -482,18 +492,91 @@ async def get_combat_page(
 		headers={"Cache-Control": "no-store"},
 	)
 
-@app.get("/insert-bulck-db")
-async def insert_bulck_db():
-	try:
-		items = []
-		count: int = 0
-		for item in items:
-			#print(item["nom"])
-			#save_doc(item)
-			count += 1
-		return {
-			"status": "done",
-			"count": count
-		}
-	except Exception as e:
-		return {"status": "error", "message": str(e)}
+@app.post("/admin/import-bulk")
+def admin_import_bulk(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: list | dict = Body(...),
+):
+	"""Import en masse de documents dans CouchDB, avec suivi de progression.
+
+	Accepte deux formats : un tableau d'objets (``[ {...}, ... ]``) ou le format
+	``_bulk_docs`` (``{"docs": [ {...}, ... ]}``). Chaque document est upserté :
+	si un doc de même ``_id`` existe déjà, son ``_rev`` courant est réattaché pour
+	éviter un conflit d'écriture CouchDB.
+
+	La réponse est un flux NDJSON (``application/x-ndjson``) : une ligne JSON par
+	événement (``start`` → ``progress`` par document → ``done``), ce qui permet au
+	client d'afficher une barre de progression en temps réel sans WebSocket."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+
+	# Normalise les deux formats acceptés vers une liste de docs.
+	# (Validation faite AVANT le streaming pour pouvoir renvoyer un vrai 400 ;
+	# une fois le flux commencé, le statut HTTP 200 est déjà parti.)
+	if isinstance(payload, dict) and isinstance(payload.get("docs"), list):
+		docs = payload["docs"]
+	elif isinstance(payload, list):
+		docs = payload
+	else:
+		raise HTTPException(
+			status_code=400,
+			detail='Format attendu : tableau d\'objets ou {"docs": [...]}.',
+		)
+
+	if not docs:
+		raise HTTPException(status_code=400, detail="Aucun document à importer.")
+
+	who = current_user.get("_id", "?")
+	total = len(docs)
+
+	def _stream():
+		"""Générateur synchrone (exécuté en threadpool par Starlette) : importe les
+		documents un à un en émettant une ligne NDJSON de progression à chaque étape."""
+		logger.info("Import bulk demandé par %s : %d document(s) à traiter.", who, total)
+		yield json.dumps({"event": "start", "total": total}) + "\n"
+
+		saved, failed, errors = 0, 0, []
+		for i, doc in enumerate(docs):
+			if not isinstance(doc, dict):
+				failed += 1
+				msg = f"#{i}: élément ignoré (pas un objet JSON)."
+				errors.append(msg)
+				logger.warning("Import bulk : %s", msg)
+				doc_id, ok = None, False
+			else:
+				# Upsert : si l'_id existe déjà en base, on attache son _rev courant.
+				doc_id = doc.get("_id")
+				if doc_id:
+					existing = get_doc(doc_id)
+					if existing and existing.get("_rev"):
+						doc["_rev"] = existing["_rev"]
+				if save_doc(doc) is None:
+					failed += 1
+					msg = f"#{i} ({doc_id or '?'}): échec d'écriture CouchDB."
+					errors.append(msg)
+					logger.warning("Import bulk : %s", msg)
+					ok = False
+				else:
+					saved += 1
+					logger.info("Import bulk : doc sauvegardé %s", doc_id or "(sans _id)")
+					ok = True
+
+			yield json.dumps({
+				"event": "progress", "processed": i + 1, "total": total,
+				"saved": saved, "failed": failed, "id": doc_id, "ok": ok,
+			}) + "\n"
+
+		logger.info(
+			"Import bulk terminé par %s : %d importé(s), %d échec(s), %d au total.",
+			who, saved, failed, total,
+		)
+		yield json.dumps({
+			"event": "done", "imported": saved, "failed": failed,
+			"total": total, "errors": errors[:20],
+		}) + "\n"
+
+	return StreamingResponse(
+		_stream(),
+		media_type="application/x-ndjson",
+		headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
+	)
