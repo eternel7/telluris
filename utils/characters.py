@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from db.config import get_doc, save_doc, find_docs
-from models.character_stats import compute_character_level
+from models.character_stats import compute_character_level, EquipmentBonus
 
 def get_user_characters(current_user: dict = Body(...)):
 	if not current_user:
@@ -36,6 +36,35 @@ def get_selected_character(current_user: dict = Body(...)):
 		return None
 
 	return character
+
+def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
+	"""Cumule les bonus des items équipés en relisant chaque doc depuis CouchDB.
+
+	`slots` = dict {slot_name: item_id|None} (IDs, PAS docs résolus). Les valeurs sont
+	relues à chaque appel (`get_doc`) pour que toute modif d'un item en base soit
+	reflétée sans ré-équiper. Partagé par /play (fiche), le snapshot de combat et les
+	endpoints equip/unequip — les stats dérivées ne sont jamais servies depuis un cache.
+	"""
+	bonus = EquipmentBonus()
+	for item_id in slots.values():
+		if not item_id:
+			continue
+		item = get_doc(item_id)
+		if not item:
+			continue
+		bonus.pa           += item.get("bonus_pa", 0)
+		bonus.pv           += item.get("bonus_pv", 0)
+		bonus.pm           += item.get("bonus_pm", 0)
+		bonus.malus_depl   += item.get("bonus_malus_depl", 0)
+		bonus.cc_bonus     += item.get("bonus_cc", 0)
+		bonus.cd_bonus     += item.get("bonus_cd", 0)
+		bonus.degats_bonus += item.get("bonus_degats", 0)
+		dice = item.get("bonus_degats_dice", "")
+		if dice:
+			bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
+		bonus.initiative   += item.get("bonus_initiative", 0)
+	return bonus
+
 
 def grant_xp(character: dict, amount: int) -> dict:
 	"""Ajoute `amount` XP au personnage et attribue les points de montée de niveau.

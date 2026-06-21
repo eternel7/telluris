@@ -4,10 +4,10 @@ import random
 import uuid
 from db.config import get_doc, save_doc, find_docs
 from models.character_stats import (
-	BaseStats, EquipmentBonus, compute_derived_stats
+	BaseStats, compute_derived_stats
 )
 from utils.lieux import nav_allows
-from utils.characters import grant_xp
+from utils.characters import grant_xp, recompute_equipment_bonus
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -418,15 +418,9 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
 		cha=stats.get("Cha", 0), ch=stats.get("Ch", 0),
 	)
-	eq_raw = character.get("equipment_bonus", {})
-	equipment = EquipmentBonus(
-		pv=eq_raw.get("pv", 0), pm=eq_raw.get("pm", 0),
-		pa=eq_raw.get("pa", 0), malus_depl=eq_raw.get("malus_depl", 0),
-		cc_bonus=eq_raw.get("cc_bonus", 0), cd_bonus=eq_raw.get("cd_bonus", 0),
-		degats_bonus=eq_raw.get("degats_bonus", 0),
-		degats_dice=eq_raw.get("degats_dice", ""),
-		initiative=eq_raw.get("initiative", 0),
-	)
+	# Bonus recalculé depuis les items équipés (slots = IDs) plutôt que depuis le champ
+	# stocké equipment_bonus, périmé si un item a été modifié en base sans ré-équiper.
+	equipment = recompute_equipment_bonus(character.get("slots", {}))
 	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
 	derived = compute_derived_stats(base, niveau=voc_niveau, equipment=equipment)
 

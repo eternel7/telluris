@@ -8,7 +8,7 @@ import re
 import uuid
 from db.config import save_doc, get_doc, delete_doc
 from utils.auth import get_current_user, create_access_token
-from utils.characters import get_user_characters, get_selected_character, grant_xp
+from utils.characters import get_user_characters, get_selected_character, grant_xp, recompute_equipment_bonus
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
 from models import character_stats
@@ -328,26 +328,6 @@ _VALID_SLOTS = {
     "pieds", "mains", "anneau_1", "anneau_2", "cou", "ceinture",
 }
 
-def _recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
-    bonus = EquipmentBonus()
-    for item_id in slots.values():
-        if not item_id:
-            continue
-        item = get_doc(item_id)
-        if not item:
-            continue
-        bonus.pa           += item.get("bonus_pa", 0)
-        bonus.pv           += item.get("bonus_pv", 0)
-        bonus.pm           += item.get("bonus_pm", 0)
-        bonus.malus_depl   += item.get("bonus_malus_depl", 0)
-        bonus.cc_bonus     += item.get("bonus_cc", 0)
-        bonus.cd_bonus     += item.get("bonus_cd", 0)
-        bonus.degats_bonus += item.get("bonus_degats", 0)
-        dice = item.get("bonus_degats_dice", "")
-        if dice:
-            bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
-        bonus.initiative   += item.get("bonus_initiative", 0)
-    return bonus
 
 def _derived_from_character(character: dict, equipment: EquipmentBonus) -> DerivedStats:
     stats = character["caracteristiques_current"]
@@ -363,7 +343,7 @@ def _derived_from_character(character: dict, equipment: EquipmentBonus) -> Deriv
 
 def _apply_world_turn_regen(character: dict) -> None:
     """Régén PV à chaque tour de jeu hors combat : ceil(R/20) PV, plafonné à pv_max."""
-    eq = _recompute_equipment_bonus(character.get("slots", {}))
+    eq = recompute_equipment_bonus(character.get("slots", {}))
     pv_max = _derived_from_character(character, eq).pv_max
     r = character.get("caracteristiques_current", {}).get("R", 1)
     regen = math.ceil(r / 20)
@@ -372,7 +352,7 @@ def _apply_world_turn_regen(character: dict) -> None:
 
 def _vitals_payload(character: dict) -> dict:
     """PV/PM courants + max, pour rafraîchir les jauges côté client sans recharger."""
-    eq = _recompute_equipment_bonus(character.get("slots", {}))
+    eq = recompute_equipment_bonus(character.get("slots", {}))
     derived = _derived_from_character(character, eq)
     return {
         "currentPV": character.get("currentPV", derived.pv_max),
@@ -521,7 +501,7 @@ async def equip_item(
 	character["slots"]      = slots
 	character["inventaire"] = inventaire
 
-	eq_bonus = _recompute_equipment_bonus(slots)
+	eq_bonus = recompute_equipment_bonus(slots)
 	character["equipment_bonus"] = eq_bonus.model_dump()
 	save_doc(character)
 
@@ -559,7 +539,7 @@ async def unequip_item(
 	character["slots"]      = slots
 	character["inventaire"] = inventaire
 
-	eq_bonus = _recompute_equipment_bonus(slots)
+	eq_bonus = recompute_equipment_bonus(slots)
 	character["equipment_bonus"] = eq_bonus.model_dump()
 	save_doc(character)
 

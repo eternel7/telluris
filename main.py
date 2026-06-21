@@ -17,7 +17,7 @@ from routers.combat import combat_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
-from utils.characters import get_user_characters, get_selected_character
+from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
@@ -393,9 +393,14 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		ch=stats_cur.get("Ch", 0),
 	)
 	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
+	# Bonus d'équipement recalculé depuis les items équipés (slots = IDs à ce stade,
+	# avant leur résolution en docs plus bas) : toute modif d'item en base est ainsi
+	# reflétée au rechargement sans ré-équiper. Les stats dérivées ne sont jamais stockées.
+	eq_bonus = recompute_equipment_bonus(character.get("slots", {}))
 	derived = compute_derived_stats(
 		base=base,
 		niveau=voc_niveau,
+		equipment=eq_bonus,
 	)
 	character["derived_stats"] = derived.model_dump()
 	character["niveau"] = compute_character_level(character.get("xp_total", 0))

@@ -37,15 +37,14 @@ La CouchDB live tourne sur un hôte distant, généralement NON joignable en loc
 main.py                  # FastAPI app, page routes, static mounts
 routers/
   user.py                # /api/* endpoints: auth, character CRUD, movement
-  stats.py               # /api/stats/* endpoints (defined but NOT mounted in main.py yet)
 utils/
   auth.py                # JWT creation + get_current_user() FastAPI dependency
-  characters.py          # get_user_characters(), get_selected_character()
+  characters.py          # get_user_characters(), get_selected_character(), recompute_equipment_bonus()
   lieux.py               # lieu_router, movement logic, navigation bitmask
 db/
   config.py              # CouchDB connection, get_doc / save_doc / find_docs helpers
 models/
-  character_stats.py     # BaseStats, DerivedStats, compute_derived_stats(), VOCATION_BONUS
+  character_stats.py     # BaseStats, DerivedStats, EquipmentBonus, compute_derived_stats()
   character_document.py  # Pydantic spec for a character document (reference only — see note below)
 templates/
   *.html                 # Jinja2 pages
