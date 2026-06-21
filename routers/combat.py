@@ -26,20 +26,42 @@ def _is_town_lieu(lieu: dict | None) -> bool:
     return bool(img) and os.path.exists(os.path.join(TOWNS_IMAGES_PATH, img))
 
 
-def _active_zone_ids(lieu: dict, character: dict) -> set:
-    """Ids des zones-defs actives à la position du personnage dans le lieu."""
+def _active_zone_placements(lieu: dict, character: dict) -> list:
+    """Placements de zone actifs (intensité > 0) à la position du personnage.
+
+    On renvoie les placements eux-mêmes (pas seulement les ids de def) pour pouvoir
+    lire un éventuel `profil_weights` propre à l'instance de zone.
+    """
     placements = lieu.get("zone_influences", [])
     if not placements:
-        return set()
+        return []
     pos = character.get("position", {})
     px, py = pos.get("x", 0), pos.get("y", 0)
     zone_defs = load_zone_defs_for_lieu(lieu, get_doc)
-    actives = set()
+    actifs = []
     for placement in placements:
         zone_def = zone_defs.get(placement.get("zone"))
         if zone_def and compute_zone_intensity(px, py, placement, zone_def) > 0.0:
-            actives.add(placement.get("zone"))
-    return actives
+            actifs.append(placement)
+    return actifs
+
+
+def _resolve_profil_weights(active_placements: list, lieu: dict) -> dict | None:
+    """Poids de profils effectifs pour le tirage du grade des monstres.
+
+    Chaîne (cf. design) : cumul (somme) des `profil_weights` des zones actives qui
+    en définissent un → sinon `profil_weights` par défaut du lieu → sinon None
+    (tirage uniforme parmi les profils). Les poids non numériques ou ≤ 0 sont ignorés.
+    """
+    merged: dict = {}
+    for placement in active_placements:
+        for pid, w in (placement.get("profil_weights") or {}).items():
+            if isinstance(w, bool) or not isinstance(w, (int, float)) or w <= 0:
+                continue
+            merged[pid] = merged.get(pid, 0) + w
+    if merged:
+        return merged
+    return lieu.get("profil_weights") or None
 
 
 class StartCombatRequest(BaseModel):
@@ -83,7 +105,8 @@ async def start_combat(
 
     # Espèces rencontrables = celles du lieu dont une zone concernée est active à la
     # position du personnage (rencontres: [{espece, zones:[zone_def_id]}]).
-    actives = _active_zone_ids(depart_lieu, character) if depart_lieu else set()
+    active_placements = _active_zone_placements(depart_lieu, character) if depart_lieu else []
+    actives = {p.get("zone") for p in active_placements}
     rencontres = (depart_lieu or {}).get("rencontres", [])
     espece_ids = {
         r["espece"] for r in rencontres
@@ -100,9 +123,14 @@ async def start_combat(
     if _is_town_lieu(depart_lieu):
         profils = [p for p in profils_all if p.get("niveau", 1) <= character_stats.TOWN_PROFIL_NIVEAU_MAX]
 
+    # Distribution de grades (profils) : override des zones actives, sinon défaut lieu.
+    profil_weights = _resolve_profil_weights(active_placements, depart_lieu or {})
+
     nb_monstres = max(1, round(body.intensite * 3))
     # Espèces déjà filtrées par zone → pas de re-filtrage par tags (zone_tags vide).
-    monstres = instantiate_monsters(pool_especes, profils, nb_monstres, [])
+    monstres = instantiate_monsters(
+        pool_especes, profils, nb_monstres, [], profil_weights=profil_weights
+    )
     if not monstres:
         return {"combat_id": None}
 

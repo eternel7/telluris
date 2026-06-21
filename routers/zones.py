@@ -13,6 +13,16 @@ def _require_admin(current_user: dict):
         raise HTTPException(status_code=403, detail="Admin only")
 
 
+def _clean_profil_weights(raw) -> dict:
+    """Normalise une table {profil_id: poids} : ne garde que les poids numériques > 0."""
+    out = {}
+    if isinstance(raw, dict):
+        for pid, w in raw.items():
+            if pid and isinstance(w, (int, float)) and not isinstance(w, bool) and w > 0:
+                out[pid] = w
+    return out
+
+
 @zones_router.get("/zones")
 async def list_zones(current_user: Annotated[dict, Depends(get_current_user)]):
     _require_admin(current_user)
@@ -82,6 +92,12 @@ async def update_lieu_zone_influences(
     placements = body.get("zone_influences", [])
     for p in placements:
         p["bbox"] = compute_bbox(p)
+        # Override de grades propre à l'instance (optionnel) : normalisé, retiré si vide.
+        pw = _clean_profil_weights(p.get("profil_weights"))
+        if pw:
+            p["profil_weights"] = pw
+        else:
+            p.pop("profil_weights", None)
     lieu_doc["zone_influences"] = placements
     save_doc(lieu_doc)
     return {"saved": len(placements), "zone_influences": placements}
@@ -109,5 +125,12 @@ async def update_lieu_rencontres(
         for r in rencontres if r.get("espece")
     ]
     lieu_doc["rencontres"] = clean
+    # Distribution de grades (profils) par défaut du lieu (optionnelle) : {profil_id: poids>0}.
+    if "profil_weights" in body:
+        lieu_doc["profil_weights"] = _clean_profil_weights(body.get("profil_weights"))
     save_doc(lieu_doc)
-    return {"saved": len(clean), "rencontres": clean}
+    return {
+        "saved": len(clean),
+        "rencontres": clean,
+        "profil_weights": lieu_doc.get("profil_weights", {}),
+    }

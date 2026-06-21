@@ -329,8 +329,31 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
     }
 
 
+def _pick_profil(profils: list, profil_weights: dict | None):
+    """Tire un profil parmi `profils` (déjà filtrés, p.ex. cap ville).
+
+    Si `profil_weights` est fourni, tirage pondéré restreint aux profils présents
+    dans `profils` (les ids inconnus / hors cap / poids ≤ 0 sont ignorés). Repli sur
+    un tirage uniforme si aucun candidat pondéré ne subsiste.
+    """
+    if not profils:
+        return None
+    if profil_weights:
+        by_id = {p["_id"]: p for p in profils}
+        candidates, poids = [], []
+        for pid, w in profil_weights.items():
+            p = by_id.get(pid)
+            if p is not None and isinstance(w, (int, float)) and not isinstance(w, bool) and w > 0:
+                candidates.append(p)
+                poids.append(w)
+        if candidates:
+            return random.choices(candidates, weights=poids, k=1)[0]
+    return random.choice(profils)
+
+
 def instantiate_monsters(
-    especes: list, profils: list, nb: int, zone_tags: list
+    especes: list, profils: list, nb: int, zone_tags: list,
+    profil_weights: dict | None = None,
 ) -> list:
     matching = [e for e in especes if set(e.get("tags", [])) & set(zone_tags)]
     pool = matching if matching else especes
@@ -340,7 +363,7 @@ def instantiate_monsters(
     monstres = []
     for i in range(nb):
         espece = random.choice(pool)
-        profil = random.choice(profils) if profils else None
+        profil = _pick_profil(profils, profil_weights)
 
         if profil:
             base_stats = roll_monster_stats(espece, profil)

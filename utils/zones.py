@@ -12,17 +12,13 @@ def _rotate_point(px: float, py: float, cx: float, cy: float, rot_deg: float) ->
     return (rx * cos_a - ry * sin_a, rx * sin_a + ry * cos_a)
 
 
-def _apply_falloff(dist_ratio: float, falloff: str, intensite_max: float) -> float:
-    if falloff == "quadratique":
-        return (dist_ratio ** 2) * intensite_max
-    if falloff == "step":
-        return intensite_max if dist_ratio > 0 else 0.0
-    # lineaire (défaut)
-    return dist_ratio * intensite_max
+def compute_zone_intensity(px: float, py: float, placement: dict, zone_def: dict | None = None) -> float:
+    """Intensité binaire (membership) : on est dans la zone ou on ne l'est pas.
 
-
-def compute_zone_intensity(px: float, py: float, placement: dict, zone_def: dict) -> float:
-    """Return the intensity [0, intensite_max] for point (px, py) in this placement, 0 if outside."""
+    Renvoie l'`intensite_max` (plate) du zone_def si le point (px, py) est À L'INTÉRIEUR
+    de la forme du placement, 0.0 sinon. Plus aucun falloff (linéaire/quadratique/step) :
+    aucune gradation par distance au centre — toute la surface vaut pareil.
+    """
     bbox = placement.get("bbox")
     if bbox and not (bbox["x_min"] <= px <= bbox["x_max"] and bbox["y_min"] <= py <= bbox["y_max"]):
         return 0.0
@@ -37,14 +33,11 @@ def compute_zone_intensity(px: float, py: float, placement: dict, zone_def: dict
     if forme == "rectangle":
         if abs(rx) > half_w or abs(ry) > half_h:
             return 0.0
-        dist_ratio = 1.0 - max(abs(rx) / half_w, abs(ry) / half_h)
     else:  # ellipse
-        d = (rx / half_w) ** 2 + (ry / half_h) ** 2
-        if d > 1.0:
+        if (rx / half_w) ** 2 + (ry / half_h) ** 2 > 1.0:
             return 0.0
-        dist_ratio = 1.0 - math.sqrt(d)
 
-    return _apply_falloff(dist_ratio, zone_def.get("falloff", "lineaire"), zone_def.get("intensite_max", 1.0))
+    return (zone_def or {}).get("intensite_max", 1.0)
 
 
 def compute_bbox(placement: dict) -> dict:

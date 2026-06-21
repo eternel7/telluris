@@ -516,6 +516,11 @@
 				</div>
 				<div style="font-size:.68rem;color:var(--accent-dim,#888);margin-bottom:6px;">Cliquer sur la grille pour placer la zone.</div>
 				<div id="zone-list" style="max-height:180px;overflow-y:auto;margin-bottom:8px;font-size:.68rem;"></div>
+				<div id="zone-pw-section" style="border-top:1px solid var(--border);margin-top:6px;padding-top:8px;margin-bottom:8px;">
+					<label style="font-size:.7rem;color:var(--accent);">⚔ Grades (override de cette instance)</label>
+					<div id="zone-pw-hint" style="font-size:.66rem;color:#888;margin-bottom:6px;">Sélectionnez une zone placée pour pondérer ses profils (vide = hérite du défaut du lieu).</div>
+					<div id="zone-profil-weights"></div>
+				</div>
 				<button class="btn" id="save-zones-btn" style="width:100%;">💾 Sauvegarder les zones</button>
 			</div>
 
@@ -530,6 +535,11 @@
 				</div>
 				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Sur chaque espèce, cliquer les zones d'influence où elle apparaît (toutes les instances d'un même type partagent les espèces).</div>
 				<div id="rencontre-list" style="max-height:240px;overflow-y:auto;margin-bottom:8px;font-size:.68rem;"></div>
+				<div style="border-top:1px solid var(--border);margin-top:6px;padding-top:8px;margin-bottom:8px;">
+					<label style="font-size:.7rem;color:var(--accent);">⚔ Grades par défaut du lieu</label>
+					<div style="font-size:.66rem;color:#888;margin-bottom:6px;">Poids de tirage des profils quand aucune zone active n'impose les siens (vide = tirage uniforme).</div>
+					<div id="lieu-profil-weights"></div>
+				</div>
 				<button class="btn" id="save-rencontres-btn" style="width:100%;">💾 Sauvegarder les rencontres</button>
 			</div>
 
@@ -698,8 +708,10 @@ const ZONE_COLORS = [
 })();
 
 // ── RENCONTRES STATE ─────────────────────────────────────────────────────────
-let especesDefs = {};   // { "espece:x": { nom, image, ... } }
-let rencontres = [];    // [ { espece: "espece:x", zones: ["zone::a", ...] } ]
+let especesDefs = {};      // { "espece:x": { nom, image, ... } }
+let rencontres = [];       // [ { espece: "espece:x", zones: ["zone::a", ...] } ]
+let profils = [];          // profils de grade, triés par niveau
+let lieuProfilWeights = {}; // distribution de grades par défaut du lieu { profil_id: poids }
 
 // Load espèces (bestiaire) on page load
 (async () => {
@@ -718,6 +730,18 @@ let rencontres = [];    // [ { espece: "espece:x", zones: ["zone::a", ...] } ]
 				});
 		}
 	} catch (e) { console.warn('Espèces non chargées', e); }
+})();
+
+// Load profils (grades) on page load — pour les éditeurs de poids de profils.
+(async () => {
+	try {
+		const res = await fetch('/api/profils');
+		if (res.ok) {
+			profils = (await res.json() || []).sort((a, b) => (a.niveau || 0) - (b.niveau || 0));
+			renderZoneProfilWeights();
+			renderLieuProfilWeights();
+		}
+	} catch (e) { console.warn('Profils non chargés', e); }
 })();
 
 // ── GET LIEU & GENERATE GRID FROM SERVER ───────────────────────────────────
@@ -760,6 +784,9 @@ lieuSelect.addEventListener('change', async (e) => {
 			selectedZoneIdx = -1;
 			renderZoneList();
 			rencontres = lieuData.rencontres ? JSON.parse(JSON.stringify(lieuData.rencontres)) : [];
+			lieuProfilWeights = lieuData.profil_weights ? JSON.parse(JSON.stringify(lieuData.profil_weights)) : {};
+			renderLieuProfilWeights();
+			renderZoneProfilWeights();
 			renderRencontreList();
 			dropZone.classList.add('hidden');
 			gridCont.classList.add('visible');
@@ -1074,6 +1101,7 @@ function paint(e) {
 		zonesPlacements.push(newPlacement);
 		selectedZoneIdx = zonesPlacements.length - 1;
 		syncZoneInputs(selectedZoneIdx);
+		renderZoneProfilWeights();
 		renderZoneList();
 		renderGrid();
 		setStatus(`Zone placée en [${cx}, ${cy}] — ${zonesPlacements.length} zone(s) au total.`);
@@ -1269,6 +1297,7 @@ function renderZoneList() {
 			}
 			renderZoneList();
 			renderGrid();
+				renderZoneProfilWeights();
 		});
 	});
 }
@@ -1278,6 +1307,7 @@ function deleteZone(idx) {
 	if (selectedZoneIdx >= zonesPlacements.length) selectedZoneIdx = zonesPlacements.length - 1;
 	renderZoneList();
 	renderGrid();
+	renderZoneProfilWeights();
 }
 
 saveZonesBtn.addEventListener('click', async () => {
@@ -1292,6 +1322,9 @@ saveZonesBtn.addEventListener('click', async () => {
 			const data = await res.json();
 			// Update local placements with computed bbox from server
 			zonesPlacements = data.zone_influences || zonesPlacements;
+			renderZoneList();
+			renderGrid();
+			renderZoneProfilWeights();
 			setStatus(`<span style="color:#80e580;">${data.saved} zone(s) sauvegardée(s).</span>`);
 		} else {
 			const err = await res.json();
@@ -1374,7 +1407,7 @@ saveRencontresBtn.addEventListener('click', async () => {
 		const res = await fetch(`/api/lieu/${encodeURIComponent(currentLocId)}/rencontres`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ rencontres }),
+			body: JSON.stringify({ rencontres, profil_weights: lieuProfilWeights }),
 		});
 		if (res.ok) {
 			const data = await res.json();
@@ -1387,6 +1420,58 @@ saveRencontresBtn.addEventListener('click', async () => {
 		}
 	} catch (e) { setStatus('<span style="color:var(--danger)">Erreur réseau.</span>'); }
 });
+
+// ── PROFIL WEIGHTS (grades) ──────────────────────────────────────────────────
+// Construit une grille de poids (un input par profil) ; vide / ≤0 = profil exclu.
+// getWeights() → l'objet courant {profil_id: poids} ; setWeight(pid, val|undefined).
+function buildWeightInputs(containerId, getWeights, setWeight, disabled) {
+	const c = document.getElementById(containerId);
+	if (!c) return;
+	if (!profils.length) { c.innerHTML = '<div style="color:#888;font-size:.66rem;">Profils non chargés.</div>'; return; }
+	const w = getWeights() || {};
+	c.innerHTML = profils.map(p => {
+		const val = (w[p._id] ?? '');
+		return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+			<span style="flex:1;font-size:.68rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p._id}">${p.nom || p._id} <span style="opacity:.55;">niv.${p.niveau ?? '?'}</span></span>
+			<input type="number" min="0" step="1" data-pid="${p._id}" value="${val}" placeholder="0" ${disabled ? 'disabled' : ''} style="width:58px;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:3px;${disabled ? 'opacity:.4;' : ''}">
+		</div>`;
+	}).join('');
+	c.querySelectorAll('input[data-pid]').forEach(inp => {
+		inp.addEventListener('input', () => {
+			const v = parseFloat(inp.value);
+			setWeight(inp.dataset.pid, (isNaN(v) || v <= 0) ? undefined : v);
+		});
+	});
+}
+
+// Éditeur de l'override de l'instance de zone sélectionnée.
+function renderZoneProfilWeights() {
+	const sel = selectedZoneIdx >= 0 && selectedZoneIdx < zonesPlacements.length;
+	const hint = document.getElementById('zone-pw-hint');
+	if (hint) hint.style.display = sel ? 'none' : '';
+	buildWeightInputs('zone-profil-weights',
+		() => sel ? (zonesPlacements[selectedZoneIdx].profil_weights || {}) : {},
+		(pid, val) => {
+			if (!sel) return;
+			const p = zonesPlacements[selectedZoneIdx];
+			p.profil_weights = p.profil_weights || {};
+			if (val === undefined) delete p.profil_weights[pid];
+			else p.profil_weights[pid] = val;
+			if (Object.keys(p.profil_weights).length === 0) delete p.profil_weights;
+		},
+		!sel);
+}
+
+// Éditeur de la distribution par défaut du lieu.
+function renderLieuProfilWeights() {
+	buildWeightInputs('lieu-profil-weights',
+		() => lieuProfilWeights,
+		(pid, val) => {
+			if (val === undefined) delete lieuProfilWeights[pid];
+			else lieuProfilWeights[pid] = val;
+		},
+		false);
+}
 
 // ── STATUS ─────────────────────────────────────────────────────────────────
 function setStatus(html) {
