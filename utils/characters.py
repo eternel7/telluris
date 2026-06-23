@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from db.config import get_doc, save_doc, find_docs
-from models.character_stats import compute_character_level, EquipmentBonus
+from models.character_stats import compute_character_level, EquipmentBonus, BaseStats, compute_derived_stats
 
 def get_user_characters(current_user: dict = Body(...)):
 	if not current_user:
@@ -37,16 +37,62 @@ def get_selected_character(current_user: dict = Body(...)):
 
 	return character
 
+# ── Références d'items (inventaire / sol / slots / butin) ──────────────────────
+# Une référence d'item stockée est SOIT une chaîne "item:xxx" (legacy → poids = min
+# de l'item), SOIT un objet {"item": "item:xxx", "poids": <nombre>} portant le poids
+# propre à l'instance (tiré au loot). Le champ `poids` d'un doc item peut lui-même être
+# un nombre fixe OU un tableau [min, max].
+
+def item_ref_id(ref) -> str | None:
+	"""ID de l'item depuis une référence (chaîne legacy ou objet {item, poids})."""
+	if isinstance(ref, dict):
+		return ref.get("item")
+	return ref
+
+
+def poids_bounds(item: dict) -> tuple[float, float]:
+	"""(min, max) du poids d'un doc item ; `poids` peut être [min, max] ou un nombre."""
+	p = (item or {}).get("poids", 0)
+	if isinstance(p, (list, tuple)) and len(p) >= 2:
+		return float(p[0] or 0), float(p[1] or 0)
+	val = float(p or 0)
+	return val, val
+
+
+def item_ref_weight(ref) -> float:
+	"""Poids effectif d'une référence : poids stocké si {item, poids}, sinon min de l'item."""
+	if isinstance(ref, dict) and ref.get("poids") is not None:
+		return float(ref.get("poids") or 0)
+	item = get_doc(item_ref_id(ref)) if item_ref_id(ref) else None
+	return poids_bounds(item)[0]
+
+
+def resolve_item_ref(ref):
+	"""Référence → doc item complet, avec `poids` écrasé par le poids effectif de
+	l'instance (nombre) et `_id`/`item` conservés. None si l'item n'existe plus."""
+	item_id = item_ref_id(ref)
+	if not item_id:
+		return None
+	doc = get_doc(item_id)
+	if not doc:
+		return None
+	doc = dict(doc)
+	doc["poids"] = item_ref_weight(ref)
+	doc["item"] = item_id
+	return doc
+
+
 def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 	"""Cumule les bonus des items équipés en relisant chaque doc depuis CouchDB.
 
-	`slots` = dict {slot_name: item_id|None} (IDs, PAS docs résolus). Les valeurs sont
-	relues à chaque appel (`get_doc`) pour que toute modif d'un item en base soit
-	reflétée sans ré-équiper. Partagé par /play (fiche), le snapshot de combat et les
-	endpoints equip/unequip — les stats dérivées ne sont jamais servies depuis un cache.
+	`slots` = dict {slot_name: ref|None} où ref est une chaîne id OU un objet
+	{item, poids}. Les valeurs sont relues à chaque appel (`get_doc`) pour que toute
+	modif d'un item en base soit reflétée sans ré-équiper. Partagé par /play (fiche),
+	le snapshot de combat et equip/unequip — jamais servi depuis un cache.
 	"""
 	bonus = EquipmentBonus()
-	for item_id in slots.values():
+	for ref in slots.values():
+		item_id = item_ref_id(ref)
 		if not item_id:
 			continue
 		item = get_doc(item_id)
@@ -64,6 +110,33 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 			bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
 		bonus.initiative   += item.get("bonus_initiative", 0)
 	return bonus
+
+
+def carried_weight(character: dict) -> float:
+	"""Poids total porté = somme des poids effectifs des références de l'inventaire ET
+	des items équipés (slots). Une référence chaîne (legacy) vaut le min de l'item ;
+	une référence {item, poids} vaut son poids d'instance.
+
+	Sert à la contrainte de charge (charge_max) et au malus de déplacement en combat.
+	"""
+	refs = list(character.get("inventaire", []))
+	refs += [v for v in (character.get("slots") or {}).values() if v]
+	return sum(item_ref_weight(r) for r in refs)
+
+
+def charge_max_of(character: dict) -> int:
+	"""Charge maximale portable du personnage (kg).
+
+	Dérivée autoritative `F*5` via `compute_derived_stats` (indépendante du niveau et
+	de l'équipement). Sert à la contrainte de charge en exploration comme en combat.
+	"""
+	stats = character.get("caracteristiques_current", {})
+	base = BaseStats(
+		v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
+		ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
+		cha=stats.get("Cha", 0), ch=stats.get("Ch", 0),
+	)
+	return compute_derived_stats(base, niveau=0).charge_max
 
 
 def grant_xp(character: dict, amount: int) -> dict:

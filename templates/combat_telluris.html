@@ -218,6 +218,8 @@
 .action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .action-btn.attack-btn { border-color: #cc3333; color: #ff8080; }
 .action-btn.attack-btn:hover:not(:disabled) { background: #3a1a1a; }
+.action-btn.loot-btn   { border-color: #8a6d2f; color: #cda349; }
+.action-btn.loot-btn:hover:not(:disabled) { background: #2e2510; }
 .action-btn.flee-btn   { border-color: #666; color: #999; }
 /* Flèches directionnelles — mêmes règles d'affichage que play_town */
 .controls {
@@ -295,11 +297,55 @@
 .end-overlay.visible { display: flex; }
 .end-card {
 	background: #1e1e1e; border: 1px solid #444;
-	border-radius: 16px; padding: 30px 40px; text-align: center; max-width: 320px;
+	border-radius: 16px; padding: 30px 40px; text-align: center; max-width: 360px;
 }
 .end-icon  { font-size: 52px; margin-bottom: 10px; }
 .end-title { font-size: 26px; font-weight: bold; margin-bottom: 8px; }
-.end-xp    { font-size: 18px; color: #ffd700; margin-bottom: 22px; min-height: 24px; }
+.end-xp    { font-size: 18px; color: #ffd700; margin-bottom: 12px; min-height: 24px; }
+
+/* ── Butin (sélection à la victoire) ── */
+.loot-section { margin: 4px 0 20px; text-align: left; }
+.loot-title {
+	font-size: 13px; color: #c9b27a; font-style: italic;
+	margin-bottom: 8px; text-align: center;
+}
+.loot-list { max-height: 180px; overflow-y: auto; margin-bottom: 14px; }
+.loot-item {
+	display: flex; align-items: center; gap: 8px;
+	padding: 5px 8px; border-radius: 6px;
+	font-size: 14px; color: #e8e4dc; cursor: pointer;
+}
+.loot-item:hover { background: rgba(255,255,255,0.04); }
+.loot-item input { accent-color: #cda349; width: 15px; height: 15px; cursor: pointer; }
+.loot-item.disabled { opacity: 0.4; cursor: not-allowed; }
+.loot-item .loot-poids { margin-left: auto; color: #9a8a66; font-size: 12px; }
+/* Jauge de charge — mêmes principes que .sh-stat-bar de play_town (track + fill + pip). */
+.charge-bar-wrap { padding: 2px 0; }
+.charge-bar {
+	position: relative; height: 8px; background: #111116;
+	border: 1px solid rgba(255,255,255,0.06); border-radius: 2px; overflow: visible;
+}
+.charge-fill {
+	height: 100%; width: 0%; border-radius: 1px 0 0 1px;
+	background: linear-gradient(90deg, #8a7355 0%, #cda349 100%);
+	box-shadow: 0 0 4px rgba(255,215,0,0.3);
+	transition: width .15s ease, background .15s ease;
+}
+.charge-fill.over-half { background: linear-gradient(90deg, #a86a2e 0%, #e0902f 100%); }
+.charge-fill.over-max  { background: linear-gradient(90deg, #a83232 0%, #e04a4a 100%); }
+/* Le pip marque la moitié de la charge max (seuil du malus de déplacement). */
+.charge-pip {
+	position: absolute; top: -3px; bottom: -3px; left: 50%;
+	width: 2px; background: #e8e4dc; box-shadow: 0 0 3px #fff;
+	transform: translateX(-50%); z-index: 2;
+}
+.charge-label { font-size: 12px; color: #c9b27a; text-align: center; margin-top: 6px; min-height: 16px; }
+/* Bloc charge sur le panneau joueur (sous les mini-stats dérivées). */
+.char-charge { margin-top: 8px; }
+.char-charge-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.char-charge-head .stat-value { font-size: 12px; }
+.charge-label .warn { color: #e0902f; }
+.charge-label .err  { color: #e04a4a; }
 .end-btn {
 	padding: 12px 28px; background: #cc2233; color: white;
 	border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
@@ -391,6 +437,21 @@
 			<span>PA {{ combat.joueurs[0].pa }}</span>
 			<span>{{ combat.joueurs[0].degats_cc }}</span>
 		</div>
+
+		<!-- Charge portée : même jauge que la sélection de butin (pip à 50 % = seuil
+		     du malus de déplacement). Mise à jour en temps réel à chaque ramassage. -->
+		<div class="char-charge">
+			<div class="char-charge-head">
+				<span class="stat-label">Charge</span>
+				<span class="stat-value" id="joueur-charge-text"></span>
+			</div>
+			<div class="charge-bar-wrap">
+				<div class="charge-bar">
+					<div class="charge-fill" id="joueur-charge-fill"></div>
+					<div class="charge-pip"></div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<!-- Centre : actions + log -->
@@ -398,6 +459,7 @@
 		<div class="action-bar">
 			<div class="btn-row">
 				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
+				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
 				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
 			</div>
 			<div id="target-row">
@@ -470,7 +532,22 @@
 		<div class="end-icon" id="end-icon"></div>
 		<div class="end-title" id="end-title"></div>
 		<div class="end-xp" id="end-xp"></div>
-		<button class="end-btn" onclick="window.location.href='/play'">Retour à la carte</button>
+
+		<!-- Butin : affiché uniquement à la victoire. Aucun objet n'est pris
+		     automatiquement — le joueur coche ce qu'il emporte (borné par charge_max). -->
+		<div class="loot-section" id="loot-section" style="display:none">
+			<div class="loot-title">🎒 Butin — cochez ce que vous emportez</div>
+			<div class="loot-list" id="loot-list"></div>
+			<div class="charge-bar-wrap">
+				<div class="charge-bar">
+					<div class="charge-fill" id="charge-fill"></div>
+					<div class="charge-pip" id="charge-pip"></div>
+				</div>
+			</div>
+			<div class="charge-label" id="charge-label"></div>
+		</div>
+
+		<button class="end-btn" id="end-btn" onclick="leaveCombat()">Retour à la carte</button>
 	</div>
 </div>
 
@@ -487,6 +564,7 @@ const SERVER_DATA = {
 	tour:                 {{ combat.tour }},
 	log:                  {{ combat.log | tojson | safe }},
 	xp_gagnee:            {{ combat.xp_gagnee }},
+	butin_disponible:     {{ (combat.butin_disponible or []) | tojson | safe }},
 };
 
 // Grille de combat : statique pour toute la durée du combat (cells appartient au
@@ -575,6 +653,22 @@ function updateJoueur(j) {
 	pipsEl.innerHTML = Array.from({length: j.actions_max}, (_, i) =>
 		`<div class="pip${i < j.actions_restantes ? '' : ' empty'}"></div>`
 	).join('');
+	updateChargeBar(j);
+}
+
+// Jauge de charge du panneau joueur : pip fixe à 50 % (= charge_max/2). Passe en
+// orange au-delà (déplacement divisé par deux) puis rouge à la surcharge.
+function updateChargeBar(j) {
+	const fill = document.getElementById('joueur-charge-fill');
+	const txt  = document.getElementById('joueur-charge-text');
+	if (!fill || !txt) return;
+	const chargeMax = j.charge_max || 0;
+	const charge = j.charge || 0;
+	const half = chargeMax / 2;
+	fill.style.width = (chargeMax > 0 ? Math.min(100, charge / chargeMax * 100) : 0) + '%';
+	fill.classList.toggle('over-half', charge > half && charge <= chargeMax + 1e-6);
+	fill.classList.toggle('over-max',  charge > chargeMax + 1e-6);
+	txt.textContent = `${(+charge).toFixed(1)} / ${chargeMax} kg`;
 }
 
 function updateEnemy(m) {
@@ -692,6 +786,18 @@ function adjacentAliveMonsters() {
 	return state.monstres.filter(m => m.vivant && chebyToPlayer(m) <= portee);
 }
 
+function chebyJM(j, m) {
+	return Math.max(Math.abs(m.pos.x - j.pos.x), Math.abs(m.pos.y - j.pos.y));
+}
+// Miroir client de la validation serveur « ramasser » : tour du joueur, action dispo,
+// aucun ennemi vivant au corps à corps, et au moins une carcasse adjacente non ramassée.
+function canLoot(data) {
+	const j = data.joueurs[0];
+	if (!(data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0)) return false;
+	if (data.monstres.some(m => m.vivant && m.pos && chebyJM(j, m) <= 1)) return false;
+	return data.monstres.some(m => !m.vivant && !m.loote && m.pos && chebyJM(j, m) <= 1);
+}
+
 // ── Disponibilité d'une direction : miroir exact de la validation serveur `deplacer`.
 // getFinalMask / navAllows / VALID_MOVES proviennent de scripts/nav.js (partagé).
 function cellPassable(x, y) {
@@ -745,6 +851,7 @@ function updateButtons(data) {
 	document.getElementById('btn-attaquer').disabled = !canAct || noTarget;
 	document.getElementById('btn-confirm').disabled  = !canAct || noTarget;
 	document.getElementById('btn-fuir').disabled     = !isActive || !isPlayer;
+	document.getElementById('btn-ramasser').disabled = !canLoot(data);
 }
 
 function refreshTargetSelect() {
@@ -836,7 +943,98 @@ function showEndOverlay(status, xp) {
 	document.getElementById('end-icon').textContent  = icons[status]  || '❓';
 	document.getElementById('end-title').textContent = titles[status] || status;
 	document.getElementById('end-xp').textContent    = status === 'victoire' && xp > 0 ? `+${xp} XP` : '';
+
+	// Le butin n'est proposé qu'à la victoire ; aucun objet n'est pris d'office.
+	const dispo = (status === 'victoire') ? (state.butin_disponible || []) : [];
+	const section = document.getElementById('loot-section');
+	const btn = document.getElementById('end-btn');
+	if (dispo.length) {
+		section.style.display = '';
+		buildLootList(dispo);
+		recomputeCharge();
+		btn.textContent = 'Récupérer et continuer';
+	} else {
+		section.style.display = 'none';
+		btn.textContent = 'Retour à la carte';
+	}
 	document.getElementById('end-overlay').classList.add('visible');
+}
+
+function buildLootList(dispo) {
+	document.getElementById('loot-list').innerHTML = dispo.map(d =>
+		`<label class="loot-item" data-mid="${d.monstre_id}" data-poids="${d.poids}">
+			<input type="checkbox" onchange="recomputeCharge()">
+			<span class="loot-nom">${d.nom}</span>
+			<span class="loot-poids">${(+d.poids).toFixed(1)} kg</span>
+		</label>`
+	).join('');
+}
+
+function lootRows() { return Array.from(document.querySelectorAll('#loot-list .loot-item')); }
+
+// Recalcule la charge (déjà portée + sélection), pilote la jauge et désactive les
+// cases dont l'ajout dépasserait la charge max. Le pip est fixé à 50 % (= charge_max/2),
+// seuil au-delà duquel le déplacement en combat est divisé par deux.
+function recomputeCharge() {
+	const j = state.joueurs[0] || {};
+	const chargeMax = j.charge_max || 0;
+	const base = j.charge || 0;   // déjà porté, incluant les carcasses ramassées en combat
+	const half = chargeMax / 2;
+	let selected = 0;
+	lootRows().forEach(lbl => {
+		if (lbl.querySelector('input').checked) selected += parseFloat(lbl.dataset.poids) || 0;
+	});
+	const total = base + selected;
+	lootRows().forEach(lbl => {
+		const cb = lbl.querySelector('input');
+		const p = parseFloat(lbl.dataset.poids) || 0;
+		const wouldExceed = !cb.checked && (total + p > chargeMax + 1e-6);
+		cb.disabled = wouldExceed;
+		lbl.classList.toggle('disabled', wouldExceed);
+	});
+	const fill = document.getElementById('charge-fill');
+	fill.style.width = (chargeMax > 0 ? Math.min(100, total / chargeMax * 100) : 0) + '%';
+	fill.classList.toggle('over-half', total > half && total <= chargeMax + 1e-6);
+	fill.classList.toggle('over-max',  total > chargeMax + 1e-6);
+	const lbl = document.getElementById('charge-label');
+	let txt = `${total.toFixed(1)} / ${chargeMax} kg`;
+	if (total > chargeMax + 1e-6)  txt += ` · <span class="err">surcharge</span>`;
+	else if (total > half)         txt += ` · <span class="warn">déplacement réduit de moitié</span>`;
+	lbl.innerHTML = txt;
+}
+
+// Ramasse la sélection (POST /collect) puis quitte vers la carte. Sans sélection,
+// ou hors victoire, quitte directement.
+async function leaveCombat() {
+	const section = document.getElementById('loot-section');
+	if (section.style.display !== 'none') {
+		const ids = lootRows()
+			.filter(lbl => lbl.querySelector('input').checked)
+			.map(lbl => lbl.dataset.mid);
+		if (ids.length) {
+			const btn = document.getElementById('end-btn');
+			btn.disabled = true;
+			try {
+				const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/collect`, {
+					method:  'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body:    JSON.stringify({ monstre_ids: ids }),
+				});
+				if (!res.ok) {
+					const err = await res.json().catch(() => ({}));
+					document.getElementById('charge-label').innerHTML =
+						`<span class="err">${(err && err.detail) || 'Échec du ramassage'}</span>`;
+					btn.disabled = false;
+					return;
+				}
+			} catch (e) {
+				document.getElementById('charge-label').innerHTML = `<span class="err">Erreur réseau</span>`;
+				btn.disabled = false;
+				return;
+			}
+		}
+	}
+	window.location.href = '/play';
 }
 
 // ─── Init ─────────────────────────────────────────────────────────
@@ -844,6 +1042,7 @@ renderTokens();
 updateCamera();
 refreshTargetSelect();
 updateButtons(state);
+updateChargeBar(state.joueurs[0]);
 document.getElementById('combat-log').scrollTop = 9999;
 if (state.status !== 'active') showEndOverlay(state.status, state.xp_gagnee);
 </script>

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
-from utils.characters import get_selected_character
+from utils.characters import get_selected_character, carried_weight
 from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc,
@@ -76,6 +76,10 @@ class ActionRequest(BaseModel):
     dx: int | None = None
     dy: int | None = None
     sens: int | None = None
+
+
+class CollectLootRequest(BaseModel):
+    monstre_ids: list[str] = []
 
 
 @combat_router.post("/combat/start")
@@ -164,6 +168,82 @@ async def get_combat(
         raise HTTPException(status_code=403, detail="Accès refusé")
 
     return combat_doc
+
+
+@combat_router.post("/combat/{combat_id}/collect")
+async def collect_loot(
+    combat_id: str,
+    body: CollectLootRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    """Ramasse à la victoire les carcasses sélectionnées par le joueur.
+
+    Le butin n'est jamais ajouté automatiquement : le client envoie la liste des
+    `monstre_ids` choisis. Chaque carcasse est ajoutée à l'inventaire sous forme de
+    référence {item, poids} (poids d'instance tiré au butin). La somme des poids
+    ajoutés ne peut faire dépasser la charge max. Une fois le butin validé et
+    l'inventaire mis à jour, l'entrée `butin_collectes[combat_id]` est purgée du
+    personnage (pas de garde persistante ; le doc combat est supprimé au retour /play).
+    """
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Non authentifié")
+
+    combat_doc = get_doc(combat_id)
+    if not combat_doc or combat_doc.get("type") != "combat":
+        raise HTTPException(status_code=404, detail="Combat introuvable")
+    if combat_doc["user_id"] != current_user["_id"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    if combat_doc.get("status") != "victoire":
+        raise HTTPException(status_code=400, detail="Butin disponible uniquement après une victoire.")
+
+    character = get_doc(combat_doc["character_id"])
+    if not character:
+        raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+    dispo = {d["monstre_id"]: d for d in combat_doc.get("butin_disponible", [])}
+    charge_max = combat_doc["joueurs"][0].get("charge_max", 0)
+
+    guard = character.get("butin_collectes", {})
+    if not isinstance(guard, dict):
+        guard = {}
+    deja = set(guard.get(combat_id, []))
+
+    # Sélection valide = carcasses proposées, pas encore encaissées.
+    selected = [mid for mid in (body.monstre_ids or []) if mid in dispo and mid not in deja]
+    add_w = sum(dispo[mid]["poids"] for mid in selected)
+    current_w = carried_weight(character)
+    if selected and current_w + add_w > charge_max + 1e-6:
+        raise HTTPException(status_code=422, detail="Charge maximale dépassée.")
+
+    inventaire = character.get("inventaire", [])
+    noms = []
+    for mid in selected:
+        # Référence {item, poids} : on conserve le poids d'instance tiré au butin.
+        inventaire.append({"item": dispo[mid]["item_id"], "poids": dispo[mid]["poids"]})
+        noms.append(dispo[mid]["nom"])
+    character["inventaire"] = inventaire
+
+    encaisses = deja | set(selected)
+    # Le butin est validé : on purge la garde de ce combat (plus de trace persistante
+    # sur le personnage une fois l'inventaire mis à jour). Sauvé dans le même doc.
+    guard.pop(combat_id, None)
+    character["butin_collectes"] = guard
+
+    if save_doc(character) is None:
+        raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+    # Best-effort : refléter les carcasses encaissées sur le doc combat (cosmétique,
+    # le combat est supprimé au retour sur /play). Non bloquant si la sauvegarde échoue.
+    for mid in selected:
+        for m in combat_doc["monstres"]:
+            if m["id"] == mid:
+                m["loote"] = True
+    combat_doc["butin_disponible"] = [
+        d for d in combat_doc.get("butin_disponible", []) if d["monstre_id"] not in encaisses
+    ]
+    save_doc(combat_doc)
+
+    return {"collected": noms, "charge": round(current_w + add_w, 2), "charge_max": charge_max}
 
 
 @combat_router.post("/combat/{combat_id}/action")

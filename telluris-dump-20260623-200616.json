@@ -1,6 +1,6 @@
 {
   "db": "telluris",
-  "exported_at": "2026-06-21T18:41:53.649909Z",
+  "exported_at": "2026-06-23T20:06:16.369326Z",
   "doc_count": 561,
   "docs": [
     {
@@ -126,7 +126,7 @@
     },
     {
       "_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
-      "_rev": "1586-ddb49f85e4625d9e896cd41d720820d5",
+      "_rev": "2022-0d33c77bedbdf6967df10dde64cb7f9b",
       "user_id": "user:eternel7@gmail.com",
       "type": "character",
       "sex": "F",
@@ -138,20 +138,20 @@
       "cite": "lieu:auxerre",
       "lieu": "lieu:auxerre",
       "position": {
-        "x": 18,
-        "y": 11
+        "x": 0,
+        "y": 39
       },
       "caracteristiques_current": {
         "V": 4,
         "F": 24,
         "R": 33,
-        "Ag": 18,
+        "Ag": 19,
         "Vol": 50,
         "Int": 30,
         "Cha": 20,
         "Ch": 20
       },
-      "currentPV": 119,
+      "currentPV": 117,
       "currentPM": 160,
       "lieux_visites": [
         "lieu:auxerre",
@@ -168,12 +168,16 @@
         "lieu:chemin_de_la_foret02",
         "lieu:france"
       ],
-      "xp_total": 199,
+      "xp_total": 627,
       "attribute_points": 0,
       "vocations_niveaux": {
         "barbare": 1
       },
-      "inventaire": [],
+      "inventaire": [
+        "item:petits_animaux_divers",
+        "item:gobelin",
+        "item:gobelin"
+      ],
       "slots": {
         "main_droite": "item:Epee_courte",
         "main_gauche": null,
@@ -193,7 +197,8 @@
         "malus_depl": 0,
         "cc_bonus": 1,
         "cd_bonus": 0,
-        "degats_bonus": 0,
+        "degats_bonus": 3,
+        "degats_dice": "",
         "initiative": 0
       },
       "portrait_translate": {
@@ -214,8 +219,36 @@
         "combat:b4397f39098544b8b148ac04cf9562cd",
         "combat:87045bf4415548b599c0a87dfb00e313",
         "combat:b42a7f6159944b44bd577c832e1d664d",
-        "combat:113f98d0d15e46f0a570c190c3d1c75e"
-      ]
+        "combat:113f98d0d15e46f0a570c190c3d1c75e",
+        "combat:5493e4b1611e4415a5f014bbe6f03dc9",
+        "combat:2bad5190ffb946adabd018e80028225b",
+        "combat:e94792c78af1428e895ef438f31a07e0",
+        "combat:9bfe56b45e1d475d9b364057a2ebe10c",
+        "combat:e88f7f350f3945d598ffa37859a19558",
+        "combat:00f6f3dae9f044b783ca41ade9ceda01",
+        "combat:466ce0b4026f47508dbea654e0fe98e1",
+        "combat:a272f9d0709e41349f7fd025f8d32f96",
+        "combat:cb8b3bd062ed4f398cd37ec06f0f7c20",
+        "combat:41f63a5181d0415c81a6429259eb99b4",
+        "combat:de63ab5f22cc4afbaee44ab61cc55ac5",
+        "combat:3722332f19f74b2ea5daafaff213a21c",
+        "combat:42ac264cda6245daa7f5d4c9b7b62b6d",
+        "combat:5d48178965ea4287815d931d8293a8e7",
+        "combat:3024007066f240fab4c31a52220afb14",
+        "combat:4f7bee148d1f4f549974051ecd5556f1",
+        "combat:807d42d0a91a42ea906ce78b8079125d",
+        "combat:8a45683d8f41451fa7c0372d5dc9dadb",
+        "combat:dcf15e0c54f149e9898344a3ea9bbc9d",
+        "combat:5e1f7bb3d9cc42d795d522b89b3131aa",
+        "combat:dd97eee1944f454198846dd306570a68",
+        "combat:7a653ac048cd41fd88e2a843cbc6e2b1"
+      ],
+      "butin_collectes": {
+        "combat:7a653ac048cd41fd88e2a843cbc6e2b1": [
+          "monstre_1",
+          "monstre_2"
+        ]
+      }
     },
     {
       "_id": "character:user:eternel7@gmail.com_1ddd3ad5-b8ad-4e34-8161-c1b9149c56e3",
@@ -8390,7 +8423,7 @@
     },
     {
       "_id": "item:Epee_courte",
-      "_rev": "4-b489ed2bda04f08838bacee1da7862f4",
+      "_rev": "5-2a7fbb7dbfc6130a998f538feae53ab0",
       "type": "item",
       "nom": "Épée courte",
       "icon": "⚔️",
@@ -8401,7 +8434,7 @@
         "main_gauche"
       ],
       "bonus_cc": 1,
-      "bonus_degats": 5,
+      "bonus_degats": 3,
       "poids": 1.5
     },
     {
@@ -9615,7 +9648,7 @@
     },
     {
       "_id": "item:aigle_geant",
-      "_rev": "1-2ab24504a08dd38b0df08f8aacda5048",
+      "_rev": "2-49f199bfcd022e059cb84a25f87ae4f6",
       "type": "item",
       "nom": "Carcasse d'Aigle Geant",
       "icon": "🥩",
@@ -9629,7 +9662,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance",
-      "_rev": "1-b9c66231ddbf659598680a1f438fcc40",
+      "_rev": "2-fea1ab9223f51dddfe2c416a1b4fb67b",
       "type": "item",
       "nom": "Carcasse d'Ange de la Connaissance",
       "icon": "🥩",
@@ -9643,7 +9676,7 @@
     },
     {
       "_id": "item:ange_de_la_justice",
-      "_rev": "1-89920f35ef0c6f01e29544adb1b2a35f",
+      "_rev": "2-cd9b140a3f8485b0a1da983aef5aefde",
       "type": "item",
       "nom": "Carcasse d'Ange de la Justice",
       "icon": "🥩",
@@ -9657,7 +9690,7 @@
     },
     {
       "_id": "item:araignee",
-      "_rev": "1-a7d87c167e6de842f9baaae2308bd0a8",
+      "_rev": "2-4bbe4313960d1d161b964bf7b566d7cf",
       "type": "item",
       "nom": "Carcasse d'Araignee",
       "icon": "🥩",
@@ -9671,7 +9704,7 @@
     },
     {
       "_id": "item:araignee_geante",
-      "_rev": "1-f483380898a94abb2242943fd2caf265",
+      "_rev": "2-6bfb47d7afd3bcc52d3a8f061052715c",
       "type": "item",
       "nom": "Carcasse d'Araignee Geante",
       "icon": "🥩",
@@ -9685,7 +9718,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre",
-      "_rev": "1-89bd2dcc58318f4af06ba2a5ea036168",
+      "_rev": "2-8e46ba4069d98e9e4f69c0fc3cd12d37",
       "type": "item",
       "nom": "Carcasse d'Archange de l Ordre",
       "icon": "🥩",
@@ -9699,7 +9732,7 @@
     },
     {
       "_id": "item:archange_du_savoir",
-      "_rev": "1-b61907a17b24b79b197db1d55bdce37c",
+      "_rev": "2-a5e7e231cf577ede7957fdf95506c1a6",
       "type": "item",
       "nom": "Carcasse d'Archange du Savoir",
       "icon": "🥩",
@@ -9713,7 +9746,7 @@
     },
     {
       "_id": "item:avatar",
-      "_rev": "1-94533d9128f918eae41a414ab2a2623a",
+      "_rev": "2-6126043ee1c764710e0d392a267c18eb",
       "type": "item",
       "nom": "Carcasse d'Avatar",
       "icon": "🥩",
@@ -9727,7 +9760,7 @@
     },
     {
       "_id": "item:banshee",
-      "_rev": "1-0a1b222ed7fa5d29a71b9123b034420f",
+      "_rev": "2-eb1c5430fd762eda2ff9042a199e7aac",
       "type": "item",
       "nom": "Résidu spectral de Banshee",
       "icon": "👻",
@@ -9741,7 +9774,7 @@
     },
     {
       "_id": "item:basilic",
-      "_rev": "1-60879af498915fee6e2fa6430a2ca602",
+      "_rev": "2-29b6bef8c7ba4b26ee7d6f2b40611dce",
       "type": "item",
       "nom": "Carcasse de Basilic",
       "icon": "🥩",
@@ -9755,7 +9788,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse",
-      "_rev": "1-43fcf9669c357b61a1f01f3170ca27b1",
+      "_rev": "2-50a9162beec7869de05e9bfa36870ce2",
       "type": "item",
       "nom": "Carcasse de Bete de l Apocalypse",
       "icon": "🥩",
@@ -9769,7 +9802,7 @@
     },
     {
       "_id": "item:bete_du_gevaudan",
-      "_rev": "1-040b5b0870ec6028ab2975794f644d2a",
+      "_rev": "2-8d1f6e6c8882d113797d1cd8ab7434de",
       "type": "item",
       "nom": "Carcasse de Bête du Gévaudan",
       "icon": "🥩",
@@ -9783,7 +9816,7 @@
     },
     {
       "_id": "item:bunyip",
-      "_rev": "1-cbacab67879afe5712374cdf58e2c807",
+      "_rev": "2-a48b5b85b576ef54a0fe3a9d1258d44c",
       "type": "item",
       "nom": "Carcasse de Bunyip",
       "icon": "🥩",
@@ -9797,7 +9830,7 @@
     },
     {
       "_id": "item:centaure",
-      "_rev": "1-40380dc2fd0b7b71af6b402b0dffdf68",
+      "_rev": "2-083156cef9fc3ee4439a5a2e5edfad68",
       "type": "item",
       "nom": "Carcasse de Centaure",
       "icon": "🥩",
@@ -9811,7 +9844,7 @@
     },
     {
       "_id": "item:cerbere",
-      "_rev": "1-ae910aa90621cbf9c7162d8e8e719393",
+      "_rev": "2-8d556f8bb79006406019454ae01a4b21",
       "type": "item",
       "nom": "Carcasse de Cerbere",
       "icon": "🥩",
@@ -9825,7 +9858,7 @@
     },
     {
       "_id": "item:chauve_souris",
-      "_rev": "1-c2da34d9235a2bfa0fe1ae94a6686db3",
+      "_rev": "2-9a19a8745b36ea346761cfbe2797de70",
       "type": "item",
       "nom": "Carcasse de Chauve Souris",
       "icon": "🥩",
@@ -9839,7 +9872,7 @@
     },
     {
       "_id": "item:chauve_souris_geante",
-      "_rev": "1-1f5ac85f97933739222ef495300a042e",
+      "_rev": "2-20556d107117dc126eded9bab83f422d",
       "type": "item",
       "nom": "Carcasse de Chauve Souris Geante",
       "icon": "🥩",
@@ -9853,7 +9886,7 @@
     },
     {
       "_id": "item:cheval",
-      "_rev": "1-3b763cddd0b1dca9ef87c9b4712bb5d0",
+      "_rev": "2-e2099f04648c3c9194a17593fcd61a2b",
       "type": "item",
       "nom": "Carcasse de Cheval",
       "icon": "🥩",
@@ -9867,7 +9900,7 @@
     },
     {
       "_id": "item:cheval_de_trait",
-      "_rev": "1-fa9811ae66195f373121fa34d16a44a7",
+      "_rev": "2-7986e5b01c2cc79caa9758ce173d5f97",
       "type": "item",
       "nom": "Carcasse de Cheval de Trait",
       "icon": "🥩",
@@ -9881,7 +9914,7 @@
     },
     {
       "_id": "item:cheval_normand",
-      "_rev": "1-f06bf8439103d2d3a1c478bb14bf2921",
+      "_rev": "2-ff053cf36e07fc8fec67f43f9fd660d6",
       "type": "item",
       "nom": "Carcasse de Cheval Normand",
       "icon": "🥩",
@@ -9895,7 +9928,7 @@
     },
     {
       "_id": "item:chevalier_du_sang",
-      "_rev": "1-d73b6894e59ac0b62bb86d5ce18ba7f7",
+      "_rev": "2-047d5e1675b1687f919186589451f510",
       "type": "item",
       "nom": "Ossements de Chevalier du Sang",
       "icon": "🦴",
@@ -9909,7 +9942,7 @@
     },
     {
       "_id": "item:chimere",
-      "_rev": "1-f5e25c79321d4e8d517c7b659d73d520",
+      "_rev": "2-67272a2ed1f9cd55e8bb6ff2d3b77b08",
       "type": "item",
       "nom": "Carcasse de Chimere",
       "icon": "🥩",
@@ -9923,7 +9956,7 @@
     },
     {
       "_id": "item:cockatrice",
-      "_rev": "1-0725c1f5a252748f4bf8e2246fe92cc6",
+      "_rev": "2-3c3a5fecda803436bfbd0f008c4ab037",
       "type": "item",
       "nom": "Carcasse de Cockatrice",
       "icon": "🥩",
@@ -9937,7 +9970,7 @@
     },
     {
       "_id": "item:comte_vampire",
-      "_rev": "1-c4589c960545d84942c2d25be1ef613c",
+      "_rev": "2-80d14e00093128e1e30db39a6d761caf",
       "type": "item",
       "nom": "Ossements de Comte Vampire",
       "icon": "🦴",
@@ -9951,7 +9984,7 @@
     },
     {
       "_id": "item:corneille_noire",
-      "_rev": "1-19e619a9da46cc478f8252a687f63db8",
+      "_rev": "2-f95c2f0098c7ff818209f1b6df25b371",
       "type": "item",
       "nom": "Ossements de Corneille Noire",
       "icon": "🦴",
@@ -9965,7 +9998,7 @@
     },
     {
       "_id": "item:coursier_elfique",
-      "_rev": "1-ded4346f2fa481b2fd4213d30d40c201",
+      "_rev": "2-491eebe56253400d7a4fd38fdff8041a",
       "type": "item",
       "nom": "Carcasse de Coursier Elfique",
       "icon": "🥩",
@@ -9979,7 +10012,7 @@
     },
     {
       "_id": "item:coursier_persan",
-      "_rev": "1-35f35b455abdc61a0f5d09bc3f2f2e17",
+      "_rev": "2-b8b4336da809d3e5bb3f8caed0f835f4",
       "type": "item",
       "nom": "Carcasse de Coursier Persan",
       "icon": "🥩",
@@ -9993,7 +10026,7 @@
     },
     {
       "_id": "item:crocodile",
-      "_rev": "1-3da5fff783dba9cfd49ae03233aa90a0",
+      "_rev": "2-22251e5ef746683b089196fb9b79775f",
       "type": "item",
       "nom": "Carcasse de Crocodile",
       "icon": "🥩",
@@ -10007,7 +10040,7 @@
     },
     {
       "_id": "item:cupidon",
-      "_rev": "1-143477823f9fa6fd184927c7a2411971",
+      "_rev": "2-e77825be42e73bc332a4a13eaacb1039",
       "type": "item",
       "nom": "Carcasse de Cupidon",
       "icon": "🥩",
@@ -10021,7 +10054,7 @@
     },
     {
       "_id": "item:cyclope",
-      "_rev": "1-5d7dd324fed8564b8f463cd1693aa923",
+      "_rev": "2-57ebac95023b1d002f122c69ac355247",
       "type": "item",
       "nom": "Carcasse de Cyclope",
       "icon": "🥩",
@@ -10035,7 +10068,7 @@
     },
     {
       "_id": "item:demon_guerrier",
-      "_rev": "1-4c51bf5e39057ea2aff81d978902844f",
+      "_rev": "2-83531429e3389573414353e5ec403bf1",
       "type": "item",
       "nom": "Carcasse de Demon Guerrier",
       "icon": "🥩",
@@ -10049,7 +10082,7 @@
     },
     {
       "_id": "item:demon_majeur_de_la_destinee",
-      "_rev": "1-85758285d553a5529beea3b5f871e4ca",
+      "_rev": "2-7a14242dfed68b0dfb3c575fbf6e4022",
       "type": "item",
       "nom": "Carcasse de Demon Majeur de la Destinee",
       "icon": "🥩",
@@ -10063,7 +10096,7 @@
     },
     {
       "_id": "item:demon_majeur_de_la_destruction",
-      "_rev": "1-8382654b74f50bec025b1be5511a8ae2",
+      "_rev": "2-fbc9ab0c04d58a32e4b62e6741b7310f",
       "type": "item",
       "nom": "Carcasse de Demon Majeur de la Destruction",
       "icon": "🥩",
@@ -10077,7 +10110,7 @@
     },
     {
       "_id": "item:demon_mineur",
-      "_rev": "1-ae14038e5ee14740c9d523f103db3a65",
+      "_rev": "2-3a81d058ddce0f7a4bd9a72a695ef2a3",
       "type": "item",
       "nom": "Carcasse de Demon Mineur",
       "icon": "🥩",
@@ -10091,7 +10124,7 @@
     },
     {
       "_id": "item:demon_servant",
-      "_rev": "1-0a5a06311ff4ee81997c11459c8f6948",
+      "_rev": "2-8b70518a0f69429e0cc6654fb9ac1f9a",
       "type": "item",
       "nom": "Carcasse de Demon Servant",
       "icon": "🥩",
@@ -10105,7 +10138,7 @@
     },
     {
       "_id": "item:doppleganger",
-      "_rev": "1-5df9b2263bc52cdf286a6fed7d742b87",
+      "_rev": "2-82d465d7da7b0bdff661c4d8aa3ac43d",
       "type": "item",
       "nom": "Carcasse de Doppleganger",
       "icon": "🥩",
@@ -10119,7 +10152,7 @@
     },
     {
       "_id": "item:dragnard",
-      "_rev": "1-f5eb70524d323664b64cfb21bf2c7ee1",
+      "_rev": "2-c6a278f0175f75930e855b24f37f3953",
       "type": "item",
       "nom": "Carcasse de Dragnard",
       "icon": "🥩",
@@ -10133,7 +10166,7 @@
     },
     {
       "_id": "item:dragon",
-      "_rev": "1-fb81001712edb0b0210784f55eee28c6",
+      "_rev": "2-72603b2fa8d577aec9b8f87f8d5109d2",
       "type": "item",
       "nom": "Carcasse de Dragon",
       "icon": "🥩",
@@ -10147,7 +10180,7 @@
     },
     {
       "_id": "item:dragon_empereur",
-      "_rev": "1-c8e5fd5d5a8a6a36aaa0e61153f81649",
+      "_rev": "2-68603ae6992be09e9c7ded620592cbd4",
       "type": "item",
       "nom": "Carcasse de Dragon Empereur",
       "icon": "🥩",
@@ -10161,7 +10194,7 @@
     },
     {
       "_id": "item:dragon_zombie",
-      "_rev": "1-4d5b70a83e331a8c719e878103320631",
+      "_rev": "2-7359da3d138f6dc675c849f48d8d74f7",
       "type": "item",
       "nom": "Ossements de Dragon Zombie",
       "icon": "🦴",
@@ -10175,7 +10208,7 @@
     },
     {
       "_id": "item:dryade",
-      "_rev": "1-da981989f212a25f417aa14c67bc3b58",
+      "_rev": "2-0bda4296033621262d986774f40b20bd",
       "type": "item",
       "nom": "Résidu spectral de Dryade",
       "icon": "👻",
@@ -10189,7 +10222,7 @@
     },
     {
       "_id": "item:elementaux",
-      "_rev": "1-14c9021ae06a128369fc6b35838d8c10",
+      "_rev": "2-b2c4bb0dd120c721aae96119a8233784",
       "type": "item",
       "nom": "Débris d'Elementaux",
       "icon": "🪨",
@@ -10203,7 +10236,7 @@
     },
     {
       "_id": "item:familier",
-      "_rev": "1-48f5fcfbfd48a64d239543649a286b32",
+      "_rev": "2-1b12231e277a08535776ea31fffa1d94",
       "type": "item",
       "nom": "Carcasse de Familier",
       "icon": "🥩",
@@ -10217,7 +10250,7 @@
     },
     {
       "_id": "item:fantome",
-      "_rev": "1-3681d627475e80c85372c8ef1cd1e797",
+      "_rev": "2-b43e40ab2b6d4526c805f0fc4cfc671e",
       "type": "item",
       "nom": "Résidu spectral de Fantome",
       "icon": "👻",
@@ -10231,7 +10264,7 @@
     },
     {
       "_id": "item:fauves",
-      "_rev": "1-be5e0ad4e89e2d48a8db6a24344b2124",
+      "_rev": "2-edeea6bea11373b644463696ddb23742",
       "type": "item",
       "nom": "Carcasse de Fauves",
       "icon": "🥩",
@@ -10245,7 +10278,7 @@
     },
     {
       "_id": "item:fee",
-      "_rev": "1-6ab4b04e4685423937f83a7b8eef3f2c",
+      "_rev": "2-a9c104b3d313c2c31a617ac7447350d0",
       "type": "item",
       "nom": "Carcasse de Fee",
       "icon": "🥩",
@@ -10259,7 +10292,7 @@
     },
     {
       "_id": "item:gargouille",
-      "_rev": "1-45e0f146f7a77ca3b5ba0539263c7530",
+      "_rev": "2-da3f0ac89091e5f57b8665a9470f1d59",
       "type": "item",
       "nom": "Carcasse de Gargouille",
       "icon": "🥩",
@@ -10273,7 +10306,7 @@
     },
     {
       "_id": "item:geant_ou_titan",
-      "_rev": "1-eed6a09fed7ea29e6f7dba69050abe5c",
+      "_rev": "2-b217f8e92c465d936fa0d0cea77d6875",
       "type": "item",
       "nom": "Carcasse de Geant ou Titan",
       "icon": "🥩",
@@ -10287,7 +10320,7 @@
     },
     {
       "_id": "item:genie",
-      "_rev": "1-fe43f6eb4a82739873b7e732b2a9ae28",
+      "_rev": "2-d240e1e7037bff6679e3f0e940c1c864",
       "type": "item",
       "nom": "Débris de Genie",
       "icon": "🪨",
@@ -10301,7 +10334,7 @@
     },
     {
       "_id": "item:gnome",
-      "_rev": "1-4518abd641355921cb587d26d251c513",
+      "_rev": "2-5393bed644b2ab4bc36dd825f73ee594",
       "type": "item",
       "nom": "Carcasse de Gnome",
       "icon": "🥩",
@@ -10315,35 +10348,41 @@
     },
     {
       "_id": "item:gobelin",
-      "_rev": "1-b96d48d592d0da6941b1e7ab0e13d8fa",
+      "_rev": "3-72e055b69ec104d5c1e74072963a090d",
       "type": "item",
       "nom": "Carcasse de Gobelin",
       "icon": "🥩",
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 1.8,
+      "poids": [
+        40,
+        60
+      ],
       "description": "Dépouille de Gobelin récupérée à l'issue du combat.",
       "source_espece": "espece:gobelin",
       "loot_defaut": true
     },
     {
       "_id": "item:gobelin_chamanique",
-      "_rev": "1-760c5d012bdfddb30f3d0ffd0a4f303e",
+      "_rev": "3-4ff98a1418cb344904caaa3f3fdd839e",
       "type": "item",
       "nom": "Carcasse de Gobelin Chamanique",
       "icon": "🥩",
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 1.0,
+      "poids": [
+        35,
+        55
+      ],
       "description": "Dépouille de Gobelin Chamanique récupérée à l'issue du combat.",
       "source_espece": "espece:gobelin_chamanique",
       "loot_defaut": true
     },
     {
       "_id": "item:gobelin_des_marais",
-      "_rev": "1-003fc19ed3073dc066e039463572c210",
+      "_rev": "2-22340832121a4579d12b2d3094ed8d4d",
       "type": "item",
       "nom": "Carcasse de Gobelin des Marais",
       "icon": "🥩",
@@ -10357,7 +10396,7 @@
     },
     {
       "_id": "item:golem_de_chair",
-      "_rev": "1-d8554ed15b73d5452c996dfd4fec38c0",
+      "_rev": "2-d12a95c0bd3989969a0647cccd4602ca",
       "type": "item",
       "nom": "Débris de Golem de Chair",
       "icon": "🪨",
@@ -10371,7 +10410,7 @@
     },
     {
       "_id": "item:golem_de_fer",
-      "_rev": "1-5f4fdfa09c080efa6c21fc85da5da694",
+      "_rev": "2-45ee64ee2ce3c1b7b5a9eb34abadfd81",
       "type": "item",
       "nom": "Débris de Golem de Fer",
       "icon": "🪨",
@@ -10385,7 +10424,7 @@
     },
     {
       "_id": "item:golem_de_pierre",
-      "_rev": "1-a63e646ed300a5b2a808371e55535e0b",
+      "_rev": "2-874f2571f34294bf151cac2b7f6f7251",
       "type": "item",
       "nom": "Débris de Golem de Pierre",
       "icon": "🪨",
@@ -10399,7 +10438,7 @@
     },
     {
       "_id": "item:gorgone",
-      "_rev": "1-a0fe1a22d7b6863d0e4c8c72c7e32c98",
+      "_rev": "2-90aad994416c43005b241a1148b1bd4a",
       "type": "item",
       "nom": "Carcasse de Gorgone",
       "icon": "🥩",
@@ -10413,7 +10452,7 @@
     },
     {
       "_id": "item:goule",
-      "_rev": "1-ce46acd973485fd0ec89f963ad45d887",
+      "_rev": "2-af2ac1977e753b85ead4fb5b7605b7b7",
       "type": "item",
       "nom": "Ossements de Goule",
       "icon": "🦴",
@@ -10427,7 +10466,7 @@
     },
     {
       "_id": "item:grand_dragon",
-      "_rev": "1-a44343da53da5a7d56f2c7e683ddb7c4",
+      "_rev": "2-0c556bbd1d7d009fde7dbae4b5280b80",
       "type": "item",
       "nom": "Carcasse de Grand Dragon",
       "icon": "🥩",
@@ -10441,7 +10480,7 @@
     },
     {
       "_id": "item:grand_faucon",
-      "_rev": "1-c4856daff3501922891bd9706eceee85",
+      "_rev": "2-54e424409e74fcbf96577bd709f0fc33",
       "type": "item",
       "nom": "Carcasse de Grand Faucon",
       "icon": "🥩",
@@ -10455,7 +10494,7 @@
     },
     {
       "_id": "item:grand_phenix",
-      "_rev": "1-7cb4f2a98b1e423120ef01a9f8e7bc55",
+      "_rev": "2-4fc49acc14782b55c023bb5c0ac0a8a0",
       "type": "item",
       "nom": "Carcasse de Grand Phenix",
       "icon": "🥩",
@@ -10469,7 +10508,7 @@
     },
     {
       "_id": "item:grand_sanglier",
-      "_rev": "1-3ac4343e5758d5f9e2a943bd14a414e9",
+      "_rev": "2-7b1639bbe86e2ab2a2e630a46fbe4a8a",
       "type": "item",
       "nom": "Carcasse de Grand Sanglier",
       "icon": "🥩",
@@ -10483,7 +10522,7 @@
     },
     {
       "_id": "item:griffon",
-      "_rev": "1-66357239f595f04814296bd27d629f97",
+      "_rev": "2-df1cecac842800f2f24f13a699c09874",
       "type": "item",
       "nom": "Carcasse de Griffon",
       "icon": "🥩",
@@ -10497,7 +10536,7 @@
     },
     {
       "_id": "item:harpie",
-      "_rev": "1-b43479930e3a329ec272913d3e7bf59f",
+      "_rev": "2-fc7d09ce7c31dc7d489d17e4f212b60a",
       "type": "item",
       "nom": "Carcasse d'Harpie",
       "icon": "🥩",
@@ -10511,7 +10550,7 @@
     },
     {
       "_id": "item:hippogriffe",
-      "_rev": "1-5934399f7c72dc52a8324376c5aa7a12",
+      "_rev": "2-3ad25894f3c779a7f9385714eb852a60",
       "type": "item",
       "nom": "Carcasse d'Hippogriffe",
       "icon": "🥩",
@@ -10525,7 +10564,7 @@
     },
     {
       "_id": "item:homme_arbre",
-      "_rev": "1-5ba35be3d12d194d5d9ba95a020ea531",
+      "_rev": "2-de940c2474392fedf98c1a1aabba53a1",
       "type": "item",
       "nom": "Carcasse d'Homme Arbre",
       "icon": "🥩",
@@ -10539,7 +10578,7 @@
     },
     {
       "_id": "item:horreur",
-      "_rev": "1-837c4161db357b4c0cb89e88e7d6931e",
+      "_rev": "2-e3d0a06c44166e12ff43996c0ff9a0df",
       "type": "item",
       "nom": "Ossements d'Horreur",
       "icon": "🦴",
@@ -10553,7 +10592,7 @@
     },
     {
       "_id": "item:hydre",
-      "_rev": "1-6be99a911884aa75eba130655ff4ad92",
+      "_rev": "2-7e67fcf1044b93b41bedd6df9fbd6eaf",
       "type": "item",
       "nom": "Carcasse d'Hydre",
       "icon": "🥩",
@@ -10567,7 +10606,7 @@
     },
     {
       "_id": "item:incube",
-      "_rev": "1-00b27958a48a12b33465f8907aa691c5",
+      "_rev": "2-7ec38becba8d4f6ba57926313a9f1663",
       "type": "item",
       "nom": "Carcasse d'Incube",
       "icon": "🥩",
@@ -10581,7 +10620,7 @@
     },
     {
       "_id": "item:kraken",
-      "_rev": "1-8cc31e61d253e5acc3647ed4cd7937cb",
+      "_rev": "2-fc724d9a63f235b31b680b84fcf2e0f8",
       "type": "item",
       "nom": "Carcasse de Kraken",
       "icon": "🥩",
@@ -10595,7 +10634,7 @@
     },
     {
       "_id": "item:leprechaun",
-      "_rev": "1-8ce03158d0327701f2600ae8a43469fb",
+      "_rev": "2-3f38e205417266eea0180ff91e47025a",
       "type": "item",
       "nom": "Carcasse de Leprechaun",
       "icon": "🥩",
@@ -10609,7 +10648,7 @@
     },
     {
       "_id": "item:leviathan",
-      "_rev": "1-743f5c2998d6b6dc33bd62d53ba0dc00",
+      "_rev": "2-6096bfe8d8a7a221311f67bb2f16e89c",
       "type": "item",
       "nom": "Carcasse de Leviathan",
       "icon": "🥩",
@@ -10623,7 +10662,7 @@
     },
     {
       "_id": "item:lhamia",
-      "_rev": "1-58af2093e951ad9da4eb13bf19be7fbf",
+      "_rev": "2-5115e6ca231bc67fbf2a1d7733409800",
       "type": "item",
       "nom": "Ossements de Lhamia",
       "icon": "🦴",
@@ -10637,7 +10676,7 @@
     },
     {
       "_id": "item:liche",
-      "_rev": "1-a29a37b4aff6ac586bd819b6e44efffc",
+      "_rev": "2-52d443635702f56212cbc37640addff8",
       "type": "item",
       "nom": "Ossements de Liche",
       "icon": "🦴",
@@ -10651,7 +10690,7 @@
     },
     {
       "_id": "item:licorne",
-      "_rev": "1-e1c559ad1505afd3a82d7c4c85b9f3f6",
+      "_rev": "2-41021023d76a15b94e74cf7c929eb2c6",
       "type": "item",
       "nom": "Carcasse de Licorne",
       "icon": "🥩",
@@ -10665,7 +10704,7 @@
     },
     {
       "_id": "item:loup",
-      "_rev": "1-3011052398b3bbd38c808f13148868f4",
+      "_rev": "2-85e007c3f93a1b8374b5020b32da38c4",
       "type": "item",
       "nom": "Carcasse de Loup",
       "icon": "🥩",
@@ -10679,7 +10718,7 @@
     },
     {
       "_id": "item:loup_garou",
-      "_rev": "1-2d6f76ec3f1586a021db6cd912b0f5bf",
+      "_rev": "2-149c175297347c5e371cdf8588472e25",
       "type": "item",
       "nom": "Carcasse de Loup Garou",
       "icon": "🥩",
@@ -10693,7 +10732,7 @@
     },
     {
       "_id": "item:loup_geant",
-      "_rev": "1-4bcefd3bdf32a41152b4b9f2221f5352",
+      "_rev": "2-c8c4f73d31edee0182bc07743c1147a4",
       "type": "item",
       "nom": "Carcasse de Loup Géant",
       "icon": "🥩",
@@ -10707,7 +10746,7 @@
     },
     {
       "_id": "item:malandhir",
-      "_rev": "1-e8fc3eca691ac589977e3f2b72d17a7b",
+      "_rev": "2-2c79335f72372b302c673143bdb343f5",
       "type": "item",
       "nom": "Carcasse de Malandhir",
       "icon": "🥩",
@@ -10721,7 +10760,7 @@
     },
     {
       "_id": "item:mammouth",
-      "_rev": "1-06bc465ad1c9c3c72e840fd8a63e7e29",
+      "_rev": "2-7f6b5ed06ad274cd35f13981852d0402",
       "type": "item",
       "nom": "Carcasse de Mammouth",
       "icon": "🥩",
@@ -10735,7 +10774,7 @@
     },
     {
       "_id": "item:manticore",
-      "_rev": "1-01f989eaefb07f9b7c82a9a480c19556",
+      "_rev": "2-7485f9419c2028798d44f7f5ada0ad5b",
       "type": "item",
       "nom": "Carcasse de Manticore",
       "icon": "🥩",
@@ -10749,7 +10788,7 @@
     },
     {
       "_id": "item:minotaure",
-      "_rev": "1-fdb2e430f804c669e0bfdf42bba7e2e3",
+      "_rev": "2-c7f4ea8639e5fb2f7b8f108889556212",
       "type": "item",
       "nom": "Carcasse de Minotaure",
       "icon": "🥩",
@@ -10763,7 +10802,7 @@
     },
     {
       "_id": "item:momie",
-      "_rev": "1-a93f3c9edeaf8a353ca951f16a523f1c",
+      "_rev": "2-adc658c86f7770c0f1988da68fc8afa3",
       "type": "item",
       "nom": "Ossements de Momie",
       "icon": "🦴",
@@ -10777,7 +10816,7 @@
     },
     {
       "_id": "item:monture_angelique",
-      "_rev": "1-a2d2e1d61e2c8115124301ea678e5a39",
+      "_rev": "2-21f26ff4b7f512c4547e1a38f7a79529",
       "type": "item",
       "nom": "Carcasse de Monture Angelique",
       "icon": "🥩",
@@ -10791,7 +10830,7 @@
     },
     {
       "_id": "item:monture_demoniaque",
-      "_rev": "1-de6d7cea9a74b2631dd42f2064e7c670",
+      "_rev": "2-9e9d57b7819f9aea1f0b966400ca11c1",
       "type": "item",
       "nom": "Carcasse de Monture Demoniaque",
       "icon": "🥩",
@@ -10805,7 +10844,7 @@
     },
     {
       "_id": "item:monture_squelette",
-      "_rev": "1-fe278c321df72af3b13f820ac3dc7701",
+      "_rev": "2-51fe39717de9d45d7c84c98d4f9f71d3",
       "type": "item",
       "nom": "Ossements de Monture Squelette",
       "icon": "🦴",
@@ -10819,7 +10858,7 @@
     },
     {
       "_id": "item:mulet_ou_ane",
-      "_rev": "1-70008bc0641925ca1ed54d0d19a73a19",
+      "_rev": "2-32195efa1129a08d7ba11e5ccbc25e4a",
       "type": "item",
       "nom": "Carcasse de Mulet ou Ane",
       "icon": "🥩",
@@ -10833,7 +10872,7 @@
     },
     {
       "_id": "item:naiade",
-      "_rev": "1-6350ad2a6e1ea17765f780b319d71f1b",
+      "_rev": "2-65fbec142470d82f5a8895fa8febf8f6",
       "type": "item",
       "nom": "Résidu spectral de Naiade",
       "icon": "👻",
@@ -10847,7 +10886,7 @@
     },
     {
       "_id": "item:nereide",
-      "_rev": "1-06887b25c5bff76ab565a559cc3f3da4",
+      "_rev": "2-28382ab94df53422f5f5c56db70426d7",
       "type": "item",
       "nom": "Résidu spectral de Nereide",
       "icon": "👻",
@@ -10861,7 +10900,7 @@
     },
     {
       "_id": "item:nosferatu",
-      "_rev": "1-21a6149afb575707027e10185d6a92cd",
+      "_rev": "2-690dfdcc028d13a083cc16d0925e61cc",
       "type": "item",
       "nom": "Ossements de Nosferatu",
       "icon": "🦴",
@@ -10875,7 +10914,7 @@
     },
     {
       "_id": "item:oceanide",
-      "_rev": "1-6475bba9fa4b084c3aa442e29747e43d",
+      "_rev": "2-e9dc71a6f0048118eae7fc928905ab3f",
       "type": "item",
       "nom": "Résidu spectral d'Oceanide",
       "icon": "👻",
@@ -10889,7 +10928,7 @@
     },
     {
       "_id": "item:oiseaux_de_proies",
-      "_rev": "1-aae47f0f5bc5ec50fef1f0566f78670f",
+      "_rev": "2-bb7d9568c70fa60430cfb024f30c84dc",
       "type": "item",
       "nom": "Carcasse d'Oiseaux de Proies",
       "icon": "🥩",
@@ -10903,7 +10942,7 @@
     },
     {
       "_id": "item:ondin",
-      "_rev": "1-a4cc4985d298b0454a323d1ab4619a62",
+      "_rev": "2-d05363955ab3ed995c1f703106d9e0b2",
       "type": "item",
       "nom": "Carcasse d'Ondin",
       "icon": "🥩",
@@ -10917,7 +10956,7 @@
     },
     {
       "_id": "item:orc",
-      "_rev": "1-447e973b9694922f7fc34963258ea272",
+      "_rev": "2-68557dfa466dee368785590ee7fe3012",
       "type": "item",
       "nom": "Carcasse d'Orc",
       "icon": "🥩",
@@ -10931,7 +10970,7 @@
     },
     {
       "_id": "item:oreade",
-      "_rev": "1-e76a32c8f15ee6382eeb8534a95ccea6",
+      "_rev": "2-19b9a9fc896c2b1654aca70d5f59dfce",
       "type": "item",
       "nom": "Résidu spectral d'Oreade",
       "icon": "👻",
@@ -10945,7 +10984,7 @@
     },
     {
       "_id": "item:ours",
-      "_rev": "1-3e34b7f2716c595ba87395855492b8e7",
+      "_rev": "2-3928401f7c48e1f0ef49c829812b5e16",
       "type": "item",
       "nom": "Carcasse d'Ours",
       "icon": "🥩",
@@ -10959,7 +10998,7 @@
     },
     {
       "_id": "item:ours_polaire",
-      "_rev": "1-39374a73afc9d4c2d0c0722bb543627c",
+      "_rev": "2-5df577ac4865375d28115ab730faace7",
       "type": "item",
       "nom": "Carcasse d'Ours Polaire",
       "icon": "🥩",
@@ -10973,7 +11012,7 @@
     },
     {
       "_id": "item:pegase",
-      "_rev": "1-ce1009e9f3db0bc94f452def685635fb",
+      "_rev": "2-291b311d67c713a01b9cfecb82967c81",
       "type": "item",
       "nom": "Carcasse de Pégase",
       "icon": "🥩",
@@ -10987,7 +11026,7 @@
     },
     {
       "_id": "item:petit_dragon",
-      "_rev": "1-6ddeca0b1b1b59b023803b12fa8de130",
+      "_rev": "2-d9d7d8572c59e9292f7a855f6a6f38d3",
       "type": "item",
       "nom": "Carcasse de Petit Dragon",
       "icon": "🥩",
@@ -11001,7 +11040,7 @@
     },
     {
       "_id": "item:petits_animaux_divers",
-      "_rev": "1-e52333b3ebd588b748c62891c9ac14ed",
+      "_rev": "2-20faf14f240d7531ebaef90769127ebc",
       "type": "item",
       "nom": "Carcasse de Lapin",
       "icon": "🥩",
@@ -11015,7 +11054,7 @@
     },
     {
       "_id": "item:phenix",
-      "_rev": "1-89840c491ad9cdbe64ad2bc4d69f8952",
+      "_rev": "2-b7652bf86b5e77574d59e7ca2c3c9669",
       "type": "item",
       "nom": "Carcasse de Phenix",
       "icon": "🥩",
@@ -11029,7 +11068,7 @@
     },
     {
       "_id": "item:poissons_mammiferes_marins",
-      "_rev": "1-5612dfd594cf157f7800b9e1e5aed1d5",
+      "_rev": "2-44fbc8dab1909e0b547fbbb5f3384edb",
       "type": "item",
       "nom": "Carcasse de Poissons Mammiferes Marins",
       "icon": "🥩",
@@ -11043,7 +11082,7 @@
     },
     {
       "_id": "item:polar_kraken",
-      "_rev": "1-2cc268d12df19306c73006f9d3986723",
+      "_rev": "2-6943e6c877c66c6641fb1fc0ca66a6d5",
       "type": "item",
       "nom": "Carcasse de Polar Kraken",
       "icon": "🥩",
@@ -11057,7 +11096,7 @@
     },
     {
       "_id": "item:poney",
-      "_rev": "1-7f4f1ae3a28ad43e48ffa59f5f3bc4c3",
+      "_rev": "2-fb77828cd62ad5c765d3cf214e01baab",
       "type": "item",
       "nom": "Carcasse de Poney",
       "icon": "🥩",
@@ -11071,7 +11110,7 @@
     },
     {
       "_id": "item:prince_demon",
-      "_rev": "1-e4355b7b99bf96c30e7ebfb531dabe26",
+      "_rev": "2-8c3f393593a93bba4a8e2b2e616dc200",
       "type": "item",
       "nom": "Carcasse de Prince Demon",
       "icon": "🥩",
@@ -11085,7 +11124,7 @@
     },
     {
       "_id": "item:rapaces",
-      "_rev": "1-d6c859cdb9485cd601d03288ad6df660",
+      "_rev": "2-83c498928c9c828a52b88ce7116dd707",
       "type": "item",
       "nom": "Carcasse de Rapaces",
       "icon": "🥩",
@@ -11099,7 +11138,7 @@
     },
     {
       "_id": "item:rat_geant",
-      "_rev": "1-5a2b4ef377722a0f6c641c5a2ca08090",
+      "_rev": "2-4b9f4225f2c45d0dc9e30cce58b5ad95",
       "type": "item",
       "nom": "Carcasse de Rat Geant",
       "icon": "🥩",
@@ -11113,7 +11152,7 @@
     },
     {
       "_id": "item:reine_lhamia",
-      "_rev": "1-585fefcc1ac6ed5a4e93021b2cb989e0",
+      "_rev": "2-d2b47d1b3c35e79bd4d507f7d322ca15",
       "type": "item",
       "nom": "Ossements de Reine Lhamia",
       "icon": "🦴",
@@ -11127,7 +11166,7 @@
     },
     {
       "_id": "item:rejeton_demoniaque",
-      "_rev": "1-84afd22b7776a2d0f11d6940b108b34d",
+      "_rev": "2-9b45f8028cf8ce0e725ed8c5e5047714",
       "type": "item",
       "nom": "Carcasse de Rejeton Demoniaque",
       "icon": "🥩",
@@ -11141,7 +11180,7 @@
     },
     {
       "_id": "item:revenant",
-      "_rev": "1-a559dc7aa2b2f39966607b1da842485b",
+      "_rev": "2-4cf8929f31e8f35e00b39413afa9e149",
       "type": "item",
       "nom": "Résidu spectral de Revenant",
       "icon": "👻",
@@ -11155,7 +11194,7 @@
     },
     {
       "_id": "item:roi_des_tombes",
-      "_rev": "1-4cd3daefa7eacaa3c758cd41d51b5b23",
+      "_rev": "2-2d707bf1ae22abd9818584e0f8ba5037",
       "type": "item",
       "nom": "Ossements de Roi des Tombes",
       "icon": "🦴",
@@ -11169,7 +11208,7 @@
     },
     {
       "_id": "item:roi_liche",
-      "_rev": "1-c22cc80046eb4c3dbd814d03d278e6f6",
+      "_rev": "2-e711bf79ce80d744651ebd2b72609301",
       "type": "item",
       "nom": "Ossements de Roi Liche",
       "icon": "🦴",
@@ -11183,7 +11222,7 @@
     },
     {
       "_id": "item:sanglier",
-      "_rev": "1-d06d948939e7ddc05cafbc97bf3fc9ac",
+      "_rev": "2-0b154bd35bc17d9158077383b44b2002",
       "type": "item",
       "nom": "Carcasse de Sanglier",
       "icon": "🥩",
@@ -11197,7 +11236,7 @@
     },
     {
       "_id": "item:satyre",
-      "_rev": "1-408bc9c866d135a4cc92bb205711ca4f",
+      "_rev": "2-8fc7698112d39f6f39f5a01fcf2630fa",
       "type": "item",
       "nom": "Carcasse de Satyre",
       "icon": "🥩",
@@ -11211,7 +11250,7 @@
     },
     {
       "_id": "item:seigneur_du_sang",
-      "_rev": "1-68c3ec70e86aed6a7f8952e18bc19d85",
+      "_rev": "2-7e21de2504a138ffa106388b3ea7dbfa",
       "type": "item",
       "nom": "Ossements de Seigneur du Sang",
       "icon": "🦴",
@@ -11225,7 +11264,7 @@
     },
     {
       "_id": "item:seraphin",
-      "_rev": "1-c70b1e3ff16c8138ee0a2a6046e10b8b",
+      "_rev": "2-a95bab9380cb79ccd60a5ae0789e3fdd",
       "type": "item",
       "nom": "Carcasse de Seraphin",
       "icon": "🥩",
@@ -11239,7 +11278,7 @@
     },
     {
       "_id": "item:serpent",
-      "_rev": "1-0e6e49f3576c55bd9986362964bcb4ab",
+      "_rev": "2-531e5e82c96ab05a1c4c84c12f7d4f71",
       "type": "item",
       "nom": "Carcasse de Serpent",
       "icon": "🥩",
@@ -11253,7 +11292,7 @@
     },
     {
       "_id": "item:serpent_geant",
-      "_rev": "1-033bf70dbd68facfbcf50964bdbf4dff",
+      "_rev": "2-5a141e7a5b3cf5b8f0a715baee3f29a7",
       "type": "item",
       "nom": "Carcasse de Serpent Geant",
       "icon": "🥩",
@@ -11267,7 +11306,7 @@
     },
     {
       "_id": "item:sirene",
-      "_rev": "1-95881500dc09ee3c51d7f99854fa8e78",
+      "_rev": "2-46d1a5ac91de975e8789392cd9dbadeb",
       "type": "item",
       "nom": "Carcasse de Sirene",
       "icon": "🥩",
@@ -11281,7 +11320,7 @@
     },
     {
       "_id": "item:spectre",
-      "_rev": "1-311209af55e9cb8c73873ec19e5ab384",
+      "_rev": "2-7f9f4d6cffca20f9cf67296381501295",
       "type": "item",
       "nom": "Résidu spectral de Spectre",
       "icon": "👻",
@@ -11295,7 +11334,7 @@
     },
     {
       "_id": "item:sphinx",
-      "_rev": "1-0921c6480455919725996e4a27e5d58e",
+      "_rev": "2-d82e68a0727ab9661303d087db1136f5",
       "type": "item",
       "nom": "Carcasse de Sphinx",
       "icon": "🥩",
@@ -11309,7 +11348,7 @@
     },
     {
       "_id": "item:squelette",
-      "_rev": "1-c0adc70c90b0fb849b0c64eb731468dc",
+      "_rev": "2-279ebfd31c85f3b4348014473dafdc3d",
       "type": "item",
       "nom": "Ossements de Squelette",
       "icon": "🦴",
@@ -11323,7 +11362,7 @@
     },
     {
       "_id": "item:succube",
-      "_rev": "1-d41ecb6740704006139c3b471222f3d5",
+      "_rev": "2-bf3f807753e09d1ff529c18af692f904",
       "type": "item",
       "nom": "Carcasse de Succube",
       "icon": "🥩",
@@ -11337,7 +11376,7 @@
     },
     {
       "_id": "item:tarasque",
-      "_rev": "1-00cbac06f86e7ce604ca03cb362d2952",
+      "_rev": "2-358bb748d0339a94ce96098876a93996",
       "type": "item",
       "nom": "Carcasse de Tarasque",
       "icon": "🥩",
@@ -11351,7 +11390,7 @@
     },
     {
       "_id": "item:taureau",
-      "_rev": "1-25ef6492fe5db9e2d00274e3b78fd220",
+      "_rev": "2-1d77537287738bd25e01ec8ac594eca6",
       "type": "item",
       "nom": "Carcasse de Taureau",
       "icon": "🥩",
@@ -11365,7 +11404,7 @@
     },
     {
       "_id": "item:triton",
-      "_rev": "1-d6e440ba883085876edf02cac7286bde",
+      "_rev": "2-8f5839b9294de8ede3f0c267ac4eda8d",
       "type": "item",
       "nom": "Carcasse de Triton",
       "icon": "🥩",
@@ -11379,7 +11418,7 @@
     },
     {
       "_id": "item:troglodyte",
-      "_rev": "1-d7919df640746fa69bbfb3c0b8c890b5",
+      "_rev": "2-2cf68f57019d3ec1bc76ebb3fa207d40",
       "type": "item",
       "nom": "Carcasse de Troglodyte",
       "icon": "🥩",
@@ -11393,7 +11432,7 @@
     },
     {
       "_id": "item:troll",
-      "_rev": "1-5c2dab86d3395bcceffc0208843c9ba4",
+      "_rev": "2-aa49af0a70bc6df86c75528d29ab8bfa",
       "type": "item",
       "nom": "Carcasse de Troll",
       "icon": "🥩",
@@ -11407,7 +11446,7 @@
     },
     {
       "_id": "item:vampire",
-      "_rev": "1-4911ec6f0be8497487737c87768c4d9f",
+      "_rev": "2-f45784c29a2a01811d728fb278d76556",
       "type": "item",
       "nom": "Ossements de Vampire",
       "icon": "🦴",
@@ -11421,7 +11460,7 @@
     },
     {
       "_id": "item:vers_des_sables",
-      "_rev": "1-c6c059ab7d39c1d1e51175fb7cdacb18",
+      "_rev": "2-b67e775d62011822c08f2c2c90e1331e",
       "type": "item",
       "nom": "Carcasse de Vers des Sables",
       "icon": "🥩",
@@ -11435,7 +11474,7 @@
     },
     {
       "_id": "item:vouivre",
-      "_rev": "1-c2aa956b41292749ec892ab7c003f4de",
+      "_rev": "2-8d32cd0cbb3d8ed434c80be37f2dd1b9",
       "type": "item",
       "nom": "Carcasse de Vouivre",
       "icon": "🥩",
@@ -11449,7 +11488,7 @@
     },
     {
       "_id": "item:wyvern",
-      "_rev": "1-97d821eca11c14c9c012d3f169a74470",
+      "_rev": "2-27f10bc6869160b86e932e30097bff95",
       "type": "item",
       "nom": "Carcasse de Wyvern",
       "icon": "🥩",
@@ -11463,7 +11502,7 @@
     },
     {
       "_id": "item:zombie",
-      "_rev": "1-2ffdab34fa249de27c6e2b22e9451b65",
+      "_rev": "2-d3e6fc8fe6f9cbd21972a5a4dc7507e8",
       "type": "item",
       "nom": "Ossements de Zombie",
       "icon": "🦴",
@@ -11485,7 +11524,7 @@
     },
     {
       "_id": "lieu:auxerre",
-      "_rev": "439-6d99b7d528fe11de4849eb3080f0602e",
+      "_rev": "440-edbd09af6d39d5541525766a31aa920c",
       "type": "lieu",
       "label": "Auxerre",
       "image": "auxerre_start_city.png",
@@ -16154,16 +16193,16 @@
         },
         {
           "x": 21,
-          "y": 8,
-          "w": 13,
-          "h": 7,
+          "y": 9,
+          "w": 9,
+          "h": 5,
           "rot": 0,
           "forme": "rectangle",
           "zone": "zone::faubourg_ville",
           "bbox": {
-            "x_min": 14.5,
-            "x_max": 27.5,
-            "y_min": 4.5,
+            "x_min": 16.5,
+            "x_max": 25.5,
+            "y_min": 6.5,
             "y_max": 11.5
           }
         },

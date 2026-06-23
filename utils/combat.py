@@ -7,7 +7,7 @@ from models.character_stats import (
 	BaseStats, compute_derived_stats
 )
 from utils.lieux import nav_allows
-from utils.characters import grant_xp, recompute_equipment_bonus
+from utils.characters import grant_xp, recompute_equipment_bonus, carried_weight, poids_bounds, item_ref_id
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -18,6 +18,25 @@ BATTLE_MAPS = [
 def _compute_actions_max(ag: int, v: int) -> int:
 	"""Nombre d'actions par tour dérivé des stats : max(1, ceil(Ag/20 + V/5))."""
 	return max(1, math.ceil(ag / 20 + v / 5))
+
+
+def _charge_penalized_deplacement(deplacement_base: int, charge: float, charge_max: float) -> int:
+	"""Déplacement de combat après malus de charge.
+
+	Au-delà de la moitié de la charge max, le déplacement est divisé par deux
+	(arrondi à l'inférieur, minimum 1). En-dessous, valeur de base inchangée.
+	"""
+	if charge_max > 0 and charge > charge_max / 2:
+		return max(1, deplacement_base // 2)
+	return max(1, deplacement_base)
+
+
+def _recompute_player_deplacement(joueur: dict) -> None:
+	"""Réapplique le malus de charge au déplacement du joueur (après un ramassage)."""
+	joueur["deplacement"] = _charge_penalized_deplacement(
+		joueur.get("deplacement_base", joueur.get("deplacement", 1)),
+		joueur.get("charge", 0), joueur.get("charge_max", 0),
+	)
 
 
 # ── Grille de combat ─────────────────────────────────────────────────────────
@@ -68,8 +87,9 @@ def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
 
 
 def _refresh_actions(actor: dict) -> None:
-	"""Recalcule actions_restantes = actions_max - attaques - AP_déplacement."""
-	used = actor.get("attaques", 0) + _move_ap_used_for(actor, actor.get("cells_moved", 0))
+	"""Recalcule actions_restantes = actions_max - attaques - ramassages - AP_déplacement."""
+	used = (actor.get("attaques", 0) + actor.get("ramasses", 0)
+			+ _move_ap_used_for(actor, actor.get("cells_moved", 0)))
 	actor["actions_restantes"] = max(0, actor["actions_max"] - used)
 
 
@@ -77,6 +97,7 @@ def _reset_turn_budget(actor: dict) -> None:
 	"""Réinitialise le budget d'un acteur en début de tour."""
 	actor["cells_moved"] = 0
 	actor["attaques"] = 0
+	actor["ramasses"] = 0
 	actor["actions_restantes"] = actor["actions_max"]
 
 
@@ -424,6 +445,10 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
 	derived = compute_derived_stats(base, niveau=voc_niveau, equipment=equipment)
 
+	# Charge portée à l'entrée en combat → malus de déplacement si > charge_max/2.
+	charge = round(carried_weight(character), 2)
+	deplacement = _charge_penalized_deplacement(derived.deplacement, charge, derived.charge_max)
+
 	return {
 		"id": f"joueur_{joueur_index}",
 		"character_id": character["_id"],
@@ -444,12 +469,17 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"degats_cc": derived.degats_cc,
 		"degats_cd": derived.degats_cd,
 		"initiative": derived.initiative,
-		"deplacement": derived.deplacement,
+		"deplacement": deplacement,            # après malus de charge
+		"deplacement_base": derived.deplacement,  # sans malus (pour recalcul au ramassage)
+		"charge": charge,
+		"charge_max": derived.charge_max,
 		"portee": 1,
 		"pos": {"x": 0, "y": 0},
 		"facing": 0,
 		"cells_moved": 0,
 		"attaques": 0,
+		"ramasses": 0,
+		"butin_ramasse": [],   # références {item, poids} des carcasses ramassées en combat
 	}
 
 
@@ -528,6 +558,7 @@ def instantiate_monsters(
 			"attaques": 0,
 			"vivant": True,
 			"xp_reward": xp_reward,
+			"niveau": niveau,   # niveau du profil → pondère le tirage du poids de carcasse
 		})
 
 	return monstres
@@ -931,6 +962,46 @@ def resolve_action(
 			joueur["actions_restantes"] = 0
 			result = {"fled": False, "roll": flee_roll, "seuil": seuil}
 
+	elif action_type == "ramasser":
+		# Ramasser la carcasse d'un ennemi mort adjacent, coûte 1 action. Interdit si
+		# un ennemi VIVANT est au corps à corps (adjacent) → il faut d'abord se dégager.
+		if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
+			return {"error": "Un ennemi vous menace au corps à corps."}
+		morts_adj = [
+			m for m in combat_doc["monstres"]
+			if not m["vivant"] and not m.get("loote") and _cheby(joueur, m) <= 1
+		]
+		if not morts_adj:
+			return {"error": "Aucune carcasse à portée."}
+		if cible_id:
+			monstre = next((m for m in morts_adj if m["id"] == cible_id), None)
+			if monstre is None:
+				return {"error": "Carcasse invalide."}
+		else:
+			monstre = morts_adj[0]
+
+		item = _ensure_loot_item(monstre.get("espece_id", ""), monstre.get("nom", ""))
+		if item is None:
+			return {"error": "Cette créature ne laisse aucun reste."}
+		poids = _roll_carcasse_weight(item, monstre.get("niveau", 1))
+		if joueur.get("charge", 0) + poids > joueur.get("charge_max", 0):
+			return {"error": "Trop lourd : vous ne pouvez pas porter cette carcasse."}
+
+		monstre["loote"] = True
+		# Référence {item, poids} : le poids d'instance tiré est conservé dans l'inventaire.
+		joueur.setdefault("butin_ramasse", []).append({"item": item["_id"], "poids": poids})
+		joueur["charge"] = round(joueur.get("charge", 0) + poids, 2)
+		_recompute_player_deplacement(joueur)  # malus de charge éventuel
+		joueur["ramasses"] = joueur.get("ramasses", 0) + 1
+		_refresh_actions(joueur)
+		combat_doc["log"].append({
+			"tour": combat_doc["tour"],
+			"acteur": joueur["nom"],
+			"kind": "sys",
+			"texte": f"{joueur['nom']} récupère {item.get('nom', 'une carcasse')}.",
+		})
+		result = {"looted": True, "item": item.get("nom"), "charge": joueur["charge"]}
+
 	else:
 		return {"error": f"Action inconnue : {action_type}"}
 
@@ -938,6 +1009,105 @@ def resolve_action(
 		_advance_and_resolve(combat_doc, grid)
 
 	return result
+
+
+# ── Butin (loot) ──────────────────────────────────────────────────────────────
+# Loot 1-pour-1 avec le bestiaire : un monstre tué laisse une « carcasse » dont
+# l'_id suit la règle item:<sub_id>, où sub_id = la partie de l'espece_id après
+# "espece:". Les 133 carcasses sont pré-générées (item.json importé) ; on en crée
+# une à la volée pour toute espèce ajoutée ensuite au bestiaire sans item associé.
+# Ces carcasses sont des composants destinés à être transformés par les PNJ
+# (boucher, alchimiste, magicien, forgeron…).
+
+def _loot_item_id(espece_id: str) -> str | None:
+	"""item:<sub_id> à partir d'un espece_id ('espece:<sub_id>'), ou None si malformé."""
+	if not espece_id or not espece_id.startswith("espece:"):
+		return None
+	return "item:" + espece_id[len("espece:"):]
+
+
+def _build_loot_item(item_id: str, espece_id: str, nom_fallback: str) -> dict:
+	"""Doc item « Restes de … » créé à la volée pour une espèce sans carcasse pré-générée.
+
+	Lit le doc espèce (si présent) pour le nom et un poids dérivé de la Force moyenne
+	(échelle ×10 : F_moy/5, ×0.5 si petite_taille, ×2 si géant, borné 0.5–25 kg).
+	"""
+	espece = get_doc(espece_id) or {}
+	nom = espece.get("nom") or nom_fallback or item_id[len("item:"):]
+	base_f = espece.get("base_attributes", {}).get("F", {})
+	f_avg = (base_f.get("min", 10) + base_f.get("max", 10)) / 2
+	poids = f_avg / 5
+	tags = set(espece.get("tags", []))
+	if "petite_taille" in tags:
+		poids *= 0.5
+	if "geant" in tags:
+		poids *= 2
+	poids = round(max(0.5, min(25.0, poids)), 1)
+	return {
+		"_id": item_id,
+		"type": "item",
+		"nom": f"Restes de {nom}",
+		"icon": "🦴",
+		"rarete": "commun",
+		"categorie": "composant",
+		"slots": [],
+		"poids": poids,
+		"description": f"Dépouille de {nom} récupérée à l'issue du combat.",
+		"source_espece": espece_id,
+		"loot_defaut": True,
+	}
+
+
+def _ensure_loot_item(espece_id: str, nom_fallback: str = "") -> dict | None:
+	"""Retourne le doc item carcasse d'une espèce, en le créant en base si absent.
+
+	None si l'espece_id est malformé ou si la création échoue. Partagé par le
+	ramassage en combat et par la construction du butin disponible à la victoire.
+	"""
+	item_id = _loot_item_id(espece_id)
+	if not item_id:
+		return None
+	item = get_doc(item_id)
+	if item is not None:
+		return item
+	item = _build_loot_item(item_id, espece_id, nom_fallback)
+	if save_doc(item) is None:
+		return None
+	return item
+
+
+def _roll_carcasse_weight(item: dict, niveau: int) -> float:
+	"""Poids tiré pour une instance de carcasse.
+
+	Si l'item a un poids fixe → ce poids. S'il a un poids [min, max] → on tire min OU
+	max via random.choices, pondéré par le niveau du profil de l'ennemi :
+	weights = [max(1, 7-niveau), max(1, 1+niveau)] → bas niveau ⇒ plutôt le min (léger),
+	haut niveau ⇒ plutôt le max (lourd).
+	"""
+	pmin, pmax = poids_bounds(item)
+	if pmin == pmax:
+		return pmin
+	w_min = max(1, 7 - niveau)
+	w_max = max(1, 1 + niveau)
+	return random.choices([pmin, pmax], weights=[w_min, w_max])[0]
+
+
+def _carcasse_payload(monstre: dict) -> dict | None:
+	"""Descripteur {monstre_id, item_id, nom, poids} de la carcasse d'un monstre, le
+	poids étant tiré selon le niveau du profil (cf. _roll_carcasse_weight).
+
+	None si la créature ne laisse pas de reste (espece_id malformé) ou si la
+	création de l'item échoue.
+	"""
+	item = _ensure_loot_item(monstre.get("espece_id", ""), monstre.get("nom", ""))
+	if item is None:
+		return None
+	return {
+		"monstre_id": monstre["id"],
+		"item_id": item["_id"],
+		"nom": item.get("nom", item["_id"]),
+		"poids": _roll_carcasse_weight(item, monstre.get("niveau", 1)),
+	}
 
 
 def finalize_combat(combat_doc: dict) -> bool:
@@ -974,6 +1144,28 @@ def finalize_combat(combat_doc: dict) -> bool:
 		character["currentPV"] = 1
 	elif status == "fuite":
 		character["currentPV"] = max(1, joueur["currentPV"])
+
+	# Butin ramassé en plein combat (action « ramasser ») : conservé quelle que soit
+	# l'issue — c'est tout l'intérêt de pouvoir saisir une carcasse puis fuir. Ajouté
+	# dans le MÊME doc que l'XP → couvert par l'idempotence atomique (pas de double).
+	ramasse = [i for i in joueur.get("butin_ramasse", []) if i]
+	if ramasse:
+		inventaire = character.get("inventaire", [])
+		inventaire.extend(ramasse)
+		character["inventaire"] = inventaire
+
+	# Carcasses laissées au sol (monstres tués non ramassés) : proposées dans l'overlay
+	# de fin UNIQUEMENT en cas de victoire. Le joueur choisit lesquelles emporter via
+	# POST /api/combat/{id}/collect (borné par charge_max) — pas d'ajout automatique.
+	if status == "victoire":
+		dispo = []
+		for m in combat_doc["monstres"]:
+			if m.get("loote"):
+				continue  # déjà ramassée pendant le combat
+			payload = _carcasse_payload(m)
+			if payload:
+				dispo.append(payload)
+		combat_doc["butin_disponible"] = dispo
 
 	# Idempotence atomique : on enregistre le combat dans le doc personnage,
 	# sauvegardé avec l'XP. Borné pour éviter une croissance illimitée.

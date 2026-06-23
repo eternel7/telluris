@@ -6,9 +6,14 @@ import bcrypt
 import math
 import re
 import uuid
+import random
 from db.config import save_doc, get_doc, delete_doc
 from utils.auth import get_current_user, create_access_token
-from utils.characters import get_user_characters, get_selected_character, grant_xp, recompute_equipment_bonus
+from utils.characters import (
+	get_user_characters, get_selected_character, grant_xp,
+	recompute_equipment_bonus, carried_weight, charge_max_of,
+	item_ref_id, resolve_item_ref,
+)
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
 from models import character_stats
@@ -253,7 +258,15 @@ async def move_character(
 			
 		position = character_to_update["position"]
 		lieu_courant = character_to_update["lieu"]
-		
+
+		# Surcharge : on ne peut pas se DÉPLACER si le poids porté dépasse la charge max
+		# (cas typique : on a ramassé un objet trop lourd, inventaire vide → bloqué tant
+		# qu'on ne s'est pas délesté). Le « wait » (move 0,0) reste autorisé pour pouvoir
+		# ouvrir l'inventaire / régénérer.
+		est_deplacement = ("link" in move) or bool(move.get("x")) or bool(move.get("y"))
+		if est_deplacement and carried_weight(character_to_update) > charge_max_of(character_to_update):
+			raise HTTPException(status_code=409, detail="Trop chargé pour vous déplacer — déposez un objet.")
+
 		if "link" in move:
 			links = get_lieu_links(current_user)
 			target_id = move["link"]
@@ -283,6 +296,8 @@ async def move_character(
 							info = grant_xp(character_to_update, xp_gain)
 							niveau_up = info["niveau_up"]
 							niveau_new = info["niveau_apres"]
+						# Changement de lieu : le sol (objets posés) est transitoire et perdu.
+						character_to_update["objets_au_sol"] = []
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
 						zone_event = None
@@ -296,6 +311,7 @@ async def move_character(
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
+			ancienne_pos = {"x": position["x"], "y": position["y"]}
 			movex = (move["x"] > 0) - (move["x"] < 0) # -1 0 1
 			movey = (move["y"] > 0) - (move["y"] < 0) # -1 0 1
 			position["x"] += movex
@@ -305,6 +321,10 @@ async def move_character(
 				position["x"]>=0 and position["y"]>=0
 				and position["x"]<=lieu_doc["dimensions"]["x"] and position["y"]<=lieu_doc["dimensions"]["y"]):
 				character_to_update["position"] = position
+				# Déplacement effectif (≠ « wait » 0,0) : le sol transitoire est vidé.
+				ground_cleared = (position["x"], position["y"]) != (ancienne_pos["x"], ancienne_pos["y"])
+				if ground_cleared:
+					character_to_update["objets_au_sol"] = []
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
@@ -317,7 +337,7 @@ async def move_character(
 							position["x"], position["y"],
 							lieu_doc["zone_influences"], zone_defs
 						)
-					return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update)}
+					return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -480,7 +500,9 @@ async def equip_item(
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 
 	inventaire = character.get("inventaire", [])
-	if item_id not in inventaire:
+	# Référence correspondant à l'item (chaîne legacy ou objet {item, poids}).
+	ref = next((r for r in inventaire if item_ref_id(r) == item_id), None)
+	if ref is None:
 		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
 
 	item = get_doc(item_id)
@@ -496,8 +518,8 @@ async def equip_item(
 	if displaced:
 		inventaire.append(displaced)
 
-	slots[slot] = item_id
-	inventaire.remove(item_id)
+	slots[slot] = ref          # garde la référence (poids d'instance préservé)
+	inventaire.remove(ref)
 	character["slots"]      = slots
 	character["inventaire"] = inventaire
 
@@ -507,8 +529,8 @@ async def equip_item(
 
 	derived = _derived_from_character(character, eq_bonus)
 	return {
-		"slots":           {s: get_doc(v) if v else None for s, v in slots.items()},
-		"inventaire":      [get_doc(i) for i in inventaire if i],
+		"slots":           {s: resolve_item_ref(v) if v else None for s, v in slots.items()},
+		"inventaire":      [d for r in inventaire if (d := resolve_item_ref(r))],
 		"equipment_bonus": character["equipment_bonus"],
 		"derived_stats":   derived.model_dump(),
 	}
@@ -529,12 +551,12 @@ async def unequip_item(
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 
 	slots   = character.get("slots", {})
-	item_id = slots.get(slot)
-	if not item_id:
+	ref = slots.get(slot)
+	if not ref:
 		raise HTTPException(status_code=422, detail="Slot déjà vide")
 
 	inventaire = character.get("inventaire", [])
-	inventaire.append(item_id)
+	inventaire.append(ref)     # remet la référence (poids d'instance préservé)
 	slots[slot] = None
 	character["slots"]      = slots
 	character["inventaire"] = inventaire
@@ -545,11 +567,109 @@ async def unequip_item(
 
 	derived = _derived_from_character(character, eq_bonus)
 	return {
-		"slots":           {s: get_doc(v) if v else None for s, v in slots.items()},
-		"inventaire":      [get_doc(i) for i in inventaire if i],
+		"slots":           {s: resolve_item_ref(v) if v else None for s, v in slots.items()},
+		"inventaire":      [d for r in inventaire if (d := resolve_item_ref(r))],
 		"equipment_bonus": character["equipment_bonus"],
 		"derived_stats":   derived.model_dump(),
 	}
+
+
+def _inventory_payload(character: dict) -> dict:
+	"""Réponse partagée par drop/pickup : inventaire, sol et slots résolus en docs
+	(poids d'instance inclus), plus la charge courante et la charge max."""
+	slots = character.get("slots", {})
+	return {
+		"slots":         {s: resolve_item_ref(v) if v else None for s, v in slots.items()},
+		"inventaire":    [d for r in character.get("inventaire", []) if (d := resolve_item_ref(r))],
+		"objets_au_sol": [d for r in character.get("objets_au_sol", []) if (d := resolve_item_ref(r))],
+		"charge":        round(carried_weight(character), 2),
+		"charge_max":    charge_max_of(character),
+	}
+
+
+def _take_ref(refs: list, idx, item_id):
+	"""Retire et renvoie la référence d'item ciblée. On adresse par index (deux
+	exemplaires d'un même item peuvent avoir des poids d'instance distincts), vérifié
+	via `item_id` ; repli sur le premier exemplaire de l'item si l'index est désaligné.
+	None si introuvable."""
+	if isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < len(refs) \
+			and (item_id is None or item_ref_id(refs[idx]) == item_id):
+		return refs.pop(idx)
+	if item_id is not None:
+		pos = next((i for i, r in enumerate(refs) if item_ref_id(r) == item_id), None)
+		if pos is not None:
+			return refs.pop(pos)
+	return None
+
+
+@user_router.post("/drop_item")
+async def drop_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Pose au sol un objet de l'inventaire (transitoire : perdu au prochain déplacement)."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	inventaire = character.get("inventaire", [])
+	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
+	if ref is None:
+		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
+
+	au_sol = character.get("objets_au_sol", [])
+	au_sol.append(ref)
+	character["inventaire"]    = inventaire
+	character["objets_au_sol"] = au_sol
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	return _inventory_payload(character)
+
+
+@user_router.post("/pickup_item")
+async def pickup_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Reprend un objet posé au sol. Si la charge max est alors dépassée, des objets
+	ALÉATOIRES de l'inventaire (hors l'exemplaire repris) tombent au sol jusqu'à repasser
+	sous la limite. Si l'objet repris seul (ou l'équipement) suffit à dépasser, on reste
+	surchargé (déplacement bloqué tant qu'on ne se déleste pas)."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	au_sol = character.get("objets_au_sol", [])
+	picked = _take_ref(au_sol, body.get("index"), body.get("item_id"))
+	if picked is None:
+		raise HTTPException(status_code=422, detail="Objet absent du sol")
+
+	inventaire = character.get("inventaire", [])
+	inventaire.append(picked)
+	character["inventaire"]    = inventaire
+	character["objets_au_sol"] = au_sol
+
+	# Auto-délestage : on protège exactement l'exemplaire ramassé (par identité), le
+	# reste est candidat au largage aléatoire tant que le poids porté dépasse la limite.
+	cmax = charge_max_of(character)
+	auto_dropped = []
+	while carried_weight(character) > cmax:
+		candidats_idx = [i for i, r in enumerate(inventaire) if r is not picked]
+		if not candidats_idx:
+			break
+		victime = inventaire.pop(random.choice(candidats_idx))
+		au_sol.append(victime)
+		doc = resolve_item_ref(victime)
+		auto_dropped.append(doc.get("nom") if doc else item_ref_id(victime))
+	character["inventaire"]    = inventaire
+	character["objets_au_sol"] = au_sol
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	payload = _inventory_payload(character)
+	payload["auto_dropped"] = auto_dropped
+	return payload
 
 
 @user_router.post("/spend_xp_vocation")

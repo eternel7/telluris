@@ -543,6 +543,20 @@
 			transform: translateX(-50%); /* Centre le trait pile sur le pourcentage */
 			z-index: 2;
 		}
+		/* Jauge de charge : largeur pilotée en JS ; vire à l'orange au-delà de la demi-charge
+		   (seuil de malus en combat, indicatif ici) puis au rouge en surcharge. */
+		#charge-fill { width: 0%; transition: width .15s ease, background .15s ease; }
+		#charge-fill.over-half { background: linear-gradient(90deg, #a86a2e 0%, #e0902f 100%); }
+		#charge-fill.over-max  { background: linear-gradient(90deg, #a83232 0%, #e04a4a 100%); }
+		.sh-charge-label { font-size: 11px; color: #c9b27a; margin-top: 3px; min-height: 14px; }
+		.sh-charge-label .warn { color: #e0902f; }
+		.sh-charge-label .err  { color: #e04a4a; font-weight: bold; }
+		.sh-inv-poids { color: #9a8a66; font-size: 11px; margin: 0 4px; white-space: nowrap; }
+		.sh-drop-btn, .sh-pickup-btn {
+			background: transparent; border: 1px solid #6b5836; color: #cda349;
+			border-radius: 5px; padding: 2px 8px; font-size: 11px; cursor: pointer;
+		}
+		.sh-drop-btn:hover, .sh-pickup-btn:hover { background: #2e2510; }
 		.sh-derived-row {
 			display: flex;
 			justify-content: space-between;
@@ -1222,6 +1236,7 @@
 								<div class="sh-finance">⚪ <span class="amt">{{ character.get("argent",0) }}</span> Argent</div>
 								<div class="sh-finance">🟤 <span class="amt">{{ character.get("cuivre",0) }}</span> Cuivre</div>
 							</div>
+
 							<div class="sh-section">🛡 Équipement</div>
 							{% set slots = character.get("slots",{}) %}
 							{% set _equip_race = character["race"] %}
@@ -1250,8 +1265,20 @@
 								</div>
 								{% endfor %}
 							</div>
+
+							<div class="sh-section">⚖️ Charge</div>
+							<div class="sh-stat-bar-wrapper" title="Charge portée. Le repère marque la moitié de la charge max (seuil de pénalité en combat).">
+								<div class="sh-stat-bar">
+									<div class="sh-stat-fill" id="charge-fill"></div>
+									<div class="sh-stat-pip" style="left:50%"></div>
+								</div>
+							</div>
+							<div id="charge-label" class="sh-charge-label"></div>
+							
 							<div class="sh-section" style="margin-top:14px">🎒 Sac</div>
 							<div id="sh-inv-sac"></div>
+							<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none">⬇️ Au sol</div>
+							<div id="sh-inv-sol"></div>
 						</div>
 
 						<!-- ── COMPETENCES ── -->
@@ -1394,6 +1421,12 @@
 				buildLocationslist();
 				updateControls();
 				updateVitals(rep.vitals);
+				// Déplacement effectif → le sol transitoire est vidé côté serveur.
+				if (rep.ground_cleared) {
+					_objetsAuSol = [];
+					_refreshSol();
+					_refreshChargeGauge();
+				}
 				if (rep.zone_event) {
 					if (rep.zone_event.type === 'combat') {
 						const cr = await fetch('/api/combat/start', {
@@ -1472,11 +1505,16 @@
 			];
 			let access = ACCESS.access;
 			let nav = ACCESS.nav;
+			// Surcharge : poids porté > charge max → déplacement impossible (miroir de la
+			// garde serveur). Le guard `typeof` évite l'erreur au 1er appel (les variables
+			// de charge sont déclarées dans un script chargé après celui-ci).
+			const surcharge = (typeof _currentCharge === 'function' && typeof _chargeMax !== 'undefined')
+				&& _currentCharge() > _chargeMax + 1e-6;
 			boutons.forEach(({ element, x, y, dir }) => {
 				if (element) {
 					const loc_access = access[y + 1][x + 1];
 					// access en fonction du type de lieu et des directions disponibles
-					element.disabled = (loc_access !== 1) || ((nav & dir) === 0);
+					element.disabled = surcharge || (loc_access !== 1) || ((nav & dir) === 0);
 				}
 			});
 		}
@@ -1933,8 +1971,39 @@ const SLOT_LABELS = {
 	jambes: "Jambes", main_droite: "Main D.", main_gauche: "Main G."
 };
 
-let _inventaire = {{ character.get("inventaire", []) | tojson | safe }};
-let _slots      = {{ character.get("slots", {}) | tojson | safe }};
+let _inventaire   = {{ character.get("inventaire", []) | tojson | safe }};
+let _slots        = {{ character.get("slots", {}) | tojson | safe }};
+let _objetsAuSol  = {{ character.get("objets_au_sol", []) | tojson | safe }};
+let _chargeMax    = {{ character.get("derived_stats", {}).get("charge_max", 0) }};
+
+// Poids porté = somme des `poids` des items du sac + des items équipés.
+function _currentCharge() {
+	let total = 0;
+	(_inventaire || []).forEach(it => { if (it) total += +(it.poids || 0); });
+	Object.values(_slots || {}).forEach(it => { if (it) total += +(it.poids || 0); });
+	return total;
+}
+
+// Jauge de charge : pip fixe à 50 % (= charge_max/2). Orange au-delà (seuil de malus
+// en combat, indicatif en ville), rouge en surcharge. Désactive les flèches si surchargé.
+function _refreshChargeGauge() {
+	const fill = document.getElementById('charge-fill');
+	const label = document.getElementById('charge-label');
+	if (!fill) return;
+	const charge = _currentCharge();
+	const max = _chargeMax || 0;
+	const half = max / 2;
+	fill.style.width = (max > 0 ? Math.min(100, charge / max * 100) : 0) + '%';
+	fill.classList.toggle('over-half', charge > half && charge <= max + 1e-6);
+	fill.classList.toggle('over-max',  charge > max + 1e-6);
+	if (label) {
+		let txt = `${charge.toFixed(1)} / ${max} kg`;
+		if (charge > max + 1e-6)   txt += ` · <span class="err">surcharge — déplacement bloqué</span>`;
+		else if (charge > half)    txt += ` · <span class="warn">demi-charge</span>`;
+		label.innerHTML = txt;
+	}
+	updateControls();
+}
 
 function _refreshPaperdoll() {
 	for (const [slot, item] of Object.entries(_slots)) {
@@ -1961,7 +2030,7 @@ function _refreshInventaire() {
 		sacEl.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Inventaire vide</div>';
 		return;
 	}
-	sacEl.innerHTML = _inventaire.map(item => {
+	sacEl.innerHTML = _inventaire.map((item, idx) => {
 		if (!item || typeof item !== 'object') return '';
 		const compat = (item.slots || []).filter(s => s in SLOT_LABELS);
 		let equipHtml = '';
@@ -1972,13 +2041,75 @@ function _refreshInventaire() {
 			equipHtml = `<div class="sh-equip-row">${selHtml}<button class="sh-equip-btn" onclick="equipFromSac('${item._id}',this)">Équiper</button></div>`;
 		}
 		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
+		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
+		const dropHtml = `<button class="sh-drop-btn" onclick="dropItem(${idx},'${item._id}')" title="Poser au sol">Poser</button>`;
 		return `<div class="sh-inv-item">
 			<span>${item.icon || '📦'}</span>
 			<span style="flex:1">${item.nom || '—'}</span>
-			<span class="sh-inv-qty">× ${item.quantite || 1}</span>
-			${rarHtml}${equipHtml}
+			${poidsHtml}<span class="sh-inv-qty">× ${item.quantite || 1}</span>
+			${rarHtml}${equipHtml}${dropHtml}
 		</div>`;
 	}).join('');
+}
+
+// Objets au sol (transitoires) : reprenables tant qu'on n'a pas bougé.
+function _refreshSol() {
+	const solEl = document.getElementById('sh-inv-sol');
+	const section = document.getElementById('sh-sol-section');
+	if (!solEl) return;
+	const has = _objetsAuSol && _objetsAuSol.length;
+	if (section) section.style.display = has ? '' : 'none';
+	if (!has) { solEl.innerHTML = ''; return; }
+	solEl.innerHTML = _objetsAuSol.map((item, idx) => {
+		if (!item || typeof item !== 'object') return '';
+		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
+		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
+		return `<div class="sh-inv-item">
+			<span>${item.icon || '📦'}</span>
+			<span style="flex:1">${item.nom || '—'}</span>
+			${poidsHtml}${rarHtml}
+			<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button>
+		</div>`;
+	}).join('');
+}
+
+async function dropItem(index, itemId) {
+	try {
+		const res  = await fetch('api/drop_item', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({index, item_id: itemId})
+		});
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		_applyInventoryPayload(data);
+	} catch(err) { console.error('Erreur drop', err); }
+}
+
+async function pickupItem(index, itemId) {
+	try {
+		const res  = await fetch('api/pickup_item', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({index, item_id: itemId})
+		});
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		_applyInventoryPayload(data);
+		if (data.auto_dropped && data.auto_dropped.length) {
+			showToast('Trop lourd ! Tombé au sol : ' + data.auto_dropped.join(', '));
+		}
+	} catch(err) { console.error('Erreur pickup', err); }
+}
+
+// Applique la réponse partagée des endpoints drop/pickup (inventaire/sol/slots + charge).
+function _applyInventoryPayload(data) {
+	_inventaire  = data.inventaire;
+	_objetsAuSol = data.objets_au_sol;
+	_slots       = data.slots;
+	if (typeof data.charge_max === 'number') _chargeMax = data.charge_max;
+	_refreshPaperdoll();
+	_refreshInventaire();
+	_refreshSol();
+	_refreshChargeGauge();
 }
 
 function equipFromSac(itemId, btn) {
@@ -2003,6 +2134,7 @@ async function equip(itemId, slot) {
 		_refreshPaperdoll();
 		_refreshInventaire();
 		_refreshDerivedStats(data.derived_stats);
+		_refreshChargeGauge();
 	} catch(err) { console.error('Erreur equip', err); }
 }
 
@@ -2020,10 +2152,13 @@ async function unequip(slot) {
 		_refreshPaperdoll();
 		_refreshInventaire();
 		_refreshDerivedStats(data.derived_stats);
+		_refreshChargeGauge();
 	} catch(err) { console.error('Erreur unequip', err); }
 }
 
 _refreshInventaire();
+_refreshSol();
+_refreshChargeGauge();
 </script>
 </body>
 </html>

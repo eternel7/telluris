@@ -17,7 +17,7 @@ from routers.combat import combat_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
-from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus
+from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
@@ -405,16 +405,21 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	character["derived_stats"] = derived.model_dump()
 	character["niveau"] = compute_character_level(character.get("xp_total", 0))
 
-	# Résolution inventaire : IDs → documents complets
+	# Résolution inventaire : références → documents complets (poids d'instance inclus)
 	character["inventaire"] = [
-		doc for item_id in character.get("inventaire", [])
-		if item_id and (doc := get_doc(item_id))
+		doc for ref in character.get("inventaire", [])
+		if (doc := resolve_item_ref(ref))
 	]
-	# Résolution slots : IDs → documents complets (None si vide)
+	# Résolution slots : références → documents complets (None si vide)
 	character["slots"] = {
-		slot: get_doc(item_id) if item_id else None
-		for slot, item_id in character.get("slots", {}).items()
+		slot: resolve_item_ref(ref) if ref else None
+		for slot, ref in character.get("slots", {}).items()
 	}
+	# Résolution des objets au sol (transitoires) : références → documents complets
+	character["objets_au_sol"] = [
+		doc for ref in character.get("objets_au_sol", [])
+		if (doc := resolve_item_ref(ref))
+	]
 
 	nb_max = race.get("nb_max_accessibles", 3) if race else 3
 	stats_max_race = race.get("stats_max", {}) if race else {}
