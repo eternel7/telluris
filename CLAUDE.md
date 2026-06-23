@@ -34,23 +34,31 @@ La CouchDB live tourne sur un hôte distant, généralement NON joignable en loc
 ## Architecture
 
 ```
-main.py                  # FastAPI app, page routes, static mounts
+main.py                  # FastAPI app, page routes (/play, /combat/{id}, /admin*), static mounts
 routers/
-  user.py                # /api/* endpoints: auth, character CRUD, movement
+  user.py                # /api/* : auth, character CRUD, movement, equip/unequip, drop/pickup, spend_xp
+  combat.py              # /api/combat/* : start, get, action, collect (loot)
+  zones.py               # /api/* : zones d'influence + tables de rencontres par lieu
+  bestiaire.py           # /admin/* : CRUD espece:* / profil:* (+ éditeur)
 utils/
   auth.py                # JWT creation + get_current_user() FastAPI dependency
-  characters.py          # get_user_characters(), get_selected_character(), recompute_equipment_bonus()
+  characters.py          # get/selected character, recompute_equipment_bonus, grant_xp,
+                         #   carried_weight, charge_max_of, références d'items (item_ref_*)
   lieux.py               # lieu_router, movement logic, navigation bitmask
+  combat.py              # logique de combat pure (snapshots, A*, résolution, loot, finalize)
+  zones.py               # géométrie des zones d'influence + tirage d'événements
 db/
   config.py              # CouchDB connection, get_doc / save_doc / find_docs helpers
 models/
   character_stats.py     # BaseStats, DerivedStats, EquipmentBonus, compute_derived_stats()
   character_document.py  # Pydantic spec for a character document (reference only — see note below)
 templates/
-  *.html                 # Jinja2 pages
+  *.html                 # Jinja2 pages (play_town, combat, fiche perso, admin, éditeurs)
   part-*.html            # Shared CSS fragments included via {% include %}
-  scripts/               # JS files (battle_map.js)
-  resources/             # Static assets (characters, towns, maps, icons)
+  scripts/               # JS files (battle_map.js, nav.js — bitmask nav partagé)
+  resources/             # Static assets (characters, towns, maps, monsters, icons)
+dev/
+  export_bestiaire.py    # writer xlsx pur stdlib (export d'équilibrage)
 tests/
   test_character_stats.py
 ```
@@ -80,3 +88,15 @@ Connections between locations are fetched via a CouchDB design view `reseau/lien
 
 ### Character image naming
 Images under `templates/resources/characters/` follow `{vocation}_{sex}_{race}{num}.jpg` (e.g. `paladin_f_humain01.jpg`). Town images under `templates/resources/towns/` use `{lieu_name}_start_*.png` for the starting images listed in the emblem picker.
+
+### Références d'items & poids (`utils/characters.py`)
+Une entrée d'`inventaire` / `objets_au_sol` / `slots` / `butin_ramasse` est **soit** une chaîne `"item:xxx"` (legacy → poids = **min** de l'item) **soit** un objet **`{"item": "item:xxx", "poids": <nb>}`** portant le poids propre à l'instance. Le champ `poids` d'un doc `item:*` peut être un **nombre fixe** OU un tableau **`[min, max]`**. Toujours passer par les helpers : `item_ref_id(ref)`, `poids_bounds(item)→(min,max)`, `item_ref_weight(ref)`, `resolve_item_ref(ref)` (renvoie le doc avec `poids` écrasé par le poids effectif scalaire + champ `item`). Ne jamais supposer qu'une entrée est une simple chaîne. Les actions client (poser/prendre) adressent par **index vérifié par `item_id`** (deux exemplaires d'un même item peuvent peser différemment).
+
+### Charge & surcharge
+`charge_max_of(character)` = `F*5` (dérivée, jamais stockée). `carried_weight(character)` somme les poids effectifs de l'inventaire **+ équipés** (pas le sol). En **exploration**, si `carried_weight > charge_max` le déplacement est bloqué (garde 409 dans `move_character`, flèches désactivées côté client) ; au pickup, le dépassement fait tomber des items **aléatoires** au sol. En **combat**, au-delà de la **demi-charge** le déplacement est divisé par deux (`utils/combat.py`). Les objets au sol (`objets_au_sol`) sont **transitoires** : vidés dès un déplacement réel.
+
+### Combat & butin (`utils/combat.py` + `routers/combat.py`)
+Un combat est un doc `combat:*` (snapshots `joueurs[]`/`monstres[]`, `ordre_initiative`, `battle_map_id`). Les **stats dérivées des monstres** viennent de `espece:*` (min/max) modulées par `profil:*` (niveau, deltas). `finalize_combat()` applique XP/PV **et** le butin ramassé en combat, de façon **idempotente atomique** (id du combat dans `character["combats_recompenses"]`, même doc que l'XP). Le butin de victoire n'est **jamais** auto-ajouté : `butin_disponible` (poids tiré au niveau du profil via `random.choices`) est proposé dans l'overlay, encaissé par `POST /api/combat/{id}/collect` (borné par `charge_max`). Carcasses = `item:<sub_id>` (1-pour-1 avec `espece:<sub_id>`), créées à la volée si absentes.
+
+### Variables de monde réglables
+Tunables de gameplay dans le doc CouchDB `rules:world_variables`, chargés au démarrage par `load_world_variables()` (`models/character_stats.py`). **Toujours lire via le module** (`character_stats.FACTEUR_DEGATS_ARMURE`, etc.), jamais `from … import CONST` (le chargeur réassigne les globales). Éditables à chaud via la page `/admin`.
