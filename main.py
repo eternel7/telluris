@@ -2,7 +2,7 @@ import os
 import json
 import logging
 from typing import Annotated
-from fastapi import FastAPI, Request, Depends, HTTPException, Response, Body
+from fastapi import FastAPI, Request, Depends, HTTPException, Response, Body, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
@@ -138,10 +138,17 @@ def admin_exports(request: Request, current_user: Annotated[User, Depends(get_cu
 	redirect = _require_admin_page(request, current_user)
 	if redirect:
 		return redirect
+	# Types de documents réellement présents en base (pour la liste à saisie libre de
+	# l'export par type). On exclut les user:* (cohérent avec le dump complet).
+	doc_types = sorted({
+		d["type"] for d in dump_all_docs()
+		if isinstance(d, dict) and d.get("type")
+		and not str(d.get("_id", "")).startswith("user:")
+	})
 	return templates.TemplateResponse(
 		request=request,
 		name="admin_exports.html",
-		context={"title": "Exports"}
+		context={"title": "Exports", "doc_types": doc_types}
 	)
 
 @app.get("/admin/exports/bestiaire")
@@ -172,6 +179,40 @@ def admin_export_couchdb(request: Request, current_user: Annotated[User, Depends
 	}
 	data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
 	filename = f"telluris-dump-{now:%Y%m%d-%H%M%S}.json"
+	return Response(
+		content=data,
+		media_type="application/json",
+		headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+	)
+
+@app.get("/admin/exports/by-type")
+def admin_export_by_type(
+	request: Request,
+	current_user: Annotated[User, Depends(get_current_user)],
+	doc_type: str = Query("", alias="type"),
+):
+	"""Export JSON de tous les documents partageant la même valeur de champ `type`.
+	Fichier nommé `<type>-AAAAMMJJ-HHMMSS.json`."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	import json, datetime, re
+	t = (doc_type or "").strip()
+	if not t:
+		raise HTTPException(status_code=400, detail="Paramètre 'type' requis")
+	# Exclut les user:* (cohérent avec le dump complet : données sensibles).
+	docs = [d for d in (find_docs({"type": t}) or [])
+			if not str(d.get("_id", "")).startswith("user:")]
+	now = datetime.datetime.utcnow()
+	payload = {
+		"db": "telluris",
+		"type": t,
+		"exported_at": now.isoformat() + "Z",
+		"doc_count": len(docs),
+		"docs": docs,
+	}
+	data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+	safe_t = re.sub(r"[^A-Za-z0-9_-]+", "_", t) or "type"   # nom de fichier sûr
+	filename = f"{safe_t}-{now:%Y%m%d-%H%M%S}.json"
 	return Response(
 		content=data,
 		media_type="application/json",

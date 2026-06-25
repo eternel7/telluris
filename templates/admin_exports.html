@@ -43,6 +43,14 @@
 			text-decoration: none; cursor: pointer; transition: all 0.2s;
 		}
 		.dl-btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+		.type-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+		.type-input {
+			flex: 1 1 200px; min-width: 160px;
+			padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text);
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+		}
+		.type-input:focus { outline: none; border-color: var(--accent); }
 	</style>
 </head>
 <body>
@@ -66,6 +74,31 @@
 			</div>
 			<a class="dl-btn" href="{{ url_for('admin_export_couchdb') }}">⬇ Télécharger le dump (.json)</a>
 		</div>
+
+		<div class="card">
+			<div class="card-title">Export JSON par type</div>
+			<div class="card-desc">
+				Exporte en JSON tous les documents partageant la même valeur de champ
+				<code>type</code>. Choisir un type dans la liste ou en <strong>saisir un
+				librement</strong>. Fichier nommé <code>&lt;type&gt;-AAAAMMJJ-HHMMSS.json</code>.
+			</div>
+			<div class="type-row">
+				<input id="type-input" class="type-input" list="type-list"
+					placeholder="type (ex. espece)" autocomplete="off">
+				<datalist id="type-list">
+					{% for t in doc_types %}<option value="{{ t }}"></option>{% endfor %}
+				</datalist>
+				<button class="dl-btn" type="button" onclick="exportByType()">⬇ Exporter</button>
+			</div>
+		</div>
 	</div>
+	<script>
+		const _byTypeUrl = "{{ url_for('admin_export_by_type') }}";
+		function exportByType() {
+			const t = document.getElementById('type-input').value.trim();
+			if (!t) { alert('Choisis ou saisis un type à exporter.'); return; }
+			window.location = _byTypeUrl + '?type=' + encodeURIComponent(t);
+		}
+	</script>
 </body>
 </html>

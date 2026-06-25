@@ -218,17 +218,12 @@ def valeur_entry_to_cuivre(entry) -> int:
 # ── Éligibilité & prix de vente marchand ───────────────────────────────────────
 
 def item_sous_categorie(item_doc: dict) -> str | None:
-	"""Sous-catégorie marchande d'un item. Explicite via `sous_categorie`, sinon
-	« carcasse » pour une dépouille de combat (source_espece / categorie composant),
-	sinon None."""
+	"""Sous-catégorie marchande d'un item. Explicite via `sous_categorie` (ex.
+	« carcasse » sur les dépouilles), sinon repli sur la `categorie` de l'item.
+	None si l'item n'existe pas. Un `sous_categorie` vide ("") est ignoré (repli)."""
 	if not item_doc:
 		return None
-	sc = item_doc.get("sous_categorie")
-	if sc:
-		return sc
-	if item_doc.get("source_espece") or item_doc.get("categorie") == "composant":
-		return "carcasse"
-	return None
+	return item_doc.get("sous_categorie") or item_doc.get("categorie")
 
 
 def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
