@@ -13,6 +13,8 @@ from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
 	recompute_equipment_bonus, carried_weight, charge_max_of,
 	item_ref_id, resolve_item_ref,
+	money_to_cuivre, cuivre_to_purse, credit_character,
+	lieu_buys, item_sale_price_cuivre,
 )
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
@@ -141,6 +143,9 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'inventaire': list(inventaire_de_base),
 			'slots': {s: None for s in ['main_droite', 'main_gauche', 'torse', 'tete', 'jambes', 'pieds', 'mains', 'anneau_1', 'anneau_2', 'cou', 'ceinture']},
 			'equipment_bonus': {},
+			'or': 0,
+			'argent': 0,
+			'cuivre': 0,
 			}
 		save_doc(character_dict)
 	
@@ -669,6 +674,86 @@ async def pickup_item(
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	payload = _inventory_payload(character)
 	payload["auto_dropped"] = auto_dropped
+	return payload
+
+
+def _current_lieu_doc(character: dict) -> dict | None:
+	"""Doc du lieu où se trouve le personnage (repli sur sa cité)."""
+	return get_doc(character.get("lieu", character.get("cite")))
+
+
+def _marchand_vendables(character: dict, lieu_doc: dict) -> list:
+	"""Liste des items de l'inventaire que le marchand du lieu achète, avec leur prix
+	proposé. Adressés par index (vérifié par item_id côté vente : deux exemplaires
+	peuvent peser/valoir différemment)."""
+	vendables = []
+	for idx, ref in enumerate(character.get("inventaire", [])):
+		item = resolve_item_ref(ref)
+		if not item or not lieu_buys(lieu_doc, item):
+			continue
+		prix_cuivre = item_sale_price_cuivre(item, ref)
+		vendables.append({
+			"index": idx,
+			"item_id": item.get("item") or item.get("_id"),
+			"nom": item.get("nom"),
+			"icon": item.get("icon"),
+			"poids": round(float(item.get("poids", 0) or 0), 2),
+			"prix_cuivre": prix_cuivre,
+			"prix": cuivre_to_purse(prix_cuivre),
+		})
+	return vendables
+
+
+@user_router.get("/marchand/quotes")
+async def marchand_quotes(
+	current_user: Annotated[User, Depends(get_current_user)],
+):
+	"""Liste initiale du panneau Vente : objets vendables ici + bourse courante."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	lieu_doc = _current_lieu_doc(character)
+	return {
+		"lieu_label": (lieu_doc or {}).get("label"),
+		"vendables": _marchand_vendables(character, lieu_doc),
+		"purse": cuivre_to_purse(money_to_cuivre(character)),
+	}
+
+
+@user_router.post("/sell_item")
+async def sell_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Vend un objet de l'inventaire au marchand du lieu courant. Adressage par index
+	vérifié par item_id (robuste au décalage après chaque vente puisqu'on re-render
+	depuis `vendables`)."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	lieu_doc = _current_lieu_doc(character)
+	inventaire = character.get("inventaire", [])
+	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
+	if ref is None:
+		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
+
+	item = resolve_item_ref(ref)
+	if not item or not lieu_buys(lieu_doc, item):
+		# On a `pop` la ref mais on raise avant tout save_doc : sans effet sur le doc.
+		raise HTTPException(status_code=422, detail="Le marchand n'achète pas cet objet")
+
+	prix_cuivre = item_sale_price_cuivre(item, ref)
+	purse = credit_character(character, prix_cuivre)
+	character["inventaire"] = inventaire
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	payload = _inventory_payload(character)
+	payload["purse"] = purse
+	payload["vendables"] = _marchand_vendables(character, lieu_doc)
+	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix_cuivre)}
 	return payload
 
 

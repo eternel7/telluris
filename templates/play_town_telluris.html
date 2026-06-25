@@ -380,7 +380,7 @@
 			color: #eee;
 		}
 		/* MAIN PANELS */
-		#game-container,#sheet-panel {
+		#game-container,#sheet-panel,#sell-panel {
 			position: relative;
 			width: 100%;
 			max-width: 1210px;
@@ -413,6 +413,23 @@
 			height: auto;
 			bottom: auto;
 		}
+		/* PANNEAU VENTE (marchand) */
+		#sell-panel {
+			display: flex;
+			flex-direction: column;
+			gap: 14px;
+		}
+		#sell-panel .sell-topbar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			flex-wrap: wrap;
+		}
+		#sell-panel h2 { margin: 0; }
+		#sell-list .sh-inv-item:last-child { border-bottom: none; }
+		.sell-prix { font-weight: bold; color: var(--accent-color); white-space: nowrap; }
+		.sell-empty { opacity: .7; padding: 12px 0; }
 		.sheet-tab-bar {
 			display: flex;
 			align-items: stretch;
@@ -964,6 +981,12 @@
 		</main>
 		<aside class="sidebar">
 			<section class="sub-locations-panel">
+				{% if achat_sous_categories %}
+				<h3>Actions</h3>
+				<ul class="sub-locations-list">
+					<li><button class="sub-loc-btn" onclick="openSellPanel()">🏷️ Vente</button></li>
+				</ul>
+				{% endif %}
 				<h3>Lieux</h3>
 				<ul id="sub-locations-list-id" class="sub-locations-list">
 				</ul>
@@ -1232,9 +1255,9 @@
 						<div class="sheet-pane" id="sh-inventaire">
 							<div class="sh-section">💰 Finances</div>
 							<div class="sh-finance-row">
-								<div class="sh-finance">🟡 <span class="amt">{{ character.get("or",0) }}</span> Or</div>
-								<div class="sh-finance">⚪ <span class="amt">{{ character.get("argent",0) }}</span> Argent</div>
-								<div class="sh-finance">🟤 <span class="amt">{{ character.get("cuivre",0) }}</span> Cuivre</div>
+								<div class="sh-finance">🟡 <span class="amt" id="amt-or">{{ character.get("or",0) }}</span> Or</div>
+								<div class="sh-finance">⚪ <span class="amt" id="amt-argent">{{ character.get("argent",0) }}</span> Argent</div>
+								<div class="sh-finance">🟤 <span class="amt" id="amt-cuivre">{{ character.get("cuivre",0) }}</span> Cuivre</div>
 							</div>
 
 							<div class="sh-section">🛡 Équipement</div>
@@ -1366,6 +1389,18 @@
 				</div><!-- /.sheet-right-col -->
 			</div><!-- /.sheet-layout -->
 		</div><!-- /#sheet-panel -->
+		<div id="sell-panel" class="panel-hidden" aria-label="Vente au marchand">
+			<div class="sell-topbar">
+				<h2>🏷️ <span id="sell-lieu-label">Vente</span></h2>
+				<button class="sheet-tab-btn" style="color:#ff4757" onclick="closeSellPanel()">✕ Fermer</button>
+			</div>
+			<div class="sh-finance-row">
+				<div class="sh-finance">🟡 <span class="amt" id="sell-amt-or">0</span> Or</div>
+				<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">0</span> Argent</div>
+				<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
+			</div>
+			<ul id="sell-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+		</div><!-- /#sell-panel -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -1798,7 +1833,12 @@
 		document.getElementById('sh-' + id).classList.add('active');
 		if (btn) btn.classList.add('active');
 	}
-	document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+	document.addEventListener('keydown', e => {
+		if (e.key !== 'Escape') return;
+		const sell = document.getElementById('sell-panel');
+		if (sell && !sell.classList.contains('panel-hidden')) { closeSellPanel(); return; }
+		closeSheet();
+	});
 
 	// ── Dépense d'XP ─────────────────────────────────────────────
 	const _RACE_MIN  = {{ race["stats"]     | tojson | safe }};
@@ -2159,6 +2199,74 @@ async function unequip(slot) {
 _refreshInventaire();
 _refreshSol();
 _refreshChargeGauge();
+
+// ── Vente au marchand ────────────────────────────────────────────────
+function formatPrix(prix) {
+	const parts = [];
+	if (prix.or)     parts.push(prix.or + ' or');
+	if (prix.argent) parts.push(prix.argent + ' ar');
+	if (prix.cuivre) parts.push(prix.cuivre + ' cu');
+	return parts.length ? parts.join(' ') : '0 cu';
+}
+
+function updatePurse(purse) {
+	if (!purse) return;
+	const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+	set('amt-or', purse.or);       set('sell-amt-or', purse.or);
+	set('amt-argent', purse.argent); set('sell-amt-argent', purse.argent);
+	set('amt-cuivre', purse.cuivre); set('sell-amt-cuivre', purse.cuivre);
+}
+
+function renderSellList(data) {
+	const list = document.getElementById('sell-list');
+	if (data.lieu_label) document.getElementById('sell-lieu-label').textContent = data.lieu_label;
+	const vendables = data.vendables || [];
+	if (!vendables.length) {
+		list.innerHTML = '<li class="sell-empty">Rien à vendre ici.</li>';
+		return;
+	}
+	list.innerHTML = vendables.map(v => `<li class="sh-inv-item">
+		<span>${v.icon || '📦'}</span>
+		<span style="flex:1">${v.nom || '—'}</span>
+		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
+		<span class="sell-prix">${formatPrix(v.prix)}</span>
+		<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}')" title="Vendre">Vendre</button>
+	</li>`).join('');
+}
+
+async function openSellPanel() {
+	try {
+		const res  = await fetch('api/marchand/quotes');
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderSellList(data);
+		document.getElementById('game-container').classList.add('panel-hidden');
+		document.getElementById('sell-panel').classList.remove('panel-hidden');
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} catch(err) { console.error('Erreur quotes', err); }
+}
+
+function closeSellPanel() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('sell-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function sellItem(index, itemId) {
+	try {
+		const res  = await fetch('api/sell_item', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({index, item_id: itemId})
+		});
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		_applyInventoryPayload(data);
+		updatePurse(data.purse);
+		renderSellList(data);
+		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')');
+	} catch(err) { console.error('Erreur vente', err); }
+}
 </script>
 </body>
 </html>

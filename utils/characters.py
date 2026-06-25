@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from db.config import get_doc, save_doc, find_docs
+from models import character_stats
 from models.character_stats import compute_character_level, EquipmentBonus, BaseStats, compute_derived_stats
 
 def get_user_characters(current_user: dict = Body(...)):
@@ -164,3 +165,92 @@ def grant_xp(character: dict, amount: int) -> dict:
 		"niveau_up": niveau_apres > niveau_avant,
 		"points_gagnes": points_gagnes,
 	}
+
+
+# ── Monnaie (Or / Argent / Cuivre) ─────────────────────────────────────────────
+# Trois paliers ; le cuivre est la base. 1 or = 100 argent = 10 000 cuivre.
+# Le personnage stocke or/argent/cuivre comme entiers (absents = 0).
+
+CUIVRE_PAR_ARGENT = 100
+ARGENT_PAR_OR     = 100
+CUIVRE_PAR_OR     = CUIVRE_PAR_ARGENT * ARGENT_PAR_OR   # 10 000
+
+
+def money_to_cuivre(character: dict) -> int:
+	"""Bourse du personnage convertie en cuivre (base)."""
+	return (
+		int(character.get("or", 0) or 0) * CUIVRE_PAR_OR
+		+ int(character.get("argent", 0) or 0) * CUIVRE_PAR_ARGENT
+		+ int(character.get("cuivre", 0) or 0)
+	)
+
+
+def cuivre_to_purse(total_cuivre: int) -> dict:
+	"""Total en cuivre → bourse normalisée {or, argent, cuivre}."""
+	total = max(0, int(total_cuivre or 0))
+	o, reste = divmod(total, CUIVRE_PAR_OR)
+	a, c = divmod(reste, CUIVRE_PAR_ARGENT)
+	return {"or": o, "argent": a, "cuivre": c}
+
+
+def credit_character(character: dict, cuivre: int) -> dict:
+	"""Ajoute `cuivre` à la bourse du personnage et la mute en place (or/argent/cuivre
+	normalisés). NE SAUVEGARDE PAS (l'appelant persiste, comme `grant_xp`). Retourne
+	la bourse mise à jour."""
+	purse = cuivre_to_purse(money_to_cuivre(character) + max(0, int(cuivre or 0)))
+	character["or"]     = purse["or"]
+	character["argent"] = purse["argent"]
+	character["cuivre"] = purse["cuivre"]
+	return purse
+
+
+def valeur_entry_to_cuivre(entry) -> int:
+	"""Une entrée de prix {or, ag, cu} → cuivre. Robuste aux clés absentes."""
+	if not isinstance(entry, dict):
+		return 0
+	return (
+		int(entry.get("or", 0) or 0) * CUIVRE_PAR_OR
+		+ int(entry.get("ag", 0) or 0) * CUIVRE_PAR_ARGENT
+		+ int(entry.get("cu", 0) or 0)
+	)
+
+
+# ── Éligibilité & prix de vente marchand ───────────────────────────────────────
+
+def item_sous_categorie(item_doc: dict) -> str | None:
+	"""Sous-catégorie marchande d'un item. Explicite via `sous_categorie`, sinon
+	« carcasse » pour une dépouille de combat (source_espece / categorie composant),
+	sinon None."""
+	if not item_doc:
+		return None
+	sc = item_doc.get("sous_categorie")
+	if sc:
+		return sc
+	if item_doc.get("source_espece") or item_doc.get("categorie") == "composant":
+		return "carcasse"
+	return None
+
+
+def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
+	"""True si le marchand du lieu achète cet item (sous-catégorie ∈ liste des règles
+	du monde pour la catégorie du lieu)."""
+	sc = item_sous_categorie(item_doc)
+	if not sc:
+		return False
+	achetees = character_stats.ACHAT_SOUS_CAT_PAR_LIEU.get((lieu_doc or {}).get("categorie"), [])
+	return sc in achetees
+
+
+def item_sale_price_cuivre(item_doc: dict, ref) -> int:
+	"""Prix de vente proposé (en cuivre). Si l'item porte un champ `valeur`, on propose
+	le MIN (laisse la place au marchandage futur vers le max) ; sinon prix dérivé
+	`poids × MULT_RARETE × PRIX_DERIVE_BASE`, minimum 1."""
+	valeur = (item_doc or {}).get("valeur")
+	if valeur is not None:
+		entry = valeur[0] if isinstance(valeur, (list, tuple)) and valeur else valeur
+		prix = valeur_entry_to_cuivre(entry)
+		if prix > 0:
+			return prix
+	mult = character_stats.MULT_RARETE.get((item_doc or {}).get("rarete"), 1)
+	poids = item_ref_weight(ref)
+	return max(1, round(poids * mult * character_stats.PRIX_DERIVE_BASE))

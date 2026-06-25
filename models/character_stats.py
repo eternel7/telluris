@@ -40,6 +40,16 @@ XP_VOC_COEFF: int = 5
 # V perd 1 point, toutes les autres perdent 10 points sous le max racial
 _SUB_CAP_REDUCTION: dict[str, int] = {"V": 1}
 
+# ── Économie marchande ────────────────────────────────────────────────────────
+# Prix dérivé d'un objet vendable sans champ `valeur` (en cuivre) :
+#   cuivre = poids × MULT_RARETE[rarete] × PRIX_DERIVE_BASE
+PRIX_DERIVE_BASE: float = 2.0
+MULT_RARETE: dict[str, float] = {
+    "commun": 1, "peu_commun": 2, "rare": 5, "tres_rare": 12, "legendaire": 30,
+}
+# Quelles sous-catégories d'item chaque catégorie de lieu (marchand) achète au personnage.
+ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {"boucherie": ["carcasse"]}
+
 
 def current_world_variables() -> dict:
     """Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
@@ -50,6 +60,9 @@ def current_world_variables() -> dict:
         "XP_COEFF": dict(XP_COEFF),
         "XP_VOC_COEFF": XP_VOC_COEFF,
         "SUB_CAP_REDUCTION": dict(_SUB_CAP_REDUCTION),
+        "PRIX_DERIVE_BASE": PRIX_DERIVE_BASE,
+        "MULT_RARETE": dict(MULT_RARETE),
+        "ACHAT_SOUS_CAT_PAR_LIEU": {k: list(v) for k, v in ACHAT_SOUS_CAT_PAR_LIEU.items()},
     }
 
 
@@ -69,7 +82,7 @@ def load_world_variables() -> dict:
     côté importateurs ; les scalaires sont réassignés (à lire via le module).
     Retourne le snapshot effectif.
     """
-    global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF
+    global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
     try:
         from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
         doc = get_doc(WORLD_VARIABLES_DOC_ID)
@@ -87,6 +100,14 @@ def load_world_variables() -> dict:
     if isinstance(v.get("SUB_CAP_REDUCTION"), dict):
         _SUB_CAP_REDUCTION.clear()
         _SUB_CAP_REDUCTION.update({k: int(x) for k, x in v["SUB_CAP_REDUCTION"].items()})
+
+    PRIX_DERIVE_BASE = float(v.get("PRIX_DERIVE_BASE", PRIX_DERIVE_BASE))
+    if isinstance(v.get("MULT_RARETE"), dict):
+        MULT_RARETE.clear()
+        MULT_RARETE.update({k: float(x) for k, x in v["MULT_RARETE"].items()})
+    if isinstance(v.get("ACHAT_SOUS_CAT_PAR_LIEU"), dict):
+        ACHAT_SOUS_CAT_PAR_LIEU.clear()
+        ACHAT_SOUS_CAT_PAR_LIEU.update({k: list(x) for k, x in v["ACHAT_SOUS_CAT_PAR_LIEU"].items()})
 
     return current_world_variables()
 

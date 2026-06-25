@@ -464,6 +464,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"stat_caps": stat_caps,
 			"xp_coeff": character_stats.XP_COEFF,
 			"xp_voc_coeff": character_stats.XP_VOC_COEFF,
+			"lieu_categorie": grid_doc.get("categorie"),
+			"achat_sous_categories": character_stats.ACHAT_SOUS_CAT_PAR_LIEU.get(grid_doc.get("categorie"), []),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.
