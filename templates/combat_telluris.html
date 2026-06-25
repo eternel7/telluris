@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Combat - {{ title }}</title>
 <link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 	:root {
 		--ink:			#0e0b08;
@@ -19,7 +19,6 @@
 		--view-width: 100vw;
 		--step: calc(var(--view-width) / 17);
 		--max-height: 7;
-		--blur-dist: 5;
 		/* Taille de la grille en cases — écrasée au chargement depuis GRID.dims.
 		   L'image de fond doit couvrir exactement dims.x × dims.y cases pour
 		   que la case (x,y) corresponde au bon pixel (défaut = repli grille ouverte). */
@@ -37,7 +36,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		background: #111;
+		background: radial-gradient(ellipse at 50% 0%, #16110b 0%, #0a0807 60%);
 		font-family: 'Georgia', serif;
 		color: white;
 		padding-bottom: 30px;
@@ -52,15 +51,15 @@
 	background: #000;
 	overflow: hidden;
 }
+/* Vignette : assombrit les bords du sol (remplace le cadrage qu'apportait le flou,
+   désormais retiré). Clippée par la forme iso du .viewport (clip-path + overflow). */
 .viewport::after {
 	content: '';
 	position: absolute;
 	top: 0; left: 0; width: 100%; height: 100%;
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
 	z-index: 5;
 	pointer-events: none;
-	background: rgba(0,0,0,0.1);
+	background: radial-gradient(ellipse at 50% 66%, transparent 24%, rgba(0,0,0,0.9) 96%);
 }
 #rotation-pivot {
 	position: absolute;
@@ -117,16 +116,16 @@
 	align-items: center;
 	justify-content: center;
 	gap: 12px;
-	padding: 6px 14px;
-	background: rgba(34,34,34,0.9);
-	border: 1px solid #333;
-	border-radius: 8px;
+	padding: 8px 18px;
+	background: rgba(14,11,8,0.82);
+	border: 1px solid var(--bronze);
+	border-radius: 24px;
 	width: 100%;
 	max-width: 1000px;
 	margin-top: 8px;
 }
-.tour-label { font-size: 13px; color: #aaa; text-transform: uppercase; white-space: nowrap; }
-.tour-label span { color: #fff; font-weight: bold; }
+.tour-label { font-family: 'Cinzel', serif; font-size: 12px; color: #c9c2b4; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+.tour-label span { color: var(--gold2); font-weight: bold; }
 #initiative-strip { display: flex; gap: 5px; flex-wrap: wrap; }
 .init-badge {
 	width: 28px; height: 28px; border-radius: 50%;
@@ -137,7 +136,7 @@
 }
 .init-badge.joueur  { background: #1a4a7a; border-color: #2e86de; color: #7ec8ff; }
 .init-badge.monstre { background: #4a1a1a; border-color: #aa3333; color: #ffaaaa; }
-.init-badge.active  { border-color: #ffd700; box-shadow: 0 0 8px #ffd700; transform: scale(1.2); }
+.init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.15); }
 .init-badge.dead    { opacity: 0.3; }
 
 /* ─── Main UI ──────────────────────────────────────────────────── */
@@ -145,7 +144,7 @@
    droite sur toute la hauteur. align-items:start → cartes à hauteur de contenu. */
 .ui-container {
 	display: grid;
-	grid-template-columns: 170px 1fr;
+	grid-template-columns: 200px 1fr;
 	grid-template-areas:
 		"perso   center"
 		"ennemis center";
@@ -182,7 +181,7 @@
 .stat-label { color: #aaa; font-size: 11px; }
 .stat-value { font-weight: bold; color: #eee; font-family: monospace; font-size: 11px; }
 .gauge-bg   {
-	width: 100%; height: 7px; background: #111;
+	width: 100%; height: 8px; background: #0c0a07;
 	border-radius: 4px; overflow: hidden; margin-top: 3px; flex-basis: 100%;
 }
 .gauge-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
@@ -191,7 +190,8 @@
 .actions-pips { display: flex; gap: 4px; margin-top: 4px; }
 .pip       { width: 10px; height: 10px; border-radius: 50%; background: #ffa502; border: 1px solid #cc8400; }
 .pip.empty { background: #333; border-color: #555; }
-.char-mini-stats { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; font-size: 10px; color: #666; }
+.char-mini-stats { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--bronze); display: flex; gap: 6px; flex-wrap: wrap; }
+.char-mini-stats span { font-size: 10px; color: #8a7b5e; font-family: monospace; background: #251d12; padding: 3px 8px; border-radius: 5px; }
 
 /* ─── Combat Center ────────────────────────────────────────────── */
 .combat-center { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -223,17 +223,18 @@
 .action-btn.flee-btn   { border-color: #666; color: #999; }
 /* Flèches directionnelles — mêmes règles d'affichage que play_town */
 .controls {
-	display: grid; grid-template-columns: repeat(3, 50px);
+	display: grid; grid-template-columns: repeat(3, 54px);
 	gap: 8px; justify-content: center; margin: 0 auto;
 }
 .controls .btn {
-	width: 50px; height: 50px; background: #222; border: 1px solid #444;
+	width: 54px; height: 54px; background: #222; border: 1px solid #444;
 	border-radius: 12px; cursor: pointer; padding: 0;
 	display: flex; align-items: center; justify-content: center;
 	user-select: none; -webkit-tap-highlight-color: transparent;
 }
 .controls .btn:hover:not(:disabled) { background: #333; }
 .controls .btn:active:not(:disabled) { background: #444; }
+.controls .btn.center { background: #333; border-color: #444; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.04em; color: #cbb98a; }
 .controls .btn > svg { width: 26px; height: 26px; }
 .move_btn:disabled > svg { display: none; }   /* direction indisponible → la flèche disparaît */
 .controls .btn:disabled { cursor: default; }
@@ -367,15 +368,6 @@
 </head>
 <body>
 
-<!-- Battle Map Viewport -->
-<div class="viewport" id="viewport">
-	<div id="rotation-pivot">
-		<img id="bg-image" src="{{ url_for('battle_maps', path=combat.map_image) }}" alt="Carte de combat">
-	</div>
-	<div id="tokens-layer"></div>
-	<div class="player-token"></div>
-</div>
-
 <!-- Tour header + Initiative strip -->
 <div class="tour-header">
 	<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span></span>
@@ -395,6 +387,14 @@
 			     id="badge-{{ actor_id }}">{{ badge_label }}</div>
 		{% endfor %}
 	</div>
+</div>
+<!-- Battle Map Viewport -->
+<div class="viewport" id="viewport">
+	<div id="rotation-pivot">
+		<img id="bg-image" src="{{ url_for('battle_maps', path=combat.map_image) }}" alt="Carte de combat">
+	</div>
+	<div id="tokens-layer"></div>
+	<div class="player-token"></div>
 </div>
 
 <!-- Main UI -->
@@ -605,40 +605,8 @@ function buildViewportClipPath(mh) {
 	}
 	return `polygon(${pts.join(', ')})`;
 }
-function buildBlurClipPath(mh, bd) {
-	const s = 'var(--step)', blurStart = mh - bd, inner = [];
-	const outer = `0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%`;
-	inner.push(
-		`calc(50% + ${s} * 0.5) calc(${s} * ${blurStart})`,
-		`calc(50% - ${s} * 0.5) calc(${s} * ${blurStart})`
-	);
-	for (let r = blurStart; r < mh; r++) {
-		const hw = 0.5 + (r - blurStart);
-		inner.push(
-			`calc(50% - ${s} * ${hw}) calc(${s} * ${r})`,
-			`calc(50% - ${s} * ${hw + 1}) calc(${s} * ${r + 1})`
-		);
-	}
-	const hwB = bd + 1.5;
-	inner.push(
-		`calc(50% - ${s} * ${hwB}) calc(${s} * ${mh})`,
-		`calc(50% + ${s} * ${hwB}) calc(${s} * ${mh})`
-	);
-	for (let r = mh - 1; r >= blurStart; r--) {
-		const hw = 0.5 + (r - blurStart);
-		inner.push(
-			`calc(50% + ${s} * ${hw + 1}) calc(${s} * ${r + 1})`,
-			`calc(50% + ${s} * ${hw}) calc(${s} * ${r})`
-		);
-	}
-	inner.push(`calc(50% + ${s} * 0.5) calc(${s} * ${blurStart})`);
-	return `polygon(${outer}, ${inner.join(', ')})`;
-}
 const _vpStyle = document.createElement('style');
-_vpStyle.textContent = `
-	.viewport        { clip-path: ${buildViewportClipPath(7)}; }
-	.viewport::after { clip-path: ${buildBlurClipPath(7, 5)}; }
-`;
+_vpStyle.textContent = `.viewport { clip-path: ${buildViewportClipPath(7)}; }`;
 document.head.appendChild(_vpStyle);
 
 // ─── UI Helpers ───────────────────────────────────────────────────
