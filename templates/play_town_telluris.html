@@ -422,7 +422,7 @@
 		#sell-panel .sell-topbar {
 			display: flex;
 			align-items: center;
-			justify-content: space-between;
+			justify-content: center;
 			gap: 12px;
 			flex-wrap: wrap;
 		}
@@ -464,11 +464,13 @@
 			border-color: var(--accent-color);
 			color: var(--accent-color);
 		}
-		#close-sheet {
+		.close-sheet-btn {
 			flex-shrink: 0;
 			margin-left: 4px;
 			border-left: 2px solid var(--border-color);
 			position: relative;
+			color:#ff4757;
+			margin-left:auto;
 		}
 		#close-sheet::before {
 			content: '';
@@ -483,10 +485,10 @@
 		.sheet-body {
 			padding: 12px;
 		}
-		.sheet-pane {
+		.sheet-panel {
 			display: none;
 		}
-		.sheet-pane.active {
+		.sheet-panel.active {
 			display: block;
 		}
 		.sh-section {
@@ -608,7 +610,7 @@
 		}
 		.sh-paperdoll .sh-slot {
 			position: absolute;
-			width: 25%;
+			width: 30%;
 			height: 15%;
 			max-height: 45px;
 			padding: 2px 2px;
@@ -943,10 +945,10 @@
 				overflow: visible;
 			}
 			.navigation-panel {
-				order: 1;
+				order: 2;
 			}
 			.sub-locations-panel {
-				order: 2;
+				order: 1;
 				overflow: visible;
 			}
 			.map-area {
@@ -982,12 +984,12 @@
 		<aside class="sidebar">
 			<section class="sub-locations-panel">
 				{% if achat_sous_categories %}
-				<h3>Actions</h3>
+				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
 					<li><button class="sub-loc-btn" onclick="openSellPanel()">🏷️ Vente</button></li>
 				</ul>
 				{% endif %}
-				<h3>Lieux</h3>
+				<h3 id="sub-locations-title">Lieux</h3>
 				<ul id="sub-locations-list-id" class="sub-locations-list">
 				</ul>
 			</section>
@@ -1084,326 +1086,328 @@
 	</div><!-- /#game-container -->
 	<div id="sheet-panel" class="panel-hidden" aria-label="Fiche personnage">
 		<!-- ══ FICHE PERSONNAGE ══ -->
-			<div class="sheet-layout">
-				<!-- Colonne gauche : portrait (paysage uniquement) -->
-				<div class="sheet-left-col">
-					<div class="sheet-left-portrait">
-						<div class="portrait-overlay-bars">
-							<div class="portrait-stat-bar pv-side">
-								<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
-							</div>
-							<div class="portrait-stat-bar pm-side">
-								<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
-							</div>
+		<div class="sheet-layout">
+			<!-- Colonne gauche : portrait (paysage uniquement) -->
+			<div class="sheet-left-col">
+				<div class="sheet-left-portrait">
+					<div class="portrait-overlay-bars">
+						<div class="portrait-stat-bar pv-side">
+							<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
 						</div>
-						<img src="{{ url_for('characters', path=character['image']) }}" alt="">
+						<div class="portrait-stat-bar pm-side">
+							<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
+						</div>
 					</div>
-					<div class="sheet-left-info">
-						<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-						<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> · Rang {{character.get("rang",'aucun')}}</div>
-						<div class="char-vitals" style="margin-top:8px">
-							<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
-							<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
-						</div>
+					<img src="{{ url_for('characters', path=character['image']) }}" alt="">
+				</div>
+				<div class="sheet-left-info">
+					<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
+					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> · Rang {{character.get("rang",'aucun')}}</div>
+					<div class="char-vitals" style="margin-top:8px">
+						<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
+						<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
 					</div>
 				</div>
-				<!-- Colonne droite : contenu -->
-				<div class="sheet-right-col">
-					<div id="personnage" class="character-card">
-						<div class="char-header">
-							<div id="scale-root2" class="char-portrait">
-								<div class="viewport-wrapper" id="vp2">
-								<div class="portrait-overlay-bars">
-									<div class="portrait-stat-bar pv-side">
-										<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
-									</div>
-									<div class="portrait-stat-bar pm-side">
-										<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
-									</div>
+			</div>
+			<!-- Colonne droite : contenu -->
+			<div class="sheet-right-col">
+				<div id="personnage" class="character-card">
+					<div class="char-header">
+						<div id="scale-root2" class="char-portrait">
+							<div class="viewport-wrapper" id="vp2">
+							<div class="portrait-overlay-bars">
+								<div class="portrait-stat-bar pv-side">
+									<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
 								</div>
-								<img id="img-portrait"
-									src="{{ url_for('characters', path=character['image']) }}"
-									alt="Image"
-									draggable="false">
-								<!-- Slider de zoom -->
-								<div id="zoom-bar2">
-									<span class="z-icon">−</span>
-									<input id="zoom-slider2" type="range" min="10" max="120" value="{{ character.get("portrait_zoom",100) | tojson | safe }}" step="5">
-									<span class="z-icon">+</span>
-									<span id="zoom-val2">{{ character.get("portrait_zoom",100) | tojson | safe }}%</span>
-								</div>
-								<button id="action-btn2" title="Activer le déplacement" aria-label="Activer le déplacement">
-									<!-- icône edit (crayon) -->
-									<svg class="icon" id="icon-edit2" viewBox="0 0 24 24">
-									<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-									<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-									</svg>
-									<!-- icône save (disquette) -->
-									<svg class="icon" id="icon-save2" viewBox="0 0 24 24" style="display:none">
-									<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-									<polyline points="17 21 17 13 7 13 7 21"></polyline>
-									<polyline points="7 3 7 8 15 8"></polyline>
-									</svg>
-								</button>
+								<div class="portrait-stat-bar pm-side">
+									<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
 								</div>
 							</div>
-							{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm, card_id="charac-sheet" %}
-								{% include "part-character-identity.html" %}
-							{% endwith %}
+							<img id="img-portrait"
+								src="{{ url_for('characters', path=character['image']) }}"
+								alt="Image"
+								draggable="false">
+							<!-- Slider de zoom -->
+							<div id="zoom-bar2">
+								<span class="z-icon">−</span>
+								<input id="zoom-slider2" type="range" min="10" max="120" value="{{ character.get("portrait_zoom",100) | tojson | safe }}" step="5">
+								<span class="z-icon">+</span>
+								<span id="zoom-val2">{{ character.get("portrait_zoom",100) | tojson | safe }}%</span>
+							</div>
+							<button id="action-btn2" title="Activer le déplacement" aria-label="Activer le déplacement">
+								<!-- icône edit (crayon) -->
+								<svg class="icon" id="icon-edit2" viewBox="0 0 24 24">
+								<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+								<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+								</svg>
+								<!-- icône save (disquette) -->
+								<svg class="icon" id="icon-save2" viewBox="0 0 24 24" style="display:none">
+								<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+								<polyline points="17 21 17 13 7 13 7 21"></polyline>
+								<polyline points="7 3 7 8 15 8"></polyline>
+								</svg>
+							</button>
+							</div>
 						</div>
+						{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm, card_id="charac-sheet" %}
+							{% include "part-character-identity.html" %}
+						{% endwith %}
 					</div>
-					<!-- Tab bar -->
-					<nav class="sheet-tab-bar" role="tablist">
-						<div class="sheet-tabs-scroll">
-							<button class="sheet-tab-btn active" onclick="sheetTab('stats', this)"      role="tab" aria-selected="true">📊 Stats</button>
-							<button class="sheet-tab-btn"        onclick="sheetTab('inventaire', this)" role="tab">🎒 Inventaire</button>
-							<button class="sheet-tab-btn"        onclick="sheetTab('competences', this)" role="tab">⚡ Compétences</button>
-							<button class="sheet-tab-btn"        onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
-							<button class="sheet-tab-btn"        onclick="sheetTab('quetes', this)"     role="tab">📜 Quêtes</button>
-							<button class="sheet-tab-btn"        onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
+				</div>
+				<!-- Tab bar -->
+				<nav class="sheet-tab-bar" role="tablist">
+					<div class="sheet-tabs-scroll">
+						<button class="sheet-tab-btn active" onclick="sheetTab('stats', this)"      role="tab" aria-selected="true">📊 Stats</button>
+						<button class="sheet-tab-btn"        onclick="sheetTab('inventaire', this)" role="tab">🎒 Inventaire</button>
+						<button class="sheet-tab-btn"        onclick="sheetTab('competences', this)" role="tab">⚡ Compétences</button>
+						<button class="sheet-tab-btn"        onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
+						<button class="sheet-tab-btn"        onclick="sheetTab('quetes', this)"     role="tab">📜 Quêtes</button>
+						<button class="sheet-tab-btn"        onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
+					</div>
+					<button id="close-sheet" class="sheet-tab-btn close-sheet-btn" onclick="closeSheet()" role="button">✕ Fermer</button>
+				</nav>
+				<div class="sheet-body">
+					<!-- ── STATS ── -->
+					<div class="sheet-panel active" id="sh-stats">
+						{% set xp_total    = character.get("xp_total", 0) %}
+						{% set attribute_points = character.get("attribute_points", 0) %}
+						{% set niveau      = character.get("niveau", 0) %}
+						{% set xp_niv_next = 10 * (3 ** niveau) %}
+						{% set xp_niv_prev = (10 * (3 ** (niveau - 1))) if niveau > 0 else 0 %}
+						{% set xp_bar_pct  = [((xp_total - xp_niv_prev) / (xp_niv_next - xp_niv_prev) * 100)|int, 100]|min if xp_niv_next > xp_niv_prev else 100 %}
+						{% set voc_id      = character.get("voc", "") %}
+						{% set voc_niveau  = character.get("vocations_niveaux", {}).get(voc_id, 0) %}
+						{% set voc_cout    = (voc_niveau + 1) * xp_voc_coeff %}
+						<div class="sh-section">✦ Expérience</div>
+						<div style="background:var(--btn-bg);border:1px solid var(--border-color);padding:12px;margin-bottom:8px">
+							<div class="sh-xp-header">
+								<span>XP totale : <strong style="color:var(--accent-color)">{{ xp_total }}</strong></span>
+								<span style="color:#2ed573">Points : <span id="sh-attribute-points">{{ attribute_points }}</span></span>
+							</div>
+							<div class="val-niveau">
+								<span>{{character["race"]}} Niv. : <strong id="sh-race-niveau" class="race-niveau niveau-nb">{{ niveau }}</strong></span>
+								<span style="white-space: wrap;text-align:right;width: 100%;">Prochain à {{ xp_niv_next }} XP</span>
+							</div>
+							<div class="sh-xp-bar">
+								<div class="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
+							</div>
+							<div class="val-niveau">
+								<span>{{ vocation["label"] }} Niv. : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{{ voc_niveau }}</strong></span>
+								<button class="sh-xp-btn" id="sh-btn-voc-niveau"
+										{% if attribute_points < voc_cout %}disabled{% endif %}
+										{% if attribute_points == 0 %}style="display:none"{% endif %}
+										onclick="spendXpVocation()">
+									Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> XP
+								</button>
+							</div>
 						</div>
-						<button id="close-sheet" class="sheet-tab-btn" style="color:#ff4757" onclick="closeSheet()" role="button">✕ Fermer</button>
-					</nav>
-					<div class="sheet-body">
-						<!-- ── STATS ── -->
-						<div class="sheet-pane active" id="sh-stats">
-							{% set xp_total    = character.get("xp_total", 0) %}
-							{% set attribute_points = character.get("attribute_points", 0) %}
-							{% set niveau      = character.get("niveau", 0) %}
-							{% set xp_niv_next = 10 * (3 ** niveau) %}
-							{% set xp_niv_prev = (10 * (3 ** (niveau - 1))) if niveau > 0 else 0 %}
-							{% set xp_bar_pct  = [((xp_total - xp_niv_prev) / (xp_niv_next - xp_niv_prev) * 100)|int, 100]|min if xp_niv_next > xp_niv_prev else 100 %}
-							{% set voc_id      = character.get("voc", "") %}
-							{% set voc_niveau  = character.get("vocations_niveaux", {}).get(voc_id, 0) %}
-							{% set voc_cout    = (voc_niveau + 1) * xp_voc_coeff %}
-							<div class="sh-section">✦ Expérience</div>
-							<div style="background:var(--btn-bg);border:1px solid var(--border-color);padding:12px;margin-bottom:8px">
-								<div class="sh-xp-header">
-									<span>XP totale : <strong style="color:var(--accent-color)">{{ xp_total }}</strong></span>
-									<span style="color:#2ed573">Points : <span id="sh-attribute-points">{{ attribute_points }}</span></span>
-								</div>
-								<div class="val-niveau">
-									<span>{{character["race"]}} Niv. : <strong id="sh-race-niveau" class="race-niveau niveau-nb">{{ niveau }}</strong></span>
-									<span style="white-space: wrap;text-align:right;width: 100%;">Prochain à {{ xp_niv_next }} XP</span>
-								</div>
-								<div class="sh-xp-bar">
-									<div class="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
-								</div>
-								<div class="val-niveau">
-									<span>{{ vocation["label"] }} Niv. : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{{ voc_niveau }}</strong></span>
-									<button class="sh-xp-btn" id="sh-btn-voc-niveau"
-											{% if attribute_points < voc_cout %}disabled{% endif %}
-											{% if attribute_points == 0 %}style="display:none"{% endif %}
-											onclick="spendXpVocation()">
-										Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> XP
-									</button>
-								</div>
-							</div>
 
-							<div class="sh-section">⚔ Caractéristiques</div>
-							<div class="sh-base-grid">
-								{% for code, nom in [("V","Vitesse"),("F","Force"),("R","Résistance"),("Ag","Agilité"),("Vol","Volonté"),("Int","Intelligence"),("Cha","Charisme"),("Ch","Chance")] %}
-								{% set val      = character["caracteristiques_current"].get(code,0) %}
-								{% set cap      = stat_caps.get(code, 0) %}
-								{% set maxRace  = race["stats_max"].get(code,1) %}
-								{% set race_min = race["stats"].get(code, 0) %}
-								{% set coeff    = xp_coeff.get(code, 1) %}
-								{% set cost_next = [(val + 1 - race_min) * coeff, 0] | max %}
-								{% set at_cap        = val >= cap %}
-								{% set is_accessible = cap >= maxRace %}
-								{% set can_afford    = attribute_points >= cost_next %}
+						<div class="sh-section">⚔ Caractéristiques</div>
+						<div class="sh-base-grid">
+							{% for code, nom in [("V","Vitesse"),("F","Force"),("R","Résistance"),("Ag","Agilité"),("Vol","Volonté"),("Int","Intelligence"),("Cha","Charisme"),("Ch","Chance")] %}
+							{% set val      = character["caracteristiques_current"].get(code,0) %}
+							{% set cap      = stat_caps.get(code, 0) %}
+							{% set maxRace  = race["stats_max"].get(code,1) %}
+							{% set race_min = race["stats"].get(code, 0) %}
+							{% set coeff    = xp_coeff.get(code, 1) %}
+							{% set cost_next = [(val + 1 - race_min) * coeff, 0] | max %}
+							{% set at_cap        = val >= cap %}
+							{% set is_accessible = cap >= maxRace %}
+							{% set can_afford    = attribute_points >= cost_next %}
 
-								<div class="sh-stat-box">
-									<span class="sh-stat-lbl">{{ nom }}</span>
-									<div class="sh-stat-val" id="sh-sv-{{ code }}">
-										{{ val }}<span class="sh-stat-max-sep">/{{ cap }}</span>
+							<div class="sh-stat-box">
+								<span class="sh-stat-lbl">{{ nom }}</span>
+								<div class="sh-stat-val" id="sh-sv-{{ code }}">
+									{{ val }}<span class="sh-stat-max-sep">/{{ cap }}</span>
+								</div>
+								<div class="sh-stat-bar-wrapper" title="Plafond : {{ cap }} · Max racial : {{ maxRace }}">
+									<div class="sh-stat-bar">
+										<div class="sh-stat-fill" style="width: {{ (val / maxRace * 100) | int }}%"></div>
+										<div class="sh-stat-pip{% if not is_accessible %} subcap{% endif %}"
+											 style="left: {{ (cap / maxRace * 100) | int }}%"></div>
 									</div>
-									<div class="sh-stat-bar-wrapper" title="Plafond : {{ cap }} · Max racial : {{ maxRace }}">
-										<div class="sh-stat-bar">
-											<div class="sh-stat-fill" style="width: {{ (val / maxRace * 100) | int }}%"></div>
-											<div class="sh-stat-pip{% if not is_accessible %} subcap{% endif %}"
-												 style="left: {{ (cap / maxRace * 100) | int }}%"></div>
-										</div>
-									</div>
-									<button class="sh-xp-btn{% if not is_accessible %} subcap{% endif %}"
-											id="sh-btn-{{ code }}"
-											{% if at_cap or not can_afford %}disabled{% endif %}
-											{% if attribute_points == 0 %}style="display:none"{% endif %}
-											onclick="spendXp('{{ code }}')">
-										- <span class="sh-xp-cost">{{ cost_next }} XP</span>
-									</button>
 								</div>
-								{% endfor %}
-							</div>
-
-							<div class="sh-section" style="margin-top:14px">🛡 Caractéristiques dérivées</div>
-							{% for lbl, key, unit in [
-								("PV max","pv_max",""),("PM max","pm_max",""),
-								("Initiative","initiative",""),("Déplacement","deplacement"," cases"),
-								("Corps à corps","cc",""),("À distance","cd",""),
-								("Armure (PA)","pa",""),("Déf. magique","pm_def",""),
-								("Dégâts CàC","degats_cc",""),("Charge max","charge_max"," kg")
-							] %}
-							<div class="sh-derived-row">
-								<span class="sh-derived-lbl">{{ lbl }}</span>
-								<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ d.get(key,"—") }}{{ unit }}</span>
+								<button class="sh-xp-btn{% if not is_accessible %} subcap{% endif %}"
+										id="sh-btn-{{ code }}"
+										{% if at_cap or not can_afford %}disabled{% endif %}
+										{% if attribute_points == 0 %}style="display:none"{% endif %}
+										onclick="spendXp('{{ code }}')">
+									- <span class="sh-xp-cost">{{ cost_next }} XP</span>
+								</button>
 							</div>
 							{% endfor %}
 						</div>
 
-						<!-- ── INVENTAIRE ── -->
-						<div class="sheet-pane" id="sh-inventaire">
-							<div class="sh-section">💰 Finances</div>
-							<div class="sh-finance-row">
-								<div class="sh-finance">🟡 <span class="amt" id="amt-or">{{ character.get("or",0) }}</span> Or</div>
-								<div class="sh-finance">⚪ <span class="amt" id="amt-argent">{{ character.get("argent",0) }}</span> Argent</div>
-								<div class="sh-finance">🟤 <span class="amt" id="amt-cuivre">{{ character.get("cuivre",0) }}</span> Cuivre</div>
+						<div class="sh-section" style="margin-top:14px">🛡 Caractéristiques dérivées</div>
+						{% for lbl, key, unit in [
+							("PV max","pv_max",""),("PM max","pm_max",""),
+							("Initiative","initiative",""),("Déplacement","deplacement"," cases"),
+							("Corps à corps","cc",""),("À distance","cd",""),
+							("Armure (PA)","pa",""),("Déf. magique","pm_def",""),
+							("Dégâts CàC","degats_cc",""),("Charge max","charge_max"," kg")
+						] %}
+						<div class="sh-derived-row">
+							<span class="sh-derived-lbl">{{ lbl }}</span>
+							<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ d.get(key,"—") }}{{ unit }}</span>
+						</div>
+						{% endfor %}
+					</div>
+
+					<!-- ── INVENTAIRE ── -->
+					<div class="sheet-panel" id="sh-inventaire">
+						<div class="sh-section">💰 Finances</div>
+						<div class="sh-finance-row">
+							<div class="sh-finance">🟡 <span class="amt" id="amt-or">{{ character.get("or",0) }}</span> Or</div>
+							<div class="sh-finance">⚪ <span class="amt" id="amt-argent">{{ character.get("argent",0) }}</span> Argent</div>
+							<div class="sh-finance">🟤 <span class="amt" id="amt-cuivre">{{ character.get("cuivre",0) }}</span> Cuivre</div>
+						</div>
+
+						<div class="sh-section">🛡 Équipement</div>
+						{% set slots = character.get("slots",{}) %}
+						{% set _equip_race = character["race"] %}
+						{% set _equip_sex = character.get("sex", "m").lower() %}
+						{% set _equip_img = "equipement_" + _equip_race + "_" + _equip_sex + ".png" %}
+						<div class="sh-paperdoll">
+							<img class="sh-paperdoll-img" src="{{ url_for('icons', path=_equip_img) }}" alt="Équipement">
+							{% for key, nom, sx, sy in [
+								("tete",        "Tête",     "0%",  "5%"),
+								("epaules",     "Epaules",  "0%",  "17%"),
+								("torse",       "Torse",    "0%",  "29%"),
+								("mains",       "Bras",     "0%",  "41%"),
+								("jambes",      "Jambes",   "0%",  "75%"),
+								("pieds",       "Pieds",    "0%",  "85%"),
+								("cou",         "Cou",      "70%", "5%"),
+								("anneau_1",    "Anneau 1", "70%", "17%"),
+								("anneau_2",    "Anneau 2", "70%", "29%"),
+								("ceinture",    "Ceinture", "70%", "41%"),
+								("main_droite", "Main D.",  "5%", "55%"),
+								("main_gauche", "Main G.",  "65%", "55%"),
+							] %}
+							<div class="sh-slot{% if slots.get(key) %} occupied{% endif %}" id="slot-{{ key }}" style="left:{{ sx }};top:{{ sy }}">
+								<button class="sh-unequip-btn" onclick="unequip('{{ key }}')" title="Déséquiper"{% if not slots.get(key) %} style="display:none"{% endif %}>×</button>
+								<span class="sh-slot-lbl">{{ nom }}</span>
+								<span class="sh-slot-name{% if not slots.get(key) %} sh-slot-empty{% endif %}">{% if slots.get(key) %}{{ slots[key]["nom"] if slots[key] is mapping else slots[key] }}{% else %}—{% endif %}</span>
 							</div>
+							{% endfor %}
+						</div>
 
-							<div class="sh-section">🛡 Équipement</div>
-							{% set slots = character.get("slots",{}) %}
-							{% set _equip_race = character["race"] %}
-							{% set _equip_sex = character.get("sex", "m").lower() %}
-							{% set _equip_img = "equipement_" + _equip_race + "_" + _equip_sex + ".png" %}
-							<div class="sh-paperdoll">
-								<img class="sh-paperdoll-img" src="{{ url_for('icons', path=_equip_img) }}" alt="Équipement">
-								{% for key, nom, sx, sy in [
-									("tete",        "Tête",     "0%",  "5%"),
-									("epaules",     "Epaules",  "0%",  "17%"),
-									("torse",       "Torse",    "0%",  "29%"),
-									("mains",       "Bras",     "0%",  "41%"),
-									("jambes",      "Jambes",   "0%",  "75%"),
-									("pieds",       "Pieds",    "0%",  "85%"),
-									("cou",         "Cou",      "70%", "5%"),
-									("anneau_1",    "Anneau 1", "70%", "17%"),
-									("anneau_2",    "Anneau 2", "70%", "29%"),
-									("ceinture",    "Ceinture", "70%", "41%"),
-									("main_droite", "Main D.",  "5%", "55%"),
-									("main_gauche", "Main G.",  "65%", "55%"),
-								] %}
-								<div class="sh-slot{% if slots.get(key) %} occupied{% endif %}" id="slot-{{ key }}" style="left:{{ sx }};top:{{ sy }}">
-									<button class="sh-unequip-btn" onclick="unequip('{{ key }}')" title="Déséquiper"{% if not slots.get(key) %} style="display:none"{% endif %}>×</button>
-									<span class="sh-slot-lbl">{{ nom }}</span>
-									<span class="sh-slot-name{% if not slots.get(key) %} sh-slot-empty{% endif %}">{% if slots.get(key) %}{{ slots[key]["nom"] if slots[key] is mapping else slots[key] }}{% else %}—{% endif %}</span>
-								</div>
-								{% endfor %}
+						<div class="sh-section">⚖️ Charge</div>
+						<div class="sh-stat-bar-wrapper" title="Charge portée. Le repère marque la moitié de la charge max (seuil de pénalité en combat).">
+							<div class="sh-stat-bar">
+								<div class="sh-stat-fill" id="charge-fill"></div>
+								<div class="sh-stat-pip" style="left:50%"></div>
 							</div>
+						</div>
+						<div id="charge-label" class="sh-charge-label"></div>
+						
+						<div class="sh-section" style="margin-top:14px">🎒 Sac</div>
+						<div id="sh-inv-sac"></div>
+						<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none">⬇️ Au sol</div>
+						<div id="sh-inv-sol"></div>
+					</div>
 
-							<div class="sh-section">⚖️ Charge</div>
-							<div class="sh-stat-bar-wrapper" title="Charge portée. Le repère marque la moitié de la charge max (seuil de pénalité en combat).">
-								<div class="sh-stat-bar">
-									<div class="sh-stat-fill" id="charge-fill"></div>
-									<div class="sh-stat-pip" style="left:50%"></div>
+					<!-- ── COMPETENCES ── -->
+					<div class="sheet-panel" id="sh-competences">
+						{% set comps = character.get("competences",[]) %}
+						{% if comps %}
+							{% for c in comps %}
+							<div class="sh-skill">
+								<span class="sh-skill-icon">{{ c.get("icon","⚡") }}</span>
+								<div class="sh-skill-info">
+									<div class="sh-skill-name">{{ c.get("nom","—") }}</div>
+									<div class="sh-skill-desc">{{ c.get("description","") }}</div>
+								</div>
+								{% if c.get("niveau") %}<span class="sh-skill-lvl">{{ c.niveau }}/5</span>{% endif %}
+							</div>
+							{% endfor %}
+						{% else %}<div class="sh-empty"><span class="sh-empty-icon">⚡</span>Aucune compétence apprise.</div>{% endif %}
+					</div>
+
+					<!-- ── RELATIONS ── -->
+					<div class="sheet-panel" id="sh-relations">
+						{% set rels = character.get("affinites_detail",[]) %}
+						{% if rels %}
+							{% for r in rels %}{% set sc = r.get("score",0) %}
+							<div class="sh-relation">
+								<div class="sh-rel-portrait">
+									{% if r.get("portrait") %}<img src="{{ r.portrait }}" alt="">
+									{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">{{ r.get("icon","👤") }}</div>{% endif %}
+								</div>
+								<div class="sh-rel-info">
+									<div class="sh-rel-name">{{ r.get("prenom","?") }} {{ r.get("nom","") }}</div>
+									<div class="sh-rel-class">{{ r.get("vocation","") }}</div>
+								</div>
+								<div>
+									<div class="sh-rel-score {% if sc>20 %}pos{% elif sc<-20 %}neg{% else %}neu{% endif %}">{% if sc>0 %}+{% endif %}{{ sc }}</div>
+									<div class="sh-rel-lbl">{% if sc>=80 %}Dévoué{% elif sc>=40 %}Ami{% elif sc>=10 %}Bienveillant{% elif sc>=-10 %}Neutre{% elif sc>=-40 %}Méfiant{% elif sc>=-80 %}Hostile{% else %}Ennemi{% endif %}</div>
 								</div>
 							</div>
-							<div id="charge-label" class="sh-charge-label"></div>
-							
-							<div class="sh-section" style="margin-top:14px">🎒 Sac</div>
-							<div id="sh-inv-sac"></div>
-							<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none">⬇️ Au sol</div>
-							<div id="sh-inv-sol"></div>
-						</div>
+							{% endfor %}
+						{% else %}<div class="sh-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>{% endif %}
+					</div>
 
-						<!-- ── COMPETENCES ── -->
-						<div class="sheet-pane" id="sh-competences">
-							{% set comps = character.get("competences",[]) %}
-							{% if comps %}
-								{% for c in comps %}
-								<div class="sh-skill">
-									<span class="sh-skill-icon">{{ c.get("icon","⚡") }}</span>
-									<div class="sh-skill-info">
-										<div class="sh-skill-name">{{ c.get("nom","—") }}</div>
-										<div class="sh-skill-desc">{{ c.get("description","") }}</div>
-									</div>
-									{% if c.get("niveau") %}<span class="sh-skill-lvl">{{ c.niveau }}/5</span>{% endif %}
+					<!-- ── QUÊTES ── -->
+					<div class="sheet-panel" id="sh-quetes">
+						{% set qa = character.get("quetes_actives_detail",[]) %}
+						{% set qt = character.get("quetes_terminees_detail",[]) %}
+						{% if qa %}
+							<div class="sh-section">📜 Actives</div>
+							{% for q in qa %}
+							<div class="sh-quest {{ q.get('rang','F') }}">
+								<div class="sh-quest-hdr">
+									<span class="sh-quest-rang">{{ q.get("rang","F") }}</span>
+									<span class="sh-quest-title">{{ q.get("titre","—") }}</span>
+									<span class="sh-quest-status en-cours">En cours</span>
 								</div>
-								{% endfor %}
-							{% else %}<div class="sh-empty"><span class="sh-empty-icon">⚡</span>Aucune compétence apprise.</div>{% endif %}
-						</div>
+								<div class="sh-quest-desc">{{ q.get("description","") }}</div>
+								{% if q.get("recompenses") %}<div class="sh-quest-reward">{% if q.recompenses.get("or") %}<span>🟡 {{ q.recompenses.or }} or</span>{% endif %}{% if q.recompenses.get("xp") %}<span>✨ {{ q.recompenses.xp }} XP</span>{% endif %}</div>{% endif %}
+							</div>
+							{% endfor %}
+						{% endif %}
+						{% if qt %}
+							<div class="sh-section" style="opacity:0.6">✓ Terminées ({{ qt|length }})</div>
+							{% for q in qt %}
+							<div class="sh-quest {{ q.get('rang','F') }}" style="opacity:0.5">
+								<div class="sh-quest-hdr"><span class="sh-quest-rang">{{ q.get("rang","F") }}</span><span class="sh-quest-title">{{ q.get("titre","—") }}</span><span class="sh-quest-status termine">Terminée</span></div>
+							</div>
+							{% endfor %}
+						{% endif %}
+						{% if not qa and not qt %}<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>{% endif %}
+					</div>
 
-						<!-- ── RELATIONS ── -->
-						<div class="sheet-pane" id="sh-relations">
-							{% set rels = character.get("affinites_detail",[]) %}
-							{% if rels %}
-								{% for r in rels %}{% set sc = r.get("score",0) %}
-								<div class="sh-relation">
-									<div class="sh-rel-portrait">
-										{% if r.get("portrait") %}<img src="{{ r.portrait }}" alt="">
-										{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">{{ r.get("icon","👤") }}</div>{% endif %}
-									</div>
-									<div class="sh-rel-info">
-										<div class="sh-rel-name">{{ r.get("prenom","?") }} {{ r.get("nom","") }}</div>
-										<div class="sh-rel-class">{{ r.get("vocation","") }}</div>
-									</div>
-									<div>
-										<div class="sh-rel-score {% if sc>20 %}pos{% elif sc<-20 %}neg{% else %}neu{% endif %}">{% if sc>0 %}+{% endif %}{{ sc }}</div>
-										<div class="sh-rel-lbl">{% if sc>=80 %}Dévoué{% elif sc>=40 %}Ami{% elif sc>=10 %}Bienveillant{% elif sc>=-10 %}Neutre{% elif sc>=-40 %}Méfiant{% elif sc>=-80 %}Hostile{% else %}Ennemi{% endif %}</div>
-									</div>
-								</div>
-								{% endfor %}
-							{% else %}<div class="sh-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>{% endif %}
-						</div>
-
-						<!-- ── QUÊTES ── -->
-						<div class="sheet-pane" id="sh-quetes">
-							{% set qa = character.get("quetes_actives_detail",[]) %}
-							{% set qt = character.get("quetes_terminees_detail",[]) %}
-							{% if qa %}
-								<div class="sh-section">📜 Actives</div>
-								{% for q in qa %}
-								<div class="sh-quest {{ q.get('rang','F') }}">
-									<div class="sh-quest-hdr">
-										<span class="sh-quest-rang">{{ q.get("rang","F") }}</span>
-										<span class="sh-quest-title">{{ q.get("titre","—") }}</span>
-										<span class="sh-quest-status en-cours">En cours</span>
-									</div>
-									<div class="sh-quest-desc">{{ q.get("description","") }}</div>
-									{% if q.get("recompenses") %}<div class="sh-quest-reward">{% if q.recompenses.get("or") %}<span>🟡 {{ q.recompenses.or }} or</span>{% endif %}{% if q.recompenses.get("xp") %}<span>✨ {{ q.recompenses.xp }} XP</span>{% endif %}</div>{% endif %}
-								</div>
-								{% endfor %}
-							{% endif %}
-							{% if qt %}
-								<div class="sh-section" style="opacity:0.6">✓ Terminées ({{ qt|length }})</div>
-								{% for q in qt %}
-								<div class="sh-quest {{ q.get('rang','F') }}" style="opacity:0.5">
-									<div class="sh-quest-hdr"><span class="sh-quest-rang">{{ q.get("rang","F") }}</span><span class="sh-quest-title">{{ q.get("titre","—") }}</span><span class="sh-quest-status termine">Terminée</span></div>
-								</div>
-								{% endfor %}
-							{% endif %}
-							{% if not qa and not qt %}<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>{% endif %}
-						</div>
-
-						<!-- ── JOURNAL ── -->
-						<div class="sheet-pane" id="sh-journal">
-							{% set jnl = character.get("journal",[]) %}
-							{% if jnl %}
-								{% for e in jnl|reverse %}
-								<div class="sh-journal-entry">
-									<div class="sh-journal-date">{{ e.get("date","—") }}{% if e.get("lieu") %} · {{ e.lieu }}{% endif %}</div>
-									{{ e.get("texte","") }}
-								</div>
-								{% endfor %}
-							{% else %}<div class="sh-empty"><span class="sh-empty-icon">📖</span>Le journal est vide.</div>{% endif %}
-						</div>
-					</div><!-- /.sheet-body -->
-				</div><!-- /.sheet-right-col -->
-			</div><!-- /.sheet-layout -->
-		</div><!-- /#sheet-panel -->
-		<div id="sell-panel" class="panel-hidden" aria-label="Vente au marchand">
-			<div class="sell-topbar">
-				<h2>🏷️ <span id="sell-lieu-label">Vente</span></h2>
-				<button class="sheet-tab-btn" style="color:#ff4757" onclick="closeSellPanel()">✕ Fermer</button>
-			</div>
-			<div class="sh-finance-row">
-				<div class="sh-finance">🟡 <span class="amt" id="sell-amt-or">0</span> Or</div>
-				<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">0</span> Argent</div>
-				<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
-			</div>
-			<h2 style="margin:.6rem 0 0">🏷️ Vente</h2>
-			<ul id="sell-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
-			<h2 style="margin:1rem 0 0">🛒 Achat</h2>
-			<ul id="buy-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
-		</div><!-- /#sell-panel -->
+					<!-- ── JOURNAL ── -->
+					<div class="sheet-panel" id="sh-journal">
+						{% set jnl = character.get("journal",[]) %}
+						{% if jnl %}
+							{% for e in jnl|reverse %}
+							<div class="sh-journal-entry">
+								<div class="sh-journal-date">{{ e.get("date","—") }}{% if e.get("lieu") %} · {{ e.lieu }}{% endif %}</div>
+								{{ e.get("texte","") }}
+							</div>
+							{% endfor %}
+						{% else %}<div class="sh-empty"><span class="sh-empty-icon">📖</span>Le journal est vide.</div>{% endif %}
+					</div>
+				</div><!-- /.sheet-body -->
+			</div><!-- /.sheet-right-col -->
+		</div><!-- /.sheet-layout -->
+	</div><!-- /#sheet-panel -->
+	<div id="sell-panel" class="panel-hidden" aria-label="Vente au marchand">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Magasin - vente au marchand">
+			<h2>{{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn  close-sheet-btn" style="" onclick="closeSellPanel()" role="button">✕ Fermer</button>
+		</div>
+		<div class="sh-finance-row">
+			<div class="sh-finance">🟡 <span class="amt" id="sell-amt-or">0</span> Or</div>
+			<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">0</span> Argent</div>
+			<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
+		</div>
+		<h2 style="margin:.6rem 0 0">🏷️ Vente</h2>
+		<ul id="sell-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+		<h2 style="margin:1rem 0 0">🛒 Achat</h2>
+		<ul id="buy-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+	</div><!-- /#sell-panel -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -1832,7 +1836,7 @@
 	}
 	function sheetTab(id, btn) {
 		document.querySelectorAll('.sheet-tab-btn').forEach(b => b.classList.remove('active'));
-		document.querySelectorAll('.sheet-pane').forEach(p => p.classList.remove('active'));
+		document.querySelectorAll('.sheet-panel').forEach(p => p.classList.remove('active'));
 		document.getElementById('sh-' + id).classList.add('active');
 		if (btn) btn.classList.add('active');
 	}
@@ -2222,7 +2226,6 @@ function updatePurse(purse) {
 
 function renderSellList(data) {
 	const list = document.getElementById('sell-list');
-	if (data.lieu_label) document.getElementById('sell-lieu-label').textContent = data.lieu_label;
 	const vendables = data.vendables || [];
 	if (!vendables.length) {
 		list.innerHTML = '<li class="sell-empty">Rien à vendre ici.</li>';
