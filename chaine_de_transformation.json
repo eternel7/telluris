@@ -1,100 +1,86 @@
 {
   "chaines_de_transformation": [
-    { "matiere_premiere": "Cuir", "lieu": "Maroquinerie", "objet_final": "Sac" },
-    { "matiere_premiere": "Cuir", "lieu": "Maroquinerie", "objet_final": "Ceinture" },
-    { "matiere_premiere": "Cuir", "lieu": "Maroquinerie", "objet_final": "Gants" },
+    { "_id": "recette:63cec5f7-e699-4829-a77f-fdb4eed9a18f", "matiere_premiere_sous_categorie": "cuir", "lieu_categorie": "maroquinerie", "objet_final": "sac", "type": "recette", "quantite_matiere": 3, "quantite_produite": 1 },
+    { "_id": "recette:eec9f067-b758-454a-acb7-f5c93d78b1b6", "matiere_premiere_sous_categorie": "cuir", "lieu_categorie": "maroquinerie", "objet_final": "ceinture", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:159f3389-4dee-42f3-9e5d-cf9c22508c9e", "matiere_premiere_sous_categorie": "cuir", "lieu_categorie": "maroquinerie", "objet_final": "gants", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Cuir", "lieu": "Cordonnerie", "objet_final": "Bottes" },
+    { "_id": "recette:ebff315f-ade2-4367-b67f-1e8f2bb10bdc", "matiere_premiere_sous_categorie": "cuir", "lieu_categorie": "cordonnerie", "objet_final": "bottes", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Cuir", "lieu": "Bourrellerie", "objet_final": "Harnais" },
-    { "matiere_premiere": "Cuir", "lieu": "Bourrellerie", "objet_final": "Outres" },
+    { "_id": "recette:c0791a03-6f56-4551-9d26-5c046c3b3fda", "matiere_premiere_sous_categorie": "cuir", "lieu_categorie": "bourrellerie", "objet_final": "harnais", "type": "recette", "quantite_matiere": 3, "quantite_produite": 1 },
+    { "_id": "recette:6a3d0ad3-cbde-4e3e-ba9c-0a3cc8f9bda0", "matiere_premiere_sous_categorie": "cuir", "lieu_categorie": "bourrellerie", "objet_final": "outres", "type": "recette", "quantite_matiere": 2, "quantite_produite": 2 },
 
-    { "matiere_premiere": "Cuir", "lieu": "Armurerie", "objet_final": "Armure de cuir" },
-    { "matiere_premiere": "Cuir", "lieu": "Armurerie", "objet_final": "Fourreau" },
+    { "_id": "recette:96307e4f-f1b0-4cb6-970d-b8c2782ceed2", "matiere_premiere_sous_categorie": "cuir", "lieu_categorie": "armurerie", "objet_final": "armure_de_cuir", "type": "recette", "quantite_matiere": 6, "quantite_produite": 1 },
+    { "_id": "recette:c756c472-af46-4bb2-9f9e-e187a9a01b0b", "matiere_premiere_sous_categorie": "cuir", "lieu_categorie": "armurerie", "objet_final": "fourreau", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Viande", "lieu": "Cuisine", "objet_final": "Repas cuisiné" },
-    { "matiere_premiere": "Viande", "lieu": "Fumoir", "objet_final": "Viande fumée" },
-    { "matiere_premiere": "Viande", "lieu": "Salaison", "objet_final": "Viande séchée" },
-    { "matiere_premiere": "Viande", "lieu": "Salaison", "objet_final": "Saucisses" },
+    { "_id": "recette:9ad71cbe-d703-4474-98b4-59f85eeccf89", "matiere_premiere_sous_categorie": "viande", "lieu_categorie": "cuisine", "objet_final": "repas_cuisine", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:09ee6b98-dfaf-416b-9b64-4425f5b22dce", "matiere_premiere_sous_categorie": "viande", "lieu_categorie": "fumoir", "objet_final": "viande_fumee", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:49b884ac-1624-4149-b884-fe5f09f158f8", "matiere_premiere_sous_categorie": "viande", "lieu_categorie": "salaison", "objet_final": "viande_sechee", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:b5703f1a-0196-489d-9c93-327e879e87ca", "matiere_premiere_sous_categorie": "viande", "lieu_categorie": "salaison", "objet_final": "saucisses", "type": "recette", "quantite_matiere": 1, "quantite_produite": 3 },
 
-    { "matiere_premiere": "Sang", "lieu": "Laboratoire d'alchimie", "objet_final": "Potion" },
-    { "matiere_premiere": "Sang", "lieu": "Laboratoire d'alchimie", "objet_final": "Composant rituel" },
-    { "matiere_premiere": "Sang", "lieu": "Scriptorium", "objet_final": "Encre" },
-    { "matiere_premiere": "Sang", "lieu": "Scriptorium", "objet_final": "Pigment" },
+    { "_id": "recette:3aac6e3b-6451-4b74-81d7-396d01762c0f", "matiere_premiere_sous_categorie": "sang", "lieu_categorie": "laboratoire_d_alchimie", "objet_final": "potion", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:32acafb3-67f7-4dd3-8157-214c963bdb97", "matiere_premiere_sous_categorie": "sang", "lieu_categorie": "laboratoire_d_alchimie", "objet_final": "composant_rituel", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:e7c250a5-e204-454a-801d-00d1e1a76cd8", "matiere_premiere_sous_categorie": "sang", "lieu_categorie": "scriptorium", "objet_final": "encre", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
+    { "_id": "recette:a9aba254-1b44-4239-863b-3aaeffead838", "matiere_premiere_sous_categorie": "sang", "lieu_categorie": "scriptorium", "objet_final": "pigment", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
 
-    { "matiere_premiere": "Graisse", "lieu": "Savonnerie", "objet_final": "Savon" },
-    { "matiere_premiere": "Graisse", "lieu": "Atelier de cirier", "objet_final": "Bougie" },
-    { "matiere_premiere": "Graisse", "lieu": "Apothicairerie", "objet_final": "Huile" },
-    { "matiere_premiere": "Graisse", "lieu": "Apothicairerie", "objet_final": "Onguent" },
+    { "_id": "recette:7b363131-5137-4bc8-9b6b-474d2541c93d", "matiere_premiere_sous_categorie": "graisse", "lieu_categorie": "savonnerie", "objet_final": "savon", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
+    { "_id": "recette:5d12dfa8-7480-4625-95af-9574c39254cd", "matiere_premiere_sous_categorie": "graisse", "lieu_categorie": "atelier_de_cirier", "objet_final": "bougie", "type": "recette", "quantite_matiere": 1, "quantite_produite": 3 },
+    { "_id": "recette:17d8bb6a-2a1f-4365-baa8-37f81ca66d63", "matiere_premiere_sous_categorie": "graisse", "lieu_categorie": "apothicairerie", "objet_final": "huile", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
+    { "_id": "recette:ef792142-11ab-49c8-807c-26b0ed66e7fb", "matiere_premiere_sous_categorie": "graisse", "lieu_categorie": "apothicairerie", "objet_final": "onguent", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Manche" },
-    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Aiguille" },
-    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Peigne" },
-    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Dé" },
-    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Flûte" },
+    { "_id": "recette:45bbd8b4-3164-4431-961e-eb684b8f8506", "matiere_premiere_sous_categorie": "os", "lieu_categorie": "tabletterie", "objet_final": "manche", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:72e17d48-663a-4b06-81f4-e7e76b47104d", "matiere_premiere_sous_categorie": "os", "lieu_categorie": "tabletterie", "objet_final": "aiguille", "type": "recette", "quantite_matiere": 1, "quantite_produite": 4 },
+    { "_id": "recette:60d1d1de-f1f7-4708-9c2b-d4008f509fce", "matiere_premiere_sous_categorie": "os", "lieu_categorie": "tabletterie", "objet_final": "peigne", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:869bfa5d-145e-4f40-8b80-c5d2f6a83573", "matiere_premiere_sous_categorie": "os", "lieu_categorie": "tabletterie", "objet_final": "de", "type": "recette", "quantite_matiere": 1, "quantite_produite": 6 },
+    { "_id": "recette:c953f9d3-a65c-45eb-b06c-a6a9aa10d66b", "matiere_premiere_sous_categorie": "os", "lieu_categorie": "tabletterie", "objet_final": "flute", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Os", "lieu": "Atelier d'artisan", "objet_final": "Bijou" },
-    { "matiere_premiere": "Os", "lieu": "Atelier d'artisan", "objet_final": "Poudre d'os" },
+    { "_id": "recette:8c20a3d6-b430-48b9-b260-2e14c5e23ef5", "matiere_premiere_sous_categorie": "os", "lieu_categorie": "atelier_d_artisan", "objet_final": "bijou", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
+    { "_id": "recette:eb71175b-43c1-46a2-bc69-b453134ebe32", "matiere_premiere_sous_categorie": "os", "lieu_categorie": "atelier_d_artisan", "objet_final": "poudre_d_os", "type": "recette", "quantite_matiere": 1, "quantite_produite": 3 },
 
-    { "matiere_premiere": "Poudre d'os", "lieu": "Laboratoire d'alchimie", "objet_final": "Réactif alchimique" },
-    { "matiere_premiere": "Poudre d'os", "lieu": "Jardinier", "objet_final": "Engrais" },
+    { "_id": "recette:2d839e99-2208-424d-868f-8c58fa3124c2", "matiere_premiere_sous_categorie": "poudre_d_os", "lieu_categorie": "laboratoire_d_alchimie", "objet_final": "reactif_alchimique", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:0cdd5ec1-77d4-4b5d-911a-1764815d7a2b", "matiere_premiere_sous_categorie": "poudre_d_os", "lieu_categorie": "jardinier", "objet_final": "engrais", "type": "recette", "quantite_matiere": 3, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Crins", "lieu": "Corderie", "objet_final": "Corde" },
-    { "matiere_premiere": "Crins", "lieu": "Corderie", "objet_final": "Filet" },
-    { "matiere_premiere": "Crins", "lieu": "Brosserie", "objet_final": "Brosse" },
-    { "matiere_premiere": "Crins", "lieu": "Brosserie", "objet_final": "Pinceau" },
+    { "_id": "recette:fe359c39-eed3-4272-9dd5-f2b8cd380840", "matiere_premiere_sous_categorie": "crins", "lieu_categorie": "corderie", "objet_final": "corde", "type": "recette", "quantite_matiere": 3, "quantite_produite": 1 },
+    { "_id": "recette:273b4fd8-27a3-4ba9-9a2b-08d1972e6e6c", "matiere_premiere_sous_categorie": "crins", "lieu_categorie": "corderie", "objet_final": "filet", "type": "recette", "quantite_matiere": 5, "quantite_produite": 1 },
+    { "_id": "recette:9f602cb9-3c13-4512-92b1-e0bcdbfa612f", "matiere_premiere_sous_categorie": "crins", "lieu_categorie": "brosserie", "objet_final": "brosse", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:b99be50b-ca45-47f3-b968-7bd64bedbde1", "matiere_premiere_sous_categorie": "crins", "lieu_categorie": "brosserie", "objet_final": "pinceau", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
 
-    { "matiere_premiere": "Poils", "lieu": "Brosserie", "objet_final": "Brosse" },
-    { "matiere_premiere": "Poils", "lieu": "Brosserie", "objet_final": "Pinceau" },
-    { "matiere_premiere": "Poils", "lieu": "Tissage", "objet_final": "Feutre" },
-    { "matiere_premiere": "Poils", "lieu": "Tissage", "objet_final": "Rembourrage" },
+    { "_id": "recette:bf681ad7-d5f1-443f-9b14-b5ab7ba39f46", "matiere_premiere_sous_categorie": "poils", "lieu_categorie": "brosserie", "objet_final": "brosse", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:25ed5975-64f5-4e87-8add-bcc74222c91d", "matiere_premiere_sous_categorie": "poils", "lieu_categorie": "brosserie", "objet_final": "pinceau", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
+    { "_id": "recette:cfd2a8cf-34a0-470c-ae06-0005c330e0ba", "matiere_premiere_sous_categorie": "poils", "lieu_categorie": "tissage", "objet_final": "feutre", "type": "recette", "quantite_matiere": 3, "quantite_produite": 1 },
+    { "_id": "recette:87968a20-3b8e-4300-91de-eeabd96a34af", "matiere_premiere_sous_categorie": "poils", "lieu_categorie": "tissage", "objet_final": "rembourrage", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Plumes", "lieu": "Plumasserie", "objet_final": "Parure" },
-    { "matiere_premiere": "Plumes", "lieu": "Plumasserie", "objet_final": "Oreiller" },
-    { "matiere_premiere": "Plumes", "lieu": "Scriptorium", "objet_final": "Plume à écrire" },
-    { "matiere_premiere": "Plumes", "lieu": "Atelier de l'empenneur", "objet_final": "Empennage de flèches" },
+    { "_id": "recette:9ac67d79-0d7b-41c6-b3fb-a063c2c8b8ae", "matiere_premiere_sous_categorie": "plumes", "lieu_categorie": "plumasserie", "objet_final": "parure", "type": "recette", "quantite_matiere": 3, "quantite_produite": 1 },
+    { "_id": "recette:1f74a664-9ef2-4d2e-b6fc-14dcf684536b", "matiere_premiere_sous_categorie": "plumes", "lieu_categorie": "plumasserie", "objet_final": "oreiller", "type": "recette", "quantite_matiere": 6, "quantite_produite": 1 },
+    { "_id": "recette:e0d9ded5-e2d8-493d-a98b-dddfbab3cbb8", "matiere_premiere_sous_categorie": "plumes", "lieu_categorie": "scriptorium", "objet_final": "plume_a_ecrire", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:f5f1009c-a385-48b3-95ed-c478d2bb3cd8", "matiere_premiere_sous_categorie": "plumes", "lieu_categorie": "atelier_de_l_empenneur", "objet_final": "empennage_de_fleches", "type": "recette", "quantite_matiere": 1, "quantite_produite": 3 },
 
-    { "matiere_premiere": "Boyaux", "lieu": "Boyauderie", "objet_final": "Boyaux pour saucisses" },
-    { "matiere_premiere": "Boyaux", "lieu": "Fletcher", "objet_final": "Cordes d'arc" },
-    { "matiere_premiere": "Boyaux", "lieu": "Lutherie", "objet_final": "Cordes d'instrument" },
+    { "_id": "recette:f9d1f0ae-70ed-4931-8693-1c0718530559", "matiere_premiere_sous_categorie": "boyaux", "lieu_categorie": "boyauderie", "objet_final": "boyaux_pour_saucisses", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
+    { "_id": "recette:5a370d2a-53e2-4b33-a7ec-fbc4e3ce48a0", "matiere_premiere_sous_categorie": "boyaux", "lieu_categorie": "fletcher", "objet_final": "cordes_d_arc", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:9aeb46c1-18e2-4558-941a-92f9ddb27824", "matiere_premiere_sous_categorie": "boyaux", "lieu_categorie": "lutherie", "objet_final": "cordes_d_instrument", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
 
-    { "matiere_premiere": "Tendons", "lieu": "Fletcher", "objet_final": "Cordes d'arc" },
-    { "matiere_premiere": "Tendons", "lieu": "Armurerie", "objet_final": "Ligatures" },
-    { "matiere_premiere": "Tendons", "lieu": "Cordonnerie", "objet_final": "Fil résistant" },
+    { "_id": "recette:fba762d2-b07c-472c-a172-1469babcf747", "matiere_premiere_sous_categorie": "tendons", "lieu_categorie": "fletcher", "objet_final": "cordes_d_arc", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:485c17fa-d319-4679-8782-ca13e25af1e1", "matiere_premiere_sous_categorie": "tendons", "lieu_categorie": "armurerie", "objet_final": "ligatures", "type": "recette", "quantite_matiere": 1, "quantite_produite": 3 },
+    { "_id": "recette:542cabac-d08c-4580-b7f3-19e1659378bf", "matiere_premiere_sous_categorie": "tendons", "lieu_categorie": "cordonnerie", "objet_final": "fil_resistant", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
 
-    { "matiere_premiere": "Griffes", "lieu": "Bijouterie", "objet_final": "Amulette" },
-    { "matiere_premiere": "Griffes", "lieu": "Bijouterie", "objet_final": "Talisman" },
-    { "matiere_premiere": "Griffes", "lieu": "Laboratoire d'alchimie", "objet_final": "Poudre alchimique" },
+    { "_id": "recette:70f174ca-b706-4f53-b837-bae935ee2829", "matiere_premiere_sous_categorie": "griffes", "lieu_categorie": "bijouterie", "objet_final": "amulette", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:414f2b13-068d-456d-b85b-6db7e4caed85", "matiere_premiere_sous_categorie": "griffes", "lieu_categorie": "bijouterie", "objet_final": "talisman", "type": "recette", "quantite_matiere": 3, "quantite_produite": 1 },
+    { "_id": "recette:5d159e89-3863-4dd2-adc8-9c632e310a52", "matiere_premiere_sous_categorie": "griffes", "lieu_categorie": "laboratoire_d_alchimie", "objet_final": "poudre_alchimique", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Crocs", "lieu": "Bijouterie", "objet_final": "Collier" },
-    { "matiere_premiere": "Crocs", "lieu": "Bijouterie", "objet_final": "Talisman" },
-    { "matiere_premiere": "Crocs", "lieu": "Tabletterie", "objet_final": "Dague rituelle" },
+    { "_id": "recette:1f10bc9d-7f3f-4b6d-835a-e4975077b3c9", "matiere_premiere_sous_categorie": "crocs", "lieu_categorie": "bijouterie", "objet_final": "collier", "type": "recette", "quantite_matiere": 4, "quantite_produite": 1 },
+    { "_id": "recette:20247e25-2ce6-49fe-8548-1fcb112d397f", "matiere_premiere_sous_categorie": "crocs", "lieu_categorie": "bijouterie", "objet_final": "talisman", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:425ed37e-5a95-4d6a-9502-466c6f851179", "matiere_premiere_sous_categorie": "crocs", "lieu_categorie": "tabletterie", "objet_final": "dague_rituelle", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Yeux", "lieu": "Laboratoire d'alchimie", "objet_final": "Potion de vision" },
-    { "matiere_premiere": "Yeux", "lieu": "Laboratoire d'alchimie", "objet_final": "Réactif magique" },
+    { "_id": "recette:754f052f-e9e1-4096-a335-a1e0a0006e54", "matiere_premiere_sous_categorie": "yeux", "lieu_categorie": "laboratoire_d_alchimie", "objet_final": "potion_de_vision", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
+    { "_id": "recette:49ae784f-a635-43dc-a23e-470448eccf19", "matiere_premiere_sous_categorie": "yeux", "lieu_categorie": "laboratoire_d_alchimie", "objet_final": "reactif_magique", "type": "recette", "quantite_matiere": 2, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Foie", "lieu": "Cuisine", "objet_final": "Plat raffiné" },
-    { "matiere_premiere": "Foie", "lieu": "Apothicairerie", "objet_final": "Remède" },
+    { "_id": "recette:7db17626-201a-405a-af63-c81252f3118e", "matiere_premiere_sous_categorie": "foie", "lieu_categorie": "cuisine", "objet_final": "plat_raffine", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:59969bb4-4e94-4fa4-b2dc-dda6453d45e8", "matiere_premiere_sous_categorie": "foie", "lieu_categorie": "apothicairerie", "objet_final": "remede", "type": "recette", "quantite_matiere": 1, "quantite_produite": 2 },
 
-    { "matiere_premiere": "Cœur", "lieu": "Cuisine", "objet_final": "Mets rare" },
-    { "matiere_premiere": "Cœur", "lieu": "Laboratoire d'alchimie", "objet_final": "Catalyseur magique" },
+    { "_id": "recette:68999460-acbc-4b15-8555-67deef6b4ab7", "matiere_premiere_sous_categorie": "coeur", "lieu_categorie": "cuisine", "objet_final": "mets_rare", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:9096c8b7-4a31-4909-b159-587c61287f1c", "matiere_premiere_sous_categorie": "coeur", "lieu_categorie": "laboratoire_d_alchimie", "objet_final": "catalyseur_magique", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
 
-    { "matiere_premiere": "Crâne", "lieu": "Taxidermie", "objet_final": "Trophée" },
-    { "matiere_premiere": "Crâne", "lieu": "Nécromancie", "objet_final": "Relique" },
-    { "matiere_premiere": "Crâne", "lieu": "Nécromancie", "objet_final": "Focus magique" }
+    { "_id": "recette:04810d7e-e40f-42a6-91fb-73b860c97488", "matiere_premiere_sous_categorie": "crane", "lieu_categorie": "taxidermie", "objet_final": "trophee", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:7bbdb882-539f-4d0f-b3b5-a29c93316826", "matiere_premiere_sous_categorie": "crane", "lieu_categorie": "necromancie", "objet_final": "relique", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 },
+    { "_id": "recette:046c28d7-e798-4ed6-8d84-2ffd6185fbfb", "matiere_premiere_sous_categorie": "crane", "lieu_categorie": "necromancie", "objet_final": "focus_magique", "type": "recette", "quantite_matiere": 1, "quantite_produite": 1 }
   ]
-}
-
-
-
-{
-  "matiere_premiere": "Cuir",
-  "quantite_matiere": 2,
-  "lieu": "Maroquinerie",
-  "niveau_metier": 15,
-  "temps": 180,
-  "outil": "Alêne",
-  "objet_final": "Sac",
-  "quantite_produite": 1,
-  "chance_reussite": 100
 }

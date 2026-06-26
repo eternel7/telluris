@@ -1399,7 +1399,10 @@
 				<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">0</span> Argent</div>
 				<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
 			</div>
+			<h2 style="margin:.6rem 0 0">🏷️ Vente</h2>
 			<ul id="sell-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+			<h2 style="margin:1rem 0 0">🛒 Achat</h2>
+			<ul id="buy-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
 		</div><!-- /#sell-panel -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
@@ -2234,6 +2237,28 @@ function renderSellList(data) {
 	</li>`).join('');
 }
 
+function dealNote(d) {
+	if (!d) return '';
+	return d.succes ? ' — marchandage réussi 🤝' : ' — marchandage raté';
+}
+
+function renderBuyList(data) {
+	const list = document.getElementById('buy-list');
+	if (!list) return;
+	const achetables = data.achetables || [];
+	if (!achetables.length) {
+		list.innerHTML = '<li class="sell-empty">Rien à acheter ici.</li>';
+		return;
+	}
+	list.innerHTML = achetables.map(v => `<li class="sh-inv-item">
+		<span>${v.icon || '📦'}</span>
+		<span style="flex:1">${v.nom || '—'} ×${v.qty}</span>
+		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
+		<span class="sell-prix">${formatPrix(v.prix_min_purse)} – ${formatPrix(v.prix_max_purse)}</span>
+		<button class="sh-drop-btn" onclick="buyItem('${v.item_id}')" title="Acheter">Acheter</button>
+	</li>`).join('');
+}
+
 async function openSellPanel() {
 	try {
 		const res  = await fetch('api/marchand/quotes');
@@ -2241,6 +2266,7 @@ async function openSellPanel() {
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 		updatePurse(data.purse);
 		renderSellList(data);
+		renderBuyList(data);
 		document.getElementById('game-container').classList.add('panel-hidden');
 		document.getElementById('sell-panel').classList.remove('panel-hidden');
 		window.scrollTo({ top: 0, behavior: 'instant' });
@@ -2264,8 +2290,25 @@ async function sellItem(index, itemId) {
 		_applyInventoryPayload(data);
 		updatePurse(data.purse);
 		renderSellList(data);
-		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')');
+		renderBuyList(data);
+		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')' + dealNote(data.marchandage));
 	} catch(err) { console.error('Erreur vente', err); }
+}
+
+async function buyItem(itemId) {
+	try {
+		const res  = await fetch('api/buy_item', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({item_id: itemId})
+		});
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		_applyInventoryPayload(data);
+		updatePurse(data.purse);
+		renderSellList(data);
+		renderBuyList(data);
+		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')' + dealNote(data.marchandage));
+	} catch(err) { console.error('Erreur achat', err); }
 }
 </script>
 </body>

@@ -62,6 +62,7 @@ class CharacterDocument(BaseModel):
         "anneau_1":     None,
         "anneau_2":     None,
         "cou":          None,
+        "ceinture":     None,
     })
 
     # Bonus cumulés de l'équipement (mis à jour quand on équipe/déséquipe)

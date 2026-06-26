@@ -12,9 +12,13 @@ from utils.auth import get_current_user, create_access_token
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
 	recompute_equipment_bonus, carried_weight, charge_max_of,
-	item_ref_id, resolve_item_ref,
+	item_ref_id, item_ref_weight, resolve_item_ref,
 	money_to_cuivre, cuivre_to_purse, credit_character,
 	lieu_buys, item_sale_price_cuivre,
+)
+from utils.marche import (
+	debit_character, merchant_cha, prix_range_cuivre, marchander,
+	convertir_apres_achat, resolve_stock_vente,
 )
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
@@ -716,8 +720,15 @@ async def marchand_quotes(
 	return {
 		"lieu_label": (lieu_doc or {}).get("label"),
 		"vendables": _marchand_vendables(character, lieu_doc),
+		"achetables": resolve_stock_vente(lieu_doc),
+		"cha_marchand": merchant_cha(lieu_doc),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 	}
+
+
+def _player_cha(character: dict) -> int:
+	"""Cha courant du personnage (échelle ×10), 0 si absent."""
+	return int((character.get("caracteristiques_current") or {}).get("Cha", 0) or 0)
 
 
 @user_router.post("/sell_item")
@@ -743,17 +754,76 @@ async def sell_item(
 		# On a `pop` la ref mais on raise avant tout save_doc : sans effet sur le doc.
 		raise HTTPException(status_code=422, detail="Le marchand n'achète pas cet objet")
 
-	prix_cuivre = item_sale_price_cuivre(item, ref)
-	purse = credit_character(character, prix_cuivre)
+	# Marchandage : prix interpolé entre min et max selon le jet Cha joueur vs marchand.
+	pmin, pmax = prix_range_cuivre(item, ref)
+	deal = marchander(pmin, pmax, _player_cha(character), merchant_cha(lieu_doc), "vente")
+	purse = credit_character(character, deal["prix"])
 	character["inventaire"] = inventaire
 
+	# Le lieu absorbe l'objet acheté → matières → stock vendable (mute lieu_doc).
+	convertir_apres_achat(lieu_doc, item)
+
+	# Le personnage (monnaie + inventaire) est l'état autoritatif : on le persiste d'abord.
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	save_doc(lieu_doc)  # best-effort : le stock du lieu est une commodité monde
 
 	payload = _inventory_payload(character)
 	payload["purse"] = purse
 	payload["vendables"] = _marchand_vendables(character, lieu_doc)
-	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix_cuivre)}
+	payload["achetables"] = resolve_stock_vente(lieu_doc)
+	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(deal["prix"])}
+	payload["marchandage"] = deal
+	return payload
+
+
+@user_router.post("/buy_item")
+async def buy_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Achète un objet du stock de vente du lieu courant. Marchandage à l'achat (le
+	joueur veut le prix le plus bas). Refus si fonds insuffisants ou surcharge."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	lieu_doc = _current_lieu_doc(character) or {}
+	item_id = body.get("item_id")
+	stock_vente = lieu_doc.get("stock_vente", [])
+	entry = next((e for e in stock_vente if e.get("item_id") == item_id and int(e.get("qty", 0)) > 0), None)
+	if entry is None:
+		raise HTTPException(status_code=422, detail="Objet indisponible à la vente ici")
+
+	item = resolve_item_ref(item_id)
+	if not item:
+		raise HTTPException(status_code=422, detail="Objet introuvable")
+
+	pmin, pmax = prix_range_cuivre(item, item_id)
+	deal = marchander(pmin, pmax, _player_cha(character), merchant_cha(lieu_doc), "achat")
+
+	if carried_weight(character) + item_ref_weight(item_id) > charge_max_of(character):
+		raise HTTPException(status_code=422, detail="Trop chargé pour porter cet objet")
+
+	purse = debit_character(character, deal["prix"])
+	if purse is None:
+		raise HTTPException(status_code=422, detail="Fonds insuffisants")
+
+	# Décrément du stock du lieu + ajout à l'inventaire (ref chaîne = poids min de l'item).
+	entry["qty"] = int(entry.get("qty", 0)) - 1
+	lieu_doc["stock_vente"] = [e for e in stock_vente if int(e.get("qty", 0)) > 0]
+	character.setdefault("inventaire", []).append(item_id)
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	save_doc(lieu_doc)  # best-effort : décrément du stock monde
+
+	payload = _inventory_payload(character)
+	payload["purse"] = purse
+	payload["vendables"] = _marchand_vendables(character, lieu_doc)
+	payload["achetables"] = resolve_stock_vente(lieu_doc)
+	payload["achete"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(deal["prix"])}
+	payload["marchandage"] = deal
 	return payload
 
 

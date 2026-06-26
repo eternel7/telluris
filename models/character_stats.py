@@ -50,6 +50,50 @@ MULT_RARETE: dict[str, float] = {
 # Quelles sous-catégories d'item chaque catégorie de lieu (marchand) achète au personnage.
 ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {"boucherie": ["carcasse"]}
 
+# ── Marchandage ─────────────────────────────────────────────────────────────────
+# Le prix d'une transaction est interpolé entre le min et le max de l'objet
+# (`valeur` à deux bornes, sinon min dérivé et max = min × PRIX_MAX_FACTEUR). Le
+# marchandage est un jet opposé Cha joueur vs Cha marchand. Le Cha du marchand vient
+# de CHA_MARCHAND_PAR_CATEGORIE[lieu.categorie], sinon du global CHA_MARCHAND (un
+# champ `cha` posé sur le doc lieu le supplante).
+CHA_MARCHAND: int = 50
+CHA_MARCHAND_PAR_CATEGORIE: dict[str, int] = {}
+PRIX_MAX_FACTEUR: float = 3.0
+
+# ── Dépeçage des carcasses (boucherie) ──────────────────────────────────────────
+# Une carcasse vendue à une boucherie est décomposée en matières premières selon les
+# `tags` de son espèce. Table tunable tag → matières produites (un sous-cat répété
+# = quantité ; on prend le MAX par sous-cat entre sources, pas la somme, pour ne pas
+# gonfler). `_charnu_base` s'applique à toute créature charnue (ni esprit/incorporel,
+# ni construct/elementaire, ni mort-vivant). Les morts-vivants n'utilisent que leurs
+# propres entrées (os). Garde : `plumes` retiré si l'espèce est `draconique`.
+DEPECAGE_TAGS: dict[str, list] = {
+	"_charnu_base":  ["viande", "viande", "os", "sang", "graisse"],
+	"animal":        ["cuir", "crocs", "poils"],
+	"monstre":       ["cuir", "crocs"],
+	"humanoide":     ["cuir"],
+	"monture":       ["cuir", "crins", "tendons"],
+	"bete_de_somme": ["cuir", "crins"],
+	"draconique":    ["cuir", "crocs", "griffes", "tendons", "coeur"],
+	"reptile":       ["cuir", "crocs"],
+	"demon":         ["cuir", "crocs", "griffes", "coeur"],
+	"infernal":      ["griffes", "coeur"],
+	"celeste":       ["griffes", "coeur"],
+	"ange":          ["plumes", "coeur"],
+	"vol":           ["plumes", "griffes"],
+	"venin":         ["crocs"],
+	"foret":         ["poils"],
+	"froid":         ["poils"],
+	"geant":         ["tendons", "boyaux", "foie", "crane"],
+	"grande_taille": ["boyaux"],
+	"boss":          ["coeur", "yeux", "crane"],
+	"legendaire":    ["coeur", "foie", "yeux"],
+	"magique":       ["yeux"],
+	"petrification": ["yeux"],
+	"undead":        ["os", "os", "crane"],
+	"non_mort":      ["os", "os"],
+}
+
 
 def current_world_variables() -> dict:
 	"""Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
@@ -63,6 +107,10 @@ def current_world_variables() -> dict:
 		"PRIX_DERIVE_BASE": PRIX_DERIVE_BASE,
 		"MULT_RARETE": dict(MULT_RARETE),
 		"ACHAT_SOUS_CAT_PAR_LIEU": {k: list(v) for k, v in ACHAT_SOUS_CAT_PAR_LIEU.items()},
+		"CHA_MARCHAND": CHA_MARCHAND,
+		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
+		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
+		"DEPECAGE_TAGS": {k: list(v) for k, v in DEPECAGE_TAGS.items()},
 	}
 
 
@@ -83,6 +131,7 @@ def load_world_variables() -> dict:
 	Retourne le snapshot effectif.
 	"""
 	global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
+	global CHA_MARCHAND, PRIX_MAX_FACTEUR
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
 		doc = get_doc(WORLD_VARIABLES_DOC_ID)
@@ -108,6 +157,15 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("ACHAT_SOUS_CAT_PAR_LIEU"), dict):
 		ACHAT_SOUS_CAT_PAR_LIEU.clear()
 		ACHAT_SOUS_CAT_PAR_LIEU.update({k: list(x) for k, x in v["ACHAT_SOUS_CAT_PAR_LIEU"].items()})
+
+	CHA_MARCHAND     = int(v.get("CHA_MARCHAND", CHA_MARCHAND))
+	PRIX_MAX_FACTEUR = float(v.get("PRIX_MAX_FACTEUR", PRIX_MAX_FACTEUR))
+	if isinstance(v.get("CHA_MARCHAND_PAR_CATEGORIE"), dict):
+		CHA_MARCHAND_PAR_CATEGORIE.clear()
+		CHA_MARCHAND_PAR_CATEGORIE.update({k: int(x) for k, x in v["CHA_MARCHAND_PAR_CATEGORIE"].items()})
+	if isinstance(v.get("DEPECAGE_TAGS"), dict):
+		DEPECAGE_TAGS.clear()
+		DEPECAGE_TAGS.update({k: list(x) for k, x in v["DEPECAGE_TAGS"].items()})
 
 	return current_world_variables()
 
