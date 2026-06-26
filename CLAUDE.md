@@ -83,6 +83,9 @@ Connections between locations are fetched via a CouchDB design view `reseau/lien
 ### Template CSS structure
 `home_telluris.html` and `auth_telluris.html` use `{% include "part-*-css.html" %}` for shared styles. `play_town_telluris.html` has all CSS inlined directly and does not use the partials.
 
+### Écran de combat — carte isométrique (`combat_telluris.html`)
+La carte de combat utilise une **projection isométrique** (clip-path trapézoïdal généré par `buildViewportClipPath`, échelle `--step`, joueur fixe en bas-centre, monde qui pivote). **Tout le placement des tokens et la caméra en dépendent** : `renderTokens`/`updateCamera`/`worldToScreen`/`rot`/`dirAvailable`. Le handoff de design `Combat HTML file/design_handoff_combat/` propose un **sol en perspective** (`perspective()/rotateX()`) — **non adopté volontairement** (le faire = réécrire toute cette math). La passe visuelle « Refined Classic » (2026-06-25) n'a touché que la présentation : flou retiré au profit d'une **vignette** `::after` (clippée par la même forme iso), thème cuir/or via les tokens `:root`, pilule d'initiative au-dessus de la carte. Bord des tokens monstres laissé **rouge** car le **doré** signale l'adjacence (cible attaquable) — ne pas le passer en or par défaut.
+
 ### Authentication
 `get_current_user()` reads an `auth_token` HTTP-only cookie, decodes the JWT, and returns the full user document from CouchDB (password field stripped). Routes that require auth declare `current_user: Annotated[User, Depends(get_current_user)]`. Admin-only routes additionally check `current_user["admin"] == 1`.
 

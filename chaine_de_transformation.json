@@ -1,0 +1,100 @@
+{
+  "chaines_de_transformation": [
+    { "matiere_premiere": "Cuir", "lieu": "Maroquinerie", "objet_final": "Sac" },
+    { "matiere_premiere": "Cuir", "lieu": "Maroquinerie", "objet_final": "Ceinture" },
+    { "matiere_premiere": "Cuir", "lieu": "Maroquinerie", "objet_final": "Gants" },
+
+    { "matiere_premiere": "Cuir", "lieu": "Cordonnerie", "objet_final": "Bottes" },
+
+    { "matiere_premiere": "Cuir", "lieu": "Bourrellerie", "objet_final": "Harnais" },
+    { "matiere_premiere": "Cuir", "lieu": "Bourrellerie", "objet_final": "Outres" },
+
+    { "matiere_premiere": "Cuir", "lieu": "Armurerie", "objet_final": "Armure de cuir" },
+    { "matiere_premiere": "Cuir", "lieu": "Armurerie", "objet_final": "Fourreau" },
+
+    { "matiere_premiere": "Viande", "lieu": "Cuisine", "objet_final": "Repas cuisiné" },
+    { "matiere_premiere": "Viande", "lieu": "Fumoir", "objet_final": "Viande fumée" },
+    { "matiere_premiere": "Viande", "lieu": "Salaison", "objet_final": "Viande séchée" },
+    { "matiere_premiere": "Viande", "lieu": "Salaison", "objet_final": "Saucisses" },
+
+    { "matiere_premiere": "Sang", "lieu": "Laboratoire d'alchimie", "objet_final": "Potion" },
+    { "matiere_premiere": "Sang", "lieu": "Laboratoire d'alchimie", "objet_final": "Composant rituel" },
+    { "matiere_premiere": "Sang", "lieu": "Scriptorium", "objet_final": "Encre" },
+    { "matiere_premiere": "Sang", "lieu": "Scriptorium", "objet_final": "Pigment" },
+
+    { "matiere_premiere": "Graisse", "lieu": "Savonnerie", "objet_final": "Savon" },
+    { "matiere_premiere": "Graisse", "lieu": "Atelier de cirier", "objet_final": "Bougie" },
+    { "matiere_premiere": "Graisse", "lieu": "Apothicairerie", "objet_final": "Huile" },
+    { "matiere_premiere": "Graisse", "lieu": "Apothicairerie", "objet_final": "Onguent" },
+
+    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Manche" },
+    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Aiguille" },
+    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Peigne" },
+    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Dé" },
+    { "matiere_premiere": "Os", "lieu": "Tabletterie", "objet_final": "Flûte" },
+
+    { "matiere_premiere": "Os", "lieu": "Atelier d'artisan", "objet_final": "Bijou" },
+    { "matiere_premiere": "Os", "lieu": "Atelier d'artisan", "objet_final": "Poudre d'os" },
+
+    { "matiere_premiere": "Poudre d'os", "lieu": "Laboratoire d'alchimie", "objet_final": "Réactif alchimique" },
+    { "matiere_premiere": "Poudre d'os", "lieu": "Jardinier", "objet_final": "Engrais" },
+
+    { "matiere_premiere": "Crins", "lieu": "Corderie", "objet_final": "Corde" },
+    { "matiere_premiere": "Crins", "lieu": "Corderie", "objet_final": "Filet" },
+    { "matiere_premiere": "Crins", "lieu": "Brosserie", "objet_final": "Brosse" },
+    { "matiere_premiere": "Crins", "lieu": "Brosserie", "objet_final": "Pinceau" },
+
+    { "matiere_premiere": "Poils", "lieu": "Brosserie", "objet_final": "Brosse" },
+    { "matiere_premiere": "Poils", "lieu": "Brosserie", "objet_final": "Pinceau" },
+    { "matiere_premiere": "Poils", "lieu": "Tissage", "objet_final": "Feutre" },
+    { "matiere_premiere": "Poils", "lieu": "Tissage", "objet_final": "Rembourrage" },
+
+    { "matiere_premiere": "Plumes", "lieu": "Plumasserie", "objet_final": "Parure" },
+    { "matiere_premiere": "Plumes", "lieu": "Plumasserie", "objet_final": "Oreiller" },
+    { "matiere_premiere": "Plumes", "lieu": "Scriptorium", "objet_final": "Plume à écrire" },
+    { "matiere_premiere": "Plumes", "lieu": "Atelier de l'empenneur", "objet_final": "Empennage de flèches" },
+
+    { "matiere_premiere": "Boyaux", "lieu": "Boyauderie", "objet_final": "Boyaux pour saucisses" },
+    { "matiere_premiere": "Boyaux", "lieu": "Fletcher", "objet_final": "Cordes d'arc" },
+    { "matiere_premiere": "Boyaux", "lieu": "Lutherie", "objet_final": "Cordes d'instrument" },
+
+    { "matiere_premiere": "Tendons", "lieu": "Fletcher", "objet_final": "Cordes d'arc" },
+    { "matiere_premiere": "Tendons", "lieu": "Armurerie", "objet_final": "Ligatures" },
+    { "matiere_premiere": "Tendons", "lieu": "Cordonnerie", "objet_final": "Fil résistant" },
+
+    { "matiere_premiere": "Griffes", "lieu": "Bijouterie", "objet_final": "Amulette" },
+    { "matiere_premiere": "Griffes", "lieu": "Bijouterie", "objet_final": "Talisman" },
+    { "matiere_premiere": "Griffes", "lieu": "Laboratoire d'alchimie", "objet_final": "Poudre alchimique" },
+
+    { "matiere_premiere": "Crocs", "lieu": "Bijouterie", "objet_final": "Collier" },
+    { "matiere_premiere": "Crocs", "lieu": "Bijouterie", "objet_final": "Talisman" },
+    { "matiere_premiere": "Crocs", "lieu": "Tabletterie", "objet_final": "Dague rituelle" },
+
+    { "matiere_premiere": "Yeux", "lieu": "Laboratoire d'alchimie", "objet_final": "Potion de vision" },
+    { "matiere_premiere": "Yeux", "lieu": "Laboratoire d'alchimie", "objet_final": "Réactif magique" },
+
+    { "matiere_premiere": "Foie", "lieu": "Cuisine", "objet_final": "Plat raffiné" },
+    { "matiere_premiere": "Foie", "lieu": "Apothicairerie", "objet_final": "Remède" },
+
+    { "matiere_premiere": "Cœur", "lieu": "Cuisine", "objet_final": "Mets rare" },
+    { "matiere_premiere": "Cœur", "lieu": "Laboratoire d'alchimie", "objet_final": "Catalyseur magique" },
+
+    { "matiere_premiere": "Crâne", "lieu": "Taxidermie", "objet_final": "Trophée" },
+    { "matiere_premiere": "Crâne", "lieu": "Nécromancie", "objet_final": "Relique" },
+    { "matiere_premiere": "Crâne", "lieu": "Nécromancie", "objet_final": "Focus magique" }
+  ]
+}
+
+
+
+{
+  "matiere_premiere": "Cuir",
+  "quantite_matiere": 2,
+  "lieu": "Maroquinerie",
+  "niveau_metier": 15,
+  "temps": 180,
+  "outil": "Alêne",
+  "objet_final": "Sac",
+  "quantite_produite": 1,
+  "chance_reussite": 100
+}
