@@ -33,7 +33,8 @@ def get_lieu_links(current_user: dict = Body(...)):
 			doc.pop("_rev",None)
 			doc.pop("_id",None)
 			node["details"] = doc
-						
+			node["details"]["label"] = node.get("label") or doc.get("label")
+			
 	return connections
 	
 # [bit, dx, dy, opposé]
