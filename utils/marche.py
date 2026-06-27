@@ -81,6 +81,7 @@ def marchander(pmin: int, pmax: int, cha_joueur: int, cha_marchand: int, sens: s
 	prix = int(round(pmin + (pmax - pmin) * frac))
 	return {
 		"prix": max(1, prix),
+		"frac": frac,   # position dans la fourchette → rejouée contre le poids de chaque instance
 		"roll": roll,
 		"seuil": seuil,
 		"succes": roll <= seuil,
@@ -115,17 +116,33 @@ def prix_base_cuivre(pmin: int, pmax: int, relation: int, sens: str) -> int:
 	return max(1, int(round(prix)))
 
 
-def prix_negocie(relation_doc: dict, item_id: str, sens: str):
-	"""Prix négocié persistant pour (item, sens) s'il existe, sinon None (en cuivre)."""
+def prix_negocie(relation_doc: dict, item_id: str, sens: str, pmin: int, pmax: int):
+	"""Prix négocié persistant pour (item, sens) résolu en cuivre contre la fourchette de
+	CETTE instance, sinon None.
+
+	Le marchandage persiste une **fraction** de la fourchette (`{"frac": t}`) et non un
+	montant fixe : le prix est recalculé `pmin + (pmax−pmin)·frac` contre `pmin`/`pmax`,
+	qui dépendent du poids de l'objet → deux exemplaires de même item_id mais de poids
+	différents gardent des prix distincts après marchandage (le facteur poids reste
+	appliqué). Rétro-compat : un montant scalaire stocké (ancien format) est renvoyé tel
+	quel (montant absolu)."""
 	pn = (relation_doc or {}).get("prix_negocies") or {}
 	val = (pn.get(item_id) or {}).get(sens)
-	return int(val) if isinstance(val, (int, float)) else None
+	if isinstance(val, dict):
+		frac = val.get("frac")
+		if isinstance(frac, (int, float)) and not isinstance(frac, bool):
+			pmin, pmax = int(pmin), int(max(pmin, pmax))
+			return max(1, int(round(pmin + (pmax - pmin) * float(frac))))
+		return None
+	if isinstance(val, (int, float)) and not isinstance(val, bool):
+		return max(1, int(val))  # legacy : montant absolu persisté avant le passage en fraction
+	return None
 
 
 def prix_courant(relation_doc: dict, item_id: str, pmin: int, pmax: int, sens: str) -> int:
 	"""Prix appliqué à une transaction : prix négocié stocké s'il existe, sinon prix de
 	base pondéré relation. Source unique de vérité du prix (listes + vente/achat)."""
-	neg = prix_negocie(relation_doc, item_id, sens)
+	neg = prix_negocie(relation_doc, item_id, sens, pmin, pmax)
 	if neg is not None:
 		return max(1, neg)
 	return prix_base_cuivre(pmin, pmax, relation_value(relation_doc), sens)
@@ -193,7 +210,14 @@ def appliquer_marchandage(relation_doc: dict, item_id: str, sens: str, deal: dic
 	neg = None
 	if deal.get("succes"):
 		pn = relation_doc.setdefault("prix_negocies", {})
-		pn.setdefault(item_id, {})[sens] = int(deal["prix"])
+		# On persiste la FRACTION de la fourchette (rejouée contre le poids de chaque
+		# instance), pas le montant fixe — sinon deux exemplaires de poids différents
+		# auraient le même prix. Repli sur l'absolu si un deal n'expose pas de frac.
+		frac = deal.get("frac")
+		if isinstance(frac, (int, float)) and not isinstance(frac, bool):
+			pn.setdefault(item_id, {})[sens] = {"frac": float(frac)}
+		else:
+			pn.setdefault(item_id, {})[sens] = int(deal["prix"])
 		neg = int(deal["prix"])
 
 	return {

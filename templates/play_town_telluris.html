@@ -414,6 +414,9 @@
 			bottom: auto;
 		}
 		/* PANNEAU VENTE (marchand) */
+		#purse {
+			margin-left: auto;
+		}
 		#sell-panel {
 			display: flex;
 			flex-direction: column;
@@ -429,9 +432,10 @@
 		#sell-panel h2 { margin: 0; }
 		#sell-list .sh-inv-item:last-child { border-bottom: none; }
 		.sell-prix { font-weight: bold; color: var(--accent-color); white-space: nowrap; }
-		.sell-range { font-size: .78em; opacity: .6; white-space: nowrap; margin-left: 4px; }
 		.sell-empty { opacity: .7; padding: 12px 0; }
 		.sell-relation {
+			display: flex;
+			align-items: center;
 			font-weight: bold;
 			padding: 4px 12px;
 			border: 2px solid var(--accent-color);
@@ -1418,10 +1422,12 @@
 			<button class="sheet-tab-btn  close-sheet-btn" style="" onclick="closeSellPanel()" role="button">✕ Fermer</button>
 		</div>
 		<div class="sh-finance-row">
-			<div class="sh-finance">🟡 <span class="amt" id="sell-amt-or">0</span> Or</div>
-			<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">0</span> Argent</div>
-			<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
 			<div class="sell-relation" id="sell-relation">🤝 Relation : —</div>
+			<div id="purse">
+				<div class="sh-finance">🟡 <span class="amt" id="sell-amt-or">0</span> Or</div>
+				<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">0</span> Argent</div>
+				<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
+			</div>
 		</div>
 		<h2 style="margin:.6rem 0 0">🏷️ Vente</h2>
 		<ul id="sell-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
@@ -2291,7 +2297,6 @@ function renderSellList(data) {
 		<span style="flex:1">${v.nom || '—'}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
-		<span class="sell-range">(${formatPrix(v.prix_min_purse)}–${formatPrix(v.prix_max_purse)})</span>
 		<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}')" title="Vendre">Vendre</button>
 		${marchBtn(v.index, v.item_id, 'vente')}
 	</li>`).join('');
@@ -2310,7 +2315,6 @@ function renderBuyList(data) {
 		<span style="flex:1">${v.nom || '—'} ×${v.qty}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
-		<span class="sell-range">(${formatPrix(v.prix_min_purse)}–${formatPrix(v.prix_max_purse)})</span>
 		<button class="sh-drop-btn" onclick="buyItem('${v.item_id}')" title="Acheter">Acheter</button>
 		${marchBtn(null, v.item_id, 'achat')}
 	</li>`).join('');
