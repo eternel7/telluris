@@ -70,6 +70,10 @@ def get_final_mask(nav, x, y):
 # (dx, dy) → bit de direction (dérivé de VALID_MOVES).
 _DIR_BIT = {(dx, dy): bit for bit, dx, dy, _op in VALID_MOVES}
 
+# Offsets (dx, dy) des 8 directions de déplacement, dérivés de VALID_MOVES.
+# Source unique partagée par la nav joueur, l'A* et le flood fill de combat.
+MOVE_OFFSETS = [(dx, dy) for _bit, dx, dy, _op in VALID_MOVES]
+
 def nav_allows(nav, x, y, dx, dy):
 	"""La direction (dx, dy) depuis (x, y) est-elle autorisée par le masque nav ?
 

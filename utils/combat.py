@@ -6,7 +6,7 @@ from db.config import get_doc, save_doc, find_docs
 from models.character_stats import (
 	BaseStats, compute_derived_stats
 )
-from utils.lieux import nav_allows
+from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import grant_xp, recompute_equipment_bonus, carried_weight, poids_bounds, item_ref_id
 
 BATTLE_MAPS = [
@@ -103,18 +103,20 @@ def _reset_turn_budget(actor: dict) -> None:
 
 def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
 			   nav: dict | None = None) -> list | None:
-	"""A* 4-directions (heuristique Manhattan). Porté du prototype client.
+	"""A* 8-directions (heuristique Chebyshev). Porté du prototype client.
 
-	Bloque les cases non praticables (`cells <= 0`), celles de `blocked` (sauf la case
-	d'arrivée, qui peut être occupée par la cible) et les directions interdites par
-	`nav` (mêmes restrictions que le joueur / play_town).
+	Mêmes règles que le déplacement du joueur : un pas est valide s'il vise une case
+	dans la grille, praticable (`cells >= 1`), non `blocked` (sauf la case d'arrivée,
+	occupable par la cible) et autorisé par `nav` (masques de la carte, diagonales
+	incluses). Les diagonales coûtant 1 case, l'heuristique est la distance de
+	Chebyshev (admissible) plutôt que Manhattan.
 	Retourne la liste [(x,y), ...] de start à goal inclus, ou None.
 	"""
 	nav = nav or {}
 	w, h = dims["x"], dims["y"]
 	sx, sy = start
 	gx, gy = goal
-	start_node = {"x": sx, "y": sy, "g": 0, "h": abs(gx - sx) + abs(gy - sy), "parent": None}
+	start_node = {"x": sx, "y": sy, "g": 0, "h": max(abs(gx - sx), abs(gy - sy)), "parent": None}
 	start_node["f"] = start_node["h"]
 	open_list = [start_node]
 	closed = set()
@@ -130,7 +132,7 @@ def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
 				node = node["parent"]
 			return path[::-1]
 		closed.add((cur["x"], cur["y"]))
-		for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+		for dx, dy in MOVE_OFFSETS:
 			nx, ny = cur["x"] + dx, cur["y"] + dy
 			if nx < 0 or nx >= w or ny < 0 or ny >= h:
 				continue
@@ -146,7 +148,7 @@ def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
 			g = cur["g"] + 1
 			existing = next((n for n in open_list if n["x"] == nx and n["y"] == ny), None)
 			if existing is None:
-				node = {"x": nx, "y": ny, "g": g, "h": abs(gx - nx) + abs(gy - ny), "parent": cur}
+				node = {"x": nx, "y": ny, "g": g, "h": max(abs(gx - nx), abs(gy - ny)), "parent": cur}
 				node["f"] = node["g"] + node["h"]
 				open_list.append(node)
 			elif g < existing["g"]:
@@ -197,7 +199,7 @@ def _is_type1(cells: list, x: int, y: int) -> bool:
 def _reachable_region(cells: list, dims: dict, nav: dict, start: tuple) -> set:
 	"""Toutes les cases praticables (>=1) atteignables depuis `start`.
 
-	Flood fill 4-directions respectant `nav` — mêmes restrictions que l'A* de
+	Flood fill 8-directions respectant `nav` — mêmes règles que l'A* de
 	déplacement, donc cette région == l'ensemble des cases que l'A* sait joindre.
 	"""
 	sx, sy = start
@@ -208,7 +210,7 @@ def _reachable_region(cells: list, dims: dict, nav: dict, start: tuple) -> set:
 	stack = [(sx, sy)]
 	while stack:
 		x, y = stack.pop()
-		for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+		for dx, dy in MOVE_OFFSETS:
 			nx, ny = x + dx, y + dy
 			if (nx, ny) in seen or nx < 0 or nx >= w or ny < 0 or ny >= h:
 				continue
