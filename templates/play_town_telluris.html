@@ -2397,11 +2397,22 @@ function renderBuyList(data) {
 	</li>`).join('');
 }
 
-function marchToast(d) {
+// Prix RÉELLEMENT appliqué après marchandage = celui affiché dans la liste re-rendue
+// (`prix_marche` = négocié × facteur_stock, re-clampé), et non le prix de bande `prix_negocie`
+// renvoyé par l'endpoint (qui ignore l'offre/demande) → le toast doit refléter la liste.
+function _appliedMarchPrice(data, index, itemId, sens) {
+	const list = sens === 'vente' ? (data.vendables || []) : (data.achetables || []);
+	let e = null;
+	if (sens === 'vente') e = list.find(v => v.index === index && v.item_id === itemId) || list.find(v => v.item_id === itemId);
+	else                  e = list.find(v => v.item_id === itemId);
+	return e ? e.prix : null;
+}
+
+function marchToast(d, applied) {
 	const deal = d.deal || {};
 	if (d.crit === 'reussite') return 'Marchandage brillant ! Relation +1 (désormais ' + d.relation + ').';
 	if (d.crit === 'echec')    return 'Marchandage désastreux ! Relation −1 (désormais ' + d.relation + '). Le marchand refuse de négocier pendant 1 h.';
-	if (deal.succes)           return 'Marchandage réussi 🤝' + (d.prix_negocie ? ' — nouveau prix : ' + formatPrix(d.prix_negocie) : '');
+	if (deal.succes)           return 'Marchandage réussi 🤝' + (applied ? ' — nouveau prix : ' + formatPrix(applied) : '');
 	return 'Marchandage raté — prix inchangé.';
 }
 
@@ -2418,7 +2429,7 @@ async function marchanderItem(index, itemId, sens) {
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
-		showToast(marchToast(data));
+		showToast(marchToast(data, _appliedMarchPrice(data, index, itemId, sens)));
 	} catch(err) { console.error('Erreur marchandage', err); }
 }
 
