@@ -134,23 +134,75 @@ def admin_home(request: Request, current_user: Annotated[User, Depends(get_curre
 		context={"title": "Administration"}
 	)
 
+def _distinct_doc_types() -> list:
+	"""Types de documents réellement présents en base (user:* exclus, comme le dump).
+	Partagé par /admin/exports et /admin/table (liste de sélection)."""
+	return sorted({
+		d["type"] for d in dump_all_docs()
+		if isinstance(d, dict) and d.get("type")
+		and not str(d.get("_id", "")).startswith("user:")
+	})
+
 @app.get("/admin/exports", response_class=HTMLResponse)
 def admin_exports(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	redirect = _require_admin_page(request, current_user)
 	if redirect:
 		return redirect
-	# Types de documents réellement présents en base (pour la liste à saisie libre de
-	# l'export par type). On exclut les user:* (cohérent avec le dump complet).
-	doc_types = sorted({
-		d["type"] for d in dump_all_docs()
-		if isinstance(d, dict) and d.get("type")
-		and not str(d.get("_id", "")).startswith("user:")
-	})
 	return templates.TemplateResponse(
 		request=request,
 		name="admin_exports.html",
-		context={"title": "Exports", "doc_types": doc_types}
+		context={"title": "Exports", "doc_types": _distinct_doc_types()}
 	)
+
+@app.get("/admin/table", response_class=HTMLResponse)
+def admin_table(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Écran « Mise à jour en tableau » : visualisation tabulaire des docs CouchDB par type,
+	avec édition du JSON d'un élément."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_table.html",
+		context={"title": "Mise à jour en tableau", "doc_types": _distinct_doc_types()}
+	)
+
+@app.get("/admin/table/data")
+def admin_table_data(
+	current_user: Annotated[User, Depends(get_current_user)],
+	doc_type: str = Query("", alias="type"),
+):
+	"""Documents d'un type (JSON simple pour l'UI tableau ; user:* exclus)."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	t = (doc_type or "").strip()
+	if not t:
+		raise HTTPException(status_code=400, detail="Paramètre 'type' requis")
+	docs = [d for d in (find_docs({"type": t}) or [])
+			if not str(d.get("_id", "")).startswith("user:")]
+	return {"type": t, "docs": docs}
+
+@app.put("/admin/doc")
+def admin_update_doc(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: dict = Body(...),
+):
+	"""Met à jour (ou crée) un document depuis le JSON édité dans l'écran tableau.
+	Réattache le `_rev` courant de la base (anti-conflit) avant l'écriture."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	doc_id = payload.get("_id")
+	if not doc_id:
+		raise HTTPException(status_code=400, detail="Champ '_id' requis.")
+	existing = get_doc(doc_id)
+	if existing and existing.get("_rev"):
+		payload["_rev"] = existing["_rev"]   # _rev courant → évite le conflit d'écriture
+	elif "_rev" in payload and not existing:
+		payload.pop("_rev")                  # doc absent en base → création (pas de _rev)
+	saved = save_doc(payload)
+	if saved is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — rechargez et réessayez.")
+	return {"saved": True, "doc": payload}
 
 @app.get("/admin/exports/bestiaire")
 def admin_export_bestiaire(request: Request, current_user: Annotated[User, Depends(get_current_user)]):

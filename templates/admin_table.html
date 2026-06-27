@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--danger: #c84b4b;
+			--success: #4bc87a;
+			--text: #fff;
+			--muted: #9aa3b2;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		.main { width: 100%; max-width: none; padding: 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-title {
+			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		code { color: var(--accent2); }
+
+		.type-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+		.type-input {
+			flex: 1 1 200px; min-width: 160px;
+			padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text);
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+		}
+		.type-input:focus { outline: none; border-color: var(--accent); }
+
+		.btn, .dl-btn {
+			display: inline-flex; align-items: center; gap: 8px;
+			padding: 10px 18px; border-radius: 6px;
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+			text-decoration: none; cursor: pointer; transition: all 0.2s;
+			border: 1px solid var(--accent); background: rgba(200,168,75,0.1); color: var(--accent);
+		}
+		.btn:hover, .dl-btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+		.btn.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
+		.btn.secondary:hover { background: rgba(75,143,200,0.22); box-shadow: 0 0 12px rgba(75,143,200,0.25); }
+
+		.status { font-size: 0.78rem; margin-top: 12px; min-height: 1.2em; color: var(--muted); }
+		.status.ok { color: var(--success); }
+		.status.err { color: var(--danger); }
+
+		textarea {
+			width: 100%; min-height: 320px; resize: vertical;
+			background: #0d0f14; border: 1px solid var(--border); border-radius: 6px;
+			color: var(--text); font-family: 'Share Tech Mono', monospace;
+			font-size: 0.8rem; line-height: 1.5; padding: 12px; outline: none;
+			transition: border-color 0.2s;
+		}
+		textarea:focus { border-color: var(--accent); }
+		textarea.invalid { border-color: var(--danger); }
+		.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+		/* Choix des colonnes (glisser-déposer pour réordonner) */
+		.cols { display: flex; flex-wrap: wrap; gap: 8px; }
+		.cols-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 10px; }
+		.col-item {
+			display: inline-flex; align-items: center; gap: 6px;
+			padding: 3px 9px; border: 1px solid var(--border); border-radius: 6px;
+			background: #0f131b; transition: border-color 0.15s, opacity 0.15s;
+		}
+		.col-item.dragging { opacity: 0.4; }
+		.col-item.dragover { border-color: var(--accent); box-shadow: 0 0 8px rgba(200,168,75,0.3); }
+		.col-item label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); cursor: pointer; }
+		.col-item input { accent-color: var(--accent); }
+		.drag-handle { cursor: grab; color: var(--muted); font-size: 0.9rem; }
+		.drag-handle:active { cursor: grabbing; }
+
+		/* Tableau */
+		.table-wrap { overflow: auto; max-height: 60vh; border: 1px solid var(--border); border-radius: 6px; }
+		/* Pleine largeur disponible ; scroll horizontal seulement si les colonnes débordent. */
+		table { border-collapse: collapse; table-layout: fixed; width: max-content; min-width: 100%; font-size: 0.78rem; }
+		thead th {
+			position: sticky; top: 0; background: #11151e; z-index: 1;
+			text-align: left; color: var(--accent); font-weight: normal;
+			padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
+		}
+		.th-label { cursor: pointer; user-select: none; }
+		.th-label:hover { color: var(--text); }
+		/* Poignée de redimensionnement sur le bord droit de l'en-tête. */
+		.col-resizer { position: absolute; top: 0; right: 0; width: 7px; height: 100%; cursor: col-resize; }
+		.col-resizer:hover { background: var(--accent); opacity: 0.5; }
+		thead tr.filters th { position: sticky; top: 33px; background: #0f131b; padding: 4px 6px; }
+		.filter-input {
+			width: 100%; min-width: 90px; padding: 4px 6px; border: 1px solid var(--border);
+			border-radius: 4px; background: var(--bg); color: var(--text);
+			font-family: inherit; font-size: 0.72rem;
+		}
+		.filter-input:focus { outline: none; border-color: var(--accent); }
+		tbody td {
+			padding: 6px 10px; border-bottom: 1px solid #1b212c;
+			max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+		}
+		tbody tr { cursor: pointer; }
+		tbody tr:hover td { background: rgba(75,143,200,0.08); }
+		tbody tr.selected td { background: rgba(200,168,75,0.16); }
+		.muted-cell { color: var(--muted); font-style: italic; }
+		.count { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; }
+
+		/* Éditeur JSON en overlay fixe à droite : le tableau reste scrollable/utilisable dessous. */
+		#editor-card {
+			position: fixed; top: 70px; right: 14px; bottom: 14px;
+			width: min(460px, 94vw); margin: 0; z-index: 60;
+			flex-direction: column; overflow: auto;
+			box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+		}
+		#editor-card textarea { flex: 1 1 auto; min-height: 120px; }
+		.editor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+		.editor-close {
+			background: none; border: none; color: var(--muted);
+			font-size: 1rem; line-height: 1; cursor: pointer; padding: 2px 6px;
+		}
+		.editor-close:hover { color: var(--danger); }
+	</style>
+</head>
+<body>
+	<header><h1>▦ Mise à jour en tableau — administration</h1></header>
+	<div class="main">
+		<!-- Sélection du type (obligatoire) -->
+		<div class="card">
+			<div class="card-title">Type de document</div>
+			<div class="card-desc">
+				Sélectionnez un <code>type</code> pour afficher ses documents. Les <code>user:*</code>
+				sont exclus. Choisir dans la liste ou saisir librement, puis <strong>Charger</strong>.
+			</div>
+			<div class="type-row">
+				<input id="type-input" class="type-input" list="type-list"
+					placeholder="type (ex. espece)" autocomplete="off">
+				<datalist id="type-list">
+					{% for t in doc_types %}<option value="{{ t }}"></option>{% endfor %}
+				</datalist>
+				<button class="dl-btn" type="button" id="load-btn">↻ Charger</button>
+			</div>
+			<div class="status" id="load-status">Sélectionnez un type.</div>
+		</div>
+
+		<!-- Choix des colonnes -->
+		<div class="card" id="cols-card" style="display:none">
+			<div class="card-title">Colonnes</div>
+			<div class="cols-hint">Cochez pour afficher · glissez ⠿ pour réordonner · tirez la poignée droite d'un en-tête pour redimensionner.</div>
+			<div class="cols" id="cols-box"></div>
+		</div>
+
+		<!-- Tableau -->
+		<div class="card" id="table-card" style="display:none">
+			<div class="count" id="row-count"></div>
+			<div class="table-wrap">
+				<table id="data-table">
+					<thead id="data-head"></thead>
+					<tbody id="data-body"></tbody>
+				</table>
+			</div>
+		</div>
+
+		<!-- Éditeur JSON -->
+		<div class="card" id="editor-card" style="display:none">
+			<div class="editor-head">
+				<div class="card-title" style="margin-bottom:0">JSON — <span id="editor-id"></span></div>
+				<button type="button" class="editor-close" id="editor-close" title="Fermer (sans sauvegarder)">✕</button>
+			</div>
+			<div class="card-desc">
+				Éditez puis <strong>Save</strong> (met à jour le document en base) ou
+				<strong>Cancel</strong> (ferme sans sauvegarder). Modifier <code>_id</code>
+				crée un nouveau document.
+			</div>
+			<textarea id="json-editor" spellcheck="false"></textarea>
+			<div class="btn-row">
+				<button class="btn" id="json-save">💾 Save</button>
+				<button class="btn secondary" id="json-cancel">✕ Cancel</button>
+			</div>
+			<div class="status" id="editor-status"></div>
+		</div>
+	</div>
+
+<script>
+// ── État ───────────────────────────────────────────────────────────
+let docs    = [];        // documents chargés
+let columns = [];        // toutes les clés de 1er niveau (_id en tête)
+let visible = [];        // colonnes affichées (sous-ensemble ordonné de columns)
+let sortCol = null, sortDir = 1;   // 1 asc / -1 desc
+let filters = {};        // { colonne: texte }
+let widths  = {};        // { colonne: largeur px } (redimensionnement)
+let dragCol = null;      // colonne en cours de glisser-déposer (réordonnancement)
+let selected = null;     // index dans docs[] de la ligne ouverte dans l'éditeur
+let currentType = null;  // type actuellement chargé (clé de persistance)
+const DEFAULT_W = 150;   // largeur de colonne par défaut (px)
+const LS_KEY = 'telluris.admin_table.v1.';   // préfixe localStorage (par type)
+
+const $ = id => document.getElementById(id);
+
+function setStatus(el, msg, kind) { el.textContent = msg; el.className = 'status' + (kind ? ' ' + kind : ''); }
+
+// ── Chargement d'un type ───────────────────────────────────────────
+async function loadType() {
+	const t = $('type-input').value.trim();
+	if (!t) { setStatus($('load-status'), 'Sélectionnez un type.', 'err'); return; }
+	setStatus($('load-status'), 'Chargement…');
+	try {
+		const res = await fetch('/admin/table/data?type=' + encodeURIComponent(t));
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			setStatus($('load-status'), 'Erreur : ' + (err.detail || res.status), 'err');
+			return;
+		}
+		const data = await res.json();
+		docs = data.docs || [];
+		setStatus($('load-status'), docs.length + ' document(s) de type « ' + t + ' ».', 'ok');
+		currentType = t;
+		initColumns();
+		restoreState(t);   // applique les préférences mémorisées pour ce type (ou les défauts)
+		closeEditor();
+		$('cols-card').style.display = docs.length ? '' : 'none';
+		$('table-card').style.display = docs.length ? '' : 'none';
+		renderCols(); renderHead(); renderBody();
+		persistState();
+	} catch (e) {
+		setStatus($('load-status'), 'Erreur réseau : ' + e.message, 'err');
+	}
+}
+
+// Union des clés de 1er niveau (_id en tête, le reste trié). Colonnes visibles par
+// défaut : _id + jusqu'à 6 colonnes suivantes.
+function initColumns() {
+	const keys = new Set();
+	docs.forEach(d => Object.keys(d || {}).forEach(k => keys.add(k)));
+	keys.delete('_id');
+	columns = ['_id', ...Array.from(keys).sort()];
+	visible = columns.slice(0, 7);
+}
+
+// ── Persistance des préférences par type (localStorage) ────────────
+// Mémorise ordre des colonnes, colonnes affichées, tri, filtres et largeurs.
+function persistState() {
+	if (!currentType) return;
+	try {
+		localStorage.setItem(LS_KEY + currentType, JSON.stringify({
+			columns, visible, sortCol, sortDir, filters, widths
+		}));
+	} catch (e) { /* quota dépassé / navigation privée : on ignore */ }
+}
+
+// Restaure les préférences pour `type`, réconciliées avec les colonnes réellement
+// présentes dans les docs (les nouvelles clés sont ajoutées en fin, les disparues ignorées).
+function restoreState(type) {
+	let s = null;
+	try { s = JSON.parse(localStorage.getItem(LS_KEY + type) || 'null'); } catch (e) { s = null; }
+	if (!s) { filters = {}; sortCol = null; sortDir = 1; widths = {}; return; }
+	const known = new Set(columns);
+	const ordered = (s.columns || []).filter(c => known.has(c));   // ordre mémorisé encore valide
+	columns.forEach(c => { if (!ordered.includes(c)) ordered.push(c); });   // + nouvelles clés à la fin
+	columns = ordered;
+	visible = columns.filter(c => Array.isArray(s.visible) && s.visible.includes(c));
+	if (!visible.length) visible = columns.slice(0, 7);
+	sortCol = (s.sortCol && known.has(s.sortCol)) ? s.sortCol : null;
+	sortDir = s.sortDir === -1 ? -1 : 1;
+	filters = {};
+	for (const k in (s.filters || {})) if (known.has(k)) filters[k] = s.filters[k];
+	widths = {};
+	for (const k in (s.widths || {})) if (known.has(k)) widths[k] = Number(s.widths[k]) || DEFAULT_W;
+}
+
+// ── Rendu : sélecteur de colonnes (cocher = affichée ; glisser = réordonner) ──
+function renderCols() {
+	$('cols-box').innerHTML = columns.map(c =>
+		`<div class="col-item" draggable="true" data-col="${esc(c)}">
+			<span class="drag-handle" title="Glisser pour réordonner">⠿</span>
+			<label><input type="checkbox" data-col="${esc(c)}" ${visible.includes(c) ? 'checked' : ''}>${esc(c)}</label>
+		</div>`
+	).join('');
+
+	$('cols-box').querySelectorAll('input[data-col]').forEach(cb => {
+		cb.addEventListener('change', () => {
+			const col = cb.dataset.col;
+			if (cb.checked) { if (!visible.includes(col)) visible.push(col); }
+			else { visible = visible.filter(c => c !== col); }
+			visible = columns.filter(c => visible.includes(c));   // conserver l'ordre de `columns`
+			renderHead(); renderBody(); persistState();
+		});
+	});
+
+	// Glisser-déposer pour réordonner les colonnes (réordonne `columns`, donc le tableau).
+	$('cols-box').querySelectorAll('.col-item').forEach(it => {
+		it.addEventListener('dragstart', e => {
+			dragCol = it.dataset.col; it.classList.add('dragging');
+			e.dataTransfer.effectAllowed = 'move';
+		});
+		it.addEventListener('dragend', () => {
+			it.classList.remove('dragging');
+			$('cols-box').querySelectorAll('.col-item').forEach(x => x.classList.remove('dragover'));
+		});
+		it.addEventListener('dragover', e => {
+			e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+			if (it.dataset.col !== dragCol) it.classList.add('dragover');
+		});
+		it.addEventListener('dragleave', () => it.classList.remove('dragover'));
+		it.addEventListener('drop', e => {
+			e.preventDefault(); it.classList.remove('dragover');
+			const target = it.dataset.col;
+			const rect = it.getBoundingClientRect();
+			const after = e.clientX > rect.left + rect.width / 2;   // liste horizontale
+			if (dragCol) reorderColumns(dragCol, target, after);
+			dragCol = null;
+		});
+	});
+}
+
+// Déplace `srcCol` avant/après `targetCol` dans `columns` (et donc dans le tableau).
+function reorderColumns(srcCol, targetCol, after) {
+	if (srcCol === targetCol) return;
+	columns = columns.filter(c => c !== srcCol);
+	let idx = columns.indexOf(targetCol);
+	if (idx < 0) idx = columns.length - 1;
+	columns.splice(after ? idx + 1 : idx, 0, srcCol);
+	visible = columns.filter(c => visible.includes(c));
+	renderCols(); renderHead(); renderBody(); persistState();
+}
+
+// ── Rendu : en-tête (titres triables + poignée de redim. + ligne de filtres) ──
+function renderHead() {
+	const head = $('data-head');
+	const ths = visible.map(c => {
+		const ind = sortCol === c ? (sortDir === 1 ? ' ▲' : ' ▼') : '';
+		const w = widths[c] || DEFAULT_W;
+		return `<th data-col="${esc(c)}" style="width:${w}px">`
+			+ `<span class="th-label">${esc(c)}${ind}</span>`
+			+ `<div class="col-resizer" data-col="${esc(c)}"></div></th>`;
+	}).join('');
+	const filterThs = visible.map(c =>
+		`<th><input class="filter-input" data-col="${esc(c)}" value="${esc(filters[c] || '')}" placeholder="filtrer…"></th>`
+	).join('');
+	head.innerHTML = `<tr>${ths}</tr><tr class="filters">${filterThs}</tr>`;
+
+	// Tri : clic sur le libellé (pas sur la poignée).
+	head.querySelectorAll('.th-label').forEach(lbl => {
+		lbl.addEventListener('click', () => {
+			const col = lbl.closest('th').dataset.col;
+			if (sortCol === col) sortDir = -sortDir; else { sortCol = col; sortDir = 1; }
+			renderHead(); renderBody(); persistState();
+		});
+	});
+	// Redimensionnement : glisser la poignée du bord droit (table-layout: fixed → le corps suit).
+	head.querySelectorAll('.col-resizer').forEach(rz => {
+		rz.addEventListener('mousedown', e => {
+			e.preventDefault(); e.stopPropagation();
+			const col = rz.dataset.col, th = rz.closest('th');
+			const startX = e.clientX, startW = th.offsetWidth;
+			const onMove = ev => { const w = Math.max(40, startW + (ev.clientX - startX)); widths[col] = w; th.style.width = w + 'px'; };
+			const onUp = () => {
+				document.removeEventListener('mousemove', onMove);
+				document.removeEventListener('mouseup', onUp);
+				document.body.style.userSelect = '';
+				persistState();
+			};
+			document.body.style.userSelect = 'none';
+			document.addEventListener('mousemove', onMove);
+			document.addEventListener('mouseup', onUp);
+		});
+	});
+	head.querySelectorAll('.filter-input').forEach(inp => {
+		inp.addEventListener('input', () => { filters[inp.dataset.col] = inp.value; renderBody(); persistState(); });
+	});
+}
+
+// ── Rendu : corps (filtré puis trié) ───────────────────────────────
+function renderBody() {
+	// Indices d'origine pour retrouver le doc édité après tri/filtre.
+	let rows = docs.map((d, i) => ({ d, i }));
+	// Filtres (substring insensible à la casse, par colonne visible).
+	for (const c of visible) {
+		const f = (filters[c] || '').trim().toLowerCase();
+		if (f) rows = rows.filter(r => filterText(r.d[c]).includes(f));
+	}
+	// Tri.
+	if (sortCol) rows.sort((a, b) => sortDir * cmp(a.d[sortCol], b.d[sortCol]));
+
+	$('data-body').innerHTML = rows.map(r => {
+		const tds = visible.map(c => {
+			const txt = cellText(r.d[c]);
+			const cls = (r.d[c] === undefined || r.d[c] === null || r.d[c] === '') ? ' class="muted-cell"' : '';
+			return `<td${cls} title="${esc(fullText(r.d[c]))}">${esc(txt)}</td>`;
+		}).join('');
+		return `<tr data-idx="${r.i}"${r.i === selected ? ' class="selected"' : ''}>${tds}</tr>`;
+	}).join('');
+
+	$('data-body').querySelectorAll('tr').forEach(tr => {
+		tr.addEventListener('click', () => openEditor(parseInt(tr.dataset.idx, 10)));
+	});
+	$('row-count').textContent = rows.length + ' / ' + docs.length + ' ligne(s)';
+}
+
+// ── Valeurs : affichage / filtre / tri ─────────────────────────────
+function fullText(v) {
+	if (v === undefined || v === null) return '';
+	return (typeof v === 'object') ? JSON.stringify(v) : String(v);
+}
+function cellText(v) {
+	const s = fullText(v);
+	return s.length > 80 ? s.slice(0, 77) + '…' : s;
+}
+function filterText(v) { return fullText(v).toLowerCase(); }
+function cmp(a, b) {
+	if (typeof a === 'number' && typeof b === 'number') return a - b;
+	return fullText(a).localeCompare(fullText(b), undefined, { numeric: true, sensitivity: 'base' });
+}
+function esc(s) {
+	return String(s == null ? '' : s)
+		.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ── Éditeur JSON ───────────────────────────────────────────────────
+function openEditor(idx) {
+	selected = idx;
+	const doc = docs[idx];
+	$('editor-id').textContent = doc && doc._id ? doc._id : '(sans _id)';
+	const ta = $('json-editor');
+	ta.value = JSON.stringify(doc, null, 2);
+	ta.classList.remove('invalid');
+	setStatus($('editor-status'), '');
+	$('editor-card').style.display = 'flex';   // overlay fixe (cf. CSS #editor-card)
+	renderBody();   // surbrillance de la ligne sélectionnée
+}
+
+function closeEditor() {
+	selected = null;
+	$('editor-card').style.display = 'none';
+}
+
+function cancelEditor() { closeEditor(); renderBody(); }
+$('json-cancel').addEventListener('click', cancelEditor);
+$('editor-close').addEventListener('click', cancelEditor);
+
+$('json-save').addEventListener('click', async () => {
+	if (selected === null) return;
+	const ta = $('json-editor');
+	let obj;
+	try { obj = JSON.parse(ta.value); ta.classList.remove('invalid'); }
+	catch (e) { ta.classList.add('invalid'); setStatus($('editor-status'), 'JSON invalide : ' + e.message, 'err'); return; }
+	if (!obj || !obj._id) { setStatus($('editor-status'), 'Champ "_id" requis.', 'err'); return; }
+
+	setStatus($('editor-status'), 'Sauvegarde…');
+	$('json-save').disabled = true;
+	try {
+		const res = await fetch('/admin/doc', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(obj),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) { setStatus($('editor-status'), 'Échec : ' + (data.detail || res.status), 'err'); return; }
+		docs[selected] = data.doc;          // doc avec le nouveau _rev
+		ta.value = JSON.stringify(data.doc, null, 2);
+		initColumns();                       // d'éventuelles nouvelles clés deviennent disponibles
+		visible = columns.filter(c => visible.includes(c));
+		renderCols(); renderHead(); renderBody(); persistState();
+		setStatus($('editor-status'), '✓ Document sauvegardé en base.', 'ok');
+	} catch (e) {
+		setStatus($('editor-status'), 'Erreur réseau : ' + e.message, 'err');
+	} finally {
+		$('json-save').disabled = false;
+	}
+});
+
+// ── Init ───────────────────────────────────────────────────────────
+$('load-btn').addEventListener('click', loadType);
+$('type-input').addEventListener('keydown', e => { if (e.key === 'Enter') loadType(); });
+</script>
+</body>
+</html>
