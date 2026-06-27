@@ -5,6 +5,7 @@
 # sauvegardent jamais (ils mutent les docs en place, comme grant_xp/credit_character).
 
 import random
+import time
 from collections import Counter
 
 from db.config import get_doc, find_docs
@@ -62,16 +63,18 @@ def prix_range_cuivre(item_doc: dict, ref=None) -> tuple[int, int]:
 	return pmin, pmax
 
 
-def marchander(pmin: int, pmax: int, cha_joueur: int, cha_marchand: int, sens: str) -> dict:
+def marchander(pmin: int, pmax: int, cha_joueur: int, cha_marchand: int, sens: str,
+			   seuil_bonus: int = 0) -> dict:
 	"""Jet opposé Cha joueur vs Cha marchand, prix interpolé entre pmin et pmax.
 
-	seuil = clamp(50 + Cha_j − Cha_m, 5, 95) ; roll d100 ; marge = seuil − roll ;
-	t = clamp(0.5 + marge/100, 0, 1) (t haut = favorable au joueur).
+	seuil = clamp(50 + Cha_j − Cha_m + seuil_bonus, 5, 95) ; roll d100 ; marge = seuil − roll ;
+	t = clamp(0.5 + marge/100, 0, 1) (t haut = favorable au joueur). `seuil_bonus` porte le poids
+	de la relation au lieu ((relation−50)·RELATION_SEUIL_COEFF).
 	- sens "vente" (le joueur vend, veut le max) : prix = pmin + (pmax−pmin)·t
 	- sens "achat" (le joueur achète, veut le min) : prix = pmin + (pmax−pmin)·(1−t)
 	"""
 	pmin, pmax = int(pmin), int(max(pmin, pmax))
-	seuil = _clamp(50 + int(cha_joueur or 0) - int(cha_marchand or 0), 5, 95)
+	seuil = _clamp(50 + int(cha_joueur or 0) - int(cha_marchand or 0) + int(seuil_bonus or 0), 5, 95)
 	roll = random.randint(1, 100)
 	t = _clamp(0.5 + (seuil - roll) / 100.0, 0.0, 1.0)
 	frac = t if sens == "vente" else (1.0 - t)
@@ -83,6 +86,121 @@ def marchander(pmin: int, pmax: int, cha_joueur: int, cha_marchand: int, sens: s
 		"succes": roll <= seuil,
 		"min": pmin,
 		"max": pmax,
+	}
+
+
+# ── Relation marchand (prix de base pondéré + persistance) ───────────────────────
+# La relation perso×lieu (0–100, neutre 50) pondère le prix de base SANS aléa, et le
+# seuil du marchandage. Un seul coeff (RELATION_SEUIL_COEFF) règle les deux : écart au
+# neutre d = relation−50 ; le prix de base utilise frac = clamp(0.5 + d·coeff/100, 0, 1)
+# (50 → médian), le marchandage ajoute d·coeff au seuil.
+
+def _relation_seuil_bonus(relation: int) -> int:
+	"""Bonus de seuil de marchandage apporté par la relation ((relation−50)·coeff)."""
+	d = int(relation or 0) - 50
+	return int(round(d * character_stats.RELATION_SEUIL_COEFF))
+
+
+def prix_base_cuivre(pmin: int, pmax: int, relation: int, sens: str) -> int:
+	"""Prix de base (sans marchander) pondéré par la relation, sans aléa. À relation 50
+	le prix est médian ; au-dessus il tend vers le favorable au joueur, en dessous vers
+	le défavorable. `sens` ∈ "vente" (le joueur veut le max) / "achat" (veut le min)."""
+	pmin, pmax = int(pmin), int(max(pmin, pmax))
+	d = int(relation or 0) - 50
+	frac = _clamp(0.5 + d * character_stats.RELATION_SEUIL_COEFF / 100.0, 0.0, 1.0)
+	if sens == "vente":
+		prix = pmin + (pmax - pmin) * frac
+	else:  # achat
+		prix = pmax - (pmax - pmin) * frac
+	return max(1, int(round(prix)))
+
+
+def prix_negocie(relation_doc: dict, item_id: str, sens: str):
+	"""Prix négocié persistant pour (item, sens) s'il existe, sinon None (en cuivre)."""
+	pn = (relation_doc or {}).get("prix_negocies") or {}
+	val = (pn.get(item_id) or {}).get(sens)
+	return int(val) if isinstance(val, (int, float)) else None
+
+
+def prix_courant(relation_doc: dict, item_id: str, pmin: int, pmax: int, sens: str) -> int:
+	"""Prix appliqué à une transaction : prix négocié stocké s'il existe, sinon prix de
+	base pondéré relation. Source unique de vérité du prix (listes + vente/achat)."""
+	neg = prix_negocie(relation_doc, item_id, sens)
+	if neg is not None:
+		return max(1, neg)
+	return prix_base_cuivre(pmin, pmax, relation_value(relation_doc), sens)
+
+
+# ── Doc relation (réputation perso × lieu) ───────────────────────────────────────
+
+def now_epoch() -> int:
+	"""Epoch UTC en secondes (isolé pour les tests / le monkeypatch)."""
+	return int(time.time())
+
+
+def relation_doc_id(character: dict, lieu_doc: dict) -> str:
+	char_id = (character or {}).get("_id") or ""
+	lieu_id = (lieu_doc or {}).get("_id") or ""
+	return "relation:" + char_id + "::" + lieu_id
+
+
+def get_relation(character: dict, lieu_doc: dict) -> dict:
+	"""Doc relation perso×lieu : l'existant en base, sinon un dict frais neutre (non
+	sauvegardé — l'endpoint persiste, comme credit_character/grant_xp)."""
+	doc_id = relation_doc_id(character, lieu_doc)
+	existing = get_doc(doc_id)
+	if existing:
+		return existing
+	return {
+		"_id": doc_id,
+		"type": "relation",
+		"character_id": (character or {}).get("_id"),
+		"lieu_id": (lieu_doc or {}).get("_id"),
+		"value": int(character_stats.RELATION_INITIALE),
+		"prix_negocies": {},
+		"marchandage_bloque_jusqu": 0,
+	}
+
+
+def relation_value(relation_doc: dict) -> int:
+	"""Valeur de relation bornée 0–100."""
+	return int(_clamp(int((relation_doc or {}).get("value", 0) or 0), 0, 100))
+
+
+def marchandage_bloque(relation_doc: dict, now: int) -> bool:
+	"""Le marchand refuse-t-il de négocier (blocage après crit échec encore actif) ?"""
+	return now < int((relation_doc or {}).get("marchandage_bloque_jusqu", 0) or 0)
+
+
+def appliquer_marchandage(relation_doc: dict, item_id: str, sens: str, deal: dict,
+						  now: int) -> dict:
+	"""Applique l'issue d'un marchandage au doc relation (mute en place, NE SAUVEGARDE
+	PAS). Crit réussite (roll ≤ MAX) → +1 relation ; crit échec (roll ≥ MIN) → −1 relation
+	et blocage du marchandage ; réussite simple → persiste le prix négocié. Renvoie un
+	résumé {crit, relation, prix_negocie, bloque_jusqu}."""
+	roll = int(deal.get("roll", 50))
+	val = relation_value(relation_doc)
+	crit = None
+	if roll <= int(character_stats.CRIT_REUSSITE_MAX):
+		val = min(100, val + 1)
+		crit = "reussite"
+	elif roll >= int(character_stats.CRIT_ECHEC_MIN):
+		val = max(0, val - 1)
+		relation_doc["marchandage_bloque_jusqu"] = now + int(character_stats.MARCHANDAGE_BLOCAGE_SECONDES)
+		crit = "echec"
+	relation_doc["value"] = val
+
+	neg = None
+	if deal.get("succes"):
+		pn = relation_doc.setdefault("prix_negocies", {})
+		pn.setdefault(item_id, {})[sens] = int(deal["prix"])
+		neg = int(deal["prix"])
+
+	return {
+		"crit": crit,
+		"relation": val,
+		"prix_negocie": neg,
+		"bloque_jusqu": int(relation_doc.get("marchandage_bloque_jusqu", 0) or 0),
 	}
 
 
@@ -250,8 +368,9 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> list[dict]:
 	return [{"item_id": k, "qty": v} for k, v in produits.items()]
 
 
-def resolve_stock_vente(lieu_doc: dict) -> list[dict]:
-	"""Stock de vente du lieu résolu en lignes affichables : item résolu + qty + prix."""
+def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> list[dict]:
+	"""Stock de vente du lieu résolu en lignes affichables : item résolu + qty + prix
+	courant à l'achat (négocié ou base pondéré relation) + fourchette min–max."""
 	out = []
 	for entry in (lieu_doc or {}).get("stock_vente", []):
 		item_id = entry.get("item_id")
@@ -262,15 +381,20 @@ def resolve_stock_vente(lieu_doc: dict) -> list[dict]:
 		if not item:
 			continue
 		pmin, pmax = prix_range_cuivre(item, item_id)
+		prix_cuivre = prix_courant(relation_doc, item_id, pmin, pmax, "achat")
+		negocie = (relation_doc or {}).get("prix_negocies", {}).get(item_id, {}).get("achat") is not None
 		out.append({
 			"item_id": item_id,
 			"nom": item.get("nom"),
 			"icon": item.get("icon"),
 			"poids": round(float(item.get("poids", 0) or 0), 2),
 			"qty": qty,
+			"prix_cuivre": prix_cuivre,
+			"prix": cuivre_to_purse(prix_cuivre),
 			"prix_min": pmin,
 			"prix_max": pmax,
 			"prix_min_purse": cuivre_to_purse(pmin),
 			"prix_max_purse": cuivre_to_purse(pmax),
+			"negocie": negocie,
 		})
 	return out

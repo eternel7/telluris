@@ -14,11 +14,13 @@ from utils.characters import (
 	recompute_equipment_bonus, carried_weight, charge_max_of,
 	item_ref_id, item_ref_weight, resolve_item_ref,
 	money_to_cuivre, cuivre_to_purse, credit_character,
-	lieu_buys, item_sale_price_cuivre,
+	lieu_buys,
 )
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
 	convertir_apres_achat, resolve_stock_vente,
+	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
+	prix_courant, _relation_seuil_bonus, now_epoch,
 )
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
@@ -686,24 +688,42 @@ def _current_lieu_doc(character: dict) -> dict | None:
 	return get_doc(character.get("lieu", character.get("cite")))
 
 
-def _marchand_vendables(character: dict, lieu_doc: dict) -> list:
+def _find_ref(refs: list, idx, item_id):
+	"""Comme _take_ref mais sans retirer : renvoie la réf ciblée (index vérifié item_id,
+	repli premier exemplaire), ou None. Utilisé par le marchandage (lecture seule)."""
+	if isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < len(refs) \
+			and (item_id is None or item_ref_id(refs[idx]) == item_id):
+		return refs[idx]
+	if item_id is not None:
+		return next((r for r in refs if item_ref_id(r) == item_id), None)
+	return None
+
+
+def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None = None) -> list:
 	"""Liste des items de l'inventaire que le marchand du lieu achète, avec leur prix
-	proposé. Adressés par index (vérifié par item_id côté vente : deux exemplaires
-	peuvent peser/valoir différemment)."""
+	courant (négocié ou base pondéré relation) et la fourchette min–max. Adressés par
+	index (vérifié par item_id côté vente : deux exemplaires peuvent peser/valoir
+	différemment)."""
 	vendables = []
 	for idx, ref in enumerate(character.get("inventaire", [])):
 		item = resolve_item_ref(ref)
 		if not item or not lieu_buys(lieu_doc, item):
 			continue
-		prix_cuivre = item_sale_price_cuivre(item, ref)
+		item_id = item.get("item") or item.get("_id")
+		pmin, pmax = prix_range_cuivre(item, ref)
+		prix_cuivre = prix_courant(relation, item_id, pmin, pmax, "vente")
+		negocie = (relation or {}).get("prix_negocies", {}).get(item_id, {}).get("vente") is not None
 		vendables.append({
 			"index": idx,
-			"item_id": item.get("item") or item.get("_id"),
+			"item_id": item_id,
 			"nom": item.get("nom"),
 			"icon": item.get("icon"),
 			"poids": round(float(item.get("poids", 0) or 0), 2),
 			"prix_cuivre": prix_cuivre,
 			"prix": cuivre_to_purse(prix_cuivre),
+			"prix_min_purse": cuivre_to_purse(pmin),
+			"prix_max_purse": cuivre_to_purse(pmax),
+			"negocie": negocie,
 		})
 	return vendables
 
@@ -712,17 +732,21 @@ def _marchand_vendables(character: dict, lieu_doc: dict) -> list:
 async def marchand_quotes(
 	current_user: Annotated[User, Depends(get_current_user)],
 ):
-	"""Liste initiale du panneau Vente : objets vendables ici + bourse courante."""
+	"""Liste initiale du panneau Vente : objets vendables ici + bourse + relation au lieu."""
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 	lieu_doc = _current_lieu_doc(character)
+	relation = get_relation(character, lieu_doc)
 	return {
 		"lieu_label": (lieu_doc or {}).get("label"),
-		"vendables": _marchand_vendables(character, lieu_doc),
-		"achetables": resolve_stock_vente(lieu_doc),
+		"vendables": _marchand_vendables(character, lieu_doc, relation),
+		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"cha_marchand": merchant_cha(lieu_doc),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
+		"relation": relation_value(relation),
+		"bloque_jusqu": int(relation.get("marchandage_bloque_jusqu", 0) or 0),
+		"now": now_epoch(),
 	}
 
 
@@ -744,6 +768,10 @@ async def sell_item(
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 
 	lieu_doc = _current_lieu_doc(character)
+	relation = get_relation(character, lieu_doc)
+	if relation_value(relation) <= 0:
+		raise HTTPException(status_code=403, detail="Ce marchand refuse de traiter avec vous.")
+
 	inventaire = character.get("inventaire", [])
 	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
 	if ref is None:
@@ -754,10 +782,12 @@ async def sell_item(
 		# On a `pop` la ref mais on raise avant tout save_doc : sans effet sur le doc.
 		raise HTTPException(status_code=422, detail="Le marchand n'achète pas cet objet")
 
-	# Marchandage : prix interpolé entre min et max selon le jet Cha joueur vs marchand.
+	# Prix appliqué = prix courant (négocié au marchandage volontaire, sinon base pondéré
+	# relation). Plus de jet automatique ici : marchander est une action explicite séparée.
+	item_id = item.get("item") or item.get("_id")
 	pmin, pmax = prix_range_cuivre(item, ref)
-	deal = marchander(pmin, pmax, _player_cha(character), merchant_cha(lieu_doc), "vente")
-	purse = credit_character(character, deal["prix"])
+	prix = prix_courant(relation, item_id, pmin, pmax, "vente")
+	purse = credit_character(character, prix)
 	character["inventaire"] = inventaire
 
 	# Le lieu absorbe l'objet acheté → matières → stock vendable (mute lieu_doc).
@@ -770,10 +800,10 @@ async def sell_item(
 
 	payload = _inventory_payload(character)
 	payload["purse"] = purse
-	payload["vendables"] = _marchand_vendables(character, lieu_doc)
-	payload["achetables"] = resolve_stock_vente(lieu_doc)
-	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(deal["prix"])}
-	payload["marchandage"] = deal
+	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation)
+	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
+	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
+	payload["relation"] = relation_value(relation)
 	return payload
 
 
@@ -789,6 +819,10 @@ async def buy_item(
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 
 	lieu_doc = _current_lieu_doc(character) or {}
+	relation = get_relation(character, lieu_doc)
+	if relation_value(relation) <= 0:
+		raise HTTPException(status_code=403, detail="Ce marchand refuse de traiter avec vous.")
+
 	item_id = body.get("item_id")
 	stock_vente = lieu_doc.get("stock_vente", [])
 	entry = next((e for e in stock_vente if e.get("item_id") == item_id and int(e.get("qty", 0)) > 0), None)
@@ -799,13 +833,14 @@ async def buy_item(
 	if not item:
 		raise HTTPException(status_code=422, detail="Objet introuvable")
 
+	# Prix courant à l'achat (négocié sinon base pondéré relation). Pas de jet auto ici.
 	pmin, pmax = prix_range_cuivre(item, item_id)
-	deal = marchander(pmin, pmax, _player_cha(character), merchant_cha(lieu_doc), "achat")
+	prix = prix_courant(relation, item_id, pmin, pmax, "achat")
 
 	if carried_weight(character) + item_ref_weight(item_id) > charge_max_of(character):
 		raise HTTPException(status_code=422, detail="Trop chargé pour porter cet objet")
 
-	purse = debit_character(character, deal["prix"])
+	purse = debit_character(character, prix)
 	if purse is None:
 		raise HTTPException(status_code=422, detail="Fonds insuffisants")
 
@@ -820,11 +855,80 @@ async def buy_item(
 
 	payload = _inventory_payload(character)
 	payload["purse"] = purse
-	payload["vendables"] = _marchand_vendables(character, lieu_doc)
-	payload["achetables"] = resolve_stock_vente(lieu_doc)
-	payload["achete"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(deal["prix"])}
-	payload["marchandage"] = deal
+	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation)
+	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
+	payload["achete"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
+	payload["relation"] = relation_value(relation)
 	return payload
+
+
+@user_router.post("/marchander")
+async def marchander_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Tente un marchandage explicite sur un objet (sens "vente" ou "achat"). Jet Cha
+	joueur vs Cha marchand + bonus de relation. Réussite → persiste le prix négocié pour
+	cet objet. Crit réussite (roll ≤ MAX) → +1 relation ; crit échec (roll ≥ MIN) →
+	−1 relation ET blocage du marchandage pendant MARCHANDAGE_BLOCAGE_SECONDES. Ne touche
+	ni l'inventaire ni la bourse (le prix s'applique à la prochaine vente/achat)."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	sens = body.get("sens")
+	if sens not in ("vente", "achat"):
+		raise HTTPException(status_code=422, detail="Sens de marchandage invalide")
+
+	lieu_doc = _current_lieu_doc(character) or {}
+	relation = get_relation(character, lieu_doc)
+	if relation_value(relation) <= 0:
+		raise HTTPException(status_code=403, detail="Ce marchand refuse de traiter avec vous.")
+
+	now = now_epoch()
+	if marchandage_bloque(relation, now):
+		raise HTTPException(status_code=403, detail="Le marchand refuse de négocier pour l'instant.")
+
+	# Résoudre l'objet et sa fourchette de prix (vente : ref d'inventaire ; achat : stock du lieu).
+	item_id = body.get("item_id")
+	if sens == "vente":
+		ref = _find_ref(character.get("inventaire", []), body.get("index"), item_id)
+		if ref is None:
+			raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
+		item = resolve_item_ref(ref)
+		if not item or not lieu_buys(lieu_doc, item):
+			raise HTTPException(status_code=422, detail="Le marchand n'achète pas cet objet")
+		item_id = item.get("item") or item.get("_id")
+		pmin, pmax = prix_range_cuivre(item, ref)
+	else:  # achat
+		entry = next((e for e in lieu_doc.get("stock_vente", [])
+					  if e.get("item_id") == item_id and int(e.get("qty", 0)) > 0), None)
+		if entry is None:
+			raise HTTPException(status_code=422, detail="Objet indisponible à la vente ici")
+		item = resolve_item_ref(item_id)
+		if not item:
+			raise HTTPException(status_code=422, detail="Objet introuvable")
+		pmin, pmax = prix_range_cuivre(item, item_id)
+
+	seuil_bonus = _relation_seuil_bonus(relation_value(relation))
+	deal = marchander(pmin, pmax, _player_cha(character), merchant_cha(lieu_doc), sens, seuil_bonus)
+	issue = appliquer_marchandage(relation, item_id, sens, deal, now)
+
+	if save_doc(relation) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	return {
+		"sens": sens,
+		"deal": deal,
+		"crit": issue["crit"],
+		"relation": issue["relation"],
+		"prix_negocie": cuivre_to_purse(issue["prix_negocie"]) if issue["prix_negocie"] is not None else None,
+		"bloque_jusqu": issue["bloque_jusqu"],
+		"now": now,
+		"vendables": _marchand_vendables(character, lieu_doc, relation),
+		"achetables": resolve_stock_vente(lieu_doc, relation),
+		"purse": cuivre_to_purse(money_to_cuivre(character)),
+	}
 
 
 @user_router.post("/spend_xp_vocation")

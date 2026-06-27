@@ -60,6 +60,23 @@ CHA_MARCHAND: int = 50
 CHA_MARCHAND_PAR_CATEGORIE: dict[str, int] = {}
 PRIX_MAX_FACTEUR: float = 3.0
 
+# ── Jets de dés (seuils de critique génériques) ──────────────────────────────────
+# Bornes de critique applicables à TOUT jet d100 (marchandage, combat futur, etc.) :
+# roll ≤ CRIT_REUSSITE_MAX = réussite critique ; roll ≥ CRIT_ECHEC_MIN = échec critique.
+CRIT_REUSSITE_MAX: int = 5
+CRIT_ECHEC_MIN: int = 96
+
+# ── Relation marchand (marchandage volontaire) ───────────────────────────────────
+# La relation perso×lieu (doc `type:"relation"`) est un entier sur 0–100, neutre à
+# 50. Elle pondère le prix de base (sans marchander : médian à 50, meilleur au-dessus,
+# pire en dessous) ET le seuil du marchandage volontaire, via l'écart au neutre
+# (relation−50) × RELATION_SEUIL_COEFF. Relation 0 = transactions interdites au lieu.
+# Marchander = action explicite : crit réussite (CRIT_REUSSITE_MAX) → +1 relation ; crit
+# échec (CRIT_ECHEC_MIN) → −1 relation ET blocage du marchandage pendant MARCHANDAGE_BLOCAGE_SECONDES.
+RELATION_INITIALE: int = 50
+RELATION_SEUIL_COEFF: float = 2.0
+MARCHANDAGE_BLOCAGE_SECONDES: int = 3600
+
 # ── Dépeçage des carcasses (boucherie) ──────────────────────────────────────────
 # Une carcasse vendue à une boucherie est décomposée en matières premières selon les
 # `tags` de son espèce. Table tunable tag → matières produites (un sous-cat répété
@@ -111,6 +128,11 @@ def current_world_variables() -> dict:
 		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
 		"DEPECAGE_TAGS": {k: list(v) for k, v in DEPECAGE_TAGS.items()},
+		"CRIT_REUSSITE_MAX": CRIT_REUSSITE_MAX,
+		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
+		"RELATION_INITIALE": RELATION_INITIALE,
+		"RELATION_SEUIL_COEFF": RELATION_SEUIL_COEFF,
+		"MARCHANDAGE_BLOCAGE_SECONDES": MARCHANDAGE_BLOCAGE_SECONDES,
 	}
 
 
@@ -132,6 +154,8 @@ def load_world_variables() -> dict:
 	"""
 	global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR
+	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
+	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
 		doc = get_doc(WORLD_VARIABLES_DOC_ID)
@@ -166,6 +190,12 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("DEPECAGE_TAGS"), dict):
 		DEPECAGE_TAGS.clear()
 		DEPECAGE_TAGS.update({k: list(x) for k, x in v["DEPECAGE_TAGS"].items()})
+
+	CRIT_REUSSITE_MAX            = int(v.get("CRIT_REUSSITE_MAX", CRIT_REUSSITE_MAX))
+	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))
+	RELATION_INITIALE            = int(v.get("RELATION_INITIALE", RELATION_INITIALE))
+	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
+	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))
 
 	return current_world_variables()
 

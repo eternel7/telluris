@@ -429,7 +429,26 @@
 		#sell-panel h2 { margin: 0; }
 		#sell-list .sh-inv-item:last-child { border-bottom: none; }
 		.sell-prix { font-weight: bold; color: var(--accent-color); white-space: nowrap; }
+		.sell-range { font-size: .78em; opacity: .6; white-space: nowrap; margin-left: 4px; }
 		.sell-empty { opacity: .7; padding: 12px 0; }
+		.sell-relation {
+			font-weight: bold;
+			padding: 4px 12px;
+			border: 2px solid var(--accent-color);
+			border-radius: 16px;
+			background: rgba(0,0,0,0.25);
+			white-space: nowrap;
+		}
+		.sell-relation.relation-bad { border-color: #b3402f; color: #e88; }
+		.sh-marchander-btn {
+			margin-left: 6px;
+			cursor: pointer;
+			background: rgba(0,0,0,0.3);
+			border: 1px solid var(--accent-color);
+			border-radius: 6px;
+			padding: 2px 8px;
+		}
+		.sh-marchander-btn:disabled { opacity: .4; cursor: not-allowed; }
 		.sheet-tab-bar {
 			display: flex;
 			align-items: stretch;
@@ -986,7 +1005,7 @@
 				{% if achat_sous_categories %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
-					<li><button class="sub-loc-btn" onclick="openSellPanel()">🏷️ Vente</button></li>
+					<li><button class="sub-loc-btn" onclick="openSellPanel()">🏷️ Achat-Vente</button></li>
 				</ul>
 				{% endif %}
 				<h3 id="sub-locations-title">Lieux</h3>
@@ -1402,6 +1421,7 @@
 			<div class="sh-finance">🟡 <span class="amt" id="sell-amt-or">0</span> Or</div>
 			<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">0</span> Argent</div>
 			<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
+			<div class="sell-relation" id="sell-relation">🤝 Relation : —</div>
 		</div>
 		<h2 style="margin:.6rem 0 0">🏷️ Vente</h2>
 		<ul id="sell-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
@@ -2224,6 +2244,41 @@ function updatePurse(purse) {
 	set('amt-cuivre', purse.cuivre); set('sell-amt-cuivre', purse.cuivre);
 }
 
+// État relation/blocage du marchand courant. `blocDeadline` = horloge client absolue
+// (on convertit `bloque_jusqu`−`now` serveur en délai relatif pour éviter les décalages).
+let MARCHAND = { relation: 50, blocDeadline: 0 };
+
+function isMarchBlocked()  { return MARCHAND.blocDeadline > Date.now(); }
+function blocRemainingMin(){ return Math.max(1, Math.ceil((MARCHAND.blocDeadline - Date.now()) / 60000)); }
+
+function setMarchandState(data) {
+	if (typeof data.relation === 'number') MARCHAND.relation = data.relation;
+	if (typeof data.bloque_jusqu === 'number') {
+		const now = (typeof data.now === 'number') ? data.now : Math.floor(Date.now() / 1000);
+		const remaining = Math.max(0, data.bloque_jusqu - now);
+		MARCHAND.blocDeadline = remaining > 0 ? Date.now() + remaining * 1000 : 0;
+	}
+	updateRelationBadge();
+}
+
+function updateRelationBadge() {
+	const el = document.getElementById('sell-relation');
+	if (!el) return;
+	const r = MARCHAND.relation;
+	if (r <= 0) {
+		el.textContent = '🚫 Transactions fermées';
+		el.classList.add('relation-bad');
+		return;
+	}
+	el.classList.remove('relation-bad');
+	el.textContent = '🤝 Relation : ' + r + (isMarchBlocked() ? ' · marchandage bloqué (~' + blocRemainingMin() + ' min)' : '');
+}
+
+function marchBtn(index, itemId, sens) {
+	const idxArg = (index === null || index === undefined) ? 'null' : index;
+	return `<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="marchanderItem(${idxArg},'${itemId}','${sens}')" title="Marchander">🤝</button>`;
+}
+
 function renderSellList(data) {
 	const list = document.getElementById('sell-list');
 	const vendables = data.vendables || [];
@@ -2235,14 +2290,11 @@ function renderSellList(data) {
 		<span>${v.icon || '📦'}</span>
 		<span style="flex:1">${v.nom || '—'}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
-		<span class="sell-prix">${formatPrix(v.prix)}</span>
+		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
+		<span class="sell-range">(${formatPrix(v.prix_min_purse)}–${formatPrix(v.prix_max_purse)})</span>
 		<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}')" title="Vendre">Vendre</button>
+		${marchBtn(v.index, v.item_id, 'vente')}
 	</li>`).join('');
-}
-
-function dealNote(d) {
-	if (!d) return '';
-	return d.succes ? ' — marchandage réussi 🤝' : ' — marchandage raté';
 }
 
 function renderBuyList(data) {
@@ -2257,9 +2309,36 @@ function renderBuyList(data) {
 		<span>${v.icon || '📦'}</span>
 		<span style="flex:1">${v.nom || '—'} ×${v.qty}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
-		<span class="sell-prix">${formatPrix(v.prix_min_purse)} – ${formatPrix(v.prix_max_purse)}</span>
+		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
+		<span class="sell-range">(${formatPrix(v.prix_min_purse)}–${formatPrix(v.prix_max_purse)})</span>
 		<button class="sh-drop-btn" onclick="buyItem('${v.item_id}')" title="Acheter">Acheter</button>
+		${marchBtn(null, v.item_id, 'achat')}
 	</li>`).join('');
+}
+
+function marchToast(d) {
+	const deal = d.deal || {};
+	if (d.crit === 'reussite') return 'Marchandage brillant ! Relation +1 (désormais ' + d.relation + ').';
+	if (d.crit === 'echec')    return 'Marchandage désastreux ! Relation −1 (désormais ' + d.relation + '). Le marchand refuse de négocier pendant 1 h.';
+	if (deal.succes)           return 'Marchandage réussi 🤝' + (d.prix_negocie ? ' — nouveau prix : ' + formatPrix(d.prix_negocie) : '');
+	return 'Marchandage raté — prix inchangé.';
+}
+
+async function marchanderItem(index, itemId, sens) {
+	if (isMarchBlocked()) { showToast('Le marchand boude — revenez dans ~' + blocRemainingMin() + ' min.'); return; }
+	try {
+		const res  = await fetch('api/marchander', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({index, item_id: itemId, sens})
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		setMarchandState(data);
+		updatePurse(data.purse);
+		renderSellList(data);
+		renderBuyList(data);
+		showToast(marchToast(data));
+	} catch(err) { console.error('Erreur marchandage', err); }
 }
 
 async function openSellPanel() {
@@ -2267,6 +2346,7 @@ async function openSellPanel() {
 		const res  = await fetch('api/marchand/quotes');
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		setMarchandState(data);
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
@@ -2291,10 +2371,11 @@ async function sellItem(index, itemId) {
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 		_applyInventoryPayload(data);
+		setMarchandState(data);
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
-		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')' + dealNote(data.marchandage));
+		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')');
 	} catch(err) { console.error('Erreur vente', err); }
 }
 
@@ -2307,10 +2388,11 @@ async function buyItem(itemId) {
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 		_applyInventoryPayload(data);
+		setMarchandState(data);
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
-		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')' + dealNote(data.marchandage));
+		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')');
 	} catch(err) { console.error('Erreur achat', err); }
 }
 </script>
