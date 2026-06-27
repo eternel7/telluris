@@ -357,40 +357,41 @@ def _matieres_entrantes(item_doc: dict, qmap: dict | None = None) -> list[tuple[
 	return []
 
 
-def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> list[dict]:
-	"""Le lieu absorbe l'objet acheté en matières (`stock_matieres`), cuit ses recettes
-	pour remplir `stock_vente`, et **revend brute** toute matière qu'aucune de ses
-	recettes ne consomme (cas boucherie : la carcasse décomposée → viande/os/cuir… sont
-	directement vendables ; une matière transformable sous le seuil reste en réserve).
-	Mute `lieu_doc` en place (l'appelant persiste). Renvoie [{item_id, qty}] ajoutés."""
+def _executer_production_batch(lieu_doc: dict, recettes: list | None = None) -> list[dict]:
+	"""Passe de production : **draine le stock** du lieu en cuisant des recettes tant qu'il
+	reste de la matière, en tirant chaque recette au hasard **pondéré par `quantite_matiere`**
+	(les plus gourmandes favorisées), jusqu'au cap anti-runaway. Les matières qu'aucune recette
+	du lieu ne consomme (produits finis de la boucherie : carcasse décomposée par espèce+poids
+	en viande/os/…) sont **mises en rayon** (`stock_vente`). La matière transformable **sous le
+	seuil** reste en stock pour le prochain batch. Mute `lieu_doc` en place ; renvoie [{item_id,qty}]."""
 	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	stock_vente = lieu_doc.setdefault("stock_vente", [])
-
-	recettes = lieu_recettes(lieu_doc.get("categorie"))
+	recettes = recettes if recettes is not None else lieu_recettes(lieu_doc.get("categorie"))
 	consommables = {r.get("matiere_premiere_sous_categorie") for r in recettes}
 
-	# Table de quantités du dépeçage : recettes `carcasse → <matiere>` du lieu (boucherie).
-	qmap = {
-		r.get("objet_final"): int(r.get("quantite_produite", 1) or 1)
-		for r in recettes if r.get("matiere_premiere_sous_categorie") == "carcasse"
-	}
-	for sous_cat, qty in _matieres_entrantes(item_doc, qmap):
-		stock_mat[sous_cat] = int(stock_mat.get(sous_cat, 0)) + qty
-
+	prepared = [
+		{
+			"matiere": r.get("matiere_premiere_sous_categorie"),
+			"qm": max(1, int(r.get("quantite_matiere", 1) or 1)),
+			"qp": max(1, int(r.get("quantite_produite", 1) or 1)),
+			"item_id": objet_final_item_id(r.get("objet_final", "")),
+		}
+		for r in recettes
+	]
 	produits: dict[str, int] = {}
 	fired = 0
-	for recette in recettes:
-		matiere = recette.get("matiere_premiere_sous_categorie")
-		qm = int(recette.get("quantite_matiere", 1) or 1)
-		qp = int(recette.get("quantite_produite", 1) or 1)
-		item_id = objet_final_item_id(recette.get("objet_final", ""))
-		while int(stock_mat.get(matiere, 0)) >= qm and fired < _CONVERSION_CAP:
-			stock_mat[matiere] -= qm
-			_stock_vente_add(stock_vente, item_id, qp)
-			produits[item_id] = produits.get(item_id, 0) + qp
-			fired += 1
+	while fired < _CONVERSION_CAP:
+		applicable = [p for p in prepared if int(stock_mat.get(p["matiere"], 0)) >= p["qm"]]
+		if not applicable:
+			break
+		chosen = random.choices(applicable, weights=[p["qm"] for p in applicable])[0]
+		stock_mat[chosen["matiere"]] -= chosen["qm"]
+		_stock_vente_add(stock_vente, chosen["item_id"], chosen["qp"])
+		produits[chosen["item_id"]] = produits.get(chosen["item_id"], 0) + chosen["qp"]
+		fired += 1
 
-	# Matières qu'aucune recette du lieu ne transforme → revendues brutes.
+	# Produits finis : matières qu'aucune recette du lieu ne consomme (ex. viande/os
+	# décomposés à la boucherie) → mises en rayon lors de la passe.
 	for sc in list(stock_mat):
 		q = int(stock_mat.get(sc, 0))
 		if q > 0 and sc not in consommables:
@@ -404,6 +405,35 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> list[dict]:
 		del stock_mat[sc]
 
 	return [{"item_id": k, "qty": v} for k, v in produits.items()]
+
+
+def tenter_production(lieu_doc: dict, recettes: list | None = None) -> list[dict]:
+	"""Avec une probabilité `ATELIER_TRANSFO_PROBA`, lance une passe de production (batch) ;
+	sinon ne fait rien (la matière reste stockée). Déclenché à chaque vente ET à chaque
+	visite du lieu. Mute `lieu_doc` en place ; renvoie les produits ajoutés (vide si pas de
+	déclenchement ou rien à produire)."""
+	proba = max(0.0, min(1.0, character_stats.ATELIER_TRANSFO_PROBA))
+	if random.random() >= proba:
+		return []
+	return _executer_production_batch(lieu_doc, recettes)
+
+
+def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> list[dict]:
+	"""Absorbe l'objet acheté en matières (`stock_matieres`) puis tente une passe de
+	production (`tenter_production`, proba `ATELIER_TRANSFO_PROBA`). Mute `lieu_doc` en
+	place (l'appelant persiste). Renvoie [{item_id, qty}] produits (vide si pas de batch)."""
+	stock_mat = lieu_doc.setdefault("stock_matieres", {})
+	recettes = lieu_recettes(lieu_doc.get("categorie"))
+
+	# Table de quantités du dépeçage : recettes `carcasse → <matiere>` du lieu (boucherie).
+	qmap = {
+		r.get("objet_final"): int(r.get("quantite_produite", 1) or 1)
+		for r in recettes if r.get("matiere_premiere_sous_categorie") == "carcasse"
+	}
+	for sous_cat, qty in _matieres_entrantes(item_doc, qmap):
+		stock_mat[sous_cat] = int(stock_mat.get(sous_cat, 0)) + qty
+
+	return tenter_production(lieu_doc, recettes)
 
 
 def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> list[dict]:

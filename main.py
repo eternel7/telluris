@@ -18,6 +18,7 @@ from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref
+from utils.marche import tenter_production
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
@@ -394,6 +395,12 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	race = next((r for r in races["value"] if r["id"] == character["race"]), None)
 	lieu = character.get("lieu",character["cite"])
 	grid_doc = get_doc(lieu)
+	# Atelier : chaque visite du lieu tente une passe de production (proba ATELIER_TRANSFO_PROBA),
+	# comme à chaque vente. On ne déclenche que si de la matière est en attente (évite une requête
+	# de recettes inutile sur les lieux sans stock) et on ne persiste que si quelque chose a été produit.
+	if grid_doc and grid_doc.get("stock_matieres"):
+		if tenter_production(grid_doc):
+			save_doc(grid_doc)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
 	# Gestion de la grille

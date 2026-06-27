@@ -118,6 +118,10 @@ DEPECAGE_TAGS: dict[str, list] = {
 # référence on retrouve les quantités de base des recettes ; plus lourd → proportionnellement plus.
 DEPECAGE_POIDS_REF: float = 5.0
 
+# Probabilité, à chaque vente à un atelier, de déclencher une passe de production (batch) ;
+# sinon la matière vendue est seulement stockée. Réglable à chaud via /admin.
+ATELIER_TRANSFO_PROBA: float = 0.10
+
 
 def current_world_variables() -> dict:
 	"""Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
@@ -136,6 +140,7 @@ def current_world_variables() -> dict:
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
 		"DEPECAGE_TAGS": {k: list(v) for k, v in DEPECAGE_TAGS.items()},
 		"DEPECAGE_POIDS_REF": DEPECAGE_POIDS_REF,
+		"ATELIER_TRANSFO_PROBA": ATELIER_TRANSFO_PROBA,
 		"CRIT_REUSSITE_MAX": CRIT_REUSSITE_MAX,
 		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
 		"RELATION_INITIALE": RELATION_INITIALE,
@@ -161,7 +166,7 @@ def load_world_variables() -> dict:
 	Retourne le snapshot effectif.
 	"""
 	global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
-	global CHA_MARCHAND, PRIX_MAX_FACTEUR, DEPECAGE_POIDS_REF
+	global CHA_MARCHAND, PRIX_MAX_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	try:
@@ -199,6 +204,7 @@ def load_world_variables() -> dict:
 		DEPECAGE_TAGS.clear()
 		DEPECAGE_TAGS.update({k: list(x) for k, x in v["DEPECAGE_TAGS"].items()})
 	DEPECAGE_POIDS_REF = float(v.get("DEPECAGE_POIDS_REF", DEPECAGE_POIDS_REF))
+	ATELIER_TRANSFO_PROBA = float(v.get("ATELIER_TRANSFO_PROBA", ATELIER_TRANSFO_PROBA))
 
 	CRIT_REUSSITE_MAX            = int(v.get("CRIT_REUSSITE_MAX", CRIT_REUSSITE_MAX))
 	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))
