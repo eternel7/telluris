@@ -59,6 +59,10 @@ ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {"boucherie": ["carcasse"]}
 CHA_MARCHAND: int = 50
 CHA_MARCHAND_PAR_CATEGORIE: dict[str, int] = {}
 PRIX_MAX_FACTEUR: float = 3.0
+# Marge appliquée à chaque étape de transformation (coût de revient propagé) :
+# prix_produit ≈ coût_ingrédients × (quantite_matiere / quantite_produite) × MARGE_TRANSFO.
+# Composé sur les chaînes (produit en N étapes ≈ ×MARGE^N). Réglable à chaud via /admin.
+MARGE_TRANSFO: float = 5.0
 
 # ── Jets de dés (seuils de critique génériques) ──────────────────────────────────
 # Bornes de critique applicables à TOUT jet d100 (marchandage, combat futur, etc.) :
@@ -151,6 +155,7 @@ def current_world_variables() -> dict:
 		"CHA_MARCHAND": CHA_MARCHAND,
 		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
+		"MARGE_TRANSFO": MARGE_TRANSFO,
 		"DEPECAGE_TAGS": {k: list(v) for k, v in DEPECAGE_TAGS.items()},
 		"DEPECAGE_POIDS_REF": DEPECAGE_POIDS_REF,
 		"ATELIER_TRANSFO_PROBA": ATELIER_TRANSFO_PROBA,
@@ -183,7 +188,7 @@ def load_world_variables() -> dict:
 	Retourne le snapshot effectif.
 	"""
 	global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
-	global CHA_MARCHAND, PRIX_MAX_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA
+	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
@@ -215,6 +220,7 @@ def load_world_variables() -> dict:
 
 	CHA_MARCHAND     = int(v.get("CHA_MARCHAND", CHA_MARCHAND))
 	PRIX_MAX_FACTEUR = float(v.get("PRIX_MAX_FACTEUR", PRIX_MAX_FACTEUR))
+	MARGE_TRANSFO    = float(v.get("MARGE_TRANSFO", MARGE_TRANSFO))
 	if isinstance(v.get("CHA_MARCHAND_PAR_CATEGORIE"), dict):
 		CHA_MARCHAND_PAR_CATEGORIE.clear()
 		CHA_MARCHAND_PAR_CATEGORIE.update({k: int(x) for k, x in v["CHA_MARCHAND_PAR_CATEGORIE"].items()})

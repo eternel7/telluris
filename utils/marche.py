@@ -51,16 +51,82 @@ def merchant_cha(lieu_doc: dict) -> int:
 
 def prix_range_cuivre(item_doc: dict, ref=None) -> tuple[int, int]:
 	"""(min, max) en cuivre. Si `valeur` porte ≥2 bornes → min/max de ces bornes ;
-	sinon min = prix proposé (`item_sale_price_cuivre`) et max = min × PRIX_MAX_FACTEUR."""
+	sinon min = **coût de revient** (`cout_production_cuivre` : dérivé poids/rareté pour les
+	matières brutes, propagé via les recettes × MARGE_TRANSFO pour les produits transformés)
+	et max = min × PRIX_MAX_FACTEUR."""
 	valeur = (item_doc or {}).get("valeur")
 	if isinstance(valeur, (list, tuple)) and len(valeur) >= 2:
 		bornes = [valeur_entry_to_cuivre(e) for e in valeur]
 		bornes = [b for b in bornes if b > 0]
 		if len(bornes) >= 2:
 			return min(bornes), max(bornes)
-	pmin = item_sale_price_cuivre(item_doc, ref)
+	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
+	pmin = cout_production_cuivre(item_id, item_doc, ref)
 	pmax = max(pmin, round(pmin * character_stats.PRIX_MAX_FACTEUR))
 	return pmin, pmax
+
+
+# ── Coût de revient propagé (chaînes de transformation) ───────────────────────────
+# Le prix d'un produit reflète le coût de ses ingrédients (récursif via les recettes)
+# × MARGE_TRANSFO par étape → les objets issus de transformations successives sont bien
+# plus chers que les matières brutes. Caches process-lifetime, vidés par reset_prix_cache().
+_recipe_map: dict | None = None   # objet_final_item_id → [recettes le produisant]
+_cout_memo: dict[str, int] = {}
+
+
+def reset_prix_cache() -> None:
+	"""Vide les caches de coût de revient (à appeler quand recettes/items/MARGE changent)."""
+	global _recipe_map
+	_recipe_map = None
+	_cout_memo.clear()
+
+
+def _get_recipe_map() -> dict:
+	"""Construit (une fois) la table objet_final_item_id → liste de recettes le produisant."""
+	global _recipe_map
+	if _recipe_map is None:
+		m: dict[str, list] = {}
+		for r in (find_docs({"type": "recette"}) or []):
+			oid = objet_final_item_id(r.get("objet_final", ""))
+			if oid:
+				m.setdefault(oid, []).append(r)
+		_recipe_map = m
+	return _recipe_map
+
+
+def cout_production_cuivre(item_id: str, item_doc: dict | None = None, ref=None, _seen=None) -> int:
+	"""Coût de revient d'un objet (cuivre). Un `valeur` explicite est autoritaire (pas de
+	propagation). Sinon : pour un objet produit par une/des recette(s), coût des ingrédients
+	(récursif) × quantite_matiere / quantite_produite × MARGE_TRANSFO (max sur les recettes),
+	borné au minimum par le coût intrinsèque (poids/rareté). Feuilles (matières brutes / sans
+	recette) = `item_sale_price_cuivre`."""
+	if not item_id:
+		return item_sale_price_cuivre(item_doc or {}, ref)
+	if item_id in _cout_memo:
+		return _cout_memo[item_id]
+	doc = item_doc if (item_doc is not None and (item_doc.get("_id") == item_id or item_doc.get("item") == item_id)) else (get_doc(item_id) or {})
+	# `valeur` explicite → prix maîtrisé à la main, pas de propagation.
+	if doc.get("valeur") is not None:
+		v = item_sale_price_cuivre(doc, ref if ref is not None else item_id)
+		_cout_memo[item_id] = v
+		return v
+	base = item_sale_price_cuivre(doc, ref if ref is not None else item_id)
+	recs = _get_recipe_map().get(item_id)
+	if not recs or (_seen and item_id in _seen):
+		# Pas de recette (matière brute) : NE PAS mémoïser — le prix peut dépendre du poids
+		# d'instance (items à poids [min,max] comme les carcasses).
+		return base
+	seen = (_seen or set()) | {item_id}
+	best = base
+	for r in recs:
+		input_id = objet_final_item_id(r.get("matiere_premiere_sous_categorie", ""))
+		ci = cout_production_cuivre(input_id, None, None, seen)
+		qm = max(1, int(r.get("quantite_matiere", 1) or 1))
+		qp = max(1, int(r.get("quantite_produite", 1) or 1))
+		best = max(best, int(round(ci * qm / qp * character_stats.MARGE_TRANSFO)))
+	best = max(1, best)
+	_cout_memo[item_id] = best
+	return best
 
 
 def marchander(pmin: int, pmax: int, cha_joueur: int, cha_marchand: int, sens: str,

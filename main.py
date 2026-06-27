@@ -18,7 +18,7 @@ from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref
-from utils.marche import tick_atelier
+from utils.marche import tick_atelier, reset_prix_cache
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
@@ -312,7 +312,9 @@ def admin_reload_world_variables(request: Request, current_user: Annotated[User,
 	"""Recharge rules:world_variables depuis CouchDB à chaud (sans redéploiement)."""
 	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
 		raise HTTPException(status_code=403, detail="Admin only")
-	return {"reloaded": True, "variables": load_world_variables()}
+	variables = load_world_variables()
+	reset_prix_cache()   # MARGE_TRANSFO / recettes / items peuvent avoir changé → vider le cache de coût
+	return {"reloaded": True, "variables": variables}
 
 @app.get("/auth", response_class=HTMLResponse)
 async def read_page_auth(request: Request):
