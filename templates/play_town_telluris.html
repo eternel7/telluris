@@ -30,6 +30,7 @@
 			--accent-color: #ffd700;
 			--text-color: #e0e0e0;
 			--btn-bg: #3a3a4a;
+			--inv-row-h: 36px;        /* hauteur fixe d'une ligne d'inventaire (sac/sol) */
 		}
 
 		* {
@@ -665,7 +666,41 @@
 		}
 		.sh-paperdoll .sh-unequip-btn:hover { background: #ff4757; }
 		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.95rem; flex-wrap: wrap; }
+		.sh-inv-item:has(.sh-equip-row) {
+			flex-wrap: wrap !important;
+			height: auto;
+		}
+		.sh-inv-item:has(.sh-equip-row) .sh-equip-row {
+			flex-basis: 100%;
+		}
 		.sh-inv-qty { color: var(--muted); }
+		/* Sac & sol : lignes à hauteur fixe → zone scrollable dimensionnée en CSS. */
+		#sh-inv-sac .sh-inv-item, #sh-inv-sol .sh-inv-item { flex-wrap: nowrap; overflow: hidden; }
+		#sh-inv-sac .sh-inv-name, #sh-inv-sol .sh-inv-name { 
+			flex: 1 1 0;
+			min-width: 50px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap; 
+		}
+		/* 10 objets visibles puis scroll vertical. */
+		#sh-inv-sac { 
+			max-height: calc(var(--inv-row-h) * 10); 
+			overflow-y: auto;
+			scrollbar-width: thin;
+			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+		}
+		.sh-inv-scroll { position: relative; }
+		/* Marge de scroll d'1 ligne : le dernier objet reste entièrement visible en bas. */
+		.sh-inv-scroll.scrollable #sh-inv-sac { padding-bottom: var(--inv-row-h); }
+		/* Ombre sur la demi-ligne du bas quand il reste des objets à scroller. */
+		.sh-inv-scroll.scrollable::after {
+			content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+			height: calc(var(--inv-row-h) / 2);
+			background: linear-gradient(to bottom, transparent, var(--panel-bg));
+			pointer-events: none;
+		}
+		#inv-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
 		.sh-rarity { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: #333; }
 		.sh-equip-row { display: flex; gap: 4px; margin-top: 4px; align-items: center; width: 100%; }
 		.sh-equip-sel {
@@ -677,8 +712,12 @@
 			padding: 2px 8px; background: rgba(255,215,0,0.08);
 			border: 1px solid rgba(255,215,0,0.3); color: var(--accent-color);
 			cursor: pointer; font-size: 0.8rem; white-space: nowrap;
+			margin-left: auto;
 		}
 		.sh-equip-btn:hover { background: rgba(255,215,0,0.2); border-color: var(--accent-color); }
+		.sh-drop-btn {
+			margin-left: auto !important;
+		}
 		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
 		.sh-skill-icon { font-size: 1.3rem; flex-shrink: 0; }
 		.sh-skill-info { flex: 1; }
@@ -1323,8 +1362,12 @@
 						</div>
 						<div id="charge-label" class="sh-charge-label"></div>
 						
-						<div class="sh-section" style="margin-top:14px">🎒 Sac</div>
-						<div id="sh-inv-sac"></div>
+						<div class="sh-section" style="margin-top:14px; display:flex; align-items:center; justify-content:space-between">
+							<span>🎒 Sac</span>
+							<button type="button" id="inv-sort-btn" class="sh-drop-btn" onclick="cycleInvSort()"
+								title="Trier le sac par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+						</div>
+						<div class="sh-inv-scroll" id="sh-inv-scroll"><div id="sh-inv-sac"></div></div>
 						<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none">⬇️ Au sol</div>
 						<div id="sh-inv-sol"></div>
 					</div>
@@ -2049,6 +2092,27 @@ let _slots        = {{ character.get("slots", {}) | tojson | safe }};
 let _objetsAuSol  = {{ character.get("objets_au_sol", []) | tojson | safe }};
 let _chargeMax    = {{ character.get("derived_stats", {}).get("charge_max", 0) }};
 
+// Tri du sac par nom (3 états : null → 'asc' → 'desc' → null), mémorisé par navigateur.
+const INV_VISIBLE = 20;
+let _invSort = null;
+try { const s = localStorage.getItem('telluris.play.inv_sort'); if (s === 'asc' || s === 'desc') _invSort = s; } catch (e) {}
+
+function cycleInvSort() {
+	_invSort = _invSort === null ? 'asc' : (_invSort === 'asc' ? 'desc' : null);
+	try {
+		if (_invSort) localStorage.setItem('telluris.play.inv_sort', _invSort);
+		else localStorage.removeItem('telluris.play.inv_sort');
+	} catch (e) {}
+	_refreshInventaire();
+}
+
+function updateSortBtn() {
+	const b = document.getElementById('inv-sort-btn');
+	if (!b) return;
+	b.textContent = _invSort === 'asc' ? 'Trier ▲' : (_invSort === 'desc' ? 'Trier ▼' : 'Trier');
+	b.classList.toggle('active', !!_invSort);
+}
+
 // Poids porté = somme des `poids` des items du sac + des items équipés.
 function _currentCharge() {
 	let total = 0;
@@ -2098,12 +2162,23 @@ function _refreshPaperdoll() {
 
 function _refreshInventaire() {
 	const sacEl = document.getElementById('sh-inv-sac');
+	const scrollEl = document.getElementById('sh-inv-scroll');
 	if (!sacEl) return;
 	if (!_inventaire || !_inventaire.length) {
 		sacEl.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Inventaire vide</div>';
+		if (scrollEl) scrollEl.classList.remove('scrollable');
+		updateSortBtn();
 		return;
 	}
-	sacEl.innerHTML = _inventaire.map((item, idx) => {
+	// Ordre d'AFFICHAGE seulement : on garde l'index d'origine pour l'adressage serveur (dropItem).
+	const order = _inventaire.map((_, i) => i);
+	if (_invSort) {
+		const dir = _invSort === 'asc' ? 1 : -1;
+		order.sort((a, b) => dir * String((_inventaire[a] || {}).nom || '')
+			.localeCompare(String((_inventaire[b] || {}).nom || ''), undefined, { numeric: true, sensitivity: 'base' }));
+	}
+	sacEl.innerHTML = order.map(idx => {
+		const item = _inventaire[idx];
 		if (!item || typeof item !== 'object') return '';
 		const compat = (item.slots || []).filter(s => s in SLOT_LABELS);
 		let equipHtml = '';
@@ -2118,11 +2193,13 @@ function _refreshInventaire() {
 		const dropHtml = `<button class="sh-drop-btn" onclick="dropItem(${idx},'${item._id}')" title="Poser au sol">Poser</button>`;
 		return `<div class="sh-inv-item">
 			<span>${item.icon || '📦'}</span>
-			<span style="flex:1">${item.nom || '—'}</span>
-			${poidsHtml}<span class="sh-inv-qty">× ${item.quantite || 1}</span>
+			<span class="sh-inv-name">${item.nom || '—'}</span>
+			${poidsHtml}
 			${rarHtml}${equipHtml}${dropHtml}
 		</div>`;
 	}).join('');
+	if (scrollEl) scrollEl.classList.toggle('scrollable', _inventaire.length > INV_VISIBLE);
+	updateSortBtn();
 }
 
 // Objets au sol (transitoires) : reprenables tant qu'on n'a pas bougé.
@@ -2139,7 +2216,7 @@ function _refreshSol() {
 		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
 		return `<div class="sh-inv-item">
 			<span>${item.icon || '📦'}</span>
-			<span style="flex:1">${item.nom || '—'}</span>
+			<span class="sh-inv-name">${item.nom || '—'}</span>
 			${poidsHtml}${rarHtml}
 			<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button>
 		</div>`;
