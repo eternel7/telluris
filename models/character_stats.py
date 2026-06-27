@@ -84,6 +84,8 @@ MARCHANDAGE_BLOCAGE_SECONDES: int = 3600
 # gonfler). `_charnu_base` s'applique à toute créature charnue (ni esprit/incorporel,
 # ni construct/elementaire, ni mort-vivant). Les morts-vivants n'utilisent que leurs
 # propres entrées (os). Garde : `plumes` retiré si l'espèce est `draconique`.
+# Les quantités finales sont mises à l'échelle du POIDS de la carcasse (cf.
+# DEPECAGE_POIDS_REF) — il n'y a plus de bucket petite_taille/geant.
 DEPECAGE_TAGS: dict[str, list] = {
 	"_charnu_base":  ["viande", "viande", "os", "sang", "graisse"],
 	"animal":        ["cuir", "crocs", "poils"],
@@ -111,6 +113,11 @@ DEPECAGE_TAGS: dict[str, list] = {
 	"non_mort":      ["os", "os"],
 }
 
+# Échelle du dépeçage : quantité de chaque matière = max(1, round(base × poids / DEPECAGE_POIDS_REF)).
+# Le poids de la carcasse pilote seul la production (conservation de la masse). À ce poids de
+# référence on retrouve les quantités de base des recettes ; plus lourd → proportionnellement plus.
+DEPECAGE_POIDS_REF: float = 5.0
+
 
 def current_world_variables() -> dict:
 	"""Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
@@ -128,6 +135,7 @@ def current_world_variables() -> dict:
 		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
 		"DEPECAGE_TAGS": {k: list(v) for k, v in DEPECAGE_TAGS.items()},
+		"DEPECAGE_POIDS_REF": DEPECAGE_POIDS_REF,
 		"CRIT_REUSSITE_MAX": CRIT_REUSSITE_MAX,
 		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
 		"RELATION_INITIALE": RELATION_INITIALE,
@@ -153,7 +161,7 @@ def load_world_variables() -> dict:
 	Retourne le snapshot effectif.
 	"""
 	global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
-	global CHA_MARCHAND, PRIX_MAX_FACTEUR
+	global CHA_MARCHAND, PRIX_MAX_FACTEUR, DEPECAGE_POIDS_REF
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	try:
@@ -190,6 +198,7 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("DEPECAGE_TAGS"), dict):
 		DEPECAGE_TAGS.clear()
 		DEPECAGE_TAGS.update({k: list(x) for k, x in v["DEPECAGE_TAGS"].items()})
+	DEPECAGE_POIDS_REF = float(v.get("DEPECAGE_POIDS_REF", DEPECAGE_POIDS_REF))
 
 	CRIT_REUSSITE_MAX            = int(v.get("CRIT_REUSSITE_MAX", CRIT_REUSSITE_MAX))
 	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))

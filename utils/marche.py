@@ -252,7 +252,19 @@ _CONSTRUCT = {"construct", "elementaire"}
 _UNDEAD = {"undead", "non_mort"}
 
 
-def depecage_carcasse(espece_doc: dict, qmap: dict | None = None) -> list[tuple[str, int]]:
+def _facteur_poids(poids) -> float:
+	"""Facteur d'échelle du dépeçage = poids / DEPECAGE_POIDS_REF (1.0 si poids absent/invalide).
+
+	Pilote la conservation de la masse : une carcasse plus lourde rend proportionnellement
+	plus de matières (cf. depecage_carcasse)."""
+	ref = character_stats.DEPECAGE_POIDS_REF
+	if not isinstance(poids, (int, float)) or isinstance(poids, bool) or poids <= 0 or ref <= 0:
+		return 1.0
+	return float(poids) / float(ref)
+
+
+def depecage_carcasse(espece_doc: dict, qmap: dict | None = None,
+					  poids=None) -> list[tuple[str, int]]:
 	"""Matières premières tirées d'une carcasse (modèle hybride espèce × recettes).
 
 	La **membership** (quelles sous-catégories) est dérivée des `tags` de l'espèce ; la
@@ -261,17 +273,20 @@ def depecage_carcasse(espece_doc: dict, qmap: dict | None = None) -> list[tuple[
 	Override : si l'espèce porte un champ `depecage` (liste de [sous_cat, qty]), on
 	l'utilise tel quel. Règle par tags (table tunable `DEPECAGE_TAGS`) : esprit/construct
 	→ rien ; mort-vivant → os ; sinon base charnue + apports par tag. On prend le MAX par
-	sous-cat entre sources (pas la somme). Échelle : ×0.5 `petite_taille`, ×2 `geant` (min 1).
+	sous-cat entre sources (pas la somme). **Conservation de la masse** : toute quantité de
+	base est mise à l'échelle du poids de l'instance (`× poids / DEPECAGE_POIDS_REF`, min 1)
+	— plus la carcasse est lourde, plus elle rend de matières (plus de bucket petite/geant).
 	"""
 	espece_doc = espece_doc or {}
+	facteur = _facteur_poids(poids)
 	override = espece_doc.get("depecage")
 	if isinstance(override, list) and override:
 		out = []
 		for entry in override:
 			if isinstance(entry, (list, tuple)) and len(entry) >= 2:
-				out.append((str(entry[0]), int(entry[1])))
+				out.append((str(entry[0]), max(1, int(round(int(entry[1]) * facteur)))))
 			elif isinstance(entry, dict) and entry.get("sous_categorie"):
-				out.append((entry["sous_categorie"], int(entry.get("quantite", 1))))
+				out.append((entry["sous_categorie"], max(1, int(round(int(entry.get("quantite", 1)) * facteur)))))
 		return out
 
 	tags = set(espece_doc.get("tags") or [])
@@ -296,14 +311,13 @@ def depecage_carcasse(espece_doc: dict, qmap: dict | None = None) -> list[tuple[
 		for sc, q in local.items():
 			counts[sc] = max(counts.get(sc, 0), q)
 
-	facteur = 0.5 if "petite_taille" in tags else (2.0 if "geant" in tags else 1.0)
 	qmap = qmap or {}
 	out = []
 	for sc, q in counts.items():
 		if q <= 0:
 			continue
 		base = qmap.get(sc, q)  # quantité de recette si dispo, sinon dérivée des tags
-		out.append((sc, max(1, int(round(base * facteur)))))
+		out.append((sc, max(1, int(round(base * facteur)))))  # facteur = échelle au poids
 	return out
 
 
@@ -337,7 +351,7 @@ def _matieres_entrantes(item_doc: dict, qmap: dict | None = None) -> list[tuple[
 		item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id") or ""
 		sub = item_id[len("item:"):] if item_id.startswith("item:") else ""
 		espece = get_doc("espece:" + sub) if sub else None
-		return depecage_carcasse(espece, qmap) if espece else []
+		return depecage_carcasse(espece, qmap, (item_doc or {}).get("poids")) if espece else []
 	if sous_cat:
 		return [(sous_cat, 1)]
 	return []

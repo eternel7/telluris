@@ -597,9 +597,14 @@ def create_combat_doc(
 	}
 	# On référence le lieu battle map (grille statique non dupliquée). `cells` est
 	# résolu à la demande via get_combat_grid(). Repli = grille ouverte.
+	# `nav` DOIT être inclus : le placement (_reachable_region) suit les mêmes règles que
+	# le déplacement (_find_path, qui charge nav via get_combat_grid). Sans lui, une carte
+	# scindée par des masques nav (ex. chemin2) ferait spawn un monstre dans une région
+	# nav-séparée du joueur → injoignable malgré la garantie de _place_actors.
 	if battle_map:
 		combat_doc["battle_map_id"] = battle_map["_id"]
-		grid = {"dims": battle_map["dimensions"], "cells": battle_map["cells"]}
+		grid = {"dims": battle_map["dimensions"], "cells": battle_map["cells"],
+				"nav": battle_map.get("nav", {})}
 	else:
 		grid = _open_grid()
 		combat_doc["grid_dims"] = grid["dims"]
