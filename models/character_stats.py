@@ -122,6 +122,19 @@ DEPECAGE_POIDS_REF: float = 5.0
 # sinon la matière vendue est seulement stockée. Réglable à chaud via /admin.
 ATELIER_TRANSFO_PROBA: float = 0.10
 
+# ── Prix offre/demande (stock cible) ──────────────────────────────────────────────
+# Le prix d'un bien est modulé par l'écart entre le stock du marchand et un stock cible :
+# stock élevé → moins cher (le marchand brade) ; stock bas → plus cher. Le facteur est borné
+# ±PRIX_AMPLITUDE_STOCK et le prix final reste dans [pmin, pmax]. Le stock cible est défini
+# PAR LIEU (champ `stock_cible` : {item|sous_categorie|categorie → cible}), STOCK_CIBLE_DEFAUT
+# servant de repli ultime.
+STOCK_CIBLE_DEFAUT: int = 100
+PRIX_AMPLITUDE_STOCK: float = 0.30
+# Écoulement PNJ des produits finis : à chaque vente/visite, proba de vendre aux PNJ une
+# fraction de l'excédent (au-dessus de la cible) de chaque produit en rayon.
+VENTE_PNJ_PROBA: float = 0.10
+VENTE_PNJ_FRACTION: float = 0.50
+
 
 def current_world_variables() -> dict:
 	"""Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
@@ -141,6 +154,10 @@ def current_world_variables() -> dict:
 		"DEPECAGE_TAGS": {k: list(v) for k, v in DEPECAGE_TAGS.items()},
 		"DEPECAGE_POIDS_REF": DEPECAGE_POIDS_REF,
 		"ATELIER_TRANSFO_PROBA": ATELIER_TRANSFO_PROBA,
+		"STOCK_CIBLE_DEFAUT": STOCK_CIBLE_DEFAUT,
+		"PRIX_AMPLITUDE_STOCK": PRIX_AMPLITUDE_STOCK,
+		"VENTE_PNJ_PROBA": VENTE_PNJ_PROBA,
+		"VENTE_PNJ_FRACTION": VENTE_PNJ_FRACTION,
 		"CRIT_REUSSITE_MAX": CRIT_REUSSITE_MAX,
 		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
 		"RELATION_INITIALE": RELATION_INITIALE,
@@ -167,6 +184,7 @@ def load_world_variables() -> dict:
 	"""
 	global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA
+	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	try:
@@ -205,6 +223,10 @@ def load_world_variables() -> dict:
 		DEPECAGE_TAGS.update({k: list(x) for k, x in v["DEPECAGE_TAGS"].items()})
 	DEPECAGE_POIDS_REF = float(v.get("DEPECAGE_POIDS_REF", DEPECAGE_POIDS_REF))
 	ATELIER_TRANSFO_PROBA = float(v.get("ATELIER_TRANSFO_PROBA", ATELIER_TRANSFO_PROBA))
+	STOCK_CIBLE_DEFAUT   = int(v.get("STOCK_CIBLE_DEFAUT", STOCK_CIBLE_DEFAUT))
+	PRIX_AMPLITUDE_STOCK = float(v.get("PRIX_AMPLITUDE_STOCK", PRIX_AMPLITUDE_STOCK))
+	VENTE_PNJ_PROBA      = float(v.get("VENTE_PNJ_PROBA", VENTE_PNJ_PROBA))
+	VENTE_PNJ_FRACTION   = float(v.get("VENTE_PNJ_FRACTION", VENTE_PNJ_FRACTION))
 
 	CRIT_REUSSITE_MAX            = int(v.get("CRIT_REUSSITE_MAX", CRIT_REUSSITE_MAX))
 	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))

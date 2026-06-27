@@ -148,6 +148,50 @@ def prix_courant(relation_doc: dict, item_id: str, pmin: int, pmax: int, sens: s
 	return prix_base_cuivre(pmin, pmax, relation_value(relation_doc), sens)
 
 
+# ── Prix offre/demande (stock cible) ──────────────────────────────────────────────
+
+def stock_cible_pour(lieu_doc: dict, item: dict) -> int:
+	"""Stock cible d'un bien chez ce lieu, par spécificité décroissante :
+	`stock_cible.item[item_id]` → `stock_cible.sous_categorie[sous_cat]` →
+	`stock_cible.categorie[cat]` → world-var `STOCK_CIBLE_DEFAUT`. `item` = doc résolu."""
+	cibles = (lieu_doc or {}).get("stock_cible") or {}
+	item = item or {}
+	item_id = item.get("item") or item.get("_id")
+	niveaux = (
+		("item", item_id),
+		("sous_categorie", item_sous_categorie(item)),
+		("categorie", item.get("categorie")),
+	)
+	for niveau, cle in niveaux:
+		table = cibles.get(niveau) or {}
+		if cle and cle in table:
+			try:
+				return max(1, int(table[cle]))
+			except (TypeError, ValueError):
+				pass
+	return max(1, int(character_stats.STOCK_CIBLE_DEFAUT))
+
+
+def facteur_stock(stock: int, cible: int) -> float:
+	"""Facteur prix selon l'écart stock/cible, borné ±PRIX_AMPLITUDE_STOCK.
+	Stock élevé → < 1 (moins cher / moins bien payé) ; stock bas → > 1. Même sens pour
+	l'achat (le marchand brade son surplus) et la vente (il paie moins une matière dont il déborde)."""
+	cible = max(1, int(cible or 0))
+	ampl = float(character_stats.PRIX_AMPLITUDE_STOCK)
+	return _clamp(1.0 - ampl * (int(stock or 0) - cible) / cible, 1.0 - ampl, 1.0 + ampl)
+
+
+def prix_marche(relation_doc: dict, item_id: str, pmin: int, pmax: int, sens: str,
+				stock: int, cible: int) -> int:
+	"""Prix « marché » : `prix_courant` (relation + marchandage) modulé par le facteur de
+	stock, re-clampé dans `[pmin, pmax]` (planchers/plafonds conservés). Source unique du
+	prix appliqué (listes + transactions)."""
+	base = prix_courant(relation_doc, item_id, pmin, pmax, sens)
+	pmin_i, pmax_i = int(pmin), int(max(pmin, pmax))
+	val = int(round(base * facteur_stock(stock, cible)))
+	return max(pmin_i, min(pmax_i, max(1, val)))
+
+
 # ── Doc relation (réputation perso × lieu) ───────────────────────────────────────
 
 def now_epoch() -> int:
@@ -418,10 +462,50 @@ def tenter_production(lieu_doc: dict, recettes: list | None = None) -> list[dict
 	return _executer_production_batch(lieu_doc, recettes)
 
 
-def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> list[dict]:
-	"""Absorbe l'objet acheté en matières (`stock_matieres`) puis tente une passe de
-	production (`tenter_production`, proba `ATELIER_TRANSFO_PROBA`). Mute `lieu_doc` en
-	place (l'appelant persiste). Renvoie [{item_id, qty}] produits (vide si pas de batch)."""
+def ecouler_produits_pnj(lieu_doc: dict) -> list[dict]:
+	"""Vente PNJ en parallèle : avec proba `VENTE_PNJ_PROBA`, écoule une fraction
+	`VENTE_PNJ_FRACTION` de l'**excédent** (au-dessus du stock cible) de chaque produit en
+	rayon (`stock_vente`). Les PNJ n'achètent que le surplus : `qty` ne descend jamais sous
+	la cible (le joueur garde le stock de base). Mute `lieu_doc` ; renvoie [{item_id, qty}]
+	écoulés (vide si pas de déclenchement)."""
+	proba = max(0.0, min(1.0, character_stats.VENTE_PNJ_PROBA))
+	if random.random() >= proba:
+		return []
+	frac = max(0.0, min(1.0, character_stats.VENTE_PNJ_FRACTION))
+	if frac <= 0:
+		return []
+	ecoules = []
+	for entry in (lieu_doc or {}).get("stock_vente", []):
+		item_id = entry.get("item_id")
+		qty = int(entry.get("qty", 0))
+		if not item_id or qty <= 0:
+			continue
+		item = resolve_item_ref(item_id)
+		if not item:
+			continue
+		cible = stock_cible_pour(lieu_doc, item)
+		excedent = qty - cible
+		if excedent <= 0:
+			continue
+		vendu = int(round(excedent * frac))
+		if vendu > 0:
+			entry["qty"] = qty - vendu
+			ecoules.append({"item_id": item_id, "qty": vendu})
+	return ecoules
+
+
+def tick_atelier(lieu_doc: dict, recettes: list | None = None) -> bool:
+	"""Tick marché à appeler à chaque vente/visite : tente une passe de production puis un
+	écoulement PNJ des produits finis. Renvoie True si le doc a changé (→ l'appelant save)."""
+	produits = tenter_production(lieu_doc, recettes)
+	ecoules = ecouler_produits_pnj(lieu_doc)
+	return bool(produits or ecoules)
+
+
+def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:
+	"""Absorbe l'objet acheté en matières (`stock_matieres`) puis lance un `tick_atelier`
+	(production + écoulement PNJ, probabilistes). Mute `lieu_doc` en place (l'appelant
+	persiste). Renvoie True si quelque chose a changé."""
 	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	recettes = lieu_recettes(lieu_doc.get("categorie"))
 
@@ -433,7 +517,7 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> list[dict]:
 	for sous_cat, qty in _matieres_entrantes(item_doc, qmap):
 		stock_mat[sous_cat] = int(stock_mat.get(sous_cat, 0)) + qty
 
-	return tenter_production(lieu_doc, recettes)
+	return tick_atelier(lieu_doc, recettes)
 
 
 def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> list[dict]:
@@ -449,7 +533,8 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 		if not item:
 			continue
 		pmin, pmax = prix_range_cuivre(item, item_id)
-		prix_cuivre = prix_courant(relation_doc, item_id, pmin, pmax, "achat")
+		cible = stock_cible_pour(lieu_doc, item)
+		prix_cuivre = prix_marche(relation_doc, item_id, pmin, pmax, "achat", qty, cible)
 		negocie = (relation_doc or {}).get("prix_negocies", {}).get(item_id, {}).get("achat") is not None
 		out.append({
 			"item_id": item_id,

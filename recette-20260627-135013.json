@@ -1,8 +1,8 @@
 {
   "db": "telluris",
   "type": "recette",
-  "exported_at": "2026-06-26T19:45:33.587072Z",
-  "doc_count": 62,
+  "exported_at": "2026-06-27T13:50:13.845666Z",
+  "doc_count": 78,
   "docs": [
     {
       "_id": "recette:046c28d7-e798-4ed6-8d84-2ffd6185fbfb",
@@ -145,6 +145,16 @@
       "quantite_produite": 1
     },
     {
+      "_id": "recette:3ed6ac55-849a-43f6-bd9d-cfd76c713ec8",
+      "_rev": "1-32823b702862230a9a5ea20acf19e7c0",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "foie",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
+    },
+    {
       "_id": "recette:414f2b13-068d-456d-b85b-6db7e4caed85",
       "_rev": "1-f2f04dc55d6d826723ef524691dcc52c",
       "matiere_premiere_sous_categorie": "griffes",
@@ -215,6 +225,16 @@
       "quantite_produite": 2
     },
     {
+      "_id": "recette:56db9605-79fa-407b-baba-317c973396da",
+      "_rev": "1-4aefc320b6ad295ed35f38dba523d28a",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "tendons",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
+    },
+    {
       "_id": "recette:59969bb4-4e94-4fa4-b2dc-dda6453d45e8",
       "_rev": "1-97a3370e16718f94831996b719621891",
       "matiere_premiere_sous_categorie": "foie",
@@ -265,6 +285,16 @@
       "quantite_produite": 1
     },
     {
+      "_id": "recette:625e83ee-81f7-490b-a71f-f3ed222ec6d8",
+      "_rev": "1-91633e0cd744f9a6958598740505dc54",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "griffes",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
+    },
+    {
       "_id": "recette:63cec5f7-e699-4829-a77f-fdb4eed9a18f",
       "_rev": "1-ac5c0f2d50bd50857eb2057897b83266",
       "matiere_premiere_sous_categorie": "cuir",
@@ -275,11 +305,31 @@
       "quantite_produite": 1
     },
     {
+      "_id": "recette:64a9e7d5-11bd-4d37-8391-7b98053c7b09",
+      "_rev": "1-adfd19bff5cc671feae7e2ebd168429c",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "yeux",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 2
+    },
+    {
       "_id": "recette:68999460-acbc-4b15-8555-67deef6b4ab7",
       "_rev": "1-be4e534dbf3d78559df54560392d5716",
       "matiere_premiere_sous_categorie": "coeur",
       "lieu_categorie": "cuisine",
       "objet_final": "mets_rare",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
+    },
+    {
+      "_id": "recette:69707d2f-984f-4b1f-8f7d-af845aff2d92",
+      "_rev": "1-c2c078c3e142ec2f949fafe1e98f6869",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "plumes",
       "type": "recette",
       "quantite_matiere": 1,
       "quantite_produite": 1
@@ -293,6 +343,16 @@
       "type": "recette",
       "quantite_matiere": 2,
       "quantite_produite": 2
+    },
+    {
+      "_id": "recette:6cfcf2d5-2206-4f5f-b26d-1529e1c9bbd3",
+      "_rev": "1-24f57e3f2c1f313df4a3b95d83707164",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "crane",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
     },
     {
       "_id": "recette:70f174ca-b706-4f53-b837-bae935ee2829",
@@ -313,6 +373,16 @@
       "type": "recette",
       "quantite_matiere": 1,
       "quantite_produite": 4
+    },
+    {
+      "_id": "recette:7355850f-efc2-4df0-943d-a682f37551dc",
+      "_rev": "1-01bcd9b23dd0e179233de063327f3183",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "coeur",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
     },
     {
       "_id": "recette:754f052f-e9e1-4096-a335-a1e0a0006e54",
@@ -355,6 +425,46 @@
       "quantite_produite": 1
     },
     {
+      "_id": "recette:7f74caa4-d1ae-414a-9c5d-b63eca210d6b",
+      "_rev": "1-47f9e42ce52852a28edc0e1e9911f28d",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "crins",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
+    },
+    {
+      "_id": "recette:83be1e90-69fd-48b8-8ef4-35d218691c9f",
+      "_rev": "1-e701dbed3eec6d6c3b5ce8775a62aa4c",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "graisse",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
+    },
+    {
+      "_id": "recette:84272052-c494-4557-a3e2-2a77ef6da79e",
+      "_rev": "1-1b5c5b66966427db65d90dd7b18f3397",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "viande",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 2
+    },
+    {
+      "_id": "recette:854f4366-412a-44a4-a6bb-34d684de997c",
+      "_rev": "1-fdf3b96b323c305d2a88e1eb72e0872f",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "os",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 2
+    },
+    {
       "_id": "recette:869bfa5d-145e-4f40-8b80-c5d2f6a83573",
       "_rev": "1-bc222bfbddb25212939a5da6255c07f4",
       "matiere_premiere_sous_categorie": "os",
@@ -383,6 +493,16 @@
       "type": "recette",
       "quantite_matiere": 1,
       "quantite_produite": 2
+    },
+    {
+      "_id": "recette:8caf9018-95d5-440e-82dc-e59fdd8c529b",
+      "_rev": "1-5d57cad4c354b571bc5f58a67f1ddf72",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "cuir brut",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
     },
     {
       "_id": "recette:9096c8b7-4a31-4909-b159-587c61287f1c",
@@ -433,6 +553,16 @@
       "type": "recette",
       "quantite_matiere": 1,
       "quantite_produite": 2
+    },
+    {
+      "_id": "recette:9dbc3c55-8dd3-41f6-8a40-07e3fac82142",
+      "_rev": "1-050cfc38f4c05b261b7a1d221c8d28b9",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "sang",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
     },
     {
       "_id": "recette:9f602cb9-3c13-4512-92b1-e0bcdbfa612f",
@@ -525,6 +655,26 @@
       "quantite_produite": 1
     },
     {
+      "_id": "recette:dc54857e-2694-4e4b-96de-ff86811d5499",
+      "_rev": "1-003274829cff7f30f34c52d37c53fe2b",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "crocs",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
+    },
+    {
+      "_id": "recette:df156843-c746-4b10-a5d6-6192e66124bd",
+      "_rev": "1-7d6c058bc37fec44c8627765ce7d0d78",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "boyaux",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
+    },
+    {
       "_id": "recette:e0d9ded5-e2d8-493d-a98b-dddfbab3cbb8",
       "_rev": "1-e18488e88697cd913be9ab5bfc0eb078",
       "matiere_premiere_sous_categorie": "plumes",
@@ -593,6 +743,16 @@
       "type": "recette",
       "quantite_matiere": 1,
       "quantite_produite": 3
+    },
+    {
+      "_id": "recette:f7d7ad77-a3af-421a-a163-e9e20429433b",
+      "_rev": "1-124f4f33bc9456c69044d3e7c0a0ea18",
+      "matiere_premiere_sous_categorie": "carcasse",
+      "lieu_categorie": "boucherie",
+      "objet_final": "poils",
+      "type": "recette",
+      "quantite_matiere": 1,
+      "quantite_produite": 1
     },
     {
       "_id": "recette:f9d1f0ae-70ed-4931-8693-1c0718530559",

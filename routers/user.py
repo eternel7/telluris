@@ -14,13 +14,13 @@ from utils.characters import (
 	recompute_equipment_bonus, carried_weight, charge_max_of,
 	item_ref_id, item_ref_weight, resolve_item_ref,
 	money_to_cuivre, cuivre_to_purse, credit_character,
-	lieu_buys,
+	lieu_buys, item_sous_categorie,
 )
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
 	convertir_apres_achat, resolve_stock_vente,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
-	prix_courant, _relation_seuil_bonus, now_epoch,
+	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 )
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
@@ -711,7 +711,9 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 			continue
 		item_id = item.get("item") or item.get("_id")
 		pmin, pmax = prix_range_cuivre(item, ref)
-		prix_cuivre = prix_courant(relation, item_id, pmin, pmax, "vente")
+		stock_mat = int((lieu_doc.get("stock_matieres", {}) or {}).get(item_sous_categorie(item), 0))
+		cible = stock_cible_pour(lieu_doc, item)
+		prix_cuivre = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
 		negocie = (relation or {}).get("prix_negocies", {}).get(item_id, {}).get("vente") is not None
 		vendables.append({
 			"index": idx,
@@ -782,11 +784,13 @@ async def sell_item(
 		# On a `pop` la ref mais on raise avant tout save_doc : sans effet sur le doc.
 		raise HTTPException(status_code=422, detail="Le marchand n'achète pas cet objet")
 
-	# Prix appliqué = prix courant (négocié au marchandage volontaire, sinon base pondéré
-	# relation). Plus de jet automatique ici : marchander est une action explicite séparée.
+	# Prix appliqué = prix marché (prix courant relation/marchandage modulé par le stock du
+	# marchand en cette matière), calculé AVANT que le lieu n'absorbe l'objet.
 	item_id = item.get("item") or item.get("_id")
 	pmin, pmax = prix_range_cuivre(item, ref)
-	prix = prix_courant(relation, item_id, pmin, pmax, "vente")
+	stock_mat = int((lieu_doc.get("stock_matieres", {}) or {}).get(item_sous_categorie(item), 0))
+	cible = stock_cible_pour(lieu_doc, item)
+	prix = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
 	purse = credit_character(character, prix)
 	character["inventaire"] = inventaire
 
@@ -833,9 +837,11 @@ async def buy_item(
 	if not item:
 		raise HTTPException(status_code=422, detail="Objet introuvable")
 
-	# Prix courant à l'achat (négocié sinon base pondéré relation). Pas de jet auto ici.
+	# Prix marché à l'achat (relation/marchandage modulé par le stock en rayon de ce produit),
+	# calculé avant le décrément du stock.
 	pmin, pmax = prix_range_cuivre(item, item_id)
-	prix = prix_courant(relation, item_id, pmin, pmax, "achat")
+	cible = stock_cible_pour(lieu_doc, item)
+	prix = prix_marche(relation, item_id, pmin, pmax, "achat", int(entry.get("qty", 0)), cible)
 
 	if carried_weight(character) + item_ref_weight(item_id) > charge_max_of(character):
 		raise HTTPException(status_code=422, detail="Trop chargé pour porter cet objet")
