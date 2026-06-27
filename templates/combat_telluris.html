@@ -83,10 +83,11 @@
 	display: flex; align-items: center; justify-content: center;
 	z-index: 10; pointer-events: none;
 }
-.player-token::after {
-	content: ''; width: 60%; height: 60%;
-	background: #2e86de; border-radius: 50%; border: 2px solid white;
-	box-shadow: 0 0 10px #2e86de;
+/* Portrait rond du joueur + anneau PV/PM (cadrage posé en JS, cf. applyPlayerPortrait). */
+.player-token .pt-img {
+	position: absolute; inset: 10%; border-radius: 50%;
+	background-repeat: no-repeat;
+	border: 2px solid var(--gold2); box-shadow: 0 0 10px rgba(0,0,0,0.6);
 }
 /* Tokens monstres positionnés relativement au joueur (centré) */
 #tokens-layer { position: absolute; inset: 0; z-index: 9; pointer-events: none; }
@@ -126,18 +127,29 @@
 }
 .tour-label { font-family: 'Cinzel', serif; font-size: 12px; color: #c9c2b4; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 .tour-label span { color: var(--gold2); font-weight: bold; }
-#initiative-strip { display: flex; gap: 5px; flex-wrap: wrap; }
+#initiative-strip { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .init-badge {
-	width: 28px; height: 28px; border-radius: 50%;
+	position: relative; flex-shrink: 0;
+	width: 42px; height: 42px; border-radius: 50%;
 	background: #333; border: 2px solid #555;
 	display: flex; align-items: center; justify-content: center;
-	font-size: 11px; font-weight: bold; color: #888;
+	font-size: 14px; font-weight: bold; color: #888;
 	transition: all 0.2s;
 }
 .init-badge.joueur  { background: #1a4a7a; border-color: #2e86de; color: #7ec8ff; }
 .init-badge.monstre { background: #4a1a1a; border-color: #aa3333; color: #ffaaaa; }
-.init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.15); }
-.init-badge.dead    { opacity: 0.3; }
+.init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.12); }
+.init-badge.dead    { opacity: 0.3; filter: grayscale(1); }
+
+/* ── Portrait/image + anneau de vitalité (partagés badge initiative ↔ player-token) ── */
+.ib-img    { position: absolute; inset: 5px; border-radius: 50%; background-repeat: no-repeat; }
+.ib-letter { position: relative; z-index: 1; }
+/* Deux demi-arcs en bordure : gauche = PV (rouge), droite = PM (bleu). */
+.vit-ring  { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
+.vit-ring path { fill: none; }
+.vit-track { stroke: rgba(0,0,0,0.55); stroke-width: 4; }
+.vit-pv    { stroke: #ff4757; stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 0.3s ease; }
+.vit-pm    { stroke: #2e86de; stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 0.3s ease; }
 
 /* ─── Main UI ──────────────────────────────────────────────────── */
 /* Tableau de bord : joueur en haut-gauche, ennemis dessous, centre (décision) à
@@ -373,18 +385,25 @@
 	<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span></span>
 	<div id="initiative-strip">
 		{% for actor_id in combat.ordre_initiative %}
+			{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
 			{% if actor_id.startswith('joueur_') %}
-				{% set badge_type = 'joueur' %}
-				{% set badge_label = combat.joueurs[0].nom[0] | upper %}
-				{% set badge_dead = '' %}
+				{% set j0 = combat.joueurs[0] %}
+				<div class="init-badge joueur {{ active }}" id="badge-{{ actor_id }}">
+					{% if j0.image %}<div class="ib-img" id="badge-portrait"></div>{% else %}<div class="ib-letter">{{ j0.nom[0] | upper }}</div>{% endif %}
+					<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
+						<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
+						<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>
+						<path class="vit-pv" id="ib-pv" d="M21 38 A17 17 0 0 1 21 4"></path>
+						<path class="vit-pm" id="ib-pm" d="M21 38 A17 17 0 0 0 21 4"></path>
+					</svg>
+				</div>
 			{% else %}
-				{% set badge_type = 'monstre' %}
 				{% set m_item = combat.monstres | selectattr('id', 'equalto', actor_id) | first %}
-				{% set badge_label = m_item.nom[0] | upper if m_item else '?' %}
 				{% set badge_dead = '' if (m_item and m_item.vivant) else ' dead' %}
+				<div class="init-badge monstre{{ badge_dead }} {{ active }}" id="badge-{{ actor_id }}">
+					{% if m_item and m_item.image %}<div class="ib-img" style="background:url('{{ url_for('monsters', path=m_item.image) }}') center/cover no-repeat"></div>{% else %}<div class="ib-letter">{{ m_item.nom[0] | upper if m_item else '?' }}</div>{% endif %}
+				</div>
 			{% endif %}
-			<div class="init-badge {{ badge_type }}{{ badge_dead }} {{ 'active' if loop.index0 == combat.acteur_courant_index else '' }}"
-			     id="badge-{{ actor_id }}">{{ badge_label }}</div>
 		{% endfor %}
 	</div>
 </div>
@@ -394,7 +413,15 @@
 		<img id="bg-image" src="{{ url_for('battle_maps', path=combat.map_image) }}" alt="Carte de combat">
 	</div>
 	<div id="tokens-layer"></div>
-	<div class="player-token"></div>
+	<div class="player-token">
+		{% if combat.joueurs[0].image %}<div class="pt-img" id="token-portrait"></div>{% endif %}
+		<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
+			<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
+			<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>
+			<path class="vit-pv" id="pt-pv" d="M21 38 A17 17 0 0 1 21 4"></path>
+			<path class="vit-pm" id="pt-pm" d="M21 38 A17 17 0 0 0 21 4"></path>
+		</svg>
+	</div>
 </div>
 
 <!-- Main UI -->
@@ -579,6 +606,48 @@ if (GRID && GRID.dims) {
 	document.documentElement.style.setProperty('--bg-h', GRID.dims.y);
 }
 
+// Portrait du joueur : la portion d'image cadrée dans play_town (zoom + déplacement) est
+// reproduite dans les jetons via background-size/-position en % (relatifs au conteneur →
+// indépendant de la taille du jeton). Fenêtre de cadrage de référence = 100×100 (play_town).
+const PORTRAIT = {
+	img:       {{ url_for('characters', path=character.image) | string | tojson | safe }},
+	W:         {{ portrait_largeur | tojson | safe }},
+	H:         {{ portrait_hauteur | tojson | safe }},
+	zoom:      {{ character.get('portrait_zoom', 100) | tojson | safe }},
+	translate: {{ character.get('portrait_translate', 0) | tojson | safe }},
+};
+function applyPlayerPortrait() {
+	if (!PORTRAIT.img || !PORTRAIT.W || !PORTRAIT.H) return;
+	const zoom = PORTRAIT.zoom || 100;
+	const imgW = PORTRAIT.W * zoom / 100, imgH = PORTRAIT.H * zoom / 100;
+	const t = PORTRAIT.translate;
+	const x = (t && t !== 0) ? Math.abs(t.x) : (imgW - 100) / 2;
+	const y = (t && t !== 0) ? Math.abs(t.y) : 0;
+	const size = `${imgW}% ${imgH}%`;
+	const pos  = `${imgW > 100 ? x / (imgW - 100) * 100 : 50}% ${imgH > 100 ? y / (imgH - 100) * 100 : 50}%`;
+	['badge-portrait', 'token-portrait'].forEach(id => {
+		const el = document.getElementById(id);
+		if (!el) return;
+		el.style.backgroundImage    = `url('${PORTRAIT.img}')`;
+		el.style.backgroundSize     = size;
+		el.style.backgroundPosition = pos;
+	});
+}
+
+// Anneau de vitalité : longueur d'un demi-arc (r=17 dans le viewBox 42×42 partagé).
+const IB_ARC = Math.PI * 17;
+function setArc(el, frac) {
+	if (el) el.style.strokeDasharray = `${Math.max(0, Math.min(1, frac)) * IB_ARC} 999`;
+}
+function updatePlayerVitals(j) {
+	const pvFrac = j.pv_max > 0 ? j.currentPV / j.pv_max : 0;
+	const pmFrac = j.pm_max > 0 ? j.currentPM / j.pm_max : 0;
+	setArc(document.getElementById('ib-pv'), pvFrac);
+	setArc(document.getElementById('pt-pv'), pvFrac);
+	setArc(document.getElementById('ib-pm'), pmFrac);
+	setArc(document.getElementById('pt-pm'), pmFrac);
+}
+
 let state    = JSON.parse(JSON.stringify(SERVER_DATA));
 let logLen   = state.log.length;
 let busy     = false;
@@ -622,6 +691,7 @@ function updateJoueur(j) {
 		`<div class="pip${i < j.actions_restantes ? '' : ' empty'}"></div>`
 	).join('');
 	updateChargeBar(j);
+	updatePlayerVitals(j);
 }
 
 // Jauge de charge du panneau joueur : pip fixe à 50 % (= charge_max/2). Passe en
@@ -1006,11 +1076,13 @@ async function leaveCombat() {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────
+applyPlayerPortrait();
 renderTokens();
 updateCamera();
 refreshTargetSelect();
 updateButtons(state);
 updateChargeBar(state.joueurs[0]);
+updatePlayerVitals(state.joueurs[0]);
 document.getElementById('combat-log').scrollTop = 9999;
 if (state.status !== 'active') showEndOverlay(state.status, state.xp_gagnee);
 </script>

@@ -533,6 +533,14 @@ async def get_combat_page(
 	if not character:
 		return RedirectResponse(url="/play", headers=request.headers)
 
+	# Taille native du portrait : permet de reproduire dans les jetons de combat la portion
+	# d'image cadrée par le joueur (portrait_zoom/portrait_translate), comme dans play_town.
+	try:
+		with Image.open(CHARACTERS_IMAGES_PATH + "/" + character.get("image", "")) as portrait:
+			portrait_largeur, portrait_hauteur = portrait.size
+	except Exception:
+		portrait_largeur, portrait_hauteur = 100, 100
+
 	return templates.TemplateResponse(
 		request=request,
 		name="combat_telluris.html",
@@ -540,6 +548,8 @@ async def get_combat_page(
 			"title": "Combat",
 			"combat": combat_doc,
 			"character": character,
+			"portrait_largeur": portrait_largeur,
+			"portrait_hauteur": portrait_hauteur,
 			"grid": get_combat_grid(combat_doc),
 		},
 		headers={"Cache-Control": "no-store"},
