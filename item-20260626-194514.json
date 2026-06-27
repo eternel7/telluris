@@ -1,8 +1,8 @@
 {
   "db": "telluris",
   "type": "item",
-  "exported_at": "2026-06-26T18:30:24.119778Z",
-  "doc_count": 318,
+  "exported_at": "2026-06-26T19:45:14.823472Z",
+  "doc_count": 387,
   "docs": [
     {
       "_id": "item:Arbalete_legere",
@@ -2029,10 +2029,10 @@
     },
     {
       "_id": "item:Poudre_os",
-      "_rev": "2-f19e24c37229568f4a3bdb2139898cbf",
+      "_rev": "3-38aebe77cc143d61a0af476fa0bce893",
       "type": "item",
       "nom": "Poudre d'os",
-      "sous_categorie": "",
+      "sous_categorie": "poudre_d_os",
       "icon": "🦴",
       "rarete": "commun",
       "categorie": "composant",
@@ -2492,6 +2492,33 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:aiguille",
+      "_rev": "1-d542b4231e24b55747ab6b49a075c849",
+      "type": "item",
+      "nom": "Aiguille",
+      "sous_categorie": "",
+      "icon": "🪡",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.02
+    },
+    {
+      "_id": "item:amulette",
+      "_rev": "1-d97ef6f7334e31977616d341de9ae9b6",
+      "type": "item",
+      "nom": "Amulette",
+      "sous_categorie": "",
+      "icon": "📿",
+      "rarete": "peu_commun",
+      "categorie": "armure",
+      "slots": [
+        "cou"
+      ],
+      "poids": 0.1,
+      "bonus_pm": 2
+    },
+    {
       "_id": "item:ange_de_la_connaissance",
       "_rev": "3-5953789476d3e62bb4e5272a6d47835e",
       "type": "item",
@@ -2585,6 +2612,21 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:armure_de_cuir",
+      "_rev": "1-26a537ad3681229e37d71619b06abce8",
+      "type": "item",
+      "nom": "Armure de cuir",
+      "sous_categorie": "",
+      "icon": "🧥",
+      "rarete": "commun",
+      "categorie": "armure",
+      "slots": [
+        "torse"
+      ],
+      "poids": 3.0,
+      "bonus_pa": 2
+    },
+    {
       "_id": "item:avatar",
       "_rev": "3-80a3ac0ad01a409e03758e8505679b0a",
       "type": "item",
@@ -2660,6 +2702,73 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:bijou",
+      "_rev": "1-385f001dae1e09f3e85c198008547d8e",
+      "type": "item",
+      "nom": "Bijou",
+      "sous_categorie": "",
+      "icon": "💍",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [
+        "anneau_1",
+        "anneau_2"
+      ],
+      "poids": 0.1,
+      "bonus_pm": 1
+    },
+    {
+      "_id": "item:bottes",
+      "_rev": "1-19ad4db03ab82fdf3f920a9feaf28f61",
+      "type": "item",
+      "nom": "Bottes",
+      "sous_categorie": "",
+      "icon": "👢",
+      "rarete": "commun",
+      "categorie": "armure",
+      "slots": [
+        "pieds"
+      ],
+      "poids": 1.0,
+      "bonus_pa": 1
+    },
+    {
+      "_id": "item:boyaux",
+      "_rev": "1-372f7c31dc1dd19e1b83d236b8540265",
+      "type": "item",
+      "nom": "Boyaux",
+      "sous_categorie": "boyaux",
+      "icon": "🌭",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
+      "_id": "item:boyaux_pour_saucisses",
+      "_rev": "1-e03004f0fabb08c83fd941a6de25c15d",
+      "type": "item",
+      "nom": "Boyaux pour saucisses",
+      "sous_categorie": "",
+      "icon": "🌭",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
+      "_id": "item:brosse",
+      "_rev": "1-0379b2d96e5eb4d463bb81e255d12ccb",
+      "type": "item",
+      "nom": "Brosse",
+      "sous_categorie": "",
+      "icon": "🧹",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
       "_id": "item:bunyip",
       "_rev": "3-0f63a12fd292eefbd215d8f5a46882fd",
       "type": "item",
@@ -2673,6 +2782,33 @@
       "description": "Dépouille de Bunyip récupérée à l'issue du combat.",
       "source_espece": "espece:bunyip",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:catalyseur_magique",
+      "_rev": "1-896d086807770efd19a990bb4e503757",
+      "type": "item",
+      "nom": "Catalyseur magique",
+      "sous_categorie": "",
+      "icon": "🔮",
+      "rarete": "rare",
+      "categorie": "catalyseur",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
+      "_id": "item:ceinture",
+      "_rev": "1-77af4a2c91bf1fdff0347df542fc4c24",
+      "type": "item",
+      "nom": "Ceinture",
+      "sous_categorie": "",
+      "icon": "🧷",
+      "rarete": "commun",
+      "categorie": "armure",
+      "slots": [
+        "ceinture"
+      ],
+      "poids": 0.2,
+      "bonus_pa": 1
     },
     {
       "_id": "item:centaure",
@@ -2825,6 +2961,45 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:coeur",
+      "_rev": "1-828d2633749dbc8109041bedd6458a84",
+      "type": "item",
+      "nom": "Cœur",
+      "sous_categorie": "coeur",
+      "icon": "❤️",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.3
+    },
+    {
+      "_id": "item:collier",
+      "_rev": "1-83e203a61ea306c82fd2129352cb36df",
+      "type": "item",
+      "nom": "Collier",
+      "sous_categorie": "",
+      "icon": "📿",
+      "rarete": "peu_commun",
+      "categorie": "armure",
+      "slots": [
+        "cou"
+      ],
+      "poids": 0.2,
+      "bonus_initiative": 1
+    },
+    {
+      "_id": "item:composant_rituel",
+      "_rev": "1-b4839d6e59aa3c67d5390034049a588f",
+      "type": "item",
+      "nom": "Composant rituel",
+      "sous_categorie": "",
+      "icon": "📿",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
       "_id": "item:comte_vampire",
       "_rev": "3-d3b953e8c8a5f0069d3dfd254c5ac9d3",
       "type": "item",
@@ -2838,6 +3013,42 @@
       "description": "Ossements et reliquats récupérés sur Comte Vampire après sa destruction.",
       "source_espece": "espece:comte_vampire",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:corde",
+      "_rev": "1-20a14a24740e6b187ce893cfeeab9606",
+      "type": "item",
+      "nom": "Corde",
+      "sous_categorie": "",
+      "icon": "🪢",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 1.0
+    },
+    {
+      "_id": "item:cordes_d_arc",
+      "_rev": "1-353afe3a4b4761f6f731ea61339412ac",
+      "type": "item",
+      "nom": "Cordes d'arc",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
+      "_id": "item:cordes_d_instrument",
+      "_rev": "1-cf1187cef45dcc9063e881885a5b246f",
+      "type": "item",
+      "nom": "Cordes d'instrument",
+      "sous_categorie": "",
+      "icon": "🎻",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.05
     },
     {
       "_id": "item:corneille_noire",
@@ -2885,6 +3096,30 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:crane",
+      "_rev": "1-bb2c2456f32a22c54aea8ac73d7bc11b",
+      "type": "item",
+      "nom": "Crâne",
+      "sous_categorie": "crane",
+      "icon": "💀",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 1.0
+    },
+    {
+      "_id": "item:crins",
+      "_rev": "1-72acf29861dd6c663250c261a0322fe6",
+      "type": "item",
+      "nom": "Crins",
+      "sous_categorie": "crins",
+      "icon": "🧵",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
       "_id": "item:crocodile",
       "_rev": "3-ddb748c07dac288a19dd756316cb0f77",
       "type": "item",
@@ -2898,6 +3133,30 @@
       "description": "Dépouille de Crocodile récupérée à l'issue du combat.",
       "source_espece": "espece:crocodile",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:crocs",
+      "_rev": "1-3a1aa6b4adb11a8b758648a27d4bb94c",
+      "type": "item",
+      "nom": "Crocs",
+      "sous_categorie": "crocs",
+      "icon": "🦷",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
+      "_id": "item:cuir",
+      "_rev": "1-1f9c40252bc64cb0a337400ec4588f73",
+      "type": "item",
+      "nom": "Cuir",
+      "sous_categorie": "cuir",
+      "icon": "🟫",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.5
     },
     {
       "_id": "item:cupidon",
@@ -2928,6 +3187,35 @@
       "description": "Dépouille de Cyclope récupérée à l'issue du combat.",
       "source_espece": "espece:cyclope",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:dague_rituelle",
+      "_rev": "1-eff445afb6554c419b3704587cc51039",
+      "type": "item",
+      "nom": "Dague rituelle",
+      "sous_categorie": "",
+      "icon": "🗡️",
+      "rarete": "peu_commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite",
+        "main_gauche"
+      ],
+      "poids": 0.4,
+      "bonus_cc": 1,
+      "bonus_degats": 1
+    },
+    {
+      "_id": "item:de",
+      "_rev": "1-f9dd4677743ba83cd1d566719dfad690",
+      "type": "item",
+      "nom": "Dé",
+      "sous_categorie": "",
+      "icon": "🎲",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.02
     },
     {
       "_id": "item:demon_guerrier",
@@ -3110,6 +3398,30 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:empennage_de_fleches",
+      "_rev": "1-5e9494f495be39810098071fa5ceb8f2",
+      "type": "item",
+      "nom": "Empennage de flèches",
+      "sous_categorie": "",
+      "icon": "🪶",
+      "rarete": "commun",
+      "categorie": "munition",
+      "slots": [],
+      "poids": 0.05
+    },
+    {
+      "_id": "item:engrais",
+      "_rev": "1-c34f2a3bd7653356e24e9bb427289c82",
+      "type": "item",
+      "nom": "Engrais",
+      "sous_categorie": "",
+      "icon": "🌱",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.5
+    },
+    {
       "_id": "item:familier",
       "_rev": "3-50ffeeec4f5c3ae6d7b068daa0e219b2",
       "type": "item",
@@ -3168,6 +3480,108 @@
       "description": "Dépouille de Fee récupérée à l'issue du combat.",
       "source_espece": "espece:fee",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:feutre",
+      "_rev": "1-55916b0ef2e2fcd5d3c051fdad784ba5",
+      "type": "item",
+      "nom": "Feutre",
+      "sous_categorie": "",
+      "icon": "🧵",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.3
+    },
+    {
+      "_id": "item:fil_resistant",
+      "_rev": "1-0b22c5d91f2f631d0cf40bb8b7c0e361",
+      "type": "item",
+      "nom": "Fil résistant",
+      "sous_categorie": "",
+      "icon": "🧵",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.05
+    },
+    {
+      "_id": "item:filet",
+      "_rev": "1-fed17f4e01a9fba2505c46ff9f1e01bc",
+      "type": "item",
+      "nom": "Filet",
+      "sous_categorie": "",
+      "icon": "🕸️",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 1.0
+    },
+    {
+      "_id": "item:flute",
+      "_rev": "1-b2e1686fe855a22657d6a6463575e24e",
+      "type": "item",
+      "nom": "Flûte",
+      "sous_categorie": "",
+      "icon": "🪈",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
+      "_id": "item:focus_magique",
+      "_rev": "1-9682bec07796eee910fa0f3ac90c604b",
+      "type": "item",
+      "nom": "Focus magique",
+      "sous_categorie": "",
+      "icon": "🔮",
+      "rarete": "peu_commun",
+      "categorie": "catalyseur",
+      "slots": [
+        "main_gauche"
+      ],
+      "poids": 0.3,
+      "bonus_pm": 3
+    },
+    {
+      "_id": "item:foie",
+      "_rev": "1-38f57e43ae2a6b92b5a1e7de6d215444",
+      "type": "item",
+      "nom": "Foie",
+      "sous_categorie": "foie",
+      "icon": "🫀",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.4
+    },
+    {
+      "_id": "item:fourreau",
+      "_rev": "1-9f18b8e61e52902e31ef8c697e0bc685",
+      "type": "item",
+      "nom": "Fourreau",
+      "sous_categorie": "",
+      "icon": "🗡️",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.3
+    },
+    {
+      "_id": "item:gants",
+      "_rev": "1-25dd228bb9724525884f3c61b5f890c1",
+      "type": "item",
+      "nom": "Gants",
+      "sous_categorie": "",
+      "icon": "🧤",
+      "rarete": "commun",
+      "categorie": "armure",
+      "slots": [
+        "mains"
+      ],
+      "poids": 0.2,
+      "bonus_pa": 1
     },
     {
       "_id": "item:gargouille",
@@ -3356,6 +3770,18 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:graisse",
+      "_rev": "1-e84d84d6b9993cafe58e976e97a591a9",
+      "type": "item",
+      "nom": "Graisse",
+      "sous_categorie": "graisse",
+      "icon": "🧈",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.3
+    },
+    {
       "_id": "item:grand_dragon",
       "_rev": "3-17a11c7408806ed53686bf57a5ed73c0",
       "type": "item",
@@ -3416,6 +3842,18 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:griffes",
+      "_rev": "1-edd7a25282ce554626d887114922d2ff",
+      "type": "item",
+      "nom": "Griffes",
+      "sous_categorie": "griffes",
+      "icon": "🪝",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
       "_id": "item:griffon",
       "_rev": "3-e41bbcf2ccf545210d69fad635f22898",
       "type": "item",
@@ -3429,6 +3867,21 @@
       "description": "Dépouille de Griffon récupérée à l'issue du combat.",
       "source_espece": "espece:griffon",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:harnais",
+      "_rev": "1-6a283560a166c4fade237e9698f309c4",
+      "type": "item",
+      "nom": "Harnais",
+      "sous_categorie": "",
+      "icon": "🎽",
+      "rarete": "commun",
+      "categorie": "armure",
+      "slots": [
+        "torse"
+      ],
+      "poids": 1.0,
+      "bonus_pa": 1
     },
     {
       "_id": "item:harpie",
@@ -3489,6 +3942,18 @@
       "description": "Ossements et reliquats récupérés sur Horreur après sa destruction.",
       "source_espece": "espece:horreur",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:huile",
+      "_rev": "1-278ac0fbfca855195126c88e76fd88b9",
+      "type": "item",
+      "nom": "Huile",
+      "sous_categorie": "",
+      "icon": "🫙",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.2
     },
     {
       "_id": "item:hydre",
@@ -3611,6 +4076,18 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:ligatures",
+      "_rev": "1-bfc52ed9b2c6f7be8c20e78284e09d44",
+      "type": "item",
+      "nom": "Ligatures",
+      "sous_categorie": "",
+      "icon": "🩹",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.05
+    },
+    {
       "_id": "item:loup",
       "_rev": "3-1e1e45b0930ab92dbf9f82af5b312400",
       "type": "item",
@@ -3686,6 +4163,18 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:manche",
+      "_rev": "1-c189d86b6f8dcb100456e6bc282905b0",
+      "type": "item",
+      "nom": "Manche",
+      "sous_categorie": "",
+      "icon": "🪵",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
       "_id": "item:manticore",
       "_rev": "3-49a7fc195127656220330339cb7e8b30",
       "type": "item",
@@ -3699,6 +4188,18 @@
       "description": "Dépouille de Manticore récupérée à l'issue du combat.",
       "source_espece": "espece:manticore",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:mets_rare",
+      "_rev": "1-d0157ef3c7977fe4bb063a0564d66586",
+      "type": "item",
+      "nom": "Mets rare",
+      "sous_categorie": "",
+      "icon": "🍲",
+      "rarete": "peu_commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.3
     },
     {
       "_id": "item:minotaure",
@@ -3881,6 +4382,18 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:onguent",
+      "_rev": "1-00d9978c276755bf48ba1a05703b593b",
+      "type": "item",
+      "nom": "Onguent",
+      "sous_categorie": "",
+      "icon": "🧴",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
       "_id": "item:orc",
       "_rev": "3-3f5ea6d6a6387b87f458532730d16402",
       "type": "item",
@@ -3909,6 +4422,30 @@
       "description": "Résidu éthéré laissé par Oreade une fois vaincu(e).",
       "source_espece": "espece:oreade",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:oreiller",
+      "_rev": "1-d3874e673ecff4ab933d5c4685981f48",
+      "type": "item",
+      "nom": "Oreiller",
+      "sous_categorie": "",
+      "icon": "🛏️",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.5
+    },
+    {
+      "_id": "item:os",
+      "_rev": "1-024c5c14dd4031e22765749b7e0409f7",
+      "type": "item",
+      "nom": "Os",
+      "sous_categorie": "os",
+      "icon": "🦴",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.4
     },
     {
       "_id": "item:ours",
@@ -3941,6 +4478,33 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:outres",
+      "_rev": "1-853111918f88741207dda71535256617",
+      "type": "item",
+      "nom": "Outres",
+      "sous_categorie": "",
+      "icon": "🫗",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.3
+    },
+    {
+      "_id": "item:parure",
+      "_rev": "1-5416c00c2fbab0162da6ae0ee6d4d98b",
+      "type": "item",
+      "nom": "Parure",
+      "sous_categorie": "",
+      "icon": "👑",
+      "rarete": "peu_commun",
+      "categorie": "armure",
+      "slots": [
+        "tete"
+      ],
+      "poids": 0.2,
+      "bonus_initiative": 1
+    },
+    {
       "_id": "item:pegase",
       "_rev": "3-47cdf70130796af19f23369ce7df25d6",
       "type": "item",
@@ -3954,6 +4518,18 @@
       "description": "Dépouille de Pégase récupérée à l'issue du combat.",
       "source_espece": "espece:pegase",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:peigne",
+      "_rev": "1-c672b2bb3e479823c1a9da202bc99284",
+      "type": "item",
+      "nom": "Peigne",
+      "sous_categorie": "",
+      "icon": "🪮",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.05
     },
     {
       "_id": "item:petit_dragon",
@@ -4001,6 +4577,66 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:pigment",
+      "_rev": "1-f80ce4fe726e16907b6615c1b6652294",
+      "type": "item",
+      "nom": "Pigment",
+      "sous_categorie": "",
+      "icon": "🎨",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
+      "_id": "item:pinceau",
+      "_rev": "1-f38b722719d8109e566d95822ed3444a",
+      "type": "item",
+      "nom": "Pinceau",
+      "sous_categorie": "",
+      "icon": "🖌️",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.05
+    },
+    {
+      "_id": "item:plat_raffine",
+      "_rev": "1-2eeba556634a40af02481cff89d2b35b",
+      "type": "item",
+      "nom": "Plat raffiné",
+      "sous_categorie": "",
+      "icon": "🍽️",
+      "rarete": "peu_commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.4
+    },
+    {
+      "_id": "item:plumes",
+      "_rev": "1-c1948f26f11c6b2a40bb3925661e0d8d",
+      "type": "item",
+      "nom": "Plumes",
+      "sous_categorie": "plumes",
+      "icon": "🪶",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.05
+    },
+    {
+      "_id": "item:poils",
+      "_rev": "1-5ad24a35349e2f571621ebd23dc17d9f",
+      "type": "item",
+      "nom": "Poils",
+      "sous_categorie": "poils",
+      "icon": "🧶",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
       "_id": "item:poissons_mammiferes_marins",
       "_rev": "3-fbe060de15ac388ed05e707310bf7e5d",
       "type": "item",
@@ -4044,6 +4680,42 @@
       "description": "Dépouille de Poney récupérée à l'issue du combat.",
       "source_espece": "espece:poney",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:potion",
+      "_rev": "1-4b16cce4694de80ea355a3681bb9c99a",
+      "type": "item",
+      "nom": "Potion",
+      "sous_categorie": "",
+      "icon": "🧪",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
+      "_id": "item:potion_de_vision",
+      "_rev": "1-1d2525836f95f478a0629be135b94dff",
+      "type": "item",
+      "nom": "Potion de vision",
+      "sous_categorie": "",
+      "icon": "🧪",
+      "rarete": "peu_commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
+      "_id": "item:poudre_alchimique",
+      "_rev": "1-1dc763239d53922a635a706c1f8ba7b1",
+      "type": "item",
+      "nom": "Poudre alchimique",
+      "sous_categorie": "",
+      "icon": "✨",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
     },
     {
       "_id": "item:prince_demon",
@@ -4091,6 +4763,30 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:reactif_alchimique",
+      "_rev": "1-1185ffb05b3d20f9d23bb35516964f7e",
+      "type": "item",
+      "nom": "Réactif alchimique",
+      "sous_categorie": "",
+      "icon": "⚗️",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
+      "_id": "item:reactif_magique",
+      "_rev": "1-d2c521f16c517eab2fd49c406bb4b601",
+      "type": "item",
+      "nom": "Réactif magique",
+      "sous_categorie": "",
+      "icon": "🔮",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
       "_id": "item:reine_lhamia",
       "_rev": "3-eb37b2b60a6aeeef8e7aa3a8ffb8c75a",
       "type": "item",
@@ -4119,6 +4815,54 @@
       "description": "Dépouille de Rejeton Demoniaque récupérée à l'issue du combat.",
       "source_espece": "espece:rejeton_demoniaque",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:relique",
+      "_rev": "1-5d3ebafd22df39154fbac8491f6f5d0d",
+      "type": "item",
+      "nom": "Relique",
+      "sous_categorie": "",
+      "icon": "⚱️",
+      "rarete": "rare",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.5
+    },
+    {
+      "_id": "item:rembourrage",
+      "_rev": "1-6ca28757e70afd1ab35709ff42fa5f74",
+      "type": "item",
+      "nom": "Rembourrage",
+      "sous_categorie": "",
+      "icon": "🧶",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.2
+    },
+    {
+      "_id": "item:remede",
+      "_rev": "1-3bcab65bd29f76137dc08b34a693ebd1",
+      "type": "item",
+      "nom": "Remède",
+      "sous_categorie": "",
+      "icon": "💊",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.1
+    },
+    {
+      "_id": "item:repas_cuisine",
+      "_rev": "1-0b8d6043f9c989d865eaed1bd0b657bb",
+      "type": "item",
+      "nom": "Repas cuisiné",
+      "sous_categorie": "",
+      "icon": "🍲",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.4
     },
     {
       "_id": "item:revenant",
@@ -4166,6 +4910,30 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:sac",
+      "_rev": "1-572d941ae0b6ca820084312f67ba3460",
+      "type": "item",
+      "nom": "Sac",
+      "sous_categorie": "",
+      "icon": "🎒",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 0.5
+    },
+    {
+      "_id": "item:sang",
+      "_rev": "1-8811d87533f18bed6b4bb28520ee5d9d",
+      "type": "item",
+      "nom": "Sang",
+      "sous_categorie": "sang",
+      "icon": "🩸",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.3
+    },
+    {
       "_id": "item:sanglier",
       "_rev": "3-c9c88649c78356e63030b33560edbb8f",
       "type": "item",
@@ -4194,6 +4962,30 @@
       "description": "Dépouille de Satyre récupérée à l'issue du combat.",
       "source_espece": "espece:satyre",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:saucisses",
+      "_rev": "1-1e9b4c00b374bd36bbd3ca18b07ee1eb",
+      "type": "item",
+      "nom": "Saucisses",
+      "sous_categorie": "",
+      "icon": "🌭",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.3
+    },
+    {
+      "_id": "item:savon",
+      "_rev": "1-bcd5c38099d9adb4b5806e3185c3c3f1",
+      "type": "item",
+      "nom": "Savon",
+      "sous_categorie": "",
+      "icon": "🧼",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.1
     },
     {
       "_id": "item:seigneur_du_sang",
@@ -4331,6 +5123,21 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:talisman",
+      "_rev": "1-7abd0ac03e5346de533fe5ebf270be90",
+      "type": "item",
+      "nom": "Talisman",
+      "sous_categorie": "",
+      "icon": "🧿",
+      "rarete": "peu_commun",
+      "categorie": "armure",
+      "slots": [
+        "cou"
+      ],
+      "poids": 0.1,
+      "bonus_pv": 3
+    },
+    {
       "_id": "item:tarasque",
       "_rev": "3-f3fe5a4784c30e925baec254cd481d83",
       "type": "item",
@@ -4359,6 +5166,18 @@
       "description": "Dépouille de Taureau récupérée à l'issue du combat.",
       "source_espece": "espece:taureau",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:tendons",
+      "_rev": "1-50b887e22716543a2f154c0b24f26684",
+      "type": "item",
+      "nom": "Tendons",
+      "sous_categorie": "tendons",
+      "icon": "🦴",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
     },
     {
       "_id": "item:triton",
@@ -4406,6 +5225,18 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:trophee",
+      "_rev": "1-86ecd08e9960327061bb546fb63762dc",
+      "type": "item",
+      "nom": "Trophée",
+      "sous_categorie": "",
+      "icon": "🏆",
+      "rarete": "commun",
+      "categorie": "outil",
+      "slots": [],
+      "poids": 1.0
+    },
+    {
       "_id": "item:vampire",
       "_rev": "3-0229ef3b8776fa8d8359bb38a963d75e",
       "type": "item",
@@ -4436,6 +5267,30 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:viande",
+      "_rev": "1-fdf85843d0ea3e13eab0cb3c6e2347d3",
+      "type": "item",
+      "nom": "Viande",
+      "sous_categorie": "viande",
+      "icon": "🥩",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.5
+    },
+    {
+      "_id": "item:viande_fumee",
+      "_rev": "1-10d74df6d84c1f9b41721577b1ed5257",
+      "type": "item",
+      "nom": "Viande fumée",
+      "sous_categorie": "",
+      "icon": "🍖",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.3
+    },
+    {
       "_id": "item:vouivre",
       "_rev": "3-e8001a1ebed89f49be704a613f0e8f28",
       "type": "item",
@@ -4464,6 +5319,18 @@
       "description": "Dépouille de Wyvern récupérée à l'issue du combat.",
       "source_espece": "espece:wyvern",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:yeux",
+      "_rev": "1-64ddb39595edf8c5415508f4a9984028",
+      "type": "item",
+      "nom": "Yeux",
+      "sous_categorie": "yeux",
+      "icon": "👁️",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "poids": 0.1
     },
     {
       "_id": "item:zombie",
