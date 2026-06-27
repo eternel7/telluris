@@ -45,10 +45,110 @@ _SUB_CAP_REDUCTION: dict[str, int] = {"V": 1}
 #   cuivre = poids × MULT_RARETE[rarete] × PRIX_DERIVE_BASE
 PRIX_DERIVE_BASE: float = 2.0
 MULT_RARETE: dict[str, float] = {
-	"commun": 1, "peu_commun": 2, "rare": 5, "tres_rare": 12, "legendaire": 30,
+	"commun": 1, "peu_commun": 10, "rare": 30, "tres_rare": 100, "legendaire": 500, "mythique": 1000, "divin" : 10000
 }
 # Quelles sous-catégories d'item chaque catégorie de lieu (marchand) achète au personnage.
-ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {"boucherie": ["carcasse"]}
+ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {
+    "boucherie": [
+      "carcasse"
+    ],
+    "tannerie": [
+      "cuir_brut"
+    ],
+    "maroquinerie": [
+      "cuir"
+    ],
+    "cordonnerie": [
+      "cuir",
+      "tendons"
+    ],
+    "bourrellerie": [
+      "cuir"
+    ],
+    "armurerie": [
+      "cuir",
+      "tendons"
+    ],
+    "cuisine": [
+      "viande",
+      "foie",
+      "coeur"
+    ],
+    "fumoir": [
+      "viande"
+    ],
+    "salaison": [
+      "viande"
+    ],
+    "laboratoire_d_alchimie": [
+      "sang",
+      "poudre_d_os",
+      "griffes",
+      "yeux",
+      "coeur"
+    ],
+    "scriptorium": [
+      "sang",
+      "plumes"
+    ],
+    "savonnerie": [
+      "graisse"
+    ],
+    "atelier_de_cirier": [
+      "graisse"
+    ],
+    "apothicairerie": [
+      "graisse",
+      "foie"
+    ],
+    "tabletterie": [
+      "os",
+      "crocs"
+    ],
+    "atelier_d_artisan": [
+      "os"
+    ],
+    "jardinier": [
+      "poudre_d_os"
+    ],
+    "corderie": [
+      "crins"
+    ],
+    "brosserie": [
+      "crins",
+      "poils"
+    ],
+    "tissage": [
+      "poils"
+    ],
+    "plumasserie": [
+      "plumes"
+    ],
+    "atelier_de_l_empenneur": [
+      "plumes",
+      "bois"
+    ],
+    "boyauderie": [
+      "boyaux"
+    ],
+    "fletcher": [
+      "boyaux",
+      "tendons"
+    ],
+    "lutherie": [
+      "boyaux"
+    ],
+    "bijouterie": [
+      "griffes",
+      "crocs"
+    ],
+    "taxidermie": [
+      "crane"
+    ],
+    "necromancie": [
+      "crane"
+    ]
+  }
 
 # ── Marchandage ─────────────────────────────────────────────────────────────────
 # Le prix d'une transaction est interpolé entre le min et le max de l'objet
@@ -57,7 +157,7 @@ ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {"boucherie": ["carcasse"]}
 # de CHA_MARCHAND_PAR_CATEGORIE[lieu.categorie], sinon du global CHA_MARCHAND (un
 # champ `cha` posé sur le doc lieu le supplante).
 CHA_MARCHAND: int = 50
-CHA_MARCHAND_PAR_CATEGORIE: dict[str, int] = {}
+CHA_MARCHAND_PAR_CATEGORIE: dict[str, int] = { "bijouterie": 70 }
 PRIX_MAX_FACTEUR: float = 3.0
 # Marge appliquée à chaque étape de transformation (coût de revient propagé) :
 # prix_produit ≈ coût_ingrédients × (quantite_matiere / quantite_produite) × MARGE_TRANSFO.

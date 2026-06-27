@@ -252,6 +252,18 @@ function initColumns() {
 	visible = columns.slice(0, 7);
 }
 
+// Fusion NON destructive après une sauvegarde : conserve l'ordre des colonnes, la
+// sélection, le tri, les filtres et les largeurs ; ajoute seulement les nouvelles clés
+// (apparues dans le doc édité) en fin de liste, et retire celles qui n'existent plus.
+function mergeColumns() {
+	const keys = new Set();
+	docs.forEach(d => Object.keys(d || {}).forEach(k => keys.add(k)));
+	const next = columns.filter(c => keys.has(c));   // colonnes courantes encore présentes (ordre gardé)
+	keys.forEach(k => { if (!next.includes(k)) next.push(k); });   // nouvelles clés à la fin
+	columns = next;
+	visible = columns.filter(c => visible.includes(c));   // sélection conservée (restreinte aux existantes)
+}
+
 // ── Persistance des préférences par type (localStorage) ────────────
 // Mémorise ordre des colonnes, colonnes affichées, tri, filtres et largeurs.
 function persistState() {
@@ -473,8 +485,7 @@ $('json-save').addEventListener('click', async () => {
 		if (!res.ok) { setStatus($('editor-status'), 'Échec : ' + (data.detail || res.status), 'err'); return; }
 		docs[selected] = data.doc;          // doc avec le nouveau _rev
 		ta.value = JSON.stringify(data.doc, null, 2);
-		initColumns();                       // d'éventuelles nouvelles clés deviennent disponibles
-		visible = columns.filter(c => visible.includes(c));
+		mergeColumns();                      // intègre d'éventuelles nouvelles clés SANS perdre ordre/sélection/tri/filtres/largeurs
 		renderCols(); renderHead(); renderBody(); persistState();
 		setStatus($('editor-status'), '✓ Document sauvegardé en base.', 'ok');
 	} catch (e) {
