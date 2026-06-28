@@ -120,9 +120,50 @@ def resolve_zone_event(
         "type": chosen.get("type", "rien"),
         "tags": chosen.get("tags", []),
         "zones_actives": [zd.get("nom", "") for _, zd in active],
+        "zones_actives_ids": [zd.get("_id") for _, zd in active if zd.get("_id")],
         "intensite": proba_globale,
         "modificateurs": modificateurs,
     }
+
+
+def resolve_recolte(event: dict | None, lieu_doc: dict, get_doc_fn) -> str | None:
+    """Ressource récoltable pour un événement de zone de type « ressource ».
+
+    Candidats = items de `lieu_doc["ressources"]` dont les `zones` recoupent les zones
+    actives de l'événement. On compare les `tags` de l'entrée d'événement (table_evenements)
+    à la `categorie`, la `sous_categorie` (si non vide) et aux `tags` de chaque item. S'il y
+    a des correspondances → on en tire une au hasard ; sinon → une ressource au hasard parmi
+    les candidats. Renvoie un `item:*` id, ou None (pas de ressource récoltable).
+    """
+    if not event or event.get("type") != "ressource":
+        return None
+    zone_ids = set(event.get("zones_actives_ids", []))
+    candidats = [
+        r.get("ressource")
+        for r in (lieu_doc or {}).get("ressources", [])
+        if r.get("ressource") and (set(r.get("zones", [])) & zone_ids)
+    ]
+    if not candidats:
+        return None
+
+    tags = {str(t).lower() for t in (event.get("tags") or [])}
+    matched = []
+    if tags:
+        for item_id in candidats:
+            item = get_doc_fn(item_id)
+            if not item:
+                continue
+            item_tags = set()
+            if item.get("categorie"):
+                item_tags.add(str(item["categorie"]).lower())
+            if item.get("sous_categorie"):
+                item_tags.add(str(item["sous_categorie"]).lower())
+            for t in (item.get("tags") or []):
+                item_tags.add(str(t).lower())
+            if tags & item_tags:
+                matched.append(item_id)
+
+    return random.choice(matched) if matched else random.choice(candidats)
 
 
 def load_zone_defs_for_lieu(lieu_doc: dict, get_doc_fn) -> dict:

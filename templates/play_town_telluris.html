@@ -1061,6 +1061,7 @@
 					{% endif %}
 				</ul>
 				{% endif %}
+				<section id="recolte-action"></section>
 				<h3 id="sub-locations-title">Lieux</h3>
 				<ul id="sub-locations-list-id" class="sub-locations-list">
 				</ul>
@@ -1505,6 +1506,29 @@
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};
 	let ACCESS = {{ access | tojson | safe }};
+	// Ressource récoltable (événement de zone « ressource ») : posée par le serveur au
+	// déplacement, transitoire (remplacée/effacée au déplacement suivant, consommée à la récolte).
+	let _ressourceRecoltable = {{ ressource_recoltable | tojson | safe }};
+	function _refreshRecolte() {
+		const el = document.getElementById('recolte-action');
+		if (!el) return;
+		const r = _ressourceRecoltable;
+		el.innerHTML = r
+			? `<h3>Récolte</h3><ul class="sub-locations-list"><li><button class="sub-loc-btn" onclick="recolterRessource()">${r.icon || '🌿'} Récolter ${r.nom}</button></li></ul>`
+			: '';
+	}
+	async function recolterRessource() {
+		try {
+			const res = await fetch('api/recolter', { method: 'POST', headers: {'Content-Type': 'application/json'} });
+			const data = await res.json();
+			if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+			_applyInventoryPayload(data);
+			_ressourceRecoltable = null;
+			_refreshRecolte();
+			if (data.recolte) showToast('Récolté : ' + data.recolte.nom);
+		} catch (err) { console.error('Erreur récolte', err); }
+	}
+	_refreshRecolte();
 	// DIRS (et VALID_MOVES / getFinalMask / navAllows) proviennent de scripts/nav.js (partagé).
 	const root = document.documentElement;
 	let isMoving = false;
@@ -1583,6 +1607,9 @@
 						showZoneEvent(rep.zone_event);
 					}
 				}
+				// Bouton « Récolter » de la sidebar (déplacement par lien = SPA, pas de reload).
+				_ressourceRecoltable = rep.ressource_recoltable || null;
+				_refreshRecolte();
 			} else {
 				const error = await response.json();
 				console.log(error.detail)

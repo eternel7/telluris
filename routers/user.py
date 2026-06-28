@@ -13,7 +13,7 @@ from utils.auth import get_current_user, create_access_token
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
 	recompute_equipment_bonus, carried_weight, charge_max_of,
-	item_ref_id, item_ref_weight, resolve_item_ref,
+	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds,
 	money_to_cuivre, cuivre_to_purse, credit_character,
 	lieu_buys, item_sous_categorie,
 )
@@ -24,7 +24,7 @@ from utils.marche import (
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 )
 from utils.lieux import get_lieu_links, get_lieu_directions
-from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
+from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
 from utils import quetes
 from models import character_stats
 from models.character_stats import (
@@ -266,6 +266,36 @@ async def update_character_portrait(
 	else:
 		raise HTTPException(status_code=405, detail="No info for character portrait update")
 
+def _set_ressource_recoltable(character: dict, zone_event: dict | None, lieu_doc: dict) -> None:
+	"""Pose (ou efface) le champ transitoire `ressource_recoltable` selon l'événement de zone.
+	Si l'événement est de type « ressource » et qu'une ressource est récoltable, on stocke une
+	réf `{item, poids}` (poids d'instance tiré dans les bornes de l'item) ; sinon None."""
+	item_id = resolve_recolte(zone_event, lieu_doc, get_doc)
+	if not item_id:
+		character["ressource_recoltable"] = None
+		return
+	item = get_doc(item_id)
+	pmin, pmax = poids_bounds(item)
+	poids = round(random.uniform(pmin, pmax), 2) if pmax > pmin else pmin
+	character["ressource_recoltable"] = {"item": item_id, "poids": poids}
+
+
+def _recolte_payload(character: dict) -> dict | None:
+	"""Ressource récoltable résolue pour l'affichage (sidebar) : {item, nom, icon, poids} ou None."""
+	ref = character.get("ressource_recoltable")
+	if not ref:
+		return None
+	doc = resolve_item_ref(ref)
+	if not doc:
+		return None
+	return {
+		"item": doc.get("item"),
+		"nom": doc.get("nom", "Ressource"),
+		"icon": doc.get("icon", "🌿"),
+		"poids": doc.get("poids", 0),
+	}
+
+
 @user_router.post("/move_character")
 async def move_character(
 	response: Response, 
@@ -324,8 +354,7 @@ async def move_character(
 							niveau_new = info["niveau_apres"]
 						# Changement de lieu : le sol (objets posés) est transitoire et perdu.
 						character_to_update["objets_au_sol"] = []
-						_apply_world_turn_regen(character_to_update)
-						save_doc(character_to_update)
+						# Événement de zone résolu AVANT le save pour persister la ressource récoltable.
 						zone_event = None
 						if lieu_doc.get("zone_influences"):
 							zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
@@ -333,7 +362,10 @@ async def move_character(
 								destination_pos["x"], destination_pos["y"],
 								lieu_doc["zone_influences"], zone_defs
 							)
-						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update)}
+						_set_ressource_recoltable(character_to_update, zone_event, lieu_doc)
+						_apply_world_turn_regen(character_to_update)
+						save_doc(character_to_update)
+						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update)}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -351,19 +383,20 @@ async def move_character(
 				ground_cleared = (position["x"], position["y"]) != (ancienne_pos["x"], ancienne_pos["y"])
 				if ground_cleared:
 					character_to_update["objets_au_sol"] = []
+				access = get_lieu_directions(current_user, lieu_doc, position)
+				# Événement de zone résolu AVANT le save pour persister la ressource récoltable.
+				zone_event = None
+				if lieu_doc.get("zone_influences"):
+					zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
+					zone_event = resolve_zone_event(
+						position["x"], position["y"],
+						lieu_doc["zone_influences"], zone_defs
+					)
+				_set_ressource_recoltable(character_to_update, zone_event, lieu_doc)
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
-				if lieu_doc:
-					access = get_lieu_directions(current_user, lieu_doc, position)
-					zone_event = None
-					if lieu_doc.get("zone_influences"):
-						zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
-						zone_event = resolve_zone_event(
-							position["x"], position["y"],
-							lieu_doc["zone_influences"], zone_defs
-						)
-					return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared}
+				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update)}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -695,6 +728,45 @@ async def pickup_item(
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	payload = _inventory_payload(character)
 	payload["auto_dropped"] = auto_dropped
+	return payload
+
+
+@user_router.post("/recolter")
+async def recolter_ressource(
+	current_user: Annotated[User, Depends(get_current_user)],
+):
+	"""Récolte la ressource rendue disponible par le dernier événement de zone « ressource »
+	(champ transitoire `ressource_recoltable`). Ajoute l'item au sac (refus 409 si la charge
+	max serait dépassée), puis vide le champ (consommé)."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	ref = character.get("ressource_recoltable")
+	if not ref:
+		raise HTTPException(status_code=404, detail="Rien à récolter ici.")
+
+	doc = resolve_item_ref(ref)
+	if not doc:
+		# Item disparu de la base : on nettoie le champ.
+		character["ressource_recoltable"] = None
+		save_doc(character)
+		raise HTTPException(status_code=404, detail="Ressource introuvable.")
+
+	if carried_weight(character) + item_ref_weight(ref) > charge_max_of(character):
+		raise HTTPException(status_code=409, detail="Trop chargé pour récolter — déposez un objet.")
+
+	inventaire = character.get("inventaire", [])
+	inventaire.append(ref)
+	character["inventaire"] = inventaire
+	character["ressource_recoltable"] = None
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	payload = _inventory_payload(character)
+	payload["recolte"] = {"nom": doc.get("nom", "Ressource"), "icon": doc.get("icon", "🌿")}
+	payload["ressource_recoltable"] = None
 	return payload
 
 

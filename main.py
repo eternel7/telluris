@@ -551,6 +551,20 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	character["quetes_actives_detail"], character["quetes_terminees_detail"] = quetes.fiche_details(character)
 	est_guilde = (grid_doc.get("categorie") == "guilde_aventurier")
 
+	# Ressource récoltable (événement de zone « ressource ») : résolue pour l'affichage initial
+	# du bouton « Récolter » dans la sidebar (champ transitoire posé par move_character).
+	ressource_recoltable = None
+	_rec_ref = character.get("ressource_recoltable")
+	if _rec_ref:
+		_rec_doc = resolve_item_ref(_rec_ref)
+		if _rec_doc:
+			ressource_recoltable = {
+				"item": _rec_doc.get("item"),
+				"nom": _rec_doc.get("nom", "Ressource"),
+				"icon": _rec_doc.get("icon", "🌿"),
+				"poids": _rec_doc.get("poids", 0),
+			}
+
 	return templates.TemplateResponse(
 		request=request,
 		name ="play_town_telluris.html",
@@ -578,6 +592,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"lieu_categorie": grid_doc.get("categorie"),
 			"achat_sous_categories": character_stats.ACHAT_SOUS_CAT_PAR_LIEU.get(grid_doc.get("categorie"), []),
 			"est_guilde": est_guilde,
+			"ressource_recoltable": ressource_recoltable,
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.
