@@ -7,6 +7,7 @@ import math
 import re
 import uuid
 import random
+import os
 from db.config import save_doc, get_doc, delete_doc
 from utils.auth import get_current_user, create_access_token
 from utils.characters import (
@@ -94,7 +95,16 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 	db_user = get_doc(user_id)
 	if not db_user:
 		raise HTTPException(status_code=404, detail="User not found")
-		
+
+	# Le portrait est obligatoire : on rejette une image manquante, non-string,
+	# avec séparateur de chemin (anti path-traversal) ou absente du dossier des portraits.
+	image = characterinfo.get("image") if characterinfo else None
+	characters_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "resources", "characters")
+	if (not isinstance(image, str) or not image
+			or "/" in image or "\\" in image
+			or not os.path.isfile(os.path.join(characters_dir, image))):
+		raise HTTPException(status_code=422, detail="Un portrait valide est requis pour créer un personnage.")
+
 	if (characterinfo and "bonusStats" in characterinfo):
 		caractUp = characterinfo["bonusStats"]
 		points_depenses = sum(

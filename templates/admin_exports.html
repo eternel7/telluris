@@ -57,25 +57,6 @@
 	<header><h1>⇩ Exports — administration</h1></header>
 	<div class="main">
 		<div class="card">
-			<div class="card-title">Bestiaire</div>
-			<div class="card-desc">
-				Classeur Excel (.xlsx) du bestiaire : une feuille « Espèces »
-				(stats min/max, tags, propriétés). Généré à la volée depuis CouchDB.
-			</div>
-			<a class="dl-btn" href="{{ url_for('admin_export_bestiaire') }}">⬇ Télécharger le bestiaire</a>
-		</div>
-
-		<div class="card">
-			<div class="card-title">Dump CouchDB</div>
-			<div class="card-desc">
-				Export JSON des documents de la base <code>telluris</code> (design docs inclus),
-				avec leurs <code>_id</code>/<code>_rev</code>. Les documents <code>user:*</code>
-				sont <strong>exclus</strong>. Ré-importable via l'API CouchDB <code>_bulk_docs</code>.
-			</div>
-			<a class="dl-btn" href="{{ url_for('admin_export_couchdb') }}">⬇ Télécharger le dump (.json)</a>
-		</div>
-
-		<div class="card">
 			<div class="card-title">Export JSON par type</div>
 			<div class="card-desc">
 				Exporte en JSON tous les documents partageant la même valeur de champ
@@ -90,6 +71,23 @@
 				</datalist>
 				<button class="dl-btn" type="button" onclick="exportByType()">⬇ Exporter</button>
 			</div>
+		</div>
+		<div class="card">
+			<div class="card-title">Bestiaire</div>
+			<div class="card-desc">
+				Classeur Excel (.xlsx) du bestiaire : une feuille « Espèces »
+				(stats min/max, tags, propriétés). Généré à la volée depuis CouchDB.
+			</div>
+			<a class="dl-btn" href="{{ url_for('admin_export_bestiaire') }}">⬇ Télécharger le bestiaire</a>
+		</div>
+		<div class="card">
+			<div class="card-title">Dump CouchDB</div>
+			<div class="card-desc">
+				Export JSON des documents de la base <code>telluris</code> (design docs inclus),
+				avec leurs <code>_id</code>/<code>_rev</code>. Les documents <code>user:*</code>
+				sont <strong>exclus</strong>. Ré-importable via l'API CouchDB <code>_bulk_docs</code>.
+			</div>
+			<a class="dl-btn" href="{{ url_for('admin_export_couchdb') }}">⬇ Télécharger le dump (.json)</a>
 		</div>
 	</div>
 	<script>

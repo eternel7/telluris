@@ -105,26 +105,29 @@
 <body>
 	<header><h1>⚙ Administration — Telluris</h1></header>
 	<div class="main">
-		<!-- ── Variables de monde (en premier) ───────────────────────────── -->
-		<div class="section-label">Variables de monde</div>
-		<div class="card">
-			<div class="card-title">📜 rules:world_variables</div>
-			<div class="card-desc">
-				Variables d'équilibrage chargées depuis CouchDB (doc <code>rules:world_variables</code>),
-				avec repli sur les valeurs par défaut du code. Éditez le JSON ci-dessous puis
-				<strong>Save</strong> pour persister en base ; <strong>Reload</strong> applique le doc
-				à chaud (sans redéploiement) et rafraîchit l'affichage.
-			</div>
-			<textarea id="wv-editor" spellcheck="false" placeholder="{ ... }"></textarea>
-			<div class="btn-row">
-				<button class="btn" id="wv-save">💾 Save</button>
-				<button class="btn secondary" id="wv-reload">↻ Reload</button>
-			</div>
-			<div class="status" id="wv-status">Chargement…</div>
-		</div>
 
+		<div class="section-label">Editeurs</div>
+
+		<div class="card">
+			<div class="card-title">🗺️ Éditeur de cartes</div>
+			<div class="card-desc">
+				Édition des grilles de déplacement, navigation, zones d'influence et rencontres.
+			</div>
+			<a class="dl-btn" href="/admin/editor">→ Ouvrir l'éditeur de cartes</a>
+		</div>
+		
+		<div class="card">
+			<div class="card-title">🐉 Éditeur de bestiaire</div>
+			<div class="card-desc">
+				Création / édition des espèces et des profils de grade (stats, tags, modificateurs).
+			</div>
+			<a class="dl-btn" href="/admin/bestiaire">→ Ouvrir l'éditeur de bestiaire</a>
+		</div>
+		
 		<!-- ── Import de documents JSON ───────────────────────────────────── -->
+		
 		<div class="section-label" id="import-json">Import de documents</div>
+		
 		<div class="card">
 			<div class="card-title">⇪ Import JSON → CouchDB</div>
 			<div class="card-desc">
@@ -148,14 +151,6 @@
 		<div class="section-label">Autres outils</div>
 
 		<div class="card">
-			<div class="card-title">⇩ Exports</div>
-			<div class="card-desc">
-				Téléchargement du bestiaire (.xlsx) et du dump JSON complet de la base.
-			</div>
-			<a class="dl-btn" href="/admin/exports">→ Ouvrir les exports</a>
-		</div>
-
-		<div class="card">
 			<div class="card-title">▦ Mise à jour en tableau</div>
 			<div class="card-desc">
 				Visualiser les documents CouchDB par type sous forme de tableau (colonnes,
@@ -163,23 +158,32 @@
 			</div>
 			<a class="dl-btn" href="/admin/table">→ Ouvrir la mise à jour en tableau</a>
 		</div>
-
+		
 		<div class="card">
-			<div class="card-title">🐉 Éditeur de bestiaire</div>
+			<div class="card-title">⇩ Exports</div>
 			<div class="card-desc">
-				Création / édition des espèces et des profils de grade (stats, tags, modificateurs).
+				Téléchargement du bestiaire (.xlsx) et du dump JSON complet de la base.
 			</div>
-			<a class="dl-btn" href="/admin/bestiaire">→ Ouvrir l'éditeur de bestiaire</a>
+			<a class="dl-btn" href="/admin/exports">→ Ouvrir les exports</a>
 		</div>
-
+		
+		<!-- ── Variables de monde ───────────────────────────── -->
+		<div class="section-label">Variables de monde</div>
 		<div class="card">
-			<div class="card-title">🗺️ Éditeur de cartes</div>
+			<div class="card-title">📜 rules:world_variables</div>
 			<div class="card-desc">
-				Édition des grilles de déplacement, navigation, zones d'influence et rencontres.
+				Variables d'équilibrage chargées depuis CouchDB (doc <code>rules:world_variables</code>),
+				avec repli sur les valeurs par défaut du code. Éditez le JSON ci-dessous puis
+				<strong>Save</strong> pour persister en base ; <strong>Reload</strong> applique le doc
+				à chaud (sans redéploiement) et rafraîchit l'affichage.
 			</div>
-			<a class="dl-btn" href="/admin/editor">→ Ouvrir l'éditeur de cartes</a>
+			<textarea id="wv-editor" spellcheck="false" placeholder="{ ... }"></textarea>
+			<div class="btn-row">
+				<button class="btn" id="wv-save">💾 Save</button>
+				<button class="btn secondary" id="wv-reload">↻ Reload</button>
+			</div>
+			<div class="status" id="wv-status">Chargement…</div>
 		</div>
-
 	</div>
 
 <script>
