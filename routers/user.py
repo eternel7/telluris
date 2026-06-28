@@ -19,7 +19,7 @@ from utils.characters import (
 )
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
-	convertir_apres_achat, resolve_stock_vente,
+	convertir_apres_achat, resolve_stock_vente, tick_atelier,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 )
@@ -1013,6 +1013,9 @@ async def buy_item(
 
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	# Tick marché à l'achat aussi (approvisionnement + production + écoulement PNJ), comme à la
+	# vente et à l'entrée du lieu — l'achat vient de retirer du stock à reconstituer.
+	tick_atelier(lieu_doc)
 	save_doc(lieu_doc)  # best-effort : décrément du stock monde
 
 	payload = _inventory_payload(character)

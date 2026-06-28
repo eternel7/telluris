@@ -130,10 +130,6 @@
 	align-items: center;
 	justify-content: center;
 	gap: 12px;
-	padding: 8px 18px;
-	background: var(--panel-bg);
-	border: 1px solid var(--border-color);
-	border-radius: 24px;
 	width: 100%;
 	margin-top: 8px;
 }
@@ -193,10 +189,12 @@
 .enemy-panel    { grid-area: ennemis; display: flex; flex-direction: column; gap: 12px; }
 
 /* Look « cuir / parchemin » partagé par les panneaux (tokens de :root). */
-.character-card, .enemy-list, .action-bar, .enemy-portrait-wrap {
+.character-card, .enemy-list, .action-bar, .enemy-portrait-wrap, .tour-header {
 	background: var(--panel-bg);
 	border: 1.5px solid var(--border-color);
 	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+	padding: 10px; font-size: 12px;
 }
 .enemy-portrait-wrap {
 	border-radius: 10px;
@@ -261,7 +259,6 @@
 
 /* ─── Joueur Card ──────────────────────────────────────────────── */
 .character-card {
-	border-radius: 10px;
 	padding: 10px;
 	font-size: 12px;
 }
@@ -356,6 +353,8 @@
 	overflow-y: auto; display: flex; flex-direction: column;
 	gap: 2px; scroll-behavior: smooth;
 	min-height: 250px;
+	scrollbar-width: thin; /* Rend la barre plus fine */
+	scrollbar-color: #4d4d4d transparent;
 }
 .log-entry {
 	font-size: 12px; color: #bbb; padding: 2px 0;
@@ -372,8 +371,6 @@
 
 /* ─── Enemy Panel ──────────────────────────────────────────────── */
 .enemy-list {
-	border-radius: 10px;
-	padding: 10px; font-size: 12px;
 }
 .enemy-list h4  {
 	margin: 0 0 8px 0; font-size: 11px; letter-spacing: 0.08em;

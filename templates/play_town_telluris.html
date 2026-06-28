@@ -2647,6 +2647,7 @@ function renderQuetesActives(data) {
 			<span class="sh-inv-poids">🎯 ${q.progress_txt}</span>
 			<span class="sell-prix">✨ ${q.recompenses.xp} XP · ${formatPrix(q.recompenses)}</span>
 		</span>
+		${(q.objectif && q.objectif.type === 'collect' && !q.complete) ? `<button class="sh-drop-btn" onclick="deposerQuete('${q.id}')" title="Déposer les pièces portées (en plusieurs voyages si besoin)">📥 Déposer</button>` : ''}
 		<button class="sh-drop-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}')" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
 	</li>`).join('');
 }
@@ -2721,6 +2722,25 @@ async function terminerQuete(queteId) {
 			showToast(msg);
 		}
 	} catch(err) { console.error('Erreur fin de quête', err); }
+}
+
+async function deposerQuete(queteId) {
+	try {
+		const res = await fetch('api/quetes/deposer', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ quete_id: queteId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_applyInventoryPayload(data);   // le dépôt a retiré des pièces du sac
+		updatePurse(data.purse);
+		renderQuetesActives(data);
+		renderQuetesOffres(data);
+		renderFicheQuetes(data);
+		if (data.depose) {
+			showToast('Déposé : ' + data.depose.n + ' pièce(s)' + (data.depose.complete ? ' — objectif atteint, à terminer !' : ''));
+		}
+	} catch(err) { console.error('Erreur dépôt de quête', err); }
 }
 </script>
 </body>

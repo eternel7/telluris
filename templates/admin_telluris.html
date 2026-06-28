@@ -53,6 +53,9 @@
 		}
 		textarea:focus { border-color: var(--accent); }
 		textarea.invalid { border-color: var(--danger); }
+		/* Champ référence en lecture seule (valeurs par défaut du code). */
+		textarea[readonly] { background: #0a0c11; color: var(--muted); cursor: default; opacity: 0.85; }
+		textarea[readonly]:focus { border-color: var(--border); }
 
 		.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 		.btn {
@@ -183,11 +186,17 @@
 				<button class="btn secondary" id="wv-reload">↻ Reload</button>
 			</div>
 			<div class="status" id="wv-status">Chargement…</div>
+			<div class="card-desc" style="margin:16px 0 6px">
+				Valeurs <strong>par défaut du code</strong> (hors doc CouchDB), telles qu'elles
+				s'appliqueraient sans surcharge — référence en lecture seule à recopier :
+			</div>
+			<textarea id="wv-code" readonly spellcheck="false" placeholder="{ ... }"></textarea>
 		</div>
 	</div>
 
 <script>
 const editor   = document.getElementById('wv-editor');
+const codeEl   = document.getElementById('wv-code');
 const statusEl = document.getElementById('wv-status');
 const saveBtn  = document.getElementById('wv-save');
 const reloadBtn = document.getElementById('wv-reload');
@@ -230,6 +239,17 @@ function parseEditor() {
 	const res = validateJsonTextarea(editor);
 	if (!res.ok) { setStatus('JSON invalide : ' + res.error, 'err'); return undefined; }
 	return res.value;
+}
+
+// GET /admin/world_variables/defaults → valeurs par défaut du code (lecture seule).
+async function loadCodeDefaults() {
+	try {
+		const res = await fetch('/admin/world_variables/defaults');
+		if (!res.ok) { codeEl.value = '// indisponible (' + res.status + ')'; return; }
+		codeEl.value = JSON.stringify(await res.json(), null, 2);
+	} catch (e) {
+		codeEl.value = '// erreur réseau : ' + e.message;
+	}
 }
 
 // GET /admin/world_variables → valeurs effectives en mémoire.
@@ -417,6 +437,7 @@ importSave.addEventListener('click', async () => {
 });
 
 loadVariables();
+loadCodeDefaults();
 </script>
 </body>
 </html>

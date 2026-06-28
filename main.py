@@ -283,6 +283,14 @@ def admin_get_world_variables(request: Request, current_user: Annotated[User, De
 		raise HTTPException(status_code=403, detail="Admin only")
 	return character_stats.current_world_variables()
 
+@app.get("/admin/world_variables/defaults")
+def admin_get_world_variables_defaults(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Valeurs PAR DÉFAUT du code (snapshot figé à l'import, hors doc CouchDB) — référence
+	lecture seule pour /admin."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	return character_stats.CODE_DEFAULTS
+
 @app.put("/admin/world_variables")
 def admin_save_world_variables(
 	current_user: Annotated[User, Depends(get_current_user)],
@@ -453,10 +461,12 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	race = next((r for r in races["value"] if r["id"] == character["race"]), None)
 	lieu = character.get("lieu",character["cite"])
 	grid_doc = get_doc(lieu)
-	# Atelier : chaque visite du lieu lance un tick marché (production + écoulement PNJ des
-	# produits finis, probabilistes), comme à chaque vente. On ne déclenche que s'il y a de la
-	# matière OU des produits en stock, et on ne persiste que si quelque chose a changé.
-	if grid_doc and (grid_doc.get("stock_matieres") or grid_doc.get("stock_vente")):
+	# Atelier : chaque visite du lieu lance un tick marché (approvisionnement + production +
+	# écoulement PNJ des produits finis), comme à chaque vente. On ne déclenche que s'il y a de la
+	# matière/produits en stock OU un approvisionnement configuré pour la catégorie (sinon le lieu
+	# ne pourrait jamais s'amorcer) ; on ne persiste que si quelque chose a changé.
+	if grid_doc and (grid_doc.get("stock_matieres") or grid_doc.get("stock_vente")
+			or character_stats.APPRO_MATIERES_PAR_LIEU.get(grid_doc.get("categorie"))):
 		if tick_atelier(grid_doc):
 			save_doc(grid_doc)
 	position = character.get("position", {"x" : 1 ,"y" : 1})

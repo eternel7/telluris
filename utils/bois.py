@@ -63,6 +63,25 @@ def cible_coupe(item_doc, find_docs_fn):
 	return None
 
 
+def pieces_legeres(item_doc, find_docs_fn, poids_max: float) -> list:
+	"""IDs des items « bois » de la MÊME essence que `item_doc` (toutes tailles de BOIS_A_COUPER)
+	dont le **poids max** est `≤ poids_max` → pièces transportables (branche/petit_rondin/rondin…),
+	à l'exclusion de fait de l'arbre/tronc/gros_rondin trop lourds. Ordre = échelle (petit→grand)."""
+	essence = _essence_de(item_doc)
+	if not essence:
+		return []
+	out = []
+	for tier in character_stats.BOIS_A_COUPER:
+		cand = _trouver_item(find_docs_fn, essence, tier)
+		if not cand:
+			continue
+		_, pmax = poids_bounds(cand)
+		cid = cand.get("_id")
+		if cid and pmax <= poids_max and cid not in out:
+			out.append(cid)
+	return out
+
+
 def repartir_poids(poids_source: float, tmax: float) -> list:
 	"""Découpe un poids en pièces ≈ `tmax` (du plus grand au plus petit), conservation
 	exacte : la dernière pièce = reliquat (possiblement < min de la cible = chute). Borné

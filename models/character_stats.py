@@ -150,6 +150,18 @@ ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {
 	]
 	}
 
+# ── Approvisionnement des ateliers (au tick) ─────────────────────────────────────
+# À chaque `tick_atelier` (vente/visite), le lieu reçoit des matières premières selon sa
+# catégorie : APPRO_MATIERES_PAR_LIEU[categorie] = {sous_categorie: quantite_par_tick}.
+# Sert surtout aux matières que le lieu « se procure » lui-même (métaux pour l'armurerie…).
+# Défaut = échafaudage : une entrée par métal existant (item tag "metal") × chaque catégorie
+# de lieu marchand (clés de ACHAT_SOUS_CAT_PAR_LIEU) — à élaguer via /admin (ex. ne garder
+# les métaux que pour l'armurerie).
+_APPRO_METAUX_DEFAUT: dict[str, int] = {"fer": 5, "acier": 3, "bronze": 5, "mithril": 1}
+APPRO_MATIERES_PAR_LIEU: dict[str, dict] = {
+	cat: dict(_APPRO_METAUX_DEFAUT) for cat in ["amurerie"]
+}
+
 # ── Marchandage ─────────────────────────────────────────────────────────────────
 # Le prix d'une transaction est interpolé entre le min et le max de l'objet
 # (`valeur` à deux bornes, sinon min dérivé et max = min × PRIX_MAX_FACTEUR). Le
@@ -192,6 +204,9 @@ QUETE_QTE_MIN: int = 2
 QUETE_QTE_MAX: int = 8
 QUETE_XP_FACTEUR: float = 1.5
 QUETE_CUIVRE_PAR_XP: float = 3.0
+# Poids max (kg) d'un objet d'une quête de collecte : on ne réclame pas d'objet plus lourd
+# (ex. un arbre entier) — pour le bois, on cible des pièces transportables de l'essence.
+QUETE_COLLECT_POIDS_MAX: float = 100.0
 
 # ── Récolte & découpe du bois ────────────────────────────────────────────────────
 # Échelle des tailles de bois, du plus petit au plus grand. Couper un item « a_couper »
@@ -354,6 +369,7 @@ def current_world_variables() -> dict:
 		"PRIX_DERIVE_BASE": PRIX_DERIVE_BASE,
 		"MULT_RARETE": dict(MULT_RARETE),
 		"ACHAT_SOUS_CAT_PAR_LIEU": {k: list(v) for k, v in ACHAT_SOUS_CAT_PAR_LIEU.items()},
+		"APPRO_MATIERES_PAR_LIEU": {k: dict(v) for k, v in APPRO_MATIERES_PAR_LIEU.items()},
 		"CHA_MARCHAND": CHA_MARCHAND,
 		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
@@ -375,10 +391,17 @@ def current_world_variables() -> dict:
 		"QUETE_QTE_MAX": QUETE_QTE_MAX,
 		"QUETE_XP_FACTEUR": QUETE_XP_FACTEUR,
 		"QUETE_CUIVRE_PAR_XP": QUETE_CUIVRE_PAR_XP,
+		"QUETE_COLLECT_POIDS_MAX": QUETE_COLLECT_POIDS_MAX,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
 		"COUPE_MAX_PIECES": COUPE_MAX_PIECES,
 	}
+
+
+# Snapshot des valeurs PAR DÉFAUT du code, figé à l'import (AVANT tout load_world_variables) :
+# l'état « via le code » seul, indépendant du doc CouchDB. Exposé en lecture seule dans /admin
+# comme référence à recopier. current_world_variables() renvoie des copies → snapshot immuable.
+CODE_DEFAULTS: dict = current_world_variables()
 
 
 def load_world_variables() -> dict:
@@ -403,6 +426,7 @@ def load_world_variables() -> dict:
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
+	global QUETE_COLLECT_POIDS_MAX
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
@@ -429,6 +453,12 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("ACHAT_SOUS_CAT_PAR_LIEU"), dict):
 		ACHAT_SOUS_CAT_PAR_LIEU.clear()
 		ACHAT_SOUS_CAT_PAR_LIEU.update({k: list(x) for k, x in v["ACHAT_SOUS_CAT_PAR_LIEU"].items()})
+	if isinstance(v.get("APPRO_MATIERES_PAR_LIEU"), dict):
+		APPRO_MATIERES_PAR_LIEU.clear()
+		APPRO_MATIERES_PAR_LIEU.update({
+			k: {sc: int(q) for sc, q in x.items()}
+			for k, x in v["APPRO_MATIERES_PAR_LIEU"].items() if isinstance(x, dict)
+		})
 
 	CHA_MARCHAND     = int(v.get("CHA_MARCHAND", CHA_MARCHAND))
 	PRIX_MAX_FACTEUR = float(v.get("PRIX_MAX_FACTEUR", PRIX_MAX_FACTEUR))
@@ -457,6 +487,7 @@ def load_world_variables() -> dict:
 	QUETE_QTE_MAX       = int(v.get("QUETE_QTE_MAX", QUETE_QTE_MAX))
 	QUETE_XP_FACTEUR    = float(v.get("QUETE_XP_FACTEUR", QUETE_XP_FACTEUR))
 	QUETE_CUIVRE_PAR_XP = float(v.get("QUETE_CUIVRE_PAR_XP", QUETE_CUIVRE_PAR_XP))
+	QUETE_COLLECT_POIDS_MAX = float(v.get("QUETE_COLLECT_POIDS_MAX", QUETE_COLLECT_POIDS_MAX))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):
 		BOIS_A_COUPER[:] = [str(x) for x in v["BOIS_A_COUPER"]]

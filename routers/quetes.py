@@ -9,7 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 
 from db.config import get_doc, save_doc
 from utils.auth import get_current_user
-from utils.characters import get_selected_character, cuivre_to_purse, money_to_cuivre
+from utils.characters import (
+	get_selected_character, cuivre_to_purse, money_to_cuivre,
+	resolve_item_ref, charge_max_of,
+)
 from utils import quetes
 
 quetes_router = APIRouter()
@@ -134,11 +137,8 @@ async def quetes_terminer(
 	if not quetes.objectif_atteint(character, q):
 		raise HTTPException(status_code=422, detail="Objectif non rempli.")
 
-	obj = q.get("objectif", {})
-	# Pour une collecte, on consomme les items rapportés (retrait avant récompenses).
-	if obj.get("type") == "collect":
-		quetes.retirer_items(character, obj.get("cible"), int(obj.get("quantite", 0) or 0))
-
+	# Les collectes ont déjà été consommées au fil des dépôts (`/api/quetes/deposer`) ; le
+	# turn-in ne fait que valider la progression et donner la récompense.
 	recap = quetes.appliquer_recompenses(character, q)
 
 	# Retrait des actives + archivage (idempotence : plus dans actives → plus de turn-in).
@@ -165,6 +165,44 @@ async def quetes_terminer(
 		"niveau_up": recap["xp"].get("niveau_up", False),
 		"recompenses": q.get("recompenses", {}),
 	}
+	return payload
+
+
+@quetes_router.post("/quetes/deposer")
+async def quetes_deposer(
+	current_user: Annotated[dict, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Dépose à la guilde les pièces de collecte portées (jusqu'au reste à faire) : les retire de
+	l'inventaire et fait progresser la quête. Permet de remplir une collecte en plusieurs voyages
+	sans devoir tout porter d'un coup (utile pour le bois lourd)."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	lieu_doc = _guild_lieu(character)
+
+	quete_id = body.get("quete_id")
+	q = quetes.quete_active(character, quete_id)
+	if not q:
+		raise HTTPException(status_code=404, detail="Quête non active")
+	if q.get("giver") != lieu_doc.get("_id"):
+		raise HTTPException(status_code=403, detail="Rendez-vous à la guilde qui a confié la quête.")
+	if q.get("objectif", {}).get("type") != "collect":
+		raise HTTPException(status_code=422, detail="Cette quête ne se dépose pas.")
+
+	n = quetes.deposer_collect(character, q)
+	if n <= 0:
+		raise HTTPException(status_code=422, detail="Rien à déposer (aucune pièce portée ou objectif déjà atteint).")
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	payload = _board_payload(character, lieu_doc)
+	payload["depose"] = {"n": n, "titre": q.get("titre", "—"), "complete": quetes.objectif_atteint(character, q)}
+	# Le dépôt a retiré des pièces du sac → rafraîchir l'inventaire côté client.
+	payload["slots"] = {s: resolve_item_ref(v) if v else None for s, v in character.get("slots", {}).items()}
+	payload["inventaire"] = [d for r in character.get("inventaire", []) if (d := resolve_item_ref(r))]
+	payload["objets_au_sol"] = [d for r in character.get("objets_au_sol", []) if (d := resolve_item_ref(r))]
+	payload["charge_max"] = charge_max_of(character)
 	return payload
 
 

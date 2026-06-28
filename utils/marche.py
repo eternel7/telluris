@@ -119,11 +119,12 @@ def cout_production_cuivre(item_id: str, item_doc: dict | None = None, ref=None,
 	seen = (_seen or set()) | {item_id}
 	best = base
 	for r in recs:
-		input_id = objet_final_item_id(r.get("matiere_premiere_sous_categorie", ""))
-		ci = cout_production_cuivre(input_id, None, None, seen)
-		qm = max(1, int(r.get("quantite_matiere", 1) or 1))
+		# Coût de revient = somme des ingrédients (multi-entrées) × quantité, / quantité produite.
+		ci = 0
+		for (sc, qm) in recette_matieres(r):
+			ci += cout_production_cuivre(objet_final_item_id(sc), None, None, seen) * qm
 		qp = max(1, int(r.get("quantite_produite", 1) or 1))
-		best = max(best, int(round(ci * qm / qp * character_stats.MARGE_TRANSFO)))
+		best = max(best, int(round(ci / qp * character_stats.MARGE_TRANSFO)))
 	best = max(1, best)
 	_cout_memo[item_id] = best
 	return best
@@ -355,6 +356,22 @@ def objet_final_item_id(slug: str) -> str:
 	return _OBJET_FINAL_ITEM_ID.get(slug, "item:" + slug)
 
 
+def recette_matieres(r: dict) -> list:
+	"""Matières premières d'une recette → liste de (sous_categorie, quantite). Multi-entrées
+	via `matieres_premieres:[{sous_categorie, quantite}, …]` ; repli rétro-compatible sur le
+	champ mono-entrée `matiere_premiere_sous_categorie`/`quantite_matiere`."""
+	mp = r.get("matieres_premieres")
+	if isinstance(mp, list) and mp:
+		out = [
+			(e.get("sous_categorie"), max(1, int(e.get("quantite", 1) or 1)))
+			for e in mp if isinstance(e, dict) and e.get("sous_categorie")
+		]
+		if out:
+			return out
+	sc = r.get("matiere_premiere_sous_categorie")
+	return [(sc, max(1, int(r.get("quantite_matiere", 1) or 1)))] if sc else []
+
+
 # ── Dépeçage des carcasses (boucherie) ──────────────────────────────────────────
 
 _INTANGIBLE = {"esprit", "incorporel"}
@@ -477,25 +494,28 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None) -> 
 	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	stock_vente = lieu_doc.setdefault("stock_vente", [])
 	recettes = recettes if recettes is not None else lieu_recettes(lieu_doc.get("categorie"))
-	consommables = {r.get("matiere_premiere_sous_categorie") for r in recettes}
+	consommables = {sc for r in recettes for (sc, _q) in recette_matieres(r)}
 
 	prepared = [
 		{
-			"matiere": r.get("matiere_premiere_sous_categorie"),
-			"qm": max(1, int(r.get("quantite_matiere", 1) or 1)),
+			"inputs": recette_matieres(r),                        # [(sous_cat, qm), …]
+			"poids": sum(qm for (_sc, qm) in recette_matieres(r)),  # pour la pondération du tirage
 			"qp": max(1, int(r.get("quantite_produite", 1) or 1)),
 			"item_id": objet_final_item_id(r.get("objet_final", "")),
 		}
 		for r in recettes
+		if recette_matieres(r)
 	]
 	produits: dict[str, int] = {}
 	fired = 0
 	while fired < _CONVERSION_CAP:
-		applicable = [p for p in prepared if int(stock_mat.get(p["matiere"], 0)) >= p["qm"]]
+		# Une recette est applicable seulement si TOUTES ses matières sont en stock suffisant.
+		applicable = [p for p in prepared if all(int(stock_mat.get(sc, 0)) >= qm for (sc, qm) in p["inputs"])]
 		if not applicable:
 			break
-		chosen = random.choices(applicable, weights=[p["qm"] for p in applicable])[0]
-		stock_mat[chosen["matiere"]] -= chosen["qm"]
+		chosen = random.choices(applicable, weights=[max(1, p["poids"]) for p in applicable])[0]
+		for (sc, qm) in chosen["inputs"]:
+			stock_mat[sc] -= qm
 		_stock_vente_add(stock_vente, chosen["item_id"], chosen["qp"])
 		produits[chosen["item_id"]] = produits.get(chosen["item_id"], 0) + chosen["qp"]
 		fired += 1
@@ -560,12 +580,32 @@ def ecouler_produits_pnj(lieu_doc: dict) -> list[dict]:
 	return ecoules
 
 
+def approvisionner(lieu_doc: dict) -> bool:
+	"""Approvisionnement automatique du lieu selon sa catégorie : ajoute à `stock_matieres`
+	les matières de `APPRO_MATIERES_PAR_LIEU[categorie]` (matières que le lieu « se procure »
+	lui-même, typiquement les métaux pour l'armurerie). Mute `lieu_doc` ; True si quelque
+	chose a été ajouté."""
+	appro = character_stats.APPRO_MATIERES_PAR_LIEU.get((lieu_doc or {}).get("categorie"))
+	if not appro:
+		return False
+	stock = lieu_doc.setdefault("stock_matieres", {})
+	changed = False
+	for sc, q in appro.items():
+		q = int(q or 0)
+		if sc and q > 0:
+			stock[sc] = int(stock.get(sc, 0)) + q
+			changed = True
+	return changed
+
+
 def tick_atelier(lieu_doc: dict, recettes: list | None = None) -> bool:
-	"""Tick marché à appeler à chaque vente/visite : tente une passe de production puis un
-	écoulement PNJ des produits finis. Renvoie True si le doc a changé (→ l'appelant save)."""
+	"""Tick marché à appeler à chaque vente/visite : approvisionne le lieu selon sa catégorie,
+	tente une passe de production puis un écoulement PNJ des produits finis. Renvoie True si le
+	doc a changé (→ l'appelant save)."""
+	approvisionne = approvisionner(lieu_doc)
 	produits = tenter_production(lieu_doc, recettes)
 	ecoules = ecouler_produits_pnj(lieu_doc)
-	return bool(produits or ecoules)
+	return bool(approvisionne or produits or ecoules)
 
 
 def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:

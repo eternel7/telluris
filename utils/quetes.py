@@ -16,7 +16,8 @@ import uuid
 
 from db.config import get_doc, find_docs, save_doc
 from models import character_stats
-from utils.characters import item_ref_id, grant_xp, credit_character, cuivre_to_purse
+from utils.characters import item_ref_id, grant_xp, credit_character, cuivre_to_purse, poids_bounds
+from utils import bois
 
 
 def now_epoch() -> int:
@@ -53,11 +54,29 @@ def ressources_du_parent(parent_doc: dict) -> list:
 
 
 def cibles_collect(parent_doc: dict) -> list:
-	"""Items collectables : ressources du lieu PLUS carcasses des espèces rencontrables."""
-	out = list(ressources_du_parent(parent_doc))
+	"""Items collectables : ressources du lieu PLUS carcasses des espèces rencontrables, bornés à
+	`QUETE_COLLECT_POIDS_MAX` par objet. Un item bois coupable (ex. un arbre) n'est PAS réclamé tel
+	quel mais remplacé par les pièces transportables (≤ limite) de la même essence."""
+	limite = character_stats.QUETE_COLLECT_POIDS_MAX
+	raw = list(ressources_du_parent(parent_doc))
 	for eid in especes_du_parent(parent_doc):
-		iid = _carcasse_item_id(eid)
-		if iid and iid not in out:
+		cid = _carcasse_item_id(eid)
+		if cid:
+			raw.append(cid)
+
+	out = []
+	for iid in raw:
+		doc = get_doc(iid)
+		if not doc:
+			continue
+		# Bois coupable (arbre/tronc/gros rondin…) : on cible les pièces ≤ limite de l'essence.
+		if bois.item_est_coupable(doc):
+			for pid in bois.pieces_legeres(doc, find_docs, limite):
+				if pid not in out:
+					out.append(pid)
+			continue
+		# Autres ressources / carcasses : gardées si l'objet reste transportable (≤ limite).
+		if poids_bounds(doc)[1] <= limite and iid not in out:
 			out.append(iid)
 	return out
 
@@ -260,12 +279,28 @@ def _count_inventaire(character: dict, item_id: str) -> int:
 
 
 def progress_courant(character: dict, q: dict) -> int:
-	"""Progression effective (entier). `collect` = comptage d'inventaire à la volée ;
-	`kill`/`visite` = compteur stocké sur la quête active."""
-	obj = q.get("objectif", {})
-	if obj.get("type") == "collect":
-		return _count_inventaire(character, obj.get("cible"))
+	"""Progression effective (entier) = compteur **`progress` stocké** sur la quête active, pour
+	tous les types : `kill`/`visite` (incrémentés par les hooks) et `collect` (incrémenté par les
+	dépôts à la guilde, cf. `deposer_collect`)."""
 	return int(q.get("progress", 0) or 0)
+
+
+def deposer_collect(character: dict, q: dict) -> int:
+	"""Dépose à la guilde les pièces de collecte actuellement portées (jusqu'au reste à faire) :
+	les retire de l'inventaire et incrémente `progress`. Mute en place ; renvoie le nombre déposé."""
+	obj = q.get("objectif", {})
+	if obj.get("type") != "collect":
+		return 0
+	reste = int(obj.get("quantite", 0) or 0) - int(q.get("progress", 0) or 0)
+	if reste <= 0:
+		return 0
+	cible = obj.get("cible")
+	n = min(reste, _count_inventaire(character, cible))
+	if n <= 0:
+		return 0
+	retirer_items(character, cible, n)
+	q["progress"] = int(q.get("progress", 0) or 0) + n
+	return n
 
 
 def objectif_atteint(character: dict, q: dict) -> bool:
