@@ -1957,141 +1957,141 @@
 	window.addEventListener('resize', applyScale);
 })();
 
-	// ── FICHE PERSONNAGE ────────────────────────────────────────
-	function openSheet() {
-		document.getElementById('game-container').classList.add('panel-hidden');
-		document.getElementById('sheet-panel').classList.remove('panel-hidden');
-		sheetTab('stats', document.querySelector('.sheet-tab-btn'));
-		window.scrollTo({ top: 0, behavior: 'instant' });
-	}
-	function closeSheet() {
-		document.getElementById('game-container').classList.remove('panel-hidden');
-		document.getElementById('sheet-panel').classList.add('panel-hidden');
-		window.scrollTo({ top: 0, behavior: 'smooth' });
-	}
-	function sheetTab(id, btn) {
-		document.querySelectorAll('.sheet-tab-btn').forEach(b => b.classList.remove('active'));
-		document.querySelectorAll('.sheet-panel').forEach(p => p.classList.remove('active'));
-		document.getElementById('sh-' + id).classList.add('active');
-		if (btn) btn.classList.add('active');
-	}
-	document.addEventListener('keydown', e => {
-		if (e.key !== 'Escape') return;
-		const sell = document.getElementById('sell-panel');
-		if (sell && !sell.classList.contains('panel-hidden')) { closeSellPanel(); return; }
-		closeSheet();
-	});
+// ── FICHE PERSONNAGE ────────────────────────────────────────
+function openSheet() {
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('sheet-panel').classList.remove('panel-hidden');
+	sheetTab('stats', document.querySelector('.sheet-tab-btn'));
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+function closeSheet() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('sheet-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function sheetTab(id, btn) {
+	document.querySelectorAll('.sheet-tab-btn').forEach(b => b.classList.remove('active'));
+	document.querySelectorAll('.sheet-panel').forEach(p => p.classList.remove('active'));
+	document.getElementById('sh-' + id).classList.add('active');
+	if (btn) btn.classList.add('active');
+}
+document.addEventListener('keydown', e => {
+	if (e.key !== 'Escape') return;
+	const sell = document.getElementById('sell-panel');
+	if (sell && !sell.classList.contains('panel-hidden')) { closeSellPanel(); return; }
+	closeSheet();
+});
 
-	// ── Dépense d'XP ─────────────────────────────────────────────
-	const _RACE_MIN  = {{ race["stats"]     | tojson | safe }};
-	const _RACE_MAX  = {{ race["stats_max"] | tojson | safe }};
-	let _charStats   = {{ character["caracteristiques_current"] | tojson | safe }};
-	let _statCaps    = {{ stat_caps | tojson | safe }};
-	let _attributePoints = {{ character.get("attribute_points", 0) | tojson | safe }};
-	let _vocNiveau   = {{ character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0) | tojson | safe }};
-	const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
-	const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
+// ── Dépense d'XP ─────────────────────────────────────────────
+const _RACE_MIN  = {{ race["stats"]     | tojson | safe }};
+const _RACE_MAX  = {{ race["stats_max"] | tojson | safe }};
+let _charStats   = {{ character["caracteristiques_current"] | tojson | safe }};
+let _statCaps    = {{ stat_caps | tojson | safe }};
+let _attributePoints = {{ character.get("attribute_points", 0) | tojson | safe }};
+let _vocNiveau   = {{ character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0) | tojson | safe }};
+const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
+const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
 
-	function _xpCostNext(statKey) {
-		const cur     = _charStats[statKey] || 0;
-		const raceMin = _RACE_MIN[statKey]  || 0;
-		const coeff   = _STAT_COEFF[statKey] || 1;
-		return Math.max(0, (cur + 1 - raceMin) * coeff);
-	}
+function _xpCostNext(statKey) {
+	const cur     = _charStats[statKey] || 0;
+	const raceMin = _RACE_MIN[statKey]  || 0;
+	const coeff   = _STAT_COEFF[statKey] || 1;
+	return Math.max(0, (cur + 1 - raceMin) * coeff);
+}
 
-	function _refreshStatBoxes() {
-		document.getElementById('sh-attribute-points').textContent = _attributePoints;
-		for (const code of ["V","F","R","Ag","Vol","Int","Cha","Ch"]) {
-			const val  = _charStats[code] || 0;
-			const cap  = _statCaps[code]  || 0;
-			const cost = _xpCostNext(code);
-			const isAccessible = cap >= (_RACE_MAX[code] || 0);
+function _refreshStatBoxes() {
+	document.getElementById('sh-attribute-points').textContent = _attributePoints;
+	for (const code of ["V","F","R","Ag","Vol","Int","Cha","Ch"]) {
+		const val  = _charStats[code] || 0;
+		const cap  = _statCaps[code]  || 0;
+		const cost = _xpCostNext(code);
+		const isAccessible = cap >= (_RACE_MAX[code] || 0);
 
-			const svEl = document.getElementById('sh-sv-' + code);
-			if (svEl) {
-				const sep = svEl.querySelector('.sh-stat-max-sep');
-				svEl.childNodes[0].textContent = val;
-				if (sep) sep.textContent = '/' + cap;
-			}
-			const btn = document.getElementById('sh-btn-' + code);
-			if (btn) {
-				btn.style.display = _attributePoints > 0 ? '' : 'none';
-				btn.disabled = val >= cap || _attributePoints < cost;
-				btn.classList.toggle('subcap', !isAccessible);
-				const costEl = btn.querySelector('.sh-xp-cost');
-				if (costEl) costEl.textContent = cost + ' XP';
-			}
+		const svEl = document.getElementById('sh-sv-' + code);
+		if (svEl) {
+			const sep = svEl.querySelector('.sh-stat-max-sep');
+			svEl.childNodes[0].textContent = val;
+			if (sep) sep.textContent = '/' + cap;
 		}
-		const btn = document.getElementById('sh-btn-voc-niveau');
+		const btn = document.getElementById('sh-btn-' + code);
 		if (btn) {
-			const cost_vocation = (_vocNiveau + 1) * _VOC_COEFF;
-			btn.style.display = (_attributePoints > 0 && _vocNiveau < 5) ? '' : 'none';
-			btn.disabled = _vocNiveau >= 5 || _attributePoints < cost_vocation;
+			btn.style.display = _attributePoints > 0 ? '' : 'none';
+			btn.disabled = val >= cap || _attributePoints < cost;
+			btn.classList.toggle('subcap', !isAccessible);
+			const costEl = btn.querySelector('.sh-xp-cost');
+			if (costEl) costEl.textContent = cost + ' XP';
 		}
 	}
-
-	function _refreshDerivedStats(d) {
-		const units = {deplacement: ' cases', charge_max: ' kg'};
-		for (const key of ['pv_max','pm_max','initiative','deplacement','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
-			const el = document.getElementById('sh-drv-' + key);
-			if (el && d[key] !== undefined) el.textContent = d[key] + (units[key] || '');
-			const el2 = document.getElementById('stat-drv-' + key);
-			if (el2 && d[key] !== undefined) el2.textContent = d[key] + (units[key] || '');
-			const el3 = document.getElementById('stat-left-drv-' + key);
-			if (el3 && d[key] !== undefined) el3.textContent = d[key] + (units[key] || '');
-			const el4 = document.getElementById('stat-right-drv-' + key);
-			if (el4 && d[key] !== undefined) el4.textContent = d[key] + (units[key] || '');
-			
-		}
+	const btn = document.getElementById('sh-btn-voc-niveau');
+	if (btn) {
+		const cost_vocation = (_vocNiveau + 1) * _VOC_COEFF;
+		btn.style.display = (_attributePoints > 0 && _vocNiveau < 5) ? '' : 'none';
+		btn.disabled = _vocNiveau >= 5 || _attributePoints < cost_vocation;
 	}
+}
 
-	async function spendXpVocation() {
-		const cout = (_vocNiveau + 1) * _VOC_COEFF;
-		if (_attributePoints < cout) { alert('Points insuffisants'); return; }
-
-		try {
-			const res = await fetch('api/spend_xp_vocation', {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'},
-			});
-			const data = await res.json();
-			if (!res.ok) { alert('Erreur : ' + data.detail); return; }
-
-			_vocNiveau       = data.voc_niveau;
-			_attributePoints = data.attribute_points;
-			const elementsNiv = document.querySelectorAll('.voc-niveau');
-			elementsNiv.forEach(el => {
-				el.textContent = _vocNiveau;
-			});
-			const elCout = document.getElementById('sh-voc-cout');
-			if (elCout) elCout.textContent = data.xp_cout_next;
-			_refreshStatBoxes();
-		} catch (err) { console.error('Erreur spend_xp_vocation', err); }
+function _refreshDerivedStats(d) {
+	const units = {deplacement: ' cases', charge_max: ' kg'};
+	for (const key of ['pv_max','pm_max','initiative','deplacement','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
+		const el = document.getElementById('sh-drv-' + key);
+		if (el && d[key] !== undefined) el.textContent = d[key] + (units[key] || '');
+		const el2 = document.getElementById('stat-drv-' + key);
+		if (el2 && d[key] !== undefined) el2.textContent = d[key] + (units[key] || '');
+		const el3 = document.getElementById('stat-left-drv-' + key);
+		if (el3 && d[key] !== undefined) el3.textContent = d[key] + (units[key] || '');
+		const el4 = document.getElementById('stat-right-drv-' + key);
+		if (el4 && d[key] !== undefined) el4.textContent = d[key] + (units[key] || '');
+		
 	}
+}
 
-	async function spendXp(statKey) {
-		const newVal = (_charStats[statKey] || 0) + 1;
-		const cost   = _xpCostNext(statKey);
-		if (_attributePoints < cost) { alert('Points insuffisants'); return; }
+async function spendXpVocation() {
+	const cout = (_vocNiveau + 1) * _VOC_COEFF;
+	if (_attributePoints < cout) { alert('Points insuffisants'); return; }
 
-		try {
-			const res = await fetch('api/spend_xp', {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'},
-				body: JSON.stringify({stat: statKey, new_value: newVal})
-			});
-			const data = await res.json();
-			if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+	try {
+		const res = await fetch('api/spend_xp_vocation', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+		});
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 
-			_charStats[statKey]  = newVal;
-			_attributePoints     = data.attribute_points;
-			_statCaps = data.stat_caps;
-			_refreshStatBoxes();
-			_refreshDerivedStats(data.derived_stats);
-		} catch (err) { console.error('Erreur spend_xp', err); }
-	}
+		_vocNiveau       = data.voc_niveau;
+		_attributePoints = data.attribute_points;
+		const elementsNiv = document.querySelectorAll('.voc-niveau');
+		elementsNiv.forEach(el => {
+			el.textContent = _vocNiveau;
+		});
+		const elCout = document.getElementById('sh-voc-cout');
+		if (elCout) elCout.textContent = data.xp_cout_next;
+		_refreshStatBoxes();
+	} catch (err) { console.error('Erreur spend_xp_vocation', err); }
+}
 
-	</script>
+async function spendXp(statKey) {
+	const newVal = (_charStats[statKey] || 0) + 1;
+	const cost   = _xpCostNext(statKey);
+	if (_attributePoints < cost) { alert('Points insuffisants'); return; }
+
+	try {
+		const res = await fetch('api/spend_xp', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({stat: statKey, new_value: newVal})
+		});
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+
+		_charStats[statKey]  = newVal;
+		_attributePoints     = data.attribute_points;
+		_statCaps = data.stat_caps;
+		_refreshStatBoxes();
+		_refreshDerivedStats(data.derived_stats);
+	} catch (err) { console.error('Erreur spend_xp', err); }
+}
+
+</script>
 <style>
 	#toast {
 		position: fixed;
