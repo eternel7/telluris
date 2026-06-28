@@ -49,106 +49,106 @@ MULT_RARETE: dict[str, float] = {
 }
 # Quelles sous-catégories d'item chaque catégorie de lieu (marchand) achète au personnage.
 ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {
-    "boucherie": [
-      "carcasse"
-    ],
-    "tannerie": [
-      "cuir_brut"
-    ],
-    "maroquinerie": [
-      "cuir"
-    ],
-    "cordonnerie": [
-      "cuir",
-      "tendons"
-    ],
-    "bourrellerie": [
-      "cuir"
-    ],
-    "armurerie": [
-      "cuir",
-      "tendons"
-    ],
-    "cuisine": [
-      "viande",
-      "foie",
-      "coeur"
-    ],
-    "fumoir": [
-      "viande"
-    ],
-    "salaison": [
-      "viande"
-    ],
-    "laboratoire_d_alchimie": [
-      "sang",
-      "poudre_d_os",
-      "griffes",
-      "yeux",
-      "coeur"
-    ],
-    "scriptorium": [
-      "sang",
-      "plumes"
-    ],
-    "savonnerie": [
-      "graisse"
-    ],
-    "atelier_de_cirier": [
-      "graisse"
-    ],
-    "apothicairerie": [
-      "graisse",
-      "foie"
-    ],
-    "tabletterie": [
-      "os",
-      "crocs"
-    ],
-    "atelier_d_artisan": [
-      "os"
-    ],
-    "jardinier": [
-      "poudre_d_os"
-    ],
-    "corderie": [
-      "crins"
-    ],
-    "brosserie": [
-      "crins",
-      "poils"
-    ],
-    "tissage": [
-      "poils"
-    ],
-    "plumasserie": [
-      "plumes"
-    ],
-    "atelier_de_l_empenneur": [
-      "plumes",
-      "bois"
-    ],
-    "boyauderie": [
-      "boyaux"
-    ],
-    "fletcher": [
-      "boyaux",
-      "tendons"
-    ],
-    "lutherie": [
-      "boyaux"
-    ],
-    "bijouterie": [
-      "griffes",
-      "crocs"
-    ],
-    "taxidermie": [
-      "crane"
-    ],
-    "necromancie": [
-      "crane"
-    ]
-  }
+	"boucherie": [
+	"carcasse"
+	],
+	"tannerie": [
+	"cuir_brut"
+	],
+	"maroquinerie": [
+	"cuir"
+	],
+	"cordonnerie": [
+	"cuir",
+	"tendons"
+	],
+	"bourrellerie": [
+	"cuir"
+	],
+	"armurerie": [
+	"cuir",
+	"tendons"
+	],
+	"cuisine": [
+	"viande",
+	"foie",
+	"coeur"
+	],
+	"fumoir": [
+	"viande"
+	],
+	"salaison": [
+	"viande"
+	],
+	"laboratoire_d_alchimie": [
+	"sang",
+	"poudre_d_os",
+	"griffes",
+	"yeux",
+	"coeur"
+	],
+	"scriptorium": [
+	"sang",
+	"plumes"
+	],
+	"savonnerie": [
+	"graisse"
+	],
+	"atelier_de_cirier": [
+	"graisse"
+	],
+	"apothicairerie": [
+	"graisse",
+	"foie"
+	],
+	"tabletterie": [
+	"os",
+	"crocs"
+	],
+	"atelier_d_artisan": [
+	"os"
+	],
+	"jardinier": [
+	"poudre_d_os"
+	],
+	"corderie": [
+	"crins"
+	],
+	"brosserie": [
+	"crins",
+	"poils"
+	],
+	"tissage": [
+	"poils"
+	],
+	"plumasserie": [
+	"plumes"
+	],
+	"atelier_de_l_empenneur": [
+	"plumes",
+	"bois"
+	],
+	"boyauderie": [
+	"boyaux"
+	],
+	"fletcher": [
+	"boyaux",
+	"tendons"
+	],
+	"lutherie": [
+	"boyaux"
+	],
+	"bijouterie": [
+	"griffes",
+	"crocs"
+	],
+	"taxidermie": [
+	"crane"
+	],
+	"necromancie": [
+	"crane"
+	]
+	}
 
 # ── Marchandage ─────────────────────────────────────────────────────────────────
 # Le prix d'une transaction est interpolé entre le min et le max de l'objet
@@ -193,6 +193,16 @@ QUETE_QTE_MAX: int = 8
 QUETE_XP_FACTEUR: float = 1.5
 QUETE_CUIVRE_PAR_XP: float = 3.0
 
+# ── Récolte & découpe du bois ────────────────────────────────────────────────────
+# Échelle des tailles de bois, du plus petit au plus grand. Couper un item « a_couper »
+# produit des pièces du tier immédiatement plus petit (même `essence`), poids conservé.
+# `branche` n'a pas le tag a_couper → terminal. La coupe nécessite un item portant le tag
+# OUTIL_COUPE_BOIS_TAG dans le sac/équipement. COUPE_MAX_PIECES borne le nombre de pièces
+# générées par coupe (anti-explosion : le reliquat est aggloméré dans la dernière pièce).
+BOIS_A_COUPER: list = ["branche", "petit_rondin", "rondin", "gros_rondin", "tronc", "arbre"]
+OUTIL_COUPE_BOIS_TAG: str = "outil_coupe_bois"
+COUPE_MAX_PIECES: int = 40
+
 # ── Dépeçage des carcasses (boucherie) ──────────────────────────────────────────
 # Une carcasse vendue à une boucherie est décomposée en matières premières selon les
 # `tags` de son espèce. Table tunable tag → matières produites (un sous-cat répété
@@ -203,31 +213,111 @@ QUETE_CUIVRE_PAR_XP: float = 3.0
 # Les quantités finales sont mises à l'échelle du POIDS de la carcasse (cf.
 # DEPECAGE_POIDS_REF) — il n'y a plus de bucket petite_taille/geant.
 DEPECAGE_TAGS: dict[str, list] = {
-	"_charnu_base":  ["viande", "viande", "os", "sang", "graisse"],
-	"animal":        ["cuir", "crocs", "poils"],
-	"monstre":       ["cuir", "crocs"],
-	"humanoide":     ["cuir"],
-	"monture":       ["cuir", "crins", "tendons"],
-	"bete_de_somme": ["cuir", "crins"],
-	"draconique":    ["cuir", "crocs", "griffes", "tendons", "coeur"],
-	"reptile":       ["cuir", "crocs"],
-	"demon":         ["cuir", "crocs", "griffes", "coeur"],
-	"infernal":      ["griffes", "coeur"],
-	"celeste":       ["griffes", "coeur"],
-	"ange":          ["plumes", "coeur"],
-	"vol":           ["plumes", "griffes"],
-	"venin":         ["crocs"],
-	"foret":         ["poils"],
-	"froid":         ["poils"],
-	"geant":         ["tendons", "boyaux", "foie", "crane"],
-	"grande_taille": ["boyaux"],
-	"boss":          ["coeur", "yeux", "crane"],
-	"legendaire":    ["coeur", "foie", "yeux"],
-	"magique":       ["yeux"],
-	"petrification": ["yeux"],
-	"undead":        ["os", "os", "crane"],
-	"non_mort":      ["os", "os"],
-}
+	"_charnu_base": [
+	  "viande",
+	  "viande",
+	  "os",
+	  "sang",
+	  "graisse"
+	],
+	"animal": [
+	  "cuir_brut",
+	  "crocs",
+	  "poils"
+	],
+	"monstre": [
+	  "cuir_brut",
+	  "crocs"
+	],
+	"humanoide": [
+	  "cuir_brut"
+	],
+	"monture": [
+	  "cuir_brut",
+	  "crins",
+	  "tendons"
+	],
+	"bete_de_somme": [
+	  "cuir_brut",
+	  "crins"
+	],
+	"draconique": [
+	  "cuir_brut",
+	  "crocs",
+	  "griffes",
+	  "tendons",
+	  "coeur"
+	],
+	"reptile": [
+	  "cuir_brut",
+	  "crocs"
+	],
+	"demon": [
+	  "cuir_brut",
+	  "crocs",
+	  "griffes",
+	  "coeur"
+	],
+	"infernal": [
+	  "griffes",
+	  "coeur"
+	],
+	"celeste": [
+	  "griffes",
+	  "coeur"
+	],
+	"ange": [
+	  "plumes",
+	  "coeur"
+	],
+	"vol": [
+	  "plumes",
+	  "griffes"
+	],
+	"venin": [
+	  "crocs"
+	],
+	"foret": [
+	  "poils"
+	],
+	"froid": [
+	  "poils"
+	],
+	"geant": [
+	  "tendons",
+	  "boyaux",
+	  "foie",
+	  "crane"
+	],
+	"grande_taille": [
+	  "boyaux"
+	],
+	"boss": [
+	  "coeur",
+	  "yeux",
+	  "crane"
+	],
+	"legendaire": [
+	  "coeur",
+	  "foie",
+	  "yeux"
+	],
+	"magique": [
+	  "yeux"
+	],
+	"petrification": [
+	  "yeux"
+	],
+	"undead": [
+	  "os",
+	  "os",
+	  "crane"
+	],
+	"non_mort": [
+	  "os",
+	  "os"
+	]
+  }
 
 # Échelle du dépeçage : quantité de chaque matière = max(1, round(base × poids / DEPECAGE_POIDS_REF)).
 # Le poids de la carcasse pilote seul la production (conservation de la masse). À ce poids de
@@ -285,6 +375,9 @@ def current_world_variables() -> dict:
 		"QUETE_QTE_MAX": QUETE_QTE_MAX,
 		"QUETE_XP_FACTEUR": QUETE_XP_FACTEUR,
 		"QUETE_CUIVRE_PAR_XP": QUETE_CUIVRE_PAR_XP,
+		"BOIS_A_COUPER": list(BOIS_A_COUPER),
+		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
+		"COUPE_MAX_PIECES": COUPE_MAX_PIECES,
 	}
 
 
@@ -310,6 +403,7 @@ def load_world_variables() -> dict:
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
+	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
 		doc = get_doc(WORLD_VARIABLES_DOC_ID)
@@ -364,6 +458,11 @@ def load_world_variables() -> dict:
 	QUETE_XP_FACTEUR    = float(v.get("QUETE_XP_FACTEUR", QUETE_XP_FACTEUR))
 	QUETE_CUIVRE_PAR_XP = float(v.get("QUETE_CUIVRE_PAR_XP", QUETE_CUIVRE_PAR_XP))
 
+	if isinstance(v.get("BOIS_A_COUPER"), list):
+		BOIS_A_COUPER[:] = [str(x) for x in v["BOIS_A_COUPER"]]
+	OUTIL_COUPE_BOIS_TAG = str(v.get("OUTIL_COUPE_BOIS_TAG", OUTIL_COUPE_BOIS_TAG))
+	COUPE_MAX_PIECES     = int(v.get("COUPE_MAX_PIECES", COUPE_MAX_PIECES))
+
 	return current_world_variables()
 
 
@@ -387,15 +486,15 @@ class BaseStats(BaseModel):
 
 class EquipmentBonus(BaseModel):
 	"""Bonus cumulés de tous les équipements portés."""
-	pv:            int = 0    # Bonus PV (objets magiques)
-	pm:            int = 0    # Bonus PM
-	pa:            int = 0    # Valeur d'armure totale
-	malus_depl:    int = 0    # Malus de déplacement (armure lourde)
-	cc_bonus:      int = 0    # Bonus attaque CàC (arme)
-	cd_bonus:      int = 0    # Bonus attaque distance (arme)
-	degats_bonus:  int = 0    # Bonus dégâts plat (arme) : +x
+	pv:			int = 0	# Bonus PV (objets magiques)
+	pm:			int = 0	# Bonus PM
+	pa:			int = 0	# Valeur d'armure totale
+	malus_depl:	int = 0	# Malus de déplacement (armure lourde)
+	cc_bonus:	  int = 0	# Bonus attaque CàC (arme)
+	cd_bonus:	  int = 0	# Bonus attaque distance (arme)
+	degats_bonus:  int = 0	# Bonus dégâts plat (arme) : +x
 	degats_dice:   str = ""   # Dés de dégâts additionnels (arme) : ex "1D4", "1D4+1D6"
-	initiative:    int = 0    # Bonus initiative (objets)
+	initiative:	int = 0	# Bonus initiative (objets)
 
 
 # ── Stats dérivées calculées ──────────────────────────────────────────────────
@@ -404,16 +503,16 @@ class DerivedStats(BaseModel):
 	"""Stats calculées — jamais stockées en base, toujours recalculées."""
 
 	# Points de ressources
-	pv_max:    int
-	pm_max:    int
+	pv_max:	int
+	pm_max:	int
 
 	# Combat
 	initiative:  int
 	deplacement: int   # cases par action
-	cc:          int   # compétence corps à corps
-	cd:          int   # compétence à distance
-	pa:          int   # points d'armure
-	pm_def:      int   # défense magique
+	cc:		  int   # compétence corps à corps
+	cd:		  int   # compétence à distance
+	pa:		  int   # points d'armure
+	pm_def:	  int   # défense magique
 	degats_cc:   str   # ex: "1D6+3"
 	degats_cd:   str   # ex: "1D4+1"
 
@@ -422,8 +521,8 @@ class DerivedStats(BaseModel):
 	xp_cout_niv: int   # coût XP pour monter au prochain niveau
 
 def compute_derived_stats(
-	base:      BaseStats,
-	niveau:    int,
+	base:	  BaseStats,
+	niveau:	int,
 	equipment: EquipmentBonus = EquipmentBonus(),
 ) -> DerivedStats:
 	"""
@@ -501,12 +600,12 @@ def compute_xp_cost(stat_key: str, from_val: int, to_val: int, race_min: int) ->
 	return sum((n + 1 - race_min) * coeff for n in range(from_val, to_val))
 
 def compute_stat_cap(
-	stat_key:           str,
-	stats_max:          dict,
+	stat_key:		   str,
+	stats_max:		  dict,
 	nb_max_accessibles: int,
-	current_stats:      dict,
-	max_bonus:          dict | None = None,
-	max_bonus_used:     str | None = None,
+	current_stats:	  dict,
+	max_bonus:		  dict | None = None,
+	max_bonus_used:	 str | None = None,
 ) -> int:
 	"""
 	Retourne le plafond effectif d'une stat pour ce personnage.
@@ -552,7 +651,7 @@ def compute_character_level(xp_total: int) -> int:
 def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus) -> str:
 	"""Assemble la notation de dégâts : dé de base + dés d'arme + modificateur plat.
 
-	- `base_die`    : dé dérivé de la caractéristique (F au CàC, Ag au tir).
+	- `base_die`	: dé dérivé de la caractéristique (F au CàC, Ag au tir).
 	- `stat_bonus`  : bonus de puissance physique = caract // FACTEUR (miroir des PA).
 	- `equipment.degats_dice` : dés additionnels de l'arme (+1DX), concaténables.
 	- `equipment.degats_bonus`: modificateur plat de l'arme (+x).

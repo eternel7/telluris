@@ -8,7 +8,7 @@ import re
 import uuid
 import random
 import os
-from db.config import save_doc, get_doc, delete_doc
+from db.config import save_doc, get_doc, delete_doc, find_docs
 from utils.auth import get_current_user, create_access_token
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
@@ -26,6 +26,7 @@ from utils.marche import (
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
 from utils import quetes
+from utils import bois
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -293,6 +294,7 @@ def _recolte_payload(character: dict) -> dict | None:
 		"nom": doc.get("nom", "Ressource"),
 		"icon": doc.get("icon", "🌿"),
 		"poids": doc.get("poids", 0),
+		"a_couper": bois.item_est_coupable(doc),
 	}
 
 
@@ -753,6 +755,24 @@ async def recolter_ressource(
 		save_doc(character)
 		raise HTTPException(status_code=404, detail="Ressource introuvable.")
 
+	# Bois (item « a_couper ») : récolter = abattre AVEC un outil ; les pièces (tier
+	# immédiatement plus petit) tombent au SOL (pas de contrôle de charge), à ramasser
+	# ensuite. Sans outil → refus.
+	if bois.item_est_coupable(doc):
+		if not bois.a_outil_coupe(character, get_doc):
+			raise HTTPException(status_code=409, detail="Il faut un outil de coupe (hache, scie…) pour récolter du bois.")
+		pieces = bois.couper_ref(ref, doc, find_docs) or [ref]
+		au_sol = character.get("objets_au_sol", [])
+		au_sol.extend(pieces)
+		character["objets_au_sol"] = au_sol
+		character["ressource_recoltable"] = None
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		payload = _inventory_payload(character)
+		payload["recolte"] = {"nom": doc.get("nom", "Bois"), "icon": doc.get("icon", "🪵"), "coupe": True, "n": len(pieces)}
+		payload["ressource_recoltable"] = None
+		return payload
+
 	if carried_weight(character) + item_ref_weight(ref) > charge_max_of(character):
 		raise HTTPException(status_code=409, detail="Trop chargé pour récolter — déposez un objet.")
 
@@ -767,6 +787,55 @@ async def recolter_ressource(
 	payload = _inventory_payload(character)
 	payload["recolte"] = {"nom": doc.get("nom", "Ressource"), "icon": doc.get("icon", "🌿")}
 	payload["ressource_recoltable"] = None
+	return payload
+
+
+@user_router.post("/couper")
+async def couper_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Coupe un item « a_couper » (bois) d'un niveau : retire la source du sac OU du sol et
+	dépose au SOL les pièces du tier immédiatement plus petit (poids conservé). Nécessite un
+	outil de coupe (item taggé). Body : {index, item_id, source:"sac"|"sol"}."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	if not bois.a_outil_coupe(character, get_doc):
+		raise HTTPException(status_code=409, detail="Il faut un outil de coupe (hache, scie…).")
+
+	source = body.get("source")
+	refs = character.get("objets_au_sol", []) if source == "sol" else character.get("inventaire", [])
+	idx, item_id = body.get("index"), body.get("item_id")
+
+	target_ref = _find_ref(refs, idx, item_id)
+	if target_ref is None:
+		raise HTTPException(status_code=422, detail="Objet introuvable.")
+	pieces = bois.couper_ref(target_ref, get_doc(item_ref_id(target_ref)), find_docs)
+	if not pieces:
+		raise HTTPException(status_code=422, detail="Cet objet ne peut pas être coupé davantage.")
+
+	if _take_ref(refs, idx, item_id) is None:
+		raise HTTPException(status_code=409, detail="Conflit — réessayez.")
+	if source == "sol":
+		character["objets_au_sol"] = refs
+	else:
+		character["inventaire"] = refs
+	au_sol = character.get("objets_au_sol", [])
+	au_sol.extend(pieces)
+	character["objets_au_sol"] = au_sol
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	cible_doc = get_doc(pieces[0]["item"])
+	payload = _inventory_payload(character)
+	payload["coupe"] = {
+		"n": len(pieces),
+		"nom": cible_doc.get("nom", "pièces") if cible_doc else "pièces",
+		"taille": cible_doc.get("sous_categorie", "") if cible_doc else "",
+	}
 	return payload
 
 

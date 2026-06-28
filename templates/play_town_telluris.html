@@ -678,25 +678,26 @@
 			flex-basis: 100%;
 		}
 		.sh-inv-qty { color: var(--muted); }
-		/* Sac & sol : lignes à hauteur fixe → zone scrollable dimensionnée en CSS. */
-		#sh-inv-sac .sh-inv-item, #sh-inv-sol .sh-inv-item { flex-wrap: nowrap; overflow: hidden; }
-		#sh-inv-sac .sh-inv-name, #sh-inv-sol .sh-inv-name { 
+		/* Sac & sol : lignes à hauteur fixe → zone scrollable dimensionnée en CSS.
+		   Même présentation pour les deux via la classe partagée .sh-inv-box. */
+		.sh-inv-box .sh-inv-item { flex-wrap: nowrap; overflow: hidden; }
+		.sh-inv-box .sh-inv-name {
 			flex: 1 1 0;
 			min-width: 50px;
 			overflow: hidden;
 			text-overflow: ellipsis;
-			white-space: nowrap; 
+			white-space: nowrap;
 		}
 		/* 10 objets visibles puis scroll vertical. */
-		#sh-inv-sac { 
-			max-height: calc(var(--inv-row-h) * 10); 
+		.sh-inv-box {
+			max-height: calc(var(--inv-row-h) * 10);
 			overflow-y: auto;
 			scrollbar-width: thin;
 			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
 		.sh-inv-scroll { position: relative; }
 		/* Marge de scroll d'1 ligne : le dernier objet reste entièrement visible en bas. */
-		.sh-inv-scroll.scrollable #sh-inv-sac { padding-bottom: var(--inv-row-h); }
+		.sh-inv-scroll.scrollable .sh-inv-box { padding-bottom: var(--inv-row-h); }
 		/* Ombre sur la demi-ligne du bas quand il reste des objets à scroller. */
 		.sh-inv-scroll.scrollable::after {
 			content: ''; position: absolute; left: 0; right: 0; bottom: 0;
@@ -704,7 +705,16 @@
 			background: linear-gradient(to bottom, transparent, var(--panel-bg));
 			pointer-events: none;
 		}
-		#inv-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
+		/* Groupe des boutons d'action d'une ligne (sac/sol) → reste solidaire à droite. */
+		.sh-inv-actions { display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; }
+		/* Mobile : ne pas tronquer le sac / le sol. Le contenu (icône, nom, poids, rareté)
+		   passe sur autant de lignes que nécessaire ; les boutons restent groupés à droite. */
+		@media (max-width: 768px) {
+			.sh-inv-box .sh-inv-item { flex-wrap: wrap; overflow: visible; }
+			.sh-inv-box .sh-inv-name { white-space: normal; overflow: visible; text-overflow: clip; flex: 1 1 auto; }
+			.sh-inv-box .sh-inv-actions { margin-left: auto; }
+		}
+		#inv-sort-btn.active, #sol-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
 		.sh-rarity { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: #333; }
 		.sh-equip-row { display: flex; gap: 4px; margin-top: 4px; align-items: center; width: 100%; }
 		.sh-equip-sel {
@@ -1378,9 +1388,13 @@
 							<button type="button" id="inv-sort-btn" class="sh-drop-btn" onclick="cycleInvSort()"
 								title="Trier le sac par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
 						</div>
-						<div class="sh-inv-scroll" id="sh-inv-scroll"><div id="sh-inv-sac"></div></div>
-						<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none">⬇️ Au sol</div>
-						<div id="sh-inv-sol"></div>
+						<div class="sh-inv-scroll" id="sh-sac-scroll"><div id="sh-inv-sac" class="sh-inv-box"></div></div>
+						<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none; align-items:center; justify-content:space-between">
+								<span>⬇️ Au sol</span>
+								<button type="button" id="sol-sort-btn" class="sh-drop-btn" onclick="cycleSolSort()"
+									title="Trier les objets au sol par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+							</div>
+						<div class="sh-inv-scroll" id="sh-sol-scroll"><div id="sh-inv-sol" class="sh-inv-box"></div></div>
 					</div>
 
 					<!-- ── COMPETENCES ── -->
@@ -1513,8 +1527,9 @@
 		const el = document.getElementById('recolte-action');
 		if (!el) return;
 		const r = _ressourceRecoltable;
+		const label = r ? (r.a_couper ? `🪓 Abattre ${r.nom}` : `${r.icon || '🌿'} Récolter ${r.nom}`) : '';
 		el.innerHTML = r
-			? `<h3>Récolte</h3><ul class="sub-locations-list"><li><button class="sub-loc-btn" onclick="recolterRessource()">${r.icon || '🌿'} Récolter ${r.nom}</button></li></ul>`
+			? `<h3>Récolte</h3><ul class="sub-locations-list"><li><button class="sub-loc-btn" onclick="recolterRessource()">${label}</button></li></ul>`
 			: '';
 	}
 	async function recolterRessource() {
@@ -1525,7 +1540,8 @@
 			_applyInventoryPayload(data);
 			_ressourceRecoltable = null;
 			_refreshRecolte();
-			if (data.recolte) showToast('Récolté : ' + data.recolte.nom);
+			if (data.recolte && data.recolte.coupe) showToast('Abattu : ' + data.recolte.n + ' pièce(s) au sol');
+			else if (data.recolte) showToast('Récolté : ' + data.recolte.nom);
 		} catch (err) { console.error('Erreur récolte', err); }
 	}
 	_refreshRecolte();
@@ -2142,26 +2158,37 @@ let _slots        = {{ character.get("slots", {}) | tojson | safe }};
 let _objetsAuSol  = {{ character.get("objets_au_sol", []) | tojson | safe }};
 let _chargeMax    = {{ character.get("derived_stats", {}).get("charge_max", 0) }};
 
-// Tri du sac par nom (3 états : null → 'asc' → 'desc' → null), mémorisé par navigateur.
+// Tri par nom (3 états : null → 'asc' → 'desc' → null), mémorisé par navigateur.
+// Logique partagée entre le sac (_invSort) et le sol (_solSort).
 const INV_VISIBLE = 20;
-let _invSort = null;
-try { const s = localStorage.getItem('telluris.play.inv_sort'); if (s === 'asc' || s === 'desc') _invSort = s; } catch (e) {}
-
-function cycleInvSort() {
-	_invSort = _invSort === null ? 'asc' : (_invSort === 'asc' ? 'desc' : null);
-	try {
-		if (_invSort) localStorage.setItem('telluris.play.inv_sort', _invSort);
-		else localStorage.removeItem('telluris.play.inv_sort');
-	} catch (e) {}
-	_refreshInventaire();
+function _loadSort(key) { try { const s = localStorage.getItem(key); return (s === 'asc' || s === 'desc') ? s : null; } catch (e) { return null; } }
+function _saveSort(key, state) { try { if (state) localStorage.setItem(key, state); else localStorage.removeItem(key); } catch (e) {} }
+function _cycleSort(state) { return state === null ? 'asc' : (state === 'asc' ? 'desc' : null); }
+// Ordre d'AFFICHAGE seulement : renvoie des index d'origine (adressage serveur conservé).
+function _sortedOrder(arr, state) {
+	const order = arr.map((_, i) => i);
+	if (state) {
+		const dir = state === 'asc' ? 1 : -1;
+		order.sort((a, b) => dir * String((arr[a] || {}).nom || '')
+			.localeCompare(String((arr[b] || {}).nom || ''), undefined, { numeric: true, sensitivity: 'base' }));
+	}
+	return order;
 }
-
-function updateSortBtn() {
-	const b = document.getElementById('inv-sort-btn');
+function _updateSortBtn(id, state) {
+	const b = document.getElementById(id);
 	if (!b) return;
-	b.textContent = _invSort === 'asc' ? 'Trier ▲' : (_invSort === 'desc' ? 'Trier ▼' : 'Trier');
-	b.classList.toggle('active', !!_invSort);
+	b.textContent = state === 'asc' ? 'Trier ▲' : (state === 'desc' ? 'Trier ▼' : 'Trier');
+	b.classList.toggle('active', !!state);
 }
+
+let _invSort = _loadSort('telluris.play.inv_sort');
+let _solSort = _loadSort('telluris.play.sol_sort');
+
+function cycleInvSort() { _invSort = _cycleSort(_invSort); _saveSort('telluris.play.inv_sort', _invSort); _refreshInventaire(); }
+function cycleSolSort() { _solSort = _cycleSort(_solSort); _saveSort('telluris.play.sol_sort', _solSort); _refreshSol(); }
+
+function updateSortBtn()    { _updateSortBtn('inv-sort-btn', _invSort); }
+function updateSolSortBtn() { _updateSortBtn('sol-sort-btn', _solSort); }
 
 // Poids porté = somme des `poids` des items du sac + des items équipés.
 function _currentCharge() {
@@ -2212,7 +2239,7 @@ function _refreshPaperdoll() {
 
 function _refreshInventaire() {
 	const sacEl = document.getElementById('sh-inv-sac');
-	const scrollEl = document.getElementById('sh-inv-scroll');
+	const scrollEl = document.getElementById('sh-sac-scroll');
 	if (!sacEl) return;
 	if (!_inventaire || !_inventaire.length) {
 		sacEl.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Inventaire vide</div>';
@@ -2220,14 +2247,7 @@ function _refreshInventaire() {
 		updateSortBtn();
 		return;
 	}
-	// Ordre d'AFFICHAGE seulement : on garde l'index d'origine pour l'adressage serveur (dropItem).
-	const order = _inventaire.map((_, i) => i);
-	if (_invSort) {
-		const dir = _invSort === 'asc' ? 1 : -1;
-		order.sort((a, b) => dir * String((_inventaire[a] || {}).nom || '')
-			.localeCompare(String((_inventaire[b] || {}).nom || ''), undefined, { numeric: true, sensitivity: 'base' }));
-	}
-	sacEl.innerHTML = order.map(idx => {
+	sacEl.innerHTML = _sortedOrder(_inventaire, _invSort).map(idx => {
 		const item = _inventaire[idx];
 		if (!item || typeof item !== 'object') return '';
 		const compat = (item.slots || []).filter(s => s in SLOT_LABELS);
@@ -2241,11 +2261,12 @@ function _refreshInventaire() {
 		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
 		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
 		const dropHtml = `<button class="sh-drop-btn" onclick="dropItem(${idx},'${item._id}')" title="Poser au sol">Poser</button>`;
+		const couperHtml = _estCoupable(item) ? _couperBtn(idx, item._id, 'sac') : '';
 		return `<div class="sh-inv-item">
 			<span>${item.icon || '📦'}</span>
 			<span class="sh-inv-name">${item.nom || '—'}</span>
 			${poidsHtml}
-			${rarHtml}${equipHtml}${dropHtml}
+			${rarHtml}${equipHtml}<span class="sh-inv-actions">${couperHtml}${dropHtml}</span>
 		</div>`;
 	}).join('');
 	if (scrollEl) scrollEl.classList.toggle('scrollable', _inventaire.length > INV_VISIBLE);
@@ -2256,11 +2277,14 @@ function _refreshInventaire() {
 function _refreshSol() {
 	const solEl = document.getElementById('sh-inv-sol');
 	const section = document.getElementById('sh-sol-section');
+	const scrollEl = document.getElementById('sh-sol-scroll');
 	if (!solEl) return;
 	const has = _objetsAuSol && _objetsAuSol.length;
-	if (section) section.style.display = has ? '' : 'none';
-	if (!has) { solEl.innerHTML = ''; return; }
-	solEl.innerHTML = _objetsAuSol.map((item, idx) => {
+	if (section) section.style.display = has ? 'flex' : 'none';
+	if (scrollEl) scrollEl.style.display = has ? '' : 'none';
+	if (!has) { solEl.innerHTML = ''; if (scrollEl) scrollEl.classList.remove('scrollable'); updateSolSortBtn(); return; }
+	solEl.innerHTML = _sortedOrder(_objetsAuSol, _solSort).map(idx => {
+		const item = _objetsAuSol[idx];
 		if (!item || typeof item !== 'object') return '';
 		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
 		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
@@ -2268,9 +2292,37 @@ function _refreshSol() {
 			<span>${item.icon || '📦'}</span>
 			<span class="sh-inv-name">${item.nom || '—'}</span>
 			${poidsHtml}${rarHtml}
-			<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button>
+			<span class="sh-inv-actions">${_estCoupable(item) ? _couperBtn(idx, item._id, 'sol') : ''}<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button></span>
 		</div>`;
 	}).join('');
+	if (scrollEl) scrollEl.classList.toggle('scrollable', _objetsAuSol.length > INV_VISIBLE);
+	updateSolSortBtn();
+}
+
+// ── Découpe du bois ───────────────────────────────────────────────────
+function _estCoupable(item) {
+	return !!item && (item.tags || []).some(t => String(t).toLowerCase() === 'a_couper');
+}
+function _hasOutilCoupe() {
+	const hasTag = o => o && (o.tags || []).some(t => String(t).toLowerCase() === 'outil_coupe_bois');
+	if ((_inventaire || []).some(hasTag)) return true;
+	return Object.values(_slots || {}).some(hasTag);
+}
+function _couperBtn(idx, itemId, source) {
+	const tool = _hasOutilCoupe();
+	return `<button class="sh-drop-btn" ${tool ? '' : 'disabled'} onclick="couperItem(${idx},'${itemId}','${source}')" title="${tool ? 'Couper en pièces plus petites' : 'Outil de coupe requis'}">🪓 Couper</button>`;
+}
+async function couperItem(index, itemId, source) {
+	try {
+		const res = await fetch('api/couper', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ index, item_id: itemId, source })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_applyInventoryPayload(data);
+		if (data.coupe) showToast('Coupé : ' + data.coupe.n + ' × ' + (data.coupe.nom || data.coupe.taille));
+	} catch(err) { console.error('Erreur coupe', err); }
 }
 
 async function dropItem(index, itemId) {

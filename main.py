@@ -20,6 +20,7 @@ from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref
 from utils import quetes
+from utils import bois
 from utils.marche import tick_atelier, reset_prix_cache
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -563,6 +564,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 				"nom": _rec_doc.get("nom", "Ressource"),
 				"icon": _rec_doc.get("icon", "🌿"),
 				"poids": _rec_doc.get("poids", 0),
+				"a_couper": bois.item_est_coupable(_rec_doc),
 			}
 
 	return templates.TemplateResponse(
