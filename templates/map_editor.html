@@ -457,6 +457,7 @@
 				<div class="mode-tab" id="mode-nav">Navigation</div>
 				<div class="mode-tab" id="mode-zones">Zones</div>
 				<div class="mode-tab" id="mode-rencontres">Rencontres</div>
+				<div class="mode-tab" id="mode-ressources">Ressources</div>
 			</div>
 
 			<!-- Panneau Terrain -->
@@ -541,6 +542,20 @@
 					<div id="lieu-profil-weights"></div>
 				</div>
 				<button class="btn" id="save-rencontres-btn" style="width:100%;">💾 Sauvegarder les rencontres</button>
+			</div>
+
+			<!-- Panneau Ressources -->
+			<div id="panel-ressources" style="display:none;">
+				<label for="ressource-select" style="font-size:.7rem;color:var(--accent);">Ressource (item)</label>
+				<div style="display:flex;gap:6px;margin-bottom:8px;">
+					<select id="ressource-select" style="flex:1;min-width:0;background:#1c1c28;color:var(--text);border:1px solid var(--accent);border-radius:4px;padding:4px;">
+						<option value="" disabled selected>-- Choisir un item --</option>
+					</select>
+					<button class="btn btn-inline" id="add-ressource-btn">+ Ajouter</button>
+				</div>
+				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Sur chaque ressource, cliquer les zones d'influence où on peut la récolter (source des quêtes de collecte).</div>
+				<div id="ressource-list" style="max-height:240px;overflow-y:auto;margin-bottom:8px;font-size:.68rem;"></div>
+				<button class="btn" id="save-ressources-btn" style="width:100%;">💾 Sauvegarder les ressources</button>
 			</div>
 
 			<!-- Panneau Navigation -->
@@ -679,6 +694,12 @@ const especeSelect		= document.getElementById('espece-select');
 const addEspeceBtn		= document.getElementById('add-espece-btn');
 const rencontreListEl	= document.getElementById('rencontre-list');
 const saveRencontresBtn	= document.getElementById('save-rencontres-btn');
+const modeRessources	= document.getElementById('mode-ressources');
+const panelRessources	= document.getElementById('panel-ressources');
+const ressourceSelect	= document.getElementById('ressource-select');
+const addRessourceBtn	= document.getElementById('add-ressource-btn');
+const ressourceListEl	= document.getElementById('ressource-list');
+const saveRessourcesBtn	= document.getElementById('save-ressources-btn');
 
 // ── ZONES STATE ────────────────────────────────────────────────────────────
 let zonesPlacements = [];    // zone_influences array for current lieu
@@ -730,6 +751,29 @@ let lieuProfilWeights = {}; // distribution de grades par défaut du lieu { prof
 				});
 		}
 	} catch (e) { console.warn('Espèces non chargées', e); }
+})();
+
+// ── RESSOURCES STATE ───────────────────────────────────────────────────────────
+let itemsDefs = {};        // { "item:x": { nom, icon, ... } }
+let ressources = [];       // [ { ressource: "item:x", zones: ["zone::a", ...] } ]
+
+// Load items (pour le picker de ressources) on page load
+(async () => {
+	try {
+		const res = await fetch('/api/items');
+		if (res.ok) {
+			const list = await res.json();
+			(list || [])
+				.sort((a, b) => (a.nom || a._id).localeCompare(b.nom || b._id))
+				.forEach(it => {
+					itemsDefs[it._id] = it;
+					const opt = document.createElement('option');
+					opt.value = it._id;
+					opt.textContent = (it.icon ? it.icon + ' ' : '') + (it.nom || it._id);
+					ressourceSelect.appendChild(opt);
+				});
+		}
+	} catch (e) { console.warn('Items non chargés', e); }
 })();
 
 // Load profils (grades) on page load — pour les éditeurs de poids de profils.
@@ -784,10 +828,12 @@ lieuSelect.addEventListener('change', async (e) => {
 			selectedZoneIdx = -1;
 			renderZoneList();
 			rencontres = lieuData.rencontres ? JSON.parse(JSON.stringify(lieuData.rencontres)) : [];
+			ressources = lieuData.ressources ? JSON.parse(JSON.stringify(lieuData.ressources)) : [];
 			lieuProfilWeights = lieuData.profil_weights ? JSON.parse(JSON.stringify(lieuData.profil_weights)) : {};
 			renderLieuProfilWeights();
 			renderZoneProfilWeights();
 			renderRencontreList();
+			renderRessourceList();
 			dropZone.classList.add('hidden');
 			gridCont.classList.add('visible');
 			mapImg.style.display = 'block';
@@ -868,6 +914,7 @@ function scheduleGridSend() {
 function updateBattleMapTabs(isBattle) {
 	modeZones.style.display = isBattle ? 'none' : '';
 	modeRencontres.style.display = isBattle ? 'none' : '';
+	modeRessources.style.display = isBattle ? 'none' : '';
 	if (isBattle) setMode('terrain');
 }
 
@@ -897,7 +944,7 @@ function renderGrid() {
 	// terrain/nav → terrain + bordures nav (pas de zones) ;
 	// zones/rencontres → uniquement les zones (+ labels), ni terrain ni bordures nav.
 	const showTerrain = (editMode === 'terrain' || editMode === 'nav');
-	const showZones   = (editMode === 'zones' || editMode === 'rencontres');
+	const showZones   = (editMode === 'zones' || editMode === 'rencontres' || editMode === 'ressources');
 
 	// Draw cell fills
 	if (showTerrain) for (let y = 0; y < rows; y++) {
@@ -1176,11 +1223,14 @@ function setMode(mode) {
 	modeNav.classList.toggle('active', mode === 'nav');
 	modeZones.classList.toggle('active', mode === 'zones');
 	modeRencontres.classList.toggle('active', mode === 'rencontres');
+	modeRessources.classList.toggle('active', mode === 'ressources');
 	panelTerrain.style.display = mode === 'terrain' ? '' : 'none';
 	panelNav.style.display = mode === 'nav' ? '' : 'none';
 	panelZones.style.display = mode === 'zones' ? '' : 'none';
 	panelRencontres.style.display = mode === 'rencontres' ? '' : 'none';
+	panelRessources.style.display = mode === 'ressources' ? '' : 'none';
 	if (mode === 'rencontres') renderRencontreList();  // puces = zones réellement utilisées
+	if (mode === 'ressources') renderRessourceList();  // mêmes puces de zones
 	if (mode !== 'nav') navSelectedCell = null;
 	if (grid.length) renderGrid();
 }
@@ -1188,6 +1238,7 @@ modeTerrain.addEventListener('click', () => setMode('terrain'));
 modeNav.addEventListener('click', () => setMode('nav'));
 modeZones.addEventListener('click', () => setMode('zones'));
 modeRencontres.addEventListener('click', () => setMode('rencontres'));
+modeRessources.addEventListener('click', () => setMode('ressources'));
 
 // ── ZONE PROPERTY EDITORS ──────────────────────────────────────────────────
 function updateSelectedZone(key, value) {
@@ -1414,6 +1465,86 @@ saveRencontresBtn.addEventListener('click', async () => {
 			rencontres = data.rencontres || rencontres;
 			renderRencontreList();
 			setStatus(`<span style="color:#80e580;">${data.saved} espèce(s) sauvegardée(s).</span>`);
+		} else {
+			const err = await res.json();
+			setStatus(`<span style="color:var(--danger)">Erreur : ${err.detail}</span>`);
+		}
+	} catch (e) { setStatus('<span style="color:var(--danger)">Erreur réseau.</span>'); }
+});
+
+// ── RESSOURCES (récoltables par zone, parallèle aux rencontres) ───────────────
+function renderRessourceList() {
+	if (!ressourceListEl) return;
+	if (ressources.length === 0) {
+		ressourceListEl.innerHTML = '<div style="color:#888;padding:4px;">Aucune ressource.</div>';
+		return;
+	}
+	const zoneDefList = usedZoneDefs();
+	ressourceListEl.innerHTML = ressources.map((r, i) => {
+		const it = itemsDefs[r.ressource];
+		const nom = it ? (it.nom || it._id) : r.ressource;
+		const icon = (it && it.icon) ? it.icon : '📦';
+		const chips = zoneDefList.length
+			? zoneDefList.map(z => {
+				const on = (r.zones || []).includes(z._id);
+				return `<span class="zchip ${on ? 'on' : ''}" data-ri="${i}" data-zid="${z._id}">${z.nom || z._id}</span>`;
+			}).join('')
+			: '<span style="color:#888;">Aucune zone d\'influence dans ce lieu.</span>';
+		return `<div class="renc-item">
+			<div class="renc-head">
+				<div class="renc-img" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">${icon}</div>
+				<span class="renc-name" title="${nom}">${nom}</span>
+				<button class="renc-del" data-ri="${i}" title="Retirer">✕</button>
+			</div>
+			<div class="renc-zones">${chips}</div>
+		</div>`;
+	}).join('');
+
+	ressourceListEl.querySelectorAll('.renc-del').forEach(b => {
+		b.addEventListener('click', () => {
+			ressources.splice(parseInt(b.dataset.ri), 1);
+			renderRessourceList();
+		});
+	});
+	ressourceListEl.querySelectorAll('.zchip[data-zid]').forEach(c => {
+		c.addEventListener('click', () => {
+			const r = ressources[parseInt(c.dataset.ri)];
+			if (!r) return;
+			r.zones = r.zones || [];
+			const idx = r.zones.indexOf(c.dataset.zid);
+			if (idx >= 0) r.zones.splice(idx, 1);
+			else r.zones.push(c.dataset.zid);
+			renderRessourceList();
+		});
+	});
+}
+
+function addRessource() {
+	const id = ressourceSelect.value;
+	if (!id) return;
+	if (ressources.some(r => r.ressource === id)) {
+		setStatus('<span style="color:var(--danger)">Ressource déjà ajoutée.</span>');
+		return;
+	}
+	ressources.push({ ressource: id, zones: [] });
+	renderRessourceList();
+	setStatus(`Ressource ajoutée — ${ressources.length} au total.`);
+}
+addRessourceBtn.addEventListener('click', addRessource);
+
+saveRessourcesBtn.addEventListener('click', async () => {
+	if (!currentLocId) { setStatus('<span style="color:var(--danger)">Aucun lieu chargé.</span>'); return; }
+	try {
+		const res = await fetch(`/api/lieu/${encodeURIComponent(currentLocId)}/ressources`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ ressources }),
+		});
+		if (res.ok) {
+			const data = await res.json();
+			ressources = data.ressources || ressources;
+			renderRessourceList();
+			setStatus(`<span style="color:#80e580;">${data.saved} ressource(s) sauvegardée(s).</span>`);
 		} else {
 			const err = await res.json();
 			setStatus(`<span style="color:var(--danger)">Erreur : ${err.detail}</span>`);

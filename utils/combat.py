@@ -8,6 +8,7 @@ from models.character_stats import (
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import grant_xp, recompute_equipment_bonus, carried_weight, poids_bounds, item_ref_id
+from utils.quetes import maj_progress_kills
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -1173,6 +1174,10 @@ def finalize_combat(combat_doc: dict) -> bool:
 			if payload:
 				dispo.append(payload)
 		combat_doc["butin_disponible"] = dispo
+
+	# Progression des quêtes de chasse : compte les monstres tués (toute issue), sous le
+	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.
+	maj_progress_kills(character, combat_doc.get("monstres", []))
 
 	# Idempotence atomique : on enregistre le combat dans le doc personnage,
 	# sauvegardé avec l'XP. Borné pour éviter une croissance illimitée.

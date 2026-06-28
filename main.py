@@ -14,10 +14,12 @@ from routers.oauth import router as oauth_router
 from routers.zones import zones_router
 from routers.bestiaire import bestiaire_router
 from routers.combat import combat_router
+from routers.quetes import quetes_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref
+from utils import quetes
 from utils.marche import tick_atelier, reset_prix_cache
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -79,6 +81,7 @@ app.include_router(lieu_router, prefix="/api")
 app.include_router(zones_router, prefix="/api")
 app.include_router(bestiaire_router, prefix="/api")
 app.include_router(combat_router, prefix="/api")
+app.include_router(quetes_router, prefix="/api")
 app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
@@ -541,7 +544,13 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 
 	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["image"]) as portrait:
 		portrait_largeur, portrait_hauteur = portrait.size
-		
+
+	# Quêtes : suivi rendu serveur dans l'onglet 📜 de la fiche (progression + récompenses).
+	# `quete_detail` lit l'inventaire pour la progression des collectes (item_ref_id gère les
+	# refs déjà résolues en docs ci-dessus). `est_guilde` conditionne le bouton « Tableau ».
+	character["quetes_actives_detail"], character["quetes_terminees_detail"] = quetes.fiche_details(character)
+	est_guilde = (grid_doc.get("categorie") == "guilde_aventurier")
+
 	return templates.TemplateResponse(
 		request=request,
 		name ="play_town_telluris.html",
@@ -568,6 +577,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"xp_voc_coeff": character_stats.XP_VOC_COEFF,
 			"lieu_categorie": grid_doc.get("categorie"),
 			"achat_sous_categories": character_stats.ACHAT_SOUS_CAT_PAR_LIEU.get(grid_doc.get("categorie"), []),
+			"est_guilde": est_guilde,
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.

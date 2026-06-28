@@ -25,6 +25,7 @@ from utils.marche import (
 )
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu
+from utils import quetes
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -162,6 +163,8 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'or': 0,
 			'argent': 0,
 			'cuivre': 0,
+			'quetes_actives': [],
+			'quetes_terminees': [],
 			}
 		save_doc(character_dict)
 	
@@ -305,6 +308,8 @@ async def move_character(
 						print("move to ", destination, destination_pos)
 						character_to_update["lieu"] = destination
 						character_to_update["position"] = destination_pos
+						# Progression des quêtes « aller en X » (persistée avec le déplacement).
+						quetes.maj_progress_visite(character_to_update, destination)
 						xp_gain = 0
 						niveau_up = False
 						niveau_new = compute_character_level(character_to_update.get("xp_total", 0))

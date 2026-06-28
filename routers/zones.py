@@ -134,3 +134,45 @@ async def update_lieu_rencontres(
         "rencontres": clean,
         "profil_weights": lieu_doc.get("profil_weights", {}),
     }
+
+
+@zones_router.put("/lieu/{lieu_id:path}/ressources")
+async def update_lieu_ressources(
+    lieu_id: str,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    body: dict = Body(...),
+):
+    """Ressources récoltables sur le lieu. Chaque entrée : {ressource: "item:x", zones:[zone_def_id]}.
+
+    Strictement parallèle à `rencontres` (monstres par zone) : on ne référence que l'id de
+    la zone-def. Sert de source aux quêtes de collecte (cf. utils/quetes.py).
+    """
+    _require_admin(current_user)
+    lieu_doc = get_doc(unquote(lieu_id))
+    if not lieu_doc:
+        raise HTTPException(status_code=404, detail="Lieu not found")
+    ressources = body.get("ressources", [])
+    clean = [
+        {"ressource": r.get("ressource"), "zones": list(r.get("zones", []))}
+        for r in ressources if r.get("ressource")
+    ]
+    lieu_doc["ressources"] = clean
+    save_doc(lieu_doc)
+    return {"saved": len(clean), "ressources": clean}
+
+
+@zones_router.get("/items")
+async def list_items(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    categorie: str | None = None,
+    sous_categorie: str | None = None,
+):
+    """Liste des items (pour le picker de ressources de l'éditeur). Filtrable par
+    `categorie` / `sous_categorie`. Miroir de GET /especes."""
+    _require_admin(current_user)
+    selector = {"type": "item"}
+    if categorie:
+        selector["categorie"] = categorie
+    if sous_categorie:
+        selector["sous_categorie"] = sous_categorie
+    return find_docs(selector) or []

@@ -181,6 +181,18 @@ RELATION_INITIALE: int = 50
 RELATION_SEUIL_COEFF: float = 2.0
 MARCHANDAGE_BLOCAGE_SECONDES: int = 3600
 
+# ── Quêtes (guilde + moteur de génération) ───────────────────────────────────────
+# Le tableau d'une guilde maintient un pool de QUETE_BOARD_TAILLE offres générées
+# (complété à la volée à chaque ouverture, en plus des quêtes authorées). La quantité
+# d'objectif est tirée dans [QUETE_QTE_MIN, QUETE_QTE_MAX] (réduite pour les cibles
+# difficiles). Récompenses dérivées de l'XP unitaire du combat (cohérence avec le grind) :
+# xp = round(xp_unitaire × quantite × QUETE_XP_FACTEUR) ; cuivre = round(xp × QUETE_CUIVRE_PAR_XP).
+QUETE_BOARD_TAILLE: int = 6
+QUETE_QTE_MIN: int = 2
+QUETE_QTE_MAX: int = 8
+QUETE_XP_FACTEUR: float = 1.5
+QUETE_CUIVRE_PAR_XP: float = 3.0
+
 # ── Dépeçage des carcasses (boucherie) ──────────────────────────────────────────
 # Une carcasse vendue à une boucherie est décomposée en matières premières selon les
 # `tags` de son espèce. Table tunable tag → matières produites (un sous-cat répété
@@ -268,6 +280,11 @@ def current_world_variables() -> dict:
 		"RELATION_INITIALE": RELATION_INITIALE,
 		"RELATION_SEUIL_COEFF": RELATION_SEUIL_COEFF,
 		"MARCHANDAGE_BLOCAGE_SECONDES": MARCHANDAGE_BLOCAGE_SECONDES,
+		"QUETE_BOARD_TAILLE": QUETE_BOARD_TAILLE,
+		"QUETE_QTE_MIN": QUETE_QTE_MIN,
+		"QUETE_QTE_MAX": QUETE_QTE_MAX,
+		"QUETE_XP_FACTEUR": QUETE_XP_FACTEUR,
+		"QUETE_CUIVRE_PAR_XP": QUETE_CUIVRE_PAR_XP,
 	}
 
 
@@ -292,6 +309,7 @@ def load_world_variables() -> dict:
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
+	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
 		doc = get_doc(WORLD_VARIABLES_DOC_ID)
@@ -339,6 +357,12 @@ def load_world_variables() -> dict:
 	RELATION_INITIALE            = int(v.get("RELATION_INITIALE", RELATION_INITIALE))
 	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
 	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))
+
+	QUETE_BOARD_TAILLE  = int(v.get("QUETE_BOARD_TAILLE", QUETE_BOARD_TAILLE))
+	QUETE_QTE_MIN       = int(v.get("QUETE_QTE_MIN", QUETE_QTE_MIN))
+	QUETE_QTE_MAX       = int(v.get("QUETE_QTE_MAX", QUETE_QTE_MAX))
+	QUETE_XP_FACTEUR    = float(v.get("QUETE_XP_FACTEUR", QUETE_XP_FACTEUR))
+	QUETE_CUIVRE_PAR_XP = float(v.get("QUETE_CUIVRE_PAR_XP", QUETE_CUIVRE_PAR_XP))
 
 	return current_world_variables()
 

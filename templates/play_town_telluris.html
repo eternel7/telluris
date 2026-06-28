@@ -381,7 +381,9 @@
 			color: #eee;
 		}
 		/* MAIN PANELS */
-		#game-container,#sheet-panel,#sell-panel {
+		/* Cadre commun à tous les panneaux plein-écran (carte, fiche, marché, quêtes).
+		   Chaque #id ne porte que sa disposition propre (grid / flex…). */
+		.panel-frame {
 			position: relative;
 			width: 100%;
 			max-width: 1210px;
@@ -418,22 +420,24 @@
 		#purse {
 			margin-left: auto;
 		}
-		#sell-panel {
+		/* Disposition « tableau » commune au marché (#sell-panel) et aux quêtes (#quetes-panel). */
+		.board-panel {
 			display: flex;
 			flex-direction: column;
 			gap: 14px;
 		}
-		#sell-panel .sell-topbar {
+		.board-panel .sell-topbar {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			gap: 12px;
 			flex-wrap: wrap;
 		}
-		#sell-panel h2 { margin: 0; }
-		#sell-list .sh-inv-item:last-child { border-bottom: none; }
+		.board-panel h2 { margin: 0; }
+		.board-panel .sh-inv-item:last-child { border-bottom: none; }
 		.sell-prix { font-weight: bold; color: var(--accent-color); white-space: nowrap; }
 		.sell-empty { opacity: .7; padding: 12px 0; }
+		.q-desc { display: block; white-space: normal; color: #9a8a66; font-size: .85rem; margin: 2px 0; }
 		.sell-relation {
 			display: flex;
 			align-items: center;
@@ -743,6 +747,7 @@
 		.sh-quest-status.en-cours { background: rgba(46,133,213,0.3); color: #2e86de; }
 		.sh-quest-status.termine { background: rgba(46,213,115,0.2); color: #2ed573; }
 		.sh-quest-desc { font-size: 0.9rem; color: var(--muted); }
+		.sh-quest-progress { font-size: 0.9rem; color: var(--gold2, var(--gold)); margin-top: 4px; }
 		.sh-quest-reward { display: flex; gap: 8px; margin-top: 6px; font-size: 0.9rem; }
 		.sh-journal-entry { padding: 10px; background: var(--btn-bg); border-left: 3px solid var(--accent-color); margin-bottom: 8px; font-size: 0.95rem; }
 		.sh-journal-date { font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
@@ -1027,7 +1032,7 @@
 	</style>
 </head>
 <body>
-	<div id="game-container">
+	<div id="game-container" class="panel-frame">
 		<header class="location-desc" aria-label="Fiche personnage">
 			<h2>{{title}}</h2>
 		</header>
@@ -1045,10 +1050,15 @@
 		</main>
 		<aside class="sidebar">
 			<section class="sub-locations-panel">
-				{% if achat_sous_categories %}
+				{% if achat_sous_categories or est_guilde %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
+					{% if achat_sous_categories %}
 					<li><button class="sub-loc-btn" onclick="openSellPanel()">🏷️ Achat-Vente</button></li>
+					{% endif %}
+					{% if est_guilde %}
+					<li><button class="sub-loc-btn" onclick="openQuetesBoard()">📜 Tableau des quêtes</button></li>
+					{% endif %}
 				</ul>
 				{% endif %}
 				<h3 id="sub-locations-title">Lieux</h3>
@@ -1146,7 +1156,7 @@
 			<button class="manage-btn">👥 Groupe</button>
 		</footer>
 	</div><!-- /#game-container -->
-	<div id="sheet-panel" class="panel-hidden" aria-label="Fiche personnage">
+	<div id="sheet-panel" class="panel-hidden panel-frame" aria-label="Fiche personnage">
 		<!-- ══ FICHE PERSONNAGE ══ -->
 		<div class="sheet-layout">
 			<!-- Colonne gauche : portrait (paysage uniquement) -->
@@ -1426,7 +1436,8 @@
 									<span class="sh-quest-status en-cours">En cours</span>
 								</div>
 								<div class="sh-quest-desc">{{ q.get("description","") }}</div>
-								{% if q.get("recompenses") %}<div class="sh-quest-reward">{% if q.recompenses.get("or") %}<span>🟡 {{ q.recompenses.or }} or</span>{% endif %}{% if q.recompenses.get("xp") %}<span>✨ {{ q.recompenses.xp }} XP</span>{% endif %}</div>{% endif %}
+								{% if q.get("progress_txt") %}<div class="sh-quest-progress">🎯 {{ q.progress_txt }}{% if q.get("complete") %} ✓ prêt à rendre{% endif %}</div>{% endif %}
+								{% if q.get("recompenses") %}<div class="sh-quest-reward">{% if q.recompenses.get("or") %}<span>🟡 {{ q.recompenses.or }} or</span>{% endif %}{% if q.recompenses.get("argent") %}<span>⚪ {{ q.recompenses.argent }} ar</span>{% endif %}{% if q.recompenses.get("xp") %}<span>✨ {{ q.recompenses.xp }} XP</span>{% endif %}</div>{% endif %}
 							</div>
 							{% endfor %}
 						{% endif %}
@@ -1457,7 +1468,7 @@
 			</div><!-- /.sheet-right-col -->
 		</div><!-- /.sheet-layout -->
 	</div><!-- /#sheet-panel -->
-	<div id="sell-panel" class="panel-hidden" aria-label="Vente au marchand">
+	<div id="sell-panel" class="panel-hidden panel-frame board-panel" aria-label="Vente au marchand">
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Magasin - vente au marchand">
 			<h2>{{title}}</h2>
@@ -1477,6 +1488,18 @@
 		<h2 style="margin:1rem 0 0">💸 Achat</h2>
 		<ul id="buy-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
 	</div><!-- /#sell-panel -->
+	<div id="quetes-panel" class="panel-hidden panel-frame board-panel" aria-label="Tableau des quêtes de la guilde">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Guilde - tableau des quêtes">
+			<h2>📜 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeQuetesPanel()" role="button">✕ Fermer</button>
+		</div>
+		<h2 style="margin:.6rem 0 0">⚔️ Quêtes en cours</h2>
+		<ul id="quetes-actives-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+		<h2 style="margin:1rem 0 0">🗒️ Offres disponibles</h2>
+		<ul id="quetes-offres-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+	</div><!-- /#quetes-panel -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -2486,6 +2509,139 @@ async function buyItem(itemId) {
 		renderBuyList(data);
 		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')');
 	} catch(err) { console.error('Erreur achat', err); }
+}
+
+// ── Tableau des quêtes (guilde) ───────────────────────────────────────
+// Reconstruit l'onglet 📜 de la fiche (rendu serveur au chargement) pour qu'il reflète
+// accept/terminer sans recharger la page. Miroir du gabarit Jinja de #sh-quetes.
+function renderFicheQuetes(data) {
+	const panel = document.getElementById('sh-quetes');
+	if (!panel || !data || (!data.fiche_actives && !data.fiche_terminees)) return;
+	const qa = data.fiche_actives || [];
+	const qt = data.fiche_terminees || [];
+	let html = '';
+	if (qa.length) {
+		html += '<div class="sh-section">📜 Actives</div>';
+		html += qa.map(q => {
+			const rang = q.rang || 'F';
+			const rew = q.recompenses || {};
+			let reward = '';
+			if (rew.or)     reward += `<span>🟡 ${rew.or} or</span>`;
+			if (rew.argent) reward += `<span>⚪ ${rew.argent} ar</span>`;
+			if (rew.xp)     reward += `<span>✨ ${rew.xp} XP</span>`;
+			const prog = q.progress_txt ? `<div class="sh-quest-progress">🎯 ${q.progress_txt}${q.complete ? ' ✓ prêt à rendre' : ''}</div>` : '';
+			return `<div class="sh-quest ${rang}">
+				<div class="sh-quest-hdr">
+					<span class="sh-quest-rang">${rang}</span>
+					<span class="sh-quest-title">${q.titre || '—'}</span>
+					<span class="sh-quest-status en-cours">En cours</span>
+				</div>
+				<div class="sh-quest-desc">${q.description || ''}</div>
+				${prog}
+				${reward ? `<div class="sh-quest-reward">${reward}</div>` : ''}
+			</div>`;
+		}).join('');
+	}
+	if (qt.length) {
+		html += `<div class="sh-section" style="opacity:0.6">✓ Terminées (${qt.length})</div>`;
+		html += qt.map(q => {
+			const rang = q.rang || 'F';
+			return `<div class="sh-quest ${rang}" style="opacity:0.5">
+				<div class="sh-quest-hdr"><span class="sh-quest-rang">${rang}</span><span class="sh-quest-title">${q.titre || '—'}</span><span class="sh-quest-status termine">Terminée</span></div>
+			</div>`;
+		}).join('');
+	}
+	if (!qa.length && !qt.length) {
+		html = '<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>';
+	}
+	panel.innerHTML = html;
+}
+
+function renderQuetesActives(data) {
+	const list = document.getElementById('quetes-actives-list');
+	if (!list) return;
+	const actives = data.actives || [];
+	if (!actives.length) { list.innerHTML = '<li class="sell-empty">Aucune quête en cours ici.</li>'; return; }
+	list.innerHTML = actives.map(q => `<li class="sh-inv-item" style="flex-wrap:wrap">
+		<span style="flex:1;min-width:0">
+			<strong>${q.titre}</strong><br>
+			<span class="sh-inv-poids">🎯 ${q.progress_txt}</span>
+			<span class="sell-prix">✨ ${q.recompenses.xp} XP · ${formatPrix(q.recompenses)}</span>
+		</span>
+		<button class="sh-drop-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}')" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
+	</li>`).join('');
+}
+
+function renderQuetesOffres(data) {
+	const list = document.getElementById('quetes-offres-list');
+	if (!list) return;
+	const offres = data.offres || [];
+	if (!offres.length) { list.innerHTML = '<li class="sell-empty">Aucune offre pour le moment.</li>'; return; }
+	list.innerHTML = offres.map(o => `<li class="sh-inv-item" style="flex-wrap:wrap">
+		<span style="flex:1;min-width:0">
+			<strong>${o.titre}</strong>${o.source === 'authoree' ? ' 📌' : ''}<br>
+			<span class="q-desc">${o.description}</span>
+			<span class="sell-prix">✨ ${o.recompenses.xp} XP · ${formatPrix(o.recompenses)}</span>
+		</span>
+		<button class="sh-drop-btn" onclick="accepterQuete('${o.id}')" title="Accepter la quête">Accepter</button>
+	</li>`).join('');
+}
+
+async function openQuetesBoard() {
+	try {
+		const res = await fetch('api/quetes/board');
+		const data = await res.json();
+		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderQuetesActives(data);
+		renderQuetesOffres(data);
+		renderFicheQuetes(data);
+		document.getElementById('game-container').classList.add('panel-hidden');
+		document.getElementById('quetes-panel').classList.remove('panel-hidden');
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} catch(err) { console.error('Erreur tableau de quêtes', err); }
+}
+
+function closeQuetesPanel() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('quetes-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function accepterQuete(queteId) {
+	try {
+		const res = await fetch('api/quetes/accepter', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ quete_id: queteId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderQuetesActives(data);
+		renderQuetesOffres(data);
+		renderFicheQuetes(data);
+		if (data.accepte) showToast('Quête acceptée : ' + data.accepte.titre);
+	} catch(err) { console.error('Erreur acceptation quête', err); }
+}
+
+async function terminerQuete(queteId) {
+	try {
+		const res = await fetch('api/quetes/terminer', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ quete_id: queteId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderQuetesActives(data);
+		renderQuetesOffres(data);
+		renderFicheQuetes(data);
+		if (data.termine) {
+			let msg = 'Quête terminée : ' + data.termine.titre + ' (+' + data.termine.xp + ' XP)';
+			if (data.termine.niveau_up) msg += ' — Niveau supérieur !';
+			showToast(msg);
+		}
+	} catch(err) { console.error('Erreur fin de quête', err); }
 }
 </script>
 </body>
