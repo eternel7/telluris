@@ -1141,6 +1141,11 @@ function updateButtons(data) {
 			: !dirAvailable(data, parseInt(b.dataset.sdx), parseInt(b.dataset.sdy));
 	});
 	document.getElementById('btn-passer').disabled   = !(isActive && isPlayer);
+	// Le sélecteur de mode (cac/jet/tir) est un toggle purement client : ré-activable dès
+	// que c'est notre tour. Sans ça, le verrou `busy` de doAction (qui disable tous les
+	// .action-btn) le laisse grisé indéfiniment après la 1re action → « 🏹 Tir inactif ».
+	document.querySelectorAll('#attack-mode-row .mode-btn')
+		.forEach(b => b.disabled = !(isActive && isPlayer));
 	const noTarget = targetableMonsters(currentMode).length === 0;
 	document.getElementById('btn-attaquer').disabled = !canAct || noTarget;
 	document.getElementById('btn-confirm').disabled  = !canAct || noTarget;
@@ -1340,6 +1345,7 @@ applyPlayerPortrait();
 syncViewSize();
 renderTokens();
 updateCamera();
+updateModeSelector(state);   // révèle le sélecteur cac/jet/tir dès le chargement (sinon visible qu'après la 1re action)
 refreshTargetSelect();
 updateButtons(state);
 updateJoueur(activePlayer(state));

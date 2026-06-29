@@ -1,8 +1,8 @@
 {
   "db": "telluris",
   "type": "item",
-  "exported_at": "2026-06-29T17:58:20.623037Z",
-  "doc_count": 467,
+  "exported_at": "2026-06-29T19:23:58.583810Z",
+  "doc_count": 472,
   "docs": [
     {
       "_id": "item:Alisier",
@@ -25,10 +25,35 @@
       ]
     },
     {
-      "_id": "item:Arbalete_legere",
-      "_rev": "3-754f154206684772b2537c5a1d83b5dc",
+      "_id": "item:Arbalete",
+      "_rev": "2-61f24d91f19bdc1af2a11a5a4acc10fa",
       "type": "item",
-      "nom": "Arbalète légère",
+      "nom": "Arbalète",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite"
+      ],
+      "poids": [
+        2.5,
+        4.5
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 8,
+      "restriction": {
+        "Ag": 15,
+        "F": 10
+      }
+    },
+    {
+      "_id": "item:Arbalete_de_poing",
+      "_rev": "2-032c7f50a7180e407dff7bcf19a17ff6",
+      "type": "item",
+      "nom": "Arbalète de poing",
       "sous_categorie": "",
       "icon": "🏹",
       "rarete": "commun",
@@ -36,11 +61,95 @@
       "slots": [
         "main_gauche"
       ],
-      "poids": 1.5
+      "poids": [
+        0.5,
+        0.9
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 5,
+      "restriction": {
+        "Ag": 25
+      }
+    },
+    {
+      "_id": "item:Arbalete_legere",
+      "_rev": "9-223d1b236d904ef1eaa8211897128a97",
+      "type": "item",
+      "nom": "Arbalète légère",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite"
+      ],
+      "poids": [
+        1.5,
+        2.5
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 7,
+      "restriction": {
+        "Ag": 10
+      }
+    },
+    {
+      "_id": "item:Arbalete_lourde",
+      "_rev": "2-103ef5023fd581bdde37b39d06f271b8",
+      "type": "item",
+      "nom": "Arbalète lourde",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite"
+      ],
+      "poids": [
+        4.5,
+        7.5
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 9,
+      "restriction": {
+        "Ag": 25,
+        "F": 20
+      }
+    },
+    {
+      "_id": "item:Arc",
+      "_rev": "2-3f7f707e22307d3ec93531a0d5e3bfe0",
+      "type": "item",
+      "nom": "Arc",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite",
+        "main_gauche"
+      ],
+      "poids": [
+        0.6,
+        1.1
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 7,
+      "restriction": {
+        "Ag": 15
+      }
     },
     {
       "_id": "item:Arc_court",
-      "_rev": "3-86a0b15cc5736fc955c7cd8c54643004",
+      "_rev": "5-d4000878a9b7d8ff58ca88fb6436ce56",
       "type": "item",
       "nom": "Arc court",
       "sous_categorie": "",
@@ -51,7 +160,42 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 0.8
+      "poids": [
+        0.4,
+        0.8
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 6,
+      "restriction": {
+        "Ag": 10
+      }
+    },
+    {
+      "_id": "item:Arc_long",
+      "_rev": "2-20b678ce79561ba0b5898807bbfffdda",
+      "type": "item",
+      "nom": "Arc long",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite",
+        "main_gauche"
+      ],
+      "poids": [
+        1.2,
+        2
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 8,
+      "restriction": {
+        "Ag": 20
+      }
     },
     {
       "_id": "item:Armure_cuir_runee",
@@ -119,7 +263,7 @@
     },
     {
       "_id": "item:Baguette_houx",
-      "_rev": "3-d53804d41c8d99517c1c87aba8fab472",
+      "_rev": "4-2b4b8ee28d68b894b046bb4a0a55bcca",
       "type": "item",
       "nom": "Baguette de bois de houx",
       "sous_categorie": "",
@@ -129,7 +273,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.2
+      "poids": 0.2,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Bandages",
@@ -187,7 +335,7 @@
     },
     {
       "_id": "item:Baton_bois_vivant",
-      "_rev": "3-013f96c44403df382fc3682557648b31",
+      "_rev": "4-b4431426739e962e74c07d3a30363305",
       "type": "item",
       "nom": "Bâton de bois vivant",
       "sous_categorie": "",
@@ -198,11 +346,15 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 1.0
+      "poids": 1.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Baton_canalisateur",
-      "_rev": "3-bf2105c74629f46ae76748f497017812",
+      "_rev": "4-315fac1d0c1963a7ed9f739c3947d9ca",
       "type": "item",
       "nom": "Bâton canalisateur",
       "sous_categorie": "",
@@ -213,11 +365,15 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 1.0
+      "poids": 1.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Baton_cornu",
-      "_rev": "3-3f40d7a573ff4017a9f82f162d276517",
+      "_rev": "4-4c4b775841539d38499602ebd8d38f6e",
       "type": "item",
       "nom": "Bâton cornu",
       "sous_categorie": "",
@@ -228,11 +384,15 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 1.3
+      "poids": 1.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Baton_de_combat",
-      "_rev": "3-7b24f39ec155a059dc5e075610c7e29a",
+      "_rev": "4-5ae2437ec26496ccdabc6f2fe7a14ebd",
       "type": "item",
       "nom": "Bâton de combat",
       "sous_categorie": "",
@@ -243,7 +403,11 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 1.2
+      "poids": 1.2,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Bonnet_de_clerc",
@@ -764,7 +928,7 @@
     },
     {
       "_id": "item:Canne_ferree",
-      "_rev": "3-6b6840e83bf6903a61952239146e6ed4",
+      "_rev": "4-427ce08dd4cc3776e0ef3d94686e645d",
       "type": "item",
       "nom": "Canne de marche ferrée",
       "sous_categorie": "",
@@ -774,7 +938,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.9
+      "poids": 0.9,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Cape_soie_sombre",
@@ -1224,7 +1392,7 @@
     },
     {
       "_id": "item:Couteau_de_chasse",
-      "_rev": "3-b65679460f00f600124d14c0576e8be8",
+      "_rev": "4-097176e2ca9a920ee84847423157be52",
       "type": "item",
       "nom": "Couteau de chasse",
       "sous_categorie": "",
@@ -1235,7 +1403,11 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 0.3
+      "poids": 0.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Couvre_chef_office",
@@ -1329,7 +1501,7 @@
     },
     {
       "_id": "item:Dague",
-      "_rev": "3-a5b6106c7a0c832fbfcc5eb65a63242a",
+      "_rev": "4-3ae35d998244a49dfb8ccb61d1602c0a",
       "type": "item",
       "nom": "Dague",
       "sous_categorie": "",
@@ -1340,11 +1512,15 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 0.3
+      "poids": 0.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Dague_de_parade",
-      "_rev": "3-4423bef5a6767346816492cb5baec3b6",
+      "_rev": "4-1834f8166e2664cbda16c773da5db4ff",
       "type": "item",
       "nom": "Dague de parade",
       "sous_categorie": "",
@@ -1354,11 +1530,15 @@
       "slots": [
         "main_gauche"
       ],
-      "poids": 0.3
+      "poids": 0.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Dague_de_scene",
-      "_rev": "3-39fd52049b2d1d76ec6e5570d00243cd",
+      "_rev": "4-7ffa7e0ebfdea2ad638f22aec6ef7a0d",
       "type": "item",
       "nom": "Dague de scène",
       "sous_categorie": "",
@@ -1368,7 +1548,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.2
+      "poids": 0.2,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Dico_des_langues",
@@ -1470,7 +1654,7 @@
     },
     {
       "_id": "item:Epee_argent",
-      "_rev": "3-0a0b9f1b0581f07006458ed5e84ecc16",
+      "_rev": "4-4da94141610d5656f939722c9d3ff58f",
       "type": "item",
       "nom": "Épée d'argent",
       "sous_categorie": "",
@@ -1480,11 +1664,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.3
+      "poids": 1.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_courte",
-      "_rev": "7-3f1cc64d2f3785bdd3b8c34d931cf8ed",
+      "_rev": "8-5faf6ab10d722b2dddbe65c13ab859db",
       "type": "item",
       "nom": "Épée courte",
       "sous_categorie": "",
@@ -1497,11 +1685,15 @@
       ],
       "bonus_cc": 1,
       "bonus_degats": 3,
-      "poids": 1.5
+      "poids": 1.5,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_courte_rune",
-      "_rev": "3-a742152cc503f5ac946ad3595d05e511",
+      "_rev": "4-344f131bfcffb1028275d1e0c76f384b",
       "type": "item",
       "nom": "Épée courte enchantée",
       "sous_categorie": "",
@@ -1511,11 +1703,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.8
+      "poids": 0.8,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_longue",
-      "_rev": "3-5ec1f7c39fa3079c53596c953c04a3c6",
+      "_rev": "4-9ef00c4a7367e206ef0c4a1a19cced7e",
       "type": "item",
       "nom": "Épée longue",
       "sous_categorie": "",
@@ -1525,11 +1721,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.5
+      "poids": 1.5,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_longue_ordre",
-      "_rev": "3-eed0fafa099208bb9120fa7c8d0581e6",
+      "_rev": "4-32a2ad7295f33367da659d912f7a7b1e",
       "type": "item",
       "nom": "Épée longue d'ordre",
       "sous_categorie": "",
@@ -1539,11 +1739,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.5
+      "poids": 1.5,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_une_main_benie",
-      "_rev": "3-8ecd275468169bedc42f02861a1ac0d0",
+      "_rev": "4-019ded0b33f169ff265f1c9162acc073",
       "type": "item",
       "nom": "Épée à une main bénie",
       "sous_categorie": "",
@@ -1553,7 +1757,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.2
+      "poids": 1.2,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Erable",
@@ -2067,7 +2275,7 @@
     },
     {
       "_id": "item:Hache_de_bucheron",
-      "_rev": "2-f4b288485f6a5adcda0c4bf1407474b7",
+      "_rev": "3-8e173a63f32c9bea3137e3fdd01d3e02",
       "type": "item",
       "nom": "Hache de bucheron",
       "sous_categorie": "outil",
@@ -2078,13 +2286,15 @@
         "main_droite"
       ],
       "tags": [
-        "outil_coupe_bois"
+        "outil_coupe_bois",
+        "cac"
       ],
-      "poids": 2.5
+      "poids": 2.5,
+      "portee": 1
     },
     {
       "_id": "item:Hache_de_guerre",
-      "_rev": "5-c7f20ff85fe56bc13ecc4a342f138b86",
+      "_rev": "6-e3f58c6df10a91cbde993d943d9a5e23",
       "type": "item",
       "nom": "Hache de guerre",
       "sous_categorie": "",
@@ -2095,9 +2305,11 @@
         "main_droite"
       ],
       "tags": [
-        "outil_coupe_bois"
+        "outil_coupe_bois",
+        "cac"
       ],
-      "poids": 2.5
+      "poids": 2.5,
+      "portee": 1
     },
     {
       "_id": "item:Heaume_de_fer",
@@ -2289,7 +2501,7 @@
     },
     {
       "_id": "item:Lame_courte",
-      "_rev": "3-8a18d157b59b1fe0d23b3ecffd0583e7",
+      "_rev": "4-809dfd020d6d53e257b23fa869aa6201",
       "type": "item",
       "nom": "Lame courte",
       "sous_categorie": "",
@@ -2299,11 +2511,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.5
+      "poids": 0.5,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Lance_rituelle",
-      "_rev": "3-fe66bd98f1e225837b6ddffee0487200",
+      "_rev": "4-fa65c48601d5a036f897a5e7d68b8565",
       "type": "item",
       "nom": "Lance rituelle",
       "sous_categorie": "",
@@ -2314,7 +2530,11 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 2.0
+      "poids": 2.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 2
     },
     {
       "_id": "item:Lettre_de_creance",
@@ -2368,7 +2588,7 @@
     },
     {
       "_id": "item:Masse_benie",
-      "_rev": "3-ed146883dc2b76ed4676d3cdc2eed5b2",
+      "_rev": "4-0ff4b2328bd53fcb347fa66a8053e086",
       "type": "item",
       "nom": "Masse d'armes bénie",
       "sous_categorie": "",
@@ -2378,7 +2598,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 2.0
+      "poids": 2.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Menottes",
@@ -2992,7 +3216,7 @@
     },
     {
       "_id": "item:Rapiere",
-      "_rev": "3-3628249cce206da35666a09e3279fc9a",
+      "_rev": "4-5be2ea0df50e081fb497ea146ddde80d",
       "type": "item",
       "nom": "Rapière",
       "sous_categorie": "",
@@ -3002,7 +3226,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.9
+      "poids": 0.9,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Ration_de_voyage",
@@ -3388,15 +3616,24 @@
     },
     {
       "_id": "item:Sarbacane",
-      "_rev": "3-639924dd35dffbbc5e9eb434acb6e622",
+      "_rev": "5-673e769de6db654c0fe83bfc9b063a4a",
       "type": "item",
-      "nom": "Sarbacane + fléchettes × 5",
+      "nom": "Sarbacane à fléchettes",
       "sous_categorie": "",
       "icon": "💨",
       "rarete": "commun",
       "categorie": "arme",
-      "slots": [],
-      "poids": 0.2
+      "slots": [
+        "main_droite"
+      ],
+      "poids": 0.2,
+      "tags": [
+        "tir"
+      ],
+      "portee": 4,
+      "restriction": {
+        "Ag": 10
+      }
     },
     {
       "_id": "item:Saule",
@@ -3432,7 +3669,7 @@
     },
     {
       "_id": "item:Sceptre_os",
-      "_rev": "3-012a73055070cd60cd2a48f32a967245",
+      "_rev": "4-e0b04f13709262866a290aa12c97e176",
       "type": "item",
       "nom": "Sceptre d'os",
       "sous_categorie": "",
@@ -3442,7 +3679,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.0
+      "poids": 1.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Sel",
@@ -4756,7 +4997,7 @@
     },
     {
       "_id": "item:dague_rituelle",
-      "_rev": "2-404bb8bfca756db002883f8f246e98ce",
+      "_rev": "3-536e7e16bda1d8a853692a49c8c4550e",
       "type": "item",
       "nom": "Dague rituelle",
       "sous_categorie": "",
@@ -4769,7 +5010,11 @@
       ],
       "poids": 0.4,
       "bonus_cc": 1,
-      "bonus_degats": 1
+      "bonus_degats": 1,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:de",
