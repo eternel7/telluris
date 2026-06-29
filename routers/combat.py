@@ -76,6 +76,7 @@ class ActionRequest(BaseModel):
     dx: int | None = None
     dy: int | None = None
     sens: int | None = None
+    mode: str | None = None
 
 
 class CollectLootRequest(BaseModel):
@@ -265,7 +266,7 @@ async def combat_action(
     if combat_doc["status"] != "active":
         raise HTTPException(status_code=400, detail="Ce combat est terminé")
 
-    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens)
+    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode)
 
     # Persist the combat state first (source of truth). couchdb2 met à jour le
     # _rev en place ; un échec (conflit 409) renvoie None → on prévient le client

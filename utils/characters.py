@@ -140,6 +140,30 @@ def charge_max_of(character: dict) -> int:
 	return compute_derived_stats(base, niveau=0).charge_max
 
 
+def restriction_satisfaite(restriction: dict | None, caracs: dict) -> tuple[bool, dict]:
+	"""Vérifie les minimums de caractéristiques d'une arme (champ item `restriction`).
+
+	`restriction` = {caract: min, …} (ex. {"F": 30, "Ag": 25}). Sémantique **ET** :
+	toutes les caract listées doivent atteindre leur minimum. `caracs` = dict des
+	caractéristiques courantes du personnage (`caracteristiques_current`).
+
+	Retourne (ok, manque) où `manque` = {caract: min} des entrées non satisfaites
+	(vide si ok). Une restriction absente/vide est toujours satisfaite. Helper pur
+	(sans DB) → partagé par l'équipement et testable.
+	"""
+	if not restriction or not isinstance(restriction, dict):
+		return True, {}
+	manque = {}
+	for caract, mini in restriction.items():
+		try:
+			seuil = int(mini)
+		except (TypeError, ValueError):
+			continue
+		if int((caracs or {}).get(caract, 0) or 0) < seuil:
+			manque[caract] = seuil
+	return (not manque), manque
+
+
 def grant_xp(character: dict, amount: int) -> dict:
 	"""Ajoute `amount` XP au personnage et attribue les points de montée de niveau.
 

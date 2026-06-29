@@ -3,6 +3,7 @@ import math
 import random
 import uuid
 from db.config import get_doc, save_doc, find_docs
+from models import character_stats
 from models.character_stats import (
 	BaseStats, compute_derived_stats
 )
@@ -63,6 +64,33 @@ def _passable(cells: list, x: int, y: int) -> bool:
 
 def _cheby(a: dict, b: dict) -> int:
 	return max(abs(a["pos"]["x"] - b["pos"]["x"]), abs(a["pos"]["y"] - b["pos"]["y"]))
+
+
+def _line_of_sight(cells: list, x0: int, y0: int, x1: int, y1: int) -> bool:
+	"""Ligne de vue libre entre deux cases (tracé de Bresenham).
+
+	Bloquée si une case INTERMÉDIAIRE (hors extrémités) n'est pas praticable
+	(`cells < 1`) — un mur arrête le projectile. `nav` n'est pas consulté : le tir
+	survole les coins nav-bloqués, seul le terrain (murs) bloque la trajectoire.
+	"""
+	dx = abs(x1 - x0)
+	dy = abs(y1 - y0)
+	sx = 1 if x0 < x1 else -1
+	sy = 1 if y0 < y1 else -1
+	err = dx - dy
+	x, y = x0, y0
+	while True:
+		if (x, y) != (x0, y0) and (x, y) != (x1, y1) and not _passable(cells, x, y):
+			return False
+		if x == x1 and y == y1:
+			return True
+		e2 = 2 * err
+		if e2 > -dy:
+			err -= dy
+			x += sx
+		if e2 < dx:
+			err += dx
+			y += sy
 
 
 def _occupied_set(combat_doc: dict, exclude: dict | None = None) -> set:
@@ -435,6 +463,50 @@ def _espece_midpoint(espece: dict) -> BaseStats:
 	)
 
 
+def _weapon_attacks(character: dict, base: BaseStats) -> list:
+	"""Profils d'attaque disponibles selon les armes équipées.
+
+	Une entrée par mode (cac/jet/tir) : la meilleure portée si plusieurs armes du même
+	mode. Le mode vient d'un tag de l'item (`tir`/`jet`, défaut `cac`) ; les armes d'hast
+	sont du `cac` à `portee >= 2` (pas de mode dédié). Une attaque de mêlée (poings,
+	portée 1) est TOUJOURS disponible. Chaque profil porte les clés à lire dans le
+	snapshot joueur : `toucher` (cc|cd) et `degats` (degats_cc|degats_cd).
+
+	- cac : toucher cc, dégâts degats_cc (basé F), portée = item.portee (>=1).
+	- jet : toucher cd, dégâts degats_cc (basé F), portée = item.portee + F//JET_PORTEE_F_DIV.
+	- tir : toucher cd, dégâts degats_cd (basé Ag), portée = item.portee.
+	"""
+	jet_div = max(1, character_stats.JET_PORTEE_F_DIV)
+	best: dict = {}
+
+	def consider(mode, portee, ranged, toucher, degats, label):
+		cur = best.get(mode)
+		if cur is None or portee > cur["portee"]:
+			best[mode] = {"mode": mode, "portee": max(1, int(portee)), "ranged": ranged,
+						  "toucher": toucher, "degats": degats, "label": label}
+
+	for ref in (character.get("slots") or {}).values():
+		item_id = item_ref_id(ref)
+		if not item_id:
+			continue
+		item = get_doc(item_id)
+		if not item or item.get("categorie") != "arme":
+			continue
+		tags = set(item.get("tags", []))
+		base_portee = int(item.get("portee", 1) or 1)
+		nom = item.get("nom", "Arme")
+		if "tir" in tags:
+			consider("tir", base_portee, True, "cd", "degats_cd", nom)
+		elif "jet" in tags:
+			consider("jet", base_portee + base.f // jet_div, True, "cd", "degats_cc", nom)
+		else:  # cac par défaut (inclut les armes d'hast, portee >= 2)
+			consider("cac", base_portee, False, "cc", "degats_cc", nom)
+
+	best.setdefault("cac", {"mode": "cac", "portee": 1, "ranged": False,
+							"toucher": "cc", "degats": "degats_cc", "label": "Mains nues"})
+	return [best[m] for m in ("cac", "jet", "tir") if m in best]
+
+
 def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	stats = character.get("caracteristiques_current", {})
 	base = BaseStats(
@@ -451,6 +523,10 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# Charge portée à l'entrée en combat → malus de déplacement si > charge_max/2.
 	charge = round(carried_weight(character), 2)
 	deplacement = _charge_penalized_deplacement(derived.deplacement, charge, derived.charge_max)
+
+	# Profils d'attaque selon les armes équipées (mêlée/jet/tir) + portée de mêlée (legacy).
+	attaques = _weapon_attacks(character, base)
+	portee_cac = next((a["portee"] for a in attaques if a["mode"] == "cac"), 1)
 
 	return {
 		"id": f"joueur_{joueur_index}",
@@ -476,7 +552,8 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"deplacement_base": derived.deplacement,  # sans malus (pour recalcul au ramassage)
 		"charge": charge,
 		"charge_max": derived.charge_max,
-		"portee": 1,
+		"portee": portee_cac,
+		"attaque_profils": attaques,   # profils d'attaque (cac/jet/tir) ; ≠ "attaques" (compteur)
 		"pos": {"x": 0, "y": 0},
 		"facing": 0,
 		"cells_moved": 0,
@@ -808,6 +885,7 @@ def resolve_first_turns(combat_doc: dict) -> None:
 def resolve_action(
 	combat_doc: dict, action_type: str, cible_id: str | None = None,
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
+	mode: str | None = None,
 ) -> dict:
 	ordre = combat_doc["ordre_initiative"]
 	actor_id = ordre[combat_doc["acteur_courant_index"]]
@@ -885,22 +963,44 @@ def resolve_action(
 		alive = [m for m in combat_doc["monstres"] if m["vivant"]]
 		if not alive:
 			return {"error": "Aucune cible disponible."}
+
+		# Profil d'attaque selon le mode demandé (arme), repli sur la mêlée (cac).
+		attaques = joueur.get("attaque_profils") or []
+		profil = next((a for a in attaques if a["mode"] == mode), None) if mode else None
+		if profil is None:
+			profil = next((a for a in attaques if a["mode"] == "cac"), None)
+		if profil is None:
+			profil = {"mode": "cac", "portee": joueur.get("portee", 1), "ranged": False,
+					  "toucher": "cc", "degats": "degats_cc"}
+		atk_portee = max(1, int(profil.get("portee", 1)))
+		is_ranged = bool(profil.get("ranged"))
+		skill = joueur.get("cd" if profil.get("toucher") == "cd" else "cc", 0)
+		notation = joueur.get(profil.get("degats", "degats_cc")) or joueur.get("degats_cc", "1D4")
+
 		if cible_id:
 			monstre = _get_monstre(combat_doc, cible_id)
 			if not monstre or not monstre["vivant"]:
 				return {"error": "Cible invalide."}
-			if _cheby(joueur, monstre) > portee:
-				return {"error": "Cible hors de portée."}
 		else:
-			adjacents = [m for m in alive if _cheby(joueur, m) <= portee]
-			if not adjacents:
+			candidats = [m for m in alive if _cheby(joueur, m) <= atk_portee]
+			if not candidats:
 				return {"error": "Aucune cible à portée. Rapprochez-vous."}
-			monstre = adjacents[0]
+			monstre = candidats[0]
 
-		seuil = _hit_threshold(joueur["cc"], monstre.get("ag", 0))
+		# Règles de combat à distance (jet/tir) : pas d'engagement au corps à corps + ligne de vue.
+		if is_ranged:
+			if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
+				return {"error": "Un ennemi vous menace au corps à corps : impossible de tirer."}
+			if not _line_of_sight(grid["cells"], joueur["pos"]["x"], joueur["pos"]["y"],
+								   monstre["pos"]["x"], monstre["pos"]["y"]):
+				return {"error": "Ligne de vue obstruée."}
+		if _cheby(joueur, monstre) > atk_portee:
+			return {"error": "Cible hors de portée."}
+
+		seuil = _hit_threshold(skill, monstre.get("ag", 0))
 		roll = random.randint(1, 100)
 		if roll <= seuil:
-			dmg = max(1, roll_dice(joueur["degats_cc"]) - monstre["pa"])
+			dmg = max(1, roll_dice(notation) - monstre["pa"])
 			monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 			if monstre["currentPV"] <= 0:
 				monstre["vivant"] = False

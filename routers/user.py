@@ -13,6 +13,7 @@ from utils.auth import get_current_user, create_access_token
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
 	recompute_equipment_bonus, carried_weight, charge_max_of,
+	restriction_satisfaite,
 	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds,
 	money_to_cuivre, cuivre_to_purse, credit_character,
 	lieu_buys, item_sous_categorie,
@@ -572,6 +573,17 @@ async def equip_item(
 
 	if slot not in item.get("slots", []):
 		raise HTTPException(status_code=422, detail=f"Slot '{slot}' incompatible avec cet objet")
+
+	# Prérequis de caractéristiques (armes) : blocage dur à l'équipement (sémantique ET).
+	ok, manque = restriction_satisfaite(
+		item.get("restriction"), character.get("caracteristiques_current", {})
+	)
+	if not ok:
+		besoin = ", ".join(f"{c} {m}" for c, m in manque.items())
+		raise HTTPException(
+			status_code=422,
+			detail=f"Caractéristiques insuffisantes pour équiper {item.get('nom', 'cet objet')} ({besoin}).",
+		)
 
 	slots = character.get("slots", {})
 

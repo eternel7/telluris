@@ -1,7 +1,7 @@
 {
   "db": "telluris",
-  "exported_at": "2026-06-28T18:34:48.554062Z",
-  "doc_count": 831,
+  "exported_at": "2026-06-29T19:18:52.007316Z",
+  "doc_count": 864,
   "docs": [
     {
       "_id": "_design/characters",
@@ -400,74 +400,6 @@
       }
     },
     {
-      "_id": "character:user:eternel7@gmail.com_1ddd3ad5-b8ad-4e34-8161-c1b9149c56e3",
-      "_rev": "32-b317c0cfb1ce86c187b2d75ef3f051bd",
-      "user_id": "user:eternel7@gmail.com",
-      "type": "character",
-      "sex": "M",
-      "race": "humain",
-      "voc": "lettre",
-      "image": "lettre_m_humain01.jpg",
-      "prenom": "Aldric",
-      "nom": "von Brunn",
-      "cite": "lieu:auxerre",
-      "lieu": "lieu:auxerre",
-      "position": {
-        "x": 27,
-        "y": 12
-      },
-      "caracteristiques_current": {
-        "V": 5,
-        "F": 20,
-        "R": 20,
-        "Ag": 20,
-        "Vol": 30,
-        "Int": 34,
-        "Cha": 30,
-        "Ch": 20
-      },
-      "currentPV": 80,
-      "currentPM": 128,
-      "lieux_visites": [
-        "lieu:auxerre",
-        "lieu:auxerre_porte_douve_exterieur03",
-        "lieu:auxerre_porte_douve_interieur03"
-      ],
-      "xp_total": 2,
-      "attribute_points": 0,
-      "vocations_niveaux": {
-        "lettre": 0
-      },
-      "inventaire": [],
-      "slots": {
-        "main_droite": "item:Epee_courte",
-        "main_gauche": null,
-        "torse": null,
-        "tete": null,
-        "jambes": null,
-        "pieds": null,
-        "mains": null,
-        "anneau_1": null,
-        "anneau_2": null,
-        "cou": null
-      },
-      "equipment_bonus": {
-        "pv": 0,
-        "pm": 0,
-        "pa": 0,
-        "malus_depl": 0,
-        "cc_bonus": 0,
-        "cd_bonus": 0,
-        "degats_bonus": 0,
-        "initiative": 0
-      },
-      "portrait_translate": {
-        "x": -55.2571,
-        "y": -13.6914
-      },
-      "portrait_zoom": 30
-    },
-    {
       "_id": "character:user:eternel7@gmail.com_7fe6b373-d9d0-4f53-b1b0-8c53009a507b",
       "_rev": "346-81484d250d6ae482baed8a21ab905833",
       "user_id": "user:eternel7@gmail.com",
@@ -642,7 +574,7 @@
     },
     {
       "_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
-      "_rev": "1295-4a14ddc3df2f3ab4e887972f019ac5f6",
+      "_rev": "2153-a41fe2dcbdc31752c28f435a678ce609",
       "user_id": "user:eternel7@gmail.com",
       "type": "character",
       "sex": "M",
@@ -652,10 +584,10 @@
       "prenom": "Johan",
       "nom": "Barbarella",
       "cite": "lieu:auxerre",
-      "lieu": "lieu:l_enclume_du_rempart",
+      "lieu": "lieu:auxerre",
       "position": {
-        "x": 0,
-        "y": 0
+        "x": 27,
+        "y": 38
       },
       "caracteristiques_current": {
         "V": 5,
@@ -682,33 +614,28 @@
         "lieu:auxerre_porte_douve_exterieur02",
         "lieu:les_etalages_d_autessiodurum",
         "lieu:l_athanor_de_saint_germain",
-        "lieu:l_enclume_du_rempart"
+        "lieu:l_enclume_du_rempart",
+        "lieu:le_mithril_de_saint_germain",
+        "lieu:festin_de_la_joyeuse_halfling",
+        "lieu:aux_ouvrages_d_os_et_d_ivoire",
+        "lieu:l_echope_du_cuir_d_auxerre",
+        "lieu:la_tannerie_des_remparts",
+        "lieu:le_garde_manger_des_3_fees",
+        "lieu:auberge_de_la_tour_de_l_horloge"
       ],
-      "xp_total": 2048,
-      "attribute_points": 0,
+      "xp_total": 2447,
+      "attribute_points": 6,
       "vocations_niveaux": {
         "repurgateur": 0
       },
       "inventaire": [
         {
-          "item": "item:Herbes_medicinales",
+          "item": "item:Herbes_a_bruler",
           "poids": 0.1
         },
         {
-          "item": "item:Herbes_medicinales",
+          "item": "item:Herbes_a_bruler",
           "poids": 0.1
-        },
-        {
-          "item": "item:Seve_de_chene",
-          "poids": 0.2
-        },
-        {
-          "item": "item:Herbes_medicinales",
-          "poids": 0.1
-        },
-        {
-          "item": "item:Seve_de_chene",
-          "poids": 0.2
         },
         {
           "item": "item:Seve_de_chene",
@@ -719,81 +646,14 @@
           "poids": 0.1
         },
         {
-          "item": "item:Herbes_a_bruler",
-          "poids": 0.1
-        },
-        {
-          "item": "item:Branche_de_Frene",
+          "item": "item:Hache_de_bucheron",
           "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 0.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.0
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Rondin_de_Frene",
-          "poids": 55.0
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Branche_de_Frene",
-          "poids": 2.5
-        },
-        {
-          "item": "item:Seve_de_chene",
-          "poids": 0.2
-        },
-        {
-          "item": "item:Herbes_a_bruler",
-          "poids": 0.1
         }
       ],
       "slots": {
-        "main_droite": {
-          "item": "item:Hache_de_bucheron",
-          "poids": 2.5
-        },
+        "main_droite": "item:Sarbacane",
         "main_gauche": "item:Epee_courte",
-        "torse": null,
+        "torse": "item:armure_de_cuir",
         "tete": null,
         "jambes": null,
         "pieds": null,
@@ -801,12 +661,12 @@
         "anneau_1": null,
         "anneau_2": null,
         "cou": null,
-        "ceinture": null
+        "ceinture": "item:ceinture"
       },
       "equipment_bonus": {
         "pv": 0,
         "pm": 0,
-        "pa": 0,
+        "pa": 2,
         "malus_depl": 0,
         "cc_bonus": 1,
         "cd_bonus": 0,
@@ -858,13 +718,64 @@
         "combat:2180e1d2041b47ac94d74a351de08a9f",
         "combat:d73cb0042ca942959847635bb00cc369",
         "combat:d1bd793dbc254bdfa7bcc77cfcbc0931",
-        "combat:79dbb7681828407d9dc56e6fbd339cc8"
+        "combat:79dbb7681828407d9dc56e6fbd339cc8",
+        "combat:08006b26268a4c20b9aa276c9c96ae92",
+        "combat:69c52333bcf7438187e1eed195d546b0",
+        "combat:e0804b462107442dade61e7497b8cccd",
+        "combat:e6801398df7b4f6ea20526eedb719974",
+        "combat:107855eb59e746fba17920f9021b9b94",
+        "combat:a7a7ab6b7c9547a5a47999d294a378b9",
+        "combat:7004b08122c94fa0b9acb57c7087d971",
+        "combat:c21dcd0f9dbd465ab63afe8b8226140b",
+        "combat:31c1ef4228444a3aa4b3b1712e6b13c6",
+        "combat:3c8a87f1234743a683998ee37162ad34",
+        "combat:f2069dbec2ff428fbed79bca9f9ac445",
+        "combat:7a8ddc25b09745518c4a82eee24f4032"
       ],
       "butin_collectes": {},
       "or": 0,
-      "argent": 70,
-      "cuivre": 99,
-      "quetes_actives": [],
+      "argent": 60,
+      "cuivre": 58,
+      "quetes_actives": [
+        {
+          "id": "quete:le_bastion_de_l_yonne_interieur_ba56ff0fc8f6",
+          "titre": "Récolte : Herbes médicinales",
+          "description": "Rapportez 7 Herbes médicinales à la guilde.",
+          "rang": "F",
+          "giver": "lieu:le_bastion_de_l_yonne_interieur",
+          "objectif": {
+            "type": "collect",
+            "cible": "item:Herbes_medicinales",
+            "quantite": 7
+          },
+          "recompenses": {
+            "xp": 32,
+            "cuivre": 96,
+            "items": []
+          },
+          "progress": 3,
+          "accepte_at": 1782677469
+        },
+        {
+          "id": "quete:le_bastion_de_l_yonne_interieur_3c5e258eebac",
+          "titre": "Récolte : Chêne",
+          "description": "Rapportez 2 Chêne à la guilde.",
+          "rang": "F",
+          "giver": "lieu:le_bastion_de_l_yonne_interieur",
+          "objectif": {
+            "type": "collect",
+            "cible": "item:Chene",
+            "quantite": 2
+          },
+          "recompenses": {
+            "xp": 9,
+            "cuivre": 27,
+            "items": []
+          },
+          "progress": 0,
+          "accepte_at": 1782679379
+        }
+      ],
       "quetes_terminees": [
         {
           "id": "quete:le_bastion_de_l_yonne_interieur_0c3d98bde0ca",
@@ -975,6 +886,17 @@
             "items": []
           },
           "termine_at": 1782655346
+        },
+        {
+          "id": "quete:le_bastion_de_l_yonne_interieur_b761bf2ac429",
+          "titre": "Récolte : Sève de chêne",
+          "rang": "F",
+          "recompenses": {
+            "xp": 14,
+            "cuivre": 42,
+            "items": []
+          },
+          "termine_at": 1782677465
         }
       ],
       "ressource_recoltable": null
@@ -1036,6 +958,479 @@
       "or": 0,
       "argent": 0,
       "cuivre": 0
+    },
+    {
+      "_id": "combat:fae474146f9544b9941682f4ae70bf86",
+      "_rev": "22-c4b2f5b2426d9bb38ae33bbc78774fb1",
+      "type": "combat",
+      "user_id": "user:eternel7@gmail.com",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "status": "active",
+      "tour": 10,
+      "ordre_initiative": [
+        "monstre_0",
+        "monstre_1",
+        "joueur_0"
+      ],
+      "acteur_courant_index": 2,
+      "map_image": "map0007.jpg",
+      "zone_tags": [
+        "voleur",
+        "faune_locale"
+      ],
+      "joueurs": [
+        {
+          "id": "joueur_0",
+          "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+          "nom": "Barbarella",
+          "voc": "repurgateur",
+          "race": "ogre",
+          "image": "repurgateur_m_ogre01.jpg",
+          "currentPV": 143,
+          "pv_max": 165,
+          "currentPM": 80,
+          "pm_max": 80,
+          "actions_restantes": 2,
+          "actions_max": 2,
+          "cc": 55,
+          "cd": 20,
+          "ag": 18,
+          "pa": 22,
+          "degats_cc": "1D8+25",
+          "degats_cd": "1D4+12",
+          "initiative": 23,
+          "deplacement": 5,
+          "deplacement_base": 5,
+          "charge": 7.9,
+          "charge_max": 225,
+          "portee": 1,
+          "attaque_profils": [
+            {
+              "mode": "cac",
+              "portee": 1,
+              "ranged": false,
+              "toucher": "cc",
+              "degats": "degats_cc",
+              "label": "Épée courte"
+            },
+            {
+              "mode": "tir",
+              "portee": 4,
+              "ranged": true,
+              "toucher": "cd",
+              "degats": "degats_cd",
+              "label": "Sarbacane à fléchettes"
+            }
+          ],
+          "pos": {
+            "x": 6,
+            "y": 5
+          },
+          "facing": 270,
+          "cells_moved": 0,
+          "attaques": 0,
+          "ramasses": 0,
+          "butin_ramasse": []
+        }
+      ],
+      "monstres": [
+        {
+          "id": "monstre_0",
+          "nom": "Loup",
+          "espece_id": "espece:loup",
+          "profil_id": "profil:combattant",
+          "image": "loup_transparent.png",
+          "currentPV": 29,
+          "pv_max": 108,
+          "actions_restantes": 0,
+          "actions_max": 4,
+          "cc": 51,
+          "ag": 43,
+          "pa": 13,
+          "degats_cc": "1D6+15",
+          "initiative": 48,
+          "deplacement": 5,
+          "portee": 1,
+          "pos": {
+            "x": 5,
+            "y": 5
+          },
+          "cells_moved": 0,
+          "attaques": 4,
+          "vivant": true,
+          "xp_reward": 23,
+          "niveau": 2,
+          "ramasses": 0
+        },
+        {
+          "id": "monstre_1",
+          "nom": "Loup",
+          "espece_id": "espece:loup",
+          "profil_id": "profil:novice",
+          "image": "loup_transparent.png",
+          "currentPV": 0,
+          "pv_max": 87,
+          "actions_restantes": 0,
+          "actions_max": 3,
+          "cc": 41,
+          "ag": 40,
+          "pa": 11,
+          "degats_cc": "1D6+10",
+          "initiative": 44,
+          "deplacement": 4,
+          "portee": 1,
+          "pos": {
+            "x": 4,
+            "y": 6
+          },
+          "cells_moved": 0,
+          "attaques": 3,
+          "vivant": false,
+          "xp_reward": 16,
+          "niveau": 1,
+          "ramasses": 0
+        }
+      ],
+      "log": [
+        {
+          "tour": 1,
+          "acteur": "Système",
+          "kind": "sys",
+          "texte": "Le combat commence !"
+        },
+        {
+          "tour": 1,
+          "acteur": "Loup",
+          "kind": "move",
+          "texte": "Loup avance vers Barbarella (4 case(s))."
+        },
+        {
+          "tour": 1,
+          "acteur": "Loup",
+          "kind": "move",
+          "texte": "Loup avance vers Barbarella (3 case(s))."
+        },
+        {
+          "tour": 1,
+          "acteur": "Barbarella",
+          "kind": "move",
+          "texte": "Barbarella pivote (droite)."
+        },
+        {
+          "tour": 1,
+          "acteur": "Barbarella",
+          "kind": "move",
+          "texte": "Barbarella pivote (droite)."
+        },
+        {
+          "tour": 1,
+          "acteur": "Barbarella",
+          "kind": "miss",
+          "texte": "Barbarella rate son attaque sur Loup ! (jet 84 / seuil 65)"
+        },
+        {
+          "tour": 2,
+          "acteur": "Loup",
+          "kind": "move",
+          "texte": "Loup avance vers Barbarella (4 case(s))."
+        },
+        {
+          "tour": 2,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 164/165)"
+        },
+        {
+          "tour": 2,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 163/165)"
+        },
+        {
+          "tour": 2,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 162/165)"
+        },
+        {
+          "tour": 2,
+          "acteur": "Barbarella",
+          "kind": "miss",
+          "texte": "Barbarella rate son attaque sur Loup ! (jet 95 / seuil 65)"
+        },
+        {
+          "tour": 2,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 18 dégâts ! (PV : 69/87)"
+        },
+        {
+          "tour": 3,
+          "acteur": "Loup",
+          "kind": "move",
+          "texte": "Loup avance vers Barbarella (4 case(s))."
+        },
+        {
+          "tour": 3,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 161/165)"
+        },
+        {
+          "tour": 3,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 160/165)"
+        },
+        {
+          "tour": 3,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 159/165)"
+        },
+        {
+          "tour": 3,
+          "acteur": "Barbarella",
+          "kind": "miss",
+          "texte": "Barbarella rate son attaque sur Loup ! (jet 77 / seuil 65)"
+        },
+        {
+          "tour": 3,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 17 dégâts ! (PV : 52/87)"
+        },
+        {
+          "tour": 4,
+          "acteur": "Loup",
+          "kind": "move",
+          "texte": "Loup avance vers Barbarella (4 case(s))."
+        },
+        {
+          "tour": 4,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 158/165)"
+        },
+        {
+          "tour": 4,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 157/165)"
+        },
+        {
+          "tour": 4,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 156/165)"
+        },
+        {
+          "tour": 4,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 19 dégâts ! (PV : 33/87)"
+        },
+        {
+          "tour": 4,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 22 dégâts ! (PV : 11/87)"
+        },
+        {
+          "tour": 5,
+          "acteur": "Loup",
+          "kind": "move",
+          "texte": "Loup avance vers Barbarella (4 case(s))."
+        },
+        {
+          "tour": 5,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 155/165)"
+        },
+        {
+          "tour": 5,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 154/165)"
+        },
+        {
+          "tour": 5,
+          "acteur": "Loup",
+          "kind": "miss",
+          "texte": "Loup rate son attaque ! (jet 84 / seuil 73)"
+        },
+        {
+          "tour": 5,
+          "acteur": "Barbarella",
+          "kind": "kill",
+          "texte": "Barbarella élimine Loup !"
+        },
+        {
+          "tour": 5,
+          "acteur": "Barbarella",
+          "kind": "sys",
+          "texte": "Barbarella passe son tour."
+        },
+        {
+          "tour": 6,
+          "acteur": "Loup",
+          "kind": "move",
+          "texte": "Loup avance vers Barbarella (4 case(s))."
+        },
+        {
+          "tour": 6,
+          "acteur": "Barbarella",
+          "kind": "move",
+          "texte": "Barbarella se déplace en [5,6]."
+        },
+        {
+          "tour": 6,
+          "acteur": "Barbarella",
+          "kind": "move",
+          "texte": "Barbarella pivote (droite)."
+        },
+        {
+          "tour": 6,
+          "acteur": "Barbarella",
+          "kind": "move",
+          "texte": "Barbarella se déplace en [6,6]."
+        },
+        {
+          "tour": 7,
+          "acteur": "Loup",
+          "kind": "move",
+          "texte": "Loup avance vers Barbarella (2 case(s))."
+        },
+        {
+          "tour": 7,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 153/165)"
+        },
+        {
+          "tour": 7,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 152/165)"
+        },
+        {
+          "tour": 7,
+          "acteur": "Barbarella",
+          "kind": "move",
+          "texte": "Barbarella se déplace en [7,6]."
+        },
+        {
+          "tour": 7,
+          "acteur": "Barbarella",
+          "kind": "move",
+          "texte": "Barbarella se déplace en [6,5]."
+        },
+        {
+          "tour": 7,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 18 dégâts ! (PV : 90/108)"
+        },
+        {
+          "tour": 8,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 151/165)"
+        },
+        {
+          "tour": 8,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 150/165)"
+        },
+        {
+          "tour": 8,
+          "acteur": "Loup",
+          "kind": "miss",
+          "texte": "Loup rate son attaque ! (jet 92 / seuil 83)"
+        },
+        {
+          "tour": 8,
+          "acteur": "Loup",
+          "kind": "miss",
+          "texte": "Loup rate son attaque ! (jet 86 / seuil 83)"
+        },
+        {
+          "tour": 8,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 13 dégâts ! (PV : 77/108)"
+        },
+        {
+          "tour": 8,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 16 dégâts ! (PV : 61/108)"
+        },
+        {
+          "tour": 9,
+          "acteur": "Loup",
+          "kind": "miss",
+          "texte": "Loup rate son attaque ! (jet 84 / seuil 83)"
+        },
+        {
+          "tour": 9,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 149/165)"
+        },
+        {
+          "tour": 9,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 148/165)"
+        },
+        {
+          "tour": 9,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 147/165)"
+        },
+        {
+          "tour": 9,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 16 dégâts ! (PV : 45/108)"
+        },
+        {
+          "tour": 9,
+          "acteur": "Barbarella",
+          "kind": "hit",
+          "texte": "Barbarella touche Loup pour 16 dégâts ! (PV : 29/108)"
+        },
+        {
+          "tour": 10,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 146/165)"
+        },
+        {
+          "tour": 10,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 145/165)"
+        },
+        {
+          "tour": 10,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 144/165)"
+        },
+        {
+          "tour": 10,
+          "acteur": "Loup",
+          "kind": "hit",
+          "texte": "Loup touche Barbarella pour 1 dégâts ! (PV : 143/165)"
+        }
+      ],
+      "xp_gagnee": 0,
+      "battle_map_id": "lieu:chemin2"
     },
     {
       "_id": "espece:aigle_geant",
@@ -7439,10 +7834,35 @@
       ]
     },
     {
-      "_id": "item:Arbalete_legere",
-      "_rev": "3-754f154206684772b2537c5a1d83b5dc",
+      "_id": "item:Arbalete",
+      "_rev": "2-61f24d91f19bdc1af2a11a5a4acc10fa",
       "type": "item",
-      "nom": "Arbalète légère",
+      "nom": "Arbalète",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite"
+      ],
+      "poids": [
+        2.5,
+        4.5
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 8,
+      "restriction": {
+        "Ag": 15,
+        "F": 10
+      }
+    },
+    {
+      "_id": "item:Arbalete_de_poing",
+      "_rev": "2-032c7f50a7180e407dff7bcf19a17ff6",
+      "type": "item",
+      "nom": "Arbalète de poing",
       "sous_categorie": "",
       "icon": "🏹",
       "rarete": "commun",
@@ -7450,11 +7870,95 @@
       "slots": [
         "main_gauche"
       ],
-      "poids": 1.5
+      "poids": [
+        0.5,
+        0.9
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 5,
+      "restriction": {
+        "Ag": 25
+      }
+    },
+    {
+      "_id": "item:Arbalete_legere",
+      "_rev": "9-223d1b236d904ef1eaa8211897128a97",
+      "type": "item",
+      "nom": "Arbalète légère",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite"
+      ],
+      "poids": [
+        1.5,
+        2.5
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 7,
+      "restriction": {
+        "Ag": 10
+      }
+    },
+    {
+      "_id": "item:Arbalete_lourde",
+      "_rev": "2-103ef5023fd581bdde37b39d06f271b8",
+      "type": "item",
+      "nom": "Arbalète lourde",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite"
+      ],
+      "poids": [
+        4.5,
+        7.5
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 9,
+      "restriction": {
+        "Ag": 25,
+        "F": 20
+      }
+    },
+    {
+      "_id": "item:Arc",
+      "_rev": "2-3f7f707e22307d3ec93531a0d5e3bfe0",
+      "type": "item",
+      "nom": "Arc",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite",
+        "main_gauche"
+      ],
+      "poids": [
+        0.6,
+        1.1
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 7,
+      "restriction": {
+        "Ag": 15
+      }
     },
     {
       "_id": "item:Arc_court",
-      "_rev": "3-86a0b15cc5736fc955c7cd8c54643004",
+      "_rev": "5-d4000878a9b7d8ff58ca88fb6436ce56",
       "type": "item",
       "nom": "Arc court",
       "sous_categorie": "",
@@ -7465,7 +7969,42 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 0.8
+      "poids": [
+        0.4,
+        0.8
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 6,
+      "restriction": {
+        "Ag": 10
+      }
+    },
+    {
+      "_id": "item:Arc_long",
+      "_rev": "2-20b678ce79561ba0b5898807bbfffdda",
+      "type": "item",
+      "nom": "Arc long",
+      "sous_categorie": "",
+      "icon": "🏹",
+      "rarete": "commun",
+      "categorie": "arme",
+      "slots": [
+        "main_droite",
+        "main_gauche"
+      ],
+      "poids": [
+        1.2,
+        2
+      ],
+      "tags": [
+        "tir"
+      ],
+      "portee": 8,
+      "restriction": {
+        "Ag": 20
+      }
     },
     {
       "_id": "item:Armure_cuir_runee",
@@ -7533,7 +8072,7 @@
     },
     {
       "_id": "item:Baguette_houx",
-      "_rev": "3-d53804d41c8d99517c1c87aba8fab472",
+      "_rev": "4-2b4b8ee28d68b894b046bb4a0a55bcca",
       "type": "item",
       "nom": "Baguette de bois de houx",
       "sous_categorie": "",
@@ -7543,7 +8082,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.2
+      "poids": 0.2,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Bandages",
@@ -7601,7 +8144,7 @@
     },
     {
       "_id": "item:Baton_bois_vivant",
-      "_rev": "3-013f96c44403df382fc3682557648b31",
+      "_rev": "4-b4431426739e962e74c07d3a30363305",
       "type": "item",
       "nom": "Bâton de bois vivant",
       "sous_categorie": "",
@@ -7612,11 +8155,15 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 1.0
+      "poids": 1.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Baton_canalisateur",
-      "_rev": "3-bf2105c74629f46ae76748f497017812",
+      "_rev": "4-315fac1d0c1963a7ed9f739c3947d9ca",
       "type": "item",
       "nom": "Bâton canalisateur",
       "sous_categorie": "",
@@ -7627,11 +8174,15 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 1.0
+      "poids": 1.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Baton_cornu",
-      "_rev": "3-3f40d7a573ff4017a9f82f162d276517",
+      "_rev": "4-4c4b775841539d38499602ebd8d38f6e",
       "type": "item",
       "nom": "Bâton cornu",
       "sous_categorie": "",
@@ -7642,11 +8193,15 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 1.3
+      "poids": 1.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Baton_de_combat",
-      "_rev": "3-7b24f39ec155a059dc5e075610c7e29a",
+      "_rev": "4-5ae2437ec26496ccdabc6f2fe7a14ebd",
       "type": "item",
       "nom": "Bâton de combat",
       "sous_categorie": "",
@@ -7657,7 +8212,11 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 1.2
+      "poids": 1.2,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Bonnet_de_clerc",
@@ -8178,7 +8737,7 @@
     },
     {
       "_id": "item:Canne_ferree",
-      "_rev": "3-6b6840e83bf6903a61952239146e6ed4",
+      "_rev": "4-427ce08dd4cc3776e0ef3d94686e645d",
       "type": "item",
       "nom": "Canne de marche ferrée",
       "sous_categorie": "",
@@ -8188,7 +8747,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.9
+      "poids": 0.9,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Cape_soie_sombre",
@@ -8638,7 +9201,7 @@
     },
     {
       "_id": "item:Couteau_de_chasse",
-      "_rev": "3-b65679460f00f600124d14c0576e8be8",
+      "_rev": "4-097176e2ca9a920ee84847423157be52",
       "type": "item",
       "nom": "Couteau de chasse",
       "sous_categorie": "",
@@ -8649,7 +9212,11 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 0.3
+      "poids": 0.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Couvre_chef_office",
@@ -8743,7 +9310,7 @@
     },
     {
       "_id": "item:Dague",
-      "_rev": "3-a5b6106c7a0c832fbfcc5eb65a63242a",
+      "_rev": "4-3ae35d998244a49dfb8ccb61d1602c0a",
       "type": "item",
       "nom": "Dague",
       "sous_categorie": "",
@@ -8754,11 +9321,15 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 0.3
+      "poids": 0.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Dague_de_parade",
-      "_rev": "3-4423bef5a6767346816492cb5baec3b6",
+      "_rev": "4-1834f8166e2664cbda16c773da5db4ff",
       "type": "item",
       "nom": "Dague de parade",
       "sous_categorie": "",
@@ -8768,11 +9339,15 @@
       "slots": [
         "main_gauche"
       ],
-      "poids": 0.3
+      "poids": 0.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Dague_de_scene",
-      "_rev": "3-39fd52049b2d1d76ec6e5570d00243cd",
+      "_rev": "4-7ffa7e0ebfdea2ad638f22aec6ef7a0d",
       "type": "item",
       "nom": "Dague de scène",
       "sous_categorie": "",
@@ -8782,7 +9357,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.2
+      "poids": 0.2,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Dico_des_langues",
@@ -8884,7 +9463,7 @@
     },
     {
       "_id": "item:Epee_argent",
-      "_rev": "3-0a0b9f1b0581f07006458ed5e84ecc16",
+      "_rev": "4-4da94141610d5656f939722c9d3ff58f",
       "type": "item",
       "nom": "Épée d'argent",
       "sous_categorie": "",
@@ -8894,11 +9473,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.3
+      "poids": 1.3,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_courte",
-      "_rev": "7-3f1cc64d2f3785bdd3b8c34d931cf8ed",
+      "_rev": "8-5faf6ab10d722b2dddbe65c13ab859db",
       "type": "item",
       "nom": "Épée courte",
       "sous_categorie": "",
@@ -8911,11 +9494,15 @@
       ],
       "bonus_cc": 1,
       "bonus_degats": 3,
-      "poids": 1.5
+      "poids": 1.5,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_courte_rune",
-      "_rev": "3-a742152cc503f5ac946ad3595d05e511",
+      "_rev": "4-344f131bfcffb1028275d1e0c76f384b",
       "type": "item",
       "nom": "Épée courte enchantée",
       "sous_categorie": "",
@@ -8925,11 +9512,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.8
+      "poids": 0.8,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_longue",
-      "_rev": "3-5ec1f7c39fa3079c53596c953c04a3c6",
+      "_rev": "4-9ef00c4a7367e206ef0c4a1a19cced7e",
       "type": "item",
       "nom": "Épée longue",
       "sous_categorie": "",
@@ -8939,11 +9530,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.5
+      "poids": 1.5,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_longue_ordre",
-      "_rev": "3-eed0fafa099208bb9120fa7c8d0581e6",
+      "_rev": "4-32a2ad7295f33367da659d912f7a7b1e",
       "type": "item",
       "nom": "Épée longue d'ordre",
       "sous_categorie": "",
@@ -8953,11 +9548,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.5
+      "poids": 1.5,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Epee_une_main_benie",
-      "_rev": "3-8ecd275468169bedc42f02861a1ac0d0",
+      "_rev": "4-019ded0b33f169ff265f1c9162acc073",
       "type": "item",
       "nom": "Épée à une main bénie",
       "sous_categorie": "",
@@ -8967,7 +9566,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.2
+      "poids": 1.2,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Erable",
@@ -9117,7 +9720,7 @@
     },
     {
       "_id": "item:Gants_fins",
-      "_rev": "3-6c3fe741774e1484c0997b41cec0efe0",
+      "_rev": "4-5b0ff77257addb70b5a467d47a97cf44",
       "type": "item",
       "nom": "Gants fins",
       "sous_categorie": "",
@@ -9127,11 +9730,14 @@
       "slots": [
         "mains"
       ],
-      "poids": 0.1
+      "poids": 0.1,
+      "bonus": {
+        "Cha": 5
+      }
     },
     {
       "_id": "item:Gants_fins_noirs",
-      "_rev": "3-7770b33e6b7a44308a784b2f6f791042",
+      "_rev": "5-d85b8cb35cd82990dd0a9e4d9a493e4d",
       "type": "item",
       "nom": "Gants fins noirs",
       "sous_categorie": "",
@@ -9141,7 +9747,10 @@
       "slots": [
         "mains"
       ],
-      "poids": 0.1
+      "poids": 0.1,
+      "bonus": {
+        "Cha": 7
+      }
     },
     {
       "_id": "item:Gants_peau_noire",
@@ -9475,7 +10084,7 @@
     },
     {
       "_id": "item:Hache_de_bucheron",
-      "_rev": "2-f4b288485f6a5adcda0c4bf1407474b7",
+      "_rev": "3-8e173a63f32c9bea3137e3fdd01d3e02",
       "type": "item",
       "nom": "Hache de bucheron",
       "sous_categorie": "outil",
@@ -9486,13 +10095,15 @@
         "main_droite"
       ],
       "tags": [
-        "outil_coupe_bois"
+        "outil_coupe_bois",
+        "cac"
       ],
-      "poids": 2.5
+      "poids": 2.5,
+      "portee": 1
     },
     {
       "_id": "item:Hache_de_guerre",
-      "_rev": "5-c7f20ff85fe56bc13ecc4a342f138b86",
+      "_rev": "6-e3f58c6df10a91cbde993d943d9a5e23",
       "type": "item",
       "nom": "Hache de guerre",
       "sous_categorie": "",
@@ -9503,9 +10114,11 @@
         "main_droite"
       ],
       "tags": [
-        "outil_coupe_bois"
+        "outil_coupe_bois",
+        "cac"
       ],
-      "poids": 2.5
+      "poids": 2.5,
+      "portee": 1
     },
     {
       "_id": "item:Heaume_de_fer",
@@ -9697,7 +10310,7 @@
     },
     {
       "_id": "item:Lame_courte",
-      "_rev": "3-8a18d157b59b1fe0d23b3ecffd0583e7",
+      "_rev": "4-809dfd020d6d53e257b23fa869aa6201",
       "type": "item",
       "nom": "Lame courte",
       "sous_categorie": "",
@@ -9707,11 +10320,15 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.5
+      "poids": 0.5,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Lance_rituelle",
-      "_rev": "3-fe66bd98f1e225837b6ddffee0487200",
+      "_rev": "4-fa65c48601d5a036f897a5e7d68b8565",
       "type": "item",
       "nom": "Lance rituelle",
       "sous_categorie": "",
@@ -9722,7 +10339,11 @@
         "main_droite",
         "main_gauche"
       ],
-      "poids": 2.0
+      "poids": 2.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 2
     },
     {
       "_id": "item:Lettre_de_creance",
@@ -9776,7 +10397,7 @@
     },
     {
       "_id": "item:Masse_benie",
-      "_rev": "3-ed146883dc2b76ed4676d3cdc2eed5b2",
+      "_rev": "4-0ff4b2328bd53fcb347fa66a8053e086",
       "type": "item",
       "nom": "Masse d'armes bénie",
       "sous_categorie": "",
@@ -9786,7 +10407,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 2.0
+      "poids": 2.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Menottes",
@@ -10400,7 +11025,7 @@
     },
     {
       "_id": "item:Rapiere",
-      "_rev": "3-3628249cce206da35666a09e3279fc9a",
+      "_rev": "4-5be2ea0df50e081fb497ea146ddde80d",
       "type": "item",
       "nom": "Rapière",
       "sous_categorie": "",
@@ -10410,7 +11035,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 0.9
+      "poids": 0.9,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Ration_de_voyage",
@@ -10796,15 +11425,24 @@
     },
     {
       "_id": "item:Sarbacane",
-      "_rev": "3-639924dd35dffbbc5e9eb434acb6e622",
+      "_rev": "5-673e769de6db654c0fe83bfc9b063a4a",
       "type": "item",
-      "nom": "Sarbacane + fléchettes × 5",
+      "nom": "Sarbacane à fléchettes",
       "sous_categorie": "",
       "icon": "💨",
       "rarete": "commun",
       "categorie": "arme",
-      "slots": [],
-      "poids": 0.2
+      "slots": [
+        "main_droite"
+      ],
+      "poids": 0.2,
+      "tags": [
+        "tir"
+      ],
+      "portee": 4,
+      "restriction": {
+        "Ag": 10
+      }
     },
     {
       "_id": "item:Saule",
@@ -10840,7 +11478,7 @@
     },
     {
       "_id": "item:Sceptre_os",
-      "_rev": "3-012a73055070cd60cd2a48f32a967245",
+      "_rev": "4-e0b04f13709262866a290aa12c97e176",
       "type": "item",
       "nom": "Sceptre d'os",
       "sous_categorie": "",
@@ -10850,7 +11488,11 @@
       "slots": [
         "main_droite"
       ],
-      "poids": 1.0
+      "poids": 1.0,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:Sel",
@@ -11392,6 +12034,26 @@
       "poids": 0.2
     },
     {
+      "_id": "item:acier",
+      "_rev": "1-fa20cb5c2230700bf3c79672b7321409",
+      "type": "item",
+      "nom": "Lingot d'acier",
+      "sous_categorie": "acier",
+      "icon": "⚙️",
+      "rarete": "peu_commun",
+      "categorie": "composant",
+      "slots": [],
+      "tags": [
+        "metal"
+      ],
+      "poids": 2.5,
+      "valeur": [
+        {
+          "ag": 2
+        }
+      ]
+    },
+    {
       "_id": "item:aigle_geant",
       "_rev": "4-c5eef6333b0182f610040ef057c26e43",
       "type": "item",
@@ -11420,7 +12082,7 @@
     },
     {
       "_id": "item:amulette",
-      "_rev": "2-a927a9ba776aa24057e309152affe1cc",
+      "_rev": "3-2515b908ea2aaad09af86ca75b1e581f",
       "type": "item",
       "nom": "Amulette",
       "sous_categorie": "",
@@ -11431,7 +12093,10 @@
         "cou"
       ],
       "poids": 0.1,
-      "bonus_pm": 2
+      "bonus_pm": 2,
+      "bonus": {
+        "Cha": 2
+      }
     },
     {
       "_id": "item:ange_de_la_connaissance",
@@ -11672,6 +12337,26 @@
       "poids": 0.2
     },
     {
+      "_id": "item:bronze",
+      "_rev": "1-0ddac4a9ef3712583abad611760fad10",
+      "type": "item",
+      "nom": "Lingot de bronze",
+      "sous_categorie": "bronze",
+      "icon": "🟫",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "tags": [
+        "metal"
+      ],
+      "poids": 3,
+      "valeur": [
+        {
+          "cu": 35
+        }
+      ]
+    },
+    {
       "_id": "item:brosse",
       "_rev": "2-ae2598de8c91657e9f568ae7a8ebf762",
       "type": "item",
@@ -11712,7 +12397,7 @@
     },
     {
       "_id": "item:ceinture",
-      "_rev": "2-a578c3c3081e15e0991382a0a652c7cd",
+      "_rev": "3-38b412a0a2d1c428d460d9031aa24483",
       "type": "item",
       "nom": "Ceinture",
       "sous_categorie": "",
@@ -11723,7 +12408,9 @@
         "ceinture"
       ],
       "poids": 0.2,
-      "bonus_pa": 1
+      "bonus": {
+        "Cha": 5
+      }
     },
     {
       "_id": "item:centaure",
@@ -11889,7 +12576,7 @@
     },
     {
       "_id": "item:collier",
-      "_rev": "2-a0fd185b4e5df0c8aad6fd2a72b8744f",
+      "_rev": "3-4e9f2f9f4d2d13bb2f9b164bad686e6f",
       "type": "item",
       "nom": "Collier",
       "sous_categorie": "",
@@ -11900,7 +12587,9 @@
         "cou"
       ],
       "poids": 0.2,
-      "bonus_initiative": 1
+      "bonus": {
+        "Cha": 5
+      }
     },
     {
       "_id": "item:composant_rituel",
@@ -12117,7 +12806,7 @@
     },
     {
       "_id": "item:dague_rituelle",
-      "_rev": "2-404bb8bfca756db002883f8f246e98ce",
+      "_rev": "3-536e7e16bda1d8a853692a49c8c4550e",
       "type": "item",
       "nom": "Dague rituelle",
       "sous_categorie": "",
@@ -12130,7 +12819,11 @@
       ],
       "poids": 0.4,
       "bonus_cc": 1,
-      "bonus_degats": 1
+      "bonus_degats": 1,
+      "tags": [
+        "cac"
+      ],
+      "portee": 1
     },
     {
       "_id": "item:de",
@@ -12409,6 +13102,26 @@
       "loot_defaut": true
     },
     {
+      "_id": "item:fer",
+      "_rev": "1-40013248a38df0bb7878377af9dfad0d",
+      "type": "item",
+      "nom": "Lingot de fer",
+      "sous_categorie": "fer",
+      "icon": "🔩",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "tags": [
+        "metal"
+      ],
+      "poids": 3,
+      "valeur": [
+        {
+          "cu": 50
+        }
+      ]
+    },
+    {
       "_id": "item:feutre",
       "_rev": "2-46afa53bfd3cf947cffc169f2ae294bd",
       "type": "item",
@@ -12608,7 +13321,7 @@
     },
     {
       "_id": "item:gobelin_des_marais",
-      "_rev": "4-186891a40dd937b986fab1371135e768",
+      "_rev": "5-a9bf4642436b7b73cf345c4ec1f86f9e",
       "type": "item",
       "nom": "Carcasse de Gobelin des Marais",
       "sous_categorie": "carcasse",
@@ -12616,7 +13329,10 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 2.2,
+      "poids": [
+        35,
+        55
+      ],
       "description": "Dépouille de Gobelin des Marais récupérée à l'issue du combat.",
       "source_espece": "espece:gobelin_des_marais",
       "loot_defaut": true
@@ -12884,7 +13600,7 @@
     },
     {
       "_id": "item:hydre",
-      "_rev": "4-e10f7d8df17428d583200bfca8b5b5f3",
+      "_rev": "5-afbb2419b3d290f763458215b9166077",
       "type": "item",
       "nom": "Carcasse d'Hydre",
       "sous_categorie": "carcasse",
@@ -12892,7 +13608,10 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 14.0,
+      "poids": [
+        100,
+        600
+      ],
       "description": "Dépouille d'Hydre récupérée à l'issue du combat.",
       "source_espece": "espece:hydre",
       "loot_defaut": true
@@ -13094,14 +13813,17 @@
     },
     {
       "_id": "item:manche",
-      "_rev": "2-1ac9c03e4903d85d5256dab35c8ca01c",
+      "_rev": "3-71c76747d7ede4787e4ea71876541893",
       "type": "item",
       "nom": "Manche",
-      "sous_categorie": "",
+      "sous_categorie": "manche",
       "icon": "🪵",
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
+      "tags": [
+        "bois"
+      ],
       "poids": 0.2
     },
     {
@@ -13145,6 +13867,26 @@
       "description": "Dépouille de Minotaure récupérée à l'issue du combat.",
       "source_espece": "espece:minotaure",
       "loot_defaut": true
+    },
+    {
+      "_id": "item:mithril",
+      "_rev": "1-7233319f5041f84bcd5147fdbe7dd71b",
+      "type": "item",
+      "nom": "Lingot de mithril",
+      "sous_categorie": "mithril",
+      "icon": "✨",
+      "rarete": "rare",
+      "categorie": "composant",
+      "slots": [],
+      "tags": [
+        "metal"
+      ],
+      "poids": 1,
+      "valeur": [
+        {
+          "or": 1
+        }
+      ]
     },
     {
       "_id": "item:momie",
@@ -13868,7 +14610,7 @@
     },
     {
       "_id": "item:sanglier",
-      "_rev": "4-d6a8b3e8505812a69958338e1281d0e2",
+      "_rev": "5-ff1c16d63b7b5e96479aeccb5519303e",
       "type": "item",
       "nom": "Carcasse de Sanglier",
       "sous_categorie": "carcasse",
@@ -13876,7 +14618,10 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 6.5,
+      "poids": [
+        60,
+        130
+      ],
       "description": "Dépouille de Sanglier récupérée à l'issue du combat.",
       "source_espece": "espece:sanglier",
       "loot_defaut": true
@@ -14314,17 +15059,15 @@
     },
     {
       "_id": "lieu:aux_ouvrages_d_os_et_d_ivoire",
-      "_rev": "27-3082b674be6c67eba01ce540e9a60c53",
+      "_rev": "37-a576a77c38d99811dea0ff4da7db04be",
       "type": "lieu",
       "label": "Aux Ouvrages d’Os et d’Ivoire",
       "image": "tabletterie_europe01.png",
       "categorie": "tabletterie",
-      "stock_matieres": {},
+      "stock_matieres": {
+        "os": 6
+      },
       "stock_vente": [
-        {
-          "item_id": "item:manche",
-          "qty": 4
-        },
         {
           "item_id": "item:de",
           "qty": 18
@@ -14349,7 +15092,7 @@
     },
     {
       "_id": "lieu:auxerre",
-      "_rev": "509-5be02c29b2fb7a295e1e3ad90bb49811",
+      "_rev": "510-5d167982ab789dce29293a86d640dff0",
       "type": "lieu",
       "label": "Auxerre",
       "image": "auxerre_start_city.png",
@@ -19671,6 +20414,13 @@
           "zones": [
             "zone:foret_dense"
           ]
+        },
+        {
+          "espece": "espece:sanglier",
+          "zones": [
+            "zone:foret_feuillus",
+            "zone:foret_dense"
+          ]
         }
       ],
       "profil_weights": {
@@ -19825,16 +20575,24 @@
     },
     {
       "_id": "lieu:boucherie_de_la_tour_de_l_horloge",
-      "_rev": "35-4498f4bec02e44444556a004abb74d83",
+      "_rev": "46-391da12b2c05f9361a2e14cac37be6e6",
       "type": "lieu",
       "label": "La Boucherie du Cadran",
       "image": "boucherie_europe01.png",
       "categorie": "boucherie",
-      "stock_matieres": {},
+      "stock_matieres": {
+        "viande": 4,
+        "os": 4,
+        "sang": 4,
+        "graisse": 4,
+        "crocs": 4,
+        "cuir_brut": 4,
+        "poils": 4
+      },
       "stock_vente": [
         {
           "item_id": "item:viande",
-          "qty": 49
+          "qty": 42
         },
         {
           "item_id": "item:os",
@@ -21660,7 +22418,7 @@
     },
     {
       "_id": "lieu:festin_de_la_joyeuse_halfling",
-      "_rev": "252-e176f5f6335393d5d1d5bffa489c621d",
+      "_rev": "301-c6cbfc30ea61850bd814f61e2bd2f076",
       "type": "lieu",
       "label": "Le Festin de la Joyeuse Halfling",
       "image": "boucherie_europe03.png",
@@ -21673,7 +22431,7 @@
         },
         {
           "item_id": "item:os",
-          "qty": 146
+          "qty": 140
         },
         {
           "item_id": "item:sang",
@@ -21685,7 +22443,7 @@
         },
         {
           "item_id": "item:cuir",
-          "qty": 29
+          "qty": 6
         },
         {
           "item_id": "item:crocs",
@@ -21694,10 +22452,6 @@
         {
           "item_id": "item:poils",
           "qty": 126
-        },
-        {
-          "item_id": "item:cuir_brut",
-          "qty": 20
         }
       ]
     },
@@ -26614,14 +27368,12 @@
     },
     {
       "_id": "lieu:l_athanor_de_saint_germain",
-      "_rev": "43-bfbbbe36514e8d75ef55fb002bafacf7",
+      "_rev": "44-d6cca46336d16896b6648e990f6e2427",
       "type": "lieu",
       "label": "L'Athanor de Saint-Germain",
       "image": "cabinet_alchimie_europe02.png",
       "categorie": "laboratoire_d_alchimie",
-      "stock_matieres": {
-        "sang": 11
-      },
+      "stock_matieres": {},
       "stock_vente": [
         {
           "item_id": "item:reactif_alchimique",
@@ -26629,17 +27381,17 @@
         },
         {
           "item_id": "item:composant_rituel",
-          "qty": 2
+          "qty": 3
         },
         {
           "item_id": "item:potion",
-          "qty": 1
+          "qty": 6
         }
       ]
     },
     {
       "_id": "lieu:l_echope_du_cuir_d_auxerre",
-      "_rev": "80-6cee144a9dcfb9c6ebcc5bfb3d597cf7",
+      "_rev": "81-ad89d4f4e1560b9b4539c7e426d2a271",
       "type": "lieu",
       "label": "L'échope du cuir d'Auxerre",
       "image": "maroquinerie_auxerre01.png",
@@ -26650,7 +27402,7 @@
       "stock_vente": [
         {
           "item_id": "item:ceinture",
-          "qty": 31
+          "qty": 30
         },
         {
           "item_id": "item:sac",
@@ -26664,11 +27416,47 @@
     },
     {
       "_id": "lieu:l_enclume_du_rempart",
-      "_rev": "1-ac8367a27637ce7705260aca044c0066",
+      "_rev": "21-0ca962b46d10efd9a1c186d5099b6fcd",
       "type": "lieu",
       "label": "L'Enclume du Rempart",
       "image": "armurerie_europe03.png",
-      "categorie": "armurerie"
+      "categorie": "armurerie",
+      "stock_matieres": {
+        "acier": 25,
+        "bronze": 28,
+        "manche": 4,
+        "cuir": 5
+      },
+      "stock_vente": [
+        {
+          "item_id": "item:Sarbacane",
+          "qty": 2
+        },
+        {
+          "item_id": "item:armure_de_cuir",
+          "qty": 1
+        },
+        {
+          "item_id": "item:Dague",
+          "qty": 1
+        },
+        {
+          "item_id": "item:Lame_courte",
+          "qty": 1
+        },
+        {
+          "item_id": "item:Dague_de_parade",
+          "qty": 1
+        },
+        {
+          "item_id": "item:Hache_de_bucheron",
+          "qty": 19
+        },
+        {
+          "item_id": "item:Canne_ferree",
+          "qty": 1
+        }
+      ]
     },
     {
       "_id": "lieu:la_couronne_des_pierres_vives",
@@ -26689,18 +27477,16 @@
     },
     {
       "_id": "lieu:la_tannerie_des_remparts",
-      "_rev": "51-8f265fb3074bd1e01c0b46c7d0ee1b12",
+      "_rev": "134-d4b2967d995f5dca73553b695cf871bc",
       "type": "lieu",
       "label": "La Tannerie des Remparts",
       "image": "tannerie_europe05.png",
       "categorie": "tannerie",
-      "stock_matieres": {
-        "cuir_brut": 6
-      },
+      "stock_matieres": {},
       "stock_vente": [
         {
           "item_id": "item:cuir",
-          "qty": 22
+          "qty": 33
         }
       ]
     },
@@ -26722,49 +27508,73 @@
       "lieu_parent": "lieu:auxerre"
     },
     {
+      "_id": "lieu:le_garde_manger_des_3_fees",
+      "_rev": "8-3af4c2e60128564ef168935d094e3e76",
+      "type": "lieu",
+      "label": "Le Garde-Manger des 3 Fées",
+      "image": "epicerie_europe07.png",
+      "categorie": "cuisine",
+      "stock_matieres": {
+        "viande": 7
+      }
+    },
+    {
+      "_id": "lieu:le_mithril_de_saint_germain",
+      "_rev": "46-7e975c8af5fcf358ef208c09af5f5e26",
+      "type": "lieu",
+      "label": "Le Mithril de Saint-Germain",
+      "image": "armurerie_europe02.png",
+      "categorie": "armurerie",
+      "stock_matieres": {
+        "cuir": 16
+      },
+      "stock_vente": [
+        {
+          "item_id": "item:armure_de_cuir",
+          "qty": 1
+        },
+        {
+          "item_id": "item:fourreau",
+          "qty": 16
+        }
+      ]
+    },
+    {
       "_id": "lieu:les_etalages_d_autessiodurum",
-      "_rev": "41-01cb3c37ba4862d267f1256597bc2d95",
+      "_rev": "82-50480fe247e0c3bd9eed2da7d5c515d8",
       "type": "lieu",
       "label": "Les Étalages d'Autessiodurum",
       "image": "boucherie_europe02.png",
       "categorie": "boucherie",
-      "stock_matieres": {
-        "viande": 61,
-        "os": 61,
-        "sang": 32,
-        "graisse": 32,
-        "cuir_brut": 32,
-        "crocs": 32,
-        "poils": 32
-      },
+      "stock_matieres": {},
       "stock_vente": [
         {
           "item_id": "item:viande",
-          "qty": 143
+          "qty": 117
         },
         {
           "item_id": "item:os",
-          "qty": 143
+          "qty": 117
         },
         {
           "item_id": "item:sang",
-          "qty": 111
+          "qty": 107
         },
         {
           "item_id": "item:graisse",
-          "qty": 111
+          "qty": 107
         },
         {
           "item_id": "item:cuir_brut",
-          "qty": 111
+          "qty": 97
         },
         {
           "item_id": "item:crocs",
-          "qty": 97
+          "qty": 107
         },
         {
           "item_id": "item:poils",
-          "qty": 97
+          "qty": 107
         }
       ]
     },
@@ -32034,6 +32844,31 @@
       }
     },
     {
+      "_id": "link:armurerie02_to_auxerre",
+      "_rev": "1-8eb3655733bbe24a77ee33fc52471b3d",
+      "type": "connection",
+      "nodes": [
+        {
+          "lieu": "lieu:auxerre",
+          "pos": [
+            30,
+            17
+          ]
+        },
+        {
+          "lieu": "lieu:le_mithril_de_saint_germain",
+          "pos": [
+            0,
+            0
+          ]
+        }
+      ],
+      "metadata": {
+        "type": "armurerie",
+        "status": "ouvert"
+      }
+    },
+    {
       "_id": "link:atelier_d_artisan01_to_auxerre",
       "_rev": "1-a1e17078224bfc23d0ffdbe2a6d8ff0b",
       "type": "connection",
@@ -32560,6 +33395,31 @@
       ],
       "metadata": {
         "type": "boucherie",
+        "status": "ouvert"
+      }
+    },
+    {
+      "_id": "link:cuisine01_to_auxerre",
+      "_rev": "1-f84fdf5ee013b3aa2946fa491c8fc4aa",
+      "type": "connection",
+      "nodes": [
+        {
+          "lieu": "lieu:auxerre",
+          "pos": [
+            48,
+            29
+          ]
+        },
+        {
+          "lieu": "lieu:le_garde_manger_des_3_fees",
+          "pos": [
+            0,
+            0
+          ]
+        }
+      ],
+      "metadata": {
+        "type": "cuisine",
         "status": "ouvert"
       }
     },
@@ -33314,6 +34174,29 @@
       "accepte_par": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f"
     },
     {
+      "_id": "quete:le_bastion_de_l_yonne_interieur_039edc2f3a77",
+      "_rev": "1-d3d1584fc79cd910fafca67161898e97",
+      "type": "quete",
+      "source": "genere",
+      "giver": "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu_parent": "lieu:auxerre",
+      "titre": "Récolte : Carcasse de Grand Sanglier",
+      "description": "Rapportez 4 Carcasse de Grand Sanglier à la guilde.",
+      "rang": "F",
+      "objectif": {
+        "type": "collect",
+        "cible": "item:grand_sanglier",
+        "quantite": 4
+      },
+      "recompenses": {
+        "xp": 138,
+        "cuivre": 414,
+        "items": []
+      },
+      "statut": "offerte",
+      "genere_at": 1782677469
+    },
+    {
       "_id": "quete:le_bastion_de_l_yonne_interieur_07d9b4ae8891",
       "_rev": "2-06c920e23359e5a8abaa9a5e8ee44813",
       "type": "quete",
@@ -33431,6 +34314,30 @@
       },
       "statut": "acceptee",
       "genere_at": 1782639973,
+      "accepte_par": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7"
+    },
+    {
+      "_id": "quete:le_bastion_de_l_yonne_interieur_3c5e258eebac",
+      "_rev": "2-e335208059ce7aa88fe7c8e8bcda3d79",
+      "type": "quete",
+      "source": "genere",
+      "giver": "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu_parent": "lieu:auxerre",
+      "titre": "Récolte : Chêne",
+      "description": "Rapportez 2 Chêne à la guilde.",
+      "rang": "F",
+      "objectif": {
+        "type": "collect",
+        "cible": "item:Chene",
+        "quantite": 2
+      },
+      "recompenses": {
+        "xp": 9,
+        "cuivre": 27,
+        "items": []
+      },
+      "statut": "acceptee",
+      "genere_at": 1782677464,
       "accepte_par": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7"
     },
     {
@@ -33553,7 +34460,7 @@
     },
     {
       "_id": "quete:le_bastion_de_l_yonne_interieur_b761bf2ac429",
-      "_rev": "1-032777a5087f2497c05841dac7b17ebc",
+      "_rev": "2-5c723649bda63c2859df90e04410fa9d",
       "type": "quete",
       "source": "genere",
       "giver": "lieu:le_bastion_de_l_yonne_interieur",
@@ -33571,12 +34478,13 @@
         "cuivre": 42,
         "items": []
       },
-      "statut": "offerte",
-      "genere_at": 1782649177
+      "statut": "acceptee",
+      "genere_at": 1782649177,
+      "accepte_par": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7"
     },
     {
       "_id": "quete:le_bastion_de_l_yonne_interieur_ba56ff0fc8f6",
-      "_rev": "1-378b5c6f69bdbd70acd6f18889b9fea2",
+      "_rev": "2-a8ad5624112acdf30470e71f5df8fcb9",
       "type": "quete",
       "source": "genere",
       "giver": "lieu:le_bastion_de_l_yonne_interieur",
@@ -33594,8 +34502,9 @@
         "cuivre": 96,
         "items": []
       },
-      "statut": "offerte",
-      "genere_at": 1782651145
+      "statut": "acceptee",
+      "genere_at": 1782651145,
+      "accepte_par": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7"
     },
     {
       "_id": "quete:le_bastion_de_l_yonne_interieur_bf6b0bec6883",
@@ -33620,6 +34529,29 @@
       "statut": "acceptee",
       "genere_at": 1782636304,
       "accepte_par": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7"
+    },
+    {
+      "_id": "quete:le_bastion_de_l_yonne_interieur_c88336c1ee41",
+      "_rev": "1-39b345b894a2e0d3d136d9ee10ae2033",
+      "type": "quete",
+      "source": "genere",
+      "giver": "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu_parent": "lieu:auxerre",
+      "titre": "Collecte de Petit rondin de Hêtre",
+      "description": "Rapportez 3 Petit rondin de Hêtre à la guilde.",
+      "rang": "F",
+      "objectif": {
+        "type": "collect",
+        "cible": "item:Petit_rondin_de_Hetre",
+        "quantite": 3
+      },
+      "recompenses": {
+        "xp": 14,
+        "cuivre": 42,
+        "items": []
+      },
+      "statut": "offerte",
+      "genere_at": 1782679382
     },
     {
       "_id": "quete:le_bastion_de_l_yonne_interieur_d0240ab63424",
@@ -34282,6 +35214,336 @@
       "quantite_produite": 2
     },
     {
+      "_id": "recette:arme_arbalete_legere",
+      "_rev": "1-1e8aebd65e5658a06e55b2a30692635a",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Arbalete_legere",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "fer",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "tendons",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_arc_court",
+      "_rev": "1-4f1422f4f050c83080cb3f0c80e51183",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Arc_court",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "tendons",
+          "quantite": 2
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_baton_de_combat",
+      "_rev": "1-ab6cc9e153b80fc094af9e4ab8d233a4",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Baton_de_combat",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "manche",
+          "quantite": 2
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_canne_ferree",
+      "_rev": "1-c41e3de66cf6bba45b8046f56f819188",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Canne_ferree",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "fer",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_couteau_de_chasse",
+      "_rev": "1-df9f13b759997873986e73c2d8fd0661",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Couteau_de_chasse",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "bronze",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_dague",
+      "_rev": "1-b7b20f173da325c9d94bb1633411f5ec",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Dague",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "bronze",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_dague_de_parade",
+      "_rev": "1-a42fdc80f12a3aa89f89b1a1bc8837df",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Dague_de_parade",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "fer",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_epee_courte",
+      "_rev": "1-9daafb5e831ac10d964d6bdad4797b98",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Epee_courte",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "fer",
+          "quantite": 2
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "tendons",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_epee_longue",
+      "_rev": "1-2b5d6757d554ef3a96c15f9d0457c6f9",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Epee_longue",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "fer",
+          "quantite": 3
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "tendons",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_epee_longue_ordre",
+      "_rev": "1-348123a88de3a443474187398879fe69",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Epee_longue_ordre",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "acier",
+          "quantite": 3
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "tendons",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_hache_de_bucheron",
+      "_rev": "1-98d0b55f337bf0d266d12ab476fe76d9",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Hache_de_bucheron",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "fer",
+          "quantite": 2
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_hache_de_guerre",
+      "_rev": "1-2ff23db6e226dd2193b151dffecfe508",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Hache_de_guerre",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "fer",
+          "quantite": 3
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "tendons",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_lame_courte",
+      "_rev": "1-5e7692e3b7427265767805f637acb9a1",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Lame_courte",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "bronze",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_rapiere",
+      "_rev": "1-be34cf1a68b78aac7164c5878552f881",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Rapiere",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "acier",
+          "quantite": 2
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:arme_sarbacane",
+      "_rev": "1-e4f32126038df5302b7d9fe7eff68748",
+      "type": "recette",
+      "lieu_categorie": "armurerie",
+      "objet_final": "Sarbacane",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "sous_categorie": "manche",
+          "quantite": 1
+        },
+        {
+          "sous_categorie": "cuir",
+          "quantite": 1
+        }
+      ]
+    },
+    {
       "_id": "recette:b5703f1a-0196-489d-9c93-327e879e87ca",
       "_rev": "1-7ced14689d4be65eb1e1e1d4000b6053",
       "matiere_premiere_sous_categorie": "viande",
@@ -34597,14 +35859,34 @@
       "marchandage_bloque_jusqu": 0
     },
     {
-      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:les_etalages_d_autessiodurum",
-      "_rev": "5-cec343583c698bc4ca01106e86dab666",
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:boucherie_de_la_tour_de_l_horloge",
+      "_rev": "5-7f7972cb145b30bb4d0221dd3abd8847",
       "type": "relation",
       "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
-      "lieu_id": "lieu:les_etalages_d_autessiodurum",
+      "lieu_id": "lieu:boucherie_de_la_tour_de_l_horloge",
       "value": 50,
       "prix_negocies": {},
       "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:festin_de_la_joyeuse_halfling",
+      "_rev": "3-e05246ed6ad64467feaf0270ffebfe75",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:festin_de_la_joyeuse_halfling",
+      "value": 50,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:les_etalages_d_autessiodurum",
+      "_rev": "7-b19bc4f6a24e271bc85800bb895814a3",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:les_etalages_d_autessiodurum",
+      "value": 49,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 1782763564
     },
     {
       "_id": "relation:character:user:eternel7@gmail.com_c361ae45-8a46-4ab5-9f85-7c7f44bf3286::lieu:festin_de_la_joyeuse_halfling",

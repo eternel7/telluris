@@ -26,6 +26,10 @@ WORLD_VARIABLES_DOC_ID: str = "rules:world_variables"
 # dés + chances de toucher. C'est le levier pour régler le nombre de rounds.
 FACTEUR_DEGATS_ARMURE: int = 20
 
+# Bonus de portée des armes de JET dérivé de la Force : portee_jet = item.portee + F // JET_PORTEE_F_DIV.
+# Sur l'échelle ×10 (F ≈ 10-100), un diviseur de 20 donne +0 à +5 cases selon la puissance.
+JET_PORTEE_F_DIV: int = 20
+
 # XP gagnée à la découverte d'un lieu (fallback si le lieu n'a pas de xp_decouverte).
 XP_DECOUVERTE_LIEU: int = 1
 
@@ -361,6 +365,7 @@ def current_world_variables() -> dict:
 	"""Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
 	return {
 		"FACTEUR_DEGATS_ARMURE": FACTEUR_DEGATS_ARMURE,
+		"JET_PORTEE_F_DIV": JET_PORTEE_F_DIV,
 		"XP_DECOUVERTE_LIEU": XP_DECOUVERTE_LIEU,
 		"TOWN_PROFIL_NIVEAU_MAX": TOWN_PROFIL_NIVEAU_MAX,
 		"XP_COEFF": dict(XP_COEFF),
@@ -420,7 +425,7 @@ def load_world_variables() -> dict:
 	côté importateurs ; les scalaires sont réassignés (à lire via le module).
 	Retourne le snapshot effectif.
 	"""
-	global FACTEUR_DEGATS_ARMURE, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
+	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
@@ -436,6 +441,7 @@ def load_world_variables() -> dict:
 	v = (doc or {}).get("value") or {}
 
 	FACTEUR_DEGATS_ARMURE  = int(v.get("FACTEUR_DEGATS_ARMURE", FACTEUR_DEGATS_ARMURE))
+	JET_PORTEE_F_DIV       = max(1, int(v.get("JET_PORTEE_F_DIV", JET_PORTEE_F_DIV)))
 	XP_DECOUVERTE_LIEU     = int(v.get("XP_DECOUVERTE_LIEU", XP_DECOUVERTE_LIEU))
 	TOWN_PROFIL_NIVEAU_MAX = int(v.get("TOWN_PROFIL_NIVEAU_MAX", TOWN_PROFIL_NIVEAU_MAX))
 	XP_VOC_COEFF           = int(v.get("XP_VOC_COEFF", XP_VOC_COEFF))
