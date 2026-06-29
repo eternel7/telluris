@@ -60,7 +60,8 @@ def test_pm_max_guerrier_faible():
 def test_initiative():
     base = make_base(ag=30, v=5)
     stats = compute_derived_stats(base, niveau=1)
-    assert stats.initiative == 35  # Ag + V = 30 + 5
+    # V normalisé ×10 et pondéré 2× l'Ag : (Ag + V*20)//3 = (30 + 100)//3 = 43
+    assert stats.initiative == 43
 
 def test_deplacement_min_1():
     # V reste petit (échelle 1-10) ; un gros malus d'armure plafonne à 1.
@@ -72,8 +73,14 @@ def test_deplacement_min_1():
 def test_cc():
     base = make_base(f=20, ag=20)
     stats = compute_derived_stats(base, niveau=1)
-    # F + Ag//2 = 20 + 10 = 30
-    assert stats.cc == 30
+    # Moyenne F/Ag (toutes deux ×10) : (F + Ag)//2 = (20 + 20)//2 = 20
+    assert stats.cc == 20
+
+def test_cd():
+    base = make_base(ag=20, v=5)
+    stats = compute_derived_stats(base, niveau=1)
+    # V normalisé ×10, moyenne avec l'Ag : (Ag + V*10)//2 = (20 + 50)//2 = 35
+    assert stats.cd == 35
 
 def test_pa_sans_armure():
     base = make_base(r=20)

@@ -573,16 +573,16 @@ def compute_derived_stats(
 	pm_max = (base.vol * 2) + (base.int_ * 2) + equipment.pm
 
 	# ── Initiative ──────────────────────────────────────────────────
-	initiative = base.ag + base.v + equipment.initiative
+	initiative = (base.ag + base.v*20) // 3 + equipment.initiative
 
 	# ── Déplacement ─────────────────────────────────────────────────
 	deplacement = max(1, base.v - equipment.malus_depl)
 
 	# ── Corps à corps ────────────────────────────────────────────────
-	cc = base.f + (base.ag // 2) + equipment.cc_bonus
+	cc = (base.f + base.ag) // 2 + equipment.cc_bonus
 
 	# ── À distance ──────────────────────────────────────────────────
-	cd = base.ag + (base.v // 2) + equipment.cd_bonus
+	cd = (base.ag + (base.v *10)) // 2 + equipment.cd_bonus
 
 	# ── Armure ───────────────────────────────────────────────────────
 	pa = (base.r // FACTEUR_DEGATS_ARMURE) + equipment.pa

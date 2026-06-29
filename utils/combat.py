@@ -18,8 +18,8 @@ BATTLE_MAPS = [
 
 
 def _compute_actions_max(ag: int, v: int) -> int:
-	"""Nombre d'actions par tour dérivé des stats : max(1, ceil(Ag/20 + V/5))."""
-	return max(1, math.ceil(ag / 20 + v / 5))
+	"""Nombre d'actions par tour dérivé des stats : max(1, ceil(Ag/40 + V/2))."""
+	return max(1, math.ceil(ag / 40 + v / 2))
 
 
 def _charge_penalized_deplacement(deplacement_base: int, charge: float, charge_max: float) -> int:
