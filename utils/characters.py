@@ -250,16 +250,6 @@ def item_sous_categorie(item_doc: dict) -> str | None:
 	return item_doc.get("sous_categorie") or item_doc.get("categorie")
 
 
-def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
-	"""True si le marchand du lieu achète cet item (sous-catégorie ∈ liste des règles
-	du monde pour la catégorie du lieu)."""
-	sc = item_sous_categorie(item_doc)
-	if not sc:
-		return False
-	achetees = character_stats.ACHAT_SOUS_CAT_PAR_LIEU.get((lieu_doc or {}).get("categorie"), [])
-	return sc in achetees
-
-
 def item_sale_price_cuivre(item_doc: dict, ref) -> int:
 	"""Prix de vente proposé (en cuivre). Si l'item porte un champ `valeur`, on propose
 	le MIN (laisse la place au marchandage futur vers le max) ; sinon prix dérivé

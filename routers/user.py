@@ -16,11 +16,11 @@ from utils.characters import (
 	restriction_satisfaite,
 	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds,
 	money_to_cuivre, cuivre_to_purse, credit_character,
-	lieu_buys, item_sous_categorie,
+	item_sous_categorie,
 )
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
-	convertir_apres_achat, resolve_stock_vente, tick_atelier,
+	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 )

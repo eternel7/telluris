@@ -21,7 +21,7 @@ from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref
 from utils import quetes
 from utils import bois
-from utils.marche import tick_atelier, reset_prix_cache, now_epoch, relation_value, marchandage_bloque
+from utils.marche import tick_atelier, reset_prix_cache, now_epoch, relation_value, marchandage_bloque, besoins_categorie, appro_leaves_categorie
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
@@ -466,7 +466,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# matière/produits en stock OU un approvisionnement configuré pour la catégorie (sinon le lieu
 	# ne pourrait jamais s'amorcer) ; on ne persiste que si quelque chose a changé.
 	if grid_doc and (grid_doc.get("stock_matieres") or grid_doc.get("stock_vente")
-			or character_stats.APPRO_MATIERES_PAR_LIEU.get(grid_doc.get("categorie"))):
+			or appro_leaves_categorie(grid_doc.get("categorie"))):
 		if tick_atelier(grid_doc):
 			save_doc(grid_doc)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
@@ -633,7 +633,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"xp_coeff": character_stats.XP_COEFF,
 			"xp_voc_coeff": character_stats.XP_VOC_COEFF,
 			"lieu_categorie": grid_doc.get("categorie"),
-			"achat_sous_categories": character_stats.ACHAT_SOUS_CAT_PAR_LIEU.get(grid_doc.get("categorie"), []),
+			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,
 			"ressource_recoltable": ressource_recoltable,
 			"relations_lieux": relations_lieux,

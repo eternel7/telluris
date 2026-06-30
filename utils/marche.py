@@ -72,12 +72,14 @@ def prix_range_cuivre(item_doc: dict, ref=None) -> tuple[int, int]:
 # plus chers que les matières brutes. Caches process-lifetime, vidés par reset_prix_cache().
 _recipe_map: dict | None = None   # objet_final_item_id → [recettes le produisant]
 _cout_memo: dict[str, int] = {}
+_marche_map: dict | None = None   # {"besoins": {cat: set}, "feuilles": set} dérivé des recettes
 
 
 def reset_prix_cache() -> None:
 	"""Vide les caches de coût de revient (à appeler quand recettes/items/MARGE changent)."""
-	global _recipe_map
+	global _recipe_map, _marche_map
 	_recipe_map = None
+	_marche_map = None
 	_cout_memo.clear()
 
 
@@ -92,6 +94,61 @@ def _get_recipe_map() -> dict:
 				m.setdefault(oid, []).append(r)
 		_recipe_map = m
 	return _recipe_map
+
+
+# ── Besoins marchands & feuilles d'appro (dérivés des recettes) ───────────────────
+# Les recettes (`recette:*`, champ `lieu_categorie` + matières d'entrée) sont la source
+# unique de vérité : ce qu'un métier achète au joueur = ce que ses recettes consomment ;
+# les matières « feuilles » à auto-approvisionner = les entrées qu'aucune recette ne
+# produit (hors `carcasse`, qui est du loot joueur). Remplace les ex-world-vars
+# ACHAT_SOUS_CAT_PAR_LIEU et APPRO_MATIERES_PAR_LIEU. Cache vidé par reset_prix_cache().
+
+def _get_marche_map() -> dict:
+	"""Construit (une fois) {"besoins": {lieu_categorie: set(sous_cat)}, "feuilles": set}
+	depuis toutes les recettes."""
+	global _marche_map
+	if _marche_map is None:
+		besoins: dict[str, set] = {}
+		outputs: set = set()
+		inputs_all: set = set()
+		for r in (find_docs({"type": "recette"}) or []):
+			cat = r.get("lieu_categorie")
+			outputs.add(r.get("objet_final"))
+			for (sc, _qm) in recette_matieres(r):
+				if not sc:
+					continue
+				inputs_all.add(sc)
+				if cat:
+					besoins.setdefault(cat, set()).add(sc)
+		feuilles = inputs_all - outputs - {"carcasse"}
+		_marche_map = {"besoins": besoins, "feuilles": feuilles}
+	return _marche_map
+
+
+def besoins_categorie(categorie: str) -> list[str]:
+	"""Sous-catégories de matières consommées par les recettes de cette catégorie de lieu
+	(= ce que le marchand achète au joueur). Liste triée, vide si aucune recette."""
+	if not categorie:
+		return []
+	return sorted(_get_marche_map()["besoins"].get(categorie, set()))
+
+
+def appro_leaves_categorie(categorie: str) -> list[str]:
+	"""Matières « feuilles » (sans recette productrice, hors carcasse) consommées par les
+	recettes de cette catégorie → à auto-approvisionner (ex. métaux pour l'armurerie)."""
+	if not categorie:
+		return []
+	mm = _get_marche_map()
+	return sorted(mm["besoins"].get(categorie, set()) & mm["feuilles"])
+
+
+def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
+	"""True si le marchand du lieu achète cet item : sa sous-catégorie ∈ besoins (dérivés des
+	recettes) de la catégorie du lieu."""
+	sc = item_sous_categorie(item_doc)
+	if not sc:
+		return False
+	return sc in besoins_categorie((lieu_doc or {}).get("categorie"))
 
 
 def cout_production_cuivre(item_id: str, item_doc: dict | None = None, ref=None, _seen=None) -> int:
@@ -581,18 +638,18 @@ def ecouler_produits_pnj(lieu_doc: dict) -> list[dict]:
 
 
 def approvisionner(lieu_doc: dict) -> bool:
-	"""Approvisionnement automatique du lieu selon sa catégorie : ajoute à `stock_matieres`
-	les matières de `APPRO_MATIERES_PAR_LIEU[categorie]` (matières que le lieu « se procure »
-	lui-même, typiquement les métaux pour l'armurerie). Mute `lieu_doc` ; True si quelque
-	chose a été ajouté."""
-	appro = character_stats.APPRO_MATIERES_PAR_LIEU.get((lieu_doc or {}).get("categorie"))
-	if not appro:
+	"""Approvisionnement automatique du lieu : injecte dans `stock_matieres` les matières
+	« feuilles » dérivées de ses recettes (`appro_leaves_categorie`, typiquement les métaux
+	pour l'armurerie), au débit `APPRO_DEBIT[sous_cat]` (sinon `APPRO_DEBIT_DEFAUT`). Mute
+	`lieu_doc` ; True si quelque chose a été ajouté."""
+	feuilles = appro_leaves_categorie((lieu_doc or {}).get("categorie"))
+	if not feuilles:
 		return False
 	stock = lieu_doc.setdefault("stock_matieres", {})
 	changed = False
-	for sc, q in appro.items():
-		q = int(q or 0)
-		if sc and q > 0:
+	for sc in feuilles:
+		q = int(character_stats.APPRO_DEBIT.get(sc, character_stats.APPRO_DEBIT_DEFAUT) or 0)
+		if q > 0:
 			stock[sc] = int(stock.get(sc, 0)) + q
 			changed = True
 	return changed

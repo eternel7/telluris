@@ -51,120 +51,16 @@ PRIX_DERIVE_BASE: float = 2.0
 MULT_RARETE: dict[str, float] = {
 	"commun": 1, "peu_commun": 10, "rare": 30, "tres_rare": 100, "legendaire": 500, "mythique": 1000, "divin" : 10000
 }
-# Quelles sous-catégories d'item chaque catégorie de lieu (marchand) achète au personnage.
-ACHAT_SOUS_CAT_PAR_LIEU: dict[str, list] = {
-	"boucherie": [
-	"carcasse"
-	],
-	"tannerie": [
-	"cuir_brut"
-	],
-	"maroquinerie": [
-	"cuir"
-	],
-	"cordonnerie": [
-	"cuir",
-	"tendons"
-	],
-	"bourrellerie": [
-	"cuir"
-	],
-	"armurerie": [
-	"cuir",
-	"tendons"
-	],
-	"cuisine": [
-	"viande",
-	"foie",
-	"coeur"
-	],
-	"fumoir": [
-	"viande"
-	],
-	"salaison": [
-	"viande"
-	],
-	"laboratoire_d_alchimie": [
-	"sang",
-	"poudre_d_os",
-	"griffes",
-	"yeux",
-	"coeur"
-	],
-	"scriptorium": [
-	"sang",
-	"plumes"
-	],
-	"savonnerie": [
-	"graisse"
-	],
-	"atelier_de_cirier": [
-	"graisse"
-	],
-	"apothicairerie": [
-	"graisse",
-	"foie"
-	],
-	"tabletterie": [
-	"os",
-	"crocs"
-	],
-	"atelier_d_artisan": [
-	"os"
-	],
-	"jardinier": [
-	"poudre_d_os"
-	],
-	"corderie": [
-	"crins"
-	],
-	"brosserie": [
-	"crins",
-	"poils"
-	],
-	"tissage": [
-	"poils"
-	],
-	"plumasserie": [
-	"plumes"
-	],
-	"atelier_de_l_empenneur": [
-	"plumes",
-	"bois"
-	],
-	"boyauderie": [
-	"boyaux"
-	],
-	"fletcher": [
-	"boyaux",
-	"tendons"
-	],
-	"lutherie": [
-	"boyaux"
-	],
-	"bijouterie": [
-	"griffes",
-	"crocs"
-	],
-	"taxidermie": [
-	"crane"
-	],
-	"necromancie": [
-	"crane"
-	]
-	}
-
 # ── Approvisionnement des ateliers (au tick) ─────────────────────────────────────
-# À chaque `tick_atelier` (vente/visite), le lieu reçoit des matières premières selon sa
-# catégorie : APPRO_MATIERES_PAR_LIEU[categorie] = {sous_categorie: quantite_par_tick}.
-# Sert surtout aux matières que le lieu « se procure » lui-même (métaux pour l'armurerie…).
-# Défaut = échafaudage : une entrée par métal existant (item tag "metal") × chaque catégorie
-# de lieu marchand (clés de ACHAT_SOUS_CAT_PAR_LIEU) — à élaguer via /admin (ex. ne garder
-# les métaux que pour l'armurerie).
-_APPRO_METAUX_DEFAUT: dict[str, int] = {"fer": 5, "acier": 3, "bronze": 5, "mithril": 1}
-APPRO_MATIERES_PAR_LIEU: dict[str, dict] = {
-	cat: dict(_APPRO_METAUX_DEFAUT) for cat in ["amurerie"]
-}
+# Ce qu'un marchand achète au joueur ET les matières « feuilles » à auto-approvisionner ne
+# sont PLUS des world-vars : ils sont DÉRIVÉS des recettes (`recette:*`, champ `lieu_categorie`
+# + matières d'entrée) par `utils/marche.py` (`besoins_categorie` / `appro_leaves_categorie`).
+# Seul reste réglable ici le **débit/tick** de l'appro (que les recettes n'encodent pas) :
+# à chaque `tick_atelier` (vente/visite), chaque feuille consommée par les recettes du lieu
+# (entrée jamais produite, hors `carcasse`) est injectée à `APPRO_DEBIT[sous_cat]` unités
+# (sinon `APPRO_DEBIT_DEFAUT`). En pratique : les métaux pour l'armurerie.
+APPRO_DEBIT: dict[str, int] = {"fer": 5, "acier": 3, "bronze": 5, "mithril": 1}
+APPRO_DEBIT_DEFAUT: int = 5
 
 # ── Marchandage ─────────────────────────────────────────────────────────────────
 # Le prix d'une transaction est interpolé entre le min et le max de l'objet
@@ -373,8 +269,8 @@ def current_world_variables() -> dict:
 		"SUB_CAP_REDUCTION": dict(_SUB_CAP_REDUCTION),
 		"PRIX_DERIVE_BASE": PRIX_DERIVE_BASE,
 		"MULT_RARETE": dict(MULT_RARETE),
-		"ACHAT_SOUS_CAT_PAR_LIEU": {k: list(v) for k, v in ACHAT_SOUS_CAT_PAR_LIEU.items()},
-		"APPRO_MATIERES_PAR_LIEU": {k: dict(v) for k, v in APPRO_MATIERES_PAR_LIEU.items()},
+		"APPRO_DEBIT": dict(APPRO_DEBIT),
+		"APPRO_DEBIT_DEFAUT": APPRO_DEBIT_DEFAUT,
 		"CHA_MARCHAND": CHA_MARCHAND,
 		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
@@ -426,7 +322,7 @@ def load_world_variables() -> dict:
 	Retourne le snapshot effectif.
 	"""
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
-	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA
+	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
@@ -456,15 +352,10 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("MULT_RARETE"), dict):
 		MULT_RARETE.clear()
 		MULT_RARETE.update({k: float(x) for k, x in v["MULT_RARETE"].items()})
-	if isinstance(v.get("ACHAT_SOUS_CAT_PAR_LIEU"), dict):
-		ACHAT_SOUS_CAT_PAR_LIEU.clear()
-		ACHAT_SOUS_CAT_PAR_LIEU.update({k: list(x) for k, x in v["ACHAT_SOUS_CAT_PAR_LIEU"].items()})
-	if isinstance(v.get("APPRO_MATIERES_PAR_LIEU"), dict):
-		APPRO_MATIERES_PAR_LIEU.clear()
-		APPRO_MATIERES_PAR_LIEU.update({
-			k: {sc: int(q) for sc, q in x.items()}
-			for k, x in v["APPRO_MATIERES_PAR_LIEU"].items() if isinstance(x, dict)
-		})
+	if isinstance(v.get("APPRO_DEBIT"), dict):
+		APPRO_DEBIT.clear()
+		APPRO_DEBIT.update({k: int(x) for k, x in v["APPRO_DEBIT"].items()})
+	APPRO_DEBIT_DEFAUT = int(v.get("APPRO_DEBIT_DEFAUT", APPRO_DEBIT_DEFAUT))
 
 	CHA_MARCHAND     = int(v.get("CHA_MARCHAND", CHA_MARCHAND))
 	PRIX_MAX_FACTEUR = float(v.get("PRIX_MAX_FACTEUR", PRIX_MAX_FACTEUR))
