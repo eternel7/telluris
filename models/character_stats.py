@@ -75,6 +75,10 @@ PRIX_MAX_FACTEUR: float = 3.0
 # prix_produit ≈ coût_ingrédients × (quantite_matiere / quantite_produite) × MARGE_TRANSFO.
 # Composé sur les chaînes (produit en N étapes ≈ ×MARGE^N). Réglable à chaud via /admin.
 MARGE_TRANSFO: float = 5.0
+# Rachat : un lieu rachète au joueur les biens qu'il produit, dans une bande plafonnée à son
+# coût de revient `pmin` → `[round(pmin × RACHAT_FACTEUR), pmin]` (garantit rachat ≤ pmin ≤ prix
+# de vente, quelle que soit la relation). `RACHAT_FACTEUR` ∈ ]0,1] = plancher de la bande.
+RACHAT_FACTEUR: float = 0.6
 
 # ── Jets de dés (seuils de critique génériques) ──────────────────────────────────
 # Bornes de critique applicables à TOUT jet d100 (marchandage, combat futur, etc.) :
@@ -275,6 +279,7 @@ def current_world_variables() -> dict:
 		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
 		"MARGE_TRANSFO": MARGE_TRANSFO,
+		"RACHAT_FACTEUR": RACHAT_FACTEUR,
 		"DEPECAGE_TAGS": {k: list(v) for k, v in DEPECAGE_TAGS.items()},
 		"DEPECAGE_POIDS_REF": DEPECAGE_POIDS_REF,
 		"ATELIER_TRANSFO_PROBA": ATELIER_TRANSFO_PROBA,
@@ -322,7 +327,7 @@ def load_world_variables() -> dict:
 	Retourne le snapshot effectif.
 	"""
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
-	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
+	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
@@ -360,6 +365,7 @@ def load_world_variables() -> dict:
 	CHA_MARCHAND     = int(v.get("CHA_MARCHAND", CHA_MARCHAND))
 	PRIX_MAX_FACTEUR = float(v.get("PRIX_MAX_FACTEUR", PRIX_MAX_FACTEUR))
 	MARGE_TRANSFO    = float(v.get("MARGE_TRANSFO", MARGE_TRANSFO))
+	RACHAT_FACTEUR   = float(v.get("RACHAT_FACTEUR", RACHAT_FACTEUR))
 	if isinstance(v.get("CHA_MARCHAND_PAR_CATEGORIE"), dict):
 		CHA_MARCHAND_PAR_CATEGORIE.clear()
 		CHA_MARCHAND_PAR_CATEGORIE.update({k: int(x) for k, x in v["CHA_MARCHAND_PAR_CATEGORIE"].items()})

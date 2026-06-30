@@ -104,16 +104,21 @@ def _get_recipe_map() -> dict:
 # ACHAT_SOUS_CAT_PAR_LIEU et APPRO_MATIERES_PAR_LIEU. Cache vidé par reset_prix_cache().
 
 def _get_marche_map() -> dict:
-	"""Construit (une fois) {"besoins": {lieu_categorie: set(sous_cat)}, "feuilles": set}
-	depuis toutes les recettes."""
+	"""Construit (une fois) depuis toutes les recettes :
+	{"besoins": {lieu_categorie: set(sous_cat consommées)},
+	 "produits": {lieu_categorie: set(item_id produits)},
+	 "feuilles": set(matières sans recette productrice, hors carcasse)}."""
 	global _marche_map
 	if _marche_map is None:
 		besoins: dict[str, set] = {}
+		produits: dict[str, set] = {}
 		outputs: set = set()
 		inputs_all: set = set()
 		for r in (find_docs({"type": "recette"}) or []):
 			cat = r.get("lieu_categorie")
 			outputs.add(r.get("objet_final"))
+			if cat:
+				produits.setdefault(cat, set()).add(objet_final_item_id(r.get("objet_final", "")))
 			for (sc, _qm) in recette_matieres(r):
 				if not sc:
 					continue
@@ -121,7 +126,7 @@ def _get_marche_map() -> dict:
 				if cat:
 					besoins.setdefault(cat, set()).add(sc)
 		feuilles = inputs_all - outputs - {"carcasse"}
-		_marche_map = {"besoins": besoins, "feuilles": feuilles}
+		_marche_map = {"besoins": besoins, "produits": produits, "feuilles": feuilles}
 	return _marche_map
 
 
@@ -142,13 +147,48 @@ def appro_leaves_categorie(categorie: str) -> list[str]:
 	return sorted(mm["besoins"].get(categorie, set()) & mm["feuilles"])
 
 
+def produits_categorie(categorie: str) -> set:
+	"""Item_ids des biens produits par les recettes de cette catégorie de lieu."""
+	if not categorie:
+		return set()
+	return _get_marche_map()["produits"].get(categorie, set())
+
+
+def lieu_produit(lieu_doc: dict, item_doc: dict) -> bool:
+	"""True si l'item est un bien que ce lieu **produit** (donc rachetable au joueur)."""
+	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
+	if not item_id:
+		return False
+	return item_id in produits_categorie((lieu_doc or {}).get("categorie"))
+
+
 def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
-	"""True si le marchand du lieu achète cet item : sa sous-catégorie ∈ besoins (dérivés des
-	recettes) de la catégorie du lieu."""
+	"""True si le marchand du lieu achète cet item : sa sous-catégorie ∈ besoins (intrants des
+	recettes) **OU** c'est un bien que le lieu produit (rachat à moindre coût)."""
+	if lieu_produit(lieu_doc, item_doc):
+		return True
 	sc = item_sous_categorie(item_doc)
 	if not sc:
 		return False
 	return sc in besoins_categorie((lieu_doc or {}).get("categorie"))
+
+
+def params_vente_lieu(lieu_doc: dict, item_doc: dict, item_id: str, ref=None) -> tuple[int, int, int]:
+	"""Paramètres du côté **vente** (joueur→lieu) : `(pmin, pmax, stock)` à passer à
+	`prix_marche(..., "vente", stock, cible)`. Source unique pour `_marchand_vendables`,
+	`sell_item` et `marchander` (sens vente) → prix affiché/appliqué/marchandé cohérents.
+	- **Rachat** d'un bien produit par le lieu (`lieu_produit`) : bande plafonnée au coût de
+	  revient → `(round(pmin × RACHAT_FACTEUR), pmin)`, stock = qty en rayon (`stock_vente`).
+	  Garantit rachat ≤ pmin ≤ prix de vente (le prix d'achat joueur est toujours ≥ pmin).
+	- **Intrant brut** (sinon) : fourchette normale `(pmin, pmax)`, stock = `stock_matieres[sous_cat]`."""
+	pmin, pmax = prix_range_cuivre(item_doc, ref if ref is not None else item_id)
+	if lieu_produit(lieu_doc, item_doc):
+		pmin_r = max(1, int(round(pmin * float(character_stats.RACHAT_FACTEUR))))
+		stock = next((int(e.get("qty", 0)) for e in (lieu_doc or {}).get("stock_vente", [])
+					  if e.get("item_id") == item_id), 0)
+		return pmin_r, pmin, stock
+	stock = int(((lieu_doc or {}).get("stock_matieres", {}) or {}).get(item_sous_categorie(item_doc), 0))
+	return pmin, pmax, stock
 
 
 def cout_production_cuivre(item_id: str, item_doc: dict | None = None, ref=None, _seen=None) -> int:
@@ -669,9 +709,16 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:
 	"""Absorbe l'objet acheté en matières (`stock_matieres`) puis lance un `tick_atelier`
 	(production + écoulement PNJ, probabilistes). Mute `lieu_doc` en place (l'appelant
 	persiste). Renvoie True si quelque chose a changé."""
-	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	recettes = lieu_recettes(lieu_doc.get("categorie"))
 
+	# Rachat d'un bien que le lieu produit : il repart en rayon (re-vendable), pas en matières.
+	if lieu_produit(lieu_doc, item_doc):
+		item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
+		if item_id:
+			_stock_vente_add(lieu_doc.setdefault("stock_vente", []), item_id, 1)
+		return tick_atelier(lieu_doc, recettes)
+
+	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	# Table de quantités du dépeçage : recettes `carcasse → <matiere>` du lieu (boucherie).
 	qmap = {
 		r.get("objet_final"): int(r.get("quantite_produite", 1) or 1)

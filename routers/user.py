@@ -16,11 +16,10 @@ from utils.characters import (
 	restriction_satisfaite,
 	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds,
 	money_to_cuivre, cuivre_to_purse, credit_character,
-	item_sous_categorie,
 )
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
-	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys,
+	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 )
@@ -878,8 +877,7 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 		if not item or not lieu_buys(lieu_doc, item):
 			continue
 		item_id = item.get("item") or item.get("_id")
-		pmin, pmax = prix_range_cuivre(item, ref)
-		stock_mat = int((lieu_doc.get("stock_matieres", {}) or {}).get(item_sous_categorie(item), 0))
+		pmin, pmax, stock_mat = params_vente_lieu(lieu_doc, item, item_id, ref)
 		cible = stock_cible_pour(lieu_doc, item)
 		prix_cuivre = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
 		negocie = (relation or {}).get("prix_negocies", {}).get(item_id, {}).get("vente") is not None
@@ -955,8 +953,7 @@ async def sell_item(
 	# Prix appliqué = prix marché (prix courant relation/marchandage modulé par le stock du
 	# marchand en cette matière), calculé AVANT que le lieu n'absorbe l'objet.
 	item_id = item.get("item") or item.get("_id")
-	pmin, pmax = prix_range_cuivre(item, ref)
-	stock_mat = int((lieu_doc.get("stock_matieres", {}) or {}).get(item_sous_categorie(item), 0))
+	pmin, pmax, stock_mat = params_vente_lieu(lieu_doc, item, item_id, ref)
 	cible = stock_cible_pour(lieu_doc, item)
 	prix = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
 	purse = credit_character(character, prix)
@@ -1076,7 +1073,7 @@ async def marchander_item(
 		if not item or not lieu_buys(lieu_doc, item):
 			raise HTTPException(status_code=422, detail="Le marchand n'achète pas cet objet")
 		item_id = item.get("item") or item.get("_id")
-		pmin, pmax = prix_range_cuivre(item, ref)
+		pmin, pmax, _ = params_vente_lieu(lieu_doc, item, item_id, ref)
 	else:  # achat
 		entry = next((e for e in lieu_doc.get("stock_vente", [])
 					  if e.get("item_id") == item_id and int(e.get("qty", 0)) > 0), None)
