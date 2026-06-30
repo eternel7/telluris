@@ -84,7 +84,7 @@ class CharacterDocument(BaseModel):
     position: dict = Field(default_factory=lambda: {"x": 0, "y": 0})
 
     # ── Relations (affinités) ────────────────────────────────────────
-    # { character_id: score (-100 à +100) }
+    # { character_id: score (0 à 100, neutre 50) }
     affinites: dict[str, int] = {}
 
     # ── Quêtes ───────────────────────────────────────────────────────

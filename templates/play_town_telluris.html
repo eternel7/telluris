@@ -1416,9 +1416,37 @@
 
 					<!-- ── RELATIONS ── -->
 					<div class="sheet-panel" id="sh-relations">
+						{% set rels_lieux = relations_lieux %}
 						{% set rels = character.get("affinites_detail",[]) %}
+						{% if not rels_lieux and not rels %}
+							<div class="sh-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>
+						{% endif %}
+
+						{# Relations de lieu (marchands) : échelle 0–100, neutre 50, 0 = banni. #}
+						{% if rels_lieux %}
+							<div class="sh-section">🏪 Lieux &amp; marchands</div>
+							{% for r in rels_lieux %}{% set v = r.value %}
+							<div class="sh-relation">
+								<div class="sh-rel-portrait">
+									{% if r.image %}<img src="/{{ r.image_route }}/{{ r.image }}" alt="">
+									{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>{% endif %}
+								</div>
+								<div class="sh-rel-info">
+									<div class="sh-rel-name">{{ r.nom }}{% if r.bloque %} <span title="Marchandage bloqué">🚫</span>{% endif %}</div>
+									<div class="sh-rel-class">{{ r.categorie }}</div>
+								</div>
+								<div>
+									<div class="sh-rel-score {% if v>50 %}pos{% elif v<50 %}neg{% else %}neu{% endif %}">{{ v }}<span style="opacity:.5;font-size:.7em">/100</span></div>
+									<div class="sh-rel-lbl">{% if v<=0 %}Banni{% elif v<35 %}Hostile{% elif v<50 %}Méfiant{% elif v==50 %}Neutre{% elif v<70 %}Cordial{% elif v<90 %}Estimé{% else %}Honoré{% endif %}</div>
+								</div>
+							</div>
+							{% endfor %}
+						{% endif %}
+
+						{# Affinités PNJ (compagnons) : échelle 0–100, neutre 50 (alignée sur les lieux) — Phase 4.2. #}
 						{% if rels %}
-							{% for r in rels %}{% set sc = r.get("score",0) %}
+							<div class="sh-section">👥 Personnages</div>
+							{% for r in rels %}{% set sc = r.get("score",50) %}
 							<div class="sh-relation">
 								<div class="sh-rel-portrait">
 									{% if r.get("portrait") %}<img src="{{ r.portrait }}" alt="">
@@ -1429,12 +1457,12 @@
 									<div class="sh-rel-class">{{ r.get("vocation","") }}</div>
 								</div>
 								<div>
-									<div class="sh-rel-score {% if sc>20 %}pos{% elif sc<-20 %}neg{% else %}neu{% endif %}">{% if sc>0 %}+{% endif %}{{ sc }}</div>
-									<div class="sh-rel-lbl">{% if sc>=80 %}Dévoué{% elif sc>=40 %}Ami{% elif sc>=10 %}Bienveillant{% elif sc>=-10 %}Neutre{% elif sc>=-40 %}Méfiant{% elif sc>=-80 %}Hostile{% else %}Ennemi{% endif %}</div>
+									<div class="sh-rel-score {% if sc>50 %}pos{% elif sc<50 %}neg{% else %}neu{% endif %}">{{ sc }}<span style="opacity:.5;font-size:.7em">/100</span></div>
+									<div class="sh-rel-lbl">{% if sc>=90 %}Dévoué{% elif sc>=70 %}Ami{% elif sc>=55 %}Bienveillant{% elif sc>=45 %}Neutre{% elif sc>=30 %}Méfiant{% elif sc>=10 %}Hostile{% else %}Ennemi{% endif %}</div>
 								</div>
 							</div>
 							{% endfor %}
-						{% else %}<div class="sh-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>{% endif %}
+						{% endif %}
 					</div>
 
 					<!-- ── QUÊTES ── -->
