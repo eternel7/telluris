@@ -5,7 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
-from utils.characters import get_selected_character, carried_weight
+from utils.characters import get_selected_character, carried_weight, resolve_item_ref
+from utils.consommables import liste_consommables_combat
+from routers.user import _take_ref
 from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc,
@@ -77,6 +79,9 @@ class ActionRequest(BaseModel):
     dy: int | None = None
     sens: int | None = None
     mode: str | None = None
+    # Action « consommer » : adressage de l'item du sac par index vérifié item_id.
+    index: int | None = None
+    item_id: str | None = None
 
 
 class CollectLootRequest(BaseModel):
@@ -266,7 +271,25 @@ async def combat_action(
     if combat_doc["status"] != "active":
         raise HTTPException(status_code=400, detail="Ce combat est terminé")
 
-    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode)
+    # Action « consommer » : l'inventaire vit sur le doc character, pas dans le combat.
+    # On retire la ref ICI (en mémoire seulement) et on passe le doc résolu à
+    # resolve_action ; le character n'est sauvegardé qu'après le combat (voir plus bas).
+    character = None
+    item_doc = None
+    if body.type == "consommer":
+        character = get_doc(combat_doc["character_id"])
+        if not character:
+            raise HTTPException(status_code=404, detail="Personnage introuvable")
+        inventaire = character.get("inventaire", [])
+        ref = _take_ref(inventaire, body.index, body.item_id)
+        if ref is None:
+            raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
+        item_doc = resolve_item_ref(ref)  # poids d'instance scalaire, `effets` préservé
+        if item_doc is None:
+            raise HTTPException(status_code=422, detail="Objet introuvable")
+        character["inventaire"] = inventaire
+
+    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc)
 
     # Persist the combat state first (source of truth). couchdb2 met à jour le
     # _rev en place ; un échec (conflit 409) renvoie None → on prévient le client
@@ -278,9 +301,27 @@ async def combat_action(
             detail="Conflit de sauvegarde — le combat a été rechargé.",
         )
 
+    # Consommation réussie : retirer l'item du sac, APRÈS le combat (409 combat → rien
+    # n'est perdu, l'item reste au sac) mais AVANT finalize_combat (qui relit le
+    # character frais). Un échec ici est bénin et en faveur du joueur (soin acquis,
+    # potion gardée, borné par le budget d'action) : on ne fait pas échouer la requête.
+    consommables_payload = None
+    if body.type == "consommer" and character is not None:
+        if "error" not in action_result:
+            if save_doc(character) is None:
+                print(f"consommer: échec de sauvegarde du personnage {character.get('_id')} (item non retiré)")
+                character = get_doc(combat_doc["character_id"]) or character
+        else:
+            # Action refusée : rien n'a été consommé, relire l'état réel pour le sélecteur.
+            character = get_doc(combat_doc["character_id"]) or character
+        consommables_payload = liste_consommables_combat(character, resolve_item_ref)
+
     # Combat persisté : applique les récompenses au personnage (idempotent).
     if combat_doc["status"] != "active":
         finalize_combat(combat_doc)
         save_doc(combat_doc)  # persiste le flag recompense_appliquee
 
-    return {"combat": combat_doc, "action_result": action_result}
+    response = {"combat": combat_doc, "action_result": action_result}
+    if consommables_payload is not None:
+        response["consommables"] = consommables_payload
+    return response

@@ -18,9 +18,10 @@ from routers.quetes import quetes_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
-from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref
+from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref, charge_max_of
 from utils import quetes
 from utils import bois
+from utils import consommables
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -498,15 +499,18 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	access = get_lieu_directions(current_user, grid_doc, position)
 
 	stats_cur = character.get("caracteristiques_current", {})
+	# Dérivées affichées avec les buffs de consommables ; `stats_cur` (brut) reste la
+	# référence pour les plafonds/coûts d'XP (stat_caps) et la grille Caractéristiques.
+	stats_buff = consommables.caracts_avec_buffs(character)
 	base = BaseStats(
-		v=stats_cur.get("V", 0),
-		f=stats_cur.get("F", 0),
-		r=stats_cur.get("R", 0),
-		ag=stats_cur.get("Ag", 0),
-		vol=stats_cur.get("Vol", 0),
-		int_=stats_cur.get("Int", 0),
-		cha=stats_cur.get("Cha", 0),
-		ch=stats_cur.get("Ch", 0),
+		v=stats_buff.get("V", 0),
+		f=stats_buff.get("F", 0),
+		r=stats_buff.get("R", 0),
+		ag=stats_buff.get("Ag", 0),
+		vol=stats_buff.get("Vol", 0),
+		int_=stats_buff.get("Int", 0),
+		cha=stats_buff.get("Cha", 0),
+		ch=stats_buff.get("Ch", 0),
 	)
 	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
 	# Bonus d'équipement recalculé depuis les items équipés (slots = IDs à ce stade,
@@ -519,6 +523,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		equipment=eq_bonus,
 	)
 	character["derived_stats"] = derived.model_dump()
+	# La charge max d'EXPLORATION reste non bufée (charge_max_of = garde de surcharge de
+	# move_character et de _inventory_payload) : on écrase la valeur bufée pour que la
+	# jauge et la ligne « Charge max » affichent la limite réellement appliquée.
+	character["derived_stats"]["charge_max"] = charge_max_of(character)
 	character["niveau"] = compute_character_level(character.get("xp_total", 0))
 
 	# Résolution inventaire : références → documents complets (poids d'instance inclus)
@@ -612,6 +620,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"est_guilde": est_guilde,
 			"ressource_recoltable": ressource_recoltable,
 			"relations_lieux": relations_lieux,
+			"effets_actifs": consommables.effets_actifs_payload(character),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.
@@ -656,6 +665,9 @@ async def get_combat_page(
 			"portrait_largeur": portrait_largeur,
 			"portrait_hauteur": portrait_hauteur,
 			"grid": get_combat_grid(combat_doc),
+			# Consommables du sac utilisables en combat (effet instantané pv/pm), avec
+			# index d'origine — resynchronisés par la réponse de l'action « consommer ».
+			"consommables": consommables.liste_consommables_combat(character, resolve_item_ref),
 		},
 		headers={"Cache-Control": "no-store"},
 	)

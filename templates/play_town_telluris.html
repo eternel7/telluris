@@ -749,6 +749,11 @@
 		.sh-rel-score.neg { color: #ff4757; }
 		.sh-rel-score.neu { color: var(--muted); }
 		.sh-rel-lbl { font-size: 0.8rem; color: var(--muted); text-align: right; }
+		/* Chips d'effets actifs (consommables) — colonne gauche de la fiche + onglet stats. */
+		.sh-effets-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+		.sh-effets-chips:not(:empty) { margin-top: 8px; }
+		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: nowrap; }
+		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
 		.sh-quest-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
@@ -1190,6 +1195,8 @@
 						<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 						<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
 					</div>
+					<!-- Effets actifs (consommables) : rendu par _renderEffetsActifs. -->
+					<div id="sh-effets-actifs" class="sh-effets-chips"></div>
 				</div>
 			</div>
 			<!-- Colonne droite : contenu -->
@@ -1334,6 +1341,10 @@
 							<span class="sh-derived-val" id="sh-drv-{{ key }}">{{ d.get(key,"—") }}{{ unit }}</span>
 						</div>
 						{% endfor %}
+
+						<!-- Effets actifs de consommables (buffs/régén, décrémentés au déplacement).
+						     Les dérivées ci-dessus les incluent déjà (caracts_avec_buffs). -->
+						<div id="sh-effets-actifs-stats" class="sh-effets-chips"></div>
 					</div>
 
 					<!-- ── INVENTAIRE ── -->
@@ -1658,6 +1669,8 @@
 				// Bouton « Récolter » de la sidebar (déplacement par lien = SPA, pas de reload).
 				_ressourceRecoltable = rep.ressource_recoltable || null;
 				_refreshRecolte();
+				// Effets actifs : décrémentés/expirés à chaque tour monde côté serveur.
+				_renderEffetsActifs(rep.effets_actifs);
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
@@ -2189,6 +2202,7 @@ let _inventaire   = {{ character.get("inventaire", []) | tojson | safe }};
 let _slots        = {{ character.get("slots", {}) | tojson | safe }};
 let _objetsAuSol  = {{ character.get("objets_au_sol", []) | tojson | safe }};
 let _chargeMax    = {{ character.get("derived_stats", {}).get("charge_max", 0) }};
+let _effetsActifs = {{ effets_actifs | tojson | safe }};
 
 // Tri par nom (3 états : null → 'asc' → 'desc' → null), mémorisé par navigateur.
 // Logique partagée entre le sac (_invSort) et le sol (_solSort).
@@ -2294,11 +2308,14 @@ function _refreshInventaire() {
 		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
 		const dropHtml = `<button class="sh-drop-btn" onclick="dropItem(${idx},'${item._id}')" title="Poser au sol">Poser</button>`;
 		const couperHtml = _estCoupable(item) ? _couperBtn(idx, item._id, 'sac') : '';
+		const consoHtml = _estConsommable(item)
+			? `<button class="sh-drop-btn" onclick="consommerItem(${idx},'${item._id}',this)" title="Consommer">🍽️ Consommer</button>`
+			: '';
 		return `<div class="sh-inv-item">
 			<span>${item.icon || '📦'}</span>
 			<span class="sh-inv-name">${item.nom || '—'}</span>
 			${poidsHtml}
-			${rarHtml}${equipHtml}<span class="sh-inv-actions">${couperHtml}${dropHtml}</span>
+			${rarHtml}${equipHtml}<span class="sh-inv-actions">${consoHtml}${couperHtml}${dropHtml}</span>
 		</div>`;
 	}).join('');
 	if (scrollEl) scrollEl.classList.toggle('scrollable', _inventaire.length > INV_VISIBLE);
@@ -2355,6 +2372,51 @@ async function couperItem(index, itemId, source) {
 		_applyInventoryPayload(data);
 		if (data.coupe) showToast('Coupé : ' + data.coupe.n + ' × ' + (data.coupe.nom || data.coupe.taille));
 	} catch(err) { console.error('Erreur coupe', err); }
+}
+
+// ── Consommables ──────────────────────────────────────────────────────
+// Miroir client de utils/consommables.est_consommable : catégorie + au moins un effet.
+function _estConsommable(item) {
+	if (!item || item.categorie !== 'consommable') return false;
+	const e = item.effets || {};
+	return !!(e.pv || e.pm || e.regen_pv || e.regen_pm || (e.buffs && Object.keys(e.buffs).length));
+}
+
+// Chips d'effets actifs (colonne gauche de la fiche + onglet stats).
+function _renderEffetsActifs(list) {
+	if (Array.isArray(list)) _effetsActifs = list;
+	const html = (_effetsActifs || []).map(e => {
+		const details = [];
+		for (const [k, v] of Object.entries(e.buffs || {})) details.push(`${v > 0 ? '+' : ''}${v} ${k}`);
+		if (e.regen_pv) details.push(`+${e.regen_pv} PV/tour`);
+		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
+		return `<span class="sh-effet-chip">${e.icon || '✨'} ${e.nom || 'Effet'}${details.length ? ' (' + details.join(', ') + ')' : ''}<span class="sh-effet-restants">⏳${e.restants}</span></span>`;
+	}).join('');
+	['sh-effets-actifs', 'sh-effets-actifs-stats'].forEach(id => {
+		const el = document.getElementById(id);
+		if (el) el.innerHTML = html;
+	});
+}
+
+async function consommerItem(index, itemId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
+	try {
+		const res = await fetch('api/consommer', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ index, item_id: itemId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		_applyInventoryPayload(data);   // re-rend le sac (le bouton disparaît avec l'item)
+		updateVitals(data.vitals);
+		_renderEffetsActifs(data.effets_actifs);
+		const c = data.consomme || {};
+		const gains = [];
+		if (c.pv_rendu) gains.push(`+${c.pv_rendu} PV`);
+		if (c.pm_rendu) gains.push(`+${c.pm_rendu} PM`);
+		if (c.effet) gains.push(`effet actif ${c.effet.restants} tours`);
+		showToast(`${c.icon || '🍽️'} ${c.nom || 'Consommé'}${gains.length ? ' : ' + gains.join(', ') : ''}`);
+	} catch(err) { console.error('Erreur consommation', err); if (btn) btn.disabled = false; }
 }
 
 async function dropItem(index, itemId) {
@@ -2443,6 +2505,7 @@ async function unequip(slot) {
 _refreshInventaire();
 _refreshSol();
 _refreshChargeGauge();
+_renderEffetsActifs(_effetsActifs);
 
 // ── Vente au marchand ────────────────────────────────────────────────
 function formatPrix(prix) {

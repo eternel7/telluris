@@ -9,6 +9,7 @@ from models.character_stats import (
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import grant_xp, recompute_equipment_bonus, carried_weight, poids_bounds, item_ref_id
+from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de
 from utils.quetes import maj_progress_kills
 
 BATTLE_MAPS = [
@@ -116,8 +117,10 @@ def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
 
 
 def _refresh_actions(actor: dict) -> None:
-	"""Recalcule actions_restantes = actions_max - attaques - ramassages - AP_déplacement."""
+	"""Recalcule actions_restantes = actions_max - attaques - ramassages - consommations
+	- AP_déplacement."""
 	used = (actor.get("attaques", 0) + actor.get("ramasses", 0)
+			+ actor.get("consommes", 0)
 			+ _move_ap_used_for(actor, actor.get("cells_moved", 0)))
 	actor["actions_restantes"] = max(0, actor["actions_max"] - used)
 
@@ -127,6 +130,7 @@ def _reset_turn_budget(actor: dict) -> None:
 	actor["cells_moved"] = 0
 	actor["attaques"] = 0
 	actor["ramasses"] = 0
+	actor["consommes"] = 0
 	actor["actions_restantes"] = actor["actions_max"]
 
 
@@ -508,7 +512,11 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 
 
 def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
-	stats = character.get("caracteristiques_current", {})
+	# Buffs de consommables inclus : un combat démarré pendant un buff en profite
+	# intégralement (pv_max, cc, dégâts, initiative, actions, déplacement — et donc
+	# charge_max, bonus de portage en combat seulement). Les effets actifs ne se
+	# décrémentent PAS pendant le combat (tick uniquement dans move_character).
+	stats = caracts_avec_buffs(character)
 	base = BaseStats(
 		v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
 		ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
@@ -559,6 +567,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"cells_moved": 0,
 		"attaques": 0,
 		"ramasses": 0,
+		"consommes": 0,
 		"butin_ramasse": [],   # références {item, poids} des carcasses ramassées en combat
 	}
 
@@ -885,7 +894,7 @@ def resolve_first_turns(combat_doc: dict) -> None:
 def resolve_action(
 	combat_doc: dict, action_type: str, cible_id: str | None = None,
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
-	mode: str | None = None,
+	mode: str | None = None, item: dict | None = None,
 ) -> dict:
 	ordre = combat_doc["ordre_initiative"]
 	actor_id = ordre[combat_doc["acteur_courant_index"]]
@@ -1110,6 +1119,37 @@ def resolve_action(
 		})
 		result = {"looted": True, "item": item.get("nom"), "charge": joueur["charge"]}
 
+	elif action_type == "consommer":
+		# Consommer un item du sac (doc résolu injecté par le router, qui l'a déjà retiré
+		# de l'inventaire du personnage), coûte 1 action. Seuls les effets INSTANTANÉS
+		# (pv/pm) s'appliquent en combat : la part buffs/régén d'un item mixte est perdue
+		# (pas d'empilement d'effet actif pendant un combat).
+		if not item or not est_consommable(item) or not effet_instantane(item):
+			return {"error": "Cet objet ne peut pas être consommé en combat."}
+		eff = effets_de(item)
+		avant_pv, avant_pm = joueur["currentPV"], joueur["currentPM"]
+		joueur["currentPV"] = min(joueur["pv_max"], avant_pv + eff["pv"])
+		joueur["currentPM"] = min(joueur["pm_max"], avant_pm + eff["pm"])
+		# L'item quitte le sac → la charge portée baisse (miroir inverse du ramassage).
+		joueur["charge"] = round(max(0.0, joueur.get("charge", 0) - float(item.get("poids", 0) or 0)), 2)
+		_recompute_player_deplacement(joueur)
+		joueur["consommes"] = joueur.get("consommes", 0) + 1
+		_refresh_actions(joueur)
+		pv_rendu = joueur["currentPV"] - avant_pv
+		pm_rendu = joueur["currentPM"] - avant_pm
+		gains = " / ".join(s for s in (
+			f"+{pv_rendu} PV" if pv_rendu else "",
+			f"+{pm_rendu} PM" if pm_rendu else "",
+		) if s) or "aucun effet"
+		combat_doc["log"].append({
+			"tour": combat_doc["tour"],
+			"acteur": joueur["nom"],
+			"kind": "sys",
+			"texte": f"{joueur['nom']} consomme {item.get('nom', 'un objet')} ({gains}).",
+		})
+		result = {"consomme": True, "item": item.get("nom"),
+				  "pv_rendu": pv_rendu, "pm_rendu": pm_rendu, "charge": joueur["charge"]}
+
 	else:
 		return {"error": f"Action inconnue : {action_type}"}
 
@@ -1252,6 +1292,9 @@ def finalize_combat(combat_doc: dict) -> bool:
 		character["currentPV"] = 1
 	elif status == "fuite":
 		character["currentPV"] = max(1, joueur["currentPV"])
+	# PM réappliqués pour TOUTES les issues (le PM n'est pas la ressource de KO ; une
+	# potion de PM bue en combat doit persister).
+	character["currentPM"] = max(0, joueur.get("currentPM", character.get("currentPM", 0)))
 
 	# Butin ramassé en plein combat (action « ramasser ») : conservé quelle que soit
 	# l'issue — c'est tout l'intérêt de pouvoir saisir une carcasse puis fuir. Ajouté

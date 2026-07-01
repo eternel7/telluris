@@ -28,6 +28,7 @@ from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
 from utils import quetes
 from utils import bois
+from utils import consommables
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -368,7 +369,7 @@ async def move_character(
 						_set_ressource_recoltable(character_to_update, zone_event, lieu_doc)
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
-						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update)}
+						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update)}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -399,7 +400,7 @@ async def move_character(
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
-				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update)}
+				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update)}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -412,7 +413,11 @@ _VALID_SLOTS = {
 
 
 def _derived_from_character(character: dict, equipment: EquipmentBonus) -> DerivedStats:
-    stats = character["caracteristiques_current"]
+    # Buffs de consommables inclus : les dérivées (pv_max, dégâts…) en profitent partout
+    # (vitals, régén, equip/unequip). Volontairement PAS bufées : charge_max_of (un buff
+    # F expiré ne doit pas bloquer le déplacement en surcharge), les plafonds/coûts d'XP
+    # (spend_xp) et restriction_satisfaite à l'équipement (anti-exploit).
+    stats = consommables.caracts_avec_buffs(character)
     base = BaseStats(
         v=stats.get("V", 0), f=stats.get("F", 0),
         r=stats.get("R", 0), ag=stats.get("Ag", 0),
@@ -424,12 +429,22 @@ def _derived_from_character(character: dict, equipment: EquipmentBonus) -> Deriv
 
 
 def _apply_world_turn_regen(character: dict) -> None:
-    """Régén PV à chaque tour de jeu hors combat : ceil(R/20) PV, plafonné à pv_max."""
+    """Régén à chaque tour de jeu hors combat : ceil(R/20) PV et ceil(Vol/20) PM (+ les
+    bonus regen_pv/regen_pm des effets actifs), plafonnés aux max. Puis décrémente les
+    effets actifs (ordre régén-puis-tick : duree N = N applications). Si un buff expire,
+    les max ont pu redescendre → re-clamp."""
     eq = recompute_equipment_bonus(character.get("slots", {}))
-    pv_max = _derived_from_character(character, eq).pv_max
-    r = character.get("caracteristiques_current", {}).get("R", 1)
-    regen = math.ceil(r / 20)
-    character["currentPV"] = min(pv_max, character.get("currentPV", pv_max) + regen)
+    derived = _derived_from_character(character, eq)
+    caracts = consommables.caracts_avec_buffs(character)
+    bonus_pv, bonus_pm = consommables.regen_bonus(character)
+    regen_pv = math.ceil(caracts.get("R", 1) / 20) + bonus_pv
+    regen_pm = math.ceil(caracts.get("Vol", 1) / 20) + bonus_pm
+    character["currentPV"] = min(derived.pv_max, character.get("currentPV", derived.pv_max) + regen_pv)
+    character["currentPM"] = min(derived.pm_max, character.get("currentPM", derived.pm_max) + regen_pm)
+    if consommables.tick_effets(character):
+        derived = _derived_from_character(character, eq)
+        character["currentPV"] = min(character["currentPV"], derived.pv_max)
+        character["currentPM"] = min(character["currentPM"], derived.pm_max)
 
 
 def _vitals_payload(character: dict) -> dict:
@@ -742,6 +757,49 @@ async def pickup_item(
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	payload = _inventory_payload(character)
 	payload["auto_dropped"] = auto_dropped
+	return payload
+
+
+@user_router.post("/consommer")
+async def consommer_item(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Consomme un item du sac (potion, nourriture…) : applique la part instantanée
+	(pv/pm, clampée aux max) et empile l'éventuel effet à durée (buffs/régén, décrémenté
+	à chaque tour monde). Pas de garde de surcharge : consommer allège."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	inventaire = character.get("inventaire", [])
+	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
+	if ref is None:
+		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
+	item = resolve_item_ref(ref)
+	if not item or not consommables.est_consommable(item):
+		# Rien n'a été sauvegardé : la ref poppée reste en mémoire seulement.
+		raise HTTPException(status_code=422, detail="Cet objet ne peut pas être consommé")
+	character["inventaire"] = inventaire
+
+	# Buff empilé AVANT le calcul des max : une potion mixte soigne dans le max bufffé.
+	effet = consommables.empiler_effet(character, item)
+	eq = recompute_equipment_bonus(character.get("slots", {}))
+	derived = _derived_from_character(character, eq)
+	rendu = consommables.appliquer_instantane(character, item, derived.pv_max, derived.pm_max)
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	payload = _inventory_payload(character)
+	payload["vitals"] = _vitals_payload(character)
+	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
+	payload["consomme"] = {
+		"nom": item.get("nom", "?"),
+		"icon": item.get("icon", "🧪"),
+		"pv_rendu": rendu["pv_rendu"],
+		"pm_rendu": rendu["pm_rendu"],
+		"effet": dict(effet) if effet else None,
+	}
 	return payload
 
 

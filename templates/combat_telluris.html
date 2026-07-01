@@ -344,10 +344,10 @@
 	border-color: var(--gold2, #d8b24a); color: var(--gold2, #d8b24a);
 	background: #2e2510;
 }
-#target-row {
+#target-row, #conso-row {
 	display: none; gap: 8px; align-items: center; justify-content: center;
 }
-#target-select {
+#target-select, #conso-select {
 	flex: 1; max-width: 200px; padding: 6px 10px;
 	background: #1a1a1a; color: #eee;
 	border: 1px solid #555; border-radius: 6px; font-size: 13px;
@@ -573,6 +573,7 @@
 			<div class="btn-row">
 				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
 				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
+				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>
 				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
 			</div>
 			<div id="attack-mode-row" style="display:none;">
@@ -583,6 +584,10 @@
 			<div id="target-row">
 				<select id="target-select"></select>
 				<button class="action-btn attack-btn" id="btn-confirm" onclick="confirmAttack()">✓ Confirmer</button>
+			</div>
+			<div id="conso-row">
+				<select id="conso-select"></select>
+				<button class="action-btn" id="btn-conso-confirm" onclick="confirmConsume()">✓ Consommer</button>
 			</div>
 			<div class="move-section">
 				<div class="controls" id="move-controls">
@@ -703,6 +708,10 @@ const SERVER_DATA = {
 // lieu battle map, non dupliqué dans le doc combat) → résolue côté serveur et mise
 // en cache ici une fois. Les réponses d'action ne la renvoient pas.
 const GRID = {{ grid | tojson | safe }};
+
+// Consommables du sac utilisables en combat (effet instantané pv/pm, index d'origine
+// dans l'inventaire) — resynchronisés par la réponse de l'action « consommer ».
+let CONSOS = {{ consommables | tojson | safe }};
 
 // L'image de fond couvre exactement dims.x × dims.y cases (sinon l'art ne s'aligne
 // plus avec les coordonnées de la grille). Piloté par GRID.dims, plus de 30 en dur.
@@ -1091,6 +1100,12 @@ function canLoot(data) {
 	if (data.monstres.some(m => m.vivant && m.pos && chebyJM(j, m) <= 1)) return false;
 	return data.monstres.some(m => !m.vivant && !m.loote && m.pos && chebyJM(j, m) <= 1);
 }
+// Consommer : tour du joueur, action disponible, au moins un consommable instantané au sac.
+function canConsume(data) {
+	const j = data.joueurs[0];
+	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
+		&& CONSOS.length > 0;
+}
 
 // ── Disponibilité d'une direction : miroir exact de la validation serveur `deplacer`.
 // getFinalMask / navAllows / VALID_MOVES proviennent de scripts/nav.js (partagé).
@@ -1151,6 +1166,9 @@ function updateButtons(data) {
 	document.getElementById('btn-confirm').disabled  = !canAct || noTarget;
 	document.getElementById('btn-fuir').disabled     = !isActive || !isPlayer;
 	document.getElementById('btn-ramasser').disabled = !canLoot(data);
+	document.getElementById('btn-consommer').disabled = !canConsume(data);
+	document.getElementById('btn-conso-confirm').disabled = !canConsume(data);
+	if (!canConsume(data)) document.getElementById('conso-row').style.display = 'none';
 }
 
 function refreshTargetSelect() {
@@ -1207,7 +1225,31 @@ function confirmAttack() {
 	doAction('attaquer', cibleId, null, null, null, currentMode);
 }
 
-async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode = null) {
+// ── Consommer (1 action) : direct si un seul consommable, sinon sélecteur.
+function consoLabel(c) {
+	const gains = [];
+	if (c.pv) gains.push(`+${c.pv} PV`);
+	if (c.pm) gains.push(`+${c.pm} PM`);
+	return `${c.icon || '🧪'} ${c.nom}${gains.length ? ' (' + gains.join(', ') + ')' : ''}`;
+}
+function triggerConsume() {
+	if (!CONSOS.length) return;
+	if (CONSOS.length === 1) {
+		doAction('consommer', null, null, null, null, null,
+			{ index: CONSOS[0].index, item_id: CONSOS[0].item_id });
+		return;
+	}
+	const sel = document.getElementById('conso-select');
+	sel.innerHTML = CONSOS.map((c, i) => `<option value="${i}">${consoLabel(c)}</option>`).join('');
+	document.getElementById('conso-row').style.display = 'flex';
+}
+function confirmConsume() {
+	const c = CONSOS[parseInt(document.getElementById('conso-select').value, 10)];
+	document.getElementById('conso-row').style.display = 'none';
+	if (c) doAction('consommer', null, null, null, null, null, { index: c.index, item_id: c.item_id });
+}
+
+async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode = null, extra = null) {
 	if (busy) return;
 	// Le portrait droit suit la cible que le joueur attaque.
 	if (type === 'attaquer' && cibleId) lastEnemyId = cibleId;
@@ -1218,10 +1260,11 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/action`, {
 			method:  'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body:    JSON.stringify({ type, cible_id: cibleId, dx, dy, sens, mode }),
+			body:    JSON.stringify({ type, cible_id: cibleId, dx, dy, sens, mode, ...(extra || {}) }),
 		});
 		if (res.ok) {
 			const data = await res.json();
+			if (data.consommables) CONSOS = data.consommables;
 			updateUI(data.combat);
 		} else if (res.status === 409) {
 			// Conflit de sauvegarde : recharger l'état réel du combat depuis le serveur.
