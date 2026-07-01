@@ -22,6 +22,7 @@ from utils.marche import (
 	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
+	relations_lieux_payload,
 )
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
@@ -915,6 +916,7 @@ async def marchand_quotes(
 		"relation": relation_value(relation),
 		"bloque_jusqu": int(relation.get("marchandage_bloque_jusqu", 0) or 0),
 		"now": now_epoch(),
+		"relations_lieux": relations_lieux_payload(character),
 	}
 
 
@@ -1102,6 +1104,7 @@ async def marchander_item(
 		"vendables": _marchand_vendables(character, lieu_doc, relation),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
+		"relations_lieux": relations_lieux_payload(character),
 	}
 
 

@@ -21,7 +21,7 @@ from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref
 from utils import quetes
 from utils import bois
-from utils.marche import tick_atelier, reset_prix_cache, now_epoch, relation_value, marchandage_bloque, besoins_categorie, appro_leaves_categorie
+from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
@@ -579,34 +579,9 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 
 	# Relations de lieu : vue agrégée des relations marchandes du personnage (docs
 	# type:"relation"). Échelle 0–100 (neutre 50 ; 0 = transactions interdites), distincte
-	# des affinités PNJ (0–100, neutre 50, champ affinites_detail). Rendu serveur dans l'onglet 🤝.
-	relations_lieux = []
-	_now = now_epoch()
-	for rel in (find_docs({"type": "relation", "character_id": character["_id"]}) or []):
-		lieu_id = rel.get("lieu_id")
-		if not lieu_id:
-			continue
-		lieu_doc = get_doc(lieu_id)
-		if not lieu_doc:
-			continue
-		img = lieu_doc.get("image")
-		img_route = None
-		if img:
-			if os.path.exists(os.path.join(TOWNS_IMAGES_PATH, img)):
-				img_route = "towns"
-			elif os.path.exists(os.path.join(MAPS_IMAGES_PATH, img)):
-				img_route = "maps"
-			elif os.path.exists(os.path.join(BATTLE_MAPS_IMAGES_PATH, img)):
-				img_route = "battle_maps"
-		relations_lieux.append({
-			"nom": lieu_doc.get("label", lieu_id),
-			"categorie": lieu_doc.get("categorie", ""),
-			"image": img if img_route else None,
-			"image_route": img_route,
-			"value": relation_value(rel),
-			"bloque": marchandage_bloque(rel, _now),
-		})
-	relations_lieux.sort(key=lambda r: r["value"], reverse=True)
+	# des affinités PNJ (0–100, neutre 50, champ affinites_detail). Rendu serveur dans l'onglet 🤝 ;
+	# le même payload est resynchronisé côté client via quotes/marchander (renderFicheRelations).
+	relations_lieux = relations_lieux_payload(character)
 
 	return templates.TemplateResponse(
 		request=request,

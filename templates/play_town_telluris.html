@@ -1419,10 +1419,13 @@
 						{% set rels_lieux = relations_lieux %}
 						{% set rels = character.get("affinites_detail",[]) %}
 						{% if not rels_lieux and not rels %}
-							<div class="sh-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>
+							<div class="sh-empty" id="sh-rel-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>
 						{% endif %}
 
-						{# Relations de lieu (marchands) : échelle 0–100, neutre 50, 0 = banni. #}
+						{# Relations de lieu (marchands) : échelle 0–100, neutre 50, 0 = banni.
+						   Wrapper #sh-rel-lieux toujours présent : re-rendu client par
+						   renderFicheRelations après marchandage (miroir JS de ce markup). #}
+						<div id="sh-rel-lieux">
 						{% if rels_lieux %}
 							<div class="sh-section">🏪 Lieux &amp; marchands</div>
 							{% for r in rels_lieux %}{% set v = r.value %}
@@ -1442,6 +1445,7 @@
 							</div>
 							{% endfor %}
 						{% endif %}
+						</div>
 
 						{# Affinités PNJ (compagnons) : échelle 0–100, neutre 50 (alignée sur les lieux) — Phase 4.2. #}
 						{% if rels %}
@@ -2472,6 +2476,49 @@ function setMarchandState(data) {
 		MARCHAND.blocDeadline = remaining > 0 ? Date.now() + remaining * 1000 : 0;
 	}
 	updateRelationBadge();
+	if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
+}
+
+// Resync de la section « 🏪 Lieux & marchands » de l'onglet 🤝 (fiche) après
+// quotes/marchander — miroir JS du markup Jinja de #sh-rel-lieux (même pattern que
+// renderFicheQuetes pour l'onglet 📜) ; sinon la relation du lieu courant resterait
+// figée jusqu'au rechargement de la page.
+function relLieuLabel(v) {
+	if (v <= 0)  return 'Banni';
+	if (v < 35)  return 'Hostile';
+	if (v < 50)  return 'Méfiant';
+	if (v === 50) return 'Neutre';
+	if (v < 70)  return 'Cordial';
+	if (v < 90)  return 'Estimé';
+	return 'Honoré';
+}
+
+function renderFicheRelations(list) {
+	const box = document.getElementById('sh-rel-lieux');
+	if (!box || !Array.isArray(list)) return;
+	if (!list.length) { box.innerHTML = ''; return; }
+	const empty = document.getElementById('sh-rel-empty');
+	if (empty) empty.remove();
+	let html = '<div class="sh-section">🏪 Lieux &amp; marchands</div>';
+	html += list.map(r => {
+		const v = r.value;
+		const cls = v > 50 ? 'pos' : (v < 50 ? 'neg' : 'neu');
+		const portrait = r.image
+			? `<img src="/${r.image_route}/${r.image}" alt="">`
+			: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>';
+		return `<div class="sh-relation">
+			<div class="sh-rel-portrait">${portrait}</div>
+			<div class="sh-rel-info">
+				<div class="sh-rel-name">${r.nom}${r.bloque ? ' <span title="Marchandage bloqué">🚫</span>' : ''}</div>
+				<div class="sh-rel-class">${r.categorie || ''}</div>
+			</div>
+			<div>
+				<div class="sh-rel-score ${cls}">${v}<span style="opacity:.5;font-size:.7em">/100</span></div>
+				<div class="sh-rel-lbl">${relLieuLabel(v)}</div>
+			</div>
+		</div>`;
+	}).join('');
+	box.innerHTML = html;
 }
 
 function updateRelationBadge() {

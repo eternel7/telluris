@@ -4,6 +4,7 @@
 # recettes (`recette:*`). Les endpoints (routers/user.py) persistent ; ces helpers ne
 # sauvegardent jamais (ils mutent les docs en place, comme grant_xp/credit_character).
 
+import os
 import random
 import time
 from collections import Counter
@@ -434,6 +435,47 @@ def appliquer_marchandage(relation_doc: dict, item_id: str, sens: str, deal: dic
 		"prix_negocie": neg,
 		"bloque_jusqu": int(relation_doc.get("marchandage_bloque_jusqu", 0) or 0),
 	}
+
+
+# Répertoires des images de lieu, dans l'ordre de résolution (mêmes chemins que les
+# mounts statiques de main.py — garder synchro).
+_IMAGE_ROUTES = (
+	("towns", "templates/resources/towns"),
+	("maps", "templates/resources/maps"),
+	("battle_maps", "templates/resources/battle_maps"),
+)
+
+
+def relations_lieux_payload(character: dict) -> list[dict]:
+	"""Relations de lieu du personnage pour l'onglet 🤝 de la fiche, triées par valeur
+	décroissante. Sert au rendu initial de /play ET au resync client après marchandage
+	(champ `relations_lieux` de quotes/marchander → renderFicheRelations)."""
+	relations = []
+	now = now_epoch()
+	for rel in (find_docs({"type": "relation", "character_id": (character or {}).get("_id")}) or []):
+		lieu_id = rel.get("lieu_id")
+		if not lieu_id:
+			continue
+		lieu_doc = get_doc(lieu_id)
+		if not lieu_doc:
+			continue
+		img = lieu_doc.get("image")
+		img_route = None
+		if img:
+			for route, path in _IMAGE_ROUTES:
+				if os.path.exists(os.path.join(path, img)):
+					img_route = route
+					break
+		relations.append({
+			"nom": lieu_doc.get("label", lieu_id),
+			"categorie": lieu_doc.get("categorie", ""),
+			"image": img if img_route else None,
+			"image_route": img_route,
+			"value": relation_value(rel),
+			"bloque": marchandage_bloque(rel, now),
+		})
+	relations.sort(key=lambda r: r["value"], reverse=True)
+	return relations
 
 
 # ── Résolution objet_final → item ───────────────────────────────────────────────
