@@ -10,9 +10,13 @@ DB_USER = os.getenv("COUCHDB_USER", "admin_qui_pourra")
 
 safe_password = urllib.parse.quote_plus(DB_PASSWORD)
 
-DB_URL = f"http://{DB_USER}:{safe_password}@couchdb:5984"
+DB_HOST = os.getenv("COUCHDB_HOST", "couchdb")
+DB_PORT = os.getenv("COUCHDB_PORT", "5984")
+DB_NAME = os.getenv("COUCHDB_DB", "telluris")
+
+DB_URL = f"http://{DB_USER}:{safe_password}@{DB_HOST}:{DB_PORT}"
 server = couchdb2.Server(DB_URL)
-db = server["telluris"]
+db = server[DB_NAME]
 
 # Indexes voulus dans CouchDB
 db.put_index(fields=["type"], name="idx-tables", ddoc="design_tables")
