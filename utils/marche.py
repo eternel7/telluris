@@ -106,9 +106,9 @@ def _get_recipe_map() -> dict:
 
 def _get_marche_map() -> dict:
 	"""Construit (une fois) depuis toutes les recettes :
-	{"besoins": {lieu_categorie: set(sous_cat consommées)},
+	{"besoins": {lieu_categorie: set(clés matières consommées — sous_cat ou item id)},
 	 "produits": {lieu_categorie: set(item_id produits)},
-	 "feuilles": set(matières sans recette productrice, hors carcasse)}."""
+	 "feuilles": set(clés matières sans recette productrice, hors carcasse)}."""
 	global _marche_map
 	if _marche_map is None:
 		besoins: dict[str, set] = {}
@@ -120,20 +120,24 @@ def _get_marche_map() -> dict:
 			outputs.add(r.get("objet_final"))
 			if cat:
 				produits.setdefault(cat, set()).add(objet_final_item_id(r.get("objet_final", "")))
-			for (sc, _qm) in recette_matieres(r):
-				if not sc:
+			for (cle, _qm) in recette_matieres(r):
+				if not cle:
 					continue
-				inputs_all.add(sc)
+				inputs_all.add(cle)
 				if cat:
-					besoins.setdefault(cat, set()).add(sc)
-		feuilles = inputs_all - outputs - {"carcasse"}
+					besoins.setdefault(cat, set()).add(cle)
+		# Une clé item-ref est « produite » si une recette a cet item pour objet_final.
+		outputs_ids = {objet_final_item_id(o) for o in outputs if o}
+		feuilles = {k for k in inputs_all
+					if k not in outputs and k not in outputs_ids} - {"carcasse"}
 		_marche_map = {"besoins": besoins, "produits": produits, "feuilles": feuilles}
 	return _marche_map
 
 
 def besoins_categorie(categorie: str) -> list[str]:
-	"""Sous-catégories de matières consommées par les recettes de cette catégorie de lieu
-	(= ce que le marchand achète au joueur). Liste triée, vide si aucune recette."""
+	"""Clés matières consommées par les recettes de cette catégorie de lieu (sous-catégories
+	et/ou ids d'items référencés directement — ce que le marchand achète au joueur). Liste
+	triée, vide si aucune recette."""
 	if not categorie:
 		return []
 	return sorted(_get_marche_map()["besoins"].get(categorie, set()))
@@ -164,14 +168,29 @@ def lieu_produit(lieu_doc: dict, item_doc: dict) -> bool:
 
 
 def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
-	"""True si le marchand du lieu achète cet item : sa sous-catégorie ∈ besoins (intrants des
-	recettes) **OU** c'est un bien que le lieu produit (rachat à moindre coût)."""
+	"""True si le marchand du lieu achète cet item : son id OU sa sous-catégorie ∈ besoins
+	(intrants des recettes, item-refs compris) **OU** c'est un bien que le lieu produit
+	(rachat à moindre coût)."""
 	if lieu_produit(lieu_doc, item_doc):
 		return True
+	besoins = besoins_categorie((lieu_doc or {}).get("categorie"))
+	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
+	if item_id and item_id in besoins:
+		return True
 	sc = item_sous_categorie(item_doc)
-	if not sc:
-		return False
-	return sc in besoins_categorie((lieu_doc or {}).get("categorie"))
+	return bool(sc) and sc in besoins
+
+
+def cle_matiere_lieu(categorie: str, item_doc: dict) -> str:
+	"""Clé sous laquelle cet item entre dans le `stock_matieres` du lieu : son **id** si une
+	recette de la catégorie le référence directement (le plus précis gagne, comme
+	`stock_cible_pour`), sinon sa sous-catégorie. Limitation assumée : si un même lieu a une
+	recette item-ref ET une recette générique sur la même sous-catégorie, l'item référencé
+	alimente le bucket spécifique (pas le générique)."""
+	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
+	if item_id and item_id in besoins_categorie(categorie):
+		return item_id
+	return item_sous_categorie(item_doc)
 
 
 def params_vente_lieu(lieu_doc: dict, item_doc: dict, item_id: str, ref=None) -> tuple[int, int, int]:
@@ -181,14 +200,16 @@ def params_vente_lieu(lieu_doc: dict, item_doc: dict, item_id: str, ref=None) ->
 	- **Rachat** d'un bien produit par le lieu (`lieu_produit`) : bande plafonnée au coût de
 	  revient → `(round(pmin × RACHAT_FACTEUR), pmin)`, stock = qty en rayon (`stock_vente`).
 	  Garantit rachat ≤ pmin ≤ prix de vente (le prix d'achat joueur est toujours ≥ pmin).
-	- **Intrant brut** (sinon) : fourchette normale `(pmin, pmax)`, stock = `stock_matieres[sous_cat]`."""
+	- **Intrant brut** (sinon) : fourchette normale `(pmin, pmax)`, stock = `stock_matieres[clé]`
+	  (clé = item id si une recette du lieu référence cet item, sinon sous-catégorie)."""
 	pmin, pmax = prix_range_cuivre(item_doc, ref if ref is not None else item_id)
 	if lieu_produit(lieu_doc, item_doc):
 		pmin_r = max(1, int(round(pmin * float(character_stats.RACHAT_FACTEUR))))
 		stock = next((int(e.get("qty", 0)) for e in (lieu_doc or {}).get("stock_vente", [])
 					  if e.get("item_id") == item_id), 0)
 		return pmin_r, pmin, stock
-	stock = int(((lieu_doc or {}).get("stock_matieres", {}) or {}).get(item_sous_categorie(item_doc), 0))
+	cle = cle_matiere_lieu((lieu_doc or {}).get("categorie"), item_doc)
+	stock = int(((lieu_doc or {}).get("stock_matieres", {}) or {}).get(cle, 0))
 	return pmin, pmax, stock
 
 
@@ -219,8 +240,8 @@ def cout_production_cuivre(item_id: str, item_doc: dict | None = None, ref=None,
 	for r in recs:
 		# Coût de revient = somme des ingrédients (multi-entrées) × quantité, / quantité produite.
 		ci = 0
-		for (sc, qm) in recette_matieres(r):
-			ci += cout_production_cuivre(objet_final_item_id(sc), None, None, seen) * qm
+		for (cle, qm) in recette_matieres(r):
+			ci += cout_production_cuivre(matiere_item_id(cle), None, None, seen) * qm
 		qp = max(1, int(r.get("quantite_produite", 1) or 1))
 		best = max(best, int(round(ci / qp * character_stats.MARGE_TRANSFO)))
 	best = max(1, best)
@@ -495,15 +516,25 @@ def objet_final_item_id(slug: str) -> str:
 	return _OBJET_FINAL_ITEM_ID.get(slug, "item:" + slug)
 
 
+def matiere_item_id(cle: str) -> str:
+	"""ID d'item correspondant à une clé matière : une clé item-ref est déjà un id, une
+	sous-catégorie passe par `objet_final_item_id` (évite `item:item:…`)."""
+	return cle if str(cle).startswith("item:") else objet_final_item_id(cle)
+
+
 def recette_matieres(r: dict) -> list:
-	"""Matières premières d'une recette → liste de (sous_categorie, quantite). Multi-entrées
-	via `matieres_premieres:[{sous_categorie, quantite}, …]` ; repli rétro-compatible sur le
-	champ mono-entrée `matiere_premiere_sous_categorie`/`quantite_matiere`."""
+	"""Matières premières d'une recette → liste de (cle, quantite). La **clé matière** est
+	soit une sous-catégorie, soit un id d'item (préfixe `item:`) : une entrée de
+	`matieres_premieres:[{sous_categorie|item, quantite}, …]` peut référencer un item
+	précis (`item` prioritaire) — deux items de même sous-catégorie (ex. les herbes)
+	peuvent ainsi avoir des recettes distinctes. Les clés item-ref circulent telles
+	quelles dans `stock_matieres`/besoins/feuilles. Repli rétro-compatible sur le champ
+	mono-entrée `matiere_premiere_sous_categorie`/`quantite_matiere`."""
 	mp = r.get("matieres_premieres")
 	if isinstance(mp, list) and mp:
 		out = [
-			(e.get("sous_categorie"), max(1, int(e.get("quantite", 1) or 1)))
-			for e in mp if isinstance(e, dict) and e.get("sous_categorie")
+			(e.get("item") or e.get("sous_categorie"), max(1, int(e.get("quantite", 1) or 1)))
+			for e in mp if isinstance(e, dict) and (e.get("item") or e.get("sous_categorie"))
 		]
 		if out:
 			return out
@@ -608,18 +639,20 @@ def _stock_vente_add(stock_vente: list, item_id: str, qty: int) -> None:
 	stock_vente.append({"item_id": item_id, "qty": qty})
 
 
-def _matieres_entrantes(item_doc: dict, qmap: dict | None = None) -> list[tuple[str, int]]:
+def _matieres_entrantes(item_doc: dict, qmap: dict | None = None,
+						categorie: str | None = None) -> list[tuple[str, int]]:
 	"""Matières apportées au lieu par l'objet acheté. Une carcasse est décomposée par
 	espèce (quantités issues de `qmap`, table des recettes de boucherie) ; tout autre
-	objet apporte 1 unité de sa propre sous-catégorie."""
-	sous_cat = item_sous_categorie(item_doc)
-	if sous_cat == "carcasse":
+	objet apporte 1 unité sous sa clé matière pour ce lieu (`cle_matiere_lieu` : id
+	d'item si une recette de la catégorie le référence directement, sinon sous-catégorie)."""
+	if item_sous_categorie(item_doc) == "carcasse":
 		item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id") or ""
 		sub = item_id[len("item:"):] if item_id.startswith("item:") else ""
 		espece = get_doc("espece:" + sub) if sub else None
 		return depecage_carcasse(espece, qmap, (item_doc or {}).get("poids")) if espece else []
-	if sous_cat:
-		return [(sous_cat, 1)]
+	cle = cle_matiere_lieu(categorie, item_doc)
+	if cle:
+		return [(cle, 1)]
 	return []
 
 
@@ -664,7 +697,7 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None) -> 
 	for sc in list(stock_mat):
 		q = int(stock_mat.get(sc, 0))
 		if q > 0 and sc not in consommables:
-			item_id = objet_final_item_id(sc)
+			item_id = matiere_item_id(sc)
 			_stock_vente_add(stock_vente, item_id, q)
 			produits[item_id] = produits.get(item_id, 0) + q
 			stock_mat[sc] = 0
@@ -719,20 +752,34 @@ def ecouler_produits_pnj(lieu_doc: dict) -> list[dict]:
 	return ecoules
 
 
+def _appro_debit_pour(cle: str) -> int:
+	"""Débit d'appro d'une clé matière : `APPRO_DEBIT[cle]` si posé ; pour une clé item-ref
+	sans entrée dédiée, repli sur la sous-catégorie du doc item (ex. les deux herbes héritent
+	de `APPRO_DEBIT["herbe"]` = 0 → pas d'auto-appro, récolte joueur) ; sinon le défaut."""
+	debit = character_stats.APPRO_DEBIT
+	if cle in debit:
+		return int(debit[cle] or 0)
+	if str(cle).startswith("item:"):
+		sc = item_sous_categorie(get_doc(cle) or {})
+		if sc in debit:
+			return int(debit[sc] or 0)
+	return int(character_stats.APPRO_DEBIT_DEFAUT or 0)
+
+
 def approvisionner(lieu_doc: dict) -> bool:
 	"""Approvisionnement automatique du lieu : injecte dans `stock_matieres` les matières
 	« feuilles » dérivées de ses recettes (`appro_leaves_categorie`, typiquement les métaux
-	pour l'armurerie), au débit `APPRO_DEBIT[sous_cat]` (sinon `APPRO_DEBIT_DEFAUT`). Mute
-	`lieu_doc` ; True si quelque chose a été ajouté."""
+	pour l'armurerie), au débit `_appro_debit_pour(cle)` (`APPRO_DEBIT`, repli item→sous-cat,
+	sinon `APPRO_DEBIT_DEFAUT`). Mute `lieu_doc` ; True si quelque chose a été ajouté."""
 	feuilles = appro_leaves_categorie((lieu_doc or {}).get("categorie"))
 	if not feuilles:
 		return False
 	stock = lieu_doc.setdefault("stock_matieres", {})
 	changed = False
-	for sc in feuilles:
-		q = int(character_stats.APPRO_DEBIT.get(sc, character_stats.APPRO_DEBIT_DEFAUT) or 0)
+	for cle in feuilles:
+		q = _appro_debit_pour(cle)
 		if q > 0:
-			stock[sc] = int(stock.get(sc, 0)) + q
+			stock[cle] = int(stock.get(cle, 0)) + q
 			changed = True
 	return changed
 
@@ -766,8 +813,8 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:
 		r.get("objet_final"): int(r.get("quantite_produite", 1) or 1)
 		for r in recettes if r.get("matiere_premiere_sous_categorie") == "carcasse"
 	}
-	for sous_cat, qty in _matieres_entrantes(item_doc, qmap):
-		stock_mat[sous_cat] = int(stock_mat.get(sous_cat, 0)) + qty
+	for cle, qty in _matieres_entrantes(item_doc, qmap, lieu_doc.get("categorie")):
+		stock_mat[cle] = int(stock_mat.get(cle, 0)) + qty
 
 	return tick_atelier(lieu_doc, recettes)
 
