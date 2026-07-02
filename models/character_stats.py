@@ -66,9 +66,9 @@ MULT_RARETE: dict[str, float] = {
 # à chaque `tick_atelier` (vente/visite), chaque feuille consommée par les recettes du lieu
 # (entrée jamais produite, hors `carcasse`) est injectée à `APPRO_DEBIT[sous_cat]` unités
 # (sinon `APPRO_DEBIT_DEFAUT`). En pratique : les métaux pour l'armurerie. Un débit à 0
-# désactive l'appro de la matière (garde `q > 0`) : `herbe` reste fournie par la récolte
-# des joueurs, pas par l'atelier.
-APPRO_DEBIT: dict[str, int] = {"fer": 5, "acier": 3, "bronze": 5, "mithril": 1, "herbe": 0}
+# désactive l'appro de la matière (garde `q > 0`) : `herbe` et `seve` restent fournies
+# par la récolte des joueurs, pas par l'atelier.
+APPRO_DEBIT: dict[str, int] = {"fer": 5, "acier": 3, "bronze": 5, "mithril": 1, "herbe": 0, "seve": 0}
 APPRO_DEBIT_DEFAUT: int = 5
 
 # ── Marchandage ─────────────────────────────────────────────────────────────────
