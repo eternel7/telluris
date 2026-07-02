@@ -155,7 +155,9 @@ def test_charge_max():
 
 
 # ── Niveau personnage ─────────────────────────────────────────────────────────
-# Seuils d'XP-totale (pas une caractéristique) → non concernés par le ×10.
+# Suite arithmétique : passage au niveau n = XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT
+# (défauts 10/5 → seuils cumulés 10, 25, 45, 70, 100…). Seuils d'XP-totale (pas une
+# caractéristique) → non concernés par le ×10.
 
 def test_compute_character_level_zero():
     assert compute_character_level(0)  == 0
@@ -163,25 +165,52 @@ def test_compute_character_level_zero():
 
 def test_compute_character_level_un():
     assert compute_character_level(11) == 1
-    assert compute_character_level(30) == 1
+    assert compute_character_level(25) == 1
 
 def test_compute_character_level_deux():
-    assert compute_character_level(31) == 2
-    assert compute_character_level(90) == 2
+    assert compute_character_level(26) == 2
+    assert compute_character_level(45) == 2
 
 def test_compute_character_level_trois():
-    assert compute_character_level(91) == 3
+    assert compute_character_level(46) == 3
+    assert compute_character_level(70) == 3
+
+def test_compute_character_level_world_vars(monkeypatch):
+    # Les deux world-vars pilotent les seuils : base 20 / incrément 10 → 20, 50, 90…
+    monkeypatch.setattr(cs, "XP_NIVEAU_BASE", 20)
+    monkeypatch.setattr(cs, "XP_NIVEAU_INCREMENT", 10)
+    assert compute_character_level(20) == 0
+    assert compute_character_level(21) == 1
+    assert compute_character_level(50) == 1
+    assert compute_character_level(51) == 2
+
+def test_xp_seuil_niveau_coherent_avec_compute_character_level():
+    # Le seuil fermé (affichage fiche) doit tomber exactement sur les bascules de niveau.
+    for n in range(1, 12):
+        seuil = cs.xp_seuil_niveau(n)
+        assert compute_character_level(seuil) == n - 1
+        assert compute_character_level(seuil + 1) == n
+    assert cs.xp_seuil_niveau(0) == 0
+
+def test_compute_character_level_increment_zero_cout_constant(monkeypatch):
+    # INCREMENT = 0 → chaque niveau coûte BASE (progression linéaire, autorisée).
+    monkeypatch.setattr(cs, "XP_NIVEAU_INCREMENT", 0)
+    assert compute_character_level(10) == 0
+    assert compute_character_level(11) == 1
+    assert compute_character_level(20) == 1
+    assert compute_character_level(21) == 2
 
 
 # ── XP ────────────────────────────────────────────────────────────────────────
-# xp_cout_niv = (niveau+1) × 5 : économie d'XP, indépendante de l'échelle des stats.
+# xp_cout_niv = coût du prochain niveau, aligné sur compute_character_level :
+# BASE + niveau × INCREMENT.
 
 def test_xp_cout_niveau():
     base = make_base()
     s1 = compute_derived_stats(base, niveau=1)
     s5 = compute_derived_stats(base, niveau=5)
-    assert s1.xp_cout_niv == 10   # (1+1) × 5
-    assert s5.xp_cout_niv == 30   # (5+1) × 5
+    assert s1.xp_cout_niv == 15   # 10 + 1 × 5
+    assert s5.xp_cout_niv == 35   # 10 + 5 × 5
 
 
 # ── compute_xp_cost ───────────────────────────────────────────────────────────

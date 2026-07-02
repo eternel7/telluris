@@ -33,6 +33,13 @@ JET_PORTEE_F_DIV: int = 20
 # XP gagnée à la découverte d'un lieu (fallback si le lieu n'a pas de xp_decouverte).
 XP_DECOUVERTE_LIEU: int = 1
 
+# Progression de niveau (suite arithmétique, remplace les ex-seuils ×3) : le passage au
+# niveau n coûte XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT (10, 15, 20, … → XP cumulée
+# quadratique : 10, 25, 45, 70, 100, 135…). INCREMENT > 0 garantit chaque niveau
+# strictement plus cher que le précédent ; INCREMENT = 0 → coût constant par niveau.
+XP_NIVEAU_BASE: int = 10
+XP_NIVEAU_INCREMENT: int = 5
+
 # Dans une ville (lieu à image TOWNS), niveau de profil de monstre maximal rencontrable.
 TOWN_PROFIL_NIVEAU_MAX: int = 2
 
@@ -269,6 +276,8 @@ def current_world_variables() -> dict:
 		"FACTEUR_DEGATS_ARMURE": FACTEUR_DEGATS_ARMURE,
 		"JET_PORTEE_F_DIV": JET_PORTEE_F_DIV,
 		"XP_DECOUVERTE_LIEU": XP_DECOUVERTE_LIEU,
+		"XP_NIVEAU_BASE": XP_NIVEAU_BASE,
+		"XP_NIVEAU_INCREMENT": XP_NIVEAU_INCREMENT,
 		"TOWN_PROFIL_NIVEAU_MAX": TOWN_PROFIL_NIVEAU_MAX,
 		"XP_COEFF": dict(XP_COEFF),
 		"XP_VOC_COEFF": XP_VOC_COEFF,
@@ -329,6 +338,7 @@ def load_world_variables() -> dict:
 	Retourne le snapshot effectif.
 	"""
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
+	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
@@ -346,6 +356,8 @@ def load_world_variables() -> dict:
 	FACTEUR_DEGATS_ARMURE  = int(v.get("FACTEUR_DEGATS_ARMURE", FACTEUR_DEGATS_ARMURE))
 	JET_PORTEE_F_DIV       = max(1, int(v.get("JET_PORTEE_F_DIV", JET_PORTEE_F_DIV)))
 	XP_DECOUVERTE_LIEU     = int(v.get("XP_DECOUVERTE_LIEU", XP_DECOUVERTE_LIEU))
+	XP_NIVEAU_BASE         = max(1, int(v.get("XP_NIVEAU_BASE", XP_NIVEAU_BASE)))
+	XP_NIVEAU_INCREMENT    = max(0, int(v.get("XP_NIVEAU_INCREMENT", XP_NIVEAU_INCREMENT)))
 	TOWN_PROFIL_NIVEAU_MAX = int(v.get("TOWN_PROFIL_NIVEAU_MAX", TOWN_PROFIL_NIVEAU_MAX))
 	XP_VOC_COEFF           = int(v.get("XP_VOC_COEFF", XP_VOC_COEFF))
 	if isinstance(v.get("XP_COEFF"), dict):
@@ -507,8 +519,8 @@ def compute_derived_stats(
 	charge_max = base.f * 5
 
 	# ── Coût XP niveau suivant ────────────────────────────────────────
-	# Règle Légende : niveau cible × 5 PEX
-	xp_cout_niv = (niveau + 1) * 5
+	# Aligné sur compute_character_level : passage au niveau n+1 = BASE + n·INCREMENT.
+	xp_cout_niv = XP_NIVEAU_BASE + niveau * XP_NIVEAU_INCREMENT
 
 	return DerivedStats(
 		pv_max=pv_max,
@@ -576,12 +588,27 @@ def compute_stat_cap(
 
 
 def compute_character_level(xp_total: int) -> int:
-	"""Niveau personnage basé sur l'XP totale. Seuils : >10→1, >30→2, >90→3, … (×3 à chaque palier)."""
-	niveau, threshold = 0, 10
-	while xp_total > threshold:
+	"""Niveau personnage basé sur l'XP totale. Le passage au niveau n coûte
+	XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT (défauts 10/5 → seuils cumulés
+	10, 25, 45, 70, 100, 135…)."""
+	base = int(XP_NIVEAU_BASE)
+	inc = int(XP_NIVEAU_INCREMENT)
+	if base <= 0:
+		return 0
+	niveau, seuil = 0, base
+	while xp_total > seuil:
 		niveau += 1
-		threshold *= 3
+		seuil += base + niveau * max(0, inc)
 	return niveau
+
+
+def xp_seuil_niveau(niveau: int) -> int:
+	"""XP cumulée du seuil d'un niveau (formule fermée de la suite arithmétique) : le
+	niveau n est acquis quand xp_total > xp_seuil_niveau(n) ; 0 pour le niveau 0.
+	Sert à l'affichage (« Prochain niveau à X XP », barre de progression) — miroir de
+	compute_character_level, garder les deux synchro."""
+	n = max(0, int(niveau))
+	return n * int(XP_NIVEAU_BASE) + max(0, int(XP_NIVEAU_INCREMENT)) * n * (n - 1) // 2
 
 
 def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus) -> str:

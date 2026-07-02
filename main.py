@@ -25,7 +25,7 @@ from utils import consommables
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
-from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, load_world_variables
+from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
 
 app = FastAPI()
 
@@ -528,6 +528,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# jauge et la ligne « Charge max » affichent la limite réellement appliquée.
 	character["derived_stats"]["charge_max"] = charge_max_of(character)
 	character["niveau"] = compute_character_level(character.get("xp_total", 0))
+	# Seuils d'XP du niveau courant/suivant pour la fiche (source unique : la même
+	# formule arithmétique que compute_character_level — plus de duplication Jinja).
+	xp_niv_prev = xp_seuil_niveau(character["niveau"])
+	xp_niv_next = xp_seuil_niveau(character["niveau"] + 1)
 
 	# Résolution inventaire : références → documents complets (poids d'instance inclus)
 	character["inventaire"] = [
@@ -615,6 +619,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"stat_caps": stat_caps,
 			"xp_coeff": character_stats.XP_COEFF,
 			"xp_voc_coeff": character_stats.XP_VOC_COEFF,
+			"xp_niv_prev": xp_niv_prev,
+			"xp_niv_next": xp_niv_next,
 			"lieu_categorie": grid_doc.get("categorie"),
 			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,

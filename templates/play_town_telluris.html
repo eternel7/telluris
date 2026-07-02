@@ -604,6 +604,15 @@
 			border-radius: 5px; padding: 2px 8px; font-size: 11px; cursor: pointer;
 		}
 		.sh-drop-btn:hover, .sh-pickup-btn:hover { background: #2e2510; }
+		/* Bouton « Terminer » d'une quête complète : mise en exergue légère (or de l'accent).
+		   Ne s'applique que non-désactivé (quête encore en cours = rendu neutre). */
+		.quest-done-btn:not(:disabled) {
+			border-color: var(--accent-color); color: var(--accent-color);
+			background: rgba(255, 215, 0, 0.08);
+			box-shadow: 0 0 6px rgba(255, 215, 0, 0.25);
+			font-weight: bold;
+		}
+		.quest-done-btn:not(:disabled):hover { background: rgba(255, 215, 0, 0.18); }
 		.sh-derived-row {
 			display: flex;
 			justify-content: space-between;
@@ -1265,8 +1274,8 @@
 						{% set xp_total    = character.get("xp_total", 0) %}
 						{% set attribute_points = character.get("attribute_points", 0) %}
 						{% set niveau      = character.get("niveau", 0) %}
-						{% set xp_niv_next = 10 * (3 ** niveau) %}
-						{% set xp_niv_prev = (10 * (3 ** (niveau - 1))) if niveau > 0 else 0 %}
+						{# Seuils xp_niv_prev / xp_niv_next fournis par le serveur (xp_seuil_niveau,
+						   même formule que compute_character_level — ne pas les recalculer ici). #}
 						{% set xp_bar_pct  = [((xp_total - xp_niv_prev) / (xp_niv_next - xp_niv_prev) * 100)|int, 100]|min if xp_niv_next > xp_niv_prev else 100 %}
 						{% set voc_id      = character.get("voc", "") %}
 						{% set voc_niveau  = character.get("vocations_niveaux", {}).get(voc_id, 0) %}
@@ -1279,7 +1288,7 @@
 							</div>
 							<div class="val-niveau">
 								<span>{{character["race"]}} Niv. : <strong id="sh-race-niveau" class="race-niveau niveau-nb">{{ niveau }}</strong></span>
-								<span style="white-space: wrap;text-align:right;width: 100%;">Prochain à {{ xp_niv_next }} XP</span>
+								<span style="white-space: wrap;text-align:right;width: 100%;">Niv. {{ niveau + 1 }} à {{ xp_niv_next }} XP</span>
 							</div>
 							<div class="sh-xp-bar">
 								<div class="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
@@ -2823,7 +2832,7 @@ function renderQuetesActives(data) {
 			<span class="sell-prix">✨ ${q.recompenses.xp} XP · ${formatPrix(q.recompenses)}</span>
 		</span>
 		${(q.objectif && q.objectif.type === 'collect' && !q.complete) ? `<button class="sh-drop-btn" onclick="deposerQuete('${q.id}')" title="Déposer les pièces portées (en plusieurs voyages si besoin)">📥 Déposer</button>` : ''}
-		<button class="sh-drop-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}')" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
+		<button class="sh-drop-btn quest-done-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}')" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
 	</li>`).join('');
 }
 
