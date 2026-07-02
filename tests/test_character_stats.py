@@ -71,16 +71,17 @@ def test_deplacement_min_1():
     assert stats.deplacement >= 1
 
 def test_cc():
-    base = make_base(f=20, ag=20)
+    # Pondération 1:3 F/Ag (rééquilibrage 2026-07-02 : F = dégâts, Ag = précision) :
+    # (F + Ag×3)//4 = (40 + 60)//4 = 25. f≠ag pour discriminer de l'ancienne moyenne 1:1.
+    base = make_base(f=40, ag=20)
     stats = compute_derived_stats(base, niveau=1)
-    # Moyenne F/Ag (toutes deux ×10) : (F + Ag)//2 = (20 + 20)//2 = 20
-    assert stats.cc == 20
+    assert stats.cc == 25
 
 def test_cd():
     base = make_base(ag=20, v=5)
     stats = compute_derived_stats(base, niveau=1)
-    # V normalisé ×10, moyenne avec l'Ag : (Ag + V*10)//2 = (20 + 50)//2 = 35
-    assert stats.cd == 35
+    # V normalisé ×10, pondération 3:1 Ag/V : (Ag×3 + V×10)//4 = (60 + 50)//4 = 27
+    assert stats.cd == 27
 
 def test_pa_sans_armure():
     base = make_base(r=20)

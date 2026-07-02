@@ -490,10 +490,10 @@ def compute_derived_stats(
 	deplacement = max(1, base.v - equipment.malus_depl)
 
 	# ── Corps à corps ────────────────────────────────────────────────
-	cc = (base.f + base.ag) // 2 + equipment.cc_bonus
+	cc = (base.f + (base.ag *3)) // 4 + equipment.cc_bonus
 
 	# ── À distance ──────────────────────────────────────────────────
-	cd = (base.ag + (base.v *10)) // 2 + equipment.cd_bonus
+	cd = ((3*base.ag) + (base.v *10)) // 4 + equipment.cd_bonus
 
 	# ── Armure ───────────────────────────────────────────────────────
 	pa = (base.r // FACTEUR_DEGATS_ARMURE) + equipment.pa
