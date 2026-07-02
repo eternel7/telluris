@@ -1177,6 +1177,9 @@
 					{% include "part-character-identity.html" %}
 				{% endwith %}
 			</div>
+			<!-- Effets actifs (consommables) : miroir du panneau latéral, resynchronisé
+			     à chaque déplacement via _renderEffetsActifs (rep.effets_actifs). -->
+			<div id="sh-effets-actifs-panel" class="sh-effets-chips"></div>
 		</div>
 		</section>
 		<footer class="management-footer">
@@ -2402,7 +2405,7 @@ function _estConsommable(item) {
 	return !!(e.pv || e.pm || e.regen_pv || e.regen_pm || (e.buffs && Object.keys(e.buffs).length));
 }
 
-// Chips d'effets actifs (colonne gauche de la fiche + onglet stats).
+// Chips d'effets actifs (colonne gauche de la fiche + onglet stats + panneau perso du jeu).
 function _renderEffetsActifs(list) {
 	if (Array.isArray(list)) _effetsActifs = list;
 	const html = (_effetsActifs || []).map(e => {
@@ -2412,7 +2415,7 @@ function _renderEffetsActifs(list) {
 		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
 		return `<span class="sh-effet-chip">${e.icon || '✨'} ${e.nom || 'Effet'}${details.length ? ' (' + details.join(', ') + ')' : ''}<span class="sh-effet-restants">⏳${e.restants}</span></span>`;
 	}).join('');
-	['sh-effets-actifs', 'sh-effets-actifs-stats'].forEach(id => {
+	['sh-effets-actifs', 'sh-effets-actifs-stats', 'sh-effets-actifs-panel'].forEach(id => {
 		const el = document.getElementById(id);
 		if (el) el.innerHTML = html;
 	});
