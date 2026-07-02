@@ -1225,26 +1225,44 @@ function confirmAttack() {
 	doAction('attaquer', cibleId, null, null, null, currentMode);
 }
 
-// ── Consommer (1 action) : direct si un seul consommable, sinon sélecteur.
+// ── Consommer (1 action) : direct si un seul choix, sinon sélecteur.
+// Les exemplaires identiques (même nom + mêmes effets pv/pm ; poids d'instance ignoré)
+// sont regroupés en une seule entrée « (n) » ; consommer prend le premier du groupe.
 function consoLabel(c) {
 	const gains = [];
 	if (c.pv) gains.push(`+${c.pv} PV`);
 	if (c.pm) gains.push(`+${c.pm} PM`);
 	return `${c.icon || '🧪'} ${c.nom}${gains.length ? ' (' + gains.join(', ') + ')' : ''}`;
 }
+function consoGroups() {
+	const groups = new Map();
+	for (const c of CONSOS) {
+		const key = `${c.nom}|${c.pv}|${c.pm}`;
+		const g = groups.get(key);
+		if (g) g.count++;
+		else groups.set(key, { ...c, count: 1 });
+	}
+	return [...groups.values()];
+}
+// Groupes affichés au moment de l'ouverture du sélecteur — confirmConsume relit
+// exactement cette liste (pas de recalcul si CONSOS a été resynchronisé entre-temps).
+let consoOptions = [];
 function triggerConsume() {
-	if (!CONSOS.length) return;
-	if (CONSOS.length === 1) {
+	consoOptions = consoGroups();
+	if (!consoOptions.length) return;
+	if (consoOptions.length === 1) {
 		doAction('consommer', null, null, null, null, null,
-			{ index: CONSOS[0].index, item_id: CONSOS[0].item_id });
+			{ index: consoOptions[0].index, item_id: consoOptions[0].item_id });
 		return;
 	}
 	const sel = document.getElementById('conso-select');
-	sel.innerHTML = CONSOS.map((c, i) => `<option value="${i}">${consoLabel(c)}</option>`).join('');
+	sel.innerHTML = consoOptions.map((c, i) =>
+		`<option value="${i}">${consoLabel(c)}${c.count > 1 ? ` (${c.count})` : ''}</option>`
+	).join('');
 	document.getElementById('conso-row').style.display = 'flex';
 }
 function confirmConsume() {
-	const c = CONSOS[parseInt(document.getElementById('conso-select').value, 10)];
+	const c = consoOptions[parseInt(document.getElementById('conso-select').value, 10)];
 	document.getElementById('conso-row').style.display = 'none';
 	if (c) doAction('consommer', null, null, null, null, null, { index: c.index, item_id: c.item_id });
 }
