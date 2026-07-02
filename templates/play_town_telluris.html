@@ -714,7 +714,8 @@
 			.sh-inv-box .sh-inv-name { white-space: normal; overflow: visible; text-overflow: clip; flex: 1 1 auto; }
 			.sh-inv-box .sh-inv-actions { margin-left: auto; }
 		}
-		#inv-sort-btn.active, #sol-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
+		#inv-sort-btn.active, #sol-sort-btn.active,
+		#sell-sort-btn.active, #buy-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
 		.sh-rarity { font-size: 0.8rem; padding: 2px 5px; border-radius: 3px; background: #333; }
 		.sh-equip-row { display: flex; gap: 4px; margin-top: 4px; align-items: center; width: 100%; }
 		.sh-equip-sel {
@@ -1541,10 +1542,18 @@
 				<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
 			</div>
 		</div>
-		<h2 style="margin:.6rem 0 0">🏷️ Vente</h2>
-		<ul id="sell-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
-		<h2 style="margin:1rem 0 0">💸 Achat</h2>
-		<ul id="buy-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+		<div style="display:flex;align-items:center;justify-content:space-between;margin:.6rem 0 0">
+			<h2 style="margin:0">🏷️ Vente</h2>
+			<button type="button" id="sell-sort-btn" class="sh-drop-btn" onclick="cycleSellSort()"
+				title="Trier la vente par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+		</div>
+		<div class="sh-inv-scroll" id="sell-scroll"><ul id="sell-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+		<div style="display:flex;align-items:center;justify-content:space-between;margin:1rem 0 0">
+			<h2 style="margin:0">💸 Achat</h2>
+			<button type="button" id="buy-sort-btn" class="sh-drop-btn" onclick="cycleBuySort()"
+				title="Trier l'achat par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+		</div>
+		<div class="sh-inv-scroll" id="buy-scroll"><ul id="buy-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
 	</div><!-- /#sell-panel -->
 	<div id="quetes-panel" class="panel-hidden panel-frame board-panel" aria-label="Tableau des quêtes de la guilde">
 		<div class="sell-topbar">
@@ -2602,39 +2611,65 @@ function marchBtn(index, itemId, sens) {
 	return `<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="marchanderItem(${idxArg},'${itemId}','${sens}')" title="Marchander">🤝</button>`;
 }
 
+// Tri par nom + scroll : même pattern que le sac/le sol (_sortedOrder rend un ordre
+// d'AFFICHAGE seulement — chaque entrée porte son index/item_id d'origine). Les listes
+// sont mémorisées sur MARCHAND pour re-rendre au clic de tri sans re-fetch.
+let _sellSort = _loadSort('telluris.play.sell_sort');
+let _buySort  = _loadSort('telluris.play.buy_sort');
+function cycleSellSort() { _sellSort = _cycleSort(_sellSort); _saveSort('telluris.play.sell_sort', _sellSort); renderSellList({ vendables: MARCHAND.vendables }); }
+function cycleBuySort()  { _buySort  = _cycleSort(_buySort);  _saveSort('telluris.play.buy_sort',  _buySort);  renderBuyList({ achetables: MARCHAND.achetables }); }
+
 function renderSellList(data) {
 	const list = document.getElementById('sell-list');
-	const vendables = data.vendables || [];
+	const scrollEl = document.getElementById('sell-scroll');
+	const vendables = MARCHAND.vendables = data.vendables || [];
+	_updateSortBtn('sell-sort-btn', _sellSort);
 	if (!vendables.length) {
 		list.innerHTML = '<li class="sell-empty">Rien à vendre ici.</li>';
+		if (scrollEl) scrollEl.classList.remove('scrollable');
 		return;
 	}
-	list.innerHTML = vendables.map(v => `<li class="sh-inv-item">
+	list.innerHTML = _sortedOrder(vendables, _sellSort).map(idx => {
+		const v = vendables[idx];
+		return `<li class="sh-inv-item">
 		<span>${v.icon || '📦'}</span>
-		<span style="flex:1">${v.nom || '—'}</span>
+		<span class="sh-inv-name">${v.nom || '—'}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
-		<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}')" title="Vendre">Vendre</button>
-		${marchBtn(v.index, v.item_id, 'vente')}
-	</li>`).join('');
+		<span class="sh-inv-actions">
+			<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}')" title="Vendre">Vendre</button>
+			${marchBtn(v.index, v.item_id, 'vente')}
+		</span>
+	</li>`;
+	}).join('');
+	if (scrollEl) scrollEl.classList.toggle('scrollable', vendables.length > INV_VISIBLE);
 }
 
 function renderBuyList(data) {
 	const list = document.getElementById('buy-list');
 	if (!list) return;
-	const achetables = data.achetables || [];
+	const scrollEl = document.getElementById('buy-scroll');
+	const achetables = MARCHAND.achetables = data.achetables || [];
+	_updateSortBtn('buy-sort-btn', _buySort);
 	if (!achetables.length) {
 		list.innerHTML = '<li class="sell-empty">Rien à acheter ici.</li>';
+		if (scrollEl) scrollEl.classList.remove('scrollable');
 		return;
 	}
-	list.innerHTML = achetables.map(v => `<li class="sh-inv-item">
+	list.innerHTML = _sortedOrder(achetables, _buySort).map(idx => {
+		const v = achetables[idx];
+		return `<li class="sh-inv-item">
 		<span>${v.icon || '📦'}</span>
-		<span style="flex:1">${v.nom || '—'} ×${v.qty}</span>
+		<span class="sh-inv-name">${v.nom || '—'} ×${v.qty}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
-		<button class="sh-drop-btn" onclick="buyItem('${v.item_id}')" title="Acheter">Acheter</button>
-		${marchBtn(null, v.item_id, 'achat')}
-	</li>`).join('');
+		<span class="sh-inv-actions">
+			<button class="sh-drop-btn" onclick="buyItem('${v.item_id}')" title="Acheter">Acheter</button>
+			${marchBtn(null, v.item_id, 'achat')}
+		</span>
+	</li>`;
+	}).join('');
+	if (scrollEl) scrollEl.classList.toggle('scrollable', achetables.length > INV_VISIBLE);
 }
 
 // Prix RÉELLEMENT appliqué après marchandage = celui affiché dans la liste re-rendue
