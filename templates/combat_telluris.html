@@ -1071,6 +1071,7 @@ function targetableMonsters(mode) {
 	return list;
 }
 function setMode(mode) {
+	closeSelectors();
 	currentMode = mode;
 	document.querySelectorAll('#attack-mode-row .mode-btn')
 		.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
@@ -1206,7 +1207,17 @@ function doRotate(sens) {
 	doAction('tourner', null, null, null, sens);
 }
 
+// Ferme les deux lignes de sélection (cible + consommable) et restaure le bouton
+// ⚔ Attaquer (masqué tant que le sélecteur de cible est ouvert). Appelé par tout
+// clic de bouton : doAction (actions), setMode (modes) et les deux triggers.
+function closeSelectors() {
+	document.getElementById('target-row').style.display = 'none';
+	document.getElementById('conso-row').style.display = 'none';
+	document.getElementById('btn-attaquer').style.display = '';
+}
+
 function triggerAttack() {
+	closeSelectors();
 	const cibles = targetableMonsters(currentMode);
 	if (!cibles.length) return;
 	if (cibles.length === 1) {
@@ -1220,8 +1231,6 @@ function triggerAttack() {
 
 function confirmAttack() {
 	const cibleId = document.getElementById('target-select').value;
-	document.getElementById('target-row').style.display = 'none';
-	document.getElementById('btn-attaquer').style.display = '';
 	doAction('attaquer', cibleId, null, null, null, currentMode);
 }
 
@@ -1248,6 +1257,7 @@ function consoGroups() {
 // exactement cette liste (pas de recalcul si CONSOS a été resynchronisé entre-temps).
 let consoOptions = [];
 function triggerConsume() {
+	closeSelectors();
 	consoOptions = consoGroups();
 	if (!consoOptions.length) return;
 	if (consoOptions.length === 1) {
@@ -1263,12 +1273,13 @@ function triggerConsume() {
 }
 function confirmConsume() {
 	const c = consoOptions[parseInt(document.getElementById('conso-select').value, 10)];
-	document.getElementById('conso-row').style.display = 'none';
 	if (c) doAction('consommer', null, null, null, null, null, { index: c.index, item_id: c.item_id });
+	else closeSelectors();
 }
 
 async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode = null, extra = null) {
 	if (busy) return;
+	closeSelectors();
 	// Le portrait droit suit la cible que le joueur attaque.
 	if (type === 'attaquer' && cibleId) lastEnemyId = cibleId;
 	busy = true;

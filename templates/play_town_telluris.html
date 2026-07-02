@@ -680,7 +680,9 @@
 		.sh-inv-qty { color: var(--muted); }
 		/* Sac & sol : lignes à hauteur fixe → zone scrollable dimensionnée en CSS.
 		   Même présentation pour les deux via la classe partagée .sh-inv-box. */
-		.sh-inv-box .sh-inv-item { flex-wrap: nowrap; overflow: hidden; }
+		/* flex-shrink 0 : les listes Vente/Achat sont aussi des .sub-locations-list (flex
+		   colonne) — sans ça, les lignes se compressent sous max-height au lieu de scroller. */
+		.sh-inv-box .sh-inv-item { flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; }
 		.sh-inv-box .sh-inv-name {
 			flex: 1 1 0;
 			min-width: 50px;
