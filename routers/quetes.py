@@ -14,6 +14,7 @@ from utils.characters import (
 	resolve_item_ref, charge_max_of,
 )
 from utils import quetes
+from utils import focalisation
 
 quetes_router = APIRouter()
 
@@ -68,6 +69,8 @@ def _board_payload(character: dict, lieu_doc: dict) -> dict:
 		"fiche_terminees": fiche_terminees,
 		"lieu_parent": lieu_doc.get("lieu_parent"),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
+		# État de la focalisation pour resynchroniser les boutons 🎯 côté client.
+		"focalisation": focalisation.payload_client(character, get_doc),
 	}
 
 
@@ -141,6 +144,9 @@ async def quetes_terminer(
 	# turn-in ne fait que valider la progression et donner la récompense.
 	recap = quetes.appliquer_recompenses(character, q)
 
+	# Quête focalisée terminée → la focalisation tombe (même save).
+	focalisation.effacer_si_quete(character, quete_id)
+
 	# Retrait des actives + archivage (idempotence : plus dans actives → plus de turn-in).
 	character["quetes_actives"] = [
 		a for a in character.get("quetes_actives", []) if a.get("id") != quete_id
@@ -193,6 +199,8 @@ async def quetes_deposer(
 	n = quetes.deposer_collect(character, q)
 	if n <= 0:
 		raise HTTPException(status_code=422, detail="Rien à déposer (aucune pièce portée ou objectif déjà atteint).")
+	# Collecte complétée par ce dépôt → la focalisation tombe (même save).
+	focalisation.effacer_si_objectif_atteint(character)
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
@@ -219,6 +227,8 @@ async def quetes_abandonner(
 	quete_id = body.get("quete_id")
 	if not quetes.quete_active(character, quete_id):
 		raise HTTPException(status_code=404, detail="Quête non active")
+	# Quête focalisée abandonnée → la focalisation tombe (même save).
+	focalisation.effacer_si_quete(character, quete_id)
 	character["quetes_actives"] = [
 		a for a in character.get("quetes_actives", []) if a.get("id") != quete_id
 	]

@@ -29,6 +29,7 @@ from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_rec
 from utils import quetes
 from utils import bois
 from utils import consommables
+from utils import focalisation
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -269,11 +270,15 @@ async def update_character_portrait(
 	else:
 		raise HTTPException(status_code=405, detail="No info for character portrait update")
 
-def _set_ressource_recoltable(character: dict, zone_event: dict | None, lieu_doc: dict) -> None:
+def _set_ressource_recoltable(character: dict, zone_event: dict | None, lieu_doc: dict,
+	favori: tuple | None = None) -> None:
 	"""Pose (ou efface) le champ transitoire `ressource_recoltable` selon l'événement de zone.
 	Si l'événement est de type « ressource » et qu'une ressource est récoltable, on stocke une
-	réf `{item, poids}` (poids d'instance tiré dans les bornes de l'item) ; sinon None."""
-	item_id = resolve_recolte(zone_event, lieu_doc, get_doc)
+	réf `{item, poids}` (poids d'instance tiré dans les bornes de l'item) ; sinon None.
+	`favori` (focalisation) = (item_id, mult) → pondère le tirage de récolte."""
+	item_id = resolve_recolte(zone_event, lieu_doc, get_doc,
+		favori=favori[0] if favori else None,
+		favori_mult=favori[1] if favori else 1.0)
 	if not item_id:
 		character["ressource_recoltable"] = None
 		return
@@ -344,6 +349,8 @@ async def move_character(
 						character_to_update["position"] = destination_pos
 						# Progression des quêtes « aller en X » (persistée avec le déplacement).
 						quetes.maj_progress_visite(character_to_update, destination)
+						# Focalisation : arrivée au lieu guidé → effacée + toast côté client.
+						focus_atteint = focalisation.effacer_si_lieu_atteint(character_to_update, destination)
 						xp_gain = 0
 						niveau_up = False
 						niveau_new = compute_character_level(character_to_update.get("xp_total", 0))
@@ -364,12 +371,14 @@ async def move_character(
 							zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
 							zone_event = resolve_zone_event(
 								destination_pos["x"], destination_pos["y"],
-								lieu_doc["zone_influences"], zone_defs
+								lieu_doc["zone_influences"], zone_defs,
+								boost=focalisation.boost_zone_event(character_to_update, lieu_doc)
 							)
-						_set_ressource_recoltable(character_to_update, zone_event, lieu_doc)
+						_set_ressource_recoltable(character_to_update, zone_event, lieu_doc,
+							favori=focalisation.favori_recolte(character_to_update))
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
-						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update)}
+						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -394,14 +403,56 @@ async def move_character(
 					zone_defs = load_zone_defs_for_lieu(lieu_doc, get_doc)
 					zone_event = resolve_zone_event(
 						position["x"], position["y"],
-						lieu_doc["zone_influences"], zone_defs
+						lieu_doc["zone_influences"], zone_defs,
+						boost=focalisation.boost_zone_event(character_to_update, lieu_doc)
 					)
-				_set_ressource_recoltable(character_to_update, zone_event, lieu_doc)
+				_set_ressource_recoltable(character_to_update, zone_event, lieu_doc,
+					favori=focalisation.favori_recolte(character_to_update))
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
-				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update)}
+				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc)}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
+
+
+@user_router.post("/focaliser")
+async def focaliser(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...)):
+	"""Pose / retire (toggle) la focalisation du personnage.
+
+	Body {"type": "lieu"|"quete", "cible": id}. Une seule focalisation à la fois
+	(poser remplace l'existante). Réponse : {focalisation, guidage} pour resync client.
+	"""
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
+
+	type_ = body.get("type")
+	cible = body.get("cible")
+	if type_ not in ("lieu", "quete") or not cible:
+		raise HTTPException(status_code=422, detail="Focalisation invalide (type lieu|quete + cible requis)")
+	if type_ == "lieu":
+		doc = get_doc(cible)
+		if not doc or doc.get("type") != "lieu":
+			raise HTTPException(status_code=404, detail="Lieu introuvable")
+		if cible == character.get("lieu"):
+			raise HTTPException(status_code=422, detail="Vous êtes déjà sur place")
+	else:
+		if not quetes.quete_active(character, cible):
+			raise HTTPException(status_code=404, detail="Quête introuvable dans vos quêtes actives")
+
+	focalisation.poser_focalisation(character, type_, cible)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit d'écriture, réessayez")
+
+	lieu_doc = get_doc(character.get("lieu")) or {}
+	return {
+		"focalisation": focalisation.payload_client(character, get_doc),
+		"guidage": focalisation.guidage(character, lieu_doc, find_docs, get_doc),
+	}
 
 
 _VALID_STATS = {"V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"}

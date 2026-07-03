@@ -11,6 +11,7 @@ from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import grant_xp, recompute_equipment_bonus, carried_weight, poids_bounds, item_ref_id
 from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de
 from utils.quetes import maj_progress_kills
+from utils.focalisation import effacer_si_objectif_atteint
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -597,15 +598,27 @@ def _pick_profil(profils: list, profil_weights: dict | None):
 def instantiate_monsters(
 	especes: list, profils: list, nb: int, zone_tags: list,
 	profil_weights: dict | None = None,
+	espece_weights: dict | None = None,
 ) -> list:
 	matching = [e for e in especes if set(e.get("tags", [])) & set(zone_tags)]
 	pool = matching if matching else especes
 	if not pool:
 		return []
 
+	# Focalisation : tirage d'espèce pondéré (défaut 1.0 par espèce — une cible absente
+	# du pool est sans effet). Repli uniforme si les poids sont tous nuls.
+	poids_especes = None
+	if espece_weights:
+		poids_especes = [max(0.0, espece_weights.get(e.get("_id"), 1.0)) for e in pool]
+		if sum(poids_especes) <= 0:
+			poids_especes = None
+
 	monstres = []
 	for i in range(nb):
-		espece = random.choice(pool)
+		espece = (
+			random.choices(pool, weights=poids_especes, k=1)[0]
+			if poids_especes else random.choice(pool)
+		)
 		profil = _pick_profil(profils, profil_weights)
 
 		if profil:
@@ -1321,6 +1334,8 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# Progression des quêtes de chasse : compte les monstres tués (toute issue), sous le
 	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.
 	maj_progress_kills(character, combat_doc.get("monstres", []))
+	# Focalisation : objectif de la quête focalisée atteint → effacée (même save).
+	effacer_si_objectif_atteint(character)
 
 	# Idempotence atomique : on enregistre le combat dans le doc personnage,
 	# sauvegardé avec l'XP. Borné pour éviter une croissance illimitée.

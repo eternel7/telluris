@@ -488,6 +488,7 @@ def relations_lieux_payload(character: dict) -> list[dict]:
 					img_route = route
 					break
 		relations.append({
+			"lieu_id": lieu_id,
 			"nom": lieu_doc.get("label", lieu_id),
 			"categorie": lieu_doc.get("categorie", ""),
 			"image": img if img_route else None,

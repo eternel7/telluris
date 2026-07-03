@@ -604,15 +604,20 @@
 			border-radius: 5px; padding: 2px 8px; font-size: 11px; cursor: pointer;
 		}
 		.sh-drop-btn:hover, .sh-pickup-btn:hover { background: #2e2510; }
-		/* Bouton « Terminer » d'une quête complète : mise en exergue légère (or de l'accent).
-		   Ne s'applique que non-désactivé (quête encore en cours = rendu neutre). */
+		/* Mise en exergue dorée PARTAGÉE (accent) : bouton « Terminer » d'une quête complète,
+		   boutons de focalisation 🧭/🎯 actifs, flèche directionnelle et lien recommandés
+		   par le guidage. `.quest-done-btn` ne s'exalte que non-désactivé (en cours = neutre). */
+		.btn-highlight,
 		.quest-done-btn:not(:disabled) {
 			border-color: var(--accent-color); color: var(--accent-color);
 			background: rgba(255, 215, 0, 0.08);
 			box-shadow: 0 0 6px rgba(255, 215, 0, 0.25);
 			font-weight: bold;
 		}
+		.btn-highlight:hover,
 		.quest-done-btn:not(:disabled):hover { background: rgba(255, 215, 0, 0.18); }
+		/* Flèche recommandée : renforce le liseré (l'icône SVG reste claire). */
+		.move_btn.btn-highlight { border-width: 2px; }
 		.sh-derived-row {
 			display: flex;
 			justify-content: space-between;
@@ -1089,6 +1094,7 @@
 				</ul>
 				{% endif %}
 				<section id="recolte-action"></section>
+				<section id="guidage-action"></section>
 				<h3 id="sub-locations-title">Lieux</h3>
 				<ul id="sub-locations-list-id" class="sub-locations-list">
 				</ul>
@@ -1468,6 +1474,7 @@
 									<div class="sh-rel-score {% if v>50 %}pos{% elif v<50 %}neg{% else %}neu{% endif %}">{{ v }}<span style="opacity:.5;font-size:.7em">/100</span></div>
 									<div class="sh-rel-lbl">{% if v<=0 %}Banni{% elif v<35 %}Hostile{% elif v<50 %}Méfiant{% elif v==50 %}Neutre{% elif v<70 %}Cordial{% elif v<90 %}Estimé{% else %}Honoré{% endif %}</div>
 								</div>
+								<button class="sh-drop-btn{% if focalisation and focalisation.type == 'lieu' and focalisation.cible == r.lieu_id %} btn-highlight{% endif %}" data-focus-key="lieu|{{ r.lieu_id }}" onclick="focaliserLieu('{{ r.lieu_id }}')" title="Retrouver ce lieu (guidage)">🧭</button>
 							</div>
 							{% endfor %}
 						{% endif %}
@@ -1507,6 +1514,7 @@
 									<span class="sh-quest-rang">{{ q.get("rang","F") }}</span>
 									<span class="sh-quest-title">{{ q.get("titre","—") }}</span>
 									<span class="sh-quest-status en-cours">En cours</span>
+									<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
 								</div>
 								<div class="sh-quest-desc">{{ q.get("description","") }}</div>
 								{% if q.get("progress_txt") %}<div class="sh-quest-progress">🎯 {{ q.progress_txt }}{% if q.get("complete") %} ✓ prêt à rendre{% endif %}</div>{% endif %}
@@ -1611,6 +1619,54 @@
 		} catch (err) { console.error('Erreur récolte', err); }
 	}
 	_refreshRecolte();
+	// ── Focalisation (🧭 lieu / 🎯 quête) ─────────────────────────────────────
+	// État injecté au rendu serveur (survit au reload de moveTo), resynchronisé par
+	// /api/focaliser, les réponses du tableau de quêtes et chaque déplacement (guidage).
+	let _focalisation = {{ focalisation | tojson | safe }};
+	let _guidage = {{ guidage | tojson | safe }};
+	function _focusEst(type, cible) {
+		return !!(_focalisation && _focalisation.type === type && _focalisation.cible === cible);
+	}
+	// Toggle de la classe dorée sur tous les boutons 🧭/🎯 rendus (Jinja comme miroirs JS).
+	function _syncFocusBtns() {
+		const key = _focalisation ? _focalisation.type + '|' + _focalisation.cible : null;
+		document.querySelectorAll('[data-focus-key]').forEach(btn => {
+			btn.classList.toggle('btn-highlight', btn.getAttribute('data-focus-key') === key);
+		});
+	}
+	function _refreshGuidage() {
+		const el = document.getElementById('guidage-action');
+		if (!el) return;
+		const g = _guidage;
+		if (!g) { el.innerHTML = ''; return; }
+		let detail;
+		if (g.injoignable) detail = 'aucun chemin connu 😕';
+		else if (!g.direction) detail = `prenez le passage → <strong>${g.etape_nom}</strong>`;
+		else detail = `prochaine étape : <strong>${g.etape_nom}</strong>`;
+		el.innerHTML = `<h3>🧭 Cap : ${g.cible_nom}</h3><div class="q-desc" style="padding:0 4px">${detail}</div>`;
+	}
+	async function _postFocaliser(type, cible) {
+		try {
+			const res = await fetch('api/focaliser', {
+				method: 'POST', headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({ type, cible })
+			});
+			const data = await res.json();
+			if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+			_focalisation = data.focalisation || null;
+			_guidage = data.guidage || null;
+			_refreshGuidage();
+			_syncFocusBtns();
+			updateControls();
+			buildLocationslist();
+			showToast(_focalisation
+				? (type === 'lieu' ? '🧭 Cap sur : ' : '🎯 Focalisation : ') + _focalisation.label
+				: 'Focalisation annulée');
+		} catch (err) { console.error('Erreur focalisation', err); }
+	}
+	function focaliserLieu(lieuId) { _postFocaliser('lieu', lieuId); }
+	function focaliserQuete(queteId) { _postFocaliser('quete', queteId); }
+	_refreshGuidage();
 	// DIRS (et VALID_MOVES / getFinalMask / navAllows) proviennent de scripts/nav.js (partagé).
 	const root = document.documentElement;
 	let isMoving = false;
@@ -1658,6 +1714,9 @@
 				LINKS = rep.links;
 				POSITIONS = {"x" : rep.position["x"], "y": rep.position["y"]};
 				ACCESS = rep.access;
+				// Guidage 🧭 : à jour AVANT buildLocationslist/updateControls (exergues flèche+lien).
+				_guidage = rep.guidage || null;
+				_refreshGuidage();
 				buildLocationslist();
 				updateControls();
 				updateVitals(rep.vitals);
@@ -1724,7 +1783,7 @@
 					}
 					return false;
 				})
-				.map(l => `<li><button class="sub-loc-btn" onclick="moveTo('${link._id}')">➔ ${l.details.label}</button></li>`)
+				.map(l => `<li><button class="sub-loc-btn${_guidage && link._id === _guidage.link_id ? ' btn-highlight' : ''}" onclick="moveTo('${link._id}')">➔ ${l.details.label}</button></li>`)
 				.join('');
 		}).join('') || `<li>Aucun</li>`;
 	}
@@ -1760,6 +1819,10 @@
 					const loc_access = access[y + 1][x + 1];
 					// access en fonction du type de lieu et des directions disponibles
 					element.disabled = surcharge || (loc_access !== 1) || ((nav & dir) === 0);
+					// Guidage 🧭 : la flèche du premier pas vers la cible est mise en exergue.
+					element.classList.toggle('btn-highlight', !element.disabled
+						&& !!(_guidage && _guidage.direction
+							&& _guidage.direction.dx === x && _guidage.direction.dy === y));
 				}
 			});
 		}
@@ -1785,6 +1848,10 @@
 				}
 				if (data.niveau_up) {
 					sessionStorage.setItem('niveau_up_notif', data.niveau);
+				}
+				if (data.focalisation_atteinte) {
+					// Arrivée au lieu focalisé : toast affiché après le reload (pattern xp_gain_notif).
+					sessionStorage.setItem('focus_arrive_notif', data.focalisation_atteinte.nom || '');
 				}
 				if (data.zone_event && data.zone_event.type === 'combat') {
 					const cr = await fetch('/api/combat/start', {
@@ -2198,6 +2265,11 @@ async function spendXp(statKey) {
 		sessionStorage.removeItem('niveau_up_notif');
 		showToast('Niveau ' + _niveauUpNotif + ' atteint !');
 	}
+	const _focusArrive = sessionStorage.getItem('focus_arrive_notif');
+	if (_focusArrive !== null) {
+		sessionStorage.removeItem('focus_arrive_notif');
+		showToast('🧭 Vous êtes arrivé : ' + _focusArrive);
+	}
 	const _zoneEvt = sessionStorage.getItem('zone_event_notif');
 	if (_zoneEvt) {
 		sessionStorage.removeItem('zone_event_notif');
@@ -2602,6 +2674,7 @@ function renderFicheRelations(list) {
 				<div class="sh-rel-score ${cls}">${v}<span style="opacity:.5;font-size:.7em">/100</span></div>
 				<div class="sh-rel-lbl">${relLieuLabel(v)}</div>
 			</div>
+			<button class="sh-drop-btn${_focusEst('lieu', r.lieu_id) ? ' btn-highlight' : ''}" data-focus-key="lieu|${r.lieu_id}" onclick="focaliserLieu('${r.lieu_id}')" title="Retrouver ce lieu (guidage)">🧭</button>
 		</div>`;
 	}).join('');
 	box.innerHTML = html;
@@ -2783,6 +2856,12 @@ async function buyItem(itemId) {
 function renderFicheQuetes(data) {
 	const panel = document.getElementById('sh-quetes');
 	if (!panel || !data || (!data.fiche_actives && !data.fiche_terminees)) return;
+	// Resync focalisation : les réponses du tableau la portent (terminer/abandonner l'effacent).
+	if ('focalisation' in data) {
+		_focalisation = data.focalisation || null;
+		if (!_focalisation) { _guidage = null; _refreshGuidage(); updateControls(); buildLocationslist(); }
+		_syncFocusBtns();
+	}
 	const qa = data.fiche_actives || [];
 	const qt = data.fiche_terminees || [];
 	let html = '';
@@ -2801,6 +2880,7 @@ function renderFicheQuetes(data) {
 					<span class="sh-quest-rang">${rang}</span>
 					<span class="sh-quest-title">${q.titre || '—'}</span>
 					<span class="sh-quest-status en-cours">En cours</span>
+					<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
 				</div>
 				<div class="sh-quest-desc">${q.description || ''}</div>
 				${prog}
@@ -2834,6 +2914,7 @@ function renderQuetesActives(data) {
 			<span class="sh-inv-poids">🎯 ${q.progress_txt}</span>
 			<span class="sell-prix">✨ ${q.recompenses.xp} XP · ${formatPrix(q.recompenses)}</span>
 		</span>
+		<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
 		${(q.objectif && q.objectif.type === 'collect' && !q.complete) ? `<button class="sh-drop-btn" onclick="deposerQuete('${q.id}')" title="Déposer les pièces portées (en plusieurs voyages si besoin)">📥 Déposer</button>` : ''}
 		<button class="sh-drop-btn quest-done-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}')" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
 	</li>`).join('');

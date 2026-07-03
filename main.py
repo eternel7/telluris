@@ -22,6 +22,7 @@ from utils.characters import get_user_characters, get_selected_character, recomp
 from utils import quetes
 from utils import bois
 from utils import consommables
+from utils import focalisation
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -595,6 +596,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# le même payload est resynchronisé côté client via quotes/marchander (renderFicheRelations).
 	relations_lieux = relations_lieux_payload(character)
 
+	# Focalisation : état (boutons 🧭/🎯) + guidage éventuel vers un lieu, servis au rendu
+	# initial (le changement de lieu recharge la page → l'état doit survivre au reload).
+	focalisation_payload = focalisation.payload_client(character, get_doc)
+	guidage_payload = focalisation.guidage(character, grid_doc, find_docs, get_doc)
+
 	return templates.TemplateResponse(
 		request=request,
 		name ="play_town_telluris.html",
@@ -626,6 +632,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"est_guilde": est_guilde,
 			"ressource_recoltable": ressource_recoltable,
 			"relations_lieux": relations_lieux,
+			"focalisation": focalisation_payload,
+			"guidage": guidage_payload,
 			"effets_actifs": consommables.effets_actifs_payload(character),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,

@@ -9,6 +9,7 @@ from utils.characters import get_selected_character, carried_weight, resolve_ite
 from utils.consommables import liste_consommables_combat
 from routers.user import _take_ref
 from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity
+from utils import focalisation
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
@@ -138,8 +139,10 @@ async def start_combat(
 
     nb_monstres = max(1, round(body.intensite * 3))
     # Espèces déjà filtrées par zone → pas de re-filtrage par tags (zone_tags vide).
+    # Focalisation : l'espèce ciblée pèse plus lourd dans le tirage (si présente au pool).
     monstres = instantiate_monsters(
-        pool_especes, profils, nb_monstres, [], profil_weights=profil_weights
+        pool_especes, profils, nb_monstres, [], profil_weights=profil_weights,
+        espece_weights=focalisation.espece_weights_focus(character),
     )
     if not monstres:
         return {"combat_id": None}

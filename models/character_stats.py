@@ -121,6 +121,15 @@ QUETE_CUIVRE_PAR_XP: float = 3.0
 # (ex. un arbre entier) — pour le bois, on cible des pièces transportables de l'essence.
 QUETE_COLLECT_POIDS_MAX: float = 100.0
 
+# ── Focalisation ─────────────────────────────────────────────────────────────────
+# Le personnage peut se focaliser sur une quête active : les tirages aléatoires sont
+# biaisés vers son objectif. FOCUS_EVENEMENT_MULT multiplie le poids des entrées de
+# `table_evenements` du type visé (combat pour kill, ressource pour collect) quand la
+# cible est présente dans une zone active ; FOCUS_CIBLE_MULT multiplie le poids de la
+# cible elle-même dans le tirage (espèce dans le pool de combat, item dans la récolte).
+FOCUS_EVENEMENT_MULT: float = 3.0
+FOCUS_CIBLE_MULT: float = 3.0
+
 # ── Récolte & découpe du bois ────────────────────────────────────────────────────
 # Échelle des tailles de bois, du plus petit au plus grand. Couper un item « a_couper »
 # produit des pièces du tier immédiatement plus petit (même `essence`), poids conservé.
@@ -309,6 +318,8 @@ def current_world_variables() -> dict:
 		"QUETE_XP_FACTEUR": QUETE_XP_FACTEUR,
 		"QUETE_CUIVRE_PAR_XP": QUETE_CUIVRE_PAR_XP,
 		"QUETE_COLLECT_POIDS_MAX": QUETE_COLLECT_POIDS_MAX,
+		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
+		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
 		"COUPE_MAX_PIECES": COUPE_MAX_PIECES,
@@ -345,6 +356,7 @@ def load_world_variables() -> dict:
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
 	global QUETE_COLLECT_POIDS_MAX
+	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
@@ -405,6 +417,9 @@ def load_world_variables() -> dict:
 	QUETE_XP_FACTEUR    = float(v.get("QUETE_XP_FACTEUR", QUETE_XP_FACTEUR))
 	QUETE_CUIVRE_PAR_XP = float(v.get("QUETE_CUIVRE_PAR_XP", QUETE_CUIVRE_PAR_XP))
 	QUETE_COLLECT_POIDS_MAX = float(v.get("QUETE_COLLECT_POIDS_MAX", QUETE_COLLECT_POIDS_MAX))
+
+	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))
+	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):
 		BOIS_A_COUPER[:] = [str(x) for x in v["BOIS_A_COUPER"]]

@@ -74,9 +74,14 @@ def resolve_zone_event(
     py: float,
     zone_influences: list,
     zone_defs: dict,
+    boost: dict | None = None,
 ) -> dict | None:
     """
     Resolve a movement event from all active zones at (px, py).
+
+    `boost` (focalisation) : {"type": "combat"|"ressource", "mult": float, "zones": set}
+    — multiplie le poids des entrées du type visé si l'une des `zones` (zone_def ids)
+    est active. Ne touche PAS à la probabilité de déclenchement.
 
     Returns {"type", "tags", "zones_actives", "intensite", "modificateurs"} or None.
     """
@@ -98,12 +103,18 @@ def resolve_zone_event(
         return None
 
     # Composite weighted event table
+    boost_actif = bool(
+        boost and (boost.get("zones") or set()) & {zd.get("_id") for _, zd in active}
+    )
     entries = []
     weights = []
     for intensity, zone_def in active:
         for entry in zone_def.get("table_evenements", []):
+            w = entry.get("poids", 1) * intensity
+            if boost_actif and entry.get("type") == boost["type"]:
+                w *= boost["mult"]
             entries.append(entry)
-            weights.append(entry.get("poids", 1) * intensity)
+            weights.append(w)
 
     if not entries:
         return None
@@ -126,7 +137,8 @@ def resolve_zone_event(
     }
 
 
-def resolve_recolte(event: dict | None, lieu_doc: dict, get_doc_fn) -> str | None:
+def resolve_recolte(event: dict | None, lieu_doc: dict, get_doc_fn,
+                    favori: str | None = None, favori_mult: float = 1.0) -> str | None:
     """Ressource récoltable pour un événement de zone de type « ressource ».
 
     Candidats = items de `lieu_doc["ressources"]` dont les `zones` recoupent les zones
@@ -134,7 +146,18 @@ def resolve_recolte(event: dict | None, lieu_doc: dict, get_doc_fn) -> str | Non
     à la `categorie`, la `sous_categorie` (si non vide) et aux `tags` de chaque item. S'il y
     a des correspondances → on en tire une au hasard ; sinon → une ressource au hasard parmi
     les candidats. Renvoie un `item:*` id, ou None (pas de ressource récoltable).
+
+    `favori`/`favori_mult` (focalisation) : l'item favori pèse `favori_mult` dans le
+    tirage (1.0 pour les autres) — sans favori, tirage uniforme inchangé.
     """
+    def _choix_pondere(ids: list) -> str:
+        if favori is None or favori not in ids:
+            return random.choice(ids)
+        weights = [max(0.0, favori_mult) if iid == favori else 1.0 for iid in ids]
+        if sum(weights) <= 0:
+            return random.choice(ids)  # repli uniforme (poids tous nuls)
+        return random.choices(ids, weights=weights, k=1)[0]
+
     if not event or event.get("type") != "ressource":
         return None
     zone_ids = set(event.get("zones_actives_ids", []))
@@ -163,7 +186,7 @@ def resolve_recolte(event: dict | None, lieu_doc: dict, get_doc_fn) -> str | Non
             if tags & item_tags:
                 matched.append(item_id)
 
-    return random.choice(matched) if matched else random.choice(candidats)
+    return _choix_pondere(matched) if matched else _choix_pondere(candidats)
 
 
 def load_zone_defs_for_lieu(lieu_doc: dict, get_doc_fn) -> dict:
