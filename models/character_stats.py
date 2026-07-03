@@ -31,14 +31,14 @@ FACTEUR_DEGATS_ARMURE: int = 20
 JET_PORTEE_F_DIV: int = 20
 
 # XP gagnée à la découverte d'un lieu (fallback si le lieu n'a pas de xp_decouverte).
-XP_DECOUVERTE_LIEU: int = 1
+XP_DECOUVERTE_LIEU: int = 10
 
 # Progression de niveau (suite arithmétique, remplace les ex-seuils ×3) : le passage au
 # niveau n coûte XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT (10, 15, 20, … → XP cumulée
 # quadratique : 10, 25, 45, 70, 100, 135…). INCREMENT > 0 garantit chaque niveau
 # strictement plus cher que le précédent ; INCREMENT = 0 → coût constant par niveau.
-XP_NIVEAU_BASE: int = 10
-XP_NIVEAU_INCREMENT: int = 5
+XP_NIVEAU_BASE: int = 100
+XP_NIVEAU_INCREMENT: int = 300
 
 # Dans une ville (lieu à image TOWNS), niveau de profil de monstre maximal rencontrable.
 TOWN_PROFIL_NIVEAU_MAX: int = 2
