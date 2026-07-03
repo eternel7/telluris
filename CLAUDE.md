@@ -20,9 +20,9 @@ FastAPI listens on `http://localhost:8000`. CouchDB listens on `http://localhost
 pytest tests/
 ```
 
-Tests only cover pure-Python stat computation (`models/character_stats.py`) and have no DB dependency.
+Tests only cover pure-Python logic (stats, combat à distance, marché/recettes, consommables) and have no DB dependency.
 
-> **Environnement de l'agent : ni Python ni Docker ne sont accessibles en local.** Ne pas tenter de lancer `pytest`, `python`, `docker` ou `docker compose` depuis le shell — ça échoue toujours. Les tests et l'app se lancent côté utilisateur (dans le conteneur). Vérifier la logique par lecture/raisonnement et laisser l'utilisateur exécuter `pytest tests/` / `docker compose up`.
+> **Environnement de l'agent : Python EST disponible en local (2026-07-03)** — lancer `pytest tests/` directement depuis le shell pour valider la logique pure (Python 3.12, pytest installé). CouchDB reste injoignable en local : `db/config.py` tolère l'absence de connexion à l'import (`server`/`db` = `None`, les helpers renvoient `None`) pour que les tests purs se collectent. Docker/l'app tournent côté utilisateur (`docker compose up` dans le conteneur).
 
 ## Inspecting live DB values
 
