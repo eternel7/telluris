@@ -422,6 +422,63 @@
 	::-webkit-scrollbar { width: 5px; }
 	::-webkit-scrollbar-track { background: #0d0f14; }
 	::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+	/* ── Fiche du lieu (overlay, thème parchemin, réplique play_town) ── */
+	#lieu-fiche-overlay {
+		position: fixed; inset: 0; z-index: 200;
+		display: flex; align-items: center; justify-content: center;
+		background: rgba(0,0,0,0.65); padding: 20px;
+	}
+	#lieu-fiche-overlay.lieu-fiche-hidden { display: none; }
+	#lieu-fiche-overlay .board-panel {
+		background: var(--parch); color: var(--ink);
+		border: 4px double var(--bronze); border-radius: 8px;
+		box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+		width: min(1000px, 100%); max-height: 92vh; overflow-y: auto;
+		padding: 14px; font-family: Georgia, serif;
+	}
+	#lieu-fiche-overlay .sell-topbar {
+		display: flex; align-items: center; gap: 10px;
+		border-bottom: 2px solid var(--bronze); padding-bottom: 8px; margin-bottom: 12px;
+	}
+	#lieu-fiche-overlay .sell-topbar h2 {
+		font-family: 'Cinzel', Georgia, serif; color: var(--gold); font-size: 1.4rem; flex: 1;
+	}
+	#lieu-fiche-overlay .close-sheet-btn {
+		margin-left: auto; background: var(--parch2); color: var(--danger);
+		border: 1px solid var(--bronze); border-radius: 5px; padding: 6px 12px;
+		cursor: pointer; font-family: Georgia, serif; font-size: .85rem;
+	}
+	#lieu-fiche-overlay .close-sheet-btn:hover { background: #fff; }
+	#lieu-fiche-overlay .lf-body {
+		display: grid; grid-template-columns: 1fr 260px; gap: 14px; align-items: start;
+	}
+	@media (max-width: 720px) { #lieu-fiche-overlay .lf-body { grid-template-columns: 1fr; } }
+	#lieu-fiche-overlay .lf-map-scroll {
+		max-height: 60vh; overflow: auto; border: 2px solid var(--bronze); border-radius: 6px; background: #0002;
+	}
+	#lieu-fiche-overlay .lf-img { display: block; max-width: none; }
+	#lieu-fiche-overlay .lf-img-fit { display: block; width: 100%; height: auto; }
+	#lieu-fiche-overlay .lf-noimg, #lieu-fiche-overlay .lf-empty {
+		color: #6b5a3a; font-style: italic; padding: 12px;
+	}
+	#lieu-fiche-overlay .lf-sublocs {
+		border: 2px solid var(--bronze); border-radius: 6px; background: var(--parch2); padding: 8px;
+	}
+	#lieu-fiche-overlay .lf-sublocs h3 {
+		font-family: 'Cinzel', Georgia, serif; color: var(--gold); font-size: 1rem; margin-bottom: 8px;
+	}
+	#lieu-fiche-overlay .lf-sublist { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+	#lieu-fiche-overlay .lf-subitem { list-style: none; }
+	#lieu-fiche-overlay .lf-subbtn {
+		display: block; width: 100%; text-align: left; cursor: pointer;
+		background: var(--parch3); color: var(--ink); border: 1px solid var(--bronze);
+		border-radius: 5px; padding: 6px 10px; font-family: Georgia, serif; font-size: .9rem;
+		transition: background .12s, border-color .12s;
+	}
+	#lieu-fiche-overlay .lf-subbtn:hover {
+		background: var(--gold2); border-color: var(--gold); color: var(--ink);
+	}
 </style>
 </head>
 <body>
@@ -458,6 +515,7 @@
 				<div class="mode-tab" id="mode-zones">Zones</div>
 				<div class="mode-tab" id="mode-rencontres">Rencontres</div>
 				<div class="mode-tab" id="mode-ressources">Ressources</div>
+				<div class="mode-tab" id="mode-lieux">Lieux</div>
 			</div>
 
 			<!-- Panneau Terrain -->
@@ -575,6 +633,12 @@
 				<div style="margin-top:8px;">
 					<button class="btn danger" id="nav-clear-btn" style="font-size:0.7rem;padding:6px;">Effacer restrictions cellule</button>
 				</div>
+			</div>
+
+			<!-- Panneau Lieux -->
+			<div id="panel-lieux" style="display:none;">
+				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez un point pour filtrer, puis 📄 Fiche pour voir le lieu de destination.</div>
+				<div id="lieux-conn-list" style="max-height:320px;overflow-y:auto;font-size:.68rem;"></div>
 			</div>
 		</div>
 	</div>
@@ -700,11 +764,18 @@ const ressourceSelect	= document.getElementById('ressource-select');
 const addRessourceBtn	= document.getElementById('add-ressource-btn');
 const ressourceListEl	= document.getElementById('ressource-list');
 const saveRessourcesBtn	= document.getElementById('save-ressources-btn');
+const modeLieux			= document.getElementById('mode-lieux');
+const panelLieux		= document.getElementById('panel-lieux');
+const lieuxConnListEl	= document.getElementById('lieux-conn-list');
 
 // ── ZONES STATE ────────────────────────────────────────────────────────────
 let zonesPlacements = [];    // zone_influences array for current lieu
 let zoneDefs = {};           // { "zone::id": { nom, ... } }
 let selectedZoneIdx = -1;    // index in zonesPlacements of selected placement
+
+// ── LIEUX STATE ────────────────────────────────────────────────────────────
+let lieuxConnections = [];   // connexions du lieu courant (enrichies details)
+let lieuxSelectedCell = null; // {cx, cy} de la case cliquée (filtre la liste)
 
 const ZONE_COLORS = [
 	'rgba(255,80,80,0.35)',  'rgba(80,160,255,0.35)', 'rgba(80,255,120,0.35)',
@@ -834,6 +905,9 @@ lieuSelect.addEventListener('change', async (e) => {
 			renderZoneProfilWeights();
 			renderRencontreList();
 			renderRessourceList();
+			lieuxConnections = [];
+			lieuxSelectedCell = null;
+			fetchLieuxConnections();
 			dropZone.classList.add('hidden');
 			gridCont.classList.add('visible');
 			mapImg.style.display = 'block';
@@ -945,6 +1019,7 @@ function renderGrid() {
 	// zones/rencontres → uniquement les zones (+ labels), ni terrain ni bordures nav.
 	const showTerrain = (editMode === 'terrain' || editMode === 'nav');
 	const showZones   = (editMode === 'zones' || editMode === 'rencontres' || editMode === 'ressources');
+	const showLieux   = (editMode === 'lieux');
 
 	// Draw cell fills
 	if (showTerrain) for (let y = 0; y < rows; y++) {
@@ -1096,6 +1171,39 @@ function renderGrid() {
 			ctx.restore();
 		});
 	}
+
+	// Draw lieux markers — un disque cliquable par case portant des connexions
+	if (showLieux && lieuxConnections.length > 0) {
+		const byCell = {};
+		lieuxConnections.forEach(conn => {
+			const node = (conn.nodes || []).find(n => n.lieu === currentLocId);
+			if (!node || !node.pos) return;
+			const key = `${node.pos[0]},${node.pos[1]}`;
+			(byCell[key] = byCell[key] || { x: node.pos[0], y: node.pos[1], conns: [] }).conns.push(conn);
+		});
+		Object.values(byCell).forEach(cell => {
+			const cx = cell.x * cw + cw / 2;
+			const cy = cell.y * ch + ch / 2;
+			const r = Math.max(5, Math.min(cw, ch) * 0.4);
+			const sel = lieuxSelectedCell && lieuxSelectedCell.cx === cell.x && lieuxSelectedCell.cy === cell.y;
+			ctx.save();
+			ctx.beginPath();
+			ctx.arc(cx, cy, r, 0, Math.PI * 2);
+			ctx.fillStyle = sel ? 'rgba(220,180,75,0.95)' : 'rgba(75,143,200,0.9)';
+			ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+			ctx.lineWidth = sel ? 3 : 2;
+			ctx.fill();
+			ctx.stroke();
+			if (cell.conns.length > 1) {
+				ctx.fillStyle = '#fff';
+				ctx.font = `bold ${Math.max(9, r)}px "Share Tech Mono", monospace`;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(String(cell.conns.length), cx, cy);
+			}
+			ctx.restore();
+		});
+	}
 }
 
 function getHoverGlow() {
@@ -1165,6 +1273,11 @@ function paint(e) {
 		renderGrid();
 		updateLegend();
 		scheduleGridSend();
+	} else if (editMode === 'lieux') {
+		// Lecture seule : sélectionne la case (filtre la liste), ne mute jamais grid.
+		lieuxSelectedCell = {cx, cy};
+		renderGrid();
+		renderLieuxConnList();
 	}
 }
 
@@ -1185,6 +1298,7 @@ canvas.addEventListener('mousemove', e => {
 		if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]} - ${currentRev}.`);
 		return;
 	}
+	if (editMode === 'lieux') return; // click-only, pas de sélection au drag
 	paint(e);
 });
 canvas.addEventListener('mouseup',		() => { isPainting = false; });
@@ -1192,7 +1306,7 @@ canvas.addEventListener('mouseleave', () => { isPainting = false; hoverCell = nu
 
 // Touch support
 canvas.addEventListener('touchstart', e => { e.preventDefault(); isPainting = true; paint(e.touches[0]); }, {passive:false});
-canvas.addEventListener('touchmove',	e => { e.preventDefault(); paint(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchmove',	e => { e.preventDefault(); if (editMode === 'lieux') return; paint(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchend',	 () => { isPainting = false; });
 
 // ── VALUE SELECTION ────────────────────────────────────────────────────────
@@ -1224,13 +1338,16 @@ function setMode(mode) {
 	modeZones.classList.toggle('active', mode === 'zones');
 	modeRencontres.classList.toggle('active', mode === 'rencontres');
 	modeRessources.classList.toggle('active', mode === 'ressources');
+	modeLieux.classList.toggle('active', mode === 'lieux');
 	panelTerrain.style.display = mode === 'terrain' ? '' : 'none';
 	panelNav.style.display = mode === 'nav' ? '' : 'none';
 	panelZones.style.display = mode === 'zones' ? '' : 'none';
 	panelRencontres.style.display = mode === 'rencontres' ? '' : 'none';
 	panelRessources.style.display = mode === 'ressources' ? '' : 'none';
+	panelLieux.style.display = mode === 'lieux' ? '' : 'none';
 	if (mode === 'rencontres') renderRencontreList();  // puces = zones réellement utilisées
 	if (mode === 'ressources') renderRessourceList();  // mêmes puces de zones
+	if (mode === 'lieux') { lieuxSelectedCell = null; fetchLieuxConnections(); renderLieuxConnList(); }
 	if (mode !== 'nav') navSelectedCell = null;
 	if (grid.length) renderGrid();
 }
@@ -1239,6 +1356,134 @@ modeNav.addEventListener('click', () => setMode('nav'));
 modeZones.addEventListener('click', () => setMode('zones'));
 modeRencontres.addEventListener('click', () => setMode('rencontres'));
 modeRessources.addEventListener('click', () => setMode('ressources'));
+modeLieux.addEventListener('click', () => setMode('lieux'));
+
+// ── LIEUX : connexions du lieu courant + fiche de destination ──────────────
+async function fetchLieuxConnections() {
+	if (!currentLocId) { lieuxConnections = []; renderLieuxConnList(); return; }
+	try {
+		const res = await fetch(`/api/lieu/${encodeURIComponent(currentLocId)}/connections`);
+		if (!res.ok) throw new Error('connexions');
+		lieuxConnections = await res.json() || [];
+	} catch (err) {
+		lieuxConnections = [];
+	}
+	if (editMode === 'lieux') { renderLieuxConnList(); if (grid.length) renderGrid(); }
+}
+
+// Renvoie l'"autre" node (destination) d'une connexion vue depuis le lieu courant.
+function _connDest(conn) {
+	const nodes = conn.nodes || [];
+	return nodes.find(n => n.lieu !== currentLocId) || nodes[0];
+}
+
+function renderLieuxConnList() {
+	if (!lieuxConnListEl) return;
+	let list = lieuxConnections;
+	if (lieuxSelectedCell) {
+		list = lieuxConnections.filter(conn => {
+			const n = (conn.nodes || []).find(x => x.lieu === currentLocId);
+			return n && n.pos && n.pos[0] === lieuxSelectedCell.cx && n.pos[1] === lieuxSelectedCell.cy;
+		});
+	}
+	if (!lieuxConnections.length) {
+		lieuxConnListEl.innerHTML = `<div style="color:#888;">Aucune connexion pour ce lieu.</div>`;
+		return;
+	}
+	const header = lieuxSelectedCell
+		? `<div style="margin-bottom:6px;"><b>[${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]</b> · ${list.length} connexion(s) <button class="btn btn-inline" onclick="clearLieuxCell()" style="font-size:.6rem;">Tout</button></div>`
+		: `<div style="margin-bottom:6px;color:#888;">${list.length} connexion(s) — cliquez un point pour filtrer.</div>`;
+	const rows = list.map(conn => {
+		const dest = _connDest(conn);
+		const label = (dest && dest.details && dest.details.label) || (dest && dest.lieu) || '?';
+		const type = (conn.metadata && conn.metadata.type) || '';
+		const node = (conn.nodes || []).find(x => x.lieu === currentLocId);
+		const pos = node && node.pos ? `[${node.pos[0]},${node.pos[1]}]` : '';
+		const destId = dest ? dest.lieu : '';
+		return `<div style="border:1px solid var(--border);border-radius:4px;padding:6px;margin-bottom:6px;">
+			<div><b>➔ ${label}</b></div>
+			<div style="color:#888;">${type} ${pos}</div>
+			<button class="btn btn-inline" style="margin-top:4px;font-size:.62rem;" onclick="openLieuFiche('${destId}')">📄 Fiche</button>
+		</div>`;
+	}).join('') || `<div style="color:#888;">Aucune connexion ici.</div>`;
+	lieuxConnListEl.innerHTML = header + rows;
+}
+
+function clearLieuxCell() {
+	lieuxSelectedCell = null;
+	renderLieuxConnList();
+	if (grid.length) renderGrid();
+}
+
+// Résout l'URL image d'un lieu (cascade towns → battle_maps → maps).
+function lieuImageUrl(image, cb) {
+	if (!image) { cb(null); return; }
+	const urls = [
+		`{{ url_for('towns', path='') }}${image}`,
+		`{{ url_for('battle_maps', path='') }}${image}`,
+		`{{ url_for('maps', path='') }}${image}`,
+	];
+	let i = 0;
+	const probe = new Image();
+	probe.onload = () => cb(urls[i]);
+	probe.onerror = () => { i++; if (i < urls.length) probe.src = urls[i]; else cb(null); };
+	probe.src = urls[0];
+}
+
+async function openLieuFiche(destId) {
+	if (!destId) return;
+	const overlay = document.getElementById('lieu-fiche-overlay');
+	const titleEl = document.getElementById('lf-title');
+	const mapEl = document.getElementById('lf-map');
+	const subEl = document.getElementById('lf-sublist');
+	titleEl.textContent = 'Chargement…';
+	mapEl.innerHTML = '';
+	subEl.innerHTML = '';
+	overlay.classList.remove('lieu-fiche-hidden');
+	try {
+		const [docRes, connRes] = await Promise.all([
+			fetch(`/api/lieu/${encodeURIComponent(destId)}`),
+			fetch(`/api/lieu/${encodeURIComponent(destId)}/connections`),
+		]);
+		const doc = await docRes.json();
+		const conns = connRes.ok ? (await connRes.json() || []) : [];
+		titleEl.textContent = (doc && doc.label) || destId;
+		// Image
+		lieuImageUrl(doc && doc.image, (url) => {
+			if (!url) { mapEl.innerHTML = `<div class="lf-noimg">Image indisponible</div>`; return; }
+			const fit = !(doc && doc.dimensions && doc.cells);
+			mapEl.innerHTML = `<div class="lf-map-scroll"><img class="${fit ? 'lf-img-fit' : 'lf-img'}" src="${url}" alt=""></div>`;
+		});
+		// Sous-lieux (miroir de buildLocationslist, exclut destId) — cliquables :
+		// ouvrent le lieu connecté dans la même fiche.
+		const seen = new Set();
+		const items = [];
+		conns.forEach(conn => {
+			(conn.nodes || []).forEach(n => {
+				const l = n.details && n.details.label;
+				if (n.lieu !== destId && l && !seen.has(l)) { seen.add(l); items.push({ label: l, id: n.lieu }); }
+			});
+		});
+		subEl.innerHTML = `<h3>Lieux</h3>` + (items.length
+			? `<ul class="lf-sublist">${items.map(it =>
+				`<li class="lf-subitem"><button class="lf-subbtn" onclick="openLieuFiche('${it.id}')">➔ ${it.label}</button></li>`).join('')}</ul>`
+			: `<div class="lf-empty">Aucun</div>`);
+	} catch (err) {
+		titleEl.textContent = 'Erreur';
+		subEl.innerHTML = `<div class="lf-empty">Impossible de charger la fiche.</div>`;
+	}
+}
+
+function closeLieuFiche() {
+	document.getElementById('lieu-fiche-overlay').classList.add('lieu-fiche-hidden');
+}
+
+document.addEventListener('keydown', (e) => {
+	if (e.key === 'Escape') {
+		const ov = document.getElementById('lieu-fiche-overlay');
+		if (ov && !ov.classList.contains('lieu-fiche-hidden')) closeLieuFiche();
+	}
+});
 
 // ── ZONE PROPERTY EDITORS ──────────────────────────────────────────────────
 function updateSelectedZone(key, value) {
@@ -1612,5 +1857,19 @@ function setStatus(html) {
 // ── RESIZE ────────────────────────────────────────────────────────────────
 window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 </script>
+
+<!-- Overlay fiche du lieu (réplique play_town, lecture seule) -->
+<div id="lieu-fiche-overlay" class="lieu-fiche-hidden" onclick="if(event.target===this)closeLieuFiche()">
+	<div class="board-panel">
+		<div class="sell-topbar">
+			<h2 id="lf-title"></h2>
+			<button class="close-sheet-btn" onclick="closeLieuFiche()">✕ Fermer</button>
+		</div>
+		<div class="lf-body">
+			<div id="lf-map"></div>
+			<div id="lf-sublist" class="lf-sublocs"></div>
+		</div>
+	</div>
+</div>
 </body>
 </html>

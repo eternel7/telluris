@@ -139,7 +139,50 @@ async def get_lieu(
 
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Erreur CouchDB : {str(e)}")
-	
+
+@lieu_router.get("/lieu/{lieu_id}/connections")
+async def get_lieu_connections(
+	response: Response,
+	current_user: Annotated[User, Depends(get_current_user)],
+	lieu_id: str):
+	"""Toutes les connexions touchant un lieu (admin, éditeur de carte).
+
+	Requête range sur la vue reseau/liens_cases (contrairement à
+	get_lieu_links qui est scoppé à la case courante du personnage).
+	Chaque node est enrichi de `details` (doc du lieu, sans cells/_rev/_id)
+	comme get_lieu_links.
+	"""
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1 ):
+		return None
+
+	decoded_id = unquote(lieu_id)
+	try:
+		rows = db.view("reseau", "liens_cases", startkey=[decoded_id], endkey=[decoded_id, {}])
+		connections = []
+		seen = set()
+		for row in rows:
+			conn = row.value
+			cid = conn.get("_id")
+			if cid in seen:
+				continue
+			seen.add(cid)
+			for node in conn["nodes"]:
+				doc = get_doc(node["lieu"])
+				if not doc:
+					continue
+				doc.pop("cells", None)
+				doc.pop("_rev", None)
+				doc.pop("_id", None)
+				node["details"] = doc
+				node["details"]["label"] = node.get("label") or doc.get("label")
+			connections.append(conn)
+		return connections
+
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"Erreur CouchDB : {str(e)}")
+
 @lieu_router.put("/update_cells")
 async def update_cells(
 	response: Response,
