@@ -183,6 +183,11 @@
 		max-width: 280px;
 	}
 }
+@media (max-width: 768px) {
+	.move-section { left: 50%;
+	  transform: translateX(-50%);
+	}
+}
 .character-card { grid-area: perso; display: flex; flex-direction: column; }
 .combat-center  { grid-area: center; }
 .enemy-panel    { grid-area: ennemis; display: flex; flex-direction: column; gap: 12px; margin: 10px; align-items: center;}
