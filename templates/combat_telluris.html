@@ -130,8 +130,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 12px;
-	width: 100%;
-	margin-top: 8px;
+	margin: 10px;
 }
 .tour-label { font-family: 'Cinzel', serif; font-size: 12px; color: #c9c2b4; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 .tour-label span { color: var(--accent-color); font-weight: bold; }
@@ -154,7 +153,7 @@
 .ib-letter { position: relative; z-index: 1; }
 /* Deux demi-arcs en bordure : gauche = PV (rouge), droite = PM (bleu). */
 .vit-ring  { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
-.vit-ring path { fill: none; }
+.vit-ring path, .vit-ring circle { fill: none; }
 .vit-track { stroke: rgba(0,0,0,0.55); stroke-width: 4; }
 .vit-pv    { stroke: #ff4757; stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 0.3s ease; }
 .vit-pm    { stroke: #2e86de; stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 0.3s ease; }
@@ -171,9 +170,7 @@
 		"ennemis";
 	align-items: start;
 	gap: 12px;
-	margin-top: 10px;
 	width: 100%;
-	padding: 0 12px 0 12px;
 }
 @media (min-width: 768px) {
 	.combat-layout {
@@ -186,10 +183,10 @@
 }
 .character-card { grid-area: perso; display: flex; flex-direction: column; }
 .combat-center  { grid-area: center; }
-.enemy-panel    { grid-area: ennemis; display: flex; flex-direction: column; gap: 12px; }
+.enemy-panel    { grid-area: ennemis; display: flex; flex-direction: column; gap: 12px; margin: 10px;}
 
 /* Look « cuir / parchemin » partagé par les panneaux (tokens de :root). */
-.character-card, .enemy-list, .action-bar, .enemy-portrait-wrap, .tour-header {
+.character-card, .action-bar, .enemy-portrait-wrap, .tour-header {
 	background: var(--panel-bg);
 	border: 1.5px solid var(--border-color);
 	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
@@ -218,6 +215,19 @@
 	width: 100%; height: 100%;
 	object-fit: cover; object-position: top center;
 	display: block;
+}
+/* En-tête character-panel du panneau joueur (repris de play_town) : portrait encadré
+	compact à gauche, identité + PV/PM à droite. Ne touche PAS .enemy-portrait (grand
+	portrait du panneau droit) qui partage la règle .sheet-left-portrait ci-dessus. */
+.character-card .char-header {
+	display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.character-card .char-portrait { flex-shrink: 0; }
+.character-card .char-identity { flex: 1; min-width: 0; }
+.character-card .char-header .sheet-left-portrait {
+	width: 96px; height: 120px; max-height: none; flex: none;
+	border: 1.5px solid var(--gold2);
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
 .portrait-overlay-bars {
 	position: absolute; inset: 0; z-index: 5;
@@ -259,8 +269,7 @@
 
 /* ─── Joueur Card ──────────────────────────────────────────────── */
 .character-card {
-	padding: 10px;
-	font-size: 12px;
+	margin: 10px;
 }
 .char-name  { font-family: 'Cinzel', serif; font-weight: 700; color: var(--accent-color); font-size: 15px; margin-bottom: 2px; }
 .char-class { color: #aaa; font-size: 10px; text-transform: uppercase; margin-bottom: 10px; }
@@ -270,13 +279,6 @@
 }
 .stat-label { color: #aaa; font-size: 11px; }
 .stat-value { font-weight: bold; color: #eee; font-family: monospace; font-size: 11px; }
-.gauge-bg   {
-	width: 100%; height: 8px; background: #0c0a07;
-	border-radius: 4px; overflow: hidden; margin-top: 3px; flex-basis: 100%;
-}
-.gauge-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
-.gauge-pv   { background: #ff4757; }
-.gauge-pm   { background: #2e86de; }
 .actions-pips { display: flex; gap: 4px; margin-top: 4px; }
 .pip       { width: 10px; height: 10px; border-radius: 50%; background: #ffa502; border: 1px solid #cc8400; }
 .pip.empty { background: #333; border-color: #555; }
@@ -294,13 +296,14 @@
 }
 
 .action-bar {
-	border-radius: 10px;
+	border-radius: 10px; 
+    margin: 10px;
 	padding: 12px; display: flex; flex-direction: column; gap: 10px;
 }
 /* Sépare visuellement la zone de déplacement de la zone d'attaque/fuite. */
 .move-section {
-	border-top: 1px solid var(--bronze);
-	padding-top: 10px;
+	border-bottom: 1px solid var(--bronze);
+	padding-bottom: 10px;
 }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .action-btn {
@@ -378,27 +381,12 @@
 .log-entry.miss       { color: #888; }
 
 /* ─── Enemy Panel ──────────────────────────────────────────────── */
-.enemy-list {
-}
-.enemy-list h4  {
-	margin: 0 0 8px 0; font-size: 11px; letter-spacing: 0.08em;
-	color: var(--accent-color); text-transform: uppercase;
-	font-family: 'Cinzel', serif;
-	border-bottom: 1px solid var(--border-color); padding-bottom: 5px;
-}
-/* Nom du monstre en portrait (panel droit) au-dessus de la liste. */
+/* Nom du monstre sous le grand portrait (panel droit). */
 .enemy-portrait-name {
 	font-family: 'Cinzel', serif; font-weight: 700;
 	color: var(--accent-color); font-size: 14px;
 	margin-top: 8px; text-align: center;
 }
-.enemy-item     { margin-bottom: 10px; opacity: 1; transition: opacity 0.3s; }
-.enemy-item.dead { opacity: 0.35; }
-.enemy-header   { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
-.enemy-dot      { width: 8px; height: 8px; background: #ff4757; border-radius: 50%; flex-shrink: 0; }
-.enemy-dot.dead { background: #555; }
-.enemy-name     { font-size: 12px; color: #eee; }
-.enemy-pv-text  { font-size: 10px; color: #888; margin-top: 2px; font-family: monospace; }
 
 /* ─── End Overlay ──────────────────────────────────────────────── */
 .end-overlay {
@@ -470,27 +458,33 @@
 <body>
 
 <div class="combat-layout">
-	<!-- Panel gauche : personnage dont c'est le tour -->
+	<!-- Panel gauche : personnage dont c'est le tour (mise en page character-panel :
+	     portrait encadré à gauche, identité + PV/PM à droite dans .char-header). -->
 	<div class="character-card">
-		<div class="sheet-left-portrait">
-			<div class="portrait-overlay-bars">
-				<div class="portrait-stat-bar pv-side">
-					<div class="bar-fill" id="left-pv-bar" style="height:{{ (combat.joueurs[0].currentPV / combat.joueurs[0].pv_max * 100) | round if combat.joueurs[0].pv_max > 0 else 0 }}%"></div>
-				</div>
-				<div class="portrait-stat-bar pm-side">
-					<div class="bar-fill" id="left-pm-bar" style="height:{{ (combat.joueurs[0].currentPM / combat.joueurs[0].pm_max * 100) | round if combat.joueurs[0].pm_max > 0 else 0 }}%"></div>
+		<div class="char-header">
+			<div class="char-portrait">
+				<div class="sheet-left-portrait">
+					<div class="portrait-overlay-bars">
+						<div class="portrait-stat-bar pv-side">
+							<div class="bar-fill" id="left-pv-bar" style="height:{{ (combat.joueurs[0].currentPV / combat.joueurs[0].pv_max * 100) | round if combat.joueurs[0].pv_max > 0 else 0 }}%"></div>
+						</div>
+						<div class="portrait-stat-bar pm-side">
+							<div class="bar-fill" id="left-pm-bar" style="height:{{ (combat.joueurs[0].currentPM / combat.joueurs[0].pm_max * 100) | round if combat.joueurs[0].pm_max > 0 else 0 }}%"></div>
+						</div>
+					</div>
+					<img id="left-portrait" src="{{ url_for('characters', path=character.image) }}" alt="">
 				</div>
 			</div>
-			<img id="left-portrait" src="{{ url_for('characters', path=character.image) }}" alt="">
+			<div class="char-identity">
+				<div class="char-name" id="left-name">{{ combat.joueurs[0].nom }}</div>
+				<div class="char-class" id="left-class">{{ combat.joueurs[0].voc }} · {{ combat.joueurs[0].race }}</div>
+				<div class="char-vitals">
+					<span class="pv-val">PV {{ combat.joueurs[0].currentPV }}/<span>{{ combat.joueurs[0].pv_max }}</span></span>
+					<span class="pm-val">PM {{ combat.joueurs[0].currentPM }}/<span>{{ combat.joueurs[0].pm_max }}</span></span>
+				</div>
+			</div>
 		</div>
 		<div class="sheet-left-info">
-			<div class="char-name" id="left-name">{{ combat.joueurs[0].nom }}</div>
-			<div class="char-class" id="left-class">{{ combat.joueurs[0].voc }} · {{ combat.joueurs[0].race }}</div>
-			<div class="char-vitals">
-				<span class="pv-val">PV {{ combat.joueurs[0].currentPV }}/<span>{{ combat.joueurs[0].pv_max }}</span></span>
-				<span class="pm-val">PM {{ combat.joueurs[0].currentPM }}/<span>{{ combat.joueurs[0].pm_max }}</span></span>
-			</div>
-
 			<div class="stat-row">
 				<span class="stat-label">Actions</span>
 				<div class="actions-pips" id="joueur-actions">
@@ -525,33 +519,6 @@
 
 	<!-- Centre : initiative + carte de combat + actions + journal -->
 	<div class="combat-center">
-		<!-- Tour header + Initiative strip -->
-		<div class="tour-header">
-			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span></span>
-			<div id="initiative-strip">
-				{% for actor_id in combat.ordre_initiative %}
-					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
-					{% if actor_id.startswith('joueur_') %}
-						{% set j0 = combat.joueurs[0] %}
-						<div class="init-badge joueur {{ active }}" id="badge-{{ actor_id }}">
-							{% if j0.image %}<div class="ib-img" id="badge-portrait"></div>{% else %}<div class="ib-letter">{{ j0.nom[0] | upper }}</div>{% endif %}
-							<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
-								<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
-								<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>
-								<path class="vit-pv" id="ib-pv" d="M21 38 A17 17 0 0 1 21 4"></path>
-								<path class="vit-pm" id="ib-pm" d="M21 38 A17 17 0 0 0 21 4"></path>
-							</svg>
-						</div>
-					{% else %}
-						{% set m_item = combat.monstres | selectattr('id', 'equalto', actor_id) | first %}
-						{% set badge_dead = '' if (m_item and m_item.vivant) else ' dead' %}
-						<div class="init-badge monstre{{ badge_dead }} {{ active }}" id="badge-{{ actor_id }}">
-							{% if m_item and m_item.image %}<div class="ib-img" style="background:url('{{ url_for('monsters', path=m_item.image) }}') center/cover no-repeat"></div>{% else %}<div class="ib-letter">{{ m_item.nom[0] | upper if m_item else '?' }}</div>{% endif %}
-						</div>
-					{% endif %}
-				{% endfor %}
-			</div>
-		</div>
 		<!-- Battle Map Viewport -->
 		<div class="viewport" id="viewport">
 			<div id="rotation-pivot">
@@ -570,25 +537,6 @@
 		</div>
 
 		<div class="action-bar">
-			<div class="btn-row">
-				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
-				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
-				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>
-				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
-			</div>
-			<div id="attack-mode-row" style="display:none;">
-				<button class="action-btn mode-btn" data-mode="cac" onclick="setMode('cac')">⚔ Mêlée</button>
-				<button class="action-btn mode-btn" data-mode="jet" onclick="setMode('jet')">🪃 Jet</button>
-				<button class="action-btn mode-btn" data-mode="tir" onclick="setMode('tir')">🏹 Tir</button>
-			</div>
-			<div id="target-row">
-				<select id="target-select"></select>
-				<button class="action-btn attack-btn" id="btn-confirm" onclick="confirmAttack()">✓ Confirmer</button>
-			</div>
-			<div id="conso-row">
-				<select id="conso-select"></select>
-				<button class="action-btn" id="btn-conso-confirm" onclick="confirmConsume()">✓ Consommer</button>
-			</div>
 			<div class="move-section">
 				<div class="controls" id="move-controls">
 					<button class="btn move_btn" data-sdx="-1" data-sdy="-1" onclick="doMove(-1,-1)">
@@ -620,8 +568,59 @@
 					</button>
 				</div>
 			</div>
+			<div class="btn-row">
+				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
+				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
+				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>
+				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
+			</div>
+			<div id="attack-mode-row" style="display:none;">
+				<button class="action-btn mode-btn" data-mode="cac" onclick="setMode('cac')">⚔ Mêlée</button>
+				<button class="action-btn mode-btn" data-mode="jet" onclick="setMode('jet')">🪃 Jet</button>
+				<button class="action-btn mode-btn" data-mode="tir" onclick="setMode('tir')">🏹 Tir</button>
+			</div>
+			<div id="target-row">
+				<select id="target-select"></select>
+				<button class="action-btn attack-btn" id="btn-confirm" onclick="confirmAttack()">✓ Confirmer</button>
+			</div>
+			<div id="conso-row">
+				<select id="conso-select"></select>
+				<button class="action-btn" id="btn-conso-confirm" onclick="confirmConsume()">✓ Consommer</button>
+			</div>
 		</div>
-	</div><!-- /combat-center -->
+		<!-- Tour header + Initiative strip -->
+		<div class="tour-header">
+			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span></span>
+			<div id="initiative-strip">
+				{% for actor_id in combat.ordre_initiative %}
+					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
+					{% if actor_id.startswith('joueur_') %}
+						{% set j0 = combat.joueurs[0] %}
+						<div class="init-badge joueur {{ active }}" id="badge-{{ actor_id }}">
+							{% if j0.image %}<div class="ib-img" id="badge-portrait"></div>{% else %}<div class="ib-letter">{{ j0.nom[0] | upper }}</div>{% endif %}
+							<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
+								<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
+								<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>
+								<path class="vit-pv" id="ib-pv" d="M21 38 A17 17 0 0 1 21 4"></path>
+								<path class="vit-pm" id="ib-pm" d="M21 38 A17 17 0 0 0 21 4"></path>
+							</svg>
+						</div>
+					{% else %}
+						{% set m_item = combat.monstres | selectattr('id', 'equalto', actor_id) | first %}
+						{% set badge_dead = '' if (m_item and m_item.vivant) else ' dead' %}
+						{% set m_pv_arc = (m_item.currentPV / m_item.pv_max * 106.814) | round(2) if (m_item and m_item.pv_max > 0) else 0 %}
+						<div class="init-badge monstre{{ badge_dead }} {{ active }}" id="badge-{{ actor_id }}">
+							{% if m_item and m_item.image %}<div class="ib-img" style="background:url('{{ url_for('monsters', path=m_item.image) }}') center/cover no-repeat"></div>{% else %}<div class="ib-letter">{{ m_item.nom[0] | upper if m_item else '?' }}</div>{% endif %}
+							<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
+								<circle class="vit-track" cx="21" cy="21" r="17"></circle>
+								<circle class="vit-pv" id="mbadge-pv-{{ actor_id }}" cx="21" cy="21" r="17" transform="rotate(-90 21 21)" style="stroke-dasharray: {{ m_pv_arc }} 999"></circle>
+							</svg>
+						</div>
+					{% endif %}
+				{% endfor %}
+			</div>
+		</div>
+		</div><!-- /combat-center -->
 
 	<!-- Panel droit : portrait du dernier ennemi ciblé/attaquant + liste -->
 	{% set m_first = (combat.monstres | selectattr('vivant') | first) or (combat.monstres | first) %}
@@ -637,23 +636,8 @@
 			<div class="enemy-portrait-name" id="enemy-portrait-name">{{ m_first.nom if m_first else '' }}</div>
 		</div>
 
-		<!-- Ennemis -->
-		<div class="enemy-list">
-			<h4>Ennemis</h4>
-			{% for m in combat.monstres %}
-			<div class="enemy-item {{ '' if m.vivant else 'dead' }}" id="enemy-{{ m.id }}">
-				<div class="enemy-header">
-					<div class="enemy-dot {{ '' if m.vivant else 'dead' }}" id="dot-{{ m.id }}"></div>
-					<span class="enemy-name">{{ m.nom }}</span>
-				</div>
-				<div class="gauge-bg">
-					<div class="gauge-fill" id="hp-{{ m.id }}"
-						 style="width:{{ (m.currentPV / m.pv_max * 100) | round if m.pv_max > 0 else 0 }}%; background:#ff4757;"></div>
-				</div>
-				<div class="enemy-pv-text" id="pvtext-{{ m.id }}">{{ m.currentPV }}/{{ m.pv_max }} PV</div>
-			</div>
-			{% endfor %}
-		</div>
+		<!-- La vie des ennemis est désormais montrée par les anneaux du header
+		     (bandeau d'initiative) et le grand portrait ci-dessus : plus de liste. -->
 		<div class="combat-log" id="combat-log">
 			{% for entry in combat.log %}
 				<div class="log-entry {{ entry.kind or '' }}">{{ entry.texte }}</div>
@@ -722,25 +706,19 @@ if (GRID && GRID.dims) {
 
 // Profondeur du champ visible : nombre de rangées affichées vers le fond. Source unique
 // pour --max-height (hauteur du viewport) ET le clip-path iso (buildViewportClipPath).
-const MAX_H = 9;
+const MAX_H = 10;
 document.documentElement.style.setProperty('--max-height', MAX_H);
 
-// Échelle UNIFORME du viewport iso : --step = min(budget largeur, budget hauteur) → l'iso se
-// met à l'échelle proportionnellement (jamais déformé). --view-width = step×17 (viewport centré).
+// Échelle du viewport iso : --step est borné par la SEULE largeur (--view-width = step×17 = w),
+// pour que la carte grandisse en hauteur (step×(MAX_H-1+floor)) dans tous les formats sans jamais
+// toucher à sa largeur. Si la carte dépasse la hauteur d'écran, la page défile (body = pan-y).
 // À poser AVANT le premier renderTokens()/updateCamera().
 function syncViewSize() {
-	const root    = document.documentElement;
-	const center  = document.querySelector('.combat-center');
-	const header  = document.querySelector('.tour-header');
-	const actions = document.querySelector('.action-bar');
+	const root   = document.documentElement;
+	const center = document.querySelector('.combat-center');
 	const w = center ? center.clientWidth : window.innerWidth;
 	if (w <= 0) return;
-	const floor = parseFloat(getComputedStyle(root).getPropertyValue('--floor')) || 0;
-	const rows  = Math.max(1, MAX_H - 1 + floor);          // rangées réellement affichées (cf. hauteur .viewport)
-	const gaps  = 8 * 2 + 8;                               // gaps flex .combat-center + marge de sécurité
-	const chrome  = (header ? header.offsetHeight : 0) + (actions ? actions.offsetHeight : 0) + gaps;
-	const budgetH = window.innerHeight * 0.97 - chrome;
-	const step = Math.max(8, Math.min(w / 17, budgetH / rows));
+	const step = Math.max(8, w / 17);
 	root.style.setProperty('--step', step + 'px');
 	root.style.setProperty('--view-width', (step * 17) + 'px');
 }
@@ -785,6 +763,11 @@ function applyPlayerPortrait() {
 const IB_ARC = Math.PI * 17;
 function setArc(el, frac) {
 	if (el) el.style.strokeDasharray = `${Math.max(0, Math.min(1, frac)) * IB_ARC} 999`;
+}
+// Anneau PV plein (badges monstres du header) : cercle complet r=17 → circonférence 2πr.
+const MONSTER_CIRC = 2 * Math.PI * 17;
+function setRing(el, frac) {
+	if (el) el.style.strokeDasharray = `${Math.max(0, Math.min(1, frac)) * MONSTER_CIRC} 999`;
 }
 function updatePlayerVitals(j) {
 	const pvFrac = j.pv_max > 0 ? j.currentPV / j.pv_max : 0;
@@ -913,15 +896,6 @@ function updateChargeBar(j) {
 	txt.textContent = `${(+charge).toFixed(1)} / ${chargeMax} kg`;
 }
 
-function updateEnemy(m) {
-	const item = document.getElementById(`enemy-${m.id}`);
-	if (!item) return;
-	item.className = `enemy-item${m.vivant ? '' : ' dead'}`;
-	document.getElementById(`dot-${m.id}`).className    = `enemy-dot${m.vivant ? '' : ' dead'}`;
-	document.getElementById(`hp-${m.id}`).style.width   = pct(m.currentPV, m.pv_max) + '%';
-	document.getElementById(`pvtext-${m.id}`).textContent = `${m.currentPV}/${m.pv_max} PV`;
-}
-
 function updateInitiativeStrip(data) {
 	data.ordre_initiative.forEach((id, i) => {
 		const el = document.getElementById(`badge-${id}`);
@@ -930,6 +904,8 @@ function updateInitiativeStrip(data) {
 		if (id.startsWith('monstre_')) {
 			const m = data.monstres.find(x => x.id === id);
 			el.classList.toggle('dead', !!m && !m.vivant);
+			// Anneau de vie de l'ennemi dans le header (PV rouge).
+			if (m) setRing(document.getElementById(`mbadge-pv-${id}`), m.pv_max > 0 ? m.currentPV / m.pv_max : 0);
 		}
 	});
 }
@@ -1182,7 +1158,6 @@ function refreshTargetSelect() {
 function updateUI(data) {
 	state = data;
 	updateJoueur(activePlayer(data));
-	data.monstres.forEach(m => updateEnemy(m));
 	renderEnemyPortrait(data);
 	document.getElementById('tour-num').textContent = data.tour;
 	updateInitiativeStrip(data);
@@ -1421,6 +1396,7 @@ updateModeSelector(state);   // révèle le sélecteur cac/jet/tir dès le charg
 refreshTargetSelect();
 updateButtons(state);
 updateJoueur(activePlayer(state));
+updateInitiativeStrip(state);   // pose les anneaux de vie des ennemis dans le header dès le chargement
 renderEnemyPortrait(state);
 document.getElementById('combat-log').scrollTop = 9999;
 window._combatReady = true;
