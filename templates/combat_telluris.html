@@ -144,7 +144,9 @@
 	transition: all 0.2s;
 }
 .init-badge.joueur  { background: #1a4a7a; border-color: #2e86de; color: #7ec8ff; }
-.init-badge.monstre { background: #4a1a1a; border-color: #aa3333; color: #ffaaaa; }
+/* Monstre : bordure grise (défaut) = hors de portée ; .targetable = à portée + attaquable. */
+.init-badge.monstre { background: #3a2a2a; border-color: #555; color: #ffaaaa; }
+.init-badge.monstre.targetable { border-color: #ff4757; box-shadow: 0 0 9px rgba(255,71,87,0.7); cursor: pointer; }
 .init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.12); }
 .init-badge.dead    { opacity: 0.3; filter: grayscale(1); }
 
@@ -224,11 +226,16 @@
 }
 .character-card .char-portrait { flex-shrink: 0; }
 .character-card .char-identity { flex: 1; min-width: 0; }
+/* Cadre CARRÉ obligatoire : #left-portrait.pt-crop reçoit le cadrage du joueur via
+   applyPlayerPortrait (background-size en %, calibré pour une fenêtre carrée 100×100). */
 .character-card .char-header .sheet-left-portrait {
-	width: 96px; height: 120px; max-height: none; flex: none;
+	width: 104px; height: 104px; max-height: none; flex: none;
 	border: 1.5px solid var(--gold2);
 	box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
+/* Portrait recadré du joueur (mêmes réglages que le jeton/badge). Le background
+   image/size/position est posé en JS ; les barres PV/PM (z-index 5) passent devant. */
+#left-portrait.pt-crop { position: absolute; inset: 0; background-repeat: no-repeat; }
 .portrait-overlay-bars {
 	position: absolute; inset: 0; z-index: 5;
 	pointer-events: none;
@@ -282,8 +289,6 @@
 .actions-pips { display: flex; gap: 4px; margin-top: 4px; }
 .pip       { width: 10px; height: 10px; border-radius: 50%; background: #ffa502; border: 1px solid #cc8400; }
 .pip.empty { background: #333; border-color: #555; }
-.char-mini-stats { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--bronze); display: flex; gap: 6px; flex-wrap: wrap; }
-.char-mini-stats span { font-size: 10px; color: #8a7b5e; font-family: monospace; background: #251d12; padding: 3px 8px; border-radius: 5px; }
 
 /* ─── Combat Center ────────────────────────────────────────────── */
 .combat-center { 
@@ -472,7 +477,7 @@
 							<div class="bar-fill" id="left-pm-bar" style="height:{{ (combat.joueurs[0].currentPM / combat.joueurs[0].pm_max * 100) | round if combat.joueurs[0].pm_max > 0 else 0 }}%"></div>
 						</div>
 					</div>
-					<img id="left-portrait" src="{{ url_for('characters', path=character.image) }}" alt="">
+					<div id="left-portrait" class="pt-crop"></div>
 				</div>
 			</div>
 			<div class="char-identity">
@@ -492,12 +497,6 @@
 						<div class="pip {{ '' if i < combat.joueurs[0].actions_restantes else 'empty' }}"></div>
 					{% endfor %}
 				</div>
-			</div>
-
-			<div class="char-mini-stats">
-				<span>CC {{ combat.joueurs[0].cc }}</span>
-				<span>PA {{ combat.joueurs[0].pa }}</span>
-				<span>{{ combat.joueurs[0].degats_cc }}</span>
 			</div>
 
 			<!-- Charge portée : même jauge que la sélection de butin (pip à 50 % = seuil
@@ -750,7 +749,7 @@ function applyPlayerPortrait() {
 	const y = (t && t !== 0) ? Math.abs(t.y) : 0;
 	const size = `${imgW}% ${imgH}%`;
 	const pos  = `${imgW > 100 ? x / (imgW - 100) * 100 : 50}% ${imgH > 100 ? y / (imgH - 100) * 100 : 50}%`;
-	['badge-portrait', 'token-portrait'].forEach(id => {
+	['badge-portrait', 'token-portrait', 'left-portrait'].forEach(id => {
 		const el = document.getElementById(id);
 		if (!el) return;
 		el.style.backgroundImage    = `url('${PORTRAIT.img}')`;
@@ -829,12 +828,8 @@ function activePlayer(data) {
 }
 
 function updateJoueur(j) {
-	// Panneau gauche : reprend le perso du tour (portrait, identité, vitals).
-	const img = document.getElementById('left-portrait');
-	if (img && j.image) {
-		const url = `/characters/${j.image}`;
-		if (img.getAttribute('src') !== url) img.src = url;
-	}
+	// Panneau gauche : identité + vitals. Le portrait (#left-portrait.pt-crop) reçoit le
+	// cadrage du joueur via applyPlayerPortrait (fixe en combat mono-joueur) — pas de src ici.
 	const nameEl = document.getElementById('left-name');
 	if (nameEl) nameEl.textContent = j.nom;
 	const classEl = document.getElementById('left-class');
@@ -855,8 +850,6 @@ function updateJoueur(j) {
 	pipsEl.innerHTML = Array.from({length: j.actions_max}, (_, i) =>
 		`<div class="pip${i < j.actions_restantes ? '' : ' empty'}"></div>`
 	).join('');
-	const mini = document.querySelector('.char-mini-stats');
-	if (mini) mini.innerHTML = `<span>CC ${j.cc}</span><span>PA ${j.pa}</span><span>${j.degats_cc}</span>`;
 	updateChargeBar(j);
 	updatePlayerVitals(j);
 }
@@ -907,6 +900,22 @@ function updateInitiativeStrip(data) {
 			// Anneau de vie de l'ennemi dans le header (PV rouge).
 			if (m) setRing(document.getElementById(`mbadge-pv-${id}`), m.pv_max > 0 ? m.currentPV / m.pv_max : 0);
 		}
+	});
+}
+
+// Badges ennemis du header = UI de ciblage : rouge + cliquables (attaque) uniquement quand
+// on peut réellement attaquer (votre tour + action dispo + à portée du mode courant). Même
+// action que le clic sur un token adjacent (renderTokens). Sinon bordure grise, non cliquable.
+function refreshBadgeTargets() {
+	const j = state.joueurs[0] || {};
+	const canAct = state.status === 'active' && isPlayerTurn(state) && (j.actions_restantes || 0) > 0;
+	const targetable = new Set(canAct ? targetableMonsters(currentMode).map(m => m.id) : []);
+	state.monstres.forEach(m => {
+		const el = document.getElementById(`badge-${m.id}`);   // badge-<actor_id>, actor_id monstre = m.id
+		if (!el) return;
+		const t = targetable.has(m.id);
+		el.classList.toggle('targetable', t);
+		el.onclick = t ? () => doAction('attaquer', m.id, null, null, null, currentMode) : null;
 	});
 }
 
@@ -1052,6 +1061,7 @@ function setMode(mode) {
 	document.querySelectorAll('#attack-mode-row .mode-btn')
 		.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
 	renderTokens();
+	refreshBadgeTargets();
 	refreshTargetSelect();
 	updateButtons(state);
 }
@@ -1163,6 +1173,7 @@ function updateUI(data) {
 	updateInitiativeStrip(data);
 	updateModeSelector(data);
 	renderTokens();
+	refreshBadgeTargets();
 	updateCamera();
 	enqueueLogs(data.log);
 	updateButtons(data);
@@ -1391,6 +1402,7 @@ async function leaveCombat() {
 applyPlayerPortrait();
 syncViewSize();
 renderTokens();
+refreshBadgeTargets();
 updateCamera();
 updateModeSelector(state);   // révèle le sélecteur cac/jet/tir dès le chargement (sinon visible qu'après la 1re action)
 refreshTargetSelect();

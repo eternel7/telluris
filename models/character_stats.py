@@ -37,8 +37,8 @@ XP_DECOUVERTE_LIEU: int = 10
 # niveau n coûte XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT (10, 15, 20, … → XP cumulée
 # quadratique : 10, 25, 45, 70, 100, 135…). INCREMENT > 0 garantit chaque niveau
 # strictement plus cher que le précédent ; INCREMENT = 0 → coût constant par niveau.
-XP_NIVEAU_BASE: int = 100
-XP_NIVEAU_INCREMENT: int = 300
+XP_NIVEAU_BASE: int = 50
+XP_NIVEAU_INCREMENT: int = 100
 
 # Dans une ville (lieu à image TOWNS), niveau de profil de monstre maximal rencontrable.
 TOWN_PROFIL_NIVEAU_MAX: int = 2
@@ -604,8 +604,7 @@ def compute_stat_cap(
 
 def compute_character_level(xp_total: int) -> int:
 	"""Niveau personnage basé sur l'XP totale. Le passage au niveau n coûte
-	XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT (défauts 10/5 → seuils cumulés
-	10, 25, 45, 70, 100, 135…)."""
+	XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT."""
 	base = int(XP_NIVEAU_BASE)
 	inc = int(XP_NIVEAU_INCREMENT)
 	if base <= 0:
