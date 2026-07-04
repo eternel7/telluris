@@ -1,0 +1,275 @@
+{
+  "db": "telluris",
+  "type": "relation",
+  "exported_at": "2026-07-02T20:22:10.387629Z",
+  "doc_count": 18,
+  "docs": [
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f::lieu:atelier_de_l_artisan_des_os",
+      "_rev": "3-79b36f1e48083c37a781c11adb5fd3cc",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
+      "lieu_id": "lieu:atelier_de_l_artisan_des_os",
+      "value": 49,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 1782576884
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f::lieu:boucherie_de_la_tour_de_l_horloge",
+      "_rev": "7-2285180438218017c0307f82a5dec6ab",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
+      "lieu_id": "lieu:boucherie_de_la_tour_de_l_horloge",
+      "value": 52,
+      "prix_negocies": {
+        "item:loup": {
+          "vente": {
+            "frac": 0.69
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f::lieu:festin_de_la_joyeuse_halfling",
+      "_rev": "37-8fd2a1e65162d98e5ff08b91493c83be",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
+      "lieu_id": "lieu:festin_de_la_joyeuse_halfling",
+      "value": 51,
+      "prix_negocies": {
+        "item:petits_animaux_divers": {
+          "vente": {
+            "frac": 0.66
+          }
+        },
+        "item:os": {
+          "achat": {
+            "frac": 0.5
+          }
+        },
+        "item:loup": {
+          "vente": {
+            "frac": 0.54
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f::lieu:fumee_de_l_yonne",
+      "_rev": "22-2fc7ebe699406cf4df83c808e42bfbbf",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
+      "lieu_id": "lieu:fumee_de_l_yonne",
+      "value": 51,
+      "prix_negocies": {
+        "item:viande": {
+          "vente": {
+            "frac": 0.65
+          }
+        },
+        "item:viande_fumee": {
+          "achat": {
+            "frac": 0.33999999999999997
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 1782589557
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f::lieu:l_echope_du_cuir_d_auxerre",
+      "_rev": "15-a93b3c1e32d3a6fe191ebb6dc2e84870",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
+      "lieu_id": "lieu:l_echope_du_cuir_d_auxerre",
+      "value": 49,
+      "prix_negocies": {
+        "item:cuir": {
+          "vente": {
+            "frac": 0.5700000000000001
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 1782551999
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f::lieu:la_couronne_des_pierres_vives",
+      "_rev": "3-8fa72d7a3eefa82729d77c83ade436d4",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
+      "lieu_id": "lieu:la_couronne_des_pierres_vives",
+      "value": 50,
+      "prix_negocies": {
+        "item:crocs": {
+          "vente": {
+            "frac": 0.54
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f::lieu:la_tannerie_des_remparts",
+      "_rev": "1-90e760d1474890d8d2e86315e5b2d92f",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_037b38cd-5010-4d73-bd8d-d8bf4ce6a92f",
+      "lieu_id": "lieu:la_tannerie_des_remparts",
+      "value": 50,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:aux_ouvrages_d_os_et_d_ivoire",
+      "_rev": "14-4dfac187799a8620284b5e05ba72b51f",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:aux_ouvrages_d_os_et_d_ivoire",
+      "value": 50,
+      "prix_negocies": {
+        "item:manche": {
+          "achat": {
+            "frac": 0.48
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:boucherie_de_la_tour_de_l_horloge",
+      "_rev": "5-7f7972cb145b30bb4d0221dd3abd8847",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:boucherie_de_la_tour_de_l_horloge",
+      "value": 50,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:festin_de_la_joyeuse_halfling",
+      "_rev": "14-f1837d4884c8ca49570ad7d3ca589d6e",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:festin_de_la_joyeuse_halfling",
+      "value": 50,
+      "prix_negocies": {
+        "item:loup": {
+          "vente": {
+            "frac": 0.52
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:l_athanor_de_saint_germain",
+      "_rev": "9-653d558e866e612614f8a8baae2af681",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:l_athanor_de_saint_germain",
+      "value": 50,
+      "prix_negocies": {
+        "item:potion": {
+          "achat": {
+            "frac": 0.41000000000000003
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 1783020812
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:l_echope_du_cuir_d_auxerre",
+      "_rev": "5-7b34518d7426071bb56da57fdce9d7d3",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:l_echope_du_cuir_d_auxerre",
+      "value": 49,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 1782939884
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:la_tannerie_des_remparts",
+      "_rev": "20-06dce18b93b1ce49d81da43b56499ea9",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:la_tannerie_des_remparts",
+      "value": 52,
+      "prix_negocies": {
+        "item:cuir": {
+          "achat": {
+            "frac": 0.4
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:le_cellier_sale",
+      "_rev": "9-a97c4ab8061a10157151c4e9ac444d0d",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:le_cellier_sale",
+      "value": 48,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 1782991853
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:le_mithril_de_saint_germain",
+      "_rev": "9-bf88fcf412ada16219b759b51640ecc6",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:le_mithril_de_saint_germain",
+      "value": 51,
+      "prix_negocies": {
+        "item:armure_de_cuir": {
+          "achat": {
+            "frac": 0.4
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 0
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7::lieu:les_etalages_d_autessiodurum",
+      "_rev": "31-283ca24bcb1dacbf9a20a47a249e6138",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
+      "lieu_id": "lieu:les_etalages_d_autessiodurum",
+      "value": 47,
+      "prix_negocies": {
+        "item:sanglier": {
+          "vente": {
+            "frac": 0.5700000000000001
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 1783015960
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_c361ae45-8a46-4ab5-9f85-7c7f44bf3286::lieu:festin_de_la_joyeuse_halfling",
+      "_rev": "9-625f68d6372084d47a6ab7f80430f9d6",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_c361ae45-8a46-4ab5-9f85-7c7f44bf3286",
+      "lieu_id": "lieu:festin_de_la_joyeuse_halfling",
+      "value": 49,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 1782604529
+    },
+    {
+      "_id": "relation:character:user:eternel7@gmail.com_c361ae45-8a46-4ab5-9f85-7c7f44bf3286::lieu:la_tannerie_des_remparts",
+      "_rev": "7-00d8b7c4497d44caac4ada7c196715c0",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_c361ae45-8a46-4ab5-9f85-7c7f44bf3286",
+      "lieu_id": "lieu:la_tannerie_des_remparts",
+      "value": 50,
+      "prix_negocies": {
+        "item:cuir": {
+          "achat": {
+            "frac": 0.48
+          }
+        }
+      },
+      "marchandage_bloque_jusqu": 0
+    }
+  ]
+}

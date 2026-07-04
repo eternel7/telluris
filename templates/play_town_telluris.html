@@ -772,12 +772,19 @@
 		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: nowrap; }
 		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
-		.sh-quest-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
-		.sh-quest-title { flex: 1; font-weight: bold; font-size: 1rem; }
+		.sh-quest-title { flex: 1; min-width: 0; font-weight: bold; font-size: 1rem; }
 		.sh-quest-status { font-size: 0.8rem; padding: 2px 6px; border-radius: 3px; }
 		.sh-quest-status.en-cours { background: rgba(46,133,213,0.3); color: #2e86de; }
 		.sh-quest-status.termine { background: rgba(46,213,115,0.2); color: #2ed573; }
+		/* Groupe d'actions du header de quête : poussé à droite, reste insécable (le header wrap
+		   au-dessus de lui en mobile) ; on neutralise l'auto-margin global de .sh-drop-btn (l.749)
+		   pour que les boutons du groupe restent collés au lieu de s'écarter. */
+		.sh-quest-hdr .sh-inv-actions { margin-left: auto; flex-wrap: wrap; }
+		.sh-quest-hdr .sh-inv-actions .sh-drop-btn { margin-left: 0 !important; }
+		.sh-abandon-btn { border-color: #7a4a3a; color: #d98b6b; }
+		.sh-abandon-btn:hover { background: rgba(160,60,40,0.15); }
 		.sh-quest-desc { font-size: 0.9rem; color: var(--muted); }
 		.sh-quest-progress { font-size: 0.9rem; color: var(--gold2, var(--gold)); margin-top: 4px; }
 		.sh-quest-reward { display: flex; gap: 8px; margin-top: 6px; font-size: 0.9rem; }
@@ -1059,6 +1066,10 @@
 				padding: 5px;
 				margin: 0 auto;
 				border-radius: 0 0 15px 15px;
+			}
+			.sh-quest-status {
+				width: 30vw;
+				text-align: center;
 			}
 		}
 	</style>
@@ -1514,7 +1525,10 @@
 									<span class="sh-quest-rang">{{ q.get("rang","F") }}</span>
 									<span class="sh-quest-title">{{ q.get("titre","—") }}</span>
 									<span class="sh-quest-status en-cours">En cours</span>
-									<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
+									<span class="sh-inv-actions">
+										<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
+										<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('{{ q.get('id') }}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
+									</span>
 								</div>
 								<div class="sh-quest-desc">{{ q.get("description","") }}</div>
 								{% if q.get("progress_txt") %}<div class="sh-quest-progress">🎯 {{ q.progress_txt }}{% if q.get("complete") %} ✓ prêt à rendre{% endif %}</div>{% endif %}
@@ -2880,7 +2894,10 @@ function renderFicheQuetes(data) {
 					<span class="sh-quest-rang">${rang}</span>
 					<span class="sh-quest-title">${q.titre || '—'}</span>
 					<span class="sh-quest-status en-cours">En cours</span>
-					<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
+					<span class="sh-inv-actions">
+						<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
+						<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
+					</span>
 				</div>
 				<div class="sh-quest-desc">${q.description || ''}</div>
 				${prog}
@@ -2917,6 +2934,7 @@ function renderQuetesActives(data) {
 		<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
 		${(q.objectif && q.objectif.type === 'collect' && !q.complete) ? `<button class="sh-drop-btn" onclick="deposerQuete('${q.id}')" title="Déposer les pièces portées (en plusieurs voyages si besoin)">📥 Déposer</button>` : ''}
 		<button class="sh-drop-btn quest-done-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}')" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
+		<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 	</li>`).join('');
 }
 
@@ -2990,6 +3008,26 @@ async function terminerQuete(queteId) {
 			showToast(msg);
 		}
 	} catch(err) { console.error('Erreur fin de quête', err); }
+}
+
+// Abandon d'une quête active. Autorisé PARTOUT (backend assoupli) : depuis le tableau de la guilde
+// OU l'onglet 📜 de la fiche. Hors guilde le payload est allégé (fiche + bourse + focalisation) ;
+// renderQuetesActives/Offres sont alors des no-op (panneau guilde fermé, garde `if (!list) return`).
+async function abandonnerQuete(queteId) {
+	if (!confirm('Abandonner cette quête ? La progression sera perdue.')) return;
+	try {
+		const res = await fetch('api/quetes/abandonner', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ quete_id: queteId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		if (data.purse) updatePurse(data.purse);
+		renderQuetesActives(data);
+		renderQuetesOffres(data);
+		renderFicheQuetes(data);   // resync fiche + focalisation (via `'focalisation' in data`)
+		showToast('Quête abandonnée' + (data.abandonne ? ' : ' + data.abandonne.titre : ''));
+	} catch(err) { console.error('Erreur abandon de quête', err); }
 }
 
 async function deposerQuete(queteId) {

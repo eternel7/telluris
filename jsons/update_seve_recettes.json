@@ -1,0 +1,65 @@
+{
+  "docs": [
+    {
+      "_id": "item:Seve_de_chene",
+      "type": "item",
+      "nom": "Sève de chêne",
+      "sous_categorie": "seve",
+      "icon": "🌳",
+      "rarete": "commun",
+      "categorie": "composant",
+      "slots": [],
+      "tags": [
+        "bois",
+        "seve"
+      ],
+      "poids": 0.2
+    },
+    {
+      "_id": "item:sirop_de_seve",
+      "type": "item",
+      "nom": "Sirop de sève",
+      "sous_categorie": "",
+      "icon": "🍯",
+      "rarete": "commun",
+      "categorie": "consommable",
+      "slots": [],
+      "poids": 0.2,
+      "effets": {
+        "pv": 5,
+        "duree": 4,
+        "regen_pv": 2
+      }
+    },
+    {
+      "_id": "recette:apothicaire_sirop_de_seve",
+      "type": "recette",
+      "lieu_categorie": "apothicairerie",
+      "objet_final": "sirop_de_seve",
+      "quantite_produite": 2,
+      "matieres_premieres": [
+        {
+          "item": "item:Seve_de_chene",
+          "quantite": 2
+        },
+        {
+          "item": "item:Herbes_medicinales",
+          "quantite": 1
+        }
+      ]
+    },
+    {
+      "_id": "recette:alchimie_composant_rituel_seve",
+      "type": "recette",
+      "lieu_categorie": "laboratoire_d_alchimie",
+      "objet_final": "composant_rituel",
+      "quantite_produite": 1,
+      "matieres_premieres": [
+        {
+          "item": "item:Seve_de_chene",
+          "quantite": 2
+        }
+      ]
+    }
+  ]
+}

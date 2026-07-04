@@ -51,6 +51,21 @@ def _offre_view(o: dict) -> dict:
 	}
 
 
+def _fiche_payload(character: dict) -> dict:
+	"""Sous-payload « fiche » (indépendant d'un lieu) : quêtes détaillées de TOUS les donneurs pour
+	l'onglet 📜, bourse et focalisation. Suffit à rafraîchir la fiche depuis n'importe où (abandon
+	hors guilde)."""
+	# Détails complets (tous donneurs) pour rafraîchir l'onglet 📜 de la fiche côté client.
+	fiche_actives, fiche_terminees = quetes.fiche_details(character)
+	return {
+		"fiche_actives": fiche_actives,
+		"fiche_terminees": fiche_terminees,
+		"purse": cuivre_to_purse(money_to_cuivre(character)),
+		# État de la focalisation pour resynchroniser les boutons 🎯 côté client.
+		"focalisation": focalisation.payload_client(character, get_doc),
+	}
+
+
 def _board_payload(character: dict, lieu_doc: dict) -> dict:
 	"""Offres du tableau + quêtes actives (détaillées) de ce donneur + bourse."""
 	offres = quetes.remplir_tableau(lieu_doc)
@@ -60,17 +75,11 @@ def _board_payload(character: dict, lieu_doc: dict) -> dict:
 		for q in character.get("quetes_actives", [])
 		if q.get("giver") == giver
 	]
-	# Détails complets (tous donneurs) pour rafraîchir l'onglet 📜 de la fiche côté client.
-	fiche_actives, fiche_terminees = quetes.fiche_details(character)
 	return {
+		**_fiche_payload(character),
 		"offres": [_offre_view(o) for o in offres],
 		"actives": actives,
-		"fiche_actives": fiche_actives,
-		"fiche_terminees": fiche_terminees,
 		"lieu_parent": lieu_doc.get("lieu_parent"),
-		"purse": cuivre_to_purse(money_to_cuivre(character)),
-		# État de la focalisation pour resynchroniser les boutons 🎯 côté client.
-		"focalisation": focalisation.payload_client(character, get_doc),
 	}
 
 
@@ -222,10 +231,14 @@ async def quetes_abandonner(
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
-	lieu_doc = _guild_lieu(character)
+	# Abandonner est autorisé PARTOUT (pas de retour à la guilde imposé) : l'onglet 📜 de la fiche
+	# est atteignable n'importe où. On résout le lieu courant sans exiger que ce soit une guilde.
+	lieu_doc = get_doc(character.get("lieu", ""))
+	est_guilde = bool(lieu_doc and lieu_doc.get("categorie") == GUILDE_CATEGORIE)
 
 	quete_id = body.get("quete_id")
-	if not quetes.quete_active(character, quete_id):
+	q = quetes.quete_active(character, quete_id)
+	if not q:
 		raise HTTPException(status_code=404, detail="Quête non active")
 	# Quête focalisée abandonnée → la focalisation tombe (même save).
 	focalisation.effacer_si_quete(character, quete_id)
@@ -234,4 +247,8 @@ async def quetes_abandonner(
 	]
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	return _board_payload(character, lieu_doc)
+	# À la guilde → payload complet (tableau à jour) ; ailleurs → payload léger (fiche + bourse +
+	# focalisation), suffisant pour resynchroniser l'onglet 📜.
+	payload = _board_payload(character, lieu_doc) if est_guilde else _fiche_payload(character)
+	payload["abandonne"] = {"titre": q.get("titre", "—")}
+	return payload
