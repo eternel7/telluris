@@ -15,6 +15,7 @@ from routers.zones import zones_router
 from routers.bestiaire import bestiaire_router
 from routers.combat import combat_router
 from routers.quetes import quetes_router
+from routers.pnj import pnj_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
@@ -24,6 +25,8 @@ from utils import bois
 from utils import consommables
 from utils import sorts as sorts_util
 from utils import focalisation
+from utils import pnj as pnj_util
+from utils import intro as intro_util
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -79,6 +82,8 @@ TOWNS_IMAGES_PATH = "templates/resources/towns"
 app.mount("/towns", StaticFiles(directory=TOWNS_IMAGES_PATH), name="towns")
 MONSTERS_IMAGES_PATH = "templates/resources/monsters"
 app.mount("/monsters", StaticFiles(directory=MONSTERS_IMAGES_PATH), name="monsters")
+PNJ_IMAGES_PATH = "templates/resources/pnj"
+app.mount("/pnj", StaticFiles(directory=PNJ_IMAGES_PATH), name="pnj")
 
 app.include_router(user_router, prefix="/api")
 app.include_router(lieu_router, prefix="/api")
@@ -86,6 +91,7 @@ app.include_router(zones_router, prefix="/api")
 app.include_router(bestiaire_router, prefix="/api")
 app.include_router(combat_router, prefix="/api")
 app.include_router(quetes_router, prefix="/api")
+app.include_router(pnj_router, prefix="/api")
 app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
@@ -504,11 +510,24 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			or appro_leaves_categorie(grid_doc.get("categorie"))):
 		if tick_atelier(grid_doc):
 			save_doc(grid_doc)
+	# PNJ de lieu : tirage de présence à l'ENTRÉE (persisté → un refresh ne re-tire pas).
+	# Écriture dans le GET assumée (précédent : tick_atelier) ; un conflit de save serait
+	# rejoué au prochain rendu, on ne lève pas de 409 ici.
+	if pnj_util.poser_pnj_present(character, grid_doc):
+		save_doc(character)
+	pnj_entree = pnj_util.entree_pnj_active(character, grid_doc)
+	pnj_doc = get_doc(pnj_entree["character"]) if pnj_entree else None
+	pnj_present = pnj_util.pnj_payload(pnj_entree, pnj_doc) if (pnj_entree and pnj_doc) else None
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
 	# Gestion de la grille
 	dimensions = grid_doc.get("dimensions",None)
 	image = grid_doc.get("image")
+	# PNJ présent : l'entrée du lieu peut fournir une variante d'image AVEC le PNJ visible
+	# (repli silencieux sur l'image de base — ex. version « _vide » — si absente du disque).
+	if pnj_present and pnj_present.get("image_lieu") and os.path.exists(
+			os.path.join(TOWNS_IMAGES_PATH, pnj_present["image_lieu"])):
+		image = pnj_present["image_lieu"]
 	if os.path.exists(os.path.join(TOWNS_IMAGES_PATH, image)):
 		image_path = os.path.join(TOWNS_IMAGES_PATH, image)
 		image_route = "towns"
@@ -634,6 +653,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	focalisation_payload = focalisation.payload_client(character, get_doc)
 	guidage_payload = focalisation.guidage(character, grid_doc, find_docs, get_doc)
 
+	# Intro narrative : overlay au premier rendu (tant qu'aucune raison de fuite n'est
+	# choisie) — le bloc de personnalisation vit sur le doc lieu de la cité.
+	intro_payload = intro_util.payload_overlay(character, grid_doc)
+
 	return templates.TemplateResponse(
 		request=request,
 		name ="play_town_telluris.html",
@@ -663,6 +686,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"lieu_categorie": grid_doc.get("categorie"),
 			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,
+			"pnj_present": pnj_present,
+			"intro": intro_payload,
 			"ressource_recoltable": ressource_recoltable,
 			"relations_lieux": relations_lieux,
 			"focalisation": focalisation_payload,

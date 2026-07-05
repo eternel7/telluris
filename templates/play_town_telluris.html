@@ -753,8 +753,11 @@
 			margin-left: auto;
 		}
 		.sh-equip-btn:hover { background: rgba(255,215,0,0.2); border-color: var(--accent-color); }
-		.sh-drop-btn {
+		.sh-inv-item .sh-drop-btn:first-of-type {
 			margin-left: auto !important;
+		}
+		.sh-drop-btn {
+			margin-left: 10px;
 		}
 		.sh-drop-btn:disabled {
 			opacity: .6; cursor: not-allowed;
@@ -1123,7 +1126,7 @@
 		</main>
 		<aside class="sidebar">
 			<section class="sub-locations-panel">
-				{% if achat_sous_categories or est_guilde %}
+				{% if achat_sous_categories or est_guilde or pnj_present %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
 					{% if achat_sous_categories %}
@@ -1131,6 +1134,9 @@
 					{% endif %}
 					{% if est_guilde %}
 					<li><button class="sub-loc-btn" onclick="openQuetesBoard()">📜 Tableau des quêtes</button></li>
+					{% endif %}
+					{% if pnj_present %}
+					<li><button class="sub-loc-btn" onclick="openPnjDialogue()">🗣 Parler à {{pnj_present.nom}}</button></li>
 					{% endif %}
 				</ul>
 				{% endif %}
@@ -1643,6 +1649,63 @@
 		<h2 style="margin:1rem 0 0">🗒️ Offres disponibles</h2>
 		<ul id="quetes-offres-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
 	</div><!-- /#quetes-panel -->
+	<style>
+		/* ── Panneau de dialogue PNJ ─────────────────────────────────────────── */
+		.pnj-entete { display: flex; gap: 1rem; align-items: flex-start; margin-top: .6rem; }
+		.pnj-portrait {
+			width: 128px; height: 128px; object-fit: cover; border-radius: 8px;
+			border: 2px solid var(--accent, #b98c4a); flex-shrink: 0;
+		}
+		.pnj-ambiance { font-style: italic; opacity: .85; font-size: .9rem; }
+		#pnj-noeud-texte {
+			margin: 1rem 0 .4rem; padding: .8rem 1rem; border-radius: 8px;
+			background: rgba(0, 0, 0, .18); line-height: 1.45;
+		}
+		/* ── Overlay narratif d'introduction ─────────────────────────────────── */
+		#intro-overlay {
+			position: fixed; inset: 0; z-index: 9000;
+			background: rgba(10, 8, 5, .72);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#intro-overlay.intro-hidden { display: none; }
+		.intro-card {
+			max-width: 580px; width: 100%; max-height: 85vh; overflow-y: auto;
+			background: #2c2c38; color: var(--text, #f1f1f1);
+			border: 1px solid var(--accent, #b98c4a); border-radius: 10px;
+			padding: 1.2rem 1.4rem; box-shadow: 0 8px 40px rgba(0, 0, 0, .6);
+		}
+		.intro-card h2 { margin: 0 0 .8rem; }
+		#intro-texte { line-height: 1.5; margin-bottom: 1rem; white-space: pre-line; }
+	</style>
+	<div id="pnj-panel" class="panel-hidden panel-frame board-panel" aria-label="Dialogue avec un personnage">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Dialogue">
+			<h2>🗣 {{ pnj_present.nom if pnj_present else '' }}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closePnjPanel()" role="button">✕ Fermer</button>
+		</div>
+		{% if pnj_present %}
+		<div class="pnj-entete">
+			{% if pnj_present.portrait %}
+			<img class="pnj-portrait" src="{{ url_for('pnj', path=pnj_present.portrait) }}" alt="{{pnj_present.nom}}">
+			{% endif %}
+			<div class="pnj-ambiance">{{pnj_present.description}}</div>
+		</div>
+		{% endif %}
+		<div id="pnj-noeud-texte"></div>
+		<ul id="pnj-choix" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+	</div><!-- /#pnj-panel -->
+	<div id="intro-overlay" class="{{ '' if intro else 'intro-hidden' }}" aria-label="Introduction narrative">
+		<div class="intro-card">
+			<h2 id="intro-titre">{{ intro.titre if intro else '' }}</h2>
+			<div id="intro-texte">{{ intro.texte if intro else '' }}</div>
+			<ul id="intro-raisons" class="sub-locations-list" style="list-style:none;padding:0;margin:0">
+				{% if intro %}{% for r in intro.raisons %}
+				<li><button class="sub-loc-btn" onclick="choisirRaisonIntro('{{r.id}}')">{{r.label}}</button></li>
+				{% endfor %}{% endif %}
+			</ul>
+		</div>
+	</div><!-- /#intro-overlay -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -1807,6 +1870,12 @@
 				_refreshRecolte();
 				// Effets actifs : décrémentés/expirés à chaque tour monde côté serveur.
 				_renderEffetsActifs(rep.effets_actifs);
+				// Intro narrative : le pas vient d'atteindre la zone de sécurité de la cité.
+				if (rep.intro_terminee) {
+					showIntroConclusion(rep.intro_terminee);
+					if (rep.intro_xp && rep.intro_xp.niveau_up) showToast('Niveau ' + rep.intro_xp.niveau + ' atteint !');
+					else if (rep.intro_xp && rep.intro_xp.gain > 0) showToast('+' + rep.intro_xp.gain + ' XP');
+				}
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
@@ -1906,6 +1975,10 @@
 				if (data.focalisation_atteinte) {
 					// Arrivée au lieu focalisé : toast affiché après le reload (pattern xp_gain_notif).
 					sessionStorage.setItem('focus_arrive_notif', data.focalisation_atteinte.nom || '');
+				}
+				if (data.intro_terminee) {
+					// Arrivée par porte directement en zone sûre : conclusion rejouée après le reload.
+					sessionStorage.setItem('intro_fin_notif', JSON.stringify(data.intro_terminee));
 				}
 				if (data.zone_event && data.zone_event.type === 'combat') {
 					const cr = await fetch('/api/combat/start', {
@@ -2328,6 +2401,43 @@ async function spendXp(statKey) {
 	if (_zoneEvt) {
 		sessionStorage.removeItem('zone_event_notif');
 		showZoneEvent(JSON.parse(_zoneEvt));
+	}
+	// ── Intro narrative : choix de la raison + conclusion ─────────────────────
+	async function choisirRaisonIntro(raisonId) {
+		try {
+			const res = await fetch('api/intro/raison', {
+				method: 'POST', headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({ raison: raisonId })
+			});
+			const data = await res.json();
+			if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+			document.getElementById('intro-texte').textContent = data.texte_suite || '';
+			document.getElementById('intro-raisons').innerHTML =
+				'<li><button class="sub-loc-btn" onclick="fermerIntro()">🛤 Prendre la route</button></li>';
+		} catch (err) { console.error('Erreur intro', err); }
+	}
+	function fermerIntro() {
+		document.getElementById('intro-overlay').classList.add('intro-hidden');
+	}
+	// Réutilise l'overlay (toujours présent, masqué) pour afficher la conclusion —
+	// déclenchée par un pas (réponse move) ou rejouée après reload (sessionStorage).
+	function showIntroConclusion(evt) {
+		if (!evt) return;
+		const ov = document.getElementById('intro-overlay');
+		if (!ov) return;
+		document.getElementById('intro-titre').textContent = evt.titre || '';
+		document.getElementById('intro-texte').textContent = evt.texte || '';
+		document.getElementById('intro-raisons').innerHTML =
+			'<li><button class="sub-loc-btn" onclick="fermerIntro()">✔ Continuer</button></li>';
+		ov.classList.remove('intro-hidden');
+	}
+	window.choisirRaisonIntro = choisirRaisonIntro;
+	window.fermerIntro = fermerIntro;
+	window.showIntroConclusion = showIntroConclusion;
+	const _introFin = sessionStorage.getItem('intro_fin_notif');
+	if (_introFin) {
+		sessionStorage.removeItem('intro_fin_notif');
+		showIntroConclusion(JSON.parse(_introFin));
 	}
 	function _zoneEventLabel(evt) {
 		const icons = { combat: '⚔', ressource: '🌿', pnj: '🧙', rien: '…' };
@@ -3233,6 +3343,59 @@ async function deposerQuete(queteId) {
 			showToast('Déposé : ' + data.depose.n + ' pièce(s)' + (data.depose.complete ? ' — objectif atteint, à terminer !' : ''));
 		}
 	} catch(err) { console.error('Erreur dépôt de quête', err); }
+}
+
+// ── Dialogue PNJ (🗣) ───────────────────────────────────────────────────────
+// Panneau plein écran (pattern quêtes/marché). Navigation stateless : chaque choix
+// renvoie le nœud suivant déjà filtré/substitué côté serveur ; `noeud: null` = fin.
+let _pnjNoeudCourant = null;
+
+function renderPnjNoeud(noeud) {
+	_pnjNoeudCourant = noeud ? noeud.id : null;
+	const texte = document.getElementById('pnj-noeud-texte');
+	const liste = document.getElementById('pnj-choix');
+	if (!noeud) { texte.textContent = ''; liste.innerHTML = ''; return; }
+	texte.textContent = noeud.texte || '';
+	liste.innerHTML = (noeud.choix || []).map(c =>
+		`<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${c.action ? '✨ ' : ''}${c.label}</button></li>`
+	).join('') || '<li><button class="sub-loc-btn" onclick="closePnjPanel()">✕ Prendre congé</button></li>';
+}
+
+async function openPnjDialogue() {
+	try {
+		const res = await fetch('api/pnj/dialogue');
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		renderPnjNoeud(data.noeud);
+		document.getElementById('game-container').classList.add('panel-hidden');
+		document.getElementById('pnj-panel').classList.remove('panel-hidden');
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} catch(err) { console.error('Erreur dialogue PNJ', err); }
+}
+
+function closePnjPanel() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('pnj-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function choisirPnj(choixId) {
+	if (!_pnjNoeudCourant) return;
+	try {
+		const res = await fetch('api/pnj/dialogue/choix', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ noeud: _pnjNoeudCourant, choix_id: choixId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		if (data.vitals) updateVitals(data.vitals);
+		if (data.purse) updatePurse(data.purse);
+		if (data.soin) {
+			showToast('✨ +' + data.soin.pv_rendu + ' PV' + (data.soin.gratuit ? ' — offert' : ''));
+		}
+		if (data.noeud) renderPnjNoeud(data.noeud);
+		else closePnjPanel();
+	} catch(err) { console.error('Erreur choix de dialogue', err); }
 }
 </script>
 </body>

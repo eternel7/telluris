@@ -55,6 +55,7 @@ routers/
   zones.py               # /api/* : zones d'influence + tables de rencontres/ressources par lieu + GET /api/items
   bestiaire.py           # /admin/* : CRUD espece:* / profil:* (+ éditeur)
   quetes.py              # /api/quetes/* : board, accepter, terminer, abandonner (guilde)
+  pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + service soin ; /api/intro/raison
 utils/
   auth.py                # JWT creation + get_current_user() FastAPI dependency
   characters.py          # get/selected character, recompute_equipment_bonus, grant_xp,
@@ -64,6 +65,8 @@ utils/
   zones.py               # géométrie des zones d'influence + tirage d'événements
   quetes.py              # moteur de génération de quêtes (pur) + état joueur / progression / récompenses
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil
+  pnj.py                 # PNJ de lieu (pur) : tirage de présence, arbre de dialogue, service de soin
+  intro.py               # intro narrative (pur) : démarrage, overlay, raisons, conclusion en zone sûre
   xlsx.py                # writer xlsx OOXML pur stdlib (zipfile) — partagé bestiaire + export tableau admin
 db/
   config.py              # CouchDB connection, get_doc / save_doc / find_docs helpers
@@ -141,13 +144,19 @@ Doc `sort:*` : `{nom, icon, description, vocation, niveau, cout_pm (>0 obligatoi
 ### Focalisation — 🧭 lieu / 🎯 quête
 Personnage focalise **UNE à la fois** : `character["focalisation"]:{type:"lieu"|"quete", cible, posee_at}`. Logique pure (mute sans save, DB injectée). `focalisation_effective` → intention `guidage`/`kill`/`collect`. **Guidage (lieu)** : BFS graphe `connection` (cache TTL 60s) → `prochaine_etape` + direction A\* (import lazy). Payload client = `{cible_nom, etape, link_id, porte, direction|None, distance}`. **Biais (quête)** : `boost_zone_event` ×`FOCUS_EVENEMENT_MULT` poids events visés ; `espece_weights_focus` ×`FOCUS_CIBLE_MULT` tirage espèce. Carcasse (`item:<sub>` ↔ `espece:<sub>`) → boost combats source. **Effacement auto** : arrivée lieu, quête terminée/abandonnée, kill atteint, collect complété. Endpoint `POST /api/focaliser` → `{focalisation, guidage}`. UI : boutons 🧭 lieux (onglet 🤝) + 🎯 quêtes (onglet 📜), classe `.btn-highlight`, sidebar `#guidage-action`. Tests purs `tests/test_focalisation.py` (23 tests, suite 105 verts). ✅ **Validé en jeu 2026-07-05**.
 
+### PNJ de lieu — dialogues à choix + services
+Un doc `lieu:*` porte `pnj:[{character:"pnj:xxx", portrait, image?, probabilite, description}]`. **Tirage de présence à l'ENTRÉE** dans le lieu (`/play` : `poser_pnj_present` + save), persisté en champ **transitoire** `character["pnj_present"]:{lieu, character|null}` → un refresh ne re-tire jamais ; re-tenter = ressortir/rentrer. Si présent : l'`image` de l'entrée remplace celle du lieu (variante avec PNJ visible, repli silencieux sur la version `_vide`), bouton sidebar 🗣. Doc PNJ **`type:"pnj"`** (`_id` préfixe `pnj:`) : `{nom, race, vocation, portrait, description, dialogue, services}`. **Dialogue** = arbre embarqué `{noeud_depart, noeuds:{id:{texte, texte_gratuit?, choix:[{id, label, next?, action:{service}?, condition?}]}}}` ; choix **filtrés serveur** par condition (`relation_min:{lieux[…OU logique], seuil}`, `intro_raison`), adressés par `choix_id`, placeholders `{prenom}`/`{cout}`. **Service soin** data-driven : `services.soin = {cout_cuivre, fraction_pv, gratuit_si:{lieux, seuil (défaut PNJ_REPUTATION_SEUIL), fraction_pv}, noeuds:{fait, sans_fonds, inutile}}` — gratuit ET plus efficace si une relation ≥ seuil ; routage des nœuds de résultat côté serveur (PV pleins = rien débité ; bourse vide = rien débité). Logique pure `utils/pnj.py` (relation_value_fn injectée) ; endpoints `routers/pnj.py` (`GET /api/pnj/dialogue`, `POST /api/pnj/dialogue/choix` — stateless, actions revalidées/débitées à l'exécution). UI play_town : panneau `#pnj-panel` (pattern quêtes), portraits servis par le mount **`/pnj`** (`templates/resources/pnj/`). Contenu : `jsons/dialogues_a_importer.json` (révérend Malakor + 2 lieux temple). Tests purs `tests/test_pnj.py` (20 tests).
+
+### Intro narrative — fuite du village natal
+Bloc **`intro`** sur le doc lieu de la cité : `{titre, texte, texte_conclusion, xp_conclusion, position_depart:{x,y}, zone_securite:"zone::coeur_ville", raisons:[{id, label, texte_suite}]}` (placeholders `{prenom}/{nom}/{race}`). À la **création** (`add_character`) : si la cité porte le bloc → spawn à `position_depart` (périphérie, zones à monstres sur le chemin) + `character["intro"]={statut:"en_cours"}` ; clé absente = rétro-compat totale. **Premier /play** : overlay `#intro-overlay` (non fermable) raconte la fuite → choix de la **raison** (dont « n'en rien dire ») via `POST /api/intro/raison` (persistée, sert aux conditions de dialogue PNJ `intro_raison`) → l'overlay ne revient plus. **Conclusion** dans `move_character` (2 branches) : `conclure_si_en_securite` quand la position entre dans `zone_securite` (helper géométrique `est_dans_zone`, `utils/zones.py` ; zone absente = conclusion au 1er déplacement) → statut `terminee` + XP + overlay de conclusion (`intro_terminee` dans la réponse ; branche lien = rejoué post-reload via sessionStorage `intro_fin_notif`). Logique pure `utils/intro.py`, tests `tests/test_intro.py` (13 tests). Contenu : `jsons/ville_a_importer.json` (3 villes, docs complets avec cells — **généré par script**, jamais à la main ; ajoute les placements `zone::coeur_capitale` à Lutecia et `zone::coeur_ville` à Rhemi).
+
 ### Mode « Lieux » — éditeur de carte
 5e onglet dans `/admin/editor` (après Terrain/Navigation/Zones/Rencontres) : affiche les **points cliquables** aux positions des connexions du lieu courant. Nouveau module `utils/lieux.py` → route `GET /api/lieu/{id}/connections` = requête range sur vue `reseau/liens_cases`, chaque node enrichi de `details` (doc lieu sans `cells`/`_rev`/`_id`). **Lecture seule** : ne peint jamais la grille, drag désactivé. Clic point → liste les connexions de cette case dans le panneau latéral. **Overlay fiche** (`#lieu-fiche-overlay`) = réplique `play_town` : image du lieu (cascade `towns→battle_maps→maps`), liste des sous-lieux cliquables (boutons `.lf-subbtn` qui rechargent la fiche sur le voisin, idempotent). Fermeture : ✕/Échap/clic backdrop. Gère destinations sans `cells` (boutiques) en image fit. Aucune migration (docs/vue déjà présents). ✅ **Validé en jeu 2026-07-05**.
 
 ### Variables de monde réglables
 Doc CouchDB `rules:world_variables`, chargé au démarrage `load_world_variables()`. **Lire via module** (jamais `from … import`). Éditables `/admin`. Groupes :
 - **Marché** : `PRIX_DERIVE_BASE`, `MULT_RARETE`, `CHA_MARCHAND`, `PRIX_MAX_FACTEUR`, `MARGE_TRANSFO` (5.0), `RACHAT_FACTEUR` (0.6), `DEPECAGE_TAGS`/`_POIDS_REF`, `ATELIER_TRANSFO_PROBA` (0.10), `STOCK_CIBLE_DEFAUT`, `PRIX_AMPLITUDE_STOCK`, `VENTE_PNJ_PROBA`/`_FRACTION`, `APPRO_DEBIT`/`_DEFAUT` (5).
-- **Relation/marchandage** : `RELATION_INITIALE` (50), `RELATION_SEUIL_COEFF` (2), `MARCHANDAGE_BLOCAGE_SECONDES` (3600).
+- **Relation/marchandage** : `RELATION_INITIALE` (50), `RELATION_SEUIL_COEFF` (2), `MARCHANDAGE_BLOCAGE_SECONDES` (3600), `PNJ_REPUTATION_SEUIL` (70 — « bonne réputation » par défaut pour services/conditions PNJ).
 - **Jets** : `CRIT_REUSSITE_MAX` (5), `CRIT_ECHEC_MIN` (96) — génériques.
 - **Progression XP** : `XP_NIVEAU_BASE` (10), `XP_NIVEAU_INCREMENT` (5) — niveau n = `BASE + (n−1)·INC`, cumulé quadratique.
 - **Combat** : `JET_PORTEE_F_DIV` (20).

@@ -31,6 +31,7 @@ from utils import bois
 from utils import consommables
 from utils import sorts as sorts_util
 from utils import focalisation
+from utils import intro
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -207,6 +208,10 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'quetes_terminees': [],
 			'sorts_connus': sorts_init,
 			}
+		# Intro narrative : si la cité porte un bloc `intro`, le personnage démarre à
+		# `position_depart` (périphérie) avec le statut en_cours — l'overlay du premier
+		# /play racontera la fuite du village natal. Sans bloc : comportement inchangé.
+		intro.demarrer(character_dict, lieu)
 		save_doc(character_dict)
 	
 	return get_user_characters(current_user)
@@ -413,9 +418,16 @@ async def move_character(
 							)
 						_set_ressource_recoltable(character_to_update, zone_event, lieu_doc,
 							favori=focalisation.favori_recolte(character_to_update))
+						# Intro : une arrivée par porte peut déposer directement en zone
+						# sûre de la cité (le reload affichera la conclusion via sessionStorage).
+						intro_terminee = intro.conclure_si_en_securite(character_to_update, lieu_doc)
+						if intro_terminee and intro_terminee.get("xp"):
+							info = grant_xp(character_to_update, intro_terminee["xp"])
+							niveau_up = niveau_up or info["niveau_up"]
+							niveau_new = info["niveau_apres"]
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
-						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None}
+						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -445,10 +457,16 @@ async def move_character(
 					)
 				_set_ressource_recoltable(character_to_update, zone_event, lieu_doc,
 					favori=focalisation.favori_recolte(character_to_update))
+				# Intro : conclusion quand le pas atteint la zone de sécurité de la cité.
+				intro_terminee = intro.conclure_si_en_securite(character_to_update, lieu_doc)
+				intro_xp = {"gain": 0, "niveau_up": False, "niveau": None}
+				if intro_terminee and intro_terminee.get("xp"):
+					info = grant_xp(character_to_update, intro_terminee["xp"])
+					intro_xp = {"gain": intro_terminee["xp"], "niveau_up": info["niveau_up"], "niveau": info["niveau_apres"]}
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
-				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc)}
+				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 

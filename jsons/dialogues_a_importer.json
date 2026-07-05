@@ -1,0 +1,146 @@
+[
+	{
+		"_id": "pnj:reverend_malakor",
+		"type": "pnj",
+		"nom": "Révérend Malakor",
+		"race": "ogre",
+		"vocation": "pretre",
+		"portrait": "ogre_m_pretre01.png",
+		"description": "Prêtre ogre du temple de Saint-Eusèbe à Auxerre — une carrure colossale, une voix douce, un calme que rien ne semble pouvoir troubler.",
+		"services": {
+			"soin": {
+				"cout_cuivre": 1,
+				"fraction_pv": 0.5,
+				"gratuit_si": {
+					"lieux": ["lieu:auxerre", "lieu:le_bastion_de_l_yonne_interieur"],
+					"seuil": 70,
+					"fraction_pv": 1.0
+				},
+				"noeuds": {
+					"fait": "soin_fait",
+					"sans_fonds": "soin_sans_fonds",
+					"inutile": "soin_inutile"
+				}
+			}
+		},
+		"dialogue": {
+			"noeud_depart": "accueil",
+			"noeuds": {
+				"accueil": {
+					"texte": "Que la paix de Saint-Eusèbe soit sur toi, voyageur. Je suis le révérend Malakor, gardien de ce temple. Prends le temps de souffler : ces murs n'ont jamais repoussé personne. Que puis-je pour toi ?",
+					"choix": [
+						{"id": "guilde", "label": "Je cherche la guilde des aventuriers.", "next": "guilde"},
+						{"id": "conseils", "label": "Auriez-vous un conseil pour un nouveau venu ?", "next": "conseils"},
+						{"id": "soin", "label": "Pouvez-vous soigner mes blessures ? ({cout})", "next": "soin_propose"},
+						{"id": "fin", "label": "Je vais reprendre ma route.", "next": "au_revoir"}
+					]
+				},
+				"guilde": {
+					"texte": "La guilde des aventuriers ? Tu y es presque, mon enfant. Longe le mur du temple : le Bastion de l'Yonne se trouve sur le côté, vers l'arrière. Dis-leur que tu viens de ma part — ils ont bon cœur, même s'ils parlent fort.",
+					"choix": [
+						{"id": "retour", "label": "Merci, révérend.", "next": "accueil"},
+						{"id": "fin", "label": "J'y vais de ce pas.", "next": "au_revoir"}
+					]
+				},
+				"conseils": {
+					"texte": "Bien sûr. Les anciens disent que la sagesse pèse moins lourd qu'une armure, et protège parfois davantage. Que veux-tu savoir ?",
+					"choix": [
+						{"id": "zones", "label": "Les environs sont-ils sûrs ?", "next": "conseil_zones"},
+						{"id": "reputation", "label": "Comment me faire une place ici ?", "next": "conseil_reputation"},
+						{"id": "repos", "label": "Comment reprendre des forces ?", "next": "conseil_repos"},
+						{"id": "retour", "label": "C'est tout ce que je voulais savoir.", "next": "accueil"}
+					]
+				},
+				"conseil_zones": {
+					"texte": "Le cœur d'Auxerre est sûr ; ses forêts ne le sont pas. Loups, gobelins, serpents… Ne t'enfonce pas sous les feuillus sans forces, et méfie-toi des futaies denses du sud — même nos chasseurs les évitent seuls.",
+					"choix": [
+						{"id": "retour", "label": "Autre chose ?", "next": "conseils"},
+						{"id": "fin", "label": "Je m'en souviendrai.", "next": "au_revoir"}
+					]
+				},
+				"conseil_reputation": {
+					"texte": "Rends service. Le tableau du Bastion de l'Yonne affiche toujours des contrats, et cette cité a la mémoire longue — pour le bien comme pour le reste. Un nom qu'on respecte ouvre plus de portes qu'une bourse pleine.",
+					"choix": [
+						{"id": "retour", "label": "Autre chose ?", "next": "conseils"},
+						{"id": "fin", "label": "Voilà qui est dit.", "next": "au_revoir"}
+					]
+				},
+				"conseil_repos": {
+					"texte": "Marche calmement et le corps se répare de lui-même ; les herbes des sous-bois font aussi de bonnes tisanes entre les mains d'un apothicaire. Et si le mal est plus profond, le temple soigne pour une petite offrande.",
+					"choix": [
+						{"id": "soin", "label": "Justement… pouvez-vous me soigner ? ({cout})", "next": "soin_propose"},
+						{"id": "retour", "label": "Autre chose ?", "next": "conseils"},
+						{"id": "fin", "label": "Merci du conseil.", "next": "au_revoir"}
+					]
+				},
+				"soin_propose": {
+					"texte": "Approche. Une offrande d'une pièce de cuivre suffira — elle ira aux plus démunis de la cité.",
+					"texte_gratuit": "Ta bonté envers cette cité te précède, {prenom}. Approche : je te soignerai de bon cœur, sans rien te demander.",
+					"choix": [
+						{"id": "accepter", "label": "J'accepte. ({cout})", "action": {"service": "soin"}},
+						{"id": "refuser", "label": "Une autre fois, peut-être.", "next": "accueil"}
+					]
+				},
+				"soin_fait": {
+					"texte": "Voilà. Respire… La douleur s'éloigne déjà. Va en paix, et prends soin de toi.",
+					"choix": [
+						{"id": "retour", "label": "Merci, révérend.", "next": "accueil"},
+						{"id": "fin", "label": "Je me sens mieux. Adieu.", "next": "au_revoir"}
+					]
+				},
+				"soin_sans_fonds": {
+					"texte": "Tu n'as pas même une piécette ?… Garde ton bien, alors. Reviens quand tu pourras faire une offrande — ou rends service à la cité : Saint-Eusèbe voit tout.",
+					"choix": [
+						{"id": "retour", "label": "Je reviendrai.", "next": "accueil"},
+						{"id": "fin", "label": "…", "next": "au_revoir"}
+					]
+				},
+				"soin_inutile": {
+					"texte": "Des blessures ? Je n'en vois aucune, mon enfant. Ménage plutôt tes forces — elles te serviront mieux que mes prières.",
+					"choix": [
+						{"id": "retour", "label": "Vous avez raison.", "next": "accueil"},
+						{"id": "fin", "label": "Au revoir, révérend.", "next": "au_revoir"}
+					]
+				},
+				"au_revoir": {
+					"texte": "Va en paix. Et si le chemin devient sombre, souviens-toi : la porte du temple reste ouverte.",
+					"choix": [
+						{"id": "fin", "label": "Adieu."}
+					]
+				}
+			}
+		}
+	},
+	{
+		"_id": "lieu:temple_de_malakor",
+		"type": "lieu",
+		"label": "Les marches du temple de Saint-Eusèbe",
+		"image": "pnj_pasteur_ogre_temple01_vide.png",
+		"categorie": "temple",
+		"pnj": [
+			{
+				"character": "pnj:reverend_malakor",
+				"portrait": "ogre_m_pretre01.png",
+				"image": "pnj_pasteur_ogre_temple01.png",
+				"probabilite": 0.7,
+				"description": "Le révérend Malakor est un prêtre ogre à la carrure efflanquée et à la peau diaphane, veille sur le parvis du temple d'Auxerre, imposant le respect par sa stature colossale plutôt que par la force brute. Ayant choisi de transcender la nature impulsive de son peuple, il a troqué la facilité de la violence pour la rigueur de la foi et la contemplation, devenant un guide spirituel dont la présence silencieuse suffit à apaiser les tensions au sein de cette cité cosmopolite où ogres, elfes et humains se côtoient quotidiennement."
+			}
+		]
+	},
+	{
+		"_id": "lieu:temple_de_malakor02",
+		"type": "lieu",
+		"label": "Temple de Saint-Eusèbe",
+		"image": "pnj_pasteur_ogre_temple02_vide.png",
+		"categorie": "temple",
+		"pnj": [
+			{
+				"character": "pnj:reverend_malakor",
+				"portrait": "ogre_m_pretre01.png",
+				"image": "pnj_pasteur_ogre_temple02.png",
+				"probabilite": 0.3,
+				"description": "Lorsque le révérend Malakor se tient dans le temple de Saint-Eusèbe, l'édifice s'imprègne d'une solennité singulière. Sa stature colossale et sa présence silencieuse apaisent instantanément l'atmosphère, transformant cet espace en un sanctuaire où la rigueur de sa foi transcende les différences raciales. Sous son regard, le temple devient un havre de contemplation pour les habitants de la cité d'Auxerre, un lieu où la violence est oubliée au profit d'une sérénité partagée."
+			}
+		]
+	}
+]

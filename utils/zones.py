@@ -40,6 +40,17 @@ def compute_zone_intensity(px: float, py: float, placement: dict, zone_def: dict
     return (zone_def or {}).get("intensite_max", 1.0)
 
 
+def est_dans_zone(px: float, py: float, zone_id: str, zone_influences: list) -> bool:
+    """Le point (px, py) est-il dans AU MOINS un placement du zone-def `zone_id` ?
+    Test géométrique pur (membership), sans lire le doc zone (intensité ignorée)."""
+    for placement in zone_influences or []:
+        if placement.get("zone") != zone_id:
+            continue
+        if compute_zone_intensity(px, py, placement, {"intensite_max": 1.0}) > 0.0:
+            return True
+    return False
+
+
 def compute_bbox(placement: dict) -> dict:
     """Compute the axis-aligned bounding box for a placement, accounting for rotation."""
     cx, cy = placement["x"], placement["y"]

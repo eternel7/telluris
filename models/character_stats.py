@@ -105,6 +105,10 @@ CRIT_ECHEC_MIN: int = 96
 RELATION_INITIALE: int = 50
 RELATION_SEUIL_COEFF: float = 2.0
 MARCHANDAGE_BLOCAGE_SECONDES: int = 3600
+# Seuil de « bonne réputation » par défaut pour les PNJ (services gratuits/améliorés,
+# conditions de dialogue relation_min) — 70 = palier « Estimé ». Surchargable par PNJ
+# dans la donnée (`gratuit_si.seuil`, `condition.relation_min.seuil`).
+PNJ_REPUTATION_SEUIL: int = 70
 
 # ── Quêtes (guilde + moteur de génération) ───────────────────────────────────────
 # Le tableau d'une guilde maintient un pool de QUETE_BOARD_TAILLE offres générées
@@ -323,6 +327,7 @@ def current_world_variables() -> dict:
 		"RELATION_INITIALE": RELATION_INITIALE,
 		"RELATION_SEUIL_COEFF": RELATION_SEUIL_COEFF,
 		"MARCHANDAGE_BLOCAGE_SECONDES": MARCHANDAGE_BLOCAGE_SECONDES,
+		"PNJ_REPUTATION_SEUIL": PNJ_REPUTATION_SEUIL,
 		"QUETE_BOARD_TAILLE": QUETE_BOARD_TAILLE,
 		"QUETE_QTE_MIN": QUETE_QTE_MIN,
 		"QUETE_QTE_MAX": QUETE_QTE_MAX,
@@ -367,6 +372,7 @@ def load_world_variables() -> dict:
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
+	global PNJ_REPUTATION_SEUIL
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
 	global QUETE_COLLECT_POIDS_MAX
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
@@ -424,6 +430,7 @@ def load_world_variables() -> dict:
 	RELATION_INITIALE            = int(v.get("RELATION_INITIALE", RELATION_INITIALE))
 	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
 	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))
+	PNJ_REPUTATION_SEUIL         = int(v.get("PNJ_REPUTATION_SEUIL", PNJ_REPUTATION_SEUIL))
 
 	QUETE_BOARD_TAILLE  = int(v.get("QUETE_BOARD_TAILLE", QUETE_BOARD_TAILLE))
 	QUETE_QTE_MIN       = int(v.get("QUETE_QTE_MIN", QUETE_QTE_MIN))
