@@ -223,6 +223,34 @@ def admin_export_bestiaire(request: Request, current_user: Annotated[User, Depen
 		headers={"Content-Disposition": 'attachment; filename="bestiaire.xlsx"'},
 	)
 
+@app.post("/admin/table/export.xlsx")
+def admin_table_export_xlsx(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: dict = Body(...),
+):
+	"""Export Excel des lignes affichées dans l'écran tableau. Le client envoie les
+	colonnes (clés de 1er niveau ordonnées) et les documents complets déjà filtrés ;
+	la sérialisation OOXML est mutualisée avec l'export bestiaire (utils/xlsx)."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	import re
+	from utils.xlsx import build_xlsx_bytes, rows_from_docs
+	columns = payload.get("columns")
+	rows = payload.get("rows")
+	if not isinstance(columns, list) or not isinstance(rows, list):
+		raise HTTPException(status_code=400, detail="Champs 'columns' et 'rows' (listes) requis.")
+	sheet = rows_from_docs(columns, rows)
+	data = build_xlsx_bytes([("Export", sheet, frozenset())])
+	# Nom fourni par le client (type + filtres + horodatage) ; assaini par sécurité.
+	name = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(payload.get("filename") or "")) or "export.xlsx"
+	if not name.lower().endswith(".xlsx"):
+		name += ".xlsx"
+	return Response(
+		content=data,
+		media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		headers={"Content-Disposition": f'attachment; filename="{name}"'},
+	)
+
 @app.get("/admin/exports/couchdb")
 def admin_export_couchdb(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):

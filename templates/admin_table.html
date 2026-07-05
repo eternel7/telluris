@@ -169,6 +169,7 @@
 		<div class="card" id="table-card" style="display:none">
 			<div class="btn-row" style="margin-top:0;margin-bottom:10px">
 				<button class="btn secondary" type="button" id="export-btn" title="Exporter les documents complets des lignes affichées (filtres/tri appliqués)">⬇ Export JSON</button>
+				<button class="btn secondary" type="button" id="export-xlsx-btn" title="Exporter les lignes affichées (filtres/tri appliqués) en tableur Excel">⬇ Export Excel</button>
 			</div>
 			<div class="count" id="row-count"></div>
 			<div class="table-wrap">
@@ -514,7 +515,7 @@ function slugify(s) {
 
 // Nom du fichier d'export : type + filtres actifs + horodatage (AAAAMMJJHHMMSS).
 // Ex. « item_filtre_categorie_arme_20260707202012.json ».
-function exportFilename() {
+function exportFilename(ext) {
 	const parts = [slugify(currentType) || 'export'];
 	// Filtres actifs (colonne + valeur), dans l'ordre d'affichage des colonnes.
 	const actifs = visible.filter(c => (filters[c] || '').trim());
@@ -527,7 +528,7 @@ function exportFilename() {
 	const stamp = '' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate())
 		+ p2(d.getHours()) + p2(d.getMinutes()) + p2(d.getSeconds());
 	parts.push(stamp);
-	return parts.filter(Boolean).join('_') + '.json';
+	return parts.filter(Boolean).join('_') + '.' + (ext || 'json');
 }
 
 // Exporte les documents COMPLETS des lignes actuellement affichées
@@ -540,7 +541,7 @@ function exportVisible() {
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a');
 	a.href = url;
-	a.download = exportFilename();
+	a.download = exportFilename('json');
 	document.body.appendChild(a);
 	a.click();
 	a.remove();
@@ -548,8 +549,49 @@ function exportVisible() {
 	setStatus($('load-status'), out.length + ' document(s) exporté(s).', 'ok');
 }
 
+// ── Export Excel (.xlsx) ───────────────────────────────────────────
+// Même sélection de lignes et même logique de nom que l'export JSON. La
+// sérialisation OOXML est faite côté serveur (POST /admin/table/export.xlsx,
+// writer partagé avec l'export bestiaire) : on envoie les colonnes (toutes les
+// clés de 1er niveau) + les documents complets déjà filtrés, on récupère le blob.
+async function exportVisibleXlsx() {
+	const rows = computeVisibleRows();
+	if (!rows.length) { setStatus($('load-status'), 'Rien à exporter (aucune ligne affichée).', 'err'); return; }
+	const out = rows.map(r => docs[r.i]);
+	const name = exportFilename('xlsx');
+	setStatus($('load-status'), 'Génération du fichier Excel…');
+	$('export-xlsx-btn').disabled = true;
+	try {
+		const res = await fetch('/admin/table/export.xlsx', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ filename: name, columns, rows: out }),
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			setStatus($('load-status'), 'Échec de l\'export Excel : ' + (err.detail || res.status), 'err');
+			return;
+		}
+		const blob = await res.blob();
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = name;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		URL.revokeObjectURL(url);
+		setStatus($('load-status'), out.length + ' ligne(s) exportée(s) en Excel.', 'ok');
+	} catch (e) {
+		setStatus($('load-status'), 'Erreur réseau : ' + e.message, 'err');
+	} finally {
+		$('export-xlsx-btn').disabled = false;
+	}
+}
+
 // ── Init ───────────────────────────────────────────────────────────
 $('export-btn').addEventListener('click', exportVisible);
+$('export-xlsx-btn').addEventListener('click', exportVisibleXlsx);
 $('load-btn').addEventListener('click', loadType);
 $('type-input').addEventListener('keydown', e => { if (e.key === 'Enter') loadType(); });
 </script>

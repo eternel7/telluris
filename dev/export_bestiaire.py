@@ -17,14 +17,13 @@ apparaît côté hôte dans Z:\\telluris\\bestiaire.xlsx.
 
 import os
 import sys
-import io
 import json
-import zipfile
 
 # Permet d'importer les modules de l'app quel que soit le cwd.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db.config import find_docs, get_doc  # noqa: E402
 from models.character_stats import BaseStats, compute_derived_stats  # noqa: E402
+from utils.xlsx import write_xlsx, build_xlsx_bytes  # noqa: E402
 
 STATS = ["V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"]
 # Clé attribut (CouchDB) → champ BaseStats.
@@ -44,134 +43,6 @@ def _derived(stat_values):
     """DerivedStats calculé à partir d'un dict {clé attribut: valeur} (niveau sans impact combat)."""
     base = BaseStats(**{_STAT_FIELD[k]: int(stat_values.get(k, 0) or 0) for k in STATS})
     return compute_derived_stats(base, niveau=0)
-
-
-# ── Mini-writer XLSX (stdlib uniquement) ─────────────────────────────────────
-def _xml_escape(s):
-    return (
-        str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        .replace('"', "&quot;").replace("'", "&apos;")
-    )
-
-
-def _col_ref(idx):
-    """0 -> A, 25 -> Z, 26 -> AA …"""
-    s = ""
-    idx += 1
-    while idx:
-        idx, r = divmod(idx - 1, 26)
-        s = chr(65 + r) + s
-    return s
-
-
-# Feuille de styles : xf 0 = défaut, xf 1 = remplissage gris (champs calculés).
-# fills : index 0 (none) et 1 (gray125) réservés par la spec ; gris solide en index 2.
-_STYLES_XML = (
-    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-    '<fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>'
-    '<fills count="3">'
-    '<fill><patternFill patternType="none"/></fill>'
-    '<fill><patternFill patternType="gray125"/></fill>'
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFD9D9D9"/><bgColor indexed="64"/></patternFill></fill>'
-    "</fills>"
-    '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
-    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-    '<cellXfs count="2">'
-    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
-    '<xf numFmtId="0" fontId="0" fillId="2" borderId="0" xfId="0" applyFill="1"/>'
-    "</cellXfs>"
-    "</styleSheet>"
-)
-
-
-def _sheet_xml(rows, greyed_cols=frozenset()):
-    out = [
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',
-        "<sheetData>",
-    ]
-    for r, row in enumerate(rows, start=1):
-        out.append(f'<row r="{r}">')
-        for c, val in enumerate(row):
-            ref = f"{_col_ref(c)}{r}"
-            s_attr = ' s="1"' if c in greyed_cols else ""
-            if isinstance(val, bool):
-                val = str(val)
-            if isinstance(val, (int, float)):
-                out.append(f'<c r="{ref}"{s_attr}><v>{val}</v></c>')
-            else:
-                out.append(
-                    f'<c r="{ref}"{s_attr} t="inlineStr"><is>'
-                    f'<t xml:space="preserve">{_xml_escape(val)}</t></is></c>'
-                )
-        out.append("</row>")
-    out.append("</sheetData></worksheet>")
-    return "".join(out)
-
-
-def write_xlsx(path, sheets):
-    """sheets : liste de (nom_feuille, rows, greyed_cols) ; rows = liste de listes de cellules."""
-    n = len(sheets)
-    content_types = [
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
-        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>',
-        '<Default Extension="xml" ContentType="application/xml"/>',
-        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>',
-        '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>',
-    ]
-    for i in range(n):
-        content_types.append(
-            f'<Override PartName="/xl/worksheets/sheet{i + 1}.xml" '
-            'ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-        )
-    content_types.append("</Types>")
-
-    root_rels = (
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
-        "</Relationships>"
-    )
-
-    wb_sheets = "".join(
-        f'<sheet name="{_xml_escape(name)}" sheetId="{i + 1}" r:id="rId{i + 1}"/>'
-        for i, (name, _, _) in enumerate(sheets)
-    )
-    workbook = (
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
-        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-        f"<sheets>{wb_sheets}</sheets></workbook>"
-    )
-
-    wb_rels = [
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
-    ]
-    for i in range(n):
-        wb_rels.append(
-            f'<Relationship Id="rId{i + 1}" '
-            'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" '
-            f'Target="worksheets/sheet{i + 1}.xml"/>'
-        )
-    # rId hors de la plage des feuilles pour la feuille de styles.
-    wb_rels.append(
-        f'<Relationship Id="rId{n + 1}" '
-        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" '
-        'Target="styles.xml"/>'
-    )
-    wb_rels.append("</Relationships>")
-
-    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("[Content_Types].xml", "".join(content_types))
-        z.writestr("_rels/.rels", root_rels)
-        z.writestr("xl/workbook.xml", workbook)
-        z.writestr("xl/_rels/workbook.xml.rels", "".join(wb_rels))
-        z.writestr("xl/styles.xml", _STYLES_XML)
-        for i, (_, rows, greyed_cols) in enumerate(sheets):
-            z.writestr(f"xl/worksheets/sheet{i + 1}.xml", _sheet_xml(rows, greyed_cols))
 
 
 # ── Construction de la feuille ───────────────────────────────────────────────
@@ -236,9 +107,7 @@ def _build_sheets():
 def build_bestiaire_xlsx_bytes() -> bytes:
     """Construit le classeur en mémoire et renvoie les octets .xlsx (pour HTTP)."""
     sheets, _, _ = _build_sheets()
-    buf = io.BytesIO()
-    write_xlsx(buf, sheets)
-    return buf.getvalue()
+    return build_xlsx_bytes(sheets)
 
 
 def main():
