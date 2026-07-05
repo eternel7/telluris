@@ -672,6 +672,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# grimoire) — resynchronisés par lancer_sort/apprendre_sort côté client.
 			"sorts": sorts_util.liste_sorts_payload(character, get_doc, "exploration"),
 			"sorts_apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref),
+			"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.
@@ -722,6 +723,9 @@ async def get_combat_page(
 			# Sorts connus utilisables en combat (part instantanée degats/pv/pm), avec
 			# disponibilité des composants — resynchronisés par la réponse de l'action « sort ».
 			"sorts": sorts_util.liste_sorts_payload(character, get_doc, "combat"),
+			# Sorts épinglés en accès rapide (icônes directement cliquables de la barre
+			# d'action) — sous-ensemble ordonné des sorts connus.
+			"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
 		},
 		headers={"Cache-Control": "no-store"},
 	)

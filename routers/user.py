@@ -996,6 +996,35 @@ async def apprendre_sort(
 	}
 
 
+@user_router.post("/epingler_sort")
+async def epingler_sort(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Épingle/désépingle un sort connu en accès rapide (barre d'icônes en combat).
+	Matérialise d'abord la liste effective (défaut = premier sort connu auto-épinglé,
+	cf. `sorts_epingles_effectifs`) pour que le choix du joueur reste explicite."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	sort_id = body.get("sort_id")
+	if sort_id not in (character.get("sorts_connus") or []):
+		raise HTTPException(status_code=422, detail="Sort inconnu du personnage")
+
+	epingles = list(sorts_util.sorts_epingles_effectifs(character))
+	if bool(body.get("epingle")):
+		if sort_id not in epingles:
+			epingles.append(sort_id)
+	else:
+		epingles = [s for s in epingles if s != sort_id]
+	character["sorts_epingles"] = epingles
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	return {"sorts_epingles": epingles}
+
+
 @user_router.post("/recolter")
 async def recolter_ressource(
 	current_user: Annotated[User, Depends(get_current_user)],

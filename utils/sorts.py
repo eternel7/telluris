@@ -231,6 +231,21 @@ def sorts_connus_docs(character: dict, get_doc) -> list:
 	return out
 
 
+def sorts_epingles_effectifs(character: dict) -> list:
+	"""Sorts d'accès rapide (barre d'icônes en combat), ids ordonnés.
+
+	Champ `sorts_epingles` présent → liste filtrée aux sorts encore connus (ordre
+	conservé, y compris vide = choix explicite du joueur). Champ absent (perso
+	d'avant la feature ou jamais touché) → **auto-épinglage du premier sort connu**,
+	sans migration."""
+	character = character or {}
+	connus = character.get("sorts_connus") or []
+	if "sorts_epingles" in character:
+		epingles = character.get("sorts_epingles") or []
+		return [s for s in epingles if s in connus]
+	return connus[:1]
+
+
 def sorts_apprenables(character: dict, find_docs, resolve_ref) -> list:
 	"""Sorts achetables par le personnage : vocation pratiquée (présente dans
 	vocations_niveaux), niveau de vocation suffisant, pas déjà connu. Chaque entrée

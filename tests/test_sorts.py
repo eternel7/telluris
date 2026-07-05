@@ -12,6 +12,7 @@ from utils.sorts import (
     normaliser_sort, effets_de_sort, fusionner_effets, composants_etat,
     effets_effectifs, sort_utilisable_combat, sort_utilisable_exploration,
     empiler_effet_sort, cout_apprentissage, grimoire_pour, sorts_apprenables,
+    sorts_epingles_effectifs,
 )
 from utils import combat as combat_mod
 from utils.combat import _magic_hit_threshold, resolve_action, roll_dice
@@ -342,3 +343,29 @@ def test_sort_buff_pur_refuse_en_combat():
     res = resolve_action(combat, "sort", sort=_sort_arg(sort_doc))
     assert "error" in res
     assert combat["joueurs"][0]["currentPM"] == 20
+
+
+# ── Sorts épinglés (accès rapide en combat) ──────────────────────────────────────
+
+def test_epingles_champ_absent_auto_premier_sort():
+    # Perso d'avant la feature : le premier sort connu est auto-épinglé.
+    char = {"sorts_connus": ["sort:a", "sort:b"]}
+    assert sorts_epingles_effectifs(char) == ["sort:a"]
+
+
+def test_epingles_champ_absent_sans_sort():
+    assert sorts_epingles_effectifs({}) == []
+    assert sorts_epingles_effectifs(None) == []
+
+
+def test_epingles_champ_present_filtre_aux_connus():
+    # Sort désappris/retiré → purgé de la liste effective, ordre conservé.
+    char = {"sorts_connus": ["sort:a", "sort:c"],
+            "sorts_epingles": ["sort:c", "sort:oublie", "sort:a"]}
+    assert sorts_epingles_effectifs(char) == ["sort:c", "sort:a"]
+
+
+def test_epingles_champ_present_vide_pas_de_fallback():
+    # Le joueur a explicitement tout désépinglé : on respecte son choix.
+    char = {"sorts_connus": ["sort:a"], "sorts_epingles": []}
+    assert sorts_epingles_effectifs(char) == []

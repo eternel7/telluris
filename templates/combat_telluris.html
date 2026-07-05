@@ -378,6 +378,9 @@
 	display: flex; align-items: center; gap: 4px;
 	font-size: 12px; color: #cbb98a; cursor: pointer; white-space: nowrap;
 }
+/* Sorts épinglés (accès rapide) : icônes directement cliquables dans la barre d'action. */
+#quick-sorts { display: inline-flex; gap: 6px; align-items: center; }
+#quick-sorts .quick-sort-btn { padding: 6px 10px; font-size: 1.15rem; line-height: 1; }
 
 .combat-log {
 	background: var(--panel-bg);
@@ -557,9 +560,10 @@
 		<div class="action-bar">
 			<div class="btn-row">
 				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
-				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
-				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>
+				<div id="quick-sorts"></div>			
 				<button class="action-btn" id="btn-sorts" onclick="triggerSort()" title="Lancer un sort (1 action + PM ; composants optionnels = effet renforcé)">🔮 Sorts</button>
+				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>	
+				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
 				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
 			</div>
 			<div id="attack-mode-row" style="display:none;">
@@ -725,6 +729,10 @@ let CONSOS = {{ consommables | tojson | safe }};
 // Sorts connus utilisables en combat (part instantanée degats/pv/pm + composants avec
 // disponibilité) — resynchronisés par la réponse de l'action « sort ».
 let SORTS = {{ sorts | tojson | safe }};
+// Sorts épinglés en accès rapide (ids ordonnés, sous-ensemble des connus) : icônes
+// directement cliquables dans la barre d'action. Épinglage géré dans l'onglet ⚡
+// de play_town ; un sort épinglé absent de SORTS (pas d'effet instantané) est ignoré.
+const SORTS_EPINGLES = {{ sorts_epingles | tojson | safe }};
 // Sort offensif confirmé en attente de cible : {sort_id, composants, portee} — les
 // badges/tokens passent en liseré violet et leur clic lance le sort au lieu d'attaquer.
 let pendingSort = null;
@@ -1154,12 +1162,14 @@ function sortTargets(s) {
 	}
 	return list;
 }
-// Sorts lançables maintenant : PM suffisants, et pour un sort offensif au moins une cible.
-function castableSorts() {
+// Sort lançable maintenant ? PM suffisants, et pour un sort offensif au moins une cible.
+// Partagé entre le sélecteur 🔮 (castableSorts) et les icônes d'accès rapide.
+function sortCastable(s) {
 	const j = state.joueurs[0] || {};
-	return SORTS.filter(s => (j.currentPM || 0) >= s.cout_pm
-		&& (s.cible !== 'ennemi' || sortTargets(s).length > 0));
+	return (j.currentPM || 0) >= s.cout_pm
+		&& (s.cible !== 'ennemi' || sortTargets(s).length > 0);
 }
+function castableSorts() { return SORTS.filter(sortCastable); }
 function canCast(data) {
 	const j = data.joueurs[0];
 	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
@@ -1248,6 +1258,11 @@ function updateButtons(data) {
 	btnSorts.disabled = !canCast(data);
 	document.getElementById('btn-sort-confirm').disabled = !canCast(data);
 	if (!canCast(data)) document.getElementById('sort-row').style.display = 'none';
+	// Icônes d'accès rapide : même prédicat que le 🔮, par sort.
+	document.querySelectorAll('#quick-sorts .quick-sort-btn').forEach(b => {
+		const s = SORTS.find(x => x.sort_id === b.dataset.sort);
+		b.disabled = !canAct || !s || !sortCastable(s);
+	});
 }
 
 function refreshTargetSelect() {
@@ -1383,13 +1398,10 @@ function triggerSort() {
 	sel.innerHTML = sortOptions.map((s, i) => `<option value="${i}">${sortLabel(s)}</option>`).join('');
 	document.getElementById('sort-row').style.display = 'flex';
 }
-function confirmSort() {
-	const s = sortOptions[parseInt(document.getElementById('sort-select').value, 10)];
-	if (!s) { closeSelectors(); return; }
-	// « Engager tout ce qui est disponible », débrayable par la checkbox (économiser
-	// ses composants consommables) — le serveur re-vérifie de toute façon.
-	const engager = document.getElementById('sort-comp-check').checked;
-	const composants = engager ? (s.composants || []).filter(c => c.disponible).map(c => c.item) : [];
+// Lance le sort `s` avec les composants engagés : cast direct (soi / 1 cible) ou
+// passage des badges/tokens en mode ciblage violet (plusieurs cibles). Partagé entre
+// le sélecteur 🔮 (confirmSort) et les icônes d'accès rapide (quickCastSort).
+function startSortCast(s, composants) {
 	if (s.cible === 'ennemi') {
 		const cibles = sortTargets(s);
 		if (!cibles.length) { closeSelectors(); return; }
@@ -1406,6 +1418,36 @@ function confirmSort() {
 	} else {
 		doAction('sort', null, null, null, null, null, { sort_id: s.sort_id, composants });
 	}
+}
+function confirmSort() {
+	const s = sortOptions[parseInt(document.getElementById('sort-select').value, 10)];
+	if (!s) { closeSelectors(); return; }
+	// « Engager tout ce qui est disponible », débrayable par la checkbox (économiser
+	// ses composants consommables) — le serveur re-vérifie de toute façon.
+	const engager = document.getElementById('sort-comp-check').checked;
+	const composants = engager ? (s.composants || []).filter(c => c.disponible).map(c => c.item) : [];
+	startSortCast(s, composants);
+}
+
+// ── Accès rapide : icônes des sorts épinglés, directement cliquables ─
+// Reconstruites quand SORTS est resynchronisé (composants consommés → tooltip à jour) ;
+// l'état enabled/disabled est géré par updateButtons (même prédicat que le 🔮).
+function renderQuickSorts() {
+	const box = document.getElementById('quick-sorts');
+	box.innerHTML = SORTS_EPINGLES
+		.map(id => SORTS.find(s => s.sort_id === id))
+		.filter(Boolean)
+		.map(s => `<button class="action-btn quick-sort-btn" data-sort="${s.sort_id}"
+			title="${sortLabel(s)}" onclick="quickCastSort('${s.sort_id}')">${s.icon || '🔮'}</button>`)
+		.join('');
+}
+function quickCastSort(sortId) {
+	const s = SORTS.find(x => x.sort_id === sortId);
+	if (!s || !sortCastable(s)) return;
+	closeSelectors();
+	// Composants engagés par défaut (même comportement que la checkbox 🔮 cochée).
+	const composants = (s.composants || []).filter(c => c.disponible).map(c => c.item);
+	startSortCast(s, composants);
 }
 
 async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode = null, extra = null) {
@@ -1425,7 +1467,7 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 		if (res.ok) {
 			const data = await res.json();
 			if (data.consommables) CONSOS = data.consommables;
-			if (data.sorts) SORTS = data.sorts;
+			if (data.sorts) { SORTS = data.sorts; renderQuickSorts(); }
 			updateUI(data.combat);
 		} else if (res.status === 409) {
 			// Conflit de sauvegarde : recharger l'état réel du combat depuis le serveur.
@@ -1551,6 +1593,7 @@ renderTokens();
 refreshBadgeTargets();
 updateCamera();
 updateModeSelector(state);   // révèle le sélecteur cac/jet/tir dès le chargement (sinon visible qu'après la 1re action)
+renderQuickSorts();          // icônes des sorts épinglés (avant updateButtons qui règle leur état)
 refreshTargetSelect();
 updateButtons(state);
 updateJoueur(activePlayer(state));
