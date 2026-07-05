@@ -167,6 +167,9 @@
 
 		<!-- Tableau -->
 		<div class="card" id="table-card" style="display:none">
+			<div class="btn-row" style="margin-top:0;margin-bottom:10px">
+				<button class="btn secondary" type="button" id="export-btn" title="Exporter les documents complets des lignes affichées (filtres/tri appliqués)">⬇ Export JSON</button>
+			</div>
 			<div class="count" id="row-count"></div>
 			<div class="table-wrap">
 				<table id="data-table">
@@ -397,9 +400,9 @@ function renderHead() {
 	});
 }
 
-// ── Rendu : corps (filtré puis trié) ───────────────────────────────
-function renderBody() {
-	// Indices d'origine pour retrouver le doc édité après tri/filtre.
+// Lignes actuellement affichées (filtrées puis triées), sous la forme { d, i }
+// où `i` est l'index d'origine dans docs[]. Source unique pour le rendu et l'export.
+function computeVisibleRows() {
 	let rows = docs.map((d, i) => ({ d, i }));
 	// Filtres (substring insensible à la casse, par colonne visible).
 	for (const c of visible) {
@@ -408,6 +411,12 @@ function renderBody() {
 	}
 	// Tri.
 	if (sortCol) rows.sort((a, b) => sortDir * cmp(a.d[sortCol], b.d[sortCol]));
+	return rows;
+}
+
+// ── Rendu : corps (filtré puis trié) ───────────────────────────────
+function renderBody() {
+	const rows = computeVisibleRows();
 
 	$('data-body').innerHTML = rows.map(r => {
 		const tds = visible.map(c => {
@@ -495,7 +504,52 @@ $('json-save').addEventListener('click', async () => {
 	}
 });
 
+// ── Export ─────────────────────────────────────────────────────────
+// Segment de nom de fichier : minuscule, [a-z0-9] conservés, tout le reste
+// devient « _ », underscores multiples repliés, bords nettoyés.
+function slugify(s) {
+	return String(s == null ? '' : s).toLowerCase()
+		.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+// Nom du fichier d'export : type + filtres actifs + horodatage (AAAAMMJJHHMMSS).
+// Ex. « item_filtre_categorie_arme_20260707202012.json ».
+function exportFilename() {
+	const parts = [slugify(currentType) || 'export'];
+	// Filtres actifs (colonne + valeur), dans l'ordre d'affichage des colonnes.
+	const actifs = visible.filter(c => (filters[c] || '').trim());
+	if (actifs.length) {
+		parts.push('filtre');
+		actifs.forEach(c => { parts.push(slugify(c), slugify(filters[c])); });
+	}
+	const d = new Date();
+	const p2 = n => String(n).padStart(2, '0');
+	const stamp = '' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate())
+		+ p2(d.getHours()) + p2(d.getMinutes()) + p2(d.getSeconds());
+	parts.push(stamp);
+	return parts.filter(Boolean).join('_') + '.json';
+}
+
+// Exporte les documents COMPLETS des lignes actuellement affichées
+// (filtres + tri appliqués), dans l'ordre du tableau, en un fichier JSON.
+function exportVisible() {
+	const rows = computeVisibleRows();
+	if (!rows.length) { setStatus($('load-status'), 'Rien à exporter (aucune ligne affichée).', 'err'); return; }
+	const out = rows.map(r => docs[r.i]);   // docs complets, pas seulement les colonnes visibles
+	const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = exportFilename();
+	document.body.appendChild(a);
+	a.click();
+	a.remove();
+	URL.revokeObjectURL(url);
+	setStatus($('load-status'), out.length + ' document(s) exporté(s).', 'ok');
+}
+
 // ── Init ───────────────────────────────────────────────────────────
+$('export-btn').addEventListener('click', exportVisible);
 $('load-btn').addEventListener('click', loadType);
 $('type-input').addEventListener('keydown', e => { if (e.key === 'Enter') loadType(); });
 </script>
