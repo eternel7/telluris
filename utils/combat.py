@@ -45,9 +45,18 @@ def _recompute_player_deplacement(joueur: dict) -> None:
 
 # ── Grille de combat ─────────────────────────────────────────────────────────
 # Terrain cells[y][x] : -1 inaccessible, 0 inaccessible sauf vol, 1 accessible,
-# n>1 accessible sous condition. Le vol n'étant pas implémenté, seuil >= 1.
+# 3 = falaise (infranchissable au sol, mais transparente à la vision : on tire/lance
+# un sort par-dessus), n>1 accessible sous condition. Deux prédicats distincts :
+# `_walkable` (déplacement, exclut les falaises sauf vol) et `_passable` (vision, seuil
+# >= 1, donc une falaise ne bloque pas la ligne de vue).
 DEFAULT_GRID_W = 13
 DEFAULT_GRID_H = 11
+TERRAIN_FALAISE = 3
+
+
+def _can_fly(actor: dict) -> bool:
+	"""L'acteur peut-il franchir les falaises ? Hook `volant` (inerte tant que non peuplé)."""
+	return bool(actor.get("volant"))
 
 
 def _open_grid(w: int = DEFAULT_GRID_W, h: int = DEFAULT_GRID_H) -> dict:
@@ -56,12 +65,26 @@ def _open_grid(w: int = DEFAULT_GRID_W, h: int = DEFAULT_GRID_H) -> dict:
 
 
 def _passable(cells: list, x: int, y: int) -> bool:
+	"""Case transparente à la vision (`>= 1`) : une falaise (3) n'arrête pas un projectile,
+	seul un mur (`< 1`) le fait. Prédicat de LIGNE DE VUE uniquement — pour le déplacement
+	voir `_walkable`."""
 	if not cells or y < 0 or y >= len(cells):
 		return False
 	row = cells[y]
 	if x < 0 or x >= len(row):
 		return False
 	return row[x] >= 1
+
+
+def _walkable(cells: list, x: int, y: int, flying: bool = False) -> bool:
+	"""Case franchissable au DÉPLACEMENT : praticable (`>= 1`) et, sauf vol, pas une falaise."""
+	if not cells or y < 0 or y >= len(cells):
+		return False
+	row = cells[y]
+	if x < 0 or x >= len(row):
+		return False
+	val = row[x]
+	return val >= 1 and (flying or val != TERRAIN_FALAISE)
 
 
 def _cheby(a: dict, b: dict) -> int:
@@ -137,7 +160,7 @@ def _reset_turn_budget(actor: dict) -> None:
 
 
 def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
-			   nav: dict | None = None) -> list | None:
+			   nav: dict | None = None, flying: bool = False) -> list | None:
 	"""A* 8-directions (heuristique Chebyshev). Porté du prototype client.
 
 	Mêmes règles que le déplacement du joueur : un pas est valide s'il vise une case
@@ -171,7 +194,7 @@ def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
 			nx, ny = cur["x"] + dx, cur["y"] + dy
 			if nx < 0 or nx >= w or ny < 0 or ny >= h:
 				continue
-			if not _passable(cells, nx, ny):
+			if not _walkable(cells, nx, ny, flying):
 				continue
 			if not nav_allows(nav, cur["x"], cur["y"], dx, dy):
 				continue
@@ -193,7 +216,8 @@ def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
 	return None
 
 
-def _nearest_passable(cells: list, dims: dict, tx: int, ty: int, occupied: set) -> tuple:
+def _nearest_passable(cells: list, dims: dict, tx: int, ty: int, occupied: set,
+					  flying: bool = False) -> tuple:
 	"""Case praticable et libre la plus proche de (tx, ty) par recherche en spirale."""
 	w, h = dims["x"], dims["y"]
 	tx = max(0, min(w - 1, tx))
@@ -204,7 +228,7 @@ def _nearest_passable(cells: list, dims: dict, tx: int, ty: int, occupied: set) 
 				if max(abs(dx), abs(dy)) != radius:
 					continue
 				x, y = tx + dx, ty + dy
-				if _passable(cells, x, y) and (x, y) not in occupied:
+				if _walkable(cells, x, y, flying) and (x, y) not in occupied:
 					return (x, y)
 	return (tx, ty)
 
@@ -231,14 +255,15 @@ def _is_type1(cells: list, x: int, y: int) -> bool:
 	return 0 <= y < len(cells) and 0 <= x < len(cells[y]) and cells[y][x] == 1
 
 
-def _reachable_region(cells: list, dims: dict, nav: dict, start: tuple) -> set:
-	"""Toutes les cases praticables (>=1) atteignables depuis `start`.
+def _reachable_region(cells: list, dims: dict, nav: dict, start: tuple,
+					  flying: bool = False) -> set:
+	"""Toutes les cases franchissables atteignables depuis `start`.
 
 	Flood fill 8-directions respectant `nav` — mêmes règles que l'A* de
-	déplacement, donc cette région == l'ensemble des cases que l'A* sait joindre.
+	déplacement (`_walkable`), donc cette région == l'ensemble des cases que l'A* sait joindre.
 	"""
 	sx, sy = start
-	if not _passable(cells, sx, sy):
+	if not _walkable(cells, sx, sy, flying):
 		return set()
 	w, h = dims["x"], dims["y"]
 	seen = {(sx, sy)}
@@ -249,7 +274,7 @@ def _reachable_region(cells: list, dims: dict, nav: dict, start: tuple) -> set:
 			nx, ny = x + dx, y + dy
 			if (nx, ny) in seen or nx < 0 or nx >= w or ny < 0 or ny >= h:
 				continue
-			if not _passable(cells, nx, ny) or not nav_allows(nav, x, y, dx, dy):
+			if not _walkable(cells, nx, ny, flying) or not nav_allows(nav, x, y, dx, dy):
 				continue
 			seen.add((nx, ny))
 			stack.append((nx, ny))
@@ -296,11 +321,11 @@ def _nearest_of(pool, ref: tuple) -> tuple | None:
 	return best
 
 
-def _first_passable_cells(cells: list, dims: dict, count: int) -> list:
-	"""Les `count` premières cases praticables (>0) en balayant depuis (0,0)."""
+def _first_passable_cells(cells: list, dims: dict, count: int, flying: bool = False) -> list:
+	"""Les `count` premières cases franchissables en balayant depuis (0,0)."""
 	out = []
 	for x, y in _iter_cells(dims):
-		if _passable(cells, x, y):
+		if _walkable(cells, x, y, flying):
 			out.append((x, y))
 			if len(out) >= count:
 				return out
@@ -811,6 +836,7 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 		(joueur["pos"]["x"], joueur["pos"]["y"]),
 		blocked,
 		grid.get("nav", {}),
+		flying=_can_fly(monstre),
 	)
 	if not path or len(path) < 2:
 		return False
@@ -950,7 +976,7 @@ def resolve_action(
 		nx, ny = joueur["pos"]["x"] + dx, joueur["pos"]["y"] + dy
 		if nx < 0 or nx >= dims["x"] or ny < 0 or ny >= dims["y"]:
 			return {"error": "Hors de la zone."}
-		if not _passable(cells, nx, ny):
+		if not _walkable(cells, nx, ny, _can_fly(joueur)):
 			return {"error": "Terrain infranchissable."}
 		if not nav_allows(grid.get("nav", {}), joueur["pos"]["x"], joueur["pos"]["y"], dx, dy):
 			return {"error": "Direction bloquée."}

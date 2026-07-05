@@ -142,6 +142,20 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 		vocation = next((v for v in vocations["value"] if v["id"] == characterinfo["voc"]), None)
 		inventaire_de_base = vocation.get("equipement_de_base", []) if vocation else []
 
+		# Garde anti-faute-de-frappe : chaque réf d'équipement de départ doit résoudre
+		# vers un item existant (IDs CouchDB sensibles à la casse). Une réf morte est
+		# ignorée ET signalée — sinon elle resterait dans l'inventaire du personnage,
+		# invisible et non équipable (resolve_item_ref / _inventory_payload la filtrent
+		# silencieusement à l'affichage).
+		inventaire_valide = []
+		for ref in inventaire_de_base:
+			if resolve_item_ref(ref):
+				inventaire_valide.append(ref)
+			else:
+				print(f"[add_character] equipement_de_base ignoré (item introuvable) : "
+					f"{item_ref_id(ref)!r} — vocation {characterinfo['voc']!r}")
+		inventaire_de_base = inventaire_valide
+
 		# Sort de départ : les vocations « pures magiciennes » (SORT_VOCATIONS_DEPART)
 		# choisissent UN sort niveau 0 de leur vocation à la création (validé serveur).
 		# Dégradé gracieux : si aucun sort niveau 0 n'existe encore en base pour la
