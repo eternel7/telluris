@@ -120,6 +120,8 @@
 	font-size: 13px; font-weight: bold; color: #ffaaaa;
 }
 .monster-token.adjacent .mt-portrait { border-color: #ffd700; box-shadow: 0 0 10px #ffd700; }
+/* Ciblage de sort en attente (pendingSort) : liseré violet au lieu du doré/rouge. */
+.monster-token.spellcast .mt-portrait { border-color: #b26bff; box-shadow: 0 0 10px #b26bff; }
 .monster-token.dead { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
 .monster-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
 .monster-token .mt-hp-fill { height: 100%; background: #ff4757; }
@@ -147,6 +149,7 @@
 /* Monstre : bordure grise (défaut) = hors de portée ; .targetable = à portée + attaquable. */
 .init-badge.monstre { background: #3a2a2a; border-color: #555; color: #ffaaaa; }
 .init-badge.monstre.targetable { border-color: #ff4757; box-shadow: 0 0 9px rgba(255,71,87,0.7); cursor: pointer; }
+.init-badge.monstre.spellcast  { border-color: #b26bff; box-shadow: 0 0 9px rgba(178,107,255,0.7); cursor: pointer; }
 .init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.12); }
 .init-badge.dead    { opacity: 0.3; filter: grayscale(1); }
 
@@ -363,13 +366,17 @@
 	border-color: var(--gold2, #d8b24a); color: var(--gold2, #d8b24a);
 	background: #2e2510;
 }
-#target-row, #conso-row {
+#target-row, #conso-row, #sort-row {
 	display: none; gap: 8px; align-items: center; justify-content: center;
 }
-#target-select, #conso-select {
+#target-select, #conso-select, #sort-select {
 	flex: 1; max-width: 200px; padding: 6px 10px;
 	background: #1a1a1a; color: #eee;
 	border: 1px solid #555; border-radius: 6px; font-size: 13px;
+}
+#sort-comp-label {
+	display: flex; align-items: center; gap: 4px;
+	font-size: 12px; color: #cbb98a; cursor: pointer; white-space: nowrap;
 }
 
 .combat-log {
@@ -582,6 +589,7 @@
 				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
 				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
 				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>
+				<button class="action-btn" id="btn-sorts" onclick="triggerSort()" title="Lancer un sort (1 action + PM ; composants optionnels = effet renforcé)">🔮 Sorts</button>
 				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
 			</div>
 			<div id="attack-mode-row" style="display:none;">
@@ -596,6 +604,11 @@
 			<div id="conso-row">
 				<select id="conso-select"></select>
 				<button class="action-btn" id="btn-conso-confirm" onclick="confirmConsume()">✓ Consommer</button>
+			</div>
+			<div id="sort-row">
+				<select id="sort-select"></select>
+				<label id="sort-comp-label" title="Engager les composants disponibles (les consommés sont dépensés, les catalyseurs restent)"><input type="checkbox" id="sort-comp-check" checked>Composants</label>
+				<button class="action-btn" id="btn-sort-confirm" onclick="confirmSort()">✓ Lancer</button>
 			</div>
 		</div>
 		<!-- Tour header + Initiative strip -->
@@ -706,6 +719,13 @@ const GRID = {{ grid | tojson | safe }};
 // Consommables du sac utilisables en combat (effet instantané pv/pm, index d'origine
 // dans l'inventaire) — resynchronisés par la réponse de l'action « consommer ».
 let CONSOS = {{ consommables | tojson | safe }};
+
+// Sorts connus utilisables en combat (part instantanée degats/pv/pm + composants avec
+// disponibilité) — resynchronisés par la réponse de l'action « sort ».
+let SORTS = {{ sorts | tojson | safe }};
+// Sort offensif confirmé en attente de cible : {sort_id, composants, portee} — les
+// badges/tokens passent en liseré violet et leur clic lance le sort au lieu d'attaquer.
+let pendingSort = null;
 
 // L'image de fond couvre exactement dims.x × dims.y cases (sinon l'art ne s'aligne
 // plus avec les coordonnées de la grille). Piloté par GRID.dims, plus de 30 en dur.
@@ -920,13 +940,21 @@ function updateInitiativeStrip(data) {
 function refreshBadgeTargets() {
 	const j = state.joueurs[0] || {};
 	const canAct = state.status === 'active' && isPlayerTurn(state) && (j.actions_restantes || 0) > 0;
-	const targetable = new Set(canAct ? targetableMonsters(currentMode).map(m => m.id) : []);
+	// Ciblage de sort en attente : les cibles du sort remplacent celles de l'attaque
+	// (liseré violet .spellcast, clic = lancer le sort au lieu d'attaquer).
+	const casting = canAct && pendingSort;
+	const targets = casting ? sortTargets(pendingSort.sort) : (canAct ? targetableMonsters(currentMode) : []);
+	const targetable = new Set(targets.map(m => m.id));
 	state.monstres.forEach(m => {
 		const el = document.getElementById(`badge-${m.id}`);   // badge-<actor_id>, actor_id monstre = m.id
 		if (!el) return;
 		const t = targetable.has(m.id);
-		el.classList.toggle('targetable', t);
-		el.onclick = t ? () => doAction('attaquer', m.id, null, null, null, currentMode) : null;
+		el.classList.toggle('targetable', t && !casting);
+		el.classList.toggle('spellcast',  t && !!casting);
+		el.onclick = !t ? null : (casting
+			? () => doAction('sort', m.id, null, null, null, null,
+				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+			: () => doAction('attaquer', m.id, null, null, null, currentMode));
 	});
 }
 
@@ -953,14 +981,17 @@ function chebyToPlayer(m) {
 function renderTokens() {
 	const layer = document.getElementById('tokens-layer');
 	const j = state.joueurs[0];
-	const targetable = new Set(targetableMonsters(currentMode).map(m => m.id));
+	// Ciblage de sort en attente : cibles du sort (liseré violet) au lieu de l'attaque.
+	const casting = !!pendingSort;
+	const targetable = new Set((casting ? sortTargets(pendingSort.sort) : targetableMonsters(currentMode)).map(m => m.id));
 	layer.innerHTML = '';
 	state.monstres.forEach(m => {
 		if (!m.pos) return;
 		const adj = targetable.has(m.id);
 		const [sx, sy] = worldToScreen(m.pos.x - j.pos.x, m.pos.y - j.pos.y);
 		const tok = document.createElement('div');
-		tok.className = 'monster-token' + (m.vivant ? '' : ' dead') + (adj ? ' adjacent' : '');
+		tok.className = 'monster-token' + (m.vivant ? '' : ' dead')
+			+ (adj ? (casting ? ' spellcast' : ' adjacent') : '');
 		tok.style.left   = `calc(50% + var(--step) * ${sx})`;
 		tok.style.bottom = `calc(var(--step) * (var(--floor) - (${sy})))`;
 		const portrait = m.image
@@ -968,7 +999,10 @@ function renderTokens() {
 			: `<div class="mt-portrait">${(m.nom || '?').charAt(0).toUpperCase()}</div>`;
 		tok.innerHTML = portrait +
 			`<div class="mt-hp"><div class="mt-hp-fill" style="width:${pct(m.currentPV, m.pv_max)}%"></div></div>`;
-		if (adj) tok.onclick = () => doAction('attaquer', m.id, null, null, null, currentMode);
+		if (adj) tok.onclick = casting
+			? () => doAction('sort', m.id, null, null, null, null,
+				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+			: () => doAction('attaquer', m.id, null, null, null, currentMode);
 		layer.appendChild(tok);
 	});
 }
@@ -1105,6 +1139,31 @@ function canConsume(data) {
 		&& CONSOS.length > 0;
 }
 
+// ── Sorts (1 action + PM) ────────────────────────────────────────────
+// Cibles valides d'un sort offensif : portée du sort, et au-delà du contact (portée > 1)
+// mêmes règles que le tir — non engagé + ligne de vue (miroir serveur).
+function sortTargets(s) {
+	const j = state.joueurs[0];
+	const portee = Math.max(1, s.portee || 1);
+	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
+	if (portee > 1) {
+		if (isEngaged()) return [];
+		list = list.filter(m => lineOfSight(j.pos.x, j.pos.y, m.pos.x, m.pos.y));
+	}
+	return list;
+}
+// Sorts lançables maintenant : PM suffisants, et pour un sort offensif au moins une cible.
+function castableSorts() {
+	const j = state.joueurs[0] || {};
+	return SORTS.filter(s => (j.currentPM || 0) >= s.cout_pm
+		&& (s.cible !== 'ennemi' || sortTargets(s).length > 0));
+}
+function canCast(data) {
+	const j = data.joueurs[0];
+	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
+		&& castableSorts().length > 0;
+}
+
 // ── Disponibilité d'une direction : miroir exact de la validation serveur `deplacer`.
 // getFinalMask / navAllows / VALID_MOVES proviennent de scripts/nav.js (partagé).
 function cellPassable(x, y) {
@@ -1167,6 +1226,12 @@ function updateButtons(data) {
 	document.getElementById('btn-consommer').disabled = !canConsume(data);
 	document.getElementById('btn-conso-confirm').disabled = !canConsume(data);
 	if (!canConsume(data)) document.getElementById('conso-row').style.display = 'none';
+	// 🔮 : masqué si le perso ne connaît aucun sort de combat, grisé si rien de lançable.
+	const btnSorts = document.getElementById('btn-sorts');
+	btnSorts.style.display = SORTS.length ? '' : 'none';
+	btnSorts.disabled = !canCast(data);
+	document.getElementById('btn-sort-confirm').disabled = !canCast(data);
+	if (!canCast(data)) document.getElementById('sort-row').style.display = 'none';
 }
 
 function refreshTargetSelect() {
@@ -1204,13 +1269,19 @@ function doRotate(sens) {
 	doAction('tourner', null, null, null, sens);
 }
 
-// Ferme les deux lignes de sélection (cible + consommable) et restaure le bouton
+// Ferme les lignes de sélection (cible + consommable + sort) et restaure le bouton
 // ⚔ Attaquer (masqué tant que le sélecteur de cible est ouvert). Appelé par tout
-// clic de bouton : doAction (actions), setMode (modes) et les deux triggers.
+// clic de bouton : doAction (actions), setMode (modes) et les triggers. Annule aussi
+// un éventuel ciblage de sort en attente (les badges/tokens redeviennent « attaque »).
 function closeSelectors() {
 	document.getElementById('target-row').style.display = 'none';
 	document.getElementById('conso-row').style.display = 'none';
+	document.getElementById('sort-row').style.display = 'none';
 	document.getElementById('btn-attaquer').style.display = '';
+	if (pendingSort) {
+		pendingSort = null;
+		if (window._combatReady) { renderTokens(); refreshBadgeTargets(); }
+	}
 }
 
 function triggerAttack() {
@@ -1274,11 +1345,58 @@ function confirmConsume() {
 	else closeSelectors();
 }
 
+// ── Lancer un sort (1 action + PM) : sélecteur puis, pour un sort offensif à
+// plusieurs cibles possibles, ciblage par badge/token (liseré violet, pendingSort).
+function sortLabel(s) {
+	const parts = [];
+	if (s.effets.degats) parts.push(`${s.effets.degats} dég.`);
+	if (s.effets.pv) parts.push(`+${s.effets.pv} PV`);
+	if (s.effets.pm) parts.push(`+${s.effets.pm} PM`);
+	const compos = (s.composants || []).filter(c => c.disponible).length;
+	return `${s.icon || '🔮'} ${s.nom} — ${s.cout_pm} PM`
+		+ (parts.length ? ` (${parts.join(', ')})` : '')
+		+ (compos ? ` [${compos} compo]` : '');
+}
+// Sorts affichés au moment de l'ouverture — confirmSort relit exactement cette liste.
+let sortOptions = [];
+function triggerSort() {
+	closeSelectors();
+	sortOptions = castableSorts();
+	if (!sortOptions.length) return;
+	const sel = document.getElementById('sort-select');
+	sel.innerHTML = sortOptions.map((s, i) => `<option value="${i}">${sortLabel(s)}</option>`).join('');
+	document.getElementById('sort-row').style.display = 'flex';
+}
+function confirmSort() {
+	const s = sortOptions[parseInt(document.getElementById('sort-select').value, 10)];
+	if (!s) { closeSelectors(); return; }
+	// « Engager tout ce qui est disponible », débrayable par la checkbox (économiser
+	// ses composants consommables) — le serveur re-vérifie de toute façon.
+	const engager = document.getElementById('sort-comp-check').checked;
+	const composants = engager ? (s.composants || []).filter(c => c.disponible).map(c => c.item) : [];
+	if (s.cible === 'ennemi') {
+		const cibles = sortTargets(s);
+		if (!cibles.length) { closeSelectors(); return; }
+		if (cibles.length === 1) {
+			doAction('sort', cibles[0].id, null, null, null, null, { sort_id: s.sort_id, composants });
+			return;
+		}
+		// Plusieurs cibles : les badges/tokens passent en mode ciblage de sort.
+		// (Ne PAS passer par closeSelectors ici : il annulerait pendingSort.)
+		pendingSort = { sort_id: s.sort_id, composants, sort: s };
+		document.getElementById('sort-row').style.display = 'none';
+		renderTokens();
+		refreshBadgeTargets();
+	} else {
+		doAction('sort', null, null, null, null, null, { sort_id: s.sort_id, composants });
+	}
+}
+
 async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode = null, extra = null) {
 	if (busy) return;
 	closeSelectors();
-	// Le portrait droit suit la cible que le joueur attaque.
-	if (type === 'attaquer' && cibleId) lastEnemyId = cibleId;
+	// Le portrait droit suit la cible que le joueur attaque (ou vise d'un sort).
+	if ((type === 'attaquer' || type === 'sort') && cibleId) lastEnemyId = cibleId;
 	busy = true;
 	document.querySelectorAll('#move-controls .btn, .action-btn')
 		.forEach(el => el.disabled = true);
@@ -1291,6 +1409,7 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 		if (res.ok) {
 			const data = await res.json();
 			if (data.consommables) CONSOS = data.consommables;
+			if (data.sorts) SORTS = data.sorts;
 			updateUI(data.combat);
 		} else if (res.status === 409) {
 			// Conflit de sauvegarde : recharger l'état réel du combat depuis le serveur.

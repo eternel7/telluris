@@ -755,6 +755,15 @@
 		.sh-skill-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; }
 		.sh-skill-desc { font-size: 0.85rem; color: var(--muted); }
 		.sh-skill-lvl { font-size: 0.85rem; color: var(--accent-color); flex-shrink: 0; }
+		/* ── Sorts (onglet ⚡) ── */
+		.sh-sort-pm { font-size: 0.8rem; color: #7ec8ff; font-weight: normal; margin-left: 6px; }
+		.sh-sort-compos { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+		.sh-sort-compo { font-size: 0.75rem; color: var(--muted); background: rgba(74,74,90,0.25);
+			border: 1px solid rgba(74,74,90,0.5); border-radius: 8px; padding: 1px 7px; }
+		.sh-sort-compo.off { opacity: 0.45; text-decoration: line-through; }
+		.sh-sort-uselbl { display: flex; align-items: center; gap: 3px; font-size: 0.75rem;
+			color: var(--muted); cursor: pointer; white-space: nowrap; }
+		.sh-sort-grim { font-size: 0.8rem; flex-shrink: 0; }
 		.sh-relation { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
 		.sh-rel-portrait { width: 100%; height: 100%;  overflow: hidden; background: #333; border: 1px solid var(--border-color); flex-shrink: 0; }
 		.sh-rel-portrait img { width: 100%; height: 100%; object-fit: cover; }
@@ -1442,6 +1451,16 @@
 
 					<!-- ── COMPETENCES ── -->
 					<div class="sheet-panel" id="sh-competences">
+						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
+						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
+						<div class="sh-section" style="display:flex; align-items:center; justify-content:space-between">
+							<span>🔮 Sorts connus</span>
+							<span style="color:#2ed573; font-size:.85rem">Points : <span id="sh-sort-points">{{ character.get("attribute_points", 0) }}</span></span>
+						</div>
+						<div id="sh-sorts-connus"></div>
+						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
+						<div id="sh-sorts-apprenables"></div>
+						<div class="sh-section" style="margin-top:14px">⚡ Compétences</div>
 						{% set comps = character.get("competences",[]) %}
 						{% if comps %}
 							{% for c in comps %}
@@ -2528,6 +2547,129 @@ async function consommerItem(index, itemId, btn) {
 	} catch(err) { console.error('Erreur consommation', err); if (btn) btn.disabled = false; }
 }
 
+// ── Sorts (onglet ⚡) ─────────────────────────────────────────────────
+// Connus (bouton Lancer si utilisable hors combat) + apprenables (coût en points,
+// grimoire requis). Rendus client depuis les payloads serveur, resynchronisés par
+// les réponses de lancer_sort / apprendre_sort.
+let _sorts            = {{ sorts | tojson | safe }};
+let _sortsApprenables = {{ sorts_apprenables | tojson | safe }};
+
+function _sortEffetsLabel(e) {
+	if (!e) return '';
+	const parts = [];
+	if (e.degats) parts.push(`${e.degats} dég.`);
+	if (e.pv) parts.push(`+${e.pv} PV`);
+	if (e.pm) parts.push(`+${e.pm} PM`);
+	for (const [k, v] of Object.entries(e.buffs || {})) parts.push(`${v > 0 ? '+' : ''}${v} ${k}`);
+	if (e.regen_pv) parts.push(`+${e.regen_pv} PV/tour`);
+	if (e.regen_pm) parts.push(`+${e.regen_pm} PM/tour`);
+	if (e.duree) parts.push(`${e.duree} tours`);
+	return parts.join(', ');
+}
+function _sortDomId(sortId) { return sortId.replace(/[^a-zA-Z0-9_-]/g, '_'); }
+
+function _renderSorts(list) {
+	if (Array.isArray(list)) _sorts = list;
+	const box = document.getElementById('sh-sorts-connus');
+	if (!box) return;
+	if (!_sorts.length) {
+		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">🔮</span>Aucun sort connu.</div>';
+		return;
+	}
+	box.innerHTML = _sorts.map(s => {
+		const compos = (s.composants || []).map(c =>
+			`<span class="sh-sort-compo${c.disponible ? '' : ' off'}" title="${c.consomme ? 'Consommé au lancement' : 'Catalyseur (non consommé, il suffit de le porter)'}">${c.consomme ? '⚗️' : '💎'} ${c.icon || ''} ${c.nom}${_sortEffetsLabel(c.bonus) ? ' → ' + _sortEffetsLabel(c.bonus) : ''}</span>`
+		).join('');
+		const hasCompo = (s.composants || []).some(c => c.disponible);
+		const actions = s.lancable
+			? `<label class="sh-sort-uselbl" title="Engager les composants disponibles (renforce le sort ; les consommés sont dépensés)"><input type="checkbox" id="sortchk-${_sortDomId(s.sort_id)}" checked ${hasCompo ? '' : 'disabled'}>compo</label>
+			   <button type="button" class="sh-drop-btn" onclick="lancerSort('${s.sort_id}', this)">Lancer</button>`
+			: `<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>`;
+		return `<div class="sh-skill">
+			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
+			<div class="sh-skill-info">
+				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span></div>
+				<div class="sh-skill-desc">${_sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}</div>
+				${compos ? `<div class="sh-sort-compos">${compos}</div>` : ''}
+			</div>
+			<div class="sh-inv-actions">${actions}</div>
+		</div>`;
+	}).join('');
+}
+
+function _renderSortsApprenables(list) {
+	if (Array.isArray(list)) _sortsApprenables = list;
+	const box = document.getElementById('sh-sorts-apprenables');
+	if (!box) return;
+	if (!_sortsApprenables.length) {
+		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">📖</span>Aucun sort à apprendre pour l\'instant.</div>';
+		return;
+	}
+	box.innerHTML = _sortsApprenables.map(s => {
+		const ok = s.grimoire_ok && _attributePoints >= s.cout_points;
+		const grim = s.grimoire_ok
+			? '<span class="sh-sort-grim" title="Grimoire porté">📖✔</span>'
+			: '<span class="sh-sort-grim" title="Il vous faut le grimoire qui enseigne ce sort (sac ou équipé)">📖✖</span>';
+		return `<div class="sh-skill">
+			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
+			<div class="sh-skill-info">
+				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span> ${grim}</div>
+				<div class="sh-skill-desc">Niv. ${s.niveau} · ${_sortEffetsLabel(s.effets)}</div>
+			</div>
+			<div class="sh-inv-actions">
+				<button type="button" class="sh-drop-btn" onclick="apprendreSort('${s.id}', this)" ${ok ? '' : 'disabled'}>Apprendre (${s.cout_points} pts)</button>
+			</div>
+		</div>`;
+	}).join('');
+}
+
+async function lancerSort(sortId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
+	const s = _sorts.find(x => x.sort_id === sortId);
+	const chk = document.getElementById('sortchk-' + _sortDomId(sortId));
+	const composants = (s && chk && chk.checked)
+		? (s.composants || []).filter(c => c.disponible).map(c => c.item) : [];
+	try {
+		const res = await fetch('api/lancer_sort', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ sort_id: sortId, composants })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		_applyInventoryPayload(data);   // composants consommés retirés du sac
+		updateVitals(data.vitals);
+		_renderEffetsActifs(data.effets_actifs);
+		_renderSorts(data.sorts);
+		const l = data.lance || {};
+		const gains = [];
+		if (l.pv_rendu) gains.push(`+${l.pv_rendu} PV`);
+		if (l.pm_rendu > 0) gains.push(`+${l.pm_rendu} PM`);
+		if (l.effet) gains.push(`effet actif ${l.effet.restants} tours`);
+		showToast(`${l.icon || '🔮'} ${l.nom || 'Sort lancé'}${gains.length ? ' : ' + gains.join(', ') : ''}`);
+	} catch(err) { console.error('Erreur sort', err); if (btn) btn.disabled = false; }
+}
+
+async function apprendreSort(sortId, btn) {
+	if (btn) btn.disabled = true;
+	try {
+		const res = await fetch('api/apprendre_sort', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ sort_id: sortId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		_attributePoints = data.attribute_points;
+		const pts = document.getElementById('sh-attribute-points');
+		if (pts) pts.textContent = _attributePoints;
+		const pts2 = document.getElementById('sh-sort-points');
+		if (pts2) pts2.textContent = _attributePoints;
+		_renderSorts(data.sorts);
+		_renderSortsApprenables(data.apprenables);
+		const a = data.appris || {};
+		showToast(`${a.icon || '🔮'} ${a.nom || 'Sort'} appris !`);
+	} catch(err) { console.error('Erreur apprentissage', err); if (btn) btn.disabled = false; }
+}
+
 async function dropItem(index, itemId) {
 	try {
 		const res  = await fetch('api/drop_item', {
@@ -2615,6 +2757,8 @@ _refreshInventaire();
 _refreshSol();
 _refreshChargeGauge();
 _renderEffetsActifs(_effetsActifs);
+_renderSorts();
+_renderSortsApprenables();
 
 // ── Vente au marchand ────────────────────────────────────────────────
 function formatPrix(prix) {

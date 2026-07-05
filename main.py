@@ -22,6 +22,7 @@ from utils.characters import get_user_characters, get_selected_character, recomp
 from utils import quetes
 from utils import bois
 from utils import consommables
+from utils import sorts as sorts_util
 from utils import focalisation
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
@@ -409,6 +410,10 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 			"characters_images": characters_images,
 			"towns_images": towns_images,
 			"xp_coeff": character_stats.XP_COEFF,
+			# Choix du sort de départ à la création : vocations « pures magiciennes »
+			# + sorts niveau 0 par vocation (id, nom, icon, description).
+			"sort_vocations_depart": list(character_stats.SORT_VOCATIONS_DEPART),
+			"sorts_depart": sorts_util.sorts_depart_par_vocation(find_docs),
 		}
 	)
 	
@@ -635,6 +640,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"focalisation": focalisation_payload,
 			"guidage": guidage_payload,
 			"effets_actifs": consommables.effets_actifs_payload(character),
+			# Sorts (onglet ⚡) : connus lançables hors combat + apprenables (coût points,
+			# grimoire) — resynchronisés par lancer_sort/apprendre_sort côté client.
+			"sorts": sorts_util.liste_sorts_payload(character, get_doc, "exploration"),
+			"sorts_apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.
@@ -682,6 +691,9 @@ async def get_combat_page(
 			# Consommables du sac utilisables en combat (effet instantané pv/pm), avec
 			# index d'origine — resynchronisés par la réponse de l'action « consommer ».
 			"consommables": consommables.liste_consommables_combat(character, resolve_item_ref),
+			# Sorts connus utilisables en combat (part instantanée degats/pv/pm), avec
+			# disponibilité des composants — resynchronisés par la réponse de l'action « sort ».
+			"sorts": sorts_util.liste_sorts_payload(character, get_doc, "combat"),
 		},
 		headers={"Cache-Control": "no-store"},
 	)

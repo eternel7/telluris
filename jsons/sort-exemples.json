@@ -1,0 +1,1397 @@
+{
+ "docs": [
+  {
+   "_id": "sort:trait_de_flamme",
+   "type": "sort",
+   "nom": "Trait de flamme",
+   "icon": "🔥",
+   "description": "Un dard de feu jaillit de la paume. Le soufre nourrit la flamme ; un cristal de canalisation la concentre.",
+   "vocation": "elementaliste",
+   "niveau": 0,
+   "cout_pm": 8,
+   "cible": "ennemi",
+   "portee": 4,
+   "effets": {
+    "degats": "2D6"
+   },
+   "composants": [
+    {
+     "item": "item:Soufre",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D6"
+     }
+    },
+    {
+     "item": "item:Cristal_canalisation",
+     "consomme": false,
+     "bonus": {
+      "degats": "2"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:armure_de_givre",
+   "type": "sort",
+   "nom": "Armure de givre",
+   "icon": "❄️",
+   "description": "Une pellicule de glace vive épaissit la peau. La poudre alchimique prolonge le gel.",
+   "vocation": "elementaliste",
+   "niveau": 0,
+   "cout_pm": 10,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "R": 10
+    },
+    "duree": 4
+   },
+   "composants": [
+    {
+     "item": "item:poudre_alchimique",
+     "consomme": true,
+     "bonus": {
+      "duree": 2
+     }
+    },
+    {
+     "item": "item:Cristal_canalisation",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "R": 5
+      }
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:projectile_arcanique",
+   "type": "sort",
+   "nom": "Projectile arcanique",
+   "icon": "✨",
+   "description": "Un trait d'énergie pure qui frappe à grande distance.",
+   "vocation": "mage",
+   "niveau": 0,
+   "cout_pm": 7,
+   "cible": "ennemi",
+   "portee": 5,
+   "effets": {
+    "degats": "1D8"
+   },
+   "composants": [
+    {
+     "item": "item:poudre_alchimique",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D4"
+     }
+    },
+    {
+     "item": "item:Cristal_canalisation",
+     "consomme": false,
+     "bonus": {
+      "degats": "1"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:bouclier_arcanique",
+   "type": "sort",
+   "nom": "Bouclier arcanique",
+   "icon": "🛡️",
+   "description": "Un écran de force invisible dévie les coups.",
+   "vocation": "mage",
+   "niveau": 0,
+   "cout_pm": 9,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "R": 10
+    },
+    "duree": 3
+   },
+   "composants": [
+    {
+     "item": "item:Cristal_canalisation",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "R": 5
+      }
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:eclat_eblouissant",
+   "type": "sort",
+   "nom": "Éclat éblouissant",
+   "icon": "🌟",
+   "description": "Une gerbe de lumière irréelle brûle les sens de la cible.",
+   "vocation": "illusionniste",
+   "niveau": 0,
+   "cout_pm": 8,
+   "cible": "ennemi",
+   "portee": 3,
+   "effets": {
+    "degats": "1D6+1"
+   },
+   "composants": [
+    {
+     "item": "item:Poudre_de_miroir",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D6"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:silhouettes_trompeuses",
+   "type": "sort",
+   "nom": "Silhouettes trompeuses",
+   "icon": "🪞",
+   "description": "Des doubles miroitants brouillent votre position.",
+   "vocation": "illusionniste",
+   "niveau": 0,
+   "cout_pm": 10,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "Ag": 10
+    },
+    "duree": 4
+   },
+   "composants": [
+    {
+     "item": "item:Poudre_de_miroir",
+     "consomme": true,
+     "bonus": {
+      "buffs": {
+       "Ag": 5
+      }
+     }
+    },
+    {
+     "item": "item:Sel_noir",
+     "consomme": false,
+     "bonus": {
+      "duree": 1
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:mot_de_pouvoir",
+   "type": "sort",
+   "nom": "Mot de pouvoir",
+   "icon": "📜",
+   "description": "Une syllabe interdite qui meurtrit la chair. L'encens porte le mot plus loin dans l'âme.",
+   "vocation": "lettre",
+   "niveau": 0,
+   "cout_pm": 8,
+   "cible": "ennemi",
+   "portee": 3,
+   "effets": {
+    "degats": "1D6"
+   },
+   "composants": [
+    {
+     "item": "item:encens",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D4"
+     }
+    },
+    {
+     "item": "item:Plume_d_oie",
+     "consomme": false,
+     "bonus": {
+      "degats": "1"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:formule_de_clairvoyance",
+   "type": "sort",
+   "nom": "Formule de clairvoyance",
+   "icon": "🖋️",
+   "description": "Un diagramme mental démultiplie l'acuité de l'esprit.",
+   "vocation": "lettre",
+   "niveau": 0,
+   "cout_pm": 9,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "Int": 10
+    },
+    "duree": 5
+   },
+   "composants": [
+    {
+     "item": "item:Plume_d_oie",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "Int": 5
+      }
+     }
+    },
+    {
+     "item": "item:encens",
+     "consomme": true,
+     "bonus": {
+      "duree": 2
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:morsure_de_ronces",
+   "type": "sort",
+   "nom": "Morsure de ronces",
+   "icon": "🌿",
+   "description": "Des ronces spectrales fouettent et lacèrent la cible.",
+   "vocation": "druide",
+   "niveau": 0,
+   "cout_pm": 7,
+   "cible": "ennemi",
+   "portee": 2,
+   "effets": {
+    "degats": "1D6"
+   },
+   "composants": [
+    {
+     "item": "item:Seve_de_chene",
+     "consomme": false,
+     "bonus": {
+      "degats": "1"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:seve_vivifiante",
+   "type": "sort",
+   "nom": "Sève vivifiante",
+   "icon": "🍃",
+   "description": "La vitalité de la forêt referme les plaies et continue d'agir.",
+   "vocation": "druide",
+   "niveau": 0,
+   "cout_pm": 9,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "pv": 10,
+    "regen_pv": 2,
+    "duree": 3
+   },
+   "composants": [
+    {
+     "item": "item:Herbes_medicinales",
+     "consomme": true,
+     "bonus": {
+      "pv": 8
+     }
+    },
+    {
+     "item": "item:Seve_de_chene",
+     "consomme": true,
+     "bonus": {
+      "regen_pv": 1
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:souffle_ancestral",
+   "type": "sort",
+   "nom": "Souffle ancestral",
+   "icon": "🪶",
+   "description": "Les esprits soufflent une bouffée de vie dans le corps.",
+   "vocation": "chaman",
+   "niveau": 0,
+   "cout_pm": 8,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "pv": 8
+   },
+   "composants": [
+    {
+     "item": "item:Herbes_a_bruler",
+     "consomme": true,
+     "bonus": {
+      "pv": 6
+     }
+    },
+    {
+     "item": "item:crocs",
+     "consomme": false,
+     "bonus": {
+      "pv": 2
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:transe_du_totem",
+   "type": "sort",
+   "nom": "Transe du totem",
+   "icon": "🐺",
+   "description": "L'esprit totem prête sa force à la chair.",
+   "vocation": "chaman",
+   "niveau": 0,
+   "cout_pm": 10,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "F": 10
+    },
+    "duree": 4
+   },
+   "composants": [
+    {
+     "item": "item:Herbes_a_bruler",
+     "consomme": true,
+     "bonus": {
+      "duree": 2
+     }
+    },
+    {
+     "item": "item:crocs",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "F": 5
+      }
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:lumiere_purificatrice",
+   "type": "sort",
+   "nom": "Lumière purificatrice",
+   "icon": "🕯️",
+   "description": "Un rayon de lumière sacrée consume l'impur.",
+   "vocation": "pretre",
+   "niveau": 0,
+   "cout_pm": 8,
+   "cible": "ennemi",
+   "portee": 3,
+   "effets": {
+    "degats": "1D8"
+   },
+   "composants": [
+    {
+     "item": "item:encens",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D4"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:soin_mineur",
+   "type": "sort",
+   "nom": "Soin mineur",
+   "icon": "✝️",
+   "description": "Une prière murmurée referme les blessures.",
+   "vocation": "pretre",
+   "niveau": 0,
+   "cout_pm": 8,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "pv": 12
+   },
+   "composants": [
+    {
+     "item": "item:Herbes_medicinales",
+     "consomme": true,
+     "bonus": {
+      "pv": 8
+     }
+    },
+    {
+     "item": "item:encens",
+     "consomme": false,
+     "bonus": {
+      "pv": 4
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:trait_mortifere",
+   "type": "sort",
+   "nom": "Trait mortifère",
+   "icon": "💀",
+   "description": "Un rai d'énergie négative flétrit la vie qu'il touche.",
+   "vocation": "necromancien",
+   "niveau": 0,
+   "cout_pm": 8,
+   "cible": "ennemi",
+   "portee": 3,
+   "effets": {
+    "degats": "1D8"
+   },
+   "composants": [
+    {
+     "item": "item:Poudre_os",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D6"
+     }
+    },
+    {
+     "item": "item:os",
+     "consomme": false,
+     "bonus": {
+      "degats": "1"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:etreinte_sepulcrale",
+   "type": "sort",
+   "nom": "Étreinte sépulcrale",
+   "icon": "⚰️",
+   "description": "Le froid de la tombe raffermit le corps et trempe la volonté.",
+   "vocation": "necromancien",
+   "niveau": 0,
+   "cout_pm": 10,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "pv": 4,
+    "buffs": {
+     "Vol": 10
+    },
+    "duree": 4
+   },
+   "composants": [
+    {
+     "item": "item:sang",
+     "consomme": true,
+     "bonus": {
+      "pv": 6
+     }
+    },
+    {
+     "item": "item:os",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "Vol": 5
+      }
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:flamme_infernale",
+   "type": "sort",
+   "nom": "Flamme infernale",
+   "icon": "😈",
+   "description": "Un feu venu d'en bas, qui laisse une odeur de soufre et de péché.",
+   "vocation": "demoniste",
+   "niveau": 0,
+   "cout_pm": 8,
+   "cible": "ennemi",
+   "portee": 3,
+   "effets": {
+    "degats": "2D4"
+   },
+   "composants": [
+    {
+     "item": "item:Sang_demon_seche",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D6"
+     }
+    },
+    {
+     "item": "item:Sel_noir",
+     "consomme": false,
+     "bonus": {
+      "degats": "1"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:vigueur_demoniaque",
+   "type": "sort",
+   "nom": "Vigueur démoniaque",
+   "icon": "🩸",
+   "description": "Un pacte mineur : la force d'un démon coule dans vos veines.",
+   "vocation": "demoniste",
+   "niveau": 0,
+   "cout_pm": 10,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "F": 10
+    },
+    "duree": 4
+   },
+   "composants": [
+    {
+     "item": "item:sang",
+     "consomme": true,
+     "bonus": {
+      "duree": 2
+     }
+    },
+    {
+     "item": "item:griffes",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "F": 5
+      }
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:verdict_de_lumiere",
+   "type": "sort",
+   "nom": "Verdict de lumière",
+   "icon": "⚔️",
+   "description": "La lame s'embrase d'une lumière qui juge — et frappe à courte distance. Redouté des morts-vivants.",
+   "vocation": "paladin",
+   "niveau": 0,
+   "cout_pm": 9,
+   "cible": "ennemi",
+   "portee": 2,
+   "effets": {
+    "degats": "1D8"
+   },
+   "composants": [
+    {
+     "item": "item:Eau_benite",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D6"
+     }
+    },
+    {
+     "item": "item:Bougie",
+     "consomme": false,
+     "bonus": {
+      "degats": "1"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:benediction_martiale",
+   "type": "sort",
+   "nom": "Bénédiction martiale",
+   "icon": "🛡️",
+   "description": "Une bénédiction guerrière guide le bras.",
+   "vocation": "paladin",
+   "niveau": 0,
+   "cout_pm": 10,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "F": 10
+    },
+    "duree": 3
+   },
+   "composants": [
+    {
+     "item": "item:Eau_benite",
+     "consomme": true,
+     "bonus": {
+      "duree": 2
+     }
+    },
+    {
+     "item": "item:encens",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "F": 5
+      }
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:jugement_sacre",
+   "type": "sort",
+   "nom": "Jugement sacré",
+   "icon": "⚜️",
+   "description": "L'institution parle : la sentence tombe, brûlante.",
+   "vocation": "templier",
+   "niveau": 0,
+   "cout_pm": 9,
+   "cible": "ennemi",
+   "portee": 3,
+   "effets": {
+    "degats": "1D6+1"
+   },
+   "composants": [
+    {
+     "item": "item:encens",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D4"
+     }
+    },
+    {
+     "item": "item:Sel",
+     "consomme": false,
+     "bonus": {
+      "degats": "1"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:aura_de_devotion",
+   "type": "sort",
+   "nom": "Aura de dévotion",
+   "icon": "✨",
+   "description": "Une aura de foi raidit le corps contre les coups.",
+   "vocation": "templier",
+   "niveau": 0,
+   "cout_pm": 10,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "R": 10
+    },
+    "duree": 4
+   },
+   "composants": [
+    {
+     "item": "item:Bougie",
+     "consomme": true,
+     "bonus": {
+      "duree": 2
+     }
+    },
+    {
+     "item": "item:encens",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "R": 5
+      }
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:feu_purificateur",
+   "type": "sort",
+   "nom": "Feu purificateur",
+   "icon": "🔱",
+   "description": "Le feu qui purge les créatures maudites. (Le surcroît contre les morts-vivants viendra plus tard.)",
+   "vocation": "repurgateur",
+   "niveau": 0,
+   "cout_pm": 9,
+   "cible": "ennemi",
+   "portee": 3,
+   "effets": {
+    "degats": "1D8"
+   },
+   "composants": [
+    {
+     "item": "item:Soufre",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D6"
+     }
+    },
+    {
+     "item": "item:Eau_benite",
+     "consomme": true,
+     "bonus": {
+      "degats": "1D4"
+     }
+    }
+   ]
+  },
+  {
+   "_id": "sort:sceau_de_protection",
+   "type": "sort",
+   "nom": "Sceau de protection",
+   "icon": "🧿",
+   "description": "Un sceau tracé au sel garde l'esprit des influences impies.",
+   "vocation": "repurgateur",
+   "niveau": 0,
+   "cout_pm": 10,
+   "cible": "soi",
+   "portee": 0,
+   "effets": {
+    "buffs": {
+     "Vol": 10
+    },
+    "duree": 4
+   },
+   "composants": [
+    {
+     "item": "item:Sel",
+     "consomme": true,
+     "bonus": {
+      "duree": 2
+     }
+    },
+    {
+     "item": "item:Bougie",
+     "consomme": false,
+     "bonus": {
+      "buffs": {
+       "Vol": 5
+      }
+     }
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_trait_de_flamme",
+   "type": "item",
+   "nom": "Grimoire : Trait de flamme",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Trait de flamme » (elementaliste). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:trait_de_flamme"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_armure_de_givre",
+   "type": "item",
+   "nom": "Grimoire : Armure de givre",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Armure de givre » (elementaliste). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:armure_de_givre"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_projectile_arcanique",
+   "type": "item",
+   "nom": "Grimoire : Projectile arcanique",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Projectile arcanique » (mage). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:projectile_arcanique"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_bouclier_arcanique",
+   "type": "item",
+   "nom": "Grimoire : Bouclier arcanique",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Bouclier arcanique » (mage). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:bouclier_arcanique"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_eclat_eblouissant",
+   "type": "item",
+   "nom": "Grimoire : Éclat éblouissant",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Éclat éblouissant » (illusionniste). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:eclat_eblouissant"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_silhouettes_trompeuses",
+   "type": "item",
+   "nom": "Grimoire : Silhouettes trompeuses",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Silhouettes trompeuses » (illusionniste). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:silhouettes_trompeuses"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_mot_de_pouvoir",
+   "type": "item",
+   "nom": "Grimoire : Mot de pouvoir",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Mot de pouvoir » (lettre). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:mot_de_pouvoir"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_formule_de_clairvoyance",
+   "type": "item",
+   "nom": "Grimoire : Formule de clairvoyance",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Formule de clairvoyance » (lettre). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:formule_de_clairvoyance"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_morsure_de_ronces",
+   "type": "item",
+   "nom": "Grimoire : Morsure de ronces",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Morsure de ronces » (druide). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:morsure_de_ronces"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_seve_vivifiante",
+   "type": "item",
+   "nom": "Grimoire : Sève vivifiante",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Sève vivifiante » (druide). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:seve_vivifiante"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_souffle_ancestral",
+   "type": "item",
+   "nom": "Grimoire : Souffle ancestral",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Souffle ancestral » (chaman). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:souffle_ancestral"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_transe_du_totem",
+   "type": "item",
+   "nom": "Grimoire : Transe du totem",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Transe du totem » (chaman). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:transe_du_totem"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_lumiere_purificatrice",
+   "type": "item",
+   "nom": "Grimoire : Lumière purificatrice",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Lumière purificatrice » (pretre). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:lumiere_purificatrice"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_soin_mineur",
+   "type": "item",
+   "nom": "Grimoire : Soin mineur",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Soin mineur » (pretre). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:soin_mineur"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_trait_mortifere",
+   "type": "item",
+   "nom": "Grimoire : Trait mortifère",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Trait mortifère » (necromancien). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:trait_mortifere"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_etreinte_sepulcrale",
+   "type": "item",
+   "nom": "Grimoire : Étreinte sépulcrale",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Étreinte sépulcrale » (necromancien). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:etreinte_sepulcrale"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_flamme_infernale",
+   "type": "item",
+   "nom": "Grimoire : Flamme infernale",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Flamme infernale » (demoniste). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:flamme_infernale"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_vigueur_demoniaque",
+   "type": "item",
+   "nom": "Grimoire : Vigueur démoniaque",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Vigueur démoniaque » (demoniste). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:vigueur_demoniaque"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_verdict_de_lumiere",
+   "type": "item",
+   "nom": "Grimoire : Verdict de lumière",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Verdict de lumière » (paladin). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:verdict_de_lumiere"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_benediction_martiale",
+   "type": "item",
+   "nom": "Grimoire : Bénédiction martiale",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Bénédiction martiale » (paladin). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:benediction_martiale"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_jugement_sacre",
+   "type": "item",
+   "nom": "Grimoire : Jugement sacré",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Jugement sacré » (templier). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:jugement_sacre"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_aura_de_devotion",
+   "type": "item",
+   "nom": "Grimoire : Aura de dévotion",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Aura de dévotion » (templier). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:aura_de_devotion"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_feu_purificateur",
+   "type": "item",
+   "nom": "Grimoire : Feu purificateur",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Feu purificateur » (repurgateur). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:feu_purificateur"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  },
+  {
+   "_id": "item:grimoire_sceau_de_protection",
+   "type": "item",
+   "nom": "Grimoire : Sceau de protection",
+   "icon": "📖",
+   "description": "Un grimoire relié qui enseigne le sort « Sceau de protection » (repurgateur). Il n'est pas consumé par l'étude.",
+   "rarete": "peu_commun",
+   "categorie": "livre",
+   "sous_categorie": "grimoire",
+   "slots": [],
+   "tags": [
+    "grimoire"
+   ],
+   "poids": 1,
+   "sorts": [
+    "sort:sceau_de_protection"
+   ],
+   "valeur": [
+    {
+     "ag": 5
+    },
+    {
+     "ag": 15
+    }
+   ]
+  }
+ ]
+}

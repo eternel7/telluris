@@ -1142,6 +1142,8 @@
 				<div class="voc-grid" id="voc-grid">
 					<!-- généré par JS -->
 				</div>
+				<!-- Choix du sort de départ (vocations pures magiciennes) — généré par JS -->
+				<div id="voc-sort-picker"></div>
 			</div>
 
 			<!-- ── ÉTAPE 4 : PORTRAIT ── -->
@@ -1187,11 +1189,16 @@
 	// cite de depart
 	const CITES = {{ towns_images | tojson | safe }};
 
+	// Sort de départ : vocations « pures magiciennes » (doivent choisir 1 sort niveau 0)
+	// + sorts niveau 0 par vocation {voc: [{id, nom, icon, description}]}.
+	const SORT_VOCS = {{ sort_vocations_depart | tojson | safe }};
+	const SORTS_DEPART = {{ sorts_depart | tojson | safe }};
+
 	/* ══════════════════════════════════════════════════════════
 	   ÉTAT
 	══════════════════════════════════════════════════════════ */
 	const statNames = { V:'Vitesse', F:'Force', R:'Résistance', Ag:'Agilité', Vol:'Volonté', Int:'Intelligence', Cha:'Charisme', Ch:'Chance'};
-	let wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'', cite:'' ,
+	let wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'', cite:'' , sort_initial:null,
 				bonusStats: { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, Cha: 0, Ch: 0}};
 	const MAX_BONUS_POINTS = 10;
 	const STAT_COEFF = {{ xp_coeff | tojson | safe }};
@@ -1209,7 +1216,7 @@
 	   WIZARD NAVIGATION
 	══════════════════════════════════════════════════════════ */
 	function openWizard() {
-		wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'' , cite:''};
+		wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'' , cite:'', sort_initial:null};
 		document.getElementById('wizard-overlay').classList.add('open');
 		document.body.style.overflow = 'hidden';
 		renderStep(1);
@@ -1259,7 +1266,7 @@
 
 		// Construire le contenu dynamique des étapes
 		if (step === 2) buildRaceGrid();
-		if (step === 3) buildVocGrid();
+		if (step === 3) { buildVocGrid(); buildSortPicker(); }
 		if (step === 4) buildPortraitGrid();
 		if (step === 5) buildCiteGrid();
 
@@ -1293,7 +1300,7 @@
 			const pointsDistribues = computePointsDepenses();
 			ok = wiz.race !== null && pointsDistribues === MAX_BONUS_POINTS;
 		}
-		if (wiz.step === 3) ok = wiz.voc  !== null;
+		if (wiz.step === 3) ok = wiz.voc !== null && (!_needsSortChoice() || wiz.sort_initial !== null);
 		if (wiz.step === 4) ok = wiz.image !== null;
 		if (wiz.step === 5) ok = wiz.cite !== null;
 		btnNext.disabled = !ok;
@@ -1421,9 +1428,44 @@
 			</button>`).join('');
 	}
 	function chooseVoc(btn) {
-		document.querySelectorAll('.voc-btn').forEach(b => b.classList.remove('chosen'));
+		document.querySelectorAll('#voc-grid .voc-btn').forEach(b => b.classList.remove('chosen'));
 		btn.classList.add('chosen');
 		wiz.voc = btn.dataset.voc;
+		wiz.sort_initial = null;   // changer de vocation invalide le sort choisi
+		buildSortPicker();
+		validateStep();
+	}
+
+	// Choix du sort de départ : affiché sous la grille des vocations pour les vocations
+	// « pures magiciennes » (SORT_VOCS) ayant des sorts niveau 0 en base. Obligatoire
+	// pour valider l'étape (miroir de la validation serveur).
+	function _needsSortChoice() {
+		return wiz.voc && SORT_VOCS.includes(wiz.voc) && (SORTS_DEPART[wiz.voc] || []).length > 0;
+	}
+	function buildSortPicker() {
+		const box = document.getElementById('voc-sort-picker');
+		if (!box) return;
+		if (!_needsSortChoice()) { box.innerHTML = ''; return; }
+		const sorts = SORTS_DEPART[wiz.voc];
+		box.innerHTML = `
+			<p style="margin:14px 0 8px; font-weight:bold">🔮 Choisissez votre sort de départ</p>
+			<div class="voc-grid">` + sorts.map(s => `
+				<button class="voc-btn ${wiz.sort_initial === s.id ? 'chosen' : ''}"
+						data-sort="${s.id}" onclick="chooseSortInitial(this)" type="button">
+					<div class="voc-img-wrap">
+						<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(0,0,0,0.05)">${s.icon}</div>
+					</div>
+					<div class="voc-txt">
+						<p class="voc-title">${s.nom}</p>
+						<p class="voc-blurb">${s.description || ''}</p>
+					</div>
+				</button>`).join('') + `</div>`;
+		box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+	}
+	function chooseSortInitial(btn) {
+		document.querySelectorAll('#voc-sort-picker .voc-btn').forEach(b => b.classList.remove('chosen'));
+		btn.classList.add('chosen');
+		wiz.sort_initial = btn.dataset.sort;
 		validateStep();
 	}
 

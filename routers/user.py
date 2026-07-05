@@ -29,6 +29,7 @@ from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_rec
 from utils import quetes
 from utils import bois
 from utils import consommables
+from utils import sorts as sorts_util
 from utils import focalisation
 from models import character_stats
 from models.character_stats import (
@@ -140,6 +141,27 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 		vocations = get_doc("rules:vocations")
 		vocation = next((v for v in vocations["value"] if v["id"] == characterinfo["voc"]), None)
 		inventaire_de_base = vocation.get("equipement_de_base", []) if vocation else []
+
+		# Sort de départ : les vocations « pures magiciennes » (SORT_VOCATIONS_DEPART)
+		# choisissent UN sort niveau 0 de leur vocation à la création (validé serveur).
+		# Dégradé gracieux : si aucun sort niveau 0 n'existe encore en base pour la
+		# vocation (contenu non importé), on laisse créer sans sort.
+		sorts_init: list = []
+		if characterinfo["voc"] in character_stats.SORT_VOCATIONS_DEPART:
+			sort_initial = characterinfo.get("sort_initial")
+			if sort_initial:
+				sort_doc = sorts_util.normaliser_sort(get_doc(sort_initial))
+				if (not sort_doc or sort_doc["vocation"] != characterinfo["voc"]
+						or sort_doc["niveau"] != 0):
+					raise HTTPException(status_code=422, detail="Sort de départ invalide pour cette vocation.")
+				sorts_init = [sort_doc["id"]]
+			else:
+				candidats = [s for d in find_docs({"type": "sort"})
+							 if (s := sorts_util.normaliser_sort(d))
+							 and s["vocation"] == characterinfo["voc"] and s["niveau"] == 0]
+				if candidats:
+					raise HTTPException(status_code=422, detail="Choisissez un sort de départ pour cette vocation.")
+
 		unique_id = "character:" + user_id + "_" + str(uuid.uuid4())
 		character_dict = {
 			'_id' : unique_id,
@@ -169,6 +191,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'cuivre': 0,
 			'quetes_actives': [],
 			'quetes_terminees': [],
+			'sorts_connus': sorts_init,
 			}
 		save_doc(character_dict)
 	
@@ -852,6 +875,111 @@ async def consommer_item(
 		"effet": dict(effet) if effet else None,
 	}
 	return payload
+
+
+@user_router.post("/lancer_sort")
+async def lancer_sort(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Lance un sort connu HORS combat (cible soi uniquement) : débite les PM, applique
+	la part instantanée (pv/pm clampés) et empile l'éventuel effet à durée (buffs/régén,
+	décrémenté au tour monde). Les composants engagés (`composants` = ids item) sont
+	re-vérifiés : les consommés quittent le sac, les catalyseurs restent."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	sort_id = body.get("sort_id")
+	if sort_id not in (character.get("sorts_connus") or []):
+		raise HTTPException(status_code=422, detail="Sort inconnu du personnage")
+	sort = sorts_util.normaliser_sort(get_doc(sort_id))
+	if not sort or not sorts_util.sort_utilisable_exploration(sort):
+		raise HTTPException(status_code=422, detail="Ce sort ne peut pas être lancé hors combat")
+	if int(character.get("currentPM", 0) or 0) < sort["cout_pm"]:
+		raise HTTPException(status_code=409, detail="PM insuffisants")
+
+	# Composants engagés : indisponibles/inconnus ignorés (mode dégradé, jamais bloquant).
+	etat = {c["item"]: c for c in sorts_util.composants_etat(sort, character)}
+	inventaire = character.get("inventaire", [])
+	engages: list = []
+	for cid in body.get("composants") or []:
+		c = etat.get(cid)
+		if not c or not c["disponible"] or cid in engages:
+			continue
+		if c["consomme"] and _take_ref(inventaire, None, cid) is None:
+			continue
+		engages.append(cid)
+	character["inventaire"] = inventaire
+	effets = sorts_util.effets_effectifs(sort, engages)
+
+	# Buff empilé AVANT le calcul des max (même règle que les consommables), puis
+	# débit PM et part instantanée clampée aux max bufffés.
+	effet = sorts_util.empiler_effet_sort(character, sort, effets)
+	eq = recompute_equipment_bonus(character.get("slots", {}))
+	derived = _derived_from_character(character, eq)
+	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - sort["cout_pm"])
+	avant_pv = int(character.get("currentPV", 0) or 0)
+	avant_pm = character["currentPM"]
+	character["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])
+	character["currentPM"] = min(derived.pm_max, avant_pm + effets["pm"])
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	payload = _inventory_payload(character)
+	payload["vitals"] = _vitals_payload(character)
+	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
+	payload["sorts"] = sorts_util.liste_sorts_payload(character, get_doc, "exploration")
+	payload["lance"] = {
+		"nom": sort["nom"],
+		"icon": sort["icon"],
+		"pv_rendu": character["currentPV"] - avant_pv,
+		"pm_rendu": character["currentPM"] - avant_pm,
+		"effet": dict(effet) if effet else None,
+	}
+	return payload
+
+
+@user_router.post("/apprendre_sort")
+async def apprendre_sort(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Apprend un sort : coût en points de caractéristique ((niveau+1) × SORT_COUT_COEFF),
+	niveau de vocation suffisant et grimoire l'enseignant porté (sac ou équipé, NON
+	consommé — un livre se relit). Ajoute l'id à `sorts_connus`."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	sort = sorts_util.normaliser_sort(get_doc(body.get("sort_id")))
+	if not sort:
+		raise HTTPException(status_code=422, detail="Sort introuvable")
+	if sort["id"] in (character.get("sorts_connus") or []):
+		raise HTTPException(status_code=422, detail="Sort déjà connu")
+	niveaux = character.get("vocations_niveaux", {})
+	if sort["vocation"] not in niveaux or niveaux[sort["vocation"]] < sort["niveau"]:
+		raise HTTPException(status_code=422, detail="Niveau de vocation insuffisant")
+	if sorts_util.grimoire_pour(character, sort["id"], resolve_item_ref) is None:
+		raise HTTPException(status_code=409, detail="Grimoire requis pour apprendre ce sort")
+
+	cout = sorts_util.cout_apprentissage(sort)
+	attribute_points = character.get("attribute_points", 0)
+	if attribute_points < cout:
+		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cout}, disponible {attribute_points})")
+
+	character["attribute_points"] = attribute_points - cout
+	character.setdefault("sorts_connus", []).append(sort["id"])
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	return {
+		"attribute_points": character["attribute_points"],
+		"sorts_connus": list(character["sorts_connus"]),
+		"sorts": sorts_util.liste_sorts_payload(character, get_doc, "exploration"),
+		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref),
+		"appris": {"nom": sort["nom"], "icon": sort["icon"]},
+	}
 
 
 @user_router.post("/recolter")

@@ -5,8 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
-from utils.characters import get_selected_character, carried_weight, resolve_item_ref
+from utils.characters import get_selected_character, carried_weight, resolve_item_ref, item_ref_weight
 from utils.consommables import liste_consommables_combat
+from utils.sorts import (
+    normaliser_sort, sort_utilisable_combat, composants_etat, effets_effectifs,
+    liste_sorts_payload,
+)
 from routers.user import _take_ref
 from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity
 from utils import focalisation
@@ -83,6 +87,9 @@ class ActionRequest(BaseModel):
     # Action « consommer » : adressage de l'item du sac par index vérifié item_id.
     index: int | None = None
     item_id: str | None = None
+    # Action « sort » : id du sort + composants à engager (ids item, re-vérifiés serveur).
+    sort_id: str | None = None
+    composants: list[str] = []
 
 
 class CollectLootRequest(BaseModel):
@@ -292,7 +299,45 @@ async def combat_action(
             raise HTTPException(status_code=422, detail="Objet introuvable")
         character["inventaire"] = inventaire
 
-    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc)
+    # Action « sort » : le sort est re-vérifié serveur (connu + utilisable en combat),
+    # les composants engagés aussi (indisponibles ignorés = mode dégradé) ; les
+    # composants CONSOMMÉS sont retirés du sac ICI (en mémoire seulement), le character
+    # n'est sauvegardé qu'après le combat (même séquence que « consommer »).
+    sort_arg = None
+    sort_consomme_items = False
+    if body.type == "sort":
+        character = get_doc(combat_doc["character_id"])
+        if not character:
+            raise HTTPException(status_code=404, detail="Personnage introuvable")
+        if body.sort_id not in (character.get("sorts_connus") or []):
+            raise HTTPException(status_code=422, detail="Sort inconnu du personnage")
+        sort_norm = normaliser_sort(get_doc(body.sort_id))
+        if sort_norm is None or not sort_utilisable_combat(sort_norm):
+            raise HTTPException(status_code=422, detail="Sort inutilisable en combat")
+        etat = {c["item"]: c for c in composants_etat(sort_norm, character)}
+        inventaire = character.get("inventaire", [])
+        engages: list = []
+        poids_consommes = 0.0
+        for cid in (body.composants or []):
+            c = etat.get(cid)
+            if not c or not c["disponible"] or cid in engages:
+                continue
+            if c["consomme"]:
+                ref = _take_ref(inventaire, None, cid)
+                if ref is None:
+                    continue
+                poids_consommes += item_ref_weight(ref)
+                sort_consomme_items = True
+            engages.append(cid)
+        character["inventaire"] = inventaire
+        sort_arg = {
+            "doc": sort_norm,
+            "effets": effets_effectifs(sort_norm, engages),
+            "composants_engages": engages,
+            "poids_consommes": round(poids_consommes, 2),
+        }
+
+    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg)
 
     # Persist the combat state first (source of truth). couchdb2 met à jour le
     # _rev en place ; un échec (conflit 409) renvoie None → on prévient le client
@@ -319,6 +364,19 @@ async def combat_action(
             character = get_doc(combat_doc["character_id"]) or character
         consommables_payload = liste_consommables_combat(character, resolve_item_ref)
 
+    # Sort réussi avec composant(s) consommé(s) : retirer les items du sac, même
+    # séquence que « consommer » (échec bénin en faveur du joueur).
+    sorts_payload = None
+    if body.type == "sort" and character is not None:
+        if "error" not in action_result:
+            if sort_consomme_items and save_doc(character) is None:
+                print(f"sort: échec de sauvegarde du personnage {character.get('_id')} (composants non retirés)")
+                character = get_doc(combat_doc["character_id"]) or character
+        else:
+            # Action refusée : rien n'a été consommé, relire l'état réel.
+            character = get_doc(combat_doc["character_id"]) or character
+        sorts_payload = liste_sorts_payload(character, get_doc, "combat")
+
     # Combat persisté : applique les récompenses au personnage (idempotent).
     if combat_doc["status"] != "active":
         finalize_combat(combat_doc)
@@ -327,4 +385,6 @@ async def combat_action(
     response = {"combat": combat_doc, "action_result": action_result}
     if consommables_payload is not None:
         response["consommables"] = consommables_payload
+    if sorts_payload is not None:
+        response["sorts"] = sorts_payload
     return response

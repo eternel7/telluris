@@ -130,6 +130,17 @@ QUETE_COLLECT_POIDS_MAX: float = 100.0
 FOCUS_EVENEMENT_MULT: float = 3.0
 FOCUS_CIBLE_MULT: float = 3.0
 
+# ── Sorts (magie) ────────────────────────────────────────────────────────────────
+# Apprendre un sort coûte des points de caractéristique : (niveau_sort + 1) × SORT_COUT_COEFF
+# (miroir de spend_xp_vocation), à condition de porter le grimoire qui l'enseigne et d'avoir
+# le niveau de vocation requis. SORT_VOCATIONS_DEPART = vocations « pures magiciennes » qui
+# choisissent UN sort gratuit (parmi les niveau 0 de leur vocation) à la création du perso.
+SORT_COUT_COEFF: int = 2
+SORT_VOCATIONS_DEPART: list = [
+	"elementaliste", "mage", "illusionniste", "lettre", "druide",
+	"chaman", "pretre", "necromancien", "demoniste",
+]
+
 # ── Récolte & découpe du bois ────────────────────────────────────────────────────
 # Échelle des tailles de bois, du plus petit au plus grand. Couper un item « a_couper »
 # produit des pièces du tier immédiatement plus petit (même `essence`), poids conservé.
@@ -320,6 +331,8 @@ def current_world_variables() -> dict:
 		"QUETE_COLLECT_POIDS_MAX": QUETE_COLLECT_POIDS_MAX,
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
+		"SORT_COUT_COEFF": SORT_COUT_COEFF,
+		"SORT_VOCATIONS_DEPART": list(SORT_VOCATIONS_DEPART),
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
 		"COUPE_MAX_PIECES": COUPE_MAX_PIECES,
@@ -357,6 +370,7 @@ def load_world_variables() -> dict:
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
 	global QUETE_COLLECT_POIDS_MAX
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
+	global SORT_COUT_COEFF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
@@ -421,6 +435,10 @@ def load_world_variables() -> dict:
 	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))
 	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))
 
+	SORT_COUT_COEFF = max(0, int(v.get("SORT_COUT_COEFF", SORT_COUT_COEFF)))
+	if isinstance(v.get("SORT_VOCATIONS_DEPART"), list):
+		SORT_VOCATIONS_DEPART[:] = [str(x) for x in v["SORT_VOCATIONS_DEPART"]]
+
 	if isinstance(v.get("BOIS_A_COUPER"), list):
 		BOIS_A_COUPER[:] = [str(x) for x in v["BOIS_A_COUPER"]]
 	OUTIL_COUPE_BOIS_TAG = str(v.get("OUTIL_COUPE_BOIS_TAG", OUTIL_COUPE_BOIS_TAG))
@@ -476,6 +494,7 @@ class DerivedStats(BaseModel):
 	cd:		  int   # compétence à distance
 	pa:		  int   # points d'armure
 	pm_def:	  int   # défense magique
+	toucher_magique: int   # compétence de lancer de sorts offensifs
 	degats_cc:   str   # ex: "1D6+3"
 	degats_cd:   str   # ex: "1D4+1"
 
@@ -516,6 +535,11 @@ def compute_derived_stats(
 	# ── Défense magique ───────────────────────────────────────────────
 	pm_def = (base.vol // 2) + (base.int_ // 4)
 
+	# ── Toucher magique ───────────────────────────────────────────────
+	# Miroir de cc/cd (bande 0-100, échelle ×10) : Int porte la précision des
+	# sorts (3:1), Vol l'appuie. Opposé au pm_def de la cible dans le jet.
+	toucher_magique = ((base.int_ * 3) + base.vol) // 4
+
 	# ── Dégâts corps à corps ─────────────────────────────────────────
 	# Bonus de puissance F//FACTEUR, miroir exact des PA = R//FACTEUR : deux builds
 	# de caractéristiques égales s'annulent, et ce sont les armes (+x / +1DX) qui
@@ -546,6 +570,7 @@ def compute_derived_stats(
 		cd=cd,
 		pa=pa,
 		pm_def=pm_def,
+		toucher_magique=toucher_magique,
 		degats_cc=degats_cc,
 		degats_cd=degats_cd,
 		charge_max=charge_max,

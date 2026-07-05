@@ -35,7 +35,7 @@ _STAT_FIELD = {
 # Stats dérivées exportées : (libellé, attribut DerivedStats).
 DERIVED = [
     ("PV", "pv_max"), ("PM", "pm_max"), ("Init", "initiative"), ("Dépl", "deplacement"),
-    ("CC", "cc"), ("CT", "cd"), ("PA", "pa"), ("PM déf", "pm_def"),
+    ("CC", "cc"), ("CT", "cd"), ("PA", "pa"), ("PM déf", "pm_def"), ("Touch. mag", "toucher_magique"),
     ("Dég. CC", "degats_cc"), ("Dég. CT", "degats_cd"),
 ]
 

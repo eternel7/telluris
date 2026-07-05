@@ -119,9 +119,9 @@ def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
 
 def _refresh_actions(actor: dict) -> None:
 	"""Recalcule actions_restantes = actions_max - attaques - ramassages - consommations
-	- AP_déplacement."""
+	- sorts - AP_déplacement."""
 	used = (actor.get("attaques", 0) + actor.get("ramasses", 0)
-			+ actor.get("consommes", 0)
+			+ actor.get("consommes", 0) + actor.get("sorts", 0)
 			+ _move_ap_used_for(actor, actor.get("cells_moved", 0)))
 	actor["actions_restantes"] = max(0, actor["actions_max"] - used)
 
@@ -132,6 +132,7 @@ def _reset_turn_budget(actor: dict) -> None:
 	actor["attaques"] = 0
 	actor["ramasses"] = 0
 	actor["consommes"] = 0
+	actor["sorts"] = 0
 	actor["actions_restantes"] = actor["actions_max"]
 
 
@@ -554,6 +555,8 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"cd": derived.cd,
 		"ag": base.ag,
 		"pa": derived.pa,
+		"pm_def": derived.pm_def,
+		"toucher_magique": derived.toucher_magique,
 		"degats_cc": derived.degats_cc,
 		"degats_cd": derived.degats_cd,
 		"initiative": derived.initiative,
@@ -569,6 +572,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"attaques": 0,
 		"ramasses": 0,
 		"consommes": 0,
+		"sorts": 0,
 		"butin_ramasse": [],   # références {item, poids} des carcasses ramassées en combat
 	}
 
@@ -651,6 +655,7 @@ def instantiate_monsters(
 			"cc": derived.cc,
 			"ag": base_stats.ag,
 			"pa": derived.pa,
+			"pm_def": derived.pm_def,
 			"degats_cc": derived.degats_cc,
 			"initiative": derived.initiative,
 			"deplacement": derived.deplacement,
@@ -735,6 +740,14 @@ def _hit_threshold(attaquant_cc: int, defenseur_ag: int) -> int:
 	Donc CC == Ag → 50 %. Clampé à [5, 95] pour garder toujours une marge.
 	"""
 	return max(5, min(95, 50 + attaquant_cc - defenseur_ag))
+
+
+def _magic_hit_threshold(toucher_magique: int, cible_pm_def: int) -> int:
+	"""Seuil de réussite d'un sort offensif sur d100 (miroir de _hit_threshold) :
+	50 + toucher magique − défense magique de la cible, clampé [5, 95]. La défense
+	magique remplace l'esquive (Ag) ET l'armure : les dégâts d'un sort qui touche ne
+	sont PAS réduits par les PA (l'armure physique n'arrête pas la magie)."""
+	return max(5, min(95, 50 + toucher_magique - cible_pm_def))
 
 
 def _flee_threshold(joueur_init: int, monstre_init_max: int) -> int:
@@ -907,7 +920,7 @@ def resolve_first_turns(combat_doc: dict) -> None:
 def resolve_action(
 	combat_doc: dict, action_type: str, cible_id: str | None = None,
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
-	mode: str | None = None, item: dict | None = None,
+	mode: str | None = None, item: dict | None = None, sort: dict | None = None,
 ) -> dict:
 	ordre = combat_doc["ordre_initiative"]
 	actor_id = ordre[combat_doc["acteur_courant_index"]]
@@ -1162,6 +1175,113 @@ def resolve_action(
 		})
 		result = {"consomme": True, "item": item.get("nom"),
 				  "pv_rendu": pv_rendu, "pm_rendu": pm_rendu, "charge": joueur["charge"]}
+
+	elif action_type == "sort":
+		# Lancer un sort connu, coûte 1 action + cout_pm PM. Le router injecte
+		# `sort = {doc (normalisé), effets (fusionnés avec les bonus des composants
+		# engagés), composants_engages, poids_consommes}` — les composants consommés
+		# ont déjà été retirés du sac du personnage en mémoire. Seule la part
+		# INSTANTANÉE (degats/pv/pm) s'applique en combat : buffs/régén d'un sort
+		# mixte sont perdus (règle consommables).
+		if not sort or not sort.get("doc"):
+			return {"error": "Sort invalide."}
+		sdoc = sort["doc"]
+		effets = sort.get("effets") or {}
+		cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
+		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")):
+			return {"error": "Ce sort n'a aucun effet utilisable en combat."}
+		if joueur["currentPM"] < cout_pm:
+			return {"error": "PM insuffisants."}
+
+		if sdoc.get("cible") == "ennemi":
+			if not effets.get("degats"):
+				return {"error": "Ce sort n'inflige aucun dégât."}
+			monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
+			if not monstre or not monstre["vivant"]:
+				return {"error": "Cible invalide."}
+			sort_portee = max(1, int(sdoc.get("portee", 1) or 1))
+			# Règles à distance identiques au jet/tir : un sort de portée > 1 est
+			# interdit si engagé au corps à corps et exige une ligne de vue ; un sort
+			# de contact (portée 1) reste lançable en mêlée.
+			if sort_portee > 1:
+				if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
+					return {"error": "Un ennemi vous menace au corps à corps : impossible d'incanter."}
+				if not _line_of_sight(grid["cells"], joueur["pos"]["x"], joueur["pos"]["y"],
+									   monstre["pos"]["x"], monstre["pos"]["y"]):
+					return {"error": "Ligne de vue obstruée."}
+			if _cheby(joueur, monstre) > sort_portee:
+				return {"error": "Cible hors de portée."}
+
+			# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés).
+			joueur["currentPM"] -= cout_pm
+			seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
+			roll = random.randint(1, 100)
+			if roll <= seuil:
+				# Pas de soustraction de PA : l'armure physique n'arrête pas la magie
+				# (la défense magique joue déjà dans le seuil).
+				dmg = max(1, roll_dice(effets["degats"]))
+				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
+				if monstre["currentPV"] <= 0:
+					monstre["vivant"] = False
+					combat_doc["log"].append({
+						"tour": combat_doc["tour"],
+						"acteur": joueur["nom"],
+						"kind": "kill",
+						"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} et élimine {monstre['nom']} !",
+					})
+				else:
+					combat_doc["log"].append({
+						"tour": combat_doc["tour"],
+						"acteur": joueur["nom"],
+						"kind": "hit",
+						"texte": (
+							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {monstre['nom']} "
+							f"subit {dmg} dégâts ! (PV : {monstre['currentPV']}/{monstre['pv_max']})"
+						),
+					})
+				result = {"sort": sdoc.get("nom"), "hit": True, "dmg": dmg,
+						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
+			else:
+				combat_doc["log"].append({
+					"tour": combat_doc["tour"],
+					"acteur": joueur["nom"],
+					"kind": "miss",
+					"texte": (
+						f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} sur {monstre['nom']}"
+						f" mais le sort se dissipe ! (jet {roll} / seuil {seuil})"
+					),
+				})
+				result = {"sort": sdoc.get("nom"), "hit": False, "roll": roll, "seuil": seuil}
+		else:
+			# Sort sur soi : toujours lançable ; débit PM puis part instantanée clampée.
+			joueur["currentPM"] -= cout_pm
+			avant_pv, avant_pm = joueur["currentPV"], joueur["currentPM"]
+			joueur["currentPV"] = min(joueur["pv_max"], avant_pv + int(effets.get("pv", 0) or 0))
+			joueur["currentPM"] = min(joueur["pm_max"], avant_pm + int(effets.get("pm", 0) or 0))
+			pv_rendu = joueur["currentPV"] - avant_pv
+			pm_rendu = joueur["currentPM"] - avant_pm
+			gains = " / ".join(s for s in (
+				f"+{pv_rendu} PV" if pv_rendu else "",
+				f"+{pm_rendu} PM" if pm_rendu else "",
+			) if s) or "aucun effet"
+			combat_doc["log"].append({
+				"tour": combat_doc["tour"],
+				"acteur": joueur["nom"],
+				"kind": "sys",
+				"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} ({gains}).",
+			})
+			result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu}
+
+		# Les composants consommés quittent le sac → la charge portée baisse.
+		poids_consommes = float(sort.get("poids_consommes", 0) or 0)
+		if poids_consommes:
+			joueur["charge"] = round(max(0.0, joueur.get("charge", 0) - poids_consommes), 2)
+			_recompute_player_deplacement(joueur)
+			result["charge"] = joueur["charge"]
+		result["currentPM"] = joueur["currentPM"]
+		joueur["sorts"] = joueur.get("sorts", 0) + 1
+		_refresh_actions(joueur)
+		_check_victory(combat_doc)
 
 	else:
 		return {"error": f"Action inconnue : {action_type}"}
