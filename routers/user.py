@@ -20,6 +20,7 @@ from utils.characters import (
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
 	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
+	fiche_item_fields,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 	relations_lieux_payload,
@@ -1191,6 +1192,7 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 			"prix_min_purse": cuivre_to_purse(pmin),
 			"prix_max_purse": cuivre_to_purse(pmax),
 			"negocie": negocie,
+			**fiche_item_fields(item),
 		})
 	return vendables
 

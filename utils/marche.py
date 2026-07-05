@@ -22,6 +22,22 @@ def _clamp(x, lo, hi):
 	return max(lo, min(hi, x))
 
 
+# Champs du doc item utiles à la fiche/comparaison côté client (mêmes clés que la fiche
+# de l'inventaire perso). Attachés aux lignes vente/achat du marchand pour qu'un clic
+# affiche la même fiche (`nom`/`icon`/`poids` sont déjà portés par la ligne, poids =
+# instance pour la vente → on ne les réécrase pas ici).
+_FICHE_ITEM_KEYS = (
+	"categorie", "sous_categorie", "rarete", "tags", "portee", "restriction", "slots", "effets",
+	"bonus_pa", "bonus_pv", "bonus_pm", "bonus_cc", "bonus_cd",
+	"bonus_degats", "bonus_degats_dice", "bonus_initiative", "bonus_malus_depl",
+)
+
+
+def fiche_item_fields(item: dict) -> dict:
+	"""Sous-ensemble des champs d'un doc item nécessaires à la fiche/comparaison client."""
+	return {k: item[k] for k in _FICHE_ITEM_KEYS if k in (item or {})}
+
+
 # ── Monnaie ─────────────────────────────────────────────────────────────────────
 
 def debit_character(character: dict, cuivre: int) -> dict | None:
@@ -849,5 +865,6 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 			"prix_min_purse": cuivre_to_purse(pmin),
 			"prix_max_purse": cuivre_to_purse(pmax),
 			"negocie": negocie,
+			**fiche_item_fields(item),
 		})
 	return out

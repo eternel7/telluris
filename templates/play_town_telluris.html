@@ -112,6 +112,7 @@
 			display: flex;
 			flex-direction: column;
 			overflow: hidden;
+			min-height: 20vh;
 		}
 		.sub-locations-panel h3 {
 			font-size: 1rem;
@@ -455,12 +456,10 @@
 		}
 		.sell-relation.relation-bad { border-color: #b3402f; color: #e88; }
 		.sh-marchander-btn {
-			margin-left: 6px;
-			cursor: pointer;
-			background: rgba(0,0,0,0.3);
-			border: 1px solid var(--accent-color);
-			border-radius: 6px;
-			padding: 2px 8px;
+			padding: 2px 8px; background: rgba(255,215,0,0.08);
+			border: 1px solid rgba(255,215,0,0.3); color: var(--accent-color);
+			cursor: pointer; font-size: 0.8rem; white-space: nowrap;
+			margin-left: auto;
 		}
 		.sh-marchander-btn:disabled { opacity: .4; cursor: not-allowed; }
 		.sheet-tab-bar {
@@ -913,6 +912,7 @@
 		}
 		.manage-btn {
 			padding: 10px;
+			height : 45px;
 			background: #222;
 			border: 2px solid var(--border-color);
 			color: var(--text-color);
@@ -1358,7 +1358,7 @@
 										{% if attribute_points < voc_cout %}disabled{% endif %}
 										{% if attribute_points == 0 %}style="display:none"{% endif %}
 										onclick="spendXpVocation()">
-									Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> XP
+									Monter — <span id="sh-voc-cout">{{ voc_cout }}</span> P<small>oints</small>
 								</button>
 							</div>
 						</div>
@@ -1393,7 +1393,7 @@
 										{% if at_cap or not can_afford %}disabled{% endif %}
 										{% if attribute_points == 0 %}style="display:none"{% endif %}
 										onclick="spendXp('{{ code }}')">
-									- <span class="sh-xp-cost">{{ cost_next }} XP</span>
+									- <span class="sh-xp-cost">{{ cost_next }} P<small>oints</small></span>
 								</button>
 							</div>
 							{% endfor %}
@@ -1708,7 +1708,7 @@
 		.item-cmp-hd { padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--border-color); }
 		.item-cmp-face { display: flex; align-items: center; gap: 8px; min-width: 0; }
 		.item-cmp-face .ic { font-size: 1.5rem; flex-shrink: 0; }
-		.item-cmp-face .nm { font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.item-cmp-face .nm { font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: wrap; }
 		.item-cmp-role { font-size: 0.7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); display: block; margin-bottom: 3px; }
 		.item-cmp-empty { color: var(--muted); font-style: italic; }
 		.item-cmp-row { padding: 5px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.88rem; }
@@ -1722,6 +1722,7 @@
 		.item-cmp-ok { color: #38d66b; }
 		.item-cmp-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
 		.item-cmp-slotsel { margin: 6px 0 4px; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+		.item-cmp-slotsel>strong { color: var(--accent-color); }
 		.item-cmp-slotsel select {
 			background: var(--btn-bg); border: 1px solid var(--border-color);
 			color: var(--text-color); padding: 2px 4px; font-size: 0.85rem;
@@ -2889,9 +2890,10 @@ function _renderItemDetail() {
 	const st = _itemDetailState;
 	const body = document.getElementById('item-detail-body');
 	if (!st || !body) return;
-	if (st.mode === 'mono')       body.innerHTML = _renderMono(st);
-	else if (st.mode === 'sac')   body.innerHTML = _renderSacCompare(st);
-	else if (st.mode === 'equip') body.innerHTML = _renderEquipCompare(st);
+	if (st.mode === 'mono')          body.innerHTML = _renderMono(st);
+	else if (st.mode === 'sac')      body.innerHTML = _renderSacCompare(st);
+	else if (st.mode === 'equip')    body.innerHTML = _renderEquipCompare(st);
+	else if (st.mode === 'marchand') body.innerHTML = _renderMarchandDetail(st);
 }
 
 function openItemDetail(source, idx) {
@@ -2923,7 +2925,10 @@ function closeItemDetail() {
 	if (ov) ov.classList.add('item-detail-hidden');
 }
 function _setDetailSlot(slot) {
-	if (_itemDetailState && _itemDetailState.mode === 'sac') { _itemDetailState.slot = slot; _renderItemDetail(); }
+	if (_itemDetailState && (_itemDetailState.mode === 'sac' || _itemDetailState.mode === 'marchand')) {
+		_itemDetailState.slot = slot;
+		_renderItemDetail();
+	}
 }
 function _setDetailAlt(i) {
 	if (_itemDetailState && _itemDetailState.mode === 'equip') { _itemDetailState.altPos = +i; _renderItemDetail(); }
@@ -2936,6 +2941,44 @@ function _cardDrop(idx, itemId)         { closeItemDetail(); dropItem(idx, itemI
 function _cardPickup(idx, itemId)       { closeItemDetail(); pickupItem(idx, itemId); }
 function _cardConsommer(idx, itemId)    { closeItemDetail(); consommerItem(idx, itemId, null); }
 function _cardCouper(idx, itemId, src)  { closeItemDetail(); couperItem(idx, itemId, src); }
+
+// Fiche d'un objet du marchand (vente/achat) : même carte, avec comparaison à
+// l'équipement porté si l'objet est équipable, et actions Vendre/Acheter/Marchander.
+function openMarchandDetail(sens, arrIdx) {
+	const list = sens === 'vente' ? (MARCHAND.vendables || []) : (MARCHAND.achetables || []);
+	const entry = list[arrIdx];
+	if (!entry) return;
+	const compat = (entry.slots || []).filter(s => s in SLOT_LABELS);
+	const slot = compat.length ? (compat.find(s => _slots[s]) || compat[0]) : null;
+	_itemDetailState = { mode: 'marchand', item: entry, sens, slots: compat, slot };
+	_renderItemDetail();
+	document.getElementById('item-detail-overlay').classList.remove('item-detail-hidden');
+}
+function _renderMarchandDetail(st) {
+	const it = st.item;
+	let html = `<h3>${it.icon || '📦'} ${it.nom || '—'}</h3>`;
+	if (it.prix) html += `<div class="item-cmp-slotsel"><span>Prix :</span><strong>${it.negocie ? '🤝 ' : ''}${formatPrix(it.prix)}</strong></div>`;
+	if (st.slots.length) {
+		const equipped = _slots[st.slot] || null;
+		if (st.slots.length > 1) {
+			const opts = st.slots.map(s => `<option value="${s}"${s === st.slot ? ' selected' : ''}>${SLOT_LABELS[s]}${_slots[s] ? ' — ' + (_slots[s].nom || '') : ' — (vide)'}</option>`).join('');
+			html += `<div class="item-cmp-slotsel"><span>Comparer à :</span><select onchange="_setDetailSlot(this.value)">${opts}</select></div>`;
+		}
+		html += _renderCmpTable(equipped, it, 'Équipé', st.sens === 'vente' ? 'À vendre' : 'Marchandise');
+	} else {
+		html += _renderCmpTable(it, null, 'Objet', '');
+	}
+	const acts = [];
+	if (st.sens === 'vente') acts.push(`<button class="sh-drop-btn" onclick="_cardSell(${it.index},'${it.item_id}')">Vendre</button>`);
+	else                     acts.push(`<button class="sh-equip-btn" onclick="_cardBuy('${it.item_id}')">Acheter</button>`);
+	const mIdx = st.sens === 'vente' ? it.index : 'null';
+	acts.push(`<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="_cardMarch(${mIdx},'${it.item_id}','${st.sens}')" title="Marchander">🤝 Marchander</button>`);
+	html += `<div class="item-detail-actions">${acts.join('')}</div>`;
+	return html;
+}
+function _cardSell(index, itemId)        { closeItemDetail(); sellItem(index, itemId); }
+function _cardBuy(itemId)                { closeItemDetail(); buyItem(itemId); }
+function _cardMarch(index, itemId, sens) { closeItemDetail(); marchanderItem(index, itemId, sens); }
 
 // ── Découpe du bois ───────────────────────────────────────────────────
 function _estCoupable(item) {
@@ -3359,8 +3402,8 @@ function renderSellList(data) {
 	list.innerHTML = _sortedOrder(vendables, _sellSort).map(idx => {
 		const v = vendables[idx];
 		return `<li class="sh-inv-item">
-		<span>${v.icon || '📦'}</span>
-		<span class="sh-inv-name">${v.nom || '—'}</span>
+		<span class="sh-inv-open" onclick="openMarchandDetail('vente',${idx})" title="Voir la fiche">${v.icon || '📦'}</span>
+		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('vente',${idx})" title="Voir la fiche">${v.nom || '—'}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
@@ -3386,8 +3429,8 @@ function renderBuyList(data) {
 	list.innerHTML = _sortedOrder(achetables, _buySort).map(idx => {
 		const v = achetables[idx];
 		return `<li class="sh-inv-item">
-		<span>${v.icon || '📦'}</span>
-		<span class="sh-inv-name">${v.nom || '—'} ×${v.qty}</span>
+		<span class="sh-inv-open" onclick="openMarchandDetail('achat',${idx})" title="Voir la fiche">${v.icon || '📦'}</span>
+		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('achat',${idx})" title="Voir la fiche">${v.nom || '—'} ×${v.qty}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
