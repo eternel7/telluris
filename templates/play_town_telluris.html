@@ -690,6 +690,9 @@
 		.sh-paperdoll .sh-unequip-btn:hover { background: #ff4757; }
 		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.95rem; flex-wrap: wrap; }
 		.sh-inv-item>span {min-width: 5vw; }
+		.sh-inv-open { cursor: pointer; }
+		.sh-inv-name.sh-inv-open:hover { color: var(--accent-color); text-decoration: underline; }
+		.sh-paperdoll .sh-slot.occupied { cursor: pointer; }
 		.sh-inv-item>span.sh-rarity {text-align: center;}
 		.sh-inv-item:has(.sh-equip-row) {
 			flex-wrap: wrap !important;
@@ -1445,8 +1448,8 @@
 								("main_droite", "Main D.",  "5%", "55%"),
 								("main_gauche", "Main G.",  "65%", "55%"),
 							] %}
-							<div class="sh-slot{% if slots.get(key) %} occupied{% endif %}" id="slot-{{ key }}" style="left:{{ sx }};top:{{ sy }}">
-								<button class="sh-unequip-btn" onclick="unequip('{{ key }}')" title="Déséquiper"{% if not slots.get(key) %} style="display:none"{% endif %}>×</button>
+							<div class="sh-slot{% if slots.get(key) %} occupied{% endif %}" id="slot-{{ key }}" style="left:{{ sx }};top:{{ sy }}" onclick="openItemDetail('equip','{{ key }}')"{% if slots.get(key) %} title="Voir la fiche"{% endif %}>
+								<button class="sh-unequip-btn" onclick="event.stopPropagation();unequip('{{ key }}')" title="Déséquiper"{% if not slots.get(key) %} style="display:none"{% endif %}>×</button>
 								<span class="sh-slot-lbl">{{ nom }}</span>
 								<span class="sh-slot-name{% if not slots.get(key) %} sh-slot-empty{% endif %}">{% if slots.get(key) %}{{ slots[key]["nom"] if slots[key] is mapping else slots[key] }}{% else %}—{% endif %}</span>
 							</div>
@@ -1676,6 +1679,56 @@
 		}
 		.intro-card h2 { margin: 0 0 .8rem; }
 		#intro-texte { line-height: 1.5; margin-bottom: 1rem; white-space: pre-line; }
+		/* ── Fiche objet / comparaison d'équipement ── */
+		#item-detail-overlay {
+			position: fixed; inset: 0; z-index: 9200;
+			background: rgba(10, 8, 5, .72);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#item-detail-overlay.item-detail-hidden { display: none; }
+		.item-detail-card {
+			position: relative;
+			max-width: 760px; width: 100%; max-height: 85vh; overflow-y: auto;
+			background: #2c2c38; color: var(--text-color, #f1f1f1);
+			border: 1px solid var(--accent-color, #b98c4a); border-radius: 10px;
+			padding: 1.2rem 1.4rem; box-shadow: 0 8px 40px rgba(0, 0, 0, .6);
+		}
+		.item-detail-close {
+			position: absolute; top: 8px; right: 10px;
+			width: 28px; height: 28px; line-height: 26px; text-align: center;
+			background: var(--btn-bg); border: 1px solid var(--border-color);
+			color: var(--text-color); font-size: 16px; border-radius: 4px; cursor: pointer;
+		}
+		.item-detail-close:hover { border-color: var(--accent-color); color: var(--accent-color); }
+		.item-detail-card h3 { margin: 0 2rem .4rem 0; font-size: 1.15rem; }
+		.item-cmp { margin-top: 8px; }
+		.item-cmp-hd, .item-cmp-row { display: grid; gap: 8px; align-items: baseline; }
+		.item-cmp.compare .item-cmp-hd, .item-cmp.compare .item-cmp-row { grid-template-columns: minmax(84px, 0.9fr) 1fr 1fr; }
+		.item-cmp.mono .item-cmp-hd, .item-cmp.mono .item-cmp-row { grid-template-columns: minmax(84px, 0.9fr) 1fr; }
+		.item-cmp-hd { padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--border-color); }
+		.item-cmp-face { display: flex; align-items: center; gap: 8px; min-width: 0; }
+		.item-cmp-face .ic { font-size: 1.5rem; flex-shrink: 0; }
+		.item-cmp-face .nm { font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.item-cmp-role { font-size: 0.7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); display: block; margin-bottom: 3px; }
+		.item-cmp-empty { color: var(--muted); font-style: italic; }
+		.item-cmp-row { padding: 5px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.88rem; }
+		.item-cmp-row .lbl { color: var(--muted); }
+		.item-cmp-row .cell { font-weight: bold; }
+		.item-cmp-row .cell.muted { color: var(--muted); font-weight: normal; }
+		.item-cmp-row .delta { font-size: 0.78rem; font-weight: bold; margin-left: 6px; }
+		.delta-up { color: #38d66b; }
+		.delta-down { color: #ff6b6b; }
+		.item-cmp-bad { color: #ff6b6b; }
+		.item-cmp-ok { color: #38d66b; }
+		.item-cmp-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+		.item-cmp-slotsel { margin: 6px 0 4px; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+		.item-cmp-slotsel select {
+			background: var(--btn-bg); border: 1px solid var(--border-color);
+			color: var(--text-color); padding: 2px 4px; font-size: 0.85rem;
+		}
+		.item-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+		.item-detail-actions button { margin: 0; }
+		.item-detail-actions button:disabled { opacity: .5; cursor: not-allowed; }
 	</style>
 	<div id="pnj-panel" class="panel-hidden panel-frame board-panel" aria-label="Dialogue avec un personnage">
 		<div class="sell-topbar">
@@ -1706,6 +1759,12 @@
 			</ul>
 		</div>
 	</div><!-- /#intro-overlay -->
+	<div id="item-detail-overlay" class="item-detail-hidden" aria-label="Fiche objet" onclick="if(event.target===this)closeItemDetail()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeItemDetail()" title="Fermer">✕</button>
+			<div id="item-detail-body"></div>
+		</div>
+	</div><!-- /#item-detail-overlay -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -2239,6 +2298,8 @@ function sheetTab(id, btn) {
 }
 document.addEventListener('keydown', e => {
 	if (e.key !== 'Escape') return;
+	const itemOv = document.getElementById('item-detail-overlay');
+	if (itemOv && !itemOv.classList.contains('item-detail-hidden')) { closeItemDetail(); return; }
 	const sell = document.getElementById('sell-panel');
 	if (sell && !sell.classList.contains('panel-hidden')) { closeSellPanel(); return; }
 	closeSheet();
@@ -2534,10 +2595,12 @@ function _refreshPaperdoll() {
 			if (nameEl) { nameEl.textContent = item.nom || '?'; nameEl.className = 'sh-slot-name'; }
 			if (unequipEl) unequipEl.style.display = '';
 			el.classList.add('occupied');
+			el.title = 'Voir la fiche';
 		} else {
 			if (nameEl) { nameEl.textContent = '—'; nameEl.className = 'sh-slot-name sh-slot-empty'; }
 			if (unequipEl) unequipEl.style.display = 'none';
 			el.classList.remove('occupied');
+			el.title = '';
 		}
 	}
 }
@@ -2571,8 +2634,8 @@ function _refreshInventaire() {
 			? `<button class="sh-drop-btn" onclick="consommerItem(${idx},'${item._id}',this)" title="Consommer">🍽️ Consommer</button>`
 			: '';
 		return `<div class="sh-inv-item">
-			<span>${item.icon || '📦'}</span>
-			<span class="sh-inv-name">${item.nom || '—'}</span>
+			<span class="sh-inv-open" onclick="openItemDetail('sac',${idx})" title="Voir la fiche">${item.icon || '📦'}</span>
+			<span class="sh-inv-name sh-inv-open" onclick="openItemDetail('sac',${idx})" title="Voir la fiche">${item.nom || '—'}</span>
 			${poidsHtml}
 			${rarHtml}${equipHtml}<span class="sh-inv-actions">${consoHtml}${couperHtml}${dropHtml}</span>
 		</div>`;
@@ -2597,8 +2660,8 @@ function _refreshSol() {
 		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
 		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
 		return `<div class="sh-inv-item">
-			<span>${item.icon || '📦'}</span>
-			<span class="sh-inv-name">${item.nom || '—'}</span>
+			<span class="sh-inv-open" onclick="openItemDetail('sol',${idx})" title="Voir la fiche">${item.icon || '📦'}</span>
+			<span class="sh-inv-name sh-inv-open" onclick="openItemDetail('sol',${idx})" title="Voir la fiche">${item.nom || '—'}</span>
 			${poidsHtml}${rarHtml}
 			<span class="sh-inv-actions">${_estCoupable(item) ? _couperBtn(idx, item._id, 'sol') : ''}<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button></span>
 		</div>`;
@@ -2606,6 +2669,273 @@ function _refreshSol() {
 	if (scrollEl) scrollEl.classList.toggle('scrollable', _objetsAuSol.length > INV_VISIBLE);
 	updateSolSortBtn();
 }
+
+// ── Fiche objet / comparaison d'équipement ────────────────────────────
+// Clic sur un objet (sac/sol) ou une case équipée → fiche flottante.
+// Si l'objet peut remplacer un équipement (ou l'inverse), les deux objets
+// sont affichés côte à côte avec comparaison chiffrée des caractéristiques.
+let _itemDetailState = null;
+
+function _itemMode(item) {
+	const tags = (item && item.tags) || [];
+	if (tags.includes('tir')) return 'tir';
+	if (tags.includes('jet')) return 'jet';
+	return 'cac';
+}
+// Miroir client de restriction_satisfaite (utils/characters.py) : ET sur {caract:min}.
+function _restrictionOk(restriction) {
+	const manque = {};
+	if (restriction) {
+		for (const [k, v] of Object.entries(restriction)) {
+			if ((+(_charStats[k] || 0)) < +v) manque[k] = v;
+		}
+	}
+	return { ok: Object.keys(manque).length === 0, manque };
+}
+function _slotCandidatesInBag(slot) {
+	const out = [];
+	(_inventaire || []).forEach((it, i) => {
+		if (it && typeof it === 'object' && (it.slots || []).includes(slot)) out.push({ idx: i, item: it });
+	});
+	return out;
+}
+
+// Attributs numériques comparables (better: +1 = plus haut mieux, -1 = plus bas mieux).
+const _CMP_ATTRS = [
+	{ label: 'Poids',        get: it => +(it.poids || 0),             better: -1, fmt: v => v.toFixed(1) + ' kg', always: true },
+	{ label: 'Portée',       get: it => it.categorie === 'arme' ? +(it.portee || 1) : null, better: 1, fmt: v => String(v) },
+	{ label: 'Armure',       get: it => +(it.bonus_pa || 0),          better: 1,  fmt: v => '+' + v },
+	{ label: 'PV',           get: it => +(it.bonus_pv || 0),          better: 1,  fmt: v => '+' + v },
+	{ label: 'PM',           get: it => +(it.bonus_pm || 0),          better: 1,  fmt: v => '+' + v },
+	{ label: 'Toucher CàC',  get: it => +(it.bonus_cc || 0),          better: 1,  fmt: v => '+' + v },
+	{ label: 'Toucher dist.',get: it => +(it.bonus_cd || 0),          better: 1,  fmt: v => '+' + v },
+	{ label: 'Dégâts',       get: it => +(it.bonus_degats || 0),      better: 1,  fmt: v => '+' + v },
+	{ label: 'Initiative',   get: it => +(it.bonus_initiative || 0),  better: 1,  fmt: v => '+' + v },
+	{ label: 'Malus dépl.',  get: it => +(it.bonus_malus_depl || 0),  better: -1, fmt: v => String(v) },
+];
+
+function _fmtDelta(d) { return Number.isInteger(d) ? String(d) : d.toFixed(1); }
+
+function _catText(item) {
+	if (!item) return '';
+	const c = item.categorie || '';
+	const sc = item.sous_categorie || '';
+	return sc && sc !== c ? `${c} · ${sc}` : c;
+}
+function _weaponModeText(item) {
+	if (!item || item.categorie !== 'arme') return '';
+	const m = _itemMode(item);
+	return m === 'tir' ? 'Tir' : (m === 'jet' ? 'Jet' : 'Corps à corps');
+}
+function _effetsChips(item) {
+	const e = (item && item.effets) || {};
+	const chips = [];
+	if (e.pv) chips.push(`❤️ +${e.pv} PV`);
+	if (e.pm) chips.push(`💧 +${e.pm} PM`);
+	if (e.regen_pv) chips.push(`❤️ +${e.regen_pv} PV/tour`);
+	if (e.regen_pm) chips.push(`💧 +${e.regen_pm} PM/tour`);
+	for (const [k, v] of Object.entries(e.buffs || {})) chips.push(`✨ ${v > 0 ? '+' : ''}${v} ${k}`);
+	if (e.duree) chips.push(`⏳ ${e.duree} tours`);
+	return chips;
+}
+
+function _faceCell(item, role) {
+	if (!item) return `<div class="item-cmp-face"><div><span class="item-cmp-role">${role}</span><span class="item-cmp-empty">— aucun —</span></div></div>`;
+	const rar = item.rarete ? ` <span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
+	return `<div class="item-cmp-face"><span class="ic">${item.icon || '📦'}</span><div><span class="item-cmp-role">${role}</span><span class="nm">${item.nom || '—'}</span>${rar}</div></div>`;
+}
+
+// Lignes numériques : delta candidat − équipé affiché sur la face droite (mode comparaison).
+function _numRows(left, right, compare) {
+	let rows = '';
+	for (const a of _CMP_ATTRS) {
+		const lv = left ? a.get(left) : null;
+		const rv = right ? a.get(right) : null;
+		const lHas = lv !== null && lv !== undefined;
+		const rHas = rv !== null && rv !== undefined;
+		if (!lHas && !rHas) continue;
+		if (!a.always) {
+			const lz = !lHas || lv === 0, rz = !rHas || rv === 0;
+			if (lz && rz) continue;
+		}
+		const lCell = `<span class="cell">${lHas ? a.fmt(lv) : '—'}</span>`;
+		let rCell = '';
+		if (compare) {
+			let deltaHtml = '';
+			if (lHas && rHas && rv !== lv) {
+				const d = rv - lv;
+				const good = a.better > 0 ? d > 0 : d < 0;
+				deltaHtml = `<span class="delta ${good ? 'delta-up' : 'delta-down'}">${good ? '▲' : '▼'} ${d > 0 ? '+' : ''}${_fmtDelta(d)}</span>`;
+			}
+			rCell = `<span class="cell">${rHas ? a.fmt(rv) : '—'}${deltaHtml}</span>`;
+		}
+		rows += `<div class="item-cmp-row"><span class="lbl">${a.label}</span>${lCell}${rCell}</div>`;
+	}
+	return rows;
+}
+function _textRow(label, lval, rval, compare) {
+	const lHas = lval !== null && lval !== undefined && lval !== '';
+	const rHas = rval !== null && rval !== undefined && rval !== '';
+	if (!lHas && (!compare || !rHas)) return '';
+	const l = `<span class="cell muted">${lHas ? lval : '—'}</span>`;
+	const r = compare ? `<span class="cell muted">${rHas ? rval : '—'}</span>` : '';
+	return `<div class="item-cmp-row"><span class="lbl">${label}</span>${l}${r}</div>`;
+}
+function _restrictionCell(item) {
+	const restr = item && item.restriction;
+	if (!restr || !Object.keys(restr).length) return '<span class="cell muted">—</span>';
+	const txt = Object.entries(restr).map(([k, v]) => {
+		const ok = (+(_charStats[k] || 0)) >= +v;
+		return `<span class="${ok ? 'item-cmp-ok' : 'item-cmp-bad'}">${k} ${v}</span>`;
+	}).join(', ');
+	return `<span class="cell">${txt}</span>`;
+}
+function _restrictionRow(left, right, compare) {
+	const lHas = left && left.restriction && Object.keys(left.restriction).length;
+	const rHas = right && right.restriction && Object.keys(right.restriction).length;
+	if (!lHas && (!compare || !rHas)) return '';
+	let html = `<div class="item-cmp-row"><span class="lbl">Restriction</span>${_restrictionCell(left)}`;
+	if (compare) html += _restrictionCell(right);
+	return html + `</div>`;
+}
+function _effetsRow(left, right, compare) {
+	const lc = _effetsChips(left), rc = compare ? _effetsChips(right) : [];
+	if (!lc.length && !rc.length) return '';
+	const cell = arr => arr.length
+		? `<span class="cell"><span class="item-cmp-chips">${arr.map(c => `<span class="sh-effet-chip">${c}</span>`).join('')}</span></span>`
+		: '<span class="cell muted">—</span>';
+	let html = `<div class="item-cmp-row"><span class="lbl">Effets</span>${cell(lc)}`;
+	if (compare) html += cell(rc);
+	return html + `</div>`;
+}
+
+// Table comparaison (right null → mono-colonne).
+function _renderCmpTable(left, right, roleLeft, roleRight) {
+	const compare = !!right;
+	let hd = `<div class="item-cmp-hd"><span></span>${_faceCell(left, roleLeft)}`;
+	if (compare) hd += _faceCell(right, roleRight);
+	hd += `</div>`;
+	let rows = '';
+	rows += _textRow('Catégorie', _catText(left), compare ? _catText(right) : null, compare);
+	rows += _textRow('Mode', _weaponModeText(left), compare ? _weaponModeText(right) : null, compare);
+	rows += _numRows(left, right, compare);
+	rows += _textRow('Dés de dégâts', left && left.bonus_degats_dice, compare ? (right && right.bonus_degats_dice) : null, compare);
+	rows += _restrictionRow(left, right, compare);
+	rows += _effetsRow(left, right, compare);
+	return `<div class="item-cmp ${compare ? 'compare' : 'mono'}">${hd}${rows}</div>`;
+}
+
+function _restrictionTitle(chk) {
+	return chk.ok ? '' : `title="Restriction non satisfaite : ${Object.entries(chk.manque).map(([k, v]) => k + ' ' + v).join(', ')}"`;
+}
+function _cardCouperBtn(idx, itemId, source) {
+	const tool = _hasOutilCoupe();
+	return `<button class="sh-drop-btn" ${tool ? '' : 'disabled'} onclick="_cardCouper(${idx},'${itemId}','${source}')" title="${tool ? 'Couper en pièces plus petites' : 'Outil de coupe requis'}">🪓 Couper</button>`;
+}
+
+function _renderMono(st) {
+	const item = st.item;
+	let html = `<h3>${item.icon || '📦'} ${item.nom || '—'}</h3>`;
+	html += _renderCmpTable(item, null, 'Objet', '');
+	const acts = [];
+	if (st.source === 'sac') {
+		if (_estConsommable(item)) acts.push(`<button class="sh-equip-btn" onclick="_cardConsommer(${st.idx},'${item._id}')">🍽️ Consommer</button>`);
+		if (_estCoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sac'));
+		acts.push(`<button class="sh-drop-btn" onclick="_cardDrop(${st.idx},'${item._id}')">Poser</button>`);
+	} else if (st.source === 'sol') {
+		if (_estCoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sol'));
+		acts.push(`<button class="sh-equip-btn" onclick="_cardPickup(${st.idx},'${item._id}')">Prendre</button>`);
+	}
+	if (acts.length) html += `<div class="item-detail-actions">${acts.join('')}</div>`;
+	return html;
+}
+function _renderSacCompare(st) {
+	const cand = st.candItem;
+	const equipped = _slots[st.slot] || null;
+	let html = `<h3>${cand.icon || '📦'} ${cand.nom || '—'}</h3>`;
+	if (st.slots.length > 1) {
+		const opts = st.slots.map(s => `<option value="${s}"${s === st.slot ? ' selected' : ''}>${SLOT_LABELS[s]}${_slots[s] ? ' — ' + (_slots[s].nom || '') : ' — (vide)'}</option>`).join('');
+		html += `<div class="item-cmp-slotsel"><span>Emplacement :</span><select onchange="_setDetailSlot(this.value)">${opts}</select></div>`;
+	}
+	html += _renderCmpTable(equipped, cand, 'Équipé', 'Sélectionné');
+	const chk = _restrictionOk(cand.restriction);
+	const acts = [];
+	acts.push(`<button class="sh-equip-btn" ${chk.ok ? '' : 'disabled'} ${_restrictionTitle(chk)} onclick="_cardEquip('${cand._id}','${st.slot}')">Équiper${equipped ? ' (remplacer)' : ''}</button>`);
+	acts.push(`<button class="sh-drop-btn" onclick="_cardDrop(${st.candIdx},'${cand._id}')">Poser</button>`);
+	html += `<div class="item-detail-actions">${acts.join('')}</div>`;
+	return html;
+}
+function _renderEquipCompare(st) {
+	const equipped = st.equipItem;
+	const alt = (st.altPos >= 0 && st.alts[st.altPos]) ? st.alts[st.altPos] : null;
+	const cand = alt ? alt.item : null;
+	let html = `<h3>${equipped.icon || '📦'} ${equipped.nom || '—'}</h3>`;
+	if (st.alts.length) {
+		const opts = st.alts.map((a, i) => `<option value="${i}"${i === st.altPos ? ' selected' : ''}>${a.item.nom || '—'}</option>`).join('');
+		html += `<div class="item-cmp-slotsel"><span>Remplacer par :</span><select onchange="_setDetailAlt(this.value)">${opts}</select></div>`;
+	}
+	html += _renderCmpTable(equipped, cand, 'Équipé', 'Candidat (sac)');
+	const acts = [];
+	if (cand) {
+		const chk = _restrictionOk(cand.restriction);
+		acts.push(`<button class="sh-equip-btn" ${chk.ok ? '' : 'disabled'} ${_restrictionTitle(chk)} onclick="_cardEquip('${cand._id}','${st.slot}')">Équiper →</button>`);
+	}
+	acts.push(`<button class="sh-drop-btn" onclick="_cardUnequip('${st.slot}')">Déséquiper</button>`);
+	html += `<div class="item-detail-actions">${acts.join('')}</div>`;
+	return html;
+}
+
+function _renderItemDetail() {
+	const st = _itemDetailState;
+	const body = document.getElementById('item-detail-body');
+	if (!st || !body) return;
+	if (st.mode === 'mono')       body.innerHTML = _renderMono(st);
+	else if (st.mode === 'sac')   body.innerHTML = _renderSacCompare(st);
+	else if (st.mode === 'equip') body.innerHTML = _renderEquipCompare(st);
+}
+
+function openItemDetail(source, idx) {
+	let item = null;
+	if (source === 'sac')        item = _inventaire[idx];
+	else if (source === 'sol')   item = _objetsAuSol[idx];
+	else if (source === 'equip') item = _slots[idx];   // idx = clé de slot
+	if (!item || typeof item !== 'object') return;
+
+	if (source === 'equip') {
+		const slot = idx;
+		const alts = _slotCandidatesInBag(slot);
+		_itemDetailState = { mode: 'equip', slot, equipItem: item, alts, altPos: alts.length ? 0 : -1 };
+	} else {
+		const compat = (item.slots || []).filter(s => s in SLOT_LABELS);
+		if (source === 'sac' && compat.length) {
+			const slot = compat.find(s => _slots[s]) || compat[0];   // défaut : 1er slot occupé sinon 1er
+			_itemDetailState = { mode: 'sac', candIdx: idx, candItem: item, slots: compat, slot };
+		} else {
+			_itemDetailState = { mode: 'mono', source, idx, item };
+		}
+	}
+	_renderItemDetail();
+	document.getElementById('item-detail-overlay').classList.remove('item-detail-hidden');
+}
+function closeItemDetail() {
+	_itemDetailState = null;
+	const ov = document.getElementById('item-detail-overlay');
+	if (ov) ov.classList.add('item-detail-hidden');
+}
+function _setDetailSlot(slot) {
+	if (_itemDetailState && _itemDetailState.mode === 'sac') { _itemDetailState.slot = slot; _renderItemDetail(); }
+}
+function _setDetailAlt(i) {
+	if (_itemDetailState && _itemDetailState.mode === 'equip') { _itemDetailState.altPos = +i; _renderItemDetail(); }
+}
+// Actions depuis la fiche : ferme la fiche puis délègue aux fonctions existantes
+// (elles rafraîchissent sac/paperdoll/stats). Les index deviennent obsolètes après coup.
+function _cardEquip(itemId, slot)       { closeItemDetail(); equip(itemId, slot); }
+function _cardUnequip(slot)             { closeItemDetail(); unequip(slot); }
+function _cardDrop(idx, itemId)         { closeItemDetail(); dropItem(idx, itemId); }
+function _cardPickup(idx, itemId)       { closeItemDetail(); pickupItem(idx, itemId); }
+function _cardConsommer(idx, itemId)    { closeItemDetail(); consommerItem(idx, itemId, null); }
+function _cardCouper(idx, itemId, src)  { closeItemDetail(); couperItem(idx, itemId, src); }
 
 // ── Découpe du bois ───────────────────────────────────────────────────
 function _estCoupable(item) {
