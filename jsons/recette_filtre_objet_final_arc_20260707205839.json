@@ -1,0 +1,94 @@
+[
+  {
+    "_id": "recette:arme_arc_court",
+    "_rev": "1-4f1422f4f050c83080cb3f0c80e51183",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Arc_court",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:5a370d2a-53e2-4b33-a7ec-fbc4e3ce48a0",
+    "_rev": "1-3a3b6bad3b758fe6d4644d0a0252f629",
+    "matiere_premiere_sous_categorie": "boyaux",
+    "lieu_categorie": "fletcher",
+    "objet_final": "cordes_d_arc",
+    "type": "recette",
+    "quantite_matiere": 2,
+    "quantite_produite": 1
+  },
+  {
+    "_id": "recette:arme_arc",
+    "_rev": "2-8da739297bb0a29c2c9ba81525e2c3c2",
+    "type": "recette",
+    "lieu_categorie": "fletcher",
+    "objet_final": "Arc",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_arc_court01",
+    "_rev": "2-73d3d109fd50bd99ff4342b167e45ef1",
+    "type": "recette",
+    "lieu_categorie": "fletcher",
+    "objet_final": "Arc_court",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_arc_long",
+    "_rev": "2-36ade777e8a5b9c64802f6c563c93fa9",
+    "type": "recette",
+    "lieu_categorie": "fletcher",
+    "objet_final": "Arc_long",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:fba762d2-b07c-472c-a172-1469babcf747",
+    "_rev": "1-b4d6952f51ee7fbbe74fa9d552481053",
+    "matiere_premiere_sous_categorie": "tendons",
+    "lieu_categorie": "fletcher",
+    "objet_final": "cordes_d_arc",
+    "type": "recette",
+    "quantite_matiere": 2,
+    "quantite_produite": 1
+  }
+]
