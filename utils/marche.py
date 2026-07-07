@@ -483,34 +483,75 @@ _IMAGE_ROUTES = (
 )
 
 
+def _lieu_image_route(lieu_doc: dict) -> tuple[str | None, str | None]:
+	"""(image, route) servable pour un doc lieu : première route dont le fichier existe
+	sur disque (towns → maps → battle_maps), sinon (None, None)."""
+	img = (lieu_doc or {}).get("image")
+	if img:
+		for route, path in _IMAGE_ROUTES:
+			if os.path.exists(os.path.join(path, img)):
+				return img, route
+	return None, None
+
+
 def relations_lieux_payload(character: dict) -> list[dict]:
-	"""Relations de lieu du personnage pour l'onglet 🤝 de la fiche, triées par valeur
-	décroissante. Sert au rendu initial de /play ET au resync client après marchandage
-	(champ `relations_lieux` de quotes/marchander → renderFicheRelations)."""
-	relations = []
+	"""Tous les lieux CONNUS du personnage (`lieux_visites`, complété des lieux ayant déjà
+	un doc relation) pour l'onglet 🤝 de la fiche, sous forme de liste à plat. Le client
+	regroupe par ville (`lieu_parent` → lieu `categorie:"ville"`) en accordéon. Sert au
+	rendu initial de /play ET au resync client après marchandage (champ `relations_lieux`
+	de quotes/marchander → renderFicheRelations).
+
+	Chaque entrée porte de quoi construire l'en-tête de ville côté client, y compris quand
+	la ville elle-même n'a pas été visitée (`parent_*`). Un lieu sans relation apparaît en
+	valeur neutre (RELATION_INITIALE)."""
+	character = character or {}
 	now = now_epoch()
-	for rel in (find_docs({"type": "relation", "character_id": (character or {}).get("_id")}) or []):
-		lieu_id = rel.get("lieu_id")
-		if not lieu_id:
-			continue
+
+	# Docs relation indexés par lieu_id en une seule passe.
+	rels_by_lieu: dict[str, dict] = {}
+	for rel in (find_docs({"type": "relation", "character_id": character.get("_id")}) or []):
+		lid = rel.get("lieu_id")
+		if lid:
+			rels_by_lieu[lid] = rel
+
+	# Ensemble connu = lieux visités + lieux avec relation (dédup, ordre conservé).
+	lieu_ids: list[str] = []
+	seen: set[str] = set()
+	for lid in list(character.get("lieux_visites") or []) + list(rels_by_lieu.keys()):
+		if lid and lid not in seen:
+			seen.add(lid)
+			lieu_ids.append(lid)
+
+	parent_cache: dict[str, dict | None] = {}
+	relations = []
+	for lieu_id in lieu_ids:
 		lieu_doc = get_doc(lieu_id)
 		if not lieu_doc:
 			continue
-		img = lieu_doc.get("image")
-		img_route = None
-		if img:
-			for route, path in _IMAGE_ROUTES:
-				if os.path.exists(os.path.join(path, img)):
-					img_route = route
-					break
+		rel = rels_by_lieu.get(lieu_id)
+		img, img_route = _lieu_image_route(lieu_doc)
+		parent_id = lieu_doc.get("lieu_parent")
+		parent_nom = parent_img = parent_route = None
+		if parent_id:
+			if parent_id not in parent_cache:
+				parent_cache[parent_id] = get_doc(parent_id)
+			pdoc = parent_cache[parent_id]
+			if pdoc:
+				parent_nom = pdoc.get("label", parent_id)
+				parent_img, parent_route = _lieu_image_route(pdoc)
 		relations.append({
 			"lieu_id": lieu_id,
 			"nom": lieu_doc.get("label", lieu_id),
-			"categorie": lieu_doc.get("categorie", ""),
-			"image": img if img_route else None,
+			"categorie": lieu_doc.get("categorie", "") or "",
+			"est_ville": lieu_doc.get("categorie") == "ville",
+			"image": img,
 			"image_route": img_route,
-			"value": relation_value(rel),
-			"bloque": marchandage_bloque(rel, now),
+			"value": relation_value(rel) if rel else int(character_stats.RELATION_INITIALE),
+			"bloque": marchandage_bloque(rel, now) if rel else False,
+			"lieu_parent": parent_id,
+			"parent_nom": parent_nom,
+			"parent_image": parent_img,
+			"parent_image_route": parent_route,
 		})
 	relations.sort(key=lambda r: r["value"], reverse=True)
 	return relations

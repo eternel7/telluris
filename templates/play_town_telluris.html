@@ -816,6 +816,33 @@
 		.sh-rel-score.neg { color: #ff4757; }
 		.sh-rel-score.neu { color: var(--muted); }
 		.sh-rel-lbl { font-size: 0.8rem; color: var(--muted); text-align: right; }
+		/* ── Onglet Relations : filtre + accordéon des lieux par ville ── */
+		.sh-rel-filter {
+			width: 100%; box-sizing: border-box; margin: 0 0 8px; padding: 7px 10px;
+			background: var(--input-bg, #1c1c1c); color: inherit;
+			border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem;
+		}
+		.sh-rel-scroll { max-height: 85vh; overflow-y: auto; overflow-x: hidden; }
+		.sh-ville { border-bottom: 2px solid var(--border-color); }
+		.sh-ville.hidden { display: none; }
+		.sh-ville-head {
+			display: flex; align-items: center; gap: 8px; width: 100%;
+			padding: 9px 4px; cursor: pointer; background: transparent; border: 0;
+			color: inherit; text-align: left; font: inherit;
+		}
+		.sh-ville-head:hover { background: rgba(255,255,255,0.04); }
+		.sh-ville-chevron { transition: transform 0.2s ease; opacity: 0.7; flex-shrink: 0; }
+		.sh-ville.open > .sh-ville-head .sh-ville-chevron { transform: rotate(90deg); }
+		.sh-ville-title { flex: 1; font-weight: bold; font-size: 0.98rem; }
+		.sh-ville-count { font-size: 0.78rem; color: var(--muted); }
+		.sh-ville-score { font-weight: bold; font-size: 0.95rem; }
+		.sh-ville-score.pos { color: #2ed573; }
+		.sh-ville-score.neg { color: #ff4757; }
+		.sh-ville-score.neu { color: var(--muted); }
+		.sh-ville-body { display: none; padding-left: 10px; }
+		.sh-ville.open > .sh-ville-body { display: block; }
+		.sh-ville-body .sh-relation:last-child { border-bottom: 0; }
+		.sh-ville-body .sh-relation.hidden { display: none; }
 		/* Chips d'effets actifs (consommables) — colonne gauche de la fiche + onglet stats. */
 		.sh-effets-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 		.sh-effets-chips:not(:empty) { margin-top: 8px; }
@@ -1529,31 +1556,13 @@
 							<div class="sh-empty" id="sh-rel-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>
 						{% endif %}
 
-						{# Relations de lieu (marchands) : échelle 0–100, neutre 50, 0 = banni.
-						   Wrapper #sh-rel-lieux toujours présent : re-rendu client par
-						   renderFicheRelations après marchandage (miroir JS de ce markup). #}
-						<div id="sh-rel-lieux">
-						{% if rels_lieux %}
-							<div class="sh-section">🏪 Lieux &amp; marchands</div>
-							{% for r in rels_lieux %}{% set v = r.value %}
-							<div class="sh-relation">
-								<strong>></strong>
-								<div class="sh-rel-info">
-									<div class="sh-rel-name">{{ r.nom }}{% if r.bloque %} <span title="Marchandage bloqué">🚫</span>{% endif %}</div>
-									<div class="sh-rel-class">{{ r.categorie }}</div>
-								</div>
-								<div>
-									<div class="sh-rel-score {% if v>50 %}pos{% elif v<50 %}neg{% else %}neu{% endif %}">{{ v }}<span style="opacity:.5;font-size:.7em">/100</span></div>
-									<div class="sh-rel-lbl">{% if v<=0 %}Banni{% elif v<35 %}Hostile{% elif v<50 %}Méfiant{% elif v==50 %}Neutre{% elif v<70 %}Cordial{% elif v<90 %}Estimé{% else %}Honoré{% endif %}</div>
-								</div>
-								<button class="sh-drop-btn{% if focalisation and focalisation.type == 'lieu' and focalisation.cible == r.lieu_id %} btn-highlight{% endif %}" data-focus-key="lieu|{{ r.lieu_id }}" onclick="focaliserLieu('{{ r.lieu_id }}')" title="Retrouver ce lieu (guidage)">🧭</button>
-								<div class="sh-rel-portrait">
-									{% if r.image %}<img src="/{{ r.image_route }}/{{ r.image }}" alt="" class="collapsed">
-									{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>{% endif %}
-								</div>
-							</div>
-							{% endfor %}
-						{% endif %}
+						{# Relations de lieu : TOUS les lieux connus (lieux_visites), regroupés par
+						   ville (lieu_parent → lieu categorie:"ville") en accordéon. Échelle 0–100,
+						   neutre 50, 0 = banni. Section rendue entièrement côté client par
+						   renderFicheRelations (RELATIONS_LIEUX_INIT à l'init + resync marchandage). #}
+						<input id="sh-rel-filter" class="sh-rel-filter" type="search" placeholder="🔍 Filtrer les lieux…" autocomplete="off">
+						<div id="sh-rel-lieux-scroll" class="sh-rel-scroll">
+							<div id="sh-rel-lieux"><!-- rendu par renderFicheRelations --></div>
 						</div>
 
 						{# Affinités PNJ (compagnons) : échelle 0–100, neutre 50 (alignée sur les lieux) — Phase 4.2. #}
@@ -2560,6 +2569,11 @@ let _objetsAuSol  = {{ character.get("objets_au_sol", []) | tojson | safe }};
 let _chargeMax    = {{ character.get("derived_stats", {}).get("charge_max", 0) }};
 let _effetsActifs = {{ effets_actifs | tojson | safe }};
 
+// Onglet 🤝 Relations : payload plat de tous les lieux connus (rendu client, accordéon
+// par ville). REL_CHAR_ID sert à retenir la ville ouverte par personnage (localStorage).
+const RELATIONS_LIEUX_INIT = {{ relations_lieux | tojson | safe }};
+const REL_CHAR_ID = {{ character.get("_id", "") | tojson | safe }};
+
 // Tri par nom (3 états : null → 'asc' → 'desc' → null), mémorisé par navigateur.
 // Logique partagée entre le sac (_invSort) et le sol (_solSort).
 const INV_VISIBLE = 20;
@@ -3355,10 +3369,10 @@ function setMarchandState(data) {
 	if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
 }
 
-// Resync de la section « 🏪 Lieux & marchands » de l'onglet 🤝 (fiche) après
-// quotes/marchander — miroir JS du markup Jinja de #sh-rel-lieux (même pattern que
-// renderFicheQuetes pour l'onglet 📜) ; sinon la relation du lieu courant resterait
-// figée jusqu'au rechargement de la page.
+// Onglet 🤝 Relations : rendu client de TOUS les lieux connus, regroupés par ville
+// (lieu_parent → lieu categorie:"ville") en accordéon. Alimenté par RELATIONS_LIEUX_INIT
+// à l'init et resynchronisé après quotes/marchander (data.relations_lieux). La ville
+// ouverte est retenue par personnage dans localStorage.
 function relLieuLabel(v) {
 	if (v <= 0)  return 'Banni';
 	if (v < 35)  return 'Hostile';
@@ -3369,34 +3383,141 @@ function relLieuLabel(v) {
 	return 'Honoré';
 }
 
+const REL_AUTRES_ID = '__autres__';
+function _relOpenKey() { return 'telluris.play.rel_ville_open.' + (typeof REL_CHAR_ID !== 'undefined' ? REL_CHAR_ID : ''); }
+function _relLoadOpen() { try { return localStorage.getItem(_relOpenKey()) || ''; } catch (e) { return ''; } }
+function _relSaveOpen(id) { try { if (id) localStorage.setItem(_relOpenKey(), id); else localStorage.removeItem(_relOpenKey()); } catch (e) {} }
+
+// Une ligne de lieu (réutilise le markup .sh-relation). data-rel-name sert au filtre.
+function relLieuRow(r) {
+	const v = r.value;
+	const cls = v > 50 ? 'pos' : (v < 50 ? 'neg' : 'neu');
+	const portrait = r.image
+		? `<img src="/${r.image_route}/${r.image}" alt="" class="collapsed">`
+		: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>';
+	return `<div class="sh-relation" data-rel-name="${(r.nom || '').toLowerCase().replace(/"/g, '&quot;')}">
+		<div class="sh-rel-portrait">${portrait}</div>
+		<div class="sh-rel-info">
+			<div class="sh-rel-name">${r.nom}${r.bloque ? ' <span title="Marchandage bloqué">🚫</span>' : ''}</div>
+			<div class="sh-rel-class">${r.categorie || ''}</div>
+		</div>
+		<div>
+			<div class="sh-rel-score ${cls}">${v}<span style="opacity:.5;font-size:.7em">/100</span></div>
+			<div class="sh-rel-lbl">${relLieuLabel(v)}</div>
+		</div>
+		<button class="sh-drop-btn${_focusEst('lieu', r.lieu_id) ? ' btn-highlight' : ''}" data-focus-key="lieu|${r.lieu_id}" onclick="focaliserLieu('${r.lieu_id}')" title="Retrouver ce lieu (guidage)">🧭</button>
+	</div>`;
+}
+
 function renderFicheRelations(list) {
 	const box = document.getElementById('sh-rel-lieux');
 	if (!box || !Array.isArray(list)) return;
 	if (!list.length) { box.innerHTML = ''; return; }
 	const empty = document.getElementById('sh-rel-empty');
 	if (empty) empty.remove();
-	let html = '<div class="sh-section">🏪 Lieux &amp; marchands</div>';
-	html += list.map(r => {
-		const v = r.value;
-		const cls = v > 50 ? 'pos' : (v < 50 ? 'neg' : 'neu');
-		const portrait = r.image
-			? `<img src="/${r.image_route}/${r.image}" alt="" class="collapsed">`
-			: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>';
-		return `<div class="sh-relation">
-			<div class="sh-rel-portrait">${portrait}</div>
-			<div class="sh-rel-info">
-				<div class="sh-rel-name">${r.nom}${r.bloque ? ' <span title="Marchandage bloqué">🚫</span>' : ''}</div>
-				<div class="sh-rel-class">${r.categorie || ''}</div>
-			</div>
-			<div>
-				<div class="sh-rel-score ${cls}">${v}<span style="opacity:.5;font-size:.7em">/100</span></div>
-				<div class="sh-rel-lbl">${relLieuLabel(v)}</div>
-			</div>
-			<button class="sh-drop-btn${_focusEst('lieu', r.lieu_id) ? ' btn-highlight' : ''}" data-focus-key="lieu|${r.lieu_id}" onclick="focaliserLieu('${r.lieu_id}')" title="Retrouver ce lieu (guidage)">🧭</button>
+
+	// Groupement par ville. `own` = la ville elle-même si connue ; `children` = sous-lieux.
+	const groups = new Map();
+	function ensure(id, nom) {
+		let g = groups.get(id);
+		if (!g) { g = { id, nom: nom || '', own: null, children: [] }; groups.set(id, g); }
+		else if (nom && !g.nom) g.nom = nom;
+		return g;
+	}
+	list.forEach(r => {
+		if (r.est_ville) {
+			ensure(r.lieu_id, r.nom).own = r;
+		} else if (r.lieu_parent) {
+			ensure(r.lieu_parent, r.parent_nom).children.push(r);
+		} else {
+			ensure(REL_AUTRES_ID, 'Autres lieux').children.push(r);
+		}
+	});
+	// Villes triées par nom, « Autres lieux » toujours en dernier.
+	const villes = [...groups.values()].filter(g => g.id !== REL_AUTRES_ID)
+		.sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
+	const autres = groups.get(REL_AUTRES_ID);
+	const ordered = autres ? [...villes, autres] : villes;
+
+	const openId = _relLoadOpen();
+	let html = '<div class="sh-section">🏪 Lieux connus</div>';
+	html += ordered.map(g => {
+		const children = g.children.slice().sort((a, b) => b.value - a.value);
+		const count = children.length + (g.own ? 1 : 0);
+		let headScore = '';
+		if (g.own) {
+			const v = g.own.value;
+			const cls = v > 50 ? 'pos' : (v < 50 ? 'neg' : 'neu');
+			headScore = `<span class="sh-ville-score ${cls}">${v}/100</span>`;
+		}
+		const rows = (g.own ? relLieuRow(g.own) : '') + children.map(relLieuRow).join('');
+		const isOpen = (g.id === openId);
+		return `<div class="sh-ville${isOpen ? ' open' : ''}" data-ville-id="${g.id}">
+			<button type="button" class="sh-ville-head" onclick="toggleVilleGroup('${g.id}')">
+				<span class="sh-ville-chevron">▶</span>
+				<span class="sh-ville-title">${g.nom || g.id}</span>
+				<span class="sh-ville-count">${count}</span>
+				${headScore}
+			</button>
+			<div class="sh-ville-body">${rows}</div>
 		</div>`;
 	}).join('');
 	box.innerHTML = html;
+
+	// Ré-appliquer le filtre courant (le rendu remplace tout le HTML).
+	const f = document.getElementById('sh-rel-filter');
+	if (f && f.value.trim()) applyRelFilter(f.value);
 }
+
+// Accordéon : un seul groupe ouvert à la fois, mémorisé par personnage.
+function toggleVilleGroup(id) {
+	const box = document.getElementById('sh-rel-lieux');
+	if (!box) return;
+	const target = box.querySelector('.sh-ville[data-ville-id="' + id + '"]');
+	if (!target) return;
+	const willOpen = !target.classList.contains('open');
+	box.querySelectorAll('.sh-ville.open').forEach(el => el.classList.remove('open'));
+	if (willOpen) { target.classList.add('open'); _relSaveOpen(id); }
+	else { _relSaveOpen(''); }
+}
+
+// Filtre texte (nom de lieu, insensible à la casse). Les groupes correspondants sont
+// auto-dépliés ; champ vidé → retour à l'état accordéon persistant.
+function applyRelFilter(q) {
+	const box = document.getElementById('sh-rel-lieux');
+	if (!box) return;
+	const term = (q || '').trim().toLowerCase();
+	const villes = box.querySelectorAll('.sh-ville');
+	if (!term) {
+		const openId = _relLoadOpen();
+		villes.forEach(v => {
+			v.classList.remove('hidden');
+			v.querySelectorAll('.sh-relation').forEach(r => r.classList.remove('hidden'));
+			v.classList.toggle('open', v.getAttribute('data-ville-id') === openId);
+		});
+		return;
+	}
+	villes.forEach(v => {
+		const villeName = (v.querySelector('.sh-ville-title')?.textContent || '').toLowerCase();
+		const villeMatches = villeName.includes(term);
+		let anyMatch = false;
+		v.querySelectorAll('.sh-relation').forEach(r => {
+			const match = villeMatches || (r.getAttribute('data-rel-name') || '').includes(term);
+			r.classList.toggle('hidden', !match);
+			if (match) anyMatch = true;
+		});
+		const show = anyMatch || villeMatches;
+		v.classList.toggle('hidden', !show);
+		v.classList.toggle('open', show);
+	});
+}
+
+// Init : rendu de la liste des lieux connus + branchement du filtre.
+renderFicheRelations(RELATIONS_LIEUX_INIT);
+(function () {
+	const f = document.getElementById('sh-rel-filter');
+	if (f) f.addEventListener('input', () => applyRelFilter(f.value));
+})();
 
 function updateRelationBadge() {
 	const el = document.getElementById('sell-relation');
