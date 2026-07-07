@@ -822,7 +822,16 @@
 			background: var(--input-bg, #1c1c1c); color: inherit;
 			border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem;
 		}
-		.sh-rel-scroll { max-height: 85vh; overflow-y: auto; overflow-x: hidden; }
+		.sh-rel-scroll { max-height: 80vh; overflow-y: auto; overflow-x: hidden; 
+			scrollbar-width: thin;
+			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+		}
+		.sh-rel-scroll::after {
+			content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+			height: calc(var(--inv-row-h) / 2);
+			background: linear-gradient(to bottom, transparent, var(--panel-bg));
+			pointer-events: none;
+		}
 		.sh-ville { border-bottom: 2px solid var(--border-color); }
 		.sh-ville.hidden { display: none; }
 		.sh-ville-head {
