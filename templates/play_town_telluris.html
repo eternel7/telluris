@@ -791,7 +791,13 @@
 		}
 		.sh-relation { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
 		.sh-rel-portrait { width: 100%; height: 100%;  overflow: hidden; background: #333; border: 1px solid var(--border-color); flex-shrink: 0; }
-		.sh-rel-portrait img { width: 100%; height: 100%; object-fit: cover; }
+		.sh-rel-portrait img { 
+			width: 100%; height: 100%; object-fit: contain; max-width : 50vw; max-height: 50vh; margin-left: auto; margin-right: auto; display: block;
+			overflow: hidden; transition: max-height 1.5s ease-in-out;
+		}
+		.sh-rel-portrait img.collapsed {
+			max-height: 0;
+		}
 		.sh-rel-info { flex: 1; }
 		.sh-rel-name { font-weight: bold; font-size: 0.95rem; }
 		.sh-rel-class { font-size: 0.8rem; color: var(--muted); }
@@ -1521,10 +1527,6 @@
 							<div class="sh-section">🏪 Lieux &amp; marchands</div>
 							{% for r in rels_lieux %}{% set v = r.value %}
 							<div class="sh-relation">
-								<div class="sh-rel-portrait">
-									{% if r.image %}<img src="/{{ r.image_route }}/{{ r.image }}" alt="">
-									{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>{% endif %}
-								</div>
 								<div class="sh-rel-info">
 									<div class="sh-rel-name">{{ r.nom }}{% if r.bloque %} <span title="Marchandage bloqué">🚫</span>{% endif %}</div>
 									<div class="sh-rel-class">{{ r.categorie }}</div>
@@ -1534,6 +1536,10 @@
 									<div class="sh-rel-lbl">{% if v<=0 %}Banni{% elif v<35 %}Hostile{% elif v<50 %}Méfiant{% elif v==50 %}Neutre{% elif v<70 %}Cordial{% elif v<90 %}Estimé{% else %}Honoré{% endif %}</div>
 								</div>
 								<button class="sh-drop-btn{% if focalisation and focalisation.type == 'lieu' and focalisation.cible == r.lieu_id %} btn-highlight{% endif %}" data-focus-key="lieu|{{ r.lieu_id }}" onclick="focaliserLieu('{{ r.lieu_id }}')" title="Retrouver ce lieu (guidage)">🧭</button>
+								<div class="sh-rel-portrait">
+									{% if r.image %}<img src="/{{ r.image_route }}/{{ r.image }}" alt="" class="collapsed">
+									{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>{% endif %}
+								</div>
 							</div>
 							{% endfor %}
 						{% endif %}
@@ -1544,10 +1550,6 @@
 							<div class="sh-section">👥 Personnages</div>
 							{% for r in rels %}{% set sc = r.get("score",50) %}
 							<div class="sh-relation">
-								<div class="sh-rel-portrait">
-									{% if r.get("portrait") %}<img src="{{ r.portrait }}" alt="">
-									{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">{{ r.get("icon","👤") }}</div>{% endif %}
-								</div>
 								<div class="sh-rel-info">
 									<div class="sh-rel-name">{{ r.get("prenom","?") }} {{ r.get("nom","") }}</div>
 									<div class="sh-rel-class">{{ r.get("vocation","") }}</div>
@@ -1555,6 +1557,10 @@
 								<div>
 									<div class="sh-rel-score {% if sc>50 %}pos{% elif sc<50 %}neg{% else %}neu{% endif %}">{{ sc }}<span style="opacity:.5;font-size:.7em">/100</span></div>
 									<div class="sh-rel-lbl">{% if sc>=90 %}Dévoué{% elif sc>=70 %}Ami{% elif sc>=55 %}Bienveillant{% elif sc>=45 %}Neutre{% elif sc>=30 %}Méfiant{% elif sc>=10 %}Hostile{% else %}Ennemi{% endif %}</div>
+								</div>
+								<div class="sh-rel-portrait">
+									{% if r.get("portrait") %}<img src="{{ r.portrait }}" alt="" class="collapsed">
+									{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">{{ r.get("icon","👤") }}</div>{% endif %}
 								</div>
 							</div>
 							{% endfor %}
