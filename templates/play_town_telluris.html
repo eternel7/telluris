@@ -3397,14 +3397,15 @@ function _relOpenKey() { return 'telluris.play.rel_ville_open.' + (typeof REL_CH
 function _relLoadOpen() { try { return localStorage.getItem(_relOpenKey()) || ''; } catch (e) { return ''; } }
 function _relSaveOpen(id) { try { if (id) localStorage.setItem(_relOpenKey(), id); else localStorage.removeItem(_relOpenKey()); } catch (e) {} }
 
-// Une ligne de lieu (réutilise le markup .sh-relation). data-rel-name sert au filtre.
+// Une ligne de lieu (réutilise le markup .sh-relation). Le filtre lit directement le
+// texte de .sh-rel-name et .sh-rel-class.
 function relLieuRow(r) {
 	const v = r.value;
 	const cls = v > 50 ? 'pos' : (v < 50 ? 'neg' : 'neu');
 	const portrait = r.image
 		? `<img src="/${r.image_route}/${r.image}" alt="" class="collapsed">`
 		: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>';
-	return `<div class="sh-relation" data-rel-name="${(r.nom || '').toLowerCase().replace(/"/g, '&quot;')}">
+	return `<div class="sh-relation">
 		<div class="sh-rel-portrait">${portrait}</div>
 		<div class="sh-rel-info">
 			<div class="sh-rel-name">${r.nom}${r.bloque ? ' <span title="Marchandage bloqué">🚫</span>' : ''}</div>
@@ -3511,7 +3512,9 @@ function applyRelFilter(q) {
 		const villeMatches = villeName.includes(term);
 		let anyMatch = false;
 		v.querySelectorAll('.sh-relation').forEach(r => {
-			const match = villeMatches || (r.getAttribute('data-rel-name') || '').includes(term);
+			const nm = (r.querySelector('.sh-rel-name')?.textContent || '').toLowerCase();
+			const cl = (r.querySelector('.sh-rel-class')?.textContent || '').toLowerCase();
+			const match = villeMatches || nm.includes(term) || cl.includes(term);
 			r.classList.toggle('hidden', !match);
 			if (match) anyMatch = true;
 		});
