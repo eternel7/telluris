@@ -30,7 +30,7 @@
 			--accent-color: #ffd700;
 			--text-color: #e0e0e0;
 			--btn-bg: #3a3a4a;
-			--inv-row-h: 36px;        /* hauteur fixe d'une ligne d'inventaire (sac/sol) */
+			--inv-row-h: 26px;
 		}
 
 		* {
@@ -789,14 +789,20 @@
 			opacity: 1; color: var(--accent-color); border-color: var(--accent-color);
 			background: rgba(255,215,0,0.08);
 		}
-		.sh-relation { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
+		.sh-relation { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 2px solid var(--border-color); }
 		.sh-rel-portrait { width: 100%; height: 100%;  overflow: hidden; background: #333; border: 1px solid var(--border-color); flex-shrink: 0; }
 		.sh-rel-portrait img { 
 			width: 100%; height: 100%; object-fit: contain; max-width : 50vw; max-height: 50vh; margin-left: auto; margin-right: auto; display: block;
-			overflow: hidden; transition: max-height 1.5s ease-in-out;
+			overflow: hidden; 
+			transition-property: max-height, border-width;
+			transition-duration: 1.5s;
+			transition-timing-function: ease-in-out;
 		}
 		.sh-rel-portrait img.collapsed {
 			max-height: 0;
+		}
+		.sh-rel-portrait:has(img.collapsed) {
+			border-width: 0;
 		}
 		.sh-rel-info { flex: 1; }
 		.sh-rel-name { font-weight: bold; font-size: 0.95rem; }
@@ -1527,6 +1533,7 @@
 							<div class="sh-section">🏪 Lieux &amp; marchands</div>
 							{% for r in rels_lieux %}{% set v = r.value %}
 							<div class="sh-relation">
+								<strong>></strong>
 								<div class="sh-rel-info">
 									<div class="sh-rel-name">{{ r.nom }}{% if r.bloque %} <span title="Marchandage bloqué">🚫</span>{% endif %}</div>
 									<div class="sh-rel-class">{{ r.categorie }}</div>
@@ -1550,6 +1557,7 @@
 							<div class="sh-section">👥 Personnages</div>
 							{% for r in rels %}{% set sc = r.get("score",50) %}
 							<div class="sh-relation">
+								<strong>></strong>
 								<div class="sh-rel-info">
 									<div class="sh-rel-name">{{ r.get("prenom","?") }} {{ r.get("nom","") }}</div>
 									<div class="sh-rel-class">{{ r.get("vocation","") }}</div>
@@ -2309,6 +2317,22 @@ document.addEventListener('keydown', e => {
 	const sell = document.getElementById('sell-panel');
 	if (sell && !sell.classList.contains('panel-hidden')) { closeSellPanel(); return; }
 	closeSheet();
+});
+
+// Clic sur une relation : plie/déplie son portrait (toggle .collapsed sur l'img de
+// .sh-rel-portrait). Accordéon → déplier une image replie toutes les autres, une seule
+// reste ouverte à la fois. Délégation sur document → couvre le rendu serveur ET le
+// re-rendu client (renderFicheRelations). Les boutons internes (🧭) gardent leur action.
+document.addEventListener('click', e => {
+	const rel = e.target.closest('.sh-relation');
+	if (!rel || e.target.closest('button, a')) return;
+	const img = rel.querySelector('.sh-rel-portrait img');
+	if (!img) return;
+	const willExpand = img.classList.contains('collapsed');
+	const panel = rel.closest('#sh-relations');
+	(panel || document).querySelectorAll('.sh-rel-portrait img')
+		.forEach(i => i.classList.add('collapsed'));
+	if (willExpand) img.classList.remove('collapsed');
 });
 
 // ── Dépense d'XP ─────────────────────────────────────────────
@@ -3350,7 +3374,7 @@ function renderFicheRelations(list) {
 		const v = r.value;
 		const cls = v > 50 ? 'pos' : (v < 50 ? 'neg' : 'neu');
 		const portrait = r.image
-			? `<img src="/${r.image_route}/${r.image}" alt="">`
+			? `<img src="/${r.image_route}/${r.image}" alt="" class="collapsed">`
 			: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🏪</div>';
 		return `<div class="sh-relation">
 			<div class="sh-rel-portrait">${portrait}</div>
