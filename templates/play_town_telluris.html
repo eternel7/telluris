@@ -2797,6 +2797,10 @@ function _effetsChips(item) {
 	if (e.duree) chips.push(`⏳ ${e.duree} tours`);
 	return chips;
 }
+function _bonusChips(item) {
+	const b = (item && item.bonus) || {};
+	return Object.keys(b).sort().map(k => `✨ ${b[k] > 0 ? '+' : ''}${b[k]} ${k}`);
+}
 
 function _faceCell(item, role) {
 	if (!item) return `<div class="item-cmp-face"><div><span class="item-cmp-role">${role}</span><span class="item-cmp-empty">— aucun —</span></div></div>`;
@@ -2867,6 +2871,16 @@ function _effetsRow(left, right, compare) {
 	if (compare) html += cell(rc);
 	return html + `</div>`;
 }
+function _bonusRow(left, right, compare) {
+	const lc = _bonusChips(left), rc = compare ? _bonusChips(right) : [];
+	if (!lc.length && !rc.length) return '';
+	const cell = arr => arr.length
+		? `<span class="cell"><span class="item-cmp-chips">${arr.map(c => `<span class="sh-effet-chip">${c}</span>`).join('')}</span></span>`
+		: '<span class="cell muted">—</span>';
+	let html = `<div class="item-cmp-row"><span class="lbl">Bonus caract.</span>${cell(lc)}`;
+	if (compare) html += cell(rc);
+	return html + `</div>`;
+}
 
 // Table comparaison (right null → mono-colonne).
 function _renderCmpTable(left, right, roleLeft, roleRight) {
@@ -2880,6 +2894,7 @@ function _renderCmpTable(left, right, roleLeft, roleRight) {
 	rows += _numRows(left, right, compare);
 	rows += _textRow('Dés de dégâts', left && left.bonus_degats_dice, compare ? (right && right.bonus_degats_dice) : null, compare);
 	rows += _restrictionRow(left, right, compare);
+	rows += _bonusRow(left, right, compare);
 	rows += _effetsRow(left, right, compare);
 	return `<div class="item-cmp ${compare ? 'compare' : 'mono'}">${hd}${rows}</div>`;
 }

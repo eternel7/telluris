@@ -28,6 +28,7 @@ def _clamp(x, lo, hi):
 # instance pour la vente → on ne les réécrase pas ici).
 _FICHE_ITEM_KEYS = (
 	"categorie", "sous_categorie", "rarete", "tags", "portee", "restriction", "slots", "effets",
+	"bonus",
 	"bonus_pa", "bonus_pv", "bonus_pm", "bonus_cc", "bonus_cd",
 	"bonus_degats", "bonus_degats_dice", "bonus_initiative", "bonus_malus_depl",
 )
@@ -779,19 +780,22 @@ def tenter_production(lieu_doc: dict, recettes: list | None = None) -> list[dict
 
 
 def ecouler_produits_pnj(lieu_doc: dict) -> list[dict]:
-	"""Vente PNJ en parallèle : avec proba `VENTE_PNJ_PROBA`, écoule une fraction
-	`VENTE_PNJ_FRACTION` de l'**excédent** (au-dessus du stock cible) de chaque produit en
-	rayon (`stock_vente`). Les PNJ n'achètent que le surplus : `qty` ne descend jamais sous
-	la cible (le joueur garde le stock de base). Mute `lieu_doc` ; renvoie [{item_id, qty}]
-	écoulés (vide si pas de déclenchement)."""
+	"""Vente PNJ en parallèle : **objet par objet**, chaque produit en rayon (`stock_vente`)
+	tire indépendamment sa demande avec proba `VENTE_PNJ_PROBA` — au même tick, certains
+	produits s'écoulent, d'autres non (plus réaliste qu'une vente en bloc). Quand un produit
+	est demandé, on écoule une fraction `VENTE_PNJ_FRACTION` de son **excédent** (au-dessus du
+	stock cible). Les PNJ n'achètent que le surplus : `qty` ne descend jamais sous la cible
+	(le joueur garde le stock de base). Mute `lieu_doc` ; renvoie [{item_id, qty}] écoulés
+	(vide si rien de demandé/écoulé)."""
 	proba = max(0.0, min(1.0, character_stats.VENTE_PNJ_PROBA))
-	if random.random() >= proba:
-		return []
 	frac = max(0.0, min(1.0, character_stats.VENTE_PNJ_FRACTION))
-	if frac <= 0:
+	if proba <= 0 or frac <= 0:
 		return []
 	ecoules = []
 	for entry in (lieu_doc or {}).get("stock_vente", []):
+		# Chaque produit tire sa propre demande PNJ ce tick (indépendant des autres).
+		if random.random() >= proba:
+			continue
 		item_id = entry.get("item_id")
 		qty = int(entry.get("qty", 0))
 		if not item_id or qty <= 0:

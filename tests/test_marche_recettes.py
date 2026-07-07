@@ -7,7 +7,9 @@
 
 import pytest
 
-from utils.marche import recette_matieres, matiere_item_id, _executer_production_batch
+from utils import marche
+from models import character_stats
+from utils.marche import recette_matieres, matiere_item_id, _executer_production_batch, ecouler_produits_pnj
 
 
 # ── matiere_item_id ──────────────────────────────────────────────────────────────
@@ -97,3 +99,40 @@ def test_batch_matiere_item_ref_non_consommee_mise_en_rayon_sans_double_prefixe(
     produits = _executer_production_batch(lieu, [])
     assert produits == [{"item_id": "item:Herbes_medicinales", "qty": 3}]
     assert lieu["stock_vente"] == [{"item_id": "item:Herbes_medicinales", "qty": 3}]
+
+
+# ── ecouler_produits_pnj (demande PNJ objet par objet) ───────────────────────────
+
+def test_ecoulement_pnj_objet_par_objet(monkeypatch):
+    # Chaque produit tire indépendamment sa demande PNJ : avec un jet qui passe pour le 1er
+    # produit et échoue pour le 2e, seul le 1er s'écoule au même tick (plus « tout d'un bloc »).
+    monkeypatch.setattr(marche, "resolve_item_ref",
+                        lambda item_id: {"_id": item_id, "item": item_id})
+    monkeypatch.setattr(character_stats, "VENTE_PNJ_PROBA", 0.5)
+    monkeypatch.setattr(character_stats, "VENTE_PNJ_FRACTION", 1.0)
+    # Séquence de jets : 0.0 < 0.5 → item:A demandé ; 0.9 ≥ 0.5 → item:B ignoré.
+    seq = iter([0.0, 0.9])
+    monkeypatch.setattr(marche.random, "random", lambda: next(seq))
+
+    lieu = {
+        "stock_cible": {"item": {"item:A": 2, "item:B": 2}},
+        "stock_vente": [
+            {"item_id": "item:A", "qty": 10},
+            {"item_id": "item:B", "qty": 10},
+        ],
+    }
+    ecoules = ecouler_produits_pnj(lieu)
+
+    # Seul A (jet réussi) s'écoule ; son excédent (10−2) part entièrement (fraction 1.0).
+    assert ecoules == [{"item_id": "item:A", "qty": 8}]
+    assert lieu["stock_vente"][0]["qty"] == 2   # A ramené au stock cible
+    assert lieu["stock_vente"][1]["qty"] == 10  # B intact (pas de demande ce tick)
+
+
+def test_ecoulement_pnj_proba_nulle_ne_fait_rien(monkeypatch):
+    # Proba globale nulle → aucun produit demandé, court-circuit sans toucher random.random.
+    monkeypatch.setattr(character_stats, "VENTE_PNJ_PROBA", 0.0)
+    monkeypatch.setattr(character_stats, "VENTE_PNJ_FRACTION", 1.0)
+    lieu = {"stock_vente": [{"item_id": "item:A", "qty": 10}]}
+    assert ecouler_produits_pnj(lieu) == []
+    assert lieu["stock_vente"][0]["qty"] == 10
