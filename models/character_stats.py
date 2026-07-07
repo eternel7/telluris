@@ -175,7 +175,8 @@ DEPECAGE_TAGS: dict[str, list] = {
 	"animal": [
 	  "cuir_brut",
 	  "crocs",
-	  "poils"
+	  "poils",
+	  "tendons"
 	],
 	"monstre": [
 	  "cuir_brut",
@@ -191,7 +192,8 @@ DEPECAGE_TAGS: dict[str, list] = {
 	],
 	"bete_de_somme": [
 	  "cuir_brut",
-	  "crins"
+	  "crins",
+	  "tendons"
 	],
 	"draconique": [
 	  "cuir_brut",
@@ -220,7 +222,8 @@ DEPECAGE_TAGS: dict[str, list] = {
 	],
 	"ange": [
 	  "plumes",
-	  "coeur"
+	  "coeur",
+	  "tendons"
 	],
 	"vol": [
 	  "plumes",
@@ -230,10 +233,12 @@ DEPECAGE_TAGS: dict[str, list] = {
 	  "crocs"
 	],
 	"foret": [
-	  "poils"
+	  "poils",
+	  "tendons"
 	],
 	"froid": [
-	  "poils"
+	  "poils",
+	  "tendons"
 	],
 	"geant": [
 	  "tendons",

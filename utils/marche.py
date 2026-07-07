@@ -715,17 +715,70 @@ def _matieres_entrantes(item_doc: dict, qmap: dict | None = None,
 	return []
 
 
-def _executer_production_batch(lieu_doc: dict, recettes: list | None = None) -> list[dict]:
+def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
+							   resolve_fn=resolve_item_ref) -> list[dict]:
 	"""Passe de production : **draine le stock** du lieu en cuisant des recettes tant qu'il
 	reste de la matière, en tirant chaque recette au hasard **pondéré par `quantite_matiere`**
 	(les plus gourmandes favorisées), jusqu'au cap anti-runaway. Les matières qu'aucune recette
 	du lieu ne consomme (produits finis de la boucherie : carcasse décomposée par espèce+poids
 	en viande/os/…) sont **mises en rayon** (`stock_vente`). La matière transformable **sous le
-	seuil** reste en stock pour le prochain batch. Mute `lieu_doc` en place ; renvoie [{item_id,qty}]."""
+	seuil** reste en stock pour le prochain batch. Mute `lieu_doc` en place ; renvoie [{item_id,qty}].
+
+	**Pool unifié** : la production puise dans `stock_matieres` PUIS dans le **surplus du rayon**
+	(`stock_vente` au-dessus du `stock_cible`) — un produit intermédiaire est donc à la fois en
+	vente ET utilisable comme matière pour la recette de niveau supérieur (chaînage intra-tick),
+	sans duplication (consommer = retirer du rayon ; une base au niveau de la cible reste en
+	vente). `resolve_fn` (injectable pour les tests) résout `item_id → doc` pour reconnaître la
+	clé-matière du rayon ; s'il renvoie None (DB absente), le rayon n'est pas traité comme matière."""
 	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	stock_vente = lieu_doc.setdefault("stock_vente", [])
-	recettes = recettes if recettes is not None else lieu_recettes(lieu_doc.get("categorie"))
+	categorie = lieu_doc.get("categorie")
+	recettes = recettes if recettes is not None else lieu_recettes(categorie)
 	consommables = {sc for r in recettes for (sc, _q) in recette_matieres(r)}
+
+	# Rayon-comme-matière : (clé-matière, cible de vente) d'une ligne de rayon, mémoïsé par
+	# item_id sur la durée du batch. Seules les clés ∈ `consommables` (intrants de recettes)
+	# alimentent la production ; les produits finis (clé hors intrants) restent purement en vente.
+	_res_cache: dict[str, tuple] = {}
+	def _cle_cible(item_id: str) -> tuple:
+		if item_id not in _res_cache:
+			item = resolve_fn(item_id) if item_id else None
+			_res_cache[item_id] = (
+				(cle_matiere_lieu(categorie, item), stock_cible_pour(lieu_doc, item))
+				if item else (None, 0)
+			)
+		return _res_cache[item_id]
+
+	def _vente_surplus_entries(cle: str) -> list:
+		"""Lignes de rayon alimentant `cle` avec leur surplus consommable (qty − cible ≥ 0)."""
+		out = []
+		if cle not in consommables:
+			return out
+		for e in stock_vente:
+			c, cible = _cle_cible(e.get("item_id"))
+			if c == cle:
+				surplus = int(e.get("qty", 0)) - int(cible)
+				if surplus > 0:
+					out.append((e, surplus))
+		return out
+
+	def _dispo(cle: str) -> int:
+		"""Matière disponible pour `cle` : stock_matieres + surplus du rayon."""
+		return int(stock_mat.get(cle, 0)) + sum(s for (_e, s) in _vente_surplus_entries(cle))
+
+	def _consommer(cle: str, qm: int) -> None:
+		"""Prélève `qm` de `cle` : d'abord `stock_matieres`, puis le surplus du rayon."""
+		dispo_mat = int(stock_mat.get(cle, 0))
+		pris = min(dispo_mat, qm)
+		if pris:
+			stock_mat[cle] = dispo_mat - pris
+		reste = qm - pris
+		for (e, surplus) in _vente_surplus_entries(cle):
+			if reste <= 0:
+				break
+			take = min(surplus, reste)
+			e["qty"] = int(e.get("qty", 0)) - take
+			reste -= take
 
 	prepared = [
 		{
@@ -740,13 +793,14 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None) -> 
 	produits: dict[str, int] = {}
 	fired = 0
 	while fired < _CONVERSION_CAP:
-		# Une recette est applicable seulement si TOUTES ses matières sont en stock suffisant.
-		applicable = [p for p in prepared if all(int(stock_mat.get(sc, 0)) >= qm for (sc, qm) in p["inputs"])]
+		# Une recette est applicable seulement si TOUTES ses matières sont disponibles (stock
+		# matières + surplus du rayon).
+		applicable = [p for p in prepared if all(_dispo(sc) >= qm for (sc, qm) in p["inputs"])]
 		if not applicable:
 			break
 		chosen = random.choices(applicable, weights=[max(1, p["poids"]) for p in applicable])[0]
 		for (sc, qm) in chosen["inputs"]:
-			stock_mat[sc] -= qm
+			_consommer(sc, qm)
 		_stock_vente_add(stock_vente, chosen["item_id"], chosen["qp"])
 		produits[chosen["item_id"]] = produits.get(chosen["item_id"], 0) + chosen["qp"]
 		fired += 1
@@ -764,6 +818,8 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None) -> 
 	# Nettoyage des matières épuisées
 	for sc in [k for k, v in stock_mat.items() if v <= 0]:
 		del stock_mat[sc]
+	# Purge des lignes de rayon vidées par la consommation (comme buy_item).
+	lieu_doc["stock_vente"] = [e for e in stock_vente if int(e.get("qty", 0)) > 0]
 
 	return [{"item_id": k, "qty": v} for k, v in produits.items()]
 

@@ -101,6 +101,66 @@ def test_batch_matiere_item_ref_non_consommee_mise_en_rayon_sans_double_prefixe(
     assert lieu["stock_vente"] == [{"item_id": "item:Herbes_medicinales", "qty": 3}]
 
 
+# ── Pool unifié : le rayon (stock_vente) sert aussi de matière (surplus seulement) ──
+
+def _recettes_arc():
+    # Corde (boyaux → cordes_d_arc) + arc (manche + cordes_d_arc → Arc).
+    corde = {
+        "type": "recette", "lieu_categorie": "fletcher", "objet_final": "cordes_d_arc",
+        "quantite_produite": 1,
+        "matieres_premieres": [{"sous_categorie": "boyaux", "quantite": 2}],
+    }
+    arc = {
+        "type": "recette", "lieu_categorie": "fletcher", "objet_final": "Arc",
+        "quantite_produite": 1,
+        "matieres_premieres": [
+            {"sous_categorie": "manche", "quantite": 1},
+            {"sous_categorie": "cordes_d_arc", "quantite": 1},
+        ],
+    }
+    return [corde, arc]
+
+
+def _resolve_arc(item_id):
+    # Stub sans DB : la corde en rayon porte la sous-catégorie attendue par la recette d'arc.
+    sc = {"item:cordes_d_arc": "cordes_d_arc"}.get(item_id, "")
+    return {"_id": item_id, "item": item_id, "categorie": "composant", "sous_categorie": sc}
+
+
+def test_pool_unifie_chaine_corde_puis_arc_en_gardant_une_base_en_vente():
+    # boyaux → 3 cordes ; le surplus au-dessus de la cible (2) alimente la recette d'arc.
+    lieu = {
+        "categorie": "fletcher",
+        "stock_matieres": {"boyaux": 6, "manche": 3},
+        "stock_vente": [],
+        "stock_cible": {"item": {"item:cordes_d_arc": 2}},
+    }
+    _executer_production_batch(lieu, _recettes_arc(), resolve_fn=_resolve_arc)
+    vente = {e["item_id"]: e["qty"] for e in lieu["stock_vente"]}
+    # Un arc a été fabriqué à partir d'une corde en surplus (chaînage intra-tick).
+    assert vente.get("item:Arc") == 1
+    # Une base de cordes reste en vente au niveau de la cible (surplus seul consommé).
+    assert vente.get("item:cordes_d_arc") == 2
+    # Conservation de la masse : boyaux épuisés, 1 manche consommée pour l'arc.
+    assert "boyaux" not in lieu["stock_matieres"]
+    assert lieu["stock_matieres"].get("manche") == 2
+
+
+def test_pool_unifie_sans_surplus_ne_consomme_pas_le_rayon():
+    # Cordes en rayon exactement au niveau de la cible → aucun surplus → pas d'arc, rayon intact.
+    lieu = {
+        "categorie": "fletcher",
+        "stock_matieres": {"manche": 3},
+        "stock_vente": [{"item_id": "item:cordes_d_arc", "qty": 2}],
+        "stock_cible": {"item": {"item:cordes_d_arc": 2}},
+    }
+    produits = _executer_production_batch(lieu, _recettes_arc(), resolve_fn=_resolve_arc)
+    assert produits == []
+    assert all(e["item_id"] != "item:Arc" for e in lieu["stock_vente"])
+    assert lieu["stock_vente"] == [{"item_id": "item:cordes_d_arc", "qty": 2}]
+    assert lieu["stock_matieres"]["manche"] == 3
+
+
 # ── ecouler_produits_pnj (demande PNJ objet par objet) ───────────────────────────
 
 def test_ecoulement_pnj_objet_par_objet(monkeypatch):
