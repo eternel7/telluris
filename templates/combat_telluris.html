@@ -190,6 +190,7 @@
 	.move-section { left: 50%;
 	  transform: translateX(-50%);
 	}
+	.btn-row .atk-mode-btn { order: 1; }
 }
 .character-card { grid-area: perso; display: flex; flex-direction: column; }
 .combat-center  { grid-area: center; }
@@ -358,14 +359,7 @@
 .move_btn:disabled > svg { display: none; }   /* direction indisponible → la flèche disparaît */
 .controls .btn:disabled { cursor: default; }
 .controls .btn.center:disabled { opacity: 0.35; }
-#attack-mode-row {
-	gap: 6px; align-items: center; justify-content: center; margin-bottom: 6px;
-}
-#attack-mode-row .mode-btn { padding: 6px 12px; font-size: 12px; }
-#attack-mode-row .mode-btn.active {
-	border-color: var(--gold2, #d8b24a); color: var(--gold2, #d8b24a);
-	background: #2e2510;
-}
+.atk-mode-btn.hidden-selecting { display: none; }
 #target-row, #conso-row, #sort-row {
 	display: none; gap: 8px; align-items: center; justify-content: center;
 }
@@ -559,17 +553,14 @@
 
 		<div class="action-bar">
 			<div class="btn-row">
-				<button class="action-btn attack-btn" id="btn-attaquer" onclick="triggerAttack()">⚔ Attaquer</button>
-				<div id="quick-sorts"></div>			
+				<button class="action-btn attack-btn atk-mode-btn" data-mode="cac" id="btn-atk-cac" onclick="triggerAttack('cac')">⚔ Mêlée</button>
+				<button class="action-btn attack-btn atk-mode-btn" data-mode="jet" id="btn-atk-jet" onclick="triggerAttack('jet')">🪃 Jet</button>
+				<button class="action-btn attack-btn atk-mode-btn" data-mode="tir" id="btn-atk-tir" onclick="triggerAttack('tir')">🏹 Tir</button>
+				<div id="quick-sorts"></div>
 				<button class="action-btn" id="btn-sorts" onclick="triggerSort()" title="Lancer un sort (1 action + PM ; composants optionnels = effet renforcé)">🔮 Sorts</button>
-				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>	
+				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>
 				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
 				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
-			</div>
-			<div id="attack-mode-row" style="display:none;">
-				<button class="action-btn mode-btn" data-mode="cac" onclick="setMode('cac')">⚔ Mêlée</button>
-				<button class="action-btn mode-btn" data-mode="jet" onclick="setMode('jet')">🪃 Jet</button>
-				<button class="action-btn mode-btn" data-mode="tir" onclick="setMode('tir')">🏹 Tir</button>
 			</div>
 			<div id="target-row">
 				<select id="target-select"></select>
@@ -1091,7 +1082,7 @@ function lineOfSight(x0, y0, x1, y1) {
 	let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
 	let sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, err = dx - dy, x = x0, y = y0;
 	while (true) {
-		if (!(x === x0 && y === y0) && !(x === x1 && y === y1) && !cellPassable(x, y)) return false;
+		if (!(x === x0 && y === y0) && !(x === x1 && y === y1) && !seeThroughCell(x, y)) return false;
 		if (x === x1 && y === y1) return true;
 		const e2 = 2 * err;
 		if (e2 > -dy) { err -= dy; x += sx; }
@@ -1110,25 +1101,13 @@ function targetableMonsters(mode) {
 	}
 	return list;
 }
-function setMode(mode) {
-	closeSelectors();
-	currentMode = mode;
-	document.querySelectorAll('#attack-mode-row .mode-btn')
-		.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-	renderTokens();
-	refreshBadgeTargets();
-	refreshTargetSelect();
-	updateButtons(state);
-}
-// Affiche le sélecteur de mode (modes équipés seulement) ; visible si > 1 mode disponible.
-function updateModeSelector(data) {
+// Affiche les boutons d'attaque (modes équipés seulement).
+function updateAttackButtons(data) {
 	const modes = (data.joueurs[0].attaque_profils || []).map(a => a.mode);
 	if (!modes.includes(currentMode)) currentMode = modes[0] || 'cac';
-	document.querySelectorAll('#attack-mode-row .mode-btn').forEach(b => {
+	document.querySelectorAll('.atk-mode-btn').forEach(b => {
 		b.style.display = modes.includes(b.dataset.mode) ? '' : 'none';
-		b.classList.toggle('active', b.dataset.mode === currentMode);
 	});
-	document.getElementById('attack-mode-row').style.display = modes.length > 1 ? 'flex' : 'none';
 }
 
 function chebyJM(j, m) {
@@ -1180,7 +1159,7 @@ function canCast(data) {
 // getFinalMask / navAllows / VALID_MOVES proviennent de scripts/nav.js (partagé).
 // Prédicat de VISION (miroir serveur `_passable`, >= 1) : une falaise (3) est transparente,
 // seul un mur (< 1) arrête un projectile. Utilisé uniquement par lineOfSight().
-function cellPassable(x, y) {
+function seeThroughCell(x, y) {
 	const g = GRID;
 	if (!g || !g.cells) return true;
 	if (x < 0 || x >= g.dims.x || y < 0 || y >= g.dims.y) return false;
@@ -1239,14 +1218,10 @@ function updateButtons(data) {
 			: !dirAvailable(data, parseInt(b.dataset.sdx), parseInt(b.dataset.sdy));
 	});
 	document.getElementById('btn-passer').disabled   = !(isActive && isPlayer);
-	// Le sélecteur de mode (cac/jet/tir) est un toggle purement client : ré-activable dès
-	// que c'est notre tour. Sans ça, le verrou `busy` de doAction (qui disable tous les
-	// .action-btn) le laisse grisé indéfiniment après la 1re action → « 🏹 Tir inactif ».
-	document.querySelectorAll('#attack-mode-row .mode-btn')
-		.forEach(b => b.disabled = !(isActive && isPlayer));
-	const noTarget = targetableMonsters(currentMode).length === 0;
-	document.getElementById('btn-attaquer').disabled = !canAct || noTarget;
-	document.getElementById('btn-confirm').disabled  = !canAct || noTarget;
+	document.querySelectorAll('.atk-mode-btn').forEach(b => {
+		b.disabled = !canAct || targetableMonsters(b.dataset.mode).length === 0;
+	});
+	document.getElementById('btn-confirm').disabled  = !canAct || targetableMonsters(currentMode).length === 0;
 	document.getElementById('btn-fuir').disabled     = !isActive || !isPlayer;
 	document.getElementById('btn-ramasser').disabled = !canLoot(data);
 	document.getElementById('btn-consommer').disabled = !canConsume(data);
@@ -1278,7 +1253,7 @@ function updateUI(data) {
 	renderEnemyPortrait(data);
 	document.getElementById('tour-num').textContent = data.tour;
 	updateInitiativeStrip(data);
-	updateModeSelector(data);
+	updateAttackButtons(data);
 	renderTokens();
 	refreshBadgeTargets();
 	updateCamera();
@@ -1300,31 +1275,36 @@ function doRotate(sens) {
 	doAction('tourner', null, null, null, sens);
 }
 
-// Ferme les lignes de sélection (cible + consommable + sort) et restaure le bouton
-// ⚔ Attaquer (masqué tant que le sélecteur de cible est ouvert). Appelé par tout
-// clic de bouton : doAction (actions), setMode (modes) et les triggers. Annule aussi
+// Ferme les lignes de sélection (cible + consommable + sort) et restaure les boutons
+// d'attaque (masqués tant que le sélecteur de cible est ouvert). Appelé par tout
+// clic de bouton : doAction (actions) et les triggers. Annule aussi
 // un éventuel ciblage de sort en attente (les badges/tokens redeviennent « attaque »).
 function closeSelectors() {
 	document.getElementById('target-row').style.display = 'none';
 	document.getElementById('conso-row').style.display = 'none';
 	document.getElementById('sort-row').style.display = 'none';
-	document.getElementById('btn-attaquer').style.display = '';
+	document.querySelectorAll('.atk-mode-btn').forEach(b => b.classList.remove('hidden-selecting'));
 	if (pendingSort) {
 		pendingSort = null;
 		if (window._combatReady) { renderTokens(); refreshBadgeTargets(); }
 	}
 }
 
-function triggerAttack() {
+function triggerAttack(mode) {
 	closeSelectors();
-	const cibles = targetableMonsters(currentMode);
+	currentMode = mode;
+	// Réaligne les anneaux d'ombre (badges .targetable + tokens .adjacent) sur la portée
+	// du mode choisi : sinon, en ouvrant le sélecteur de cible, ils reflètent l'ancien mode.
+	renderTokens();
+	refreshBadgeTargets();
+	const cibles = targetableMonsters(mode);
 	if (!cibles.length) return;
 	if (cibles.length === 1) {
-		doAction('attaquer', cibles[0].id, null, null, null, currentMode);
+		doAction('attaquer', cibles[0].id, null, null, null, mode);
 	} else {
 		refreshTargetSelect();
 		document.getElementById('target-row').style.display = 'flex';
-		document.getElementById('btn-attaquer').style.display = 'none';
+		document.querySelectorAll('.atk-mode-btn').forEach(b => b.classList.add('hidden-selecting'));
 	}
 }
 
@@ -1592,7 +1572,7 @@ syncViewSize();
 renderTokens();
 refreshBadgeTargets();
 updateCamera();
-updateModeSelector(state);   // révèle le sélecteur cac/jet/tir dès le chargement (sinon visible qu'après la 1re action)
+updateAttackButtons(state);  // révèle les boutons cac/jet/tir équipés dès le chargement (sinon visibles qu'après la 1re action)
 renderQuickSorts();          // icônes des sorts épinglés (avant updateButtons qui règle leur état)
 refreshTargetSelect();
 updateButtons(state);
