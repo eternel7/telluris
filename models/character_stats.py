@@ -34,9 +34,10 @@ JET_PORTEE_F_DIV: int = 20
 XP_DECOUVERTE_LIEU: int = 10
 
 # Progression de niveau (suite arithmétique, remplace les ex-seuils ×3) : le passage au
-# niveau n coûte XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT (10, 15, 20, … → XP cumulée
-# quadratique : 10, 25, 45, 70, 100, 135…). INCREMENT > 0 garantit chaque niveau
-# strictement plus cher que le précédent ; INCREMENT = 0 → coût constant par niveau.
+# niveau n coûte XP_NIVEAU_BASE + (n−1)·XP_NIVEAU_INCREMENT. Avec les défauts 50/100 :
+# coûts par niveau 50, 150, 250, … → XP cumulée quadratique 50, 200, 450, 800, 1250…
+# INCREMENT > 0 garantit chaque niveau strictement plus cher que le précédent ;
+# INCREMENT = 0 → coût constant par niveau. Réglable à chaud (world-vars).
 XP_NIVEAU_BASE: int = 50
 XP_NIVEAU_INCREMENT: int = 100
 
