@@ -1,0 +1,231 @@
+[
+  {
+    "_id": "rules:vocations",
+    "_rev": "4-e41d27e12948a63bbcc9a4402b9aaf2d",
+    "type": "rules",
+    "value": [
+      {
+        "id": "guerrier",
+        "label": "Guerrier",
+        "icon": "⚔️",
+        "img": "",
+        "magie": "",
+        "blurb": "Maître des armes blanches. Robuste, polyvalent, le pilier de toute troupe.",
+        "equipement_de_base": [
+          "item:Epee_courte"
+        ]
+      },
+      {
+        "id": "barbare",
+        "label": "Barbare",
+        "icon": "🪓",
+        "img": "",
+        "magie": "",
+        "blurb": "Guerrier des steppes, mu par la rage. Sa furie est une ressource redoutable.",
+        "equipement_de_base": [
+          "item:Hache_de_guerre"
+        ]
+      },
+      {
+        "id": "forestier",
+        "label": "Forestier",
+        "icon": "🏹",
+        "img": "",
+        "magie": "",
+        "blurb": "Chasseur et éclaireur hors pair. Il connaît les routes que les cartes n'indiquent pas.",
+        "equipement_de_base": [
+          "item:Arc_court",
+          "item:Couteau_de_chasse"
+        ]
+      },
+      {
+        "id": "duelliste",
+        "label": "Duelliste",
+        "icon": "🤺",
+        "img": "",
+        "magie": "",
+        "blurb": "Escrimeur élégant. Sa précision chirurgicale compense l'absence de robustesse.",
+        "equipement_de_base": [
+          "item:Rapiere"
+        ]
+      },
+      {
+        "id": "moine",
+        "label": "Moine",
+        "icon": "🥋",
+        "img": "",
+        "magie": "",
+        "blurb": "Corps comme arme, esprit comme bouclier. Énergie intérieure rare.",
+        "equipement_de_base": [
+          "item:Baton_de_combat"
+        ]
+      },
+      {
+        "id": "elementaliste",
+        "label": "Élémentaliste",
+        "icon": "🔥",
+        "img": "",
+        "magie": "Élémentaire",
+        "blurb": "Maître du feu, glace, foudre. Ses sorts exigent des composants physiques puissants.",
+        "equipement_de_base": [
+          "item:Canne_ferree"
+        ]
+      },
+      {
+        "id": "mage",
+        "label": "Magicien de combat",
+        "icon": "🌀",
+        "img": "",
+        "magie": "Bataille",
+        "blurb": "La magie au service de la guerre. Enchantements d'armes, boucliers arcaniques.",
+        "equipement_de_base": [
+          "item:Baton_canalisateur"
+        ]
+      },
+      {
+        "id": "illusionniste",
+        "label": "Illusionniste",
+        "icon": "🎭",
+        "img": "",
+        "magie": "Illusoire",
+        "blurb": "Manipulateur de perceptions. Ses illusions peuvent détourner des armées.",
+        "equipement_de_base": [
+          "item:Baton_canalisateur"
+        ]
+      },
+      {
+        "id": "lettre",
+        "label": "Lettré",
+        "icon": "📜",
+        "img": "",
+        "magie": "Illusoire",
+        "blurb": "Érudit universel capable d'apprendre n'importe quel type de magie.",
+        "equipement_de_base": [
+          "item:Canne_ferree"
+        ]
+      },
+      {
+        "id": "druide",
+        "label": "Druide",
+        "icon": "🌳",
+        "img": "",
+        "magie": "Élémentaire",
+        "blurb": "Gardien des cycles naturels. Les animaux lui obéissent, les plantes l'écoutent.",
+        "equipement_de_base": [
+          "item:Baton_bois_vivant"
+        ]
+      },
+      {
+        "id": "chaman",
+        "label": "Chaman",
+        "icon": "🐺",
+        "img": "",
+        "magie": "Élémentaire",
+        "blurb": "Se métamorphose en esprit totem: Ours, Loup, Sanglier, Chat sauvage ou Faucon.",
+        "equipement_de_base": [
+          "item:Baton_bois_vivant"
+        ]
+      },
+      {
+        "id": "pretre",
+        "label": "Prêtre",
+        "icon": "✝",
+        "img": "",
+        "magie": "Sainte",
+        "blurb": "Guérisseur indispensable. Peut ressusciter les tombés au combat.",
+        "equipement_de_base": [
+          "item:Lance_rituelle"
+        ]
+      },
+      {
+        "id": "paladin",
+        "label": "Paladin",
+        "icon": "🛡",
+        "img": "",
+        "magie": "Sainte",
+        "blurb": "Guerrier sacré. Sa lame brûle d'une lumière que les morts-vivants redoutent.",
+        "equipement_de_base": [
+          "item:Masse_benie"
+        ]
+      },
+      {
+        "id": "templier",
+        "label": "Templier",
+        "icon": "⚜️",
+        "img": "",
+        "magie": "Sainte",
+        "blurb": "Mi-soldat mi-moine. L'épée de l'institution autant que celle des dieux.",
+        "equipement_de_base": [
+          "item:Epee_longue_ordre"
+        ]
+      },
+      {
+        "id": "repurgateur",
+        "label": "Répurgateur",
+        "icon": "🔱",
+        "img": "",
+        "magie": "Sainte",
+        "blurb": "Chasseur de créatures maudites. Spécialiste des morts-vivants et des démons.",
+        "equipement_de_base": [
+          "item:Epee_argent"
+        ]
+      },
+      {
+        "id": "necromancien",
+        "label": "Nécromancien",
+        "icon": "💀",
+        "img": "",
+        "magie": "Noire",
+        "blurb": "Maître de la magie noire. Sa voie ultime mène vers la Liche.",
+        "equipement_de_base": [
+          "item:Sceptre_os"
+        ]
+      },
+      {
+        "id": "assassin",
+        "label": "Assassin",
+        "icon": "🗡",
+        "img": "",
+        "magie": "",
+        "blurb": "L'ombre faite chair. Spécialiste de l'élimination silencieuse et des poisons.",
+        "equipement_de_base": [
+          "item:Dague",
+          "item:Lame_courte"
+        ]
+      },
+      {
+        "id": "voleur",
+        "label": "Voleur",
+        "icon": "🔑",
+        "img": "",
+        "magie": "",
+        "blurb": "Doigts légers, esprit plus léger encore. Son réseau d'informateurs vaut une armée.",
+        "equipement_de_base": [
+          "item:Lame_courte"
+        ]
+      },
+      {
+        "id": "menestrel",
+        "label": "Ménestrel",
+        "icon": "🎶",
+        "img": "",
+        "magie": "Illusoire",
+        "blurb": "Chanteur, espion, négociateur. Sa musique ouvre des portes que les épées ne peuvent forcer.",
+        "equipement_de_base": [
+          "item:Dague_de_scene"
+        ]
+      },
+      {
+        "id": "demoniste",
+        "label": "Démoniste",
+        "icon": "😈",
+        "img": "",
+        "magie": "Noire",
+        "blurb": "Invocateur de créatures infernales. Chaque pacte consume une part de son âme.",
+        "equipement_de_base": [
+          "item:Baton_cornu"
+        ]
+      }
+    ]
+  }
+]

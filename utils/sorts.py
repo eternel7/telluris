@@ -75,6 +75,7 @@ def normaliser_sort(sort_doc) -> dict | None:
 		"icon": doc.get("icon", "🔮"),
 		"description": doc.get("description", ""),
 		"vocation": doc.get("vocation"),
+		"magie": (str(doc.get("magie")).strip() or None) if doc.get("magie") else None,
 		"niveau": _as_int(doc.get("niveau")),
 		"cout_pm": cout_pm,
 		"cible": doc.get("cible") or "soi",
@@ -246,23 +247,131 @@ def sorts_epingles_effectifs(character: dict) -> list:
 	return connus[:1]
 
 
-def sorts_apprenables(character: dict, find_docs, resolve_ref) -> list:
-	"""Sorts achetables par le personnage : vocation pratiquée (présente dans
-	vocations_niveaux), niveau de vocation suffisant, pas déjà connu. Chaque entrée
-	est enrichie de `cout_points` et `grimoire_ok` (grimoire enseignant porté)."""
+# ── Écoles de magie (accès par école, pas par vocation) ──────────────────────────
+# L'accès aux sorts se fait par ÉCOLE de magie (`magie` du sort, en miroir du `magie`
+# de rules:vocations), pas par la vocation. Chaque personnage « pratique » son école
+# native (dérivée de sa vocation) ; seules les vocations polyvalentes (lettré) peuvent
+# ACHETER la pratique d'autres écoles avec des points de caractéristique. Le niveau de
+# l'école native = niveau de la vocation native (vocations_niveaux) ; les écoles achetées
+# ont leur propre niveau, stocké dans character["magies_apprises"] = {ecole: niveau}, et
+# n'affectent JAMAIS les stats dérivées (anti-exploit).
+
+def _vocation_magie_map(rules_vocations) -> dict:
+	"""Map {id_vocation: ecole} depuis le doc rules:vocations (doc complet OU sa `value`).
+	Tolère None (→ map vide) et les vocations sans magie (→ chaîne vide)."""
+	entries = rules_vocations
+	if isinstance(rules_vocations, dict):
+		entries = rules_vocations.get("value") or []
+	out = {}
+	for v in entries or []:
+		vid = (v or {}).get("id")
+		if vid:
+			out[str(vid)] = (str((v or {}).get("magie") or "")).strip()
+	return out
+
+
+def ecole_native(voc, rules_vocations) -> str | None:
+	"""École de magie de la vocation native, ou None si la vocation n'est pas magique."""
+	return _vocation_magie_map(rules_vocations).get(str(voc or ""), "") or None
+
+
+def magie_de_sort(sort: dict, rules_vocations) -> str | None:
+	"""École d'un sort : champ `magie` s'il est présent, sinon fallback dérivé de sa
+	`vocation` via rules:vocations (rétro-compat des sorts non ré-importés)."""
+	m = (sort or {}).get("magie")
+	if m:
+		return str(m).strip()
+	return _vocation_magie_map(rules_vocations).get(str((sort or {}).get("vocation") or ""), "") or None
+
+
+def niveau_ecole(character: dict, ecole, rules_vocations) -> int | None:
+	"""Niveau effectif d'une école POUR CE PERSONNAGE, ou None si non pratiquée.
+	École native → niveau de la vocation native ; école achetée → magies_apprises."""
+	character = character or {}
+	if not ecole:
+		return None
+	native = ecole_native(character.get("voc"), rules_vocations)
+	if ecole == native:
+		return _as_int((character.get("vocations_niveaux") or {}).get(character.get("voc", ""), 0))
+	apprises = character.get("magies_apprises") or {}
+	if ecole in apprises:
+		return _as_int(apprises[ecole])
+	return None
+
+
+def magies_pratiquees(character: dict, rules_vocations) -> dict:
+	"""{ecole: niveau} de toutes les écoles pratiquées : native + achetées."""
+	character = character or {}
+	out = {}
+	native = ecole_native(character.get("voc"), rules_vocations)
+	if native:
+		out[native] = _as_int((character.get("vocations_niveaux") or {}).get(character.get("voc", ""), 0))
+	for ecole, niv in (character.get("magies_apprises") or {}).items():
+		out[str(ecole)] = _as_int(niv)
+	return out
+
+
+def ecoles_du_monde(rules_vocations) -> list:
+	"""Toutes les écoles de magie existantes (valeurs `magie` non vides), triées."""
+	return sorted({m for m in _vocation_magie_map(rules_vocations).values() if m})
+
+
+def peut_apprendre_magie(character: dict) -> bool:
+	"""Vrai si la vocation du perso est polyvalente (lettré) et peut acheter des écoles."""
+	return (character or {}).get("voc") in character_stats.MAGIE_POLYVALENTE_VOCATIONS
+
+
+def ecoles_achetables(character: dict, rules_vocations) -> list:
+	"""Écoles que le perso peut encore acheter (polyvalent uniquement, hors déjà pratiquées)."""
+	if not peut_apprendre_magie(character):
+		return []
+	pratiquees = set(magies_pratiquees(character, rules_vocations))
+	return [e for e in ecoles_du_monde(rules_vocations) if e not in pratiquees]
+
+
+def cout_ecole(niveau) -> int:
+	"""Coût en points pour acheter (niveau 0) ou monter une école : (niveau+1) × coeff
+	(lecture via le module — world-var réassignée à chaud)."""
+	return (_as_int(niveau) + 1) * character_stats.MAGIE_ECOLE_COUT_COEFF
+
+
+def apprentissage_magies_payload(character: dict, rules_vocations) -> dict:
+	"""État des écoles pour l'onglet ⚡ (rendu initial + resync) : écoles pratiquées
+	(niveau, native/achetée, coût de montée) et écoles achetables (coût d'achat)."""
+	native = ecole_native((character or {}).get("voc"), rules_vocations)
+	pratiquees = magies_pratiquees(character, rules_vocations)
+	return {
+		"peut_apprendre": peut_apprendre_magie(character),
+		"native": native,
+		"pratiquees": [
+			{"ecole": e, "niveau": n, "native": e == native,
+			 "montable": e != native, "cout_montee": cout_ecole(n)}
+			for e, n in sorted(pratiquees.items())
+		],
+		"achetables": [{"ecole": e, "cout": cout_ecole(0)}
+					   for e in ecoles_achetables(character, rules_vocations)],
+	}
+
+
+def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) -> list:
+	"""Sorts achetables par le personnage : école pratiquée (native ou achetée), niveau
+	d'école suffisant, pas déjà connu. Chaque entrée est enrichie de `cout_points`,
+	`grimoire_ok` (grimoire enseignant porté) et `magie` (école résolue)."""
 	connus = set((character or {}).get("sorts_connus") or [])
-	niveaux = (character or {}).get("vocations_niveaux") or {}
 	out = []
 	for doc in find_docs({"type": "sort"}) or []:
 		sort = normaliser_sort(doc)
 		if not sort or sort["id"] in connus:
 			continue
-		if sort["vocation"] not in niveaux or niveaux[sort["vocation"]] < sort["niveau"]:
+		ecole = magie_de_sort(sort, rules_vocations)
+		niv = niveau_ecole(character, ecole, rules_vocations)
+		if niv is None or niv < sort["niveau"]:
 			continue
+		sort["magie"] = ecole
 		sort["cout_points"] = cout_apprentissage(sort)
 		sort["grimoire_ok"] = grimoire_pour(character, sort["id"], resolve_ref) is not None
 		out.append(sort)
-	out.sort(key=lambda s: (s["vocation"], s["niveau"], s["nom"]))
+	out.sort(key=lambda s: (s.get("magie") or "", s["niveau"], s["nom"]))
 	return out
 
 

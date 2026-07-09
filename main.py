@@ -696,7 +696,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# Sorts (onglet ⚡) : connus lançables hors combat + apprenables (coût points,
 			# grimoire) — resynchronisés par lancer_sort/apprendre_sort côté client.
 			"sorts": sorts_util.liste_sorts_payload(character, get_doc, "exploration"),
-			"sorts_apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref),
+			"sorts_apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
+			"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
 			"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,

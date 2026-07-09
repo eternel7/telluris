@@ -1539,6 +1539,8 @@
 							<span style="color:#2ed573; font-size:.85rem">Points : <span id="sh-sort-points">{{ character.get("attribute_points", 0) }}</span></span>
 						</div>
 						<div id="sh-sorts-connus"></div>
+						<div class="sh-section" style="margin-top:14px">🏫 Écoles de magie</div>
+						<div id="sh-sorts-magies"></div>
 						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
 						<div id="sh-sorts-apprenables"></div>
 						<div class="sh-section" style="margin-top:14px">⚡ Compétences</div>
@@ -3130,6 +3132,7 @@ async function consommerItem(index, itemId, btn) {
 // les réponses de lancer_sort / apprendre_sort.
 let _sorts            = {{ sorts | tojson | safe }};
 let _sortsApprenables = {{ sorts_apprenables | tojson | safe }};
+let _sortsMagies      = {{ sorts_magies | tojson | safe }};      // écoles pratiquées + achetables
 let _sortsEpingles    = {{ sorts_epingles | tojson | safe }};   // accès rapide combat (ids ordonnés)
 
 function _sortEffetsLabel(e) {
@@ -3231,6 +3234,80 @@ async function lancerSort(sortId, btn) {
 	} catch(err) { console.error('Erreur sort', err); if (btn) btn.disabled = false; }
 }
 
+// Écoles de magie : pratiquées (niveau, native/achetée) + achetables (lettré). Rendu
+// client depuis sorts_magies, resync après apprendre_magie / monter_magie / apprendre_sort.
+function _renderSortsMagies(payload) {
+	if (payload) _sortsMagies = payload;
+	const box = document.getElementById('sh-sorts-magies');
+	if (!box) return;
+	const m = _sortsMagies || {};
+	const prat = (m.pratiquees || []).map(e => {
+		const tag = e.native ? '<span class="sh-skill-lvl" title="École native de votre vocation">native</span>' : '';
+		const monter = (e.montable && m.peut_apprendre)
+			? `<button type="button" class="sh-drop-btn" onclick="monterMagie('${e.ecole}', this)" ${_attributePoints >= e.cout_montee ? '' : 'disabled'}>Niv. + (${e.cout_montee} pts)</button>`
+			: '';
+		return `<div class="sh-skill">
+			<span class="sh-skill-icon">✨</span>
+			<div class="sh-skill-info">
+				<div class="sh-skill-name">${e.ecole}<span class="sh-sort-pm">Niv. ${e.niveau}</span> ${tag}</div>
+			</div>
+			<div class="sh-inv-actions">${monter}</div>
+		</div>`;
+	}).join('');
+	const achet = (m.achetables || []).map(e =>
+		`<div class="sh-skill">
+			<span class="sh-skill-icon">🔓</span>
+			<div class="sh-skill-info">
+				<div class="sh-skill-name">${e.ecole}</div>
+				<div class="sh-skill-desc">Débloquer la pratique de cette magie</div>
+			</div>
+			<div class="sh-inv-actions">
+				<button type="button" class="sh-drop-btn" onclick="apprendreMagie('${e.ecole}', this)" ${_attributePoints >= e.cout ? '' : 'disabled'}>Pratiquer (${e.cout} pts)</button>
+			</div>
+		</div>`
+	).join('');
+	box.innerHTML = (prat || '') + (achet || '')
+		|| '<div class="sh-empty"><span class="sh-empty-icon">🏫</span>Aucune école de magie.</div>';
+}
+
+function _syncPoints(pts) {
+	_attributePoints = pts;
+	const a = document.getElementById('sh-attribute-points'); if (a) a.textContent = pts;
+	const b = document.getElementById('sh-sort-points');      if (b) b.textContent = pts;
+}
+
+async function apprendreMagie(ecole, btn) {
+	if (btn) btn.disabled = true;
+	try {
+		const res = await fetch('api/apprendre_magie', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ ecole })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		_syncPoints(data.attribute_points);
+		_renderSortsMagies(data.sorts_magies);
+		_renderSortsApprenables(data.apprenables);
+		showToast(`🔓 École ${ecole} : pratique débloquée !`);
+	} catch(err) { console.error('Erreur apprendre_magie', err); if (btn) btn.disabled = false; }
+}
+
+async function monterMagie(ecole, btn) {
+	if (btn) btn.disabled = true;
+	try {
+		const res = await fetch('api/monter_magie', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ ecole })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		_syncPoints(data.attribute_points);
+		_renderSortsMagies(data.sorts_magies);
+		_renderSortsApprenables(data.apprenables);
+		showToast(`✨ ${ecole} : niveau ${data.ecole.niveau}`);
+	} catch(err) { console.error('Erreur monter_magie', err); if (btn) btn.disabled = false; }
+}
+
 async function apprendreSort(sortId, btn) {
 	if (btn) btn.disabled = true;
 	try {
@@ -3240,13 +3317,10 @@ async function apprendreSort(sortId, btn) {
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
-		_attributePoints = data.attribute_points;
-		const pts = document.getElementById('sh-attribute-points');
-		if (pts) pts.textContent = _attributePoints;
-		const pts2 = document.getElementById('sh-sort-points');
-		if (pts2) pts2.textContent = _attributePoints;
+		_syncPoints(data.attribute_points);
 		_renderSorts(data.sorts);
 		_renderSortsApprenables(data.apprenables);
+		if (data.sorts_magies) _renderSortsMagies(data.sorts_magies);
 		const a = data.appris || {};
 		showToast(`${a.icon || '🔮'} ${a.nom || 'Sort'} appris !`);
 	} catch(err) { console.error('Erreur apprentissage', err); if (btn) btn.disabled = false; }
@@ -3356,6 +3430,7 @@ _refreshSol();
 _refreshChargeGauge();
 _renderEffetsActifs(_effetsActifs);
 _renderSorts();
+_renderSortsMagies();
 _renderSortsApprenables();
 
 // ── Vente au marchand ────────────────────────────────────────────────

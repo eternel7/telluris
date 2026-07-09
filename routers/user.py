@@ -1006,12 +1006,89 @@ async def apprendre_sort(
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
+	vocations = get_doc("rules:vocations")
 	return {
 		"attribute_points": character["attribute_points"],
 		"sorts_connus": list(character["sorts_connus"]),
 		"sorts": sorts_util.liste_sorts_payload(character, get_doc, "exploration"),
-		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref),
+		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
+		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
 		"appris": {"nom": sort["nom"], "icon": sort["icon"]},
+	}
+
+
+@user_router.post("/apprendre_magie")
+async def apprendre_magie(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Achète la PRATIQUE d'une nouvelle école de magie (réservé aux vocations
+	polyvalentes — le lettré). Coût en points de caractéristique = cout_ecole(0). Ajoute
+	l'école à `magies_apprises` au niveau 0 ; débloque l'apprentissage de ses sorts."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	if not sorts_util.peut_apprendre_magie(character):
+		raise HTTPException(status_code=403, detail="Cette vocation ne peut pas apprendre d'autres écoles de magie.")
+
+	vocations = get_doc("rules:vocations")
+	ecole = str(body.get("ecole") or "").strip()
+	if not ecole or ecole not in sorts_util.ecoles_du_monde(vocations):
+		raise HTTPException(status_code=422, detail="École de magie inconnue")
+	if ecole not in sorts_util.ecoles_achetables(character, vocations):
+		raise HTTPException(status_code=422, detail="École déjà pratiquée")
+
+	cout = sorts_util.cout_ecole(0)
+	attribute_points = character.get("attribute_points", 0)
+	if attribute_points < cout:
+		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cout}, disponible {attribute_points})")
+
+	character["attribute_points"] = attribute_points - cout
+	character.setdefault("magies_apprises", {})[ecole] = 0
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	return {
+		"attribute_points": character["attribute_points"],
+		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
+		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
+		"apprise": {"ecole": ecole},
+	}
+
+
+@user_router.post("/monter_magie")
+async def monter_magie(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Monte d'un niveau une école ACHETÉE (dans `magies_apprises`). Coût =
+	cout_ecole(niveau courant). L'école native se monte via spend_xp_vocation."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	vocations = get_doc("rules:vocations")
+	ecole = str(body.get("ecole") or "").strip()
+	apprises = character.get("magies_apprises") or {}
+	if ecole not in apprises:
+		raise HTTPException(status_code=422, detail="École non pratiquée (achetée)")
+
+	niveau = int(apprises[ecole])
+	cout = sorts_util.cout_ecole(niveau)
+	attribute_points = character.get("attribute_points", 0)
+	if attribute_points < cout:
+		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cout}, disponible {attribute_points})")
+
+	character["attribute_points"] = attribute_points - cout
+	character["magies_apprises"][ecole] = niveau + 1
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	return {
+		"attribute_points": character["attribute_points"],
+		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
+		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
+		"ecole": {"ecole": ecole, "niveau": niveau + 1},
 	}
 
 

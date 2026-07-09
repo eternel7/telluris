@@ -13,7 +13,21 @@ from utils.sorts import (
     effets_effectifs, sort_utilisable_combat, sort_utilisable_exploration,
     empiler_effet_sort, cout_apprentissage, grimoire_pour, sorts_apprenables,
     sorts_epingles_effectifs,
+    ecole_native, magie_de_sort, niveau_ecole, magies_pratiquees,
+    ecoles_du_monde, peut_apprendre_magie, ecoles_achetables, cout_ecole,
 )
+
+
+# rules:vocations minimal (map vocation → école de magie) pour les tests d'école.
+_RULES_VOCS = {"_id": "rules:vocations", "type": "rules", "value": [
+    {"id": "elementaliste", "magie": "Élémentaire"},
+    {"id": "pretre", "magie": "Sainte"},
+    {"id": "necromancien", "magie": "Noire"},
+    {"id": "demoniste", "magie": "Noire"},
+    {"id": "illusionniste", "magie": "Illusoire"},
+    {"id": "lettre", "magie": "Illusoire"},
+    {"id": "guerrier", "magie": ""},
+]}
 from utils import combat as combat_mod
 from utils.combat import _magic_hit_threshold, resolve_action, roll_dice
 
@@ -92,6 +106,7 @@ def _perso(**extra):
         "caracteristiques_current": {"V": 5, "F": 40, "R": 40, "Ag": 30,
                                      "Vol": 40, "Int": 60, "Cha": 20, "Ch": 20},
         "currentPV": 100, "currentPM": 50,
+        "voc": "elementaliste",
         "inventaire": [], "slots": {},
         "vocations_niveaux": {"elementaliste": 0},
         "sorts_connus": [],
@@ -193,10 +208,69 @@ def test_sorts_apprenables_gates(monkeypatch):
     find_docs = lambda sel: docs
     perso = _perso(vocations_niveaux={"elementaliste": 1}, sorts_connus=["sort:connu"],
                    inventaire=["item:grimoire_trait"])
-    out = sorts_apprenables(perso, find_docs, _resolve)
+    out = sorts_apprenables(perso, find_docs, _resolve, _RULES_VOCS)
     assert [s["id"] for s in out] == ["sort:a"]
     assert out[0]["cout_points"] == 2
     assert out[0]["grimoire_ok"] is False   # le grimoire porté n'enseigne que sort:test
+
+
+# ── Écoles de magie : accès par école, achat (lettré), niveau par école ───────────
+
+def test_ecole_native_et_fallback_magie():
+    assert ecole_native("elementaliste", _RULES_VOCS) == "Élémentaire"
+    assert ecole_native("guerrier", _RULES_VOCS) is None      # vocation non magique
+    # Sort avec champ magie explicite → utilisé tel quel.
+    s = normaliser_sort(_sort(magie="Noire", vocation="elementaliste"))
+    assert magie_de_sort(s, _RULES_VOCS) == "Noire"
+    # Sort sans champ magie → école dérivée de la vocation (rétro-compat).
+    s2 = normaliser_sort(_sort(vocation="pretre"))
+    assert s2["magie"] is None
+    assert magie_de_sort(s2, _RULES_VOCS) == "Sainte"
+
+
+def test_niveau_ecole_native_achetee_absente():
+    perso = _perso(voc="lettre", vocations_niveaux={"lettre": 3},
+                   magies_apprises={"Noire": 1})
+    assert niveau_ecole(perso, "Illusoire", _RULES_VOCS) == 3    # native (via vocations_niveaux)
+    assert niveau_ecole(perso, "Noire", _RULES_VOCS) == 1        # achetée
+    assert niveau_ecole(perso, "Sainte", _RULES_VOCS) is None    # non pratiquée
+    assert magies_pratiquees(perso, _RULES_VOCS) == {"Illusoire": 3, "Noire": 1}
+
+
+def test_peut_apprendre_magie_et_achetables(monkeypatch):
+    monkeypatch.setattr(character_stats, "MAGIE_POLYVALENTE_VOCATIONS", ["lettre"])
+    lettre = _perso(voc="lettre", vocations_niveaux={"lettre": 0})
+    elem = _perso(voc="elementaliste")
+    assert peut_apprendre_magie(lettre) is True
+    assert peut_apprendre_magie(elem) is False
+    assert peut_apprendre_magie(_perso(voc="guerrier")) is False
+    # Le lettré peut acheter toutes les écoles sauf sa native (Illusoire).
+    achet = ecoles_achetables(lettre, _RULES_VOCS)
+    assert "Illusoire" not in achet
+    assert set(achet) == set(ecoles_du_monde(_RULES_VOCS)) - {"Illusoire"}
+    # Le spécialiste n'a aucune école achetable.
+    assert ecoles_achetables(elem, _RULES_VOCS) == []
+
+
+def test_cout_ecole(monkeypatch):
+    monkeypatch.setattr(character_stats, "MAGIE_ECOLE_COUT_COEFF", 2)
+    assert cout_ecole(0) == 2
+    assert cout_ecole(3) == 8
+
+
+def test_lettre_apprend_sort_ecole_achetee(monkeypatch):
+    """Un lettré ayant acheté l'école Noire peut apprendre un sort nécromancien niveau 0."""
+    monkeypatch.setattr(character_stats, "SORT_COUT_COEFF", 2)
+    docs = [_sort(_id="sort:necro", niveau=0, vocation="necromancien")]   # magie fallback → Noire
+    find_docs = lambda sel: docs
+    lettre = _perso(voc="lettre", vocations_niveaux={"lettre": 0},
+                    magies_apprises={"Noire": 0})
+    out = sorts_apprenables(lettre, find_docs, _resolve, _RULES_VOCS)
+    assert [s["id"] for s in out] == ["sort:necro"]
+    assert out[0]["magie"] == "Noire"
+    # Sans l'achat de l'école, rien n'est apprenable.
+    lettre_sans = _perso(voc="lettre", vocations_niveaux={"lettre": 0})
+    assert sorts_apprenables(lettre_sans, find_docs, _resolve, _RULES_VOCS) == []
 
 
 # ── Jet magique + dérivée toucher_magique ────────────────────────────────────────
