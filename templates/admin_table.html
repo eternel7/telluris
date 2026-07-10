@@ -513,8 +513,12 @@ function slugify(s) {
 		.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 }
 
-// Nom du fichier d'export : type + filtres actifs + horodatage (AAAAMMJJHHMMSS).
-// Ex. « item_filtre_categorie_arme_20260707202012.json ».
+// Nom du fichier d'export : type + filtres actifs + horodatage (AAAAMMJJ-HHMMSS).
+// Ex. « item_filtre_categorie_arme_20260707-202012.json ».
+// Horodatage en UTC (getUTC*) et tiret date/heure pour rester cohérent avec les
+// exports serveur (/admin/exports/couchdb et /by-type, nommés via datetime.utcnow()
+// au format %Y%m%d-%H%M%S + champ `exported_at` en UTC) : tous les exports JSON
+// partagent la même base de temps ET le même format d'horodatage.
 function exportFilename(ext) {
 	const parts = [slugify(currentType) || 'export'];
 	// Filtres actifs (colonne + valeur), dans l'ordre d'affichage des colonnes.
@@ -525,9 +529,9 @@ function exportFilename(ext) {
 	}
 	const d = new Date();
 	const p2 = n => String(n).padStart(2, '0');
-	const stamp = '' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate())
-		+ p2(d.getHours()) + p2(d.getMinutes()) + p2(d.getSeconds());
-	parts.push(stamp);
+	const date = '' + d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate());
+	const time = p2(d.getUTCHours()) + p2(d.getUTCMinutes()) + p2(d.getUTCSeconds());
+	parts.push(date + '-' + time);
 	return parts.filter(Boolean).join('_') + '.' + (ext || 'json');
 }
 
