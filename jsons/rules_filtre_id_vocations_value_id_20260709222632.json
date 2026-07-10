@@ -109,7 +109,7 @@
         "label": "Druide",
         "icon": "🌳",
         "img": "",
-        "magie": "Élémentaire",
+        "magie": "Nature",
         "blurb": "Gardien des cycles naturels. Les animaux lui obéissent, les plantes l'écoutent.",
         "equipement_de_base": [
           "item:Baton_bois_vivant"
@@ -120,7 +120,7 @@
         "label": "Chaman",
         "icon": "🐺",
         "img": "",
-        "magie": "Élémentaire",
+        "magie": "Nature",
         "blurb": "Se métamorphose en esprit totem: Ours, Loup, Sanglier, Chat sauvage ou Faucon.",
         "equipement_de_base": [
           "item:Baton_bois_vivant"
@@ -175,8 +175,8 @@
         "label": "Nécromancien",
         "icon": "💀",
         "img": "",
-        "magie": "Noire",
-        "blurb": "Maître de la magie noire. Sa voie ultime mène vers la Liche.",
+        "magie": "Nécromancie",
+        "blurb": "Maître de la nécromancie. Sa voie ultime mène vers la Liche.",
         "equipement_de_base": [
           "item:Sceptre_os"
         ]
@@ -220,7 +220,7 @@
         "label": "Démoniste",
         "icon": "😈",
         "img": "",
-        "magie": "Noire",
+        "magie": "Démonologie",
         "blurb": "Invocateur de créatures infernales. Chaque pacte consume une part de son âme.",
         "equipement_de_base": [
           "item:Baton_cornu"

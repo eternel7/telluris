@@ -890,7 +890,9 @@ lieuSelect.addEventListener('change', async (e) => {
 			cols = lieuData.dimensions.x;
 			rows = lieuData.dimensions.y;
 			currentRev = lieuData._rev;
-			grid = lieuData.cells.map(row => [...row]);
+			grid = (lieuData.cells && lieuData.cells.length)
+				? lieuData.cells.map(row => [...row])
+				: Array.from({ length: rows }, () => Array(cols).fill(1));
 			nav = lieuData.nav ? { ...lieuData.nav } : {};
 			document.getElementById('bm-categorie').checked = (lieuData.categorie === 'battle_map');
 			updateBattleMapTabs(lieuData.categorie === 'battle_map');

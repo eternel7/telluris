@@ -749,7 +749,7 @@ function syncViewSize() {
 	const center = document.querySelector('.combat-center');
 	const w = center ? center.clientWidth : window.innerWidth;
 	if (w <= 0) return;
-	const step = Math.max(8, w / 17);
+	const step = Math.max(8, w / 17)-1;
 	root.style.setProperty('--step', step + 'px');
 	root.style.setProperty('--view-width', (step * 17) + 'px');
 }
