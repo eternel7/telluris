@@ -4024,6 +4024,11 @@ async function choisirPnj(choixId) {
 		if (data.soin) {
 			showToast('✨ +' + data.soin.pv_rendu + ' PV' + (data.soin.gratuit ? ' — offert' : ''));
 		}
+		if (data.don) {
+			const q = data.don.quantite > 1 ? ' ×' + data.don.quantite : '';
+			showToast((data.don.icon || '🎁') + ' ' + data.don.nom + q + (data.don.gratuit ? ' — offert' : ''));
+			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+		}
 		if (data.noeud) renderPnjNoeud(data.noeud);
 		else closePnjPanel();
 	} catch(err) { console.error('Erreur choix de dialogue', err); }

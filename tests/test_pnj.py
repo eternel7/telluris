@@ -35,7 +35,14 @@ def _pnj_doc():
                     "fraction_pv": 1.0,
                 },
                 "noeuds": {"fait": "soin_fait", "sans_fonds": "soin_sans_fonds", "inutile": "soin_inutile"},
-            }
+            },
+            "don": {
+                "item": "item:Eau_benite",
+                "quantite": 1,
+                "cout_cuivre": 5,
+                "gratuit_si": {"lieux": ["lieu:auxerre", "lieu:guilde"], "seuil": 70},
+                "noeuds": {"fait": "don_fait", "sans_fonds": "don_sans_fonds", "trop_charge": "don_trop_charge"},
+            },
         },
         "dialogue": {
             "noeud_depart": "accueil",
@@ -260,3 +267,45 @@ def test_appliquer_soin_fraction_et_clamp():
     assert character["currentPV"] == 100
     # PV pleins → 0 rendu.
     assert pnj.appliquer_soin(character, pv_max=100, fraction=1.0) == 0
+
+
+# ---------------------------------------------------------------------------
+# Service de don (eau bénite)
+# ---------------------------------------------------------------------------
+
+def test_don_effectif_payant_par_defaut():
+    don = pnj.don_effectif(_pnj_doc(), _ctx({"lieu:auxerre": 50, "lieu:guilde": 69}))
+    assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 5, "gratuit": False}
+
+
+def test_don_effectif_gratuit_si_une_relation_suffit():
+    don = pnj.don_effectif(_pnj_doc(), _ctx({"lieu:auxerre": 20, "lieu:guilde": 70}))
+    assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 0, "gratuit": True}
+
+
+def test_don_effectif_sans_service_ou_sans_item():
+    assert pnj.don_effectif({"services": {}}, _ctx()) is None
+    assert pnj.don_effectif({}, _ctx()) is None
+    # Service présent mais sans item → None (rien à donner).
+    doc = _pnj_doc(); doc["services"]["don"].pop("item")
+    assert pnj.don_effectif(doc, _ctx()) is None
+
+
+def test_don_effectif_seuil_defaut_world_var():
+    doc = _pnj_doc()
+    del doc["services"]["don"]["gratuit_si"]["seuil"]     # → défaut PNJ_REPUTATION_SEUIL (70)
+    assert pnj.don_effectif(doc, _ctx({"lieu:auxerre": 70}))["gratuit"] is True
+    assert pnj.don_effectif(doc, _ctx({"lieu:auxerre": 69}))["gratuit"] is False
+
+
+def test_appliquer_don_ajoute_references_inventaire():
+    character = {}
+    assert pnj.appliquer_don(character, "item:Eau_benite", 0.4, 2) == 2
+    assert character["inventaire"] == [
+        {"item": "item:Eau_benite", "poids": 0.4},
+        {"item": "item:Eau_benite", "poids": 0.4},
+    ]
+    # Ajout cumulatif (au moins 1 même si quantite < 1).
+    assert pnj.appliquer_don(character, "item:Bougie", 0.1, 0) == 1
+    assert len(character["inventaire"]) == 3
+    assert character["inventaire"][-1] == {"item": "item:Bougie", "poids": 0.1}

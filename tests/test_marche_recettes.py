@@ -9,7 +9,10 @@ import pytest
 
 from utils import marche
 from models import character_stats
-from utils.marche import recette_matieres, matiere_item_id, _executer_production_batch, ecouler_produits_pnj
+from utils.marche import (
+    recette_matieres, matiere_item_id, _executer_production_batch, ecouler_produits_pnj,
+    depecage_carcasse,
+)
 
 
 # ── matiere_item_id ──────────────────────────────────────────────────────────────
@@ -25,6 +28,23 @@ def test_matiere_item_id_item_ref_inchange():
 
 def test_matiere_item_id_override_legacy():
     assert matiere_item_id("bougie") == "item:Bougie"
+
+
+# ── Dépeçage : loot de matière ciblée par clé item-ref (sang de démon) ──────────
+
+def test_depecage_demon_donne_sang_demon_seche():
+    # Une carcasse démoniaque rend son sang séché (clé item-ref → item:Sang_demon_seche)
+    # EN PLUS de ses matières charnues normales (membership additive par tags).
+    demon = {"tags": ["demon", "infernal"], "base_attributes": {}}
+    out = dict(depecage_carcasse(demon, poids=character_stats.DEPECAGE_POIDS_REF))
+    assert out.get("item:Sang_demon_seche") == 1        # au poids de réf, facteur = 1
+    assert "sang" in out and "coeur" in out             # matières normales conservées
+    # La clé item-ref traverse la résolution telle quelle (pas de item:item:…).
+    assert matiere_item_id("item:Sang_demon_seche") == "item:Sang_demon_seche"
+    # Une espèce non démoniaque n'en produit pas.
+    loup = {"tags": ["animal"], "base_attributes": {}}
+    assert "item:Sang_demon_seche" not in dict(
+        depecage_carcasse(loup, poids=character_stats.DEPECAGE_POIDS_REF))
 
 
 # ── recette_matieres (clé mixte sous_categorie / item) ──────────────────────────

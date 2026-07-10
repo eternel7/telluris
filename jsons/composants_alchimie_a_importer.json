@@ -1,0 +1,52 @@
+[
+  {
+    "_id": "recette:reactif_soufre",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Soufre",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      { "sous_categorie": "reactif_brut", "quantite": 1 }
+    ]
+  },
+  {
+    "_id": "recette:reactif_poudre_de_miroir",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Poudre_de_miroir",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      { "sous_categorie": "reactif_brut", "quantite": 1 }
+    ]
+  },
+  {
+    "_id": "recette:reactif_cristal_canalisation",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Cristal_canalisation",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "reactif_brut", "quantite": 2 }
+    ]
+  },
+  {
+    "_id": "recette:reactif_sel_noir",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Sel_noir",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "reactif_brut", "quantite": 2 }
+    ]
+  },
+  {
+    "_id": "recette:reactif_sang_demon_seche",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Sang_demon_seche",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "reactif_brut", "quantite": 3 }
+    ]
+  }
+]

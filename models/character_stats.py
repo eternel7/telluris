@@ -173,6 +173,10 @@ COUPE_MAX_PIECES: int = 40
 # propres entrées (os). Garde : `plumes` retiré si l'espèce est `draconique`.
 # Les quantités finales sont mises à l'échelle du POIDS de la carcasse (cf.
 # DEPECAGE_POIDS_REF) — il n'y a plus de bucket petite_taille/geant.
+# Une entrée peut être une sous-catégorie (cas courant) OU une clé item-ref `item:*`
+# pour cibler un item précis (ex. `item:Sang_demon_seche` sur `demon`) : elle circule
+# telle quelle jusqu'au rayon (matiere_item_id la laisse intacte), sans passer par la
+# résolution sous_cat→item.
 DEPECAGE_TAGS: dict[str, list] = {
 	"_charnu_base": [
 	  "viande",
@@ -219,7 +223,8 @@ DEPECAGE_TAGS: dict[str, list] = {
 	  "cuir_brut",
 	  "crocs",
 	  "griffes",
-	  "coeur"
+	  "coeur",
+	  "item:Sang_demon_seche"
 	],
 	"infernal": [
 	  "griffes",

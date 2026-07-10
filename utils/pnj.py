@@ -14,6 +14,9 @@
 # - `services.soin` : {cout_cuivre, fraction_pv, gratuit_si:{lieux, seuil, fraction_pv},
 #   noeuds:{fait, sans_fonds, inutile}} — data-driven, seuil par défaut en world-var
 #   PNJ_REPUTATION_SEUIL.
+# - `services.don` : {item, quantite, cout_cuivre, gratuit_si:{lieux, seuil},
+#   noeuds:{fait, sans_fonds, trop_charge}} — remise d'un objet (ex. eau bénite),
+#   gratuit si bonne réputation ; contrôle de charge côté router.
 # Placeholders substitués serveur dans texte/label : {prenom}, {cout}.
 #
 # Logique pure (DB injectée : relation_value_fn), mute sans save — l'endpoint persiste.
@@ -229,3 +232,41 @@ def appliquer_soin(character: dict, pv_max: int, fraction: float) -> int:
 	rendu = max(0, round(int(pv_max) * float(fraction)))
 	character["currentPV"] = min(int(pv_max), avant + rendu)
 	return character["currentPV"] - avant
+
+
+# ---------------------------------------------------------------------------
+# Service de don (remise d'un objet — ex. eau bénite du temple)
+# ---------------------------------------------------------------------------
+
+def don_effectif(pnj_doc: dict, contexte: dict) -> dict | None:
+	"""Paramètres effectifs du service `don` pour CE personnage : quel item, quelle
+	quantité, et son coût — **gratuit** si l'une des relations de `gratuit_si.lieux`
+	atteint le seuil (défaut world-var PNJ_REPUTATION_SEUIL). None si le PNJ n'offre pas
+	ce service. Miroir de `soin_effectif`. Schéma data attendu :
+	`services.don = {item, quantite, cout_cuivre, gratuit_si:{lieux, seuil},
+	noeuds:{fait, sans_fonds, trop_charge}}`."""
+	service = (((pnj_doc or {}).get("services") or {}).get("don"))
+	if not service or not service.get("item"):
+		return None
+	gratuit_si = service.get("gratuit_si") or {}
+	seuil = int(gratuit_si.get("seuil", character_stats.PNJ_REPUTATION_SEUIL))
+	relations = contexte.get("relations") or {}
+	gratuit = any(relations.get(lid, 0) >= seuil for lid in gratuit_si.get("lieux") or [])
+	cout = 0 if gratuit else max(0, int(service.get("cout_cuivre", 0)))
+	return {
+		"item": service.get("item"),
+		"quantite": max(1, int(service.get("quantite", 1))),
+		"cout_cuivre": cout,
+		"gratuit": gratuit,
+	}
+
+
+def appliquer_don(character: dict, item_id: str, poids_unitaire: float, quantite: int) -> int:
+	"""Ajoute `quantite` instances de `item_id` à l'inventaire, chacune en référence
+	`{item, poids}` (mute `inventaire`, NE SAUVEGARDE PAS). Renvoie la quantité ajoutée.
+	Le contrôle de charge et le débit se font côté router avant l'appel."""
+	inv = character.setdefault("inventaire", [])
+	n = max(1, int(quantite))
+	for _ in range(n):
+		inv.append({"item": item_id, "poids": float(poids_unitaire)})
+	return n

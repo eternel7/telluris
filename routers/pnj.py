@@ -13,11 +13,12 @@ from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, recompute_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
+	poids_bounds, carried_weight, charge_max_of,
 )
 from utils.marche import debit_character, get_relation, relation_value
 from utils import pnj
 from utils import intro
-from routers.user import _derived_from_character, _vitals_payload
+from routers.user import _derived_from_character, _vitals_payload, _inventory_payload
 
 pnj_router = APIRouter()
 
@@ -64,8 +65,9 @@ async def pnj_dialogue_choix(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...)):
 	"""Résout un choix de dialogue (stateless, revalidé serveur). Body {"noeud", "choix_id"}.
-	Un choix à action `{"service":"soin"}` débite et soigne (séquence modèle buy_item) ;
-	un choix simple renvoie le nœud suivant, `noeud: null` = fin (le client ferme)."""
+	Un choix à action `{"service":"soin"}` débite et soigne ; `{"service":"don"}` remet un
+	objet (contrôle de charge + débit, séquence modèle buy_item) ; un choix simple renvoie
+	le nœud suivant, `noeud: null` = fin (le client ferme)."""
 	if not current_user:
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	character = get_selected_character(current_user)
@@ -106,6 +108,37 @@ async def pnj_dialogue_choix(
 				"cout": soin["cout_cuivre"],
 			}
 		reponse["vitals"] = _vitals_payload(character)
+		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+	elif action.get("service") == "don":
+		don = pnj.don_effectif(pnj_doc, contexte)
+		if not don:
+			raise HTTPException(status_code=422, detail="Ce personnage n'a rien à donner.")
+		item_doc = get_doc(don["item"])
+		if not item_doc:
+			raise HTTPException(status_code=422, detail="Objet du don introuvable.")
+		noeuds_don = (pnj_doc.get("services", {}).get("don", {}).get("noeuds", {}))
+		poids_unitaire = poids_bounds(item_doc)[0]
+		poids_total = poids_unitaire * don["quantite"]
+		if carried_weight(character) + poids_total > charge_max_of(character):
+			# Surcharge : rien donné, rien débité, le PNJ le fait remarquer.
+			suivant = noeuds_don.get("trop_charge")
+		elif don["cout_cuivre"] > 0 and debit_character(character, don["cout_cuivre"]) is None:
+			# Bourse vide : rien débité (fonds non mutés), rien donné.
+			suivant = noeuds_don.get("sans_fonds")
+		else:
+			pnj.appliquer_don(character, don["item"], poids_unitaire, don["quantite"])
+			if save_doc(character) is None:
+				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+			suivant = noeuds_don.get("fait")
+			reponse["don"] = {
+				"item": don["item"],
+				"nom": item_doc.get("nom"),
+				"icon": item_doc.get("icon"),
+				"quantite": don["quantite"],
+				"gratuit": don["gratuit"],
+				"cout": don["cout_cuivre"],
+			}
+			reponse["inventaire_payload"] = _inventory_payload(character)
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 	else:
 		suivant = choix.get("next")

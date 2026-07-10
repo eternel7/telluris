@@ -13,6 +13,19 @@
     ]
   },
   {
+    "_id": "recette:papier_cuir",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "Papier",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
     "_id": "recette:grimoire_armure_de_givre",
     "type": "recette",
     "lieu_categorie": "scriptorium",
