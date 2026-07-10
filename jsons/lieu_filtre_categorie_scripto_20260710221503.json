@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "lieu:l_encre_des_arcanes",
+    "_rev": "4-da96cccf2c92cf527908fecccdecd295",
+    "type": "lieu",
+    "label": "L'Encre des Arcanes",
+    "image": "scriptorium_europe01.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "scriptorium"
+  },
+  {
+    "_id": "lieu:le_codex_eternel",
+    "_rev": "5-da70486d3949f0db05f20364c482a1c3",
+    "type": "lieu",
+    "label": "Le Codex Éternel",
+    "image": "scriptorium_europe03.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "scriptorium"
+  }
+]

@@ -1,0 +1,953 @@
+[
+  {
+    "_id": "sort:bouclier_arcanique",
+    "_rev": "3-26d3f9648361a7c23b8f90848534cf82",
+    "type": "sort",
+    "nom": "Bouclier arcanique",
+    "icon": "🛡️",
+    "description": "Un écran de force invisible dévie les coups.",
+    "vocation": "mage",
+    "magie": "Bataille",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "R": 10
+      },
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "R": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:projectile_arcanique",
+    "_rev": "4-81e9e25627f272795a89d791f184b0e5",
+    "type": "sort",
+    "nom": "Projectile arcanique",
+    "icon": "✨",
+    "description": "Un trait d'énergie pure qui frappe à grande distance.",
+    "vocation": "mage",
+    "magie": "Bataille",
+    "niveau": 0,
+    "cout_pm": 7,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "1D8"
+    },
+    "composants": [
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      },
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:flamme_infernale",
+    "_rev": "4-0fbc3e8db44463cd63a000b82d28801f",
+    "type": "sort",
+    "nom": "Flamme infernale",
+    "icon": "😈",
+    "description": "Un feu venu d'en bas, qui laisse une odeur de soufre et de péché.",
+    "vocation": "demoniste",
+    "magie": "Démonologie",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "2D4"
+    },
+    "composants": [
+      {
+        "item": "item:Sang_demon_seche",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:vigueur_demoniaque",
+    "_rev": "3-3714eda79584fab3393c502a17f18fe5",
+    "type": "sort",
+    "nom": "Vigueur démoniaque",
+    "icon": "🩸",
+    "description": "Un pacte mineur : la force d'un démon coule dans vos veines.",
+    "vocation": "demoniste",
+    "magie": "Démonologie",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "F": 10
+      },
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:sang",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      },
+      {
+        "item": "item:griffes",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "F": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:armure_de_givre",
+    "_rev": "3-e0f72c8578fcaa9fd8f7ff59eb65dbb8",
+    "type": "sort",
+    "nom": "Armure de givre",
+    "icon": "❄️",
+    "description": "Une pellicule de glace vive épaissit la peau. La poudre alchimique prolonge le gel.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "R": 10
+      },
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      },
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "R": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:trait_de_flamme",
+    "_rev": "4-a65b3d0aba0146fc303ed406e252fa39",
+    "type": "sort",
+    "nom": "Trait de flamme",
+    "icon": "🔥",
+    "description": "Un dard de feu jaillit de la paume. Le soufre nourrit la flamme ; un cristal de canalisation la concentre.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "2D6"
+    },
+    "composants": [
+      {
+        "item": "item:Soufre",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "2"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:eclat_eblouissant",
+    "_rev": "4-7bf84126559210fd47a0b7ae7e99ef07",
+    "type": "sort",
+    "nom": "Éclat éblouissant",
+    "icon": "🌟",
+    "description": "Une gerbe de lumière irréelle brûle les sens de la cible.",
+    "vocation": "illusionniste",
+    "magie": "Illusoire",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "1D6+1"
+    },
+    "composants": [
+      {
+        "item": "item:Poudre_de_miroir",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:formule_de_clairvoyance",
+    "_rev": "3-b59e971d6130aed6268674096c449d88",
+    "type": "sort",
+    "nom": "Formule de clairvoyance",
+    "icon": "🖋️",
+    "description": "Un diagramme mental démultiplie l'acuité de l'esprit.",
+    "vocation": "lettre",
+    "magie": "Illusoire",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "Int": 10
+      },
+      "duree": 5
+    },
+    "composants": [
+      {
+        "item": "item:Plume_d_oie",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "Int": 5
+          }
+        }
+      },
+      {
+        "item": "item:encens",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:mot_de_pouvoir",
+    "_rev": "4-f0675ba063b06d45a458f37bc81a558c",
+    "type": "sort",
+    "nom": "Mot de pouvoir",
+    "icon": "📜",
+    "description": "Une syllabe interdite qui meurtrit la chair. L'encens porte le mot plus loin dans l'âme.",
+    "vocation": "lettre",
+    "magie": "Illusoire",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 6,
+    "effets": {
+      "degats": "1D6"
+    },
+    "composants": [
+      {
+        "item": "item:encens",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:silhouettes_trompeuses",
+    "_rev": "3-60626238a793fc0581c975494e5f0719",
+    "type": "sort",
+    "nom": "Silhouettes trompeuses",
+    "icon": "🪞",
+    "description": "Des doubles miroitants brouillent votre position.",
+    "vocation": "illusionniste",
+    "magie": "Illusoire",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "Ag": 10
+      },
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:Poudre_de_miroir",
+        "consomme": true,
+        "bonus": {
+          "buffs": {
+            "Ag": 5
+          }
+        }
+      },
+      {
+        "item": "item:Sel_noir",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:baume_de_seve",
+    "_rev": "1-a6e14cec1f1878c803f081fe2a61b59c",
+    "type": "sort",
+    "nom": "Baume de sève",
+    "icon": "🌱",
+    "description": "Une sève tiède sourd de la peau et referme les plaies.",
+    "vocation": "druide",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "pv": 12
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_medicinales",
+        "consomme": true,
+        "bonus": {
+          "pv": 8
+        }
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": false,
+        "bonus": {
+          "pv": 3
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:fracas_tellurique",
+    "_rev": "1-73984644daa6b35362e4e3c032c08335",
+    "type": "sort",
+    "nom": "Fracas tellurique",
+    "icon": "⚡",
+    "description": "Les esprits de la terre frappent l'ennemi d'une décharge brutale.",
+    "vocation": "chaman",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "1D8"
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_a_bruler",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:crocs",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:morsure_de_ronces",
+    "_rev": "5-f75457e403c89dd94e6a359db6598812",
+    "type": "sort",
+    "nom": "Morsure de ronces",
+    "icon": "🌿",
+    "description": "Des ronces spectrales fouettent et lacèrent la cible.",
+    "vocation": "druide",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 7,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "1D6"
+    },
+    "composants": [
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:morsure_totemique",
+    "_rev": "1-1c7e8a1a856988b47b4e627519e5a9ee",
+    "type": "sort",
+    "nom": "Morsure totémique",
+    "icon": "🐾",
+    "description": "L'esprit fauve se jette sur la proie et la déchire.",
+    "vocation": "chaman",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 6,
+    "effets": {
+      "degats": "2D4"
+    },
+    "composants": [
+      {
+        "item": "item:griffes",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      },
+      {
+        "item": "item:crocs",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:regain_sylvestre",
+    "_rev": "3-be9e32943cbe86cf0686c913da955f29",
+    "type": "sort",
+    "nom": "Regain sylvestre",
+    "icon": "🍀",
+    "description": "La vigueur de la forêt irrigue le corps et continue de le régénérer.",
+    "vocation": "druide",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "pv": 6,
+      "regen_pv": 2,
+      "duree": 5
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_medicinales",
+        "consomme": true,
+        "bonus": {
+          "regen_pv": 1
+        }
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:seve_vivifiante",
+    "_rev": "3-5a5672e3966ec307ccc1a26b2c1a11ce",
+    "type": "sort",
+    "nom": "Sève vivifiante",
+    "icon": "🍃",
+    "description": "La vitalité de la forêt referme les plaies et continue d'agir.",
+    "vocation": "druide",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "pv": 10,
+      "regen_pv": 2,
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_medicinales",
+        "consomme": true,
+        "bonus": {
+          "pv": 8
+        }
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": true,
+        "bonus": {
+          "regen_pv": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:souffle_ancestral",
+    "_rev": "3-47c3c0cb18bda43e57a47a512b810618",
+    "type": "sort",
+    "nom": "Souffle ancestral",
+    "icon": "🪶",
+    "description": "Les esprits soufflent une bouffée de vie dans le corps.",
+    "vocation": "chaman",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "pv": 8
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_a_bruler",
+        "consomme": true,
+        "bonus": {
+          "pv": 6
+        }
+      },
+      {
+        "item": "item:crocs",
+        "consomme": false,
+        "bonus": {
+          "pv": 2
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:transe_du_totem",
+    "_rev": "3-ceccdd1ab76ced7a7c1fb995640e5033",
+    "type": "sort",
+    "nom": "Transe du totem",
+    "icon": "🐺",
+    "description": "L'esprit totem prête sa force à la chair.",
+    "vocation": "chaman",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "F": 10
+      },
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_a_bruler",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      },
+      {
+        "item": "item:crocs",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "F": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:etreinte_sepulcrale",
+    "_rev": "3-972731ad2a1e568d6cbebfdfcec61cc7",
+    "type": "sort",
+    "nom": "Étreinte sépulcrale",
+    "icon": "⚰️",
+    "description": "Le froid de la tombe raffermit le corps et trempe la volonté.",
+    "vocation": "necromancien",
+    "magie": "Nécromancie",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "pv": 4,
+      "buffs": {
+        "Vol": 10
+      },
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:sang",
+        "consomme": true,
+        "bonus": {
+          "pv": 6
+        }
+      },
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "Vol": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:trait_mortifere",
+    "_rev": "4-32a96d3d5e4ff581b934a6bc7601d745",
+    "type": "sort",
+    "nom": "Trait mortifère",
+    "icon": "💀",
+    "description": "Un rai d'énergie négative flétrit la vie qu'il touche.",
+    "vocation": "necromancien",
+    "magie": "Nécromancie",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "1D8"
+    },
+    "composants": [
+      {
+        "item": "item:Poudre_os",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:os",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:aura_de_devotion",
+    "_rev": "3-b57986b63d86f0f15a01535700c255a0",
+    "type": "sort",
+    "nom": "Aura de dévotion",
+    "icon": "✨",
+    "description": "Une aura de foi raidit le corps contre les coups.",
+    "vocation": "templier",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "R": 10
+      },
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:Bougie",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      },
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "R": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:benediction_martiale",
+    "_rev": "3-b7dfbfa2f4d3074dad09c3db116b6dfa",
+    "type": "sort",
+    "nom": "Bénédiction martiale",
+    "icon": "🛡️",
+    "description": "Une bénédiction guerrière guide le bras.",
+    "vocation": "paladin",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "F": 10
+      },
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      },
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "F": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:feu_purificateur",
+    "_rev": "5-f36e477337d05457bb53018c2ad7b54f",
+    "type": "sort",
+    "nom": "Feu purificateur",
+    "icon": "🔱",
+    "description": "Le feu qui purge les créatures maudites.",
+    "vocation": "repurgateur",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "ennemi",
+    "portee": 6,
+    "effets": {
+      "degats": "1D8"
+    },
+    "composants": [
+      {
+        "item": "item:Soufre",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:jugement_sacre",
+    "_rev": "3-904a6067fc93963d96dd63cf77154c87",
+    "type": "sort",
+    "nom": "Jugement sacré",
+    "icon": "⚜️",
+    "description": "L'institution parle : la sentence tombe, brûlante.",
+    "vocation": "templier",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "ennemi",
+    "portee": 3,
+    "effets": {
+      "degats": "1D6+1"
+    },
+    "composants": [
+      {
+        "item": "item:encens",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      },
+      {
+        "item": "item:Sel",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:lumiere_purificatrice",
+    "_rev": "4-da8ca528ec2e639825c87367f32d6809",
+    "type": "sort",
+    "nom": "Lumière purificatrice",
+    "icon": "🕯️",
+    "description": "Un rayon de lumière sacrée consume l'impur.",
+    "vocation": "pretre",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "1D8"
+    },
+    "composants": [
+      {
+        "item": "item:encens",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:sceau_de_protection",
+    "_rev": "3-e30f26bd55f45a8ae286f6e714fd4c92",
+    "type": "sort",
+    "nom": "Sceau de protection",
+    "icon": "🧿",
+    "description": "Un sceau tracé au sel garde l'esprit des influences impies.",
+    "vocation": "repurgateur",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "Vol": 10
+      },
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:Sel",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      },
+      {
+        "item": "item:Bougie",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "Vol": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:soin_mineur",
+    "_rev": "3-8eee240dc84d3f93d5d144b88b424a47",
+    "type": "sort",
+    "nom": "Soin mineur",
+    "icon": "✝️",
+    "description": "Une prière murmurée referme les blessures.",
+    "vocation": "pretre",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "pv": 12
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_medicinales",
+        "consomme": true,
+        "bonus": {
+          "pv": 8
+        }
+      },
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "pv": 4
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:verdict_de_lumiere",
+    "_rev": "4-5091dd2f31d38b4606eb4da5ee004211",
+    "type": "sort",
+    "nom": "Verdict de lumière",
+    "icon": "⚔️",
+    "description": "La lame s'embrase d'une lumière qui juge — et frappe à courte distance. Redouté des morts-vivants.",
+    "vocation": "paladin",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "ennemi",
+    "portee": 3,
+    "effets": {
+      "degats": "1D8"
+    },
+    "composants": [
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:Bougie",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  }
+]

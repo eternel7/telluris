@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "recette:e7c250a5-e204-454a-801d-00d1e1a76cd8",
+    "_rev": "1-b34b1370b6abde26e9606b0e8d515a93",
+    "matiere_premiere_sous_categorie": "sang",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "encre",
+    "type": "recette",
+    "quantite_matiere": 1,
+    "quantite_produite": 2
+  },
+  {
+    "_id": "recette:e0d9ded5-e2d8-493d-a98b-dddfbab3cbb8",
+    "_rev": "1-e18488e88697cd913be9ab5bfc0eb078",
+    "matiere_premiere_sous_categorie": "plumes",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "plume_a_ecrire",
+    "type": "recette",
+    "quantite_matiere": 1,
+    "quantite_produite": 1
+  },
+  {
+    "_id": "recette:a9aba254-1b44-4239-863b-3aaeffead838",
+    "_rev": "1-e72165909a89ba18ec4ad4b044f0e2a7",
+    "matiere_premiere_sous_categorie": "sang",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "pigment",
+    "type": "recette",
+    "quantite_matiere": 1,
+    "quantite_produite": 2
+  }
+]

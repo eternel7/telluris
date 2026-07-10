@@ -1,0 +1,786 @@
+[
+  {
+    "_id": "item:Grimoire_necromancie",
+    "_rev": "5-5b103dcafaeb0404cfa880f0f1c332bc",
+    "type": "item",
+    "nom": "Grimoire de nécromancie",
+    "sous_categorie": "grimoire",
+    "icon": "📚",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 1.2
+  },
+  {
+    "_id": "item:Grimoire_pactes",
+    "_rev": "6-9d93dec5393d8fa9bccacfeb0fb83dad",
+    "type": "item",
+    "nom": "Grimoire des pactes",
+    "sous_categorie": "grimoire",
+    "icon": "📚",
+    "rarete": "rare",
+    "categorie": "livre",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 1.5
+  },
+  {
+    "_id": "item:grimoire_armure_de_givre",
+    "_rev": "1-a83cbb5717e16467728455b7f1d067ae",
+    "type": "item",
+    "nom": "Grimoire : Armure de givre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Armure de givre » (elementaliste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:armure_de_givre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_aura_de_devotion",
+    "_rev": "1-4f62279a88cc2638bd3712a13a95e9e4",
+    "type": "item",
+    "nom": "Grimoire : Aura de dévotion",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Aura de dévotion » (templier). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:aura_de_devotion"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_baume_de_seve",
+    "_rev": "1-aa77f18bb2987a085074b232ac8704c6",
+    "type": "item",
+    "nom": "Grimoire : Baume de sève",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Baume de sève » (druide). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:baume_de_seve"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_benediction_martiale",
+    "_rev": "1-f9f7afd70385521631fc060edb2970a8",
+    "type": "item",
+    "nom": "Grimoire : Bénédiction martiale",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bénédiction martiale » (paladin). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:benediction_martiale"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_bouclier_arcanique",
+    "_rev": "1-b8c8965bef7ab612db236907033780b0",
+    "type": "item",
+    "nom": "Grimoire : Bouclier arcanique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bouclier arcanique » (mage). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:bouclier_arcanique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eclat_eblouissant",
+    "_rev": "1-ff6017c0be2d99dfca18231085976873",
+    "type": "item",
+    "nom": "Grimoire : Éclat éblouissant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éclat éblouissant » (illusionniste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eclat_eblouissant"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_etreinte_sepulcrale",
+    "_rev": "1-53b837459009750f1121418cffc65aa7",
+    "type": "item",
+    "nom": "Grimoire : Étreinte sépulcrale",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Étreinte sépulcrale » (necromancien). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:etreinte_sepulcrale"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_feu_purificateur",
+    "_rev": "1-4e221365c225f1cd3fb25164d7ba5670",
+    "type": "item",
+    "nom": "Grimoire : Feu purificateur",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Feu purificateur » (repurgateur). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:feu_purificateur"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_flamme_infernale",
+    "_rev": "1-e71aa711cdcccd73611aa4a8dcf1bbde",
+    "type": "item",
+    "nom": "Grimoire : Flamme infernale",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Flamme infernale » (demoniste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:flamme_infernale"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_formule_de_clairvoyance",
+    "_rev": "1-3d40c1b2e1c61ca7a1d1fbd7da0ea7cb",
+    "type": "item",
+    "nom": "Grimoire : Formule de clairvoyance",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Formule de clairvoyance » (lettre). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:formule_de_clairvoyance"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_fracas_tellurique",
+    "_rev": "1-53347bea8ac69bb468f9d65165381206",
+    "type": "item",
+    "nom": "Grimoire : Fracas tellurique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Fracas tellurique » (chaman). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:fracas_tellurique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_jugement_sacre",
+    "_rev": "1-33a33b61fc1ff1bdc62da22e8ee7ec5c",
+    "type": "item",
+    "nom": "Grimoire : Jugement sacré",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Jugement sacré » (templier). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:jugement_sacre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lumiere_purificatrice",
+    "_rev": "1-c369c9f607f27708d16ee144346d0e1f",
+    "type": "item",
+    "nom": "Grimoire : Lumière purificatrice",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lumière purificatrice » (pretre). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lumiere_purificatrice"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_morsure_de_ronces",
+    "_rev": "1-5ef6dc224ec94b6e2e896856f7c2003c",
+    "type": "item",
+    "nom": "Grimoire : Morsure de ronces",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Morsure de ronces » (druide). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:morsure_de_ronces"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_morsure_totemique",
+    "_rev": "1-690c566d95cd388d2211f012bfca89f5",
+    "type": "item",
+    "nom": "Grimoire : Morsure totémique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Morsure totémique » (chaman). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:morsure_totemique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_mot_de_pouvoir",
+    "_rev": "1-6449dee07f9de8a5e977ee7095a70303",
+    "type": "item",
+    "nom": "Grimoire : Mot de pouvoir",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Mot de pouvoir » (lettre). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:mot_de_pouvoir"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_projectile_arcanique",
+    "_rev": "1-5ac1038a79b5c922396b97ca4de58c87",
+    "type": "item",
+    "nom": "Grimoire : Projectile arcanique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Projectile arcanique » (mage). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:projectile_arcanique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_regain_sylvestre",
+    "_rev": "1-3c884e8c2efbefc33a478246cd492e6c",
+    "type": "item",
+    "nom": "Grimoire : Regain sylvestre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Regain sylvestre » (druide). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:regain_sylvestre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_sceau_de_protection",
+    "_rev": "1-34eb31cfcebe574306ed5fbe0361d8f1",
+    "type": "item",
+    "nom": "Grimoire : Sceau de protection",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sceau de protection » (repurgateur). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:sceau_de_protection"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_seve_vivifiante",
+    "_rev": "1-ff6704d811fb1948d437557da07db4df",
+    "type": "item",
+    "nom": "Grimoire : Sève vivifiante",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sève vivifiante » (druide). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:seve_vivifiante"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_silhouettes_trompeuses",
+    "_rev": "1-d89478c320c95ff9190fba99ee7d4e4f",
+    "type": "item",
+    "nom": "Grimoire : Silhouettes trompeuses",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Silhouettes trompeuses » (illusionniste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:silhouettes_trompeuses"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_soin_mineur",
+    "_rev": "1-2803e14a349b0f5347a32519fe90523b",
+    "type": "item",
+    "nom": "Grimoire : Soin mineur",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Soin mineur » (pretre). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:soin_mineur"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_souffle_ancestral",
+    "_rev": "1-383fe0b8bbe46f5389ba1030a72747e5",
+    "type": "item",
+    "nom": "Grimoire : Souffle ancestral",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Souffle ancestral » (chaman). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:souffle_ancestral"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_trait_de_flamme",
+    "_rev": "1-7e9bec59b1ce942188de32c120df92a7",
+    "type": "item",
+    "nom": "Grimoire : Trait de flamme",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Trait de flamme » (elementaliste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:trait_de_flamme"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_trait_mortifere",
+    "_rev": "1-b445e58804e3309b92ade93045e15d66",
+    "type": "item",
+    "nom": "Grimoire : Trait mortifère",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Trait mortifère » (necromancien). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:trait_mortifere"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_transe_du_totem",
+    "_rev": "1-63d4646d048335b890c6dff9d9f0124d",
+    "type": "item",
+    "nom": "Grimoire : Transe du totem",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Transe du totem » (chaman). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:transe_du_totem"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_verdict_de_lumiere",
+    "_rev": "1-a384d374a0ff0d53df59bdd4ba2ff38d",
+    "type": "item",
+    "nom": "Grimoire : Verdict de lumière",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Verdict de lumière » (paladin). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:verdict_de_lumiere"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_vigueur_demoniaque",
+    "_rev": "1-4d4c09fe284cf01c96c7fa40cb1a42f8",
+    "type": "item",
+    "nom": "Grimoire : Vigueur démoniaque",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Vigueur démoniaque » (demoniste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:vigueur_demoniaque"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  }
+]
