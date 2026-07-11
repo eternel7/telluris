@@ -30,6 +30,9 @@ FACTEUR_DEGATS_ARMURE: int = 20
 # Bonus de portée des armes de JET dérivé de la Force : portee_jet = item.portee + F // JET_PORTEE_F_DIV.
 # Sur l'échelle ×10 (F ≈ 10-100), un diviseur de 20 donne +0 à +5 cases selon la puissance.
 JET_PORTEE_F_DIV: int = 20
+# Facteur multipliant la distance entre 2 protagoniste dont l'un est furtif. 
+# Le resultat obtenu vient augmenté la difficulte du jet de detection
+DETECTION_DISTANCE_FACTEUR: int = 5
 
 # XP gagnée à la découverte d'un lieu (fallback si le lieu n'a pas de xp_decouverte).
 XP_DECOUVERTE_LIEU: int = 10
@@ -328,6 +331,7 @@ def current_world_variables() -> dict:
 	return {
 		"FACTEUR_DEGATS_ARMURE": FACTEUR_DEGATS_ARMURE,
 		"JET_PORTEE_F_DIV": JET_PORTEE_F_DIV,
+		"DETECTION_DISTANCE_FACTEUR": DETECTION_DISTANCE_FACTEUR,
 		"XP_DECOUVERTE_LIEU": XP_DECOUVERTE_LIEU,
 		"XP_NIVEAU_BASE": XP_NIVEAU_BASE,
 		"XP_NIVEAU_INCREMENT": XP_NIVEAU_INCREMENT,
@@ -398,7 +402,7 @@ def load_world_variables() -> dict:
 	côté importateurs ; les scalaires sont réassignés (à lire via le module).
 	Retourne le snapshot effectif.
 	"""
-	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
+	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
@@ -417,13 +421,14 @@ def load_world_variables() -> dict:
 		doc = None
 	v = (doc or {}).get("value") or {}
 
-	FACTEUR_DEGATS_ARMURE  = int(v.get("FACTEUR_DEGATS_ARMURE", FACTEUR_DEGATS_ARMURE))
-	JET_PORTEE_F_DIV       = max(1, int(v.get("JET_PORTEE_F_DIV", JET_PORTEE_F_DIV)))
-	XP_DECOUVERTE_LIEU     = int(v.get("XP_DECOUVERTE_LIEU", XP_DECOUVERTE_LIEU))
-	XP_NIVEAU_BASE         = max(1, int(v.get("XP_NIVEAU_BASE", XP_NIVEAU_BASE)))
-	XP_NIVEAU_INCREMENT    = max(0, int(v.get("XP_NIVEAU_INCREMENT", XP_NIVEAU_INCREMENT)))
-	TOWN_PROFIL_NIVEAU_MAX = int(v.get("TOWN_PROFIL_NIVEAU_MAX", TOWN_PROFIL_NIVEAU_MAX))
-	XP_VOC_COEFF           = int(v.get("XP_VOC_COEFF", XP_VOC_COEFF))
+	FACTEUR_DEGATS_ARMURE      = int(v.get("FACTEUR_DEGATS_ARMURE", FACTEUR_DEGATS_ARMURE))
+	JET_PORTEE_F_DIV           = max(1, int(v.get("JET_PORTEE_F_DIV", JET_PORTEE_F_DIV)))
+	DETECTION_DISTANCE_FACTEUR = max(0, int(v.get("DETECTION_DISTANCE_FACTEUR", DETECTION_DISTANCE_FACTEUR)))
+	XP_DECOUVERTE_LIEU         = int(v.get("XP_DECOUVERTE_LIEU", XP_DECOUVERTE_LIEU))
+	XP_NIVEAU_BASE             = max(1, int(v.get("XP_NIVEAU_BASE", XP_NIVEAU_BASE)))
+	XP_NIVEAU_INCREMENT        = max(0, int(v.get("XP_NIVEAU_INCREMENT", XP_NIVEAU_INCREMENT)))
+	TOWN_PROFIL_NIVEAU_MAX     = int(v.get("TOWN_PROFIL_NIVEAU_MAX", TOWN_PROFIL_NIVEAU_MAX))
+	XP_VOC_COEFF               = int(v.get("XP_VOC_COEFF", XP_VOC_COEFF))
 	if isinstance(v.get("XP_COEFF"), dict):
 		XP_COEFF.clear()
 		XP_COEFF.update({k: int(x) for k, x in v["XP_COEFF"].items()})

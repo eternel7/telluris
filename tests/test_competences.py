@@ -463,13 +463,18 @@ def test_detection_threshold_et_replis():
     assert _detection_threshold({"vol": 0, "int": 0, "ag": 0}, {"ag": 100}) == 5
 
 
-def test_detection_malus_de_distance():
-    # 1 point de difficulté par case (Chebyshev) : le même monstre repère moins bien de loin.
+def test_detection_malus_de_distance(monkeypatch):
+    # DETECTION_DISTANCE_FACTEUR points de difficulté par case (Chebyshev) : le même
+    # monstre repère moins bien de loin. Lu via le module (variable de monde réglable).
+    monkeypatch.setattr(character_stats, "DETECTION_DISTANCE_FACTEUR", 5)
     joueur = {"ag": 30, "furtivite_bonus": 0, "pos": {"x": 3, "y": 5}}
-    proche = {"vol": 40, "int": 0, "ag": 0, "pos": {"x": 3, "y": 4}}   # 1 case  : 50+40−(30+1) = 59
-    loin = {"vol": 40, "int": 0, "ag": 0, "pos": {"x": 9, "y": 5}}     # 6 cases : 50+40−(30+6) = 54
-    assert _detection_threshold(proche, joueur) == 59
-    assert _detection_threshold(loin, joueur) == 54
+    proche = {"vol": 40, "int": 0, "ag": 0, "pos": {"x": 3, "y": 4}}   # 1 case  : 50+40−(30+5)  = 55
+    loin = {"vol": 40, "int": 0, "ag": 0, "pos": {"x": 9, "y": 5}}     # 6 cases : 50+40−(30+30) = 30
+    assert _detection_threshold(proche, joueur) == 55
+    assert _detection_threshold(loin, joueur) == 30
+    # Facteur 0 = malus désactivé : la distance ne joue plus.
+    monkeypatch.setattr(character_stats, "DETECTION_DISTANCE_FACTEUR", 0)
+    assert _detection_threshold(loin, joueur) == _detection_threshold(proche, joueur) == 60
 
 
 def _monstre_actif(mid, x, y, **extra):

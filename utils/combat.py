@@ -906,10 +906,11 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 def _detection_threshold(monstre: dict, joueur: dict) -> int:
 	"""Seuil du jet de détection d'un joueur furtif (d100, jet ≤ seuil = repéré).
 	Compétence de détection = Vol du monstre, repli Int−10 (créature sans volonté),
-	repli Ag−30 (créature sans intelligence). Difficulté = Ag du joueur + son bonus
-	de furtivité + la DISTANCE qui les sépare (1 point par case : plus on est loin,
-	plus on est dur à repérer). Même idiome que _hit_threshold : 50 + skill − difficulté,
-	[5, 95]."""
+	repli Ag−30 (créature sans intelligence). Difficulté = Ag du joueur + son bonus de
+	furtivité + la DISTANCE qui les sépare, à raison de DETECTION_DISTANCE_FACTEUR points
+	par case (plus on est loin, plus on est dur à repérer — variable de monde, lue via le
+	module pour rester réglable à chaud). Même idiome que _hit_threshold : 50 + skill −
+	difficulté, [5, 95]."""
 	vol = int(monstre.get("vol", 0) or 0)
 	intel = int(monstre.get("int", 0) or 0)
 	if vol > 0:
@@ -918,10 +919,10 @@ def _detection_threshold(monstre: dict, joueur: dict) -> int:
 		skill = intel - 10
 	else:
 		skill = int(monstre.get("ag", 0) or 0) - 30
-	distance = _cheby(monstre, joueur) if monstre.get("pos") and joueur.get("pos") else 0
+	cases = _cheby(monstre, joueur) if monstre.get("pos") and joueur.get("pos") else 0
 	difficulte = (int(joueur.get("ag", 0) or 0)
 				  + int(joueur.get("furtivite_bonus", 0) or 0)
-				  + distance)
+				  + cases * max(0, character_stats.DETECTION_DISTANCE_FACTEUR))
 	return max(5, min(95, 50 + skill - difficulte))
 
 
