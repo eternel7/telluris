@@ -31,6 +31,7 @@ from utils import quetes
 from utils import bois
 from utils import consommables
 from utils import sorts as sorts_util
+from utils import competences as competences_util
 from utils import focalisation
 from utils import intro
 from models import character_stats
@@ -178,6 +179,25 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 				if candidats:
 					raise HTTPException(status_code=422, detail="Choisissez un sort de départ pour cette vocation.")
 
+		# Compétence de départ : miroir exact du sort pour TOUTES les autres vocations
+		# (complément de SORT_VOCATIONS_DEPART) — on choisit un sort OU une compétence de
+		# niveau 0, jamais les deux. Même dégradé gracieux si le contenu n'est pas importé.
+		competences_init: list = []
+		if competences_util.vocation_choisit_competence(characterinfo["voc"]):
+			competence_initiale = characterinfo.get("competence_initiale")
+			if competence_initiale:
+				comp_doc = competences_util.normaliser_competence(get_doc(competence_initiale))
+				if (not comp_doc or comp_doc["vocation"] != characterinfo["voc"]
+						or comp_doc["niveau"] != 0):
+					raise HTTPException(status_code=422, detail="Compétence de départ invalide pour cette vocation.")
+				competences_init = [comp_doc["id"]]
+			else:
+				candidats = [c for d in find_docs({"type": "competence"})
+							 if (c := competences_util.normaliser_competence(d))
+							 and c["vocation"] == characterinfo["voc"] and c["niveau"] == 0]
+				if candidats:
+					raise HTTPException(status_code=422, detail="Choisissez une compétence de départ pour cette vocation.")
+
 		unique_id = "character:" + user_id + "_" + str(uuid.uuid4())
 		character_dict = {
 			'_id' : unique_id,
@@ -208,7 +228,22 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'quetes_actives': [],
 			'quetes_terminees': [],
 			'sorts_connus': sorts_init,
+			'competences_connues': competences_init,
+			'competences_bonus': {},
 			}
+		# Une compétence passive buffe en permanence : on dénormalise son bonus, puis on
+		# recalcule les max pour démarrer PV/PM pleins DANS les valeurs bufffées (une passive
+		# en R relève pv_max). `caracteristiques_current` reste la valeur brute, jamais bufffée.
+		competences_util.recompute_competences_bonus(character_dict, get_doc)
+		if character_dict['competences_bonus'].get('buffs'):
+			stats = consommables.caracts_avec_buffs(character_dict)
+			derived = compute_derived_stats(base=BaseStats(
+				v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
+				ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
+				cha=stats.get("Cha", 0), ch=stats.get("Ch", 0),
+			), niveau=0)
+			character_dict['currentPV'] = derived.pv_max
+			character_dict['currentPM'] = derived.pm_max
 		# Intro narrative : si la cité porte un bloc `intro`, le personnage démarre à
 		# `position_depart` (périphérie) avec le statut en_cours — l'overlay du premier
 		# /play racontera la fuite du village natal. Sans bloc : comportement inchangé.
@@ -1014,6 +1049,103 @@ async def apprendre_sort(
 		"apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
 		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
 		"appris": {"nom": sort["nom"], "icon": sort["icon"]},
+	}
+
+
+@user_router.post("/utiliser_competence")
+async def utiliser_competence(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Utilise une compétence ACTIVE hors combat (cible soi uniquement) : débite les PM
+	éventuels, applique la part instantanée (pv/pm clampés) et empile l'effet à durée
+	(buffs/régén, décrémenté au tour monde). Miroir de `lancer_sort`, sans composants —
+	une compétence ne consomme aucun objet. Les passives ne s'« utilisent » pas : leur
+	bonus est permanent (competences_bonus)."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	competence_id = body.get("competence_id")
+	if competence_id not in (character.get("competences_connues") or []):
+		raise HTTPException(status_code=422, detail="Compétence inconnue du personnage")
+	comp = competences_util.normaliser_competence(get_doc(competence_id))
+	if not comp or not competences_util.competence_utilisable_exploration(comp):
+		raise HTTPException(status_code=422, detail="Cette compétence ne peut pas être utilisée hors combat")
+	if int(character.get("currentPM", 0) or 0) < comp["cout_pm"]:
+		raise HTTPException(status_code=409, detail="PM insuffisants")
+
+	# Buff empilé AVANT le calcul des max (même règle que les consommables et les sorts),
+	# puis débit PM et part instantanée clampée aux max bufffés.
+	effets = comp["effets"]
+	effet = competences_util.empiler_effet_competence(character, comp)
+	eq = recompute_equipment_bonus(character.get("slots", {}))
+	derived = _derived_from_character(character, eq)
+	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - comp["cout_pm"])
+	avant_pv = int(character.get("currentPV", 0) or 0)
+	avant_pm = character["currentPM"]
+	character["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])
+	character["currentPM"] = min(derived.pm_max, avant_pm + effets["pm"])
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	payload = _inventory_payload(character)
+	payload["vitals"] = _vitals_payload(character)
+	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
+	payload["competences"] = competences_util.liste_competences_payload(character, get_doc, "exploration")
+	payload["utilisee"] = {
+		"nom": comp["nom"],
+		"icon": comp["icon"],
+		"pv_rendu": character["currentPV"] - avant_pv,
+		"pm_rendu": character["currentPM"] - avant_pm,
+		"effet": dict(effet) if effet else None,
+	}
+	return payload
+
+
+@user_router.post("/apprendre_competence")
+async def apprendre_competence(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Apprend une compétence de sa vocation : coût en points de caractéristique
+	((niveau + 1) × COMPETENCE_COUT_COEFF) et niveau de vocation suffisant. Miroir de
+	`apprendre_sort`, sans grimoire (l'équivalent viendra avec l'arbre de compétences).
+	Ajoute l'id à `competences_connues` et re-dénormalise le bonus des passives."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	comp = competences_util.normaliser_competence(get_doc(body.get("competence_id")))
+	if not comp:
+		raise HTTPException(status_code=422, detail="Compétence introuvable")
+	if comp["id"] in (character.get("competences_connues") or []):
+		raise HTTPException(status_code=422, detail="Compétence déjà connue")
+	if comp["vocation"] != character.get("voc"):
+		raise HTTPException(status_code=422, detail="Cette compétence n'est pas de votre vocation")
+	niveaux = character.get("vocations_niveaux", {})
+	if niveaux.get(comp["vocation"], 0) < comp["niveau"]:
+		raise HTTPException(status_code=422, detail="Niveau de vocation insuffisant")
+
+	cout = competences_util.cout_apprentissage(comp)
+	attribute_points = character.get("attribute_points", 0)
+	if attribute_points < cout:
+		raise HTTPException(status_code=422, detail=f"Points insuffisants (besoin {cout}, disponible {attribute_points})")
+
+	character["attribute_points"] = attribute_points - cout
+	character.setdefault("competences_connues", []).append(comp["id"])
+	# Une passive apprise buffe immédiatement : re-dénormaliser AVANT le save.
+	competences_util.recompute_competences_bonus(character, get_doc)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	return {
+		"attribute_points": character["attribute_points"],
+		"competences_connues": list(character["competences_connues"]),
+		"competences": competences_util.liste_competences_payload(character, get_doc, "exploration"),
+		"competences_apprenables": competences_util.competences_apprenables(character, find_docs),
+		"vitals": _vitals_payload(character),
+		"appris": {"nom": comp["nom"], "icon": comp["icon"]},
 	}
 
 

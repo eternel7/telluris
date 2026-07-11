@@ -154,6 +154,15 @@ SORT_VOCATIONS_DEPART: list = [
 MAGIE_POLYVALENTE_VOCATIONS: list = ["lettre"]
 MAGIE_ECOLE_COUT_COEFF: int = 2
 
+# ── Compétences (vocation) ───────────────────────────────────────────────────────
+# Miroir des sorts pour les vocations non magiciennes : un doc `competence:*` porte une
+# vocation, un niveau, un mode (passive/active) et des `effets` au même format. Apprendre
+# une compétence coûte (niveau + 1) × COMPETENCE_COUT_COEFF points de caractéristique.
+# Les vocations qui choisissent une compétence de niveau 0 à la création sont le COMPLÉMENT
+# de SORT_VOCATIONS_DEPART (règle dérivée : on choisit un sort OU une compétence, jamais
+# les deux) — pas de liste à maintenir en double.
+COMPETENCE_COUT_COEFF: int = 2
+
 # ── Récolte & découpe du bois ────────────────────────────────────────────────────
 # Échelle des tailles de bois, du plus petit au plus grand. Couper un item « a_couper »
 # produit des pièces du tier immédiatement plus petit (même `essence`), poids conservé.
@@ -359,6 +368,7 @@ def current_world_variables() -> dict:
 		"SORT_VOCATIONS_DEPART": list(SORT_VOCATIONS_DEPART),
 		"MAGIE_POLYVALENTE_VOCATIONS": list(MAGIE_POLYVALENTE_VOCATIONS),
 		"MAGIE_ECOLE_COUT_COEFF": MAGIE_ECOLE_COUT_COEFF,
+		"COMPETENCE_COUT_COEFF": COMPETENCE_COUT_COEFF,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
 		"COUPE_MAX_PIECES": COUPE_MAX_PIECES,
@@ -397,7 +407,7 @@ def load_world_variables() -> dict:
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
 	global QUETE_COLLECT_POIDS_MAX
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
-	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF
+	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
@@ -469,6 +479,7 @@ def load_world_variables() -> dict:
 	MAGIE_ECOLE_COUT_COEFF = max(0, int(v.get("MAGIE_ECOLE_COUT_COEFF", MAGIE_ECOLE_COUT_COEFF)))
 	if isinstance(v.get("MAGIE_POLYVALENTE_VOCATIONS"), list):
 		MAGIE_POLYVALENTE_VOCATIONS[:] = [str(x) for x in v["MAGIE_POLYVALENTE_VOCATIONS"]]
+	COMPETENCE_COUT_COEFF = max(0, int(v.get("COMPETENCE_COUT_COEFF", COMPETENCE_COUT_COEFF)))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):
 		BOIS_A_COUPER[:] = [str(x) for x in v["BOIS_A_COUPER"]]

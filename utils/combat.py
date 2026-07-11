@@ -142,9 +142,10 @@ def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
 
 def _refresh_actions(actor: dict) -> None:
 	"""Recalcule actions_restantes = actions_max - attaques - ramassages - consommations
-	- sorts - AP_déplacement."""
+	- sorts - compétences - AP_déplacement."""
 	used = (actor.get("attaques", 0) + actor.get("ramasses", 0)
 			+ actor.get("consommes", 0) + actor.get("sorts", 0)
+			+ actor.get("competences", 0)
 			+ _move_ap_used_for(actor, actor.get("cells_moved", 0)))
 	actor["actions_restantes"] = max(0, actor["actions_max"] - used)
 
@@ -156,6 +157,7 @@ def _reset_turn_budget(actor: dict) -> None:
 	actor["ramasses"] = 0
 	actor["consommes"] = 0
 	actor["sorts"] = 0
+	actor["competences"] = 0
 	actor["actions_restantes"] = actor["actions_max"]
 
 
@@ -598,6 +600,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"ramasses": 0,
 		"consommes": 0,
 		"sorts": 0,
+		"competences": 0,
 		"butin_ramasse": [],   # références {item, poids} des carcasses ramassées en combat
 	}
 
@@ -947,6 +950,7 @@ def resolve_action(
 	combat_doc: dict, action_type: str, cible_id: str | None = None,
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
 	mode: str | None = None, item: dict | None = None, sort: dict | None = None,
+	competence: dict | None = None,
 ) -> dict:
 	ordre = combat_doc["ordre_initiative"]
 	actor_id = ordre[combat_doc["acteur_courant_index"]]
@@ -1306,6 +1310,114 @@ def resolve_action(
 			result["charge"] = joueur["charge"]
 		result["currentPM"] = joueur["currentPM"]
 		joueur["sorts"] = joueur.get("sorts", 0) + 1
+		_refresh_actions(joueur)
+		_check_victory(combat_doc)
+
+	elif action_type == "competence":
+		# Utiliser une compétence ACTIVE connue, coûte 1 action + cout_pm PM (souvent 0 :
+		# une compétence martiale ne consomme pas de magie). Le router injecte la compétence
+		# normalisée. Comme pour les sorts et les consommables, seule la part INSTANTANÉE
+		# (degats/pv/pm) s'applique en combat : la part buffs/durée est perdue (pas de tick
+		# en combat). Les compétences PASSIVES n'arrivent jamais ici — leur bonus est déjà
+		# intégré au snapshot (competences_bonus → caracts_avec_buffs).
+		if not competence:
+			return {"error": "Compétence invalide."}
+		effets = competence.get("effets") or {}
+		cout_pm = max(0, int(competence.get("cout_pm", 0) or 0))
+		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")):
+			return {"error": "Cette compétence n'a aucun effet utilisable en combat."}
+		if joueur["currentPM"] < cout_pm:
+			return {"error": "PM insuffisants."}
+
+		nom = competence.get("nom", "une compétence")
+		if competence.get("cible") == "ennemi":
+			if not effets.get("degats"):
+				return {"error": "Cette compétence n'inflige aucun dégât."}
+			monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
+			if not monstre or not monstre["vivant"]:
+				return {"error": "Cible invalide."}
+			comp_portee = max(1, int(competence.get("portee", 1) or 1))
+			# Portée > 1 = règles à distance (jet/tir/sort) : interdit si engagé au corps à
+			# corps, et exige une ligne de vue.
+			if comp_portee > 1:
+				if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
+					return {"error": "Un ennemi vous menace au corps à corps : impossible."}
+				if not _line_of_sight(grid["cells"], joueur["pos"]["x"], joueur["pos"]["y"],
+									   monstre["pos"]["x"], monstre["pos"]["y"]):
+					return {"error": "Ligne de vue obstruée."}
+			if _cheby(joueur, monstre) > comp_portee:
+				return {"error": "Cible hors de portée."}
+
+			# La compétence part : PM débités AVANT le jet (raté = PM quand même dépensés).
+			joueur["currentPM"] -= cout_pm
+			# Le jet est porté par la DONNÉE : une frappe martiale se résout sous cc/cd contre
+			# l'Ag de la cible (PA soustraits comme une attaque d'arme) ; une compétence
+			# magique se résout sous toucher_magique contre la pm_def (sans soustraction de PA,
+			# l'armure physique n'arrête pas la magie).
+			jet = competence.get("jet", "cc")
+			if jet == "magique":
+				seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
+			else:
+				skill = joueur["cd"] if jet == "cd" else joueur["cc"]
+				seuil = _hit_threshold(skill, monstre.get("ag", 0))
+			roll = random.randint(1, 100)
+			if roll <= seuil:
+				degats_bruts = roll_dice(effets["degats"])
+				dmg = max(1, degats_bruts if jet == "magique" else degats_bruts - monstre["pa"])
+				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
+				if monstre["currentPV"] <= 0:
+					monstre["vivant"] = False
+					combat_doc["log"].append({
+						"tour": combat_doc["tour"],
+						"acteur": joueur["nom"],
+						"kind": "kill",
+						"texte": f"{joueur['nom']} utilise {nom} et élimine {monstre['nom']} !",
+					})
+				else:
+					combat_doc["log"].append({
+						"tour": combat_doc["tour"],
+						"acteur": joueur["nom"],
+						"kind": "hit",
+						"texte": (
+							f"{joueur['nom']} utilise {nom} : {monstre['nom']} subit {dmg} dégâts ! "
+							f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
+						),
+					})
+				result = {"competence": nom, "hit": True, "dmg": dmg,
+						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
+			else:
+				combat_doc["log"].append({
+					"tour": combat_doc["tour"],
+					"acteur": joueur["nom"],
+					"kind": "miss",
+					"texte": (
+						f"{joueur['nom']} utilise {nom} sur {monstre['nom']}"
+						f" mais manque son coup ! (jet {roll} / seuil {seuil})"
+					),
+				})
+				result = {"competence": nom, "hit": False, "roll": roll, "seuil": seuil}
+		else:
+			# Compétence sur soi : toujours utilisable ; débit PM puis part instantanée clampée.
+			joueur["currentPM"] -= cout_pm
+			avant_pv, avant_pm = joueur["currentPV"], joueur["currentPM"]
+			joueur["currentPV"] = min(joueur["pv_max"], avant_pv + int(effets.get("pv", 0) or 0))
+			joueur["currentPM"] = min(joueur["pm_max"], avant_pm + int(effets.get("pm", 0) or 0))
+			pv_rendu = joueur["currentPV"] - avant_pv
+			pm_rendu = joueur["currentPM"] - avant_pm
+			gains = " / ".join(s for s in (
+				f"+{pv_rendu} PV" if pv_rendu else "",
+				f"+{pm_rendu} PM" if pm_rendu else "",
+			) if s) or "aucun effet"
+			combat_doc["log"].append({
+				"tour": combat_doc["tour"],
+				"acteur": joueur["nom"],
+				"kind": "sys",
+				"texte": f"{joueur['nom']} utilise {nom} ({gains}).",
+			})
+			result = {"competence": nom, "pv_rendu": pv_rendu, "pm_rendu": pm_rendu}
+
+		result["currentPM"] = joueur["currentPM"]
+		joueur["competences"] = joueur.get("competences", 0) + 1
 		_refresh_actions(joueur)
 		_check_victory(combat_doc)
 

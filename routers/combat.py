@@ -11,6 +11,9 @@ from utils.sorts import (
     normaliser_sort, sort_utilisable_combat, composants_etat, effets_effectifs,
     liste_sorts_payload,
 )
+from utils.competences import (
+    normaliser_competence, competence_utilisable_combat, liste_competences_payload,
+)
 from routers.user import _take_ref
 from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity
 from utils import focalisation
@@ -90,6 +93,8 @@ class ActionRequest(BaseModel):
     # Action « sort » : id du sort + composants à engager (ids item, re-vérifiés serveur).
     sort_id: str | None = None
     composants: list[str] = []
+    # Action « competence » : id de la compétence active (re-vérifiée serveur).
+    competence_id: str | None = None
 
 
 class CollectLootRequest(BaseModel):
@@ -337,7 +342,21 @@ async def combat_action(
             "poids_consommes": round(poids_consommes, 2),
         }
 
-    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg)
+    # Action « compétence » : re-vérifiée serveur (connue + active + utilisable en combat).
+    # Bien plus simple qu'un sort : aucun composant, donc aucune mutation d'inventaire. Les PM
+    # vivent sur le snapshot du combat et sont réécrits sur le personnage par finalize_combat.
+    competence_arg = None
+    if body.type == "competence":
+        character = get_doc(combat_doc["character_id"])
+        if not character:
+            raise HTTPException(status_code=404, detail="Personnage introuvable")
+        if body.competence_id not in (character.get("competences_connues") or []):
+            raise HTTPException(status_code=422, detail="Compétence inconnue du personnage")
+        competence_arg = normaliser_competence(get_doc(body.competence_id))
+        if competence_arg is None or not competence_utilisable_combat(competence_arg):
+            raise HTTPException(status_code=422, detail="Compétence inutilisable en combat")
+
+    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg, competence=competence_arg)
 
     # Persist the combat state first (source of truth). couchdb2 met à jour le
     # _rev en place ; un échec (conflit 409) renvoie None → on prévient le client

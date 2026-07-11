@@ -1543,20 +1543,13 @@
 						<div id="sh-sorts-magies"></div>
 						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
 						<div id="sh-sorts-apprenables"></div>
+						{# Compétences : mêmes règles que les sorts, rendues 100 % côté client
+						   depuis _competences / _competencesApprenables — resync après
+						   utiliser/apprendre. #}
 						<div class="sh-section" style="margin-top:14px">⚡ Compétences</div>
-						{% set comps = character.get("competences",[]) %}
-						{% if comps %}
-							{% for c in comps %}
-							<div class="sh-skill">
-								<span class="sh-skill-icon">{{ c.get("icon","⚡") }}</span>
-								<div class="sh-skill-info">
-									<div class="sh-skill-name">{{ c.get("nom","—") }}</div>
-									<div class="sh-skill-desc">{{ c.get("description","") }}</div>
-								</div>
-								{% if c.get("niveau") %}<span class="sh-skill-lvl">{{ c.niveau }}/5</span>{% endif %}
-							</div>
-							{% endfor %}
-						{% else %}<div class="sh-empty"><span class="sh-empty-icon">⚡</span>Aucune compétence apprise.</div>{% endif %}
+						<div id="sh-competences-connues"></div>
+						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
+						<div id="sh-competences-apprenables"></div>
 					</div>
 
 					<!-- ── RELATIONS ── -->
@@ -3326,6 +3319,106 @@ async function apprendreSort(sortId, btn) {
 	} catch(err) { console.error('Erreur apprentissage', err); if (btn) btn.disabled = false; }
 }
 
+// ── Compétences (onglet ⚡) ───────────────────────────────────────────
+// Miroir des sorts : connues (passives = bonus permanent, actives = bouton Utiliser si
+// utilisable hors combat) + apprenables (coût en points, niveau de vocation). Rendues
+// client, resynchronisées par les réponses de utiliser_competence / apprendre_competence.
+let _competences            = {{ competences | tojson | safe }};
+let _competencesApprenables = {{ competences_apprenables | tojson | safe }};
+
+function _renderCompetences(list) {
+	if (Array.isArray(list)) _competences = list;
+	const box = document.getElementById('sh-competences-connues');
+	if (!box) return;
+	if (!_competences.length) {
+		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">⚡</span>Aucune compétence apprise.</div>';
+		return;
+	}
+	box.innerHTML = _competences.map(c => {
+		// Une passive n'a pas d'action : son bonus est permanent (inclus dans les dérivées).
+		const actions = c.mode === 'passive'
+			? '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>'
+			: (c.utilisable
+				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
+				: '<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>');
+		const pm = c.cout_pm ? `<span class="sh-sort-pm">${c.cout_pm} PM</span>` : '';
+		const portee = (c.mode === 'active' && c.cible === 'ennemi') ? ` · portée ${c.portee}` : '';
+		return `<div class="sh-skill">
+			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
+			<div class="sh-skill-info">
+				<div class="sh-skill-name">${c.nom}${pm}</div>
+				<div class="sh-skill-desc">${c.description || ''}</div>
+				<div class="sh-skill-desc">${_sortEffetsLabel(c.effets)}${portee}</div>
+			</div>
+			<div class="sh-inv-actions">${actions}</div>
+		</div>`;
+	}).join('');
+}
+
+function _renderCompetencesApprenables(list) {
+	if (Array.isArray(list)) _competencesApprenables = list;
+	const box = document.getElementById('sh-competences-apprenables');
+	if (!box) return;
+	if (!_competencesApprenables.length) {
+		box.innerHTML = '<div class="sh-empty"><span class="sh-empty-icon">📖</span>Aucune compétence à apprendre pour l\'instant.</div>';
+		return;
+	}
+	box.innerHTML = _competencesApprenables.map(c => {
+		const ok = _attributePoints >= c.cout_points;
+		const tag = c.mode === 'passive' ? '🛡 Passive' : '⚡ Active';
+		return `<div class="sh-skill">
+			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
+			<div class="sh-skill-info">
+				<div class="sh-skill-name">${c.nom}<span class="sh-skill-lvl">${tag}</span></div>
+				<div class="sh-skill-desc">Niv. ${c.niveau} · ${_sortEffetsLabel(c.effets)}</div>
+			</div>
+			<div class="sh-inv-actions">
+				<button type="button" class="sh-drop-btn" onclick="apprendreCompetence('${c.id}', this)" ${ok ? '' : 'disabled'}>Apprendre (${c.cout_points} pts)</button>
+			</div>
+		</div>`;
+	}).join('');
+}
+
+async function utiliserCompetence(competenceId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
+	try {
+		const res = await fetch('api/utiliser_competence', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ competence_id: competenceId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		updateVitals(data.vitals);
+		_renderEffetsActifs(data.effets_actifs);
+		_renderCompetences(data.competences);
+		const u = data.utilisee || {};
+		const gains = [];
+		if (u.pv_rendu) gains.push(`+${u.pv_rendu} PV`);
+		if (u.pm_rendu > 0) gains.push(`+${u.pm_rendu} PM`);
+		if (u.effet) gains.push(`effet actif ${u.effet.restants} tours`);
+		showToast(`${u.icon || '⚡'} ${u.nom || 'Compétence utilisée'}${gains.length ? ' : ' + gains.join(', ') : ''}`);
+	} catch(err) { console.error('Erreur compétence', err); if (btn) btn.disabled = false; }
+}
+
+async function apprendreCompetence(competenceId, btn) {
+	if (btn) btn.disabled = true;
+	try {
+		const res = await fetch('api/apprendre_competence', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ competence_id: competenceId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		_syncPoints(data.attribute_points);
+		_renderCompetences(data.competences);
+		_renderCompetencesApprenables(data.competences_apprenables);
+		// Une passive apprise relève les dérivées (donc les max PV/PM) immédiatement.
+		if (data.vitals) updateVitals(data.vitals);
+		const a = data.appris || {};
+		showToast(`${a.icon || '⚡'} ${a.nom || 'Compétence'} apprise !`);
+	} catch(err) { console.error('Erreur apprentissage compétence', err); if (btn) btn.disabled = false; }
+}
+
 // Toggle épinglage d'un sort en accès rapide (persisté sur le personnage).
 async function epinglerSort(sortId, btn) {
 	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
@@ -3432,6 +3525,8 @@ _renderEffetsActifs(_effetsActifs);
 _renderSorts();
 _renderSortsMagies();
 _renderSortsApprenables();
+_renderCompetences();
+_renderCompetencesApprenables();
 
 // ── Vente au marchand ────────────────────────────────────────────────
 function formatPrix(prix) {

@@ -24,6 +24,7 @@ from utils import quetes
 from utils import bois
 from utils import consommables
 from utils import sorts as sorts_util
+from utils import competences as competences_util
 from utils import focalisation
 from utils import pnj as pnj_util
 from utils import intro as intro_util
@@ -448,6 +449,9 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 			# + sorts niveau 0 par vocation (id, nom, icon, description).
 			"sort_vocations_depart": list(character_stats.SORT_VOCATIONS_DEPART),
 			"sorts_depart": sorts_util.sorts_depart_par_vocation(find_docs),
+			# Compétences niveau 0 par vocation : les vocations HORS sort_vocations_depart
+			# choisissent une compétence à la place du sort (complément exact, dérivé client).
+			"competences_depart": competences_util.competences_depart_par_vocation(find_docs),
 		}
 	)
 	
@@ -699,6 +703,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"sorts_apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
 			"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
 			"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
+			# Compétences (même onglet ⚡) : connues (passives + actives, drapeau `utilisable`
+			# hors combat) + apprenables — resynchronisées par utiliser/apprendre côté client.
+			"competences": competences_util.liste_competences_payload(character, get_doc, "exploration"),
+			"competences_apprenables": competences_util.competences_apprenables(character, find_docs),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.
@@ -752,6 +760,9 @@ async def get_combat_page(
 			# Sorts épinglés en accès rapide (icônes directement cliquables de la barre
 			# d'action) — sous-ensemble ordonné des sorts connus.
 			"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
+			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm) —
+			# les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
+			"competences": competences_util.liste_competences_payload(character, get_doc, "combat"),
 		},
 		headers={"Cache-Control": "no-store"},
 	)

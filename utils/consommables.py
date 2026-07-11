@@ -56,12 +56,25 @@ def effet_instantane(item_doc) -> bool:
 	return eff["pv"] > 0 or eff["pm"] > 0
 
 
+def _sources_de_buffs(character: dict) -> list:
+	"""Toutes les sources de buffs/régén d'un personnage, au même format {buffs, regen_*} :
+	les effets actifs TEMPORAIRES (consommables, sorts — décrémentés au tour monde) et le
+	bonus PERMANENT des compétences passives (`competences_bonus`, dénormalisé par
+	utils/competences.recompute_competences_bonus). Chokepoint unique : tout ce qui buffe
+	un personnage passe ici, donc par caracts_avec_buffs/regen_bonus."""
+	character = character or {}
+	sources = list(character.get("effets_actifs") or [])
+	passif = character.get("competences_bonus")
+	if passif:
+		sources.append(passif)
+	return sources
+
+
 def caracts_avec_buffs(character: dict) -> dict:
-	"""COPIE de caracteristiques_current + somme des buffs actifs (clamp ≥ 0). N'applique
-	que les caracts déjà présentes, et jamais V (échelle 1-10, incompatible avec des
-	deltas ×10)."""
+	"""COPIE de caracteristiques_current + somme des buffs (clamp ≥ 0). N'applique que les
+	caracts déjà présentes, et jamais V (échelle 1-10, incompatible avec des deltas ×10)."""
 	caracts = dict((character or {}).get("caracteristiques_current") or {})
-	for eff in (character or {}).get("effets_actifs") or []:
+	for eff in _sources_de_buffs(character):
 		for k, delta in (eff.get("buffs") or {}).items():
 			if k == "V" or k not in caracts:
 				continue
@@ -73,9 +86,10 @@ def caracts_avec_buffs(character: dict) -> dict:
 
 
 def regen_bonus(character: dict) -> tuple[int, int]:
-	"""(Σ regen_pv, Σ regen_pm) des effets actifs — s'ajoute à la régén naturelle."""
+	"""(Σ regen_pv, Σ regen_pm) des effets actifs et des passives — s'ajoute à la régén
+	naturelle."""
 	pv = pm = 0
-	for eff in (character or {}).get("effets_actifs") or []:
+	for eff in _sources_de_buffs(character):
 		pv += _as_int(eff.get("regen_pv"))
 		pm += _as_int(eff.get("regen_pm"))
 	return pv, pm

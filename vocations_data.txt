@@ -1,0 +1,649 @@
+[
+    {
+      "id": "guerrier",
+      "label": "Guerrier",
+      "magie": "",
+      "blurb": "Maître des armes blanches. Robuste, polyvalent, le pilier de toute troupe.",
+	  "Chemins de vocation": "Niveau 3 : Chevalier, ces guerriers ont compris que pour survivre une bonne armure était très efficace. Ils ont donc une grande habitude de les porter = +1 en Ag d’un malus de n'importe quelle armure, ne peut pas devenir un bonus.
+
+Niveau 3 : Stratège, des chefs-nés que les plus lâches suivent jusqu’à la mort = annule la panique et ou le moral sur un jet de ralliement réussi.
+
+Niveau 3 : Mercenaire, ces guerriers savent s’adapter à toutes les formes de combat. Ils peuvent tirer à l’arc, parer avec un bouclier puis frapper d’un coup de hache à 2 mains dans un même rd. = ils ne perdent pas d’A pour changer d’armes en cours de combat.
+
+Niveau 5 : Protecteur, les cicatrices de ces guerriers se comptent par dizaines et démontrent leur faculté surhumaine à encaisser les coups = +5 PV au-dessus du maximum.
+
+Niveau 5 : Seigneur de guerre, ce sont les maîtres dans l’art de donner des ordres et de commander des armées, ils ont appris à se faire entendre = triple le bonus de Sf à la compétence de commandement.
+
+Niveau 5 : Mastodonte, ces guerriers ont une force et une technique si grande qu’ils ont la capacité de porter des armes lourdes dans une seule main = ils peuvent manier une arme à 2 mains dans une main."
+    },
+    {
+      "id": "barbare",
+      "label": "Barbare",
+      "magie": "",
+      "blurb": "Guerrier des steppes, mu par la rage. Sa furie est une ressource redoutable.",
+	  "Chemins de vocation":	"Niveau 3 : Berserker, ce sont des véritables taureaux lorsqu’ils se jettent dans la bataille, ils gagnent ainsi une facilité à devenir frénétique = ils peuvent ajouter leur modificateur de Vol à leur compétence de frénésie.
+
+Niveau 3 : Gladiateur, habitués des combats, se battant pour survivre, ils savent rendre efficace les armes les plus simples = annule 1 échec critique par rd en contact (le transforme en échec).
+
+Niveau 3 : Conquérant, fiers sont ces barbares qui écument les mers et parcourent les contrées. Ils ont appris à survivre dans les conditions les plus difficiles = ils doublent le nombre de PV récupérés chaque jour naturellement (par la R).
+
+Niveau 5 : Annonce de sang, les barbares qui pratiquent la frénésie ont parfois atteints un niveau supérieur de fureur guerrière, on les surnomme alors « Annonces de sang » = entre en spasme de furie sur une réussite critique du jet de Frénésie.
+
+Niveau 5 : Vétéran, vieux roublard des combats, ces rares barbares qui ont réussi à survivre après d’innombrables batailles, ont appris à se battre dans n’importe quelle situation = pas de malus pour toucher due aux modificateurs de situation ou aux arts de combats.
+
+Niveau 5 : Danseur de guerre, ils adoptent une sorte de transe pour se battre qui les rend particulièrement résistant aux blessures = chaque jour ils ignorent la première blessure subie (mais pas la perte de PV engendrée !)."
+    },
+    {
+      "id": "forestier",
+      "label": "Forestier",
+      "magie": "",
+      "blurb": "Chasseur et éclaireur hors pair. Il connaît les routes que les cartes n'indiquent pas.",
+	  "Chemins de vocation": "Niveau 3 : Pisteur, ces forestiers ont l’œil du faucon, l’oreille du loup et le nez du chien = +1 en Sens au-dessus du maximum.
+
+Niveau 3 : Franc-archer, ces forestiers habitués des batailles ont appris à ne pas toucher leur compagnon dans la mêlée = annule un échec critique par round lors d'une attaque à distance (le transforme en échec).
+
+Niveau 3 : Rôdeur, ce sont des guides qui parcourent les terres les plus hostiles, ils sont habitués aux escarmouches et aux combats rapprochés= ils sont ambidextres et peuvent donc manier 2 armes à une main sans malus.
+
+Niveau 5 : Eclaireur, la faculté de ce type de forestier à déniché le moindre indice, à suivre les pistes les plus effacées et à se repérer au milieu des dunes de sable frôle la sorcellerie = critique sur 9+ pour les compétences sensorielles.
+
+Niveau 5 : Tireur d’élite, un tir effectuer par ces personnages est quasiment tout le temps entre les deux yeux = une touche à distance par round est transformée en réussite critique.
+
+Niveau 5 : Chasseur de monstres, ces forestiers se sont spécialisés dans la chasse aux monstres. Ils ne craignent pas l’effroi que provoque ces créatures = ils sont immunisés à la psychologie des monstres mythologiques."
+    },
+    {
+      "id": "duelliste",
+      "label": "Duelliste",
+      "magie": "",
+      "blurb": "Escrimeur élégant. Sa précision chirurgicale compense l'absence de robustesse.",
+	  "Chemins de vocation": "Niveau 3 : Gentilhomme, aristocrate dans l’âme ces duellistes se battent plus souvent à la cour des rois qu’en duel = double le bonus de Cha dans les compétences sociales.
+
+Niveau 3 : Mousquetaire, ce sont des experts dans le maniement des armes. Ils ont appris à exploiter au mieux les techniques martiales = +1 dans une compétence d’armes (y compris art de combat) au-dessus du maximum.
+
+Niveau 3 : Garde, ce sont les champions implacables ou les gardes du corps dévoués de notables. Ils ne reculeraient jamais devant un combat difficile = ils gagnent +2 en résistance au moral et à la panique.
+
+Niveau 5 : Seigneur, véritable icône pour certaines personnes, ces duellistes inspirent une admiration tel qu’un bandit hésiterait à les détrousser de leurs biens = inspire « respect » égal au Cha du perso aux humanoïdes jouables.
+
+Niveau 5 : Maître d’armes, ces duellistes ne font plus qu’un avec leur arme de prédilection qui devient un prolongement de leur bras = +1 ou –1 au choix dans deux modificateurs de caractéristique différents d’une arme (excepté Dé pour les armes de distance).
+
+Niveau 5 : Exécuteur, ces duellistes sont de vrais chirurgiens du combat. Ils savent placer leur coups pour infliger la blessure souhaitée = ils peuvent lors d’un jet de blessure, en choisir l’effet. Ils peuvent utiliser cette aptitude 3 fois par aventure et elle doit être déclarée avant le jet de blessure."
+    },
+    {
+      "id": "moine",
+      "label": "Moine",
+      "magie": "",
+      "blurb": "Corps comme arme, esprit comme bouclier. Énergie intérieure rare.",
+	  "Chemins de vocation": "Niveau 3 : Vagabond, ce sont des voyageurs habitués à se défendre qui savent réagir avec la rapidité du chat = ils frappent toujours en premier contre un adversaire qui utilise corps à corps (et arts de combat liés), si les deux personnages ont cette aptitude la règle de l’Ag s’applique.
+
+Niveau 3 : Sage, calme et réfléchi l’esprit de ces moines se trouble très rarement = +2 en résistance à la folie et à la débilité.
+
+Niveau 3 : Pèlerin, ces moines voyagent à travers le monde avec comme seule arme leur bâton. Ils peuvent s’en servir tel un bouclier = lorsqu’il se battent avec un bâton, ils ont la possibilité de parer les projectiles magiques et ils gagnent +1 PA/tir.
+
+Niveau 5 : Légende, les poings et les pieds de ces moines sont si puissants que certaines légendes racontent qu’ils déchirent les étoiles et fendent la roche = réussite critique 9+ sous corps à corps (et arts de combat liés).
+
+Niveau 5 : Sensei, la sagesse de ces êtres les rendent aussi paisible que la montagne = +1 en Sf au-dessus du maximum.
+
+Niveau 5 :Ascète, ces moines peuvent survivre sans boire, manger ou dormir. Leur seule méditation suffit. = ils gagnent +3 en résistance à la maladie, l’ivresse et à la faiblesse."
+    },
+    {
+      "id": "elementaliste",
+      "label": "Élémentaliste",
+      "magie": "Élémentaire",
+      "blurb": "Maître du feu, glace, foudre. Ses sorts exigent des composants physiques puissants.",
+	  "Chemins de vocation": "Niveau 3 : Mage, l’expérience de ces sorciers leur permet de contrôler au mieux les erreurs dans les rituels magiques les plus complexes = annule un échec critique lors d’un sort par rd.
+
+Niveau 3 : Arcaniste, la compréhension des arcanes magiques renfermés dans les parchemins n’est plus un secret pour ces sorciers = double le bonus de Vol pour la compétence lecture de parchemins.
+
+Niveau 3 : Conjurateur, les sorciers conjurateurs ont la capacité de puiser dans leur volonté la puissance nécessaire pour lancer des sorts qui épuiseraient la plupart des magiciens = ils peuvent relancer un sort « à limite de fois (par rd., jour, aventure…)». Ils peuvent utiliser cette aptitude 3 fois par aventure.
+
+Niveau 5 : Archimage, leur maîtrise des pouvoirs de la nature les rendent terriblement dangereux = +2 à la force et l’activation d’un effet de la nature au choix.
+
+Niveau 5 : Nexus, véritable nœud dans la circulation des forces magiques, ces adeptes de la maîtrise du drain magique peuvent posséder une quantité de magie extraordinaire = +1D de PM au-dessus du maximum.
+
+Niveau 5 : Invocateur, ils se sont voués à la maîtrise des invocations. Par leur seule force mentale ils arrivent en contrôler plusieurs à la fois = ils peuvent utiliser 2 sorts d’invocation simultanément. Ils peuvent utiliser cette aptitude 2 fois par aventure."
+    },
+    {
+      "id": "mage",
+      "label": "Magicien de combat",
+      "magie": "Bataille",
+      "blurb": "La magie au service de la guerre. Enchantements d'armes, boucliers arcaniques.",
+	  "Chemins de vocation": "Niveau 3 : Mage, l’expérience de ces sorciers leur permet de contrôler au mieux les erreurs dans les rituels magiques les plus complexes = annule un échec critique lors d’un sort par rd.
+
+Niveau 3 : Arcaniste, la compréhension des arcanes magiques renfermés dans les parchemins n’est plus un secret pour ces sorciers = double le bonus de Vol pour la compétence lecture de parchemins.
+
+Niveau 3 : Conjurateur, les sorciers conjurateurs ont la capacité de puiser dans leur volonté la puissance nécessaire pour lancer des sorts qui épuiseraient la plupart des magiciens = ils peuvent relancer un sort « à limite de fois (par rd., jour, aventure…)». Ils peuvent utiliser cette aptitude 3 fois par aventure.
+
+Niveau 5 : Archimage, leur maîtrise des pouvoirs de la nature les rendent terriblement dangereux = +2 à la force et l’activation d’un effet de la nature au choix.
+
+Niveau 5 : Nexus, véritable nœud dans la circulation des forces magiques, ces adeptes de la maîtrise du drain magique peuvent posséder une quantité de magie extraordinaire = +1D de PM au-dessus du maximum.
+
+Niveau 5 : Invocateur, ils se sont voués à la maîtrise des invocations. Par leur seule force mentale ils arrivent en contrôler plusieurs à la fois = ils peuvent utiliser 2 sorts d’invocation simultanément. Ils peuvent utiliser cette aptitude 2 fois par aventure."
+    },
+    {
+      "id": "illusionniste",
+      "label": "Illusionniste",
+      "magie": "Illusoire",
+      "blurb": "Manipulateur de perceptions. Ses illusions peuvent détourner des armées.",
+	  "Chemins de vocation": "Niveau 3 : Mage, l’expérience de ces sorciers leur permet de contrôler au mieux les erreurs dans les rituels magiques les plus complexes = annule un échec critique lors d’un sort par rd.
+
+Niveau 3 : Arcaniste, la compréhension des arcanes magiques renfermés dans les parchemins n’est plus un secret pour ces sorciers = double le bonus de Vol pour la compétence lecture de parchemins.
+
+Niveau 3 : Conjurateur, les sorciers conjurateurs ont la capacité de puiser dans leur volonté la puissance nécessaire pour lancer des sorts qui épuiseraient la plupart des magiciens = ils peuvent relancer un sort « à limite de fois (par rd., jour, aventure…)». Ils peuvent utiliser cette aptitude 3 fois par aventure.
+
+Niveau 5 : Archimage, leur maîtrise des pouvoirs de la nature les rendent terriblement dangereux = +2 à la force et l’activation d’un effet de la nature au choix.
+
+Niveau 5 : Nexus, véritable nœud dans la circulation des forces magiques, ces adeptes de la maîtrise du drain magique peuvent posséder une quantité de magie extraordinaire = +1D de PM au-dessus du maximum.
+
+Niveau 5 : Invocateur, ils se sont voués à la maîtrise des invocations. Par leur seule force mentale ils arrivent en contrôler plusieurs à la fois = ils peuvent utiliser 2 sorts d’invocation simultanément. Ils peuvent utiliser cette aptitude 2 fois par aventure."
+    },
+    {
+      "id": "lettre",
+      "label": "Lettré",
+      "magie": "Illusoire",
+      "blurb": "Érudit universel capable d'apprendre n'importe quel type de magie.",
+	  "Chemins de vocation": "Niveau 3 : Ingénieur, un objet créer par ces lettrés ne marche pas toujours mais n’est jamais raté = annule un échec critique en fabrication (le transforme en échec).
+
+Niveau 3 : Erudit, leur faculté à apprendre leur permet d’assimiler le savoir plus vite que les autres = +10% de PEX à chaque aventure.
+
+Niveau 3 : Alchimiste, ce sont des lettrés versés dans l’art de la fabrication des potions magiques. Ils savent concocter les filtres les plus puissants = ils doublent le bonus d’Ag pour la compétence Potions (Fabrications).
+
+Niveau 5 : Génie, leur intelligence impressionnerait les plus grands savants = +1 en Int au-dessus du maximum.
+
+Niveau 5 : Maître artisan, ils créent des chefs d’œuvre avec une facilité déconcertante = réussite critique sur 9+ pour les compétences de fabrications.
+
+Niveau 5 : Enchanteur, ils ont créé les plus puissant objets magiques de ce monde. Seules les dieux peuvent prétendre mieux = ils triplent le bonus d’Ag pour la compétence Objets magiques (Fabrications)."
+    },
+    {
+      "id": "druide",
+      "label": "Druide",
+      "magie": "Nature",
+      "blurb": "Gardien des cycles naturels. Les animaux lui obéissent, les plantes l'écoutent.",
+	  "Chemins de vocation":"Niveau 3 : Belluaire, ces druides sont si proche des animaux que ceux-ci ne l’attaqueraient pas même poussés par une faim de loup = inspire « respect » égale à Vol du personnage aux animaux et aux montures.
+
+Niveau 3 : Ermite, habitué à vivre dans des conditions hostiles, ces druides sont particulièrement résistant aux maladies = +2 en résistance à la maladie et à la faiblesse.
+
+Niveau 3 : Chasseur, ces druides sont des experts pour abattre des proies. Ils manient parfaitement les armes traditionnelles de la chasse = ils gagnent 1A supplémentaire par rd. à distance avec les arcs, les frondes, les javelots et les lances.
+
+Niveau 5 : Dompteur de monstres, ils sont les maîtres pour dompter les monstres. Ils sont capables d’apprivoiser un griffon ou d’être lié d’amitié à un dragon empereur par leur force de persuasion et leur empathie = triple le bonus de Vol pour le modificateur d’emprise sur les animaux contre les monstres mythologiques.
+
+Niveau 5 : Fils de la nature, ces druides ont atteint un état de symbiose avec la nature qui le leur rend bien = +2 en résistance totale.
+
+Niveau 5 : Homme-tempête, ils se sont voués à la maîtrise des éléments du ciel = ils gagnent les sorts Foudre, Aiguilles de glace et Avalanche de magie de Bataille."
+    },
+    {
+      "id": "chaman",
+      "label": "Chaman",
+      "magie": "Nature",
+      "blurb": "Se métamorphose en esprit totem: Ours, Loup, Sanglier, Chat sauvage ou Faucon.",
+	  "Chemins de vocation": "Niveau 3 : Métamorphe, ils sont experts dans les métamorphoses et savent mieux que quiconque palier aux faiblesses des esprits avec lesquels ils fusionnent = -1 dans un des malus de transformation dans une caractéristique.
+
+Niveau 3 : Médium, le lien que tisse un médium avec un type d’esprit totem est si fort qu’il lui facilite grandement son invocation = -1 PM pour invoquer un type d’esprit totem.
+
+Niveau 3 : Onirologue, leur longues conversation avec les esprits leur permet de percer les secrets du réel. = ils gagnent un bonus de +1 en Vol., en Int. et en Vol. contre tous les sorts faisant un test de difficulté sous ces caractéristiques.
+
+Niveau 5 : Homme bête, le chaman entre en symbiose avec un esprit et celui-ci n’est plus un compagnon mais fait parti intégrante du chaman = un esprit totem (type et niveau) devient lié au personnage et n’a plus besoin d’être invoqué (il vit à l’intérieur du personnage).
+
+Niveau 5 : Gardien des esprits, la faculté de ce chaman a contrôlé les esprits totem est si impressionnante qu’il est capable d’en contrôler plus que n’importe quel autre chaman = +1 esprit invocable par jour.
+
+Niveau 5 : Ancien, ces chamans ont lié un lien avec d’antiques esprits totems tels que le mammouth, le tigre à dents de sabre ou le grand saurien = ils peuvent appeler un et un seul Esprit Antique pour se métamorphoser. Celui-ci est compte comme 2 esprits (dans le nombre maximum d’invocation par jour) et coûte 30 PM."
+    },
+    {
+      "id": "pretre",
+      "label": "Prêtre",
+      "magie": "Sainte",
+      "blurb": "Guérisseur indispensable. Peut ressusciter les tombés au combat.",
+	  "Chemins de vocation": "Niveau 3 : Guérisseur, ils savent comment améliorer n’importe quel soin qu’il soit naturel ou magique = +1 PV sur tous les soins (sorts et traumatologie).
+
+Niveau 3 : Clerc, les heures passées à lire et retranscrire des piles de livres, leur offre une faculté supérieure à apprendre le savoir contenu dans les grimoires = double le bonus d’Int pour la compétence alphabétisation.
+
+Niveau 3 : Augure, ils possèdent un don de voyance qui leur permet de mieux connaître la roue du destin = ils gagnent +1 en Ch. au dessus du maximum. En cas de perte de point(s) de Ch. au cours d’une aventure, ils gagnent automatiquement 1 point de Ch. à la fin de l’aventure.
+
+Niveau 5 : Thaumaturge, leur soin sont quasi-miraculeux, tant le nombre de gens qu’ils ont soignés et qui sont morts sur la table d’opération se compte sur les doigts d’une main = ne peut enlever des PV ou blesser lors d’échec sous chirurgie et traumatologie (sauf pour des échecs critiques qui deviennent des échecs simples).
+
+Niveau 5 : Prophète, leur aura de bienfaisance irradie tous ceux qui les suivent = double le bonus de Cha pour son aptitude de vocation (affecte ses compagnons).
+
+Niveau 5 : Oracle, leur prédictions sont complexes à décrypter mais s’avèrent souvent exactes = ils gagnent ou font gagner à un de leur amis présents 1 réussite automatique (à déclarer en tout début de rd.). Ils peuvent l’utiliser cette aptitude 3 fois par aventure."
+    },
+    {
+      "id": "paladin",
+      "label": "Paladin",
+      "magie": "Sainte",
+      "blurb": "Guerrier sacré. Sa lame brûle d'une lumière que les morts-vivants redoutent.",
+	  "Chemins de vocation": "Niveau 3 : Champion, ils se sont spécialisés dans le combat contre les morts-vivants, ils savent mieux que quiconque quels sont les points faibles de ces créatures = +2 en dommages au contact contre les morts-vivants.
+
+Niveau 3 : Prélat, habitués à combattre les pires abominations du monde ces paladins sont sans peur et sans reproche = résistance à la peur et à la terreur +2.
+
+Niveau 3 : Martyr, symbole même de la souffrance pour sauver les autres, ces paladins peuvent endurer les blessures les plus critiques = lors d’un jet de blessure subie, ils doublent le nombre de rd. qu’il reste à vivre et peuvent continuer à se battre quelque soit la blessure (excepté la mort automatique).
+
+Niveau 5 : Héros, ce sont des maîtres dans le maniement des boucliers qui sont une représentation de leur volonté à défendre les plus faibles = +1 PA et +2 en parade avec les boucliers.
+
+Niveau 5 : Exarque, la ferveur de ces paladins les rendent particulièrement résistants aux attaques contre l’esprit = +1 en Vol au-dessus du maximum.
+
+Niveau 5 : Purificateur, ces paladins peuvent faire face aux plus terribles créatures venus du monde des morts = immunité à la psychologie des morts-vivants."
+    },
+    {
+      "id": "templier",
+      "label": "Templier",
+      "magie": "Sainte",
+      "blurb": "Mi-soldat mi-moine. L'épée de l'institution autant que celle des dieux.",
+	  "Chemins de vocation": "Niveau 3 : Juge, ces templiers se servent du pouvoir de la vie pour rendre justice = gagne le sort Arme de vie et de niveau 3 de magie sainte.
+
+Niveau 3 : Vengeur, la haine se lit dans le visage de ces êtres qui souhaitent venger les méfaits accomplis par les créatures les plus immondes = haine 6 testé à la volonté du joueur.
+
+Niveau 3 : Brise-sort, à force de lutter contre des sources magiques ils ont développé une résistance naturelle à la magie = dissipation naturelle 10+.
+
+Niveau 5 : Champion de Justice, la foi de ces êtres les protégent des éléments liés aux forces magiques que sont le feu, la glace et la foudre = +3 en résistance au feu, au froid et à la foudre.
+
+Niveau 5 : Bras divin, ces templiers ce sont spécialisés dans l’utilisation de sortilèges qui enchantent les armes avec des pouvoirs de la nature = +2 à la force et à l’activation des armes enchantées par des sorts avec un pouvoir de la nature.
+
+Niveau 5 : Gardien, leur esprit et leur corps deviennent si puissants qu’ils semblent insensibles aux dommages = sauvegarde naturelle 10+."
+    },
+    {
+      "id": "repurgateur",
+      "label": "Répurgateur",
+      "magie": "Sainte",
+      "blurb": "Chasseur de créatures maudites. Spécialiste des morts-vivants et des démons.",
+	  "Chemins de vocation": "Niveau 3 : Exalté, la volonté de ces répurgateurs à affronter les créatures les plus terrifiantes est hallucinante = permet d’ajouter son bonus de Vol à la compétence Résistance aux états et résistances aux éléments.
+
+Niveau 3 : Chasseur de Sorcier, expert dans la chasse et le combat contre les magiciens, ils ont la faculté de dissiper les magies les plus puissantes = gain automatique des sorts Dissipation et Destructions magiques de magie Illusoire.
+
+Niveau 3 : Traqueur, ces répurgateurs peuvent dénicher les monstruosités dans les lieus les plus sombres du monde = réussite critique sur 9+ pour la compétences détection des créatures.
+
+Niveau 5 : Inquisiteur, le zèle de ces êtres repoussent les limites de la conscience = Immunité à la psychologie des démons et au respect des anges.
+
+Niveau 5 : Tueur de démon, leur bras est une arme qui terrorise les démons les plus maléfiques et détruit les anges les plus purs = -1 à la sauvegarde des démons et des anges pour ses propres attaques.
+
+Niveau 5 : Rejeton ou Saint, ces répurgateurs se sont rapprochés au niveau des dieux ou des démons qu’ils servent. Ils en sont si proches qu’ils ont la capacité d’absorber les dommages des pouvoirs de la nature vie et mort = ils regagnent automatiquement 1D5 PV après avoir subi des dommages de mort (rejeton) ou de vie (saint). Ils ne peuvent avoir qu’un seul de ces deux titres et le choisissent."
+    },
+    {
+      "id": "necromancien",
+      "label": "Nécromancien",
+      "magie": "Nécromancie",
+      "blurb": "Maître de la nécromancie. Sa voie ultime mène vers la Liche.",
+	  "Chemins de vocation": "Niveau 3 : Mage, l’expérience de ces sorciers leur permet de contrôler au mieux les erreurs dans les rituels magiques les plus complexes = annule un échec critique lors d’un sort par rd.
+
+Niveau 3 : Arcaniste, la compréhension des arcanes magiques renfermés dans les parchemins n’est plus un secret pour ces sorciers = double le bonus de Vol pour la compétence lecture de parchemins.
+
+Niveau 3 : Conjurateur, les sorciers conjurateurs ont la capacité de puiser dans leur volonté la puissance nécessaire pour lancer des sorts qui épuiseraient la plupart des magiciens = ils peuvent relancer un sort « à limite de fois (par rd., jour, aventure…)». Ils peuvent utiliser cette aptitude 3 fois par aventure.
+
+Niveau 5 : Archimage, leur maîtrise des pouvoirs de la nature les rendent terriblement dangereux = +2 à la force et l’activation d’un effet de la nature au choix.
+
+Niveau 5 : Nexus, véritable nœud dans la circulation des forces magiques, ces adeptes de la maîtrise du drain magique peuvent posséder une quantité de magie extraordinaire = +1D de PM au-dessus du maximum.
+
+Niveau 5 : Invocateur, ils se sont voués à la maîtrise des invocations. Par leur seule force mentale ils arrivent en contrôler plusieurs à la fois = ils peuvent utiliser 2 sorts d’invocation simultanément. Ils peuvent utiliser cette aptitude 2 fois par aventure."
+    },
+    {
+      "id": "assassin",
+      "label": "Assassin",
+      "magie": "",
+      "blurb": "L'ombre faite chair. Spécialiste de l'élimination silencieuse et des poisons.",
+	  "Chemins de vocation":	"Niveau 3 : Espion, expert dans l’art de se cacher et de la discrétion, ils ont une faculté supérieure à réussir des actes dans ce domaine que seul les plus fous tenteraient = réussite critique sur 9+ en dissimulation.
+
+		Niveau 3 : Surineur, ce sont des assassins spécialistes du maniement des armes courtes type dagues et autres poignards, ils n’ont aucun problème pour s’en servir face aux plus fines lames = perte de la note petite taille.
+
+		Niveau 3 : Empoisonneur, ces assassins affectionnent tout particulièrement l’utilisation des poisons et des drogues = réussite critique sur 9+ lors de la fabrication de poisons et de drogues.
+
+		Niveau 5 : Maître des ombres, leur souplesse et leur grâce leur octroie une agilité hors du commun = +1 en Ag au-dessus du maximum.
+
+		Niveau 5 : Maître lames, les assassins sont les personnages les plus aptes à infliger des dommages très importants en une seule attaque, les maîtres lames en sont l’exemple le plus probant = critique sur 9+ en armes blanches (et arts de combats liés).
+
+		Niveau 5 : Maître venins, les nombreuses expériences dans la fabrication de poisons de ces assassins les ont rendus quasi insensibles à son effet = +6 en résistance aux poisons (pouvoir de la nature)."
+    },
+    {
+      "id": "voleur",
+      "label": "Voleur",
+      "magie": "",
+      "blurb": "Doigts légers, esprit plus léger encore. Son réseau d'informateurs vaut une armée.",
+	  "Chemins de vocation": "Niveau 3 : Tire-laine, ces filous ne se font quasiment jamais prendre en flagrant délit = annule un échec critique pour les compétences de filou.
+
+Niveau 3 : Coupe-jarret, ils se sont spécialisés à attaquer leur victime avec des armes tranchantes = +2 en dommages pour les armes à lames (de type couteaux, dagues, épées, sabres, couteaux de lancer…).
+
+Niveau 3 : Escamoteur, ces voleurs sont très habiles de leur doigts. Ils peuvent faire disparaître un objet en quelques centièmes de seconde = ils doublent le bonus d’Ag pour les compétences Vol à la tire et Jeux.
+
+Niveau 5 : Bandit de grands chemins, l’adresse de ces voleurs est tout simplement incroyable = +1 A au-dessus du maximum.
+
+Niveau 5 : Grand maître de guilde, la connaissance et la maîtrise du vol, des pièges et autres domaines des filous, leur permet d’accomplir des actes extraordinaires = critique sur 9+ pour les compétences de filou.
+
+Niveau 5 : Maraudeur, leurs réflexes sont si grands qu’ils semblent impossible à toucher = une esquive par round est transformée automatiquement en réussite critique."
+    },
+    {
+      "id": "menestrel",
+      "label": "Ménestrel",
+      "magie": "Illusoire",
+      "blurb": "Chanteur, espion, négociateur. Sa musique ouvre des portes que les épées ne peuvent forcer.",
+	  "Chemins de vocation": "Niveau 3 : Célébrité, leur renommée leur permet d’être mieux apprécié en société = réussite critique 9+ pour les compétences sociales.
+
+Niveau 3 : Artiste, la précision de leur art influence les esprits les plus récalcitrants = +2 à l’effet des charmes.
+
+Niveau 3 : Bouffon, personnage moqueur et taquin le bouffon peut faire sourire les visages les plus coincés = gain du charme « mort de rire » (-2 en Vol, -1 A, -2 à la parade et à l’esquive et +1 en coût en PM pour chaque sort lancé).
+
+Niveau 5 : Etoile, leur beauté, leur voix, leur grâce en font des êtres que tout le monde admire = +1 en Cha au-dessus du maximum.
+
+Niveau 5 : Prodige, ces ménestrels ont appris à affaiblir leur ennemis par la virtuosité de leur voix ou la douceur de leur musique, les plongeants dans une torpeur proche de l’inconscience = peut infliger un charme de faiblesse.
+
+Niveau 5 : Imitateur, ils adorent copier les gestes, les expressions et les attitudes de leurs compagnons = ils peuvent copier une aptitude spéciale (et titres) d’un de leur compagnon. A déterminer au début de l’aventure, pour toute l’aventure. Cette aptitude ne peut copier les sortilèges."
+    },
+    {
+      "id": "demoniste",
+      "label": "Démoniste",
+      "magie": "Démonologie",
+      "blurb": "Invocateur de créatures infernales. Chaque pacte consume une part de son âme.",
+	  "Chemins de vocation": "Niveau 3 : Mage, l’expérience de ces sorciers leur permet de contrôler au mieux les erreurs dans les rituels magiques les plus complexes = annule un échec critique lors d’un sort par rd.
+
+Niveau 3 : Arcaniste, la compréhension des arcanes magiques renfermés dans les parchemins n’est plus un secret pour ces sorciers = double le bonus de Vol pour la compétence lecture de parchemins.
+
+Niveau 3 : Conjurateur, les sorciers conjurateurs ont la capacité de puiser dans leur volonté la puissance nécessaire pour lancer des sorts qui épuiseraient la plupart des magiciens = ils peuvent relancer un sort « à limite de fois (par rd., jour, aventure…)». Ils peuvent utiliser cette aptitude 3 fois par aventure.
+
+Niveau 5 : Archimage, leur maîtrise des pouvoirs de la nature les rendent terriblement dangereux = +2 à la force et l’activation d’un effet de la nature au choix.
+
+Niveau 5 : Nexus, véritable nœud dans la circulation des forces magiques, ces adeptes de la maîtrise du drain magique peuvent posséder une quantité de magie extraordinaire = +1D de PM au-dessus du maximum.
+
+Niveau 5 : Invocateur, ils se sont voués à la maîtrise des invocations. Par leur seule force mentale ils arrivent en contrôler plusieurs à la fois = ils peuvent utiliser 2 sorts d’invocation simultanément. Ils peuvent utiliser cette aptitude 2 fois par aventure."
+    }
+  ]
+  
+  
+  Voilà une liste d'idée à remanier pour les compétences de niveau 0 disponible à la création du personnage. Les personnages ayant accès à la magie on le choix sur leur sort, les autres ont le choix sur la compétence avec laquelle démarrer.
+  
+[
+  {
+    "id": "guerrier",
+    "competences": [
+      {
+        "nom": "Maîtrise martiale",
+        "type": "passive",
+        "description": "Ignore le malus de maîtrise de la première arme inconnue qu'il utilise."
+      },
+      {
+        "nom": "Posture défensive",
+        "type": "active",
+        "description": "Jusqu'à son prochain tour, gagne +2 en Parade mais subit -1 en Attaque."
+      }
+    ]
+  },
+  {
+    "id": "barbare",
+    "competences": [
+      {
+        "nom": "Sang chaud",
+        "type": "passive",
+        "description": "Gagne +2 aux tests contre la peur lorsqu'il est blessé."
+      },
+      {
+        "nom": "Rage",
+        "type": "active",
+        "description": "Pendant 3 rounds, gagne +2 aux dégâts mais subit -1 en Parade."
+      }
+    ]
+  },
+  {
+    "id": "forestier",
+    "competences": [
+      {
+        "nom": "Furtivité sylvestre",
+        "type": "passive",
+        "description": "Dans une battlemap possédant le tag 'forêt' ou 'bois', les ennemis doivent réussir un test de Volonté, ou Intelligence-10 (ou Agilité-30 s'ils ne possèdent pas d'Intelligence) pour le détecter tant qu'il reste discret."
+      },
+      {
+        "nom": "Tir précis",
+        "type": "active",
+        "description": "La prochaine attaque à distance ignore les bonus de couvert léger."
+      }
+    ]
+  },
+  {
+    "id": "duelliste",
+    "competences": [
+      {
+        "nom": "Jeu de jambes",
+        "type": "passive",
+        "description": "Gagne +1 en Esquive contre une attaque par round."
+      },
+      {
+        "nom": "Fente",
+        "type": "active",
+        "description": "Effectue une attaque avec +2 en Initiative et +1 pour toucher."
+      }
+    ]
+  },
+  {
+    "id": "moine",
+    "competences": [
+      {
+        "nom": "Discipline intérieure",
+        "type": "passive",
+        "description": "Gagne +2 aux tests contre la panique et la provocation."
+      },
+      {
+        "nom": "Concentration",
+        "type": "active",
+        "description": "Médite brièvement pour récupérer quelques PM ou obtenir +2 en Volonté pendant 3 rounds."
+      }
+    ]
+  },
+  {
+    "id": "elementaliste",
+    "competences": [
+      {
+        "nom": "Affinité élémentaire",
+        "type": "passive",
+        "description": "Les sorts élémentaires coûtent 1 PM de moins (minimum 1 PM)."
+      },
+      {
+        "nom": "Canalisation",
+        "type": "active",
+        "description": "Le prochain sort élémentaire gagne +2 en puissance."
+      }
+    ]
+  },
+  {
+    "id": "mage",
+    "competences": [
+      {
+        "nom": "Bouclier arcanique",
+        "type": "passive",
+        "description": "Après avoir lancé un sort, gagne 1 PA magique jusqu'au début de son prochain tour."
+      },
+      {
+        "nom": "Enchantement martial",
+        "type": "active",
+        "description": "Enchante son arme pendant quelques rounds afin qu'elle inflige des dégâts magiques."
+      }
+    ]
+  },
+  {
+    "id": "illusionniste",
+    "competences": [
+      {
+        "nom": "Voile d'illusion",
+        "type": "passive",
+        "description": "Les attaques à distance dirigées contre lui subissent un malus de -1."
+      },
+      {
+        "nom": "Image miroir",
+        "type": "active",
+        "description": "Crée un double illusoire absorbant la prochaine attaque réussie."
+      }
+    ]
+  },
+  {
+    "id": "lettre",
+    "competences": [
+      {
+        "nom": "Mémoire encyclopédique",
+        "type": "passive",
+        "description": "Gagne +2 à toutes les compétences de connaissance."
+      },
+      {
+        "nom": "Analyse",
+        "type": "active",
+        "description": "Révèle les principales résistances et faiblesses d'une cible."
+      }
+    ]
+  },
+  {
+    "id": "druide",
+    "competences": [
+      {
+        "nom": "Symbiose naturelle",
+        "type": "passive",
+        "description": "Régénère lentement ses PV lorsqu'il se trouve sur une battlemap possédant le tag 'nature', 'forêt' ou 'bois'."
+      },
+      {
+        "nom": "Appel de la nature",
+        "type": "active",
+        "description": "Des racines surgissent du sol et ralentissent les ennemis dans une petite zone."
+      }
+    ]
+  },
+  {
+    "id": "chaman",
+    "competences": [
+      {
+        "nom": "Présence des esprits",
+        "type": "passive",
+        "description": "Perçoit naturellement les esprits proches et les phénomènes spirituels."
+      },
+      {
+        "nom": "Esprit totem",
+        "type": "active",
+        "description": "Invoque temporairement un esprit mineur accordant un bonus selon son totem."
+      }
+    ]
+  },
+  {
+    "id": "pretre",
+    "competences": [
+      {
+        "nom": "Foi inébranlable",
+        "type": "passive",
+        "description": "Gagne +2 aux tests contre les malédictions et la corruption."
+      },
+      {
+        "nom": "Prière curative",
+        "type": "active",
+        "description": "Soigne légèrement un allié proche."
+      }
+    ]
+  },
+  {
+    "id": "paladin",
+    "competences": [
+      {
+        "nom": "Aura sacrée",
+        "type": "passive",
+        "description": "Les morts-vivants proches subissent un malus de Moral de 1."
+      },
+      {
+        "nom": "Châtiment sacré",
+        "type": "active",
+        "description": "La prochaine attaque inflige des dégâts sacrés supplémentaires."
+      }
+    ]
+  },
+  {
+    "id": "templier",
+    "competences": [
+      {
+        "nom": "Discipline militaire",
+        "type": "passive",
+        "description": "Gagne +1 aux tests contre le désarmement et la dissipation."
+      },
+      {
+        "nom": "Garde sacrée",
+        "type": "active",
+        "description": "Protège un allié adjacent et peut intercepter la prochaine attaque dirigée contre lui."
+      }
+    ]
+  },
+  {
+    "id": "repurgateur",
+    "competences": [
+      {
+        "nom": "Sixième sens",
+        "type": "passive",
+        "description": "Détecte plus facilement les démons, morts-vivants et créatures maudites."
+      },
+      {
+        "nom": "Sentence",
+        "type": "active",
+        "description": "Désigne une cible qui subit un bonus de +2 pour être touchée par le répurgateur jusqu'à la fin du combat."
+      }
+    ]
+  },
+  {
+    "id": "necromancien",
+    "competences": [
+      {
+        "nom": "Affinité morbide",
+        "type": "passive",
+        "description": "Gagne une résistance accrue aux dégâts de Mort."
+      },
+      {
+        "nom": "Animation macabre",
+        "type": "active",
+        "description": "Anime temporairement un cadavre faible afin qu'il combatte à ses côtés."
+      }
+    ]
+  },
+  {
+    "id": "assassin",
+    "competences": [
+      {
+        "nom": "Œil du prédateur",
+        "type": "passive",
+        "description": "Inflige +1 dégât contre une cible surprise ou non engagée."
+      },
+      {
+        "nom": "Furtivité",
+        "type": "active",
+        "description": "Devient difficile à détecter tant qu'il ne réalise pas d'action offensive. Les ennemis doivent réussir un test de Volonté, ou Intelligence-10 (ou Agilité-30 s'ils ne possèdent pas d'Intelligence) pour le repérer."
+      }
+    ]
+  },
+  {
+    "id": "voleur",
+    "competences": [
+      {
+        "nom": "Doigts agiles",
+        "type": "passive",
+        "description": "Gagne +2 pour le crochetage, le désamorçage de pièges et le vol à la tire."
+      },
+      {
+        "nom": "Esquive acrobatique",
+        "type": "active",
+        "description": "Annule une attaque au corps à corps réussie contre lui (1 fois par combat)."
+      }
+    ]
+  },
+  {
+    "id": "menestrel",
+    "competences": [
+      {
+        "nom": "Aura sympathique",
+        "type": "passive",
+        "description": "Gagne +1 à toutes les interactions sociales amicales."
+      },
+      {
+        "nom": "Ballade inspirante",
+        "type": "active",
+        "description": "Les alliés proches gagnent +1 au Moral pendant quelques rounds."
+      }
+    ]
+  },
+  {
+    "id": "demoniste",
+    "competences": [
+      {
+        "nom": "Pacte obscur",
+        "type": "passive",
+        "description": "Les invocations démoniaques coûtent 1 PM de moins (minimum 1 PM)."
+      },
+      {
+        "nom": "Marque infernale",
+        "type": "active",
+        "description": "Maudit une cible qui subit +1 dégât de toutes les attaques jusqu'à la fin du combat."
+      }
+    ]
+  }
+]
+
