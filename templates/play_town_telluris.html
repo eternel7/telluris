@@ -2875,6 +2875,16 @@ function _effetsChips(item) {
 	if (e.duree) chips.push(`⏳ ${e.duree} tours`);
 	return chips;
 }
+// `bonus_degats_dice` porte le nombre de FACES en base (6 = 1D6) : miroir de
+// models/character_stats.normalize_dice, pour ne pas afficher un « 6 » ambigu.
+function _diceText(raw) {
+	if (raw === undefined || raw === null || raw === '') return '';
+	const s = String(raw).trim().toUpperCase();
+	if (s.includes('D')) return s;
+	const faces = parseInt(s, 10);
+	return faces > 0 ? `1D${faces}` : '';
+}
+
 function _bonusChips(item) {
 	const b = (item && item.bonus) || {};
 	// V est déjà donné par la ligne comparable « Vitesse (V) » (qui y agrège le malus
@@ -2973,7 +2983,8 @@ function _renderCmpTable(left, right, roleLeft, roleRight) {
 	rows += _textRow('Catégorie', _catText(left), compare ? _catText(right) : null, compare);
 	rows += _textRow('Mode', _weaponModeText(left), compare ? _weaponModeText(right) : null, compare);
 	rows += _numRows(left, right, compare);
-	rows += _textRow('Dés de dégâts', left && left.bonus_degats_dice, compare ? (right && right.bonus_degats_dice) : null, compare);
+	rows += _textRow('Dés de dégâts', left && _diceText(left.bonus_degats_dice),
+		compare ? (right && _diceText(right.bonus_degats_dice)) : null, compare);
 	rows += _restrictionRow(left, right, compare);
 	rows += _bonusRow(left, right, compare);
 	rows += _effetsRow(left, right, compare);

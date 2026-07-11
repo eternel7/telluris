@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from db.config import get_doc, save_doc, find_docs
 from models import character_stats
-from models.character_stats import compute_character_level, EquipmentBonus, BaseStats, compute_derived_stats
+from models.character_stats import compute_character_level, EquipmentBonus, BaseStats, compute_derived_stats, normalize_dice
 
 def get_user_characters(current_user: dict = Body(...)):
 	if not current_user:
@@ -106,7 +106,9 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 		bonus.cc_bonus     += item.get("bonus_cc", 0)
 		bonus.cd_bonus     += item.get("bonus_cd", 0)
 		bonus.degats_bonus += item.get("bonus_degats", 0)
-		dice = item.get("bonus_degats_dice", "")
+		# `bonus_degats_dice` porte le NOMBRE DE FACES en base (6 = 1D6) — normalisé ici,
+		# sinon il serait concaténé en "+6", c.-à-d. lu comme un modificateur plat.
+		dice = normalize_dice(item.get("bonus_degats_dice"))
 		if dice:
 			bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
 		bonus.initiative   += item.get("bonus_initiative", 0)

@@ -3,6 +3,7 @@
 
 from pydantic import BaseModel, Field
 import math
+import re
 
 # ── Variables de monde (réglables sans redéploiement) ───────────────────
 # Les constantes ci-dessous sont les valeurs PAR DÉFAUT (fallback). Au démarrage,
@@ -702,6 +703,36 @@ def xp_seuil_niveau(niveau: int) -> int:
 	return n * int(XP_NIVEAU_BASE) + max(0, int(XP_NIVEAU_INCREMENT)) * n * (n - 1) // 2
 
 
+_DICE_RE = re.compile(r"(\d*)D(\d+)", re.IGNORECASE)
+
+
+def normalize_dice(raw) -> str:
+	"""Normalise le champ item `bonus_degats_dice` en notation complète.
+
+	La donnée porte le plus souvent le seul NOMBRE DE FACES (`6` = un dé à 6 faces =
+	"1D6") ; une notation déjà complète ("1D6", "2D4+1D6") est acceptée telle quelle.
+	Sans cette normalisation, un `6` se retrouverait concaténé en "+6" — c.-à-d. lu comme
+	un modificateur plat, à l'affichage comme au jet (roll_dice).
+	"""
+	if raw is None or raw == "":
+		return ""
+	if isinstance(raw, bool):
+		return ""
+	if isinstance(raw, (int, float)):
+		faces = int(raw)
+		return f"1D{faces}" if faces > 0 else ""
+	s = str(raw).strip().upper().replace(" ", "")
+	if not s:
+		return ""
+	if "D" not in s:
+		try:
+			faces = int(s)
+		except ValueError:
+			return ""
+		return f"1D{faces}" if faces > 0 else ""
+	return s
+
+
 def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus) -> str:
 	"""Assemble la notation de dégâts : dé de base + dés d'arme + modificateur plat.
 
@@ -710,11 +741,16 @@ def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus) ->
 	- `equipment.degats_dice` : dés additionnels de l'arme (+1DX), concaténables.
 	- `equipment.degats_bonus`: modificateur plat de l'arme (+x).
 
-	Ex : F=24 sans arme → "1D6+1" ; avec une épée +1 et +1D4 → "1D6+1D4+2".
+	Les dés de MÊME taille sont regroupés (1D6 + 1D6 → "2D6"), dans l'ordre d'apparition
+	(le dé de caract d'abord). Ex : F=24 sans arme → "1D6+1" ; avec une hache +4/+1D6 →
+	"2D6+5" ; avec une épée +1/+1D4 → "1D6+1D4+2".
 	"""
-	expr = f"1D{base_die}"
-	if equipment.degats_dice:
-		expr += f"+{equipment.degats_dice}"
+	dice: dict[int, int] = {base_die: 1}
+	for n, sides in _DICE_RE.findall(equipment.degats_dice or ""):
+		sides = int(sides)
+		dice[sides] = dice.get(sides, 0) + int(n or "1")
+
+	expr = "+".join(f"{count}D{sides}" for sides, count in dice.items())
 	flat = stat_bonus + equipment.degats_bonus
 	if flat:
 		expr += f"{flat:+d}"

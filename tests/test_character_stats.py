@@ -5,7 +5,7 @@ import models.character_stats as cs
 from models.character_stats import (
     BaseStats, EquipmentBonus, DerivedStats,
     compute_derived_stats, compute_xp_cost, compute_stat_cap,
-    compute_character_level,
+    compute_character_level, normalize_dice,
 )
 
 
@@ -129,11 +129,33 @@ def test_degats_cc_avec_bonus():
     assert "+5" in stats.degats_cc
 
 def test_degats_cc_dice_arme():
-    # Une arme peut ajouter des dés (+1DX) en plus du modificateur plat.
+    # Une arme peut ajouter des dés (+1DX) en plus du modificateur plat. Dés de tailles
+    # différentes → termes distincts, dans l'ordre (dé de caract d'abord).
     base = make_base(f=24)  # D6, puissance F//20 = 1
     eq = EquipmentBonus(degats_dice="1D4", degats_bonus=1)
     stats = compute_derived_stats(base, niveau=1, equipment=eq)
     assert stats.degats_cc == "1D6+1D4+2"
+
+
+def test_degats_cc_dice_meme_taille_regroupes():
+    # Cas de la Hache de guerre (bonus_degats 4, bonus_degats_dice 6) sur un perso à 1D6+1 :
+    # le dé de l'arme a la MÊME taille que le dé de caract → "2D6+5", pas "1D6+1D6+5".
+    base = make_base(f=24)  # D6, puissance F//20 = 1
+    eq = EquipmentBonus(degats_dice=normalize_dice(6), degats_bonus=4)
+    stats = compute_derived_stats(base, niveau=1, equipment=eq)
+    assert stats.degats_cc == "2D6+5"
+
+
+def test_normalize_dice():
+    # La base porte le NOMBRE DE FACES (6 = 1D6). Sans normalisation, le "6" serait
+    # concaténé en "+6" → lu comme un modificateur plat, à l'affichage COMME au jet.
+    assert normalize_dice(6) == "1D6"
+    assert normalize_dice("6") == "1D6"
+    assert normalize_dice("1D6") == "1D6"
+    assert normalize_dice("2d4") == "2D4"
+    assert normalize_dice(0) == ""
+    assert normalize_dice(None) == ""
+    assert normalize_dice("") == ""
 
 
 # ── Facteur dégâts / armure ───────────────────────────────────────────────────
