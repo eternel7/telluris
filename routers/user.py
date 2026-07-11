@@ -1253,6 +1253,38 @@ async def epingler_sort(
 	return {"sorts_epingles": epingles}
 
 
+@user_router.post("/epingler_competence")
+async def epingler_competence(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Épingle/désépingle une compétence ACTIVE connue en accès rapide (barre d'icônes
+	en combat) — miroir d'epingler_sort. Matérialise d'abord la liste effective (défaut
+	= première active connue auto-épinglée, cf. competences_epinglees_effectives)."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	competence_id = body.get("competence_id")
+	if competence_id not in (character.get("competences_connues") or []):
+		raise HTTPException(status_code=422, detail="Compétence inconnue du personnage")
+	comp = competences_util.normaliser_competence(get_doc(competence_id))
+	if not comp or not competences_util.est_active(comp):
+		raise HTTPException(status_code=422, detail="Seule une compétence active s'épingle")
+
+	epingles = list(competences_util.competences_epinglees_effectives(character, get_doc))
+	if bool(body.get("epingle")):
+		if competence_id not in epingles:
+			epingles.append(competence_id)
+	else:
+		epingles = [c for c in epingles if c != competence_id]
+	character["competences_epinglees"] = epingles
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	return {"competences_epinglees": epingles}
+
+
 @user_router.post("/recolter")
 async def recolter_ressource(
 	current_user: Annotated[User, Depends(get_current_user)],

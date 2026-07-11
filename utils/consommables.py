@@ -37,6 +37,7 @@ def effets_de(item_doc) -> dict:
 		"regen_pm": _as_int(raw.get("regen_pm")),
 		"buffs": buffs,
 		"duree": _as_int(raw.get("duree")),
+		"esquive": _as_int(raw.get("esquive")),
 	}
 
 
@@ -46,7 +47,8 @@ def est_consommable(item_doc) -> bool:
 	if not item_doc or item_doc.get("categorie") != "consommable":
 		return False
 	eff = effets_de(item_doc)
-	return bool(eff["pv"] or eff["pm"] or eff["regen_pv"] or eff["regen_pm"] or eff["buffs"])
+	return bool(eff["pv"] or eff["pm"] or eff["regen_pv"] or eff["regen_pm"]
+				or eff["buffs"] or eff["esquive"])
 
 
 def effet_instantane(item_doc) -> bool:
@@ -95,12 +97,23 @@ def regen_bonus(character: dict) -> tuple[int, int]:
 	return pv, pm
 
 
+def esquive_bonus(character: dict) -> int:
+	"""Σ `esquive` des effets actifs et des passives — malus au seuil de toucher
+	PHYSIQUE (cc/cd) des attaques subies en combat (la magie se résout sur pm_def,
+	jamais réduite par l'esquive). Snapshotté à l'entrée en combat."""
+	total = 0
+	for eff in _sources_de_buffs(character):
+		total += _as_int(eff.get("esquive"))
+	return total
+
+
 def empiler_effet(character: dict, item_doc: dict) -> dict | None:
 	"""Empile l'effet à durée (buffs/régén) de l'item sur character["effets_actifs"]
 	(mute en place, NE SAUVEGARDE PAS). Renvoie l'entrée créée, None si l'item n'a pas
 	d'effet à durée. Empilement autorisé (2 potions = 2 entrées)."""
 	eff = effets_de(item_doc)
-	if eff["duree"] <= 0 or not (eff["buffs"] or eff["regen_pv"] or eff["regen_pm"]):
+	if eff["duree"] <= 0 or not (eff["buffs"] or eff["regen_pv"] or eff["regen_pm"]
+			or eff["esquive"]):
 		return None
 	entry = {
 		"item_id": item_doc.get("item") or item_doc.get("_id"),
@@ -109,6 +122,7 @@ def empiler_effet(character: dict, item_doc: dict) -> dict | None:
 		"buffs": eff["buffs"],
 		"regen_pv": eff["regen_pv"],
 		"regen_pm": eff["regen_pm"],
+		"esquive": eff["esquive"],
 		"restants": eff["duree"],
 	}
 	character.setdefault("effets_actifs", []).append(entry)

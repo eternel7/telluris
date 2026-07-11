@@ -9,7 +9,7 @@ from models.character_stats import (
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import grant_xp, recompute_equipment_bonus, carried_weight, poids_bounds, item_ref_id
-from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de
+from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus
 from utils.quetes import maj_progress_kills
 from utils.focalisation import effacer_si_objectif_atteint
 
@@ -601,6 +601,14 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"consommes": 0,
 		"sorts": 0,
 		"competences": 0,
+		# Esquive = malus au seuil de toucher PHYSIQUE des attaques subies (cc/cd,
+		# jamais la magie). Somme des passives (competences_bonus) + effets actifs.
+		"esquive": esquive_bonus(character),
+		# Furtivité : tant que furtif, un monstre non-détecté ne vient pas au joueur.
+		# Posée à l'entrée en combat (passives conditionnées au terrain) ou par une
+		# active/un sort ; brisée par toute action offensive du joueur.
+		"furtif": False,
+		"furtivite_bonus": 0,
 		"butin_ramasse": [],   # références {item, poids} des carcasses ramassées en combat
 	}
 
@@ -682,6 +690,10 @@ def instantiate_monsters(
 			"actions_max": _compute_actions_max(base_stats.ag, base_stats.v),
 			"cc": derived.cc,
 			"ag": base_stats.ag,
+			# Vol/Int alimentent le jet de DÉTECTION contre un joueur furtif (repli
+			# Int−10 puis Ag−30 pour les créatures sans volonté/intelligence).
+			"vol": base_stats.vol,
+			"int": base_stats.int_,
 			"pa": derived.pa,
 			"pm_def": derived.pm_def,
 			"degats_cc": derived.degats_cc,
@@ -692,6 +704,10 @@ def instantiate_monsters(
 			"cells_moved": 0,
 			"attaques": 0,
 			"vivant": True,
+			# Tags d'espèce embarqués : predateur/proie pilotent la chasse entre
+			# monstres quand le joueur est furtif et non détecté.
+			"tags": list(espece.get("tags", [])),
+			"detecte": False,
 			"xp_reward": xp_reward,
 			"niveau": niveau,   # niveau du profil → pondère le tirage du poids de carcasse
 		})
@@ -702,8 +718,15 @@ def instantiate_monsters(
 def create_combat_doc(
 	character: dict, monstres: list, zone_tags: list, map_image: str,
 	battle_map: dict | None = None,
+	furtivite_initiale: int = 0,
 ) -> dict:
 	joueur = build_joueur_snapshot(character, joueur_index=0)
+	# Furtivité passive à l'entrée (conditions de terrain déjà évaluées par l'appelant
+	# via competences.furtivite_passive) : posée AVANT resolve_first_turns pour que les
+	# monstres à meilleure initiative testent leur détection dès le tour 1.
+	if furtivite_initiale > 0:
+		joueur["furtif"] = True
+		joueur["furtivite_bonus"] = int(furtivite_initiale)
 	joueurs = [joueur]
 
 	all_actors = [(j["id"], j["initiative"]) for j in joueurs]
@@ -797,37 +820,59 @@ def _check_victory(combat_doc: dict) -> None:
 		})
 
 
-def _do_monster_attack(combat_doc: dict, monstre: dict) -> None:
-	joueur = combat_doc["joueurs"][0]
-	seuil = _hit_threshold(monstre["cc"], joueur.get("ag", 0))
+def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
+	"""Attaque physique d'un monstre sur un défenseur — le joueur (cas normal) OU un
+	autre monstre (chasse prédateur/proie pendant la furtivité du joueur). L'`esquive`
+	du défenseur gonfle sa difficulté défensive (l'Ag), jamais sur la magie."""
+	est_joueur = str(defenseur.get("id", "")).startswith("joueur_")
+	seuil = _hit_threshold(attaquant["cc"],
+						   defenseur.get("ag", 0) + defenseur.get("esquive", 0))
 	roll = random.randint(1, 100)
 	if roll <= seuil:
-		dmg = max(1, roll_dice(monstre["degats_cc"]) - joueur["pa"])
-		joueur["currentPV"] = max(0, joueur["currentPV"] - dmg)
+		dmg = max(1, roll_dice(attaquant["degats_cc"]) - defenseur["pa"])
+		defenseur["currentPV"] = max(0, defenseur["currentPV"] - dmg)
 		combat_doc["log"].append({
 			"tour": combat_doc["tour"],
-			"acteur": monstre["nom"],
+			"acteur": attaquant["nom"],
 			"kind": "hit",
 			"texte": (
-				f"{monstre['nom']} touche {joueur['nom']} pour {dmg} dégâts ! "
-				f"(PV : {joueur['currentPV']}/{joueur['pv_max']})"
+				f"{attaquant['nom']} touche {defenseur['nom']} pour {dmg} dégâts ! "
+				f"(PV : {defenseur['currentPV']}/{defenseur['pv_max']})"
 			),
 		})
-		if joueur["currentPV"] <= 0:
-			combat_doc["status"] = "defaite"
-			combat_doc["log"].append({
-				"tour": combat_doc["tour"],
-				"acteur": "Système",
-				"kind": "sys",
-				"texte": f"{joueur['nom']} est à terre !",
-			})
+		if defenseur["currentPV"] <= 0:
+			if est_joueur:
+				combat_doc["status"] = "defaite"
+				combat_doc["log"].append({
+					"tour": combat_doc["tour"],
+					"acteur": "Système",
+					"kind": "sys",
+					"texte": f"{defenseur['nom']} est à terre !",
+				})
+			else:
+				# Proie tuée par un monstre : le joueur n'en tire pas l'XP (kill qu'il
+				# n'a pas fait) mais la carcasse reste dépeçable (butin conservé).
+				defenseur["vivant"] = False
+				defenseur["tue_par_monstre"] = True
+				defenseur["xp_reward"] = 0
+				combat_doc["log"].append({
+					"tour": combat_doc["tour"],
+					"acteur": attaquant["nom"],
+					"kind": "kill",
+					"texte": f"{attaquant['nom']} abat {defenseur['nom']} !",
+				})
+				_check_victory(combat_doc)
 	else:
 		combat_doc["log"].append({
 			"tour": combat_doc["tour"],
-			"acteur": monstre["nom"],
+			"acteur": attaquant["nom"],
 			"kind": "miss",
-			"texte": f"{monstre['nom']} rate son attaque ! (jet {roll} / seuil {seuil})",
+			"texte": f"{attaquant['nom']} rate son attaque ! (jet {roll} / seuil {seuil})",
 		})
+
+
+def _do_monster_attack(combat_doc: dict, monstre: dict) -> None:
+	_do_attack_on(combat_doc, monstre, combat_doc["joueurs"][0])
 
 
 def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: dict) -> bool:
@@ -857,11 +902,163 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 	return True
 
 
+def _detection_threshold(monstre: dict, joueur: dict) -> int:
+	"""Seuil du jet de détection d'un joueur furtif (d100, jet ≤ seuil = repéré).
+	Compétence de détection = Vol du monstre, repli Int−10 (créature sans volonté),
+	repli Ag−30 (créature sans intelligence). Difficulté = Ag du joueur + son bonus
+	de furtivité. Même idiome que _hit_threshold : 50 + skill − difficulté, [5, 95]."""
+	vol = int(monstre.get("vol", 0) or 0)
+	intel = int(monstre.get("int", 0) or 0)
+	if vol > 0:
+		skill = vol
+	elif intel > 0:
+		skill = intel - 10
+	else:
+		skill = int(monstre.get("ag", 0) or 0) - 30
+	difficulte = int(joueur.get("ag", 0) or 0) + int(joueur.get("furtivite_bonus", 0) or 0)
+	return max(5, min(95, 50 + skill - difficulte))
+
+
+def _briser_furtivite(combat_doc: dict, joueur: dict) -> None:
+	"""Toute action OFFENSIVE du joueur (attaque, sort ou compétence sur un ennemi)
+	révèle sa position — se déplacer/consommer/ramasser ne brise pas la furtivité."""
+	if not joueur.get("furtif"):
+		return
+	joueur["furtif"] = False
+	joueur["furtivite_bonus"] = 0
+	combat_doc["log"].append({
+		"tour": combat_doc["tour"],
+		"acteur": joueur["nom"],
+		"kind": "sys",
+		"texte": f"{joueur['nom']} sort de l'ombre : tous les ennemis l'ont repéré !",
+	})
+
+
+def _activer_furtivite(combat_doc: dict, joueur: dict, bonus: int) -> None:
+	"""Pose l'état furtif (compétence active ou sort, `effets.furtivite > 0`) et efface
+	la détection de TOUS les monstres : chacun devra réussir un nouveau jet."""
+	joueur["furtif"] = True
+	joueur["furtivite_bonus"] = max(int(joueur.get("furtivite_bonus", 0) or 0), int(bonus))
+	for m in combat_doc["monstres"]:
+		m["detecte"] = False
+	combat_doc["log"].append({
+		"tour": combat_doc["tour"],
+		"acteur": joueur["nom"],
+		"kind": "sys",
+		"texte": f"{joueur['nom']} se fond dans les ombres…",
+	})
+
+
+def _proie_la_plus_proche(combat_doc: dict, predateur: dict) -> dict | None:
+	"""Le plus proche monstre vivant taggé `proie` (≠ lui-même), pour la chasse d'un
+	prédateur pendant que le joueur est furtif. None si aucune proie sur la carte."""
+	proies = [m for m in combat_doc["monstres"]
+			  if m["vivant"] and m["id"] != predateur["id"]
+			  and "proie" in (m.get("tags") or [])]
+	if not proies:
+		return None
+	return min(proies, key=lambda m: _cheby(predateur, m))
+
+
+def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
+	"""Un pas d'errance : case voisine aléatoire praticable (mêmes règles que le
+	déplacement — nav bitmask, terrain, cases occupées). Retourne True si déplacé."""
+	blocked = _occupied_set(combat_doc, exclude=monstre)
+	x, y = monstre["pos"]["x"], monstre["pos"]["y"]
+	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
+	flying = _can_fly(monstre)
+	options = []
+	for dx, dy in MOVE_OFFSETS:
+		nx, ny = x + dx, y + dy
+		if not (0 <= nx < dims["x"] and 0 <= ny < dims["y"]):
+			continue
+		if (nx, ny) in blocked or not nav_allows(nav, x, y, dx, dy):
+			continue
+		if not _walkable(cells, nx, ny, flying):
+			continue
+		options.append((nx, ny))
+	if not options:
+		return False
+	projected = monstre["attaques"] + _move_ap_used_for(monstre, monstre["cells_moved"] + 1)
+	if projected > monstre["actions_max"]:
+		return False
+	nx, ny = random.choice(options)
+	monstre["pos"] = {"x": nx, "y": ny}
+	monstre["cells_moved"] += 1
+	_refresh_actions(monstre)
+	return True
+
+
+def _chasse_ou_erre(combat_doc: dict, monstre: dict, grid: dict) -> None:
+	"""Tour alternatif d'un monstre qui n'a PAS détecté le joueur furtif : un prédateur
+	chasse la proie la plus proche (mêmes règles d'attaque, la victime ne rapporte pas
+	d'XP mais reste au butin) ; sinon il erre au hasard."""
+	proie = None
+	if "predateur" in (monstre.get("tags") or []):
+		proie = _proie_la_plus_proche(combat_doc, monstre)
+	if proie is not None:
+		portee = monstre.get("portee", 1)
+		safety = 0
+		while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
+			   and proie["vivant"] and _cheby(monstre, proie) > portee
+			   and monstre["cells_moved"] < monstre.get("deplacement", 1)
+			   and safety < 100):
+			safety += 1
+			if not _monster_step_toward(combat_doc, monstre, proie, grid):
+				break
+		while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
+			   and proie["vivant"] and _cheby(monstre, proie) <= portee):
+			_do_attack_on(combat_doc, monstre, proie)
+			monstre["attaques"] += 1
+			_refresh_actions(monstre)
+		return
+	# Errance : quelques pas au hasard, sans jamais fondre sur le joueur.
+	steps = 0
+	safety = 0
+	while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
+		   and monstre["cells_moved"] < monstre.get("deplacement", 1)
+		   and safety < 100):
+		safety += 1
+		if not _wander_step(combat_doc, monstre, grid):
+			break
+		steps += 1
+	if steps > 0:
+		combat_doc["log"].append({
+			"tour": combat_doc["tour"],
+			"acteur": monstre["nom"],
+			"kind": "move",
+			"texte": f"{monstre['nom']} erre en cherchant du regard ({steps} case(s)).",
+		})
+
+
 def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
-	"""Tour d'un monstre : se rapprocher du joueur (A*) puis attaquer si à portée."""
+	"""Tour d'un monstre : se rapprocher du joueur (A*) puis attaquer si à portée.
+	Joueur FURTIF : le monstre doit d'abord le détecter (jet en début de tour, réussite
+	définitive pour le combat) ; tant qu'il ne l'a pas repéré, il ne vient pas vers lui
+	— un prédateur chasse une proie, les autres errent."""
 	_reset_turn_budget(monstre)
 	joueur = combat_doc["joueurs"][0]
 	portee = monstre.get("portee", 1)
+
+	if joueur.get("furtif") and not monstre.get("detecte"):
+		seuil = _detection_threshold(monstre, joueur)
+		roll = random.randint(1, 100)
+		if roll <= seuil:
+			monstre["detecte"] = True
+			combat_doc["log"].append({
+				"tour": combat_doc["tour"],
+				"acteur": monstre["nom"],
+				"kind": "sys",
+				"texte": f"{monstre['nom']} vous repère ! (jet {roll} / seuil {seuil})",
+			})
+		else:
+			_chasse_ou_erre(combat_doc, monstre, grid)
+			idx = combat_doc["acteur_courant_index"] + 1
+			if idx >= len(combat_doc["ordre_initiative"]):
+				idx = 0
+				combat_doc["tour"] += 1
+			combat_doc["acteur_courant_index"] = idx
+			return
 
 	# Phase déplacement : avancer vers le joueur tant qu'éloigné et budget dispo.
 	steps = 0
@@ -1095,6 +1292,7 @@ def resolve_action(
 			})
 			result = {"hit": False, "roll": roll, "seuil": seuil}
 
+		_briser_furtivite(combat_doc, joueur)
 		joueur["attaques"] += 1
 		_refresh_actions(joueur)
 		_check_victory(combat_doc)
@@ -1211,14 +1409,15 @@ def resolve_action(
 		# `sort = {doc (normalisé), effets (fusionnés avec les bonus des composants
 		# engagés), composants_engages, poids_consommes}` — les composants consommés
 		# ont déjà été retirés du sac du personnage en mémoire. Seule la part
-		# INSTANTANÉE (degats/pv/pm) s'applique en combat : buffs/régén d'un sort
-		# mixte sont perdus (règle consommables).
+		# INSTANTANÉE (degats/pv/pm, ou furtivité = état posé instantanément) s'applique
+		# en combat : buffs/régén d'un sort mixte sont perdus (règle consommables).
 		if not sort or not sort.get("doc"):
 			return {"error": "Sort invalide."}
 		sdoc = sort["doc"]
 		effets = sort.get("effets") or {}
 		cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
-		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")):
+		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")
+				or int(effets.get("furtivite", 0) or 0) > 0):
 			return {"error": "Ce sort n'a aucun effet utilisable en combat."}
 		if joueur["currentPM"] < cout_pm:
 			return {"error": "PM insuffisants."}
@@ -1242,8 +1441,10 @@ def resolve_action(
 			if _cheby(joueur, monstre) > sort_portee:
 				return {"error": "Cible hors de portée."}
 
-			# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés).
+			# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés),
+			# et incanter sur un ennemi révèle le lanceur (furtivité brisée même raté).
 			joueur["currentPM"] -= cout_pm
+			_briser_furtivite(combat_doc, joueur)
 			seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
 			roll = random.randint(1, 100)
 			if roll <= seuil:
@@ -1300,7 +1501,12 @@ def resolve_action(
 				"kind": "sys",
 				"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} ({gains}).",
 			})
-			result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu}
+			# Sort de dissimulation (effets.furtivite > 0) : pose l'état furtif et
+			# remet la détection de tous les monstres à zéro.
+			if int(effets.get("furtivite", 0) or 0) > 0:
+				_activer_furtivite(combat_doc, joueur, int(effets["furtivite"]))
+			result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
+					  "furtif": bool(joueur.get("furtif"))}
 
 		# Les composants consommés quittent le sac → la charge portée baisse.
 		poids_consommes = float(sort.get("poids_consommes", 0) or 0)
@@ -1324,7 +1530,8 @@ def resolve_action(
 			return {"error": "Compétence invalide."}
 		effets = competence.get("effets") or {}
 		cout_pm = max(0, int(competence.get("cout_pm", 0) or 0))
-		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")):
+		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")
+				or int(effets.get("furtivite", 0) or 0) > 0):
 			return {"error": "Cette compétence n'a aucun effet utilisable en combat."}
 		if joueur["currentPM"] < cout_pm:
 			return {"error": "PM insuffisants."}
@@ -1348,8 +1555,10 @@ def resolve_action(
 			if _cheby(joueur, monstre) > comp_portee:
 				return {"error": "Cible hors de portée."}
 
-			# La compétence part : PM débités AVANT le jet (raté = PM quand même dépensés).
+			# La compétence part : PM débités AVANT le jet (raté = PM quand même dépensés),
+			# et frapper un ennemi révèle le joueur (furtivité brisée même raté).
 			joueur["currentPM"] -= cout_pm
+			_briser_furtivite(combat_doc, joueur)
 			# Le jet est porté par la DONNÉE : une frappe martiale se résout sous cc/cd contre
 			# l'Ag de la cible (PA soustraits comme une attaque d'arme) ; une compétence
 			# magique se résout sous toucher_magique contre la pm_def (sans soustraction de PA,
@@ -1414,7 +1623,12 @@ def resolve_action(
 				"kind": "sys",
 				"texte": f"{joueur['nom']} utilise {nom} ({gains}).",
 			})
-			result = {"competence": nom, "pv_rendu": pv_rendu, "pm_rendu": pm_rendu}
+			# Compétence de dissimulation (ex. Furtivité de l'assassin) : pose l'état
+			# furtif et remet la détection de tous les monstres à zéro.
+			if int(effets.get("furtivite", 0) or 0) > 0:
+				_activer_furtivite(combat_doc, joueur, int(effets["furtivite"]))
+			result = {"competence": nom, "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
+					  "furtif": bool(joueur.get("furtif"))}
 
 		result["currentPM"] = joueur["currentPM"]
 		joueur["competences"] = joueur.get("competences", 0) + 1

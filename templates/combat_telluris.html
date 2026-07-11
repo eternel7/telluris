@@ -360,10 +360,10 @@
 .controls .btn:disabled { cursor: default; }
 .controls .btn.center:disabled { opacity: 0.35; }
 .atk-mode-btn.hidden-selecting { display: none; }
-#target-row, #conso-row, #sort-row {
+#target-row, #conso-row, #sort-row, #comp-row {
 	display: none; gap: 8px; align-items: center; justify-content: center;
 }
-#target-select, #conso-select, #sort-select {
+#target-select, #conso-select, #sort-select, #comp-select {
 	flex: 1; max-width: 200px; padding: 6px 10px;
 	background: #1a1a1a; color: #eee;
 	border: 1px solid #555; border-radius: 6px; font-size: 13px;
@@ -372,9 +372,11 @@
 	display: flex; align-items: center; gap: 4px;
 	font-size: 12px; color: #cbb98a; cursor: pointer; white-space: nowrap;
 }
-/* Sorts épinglés (accès rapide) : icônes directement cliquables dans la barre d'action. */
-#quick-sorts { display: inline-flex; gap: 6px; align-items: center; }
-#quick-sorts .quick-sort-btn { padding: 6px 10px; font-size: 1.15rem; line-height: 1; }
+/* Sorts/compétences épinglés (accès rapide) : icônes cliquables dans la barre d'action. */
+#quick-sorts, #quick-comps { display: inline-flex; gap: 6px; align-items: center; }
+#quick-sorts .quick-sort-btn, #quick-comps .quick-sort-btn { padding: 6px 10px; font-size: 1.15rem; line-height: 1; }
+/* Badge d'état furtif du joueur (🥷) dans l'en-tête de tour. */
+#furtif-badge { font-size: 1.05rem; margin-left: 6px; filter: drop-shadow(0 0 4px #b26bff); }
 
 .combat-log {
 	background: var(--panel-bg);
@@ -558,6 +560,8 @@
 				<button class="action-btn attack-btn atk-mode-btn" data-mode="tir" id="btn-atk-tir" onclick="triggerAttack('tir')">🏹 Tir</button>
 				<div id="quick-sorts"></div>
 				<button class="action-btn" id="btn-sorts" onclick="triggerSort()" title="Lancer un sort (1 action + PM ; composants optionnels = effet renforcé)">🔮 Sorts</button>
+				<div id="quick-comps"></div>
+				<button class="action-btn" id="btn-comps" onclick="triggerComp()" title="Utiliser une compétence active (1 action + PM éventuels)">⚡ Compétence</button>
 				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>
 				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
 				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
@@ -575,10 +579,14 @@
 				<label id="sort-comp-label" title="Engager les composants disponibles (les consommés sont dépensés, les catalyseurs restent)"><input type="checkbox" id="sort-comp-check" checked>Composants</label>
 				<button class="action-btn" id="btn-sort-confirm" onclick="confirmSort()">✓ Lancer</button>
 			</div>
+			<div id="comp-row">
+				<select id="comp-select"></select>
+				<button class="action-btn" id="btn-comp-confirm" onclick="confirmComp()">✓ Utiliser</button>
+			</div>
 		</div>
 		<!-- Tour header + Initiative strip -->
 		<div class="tour-header">
-			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span></span>
+			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><span id="furtif-badge" style="display:none" title="Furtif : les ennemis ne viennent pas à vous tant qu'ils ne vous ont pas repéré. Attaquer vous révèle.">🥷</span></span>
 			<div id="initiative-strip">
 				{% for actor_id in combat.ordre_initiative %}
 					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
@@ -727,6 +735,14 @@ const SORTS_EPINGLES = {{ sorts_epingles | tojson | safe }};
 // Sort offensif confirmé en attente de cible : {sort_id, composants, portee} — les
 // badges/tokens passent en liseré violet et leur clic lance le sort au lieu d'attaquer.
 let pendingSort = null;
+
+// Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/furtivité) —
+// la liste ne change pas en combat (pas de composants, rien n'est consommé du sac).
+let COMPS = {{ competences | tojson | safe }};
+// Compétences épinglées en accès rapide (miroir des sorts épinglés, onglet ⚡ play_town).
+const COMPS_EPINGLEES = {{ competences_epinglees | tojson | safe }};
+// Compétence offensive confirmée en attente de cible — même mécanisme violet que pendingSort.
+let pendingComp = null;
 
 // L'image de fond couvre exactement dims.x × dims.y cases (sinon l'art ne s'aligne
 // plus avec les coordonnées de la grille). Piloté par GRID.dims, plus de 30 en dur.
@@ -941,10 +957,12 @@ function updateInitiativeStrip(data) {
 function refreshBadgeTargets() {
 	const j = state.joueurs[0] || {};
 	const canAct = state.status === 'active' && isPlayerTurn(state) && (j.actions_restantes || 0) > 0;
-	// Ciblage de sort en attente : les cibles du sort remplacent celles de l'attaque
-	// (liseré violet .spellcast, clic = lancer le sort au lieu d'attaquer).
-	const casting = canAct && pendingSort;
-	const targets = casting ? sortTargets(pendingSort.sort) : (canAct ? targetableMonsters(currentMode) : []);
+	// Ciblage de sort/compétence en attente : les cibles de la capacité remplacent celles
+	// de l'attaque (liseré violet .spellcast, clic = lancer au lieu d'attaquer).
+	const casting = canAct && (pendingSort || pendingComp);
+	const targets = casting
+		? (pendingSort ? sortTargets(pendingSort.sort) : compTargets(pendingComp.comp))
+		: (canAct ? targetableMonsters(currentMode) : []);
 	const targetable = new Set(targets.map(m => m.id));
 	state.monstres.forEach(m => {
 		const el = document.getElementById(`badge-${m.id}`);   // badge-<actor_id>, actor_id monstre = m.id
@@ -953,8 +971,11 @@ function refreshBadgeTargets() {
 		el.classList.toggle('targetable', t && !casting);
 		el.classList.toggle('spellcast',  t && !!casting);
 		el.onclick = !t ? null : (casting
-			? () => doAction('sort', m.id, null, null, null, null,
-				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+			? (pendingSort
+				? () => doAction('sort', m.id, null, null, null, null,
+					{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+				: () => doAction('competence', m.id, null, null, null, null,
+					{ competence_id: pendingComp.competence_id }))
 			: () => doAction('attaquer', m.id, null, null, null, currentMode));
 	});
 }
@@ -982,9 +1003,11 @@ function chebyToPlayer(m) {
 function renderTokens() {
 	const layer = document.getElementById('tokens-layer');
 	const j = state.joueurs[0];
-	// Ciblage de sort en attente : cibles du sort (liseré violet) au lieu de l'attaque.
-	const casting = !!pendingSort;
-	const targetable = new Set((casting ? sortTargets(pendingSort.sort) : targetableMonsters(currentMode)).map(m => m.id));
+	// Ciblage de sort/compétence en attente : cibles violettes au lieu de l'attaque.
+	const casting = !!(pendingSort || pendingComp);
+	const targetable = new Set((casting
+		? (pendingSort ? sortTargets(pendingSort.sort) : compTargets(pendingComp.comp))
+		: targetableMonsters(currentMode)).map(m => m.id));
 	layer.innerHTML = '';
 	state.monstres.forEach(m => {
 		if (!m.pos) return;
@@ -1001,8 +1024,11 @@ function renderTokens() {
 		tok.innerHTML = portrait +
 			`<div class="mt-hp"><div class="mt-hp-fill" style="width:${pct(m.currentPV, m.pv_max)}%"></div></div>`;
 		if (adj) tok.onclick = casting
-			? () => doAction('sort', m.id, null, null, null, null,
-				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+			? (pendingSort
+				? () => doAction('sort', m.id, null, null, null, null,
+					{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+				: () => doAction('competence', m.id, null, null, null, null,
+					{ competence_id: pendingComp.competence_id }))
 			: () => doAction('attaquer', m.id, null, null, null, currentMode);
 		layer.appendChild(tok);
 	});
@@ -1155,6 +1181,22 @@ function canCast(data) {
 		&& castableSorts().length > 0;
 }
 
+// ── Compétences actives (1 action + PM éventuels) — miroir exact des sorts ──────
+// Mêmes règles de portée/cibles (compTargets = sortTargets : les payloads partagent
+// les champs cible/portee) ; pas de composants, PM souvent à 0 (martiale).
+function compTargets(c) { return sortTargets(c); }
+function compCastable(c) {
+	const j = state.joueurs[0] || {};
+	return (j.currentPM || 0) >= c.cout_pm
+		&& (c.cible !== 'ennemi' || compTargets(c).length > 0);
+}
+function castableComps() { return COMPS.filter(compCastable); }
+function canComp(data) {
+	const j = data.joueurs[0];
+	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
+		&& castableComps().length > 0;
+}
+
 // ── Disponibilité d'une direction : miroir exact de la validation serveur `deplacer`.
 // getFinalMask / navAllows / VALID_MOVES proviennent de scripts/nav.js (partagé).
 // Prédicat de VISION (miroir serveur `_passable`, >= 1) : une falaise (3) est transparente,
@@ -1238,6 +1280,16 @@ function updateButtons(data) {
 		const s = SORTS.find(x => x.sort_id === b.dataset.sort);
 		b.disabled = !canAct || !s || !sortCastable(s);
 	});
+	// ⚡ : masqué si aucune compétence active de combat, grisé si rien d'utilisable.
+	const btnComps = document.getElementById('btn-comps');
+	btnComps.style.display = COMPS.length ? '' : 'none';
+	btnComps.disabled = !canComp(data);
+	document.getElementById('btn-comp-confirm').disabled = !canComp(data);
+	if (!canComp(data)) document.getElementById('comp-row').style.display = 'none';
+	document.querySelectorAll('#quick-comps .quick-sort-btn').forEach(b => {
+		const c = COMPS.find(x => x.competence_id === b.dataset.comp);
+		b.disabled = !canAct || !c || !compCastable(c);
+	});
 }
 
 function refreshTargetSelect() {
@@ -1252,6 +1304,9 @@ function updateUI(data) {
 	updateJoueur(activePlayer(data));
 	renderEnemyPortrait(data);
 	document.getElementById('tour-num').textContent = data.tour;
+	// Badge 🥷 : visible tant que le joueur est furtif (posé à l'entrée ou par une capacité).
+	document.getElementById('furtif-badge').style.display =
+		(data.joueurs[0] || {}).furtif ? '' : 'none';
 	updateInitiativeStrip(data);
 	updateAttackButtons(data);
 	renderTokens();
@@ -1283,9 +1338,11 @@ function closeSelectors() {
 	document.getElementById('target-row').style.display = 'none';
 	document.getElementById('conso-row').style.display = 'none';
 	document.getElementById('sort-row').style.display = 'none';
+	document.getElementById('comp-row').style.display = 'none';
 	document.querySelectorAll('.atk-mode-btn').forEach(b => b.classList.remove('hidden-selecting'));
-	if (pendingSort) {
+	if (pendingSort || pendingComp) {
 		pendingSort = null;
+		pendingComp = null;
 		if (window._combatReady) { renderTokens(); refreshBadgeTargets(); }
 	}
 }
@@ -1363,6 +1420,7 @@ function sortLabel(s) {
 	if (s.effets.degats) parts.push(`${s.effets.degats} dég.`);
 	if (s.effets.pv) parts.push(`+${s.effets.pv} PV`);
 	if (s.effets.pm) parts.push(`+${s.effets.pm} PM`);
+	if (s.effets.furtivite) parts.push('🥷 furtivité');
 	const compos = (s.composants || []).filter(c => c.disponible).length;
 	return `${s.icon || '🔮'} ${s.nom} — ${s.cout_pm} PM`
 		+ (parts.length ? ` (${parts.join(', ')})` : '')
@@ -1430,11 +1488,74 @@ function quickCastSort(sortId) {
 	startSortCast(s, composants);
 }
 
+// ── Utiliser une compétence active (1 action + PM éventuels) — miroir du 🔮 ──────
+function compLabel(c) {
+	const parts = [];
+	if (c.effets.degats) parts.push(`${c.effets.degats} dég.`);
+	if (c.effets.pv) parts.push(`+${c.effets.pv} PV`);
+	if (c.effets.pm) parts.push(`+${c.effets.pm} PM`);
+	if (c.effets.furtivite) parts.push('🥷 furtivité');
+	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${c.cout_pm} PM` : ''}`
+		+ (parts.length ? ` (${parts.join(', ')})` : '');
+}
+// Compétences affichées à l'ouverture — confirmComp relit exactement cette liste.
+let compOptions = [];
+function triggerComp() {
+	closeSelectors();
+	compOptions = castableComps();
+	if (!compOptions.length) return;
+	if (compOptions.length === 1) { startCompUse(compOptions[0]); return; }
+	const sel = document.getElementById('comp-select');
+	sel.innerHTML = compOptions.map((c, i) => `<option value="${i}">${compLabel(c)}</option>`).join('');
+	document.getElementById('comp-row').style.display = 'flex';
+}
+// Utilise la compétence `c` : direct (soi / 1 cible) ou ciblage violet (plusieurs cibles).
+// Partagé entre le sélecteur ⚡ (confirmComp) et les icônes d'accès rapide (quickUseComp).
+function startCompUse(c) {
+	if (c.cible === 'ennemi') {
+		const cibles = compTargets(c);
+		if (!cibles.length) { closeSelectors(); return; }
+		if (cibles.length === 1) {
+			doAction('competence', cibles[0].id, null, null, null, null, { competence_id: c.competence_id });
+			return;
+		}
+		// Plusieurs cibles : badges/tokens en mode ciblage violet (comme pendingSort).
+		pendingComp = { competence_id: c.competence_id, comp: c };
+		document.getElementById('comp-row').style.display = 'none';
+		renderTokens();
+		refreshBadgeTargets();
+	} else {
+		doAction('competence', null, null, null, null, null, { competence_id: c.competence_id });
+	}
+}
+function confirmComp() {
+	const c = compOptions[parseInt(document.getElementById('comp-select').value, 10)];
+	if (!c) { closeSelectors(); return; }
+	startCompUse(c);
+}
+
+// Accès rapide : icônes des compétences épinglées, mêmes règles que les sorts.
+function renderQuickComps() {
+	const box = document.getElementById('quick-comps');
+	box.innerHTML = COMPS_EPINGLEES
+		.map(id => COMPS.find(c => c.competence_id === id))
+		.filter(Boolean)
+		.map(c => `<button class="action-btn quick-sort-btn" data-comp="${c.competence_id}"
+			title="${compLabel(c)}" onclick="quickUseComp('${c.competence_id}')">${c.icon || '⚡'}</button>`)
+		.join('');
+}
+function quickUseComp(compId) {
+	const c = COMPS.find(x => x.competence_id === compId);
+	if (!c || !compCastable(c)) return;
+	closeSelectors();
+	startCompUse(c);
+}
+
 async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode = null, extra = null) {
 	if (busy) return;
 	closeSelectors();
-	// Le portrait droit suit la cible que le joueur attaque (ou vise d'un sort).
-	if ((type === 'attaquer' || type === 'sort') && cibleId) lastEnemyId = cibleId;
+	// Le portrait droit suit la cible que le joueur attaque (ou vise d'un sort/compétence).
+	if ((type === 'attaquer' || type === 'sort' || type === 'competence') && cibleId) lastEnemyId = cibleId;
 	busy = true;
 	document.querySelectorAll('#move-controls .btn, .action-btn')
 		.forEach(el => el.disabled = true);
@@ -1574,10 +1695,12 @@ refreshBadgeTargets();
 updateCamera();
 updateAttackButtons(state);  // révèle les boutons cac/jet/tir équipés dès le chargement (sinon visibles qu'après la 1re action)
 renderQuickSorts();          // icônes des sorts épinglés (avant updateButtons qui règle leur état)
+renderQuickComps();          // icônes des compétences épinglées (idem)
 refreshTargetSelect();
 updateButtons(state);
 updateJoueur(activePlayer(state));
 updateInitiativeStrip(state);   // pose les anneaux de vie des ennemis dans le header dès le chargement
+document.getElementById('furtif-badge').style.display = (state.joueurs[0] || {}).furtif ? '' : 'none';
 renderEnemyPortrait(state);
 document.getElementById('combat-log').scrollTop = 9999;
 window._combatReady = true;

@@ -24,7 +24,13 @@ from utils.consommables import _as_int
 
 def _bonus_dict(raw) -> dict:
 	"""Normalise un bloc d'effets/bonus : degats str, entiers ≥ 0, buffs {caract:int}
-	(V exclu — échelle 1-10, incompatible avec des deltas ×10), duree ≥ 0."""
+	(V exclu — échelle 1-10, incompatible avec des deltas ×10), duree ≥ 0.
+
+	Clés de combat partagées sorts/compétences :
+	- `esquive`  : malus au seuil de toucher PHYSIQUE (cc/cd) des attaques subies —
+	  jamais la magie (elle se résout sur pm_def, pas sur l'Ag).
+	- `furtivite`: > 0 = confère l'état furtif ; la valeur s'ajoute à l'Ag dans la
+	  difficulté du jet de détection des ennemis."""
 	raw = raw or {}
 	buffs = {}
 	for k, v in (raw.get("buffs") or {}).items():
@@ -42,6 +48,8 @@ def _bonus_dict(raw) -> dict:
 		"regen_pm": _as_int(raw.get("regen_pm")),
 		"buffs": buffs,
 		"duree": _as_int(raw.get("duree")),
+		"esquive": _as_int(raw.get("esquive")),
+		"furtivite": _as_int(raw.get("furtivite")),
 	}
 
 
@@ -82,6 +90,9 @@ def normaliser_sort(sort_doc) -> dict | None:
 		"portee": _as_int(doc.get("portee")),
 		"effets": effets_de_sort(doc),
 		"composants": composants,
+		# Condition d'activation optionnelle (partagée avec les compétences) :
+		# {"battle_map_tags": [...]} — évaluée en combat via condition_remplie.
+		"condition": dict(doc.get("condition") or {}),
 	}
 
 
@@ -106,11 +117,13 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"regen_pm": _as_int(base.get("regen_pm")),
 		"buffs": dict(base.get("buffs") or {}),
 		"duree": _as_int(base.get("duree")),
+		"esquive": _as_int(base.get("esquive")),
+		"furtivite": _as_int(base.get("furtivite")),
 	}
 	for bonus in bonus_list or []:
 		bonus = bonus or {}
 		out["degats"] = _concat_degats(out["degats"], bonus.get("degats", ""))
-		for key in ("pv", "pm", "regen_pv", "regen_pm", "duree"):
+		for key in ("pv", "pm", "regen_pv", "regen_pm", "duree", "esquive", "furtivite"):
 			out[key] += _as_int(bonus.get(key))
 		for k, delta in (bonus.get("buffs") or {}).items():
 			if str(k) == "V":
@@ -158,10 +171,12 @@ def effets_effectifs(sort: dict, composants_engages: list) -> dict:
 
 
 def sort_utilisable_combat(sort: dict) -> bool:
-	"""Éligibilité combat : le sort doit avoir une part instantanée (dégâts, PV ou PM).
-	La part buffs/durée d'un sort mixte est perdue en combat (règle consommables)."""
+	"""Éligibilité combat : le sort doit avoir une part instantanée (dégâts, PV, PM —
+	ou furtivité, qui est un état de combat posé instantanément). La part buffs/durée
+	d'un sort mixte est perdue en combat (règle consommables)."""
 	eff = (sort or {}).get("effets") or {}
-	return bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0
+	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
+			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0)
 
 
 def sort_utilisable_exploration(sort: dict) -> bool:
@@ -183,7 +198,8 @@ def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None
 	que les consommables → tick_effets/caracts_avec_buffs/regen_bonus/chips inchangés."""
 	eff = effets or {}
 	if _as_int(eff.get("duree")) <= 0 or not (
-			eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm"))):
+			eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm"))
+			or _as_int(eff.get("esquive"))):
 		return None
 	entry = {
 		"sort_id": (sort or {}).get("id", ""),
@@ -192,6 +208,7 @@ def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None
 		"buffs": dict(eff.get("buffs") or {}),
 		"regen_pv": _as_int(eff.get("regen_pv")),
 		"regen_pm": _as_int(eff.get("regen_pm")),
+		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}
 	character.setdefault("effets_actifs", []).append(entry)

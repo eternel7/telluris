@@ -707,6 +707,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# hors combat) + apprenables — resynchronisées par utiliser/apprendre côté client.
 			"competences": competences_util.liste_competences_payload(character, get_doc, "exploration"),
 			"competences_apprenables": competences_util.competences_apprenables(character, find_docs),
+			"competences_epinglees": competences_util.competences_epinglees_effectives(character, get_doc),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.
@@ -760,9 +761,11 @@ async def get_combat_page(
 			# Sorts épinglés en accès rapide (icônes directement cliquables de la barre
 			# d'action) — sous-ensemble ordonné des sorts connus.
 			"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
-			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm) —
-			# les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
+			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/
+			# furtivité) — les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
 			"competences": competences_util.liste_competences_payload(character, get_doc, "combat"),
+			# Compétences épinglées en accès rapide (miroir des sorts épinglés).
+			"competences_epinglees": competences_util.competences_epinglees_effectives(character, get_doc),
 		},
 		headers={"Cache-Control": "no-store"},
 	)

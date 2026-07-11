@@ -1,0 +1,39 @@
+[
+  {
+    "_id": "competence:furtivite_sylvestre",
+    "type": "competence",
+    "nom": "Furtivité sylvestre",
+    "icon": "🌲",
+    "description": "Sous les frondaisons, il n'est qu'une ombre parmi les ombres : en forêt ou dans les bois, les ennemis ne viennent pas à lui tant qu'ils ne l'ont pas repéré.",
+    "vocation": "forestier",
+    "niveau": 0,
+    "mode": "passive",
+    "condition": { "battle_map_tags": ["foret", "bois"] },
+    "effets": { "furtivite": 1 }
+  },
+  {
+    "_id": "competence:furtivite",
+    "type": "competence",
+    "nom": "Furtivité",
+    "icon": "🥷",
+    "description": "Il s'efface : tant qu'il ne frappe pas, les ennemis doivent le repérer avant de venir à lui. Frapper le révèle — mais il peut se fondre à nouveau dans les ombres.",
+    "vocation": "assassin",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 0,
+    "cible": "soi",
+    "portee": 1,
+    "effets": { "furtivite": 1 }
+  },
+  {
+    "_id": "competence:esquive",
+    "type": "competence",
+    "nom": "Esquive",
+    "icon": "💨",
+    "description": "Un pas de côté au dernier instant : les lames et les traits le manquent plus souvent qu'à leur tour. La magie, elle, ne s'esquive pas.",
+    "vocation": "voleur",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": { "esquive": 10 }
+  }
+]

@@ -1531,18 +1531,7 @@
 					</div>
 
 					<!-- ── COMPETENCES ── -->
-					<div class="sheet-panel" id="sh-competences">
-						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
-						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
-						<div class="sh-section" style="display:flex; align-items:center; justify-content:space-between">
-							<span>🔮 Sorts connus</span>
-							<span style="color:#2ed573; font-size:.85rem">Points : <span id="sh-sort-points">{{ character.get("attribute_points", 0) }}</span></span>
-						</div>
-						<div id="sh-sorts-connus"></div>
-						<div class="sh-section" style="margin-top:14px">🏫 Écoles de magie</div>
-						<div id="sh-sorts-magies"></div>
-						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
-						<div id="sh-sorts-apprenables"></div>
+					<div class="sheet-panel" id="sh-competences"><div style="color:#2ed573; font-size:.85rem; float: right;">Points : <span id="sh-comp-points">{{ character.get("attribute_points", 0) }}</span></div>
 						{# Compétences : mêmes règles que les sorts, rendues 100 % côté client
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
@@ -1550,6 +1539,16 @@
 						<div id="sh-competences-connues"></div>
 						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
 						<div id="sh-competences-apprenables"></div>
+						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
+						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
+						<div class="sh-section" style="display:flex; align-items:center; justify-content:space-between">
+							<span>🔮 Sorts connus</span>
+						</div>
+						<div id="sh-sorts-connus"></div>
+						<div class="sh-section" style="margin-top:14px">🏫 Écoles de magie</div>
+						<div id="sh-sorts-magies"></div>
+						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
+						<div id="sh-sorts-apprenables"></div>
 					</div>
 
 					<!-- ── RELATIONS ── -->
@@ -3137,6 +3136,8 @@ function _sortEffetsLabel(e) {
 	for (const [k, v] of Object.entries(e.buffs || {})) parts.push(`${v > 0 ? '+' : ''}${v} ${k}`);
 	if (e.regen_pv) parts.push(`+${e.regen_pv} PV/tour`);
 	if (e.regen_pm) parts.push(`+${e.regen_pm} PM/tour`);
+	if (e.esquive) parts.push(`esquive +${e.esquive}`);
+	if (e.furtivite) parts.push(`🥷 furtivité`);
 	if (e.duree) parts.push(`${e.duree} tours`);
 	return parts.join(', ');
 }
@@ -3266,7 +3267,7 @@ function _renderSortsMagies(payload) {
 function _syncPoints(pts) {
 	_attributePoints = pts;
 	const a = document.getElementById('sh-attribute-points'); if (a) a.textContent = pts;
-	const b = document.getElementById('sh-sort-points');      if (b) b.textContent = pts;
+	const b = document.getElementById('sh-comp-points');      if (b) b.textContent = pts;
 }
 
 async function apprendreMagie(ecole, btn) {
@@ -3325,6 +3326,7 @@ async function apprendreSort(sortId, btn) {
 // client, resynchronisées par les réponses de utiliser_competence / apprendre_competence.
 let _competences            = {{ competences | tojson | safe }};
 let _competencesApprenables = {{ competences_apprenables | tojson | safe }};
+let _competencesEpinglees   = {{ competences_epinglees | tojson | safe }};   // accès rapide combat (ids ordonnés)
 
 function _renderCompetences(list) {
 	if (Array.isArray(list)) _competences = list;
@@ -3335,10 +3337,14 @@ function _renderCompetences(list) {
 		return;
 	}
 	box.innerHTML = _competences.map(c => {
-		// Une passive n'a pas d'action : son bonus est permanent (inclus dans les dérivées).
+		// Une passive n'a ni action ni pin : son bonus est permanent (inclus dans les dérivées).
+		const pinned = _competencesEpinglees.includes(c.competence_id);
+		const pin = c.mode === 'active' ? `<button type="button" class="sh-pin-btn${pinned ? ' active' : ''}"
+			title="${pinned ? 'Retirer de l\'accès rapide (barre de combat)' : 'Épingler en accès rapide (barre de combat)'}"
+			onclick="epinglerCompetence('${c.competence_id}', this)">📌</button>` : '';
 		const actions = c.mode === 'passive'
 			? '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>'
-			: (c.utilisable
+			: pin + (c.utilisable
 				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
 				: '<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>');
 		const pm = c.cout_pm ? `<span class="sh-sort-pm">${c.cout_pm} PM</span>` : '';
@@ -3353,6 +3359,22 @@ function _renderCompetences(list) {
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;
 	}).join('');
+}
+
+// Toggle épinglage d'une compétence active en accès rapide (persisté sur le personnage).
+async function epinglerCompetence(competenceId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
+	const epingle = !_competencesEpinglees.includes(competenceId);
+	try {
+		const res = await fetch('api/epingler_competence', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ competence_id: competenceId, epingle })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
+		_competencesEpinglees = data.competences_epinglees || [];
+		_renderCompetences(_competences);   // ré-affiche les états 📌
+	} catch(err) { console.error('Erreur épinglage compétence', err); if (btn) btn.disabled = false; }
 }
 
 function _renderCompetencesApprenables(list) {

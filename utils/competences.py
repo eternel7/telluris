@@ -58,7 +58,22 @@ def normaliser_competence(doc) -> dict | None:
 		"jet": jet,
 		"portee": max(1, _as_int(doc.get("portee")) or 1),
 		"effets": _bonus_dict(doc.get("effets")),
+		# Condition d'activation optionnelle : {"battle_map_tags": [...]} — la
+		# compétence n'agit en combat que si la carte porte l'un de ces tags
+		# (condition_remplie). Absente = toujours active.
+		"condition": dict(doc.get("condition") or {}),
 	}
+
+
+def condition_remplie(comp: dict, map_tags) -> bool:
+	"""Évalue la `condition` d'une compétence (ou d'un sort — champ partagé) contre les
+	tags du terrain de combat (tags de la battle_map ∪ zone_tags). Condition absente ou
+	vide = toujours vraie ; `battle_map_tags` = vrai si l'intersection est non vide."""
+	cond = (comp or {}).get("condition") or {}
+	requis = cond.get("battle_map_tags")
+	if not requis:
+		return True
+	return bool(set(str(t) for t in requis) & set(str(t) for t in (map_tags or [])))
 
 
 def est_passive(comp: dict) -> bool:
@@ -70,12 +85,14 @@ def est_active(comp: dict) -> bool:
 
 
 def competence_utilisable_combat(comp: dict) -> bool:
-	"""Éligibilité combat : active ET part instantanée (dégâts, PV ou PM). La part
-	buffs/durée d'une compétence mixte est perdue en combat (règle consommables)."""
+	"""Éligibilité combat : active ET part instantanée (dégâts, PV, PM — ou furtivité,
+	qui est un état de combat posé instantanément). La part buffs/durée d'une compétence
+	mixte est perdue en combat (règle consommables)."""
 	if not est_active(comp):
 		return False
 	eff = (comp or {}).get("effets") or {}
-	return bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0
+	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
+			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0)
 
 
 def competence_utilisable_exploration(comp: dict) -> bool:
@@ -96,7 +113,8 @@ def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 	les consommables/sorts → tick_effets/caracts_avec_buffs/regen_bonus/chips inchangés."""
 	eff = (comp or {}).get("effets") or {}
 	if _as_int(eff.get("duree")) <= 0 or not (
-			eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm"))):
+			eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm"))
+			or _as_int(eff.get("esquive"))):
 		return None
 	entry = {
 		"competence_id": (comp or {}).get("id", ""),
@@ -105,6 +123,7 @@ def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 		"buffs": dict(eff.get("buffs") or {}),
 		"regen_pv": _as_int(eff.get("regen_pv")),
 		"regen_pm": _as_int(eff.get("regen_pm")),
+		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}
 	character.setdefault("effets_actifs", []).append(entry)
@@ -124,19 +143,23 @@ def competences_connues_docs(character: dict, get_doc) -> list:
 
 
 def bonus_passifs(character: dict, get_doc) -> dict:
-	"""Somme des buffs/régén des compétences PASSIVES connues : {buffs, regen_pv, regen_pm}.
-	Les actives n'y contribuent jamais (leur effet passe par effets_actifs à l'usage)."""
+	"""Somme des buffs/régén/esquive des compétences PASSIVES connues :
+	{buffs, regen_pv, regen_pm, esquive}. Les actives n'y contribuent jamais (leur effet
+	passe par effets_actifs à l'usage). Les passives portant une `condition` sont EXCLUES
+	de ce repli inconditionnel : elles ne valent que là où la condition s'évalue, au
+	snapshot de combat (cf. furtivite_passive)."""
 	buffs: dict = {}
-	regen_pv = regen_pm = 0
+	regen_pv = regen_pm = esquive = 0
 	for comp in competences_connues_docs(character, get_doc):
-		if not est_passive(comp):
+		if not est_passive(comp) or comp.get("condition"):
 			continue
 		eff = comp["effets"]
 		for k, delta in (eff.get("buffs") or {}).items():
 			buffs[str(k)] = int(buffs.get(str(k), 0)) + int(delta)
 		regen_pv += _as_int(eff.get("regen_pv"))
 		regen_pm += _as_int(eff.get("regen_pm"))
-	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm}
+		esquive += _as_int(eff.get("esquive"))
+	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive}
 
 
 def recompute_competences_bonus(character: dict, get_doc) -> dict:
@@ -145,6 +168,39 @@ def recompute_competences_bonus(character: dict, get_doc) -> dict:
 	bonus = bonus_passifs(character, get_doc)
 	character["competences_bonus"] = bonus
 	return bonus
+
+
+def furtivite_passive(character: dict, get_doc, map_tags) -> int:
+	"""Bonus de furtivité conféré par les PASSIVES à l'entrée d'un combat, conditions
+	évaluées contre les tags du terrain (battle_map ∪ zone). 0 = pas furtif. En cas de
+	sources multiples on prend le MAX (être caché ne se cumule pas, on garde la
+	meilleure dissimulation)."""
+	best = 0
+	for comp in competences_connues_docs(character, get_doc):
+		if not est_passive(comp) or not condition_remplie(comp, map_tags):
+			continue
+		best = max(best, _as_int(comp["effets"].get("furtivite")))
+	return best
+
+
+def competences_epinglees_effectives(character: dict, get_doc) -> list:
+	"""Compétences d'accès rapide (barre d'icônes en combat), ids ordonnés — miroir de
+	sorts_epingles_effectifs.
+
+	Champ `competences_epinglees` présent → liste filtrée aux compétences encore connues
+	(ordre conservé, y compris vide = choix explicite du joueur). Champ absent →
+	**auto-épinglage de la première ACTIVE connue** (une passive n'a pas d'usage en
+	barre d'action), sans migration."""
+	character = character or {}
+	connues = character.get("competences_connues") or []
+	if "competences_epinglees" in character:
+		epingles = character.get("competences_epinglees") or []
+		return [c for c in epingles if c in connues]
+	for cid in connues:
+		comp = normaliser_competence(get_doc(cid))
+		if comp and est_active(comp):
+			return [cid]
+	return []
 
 
 # ── Apprentissage ────────────────────────────────────────────────────────────────

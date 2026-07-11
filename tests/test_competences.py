@@ -8,16 +8,20 @@
 import pytest
 
 from models import character_stats
-from utils.consommables import caracts_avec_buffs, regen_bonus
+from utils.consommables import caracts_avec_buffs, regen_bonus, esquive_bonus
 from utils.competences import (
     normaliser_competence, est_passive, est_active,
     competence_utilisable_combat, competence_utilisable_exploration,
     empiler_effet_competence, bonus_passifs, recompute_competences_bonus,
     cout_apprentissage, vocation_choisit_competence, competences_apprenables,
     competences_depart_par_vocation, liste_competences_payload,
+    condition_remplie, furtivite_passive, competences_epinglees_effectives,
 )
 from utils import combat as combat_mod
-from utils.combat import resolve_action
+from utils.combat import (
+    resolve_action, _detection_threshold, _run_monster_turn, _do_attack_on,
+    get_combat_grid,
+)
 
 
 def _comp(**overrides):
@@ -158,7 +162,8 @@ def test_bonus_passifs_somme_les_passives_et_ignore_les_actives():
 def test_recompute_competences_bonus_ecrit_le_champ():
     perso = _perso(competences_connues=["competence:maitrise"])
     recompute_competences_bonus(perso, _get_doc)
-    assert perso["competences_bonus"] == {"buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0}
+    assert perso["competences_bonus"] == {"buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0,
+                                          "esquive": 0}
 
 
 def test_passive_arrive_dans_les_caracts():
@@ -363,3 +368,212 @@ def test_competence_ranged_exige_une_ligne_de_vue_libre():
     comp = normaliser_competence(_comp(jet="cd", portee=6))
     res = resolve_action(combat, "competence", cible_id="monstre_1", competence=comp)
     assert "error" in res and "corps à corps" in res["error"]
+
+
+# ── Nouvelles clés d'effets : esquive / furtivite ────────────────────────────────
+
+def test_normalisation_esquive_et_furtivite():
+    comp = normaliser_competence(_comp(effets={"esquive": 10, "furtivite": 3}))
+    assert comp["effets"]["esquive"] == 10
+    assert comp["effets"]["furtivite"] == 3
+    # Absentes → normalisées à 0 (clés toujours présentes).
+    comp = normaliser_competence(_comp())
+    assert comp["effets"]["esquive"] == 0 and comp["effets"]["furtivite"] == 0
+
+
+def test_fusionner_effets_additionne_esquive_et_furtivite():
+    from utils.sorts import fusionner_effets
+    out = fusionner_effets({"esquive": 5, "furtivite": 1},
+                           [{"esquive": 3}, {"furtivite": 2}])
+    assert out["esquive"] == 8 and out["furtivite"] == 3
+
+
+def test_empiler_effet_competence_porte_l_esquive():
+    perso = {"effets_actifs": []}
+    comp = normaliser_competence(_comp(cible="soi", effets={"esquive": 10, "duree": 3}))
+    entry = empiler_effet_competence(perso, comp)
+    # Un effet à durée dont la seule substance est l'esquive doit s'empiler.
+    assert entry is not None and entry["esquive"] == 10 and entry["restants"] == 3
+
+
+# ── condition (battle_map_tags) ──────────────────────────────────────────────────
+
+def test_condition_remplie():
+    comp = normaliser_competence(_comp(condition={"battle_map_tags": ["foret", "bois"]}))
+    assert condition_remplie(comp, ["chemin", "foret"]) is True
+    assert condition_remplie(comp, ["desert"]) is False
+    assert condition_remplie(comp, []) is False
+    # Condition absente = toujours active.
+    assert condition_remplie(normaliser_competence(_comp()), []) is True
+
+
+_DOCS_FURTIF = {
+    "competence:furtivite_sylvestre": _passive(
+        _id="competence:furtivite_sylvestre", nom="Furtivité sylvestre",
+        condition={"battle_map_tags": ["foret", "bois"]}, effets={"furtivite": 1}),
+    "competence:esquive": _passive(
+        _id="competence:esquive", nom="Esquive", vocation="voleur",
+        effets={"esquive": 10}),
+    "competence:maitrise": _passive(),
+}
+
+
+def test_passive_conditionnee_exclue_du_repli_inconditionnel():
+    # La furtivité sylvestre ne vaut qu'en forêt : elle ne doit JAMAIS fuiter dans
+    # competences_bonus (qui s'applique partout, exploration comprise).
+    perso = _perso(competences_connues=["competence:furtivite_sylvestre", "competence:esquive"])
+    bonus = bonus_passifs(perso, _DOCS_FURTIF.get)
+    assert bonus["esquive"] == 10
+    assert bonus["buffs"] == {}
+
+
+def test_esquive_bonus_somme_passives_et_effets_actifs():
+    perso = _perso(competences_connues=["competence:esquive"],
+                   effets_actifs=[{"esquive": 5, "restants": 2}])
+    recompute_competences_bonus(perso, _DOCS_FURTIF.get)
+    assert esquive_bonus(perso) == 15
+
+
+def test_furtivite_passive_selon_les_tags_du_terrain():
+    perso = _perso(competences_connues=["competence:furtivite_sylvestre"])
+    assert furtivite_passive(perso, _DOCS_FURTIF.get, ["foret", "chemin"]) == 1
+    assert furtivite_passive(perso, _DOCS_FURTIF.get, ["desert"]) == 0
+    # Une passive sans condition (Esquive) ne confère pas de furtivité.
+    perso = _perso(competences_connues=["competence:esquive"])
+    assert furtivite_passive(perso, _DOCS_FURTIF.get, ["foret"]) == 0
+
+
+# ── Détection & tour des monstres ────────────────────────────────────────────────
+
+def test_detection_threshold_et_replis():
+    joueur = {"ag": 30, "furtivite_bonus": 0}
+    # Vol prioritaire : 50 + 40 − 30 = 60.
+    assert _detection_threshold({"vol": 40, "int": 60, "ag": 80}, joueur) == 60
+    # Sans Vol → Int−10 : 50 + (60−10) − 30 = 70.
+    assert _detection_threshold({"vol": 0, "int": 60, "ag": 80}, joueur) == 70
+    # Sans Vol ni Int → Ag−30 : 50 + (80−30) − 30 = 70.
+    assert _detection_threshold({"vol": 0, "int": 0, "ag": 80}, joueur) == 70
+    # Le bonus de furtivité gonfle la difficulté : 50 + 40 − (30+20) = 40.
+    joueur = {"ag": 30, "furtivite_bonus": 20}
+    assert _detection_threshold({"vol": 40, "int": 0, "ag": 0}, joueur) == 40
+    # Clamp [5, 95].
+    assert _detection_threshold({"vol": 0, "int": 0, "ag": 0}, {"ag": 100}) == 5
+
+
+def _monstre_actif(mid, x, y, **extra):
+    """Monstre complet pour faire tourner _run_monster_turn (pas seulement une cible)."""
+    m = _monstre(mid, x, y, cc=50, degats_cc="1D4",
+                 actions_max=2, actions_restantes=2, cells_moved=0, attaques=0,
+                 portee=1, vol=0, tags=[], detecte=False)
+    m["int"] = 0
+    m.update(extra)
+    return m
+
+
+def _avancer_tour(combat, monstre):
+    grid = get_combat_grid(combat)
+    _run_monster_turn(combat, monstre, grid)
+
+
+def test_monstre_non_detecte_ne_vient_pas_au_joueur(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 100)  # détection ratée
+    # Monstre adjacent au joueur, immobile (deplacement 0) : sans furtivité il frapperait.
+    m = _monstre_actif("monstre_0", 3, 4, deplacement=0)
+    combat = _combat(joueur_extra={"furtif": True, "furtivite_bonus": 1}, monstres=[m])
+    combat["acteur_courant_index"] = 1
+    pv_avant = combat["joueurs"][0]["currentPV"]
+    _avancer_tour(combat, m)
+    assert combat["joueurs"][0]["currentPV"] == pv_avant   # pas attaqué
+    assert m["detecte"] is False
+    assert m["pos"] == {"x": 3, "y": 4}                    # pas bougé (deplacement 0)
+
+
+def test_monstre_detecte_puis_attaque(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)   # détection + coups réussis
+    m = _monstre_actif("monstre_0", 3, 4, deplacement=0, vol=40)
+    combat = _combat(joueur_extra={"furtif": True, "furtivite_bonus": 1}, monstres=[m])
+    combat["acteur_courant_index"] = 1
+    pv_avant = combat["joueurs"][0]["currentPV"]
+    _avancer_tour(combat, m)
+    assert m["detecte"] is True
+    assert combat["joueurs"][0]["currentPV"] < pv_avant    # repéré → frappé
+    # La détection PERSISTE : le tour suivant attaque directement même si le jet raterait.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 100)
+    combat["acteur_courant_index"] = 1
+    pv = combat["joueurs"][0]["currentPV"]
+    _avancer_tour(combat, m)
+    # (roll 100 = miss sur l'attaque, mais il a bien tenté : detecte est resté True)
+    assert m["detecte"] is True
+
+
+def test_attaquer_brise_la_furtivite(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 100)
+    combat = _combat(joueur_extra={
+        "furtif": True, "furtivite_bonus": 1,
+        "attaque_profils": [{"mode": "cac", "portee": 1, "ranged": False,
+                             "toucher": "cc", "degats": "degats_cc"}],
+        "degats_cc": "1D4",
+    })
+    resolve_action(combat, "attaquer", cible_id="monstre_0", mode="cac")
+    assert combat["joueurs"][0]["furtif"] is False
+    assert combat["joueurs"][0]["furtivite_bonus"] == 0
+
+
+def test_active_furtivite_refurtive_et_efface_la_detection():
+    m1 = _monstre_actif("monstre_0", 3, 4, detecte=True)
+    m2 = _monstre_actif("monstre_1", 0, 0, detecte=True)
+    combat = _combat(monstres=[m1, m2])
+    comp = normaliser_competence(_comp(cible="soi", cout_pm=0, effets={"furtivite": 1}))
+    res = resolve_action(combat, "competence", cible_id=None, competence=comp)
+    assert res.get("furtif") is True
+    assert combat["joueurs"][0]["furtif"] is True
+    assert combat["joueurs"][0]["furtivite_bonus"] == 1
+    assert m1["detecte"] is False and m2["detecte"] is False
+    assert combat["joueurs"][0]["competences"] == 1        # coûte bien 1 action
+
+
+def test_predateur_chasse_la_proie(monkeypatch):
+    rolls = iter([100, 1, 1, 1, 1, 1, 1])   # détection ratée, puis coups réussis (dés à 1)
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: next(rolls, 1))
+    predateur = _monstre_actif("monstre_0", 3, 4, tags=["predateur"], deplacement=2)
+    proie = _monstre_actif("monstre_1", 2, 4, tags=["proie"], pa=0, currentPV=1, pv_max=20)
+    combat = _combat(joueur_extra={"furtif": True, "furtivite_bonus": 1},
+                     monstres=[predateur, proie])
+    combat["acteur_courant_index"] = 1
+    pv_joueur = combat["joueurs"][0]["currentPV"]
+    _avancer_tour(combat, predateur)
+    assert combat["joueurs"][0]["currentPV"] == pv_joueur  # le joueur n'a pas été visé
+    assert proie["vivant"] is False                        # la proie est abattue
+    assert proie["tue_par_monstre"] is True
+    assert proie["xp_reward"] == 0                         # pas d'XP pour un kill de monstre
+
+
+def test_esquive_reduit_le_seuil_physique(monkeypatch):
+    # cc 50 vs Ag 30 → seuil 70. Jet forcé à 65 : touche SANS esquive, rate AVEC esquive 10.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 65)
+    attaquant = _monstre_actif("monstre_0", 3, 4)
+    combat = _combat(monstres=[attaquant])
+    joueur = combat["joueurs"][0]
+
+    joueur["esquive"] = 0
+    pv = joueur["currentPV"]
+    _do_attack_on(combat, attaquant, joueur)
+    assert joueur["currentPV"] < pv                        # 65 ≤ 70 : touché
+
+    joueur["esquive"] = 10
+    pv = joueur["currentPV"]
+    _do_attack_on(combat, attaquant, joueur)
+    assert joueur["currentPV"] == pv                       # 65 > 60 : esquivé
+
+
+# ── Épinglage des compétences actives ────────────────────────────────────────────
+
+def test_competences_epinglees_auto_pin_premiere_active():
+    perso = _perso(competences_connues=["competence:maitrise", "competence:frappe"])
+    # Champ absent → auto-épingle la première ACTIVE (la passive est sautée).
+    assert competences_epinglees_effectives(perso, _get_doc) == ["competence:frappe"]
+    # Champ présent → choix explicite respecté (y compris vide) et ids inconnus filtrés.
+    perso["competences_epinglees"] = []
+    assert competences_epinglees_effectives(perso, _get_doc) == []
+    perso["competences_epinglees"] = ["competence:frappe", "competence:disparue"]
+    assert competences_epinglees_effectives(perso, _get_doc) == ["competence:frappe"]

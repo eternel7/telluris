@@ -13,6 +13,7 @@ from utils.sorts import (
 )
 from utils.competences import (
     normaliser_competence, competence_utilisable_combat, liste_competences_payload,
+    furtivite_passive,
 )
 from routers.user import _take_ref
 from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity
@@ -162,8 +163,13 @@ async def start_combat(
     # Sélection pondérée d'une battle map (lieu) selon les tags de la zone + lieu de départ.
     battle_map = select_battle_map(body.tags, depart_lieu)
     map_image = battle_map.get("image") if battle_map else random.choice(BATTLE_MAPS)
+    # Furtivité passive à l'entrée en combat : conditions de terrain évaluées contre les
+    # tags de la battle map ∪ tags de zone (ex. Furtivité sylvestre du forestier en forêt).
+    map_tags = set((battle_map or {}).get("tags", [])) | set(body.tags or [])
+    furtivite = furtivite_passive(character, get_doc, map_tags)
     # Le combat référence le lieu battle map (cells non dupliqué) ; repli grille ouverte.
-    combat_doc = create_combat_doc(character, monstres, body.tags, map_image, battle_map=battle_map)
+    combat_doc = create_combat_doc(character, monstres, body.tags, map_image,
+                                   battle_map=battle_map, furtivite_initiale=furtivite)
     resolve_first_turns(combat_doc)  # no-op if player goes first
     # Cas limite : les monstres terminent déjà le combat au 1er tour.
     if combat_doc["status"] != "active":
