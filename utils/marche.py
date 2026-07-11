@@ -540,6 +540,10 @@ def relations_lieux_payload(character: dict) -> list[dict]:
 			if pdoc:
 				parent_nom = pdoc.get("label", parent_id)
 				parent_img, parent_route = _lieu_image_route(pdoc)
+				
+		if lieu_doc.get("cells"):
+			img = None
+			img_route = None
 		relations.append({
 			"lieu_id": lieu_id,
 			"nom": lieu_doc.get("label", lieu_id),
