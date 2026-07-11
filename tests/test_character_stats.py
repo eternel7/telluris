@@ -64,11 +64,19 @@ def test_initiative():
     assert stats.initiative == 43
 
 def test_deplacement_min_1():
-    # V reste petit (échelle 1-10) ; un gros malus d'armure plafonne à 1.
-    base = make_base(v=1)
-    eq = EquipmentBonus(malus_depl=5)
-    stats = compute_derived_stats(base, niveau=1, equipment=eq)
-    assert stats.deplacement >= 1
+    # V reste petit (échelle 1-10) et le malus d'armure est déjà replié dedans (delta sur V,
+    # cf. recompute_equipment_bonus) : le déplacement ne descend jamais sous 1.
+    base = make_base(v=0)
+    stats = compute_derived_stats(base, niveau=1)
+    assert stats.deplacement == 1
+
+
+def test_malus_depl_pas_soustrait_deux_fois():
+    # `equipment.malus_depl` est informatif : il a déjà été replié dans V via les buffs, le
+    # soustraire ici le compterait deux fois (l'armure lourde ralentirait double).
+    base = make_base(v=4)
+    eq = EquipmentBonus(malus_depl=-1)
+    assert compute_derived_stats(base, niveau=1, equipment=eq).deplacement == 4
 
 def test_cc():
     # Pondération 1:3 F/Ag (rééquilibrage 2026-07-02 : F = dégâts, Ag = précision) :

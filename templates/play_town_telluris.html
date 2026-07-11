@@ -2845,7 +2845,10 @@ const _CMP_ATTRS = [
 	{ label: 'Toucher dist.',get: it => +(it.bonus_cd || 0),          better: 1,  fmt: v => '+' + v },
 	{ label: 'Dégâts',       get: it => +(it.bonus_degats || 0),      better: 1,  fmt: v => '+' + v },
 	{ label: 'Initiative',   get: it => +(it.bonus_initiative || 0),  better: 1,  fmt: v => '+' + v },
-	{ label: 'Malus dépl.',  get: it => +(it.bonus_malus_depl || 0),  better: -1, fmt: v => String(v) },
+	// V porté par l'objet : `bonus.V` + `bonus_malus_depl` (delta négatif des armures
+	// lourdes), les deux se cumulant sur la même caract. Plus haut = mieux.
+	{ label: 'Vitesse (V)',  get: it => +((it.bonus || {}).V || 0) + +(it.bonus_malus_depl || 0),
+	  better: 1, fmt: v => (v > 0 ? '+' : '') + v },
 ];
 
 function _fmtDelta(d) { return Number.isInteger(d) ? String(d) : d.toFixed(1); }
@@ -2874,7 +2877,10 @@ function _effetsChips(item) {
 }
 function _bonusChips(item) {
 	const b = (item && item.bonus) || {};
-	return Object.keys(b).sort().map(k => `✨ ${b[k] > 0 ? '+' : ''}${b[k]} ${k}`);
+	// V est déjà donné par la ligne comparable « Vitesse (V) » (qui y agrège le malus
+	// d'armure) : on ne le répète pas en chip.
+	return Object.keys(b).filter(k => k !== 'V').sort()
+		.map(k => `✨ ${b[k] > 0 ? '+' : ''}${b[k]} ${k}`);
 }
 
 function _faceCell(item, role) {

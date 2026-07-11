@@ -512,7 +512,7 @@ class EquipmentBonus(BaseModel):
 	pv:			int = 0	# Bonus PV (objets magiques)
 	pm:			int = 0	# Bonus PM
 	pa:			int = 0	# Valeur d'armure totale
-	malus_depl:	int = 0	# Malus de déplacement (armure lourde)
+	malus_depl:	int = 0	# Delta de V des armures (négatif = lourde) — replié dans `buffs`
 	cc_bonus:	  int = 0	# Bonus attaque CàC (arme)
 	cd_bonus:	  int = 0	# Bonus attaque distance (arme)
 	degats_bonus:  int = 0	# Bonus dégâts plat (arme) : +x
@@ -569,7 +569,11 @@ def compute_derived_stats(
 	initiative = (base.ag + base.v*20) // 3 + equipment.initiative
 
 	# ── Déplacement ─────────────────────────────────────────────────
-	deplacement = max(1, base.v - equipment.malus_depl)
+	# `equipment.malus_depl` n'est PAS soustrait ici : c'est un delta sur V, replié dans
+	# equipment.buffs par recompute_equipment_bonus, donc déjà présent dans `base.v` (et
+	# pesant aussi sur l'initiative et le cd). Le soustraire une seconde fois le compterait
+	# deux fois. Le champ reste exposé à titre informatif (fiche objet, marché).
+	deplacement = max(1, base.v)
 
 	# ── Corps à corps ────────────────────────────────────────────────
 	cc = (base.f + (base.ag *3)) // 4 + equipment.cc_bonus

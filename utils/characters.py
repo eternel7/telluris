@@ -110,7 +110,10 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 		if dice:
 			bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
 		bonus.initiative   += item.get("bonus_initiative", 0)
-		# Champ `bonus` = {caract: delta} : buff de caractéristique porté par l'objet.
+
+		# Buffs de caractéristiques portés par l'objet : le champ `bonus` = {caract: delta},
+		# PLUS `bonus_malus_depl`, qui est lui aussi un delta sur V (données : -1, -2 pour les
+		# armures lourdes) et se cumule donc naturellement avec un éventuel `bonus.V`.
 		buffs = {}
 		for caract, delta in (item.get("bonus") or {}).items():
 			try:
@@ -119,6 +122,12 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 				continue
 			if delta:
 				buffs[str(caract)] = buffs.get(str(caract), 0) + delta
+		try:
+			malus_v = int(item.get("bonus_malus_depl", 0) or 0)
+		except (TypeError, ValueError):
+			malus_v = 0
+		if malus_v:
+			buffs["V"] = buffs.get("V", 0) + malus_v
 		if buffs:
 			for caract, delta in buffs.items():
 				bonus.buffs[caract] = bonus.buffs.get(caract, 0) + delta

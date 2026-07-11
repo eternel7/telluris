@@ -161,6 +161,38 @@ def test_caracts_detail_caract_sans_modificateur():
     assert detail["R"] == {"base": 40, "total": 40, "delta": 0, "sources": []}
 
 
+# ── recompute_equipment_bonus : agrégation des buffs portés par les objets ───────
+
+def test_recompute_equipment_bonus_agrege_bonus_et_malus_depl(monkeypatch):
+    # `bonus_malus_depl` est un delta sur V (négatif = armure lourde) : il se replie dans
+    # les buffs, au même titre que `bonus`, et se cumule avec un éventuel bonus V du même
+    # objet. Il n'est PAS re-soustrait dans compute_derived_stats (double comptage).
+    import utils.characters as characters
+    items = {
+        "item:dague":   {"nom": "Dague", "icon": "🗡️", "bonus": {"Ag": 3, "V": 1}},
+        "item:harnois": {"nom": "Harnois", "icon": "🛡️", "bonus_pa": 6,
+                         "bonus_malus_depl": -2},
+    }
+    monkeypatch.setattr(characters, "get_doc", lambda i: items.get(i))
+
+    eq = characters.recompute_equipment_bonus(
+        {"main_droite": "item:dague", "torse": "item:harnois"})
+    assert eq.pa == 6
+    assert eq.buffs == {"Ag": 3, "V": -1}          # +1 (dague) − 2 (harnois)
+    assert {s["nom"] for s in eq.buffs_sources} == {"Dague", "Harnois"}
+
+
+def test_sync_equipment_bonus_denormalise_sur_le_perso(monkeypatch):
+    import utils.characters as characters
+    monkeypatch.setattr(characters, "get_doc",
+                        lambda i: {"nom": "Dague", "icon": "🗡️", "bonus": {"Ag": 3}})
+    perso = _perso(slots={"main_droite": "item:dague"})
+    characters.sync_equipment_bonus(perso)
+    # Le champ dénormalisé est ce que lit le chokepoint _sources_de_buffs.
+    assert perso["equipment_bonus"]["buffs"] == {"Ag": 3}
+    assert caracts_avec_buffs(perso)["Ag"] == 33
+
+
 # ── empiler_effet / appliquer_instantane ────────────────────────────────────────
 
 def test_empiler_effet_a_duree():
