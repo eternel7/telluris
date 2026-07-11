@@ -377,6 +377,15 @@
 #quick-sorts .quick-sort-btn, #quick-comps .quick-sort-btn { padding: 6px 10px; font-size: 1.15rem; line-height: 1; }
 /* Badge d'état furtif du joueur (🥷) dans l'en-tête de tour. */
 #furtif-badge { font-size: 1.05rem; margin-left: 6px; filter: drop-shadow(0 0 4px #b26bff); }
+/* Œil barré sur le badge d'un ennemi qui ne vous a pas encore repéré (joueur furtif). */
+.ib-eye {
+	position: absolute; right: -3px; bottom: -3px; z-index: 2;
+	width: 17px; height: 17px; border-radius: 50%;
+	background: #241a30; border: 1px solid #b26bff;
+	display: flex; align-items: center; justify-content: center;
+	color: #d9b8ff; filter: drop-shadow(0 0 3px #b26bff);
+}
+.ib-eye[hidden] { display: none; }
 
 .combat-log {
 	background: var(--panel-bg);
@@ -586,7 +595,7 @@
 		</div>
 		<!-- Tour header + Initiative strip -->
 		<div class="tour-header">
-			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><span id="furtif-badge" style="display:none" title="Furtif : les ennemis ne viennent pas à vous tant qu'ils ne vous ont pas repéré. Attaquer vous révèle.">🥷</span></span>
+			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><span id="furtif-badge" style="display:none" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
 			<div id="initiative-strip">
 				{% for actor_id in combat.ordre_initiative %}
 					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
@@ -611,6 +620,13 @@
 								<circle class="vit-track" cx="21" cy="21" r="17"></circle>
 								<circle class="vit-pv" id="mbadge-pv-{{ actor_id }}" cx="21" cy="21" r="17" transform="rotate(-90 21 21)" style="stroke-dasharray: {{ m_pv_arc }} 999"></circle>
 							</svg>
+							<span class="ib-eye" id="eye-{{ actor_id }}" hidden title="Ne vous a pas repéré : il ne vient pas à vous.">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+									<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"></path>
+									<circle cx="12" cy="12" r="2.6"></circle>
+									<line x1="3" y1="21" x2="21" y2="3"></line>
+								</svg>
+							</span>
 						</div>
 					{% endif %}
 				{% endfor %}
@@ -938,6 +954,7 @@ function updateChargeBar(j) {
 }
 
 function updateInitiativeStrip(data) {
+	const furtif = !!(data.joueurs[0] || {}).furtif;
 	data.ordre_initiative.forEach((id, i) => {
 		const el = document.getElementById(`badge-${id}`);
 		if (!el) return;
@@ -947,6 +964,9 @@ function updateInitiativeStrip(data) {
 			el.classList.toggle('dead', !!m && !m.vivant);
 			// Anneau de vie de l'ennemi dans le header (PV rouge).
 			if (m) setRing(document.getElementById(`mbadge-pv-${id}`), m.pv_max > 0 ? m.currentPV / m.pv_max : 0);
+			// Œil barré : cet ennemi ne vous a pas repéré (n'a de sens que si vous êtes furtif).
+			const eye = document.getElementById(`eye-${id}`);
+			if (eye) eye.hidden = !(furtif && m && m.vivant && !m.detecte);
 		}
 	});
 }

@@ -463,6 +463,15 @@ def test_detection_threshold_et_replis():
     assert _detection_threshold({"vol": 0, "int": 0, "ag": 0}, {"ag": 100}) == 5
 
 
+def test_detection_malus_de_distance():
+    # 1 point de difficulté par case (Chebyshev) : le même monstre repère moins bien de loin.
+    joueur = {"ag": 30, "furtivite_bonus": 0, "pos": {"x": 3, "y": 5}}
+    proche = {"vol": 40, "int": 0, "ag": 0, "pos": {"x": 3, "y": 4}}   # 1 case  : 50+40−(30+1) = 59
+    loin = {"vol": 40, "int": 0, "ag": 0, "pos": {"x": 9, "y": 5}}     # 6 cases : 50+40−(30+6) = 54
+    assert _detection_threshold(proche, joueur) == 59
+    assert _detection_threshold(loin, joueur) == 54
+
+
 def _monstre_actif(mid, x, y, **extra):
     """Monstre complet pour faire tourner _run_monster_turn (pas seulement une cible)."""
     m = _monstre(mid, x, y, cc=50, degats_cc="1D4",
@@ -520,6 +529,79 @@ def test_attaquer_brise_la_furtivite(monkeypatch):
     resolve_action(combat, "attaquer", cible_id="monstre_0", mode="cac")
     assert combat["joueurs"][0]["furtif"] is False
     assert combat["joueurs"][0]["furtivite_bonus"] == 0
+
+
+# ── Attaques à DISTANCE depuis l'ombre : pas de rupture, la cible seule tente un jet ──
+
+_PROFIL_TIR = [{"mode": "tir", "portee": 6, "ranged": True,
+                "toucher": "cd", "degats": "degats_cd"}]
+
+
+def _combat_embuscade(**joueur_extra):
+    """Joueur furtif à l'arc, deux monstres LOIN (aucun engagement au corps à corps) :
+    la cible en (3, 1), un témoin en (0, 0). Grille 7×7 ouverte = ligne de vue dégagée."""
+    cible = _monstre_actif("monstre_0", 3, 1)
+    temoin = _monstre_actif("monstre_1", 0, 0)
+    joueur = {"furtif": True, "furtivite_bonus": 1,
+              "attaque_profils": _PROFIL_TIR, "degats_cd": "1D4"}
+    joueur.update(joueur_extra)
+    return _combat(joueur_extra=joueur, monstres=[cible, temoin]), cible, temoin
+
+
+def test_attaque_a_distance_ne_brise_pas_la_furtivite(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 100)  # tir raté, détection ratée
+    combat, cible, temoin = _combat_embuscade()
+    resolve_action(combat, "attaquer", cible_id="monstre_0", mode="tir")
+    assert combat["joueurs"][0]["furtif"] is True          # l'archer reste dans l'ombre
+    assert combat["joueurs"][0]["furtivite_bonus"] == 1
+    assert cible["detecte"] is False
+    assert temoin["detecte"] is False
+
+
+def test_attaque_a_distance_peut_alerter_la_cible(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)    # tir touché, détection réussie
+    combat, cible, temoin = _combat_embuscade()
+    cible["pv_max"] = cible["currentPV"] = 200            # survit à la flèche → elle peut chercher
+    resolve_action(combat, "attaquer", cible_id="monstre_0", mode="tir")
+    assert cible["detecte"] is True                        # la victime, elle, vous a repéré
+    assert temoin["detecte"] is False                      # les autres n'ont rien vu
+    assert combat["joueurs"][0]["furtif"] is True          # la furtivité tient pour eux
+
+
+def test_kill_a_distance_reste_silencieux(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)    # tir touché + détection réussirait
+    combat, cible, temoin = _combat_embuscade()
+    cible["currentPV"] = cible["pa"] = 1                   # la flèche l'abat
+    resolve_action(combat, "attaquer", cible_id="monstre_0", mode="tir")
+    assert cible["vivant"] is False
+    assert cible["detecte"] is False                       # une cible abattue ne repère plus rien
+    assert combat["joueurs"][0]["furtif"] is True
+
+
+def test_sort_distant_ne_brise_pas_mais_sort_de_contact_brise(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 100)  # tout raté
+    sort_distant = {"doc": {"nom": "Trait d'ombre", "cout_pm": 0, "cible": "ennemi", "portee": 5},
+                    "effets": {"degats": "1D4"}}
+    combat, cible, _ = _combat_embuscade()
+    resolve_action(combat, "sort", cible_id="monstre_0", sort=sort_distant)
+    assert combat["joueurs"][0]["furtif"] is True
+    assert cible["detecte"] is False
+
+    # Un sort de CONTACT (portée 1) révèle le lanceur, touché ou raté.
+    sort_contact = {"doc": {"nom": "Griffe spectrale", "cout_pm": 0, "cible": "ennemi", "portee": 1},
+                    "effets": {"degats": "1D4"}}
+    combat = _combat(joueur_extra={"furtif": True, "furtivite_bonus": 1})   # monstre adjacent
+    resolve_action(combat, "sort", cible_id="monstre_0", sort=sort_contact)
+    assert combat["joueurs"][0]["furtif"] is False
+
+
+def test_competence_distante_ne_brise_pas(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 100)
+    comp = normaliser_competence(_comp(jet="cd", portee=5, cout_pm=0))
+    combat, cible, _ = _combat_embuscade()
+    resolve_action(combat, "competence", cible_id="monstre_0", competence=comp)
+    assert combat["joueurs"][0]["furtif"] is True
+    assert cible["detecte"] is False
 
 
 def test_active_furtivite_refurtive_et_efface_la_detection():

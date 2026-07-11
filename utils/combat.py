@@ -907,7 +907,9 @@ def _detection_threshold(monstre: dict, joueur: dict) -> int:
 	"""Seuil du jet de détection d'un joueur furtif (d100, jet ≤ seuil = repéré).
 	Compétence de détection = Vol du monstre, repli Int−10 (créature sans volonté),
 	repli Ag−30 (créature sans intelligence). Difficulté = Ag du joueur + son bonus
-	de furtivité. Même idiome que _hit_threshold : 50 + skill − difficulté, [5, 95]."""
+	de furtivité + la DISTANCE qui les sépare (1 point par case : plus on est loin,
+	plus on est dur à repérer). Même idiome que _hit_threshold : 50 + skill − difficulté,
+	[5, 95]."""
 	vol = int(monstre.get("vol", 0) or 0)
 	intel = int(monstre.get("int", 0) or 0)
 	if vol > 0:
@@ -916,8 +918,36 @@ def _detection_threshold(monstre: dict, joueur: dict) -> int:
 		skill = intel - 10
 	else:
 		skill = int(monstre.get("ag", 0) or 0) - 30
-	difficulte = int(joueur.get("ag", 0) or 0) + int(joueur.get("furtivite_bonus", 0) or 0)
+	distance = _cheby(monstre, joueur) if monstre.get("pos") and joueur.get("pos") else 0
+	difficulte = (int(joueur.get("ag", 0) or 0)
+				  + int(joueur.get("furtivite_bonus", 0) or 0)
+				  + distance)
 	return max(5, min(95, 50 + skill - difficulte))
+
+
+def _tenter_detection(combat_doc: dict, monstre: dict, joueur: dict,
+					  echec_texte: str | None = None) -> bool:
+	"""Jet de détection d100 (≤ seuil = repéré). Une réussite est DÉFINITIVE pour le
+	combat. Tiré en début de tour du monstre, ou par la cible d'une attaque à distance."""
+	seuil = _detection_threshold(monstre, joueur)
+	roll = random.randint(1, 100)
+	if roll <= seuil:
+		monstre["detecte"] = True
+		combat_doc["log"].append({
+			"tour": combat_doc["tour"],
+			"acteur": monstre["nom"],
+			"kind": "sys",
+			"texte": f"{monstre['nom']} vous repère ! (jet {roll} / seuil {seuil})",
+		})
+		return True
+	if echec_texte:
+		combat_doc["log"].append({
+			"tour": combat_doc["tour"],
+			"acteur": monstre["nom"],
+			"kind": "sys",
+			"texte": f"{echec_texte} (jet {roll} / seuil {seuil})",
+		})
+	return False
 
 
 def _briser_furtivite(combat_doc: dict, joueur: dict) -> None:
@@ -948,6 +978,24 @@ def _activer_furtivite(combat_doc: dict, joueur: dict, bonus: int) -> None:
 		"kind": "sys",
 		"texte": f"{joueur['nom']} se fond dans les ombres…",
 	})
+
+
+def _furtivite_apres_offensive(combat_doc: dict, joueur: dict, cible: dict | None,
+							   distant: bool) -> None:
+	"""Sort du joueur furtif après une action offensive. Corps à corps = révélation
+	totale ; à distance = seule la CIBLE tente un jet de détection (tuée d'un trait ou
+	déjà alertée : aucun jet — l'embuscade tient toujours pour les autres)."""
+	if not joueur.get("furtif"):
+		return
+	if not distant:
+		_briser_furtivite(combat_doc, joueur)
+		return
+	if not cible or not cible.get("vivant") or cible.get("detecte"):
+		return
+	_tenter_detection(
+		combat_doc, cible, joueur,
+		echec_texte=f"{cible['nom']} cherche d'où vient le coup sans repérer {joueur['nom']} !",
+	)
 
 
 def _proie_la_plus_proche(combat_doc: dict, predateur: dict) -> dict | None:
@@ -1042,17 +1090,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	portee = monstre.get("portee", 1)
 
 	if joueur.get("furtif") and not monstre.get("detecte"):
-		seuil = _detection_threshold(monstre, joueur)
-		roll = random.randint(1, 100)
-		if roll <= seuil:
-			monstre["detecte"] = True
-			combat_doc["log"].append({
-				"tour": combat_doc["tour"],
-				"acteur": monstre["nom"],
-				"kind": "sys",
-				"texte": f"{monstre['nom']} vous repère ! (jet {roll} / seuil {seuil})",
-			})
-		else:
+		if not _tenter_detection(combat_doc, monstre, joueur):
 			_chasse_ou_erre(combat_doc, monstre, grid)
 			idx = combat_doc["acteur_courant_index"] + 1
 			if idx >= len(combat_doc["ordre_initiative"]):
@@ -1293,7 +1331,7 @@ def resolve_action(
 			})
 			result = {"hit": False, "roll": roll, "seuil": seuil}
 
-		_briser_furtivite(combat_doc, joueur)
+		_furtivite_apres_offensive(combat_doc, joueur, monstre, is_ranged)
 		joueur["attaques"] += 1
 		_refresh_actions(joueur)
 		_check_victory(combat_doc)
@@ -1442,10 +1480,8 @@ def resolve_action(
 			if _cheby(joueur, monstre) > sort_portee:
 				return {"error": "Cible hors de portée."}
 
-			# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés),
-			# et incanter sur un ennemi révèle le lanceur (furtivité brisée même raté).
+			# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés).
 			joueur["currentPM"] -= cout_pm
-			_briser_furtivite(combat_doc, joueur)
 			seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
 			roll = random.randint(1, 100)
 			if roll <= seuil:
@@ -1484,6 +1520,10 @@ def resolve_action(
 					),
 				})
 				result = {"sort": sdoc.get("nom"), "hit": False, "roll": roll, "seuil": seuil}
+
+			# Incanter au contact révèle le lanceur (touché ou raté) ; à distance, seule la
+			# cible tente de le repérer — foudroyée sur place, elle n'en a même pas le temps.
+			_furtivite_apres_offensive(combat_doc, joueur, monstre, sort_portee > 1)
 		else:
 			# Sort sur soi : toujours lançable ; débit PM puis part instantanée clampée.
 			joueur["currentPM"] -= cout_pm
@@ -1556,10 +1596,8 @@ def resolve_action(
 			if _cheby(joueur, monstre) > comp_portee:
 				return {"error": "Cible hors de portée."}
 
-			# La compétence part : PM débités AVANT le jet (raté = PM quand même dépensés),
-			# et frapper un ennemi révèle le joueur (furtivité brisée même raté).
+			# La compétence part : PM débités AVANT le jet (raté = PM quand même dépensés).
 			joueur["currentPM"] -= cout_pm
-			_briser_furtivite(combat_doc, joueur)
 			# Le jet est porté par la DONNÉE : une frappe martiale se résout sous cc/cd contre
 			# l'Ag de la cible (PA soustraits comme une attaque d'arme) ; une compétence
 			# magique se résout sous toucher_magique contre la pm_def (sans soustraction de PA,
@@ -1606,6 +1644,10 @@ def resolve_action(
 					),
 				})
 				result = {"competence": nom, "hit": False, "roll": roll, "seuil": seuil}
+
+			# Frapper au contact révèle le joueur (touché ou raté) ; à distance, seule la
+			# cible tente de le repérer — et une cible abattue ne repère plus rien.
+			_furtivite_apres_offensive(combat_doc, joueur, monstre, comp_portee > 1)
 		else:
 			# Compétence sur soi : toujours utilisable ; débit PM puis part instantanée clampée.
 			joueur["currentPM"] -= cout_pm
