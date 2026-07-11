@@ -7,6 +7,7 @@ import pytest
 
 from utils.consommables import (
     effets_de, est_consommable, effet_instantane, caracts_avec_buffs, regen_bonus,
+    esquive_bonus, caracts_detail,
     empiler_effet, appliquer_instantane, tick_effets, effets_actifs_payload,
 )
 
@@ -76,10 +77,11 @@ def test_buffs_ne_mutent_pas_l_original():
     assert perso["caracteristiques_current"]["F"] == 40
 
 
-def test_buff_v_ignore():
-    # V reste sur l'échelle 1-10 : jamais buffé, même si la donnée en contient un.
-    perso = _perso(effets_actifs=[{"buffs": {"V": 5}, "restants": 3}])
-    assert caracts_avec_buffs(perso)["V"] == 5
+def test_buff_v_applique():
+    # V se buffe comme les autres caracts, à SON échelle (1-10) : une dague +1 V accélère
+    # bel et bien le personnage (deplacement, initiative, cd).
+    perso = _perso(effets_actifs=[{"buffs": {"V": 1}, "restants": 3}])
+    assert caracts_avec_buffs(perso)["V"] == 6
 
 
 def test_buff_caract_absente_ignoree():
@@ -96,6 +98,67 @@ def test_malus_clampe_a_zero():
 def test_sans_effets_actifs_copie_identique():
     perso = _perso()
     assert caracts_avec_buffs(perso) == perso["caracteristiques_current"]
+
+
+# ── équipement comme source de buffs (champ item `bonus`, agrégé dans equipment_bonus) ──
+
+def _eq_bonus(buffs, nom="Dague", icon="🗡️"):
+    """Forme d'EquipmentBonus.model_dump() (seuls les champs lus par le chokepoint)."""
+    return {"pv": 0, "pm": 0, "pa": 0, "malus_depl": 0, "cc_bonus": 0, "cd_bonus": 0,
+            "degats_bonus": 0, "degats_dice": "", "initiative": 0,
+            "buffs": dict(buffs),
+            "buffs_sources": [{"nom": nom, "icon": icon, "buffs": dict(buffs)}]}
+
+
+def test_equipement_buffe_les_caracts():
+    perso = _perso(equipment_bonus=_eq_bonus({"Ag": 3, "V": 1}))
+    buffed = caracts_avec_buffs(perso)
+    assert buffed["Ag"] == 33 and buffed["V"] == 6
+
+
+def test_equipement_competences_et_effets_se_cumulent():
+    perso = _perso(
+        equipment_bonus=_eq_bonus({"F": 3}),
+        competences_bonus={"buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0, "esquive": 0},
+        effets_actifs=[{"buffs": {"F": 10}, "restants": 2}],
+    )
+    assert caracts_avec_buffs(perso)["F"] == 57      # 40 + 3 + 4 + 10
+
+
+def test_equipement_neutre_pour_regen_et_esquive():
+    # EquipmentBonus ne porte ni regen_* ni esquive : la source est inerte pour ces helpers
+    # (ses champs pv/pm sont des bonus de DÉRIVÉES, à ne pas confondre avec de la régén).
+    perso = _perso(equipment_bonus=_eq_bonus({"Ag": 3}))
+    perso["equipment_bonus"]["pv"] = 10
+    assert regen_bonus(perso) == (0, 0)
+    assert esquive_bonus(perso) == 0
+
+
+# ── caracts_detail (grille « Profil modifié ») ───────────────────────────────────
+
+def test_caracts_detail_ventile_les_sources_par_origine():
+    perso = _perso(
+        equipment_bonus=_eq_bonus({"Ag": 3}, nom="Dague"),
+        competences_bonus={"buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0, "esquive": 0,
+                           "buffs_sources": [{"nom": "Maîtrise", "icon": "🗡️",
+                                              "buffs": {"F": 4}}]},
+        effets_actifs=[{"nom": "Potion", "icon": "🧪", "buffs": {"F": 10}, "restants": 2}],
+    )
+    detail = caracts_detail(perso)
+
+    assert detail["Ag"]["base"] == 30 and detail["Ag"]["total"] == 33
+    assert detail["Ag"]["delta"] == 3
+    assert detail["Ag"]["sources"] == [
+        {"origine": "equipement", "nom": "Dague", "icon": "🗡️", "delta": 3}]
+
+    assert detail["F"]["total"] == 54 and detail["F"]["delta"] == 14
+    origines = {(s["origine"], s["nom"], s["delta"]) for s in detail["F"]["sources"]}
+    assert origines == {("effet", "Potion", 10), ("competence", "Maîtrise", 4)}
+
+
+def test_caracts_detail_caract_sans_modificateur():
+    detail = caracts_detail(_perso())
+    assert detail["R"] == {"base": 40, "total": 40, "delta": 0, "sources": []}
 
 
 # ── empiler_effet / appliquer_instantane ────────────────────────────────────────

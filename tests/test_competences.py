@@ -162,8 +162,11 @@ def test_bonus_passifs_somme_les_passives_et_ignore_les_actives():
 def test_recompute_competences_bonus_ecrit_le_champ():
     perso = _perso(competences_connues=["competence:maitrise"])
     recompute_competences_bonus(perso, _get_doc)
-    assert perso["competences_bonus"] == {"buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0,
-                                          "esquive": 0}
+    assert perso["competences_bonus"] == {
+        "buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0, "esquive": 0,
+        # Détail nommé du même agrégat (tooltip « Profil modifié » de la fiche).
+        "buffs_sources": [{"nom": "Maîtrise martiale", "icon": "🗡️", "buffs": {"F": 4}}],
+    }
 
 
 def test_passive_arrive_dans_les_caracts():

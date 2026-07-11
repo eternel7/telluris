@@ -558,6 +558,29 @@
 			margin-left: 2px;
 		}
 
+		/* Grille « Profil modifié » : une seule valeur (la courante, tous modificateurs
+		   compris), pas de jauge ni de bouton d'XP → boîtes plus compactes. Le delta est
+		   coloré et le tooltip (title) détaille chaque source. */
+		.sh-mod-grid{
+			margin-top: 8px;
+		}
+		.sh-mod-grid .sh-stat-box {
+			padding: 6px 8px;
+			cursor: help;
+		}
+		.sh-mod-grid .sh-stat-box.buffed {
+			border-color: var(--accent-color);
+		}
+		.sh-mod-grid .sh-stat-val { margin: 2px 0 0; }
+		.sh-stat-delta {
+			margin-left: 8px;
+			font-size: 0.75rem;
+			font-weight: bold;
+			min-height: 1em;
+		}
+		.sh-stat-delta.pos { color: #4caf50; }
+		.sh-stat-delta.neg { color: #e05252; }
+
 		/* Conteneur de la jauge pour gérer le survol ou le positionnement */
 		.sh-stat-bar-wrapper {
 			width: 100%;
@@ -1450,6 +1473,12 @@
 							{% endfor %}
 						</div>
 
+						<!-- Profil réellement en jeu : la valeur courante de chaque caract, tous
+						     modificateurs compris (objets équipés, compétences passives, effets
+						     actifs). Rendu 100 % client (_renderCaractsMod) pour que le tooltip
+						     d'origine n'ait qu'une seule implémentation. -->
+						<div class="sh-base-grid sh-mod-grid" id="sh-mod-grid"></div>
+
 						<div class="sh-section" style="margin-top:14px">🛡 Caractéristiques dérivées</div>
 						{% for lbl, key, unit in [
 							("PV max","pv_max",""),("PM max","pm_max",""),
@@ -1959,6 +1988,7 @@
 				_refreshRecolte();
 				// Effets actifs : décrémentés/expirés à chaque tour monde côté serveur.
 				_renderEffetsActifs(rep.effets_actifs);
+				_renderCaractsMod(rep.caracts_detail);
 				// Intro narrative : le pas vient d'atteindre la zone de sécurité de la cité.
 				if (rep.intro_terminee) {
 					showIntroConclusion(rep.intro_terminee);
@@ -2362,6 +2392,11 @@ let _attributePoints = {{ character.get("attribute_points", 0) | tojson | safe }
 let _vocNiveau   = {{ character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0) | tojson | safe }};
 const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
 const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
+// Grille « Profil modifié » : {code: {base, total, delta, sources:[{origine,nom,icon,delta}]}}
+let _caractsDetail = {{ caracts_detail | tojson | safe }};
+const _CARACT_NOMS = [["V","Vitesse"],["F","Force"],["R","Résistance"],["Ag","Agilité"],
+	["Vol","Volonté"],["Int","Intelligence"],["Cha","Charisme"],["Ch","Chance"]];
+const _ORIGINE_LBL = {equipement: "Équipement", competence: "Compétences", effet: "Effets"};
 
 function _xpCostNext(statKey) {
 	const cur     = _charStats[statKey] || 0;
@@ -2383,6 +2418,17 @@ function _refreshStatBoxes() {
 			const sep = svEl.querySelector('.sh-stat-max-sep');
 			svEl.childNodes[0].textContent = val;
 			if (sep) sep.textContent = '/' + cap;
+
+			// Jauge et repère de plafond : mêmes formules que le rendu Jinja initial.
+			const box     = svEl.closest('.sh-stat-box');
+			const maxRace = _RACE_MAX[code] || 1;
+			const fill = box && box.querySelector('.sh-stat-fill');
+			if (fill) fill.style.width = Math.round(val / maxRace * 100) + '%';
+			const pip = box && box.querySelector('.sh-stat-pip');
+			if (pip) {
+				pip.style.left = Math.round(cap / maxRace * 100) + '%';
+				pip.classList.toggle('subcap', !isAccessible);
+			}
 		}
 		const btn = document.getElementById('sh-btn-' + code);
 		if (btn) {
@@ -2390,7 +2436,7 @@ function _refreshStatBoxes() {
 			btn.disabled = val >= cap || _attributePoints < cost;
 			btn.classList.toggle('subcap', !isAccessible);
 			const costEl = btn.querySelector('.sh-xp-cost');
-			if (costEl) costEl.textContent = cost + ' XP';
+			if (costEl) costEl.innerHTML = cost + ' P<small>oints</small>';
 		}
 	}
 	const btn = document.getElementById('sh-btn-voc-niveau');
@@ -2399,6 +2445,40 @@ function _refreshStatBoxes() {
 		btn.style.display = (_attributePoints > 0 && _vocNiveau < 5) ? '' : 'none';
 		btn.disabled = _vocNiveau >= 5 || _attributePoints < cost_vocation;
 	}
+}
+
+// Valeur courante de chaque caract, tous modificateurs compris, avec un tooltip qui
+// nomme chaque source (objet équipé, compétence passive, consommable/sort en cours).
+function _renderCaractsMod(detail) {
+	if (detail) _caractsDetail = detail;
+	const grid = document.getElementById('sh-mod-grid');
+	if (!grid) return;
+	grid.innerHTML = _CARACT_NOMS.map(([code, nom]) => {
+		const d = _caractsDetail[code] || {base: 0, total: 0, delta: 0, sources: []};
+		const delta = d.delta || 0;
+		const signe = delta > 0 ? '+' + delta : (delta < 0 ? '−' + Math.abs(delta) : '');
+		const cls   = delta > 0 ? 'pos' : (delta < 0 ? 'neg' : '');
+
+		// Tooltip : les sources regroupées par origine, dans l'ordre Équipement/Comp./Effets.
+		const lignes = [`${nom} : ${d.base} de base`];
+		for (const origine of ['equipement', 'competence', 'effet']) {
+			for (const s of (d.sources || []).filter(s => s.origine === origine)) {
+				const sd = s.delta > 0 ? '+' + s.delta : '−' + Math.abs(s.delta);
+				lignes.push(`${_ORIGINE_LBL[origine]} · ${s.icon} ${s.nom} ${sd}`);
+			}
+		}
+		if (!delta) lignes.push('Aucun modificateur');
+
+		return `<div class="sh-stat-box${delta ? ' buffed' : ''}" id="sh-mod-${code}"
+					 title="${_escapeAttr(lignes.join('\n'))}">
+					<div class="sh-stat-val">${d.total}<span class="sh-stat-delta ${cls}">${signe}</span></div>
+					
+				</div>`;
+	}).join('');
+}
+
+function _escapeAttr(s) {
+	return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
 function _refreshDerivedStats(d) {
@@ -2459,6 +2539,7 @@ async function spendXp(statKey) {
 		_statCaps = data.stat_caps;
 		_refreshStatBoxes();
 		_refreshDerivedStats(data.derived_stats);
+		_renderCaractsMod(data.caracts_detail);
 	} catch (err) { console.error('Erreur spend_xp', err); }
 }
 
@@ -3109,6 +3190,7 @@ async function consommerItem(index, itemId, btn) {
 		_applyInventoryPayload(data);   // re-rend le sac (le bouton disparaît avec l'item)
 		updateVitals(data.vitals);
 		_renderEffetsActifs(data.effets_actifs);
+		_renderCaractsMod(data.caracts_detail);
 		const c = data.consomme || {};
 		const gains = [];
 		if (c.pv_rendu) gains.push(`+${c.pv_rendu} PV`);
@@ -3218,6 +3300,7 @@ async function lancerSort(sortId, btn) {
 		_applyInventoryPayload(data);   // composants consommés retirés du sac
 		updateVitals(data.vitals);
 		_renderEffetsActifs(data.effets_actifs);
+		_renderCaractsMod(data.caracts_detail);
 		_renderSorts(data.sorts);
 		const l = data.lance || {};
 		const gains = [];
@@ -3412,6 +3495,7 @@ async function utiliserCompetence(competenceId, btn) {
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		updateVitals(data.vitals);
 		_renderEffetsActifs(data.effets_actifs);
+		_renderCaractsMod(data.caracts_detail);
 		_renderCompetences(data.competences);
 		const u = data.utilisee || {};
 		const gains = [];
@@ -3434,6 +3518,7 @@ async function apprendreCompetence(competenceId, btn) {
 		_syncPoints(data.attribute_points);
 		_renderCompetences(data.competences);
 		_renderCompetencesApprenables(data.competences_apprenables);
+		_renderCaractsMod(data.caracts_detail);
 		// Une passive apprise relève les dérivées (donc les max PV/PM) immédiatement.
 		if (data.vitals) updateVitals(data.vitals);
 		const a = data.appris || {};
@@ -3518,6 +3603,7 @@ async function equip(itemId, slot) {
 		_refreshPaperdoll();
 		_refreshInventaire();
 		_refreshDerivedStats(data.derived_stats);
+		_renderCaractsMod(data.caracts_detail);
 		_refreshChargeGauge();
 	} catch(err) { console.error('Erreur equip', err); }
 }
@@ -3536,6 +3622,7 @@ async function unequip(slot) {
 		_refreshPaperdoll();
 		_refreshInventaire();
 		_refreshDerivedStats(data.derived_stats);
+		_renderCaractsMod(data.caracts_detail);
 		_refreshChargeGauge();
 	} catch(err) { console.error('Erreur unequip', err); }
 }
@@ -3544,6 +3631,7 @@ _refreshInventaire();
 _refreshSol();
 _refreshChargeGauge();
 _renderEffetsActifs(_effetsActifs);
+_renderCaractsMod();
 _renderSorts();
 _renderSortsMagies();
 _renderSortsApprenables();

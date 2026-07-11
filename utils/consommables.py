@@ -58,33 +58,78 @@ def effet_instantane(item_doc) -> bool:
 	return eff["pv"] > 0 or eff["pm"] > 0
 
 
-def _sources_de_buffs(character: dict) -> list:
-	"""Toutes les sources de buffs/régén d'un personnage, au même format {buffs, regen_*} :
-	les effets actifs TEMPORAIRES (consommables, sorts — décrémentés au tour monde) et le
-	bonus PERMANENT des compétences passives (`competences_bonus`, dénormalisé par
-	utils/competences.recompute_competences_bonus). Chokepoint unique : tout ce qui buffe
-	un personnage passe ici, donc par caracts_avec_buffs/regen_bonus."""
+def _sources_de_buffs_detaillees(character: dict) -> list:
+	"""Toutes les sources de buffs/régén, étiquetées par origine : [(origine, entrée), …].
+
+	origine ∈ "effet" (consommables/sorts/compétences actives — TEMPORAIRE, décrémenté au
+	tour monde), "equipement" (`equipment_bonus`, dénormalisé par
+	utils/characters.sync_equipment_bonus) et "competence" (`competences_bonus`, passives
+	permanentes, dénormalisé par utils/competences.recompute_competences_bonus).
+
+	Toutes les entrées ont le même format {buffs, regen_pv, regen_pm, esquive} — celles qui
+	n'en portent qu'une partie (l'équipement n'a que `buffs`) sont neutres pour le reste.
+	"""
 	character = character or {}
-	sources = list(character.get("effets_actifs") or [])
-	passif = character.get("competences_bonus")
-	if passif:
-		sources.append(passif)
+	sources = [("effet", eff) for eff in (character.get("effets_actifs") or [])]
+	for origine, cle in (("equipement", "equipment_bonus"), ("competence", "competences_bonus")):
+		entree = character.get(cle)
+		if entree:
+			sources.append((origine, entree))
 	return sources
+
+
+def _sources_de_buffs(character: dict) -> list:
+	"""Chokepoint unique : tout ce qui buffe un personnage passe ici, donc par
+	caracts_avec_buffs / regen_bonus / esquive_bonus."""
+	return [eff for _, eff in _sources_de_buffs_detaillees(character)]
 
 
 def caracts_avec_buffs(character: dict) -> dict:
 	"""COPIE de caracteristiques_current + somme des buffs (clamp ≥ 0). N'applique que les
-	caracts déjà présentes, et jamais V (échelle 1-10, incompatible avec des deltas ×10)."""
+	caracts déjà présentes. V incluse : une dague +1 V accélère bel et bien le personnage
+	(deltas de V à son échelle 1-10, comme dans les données d'items)."""
 	caracts = dict((character or {}).get("caracteristiques_current") or {})
 	for eff in _sources_de_buffs(character):
 		for k, delta in (eff.get("buffs") or {}).items():
-			if k == "V" or k not in caracts:
+			if k not in caracts:
 				continue
 			try:
 				caracts[k] = max(0, int(caracts[k] or 0) + int(delta))
 			except (TypeError, ValueError):
 				continue
 	return caracts
+
+
+def caracts_detail(character: dict) -> dict:
+	"""Détail par caractéristique pour la fiche : {code: {base, total, delta, sources}}.
+
+	`sources` = [{origine, nom, icon, delta}] — une entrée par contributeur NOMMÉ (l'objet
+	équipé, la compétence passive, le consommable/sort en cours), pour le tooltip de la
+	grille « Profil modifié ». Fonction PURE : tout est déjà dénormalisé sur le doc perso
+	(les agrégats `equipment_bonus`/`competences_bonus` portent un `buffs_sources`).
+	"""
+	base = dict((character or {}).get("caracteristiques_current") or {})
+	total = caracts_avec_buffs(character)
+	detail = {
+		code: {"base": val, "total": total.get(code, val), "delta": total.get(code, val) - val,
+			   "sources": []}
+		for code, val in base.items()
+	}
+	for origine, eff in _sources_de_buffs_detaillees(character):
+		# Un agrégat (équipement, compétences) porte le détail nommé de ses contributeurs ;
+		# une entrée d'effet actif est elle-même déjà nommée.
+		contributeurs = eff.get("buffs_sources") or [eff]
+		for src in contributeurs:
+			for code, delta in (src.get("buffs") or {}).items():
+				if code not in detail or not delta:
+					continue
+				detail[code]["sources"].append({
+					"origine": origine,
+					"nom":     src.get("nom", "?"),
+					"icon":    src.get("icon", "✨"),
+					"delta":   int(delta),
+				})
+	return detail
 
 
 def regen_bonus(character: dict) -> tuple[int, int]:

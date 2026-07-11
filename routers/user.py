@@ -12,7 +12,7 @@ from db.config import save_doc, get_doc, delete_doc, find_docs
 from utils.auth import get_current_user, create_access_token
 from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
-	recompute_equipment_bonus, carried_weight, charge_max_of,
+	sync_equipment_bonus, carried_weight, charge_max_of,
 	restriction_satisfaite,
 	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds,
 	money_to_cuivre, cuivre_to_purse, credit_character,
@@ -463,7 +463,7 @@ async def move_character(
 							niveau_new = info["niveau_apres"]
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
-						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -502,7 +502,7 @@ async def move_character(
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
-				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
+				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -575,7 +575,7 @@ def _apply_world_turn_regen(character: dict) -> None:
     bonus regen_pv/regen_pm des effets actifs), plafonnés aux max. Puis décrémente les
     effets actifs (ordre régén-puis-tick : duree N = N applications). Si un buff expire,
     les max ont pu redescendre → re-clamp."""
-    eq = recompute_equipment_bonus(character.get("slots", {}))
+    eq = sync_equipment_bonus(character)
     derived = _derived_from_character(character, eq)
     caracts = consommables.caracts_avec_buffs(character)
     bonus_pv, bonus_pm = consommables.regen_bonus(character)
@@ -589,9 +589,16 @@ def _apply_world_turn_regen(character: dict) -> None:
         character["currentPM"] = min(character["currentPM"], derived.pm_max)
 
 
+def _caracts_payload(character: dict) -> dict:
+    """Détail par caract (base/total/delta/sources nommées) pour la grille « Profil modifié »
+    de la fiche : l'équipement doit être resynchronisé avant tout repli de buffs."""
+    sync_equipment_bonus(character)
+    return consommables.caracts_detail(character)
+
+
 def _vitals_payload(character: dict) -> dict:
     """PV/PM courants + max, pour rafraîchir les jauges côté client sans recharger."""
-    eq = recompute_equipment_bonus(character.get("slots", {}))
+    eq = sync_equipment_bonus(character)
     derived = _derived_from_character(character, eq)
     return {
         "currentPV": character.get("currentPV", derived.pv_max),
@@ -671,16 +678,10 @@ async def spend_xp(
 
 	save_doc(character)
 
-	# Recalculer les stats dérivées et les nouveaux plafonds
+	# Dérivées bufées + équipées (mêmes valeurs que la fiche : le client les recopie tel
+	# quel dans #sh-drv-*). Les plafonds, eux, restent calculés sur les caracts BRUTES.
+	derived = _derived_from_character(character, sync_equipment_bonus(character))
 	stats_cur = character["caracteristiques_current"]
-	base = BaseStats(
-		v=stats_cur.get("V", 0), f=stats_cur.get("F", 0),
-		r=stats_cur.get("R", 0), ag=stats_cur.get("Ag", 0),
-		vol=stats_cur.get("Vol", 0), int_=stats_cur.get("Int", 0),
-		cha=stats_cur.get("Cha", 0), ch=stats_cur.get("Ch", 0),
-	)
-	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
-	derived = compute_derived_stats(base, niveau=voc_niveau)
 
 	new_caps = {
 		code: compute_stat_cap(
@@ -700,6 +701,7 @@ async def spend_xp(
 		"attribute_points": character["attribute_points"],
 		"stat_caps":     new_caps,
 		"derived_stats": derived.model_dump(),
+		"caracts_detail": consommables.caracts_detail(character),
 	}
 
 
@@ -753,8 +755,7 @@ async def equip_item(
 	character["slots"]      = slots
 	character["inventaire"] = inventaire
 
-	eq_bonus = recompute_equipment_bonus(slots)
-	character["equipment_bonus"] = eq_bonus.model_dump()
+	eq_bonus = sync_equipment_bonus(character)
 	save_doc(character)
 
 	derived = _derived_from_character(character, eq_bonus)
@@ -763,6 +764,7 @@ async def equip_item(
 		"inventaire":      [d for r in inventaire if (d := resolve_item_ref(r))],
 		"equipment_bonus": character["equipment_bonus"],
 		"derived_stats":   derived.model_dump(),
+		"caracts_detail":  consommables.caracts_detail(character),
 	}
 
 
@@ -791,8 +793,7 @@ async def unequip_item(
 	character["slots"]      = slots
 	character["inventaire"] = inventaire
 
-	eq_bonus = recompute_equipment_bonus(slots)
-	character["equipment_bonus"] = eq_bonus.model_dump()
+	eq_bonus = sync_equipment_bonus(character)
 	save_doc(character)
 
 	derived = _derived_from_character(character, eq_bonus)
@@ -801,6 +802,7 @@ async def unequip_item(
 		"inventaire":      [d for r in inventaire if (d := resolve_item_ref(r))],
 		"equipment_bonus": character["equipment_bonus"],
 		"derived_stats":   derived.model_dump(),
+		"caracts_detail":  consommables.caracts_detail(character),
 	}
 
 
@@ -926,7 +928,7 @@ async def consommer_item(
 
 	# Buff empilé AVANT le calcul des max : une potion mixte soigne dans le max bufffé.
 	effet = consommables.empiler_effet(character, item)
-	eq = recompute_equipment_bonus(character.get("slots", {}))
+	eq = sync_equipment_bonus(character)
 	derived = _derived_from_character(character, eq)
 	rendu = consommables.appliquer_instantane(character, item, derived.pv_max, derived.pm_max)
 
@@ -935,6 +937,7 @@ async def consommer_item(
 	payload = _inventory_payload(character)
 	payload["vitals"] = _vitals_payload(character)
 	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
+	payload["caracts_detail"] = _caracts_payload(character)
 	payload["consomme"] = {
 		"nom": item.get("nom", "?"),
 		"icon": item.get("icon", "🧪"),
@@ -984,7 +987,7 @@ async def lancer_sort(
 	# Buff empilé AVANT le calcul des max (même règle que les consommables), puis
 	# débit PM et part instantanée clampée aux max bufffés.
 	effet = sorts_util.empiler_effet_sort(character, sort, effets)
-	eq = recompute_equipment_bonus(character.get("slots", {}))
+	eq = sync_equipment_bonus(character)
 	derived = _derived_from_character(character, eq)
 	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - sort["cout_pm"])
 	avant_pv = int(character.get("currentPV", 0) or 0)
@@ -997,6 +1000,7 @@ async def lancer_sort(
 	payload = _inventory_payload(character)
 	payload["vitals"] = _vitals_payload(character)
 	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
+	payload["caracts_detail"] = _caracts_payload(character)
 	payload["sorts"] = sorts_util.liste_sorts_payload(character, get_doc, "exploration")
 	payload["lance"] = {
 		"nom": sort["nom"],
@@ -1079,7 +1083,7 @@ async def utiliser_competence(
 	# puis débit PM et part instantanée clampée aux max bufffés.
 	effets = comp["effets"]
 	effet = competences_util.empiler_effet_competence(character, comp)
-	eq = recompute_equipment_bonus(character.get("slots", {}))
+	eq = sync_equipment_bonus(character)
 	derived = _derived_from_character(character, eq)
 	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - comp["cout_pm"])
 	avant_pv = int(character.get("currentPV", 0) or 0)
@@ -1092,6 +1096,7 @@ async def utiliser_competence(
 	payload = _inventory_payload(character)
 	payload["vitals"] = _vitals_payload(character)
 	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
+	payload["caracts_detail"] = _caracts_payload(character)
 	payload["competences"] = competences_util.liste_competences_payload(character, get_doc, "exploration")
 	payload["utilisee"] = {
 		"nom": comp["nom"],
@@ -1145,6 +1150,7 @@ async def apprendre_competence(
 		"competences": competences_util.liste_competences_payload(character, get_doc, "exploration"),
 		"competences_apprenables": competences_util.competences_apprenables(character, find_docs),
 		"vitals": _vitals_payload(character),
+		"caracts_detail": _caracts_payload(character),
 		"appris": {"nom": comp["nom"], "icon": comp["icon"]},
 	}
 

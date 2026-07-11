@@ -144,22 +144,33 @@ def competences_connues_docs(character: dict, get_doc) -> list:
 
 def bonus_passifs(character: dict, get_doc) -> dict:
 	"""Somme des buffs/régén/esquive des compétences PASSIVES connues :
-	{buffs, regen_pv, regen_pm, esquive}. Les actives n'y contribuent jamais (leur effet
-	passe par effets_actifs à l'usage). Les passives portant une `condition` sont EXCLUES
-	de ce repli inconditionnel : elles ne valent que là où la condition s'évalue, au
-	snapshot de combat (cf. furtivite_passive)."""
+	{buffs, regen_pv, regen_pm, esquive, buffs_sources}. Les actives n'y contribuent jamais
+	(leur effet passe par effets_actifs à l'usage). Les passives portant une `condition` sont
+	EXCLUES de ce repli inconditionnel : elles ne valent que là où la condition s'évalue, au
+	snapshot de combat (cf. furtivite_passive). `buffs_sources` = [{nom, icon, buffs}], le
+	détail nommé du même agrégat (tooltip de la fiche), miroir d'EquipmentBonus."""
 	buffs: dict = {}
+	sources: list = []
 	regen_pv = regen_pm = esquive = 0
 	for comp in competences_connues_docs(character, get_doc):
 		if not est_passive(comp) or comp.get("condition"):
 			continue
 		eff = comp["effets"]
+		propres = {}
 		for k, delta in (eff.get("buffs") or {}).items():
 			buffs[str(k)] = int(buffs.get(str(k), 0)) + int(delta)
+			propres[str(k)] = int(propres.get(str(k), 0)) + int(delta)
+		if propres:
+			sources.append({
+				"nom":   comp.get("nom", "?"),
+				"icon":  comp.get("icon", "✨"),
+				"buffs": propres,
+			})
 		regen_pv += _as_int(eff.get("regen_pv"))
 		regen_pm += _as_int(eff.get("regen_pm"))
 		esquive += _as_int(eff.get("esquive"))
-	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive}
+	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive,
+			"buffs_sources": sources}
 
 
 def recompute_competences_bonus(character: dict, get_doc) -> dict:

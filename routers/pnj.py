@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from db.config import get_doc, save_doc
 from utils.auth import get_current_user
 from utils.characters import (
-	get_selected_character, recompute_equipment_bonus,
+	get_selected_character, sync_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
 	poids_bounds, carried_weight, charge_max_of,
 )
@@ -89,7 +89,7 @@ async def pnj_dialogue_choix(
 		if not soin:
 			raise HTTPException(status_code=422, detail="Ce personnage ne soigne pas.")
 		noeuds_soin = (pnj_doc.get("services", {}).get("soin", {}).get("noeuds", {}))
-		eq = recompute_equipment_bonus(character.get("slots", {}))
+		eq = sync_equipment_bonus(character)
 		derived = _derived_from_character(character, eq)
 		if int(character.get("currentPV", derived.pv_max)) >= derived.pv_max:
 			# PV pleins : rien débité, le PNJ le fait remarquer.

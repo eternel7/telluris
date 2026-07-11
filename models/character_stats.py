@@ -518,6 +518,12 @@ class EquipmentBonus(BaseModel):
 	degats_bonus:  int = 0	# Bonus dégâts plat (arme) : +x
 	degats_dice:   str = ""   # Dés de dégâts additionnels (arme) : ex "1D4", "1D4+1D6"
 	initiative:	int = 0	# Bonus initiative (objets)
+	# Bonus de CARACTÉRISTIQUES (champ item `bonus` = {caract: delta}). Agrégé ici puis
+	# replié par utils/consommables._sources_de_buffs comme n'importe quel buff : les
+	# dérivées en profitent via BaseStats, sans double comptage avec les champs ci-dessus.
+	buffs:		 dict[str, int] = Field(default_factory=dict)
+	# Détail nommé du même agrégat, pour le tooltip de la fiche : [{nom, icon, buffs}].
+	buffs_sources: list[dict] = Field(default_factory=list)
 
 
 # ── Stats dérivées calculées ──────────────────────────────────────────────────

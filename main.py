@@ -19,7 +19,7 @@ from routers.pnj import pnj_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
-from utils.characters import get_user_characters, get_selected_character, recompute_equipment_bonus, resolve_item_ref, charge_max_of
+from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of
 from utils import quetes
 from utils import bois
 from utils import consommables
@@ -556,8 +556,14 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	access = get_lieu_directions(current_user, grid_doc, position)
 
 	stats_cur = character.get("caracteristiques_current", {})
-	# Dérivées affichées avec les buffs de consommables ; `stats_cur` (brut) reste la
-	# référence pour les plafonds/coûts d'XP (stat_caps) et la grille Caractéristiques.
+	# Bonus d'équipement recalculé depuis les items équipés (slots = IDs à ce stade, avant
+	# leur résolution en docs plus bas) : toute modif d'item en base est ainsi reflétée au
+	# rechargement sans ré-équiper. Dénormalisé sur le perso AVANT caracts_avec_buffs, qui
+	# y lit les buffs de caractéristiques portés par les objets (champ item `bonus`).
+	eq_bonus = sync_equipment_bonus(character)
+	# Dérivées affichées avec tous les buffs (équipement, passives, consommables/sorts) ;
+	# `stats_cur` (brut) reste la référence pour les plafonds/coûts d'XP (stat_caps) et la
+	# première grille Caractéristiques.
 	stats_buff = consommables.caracts_avec_buffs(character)
 	base = BaseStats(
 		v=stats_buff.get("V", 0),
@@ -570,10 +576,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		ch=stats_buff.get("Ch", 0),
 	)
 	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
-	# Bonus d'équipement recalculé depuis les items équipés (slots = IDs à ce stade,
-	# avant leur résolution en docs plus bas) : toute modif d'item en base est ainsi
-	# reflétée au rechargement sans ré-équiper. Les stats dérivées ne sont jamais stockées.
-	eq_bonus = recompute_equipment_bonus(character.get("slots", {}))
+	# Les stats dérivées ne sont jamais stockées.
 	derived = compute_derived_stats(
 		base=base,
 		niveau=voc_niveau,
@@ -697,6 +700,9 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"focalisation": focalisation_payload,
 			"guidage": guidage_payload,
 			"effets_actifs": consommables.effets_actifs_payload(character),
+			# Grille « Profil modifié » : par caract, base / total / delta / sources nommées
+			# (équipement, passives, effets actifs) pour le tooltip d'origine.
+			"caracts_detail": consommables.caracts_detail(character),
 			# Sorts (onglet ⚡) : connus lançables hors combat + apprenables (coût points,
 			# grimoire) — resynchronisés par lancer_sort/apprendre_sort côté client.
 			"sorts": sorts_util.liste_sorts_payload(character, get_doc, "exploration"),

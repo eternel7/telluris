@@ -110,6 +110,36 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 		if dice:
 			bonus.degats_dice = f"{bonus.degats_dice}+{dice}" if bonus.degats_dice else dice
 		bonus.initiative   += item.get("bonus_initiative", 0)
+		# Champ `bonus` = {caract: delta} : buff de caractéristique porté par l'objet.
+		buffs = {}
+		for caract, delta in (item.get("bonus") or {}).items():
+			try:
+				delta = int(delta)
+			except (TypeError, ValueError):
+				continue
+			if delta:
+				buffs[str(caract)] = buffs.get(str(caract), 0) + delta
+		if buffs:
+			for caract, delta in buffs.items():
+				bonus.buffs[caract] = bonus.buffs.get(caract, 0) + delta
+			bonus.buffs_sources.append({
+				"nom":   item.get("nom", item_id),
+				"icon":  item.get("icon", "⚔"),
+				"buffs": buffs,
+			})
+	return bonus
+
+
+def sync_equipment_bonus(character: dict) -> EquipmentBonus:
+	"""Recalcule le bonus d'équipement depuis les slots ET le dénormalise dans
+	character["equipment_bonus"] (mute en place, NE SAUVEGARDE PAS).
+
+	À appeler AVANT tout caracts_avec_buffs / compute_derived_stats : c'est ce champ
+	dénormalisé que lit utils/consommables._sources_de_buffs pour replier les buffs de
+	caractéristiques de l'équipement. Miroir de competences.recompute_competences_bonus.
+	"""
+	bonus = recompute_equipment_bonus(character.get("slots", {}))
+	character["equipment_bonus"] = bonus.model_dump()
 	return bonus
 
 

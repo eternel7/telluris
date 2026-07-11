@@ -8,7 +8,7 @@ from models.character_stats import (
 	BaseStats, compute_derived_stats
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
-from utils.characters import grant_xp, recompute_equipment_bonus, carried_weight, poids_bounds, item_ref_id
+from utils.characters import grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id
 from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus
 from utils.quetes import maj_progress_kills
 from utils.focalisation import effacer_si_objectif_atteint
@@ -545,15 +545,16 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# intégralement (pv_max, cc, dégâts, initiative, actions, déplacement — et donc
 	# charge_max, bonus de portage en combat seulement). Les effets actifs ne se
 	# décrémentent PAS pendant le combat (tick uniquement dans move_character).
+	# Bonus recalculé depuis les items équipés (slots = IDs) plutôt que depuis le champ
+	# stocké equipment_bonus, périmé si un item a été modifié en base sans ré-équiper. Posé
+	# AVANT caracts_avec_buffs, qui y lit les buffs de caract portés par les objets.
+	equipment = sync_equipment_bonus(character)
 	stats = caracts_avec_buffs(character)
 	base = BaseStats(
 		v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
 		ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
 		cha=stats.get("Cha", 0), ch=stats.get("Ch", 0),
 	)
-	# Bonus recalculé depuis les items équipés (slots = IDs) plutôt que depuis le champ
-	# stocké equipment_bonus, périmé si un item a été modifié en base sans ré-équiper.
-	equipment = recompute_equipment_bonus(character.get("slots", {}))
 	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
 	derived = compute_derived_stats(base, niveau=voc_niveau, equipment=equipment)
 
