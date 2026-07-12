@@ -129,6 +129,14 @@ QUETE_CUIVRE_PAR_XP: float = 3.0
 # Poids max (kg) d'un objet d'une quête de collecte : on ne réclame pas d'objet plus lourd
 # (ex. un arbre entier) — pour le bois, on cible des pièces transportables de l'essence.
 QUETE_COLLECT_POIDS_MAX: float = 100.0
+# Durée de vie d'une offre GÉNÉRÉE au tableau : passé son terme, elle est réputée prise par
+# un autre aventurier — son doc est supprimé et une nouvelle offre la remplace (péremption
+# PARESSEUSE, évaluée à l'ouverture du tableau). Les 6 offres naissant au même instant, un
+# délai fixe ferait basculer tout le tableau d'un bloc : la durée effective est donc tirée
+# dans [D × (1 − JITTER), D × (1 + JITTER)] → le tableau tourne par petites touches.
+# JITTER = 0 → durée fixe (bascule en bloc).
+QUETE_BOARD_DUREE_SECONDES: int = 3600
+QUETE_BOARD_DUREE_JITTER: float = 0.5
 
 # ── Quêtes de transport (magasins) ───────────────────────────────────────────────
 # À chaque ENTRÉE dans un lieu marchand, le tenancier a QUETE_TRANSPORT_PROBA de chance
@@ -392,6 +400,8 @@ def current_world_variables() -> dict:
 		"QUETE_XP_FACTEUR": QUETE_XP_FACTEUR,
 		"QUETE_CUIVRE_PAR_XP": QUETE_CUIVRE_PAR_XP,
 		"QUETE_COLLECT_POIDS_MAX": QUETE_COLLECT_POIDS_MAX,
+		"QUETE_BOARD_DUREE_SECONDES": QUETE_BOARD_DUREE_SECONDES,
+		"QUETE_BOARD_DUREE_JITTER": QUETE_BOARD_DUREE_JITTER,
 		"QUETE_TRANSPORT_PROBA": QUETE_TRANSPORT_PROBA,
 		"QUETE_TRANSPORT_DUREE_SECONDES": QUETE_TRANSPORT_DUREE_SECONDES,
 		"QUETE_TRANSPORT_POIDS_MAX": QUETE_TRANSPORT_POIDS_MAX,
@@ -443,7 +453,7 @@ def load_world_variables() -> dict:
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	global PNJ_REPUTATION_SEUIL
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
-	global QUETE_COLLECT_POIDS_MAX
+	global QUETE_COLLECT_POIDS_MAX, QUETE_BOARD_DUREE_SECONDES, QUETE_BOARD_DUREE_JITTER
 	global QUETE_TRANSPORT_PROBA, QUETE_TRANSPORT_DUREE_SECONDES, QUETE_TRANSPORT_POIDS_MAX
 	global QUETE_TRANSPORT_NB_MAX, QUETE_TRANSPORT_XP, QUETE_TRANSPORT_RELATION_DELTA
 	global QUETE_TRANSPORT_STOCK_PROBA, QUETE_TRANSPORT_RELATION_MIN
@@ -511,6 +521,8 @@ def load_world_variables() -> dict:
 	QUETE_XP_FACTEUR    = float(v.get("QUETE_XP_FACTEUR", QUETE_XP_FACTEUR))
 	QUETE_CUIVRE_PAR_XP = float(v.get("QUETE_CUIVRE_PAR_XP", QUETE_CUIVRE_PAR_XP))
 	QUETE_COLLECT_POIDS_MAX = float(v.get("QUETE_COLLECT_POIDS_MAX", QUETE_COLLECT_POIDS_MAX))
+	QUETE_BOARD_DUREE_SECONDES = int(v.get("QUETE_BOARD_DUREE_SECONDES", QUETE_BOARD_DUREE_SECONDES))
+	QUETE_BOARD_DUREE_JITTER = float(v.get("QUETE_BOARD_DUREE_JITTER", QUETE_BOARD_DUREE_JITTER))
 	QUETE_TRANSPORT_PROBA   = float(v.get("QUETE_TRANSPORT_PROBA", QUETE_TRANSPORT_PROBA))
 	QUETE_TRANSPORT_DUREE_SECONDES = int(v.get("QUETE_TRANSPORT_DUREE_SECONDES", QUETE_TRANSPORT_DUREE_SECONDES))
 	QUETE_TRANSPORT_POIDS_MAX = float(v.get("QUETE_TRANSPORT_POIDS_MAX", QUETE_TRANSPORT_POIDS_MAX))

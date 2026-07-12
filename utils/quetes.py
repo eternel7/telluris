@@ -14,7 +14,7 @@ import random
 import time
 import uuid
 
-from db.config import get_doc, find_docs, save_doc
+from db.config import get_doc, find_docs, save_doc, delete_doc
 from models import character_stats
 from utils.characters import item_ref_id, grant_xp, credit_character, cuivre_to_purse, poids_bounds
 from utils import bois, marche
@@ -187,6 +187,7 @@ def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible: str, 
 
 	guild_id = guild_doc.get("_id", "")
 	sub = guild_id.split(":", 1)[-1] if ":" in guild_id else guild_id
+	now = now_epoch()
 	return {
 		"_id": f"quete:{sub}_{uuid.uuid4().hex[:12]}",
 		"type": "quete",
@@ -199,11 +200,51 @@ def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible: str, 
 		"objectif": {"type": type_obj, "cible": cible, "quantite": quantite},
 		"recompenses": {"xp": xp, "cuivre": cuivre, "items": []},
 		"statut": "offerte",
-		"genere_at": now_epoch(),
+		"genere_at": now,
+		"expire_at": now + _duree_de_vie(),
 	}
 
 
 # ── Tableau de la guilde ─────────────────────────────────────────────────────────
+
+def _duree_de_vie() -> int:
+	"""Durée de vie d'une offre générée : QUETE_BOARD_DUREE_SECONDES, JITTÉE. Les offres d'un
+	tableau naissent au même instant — sans jitter, elles périmeraient toutes ensemble et le
+	tableau basculerait d'un bloc au lieu de tourner par petites touches."""
+	base = int(character_stats.QUETE_BOARD_DUREE_SECONDES)
+	jitter = max(0.0, float(character_stats.QUETE_BOARD_DUREE_JITTER))
+	return max(1, int(base * random.uniform(1.0 - jitter, 1.0 + jitter)))
+
+
+def offre_perimee(offre: dict, now: int) -> bool:
+	"""Une offre GÉNÉRÉE encore au tableau dont l'échéance est passée : d'autres aventuriers
+	ont vécu leur vie et l'ont prise. Une quête AUTHORÉE (mission écrite) ne périme jamais, et
+	une offre déjà ACCEPTÉE n'est plus au tableau — ni l'une ni l'autre n'est concernée.
+	Repli pour les offres d'avant la feature (pas d'`expire_at`) : `genere_at` + la durée
+	nominale ; sans horodatage du tout, elles sont périmées d'office."""
+	if offre.get("source") != "genere" or offre.get("statut", "offerte") != "offerte":
+		return False
+	expire_at = offre.get("expire_at")
+	if not expire_at:
+		genere_at = int(offre.get("genere_at", 0) or 0)
+		expire_at = genere_at + int(character_stats.QUETE_BOARD_DUREE_SECONDES) if genere_at else 0
+	return now >= int(expire_at)
+
+
+def purger_offres_perimees(offres: list, now: int, delete_doc_fn=None) -> list:
+	"""Retire du tableau — et de la BASE — les offres générées périmées. Le doc est supprimé
+	(personne ne le référence : accepter une quête en fait un snapshot dans le perso) plutôt
+	qu'archivé, sinon la collection `quete:*` gonflerait de plusieurs docs morts par guilde et
+	par heure. Suppression best-effort. Renvoie les offres qui restent."""
+	supprimer = delete_doc_fn or delete_doc
+	restantes = []
+	for o in offres:
+		if offre_perimee(o, now):
+			supprimer(o)
+		else:
+			restantes.append(o)
+	return restantes
+
 
 def offres_du_giver(guild_id: str) -> list:
 	"""Offres ouvertes (`statut:"offerte"`) d'une guilde — générées ET authorées."""
@@ -215,14 +256,17 @@ def offres_du_giver(guild_id: str) -> list:
 
 
 def remplir_tableau(guild_doc: dict) -> list:
-	"""Garantit QUETE_BOARD_TAILLE offres GÉNÉRÉES au tableau (complétées à la volée),
-	persiste les nouvelles, puis renvoie toutes les offres ouvertes (générées + authorées).
-	Le nombre d'offres générées est borné par le nombre de cibles distinctes du parent."""
+	"""Périme les offres générées trop vieilles (prises par d'autres aventuriers) PUIS garantit
+	QUETE_BOARD_TAILLE offres GÉNÉRÉES au tableau (complétées à la volée), persiste les
+	nouvelles, et renvoie toutes les offres ouvertes (générées + authorées). Le nombre d'offres
+	générées est borné par le nombre de cibles distinctes du parent."""
 	guild_id = guild_doc.get("_id")
 	parent_id = guild_doc.get("lieu_parent")
 	parent_doc = get_doc(parent_id) if parent_id else None
 
-	offres = offres_du_giver(guild_id)
+	# Péremption PARESSEUSE (aucun tick de fond dans le jeu) : les places libérées sont
+	# aussitôt repeuplées par la complétion ci-dessous.
+	offres = purger_offres_perimees(offres_du_giver(guild_id), now_epoch())
 	generees = [o for o in offres if o.get("source") == "genere"]
 	manquantes = max(0, int(character_stats.QUETE_BOARD_TAILLE) - len(generees))
 
