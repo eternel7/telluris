@@ -130,6 +130,26 @@ QUETE_CUIVRE_PAR_XP: float = 3.0
 # (ex. un arbre entier) — pour le bois, on cible des pièces transportables de l'essence.
 QUETE_COLLECT_POIDS_MAX: float = 100.0
 
+# ── Quêtes de transport (magasins) ───────────────────────────────────────────────
+# À chaque ENTRÉE dans un lieu marchand, le tenancier a QUETE_TRANSPORT_PROBA de chance
+# de proposer une course : livrer une cargaison à un autre magasin qui rachète ces biens,
+# en QUETE_TRANSPORT_DUREE_SECONDES de temps RÉEL. La cargaison est bornée par DEUX
+# contraintes (poids cumulé ET nombre d'objets) : on empile les instances une à une et on
+# s'arrête dès que l'ajout suivant franchirait l'une d'elles.
+# Récompense : QUETE_TRANSPORT_XP (× (1 + distance) si la destination est dans une autre
+# ville) + une prime de round(xp × QUETE_CUIVRE_PAR_XP). Réussite → +QUETE_TRANSPORT_RELATION_DELTA
+# de relation avec le magasin donneur ; échec (délai dépassé) ou abandon → −autant.
+QUETE_TRANSPORT_PROBA: float = 0.30
+QUETE_TRANSPORT_DUREE_SECONDES: int = 3600
+QUETE_TRANSPORT_POIDS_MAX: float = 100.0
+QUETE_TRANSPORT_NB_MAX: int = 10
+QUETE_TRANSPORT_XP: int = 10
+QUETE_TRANSPORT_RELATION_DELTA: int = 1
+# À la livraison, chaque objet a cette chance de finir en RAYON (`stock_vente`) du magasin
+# destinataire — à condition qu'il vende ce produit (`lieu_produit`). Le reste part à
+# l'atelier / à la consommation : la course a donc un effet visible mais partiel sur l'étal.
+QUETE_TRANSPORT_STOCK_PROBA: float = 0.50
+
 # ── Focalisation ─────────────────────────────────────────────────────────────────
 # Le personnage peut se focaliser sur une quête active : les tirages aléatoires sont
 # biaisés vers son objectif. FOCUS_EVENEMENT_MULT multiplie le poids des entrées de
@@ -196,7 +216,8 @@ DEPECAGE_TAGS: dict[str, list] = {
 	  "viande",
 	  "os",
 	  "sang",
-	  "graisse"
+	  "graisse",
+	  "tendons"
 	],
 	"animal": [
 	  "cuir_brut",
@@ -367,6 +388,13 @@ def current_world_variables() -> dict:
 		"QUETE_XP_FACTEUR": QUETE_XP_FACTEUR,
 		"QUETE_CUIVRE_PAR_XP": QUETE_CUIVRE_PAR_XP,
 		"QUETE_COLLECT_POIDS_MAX": QUETE_COLLECT_POIDS_MAX,
+		"QUETE_TRANSPORT_PROBA": QUETE_TRANSPORT_PROBA,
+		"QUETE_TRANSPORT_DUREE_SECONDES": QUETE_TRANSPORT_DUREE_SECONDES,
+		"QUETE_TRANSPORT_POIDS_MAX": QUETE_TRANSPORT_POIDS_MAX,
+		"QUETE_TRANSPORT_NB_MAX": QUETE_TRANSPORT_NB_MAX,
+		"QUETE_TRANSPORT_XP": QUETE_TRANSPORT_XP,
+		"QUETE_TRANSPORT_RELATION_DELTA": QUETE_TRANSPORT_RELATION_DELTA,
+		"QUETE_TRANSPORT_STOCK_PROBA": QUETE_TRANSPORT_STOCK_PROBA,
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
 		"SORT_COUT_COEFF": SORT_COUT_COEFF,
@@ -411,6 +439,9 @@ def load_world_variables() -> dict:
 	global PNJ_REPUTATION_SEUIL
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
 	global QUETE_COLLECT_POIDS_MAX
+	global QUETE_TRANSPORT_PROBA, QUETE_TRANSPORT_DUREE_SECONDES, QUETE_TRANSPORT_POIDS_MAX
+	global QUETE_TRANSPORT_NB_MAX, QUETE_TRANSPORT_XP, QUETE_TRANSPORT_RELATION_DELTA
+	global QUETE_TRANSPORT_STOCK_PROBA
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
@@ -475,6 +506,13 @@ def load_world_variables() -> dict:
 	QUETE_XP_FACTEUR    = float(v.get("QUETE_XP_FACTEUR", QUETE_XP_FACTEUR))
 	QUETE_CUIVRE_PAR_XP = float(v.get("QUETE_CUIVRE_PAR_XP", QUETE_CUIVRE_PAR_XP))
 	QUETE_COLLECT_POIDS_MAX = float(v.get("QUETE_COLLECT_POIDS_MAX", QUETE_COLLECT_POIDS_MAX))
+	QUETE_TRANSPORT_PROBA   = float(v.get("QUETE_TRANSPORT_PROBA", QUETE_TRANSPORT_PROBA))
+	QUETE_TRANSPORT_DUREE_SECONDES = int(v.get("QUETE_TRANSPORT_DUREE_SECONDES", QUETE_TRANSPORT_DUREE_SECONDES))
+	QUETE_TRANSPORT_POIDS_MAX = float(v.get("QUETE_TRANSPORT_POIDS_MAX", QUETE_TRANSPORT_POIDS_MAX))
+	QUETE_TRANSPORT_NB_MAX  = int(v.get("QUETE_TRANSPORT_NB_MAX", QUETE_TRANSPORT_NB_MAX))
+	QUETE_TRANSPORT_XP      = int(v.get("QUETE_TRANSPORT_XP", QUETE_TRANSPORT_XP))
+	QUETE_TRANSPORT_RELATION_DELTA = int(v.get("QUETE_TRANSPORT_RELATION_DELTA", QUETE_TRANSPORT_RELATION_DELTA))
+	QUETE_TRANSPORT_STOCK_PROBA = float(v.get("QUETE_TRANSPORT_STOCK_PROBA", QUETE_TRANSPORT_STOCK_PROBA))
 
 	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))
 	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))

@@ -1,0 +1,3782 @@
+[
+  {
+    "_id": "pnj:marchand_apothicairerie",
+    "type": "pnj",
+    "nom": "Dame Ysoline",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des bocaux d'herbes sèches montent jusqu'au plafond. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_armurerie",
+    "type": "pnj",
+    "nom": "Maître Gorm",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_f_duelliste01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le marteau retombe en cadence sur l'enclume. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_atelier_d_artisan",
+    "type": "pnj",
+    "nom": "Maître Aldric",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Copeaux et limaille jonchent l'établi. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_atelier_de_cirier",
+    "type": "pnj",
+    "nom": "Dame Bertrade",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier02.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "L'odeur chaude de la cire d'abeille sature l'air. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_atelier_de_l_empenneur",
+    "type": "pnj",
+    "nom": "Le vieux Renaud",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "elfe_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des plumes triées par teinte attendent en fagots. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_bijouterie",
+    "type": "pnj",
+    "nom": "Maître Orfeo",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier03.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une loupe pend au-dessus d'un plateau de pierres. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_boucherie",
+    "type": "pnj",
+    "nom": "Maître Barnabé",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "elfe_m_lettre02.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Les quartiers de viande pendent aux crocs. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_bourrellerie",
+    "type": "pnj",
+    "nom": "Maître Guerric",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Harnais et colliers de trait sèchent sur des tréteaux. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_boyauderie",
+    "type": "pnj",
+    "nom": "Dame Mahaut",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_f_duelliste01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des boyaux tendus sèchent sur des perches. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_brosserie",
+    "type": "pnj",
+    "nom": "Le vieux Colin",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des touffes de soies attendent d'être montées. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_corderie",
+    "type": "pnj",
+    "nom": "Maître Erwan",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier02.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le chanvre torsadé court sur toute la longueur de l'atelier. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_cordonnerie",
+    "type": "pnj",
+    "nom": "Maître Simon",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "elfe_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des formes de bois s'alignent sous l'établi. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_cuisine",
+    "type": "pnj",
+    "nom": "Dame Perrine",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier03.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Un bouillon mijote sur le feu. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_fletcher",
+    "type": "pnj",
+    "nom": "Le vieux Thibaut",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "elfe_m_lettre02.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des hampes bien droites sèchent en faisceaux. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_fumoir",
+    "type": "pnj",
+    "nom": "Maître Jorund",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Une fumée grasse pique les yeux. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_jardinier",
+    "type": "pnj",
+    "nom": "Dame Aveline",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_f_duelliste01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des semis attendent en caissettes. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_laboratoire_d_alchimie",
+    "type": "pnj",
+    "nom": "Maître Corvin",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Un alambic siffle doucement dans la pénombre. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_lutherie",
+    "type": "pnj",
+    "nom": "Maître Anselme",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier02.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Un manche à peine dégrossi repose sur l'établi. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_maroquinerie",
+    "type": "pnj",
+    "nom": "Dame Ermeline",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "elfe_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le cuir teint embaume la boutique. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_necromancie",
+    "type": "pnj",
+    "nom": "L'ombre de Vaudrec",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier03.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le froid s'accroche aux murs sans raison. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_plumasserie",
+    "type": "pnj",
+    "nom": "Dame Alaïs",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "elfe_m_lettre02.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Les plumes d'apparat frémissent au moindre courant d'air. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_salaison",
+    "type": "pnj",
+    "nom": "Maître Gontran",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des baquets de saumure occupent tout le fond. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_savonnerie",
+    "type": "pnj",
+    "nom": "Dame Osanne",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_f_duelliste01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "La soude et la graisse se disputent l'air. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_scriptorium",
+    "type": "pnj",
+    "nom": "Frère Anselin",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "On n'entend que le grattement des calames. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_tabletterie",
+    "type": "pnj",
+    "nom": "Maître Ivon",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier02.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "L'os poli luit sous la lampe. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_tannerie",
+    "type": "pnj",
+    "nom": "Maître Rufin",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "elfe_m_lettre01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "L'odeur du tan prend à la gorge. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_taxidermie",
+    "type": "pnj",
+    "nom": "Maître Sylvain",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier03.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Des regards de verre vous suivent depuis les étagères. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:marchand_tissage",
+    "type": "pnj",
+    "nom": "Dame Guillemette",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "elfe_m_lettre02.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "incomplet": "transport_incomplet"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le métier à tisser bat une mesure obstinée. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

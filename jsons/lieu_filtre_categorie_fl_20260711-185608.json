@@ -1,0 +1,37 @@
+[
+  {
+    "_id": "lieu:la_corde_tendue",
+    "_rev": "2-1980ca7d74f6bab9f3421182645cdaef",
+    "type": "lieu",
+    "label": "La Corde Tendue",
+    "image": "archerie_europe01.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "fletcher"
+  },
+  {
+    "_id": "lieu:la_fleche_d_argent",
+    "_rev": "63-3f06d9ead81a1ffe302692143e02c6a4",
+    "type": "lieu",
+    "label": "La Flèche d'Argent",
+    "image": "archerie_europe02.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "fletcher",
+    "stock_matieres": {
+      "branche": 67,
+      "petit_rondin": 43
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:manche",
+        "qty": 313
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_fletcher",
+        "nom": "Lucinda Mortecroix",
+        "portrait": "marchand_lucinda_mortecroix_fletcher.png"
+      }
+    ]
+  }
+]

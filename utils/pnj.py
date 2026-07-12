@@ -17,7 +17,14 @@
 # - `services.don` : {item, quantite, cout_cuivre, gratuit_si:{lieux, seuil},
 #   noeuds:{fait, sans_fonds, trop_charge}} — remise d'un objet (ex. eau bénite),
 #   gratuit si bonne réputation ; contrôle de charge côté router.
-# Placeholders substitués serveur dans texte/label : {prenom}, {cout}.
+# - `services.transport` : {noeuds:{propose, infos, accepte, trop_charge, livre, incomplet}}
+#   — quête de course entre magasins (utils/transport.py). Les conditions `transport_offert`
+#   / `transport_a_livrer` sont des FLAGS posés par le router.
+# Placeholders substitués serveur dans texte/label : {prenom}, {cout}, plus toute clé de
+# `contexte["placeholders"]` (ex. {destination}, {direction}, {repere}, {delai}, {xp}).
+#
+# Les magasins ne portent pas de champ `pnj` : leur tenancier est dérivé de leur catégorie
+# par `marchand_fn` (utils/transport.entree_marchand), injecté dans la résolution de présence.
 #
 # Logique pure (DB injectée : relation_value_fn), mute sans save — l'endpoint persiste.
 
@@ -30,10 +37,21 @@ from models import character_stats
 # Présence dans le lieu
 # ---------------------------------------------------------------------------
 
-def tirer_pnj_present(lieu_doc: dict, rand_fn=random.random) -> str | None:
+def entrees_pnj(lieu_doc: dict, marchand_fn=None) -> list:
+	"""Entrées `pnj` effectives du lieu : le champ explicite s'il existe, sinon le tenancier
+	implicite fourni par `marchand_fn(lieu_doc)` (les magasins ne portent pas de champ `pnj`
+	— leur tenancier est dérivé de leur catégorie, cf. utils/transport.entree_marchand)."""
+	explicites = (lieu_doc or {}).get("pnj") or []
+	if explicites:
+		return explicites
+	implicite = marchand_fn(lieu_doc) if marchand_fn else None
+	return [implicite] if implicite else []
+
+
+def tirer_pnj_present(lieu_doc: dict, rand_fn=random.random, marchand_fn=None) -> str | None:
 	"""Tire le PNJ présent parmi les entrées `pnj` du lieu : la première entrée dont
 	`rand_fn() < probabilite` gagne (ordre de la liste = priorité). None si aucun."""
-	for entree in (lieu_doc or {}).get("pnj") or []:
+	for entree in entrees_pnj(lieu_doc, marchand_fn):
 		pnj_id = entree.get("character")
 		if not pnj_id:
 			continue
@@ -46,7 +64,8 @@ def tirer_pnj_present(lieu_doc: dict, rand_fn=random.random) -> str | None:
 	return None
 
 
-def poser_pnj_present(character: dict, lieu_doc: dict, rand_fn=random.random) -> bool:
+def poser_pnj_present(character: dict, lieu_doc: dict, rand_fn=random.random,
+					  marchand_fn=None) -> bool:
 	"""Pose le champ transitoire `pnj_present` si le personnage vient d'entrer dans ce
 	lieu (mute sans save). No-op si le tirage a déjà été fait pour ce lieu (refresh
 	stable). Renvoie True si le champ a changé (l'appelant décide de sauvegarder)."""
@@ -58,12 +77,12 @@ def poser_pnj_present(character: dict, lieu_doc: dict, rand_fn=random.random) ->
 		return False
 	character["pnj_present"] = {
 		"lieu": lieu_id,
-		"character": tirer_pnj_present(lieu_doc, rand_fn),
+		"character": tirer_pnj_present(lieu_doc, rand_fn, marchand_fn),
 	}
 	return True
 
 
-def entree_pnj_active(character: dict, lieu_doc: dict) -> dict | None:
+def entree_pnj_active(character: dict, lieu_doc: dict, marchand_fn=None) -> dict | None:
 	"""L'entrée `pnj` du lieu correspondant au tirage persisté, ou None (tirage périmé,
 	PNJ absent, lieu sans pnj, entrée retirée de la donnée depuis le tirage)."""
 	present = (character or {}).get("pnj_present") or {}
@@ -71,7 +90,7 @@ def entree_pnj_active(character: dict, lieu_doc: dict) -> dict | None:
 	pnj_id = present.get("character")
 	if not lieu_id or present.get("lieu") != lieu_id or not pnj_id:
 		return None
-	for entree in lieu_doc.get("pnj") or []:
+	for entree in entrees_pnj(lieu_doc, marchand_fn):
 		if entree.get("character") == pnj_id:
 			return entree
 	return None
@@ -79,10 +98,12 @@ def entree_pnj_active(character: dict, lieu_doc: dict) -> dict | None:
 
 def pnj_payload(entree: dict, pnj_doc: dict) -> dict:
 	"""Payload de rendu du PNJ présent (template /play + panneau de dialogue).
-	Portrait/description : l'entrée du lieu prime (ambiance par lieu), repli doc PNJ."""
+	Nom/portrait/description : l'entrée du lieu prime (identité propre à la boutique), repli
+	doc PNJ. C'est ce qui permet de donner un tenancier NOMMÉ à un magasin tout en réutilisant
+	le doc — et donc le dialogue — générique de sa catégorie."""
 	return {
 		"character": (pnj_doc or {}).get("_id") or entree.get("character"),
-		"nom": (pnj_doc or {}).get("nom", "???"),
+		"nom": entree.get("nom") or (pnj_doc or {}).get("nom", "???"),
 		"portrait": entree.get("portrait") or (pnj_doc or {}).get("portrait"),
 		"image_lieu": entree.get("image"),
 		"description": entree.get("description") or (pnj_doc or {}).get("description", ""),
@@ -109,10 +130,16 @@ def _lieux_cites(pnj_doc: dict) -> set:
 	return lieux
 
 
-def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn) -> dict:
+def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
+					  flags: dict | None = None, placeholders: dict | None = None) -> dict:
 	"""Contexte d'évaluation des conditions : relations du personnage avec les lieux
 	cités par l'arbre/les services (`relation_value_fn(lieu_id) -> int`, injectée par le
-	router) + raison d'intro éventuelle. Ajoute aussi `prenom` pour les placeholders."""
+	router) + raison d'intro éventuelle. Ajoute aussi `prenom` pour les placeholders.
+
+	`flags` = booléens d'état supplémentaires que les conditions peuvent tester (ex.
+	`transport_offert`, `transport_a_livrer`) ; `placeholders` = valeurs à substituer dans
+	les textes (ex. `{destination}`, `{direction}`). Les deux sont fournis par le router,
+	qui seul connaît le lieu courant et l'état des quêtes."""
 	relations = {}
 	for lid in _lieux_cites(pnj_doc):
 		try:
@@ -123,12 +150,16 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn) -> dict
 		"relations": relations,
 		"intro_raison": ((character or {}).get("intro") or {}).get("raison"),
 		"prenom": (character or {}).get("prenom", ""),
+		"flags": dict(flags or {}),
+		"placeholders": dict(placeholders or {}),
 	}
 
 
 def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	"""Évalue une condition de choix. Sans condition → True. `relation_min` = OU logique
-	sur les lieux (une relation ≥ seuil suffit) ; `intro_raison` = égalité stricte."""
+	sur les lieux (une relation ≥ seuil suffit) ; `intro_raison` = égalité stricte ; toute
+	autre clé est traitée comme un **flag booléen** du contexte (ex. `transport_offert`) —
+	un flag absent vaut False, ce qui masque le choix."""
 	if not condition:
 		return True
 	rel_min = condition.get("relation_min")
@@ -140,6 +171,12 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	if "intro_raison" in condition:
 		if contexte.get("intro_raison") != condition["intro_raison"]:
 			return False
+	flags = contexte.get("flags") or {}
+	for cle, attendu in condition.items():
+		if cle in ("relation_min", "intro_raison"):
+			continue
+		if bool(flags.get(cle)) is not bool(attendu):
+			return False
 	return True
 
 
@@ -148,7 +185,9 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 def _substituer(texte: str, contexte: dict, soin: dict | None) -> str:
-	"""Placeholders {prenom} / {cout} (coût effectif du soin, « gratuit » si offert)."""
+	"""Placeholders {prenom} / {cout} (coût effectif du soin, « gratuit » si offert), plus
+	toute clé de `contexte["placeholders"]` posée par le router (ex. {destination},
+	{direction}, {repere}, {delai}, {xp} pour les quêtes de transport)."""
 	if not texte:
 		return ""
 	texte = texte.replace("{prenom}", str(contexte.get("prenom", "")))
@@ -158,6 +197,8 @@ def _substituer(texte: str, contexte: dict, soin: dict | None) -> str:
 		else:
 			cout = "gratuit"
 		texte = texte.replace("{cout}", cout)
+	for cle, valeur in (contexte.get("placeholders") or {}).items():
+		texte = texte.replace("{" + str(cle) + "}", str(valeur))
 	return texte
 
 

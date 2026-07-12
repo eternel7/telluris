@@ -408,11 +408,12 @@ def relation_doc_id(character: dict, lieu_doc: dict) -> str:
 	return "relation:" + char_id + "::" + lieu_id
 
 
-def get_relation(character: dict, lieu_doc: dict) -> dict:
+def get_relation(character: dict, lieu_doc: dict, get_doc_fn=None) -> dict:
 	"""Doc relation perso×lieu : l'existant en base, sinon un dict frais neutre (non
-	sauvegardé — l'endpoint persiste, comme credit_character/grant_xp)."""
+	sauvegardé — l'endpoint persiste, comme credit_character/grant_xp). `get_doc_fn`
+	permet d'injecter la lecture (modules purs / tests) ; défaut = la DB du module."""
 	doc_id = relation_doc_id(character, lieu_doc)
-	existing = get_doc(doc_id)
+	existing = (get_doc_fn or get_doc)(doc_id)
 	if existing:
 		return existing
 	return {
@@ -431,6 +432,16 @@ def relation_value(relation_doc: dict) -> int:
 	return int(_clamp(int((relation_doc or {}).get("value", 0) or 0), 0, 100))
 
 
+def ajuster_relation(relation_doc: dict, delta: int) -> int:
+	"""Décale la valeur d'une relation de `delta`, bornée 0–100 (mute en place, NE
+	SAUVEGARDE PAS — l'appelant persiste le doc relation). Source unique du bornage :
+	tout ce qui fait bouger une relation (crit de marchandage, quête de transport…)
+	passe par ici. Renvoie la nouvelle valeur."""
+	val = int(_clamp(relation_value(relation_doc) + int(delta), 0, 100))
+	relation_doc["value"] = val
+	return val
+
+
 def marchandage_bloque(relation_doc: dict, now: int) -> bool:
 	"""Le marchand refuse-t-il de négocier (blocage après crit échec encore actif) ?"""
 	return now < int((relation_doc or {}).get("marchandage_bloque_jusqu", 0) or 0)
@@ -446,13 +457,14 @@ def appliquer_marchandage(relation_doc: dict, item_id: str, sens: str, deal: dic
 	val = relation_value(relation_doc)
 	crit = None
 	if roll <= int(character_stats.CRIT_REUSSITE_MAX):
-		val = min(100, val + 1)
+		val = ajuster_relation(relation_doc, +1)
 		crit = "reussite"
 	elif roll >= int(character_stats.CRIT_ECHEC_MIN):
-		val = max(0, val - 1)
+		val = ajuster_relation(relation_doc, -1)
 		relation_doc["marchandage_bloque_jusqu"] = now + int(character_stats.MARCHANDAGE_BLOCAGE_SECONDES)
 		crit = "echec"
-	relation_doc["value"] = val
+	else:
+		relation_doc["value"] = val
 
 	neg = None
 	if deal.get("succes"):

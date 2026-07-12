@@ -1,0 +1,512 @@
+# utils/transport.py
+# Quêtes de transport de marchandise : un magasin X confie une cargaison à livrer à un
+# magasin Y qui rachète ces biens, dans un délai RÉEL (QUETE_TRANSPORT_DUREE_SECONDES).
+# Réussite → +1 relation avec X (+ XP + prime) ; échec (délai dépassé) ou abandon → −1
+# relation avec X, la cargaison RESTE dans le sac (le joueur peut la revendre).
+#
+# L'offre est tirée à l'ENTRÉE d'un magasin (QUETE_TRANSPORT_PROBA) et persistée en champ
+# transitoire `character["transport_offert"]` — même sémantique que `pnj_present` : un
+# refresh ne re-tire pas, ressortir/rentrer re-tire.
+#
+# Toute l'interaction passe par le dialogue PNJ (utils/pnj.py) : les magasins n'ayant pas
+# de champ `pnj`, `entree_marchand` fournit un tenancier GÉNÉRIQUE par catégorie
+# (`pnj:marchand_<categorie>`), injecté dans la résolution de présence.
+#
+# Géographie : il n'y a aucune coordonnée monde sur les docs `lieu:*`, mais chaque doc
+# `connection` boutique↔ville porte la position de la porte DANS la grille de la ville.
+# `focalisation.charger_graphe` l'expose déjà → direction cardinale et « près du magasin
+# Z » se calculent en comparant les portes dans la grille du parent commun.
+#
+# Logique pure (DB injectée : get_doc_fn / find_docs_fn / rand_fn / now), mute sans save —
+# l'endpoint persiste. Pattern de utils/focalisation.py et utils/pnj.py.
+
+import random
+import uuid
+
+from models import character_stats
+from utils.characters import item_ref_id, poids_bounds
+from utils import focalisation, marche, quetes
+
+
+# ---------------------------------------------------------------------------
+# Magasins & tenancier générique
+# ---------------------------------------------------------------------------
+
+def est_magasin(lieu_doc: dict) -> bool:
+	"""Le lieu est-il marchand ? Un lieu l'est de fait dès que sa catégorie a des recettes,
+	donc des matières à racheter au joueur — c'est déjà le prédicat du bouton 🏷️ Achat-Vente."""
+	return bool(marche.besoins_categorie((lieu_doc or {}).get("categorie")))
+
+
+def entree_marchand(lieu_doc: dict) -> dict | None:
+	"""Entrée `pnj` implicite d'un lieu marchand : son tenancier générique de catégorie.
+	Aucun doc `lieu:*` ne porte de `pnj` marchand — on le dérive de la catégorie. Présence
+	certaine (une boutique a toujours quelqu'un derrière le comptoir : sans lui, aucune
+	livraison ne serait possible). None si le lieu n'est pas un magasin."""
+	if not est_magasin(lieu_doc):
+		return None
+	return {
+		"character": "pnj:marchand_" + str((lieu_doc or {}).get("categorie")),
+		"probabilite": 1.0,
+	}
+
+
+# ---------------------------------------------------------------------------
+# Géographie : portes, direction cardinale, repère
+# ---------------------------------------------------------------------------
+
+# Octants, dans l'ordre des angles croissants à partir de l'est (y croît vers le BAS
+# dans la grille → le nord est en dy négatif).
+_OCTANTS = [
+	(1, 0, "est"), (1, 1, "sud-est"), (0, 1, "sud"), (-1, 1, "sud-ouest"),
+	(-1, 0, "ouest"), (-1, -1, "nord-ouest"), (0, -1, "nord"), (1, -1, "nord-est"),
+]
+
+
+def portes_du_parent(graphe: dict, parent_id: str) -> dict:
+	"""{lieu_id: (x, y)} — la porte de chaque lieu enfant DANS la grille du parent.
+	Extrait tel quel de `focalisation.charger_graphe` (les arêtes du parent portent la
+	position côté parent)."""
+	return {a["voisin"]: a["porte"] for a in (graphe or {}).get(parent_id, [])}
+
+
+def direction_cardinale(depuis: tuple, vers: tuple) -> str | None:
+	"""Direction cardinale (8 octants) de `depuis` vers `vers`, en coordonnées de grille
+	(y croît vers le BAS → nord = dy < 0). None si les deux portes coïncident."""
+	dx = int(vers[0]) - int(depuis[0])
+	dy = int(vers[1]) - int(depuis[1])
+	if dx == 0 and dy == 0:
+		return None
+	# Octant de plus grande projection : évite la trigonométrie et reste exact sur les axes.
+	meilleur, meilleur_score = None, None
+	norme = (dx * dx + dy * dy) ** 0.5
+	for ox, oy, nom in _OCTANTS:
+		on = (ox * ox + oy * oy) ** 0.5
+		score = (dx * ox + dy * oy) / (norme * on)
+		if meilleur_score is None or score > meilleur_score:
+			meilleur, meilleur_score = nom, score
+	return meilleur
+
+
+def repere_proche(cible_id: str, portes: dict, get_doc_fn, exclure: set | None = None) -> str | None:
+	"""Label du lieu dont la porte est la plus proche de celle de `cible_id` dans la grille
+	du parent (« tout près de … »). `exclure` = lieux à ignorer (la cible, le donneur).
+	None si la cible n'a pas de porte connue ou qu'il n'y a aucun voisin."""
+	cible_porte = (portes or {}).get(cible_id)
+	if not cible_porte:
+		return None
+	exclure = set(exclure or ()) | {cible_id}
+	meilleur, meilleure_d = None, None
+	for lieu_id, porte in portes.items():
+		if lieu_id in exclure:
+			continue
+		doc = get_doc_fn(lieu_id) or {}
+		if not est_magasin(doc):
+			continue
+		d = (porte[0] - cible_porte[0]) ** 2 + (porte[1] - cible_porte[1]) ** 2
+		if meilleure_d is None or d < meilleure_d:
+			meilleur, meilleure_d = (doc.get("label") or doc.get("nom") or lieu_id), d
+	return meilleur
+
+
+def indice_destination(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) -> dict:
+	"""Indices donnés par le marchand quand on l'interroge sur la destination :
+	{nom, direction, repere, meme_ville, ville_nom, distance}. `direction`/`repere` ne
+	sont renseignés que si les deux magasins partagent la même ville (donc la même grille,
+	seule échelle où une direction cardinale a un sens) ; sinon on nomme la ville et on
+	donne la distance en nombre d'étapes."""
+	dest_doc = get_doc_fn(dest_id) or {}
+	nom = dest_doc.get("label") or dest_doc.get("nom") or dest_id
+	parent_x = (giver_doc or {}).get("lieu_parent")
+	parent_y = dest_doc.get("lieu_parent")
+	graphe = focalisation.charger_graphe(find_docs_fn)
+	etape = focalisation.prochaine_etape(graphe, (giver_doc or {}).get("_id"), dest_id)
+	distance = (etape or {}).get("distance", 0)
+
+	meme_ville = bool(parent_x) and parent_x == parent_y
+	direction = repere = None
+	ville_nom = None
+	if meme_ville:
+		portes = portes_du_parent(graphe, parent_x)
+		porte_x, porte_y = portes.get((giver_doc or {}).get("_id")), portes.get(dest_id)
+		if porte_x and porte_y:
+			direction = direction_cardinale(porte_x, porte_y)
+		repere = repere_proche(dest_id, portes, get_doc_fn, exclure={(giver_doc or {}).get("_id")})
+	else:
+		ville_doc = get_doc_fn(parent_y) if parent_y else None
+		ville_nom = (ville_doc or {}).get("label") or (ville_doc or {}).get("nom")
+
+	return {
+		"nom": nom,
+		"direction": direction,
+		"repere": repere,
+		"meme_ville": meme_ville,
+		"ville_nom": ville_nom,
+		"distance": distance,
+	}
+
+
+def texte_indice(indice: dict) -> str:
+	"""Phrase d'orientation prête à insérer dans un dialogue ({direction} du gabarit)."""
+	if indice.get("meme_ville"):
+		bout = f"au {indice['direction']} d'ici" if indice.get("direction") else "à deux pas d'ici"
+		if indice.get("repere"):
+			bout += f", tout près de {indice['repere']}"
+		return bout
+	if indice.get("ville_nom"):
+		return f"à {indice['ville_nom']}, à {indice.get('distance', 0)} étapes de route"
+	return "loin d'ici"
+
+
+# ---------------------------------------------------------------------------
+# Génération de l'offre
+# ---------------------------------------------------------------------------
+
+def magasins_candidats(giver_doc: dict, find_docs_fn) -> list:
+	"""Magasins livrables depuis X : d'abord ceux de sa ville (le cas nominal — tout le
+	réseau de boutiques vit dans une ville), puis, à défaut, tous les magasins du monde."""
+	giver_id = (giver_doc or {}).get("_id")
+	parent = (giver_doc or {}).get("lieu_parent")
+	pools = []
+	if parent:
+		pools.append(find_docs_fn({"type": "lieu", "lieu_parent": parent}) or [])
+	pools.append(find_docs_fn({"type": "lieu"}) or [])
+	for pool in pools:
+		candidats = [d for d in pool if d.get("_id") != giver_id and est_magasin(d)]
+		if candidats:
+			return candidats
+	return []
+
+
+def items_fournis(giver_doc: dict) -> list:
+	"""Item_ids que le magasin X peut sortir de ses réserves : ce qu'il a en rayon
+	(`stock_vente`) plus ce que ses recettes produisent."""
+	out = []
+	for ligne in (giver_doc or {}).get("stock_vente") or []:
+		iid = ligne.get("item_id")
+		if iid and iid not in out:
+			out.append(iid)
+	for iid in sorted(marche.produits_categorie((giver_doc or {}).get("categorie"))):
+		if iid not in out:
+			out.append(iid)
+	return out
+
+
+def items_livrables(giver_doc: dict, dest_doc: dict, get_doc_fn) -> list:
+	"""Docs des items que X peut fournir ET que Y rachète — la contrainte « pouvant être
+	vendu à un magasin Y »."""
+	out = []
+	for iid in items_fournis(giver_doc):
+		doc = get_doc_fn(iid)
+		if doc and marche.lieu_buys(dest_doc, doc):
+			out.append(doc)
+	return out
+
+
+def choisir_cargaison(items: list, rand_fn=random.random) -> list:
+	"""Empile des instances tirées au hasard parmi `items` (docs) tant que ni le poids
+	cumulé (QUETE_TRANSPORT_POIDS_MAX) ni le nombre d'objets (QUETE_TRANSPORT_NB_MAX) ne
+	seraient franchis : on s'arrête AVANT l'instance qui dépasserait l'une des deux bornes
+	et on garde l'état précédent. Renvoie des références `{item, poids}` (liste vide si
+	même un objet seul est trop lourd → pas d'offre)."""
+	if not items:
+		return []
+	poids_max = float(character_stats.QUETE_TRANSPORT_POIDS_MAX)
+	nb_max = int(character_stats.QUETE_TRANSPORT_NB_MAX)
+	cargaison: list = []
+	total = 0.0
+	while len(cargaison) < nb_max:
+		doc = items[min(int(rand_fn() * len(items)), len(items) - 1)]
+		pmin, pmax = poids_bounds(doc)
+		poids = round(pmin + (pmax - pmin) * rand_fn(), 2)
+		if total + poids > poids_max:
+			break
+		cargaison.append({"item": doc.get("_id") or doc.get("item"), "poids": poids})
+		total += poids
+	return cargaison
+
+
+def _xp_transport(indice: dict) -> int:
+	"""XP de la course : la base pour une livraison dans la même ville, multipliée par la
+	distance quand il faut prendre la route."""
+	base = int(character_stats.QUETE_TRANSPORT_XP)
+	if indice.get("meme_ville"):
+		return base
+	return max(base, base * (1 + int(indice.get("distance", 0) or 0)))
+
+
+def poids_cargaison(cargaison: list) -> float:
+	return round(sum(float(r.get("poids", 0) or 0) for r in cargaison or []), 2)
+
+
+def generer_transport(giver_doc: dict, find_docs_fn, get_doc_fn,
+					  rand_fn=random.random) -> dict | None:
+	"""Construit une offre de transport depuis le magasin X (non persistée, pas encore
+	acceptée). None si aucun magasin destinataire ne rachète ce que X peut fournir, ou si
+	la cargaison tirée est vide (objet unique trop lourd)."""
+	candidats = magasins_candidats(giver_doc, find_docs_fn)
+	rand_fn_ = rand_fn
+	# On essaie les destinations dans un ordre aléatoire jusqu'à en trouver une qui rachète.
+	ordre = sorted(candidats, key=lambda _d: rand_fn_())
+	for dest_doc in ordre:
+		items = items_livrables(giver_doc, dest_doc, get_doc_fn)
+		if not items:
+			continue
+		cargaison = choisir_cargaison(items, rand_fn)
+		if not cargaison:
+			continue
+		dest_id = dest_doc.get("_id")
+		indice = indice_destination(giver_doc, dest_id, find_docs_fn, get_doc_fn)
+		xp = _xp_transport(indice)
+		cuivre = max(0, round(xp * float(character_stats.QUETE_CUIVRE_PAR_XP)))
+		nb = len(cargaison)
+		giver_nom = (giver_doc or {}).get("label") or (giver_doc or {}).get("nom") or "Le marchand"
+		return {
+			"id": "quete:transport_" + uuid.uuid4().hex[:12],
+			"type_quete": "transport",
+			"titre": f"Livraison : {indice['nom']}",
+			# Les enseignes portent déjà leur article (« Le Saloir ») : on les introduit par un
+			# deux-points plutôt que par une préposition, qui donnerait « à porter à Le Saloir ».
+			"description": (
+				f"{giver_nom} vous confie {nb} colis "
+				f"({poids_cargaison(cargaison)} kg). Destination : {indice['nom']}, "
+				f"{texte_indice(indice)}."
+			),
+			"rang": "F",
+			"giver": (giver_doc or {}).get("_id"),
+			"objectif": {"type": "transport", "cible": dest_id, "quantite": 1},
+			"cargaison": cargaison,
+			"duree": int(character_stats.QUETE_TRANSPORT_DUREE_SECONDES),
+			"recompenses": {"xp": xp, "cuivre": cuivre, "items": []},
+			"progress": 0,
+		}
+	return None
+
+
+# ---------------------------------------------------------------------------
+# Offre du lieu (champ transitoire, miroir de pnj_present)
+# ---------------------------------------------------------------------------
+
+def transports_actifs(character: dict) -> list:
+	return [
+		q for q in (character or {}).get("quetes_actives", [])
+		if (q.get("objectif") or {}).get("type") == "transport"
+	]
+
+
+def poser_transport_offert(character: dict, lieu_doc: dict, find_docs_fn, get_doc_fn,
+						   rand_fn=random.random) -> bool:
+	"""Tire (une seule fois par entrée) l'offre de transport du magasin courant et la pose
+	dans le champ transitoire `transport_offert` (mute sans save). No-op si le tirage a
+	déjà été fait pour ce lieu → un refresh ne re-tire pas ; ressortir/rentrer re-tire.
+	Aucune offre si le personnage a déjà une course en cours (pas d'empilement de
+	cargaisons). Renvoie True si le champ a changé (l'appelant décide de sauvegarder)."""
+	lieu_id = (lieu_doc or {}).get("_id")
+	if not lieu_id or not est_magasin(lieu_doc):
+		# Sortie d'un magasin : on nettoie l'offre restée sur l'ancien lieu.
+		if (character.get("transport_offert") or {}).get("lieu"):
+			character["transport_offert"] = None
+			return True
+		return False
+	offert = character.get("transport_offert") or {}
+	if offert.get("lieu") == lieu_id:
+		return False
+	quete = None
+	if not transports_actifs(character) and rand_fn() < float(character_stats.QUETE_TRANSPORT_PROBA):
+		quete = generer_transport(lieu_doc, find_docs_fn, get_doc_fn, rand_fn)
+	character["transport_offert"] = {"lieu": lieu_id, "quete": quete}
+	return True
+
+
+def offre_courante(character: dict, lieu_doc: dict) -> dict | None:
+	"""L'offre tirée pour le lieu courant, ou None (tirage périmé / pas d'offre)."""
+	offert = (character or {}).get("transport_offert") or {}
+	lieu_id = (lieu_doc or {}).get("_id")
+	if not lieu_id or offert.get("lieu") != lieu_id:
+		return None
+	return offert.get("quete") or None
+
+
+def transport_a_livrer(character: dict, lieu_id: str) -> dict | None:
+	"""La course active dont la destination est ce lieu (donc livrable ici), ou None."""
+	for q in transports_actifs(character):
+		if (q.get("objectif") or {}).get("cible") == lieu_id:
+			return q
+	return None
+
+
+# ---------------------------------------------------------------------------
+# Acceptation / livraison / expiration
+# ---------------------------------------------------------------------------
+
+def accepter_transport(character: dict, offre: dict, now: int | None = None) -> dict:
+	"""Remet la cargaison au joueur et pose la quête dans `quetes_actives` (mute sans save).
+	Le contrôle de charge est fait par l'appelant AVANT (nœud « trop chargé »). Vide l'offre
+	du lieu pour qu'elle ne soit pas reprise. Renvoie le snapshot posé."""
+	now = int(quetes.now_epoch() if now is None else now)
+	snapshot = {
+		"id": offre.get("id"),
+		"titre": offre.get("titre", "—"),
+		"description": offre.get("description", ""),
+		"rang": offre.get("rang", "F"),
+		"giver": offre.get("giver"),
+		"objectif": dict(offre.get("objectif", {})),
+		"recompenses": dict(offre.get("recompenses", {})),
+		"cargaison": [dict(r) for r in offre.get("cargaison", [])],
+		"progress": 0,
+		"accepte_at": now,
+		"expire_at": now + int(offre.get("duree", character_stats.QUETE_TRANSPORT_DUREE_SECONDES)),
+	}
+	inv = character.setdefault("inventaire", [])
+	for ref in snapshot["cargaison"]:
+		inv.append(dict(ref))
+	character.setdefault("quetes_actives", []).append(snapshot)
+	character["transport_offert"] = None
+	return snapshot
+
+
+def cargaison_manquante(character: dict, q: dict) -> dict:
+	"""{item_id: nb manquant} — ce que le joueur ne porte plus de la cargaison confiée
+	(vendu, jeté, perdu). Vide = livraison possible."""
+	requis: dict = {}
+	for ref in q.get("cargaison") or []:
+		iid = item_ref_id(ref)
+		if iid:
+			requis[iid] = requis.get(iid, 0) + 1
+	porte: dict = {}
+	for ref in character.get("inventaire", []):
+		iid = item_ref_id(ref)
+		if iid in requis:
+			porte[iid] = porte.get(iid, 0) + 1
+	return {
+		iid: n - porte.get(iid, 0)
+		for iid, n in requis.items() if n > porte.get(iid, 0)
+	}
+
+
+def livrer_transport(character: dict, q: dict) -> bool:
+	"""Retire la cargaison du sac et marque l'objectif atteint (mute sans save). False si
+	le joueur ne porte plus tout (l'appelant route vers le nœud « incomplet »)."""
+	if cargaison_manquante(character, q):
+		return False
+	requis: dict = {}
+	for ref in q.get("cargaison") or []:
+		iid = item_ref_id(ref)
+		if iid:
+			requis[iid] = requis.get(iid, 0) + 1
+	for iid, n in requis.items():
+		quetes.retirer_items(character, iid, n)
+	q["progress"] = int((q.get("objectif") or {}).get("quantite", 1) or 1)
+	return True
+
+
+def deposer_en_rayon(dest_doc: dict, cargaison: list, get_doc_fn,
+					 rand_fn=random.random) -> dict:
+	"""Range la cargaison livrée dans le magasin destinataire : chaque objet a
+	`QUETE_TRANSPORT_STOCK_PROBA` de finir en **rayon** (`stock_vente`), à condition que le
+	magasin **vende** ce produit (`lieu_produit` — ses recettes le produisent, donc il l'étale).
+	Le reste disparaît en arrière-boutique (atelier, consommation) : la livraison garnit
+	l'étal sans le remplir d'un coup.
+
+	Mute `dest_doc` en place, NE SAUVEGARDE PAS (l'appelant persiste le doc lieu).
+	Renvoie {item_id: nb mis en rayon} — vide si rien n'a été rangé.
+	"""
+	proba = float(character_stats.QUETE_TRANSPORT_STOCK_PROBA)
+	ajouts: dict = {}
+	vendable: dict = {}  # cache par item_id : ce magasin l'étale-t-il ?
+	for ref in cargaison or []:
+		iid = item_ref_id(ref)
+		if not iid:
+			continue
+		if iid not in vendable:
+			doc = get_doc_fn(iid)
+			vendable[iid] = bool(doc) and marche.lieu_produit(dest_doc, doc)
+		if not vendable[iid]:
+			continue
+		if rand_fn() >= proba:
+			continue
+		ajouts[iid] = ajouts.get(iid, 0) + 1
+
+	if not ajouts:
+		return {}
+	rayon = dest_doc.setdefault("stock_vente", [])
+	for iid, n in ajouts.items():
+		ligne = next((l for l in rayon if l.get("item_id") == iid), None)
+		if ligne:
+			ligne["qty"] = int(ligne.get("qty", 0) or 0) + n
+		else:
+			rayon.append({"item_id": iid, "qty": n})
+	return ajouts
+
+
+def archiver(character: dict, q: dict, echec: bool, now: int) -> None:
+	"""Sort la quête des actives et l'archive dans `quetes_terminees` (mute sans save)."""
+	character["quetes_actives"] = [
+		a for a in character.get("quetes_actives", []) if a.get("id") != q.get("id")
+	]
+	character.setdefault("quetes_terminees", []).append({
+		"id": q.get("id"),
+		"titre": q.get("titre", "—"),
+		"rang": q.get("rang", "F"),
+		"echec": bool(echec),
+		"recompenses": {} if echec else dict(q.get("recompenses", {})),
+		"termine_at": now,
+	})
+
+
+def expirer_transports(character: dict, now: int) -> list:
+	"""Sort des actives toutes les courses dont le délai est écoulé et les archive en échec
+	(mute sans save). La cargaison RESTE dans le sac — le joueur garde la marchandise, seule
+	sa réputation en pâtit. Renvoie les quêtes échues (l'appelant applique le −1 relation)."""
+	echues = [
+		q for q in transports_actifs(character)
+		if int(q.get("expire_at", 0) or 0) and now >= int(q["expire_at"])
+	]
+	for q in echues:
+		archiver(character, q, echec=True, now=now)
+	return echues
+
+
+def traiter_expirations(character: dict, now: int, get_doc_fn, save_doc_fn) -> list:
+	"""Expire les courses échues ET applique la sanction de réputation (−1 chez le donneur),
+	en persistant chaque doc `relation` (doc annexe : il n'est pas dans le character).
+	Le personnage est muté SANS save — l'appelant le sauvegarde s'il reçoit une liste non
+	vide. Renvoie les quêtes échues (pour le toast client)."""
+	echues = expirer_transports(character, now)
+	for q in echues:
+		lieu_doc = get_doc_fn(q.get("giver")) if q.get("giver") else None
+		if not lieu_doc:
+			continue
+		relation = marche.get_relation(character, lieu_doc, get_doc_fn)
+		marche.ajuster_relation(relation, -int(character_stats.QUETE_TRANSPORT_RELATION_DELTA))
+		save_doc_fn(relation)
+	return echues
+
+
+def reussir_transport(character: dict, q: dict, lieu_doc: dict, get_doc_fn, save_doc_fn,
+					  now: int | None = None, rand_fn=random.random) -> dict:
+	"""Livraison réussie : récompenses (XP + prime), archivage, mise en rayon d'une partie de
+	la cargaison chez le destinataire, +1 relation avec le DONNEUR (pas le destinataire).
+
+	Les docs `relation` et `lieu` sont ANNEXES (hors character) : ils sont persistés ici ; le
+	character est muté sans save — l'endpoint le sauvegarde. Renvoie {xp, purse, relation, rayon}.
+	"""
+	now = int(quetes.now_epoch() if now is None else now)
+	recap = quetes.appliquer_recompenses(character, q)
+
+	# La marchandise entre chez le destinataire : ce qu'il vend a une chance de rejoindre son
+	# étal (le joueur voit donc l'effet de sa course sur le stock du magasin).
+	rayon = deposer_en_rayon(lieu_doc, q.get("cargaison") or [], get_doc_fn, rand_fn)
+	if rayon:
+		save_doc_fn(lieu_doc)
+
+	archiver(character, q, echec=False, now=now)
+	relation_val = None
+	giver_doc = get_doc_fn(q.get("giver")) if q.get("giver") else None
+	if giver_doc:
+		relation = marche.get_relation(character, giver_doc, get_doc_fn)
+		relation_val = marche.ajuster_relation(
+			relation, int(character_stats.QUETE_TRANSPORT_RELATION_DELTA)
+		)
+		save_doc_fn(relation)
+	return {"xp": recap["xp"], "purse": recap["purse"], "relation": relation_val, "rayon": rayon}

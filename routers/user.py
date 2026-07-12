@@ -34,6 +34,7 @@ from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import focalisation
 from utils import intro
+from utils import transport
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -366,6 +367,11 @@ def _set_ressource_recoltable(character: dict, zone_event: dict | None, lieu_doc
 	character["ressource_recoltable"] = {"item": item_id, "poids": poids}
 
 
+def _echecs_payload(echues: list) -> list:
+	"""Courses de transport dont le délai vient d'expirer, pour le toast client."""
+	return [{"titre": q.get("titre", "—")} for q in echues or []]
+
+
 def _recolte_payload(character: dict) -> dict | None:
 	"""Ressource récoltable résolue pour l'affichage (sidebar) : {item, nom, icon, poids} ou None."""
 	ref = character.get("ressource_recoltable")
@@ -461,9 +467,12 @@ async def move_character(
 							info = grant_xp(character_to_update, intro_terminee["xp"])
 							niveau_up = niveau_up or info["niveau_up"]
 							niveau_new = info["niveau_apres"]
+						# Courses de transport échues (expiration paresseuse : pas de tick de fond).
+						transports_echoues = transport.traiter_expirations(
+							character_to_update, quetes.now_epoch(), get_doc, save_doc)
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
-						return {"moved": 1, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -499,10 +508,13 @@ async def move_character(
 				if intro_terminee and intro_terminee.get("xp"):
 					info = grant_xp(character_to_update, intro_terminee["xp"])
 					intro_xp = {"gain": intro_terminee["xp"], "niveau_up": info["niveau_up"], "niveau": info["niveau_apres"]}
+				# Courses de transport échues (expiration paresseuse : pas de tick de fond).
+				transports_echoues = transport.traiter_expirations(
+					character_to_update, quetes.now_epoch(), get_doc, save_doc)
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
-				return {"position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
+				return {"transports_echoues": _echecs_payload(transports_echoues), "position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -532,8 +544,11 @@ async def focaliser(
 		if cible == character.get("lieu"):
 			raise HTTPException(status_code=422, detail="Vous êtes déjà sur place")
 	else:
-		if not quetes.quete_active(character, cible):
+		q = quetes.quete_active(character, cible)
+		if not q:
 			raise HTTPException(status_code=404, detail="Quête introuvable dans vos quêtes actives")
+		if not focalisation.quete_focalisable(q):
+			raise HTTPException(status_code=422, detail="Cette quête ne peut pas être focalisée.")
 
 	focalisation.poser_focalisation(character, type_, cible)
 	if save_doc(character) is None:

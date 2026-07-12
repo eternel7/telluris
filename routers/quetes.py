@@ -13,8 +13,10 @@ from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre,
 	resolve_item_ref, charge_max_of,
 )
+from utils.marche import get_relation, ajuster_relation
 from utils import quetes
 from utils import focalisation
+from models import character_stats
 
 quetes_router = APIRouter()
 
@@ -242,6 +244,15 @@ async def quetes_abandonner(
 		raise HTTPException(status_code=404, detail="Quête non active")
 	# Quête focalisée abandonnée → la focalisation tombe (même save).
 	focalisation.effacer_si_quete(character, quete_id)
+	# Renoncer à une course confiée coûte la même réputation que la laisser expirer : on ne
+	# se défausse pas d'une livraison sans que le marchand s'en souvienne. La cargaison, elle,
+	# reste dans le sac (le joueur garde la marchandise).
+	if (q.get("objectif") or {}).get("type") == "transport":
+		giver_doc = get_doc(q.get("giver")) if q.get("giver") else None
+		if giver_doc:
+			relation = get_relation(character, giver_doc)
+			ajuster_relation(relation, -int(character_stats.QUETE_TRANSPORT_RELATION_DELTA))
+			save_doc(relation)
 	character["quetes_actives"] = [
 		a for a in character.get("quetes_actives", []) if a.get("id") != quete_id
 	]

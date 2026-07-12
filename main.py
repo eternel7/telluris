@@ -28,6 +28,7 @@ from utils import competences as competences_util
 from utils import focalisation
 from utils import pnj as pnj_util
 from utils import intro as intro_util
+from utils import transport as transport_util
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -514,12 +515,21 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			or appro_leaves_categorie(grid_doc.get("categorie"))):
 		if tick_atelier(grid_doc):
 			save_doc(grid_doc)
+	# Courses de transport échues : l'expiration est PARESSEUSE (aucun tick de fond dans le
+	# jeu) — on la solde à chaque point de passage. La sanction de réputation part avec.
+	transports_echoues = transport_util.traiter_expirations(
+		character, quetes.now_epoch(), get_doc, save_doc)
 	# PNJ de lieu : tirage de présence à l'ENTRÉE (persisté → un refresh ne re-tire pas).
+	# Un magasin n'a pas de champ `pnj` : son tenancier est dérivé de sa catégorie.
 	# Écriture dans le GET assumée (précédent : tick_atelier) ; un conflit de save serait
 	# rejoué au prochain rendu, on ne lève pas de 409 ici.
-	if pnj_util.poser_pnj_present(character, grid_doc):
+	change = bool(transports_echoues)
+	change |= pnj_util.poser_pnj_present(character, grid_doc, marchand_fn=transport_util.entree_marchand)
+	# Offre de course du magasin : tirée à l'entrée, persistée (même sémantique que pnj_present).
+	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc)
+	if change:
 		save_doc(character)
-	pnj_entree = pnj_util.entree_pnj_active(character, grid_doc)
+	pnj_entree = pnj_util.entree_pnj_active(character, grid_doc, transport_util.entree_marchand)
 	pnj_doc = get_doc(pnj_entree["character"]) if pnj_entree else None
 	pnj_present = pnj_util.pnj_payload(pnj_entree, pnj_doc) if (pnj_entree and pnj_doc) else None
 	position = character.get("position", {"x" : 1 ,"y" : 1})
@@ -694,6 +704,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,
 			"pnj_present": pnj_present,
+			# Courses échues pendant l'absence du joueur : toast d'échec au rendu.
+			"transports_echoues": [
+				{"titre": q.get("titre", "—")} for q in transports_echoues
+			],
 			"intro": intro_payload,
 			"ressource_recoltable": ressource_recoltable,
 			"relations_lieux": relations_lieux,

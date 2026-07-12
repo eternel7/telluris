@@ -122,7 +122,7 @@ def _cible_nom(objectif: dict) -> str:
 		return _nom_espece(cible)
 	if t == "collect":
 		return _nom_item(cible)
-	if t == "visite":
+	if t in ("visite", "transport"):
 		doc = get_doc(cible)
 		return (doc.get("label") if doc else None) or (cible or "").split(":", 1)[-1]
 	return cible
@@ -308,6 +308,13 @@ def objectif_atteint(character: dict, q: dict) -> bool:
 	return progress_courant(character, q) >= int(obj.get("quantite", 0) or 0)
 
 
+def _focalisable(q: dict) -> bool:
+	"""Cette quête accepte-t-elle la focalisation 🎯 ? (règle portée par utils/focalisation,
+	importé paresseusement : c'est lui qui dépend de ce module, pas l'inverse.)"""
+	from utils.focalisation import quete_focalisable
+	return quete_focalisable(q)
+
+
 def quete_detail(character: dict, q: dict) -> dict:
 	"""Vue d'affichage d'une quête active (onglet fiche + tableau) : progression + récompenses."""
 	obj = q.get("objectif", {})
@@ -315,7 +322,11 @@ def quete_detail(character: dict, q: dict) -> dict:
 	qte = int(obj.get("quantite", 0) or 0)
 	rec = q.get("recompenses", {}) or {}
 	purse = cuivre_to_purse(rec.get("cuivre", 0))
-	return {
+	if obj.get("type") == "transport":
+		progress_txt = f"Livraison à {_cible_nom(obj)}"
+	else:
+		progress_txt = f"{_cible_nom(obj)} : {min(prog, qte) if qte else prog}/{qte}"
+	detail = {
 		"id": q.get("id") or q.get("_id"),
 		"titre": q.get("titre", "—"),
 		"description": q.get("description", ""),
@@ -324,7 +335,11 @@ def quete_detail(character: dict, q: dict) -> dict:
 		"progress": min(prog, qte) if qte else prog,
 		"quantite": qte,
 		"complete": prog >= qte,
-		"progress_txt": f"{_cible_nom(obj)} : {min(prog, qte) if qte else prog}/{qte}",
+		"progress_txt": progress_txt,
+		# Le bouton 🎯 n'a de sens que si la focalisation ferait quelque chose (guidage ou biais
+		# des tirages) — pas sur une course de transport. Import paresseux : focalisation importe
+		# déjà ce module.
+		"focalisable": _focalisable(q),
 		"recompenses": {
 			"xp": rec.get("xp", 0),
 			"or": purse["or"],
@@ -332,6 +347,12 @@ def quete_detail(character: dict, q: dict) -> dict:
 			"cuivre": purse["cuivre"],
 		},
 	}
+	# Quête à délai réel (transport) : on expose l'échéance ET l'heure serveur, le client en
+	# déduit une deadline locale — comparer `expire_at` à l'horloge du navigateur dériverait.
+	if q.get("expire_at"):
+		detail["expire_at"] = int(q["expire_at"])
+		detail["now"] = now_epoch()
+	return detail
 
 
 def fiche_details(character: dict) -> tuple:

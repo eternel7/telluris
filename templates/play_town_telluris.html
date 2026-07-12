@@ -888,6 +888,10 @@
 		.sh-quest-status { font-size: 0.8rem; padding: 2px 6px; border-radius: 3px; }
 		.sh-quest-status.en-cours { background: rgba(46,133,213,0.3); color: #2e86de; }
 		.sh-quest-status.termine { background: rgba(46,213,115,0.2); color: #2ed573; }
+		/* Chrono des quêtes à délai réel (transport) — vire à l'orange dans les 5 dernières minutes. */
+		.sh-quest-timer { font-size: 0.8rem; padding: 2px 6px; border-radius: 3px; background: rgba(255,255,255,0.08); color: var(--gold2, var(--gold)); white-space: nowrap; }
+		.sh-quest-timer.urgent { background: rgba(255,165,2,0.25); color: #ffa502; }
+		.sh-quest-timer.expire { background: rgba(255,71,87,0.25); color: #ff4757; }
 		/* Groupe d'actions du header de quête : poussé à droite, reste insécable (le header wrap
 		   au-dessus de lui en mobile) ; on neutralise l'auto-margin global de .sh-drop-btn (l.749)
 		   pour que les boutons du groupe restent collés au lieu de s'écarter. */
@@ -1633,8 +1637,9 @@
 									<span class="sh-quest-rang">{{ q.get("rang","F") }}</span>
 									<span class="sh-quest-title">{{ q.get("titre","—") }}</span>
 									<span class="sh-quest-status en-cours">En cours</span>
+									{% if q.get("expire_at") %}<span class="sh-quest-timer" data-expire="{{ q.expire_at }}" data-now="{{ q.now }}"></span>{% endif %}
 									<span class="sh-inv-actions">
-										<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
+										{% if q.get("focalisable") %}<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>{% endif %}
 										<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('{{ q.get('id') }}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 									</span>
 								</div>
@@ -1713,15 +1718,26 @@
 	</div><!-- /#quetes-panel -->
 	<style>
 		/* ── Panneau de dialogue PNJ ─────────────────────────────────────────── */
-		.pnj-entete { display: flex; gap: 1rem; align-items: flex-start; margin-top: .6rem; }
-		.pnj-portrait {
-			width: 128px; height: 128px; object-fit: cover; border-radius: 8px;
-			border: 2px solid var(--accent, #b98c4a); flex-shrink: 0;
+		/* Deux colonnes : le portrait à gauche, la réplique et les choix à droite. En dessous
+		   de 760px la grille retombe sur une colonne — portrait centré, textes en dessous. */
+		.pnj-corps {
+			display: grid; grid-template-columns: minmax(180px, min-content) 1fr;
+			gap: 1.4rem; align-items: start; margin-top: .6rem;
 		}
-		.pnj-ambiance { font-style: italic; opacity: .85; font-size: .9rem; }
+		.pnj-portrait {
+			width: auto; max-width: 50vw; height: auto; max-height: 85vh; object-fit: contain;
+			display: block; border-radius: 10px;
+			border: 2px solid var(--accent, #b98c4a);			
+		}
+		.pnj-dialogue { min-width: 0; }
+		.pnj-ambiance { font-style: italic; opacity: .85; font-size: .9rem; margin-bottom: .6rem; }
 		#pnj-noeud-texte {
-			margin: 1rem 0 .4rem; padding: .8rem 1rem; border-radius: 8px;
+			margin: 0 0 .6rem; padding: .8rem 1rem; border-radius: 8px;
 			background: rgba(0, 0, 0, .18); line-height: 1.45;
+		}
+		@media (max-width: 760px) {
+			.pnj-corps { grid-template-columns: 1fr; gap: 1rem; }
+			.pnj-portrait { margin: 0 auto; width: 100%; max-width: none; }
 		}
 		/* ── Overlay narratif d'introduction ─────────────────────────────────── */
 		#intro-overlay {
@@ -1797,16 +1813,21 @@
 			</header>
 			<button class="sheet-tab-btn close-sheet-btn" onclick="closePnjPanel()" role="button">✕ Fermer</button>
 		</div>
-		{% if pnj_present %}
-		<div class="pnj-entete">
-			{% if pnj_present.portrait %}
+		<div class="pnj-corps">
+			{% if pnj_present and pnj_present.portrait %}
 			<img class="pnj-portrait" src="{{ url_for('pnj', path=pnj_present.portrait) }}" alt="{{pnj_present.nom}}">
 			{% endif %}
-			<div class="pnj-ambiance">{{pnj_present.description}}</div>
+			<div class="pnj-dialogue">
+				{# Description facultative : les tenanciers génériques n'en ont pas (le doc est
+				   partagé par tout le métier et ne peut décrire personne en particulier) ; une
+				   boutique qui veut la sienne la pose sur son entrée `pnj`. #}
+				{% if pnj_present and pnj_present.description %}
+				<div class="pnj-ambiance">{{pnj_present.description}}</div>
+				{% endif %}
+				<div id="pnj-noeud-texte"></div>
+				<ul id="pnj-choix" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+			</div>
 		</div>
-		{% endif %}
-		<div id="pnj-noeud-texte"></div>
-		<ul id="pnj-choix" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
 	</div><!-- /#pnj-panel -->
 	<div id="intro-overlay" class="{{ '' if intro else 'intro-hidden' }}" aria-label="Introduction narrative">
 		<div class="intro-card">
@@ -1956,6 +1977,7 @@
 				buildLocationslist();
 				updateControls();
 				updateVitals(rep.vitals);
+				_notifierTransportsEchoues(rep);
 				// Déplacement effectif → le sol transitoire est vidé côté serveur.
 				if (rep.ground_cleared) {
 					_objetsAuSol = [];
@@ -2099,6 +2121,10 @@
 				if (data.intro_terminee) {
 					// Arrivée par porte directement en zone sûre : conclusion rejouée après le reload.
 					sessionStorage.setItem('intro_fin_notif', JSON.stringify(data.intro_terminee));
+				}
+				if ((data.transports_echoues || []).length) {
+					// Le changement de lieu recharge la page : le toast doit survivre au reload.
+					sessionStorage.setItem('transports_echoues_notif', JSON.stringify(data.transports_echoues));
 				}
 				if (data.zone_event && data.zone_event.type === 'combat') {
 					const cr = await fetch('/api/combat/start', {
@@ -4017,6 +4043,61 @@ async function buyItem(itemId) {
 // ── Tableau des quêtes (guilde) ───────────────────────────────────────
 // Reconstruit l'onglet 📜 de la fiche (rendu serveur au chargement) pour qu'il reflète
 // accept/terminer sans recharger la page. Miroir du gabarit Jinja de #sh-quetes.
+// ── Chronos des quêtes à délai réel (transport) ───────────────────────────────────
+// Le serveur envoie `expire_at` ET son `now` : on en déduit une deadline LOCALE (l'horloge
+// du navigateur peut dériver de celle du serveur — même précaution que le blocage de
+// marchandage). Un seul intervalle pour tous les chronos, arrêté dès qu'il n'y en a plus.
+let _questTimer = null;
+
+// Une course dont le délai a expiré est soldée par le serveur au premier point de passage
+// (rendu de la page, déplacement, dialogue) : on ne fait qu'en informer le joueur.
+function _notifierTransportsEchoues(rep) {
+	((rep && rep.transports_echoues) || []).forEach(q => {
+		showToast('📦 Course échouée : ' + q.titre + ' — réputation en baisse.');
+	});
+}
+
+function _deadlineLocale(expireAt, nowServeur) {
+	const now = Number.isFinite(nowServeur) ? nowServeur : Math.floor(Date.now() / 1000);
+	return Date.now() + Math.max(0, expireAt - now) * 1000;
+}
+
+function _questDeadlineAttr(q) {
+	if (typeof q.expire_at !== 'number') return '';
+	return ` data-deadline="${_deadlineLocale(q.expire_at, q.now)}"`;
+}
+
+function _fmtRestant(ms) {
+	if (ms <= 0) return 'délai dépassé';
+	const s = Math.ceil(ms / 1000);
+	if (s < 60) return s + ' s';
+	const m = Math.floor(s / 60);
+	return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`;
+}
+
+function _tickQuestTimers() {
+	const spans = document.querySelectorAll('.sh-quest-timer[data-deadline]');
+	if (!spans.length) { clearInterval(_questTimer); _questTimer = null; return; }
+	spans.forEach(sp => {
+		const reste = Number(sp.dataset.deadline) - Date.now();
+		sp.textContent = '⏳ ' + _fmtRestant(reste);
+		sp.classList.toggle('urgent', reste > 0 && reste < 5 * 60 * 1000);
+		sp.classList.toggle('expire', reste <= 0);
+	});
+}
+
+function _startQuestTimers() {
+	// Chronos posés par le rendu Jinja initial : ils portent l'échéance et l'heure SERVEUR
+	// et doivent être convertis en deadline locale, comme ceux du rendu client.
+	document.querySelectorAll('.sh-quest-timer[data-expire]:not([data-deadline])').forEach(sp => {
+		sp.dataset.deadline = _deadlineLocale(Number(sp.dataset.expire), Number(sp.dataset.now));
+	});
+	_tickQuestTimers();
+	if (!_questTimer && document.querySelector('.sh-quest-timer[data-deadline]')) {
+		_questTimer = setInterval(_tickQuestTimers, 1000);
+	}
+}
+
 function renderFicheQuetes(data) {
 	const panel = document.getElementById('sh-quetes');
 	if (!panel || !data || (!data.fiche_actives && !data.fiche_terminees)) return;
@@ -4039,13 +4120,20 @@ function renderFicheQuetes(data) {
 			if (rew.argent) reward += `<span>⚪ ${rew.argent} ar</span>`;
 			if (rew.xp)     reward += `<span>✨ ${rew.xp} XP</span>`;
 			const prog = q.progress_txt ? `<div class="sh-quest-progress">🎯 ${q.progress_txt}${q.complete ? ' ✓ prêt à rendre' : ''}</div>` : '';
+			const timer = (typeof q.expire_at === 'number')
+				? `<span class="sh-quest-timer"${_questDeadlineAttr(q)}></span>` : '';
+			// 🎯 seulement là où la focalisation a un effet (pas sur une course de transport).
+			const focusBtn = q.focalisable
+				? `<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>`
+				: '';
 			return `<div class="sh-quest ${rang}">
 				<div class="sh-quest-hdr">
 					<span class="sh-quest-rang">${rang}</span>
 					<span class="sh-quest-title">${q.titre || '—'}</span>
 					<span class="sh-quest-status en-cours">En cours</span>
+					${timer}
 					<span class="sh-inv-actions">
-						<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
+						${focusBtn}
 						<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 					</span>
 				</div>
@@ -4068,7 +4156,22 @@ function renderFicheQuetes(data) {
 		html = '<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>';
 	}
 	panel.innerHTML = html;
+	_startQuestTimers();
 }
+
+// Init des chronos — DOIT rester après les `let` ci-dessus : appelé plus haut dans le script,
+// il lèverait une ReferenceError (zone morte temporelle) qui interromprait tout le reste des
+// déclarations de haut niveau (dialogue PNJ, panneau de vente…).
+_startQuestTimers();
+// Courses échues pendant l'absence du joueur : le serveur les a déjà soldées au rendu.
+_notifierTransportsEchoues({ transports_echoues: {{ transports_echoues | tojson | safe }} });
+// Course expirée pendant un changement de lieu : le toast a été mis de côté avant le reload.
+(function () {
+	const differe = sessionStorage.getItem('transports_echoues_notif');
+	if (!differe) return;
+	sessionStorage.removeItem('transports_echoues_notif');
+	try { _notifierTransportsEchoues({ transports_echoues: JSON.parse(differe) }); } catch (e) {}
+})();
 
 function renderQuetesActives(data) {
 	const list = document.getElementById('quetes-actives-list');
@@ -4081,7 +4184,7 @@ function renderQuetesActives(data) {
 			<span class="sh-inv-poids">🎯 ${q.progress_txt}</span>
 			<span class="sell-prix">✨ ${q.recompenses.xp} XP · ${formatPrix(q.recompenses)}</span>
 		</span>
-		<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>
+		${q.focalisable ? `<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>` : ''}
 		${(q.objectif && q.objectif.type === 'collect' && !q.complete) ? `<button class="sh-drop-btn" onclick="deposerQuete('${q.id}')" title="Déposer les pièces portées (en plusieurs voyages si besoin)">📥 Déposer</button>` : ''}
 		<button class="sh-drop-btn quest-done-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}')" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
 		<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
@@ -4251,6 +4354,16 @@ async function choisirPnj(choixId) {
 			const q = data.don.quantite > 1 ? ' ×' + data.don.quantite : '';
 			showToast((data.don.icon || '🎁') + ' ' + data.don.nom + q + (data.don.gratuit ? ' — offert' : ''));
 			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+		}
+		if (data.transport) {
+			if (data.transport.accepte) showToast('📦 Course acceptée : ' + data.transport.accepte);
+			if (data.transport.livre) {
+				showToast('📦 Livré ! ✨ +' + data.transport.xp + ' XP, 🤝 relation ' + data.transport.relation);
+				if (data.transport.en_rayon) showToast('🏷️ ' + data.transport.en_rayon + ' colis mis en rayon ici.');
+				if (data.transport.niveau_up) showToast('⭐ Niveau supérieur !');
+			}
+			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+			renderFicheQuetes(data);
 		}
 		if (data.noeud) renderPnjNoeud(data.noeud);
 		else closePnjPanel();

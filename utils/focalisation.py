@@ -63,6 +63,18 @@ def focalisation_effective(character: dict) -> dict | None:
 	return None
 
 
+# Types d'objectif sur lesquels une focalisation a un effet (guidage ou biais des tirages).
+# Une quête de transport n'en fait PAS partie : sa destination est nommée et sa route est
+# triviale (on reste en ville), il n'y a ni rencontre ni récolte à biaiser — un focus n'y
+# ferait rien. Source unique : le serveur refuse le focus, le client masque le bouton 🎯.
+OBJECTIFS_FOCALISABLES = ("kill", "collect", "visite")
+
+
+def quete_focalisable(q: dict) -> bool:
+	"""Une focalisation sur cette quête active aurait-elle un effet ?"""
+	return ((q or {}).get("objectif") or {}).get("type") in OBJECTIFS_FOCALISABLES
+
+
 def poser_focalisation(character: dict, type_: str, cible: str) -> dict | None:
 	"""Pose la focalisation (remplace l'existante). Re-cliquer la même cible = toggle off.
 
