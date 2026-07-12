@@ -1,0 +1,383 @@
+[
+  {
+    "_id": "character:user:eternel7@gmail.com_6ca82e79-1144-4ebc-9544-aed5895ac6c9",
+    "_rev": "1826-46a5beeb7b3944611791be2668d98ce6",
+    "user_id": "user:eternel7@gmail.com",
+    "type": "character",
+    "sex": "M",
+    "race": "nain",
+    "voc": "elementaliste",
+    "image": "elementaliste_m_nain01.jpg",
+    "prenom": "Baal",
+    "nom": "Hazgard",
+    "cite": "lieu:auxerre",
+    "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "caracteristiques_current": {
+      "V": 4,
+      "F": 20,
+      "R": 30,
+      "Ag": 15,
+      "Vol": 50,
+      "Int": 34,
+      "Cha": 20,
+      "Ch": 20
+    },
+    "currentPV": 110,
+    "currentPM": 182,
+    "lieux_visites": [
+      "lieu:auxerre",
+      "lieu:fumee_de_l_yonne",
+      "lieu:auxerre_porte_douve_exterieur03",
+      "lieu:auxerre_porte_douve_interieur03",
+      "lieu:temple_de_malakor02",
+      "lieu:temple_de_malakor",
+      "lieu:le_bastion_de_l_yonne",
+      "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu:l_athanor_de_saint_germain",
+      "lieu:le_cellier_sale",
+      "lieu:l_enclume_du_rempart",
+      "lieu:les_etalages_d_autessiodurum",
+      "lieu:l_officine_des_simples",
+      "lieu:la_fleche_d_argent",
+      "lieu:auxerre_porte_douve_interieur02",
+      "lieu:auxerre_porte_douve_exterieur02",
+      "lieu:l_encre_des_arcanes",
+      "lieu:le_codex_eternel",
+      "lieu:auxerre_porte_pont_interieur02",
+      "lieu:auxerre_porte_pont_exterieur02",
+      "lieu:la_tannerie_des_remparts",
+      "lieu:boucherie_de_la_tour_de_l_horloge",
+      "lieu:la_couronne_de_mandragore",
+      "lieu:le_garde_manger_des_3_fees",
+      "lieu:la_corde_tendue",
+      "lieu:le_bastion_de_l_yonne_comptoir",
+      "lieu:aux_ouvrages_d_os_et_d_ivoire",
+      "lieu:l_echope_du_cuir_d_auxerre",
+      "lieu:atelier_de_l_artisan_des_os",
+      "lieu:festin_de_la_joyeuse_halfling",
+      "lieu:le_mithril_de_saint_germain"
+    ],
+    "xp_total": 654,
+    "attribute_points": 2,
+    "vocations_niveaux": {
+      "elementaliste": 0
+    },
+    "inventaire": [
+      "item:poils",
+      {
+        "item": "item:Eau_benite",
+        "poids": 0.3
+      },
+      {
+        "item": "item:carte_aventurier_auxerre",
+        "poids": 0.05
+      },
+      {
+        "item": "item:carte_aventurier",
+        "poids": 0.05,
+        "lieu_parent": "lieu:auxerre"
+      }
+    ],
+    "slots": {
+      "main_droite": "item:Canne_ferree",
+      "main_gauche": "item:dague_rituelle",
+      "torse": null,
+      "tete": null,
+      "jambes": null,
+      "pieds": null,
+      "mains": null,
+      "anneau_1": null,
+      "anneau_2": null,
+      "cou": null,
+      "ceinture": null
+    },
+    "equipment_bonus": {
+      "pv": 0,
+      "pm": 0,
+      "pa": 0,
+      "malus_depl": 0,
+      "cc_bonus": 1,
+      "cd_bonus": 0,
+      "degats_bonus": 2,
+      "degats_dice": "",
+      "initiative": 0,
+      "buffs": {
+        "Vol": 2,
+        "Int": 1
+      },
+      "buffs_sources": [
+        {
+          "nom": "Dague rituelle grossière",
+          "icon": "🗡️",
+          "buffs": {
+            "Vol": 2,
+            "Int": 1
+          }
+        }
+      ]
+    },
+    "or": 0,
+    "argent": 9,
+    "cuivre": 6,
+    "quetes_actives": [],
+    "quetes_terminees": [
+      {
+        "id": "quete:transport_38234283f7a7",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783800301
+      },
+      {
+        "id": "quete:transport_c78207d9e709",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783800957
+      },
+      {
+        "id": "quete:transport_1eec8cef079f",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783801025
+      },
+      {
+        "id": "quete:transport_c2fceb638a43",
+        "titre": "Livraison : L'Officine des Simples",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783801095
+      },
+      {
+        "id": "quete:transport_9db0b5c7c9a2",
+        "titre": "Livraison : La Couronne de Mandragore",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783801820
+      },
+      {
+        "id": "quete:transport_20b1a2c21bc5",
+        "titre": "Livraison : L'Officine des Simples",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783801857
+      },
+      {
+        "id": "quete:transport_8790c5b1d56a",
+        "titre": "Livraison : La Flèche d'Argent",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783804335
+      },
+      {
+        "id": "quete:transport_9a51312a5afb",
+        "titre": "Livraison : L'Enclume du Rempart",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783807608
+      },
+      {
+        "id": "quete:transport_4e9a50456f4e",
+        "titre": "Livraison : La Couronne de Mandragore",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783807894
+      },
+      {
+        "id": "quete:transport_292d21e55b97",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783808050
+      },
+      {
+        "id": "quete:transport_03f7cfa89347",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783808181
+      },
+      {
+        "id": "quete:transport_c784611ca393",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783808249
+      },
+      {
+        "id": "quete:transport_17e901b77760",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783857049
+      },
+      {
+        "id": "quete:transport_1e8d8e1041da",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783857129
+      },
+      {
+        "id": "quete:transport_791eb5c575a6",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783857218
+      },
+      {
+        "id": "quete:transport_borin_premiere_mission",
+        "titre": "Première mission : les caisses du Bastion",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 30,
+          "cuivre": 200,
+          "items": [
+            {
+              "item": "item:carte_aventurier",
+              "poids": 0.05,
+              "lieu_parent": "lieu:auxerre"
+            }
+          ]
+        },
+        "termine_at": 1783865175
+      }
+    ],
+    "sorts_connus": [
+      "sort:trait_de_flamme",
+      "sort:armure_de_givre"
+    ],
+    "intro": {
+      "statut": "terminee",
+      "raison": "pillage"
+    },
+    "pnj_present": {
+      "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+      "character": "pnj:borin_barbe_de_jais"
+    },
+    "objets_au_sol": [],
+    "ressource_recoltable": null,
+    "portrait_translate": {
+      "x": -89.8,
+      "y": -41.5172
+    },
+    "portrait_zoom": 15,
+    "combats_recompenses": [
+      "combat:66dee8b5cba0486fb7ed09091ecd518b",
+      "combat:96858a6047644398bbd1a053e66c6d4e",
+      "combat:5344a08b90a542dd97807027ea036edb",
+      "combat:8a6a3a3628584e97b5d503c3775a01da",
+      "combat:d79af49b8ba348a8aaceacd9969d93ef",
+      "combat:91b67870f83c480fb7009b883e579f19",
+      "combat:cd008fe208d546179b44f4a648f59a86"
+    ],
+    "butin_collectes": {},
+    "competences_connues": [
+      "competence:affinite_elementaire"
+    ],
+    "competences_bonus": {
+      "buffs": {
+        "Int": 4
+      },
+      "regen_pv": 0,
+      "regen_pm": 0,
+      "esquive": 0,
+      "buffs_sources": [
+        {
+          "nom": "Affinité élémentaire",
+          "icon": "🔥",
+          "buffs": {
+            "Int": 4
+          }
+        }
+      ]
+    },
+    "focalisation": null,
+    "transport_offert": {
+      "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+      "quete": null
+    },
+    "effets_actifs": []
+  }
+]

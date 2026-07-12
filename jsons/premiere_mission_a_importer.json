@@ -54,16 +54,15 @@
 		"description": "Une caisse de bois fermée par des courroies de cuir, d'où s'échappe une odeur puissante. Cinq kilos de viande fraîche, rapportée le matin même par les chasseurs de la Guilde."
 	},
 	{
-		"_id": "item:carte_aventurier_auxerre",
+		"_id": "item:carte_aventurier",
 		"type": "item",
-		"nom": "Carte d'aventurier d'Auxerre",
+		"nom": "Carte d'aventurier",
 		"icon": "🪪",
 		"categorie": "document",
 		"sous_categorie": "carte_aventurier",
 		"rarete": "peu_commun",
 		"slots": [],
 		"poids": 0.05,
-		"lieu_parent": "lieu:auxerre",
-		"description": "Une plaque de cuir bouilli frappée du blason du Bastion de l'Yonne, où Borin Barbe-de-Jais a inscrit ton nom de sa main. Elle atteste que la Guilde des aventuriers d'Auxerre te compte parmi les siens."
+		"description": "Une plaque de cuir bouilli frappée du blason d'une guilde d'aventuriers, où ton nom a été inscrit à la main. Elle atteste que la guilde qui l'a délivrée te compte parmi les siens."
 	}
 ]

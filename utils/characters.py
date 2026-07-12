@@ -76,9 +76,28 @@ def item_ref_weight(ref) -> float:
 	return poids_bounds(item)[0]
 
 
+def item_ref_lieu(ref) -> str | None:
+	"""Lieu d'ÉMISSION de l'instance : `lieu_parent` porté par la RÉFÉRENCE, jamais par le doc.
+	Une carte de guilde est un objet GÉNÉRIQUE (`item:carte_aventurier`, un seul doc pour tout
+	le monde) — c'est l'exemplaire remis qui sait de quelle guilde il vient."""
+	if isinstance(ref, dict):
+		return ref.get("lieu_parent")
+	return None
+
+
+def item_label(nom: str, lieu_doc: dict | None) -> str:
+	"""« Carte d'aventurier (Auxerre) » — le nom du doc, suffixé du lieu de l'instance."""
+	label = (lieu_doc or {}).get("label") or (lieu_doc or {}).get("nom")
+	return f"{nom} ({label})" if label else nom
+
+
 def resolve_item_ref(ref):
 	"""Référence → doc item complet, avec `poids` écrasé par le poids effectif de
-	l'instance (nombre) et `_id`/`item` conservés. None si l'item n'existe plus."""
+	l'instance (nombre) et `_id`/`item` conservés. None si l'item n'existe plus.
+
+	Chokepoint d'affichage : tout ce que voit le client (sac, sol, paperdoll, fiche objet,
+	marché, combat, butin) passe par ici et n'affiche que `nom` — c'est donc le seul endroit
+	où le lieu d'émission d'une instance devient visible."""
 	item_id = item_ref_id(ref)
 	if not item_id:
 		return None
@@ -88,6 +107,9 @@ def resolve_item_ref(ref):
 	doc = dict(doc)
 	doc["poids"] = item_ref_weight(ref)
 	doc["item"] = item_id
+	if (lieu_id := item_ref_lieu(ref)):
+		doc["lieu_parent"] = lieu_id
+		doc["nom"] = item_label(doc.get("nom") or item_id, get_doc(lieu_id))
 	return doc
 
 

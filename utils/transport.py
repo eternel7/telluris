@@ -6,7 +6,8 @@
 #
 # DEUX SOURCES d'offre, aiguillées par `poser_transport_offert` :
 # - GÉNÉRÉE — le donneur est un magasin (`est_magasin`) : destination, cargaison, délai et
-#   XP sont TIRÉS AU HASARD (`generer_transport`), avec la probabilité QUETE_TRANSPORT_PROBA.
+#   XP sont TIRÉS AU HASARD (`generer_transport`), avec la probabilité QUETE_TRANSPORT_PROBA —
+#   et seulement s'il a assez confiance (`relation_suffisante` : relation ≥ QUETE_TRANSPORT_RELATION_MIN).
 # - AUTHORÉE — le PNJ présent porte une course ÉCRITE dans `services.transport.offre`
 #   (`generer_transport_authore`) : destination, cargaison et récompenses fixes, id stable.
 #   N'IMPORTE QUEL PNJ peut ainsi donner une course — le donneur n'a pas à être un magasin
@@ -15,6 +16,9 @@
 #   Une course écrite peut demander un `retour` : le destinataire prend la marchandise mais ne
 #   paie pas — la quête reste active (délai levé) jusqu'à ce que le joueur revienne RENDRE COMPTE
 #   au donneur, qui solde alors tout (XP, prime, items — la carte d'aventurier de la guilde).
+#   Ses `recompenses.items` sont des références d'INSTANCES : une entrée `lieu_parent: "auto"`
+#   est résolue contre la cité du donneur (`items_recompense`) — la carte est un objet générique,
+#   c'est l'exemplaire qui dit de quelle guilde on est membre.
 #
 # L'offre est tirée à l'ENTRÉE du lieu et persistée en champ transitoire
 # `character["transport_offert"]` — même sémantique que `pnj_present` : un refresh ne
@@ -38,6 +42,11 @@ import uuid
 from models import character_stats
 from utils.characters import item_ref_id, poids_bounds
 from utils import focalisation, marche, quetes
+
+
+# Sentinelle de `recompenses.items[].lieu_parent` dans une offre écrite : « le lieu parent du
+# donneur » (cf. `items_recompense`) — la cité dont relève la guilde qui délivre l'objet.
+LIEU_PARENT_AUTO = "auto"
 
 
 # ---------------------------------------------------------------------------
@@ -277,6 +286,19 @@ def poids_cargaison(cargaison: list) -> float:
 	return round(sum(float(r.get("poids", 0) or 0) for r in cargaison or []), 2)
 
 
+def relation_suffisante(character: dict, lieu_doc: dict, get_doc_fn) -> bool:
+	"""Le tenancier a-t-il assez confiance pour confier sa marchandise ? On ne remet pas une
+	cargaison à quelqu'un qu'on voit d'un mauvais œil : sous QUETE_TRANSPORT_RELATION_MIN
+	(50 = la relation neutre), il ne propose aucune course. Le joueur mal vu doit d'abord se
+	refaire une réputation en commerçant (ou en marchandant bien) avant qu'on lui confie un colis.
+	Ne vaut que pour les courses GÉNÉRÉES : une course ÉCRITE est confiée par son scénario."""
+	seuil = int(character_stats.QUETE_TRANSPORT_RELATION_MIN)
+	if seuil <= 0:
+		return True
+	relation = marche.get_relation(character, lieu_doc, get_doc_fn)
+	return marche.relation_value(relation) >= seuil
+
+
 def generer_transport(giver_doc: dict, find_docs_fn, get_doc_fn,
 					  rand_fn=random.random) -> dict | None:
 	"""Construit une offre de transport depuis le magasin X (non persistée, pas encore
@@ -370,6 +392,25 @@ def cargaison_authoree(spec: dict, get_doc_fn) -> list:
 	return cargaison
 
 
+def items_recompense(spec_items: list, giver_doc: dict) -> list:
+	"""Références d'INSTANCES des items de récompense. Une entrée peut demander
+	`lieu_parent: "auto"` → l'exemplaire remis portera le lieu PARENT du donneur (la cité dont
+	relève sa guilde) : une carte d'aventurier est un objet GÉNÉRIQUE, c'est l'instance qui dit
+	de quelle guilde on est membre. La même mission copiée dans une autre guilde délivrera donc
+	la carte de SA cité. Un id littéral est recopié tel quel ; sans clé, rien n'est ajouté."""
+	parent = (giver_doc or {}).get("lieu_parent") or (giver_doc or {}).get("_id")
+	sortie = []
+	for ligne in spec_items or []:
+		ref = dict(ligne)
+		if ref.get("lieu_parent") == LIEU_PARENT_AUTO:
+			if parent:
+				ref["lieu_parent"] = parent
+			else:
+				ref.pop("lieu_parent")
+		sortie.append(ref)
+	return sortie
+
+
 def generer_transport_authore(spec: dict, giver_doc: dict, find_docs_fn, get_doc_fn) -> dict | None:
 	"""Construit l'offre décrite par la spec du PNJ — même structure que `generer_transport`,
 	mais rien n'est tiré au sort : destination, cargaison, délai et récompenses sont écrits.
@@ -399,7 +440,10 @@ def generer_transport_authore(spec: dict, giver_doc: dict, find_docs_fn, get_doc
 		"objectif": {"type": "transport", "cible": dest_id, "quantite": 1},
 		"cargaison": cargaison,
 		"duree": int(spec.get("duree", character_stats.QUETE_TRANSPORT_DUREE_SECONDES)),
-		"recompenses": {"xp": xp, "cuivre": cuivre, "items": list(rec.get("items") or [])},
+		"recompenses": {
+			"xp": xp, "cuivre": cuivre,
+			"items": items_recompense(rec.get("items"), giver_doc),
+		},
 		# `retour` : la course ne se solde PAS chez le destinataire — il faut revenir en rendre
 		# compte au donneur, qui paie (et remet ses items de récompense : la carte d'aventurier).
 		"retour": bool(spec.get("retour")),
@@ -447,7 +491,8 @@ def poser_transport_offert(character: dict, lieu_doc: dict, find_docs_fn, get_do
 			deja = bool(spec.get("unique")) and deja_reussie(character, spec.get("id"))
 			if not deja and rand_fn() < float(spec.get("proba", 1.0)):
 				quete = generer_transport_authore(spec, lieu_doc, find_docs_fn, get_doc_fn)
-		elif rand_fn() < float(character_stats.QUETE_TRANSPORT_PROBA):
+		elif (relation_suffisante(character, lieu_doc, get_doc_fn)
+				and rand_fn() < float(character_stats.QUETE_TRANSPORT_PROBA)):
 			quete = generer_transport(lieu_doc, find_docs_fn, get_doc_fn, rand_fn)
 	character["transport_offert"] = {"lieu": lieu_id, "quete": quete}
 	return True

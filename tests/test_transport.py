@@ -323,6 +323,70 @@ def test_sortir_du_magasin_efface_l_offre(monkeypatch):
 	assert c["transport_offert"] is None
 
 
+# ── Confiance : pas de colis à qui l'on voit d'un mauvais œil ────────────────────
+
+def get_doc_relation(valeur):
+	"""get_doc_fn semant une relation de la valeur voulue entre Alia et la boucherie."""
+	rel_id = marche.relation_doc_id(character(), BOUCHERIE)
+
+	def _get(doc_id):
+		if doc_id == rel_id:
+			return {"_id": rel_id, "type": "relation", "value": valeur}
+		return DOCS.get(doc_id)
+	return _get
+
+
+def test_pas_d_offre_si_la_relation_est_sous_le_seuil(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_PROBA", 1.0)
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, get_doc_relation(49),
+									 rand_fn=lambda: 0.0)
+	# Le tirage a bien eu lieu (le champ est posé, un refresh ne re-tirera pas) : le marchand
+	# n'a simplement rien confié.
+	assert c["transport_offert"] == {"lieu": "lieu:boucherie", "quete": None}
+
+
+def test_offre_des_le_seuil_atteint(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_PROBA", 1.0)
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, get_doc_relation(50),
+									 rand_fn=lambda: 0.0)
+	assert transport.offre_courante(c, BOUCHERIE) is not None
+
+
+def test_relation_absente_vaut_neutre_donc_offre(monkeypatch):
+	"""Cas du tout-venant : aucun doc relation en base → valeur neutre (50), le marchand propose."""
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_PROBA", 1.0)
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, get_doc, rand_fn=lambda: 0.0)
+	assert transport.offre_courante(c, BOUCHERIE) is not None
+
+
+def test_seuil_a_zero_desactive_le_garde_fou(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_PROBA", 1.0)
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 0)
+	c = character()
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, get_doc_relation(0),
+									 rand_fn=lambda: 0.0)
+	assert transport.offre_courante(c, BOUCHERIE) is not None
+
+
+def test_course_ecrite_ignore_le_seuil_de_relation(monkeypatch):
+	"""Une course ÉCRITE est confiée par son scénario : la mission d'initiation de la guilde ne
+	dépend pas de la cote du joueur auprès du donneur."""
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	rel_id = marche.relation_doc_id(c, COMPTOIR)
+	get_doc_hostile = lambda doc_id: (
+		{"_id": rel_id, "type": "relation", "value": 0} if doc_id == rel_id else DOCS.get(doc_id))
+	transport.poser_transport_offert(c, COMPTOIR, find_docs, get_doc_hostile,
+									 rand_fn=lambda: 0.0, pnj_doc=BORIN)
+	assert transport.offre_courante(c, COMPTOIR)["id"] == "quete:transport_borin"
+
+
 # ── Acceptation ──────────────────────────────────────────────────────────────────
 
 def test_accepter_met_la_cargaison_au_sac_et_pose_l_echeance(monkeypatch):
@@ -698,8 +762,12 @@ def test_indice_depuis_un_lieu_imbrique_donne_une_direction():
 
 def _offre_retour():
 	spec = dict(transport.offre_spec(BORIN), retour=True)
-	spec["recompenses"] = {"xp": 30, "cuivre": 200,
-						   "items": [{"item": "item:carte", "poids": 0.05}]}
+	spec["recompenses"] = {
+		"xp": 30, "cuivre": 200,
+		# La carte d'aventurier : objet générique, localisé à la volée par la cité du donneur.
+		"items": [{"item": "item:carte", "poids": 0.05,
+				   "lieu_parent": transport.LIEU_PARENT_AUTO}],
+	}
 	return transport.generer_transport_authore(spec, COMPTOIR, find_docs, get_doc)
 
 
@@ -730,7 +798,9 @@ def test_le_donneur_solde_la_course_a_retour_et_remet_ses_items():
 	recap = transport.rapporter_transport(c, snap, get_doc, sauves.append, now=3000)
 	assert recap["xp"]["xp_gain"] == 30
 	assert recap["relation"] == character_stats.RELATION_INITIALE + 1   # +1 chez le DONNEUR
-	assert c["inventaire"] == [{"item": "item:carte", "poids": 0.05}]   # la carte d'aventurier
+	# La carte d'aventurier entre au sac en INSTANCE localisée : le comptoir relève de la ville,
+	# c'est donc la carte de CETTE guilde-là que Borin remet.
+	assert c["inventaire"] == [{"item": "item:carte", "poids": 0.05, "lieu_parent": "lieu:ville"}]
 	assert transport.transports_actifs(c) == []
 	assert c["quetes_terminees"][0]["echec"] is False
 	# Course soldée → `unique` la scelle : Borin ne la repropose plus.
@@ -789,3 +859,38 @@ def test_un_dialogue_generique_prononce_le_nom_du_lieu():
 	noeud = pnj.noeud_client(doc, "accueil", ctx)
 	assert noeud["texte"] == "Hermine Valcorbe hume la viande en connaisseur."
 	assert noeud["choix"][0]["label"] == "Merci, Hermine Valcorbe."   # les labels aussi
+
+
+# ── Récompenses : l'objet remis est une INSTANCE, localisée par la guilde qui la délivre ──
+
+def test_items_recompense_resout_la_sentinelle_auto():
+	# Le comptoir relève de la ville → la carte remise est celle de la guilde de CETTE cité.
+	items = transport.items_recompense(
+		[{"item": "item:carte", "poids": 0.05, "lieu_parent": transport.LIEU_PARENT_AUTO}],
+		COMPTOIR,
+	)
+	assert items == [{"item": "item:carte", "poids": 0.05, "lieu_parent": "lieu:ville"}]
+
+
+def test_items_recompense_laisse_le_reste_intact():
+	# Id littéral : recopié tel quel. Pas de clé : rien n'est ajouté — une épée n'est d'aucune ville.
+	items = transport.items_recompense([
+		{"item": "item:carte", "lieu_parent": "lieu:ailleurs"},
+		{"item": "item:enclume", "poids": 500.0},
+	], COMPTOIR)
+	assert items == [
+		{"item": "item:carte", "lieu_parent": "lieu:ailleurs"},
+		{"item": "item:enclume", "poids": 500.0},
+	]
+	assert transport.items_recompense(None, COMPTOIR) == []
+
+
+def test_items_recompense_donneur_sans_lieu_parent():
+	# Un donneur qui EST déjà une ville est son propre parent.
+	assert transport.items_recompense(
+		[{"item": "item:carte", "lieu_parent": "auto"}], VILLE,
+	) == [{"item": "item:carte", "lieu_parent": "lieu:ville"}]
+	# Aucun lieu à nommer : on retire la clé plutôt que de laisser « auto » filer en base.
+	assert transport.items_recompense(
+		[{"item": "item:carte", "lieu_parent": "auto"}], {},
+	) == [{"item": "item:carte"}]

@@ -145,6 +145,10 @@ QUETE_TRANSPORT_POIDS_MAX: float = 100.0
 QUETE_TRANSPORT_NB_MAX: int = 10
 QUETE_TRANSPORT_XP: int = 10
 QUETE_TRANSPORT_RELATION_DELTA: int = 1
+# On ne confie pas sa marchandise à quelqu'un qu'on voit d'un mauvais œil : sous ce seuil de
+# relation, le tenancier ne propose AUCUNE course générée (0 = garde-fou désactivé). Ne concerne
+# pas les courses ÉCRITES (`services.transport.offre`), que le scénario décide de confier.
+QUETE_TRANSPORT_RELATION_MIN: int = 50
 # À la livraison, chaque objet a cette chance de finir en RAYON (`stock_vente`) du magasin
 # destinataire — à condition qu'il vende ce produit (`lieu_produit`). Le reste part à
 # l'atelier / à la consommation : la course a donc un effet visible mais partiel sur l'étal.
@@ -394,6 +398,7 @@ def current_world_variables() -> dict:
 		"QUETE_TRANSPORT_NB_MAX": QUETE_TRANSPORT_NB_MAX,
 		"QUETE_TRANSPORT_XP": QUETE_TRANSPORT_XP,
 		"QUETE_TRANSPORT_RELATION_DELTA": QUETE_TRANSPORT_RELATION_DELTA,
+		"QUETE_TRANSPORT_RELATION_MIN": QUETE_TRANSPORT_RELATION_MIN,
 		"QUETE_TRANSPORT_STOCK_PROBA": QUETE_TRANSPORT_STOCK_PROBA,
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
@@ -441,7 +446,7 @@ def load_world_variables() -> dict:
 	global QUETE_COLLECT_POIDS_MAX
 	global QUETE_TRANSPORT_PROBA, QUETE_TRANSPORT_DUREE_SECONDES, QUETE_TRANSPORT_POIDS_MAX
 	global QUETE_TRANSPORT_NB_MAX, QUETE_TRANSPORT_XP, QUETE_TRANSPORT_RELATION_DELTA
-	global QUETE_TRANSPORT_STOCK_PROBA
+	global QUETE_TRANSPORT_STOCK_PROBA, QUETE_TRANSPORT_RELATION_MIN
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
@@ -512,6 +517,7 @@ def load_world_variables() -> dict:
 	QUETE_TRANSPORT_NB_MAX  = int(v.get("QUETE_TRANSPORT_NB_MAX", QUETE_TRANSPORT_NB_MAX))
 	QUETE_TRANSPORT_XP      = int(v.get("QUETE_TRANSPORT_XP", QUETE_TRANSPORT_XP))
 	QUETE_TRANSPORT_RELATION_DELTA = int(v.get("QUETE_TRANSPORT_RELATION_DELTA", QUETE_TRANSPORT_RELATION_DELTA))
+	QUETE_TRANSPORT_RELATION_MIN = int(v.get("QUETE_TRANSPORT_RELATION_MIN", QUETE_TRANSPORT_RELATION_MIN))
 	QUETE_TRANSPORT_STOCK_PROBA = float(v.get("QUETE_TRANSPORT_STOCK_PROBA", QUETE_TRANSPORT_STOCK_PROBA))
 
 	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))

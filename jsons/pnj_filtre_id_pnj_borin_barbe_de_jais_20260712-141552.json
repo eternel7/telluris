@@ -1,0 +1,226 @@
+[
+  {
+    "_id": "pnj:borin_barbe_de_jais",
+    "_rev": "5-03c0ce392e2983f834b7649e2c3603e4",
+    "type": "pnj",
+    "nom": "Borin Barbe-de-Jais",
+    "race": "nain",
+    "vocation": "marchand",
+    "portrait": "nain_m_receptioniste01.png",
+    "description": "Réceptionniste du Bastion de l'Yonne. Ses yeux pétillent d'une malice bienveillante, mais rien n'échappe à son regard.",
+    "services": {
+      "transport": {
+        "offre": {
+          "id": "quete:transport_borin_premiere_mission",
+          "destination": "lieu:fumee_de_l_yonne",
+          "cargaison": [
+            {
+              "item": "item:viande_sanglier_gobelin",
+              "quantite": 2,
+              "poids": 5
+            }
+          ],
+          "duree": 3600,
+          "proba": 1,
+          "unique": true,
+          "retour": true,
+          "rang": "F",
+          "titre": "Première mission : les caisses du Bastion",
+          "description": "Borin Barbe-de-Jais vous confie deux caisses de viande de sanglier-gobelin — dix bons kilos — à porter au fumoir de la Guilde, Fumée de l'Yonne. Elles y deviendront les provisions des expéditions. Revenez ensuite lui en rendre compte au comptoir : ce n'est pas la viande qu'il met à l'épreuve.",
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 200,
+            "items": [
+              {
+                "item": "item:carte_aventurier",
+                "poids": 0.05,
+                "lieu_parent": "auto"
+              }
+            ]
+          }
+        },
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "rapporte": "transport_rapporte"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le nain vous observe quelques secondes avant d'esquisser un sourire. « Bienvenue au Bastion de l'Yonne ! Approche donc, {prenom}. Tu viens chercher fortune, ou simplement vérifier que les histoires sont vraies ? »",
+          "choix": [
+            {
+              "id": "mission",
+              "label": "Je voudrais devenir aventurier.",
+              "next": "premiere_mission",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "rapport",
+              "label": "C'est fait. {destinataire} a sa viande.",
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              },
+              "condition": {
+                "transport_a_rapporter": true
+              }
+            },
+            {
+              "id": "relance",
+              "label": "Où en est ma livraison, déjà ?",
+              "next": "transport_relance",
+              "condition": {
+                "transport_en_cours": true
+              }
+            },
+            {
+              "id": "veteran",
+              "label": "Vous vous souvenez de moi ?",
+              "next": "transport_veteran",
+              "condition": {
+                "transport_accompli": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "premiere_mission": {
+          "texte": "« Beaucoup le disent. Peu comprennent ce que cela signifie. » Il ouvre un grand registre relié de cuir et y inscrit soigneusement ton nom. « Les recrues pensent souvent que leur première mission sera de tuer un monstre. C'est faux. Avant de savoir combattre, il faut apprendre à être digne de confiance. »",
+          "choix": [
+            {
+              "id": "ecouter",
+              "label": "Qu'attendez-vous de moi ?",
+              "next": "transport_propose"
+            },
+            {
+              "id": "refuser",
+              "label": "Je préfère chercher fortune ailleurs.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "Borin disparaît derrière une porte donnant sur les réserves, et revient avec {colis} solides caisses de bois fermées par des courroies de cuir. Une odeur puissante s'en échappe. « {poids} kilos de viande de sanglier-gobelin, toute fraîche. Tu la livreras au fumoir de la Guilde. Destination : {destination}. Tu as {delai} minutes — après, la marchandise ne vaut plus rien, et ce ne sont pas deux caisses qui disparaissent : ce sont les provisions de tes futurs compagnons. » Il glisse un jeton de cuivre dans ta main. « {xp} points d'expérience et {prime} pièces de cuivre à ton retour. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Ce n'est... qu'une livraison.",
+              "next": "transport_lecon"
+            }
+          ]
+        },
+        "transport_lecon": {
+          "texte": "Le sourire du nain s'efface doucement. « Tu crois ? » Il se penche vers toi. « Les plus grands héros commencent rarement en terrassant un dragon. Ils commencent en accomplissant parfaitement une tâche que tout le monde croit ordinaire. » Puis il reprend son éternel sourire. « Et entre nous... l'odeur attirera sans doute quelques renards, des chiens errants, peut-être même un jeune loup ou deux. Tu devras garder la tête froide. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "Donnez-moi ces caisses.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas aujourd'hui.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "Il pose un doigt épais sur une carte de la région. « Tu quitteras la ville et tu suivras la route : c'est {direction}. Le bâtiment de pierre aux hautes cheminées, tu ne peux pas le manquer. Présente le jeton à {destinataire} : on saura que tu viens de notre part. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "Borin contourne le comptoir et t'aide à charger les {colis} caisses dans une solide hotte de portage. « Destination : {destination}, dans les {delai} minutes. Et reviens me voir ensuite : je veux te l'entendre dire. Tu découvriras bientôt une vérité que tous les vétérans connaissent, petit. » Il t'adresse un clin d'œil et referme son registre.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_rapporte": {
+          "texte": "Le vieux nain rouvre son grand registre et trace une ligne à côté de ton nom. « Les caisses sont arrivées, et à l'heure. » Il fait glisser sur le chêne une plaque de cuir bouilli frappée du blason du Bastion, puis {prime} pièces de cuivre. « Ce n'était pas la viande que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. Les aventuriers capables de protéger une simple cargaison sont souvent ceux à qui l'on confiera, un jour, des compagnons... et peut-être le destin d'une cité entière. » Il désigne le grand tableau de la salle commune. « Va choisir ta prochaine quête. Tu es des nôtres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "Le nain soupèse ton barda d'un regard et éclate de rire. « Par les enclumes des anciens ! Tu ploies déjà sous ton propre bagage, {prenom}. Déleste-toi et reviens : la viande ne s'envolera pas... enfin, pas tout de suite. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_relance": {
+          "texte": "Borin lève un sourcil au-dessus de son registre. « Toujours là ? Ces caisses ne se porteront pas toutes seules. Destination : {destination}, c'est {direction}. Il te reste {delai} minutes, et la viande n'attend pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y cours.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_veteran": {
+          "texte": "« Si je me souviens de toi ? » Le vieux nain caresse distraitement une tresse de sa barbe noire de jais. « {destinataire} a reçu sa viande, et à l'heure. Ce n'était pas la marchandise que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. » Il désigne du menton le grand tableau couvert de parchemins, dans la salle commune. « Va donc voir ce qu'on y épingle. Tu as gagné le droit de choisir. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

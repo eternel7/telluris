@@ -13,7 +13,7 @@ from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, sync_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
-	poids_bounds, carried_weight, charge_max_of, item_ref_id,
+	poids_bounds, carried_weight, charge_max_of, item_ref_id, resolve_item_ref,
 )
 from utils.marche import debit_character, get_relation, relation_value
 from utils import pnj
@@ -351,13 +351,15 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 		# Les items de récompense (la carte d'aventurier) sont entrés au sac avec la prime.
+		# `resolve_item_ref` — pas `get_doc` — pour que le toast porte le nom de l'INSTANCE :
+		# « Carte d'aventurier (Auxerre) », pas le nom nu du doc générique.
 		reponse["transport"] = {
 			"livre": q.get("titre"),
 			"xp": recap["xp"].get("xp_gain", 0),
 			"niveau_up": recap["xp"].get("niveau_up", False),
 			"relation": recap["relation"],
 			"items": [
-				(get_doc(item_ref_id(ref)) or {}).get("nom") or item_ref_id(ref)
+				(resolve_item_ref(ref) or {}).get("nom") or item_ref_id(ref)
 				for ref in (rec.get("items") or [])
 			],
 		}
