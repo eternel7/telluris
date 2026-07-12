@@ -1,12 +1,24 @@
 # utils/transport.py
-# Quêtes de transport de marchandise : un magasin X confie une cargaison à livrer à un
+# Quêtes de transport de marchandise : un donneur X confie une cargaison à livrer à un
 # magasin Y qui rachète ces biens, dans un délai RÉEL (QUETE_TRANSPORT_DUREE_SECONDES).
 # Réussite → +1 relation avec X (+ XP + prime) ; échec (délai dépassé) ou abandon → −1
 # relation avec X, la cargaison RESTE dans le sac (le joueur peut la revendre).
 #
-# L'offre est tirée à l'ENTRÉE d'un magasin (QUETE_TRANSPORT_PROBA) et persistée en champ
-# transitoire `character["transport_offert"]` — même sémantique que `pnj_present` : un
-# refresh ne re-tire pas, ressortir/rentrer re-tire.
+# DEUX SOURCES d'offre, aiguillées par `poser_transport_offert` :
+# - GÉNÉRÉE — le donneur est un magasin (`est_magasin`) : destination, cargaison, délai et
+#   XP sont TIRÉS AU HASARD (`generer_transport`), avec la probabilité QUETE_TRANSPORT_PROBA.
+# - AUTHORÉE — le PNJ présent porte une course ÉCRITE dans `services.transport.offre`
+#   (`generer_transport_authore`) : destination, cargaison et récompenses fixes, id stable.
+#   N'IMPORTE QUEL PNJ peut ainsi donner une course — le donneur n'a pas à être un magasin
+#   (ex. le réceptionniste de la guilde et sa mission d'initiation). Le DESTINATAIRE, lui,
+#   reste un lieu marchand : c'est lui qui prend livraison (son tenancier a les nœuds `livre`).
+#   Une course écrite peut demander un `retour` : le destinataire prend la marchandise mais ne
+#   paie pas — la quête reste active (délai levé) jusqu'à ce que le joueur revienne RENDRE COMPTE
+#   au donneur, qui solde alors tout (XP, prime, items — la carte d'aventurier de la guilde).
+#
+# L'offre est tirée à l'ENTRÉE du lieu et persistée en champ transitoire
+# `character["transport_offert"]` — même sémantique que `pnj_present` : un refresh ne
+# re-tire pas, ressortir/rentrer re-tire.
 #
 # Toute l'interaction passe par le dialogue PNJ (utils/pnj.py) : les magasins n'ayant pas
 # de champ `pnj`, `entree_marchand` fournit un tenancier GÉNÉRIQUE par catégorie
@@ -70,6 +82,28 @@ def portes_du_parent(graphe: dict, parent_id: str) -> dict:
 	return {a["voisin"]: a["porte"] for a in (graphe or {}).get(parent_id, [])}
 
 
+def porte_effective(graphe: dict, portes: dict, lieu_id: str) -> tuple | None:
+	"""Porte par laquelle ce lieu débouche sur la grille du parent. Un lieu IMBRIQUÉ n'a pas
+	de porte à lui (le comptoir de la guilde ouvre sur la réception, qui ouvre sur la façade,
+	qui seule ouvre sur la ville) : on remonte alors le graphe jusqu'au premier lieu qui, lui,
+	en a une — c'est bien par là que le joueur sortira. None si aucun ancêtre n'en a."""
+	if lieu_id in (portes or {}):
+		return portes[lieu_id]
+	vus = {lieu_id}
+	file = [lieu_id]
+	while file:
+		courant = file.pop(0)
+		for arete in (graphe or {}).get(courant, []):
+			voisin = arete.get("voisin")
+			if not voisin or voisin in vus:
+				continue
+			if voisin in (portes or {}):
+				return portes[voisin]
+			vus.add(voisin)
+			file.append(voisin)
+	return None
+
+
 def direction_cardinale(depuis: tuple, vers: tuple) -> str | None:
 	"""Direction cardinale (8 octants) de `depuis` vers `vers`, en coordonnées de grille
 	(y croît vers le BAS → nord = dy < 0). None si les deux portes coïncident."""
@@ -128,7 +162,11 @@ def indice_destination(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) 
 	ville_nom = None
 	if meme_ville:
 		portes = portes_du_parent(graphe, parent_x)
-		porte_x, porte_y = portes.get((giver_doc or {}).get("_id")), portes.get(dest_id)
+		# `porte_effective` et non `portes.get` : un donneur imbriqué (comptoir → réception →
+		# façade) n'ouvre pas lui-même sur la ville, mais la direction se mesure depuis la
+		# porte par laquelle on en sort.
+		porte_x = porte_effective(graphe, portes, (giver_doc or {}).get("_id"))
+		porte_y = porte_effective(graphe, portes, dest_id)
 		if porte_x and porte_y:
 			direction = direction_cardinale(porte_x, porte_y)
 		repere = repere_proche(dest_id, portes, get_doc_fn, exclure={(giver_doc or {}).get("_id")})
@@ -284,6 +322,92 @@ def generer_transport(giver_doc: dict, find_docs_fn, get_doc_fn,
 
 
 # ---------------------------------------------------------------------------
+# Offre AUTHORÉE portée par un PNJ (services.transport.offre)
+# ---------------------------------------------------------------------------
+
+def offre_spec(pnj_doc: dict) -> dict | None:
+	"""La course ÉCRITE que ce PNJ confie, ou None (cas des marchands : leur course est
+	tirée au hasard). Miroir de `services.soin` / `services.don` (utils/pnj.py) :
+	`services.transport.offre` = {id, destination, cargaison:[{item, quantite, poids?}],
+	duree?, proba?, unique?, titre?, description?, recompenses?{xp, cuivre}}."""
+	service = (((pnj_doc or {}).get("services") or {}).get("transport") or {})
+	spec = service.get("offre")
+	if not spec or not spec.get("destination") or not spec.get("cargaison"):
+		return None
+	return spec
+
+
+def deja_reussie(character: dict, quete_id: str) -> bool:
+	"""Cette quête a-t-elle déjà été MENÉE À BIEN par le personnage ? (Un échec ne compte
+	pas : le donneur repropose sa course — on ne condamne pas un joueur pour un retard.)
+	Gate des offres `unique`, d'où la nécessité d'un id STABLE sur la spec."""
+	if not quete_id:
+		return False
+	return any(
+		t.get("id") == quete_id and not t.get("echec")
+		for t in (character or {}).get("quetes_terminees", [])
+	)
+
+
+def cargaison_authoree(spec: dict, get_doc_fn) -> list:
+	"""Développe la cargaison écrite en références d'instances `{item, poids}` (une par
+	exemplaire). Poids = celui de la spec s'il est donné, sinon le poids mini de l'item.
+	Les bornes QUETE_TRANSPORT_POIDS_MAX / _NB_MAX ne s'appliquent PAS : une cargaison
+	authorée dit exactement ce qu'elle pèse (le contrôle de charge à l'acceptation, lui,
+	joue toujours → nœud « trop chargé »)."""
+	cargaison = []
+	for ligne in (spec or {}).get("cargaison") or []:
+		iid = ligne.get("item")
+		if not iid:
+			continue
+		doc = get_doc_fn(iid)
+		if not doc:
+			continue
+		poids = ligne.get("poids")
+		poids = float(poids) if poids is not None else poids_bounds(doc)[0]
+		for _ in range(max(1, int(ligne.get("quantite", 1) or 1))):
+			cargaison.append({"item": iid, "poids": poids})
+	return cargaison
+
+
+def generer_transport_authore(spec: dict, giver_doc: dict, find_docs_fn, get_doc_fn) -> dict | None:
+	"""Construit l'offre décrite par la spec du PNJ — même structure que `generer_transport`,
+	mais rien n'est tiré au sort : destination, cargaison, délai et récompenses sont écrits.
+	Titre/description/récompenses absents de la spec sont dérivés comme pour une course
+	générée. None si la cargaison ne se résout pas (items introuvables)."""
+	cargaison = cargaison_authoree(spec, get_doc_fn)
+	if not cargaison:
+		return None
+	dest_id = spec.get("destination")
+	indice = indice_destination(giver_doc, dest_id, find_docs_fn, get_doc_fn)
+	rec = dict(spec.get("recompenses") or {})
+	xp = int(rec.get("xp", _xp_transport(indice)))
+	cuivre = int(rec.get("cuivre", max(0, round(xp * float(character_stats.QUETE_CUIVRE_PAR_XP)))))
+	nb = len(cargaison)
+	giver_nom = (giver_doc or {}).get("label") or (giver_doc or {}).get("nom") or "Le donneur"
+	return {
+		"id": spec.get("id") or ("quete:transport_" + uuid.uuid4().hex[:12]),
+		"type_quete": "transport",
+		"titre": spec.get("titre") or f"Livraison : {indice['nom']}",
+		"description": spec.get("description") or (
+			f"{giver_nom} vous confie {nb} colis "
+			f"({poids_cargaison(cargaison)} kg). Destination : {indice['nom']}, "
+			f"{texte_indice(indice)}."
+		),
+		"rang": spec.get("rang", "F"),
+		"giver": (giver_doc or {}).get("_id"),
+		"objectif": {"type": "transport", "cible": dest_id, "quantite": 1},
+		"cargaison": cargaison,
+		"duree": int(spec.get("duree", character_stats.QUETE_TRANSPORT_DUREE_SECONDES)),
+		"recompenses": {"xp": xp, "cuivre": cuivre, "items": list(rec.get("items") or [])},
+		# `retour` : la course ne se solde PAS chez le destinataire — il faut revenir en rendre
+		# compte au donneur, qui paie (et remet ses items de récompense : la carte d'aventurier).
+		"retour": bool(spec.get("retour")),
+		"progress": 0,
+	}
+
+
+# ---------------------------------------------------------------------------
 # Offre du lieu (champ transitoire, miroir de pnj_present)
 # ---------------------------------------------------------------------------
 
@@ -295,15 +419,21 @@ def transports_actifs(character: dict) -> list:
 
 
 def poser_transport_offert(character: dict, lieu_doc: dict, find_docs_fn, get_doc_fn,
-						   rand_fn=random.random) -> bool:
-	"""Tire (une seule fois par entrée) l'offre de transport du magasin courant et la pose
-	dans le champ transitoire `transport_offert` (mute sans save). No-op si le tirage a
-	déjà été fait pour ce lieu → un refresh ne re-tire pas ; ressortir/rentrer re-tire.
-	Aucune offre si le personnage a déjà une course en cours (pas d'empilement de
-	cargaisons). Renvoie True si le champ a changé (l'appelant décide de sauvegarder)."""
+						   rand_fn=random.random, pnj_doc: dict | None = None) -> bool:
+	"""Tire (une seule fois par entrée) l'offre de transport du lieu courant et la pose dans
+	le champ transitoire `transport_offert` (mute sans save). No-op si le tirage a déjà été
+	fait pour ce lieu → un refresh ne re-tire pas ; ressortir/rentrer re-tire. Aucune offre
+	si le personnage a déjà une course en cours (pas d'empilement de cargaisons). Renvoie
+	True si le champ a changé (l'appelant décide de sauvegarder).
+
+	Deux donneurs possibles : le PNJ présent porte une course ÉCRITE (`services.transport.offre`
+	— elle prime, et le lieu n'a pas à être un magasin), sinon le lieu est un magasin et sa
+	course est TIRÉE AU HASARD. `pnj_doc` = le PNJ déjà arrêté pour cette entrée (le tirage de
+	présence, `pnj.poser_pnj_present`, a lieu juste avant côté appelant)."""
 	lieu_id = (lieu_doc or {}).get("_id")
-	if not lieu_id or not est_magasin(lieu_doc):
-		# Sortie d'un magasin : on nettoie l'offre restée sur l'ancien lieu.
+	spec = offre_spec(pnj_doc)
+	if not lieu_id or not (spec or est_magasin(lieu_doc)):
+		# Lieu sans donneur : on nettoie l'offre restée sur l'ancien lieu.
 		if (character.get("transport_offert") or {}).get("lieu"):
 			character["transport_offert"] = None
 			return True
@@ -312,8 +442,13 @@ def poser_transport_offert(character: dict, lieu_doc: dict, find_docs_fn, get_do
 	if offert.get("lieu") == lieu_id:
 		return False
 	quete = None
-	if not transports_actifs(character) and rand_fn() < float(character_stats.QUETE_TRANSPORT_PROBA):
-		quete = generer_transport(lieu_doc, find_docs_fn, get_doc_fn, rand_fn)
+	if not transports_actifs(character):
+		if spec:
+			deja = bool(spec.get("unique")) and deja_reussie(character, spec.get("id"))
+			if not deja and rand_fn() < float(spec.get("proba", 1.0)):
+				quete = generer_transport_authore(spec, lieu_doc, find_docs_fn, get_doc_fn)
+		elif rand_fn() < float(character_stats.QUETE_TRANSPORT_PROBA):
+			quete = generer_transport(lieu_doc, find_docs_fn, get_doc_fn, rand_fn)
 	character["transport_offert"] = {"lieu": lieu_id, "quete": quete}
 	return True
 
@@ -327,10 +462,29 @@ def offre_courante(character: dict, lieu_doc: dict) -> dict | None:
 	return offert.get("quete") or None
 
 
-def transport_a_livrer(character: dict, lieu_id: str) -> dict | None:
-	"""La course active dont la destination est ce lieu (donc livrable ici), ou None."""
+def course_du_donneur(character: dict, lieu_id: str) -> dict | None:
+	"""La course active CONFIÉE par ce lieu, ou None — de quoi laisser le donneur relancer le
+	joueur tant qu'il n'a pas livré (« la viande n'attend pas »)."""
 	for q in transports_actifs(character):
-		if (q.get("objectif") or {}).get("cible") == lieu_id:
+		if q.get("giver") == lieu_id:
+			return q
+	return None
+
+
+def transport_a_livrer(character: dict, lieu_id: str) -> dict | None:
+	"""La course active dont la destination est ce lieu et dont la cargaison n'a pas ENCORE été
+	remise (donc livrable ici), ou None. Une course `retour` reste active après la livraison —
+	le temps d'aller en rendre compte au donneur — mais elle n'est plus à livrer."""
+	for q in transports_actifs(character):
+		if (q.get("objectif") or {}).get("cible") == lieu_id and not q.get("livree_at"):
+			return q
+	return None
+
+
+def retour_attendu(character: dict, lieu_id: str) -> dict | None:
+	"""La course livrée dont il reste à rendre compte AU DONNEUR, si ce lieu est le sien."""
+	for q in transports_actifs(character):
+		if q.get("livree_at") and q.get("giver") == lieu_id:
 			return q
 	return None
 
@@ -353,6 +507,7 @@ def accepter_transport(character: dict, offre: dict, now: int | None = None) -> 
 		"objectif": dict(offre.get("objectif", {})),
 		"recompenses": dict(offre.get("recompenses", {})),
 		"cargaison": [dict(r) for r in offre.get("cargaison", [])],
+		"retour": bool(offre.get("retour")),
 		"progress": 0,
 		"accepte_at": now,
 		"expire_at": now + int(offre.get("duree", character_stats.QUETE_TRANSPORT_DUREE_SECONDES)),
@@ -483,23 +638,11 @@ def traiter_expirations(character: dict, now: int, get_doc_fn, save_doc_fn) -> l
 	return echues
 
 
-def reussir_transport(character: dict, q: dict, lieu_doc: dict, get_doc_fn, save_doc_fn,
-					  now: int | None = None, rand_fn=random.random) -> dict:
-	"""Livraison réussie : récompenses (XP + prime), archivage, mise en rayon d'une partie de
-	la cargaison chez le destinataire, +1 relation avec le DONNEUR (pas le destinataire).
-
-	Les docs `relation` et `lieu` sont ANNEXES (hors character) : ils sont persistés ici ; le
-	character est muté sans save — l'endpoint le sauvegarde. Renvoie {xp, purse, relation, rayon}.
-	"""
-	now = int(quetes.now_epoch() if now is None else now)
+def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int) -> dict:
+	"""Solde la course : récompenses (XP + prime + items), archivage, +1 relation avec le DONNEUR
+	(jamais le destinataire). Le doc `relation` est ANNEXE (hors character) : il est persisté ici ;
+	le character est muté sans save — l'endpoint le sauvegarde."""
 	recap = quetes.appliquer_recompenses(character, q)
-
-	# La marchandise entre chez le destinataire : ce qu'il vend a une chance de rejoindre son
-	# étal (le joueur voit donc l'effet de sa course sur le stock du magasin).
-	rayon = deposer_en_rayon(lieu_doc, q.get("cargaison") or [], get_doc_fn, rand_fn)
-	if rayon:
-		save_doc_fn(lieu_doc)
-
 	archiver(character, q, echec=False, now=now)
 	relation_val = None
 	giver_doc = get_doc_fn(q.get("giver")) if q.get("giver") else None
@@ -509,4 +652,47 @@ def reussir_transport(character: dict, q: dict, lieu_doc: dict, get_doc_fn, save
 			relation, int(character_stats.QUETE_TRANSPORT_RELATION_DELTA)
 		)
 		save_doc_fn(relation)
-	return {"xp": recap["xp"], "purse": recap["purse"], "relation": relation_val, "rayon": rayon}
+	return {"xp": recap["xp"], "purse": recap["purse"], "relation": relation_val}
+
+
+def _ranger_chez_le_destinataire(q: dict, lieu_doc: dict, get_doc_fn, save_doc_fn, rand_fn) -> dict:
+	"""La marchandise entre chez le destinataire : ce qu'il vend a une chance de rejoindre son
+	étal (le joueur voit donc l'effet de sa course sur le stock du magasin). Le doc `lieu` est
+	ANNEXE → persisté ici."""
+	rayon = deposer_en_rayon(lieu_doc, q.get("cargaison") or [], get_doc_fn, rand_fn)
+	if rayon:
+		save_doc_fn(lieu_doc)
+	return rayon
+
+
+def reussir_transport(character: dict, q: dict, lieu_doc: dict, get_doc_fn, save_doc_fn,
+					  now: int | None = None, rand_fn=random.random) -> dict:
+	"""Livraison réussie chez le destinataire, qui SOLDE la course (cas nominal des marchands :
+	c'est lui qui paie). Renvoie {xp, purse, relation, rayon}."""
+	now = int(quetes.now_epoch() if now is None else now)
+	rayon = _ranger_chez_le_destinataire(q, lieu_doc, get_doc_fn, save_doc_fn, rand_fn)
+	recap = _solder(character, q, get_doc_fn, save_doc_fn, now)
+	recap["rayon"] = rayon
+	return recap
+
+
+def livrer_en_attente_de_retour(character: dict, q: dict, lieu_doc: dict, get_doc_fn,
+								save_doc_fn, now: int | None = None,
+								rand_fn=random.random) -> dict:
+	"""Livraison d'une course `retour` : la marchandise est remise, mais RIEN n'est payé ici —
+	la quête reste active, le temps d'aller rendre compte au donneur (`rapporter_transport`).
+	Le délai, lui, portait sur la livraison : il est levé, le chemin du retour n'est pas couru
+	d'avance. Mute sans save (les docs annexes sont persistés). Renvoie {rayon}."""
+	now = int(quetes.now_epoch() if now is None else now)
+	rayon = _ranger_chez_le_destinataire(q, lieu_doc, get_doc_fn, save_doc_fn, rand_fn)
+	q["livree_at"] = now
+	q.pop("expire_at", None)
+	return {"rayon": rayon}
+
+
+def rapporter_transport(character: dict, q: dict, get_doc_fn, save_doc_fn,
+						now: int | None = None) -> dict:
+	"""Le joueur rend compte au donneur d'une course `retour` déjà livrée : c'est LUI qui solde
+	(XP, prime, items de récompense — la carte d'aventurier) et dont la relation monte."""
+	now = int(quetes.now_epoch() if now is None else now)
+	return _solder(character, q, get_doc_fn, save_doc_fn, now)

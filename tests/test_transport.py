@@ -35,14 +35,49 @@ TEMPLE = {
 	"_id": "lieu:temple", "type": "lieu", "categorie": "temple", "label": "Le Temple",
 	"lieu_parent": "lieu:ville",
 }
+# La guilde : deux lieux, dont un IMBRIQUÉ. Le comptoir n'ouvre pas sur la ville (on y accède
+# par la réception) et sa catégorie n'a aucune recette → ce n'est PAS un magasin. C'est le
+# donneur d'une course écrite, portée par son réceptionniste.
+GUILDE = {
+	"_id": "lieu:guilde", "type": "lieu", "categorie": "guilde_aventurier", "label": "Le Bastion",
+	"lieu_parent": "lieu:ville",
+}
+COMPTOIR = {
+	"_id": "lieu:guilde_comptoir", "type": "lieu", "categorie": "guilde_aventurier_comptoir",
+	"label": "Le comptoir", "lieu_parent": "lieu:ville",
+}
 
 VIANDE = {"_id": "item:viande", "type": "item", "nom": "Viande", "sous_categorie": "viande", "poids": [2, 2]}
 ENCLUME = {"_id": "item:enclume", "type": "item", "nom": "Enclume", "sous_categorie": "viande", "poids": [500, 500]}
 
-DOCS = {d["_id"]: d for d in (VILLE, BOUCHERIE, SALAISON, FUMOIR, TEMPLE, VIANDE, ENCLUME)}
+# Le réceptionniste porte une course ÉCRITE ; le tenancier d'une boutique, non (la sienne est
+# tirée au hasard) — c'est toute la différence entre les deux chemins de `poser_transport_offert`.
+BORIN = {
+	"_id": "pnj:borin", "type": "pnj", "nom": "Borin",
+	"services": {"transport": {
+		"offre": {
+			"id": "quete:transport_borin",
+			"destination": "lieu:fumoir",
+			"cargaison": [{"item": "item:viande", "quantite": 2, "poids": 5.0}],
+			"duree": 3600,
+			"unique": True,
+			"titre": "Première mission",
+			"recompenses": {"xp": 30, "cuivre": 200},
+		},
+		"noeuds": {"accepte": "transport_accepte"},
+	}},
+}
+TENANCIER = {
+	"_id": "pnj:marchand_boucherie", "type": "pnj", "nom": "Le boucher",
+	"services": {"transport": {"noeuds": {"accepte": "transport_accepte"}}},
+}
+
+DOCS = {d["_id"]: d for d in (VILLE, BOUCHERIE, SALAISON, FUMOIR, TEMPLE, GUILDE, COMPTOIR,
+							  VIANDE, ENCLUME, BORIN, TENANCIER)}
 
 # Portes des boutiques dans la grille de la ville : la boucherie au centre, la salaison
-# plein nord, le fumoir plein est.
+# plein nord, le fumoir plein est, la guilde plein sud. Le comptoir, lui, n'a de porte que
+# sur la réception de la guilde (lieu imbriqué).
 CONNECTIONS = [
 	{"_id": "link:b", "type": "connection",
 	 "nodes": [{"lieu": "lieu:ville", "pos": [20, 20]}, {"lieu": "lieu:boucherie", "pos": [0, 0]}]},
@@ -52,6 +87,10 @@ CONNECTIONS = [
 	 "nodes": [{"lieu": "lieu:ville", "pos": [40, 20]}, {"lieu": "lieu:fumoir", "pos": [0, 0]}]},
 	{"_id": "link:t", "type": "connection",
 	 "nodes": [{"lieu": "lieu:ville", "pos": [22, 6]}, {"lieu": "lieu:temple", "pos": [0, 0]}]},
+	{"_id": "link:g", "type": "connection",
+	 "nodes": [{"lieu": "lieu:ville", "pos": [20, 40]}, {"lieu": "lieu:guilde", "pos": [0, 0]}]},
+	{"_id": "link:gc", "type": "connection",
+	 "nodes": [{"lieu": "lieu:guilde", "pos": [0, 0]}, {"lieu": "lieu:guilde_comptoir", "pos": [0, 0]}]},
 ]
 
 
@@ -518,3 +557,235 @@ def test_choix_valide_revalide_le_flag_serveur():
 	# Le client réclame la course alors que le marchand n'a rien à proposer : refusé.
 	ctx = pnj.contexte_dialogue(character(), doc, lambda _l: 50, flags={"transport_offert": False})
 	assert pnj.choix_valide(doc, "accueil", "course", ctx) is None
+
+
+# ── Offres AUTHORÉES portées par un PNJ (n'importe quel PNJ, magasin ou non) ──────
+
+def test_offre_spec_distingue_le_pnj_authore_du_tenancier():
+	assert transport.offre_spec(BORIN)["destination"] == "lieu:fumoir"
+	# Le tenancier d'une boutique n'a pas de course écrite : la sienne est tirée au hasard.
+	assert transport.offre_spec(TENANCIER) is None
+	assert transport.offre_spec(None) is None
+
+
+def test_course_authoree_depuis_un_lieu_qui_n_est_pas_un_magasin():
+	assert not transport.est_magasin(COMPTOIR)
+	c = character()
+	# rand=0.99 : aucune probabilité ne s'y oppose (proba par défaut = 1.0), contrairement au
+	# tirage des marchands — la mission écrite est toujours là pour qui entre.
+	assert transport.poser_transport_offert(c, COMPTOIR, find_docs, get_doc,
+											rand_fn=lambda: 0.99, pnj_doc=BORIN)
+	q = transport.offre_courante(c, COMPTOIR)
+	assert q["id"] == "quete:transport_borin"          # id STABLE (gate de `unique`)
+	assert q["titre"] == "Première mission"
+	assert q["giver"] == "lieu:guilde_comptoir"
+	assert q["objectif"] == {"type": "transport", "cible": "lieu:fumoir", "quantite": 1}
+	assert q["cargaison"] == [{"item": "item:viande", "poids": 5.0}] * 2
+	assert transport.poids_cargaison(q["cargaison"]) == 10.0
+	assert q["recompenses"] == {"xp": 30, "cuivre": 200, "items": []}
+
+
+def test_sans_pnj_le_comptoir_ne_donne_rien():
+	c = character()
+	transport.poser_transport_offert(c, COMPTOIR, find_docs, get_doc,
+									 rand_fn=lambda: 0.0, pnj_doc=None)
+	assert transport.offre_courante(c, COMPTOIR) is None
+
+
+def test_le_magasin_sans_spec_garde_son_tirage_aleatoire(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_PROBA", 0.10)
+	c = character()
+	# Non-régression : le tenancier ne porte pas de course écrite → chemin aléatoire, seuil compris.
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, get_doc,
+									 rand_fn=lambda: 0.5, pnj_doc=TENANCIER)
+	assert transport.offre_courante(c, BOUCHERIE) is None
+	c = character()
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, get_doc,
+									 rand_fn=lambda: 0.05, pnj_doc=TENANCIER)
+	assert transport.offre_courante(c, BOUCHERIE) is not None
+
+
+def test_une_course_ecrite_prime_sur_le_tirage_du_magasin(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_PROBA", 0.0)  # aucun tirage possible
+	c = character()
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, get_doc,
+									 rand_fn=lambda: 0.5, pnj_doc=BORIN)
+	q = transport.offre_courante(c, BOUCHERIE)
+	assert q["id"] == "quete:transport_borin"
+
+
+def test_unique_reproposee_apres_un_echec_mais_pas_apres_une_reussite():
+	reussie = character(quetes_terminees=[{"id": "quete:transport_borin", "echec": False}])
+	transport.poser_transport_offert(reussie, COMPTOIR, find_docs, get_doc,
+									 rand_fn=lambda: 0.0, pnj_doc=BORIN)
+	assert transport.offre_courante(reussie, COMPTOIR) is None
+
+	# Un retard n'est pas une condamnation : Borin reconfie ses caisses.
+	echouee = character(quetes_terminees=[{"id": "quete:transport_borin", "echec": True}])
+	transport.poser_transport_offert(echouee, COMPTOIR, find_docs, get_doc,
+									 rand_fn=lambda: 0.0, pnj_doc=BORIN)
+	assert transport.offre_courante(echouee, COMPTOIR) is not None
+
+
+def test_deja_reussie():
+	c = character(quetes_terminees=[{"id": "quete:x", "echec": False}])
+	assert transport.deja_reussie(c, "quete:x")
+	assert not transport.deja_reussie(c, "quete:y")
+	assert not transport.deja_reussie(c, None)
+
+
+def test_la_cargaison_ecrite_ignore_les_bornes_de_poids_et_de_nombre(monkeypatch):
+	# Les bornes du tirage aléatoire ne s'appliquent pas à une intention écrite : la spec dit
+	# exactement ce qu'elle pèse (seul le contrôle de charge à l'acceptation joue encore).
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_POIDS_MAX", 1.0)
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_NB_MAX", 1)
+	q = transport.generer_transport_authore(transport.offre_spec(BORIN), COMPTOIR, find_docs, get_doc)
+	assert len(q["cargaison"]) == 2
+	assert transport.poids_cargaison(q["cargaison"]) == 10.0
+
+
+def test_cargaison_authoree_sans_poids_prend_le_poids_mini_de_l_item():
+	spec = {"destination": "lieu:fumoir", "cargaison": [{"item": "item:viande", "quantite": 3}]}
+	assert transport.cargaison_authoree(spec, get_doc) == [{"item": "item:viande", "poids": 2}] * 3
+
+
+def test_cargaison_authoree_ignore_un_item_introuvable():
+	spec = {"destination": "lieu:fumoir", "cargaison": [{"item": "item:fantome", "quantite": 2}]}
+	assert transport.cargaison_authoree(spec, get_doc) == []
+	assert transport.generer_transport_authore(spec, COMPTOIR, find_docs, get_doc) is None
+
+
+def test_une_course_ecrite_se_livre_comme_une_autre():
+	c = character()
+	q = transport.generer_transport_authore(transport.offre_spec(BORIN), COMPTOIR, find_docs, get_doc)
+	snap = transport.accepter_transport(c, q, now=1000)
+	assert len(c["inventaire"]) == 2                       # les deux caisses sont dans le sac
+	assert snap["expire_at"] == 1000 + 3600
+	assert transport.transport_a_livrer(c, "lieu:fumoir") == snap
+	assert transport.livrer_transport(c, snap) is True
+	assert c["inventaire"] == []
+
+
+def test_course_du_donneur():
+	c = character()
+	q = transport.generer_transport_authore(transport.offre_spec(BORIN), COMPTOIR, find_docs, get_doc)
+	transport.accepter_transport(c, q, now=1000)
+	# Le donneur peut relancer le joueur tant qu'il n'a pas livré ; le destinataire, lui, attend.
+	assert transport.course_du_donneur(c, "lieu:guilde_comptoir")["id"] == "quete:transport_borin"
+	assert transport.course_du_donneur(c, "lieu:fumoir") is None
+
+
+# ── Géographie des lieux imbriqués ───────────────────────────────────────────────
+
+def test_porte_effective_remonte_jusqu_a_la_porte_sur_la_ville():
+	graphe = focalisation.charger_graphe(find_docs)
+	portes = transport.portes_du_parent(graphe, "lieu:ville")
+	# Le comptoir n'a pas de porte sur la ville : on sort par la réception de la guilde.
+	assert "lieu:guilde_comptoir" not in portes
+	assert transport.porte_effective(graphe, portes, "lieu:guilde_comptoir") == (20, 40)
+	assert transport.porte_effective(graphe, portes, "lieu:fumoir") == (40, 20)
+
+
+def test_indice_depuis_un_lieu_imbrique_donne_une_direction():
+	indice = transport.indice_destination(COMPTOIR, "lieu:fumoir", find_docs, get_doc)
+	assert indice["meme_ville"] is True
+	# Sans le repli de `porte_effective`, la direction serait perdue (« à deux pas d'ici »).
+	assert indice["direction"] == "nord-est"
+	assert "au nord-est d'ici" in transport.texte_indice(indice)
+
+
+# ── Courses à RETOUR : c'est le donneur qui solde, pas le destinataire ────────────
+
+def _offre_retour():
+	spec = dict(transport.offre_spec(BORIN), retour=True)
+	spec["recompenses"] = {"xp": 30, "cuivre": 200,
+						   "items": [{"item": "item:carte", "poids": 0.05}]}
+	return transport.generer_transport_authore(spec, COMPTOIR, find_docs, get_doc)
+
+
+def test_le_destinataire_d_une_course_a_retour_ne_paie_pas():
+	c = character()
+	sauves = []
+	snap = transport.accepter_transport(c, _offre_retour(), now=1000)
+	assert transport.livrer_transport(c, snap) is True      # la marchandise sort du sac
+	recap = transport.livrer_en_attente_de_retour(c, snap, FUMOIR, get_doc, sauves.append, now=2000)
+	assert "rayon" in recap
+	assert c["xp_total"] == 0                               # rien n'est payé ici
+	assert transport.transports_actifs(c) == [snap]         # la quête reste active
+	assert snap["livree_at"] == 2000
+	assert "expire_at" not in snap                          # le délai portait sur la livraison
+	# Elle n'est plus « à livrer » (sinon le tenancier la reproposerait, cargaison en moins).
+	assert transport.transport_a_livrer(c, "lieu:fumoir") is None
+	assert transport.retour_attendu(c, "lieu:guilde_comptoir") == snap
+	assert transport.retour_attendu(c, "lieu:fumoir") is None
+
+
+def test_le_donneur_solde_la_course_a_retour_et_remet_ses_items():
+	c = character()
+	sauves = []
+	snap = transport.accepter_transport(c, _offre_retour(), now=1000)
+	transport.livrer_transport(c, snap)
+	transport.livrer_en_attente_de_retour(c, snap, FUMOIR, get_doc, sauves.append, now=2000)
+
+	recap = transport.rapporter_transport(c, snap, get_doc, sauves.append, now=3000)
+	assert recap["xp"]["xp_gain"] == 30
+	assert recap["relation"] == character_stats.RELATION_INITIALE + 1   # +1 chez le DONNEUR
+	assert c["inventaire"] == [{"item": "item:carte", "poids": 0.05}]   # la carte d'aventurier
+	assert transport.transports_actifs(c) == []
+	assert c["quetes_terminees"][0]["echec"] is False
+	# Course soldée → `unique` la scelle : Borin ne la repropose plus.
+	assert transport.deja_reussie(c, snap["id"])
+
+
+def test_une_course_sans_retour_se_solde_toujours_chez_le_destinataire():
+	# Non-régression : les courses des marchands (pas de `retour`) paient sur place.
+	c = character()
+	sauves = []
+	snap = transport.accepter_transport(c, offre(), now=1000)
+	assert snap["retour"] is False
+	transport.livrer_transport(c, snap)
+	recap = transport.reussir_transport(c, snap, SALAISON, get_doc, sauves.append, now=2000)
+	assert recap["xp"]["xp_gain"] > 0
+	assert transport.transports_actifs(c) == []
+	assert transport.retour_attendu(c, "lieu:boucherie") is None
+
+
+# ── Le nom du PNJ vient du LIEU, jamais du doc générique ──────────────────────────
+
+def test_nom_effectif_le_lieu_prime_sur_le_doc():
+	doc = {"_id": "pnj:marchand_fumoir", "nom": "Maître Colin"}
+	# La boutique rebaptise son tenancier : c'est CE nom que le dialogue doit prononcer.
+	assert pnj.nom_effectif({"character": "pnj:marchand_fumoir", "nom": "Hermine Valcorbe"}, doc) \
+		== "Hermine Valcorbe"
+	# Sans surcharge, le doc générique fait repli (comportement historique).
+	assert pnj.nom_effectif({"character": "pnj:marchand_fumoir"}, doc) == "Maître Colin"
+	assert pnj.nom_effectif({}, {}) == "???"
+
+
+def test_nom_pnj_du_lieu_sans_y_etre():
+	# Magasin sans champ `pnj` : le tenancier implicite de la catégorie (nom du doc générique).
+	docs = dict(DOCS, **{"pnj:marchand_fumoir": {"_id": "pnj:marchand_fumoir", "nom": "Maître Colin"}})
+	get = docs.get
+	assert pnj.nom_pnj_du_lieu(FUMOIR, get, transport.entree_marchand) == "Maître Colin"
+	# Le même magasin, mais qui nomme sa tenancière : c'est elle qu'on annonce au joueur.
+	fumoir_nomme = dict(FUMOIR, pnj=[{"character": "pnj:marchand_fumoir", "nom": "Hermine Valcorbe"}])
+	assert pnj.nom_pnj_du_lieu(fumoir_nomme, get, transport.entree_marchand) == "Hermine Valcorbe"
+	# Un lieu que personne ne tient (ni entrée `pnj`, ni recettes → pas de tenancier).
+	assert pnj.nom_pnj_du_lieu(VILLE, get, transport.entree_marchand) is None
+
+
+def test_un_dialogue_generique_prononce_le_nom_du_lieu():
+	# Le doc est partagé par tous les fumoirs : son texte ne peut citer que {pnj}, jamais un nom.
+	doc = {
+		"_id": "pnj:marchand_fumoir", "nom": "Maître Colin",
+		"dialogue": {"noeuds": {"accueil": {
+			"texte": "{pnj} hume la viande en connaisseur.",
+			"choix": [{"id": "ok", "label": "Merci, {pnj}."}],
+		}}},
+	}
+	entree = {"character": "pnj:marchand_fumoir", "nom": "Hermine Valcorbe"}
+	ctx = pnj.contexte_dialogue(character(), doc, lambda _l: 50,
+								placeholders={"pnj": pnj.nom_effectif(entree, doc)})
+	noeud = pnj.noeud_client(doc, "accueil", ctx)
+	assert noeud["texte"] == "Hermine Valcorbe hume la viande en connaisseur."
+	assert noeud["choix"][0]["label"] == "Merci, Hermine Valcorbe."   # les labels aussi

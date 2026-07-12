@@ -323,7 +323,12 @@ def quete_detail(character: dict, q: dict) -> dict:
 	rec = q.get("recompenses", {}) or {}
 	purse = cuivre_to_purse(rec.get("cuivre", 0))
 	if obj.get("type") == "transport":
-		progress_txt = f"Livraison à {_cible_nom(obj)}"
+		if q.get("livree_at"):
+			# Course à retour : la marchandise est remise, il reste à en rendre compte au donneur.
+			giver = get_doc(q.get("giver")) if q.get("giver") else None
+			progress_txt = f"Rendre compte : {(giver or {}).get('label') or 'au donneur'}"
+		else:
+			progress_txt = f"Livraison à {_cible_nom(obj)}"
 	else:
 		progress_txt = f"{_cible_nom(obj)} : {min(prog, qte) if qte else prog}/{qte}"
 	detail = {

@@ -13,7 +13,7 @@ from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, sync_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
-	poids_bounds, carried_weight, charge_max_of,
+	poids_bounds, carried_weight, charge_max_of, item_ref_id,
 )
 from utils.marche import debit_character, get_relation, relation_value
 from utils import pnj
@@ -38,42 +38,86 @@ def _pnj_du_lieu(character: dict) -> tuple[dict, dict, dict]:
 	return entree, pnj_doc, lieu_doc
 
 
-def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None) -> dict:
+def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
+			  entree: dict | None = None) -> dict:
 	"""Contexte de dialogue avec la résolution de relation fermée sur la DB (le lieu peut
 	ne pas exister → relation neutre sur doc minimal, get_relation ne sauvegarde pas).
 
+	`{pnj}` (le nom sous lequel CE lieu présente son PNJ) est posé pour TOUT dialogue, course
+	ou pas : un doc `pnj:marchand_*` est générique, seul le lieu sait comment s'appelle son
+	tenancier — un dialogue ne peut donc pas écrire de nom en dur.
+
 	Y ajoute l'état des quêtes de transport du lieu courant : les FLAGS qui rendent
 	visibles les choix « une course pour moi ? » / « je vous apporte une livraison », et
-	les PLACEHOLDERS d'orientation ({destination}, {direction}, {repere}…) que le marchand
-	récite quand on l'interroge sur la destination."""
+	les PLACEHOLDERS d'orientation ({destination}, {direction}, {repere}…) que le donneur
+	récite quand on l'interroge sur la destination.
+
+	`transport_en_cours` (course confiée par CE lieu, pas encore livrée) laisse le donneur
+	relancer le joueur ; `transport_accompli` (course ÉCRITE `unique` déjà réussie) lui laisse
+	saluer un joueur qui a fait ses preuves plutôt que reproposer une mission accomplie."""
 	def _rel(lieu_id: str) -> int:
 		lieu = get_doc(lieu_id) or {"_id": lieu_id}
 		return relation_value(get_relation(character, lieu))
 
 	flags: dict = {}
-	placeholders: dict = {}
+	placeholders: dict = {"pnj": pnj.nom_effectif(entree or {}, pnj_doc)}
 	if lieu_doc:
 		offre = transport.offre_courante(character, lieu_doc)
 		a_livrer = transport.transport_a_livrer(character, lieu_doc.get("_id"))
-		flags = {"transport_offert": bool(offre), "transport_a_livrer": bool(a_livrer)}
-		if offre:
-			placeholders = _placeholders_offre(offre, lieu_doc)
+		en_cours = transport.course_du_donneur(character, lieu_doc.get("_id"))
+		a_rapporter = transport.retour_attendu(character, lieu_doc.get("_id"))
+		spec = transport.offre_spec(pnj_doc)
+		flags = {
+			"transport_offert": bool(offre),
+			"transport_a_livrer": bool(a_livrer),
+			# Course livrée dont il reste à rendre compte ici (courses `retour`) : c'est le donneur
+			# qui solde. `transport_en_cours` (relance) l'exclut — la marchandise est déjà remise.
+			"transport_a_rapporter": bool(a_rapporter),
+			"transport_en_cours": bool(en_cours and not en_cours.get("livree_at")),
+			"transport_accompli": bool(spec and transport.deja_reussie(character, spec.get("id"))),
+		}
+		# Une course déjà confiée se raconte avec les mêmes mots qu'une offre (le snapshot a la
+		# même forme) : le donneur peut rappeler la destination et le temps qu'il reste.
+		if offre or en_cours:
+			placeholders.update(_placeholders_offre(offre or en_cours, lieu_doc))
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders)
 
 
+def _nom_pnj(lieu_id: str | None) -> str | None:
+	"""Nom du PNJ qui tient ce lieu (le tenancier implicite d'un magasin y compris), sans y
+	être : c'est ainsi que le donneur peut nommer la personne à qui livrer, et le destinataire
+	celle qui l'envoie. None si le lieu n'existe pas ou n'a personne."""
+	lieu = get_doc(lieu_id) if lieu_id else None
+	if not lieu:
+		return None
+	return pnj.nom_pnj_du_lieu(lieu, get_doc, transport.entree_marchand)
+
+
 def _placeholders_offre(offre: dict, lieu_doc: dict) -> dict:
-	"""Valeurs récitées par le marchand pour décrire la course proposée."""
+	"""Valeurs récitées par le donneur pour décrire la course. Fonctionne aussi bien sur une
+	offre (pas encore acceptée : `duree`) que sur le snapshot d'une course active (`expire_at`)
+	— {delai} = les minutes qu'il RESTE dans ce dernier cas."""
 	dest_id = (offre.get("objectif") or {}).get("cible")
 	indice = transport.indice_destination(lieu_doc, dest_id, find_docs, get_doc)
 	rec = offre.get("recompenses") or {}
 	cargaison = offre.get("cargaison") or []
+	if offre.get("expire_at"):
+		restant = int(offre["expire_at"]) - quetes.now_epoch()
+	else:
+		restant = int(offre.get("duree", 3600))
+	# Un marchand dit « dix kilos », pas « 10.0 kilos » : on ne garde la décimale que si elle
+	# porte une information (cargaison aux poids tirés au hasard).
+	poids = transport.poids_cargaison(cargaison)
 	return {
 		"destination": indice["nom"],
+		# Le lieu où livrer ({destination}) et la personne à qui livrer ({destinataire}) sont deux
+		# choses : « Présente le jeton à Hermine Valcorbe » vs « Destination : Fumée de l'Yonne ».
+		"destinataire": _nom_pnj(dest_id) or indice["nom"],
 		"direction": transport.texte_indice(indice),
 		"repere": indice.get("repere") or indice["nom"],
 		"colis": len(cargaison),
-		"poids": transport.poids_cargaison(cargaison),
-		"delai": max(1, int(offre.get("duree", 3600)) // 60),
+		"poids": int(poids) if float(poids).is_integer() else poids,
+		"delai": max(1, restant // 60),
 		"xp": rec.get("xp", 0),
 		"prime": rec.get("cuivre", 0),
 	}
@@ -93,7 +137,7 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)])
 	# échéances (et leur sanction de réputation) avant de composer le dialogue.
 	if transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc):
 		save_doc(character)
-	contexte = _contexte(character, pnj_doc, lieu_doc)
+	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	depart = (pnj_doc.get("dialogue") or {}).get("noeud_depart", "accueil")
 	return {
 		"pnj": pnj.pnj_payload(entree, pnj_doc),
@@ -118,7 +162,7 @@ async def pnj_dialogue_choix(
 	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character)
 	if transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc):
 		save_doc(character)
-	contexte = _contexte(character, pnj_doc, lieu_doc)
+	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	noeud_id = body.get("noeud")
 	choix = pnj.choix_valide(pnj_doc, noeud_id, body.get("choix_id"), contexte)
 	if not choix:
@@ -189,7 +233,7 @@ async def pnj_dialogue_choix(
 		# sur les nouveaux FLAGS, sinon le marchand reproposerait la course qu'il vient de
 		# confier. Les PLACEHOLDERS, eux, viennent de l'action : l'offre n'existe plus une fois
 		# acceptée, mais le nœud de résultat doit encore pouvoir citer le délai et la destination.
-		contexte = _contexte(character, pnj_doc, lieu_doc)
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 		contexte["placeholders"].update(dits)
 	else:
 		suivant = choix.get("next")
@@ -206,9 +250,12 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 	"""Exécute une action du service `transport` : renvoie (nœud de résultat, placeholders
 	que ce nœud peut citer).
 
-	`accepter` : le marchand remet la cargaison (refus si le sac ne suit pas).
-	`livrer`   : le destinataire prend livraison, paie, et sa recommandation remonte chez
-	             le donneur (+1 relation) — refus si le joueur ne porte plus tout.
+	`accepter` : le donneur remet la cargaison (refus si le sac ne suit pas).
+	`livrer`   : le destinataire prend livraison — refus si le joueur ne porte plus tout. Il
+	             paie et fait remonter sa recommandation chez le donneur (+1 relation), SAUF
+	             pour une course `retour` : il ne fait alors que prendre la marchandise.
+	`rapporter`: le donneur d'une course `retour` solde lui-même (XP, prime, items — la carte
+	             d'aventurier) une fois la livraison faite.
 	Les autres opérations (proposer/informer) sont de simples `next` conditionnés côté
 	donnée : elles n'arrivent jamais ici."""
 	noeuds = ((pnj_doc.get("services") or {}).get("transport") or {}).get("noeuds") or {}
@@ -238,9 +285,12 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			raise HTTPException(status_code=422, detail="Aucune livraison attendue ici.")
 		giver_doc = get_doc(q.get("giver")) if q.get("giver") else None
 		rec = q.get("recompenses") or {}
+		expediteur = (giver_doc or {}).get("label") or (giver_doc or {}).get("nom") or "l'expéditeur"
 		dits = {
 			"destination": lieu_doc.get("label") or lieu_doc.get("nom") or "",
-			"expediteur": (giver_doc or {}).get("label") or (giver_doc or {}).get("nom") or "l'expéditeur",
+			# {expediteur} = l'enseigne d'où part la marchandise ; {donneur} = qui l'a confiée.
+			"expediteur": expediteur,
+			"donneur": _nom_pnj(q.get("giver")) or expediteur,
 			"colis": len(q.get("cargaison") or []),
 			"xp": rec.get("xp", 0),
 			"prime": rec.get("cuivre", 0),
@@ -248,6 +298,18 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		if not transport.livrer_transport(character, q):
 			# Cargaison incomplète (vendue, jetée) : la quête reste active, le délai court.
 			return noeuds.get("incomplet"), dits
+		if q.get("retour"):
+			# Course à retour : le destinataire prend la marchandise mais ne paie pas — tout se
+			# solde chez le donneur, à qui il faut aller rendre compte.
+			recap = transport.livrer_en_attente_de_retour(character, q, lieu_doc, get_doc, save_doc)
+			if save_doc(character) is None:
+				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+			reponse["transport"] = {"remis": q.get("titre"), "en_rayon": sum(recap["rayon"].values())}
+			reponse["inventaire_payload"] = _inventory_payload(character)
+			reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+			# Le nœud de reçu, à défaut celui de livraison (les tenanciers génériques n'en ont
+			# qu'un : la plupart des courses se paient sur place).
+			return noeuds.get("livre_retour") or noeuds.get("livre"), dits
 		# Le doc `relation` est annexe (hors character) : reussir_transport le persiste, le
 		# character est sauvé juste après — un conflit sur la relation n'annule pas la livraison.
 		recap = transport.reussir_transport(character, q, lieu_doc, get_doc, save_doc)
@@ -268,6 +330,43 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
 		reponse["focalisation"] = focalisation.payload_client(character, get_doc)
 		return noeuds.get("livre"), dits
+
+	if op == "rapporter":
+		q = transport.retour_attendu(character, lieu_doc.get("_id"))
+		if not q:
+			raise HTTPException(status_code=422, detail="Aucune course à rapporter ici.")
+		rec = q.get("recompenses") or {}
+		dest_id = (q.get("objectif") or {}).get("cible")
+		dest_doc = get_doc(dest_id) if dest_id else None
+		dits = {
+			# Le donneur peut citer celle qui a pris livraison (« {destinataire} a sa viande »).
+			"destination": (dest_doc or {}).get("label") or (dest_doc or {}).get("nom") or "",
+			"destinataire": _nom_pnj(dest_id) or (dest_doc or {}).get("label") or "",
+			"colis": len(q.get("cargaison") or []),
+			"xp": rec.get("xp", 0),
+			"prime": rec.get("cuivre", 0),
+		}
+		recap = transport.rapporter_transport(character, q, get_doc, save_doc)
+		focalisation.effacer_si_quete(character, q.get("id"))
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		# Les items de récompense (la carte d'aventurier) sont entrés au sac avec la prime.
+		reponse["transport"] = {
+			"livre": q.get("titre"),
+			"xp": recap["xp"].get("xp_gain", 0),
+			"niveau_up": recap["xp"].get("niveau_up", False),
+			"relation": recap["relation"],
+			"items": [
+				(get_doc(item_ref_id(ref)) or {}).get("nom") or item_ref_id(ref)
+				for ref in (rec.get("items") or [])
+			],
+		}
+		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+		reponse["vitals"] = _vitals_payload(character)
+		reponse["inventaire_payload"] = _inventory_payload(character)
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		reponse["focalisation"] = focalisation.payload_client(character, get_doc)
+		return noeuds.get("rapporte"), dits
 
 	raise HTTPException(status_code=422, detail="Action de transport inconnue.")
 

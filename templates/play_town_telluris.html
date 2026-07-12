@@ -4369,9 +4369,16 @@ async function choisirPnj(choixId) {
 		}
 		if (data.transport) {
 			if (data.transport.accepte) showToast('📦 Course acceptée : ' + data.transport.accepte);
+			// Course à retour : la marchandise est remise ici, mais c'est le donneur qui paie — on
+			// ne promet ni XP ni prime tant que le joueur n'est pas allé lui en rendre compte.
+			if (data.transport.remis) {
+				showToast('📦 Marchandise remise — retournez en rendre compte au donneur.');
+				if (data.transport.en_rayon) showToast('🏷️ ' + data.transport.en_rayon + ' colis mis en rayon ici.');
+			}
 			if (data.transport.livre) {
 				showToast('📦 Livré ! ✨ +' + data.transport.xp + ' XP, 🤝 relation ' + data.transport.relation);
 				if (data.transport.en_rayon) showToast('🏷️ ' + data.transport.en_rayon + ' colis mis en rayon ici.');
+				(data.transport.items || []).forEach(nom => showToast('🎁 ' + nom));
 				if (data.transport.niveau_up) showToast('⭐ Niveau supérieur !');
 			}
 			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);

@@ -10,6 +10,12 @@ piloté par les flags `transport_offert` / `transport_a_livrer`), avec un texte 
 propre à son métier. La liste des catégories est lue dans l'export des recettes — la même
 source que `marche.besoins_categorie`, pour ne jamais diverger.
 
+⚠️ Le `nom` d'un doc généré n'est qu'un REPLI : chaque boutique peut rebaptiser son tenancier
+via `nom` dans son entrée `pnj` (Lucinda Mortecroix à La Flèche d'Argent, Hermine Valcorbe au
+fumoir…). Un texte de dialogue ne cite donc JAMAIS un nom en dur — il utilise `{pnj}` (celui
+à qui l'on parle), `{donneur}` / `{destinataire}` (les deux bouts d'une course), et aucun
+pronom genré autour d'eux : le tenancier peut être une femme.
+
 	python dev/gen_marchands.py
 """
 
@@ -44,7 +50,7 @@ METIERS = {
 	"cordonnerie":          ("Maître Simon", "le cordonnier", "Des formes de bois s'alignent sous l'établi."),
 	"cuisine":              ("Dame Perrine", "la cuisinière", "Un bouillon mijote sur le feu."),
 	"fletcher":             ("Le vieux Thibaut", "le flèchier", "Des hampes bien droites sèchent en faisceaux."),
-	"fumoir":               ("Maître Jorund", "le fumeur", "Une fumée grasse pique les yeux."),
+	"fumoir":               ("Maître Colin", "le fumeur", "Une fumée grasse pique les yeux."),
 	"jardinier":            ("Dame Aveline", "la jardinière", "Des semis attendent en caissettes."),
 	"laboratoire_d_alchimie": ("Maître Corvin", "l'alchimiste", "Un alambic siffle doucement dans la pénombre."),
 	"lutherie":             ("Maître Anselme", "le luthier", "Un manche à peine dégrossi repose sur l'établi."),
@@ -68,6 +74,7 @@ NOEUDS_TRANSPORT = {
 	"accepte": "transport_accepte",
 	"trop_charge": "transport_trop_charge",
 	"livre": "transport_livre",
+	"livre_retour": "transport_livre_retour",
 	"incomplet": "transport_incomplet",
 }
 
@@ -139,6 +146,17 @@ def dialogue(metier: str, ambiance: str) -> dict:
 					"peut compter sur vous. »"
 				),
 				"choix": [{"id": "ok", "label": "Ce fut un plaisir.", "next": "fin"}],
+			},
+			# Course à RETOUR : le destinataire prend la marchandise mais ne paie pas — c'est le
+			# donneur qui solde, une fois qu'on est allé lui en rendre compte. Le nœud `livre`
+			# promettrait une prime que personne ne verse ici.
+			"transport_livre_retour": {
+				"texte": (
+					"« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, "
+					"et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} "
+					"qui paie les siens. Rapportez-lui ce papier, il fait foi. »"
+				),
+				"choix": [{"id": "ok", "label": "J'y retourne de ce pas.", "next": "fin"}],
 			},
 			"transport_incomplet": {
 				"texte": (

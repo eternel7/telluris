@@ -17,11 +17,20 @@
 # - `services.don` : {item, quantite, cout_cuivre, gratuit_si:{lieux, seuil},
 #   noeuds:{fait, sans_fonds, trop_charge}} — remise d'un objet (ex. eau bénite),
 #   gratuit si bonne réputation ; contrôle de charge côté router.
-# - `services.transport` : {noeuds:{propose, infos, accepte, trop_charge, livre, incomplet}}
-#   — quête de course entre magasins (utils/transport.py). Les conditions `transport_offert`
-#   / `transport_a_livrer` sont des FLAGS posés par le router.
+# - `services.transport` : {noeuds:{propose, infos, accepte, trop_charge, livre, incomplet},
+#   offre?:{id, destination, cargaison, duree, proba, unique, titre, description, recompenses}}
+#   — quête de course (utils/transport.py). Sans `offre`, la course est TIRÉE AU HASARD et le
+#   donneur doit être un magasin (cas des tenanciers) ; AVEC `offre`, elle est ÉCRITE et
+#   N'IMPORTE QUEL PNJ peut la confier, magasin ou non (ex. le réceptionniste de la guilde et
+#   sa mission d'initiation). Les conditions `transport_offert` / `transport_a_livrer` /
+#   `transport_en_cours` / `transport_accompli` sont des FLAGS posés par le router.
 # Placeholders substitués serveur dans texte/label : {prenom}, {cout}, plus toute clé de
-# `contexte["placeholders"]` (ex. {destination}, {direction}, {repere}, {delai}, {xp}).
+# `contexte["placeholders"]` posée par le router — {pnj} (le nom EFFECTIF de celui à qui l'on
+# parle, cf. `nom_effectif`), {destinataire} / {donneur} (les PNJ des deux bouts d'une course),
+# {destination}, {direction}, {repere}, {colis}, {poids}, {delai}, {xp}, {prime}, {expediteur}.
+# ⚠️ RÈGLE : un dialogue ne cite JAMAIS un nom de PNJ en dur. Les docs `pnj:marchand_*` sont
+# GÉNÉRIQUES (un par catégorie, partagé par toutes les boutiques) et chaque lieu peut renommer
+# son tenancier via `nom` dans son entrée `pnj` — un nom écrit dans un texte mentirait.
 #
 # Les magasins ne portent pas de champ `pnj` : leur tenancier est dérivé de leur catégorie
 # par `marchand_fn` (utils/transport.entree_marchand), injecté dans la résolution de présence.
@@ -96,6 +105,29 @@ def entree_pnj_active(character: dict, lieu_doc: dict, marchand_fn=None) -> dict
 	return None
 
 
+def nom_effectif(entree: dict, pnj_doc: dict) -> str:
+	"""Nom sous lequel CE lieu présente le PNJ : l'entrée du lieu prime (une boutique nomme son
+	tenancier — « Lucinda Mortecroix » à La Flèche d'Argent), repli sur le doc générique.
+
+	⚠️ Source unique du nom affiché : un dialogue de PNJ **générique** ne doit JAMAIS citer un
+	nom en dur (le doc est partagé par toutes les boutiques de la catégorie, et chacune peut
+	renommer son tenancier) — il utilise le placeholder `{pnj}`, posé depuis ici par le router."""
+	return (entree or {}).get("nom") or (pnj_doc or {}).get("nom", "???")
+
+
+def nom_pnj_du_lieu(lieu_doc: dict, get_doc_fn, marchand_fn=None) -> str | None:
+	"""Nom effectif du PNJ d'un lieu qu'on ne visite PAS (le destinataire d'une livraison, le
+	donneur d'une course) : on ne peut pas s'appuyer sur le tirage de présence, on prend donc
+	la PREMIÈRE entrée du lieu — l'ordre de la liste vaut priorité, comme dans
+	`tirer_pnj_present`. None si personne ne tient ce lieu."""
+	for entree in entrees_pnj(lieu_doc, marchand_fn):
+		pnj_id = entree.get("character")
+		if not pnj_id:
+			continue
+		return nom_effectif(entree, get_doc_fn(pnj_id) or {})
+	return None
+
+
 def pnj_payload(entree: dict, pnj_doc: dict) -> dict:
 	"""Payload de rendu du PNJ présent (template /play + panneau de dialogue).
 	Nom/portrait/description : l'entrée du lieu prime (identité propre à la boutique), repli
@@ -103,7 +135,7 @@ def pnj_payload(entree: dict, pnj_doc: dict) -> dict:
 	le doc — et donc le dialogue — générique de sa catégorie."""
 	return {
 		"character": (pnj_doc or {}).get("_id") or entree.get("character"),
-		"nom": entree.get("nom") or (pnj_doc or {}).get("nom", "???"),
+		"nom": nom_effectif(entree, pnj_doc),
 		"portrait": entree.get("portrait") or (pnj_doc or {}).get("portrait"),
 		"image_lieu": entree.get("image"),
 		"description": entree.get("description") or (pnj_doc or {}).get("description", ""),

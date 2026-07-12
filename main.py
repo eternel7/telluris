@@ -525,12 +525,16 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# rejoué au prochain rendu, on ne lève pas de 409 ici.
 	change = bool(transports_echoues)
 	change |= pnj_util.poser_pnj_present(character, grid_doc, marchand_fn=transport_util.entree_marchand)
-	# Offre de course du magasin : tirée à l'entrée, persistée (même sémantique que pnj_present).
-	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc)
-	if change:
-		save_doc(character)
+	# Le PNJ arrêté pour cette entrée est résolu AVANT l'offre de course : c'est lui qui peut
+	# porter une course écrite (`services.transport.offre`), auquel cas le lieu n'a pas à être
+	# un magasin (le réceptionniste de la guilde confie sa mission d'initiation).
 	pnj_entree = pnj_util.entree_pnj_active(character, grid_doc, transport_util.entree_marchand)
 	pnj_doc = get_doc(pnj_entree["character"]) if pnj_entree else None
+	# Offre de course : tirée à l'entrée, persistée (même sémantique que pnj_present).
+	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc,
+													pnj_doc=pnj_doc)
+	if change:
+		save_doc(character)
 	pnj_present = pnj_util.pnj_payload(pnj_entree, pnj_doc) if (pnj_entree and pnj_doc) else None
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
