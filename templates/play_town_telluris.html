@@ -535,11 +535,14 @@
 			grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
 			gap: 8px;
 		}
+		/* La boîte entière est cliquable : le clic rejoue le title en toast (seul canal au
+		   tactile, cf. showCaractTooltip) — le bouton d'XP garde son propre clic. */
 		.sh-stat-box {
 			background: var(--btn-bg);
 			border: 1px solid var(--border-color);
 			padding: 8px;
 			text-align: center;
+			cursor: help;
 		}
 		.sh-stat-lbl { font-size: 0.8rem; color: var(--muted); display: block; }
 		/* Style des valeurs et petits séparateurs */
@@ -558,20 +561,14 @@
 			margin-left: 2px;
 		}
 
-		/* Grille « Profil modifié » : une seule valeur (la courante, tous modificateurs
-		   compris), pas de jauge ni de bouton d'XP → boîtes plus compactes. Le delta est
-		   coloré et le tooltip (title) détaille chaque source. */
-		.sh-mod-grid{
-			margin-top: 8px;
+		/* Valeur courante (tous modificateurs compris), sous la jauge de la valeur de base.
+		   Le delta est coloré et le tooltip (title) de la boîte détaille chaque source. */
+		.sh-mod-val {
+			margin: 2px 0 4px;
 		}
-		.sh-mod-grid .sh-stat-box {
-			padding: 6px 8px;
-			cursor: help;
-		}
-		.sh-mod-grid .sh-stat-box.buffed {
+		.sh-stat-box.buffed {
 			border-color: var(--accent-color);
 		}
-		.sh-mod-grid .sh-stat-val { margin: 2px 0 0; }
 		.sh-stat-delta {
 			margin-left: 8px;
 			font-size: 0.75rem;
@@ -1442,6 +1439,10 @@
 							</div>
 						</div>
 
+						<!-- Chaque boîte porte la valeur de BASE (val/plafond + jauge) puis la valeur
+						     COURANTE, tous modificateurs compris (objets équipés, compétences passives,
+						     effets actifs) : rendu 100 % client (_renderCaractsMod) pour que le tooltip
+						     d'origine n'ait qu'une seule implémentation. -->
 						<div class="sh-section">⚔ Caractéristiques</div>
 						<div class="sh-base-grid">
 							{% for code, nom in [("V","Vitesse"),("F","Force"),("R","Résistance"),("Ag","Agilité"),("Vol","Volonté"),("Int","Intelligence"),("Cha","Charisme"),("Ch","Chance")] %}
@@ -1455,18 +1456,19 @@
 							{% set is_accessible = cap >= maxRace %}
 							{% set can_afford    = attribute_points >= cost_next %}
 
-							<div class="sh-stat-box">
+							<div class="sh-stat-box" onclick="showCaractTooltip(event, '{{ code }}')">
 								<span class="sh-stat-lbl">{{ nom }}</span>
 								<div class="sh-stat-val" id="sh-sv-{{ code }}">
 									{{ val }}<span class="sh-stat-max-sep">/{{ cap }}</span>
 								</div>
-								<div class="sh-stat-bar-wrapper" title="Plafond : {{ cap }} · Max racial : {{ maxRace }}">
+								<div class="sh-stat-bar-wrapper">
 									<div class="sh-stat-bar">
 										<div class="sh-stat-fill" style="width: {{ (val / maxRace * 100) | int }}%"></div>
 										<div class="sh-stat-pip{% if not is_accessible %} subcap{% endif %}"
 											 style="left: {{ (cap / maxRace * 100) | int }}%"></div>
 									</div>
 								</div>
+								<div class="sh-stat-val sh-mod-val" id="sh-mod-{{ code }}"></div>
 								<button class="sh-xp-btn{% if not is_accessible %} subcap{% endif %}"
 										id="sh-btn-{{ code }}"
 										{% if at_cap or not can_afford %}disabled{% endif %}
@@ -1477,12 +1479,6 @@
 							</div>
 							{% endfor %}
 						</div>
-
-						<!-- Profil réellement en jeu : la valeur courante de chaque caract, tous
-						     modificateurs compris (objets équipés, compétences passives, effets
-						     actifs). Rendu 100 % client (_renderCaractsMod) pour que le tooltip
-						     d'origine n'ait qu'une seule implémentation. -->
-						<div class="sh-base-grid sh-mod-grid" id="sh-mod-grid"></div>
 
 						<div class="sh-section" style="margin-top:14px">🛡 Caractéristiques dérivées</div>
 						{% for lbl, key, unit in [
@@ -2474,38 +2470,51 @@ function _refreshStatBoxes() {
 	}
 }
 
+// Texte de l'infobulle d'une caract : valeur de base, plafond/max racial, puis chaque source
+// nommée (objet équipé, compétence passive, consommable/sort en cours). Servi au survol (title)
+// ET au clic (toast) — le tactile n'a pas de survol, cf. showCaractTooltip.
+function _caractTooltipLignes(code, nom) {
+	const d = _caractsDetail[code] || {base: 0, total: 0, delta: 0, sources: []};
+	const lignes = [`${nom} : ${d.base}`,
+					`Max racial : ${_RACE_MAX[code] || 0} \nCourant : ${d.total || d.base}`];
+	// Sources regroupées par origine, dans l'ordre Équipement/Compétences/Effets.
+	for (const origine of ['equipement', 'competence', 'effet']) {
+		for (const s of (d.sources || []).filter(s => s.origine === origine)) {
+			const sd = s.delta > 0 ? '+' + s.delta : '−' + Math.abs(s.delta);
+			lignes.push(`${_ORIGINE_LBL[origine]} · ${s.icon} ${s.nom} ${sd}`);
+		}
+	}
+	if (!d.delta) lignes.push('Aucun modificateur');
+	return lignes;
+}
+
+// Clic sur une boîte de caract : même contenu que le title, mais en toast — seul canal
+// disponible au tactile. Le bouton de dépense d'XP garde son propre clic.
+function showCaractTooltip(ev, code) {
+	if (ev.target.closest('.sh-xp-btn')) return;
+	const paire = _CARACT_NOMS.find(([c]) => c === code);
+	if (paire) showToast(_caractTooltipLignes(code, paire[1]).join('\n'));
+}
+
 // Valeur courante de chaque caract, tous modificateurs compris, avec un tooltip qui
 // nomme chaque source (objet équipé, compétence passive, consommable/sort en cours).
 function _renderCaractsMod(detail) {
 	if (detail) _caractsDetail = detail;
-	const grid = document.getElementById('sh-mod-grid');
-	if (!grid) return;
-	grid.innerHTML = _CARACT_NOMS.map(([code, nom]) => {
+	for (const [code, nom] of _CARACT_NOMS) {
+		const el = document.getElementById('sh-mod-' + code);
+		if (!el) continue;
 		const d = _caractsDetail[code] || {base: 0, total: 0, delta: 0, sources: []};
 		const delta = d.delta || 0;
 		const signe = delta > 0 ? '+' + delta : (delta < 0 ? '−' + Math.abs(delta) : '');
 		const cls   = delta > 0 ? 'pos' : (delta < 0 ? 'neg' : '');
 
-		// Tooltip : les sources regroupées par origine, dans l'ordre Équipement/Comp./Effets.
-		const lignes = [`${nom} : ${d.base} de base`];
-		for (const origine of ['equipement', 'competence', 'effet']) {
-			for (const s of (d.sources || []).filter(s => s.origine === origine)) {
-				const sd = s.delta > 0 ? '+' + s.delta : '−' + Math.abs(s.delta);
-				lignes.push(`${_ORIGINE_LBL[origine]} · ${s.icon} ${s.nom} ${sd}`);
-			}
+		el.innerHTML = `${d.total}<span class="sh-stat-delta ${cls}">${signe}</span>`;
+		const box = el.closest('.sh-stat-box');
+		if (box) {
+			box.title = _caractTooltipLignes(code, nom).join('\n');
+			box.classList.toggle('buffed', !!delta);
 		}
-		if (!delta) lignes.push('Aucun modificateur');
-
-		return `<div class="sh-stat-box${delta ? ' buffed' : ''}" id="sh-mod-${code}"
-					 title="${_escapeAttr(lignes.join('\n'))}">
-					<div class="sh-stat-val">${d.total}<span class="sh-stat-delta ${cls}">${signe}</span></div>
-					
-				</div>`;
-	}).join('');
-}
-
-function _escapeAttr(s) {
-	return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+	}
 }
 
 function _refreshDerivedStats(d) {
@@ -2584,6 +2593,9 @@ async function spendXp(statKey) {
 		border-radius: 8px;
 		font-size: .9rem;
 		letter-spacing: .03em;
+		/* Les infobulles de caract arrivent ici en plusieurs lignes (une par source). */
+		white-space: pre-line;
+		text-align: left;
 		opacity: 0;
 		transition: opacity .4s, transform .4s;
 		pointer-events: none;

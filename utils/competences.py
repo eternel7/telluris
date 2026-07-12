@@ -181,6 +181,19 @@ def recompute_competences_bonus(character: dict, get_doc) -> dict:
 	return bonus
 
 
+def competences_bonus_perime(character: dict) -> bool:
+	"""L'agrégat dénormalisé date-t-il d'avant `buffs_sources` (le détail NOMMÉ de ses
+	contributeurs) ? Contrairement à `equipment_bonus`, `competences_bonus` n'est réécrit
+	qu'à la création et à l'apprentissage : un perso plus ancien porte un agrégat sans
+	`buffs_sources`, et le tooltip de la fiche affiche alors une source anonyme (« ? »).
+	Un perso sans compétence connue n'a rien à recalculer. Le repli d'un perso SANS passive
+	à buffs porte quand même la clé (liste vide) → il n'est pas périmé."""
+	character = character or {}
+	if not character.get("competences_connues"):
+		return False
+	return "buffs_sources" not in (character.get("competences_bonus") or {})
+
+
 def furtivite_passive(character: dict, get_doc, map_tags) -> int:
 	"""Bonus de furtivité conféré par les PASSIVES à l'entrée d'un combat, conditions
 	évaluées contre les tags du terrain (battle_map ∪ zone). 0 = pas furtif. En cas de

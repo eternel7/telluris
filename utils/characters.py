@@ -36,6 +36,14 @@ def get_selected_character(current_user: dict = Body(...)):
 	if not character or not character["user_id"] == user_id:
 		return None
 
+	# Réparation paresseuse de l'agrégat des passives : import tardif, le module competences
+	# dépend (via consommables) de celui-ci. Ne coûte des lectures que pour un perso périmé,
+	# et une seule fois — on persiste la réparation en best-effort.
+	from utils.competences import competences_bonus_perime, recompute_competences_bonus
+	if competences_bonus_perime(character):
+		recompute_competences_bonus(character, get_doc)
+		save_doc(character)
+
 	return character
 
 # ── Références d'items (inventaire / sol / slots / butin) ──────────────────────

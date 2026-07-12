@@ -16,6 +16,7 @@ from utils.competences import (
     cout_apprentissage, vocation_choisit_competence, competences_apprenables,
     competences_depart_par_vocation, liste_competences_payload,
     condition_remplie, furtivite_passive, competences_epinglees_effectives,
+    competences_bonus_perime,
 )
 from utils import combat as combat_mod
 from utils.combat import (
@@ -167,6 +168,30 @@ def test_recompute_competences_bonus_ecrit_le_champ():
         # Détail nommé du même agrégat (tooltip « Profil modifié » de la fiche).
         "buffs_sources": [{"nom": "Maîtrise martiale", "icon": "🗡️", "buffs": {"F": 4}}],
     }
+
+
+def test_competences_bonus_perime_detecte_un_agregat_sans_sources():
+    # Agrégat écrit avant `buffs_sources` : le tooltip de la fiche n'aurait aucun nom de
+    # source à afficher → à recalculer (réparation paresseuse dans get_selected_character).
+    perso = _perso(competences_connues=["competence:maitrise"],
+                   competences_bonus={"buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0,
+                                      "esquive": 0})
+    assert competences_bonus_perime(perso) is True
+    recompute_competences_bonus(perso, _get_doc)
+    assert competences_bonus_perime(perso) is False
+
+
+def test_competences_bonus_perime_faux_sans_competence_ni_buff():
+    # Rien à recalculer pour un perso sans compétence…
+    assert competences_bonus_perime(_perso()) is False
+    # …ni pour une passive sans buff (régén seule) : l'agrégat porte quand même la clé,
+    # avec une liste de sources vide — ce n'est pas un agrégat périmé.
+    docs = {"competence:souffle": _passive(_id="competence:souffle", nom="Second souffle",
+                                           effets={"regen_pv": 1})}
+    perso = _perso(competences_connues=["competence:souffle"])
+    recompute_competences_bonus(perso, docs.get)
+    assert perso["competences_bonus"]["buffs_sources"] == []
+    assert competences_bonus_perime(perso) is False
 
 
 def test_passive_arrive_dans_les_caracts():
