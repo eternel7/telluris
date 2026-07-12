@@ -547,8 +547,7 @@
 		.sh-stat-lbl { font-size: 0.8rem; color: var(--muted); display: block; }
 		/* Style des valeurs et petits séparateurs */
 		.sh-stat-val {
-			font-size: 1.5rem;
-			font-weight: bold;
+			font-size: 1.3rem;
 			color: var(--accent-color);
 			margin: 4px 0;
 		}
@@ -557,6 +556,7 @@
 			color: var(--muted);
 		}
 		.sh-stat-max-sep {
+			font-size: 1rem;
 			font-weight: normal;
 			margin-left: 2px;
 		}
@@ -564,13 +564,15 @@
 		/* Valeur courante (tous modificateurs compris), sous la jauge de la valeur de base.
 		   Le delta est coloré et le tooltip (title) de la boîte détaille chaque source. */
 		.sh-mod-val {
+			font-size: 1.5rem;
+			font-weight: bold;
 			margin: 2px 0 4px;
 		}
 		.sh-stat-box.buffed {
 			border-color: var(--accent-color);
 		}
 		.sh-stat-delta {
-			margin-left: 8px;
+			margin-right: 8px;
 			font-size: 0.75rem;
 			font-weight: bold;
 			min-height: 1em;
@@ -1451,30 +1453,29 @@
 						     d'origine n'ait qu'une seule implémentation. -->
 						<div class="sh-section">⚔ Caractéristiques</div>
 						<div class="sh-base-grid">
-							{% for code, nom in [("V","Vitesse"),("F","Force"),("R","Résistance"),("Ag","Agilité"),("Vol","Volonté"),("Int","Intelligence"),("Cha","Charisme"),("Ch","Chance")] %}
-							{% set val      = character["caracteristiques_current"].get(code,0) %}
-							{% set cap      = stat_caps.get(code, 0) %}
-							{% set maxRace  = race["stats_max"].get(code,1) %}
-							{% set race_min = race["stats"].get(code, 0) %}
-							{% set coeff    = xp_coeff.get(code, 1) %}
-							{% set cost_next = [(val + 1 - race_min) * coeff, 0] | max %}
-							{% set at_cap        = val >= cap %}
-							{% set is_accessible = cap >= maxRace %}
-							{% set can_afford    = attribute_points >= cost_next %}
-
+{% for code, nom in [("V","Vitesse"),("F","Force"),("R","Résistance"),("Ag","Agilité"),("Vol","Volonté"),("Int","Intelligence"),("Cha","Charisme"),("Ch","Chance")] %}
+{% set val      = character["caracteristiques_current"].get(code,0) %}
+{% set cap      = stat_caps.get(code, 0) %}
+{% set maxRace  = race["stats_max"].get(code,1) %}
+{% set race_min = race["stats"].get(code, 0) %}
+{% set coeff    = xp_coeff.get(code, 1) %}
+{% set cost_next = [(val + 1 - race_min) * coeff, 0] | max %}
+{% set at_cap        = val >= cap %}
+{% set is_accessible = cap >= maxRace %}
+{% set can_afford    = attribute_points >= cost_next %}
 							<div class="sh-stat-box" onclick="showCaractTooltip(event, '{{ code }}')">
 								<span class="sh-stat-lbl">{{ nom }}</span>
 								<div class="sh-stat-val" id="sh-sv-{{ code }}">
 									{{ val }}<span class="sh-stat-max-sep">/{{ cap }}</span>
 								</div>
+								<div class="sh-stat-val sh-mod-val" id="sh-mod-{{ code }}"></div>
 								<div class="sh-stat-bar-wrapper">
 									<div class="sh-stat-bar">
-										<div class="sh-stat-fill" style="width: {{ (val / maxRace * 100) | int }}%"></div>
+										<div class="sh-stat-fill" id="sh-stat-bar-{{ code }}" style="width: {{ (val / maxRace * 100) | int }}%" data-maxrace="{{ maxRace | int }}"></div>
 										<div class="sh-stat-pip{% if not is_accessible %} subcap{% endif %}"
 											 style="left: {{ (cap / maxRace * 100) | int }}%"></div>
 									</div>
 								</div>
-								<div class="sh-stat-val sh-mod-val" id="sh-mod-{{ code }}"></div>
 								<button class="sh-xp-btn{% if not is_accessible %} subcap{% endif %}"
 										id="sh-btn-{{ code }}"
 										{% if at_cap or not can_afford %}disabled{% endif %}
@@ -2514,11 +2515,20 @@ function _renderCaractsMod(detail) {
 		const signe = delta > 0 ? '+' + delta : (delta < 0 ? '−' + Math.abs(delta) : '');
 		const cls   = delta > 0 ? 'pos' : (delta < 0 ? 'neg' : '');
 
-		el.innerHTML = `${d.total}<span class="sh-stat-delta ${cls}">${signe}</span>`;
+		el.innerHTML = `<span class="sh-stat-delta ${cls}">${signe}</span>${d.total}`;
 		const box = el.closest('.sh-stat-box');
 		if (box) {
 			box.title = _caractTooltipLignes(code, nom).join('\n');
 			box.classList.toggle('buffed', !!delta);
+		}
+		const bar = document.getElementById('sh-stat-bar-' + code);
+		if (!bar) continue;
+		console.log(d,bar,bar.dataset.maxrace);
+		const maxRaceStr = bar.dataset.maxrace;
+		if(maxRaceStr) {
+			const maxRace = parseInt(maxRaceStr, 10);
+			const progression = d.total / maxRace * 100;
+			bar.style.width = progression + '%';
 		}
 	}
 }
