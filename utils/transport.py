@@ -7,7 +7,8 @@
 # DEUX SOURCES d'offre, aiguillées par `poser_transport_offert` :
 # - GÉNÉRÉE — le donneur est un magasin (`est_magasin`) : destination, cargaison, délai et
 #   XP sont TIRÉS AU HASARD (`generer_transport`), avec la probabilité QUETE_TRANSPORT_PROBA —
-#   et seulement s'il a assez confiance (`relation_suffisante` : relation ≥ QUETE_TRANSPORT_RELATION_MIN).
+#   et seulement s'il a assez confiance (`confiance_suffisante` : relation ≥ QUETE_TRANSPORT_RELATION_MIN
+#   ET marchandage non bloqué). Le refus est PARLÉ (`mefiance` → nœud de dialogue), jamais muet.
 # - AUTHORÉE — le PNJ présent porte une course ÉCRITE dans `services.transport.offre`
 #   (`generer_transport_authore`) : destination, cargaison et récompenses fixes, id stable.
 #   N'IMPORTE QUEL PNJ peut ainsi donner une course — le donneur n'a pas à être un magasin
@@ -286,17 +287,44 @@ def poids_cargaison(cargaison: list) -> float:
 	return round(sum(float(r.get("poids", 0) or 0) for r in cargaison or []), 2)
 
 
-def relation_suffisante(character: dict, lieu_doc: dict, get_doc_fn) -> bool:
-	"""Le tenancier a-t-il assez confiance pour confier sa marchandise ? On ne remet pas une
-	cargaison à quelqu'un qu'on voit d'un mauvais œil : sous QUETE_TRANSPORT_RELATION_MIN
-	(50 = la relation neutre), il ne propose aucune course. Le joueur mal vu doit d'abord se
-	refaire une réputation en commerçant (ou en marchandant bien) avant qu'on lui confie un colis.
+def confiance_suffisante(character: dict, lieu_doc: dict, get_doc_fn,
+						 now: int | None = None) -> bool:
+	"""Le tenancier a-t-il assez confiance pour remettre sa marchandise ? DEUX refus, une seule
+	porte fermée :
+	- **relation < QUETE_TRANSPORT_RELATION_MIN** (50 = la relation neutre ; 0 = garde-fou
+	  désactivé) — on ne confie pas un colis à quelqu'un qu'on voit d'un mauvais œil ;
+	- **marchandage bloqué** (`marche.marchandage_bloque` : crit d'échec récent) — celui qui vient
+	  de se fâcher avec le joueur ne lui confierait pas davantage sa marchandise qu'un prix. Ce
+	  blocage est une brouille datée, indépendante de la cote : il vaut même à relation ≥ seuil, et
+	  même si le garde-fou de relation est désactivé (sa durée a sa propre world-var,
+	  MARCHANDAGE_BLOCAGE_SECONDES).
+
 	Ne vaut que pour les courses GÉNÉRÉES : une course ÉCRITE est confiée par son scénario."""
+	relation = marche.get_relation(character, lieu_doc, get_doc_fn)
+	now = int(quetes.now_epoch() if now is None else now)
+	if marche.marchandage_bloque(relation, now):
+		return False
 	seuil = int(character_stats.QUETE_TRANSPORT_RELATION_MIN)
 	if seuil <= 0:
 		return True
-	relation = marche.get_relation(character, lieu_doc, get_doc_fn)
 	return marche.relation_value(relation) >= seuil
+
+
+def mefiance(character: dict, lieu_doc: dict, pnj_doc: dict | None, get_doc_fn,
+			 now: int | None = None) -> bool:
+	"""Le tenancier refuse-t-il de confier une course, faute de confiance ? C'est le pendant
+	PARLANT de `confiance_suffisante` : sans lui, le refus serait muet (le choix « une course
+	pour moi ? » disparaîtrait, indiscernable d'un simple tirage négatif) et la sanction de
+	réputation — comme la brouille d'un marchandage raté — n'existerait pas en jeu.
+
+	Vrai pour un MAGASIN seul (les courses générées) : une course ÉCRITE est confiée par son
+	scénario, pas par la cote du joueur. Faux tant qu'une course est en cours — le refus ne
+	parle que de confiance, jamais de « pas de course aujourd'hui »."""
+	if not est_magasin(lieu_doc) or offre_spec(pnj_doc):
+		return False
+	if offre_courante(character, lieu_doc) or transports_actifs(character):
+		return False
+	return not confiance_suffisante(character, lieu_doc, get_doc_fn, now)
 
 
 def generer_transport(giver_doc: dict, find_docs_fn, get_doc_fn,
@@ -491,7 +519,7 @@ def poser_transport_offert(character: dict, lieu_doc: dict, find_docs_fn, get_do
 			deja = bool(spec.get("unique")) and deja_reussie(character, spec.get("id"))
 			if not deja and rand_fn() < float(spec.get("proba", 1.0)):
 				quete = generer_transport_authore(spec, lieu_doc, find_docs_fn, get_doc_fn)
-		elif (relation_suffisante(character, lieu_doc, get_doc_fn)
+		elif (confiance_suffisante(character, lieu_doc, get_doc_fn)
 				and rand_fn() < float(character_stats.QUETE_TRANSPORT_PROBA)):
 			quete = generer_transport(lieu_doc, find_docs_fn, get_doc_fn, rand_fn)
 	character["transport_offert"] = {"lieu": lieu_id, "quete": quete}

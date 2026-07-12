@@ -76,6 +76,7 @@ NOEUDS_TRANSPORT = {
 	"livre": "transport_livre",
 	"livre_retour": "transport_livre_retour",
 	"incomplet": "transport_incomplet",
+	"mefiance": "transport_mefiance",
 }
 
 # Décider = accepter ou refuser. On n'y remet PAS « Où est-ce ? » : le nœud d'information
@@ -103,6 +104,11 @@ def dialogue(metier: str, ambiance: str) -> dict:
 					{"id": "livraison", "label": "Je vous apporte une livraison.",
 					 "action": {"service": "transport", "op": "livrer"},
 					 "condition": {"transport_a_livrer": True}},
+					# Même question, autre réponse : sous le seuil de relation, le tenancier ne
+					# confie rien — et il faut qu'il le DISE, sinon le joueur mal vu croirait
+					# simplement n'avoir pas de chance.
+					{"id": "course_refus", "label": "Vous auriez une course pour moi ?",
+					 "next": "transport_mefiance", "condition": {"transport_mefiance": True}},
 					{"id": "rien", "label": "Je ne faisais que passer.", "next": "fin"},
 				],
 			},
@@ -117,6 +123,19 @@ def dialogue(metier: str, ambiance: str) -> dict:
 					"et vous grimperez dans mon estime. »"
 				),
 				"choix": CHOIX_PRENDRE,
+			},
+			# Refus faute de confiance (flag `transport_mefiance`) : mauvaise réputation OU brouille
+			# fraîche (marchandage bloqué par un crit d'échec). Un seul nœud pour les deux — le
+			# texte reste donc vrai dans les deux cas : il parle d'entente, pas d'une cause précise.
+			# Le tenancier dit AUSSI comment rouvrir la porte : un refus sans issue est un cul-de-sac.
+			"transport_mefiance": {
+				"texte": (
+					"« Une course ? » Le regard se fait plus froid, la main reste posée sur le "
+					"registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez "
+					"quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous "
+					"en reparlerons. »"
+				),
+				"choix": [{"id": "ok", "label": "On en reparlera.", "next": "fin"}],
 			},
 			"transport_infos": {
 				"texte": (

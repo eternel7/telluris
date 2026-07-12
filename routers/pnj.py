@@ -75,11 +75,25 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			"transport_a_rapporter": bool(a_rapporter),
 			"transport_en_cours": bool(en_cours and not en_cours.get("livree_at")),
 			"transport_accompli": bool(spec and transport.deja_reussie(character, spec.get("id"))),
+			# Le tenancier ne confie rien à un joueur mal vu — ni à celui avec qui il vient de se
+			# fâcher (marchandage bloqué) : le choix « une course pour moi ? » devient un REFUS
+			# parlé, au lieu de disparaître (silence indiscernable d'un tirage négatif — la
+			# sanction serait invisible).
+			"transport_mefiance": transport.mefiance(character, lieu_doc, pnj_doc, get_doc,
+													 quetes.now_epoch()),
 		}
 		# Une course déjà confiée se raconte avec les mêmes mots qu'une offre (le snapshot a la
 		# même forme) : le donneur peut rappeler la destination et le temps qu'il reste.
 		if offre or en_cours:
 			placeholders.update(_placeholders_offre(offre or en_cours, lieu_doc))
+		elif spec:
+			# Une course ÉCRITE se raconte même quand elle n'est plus vivante : le nœud « vétéran »
+			# ne s'affiche QU'APRÈS la réussite (l'offre a disparu, la quête est archivée) et doit
+			# pouvoir nommer qui a reçu la marchandise. Rien n'est tiré au sort dans une course
+			# écrite → la reconstruire donne exactement ce que le PNJ avait proposé.
+			apercu = transport.generer_transport_authore(spec, lieu_doc, find_docs, get_doc)
+			if apercu:
+				placeholders.update(_placeholders_offre(apercu, lieu_doc))
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders)
 
 

@@ -14,7 +14,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -44,6 +46,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -70,6 +80,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -117,6 +137,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -149,7 +179,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -179,6 +211,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -205,6 +245,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -252,6 +302,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -284,7 +344,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -314,6 +376,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -340,6 +410,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -387,6 +467,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -419,7 +509,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -449,6 +541,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -475,6 +575,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -522,6 +632,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -554,7 +674,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -584,6 +706,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -610,6 +740,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -657,6 +797,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -689,7 +839,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -719,6 +871,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -745,6 +905,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -792,6 +962,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -824,7 +1004,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -854,6 +1036,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -880,6 +1070,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -927,6 +1127,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -959,7 +1169,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -989,6 +1201,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -1015,6 +1235,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -1062,6 +1292,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -1094,7 +1334,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -1124,6 +1366,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -1150,6 +1400,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -1197,6 +1457,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -1229,7 +1499,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -1259,6 +1531,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -1285,6 +1565,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -1332,6 +1622,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -1364,7 +1664,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -1394,6 +1696,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -1420,6 +1730,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -1467,6 +1787,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -1499,7 +1829,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -1529,6 +1861,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -1555,6 +1895,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -1602,6 +1952,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -1634,7 +1994,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -1664,6 +2026,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -1690,6 +2060,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -1737,6 +2117,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -1769,7 +2159,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -1799,6 +2191,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -1825,6 +2225,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -1876,6 +2286,16 @@
             }
           ]
         },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
         "transport_incomplet": {
           "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
           "choix": [
@@ -1892,7 +2312,7 @@
   {
     "_id": "pnj:marchand_fumoir",
     "type": "pnj",
-    "nom": "Maître Jorund",
+    "nom": "Maître Colin",
     "race": "humain",
     "vocation": "marchand",
     "portrait": "humain_m_guerrier01.jpg",
@@ -1904,7 +2324,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -1934,6 +2356,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -1960,6 +2390,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -2007,6 +2447,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -2039,7 +2489,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -2069,6 +2521,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -2095,6 +2555,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -2142,6 +2612,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -2174,7 +2654,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -2204,6 +2686,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -2230,6 +2720,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -2277,6 +2777,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -2309,7 +2819,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -2339,6 +2851,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -2365,6 +2885,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -2412,6 +2942,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -2444,7 +2984,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -2474,6 +3016,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -2500,6 +3050,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -2547,6 +3107,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -2579,7 +3149,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -2609,6 +3181,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -2635,6 +3215,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -2682,6 +3272,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -2714,7 +3314,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -2744,6 +3346,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -2770,6 +3380,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -2817,6 +3437,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -2849,7 +3479,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -2879,6 +3511,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -2905,6 +3545,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -2952,6 +3602,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -2984,7 +3644,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -3014,6 +3676,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -3040,6 +3710,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -3087,6 +3767,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -3119,7 +3809,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -3149,6 +3841,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -3175,6 +3875,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -3222,6 +3932,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -3254,7 +3974,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -3284,6 +4006,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -3310,6 +4040,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -3357,6 +4097,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -3389,7 +4139,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -3419,6 +4171,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -3445,6 +4205,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -3492,6 +4262,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -3524,7 +4304,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -3554,6 +4336,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -3580,6 +4370,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -3627,6 +4427,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]
@@ -3659,7 +4469,9 @@
           "accepte": "transport_accepte",
           "trop_charge": "transport_trop_charge",
           "livre": "transport_livre",
-          "incomplet": "transport_incomplet"
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
         }
       }
     },
@@ -3689,6 +4501,14 @@
               }
             },
             {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
               "id": "rien",
               "label": "Je ne faisais que passer.",
               "next": "fin"
@@ -3715,6 +4535,16 @@
               "id": "transport_refuser",
               "label": "Pas cette fois.",
               "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
             }
           ]
         },
@@ -3762,6 +4592,16 @@
             {
               "id": "ok",
               "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
               "next": "fin"
             }
           ]

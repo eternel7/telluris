@@ -325,13 +325,15 @@ def test_sortir_du_magasin_efface_l_offre(monkeypatch):
 
 # ── Confiance : pas de colis à qui l'on voit d'un mauvais œil ────────────────────
 
-def get_doc_relation(valeur):
-	"""get_doc_fn semant une relation de la valeur voulue entre Alia et la boucherie."""
+def get_doc_relation(valeur, bloque_jusqu=0):
+	"""get_doc_fn semant une relation de la valeur voulue entre Alia et la boucherie —
+	`bloque_jusqu` = blocage de marchandage (crit d'échec) encore actif jusqu'à cette epoch."""
 	rel_id = marche.relation_doc_id(character(), BOUCHERIE)
 
 	def _get(doc_id):
 		if doc_id == rel_id:
-			return {"_id": rel_id, "type": "relation", "value": valeur}
+			return {"_id": rel_id, "type": "relation", "value": valeur,
+					"marchandage_bloque_jusqu": bloque_jusqu}
 		return DOCS.get(doc_id)
 	return _get
 
@@ -374,6 +376,38 @@ def test_seuil_a_zero_desactive_le_garde_fou(monkeypatch):
 	assert transport.offre_courante(c, BOUCHERIE) is not None
 
 
+# ── Confiance : la brouille d'un marchandage raté ferme aussi la porte ───────────
+
+def test_pas_d_offre_pendant_un_blocage_de_marchandage(monkeypatch):
+	"""Crit d'échec au marchandage : le tenancier ne veut plus rien savoir — ni négocier, ni
+	confier ses colis. La cote (ici bonne) n'y change rien : la brouille est un état daté."""
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_PROBA", 1.0)
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	fache = get_doc_relation(80, bloque_jusqu=quetes.now_epoch() + 600)
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, fache, rand_fn=lambda: 0.0)
+	assert transport.offre_courante(c, BOUCHERIE) is None
+	assert transport.mefiance(c, BOUCHERIE, TENANCIER, fache)
+
+
+def test_blocage_expire_rouvre_la_porte(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_PROBA", 1.0)
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	passe = get_doc_relation(50, bloque_jusqu=quetes.now_epoch() - 1)
+	transport.poser_transport_offert(c, BOUCHERIE, find_docs, passe, rand_fn=lambda: 0.0)
+	assert transport.offre_courante(c, BOUCHERIE) is not None
+
+
+def test_blocage_ferme_la_porte_meme_garde_fou_desactive(monkeypatch):
+	"""Le seuil de relation à 0 désactive SON garde-fou, pas la brouille : les deux règles ont
+	leur propre réglage (`MARCHANDAGE_BLOCAGE_SECONDES` pour celle-ci)."""
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 0)
+	c = character()
+	fache = get_doc_relation(50, bloque_jusqu=quetes.now_epoch() + 600)
+	assert not transport.confiance_suffisante(c, BOUCHERIE, fache)
+
+
 def test_course_ecrite_ignore_le_seuil_de_relation(monkeypatch):
 	"""Une course ÉCRITE est confiée par son scénario : la mission d'initiation de la guilde ne
 	dépend pas de la cote du joueur auprès du donneur."""
@@ -385,6 +419,45 @@ def test_course_ecrite_ignore_le_seuil_de_relation(monkeypatch):
 	transport.poser_transport_offert(c, COMPTOIR, find_docs, get_doc_hostile,
 									 rand_fn=lambda: 0.0, pnj_doc=BORIN)
 	assert transport.offre_courante(c, COMPTOIR)["id"] == "quete:transport_borin"
+
+
+# ── Méfiance : le refus est PARLÉ (flag de dialogue) ─────────────────────────────
+
+def test_mefiance_du_marchand_sous_le_seuil(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	assert transport.mefiance(c, BOUCHERIE, TENANCIER, get_doc_relation(30))
+
+
+def test_pas_de_mefiance_au_dessus_du_seuil(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	assert not transport.mefiance(c, BOUCHERIE, TENANCIER, get_doc_relation(50))
+
+
+def test_pas_de_mefiance_sur_une_course_ecrite(monkeypatch):
+	"""Le donneur d'une course écrite la confie parce que le scénario le dit — même à un joueur
+	détesté (et le comptoir n'est de toute façon pas un magasin)."""
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	rel_id = marche.relation_doc_id(c, COMPTOIR)
+	get_doc_hostile = lambda doc_id: (
+		{"_id": rel_id, "type": "relation", "value": 0} if doc_id == rel_id else DOCS.get(doc_id))
+	assert not transport.mefiance(c, COMPTOIR, BORIN, get_doc_hostile)
+
+
+def test_pas_de_mefiance_pendant_une_course(monkeypatch):
+	"""Une course déjà en cours ne serait pas remplacée par une nouvelle : le refus n'aurait plus
+	rien à voir avec la réputation, il induirait le joueur en erreur."""
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	c = character()
+	transport.accepter_transport(c, offre(), now=1000)
+	assert not transport.mefiance(c, BOUCHERIE, TENANCIER, get_doc_relation(10))
+
+
+def test_pas_de_mefiance_hors_magasin(monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_MIN", 50)
+	assert not transport.mefiance(character(), VILLE, None, get_doc_relation(0))
 
 
 # ── Acceptation ──────────────────────────────────────────────────────────────────
