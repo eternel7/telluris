@@ -695,9 +695,11 @@ def expirer_transports(character: dict, now: int) -> list:
 	return echues
 
 
-def traiter_expirations(character: dict, now: int, get_doc_fn, save_doc_fn) -> list:
-	"""Expire les courses échues ET applique la sanction de réputation (−1 chez le donneur),
+def traiter_expirations(character: dict, now: int, get_doc_fn, save_doc_fn, find_docs_fn=None) -> list:
+	"""Expire les courses échues ET applique la sanction de réputation (−1 chez le donneur ET
+	chez tous les lieux de sa maison — même sanction qu'un abandon, cf. `quetes.sanctionner_renoncement`),
 	en persistant chaque doc `relation` (doc annexe : il n'est pas dans le character).
+	`find_docs_fn` est optionnel (repli sur celui de db.config) : il n'est là que pour l'injection.
 	Le personnage est muté SANS save — l'appelant le sauvegarde s'il reçoit une liste non
 	vide. Renvoie les quêtes échues (pour le toast client)."""
 	echues = expirer_transports(character, now)
@@ -705,9 +707,7 @@ def traiter_expirations(character: dict, now: int, get_doc_fn, save_doc_fn) -> l
 		lieu_doc = get_doc_fn(q.get("giver")) if q.get("giver") else None
 		if not lieu_doc:
 			continue
-		relation = marche.get_relation(character, lieu_doc, get_doc_fn)
-		marche.ajuster_relation(relation, -int(character_stats.QUETE_TRANSPORT_RELATION_DELTA))
-		save_doc_fn(relation)
+		quetes.sanctionner_renoncement(character, lieu_doc, get_doc_fn, save_doc_fn, find_docs_fn)
 	return echues
 
 

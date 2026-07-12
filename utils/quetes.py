@@ -17,7 +17,7 @@ import uuid
 from db.config import get_doc, find_docs, save_doc
 from models import character_stats
 from utils.characters import item_ref_id, grant_xp, credit_character, cuivre_to_purse, poids_bounds
-from utils import bois
+from utils import bois, marche
 
 
 def now_epoch() -> int:
@@ -396,6 +396,50 @@ def appliquer_recompenses(character: dict, q: dict) -> dict:
 		inv.extend(items)
 		character["inventaire"] = inv
 	return {"xp": xp_info, "purse": purse}
+
+
+# ── Renoncement : la maison du donneur encaisse d'un bloc ────────────────────────
+
+def sous_categorie_lieu(lieu_doc: dict) -> str:
+	"""Maison à laquelle un lieu appartient (`sous_categorie`, même orthographe que sur les items)."""
+	return str((lieu_doc or {}).get("sous_categorie") or "").strip()
+
+
+def lieux_solidaires(giver_doc: dict, find_docs_fn=None) -> list:
+	"""Lieux dont la réputation encaisse ENSEMBLE un renoncement du joueur.
+
+	Une maison (guilde…) est éclatée en plusieurs lieux — réception, comptoir… — qui portent
+	la même `sous_categorie` mais ont la CITÉ pour `lieu_parent` : c'est la CONJONCTION des
+	deux qui la reconstitue (le seul `lieu_parent` ramènerait toute la ville, boucheries
+	comprises ; la seule `sous_categorie` ramènerait les guildes des autres cités). Un donneur
+	sans `sous_categorie` — un magasin — n'est solidaire que de lui-même.
+	"""
+	sous_cat = sous_categorie_lieu(giver_doc)
+	parent = (giver_doc or {}).get("lieu_parent")
+	if not sous_cat or not parent:
+		return [giver_doc]
+	freres = (find_docs_fn or find_docs)({"type": "lieu", "lieu_parent": parent}) or []
+	lieux = [giver_doc]
+	vus = {(giver_doc or {}).get("_id")}
+	for d in freres:
+		if d.get("_id") not in vus and sous_categorie_lieu(d) == sous_cat:
+			lieux.append(d)
+			vus.add(d.get("_id"))
+	return lieux
+
+
+def sanctionner_renoncement(character: dict, giver_doc: dict, get_doc_fn, save_doc_fn, find_docs_fn=None) -> dict:
+	"""Renoncer à une quête (abandon volontaire ou délai laissé filer) coûte
+	QUETE_TRANSPORT_RELATION_DELTA de réputation chez le donneur ET chez tous les lieux de sa
+	maison : lâcher la mission du comptoir fâche aussi la réception. Les docs `relation` sont
+	ANNEXES (hors character) → persistés ici, un par lieu. Renvoie {lieu_id: nouvelle_valeur}."""
+	delta = -int(character_stats.QUETE_TRANSPORT_RELATION_DELTA)
+	valeurs = {}
+	for lieu in lieux_solidaires(giver_doc, find_docs_fn):
+		relation = marche.get_relation(character, lieu, get_doc_fn)
+		valeurs[lieu.get("_id")] = marche.ajuster_relation(relation, delta)
+		save_doc_fn(relation)
+	return valeurs
 
 
 # ── Hooks de progression (appelés par combat / déplacement) ──────────────────────
