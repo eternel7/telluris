@@ -12,6 +12,7 @@ from utils.characters import grant_xp, sync_equipment_bonus, carried_weight, poi
 from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus
 from utils.quetes import maj_progress_kills
 from utils.focalisation import effacer_si_objectif_atteint
+from utils import recrutement
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -720,15 +721,22 @@ def create_combat_doc(
 	character: dict, monstres: list, zone_tags: list, map_image: str,
 	battle_map: dict | None = None,
 	furtivite_initiale: int = 0,
+	compagnons: list | None = None,
 ) -> dict:
 	joueur = build_joueur_snapshot(character, joueur_index=0)
 	# Furtivité passive à l'entrée (conditions de terrain déjà évaluées par l'appelant
 	# via competences.furtivite_passive) : posée AVANT resolve_first_turns pour que les
-	# monstres à meilleure initiative testent leur détection dès le tour 1.
+	# monstres à meilleure initiative testent leur détection dès le tour 1. Sur le
+	# joueur principal SEUL (v1) : les compagnons entrent à découvert.
 	if furtivite_initiale > 0:
 		joueur["furtif"] = True
 		joueur["furtivite_bonus"] = int(furtivite_initiale)
-	joueurs = [joueur]
+	# Compagnons recrutés (docs `aventurier:*`, miroirs du character) : mêmes snapshots
+	# que le joueur — _place_actors et l'initiative gèrent déjà N joueurs.
+	joueurs = [joueur] + [
+		build_joueur_snapshot(c, joueur_index=i + 1)
+		for i, c in enumerate(compagnons or [])
+	]
 
 	all_actors = [(j["id"], j["initiative"]) for j in joueurs]
 	all_actors += [(m["id"], m["initiative"]) for m in monstres]
@@ -812,7 +820,6 @@ def _check_victory(combat_doc: dict) -> None:
 		xp = sum(m["xp_reward"] for m in combat_doc["monstres"])
 		combat_doc["xp_gagnee"] = xp
 		combat_doc["status"] = "victoire"
-		joueur = combat_doc["joueurs"][0]
 		combat_doc["log"].append({
 			"tour": combat_doc["tour"],
 			"acteur": "Système",
@@ -843,13 +850,22 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 		})
 		if defenseur["currentPV"] <= 0:
 			if est_joueur:
-				combat_doc["status"] = "defaite"
+				# KO d'un membre du groupe : le combat continue tant qu'il reste un
+				# joueur debout — la défaite n'arrive que TOUS à terre.
 				combat_doc["log"].append({
 					"tour": combat_doc["tour"],
 					"acteur": "Système",
 					"kind": "sys",
 					"texte": f"{defenseur['nom']} est à terre !",
 				})
+				if all(j.get("currentPV", 0) <= 0 for j in combat_doc["joueurs"]):
+					combat_doc["status"] = "defaite"
+					combat_doc["log"].append({
+						"tour": combat_doc["tour"],
+						"acteur": "Système",
+						"kind": "sys",
+						"texte": "Tout le groupe est à terre… Défaite.",
+					})
 			else:
 				# Proie tuée par un monstre : le joueur n'en tire pas l'XP (kill qu'il
 				# n'a pas fait) mais la carcasse reste dépeçable (butin conservé).
@@ -872,8 +888,25 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 		})
 
 
-def _do_monster_attack(combat_doc: dict, monstre: dict) -> None:
-	_do_attack_on(combat_doc, monstre, combat_doc["joueurs"][0])
+def _joueurs_vivants(combat_doc: dict) -> list:
+	return [j for j in combat_doc["joueurs"] if j.get("currentPV", 0) > 0]
+
+
+def _cible_joueur(combat_doc: dict, monstre: dict) -> dict | None:
+	"""Cible de l'IA d'un monstre : le joueur VIVANT le plus proche (Chebyshev), en
+	excluant un joueur furtif non détecté (il ne le voit pas). None si aucun joueur
+	visible — tous furtifs non détectés (le monstre tentera une détection) ou tous KO."""
+	visibles = [
+		j for j in _joueurs_vivants(combat_doc)
+		if not (j.get("furtif") and not monstre.get("detecte"))
+	]
+	if not visibles:
+		return None
+	return min(visibles, key=lambda j: _cheby(monstre, j))
+
+
+def _do_monster_attack(combat_doc: dict, monstre: dict, joueur: dict) -> None:
+	_do_attack_on(combat_doc, monstre, joueur)
 
 
 def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: dict) -> bool:
@@ -1087,11 +1120,16 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	définitive pour le combat) ; tant qu'il ne l'a pas repéré, il ne vient pas vers lui
 	— un prédateur chasse une proie, les autres errent."""
 	_reset_turn_budget(monstre)
-	joueur = combat_doc["joueurs"][0]
 	portee = monstre.get("portee", 1)
 
-	if joueur.get("furtif") and not monstre.get("detecte"):
-		if not _tenter_detection(combat_doc, monstre, joueur):
+	# Cible résolue en début de tour : le joueur vivant le plus proche. Aucun joueur
+	# visible = tous furtifs non détectés → jet de détection sur le plus proche, puis
+	# chasse/errance en cas d'échec (comportement furtivité inchangé).
+	joueur = _cible_joueur(combat_doc, monstre)
+	if joueur is None:
+		furtifs = [j for j in _joueurs_vivants(combat_doc) if j.get("furtif")]
+		cible_furtive = min(furtifs, key=lambda j: _cheby(monstre, j)) if furtifs else None
+		if cible_furtive is None or not _tenter_detection(combat_doc, monstre, cible_furtive):
 			_chasse_ou_erre(combat_doc, monstre, grid)
 			idx = combat_doc["acteur_courant_index"] + 1
 			if idx >= len(combat_doc["ordre_initiative"]):
@@ -1099,6 +1137,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 				combat_doc["tour"] += 1
 			combat_doc["acteur_courant_index"] = idx
 			return
+		joueur = cible_furtive
 
 	# Phase déplacement : avancer vers le joueur tant qu'éloigné et budget dispo.
 	steps = 0
@@ -1119,10 +1158,14 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			"texte": f"{monstre['nom']} avance vers {joueur['nom']} ({steps} case(s)).",
 		})
 
-	# Phase attaque : frapper tant qu'à portée et qu'il reste des actions.
-	while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
-		   and _cheby(monstre, joueur) <= portee):
-		_do_monster_attack(combat_doc, monstre)
+	# Phase attaque : frapper tant qu'à portée et qu'il reste des actions. Si la cible
+	# tombe (KO) en cours de tour, le monstre se rabat sur le joueur visible suivant.
+	while combat_doc["status"] == "active" and monstre["actions_restantes"] > 0:
+		if joueur is None or joueur.get("currentPV", 0) <= 0:
+			joueur = _cible_joueur(combat_doc, monstre)
+		if joueur is None or _cheby(monstre, joueur) > portee:
+			break
+		_do_monster_attack(combat_doc, monstre, joueur)
 		monstre["attaques"] += 1
 		_refresh_actions(monstre)
 
@@ -1156,9 +1199,16 @@ def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool =
 		actor_id = ordre[combat_doc["acteur_courant_index"]]
 		if actor_id.startswith("joueur_"):
 			joueur = _get_joueur(combat_doc, actor_id)
-			if joueur:
+			if joueur and joueur.get("currentPV", 0) > 0:
 				_reset_turn_budget(joueur)
-			break
+				break
+			# Joueur KO (à terre) : son tour est sauté, comme un monstre mort.
+			idx = combat_doc["acteur_courant_index"] + 1
+			if idx >= len(ordre):
+				idx = 0
+				combat_doc["tour"] += 1
+			combat_doc["acteur_courant_index"] = idx
+			continue
 		monstre = _get_monstre(combat_doc, actor_id)
 		if not monstre or not monstre["vivant"]:
 			# Dead monster — skip
@@ -1198,6 +1248,10 @@ def resolve_action(
 	joueur = _get_joueur(combat_doc, actor_id)
 	if not joueur:
 		return {"error": "Joueur introuvable."}
+	if joueur.get("currentPV", 0) <= 0:
+		# Garde défensive : un joueur à terre ne devrait jamais avoir la main
+		# (_resolve_until_player le saute), mais un doc en vol ne doit pas agir.
+		return {"error": f"{joueur['nom']} est à terre."}
 	if joueur["actions_restantes"] <= 0:
 		return {"error": "Plus d'actions disponibles."}
 
@@ -1787,52 +1841,93 @@ def _carcasse_payload(monstre: dict) -> dict | None:
 	}
 
 
+def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> bool:
+	"""Applique l'issue du combat au doc d'UN membre du groupe (principal ou compagnon,
+	les docs `aventurier:*` étant des miroirs du character) : PV (KO → relevé à 1),
+	PM, XP pleine (v1) et butin ramassé par CE membre → SON sac. Garde d'idempotence
+	PAR DOC (`combats_recompenses`, même document que l'XP). Sauvegarde ; True si la
+	récompense vient d'être appliquée."""
+	combat_id = combat_doc.get("_id")
+	rewarded = doc.get("combats_recompenses", [])
+	if combat_id in rewarded:
+		return False
+
+	if status == "victoire":
+		# Un membre KO à la victoire est relevé à 1 PV (jamais de mort définitive).
+		doc["currentPV"] = max(1, joueur.get("currentPV", 0))
+		# XP + montée de niveau : règle partagée avec la découverte de lieux. XP
+		# pleine pour chaque membre (v1, pas de partage).
+		grant_xp(doc, combat_doc.get("xp_gagnee", 0))
+	elif status == "defaite":
+		doc["currentPV"] = 1
+	elif status == "fuite":
+		doc["currentPV"] = max(1, joueur.get("currentPV", 0))
+	# PM réappliqués pour TOUTES les issues (le PM n'est pas la ressource de KO ; une
+	# potion de PM bue en combat doit persister).
+	doc["currentPM"] = max(0, joueur.get("currentPM", doc.get("currentPM", 0)))
+
+	# Butin ramassé en plein combat (action « ramasser ») : conservé quelle que soit
+	# l'issue, dans le sac du membre qui l'a saisi. Ajouté dans le MÊME doc que l'XP
+	# → couvert par l'idempotence atomique (pas de double).
+	ramasse = [i for i in joueur.get("butin_ramasse", []) if i]
+	if ramasse:
+		inventaire = doc.get("inventaire", [])
+		inventaire.extend(ramasse)
+		doc["inventaire"] = inventaire
+
+	# Idempotence atomique : le combat est enregistré dans le doc du membre,
+	# sauvegardé avec l'XP. Borné pour éviter une croissance illimitée.
+	rewarded.append(combat_id)
+	doc["combats_recompenses"] = rewarded[-50:]
+	return save_doc(doc) is not None
+
+
 def finalize_combat(combat_doc: dict) -> bool:
-	"""Applique l'issue du combat (XP/PV) au personnage en base.
+	"""Applique l'issue du combat (XP/PV/butin) à TOUS les membres du groupe en base —
+	compagnons (docs `aventurier:*`) d'abord, personnage principal en dernier.
 
-	Idempotent ET atomique : l'id du combat est enregistré dans
-	`character["combats_recompenses"]`, c.-à-d. DANS LE MÊME document que l'XP.
-	La récompense ne peut donc être appliquée qu'une seule fois, même si la
-	sauvegarde du doc combat échoue par ailleurs, et reste rattrapable (par /play)
-	si `combat_action` n'a pas pu la finaliser.
+	Idempotent ET atomique PAR DOC : l'id du combat est enregistré dans le
+	`combats_recompenses` de chaque membre, c.-à-d. DANS LE MÊME document que son XP.
+	La récompense ne peut donc être appliquée qu'une seule fois par membre, même si
+	une sauvegarde échoue par ailleurs, et reste rattrapable (par /play) si
+	`combat_action` n'a pas pu la finaliser.
 
-	Retourne True si une récompense vient d'être appliquée et sauvegardée.
+	Sur le principal SEUL : progression des quêtes de chasse, focalisation, et deltas
+	d'affinité envers les compagnons (+VICTOIRE / +KO, dans le même save que l'XP).
+
+	Retourne True si la récompense du PRINCIPAL vient d'être appliquée et sauvegardée.
 	"""
 	status = combat_doc.get("status")
 	if status not in ("victoire", "defaite", "fuite"):
 		return False  # combat encore actif → rien à appliquer
 
-	character = get_doc(combat_doc["character_id"])
+	principal_id = combat_doc["character_id"]
+	character = get_doc(principal_id)
 	if not character:
 		return False
 
+	# Compagnons d'abord (best-effort chacun), principal en dernier : si le save du
+	# principal échoue, /play re-finalisera — les compagnons déjà servis sont protégés
+	# par leur propre garde d'idempotence.
+	compagnons_traites = []
+	joueur_principal = None
+	for j in combat_doc["joueurs"]:
+		cid = j.get("character_id")
+		if cid == principal_id:
+			joueur_principal = j
+			continue
+		doc = get_doc(cid) if cid else None
+		if not doc:
+			continue
+		_finalize_membre(combat_doc, j, doc, status)
+		compagnons_traites.append((j, doc))
+	if joueur_principal is None:
+		joueur_principal = combat_doc["joueurs"][0]
+
 	combat_id = combat_doc.get("_id")
-	rewarded = character.get("combats_recompenses", [])
-	if combat_id in rewarded:
-		combat_doc["recompense_appliquee"] = True  # déjà appliqué à ce personnage
+	if combat_id in character.get("combats_recompenses", []):
+		combat_doc["recompense_appliquee"] = True  # déjà appliqué au principal
 		return False
-
-	joueur = combat_doc["joueurs"][0]
-	if status == "victoire":
-		character["currentPV"] = joueur["currentPV"]
-		# XP + montée de niveau : règle partagée avec la découverte de lieux.
-		grant_xp(character, combat_doc.get("xp_gagnee", 0))
-	elif status == "defaite":
-		character["currentPV"] = 1
-	elif status == "fuite":
-		character["currentPV"] = max(1, joueur["currentPV"])
-	# PM réappliqués pour TOUTES les issues (le PM n'est pas la ressource de KO ; une
-	# potion de PM bue en combat doit persister).
-	character["currentPM"] = max(0, joueur.get("currentPM", character.get("currentPM", 0)))
-
-	# Butin ramassé en plein combat (action « ramasser ») : conservé quelle que soit
-	# l'issue — c'est tout l'intérêt de pouvoir saisir une carcasse puis fuir. Ajouté
-	# dans le MÊME doc que l'XP → couvert par l'idempotence atomique (pas de double).
-	ramasse = [i for i in joueur.get("butin_ramasse", []) if i]
-	if ramasse:
-		inventaire = character.get("inventaire", [])
-		inventaire.extend(ramasse)
-		character["inventaire"] = inventaire
 
 	# Carcasses laissées au sol (monstres tués non ramassés) : proposées dans l'overlay
 	# de fin UNIQUEMENT en cas de victoire. Le joueur choisit lesquelles emporter via
@@ -1853,12 +1948,16 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# Focalisation : objectif de la quête focalisée atteint → effacée (même save).
 	effacer_si_objectif_atteint(character)
 
-	# Idempotence atomique : on enregistre le combat dans le doc personnage,
-	# sauvegardé avec l'XP. Borné pour éviter une croissance illimitée.
-	rewarded.append(combat_id)
-	character["combats_recompenses"] = rewarded[-50:]
+	# Affinités (même doc que l'XP → idempotent) : une victoire ensemble resserre les
+	# liens ; laisser un compagnon se faire mettre à terre les abîme.
+	for j, doc in compagnons_traites:
+		delta = character_stats.AFFINITE_DELTA_VICTOIRE if status == "victoire" else 0
+		if j.get("currentPV", 0) <= 0:
+			delta += character_stats.AFFINITE_DELTA_KO
+		if delta:
+			recrutement.ajuster_affinite(character, doc["_id"], delta)
 
-	if save_doc(character) is None:
+	if not _finalize_membre(combat_doc, joueur_principal, character, status):
 		return False  # échec de sauvegarde → ne pas marquer, on réessaiera
 
 	combat_doc["recompense_appliquee"] = True

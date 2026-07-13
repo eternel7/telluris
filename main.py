@@ -16,6 +16,7 @@ from routers.bestiaire import bestiaire_router
 from routers.combat import combat_router
 from routers.quetes import quetes_router
 from routers.pnj import pnj_router
+from routers.recrutement import recrutement_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
@@ -29,6 +30,7 @@ from utils import focalisation
 from utils import pnj as pnj_util
 from utils import intro as intro_util
 from utils import transport as transport_util
+from utils import recrutement as recrutement_util
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -94,6 +96,7 @@ app.include_router(bestiaire_router, prefix="/api")
 app.include_router(combat_router, prefix="/api")
 app.include_router(quetes_router, prefix="/api")
 app.include_router(pnj_router, prefix="/api")
+app.include_router(recrutement_router, prefix="/api")
 app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
@@ -533,6 +536,13 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Offre de course : tirée à l'entrée, persistée (même sémantique que pnj_present).
 	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc,
 													pnj_doc=pnj_doc)
+	# Compagnons : départs volontaires paresseux (affinité tombée sous le seuil pendant
+	# l'absence) — les docs `aventurier:*` sont annexes, persistés séparément ; le retrait
+	# du groupe part avec le save du personnage ci-dessous. Toast au rendu.
+	compagnons_partis = recrutement_util.departs_volontaires(character, get_doc)
+	for _av in compagnons_partis:
+		save_doc(_av)
+	change |= bool(compagnons_partis)
 	if change:
 		save_doc(character)
 	pnj_present = pnj_util.pnj_payload(pnj_entree, pnj_doc) if (pnj_entree and pnj_doc) else None
@@ -648,6 +658,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	character["quetes_actives_detail"], character["quetes_terminees_detail"] = quetes.fiche_details(character)
 	est_guilde = (grid_doc.get("categorie") == "guilde_aventurier")
 
+	# Recrutement : `est_recrutement` conditionne le bouton « Recrues » (le contrôle de la
+	# carte d'aventurier se fait à l'ouverture du board — 403 explicite).
+	est_recrutement = recrutement_util.lieu_recrute(grid_doc)
+
 	# Ressource récoltable (événement de zone « ressource ») : résolue pour l'affichage initial
 	# du bouton « Récolter » dans la sidebar (champ transitoire posé par move_character).
 	ressource_recoltable = None
@@ -707,6 +721,14 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"lieu_categorie": grid_doc.get("categorie"),
 			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,
+			"est_recrutement": est_recrutement,
+			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
+			# après embauche/congédiement/retour de combat.
+			"affinites_detail": recrutement_util.affinites_detail_payload(character, get_doc),
+			# Compagnons partis d'eux-mêmes pendant l'absence (affinité sous le seuil) : toast.
+			"compagnons_partis": [
+				f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in compagnons_partis
+			],
 			"pnj_present": pnj_present,
 			# Courses échues pendant l'absence du joueur : toast d'échec au rendu.
 			"transports_echoues": [
@@ -766,6 +788,28 @@ async def get_combat_page(
 	except Exception:
 		portrait_largeur, portrait_hauteur = 100, 100
 
+	# Portraits de TOUS les membres du groupe (joueur + compagnons `aventurier:*`) :
+	# le client rend les tokens alliés et le panneau du membre actif à partir de là.
+	portraits_joueurs = {}
+	for j in combat_doc.get("joueurs", []):
+		cid = j.get("character_id")
+		cdoc = character if cid == character["_id"] else (get_doc(cid) if cid else None)
+		img = (cdoc or {}).get("image") or j.get("image", "")
+		try:
+			with Image.open(CHARACTERS_IMAGES_PATH + "/" + img) as p:
+				largeur, hauteur = p.size
+		except Exception:
+			largeur, hauteur = 100, 100
+		portraits_joueurs[j["id"]] = {
+			"image": img,
+			"largeur": largeur,
+			"hauteur": hauteur,
+			"portrait_zoom": (cdoc or {}).get("portrait_zoom"),
+			"portrait_translate": (cdoc or {}).get("portrait_translate"),
+			"nom": (cdoc or {}).get("nom", j.get("nom", "")),
+			"prenom": (cdoc or {}).get("prenom", ""),
+		}
+
 	return templates.TemplateResponse(
 		request=request,
 		name="combat_telluris.html",
@@ -790,6 +834,8 @@ async def get_combat_page(
 			"competences": competences_util.liste_competences_payload(character, get_doc, "combat"),
 			# Compétences épinglées en accès rapide (miroir des sorts épinglés).
 			"competences_epinglees": competences_util.competences_epinglees_effectives(character, get_doc),
+			# Portraits du groupe (tokens alliés + panneau du membre actif côté client).
+			"portraits_joueurs": portraits_joueurs,
 		},
 		headers={"Cache-Control": "no-store"},
 	)

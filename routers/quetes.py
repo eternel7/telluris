@@ -15,6 +15,9 @@ from utils.characters import (
 )
 from utils import quetes
 from utils import focalisation
+from utils import recrutement
+from utils.marche import debit_character
+from models import character_stats
 
 quetes_router = APIRouter()
 
@@ -153,6 +156,29 @@ async def quetes_terminer(
 	# turn-in ne fait que valider la progression et donner la récompense.
 	recap = quetes.appliquer_recompenses(character, q)
 
+	# Part de butin des compagnons : chaque membre du groupe prélève sa part EFFECTIVE
+	# (affinité déduite) sur le CUIVRE de la récompense, créditée à SON doc ; et une
+	# quête réussie ensemble resserre les liens (chokepoint recrutement).
+	parts_info = None
+	groupe = recrutement.groupe_effectif(character, get_doc)
+	if groupe:
+		cuivre_total = int((q.get("recompenses", {}) or {}).get("cuivre", 0) or 0)
+		reglement = recrutement.regler_part_butin(character, groupe, cuivre_total)
+		preleve = sum(reglement["parts"].values())
+		if preleve:
+			debit_character(character, preleve)
+		recrutement.memoriser_liens_post_quete(character, groupe)
+		# ⚠️ Les docs compagnons (bourse créditée) ne sont persistés qu'APRÈS le save du
+		# personnage (plus bas) : un 409 rejoué ici les paierait deux fois.
+		parts_info = {
+			"parts": [
+				{"nom": f"{av.get('prenom', '')} {av.get('nom', '')}".strip(),
+				 "cuivre": reglement["parts"].get(av["_id"], 0)}
+				for av in groupe
+			],
+			"reste": reglement["reste"],
+		}
+
 	# Quête focalisée terminée → la focalisation tombe (même save).
 	focalisation.effacer_si_quete(character, quete_id)
 
@@ -173,13 +199,23 @@ async def quetes_terminer(
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
+	# Bourses des compagnons (annexes, best-effort) : persistées APRÈS le save du
+	# personnage — le turn-in est acquis (quête retirée des actives), un rejeu ne
+	# peut plus les créditer deux fois ; un échec ici leur fait juste perdre leur part.
+	for av in groupe:
+		save_doc(av)
+
 	payload = _board_payload(character, lieu_doc)
 	payload["termine"] = {
 		"titre": q.get("titre", "—"),
 		"xp": recap["xp"].get("xp_gain", 0),
 		"niveau_up": recap["xp"].get("niveau_up", False),
 		"recompenses": q.get("recompenses", {}),
+		"parts_compagnons": parts_info,
 	}
+	# Liens resserrés par la quête réussie ensemble → resync de l'onglet 🤝 section 👥.
+	if groupe:
+		payload["affinites_detail"] = recrutement.affinites_detail_payload(character, get_doc)
 	return payload
 
 
@@ -249,6 +285,10 @@ async def quetes_abandonner(
 	giver_doc = get_doc(q.get("giver")) if q.get("giver") else None
 	if giver_doc:
 		quetes.sanctionner_renoncement(character, giver_doc, get_doc, save_doc, find_docs)
+	# Les compagnons aussi tiquent quand on renonce : petit malus d'affinité de groupe.
+	for av in recrutement.groupe_effectif(character, get_doc):
+		recrutement.ajuster_affinite(character, av["_id"],
+									 -abs(character_stats.AFFINITE_DELTA_CONGEDIE))
 	character["quetes_actives"] = [
 		a for a in character.get("quetes_actives", []) if a.get("id") != quete_id
 	]

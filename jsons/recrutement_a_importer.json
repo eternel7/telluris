@@ -1,0 +1,14 @@
+[
+ {
+  "_id": "lieu:le_bastion_de_l_yonne_interieur",
+  "type": "lieu",
+  "label": "Le Bastion de l'Yonne - reception",
+  "image": "guilde_aventuriers_interieur_europe01.png",
+  "categorie": "guilde_aventurier",
+  "sous_categorie": "guilde_aventurier",
+  "lieu_parent": "lieu:auxerre",
+  "tags": [
+   "recrutement"
+  ]
+ }
+]

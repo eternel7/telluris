@@ -845,7 +845,7 @@
 			background: var(--input-bg, #1c1c1c); color: inherit;
 			border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem;
 		}
-		.sh-rel-scroll { max-height: 80vh; overflow-y: auto; overflow-x: hidden; 
+		.sh-rel-scroll { max-height: 45vh; overflow-y: auto; overflow-x: hidden; 
 			scrollbar-width: thin;
 			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
@@ -1207,7 +1207,7 @@
 		</main>
 		<aside class="sidebar">
 			<section class="sub-locations-panel">
-				{% if achat_sous_categories or est_guilde or pnj_present %}
+				{% if achat_sous_categories or est_guilde or est_recrutement or pnj_present %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
 					{% if achat_sous_categories %}
@@ -1215,6 +1215,9 @@
 					{% endif %}
 					{% if est_guilde %}
 					<li><button class="sub-loc-btn" onclick="openQuetesBoard()">📜 Tableau des quêtes</button></li>
+					{% endif %}
+					{% if est_recrutement %}
+					<li><button class="sub-loc-btn" onclick="openRecrutementBoard()">🤝 Recrues</button></li>
 					{% endif %}
 					{% if pnj_present %}
 					<li><button class="sub-loc-btn" onclick="openPnjDialogue()">🗣 Parler à {{pnj_present.nom}}</button></li>
@@ -1591,7 +1594,7 @@
 					<!-- ── RELATIONS ── -->
 					<div class="sheet-panel" id="sh-relations">
 						{% set rels_lieux = relations_lieux %}
-						{% set rels = character.get("affinites_detail",[]) %}
+						{% set rels = affinites_detail %}
 						{% if not rels_lieux and not rels %}
 							<div class="sh-empty" id="sh-rel-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>
 						{% endif %}
@@ -1600,32 +1603,17 @@
 						   ville (lieu_parent → lieu categorie:"ville") en accordéon. Échelle 0–100,
 						   neutre 50, 0 = banni. Section rendue entièrement côté client par
 						   renderFicheRelations (RELATIONS_LIEUX_INIT à l'init + resync marchandage). #}
+					   <div class="sh-section">🏪 Lieux connus</div>
 						<input id="sh-rel-filter" class="sh-rel-filter" type="search" placeholder="🔍 Filtrer les lieux…" autocomplete="off">
 						<div id="sh-rel-lieux-scroll" class="sh-rel-scroll">
 							<div id="sh-rel-lieux"><!-- rendu par renderFicheRelations --></div>
 						</div>
 
-						{# Affinités PNJ (compagnons) : échelle 0–100, neutre 50 (alignée sur les lieux) — Phase 4.2. #}
-						{% if rels %}
-							<div class="sh-section">👥 Personnages</div>
-							{% for r in rels %}{% set sc = r.get("score",50) %}
-							<div class="sh-relation">
-								<strong>></strong>
-								<div class="sh-rel-info">
-									<div class="sh-rel-name">{{ r.get("prenom","?") }} {{ r.get("nom","") }}</div>
-									<div class="sh-rel-class">{{ r.get("vocation","") }}</div>
-								</div>
-								<div>
-									<div class="sh-rel-score {% if sc>50 %}pos{% elif sc<50 %}neg{% else %}neu{% endif %}">{{ sc }}<span style="opacity:.5;font-size:.7em">/100</span></div>
-									<div class="sh-rel-lbl">{% if sc>=90 %}Dévoué{% elif sc>=70 %}Ami{% elif sc>=55 %}Bienveillant{% elif sc>=45 %}Neutre{% elif sc>=30 %}Méfiant{% elif sc>=10 %}Hostile{% else %}Ennemi{% endif %}</div>
-								</div>
-								<div class="sh-rel-portrait">
-									{% if r.get("portrait") %}<img src="{{ r.portrait }}" alt="" class="collapsed">
-									{% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">{{ r.get("icon","👤") }}</div>{% endif %}
-								</div>
-							</div>
-							{% endfor %}
-						{% endif %}
+						{# Compagnons recrutés (affinités 0–100, neutre 50, alignée sur les lieux) :
+						   rendu 100 % client par renderFicheCompagnons (AFFINITES_INIT à l'init +
+						   resync embauche/congédiement/retour de combat). #}
+						<div class="sh-section" id="sh-rel-comp-titre" style="display:none">👥 Compagnons</div>
+						<div id="sh-rel-compagnons"><!-- rendu par renderFicheCompagnons --></div>
 					</div>
 
 					<!-- ── QUÊTES ── -->
@@ -1719,6 +1707,25 @@
 		<h2 style="margin:1rem 0 0">🗒️ Offres disponibles</h2>
 		<ul id="quetes-offres-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
 	</div><!-- /#quetes-panel -->
+	<div id="recrutement-panel" class="panel-hidden panel-frame board-panel" aria-label="Tableau de recrutement">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Recrutement d'aventuriers">
+			<h2>🤝 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeRecrutementPanel()" role="button">✕ Fermer</button>
+		</div>
+		<h2 style="margin:.6rem 0 0">👥 Votre groupe (<span id="rec-plafond"></span>)</h2>
+		<ul id="rec-groupe-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+		<h2 style="margin:1rem 0 0">🗒️ Recrues disponibles</h2>
+		<ul id="rec-recrues-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+	</div><!-- /#recrutement-panel -->
+	<style>
+		/* Portrait rond d'une recrue/compagnon dans les listes du panneau de recrutement. */
+		.rec-portrait {
+			width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
+			border: 2px solid var(--accent, #b98c4a); flex-shrink: 0;
+		}
+	</style>
 	<style>
 		/* ── Panneau de dialogue PNJ ─────────────────────────────────────────── */
 		/* Deux colonnes : le portrait à gauche, la réplique et les choix à droite. En dessous
@@ -3817,7 +3824,7 @@ function renderFicheRelations(list) {
 	const ordered = autres ? [...villes, autres] : villes;
 
 	const openId = _relLoadOpen();
-	let html = '<div class="sh-section">🏪 Lieux connus</div>';
+	let html = '';
 	html += ordered.map(g => {
 		const children = g.children.slice().sort((a, b) => b.value - a.value);
 		const count = children.length + (g.own ? 1 : 0);
@@ -4287,7 +4294,13 @@ async function terminerQuete(queteId) {
 			let msg = 'Quête terminée : ' + data.termine.titre + ' (+' + data.termine.xp + ' XP)';
 			if (data.termine.niveau_up) msg += ' — Niveau supérieur !';
 			showToast(msg);
+			// Parts de butin des compagnons, prélevées sur le cuivre de la récompense.
+			const pc = data.termine.parts_compagnons;
+			if (pc) (pc.parts || []).forEach(p => {
+				if (p.cuivre > 0) showToast('💰 ' + p.nom + ' prend sa part : ' + p.cuivre + ' cu');
+			});
 		}
+		if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
 	} catch(err) { console.error('Erreur fin de quête', err); }
 }
 
@@ -4329,6 +4342,146 @@ async function deposerQuete(queteId) {
 		}
 	} catch(err) { console.error('Erreur dépôt de quête', err); }
 }
+
+// ── Recrutement d'aventuriers (🤝) ──────────────────────────────────────────
+// Panneau plein écran (clone structurel du tableau de quêtes). Le board exige la
+// carte d'aventurier de la cité (403 explicite sinon → toast). Les affinités de
+// l'onglet 🤝 sont resynchronisées par chaque réponse (renderFicheCompagnons).
+
+function _affLabel(sc) {
+	return sc >= 90 ? 'Dévoué' : sc >= 70 ? 'Ami' : sc >= 55 ? 'Bienveillant'
+		: sc >= 45 ? 'Neutre' : sc >= 30 ? 'Méfiant' : sc >= 10 ? 'Hostile' : 'Ennemi';
+}
+
+// Onglet 🤝 section 👥 : tous les compagnons CONNUS (mémo du perso), actifs d'abord.
+function renderFicheCompagnons(list) {
+	const box = document.getElementById('sh-rel-compagnons');
+	const titre = document.getElementById('sh-rel-comp-titre');
+	if (!box) return;
+	if (!list || !list.length) {
+		box.innerHTML = '';
+		if (titre) titre.style.display = 'none';
+		return;
+	}
+	if (titre) titre.style.display = '';
+	box.innerHTML = list.map(r => {
+		const sc = (r.affinite === null || r.affinite === undefined) ? 50 : r.affinite;
+		const cls = sc > 50 ? 'pos' : sc < 50 ? 'neg' : 'neu';
+		const part = (r.exigences_effectives || {}).part_butin_pct;
+		return `<div class="sh-relation">
+			<strong>${r.actif ? '⚔' : '·'}</strong>
+			<div class="sh-rel-info">
+				<div class="sh-rel-name">${r.prenom || '?'} ${r.nom || ''}${r.actif ? ' <span style="opacity:.6;font-size:.75em">(dans le groupe)</span>' : ''}</div>
+				<div class="sh-rel-class">${r.voc || ''} · ${r.race || ''} · rang ${r.rang || 'F'}${part !== undefined ? ` · part ${part}%` : ''}</div>
+			</div>
+			<div>
+				<div class="sh-rel-score ${cls}">${sc}<span style="opacity:.5;font-size:.7em">/100</span></div>
+				<div class="sh-rel-lbl">${_affLabel(sc)}</div>
+			</div>
+			<div class="sh-rel-portrait">
+				${r.image ? `<img src="/characters/${r.image}" alt="" class="collapsed">`
+					: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">👤</div>'}
+			</div>
+			${r.actif ? `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${r.id}')" title="Congédier ce compagnon">✕</button>` : ''}
+		</div>`;
+	}).join('');
+}
+
+function renderRecrutement(data) {
+	const plafondEl = document.getElementById('rec-plafond');
+	if (plafondEl) plafondEl.textContent = `${(data.groupe || []).length}/${data.plafond}`;
+	const full = (data.groupe || []).length >= (data.plafond || 0);
+	const gl = document.getElementById('rec-groupe-list');
+	if (gl) {
+		const groupe = data.groupe || [];
+		gl.innerHTML = groupe.length ? groupe.map(c => `<li class="sh-inv-item">
+			<img class="rec-portrait" src="/characters/${c.image}" alt="" onerror="this.style.display='none'">
+			<span>
+				<strong>${c.prenom} ${c.nom}</strong> <span class="sh-inv-poids">${c.race} · ${c.voc} · rang ${c.rang}</span><br>
+				<span class="sh-inv-poids">❤️ ${c.currentPV} PV · 💰 part ${(c.exigences_effectives || {}).part_butin_pct}% · 🤝 ${c.affinite === null || c.affinite === undefined ? 50 : c.affinite}</span>
+			</span>
+			<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${c.id}')" title="Congédier (le lien est conservé)">✕ Congédier</button>
+		</li>`).join('') : '<li class="sell-empty">Personne ne vous accompagne.</li>';
+	}
+	const rl = document.getElementById('rec-recrues-list');
+	if (rl) {
+		const recrues = data.recrues || [];
+		rl.innerHTML = recrues.length ? recrues.map(r => {
+			const ex = r.exigences_effectives || {};
+			const clauses = (ex.clauses || []).map(c => `<span class="q-desc">• ${c}</span>`).join('<br>');
+			const aff = (r.affinite !== null && r.affinite !== undefined)
+				? ` · 🤝 ${r.affinite}${r.deja_connu ? ' (déjà connu)' : ''}` : '';
+			return `<li class="sh-inv-item">
+				<img class="rec-portrait" src="/characters/${r.image}" alt="" onerror="this.style.display='none'">
+				<span>
+					<strong>${r.prenom} ${r.nom}</strong> <span class="sh-inv-poids">${r.race} · ${r.voc} · rang ${r.rang} (niv. ${r.niveau})${aff}</span><br>
+					<span class="q-desc">${r.specialite || ''}</span>
+					<span class="sell-prix">💰 part de butin : ${ex.part_butin_pct} %</span>
+					${clauses ? '<br>' + clauses : ''}
+				</span>
+				<button class="sh-drop-btn" ${full ? 'disabled title="Votre groupe est au complet"' : 'title="Embaucher (gratuit — payé en part de butin de quête)"'} onclick="embaucherAventurier('${r.id}')">Embaucher</button>
+			</li>`;
+		}).join('') : '<li class="sell-empty">Personne au tableau pour le moment.</li>';
+	}
+	if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
+	(data.departs || []).forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+}
+
+async function openRecrutementBoard() {
+	try {
+		const res = await fetch('api/recrutement/board');
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderRecrutement(data);
+		document.getElementById('game-container').classList.add('panel-hidden');
+		document.getElementById('recrutement-panel').classList.remove('panel-hidden');
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} catch(err) { console.error('Erreur tableau de recrutement', err); }
+}
+
+function closeRecrutementPanel() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('recrutement-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function embaucherAventurier(avId) {
+	try {
+		const res = await fetch('api/recrutement/embaucher', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ aventurier_id: avId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderRecrutement(data);
+		if (data.embauche) showToast('🤝 ' + data.embauche.nom + ' rejoint le groupe !');
+	} catch(err) { console.error('Erreur embauche', err); }
+}
+
+// Congédier est autorisé PARTOUT (onglet 🤝 ou panneau) : hors lieu recruteur, le
+// payload ne porte pas de recrues → seuls groupe + fiche 👥 sont resynchronisés.
+async function congedierAventurier(avId) {
+	if (!confirm('Congédier ce compagnon ? Il gardera le souvenir de vos aventures.')) return;
+	try {
+		const res = await fetch('api/recrutement/congedier', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ aventurier_id: avId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		if ('recrues' in data) renderRecrutement(data);
+		else if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
+		if (data.congedie) showToast('👋 ' + data.congedie.nom + ' quitte le groupe.');
+	} catch(err) { console.error('Erreur congédiement', err); }
+}
+
+// Rendu initial de l'onglet 🤝 section 👥 + toasts des départs volontaires (check
+// paresseux au rendu de /play : affinité tombée sous le seuil pendant l'absence).
+const AFFINITES_INIT = {{ affinites_detail | tojson | safe }};
+renderFicheCompagnons(AFFINITES_INIT);
+{{ compagnons_partis | tojson | safe }}.forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
 
 // ── Dialogue PNJ (🗣) ───────────────────────────────────────────────────────
 // Panneau plein écran (pattern quêtes/marché). Navigation stateless : chaque choix

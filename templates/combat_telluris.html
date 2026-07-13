@@ -126,6 +126,27 @@
 .monster-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
 .monster-token .mt-hp-fill { height: 100%; background: #ff4757; }
 
+/* Alliés : membres du groupe NON actifs, rendus relativement au membre actif comme les
+   monstres. Bleus (couleur joueur du bandeau), non ciblables en v1 (pas de soin d'allié). */
+.ally-token {
+	position: absolute;
+	width: var(--step); height: var(--step);
+	transform: translateX(-50%);
+	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+	transition: left 0.25s ease, bottom 0.25s ease;
+	pointer-events: none;
+}
+.ally-token .at-portrait {
+	width: 70%; height: 70%; border-radius: 50%;
+	background-color: #1a3a5a; background-repeat: no-repeat;
+	border: 2px solid #2e86de; box-shadow: 0 0 8px rgba(46,134,222,0.7);
+	display: flex; align-items: center; justify-content: center;
+	font-size: 13px; font-weight: bold; color: #7ec8ff;
+}
+.ally-token.ko { opacity: 0.35; filter: grayscale(1); }
+.ally-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
+.ally-token .mt-hp-fill { height: 100%; background: #2e86de; }
+
 /* ─── Tour Header ──────────────────────────────────────────────── */
 .tour-header {
 	display: flex;
@@ -552,7 +573,9 @@
 			</div>
 			<div id="tokens-layer"></div>
 			<div class="player-token">
-				{% if combat.joueurs[0].image %}<div class="pt-img" id="token-portrait"></div>{% endif %}
+				<!-- Portrait du MEMBRE ACTIF (posé en JS via applyPlayerPortrait, re-appliqué
+				     au changement d'acteur — plus de condition Jinja sur joueurs[0]). -->
+				<div class="pt-img" id="token-portrait"></div>
 				<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
 					<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
 					<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>
@@ -600,14 +623,17 @@
 				{% for actor_id in combat.ordre_initiative %}
 					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
 					{% if actor_id.startswith('joueur_') %}
-						{% set j0 = combat.joueurs[0] %}
-						<div class="init-badge joueur {{ active }}" id="badge-{{ actor_id }}">
-							{% if j0.image %}<div class="ib-img" id="badge-portrait"></div>{% else %}<div class="ib-letter">{{ j0.nom[0] | upper }}</div>{% endif %}
+						{# Chaque joueur_* est résolu par SON id (groupe : plus de duplication
+						   de joueurs[0]) ; ids DOM uniques par acteur pour les anneaux/portraits. #}
+						{% set jp = combat.joueurs | selectattr('id', 'equalto', actor_id) | first %}
+						{% set j_ko = ' dead' if (jp and jp.currentPV <= 0) else '' %}
+						<div class="init-badge joueur{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}">
+							{% if portraits_joueurs.get(actor_id, {}).get('image') %}<div class="ib-img" id="badge-portrait-{{ actor_id }}"></div>{% else %}<div class="ib-letter">{{ jp.nom[0] | upper if jp and jp.nom else '?' }}</div>{% endif %}
 							<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
 								<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
 								<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>
-								<path class="vit-pv" id="ib-pv" d="M21 38 A17 17 0 0 1 21 4"></path>
-								<path class="vit-pm" id="ib-pm" d="M21 38 A17 17 0 0 0 21 4"></path>
+								<path class="vit-pv" id="ib-pv-{{ actor_id }}" d="M21 38 A17 17 0 0 1 21 4"></path>
+								<path class="vit-pm" id="ib-pm-{{ actor_id }}" d="M21 38 A17 17 0 0 0 21 4"></path>
 							</svg>
 						</div>
 					{% else %}
@@ -747,7 +773,8 @@ let SORTS = {{ sorts | tojson | safe }};
 // Sorts épinglés en accès rapide (ids ordonnés, sous-ensemble des connus) : icônes
 // directement cliquables dans la barre d'action. Épinglage géré dans l'onglet ⚡
 // de play_town ; un sort épinglé absent de SORTS (pas d'effet instantané) est ignoré.
-const SORTS_EPINGLES = {{ sorts_epingles | tojson | safe }};
+// `let` : remplacés par ceux du MEMBRE ACTIF au changement d'acteur (fetch /acteur).
+let SORTS_EPINGLES = {{ sorts_epingles | tojson | safe }};
 // Sort offensif confirmé en attente de cible : {sort_id, composants, portee} — les
 // badges/tokens passent en liseré violet et leur clic lance le sort au lieu d'attaquer.
 let pendingSort = null;
@@ -756,7 +783,7 @@ let pendingSort = null;
 // la liste ne change pas en combat (pas de composants, rien n'est consommé du sac).
 let COMPS = {{ competences | tojson | safe }};
 // Compétences épinglées en accès rapide (miroir des sorts épinglés, onglet ⚡ play_town).
-const COMPS_EPINGLEES = {{ competences_epinglees | tojson | safe }};
+let COMPS_EPINGLEES = {{ competences_epinglees | tojson | safe }};
 // Compétence offensive confirmée en attente de cible — même mécanisme violet que pendingSort.
 let pendingComp = null;
 
@@ -794,32 +821,41 @@ if (window.ResizeObserver) {
 // La hauteur de fenêtre (budget hauteur) n'est pas captée par le ResizeObserver sur la colonne.
 window.addEventListener('resize', () => { syncViewSize(); if (window._combatReady) { renderTokens(); updateCamera(); } });
 
-// Portrait du joueur : la portion d'image cadrée dans play_town (zoom + déplacement) est
-// reproduite dans les jetons via background-size/-position en % (relatifs au conteneur →
-// indépendant de la taille du jeton). Fenêtre de cadrage de référence = 100×100 (play_town).
-const PORTRAIT = {
-	img:       {{ url_for('characters', path=character.image) | string | tojson | safe }},
-	W:         {{ portrait_largeur | tojson | safe }},
-	H:         {{ portrait_hauteur | tojson | safe }},
-	zoom:      {{ character.get('portrait_zoom', 100) | tojson | safe }},
-	translate: {{ character.get('portrait_translate', 0) | tojson | safe }},
-};
-function applyPlayerPortrait() {
-	if (!PORTRAIT.img || !PORTRAIT.W || !PORTRAIT.H) return;
-	const zoom = PORTRAIT.zoom || 100;
-	const imgW = PORTRAIT.W * zoom / 100, imgH = PORTRAIT.H * zoom / 100;
-	const t = PORTRAIT.translate;
+// Portraits des membres du groupe : la portion d'image cadrée dans play_town (zoom +
+// déplacement) est reproduite dans les jetons via background-size/-position en %
+// (relatifs au conteneur → indépendant de la taille du jeton). Fenêtre de cadrage de
+// référence = 100×100 (play_town). Un doc `aventurier:*` n'a pas de cadrage → défauts.
+const PORTRAITS_JOUEURS = {{ portraits_joueurs | tojson | safe }};
+function portraitStyle(jid) {
+	const p = PORTRAITS_JOUEURS[jid];
+	if (!p || !p.image || !p.largeur || !p.hauteur) return null;
+	const zoom = p.portrait_zoom || 100;
+	const imgW = p.largeur * zoom / 100, imgH = p.hauteur * zoom / 100;
+	const t = p.portrait_translate;
 	const x = (t && t !== 0) ? Math.abs(t.x) : (imgW - 100) / 2;
 	const y = (t && t !== 0) ? Math.abs(t.y) : 0;
-	const size = `${imgW}% ${imgH}%`;
-	const pos  = `${imgW > 100 ? x / (imgW - 100) * 100 : 50}% ${imgH > 100 ? y / (imgH - 100) * 100 : 50}%`;
-	['badge-portrait', 'token-portrait', 'left-portrait'].forEach(id => {
-		const el = document.getElementById(id);
-		if (!el) return;
-		el.style.backgroundImage    = `url('${PORTRAIT.img}')`;
-		el.style.backgroundSize     = size;
-		el.style.backgroundPosition = pos;
-	});
+	return {
+		img:  `/characters/${p.image}`,
+		size: `${imgW}% ${imgH}%`,
+		pos:  `${imgW > 100 ? x / (imgW - 100) * 100 : 50}% ${imgH > 100 ? y / (imgH - 100) * 100 : 50}%`,
+	};
+}
+function applyPortraitTo(el, st) {
+	if (!el || !st) return;
+	el.style.backgroundImage    = `url('${st.img}')`;
+	el.style.backgroundSize     = st.size;
+	el.style.backgroundPosition = st.pos;
+}
+// Portrait du MEMBRE ACTIF : panneau gauche + token central (re-appliqué à chaque
+// changement d'acteur — le monde re-pivote autour de lui).
+function applyPlayerPortrait(jid) {
+	const st = portraitStyle(jid || (activePlayer(state) || {}).id || 'joueur_0');
+	['token-portrait', 'left-portrait'].forEach(id => applyPortraitTo(document.getElementById(id), st));
+}
+// Badges du bandeau d'initiative : chaque joueur garde SON portrait (posé une fois).
+function applyBadgePortraits() {
+	(state.joueurs || []).forEach(j =>
+		applyPortraitTo(document.getElementById(`badge-portrait-${j.id}`), portraitStyle(j.id)));
 }
 
 // Anneau de vitalité : longueur d'un demi-arc (r=17 dans le viewBox 42×42 partagé).
@@ -833,11 +869,11 @@ function setRing(el, frac) {
 	if (el) el.style.strokeDasharray = `${Math.max(0, Math.min(1, frac)) * MONSTER_CIRC} 999`;
 }
 function updatePlayerVitals(j) {
+	// Token central = membre actif seulement ; les anneaux des badges joueurs du
+	// bandeau sont tenus par updateInitiativeStrip (un par joueur_*).
 	const pvFrac = j.pv_max > 0 ? j.currentPV / j.pv_max : 0;
 	const pmFrac = j.pm_max > 0 ? j.currentPM / j.pm_max : 0;
-	setArc(document.getElementById('ib-pv'), pvFrac);
 	setArc(document.getElementById('pt-pv'), pvFrac);
-	setArc(document.getElementById('ib-pm'), pmFrac);
 	setArc(document.getElementById('pt-pm'), pmFrac);
 }
 
@@ -890,10 +926,15 @@ function activePlayer(data) {
 	}
 	return data.joueurs[0];
 }
+// Le MEMBRE ACTIF du groupe : tout ce qui lisait state.joueurs[0] lit me() — caméra,
+// prédicats d'action, portées… Le joueur joue tous les personnages du groupe.
+const me = () => activePlayer(state);
+// Noms des membres du groupe (colorisation du log : coup allié vs coup ennemi).
+function playerNames() { return (state.joueurs || []).map(j => j.nom); }
 
 function updateJoueur(j) {
-	// Panneau gauche : identité + vitals. Le portrait (#left-portrait.pt-crop) reçoit le
-	// cadrage du joueur via applyPlayerPortrait (fixe en combat mono-joueur) — pas de src ici.
+	// Panneau gauche : identité + vitals du MEMBRE ACTIF. Le portrait (#left-portrait.pt-crop)
+	// reçoit le cadrage via applyPlayerPortrait (re-appliqué au changement d'acteur).
 	const nameEl = document.getElementById('left-name');
 	if (nameEl) nameEl.textContent = j.nom;
 	const classEl = document.getElementById('left-class');
@@ -954,11 +995,21 @@ function updateChargeBar(j) {
 }
 
 function updateInitiativeStrip(data) {
-	const furtif = !!(data.joueurs[0] || {}).furtif;
+	// L'œil barré a un sens dès qu'UN membre vivant du groupe est furtif.
+	const furtif = (data.joueurs || []).some(j => (j.currentPV || 0) > 0 && j.furtif);
 	data.ordre_initiative.forEach((id, i) => {
 		const el = document.getElementById(`badge-${id}`);
 		if (!el) return;
 		el.classList.toggle('active', i === data.acteur_courant_index);
+		if (id.startsWith('joueur_')) {
+			// Anneaux PV/PM + classe KO de chaque membre du groupe (ids DOM par acteur).
+			const p = data.joueurs.find(x => x.id === id);
+			if (p) {
+				el.classList.toggle('dead', (p.currentPV || 0) <= 0);
+				setArc(document.getElementById(`ib-pv-${id}`), p.pv_max > 0 ? p.currentPV / p.pv_max : 0);
+				setArc(document.getElementById(`ib-pm-${id}`), p.pm_max > 0 ? p.currentPM / p.pm_max : 0);
+			}
+		}
 		if (id.startsWith('monstre_')) {
 			const m = data.monstres.find(x => x.id === id);
 			el.classList.toggle('dead', !!m && !m.vivant);
@@ -975,7 +1026,7 @@ function updateInitiativeStrip(data) {
 // on peut réellement attaquer (votre tour + action dispo + à portée du mode courant). Même
 // action que le clic sur un token adjacent (renderTokens). Sinon bordure grise, non cliquable.
 function refreshBadgeTargets() {
-	const j = state.joueurs[0] || {};
+	const j = me() || {};
 	const canAct = state.status === 'active' && isPlayerTurn(state) && (j.actions_restantes || 0) > 0;
 	// Ciblage de sort/compétence en attente : les cibles de la capacité remplacent celles
 	// de l'attaque (liseré violet .spellcast, clic = lancer au lieu d'attaquer).
@@ -1010,19 +1061,19 @@ function rot(x, y, deg) {
 	if (a === 270) return [y, -x];
 	return [x, y];
 }
-function facingDeg() { return state.joueurs[0].facing || 0; }
+function facingDeg() { return (me() || {}).facing || 0; }
 // Écran → monde (pour envoyer un déplacement absolu) et monde → écran (pour le rendu).
 function screenToWorld(sdx, sdy) { return rot(sdx, sdy, facingDeg()); }
 function worldToScreen(wdx, wdy) { return rot(wdx, wdy, -facingDeg()); }
 
 function chebyToPlayer(m) {
-	const j = state.joueurs[0];
+	const j = me();
 	return Math.max(Math.abs(m.pos.x - j.pos.x), Math.abs(m.pos.y - j.pos.y));
 }
 
 function renderTokens() {
 	const layer = document.getElementById('tokens-layer');
-	const j = state.joueurs[0];
+	const j = me();
 	// Ciblage de sort/compétence en attente : cibles violettes au lieu de l'attaque.
 	const casting = !!(pendingSort || pendingComp);
 	const targetable = new Set((casting
@@ -1052,10 +1103,31 @@ function renderTokens() {
 			: () => doAction('attaquer', m.id, null, null, null, currentMode);
 		layer.appendChild(tok);
 	});
+	// Alliés : les membres du groupe NON actifs, aux coords relatives au membre actif
+	// (le token central, lui, montre toujours le membre actif). Non ciblables en v1.
+	(state.joueurs || []).forEach(p => {
+		if (!p.pos || p.id === j.id) return;
+		const [sx, sy] = worldToScreen(p.pos.x - j.pos.x, p.pos.y - j.pos.y);
+		const tok = document.createElement('div');
+		tok.className = 'ally-token' + ((p.currentPV || 0) > 0 ? '' : ' ko');
+		tok.style.left   = `calc(50% + var(--step) * ${sx})`;
+		tok.style.bottom = `calc(var(--step) * (var(--floor) - (${sy})))`;
+		const inner = document.createElement('div');
+		inner.className = 'at-portrait';
+		const st = portraitStyle(p.id);
+		if (st) applyPortraitTo(inner, st);
+		else inner.textContent = (p.nom || '?').charAt(0).toUpperCase();
+		tok.appendChild(inner);
+		const hp = document.createElement('div');
+		hp.className = 'mt-hp';
+		hp.innerHTML = `<div class="mt-hp-fill" style="width:${pct(p.currentPV, p.pv_max)}%"></div>`;
+		tok.appendChild(hp);
+		layer.appendChild(tok);
+	});
 }
 
 function updateCamera() {
-	const j = state.joueurs[0];
+	const j = me();
 	const dims = (GRID && GRID.dims) || { x: 13, y: 11 };
 	const [ox, oy] = worldToScreen((dims.x - 1) / 2 - j.pos.x, (dims.y - 1) / 2 - j.pos.y);
 	document.getElementById('bg-image').style.transform =
@@ -1070,7 +1142,7 @@ function logClass(entry) {
 		case 'flee': return 'flee';
 		case 'move': return 'move';
 		case 'miss': return 'miss';
-		case 'hit':  return entry.acteur === state.joueurs[0].nom ? 'j-hit' : 'm-hit';
+		case 'hit':  return playerNames().includes(entry.acteur) ? 'j-hit' : 'm-hit';
 		default:     return '';
 	}
 }
@@ -1087,7 +1159,7 @@ function revealNext() {
 	revealing = true;
 	const entry = logQueue.shift();
 	// Un coup porté par un monstre fait passer son portrait au panneau droit.
-	if (entry.kind === 'hit' && entry.acteur && entry.acteur !== state.joueurs[0].nom) {
+	if (entry.kind === 'hit' && entry.acteur && !playerNames().includes(entry.acteur)) {
 		const m = state.monstres.find(x => x.nom === entry.acteur);
 		if (m) { lastEnemyId = m.id; renderEnemyPortrait(state); }
 	}
@@ -1109,16 +1181,16 @@ function isPlayerTurn(data) {
 let currentMode = 'cac';
 const MODE_LABEL = { cac: '⚔ Mêlée', jet: '🪃 Jet', tir: '🏹 Tir' };
 
-function playerAttacks() { return (state.joueurs[0] && state.joueurs[0].attaque_profils) || []; }
+function playerAttacks() { return (me() || {}).attaque_profils || []; }
 function attackProfile(mode) {
 	const list = playerAttacks();
 	return list.find(a => a.mode === mode)
 		|| list.find(a => a.mode === 'cac')
-		|| { mode: 'cac', portee: (state.joueurs[0] || {}).portee || 1, ranged: false };
+		|| { mode: 'cac', portee: (me() || {}).portee || 1, ranged: false };
 }
 // Engagé = un ennemi vivant au corps à corps (≤ 1 case) → tir/jet interdit (miroir serveur).
 function isEngaged() {
-	const j = state.joueurs[0];
+	const j = me();
 	return state.monstres.some(m => m.vivant && m.pos && chebyJM(j, m) <= 1);
 }
 // Miroir client de _line_of_sight : un mur (cells < 1) entre les deux cases bloque le tir.
@@ -1137,7 +1209,7 @@ function lineOfSight(x0, y0, x1, y1) {
 }
 // Cibles atteignables pour un mode : portée, et pour le tir/jet non engagé + ligne de vue.
 function targetableMonsters(mode) {
-	const j = state.joueurs[0];
+	const j = me();
 	const prof = attackProfile(mode);
 	const portee = prof.portee || 1;
 	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
@@ -1149,7 +1221,7 @@ function targetableMonsters(mode) {
 }
 // Affiche les boutons d'attaque (modes équipés seulement).
 function updateAttackButtons(data) {
-	const modes = (data.joueurs[0].attaque_profils || []).map(a => a.mode);
+	const modes = ((activePlayer(data) || {}).attaque_profils || []).map(a => a.mode);
 	if (!modes.includes(currentMode)) currentMode = modes[0] || 'cac';
 	document.querySelectorAll('.atk-mode-btn').forEach(b => {
 		b.style.display = modes.includes(b.dataset.mode) ? '' : 'none';
@@ -1162,14 +1234,14 @@ function chebyJM(j, m) {
 // Miroir client de la validation serveur « ramasser » : tour du joueur, action dispo,
 // aucun ennemi vivant au corps à corps, et au moins une carcasse adjacente non ramassée.
 function canLoot(data) {
-	const j = data.joueurs[0];
+	const j = activePlayer(data);
 	if (!(data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0)) return false;
 	if (data.monstres.some(m => m.vivant && m.pos && chebyJM(j, m) <= 1)) return false;
 	return data.monstres.some(m => !m.vivant && !m.loote && m.pos && chebyJM(j, m) <= 1);
 }
 // Consommer : tour du joueur, action disponible, au moins un consommable instantané au sac.
 function canConsume(data) {
-	const j = data.joueurs[0];
+	const j = activePlayer(data);
 	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
 		&& CONSOS.length > 0;
 }
@@ -1178,7 +1250,7 @@ function canConsume(data) {
 // Cibles valides d'un sort offensif : portée du sort, et au-delà du contact (portée > 1)
 // mêmes règles que le tir — non engagé + ligne de vue (miroir serveur).
 function sortTargets(s) {
-	const j = state.joueurs[0];
+	const j = me();
 	const portee = Math.max(1, s.portee || 1);
 	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
 	if (portee > 1) {
@@ -1190,13 +1262,13 @@ function sortTargets(s) {
 // Sort lançable maintenant ? PM suffisants, et pour un sort offensif au moins une cible.
 // Partagé entre le sélecteur 🔮 (castableSorts) et les icônes d'accès rapide.
 function sortCastable(s) {
-	const j = state.joueurs[0] || {};
+	const j = me() || {};
 	return (j.currentPM || 0) >= s.cout_pm
 		&& (s.cible !== 'ennemi' || sortTargets(s).length > 0);
 }
 function castableSorts() { return SORTS.filter(sortCastable); }
 function canCast(data) {
-	const j = data.joueurs[0];
+	const j = activePlayer(data);
 	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
 		&& castableSorts().length > 0;
 }
@@ -1206,13 +1278,13 @@ function canCast(data) {
 // les champs cible/portee) ; pas de composants, PM souvent à 0 (martiale).
 function compTargets(c) { return sortTargets(c); }
 function compCastable(c) {
-	const j = state.joueurs[0] || {};
+	const j = me() || {};
 	return (j.currentPM || 0) >= c.cout_pm
 		&& (c.cible !== 'ennemi' || compTargets(c).length > 0);
 }
 function castableComps() { return COMPS.filter(compCastable); }
 function canComp(data) {
-	const j = data.joueurs[0];
+	const j = activePlayer(data);
 	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
 		&& castableComps().length > 0;
 }
@@ -1237,12 +1309,12 @@ function cellWalkable(x, y) {
 	if (x < 0 || x >= g.dims.x || y < 0 || y >= g.dims.y) return false;
 	const row = g.cells[y];
 	if (!row || row[x] < 1) return false;
-	const playerCanFly = !!(state.joueurs[0] && state.joueurs[0].volant);
+	const playerCanFly = !!(me() || {}).volant;
 	return playerCanFly || row[x] !== TERRAIN_FALAISE;
 }
 function cellOccupied(x, y) {
-	const j = state.joueurs[0];
-	if (j.pos.x === x && j.pos.y === y) return true;
+	// Tous les joueurs VIVANTS bloquent une case (miroir serveur _occupied_set).
+	if (state.joueurs.some(p => (p.currentPV || 0) > 0 && p.pos && p.pos.x === x && p.pos.y === y)) return true;
 	return state.monstres.some(m => m.vivant && m.pos && m.pos.x === x && m.pos.y === y);
 }
 function moveApUsedFor(j, cells) {
@@ -1251,7 +1323,7 @@ function moveApUsedFor(j, cells) {
 }
 // Peut-on dépenser une case de déplacement ce tour (budget + AP) ? (indépendant de la direction)
 function canMoveBudget(data) {
-	const j = data.joueurs[0];
+	const j = activePlayer(data);
 	if (!(data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0)) return false;
 	if ((j.cells_moved || 0) >= (j.deplacement || 1)) return false;
 	const projected = (j.attaques || 0) + moveApUsedFor(j, (j.cells_moved || 0) + 1);
@@ -1260,7 +1332,7 @@ function canMoveBudget(data) {
 // Disponibilité d'une flèche : direction écran → monde (selon l'orientation), puis case cible valide.
 function dirAvailable(data, sdx, sdy) {
 	if (!canMoveBudget(data)) return false;
-	const j = data.joueurs[0];
+	const j = activePlayer(data);
 	const [wx, wy] = screenToWorld(sdx, sdy);
 	const nx = j.pos.x + wx, ny = j.pos.y + wy;
 	return cellWalkable(nx, ny) && !cellOccupied(nx, ny)
@@ -1268,7 +1340,7 @@ function dirAvailable(data, sdx, sdy) {
 }
 
 function updateButtons(data) {
-	const j        = data.joueurs[0];
+	const j        = activePlayer(data);
 	const isPlayer = isPlayerTurn(data);
 	const isActive = data.status === 'active';
 	const canAct   = isActive && isPlayer && j.actions_restantes > 0;
@@ -1319,14 +1391,43 @@ function refreshTargetSelect() {
 	).join('');
 }
 
+// Membre actif du dernier rendu : quand le tour passe à un AUTRE joueur_* (compagnon),
+// le panneau, le portrait central et les ressources (sac/sorts/compétences) basculent.
+let lastActorId = null;
+
+// Recharge les ressources du MEMBRE ACTIF (GET /acteur) : consommables, sorts (+
+// épinglés), compétences (+ épinglées) — le compagnon boit SES potions, lance SES sorts.
+async function syncActorResources() {
+	try {
+		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/acteur`);
+		if (!res.ok) return;
+		const data = await res.json();
+		CONSOS = data.consommables || [];
+		SORTS = data.sorts || [];
+		SORTS_EPINGLES = data.sorts_epingles || [];
+		COMPS = data.competences || [];
+		COMPS_EPINGLEES = data.competences_epinglees || [];
+		renderQuickSorts();
+		renderQuickComps();
+		if (window._combatReady) { updateButtons(state); refreshTargetSelect(); }
+	} catch (e) { /* réseau : les ressources du membre précédent restent affichées */ }
+}
+
 function updateUI(data) {
 	state = data;
+	// Changement d'acteur (le monde re-pivote autour du nouveau membre actif).
+	const act = activePlayer(data) || {};
+	if (act.id && act.id !== lastActorId) {
+		lastActorId = act.id;
+		applyPlayerPortrait(act.id);
+		if (data.joueurs.length > 1 && data.status === 'active') syncActorResources();
+	}
 	updateJoueur(activePlayer(data));
 	renderEnemyPortrait(data);
 	document.getElementById('tour-num').textContent = data.tour;
-	// Badge 🥷 : visible tant que le joueur est furtif (posé à l'entrée ou par une capacité).
+	// Badge 🥷 : visible tant que le MEMBRE ACTIF est furtif (posé à l'entrée ou par une capacité).
 	document.getElementById('furtif-badge').style.display =
-		(data.joueurs[0] || {}).furtif ? '' : 'none';
+		(activePlayer(data) || {}).furtif ? '' : 'none';
 	updateInitiativeStrip(data);
 	updateAttackButtons(data);
 	renderTokens();
@@ -1609,7 +1710,10 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 // ─── End Overlay ──────────────────────────────────────────────────
 function showEndOverlay(status, xp) {
 	const icons  = { victoire: '🏆', defaite: '💀', fuite: '🏃' };
-	const titles = { victoire: 'Victoire !', defaite: 'Défaite...', fuite: 'Vous fuyez !' };
+	const solo   = (state.joueurs || []).length <= 1;
+	const titles = { victoire: 'Victoire !',
+					 defaite: solo ? 'Défaite...' : 'Tout le groupe est à terre…',
+					 fuite: solo ? 'Vous fuyez !' : 'Le groupe prend la fuite !' };
 	document.getElementById('end-icon').textContent  = icons[status]  || '❓';
 	document.getElementById('end-title').textContent = titles[status] || status;
 	document.getElementById('end-xp').textContent    = status === 'victoire' && xp > 0 ? `+${xp} XP` : '';
@@ -1646,6 +1750,7 @@ function lootRows() { return Array.from(document.querySelectorAll('#loot-list .l
 // cases dont l'ajout dépasserait la charge max. Le pip est fixé à 50 % (= charge_max/2),
 // seuil au-delà duquel le déplacement en combat est divisé par deux.
 function recomputeCharge() {
+	// Butin de victoire → sac du PRINCIPAL (v1) : la jauge lit bien joueurs[0], pas me().
 	const j = state.joueurs[0] || {};
 	const chargeMax = j.charge_max || 0;
 	const base = j.charge || 0;   // déjà porté, incluant les carcasses ramassées en combat
@@ -1708,7 +1813,9 @@ async function leaveCombat() {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────
+lastActorId = (activePlayer(state) || {}).id || null;
 applyPlayerPortrait();
+applyBadgePortraits();   // portraits des badges joueurs du bandeau (un par membre)
 syncViewSize();
 renderTokens();
 refreshBadgeTargets();
@@ -1720,7 +1827,7 @@ refreshTargetSelect();
 updateButtons(state);
 updateJoueur(activePlayer(state));
 updateInitiativeStrip(state);   // pose les anneaux de vie des ennemis dans le header dès le chargement
-document.getElementById('furtif-badge').style.display = (state.joueurs[0] || {}).furtif ? '' : 'none';
+document.getElementById('furtif-badge').style.display = (activePlayer(state) || {}).furtif ? '' : 'none';
 renderEnemyPortrait(state);
 document.getElementById('combat-log').scrollTop = 9999;
 window._combatReady = true;
