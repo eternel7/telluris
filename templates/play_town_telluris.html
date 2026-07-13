@@ -1428,19 +1428,21 @@
 						{% set voc_cout    = (voc_niveau + 1) * xp_voc_coeff %}
 						<div class="sh-section">✦ Expérience</div>
 						<div style="background:var(--btn-bg);border:1px solid var(--border-color);padding:12px;margin-bottom:8px">
+							<!-- Valeurs identifiées : la fiche sert aussi les compagnons (mode compagnon),
+							     donc ce bloc est entièrement re-rendu côté client par _renderXp(). -->
 							<div class="sh-xp-header">
-								<span>XP totale : <strong style="color:var(--accent-color)">{{ xp_total }}</strong></span>
+								<span>XP totale : <strong id="sh-xp-total" style="color:var(--accent-color)">{{ xp_total }}</strong></span>
 								<span style="color:#2ed573">Points : <span id="sh-attribute-points">{{ attribute_points }}</span></span>
 							</div>
 							<div class="val-niveau">
-								<span>{{character["race"]}} Niv. : <strong id="sh-race-niveau" class="race-niveau niveau-nb">{{ niveau }}</strong></span>
-								<span style="white-space: wrap;text-align:right;width: 100%;">Niv. {{ niveau + 1 }} à {{ xp_niv_next }} XP</span>
+								<span><span id="sh-race-label">{{character["race"]}}</span> Niv. : <strong id="sh-race-niveau" class="race-niveau niveau-nb">{{ niveau }}</strong></span>
+								<span id="sh-xp-next-lbl" style="white-space: wrap;text-align:right;width: 100%;">Niv. {{ niveau + 1 }} à {{ xp_niv_next }} XP</span>
 							</div>
 							<div class="sh-xp-bar">
-								<div class="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
+								<div class="sh-xp-fill" id="sh-xp-fill" style="width:{{ xp_bar_pct }}%"></div>
 							</div>
 							<div class="val-niveau">
-								<span>{{ vocation["label"] }} Niv. : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{{ voc_niveau }}</strong></span>
+								<span><span id="sh-voc-label">{{ vocation["label"] }}</span> Niv. : <strong id="sh-voc-niveau" class="voc-niveau niveau-nb">{{ voc_niveau }}</strong></span>
 								<button class="sh-xp-btn" id="sh-btn-voc-niveau"
 										{% if attribute_points < voc_cout %}disabled{% endif %}
 										{% if attribute_points == 0 %}style="display:none"{% endif %}
@@ -2518,6 +2520,20 @@ const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
 const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
 // Grille « Profil modifié » : {code: {base, total, delta, sources:[{origine,nom,icon,delta}]}}
 let _caractsDetail = {{ caracts_detail | tojson | safe }};
+// Bloc ✦ Expérience : ces valeurs suivent le personnage AFFICHÉ (le joueur ou un compagnon),
+// d'où des globales et un rendu client (_renderXp) plutôt que le seul rendu Jinja initial.
+let _xpTotal   = {{ character.get("xp_total", 0) | tojson | safe }};
+let _niveau    = {{ character.get("niveau", 0) | tojson | safe }};
+let _xpNivPrev = {{ xp_niv_prev | tojson | safe }};
+let _xpNivNext = {{ xp_niv_next | tojson | safe }};
+let _raceNom   = {{ character.get("race", "") | tojson | safe }};
+let _vocId     = {{ character.get("voc", "") | tojson | safe }};
+// Icône + libellé par vocation : un compagnon n'a pas forcément celle du joueur.
+const VOC_LABELS = {{ vocations_labels | tojson | safe }};
+function _vocLabel(voc) {
+	const v = VOC_LABELS[voc] || {};
+	return `${v.icon || ''} ${v.label || voc || ''}`.trim();
+}
 const _CARACT_NOMS = [["V","Vitesse"],["F","Force"],["R","Résistance"],["Ag","Agilité"],
 	["Vol","Volonté"],["Int","Intelligence"],["Cha","Charisme"],["Ch","Chance"]];
 const _ORIGINE_LBL = {equipement: "Équipement", competence: "Compétences", effet: "Effets"};
@@ -2529,8 +2545,30 @@ function _xpCostNext(statKey) {
 	return Math.max(0, (cur + 1 - raceMin) * coeff);
 }
 
+// Bloc ✦ Expérience (XP totale, niveau de race, jauge, vocation) — mêmes formules que le
+// rendu Jinja initial, mais sur les globales : elles décrivent le personnage AFFICHÉ, qui
+// peut être un compagnon (race, vocation et seuils d'XP différents).
+function _renderXp() {
+	const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+	set('sh-xp-total', _xpTotal);
+	set('sh-race-label', _raceNom);
+	set('sh-race-niveau', _niveau);
+	set('sh-xp-next-lbl', `Niv. ${_niveau + 1} à ${_xpNivNext} XP`);
+	set('sh-voc-label', (VOC_LABELS[_vocId] || {}).label || _vocId);
+	set('sh-voc-niveau', _vocNiveau);
+	set('sh-voc-cout', (_vocNiveau + 1) * _VOC_COEFF);
+	const fill = document.getElementById('sh-xp-fill');
+	if (fill) {
+		const pct = _xpNivNext > _xpNivPrev
+			? Math.min(100, Math.floor((_xpTotal - _xpNivPrev) / (_xpNivNext - _xpNivPrev) * 100))
+			: 100;
+		fill.style.width = pct + '%';
+	}
+}
+
 function _refreshStatBoxes() {
 	document.getElementById('sh-attribute-points').textContent = _attributePoints;
+	_renderXp();
 	for (const code of ["V","F","R","Ag","Vol","Int","Cha","Ch"]) {
 		const val  = _charStats[code] || 0;
 		const cap  = _statCaps[code]  || 0;
@@ -4587,8 +4625,6 @@ renderFicheCompagnons(AFFINITES_INIT);
 // Deux sections en accordéon : les compagnons (→ fiche complète de chacun) et l'inventaire
 // du groupe (le sac du joueur et celui d'un compagnon côte à côte, flèches de transfert).
 // Accessible PARTOUT, contrairement au tableau de recrutement (lieu recruteur + carte).
-const VOC_LABELS = {{ vocations_labels | tojson | safe }};
-
 let _grpEtat = null;          // dernier payload de GET api/groupe
 let _grpSelId = null;         // compagnon affiché dans la colonne de droite de l'inventaire
 
@@ -4596,11 +4632,6 @@ const GRP_SECTION_KEY = 'telluris.play.groupe_section.' + REL_CHAR_ID;
 const GRP_INV_KEY     = 'telluris.play.groupe_inv.' + REL_CHAR_ID;
 function _grpLsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function _grpLsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-
-function _vocLabel(voc) {
-	const v = VOC_LABELS[voc] || {};
-	return `${v.icon || ''} ${v.label || voc || ''}`.trim();
-}
 
 // Accordéon : une seule section ouverte, mémorisée par personnage.
 function toggleGroupeSection(id) {
@@ -4848,6 +4879,8 @@ async function openCompagnonSheet(avId) {
 			effetsActifs: _effetsActifs, charStats: _charStats, statCaps: _statCaps,
 			attributePoints: _attributePoints, vocNiveau: _vocNiveau, caractsDetail: _caractsDetail,
 			derived: _derivedCur, raceMin: _RACE_MIN, raceMax: _RACE_MAX,
+			xpTotal: _xpTotal, niveau: _niveau, xpNivPrev: _xpNivPrev, xpNivNext: _xpNivNext,
+			raceNom: _raceNom, vocId: _vocId,
 			sorts: _sorts, sortsApprenables: _sortsApprenables, sortsMagies: _sortsMagies,
 			sortsEpingles: _sortsEpingles, competences: _competences,
 			competencesApprenables: _competencesApprenables, competencesEpinglees: _competencesEpinglees,
@@ -4865,6 +4898,9 @@ async function openCompagnonSheet(avId) {
 		_attributePoints = p.attribute_points; _vocNiveau = p.voc_niveau;
 		_caractsDetail = p.caracts_detail; _derivedCur = p.derived_stats;
 		_RACE_MIN = p.race_min; _RACE_MAX = p.race_max;
+		_xpTotal = p.xp_total; _niveau = p.niveau;
+		_xpNivPrev = p.xp_niv_prev; _xpNivNext = p.xp_niv_next;
+		_raceNom = p.race; _vocId = p.voc;
 		_sorts = p.sorts; _sortsApprenables = p.sorts_apprenables; _sortsMagies = p.sorts_magies;
 		_sortsEpingles = p.sorts_epingles; _competences = p.competences;
 		_competencesApprenables = p.competences_apprenables;
@@ -4895,6 +4931,9 @@ function closeCompagnonSheet() {
 		_attributePoints = s.attributePoints; _vocNiveau = s.vocNiveau;
 		_caractsDetail = s.caractsDetail; _derivedCur = s.derived;
 		_RACE_MIN = s.raceMin; _RACE_MAX = s.raceMax;
+		_xpTotal = s.xpTotal; _niveau = s.niveau;
+		_xpNivPrev = s.xpNivPrev; _xpNivNext = s.xpNivNext;
+		_raceNom = s.raceNom; _vocId = s.vocId;
 		_sorts = s.sorts; _sortsApprenables = s.sortsApprenables; _sortsMagies = s.sortsMagies;
 		_sortsEpingles = s.sortsEpingles; _competences = s.competences;
 		_competencesApprenables = s.competencesApprenables;
