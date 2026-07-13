@@ -638,6 +638,42 @@ def _vitals_payload(character: dict) -> dict:
     }
 
 
+def _acteur(current_user, body: dict) -> tuple[dict, dict]:
+	"""Résout le PORTEUR d'une action de fiche : le personnage sélectionné, ou l'un de ses
+	compagnons si le corps porte un `compagnon_id`. Renvoie `(porteur, principal)` — les
+	deux sont le MÊME dict hors mode compagnon (un seul `save_doc` suffit alors).
+
+	Un doc `aventurier:*` est un miroir du character (mêmes champs), donc tous les helpers
+	de ce module s'y appliquent tels quels — c'est déjà ce que fait `_apply_world_turn_groupe`
+	et, en combat, `_actor_character_id`. Il n'a en revanche PAS de `user_id` : l'unique
+	preuve d'appartenance est `groupe_effectif` (statut « embauche » + `embauche_par`)."""
+	principal = get_selected_character(current_user)
+	if not principal:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	compagnon_id = (body or {}).get("compagnon_id")
+	if not compagnon_id:
+		return principal, principal
+
+	av = next(
+		(a for a in recrutement.groupe_effectif(principal, get_doc) if a.get("_id") == compagnon_id),
+		None,
+	)
+	if av is None:
+		raise HTTPException(status_code=403, detail="Ce compagnon ne fait pas partie de votre groupe")
+	return av, principal
+
+
+def _save_acteur(porteur: dict, principal: dict) -> None:
+	"""Sauve le porteur (autoritatif : 409 en cas de conflit) puis, si l'action a aussi muté
+	le personnage principal (le sol lui appartient), son doc en best-effort — même séquence
+	bi-doc que le recrutement et le combat."""
+	if save_doc(porteur) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	if principal is not porteur:
+		save_doc(principal)
+
+
 @user_router.post("/spend_xp")
 async def spend_xp(
 	current_user: Annotated[User, Depends(get_current_user)],
@@ -653,9 +689,7 @@ async def spend_xp(
 	if stat_key not in _VALID_STATS or not isinstance(new_value, int):
 		raise HTTPException(status_code=422, detail="Paramètres invalides")
 
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 
 	races = get_doc("rules:races")
 	race  = next((r for r in races["value"] if r["id"] == character["race"]), None)
@@ -746,9 +780,7 @@ async def equip_item(
 	if not item_id or slot not in _VALID_SLOTS:
 		raise HTTPException(status_code=422, detail="Paramètres invalides")
 
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 
 	inventaire = character.get("inventaire", [])
 	# Référence correspondant à l'item (chaîne legacy ou objet {item, poids}).
@@ -808,9 +840,7 @@ async def unequip_item(
 	if slot not in _VALID_SLOTS:
 		raise HTTPException(status_code=422, detail="Slot invalide")
 
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 
 	slots   = character.get("slots", {})
 	ref = slots.get(slot)
@@ -836,14 +866,19 @@ async def unequip_item(
 	}
 
 
-def _inventory_payload(character: dict) -> dict:
+def _inventory_payload(character: dict, sol_doc: dict | None = None) -> dict:
 	"""Réponse partagée par drop/pickup : inventaire, sol et slots résolus en docs
-	(poids d'instance inclus), plus la charge courante et la charge max."""
+	(poids d'instance inclus), plus la charge courante et la charge max.
+
+	Le SOL n'appartient pas au porteur mais au lieu où se tient le personnage principal :
+	un compagnon n'a ni `lieu` ni `position`. Quand le porteur est un compagnon, on passe
+	donc le doc du principal en `sol_doc` — sac du compagnon, sol du joueur."""
 	slots = character.get("slots", {})
+	sol   = sol_doc if sol_doc is not None else character
 	return {
 		"slots":         {s: resolve_item_ref(v) if v else None for s, v in slots.items()},
 		"inventaire":    [d for r in character.get("inventaire", []) if (d := resolve_item_ref(r))],
-		"objets_au_sol": [d for r in character.get("objets_au_sol", []) if (d := resolve_item_ref(r))],
+		"objets_au_sol": [d for r in sol.get("objets_au_sol", []) if (d := resolve_item_ref(r))],
 		"charge":        round(carried_weight(character), 2),
 		"charge_max":    charge_max_of(character),
 	}
@@ -869,24 +904,23 @@ async def drop_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Pose au sol un objet de l'inventaire (transitoire : perdu au prochain déplacement)."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	"""Pose au sol un objet de l'inventaire (transitoire : perdu au prochain déplacement).
+	Un compagnon pose au sol DU JOUEUR : le sac est le sien, le tas par terre est celui du
+	lieu où se tient le principal."""
+	character, principal = _acteur(current_user, body)
 
 	inventaire = character.get("inventaire", [])
 	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
 	if ref is None:
 		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
 
-	au_sol = character.get("objets_au_sol", [])
+	au_sol = principal.get("objets_au_sol", [])
 	au_sol.append(ref)
 	character["inventaire"]    = inventaire
-	character["objets_au_sol"] = au_sol
+	principal["objets_au_sol"] = au_sol
 
-	if save_doc(character) is None:
-		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	return _inventory_payload(character)
+	_save_acteur(character, principal)
+	return _inventory_payload(character, principal)
 
 
 @user_router.post("/pickup_item")
@@ -942,9 +976,7 @@ async def consommer_item(
 	"""Consomme un item du sac (potion, nourriture…) : applique la part instantanée
 	(pv/pm, clampée aux max) et empile l'éventuel effet à durée (buffs/régén, décrémenté
 	à chaque tour monde). Pas de garde de surcharge : consommer allège."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, principal = _acteur(current_user, body)
 
 	inventaire = character.get("inventaire", [])
 	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
@@ -964,7 +996,7 @@ async def consommer_item(
 
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	payload = _inventory_payload(character)
+	payload = _inventory_payload(character, principal)
 	payload["vitals"] = _vitals_payload(character)
 	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
 	payload["caracts_detail"] = _caracts_payload(character)
@@ -1049,10 +1081,9 @@ async def apprendre_sort(
 ):
 	"""Apprend un sort : coût en points de caractéristique ((niveau+1) × SORT_COUT_COEFF),
 	niveau de vocation suffisant et grimoire l'enseignant porté (sac ou équipé, NON
-	consommé — un livre se relit). Ajoute l'id à `sorts_connus`."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	consommé — un livre se relit). Ajoute l'id à `sorts_connus`. Un compagnon apprend avec
+	SES points et le grimoire porté dans SON sac (d'où le transfert d'objets du groupe)."""
+	character, _principal = _acteur(current_user, body)
 
 	sort = sorts_util.normaliser_sort(get_doc(body.get("sort_id")))
 	if not sort:
@@ -1147,9 +1178,7 @@ async def apprendre_competence(
 	((niveau + 1) × COMPETENCE_COUT_COEFF) et niveau de vocation suffisant. Miroir de
 	`apprendre_sort`, sans grimoire (l'équivalent viendra avec l'arbre de compétences).
 	Ajoute l'id à `competences_connues` et re-dénormalise le bonus des passives."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 
 	comp = competences_util.normaliser_competence(get_doc(body.get("competence_id")))
 	if not comp:
@@ -1193,9 +1222,7 @@ async def apprendre_magie(
 	"""Achète la PRATIQUE d'une nouvelle école de magie (réservé aux vocations
 	polyvalentes — le lettré). Coût en points de caractéristique = cout_ecole(0). Ajoute
 	l'école à `magies_apprises` au niveau 0 ; débloque l'apprentissage de ses sorts."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 	if not sorts_util.peut_apprendre_magie(character):
 		raise HTTPException(status_code=403, detail="Cette vocation ne peut pas apprendre d'autres écoles de magie.")
 
@@ -1231,9 +1258,7 @@ async def monter_magie(
 ):
 	"""Monte d'un niveau une école ACHETÉE (dans `magies_apprises`). Coût =
 	cout_ecole(niveau courant). L'école native se monte via spend_xp_vocation."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 
 	vocations = get_doc("rules:vocations")
 	ecole = str(body.get("ecole") or "").strip()
@@ -1268,9 +1293,7 @@ async def epingler_sort(
 	"""Épingle/désépingle un sort connu en accès rapide (barre d'icônes en combat).
 	Matérialise d'abord la liste effective (défaut = premier sort connu auto-épinglé,
 	cf. `sorts_epingles_effectifs`) pour que le choix du joueur reste explicite."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 
 	sort_id = body.get("sort_id")
 	if sort_id not in (character.get("sorts_connus") or []):
@@ -1297,9 +1320,7 @@ async def epingler_competence(
 	"""Épingle/désépingle une compétence ACTIVE connue en accès rapide (barre d'icônes
 	en combat) — miroir d'epingler_sort. Matérialise d'abord la liste effective (défaut
 	= première active connue auto-épinglée, cf. competences_epinglees_effectives)."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 
 	competence_id = body.get("competence_id")
 	if competence_id not in (character.get("competences_connues") or []):
@@ -1688,13 +1709,12 @@ async def marchander_item(
 @user_router.post("/spend_xp_vocation")
 async def spend_xp_vocation(
 	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(default={}),
 ):
 	if not current_user:
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	character, _principal = _acteur(current_user, body)
 
 	voc = character.get("voc", "")
 	vocations_niveaux = character.get("vocations_niveaux", {})

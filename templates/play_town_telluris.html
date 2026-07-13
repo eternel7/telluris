@@ -1327,7 +1327,7 @@
 		</section>
 		<footer class="management-footer">
 			<button class="manage-btn" onclick="openSheet()">👤 Personnage</button>
-			<button class="manage-btn">👥 Groupe</button>
+			<button class="manage-btn" onclick="openGroupe()">👥 Groupe</button>
 		</footer>
 	</div><!-- /#game-container -->
 	<div id="sheet-panel" class="panel-hidden panel-frame" aria-label="Fiche personnage">
@@ -1407,10 +1407,10 @@
 					<div class="sheet-tabs-scroll">
 						<button class="sheet-tab-btn active" onclick="sheetTab('stats', this)"      role="tab" aria-selected="true">📊 Stats</button>
 						<button class="sheet-tab-btn"        onclick="sheetTab('inventaire', this)" role="tab">🎒 Inventaire</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('quetes', this)"     role="tab">📜 Quêtes</button>
+						<button class="sheet-tab-btn tab-principal-only" onclick="sheetTab('quetes', this)"     role="tab">📜 Quêtes</button>
 						<button class="sheet-tab-btn"        onclick="sheetTab('competences', this)" role="tab">⚡ Compétences</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
-						<button class="sheet-tab-btn"        onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
+						<button class="sheet-tab-btn tab-principal-only" onclick="sheetTab('relations', this)"  role="tab">🤝 Relations</button>
+						<button class="sheet-tab-btn tab-principal-only" onclick="sheetTab('journal', this)"    role="tab">📖 Journal</button>
 					</div>
 					<button id="close-sheet" class="sheet-tab-btn close-sheet-btn" onclick="closeSheet()" role="button">✕ Fermer</button>
 				</nav>
@@ -1719,12 +1719,90 @@
 		<h2 style="margin:1rem 0 0">🗒️ Recrues disponibles</h2>
 		<ul id="rec-recrues-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
 	</div><!-- /#recrutement-panel -->
+	<div id="groupe-panel" class="panel-hidden panel-frame board-panel" aria-label="Gestion du groupe">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Gestion du groupe">
+			<h2>👥 Votre groupe (<span id="grp-plafond"></span>)</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeGroupe()" role="button">✕ Fermer</button>
+		</div>
+		<!-- Accordéon : une section ouverte à la fois (choix mémorisé par personnage). -->
+		<section class="grp-section">
+			<button type="button" class="grp-head" id="grp-head-compagnons" onclick="toggleGroupeSection('compagnons')">
+				<span>👥 Compagnons</span><span class="grp-chevron">▾</span>
+			</button>
+			<div class="grp-body" id="grp-body-compagnons">
+				<ul id="grp-compagnons-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+			</div>
+		</section>
+		<section class="grp-section">
+			<button type="button" class="grp-head" id="grp-head-inventaire" onclick="toggleGroupeSection('inventaire')">
+				<span>🎒 Inventaire du groupe</span><span class="grp-chevron">▾</span>
+			</button>
+			<div class="grp-body" id="grp-body-inventaire">
+				<div id="grp-inv-vide" class="sh-empty" style="display:none">
+					<span class="sh-empty-icon">👥</span>Aucun compagnon : rien à échanger.
+				</div>
+				<div id="grp-inv-wrap" class="grp-inv-wrap">
+					<div class="grp-inv-col">
+						<div class="grp-inv-head">
+							<strong id="grp-inv-nom-principal">Vous</strong>
+							<span class="sh-inv-poids" id="grp-inv-charge-principal"></span>
+						</div>
+						<div class="sh-inv-scroll scrollable"><div id="grp-inv-principal" class="sh-inv-box"></div></div>
+					</div>
+					<div class="grp-inv-col">
+						<div class="grp-inv-head">
+							<select id="grp-inv-select" onchange="onGroupeInvSelect(this.value)"></select>
+							<span class="sh-inv-poids" id="grp-inv-charge-compagnon"></span>
+						</div>
+						<div class="sh-inv-scroll scrollable"><div id="grp-inv-compagnon" class="sh-inv-box"></div></div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div><!-- /#groupe-panel -->
 	<style>
 		/* Portrait rond d'une recrue/compagnon dans les listes du panneau de recrutement. */
 		.rec-portrait {
 			width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
 			border: 2px solid var(--accent, #b98c4a); flex-shrink: 0;
 		}
+		/* ── Panneau 👥 Groupe ────────────────────────────────────────────────── */
+		.grp-section { border: 1px solid var(--border-color, #6b5836); border-radius: 6px; overflow: hidden; }
+		.grp-head {
+			width: 100%; display: flex; align-items: center; justify-content: space-between;
+			padding: .6rem .8rem; background: rgba(0,0,0,.18); border: 0; cursor: pointer;
+			color: inherit; font: inherit; font-weight: 700;
+		}
+		.grp-head:hover { background: rgba(0,0,0,.28); }
+		.grp-chevron { transition: transform .15s ease; }
+		.grp-section.open .grp-chevron { transform: rotate(180deg); }
+		.grp-body { display: none; padding: .7rem .8rem; }
+		.grp-section.open .grp-body { display: block; }
+		/* Les deux sacs côte à côte ; en dessous de 720px ils s'empilent (les flèches
+		   gardent leur sens : ← / → restent lisibles en colonne). */
+		.grp-inv-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+		@media (max-width: 720px) { .grp-inv-wrap { grid-template-columns: 1fr; } }
+		.grp-inv-col { min-width: 0; }
+		.grp-inv-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .35rem; }
+		.grp-inv-head select { max-width: 65%; }
+		/* Flèche de transfert : désactivée (et explicite) quand l'objet ne rentre pas chez
+		   le destinataire — le serveur refuserait de toute façon (409). */
+		.grp-move-btn {
+			border: 1px solid var(--border-color, #6b5836); background: rgba(0,0,0,.25);
+			color: inherit; border-radius: 4px; cursor: pointer; padding: 0 .45rem; font-size: 1rem;
+		}
+		.grp-move-btn:hover:not(:disabled) { background: var(--accent, #b98c4a); color: #1c1710; }
+		.grp-move-btn:disabled { opacity: .3; cursor: not-allowed; }
+		.grp-charge-over { color: #e06c5a; }
+		/* Fiche d'un compagnon : les onglets propres au personnage principal disparaissent
+		   (un compagnon n'a ni quêtes, ni relations marchandes, ni journal). Le SOL reste
+		   affiché — c'est là que tombe ce qu'un compagnon « pose » (le sol appartient au
+		   lieu où se tient le joueur) —, mais « Prendre » est masqué : le ramassage revient
+		   au personnage principal, il n'a pas de sens depuis la fiche d'un compagnon. */
+		body.sheet-compagnon .tab-principal-only { display: none !important; }
+		body.sheet-compagnon .sh-pickup-btn { display: none !important; }
 	</style>
 	<style>
 		/* ── Panneau de dialogue PNJ ─────────────────────────────────────────── */
@@ -2385,6 +2463,9 @@ function openSheet() {
 	window.scrollTo({ top: 0, behavior: 'instant' });
 }
 function closeSheet() {
+	// En mode compagnon, ✕ Fermer (et Échap) rendent la main au groupe, pas à la ville :
+	// on restaure d'abord la fiche du joueur (cf. closeCompagnonSheet).
+	if (_compagnonActif) { closeCompagnonSheet(); return; }
 	document.getElementById('game-container').classList.remove('panel-hidden');
 	document.getElementById('sheet-panel').classList.add('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2401,6 +2482,8 @@ document.addEventListener('keydown', e => {
 	if (itemOv && !itemOv.classList.contains('item-detail-hidden')) { closeItemDetail(); return; }
 	const sell = document.getElementById('sell-panel');
 	if (sell && !sell.classList.contains('panel-hidden')) { closeSellPanel(); return; }
+	const groupe = document.getElementById('groupe-panel');
+	if (groupe && !groupe.classList.contains('panel-hidden')) { closeGroupe(); return; }
 	closeSheet();
 });
 
@@ -2423,8 +2506,10 @@ document.addEventListener('click', e => {
 });
 
 // ── Dépense d'XP ─────────────────────────────────────────────
-const _RACE_MIN  = {{ race["stats"]     | tojson | safe }};
-const _RACE_MAX  = {{ race["stats_max"] | tojson | safe }};
+// Bornes raciales : `let` et non `const` — la fiche sert aussi les compagnons, qui peuvent
+// être d'une autre race (openCompagnonSheet les remplace, closeCompagnonSheet les restaure).
+let _RACE_MIN  = {{ race["stats"]     | tojson | safe }};
+let _RACE_MAX  = {{ race["stats_max"] | tojson | safe }};
 let _charStats   = {{ character["caracteristiques_current"] | tojson | safe }};
 let _statCaps    = {{ stat_caps | tojson | safe }};
 let _attributePoints = {{ character.get("attribute_points", 0) | tojson | safe }};
@@ -2532,17 +2617,19 @@ function _renderCaractsMod(detail) {
 		}
 		const bar = document.getElementById('sh-stat-bar-' + code);
 		if (!bar) continue;
-		console.log(d,bar,bar.dataset.maxrace);
-		const maxRaceStr = bar.dataset.maxrace;
-		if(maxRaceStr) {
-			const maxRace = parseInt(maxRaceStr, 10);
-			const progression = d.total / maxRace * 100;
-			bar.style.width = progression + '%';
-		}
+		// Échelle = plafond RACIAL du personnage affiché : _RACE_MAX suit le compagnon en
+		// mode compagnon (le data-attribut, lui, est figé sur la race du joueur par Jinja).
+		const maxRace = _RACE_MAX[code] || parseInt(bar.dataset.maxrace, 10);
+		if (maxRace) bar.style.width = (d.total / maxRace * 100) + '%';
 	}
 }
 
+// Dernières dérivées affichées : mémorisées pour pouvoir restaurer la fiche du joueur
+// après un détour par celle d'un compagnon (le DOM est la seule autre trace).
+let _derivedCur = {{ character.get("derived_stats", {}) | tojson | safe }};
+
 function _refreshDerivedStats(d) {
+	if (d) _derivedCur = d;
 	const units = {deplacement: ' cases', charge_max: ' kg'};
 	for (const key of ['pv_max','pm_max','initiative','deplacement','cc','cd','pa','pm_def','degats_cc','degats_cd','charge_max']) {
 		const el = document.getElementById('sh-drv-' + key);
@@ -2565,6 +2652,7 @@ async function spendXpVocation() {
 		const res = await fetch('api/spend_xp_vocation', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(_actionBody({}))
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
@@ -2590,7 +2678,7 @@ async function spendXp(statKey) {
 		const res = await fetch('api/spend_xp', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({stat: statKey, new_value: newVal})
+			body: JSON.stringify(_actionBody({stat: statKey, new_value: newVal}))
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
@@ -3264,7 +3352,7 @@ async function consommerItem(index, itemId, btn) {
 	try {
 		const res = await fetch('api/consommer', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ index, item_id: itemId })
+			body: JSON.stringify(_actionBody({ index, item_id: itemId }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -3439,7 +3527,7 @@ async function apprendreMagie(ecole, btn) {
 	try {
 		const res = await fetch('api/apprendre_magie', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ ecole })
+			body: JSON.stringify(_actionBody({ ecole }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -3455,7 +3543,7 @@ async function monterMagie(ecole, btn) {
 	try {
 		const res = await fetch('api/monter_magie', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ ecole })
+			body: JSON.stringify(_actionBody({ ecole }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -3471,7 +3559,7 @@ async function apprendreSort(sortId, btn) {
 	try {
 		const res = await fetch('api/apprendre_sort', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ sort_id: sortId })
+			body: JSON.stringify(_actionBody({ sort_id: sortId }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -3532,7 +3620,7 @@ async function epinglerCompetence(competenceId, btn) {
 	try {
 		const res = await fetch('api/epingler_competence', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ competence_id: competenceId, epingle })
+			body: JSON.stringify(_actionBody({ competence_id: competenceId, epingle }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -3592,7 +3680,7 @@ async function apprendreCompetence(competenceId, btn) {
 	try {
 		const res = await fetch('api/apprendre_competence', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ competence_id: competenceId })
+			body: JSON.stringify(_actionBody({ competence_id: competenceId }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -3614,7 +3702,7 @@ async function epinglerSort(sortId, btn) {
 	try {
 		const res = await fetch('api/epingler_sort', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ sort_id: sortId, epingle })
+			body: JSON.stringify(_actionBody({ sort_id: sortId, epingle }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -3627,7 +3715,7 @@ async function dropItem(index, itemId) {
 	try {
 		const res  = await fetch('api/drop_item', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({index, item_id: itemId})
+			body: JSON.stringify(_actionBody({index, item_id: itemId}))
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
@@ -3675,7 +3763,7 @@ async function equip(itemId, slot) {
 		const res  = await fetch('api/equip', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({item_id: itemId, slot})
+			body: JSON.stringify(_actionBody({item_id: itemId, slot}))
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
@@ -3694,7 +3782,7 @@ async function unequip(slot) {
 		const res  = await fetch('api/unequip', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({slot})
+			body: JSON.stringify(_actionBody({slot}))
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
@@ -4478,6 +4566,13 @@ async function congedierAventurier(avId) {
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
 		if ('recrues' in data) renderRecrutement(data);
 		else if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
+		// Congédier depuis le panneau 👥 : son état (liste ET sacs) doit être re-tiré, le
+		// payload du congédiement ne porte pas les inventaires.
+		const grp = document.getElementById('groupe-panel');
+		if (grp && !grp.classList.contains('panel-hidden')) {
+			const r2 = await fetch('api/groupe');
+			if (r2.ok) renderGroupe(await r2.json());
+		}
 		if (data.congedie) showToast('👋 ' + data.congedie.nom + ' quitte le groupe.');
 	} catch(err) { console.error('Erreur congédiement', err); }
 }
@@ -4487,6 +4582,335 @@ async function congedierAventurier(avId) {
 const AFFINITES_INIT = {{ affinites_detail | tojson | safe }};
 renderFicheCompagnons(AFFINITES_INIT);
 {{ compagnons_partis | tojson | safe }}.forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+
+// ── Panneau 👥 Groupe ───────────────────────────────────────────────────────────
+// Deux sections en accordéon : les compagnons (→ fiche complète de chacun) et l'inventaire
+// du groupe (le sac du joueur et celui d'un compagnon côte à côte, flèches de transfert).
+// Accessible PARTOUT, contrairement au tableau de recrutement (lieu recruteur + carte).
+const VOC_LABELS = {{ vocations_labels | tojson | safe }};
+
+let _grpEtat = null;          // dernier payload de GET api/groupe
+let _grpSelId = null;         // compagnon affiché dans la colonne de droite de l'inventaire
+
+const GRP_SECTION_KEY = 'telluris.play.groupe_section.' + REL_CHAR_ID;
+const GRP_INV_KEY     = 'telluris.play.groupe_inv.' + REL_CHAR_ID;
+function _grpLsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function _grpLsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+function _vocLabel(voc) {
+	const v = VOC_LABELS[voc] || {};
+	return `${v.icon || ''} ${v.label || voc || ''}`.trim();
+}
+
+// Accordéon : une seule section ouverte, mémorisée par personnage.
+function toggleGroupeSection(id) {
+	const ouvrir = !document.getElementById('grp-head-' + id).parentElement.classList.contains('open');
+	['compagnons', 'inventaire'].forEach(s => {
+		document.getElementById('grp-head-' + s).parentElement
+			.classList.toggle('open', s === id && ouvrir);
+	});
+	_grpLsSet(GRP_SECTION_KEY, ouvrir ? id : '');
+}
+
+function renderGroupe(data) {
+	_grpEtat = data;
+	const groupe = data.groupe || [];
+	const plafond = document.getElementById('grp-plafond');
+	if (plafond) plafond.textContent = `${groupe.length}/${data.plafond}`;
+
+	const liste = document.getElementById('grp-compagnons-list');
+	if (liste) {
+		liste.innerHTML = groupe.length ? groupe.map(c => `<li class="sh-inv-item">
+			<img class="rec-portrait" src="/characters/${c.image}" alt="" onerror="this.style.display='none'">
+			<span>
+				<strong>${c.prenom} ${c.nom}</strong> <span class="sh-inv-poids">${c.race} · ${_vocLabel(c.voc)} · rang ${c.rang} (niv. ${c.niveau})</span><br>
+				<span class="sh-inv-poids">❤️ ${c.currentPV}/${c.pv_max} PV · 🔵 ${c.currentPM}/${c.pm_max} PM · 💰 part ${(c.exigences_effectives || {}).part_butin_pct}% · 🤝 ${c.affinite === null || c.affinite === undefined ? 50 : c.affinite}</span>
+			</span>
+			<span class="sh-inv-actions">
+				<button class="sh-equip-btn" onclick="openCompagnonSheet('${c.id}')" title="Ouvrir sa fiche (stats, sac, compétences)">📋 Fiche</button>
+				<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${c.id}')" title="Congédier (le lien est conservé)">✕ Congédier</button>
+			</span>
+		</li>`).join('') : '<li class="sell-empty">Personne ne vous accompagne.</li>';
+	}
+	renderGroupeInventaire();
+}
+
+// Sacs côte à côte. Le compagnon affiché à droite est le dernier choisi (mémorisé), à
+// défaut le premier du groupe.
+function renderGroupeInventaire() {
+	const data = _grpEtat || {};
+	const groupe = data.groupe || [];
+	const vide = document.getElementById('grp-inv-vide');
+	const wrap = document.getElementById('grp-inv-wrap');
+	if (!wrap) return;
+	if (!groupe.length) {
+		if (vide) vide.style.display = '';
+		wrap.style.display = 'none';
+		return;
+	}
+	if (vide) vide.style.display = 'none';
+	wrap.style.display = '';
+
+	const ids = groupe.map(c => c.id);
+	if (!ids.includes(_grpSelId)) {
+		const memo = _grpLsGet(GRP_INV_KEY);
+		_grpSelId = ids.includes(memo) ? memo : ids[0];
+	}
+	const sel = document.getElementById('grp-inv-select');
+	if (sel) {
+		sel.innerHTML = groupe.map(c =>
+			`<option value="${c.id}"${c.id === _grpSelId ? ' selected' : ''}>${c.prenom} ${c.nom}</option>`).join('');
+		// Un seul compagnon : le sélecteur n'a rien à sélectionner, il devient une étiquette.
+		sel.disabled = groupe.length < 2;
+	}
+
+	const principal = data.principal || {};
+	const compagnon = (data.sacs || {})[_grpSelId] || {inventaire: [], charge: 0, charge_max: 0};
+	_grpCharge('grp-inv-charge-principal', principal);
+	_grpCharge('grp-inv-charge-compagnon', compagnon);
+	document.getElementById('grp-inv-principal').innerHTML =
+		_grpSac(principal.inventaire, compagnon, 'vers_compagnon');
+	document.getElementById('grp-inv-compagnon').innerHTML =
+		_grpSac(compagnon.inventaire, principal, 'vers_principal');
+}
+
+function _grpCharge(elId, porteur) {
+	const el = document.getElementById(elId);
+	if (!el) return;
+	const charge = +(porteur.charge || 0), max = +(porteur.charge_max || 0);
+	el.textContent = `${charge.toFixed(1)} / ${max} kg`;
+	el.classList.toggle('grp-charge-over', charge > max + 1e-6);
+}
+
+// Une ligne par objet ; la flèche est grisée quand l'objet ne rentre pas chez le
+// destinataire — même arithmétique que `peut_porter` côté serveur, qui refuserait (409).
+function _grpSac(items, dest, sens) {
+	items = items || [];
+	if (!items.length) return '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>';
+	const libre = +(dest.charge_max || 0) - +(dest.charge || 0);
+	const fleche = sens === 'vers_compagnon' ? '→' : '←';
+	return items.map((item, idx) => {
+		if (!item || typeof item !== 'object') return '';
+		const poids = +(item.poids || 0);
+		const rentre = poids <= libre + 1e-6;
+		const btn = `<button class="grp-move-btn" ${rentre ? '' : 'disabled'}
+			title="${rentre ? 'Transférer' : 'Trop lourd — le destinataire est à sa charge maximale'}"
+			onclick="transfererItem('${sens}',${idx},'${item._id}')">${fleche}</button>`;
+		const row = `<span class="sh-inv-name">${item.icon || '📦'} ${item.nom || '—'}</span>
+			<span class="sh-inv-poids">${poids.toFixed(1)} kg</span>`;
+		// Le bouton se place du côté où part l'objet : à droite pour →, à gauche pour ←.
+		return `<div class="sh-inv-item">${sens === 'vers_principal' ? btn + row : row + btn}</div>`;
+	}).join('');
+}
+
+function onGroupeInvSelect(avId) {
+	_grpSelId = avId;
+	_grpLsSet(GRP_INV_KEY, avId);
+	renderGroupeInventaire();
+}
+
+async function transfererItem(sens, index, itemId) {
+	try {
+		const res = await fetch('api/groupe/transferer', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ compagnon_id: _grpSelId, sens, index, item_id: itemId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		// Le sac du joueur est aussi celui de la fiche : on resynchronise les deux vues.
+		_inventaire = data.principal.inventaire;
+		_slots      = data.principal.slots;
+		_chargeMax  = data.principal.charge_max;
+		_refreshInventaire();
+		_refreshChargeGauge();
+		if (_grpEtat) {
+			_grpEtat.principal = Object.assign({}, _grpEtat.principal, {
+				inventaire: data.principal.inventaire,
+				charge: data.principal.charge, charge_max: data.principal.charge_max,
+			});
+			(_grpEtat.sacs || {})[data.compagnon_id] = {
+				inventaire: data.compagnon.inventaire,
+				charge: data.compagnon.charge, charge_max: data.compagnon.charge_max,
+			};
+			renderGroupeInventaire();
+		}
+		const t = data.transfere || {};
+		showToast(`${t.icon || '📦'} ${t.nom} ${t.vers === 'compagnon' ? '→' : '←'} ${t.poids} kg`);
+	} catch (err) { console.error('Erreur transfert', err); }
+}
+
+async function openGroupe() {
+	try {
+		const res = await fetch('api/groupe');
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		renderGroupe(data);
+		if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
+		(data.departs || []).forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+		const ouverte = _grpLsGet(GRP_SECTION_KEY);
+		['compagnons', 'inventaire'].forEach(s => {
+			document.getElementById('grp-head-' + s).parentElement
+				.classList.toggle('open', s === (ouverte === null ? 'compagnons' : ouverte));
+		});
+		document.getElementById('game-container').classList.add('panel-hidden');
+		document.getElementById('groupe-panel').classList.remove('panel-hidden');
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} catch (err) { console.error('Erreur panneau groupe', err); }
+}
+
+function closeGroupe() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('groupe-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Fiche d'un compagnon : le panneau de fiche, en « mode compagnon » ───────────
+// On ne duplique aucun rendu : les globales du joueur sont mises de côté, remplacées par
+// celles du compagnon, et TOUTES les fonctions de rendu existantes sont rappelées telles
+// quelles. Les actions, elles, partent avec un `compagnon_id` (_actionBody) — le serveur
+// résout alors le porteur (cf. `_acteur`, routers/user.py).
+let _compagnonActif = null;   // payload de GET api/groupe/compagnon/{id}
+let _sheetSnap = null;        // état du personnage principal, restauré à la fermeture
+
+function _actionBody(extra) {
+	return _compagnonActif ? Object.assign({}, extra, { compagnon_id: _compagnonActif.id }) : extra;
+}
+
+function _sheetIdentiteEls() {
+	return {
+		gauche: document.querySelector('.sheet-left-info'),
+		droite: document.querySelector('#personnage .char-identity'),
+		imgGauche: document.querySelector('.sheet-left-portrait img'),
+		imgDroite: document.getElementById('img-portrait'),
+		barres: Array.from(document.querySelectorAll('#sheet-panel .portrait-stat-bar .bar-fill')),
+	};
+}
+
+// Identité + portraits + barres PV/PM des deux colonnes de la fiche. On réécrit le HTML
+// des blocs d'identité (gabarit part-character-identity.html) : c'est aussi ce qui permet
+// de tout restaurer d'un coup à la fermeture (snapshot de leur innerHTML).
+function _applySheetIdentite(p) {
+	const els = _sheetIdentiteEls();
+	const v = p.vitals || {};
+	const pvPct = v.pv_max ? Math.min(100, Math.round(v.currentPV / v.pv_max * 100)) : 0;
+	const pmPct = v.pm_max ? Math.min(100, Math.round(v.currentPM / v.pm_max * 100)) : 0;
+	const nom = `${p.prenom} ${p.nom}`;
+	const classe = `${_vocLabel(p.voc)} Niv.<span class="voc-niveau niveau-nb">${p.voc_niveau}</span>`
+		+ ` - ${p.race} Niv.<span class="race-niveau niveau-nb">${p.niveau}</span> · Rang ${p.rang}`;
+	const vitals = `<span class="pv-val">PV ${v.currentPV}/${v.pv_max}</span>`
+		+ `<span class="pm-val">PM ${v.currentPM}/${v.pm_max}</span>`;
+	if (els.gauche) {
+		els.gauche.innerHTML = `<div class="char-name">${nom}</div>`
+			+ `<div class="char-class">${classe}</div>`
+			+ `<div class="char-vitals" style="margin-top:8px">${vitals}</div>`
+			+ `<div id="sh-effets-actifs" class="sh-effets-chips"></div>`;
+	}
+	if (els.droite) {
+		els.droite.innerHTML = `<div class="char-name">${nom}</div>`
+			+ `<div class="char-class">${classe}</div>`
+			+ `<div class="char-vitals">${vitals}</div>`;
+	}
+	if (els.imgGauche) els.imgGauche.src = '/characters/' + p.image;
+	if (els.imgDroite) els.imgDroite.src = '/characters/' + p.image;
+	els.barres.forEach((b, i) => { b.style.height = (i % 2 === 0 ? pvPct : pmPct) + '%'; });
+}
+
+function _sheetRendreTout() {
+	_refreshStatBoxes();
+	_refreshDerivedStats(_derivedCur);
+	_renderCaractsMod();
+	_refreshPaperdoll();
+	_refreshInventaire();
+	_refreshSol();
+	_refreshChargeGauge();
+	_renderEffetsActifs(_effetsActifs);
+	_renderSorts();
+	_renderSortsMagies();
+	_renderSortsApprenables();
+	_renderCompetences();
+	_renderCompetencesApprenables();
+	_syncPoints(_attributePoints);
+}
+
+async function openCompagnonSheet(avId) {
+	try {
+		const res = await fetch('api/groupe/compagnon/' + encodeURIComponent(avId));
+		const p = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + p.detail); return; }
+
+		const els = _sheetIdentiteEls();
+		// `_objetsAuSol` n'est PAS mis de côté : le sol appartient au lieu, pas au porteur.
+		// Il reste donc à jour pendant tout le détour (ce qu'un compagnon « pose » y tombe)
+		// et doit être conservé tel quel au retour — le figer ici ferait disparaître de la
+		// vue du joueur ce que son compagnon vient de poser.
+		_sheetSnap = {
+			inventaire: _inventaire, slots: _slots, chargeMax: _chargeMax,
+			effetsActifs: _effetsActifs, charStats: _charStats, statCaps: _statCaps,
+			attributePoints: _attributePoints, vocNiveau: _vocNiveau, caractsDetail: _caractsDetail,
+			derived: _derivedCur, raceMin: _RACE_MIN, raceMax: _RACE_MAX,
+			sorts: _sorts, sortsApprenables: _sortsApprenables, sortsMagies: _sortsMagies,
+			sortsEpingles: _sortsEpingles, competences: _competences,
+			competencesApprenables: _competencesApprenables, competencesEpinglees: _competencesEpinglees,
+			htmlGauche: els.gauche ? els.gauche.innerHTML : '',
+			htmlDroite: els.droite ? els.droite.innerHTML : '',
+			imgGauche: els.imgGauche ? els.imgGauche.getAttribute('src') : '',
+			imgDroite: els.imgDroite ? els.imgDroite.getAttribute('src') : '',
+			barres: els.barres.map(b => b.style.height),
+		};
+
+		_compagnonActif = p;
+		_inventaire = p.inventaire; _slots = p.slots; _objetsAuSol = p.objets_au_sol;
+		_chargeMax = p.charge_max; _effetsActifs = p.effets_actifs;
+		_charStats = p.caracteristiques_current; _statCaps = p.stat_caps;
+		_attributePoints = p.attribute_points; _vocNiveau = p.voc_niveau;
+		_caractsDetail = p.caracts_detail; _derivedCur = p.derived_stats;
+		_RACE_MIN = p.race_min; _RACE_MAX = p.race_max;
+		_sorts = p.sorts; _sortsApprenables = p.sorts_apprenables; _sortsMagies = p.sorts_magies;
+		_sortsEpingles = p.sorts_epingles; _competences = p.competences;
+		_competencesApprenables = p.competences_apprenables;
+		_competencesEpinglees = p.competences_epinglees;
+
+		document.body.classList.add('sheet-compagnon');
+		_applySheetIdentite(p);
+		_sheetRendreTout();
+
+		document.getElementById('groupe-panel').classList.add('panel-hidden');
+		document.getElementById('sheet-panel').classList.remove('panel-hidden');
+		sheetTab('stats', document.querySelector('.sheet-tab-btn'));
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} catch (err) { console.error('Erreur fiche compagnon', err); }
+}
+
+// Retour au joueur : on restaure l'état mis de côté, puis on rouvre le panneau du groupe
+// (les charges ont pu changer — équipement, objets posés).
+function closeCompagnonSheet() {
+	const s = _sheetSnap;
+	_compagnonActif = null;
+	_sheetSnap = null;
+	document.body.classList.remove('sheet-compagnon');
+	if (s) {
+		_inventaire = s.inventaire; _slots = s.slots;   // `_objetsAuSol` : cf. openCompagnonSheet
+		_chargeMax = s.chargeMax; _effetsActifs = s.effetsActifs;
+		_charStats = s.charStats; _statCaps = s.statCaps;
+		_attributePoints = s.attributePoints; _vocNiveau = s.vocNiveau;
+		_caractsDetail = s.caractsDetail; _derivedCur = s.derived;
+		_RACE_MIN = s.raceMin; _RACE_MAX = s.raceMax;
+		_sorts = s.sorts; _sortsApprenables = s.sortsApprenables; _sortsMagies = s.sortsMagies;
+		_sortsEpingles = s.sortsEpingles; _competences = s.competences;
+		_competencesApprenables = s.competencesApprenables;
+		_competencesEpinglees = s.competencesEpinglees;
+
+		const els = _sheetIdentiteEls();
+		if (els.gauche) els.gauche.innerHTML = s.htmlGauche;
+		if (els.droite) els.droite.innerHTML = s.htmlDroite;
+		if (els.imgGauche) els.imgGauche.src = s.imgGauche;
+		if (els.imgDroite) els.imgDroite.src = s.imgDroite;
+		els.barres.forEach((b, i) => { b.style.height = s.barres[i] || '0%'; });
+		_sheetRendreTout();
+	}
+	document.getElementById('sheet-panel').classList.add('panel-hidden');
+	openGroupe();
+}
 
 // ── Dialogue PNJ (🗣) ───────────────────────────────────────────────────────
 // Panneau plein écran (pattern quêtes/marché). Navigation stateless : chaque choix

@@ -31,6 +31,7 @@ from utils import pnj as pnj_util
 from utils import intro as intro_util
 from utils import transport as transport_util
 from utils import recrutement as recrutement_util
+from utils import fiche as fiche_util
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -579,43 +580,12 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 
 	access = get_lieu_directions(current_user, grid_doc, position)
 
-	stats_cur = character.get("caracteristiques_current", {})
-	# Bonus d'équipement recalculé depuis les items équipés (slots = IDs à ce stade, avant
-	# leur résolution en docs plus bas) : toute modif d'item en base est ainsi reflétée au
-	# rechargement sans ré-équiper. Dénormalisé sur le perso AVANT caracts_avec_buffs, qui
-	# y lit les buffs de caractéristiques portés par les objets (champ item `bonus`).
-	eq_bonus = sync_equipment_bonus(character)
-	# Dérivées affichées avec tous les buffs (équipement, passives, consommables/sorts) ;
-	# `stats_cur` (brut) reste la référence pour les plafonds/coûts d'XP (stat_caps) et la
-	# première grille Caractéristiques.
-	stats_buff = consommables.caracts_avec_buffs(character)
-	base = BaseStats(
-		v=stats_buff.get("V", 0),
-		f=stats_buff.get("F", 0),
-		r=stats_buff.get("R", 0),
-		ag=stats_buff.get("Ag", 0),
-		vol=stats_buff.get("Vol", 0),
-		int_=stats_buff.get("Int", 0),
-		cha=stats_buff.get("Cha", 0),
-		ch=stats_buff.get("Ch", 0),
-	)
-	voc_niveau = character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0)
+	# Dérivées bufées (équipement, passives, consommables/sorts), charge max exceptée : elle
+	# reste brute, c'est la limite réellement appliquée par la garde de surcharge. Les stats
+	# BRUTES restent la référence des plafonds/coûts d'XP (stat_caps, dans bloc_fiche).
 	# Les stats dérivées ne sont jamais stockées.
-	derived = compute_derived_stats(
-		base=base,
-		niveau=voc_niveau,
-		equipment=eq_bonus,
-	)
-	character["derived_stats"] = derived.model_dump()
-	# La charge max d'EXPLORATION reste non bufée (charge_max_of = garde de surcharge de
-	# move_character et de _inventory_payload) : on écrase la valeur bufée pour que la
-	# jauge et la ligne « Charge max » affichent la limite réellement appliquée.
-	character["derived_stats"]["charge_max"] = charge_max_of(character)
+	character["derived_stats"] = fiche_util.derived_de(character)
 	character["niveau"] = compute_character_level(character.get("xp_total", 0))
-	# Seuils d'XP du niveau courant/suivant pour la fiche (source unique : la même
-	# formule arithmétique que compute_character_level — plus de duplication Jinja).
-	xp_niv_prev = xp_seuil_niveau(character["niveau"])
-	xp_niv_next = xp_seuil_niveau(character["niveau"] + 1)
 
 	# Résolution inventaire : références → documents complets (poids d'instance inclus)
 	character["inventaire"] = [
@@ -633,21 +603,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		if (doc := resolve_item_ref(ref))
 	]
 
-	nb_max = race.get("nb_max_accessibles", 3) if race else 3
-	stats_max_race = race.get("stats_max", {}) if race else {}
-	max_bonus = race.get("max_bonus") if race else None
-	max_bonus_used = character.get("max_bonus_used")
-	stat_caps = {
-		code: compute_stat_cap(
-			stat_key=code,
-			stats_max=stats_max_race,
-			nb_max_accessibles=nb_max,
-			current_stats=stats_cur,
-			max_bonus=max_bonus,
-			max_bonus_used=max_bonus_used,
-		)
-		for code in ["V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"]
-	}
+	# Contenu des onglets Stats et ⚡ (plafonds, seuils d'XP, profil modifié, sorts, écoles,
+	# compétences) : SOURCE UNIQUE `utils/fiche.bloc_fiche`, partagée avec la fiche d'un
+	# compagnon (GET /api/groupe/compagnon/{id}) — le client rend les deux avec les mêmes
+	# fonctions, sous les mêmes clés.
+	fiche_bloc = fiche_util.bloc_fiche(character, get_doc, find_docs, race or {})
 
 	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["image"]) as portrait:
 		portrait_largeur, portrait_hauteur = portrait.size
@@ -708,16 +668,20 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"position": position,
 			"links": links,
 			"vocation": vocation,
+			# Icône + libellé par vocation : la fiche sert aussi les compagnons, qui n'ont
+			# pas forcément la vocation du joueur (cf. openCompagnonSheet).
+			"vocations_labels": {
+				v["id"]: {"icon": v.get("icon", ""), "label": v.get("label", v["id"])}
+				for v in (vocations.get("value") or [])
+			},
 			"race": race,
 			"dimensions": dimensions,
 			"dim_x": dim_x,
 			"dim_y": dim_y,
 			"access" : access,
-			"stat_caps": stat_caps,
-			"xp_coeff": character_stats.XP_COEFF,
-			"xp_voc_coeff": character_stats.XP_VOC_COEFF,
-			"xp_niv_prev": xp_niv_prev,
-			"xp_niv_next": xp_niv_next,
+			# stat_caps, xp_coeff/xp_voc_coeff, xp_niv_prev/next, effets_actifs,
+			# caracts_detail, sorts*, competences* — cf. utils/fiche.bloc_fiche.
+			**fiche_bloc,
 			"lieu_categorie": grid_doc.get("categorie"),
 			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,
@@ -739,21 +703,6 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"relations_lieux": relations_lieux,
 			"focalisation": focalisation_payload,
 			"guidage": guidage_payload,
-			"effets_actifs": consommables.effets_actifs_payload(character),
-			# Grille « Profil modifié » : par caract, base / total / delta / sources nommées
-			# (équipement, passives, effets actifs) pour le tooltip d'origine.
-			"caracts_detail": consommables.caracts_detail(character),
-			# Sorts (onglet ⚡) : connus lançables hors combat + apprenables (coût points,
-			# grimoire) — resynchronisés par lancer_sort/apprendre_sort côté client.
-			"sorts": sorts_util.liste_sorts_payload(character, get_doc, "exploration"),
-			"sorts_apprenables": sorts_util.sorts_apprenables(character, find_docs, resolve_item_ref, vocations),
-			"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
-			"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
-			# Compétences (même onglet ⚡) : connues (passives + actives, drapeau `utilisable`
-			# hors combat) + apprenables — resynchronisées par utiliser/apprendre côté client.
-			"competences": competences_util.liste_competences_payload(character, get_doc, "exploration"),
-			"competences_apprenables": competences_util.competences_apprenables(character, find_docs),
-			"competences_epinglees": competences_util.competences_epinglees_effectives(character, get_doc),
 		},
 		# Page dynamique par-personnage (PV/XP changent après combat) : jamais en cache,
 		# sinon le retour de combat affiche un état périmé tant qu'on n'a pas rechargé.

@@ -27,8 +27,8 @@ from db.config import get_doc, save_doc, find_docs, delete_doc
 from models import character_stats
 from models.character_stats import BaseStats, compute_derived_stats, xp_seuil_niveau
 from utils.characters import (
-	item_ref_id, item_ref_lieu, resolve_item_ref, sync_equipment_bonus,
-	credit_character,
+	item_ref_id, item_ref_lieu, item_ref_weight, resolve_item_ref, sync_equipment_bonus,
+	credit_character, carried_weight, charge_max_of,
 )
 from utils.consommables import caracts_avec_buffs
 
@@ -428,6 +428,50 @@ def groupe_effectif(character: dict, get_doc_fn=None) -> list:
 		if av and av.get("statut") == "embauche" and av.get("embauche_par") == character.get("_id"):
 			out.append(av)
 	return out
+
+
+# ── Inventaire du groupe : transfert d'objets ────────────────────────────────────
+
+def _localiser_ref(refs: list, idx, item_id) -> int | None:
+	"""Position de la référence ciblée dans une liste d'inventaire. On adresse par index
+	(deux exemplaires d'un même item peuvent avoir des poids d'instance distincts), vérifié
+	via `item_id` ; repli sur le premier exemplaire de l'item si l'index est désaligné.
+	Miroir de `_take_ref` (routers/user.py) mais en LECTURE : le transfert doit pouvoir
+	refuser AVANT de retirer quoi que ce soit de la source."""
+	if isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < len(refs) \
+			and (item_id is None or item_ref_id(refs[idx]) == item_id):
+		return idx
+	if item_id is not None:
+		return next((i for i, r in enumerate(refs) if item_ref_id(r) == item_id), None)
+	return None
+
+
+def peut_porter(porteur: dict, ref) -> bool:
+	"""Le porteur peut-il encaisser CET exemplaire sans dépasser sa charge max ? On compare
+	le poids d'instance (pas le minimum du doc item) à `charge_max_of` (F×5, non buffée)."""
+	return carried_weight(porteur) + item_ref_weight(ref) <= charge_max_of(porteur)
+
+
+def transferer_ref(source: dict, cible: dict, idx, item_id) -> tuple[bool, str, object]:
+	"""Passe un objet du sac de `source` à celui de `cible`. Refus DUR si la charge max du
+	destinataire est dépassée — et dans ce cas la source n'est pas amputée (on localise
+	avant de retirer). Mute les deux docs en place, NE SAUVEGARDE PAS (l'endpoint persiste).
+	Renvoie (ok, raison, ref transférée|None). Seul l'inventaire est concerné : un objet
+	équipé n'y est pas, il faut le déséquiper d'abord."""
+	refs = source.get("inventaire", []) or []
+	pos = _localiser_ref(refs, idx, item_id)
+	if pos is None:
+		return False, "Objet absent de l'inventaire", None
+
+	ref = refs[pos]
+	if not peut_porter(cible, ref):
+		qui = (cible.get("prenom") or "").strip() or "Le destinataire"
+		return False, f"{qui} ne peut pas porter davantage.", None
+
+	refs.pop(pos)
+	source["inventaire"] = refs
+	cible.setdefault("inventaire", []).append(ref)
+	return True, "", ref
 
 
 def affinite_de(character: dict, av_id: str) -> int:
