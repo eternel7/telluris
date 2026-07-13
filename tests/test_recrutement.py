@@ -405,3 +405,79 @@ def test_tirer_exigences_bornes(monde):
 			ex = recrutement._tirer_exigences(niveau)
 			assert 10 <= ex["part_butin_pct"] <= 30
 			assert 0 <= len(ex["clauses"]) <= 2
+
+
+# ── Tour monde : le groupe régénère avec le joueur ───────────────────────────────
+# `_apply_world_turn_regen` vit dans routers/user.py mais ne touche jamais la DB : un doc
+# `aventurier:*` étant un miroir du character, elle s'y applique telle quelle. Le helper de
+# groupe, lui, lit/sauve des docs → on lui monkeypatche la base en mémoire du fixture.
+
+@pytest.fixture
+def tour_monde(monde, monkeypatch):
+	from routers import user as user_router
+	docs = monde["docs"]
+	monkeypatch.setattr(user_router, "get_doc", lambda doc_id: docs.get(doc_id))
+	monkeypatch.setattr(user_router, "save_doc", lambda doc: docs.__setitem__(doc["_id"], doc) or doc)
+	return user_router
+
+
+def test_tour_monde_regenere_un_compagnon(tour_monde, monde):
+	av = recrutement.generer_aventurier(GUILDE, VILLE, 1, portraits=PORTRAITS)
+	pv_max, pm_max = recrutement.vitaux_de(av)["pv_max"], recrutement.vitaux_de(av)["pm_max"]
+	av["currentPV"], av["currentPM"] = 1, 0
+	tour_monde._apply_world_turn_regen(av)
+	assert av["currentPV"] > 1 and av["currentPM"] > 0
+	# Plafonné aux max dérivés, même après beaucoup de tours.
+	for _ in range(200):
+		tour_monde._apply_world_turn_regen(av)
+	assert av["currentPV"] == pv_max and av["currentPM"] == pm_max
+
+
+def test_tour_monde_tick_les_effets_du_compagnon(tour_monde, monde):
+	av = recrutement.generer_aventurier(GUILDE, VILLE, 1, portraits=PORTRAITS)
+	av["effets_actifs"] = [{"item_id": "item:potion", "nom": "Potion", "icon": "",
+							"buffs": {"F": 10}, "regen_pv": 0, "regen_pm": 0, "restants": 2}]
+	tour_monde._apply_world_turn_regen(av)
+	assert av["effets_actifs"][0]["restants"] == 1
+	tour_monde._apply_world_turn_regen(av)
+	assert av["effets_actifs"] == []
+
+
+def test_tour_monde_groupe_regenere_les_membres_actifs(tour_monde, monde):
+	docs = monde["docs"]
+	actif = recrutement.generer_aventurier(GUILDE, VILLE, 1, portraits=PORTRAITS)
+	actif.update({"_id": "aventurier:a", "statut": "embauche", "embauche_par": "character:u_1",
+				  "currentPV": 1, "currentPM": 0})
+	parti = dict(actif, _id="aventurier:b", statut="parti")
+	docs["aventurier:a"], docs["aventurier:b"] = actif, parti
+	c = perso(groupe=["aventurier:a", "aventurier:b", "aventurier:fantome"])
+
+	rendus = tour_monde._apply_world_turn_groupe(c)
+
+	assert [av["_id"] for av in rendus] == ["aventurier:a"]  # parti + id périmé ignorés
+	assert docs["aventurier:a"]["currentPV"] > 1   # régénéré ET persisté
+	assert docs["aventurier:b"]["currentPV"] == 1  # un ex-compagnon ne récupère pas
+
+
+def test_vitaux_de_expose_courants_et_max(tour_monde, monde):
+	av = recrutement.generer_aventurier(GUILDE, VILLE, 1, portraits=PORTRAITS)
+	av["currentPV"] = 3
+	vit = recrutement.vitaux_de(av)
+	assert vit["currentPV"] == 3 and vit["pv_max"] > 0
+	assert vit["currentPM"] == av["currentPM"] and vit["pm_max"] > 0
+
+
+def test_affinites_detail_vitaux_pour_les_actifs_seuls(monde):
+	docs = monde["docs"]
+	actif = recrutement.generer_aventurier(GUILDE, VILLE, 1, portraits=PORTRAITS)
+	actif.update({"_id": "aventurier:a", "statut": "embauche", "embauche_par": "character:u_1"})
+	docs["aventurier:a"] = actif
+	c = perso(groupe=["aventurier:a"], affinites={"aventurier:a": 60, "aventurier:z": 40})
+	recrutement.memo_compagnon(c, actif)
+	# Compagnon oublié en base (doc supprimé) : le mémo suffit, pas de vitaux, pas de crash.
+	c["compagnons_connus"]["aventurier:z"] = {"prenom": "Vieux", "nom": "Ami", "voc": "guerrier"}
+
+	detail = {e["id"]: e for e in recrutement.affinites_detail_payload(c, docs.get)}
+
+	assert detail["aventurier:a"]["pv_max"] > 0 and "currentPM" in detail["aventurier:a"]
+	assert "pv_max" not in detail["aventurier:z"] and detail["aventurier:z"]["actif"] is False

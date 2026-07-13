@@ -52,8 +52,7 @@ def _groupe_view(character: dict) -> list:
 	out = []
 	for av in recrutement.groupe_effectif(character, get_doc):
 		vue = _recrue_view(character, av)
-		vue["currentPV"] = av.get("currentPV", 0)
-		vue["currentPM"] = av.get("currentPM", 0)
+		vue.update(recrutement.vitaux_de(av))
 		out.append(vue)
 	return out
 

@@ -35,6 +35,7 @@ from utils import competences as competences_util
 from utils import focalisation
 from utils import intro
 from utils import transport
+from utils import recrutement
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -471,6 +472,7 @@ async def move_character(
 						transports_echoues = transport.traiter_expirations(
 							character_to_update, quetes.now_epoch(), get_doc, save_doc)
 						_apply_world_turn_regen(character_to_update)
+						_apply_world_turn_groupe(character_to_update)
 						save_doc(character_to_update)
 						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
@@ -512,9 +514,10 @@ async def move_character(
 				transports_echoues = transport.traiter_expirations(
 					character_to_update, quetes.now_epoch(), get_doc, save_doc)
 				_apply_world_turn_regen(character_to_update)
+				_apply_world_turn_groupe(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
+				return {"transports_echoues": _echecs_payload(transports_echoues), "position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -602,6 +605,18 @@ def _apply_world_turn_regen(character: dict) -> None:
         derived = _derived_from_character(character, eq)
         character["currentPV"] = min(character["currentPV"], derived.pv_max)
         character["currentPM"] = min(character["currentPM"], derived.pm_max)
+
+
+def _apply_world_turn_groupe(character: dict) -> list:
+    """Le tour monde vaut pour TOUT le groupe : chaque compagnon régénère PV/PM et
+    décrémente ses effets actifs exactement comme le joueur — un doc `aventurier:*` est
+    un miroir du character, `_apply_world_turn_regen` s'y applique tel quel. Les docs
+    compagnons sont ANNEXES au personnage : sauvés ici, séparément."""
+    compagnons = recrutement.groupe_effectif(character, get_doc)
+    for av in compagnons:
+        _apply_world_turn_regen(av)
+        save_doc(av)
+    return compagnons
 
 
 def _caracts_payload(character: dict) -> dict:

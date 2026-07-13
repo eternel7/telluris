@@ -2022,6 +2022,8 @@
 				// Effets actifs : décrémentés/expirés à chaque tour monde côté serveur.
 				_renderEffetsActifs(rep.effets_actifs);
 				_renderCaractsMod(rep.caracts_detail);
+				// Le groupe régénère au même tour monde que le joueur : la fiche 👥 suit.
+				if (rep.affinites_detail) renderFicheCompagnons(rep.affinites_detail);
 				// Intro narrative : le pas vient d'atteindre la zone de sécurité de la cité.
 				if (rep.intro_terminee) {
 					showIntroConclusion(rep.intro_terminee);
@@ -4368,11 +4370,14 @@ function renderFicheCompagnons(list) {
 		const sc = (r.affinite === null || r.affinite === undefined) ? 50 : r.affinite;
 		const cls = sc > 50 ? 'pos' : sc < 50 ? 'neg' : 'neu';
 		const part = (r.exigences_effectives || {}).part_butin_pct;
+		// Vitaux : présents pour les compagnons ACTIFS seulement (le mémo d'un parti n'en porte pas).
+		const vit = r.pv_max !== undefined
+			? ` · ❤️ ${r.currentPV}/${r.pv_max} · 🔵 ${r.currentPM}/${r.pm_max}` : '';
 		return `<div class="sh-relation">
 			<strong>${r.actif ? '⚔' : '·'}</strong>
 			<div class="sh-rel-info">
 				<div class="sh-rel-name">${r.prenom || '?'} ${r.nom || ''}${r.actif ? ' <span style="opacity:.6;font-size:.75em">(dans le groupe)</span>' : ''}</div>
-				<div class="sh-rel-class">${r.voc || ''} · ${r.race || ''} · rang ${r.rang || 'F'}${part !== undefined ? ` · part ${part}%` : ''}</div>
+				<div class="sh-rel-class">${r.voc || ''} · ${r.race || ''} · rang ${r.rang || 'F'}${part !== undefined ? ` · part ${part}%` : ''}${vit}</div>
 			</div>
 			<div>
 				<div class="sh-rel-score ${cls}">${sc}<span style="opacity:.5;font-size:.7em">/100</span></div>
@@ -4398,7 +4403,7 @@ function renderRecrutement(data) {
 			<img class="rec-portrait" src="/characters/${c.image}" alt="" onerror="this.style.display='none'">
 			<span>
 				<strong>${c.prenom} ${c.nom}</strong> <span class="sh-inv-poids">${c.race} · ${c.voc} · rang ${c.rang}</span><br>
-				<span class="sh-inv-poids">❤️ ${c.currentPV} PV · 💰 part ${(c.exigences_effectives || {}).part_butin_pct}% · 🤝 ${c.affinite === null || c.affinite === undefined ? 50 : c.affinite}</span>
+				<span class="sh-inv-poids">❤️ ${c.currentPV}/${c.pv_max} PV · 🔵 ${c.currentPM}/${c.pm_max} PM · 💰 part ${(c.exigences_effectives || {}).part_butin_pct}% · 🤝 ${c.affinite === null || c.affinite === undefined ? 50 : c.affinite}</span>
 			</span>
 			<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${c.id}')" title="Congédier (le lien est conservé)">✕ Congédier</button>
 		</li>`).join('') : '<li class="sell-empty">Personne ne vous accompagne.</li>';

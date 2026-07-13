@@ -219,6 +219,18 @@ def _derives_de(aventurier: dict):
 	return compute_derived_stats(base, niveau=voc_niveau, equipment=equipment)
 
 
+def vitaux_de(aventurier: dict) -> dict:
+	"""État vital d'un compagnon (courants + max dérivés) pour les payloads : le doc du
+	compagnon est la source, ses max se recalculent comme ceux du joueur (jamais stockés)."""
+	derived = _derives_de(aventurier)
+	return {
+		"currentPV": aventurier.get("currentPV", derived.pv_max),
+		"pv_max": derived.pv_max,
+		"currentPM": aventurier.get("currentPM", derived.pm_max),
+		"pm_max": derived.pm_max,
+	}
+
+
 def _duree_de_vie_recrue() -> int:
 	"""Durée d'affichage d'une recrue au tableau, jittée (miroir de quetes._duree_de_vie) :
 	les recrues d'un même lot ne partent pas toutes en bloc."""
@@ -556,7 +568,7 @@ def affinites_detail_payload(character: dict, get_doc_fn=None) -> list:
 		}
 		if av and av_id in actifs:
 			entry["exigences_effectives"] = conditions_effectives(av, entry["affinite"])
-			entry["currentPV"] = av.get("currentPV", 0)
+			entry.update(vitaux_de(av))
 		out.append(entry)
 	out.sort(key=lambda e: (not e["actif"], -e["affinite"]))
 	return out
