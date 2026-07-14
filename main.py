@@ -116,7 +116,7 @@ def bestiaire_editor(request: Request, current_user: Annotated[User, Depends(get
 		return RedirectResponse(url="/auth", headers=request.headers)
 	return templates.TemplateResponse(
 		request=request,
-		name="bestiaire_editor.html",
+		name="admin_bestiaire_editor.html",
 		context={"title": "Éditeur Bestiaire"}
 	)
 
@@ -129,7 +129,7 @@ def read_root(request: Request, current_user: Annotated[User, Depends(get_curren
 	lieux = get_lieux_ids(current_user)
 	return templates.TemplateResponse(
 		request=request,
-		name="map_editor.html",
+		name="admin_map_editor.html",
 		context={
 			"title": "Map Grid Editor",
 			"lieux": lieux

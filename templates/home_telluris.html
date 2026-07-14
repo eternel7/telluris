@@ -297,7 +297,6 @@
 		font-size: 16px;
 		line-height: 1.8;
 		color: var(--parch3);
-		font-style: italic;
 	}
 
 	/* ── RANKS SECTION ───────────────────────────────────────── */
@@ -452,7 +451,96 @@
 		from { transform: rotate(0) translateX(var(--r, 148px)); }
 		to	 { transform: rotate(360deg) translateX(var(--r, 148px)); }
 	}
-	
+
+	/* ── RACES ────────────────────────────────────────────────── */
+	.races-section {
+		padding: 100px 48px;
+		max-width: 1210px;
+		margin: 0 auto;
+	}
+
+	.races-intro {
+		font-family: 'IM Fell English', serif;
+		font-size: 17px;
+		line-height: 1.9;
+		color: var(--parch3);
+		max-width: 820px;
+		margin: 0 auto 56px;
+		text-align: center;
+	}
+
+	.races-grid {
+		display: grid;
+		grid-template-columns: repeat(5, 1fr);
+		gap: 2px;
+	}
+
+	.race-card {
+		background: rgba(14,11,8,0.6);
+		border: 0.5px solid rgba(201,146,42,0.12);
+		position: relative;
+		overflow: hidden;
+		transition: background 0.25s, border-color 0.25s;
+	}
+	.race-card:hover {
+		background: rgba(37,61,41,0.18);
+		border-color: rgba(201,146,42,0.35);
+	}
+
+	.race-portrait {
+		width: 100%;
+		aspect-ratio: 3 / 4;
+		object-fit: cover;
+		object-position: top center;
+		display: block;
+		filter: sepia(0.15) saturate(0.9);
+		transition: filter 0.25s, transform 1s;
+		transform-origin: top center;
+	}
+	.race-portrait-container {
+		overflow: hidden;
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+	.race-card:hover img.race-portrait {
+		filter: sepia(0) saturate(1);
+		transform: scale(1.8);
+	}
+
+	.race-body {
+		padding: 18px 18px 22px;
+	}
+
+	.race-name {
+		font-family: 'Cinzel', serif;
+		font-size: 14px;
+		letter-spacing: 0.1em;
+		color: var(--gold2);
+		text-transform: uppercase;
+		display: block;
+		margin-bottom: 8px;
+	}
+
+	.race-trait {
+		font-family: 'IM Fell English', serif;
+		font-size: 15px;
+		line-height: 1.7;
+		color: var(--parch3);
+	}
+
+	.races-cohab {
+		font-family: 'IM Fell English', serif;
+		font-size: 16px;
+		line-height: 1.9;
+		color: var(--parch3);
+		max-width: 820px;
+		margin: 48px auto 0;
+		text-align: center;
+		border-top: 0.5px solid rgba(201,146,42,0.15);
+		padding-top: 40px;
+	}
+
 	/* ── VOCATIONS ────────────────────────────────────────────── */
 	.vocations-section {
 		padding: 100px 48px;
@@ -545,7 +633,6 @@
 	.voc-desc {
 		font-family: 'IM Fell English', serif;
 		font-size: 16px;
-		font-style: italic;
 		line-height: 1.75;
 		color: var(--parch3);
 		margin-bottom: 12px;
@@ -629,6 +716,8 @@
 	@media (max-width: 768px) {
 		.section { padding: 60px 24px; }
 		.features-grid { grid-template-columns: 1fr; }
+		.races-section { padding: 60px 24px; }
+		.races-grid { grid-template-columns: repeat(2, 1fr); }
 		.ranks-grid { grid-template-columns: repeat(2, 1fr); }
 		.world-section { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
 		.world-visual { display: none; }
@@ -644,9 +733,10 @@
 <nav role="navigation" aria-label="Menu principal">
 	<a href="#" class="nav-logo">Telluris</a>
 	<ul class="nav-links">
-		<li><a href="#monde">Le monde</a></li>
-		<li><a href="#guildes">Guildes</a></li>
-		<li><a href="#vocations">Vocations</a></li>
+		<li><a href="/#monde">Le monde</a></li>
+		<li><a href="/#races">Races</a></li>
+		<li><a href="/#guildes">Guildes</a></li>
+		<li><a href="/#vocations">Vocations</a></li>
 		<li><a href="/auth">Jouer</a></li>
 	</ul>
 </nav>
@@ -713,6 +803,64 @@
 		</div>
 	</section>
 
+	<section id="races" class="races-section" aria-labelledby="races-title">
+		<p class="section-eyebrow reveal">Les peuples de Telluris</p>
+		<h2 id="races-title" class="section-title reveal reveal-delay-1">Les Lignées d'Anthropes</h2>
+		<div class="section-divider reveal reveal-delay-2" role="presentation"></div>
+
+		<p class="races-intro reveal reveal-delay-2">Humains, elfes, nains, ogres et hobbits ne sont pas des espèces nées de terres différentes, mais les branches d'un même arbre : les Anthropes. Tous partagent le même sang et la même origine, façonnés au fil des âges par la magie brute qui baigne le monde — une force d'adaptation plastique qui, selon les environnements et les flux ésotériques, a fait bourgeonner les différentes Lignées. Aujourd'hui encore, l'union entre deux Lignées reste fertile : un enfant peut naître elfe d'un parent nain si les courants magiques de sa conception s'y prêtent.</p>
+
+		<div class="races-grid">
+			<article class="race-card reveal reveal-delay-1">
+				<div class="race-portrait-container">
+					<img class="race-portrait" src="{{ url_for('pnj', path='race_paladin_f_humain01.jpg') }}" alt="Paladine humaine en armure" loading="lazy">
+				</div>
+				<div class="race-body">
+					<span class="race-name">Humains</span>
+					<p class="race-trait">Leur incroyable adaptabilité leur permet de s’épanouir dans tous les aspects de l'existence. Qu'il s'agisse de maîtriser les rouages de la finance à l’abri des remparts ou de verser le sang sur les champs de bataille, leur polyvalence reste leur plus grande force.</p>
+				</div>
+			</article>
+			<article class="race-card reveal reveal-delay-2">
+				<div class="race-portrait-container">
+					<img class="race-portrait" src="{{ url_for('pnj', path='race_assassin_f_elfe01.jpg') }}" alt="Assassine elfe aux oreilles pointues" loading="lazy">
+				</div>
+				<div class="race-body">
+					<span class="race-name">Elfes</span>
+					<p class="race-trait">Leur longue vie leur offre le temps d'acquérir une connaissance immense. Toutefois, leur fragilité les a toujours conduits à privilégier la coopération, car même le plus grand des sages ne survit pas longtemps seul au-delà des remparts.</p>
+				</div>
+			</article>
+			<article class="race-card reveal reveal-delay-3">
+				<div class="race-portrait-container">
+					<img class="race-portrait" src="{{ url_for('pnj', path='race_guerrier_m_nain01.jpg') }}" alt="Guerrier nain à la longue barbe tressée" loading="lazy">
+				</div>
+				<div class="race-body">
+					<span class="race-name">Nains</span>
+					<p class="race-trait">Leur constitution robuste leur confère une endurance physique à toute épreuve face aux pires rigueurs du monde. De plus, leur volonté de fer dresse un rempart mental inébranlable, les rendant naturellement résistants aux flux perturbateurs de la magie.</p>
+				</div>
+			</article>
+			<article class="race-card reveal reveal-delay-4">
+				<div class="race-portrait-container">
+					<img class="race-portrait" src="{{ url_for('pnj', path='race_pretre_m_ogre01.jpg') }}" alt="Prêtre ogre à la stature imposante" loading="lazy">
+				</div>
+				<div class="race-body">
+					<span class="race-name">Ogres</span>
+					<p class="race-trait">Leur stature colossale et leur force brute en font des géants à l’endurance sans faille. De toutes les Lignées issues de la magie brute, ils sont celle qui affiche les apparences les plus diverses et surprenantes.</p>
+				</div>
+			</article>
+			<article class="race-card reveal reveal-delay-5">
+				<div class="race-portrait-container">
+					<img class="race-portrait" src="{{ url_for('pnj', path='race_barbare_m_hobbit01.jpg') }}" alt="Jeune barbare hobbit armé d'une hache" loading="lazy">
+				</div>
+				<div class="race-body">
+					<span class="race-name">Hobbits</span>
+					<p class="race-trait">Leur petite taille et leur discrétion cachent une agilité hors pair et une chance insolente qui leur permettent d'accomplir des exploits hors des remparts. Bien que fragiles et dépendants de leur groupe pour survivre, leur volonté de fer et leur résistance à la magie font d'eux des compagnons rusés qui déjouent tous les clichés.</p>
+				</div>
+			</article>
+		</div>
+
+		<p class="races-cohab reveal reveal-delay-2">Parce que le dehors est un sanctuaire de dangers mortels, les Anthropes ont appris à cohabiter par pure nécessité de survie. Derrière les murailles des Cités-États, la distinction se fait par la richesse et le rang, jamais par la Lignée — et c'est au sein de la Guilde des Aventuriers que ce métissage atteint son paroxysme : face aux zones blanches de la carte, nul ne peut se payer le luxe des préjugés.</p>
+	</section>
+
 	<div class="quote-section" role="complementary" aria-label="Citation">
 		<blockquote class="quote-text reveal">"Nul ne devient héros entre les remparts. La gloire attend là où les cartes deviennent blanches."</blockquote>
 		<p class="quote-source reveal reveal-delay-1">Aldric von Brunn — Guerrier, Rang Or</p>
@@ -755,42 +903,42 @@
 				<div class="rank-item reveal reveal-delay-1">
 					<span class="rank-gem" aria-hidden="true">🟤</span>
 					<span class="rank-name">Cuivre - F</span>
-					<span class="rank-levels">Niveaux 3 – 6</span>
+					<span class="rank-levels">Niveaux 3 – 10</span>
 				</div>
 				<div class="rank-item reveal reveal-delay-2">
 					<span class="rank-gem" aria-hidden="true">🔩</span>
 					<span class="rank-name">Fer - E</span>
-					<span class="rank-levels">Niveaux 6 – 9</span>
+					<span class="rank-levels">Niveaux 10 – 20</span>
 				</div>
 				<div class="rank-item reveal reveal-delay-3">
 					<span class="rank-gem" aria-hidden="true">🔘</span>
 					<span class="rank-name">Argent - D</span>
-					<span class="rank-levels">Niveaux 9 – 12</span>
+					<span class="rank-levels">Niveaux 21 – 30</span>
 				</div>
 				<div class="rank-item reveal reveal-delay-4">
 					<span class="rank-gem" aria-hidden="true">✨</span>
 					<span class="rank-name">Or - C</span>
-					<span class="rank-levels">Niveaux 13 – 16</span>
+					<span class="rank-levels">Niveaux 31 – 40</span>
 				</div>
 				<div class="rank-item reveal reveal-delay-1">
 					<span class="rank-gem" aria-hidden="true">💠</span>
 					<span class="rank-name">Platine - B</span>
-					<span class="rank-levels">Niveaux 17 – 20</span>
+					<span class="rank-levels">Niveaux 41 – 50</span>
 				</div>
 				<div class="rank-item reveal reveal-delay-2">
 					<span class="rank-gem" aria-hidden="true">🔷</span>
 					<span class="rank-name">Mythril - A</span>
-					<span class="rank-levels">Niveaux 21 – 24</span>
+					<span class="rank-levels">Niveaux 51 – 60</span>
 				</div>
 				<div class="rank-item reveal reveal-delay-3">
 					<span class="rank-gem" aria-hidden="true">🌟</span>
 					<span class="rank-name">Orichalque - S</span>
-					<span class="rank-levels">Niveaux 25 – 27</span>
+					<span class="rank-levels">Niveaux 61 – 80</span>
 				</div>
 				<div class="rank-item reveal reveal-delay-4">
 					<span class="rank-gem" style="color:red;" aria-hidden="true">⚫</span>
 					<span class="rank-name">Adamantite - S+</span>
-					<span class="rank-levels">Niveaux 28 – 31</span>
+					<span class="rank-levels">Niveaux 81 et plus</span>
 				</div>
 			</div>
 		</div>
@@ -958,7 +1106,7 @@
 		<p class="section-eyebrow reveal">Votre aventure commence</p>
 		<h2 id="cta-title" class="section-title reveal reveal-delay-1">Êtes-vous prêt à sortir des remparts ?</h2>
 		<div class="section-divider reveal reveal-delay-2" role="presentation"></div>
-		<p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--parch3); max-width:500px; margin: 0 auto 40px; line-height:1.85; font-size:17px" class="reveal reveal-delay-2">
+		<p style="font-family:'IM Fell English',serif; color:var(--parch3); max-width:500px; margin: 0 auto 40px; line-height:1.85; font-size:17px" class="reveal reveal-delay-2">
 			Rejoignez la Guilde. Accomplissez des quêtes. Forgez des alliances. Fondez peut-être votre propre cité-état. Telluris attend ceux qui osent.
 		</p>
 		<div class="hero-cta reveal reveal-delay-3">
