@@ -398,6 +398,8 @@
 			background: rgba(0,0,0,.15);
 		}
 		.character-card.card-list .char-class { margin-bottom: 4px; }
+		/* Carte de liste cliquable (compagnons du groupe) : la carte ouvre la fiche du compagnon. */
+		.character-card.card-clickable { cursor: pointer; }
 		.cards-list { display: flex; flex-direction: column; }
 		.cards-list .sell-empty { padding: .4rem 0; }
 
@@ -4887,9 +4889,19 @@ function renderGroupe(data) {
 
 	// Chaque compagnon s'affiche avec la MÊME carte que le joueur (portrait cadré, barres
 	// PV/PM, identité) ; son pied ne dit que ce qu'elle n'a pas : la part de butin et l'affinité.
-	_rendreCartesCompagnons(document.getElementById('grp-compagnons-list'), groupe, c =>
-		`<button class="sh-equip-btn" onclick="openCompagnonSheet('${c.id}')"
-			title="Ouvrir sa fiche (stats, sac, compétences)">📋 Fiche</button>` + _btnCongedier(c.id));
+	_rendreCartesCompagnons(document.getElementById('grp-compagnons-list'), groupe,
+		c => _btnCongedier(c.id));
+	// La carte entière ouvre la fiche du compagnon (le bouton 📋 Fiche faisait doublon). Restent
+	// exclus : la barre d'actions (→ Congédier) et les contrôles d'édition du portrait.
+	document.querySelectorAll('#grp-compagnons-list .character-card').forEach(card => {
+		card.classList.add('card-clickable');
+		card.addEventListener('click', e => {
+			if (e.target.closest('.card-actions, .zoom-bar, [data-role="action-btn"]')) return;
+			const vp = card.querySelector('[data-role="vp"]');
+			if (vp && vp.classList.contains('drag-mode')) return;  // recadrage du portrait en cours
+			openCompagnonSheet(card.dataset.porteur);
+		});
+	});
 	renderGroupeInventaire();
 }
 
