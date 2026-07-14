@@ -517,7 +517,12 @@ async def move_character(
 				_apply_world_turn_groupe(character_to_update)
 				save_doc(character_to_update)
 				links = get_lieu_links(current_user)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
+				# Un pas ne recharge pas la page : la sanction de réputation (−1 chez le donneur ET
+				# sa maison) doit repartir avec la réponse, sinon l'onglet 🤝 — rendu 100 % client —
+				# resterait sur le payload injecté au chargement. Payload calculé seulement en cas
+				# d'échec (il relit les docs relation) ; la branche « lien », elle, recharge /play.
+				relations_lieux = relations_lieux_payload(character_to_update) if transports_echoues else None
+				return {"transports_echoues": _echecs_payload(transports_echoues), "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 

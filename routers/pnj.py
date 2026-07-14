@@ -15,7 +15,9 @@ from utils.characters import (
 	money_to_cuivre, cuivre_to_purse,
 	poids_bounds, carried_weight, charge_max_of, item_ref_id, resolve_item_ref,
 )
-from utils.marche import debit_character, get_relation, relation_value
+from utils.marche import (
+	debit_character, get_relation, relation_value, relations_lieux_payload,
+)
 from utils import pnj
 from utils import intro
 from utils import transport
@@ -149,13 +151,17 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)])
 	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character)
 	# Une course dont le délai vient d'expirer ne doit pas être livrable : on solde les
 	# échéances (et leur sanction de réputation) avant de composer le dialogue.
-	if transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc):
+	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
+	if echues:
 		save_doc(character)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	depart = (pnj_doc.get("dialogue") or {}).get("noeud_depart", "accueil")
 	return {
 		"pnj": pnj.pnj_payload(entree, pnj_doc),
 		"noeud": pnj.noeud_client(pnj_doc, depart, contexte, pnj.soin_effectif(pnj_doc, contexte)),
+		# Une course a pu périmer en ouvrant le dialogue : la sanction de réputation est déjà
+		# appliquée en base, l'onglet 🤝 (rendu client) doit la voir.
+		"relations_lieux": relations_lieux_payload(character) if echues else None,
 	}
 
 
@@ -174,7 +180,8 @@ async def pnj_dialogue_choix(
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
 
 	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character)
-	if transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc):
+	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
+	if echues:
 		save_doc(character)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 	noeud_id = body.get("noeud")
@@ -184,6 +191,10 @@ async def pnj_dialogue_choix(
 
 	soin = pnj.soin_effectif(pnj_doc, contexte)
 	reponse: dict = {}
+	if echues:
+		# Sanction d'une course périmée en cours de dialogue. Un service `transport` qui solde
+		# ensuite une livraison réécrira ce champ avec un payload encore plus frais.
+		reponse["relations_lieux"] = relations_lieux_payload(character)
 
 	action = choix.get("action") or {}
 	if action.get("service") == "soin":
@@ -343,6 +354,10 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		reponse["inventaire_payload"] = _inventory_payload(character)
 		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
 		reponse["focalisation"] = focalisation.payload_client(character, get_doc)
+		# Le doc `relation` du donneur vient de monter : l'onglet 🤝 est rendu 100 % client, il
+		# faut lui renvoyer le payload complet (comme le fait /api/marchander), sinon il resterait
+		# sur celui injecté au chargement de /play.
+		reponse["relations_lieux"] = relations_lieux_payload(character)
 		return noeuds.get("livre"), dits
 
 	if op == "rapporter":
@@ -382,6 +397,7 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		reponse["inventaire_payload"] = _inventory_payload(character)
 		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
 		reponse["focalisation"] = focalisation.payload_client(character, get_doc)
+		reponse["relations_lieux"] = relations_lieux_payload(character)
 		return noeuds.get("rapporte"), dits
 
 	raise HTTPException(status_code=422, detail="Action de transport inconnue.")

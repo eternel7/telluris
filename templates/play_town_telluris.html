@@ -2068,6 +2068,9 @@
 				updateControls();
 				updateVitals(rep.vitals);
 				_notifierTransportsEchoues(rep);
+				// Course échue = réputation en baisse chez le donneur et sa maison : l'onglet 🤝
+				// n'en sait rien sans ce resync (le pas ne recharge pas la page).
+				if (Array.isArray(rep.relations_lieux)) renderFicheRelations(rep.relations_lieux);
 				// Déplacement effectif → le sol transitoire est vidé côté serveur.
 				if (rep.ground_cleared) {
 					_objetsAuSol = [];
@@ -4972,6 +4975,9 @@ async function openPnjDialogue() {
 		const res = await fetch('api/pnj/dialogue');
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		// Une course a pu périmer à l'ouverture du dialogue (expiration paresseuse) : le serveur
+		// renvoie alors les relations à jour, sanction comprise.
+		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
 		renderPnjNoeud(data.noeud);
 		document.getElementById('game-container').classList.add('panel-hidden');
 		document.getElementById('pnj-panel').classList.remove('panel-hidden');
@@ -4996,6 +5002,9 @@ async function choisirPnj(choixId) {
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
 		if (data.vitals) updateVitals(data.vitals);
 		if (data.purse) updatePurse(data.purse);
+		// Une course livrée/rapportée fait monter la relation du donneur : l'onglet 🤝 est rendu
+		// client, il ne se met à jour que si le serveur renvoie le payload complet.
+		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
 		if (data.soin) {
 			showToast('✨ +' + data.soin.pv_rendu + ' PV' + (data.soin.gratuit ? ' — offert' : ''));
 		}
