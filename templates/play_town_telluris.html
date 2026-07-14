@@ -261,8 +261,12 @@
 			opacity: 0;
 		}
 		.viewport-wrapper img.cadree { opacity: 1; }
+		/* Un changement de zoom touche la TAILLE de l'image autant que sa position : sans
+		   transition sur width/height, elle sauterait pendant que la translation, elle, glisse. */
 		.viewport-wrapper img.animate {
-			transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+			transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+						width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+						height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 		}
 
 		/* Éditeur de portrait : accroché par CLASSE, jamais par id — une page porte autant de
@@ -2294,6 +2298,9 @@ function makePortraitViewport(card) {
 	const iconEdit   = q('icon-edit');
 	const iconSave   = q('icon-save');
 	if (!vp || !img) return null;
+	// La carte porte-t-elle l'éditeur (curseur + ✏️/💾) ? La macro ne les rend que là où le
+	// cadrage est ENREGISTRABLE. Sans lui, le portrait n'est cadré par personne → affiché entier.
+	const editable = !!(zoomSlider || actionBtn);
 
 	const W1 = PORTRAIT_W1, H1 = PORTRAIT_H1;
 	// État PROPRE à ce viewport. Le partager entre les deux images ÉTAIT le bug : la fiche
@@ -2307,10 +2314,24 @@ function makePortraitViewport(card) {
 	const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 	const imgW  = () => W * zoomPct / 100;
 	const imgH  = () => H * zoomPct / 100;
+	// Zoom auquel l'image ENTIÈRE tient dans la fenêtre (aperçu au survol d'un portrait non
+	// éditable : c'est ainsi qu'on voit qui l'on embauche, plutôt qu'un fragment d'image).
+	const zoomFit = () => Math.max(1, 100 * Math.min(W1 / W, H1 / H));
+
+	// Bornes de défilement sur un axe. Image plus grande que la fenêtre : elle défile de 0 à son
+	// débord. Image plus PETITE (cas du dézoom) : elle ne défile pas, on la CENTRE — offset
+	// négatif, donc translation positive. (L'ancien `Math.abs` renvoyait une valeur négative du
+	// mauvais côté au lieu de la borner : un glisser vers le haut faisait sauter l'image.)
+	function bornes(taille, fenetre) {
+		if (taille <= fenetre) { const c = (taille - fenetre) / 2; return [c, c]; }
+		return [0, taille - fenetre];
+	}
 
 	function applyOffset(x, y, animated) {
-		x = clamp(Math.abs(x), 0, Math.max(0, imgW() - W1));
-		y = clamp(Math.abs(y), 0, Math.max(0, imgH() - H1));
+		const [minX, maxX] = bornes(imgW(), W1);
+		const [minY, maxY] = bornes(imgH(), H1);
+		x = clamp(x, minX, maxX);
+		y = clamp(y, minY, maxY);
 		offsetX = x; offsetY = y;
 		img.classList.toggle('animate', !!animated);
 		img.style.width  = imgW() + 'px';
@@ -2329,9 +2350,14 @@ function makePortraitViewport(card) {
 		applyOffset(cx * ratio - W1 / 2, cy * ratio - H1 / 2, animated);
 	}
 
+	// ⚠️ `portrait_translate` est ce qui a été ENREGISTRÉ : la translation CSS de l'image, donc
+	// l'OPPOSÉ de l'offset (on écrit `translate(-x, -y)`, le serveur relit « -30 »). Un offset,
+	// lui, est un défilement positif → il faut retourner le signe. C'est ce que faisait, à son
+	// insu, le `Math.abs` de l'ancien clamp ; le clamp borne désormais pour de vrai, la
+	// conversion doit donc être faite ici, là où elle se comprend.
 	function defaultOffset() {
 		const t = sujet && sujet.portrait_translate;
-		if (t && typeof t === 'object') return { x: t.x, y: t.y };
+		if (t && typeof t === 'object') return { x: Math.abs(t.x), y: Math.abs(t.y) };
 		return { x: (imgW() - W1) / 2, y: 0 };   // jamais cadré : centré horizontalement
 	}
 
@@ -2348,6 +2374,10 @@ function makePortraitViewport(card) {
 
 	// Change le porteur affiché : pose l'image, la MESURE (une image déjà en cache l'est
 	// immédiatement ; sinon `decode()` attend son décodage), puis applique SON cadrage.
+	//
+	// Un portrait SANS éditeur (une recrue) n'est jamais cadré par personne : on l'affiche
+	// ENTIER (zoomFit, centré par `bornes`) plutôt qu'en gros plan sur un fragment d'image —
+	// c'est le moment où l'on regarde qui l'on embauche.
 	async function setSujet(s) {
 		sujet = s || SUJET_JOUEUR;
 		zoomPct = parseInt(sujet.portrait_zoom, 10) || 100;
@@ -2358,7 +2388,8 @@ function makePortraitViewport(card) {
 		try { if (!img.complete || !img.naturalWidth) await img.decode(); } catch (e) {}
 		W = img.naturalWidth  || W1;
 		H = img.naturalHeight || H1;
-		const d = defaultOffset();
+		if (!editable) zoomPct = zoomFit();
+		const d = editable ? defaultOffset() : { x: 0, y: 0 };   // hors cadrage : `bornes` centre
 		applyOffset(d.x, d.y, false);
 		applyScale();
 	}
@@ -3334,6 +3365,14 @@ function _renderMono(st) {
 		if (_estCoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sol'));
 		acts.push(`<button class="sh-equip-btn" onclick="_cardPickup(${st.idx},'${item._id}')">Prendre</button>`);
 	}
+	else if (st.source in _GRP_SENS) {
+		const dest = _grpPorteurs(st.source).dest;
+		const rentre = _grpRentre(item, dest);
+		const fleche = st.source === 'grp_principal' ? '→' : '←';
+		acts.push(`<button class="sh-equip-btn" ${rentre ? '' : 'disabled'}
+			title="${rentre ? 'Transférer' : 'Trop lourd — le destinataire est à sa charge maximale'}"
+			onclick="_cardTransferer('${st.source}',${st.idx},'${item._id}')">${fleche} Transférer</button>`);
+	}
 	if (acts.length) html += `<div class="item-detail-actions">${acts.join('')}</div>`;
 	return html;
 }
@@ -3388,6 +3427,9 @@ function openItemDetail(source, idx) {
 	if (source === 'sac')        item = _inventaire[idx];
 	else if (source === 'sol')   item = _objetsAuSol[idx];
 	else if (source === 'equip') item = _slots[idx];   // idx = clé de slot
+	// Sacs de l'onglet 🎒 Inventaire du groupe : fiche en mono, sans comparaison — l'équipement
+	// porté est celui du JOUEUR, comparer le sac d'un compagnon avec mentirait.
+	else if (source in _GRP_SENS) item = (_grpPorteurs(source).src.inventaire || [])[idx];
 	if (!item || typeof item !== 'object') return;
 
 	if (source === 'equip') {
@@ -3428,6 +3470,7 @@ function _cardDrop(idx, itemId)         { closeItemDetail(); dropItem(idx, itemI
 function _cardPickup(idx, itemId)       { closeItemDetail(); pickupItem(idx, itemId); }
 function _cardConsommer(idx, itemId)    { closeItemDetail(); consommerItem(idx, itemId, null); }
 function _cardCouper(idx, itemId, src)  { closeItemDetail(); couperItem(idx, itemId, src); }
+function _cardTransferer(source, idx, itemId) { closeItemDetail(); transfererItem(_GRP_SENS[source], idx, itemId); }
 
 // Fiche d'un objet du marchand (vente/achat) : même carte, avec comparaison à
 // l'équipement porté si l'objet est équipable, et actions Vendre/Acheter/Marchander.
@@ -4877,21 +4920,40 @@ function _grpCharge(elId, porteur) {
 	el.classList.toggle('grp-charge-over', charge > max + 1e-6);
 }
 
-// Une ligne par objet ; la flèche est grisée quand l'objet ne rentre pas chez le
-// destinataire — même arithmétique que `peut_porter` côté serveur, qui refuserait (409).
+// Sources de fiche objet propres aux sacs du groupe → sens du transfert (les deux sens de
+// `transfererItem` désignent chacun un porteur : celui QUI DONNE est la source de la fiche).
+const _GRP_SENS = { grp_principal: 'vers_compagnon', grp_compagnon: 'vers_principal' };
+const _GRP_SOURCE = { vers_compagnon: 'grp_principal', vers_principal: 'grp_compagnon' };
+
+// Qui donne, qui reçoit, pour une source de fiche donnée.
+function _grpPorteurs(source) {
+	const data = _grpEtat || {};
+	const principal = data.principal || { inventaire: [], charge: 0, charge_max: 0 };
+	const compagnon = (data.sacs || {})[_grpSelId] || { inventaire: [], charge: 0, charge_max: 0 };
+	return source === 'grp_principal'
+		? { src: principal, dest: compagnon }
+		: { src: compagnon, dest: principal };
+}
+// Même arithmétique que `peut_porter` côté serveur, qui refuserait (409).
+function _grpRentre(item, dest) {
+	return +(item.poids || 0) <= (+(dest.charge_max || 0) - +(dest.charge || 0)) + 1e-6;
+}
+
+// Une ligne par objet ; la flèche est grisée quand l'objet ne rentre pas chez le destinataire.
+// Icône + nom ouvrent la fiche de l'objet, comme dans le sac de la fiche perso.
 function _grpSac(items, dest, sens) {
 	items = items || [];
 	if (!items.length) return '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>';
-	const libre = +(dest.charge_max || 0) - +(dest.charge || 0);
+	const source = _GRP_SOURCE[sens];
 	const fleche = sens === 'vers_compagnon' ? '→' : '←';
 	return items.map((item, idx) => {
 		if (!item || typeof item !== 'object') return '';
 		const poids = +(item.poids || 0);
-		const rentre = poids <= libre + 1e-6;
+		const rentre = _grpRentre(item, dest);
 		const btn = `<button class="grp-move-btn" ${rentre ? '' : 'disabled'}
 			title="${rentre ? 'Transférer' : 'Trop lourd — le destinataire est à sa charge maximale'}"
 			onclick="transfererItem('${sens}',${idx},'${item._id}')">${fleche}</button>`;
-		const row = `<span class="sh-inv-name">${item.icon || '📦'} ${item.nom || '—'}</span>
+		const row = `<span class="sh-inv-name sh-inv-open" onclick="openItemDetail('${source}',${idx})" title="Voir la fiche">${item.icon || '📦'} ${item.nom || '—'}</span>
 			<span class="sh-inv-poids">${poids.toFixed(1)} kg</span>`;
 		// Le bouton se place du côté où part l'objet : à droite pour →, à gauche pour ←.
 		return `<div class="sh-inv-item">${sens === 'vers_principal' ? btn + row : row + btn}</div>`;
