@@ -1,3 +1,6 @@
+{# Carte de personnage : source unique du markup, partagée par la sidebar, la fiche, la liste
+   du groupe et le board de recrutement (les deux dernières la clonent depuis <template>). #}
+{% import "part-character-card.html" as cards %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -167,7 +170,7 @@
 		.char-portrait {
 			flex-shrink: 0;
 		}
-		#scale-root {
+		.char-portrait {
 			transform-origin: top center;
 		}
 
@@ -262,7 +265,9 @@
 			transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 		}
 
-		#action-btn, #action-btn2 {
+		/* Éditeur de portrait : accroché par CLASSE, jamais par id — une page porte autant de
+		   cartes que de personnages affichés (joueur, compagnons, recrues). */
+		.action-btn {
 			position: absolute;
 			top: 5px;
 			right: 5px;
@@ -287,18 +292,17 @@
 			pointer-events: none;
 		}
 
-		.viewport-wrapper.hovered #action-btn,
-		.viewport-wrapper.hovered #action-btn2 {
+		.viewport-wrapper.hovered .action-btn {
 			opacity: 1;
 			transform: scale(1);
 			pointer-events: auto;
 		}
 
-		#action-btn.save-mode, #action-btn2.save-mode {
+		.action-btn.save-mode {
 			border-color: rgba(200,169,110,0.5);
 			color: var(--accent);
 		}
-		#action-btn:hover, #action-btn2:hover {
+		.action-btn:hover {
 			background: rgba(200,169,110,0.2);
 			border-color: var(--accent);
 			color: var(--accent);
@@ -307,7 +311,7 @@
 				stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 		/* ── Slider de zoom ─────────────────────────────────────── */
-		#zoom-bar, #zoom-bar2 {
+		.zoom-bar {
 			position: absolute;
 			bottom: 5px;
 			left: 0;
@@ -326,17 +330,16 @@
 			transition: opacity 0.25s ease;
 			white-space: nowrap;
 		}
-		.viewport-wrapper.drag-mode #zoom-bar,
-		.viewport-wrapper.drag-mode #zoom-bar2 {
+		.viewport-wrapper.drag-mode .zoom-bar {
 			opacity: 1;
 			pointer-events: auto;
 		}
-		#zoom-bar .z-icon, #zoom-bar2 .z-icon {
+		.zoom-bar .z-icon {
 			color: var(--muted);
 			font-size: 11px;
 			user-select: none;
 		}
-		#zoom-slider, #zoom-slider2 {
+		.zoom-slider {
 			-webkit-appearance: none;
 			appearance: none;
 			width: 80%;
@@ -346,8 +349,7 @@
 			outline: none;
 			cursor: pointer;
 		}
-		#zoom-slider::-webkit-slider-thumb,
-		#zoom-slider2::-webkit-slider-thumb {
+		.zoom-slider::-webkit-slider-thumb {
 			-webkit-appearance: none;
 			appearance: none;
 			width: 12px; height: 12px;
@@ -356,15 +358,14 @@
 			border: 2px solid #0e0e0e;
 			cursor: pointer;
 		}
-		#zoom-slider::-moz-range-thumb,
-		#zoom-slider2::-moz-range-thumb {
+		.zoom-slider::-moz-range-thumb {
 			width: 12px; height: 12px;
 			border-radius: 50%;
 			background: var(--accent);
 			border: 2px solid #0e0e0e;
 			cursor: pointer;
 		}
-		#zoom-val, #zoom-val2 {
+		.zoom-val {
 			font-size: 0.65rem;
 			color: var(--accent);
 			min-width: 20%;
@@ -377,6 +378,24 @@
 		}
 		.char-name { font-weight: bold; color: #ff4757; font-size: 16px; margin-bottom: 2px; }
 		.char-class { color: #aaa; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+
+		/* ── Emplacements libres de la carte (part de butin, spécialité, boutons…) ─────
+		   Vides = invisibles : une carte sans pied ni actions (sidebar, fiche) ne montre rien. */
+		.card-footer:empty, .card-actions:empty { display: none; }
+		.card-footer {
+			font-size: 12px; color: var(--muted, #aaa);
+			margin-top: 6px; display: flex; flex-wrap: wrap; gap: 10px;
+		}
+		.card-actions { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+		/* Carte posée dans une liste (groupe, board de recrutement) : encadrée et resserrée. */
+		.character-card.card-list {
+			border: 1px solid var(--border-color, #6b5836);
+			border-radius: 6px; padding: .6rem .7rem; margin-bottom: .6rem;
+			background: rgba(0,0,0,.15);
+		}
+		.character-card.card-list .char-class { margin-bottom: 4px; }
+		.cards-list { display: flex; flex-direction: column; }
+		.cards-list .sell-empty { padding: .4rem 0; }
 
 		.stat-row { 
 			margin-bottom: 8px; 
@@ -1291,53 +1310,23 @@
 		{% set _pm_max = d.get("pm_max") or 1 %}
 		{% set _pv_pct = [(_pv / _pv_max * 100)|int, 100]|min %}
 		{% set _pm_pct = [(_pm / _pm_max * 100)|int, 100]|min %}
+		{# Les paramètres de la carte du joueur, une fois pour les deux exemplaires (sidebar + fiche). #}
+		{% set carte_joueur = {
+			"porteur_id": character["_id"],
+			"nom": character["prenom"] ~ " " ~ character["nom"],
+			"voc_icon": vocation["icon"], "voc_label": vocation["label"],
+			"voc_niveau": character.get("vocations_niveaux", {}).get(character.get("voc",""), 0),
+			"race": character["race"], "niveau": character.get("niveau", 0),
+			"rang": character.get("rang", "aucun"),
+			"pv": _pv, "pv_max": d.get("pv_max", 0), "pm": _pm, "pm_max": d.get("pm_max", 0),
+			"image": character["image"], "zoom": character.get("portrait_zoom", 100),
+		} %}
 		<section class="character-panel">
-		<div class="character-card">
-			<div class="char-header">
-				<div id="scale-root" class="char-portrait">
-					<div class="viewport-wrapper" id="vp">
-					<div class="portrait-overlay-bars">
-						<div class="portrait-stat-bar pv-side">
-							<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
-						</div>
-						<div class="portrait-stat-bar pm-side">
-							<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
-						</div>
-					</div>
-					<img id="img"
-						src="{{ url_for('characters', path=character['image']) }}"
-						alt="Image"
-						draggable="false">
-					<!-- Slider de zoom -->
-					<div id="zoom-bar">
-						<span class="z-icon">−</span>
-						<input id="zoom-slider" type="range" min="10" max="120" value="{{ character.get("portrait_zoom",100) | tojson | safe }}" step="5">
-						<span class="z-icon">+</span>
-						<span id="zoom-val">{{ character.get("portrait_zoom",100) | tojson | safe }}%</span>
-					</div>
-					<button id="action-btn" title="Activer le déplacement" aria-label="Activer le déplacement">
-						<!-- icône edit (crayon) -->
-						<svg class="icon" id="icon-edit" viewBox="0 0 24 24">
-						<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-						<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-						</svg>
-						<!-- icône save (disquette) -->
-						<svg class="icon" id="icon-save" viewBox="0 0 24 24" style="display:none">
-						<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-						<polyline points="17 21 17 13 7 13 7 21"></polyline>
-						<polyline points="7 3 7 8 15 8"></polyline>
-						</svg>
-					</button>
-					</div>
-				</div>
-				{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm, card_id="sidebar" %}
-					{% include "part-character-identity.html" %}
-				{% endwith %}
-			</div>
+		{% call cards.character_card(card_id="sidebar", **carte_joueur) %}
 			<!-- Effets actifs (consommables) : miroir du panneau latéral, resynchronisé
 			     à chaque déplacement via _renderEffetsActifs (rep.effets_actifs). -->
 			<div id="sh-effets-actifs-panel" class="sh-effets-chips"></div>
-		</div>
+		{% endcall %}
 		</section>
 		<footer class="management-footer">
 			<button class="manage-btn" onclick="openSheet()">👤 Personnage</button>
@@ -1373,48 +1362,10 @@
 			</div>
 			<!-- Colonne droite : contenu -->
 			<div class="sheet-right-col">
-				<div id="personnage" class="character-card">
-					<div class="char-header">
-						<div id="scale-root2" class="char-portrait">
-							<div class="viewport-wrapper" id="vp2">
-							<div class="portrait-overlay-bars">
-								<div class="portrait-stat-bar pv-side">
-									<div class="bar-fill{% if _pv > _pv_max %} is-overflow{% endif %}" style="height:{{_pv_pct}}%"></div>
-								</div>
-								<div class="portrait-stat-bar pm-side">
-									<div class="bar-fill{% if _pm > _pm_max %} is-overflow{% endif %}" style="height:{{_pm_pct}}%"></div>
-								</div>
-							</div>
-							<img id="img-portrait"
-								src="{{ url_for('characters', path=character['image']) }}"
-								alt="Image"
-								draggable="false">
-							<!-- Slider de zoom -->
-							<div id="zoom-bar2">
-								<span class="z-icon">−</span>
-								<input id="zoom-slider2" type="range" min="10" max="120" value="{{ character.get("portrait_zoom",100) | tojson | safe }}" step="5">
-								<span class="z-icon">+</span>
-								<span id="zoom-val2">{{ character.get("portrait_zoom",100) | tojson | safe }}%</span>
-							</div>
-							<button id="action-btn2" title="Activer le déplacement" aria-label="Activer le déplacement">
-								<!-- icône edit (crayon) -->
-								<svg class="icon" id="icon-edit2" viewBox="0 0 24 24">
-								<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-								<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-								</svg>
-								<!-- icône save (disquette) -->
-								<svg class="icon" id="icon-save2" viewBox="0 0 24 24" style="display:none">
-								<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-								<polyline points="17 21 17 13 7 13 7 21"></polyline>
-								<polyline points="7 3 7 8 15 8"></polyline>
-								</svg>
-							</button>
-							</div>
-						</div>
-						{% with character=character, vocation=vocation, d=d, _pv=_pv, _pm=_pm, card_id="charac-sheet" %}
-							{% include "part-character-identity.html" %}
-						{% endwith %}
-					</div>
+				{# Carte du joueur, exemplaire de la fiche (mobile). Le mode compagnon la rebascule sur
+				   un compagnon : c'est la MÊME carte, un autre porteur (renderCharacterCard / setSujet). #}
+				<div id="personnage">
+					{{ cards.character_card(card_id="charac-sheet", **carte_joueur) }}
 				</div>
 				<!-- Tab bar -->
 				<nav class="sheet-tab-bar" role="tablist">
@@ -1737,9 +1688,9 @@
 			<button class="sheet-tab-btn close-sheet-btn" onclick="closeRecrutementPanel()" role="button">✕ Fermer</button>
 		</div>
 		<h2 style="margin:.6rem 0 0">👥 Votre groupe (<span id="rec-plafond"></span>)</h2>
-		<ul id="rec-groupe-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+		<div id="rec-groupe-list" class="cards-list"></div>
 		<h2 style="margin:1rem 0 0">🗒️ Recrues disponibles</h2>
-		<ul id="rec-recrues-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+		<div id="rec-recrues-list" class="cards-list"></div>
 	</div><!-- /#recrutement-panel -->
 	<div id="groupe-panel" class="panel-hidden panel-frame board-panel" aria-label="Gestion du groupe">
 		<div class="sell-topbar">
@@ -1754,7 +1705,9 @@
 				<span>👥 Compagnons</span><span class="grp-chevron">▾</span>
 			</button>
 			<div class="grp-body" id="grp-body-compagnons">
-				<ul id="grp-compagnons-list" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
+				{# Une CARTE par compagnon (renderCharacterCard clone le <template> ci-dessous) :
+				   même visualisation que la fiche du joueur, pied « part / affinité » en plus. #}
+				<div id="grp-compagnons-list" class="cards-list"></div>
 			</div>
 		</section>
 		<section class="grp-section">
@@ -1784,12 +1737,16 @@
 			</div>
 		</section>
 	</div><!-- /#groupe-panel -->
+
+	{# Gabarits clonés par renderCharacterCard : la macro est la SEULE à écrire du markup de
+	   carte — le JS ne fait que cloner et remplir les [data-role]. Deux variantes, parce que le
+	   portrait n'est éditable que là où son cadrage peut être ENREGISTRÉ (cf. part-character-card). #}
+	<template id="tpl-character-card"><div>{{ cards.character_card(classes="card-list", editable=true) }}</div></template>
+	<template id="tpl-character-card-ro"><div>{{ cards.character_card(classes="card-list", editable=false) }}</div></template>
+
 	<style>
-		/* Portrait rond d'une recrue/compagnon dans les listes du panneau de recrutement. */
-		.rec-portrait {
-			width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
-			border: 2px solid var(--accent, #b98c4a); flex-shrink: 0;
-		}
+		/* (La vignette ronde `.rec-portrait` des listes a disparu : recrues et compagnons
+		   s'affichent désormais avec la CARTE de personnage, portrait cadré compris.) */
 		/* ── Panneau 👥 Groupe ────────────────────────────────────────────────── */
 		.grp-section { border: 1px solid var(--border-color, #6b5836); border-radius: 6px; overflow: hidden; }
 		.grp-head {
@@ -2038,19 +1995,20 @@
 	// DIRS (et VALID_MOVES / getFinalMask / navAllows) proviennent de scripts/nav.js (partagé).
 	const root = document.documentElement;
 	let isMoving = false;
-	// Rafraîchit toutes les jauges PV/PM (portrait, fiche) + textes, sans recharger.
-	// Générique : le PM sera pris en charge automatiquement dès sa régén serveur.
-	function updateVitals(v) {
-		if (!v) return;
-		const setBars = (side, cur, max) => {
+	// Colonne gauche de la fiche (paysage) : ce n'est pas une carte (autre mise en page), mais
+	// elle miroite le personnage que la fiche affiche.
+	function _setLeftColVitals(v) {
+		const col = document.querySelector('.sheet-left-col');
+		if (!col || !v) return;
+		const bar = (side, cur, max) => {
 			const pct = max > 0 ? Math.min(Math.round(cur / max * 100), 100) : 0;
-			document.querySelectorAll(`.portrait-stat-bar.${side}-side .bar-fill`).forEach(el => {
+			col.querySelectorAll(`.portrait-stat-bar.${side}-side .bar-fill`).forEach(el => {
 				el.style.height = pct + '%';
 				el.classList.toggle('is-overflow', cur > max);
 			});
 		};
-		const setVal = (cls, label, cur, max) => {
-			document.querySelectorAll(cls).forEach(el => {
+		const val = (cls, label, cur, max) => {
+			col.querySelectorAll(cls).forEach(el => {
 				if (el.firstChild && el.firstChild.nodeType === Node.TEXT_NODE) {
 					el.firstChild.nodeValue = `${label} ${cur}/`;
 				}
@@ -2058,10 +2016,22 @@
 				if (span) span.textContent = max;
 			});
 		};
-		setBars('pv', v.currentPV, v.pv_max);
-		setBars('pm', v.currentPM, v.pm_max);
-		setVal('.pv-val', 'PV', v.currentPV, v.pv_max);
-		setVal('.pm-val', 'PM', v.currentPM, v.pm_max);
+		bar('pv', v.currentPV, v.pv_max);
+		bar('pm', v.currentPM, v.pm_max);
+		val('.pv-val', 'PV', v.currentPV, v.pv_max);
+		val('.pm-val', 'PM', v.currentPM, v.pm_max);
+	}
+
+	// Jauges + textes PV/PM d'UN porteur (défaut : le joueur), partout où il est affiché.
+	// ⚠️ Ces vitaux appartiennent à quelqu'un : les écrire à l'échelle du document recopierait
+	// ceux du joueur sur les cartes de ses compagnons (et inversement, une potion bue par un
+	// compagnon écraserait les siennes). Le `data-porteur` de chaque carte tranche.
+	function updateVitals(v, porteurId) {
+		if (!v) return;
+		const cible = porteurId || PRINCIPAL_ID;
+		if (cible === PRINCIPAL_ID) _vitalsJoueur = Object.assign({}, v);
+		cartesDuPorteur(cible).forEach(card => _setCardVitals(card, v));
+		if (cible === porteurActifId()) _setLeftColVitals(v);
 	}
 
 	async function move(viewDx, viewDy) {
@@ -2280,6 +2250,23 @@
 const PORTRAIT_W1 = 100;   // fenêtre d'affichage : constante de mise en page (cf. --portraitW)
 const PORTRAIT_H1 = 100;
 
+// Identité du joueur (partie FIXE : ce qui ne bouge pas d'une action à l'autre). Les parties
+// mobiles — niveaux, vitaux — vivent dans les globales `_vocNiveau`/`_niveau`/`_vitalsJoueur`,
+// que `_identiteJoueur()` recolle pour rendre la fiche au joueur (cf. closeCompagnonSheet).
+const IDENTITE_JOUEUR = {
+	prenom: {{ character["prenom"] | tojson | safe }},
+	nom:    {{ character["nom"] | tojson | safe }},
+	voc:    {{ character.get("voc", "") | tojson | safe }},
+	race:   {{ character["race"] | tojson | safe }},
+	rang:   {{ character.get("rang", "aucun") | tojson | safe }},
+};
+// Vitaux courants du joueur, tenus à jour par updateVitals (la fiche peut être partie chez un
+// compagnon entre-temps : sans mémoire, on ne saurait pas quoi réafficher au retour).
+let _vitalsJoueur = {
+	currentPV: {{ _pv | tojson | safe }}, pv_max: {{ d.get("pv_max", 0) | tojson | safe }},
+	currentPM: {{ _pm | tojson | safe }}, pm_max: {{ d.get("pm_max", 0) | tojson | safe }},
+};
+
 // Sujet cadré = son image, son cadrage persisté, et le doc sur lequel l'enregistrer.
 const SUJET_JOUEUR = {
 	image: {{ character["image"] | tojson | safe }},
@@ -2288,18 +2275,24 @@ const SUJET_JOUEUR = {
 	compagnon_id: null,
 };
 
-let PORTRAIT_SIDEBAR = null;   // #vp  / #img          — le joueur, toujours
-let PORTRAIT_FICHE   = null;   // #vp2 / #img-portrait — sujet interchangeable (mode compagnon)
+let PORTRAIT_SIDEBAR = null;   // carte de la sidebar — le joueur, toujours
+let PORTRAIT_FICHE   = null;   // carte de la fiche   — sujet interchangeable (mode compagnon)
 
-function makePortraitViewport(ids) {
-	const vp         = document.getElementById(ids.vp);
-	const img        = document.getElementById(ids.img);
-	const scaleRoot  = document.getElementById(ids.scaleRoot);
-	const zoomSlider = document.getElementById(ids.zoomSlider);
-	const zoomVal    = document.getElementById(ids.zoomVal);
-	const actionBtn  = document.getElementById(ids.actionBtn);
-	const iconEdit   = document.getElementById(ids.iconEdit);
-	const iconSave   = document.getElementById(ids.iconSave);
+// Un viewport se branche sur une CARTE (racine `.character-card`) et résout ses éléments
+// DEDANS, par data-role : la page porte autant de cartes que de personnages affichés, des ids
+// globaux seraient forcément dupliqués. Une carte sans éditeur (recrue) n'a ni slider ni
+// bouton : les branchements sont tous gardés.
+function makePortraitViewport(card) {
+	if (!card) return null;
+	const q          = (role) => card.querySelector(`[data-role="${role}"]`);
+	const vp         = q('vp');
+	const img        = q('img');
+	const scaleRoot  = q('scale-root');
+	const zoomSlider = q('zoom-slider');
+	const zoomVal    = q('zoom-val');
+	const actionBtn  = q('action-btn');
+	const iconEdit   = q('icon-edit');
+	const iconSave   = q('icon-save');
 	if (!vp || !img) return null;
 
 	const W1 = PORTRAIT_W1, H1 = PORTRAIT_H1;
@@ -2468,19 +2461,109 @@ function makePortraitViewport(ids) {
 	return { setSujet, applyScale, sujet: () => sujet };
 }
 
-PORTRAIT_SIDEBAR = makePortraitViewport({
-	vp: 'vp', img: 'img', scaleRoot: 'scale-root',
-	zoomSlider: 'zoom-slider', zoomVal: 'zoom-val',
-	actionBtn: 'action-btn', iconEdit: 'icon-edit', iconSave: 'icon-save',
-});
-PORTRAIT_FICHE = makePortraitViewport({
-	vp: 'vp2', img: 'img-portrait', scaleRoot: 'scale-root2',
-	zoomSlider: 'zoom-slider2', zoomVal: 'zoom-val2',
-	actionBtn: 'action-btn2', iconEdit: 'icon-edit2', iconSave: 'icon-save2',
-});
+// ── CARTES DE PERSONNAGE ────────────────────────────────────
+// Le markup vient TOUJOURS de la macro Jinja (part-character-card.html) : les cartes fixes
+// (sidebar, fiche) sont rendues par le serveur, les cartes de liste (compagnons, recrues) sont
+// CLONÉES depuis le <template> qu'elle a rempli. Aucun HTML de carte n'est écrit ici — c'est ce
+// qui garantit qu'elles ne divergent pas.
+const PRINCIPAL_ID = {{ character["_id"] | tojson | safe }};
+
+const carteSidebar = () => document.querySelector('.character-card[data-card="sidebar"]');
+const carteFiche   = () => document.querySelector('.character-card[data-card="charac-sheet"]');
+// Toutes les cartes qui montrent CE porteur (le joueur peut apparaître deux fois : sidebar +
+// fiche ; un compagnon, dans sa carte de liste et dans la fiche ouverte sur lui).
+const cartesDuPorteur = (id) =>
+	document.querySelectorAll(`.character-card[data-porteur="${(id || '').replace(/"/g, '\\"')}"]`);
+// Le porteur affiché par la fiche : le compagnon en mode compagnon, sinon le joueur.
+const porteurActifId = () => (_compagnonActif ? _compagnonActif.id : PRINCIPAL_ID);
+
+// Viewports des cartes de liste, indexés par la CARTE (pas par le porteur : un même compagnon
+// peut avoir une carte dans le panneau du groupe ET dans celui du recrutement). Un re-render
+// remplace les cartes → les instances mortes partent avec elles.
+const _cardViewports = new Map();
+
+function _q(card, role) { return card ? card.querySelector(`[data-role="${role}"]`) : null; }
+
+// Vitaux d'UNE carte. Écrire à l'échelle du document (l'ancien `querySelectorAll('.pv-val')`)
+// aurait recopié les PV du joueur sur toutes les cartes de compagnons affichées.
+function _setCardVitals(card, v) {
+	if (!card || !v) return;
+	const set = (role, val) => { const el = _q(card, role); if (el) el.textContent = val; };
+	set('pv', v.currentPV); set('pv-max', v.pv_max);
+	set('pm', v.currentPM); set('pm-max', v.pm_max);
+	const bar = (role, cur, max) => {
+		const el = _q(card, role);
+		if (!el) return;
+		el.style.height = (max > 0 ? Math.min(Math.round(cur / max * 100), 100) : 0) + '%';
+		el.classList.toggle('is-overflow', cur > max);
+	};
+	bar('pv-bar', v.currentPV, v.pv_max);
+	bar('pm-bar', v.currentPM, v.pm_max);
+}
+
+// Identité d'UNE carte + son porteur (data-porteur suit le personnage affiché : c'est lui qui
+// dit à qui s'appliquent les vitaux et les niveaux qu'on écrira ensuite).
+function _setCardIdentite(card, p) {
+	if (!card || !p) return;
+	const set = (role, val) => { const el = _q(card, role); if (el) el.textContent = val; };
+	const voc = VOC_LABELS[p.voc] || {};
+	card.dataset.porteur = p.id || PRINCIPAL_ID;
+	set('nom', `${p.prenom || ''} ${p.nom || ''}`.trim());
+	set('voc-niveau', p.voc_niveau !== undefined ? p.voc_niveau : 0);
+	set('race', p.race || '');
+	set('race-niveau', p.niveau !== undefined ? p.niveau : 0);
+	set('rang', p.rang || 'aucun');
+	// La ligne « ⚔ Guerrier Niv.<span> - <race> Niv.<span> · Rang <span> » : seul son premier
+	// nœud TEXTE porte l'icône et le libellé de vocation (le reste est déjà en data-role).
+	const classeEl = _q(card, 'classe');
+	if (classeEl && classeEl.firstChild) {
+		classeEl.firstChild.nodeValue = `${voc.icon || ''} ${voc.label || p.voc || ''} Niv.`;
+	}
+	_setCardVitals(card, p.vitals || p);
+}
+
+// Une carte de liste : clone du gabarit, remplissage, portrait branché sur SON image et SON
+// cadrage. `opts` = { editable, footer (html), actions (html) }.
+function renderCharacterCard(container, p, opts) {
+	opts = opts || {};
+	const tpl = document.getElementById(opts.editable ? 'tpl-character-card' : 'tpl-character-card-ro');
+	if (!container || !tpl) return null;
+	const card = tpl.content.firstElementChild.firstElementChild.cloneNode(true);
+	_setCardIdentite(card, p);
+	const footer = _q(card, 'footer');
+	const actions = _q(card, 'actions');
+	if (footer)  footer.innerHTML  = opts.footer  || '';
+	if (actions) actions.innerHTML = opts.actions || '';
+	container.appendChild(card);
+
+	const vp = makePortraitViewport(card);
+	if (vp) {
+		_cardViewports.set(card, vp);
+		vp.setSujet({
+			image: p.image,
+			portrait_zoom: p.portrait_zoom,
+			portrait_translate: p.portrait_translate,
+			// Le cadrage n'est enregistrable que sur un doc qui nous appartient (groupe_effectif) :
+			// une carte non éditable n'a de toute façon ni curseur ni bouton 💾.
+			compagnon_id: opts.editable ? p.id : null,
+		});
+	}
+	return card;
+}
+
+// Vide un conteneur de cartes (et les viewports qui allaient avec).
+function clearCharacterCards(container) {
+	if (!container) return;
+	container.querySelectorAll('.character-card').forEach(c => _cardViewports.delete(c));
+	container.innerHTML = '';
+}
+
+PORTRAIT_SIDEBAR = makePortraitViewport(carteSidebar());
+PORTRAIT_FICHE   = makePortraitViewport(carteFiche());
 for (const p of [PORTRAIT_SIDEBAR, PORTRAIT_FICHE]) { if (p) p.setSujet(SUJET_JOUEUR); }
 window.addEventListener('resize', () => {
 	for (const p of [PORTRAIT_SIDEBAR, PORTRAIT_FICHE]) { if (p) p.applyScale(); }
+	_cardViewports.forEach(v => v.applyScale());
 });
 
 // ── FICHE PERSONNAGE ────────────────────────────────────────
@@ -2704,9 +2787,15 @@ function _refreshDerivedStats(d) {
 		if (el2 && d[key] !== undefined) el2.textContent = d[key] + (units[key] || '');
 		const el3 = document.getElementById('stat-left-drv-' + key);
 		if (el3 && d[key] !== undefined) el3.textContent = d[key] + (units[key] || '');
-		const el4 = document.getElementById('stat-right-drv-' + key);
-		if (el4 && d[key] !== undefined) el4.textContent = d[key] + (units[key] || '');
-		
+	}
+	// Les max PV/PM affichés par les cartes du porteur de la fiche (l'ancien id
+	// `stat-right-drv-*` était unique : il ne pouvait pas servir N cartes).
+	if (d.pv_max !== undefined || d.pm_max !== undefined) {
+		cartesDuPorteur(porteurActifId()).forEach(card => {
+			const pvm = _q(card, 'pv-max'), pmm = _q(card, 'pm-max');
+			if (pvm && d.pv_max !== undefined) pvm.textContent = d.pv_max;
+			if (pmm && d.pm_max !== undefined) pmm.textContent = d.pm_max;
+		});
 	}
 }
 
@@ -2725,10 +2814,14 @@ async function spendXpVocation() {
 
 		_vocNiveau       = data.voc_niveau;
 		_attributePoints = data.attribute_points;
-		const elementsNiv = document.querySelectorAll('.voc-niveau');
-		elementsNiv.forEach(el => {
-			el.textContent = _vocNiveau;
-		});
+		// Le niveau de vocation monté est celui du PORTEUR : ne le recopier que sur SES cartes
+		// (+ l'onglet Stats et la colonne gauche, qui affichent le porteur de la fiche).
+		const nivEls = [
+			...cartesDuPorteur(porteurActifId()),
+			document.querySelector('.sheet-left-col'),
+			document.getElementById('sh-stats'),
+		].filter(Boolean).flatMap(root => [...root.querySelectorAll('.voc-niveau')]);
+		nivEls.forEach(el => { el.textContent = _vocNiveau; });
 		const elCout = document.getElementById('sh-voc-cout');
 		if (elCout) elCout.textContent = data.xp_cout_next;
 		_refreshStatBoxes();
@@ -3434,7 +3527,8 @@ async function consommerItem(index, itemId, btn) {
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		_applyInventoryPayload(data);   // re-rend le sac (le bouton disparaît avec l'item)
-		updateVitals(data.vitals);
+		// Vitaux du PORTEUR (un compagnon boit ses propres potions) — pas ceux du joueur.
+		updateVitals(data.vitals, porteurActifId());
 		_renderEffetsActifs(data.effets_actifs);
 		_renderCaractsMod(data.caracts_detail);
 		const c = data.consomme || {};
@@ -3544,7 +3638,8 @@ async function lancerSort(sortId, btn) {
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		_applyInventoryPayload(data);   // composants consommés retirés du sac
-		updateVitals(data.vitals);
+		// Vitaux du PORTEUR (un compagnon boit ses propres potions) — pas ceux du joueur.
+		updateVitals(data.vitals, porteurActifId());
 		_renderEffetsActifs(data.effets_actifs);
 		_renderCaractsMod(data.caracts_detail);
 		_renderSorts(data.sorts);
@@ -3739,7 +3834,8 @@ async function utiliserCompetence(competenceId, btn) {
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
-		updateVitals(data.vitals);
+		// Vitaux du PORTEUR (un compagnon boit ses propres potions) — pas ceux du joueur.
+		updateVitals(data.vitals, porteurActifId());
 		_renderEffetsActifs(data.effets_actifs);
 		_renderCaractsMod(data.caracts_detail);
 		_renderCompetences(data.competences);
@@ -3765,8 +3861,9 @@ async function apprendreCompetence(competenceId, btn) {
 		_renderCompetences(data.competences);
 		_renderCompetencesApprenables(data.competences_apprenables);
 		_renderCaractsMod(data.caracts_detail);
-		// Une passive apprise relève les dérivées (donc les max PV/PM) immédiatement.
-		if (data.vitals) updateVitals(data.vitals);
+		// Une passive apprise relève les dérivées (donc les max PV/PM) immédiatement — celles
+		// du PORTEUR : la fiche peut être ouverte sur un compagnon, qui apprend pour lui-même.
+		if (data.vitals) updateVitals(data.vitals, porteurActifId());
 		const a = data.appris || {};
 		showToast(`${a.icon || '⚡'} ${a.nom || 'Compétence'} apprise !`);
 	} catch(err) { console.error('Erreur apprentissage compétence', err); if (btn) btn.disabled = false; }
@@ -4562,41 +4659,73 @@ function renderFicheCompagnons(list) {
 	}).join('');
 }
 
+// ── Cartes de compagnons / recrues ──────────────────────────────────────────
+// Le groupe et le board affichent les MÊMES personnages, avec la même carte que la fiche du
+// joueur ; seuls le pied et les actions changent. Rien n'est écrit en HTML de carte ici : la
+// macro Jinja reste la seule source du markup (cf. renderCharacterCard).
+
+// Pied d'un compagnon : ce que la carte ne dit pas DÉJÀ — ses PV/PM sont dans ses barres et sa
+// ligne de vitaux, inutile de les répéter. Restent le contrat (part de butin) et le lien (affinité).
+function _piedCompagnon(c) {
+	const aff = (c.affinite === null || c.affinite === undefined) ? 50 : c.affinite;
+	const part = (c.exigences_effectives || {}).part_butin_pct;
+	return `<span>💰 part ${part}%</span><span>🤝 ${aff} — ${_affLabel(aff)}</span>`;
+}
+
+function _btnCongedier(id) {
+	return `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${id}')"
+		title="Congédier (le lien est conservé)">✕ Congédier</button>`;
+}
+
+// Une liste de cartes de compagnons. `actions(c)` compose les boutons propres à l'endroit.
+function _rendreCartesCompagnons(container, groupe, actions) {
+	if (!container) return;
+	clearCharacterCards(container);
+	if (!groupe.length) {
+		container.innerHTML = '<div class="sell-empty">Personne ne vous accompagne.</div>';
+		return;
+	}
+	groupe.forEach(c => renderCharacterCard(container, c, {
+		// Un compagnon du groupe est à nous : son cadrage est enregistrable (cf. _acteur).
+		editable: true,
+		footer: _piedCompagnon(c),
+		actions: actions(c),
+	}));
+}
+
 function renderRecrutement(data) {
 	const plafondEl = document.getElementById('rec-plafond');
 	if (plafondEl) plafondEl.textContent = `${(data.groupe || []).length}/${data.plafond}`;
 	const full = (data.groupe || []).length >= (data.plafond || 0);
-	const gl = document.getElementById('rec-groupe-list');
-	if (gl) {
-		const groupe = data.groupe || [];
-		gl.innerHTML = groupe.length ? groupe.map(c => `<li class="sh-inv-item">
-			<img class="rec-portrait" src="/characters/${c.image}" alt="" onerror="this.style.display='none'">
-			<span>
-				<strong>${c.prenom} ${c.nom}</strong> <span class="sh-inv-poids">${c.race} · ${c.voc} · rang ${c.rang}</span><br>
-				<span class="sh-inv-poids">❤️ ${c.currentPV}/${c.pv_max} PV · 🔵 ${c.currentPM}/${c.pm_max} PM · 💰 part ${(c.exigences_effectives || {}).part_butin_pct}% · 🤝 ${c.affinite === null || c.affinite === undefined ? 50 : c.affinite}</span>
-			</span>
-			<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${c.id}')" title="Congédier (le lien est conservé)">✕ Congédier</button>
-		</li>`).join('') : '<li class="sell-empty">Personne ne vous accompagne.</li>';
-	}
+
+	_rendreCartesCompagnons(document.getElementById('rec-groupe-list'), data.groupe || [],
+		c => _btnCongedier(c.id));
+
 	const rl = document.getElementById('rec-recrues-list');
 	if (rl) {
 		const recrues = data.recrues || [];
-		rl.innerHTML = recrues.length ? recrues.map(r => {
+		clearCharacterCards(rl);
+		if (!recrues.length) {
+			rl.innerHTML = '<div class="sell-empty">Personne au tableau pour le moment.</div>';
+		}
+		recrues.forEach(r => {
 			const ex = r.exigences_effectives || {};
-			const clauses = (ex.clauses || []).map(c => `<span class="q-desc">• ${c}</span>`).join('<br>');
+			const clauses = (ex.clauses || []).map(c => `<span class="q-desc">• ${c}</span>`).join('');
 			const aff = (r.affinite !== null && r.affinite !== undefined)
-				? ` · 🤝 ${r.affinite}${r.deja_connu ? ' (déjà connu)' : ''}` : '';
-			return `<li class="sh-inv-item">
-				<img class="rec-portrait" src="/characters/${r.image}" alt="" onerror="this.style.display='none'">
-				<span>
-					<strong>${r.prenom} ${r.nom}</strong> <span class="sh-inv-poids">${r.race} · ${r.voc} · rang ${r.rang} (niv. ${r.niveau})${aff}</span><br>
-					<span class="q-desc">${r.specialite || ''}</span>
-					<span class="sell-prix">💰 part de butin : ${ex.part_butin_pct} %</span>
-					${clauses ? '<br>' + clauses : ''}
-				</span>
-				<button class="sh-drop-btn" ${full ? 'disabled title="Votre groupe est au complet"' : 'title="Embaucher (gratuit — payé en part de butin de quête)"'} onclick="embaucherAventurier('${r.id}')">Embaucher</button>
-			</li>`;
-		}).join('') : '<li class="sell-empty">Personne au tableau pour le moment.</li>';
+				? `<span>🤝 ${r.affinite}${r.deja_connu ? ' (déjà connu)' : ''}</span>` : '';
+			renderCharacterCard(rl, r, {
+				// Recrue seulement OFFERTE : elle n'est pas dans le groupe, `_acteur` refuserait
+				// d'enregistrer son cadrage (403) → pas d'éditeur de portrait sur sa carte.
+				editable: false,
+				footer: `<span class="q-desc">${r.specialite || ''}</span>`
+					+ `<span class="sell-prix">💰 part de butin : ${ex.part_butin_pct} %</span>`
+					+ aff + clauses,
+				actions: `<button class="sh-drop-btn"
+					${full ? 'disabled title="Votre groupe est au complet"'
+						   : 'title="Embaucher (gratuit — payé en part de butin de quête)"'}
+					onclick="embaucherAventurier('${r.id}')">Embaucher</button>`,
+			});
+		});
 	}
 	if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
 	(data.departs || []).forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
@@ -4693,20 +4822,11 @@ function renderGroupe(data) {
 	const plafond = document.getElementById('grp-plafond');
 	if (plafond) plafond.textContent = `${groupe.length}/${data.plafond}`;
 
-	const liste = document.getElementById('grp-compagnons-list');
-	if (liste) {
-		liste.innerHTML = groupe.length ? groupe.map(c => `<li class="sh-inv-item">
-			<img class="rec-portrait" src="/characters/${c.image}" alt="" onerror="this.style.display='none'">
-			<span>
-				<strong>${c.prenom} ${c.nom}</strong> <span class="sh-inv-poids">${c.race} · ${_vocLabel(c.voc)} · rang ${c.rang} (niv. ${c.niveau})</span><br>
-				<span class="sh-inv-poids">❤️ ${c.currentPV}/${c.pv_max} PV · 🔵 ${c.currentPM}/${c.pm_max} PM · 💰 part ${(c.exigences_effectives || {}).part_butin_pct}% · 🤝 ${c.affinite === null || c.affinite === undefined ? 50 : c.affinite}</span>
-			</span>
-			<span class="sh-inv-actions">
-				<button class="sh-equip-btn" onclick="openCompagnonSheet('${c.id}')" title="Ouvrir sa fiche (stats, sac, compétences)">📋 Fiche</button>
-				<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${c.id}')" title="Congédier (le lien est conservé)">✕ Congédier</button>
-			</span>
-		</li>`).join('') : '<li class="sell-empty">Personne ne vous accompagne.</li>';
-	}
+	// Chaque compagnon s'affiche avec la MÊME carte que le joueur (portrait cadré, barres
+	// PV/PM, identité) ; son pied ne dit que ce qu'elle n'a pas : la part de butin et l'affinité.
+	_rendreCartesCompagnons(document.getElementById('grp-compagnons-list'), groupe, c =>
+		`<button class="sh-equip-btn" onclick="openCompagnonSheet('${c.id}')"
+			title="Ouvrir sa fiche (stats, sac, compétences)">📋 Fiche</button>` + _btnCongedier(c.id));
 	renderGroupeInventaire();
 }
 
@@ -4853,49 +4973,59 @@ function _actionBody(extra) {
 
 function _sheetIdentiteEls() {
 	return {
+		// La colonne gauche (paysage) n'est pas une carte : autre mise en page, donc son HTML
+		// est réécrit (et restauré depuis le snapshot). La colonne droite, elle, EST la carte
+		// `charac-sheet` : elle se pilote par `_setCardIdentite` + `setSujet`, jamais en innerHTML.
 		gauche: document.querySelector('.sheet-left-info'),
-		droite: document.querySelector('#personnage .char-identity'),
 		imgGauche: document.querySelector('.sheet-left-portrait img'),
-		// `#img-portrait` n'est PAS une simple <img> : c'est le viewport cadré PORTRAIT_FICHE
-		// (dimensions natives + zoom + translate du porteur) → il se pilote par `setSujet`.
-		barres: Array.from(document.querySelectorAll('#sheet-panel .portrait-stat-bar .bar-fill')),
+		barres: Array.from(document.querySelectorAll('.sheet-left-col .portrait-stat-bar .bar-fill')),
 	};
 }
 
-// Identité + portraits + barres PV/PM des deux colonnes de la fiche. On réécrit le HTML
-// des blocs d'identité (gabarit part-character-identity.html) : c'est aussi ce qui permet
-// de tout restaurer d'un coup à la fermeture (snapshot de leur innerHTML).
+// Le personnage affiché par la fiche : le joueur, ou un compagnon. Les deux colonnes suivent.
 function _applySheetIdentite(p) {
 	const els = _sheetIdentiteEls();
 	const v = p.vitals || {};
 	const pvPct = v.pv_max ? Math.min(100, Math.round(v.currentPV / v.pv_max * 100)) : 0;
 	const pmPct = v.pm_max ? Math.min(100, Math.round(v.currentPM / v.pm_max * 100)) : 0;
-	const nom = `${p.prenom} ${p.nom}`;
-	const classe = `${_vocLabel(p.voc)} Niv.<span class="voc-niveau niveau-nb">${p.voc_niveau}</span>`
-		+ ` - ${p.race} Niv.<span class="race-niveau niveau-nb">${p.niveau}</span> · Rang ${p.rang}`;
-	const vitals = `<span class="pv-val">PV ${v.currentPV}/${v.pv_max}</span>`
-		+ `<span class="pm-val">PM ${v.currentPM}/${v.pm_max}</span>`;
 	if (els.gauche) {
-		els.gauche.innerHTML = `<div class="char-name">${nom}</div>`
+		const classe = `${_vocLabel(p.voc)} Niv.<span class="voc-niveau niveau-nb">${p.voc_niveau}</span>`
+			+ ` - ${p.race} Niv.<span class="race-niveau niveau-nb">${p.niveau}</span> · Rang ${p.rang}`;
+		// Mêmes ids que le gabarit Jinja : _refreshDerivedStats continue d'y écrire les max.
+		const vitals = `<span class="pv-val">PV ${v.currentPV}/<span id="stat-left-drv-pv_max">${v.pv_max}</span></span>`
+			+ `<span class="pm-val">PM ${v.currentPM}/<span id="stat-left-drv-pm_max">${v.pm_max}</span></span>`;
+		els.gauche.innerHTML = `<div class="char-name">${p.prenom} ${p.nom}</div>`
 			+ `<div class="char-class">${classe}</div>`
 			+ `<div class="char-vitals" style="margin-top:8px">${vitals}</div>`
 			+ `<div id="sh-effets-actifs" class="sh-effets-chips"></div>`;
 	}
-	if (els.droite) {
-		els.droite.innerHTML = `<div class="char-name">${nom}</div>`
-			+ `<div class="char-class">${classe}</div>`
-			+ `<div class="char-vitals">${vitals}</div>`;
-	}
 	if (els.imgGauche) els.imgGauche.src = '/characters/' + p.image;
-	// Le portrait cadré de la fiche passe sur le compagnon : SON image (mesurée dans le
-	// navigateur), SON cadrage, et son doc comme cible d'un éventuel enregistrement.
+	els.barres.forEach((b, i) => { b.style.height = (i % 2 === 0 ? pvPct : pmPct) + '%'; });
+
+	// La carte de la fiche change de porteur : identité, vitaux, barres — et son portrait, dont
+	// l'image est mesurée et le cadrage propre au compagnon (enregistrable sur SON doc).
+	_setCardIdentite(carteFiche(), p);
 	if (PORTRAIT_FICHE) PORTRAIT_FICHE.setSujet({
 		image: p.image,
 		portrait_zoom: p.portrait_zoom,
 		portrait_translate: p.portrait_translate,
-		compagnon_id: p.id,
+		compagnon_id: p.id === PRINCIPAL_ID ? null : p.id,
 	});
-	els.barres.forEach((b, i) => { b.style.height = (i % 2 === 0 ? pvPct : pmPct) + '%'; });
+}
+
+// Le joueur tel que la carte l'attend (l'identité vient des globales, tenues à jour : niveaux
+// dépensés, vitaux régénérés) — de quoi rendre la fiche au joueur en sortant du mode compagnon.
+function _identiteJoueur() {
+	return {
+		id: PRINCIPAL_ID,
+		prenom: IDENTITE_JOUEUR.prenom, nom: IDENTITE_JOUEUR.nom,
+		voc: IDENTITE_JOUEUR.voc, race: IDENTITE_JOUEUR.race, rang: IDENTITE_JOUEUR.rang,
+		voc_niveau: _vocNiveau, niveau: _niveau,
+		image: SUJET_JOUEUR.image,
+		portrait_zoom: SUJET_JOUEUR.portrait_zoom,
+		portrait_translate: SUJET_JOUEUR.portrait_translate,
+		vitals: _vitalsJoueur,
+	};
 }
 
 function _sheetRendreTout() {
@@ -4937,10 +5067,10 @@ async function openCompagnonSheet(avId) {
 			sortsEpingles: _sortsEpingles, competences: _competences,
 			competencesApprenables: _competencesApprenables, competencesEpinglees: _competencesEpinglees,
 			htmlGauche: els.gauche ? els.gauche.innerHTML : '',
-			htmlDroite: els.droite ? els.droite.innerHTML : '',
 			imgGauche: els.imgGauche ? els.imgGauche.getAttribute('src') : '',
-			// Le portrait cadré n'est pas snapshotté : `PORTRAIT_FICHE` le rebâtit du sujet
-			// (image + zoom + translate), un `src` mis de côté ne dirait rien du cadrage.
+			// La CARTE de la fiche n'est pas snapshottée : elle se reconstruit du joueur
+			// (`_identiteJoueur()` + `SUJET_JOUEUR`), et un HTML mis de côté serait déjà périmé
+			// si le joueur a régénéré ou dépensé un point pendant le détour.
 			barres: els.barres.map(b => b.style.height),
 		};
 
@@ -4994,10 +5124,12 @@ function closeCompagnonSheet() {
 
 		const els = _sheetIdentiteEls();
 		if (els.gauche) els.gauche.innerHTML = s.htmlGauche;
-		if (els.droite) els.droite.innerHTML = s.htmlDroite;
 		if (els.imgGauche) els.imgGauche.src = s.imgGauche;
-		if (PORTRAIT_FICHE) PORTRAIT_FICHE.setSujet(SUJET_JOUEUR);
 		els.barres.forEach((b, i) => { b.style.height = s.barres[i] || '0%'; });
+		// La carte de la fiche redevient celle du joueur — reconstruite (globales restaurées
+		// juste au-dessus), pas restaurée d'un HTML figé.
+		_setCardIdentite(carteFiche(), _identiteJoueur());
+		if (PORTRAIT_FICHE) PORTRAIT_FICHE.setSujet(SUJET_JOUEUR);
 		_sheetRendreTout();
 	}
 	document.getElementById('sheet-panel').classList.add('panel-hidden');

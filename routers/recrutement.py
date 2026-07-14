@@ -35,7 +35,12 @@ def _lieu_recruteur(character: dict) -> dict:
 
 def _recrue_view(character: dict, av: dict) -> dict:
 	"""Vue d'une recrue pour le client : identité + conditions EFFECTIVES (affinité
-	déduite) + mémoire du lien (`affinite` brute — None si jamais rencontrée)."""
+	déduite) + mémoire du lien (`affinite` brute — None si jamais rencontrée).
+
+	Source unique des recrues ET du groupe (`_groupe_view` n'y ajoute que les vitaux) : le
+	client en fait des CARTES de personnage (part-character-card.html), d'où le niveau de
+	vocation et le cadrage du portrait — sans eux, la carte ne saurait ni afficher la ligne
+	d'identité complète ni recadrer l'image comme son porteur l'a réglée."""
 	affinite_brute = (character.get("affinites", {}) or {}).get(av["_id"])
 	return {
 		"id": av["_id"],
@@ -43,26 +48,27 @@ def _recrue_view(character: dict, av: dict) -> dict:
 		"nom": av.get("nom", ""),
 		"race": av.get("race", ""),
 		"voc": av.get("voc", ""),
+		"voc_niveau": (av.get("vocations_niveaux") or {}).get(av.get("voc", ""), 0),
 		"sex": av.get("sex", ""),
 		"rang": av.get("rang", "F"),
 		"niveau": compute_character_level(av.get("xp_total", 0)),
 		"specialite": av.get("specialite", ""),
 		"image": av.get("image", ""),
+		"portrait_zoom": av.get("portrait_zoom"),
+		"portrait_translate": av.get("portrait_translate"),
 		"exigences_effectives": recrutement.conditions_effectives(
 			av, recrutement.affinite_de(character, av["_id"])),
 		"affinite": affinite_brute,
 		"deja_connu": av["_id"] in (character.get("compagnons_connus", {}) or {}),
+		# Vitaux : la carte les affiche (barres + ligne PV/PM) pour un compagnon comme pour une
+		# recrue — son doc est la source, ses max se recalculent comme ceux du joueur.
+		**recrutement.vitaux_de(av),
 	}
 
 
 def _groupe_view(character: dict) -> list:
-	"""Le groupe actif, avec l'état vital du compagnon (son doc est la source)."""
-	out = []
-	for av in recrutement.groupe_effectif(character, get_doc):
-		vue = _recrue_view(character, av)
-		vue.update(recrutement.vitaux_de(av))
-		out.append(vue)
-	return out
+	"""Le groupe actif (même vue que les recrues : `_recrue_view` porte déjà les vitaux)."""
+	return [_recrue_view(character, av) for av in recrutement.groupe_effectif(character, get_doc)]
 
 
 def _appliquer_departs(character: dict) -> list:

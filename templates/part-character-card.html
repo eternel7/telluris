@@ -1,0 +1,80 @@
+{#
+  Carte de personnage — SOURCE UNIQUE du markup, pour TOUS les porteurs.
+
+  Une carte = portrait cadré (barres PV/PM superposées) + identité + deux emplacements
+  libres (pied de carte et barre d'actions). Elle sert le joueur (sidebar, fiche) comme
+  n'importe quel compagnon ou recrue d'une liste — c'est le même composant, décliné.
+
+  ⚠️ AUCUN id ici, uniquement des `data-role` : une page porte N cartes, des ids seraient
+  fatalement dupliqués. Les hooks JS (makePortraitViewport, _setCardVitals, _setCardIdentite)
+  résolvent leurs éléments DANS la racine de la carte — c'est ce cadrage qui garantit que les
+  vitaux du joueur n'écrasent pas ceux de ses compagnons.
+
+  Deux consommateurs, un seul markup :
+  - Jinja  : `{% raw %}{% import "part-character-card.html" as cards %}{% endraw %}` puis `cards.character_card(...)`
+             (un `{% raw %}{% call %}{% endraw %}` ajoute du contenu libre en bas de carte).
+  - Client : la macro est rendue à vide dans un `<template>` que `renderCharacterCard` clone
+             et remplit (aucun HTML de carte n'est écrit en JS).
+
+  `editable` = le portrait porte son éditeur (curseur de zoom + ✏️/💾). À réserver aux porteurs
+  dont le cadrage est enregistrable : une recrue seulement OFFERTE n'est pas dans le groupe,
+  `_acteur` refuserait la sauvegarde (403) — on ne montre pas un éditeur qui ne peut pas écrire.
+#}
+{% macro character_card(card_id='', porteur_id='', nom='', voc_icon='', voc_label='',
+                        voc_niveau=0, race='', niveau=0, rang='', pv=0, pv_max=0,
+                        pm=0, pm_max=0, image='', zoom=100, editable=true, classes='') %}
+{% set _pv_max = pv_max or 1 %}
+{% set _pm_max = pm_max or 1 %}
+{% set pv_pct = [(pv / _pv_max * 100)|int, 100]|min %}
+{% set pm_pct = [(pm / _pm_max * 100)|int, 100]|min %}
+<div class="character-card {{ classes }}" data-card="{{ card_id }}" data-porteur="{{ porteur_id }}">
+	<div class="char-header">
+		<div class="char-portrait" data-role="scale-root">
+			<div class="viewport-wrapper" data-role="vp">
+				<div class="portrait-overlay-bars">
+					<div class="portrait-stat-bar pv-side">
+						<div class="bar-fill{% if pv > _pv_max %} is-overflow{% endif %}" data-role="pv-bar" style="height:{{ pv_pct }}%"></div>
+					</div>
+					<div class="portrait-stat-bar pm-side">
+						<div class="bar-fill{% if pm > _pm_max %} is-overflow{% endif %}" data-role="pm-bar" style="height:{{ pm_pct }}%"></div>
+					</div>
+				</div>
+				{# `src` définitif posé par makePortraitViewport, qui MESURE l'image avant de la cadrer. #}
+				<img data-role="img" src="{% if image %}/characters/{{ image }}{% endif %}" alt="" draggable="false">
+				{% if editable %}
+				<div class="zoom-bar">
+					<span class="z-icon">−</span>
+					<input class="zoom-slider" data-role="zoom-slider" type="range" min="10" max="120" value="{{ zoom }}" step="1">
+					<span class="z-icon">+</span>
+					<span class="zoom-val" data-role="zoom-val">{{ zoom }}%</span>
+				</div>
+				<button class="action-btn" data-role="action-btn" title="Activer le déplacement" aria-label="Activer le déplacement">
+					<svg class="icon" data-role="icon-edit" viewBox="0 0 24 24">
+						<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+						<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+					</svg>
+					<svg class="icon" data-role="icon-save" viewBox="0 0 24 24" style="display:none">
+						<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+						<polyline points="17 21 17 13 7 13 7 21"></polyline>
+						<polyline points="7 3 7 8 15 8"></polyline>
+					</svg>
+				</button>
+				{% endif %}
+			</div>
+		</div>
+		<div class="char-identity" data-role="identity">
+			<div class="char-name" data-role="nom">{{ nom }}</div>
+			<div class="char-class" data-role="classe">{{ voc_icon }} {{ voc_label }} Niv.<span class="voc-niveau niveau-nb" data-role="voc-niveau">{{ voc_niveau }}</span> - <span data-role="race">{{ race }}</span> Niv.<span class="race-niveau niveau-nb" data-role="race-niveau">{{ niveau }}</span> · Rang <span data-role="rang">{{ rang }}</span></div>
+			<div class="char-vitals">
+				<span class="pv-val" data-role="pv-val">PV <span data-role="pv">{{ pv }}</span>/<span data-role="pv-max">{{ pv_max or "—" }}</span></span>
+				<span class="pm-val" data-role="pm-val">PM <span data-role="pm">{{ pm }}</span>/<span data-role="pm-max">{{ pm_max or "—" }}</span></span>
+			</div>
+		</div>
+	</div>
+	{# Pied de carte : ce qui n'est pas de l'identité (part de butin, affinité, spécialité…). #}
+	<div class="card-footer" data-role="footer"></div>
+	{# Barre d'actions : Fiche, Congédier, Embaucher… selon l'endroit où la carte est posée. #}
+	<div class="card-actions" data-role="actions"></div>
+	{% if caller %}{{ caller() }}{% endif %}
+</div>
+{% endmacro %}
