@@ -488,6 +488,13 @@
 			margin-left: auto;
 		}
 		.sh-marchander-btn:disabled { opacity: .4; cursor: not-allowed; }
+		/* Badge « objet d'un compagnon » dans la liste de vente (biens mis en commun). */
+		.sell-owner {
+			margin-left: 6px; padding: 0 6px; border-radius: 8px;
+			font-size: 0.72rem; color: #cbb98a;
+			background: rgba(120,110,80,0.28); border: 1px solid rgba(205,163,73,0.3);
+			white-space: nowrap; vertical-align: middle;
+		}
 		.sheet-tab-bar {
 			display: flex;
 			align-items: stretch;
@@ -3487,6 +3494,7 @@ function openMarchandDetail(sens, arrIdx) {
 function _renderMarchandDetail(st) {
 	const it = st.item;
 	let html = `<h3>${it.icon || '📦'} ${it.nom || '—'}</h3>`;
+	if (it.compagnon_id) html += `<div class="item-cmp-slotsel"><span>Porteur :</span><strong>👤 ${it.porteur_nom || 'Compagnon'}</strong></div>`;
 	if (it.prix) html += `<div class="item-cmp-slotsel"><span>Prix :</span><strong>${it.negocie ? '🤝 ' : ''}${formatPrix(it.prix)}</strong></div>`;
 	if (st.slots.length) {
 		const equipped = _slots[st.slot] || null;
@@ -3499,16 +3507,16 @@ function _renderMarchandDetail(st) {
 		html += _renderCmpTable(it, null, 'Objet', '');
 	}
 	const acts = [];
-	if (st.sens === 'vente') acts.push(`<button class="sh-drop-btn" onclick="_cardSell(${it.index},'${it.item_id}')">Vendre</button>`);
+	if (st.sens === 'vente') acts.push(`<button class="sh-drop-btn" onclick="_cardSell(${it.index},'${it.item_id}',${_cgArg(it.compagnon_id)})">Vendre</button>`);
 	else                     acts.push(`<button class="sh-equip-btn" onclick="_cardBuy('${it.item_id}')">Acheter</button>`);
 	const mIdx = st.sens === 'vente' ? it.index : 'null';
-	acts.push(`<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="_cardMarch(${mIdx},'${it.item_id}','${st.sens}')" title="Marchander">🤝 Marchander</button>`);
+	acts.push(`<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="_cardMarch(${mIdx},'${it.item_id}','${st.sens}',${_cgArg(it.compagnon_id)})" title="Marchander">🤝 Marchander</button>`);
 	html += `<div class="item-detail-actions">${acts.join('')}</div>`;
 	return html;
 }
-function _cardSell(index, itemId)        { closeItemDetail(); sellItem(index, itemId); }
-function _cardBuy(itemId)                { closeItemDetail(); buyItem(itemId); }
-function _cardMarch(index, itemId, sens) { closeItemDetail(); marchanderItem(index, itemId, sens); }
+function _cardSell(index, itemId, compagnonId)        { closeItemDetail(); sellItem(index, itemId, compagnonId); }
+function _cardBuy(itemId)                             { closeItemDetail(); buyItem(itemId); }
+function _cardMarch(index, itemId, sens, compagnonId) { closeItemDetail(); marchanderItem(index, itemId, sens, compagnonId); }
 
 // ── Découpe du bois ───────────────────────────────────────────────────
 function _estCoupable(item) {
@@ -4226,9 +4234,13 @@ function updateRelationBadge() {
 	el.textContent = '🤝 Relation : ' + r + (isMarchBlocked() ? ' · marchandage bloqué (~' + blocRemainingMin() + ' min)' : '');
 }
 
-function marchBtn(index, itemId, sens) {
+// Sérialise un compagnon_id en argument d'onclick : `'aventurier:xxx'` ou le littéral null
+// (objet du personnage principal).
+function _cgArg(id) { return id ? `'${id}'` : 'null'; }
+
+function marchBtn(index, itemId, sens, compagnonId) {
 	const idxArg = (index === null || index === undefined) ? 'null' : index;
-	return `<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="marchanderItem(${idxArg},'${itemId}','${sens}')" title="Marchander">🤝</button>`;
+	return `<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="marchanderItem(${idxArg},'${itemId}','${sens}',${_cgArg(compagnonId)})" title="Marchander">🤝</button>`;
 }
 
 // Tri par nom + scroll : même pattern que le sac/le sol (_sortedOrder rend un ordre
@@ -4251,14 +4263,15 @@ function renderSellList(data) {
 	}
 	list.innerHTML = _sortedOrder(vendables, _sellSort).map(idx => {
 		const v = vendables[idx];
+		const owner = v.compagnon_id ? `<span class="sell-owner" title="Objet de ${v.porteur_nom}">👤 ${v.porteur_nom}</span>` : '';
 		return `<li class="sh-inv-item">
 		<span class="sh-inv-open" onclick="openMarchandDetail('vente',${idx})" title="Voir la fiche">${v.icon || '📦'}</span>
-		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('vente',${idx})" title="Voir la fiche">${v.nom || '—'}</span>
+		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('vente',${idx})" title="Voir la fiche">${v.nom || '—'}${owner}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
-			<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}')" title="Vendre">Vendre</button>
-			${marchBtn(v.index, v.item_id, 'vente')}
+			<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}',${_cgArg(v.compagnon_id)})" title="Vendre">Vendre</button>
+			${marchBtn(v.index, v.item_id, 'vente', v.compagnon_id)}
 		</span>
 	</li>`;
 	}).join('');
@@ -4295,10 +4308,13 @@ function renderBuyList(data) {
 // Prix RÉELLEMENT appliqué après marchandage = celui affiché dans la liste re-rendue
 // (`prix_marche` = négocié × facteur_stock, re-clampé), et non le prix de bande `prix_negocie`
 // renvoyé par l'endpoint (qui ignore l'offre/demande) → le toast doit refléter la liste.
-function _appliedMarchPrice(data, index, itemId, sens) {
+function _appliedMarchPrice(data, index, itemId, sens, compagnonId) {
 	const list = sens === 'vente' ? (data.vendables || []) : (data.achetables || []);
+	const cg = compagnonId || null;
 	let e = null;
-	if (sens === 'vente') e = list.find(v => v.index === index && v.item_id === itemId) || list.find(v => v.item_id === itemId);
+	if (sens === 'vente') e = list.find(v => v.index === index && v.item_id === itemId && (v.compagnon_id || null) === cg)
+						   || list.find(v => v.item_id === itemId && (v.compagnon_id || null) === cg)
+						   || list.find(v => v.item_id === itemId);
 	else                  e = list.find(v => v.item_id === itemId);
 	return e ? e.prix : null;
 }
@@ -4311,12 +4327,14 @@ function marchToast(d, applied) {
 	return 'Marchandage raté — prix inchangé.';
 }
 
-async function marchanderItem(index, itemId, sens) {
+async function marchanderItem(index, itemId, sens, compagnonId) {
 	if (isMarchBlocked()) { showToast('Le marchand boude — revenez dans ~' + blocRemainingMin() + ' min.'); return; }
 	try {
+		const body = {index, item_id: itemId, sens};
+		if (compagnonId) body.compagnon_id = compagnonId;
 		const res  = await fetch('api/marchander', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({index, item_id: itemId, sens})
+			body: JSON.stringify(body)
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
@@ -4324,7 +4342,7 @@ async function marchanderItem(index, itemId, sens) {
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
-		showToast(marchToast(data, _appliedMarchPrice(data, index, itemId, sens)));
+		showToast(marchToast(data, _appliedMarchPrice(data, index, itemId, sens, compagnonId)));
 	} catch(err) { console.error('Erreur marchandage', err); }
 }
 
@@ -4349,11 +4367,13 @@ function closeSellPanel() {
 	window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function sellItem(index, itemId) {
+async function sellItem(index, itemId, compagnonId) {
 	try {
+		const body = {index, item_id: itemId};
+		if (compagnonId) body.compagnon_id = compagnonId;
 		const res  = await fetch('api/sell_item', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({index, item_id: itemId})
+			body: JSON.stringify(body)
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }

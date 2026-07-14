@@ -114,16 +114,22 @@ def couper_ref(source_ref, source_item_doc, find_docs_fn):
 	return [{"item": cible_id, "poids": p} for p in poids_list]
 
 
-def a_outil_coupe(character, get_doc_fn) -> bool:
-	"""True si un item du sac OU de l'équipement porte le tag outil de coupe."""
+def a_outil_coupe(character, get_doc_fn, compagnons=None) -> bool:
+	"""True si un item du sac OU de l'équipement porte le tag outil de coupe.
+
+	Compétences/équipements partagés en exploration : si `compagnons` (liste de docs
+	`aventurier:*` du groupe) est fournie, il suffit qu'UN membre de l'expédition — le
+	personnage OU un compagnon — porte l'outil. `None` → seul le personnage est scanné
+	(comportement historique inchangé)."""
 	tag = character_stats.OUTIL_COUPE_BOIS_TAG.lower()
-	refs = list(character.get("inventaire", []) or [])
-	refs += [r for r in (character.get("slots", {}) or {}).values() if r]
-	for ref in refs:
-		item_id = item_ref_id(ref)
-		if not item_id:
-			continue
-		doc = get_doc_fn(item_id)
-		if doc and tag in _item_tags(doc):
-			return True
+	for porteur in [character, *(compagnons or [])]:
+		refs = list((porteur or {}).get("inventaire", []) or [])
+		refs += [r for r in ((porteur or {}).get("slots", {}) or {}).values() if r]
+		for ref in refs:
+			item_id = item_ref_id(ref)
+			if not item_id:
+				continue
+			doc = get_doc_fn(item_id)
+			if doc and tag in _item_tags(doc):
+				return True
 	return False

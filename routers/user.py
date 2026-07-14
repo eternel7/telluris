@@ -1374,7 +1374,7 @@ async def recolter_ressource(
 	# immédiatement plus petit) tombent au SOL (pas de contrôle de charge), à ramasser
 	# ensuite. Sans outil → refus.
 	if bois.item_est_coupable(doc):
-		if not bois.a_outil_coupe(character, get_doc):
+		if not bois.a_outil_coupe(character, get_doc, recrutement.groupe_effectif(character, get_doc)):
 			raise HTTPException(status_code=409, detail="Il faut un outil de coupe (hache, scie…) pour récolter du bois.")
 		pieces = bois.couper_ref(ref, doc, find_docs) or [ref]
 		au_sol = character.get("objets_au_sol", [])
@@ -1417,7 +1417,7 @@ async def couper_item(
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 
-	if not bois.a_outil_coupe(character, get_doc):
+	if not bois.a_outil_coupe(character, get_doc, recrutement.groupe_effectif(character, get_doc)):
 		raise HTTPException(status_code=409, detail="Il faut un outil de coupe (hache, scie…).")
 
 	source = body.get("source")
@@ -1470,34 +1470,45 @@ def _find_ref(refs: list, idx, item_id):
 	return None
 
 
-def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None = None) -> list:
-	"""Liste des items de l'inventaire que le marchand du lieu achète, avec leur prix
-	courant (négocié ou base pondéré relation) et la fourchette min–max. Adressés par
-	index (vérifié par item_id côté vente : deux exemplaires peuvent peser/valoir
-	différemment)."""
+def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None = None,
+						compagnons: list | None = None) -> list:
+	"""Liste des items que le marchand du lieu achète, **agrégée sur toute l'expédition** :
+	le sac du personnage principal PUIS celui de chaque compagnon. Chaque entrée porte son
+	prix courant (négocié ou base pondéré relation) et sa fourchette min–max. Adressée par
+	`index` (dans le sac de SON porteur, vérifié par item_id : deux exemplaires peuvent
+	peser/valoir différemment) + `compagnon_id` (None = principal → le porteur de l'objet).
+	La relation/le marchandage restent ceux du principal : c'est lui qui traite et encaisse."""
+	# (compagnon_id, doc, nom affiché) — None pour le principal (objets non badgés côté UI).
+	porteurs = [(None, character, "")]
+	for c in (compagnons or []):
+		porteurs.append((c.get("_id"), c, c.get("prenom") or c.get("nom") or "Compagnon"))
+
 	vendables = []
-	for idx, ref in enumerate(character.get("inventaire", [])):
-		item = resolve_item_ref(ref)
-		if not item or not lieu_buys(lieu_doc, item):
-			continue
-		item_id = item.get("item") or item.get("_id")
-		pmin, pmax, stock_mat = params_vente_lieu(lieu_doc, item, item_id, ref)
-		cible = stock_cible_pour(lieu_doc, item)
-		prix_cuivre = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
-		negocie = (relation or {}).get("prix_negocies", {}).get(item_id, {}).get("vente") is not None
-		vendables.append({
-			"index": idx,
-			"item_id": item_id,
-			"nom": item.get("nom"),
-			"icon": item.get("icon"),
-			"poids": round(float(item.get("poids", 0) or 0), 2),
-			"prix_cuivre": prix_cuivre,
-			"prix": cuivre_to_purse(prix_cuivre),
-			"prix_min_purse": cuivre_to_purse(pmin),
-			"prix_max_purse": cuivre_to_purse(pmax),
-			"negocie": negocie,
-			**fiche_item_fields(item),
-		})
+	for compagnon_id, porteur, nom in porteurs:
+		for idx, ref in enumerate(porteur.get("inventaire", [])):
+			item = resolve_item_ref(ref)
+			if not item or not lieu_buys(lieu_doc, item):
+				continue
+			item_id = item.get("item") or item.get("_id")
+			pmin, pmax, stock_mat = params_vente_lieu(lieu_doc, item, item_id, ref)
+			cible = stock_cible_pour(lieu_doc, item)
+			prix_cuivre = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
+			negocie = (relation or {}).get("prix_negocies", {}).get(item_id, {}).get("vente") is not None
+			vendables.append({
+				"index": idx,
+				"compagnon_id": compagnon_id,
+				"porteur_nom": nom,
+				"item_id": item_id,
+				"nom": item.get("nom"),
+				"icon": item.get("icon"),
+				"poids": round(float(item.get("poids", 0) or 0), 2),
+				"prix_cuivre": prix_cuivre,
+				"prix": cuivre_to_purse(prix_cuivre),
+				"prix_min_purse": cuivre_to_purse(pmin),
+				"prix_max_purse": cuivre_to_purse(pmax),
+				"negocie": negocie,
+				**fiche_item_fields(item),
+			})
 	return vendables
 
 
@@ -1511,9 +1522,10 @@ async def marchand_quotes(
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 	lieu_doc = _current_lieu_doc(character)
 	relation = get_relation(character, lieu_doc)
+	compagnons = recrutement.groupe_effectif(character, get_doc)
 	return {
 		"lieu_label": (lieu_doc or {}).get("label"),
-		"vendables": _marchand_vendables(character, lieu_doc, relation),
+		"vendables": _marchand_vendables(character, lieu_doc, relation, compagnons),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"cha_marchand": merchant_cha(lieu_doc),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
@@ -1534,19 +1546,19 @@ async def sell_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Vend un objet de l'inventaire au marchand du lieu courant. Adressage par index
-	vérifié par item_id (robuste au décalage après chaque vente puisqu'on re-render
-	depuis `vendables`)."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	"""Vend un objet au marchand du lieu courant. L'objet peut appartenir au personnage OU
+	à un compagnon du groupe (`compagnon_id` optionnel) — l'expédition met en commun ses
+	biens —, mais **l'argent revient toujours au personnage principal** (qui rétribue déjà
+	ses compagnons via leur part de butin). Adressage par index vérifié par item_id (robuste
+	au décalage après chaque vente puisqu'on re-render depuis `vendables`)."""
+	porteur, principal = _acteur(current_user, body)
 
-	lieu_doc = _current_lieu_doc(character)
-	relation = get_relation(character, lieu_doc)
+	lieu_doc = _current_lieu_doc(principal)
+	relation = get_relation(principal, lieu_doc)
 	if relation_value(relation) <= 0:
 		raise HTTPException(status_code=403, detail="Ce marchand refuse de traiter avec vous.")
 
-	inventaire = character.get("inventaire", [])
+	inventaire = porteur.get("inventaire", [])
 	ref = _take_ref(inventaire, body.get("index"), body.get("item_id"))
 	if ref is None:
 		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
@@ -1562,20 +1574,21 @@ async def sell_item(
 	pmin, pmax, stock_mat = params_vente_lieu(lieu_doc, item, item_id, ref)
 	cible = stock_cible_pour(lieu_doc, item)
 	prix = prix_marche(relation, item_id, pmin, pmax, "vente", stock_mat, cible)
-	purse = credit_character(character, prix)
-	character["inventaire"] = inventaire
+	purse = credit_character(principal, prix)   # l'argent va au principal, l'objet quitte le porteur
+	porteur["inventaire"] = inventaire
 
 	# Le lieu absorbe l'objet acheté → matières → stock vendable (mute lieu_doc).
 	convertir_apres_achat(lieu_doc, item)
 
-	# Le personnage (monnaie + inventaire) est l'état autoritatif : on le persiste d'abord.
-	if save_doc(character) is None:
-		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	# Porteur d'abord (autoritatif : l'objet est retiré pour de bon → pas de double vente),
+	# puis le principal (monnaie, best-effort si compagnon). Même séquence bi-doc que drop.
+	_save_acteur(porteur, principal)
 	save_doc(lieu_doc)  # best-effort : le stock du lieu est une commodité monde
 
-	payload = _inventory_payload(character)
+	compagnons = recrutement.groupe_effectif(principal, get_doc)
+	payload = _inventory_payload(principal)
 	payload["purse"] = purse
-	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation)
+	payload["vendables"] = _marchand_vendables(principal, lieu_doc, relation, compagnons)
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
 	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
 	payload["relation"] = relation_value(relation)
@@ -1635,7 +1648,7 @@ async def buy_item(
 
 	payload = _inventory_payload(character)
 	payload["purse"] = purse
-	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation)
+	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation, recrutement.groupe_effectif(character, get_doc))
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
 	payload["achete"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
 	payload["relation"] = relation_value(relation)
@@ -1652,9 +1665,10 @@ async def marchander_item(
 	cet objet. Crit réussite (roll ≤ MAX) → +1 relation ; crit échec (roll ≥ MIN) →
 	−1 relation ET blocage du marchandage pendant MARCHANDAGE_BLOCAGE_SECONDES. Ne touche
 	ni l'inventaire ni la bourse (le prix s'applique à la prochaine vente/achat)."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	# Le porteur peut être un compagnon (marchandage d'un objet du groupe) ; le principal
+	# reste celui qui négocie et dont dépend la relation au marchand.
+	porteur, principal = _acteur(current_user, body)
+	character = principal
 
 	sens = body.get("sens")
 	if sens not in ("vente", "achat"):
@@ -1669,10 +1683,10 @@ async def marchander_item(
 	if marchandage_bloque(relation, now):
 		raise HTTPException(status_code=403, detail="Le marchand refuse de négocier pour l'instant.")
 
-	# Résoudre l'objet et sa fourchette de prix (vente : ref d'inventaire ; achat : stock du lieu).
+	# Résoudre l'objet et sa fourchette de prix (vente : ref du sac du porteur ; achat : stock du lieu).
 	item_id = body.get("item_id")
 	if sens == "vente":
-		ref = _find_ref(character.get("inventaire", []), body.get("index"), item_id)
+		ref = _find_ref(porteur.get("inventaire", []), body.get("index"), item_id)
 		if ref is None:
 			raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
 		item = resolve_item_ref(ref)
@@ -1705,7 +1719,7 @@ async def marchander_item(
 		"prix_negocie": cuivre_to_purse(issue["prix_negocie"]) if issue["prix_negocie"] is not None else None,
 		"bloque_jusqu": issue["bloque_jusqu"],
 		"now": now,
-		"vendables": _marchand_vendables(character, lieu_doc, relation),
+		"vendables": _marchand_vendables(character, lieu_doc, relation, recrutement.groupe_effectif(character, get_doc)),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"relations_lieux": relations_lieux_payload(character),

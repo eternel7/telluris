@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from db.config import get_doc, save_doc, find_docs
 from utils.auth import get_current_user
-from utils.characters import get_selected_character, carried_weight, resolve_item_ref, item_ref_weight
+from utils.characters import get_selected_character, carried_weight, charge_max_of, resolve_item_ref, item_ref_weight
 from utils.consommables import liste_consommables_combat
 from utils.sorts import (
     normaliser_sort, sort_utilisable_combat, composants_etat, effets_effectifs,
@@ -115,7 +115,16 @@ class ActionRequest(BaseModel):
     competence_id: str | None = None
 
 
+class LootAttribution(BaseModel):
+    monstre_id: str
+    beneficiaire_id: str  # character_id d'un membre du combat (character:* ou aventurier:*)
+
+
 class CollectLootRequest(BaseModel):
+    # Répartition du butin entre les membres du groupe : chaque carcasse va au sac du
+    # bénéficiaire choisi (borné par SA charge). `monstre_ids` = repli legacy → tout au
+    # principal (compat clients/appels antérieurs à la répartition).
+    attributions: list[LootAttribution] = []
     monstre_ids: list[str] = []
 
 
@@ -260,14 +269,14 @@ async def collect_loot(
     body: CollectLootRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
-    """Ramasse à la victoire les carcasses sélectionnées par le joueur.
+    """Ramasse à la victoire les carcasses, réparties entre les membres du groupe.
 
-    Le butin n'est jamais ajouté automatiquement : le client envoie la liste des
-    `monstre_ids` choisis. Chaque carcasse est ajoutée à l'inventaire sous forme de
-    référence {item, poids} (poids d'instance tiré au butin). La somme des poids
-    ajoutés ne peut faire dépasser la charge max. Une fois le butin validé et
-    l'inventaire mis à jour, l'entrée `butin_collectes[combat_id]` est purgée du
-    personnage (pas de garde persistante ; le doc combat est supprimé au retour /play).
+    Le butin n'est jamais ajouté automatiquement : le client envoie des `attributions`
+    `{monstre_id, beneficiaire_id}` (repli legacy `monstre_ids` → tout au principal).
+    Chaque carcasse rejoint l'inventaire de SON bénéficiaire sous forme de référence
+    {item, poids} (poids d'instance tiré au butin), borné par la charge max de ce membre.
+    La garde d'idempotence `butin_collectes[combat_id]` (sur le principal) mémorise les
+    carcasses encaissées → une reprise après échec partiel ne peut jamais les dupliquer.
     """
     if not current_user:
         raise HTTPException(status_code=401, detail="Non authentifié")
@@ -283,42 +292,86 @@ async def collect_loot(
     character = get_doc(combat_doc["character_id"])
     if not character:
         raise HTTPException(status_code=404, detail="Personnage introuvable")
+    principal_id = character["_id"]
 
     dispo = {d["monstre_id"]: d for d in combat_doc.get("butin_disponible", [])}
-    charge_max = combat_doc["joueurs"][0].get("charge_max", 0)
+    # Bénéficiaires légitimes = les membres qui ont combattu (source de vérité : joueurs[]).
+    snap_par_cid = {
+        j["character_id"]: j
+        for j in combat_doc.get("joueurs", []) if j.get("character_id")
+    }
 
     guard = character.get("butin_collectes", {})
     if not isinstance(guard, dict):
         guard = {}
     deja = set(guard.get(combat_id, []))
 
-    # Sélection valide = carcasses proposées, pas encore encaissées.
-    selected = [mid for mid in (body.monstre_ids or []) if mid in dispo and mid not in deja]
-    add_w = sum(dispo[mid]["poids"] for mid in selected)
-    current_w = carried_weight(character)
-    if selected and current_w + add_w > charge_max + 1e-6:
-        raise HTTPException(status_code=422, detail="Charge maximale dépassée.")
+    # Repli legacy : une liste de monstre_ids nus → tout au principal.
+    attributions = body.attributions or [
+        LootAttribution(monstre_id=mid, beneficiaire_id=principal_id)
+        for mid in (body.monstre_ids or [])
+    ]
 
-    inventaire = character.get("inventaire", [])
+    # Regroupement par bénéficiaire ; carcasses non proposées / déjà encaissées ignorées.
+    par_benef: dict[str, list[str]] = {}
+    for a in attributions:
+        if a.monstre_id not in dispo or a.monstre_id in deja:
+            continue
+        if a.beneficiaire_id not in snap_par_cid:
+            raise HTTPException(status_code=422, detail="Bénéficiaire hors du groupe de combat.")
+        par_benef.setdefault(a.beneficiaire_id, []).append(a.monstre_id)
+
+    # Docs des bénéficiaires : le principal est déjà chargé (ne pas le re-fetcher → éviter
+    # deux versions du même doc / conflit _rev).
+    docs: dict[str, dict] = {principal_id: character}
+    for cid in par_benef:
+        if cid not in docs:
+            d = get_doc(cid)
+            if not d:
+                raise HTTPException(status_code=404, detail="Bénéficiaire introuvable.")
+            docs[cid] = d
+
+    # Contrôle de charge PAR bénéficiaire — refus global (aucune carcasse encaissée) pour
+    # que la validation reste atomique. charge_max = celle du snapshot (cohérente avec l'UI).
+    for cid, mids in par_benef.items():
+        doc = docs[cid]
+        add_w = sum(dispo[mid]["poids"] for mid in mids)
+        charge_max = snap_par_cid[cid].get("charge_max") or charge_max_of(doc)
+        if carried_weight(doc) + add_w > charge_max + 1e-6:
+            nom = snap_par_cid[cid].get("nom", "Ce personnage")
+            raise HTTPException(status_code=422, detail=f"Charge maximale dépassée pour {nom}.")
+
+    # Encaissement en mémoire.
     noms = []
-    for mid in selected:
-        # Référence {item, poids} : on conserve le poids d'instance tiré au butin.
-        inventaire.append({"item": dispo[mid]["item_id"], "poids": dispo[mid]["poids"]})
-        noms.append(dispo[mid]["nom"])
-    character["inventaire"] = inventaire
+    encaisses = set(deja)
+    for cid, mids in par_benef.items():
+        doc = docs[cid]
+        inventaire = doc.get("inventaire", [])
+        for mid in mids:
+            # Référence {item, poids} : on conserve le poids d'instance tiré au butin.
+            inventaire.append({"item": dispo[mid]["item_id"], "poids": dispo[mid]["poids"]})
+            noms.append(dispo[mid]["nom"])
+            encaisses.add(mid)
+        doc["inventaire"] = inventaire
 
-    encaisses = deja | set(selected)
-    # Le butin est validé : on purge la garde de ce combat (plus de trace persistante
-    # sur le personnage une fois l'inventaire mis à jour). Sauvé dans le même doc.
-    guard.pop(combat_id, None)
+    # Garde d'idempotence sur le principal : on MÉMORISE les carcasses encaissées (au lieu
+    # de purger) → sans atomicité multi-docs, une reprise ne peut pas re-créditer.
+    guard[combat_id] = sorted(encaisses)
     character["butin_collectes"] = guard
 
+    # Principal d'abord (il porte la garde) : si le save d'un compagnon échoue ensuite, la
+    # garde est déjà posée → au pire une carcasse de compagnon est perdue, jamais dupliquée.
     if save_doc(character) is None:
         raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+    for cid, doc in docs.items():
+        if cid == principal_id:
+            continue
+        if save_doc(doc) is None:
+            raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
     # Best-effort : refléter les carcasses encaissées sur le doc combat (cosmétique,
     # le combat est supprimé au retour sur /play). Non bloquant si la sauvegarde échoue.
-    for mid in selected:
+    for mid in encaisses:
         for m in combat_doc["monstres"]:
             if m["id"] == mid:
                 m["loote"] = True
@@ -327,7 +380,8 @@ async def collect_loot(
     ]
     save_doc(combat_doc)
 
-    return {"collected": noms, "charge": round(current_w + add_w, 2), "charge_max": charge_max}
+    par_membre = {cid: round(carried_weight(docs[cid]), 2) for cid in par_benef}
+    return {"collected": noms, "par_membre": par_membre}
 
 
 @combat_router.post("/combat/{combat_id}/action")

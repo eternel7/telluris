@@ -463,16 +463,50 @@
 	font-size: 13px; color: #c9b27a; font-style: italic;
 	margin-bottom: 8px; text-align: center;
 }
-.loot-list { max-height: 180px; overflow-y: auto; margin-bottom: 14px; }
+.loot-list { max-height: 200px; overflow-y: auto; margin-bottom: 14px; }
 .loot-item {
-	display: flex; align-items: center; gap: 8px;
+	display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
 	padding: 5px 8px; border-radius: 6px;
-	font-size: 14px; color: #e8e4dc; cursor: pointer;
+	font-size: 14px; color: #e8e4dc;
 }
 .loot-item:hover { background: rgba(255,255,255,0.04); }
-.loot-item input { accent-color: #cda349; width: 15px; height: 15px; cursor: pointer; }
-.loot-item.disabled { opacity: 0.4; cursor: not-allowed; }
-.loot-item .loot-poids { margin-left: auto; color: #9a8a66; font-size: 12px; }
+.loot-item .loot-nom { flex: 1 1 auto; }
+.loot-item .loot-poids { color: #9a8a66; font-size: 12px; }
+/* Sélecteur de bénéficiaire : une pastille-portrait par membre du groupe + « personne ».
+   Remplace la case à cocher — la carcasse va au sac du membre choisi. */
+.loot-benefs { display: flex; gap: 4px; flex: 0 0 auto; margin-left: auto; }
+.loot-benef-btn {
+	width: 28px; height: 28px; padding: 0; border-radius: 50%;
+	border: 2px solid rgba(255,255,255,0.15); background: #1a1a20;
+	cursor: pointer; overflow: hidden; position: relative;
+	display: flex; align-items: center; justify-content: center;
+	color: #9a8a66; font-size: 13px; transition: border-color .12s, opacity .12s;
+}
+.loot-benef-btn .lb-portrait {
+	width: 100%; height: 100%; border-radius: 50%;
+	background-size: cover; background-position: 50% 50%;
+	display: flex; align-items: center; justify-content: center;
+	color: #cbb98a; font-size: 12px; font-weight: 600;
+}
+.loot-benef-btn.selected { border-color: #cda349; box-shadow: 0 0 6px rgba(205,163,73,0.55); }
+.loot-benef-btn.disabled { opacity: 0.28; cursor: not-allowed; }
+.loot-benef-none { color: #b9553f; font-size: 15px; line-height: 1; }
+.loot-benef-none.selected { border-color: #b9553f; box-shadow: 0 0 6px rgba(185,85,63,0.5); }
+/* Jauges de charge par membre (rendues sous la liste). */
+.loot-charges { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.loot-charge-row { display: flex; align-items: center; gap: 8px; }
+.loot-charge-row .lcr-portrait {
+	width: 26px; height: 26px; flex: 0 0 auto; border-radius: 50%;
+	background-size: cover; background-position: 50% 50%;
+	border: 1px solid rgba(255,255,255,0.12);
+	display: flex; align-items: center; justify-content: center;
+	color: #cbb98a; font-size: 12px; font-weight: 600;
+}
+.loot-charge-row .lcr-body { flex: 1 1 auto; min-width: 0; }
+.loot-charge-row .lcr-name { font-size: 11px; color: #c9b27a; margin-bottom: 2px; }
+.loot-charge-row .lcr-label { flex: 0 0 auto; font-size: 11px; color: #9a8a66; }
+.loot-charge-row .lcr-label.warn { color: #e0902f; }
+.loot-charge-row .lcr-label.err  { color: #e04a4a; }
 /* Jauge de charge — mêmes principes que .sh-stat-bar de play_town (track + fill + pip). */
 .charge-bar-wrap { padding: 2px 0; }
 .charge-bar {
@@ -725,16 +759,12 @@
 		<div class="end-xp" id="end-xp"></div>
 
 		<!-- Butin : affiché uniquement à la victoire. Aucun objet n'est pris
-		     automatiquement — le joueur coche ce qu'il emporte (borné par charge_max). -->
+		     automatiquement — le joueur choisit QUI emporte chaque carcasse (défaut =
+		     personnage principal), borné par la charge de chaque membre. -->
 		<div class="loot-section" id="loot-section" style="display:none">
-			<div class="loot-title">🎒 Butin — cochez ce que vous emportez</div>
+			<div class="loot-title">🎒 Butin — choisissez qui emporte quoi</div>
 			<div class="loot-list" id="loot-list"></div>
-			<div class="charge-bar-wrap">
-				<div class="charge-bar">
-					<div class="charge-fill" id="charge-fill"></div>
-					<div class="charge-pip" id="charge-pip"></div>
-				</div>
-			</div>
+			<div class="loot-charges" id="loot-charges"></div>
 			<div class="charge-label" id="charge-label"></div>
 		</div>
 
@@ -1734,66 +1764,137 @@ function showEndOverlay(status, xp) {
 	document.getElementById('end-overlay').classList.add('visible');
 }
 
+// Membres du combat = bénéficiaires possibles du butin (principal en tête). Un compagnon
+// peut porter sa part : ses compétences ET son sac servent l'expédition (cf. CLAUDE.md).
+function lootMembers() {
+	return (state.joueurs || []).filter(j => j && j.character_id);
+}
+
+// Une pastille-portrait cliquable par membre : reproduit le cadrage de play_town via
+// portraitStyle (fond en %, indépendant de la taille). Repli lettre si pas d'image.
 function buildLootList(dispo) {
+	const membres = lootMembers();
+	const principalCid = (state.joueurs[0] || {}).character_id || '';
+	const btnHtml = j => {
+		const st = portraitStyle(j.id);
+		const inner = st
+			? `<span class="lb-portrait"></span>`
+			: `<span class="lb-portrait">${(j.nom || '?').charAt(0).toUpperCase()}</span>`;
+		return `<button type="button" class="loot-benef-btn" data-benef="${j.character_id}" data-jid="${j.id}" title="${j.nom || ''}">${inner}</button>`;
+	};
 	document.getElementById('loot-list').innerHTML = dispo.map(d =>
-		`<label class="loot-item" data-mid="${d.monstre_id}" data-poids="${d.poids}">
-			<input type="checkbox" onchange="recomputeCharge()">
+		`<div class="loot-item" data-mid="${d.monstre_id}" data-poids="${d.poids}" data-benef="${principalCid}">
 			<span class="loot-nom">${d.nom}</span>
 			<span class="loot-poids">${(+d.poids).toFixed(1)} kg</span>
-		</label>`
+			<div class="loot-benefs">
+				${membres.map(btnHtml).join('')}
+				<button type="button" class="loot-benef-btn loot-benef-none" data-benef="" title="Ne pas ramasser">✕</button>
+			</div>
+		</div>`
 	).join('');
+	// Portraits (fond) + clic d'attribution.
+	document.querySelectorAll('#loot-list .loot-benef-btn[data-jid]').forEach(btn => {
+		const st = portraitStyle(btn.dataset.jid);
+		const el = btn.querySelector('.lb-portrait');
+		if (st && el) applyPortraitTo(el, st);
+	});
+	lootRows().forEach(row => {
+		row.querySelectorAll('.loot-benef-btn').forEach(btn => {
+			btn.addEventListener('click', () => {
+				if (btn.classList.contains('disabled')) return;
+				row.dataset.benef = btn.dataset.benef;
+				recomputeCharge();
+			});
+		});
+	});
+	recomputeCharge();
 }
 
 function lootRows() { return Array.from(document.querySelectorAll('#loot-list .loot-item')); }
 
-// Recalcule la charge (déjà portée + sélection), pilote la jauge et désactive les
-// cases dont l'ajout dépasserait la charge max. Le pip est fixé à 50 % (= charge_max/2),
-// seuil au-delà duquel le déplacement en combat est divisé par deux.
-function recomputeCharge() {
-	// Butin de victoire → sac du PRINCIPAL (v1) : la jauge lit bien joueurs[0], pas me().
-	const j = state.joueurs[0] || {};
-	const chargeMax = j.charge_max || 0;
-	const base = j.charge || 0;   // déjà porté, incluant les carcasses ramassées en combat
-	const half = chargeMax / 2;
-	let selected = 0;
-	lootRows().forEach(lbl => {
-		if (lbl.querySelector('input').checked) selected += parseFloat(lbl.dataset.poids) || 0;
+// Poids attribué à chaque membre (character_id → kg de carcasses qui lui reviennent).
+function lootParBenef() {
+	const par = {};
+	lootRows().forEach(row => {
+		const b = row.dataset.benef;
+		if (b) par[b] = (par[b] || 0) + (parseFloat(row.dataset.poids) || 0);
 	});
-	const total = base + selected;
-	lootRows().forEach(lbl => {
-		const cb = lbl.querySelector('input');
-		const p = parseFloat(lbl.dataset.poids) || 0;
-		const wouldExceed = !cb.checked && (total + p > chargeMax + 1e-6);
-		cb.disabled = wouldExceed;
-		lbl.classList.toggle('disabled', wouldExceed);
-	});
-	const fill = document.getElementById('charge-fill');
-	fill.style.width = (chargeMax > 0 ? Math.min(100, total / chargeMax * 100) : 0) + '%';
-	fill.classList.toggle('over-half', total > half && total <= chargeMax + 1e-6);
-	fill.classList.toggle('over-max',  total > chargeMax + 1e-6);
-	const lbl = document.getElementById('charge-label');
-	let txt = `${total.toFixed(1)} / ${chargeMax} kg`;
-	if (total > chargeMax + 1e-6)  txt += ` · <span class="err">surcharge</span>`;
-	else if (total > half)         txt += ` · <span class="warn">déplacement réduit de moitié</span>`;
-	lbl.innerHTML = txt;
+	return par;
 }
 
-// Ramasse la sélection (POST /collect) puis quitte vers la carte. Sans sélection,
-// ou hors victoire, quitte directement.
+// Reflète la sélection : bouton actif surligné, bouton grisé si l'attribuer surchargerait
+// ce membre (miroir exact du contrôle serveur), et jauges de charge par membre concerné.
+function recomputeCharge() {
+	const membres = lootMembers();
+	const par = lootParBenef();
+	lootRows().forEach(row => {
+		const p = parseFloat(row.dataset.poids) || 0;
+		const cur = row.dataset.benef;
+		row.querySelectorAll('.loot-benef-btn').forEach(btn => {
+			const b = btn.dataset.benef;
+			btn.classList.toggle('selected', b === cur);
+			if (!b) { btn.classList.remove('disabled'); return; }   // « personne » : toujours dispo
+			const j = membres.find(m => m.character_id === b) || {};
+			const dejaSansCeLigne = (par[b] || 0) - (cur === b ? p : 0);
+			const surcharge = (j.charge || 0) + dejaSansCeLigne + p > (j.charge_max || 0) + 1e-6;
+			btn.classList.toggle('disabled', surcharge && cur !== b);
+		});
+	});
+	renderLootCharges(membres, par);
+}
+
+function renderLootCharges(membres, par) {
+	const cont = document.getElementById('loot-charges');
+	if (!cont) return;
+	const rows = membres.filter(j => (par[j.character_id] || 0) > 0);
+	cont.innerHTML = rows.map(j => {
+		const base = j.charge || 0, max = j.charge_max || 0;
+		const total = base + (par[j.character_id] || 0), half = max / 2;
+		const pct = max > 0 ? Math.min(100, total / max * 100) : 0;
+		const over = total > max + 1e-6, warn = !over && total > half;
+		const fillCls = over ? 'over-max' : (warn ? 'over-half' : '');
+		const lblCls = over ? 'err' : (warn ? 'warn' : '');
+		const st = portraitStyle(j.id);
+		return `<div class="loot-charge-row">
+			<span class="lcr-portrait" data-jid="${j.id}">${st ? '' : (j.nom || '?').charAt(0).toUpperCase()}</span>
+			<div class="lcr-body">
+				<div class="lcr-name">${j.nom || ''}</div>
+				<div class="charge-bar"><div class="charge-fill ${fillCls}" style="width:${pct}%"></div><div class="charge-pip"></div></div>
+			</div>
+			<span class="lcr-label ${lblCls}">${total.toFixed(1)} / ${max} kg</span>
+		</div>`;
+	}).join('');
+	cont.querySelectorAll('.lcr-portrait[data-jid]').forEach(el => {
+		const st = portraitStyle(el.dataset.jid);
+		if (st) applyPortraitTo(el, st);
+	});
+}
+
+// Envoie la répartition (POST /collect) puis quitte vers la carte. Sans attribution, ou
+// hors victoire, quitte directement. Refuse localement toute surcharge (miroir serveur).
 async function leaveCombat() {
 	const section = document.getElementById('loot-section');
 	if (section.style.display !== 'none') {
-		const ids = lootRows()
-			.filter(lbl => lbl.querySelector('input').checked)
-			.map(lbl => lbl.dataset.mid);
-		if (ids.length) {
+		const membres = lootMembers();
+		const par = lootParBenef();
+		const trop = membres.find(j => (par[j.character_id] || 0) > 0
+			&& (j.charge || 0) + par[j.character_id] > (j.charge_max || 0) + 1e-6);
+		if (trop) {
+			document.getElementById('charge-label').innerHTML =
+				`<span class="err">${trop.nom || 'Un membre'} est en surcharge — réattribuez ou laissez au sol.</span>`;
+			return;
+		}
+		const attributions = lootRows()
+			.filter(row => row.dataset.benef)
+			.map(row => ({ monstre_id: row.dataset.mid, beneficiaire_id: row.dataset.benef }));
+		if (attributions.length) {
 			const btn = document.getElementById('end-btn');
 			btn.disabled = true;
 			try {
 				const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/collect`, {
 					method:  'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body:    JSON.stringify({ monstre_ids: ids }),
+					body:    JSON.stringify({ attributions }),
 				});
 				if (!res.ok) {
 					const err = await res.json().catch(() => ({}));
