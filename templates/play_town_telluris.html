@@ -821,6 +821,7 @@
 			transition-duration: 1.5s, 1.5s, 3s;
 			transition-timing-function: ease-in-out;
 		}
+		.sh-rel-portrait img.compagnon-portrait { transform-origin: top center; object-position: top center; }
 		/* Zoom au survol (parité wizard : scale(2), transition 3s). Le conteneur
 		   .sh-rel-portrait a overflow:hidden → l'agrandissement est recadré au centre.
 		   :not(.collapsed) évite tout zoom pendant/après le repli. */
@@ -849,12 +850,6 @@
 			scrollbar-width: thin;
 			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
-		.sh-rel-scroll::after {
-			content: ''; position: absolute; left: 0; right: 0; bottom: 0;
-			height: calc(var(--inv-row-h) / 2);
-			background: linear-gradient(to bottom, transparent, var(--panel-bg));
-			pointer-events: none;
-		}
 		.sh-ville { border-bottom: 2px solid var(--border-color); }
 		.sh-ville.hidden { display: none; }
 		.sh-ville-head {
@@ -881,6 +876,18 @@
 		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: nowrap; }
 		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
+		.sh-quest-list-active.sh-rel-scroll { max-height : 40vh; position: relative;}
+		.sh-quest-list-ended.sh-rel-scroll { max-height : 35vh; position: relative;}
+		div.sh-list-shadow-overlay {
+			position: sticky;
+			bottom: 0px;
+			left: 0px;
+			width: 100%;
+			height: 20px;
+			pointer-events: none;
+			background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+			z-index: 10;
+		}
 		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
 		.sh-quest-title { flex: 1; min-width: 200px; font-weight: bold; font-size: 1rem; }
@@ -1609,6 +1616,7 @@
 						<input id="sh-rel-filter" class="sh-rel-filter" type="search" placeholder="🔍 Filtrer les lieux…" autocomplete="off">
 						<div id="sh-rel-lieux-scroll" class="sh-rel-scroll">
 							<div id="sh-rel-lieux"><!-- rendu par renderFicheRelations --></div>
+							<div class="sh-list-shadow-overlay"></div>
 						</div>
 
 						{# Compagnons recrutés (affinités 0–100, neutre 50, alignée sur les lieux) :
@@ -1623,7 +1631,8 @@
 						{% set qa = character.get("quetes_actives_detail",[]) %}
 						{% set qt = character.get("quetes_terminees_detail",[]) %}
 						{% if qa %}
-							<div class="sh-section">📜 Actives</div>
+							<div class="sh-section">📜 Actives</div>							
+							<div class="sh-quest-list-active sh-rel-scroll">
 							{% for q in qa %}
 							<div class="sh-quest {{ q.get('rang','F') }}">
 								<div class="sh-quest-hdr">
@@ -1641,14 +1650,19 @@
 								{% if q.get("recompenses") %}<div class="sh-quest-reward">{% if q.recompenses.get("or") %}<span>🟡 {{ q.recompenses.or }} or</span>{% endif %}{% if q.recompenses.get("argent") %}<span>⚪ {{ q.recompenses.argent }} ar</span>{% endif %}{% if q.recompenses.get("xp") %}<span>✨ {{ q.recompenses.xp }} XP</span>{% endif %}</div>{% endif %}
 							</div>
 							{% endfor %}
+							<div class="sh-list-shadow-overlay"></div>
+							</div>
 						{% endif %}
 						{% if qt %}
 							<div class="sh-section" style="opacity:0.6">✓ Terminées ({{ qt|length }})</div>
+							<div class="sh-quest-list-ended sh-rel-scroll">
 							{% for q in qt %}
 							<div class="sh-quest {{ q.get('rang','F') }}" style="opacity:0.5">
 								<div class="sh-quest-hdr"><span class="sh-quest-rang">{{ q.get("rang","F") }}</span><span class="sh-quest-title">{{ q.get("titre","—") }}</span><span class="sh-quest-status termine">Terminée</span></div>
 							</div>
 							{% endfor %}
+							<div class="sh-list-shadow-overlay"></div>
+							</div>
 						{% endif %}
 						{% if not qa and not qt %}<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>{% endif %}
 					</div>
@@ -4278,6 +4292,7 @@ function renderFicheQuetes(data) {
 	let html = '';
 	if (qa.length) {
 		html += '<div class="sh-section">📜 Actives</div>';
+		html += `<div class="sh-quest-list-active sh-rel-scroll">`;
 		html += qa.map(q => {
 			const rang = q.rang || 'F';
 			const rew = q.recompenses || {};
@@ -4308,15 +4323,18 @@ function renderFicheQuetes(data) {
 				${reward ? `<div class="sh-quest-reward">${reward}</div>` : ''}
 			</div>`;
 		}).join('');
+		html += `<div class="sh-list-shadow-overlay"></div></div>`;
 	}
 	if (qt.length) {
 		html += `<div class="sh-section" style="opacity:0.6">✓ Terminées (${qt.length})</div>`;
+		html += `<div class="sh-quest-list-ended sh-rel-scroll">`;
 		html += qt.map(q => {
 			const rang = q.rang || 'F';
 			return `<div class="sh-quest ${rang}" style="opacity:0.5">
 				<div class="sh-quest-hdr"><span class="sh-quest-rang">${rang}</span><span class="sh-quest-title">${q.titre || '—'}</span><span class="sh-quest-status termine">Terminée</span></div>
 			</div>`;
 		}).join('');
+		html += `<div class="sh-list-shadow-overlay"></div></div>`;
 	}
 	if (!qa.length && !qt.length) {
 		html = '<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>';
@@ -4512,11 +4530,11 @@ function renderFicheCompagnons(list) {
 				<div class="sh-rel-score ${cls}">${sc}<span style="opacity:.5;font-size:.7em">/100</span></div>
 				<div class="sh-rel-lbl">${_affLabel(sc)}</div>
 			</div>
+			${r.actif ? `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${r.id}')" title="Congédier ce compagnon">✕</button>` : ''}
 			<div class="sh-rel-portrait">
-				${r.image ? `<img src="/characters/${r.image}" alt="" class="collapsed">`
+				${r.image ? `<img src="/characters/${r.image}" alt="" class="collapsed compagnon-portrait">`
 					: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">👤</div>'}
 			</div>
-			${r.actif ? `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${r.id}')" title="Congédier ce compagnon">✕</button>` : ''}
 		</div>`;
 	}).join('');
 }
