@@ -1529,11 +1529,10 @@
 
 						<div class="sh-section">🛡 Équipement</div>
 						{% set slots = character.get("slots",{}) %}
-						{% set _equip_race = character["race"] %}
-						{% set _equip_sex = character.get("sex", "m").lower() %}
-						{% set _equip_img = "equipement_" + _equip_race + "_" + _equip_sex + ".png" %}
 						<div class="sh-paperdoll">
-							<img class="sh-paperdoll-img" src="{{ url_for('icons', path=_equip_img) }}" alt="Équipement">
+							{# `src` posé par `_refreshPaperdollImg` (globales `_raceNom`/`_sexe`) : la fiche
+							   sert aussi les COMPAGNONS, une silhouette rendue ici serait figée sur le joueur. #}
+							<img class="sh-paperdoll-img" alt="Équipement">
 							{% for key, nom, sx, sy in [
 								("tete",        "Tête",     "0%",  "5%"),
 								("epaules",     "Epaules",  "0%",  "17%"),
@@ -2545,6 +2544,8 @@ let _xpNivPrev = {{ xp_niv_prev | tojson | safe }};
 let _xpNivNext = {{ xp_niv_next | tojson | safe }};
 let _raceNom   = {{ character.get("race", "") | tojson | safe }};
 let _vocId     = {{ character.get("voc", "") | tojson | safe }};
+{# `sex` : sert à la silhouette du paperdoll (equipement_<race>_<sexe>.png), remplacée en mode compagnon. #}
+let _sexe      = {{ character.get("sex", "m") | tojson | safe }};
 // Icône + libellé par vocation : un compagnon n'a pas forcément celle du joueur.
 const VOC_LABELS = {{ vocations_labels | tojson | safe }};
 function _vocLabel(voc) {
@@ -2926,7 +2927,18 @@ function _refreshChargeGauge() {
 	updateControls();
 }
 
+// Silhouette du paperdoll : dépend de la race ET du sexe du PORTEUR — donc du compagnon dès
+// que la fiche en sert un. Rendue côté client depuis les globales (jamais par Jinja, qui la
+// figerait sur le joueur de la page) et rafraîchie avec les slots qu'elle porte.
+function _refreshPaperdollImg() {
+	const img = document.querySelector('.sh-paperdoll-img');
+	if (img && _raceNom && _sexe) {
+		img.src = `/icons/equipement_${_raceNom}_${String(_sexe).toLowerCase()}.png`;
+	}
+}
+
 function _refreshPaperdoll() {
+	_refreshPaperdollImg();
 	for (const [slot, item] of Object.entries(_slots)) {
 		const el = document.getElementById('slot-' + slot);
 		if (!el) continue;
@@ -3851,6 +3863,7 @@ async function unequip(slot) {
 	} catch(err) { console.error('Erreur unequip', err); }
 }
 
+_refreshPaperdoll();
 _refreshInventaire();
 _refreshSol();
 _refreshChargeGauge();
@@ -4901,7 +4914,7 @@ async function openCompagnonSheet(avId) {
 			attributePoints: _attributePoints, vocNiveau: _vocNiveau, caractsDetail: _caractsDetail,
 			derived: _derivedCur, raceMin: _RACE_MIN, raceMax: _RACE_MAX,
 			xpTotal: _xpTotal, niveau: _niveau, xpNivPrev: _xpNivPrev, xpNivNext: _xpNivNext,
-			raceNom: _raceNom, vocId: _vocId,
+			raceNom: _raceNom, vocId: _vocId, sexe: _sexe,
 			sorts: _sorts, sortsApprenables: _sortsApprenables, sortsMagies: _sortsMagies,
 			sortsEpingles: _sortsEpingles, competences: _competences,
 			competencesApprenables: _competencesApprenables, competencesEpinglees: _competencesEpinglees,
@@ -4921,7 +4934,7 @@ async function openCompagnonSheet(avId) {
 		_RACE_MIN = p.race_min; _RACE_MAX = p.race_max;
 		_xpTotal = p.xp_total; _niveau = p.niveau;
 		_xpNivPrev = p.xp_niv_prev; _xpNivNext = p.xp_niv_next;
-		_raceNom = p.race; _vocId = p.voc;
+		_raceNom = p.race; _vocId = p.voc; _sexe = p.sex;
 		_sorts = p.sorts; _sortsApprenables = p.sorts_apprenables; _sortsMagies = p.sorts_magies;
 		_sortsEpingles = p.sorts_epingles; _competences = p.competences;
 		_competencesApprenables = p.competences_apprenables;
@@ -4954,7 +4967,7 @@ function closeCompagnonSheet() {
 		_RACE_MIN = s.raceMin; _RACE_MAX = s.raceMax;
 		_xpTotal = s.xpTotal; _niveau = s.niveau;
 		_xpNivPrev = s.xpNivPrev; _xpNivNext = s.xpNivNext;
-		_raceNom = s.raceNom; _vocId = s.vocId;
+		_raceNom = s.raceNom; _vocId = s.vocId; _sexe = s.sexe;
 		_sorts = s.sorts; _sortsApprenables = s.sortsApprenables; _sortsMagies = s.sortsMagies;
 		_sortsEpingles = s.sortsEpingles; _competences = s.competences;
 		_competencesApprenables = s.competencesApprenables;
