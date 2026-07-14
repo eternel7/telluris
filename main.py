@@ -609,8 +609,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# fonctions, sous les mêmes clés.
 	fiche_bloc = fiche_util.bloc_fiche(character, get_doc, find_docs, race or {})
 
-	with Image.open(CHARACTERS_IMAGES_PATH+"/"+character["image"]) as portrait:
-		portrait_largeur, portrait_hauteur = portrait.size
+	# Pas de mesure du portrait ici : la fiche sert aussi les COMPAGNONS, dont l'image n'a pas
+	# les dimensions de celle du joueur. La taille native est mesurée dans le navigateur
+	# (naturalWidth/Height, cf. makePortraitViewport) — la mesurer ici la figerait sur le
+	# personnage de la page. (La page de combat, elle, garde sa mesure : cf. /combat.)
 
 	# Quêtes : suivi rendu serveur dans l'onglet 📜 de la fiche (progression + récompenses).
 	# `quete_detail` lit l'inventaire pour la progression des collectes (item_ref_id gère les
@@ -659,10 +661,6 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"title": grid_doc.get("label"),
 			"image_route": image_route,
 			"character": character,
-			"portrait_largeur": portrait_largeur,
-			"portrait_hauteur": portrait_hauteur,
-			"portrait_disp_largeur": 100,
-			"portrait_disp_hauteur": 100,
 			"lieu": lieu,
 			"image": image,
 			"position": position,

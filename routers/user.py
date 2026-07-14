@@ -332,10 +332,11 @@ async def update_character_portrait(
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	
 	if portrait_info:
-		character_to_update = get_selected_character(current_user)
-		if not character_to_update:
-			raise HTTPException(status_code=406, detail="Incorrect info for character portrait update")
-			
+		# Le cadrage appartient au PORTEUR affiché : la fiche sert aussi les compagnons, et le
+		# leur vit sur leur doc `aventurier:*` (les jetons alliés du combat le relisent).
+		# Sans `compagnon_id`, `_acteur` rend le personnage sélectionné — comportement d'avant.
+		character_to_update, _principal = _acteur(current_user, portrait_info)
+
 		match = re.search(r"translate\((-?\d+\.?\d*)px,\s*(-?\d+\.?\d*)px\)", portrait_info["value"])
 		zoom = portrait_info["zoom"]
 		if match:

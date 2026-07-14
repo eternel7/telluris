@@ -252,6 +252,11 @@ async def groupe_compagnon(
 		"rang": av.get("rang", "F"),
 		"specialite": av.get("specialite", ""),
 		"image": av.get("image", ""),
+		# Cadrage du portrait : le client mesure l'image, mais il ne peut pas DEVINER le
+		# recadrage déjà enregistré sur ce compagnon (absent d'une recrue neuve → défaut :
+		# zoom 100, centré). Mêmes champs que ceux relus par les jetons alliés en combat.
+		"portrait_zoom": av.get("portrait_zoom"),
+		"portrait_translate": av.get("portrait_translate"),
 		"niveau": compute_character_level(av.get("xp_total", 0)),
 		"xp_total": av.get("xp_total", 0),
 		"attribute_points": av.get("attribute_points", 0),

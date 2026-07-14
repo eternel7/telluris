@@ -13,10 +13,12 @@
 			--y: {{ position["y"] | tojson | safe }};
 			--dim_x: {{ dim_x | tojson | safe }};
 			--dim_y: {{ dim_y | tojson | safe }};
-			--portrait_largeur: {{portrait_largeur | tojson | safe }};
-			--portrait_hauteur: {{portrait_hauteur | tojson | safe }};
-			--portraitW: {{portrait_disp_largeur | tojson | safe }};
-			--portraitH: {{portrait_disp_hauteur | tojson | safe }};
+			/* Fenêtre d'affichage du portrait : une CONSTANTE de mise en page (pas une mesure).
+			   La taille NATIVE de l'image, elle, est mesurée dans le navigateur
+			   (naturalWidth/Height) et posée en inline par makePortraitViewport : la fiche peut
+			   montrer un COMPAGNON, dont l'image n'a pas les dimensions de celle du joueur. */
+			--portraitW: 100;
+			--portraitH: 100;
 			--dist-view: 10;
 			--bg: #0e0e0e;
 			--surface: #181818;
@@ -245,15 +247,17 @@
 			cursor: grabbing;
 		}
 
+		/* `width`/`height` posés en inline par le contrôleur, une fois l'image mesurée. Masquée
+		   d'ici là : sans cela, l'image s'afficherait un instant à sa taille naturelle. */
 		.viewport-wrapper img {
 			position: absolute;
-			width:  calc(var(--portrait_largeur) * 1px);
-			height: calc(var(--portrait_hauteur) * 1px);
 			max-width: none;
 			display: block;
 			pointer-events: none;
 			will-change: transform;
+			opacity: 0;
 		}
+		.viewport-wrapper img.cadree { opacity: 1; }
 		.viewport-wrapper img.animate {
 			transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 		}
@@ -745,9 +749,12 @@
 		/* Marge de scroll d'1 ligne : le dernier objet reste entièrement visible en bas. */
 		.sh-inv-scroll.scrollable .sh-inv-box { padding-bottom: var(--inv-row-h); }
 		/* Ombre sur la demi-ligne du bas quand il reste des objets à scroller. */
-		.sh-inv-scroll.scrollable::after {
-			content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+		.sh-inv-scroll.sh-scroll.scrollable::after {
 			height: calc(var(--inv-row-h) / 2);
+		}
+		.sh-scroll.scrollable::after {
+			height: 20px;
+			content: ''; position: absolute; left: 0; right: 0; bottom: 0;
 			background: linear-gradient(to bottom, transparent, var(--panel-bg));
 			pointer-events: none;
 		}
@@ -757,7 +764,7 @@
 		   passe sur autant de lignes que nécessaire ; les boutons restent groupés à droite. */
 		@media (max-width: 768px) {
 			.sh-inv-box .sh-inv-item { flex-wrap: wrap; overflow: visible; }
-			.sh-inv-box .sh-inv-name { white-space: normal; overflow: visible; text-overflow: clip; flex: 1 1 auto; }
+			.sh-inv-box .sh-inv-name { white-space: normal; overflow: visible; text-overflow: clip; }
 			.sh-inv-box .sh-inv-actions { margin-left: auto; }
 		}
 		#inv-sort-btn.active, #sol-sort-btn.active,
@@ -1764,14 +1771,14 @@
 							<strong id="grp-inv-nom-principal">Vous</strong>
 							<span class="sh-inv-poids" id="grp-inv-charge-principal"></span>
 						</div>
-						<div class="sh-inv-scroll scrollable"><div id="grp-inv-principal" class="sh-inv-box"></div></div>
+						<div class="sh-inv-scroll sh-scroll scrollable"><div id="grp-inv-principal" class="sh-inv-box"></div></div>
 					</div>
 					<div class="grp-inv-col">
 						<div class="grp-inv-head">
 							<select id="grp-inv-select" onchange="onGroupeInvSelect(this.value)"></select>
 							<span class="sh-inv-poids" id="grp-inv-charge-compagnon"></span>
 						</div>
-						<div class="sh-inv-scroll scrollable"><div id="grp-inv-compagnon" class="sh-inv-box"></div></div>
+						<div class="sh-inv-scroll sh-scroll scrollable"><div id="grp-inv-compagnon" class="sh-inv-box"></div></div>
 					</div>
 				</div>
 			</div>
@@ -1801,7 +1808,8 @@
 		@media (max-width: 720px) { .grp-inv-wrap { grid-template-columns: 1fr; } }
 		.grp-inv-col { min-width: 0; }
 		.grp-inv-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .35rem; }
-		.grp-inv-head select { max-width: 65%; }
+		.grp-inv-head select { max-width: 65%; color: var(--accent-color); background: var(--bg);}
+		.grp-inv-head select:disabled { background: #474747;}
 		/* Flèche de transfert : désactivée (et explicite) quand l'objet ne rentre pas chez
 		   le destinataire — le serveur refuserait de toute façon (409). */
 		.grp-move-btn {
@@ -2264,59 +2272,58 @@
 	}
 </script>
 <script>
-(() => {
-	// ── Paramètres ──────────────────────────────────────────────
-	const W  = {{portrait_largeur | tojson | safe }};
-	const H  = {{portrait_hauteur | tojson | safe }};
-	const W1 = {{portrait_disp_largeur | tojson | safe }};
-	const H1 = {{portrait_disp_hauteur | tojson | safe }};
+// ── PORTRAITS : moteur de cadrage ───────────────────────────
+// UNE INSTANCE PAR VIEWPORT, chacune avec SON sujet : la sidebar montre toujours le joueur,
+// la fiche peut montrer un COMPAGNON — dont l'image n'a ni les mêmes dimensions natives ni le
+// même cadrage. La taille native est MESURÉE dans le navigateur (naturalWidth/Height) : la
+// mesurer côté serveur (PIL) la figeait sur le personnage de la page.
+const PORTRAIT_W1 = 100;   // fenêtre d'affichage : constante de mise en page (cf. --portraitW)
+const PORTRAIT_H1 = 100;
 
-	// Viewport principal (jeu) et viewport fiche mobile
-	const vp          = document.getElementById('vp');
-	const vp2         = document.getElementById('vp2');
-	const img         = document.getElementById('img');
-	const img2        = document.getElementById('img-portrait');
-	const scaleRoot   = document.getElementById('scale-root');
-	const scaleRoot2  = document.getElementById('scale-root2');
-	const actionBtn   = document.getElementById('action-btn');
-	const actionBtn2  = document.getElementById('action-btn2');
-	const iconEdit    = document.getElementById('icon-edit');
-	const iconEdit2   = document.getElementById('icon-edit2');
-	const iconSave    = document.getElementById('icon-save');
-	const iconSave2   = document.getElementById('icon-save2');
-	const zoomSlider  = document.getElementById('zoom-slider');
-	const zoomSlider2 = document.getElementById('zoom-slider2');
-	const zoomVal     = document.getElementById('zoom-val');
-	const zoomVal2    = document.getElementById('zoom-val2');
+// Sujet cadré = son image, son cadrage persisté, et le doc sur lequel l'enregistrer.
+const SUJET_JOUEUR = {
+	image: {{ character["image"] | tojson | safe }},
+	portrait_zoom: {{ character.get("portrait_zoom", 100) | tojson | safe }},
+	portrait_translate: {{ character.get("portrait_translate", 0) | tojson | safe }},
+	compagnon_id: null,
+};
 
-	const root = document.documentElement;
-	root.style.setProperty('--portrait_largeur', W);
-	root.style.setProperty('--portrait_hauteur', H);
-	root.style.setProperty('--portraitW', W1);
-	root.style.setProperty('--portraitH', H1);
+let PORTRAIT_SIDEBAR = null;   // #vp  / #img          — le joueur, toujours
+let PORTRAIT_FICHE   = null;   // #vp2 / #img-portrait — sujet interchangeable (mode compagnon)
 
+function makePortraitViewport(ids) {
+	const vp         = document.getElementById(ids.vp);
+	const img        = document.getElementById(ids.img);
+	const scaleRoot  = document.getElementById(ids.scaleRoot);
+	const zoomSlider = document.getElementById(ids.zoomSlider);
+	const zoomVal    = document.getElementById(ids.zoomVal);
+	const actionBtn  = document.getElementById(ids.actionBtn);
+	const iconEdit   = document.getElementById(ids.iconEdit);
+	const iconSave   = document.getElementById(ids.iconSave);
+	if (!vp || !img) return null;
+
+	const W1 = PORTRAIT_W1, H1 = PORTRAIT_H1;
+	// État PROPRE à ce viewport. Le partager entre les deux images ÉTAIT le bug : la fiche
+	// héritait des dimensions natives et du cadrage du joueur, quel que soit qui elle montrait.
+	let sujet = null;
+	let W = W1, H = H1;          // taille native de l'image courante
+	let zoomPct = 100;
 	let offsetX = 0, offsetY = 0;
 	let dragMode = false;
-	const portrait_translate = {{ character.get("portrait_translate",0) | tojson | safe }};
-	let zoomPct = {{ character.get("portrait_zoom",100) | tojson | safe }};
 
-	function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-	function imgW() { return W * zoomPct / 100; }
-	function imgH() { return H * zoomPct / 100; }
+	const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+	const imgW  = () => W * zoomPct / 100;
+	const imgH  = () => H * zoomPct / 100;
 
-	function applyOffsetToImg(imgDom, x, y, animated) {
-		if (!imgDom) return;
-		imgDom.classList.toggle('animate', !!animated);
-		imgDom.style.width  = imgW() + 'px';
-		imgDom.style.height = imgH() + 'px';
-		imgDom.style.transform = `translate(${-x}px, ${-y}px)`;
-	}
 	function applyOffset(x, y, animated) {
 		x = clamp(Math.abs(x), 0, Math.max(0, imgW() - W1));
 		y = clamp(Math.abs(y), 0, Math.max(0, imgH() - H1));
 		offsetX = x; offsetY = y;
-		applyOffsetToImg(img,  x, y, animated);
-		applyOffsetToImg(img2, x, y, animated);
+		img.classList.toggle('animate', !!animated);
+		img.style.width  = imgW() + 'px';
+		img.style.height = imgH() + 'px';
+		img.style.transform = `translate(${-x}px, ${-y}px)`;
+		img.classList.add('cadree');   // dimensionnée : elle peut s'afficher
 	}
 
 	function applyZoom(pct, animated) {
@@ -2324,136 +2331,15 @@
 		const cy = offsetY + H1 / 2;
 		const ratio = pct / zoomPct;
 		zoomPct = pct;
-		if (zoomVal)  zoomVal.textContent  = pct + '%';
-		if (zoomVal2) zoomVal2.textContent = pct + '%';
-		if (zoomSlider)  zoomSlider.value  = pct;
-		if (zoomSlider2) zoomSlider2.value = pct;
+		if (zoomVal)    zoomVal.textContent = pct + '%';
+		if (zoomSlider) zoomSlider.value    = pct;
 		applyOffset(cx * ratio - W1 / 2, cy * ratio - H1 / 2, animated);
 	}
 
-	for (const sl of [zoomSlider, zoomSlider2]) {
-		if (!sl) continue;
-		sl.addEventListener('input',      () => applyZoom(parseInt(sl.value), false));
-		sl.addEventListener('mousedown',  e  => e.stopPropagation());
-		sl.addEventListener('touchstart', e  => e.stopPropagation(), { passive: true });
-	}
-
 	function defaultOffset() {
-		if (portrait_translate != 0) { return { x: portrait_translate["x"], y: portrait_translate["y"] }; }
-		return { x: (imgW() - W1) / 2, y: 0 };
-	}
-
-	async function setDragMode(on) {
-		dragMode = on;
-		for (const [vpEl, aBtn, iEdit, iSave] of [
-			[vp,  actionBtn,  iconEdit,  iconSave],
-			[vp2, actionBtn2, iconEdit2, iconSave2]
-		]) {
-			if (!vpEl) continue;
-			vpEl.classList.toggle('drag-mode', on);
-			if (iEdit) iEdit.style.display = on ? 'none' : '';
-			if (iSave) iSave.style.display = on ? '' : 'none';
-			if (aBtn) {
-				aBtn.classList.toggle('save-mode', on);
-				aBtn.title     = on ? 'Figer la position' : 'Activer le déplacement';
-				aBtn.ariaLabel = aBtn.title;
-			}
-		}
-		if (!on && img && img.style.transform) {
-			const portraitData = { value: img.style.transform, zoom: zoomPct };
-			try {
-				const response = await fetch('api/update_character_portrait', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(portraitData)
-				});
-				if (!response.ok) {
-					const error = await response.json();
-					console.log(error.detail);
-					alert("Erreur : " + error.detail);
-				}
-			} catch (err) { console.error("Erreur de connexion", err); }
-		}
-	}
-
-	for (const aBtn of [actionBtn, actionBtn2]) {
-		if (aBtn) aBtn.addEventListener('click', e => { e.stopPropagation(); setDragMode(!dragMode); });
-	}
-
-	let hoverTimer = null;
-	function showOverlay() {
-		clearTimeout(hoverTimer);
-		if (vp)  vp.classList.add('hovered');
-		if (vp2) vp2.classList.add('hovered');
-	}
-	function hideOverlay() {
-		hoverTimer = setTimeout(() => {
-			if (!dragMode) {
-				if (vp)  vp.classList.remove('hovered');
-				if (vp2) vp2.classList.remove('hovered');
-			}
-		}, 120);
-	}
-
-	for (const el of [vp, vp2, actionBtn, actionBtn2]) {
-		if (!el) continue;
-		el.addEventListener('mouseenter', showOverlay);
-		el.addEventListener('mouseleave', hideOverlay);
-	}
-	for (const vpEl of [vp, vp2]) {
-		if (vpEl) vpEl.addEventListener('touchstart', () => showOverlay(), { passive: true });
-	}
-
-	let dragging = false; let startClientX, startClientY, startOX, startOY;
-
-	for (const vpEl of [vp, vp2]) {
-		if (!vpEl) continue;
-		vpEl.addEventListener('mousedown', e => {
-			if (!dragMode) return;
-			dragging = true; startClientX = e.clientX; startClientY = e.clientY;
-			startOX = offsetX; startOY = offsetY; e.preventDefault();
-		});
-	}
-
-	window.addEventListener('mousemove', e => {
-		if (!dragging) return;
-		const s = computeScale();
-		applyOffset(startOX - (e.clientX - startClientX) / s, startOY - (e.clientY - startClientY) / s, false);
-	});
-
-	window.addEventListener('mouseup', () => { dragging = false; });
-
-	let touch0 = null; let touchOnBtn = false; let touchMoved = false; const TAP_THRESHOLD = 8;
-
-	for (const [vpEl, aBtn] of [[vp, actionBtn], [vp2, actionBtn2]]) {
-		if (!vpEl) continue;
-		vpEl.addEventListener('touchstart', e => {
-			showOverlay();
-			const t = e.touches[0];
-			const el = document.elementFromPoint(t.clientX, t.clientY);
-			touchOnBtn = aBtn && (el === aBtn || aBtn.contains(el));
-			if (touchOnBtn) return;
-			if (!dragMode) return;
-			touch0 = t; touchMoved = false; startOX = offsetX; startOY = offsetY; e.preventDefault();
-		}, { passive: false });
-
-		vpEl.addEventListener('touchmove', e => {
-			if (!dragMode || !touch0 || touchOnBtn) return;
-			const t = e.touches[0];
-			const dx = t.clientX - touch0.clientX; const dy = t.clientY - touch0.clientY;
-			if (!touchMoved && Math.hypot(dx, dy) < TAP_THRESHOLD) return;
-			touchMoved = true;
-			const s = computeScale();
-			applyOffset(startOX - dx / s, startOY - dy / s, false); e.preventDefault();
-		}, { passive: false });
-
-		vpEl.addEventListener('touchend', e => {
-			if (touchOnBtn && !touchMoved) {
-				const t = e.changedTouches[0]; const el = document.elementFromPoint(t.clientX, t.clientY);
-				if (aBtn && (el === aBtn || aBtn.contains(el))) { setDragMode(!dragMode); e.preventDefault(); }
-			}
-			touch0 = null; touchOnBtn = false; touchMoved = false;
-		}, { passive: false });
+		const t = sujet && sujet.portrait_translate;
+		if (t && typeof t === 'object') return { x: t.x, y: t.y };
+		return { x: (imgW() - W1) / 2, y: 0 };   // jamais cadré : centré horizontalement
 	}
 
 	function computeScale() {
@@ -2461,17 +2347,141 @@
 		return Math.max(0.1, Math.min(1, availW / W1, availH / H1));
 	}
 	function applyScale() {
+		if (!scaleRoot) return;
 		const s = computeScale();
-		for (const sr of [scaleRoot, scaleRoot2]) {
-			if (!sr) continue;
-			sr.style.transform    = `scale(${s})`;
-			sr.style.marginBottom = `${(H1 * s - H1)}px`;
-		}
+		scaleRoot.style.transform    = `scale(${s})`;
+		scaleRoot.style.marginBottom = `${(H1 * s - H1)}px`;
 	}
 
-	const d = defaultOffset(); applyOffset(d.x, d.y, false); applyScale();
-	window.addEventListener('resize', applyScale);
-})();
+	// Change le porteur affiché : pose l'image, la MESURE (une image déjà en cache l'est
+	// immédiatement ; sinon `decode()` attend son décodage), puis applique SON cadrage.
+	async function setSujet(s) {
+		sujet = s || SUJET_JOUEUR;
+		zoomPct = parseInt(sujet.portrait_zoom, 10) || 100;
+		if (zoomVal)    zoomVal.textContent = zoomPct + '%';
+		if (zoomSlider) zoomSlider.value    = zoomPct;
+		img.classList.remove('cadree');
+		img.src = '/characters/' + sujet.image;
+		try { if (!img.complete || !img.naturalWidth) await img.decode(); } catch (e) {}
+		W = img.naturalWidth  || W1;
+		H = img.naturalHeight || H1;
+		const d = defaultOffset();
+		applyOffset(d.x, d.y, false);
+		applyScale();
+	}
+
+	async function setDragMode(on) {
+		dragMode = on;
+		vp.classList.toggle('drag-mode', on);
+		if (iconEdit) iconEdit.style.display = on ? 'none' : '';
+		if (iconSave) iconSave.style.display = on ? '' : 'none';
+		if (actionBtn) {
+			actionBtn.classList.toggle('save-mode', on);
+			actionBtn.title     = on ? 'Figer la position' : 'Activer le déplacement';
+			actionBtn.ariaLabel = actionBtn.title;
+		}
+		if (on || !img.style.transform) return;
+		// Enregistrement sur le doc du porteur cadré ICI : chaque viewport sauve SON sujet (la
+		// sidebar reste sur le joueur même quand la fiche montre un compagnon). Le cadrage d'un
+		// compagnon vit sur son doc `aventurier:*` — la page de combat le relit pour son jeton.
+		const body = { value: img.style.transform, zoom: zoomPct };
+		if (sujet && sujet.compagnon_id) body.compagnon_id = sujet.compagnon_id;
+		try {
+			const response = await fetch('api/update_character_portrait', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(body)
+			});
+			if (!response.ok) {
+				const error = await response.json();
+				console.log(error.detail);
+				alert("Erreur : " + error.detail);
+			}
+		} catch (err) { console.error("Erreur de connexion", err); }
+	}
+
+	if (zoomSlider) {
+		zoomSlider.addEventListener('input',      () => applyZoom(parseInt(zoomSlider.value), false));
+		zoomSlider.addEventListener('mousedown',  e  => e.stopPropagation());
+		zoomSlider.addEventListener('touchstart', e  => e.stopPropagation(), { passive: true });
+	}
+	if (actionBtn) {
+		actionBtn.addEventListener('click', e => { e.stopPropagation(); setDragMode(!dragMode); });
+	}
+
+	let hoverTimer = null;
+	function showOverlay() { clearTimeout(hoverTimer); vp.classList.add('hovered'); }
+	function hideOverlay() {
+		hoverTimer = setTimeout(() => { if (!dragMode) vp.classList.remove('hovered'); }, 120);
+	}
+	for (const el of [vp, actionBtn]) {
+		if (!el) continue;
+		el.addEventListener('mouseenter', showOverlay);
+		el.addEventListener('mouseleave', hideOverlay);
+	}
+	vp.addEventListener('touchstart', () => showOverlay(), { passive: true });
+
+	// ── Glisser (souris) ────────────────────────────────────
+	let dragging = false; let startClientX, startClientY, startOX, startOY;
+	vp.addEventListener('mousedown', e => {
+		if (!dragMode) return;
+		dragging = true; startClientX = e.clientX; startClientY = e.clientY;
+		startOX = offsetX; startOY = offsetY; e.preventDefault();
+	});
+	window.addEventListener('mousemove', e => {
+		if (!dragging) return;
+		const s = computeScale();
+		applyOffset(startOX - (e.clientX - startClientX) / s, startOY - (e.clientY - startClientY) / s, false);
+	});
+	window.addEventListener('mouseup', () => { dragging = false; });
+
+	// ── Glisser (tactile) ───────────────────────────────────
+	let touch0 = null; let touchOnBtn = false; let touchMoved = false; const TAP_THRESHOLD = 8;
+	vp.addEventListener('touchstart', e => {
+		showOverlay();
+		const t = e.touches[0];
+		const el = document.elementFromPoint(t.clientX, t.clientY);
+		touchOnBtn = actionBtn && (el === actionBtn || actionBtn.contains(el));
+		if (touchOnBtn) return;
+		if (!dragMode) return;
+		touch0 = t; touchMoved = false; startOX = offsetX; startOY = offsetY; e.preventDefault();
+	}, { passive: false });
+
+	vp.addEventListener('touchmove', e => {
+		if (!dragMode || !touch0 || touchOnBtn) return;
+		const t = e.touches[0];
+		const dx = t.clientX - touch0.clientX; const dy = t.clientY - touch0.clientY;
+		if (!touchMoved && Math.hypot(dx, dy) < TAP_THRESHOLD) return;
+		touchMoved = true;
+		const s = computeScale();
+		applyOffset(startOX - dx / s, startOY - dy / s, false); e.preventDefault();
+	}, { passive: false });
+
+	vp.addEventListener('touchend', e => {
+		if (touchOnBtn && !touchMoved) {
+			const t = e.changedTouches[0]; const el = document.elementFromPoint(t.clientX, t.clientY);
+			if (actionBtn && (el === actionBtn || actionBtn.contains(el))) { setDragMode(!dragMode); e.preventDefault(); }
+		}
+		touch0 = null; touchOnBtn = false; touchMoved = false;
+	}, { passive: false });
+
+	return { setSujet, applyScale, sujet: () => sujet };
+}
+
+PORTRAIT_SIDEBAR = makePortraitViewport({
+	vp: 'vp', img: 'img', scaleRoot: 'scale-root',
+	zoomSlider: 'zoom-slider', zoomVal: 'zoom-val',
+	actionBtn: 'action-btn', iconEdit: 'icon-edit', iconSave: 'icon-save',
+});
+PORTRAIT_FICHE = makePortraitViewport({
+	vp: 'vp2', img: 'img-portrait', scaleRoot: 'scale-root2',
+	zoomSlider: 'zoom-slider2', zoomVal: 'zoom-val2',
+	actionBtn: 'action-btn2', iconEdit: 'icon-edit2', iconSave: 'icon-save2',
+});
+for (const p of [PORTRAIT_SIDEBAR, PORTRAIT_FICHE]) { if (p) p.setSujet(SUJET_JOUEUR); }
+window.addEventListener('resize', () => {
+	for (const p of [PORTRAIT_SIDEBAR, PORTRAIT_FICHE]) { if (p) p.applyScale(); }
+});
 
 // ── FICHE PERSONNAGE ────────────────────────────────────────
 function openSheet() {
@@ -4846,7 +4856,8 @@ function _sheetIdentiteEls() {
 		gauche: document.querySelector('.sheet-left-info'),
 		droite: document.querySelector('#personnage .char-identity'),
 		imgGauche: document.querySelector('.sheet-left-portrait img'),
-		imgDroite: document.getElementById('img-portrait'),
+		// `#img-portrait` n'est PAS une simple <img> : c'est le viewport cadré PORTRAIT_FICHE
+		// (dimensions natives + zoom + translate du porteur) → il se pilote par `setSujet`.
 		barres: Array.from(document.querySelectorAll('#sheet-panel .portrait-stat-bar .bar-fill')),
 	};
 }
@@ -4876,7 +4887,14 @@ function _applySheetIdentite(p) {
 			+ `<div class="char-vitals">${vitals}</div>`;
 	}
 	if (els.imgGauche) els.imgGauche.src = '/characters/' + p.image;
-	if (els.imgDroite) els.imgDroite.src = '/characters/' + p.image;
+	// Le portrait cadré de la fiche passe sur le compagnon : SON image (mesurée dans le
+	// navigateur), SON cadrage, et son doc comme cible d'un éventuel enregistrement.
+	if (PORTRAIT_FICHE) PORTRAIT_FICHE.setSujet({
+		image: p.image,
+		portrait_zoom: p.portrait_zoom,
+		portrait_translate: p.portrait_translate,
+		compagnon_id: p.id,
+	});
 	els.barres.forEach((b, i) => { b.style.height = (i % 2 === 0 ? pvPct : pmPct) + '%'; });
 }
 
@@ -4921,7 +4939,8 @@ async function openCompagnonSheet(avId) {
 			htmlGauche: els.gauche ? els.gauche.innerHTML : '',
 			htmlDroite: els.droite ? els.droite.innerHTML : '',
 			imgGauche: els.imgGauche ? els.imgGauche.getAttribute('src') : '',
-			imgDroite: els.imgDroite ? els.imgDroite.getAttribute('src') : '',
+			// Le portrait cadré n'est pas snapshotté : `PORTRAIT_FICHE` le rebâtit du sujet
+			// (image + zoom + translate), un `src` mis de côté ne dirait rien du cadrage.
 			barres: els.barres.map(b => b.style.height),
 		};
 
@@ -4977,7 +4996,7 @@ function closeCompagnonSheet() {
 		if (els.gauche) els.gauche.innerHTML = s.htmlGauche;
 		if (els.droite) els.droite.innerHTML = s.htmlDroite;
 		if (els.imgGauche) els.imgGauche.src = s.imgGauche;
-		if (els.imgDroite) els.imgDroite.src = s.imgDroite;
+		if (PORTRAIT_FICHE) PORTRAIT_FICHE.setSujet(SUJET_JOUEUR);
 		els.barres.forEach((b, i) => { b.style.height = s.barres[i] || '0%'; });
 		_sheetRendreTout();
 	}
