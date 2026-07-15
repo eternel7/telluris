@@ -937,20 +937,22 @@ async def pickup_item(
 	"""Reprend un objet posé au sol. Si la charge max est alors dépassée, des objets
 	ALÉATOIRES de l'inventaire (hors l'exemplaire repris) tombent au sol jusqu'à repasser
 	sous la limite. Si l'objet repris seul (ou l'équipement) suffit à dépasser, on reste
-	surchargé (déplacement bloqué tant qu'on ne se déleste pas)."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	surchargé (déplacement bloqué tant qu'on ne se déleste pas).
 
-	au_sol = character.get("objets_au_sol", [])
+	Un compagnon ramasse DANS LE SOL DU JOUEUR : le tas par terre est celui du lieu où se
+	tient le principal, le sac (et la charge max qui borne le ramassage) sont ceux du porteur —
+	mêmes règles que le principal (miroir de drop_item)."""
+	character, principal = _acteur(current_user, body)
+
+	au_sol = principal.get("objets_au_sol", [])
 	picked = _take_ref(au_sol, body.get("index"), body.get("item_id"))
 	if picked is None:
 		raise HTTPException(status_code=422, detail="Objet absent du sol")
 
 	inventaire = character.get("inventaire", [])
 	inventaire.append(picked)
-	character["inventaire"]    = inventaire
-	character["objets_au_sol"] = au_sol
+	character["inventaire"]     = inventaire
+	principal["objets_au_sol"]  = au_sol
 
 	# Auto-délestage : on protège exactement l'exemplaire ramassé (par identité), le
 	# reste est candidat au largage aléatoire tant que le poids porté dépasse la limite.
@@ -964,12 +966,11 @@ async def pickup_item(
 		au_sol.append(victime)
 		doc = resolve_item_ref(victime)
 		auto_dropped.append(doc.get("nom") if doc else item_ref_id(victime))
-	character["inventaire"]    = inventaire
-	character["objets_au_sol"] = au_sol
+	character["inventaire"]     = inventaire
+	principal["objets_au_sol"]  = au_sol
 
-	if save_doc(character) is None:
-		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	payload = _inventory_payload(character)
+	_save_acteur(character, principal)
+	payload = _inventory_payload(character, principal)
 	payload["auto_dropped"] = auto_dropped
 	return payload
 

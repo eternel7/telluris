@@ -1791,11 +1791,10 @@
 		.grp-charge-over { color: #e06c5a; }
 		/* Fiche d'un compagnon : les onglets propres au personnage principal disparaissent
 		   (un compagnon n'a ni quêtes, ni relations marchandes, ni journal). Le SOL reste
-		   affiché — c'est là que tombe ce qu'un compagnon « pose » (le sol appartient au
-		   lieu où se tient le joueur) —, mais « Prendre » est masqué : le ramassage revient
-		   au personnage principal, il n'a pas de sens depuis la fiche d'un compagnon. */
+		   affiché — c'est là que tombe ce qu'un compagnon « pose », et « Prendre » y ramasse
+		   dans SON sac (mêmes règles de charge que le principal ; le sol appartient au lieu
+		   où se tient le joueur, cf. pickup_item côté serveur). */
 		body.sheet-compagnon .tab-principal-only { display: none !important; }
-		body.sheet-compagnon .sh-pickup-btn { display: none !important; }
 	</style>
 	<style>
 		/* ── Panneau de dialogue PNJ ─────────────────────────────────────────── */
@@ -3967,9 +3966,12 @@ async function dropItem(index, itemId) {
 
 async function pickupItem(index, itemId) {
 	try {
+		// `compagnon_id` (via _actionBody en mode compagnon) → le porteur ramasse dans le sol
+		// du principal vers SON sac, borné par SA charge (mêmes règles que le principal). Le
+		// payload renvoyé (sac du porteur + sol du principal) est correct dans les deux modes.
 		const res  = await fetch('api/pickup_item', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({index, item_id: itemId})
+			body: JSON.stringify(_actionBody({index, item_id: itemId}))
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
