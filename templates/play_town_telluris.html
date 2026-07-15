@@ -3003,6 +3003,11 @@ let _slots        = {{ character.get("slots", {}) | tojson | safe }};
 let _objetsAuSol  = {{ character.get("objets_au_sol", []) | tojson | safe }};
 let _chargeMax    = {{ character.get("derived_stats", {}).get("charge_max", 0) }};
 let _effetsActifs = {{ effets_actifs | tojson | safe }};
+// Mode « fiche compagnon » — déclarés ICI (et non près de openCompagnonSheet) car le premier
+// rendu (_refreshSol/_refreshInventaire → _hasOutilCoupe) les lit à l'init, avant ce bloc :
+// une déclaration `let` plus bas les mettrait en zone morte temporelle (TDZ → ReferenceError).
+let _compagnonActif = null;   // payload de GET api/groupe/compagnon/{id}
+let _sheetSnap = null;        // état du personnage principal, restauré à la fermeture
 
 // Onglet 🤝 Relations : payload plat de tous les lieux connus (rendu client, accordéon
 // par ville). REL_CHAR_ID sert à retenir la ville ouverte par personnage (localStorage).
@@ -3526,8 +3531,13 @@ function _estCoupable(item) {
 }
 function _hasOutilCoupe() {
 	const hasTag = o => o && (o.tags || []).some(t => String(t).toLowerCase() === 'outil_coupe_bois');
-	if ((_inventaire || []).some(hasTag)) return true;
-	return Object.values(_slots || {}).some(hasTag);
+	const scan = (inv, slots) => (inv || []).some(hasTag) || Object.values(slots || {}).some(hasTag);
+	if (scan(_inventaire, _slots)) return true;
+	// L'outil est PARTAGÉ par le groupe (miroir de bois.a_outil_coupe côté serveur). En mode
+	// compagnon, _inventaire/_slots sont ceux du compagnon affiché ; le principal (qui porte
+	// souvent la hache) est rangé dans le snapshot — on l'inclut pour ne pas griser à tort.
+	if (_compagnonActif && _sheetSnap && scan(_sheetSnap.inventaire, _sheetSnap.slots)) return true;
+	return false;
 }
 function _couperBtn(idx, itemId, source) {
 	const tool = _hasOutilCoupe();
@@ -3535,9 +3545,14 @@ function _couperBtn(idx, itemId, source) {
 }
 async function couperItem(index, itemId, source) {
 	try {
+		// `compagnon_id` (injecté par _actionBody en mode compagnon) → le serveur coupe le sac
+		// du COMPAGNON ; les pièces tombent toujours au sol du principal (partagé). Le payload
+		// renvoyé est alors celui du porteur affiché (sac compagnon + sol principal), donc
+		// `_applyInventoryPayload` est correct dans les deux modes. Un « sol » reste toujours
+		// une coupe du sol du principal côté serveur, quel que soit le porteur actif.
 		const res = await fetch('api/couper', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ index, item_id: itemId, source })
+			body: JSON.stringify(_actionBody({ index, item_id: itemId, source }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
@@ -5058,8 +5073,7 @@ function closeGroupe() {
 // celles du compagnon, et TOUTES les fonctions de rendu existantes sont rappelées telles
 // quelles. Les actions, elles, partent avec un `compagnon_id` (_actionBody) — le serveur
 // résout alors le porteur (cf. `_acteur`, routers/user.py).
-let _compagnonActif = null;   // payload de GET api/groupe/compagnon/{id}
-let _sheetSnap = null;        // état du personnage principal, restauré à la fermeture
+// `_compagnonActif` / `_sheetSnap` sont déclarés plus haut (près de _inventaire) — TDZ à l'init.
 
 function _actionBody(extra) {
 	return _compagnonActif ? Object.assign({}, extra, { compagnon_id: _compagnonActif.id }) : extra;

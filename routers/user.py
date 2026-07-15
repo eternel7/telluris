@@ -1410,18 +1410,19 @@ async def couper_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Coupe un item « a_couper » (bois) d'un niveau : retire la source du sac OU du sol et
-	dépose au SOL les pièces du tier immédiatement plus petit (poids conservé). Nécessite un
-	outil de coupe (item taggé). Body : {index, item_id, source:"sac"|"sol"}."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	"""Coupe un item « a_couper » (bois) d'un niveau : retire la source du sac (du personnage
+	OU d'un compagnon via `compagnon_id`) OU du sol, et dépose au SOL du principal les pièces du
+	tier immédiatement plus petit (poids conservé). Nécessite un outil de coupe (item taggé),
+	PARTAGÉ par le groupe. Body : {index, item_id, source:"sac"|"sol", compagnon_id?}."""
+	porteur, principal = _acteur(current_user, body)
 
-	if not bois.a_outil_coupe(character, get_doc, recrutement.groupe_effectif(character, get_doc)):
+	if not bois.a_outil_coupe(principal, get_doc, recrutement.groupe_effectif(principal, get_doc)):
 		raise HTTPException(status_code=409, detail="Il faut un outil de coupe (hache, scie…).")
 
 	source = body.get("source")
-	refs = character.get("objets_au_sol", []) if source == "sol" else character.get("inventaire", [])
+	# Le sac coupé est celui du PORTEUR (compagnon si `compagnon_id`) ; le sol est TOUJOURS
+	# celui du principal (il appartient au lieu — un compagnon n'a ni lieu ni position).
+	refs = principal.get("objets_au_sol", []) if source == "sol" else porteur.get("inventaire", [])
 	idx, item_id = body.get("index"), body.get("item_id")
 
 	target_ref = _find_ref(refs, idx, item_id)
@@ -1434,18 +1435,19 @@ async def couper_item(
 	if _take_ref(refs, idx, item_id) is None:
 		raise HTTPException(status_code=409, detail="Conflit — réessayez.")
 	if source == "sol":
-		character["objets_au_sol"] = refs
+		principal["objets_au_sol"] = refs
 	else:
-		character["inventaire"] = refs
-	au_sol = character.get("objets_au_sol", [])
+		porteur["inventaire"] = refs
+	au_sol = principal.get("objets_au_sol", [])
 	au_sol.extend(pieces)
-	character["objets_au_sol"] = au_sol
+	principal["objets_au_sol"] = au_sol
 
-	if save_doc(character) is None:
-		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	# Porteur autoritatif (409 si conflit) puis principal en best-effort — le sol lui
+	# appartient (bi-doc). Hors mode compagnon, porteur EST principal → un seul save.
+	_save_acteur(porteur, principal)
 
 	cible_doc = get_doc(pieces[0]["item"])
-	payload = _inventory_payload(character)
+	payload = _inventory_payload(porteur, principal)
 	payload["coupe"] = {
 		"n": len(pieces),
 		"nom": cible_doc.get("nom", "pièces") if cible_doc else "pièces",
