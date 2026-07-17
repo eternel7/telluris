@@ -1842,7 +1842,7 @@
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
 		#item-detail-overlay.item-detail-hidden { display: none; }
-		/* ── Carte 3×3 d'une quête de chasse ── */
+		/* ── Carte 6×6 d'une quête de chasse ── */
 		#quest-map-overlay {
 			position: fixed; inset: 0; z-index: 9300;
 			background: rgba(10, 8, 5, .78);
@@ -4530,9 +4530,10 @@ function _escAttr(s) {
 		.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// Carte 3×3 d'une quête de chasse : crop de l'image du lieu centré sur la case cible.
-// La géométrie reprend celle de #bg-image (image décalée pour centrer une case), mais
-// centrée SUR la case (vrai 3×3) au lieu du demi-décalage du jeu.
+// Carte QMAP_N×QMAP_N d'une quête de chasse : crop de l'image du lieu centré sur la case cible.
+// La géométrie reprend celle de #bg-image (image décalée pour centrer une case) ; la case
+// cible est centrée dans une fenêtre de N cases (N pair → centre entre 2 cases).
+const QMAP_N = 9;
 function showQuestMap(el) {
 	let carte;
 	try { carte = JSON.parse(el.dataset.carte); } catch (e) { return; }
@@ -4551,21 +4552,22 @@ function showQuestMap(el) {
 		// forcément carrées : on garde l'aspect natif via une échelle unique).
 		const cw = img.naturalWidth / (dims.x || 1);
 		const ch = img.naturalHeight / (dims.y || 1);
-		const TARGET = 270;                       // ~270 px pour le plus grand côté du 3×3
-		const scale = TARGET / (3 * Math.max(1, cw, ch));
+		const TARGET = 270;                       // ~270 px pour le plus grand côté du 6×6 (2×)
+		const scale = TARGET / (QMAP_N * Math.max(1, cw, ch));
 		const cW = cw * scale, cH = ch * scale;
-		view.style.width  = (3 * cW) + 'px';
-		view.style.height = (3 * cH) + 'px';
+		// Décalage pour centrer le CENTRE de la case cible au centre de la fenêtre N×N.
+		const off = QMAP_N / 2 - 0.5;             // 2.5 pour N=6
+		view.style.width  = (QMAP_N * cW) + 'px';
+		view.style.height = (QMAP_N * cH) + 'px';
 		img.style.width  = (img.naturalWidth  * scale) + 'px';
 		img.style.height = (img.naturalHeight * scale) + 'px';
-		// Coin haut-gauche de la case cible posé à (cW, cH) → case centrée dans le 3×3.
-		img.style.left = ((1 - px) * cW) + 'px';
-		img.style.top  = ((1 - py) * cH) + 'px';
+		img.style.left = ((off - px) * cW) + 'px';
+		img.style.top  = ((off - py) * cH) + 'px';
 		view.appendChild(img);
 		const marker = document.createElement('div');
 		marker.className = 'qmap-marker';
 		marker.textContent = '🎯';
-		marker.style.left = cW + 'px';  marker.style.top = cH + 'px';
+		marker.style.left = (off * cW) + 'px';  marker.style.top = (off * cH) + 'px';
 		marker.style.width = cW + 'px'; marker.style.height = cH + 'px';
 		view.appendChild(marker);
 	};
