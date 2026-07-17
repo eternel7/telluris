@@ -357,6 +357,55 @@ def test_carte_chasse_none_sans_image(quetes_db, monkeypatch):
 	assert quetes._carte_chasse({"lieu": "lieu:auxerre", "position": {"x": 5, "y": 5}}) is None
 
 
+# ── Direction cardinale (règle par axe, y vers le bas) ───────────────────────────
+
+@pytest.mark.parametrize("depuis,vers,attendu", [
+	((0, 0), (1, 1), "sud-est"),
+	((1, 1), (0, 0), "nord-ouest"),
+	((0, 0), (1, 0), "est"),
+	((1, 0), (0, 0), "ouest"),
+	((0, 0), (0, 1), "sud"),
+	((0, 1), (0, 0), "nord"),
+	((3, 3), (3, 3), ""),          # même case → aucune direction
+])
+def test_direction_cardinale_simple(depuis, vers, attendu):
+	assert chasse.direction_cardinale_simple(depuis, vers) == attendu
+
+
+def test_phrase_direction_prepositions():
+	assert quetes._phrase_direction("sud-est") == "Au sud-est du bâtiment de la guilde"
+	assert quetes._phrase_direction("nord") == "Au nord du bâtiment de la guilde"
+	assert quetes._phrase_direction("est") == "À l'est du bâtiment de la guilde"
+	assert quetes._phrase_direction("ouest") == "À l'ouest du bâtiment de la guilde"
+	assert quetes._phrase_direction("") == "Sur l'emplacement du bâtiment de la guilde"
+
+
+def test_carte_chasse_direction_texte(quetes_db, monkeypatch):
+	from utils import marche, focalisation
+	monkeypatch.setattr(marche, "_lieu_image_route", lambda lieu: ("auxerre.png", "towns"))
+	monkeypatch.setattr(focalisation, "charger_graphe", lambda fd: {})
+	monkeypatch.setattr(focalisation, "prochaine_etape", lambda g, d, v: {"porte": (2, 2)})
+	obj = {"type": "chasse", "lieu": "lieu:auxerre", "position": {"x": 5, "y": 5}}
+	carte = quetes._carte_chasse(obj, giver_id="lieu:guilde")
+	assert carte["direction_texte"] == "Au sud-est du bâtiment de la guilde"
+	# Porte au-delà de la cible → direction inverse.
+	monkeypatch.setattr(focalisation, "prochaine_etape", lambda g, d, v: {"porte": (9, 9)})
+	carte = quetes._carte_chasse(obj, giver_id="lieu:guilde")
+	assert carte["direction_texte"] == "Au nord-ouest du bâtiment de la guilde"
+
+
+def test_carte_chasse_sans_direction_si_donneur_injoignable(quetes_db, monkeypatch):
+	from utils import marche, focalisation
+	monkeypatch.setattr(marche, "_lieu_image_route", lambda lieu: ("auxerre.png", "towns"))
+	monkeypatch.setattr(focalisation, "charger_graphe", lambda fd: {})
+	monkeypatch.setattr(focalisation, "prochaine_etape", lambda g, d, v: None)
+	obj = {"type": "chasse", "lieu": "lieu:auxerre", "position": {"x": 5, "y": 5}}
+	carte = quetes._carte_chasse(obj, giver_id="lieu:guilde")
+	assert "direction_texte" not in carte
+	# Sans giver du tout → pas de direction non plus.
+	assert "direction_texte" not in quetes._carte_chasse(obj)
+
+
 def test_quete_detail_carte_seulement_si_chasse_localisee(quetes_db, monkeypatch):
 	from utils import marche
 	monkeypatch.setattr(marche, "_lieu_image_route", lambda lieu: ("auxerre.png", "towns"))

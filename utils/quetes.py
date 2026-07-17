@@ -487,16 +487,26 @@ def quete_detail(character: dict, q: dict) -> dict:
 		detail["now"] = now_epoch()
 	# Quête de chasse localisée : de quoi dessiner le crop 3×3 de la carte centré sur la cible.
 	if obj.get("type") == "chasse" and obj.get("position"):
-		carte = _carte_chasse(obj)
+		carte = _carte_chasse(obj, q.get("giver"))
 		if carte:
 			detail["carte"] = carte
 	return detail
 
 
-def _carte_chasse(objectif: dict) -> dict | None:
+def _phrase_direction(direction: str) -> str:
+	"""Ligne d'orientation de l'overlay carte à partir d'une direction cardinale (« sud-est »…).
+	Gère la préposition : « À l'est/ouest » (pur E/O), « Au … » sinon (nord/sud, composés)."""
+	if not direction:
+		return "Sur l'emplacement du bâtiment de la guilde"
+	prep = "À l'" if direction[0] in ("e", "o") else "Au "
+	return f"{prep}{direction} du bâtiment de la guilde"
+
+
+def _carte_chasse(objectif: dict, giver_id: str | None = None) -> dict | None:
 	"""Données du bouton 🗺️ d'une quête de chasse : l'image servable du lieu + ses dimensions
 	en cases + la position cible → le client recadre un 3×3 centré sur la case. None si le lieu
-	n'a pas d'image servable ou pas de grille (le bouton est alors masqué)."""
+	n'a pas d'image servable ou pas de grille (le bouton est alors masqué). Ajoute une ligne
+	d'orientation « Au <direction> du bâtiment de la guilde » si le donneur est joignable."""
 	lieu = get_doc(objectif.get("lieu")) if objectif.get("lieu") else None
 	dims = (lieu or {}).get("dimensions")
 	if not lieu or not dims:
@@ -504,13 +514,25 @@ def _carte_chasse(objectif: dict) -> dict | None:
 	image, route = marche._lieu_image_route(lieu)
 	if not image or not route:
 		return None
-	return {
-		"position": dict(objectif.get("position") or {}),
+	pos = objectif.get("position") or {}
+	carte = {
+		"position": dict(pos),
 		"dimensions": dims,
 		"image": image,
 		"image_route": route,
 		"lieu_nom": lieu.get("label") or lieu.get("nom") or (lieu.get("_id") or "").split(":", 1)[-1],
 	}
+	# Orientation depuis le bâtiment donneur : porte du 1er lien vers le donneur, dans la grille
+	# de CE lieu (BFS multi-hop → marche même si le comptoir est imbriqué derrière une façade).
+	if giver_id:
+		from utils import focalisation, chasse  # imports paresseux (dépendent de ce module)
+		etape = focalisation.prochaine_etape(
+			focalisation.charger_graphe(find_docs), objectif.get("lieu"), giver_id)
+		if etape and etape.get("porte"):
+			direction = chasse.direction_cardinale_simple(
+				etape["porte"], (int(pos.get("x", 0)), int(pos.get("y", 0))))
+			carte["direction_texte"] = _phrase_direction(direction)
+	return carte
 
 
 def fiche_details(character: dict) -> tuple:

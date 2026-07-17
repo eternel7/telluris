@@ -157,6 +157,18 @@ def quetes_chasse_actives(character: dict, lieu_id: str) -> list:
 	return out
 
 
+def direction_cardinale_simple(depuis_xy, vers_xy) -> str:
+	"""Direction cardinale de `vers_xy` PAR RAPPORT À `depuis_xy`, règle par axe (`y` croît
+	vers le BAS) : sud si `depuis.y < vers.y`, nord si `>`, rien si égal ; est si
+	`depuis.x < vers.x`, ouest si `>`, rien si égal. Combinée → « sud-est », « nord »,
+	« ouest »… ; chaîne vide si même case (aucun axe ne départage)."""
+	dx0, dy0 = int(depuis_xy[0]), int(depuis_xy[1])
+	dx1, dy1 = int(vers_xy[0]), int(vers_xy[1])
+	ns = "sud" if dy0 < dy1 else ("nord" if dy0 > dy1 else "")
+	ew = "est" if dx0 < dx1 else ("ouest" if dx0 > dx1 else "")
+	return "-".join(p for p in (ns, ew) if p)
+
+
 def dans_zone_chasse(objectif: dict, position_joueur: dict | None) -> bool:
 	"""Le combat est-il déclenché dans la zone 3×3 centrée sur la position de la quête ?
 	L'élite n'est marquée que là. Sans `position` (lieu sans grille) → True (contrainte de

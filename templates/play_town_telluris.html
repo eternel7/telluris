@@ -1855,7 +1855,10 @@
 			padding: 1rem 1.1rem; box-shadow: 0 8px 40px rgba(0, 0, 0, .6);
 			text-align: center;
 		}
-		.qmap-title { font-weight: bold; margin-bottom: .6rem; }
+		.qmap-title { font-weight: bold; margin-bottom: .3rem; }
+		.qmap-dir { color: var(--gold2, var(--gold, #d8b46a)); font-size: .9rem;
+			margin-bottom: .6rem; font-style: italic; }
+		.qmap-dir:empty { display: none; }
 		/* Fenêtre du crop : taille posée en inline par showQuestMap (3 cases × échelle). */
 		.qmap-view { position: relative; overflow: hidden; margin: 0 auto;
 			border: 1px solid var(--border-color, #555); background: #000; }
@@ -1958,6 +1961,7 @@
 		<div class="qmap-card">
 			<button class="qmap-close" onclick="closeQuestMap()" title="Fermer">✕</button>
 			<div class="qmap-title" id="qmap-title"></div>
+			<div class="qmap-dir" id="qmap-dir"></div>
 			<div class="qmap-view" id="qmap-view"></div>
 		</div>
 	</div><!-- /#quest-map-overlay -->
@@ -4538,6 +4542,7 @@ function showQuestMap(el) {
 	const view = document.getElementById('qmap-view');
 	document.getElementById('qmap-title').textContent =
 		`${carte.lieu_nom || 'Zone'} — case (${px}, ${py})`;
+	document.getElementById('qmap-dir').textContent = carte.direction_texte || '';
 	view.innerHTML = '';
 	view.style.width = view.style.height = '';
 	const img = new Image();
