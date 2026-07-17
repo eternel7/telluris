@@ -1611,6 +1611,7 @@
 									<span class="sh-quest-status en-cours">En cours</span>
 									{% if q.get("expire_at") %}<span class="sh-quest-timer" data-expire="{{ q.expire_at }}" data-now="{{ q.now }}"></span>{% endif %}
 									<span class="sh-inv-actions">
+										{% if q.get("carte") %}<button class="sh-drop-btn" data-carte='{{ q.carte | tojson }}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">🗺️</button>{% endif %}
 										{% if q.get("focalisable") %}<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>{% endif %}
 										<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('{{ q.get('id') }}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 									</span>
@@ -1841,6 +1842,33 @@
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
 		#item-detail-overlay.item-detail-hidden { display: none; }
+		/* ── Carte 3×3 d'une quête de chasse ── */
+		#quest-map-overlay {
+			position: fixed; inset: 0; z-index: 9300;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#quest-map-overlay.hidden { display: none; }
+		.qmap-card {
+			position: relative; background: #24222b; color: var(--text-color, #f1f1f1);
+			border: 1px solid var(--accent-color, #b98c4a); border-radius: 10px;
+			padding: 1rem 1.1rem; box-shadow: 0 8px 40px rgba(0, 0, 0, .6);
+			text-align: center;
+		}
+		.qmap-title { font-weight: bold; margin-bottom: .6rem; }
+		/* Fenêtre du crop : taille posée en inline par showQuestMap (3 cases × échelle). */
+		.qmap-view { position: relative; overflow: hidden; margin: 0 auto;
+			border: 1px solid var(--border-color, #555); background: #000; }
+		.qmap-view img { position: absolute; max-width: none; image-rendering: auto; }
+		.qmap-marker { position: absolute; z-index: 5; display: flex;
+			align-items: center; justify-content: center; pointer-events: none;
+			font-size: 1.4rem; }
+		.qmap-close {
+			position: absolute; top: 8px; right: 10px;
+			width: 28px; height: 28px; line-height: 26px; text-align: center;
+			background: var(--btn-bg); border: 1px solid var(--border-color);
+			color: var(--text-color); border-radius: 6px; cursor: pointer;
+		}
 		.item-detail-card {
 			position: relative;
 			max-width: 760px; width: 100%; max-height: 85vh; overflow-y: auto;
@@ -1926,6 +1954,13 @@
 			<div id="item-detail-body"></div>
 		</div>
 	</div><!-- /#item-detail-overlay -->
+	<div id="quest-map-overlay" class="hidden" aria-label="Carte de la quête" onclick="if(event.target===this)closeQuestMap()">
+		<div class="qmap-card">
+			<button class="qmap-close" onclick="closeQuestMap()" title="Fermer">✕</button>
+			<div class="qmap-title" id="qmap-title"></div>
+			<div class="qmap-view" id="qmap-view"></div>
+		</div>
+	</div><!-- /#quest-map-overlay -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -2628,6 +2663,8 @@ function sheetTab(id, btn) {
 }
 document.addEventListener('keydown', e => {
 	if (e.key !== 'Escape') return;
+	const qmap = document.getElementById('quest-map-overlay');
+	if (qmap && !qmap.classList.contains('hidden')) { closeQuestMap(); return; }
 	const itemOv = document.getElementById('item-detail-overlay');
 	if (itemOv && !itemOv.classList.contains('item-detail-hidden')) { closeItemDetail(); return; }
 	const sell = document.getElementById('sell-panel');
@@ -4480,6 +4517,61 @@ function _startQuestTimers() {
 	}
 }
 
+// Échappe une chaîne (souvent du JSON) pour l'insérer dans un attribut HTML entre
+// apostrophes : le nom d'un lieu peut contenir une apostrophe (« L'Étal ») qui, non
+// échappée, romprait `data-carte='…'`.
+function _escAttr(s) {
+	return String(s)
+		.replace(/&/g, '&amp;').replace(/'/g, '&#39;')
+		.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Carte 3×3 d'une quête de chasse : crop de l'image du lieu centré sur la case cible.
+// La géométrie reprend celle de #bg-image (image décalée pour centrer une case), mais
+// centrée SUR la case (vrai 3×3) au lieu du demi-décalage du jeu.
+function showQuestMap(el) {
+	let carte;
+	try { carte = JSON.parse(el.dataset.carte); } catch (e) { return; }
+	if (!carte || !carte.image || !carte.dimensions) return;
+	const dims = carte.dimensions, pos = carte.position || {};
+	const px = pos.x || 0, py = pos.y || 0;
+	const view = document.getElementById('qmap-view');
+	document.getElementById('qmap-title').textContent =
+		`${carte.lieu_nom || 'Zone'} — case (${px}, ${py})`;
+	view.innerHTML = '';
+	view.style.width = view.style.height = '';
+	const img = new Image();
+	img.onload = () => {
+		// Taille native MESURÉE dans le navigateur → px par case (les cases ne sont pas
+		// forcément carrées : on garde l'aspect natif via une échelle unique).
+		const cw = img.naturalWidth / (dims.x || 1);
+		const ch = img.naturalHeight / (dims.y || 1);
+		const TARGET = 270;                       // ~270 px pour le plus grand côté du 3×3
+		const scale = TARGET / (3 * Math.max(1, cw, ch));
+		const cW = cw * scale, cH = ch * scale;
+		view.style.width  = (3 * cW) + 'px';
+		view.style.height = (3 * cH) + 'px';
+		img.style.width  = (img.naturalWidth  * scale) + 'px';
+		img.style.height = (img.naturalHeight * scale) + 'px';
+		// Coin haut-gauche de la case cible posé à (cW, cH) → case centrée dans le 3×3.
+		img.style.left = ((1 - px) * cW) + 'px';
+		img.style.top  = ((1 - py) * cH) + 'px';
+		view.appendChild(img);
+		const marker = document.createElement('div');
+		marker.className = 'qmap-marker';
+		marker.textContent = '🎯';
+		marker.style.left = cW + 'px';  marker.style.top = cH + 'px';
+		marker.style.width = cW + 'px'; marker.style.height = cH + 'px';
+		view.appendChild(marker);
+	};
+	img.onerror = () => { view.textContent = 'Carte indisponible.'; };
+	img.src = `/${carte.image_route}/${carte.image}`;
+	document.getElementById('quest-map-overlay').classList.remove('hidden');
+}
+function closeQuestMap() {
+	document.getElementById('quest-map-overlay').classList.add('hidden');
+}
+
 function renderFicheQuetes(data) {
 	const panel = document.getElementById('sh-quetes');
 	if (!panel || !data || (!data.fiche_actives && !data.fiche_terminees)) return;
@@ -4509,6 +4601,11 @@ function renderFicheQuetes(data) {
 			const focusBtn = q.focalisable
 				? `<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>`
 				: '';
+			// 🗺️ carte de la zone à explorer (quête de chasse localisée) : les données du crop
+			// voyagent dans data-carte pour rester disponibles sans re-fetch.
+			const mapBtn = q.carte
+				? `<button class="sh-drop-btn" data-carte='${_escAttr(JSON.stringify(q.carte))}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">🗺️</button>`
+				: '';
 			return `<div class="sh-quest ${rang}">
 				<div class="sh-quest-hdr">
 					<span class="sh-quest-rang">${rang}</span>
@@ -4516,6 +4613,7 @@ function renderFicheQuetes(data) {
 					<span class="sh-quest-status en-cours">En cours</span>
 					${timer}
 					<span class="sh-inv-actions">
+						${mapBtn}
 						${focusBtn}
 						<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 					</span>

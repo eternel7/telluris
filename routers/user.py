@@ -229,6 +229,9 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'cuivre': 0,
 			'quetes_actives': [],
 			'quetes_terminees': [],
+			# Rang de guilde par cité (clé = lieu_parent) — progresse via les épreuves de rang
+			# du comptoir (utils/chasse). Absent ⇒ rang F ; v1 = prestige/affichage seul.
+			'rangs_guilde': {},
 			'sorts_connus': sorts_init,
 			'competences_connues': competences_init,
 			'competences_bonus': {},

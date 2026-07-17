@@ -162,6 +162,14 @@ QUETE_TRANSPORT_RELATION_MIN: int = 50
 # l'atelier / à la consommation : la course a donc un effet visible mais partiel sur l'étal.
 QUETE_TRANSPORT_STOCK_PROBA: float = 0.50
 
+# ── Quêtes de chasse (élite à profil élevé) + rang de guilde ─────────────────────
+# Traquer UN ennemi marqué d'un profil élevé dans un lieu précis. L'élite valant bien plus
+# qu'un individu normal, son XP est majorée : xp = round(xp_unitaire × QUETE_CHASSE_XP_FACTEUR)
+# (cuivre via QUETE_CUIVRE_PAR_XP). À l'entrée d'un COMPTOIR de guilde avec PNJ présent,
+# QUETE_CHASSE_PROBA_RANG donne la chance de se voir proposer une épreuve de rang (grade `max`).
+QUETE_CHASSE_XP_FACTEUR: float = 3.0
+QUETE_CHASSE_PROBA_RANG: float = 0.5
+
 # ── Focalisation ─────────────────────────────────────────────────────────────────
 # Le personnage peut se focaliser sur une quête active : les tirages aléatoires sont
 # biaisés vers son objectif. FOCUS_EVENEMENT_MULT multiplie le poids des entrées de
@@ -448,6 +456,8 @@ def current_world_variables() -> dict:
 		"QUETE_TRANSPORT_RELATION_DELTA": QUETE_TRANSPORT_RELATION_DELTA,
 		"QUETE_TRANSPORT_RELATION_MIN": QUETE_TRANSPORT_RELATION_MIN,
 		"QUETE_TRANSPORT_STOCK_PROBA": QUETE_TRANSPORT_STOCK_PROBA,
+		"QUETE_CHASSE_XP_FACTEUR": QUETE_CHASSE_XP_FACTEUR,
+		"QUETE_CHASSE_PROBA_RANG": QUETE_CHASSE_PROBA_RANG,
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
 		"SORT_COUT_COEFF": SORT_COUT_COEFF,
@@ -513,6 +523,7 @@ def load_world_variables() -> dict:
 	global QUETE_TRANSPORT_PROBA, QUETE_TRANSPORT_DUREE_SECONDES, QUETE_TRANSPORT_POIDS_MAX
 	global QUETE_TRANSPORT_NB_MAX, QUETE_TRANSPORT_XP, QUETE_TRANSPORT_RELATION_DELTA
 	global QUETE_TRANSPORT_STOCK_PROBA, QUETE_TRANSPORT_RELATION_MIN
+	global QUETE_CHASSE_XP_FACTEUR, QUETE_CHASSE_PROBA_RANG
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
 	global RECRUTEMENT_GROUPE_TAILLE_MAX, RECRUTEMENT_BOARD_DUREE_SECONDES, RECRUTEMENT_BOARD_DUREE_JITTER
@@ -593,6 +604,8 @@ def load_world_variables() -> dict:
 	QUETE_TRANSPORT_RELATION_DELTA = int(v.get("QUETE_TRANSPORT_RELATION_DELTA", QUETE_TRANSPORT_RELATION_DELTA))
 	QUETE_TRANSPORT_RELATION_MIN = int(v.get("QUETE_TRANSPORT_RELATION_MIN", QUETE_TRANSPORT_RELATION_MIN))
 	QUETE_TRANSPORT_STOCK_PROBA = float(v.get("QUETE_TRANSPORT_STOCK_PROBA", QUETE_TRANSPORT_STOCK_PROBA))
+	QUETE_CHASSE_XP_FACTEUR = float(v.get("QUETE_CHASSE_XP_FACTEUR", QUETE_CHASSE_XP_FACTEUR))
+	QUETE_CHASSE_PROBA_RANG = float(v.get("QUETE_CHASSE_PROBA_RANG", QUETE_CHASSE_PROBA_RANG))
 
 	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))
 	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))

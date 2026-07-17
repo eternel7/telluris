@@ -10,7 +10,7 @@ from models.character_stats import (
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id
 from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus
-from utils.quetes import maj_progress_kills
+from utils.quetes import maj_progress_kills, maj_progress_chasse
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
 
@@ -662,59 +662,66 @@ def instantiate_monsters(
 			if poids_especes else random.choice(pool)
 		)
 		profil = _pick_profil(profils, profil_weights)
-
-		if profil:
-			base_stats = roll_monster_stats(espece, profil)
-			niveau = profil.get("niveau", 1)
-			profil_id = profil["_id"]
-		else:
-			base_stats = _espece_midpoint(espece)
-			niveau = 1
-			profil_id = None
-
-		derived = compute_derived_stats(base_stats, niveau=niveau)
-		# XP dérivée de la difficulté : niveau du profil + somme des stats du monstre.
-		sum_stats = (
-			base_stats.v + base_stats.f + base_stats.r + base_stats.ag
-			+ base_stats.vol + base_stats.int_ + base_stats.cha + base_stats.ch
-		)
-		xp_reward = max(1, niveau * 4 + sum_stats // 10)
-
-		monstres.append({
-			"id": f"monstre_{i}",
-			"nom": espece.get("nom", "Monstre"),
-			"espece_id": espece["_id"],
-			"profil_id": profil_id,
-			"image": espece.get("image", ""),
-			"currentPV": max(1, derived.pv_max),
-			"pv_max": max(1, derived.pv_max),
-			"actions_restantes": _compute_actions_max(base_stats.ag, base_stats.v),
-			"actions_max": _compute_actions_max(base_stats.ag, base_stats.v),
-			"cc": derived.cc,
-			"ag": base_stats.ag,
-			# Vol/Int alimentent le jet de DÉTECTION contre un joueur furtif (repli
-			# Int−10 puis Ag−30 pour les créatures sans volonté/intelligence).
-			"vol": base_stats.vol,
-			"int": base_stats.int_,
-			"pa": derived.pa,
-			"pm_def": derived.pm_def,
-			"degats_cc": derived.degats_cc,
-			"initiative": derived.initiative,
-			"deplacement": derived.deplacement,
-			"portee": 1,
-			"pos": {"x": 0, "y": 0},
-			"cells_moved": 0,
-			"attaques": 0,
-			"vivant": True,
-			# Tags d'espèce embarqués : predateur/proie pilotent la chasse entre
-			# monstres quand le joueur est furtif et non détecté.
-			"tags": list(espece.get("tags", [])),
-			"detecte": False,
-			"xp_reward": xp_reward,
-			"niveau": niveau,   # niveau du profil → pondère le tirage du poids de carcasse
-		})
+		monstres.append(build_monster_snapshot(espece, profil, i))
 
 	return monstres
+
+
+def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
+	"""Snapshot d'UN monstre (stats dérivées + XP) pour un profil donné. `profil is None`
+	→ repli sur le point médian de l'espèce (niveau 1). Extrait de la boucle
+	d'`instantiate_monsters` pour pouvoir reconstruire un monstre à profil FORCÉ (quête de
+	chasse : l'élite recherchée) sans dupliquer la dérivation des stats."""
+	if profil:
+		base_stats = roll_monster_stats(espece, profil)
+		niveau = profil.get("niveau", 1)
+		profil_id = profil["_id"]
+	else:
+		base_stats = _espece_midpoint(espece)
+		niveau = 1
+		profil_id = None
+
+	derived = compute_derived_stats(base_stats, niveau=niveau)
+	# XP dérivée de la difficulté : niveau du profil + somme des stats du monstre.
+	sum_stats = (
+		base_stats.v + base_stats.f + base_stats.r + base_stats.ag
+		+ base_stats.vol + base_stats.int_ + base_stats.cha + base_stats.ch
+	)
+	xp_reward = max(1, niveau * 4 + sum_stats // 10)
+
+	return {
+		"id": f"monstre_{idx}",
+		"nom": espece.get("nom", "Monstre"),
+		"espece_id": espece["_id"],
+		"profil_id": profil_id,
+		"image": espece.get("image", ""),
+		"currentPV": max(1, derived.pv_max),
+		"pv_max": max(1, derived.pv_max),
+		"actions_restantes": _compute_actions_max(base_stats.ag, base_stats.v),
+		"actions_max": _compute_actions_max(base_stats.ag, base_stats.v),
+		"cc": derived.cc,
+		"ag": base_stats.ag,
+		# Vol/Int alimentent le jet de DÉTECTION contre un joueur furtif (repli
+		# Int−10 puis Ag−30 pour les créatures sans volonté/intelligence).
+		"vol": base_stats.vol,
+		"int": base_stats.int_,
+		"pa": derived.pa,
+		"pm_def": derived.pm_def,
+		"degats_cc": derived.degats_cc,
+		"initiative": derived.initiative,
+		"deplacement": derived.deplacement,
+		"portee": 1,
+		"pos": {"x": 0, "y": 0},
+		"cells_moved": 0,
+		"attaques": 0,
+		"vivant": True,
+		# Tags d'espèce embarqués : predateur/proie pilotent la chasse entre
+		# monstres quand le joueur est furtif et non détecté.
+		"tags": list(espece.get("tags", [])),
+		"detecte": False,
+		"xp_reward": xp_reward,
+		"niveau": niveau,   # niveau du profil → pondère le tirage du poids de carcasse
+	}
 
 
 def create_combat_doc(
@@ -1945,6 +1952,9 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# Progression des quêtes de chasse : compte les monstres tués (toute issue), sous le
 	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.
 	maj_progress_kills(character, combat_doc.get("monstres", []))
+	# Quêtes de « chasse » (élite marquée) : complétées si le monstre porteur du quete_chasse
+	# est tombé. Même fenêtre d'idempotence que les kills ci-dessus.
+	maj_progress_chasse(character, combat_doc.get("monstres", []))
 	# Focalisation : objectif de la quête focalisée atteint → effacée (même save).
 	effacer_si_objectif_atteint(character)
 

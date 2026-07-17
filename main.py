@@ -30,6 +30,7 @@ from utils import focalisation
 from utils import pnj as pnj_util
 from utils import intro as intro_util
 from utils import transport as transport_util
+from utils import chasse as chasse_util
 from utils import recrutement as recrutement_util
 from utils import fiche as fiche_util
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
@@ -540,6 +541,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Compagnons : départs volontaires paresseux (affinité tombée sous le seuil pendant
 	# l'absence) — les docs `aventurier:*` sont annexes, persistés séparément ; le retrait
 	# du groupe part avec le save du personnage ci-dessous. Toast au rendu.
+	# Offre d'épreuve de RANG : au comptoir de guilde avec PNJ présent, tirée à l'entrée (même
+	# sémantique que l'offre de course). Hors comptoir, purge un éventuel reliquat d'offre.
+	change |= chasse_util.poser_rang_offert(character, grid_doc, get_doc, find_docs,
+		pnj_present=bool(pnj_entree and pnj_doc))
 	compagnons_partis = recrutement_util.departs_volontaires(character, get_doc)
 	for _av in compagnons_partis:
 		save_doc(_av)

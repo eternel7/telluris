@@ -200,6 +200,27 @@ def resolve_recolte(event: dict | None, lieu_doc: dict, get_doc_fn,
     return _choix_pondere(matched) if matched else _choix_pondere(candidats)
 
 
+def resolve_profil_weights(active_placements: list, lieu: dict) -> dict | None:
+    """Poids de profils effectifs pour le tirage du grade des monstres.
+
+    Chaîne : cumul (somme) des `profil_weights` des placements de zone actifs qui en
+    définissent un → sinon `profil_weights` par défaut du lieu → sinon None (tirage
+    uniforme parmi les profils). Les poids non numériques ou ≤ 0 sont ignorés.
+
+    Pur (aucun accès DB) : partagé par `routers/combat.py` (tirage à l'entrée en combat)
+    et `utils/chasse.py` (résolution du grade d'une quête de chasse à la génération).
+    """
+    merged: dict = {}
+    for placement in active_placements or []:
+        for pid, w in (placement.get("profil_weights") or {}).items():
+            if isinstance(w, bool) or not isinstance(w, (int, float)) or w <= 0:
+                continue
+            merged[pid] = merged.get(pid, 0) + w
+    if merged:
+        return merged
+    return (lieu or {}).get("profil_weights") or None
+
+
 def load_zone_defs_for_lieu(lieu_doc: dict, get_doc_fn) -> dict:
     """Batch-fetch all zone definition documents referenced by lieu_doc's zone_influences."""
     ids = {p["zone"] for p in lieu_doc.get("zone_influences", []) if "zone" in p}

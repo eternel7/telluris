@@ -21,6 +21,7 @@ from utils.marche import (
 from utils import pnj
 from utils import intro
 from utils import transport
+from utils import chasse
 from utils import quetes
 from utils import focalisation
 from routers.user import _derived_from_character, _vitals_payload, _inventory_payload
@@ -96,6 +97,20 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			apercu = transport.generer_transport_authore(spec, lieu_doc, find_docs, get_doc)
 			if apercu:
 				placeholders.update(_placeholders_offre(apercu, lieu_doc))
+		# Épreuves de RANG de guilde (comptoir seulement) : flags qui montrent les choix
+		# « une épreuve pour moi ? » / « c'est fait » et placeholders ({espece}/{lieu}/{rang}/
+		# {rang_vise}) que le maître d'armes récite. Le rang est propre à la CITÉ (lieu_parent).
+		if chasse.est_comptoir(lieu_doc):
+			cite = lieu_doc.get("lieu_parent")
+			rang_courant = chasse.rang_de(character, cite)
+			offre_rang = chasse.offre_rang_courante(character, lieu_doc)
+			a_rapporter = chasse.rang_a_rapporter(character, cite)
+			flags["rang_offert"] = bool(offre_rang)
+			flags["rang_a_rapporter"] = bool(a_rapporter)
+			flags["rang_max"] = chasse.rang_max_atteint(rang_courant)
+			placeholders["rang"] = rang_courant
+			if offre_rang or a_rapporter:
+				placeholders.update(_placeholders_rang(offre_rang or a_rapporter, rang_courant))
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders)
 
 
@@ -260,6 +275,12 @@ async def pnj_dialogue_choix(
 		# acceptée, mais le nœud de résultat doit encore pouvoir citer le délai et la destination.
 		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 		contexte["placeholders"].update(dits)
+	elif action.get("service") == "rang":
+		suivant, dits = _resoudre_rang(character, pnj_doc, lieu_doc, action.get("op"), reponse)
+		# Même raison que le transport : le contexte a changé (épreuve prise / soldée) → on
+		# refiltre les choix sur les nouveaux flags, en conservant les placeholders de l'action.
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+		contexte["placeholders"].update(dits)
 	else:
 		suivant = choix.get("next")
 
@@ -401,6 +422,73 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		return noeuds.get("rapporte"), dits
 
 	raise HTTPException(status_code=422, detail="Action de transport inconnue.")
+
+
+def _placeholders_rang(q: dict, rang_courant: str) -> dict:
+	"""Placeholders qu'un nœud du service `rang` peut citer : espèce et lieu de l'élite à
+	traquer, rang courant, rang visé et XP de récompense."""
+	obj = q.get("objectif", {}) or {}
+	espece_doc = get_doc(obj.get("cible")) if obj.get("cible") else None
+	lieu_cible = get_doc(obj.get("lieu")) if obj.get("lieu") else None
+	rec = q.get("recompenses") or {}
+	return {
+		"espece": (espece_doc or {}).get("nom") or (obj.get("cible") or "").split(":", 1)[-1],
+		"lieu": (lieu_cible or {}).get("label") or (lieu_cible or {}).get("nom")
+		or (obj.get("lieu") or "").split(":", 1)[-1],
+		"rang": rang_courant,
+		"rang_vise": q.get("rang_vise") or chasse.rang_suivant(rang_courant),
+		"xp": rec.get("xp", 0),
+	}
+
+
+def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
+				   reponse: dict) -> tuple[str | None, dict]:
+	"""Exécute une action du service `rang` du comptoir de guilde :
+	`accepter` : le maître d'armes confie l'épreuve de rang offerte (chasse à l'élite).
+	`rapporter`: il solde une épreuve accomplie → promotion de rang (par cité) + XP + prime.
+	Renvoie (nœud de résultat, placeholders que ce nœud peut citer)."""
+	noeuds = ((pnj_doc.get("services") or {}).get("rang") or {}).get("noeuds") or {}
+	cite = lieu_doc.get("lieu_parent")
+
+	if op == "accepter":
+		offre = chasse.offre_rang_courante(character, lieu_doc)
+		if not offre:
+			raise HTTPException(status_code=422, detail="Aucune épreuve de rang à prendre ici.")
+		# Calculés AVANT la mutation : l'offre est vidée à l'acceptation, mais le nœud de résultat
+		# doit encore pouvoir nommer la cible et le rang visé.
+		dits = _placeholders_rang(offre, chasse.rang_de(character, cite))
+		q = chasse.accepter_rang(character)
+		if not q:
+			raise HTTPException(status_code=422, detail="Aucune épreuve de rang à prendre ici.")
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		reponse["rang"] = {"accepte": q.get("titre")}
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		return noeuds.get("accepte"), dits
+
+	if op == "rapporter":
+		q = chasse.rang_a_rapporter(character, cite)
+		if not q:
+			raise HTTPException(status_code=422, detail="Aucune épreuve de rang à solder ici.")
+		dits = _placeholders_rang(q, chasse.rang_de(character, cite))
+		resultat = chasse.solder_rang(character, q.get("id") or q.get("_id"))
+		if not resultat:
+			raise HTTPException(status_code=422, detail="Épreuve de rang non accomplie.")
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		# Le rang affiché est désormais le NOUVEAU (après promotion).
+		dits["rang"] = resultat["promu"]
+		reponse["rang"] = {
+			"promu": resultat["promu"],
+			"xp": resultat["recompenses"]["xp"].get("xp_gain", 0),
+			"niveau_up": resultat["recompenses"]["xp"].get("niveau_up", False),
+		}
+		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+		reponse["vitals"] = _vitals_payload(character)
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		return noeuds.get("rapporte"), dits
+
+	raise HTTPException(status_code=422, detail="Action de rang inconnue.")
 
 
 @pnj_router.post("/intro/raison")

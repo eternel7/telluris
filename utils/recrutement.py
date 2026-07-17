@@ -48,7 +48,7 @@ SLOTS_PERSONNAGE = [
 ]
 
 # Rang affiché, dérivé du niveau (F = débutant, comme les quêtes générées).
-RANGS = ["F", "E", "D", "C", "B", "A", "S"]
+RANGS = ["F", "E", "D", "C", "B", "A", "S", "S+"]
 
 # Clauses de conduite types (données affichées, sans détection de violation en v1).
 CLAUSES_TYPES = [
@@ -60,30 +60,65 @@ CLAUSES_TYPES = [
 	"Refuse d'entrer dans les égouts.",
 	"Ne travaille pas pour un employeur banni d'une guilde.",
 	"Exige d'être payé rubis sur l'ongle, sans délai.",
+	"Refuse de camper à moins d'une lieue d'un cimetière.",
+	"Exige une part double si le contrat implique des dragons ou des wyvernes.",
+	"Ne combat jamais sous une pluie battante.",
+	"Exige d'avoir le dernier mot sur le choix de son propre équipement.",
+	"Refuse catégoriquement de porter le moindre message secret.",
+	"Ne travaille pas si le groupe compte plus d'un magicien.",
+	"Garde toujours la moitié de sa prime d'embauche en cas de retraite anticipée.",
+	"Exige un jour de repos complet après chaque affrontement majeur.",
+	"Refuse d'attaquer une cible de dos ou par surprise.",
+	"Ne franchit aucun portail magique sans une compensation financière.",
+	"Exige que sa monture soit nourrie aux frais de l'employeur.",
+	"Refuse de s'enfoncer dans un donjon sans une carte ou un guide local.",
+	"Ne participe à aucune fouille de coffre potentiellement piégé.",
+	"Exige d'être logé dans une vraie taverne, jamais à la belle étoile en ville.",
+	"Refuse de lever l'épée contre un membre de son ancienne compagnie.",
+	"Exige une prime de risque immédiate si la cible s'avère être un noble."
 ]
 
 # Prénoms/noms par race (repli "defaut"). Constantes de module : le contenu peut être
 # enrichi ici sans toucher à la logique.
 PRENOMS = {
-	"humain": {"M": ["Aldric", "Bertrand", "Corentin", "Enguerrand", "Gaultier", "Renaud", "Thibaut"],
-			   "F": ["Adélaïde", "Blanche", "Clotilde", "Héloïse", "Mathilde", "Rosamonde", "Ysabeau"]},
-	"elfe":   {"M": ["Aelthir", "Caelun", "Faelor", "Lorandril", "Sylvarel", "Thalion"],
-			   "F": ["Aelwen", "Elenwë", "Lithrielle", "Nimloth", "Sylvaine", "Yavielle"]},
-	"nain":   {"M": ["Balrik", "Dorin", "Grimnur", "Kazrag", "Morgrim", "Thorgan"],
-			   "F": ["Berga", "Dagna", "Helga", "Runa", "Sigrun", "Thyra"]},
-	"ogre":   {"M": ["Brog", "Dhurk", "Gronk", "Krug", "Morg", "Thok"],
-			   "F": ["Brakka", "Gruna", "Morga", "Ruk", "Thura", "Urga"]},
-	"hobbit": {"M": ["Bingo", "Drogon", "Falco", "Milo", "Podo", "Tolman"],
-			   "F": ["Amaranthe", "Belladone", "Mirabelle", "Pervenche", "Primula", "Salvia"]},
-	"defaut": {"M": ["Jor", "Kel", "Mar", "Ren"], "F": ["Ana", "Isa", "Lena", "Mira"]},
+    "humain": {
+        "M": ["Aldric", "Bertrand", "Corentin", "Enguerrand", "Gaultier", "Renaud", "Thibaut", "Amaury", "Baudouin", "Gautier", "Godefroy", "Josselin", "Lothaire", "Raoul"],
+        "F": ["Adélaïde", "Blanche", "Clotilde", "Héloïse", "Mathilde", "Rosamonde", "Ysabeau", "Aliénor", "Béatrice", "Emmeline", "Geneviève", "Gisèle", "Hermine", "Isabeau"]
+    },
+    "elfe": {
+        "M": ["Aelthir", "Caelun", "Faelor", "Lorandril", "Sylvarel", "Thalion", "Aerandir", "Earendil", "Finrod", "Haldir", "Lindir", "Valandil"],
+        "F": ["Aelwen", "Elenwë", "Lithrielle", "Nimloth", "Sylvaine", "Yavielle", "Celebrian", "Galadriel", "Idril", "Laurelin", "Melian", "Tinuviel"]
+    },
+    "nain": {
+        "M": ["Balrik", "Dorin", "Grimnur", "Kazrag", "Morgrim", "Thorgan", "Bofur", "Dwalin", "Gimli", "Gloin", "Kili", "Thorin"],
+        "F": ["Berga", "Dagna", "Helga", "Runa", "Sigrun", "Thyra", "Dis", "Frida", "Gerd", "Hilda", "Ingrid", "Sif"]
+    },
+    "ogre": {
+        "M": ["Brog", "Dhurk", "Gronk", "Krug", "Morg", "Thok", "Brag", "Gark", "Gor", "Krosh", "Ogg", "Urk"],
+        "F": ["Brakka", "Gruna", "Morga", "Ruk", "Thura", "Urga", "Garka", "Groka", "Morka", "Rakka", "Ugra", "Zouga"]
+    },
+    "hobbit": {
+        "M": ["Bingo", "Drogon", "Falco", "Milo", "Podo", "Tolman", "Bungo", "Fastolf", "Flourdelys", "Olo", "Rufus", "Wilco"],
+        "F": ["Amaranthe", "Belladone", "Mirabelle", "Pervenche", "Primula", "Salvia", "Camélia", "Eglantine", "Lobelia", "Menthe", "Myrtille", "Pâquerette"]
+    },
+    "defaut": {
+        "M": ["Jor", "Kel", "Mar", "Ren", "Dan", "Gor", "Mal", "Zor"],
+        "F": ["Ana", "Isa", "Lena", "Mira", "Aya", "Eva", "Lia", "Nia"]
+    },
 }
 NOMS = {
-	"humain": ["de Hautterre", "Ferrant", "Leloup", "Morvan", "du Guet", "Vaillancourt"],
-	"elfe":   ["Feuillargent", "Lunevoile", "Sombrefrêne", "Ventelame", "Écorcelune"],
-	"nain":   ["Barbeforge", "Fendroc", "Grave-Enclume", "Piochefer", "Rudemarteau"],
-	"ogre":   ["Brise-Os", "Croque-Pierre", "Deux-Massues", "Grande-Faim", "Tord-Boyaux"],
-	"hobbit": ["Bonpré", "Fouilleterre", "Pied-Léger", "Souscolline", "Troisquarts"],
-	"defaut": ["Sans-Terre", "l'Errant", "du Chemin"],
+    "humain": ["de Hautterre", "Ferrant", "Leloup", "Morvan", "du Guet", "Vaillancourt",
+		"Beauvisage", "Chassevent", "Dumont", "Grandpas", "Rochefort", "Valois"],
+    "elfe": ["Feuillargent", "Lunevoile", "Sombrefrêne", "Ventelame", "Écorcelune",
+        "Astrebrillant", "Briseflammes", "Cielazur", "Fleurépine", "Rondevalle"],
+    "nain": ["Barbeforge", "Fendroc", "Grave-Enclume", "Piochefer", "Rudemarteau",
+        "Brise-Mine", "Cœur-d'Acier", "Fort-Armure", "Fouille-Filons", "Lourde-Hache"],
+    "ogre": ["Brise-Os", "Croque-Pierre", "Deux-Massues", "Grande-Faim", "Tord-Boyaux",
+        "Avale-Tout", "Gros-Bide", "Lourde-Patte", "Mâche-Fer", "Pousse-Rocs"],
+    "hobbit": ["Bonpré", "Fouilleterre", "Pied-Léger", "Souscolline", "Troisquarts",
+        "Basse-Vallée", "Chaud-Chaudron", "Douce-Amande", "Petit-Pas", "Verte-Herbe"],
+    "defaut": ["Sans-Terre", "l'Errant", "du Chemin",
+        "l'Inconnu", "le Muet", "Sans-Nom"],
 }
 
 

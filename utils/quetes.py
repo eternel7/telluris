@@ -118,7 +118,7 @@ def _nom_item(item_id: str) -> str:
 def _cible_nom(objectif: dict) -> str:
 	t = objectif.get("type")
 	cible = objectif.get("cible", "")
-	if t == "kill":
+	if t in ("kill", "chasse"):
 		return _nom_espece(cible)
 	if t == "collect":
 		return _nom_item(cible)
@@ -156,10 +156,62 @@ def _xp_unitaire_item(item_doc: dict, niveau: int) -> int:
 
 _TITRES_KILL = ["Réguler les {nom}", "Chasse aux {nom}", "Éliminer les {nom}"]
 _TITRES_COLLECT = ["Récolte : {nom}", "Rapporter du {nom}", "Collecte de {nom}"]
+_TITRES_CHASSE = ["Traquer le {nom} « {grade} »", "Abattre le {nom} « {grade} »", "La tête du {nom} « {grade} »"]
 
 
-def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible: str, niveau: int) -> dict:
-	"""Construit un doc `quete:*` (non persisté) pour une cible donnée."""
+def _generer_chasse(guild_doc: dict, parent_doc: dict, cible) -> dict | None:
+	"""Doc `quete:*` d'une quête de chasse `board` (grade `max−1`) : `cible = (lieu_id, espece_id)`.
+	Le grade est RÉSOLU ICI (à la génération), nommé dans le titre. None si aucun grade compatible."""
+	from utils import chasse  # import paresseux : chasse dépend de ce module
+	lieu_id, espece_id = cible
+	lieu_doc = get_doc(lieu_id)
+	espece_doc = get_doc(espece_id)
+	if not lieu_doc or not espece_doc:
+		return None
+	position = chasse.position_de_chasse(lieu_doc, espece_doc)
+	profil_id = chasse.resoudre_profil_chasse(lieu_doc, espece_doc, chasse.TIER_MAX_MOINS_1, position, get_doc)
+	if not profil_id:
+		return None
+	profil = get_doc(profil_id) or {}
+	niv = int(profil.get("niveau", 1))
+	grade = profil.get("nom", "élite")
+	nom = espece_doc.get("nom") or _nom_espece(espece_id)
+	lieu_nom = lieu_doc.get("label") or lieu_doc.get("nom") or (lieu_id or "").split(":", 1)[-1]
+
+	xp = max(1, round(_xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
+	cuivre = max(0, round(xp * character_stats.QUETE_CUIVRE_PAR_XP))
+	objectif = {"type": "chasse", "cible": espece_id, "lieu": lieu_id, "profil": profil_id, "quantite": 1}
+	if position is not None:
+		objectif["position"] = position
+
+	guild_id = guild_doc.get("_id", "")
+	sub = guild_id.split(":", 1)[-1] if ":" in guild_id else guild_id
+	now = now_epoch()
+	return {
+		"_id": f"quete:{sub}_{uuid.uuid4().hex[:12]}",
+		"type": "quete",
+		"source": "genere",
+		"giver": guild_id,
+		"lieu_parent": (parent_doc or {}).get("_id"),
+		"titre": random.choice(_TITRES_CHASSE).format(nom=nom, grade=grade),
+		"description": (
+			f"Un {nom} d'exception — un « {grade} » — écume {lieu_nom}. "
+			f"La guilde met sa tête à prix : traquez-le et abattez-le."
+		),
+		"rang": "F",
+		"objectif": objectif,
+		"recompenses": {"xp": xp, "cuivre": cuivre, "items": []},
+		"statut": "offerte",
+		"genere_at": now,
+		"expire_at": now + _duree_de_vie(),
+	}
+
+
+def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible, niveau: int) -> dict | None:
+	"""Construit un doc `quete:*` (non persisté) pour une cible donnée. Renvoie None si une
+	quête `chasse` ne peut être résolue (aucun grade compatible) — l'appelant saute la cible."""
+	if type_obj == "chasse":
+		return _generer_chasse(guild_doc, parent_doc, cible)
 	if type_obj == "kill":
 		esp = get_doc(cible)
 		xp_unit = _xp_unitaire(esp, niveau) if esp else max(1, int(niveau) * 4)
@@ -272,25 +324,51 @@ def remplir_tableau(guild_doc: dict) -> list:
 
 	if manquantes > 0 and parent_doc:
 		niveau = niveau_representatif(parent_doc)
-		existants = {
-			(o["objectif"].get("type"), o["objectif"].get("cible"))
-			for o in offres if o.get("objectif")
-		}
+		existants = {_offre_key(o["objectif"]) for o in offres if o.get("objectif")}
 		candidats = [("kill", eid) for eid in especes_du_parent(parent_doc)]
 		candidats += [("collect", iid) for iid in cibles_collect(parent_doc)]
+		candidats += _candidats_chasse(parent_id)
 		random.shuffle(candidats)
 		for type_obj, cible in candidats:
 			if manquantes <= 0:
 				break
-			if (type_obj, cible) in existants:
+			key = ("chasse", cible) if type_obj == "chasse" else (type_obj, cible)
+			if key in existants:
 				continue
 			q = generer_quete(guild_doc, parent_doc, type_obj, cible, niveau)
-			if save_doc(q) is None:
+			if q is None or save_doc(q) is None:
 				continue
 			offres.append(q)
-			existants.add((type_obj, cible))
+			existants.add(key)
 			manquantes -= 1
 	return offres
+
+
+def _offre_key(objectif: dict):
+	"""Clé de déduplication d'une offre au tableau. Une chasse est dédupliquée sur le couple
+	(lieu, espèce) — une même espèce peut être traquée dans deux lieux ; les autres types sur
+	(type, cible)."""
+	if objectif.get("type") == "chasse":
+		return ("chasse", (objectif.get("lieu"), objectif.get("cible")))
+	return (objectif.get("type"), objectif.get("cible"))
+
+
+def _candidats_chasse(cite_id: str) -> list:
+	"""Candidats `("chasse", (lieu_id, espece_id))` du tableau : élites d'un lieu de la cité,
+	résolvables au grade `max−1`. Balaie les lieux de chasse × leurs rencontres."""
+	from utils import chasse  # import paresseux : chasse dépend de ce module
+	out = []
+	for L in chasse.lieux_chasse_de(cite_id, get_doc, find_docs):
+		for eid in especes_du_parent(L):
+			espece = get_doc(eid)
+			if not espece:
+				continue
+			position = chasse.position_de_chasse(L, espece)
+			if position is None:
+				continue
+			if chasse.resoudre_profil_chasse(L, espece, chasse.TIER_MAX_MOINS_1, position, get_doc):
+				out.append(("chasse", (L["_id"], eid)))
+	return out
 
 
 # ── État joueur ──────────────────────────────────────────────────────────────────
@@ -373,6 +451,12 @@ def quete_detail(character: dict, q: dict) -> dict:
 			progress_txt = f"Rendre compte : {(giver or {}).get('label') or 'au donneur'}"
 		else:
 			progress_txt = f"Livraison à {_cible_nom(obj)}"
+	elif obj.get("type") == "chasse":
+		lieu_doc = get_doc(obj.get("lieu")) if obj.get("lieu") else None
+		lieu_nom = (lieu_doc.get("label") or lieu_doc.get("nom")) if lieu_doc else None
+		lieu_nom = lieu_nom or (obj.get("lieu") or "").split(":", 1)[-1]
+		compteur = min(prog, qte) if qte else prog
+		progress_txt = f"Traquer l'élite : {_cible_nom(obj)} ({lieu_nom}) — {compteur}/{qte}"
 	else:
 		progress_txt = f"{_cible_nom(obj)} : {min(prog, qte) if qte else prog}/{qte}"
 	detail = {
@@ -401,7 +485,32 @@ def quete_detail(character: dict, q: dict) -> dict:
 	if q.get("expire_at"):
 		detail["expire_at"] = int(q["expire_at"])
 		detail["now"] = now_epoch()
+	# Quête de chasse localisée : de quoi dessiner le crop 3×3 de la carte centré sur la cible.
+	if obj.get("type") == "chasse" and obj.get("position"):
+		carte = _carte_chasse(obj)
+		if carte:
+			detail["carte"] = carte
 	return detail
+
+
+def _carte_chasse(objectif: dict) -> dict | None:
+	"""Données du bouton 🗺️ d'une quête de chasse : l'image servable du lieu + ses dimensions
+	en cases + la position cible → le client recadre un 3×3 centré sur la case. None si le lieu
+	n'a pas d'image servable ou pas de grille (le bouton est alors masqué)."""
+	lieu = get_doc(objectif.get("lieu")) if objectif.get("lieu") else None
+	dims = (lieu or {}).get("dimensions")
+	if not lieu or not dims:
+		return None
+	image, route = marche._lieu_image_route(lieu)
+	if not image or not route:
+		return None
+	return {
+		"position": dict(objectif.get("position") or {}),
+		"dimensions": dims,
+		"image": image,
+		"image_route": route,
+		"lieu_nom": lieu.get("label") or lieu.get("nom") or (lieu.get("_id") or "").split(":", 1)[-1],
+	}
 
 
 def fiche_details(character: dict) -> tuple:
@@ -512,6 +621,28 @@ def maj_progress_kills(character: dict, monstres: list) -> None:
 			continue
 		qte = int(obj.get("quantite", 0) or 0)
 		q["progress"] = min(qte, int(q.get("progress", 0) or 0) + n)
+
+
+def maj_progress_chasse(character: dict, monstres: list) -> None:
+	"""Complète les quêtes `chasse` actives dont l'élite MARQUÉE est tombée : un monstre mort
+	(`not vivant`) portant `quete_chasse == q.id`. Les autres monstres de la même espèce ne
+	comptent pas — seule la cible marquée. Mute en place. À appeler dans finalize_combat, juste
+	après maj_progress_kills (même fenêtre d'idempotence, garde `combats_recompenses`)."""
+	actives = character.get("quetes_actives", [])
+	if not actives:
+		return
+	tues = {
+		m.get("quete_chasse") for m in (monstres or [])
+		if not m.get("vivant", True) and m.get("quete_chasse")
+	}
+	if not tues:
+		return
+	for q in actives:
+		obj = q.get("objectif", {})
+		if obj.get("type") != "chasse":
+			continue
+		if (q.get("id") or q.get("_id")) in tues:
+			q["progress"] = int(obj.get("quantite", 1) or 1)
 
 
 def maj_progress_visite(character: dict, lieu_id: str) -> None:

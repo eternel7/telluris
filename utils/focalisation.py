@@ -54,7 +54,9 @@ def focalisation_effective(character: dict) -> dict | None:
 		q = quete_active(character, f["cible"])
 		obj = (q or {}).get("objectif") or {}
 		t, cible = obj.get("type"), obj.get("cible")
-		if t == "kill" and cible:
+		# La chasse réutilise INTÉGRALEMENT la mécanique kill (biais du tirage d'espèce
+		# → plus de chances de faire apparaître l'espèce cible, où l'élite sera marquée).
+		if t in ("kill", "chasse") and cible:
 			return {"mode": "kill", "espece": cible, "quete_id": f["cible"]}
 		if t == "collect" and cible:
 			return {"mode": "collect", "item": cible, "quete_id": f["cible"]}
@@ -67,7 +69,7 @@ def focalisation_effective(character: dict) -> dict | None:
 # Une quête de transport n'en fait PAS partie : sa destination est nommée et sa route est
 # triviale (on reste en ville), il n'y a ni rencontre ni récolte à biaiser — un focus n'y
 # ferait rien. Source unique : le serveur refuse le focus, le client masque le bouton 🎯.
-OBJECTIFS_FOCALISABLES = ("kill", "collect", "visite")
+OBJECTIFS_FOCALISABLES = ("kill", "chasse", "collect", "visite")
 
 
 def quete_focalisable(q: dict) -> bool:

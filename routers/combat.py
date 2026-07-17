@@ -16,15 +16,16 @@ from utils.competences import (
     furtivite_passive,
 )
 from routers.user import _take_ref
-from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity
+from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights
 from utils import focalisation
 from utils import recrutement
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils.combat import (
-    BATTLE_MAPS, instantiate_monsters, create_combat_doc,
+    BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
 )
+from utils import chasse
 from models import character_stats
 
 combat_router = APIRouter()
@@ -58,24 +59,6 @@ def _active_zone_placements(lieu: dict, character: dict) -> list:
         if zone_def and compute_zone_intensity(px, py, placement, zone_def) > 0.0:
             actifs.append(placement)
     return actifs
-
-
-def _resolve_profil_weights(active_placements: list, lieu: dict) -> dict | None:
-    """Poids de profils effectifs pour le tirage du grade des monstres.
-
-    Chaîne (cf. design) : cumul (somme) des `profil_weights` des zones actives qui
-    en définissent un → sinon `profil_weights` par défaut du lieu → sinon None
-    (tirage uniforme parmi les profils). Les poids non numériques ou ≤ 0 sont ignorés.
-    """
-    merged: dict = {}
-    for placement in active_placements:
-        for pid, w in (placement.get("profil_weights") or {}).items():
-            if isinstance(w, bool) or not isinstance(w, (int, float)) or w <= 0:
-                continue
-            merged[pid] = merged.get(pid, 0) + w
-    if merged:
-        return merged
-    return lieu.get("profil_weights") or None
 
 
 def _actor_character_id(combat_doc: dict) -> str:
@@ -174,7 +157,7 @@ async def start_combat(
         profils = [p for p in profils_all if p.get("niveau", 1) <= character_stats.TOWN_PROFIL_NIVEAU_MAX]
 
     # Distribution de grades (profils) : override des zones actives, sinon défaut lieu.
-    profil_weights = _resolve_profil_weights(active_placements, depart_lieu or {})
+    profil_weights = resolve_profil_weights(active_placements, depart_lieu or {})
 
     # Compagnons recrutés : ils entrent en combat avec le joueur — l'opposition est
     # relevée d'un monstre par tranche de 2 compagnons (à équilibrer en jeu).
@@ -189,6 +172,44 @@ async def start_combat(
     if not monstres:
         return {"combat_id": None}
 
+    # Quêtes de « chasse » : si un combat tire NATURELLEMENT l'espèce cible dans ce lieu, UN
+    # monstre de cette espèce est promu en élite — on lui applique le profil déjà résolu à la
+    # génération (pas de re-résolution ici). On ne force PAS l'espèce à apparaître : si elle
+    # n'est pas au pool, rien n'est marqué. La variante « rang » (comptoir) porte une narration
+    # pré-combat, affichée en overlay au chargement du combat.
+    chasse_narration = None
+    if depart_lieu:
+        marques = set()
+        for q in chasse.quetes_chasse_actives(character, depart_lieu["_id"]):
+            obj = q.get("objectif", {})
+            espece_id, profil_id = obj.get("cible"), obj.get("profil")
+            if not espece_id or not profil_id:
+                continue
+            # L'élite ne surgit que si le combat se déclenche dans la zone 3×3 autour de la
+            # position de la quête (la carte 🗺️ y mène le joueur). Sans position → lieu seul.
+            if not chasse.dans_zone_chasse(obj, character.get("position")):
+                continue
+            idx = next(
+                (i for i, m in enumerate(monstres)
+                 if m.get("espece_id") == espece_id and m["id"] not in marques),
+                None,
+            )
+            if idx is None:
+                continue
+            espece_doc = next((e for e in pool_especes if e["_id"] == espece_id), None)
+            profil_doc = get_doc(profil_id)
+            if not espece_doc or not profil_doc:
+                continue
+            ancien = monstres[idx]
+            elite = build_monster_snapshot(espece_doc, profil_doc, idx)
+            elite["id"] = ancien["id"]
+            elite["pos"] = ancien.get("pos", elite["pos"])
+            elite["quete_chasse"] = q.get("id") or q.get("_id")
+            monstres[idx] = elite
+            marques.add(elite["id"])
+            if q.get("source") == "rang" and q.get("narration"):
+                chasse_narration = q["narration"]
+
     # Sélection pondérée d'une battle map (lieu) selon les tags de la zone + lieu de départ.
     battle_map = select_battle_map(body.tags, depart_lieu)
     map_image = battle_map.get("image") if battle_map else random.choice(BATTLE_MAPS)
@@ -200,6 +221,8 @@ async def start_combat(
     combat_doc = create_combat_doc(character, monstres, body.tags, map_image,
                                    battle_map=battle_map, furtivite_initiale=furtivite,
                                    compagnons=compagnons)
+    if chasse_narration:
+        combat_doc["chasse_narration"] = chasse_narration
     resolve_first_turns(combat_doc)  # no-op if player goes first
     # Cas limite : les monstres terminent déjà le combat au 1er tour.
     if combat_doc["status"] != "active":
