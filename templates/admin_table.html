@@ -59,6 +59,8 @@
 		.btn:hover, .dl-btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
 		.btn.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
 		.btn.secondary:hover { background: rgba(75,143,200,0.22); box-shadow: 0 0 12px rgba(75,143,200,0.25); }
+		.btn.danger { border-color: var(--danger); background: rgba(200,75,75,0.1); color: var(--danger); }
+		.btn.danger:hover { background: rgba(200,75,75,0.22); box-shadow: 0 0 12px rgba(200,75,75,0.25); }
 
 		.status { font-size: 0.78rem; margin-top: 12px; min-height: 1.2em; color: var(--muted); }
 		.status.ok { color: var(--success); }
@@ -189,12 +191,14 @@
 			<div class="card-desc">
 				Éditez puis <strong>Save</strong> (met à jour le document en base) ou
 				<strong>Cancel</strong> (ferme sans sauvegarder). Modifier <code>_id</code>
-				crée un nouveau document.
+				crée un nouveau document. <strong>Delete</strong> supprime définitivement
+				le document en base (après confirmation).
 			</div>
 			<textarea id="json-editor" spellcheck="false"></textarea>
 			<div class="btn-row">
 				<button class="btn" id="json-save">💾 Save</button>
 				<button class="btn secondary" id="json-cancel">✕ Cancel</button>
+				<button class="btn danger" id="json-delete">🗑 Delete</button>
 			</div>
 			<div class="status" id="editor-status"></div>
 		</div>
@@ -502,6 +506,34 @@ $('json-save').addEventListener('click', async () => {
 		setStatus($('editor-status'), 'Erreur réseau : ' + e.message, 'err');
 	} finally {
 		$('json-save').disabled = false;
+	}
+});
+
+// Suppression du document ouvert : confirmation puis DELETE /admin/doc. La ligne est
+// retirée localement (pas de rechargement du type : on garde scroll, tri et filtres,
+// comme après un Save).
+$('json-delete').addEventListener('click', async () => {
+	if (selected === null) return;
+	const doc = docs[selected];
+	const id  = doc && doc._id;
+	if (!id) { setStatus($('editor-status'), 'Document sans "_id" : rien à supprimer.', 'err'); return; }
+	if (!confirm(`Supprimer définitivement "${id}" ?`)) return;
+
+	setStatus($('editor-status'), 'Suppression…');
+	$('json-delete').disabled = true;
+	try {
+		const res = await fetch('/admin/doc?id=' + encodeURIComponent(id), { method: 'DELETE' });
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) { setStatus($('editor-status'), 'Échec : ' + (data.detail || res.status), 'err'); return; }
+		docs.splice(selected, 1);
+		closeEditor();          // remet selected à null : l'index n'a plus de sens après le splice
+		mergeColumns();         // une clé peut disparaître avec le dernier doc qui la portait
+		renderCols(); renderHead(); renderBody(); persistState();
+		setStatus($('load-status'), '✓ ' + id + ' supprimé de la base.', 'ok');
+	} catch (e) {
+		setStatus($('editor-status'), 'Erreur réseau : ' + e.message, 'err');
+	} finally {
+		$('json-delete').disabled = false;
 	}
 });
 

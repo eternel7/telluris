@@ -224,6 +224,28 @@ def admin_update_doc(
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — rechargez et réessayez.")
 	return {"saved": True, "doc": payload}
 
+@app.delete("/admin/doc")
+def admin_delete_doc(
+	current_user: Annotated[User, Depends(get_current_user)],
+	doc_id: str = Query("", alias="id"),
+):
+	"""Supprime un document depuis l'écran tableau (bouton Delete de l'overlay JSON).
+	Le `_rev` est relu en base (jamais celui du client), comme pour la mise à jour."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	doc_id = (doc_id or "").strip()
+	if not doc_id:
+		raise HTTPException(status_code=400, detail="Paramètre 'id' requis.")
+	existing = get_doc(doc_id)
+	if not existing:
+		raise HTTPException(status_code=404, detail="Document introuvable.")
+	delete_doc(existing)
+	# `delete_doc` avale les exceptions et renvoie None dans TOUS les cas : le succès
+	# ne se lit pas au retour, on le vérifie par relecture.
+	if get_doc(doc_id) is not None:
+		raise HTTPException(status_code=409, detail="Échec de la suppression — rechargez et réessayez.")
+	return {"deleted": True, "_id": doc_id}
+
 @app.get("/admin/exports/bestiaire")
 def admin_export_bestiaire(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
