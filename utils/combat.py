@@ -143,10 +143,14 @@ def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
 
 def _refresh_actions(actor: dict) -> None:
 	"""Recalcule actions_restantes = actions_max - attaques - ramassages - consommations
-	- sorts - compétences - AP_déplacement."""
+	- sorts - compétences - pénalités - AP_déplacement.
+
+	`penalites` = actions perdues sur échec critique (cf. _appliquer_fumble). Comme
+	actions_restantes est TOUJOURS recalculé ici, une pénalité doit être un compteur :
+	poser actions_restantes = 0 à la main serait écrasé au prochain appel."""
 	used = (actor.get("attaques", 0) + actor.get("ramasses", 0)
 			+ actor.get("consommes", 0) + actor.get("sorts", 0)
-			+ actor.get("competences", 0)
+			+ actor.get("competences", 0) + actor.get("penalites", 0)
 			+ _move_ap_used_for(actor, actor.get("cells_moved", 0)))
 	actor["actions_restantes"] = max(0, actor["actions_max"] - used)
 
@@ -159,7 +163,12 @@ def _reset_turn_budget(actor: dict) -> None:
 	actor["consommes"] = 0
 	actor["sorts"] = 0
 	actor["competences"] = 0
+	# Une dette d'action (échec critique commis alors qu'il ne restait rien à perdre)
+	# se paie MAINTENANT : elle devient la pénalité du nouveau tour, puis s'efface.
+	actor["penalites"] = actor.get("dette_actions", 0)
+	actor["dette_actions"] = 0
 	actor["actions_restantes"] = actor["actions_max"]
+	_refresh_actions(actor)
 
 
 def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
@@ -583,6 +592,9 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"cc": derived.cc,
 		"cd": derived.cd,
 		"ag": base.ag,
+		# Ch : écart de Chance attaquant/cible = glissement des fenêtres de critique
+		# (_seuils_critiques). Valeur AVEC buffs, comme le reste du snapshot.
+		"ch": base.ch,
 		"pa": derived.pa,
 		"pm_def": derived.pm_def,
 		"toucher_magique": derived.toucher_magique,
@@ -603,6 +615,10 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"consommes": 0,
 		"sorts": 0,
 		"competences": 0,
+		# Actions perdues sur échec critique : `penalites` compte dans le budget du tour
+		# courant, `dette_actions` reporte au suivant ce qui n'a pas pu être payé.
+		"penalites": 0,
+		"dette_actions": 0,
 		# Esquive = malus au seuil de toucher PHYSIQUE des attaques subies (cc/cd,
 		# jamais la magie). Somme des passives (competences_bonus) + effets actifs.
 		"esquive": esquive_bonus(character),
@@ -705,6 +721,9 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		# Int−10 puis Ag−30 pour les créatures sans volonté/intelligence).
 		"vol": base_stats.vol,
 		"int": base_stats.int_,
+		# Ch : glissement des fenêtres de critique (_seuils_critiques). Beaucoup
+		# d'espèces ont encore Ch = 0 en base → delta large en faveur du joueur.
+		"ch": base_stats.ch,
 		"pa": derived.pa,
 		"pm_def": derived.pm_def,
 		"degats_cc": derived.degats_cc,
@@ -714,6 +733,10 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		"pos": {"x": 0, "y": 0},
 		"cells_moved": 0,
 		"attaques": 0,
+		# Actions perdues sur échec critique (cf. _appliquer_fumble) — les monstres
+		# fumblent comme les joueurs.
+		"penalites": 0,
+		"dette_actions": 0,
 		"vivant": True,
 		# Tags d'espèce embarqués : predateur/proie pilotent la chasse entre
 		# monstres quand le joueur est furtif et non détecté.
@@ -817,6 +840,68 @@ def _magic_hit_threshold(toucher_magique: int, cible_pm_def: int) -> int:
 	return max(5, min(95, 50 + toucher_magique - cible_pm_def))
 
 
+def _seuils_critiques(attaquant: dict, defenseur: dict) -> tuple:
+	"""Fenêtres de critique d'un jet d100 offensif, glissées par l'écart de Chance.
+
+	delta = Ch attaquant − Ch cible, divisé par CRIT_CHANCE_DIVISEUR : la chance élargit
+	la réussite critique ET repousse l'échec critique, symétriquement. Les deux world-vars
+	génériques restent des garde-fous — un jet ≤ CRIT_REUSSITE_MAX est TOUJOURS une réussite
+	critique, un jet ≥ CRIT_ECHEC_MIN toujours un échec —, donc le glissement ne peut que
+	jouer en faveur du plus chanceux. Renvoie (seuil_reussite, seuil_echec).
+
+	Snapshot sans `ch` (combat créé avant la feature) → delta 0 = fenêtres de base.
+	"""
+	base_ok = int(character_stats.CRIT_REUSSITE_MAX)
+	base_ko = int(character_stats.CRIT_ECHEC_MIN)
+	div = int(character_stats.CRIT_CHANCE_DIVISEUR)
+	if div <= 0:
+		return base_ok, base_ko          # mécanique désactivée
+	glissement = (attaquant.get("ch", 0) - defenseur.get("ch", 0)) // div
+	return max(base_ok, base_ok + glissement), min(base_ko, base_ko + glissement)
+
+
+def _resoudre_jet(attaquant: dict, defenseur: dict, seuil: int) -> dict:
+	"""Un jet d100 offensif : {roll, seuil, touche, critique, fumble, mult_degats}.
+
+	Le critique PRIME sur le seuil de toucher : une réussite critique touche même si le
+	seuil était raté, un échec critique rate même si le seuil passait. Si un réglage
+	extrême faisait se croiser les deux fenêtres, la réussite l'emporte (ordre des tests).
+	"""
+	crit_ok, crit_ko = _seuils_critiques(attaquant, defenseur)
+	roll = random.randint(1, 100)
+	if roll <= crit_ok:
+		return {"roll": roll, "seuil": seuil, "touche": True,
+				"critique": True, "fumble": False, "mult_degats": 2}
+	if roll >= crit_ko:
+		return {"roll": roll, "seuil": seuil, "touche": False,
+				"critique": False, "fumble": True, "mult_degats": 1}
+	return {"roll": roll, "seuil": seuil, "touche": roll <= seuil,
+			"critique": False, "fumble": False, "mult_degats": 1}
+
+
+def _appliquer_fumble(combat_doc: dict, acteur: dict) -> None:
+	"""Échec critique : coûte une action de plus que celle déjà dépensée.
+
+	S'il n'en reste aucune (le fumble était la dernière action du tour), la pénalité est
+	REPORTÉE au tour suivant via `dette_actions` — sans ce report, le clamp `max(0, …)`
+	de _refresh_actions l'avalerait silencieusement. À appeler APRÈS l'incrément du
+	compteur d'action et son _refresh_actions, sinon actions_restantes est périmé.
+	"""
+	if acteur.get("actions_restantes", 0) > 0:
+		acteur["penalites"] = acteur.get("penalites", 0) + 1
+		_refresh_actions(acteur)
+		texte = f"{acteur['nom']} perd pied : une action de perdue !"
+	else:
+		acteur["dette_actions"] = acteur.get("dette_actions", 0) + 1
+		texte = f"{acteur['nom']} perd pied : il entamera son prochain tour avec une action de moins !"
+	combat_doc["log"].append({
+		"tour": combat_doc["tour"],
+		"acteur": acteur["nom"],
+		"kind": "sys",
+		"texte": texte,
+	})
+
+
 def _flee_threshold(joueur_init: int, monstre_init_max: int) -> int:
 	"""Seuil de fuite sur d100 : 50 + init joueur - meilleure init ennemie, clampé [5, 95]."""
 	return max(5, min(95, 50 + joueur_init - monstre_init_max))
@@ -838,19 +923,30 @@ def _check_victory(combat_doc: dict) -> None:
 def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 	"""Attaque physique d'un monstre sur un défenseur — le joueur (cas normal) OU un
 	autre monstre (chasse prédateur/proie pendant la furtivité du joueur). L'`esquive`
-	du défenseur gonfle sa difficulté défensive (l'Ag), jamais sur la magie."""
+	du défenseur gonfle sa difficulté défensive (l'Ag), jamais sur la magie.
+
+	Décompte l'action de l'attaquant lui-même : un échec critique en coûte une SECONDE
+	(ou l'endette pour le tour suivant), ce qui exige que le budget soit déjà à jour."""
 	est_joueur = str(defenseur.get("id", "")).startswith("joueur_")
 	seuil = _hit_threshold(attaquant["cc"],
 						   defenseur.get("ag", 0) + defenseur.get("esquive", 0))
-	roll = random.randint(1, 100)
-	if roll <= seuil:
-		dmg = max(1, roll_dice(attaquant["degats_cc"]) - defenseur["pa"])
+	jet = _resoudre_jet(attaquant, defenseur, seuil)
+	roll = jet["roll"]
+	attaquant["attaques"] = attaquant.get("attaques", 0) + 1
+	_refresh_actions(attaquant)
+	if jet["touche"]:
+		# Le multiplicateur de critique double le COUP, pas la pénétration d'armure :
+		# il s'applique aux dés avant la soustraction des PA.
+		dmg = max(1, roll_dice(attaquant["degats_cc"]) * jet["mult_degats"] - defenseur["pa"])
 		defenseur["currentPV"] = max(0, defenseur["currentPV"] - dmg)
 		combat_doc["log"].append({
 			"tour": combat_doc["tour"],
 			"acteur": attaquant["nom"],
-			"kind": "hit",
+			"kind": "crit" if jet["critique"] else "hit",
 			"texte": (
+				f"{attaquant['nom']} porte un COUP CRITIQUE à {defenseur['nom']} : {dmg} dégâts ! "
+				f"(PV : {defenseur['currentPV']}/{defenseur['pv_max']})"
+				if jet["critique"] else
 				f"{attaquant['nom']} touche {defenseur['nom']} pour {dmg} dégâts ! "
 				f"(PV : {defenseur['currentPV']}/{defenseur['pv_max']})"
 			),
@@ -890,9 +986,15 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 		combat_doc["log"].append({
 			"tour": combat_doc["tour"],
 			"acteur": attaquant["nom"],
-			"kind": "miss",
-			"texte": f"{attaquant['nom']} rate son attaque ! (jet {roll} / seuil {seuil})",
+			"kind": "fumble" if jet["fumble"] else "miss",
+			"texte": (
+				f"{attaquant['nom']} rate LAMENTABLEMENT son attaque ! (jet {roll} / seuil {seuil})"
+				if jet["fumble"] else
+				f"{attaquant['nom']} rate son attaque ! (jet {roll} / seuil {seuil})"
+			),
 		})
+		if jet["fumble"]:
+			_appliquer_fumble(combat_doc, attaquant)
 
 
 def _joueurs_vivants(combat_doc: dict) -> list:
@@ -934,7 +1036,8 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 	if nxt == (joueur["pos"]["x"], joueur["pos"]["y"]) or nxt in blocked:
 		return False
 	# Vérifier qu'il reste assez d'AP pour ce pas (coût proportionnel).
-	projected = monstre["attaques"] + _move_ap_used_for(monstre, monstre["cells_moved"] + 1)
+	projected = (monstre["attaques"] + monstre.get("penalites", 0)
+				 + _move_ap_used_for(monstre, monstre["cells_moved"] + 1))
 	if projected > monstre["actions_max"]:
 		return False
 	monstre["pos"] = {"x": nxt[0], "y": nxt[1]}
@@ -1069,7 +1172,8 @@ def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
 		options.append((nx, ny))
 	if not options:
 		return False
-	projected = monstre["attaques"] + _move_ap_used_for(monstre, monstre["cells_moved"] + 1)
+	projected = (monstre["attaques"] + monstre.get("penalites", 0)
+				 + _move_ap_used_for(monstre, monstre["cells_moved"] + 1))
 	if projected > monstre["actions_max"]:
 		return False
 	nx, ny = random.choice(options)
@@ -1098,9 +1202,7 @@ def _chasse_ou_erre(combat_doc: dict, monstre: dict, grid: dict) -> None:
 				break
 		while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
 			   and proie["vivant"] and _cheby(monstre, proie) <= portee):
-			_do_attack_on(combat_doc, monstre, proie)
-			monstre["attaques"] += 1
-			_refresh_actions(monstre)
+			_do_attack_on(combat_doc, monstre, proie)   # décompte l'action lui-même
 		return
 	# Errance : quelques pas au hasard, sans jamais fondre sur le joueur.
 	steps = 0
@@ -1172,9 +1274,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			joueur = _cible_joueur(combat_doc, monstre)
 		if joueur is None or _cheby(monstre, joueur) > portee:
 			break
-		_do_monster_attack(combat_doc, monstre, joueur)
-		monstre["attaques"] += 1
-		_refresh_actions(monstre)
+		_do_monster_attack(combat_doc, monstre, joueur)   # décompte l'action lui-même
 
 	idx = combat_doc["acteur_courant_index"] + 1
 	if idx >= len(combat_doc["ordre_initiative"]):
@@ -1286,7 +1386,8 @@ def resolve_action(
 			return {"error": "Case occupée."}
 		if joueur["cells_moved"] >= joueur.get("deplacement", 1):
 			return {"error": "Budget de déplacement épuisé."}
-		projected = joueur["attaques"] + _move_ap_used_for(joueur, joueur["cells_moved"] + 1)
+		projected = (joueur["attaques"] + joueur.get("penalites", 0)
+					 + _move_ap_used_for(joueur, joueur["cells_moved"] + 1))
 		if projected > joueur["actions_max"]:
 			return {"error": "Plus d'actions pour se déplacer."}
 
@@ -1307,7 +1408,8 @@ def resolve_action(
 			return {"error": "Sens de rotation invalide."}
 		if joueur["cells_moved"] >= joueur.get("deplacement", 1):
 			return {"error": "Budget de déplacement épuisé."}
-		projected = joueur["attaques"] + _move_ap_used_for(joueur, joueur["cells_moved"] + 1)
+		projected = (joueur["attaques"] + joueur.get("penalites", 0)
+					 + _move_ap_used_for(joueur, joueur["cells_moved"] + 1))
 		if projected > joueur["actions_max"]:
 			return {"error": "Plus d'actions pour pivoter."}
 
@@ -1361,9 +1463,12 @@ def resolve_action(
 			return {"error": "Cible hors de portée."}
 
 		seuil = _hit_threshold(skill, monstre.get("ag", 0))
-		roll = random.randint(1, 100)
-		if roll <= seuil:
-			dmg = max(1, roll_dice(notation) - monstre["pa"])
+		jet = _resoudre_jet(joueur, monstre, seuil)
+		roll = jet["roll"]
+		if jet["touche"]:
+			# Le critique double les dés AVANT la soustraction des PA : il double le coup,
+			# pas la pénétration d'armure.
+			dmg = max(1, roll_dice(notation) * jet["mult_degats"] - monstre["pa"])
 			monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 			if monstre["currentPV"] <= 0:
 				monstre["vivant"] = False
@@ -1371,31 +1476,47 @@ def resolve_action(
 					"tour": combat_doc["tour"],
 					"acteur": joueur["nom"],
 					"kind": "kill",
-					"texte": f"{joueur['nom']} élimine {monstre['nom']} !",
+					"texte": (
+						f"{joueur['nom']} porte un COUP CRITIQUE et élimine {monstre['nom']} !"
+						if jet["critique"] else
+						f"{joueur['nom']} élimine {monstre['nom']} !"
+					),
 				})
 			else:
 				combat_doc["log"].append({
 					"tour": combat_doc["tour"],
 					"acteur": joueur["nom"],
-					"kind": "hit",
+					"kind": "crit" if jet["critique"] else "hit",
 					"texte": (
+						f"{joueur['nom']} porte un COUP CRITIQUE à {monstre['nom']} : {dmg} dégâts ! "
+						f"(jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
+						if jet["critique"] else
 						f"{joueur['nom']} touche {monstre['nom']} pour {dmg} dégâts ! "
 						f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
 					),
 				})
-			result = {"hit": True, "dmg": dmg, "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
+			result = {"hit": True, "dmg": dmg, "critique": jet["critique"],
+					  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
 		else:
 			combat_doc["log"].append({
 				"tour": combat_doc["tour"],
 				"acteur": joueur["nom"],
-				"kind": "miss",
-				"texte": f"{joueur['nom']} rate son attaque sur {monstre['nom']} ! (jet {roll} / seuil {seuil})",
+				"kind": "fumble" if jet["fumble"] else "miss",
+				"texte": (
+					f"{joueur['nom']} rate LAMENTABLEMENT son attaque sur {monstre['nom']} ! "
+					f"(jet {roll} / seuil {seuil})"
+					if jet["fumble"] else
+					f"{joueur['nom']} rate son attaque sur {monstre['nom']} ! (jet {roll} / seuil {seuil})"
+				),
 			})
-			result = {"hit": False, "roll": roll, "seuil": seuil}
+			result = {"hit": False, "fumble": jet["fumble"], "roll": roll, "seuil": seuil}
 
 		_furtivite_apres_offensive(combat_doc, joueur, monstre, is_ranged)
 		joueur["attaques"] += 1
 		_refresh_actions(joueur)
+		# Après le décompte de l'attaque : un fumble coûte une action de PLUS.
+		if jet["fumble"]:
+			_appliquer_fumble(combat_doc, joueur)
 		_check_victory(combat_doc)
 
 	elif action_type == "passer":
@@ -1523,6 +1644,7 @@ def resolve_action(
 		if joueur["currentPM"] < cout_pm:
 			return {"error": "PM insuffisants."}
 
+		jet = None   # renseigné seulement par la branche offensive (jet de toucher)
 		if sdoc.get("cible") == "ennemi":
 			if not effets.get("degats"):
 				return {"error": "Ce sort n'inflige aucun dégât."}
@@ -1545,11 +1667,13 @@ def resolve_action(
 			# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés).
 			joueur["currentPM"] -= cout_pm
 			seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
-			roll = random.randint(1, 100)
-			if roll <= seuil:
+			jet = _resoudre_jet(joueur, monstre, seuil)
+			roll = jet["roll"]
+			if jet["touche"]:
 				# Pas de soustraction de PA : l'armure physique n'arrête pas la magie
-				# (la défense magique joue déjà dans le seuil).
-				dmg = max(1, roll_dice(effets["degats"]))
+				# (la défense magique joue déjà dans le seuil). Le critique double donc
+				# des dégâts déjà bruts.
+				dmg = max(1, roll_dice(effets["degats"]) * jet["mult_degats"])
 				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 				if monstre["currentPV"] <= 0:
 					monstre["vivant"] = False
@@ -1557,31 +1681,45 @@ def resolve_action(
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
 						"kind": "kill",
-						"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} et élimine {monstre['nom']} !",
+						"texte": (
+							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} d'une puissance CRITIQUE "
+							f"et pulvérise {monstre['nom']} !"
+							if jet["critique"] else
+							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} et élimine {monstre['nom']} !"
+						),
 					})
 				else:
 					combat_doc["log"].append({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
-						"kind": "hit",
+						"kind": "crit" if jet["critique"] else "hit",
 						"texte": (
+							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} d'une puissance CRITIQUE : "
+							f"{monstre['nom']} subit {dmg} dégâts ! "
+							f"(jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
+							if jet["critique"] else
 							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {monstre['nom']} "
 							f"subit {dmg} dégâts ! (PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						),
 					})
 				result = {"sort": sdoc.get("nom"), "hit": True, "dmg": dmg,
+						  "critique": jet["critique"],
 						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
 			else:
 				combat_doc["log"].append({
 					"tour": combat_doc["tour"],
 					"acteur": joueur["nom"],
-					"kind": "miss",
+					"kind": "fumble" if jet["fumble"] else "miss",
 					"texte": (
+						f"{joueur['nom']} bafouille son incantation : {sdoc.get('nom', 'le sort')} "
+						f"lui explose au visage ! (jet {roll} / seuil {seuil})"
+						if jet["fumble"] else
 						f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} sur {monstre['nom']}"
 						f" mais le sort se dissipe ! (jet {roll} / seuil {seuil})"
 					),
 				})
-				result = {"sort": sdoc.get("nom"), "hit": False, "roll": roll, "seuil": seuil}
+				result = {"sort": sdoc.get("nom"), "hit": False, "fumble": jet["fumble"],
+						  "roll": roll, "seuil": seuil}
 
 			# Incanter au contact révèle le lanceur (touché ou raté) ; à distance, seule la
 			# cible tente de le repérer — foudroyée sur place, elle n'en a même pas le temps.
@@ -1620,6 +1758,10 @@ def resolve_action(
 		result["currentPM"] = joueur["currentPM"]
 		joueur["sorts"] = joueur.get("sorts", 0) + 1
 		_refresh_actions(joueur)
+		# Après le décompte du sort : une incantation ratée sur un échec critique coûte
+		# une action de PLUS (les PM, eux, sont déjà partis avant le jet).
+		if jet and jet["fumble"]:
+			_appliquer_fumble(combat_doc, joueur)
 		_check_victory(combat_doc)
 
 	elif action_type == "competence":
@@ -1640,6 +1782,7 @@ def resolve_action(
 			return {"error": "PM insuffisants."}
 
 		nom = competence.get("nom", "une compétence")
+		resultat_jet = None   # renseigné seulement par la branche offensive (jet de toucher)
 		if competence.get("cible") == "ennemi":
 			if not effets.get("degats"):
 				return {"error": "Cette compétence n'inflige aucun dégât."}
@@ -1670,9 +1813,12 @@ def resolve_action(
 			else:
 				skill = joueur["cd"] if jet == "cd" else joueur["cc"]
 				seuil = _hit_threshold(skill, monstre.get("ag", 0))
-			roll = random.randint(1, 100)
-			if roll <= seuil:
-				degats_bruts = roll_dice(effets["degats"])
+			resultat_jet = _resoudre_jet(joueur, monstre, seuil)
+			roll = resultat_jet["roll"]
+			if resultat_jet["touche"]:
+				# Le critique double les dés ; les PA ne sont soustraits qu'après, et
+				# seulement pour une frappe martiale (l'armure n'arrête pas la magie).
+				degats_bruts = roll_dice(effets["degats"]) * resultat_jet["mult_degats"]
 				dmg = max(1, degats_bruts if jet == "magique" else degats_bruts - monstre["pa"])
 				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 				if monstre["currentPV"] <= 0:
@@ -1681,31 +1827,43 @@ def resolve_action(
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
 						"kind": "kill",
-						"texte": f"{joueur['nom']} utilise {nom} et élimine {monstre['nom']} !",
+						"texte": (
+							f"{joueur['nom']} utilise {nom} — coup CRITIQUE — et élimine {monstre['nom']} !"
+							if resultat_jet["critique"] else
+							f"{joueur['nom']} utilise {nom} et élimine {monstre['nom']} !"
+						),
 					})
 				else:
 					combat_doc["log"].append({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
-						"kind": "hit",
+						"kind": "crit" if resultat_jet["critique"] else "hit",
 						"texte": (
+							f"{joueur['nom']} utilise {nom} — coup CRITIQUE : {monstre['nom']} subit "
+							f"{dmg} dégâts ! (jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
+							if resultat_jet["critique"] else
 							f"{joueur['nom']} utilise {nom} : {monstre['nom']} subit {dmg} dégâts ! "
 							f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						),
 					})
 				result = {"competence": nom, "hit": True, "dmg": dmg,
+						  "critique": resultat_jet["critique"],
 						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
 			else:
 				combat_doc["log"].append({
 					"tour": combat_doc["tour"],
 					"acteur": joueur["nom"],
-					"kind": "miss",
+					"kind": "fumble" if resultat_jet["fumble"] else "miss",
 					"texte": (
+						f"{joueur['nom']} rate complètement {nom} sur {monstre['nom']} "
+						f"et se découvre ! (jet {roll} / seuil {seuil})"
+						if resultat_jet["fumble"] else
 						f"{joueur['nom']} utilise {nom} sur {monstre['nom']}"
 						f" mais manque son coup ! (jet {roll} / seuil {seuil})"
 					),
 				})
-				result = {"competence": nom, "hit": False, "roll": roll, "seuil": seuil}
+				result = {"competence": nom, "hit": False, "fumble": resultat_jet["fumble"],
+						  "roll": roll, "seuil": seuil}
 
 			# Frapper au contact révèle le joueur (touché ou raté) ; à distance, seule la
 			# cible tente de le repérer — et une cible abattue ne repère plus rien.
@@ -1738,6 +1896,9 @@ def resolve_action(
 		result["currentPM"] = joueur["currentPM"]
 		joueur["competences"] = joueur.get("competences", 0) + 1
 		_refresh_actions(joueur)
+		# Après le décompte de la compétence : un échec critique coûte une action de PLUS.
+		if resultat_jet and resultat_jet["fumble"]:
+			_appliquer_fumble(combat_doc, joueur)
 		_check_victory(combat_doc)
 
 	else:

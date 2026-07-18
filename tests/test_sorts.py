@@ -337,7 +337,9 @@ def test_sort_pm_insuffisants():
 
 
 def test_sort_rate_debite_les_pm(monkeypatch):
-    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 100)  # miss garanti
+    # 90 > seuil 70 = raté ORDINAIRE : sous CRIT_ECHEC_MIN, donc sans perte d'action
+    # supplémentaire (un échec critique, lui, coûterait une action de plus).
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 90)
     combat = _combat()
     res = resolve_action(combat, "sort", cible_id="monstre_0", sort=_sort_arg(_sort()))
     assert res["hit"] is False
@@ -348,7 +350,9 @@ def test_sort_rate_debite_les_pm(monkeypatch):
 
 
 def test_sort_touche_sans_soustraire_les_pa(monkeypatch):
-    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)   # hit + dés à 1
+    # d100 à 50 (touche ORDINAIRE sous seuil 70, pas un critique qui doublerait les
+    # dégâts) et dés à 1.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
     combat = _combat()
     res = resolve_action(combat, "sort", cible_id="monstre_0", sort=_sort_arg(_sort()))
     # 2D6 à 1 → 2 dégâts PLEINS malgré pa=5 (l'armure n'arrête pas la magie).

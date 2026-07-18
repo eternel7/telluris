@@ -342,7 +342,9 @@ def test_competence_martiale_soustrait_les_pa(monkeypatch):
 
 
 def test_competence_magique_ignore_les_pa(monkeypatch):
-    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)
+    # d100 à 50 = touche ORDINAIRE (seuil 70) : un critique doublerait les dégâts et
+    # masquerait ce que ce test vérifie. Dés à 1.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
     combat = _combat()
     res = resolve_action(combat, "competence", cible_id="monstre_0",
                          competence=normaliser_competence(_comp(jet="magique", cout_pm=4)))

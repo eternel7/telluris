@@ -95,10 +95,17 @@ MARGE_TRANSFO: float = 5.0
 RACHAT_FACTEUR: float = 0.6
 
 # ── Jets de dés (seuils de critique génériques) ──────────────────────────────────
-# Bornes de critique applicables à TOUT jet d100 (marchandage, combat futur, etc.) :
+# Bornes de critique applicables à TOUT jet d100 (marchandage, combat, etc.) :
 # roll ≤ CRIT_REUSSITE_MAX = réussite critique ; roll ≥ CRIT_ECHEC_MIN = échec critique.
 CRIT_REUSSITE_MAX: int = 5
 CRIT_ECHEC_MIN: int = 96
+# Diviseur de l'écart de Chance dans les seuils de critique EN COMBAT : delta =
+# Ch attaquant − Ch cible, et les deux fenêtres glissent de (delta // W) — la chance
+# élargit la réussite critique ET repousse l'échec critique, symétriquement. Les deux
+# bornes ci-dessus restent des garde-fous : un jet ≤ CRIT_REUSSITE_MAX est toujours une
+# réussite critique, un jet ≥ CRIT_ECHEC_MIN toujours un échec. Plus W est grand, moins
+# la Chance pèse ; 0 = mécanique désactivée (fenêtres fixes).
+CRIT_CHANCE_DIVISEUR: int = 10
 
 # ── Relation marchand (marchandage volontaire) ───────────────────────────────────
 # La relation perso×lieu (doc `type:"relation"`) est un entier sur 0–100, neutre à
@@ -436,6 +443,7 @@ def current_world_variables() -> dict:
 		"VENTE_PNJ_FRACTION": VENTE_PNJ_FRACTION,
 		"CRIT_REUSSITE_MAX": CRIT_REUSSITE_MAX,
 		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
+		"CRIT_CHANCE_DIVISEUR": CRIT_CHANCE_DIVISEUR,
 		"RELATION_INITIALE": RELATION_INITIALE,
 		"RELATION_SEUIL_COEFF": RELATION_SEUIL_COEFF,
 		"MARCHANDAGE_BLOCAGE_SECONDES": MARCHANDAGE_BLOCAGE_SECONDES,
@@ -515,7 +523,7 @@ def load_world_variables() -> dict:
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
-	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN
+	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN, CRIT_CHANCE_DIVISEUR
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	global PNJ_REPUTATION_SEUIL
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
@@ -583,6 +591,7 @@ def load_world_variables() -> dict:
 
 	CRIT_REUSSITE_MAX            = int(v.get("CRIT_REUSSITE_MAX", CRIT_REUSSITE_MAX))
 	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))
+	CRIT_CHANCE_DIVISEUR         = int(v.get("CRIT_CHANCE_DIVISEUR", CRIT_CHANCE_DIVISEUR))
 	RELATION_INITIALE            = int(v.get("RELATION_INITIALE", RELATION_INITIALE))
 	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
 	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))

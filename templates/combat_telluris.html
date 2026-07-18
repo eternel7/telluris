@@ -432,6 +432,15 @@
 .log-entry.flee       { color: #999; font-style: italic; }
 .log-entry.move       { color: #8fae8f; font-style: italic; }
 .log-entry.miss       { color: #888; }
+/* Critiques : `crit` est la classe BRUTE écrite par le rendu Jinja au chargement
+   (il ne connaît pas la bascule j-/m- du JS) ; j-crit/m-crit la raffinent côté client. */
+.log-entry.crit,
+.log-entry.j-crit,
+.log-entry.m-crit     { font-weight: bold; }
+.log-entry.crit       { color: #ffe066; text-shadow: 0 0 6px rgba(255, 224, 102, .55); }
+.log-entry.j-crit     { color: #9fe0ff; text-shadow: 0 0 6px rgba(159, 224, 255, .6); }
+.log-entry.m-crit     { color: #ffb0b0; text-shadow: 0 0 6px rgba(255, 176, 176, .6); }
+.log-entry.fumble     { color: #a06060; font-style: italic; font-weight: bold; }
 
 /* ─── Enemy Panel ──────────────────────────────────────────────── */
 /* Nom du monstre sous le grand portrait (panel droit). */
@@ -1204,7 +1213,9 @@ function logClass(entry) {
 		case 'flee': return 'flee';
 		case 'move': return 'move';
 		case 'miss': return 'miss';
+		case 'fumble': return 'fumble';
 		case 'hit':  return playerNames().includes(entry.acteur) ? 'j-hit' : 'm-hit';
+		case 'crit': return playerNames().includes(entry.acteur) ? 'j-crit' : 'm-crit';
 		default:     return '';
 	}
 }
@@ -1221,7 +1232,8 @@ function revealNext() {
 	revealing = true;
 	const entry = logQueue.shift();
 	// Un coup porté par un monstre fait passer son portrait au panneau droit.
-	if (entry.kind === 'hit' && entry.acteur && !playerNames().includes(entry.acteur)) {
+	if ((entry.kind === 'hit' || entry.kind === 'crit')
+		&& entry.acteur && !playerNames().includes(entry.acteur)) {
 		const m = state.monstres.find(x => x.nom === entry.acteur);
 		if (m) { lastEnemyId = m.id; renderEnemyPortrait(state); }
 	}
