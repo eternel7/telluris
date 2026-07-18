@@ -5185,12 +5185,15 @@ function _grpRentre(item, dest) {
 
 // Une ligne par objet ; la flèche est grisée quand l'objet ne rentre pas chez le destinataire.
 // Icône + nom ouvrent la fiche de l'objet, comme dans le sac de la fiche perso.
+// Affichage trié par nom via `_sortedOrder` : l'index d'origine est conservé pour l'adressage
+// serveur (transfert + fiche objet).
 function _grpSac(items, dest, sens) {
 	items = items || [];
 	if (!items.length) return '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>';
 	const source = _GRP_SOURCE[sens];
 	const fleche = sens === 'vers_compagnon' ? '→' : '←';
-	return items.map((item, idx) => {
+	return _sortedOrder(items, 'asc').map(idx => {
+		const item = items[idx];
 		if (!item || typeof item !== 'object') return '';
 		const poids = +(item.poids || 0);
 		const rentre = _grpRentre(item, dest);
