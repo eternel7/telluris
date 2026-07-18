@@ -17,6 +17,7 @@ from routers.combat import combat_router
 from routers.quetes import quetes_router
 from routers.pnj import pnj_router
 from routers.recrutement import recrutement_router
+from routers.montures import montures_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
@@ -32,7 +33,9 @@ from utils import intro as intro_util
 from utils import transport as transport_util
 from utils import chasse as chasse_util
 from utils import recrutement as recrutement_util
+from utils import montures as montures_util
 from utils import fiche as fiche_util
+from utils import lint_dialogues
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
@@ -99,6 +102,7 @@ app.include_router(combat_router, prefix="/api")
 app.include_router(quetes_router, prefix="/api")
 app.include_router(pnj_router, prefix="/api")
 app.include_router(recrutement_router, prefix="/api")
+app.include_router(montures_router, prefix="/api")
 app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
@@ -651,6 +655,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# carte d'aventurier se fait à l'ouverture du board — 403 explicite).
 	est_recrutement = recrutement_util.lieu_recrute(grid_doc)
 
+	# Étable : `est_etable` conditionne le bouton « Montures ». Pas de contrôle d'accès
+	# ici (ni carte, ni relation) — acheter une bête de somme ne demande rien d'autre
+	# que de l'argent, contrairement au tableau de recrutement.
+	est_etable = montures_util.lieu_vend_montures(grid_doc)
+
 	# Ressource récoltable (événement de zone « ressource ») : résolue pour l'affichage initial
 	# du bouton « Récolter » dans la sidebar (champ transitoire posé par move_character).
 	ressource_recoltable = None
@@ -711,6 +720,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,
 			"est_recrutement": est_recrutement,
+			"est_etable": est_etable,
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.
 			"affinites_detail": recrutement_util.affinites_detail_payload(character, get_doc),
@@ -769,13 +779,18 @@ async def get_combat_page(
 		cid = j.get("character_id")
 		cdoc = character if cid == character["_id"] else (get_doc(cid) if cid else None)
 		img = (cdoc or {}).get("image") or j.get("image", "")
+		# Une monture est illustrée par l'image de son ESPÈCE, servie par /monsters : ni le
+		# dossier ni le mount ne sont ceux d'un portrait de personnage.
+		est_monture = bool(j.get("est_monture"))
+		dossier = MONSTERS_IMAGES_PATH if est_monture else CHARACTERS_IMAGES_PATH
 		try:
-			with Image.open(CHARACTERS_IMAGES_PATH + "/" + img) as p:
+			with Image.open(dossier + "/" + img) as p:
 				largeur, hauteur = p.size
 		except Exception:
 			largeur, hauteur = 100, 100
 		portraits_joueurs[j["id"]] = {
 			"image": img,
+			"base": "/monsters" if est_monture else "/characters",
 			"largeur": largeur,
 			"hauteur": hauteur,
 			"portrait_zoom": (cdoc or {}).get("portrait_zoom"),
@@ -902,3 +917,24 @@ def admin_import_bulk(
 		media_type="application/x-ndjson",
 		headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
 	)
+
+
+@app.post("/admin/lint-dialogues")
+def admin_lint_dialogues(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: list | dict = Body(...),
+):
+	"""Contrôle de cohérence des arbres de dialogue AVANT import — en LECTURE SEULE, rien
+	n'est écrit en base.
+
+	Un dialogue est de la donnée : ni typée, ni exécutée à l'import. Un `next` vers un nœud
+	inexistant, un nœud de service mal nommé ou une condition mal orthographiée ne se voient
+	qu'en jouant la branche — et une branche conditionnée qui ne s'affiche jamais est
+	indiscernable d'un tirage malheureux. D'où ce passage préalable.
+
+	Même moteur que `dev/lint_dialogues.py` (`utils/lint_dialogues.analyser`), et mêmes deux
+	formats de corps que `/admin/import-bulk` : le bouton peut porter sur ce que contient
+	déjà la zone de saisie, sans rien reformater."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	return lint_dialogues.analyser(payload)

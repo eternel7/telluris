@@ -33,6 +33,7 @@ from utils.characters import (
 	credit_character, carried_weight, charge_max_of,
 )
 from utils.consommables import caracts_avec_buffs
+from utils import montures
 
 
 def now_epoch() -> int:
@@ -524,8 +525,10 @@ def _localiser_ref(refs: list, idx, item_id) -> int | None:
 
 def peut_porter(porteur: dict, ref) -> bool:
 	"""Le porteur peut-il encaisser CET exemplaire sans dépasser sa charge max ? On compare
-	le poids d'instance (pas le minimum du doc item) à `charge_max_of` (F×5, non buffée)."""
-	return carried_weight(porteur) + item_ref_weight(ref) <= charge_max_of(porteur)
+	le poids d'instance (pas le minimum du doc item) au plafond du porteur — délégué à
+	`montures.charge_max_porteur`, qui aiguille entre `charge_max_of` (F×5, non buffée) et
+	la capacité démultipliée d'une monture. Le groupe contient les deux."""
+	return carried_weight(porteur) + item_ref_weight(ref) <= montures.charge_max_porteur(porteur)
 
 
 def transferer_ref(source: dict, cible: dict, idx, item_id) -> tuple[bool, str, object]:
@@ -541,7 +544,10 @@ def transferer_ref(source: dict, cible: dict, idx, item_id) -> tuple[bool, str, 
 
 	ref = refs[pos]
 	if not peut_porter(cible, ref):
-		qui = (cible.get("prenom") or "").strip() or "Le destinataire"
+		# Une monture n'a pas de `prenom` : replier sur `nom` avant le générique, sinon
+		# elle serait toujours annoncée comme « Le destinataire ».
+		qui = ((cible.get("prenom") or "").strip() or (cible.get("nom") or "").strip()
+			   or "Le destinataire")
 		return False, f"{qui} ne peut pas porter davantage.", None
 
 	refs.pop(pos)

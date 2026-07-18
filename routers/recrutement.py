@@ -16,7 +16,12 @@ from utils.characters import (
 	carried_weight, charge_max_of, resolve_item_ref, item_ref_weight,
 )
 from utils import recrutement
+from utils import montures
 from utils import fiche as fiche_util
+# Une monture est un porteur du groupe : le panneau 👥 la rend avec la même carte que les
+# compagnons. On réutilise sa vue plutôt que de la recopier — même précédent que
+# `_inventory_payload` importé de routers/user.py juste en dessous.
+from routers.montures import _monture_view
 # Le sac d'un compagnon se sert exactement comme celui du joueur (mêmes refs, mêmes docs
 # résolus) : on réutilise le payload d'inventaire de routers/user.py plutôt que de le
 # recopier — précédent : routers/combat.py importe déjà `_take_ref` du même module.
@@ -119,6 +124,12 @@ def _payload(character: dict, recrues: list | None = None) -> dict:
 		"plafond": recrutement.taille_max_groupe(),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"affinites_detail": recrutement.affinites_detail_payload(character, get_doc),
+		# Les montures voyagent avec le groupe mais n'en sont pas membres (ni affinité, ni
+		# part de butin, ni plafond commun) : liste et plafond SÉPARÉS, que le client rend
+		# dans son propre regroupement en fin de panneau.
+		"montures": [_monture_view(m)
+					 for m in montures.montures_effectives(character, get_doc)],
+		"montures_plafond": montures.plafond_montures(),
 	}
 	if recrues is not None:
 		payload["recrues"] = [_recrue_view(character, av) for av in recrues]
@@ -236,8 +247,27 @@ def _compagnon(character: dict, av_id: str) -> dict:
 	return av
 
 
+def _porteurs_du_groupe(character: dict) -> list:
+	"""Tous ceux qui peuvent porter un objet pour le joueur : compagnons PUIS montures.
+	L'ordre compte — le client range les montures en fin de liste."""
+	return (recrutement.groupe_effectif(character, get_doc)
+			+ montures.montures_effectives(character, get_doc))
+
+
+def _porteur_du_groupe(character: dict, porteur_id: str) -> dict:
+	"""Doc du porteur visé, compagnon OU monture, avec la même preuve d'appartenance dans
+	les deux cas (statut + lien vers CE personnage). Garde des transferts."""
+	p = next((x for x in _porteurs_du_groupe(character) if x.get("_id") == porteur_id), None)
+	if p is None:
+		raise HTTPException(status_code=403, detail="Ce porteur ne fait pas partie de votre groupe")
+	return p
+
+
 def _charge_view(porteur: dict) -> dict:
-	return {"charge": round(carried_weight(porteur), 2), "charge_max": charge_max_of(porteur)}
+	"""⚠️ `charge_max_porteur` et non `charge_max_of` : une monture porte bien davantage,
+	et c'est ce plafond que le client recopie pour griser ses flèches de transfert."""
+	return {"charge": round(carried_weight(porteur), 2),
+			"charge_max": montures.charge_max_porteur(porteur)}
 
 
 @recrutement_router.get("/groupe")
@@ -258,14 +288,15 @@ async def groupe_etat(current_user: Annotated[dict, Depends(get_current_user)]):
 		**_charge_view(character),
 		"inventaire": [d for r in character.get("inventaire", []) if (d := resolve_item_ref(r))],
 	}
-	# Sacs des compagnons : le panneau affiche deux inventaires côte à côte et doit pouvoir
-	# griser une flèche de transfert AVANT l'appel serveur (même arithmétique que peut_porter).
+	# Sacs des porteurs (compagnons ET montures) : le panneau affiche deux inventaires côte
+	# à côte et doit pouvoir griser une flèche de transfert AVANT l'appel serveur (même
+	# arithmétique que peut_porter).
 	payload["sacs"] = {
-		av["_id"]: {
-			**_charge_view(av),
-			"inventaire": [d for r in av.get("inventaire", []) if (d := resolve_item_ref(r))],
+		p["_id"]: {
+			**_charge_view(p),
+			"inventaire": [d for r in p.get("inventaire", []) if (d := resolve_item_ref(r))],
 		}
-		for av in recrutement.groupe_effectif(character, get_doc)
+		for p in _porteurs_du_groupe(character)
 	}
 	if departs:
 		payload["departs"] = departs
@@ -327,14 +358,16 @@ async def groupe_transferer(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Passe un objet entre le sac du joueur et celui d'un compagnon. Refus DUR (409) si le
-	destinataire dépasse sa charge max : rien ne tombe au sol, rien n'est perdu — le client
-	grise d'ailleurs la flèche à l'avance. Un bout du transfert est TOUJOURS le principal."""
+	"""Passe un objet entre le sac du joueur et celui d'un porteur du groupe — compagnon ou
+	MONTURE, indifféremment (`_porteur_du_groupe` prouve l'appartenance dans les deux cas,
+	`peut_porter` applique le bon plafond). Refus DUR (409) si le destinataire dépasse sa
+	charge max : rien ne tombe au sol, rien n'est perdu — le client grise d'ailleurs la
+	flèche à l'avance. Un bout du transfert est TOUJOURS le principal."""
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 
-	av = _compagnon(character, body.get("compagnon_id") or "")
+	av = _porteur_du_groupe(character, body.get("compagnon_id") or "")
 	sens = body.get("sens")
 	if sens not in ("vers_compagnon", "vers_principal"):
 		raise HTTPException(status_code=422, detail="Sens de transfert invalide")

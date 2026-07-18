@@ -73,6 +73,21 @@
 		.status.ok { color: var(--success); }
 		.status.err { color: var(--danger); }
 
+		/* Rapport du contrôle de dialogues : une ligne par anomalie, scrollable — un gros
+		   lot peut en produire beaucoup, et le rapport ne doit pas repousser le bouton Save
+		   hors de l'écran. */
+		.lint-report { display: none; margin-top: 12px; max-height: 260px; overflow-y: auto; }
+		.lint-report.active { display: block; }
+		.lint-line {
+			font-size: 0.75rem; line-height: 1.5; padding: 5px 8px;
+			border-left: 3px solid var(--border); margin-bottom: 4px;
+			background: #0d0f14; border-radius: 0 4px 4px 0;
+		}
+		.lint-line.erreur { border-left-color: var(--danger); }
+		.lint-line.avertissement { border-left-color: var(--accent); }
+		.lint-where { color: var(--accent2); }
+		.lint-node { color: var(--muted); }
+
 		/* Barre de progression de l'import (déterminée + repli indéterminé). */
 		.progress {
 			display: none; margin-top: 12px; height: 10px; overflow: hidden;
@@ -144,10 +159,12 @@
 			<textarea id="import-editor" spellcheck="false" placeholder='[ { "_id": "item:…", … } ]'></textarea>
 			<div class="btn-row">
 				<button class="btn secondary" id="import-file-btn">📁 Import file</button>
+				<button class="btn secondary" id="import-lint">🔍 Vérifier les dialogues</button>
 				<button class="btn" id="import-save">💾 Save</button>
 			</div>
 			<div class="progress" id="import-progress"><div class="progress-bar" id="import-bar"></div></div>
 			<div class="status" id="import-status"></div>
+			<div class="lint-report" id="import-lint-report"></div>
 		</div>
 
 		<!-- ── Autres outils d'administration ─────────────────────────────── -->
@@ -358,6 +375,89 @@ importFile.addEventListener('change', () => {
 	reader.readAsText(file);
 	importFile.value = '';  // autorise une nouvelle sélection du même fichier
 });
+
+// ── Contrôle des dialogues (avant import) ──────────────────────────
+// Un arbre de dialogue n'est ni typé ni exécuté à l'import : une référence morte ou une
+// condition mal orthographiée ne se verrait qu'en JOUANT la branche — et un choix
+// conditionné qui ne s'affiche jamais est indiscernable d'un tirage malheureux.
+// Le contrôle est en LECTURE SEULE : il n'écrit rien, il ne bloque pas l'import.
+const importLint       = document.getElementById('import-lint');
+const importLintReport = document.getElementById('import-lint-report');
+
+function lintClear() {
+	importLintReport.classList.remove('active');
+	importLintReport.innerHTML = '';
+}
+
+function escapeHtml(s) {
+	return String(s).replace(/[&<>"']/g, c => ({
+		'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+	}[c]));
+}
+
+function lintRender(bilan) {
+	const lignes = (bilan.trouvailles || []).map(t => {
+		const noeud = t.noeud ? ` <span class="lint-node">[${escapeHtml(t.noeud)}]</span>` : '';
+		return `<div class="lint-line ${t.niveau}">`
+			+ `<span class="lint-where">${escapeHtml(t.doc_id)}</span>${noeud} — `
+			+ `${escapeHtml(t.message)}</div>`;
+	});
+	importLintReport.innerHTML = lignes.join('');
+	importLintReport.classList.toggle('active', lignes.length > 0);
+}
+
+// Le contenu de la zone n'est pas forcément du dialogue : la plupart des documents du jeu
+// (items, lieux, espèces) n'en portent pas. On le dit, plutôt que d'annoncer « tout va
+// bien » sur un lot que l'on n'a en réalité pas pu contrôler.
+function lintResume(bilan) {
+	if (!bilan.analyses) {
+		return [bilan.ignores + ' document(s) sans dialogue : rien à vérifier ici.', 'ok'];
+	}
+	const bouts = [bilan.analyses + ' dialogue(s) vérifié(s)'];
+	if (bilan.ignores) bouts.push(bilan.ignores + ' sans dialogue');
+	const suffixe = bouts.join(', ');
+	if (bilan.erreurs) {
+		return ['✗ ' + suffixe + ' — ' + bilan.erreurs + ' erreur(s), '
+			+ bilan.avertissements + ' avertissement(s).', 'err'];
+	}
+	if (bilan.avertissements) {
+		return ['⚠ ' + suffixe + ' — aucune erreur, '
+			+ bilan.avertissements + ' avertissement(s).', 'ok'];
+	}
+	return ['✓ ' + suffixe + ' — aucune anomalie.', 'ok'];
+}
+
+importLint.addEventListener('click', async () => {
+	lintClear();
+	const res = validateJsonTextarea(importEditor);
+	if (!res.ok) { setStatusOn(importStatus, 'JSON invalide : ' + res.error, 'err'); return; }
+
+	importLint.disabled = true;
+	setStatusOn(importStatus, 'Vérification…');
+	try {
+		const r = await fetch('/admin/lint-dialogues', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: importEditor.value.trim(),
+		});
+		const bilan = await r.json();
+		if (!r.ok) {
+			setStatusOn(importStatus, 'Échec : ' + (bilan.detail || r.status), 'err');
+			return;
+		}
+		lintRender(bilan);
+		const [msg, ton] = lintResume(bilan);
+		setStatusOn(importStatus, msg, ton);
+	} catch (e) {
+		setStatusOn(importStatus, 'Erreur réseau : ' + e.message, 'err');
+	} finally {
+		importLint.disabled = false;
+	}
+});
+
+// Éditer la zone invalide le rapport précédent : il porterait sur un contenu qui n'est plus
+// celui qu'on s'apprête à importer.
+importEditor.addEventListener('input', lintClear);
 
 // Save → POST /admin/import-bulk. Debounce : refuse un envoi concurrent
 // (in-flight) et un renvoi du même contenu (double clic ou plus).

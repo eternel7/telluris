@@ -252,6 +252,22 @@ AFFINITE_SEUIL_DEPART: int = 30
 AFFINITE_SEUIL_REMISE: int = 60
 AFFINITE_REDUC_PART: int = 10
 
+# ── Montures de transport ────────────────────────────────────────────────────────
+# Une étable (`categorie:"etable"` ou tag "montures") vend des montures — docs
+# `monture:*`, miroir du character comme `aventurier:*`, mais NON JOUABLES : elles
+# n'ont pas de tour en combat, ne s'y déplacent pas, et servent de porteurs. Leur
+# capacité = charge_max_of (F*5) × `espece.proprietes.charge_mult` : c'est le seul
+# moyen d'augmenter durablement l'emport d'une expédition. Plafond SÉPARÉ de celui
+# des compagnons (une monture n'est pas une épée : les mettre en concurrence
+# forcerait un arbitrage absurde entre porter et se battre).
+# MORT_DEFINITIVE : à 0 PV la monture est perdue et sa cargaison tombe au sol
+# (proposée dans l'overlay de fin) ; à False elle est seulement KO, relevée à 1 PV
+# comme un compagnon.
+MONTURE_GROUPE_MAX: int = 2
+MONTURE_CHARGE_MULT_DEFAUT: float = 3.0
+MONTURE_PRIX_DEFAUT: int = 200000
+MONTURE_MORT_DEFINITIVE: bool = True
+
 # ── Récolte & découpe du bois ────────────────────────────────────────────────────
 # Échelle des tailles de bois, du plus petit au plus grand. Couper un item « a_couper »
 # produit des pièces du tier immédiatement plus petit (même `essence`), poids conservé.
@@ -491,6 +507,10 @@ def current_world_variables() -> dict:
 		"AFFINITE_SEUIL_DEPART": AFFINITE_SEUIL_DEPART,
 		"AFFINITE_SEUIL_REMISE": AFFINITE_SEUIL_REMISE,
 		"AFFINITE_REDUC_PART": AFFINITE_REDUC_PART,
+		"MONTURE_GROUPE_MAX": MONTURE_GROUPE_MAX,
+		"MONTURE_CHARGE_MULT_DEFAUT": MONTURE_CHARGE_MULT_DEFAUT,
+		"MONTURE_PRIX_DEFAUT": MONTURE_PRIX_DEFAUT,
+		"MONTURE_MORT_DEFINITIVE": MONTURE_MORT_DEFINITIVE,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
 		"COUPE_MAX_PIECES": COUPE_MAX_PIECES,
@@ -540,6 +560,8 @@ def load_world_variables() -> dict:
 	global AFFINITE_INITIALE, AFFINITE_DELTA_QUETE, AFFINITE_DELTA_VICTOIRE, AFFINITE_DELTA_KO
 	global AFFINITE_DELTA_CONGEDIE, AFFINITE_DELTA_CONGEDIE_EN_QUETE
 	global AFFINITE_SEUIL_DEPART, AFFINITE_SEUIL_REMISE, AFFINITE_REDUC_PART
+	global MONTURE_GROUPE_MAX, MONTURE_CHARGE_MULT_DEFAUT, MONTURE_PRIX_DEFAUT
+	global MONTURE_MORT_DEFINITIVE
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
@@ -651,6 +673,13 @@ def load_world_variables() -> dict:
 	AFFINITE_SEUIL_DEPART = int(v.get("AFFINITE_SEUIL_DEPART", AFFINITE_SEUIL_DEPART))
 	AFFINITE_SEUIL_REMISE = int(v.get("AFFINITE_SEUIL_REMISE", AFFINITE_SEUIL_REMISE))
 	AFFINITE_REDUC_PART = max(1, int(v.get("AFFINITE_REDUC_PART", AFFINITE_REDUC_PART)))
+
+	MONTURE_GROUPE_MAX = max(0, int(v.get("MONTURE_GROUPE_MAX", MONTURE_GROUPE_MAX)))
+	# Plancher à 1.0 : un multiplicateur < 1 ferait d'une monture un porteur PIRE
+	# qu'un humain de même Force, ce qui n'a aucun sens de jeu.
+	MONTURE_CHARGE_MULT_DEFAUT = max(1.0, float(v.get("MONTURE_CHARGE_MULT_DEFAUT", MONTURE_CHARGE_MULT_DEFAUT)))
+	MONTURE_PRIX_DEFAUT = max(0, int(v.get("MONTURE_PRIX_DEFAUT", MONTURE_PRIX_DEFAUT)))
+	MONTURE_MORT_DEFINITIVE = bool(v.get("MONTURE_MORT_DEFINITIVE", MONTURE_MORT_DEFINITIVE))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):
 		BOIS_A_COUPER[:] = [str(x) for x in v["BOIS_A_COUPER"]]

@@ -1,0 +1,952 @@
+[
+  {
+    "_id": "espece:ane",
+    "type": "espece",
+    "nom": "Âne",
+    "image": "ane_transparent.png",
+    "description": "Animal de bât increvable, têtu mais d'une endurance remarquable sur les terrains difficiles.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "bete_de_somme",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 4.0,
+      "prix_cuivre": 80000
+    }
+  },
+  {
+    "_id": "espece:cheval",
+    "type": "espece",
+    "nom": "Cheval",
+    "image": "cheval_transparent.png",
+    "description": "Monture commune et polyvalente, alliant vitesse et fiabilité sur tous les terrains.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 8
+      },
+      "F": {
+        "min": 20,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 25,
+        "max": 50
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 3.0,
+      "prix_cuivre": 250000
+    }
+  },
+  {
+    "_id": "espece:cheval_de_trait",
+    "type": "espece",
+    "nom": "Cheval de Trait",
+    "image": "cheval_de_trait_transparent.png",
+    "description": "Cheval massif élevé pour la force de traction, lent mais d'une puissance considérable.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "bete_de_somme",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 5.0,
+      "prix_cuivre": 300000
+    }
+  },
+  {
+    "_id": "espece:cheval_normand",
+    "type": "espece",
+    "nom": "Cheval Normand",
+    "image": "cheval_normand_transparent.png",
+    "description": "Race de guerre réputée pour sa robustesse, capable de porter un cavalier en armure complète.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 3.0,
+      "prix_cuivre": 450000
+    }
+  },
+  {
+    "_id": "espece:coursier_elfique",
+    "type": "espece",
+    "nom": "Coursier Elfique",
+    "image": "coursier_elfique_transparent.png",
+    "description": "Monture d'une grâce surnaturelle, façonnée par les elfes pour épouser silence et célérité.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 45,
+        "max": 75
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 5,
+        "max": 15
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "magique",
+      "elfique",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 2.0,
+      "prix_cuivre": 900000
+    }
+  },
+  {
+    "_id": "espece:coursier_persan",
+    "type": "espece",
+    "nom": "Coursier Persan",
+    "image": "coursier_persan_transparent.png",
+    "description": "Cheval racé du désert, taillé pour la vitesse et l'endurance sur de longues distances.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "rapide",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 2.0,
+      "prix_cuivre": 500000
+    }
+  },
+  {
+    "_id": "espece:dragnard",
+    "type": "espece",
+    "nom": "Dragnard",
+    "image": "dragnard_transparent.png",
+    "description": "Croisement entre coursier et créature draconique mineure, doté d'écailles protectrices et d'un souffle bref.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "monture",
+      "draconique"
+    ],
+    "proprietes": {
+      "charge_mult": 3.0,
+      "prix_cuivre": 1200000
+    }
+  },
+  {
+    "_id": "espece:grand_faucon",
+    "type": "espece",
+    "nom": "Grand Faucon",
+    "image": "grand_faucon_transparent.png",
+    "description": "Rapace de grande envergure dressé pour porter un cavalier léger lors de raids aériens rapides.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "vol",
+      "rapide",
+      "predateur"
+    ],
+    "proprietes": {
+      "charge_mult": 1.5,
+      "prix_cuivre": 800000
+    }
+  },
+  {
+    "_id": "espece:grand_sanglier",
+    "type": "espece",
+    "nom": "Grand Sanglier",
+    "image": "grand_sanglier_transparent.png",
+    "description": "Sanglier de guerre aux défenses acérées, monture brutale prisée pour les charges de front.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 65
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 3.5,
+      "prix_cuivre": 400000
+    }
+  },
+  {
+    "_id": "espece:licorne",
+    "type": "espece",
+    "nom": "Licorne",
+    "image": "licorne_transparent.png",
+    "description": "Créature pure et majestueuse, son contact apaise les blessures et repousse la corruption.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 30,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "magique",
+      "pure",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 2.5,
+      "prix_cuivre": 2000000
+    }
+  },
+  {
+    "_id": "espece:loup_geant",
+    "type": "espece",
+    "nom": "Loup Géant",
+    "image": "loup_geant_transparent.png",
+    "description": "Loup de taille colossale, chasseur en meute redoutable autant que monture pour les guerriers du froid.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "monture",
+      "monstre",
+      "predateur"
+    ],
+    "proprietes": {
+      "charge_mult": 2.5,
+      "prix_cuivre": 600000
+    }
+  },
+  {
+    "_id": "espece:malandhir",
+    "type": "espece",
+    "nom": "Malandhir",
+    "image": "malandhir_transparent.png",
+    "description": "Monstre-monture des terres sombres, féroce et difficile à dompter, réservé aux cavaliers expérimentés.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "monture",
+      "sombre"
+    ],
+    "proprietes": {
+      "charge_mult": 3.0,
+      "prix_cuivre": 1000000
+    }
+  },
+  {
+    "_id": "espece:monture_angelique",
+    "type": "espece",
+    "nom": "Monture Angelique",
+    "image": "monture_angelique_transparent.png",
+    "description": "Créature céleste portant les messagers divins, sa crinière rayonne d'une lumière apaisante.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 30,
+        "max": 50
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "monture",
+      "vol"
+    ],
+    "proprietes": {
+      "charge_mult": 2.5,
+      "prix_cuivre": 2500000
+    }
+  },
+  {
+    "_id": "espece:monture_demoniaque",
+    "type": "espece",
+    "nom": "Monture Demoniaque",
+    "image": "monture_demoniaque_transparent.png",
+    "description": "Créature infernale dressée pour porter un cavalier, ses sabots brûlants laissent des traces de cendres.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "monture"
+    ],
+    "proprietes": {
+      "charge_mult": 3.0,
+      "prix_cuivre": 2000000
+    }
+  },
+  {
+    "_id": "espece:monture_squelette",
+    "type": "espece",
+    "nom": "Monture Squelette",
+    "image": "monture_squelette_transparent.png",
+    "description": "Cheval ou bête réduite à l'état d'ossature, monture obéissante des morts-vivants n'ayant plus à se reposer.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 0,
+        "max": 0
+      },
+      "Int": {
+        "min": 0,
+        "max": 5
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "monture"
+    ],
+    "proprietes": {
+      "charge_mult": 3.0,
+      "prix_cuivre": 700000
+    }
+  },
+  {
+    "_id": "espece:mulet",
+    "type": "espece",
+    "nom": "Mulet",
+    "image": "mulet_transparent.png",
+    "description": "Animal de bât increvable, têtu mais d'une endurance remarquable sur les terrains difficiles.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "bete_de_somme",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 4.5,
+      "prix_cuivre": 120000
+    }
+  },
+  {
+    "_id": "espece:pegase",
+    "type": "espece",
+    "nom": "Pégase",
+    "image": "pegase_transparent.png",
+    "description": "Cheval ailé capable de fendre les cieux, symbole de noblesse et de liberté.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 45,
+        "max": 75
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "vol",
+      "magique"
+    ],
+    "proprietes": {
+      "charge_mult": 2.0,
+      "prix_cuivre": 1500000
+    }
+  },
+  {
+    "_id": "espece:poney",
+    "type": "espece",
+    "nom": "Poney",
+    "image": "poney_transparent.png",
+    "description": "Petit équidé robuste et docile, apprécié comme première monture par les jeunes cavaliers.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 10,
+        "max": 25
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "petite_taille"
+    ],
+    "proprietes": {
+      "charge_mult": 2.5,
+      "prix_cuivre": 60000
+    }
+  },
+  {
+    "_id": "espece:sanglier_apprivoise",
+    "type": "espece",
+    "nom": "Sanglier apprivoisé",
+    "image": "sanglier_apprivoise_transparent.png",
+    "description": "Sanglier dompté capable de porter vos lourdes charges.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "animal",
+      "proie",
+      "monture"
+    ],
+    "proprietes": {
+      "charge_mult": 3.5,
+      "prix_cuivre": 150000
+    }
+  }
+]

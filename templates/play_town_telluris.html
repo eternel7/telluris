@@ -16,10 +16,6 @@
 			--y: {{ position["y"] | tojson | safe }};
 			--dim_x: {{ dim_x | tojson | safe }};
 			--dim_y: {{ dim_y | tojson | safe }};
-			/* Fenêtre d'affichage du portrait : une CONSTANTE de mise en page (pas une mesure).
-			   La taille NATIVE de l'image, elle, est mesurée dans le navigateur
-			   (naturalWidth/Height) et posée en inline par makePortraitViewport : la fiche peut
-			   montrer un COMPAGNON, dont l'image n'a pas les dimensions de celle du joueur. */
 			--portraitW: 100;
 			--portraitH: 100;
 			--dist-view: 10;
@@ -1253,7 +1249,7 @@
 		</main>
 		<aside class="sidebar">
 			<section class="sub-locations-panel">
-				{% if achat_sous_categories or est_guilde or est_recrutement or pnj_present %}
+				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or pnj_present %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
 					{% if achat_sous_categories %}
@@ -1264,6 +1260,9 @@
 					{% endif %}
 					{% if est_recrutement %}
 					<li><button class="sub-loc-btn" onclick="openRecrutementBoard()">🤝 Recrues</button></li>
+					{% endif %}
+					{% if est_etable %}
+					<li><button class="sub-loc-btn" onclick="openEtable()">🐴 Montures</button></li>
 					{% endif %}
 					{% if pnj_present %}
 					<li><button class="sub-loc-btn" onclick="openPnjDialogue()">🗣 Parler à {{pnj_present.nom}}</button></li>
@@ -1706,6 +1705,18 @@
 		<h2 style="margin:1rem 0 0">🗒️ Recrues disponibles</h2>
 		<div id="rec-recrues-list" class="cards-list"></div>
 	</div><!-- /#recrutement-panel -->
+	<div id="montures-panel" class="panel-hidden panel-frame board-panel" aria-label="Étable">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Montures de transport">
+			<h2>🐴 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeEtable()" role="button">✕ Fermer</button>
+		</div>
+		<h2 style="margin:.6rem 0 0">🐴 Vos montures (<span id="mnt-plafond"></span>)</h2>
+		<div id="mnt-possedees-list" class="cards-list"></div>
+		<h2 style="margin:1rem 0 0">🗒️ À vendre</h2>
+		<div id="mnt-offres-list" class="mnt-offres"></div>
+	</div><!-- /#montures-panel -->
 	<div id="groupe-panel" class="panel-hidden panel-frame board-panel" aria-label="Gestion du groupe">
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Gestion du groupe">
@@ -1722,6 +1733,11 @@
 				{# Une CARTE par compagnon (renderCharacterCard clone le <template> ci-dessous) :
 				   même visualisation que la fiche du joueur, pied « part / affinité » en plus. #}
 				<div id="grp-compagnons-list" class="cards-list"></div>
+				{# Les montures ferment la marche, dans leur propre regroupement : elles
+				   voyagent avec le groupe mais n'en sont pas membres (ni affinité, ni part
+				   de butin, ni plafond commun). Titre masqué tant qu'il n'y en a aucune. #}
+				<h3 id="grp-montures-titre" class="grp-sous-titre" style="display:none">🐴 Montures</h3>
+				<div id="grp-montures-list" class="cards-list"></div>
 			</div>
 		</section>
 		<section class="grp-section">
@@ -1730,7 +1746,7 @@
 			</button>
 			<div class="grp-body" id="grp-body-inventaire">
 				<div id="grp-inv-vide" class="sh-empty" style="display:none">
-					<span class="sh-empty-icon">👥</span>Aucun compagnon : rien à échanger.
+					<span class="sh-empty-icon">👥</span>Ni compagnon ni monture : rien à échanger.
 				</div>
 				<div id="grp-inv-wrap" class="grp-inv-wrap">
 					<div class="grp-inv-col">
@@ -1790,6 +1806,27 @@
 		.grp-move-btn:hover:not(:disabled) { background: var(--accent, #b98c4a); color: #1c1710; }
 		.grp-move-btn:disabled { opacity: .3; cursor: not-allowed; }
 		.grp-charge-over { color: #e06c5a; }
+		/* ── Montures ─────────────────────────────────────────────────────────── */
+		/* Sous-titre du regroupement en fin de liste des compagnons. */
+		.grp-sous-titre {
+			margin: 1rem 0 .4rem; padding-top: .6rem; font-size: 1rem;
+			border-top: 1px solid var(--border-color, #6b5836);
+		}
+		/* Les bêtes à vendre : une ligne par espèce (image, texte, bouton), pas une carte de
+		   personnage — on n'achète pas encore un individu, seulement une espèce. */
+		.mnt-offres { display: flex; flex-direction: column; gap: .5rem; }
+		.mnt-offre {
+			display: flex; align-items: center; gap: .75rem; padding: .5rem;
+			border: 1px solid var(--border-color, #6b5836); border-radius: 6px;
+		}
+		.mnt-offre-img {
+			width: 84px; height: 84px; object-fit: contain; flex: 0 0 auto;
+		}
+		.mnt-offre-txt { display: flex; flex-direction: column; gap: .15rem; flex: 1 1 auto; }
+		@media (max-width: 720px) {
+			.mnt-offre { flex-wrap: wrap; }
+			.mnt-offre-txt { flex-basis: 100%; }
+		}
 		/* Fiche d'un compagnon : les onglets propres au personnage principal disparaissent
 		   (un compagnon n'a ni quêtes, ni relations marchandes, ni journal). Le SOL reste
 		   affiché — c'est là que tombe ce qu'un compagnon « pose », et « Prendre » y ramasse
@@ -2456,7 +2493,10 @@ function makePortraitViewport(card) {
 		if (zoomVal)    zoomVal.textContent = zoomPct + '%';
 		if (zoomSlider) zoomSlider.value    = zoomPct;
 		img.classList.remove('cadree');
-		img.src = '/characters/' + sujet.image;
+		// `base` : les portraits de personnage vivent dans /characters, mais une MONTURE est
+		// illustrée par l'image de son espèce, servie par le mount /monsters. Le serveur dit
+		// laquelle (image_base) — le client ne devine pas.
+		img.src = (sujet.base || '/characters') + '/' + sujet.image;
 		try { if (!img.complete || !img.naturalWidth) await img.decode(); } catch (e) {}
 		W = img.naturalWidth  || W1;
 		H = img.naturalHeight || H1;
@@ -2644,6 +2684,7 @@ function renderCharacterCard(container, p, opts) {
 		_cardViewports.set(card, vp);
 		vp.setSujet({
 			image: p.image,
+			base: p.image_base,          // /monsters pour une monture, /characters par défaut
 			portrait_zoom: p.portrait_zoom,
 			portrait_translate: p.portrait_translate,
 			// Le cadrage n'est enregistrable que sur un doc qui nous appartient (groupe_effectif) :
@@ -2703,6 +2744,8 @@ document.addEventListener('keydown', e => {
 	if (sell && !sell.classList.contains('panel-hidden')) { closeSellPanel(); return; }
 	const groupe = document.getElementById('groupe-panel');
 	if (groupe && !groupe.classList.contains('panel-hidden')) { closeGroupe(); return; }
+	const etable = document.getElementById('montures-panel');
+	if (etable && !etable.classList.contains('panel-hidden')) { closeEtable(); return; }
 	closeSheet();
 });
 
@@ -4972,6 +5015,117 @@ function closeRecrutementPanel() {
 	window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ── Étable : montures de transport ───────────────────────────────────────────────
+// Panneau jumeau du tableau de recrutement, à deux différences près : on ACHÈTE (la bourse
+// est le seul obstacle, il n'y a ni clause ni affinité), et le plafond est propre aux
+// montures — elles ne prennent pas la place d'un compagnon.
+
+function renderEtable(data) {
+	const plafondEl = document.getElementById('mnt-plafond');
+	const possedees = data.montures || [];
+	if (plafondEl) plafondEl.textContent = `${possedees.length}/${data.plafond}`;
+	const full = possedees.length >= (data.plafond || 0);
+	const bourse = _purseEnCuivre(data.purse);
+
+	_rendreCartesMontures(document.getElementById('mnt-possedees-list'), possedees,
+		m => _btnRelacher(m));
+	const vide = document.getElementById('mnt-possedees-list');
+	if (vide && !possedees.length) {
+		vide.innerHTML = '<div class="sell-empty">Vous ne menez aucune monture.</div>';
+	}
+
+	const ol = document.getElementById('mnt-offres-list');
+	if (!ol) return;
+	const offres = data.offres || [];
+	if (!offres.length) {
+		ol.innerHTML = '<div class="sell-empty">Aucune bête à vendre ici pour le moment.</div>';
+		return;
+	}
+	ol.innerHTML = offres.map(o => {
+		const trop = o.prix > bourse;
+		const raison = full ? 'Vous ne pouvez pas mener davantage de montures'
+					 : trop ? 'Vous n\'avez pas de quoi payer' : 'Acheter cette monture';
+		return `<div class="mnt-offre">
+			<img src="/monsters/${o.image}" alt="" class="mnt-offre-img">
+			<div class="mnt-offre-txt">
+				<strong>${o.nom}</strong>
+				<span class="q-desc">${o.description || ''}</span>
+				<span class="q-desc">🎒 porte ${o.charge_min} à ${o.charge_max} kg</span>
+				<span class="sell-prix">💰 ${_prixTexte(o.prix)}</span>
+			</div>
+			<button class="sh-drop-btn" ${(full || trop) ? 'disabled' : ''} title="${raison}"
+				onclick="acheterMonture('${o.espece}')">Acheter</button>
+		</div>`;
+	}).join('');
+}
+
+// La bourse arrive en {or, argent, cuivre} : le comparateur de prix travaille en cuivre.
+function _purseEnCuivre(p) {
+	p = p || {};
+	return (+(p.or || 0)) * 10000 + (+(p.argent || 0)) * 100 + (+(p.cuivre || 0));
+}
+
+// Un prix de monture se compte en dizaines d'or : l'afficher en cuivre serait illisible.
+function _prixTexte(cuivre) {
+	cuivre = +(cuivre || 0);
+	const or = Math.floor(cuivre / 10000);
+	const argent = Math.floor((cuivre % 10000) / 100);
+	const cu = cuivre % 100;
+	return [or ? `${or} or` : '', argent ? `${argent} ar` : '', cu ? `${cu} cu` : '']
+		.filter(Boolean).join(' ') || '0 cu';
+}
+
+async function openEtable() {
+	try {
+		const res = await fetch('api/montures/etable');
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderEtable(data);
+		document.getElementById('game-container').classList.add('panel-hidden');
+		document.getElementById('montures-panel').classList.remove('panel-hidden');
+		window.scrollTo({ top: 0, behavior: 'instant' });
+	} catch (err) { console.error('Erreur étable', err); }
+}
+
+function closeEtable() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('montures-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function acheterMonture(espece) {
+	try {
+		const res = await fetch('api/montures/acheter', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ espece })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderEtable(data);
+		showToast(`🐴 ${(data.achetee || {}).nom || 'Monture'} vous suit désormais.`);
+	} catch (err) { console.error('Erreur achat de monture', err); }
+}
+
+async function relacherMonture(monture_id) {
+	try {
+		const res = await fetch('api/montures/relacher', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ monture_id })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		showToast(`👋 ${data.relachee} retrouve la liberté.`);
+		// Le bouton vit dans DEUX panneaux : on rafraîchit celui qui est ouvert.
+		if (!document.getElementById('montures-panel').classList.contains('panel-hidden')) {
+			renderEtable(data);
+		} else {
+			openGroupe();
+		}
+	} catch (err) { console.error('Erreur relâchement', err); }
+}
+
 // ── Conditions d'engagement ──────────────────────────────────────────────────────
 // Une recrue qui pose des CLAUSES de conduite ne s'embauche qu'après les avoir acceptées.
 // Sans clause, rien à négocier : embauche directe, comme avant.
@@ -5114,7 +5268,52 @@ function renderGroupe(data) {
 			openCompagnonSheet(card.dataset.porteur);
 		});
 	});
+	_rendreCartesMontures(document.getElementById('grp-montures-list'), data.montures || [],
+		m => _btnRelacher(m));
+	const titreMnt = document.getElementById('grp-montures-titre');
+	if (titreMnt) titreMnt.style.display = (data.montures || []).length ? '' : 'none';
 	renderGroupeInventaire();
+}
+
+// Pied d'une monture : ce qui la définit, c'est ce qu'elle PORTE (ses PV sont déjà dans ses
+// barres). L'espèce n'est pas répétée — c'est le nom de la carte.
+function _piedMonture(m) {
+	const charge = +(m.charge || 0), max = +(m.charge_max || 0);
+	return `<span>🎒 ${charge.toFixed(1)} / ${max} kg</span>`;
+}
+
+// Rafraîchit en place le pied (et le bouton Relâcher) de la carte d'UNE monture, sans
+// reconstruire la liste — reconstruire perdrait les viewports de portrait déjà mesurés.
+function _majPiedMonture(m) {
+	const card = document.querySelector(`#grp-montures-list .character-card[data-porteur="${m.id}"]`);
+	if (!card) return;
+	const pied = card.querySelector('[data-role="footer"]');
+	if (pied) pied.innerHTML = _piedMonture(m);
+	const act = card.querySelector('[data-role="actions"]');
+	if (act) act.innerHTML = _btnRelacher(m);
+}
+
+function _btnRelacher(m) {
+	// Relâcher est définitif : on ne le propose pas tant que la bête est chargée (le serveur
+	// refuse de toute façon, autant l'expliquer avant le clic).
+	const chargee = +(m.charge || 0) > 0;
+	return `<button class="sh-drop-btn sh-abandon-btn" ${chargee ? 'disabled' : ''}
+		title="${chargee ? 'Videz son sac avant de la relâcher' : 'Relâcher cette monture (définitif)'}"
+		onclick="relacherMonture('${m.id}')">✕ Relâcher</button>`;
+}
+
+// Les cartes de montures : même composant que les compagnons, mais NON éditable (une monture
+// n'est pas dans `groupe_effectif`, `_acteur` refuserait d'enregistrer son cadrage) et non
+// cliquable (elle n'a pas de fiche de personnage — pas de stats à dépenser, pas de sorts).
+function _rendreCartesMontures(container, liste, actions) {
+	if (!container) return;
+	clearCharacterCards(container);
+	if (!liste.length) return;   // le titre est masqué par l'appelant : pas de « aucune »
+	liste.forEach(m => renderCharacterCard(container, m, {
+		editable: false,
+		footer: _piedMonture(m),
+		actions: actions(m),
+	}));
 }
 
 // Sacs côte à côte. Le compagnon affiché à droite est le dernier choisi (mémorisé), à
@@ -5122,10 +5321,14 @@ function renderGroupe(data) {
 function renderGroupeInventaire() {
 	const data = _grpEtat || {};
 	const groupe = data.groupe || [];
+	const montures = data.montures || [];
+	// Compagnons PUIS montures : tout ce qui peut porter pour vous. Une monture est un
+	// porteur comme un autre ici — c'est même le meilleur.
+	const porteurs = groupe.concat(montures);
 	const vide = document.getElementById('grp-inv-vide');
 	const wrap = document.getElementById('grp-inv-wrap');
 	if (!wrap) return;
-	if (!groupe.length) {
+	if (!porteurs.length) {
 		if (vide) vide.style.display = '';
 		wrap.style.display = 'none';
 		return;
@@ -5133,17 +5336,20 @@ function renderGroupeInventaire() {
 	if (vide) vide.style.display = 'none';
 	wrap.style.display = '';
 
-	const ids = groupe.map(c => c.id);
+	const ids = porteurs.map(c => c.id);
 	if (!ids.includes(_grpSelId)) {
 		const memo = _grpLsGet(GRP_INV_KEY);
 		_grpSelId = ids.includes(memo) ? memo : ids[0];
 	}
 	const sel = document.getElementById('grp-inv-select');
 	if (sel) {
-		sel.innerHTML = groupe.map(c =>
-			`<option value="${c.id}"${c.id === _grpSelId ? ' selected' : ''}>${c.prenom} ${c.nom}</option>`).join('');
-		// Un seul compagnon : le sélecteur n'a rien à sélectionner, il devient une étiquette.
-		sel.disabled = groupe.length < 2;
+		const opt = c => `<option value="${c.id}"${c.id === _grpSelId ? ' selected' : ''}>`
+			+ `${`${c.prenom || ''} ${c.nom || ''}`.trim()}</option>`;
+		// Les montures dans leur propre groupe : on ne confond pas un compagnon et une bête.
+		sel.innerHTML = groupe.map(opt).join('')
+			+ (montures.length ? `<optgroup label="🐴 Montures">${montures.map(opt).join('')}</optgroup>` : '');
+		// Un seul porteur : le sélecteur n'a rien à sélectionner, il devient une étiquette.
+		sel.disabled = porteurs.length < 2;
 	}
 
 	const principal = data.principal || {};
@@ -5236,6 +5442,13 @@ async function transfererItem(sens, index, itemId) {
 				inventaire: data.compagnon.inventaire,
 				charge: data.compagnon.charge, charge_max: data.compagnon.charge_max,
 			};
+			// La carte d'une monture affiche sa charge en pied : sans cette resynchro elle
+			// resterait figée sur l'état d'avant le transfert jusqu'à la réouverture du panneau.
+			const mnt = (_grpEtat.montures || []).find(m => m.id === data.compagnon_id);
+			if (mnt) {
+				mnt.charge = data.compagnon.charge;
+				_majPiedMonture(mnt);
+			}
 			renderGroupeInventaire();
 		}
 		const t = data.transfere || {};

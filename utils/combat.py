@@ -8,11 +8,14 @@ from models.character_stats import (
 	BaseStats, compute_derived_stats
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
-from utils.characters import grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id
+from utils.characters import (
+	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id, item_ref_weight,
+)
 from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
+from utils import montures as montures_util
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -752,6 +755,7 @@ def create_combat_doc(
 	battle_map: dict | None = None,
 	furtivite_initiale: int = 0,
 	compagnons: list | None = None,
+	montures: list | None = None,
 ) -> dict:
 	joueur = build_joueur_snapshot(character, joueur_index=0)
 	# Furtivité passive à l'entrée (conditions de terrain déjà évaluées par l'appelant
@@ -767,8 +771,29 @@ def create_combat_doc(
 		build_joueur_snapshot(c, joueur_index=i + 1)
 		for i, c in enumerate(compagnons or [])
 	]
+	# Montures : elles SUIVENT le groupe sur la carte (elles portent la charge, on ne les
+	# laisse pas à la porte) mais ne combattent pas. Snapshot standard — c'est ce qui les
+	# rend ciblables par les monstres — puis on les marque `jouable: False` et on les
+	# immobilise. Elles vivent dans `joueurs` : tout ce qui parcourt cette liste (ciblage,
+	# placement, jetons alliés) les voit sans code neuf.
+	montures_snaps = []
+	for i, m in enumerate(montures or []):
+		snap = build_joueur_snapshot(m, joueur_index=len(joueurs) + i)
+		snap["jouable"] = False
+		snap["est_monture"] = True
+		snap["deplacement"] = 0
+		snap["deplacement_base"] = 0
+		# `derived.charge_max` vaut F×5 : sur une monture il faut le multiplicateur
+		# d'espèce, sinon la répartition du butin de fin lui refuserait des carcasses
+		# qu'elle peut parfaitement porter (/collect borne sur CETTE valeur).
+		snap["charge_max"] = montures_util.charge_max_porteur(m)
+		montures_snaps.append(snap)
+	joueurs += montures_snaps
 
-	all_actors = [(j["id"], j["initiative"]) for j in joueurs]
+	# ⚠️ `ordre_initiative` n'accueille QUE les jouables : une monture qui y figurerait
+	# obtiendrait un tour que personne ne peut jouer (_resolve_until_player rendrait la
+	# main au client sur un acteur qui n'a pas d'actions) — le combat s'arrêterait là.
+	all_actors = [(j["id"], j["initiative"]) for j in joueurs if j.get("jouable", True)]
 	all_actors += [(m["id"], m["initiative"]) for m in monstres]
 	all_actors.sort(key=lambda x: x[1], reverse=True)
 	ordre = [a[0] for a in all_actors]
@@ -955,13 +980,22 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 			if est_joueur:
 				# KO d'un membre du groupe : le combat continue tant qu'il reste un
 				# joueur debout — la défaite n'arrive que TOUS à terre.
+				est_monture = defenseur.get("est_monture")
 				combat_doc["log"].append({
 					"tour": combat_doc["tour"],
 					"acteur": "Système",
 					"kind": "sys",
-					"texte": f"{defenseur['nom']} est à terre !",
+					"texte": (f"{defenseur['nom']} s'effondre — sa charge se répand au sol !"
+							  if est_monture else f"{defenseur['nom']} est à terre !"),
 				})
-				if all(j.get("currentPV", 0) <= 0 for j in combat_doc["joueurs"]):
+				# La cargaison vit sur le DOC de la monture, pas sur son snapshot : on se
+				# contente de la marquer ici, `finalize_combat` déversera son sac dans le
+				# butin disponible (là où le doc est chargé, et sauvé).
+				if est_monture:
+					defenseur["morte"] = True
+				# ⚠️ `_combattants_vivants` et non la liste brute : une monture debout ne
+				# doit pas empêcher la défaite d'être déclarée (plus personne ne joue).
+				if not _combattants_vivants(combat_doc):
 					combat_doc["status"] = "defaite"
 					combat_doc["log"].append({
 						"tour": combat_doc["tour"],
@@ -998,7 +1032,18 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 
 
 def _joueurs_vivants(combat_doc: dict) -> list:
+	"""Tous les acteurs du camp du joueur encore debout, MONTURES COMPRISES : c'est la
+	liste du CIBLAGE (un monstre peut s'en prendre à une bête de somme). Pour savoir si
+	le combat est perdu, voir `_combattants_vivants` — les deux ne se confondent pas."""
 	return [j for j in combat_doc["joueurs"] if j.get("currentPV", 0) > 0]
+
+
+def _combattants_vivants(combat_doc: dict) -> list:
+	"""Les acteurs encore debout qui peuvent AGIR. ⚠️ Distinct de `_joueurs_vivants` :
+	une monture ne joue pas. Si on comptait sur elle pour décider de la défaite, un groupe
+	entièrement à terre avec une monture indemne ne perdrait jamais — et plus personne ne
+	pouvant jouer, le combat resterait bloqué indéfiniment."""
+	return [j for j in _joueurs_vivants(combat_doc) if j.get("jouable", True)]
 
 
 def _cible_joueur(combat_doc: dict, monstre: dict) -> dict | None:
@@ -2050,6 +2095,50 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 	return save_doc(doc) is not None
 
 
+def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
+					  character: dict) -> bool:
+	"""Applique l'issue du combat au doc d'UNE monture. Elle ne gagne pas d'XP (elle porte,
+	elle ne se bat pas) et n'a pas d'affinité — seuls ses PV comptent, et sa survie.
+
+	Tombée à 0 PV, elle est PERDUE (world-var MONTURE_MORT_DEFINITIVE) : elle quitte le
+	troupeau et sa cargaison rejoint le butin disponible, pour que le joueur puisse la
+	récupérer dans l'overlay de fin plutôt que de la voir disparaître avec la bête.
+	⚠️ Cela suppose une victoire — `butin_disponible` n'est proposé que dans ce cas ; une
+	défaite emporte donc la cargaison, ce qui est le prix assumé du risque.
+
+	Même garde d'idempotence PAR DOC que `_finalize_membre` : une re-finalisation ne peut
+	ni ressusciter la bête ni dupliquer sa cargaison."""
+	combat_id = combat_doc.get("_id")
+	rewarded = doc.get("combats_recompenses", [])
+	if combat_id in rewarded:
+		return False
+
+	if snap.get("morte") and character_stats.MONTURE_MORT_DEFINITIVE:
+		cargaison = montures_util.tuer(character, doc)
+		dispo = combat_doc.setdefault("butin_disponible", [])
+		for n, ref in enumerate(cargaison):
+			item = get_doc(item_ref_id(ref))
+			if not item:
+				continue
+			dispo.append({
+				# Id synthétique : /collect indexe le butin par `monstre_id` sans exiger
+				# qu'un monstre porte ce nom (la boucle de marquage ne trouvera rien, ce
+				# qui est sans effet).
+				"monstre_id": f"cargo_{snap['id']}_{n}",
+				"item_id": item["_id"],
+				"nom": item.get("nom", item["_id"]),
+				"poids": item_ref_weight(ref),
+			})
+	else:
+		# Survivante (ou mort désactivée) : relevée comme un membre du groupe.
+		doc["currentPV"] = max(1, snap.get("currentPV", 0))
+		doc["currentPM"] = max(0, snap.get("currentPM", doc.get("currentPM", 0)))
+
+	rewarded.append(combat_id)
+	doc["combats_recompenses"] = rewarded[-50:]
+	return save_doc(doc) is not None
+
+
 def finalize_combat(combat_doc: dict) -> bool:
 	"""Applique l'issue du combat (XP/PV/butin) à TOUS les membres du groupe en base —
 	compagnons (docs `aventurier:*`) d'abord, personnage principal en dernier.
@@ -2078,6 +2167,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# principal échoue, /play re-finalisera — les compagnons déjà servis sont protégés
 	# par leur propre garde d'idempotence.
 	compagnons_traites = []
+	montures_traitees = []
 	joueur_principal = None
 	for j in combat_doc["joueurs"]:
 		cid = j.get("character_id")
@@ -2086,6 +2176,12 @@ def finalize_combat(combat_doc: dict) -> bool:
 			continue
 		doc = get_doc(cid) if cid else None
 		if not doc:
+			continue
+		# ⚠️ Une monture n'est PAS un compagnon : elle ne gagne pas d'XP, n'a pas
+		# d'affinité, et à 0 PV elle meurt au lieu d'être relevée. `_finalize_membre` lui
+		# appliquerait les trois — elle a sa propre passe, plus bas.
+		if j.get("est_monture"):
+			montures_traitees.append((j, doc))
 			continue
 		_finalize_membre(combat_doc, j, doc, status)
 		compagnons_traites.append((j, doc))
@@ -2109,6 +2205,12 @@ def finalize_combat(combat_doc: dict) -> bool:
 			if payload:
 				dispo.append(payload)
 		combat_doc["butin_disponible"] = dispo
+
+	# Montures — APRÈS l'affectation de `butin_disponible` ci-dessus, qui l'écraserait :
+	# la cargaison d'une bête tombée s'y ajoute (mute `character["montures"]`, sauvé avec
+	# le principal juste en dessous).
+	for j, doc in montures_traitees:
+		_finalize_monture(combat_doc, j, doc, status, character)
 
 	# Progression des quêtes de chasse : compte les monstres tués (toute issue), sous le
 	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.

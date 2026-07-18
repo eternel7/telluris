@@ -36,6 +36,7 @@ from utils import focalisation
 from utils import intro
 from utils import transport
 from utils import recrutement
+from utils import montures
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -620,11 +621,15 @@ def _apply_world_turn_groupe(character: dict) -> list:
     """Le tour monde vaut pour TOUT le groupe : chaque compagnon régénère PV/PM et
     décrémente ses effets actifs exactement comme le joueur — un doc `aventurier:*` est
     un miroir du character, `_apply_world_turn_regen` s'y applique tel quel. Les docs
-    compagnons sont ANNEXES au personnage : sauvés ici, séparément."""
+    compagnons sont ANNEXES au personnage : sauvés ici, séparément.
+
+    Les MONTURES régénèrent au même titre : leur doc est le même miroir, elles pansent
+    donc leurs plaies en marchant comme le reste de l'expédition. Elles ne sont pas
+    renvoyées — l'appelant ne se sert du retour que pour les compagnons."""
     compagnons = recrutement.groupe_effectif(character, get_doc)
-    for av in compagnons:
-        _apply_world_turn_regen(av)
-        save_doc(av)
+    for porteur in compagnons + montures.montures_effectives(character, get_doc):
+        _apply_world_turn_regen(porteur)
+        save_doc(porteur)
     return compagnons
 
 
@@ -881,7 +886,11 @@ def _inventory_payload(character: dict, sol_doc: dict | None = None) -> dict:
 
 	Le SOL n'appartient pas au porteur mais au lieu où se tient le personnage principal :
 	un compagnon n'a ni `lieu` ni `position`. Quand le porteur est un compagnon, on passe
-	donc le doc du principal en `sol_doc` — sac du compagnon, sol du joueur."""
+	donc le doc du principal en `sol_doc` — sac du compagnon, sol du joueur.
+
+	⚠️ `charge_max` passe par `montures.charge_max_porteur` : le porteur peut être une
+	monture, dont la capacité est démultipliée. `charge_max_of` seul sous-évaluerait son
+	sac d'un facteur 3 à 5, et le client recopie cette valeur pour griser ses flèches."""
 	slots = character.get("slots", {})
 	sol   = sol_doc if sol_doc is not None else character
 	return {
@@ -889,7 +898,7 @@ def _inventory_payload(character: dict, sol_doc: dict | None = None) -> dict:
 		"inventaire":    [d for r in character.get("inventaire", []) if (d := resolve_item_ref(r))],
 		"objets_au_sol": [d for r in sol.get("objets_au_sol", []) if (d := resolve_item_ref(r))],
 		"charge":        round(carried_weight(character), 2),
-		"charge_max":    charge_max_of(character),
+		"charge_max":    montures.charge_max_porteur(character),
 	}
 
 
