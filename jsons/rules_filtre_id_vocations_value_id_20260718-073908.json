@@ -1,7 +1,7 @@
 [
   {
     "_id": "rules:vocations",
-    "_rev": "4-e41d27e12948a63bbcc9a4402b9aaf2d",
+    "_rev": "9-54f421353f022a9bd8ea206e33fc6c87",
     "type": "rules",
     "value": [
       {
@@ -143,7 +143,7 @@
         "icon": "🛡",
         "img": "",
         "magie": "Sainte",
-        "blurb": "Guerrier sacré. Sa lame brûle d'une lumière que les morts-vivants redoutent.",
+        "blurb": "Guerrier protecteurs aux delà des remparts. Son arme brûle d'une lumière que les monstres redoutent.",
         "equipement_de_base": [
           "item:Masse_benie"
         ]
@@ -153,8 +153,8 @@
         "label": "Templier",
         "icon": "⚜️",
         "img": "",
-        "magie": "Sainte",
-        "blurb": "Mi-soldat mi-moine. L'épée de l'institution autant que celle des dieux.",
+        "magie": "Bataille",
+        "blurb": "Défenseur de la cité, gardien des temples. L'épée de l'institution autant que celle des dieux.",
         "equipement_de_base": [
           "item:Epee_longue_ordre"
         ]
