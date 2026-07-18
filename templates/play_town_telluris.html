@@ -1611,8 +1611,8 @@
 									<span class="sh-quest-status en-cours">En cours</span>
 									{% if q.get("expire_at") %}<span class="sh-quest-timer" data-expire="{{ q.expire_at }}" data-now="{{ q.now }}"></span>{% endif %}
 									<span class="sh-inv-actions">
-										{% if q.get("carte") %}<button class="sh-drop-btn" data-carte='{{ q.carte | tojson }}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">🗺️</button>{% endif %}
 										{% if q.get("focalisable") %}<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>{% endif %}
+										{% if q.get("carte") %}<button class="sh-drop-btn" data-carte='{{ q.carte | tojson }}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">Carte</button>{% endif %}
 										<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('{{ q.get('id') }}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 									</span>
 								</div>
@@ -1916,6 +1916,23 @@
 		.item-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: flex-end; }
 		.item-detail-actions button { margin: 0; }
 		.item-detail-actions button:disabled { opacity: .5; cursor: not-allowed; }
+		/* ── Conditions d'engagement d'une recrue (clauses à accepter) ──
+		   Réutilise .item-detail-card / .item-detail-close / .item-detail-actions ;
+		   seul le calque est neuf (au-dessus des autres : décision bloquante). */
+		#clauses-overlay {
+			position: fixed; inset: 0; z-index: 9400;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#clauses-overlay.clauses-hidden { display: none; }
+		#clauses-overlay .item-detail-card { max-width: 520px; }
+		.clauses-part { color: var(--gold2, var(--gold, #d8b46a)); margin: .2rem 0 .8rem; }
+		.clauses-list { list-style: none; padding: 0; margin: 0 0 .9rem; }
+		.clauses-list li {
+			padding: 7px 0 7px 1.1em; text-indent: -1.1em;
+			border-bottom: 1px solid rgba(74, 74, 90, .3); line-height: 1.4;
+		}
+		.clauses-avert { color: var(--muted); font-size: .85rem; font-style: italic; }
 	</style>
 	<div id="pnj-panel" class="panel-hidden panel-frame board-panel" aria-label="Dialogue avec un personnage">
 		<div class="sell-topbar">
@@ -1965,6 +1982,14 @@
 			<div class="qmap-view" id="qmap-view"></div>
 		</div>
 	</div><!-- /#quest-map-overlay -->
+	<!-- Conditions d'engagement : ✕/Échap/backdrop FERMENT sans décider — seul le bouton
+	     « Refuser » écarte la recrue, et ce geste est irréversible. -->
+	<div id="clauses-overlay" class="clauses-hidden" aria-label="Conditions d'engagement" onclick="if(event.target===this)closeClauses()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeClauses()" title="Fermer sans décider">✕</button>
+			<div id="clauses-body"></div>
+		</div>
+	</div><!-- /#clauses-overlay -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -2667,6 +2692,9 @@ function sheetTab(id, btn) {
 }
 document.addEventListener('keydown', e => {
 	if (e.key !== 'Escape') return;
+	// Cascade ordonnée par z-index décroissant : le calque le plus haut se ferme d'abord.
+	const clauses = document.getElementById('clauses-overlay');
+	if (clauses && !clauses.classList.contains('clauses-hidden')) { closeClauses(); return; }
 	const qmap = document.getElementById('quest-map-overlay');
 	if (qmap && !qmap.classList.contains('hidden')) { closeQuestMap(); return; }
 	const itemOv = document.getElementById('item-detail-overlay');
@@ -4542,7 +4570,7 @@ function showQuestMap(el) {
 	const px = pos.x || 0, py = pos.y || 0;
 	const view = document.getElementById('qmap-view');
 	document.getElementById('qmap-title').textContent =
-		`${carte.lieu_nom || 'Zone'} — case (${px}, ${py})`;
+		`${carte.lieu_nom || 'Zone'}`;
 	document.getElementById('qmap-dir').textContent = carte.direction_texte || '';
 	view.innerHTML = '';
 	view.style.width = view.style.height = '';
@@ -4611,7 +4639,7 @@ function renderFicheQuetes(data) {
 			// 🗺️ carte de la zone à explorer (quête de chasse localisée) : les données du crop
 			// voyagent dans data-carte pour rester disponibles sans re-fetch.
 			const mapBtn = q.carte
-				? `<button class="sh-drop-btn" data-carte='${_escAttr(JSON.stringify(q.carte))}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">🗺️</button>`
+				? `<button class="sh-drop-btn" data-carte='${_escAttr(JSON.stringify(q.carte))}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">Carte</button>`
 				: '';
 			return `<div class="sh-quest ${rang}">
 				<div class="sh-quest-hdr">
@@ -4880,6 +4908,11 @@ function _rendreCartesCompagnons(container, groupe, actions) {
 	}));
 }
 
+// Payload des recrues affichées (id → recrue), pour le dialogue de clauses : le bouton
+// d'embauche ne transporte qu'un id, et il faut relire les exigences à l'ouverture.
+// Repeuplé à CHAQUE rendu — une recrue disparue du tableau ne doit pas y survivre.
+let _recEtat = {};
+
 function renderRecrutement(data) {
 	const plafondEl = document.getElementById('rec-plafond');
 	if (plafondEl) plafondEl.textContent = `${(data.groupe || []).length}/${data.plafond}`;
@@ -4891,11 +4924,13 @@ function renderRecrutement(data) {
 	const rl = document.getElementById('rec-recrues-list');
 	if (rl) {
 		const recrues = data.recrues || [];
+		_recEtat = {};
 		clearCharacterCards(rl);
 		if (!recrues.length) {
 			rl.innerHTML = '<div class="sell-empty">Personne au tableau pour le moment.</div>';
 		}
 		recrues.forEach(r => {
+			_recEtat[r.id] = r;
 			const ex = r.exigences_effectives || {};
 			const clauses = (ex.clauses || []).map(c => `<span class="q-desc">• ${c}</span>`).join('');
 			const aff = (r.affinite !== null && r.affinite !== undefined)
@@ -4910,7 +4945,7 @@ function renderRecrutement(data) {
 				actions: `<button class="sh-drop-btn"
 					${full ? 'disabled title="Votre groupe est au complet"'
 						   : 'title="Embaucher (gratuit — payé en part de butin de quête)"'}
-					onclick="embaucherAventurier('${r.id}')">Embaucher</button>`,
+					onclick="demanderEmbauche('${r.id}')">Embaucher</button>`,
 			});
 		});
 	}
@@ -4935,6 +4970,61 @@ function closeRecrutementPanel() {
 	document.getElementById('game-container').classList.remove('panel-hidden');
 	document.getElementById('recrutement-panel').classList.add('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Conditions d'engagement ──────────────────────────────────────────────────────
+// Une recrue qui pose des CLAUSES de conduite ne s'embauche qu'après les avoir acceptées.
+// Sans clause, rien à négocier : embauche directe, comme avant.
+function demanderEmbauche(avId) {
+	const clauses = ((_recEtat[avId] || {}).exigences_effectives || {}).clauses || [];
+	if (!clauses.length) return embaucherAventurier(avId);
+	openClauses(avId);
+}
+
+function openClauses(avId) {
+	const r = _recEtat[avId];
+	const ov = document.getElementById('clauses-overlay');
+	if (!r || !ov) return;
+	const ex = r.exigences_effectives || {};
+	const nom = `${r.prenom || ''} ${r.nom || ''}`.trim();
+	document.getElementById('clauses-body').innerHTML =
+		`<h3>Conditions d'engagement — ${nom}</h3>`
+		+ `<div class="clauses-part">💰 Part de butin exigée : <strong>${ex.part_butin_pct} %</strong></div>`
+		+ `<div>« Je vous accompagne, mais à mes conditions : »</div>`
+		+ `<ul class="clauses-list">${(ex.clauses || []).map(c => `<li>• ${c}</li>`).join('')}</ul>`
+		+ `<div class="clauses-avert">Refuser ses conditions la vexe : elle quittera le tableau.</div>`
+		+ `<div class="item-detail-actions">`
+		+ `<button class="sh-drop-btn sh-abandon-btn" onclick="_clausesRefuser('${r.id}')"`
+		+ ` title="Elle quitte le tableau — c'est sans retour">✕ Refuser ses conditions</button>`
+		+ `<button class="sh-equip-btn" onclick="_clausesAccepter('${r.id}')"`
+		+ ` title="Accepter les clauses et embaucher">✔ Accepter et embaucher</button>`
+		+ `</div>`;
+	ov.classList.remove('clauses-hidden');
+}
+
+// ⚠️ Fermer ≠ décider : ✕, Échap et clic hors carte laissent la recrue au tableau. Le
+// refus est irréversible, il ne doit jamais partir d'un geste de sortie accidentel.
+function closeClauses() {
+	document.getElementById('clauses-overlay').classList.add('clauses-hidden');
+}
+
+function _clausesAccepter(id) { closeClauses(); embaucherAventurier(id); }
+function _clausesRefuser(id)  { closeClauses(); refuserAventurier(id); }
+
+// Le refus retire la recrue du tableau (serveur) ; la réponse est le board reconstruit,
+// place déjà repeuplée — même forme que l'embauche.
+async function refuserAventurier(avId) {
+	try {
+		const res = await fetch('api/recrutement/refuser', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ aventurier_id: avId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		renderRecrutement(data);
+		if (data.refus) showToast('✕ ' + data.refus.nom + ' remballe ses exigences et s\'en va.');
+	} catch(err) { console.error('Erreur refus', err); }
 }
 
 async function embaucherAventurier(avId) {

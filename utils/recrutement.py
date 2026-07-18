@@ -11,7 +11,9 @@
 # AFFINITE_SEUIL_DEPART). Embauche gratuite ; la recrue exige une PART du butin,
 # prélevée sur le cuivre des récompenses de quête au turn-in (`regler_part_butin`,
 # chokepoint unique — la phase 2 « compagnie permanente » s'y branchera). Les clauses
-# de conduite sont des données affichées, sans détection de violation (v1).
+# de conduite doivent être ACCEPTÉES pour que l'embauche ait lieu : les refuser retire la
+# recrue du tableau (`retirer_du_tableau`). Leur respect n'est pas détecté en jeu (v1) —
+# elles engagent le joueur moralement, pas mécaniquement.
 #
 # Comme utils/quetes.py : logique pure, ne sauvegarde jamais — SAUF
 # `remplir_tableau_recrues`, qui persiste les recrues nouvellement générées (création
@@ -80,6 +82,11 @@ CLAUSES_TYPES = [
 
 # Prénoms/noms par race (repli "defaut"). Constantes de module : le contenu peut être
 # enrichi ici sans toucher à la logique.
+#
+# Les PRÉNOMS ne sont pas cloisonnés : les humains vivant partout, un nain ou un hobbit
+# né en cité humaine peut porter un prénom humain (PRENOM_RACE_MUTUALISEE, tiré avec la
+# proba PRENOM_MUTUALISE_PROBA). Les NOMS, eux, restent racialement stricts — un nom de
+# famille dit une lignée, pas un voisinage.
 PRENOMS = {
     "humain": {
         "M": ["Aldric", "Bertrand", "Corentin", "Enguerrand", "Gaultier", "Renaud", "Thibaut", "Amaury", "Baudouin", "Gautier", "Godefroy", "Josselin", "Lothaire", "Raoul"],
@@ -120,6 +127,26 @@ NOMS = {
     "defaut": ["Sans-Terre", "l'Errant", "du Chemin",
         "l'Inconnu", "le Muet", "Sans-Nom"],
 }
+
+# Race dont le répertoire de prénoms déborde sur les autres, et fréquence du débordement.
+PRENOM_RACE_MUTUALISEE = "humain"
+PRENOM_MUTUALISE_PROBA = 0.25
+
+
+def prenoms_possibles(race_id: str, sex: str) -> list:
+	"""Pool de prénoms tirable pour (race, sexe). Toujours celui de la race — sauf tirage
+	à PRENOM_MUTUALISE_PROBA pour une race AUTRE que PRENOM_RACE_MUTUALISEE, qui rend alors
+	le pool humain : un aventurier non-humain élevé en cité humaine porte un prénom d'ici.
+	Renvoie une liste non vide (replis : autre sexe du pool, puis "defaut")."""
+	def pool(rid: str) -> list:
+		p = PRENOMS.get(rid) or PRENOMS["defaut"]
+		return p.get(sex) or p.get("M") or []
+
+	if race_id != PRENOM_RACE_MUTUALISEE and random.random() < PRENOM_MUTUALISE_PROBA:
+		emprunt = pool(PRENOM_RACE_MUTUALISEE)
+		if emprunt:
+			return emprunt
+	return pool(race_id) or PRENOMS["defaut"].get(sex) or PRENOMS["defaut"]["M"]
 
 
 # ── Éligibilité du lieu ──────────────────────────────────────────────────────────
@@ -312,8 +339,7 @@ def generer_aventurier(guild_doc: dict, parent_doc: dict | None, niveau_max: int
 
 	if portraits is None:
 		portraits = portraits_disponibles()
-	pool_prenoms = PRENOMS.get(race.get("id"), PRENOMS["defaut"])
-	prenoms = pool_prenoms.get(sex) or pool_prenoms.get("M") or ["Sans-Nom"]
+	prenoms = prenoms_possibles(race.get("id", ""), sex)
 	noms = NOMS.get(race.get("id"), NOMS["defaut"])
 
 	guild_id = guild_doc.get("_id", "")
@@ -375,20 +401,35 @@ def recrue_perimee(av: dict, now: int) -> bool:
 	return now >= int(expire_at)
 
 
+def retirer_du_tableau(av: dict) -> None:
+	"""Retire définitivement une recrue du tableau — CHOKEPOINT unique des deux motifs :
+	péremption de l'offre et refus des clauses par le joueur. Une recrue JAMAIS embauchée
+	est supprimée de la base (personne ne la référence) ; un ANCIEN compagnon ré-offert
+	repasse simplement `parti` (son doc porte l'affinité mémorisée — le détruire romprait
+	le lien) et pourra revenir. PERSISTE lui-même (ou supprime), best-effort."""
+	if av.get("embauche_par"):
+		av["statut"] = "parti"
+		av.pop("expire_at", None)
+		save_doc(av)
+	else:
+		delete_doc(av)
+
+
+def peut_refuser(av: dict) -> tuple[bool, str]:
+	"""(ok, raison) : on ne refuse les conditions que d'une recrue encore OFFERTE — un
+	compagnon déjà embauché se congédie, il ne se refuse pas."""
+	if (av or {}).get("statut") != "offert":
+		return False, "Cette recrue n'est plus disponible."
+	return True, ""
+
+
 def purger_recrues_perimees(recrues: list, now: int) -> list:
-	"""Retire du tableau les recrues périmées. Une recrue JAMAIS embauchée est supprimée
-	de la base (personne ne la référence) ; un ANCIEN compagnon ré-offert repasse
-	simplement `parti` (son doc porte l'affinité mémorisée — le détruire romprait le
-	lien) et pourra revenir. Best-effort. Renvoie les recrues qui restent."""
+	"""Retire du tableau les recrues périmées (via `retirer_du_tableau`, qui tranche entre
+	suppression et retour au statut `parti`). Renvoie les recrues qui restent."""
 	restantes = []
 	for av in recrues:
 		if recrue_perimee(av, now):
-			if av.get("embauche_par"):
-				av["statut"] = "parti"
-				av.pop("expire_at", None)
-				save_doc(av)
-			else:
-				delete_doc(av)
+			retirer_du_tableau(av)
 		else:
 			restantes.append(av)
 	return restantes

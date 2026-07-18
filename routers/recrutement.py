@@ -2,8 +2,9 @@
 # Endpoints du tableau de recrutement d'un lieu recruteur (tag "recrutement" ou guilde
 # d'aventuriers). Le moteur (utils/recrutement.py) génère/complète les recrues ; ici on
 # gère l'interaction joueur : consulter le tableau (carte d'aventurier de la cité
-# requise), embaucher (gratuit), congédier (autorisé partout, miroir de l'abandon de
-# quête). Pattern calqué sur routers/quetes.py : muter → save_doc is None ⇒ 409.
+# requise), embaucher (gratuit — c'est l'ACCEPTATION des clauses de conduite), refuser
+# ces clauses (la recrue quitte le tableau), congédier (autorisé partout, miroir de
+# l'abandon de quête). Pattern calqué sur routers/quetes.py : muter → save_doc is None ⇒ 409.
 
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
@@ -31,6 +32,36 @@ def _lieu_recruteur(character: dict) -> dict:
 	if not lieu_doc or not recrutement.lieu_recrute(lieu_doc):
 		raise HTTPException(status_code=403, detail="Aucun tableau de recrutement ici.")
 	return lieu_doc
+
+
+def _acces_tableau(current_user: dict) -> tuple[dict, dict]:
+	"""(personnage, lieu) pour toute opération sur le tableau : personnage sélectionné (404),
+	lieu recruteur (403), carte d'aventurier de la cité (403). Prélude commun au board, à
+	l'embauche et au refus."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	lieu_doc = _lieu_recruteur(character)
+	ok, raison = recrutement.acces_autorise(character, lieu_doc)
+	if not ok:
+		raise HTTPException(status_code=403, detail=raison)
+	return character, lieu_doc
+
+
+def _recrue_du_tableau(lieu_doc: dict, body: dict) -> dict:
+	"""Doc de la recrue visée par le corps de requête, vérifié comme proposée PAR CE LIEU.
+	Le statut (`offert` ?) est laissé aux gardes métier, qui remontent en 409."""
+	av_id = body.get("aventurier_id")
+	av = get_doc(av_id) if av_id else None
+	if not av or av.get("type") != "aventurier":
+		raise HTTPException(status_code=404, detail="Recrue introuvable")
+	if av.get("giver") != lieu_doc.get("_id"):
+		raise HTTPException(status_code=403, detail="Cette recrue n'est pas proposée ici.")
+	return av
+
+
+def _nom_de(av: dict) -> str:
+	return f"{av.get('prenom', '')} {av.get('nom', '')}".strip()
 
 
 def _recrue_view(character: dict, av: dict) -> dict:
@@ -79,7 +110,7 @@ def _appliquer_departs(character: dict) -> list:
 		for av in partis:
 			save_doc(av)
 		save_doc(character)
-	return [f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in partis]
+	return [_nom_de(av) for av in partis]
 
 
 def _payload(character: dict, recrues: list | None = None) -> dict:
@@ -96,14 +127,7 @@ def _payload(character: dict, recrues: list | None = None) -> dict:
 
 @recrutement_router.get("/recrutement/board")
 async def recrutement_board(current_user: Annotated[dict, Depends(get_current_user)]):
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
-	lieu_doc = _lieu_recruteur(character)
-	ok, raison = recrutement.acces_autorise(character, lieu_doc)
-	if not ok:
-		raise HTTPException(status_code=403, detail=raison)
-
+	character, lieu_doc = _acces_tableau(current_user)
 	departs = _appliquer_departs(character)
 	recrues = recrutement.remplir_tableau_recrues(lieu_doc, character)
 	payload = _payload(character, recrues)
@@ -117,20 +141,10 @@ async def recrutement_embaucher(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
-	lieu_doc = _lieu_recruteur(character)
-	ok, raison = recrutement.acces_autorise(character, lieu_doc)
-	if not ok:
-		raise HTTPException(status_code=403, detail=raison)
-
-	av_id = body.get("aventurier_id")
-	av = get_doc(av_id) if av_id else None
-	if not av or av.get("type") != "aventurier":
-		raise HTTPException(status_code=404, detail="Recrue introuvable")
-	if av.get("giver") != lieu_doc.get("_id"):
-		raise HTTPException(status_code=403, detail="Cette recrue n'est pas proposée ici.")
+	"""Embauche = ACCEPTATION des conditions de la recrue (part de butin + clauses de
+	conduite) : le client ne l'appelle qu'après validation du dialogue de clauses."""
+	character, lieu_doc = _acces_tableau(current_user)
+	av = _recrue_du_tableau(lieu_doc, body)
 
 	ok, raison = recrutement.embaucher(character, av)
 	if not ok:
@@ -143,7 +157,32 @@ async def recrutement_embaucher(
 
 	recrues = recrutement.remplir_tableau_recrues(lieu_doc, character)
 	payload = _payload(character, recrues)
-	payload["embauche"] = {"nom": f"{av.get('prenom', '')} {av.get('nom', '')}".strip()}
+	payload["embauche"] = {"nom": _nom_de(av)}
+	return payload
+
+
+@recrutement_router.post("/recrutement/refuser")
+async def recrutement_refuser(
+	current_user: Annotated[dict, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Refus des conditions : la recrue se vexe et QUITTE le tableau (`retirer_du_tableau`
+	tranche entre suppression et retour au statut `parti` pour un ancien compagnon). Le
+	refus ne coûte AUCUNE affinité — éconduire un inconnu n'a pas de coût social — donc le
+	personnage n'est pas muté : pas de save_doc(character), pas de branche de conflit."""
+	character, lieu_doc = _acces_tableau(current_user)
+	av = _recrue_du_tableau(lieu_doc, body)
+
+	ok, raison = recrutement.peut_refuser(av)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	recrutement.retirer_du_tableau(av)  # persiste ou supprime lui-même
+
+	# La place libérée est aussitôt repeuplée (remplir_tableau_recrues complète jusqu'à
+	# offre.nb) : le tableau ne rétrécit pas, la recrue refusée est simplement remplacée.
+	recrues = recrutement.remplir_tableau_recrues(lieu_doc, character)
+	payload = _payload(character, recrues)
+	payload["refus"] = {"nom": _nom_de(av)}
 	return payload
 
 
@@ -176,7 +215,7 @@ async def recrutement_congedier(
 	if lieu_doc and recrutement.lieu_recrute(lieu_doc) and recrutement.acces_autorise(character, lieu_doc)[0]:
 		recrues = recrutement.remplir_tableau_recrues(lieu_doc, character)
 	payload = _payload(character, recrues)
-	payload["congedie"] = {"nom": f"{av.get('prenom', '')} {av.get('nom', '')}".strip()}
+	payload["congedie"] = {"nom": _nom_de(av)}
 	return payload
 
 

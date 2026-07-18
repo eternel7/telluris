@@ -243,6 +243,43 @@ def test_purge_conserve_un_ancien_compagnon(monde):
 	assert monde["docs"][av["_id"]]["statut"] == "parti"
 
 
+# ── Retrait du tableau (péremption ET refus des clauses) ─────────────────────────
+
+def test_retirer_du_tableau_supprime_une_recrue_neuve(monde):
+	av = recrue()
+	monde["docs"][av["_id"]] = av
+	recrutement.retirer_du_tableau(av)
+	assert av["_id"] not in monde["docs"]
+	assert monde["supprimes"] == [av]
+
+
+def test_retirer_du_tableau_conserve_un_ancien_compagnon(monde):
+	"""Refuser les conditions d'un ancien compagnon ne détruit pas son doc : il repasse
+	`parti` et pourra être ré-offert — la mémoire du lien survit au refus."""
+	av = recrue(embauche_par="character:u_1", expire_at=9000)
+	monde["docs"][av["_id"]] = av
+	recrutement.retirer_du_tableau(av)
+	assert monde["docs"][av["_id"]]["statut"] == "parti"
+	assert "expire_at" not in monde["docs"][av["_id"]]
+	assert monde["supprimes"] == []
+
+
+def test_refus_ne_coute_aucune_affinite(monde):
+	"""Éconduire quelqu'un n'a pas de coût social : le personnage n'est pas touché."""
+	c = perso(affinites={"aventurier:guilde_abc": 70})
+	av = recrue(embauche_par="character:u_1")
+	monde["docs"][av["_id"]] = av
+	recrutement.retirer_du_tableau(av)
+	assert c["affinites"] == {"aventurier:guilde_abc": 70}
+
+
+def test_peut_refuser_seulement_une_offerte(monde):
+	assert recrutement.peut_refuser(recrue())[0] is True
+	assert recrutement.peut_refuser(recrue(statut="embauche"))[0] is False
+	assert recrutement.peut_refuser(recrue(statut="parti"))[0] is False
+	assert recrutement.peut_refuser({})[0] is False
+
+
 def test_remplir_tableau_complete_jusqu_au_nb(monde):
 	tableau = recrutement.remplir_tableau_recrues(GUILDE, perso())
 	assert len(tableau) == 4  # sous_categorie "ville" → nb 4
