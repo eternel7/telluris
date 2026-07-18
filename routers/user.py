@@ -1090,9 +1090,11 @@ async def apprendre_sort(
 	body: dict = Body(...),
 ):
 	"""Apprend un sort : coût en points de caractéristique ((niveau+1) × SORT_COUT_COEFF),
-	niveau de vocation suffisant et grimoire l'enseignant porté (sac ou équipé, NON
-	consommé — un livre se relit). Ajoute l'id à `sorts_connus`. Un compagnon apprend avec
-	SES points et le grimoire porté dans SON sac (d'où le transfert d'objets du groupe)."""
+	école de magie pratiquée à un niveau suffisant (native ou achetée — MÊME règle que
+	`sorts_apprenables`, qui alimente la liste affichée) et grimoire l'enseignant porté
+	(sac ou équipé, NON consommé — un livre se relit). Ajoute l'id à `sorts_connus`. Un
+	compagnon apprend avec SES points et le grimoire porté dans SON sac (d'où le transfert
+	d'objets du groupe)."""
 	character, _principal = _acteur(current_user, body)
 
 	sort = sorts_util.normaliser_sort(get_doc(body.get("sort_id")))
@@ -1100,9 +1102,11 @@ async def apprendre_sort(
 		raise HTTPException(status_code=422, detail="Sort introuvable")
 	if sort["id"] in (character.get("sorts_connus") or []):
 		raise HTTPException(status_code=422, detail="Sort déjà connu")
-	niveaux = character.get("vocations_niveaux", {})
-	if sort["vocation"] not in niveaux or niveaux[sort["vocation"]] < sort["niveau"]:
-		raise HTTPException(status_code=422, detail="Niveau de vocation insuffisant")
+	vocations = get_doc("rules:vocations")
+	ecole = sorts_util.magie_de_sort(sort, vocations)
+	niveau = sorts_util.niveau_ecole(character, ecole, vocations)
+	if niveau is None or niveau < sort["niveau"]:
+		raise HTTPException(status_code=422, detail="École de magie non pratiquée ou niveau insuffisant")
 	if sorts_util.grimoire_pour(character, sort["id"], resolve_item_ref) is None:
 		raise HTTPException(status_code=409, detail="Grimoire requis pour apprendre ce sort")
 
@@ -1116,7 +1120,6 @@ async def apprendre_sort(
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
-	vocations = get_doc("rules:vocations")
 	return {
 		"attribute_points": character["attribute_points"],
 		"sorts_connus": list(character["sorts_connus"]),
