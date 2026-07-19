@@ -149,6 +149,9 @@
 .ally-token.monture .at-portrait {
 	background-color: #3a2f1a; border-color: #b98c4a;
 	box-shadow: 0 0 8px rgba(185,140,74,0.7); color: #e8c98a;
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 .ally-token.monture .mt-hp-fill { background: #b98c4a; }
 .ally-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
@@ -353,7 +356,15 @@
 	border-radius: 10px;
     padding: 10px;
 }
-.btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.btn-row { 
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	align-content: space-around;
+	gap: 10px;
+	}
 .action-btn {
 	padding: 9px 16px; font-size: 13px; font-weight: bold;
 	border: 1px solid #555; border-radius: 8px; cursor: pointer;
@@ -670,16 +681,16 @@
 
 		<div class="action-bar">
 			<div class="btn-row">
-				<button class="action-btn attack-btn atk-mode-btn" data-mode="cac" id="btn-atk-cac" onclick="triggerAttack('cac')">⚔ Mêlée</button>
-				<button class="action-btn attack-btn atk-mode-btn" data-mode="jet" id="btn-atk-jet" onclick="triggerAttack('jet')">🪃 Jet</button>
-				<button class="action-btn attack-btn atk-mode-btn" data-mode="tir" id="btn-atk-tir" onclick="triggerAttack('tir')">🏹 Tir</button>
+				<button class="action-btn attack-btn atk-mode-btn" data-mode="cac" id="btn-atk-cac" onclick="triggerAttack('cac')">⚔</button>
+				<button class="action-btn attack-btn atk-mode-btn" data-mode="jet" id="btn-atk-jet" onclick="triggerAttack('jet')">🪃</button>
+				<button class="action-btn attack-btn atk-mode-btn" data-mode="tir" id="btn-atk-tir" onclick="triggerAttack('tir')">🏹</button>
 				<div id="quick-sorts"></div>
-				<button class="action-btn" id="btn-sorts" onclick="triggerSort()" title="Lancer un sort (1 action + PM ; composants optionnels = effet renforcé)">🔮 Sorts</button>
+				<button class="action-btn" id="btn-sorts" onclick="triggerSort()" title="Lancer un sort (1 action + PM ; composants optionnels = effet renforcé)">🔮</button>
 				<div id="quick-comps"></div>
-				<button class="action-btn" id="btn-comps" onclick="triggerComp()" title="Utiliser une compétence active (1 action + PM éventuels)">⚡ Compétence</button>
-				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪 Consommer</button>
-				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🦴 Ramasser</button>
-				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃 Fuir</button>
+				<button class="action-btn" id="btn-comps" onclick="triggerComp()" title="Utiliser une compétence active (1 action + PM éventuels)">⚡</button>
+				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪</button>
+				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🫳</button>
+				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃</button>
 			</div>
 			<div id="target-row">
 				<select id="target-select"></select>
@@ -920,13 +931,18 @@ const PORTRAITS_JOUEURS = {{ portraits_joueurs | tojson | safe }};
 function portraitStyle(jid) {
 	const p = PORTRAITS_JOUEURS[jid];
 	if (!p || !p.image || !p.largeur || !p.hauteur) return null;
+	console.log(jid, p);
+	if(p.base=='/monsters') {
+		return {
+			img:  `${p.base}/${p.image}`
+		};
+	}
 	const zoom = p.portrait_zoom || 100;
 	const imgW = p.largeur * zoom / 100, imgH = p.hauteur * zoom / 100;
 	const t = p.portrait_translate;
 	const x = (t && t !== 0) ? Math.abs(t.x) : (imgW - 100) / 2;
 	const y = (t && t !== 0) ? Math.abs(t.y) : 0;
 	return {
-		// `base` : /monsters pour une monture (illustrée par son espèce), /characters sinon.
 		img:  `${p.base || '/characters'}/${p.image}`,
 		size: `${imgW}% ${imgH}%`,
 		pos:  `${imgW > 100 ? x / (imgW - 100) * 100 : 50}% ${imgH > 100 ? y / (imgH - 100) * 100 : 50}%`,
