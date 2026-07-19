@@ -794,12 +794,22 @@
 		}
 		/* Groupe des boutons d'action d'une ligne (sac/sol) → reste solidaire à droite. */
 		.sh-inv-actions { display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; }
+		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
+		.sh-skill-icon { font-size: 1.3rem; flex-shrink: 0; }
+		.sh-skill-info { flex: 1; }
+		.sh-skill-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; }
+		.sh-skill-desc { font-size: 0.85rem; color: var(--muted); }
+		.sh-skill-lvl { font-size: 0.85rem; color: var(--accent-color); flex-shrink: 0; }
 		/* Mobile : ne pas tronquer le sac / le sol. Le contenu (icône, nom, poids, rareté)
 		   passe sur autant de lignes que nécessaire ; les boutons restent groupés à droite. */
 		@media (max-width: 768px) {
+			.sh-skill { display: flex; flex-wrap: wrap; flex-direction: row; }
 			.sh-inv-box .sh-inv-item { flex-wrap: wrap; overflow: visible; }
-			.sh-inv-box .sh-inv-name { white-space: normal; overflow: visible; text-overflow: clip; }
-			.sh-inv-box .sh-inv-actions { margin-left: auto; }
+			.sh-inv-box .sh-inv-name, .sh-skill .sh-skill-name, .sh-skill .sh-skill-desc  { white-space: normal; overflow: visible; text-overflow: clip; }
+			.sh-inv-box .sh-inv-actions, .sh-skill .sh-inv-actions { 
+				display: flex; margin-left: auto; flex-wrap: wrap; gap: 5px; 
+				flex: 0 0 100%; margin-top: 10px;
+			}
 		}
 		#inv-sort-btn.active, #sol-sort-btn.active,
 		#sell-sort-btn.active, #buy-sort-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
@@ -826,12 +836,6 @@
 		.sh-drop-btn:disabled {
 			opacity: .6; cursor: not-allowed;
 		}
-		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
-		.sh-skill-icon { font-size: 1.3rem; flex-shrink: 0; }
-		.sh-skill-info { flex: 1; }
-		.sh-skill-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; }
-		.sh-skill-desc { font-size: 0.85rem; color: var(--muted); }
-		.sh-skill-lvl { font-size: 0.85rem; color: var(--accent-color); flex-shrink: 0; }
 		/* ── Sorts (onglet ⚡) ── */
 		.sh-sort-pm { font-size: 0.8rem; color: #7ec8ff; font-weight: normal; margin-left: 6px; }
 		.sh-sort-compos { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
@@ -874,7 +878,36 @@
 		.sh-barre-slot.dragging { opacity: 0.5; transform: scale(1.12); z-index: 10; }
 		.sh-barre-slot.drag-over { border-color: var(--accent-color); background: #2e2510; }
 		.sh-barre-num { position: absolute; top: 1px; right: 3px; font-size: 9px; color: #777; font-weight: bold; }
-		.sh-barre-plus { position: absolute; bottom: 0; right: 3px; font-size: 10px; color: #b26bff; font-weight: bold; }
+		/* Retirer l'action d'une case — pastille ✕ au survol, reprise de `.char-delete-btn`
+		   de user_home_telluris.html. ⚠️ Palette locale : play_town n'inclut pas
+		   part-root-css.html, donc --ink/--parch/--bronze y sont INDÉFINIES. Taille réduite
+		   à 18px (contre 22) : la case fait au plus 44px, une pastille de 22px en couvrirait
+		   la moitié. Jamais sur une case obligatoire ni sur une case vide (cf. :not() plus bas). */
+		.sh-barre-del {
+			display: none;
+			position: absolute; top: -8px; left: -6px;
+			width: 18px; height: 18px; padding: 0;
+			background: var(--bg-color); color: var(--text-color);
+			border: 2px solid var(--accent); border-radius: 50%;
+			font-size: 10px; font-weight: bold; line-height: 1;
+			cursor: pointer; z-index: 12;
+			align-items: center; justify-content: center; text-align: center;
+			transition: background 0.2s, color 0.2s, border-color 0.2s;
+		}
+		.sh-barre-slot:not(.oblig):not(.empty):hover .sh-barre-del { display: flex; }
+		.sh-barre-del:hover { background: #8b1a1a; border-color: #8b1a1a; color: #fff; }
+		/* Pendant un glisser, la pastille ne doit ni s'afficher ni capter le pointeur. */
+		.sh-barre-slot.dragging .sh-barre-del { display: none; }
+		.sh-barre-plus-pos { position: absolute; bottom: 0; right: 3px;	}
+		.sh-barre-plus {
+			font-size: 18px;
+			font-weight: 900;
+			color: rgb(255, 215, 0);
+			text-shadow: rgba(255, 215, 0, 0.5) 0px 0px 5px;
+			display: inline-block;
+			vertical-align: middle;
+			margin: 0px 4px;
+		}
 		.sh-barre-hint { font-size: 0.75rem; color: var(--muted); }
 		.sh-relation { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 2px solid var(--border-color); }
 		.sh-relation.clickable { cursor: pointer; }
@@ -3824,7 +3857,7 @@ function _slotOptions(type, ref, composants) {
 function _slotSelect(type, ref, composants, titre) {
 	const { html, assignee } = _slotOptions(type, ref, composants);
 	const arg = composants === undefined ? 'undefined' : String(composants);
-	return `<select class="sh-slot-select${assignee ? ' active' : ''}"
+	return `<select name="sh-slot-select-${ref}" class="sh-slot-select${assignee ? ' active' : ''}"
 		title="${titre || 'Case de la barre de combat'}"
 		onchange="affecterSlot('${type}', '${ref}', ${arg}, this)">${html}</select>`;
 }
@@ -3921,13 +3954,35 @@ function _renderBarreSlots() {
 		const cls = ['sh-barre-slot', s.type ? '' : 'empty', s.obligatoire ? 'oblig' : ''].filter(Boolean).join(' ');
 		const titre = s.type ? `${s.nom}${s.disponible ? '' : ' (indisponible)'}` : 'Emplacement libre';
 		// « + » : ce sort est réglé pour dépenser ses composants consommés.
-		const plus = (s.type === 'sort' && s.composants) ? '<span class="sh-barre-plus">+</span>' : '';
+		const plus = (s.type === 'sort' && s.composants) ? '<span class="sh-barre-plus sh-barre-plus-pos">+</span>' : '';
+		// ✕ au survol : retirer l'action de la case. Rendu seulement là où c'est LÉGAL —
+		// une obligatoire ne se vide pas (le serveur répondrait 422), une case vide non plus.
+		const del = (s.type && !s.obligatoire)
+			? `<button type="button" class="sh-barre-del" title="Retirer cette action de la barre"
+				aria-label="Retirer ${(s.nom || '').replace(/"/g, '&quot;')} de la case ${s.position}">✕</button>`
+			: '';
 		return `<div class="${cls}" data-slot="${s.position}" title="${titre.replace(/"/g, '&quot;')}"
-			style="${s.type && !s.disponible ? 'opacity:.4' : ''}">${s.icon || ''}<span class="sh-barre-num">${s.position}</span>${plus}</div>`;
+			style="${s.type && !s.disponible ? 'opacity:.4' : ''}">${s.icon || ''}<span class="sh-barre-num">${s.position}</span>${plus}${del}</div>`;
 	}).join('');
 	box.querySelectorAll('.sh-barre-slot').forEach(el => {
-		_attacherDragLong(el, parseInt(el.dataset.slot, 10), '.sh-barre-slot', _deplacerSlot);
+		const n = parseInt(el.dataset.slot, 10);
+		_attacherDragLong(el, n, '.sh-barre-slot', _deplacerSlot);
+		const del = el.querySelector('.sh-barre-del');
+		if (!del) return;
+		// ⚠️ La case entière écoute `pointerdown` pour armer le clic long : sans ce
+		// stopPropagation, viser la pastille amorcerait un glisser au lieu d'un clic.
+		del.addEventListener('pointerdown', e => e.stopPropagation());
+		del.addEventListener('click', e => { e.stopPropagation(); _viderCaseBarre(n); });
 	});
+}
+
+// Retire l'action d'une case, sur confirmation. Le serveur refuse déjà (422) de vider
+// une case obligatoire — la pastille n'y est simplement jamais rendue.
+function _viderCaseBarre(position) {
+	const slot = _barreSlots.find(s => s.position === position);
+	if (!slot || !slot.type || slot.obligatoire) return;
+	if (!confirm(`Retirer ${slot.nom || 'cette action'} de la case ${position} ?`)) return;
+	_postSlots('api/slot_action', { position, entree: null });
 }
 
 function _sortEffetsLabel(e) {
@@ -3965,7 +4020,7 @@ function _renderSorts(list) {
 		const aCompoConso = (s.composants || []).some(c => c.consomme);
 		const pin = _slotSelect('sort', s.sort_id, false, 'Case de la barre — sans dépenser de composant')
 			+ (aCompoConso
-				? '<span class="sh-compo-lbl" title="Variante qui dépense les composants">+</span>'
+				? '<span class="sh-compo-lbl sh-barre-plus " title="Variante qui dépense les composants">+</span>'
 				  + _slotSelect('sort', s.sort_id, true, 'Case de la barre — en dépensant les composants')
 				: '');
 		const actions = pin + (s.lancable
