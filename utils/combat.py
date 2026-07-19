@@ -114,8 +114,11 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 	acteur["degats_cc"] = derived.degats_cc
 	acteur["degats_cd"] = derived.degats_cd
 	acteur["initiative"] = derived.initiative
-	acteur["pv_max"] = derived.pv_max
-	acteur["pm_max"] = derived.pm_max
+	# Plancher à 1 : un debuff de R assez violent amènerait pv_max à 0, donc currentPV à 0
+	# au re-clamp — un acteur « mort » sans que personne ne l'ait frappé, et sans que
+	# `vivant` soit mis à jour (le combat resterait bloqué sur un cadavre debout).
+	acteur["pv_max"] = max(1, derived.pv_max)
+	acteur["pm_max"] = max(0, derived.pm_max)
 	acteur["deplacement_base"] = derived.deplacement
 	# Esquive = passives permanentes (figées à l'entrée) + effets vivants.
 	acteur["esquive"] = acteur.get("esquive_base", 0) + sum(
@@ -128,9 +131,15 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 
 	# Un buff de R/Vol qui expire abaisse les max : on re-clampe plutôt que de laisser
 	# des PV au-dessus du plafond (l'inverse — un buff qui monte le max — ne soigne pas).
-	acteur["currentPV"] = min(int(acteur.get("currentPV", derived.pv_max) or 0), derived.pv_max)
-	acteur["currentPM"] = min(int(acteur.get("currentPM", derived.pm_max) or 0), derived.pm_max)
-	_recompute_player_deplacement(acteur)
+	acteur["currentPV"] = min(int(acteur.get("currentPV", acteur["pv_max"]) or 0), acteur["pv_max"])
+	acteur["currentPM"] = min(int(acteur.get("currentPM", acteur["pm_max"]) or 0), acteur["pm_max"])
+	# ⚠️ Une monture est immobilisée à l'entrée (`deplacement: 0`, hors ordre d'initiative) :
+	# recalculer son déplacement depuis V la remettrait en marche. Elle est dans `joueurs`,
+	# donc CIBLABLE — un debuff qui la touche ne doit pas la « réveiller ».
+	if acteur.get("est_monture"):
+		acteur["deplacement"] = 0
+	else:
+		_recompute_player_deplacement(acteur)
 
 
 def _equipment_bonus_de(acteur: dict) -> EquipmentBonus:
@@ -170,6 +179,102 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 	acteur.setdefault("effets_actifs", []).append(entry)
 	_refresh_snapshot_stats(acteur)
 	return entry
+
+
+def _appliquer_effet_sur_cible(combat_doc: dict, cible: dict, source: dict,
+							   effets: dict, tour: int, hostile: bool = True) -> dict | None:
+	"""Empile la part à durée d'un sort/compétence OFFENSIF sur la CIBLE touchée.
+
+	Miroir exact de la pose « sur soi » (même entrée, même chokepoint de recalcul), à trois
+	différences près :
+	  • elle n'est posée qu'en cas de TOUCHE — un sort qui se dissipe ne débuffe personne ;
+	  • une cible MORTE du même coup n'est pas affectée (rien à ralentir dans un cadavre) ;
+	  • elle ne remonte sur aucun doc : `_finalize_membre` ne reverse que les effets des
+		membres du groupe, et un monstre ne survit pas au combat.
+
+	Le tick est déjà générique : `_reset_turn_budget` appelle `_tick_effets_combat` pour les
+	monstres comme pour les joueurs → la durée compte en TOURS DE LA CIBLE, ce qui est la
+	lecture attendue (« -10 Ag pendant 2 tours » = les 2 prochains tours de l'ennemi).
+	"""
+	if not cible or not cible.get("vivant", True):
+		return None
+	entry = _empiler_effet_combat(cible, source, effets, tour)
+	if not entry:
+		return None
+	combat_doc.setdefault("log", []).append({
+		"tour": int(tour or 0),
+		"acteur": cible.get("nom", "?"),
+		"kind": "sys",
+		"texte": f"{entry.get('icon', '✨')} {cible.get('nom', '?')} "
+				 f"{'subit' if hostile else 'bénéficie de'} "
+				 f"{entry.get('nom', 'un effet')} ({entry['restants']} tour(s)).",
+	})
+	return entry
+
+
+def _lancer_sur_allie(combat_doc: dict, lanceur: dict, cible: dict, source: dict,
+					  effets: dict, portee: int, grid: dict) -> dict:
+	"""Applique un sort/une compétence bénéfique à un ALLIÉ (compagnon ou monture).
+
+	Chokepoint partagé par les deux branches `cible == "allie"` de `resolve_action` : la
+	seule différence entre un sort et une compétence à cet endroit serait le libellé, ce
+	qui ne justifie pas deux copies de la même logique.
+
+	⚠️ **Aucun jet de toucher.** Un allié ne se défend pas : on ne rate pas une main
+	tendue. C'est ce qui rend `jet` (cc/cd/magique) sans objet ici — il ne concerne que
+	les cibles hostiles.
+
+	⚠️ **Pas d'interdiction « engagé au corps à corps ».** Elle existe pour les effets
+	OFFENSIFS à distance (on n'incante pas tranquillement une bombe avec une épée sous la
+	gorge) ; l'appliquer aux soins les rendrait impossibles exactement au moment où ils
+	servent. La ligne de vue, elle, reste exigée au-delà du contact : on ne soigne pas à
+	travers un mur.
+	"""
+	if not cible:
+		return {"error": "Allié invalide."}
+	# Seul un allié DEBOUT est visable : soigner un membre à 0 PV le remettrait en jeu,
+	# donc changerait la condition de défaite et l'ordre du tour. Relever un compagnon à
+	# terre mérite sa propre mécanique, pas un effet de bord d'un sort de soin.
+	if cible.get("currentPV", 0) <= 0:
+		return {"error": f"{cible.get('nom', 'Cet allié')} est à terre."}
+	portee = max(1, int(portee or 1))
+	if _cheby(lanceur, cible) > portee:
+		return {"error": "Allié hors de portée."}
+	if portee > 1 and not _line_of_sight(grid["cells"], lanceur["pos"]["x"], lanceur["pos"]["y"],
+										  cible["pos"]["x"], cible["pos"]["y"]):
+		return {"error": "Ligne de vue obstruée."}
+
+	avant_pv, avant_pm = cible.get("currentPV", 0), cible.get("currentPM", 0)
+	cible["currentPV"] = min(cible.get("pv_max", avant_pv), avant_pv + int(effets.get("pv", 0) or 0))
+	cible["currentPM"] = min(cible.get("pm_max", avant_pm), avant_pm + int(effets.get("pm", 0) or 0))
+	pv_rendu = cible["currentPV"] - avant_pv
+	pm_rendu = cible["currentPM"] - avant_pm
+	effet_pose = _appliquer_effet_sur_cible(
+		combat_doc, cible, source, effets, combat_doc["tour"], hostile=False)
+	# Une dissimulation lancée sur un allié le dissimule LUI (et remet la détection des
+	# monstres à zéro) : _activer_furtivite prend déjà son porteur en paramètre.
+	if int(effets.get("furtivite", 0) or 0) > 0:
+		_activer_furtivite(combat_doc, cible, int(effets["furtivite"]))
+
+	gains = " / ".join(s for s in (
+		f"+{pv_rendu} PV" if pv_rendu else "",
+		f"+{pm_rendu} PM" if pm_rendu else "",
+		f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
+	) if s) or "aucun effet"
+	combat_doc.setdefault("log", []).append({
+		"tour": combat_doc["tour"],
+		"acteur": lanceur["nom"],
+		"kind": "sys",
+		"texte": f"{lanceur['nom']} lance {source.get('nom', 'un effet')} "
+				 f"sur {cible['nom']} ({gains}).",
+	})
+	return {
+		"cible": cible["nom"], "cible_id": cible.get("id"),
+		"cible_pv": cible["currentPV"], "cible_pv_max": cible.get("pv_max"),
+		"cible_pm": cible["currentPM"], "cible_pm_max": cible.get("pm_max"),
+		"pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
+		"effet_cible": dict(effet_pose) if effet_pose else None,
+	}
 
 
 def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
@@ -915,6 +1020,18 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		"id": f"monstre_{idx}",
 		"nom": espece.get("nom", "Monstre"),
 		"espece_id": espece["_id"],
+		# Un monstre porte les MÊMES champs de recalcul qu'un joueur (`caracts_base`,
+		# `voc_niveau`, `esquive_base`, `effets_actifs`) : c'est ce qui rend
+		# _refresh_snapshot_stats opérant sur lui, donc ce qui donne une prise à un
+		# debuff. Il n'a ni équipement ni passive → `caracts_base` = ses stats brutes.
+		"caracts_base": {
+			"V": base_stats.v, "F": base_stats.f, "R": base_stats.r, "Ag": base_stats.ag,
+			"Vol": base_stats.vol, "Int": base_stats.int_, "Cha": base_stats.cha,
+			"Ch": base_stats.ch,
+		},
+		"voc_niveau": niveau,
+		"esquive_base": 0,
+		"effets_actifs": [],
 		"profil_id": profil_id,
 		"image": espece.get("image", ""),
 		"currentPV": max(1, derived.pv_max),
@@ -1060,6 +1177,18 @@ def _hit_threshold(attaquant_cc: int, defenseur_ag: int) -> int:
 	return max(5, min(95, 50 + attaquant_cc - defenseur_ag))
 
 
+def _defense_physique(defenseur: dict) -> int:
+	"""Difficulté défensive contre un jet PHYSIQUE (cc/cd) : Ag + esquive.
+
+	SOURCE UNIQUE des trois sites qui résolvent un jet martial — attaque d'arme
+	(`_do_attack_on`), compétence à `jet` cc/cd, et sort de contact à `jet` cc/cd. Les
+	compétences ne lisaient que l'Ag : un buff d'esquive sur la cible y était ignoré,
+	alors qu'il comptait face à une arme. La magie, elle, ne passe jamais par ici — elle
+	se résout sur la pm_def, où l'esquive n'a rien à faire.
+	"""
+	return int(defenseur.get("ag", 0) or 0) + int(defenseur.get("esquive", 0) or 0)
+
+
 def _magic_hit_threshold(toucher_magique: int, cible_pm_def: int) -> int:
 	"""Seuil de réussite d'un sort offensif sur d100 (miroir de _hit_threshold) :
 	50 + toucher magique − défense magique de la cible, clampé [5, 95]. La défense
@@ -1157,7 +1286,7 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 	(ou l'endette pour le tour suivant), ce qui exige que le budget soit déjà à jour."""
 	est_joueur = str(defenseur.get("id", "")).startswith("joueur_")
 	seuil = _hit_threshold(attaquant["cc"],
-						   defenseur.get("ag", 0) + defenseur.get("esquive", 0))
+						   _defense_physique(defenseur))
 	jet = _resoudre_jet(attaquant, defenseur, seuil)
 	roll = jet["roll"]
 	attaquant["attaques"] = attaquant.get("attaques", 0) + 1
@@ -1710,7 +1839,7 @@ def resolve_action(
 		if _cheby(joueur, monstre) > atk_portee:
 			return {"error": "Cible hors de portée."}
 
-		seuil = _hit_threshold(skill, monstre.get("ag", 0))
+		seuil = _hit_threshold(skill, _defense_physique(monstre))
 		jet = _resoudre_jet(joueur, monstre, seuil)
 		roll = jet["roll"]
 		if jet["touche"]:
@@ -1916,9 +2045,21 @@ def resolve_action(
 			return {"error": "PM insuffisants."}
 
 		jet = None   # renseigné seulement par la branche offensive (jet de toucher)
-		if sdoc.get("cible") == "ennemi":
-			if not effets.get("degats"):
-				return {"error": "Ce sort n'inflige aucun dégât."}
+		if sdoc.get("cible") == "allie":
+			# Sort d'entraide : compagnon OU monture, désigné par son id de snapshot.
+			# Aucun jet, aucun compteur d'attaque — seulement l'action et les PM.
+			allie = _get_joueur(combat_doc, cible_id) if cible_id else None
+			res_allie = _lancer_sur_allie(combat_doc, joueur, allie, sdoc, effets,
+										  sdoc.get("portee", 1), grid)
+			if "error" in res_allie:
+				return res_allie   # PM NON débités : le sort n'est jamais parti
+			joueur["currentPM"] -= cout_pm
+			result = {"sort": sdoc.get("nom"), **res_allie}
+		elif sdoc.get("cible") == "ennemi":
+			# Dégâts OU part à durée : un sort offensif peut n'être qu'un debuff
+			# (« −10 Ag pendant 2 tours »), il lui suffit d'avoir quelque chose à faire.
+			if not effets.get("degats") and not part_durative(effets):
+				return {"error": "Ce sort n'a aucun effet sur une cible."}
 			monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
 			if not monstre or not monstre["vivant"]:
 				return {"error": "Cible invalide."}
@@ -1937,16 +2078,33 @@ def resolve_action(
 
 			# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés).
 			joueur["currentPM"] -= cout_pm
-			seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
+			# Jet porté par la DONNÉE, exactement comme pour les compétences :
+			# `magique` (défaut des sorts) se résout sous toucher_magique contre la
+			# pm_def ; un sort de CONTACT marqué `cc`/`cd` (« au toucher ») exige
+			# d'abord de poser la main — jet martial contre la défense physique.
+			mode_jet = sdoc.get("jet") or "magique"
+			if mode_jet == "magique":
+				seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0),
+											 monstre.get("pm_def", 0))
+			else:
+				skill = joueur["cd"] if mode_jet == "cd" else joueur["cc"]
+				seuil = _hit_threshold(skill, _defense_physique(monstre))
 			jet = _resoudre_jet(joueur, monstre, seuil)
 			roll = jet["roll"]
 			if jet["touche"]:
 				# Pas de soustraction de PA : l'armure physique n'arrête pas la magie
 				# (la défense magique joue déjà dans le seuil). Le critique double donc
 				# des dégâts déjà bruts.
-				dmg = max(1, roll_dice(effets["degats"]) * jet["mult_degats"])
+				if effets.get("degats"):
+					bruts = roll_dice(effets["degats"]) * jet["mult_degats"]
+					# Un sort qui passe par un jet MARTIAL passe aussi par l'armure : même
+					# contrat que les compétences, sinon `jet: "cc"` serait un pur gain
+					# (contourner la pm_def sans rien payer en retour).
+					dmg = max(1, bruts if mode_jet == "magique" else bruts - monstre["pa"])
+				else:
+					dmg = 0
 				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
-				if monstre["currentPV"] <= 0:
+				if dmg and monstre["currentPV"] <= 0:
 					monstre["vivant"] = False
 					combat_doc["log"].append({
 						"tour": combat_doc["tour"],
@@ -1959,7 +2117,7 @@ def resolve_action(
 							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} et élimine {monstre['nom']} !"
 						),
 					})
-				else:
+				elif dmg:
 					combat_doc["log"].append({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
@@ -1973,9 +2131,24 @@ def resolve_action(
 							f"subit {dmg} dégâts ! (PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						),
 					})
+				else:
+					# Sort de pur debuff : il touche sans blesser. La ligne posée juste
+					# après par _appliquer_effet_sur_cible dit ce que la cible encaisse.
+					combat_doc["log"].append({
+						"tour": combat_doc["tour"],
+						"acteur": joueur["nom"],
+						"kind": "hit",
+						"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} "
+								 f"sur {monstre['nom']} : le sort prend.",
+					})
+				# Part à DURÉE sur la CIBLE : posée seulement si le sort a TOUCHÉ, et jamais
+				# sur une cible que le même coup vient d'abattre.
+				effet_cible = _appliquer_effet_sur_cible(
+					combat_doc, monstre, sdoc, effets, combat_doc["tour"])
 				result = {"sort": sdoc.get("nom"), "hit": True, "dmg": dmg,
 						  "critique": jet["critique"],
-						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
+						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"],
+						  "effet_cible": dict(effet_cible) if effet_cible else None}
 			else:
 				combat_doc["log"].append({
 					"tour": combat_doc["tour"],
@@ -2059,9 +2232,20 @@ def resolve_action(
 
 		nom = competence.get("nom", "une compétence")
 		resultat_jet = None   # renseigné seulement par la branche offensive (jet de toucher)
-		if competence.get("cible") == "ennemi":
-			if not effets.get("degats"):
-				return {"error": "Cette compétence n'inflige aucun dégât."}
+		if competence.get("cible") == "allie":
+			# Miroir exact de la branche alliée du sort (même chokepoint).
+			allie = _get_joueur(combat_doc, cible_id) if cible_id else None
+			res_allie = _lancer_sur_allie(combat_doc, joueur, allie, competence, effets,
+										  competence.get("portee", 1), grid)
+			if "error" in res_allie:
+				return res_allie
+			joueur["currentPM"] -= cout_pm
+			result = {"competence": nom, **res_allie}
+		elif competence.get("cible") == "ennemi":
+			# Dégâts OU part à durée : une compétence offensive peut n'être qu'un debuff
+			# (cri de guerre qui affaiblit, entrave qui ralentit…).
+			if not effets.get("degats") and not part_durative(effets):
+				return {"error": "Cette compétence n'a aucun effet sur une cible."}
 			monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
 			if not monstre or not monstre["vivant"]:
 				return {"error": "Cible invalide."}
@@ -2094,10 +2278,13 @@ def resolve_action(
 			if resultat_jet["touche"]:
 				# Le critique double les dés ; les PA ne sont soustraits qu'après, et
 				# seulement pour une frappe martiale (l'armure n'arrête pas la magie).
-				degats_bruts = roll_dice(effets["degats"]) * resultat_jet["mult_degats"]
-				dmg = max(1, degats_bruts if jet == "magique" else degats_bruts - monstre["pa"])
+				if effets.get("degats"):
+					degats_bruts = roll_dice(effets["degats"]) * resultat_jet["mult_degats"]
+					dmg = max(1, degats_bruts if jet == "magique" else degats_bruts - monstre["pa"])
+				else:
+					dmg = 0   # compétence de pur debuff : elle touche sans blesser
 				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
-				if monstre["currentPV"] <= 0:
+				if dmg and monstre["currentPV"] <= 0:
 					monstre["vivant"] = False
 					combat_doc["log"].append({
 						"tour": combat_doc["tour"],
@@ -2109,7 +2296,7 @@ def resolve_action(
 							f"{joueur['nom']} utilise {nom} et élimine {monstre['nom']} !"
 						),
 					})
-				else:
+				elif dmg:
 					combat_doc["log"].append({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
@@ -2122,9 +2309,23 @@ def resolve_action(
 							f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						),
 					})
+				else:
+					# Compétence de pur debuff : elle touche sans blesser. La ligne posée
+					# juste après par _appliquer_effet_sur_cible dit ce que la cible encaisse.
+					combat_doc["log"].append({
+						"tour": combat_doc["tour"],
+						"acteur": joueur["nom"],
+						"kind": "hit",
+						"texte": f"{joueur['nom']} utilise {nom} sur {monstre['nom']} : la prise porte.",
+					})
+				# Part à DURÉE sur la CIBLE : posée seulement si la compétence a TOUCHÉ, et
+				# jamais sur une cible que le même coup vient d'abattre.
+				effet_cible = _appliquer_effet_sur_cible(
+					combat_doc, monstre, competence, effets, combat_doc["tour"])
 				result = {"competence": nom, "hit": True, "dmg": dmg,
 						  "critique": resultat_jet["critique"],
-						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
+						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"],
+						  "effet_cible": dict(effet_cible) if effet_cible else None}
 			else:
 				combat_doc["log"].append({
 					"tour": combat_doc["tour"],
@@ -2382,6 +2583,16 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 		# Survivante (ou mort désactivée) : relevée comme un membre du groupe.
 		doc["currentPV"] = max(1, snap.get("currentPV", 0))
 		doc["currentPM"] = max(0, snap.get("currentPM", doc.get("currentPM", 0)))
+		# Effets à durée encore vivants (un buff lancé sur la bête par un allié) :
+		# reversés comme pour un membre du groupe. Un doc `monture:*` étant un miroir
+		# du character, le tick d'exploration les reprend sans code supplémentaire.
+		restants = [
+			{k: v for k, v in eff.items() if k != "pose_tour"}
+			for eff in snap.get("effets_actifs") or []
+			if _eff_int(eff.get("restants")) > 0
+		]
+		if restants or snap.get("effets_actifs") is not None:
+			doc["effets_actifs"] = restants
 
 	rewarded.append(combat_id)
 	doc["combats_recompenses"] = rewarded[-50:]

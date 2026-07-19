@@ -26,10 +26,11 @@
 
 from models import character_stats
 from utils.consommables import _as_int
-from utils.sorts import _bonus_dict, part_durative
+from utils.sorts import CIBLE_DEFAUT, CIBLES, JETS, _bonus_dict, part_durative
 
 MODES = ("passive", "active")
-JETS = ("cc", "cd", "magique")
+# JETS vient de utils.sorts (source unique partagée avec les sorts) ; seul le DÉFAUT
+# diffère : martial ici (`cc`), magique là-bas.
 
 
 def normaliser_competence(doc) -> dict | None:
@@ -42,6 +43,9 @@ def normaliser_competence(doc) -> dict | None:
 	mode = str(doc.get("mode") or "passive")
 	if mode not in MODES:
 		mode = "passive"
+	cible = str(doc.get("cible") or CIBLE_DEFAUT)
+	if cible not in CIBLES:
+		cible = CIBLE_DEFAUT
 	jet = str(doc.get("jet") or "cc")
 	if jet not in JETS:
 		jet = "cc"
@@ -54,7 +58,7 @@ def normaliser_competence(doc) -> dict | None:
 		"niveau": _as_int(doc.get("niveau")),
 		"mode": mode,
 		"cout_pm": _as_int(doc.get("cout_pm")),
-		"cible": doc.get("cible") or "soi",
+		"cible": cible,
 		"jet": jet,
 		"portee": max(1, _as_int(doc.get("portee")) or 1),
 		"effets": _bonus_dict(doc.get("effets")),
@@ -98,9 +102,10 @@ def competence_utilisable_combat(comp: dict) -> bool:
 
 
 def competence_utilisable_exploration(comp: dict) -> bool:
-	"""Éligibilité exploration : active, ciblée sur soi, et au moins un effet applicable
-	hors combat (soin/PM instantanés, ou buffs/régén/esquive à durée)."""
-	if not est_active(comp) or (comp or {}).get("cible", "soi") != "soi":
+	"""Éligibilité exploration : active, NON offensive (`soi` ou `allie`), et au moins un
+	effet applicable hors combat (soin/PM instantanés, ou buffs/régén/esquive à durée).
+	Miroir exact de sorts.sort_utilisable_exploration."""
+	if not est_active(comp) or (comp or {}).get("cible", "soi") == "ennemi":
 		return False
 	eff = (comp or {}).get("effets") or {}
 	instant = _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0

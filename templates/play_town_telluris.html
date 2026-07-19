@@ -2053,6 +2053,25 @@
 		}
 		#clauses-overlay.clauses-hidden { display: none; }
 		#clauses-overlay .item-detail-card { max-width: 520px; }
+		/* ── Choix de la cible d'un effet bénéfique (sort/compétence `cible: allie`) ──
+		   Même calque et mêmes briques de carte que les clauses : c'est aussi une
+		   décision bloquante, et refermer sans choisir ne doit RIEN lancer. */
+		#cible-allie-overlay {
+			position: fixed; inset: 0; z-index: 9400;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#cible-allie-overlay.clauses-hidden { display: none; }
+		#cible-allie-overlay .item-detail-card { max-width: 460px; }
+		.cible-allie-btn {
+			display: flex; align-items: center; gap: .6rem; width: 100%;
+			padding: .5rem .6rem; margin-bottom: .4rem; cursor: pointer;
+			background: rgba(255,255,255,.04); color: inherit; text-align: left;
+			border: 1px solid rgba(216,180,106,.35); border-radius: 6px;
+		}
+		.cible-allie-btn:hover { background: rgba(216,180,106,.14); }
+		.cible-allie-nom { flex: 1; }
+		.cible-allie-pv { font-size: .82em; opacity: .8; white-space: nowrap; }
 		.clauses-part { color: var(--gold2, var(--gold, #d8b46a)); margin: .2rem 0 .8rem; }
 		.clauses-list { list-style: none; padding: 0; margin: 0 0 .9rem; }
 		.clauses-list li {
@@ -2117,6 +2136,15 @@
 			<div id="clauses-body"></div>
 		</div>
 	</div><!-- /#clauses-overlay -->
+	{# Cible d'un sort/compétence bénéfique : ✕ / Échap / clic hors carte = ANNULER,
+	   jamais « lancer sur quelqu'un par défaut » — les PM sont dépensés à l'envoi. #}
+	<div id="cible-allie-overlay" class="clauses-hidden" aria-label="Choisir la cible"
+		 onclick="if(event.target===this)closeCibleAllie()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeCibleAllie()" title="Annuler">✕</button>
+			<div id="cible-allie-body"></div>
+		</div>
+	</div><!-- /#cible-allie-overlay -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -2824,6 +2852,10 @@ function sheetTab(id, btn) {
 document.addEventListener('keydown', e => {
 	if (e.key !== 'Escape') return;
 	// Cascade ordonnée par z-index décroissant : le calque le plus haut se ferme d'abord.
+	// ⚠️ Le choix de cible est en attente d'une promesse : Échap doit la RÉSOUDRE (à null),
+	// sinon le lancement resterait suspendu et son bouton désactivé pour toujours.
+	const cibleAllie = document.getElementById('cible-allie-overlay');
+	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
 	const clauses = document.getElementById('clauses-overlay');
 	if (clauses && !clauses.classList.contains('clauses-hidden')) { closeClauses(); return; }
 	const qmap = document.getElementById('quest-map-overlay');
@@ -4031,7 +4063,7 @@ function _renderSorts(list) {
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span></div>
-				<div class="sh-skill-desc">${_sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}</div>
+				<div class="sh-skill-desc">${_sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
 				${compos ? `<div class="sh-sort-compos">${compos}</div>` : ''}
 			</div>
 			<div class="sh-inv-actions">${actions}</div>
@@ -4065,16 +4097,91 @@ function _renderSortsApprenables(list) {
 	}).join('');
 }
 
+// ── Cible d'un effet bénéfique hors combat (`cible: "allie"`) ───────────────────
+// Le groupe n'est chargé que quand le panneau 👥 s'ouvre : un sort d'allié peut être
+// lancé sans y être passé, d'où ce chargement paresseux.
+async function _assurerGroupe() {
+	if (_grpEtat) return _grpEtat;
+	try {
+		const res = await fetch('api/groupe');
+		if (res.ok) _grpEtat = await res.json();
+	} catch (err) { console.error('Erreur groupe', err); }
+	return _grpEtat;
+}
+
+// Cibles possibles : tout le groupe — principal, compagnons ET montures — SAUF le
+// lanceur (un effet sur soi se déclare `cible: "soi"`, il a son propre bouton).
+function _alliesCibles() {
+	const d = _grpEtat || {};
+	const moi = porteurActifId();
+	const nomDe = c => `${c.prenom || ''} ${c.nom || ''}`.trim() || '?';
+	const out = [];
+	if (d.principal) out.push({ id: d.principal.id, nom: nomDe(d.principal), icon: '👤' });
+	(d.groupe || []).forEach(c => out.push({
+		id: c.id, nom: nomDe(c), icon: '🧑‍🤝‍🧑',
+		pv: c.currentPV, pv_max: c.pv_max }));
+	(d.montures || []).forEach(m => out.push({
+		id: m.id, nom: nomDe(m), icon: '🐴',
+		pv: m.currentPV, pv_max: m.pv_max }));
+	return out.filter(c => c.id && c.id !== moi);
+}
+
+let _cibleAllieResolve = null;
+
+function closeCibleAllie() {
+	document.getElementById('cible-allie-overlay').classList.add('clauses-hidden');
+	if (_cibleAllieResolve) { const r = _cibleAllieResolve; _cibleAllieResolve = null; r(null); }
+}
+
+function _choisirCibleAllie(id) {
+	document.getElementById('cible-allie-overlay').classList.add('clauses-hidden');
+	if (_cibleAllieResolve) { const r = _cibleAllieResolve; _cibleAllieResolve = null; r(id); }
+}
+
+// Renvoie l'id choisi, ou null si l'utilisateur annule. Une seule cible possible ⇒ pas
+// d'overlay : on ne fait pas cliquer quelqu'un sur l'unique choix qui existe.
+async function demanderCibleAllie(titre) {
+	await _assurerGroupe();
+	const cibles = _alliesCibles();
+	if (!cibles.length) { showToast('Personne à cibler : votre groupe est vide.'); return null; }
+	if (cibles.length === 1) return cibles[0].id;
+	document.getElementById('cible-allie-body').innerHTML =
+		`<h3 style="margin:.1rem 0 .7rem">${titre}</h3>`
+		+ cibles.map(c => `<button type="button" class="cible-allie-btn"
+			onclick="_choisirCibleAllie('${c.id}')">
+			<span>${c.icon}</span><span class="cible-allie-nom">${c.nom}</span>
+			${c.pv != null ? `<span class="cible-allie-pv">${c.pv}/${c.pv_max} PV</span>` : ''}
+		</button>`).join('');
+	document.getElementById('cible-allie-overlay').classList.remove('clauses-hidden');
+	return new Promise(resolve => { _cibleAllieResolve = resolve; });
+}
+
+// Vitaux de la cible d'un effet bénéfique : ils ne concernent PAS la fiche ouverte
+// (c'est le lanceur), mais la carte du bénéficiaire dans le panneau 👥.
+function _appliquerVitauxCible(l) {
+	if (!l || !l.cible_id || !l.cible_vitaux) return;
+	updateVitals(l.cible_vitaux, l.cible_id);
+	if (_grpEtat) _grpEtat = null;   // payload périmé : rechargé au prochain besoin
+}
+
 async function lancerSort(sortId, btn) {
 	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	const s = _sorts.find(x => x.sort_id === sortId);
 	const chk = document.getElementById('sortchk-' + _sortDomId(sortId));
 	const composants = (s && chk && chk.checked)
 		? (s.composants || []).filter(c => c.disponible).map(c => c.item) : [];
+	// Sort d'entraide : on demande la cible AVANT d'envoyer (les PM partent à l'envoi).
+	// Annuler doit tout arrêter, y compris réactiver le bouton.
+	let cible_id = null;
+	if (s && s.cible === 'allie') {
+		cible_id = await demanderCibleAllie(`${s.icon || '🔮'} ${s.nom} — sur qui ?`);
+		if (!cible_id) { if (btn) btn.disabled = false; return; }
+	}
 	try {
 		const res = await fetch('api/lancer_sort', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ sort_id: sortId, composants })
+			// _actionBody injecte `compagnon_id` : c'est le LANCEUR (la fiche ouverte).
+			body: JSON.stringify(_actionBody({ sort_id: sortId, composants, cible_id }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -4085,11 +4192,13 @@ async function lancerSort(sortId, btn) {
 		_renderCaractsMod(data.caracts_detail);
 		_renderSorts(data.sorts);
 		const l = data.lance || {};
+		_appliquerVitauxCible(l);
 		const gains = [];
 		if (l.pv_rendu) gains.push(`+${l.pv_rendu} PV`);
 		if (l.pm_rendu > 0) gains.push(`+${l.pm_rendu} PM`);
 		if (l.effet) gains.push(`effet actif ${l.effet.restants} tours`);
-		showToast(`${l.icon || '🔮'} ${l.nom || 'Sort lancé'}${gains.length ? ' : ' + gains.join(', ') : ''}`);
+		const sur = l.cible_nom ? ` sur ${l.cible_nom}` : '';
+		showToast(`${l.icon || '🔮'} ${l.nom || 'Sort lancé'}${sur}${gains.length ? ' : ' + gains.join(', ') : ''}`);
 	} catch(err) { console.error('Erreur sort', err); if (btn) btn.disabled = false; }
 }
 
@@ -4210,7 +4319,9 @@ function _renderCompetences(list) {
 				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
 				: '<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>');
 		const pm = c.cout_pm ? `<span class="sh-sort-pm">${c.cout_pm} PM</span>` : '';
-		const portee = (c.mode === 'active' && c.cible === 'ennemi') ? ` · portée ${c.portee}` : '';
+		let portee = '';
+		if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
+		else if (c.mode === 'active' && c.cible === 'allie') portee = ' · 🤝 sur un allié';
 		return `<div class="sh-skill">
 			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
 			<div class="sh-skill-info">
@@ -4249,10 +4360,17 @@ function _renderCompetencesApprenables(list) {
 
 async function utiliserCompetence(competenceId, btn) {
 	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
+	const c = (_competences || []).find(x => x.competence_id === competenceId);
+	// Compétence d'entraide : miroir exact de lancerSort (cible demandée avant l'envoi).
+	let cible_id = null;
+	if (c && c.cible === 'allie') {
+		cible_id = await demanderCibleAllie(`${c.icon || '⚡'} ${c.nom} — sur qui ?`);
+		if (!cible_id) { if (btn) btn.disabled = false; return; }
+	}
 	try {
 		const res = await fetch('api/utiliser_competence', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ competence_id: competenceId })
+			body: JSON.stringify(_actionBody({ competence_id: competenceId, cible_id }))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
@@ -4262,11 +4380,13 @@ async function utiliserCompetence(competenceId, btn) {
 		_renderCaractsMod(data.caracts_detail);
 		_renderCompetences(data.competences);
 		const u = data.utilisee || {};
+		_appliquerVitauxCible(u);
 		const gains = [];
 		if (u.pv_rendu) gains.push(`+${u.pv_rendu} PV`);
 		if (u.pm_rendu > 0) gains.push(`+${u.pm_rendu} PM`);
 		if (u.effet) gains.push(`effet actif ${u.effet.restants} tours`);
-		showToast(`${u.icon || '⚡'} ${u.nom || 'Compétence utilisée'}${gains.length ? ' : ' + gains.join(', ') : ''}`);
+		const sur = u.cible_nom ? ` sur ${u.cible_nom}` : '';
+		showToast(`${u.icon || '⚡'} ${u.nom || 'Compétence utilisée'}${sur}${gains.length ? ' : ' + gains.join(', ') : ''}`);
 	} catch(err) { console.error('Erreur compétence', err); if (btn) btn.disabled = false; }
 }
 

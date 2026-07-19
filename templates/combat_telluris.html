@@ -144,6 +144,10 @@
 	font-size: 13px; font-weight: bold; color: #7ec8ff;
 }
 .ally-token.ko { opacity: 0.35; filter: grayscale(1); }
+/* Ciblage d'un sort/compétence BÉNÉFIQUE : le vert distingue l'entraide du ciblage
+   offensif (violet), pour qu'on ne confonde jamais « je soigne » et « je frappe ». */
+.ally-token.spellcast { cursor: pointer; }
+.ally-token.spellcast .at-portrait { border-color: #4cd97b; box-shadow: 0 0 10px #4cd97b; }
 /* Monture : même jeton, anneau ocre plutôt que bleu — elle est du camp du joueur mais ne
    joue pas, et le joueur doit voir d'un coup d'œil que ce n'est pas un combattant. */
 .ally-token.monture .at-portrait {
@@ -181,6 +185,7 @@
 .init-badge.monstre { background: #3a2a2a; border-color: #555; color: #ffaaaa; }
 .init-badge.monstre.targetable { border-color: #ff4757; box-shadow: 0 0 9px rgba(255,71,87,0.7); cursor: pointer; }
 .init-badge.monstre.spellcast  { border-color: #b26bff; box-shadow: 0 0 9px rgba(178,107,255,0.7); cursor: pointer; }
+.init-badge.joueur.spellcast   { border-color: #4cd97b; box-shadow: 0 0 9px rgba(76,217,123,0.7); cursor: pointer; }
 .init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.12); }
 .init-badge.dead    { opacity: 0.3; filter: grayscale(1); }
 
@@ -1205,14 +1210,30 @@ function refreshBadgeTargets() {
 	// Ciblage de sort/compétence en attente : les cibles de la capacité remplacent celles
 	// de l'attaque (liseré violet .spellcast, clic = lancer au lieu d'attaquer).
 	const casting = canAct && (pendingSort || pendingComp);
+	const capa = casting ? (pendingSort ? pendingSort.sort : pendingComp.comp) : null;
+	const versAllies = !!capa && capa.cible === 'allie';
 	const targets = casting
-		? (pendingSort ? sortTargets(pendingSort.sort) : compTargets(pendingComp.comp))
+		? capaCibles(capa)
 		: (canAct ? targetableMonsters(currentMode) : []);
 	const targetable = new Set(targets.map(m => m.id));
+	// Badges ALLIÉS : cliquables (vert) seulement pendant une capacité bénéfique.
+	// ⚠️ Une monture n'est PAS dans `ordre_initiative` → elle n'a pas de badge ; on ne
+	// peut la viser que par son jeton. Le token reste donc le canal complet.
+	(state.joueurs || []).forEach(p => {
+		const el = document.getElementById(`badge-${p.id}`);
+		if (!el) return;
+		const t = versAllies && targetable.has(p.id);
+		el.classList.toggle('spellcast', t);
+		el.onclick = !t ? null : (pendingSort
+			? () => doAction('sort', p.id, null, null, null, null,
+				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+			: () => doAction('competence', p.id, null, null, null, null,
+				{ competence_id: pendingComp.competence_id }));
+	});
 	state.monstres.forEach(m => {
 		const el = document.getElementById(`badge-${m.id}`);   // badge-<actor_id>, actor_id monstre = m.id
 		if (!el) return;
-		const t = targetable.has(m.id);
+		const t = targetable.has(m.id) && !versAllies;
 		el.classList.toggle('targetable', t && !casting);
 		el.classList.toggle('spellcast',  t && !!casting);
 		el.onclick = !t ? null : (casting
@@ -1250,13 +1271,17 @@ function renderTokens() {
 	const j = me();
 	// Ciblage de sort/compétence en attente : cibles violettes au lieu de l'attaque.
 	const casting = !!(pendingSort || pendingComp);
+	const capa = casting ? (pendingSort ? pendingSort.sort : pendingComp.comp) : null;
+	// Une capacité bénéfique cible les ALLIÉS : les monstres sortent alors du ciblage,
+	// et ce sont les jetons alliés qui s'allument (en vert).
+	const versAllies = !!capa && capa.cible === 'allie';
 	const targetable = new Set((casting
-		? (pendingSort ? sortTargets(pendingSort.sort) : compTargets(pendingComp.comp))
+		? capaCibles(capa)
 		: targetableMonsters(currentMode)).map(m => m.id));
 	layer.innerHTML = '';
 	state.monstres.forEach(m => {
 		if (!m.pos) return;
-		const adj = targetable.has(m.id);
+		const adj = targetable.has(m.id) && !versAllies;
 		const [sx, sy] = worldToScreen(m.pos.x - j.pos.x, m.pos.y - j.pos.y);
 		const tok = document.createElement('div');
 		tok.className = 'monster-token' + (m.vivant ? '' : ' dead')
@@ -1278,13 +1303,17 @@ function renderTokens() {
 		layer.appendChild(tok);
 	});
 	// Alliés : les membres du groupe NON actifs, aux coords relatives au membre actif
-	// (le token central, lui, montre toujours le membre actif). Non ciblables en v1.
+	// (le token central, lui, montre toujours le membre actif). Ciblables UNIQUEMENT
+	// pendant le lancement d'une capacité bénéfique — jamais par une attaque (pas de
+	// tir ami dans ce jeu).
 	(state.joueurs || []).forEach(p => {
 		if (!p.pos || p.id === j.id) return;
+		const vise = versAllies && targetable.has(p.id);
 		const [sx, sy] = worldToScreen(p.pos.x - j.pos.x, p.pos.y - j.pos.y);
 		const tok = document.createElement('div');
 		tok.className = 'ally-token' + ((p.currentPV || 0) > 0 ? '' : ' ko')
-					  + (p.est_monture ? ' monture' : '');
+					  + (p.est_monture ? ' monture' : '')
+					  + (vise ? ' spellcast' : '');
 		tok.style.left   = `calc(50% + var(--step) * ${sx})`;
 		tok.style.bottom = `calc(var(--step) * (var(--floor) - (${sy})))`;
 		const inner = document.createElement('div');
@@ -1297,6 +1326,11 @@ function renderTokens() {
 		hp.className = 'mt-hp';
 		hp.innerHTML = `<div class="mt-hp-fill" style="width:${pct(p.currentPV, p.pv_max)}%"></div>`;
 		tok.appendChild(hp);
+		if (vise) tok.onclick = pendingSort
+			? () => doAction('sort', p.id, null, null, null, null,
+				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+			: () => doAction('competence', p.id, null, null, null, null,
+				{ competence_id: pendingComp.competence_id });
 		layer.appendChild(tok);
 	});
 }
@@ -1450,22 +1484,41 @@ function sortTargets(s) {
 	}
 	return list;
 }
-// Sort lançable maintenant ? PM suffisants, et pour un sort offensif au moins une cible.
+// Cibles valides d'un sort/compétence BÉNÉFIQUE (`cible: "allie"`) : les autres membres
+// du groupe — compagnons ET montures — encore DEBOUT, à portée. Miroir de _lancer_sur_allie :
+//   • le lanceur lui-même est exclu (un effet sur soi se déclare `cible: "soi"`) ;
+//   • un allié à 0 PV n'est pas visable (le relever demande sa propre mécanique) ;
+//   • pas d'interdiction « engagé au corps à corps » : on doit pouvoir soigner sous le feu,
+//     c'est même là que ça sert. La ligne de vue reste exigée au-delà du contact.
+function allyTargets(s) {
+	const j = me();
+	const portee = Math.max(1, s.portee || 1);
+	let list = (state.joueurs || []).filter(p =>
+		p.pos && p.id !== j.id && (p.currentPV || 0) > 0 && chebyJM(j, p) <= portee);
+	if (portee > 1) list = list.filter(p => lineOfSight(j.pos.x, j.pos.y, p.pos.x, p.pos.y));
+	return list;
+}
+// Cibles d'une capacité, quel que soit son camp — SOURCE UNIQUE des trois consommateurs
+// (slot grisé, rendu des tokens, badges d'initiative), pour qu'une case cliquable et une
+// cible cliquable ne puissent pas diverger.
+function capaCibles(c) { return c.cible === 'allie' ? allyTargets(c) : sortTargets(c); }
+
+// Sort lançable maintenant ? PM suffisants, et pour un sort CIBLÉ au moins une cible.
 // Consommé par slotJouable (état de la case) et par activerSlot (refus au clic).
 function sortCastable(s) {
 	const j = me() || {};
 	return (j.currentPM || 0) >= s.cout_pm
-		&& (s.cible !== 'ennemi' || sortTargets(s).length > 0);
+		&& (s.cible === 'soi' || capaCibles(s).length > 0);
 }
 
 // ── Compétences actives (1 action + PM éventuels) — miroir exact des sorts ──────
 // Mêmes règles de portée/cibles (compTargets = sortTargets : les payloads partagent
 // les champs cible/portee) ; pas de composants, PM souvent à 0 (martiale).
-function compTargets(c) { return sortTargets(c); }
+function compTargets(c) { return capaCibles(c); }
 function compCastable(c) {
 	const j = me() || {};
 	return (j.currentPM || 0) >= c.cout_pm
-		&& (c.cible !== 'ennemi' || compTargets(c).length > 0);
+		&& (c.cible === 'soi' || capaCibles(c).length > 0);
 }
 
 // ── Disponibilité d'une direction : miroir exact de la validation serveur `deplacer`.
@@ -1701,8 +1754,8 @@ function sortLabel(s) {
 // passage des badges/tokens en mode ciblage violet (plusieurs cibles). Appelé depuis
 // la case du sort (activerSlot), qui décide des composants à engager.
 function startSortCast(s, composants) {
-	if (s.cible === 'ennemi') {
-		const cibles = sortTargets(s);
+	if (s.cible !== 'soi') {
+		const cibles = capaCibles(s);
 		if (!cibles.length) { closeSelectors(); return; }
 		if (cibles.length === 1) {
 			doAction('sort', cibles[0].id, null, null, null, null, { sort_id: s.sort_id, composants });
@@ -1908,8 +1961,8 @@ function compLabel(c) {
 // Utilise la compétence `c` : direct (soi / 1 cible) ou ciblage violet (plusieurs cibles).
 // Appelé depuis la case de la compétence (activerSlot).
 function startCompUse(c) {
-	if (c.cible === 'ennemi') {
-		const cibles = compTargets(c);
+	if (c.cible !== 'soi') {
+		const cibles = capaCibles(c);
 		if (!cibles.length) { closeSelectors(); return; }
 		if (cibles.length === 1) {
 			doAction('competence', cibles[0].id, null, null, null, null, { competence_id: c.competence_id });

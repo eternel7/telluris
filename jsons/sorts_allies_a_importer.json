@@ -1,0 +1,245 @@
+[
+  {
+    "_id": "sort:soin_du_compagnon",
+    "type": "sort",
+    "nom": "Soin du compagnon",
+    "icon": "🙌",
+    "description": "La main se pose sur la blessure d'un autre. Ce que la prière referme chez soi, elle le referme chez son prochain.",
+    "vocation": "pretre",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "pv": 14
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_medicinales",
+        "consomme": true,
+        "bonus": {
+          "pv": 8
+        }
+      },
+      {
+        "item": "item:Eau_benite",
+        "consomme": false,
+        "bonus": {
+          "pv": 4
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:benir",
+    "type": "sort",
+    "nom": "Bénir",
+    "icon": "🙏",
+    "description": "Le pouce trace un signe sur le front de l'allié. Son bras s'affermit, et ce qui est impur devant lui recule.",
+    "vocation": "paladin",
+    "magie": "Sainte",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "buffs": {
+        "F": 10,
+        "Vol": 5
+      },
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Eau_benite",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      },
+      {
+        "item": "item:encens",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "F": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:guerison_des_animaux",
+    "type": "sort",
+    "nom": "Guérison des animaux",
+    "icon": "🐴",
+    "description": "Une paume à plat sur l'encolure, et la bête reprend souffle. Les druides soignent d'abord ceux qui portent, tirent et suivent sans rien demander.",
+    "vocation": "druide",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "pv": 16
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_medicinales",
+        "consomme": true,
+        "bonus": {
+          "pv": 10
+        }
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": false,
+        "bonus": {
+          "pv": 4
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:force_partagee",
+    "type": "sort",
+    "nom": "Force partagée",
+    "icon": "🤝",
+    "description": "La formule passe par le contact : ce que le mage n'a pas dans les bras, il le donne à qui sait s'en servir.",
+    "vocation": "mage",
+    "magie": "Bataille",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "buffs": {
+        "F": 15
+      },
+      "duree": 3
+    },
+    "composants": [
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "buffs": {
+            "F": 5
+          }
+        }
+      },
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_soin_du_compagnon",
+    "type": "item",
+    "nom": "Grimoire : Soin du compagnon",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Soin du compagnon » (pretre). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:soin_du_compagnon"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_benir",
+    "type": "item",
+    "nom": "Grimoire : Bénir",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bénir » (paladin). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:benir"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_guerison_des_animaux",
+    "type": "item",
+    "nom": "Grimoire : Guérison des animaux",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Guérison des animaux » (druide). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:guerison_des_animaux"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_force_partagee",
+    "type": "item",
+    "nom": "Grimoire : Force partagée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Force partagée » (mage). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:force_partagee"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  }
+]

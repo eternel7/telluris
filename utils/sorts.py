@@ -21,6 +21,26 @@ from models import character_stats
 from utils.characters import item_ref_id
 from utils.consommables import _as_int
 
+# Jet de toucher d'un effet offensif, porté par la DONNÉE. SOURCE UNIQUE, partagée avec
+# les compétences (utils/competences.py l'importe) — les deux familles se résolvent par
+# le même contrat, il ne doit pas exister deux listes qui divergent.
+#   `magique` → seuil `_magic_hit_threshold` contre la pm_def, PA NON soustraits ;
+#   `cc`/`cd` → seuil `_hit_threshold` contre l'Ag (+ esquive), PA soustraits.
+# ⚠️ Le défaut DIFFÈRE entre les deux familles, et c'est voulu : une compétence est
+# martiale par défaut (`cc`), un sort est magique par défaut (`magique`) — sans quoi les
+# sorts déjà en base changeraient de mode de résolution du jour au lendemain.
+JETS = ("cc", "cd", "magique")
+JET_SORT_DEFAUT = "magique"
+
+# Cibles possibles d'un sort ou d'une compétence. SOURCE UNIQUE, partagée elle aussi.
+#   `soi`    → le lanceur ;
+#   `ennemi` → un monstre, jet de toucher (cf. JETS) ;
+#   `allie`  → un COMPAGNON ou une MONTURE du groupe, SANS jet (un allié ne se défend
+#              pas). Combat uniquement : l'exploration ne sait pas encore désigner un
+#              porteur comme cible, cf. `sort_utilisable_exploration`.
+CIBLES = ("soi", "ennemi", "allie")
+CIBLE_DEFAUT = "soi"
+
 
 def _bonus_dict(raw) -> dict:
 	"""Normalise un bloc d'effets/bonus : degats str, entiers ≥ 0, buffs {caract:int}
@@ -67,6 +87,12 @@ def normaliser_sort(sort_doc) -> dict | None:
 	cout_pm = _as_int(doc.get("cout_pm"))
 	if cout_pm <= 0:
 		return None
+	cible = str(doc.get("cible") or CIBLE_DEFAUT)
+	if cible not in CIBLES:
+		cible = CIBLE_DEFAUT
+	jet = str(doc.get("jet") or JET_SORT_DEFAUT)
+	if jet not in JETS:
+		jet = JET_SORT_DEFAUT
 	composants = []
 	for c in doc.get("composants") or []:
 		item_id = (c or {}).get("item")
@@ -86,7 +112,10 @@ def normaliser_sort(sort_doc) -> dict | None:
 		"magie": (str(doc.get("magie")).strip() or None) if doc.get("magie") else None,
 		"niveau": _as_int(doc.get("niveau")),
 		"cout_pm": cout_pm,
-		"cible": doc.get("cible") or "soi",
+		"cible": cible,
+		# Jet de toucher (cible ennemie seulement) : `magique` par défaut — un sort de
+		# CONTACT peut demander `cc` (« au toucher » : il faut d'abord poser la main).
+		"jet": jet,
 		"portee": _as_int(doc.get("portee")),
 		"effets": effets_de_sort(doc),
 		"composants": composants,
@@ -196,10 +225,14 @@ def sort_utilisable_combat(sort: dict) -> bool:
 
 
 def sort_utilisable_exploration(sort: dict) -> bool:
-	"""Éligibilité exploration : ciblé sur soi ET au moins un effet applicable hors
-	combat (soin/PM instantanés, ou buffs/régén/esquive à durée)."""
+	"""Éligibilité exploration : NON offensif (`soi` ou `allie`) ET au moins un effet
+	applicable hors combat (soin/PM instantanés, ou buffs/régén/esquive à durée).
+
+	⚠️ Seul `ennemi` est exclu : il n'y a pas de monstre à viser hors combat. Un sort
+	`allie` est lançable sur un compagnon ou une monture — la cible est désignée par le
+	`cible_id` du corps de requête (cf. `_cible_alliee`, routers/user.py)."""
 	s = sort or {}
-	if (s.get("cible") or "soi") != "soi":
+	if (s.get("cible") or "soi") == "ennemi":
 		return False
 	eff = s.get("effets") or {}
 	instant = _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0

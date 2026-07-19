@@ -1,0 +1,487 @@
+[
+  {
+    "_id": "sort:antidote_sylvestre",
+    "type": "sort",
+    "nom": "Antidote sylvestre",
+    "icon": "🍵",
+    "description": "Une décoction de racines amères circule dans le sang et repousse venins et miasmes.",
+    "vocation": "druide",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "buffs": {
+        "R": 10
+      },
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_medicinales",
+        "consomme": true,
+        "bonus": {
+          "buffs": {
+            "R": 5
+          }
+        }
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:oeil_de_la_chouette",
+    "type": "sort",
+    "nom": "Œil de la chouette",
+    "icon": "🦉",
+    "description": "Les yeux se dilatent comme ceux d'un rapace de nuit : l'ombre ne cache plus rien, et les coups se voient venir.",
+    "vocation": "chaman",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "esquive": 10,
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_a_bruler",
+        "consomme": true,
+        "bonus": {
+          "duree": 2
+        }
+      },
+      {
+        "item": "item:plumes",
+        "consomme": false,
+        "bonus": {
+          "esquive": 5
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:amitie_des_betes",
+    "type": "sort",
+    "nom": "Amitié des bêtes",
+    "icon": "🦌",
+    "description": "Votre odeur se fond dans celle du sous-bois. Les bêtes vous prennent pour l'une des leurs tant que vous ne levez pas la main sur elles.",
+    "vocation": "druide",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 10,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "furtivite": 10,
+      "duree": 4
+    },
+    "composants": [
+      {
+        "item": "item:Herbes_a_bruler",
+        "consomme": true,
+        "bonus": {
+          "furtivite": 5
+        }
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:source_vive",
+    "type": "sort",
+    "nom": "Source vive",
+    "icon": "💦",
+    "description": "Une eau claire sourd d'entre vos doigts, tant que l'esprit la maintient. Elle lave la fatigue autant que la soif.",
+    "vocation": "chaman",
+    "magie": "Nature",
+    "niveau": 0,
+    "cout_pm": 7,
+    "cible": "soi",
+    "portee": 0,
+    "effets": {
+      "pm": 4,
+      "regen_pm": 2,
+      "duree": 5
+    },
+    "composants": [
+      {
+        "item": "item:Eau_de_source",
+        "consomme": true,
+        "bonus": {
+          "regen_pm": 1
+        }
+      },
+      {
+        "item": "item:crocs",
+        "consomme": false,
+        "bonus": {
+          "duree": 1
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:jet_d_eau",
+    "type": "sort",
+    "nom": "Jet d'eau",
+    "icon": "💧",
+    "description": "Un jet d'eau sous pression frappe la cible de plein fouet et la déséquilibre.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 6,
+    "effets": {
+      "degats": "2D4",
+      "buffs": {
+        "Ag": -5
+      },
+      "duree": 2
+    },
+    "composants": [
+      {
+        "item": "item:Eau_de_source",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D4"
+        }
+      },
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:eclat_de_givre",
+    "type": "sort",
+    "nom": "Éclat de givre",
+    "icon": "❄️",
+    "description": "Un éclat de glace transperce la cible et engourdit ses mouvements.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 8,
+    "effets": {
+      "degats": "1D8",
+      "buffs": {
+        "Ag": -10
+      },
+      "duree": 2
+    },
+    "composants": [
+      {
+        "item": "item:poudre_alchimique",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:lame_de_vent",
+    "type": "sort",
+    "nom": "Lame de vent",
+    "icon": "🌪️",
+    "description": "Une lame d'air comprimé fend l'espace et atteint l'ennemi bien au-delà de la portée d'un arc.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 0,
+    "cout_pm": 9,
+    "cible": "ennemi",
+    "portee": 10,
+    "effets": {
+      "degats": "2D6"
+    },
+    "composants": [
+      {
+        "item": "item:plumes",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:Cristal_canalisation",
+        "consomme": false,
+        "bonus": {
+          "degats": "2"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "sort:eclat_rocheux",
+    "type": "sort",
+    "nom": "Éclat rocheux",
+    "icon": "🪨",
+    "description": "Un bloc de pierre jaillit du sol et percute violemment la cible, qui peine ensuite à lever son arme.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 0,
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "portee": 6,
+    "effets": {
+      "degats": "2D6",
+      "buffs": {
+        "F": -5
+      },
+      "duree": 2
+    },
+    "composants": [
+      {
+        "item": "item:Sel_gemme",
+        "consomme": true,
+        "bonus": {
+          "degats": "1D6"
+        }
+      },
+      {
+        "item": "item:Pierre_a_aiguiser",
+        "consomme": false,
+        "bonus": {
+          "degats": "1"
+        }
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_antidote_sylvestre",
+    "type": "item",
+    "nom": "Grimoire : Antidote sylvestre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Antidote sylvestre » (druide). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:antidote_sylvestre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_oeil_de_la_chouette",
+    "type": "item",
+    "nom": "Grimoire : Œil de la chouette",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Œil de la chouette » (chaman). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:oeil_de_la_chouette"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_amitie_des_betes",
+    "type": "item",
+    "nom": "Grimoire : Amitié des bêtes",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Amitié des bêtes » (druide). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:amitie_des_betes"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_source_vive",
+    "type": "item",
+    "nom": "Grimoire : Source vive",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Source vive » (chaman). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:source_vive"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_jet_d_eau",
+    "type": "item",
+    "nom": "Grimoire : Jet d'eau",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Jet d'eau » (élémentaliste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:jet_d_eau"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eclat_de_givre",
+    "type": "item",
+    "nom": "Grimoire : Éclat de givre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éclat de givre » (élémentaliste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eclat_de_givre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lame_de_vent",
+    "type": "item",
+    "nom": "Grimoire : Lame de vent",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lame de vent » (élémentaliste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lame_de_vent"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eclat_rocheux",
+    "type": "item",
+    "nom": "Grimoire : Éclat rocheux",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éclat rocheux » (élémentaliste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eclat_rocheux"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  }
+]

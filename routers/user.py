@@ -681,6 +681,54 @@ def _acteur(current_user, body: dict) -> tuple[dict, dict]:
 	return av, principal
 
 
+def _cible_alliee(principal: dict, lanceur: dict, body: dict) -> dict:
+	"""Résout la CIBLE d'un effet bénéfique hors combat (`cible: "allie"`) : le personnage
+	principal, un compagnon ou une monture du groupe, désigné par `cible_id`.
+
+	⚠️ Le LANCEUR est testé EN PREMIER. `porteurs_effectifs` relit les docs en base : si la
+	cible est le lanceur lui-même, en passer par là rendrait un SECOND dict du même document
+	— deux `save_doc` concurrents sur un `_rev` identique, donc une écriture perdue en
+	silence. Renvoyer le dict déjà en main garantit qu'on ne manipule qu'un seul objet.
+
+	Miroir de `_acteur` pour la preuve d'appartenance : un doc `aventurier:*`/`monture:*`
+	n'a pas de `user_id`, seul `porteurs_effectifs` atteste du lien avec CE personnage.
+	"""
+	cible_id = (body or {}).get("cible_id")
+	if not cible_id:
+		raise HTTPException(status_code=422, detail="Cet effet demande une cible")
+	if cible_id == lanceur.get("_id"):
+		return lanceur
+	if cible_id == principal.get("_id"):
+		return principal
+	cible = next(
+		(a for a in recrutement.porteurs_effectifs(principal, get_doc) if a.get("_id") == cible_id),
+		None,
+	)
+	if cible is None:
+		raise HTTPException(status_code=403, detail="Cette cible ne fait pas partie de votre groupe")
+	return cible
+
+
+def _save_cast(lanceur: dict, cible: dict, principal: dict) -> None:
+	"""Persiste un lancement hors combat : jusqu'à TROIS docs distincts (le lanceur qui
+	paie les PM, la cible qui reçoit l'effet, le principal qui porte le groupe).
+
+	Le LANCEUR est autoritatif (409 s'il ne passe pas) : c'est lui qui a payé. Un échec sur
+	la cible est signalé mais non bloquant — même compromis best-effort que `_save_acteur`
+	et que la séquence bi-doc du combat, faute d'écriture multi-documents atomique en
+	CouchDB. Les doublons sont écartés par IDENTITÉ (`is`), pas par id : deux dicts du même
+	doc ne doivent jamais arriver ici (cf. `_cible_alliee`)."""
+	if save_doc(lanceur) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	deja = [lanceur]
+	for autre in (cible, principal):
+		if any(autre is d for d in deja):
+			continue
+		deja.append(autre)
+		if save_doc(autre) is None:
+			print(f"cast: échec de sauvegarde de {autre.get('_id')} (effet non persisté)")
+
+
 def _save_acteur(porteur: dict, principal: dict) -> None:
 	"""Sauve le porteur (autoritatif : 409 en cas de conflit) puis, si l'action a aussi muté
 	le personnage principal (le sol lui appartient), son doc en best-effort — même séquence
@@ -1037,13 +1085,20 @@ async def lancer_sort(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Lance un sort connu HORS combat (cible soi uniquement) : débite les PM, applique
-	la part instantanée (pv/pm clampés) et empile l'éventuel effet à durée (buffs/régén,
-	décrémenté au tour monde). Les composants engagés (`composants` = ids item) sont
-	re-vérifiés : les consommés quittent le sac, les catalyseurs restent."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	"""Lance un sort connu HORS combat : débite les PM du LANCEUR, applique la part
+	instantanée (pv/pm clampés) et empile l'éventuel effet à durée (buffs/régén,
+	décrémenté au tour monde) sur la CIBLE. Les composants engagés (`composants` = ids
+	item) sont re-vérifiés : les consommés quittent le sac, les catalyseurs restent.
+
+	Deux personnages peuvent être en jeu, et il ne faut pas les confondre :
+	  • le LANCEUR = `_acteur` (`compagnon_id`) — il connaît le sort, paie les PM et
+	    fournit les composants ; c'est SA fiche qui est ouverte ;
+	  • la CIBLE = lui-même (`cible: "soi"`) ou un allié désigné par `cible_id`
+	    (`cible: "allie"` — compagnon ou monture, cf. `_cible_alliee`).
+	⚠️ Cet endpoint lisait `get_selected_character` et ignorait donc `compagnon_id` : un
+	sort lancé depuis la fiche d'un compagnon débitait les PM du PRINCIPAL et le buffait
+	lui. Même classe de bug que le mélange des barres de slots du 2026-07-19."""
+	character, principal = _acteur(current_user, body)
 
 	sort_id = body.get("sort_id")
 	if sort_id not in (character.get("sorts_connus") or []):
@@ -1068,20 +1123,23 @@ async def lancer_sort(
 	character["inventaire"] = inventaire
 	effets = sorts_util.effets_effectifs(sort, engages)
 
-	# Buff empilé AVANT le calcul des max (même règle que les consommables), puis
-	# débit PM et part instantanée clampée aux max bufffés.
-	effet = sorts_util.empiler_effet_sort(character, sort, effets)
-	eq = sync_equipment_bonus(character)
-	derived = _derived_from_character(character, eq)
-	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - sort["cout_pm"])
-	avant_pv = int(character.get("currentPV", 0) or 0)
-	avant_pm = character["currentPM"]
-	character["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])
-	character["currentPM"] = min(derived.pm_max, avant_pm + effets["pm"])
+	# Cible : soi-même, ou l'allié désigné. Résolue APRÈS les gardes du lanceur pour
+	# qu'un sort inconnu ou sans PM échoue sur SA vraie cause.
+	cible = _cible_alliee(principal, character, body) if sort["cible"] == "allie" else character
 
-	if save_doc(character) is None:
-		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	payload = _inventory_payload(character)
+	# Buff empilé AVANT le calcul des max (même règle que les consommables), puis
+	# débit PM (LANCEUR) et part instantanée clampée aux max bufffés (CIBLE).
+	effet = sorts_util.empiler_effet_sort(cible, sort, effets)
+	eq = sync_equipment_bonus(cible)
+	derived = _derived_from_character(cible, eq)
+	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - sort["cout_pm"])
+	avant_pv = int(cible.get("currentPV", 0) or 0)
+	avant_pm = int(cible.get("currentPM", 0) or 0)
+	cible["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])
+	cible["currentPM"] = min(derived.pm_max, avant_pm + effets["pm"])
+
+	_save_cast(character, cible, principal)
+	payload = _inventory_payload(character, principal)
 	payload["vitals"] = _vitals_payload(character)
 	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
 	payload["caracts_detail"] = _caracts_payload(character)
@@ -1089,9 +1147,14 @@ async def lancer_sort(
 	payload["lance"] = {
 		"nom": sort["nom"],
 		"icon": sort["icon"],
-		"pv_rendu": character["currentPV"] - avant_pv,
-		"pm_rendu": character["currentPM"] - avant_pm,
+		"pv_rendu": cible["currentPV"] - avant_pv,
+		"pm_rendu": cible["currentPM"] - avant_pm,
 		"effet": dict(effet) if effet else None,
+		# Renseignés seulement pour un sort d'allié : le client sait alors que les PV/PM
+		# rendus ne concernent PAS la fiche ouverte, et rafraîchit la bonne carte.
+		"cible_id": cible.get("_id") if cible is not character else None,
+		"cible_nom": cible.get("nom") if cible is not character else None,
+		"cible_vitaux": _vitals_payload(cible) if cible is not character else None,
 	}
 	return payload
 
@@ -1147,14 +1210,16 @@ async def utiliser_competence(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Utilise une compétence ACTIVE hors combat (cible soi uniquement) : débite les PM
-	éventuels, applique la part instantanée (pv/pm clampés) et empile l'effet à durée
-	(buffs/régén, décrémenté au tour monde). Miroir de `lancer_sort`, sans composants —
-	une compétence ne consomme aucun objet. Les passives ne s'« utilisent » pas : leur
-	bonus est permanent (competences_bonus)."""
-	character = get_selected_character(current_user)
-	if not character:
-		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	"""Utilise une compétence ACTIVE hors combat : débite les PM éventuels du LANCEUR,
+	applique la part instantanée (pv/pm clampés) et empile l'effet à durée sur la CIBLE
+	(soi, ou l'allié désigné par `cible_id`). Miroir exact de `lancer_sort`, sans
+	composants — une compétence ne consomme aucun objet. Les passives ne s'« utilisent »
+	pas : leur bonus est permanent (competences_bonus).
+
+	⚠️ Même correctif que `lancer_sort` : cet endpoint lisait `get_selected_character` et
+	ignorait `compagnon_id`, donc une compétence lancée depuis la fiche d'un compagnon
+	s'appliquait au principal."""
+	character, principal = _acteur(current_user, body)
 
 	competence_id = body.get("competence_id")
 	if competence_id not in (character.get("competences_connues") or []):
@@ -1168,18 +1233,18 @@ async def utiliser_competence(
 	# Buff empilé AVANT le calcul des max (même règle que les consommables et les sorts),
 	# puis débit PM et part instantanée clampée aux max bufffés.
 	effets = comp["effets"]
-	effet = competences_util.empiler_effet_competence(character, comp)
-	eq = sync_equipment_bonus(character)
-	derived = _derived_from_character(character, eq)
+	cible = _cible_alliee(principal, character, body) if comp["cible"] == "allie" else character
+	effet = competences_util.empiler_effet_competence(cible, comp)
+	eq = sync_equipment_bonus(cible)
+	derived = _derived_from_character(cible, eq)
 	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - comp["cout_pm"])
-	avant_pv = int(character.get("currentPV", 0) or 0)
-	avant_pm = character["currentPM"]
-	character["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])
-	character["currentPM"] = min(derived.pm_max, avant_pm + effets["pm"])
+	avant_pv = int(cible.get("currentPV", 0) or 0)
+	avant_pm = int(cible.get("currentPM", 0) or 0)
+	cible["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])
+	cible["currentPM"] = min(derived.pm_max, avant_pm + effets["pm"])
 
-	if save_doc(character) is None:
-		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	payload = _inventory_payload(character)
+	_save_cast(character, cible, principal)
+	payload = _inventory_payload(character, principal)
 	payload["vitals"] = _vitals_payload(character)
 	payload["effets_actifs"] = consommables.effets_actifs_payload(character)
 	payload["caracts_detail"] = _caracts_payload(character)
@@ -1187,9 +1252,12 @@ async def utiliser_competence(
 	payload["utilisee"] = {
 		"nom": comp["nom"],
 		"icon": comp["icon"],
-		"pv_rendu": character["currentPV"] - avant_pv,
-		"pm_rendu": character["currentPM"] - avant_pm,
+		"pv_rendu": cible["currentPV"] - avant_pv,
+		"pm_rendu": cible["currentPM"] - avant_pm,
 		"effet": dict(effet) if effet else None,
+		"cible_id": cible.get("_id") if cible is not character else None,
+		"cible_nom": cible.get("nom") if cible is not character else None,
+		"cible_vitaux": _vitals_payload(cible) if cible is not character else None,
 	}
 	return payload
 
