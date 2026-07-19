@@ -271,7 +271,7 @@ AFFINITE_REDUC_PART: int = 10
 # (proposée dans l'overlay de fin) ; à False elle est seulement KO, relevée à 1 PV
 # comme un compagnon.
 MONTURE_GROUPE_MAX: int = 2
-MONTURE_CHARGE_MULT_DEFAUT: float = 3.0
+MONTURE_CHARGE_MULT_DEFAUT: float = 1.2
 MONTURE_PRIX_DEFAUT: int = 2000
 MONTURE_MORT_DEFINITIVE: bool = True
 
