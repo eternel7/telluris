@@ -13,7 +13,7 @@ from routers.user import user_router, User
 from routers.oauth import router as oauth_router
 from routers.zones import zones_router
 from routers.bestiaire import bestiaire_router
-from routers.combat import combat_router
+from routers.combat import combat_router, _actor_character_id
 from routers.quetes import quetes_router
 from routers.pnj import pnj_router
 from routers.recrutement import recrutement_router
@@ -772,6 +772,13 @@ async def get_combat_page(
 	except Exception:
 		portrait_largeur, portrait_hauteur = 100, 100
 
+	# ⚠️ Les ressources rendues sont celles de l'ACTEUR COURANT, pas du principal : si
+	# l'initiative revient d'abord à un compagnon, la page doit s'ouvrir sur SES sorts /
+	# consommables / compétences. Le client ne resynchronise qu'au CHANGEMENT d'acteur
+	# (hook `lastActorId`), donc le premier rendu doit déjà être le bon — sinon le joueur
+	# voit et peut déclencher les commandes du principal pendant le tour du compagnon.
+	acteur = get_doc(_actor_character_id(combat_doc)) or character
+
 	# Portraits de TOUS les membres du groupe (joueur + compagnons `aventurier:*`) :
 	# le client rend les tokens alliés et le panneau du membre actif à partir de là.
 	portraits_joueurs = {}
@@ -811,18 +818,18 @@ async def get_combat_page(
 			"grid": get_combat_grid(combat_doc),
 			# Consommables du sac utilisables en combat (effet instantané pv/pm), avec
 			# index d'origine — resynchronisés par la réponse de l'action « consommer ».
-			"consommables": consommables.liste_consommables_combat(character, resolve_item_ref),
+			"consommables": consommables.liste_consommables_combat(acteur, resolve_item_ref),
 			# Sorts connus utilisables en combat (part instantanée degats/pv/pm), avec
 			# disponibilité des composants — resynchronisés par la réponse de l'action « sort ».
-			"sorts": sorts_util.liste_sorts_payload(character, get_doc, "combat"),
+			"sorts": sorts_util.liste_sorts_payload(acteur, get_doc, "combat"),
 			# Sorts épinglés en accès rapide (icônes directement cliquables de la barre
 			# d'action) — sous-ensemble ordonné des sorts connus.
-			"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
+			"sorts_epingles": sorts_util.sorts_epingles_effectifs(acteur),
 			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/
 			# furtivité) — les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
-			"competences": competences_util.liste_competences_payload(character, get_doc, "combat"),
+			"competences": competences_util.liste_competences_payload(acteur, get_doc, "combat"),
 			# Compétences épinglées en accès rapide (miroir des sorts épinglés).
-			"competences_epinglees": competences_util.competences_epinglees_effectives(character, get_doc),
+			"competences_epinglees": competences_util.competences_epinglees_effectives(acteur, get_doc),
 			# Portraits du groupe (tokens alliés + panneau du membre actif côté client).
 			"portraits_joueurs": portraits_joueurs,
 		},
