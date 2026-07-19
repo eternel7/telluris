@@ -1,0 +1,28 @@
+[
+  {
+    "_id": "item:grimoire_soin_regenerant",
+    "type": "item",
+    "nom": "Grimoire : Soin régénérant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Soin régénérant » (pretre). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:soin_regenerant"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  }
+]

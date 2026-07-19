@@ -944,7 +944,11 @@
 			background: var(--input-bg, #1c1c1c); color: inherit;
 			border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem;
 		}
-		.sh-rel-scroll { max-height: 45vh; overflow-y: auto; overflow-x: hidden; 
+		/* Conteneur scrollable GÉNÉRIQUE des listes longues de la fiche (relations,
+		   quêtes, sorts, compétences…). Une classe de HAUTEUR l'accompagne par
+		   famille de liste ; le dernier enfant doit être .sh-list-shadow-overlay. */
+		.sh-rel-scroll { max-height: 45vh; overflow-y: auto; overflow-x: hidden;
+			position: relative;
 			scrollbar-width: thin;
 			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
@@ -974,8 +978,12 @@
 		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: nowrap; }
 		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
-		.sh-quest-list-active.sh-rel-scroll { max-height : 40vh; position: relative;}
-		.sh-quest-list-ended.sh-rel-scroll { max-height : 35vh; position: relative;}
+		.sh-quest-list-active.sh-rel-scroll { max-height : 40vh; }
+		.sh-quest-list-ended.sh-rel-scroll { max-height : 35vh; }
+		/* Listes de l'onglet ⚡ (sorts, écoles, compétences, apprentissages) : le
+		   contenu est réécrit en innerHTML dans le div INTERNE, l'ombre vit donc
+		   dans le wrapper et survit à chaque rendu client. */
+		.sh-capa-list.sh-rel-scroll { max-height: 35vh; }
 		div.sh-list-shadow-overlay {
 			position: sticky;
 			bottom: 0px;
@@ -1602,13 +1610,13 @@
 							<button type="button" id="inv-sort-btn" class="sh-drop-btn" onclick="cycleInvSort()"
 								title="Trier le sac par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
 						</div>
-						<div class="sh-inv-scroll" id="sh-sac-scroll"><div id="sh-inv-sac" class="sh-inv-box"></div></div>
+						<div class="sh-inv-scroll sh-scroll" id="sh-sac-scroll"><div id="sh-inv-sac" class="sh-inv-box"></div></div>
 						<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none; align-items:center; justify-content:space-between">
 								<span>⬇️ Au sol</span>
 								<button type="button" id="sol-sort-btn" class="sh-drop-btn" onclick="cycleSolSort()"
 									title="Trier les objets au sol par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
 							</div>
-						<div class="sh-inv-scroll" id="sh-sol-scroll"><div id="sh-inv-sol" class="sh-inv-box"></div></div>
+						<div class="sh-inv-scroll sh-scroll" id="sh-sol-scroll"><div id="sh-inv-sol" class="sh-inv-box"></div></div>
 					</div>
 
 					<!-- ── COMPETENCES ── -->
@@ -1623,19 +1631,34 @@
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
 						<div class="sh-section" style="margin-top:14px">⚡ Compétences</div>
-						<div id="sh-competences-connues"></div>
+						<div class="sh-capa-list sh-rel-scroll">
+							<div id="sh-competences-connues"></div>
+							<div class="sh-list-shadow-overlay"></div>
+						</div>
 						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
-						<div id="sh-competences-apprenables"></div>
+						<div class="sh-capa-list sh-rel-scroll">
+							<div id="sh-competences-apprenables"></div>
+							<div class="sh-list-shadow-overlay"></div>
+						</div>
 						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
 						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
 						<div class="sh-section" style="display:flex; align-items:center; justify-content:space-between">
 							<span>🔮 Sorts connus</span>
 						</div>
-						<div id="sh-sorts-connus"></div>
+						<div class="sh-capa-list sh-rel-scroll">
+							<div id="sh-sorts-connus"></div>
+							<div class="sh-list-shadow-overlay"></div>
+						</div>
 						<div class="sh-section" style="margin-top:14px">🏫 Écoles de magie</div>
-						<div id="sh-sorts-magies"></div>
+						<div class="sh-capa-list sh-rel-scroll">
+							<div id="sh-sorts-magies"></div>
+							<div class="sh-list-shadow-overlay"></div>
+						</div>
 						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
-						<div id="sh-sorts-apprenables"></div>
+						<div class="sh-capa-list sh-rel-scroll">
+							<div id="sh-sorts-apprenables"></div>
+							<div class="sh-list-shadow-overlay"></div>
+						</div>
 					</div>
 
 					<!-- ── RELATIONS ── -->

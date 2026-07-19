@@ -1,0 +1,270 @@
+[
+  {
+    "_id": "character:user:eternel7@gmail.com_b5cb3b70-6c86-43fb-b18a-87e106cbad5b",
+    "_rev": "193-bd0ad6e3cdea002631cc142bc2196b69",
+    "user_id": "user:eternel7@gmail.com",
+    "type": "character",
+    "sex": "F",
+    "race": "humain",
+    "voc": "lettre",
+    "image": "lettre_f_humain04.jpg",
+    "prenom": "Julia",
+    "nom": "Einstein",
+    "cite": "lieu:auxerre",
+    "lieu": "lieu:le_bastion_de_l_yonne_interieur",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "caracteristiques_current": {
+      "V": 5,
+      "F": 20,
+      "R": 20,
+      "Ag": 20,
+      "Vol": 30,
+      "Int": 34,
+      "Cha": 30,
+      "Ch": 20
+    },
+    "currentPV": 80,
+    "currentPM": 128,
+    "lieux_visites": [
+      "lieu:auxerre",
+      "lieu:fumee_de_l_yonne",
+      "lieu:auxerre_porte_douve_exterieur03",
+      "lieu:auxerre_porte_douve_interieur03",
+      "lieu:temple_de_malakor02",
+      "lieu:temple_de_malakor",
+      "lieu:le_bastion_de_l_yonne",
+      "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu:le_bastion_de_l_yonne_comptoir",
+      "lieu:l_echope_du_cuir_d_auxerre",
+      "lieu:le_chaudron_des_brumes",
+      "lieu:le_mithril_de_saint_germain",
+      "lieu:la_couronne_des_pierres_vives"
+    ],
+    "xp_total": 152,
+    "attribute_points": 986,
+    "vocations_niveaux": {
+      "lettre": 0
+    },
+    "inventaire": [
+      {
+        "item": "item:Herbes_medicinales",
+        "poids": 0.1
+      },
+      {
+        "item": "item:carte_aventurier",
+        "poids": 0.05,
+        "lieu_parent": "lieu:auxerre"
+      }
+    ],
+    "slots": {
+      "main_droite": "item:Canne_ferree",
+      "main_gauche": null,
+      "torse": null,
+      "tete": null,
+      "jambes": null,
+      "pieds": null,
+      "mains": null,
+      "anneau_1": null,
+      "anneau_2": null,
+      "cou": null,
+      "ceinture": null
+    },
+    "equipment_bonus": {
+      "pv": 0,
+      "pm": 0,
+      "pa": 0,
+      "malus_depl": 0,
+      "cc_bonus": 0,
+      "cd_bonus": 0,
+      "degats_bonus": 1,
+      "degats_dice": "",
+      "initiative": 0,
+      "buffs": {},
+      "buffs_sources": []
+    },
+    "or": 0,
+    "argent": 2,
+    "cuivre": 0,
+    "quetes_actives": [
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_2e2a1b295d15",
+        "titre": "Récolte : Carcasse de Lapin",
+        "description": "Rapportez 4 Carcasse de Lapin à la guilde.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "collect",
+          "cible": "item:petits_animaux_divers",
+          "quantite": 4
+        },
+        "recompenses": {
+          "xp": 66,
+          "cuivre": 198,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1784487873
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_1c4f4e6c6131",
+        "titre": "Récolte : Carcasse de Cerf",
+        "description": "Rapportez 5 Carcasse de Cerf à la guilde.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "collect",
+          "cible": "item:cerf",
+          "quantite": 5
+        },
+        "recompenses": {
+          "xp": 128,
+          "cuivre": 384,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1784487881
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_827ab569a2d9",
+        "titre": "Rapporter du Carcasse de Lapin",
+        "description": "Rapportez 2 Carcasse de Lapin à la guilde.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "collect",
+          "cible": "item:petits_animaux_divers",
+          "quantite": 2
+        },
+        "recompenses": {
+          "xp": 33,
+          "cuivre": 99,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1784487892
+      }
+    ],
+    "quetes_terminees": [
+      {
+        "id": "quete:transport_borin_premiere_mission",
+        "titre": "Première mission : les caisses du Bastion",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 30,
+          "cuivre": 200,
+          "items": [
+            {
+              "item": "item:carte_aventurier",
+              "poids": 0.05,
+              "lieu_parent": "lieu:auxerre"
+            }
+          ]
+        },
+        "termine_at": 1784487851
+      }
+    ],
+    "rangs_guilde": {},
+    "sorts_connus": [
+      "sort:trouble_magique"
+    ],
+    "competences_connues": [
+      "competence:memoire_encyclopedique"
+    ],
+    "competences_bonus": {
+      "buffs": {
+        "Int": 5
+      },
+      "regen_pv": 0,
+      "regen_pm": 0,
+      "esquive": 0,
+      "buffs_sources": [
+        {
+          "nom": "Mémoire encyclopédique",
+          "icon": "📚",
+          "buffs": {
+            "Int": 5
+          }
+        }
+      ]
+    },
+    "intro": {
+      "statut": "terminee",
+      "raison": "famine"
+    },
+    "pnj_present": {
+      "lieu": "lieu:le_bastion_de_l_yonne_interieur",
+      "character": null
+    },
+    "portrait_translate": {
+      "x": -49.36,
+      "y": -12.7449
+    },
+    "portrait_zoom": 27,
+    "slots_actions": [
+      {
+        "type": "fuir",
+        "ref": ""
+      },
+      null,
+      {
+        "type": "ramasser",
+        "ref": ""
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "type": "sort",
+        "ref": "sort:trouble_magique",
+        "composants": true
+      },
+      null,
+      {
+        "type": "attaque",
+        "ref": "cac"
+      }
+    ],
+    "objets_au_sol": [],
+    "ressource_recoltable": null,
+    "transport_offert": null,
+    "groupe": [
+      "aventurier:le_bastion_de_l_yonne_interieur_4a059fd8c889"
+    ],
+    "affinites": {
+      "aventurier:le_bastion_de_l_yonne_interieur_4a059fd8c889": 50
+    },
+    "compagnons_connus": {
+      "aventurier:le_bastion_de_l_yonne_interieur_4a059fd8c889": {
+        "prenom": "Josselin",
+        "nom": "Mâche-Fer",
+        "voc": "druide",
+        "race": "ogre",
+        "image": "druide_m_ogre02.jpg",
+        "rang": "E"
+      }
+    },
+    "magies_apprises": {
+      "Bataille": 0,
+      "Démonologie": 0,
+      "Nature": 0,
+      "Nécromancie": 0,
+      "Sainte": 0,
+      "Élémentaire": 0
+    }
+  }
+]
