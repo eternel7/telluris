@@ -257,7 +257,11 @@
 			will-change: transform;
 			opacity: 0;
 		}
-		.viewport-wrapper img.cadree { opacity: 1; }
+		.viewport-wrapper img.cadree { 
+			opacity: 1;
+			filter: drop-shadow(rgba(255, 255, 255, 0.4) 0px 0px 12px) brightness(1.2) contrast(1.1);
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+		}
 		/* Un changement de zoom touche la TAILLE de l'image autant que sa position : sans
 		   transition sur width/height, elle sauterait pendant que la translation, elle, glisse. */
 		.viewport-wrapper img.animate {
@@ -866,7 +870,7 @@
 			touch-action: none; user-select: none;   /* le clic long doit pouvoir glisser */
 		}
 		.sh-barre-slot.empty { border-style: dashed; border-color: #3a3a3a; background: transparent; }
-		.sh-barre-slot.oblig { border-color: #6b5836; }
+		.sh-barre-slot.oblig { border-color: var(--accent); }
 		.sh-barre-slot.dragging { opacity: 0.5; transform: scale(1.12); z-index: 10; }
 		.sh-barre-slot.drag-over { border-color: var(--accent-color); background: #2e2510; }
 		.sh-barre-num { position: absolute; top: 1px; right: 3px; font-size: 9px; color: #777; font-weight: bold; }
