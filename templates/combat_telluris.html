@@ -571,6 +571,14 @@
 .char-charge-head .stat-value { font-size: 12px; }
 .charge-label .warn { color: #e0902f; }
 .charge-label .err  { color: #e04a4a; }
+/* Effets à durée du membre actif — mêmes chips que la fiche de play_town
+   (.sh-effet-chip / .sh-effet-restants), pour ne pas maintenir deux styles d'état. */
+.sh-effets-actifs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.sh-effet-chip {
+	font-size: 0.75rem; padding: 2px 7px; background: #1b1b22;
+	border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; white-space: nowrap;
+}
+.sh-effet-chip .sh-effet-restants { color: #8d8878; margin-left: 4px; }
 .end-btn {
 	padding: 12px 28px; background: #cc2233; color: white;
 	border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
@@ -632,6 +640,10 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- Effets à durée du MEMBRE ACTIF (buffs, régén, esquive). Rendu 100 % client
+				 par renderEffetsActifs : le doc combat porte déjà joueur.effets_actifs. -->
+			<div class="sh-effets-actifs" id="joueur-effets"></div>
 		</div>
 	</div>
 
@@ -1037,6 +1049,24 @@ function updateJoueur(j) {
 	).join('');
 	updateChargeBar(j);
 	updatePlayerVitals(j);
+	renderEffetsActifs(j.effets_actifs);
+}
+
+// Chips d'effets à durée du membre actif. Markup identique à _renderEffetsActifs de
+// play_town : un effet lancé en exploration ou en combat se lit pareil des deux côtés.
+function renderEffetsActifs(list) {
+	const el = document.getElementById('joueur-effets');
+	if (!el) return;
+	el.innerHTML = (list || []).map(e => {
+		const details = [];
+		for (const [k, v] of Object.entries(e.buffs || {})) details.push(`${v > 0 ? '+' : ''}${v} ${k}`);
+		if (e.regen_pv) details.push(`+${e.regen_pv} PV/tour`);
+		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
+		if (e.esquive) details.push(`+${e.esquive} esquive`);
+		return `<span class="sh-effet-chip">${e.icon || '✨'} ${e.nom || 'Effet'}`
+			+ `${details.length ? ' (' + details.join(', ') + ')' : ''}`
+			+ `<span class="sh-effet-restants">⏳${e.restants}</span></span>`;
+	}).join('');
 }
 
 // Panneau droit : portrait du dernier ennemi ciblé/attaquant + ses barres PV/PM.
@@ -1582,12 +1612,14 @@ function consoLabel(c) {
 	const gains = [];
 	if (c.pv) gains.push(`+${c.pv} PV`);
 	if (c.pm) gains.push(`+${c.pm} PM`);
+	// Potion à effet prolongé : sans cette mention, un buff pur s'afficherait sans gain.
+	if (c.duree) gains.push(`⏳${c.duree} tours`);
 	return `${c.icon || '🧪'} ${c.nom}${gains.length ? ' (' + gains.join(', ') + ')' : ''}`;
 }
 function consoGroups() {
 	const groups = new Map();
 	for (const c of CONSOS) {
-		const key = `${c.nom}|${c.pv}|${c.pm}`;
+		const key = `${c.nom}|${c.pv}|${c.pm}|${c.duree || 0}`;
 		const g = groups.get(key);
 		if (g) g.count++;
 		else groups.set(key, { ...c, count: 1 });

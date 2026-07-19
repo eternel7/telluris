@@ -92,13 +92,16 @@ def test_buff_negatif_conserve():
 
 # ── Éligibilité combat / exploration ─────────────────────────────────────────────
 
-def test_utilisable_combat_exige_une_part_instantanee():
+def test_utilisable_combat_exige_un_effet_instantane_ou_duratif():
     assert competence_utilisable_combat(normaliser_competence(_comp())) is True
     assert competence_utilisable_combat(
         normaliser_competence(_comp(effets={"pv": 10}))) is True
-    # Buff seul → perdu en combat (pas de tick), donc inutilisable.
+    # Buff à durée : utilisable en combat (le snapshot le porte et le décrémente).
     assert competence_utilisable_combat(
-        normaliser_competence(_comp(effets={"buffs": {"F": 5}, "duree": 3}))) is False
+        normaliser_competence(_comp(effets={"buffs": {"F": 5}, "duree": 3}))) is True
+    # Sans durée, rien à empiler.
+    assert competence_utilisable_combat(
+        normaliser_competence(_comp(effets={"buffs": {"F": 5}}))) is False
     # Une passive n'est jamais une action.
     assert competence_utilisable_combat(normaliser_competence(_passive())) is False
 
@@ -372,24 +375,25 @@ def test_competence_ratee_debite_les_pm(monkeypatch):
     assert combat["monstres"][0]["currentPV"] == 20
 
 
-def test_competence_sur_soi_soigne_et_perd_le_buff(monkeypatch):
+def test_competence_sur_soi_soigne_et_empile_le_buff(monkeypatch):
     combat = _combat()
     comp = normaliser_competence(_comp(
         cible="soi", cout_pm=6, effets={"pv": 12, "buffs": {"R": 6}, "duree": 4}))
     res = resolve_action(combat, "competence", cible_id=None, competence=comp)
     assert res["pv_rendu"] == 12
-    assert combat["joueurs"][0]["currentPV"] == 72
     assert combat["joueurs"][0]["currentPM"] == 14
-    # La part buffs/durée est PERDUE en combat (pas de tick) — règle des consommables.
-    assert "effets_actifs" not in combat["joueurs"][0]
+    # La part à durée est empilée sur les effets vivants du snapshot.
+    effets = combat["joueurs"][0]["effets_actifs"]
+    assert [(e["buffs"], e["restants"]) for e in effets] == [({"R": 6}, 4)]
 
 
-def test_competence_sans_effet_instantane_refusee():
+def test_competence_buff_pur_acceptee_en_combat():
     combat = _combat()
     comp = normaliser_competence(_comp(cible="soi", effets={"buffs": {"F": 8}, "duree": 3}))
     res = resolve_action(combat, "competence", cible_id=None, competence=comp)
-    assert "error" in res
-    assert combat["joueurs"][0]["competences"] == 0
+    assert "error" not in res
+    assert combat["joueurs"][0]["competences"] == 1
+    assert [e["buffs"] for e in combat["joueurs"][0]["effets_actifs"]] == [{"F": 8}]
 
 
 def test_competence_ranged_exige_une_ligne_de_vue_libre():

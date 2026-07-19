@@ -5,13 +5,17 @@ import uuid
 from db.config import get_doc, save_doc, find_docs
 from models import character_stats
 from models.character_stats import (
-	BaseStats, compute_derived_stats
+	BaseStats, EquipmentBonus, compute_derived_stats
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
 	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id, item_ref_weight,
 )
-from utils.consommables import caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus
+from utils.consommables import (
+	caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus,
+	_as_int as _eff_int,
+)
+from utils.sorts import part_durative
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
@@ -45,6 +49,177 @@ def _recompute_player_deplacement(joueur: dict) -> None:
 		joueur.get("deplacement_base", joueur.get("deplacement", 1)),
 		joueur.get("charge", 0), joueur.get("charge_max", 0),
 	)
+
+
+# ── Effets à durée EN COMBAT ─────────────────────────────────────────────────
+# Un snapshot de joueur porte une liste `effets_actifs` VIVANTE (même forme d'entrée que
+# character["effets_actifs"] : {nom, icon, buffs, regen_pv, regen_pm, esquive, restants}),
+# alimentée à l'entrée par les effets déjà en cours et par tout sort/compétence/consommable
+# à durée lancé pendant le combat. Elle est décrémentée au tour de son porteur
+# (_tick_effets_combat) et reversée sur le personnage à la fin (_finalize_membre).
+#
+# Pour que ces effets pèsent réellement sur les dérivées, le snapshot conserve de quoi les
+# RECALCULER : `caracts_base` (caracts + buffs PERMANENTS d'équipement et de passives),
+# `equipment_bonus` et `voc_niveau`. Un snapshot d'avant cette feature n'a pas ces champs :
+# _refresh_snapshot_stats sort alors sans rien toucher → un combat déjà en base tourne à
+# l'identique, sans migration.
+
+
+def _buffs_des_effets(acteur: dict) -> dict:
+	"""Σ des buffs de caract portés par les effets vivants du snapshot."""
+	total: dict = {}
+	for eff in acteur.get("effets_actifs") or []:
+		for code, delta in (eff.get("buffs") or {}).items():
+			try:
+				total[str(code)] = total.get(str(code), 0) + int(delta)
+			except (TypeError, ValueError):
+				continue
+	return total
+
+
+def _refresh_snapshot_stats(acteur: dict) -> None:
+	"""Recompose les dérivées d'un snapshot depuis `caracts_base` + Σ buffs de ses effets
+	vivants. Chokepoint unique : tout ce qui ajoute ou retire un effet en combat finit ici.
+
+	⚠️ Deux valeurs restent FIGÉES à l'entrée en combat et ne sont JAMAIS recalculées :
+	  • `actions_max` — _refresh_actions recalcule actions_restantes = actions_max − Σ
+		compteurs. Un actions_max qui bouge en plein tour offrirait des actions gratuites
+		au moment du cast, puis un budget incohérent à l'expiration du buff.
+	  • `charge_max` — même exclusion anti-exploit qu'en exploration (charge_max_of ignore
+		les buffs) : un buff de F qui expire rendrait rétroactivement surchargé.
+	"""
+	base_caracts = acteur.get("caracts_base")
+	if not base_caracts:
+		return  # snapshot d'avant la feature : rien à recalculer
+	stats = dict(base_caracts)
+	for code, delta in _buffs_des_effets(acteur).items():
+		if code in stats:
+			stats[code] = max(0, int(stats[code] or 0) + delta)
+
+	base = BaseStats(
+		v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
+		ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
+		cha=stats.get("Cha", 0), ch=stats.get("Ch", 0),
+	)
+	equipment = _equipment_bonus_de(acteur)
+	derived = compute_derived_stats(base, niveau=acteur.get("voc_niveau", 0), equipment=equipment)
+
+	acteur["cc"] = derived.cc
+	acteur["cd"] = derived.cd
+	acteur["ag"] = base.ag
+	acteur["ch"] = base.ch
+	acteur["pa"] = derived.pa
+	acteur["pm_def"] = derived.pm_def
+	acteur["toucher_magique"] = derived.toucher_magique
+	acteur["degats_cc"] = derived.degats_cc
+	acteur["degats_cd"] = derived.degats_cd
+	acteur["initiative"] = derived.initiative
+	acteur["pv_max"] = derived.pv_max
+	acteur["pm_max"] = derived.pm_max
+	acteur["deplacement_base"] = derived.deplacement
+	# Esquive = passives permanentes (figées à l'entrée) + effets vivants.
+	acteur["esquive"] = acteur.get("esquive_base", 0) + sum(
+		_eff_int(eff.get("esquive")) for eff in acteur.get("effets_actifs") or [])
+
+	# `attaque_profils` reste FIGÉ lui aussi : les recalculer relirait les docs d'items en
+	# base (_weapon_attacks fait un get_doc par slot) à chaque tour, dans ce qui doit rester
+	# du calcul pur. Le seul effet perdu est la portée d'une arme de jet (F // 20, soit +1
+	# case pour +20 de Force) — négligeable au regard du coût.
+
+	# Un buff de R/Vol qui expire abaisse les max : on re-clampe plutôt que de laisser
+	# des PV au-dessus du plafond (l'inverse — un buff qui monte le max — ne soigne pas).
+	acteur["currentPV"] = min(int(acteur.get("currentPV", derived.pv_max) or 0), derived.pv_max)
+	acteur["currentPM"] = min(int(acteur.get("currentPM", derived.pm_max) or 0), derived.pm_max)
+	_recompute_player_deplacement(acteur)
+
+
+def _equipment_bonus_de(acteur: dict) -> EquipmentBonus:
+	"""EquipmentBonus du snapshot (stocké en dict pour rester sérialisable en base)."""
+	brut = acteur.get("equipment_bonus")
+	if isinstance(brut, EquipmentBonus):
+		return brut
+	try:
+		return EquipmentBonus(**(brut or {}))
+	except Exception:
+		return EquipmentBonus()
+
+
+def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -> dict | None:
+	"""Empile la part à durée de `effets` sur les effets vivants du snapshot (mute en
+	place). Renvoie l'entrée créée, None si rien à empiler.
+
+	L'entrée a EXACTEMENT la forme de celles de character["effets_actifs"] (plus un
+	`pose_tour` retiré à la sortie du combat) : c'est ce qui permet à _finalize_membre de
+	la reverser telle quelle sur le personnage, où le tick d'exploration la reprendra.
+	"""
+	eff = effets or {}
+	if not part_durative(eff):
+		return None
+	entry = {
+		"nom": (source or {}).get("nom", "Effet"),
+		"icon": (source or {}).get("icon", "✨"),
+		"buffs": dict(eff.get("buffs") or {}),
+		"regen_pv": _eff_int(eff.get("regen_pv")),
+		"regen_pm": _eff_int(eff.get("regen_pm")),
+		"esquive": _eff_int(eff.get("esquive")),
+		"restants": _eff_int(eff.get("duree")),
+		# Tour de la pose : le tick du même tour la saute, sinon un effet lancé pendant
+		# son propre tour perdrait un point avant d'avoir servi.
+		"pose_tour": int(tour or 0),
+	}
+	acteur.setdefault("effets_actifs", []).append(entry)
+	_refresh_snapshot_stats(acteur)
+	return entry
+
+
+def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
+	"""Début de tour d'un acteur : régén des effets, décrément, purge, recalcul.
+
+	La `duree` compte donc en TOURS DU PORTEUR — même nombre qu'en exploration (où elle
+	compte les déplacements), et indépendante du nombre de combattants.
+	"""
+	actifs = acteur.get("effets_actifs") or []
+	if not actifs:
+		return
+	tour = int(combat_doc.get("tour", 0) or 0)
+
+	# 1. Régénération (avant le décrément : un effet à 1 restant soigne une dernière fois).
+	pv = sum(_eff_int(eff.get("regen_pv")) for eff in actifs)
+	pm = sum(_eff_int(eff.get("regen_pm")) for eff in actifs)
+	if pv or pm:
+		avant_pv, avant_pm = acteur.get("currentPV", 0), acteur.get("currentPM", 0)
+		acteur["currentPV"] = min(acteur.get("pv_max", avant_pv), avant_pv + pv)
+		acteur["currentPM"] = min(acteur.get("pm_max", avant_pm), avant_pm + pm)
+		gains = " / ".join(s for s in (
+			f"+{acteur['currentPV'] - avant_pv} PV" if acteur["currentPV"] != avant_pv else "",
+			f"+{acteur['currentPM'] - avant_pm} PM" if acteur["currentPM"] != avant_pm else "",
+		) if s)
+		if gains:
+			combat_doc.setdefault("log", []).append({
+				"tour": tour, "acteur": acteur.get("nom", "?"), "kind": "sys",
+				"texte": f"{acteur.get('nom', '?')} régénère ({gains}).",
+			})
+
+	# 2. Décrément + purge. Une entrée posée CE tour-ci est épargnée.
+	restants, expires = [], []
+	for eff in actifs:
+		if int(eff.get("pose_tour", -1)) == tour:
+			restants.append(eff)
+			continue
+		eff["restants"] = _eff_int(eff.get("restants")) - 1
+		(restants if eff["restants"] > 0 else expires).append(eff)
+	acteur["effets_actifs"] = restants
+
+	for eff in expires:
+		combat_doc.setdefault("log", []).append({
+			"tour": tour, "acteur": acteur.get("nom", "?"), "kind": "sys",
+			"texte": f"{eff.get('icon', '✨')} {eff.get('nom', 'Effet')} se dissipe "
+					 f"({acteur.get('nom', '?')}).",
+		})
+
+	# 3. Les dérivées suivent (un buff expiré doit cesser de compter immédiatement).
+	if expires:
+		_refresh_snapshot_stats(acteur)
 
 
 # ── Grille de combat ─────────────────────────────────────────────────────────
@@ -158,8 +333,15 @@ def _refresh_actions(actor: dict) -> None:
 	actor["actions_restantes"] = max(0, actor["actions_max"] - used)
 
 
-def _reset_turn_budget(actor: dict) -> None:
-	"""Réinitialise le budget d'un acteur en début de tour."""
+def _reset_turn_budget(actor: dict, combat_doc: dict | None = None) -> None:
+	"""Réinitialise le budget d'un acteur en début de tour.
+
+	Seul hook « début de tour d'acteur » du moteur : c'est donc ici que les effets à durée
+	régénèrent, se décrémentent et expirent (`combat_doc` fourni). Sans `combat_doc` —
+	appels de test, monstres — le budget seul est réinitialisé.
+	"""
+	if combat_doc is not None:
+		_tick_effets_combat(combat_doc, actor)
 	actor["cells_moved"] = 0
 	actor["attaques"] = 0
 	actor["ramasses"] = 0
@@ -556,13 +738,20 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# Buffs de consommables inclus : un combat démarré pendant un buff en profite
 	# intégralement (pv_max, cc, dégâts, initiative, actions, déplacement — et donc
-	# charge_max, bonus de portage en combat seulement). Les effets actifs ne se
-	# décrémentent PAS pendant le combat (tick uniquement dans move_character).
+	# charge_max, bonus de portage en combat seulement). Ces effets sont désormais VIVANTS
+	# dans le snapshot : décrémentés au tour de leur porteur (_tick_effets_combat) puis
+	# reversés sur le personnage (_finalize_membre). Une potion bue juste avant d'entrer
+	# ne dure donc plus tout le combat.
 	# Bonus recalculé depuis les items équipés (slots = IDs) plutôt que depuis le champ
 	# stocké equipment_bonus, périmé si un item a été modifié en base sans ré-équiper. Posé
 	# AVANT caracts_avec_buffs, qui y lit les buffs de caract portés par les objets.
 	equipment = sync_equipment_bonus(character)
 	stats = caracts_avec_buffs(character)
+	# Base PERMANENTE (équipement + passives, SANS les effets temporaires) : c'est depuis
+	# elle que _refresh_snapshot_stats recompose les dérivées à chaque changement d'effet.
+	# `stats` ci-dessus = caracts_base + Σ buffs des effets entrants → le snapshot construit
+	# ici et un refresh immédiat donnent exactement les mêmes valeurs.
+	caracts_base = caracts_avec_buffs(character, origines=("equipement", "competence"))
 	base = BaseStats(
 		v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
 		ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
@@ -625,6 +814,16 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		# Esquive = malus au seuil de toucher PHYSIQUE des attaques subies (cc/cd,
 		# jamais la magie). Somme des passives (competences_bonus) + effets actifs.
 		"esquive": esquive_bonus(character),
+		# Part PERMANENTE seule : _refresh_snapshot_stats y rajoute celle des effets
+		# vivants, qui varie au fil du combat.
+		"esquive_base": esquive_bonus(character, origines=("equipement", "competence")),
+		# ── De quoi RECALCULER les dérivées quand un effet est posé ou expire ──
+		"caracts_base": caracts_base,
+		"equipment_bonus": equipment.model_dump() if hasattr(equipment, "model_dump") else dict(equipment or {}),
+		"voc_niveau": voc_niveau,
+		# Effets à durée VIVANTS : copies (jamais les entrées du doc perso, qui seraient
+		# alors mutées par le combat avant même sa conclusion).
+		"effets_actifs": [dict(eff) for eff in (character.get("effets_actifs") or [])],
 		# Furtivité : tant que furtif, un monstre non-détecté ne vient pas au joueur.
 		# Posée à l'entrée en combat (passives conditionnées au terrain) ou par une
 		# active/un sort ; brisée par toute action offensive du joueur.
@@ -1273,7 +1472,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	Joueur FURTIF : le monstre doit d'abord le détecter (jet en début de tour, réussite
 	définitive pour le combat) ; tant qu'il ne l'a pas repéré, il ne vient pas vers lui
 	— un prédateur chasse une proie, les autres errent."""
-	_reset_turn_budget(monstre)
+	_reset_turn_budget(monstre, combat_doc)
 	portee = monstre.get("portee", 1)
 
 	# Cible résolue en début de tour : le joueur vivant le plus proche. Aucun joueur
@@ -1352,7 +1551,7 @@ def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool =
 		if actor_id.startswith("joueur_"):
 			joueur = _get_joueur(combat_doc, actor_id)
 			if joueur and joueur.get("currentPV", 0) > 0:
-				_reset_turn_budget(joueur)
+				_reset_turn_budget(joueur, combat_doc)
 				break
 			# Joueur KO (à terre) : son tour est sauté, comme un monstre mort.
 			idx = combat_doc["acteur_courant_index"] + 1
@@ -1642,12 +1841,15 @@ def resolve_action(
 
 	elif action_type == "consommer":
 		# Consommer un item du sac (doc résolu injecté par le router, qui l'a déjà retiré
-		# de l'inventaire du personnage), coûte 1 action. Seuls les effets INSTANTANÉS
-		# (pv/pm) s'appliquent en combat : la part buffs/régén d'un item mixte est perdue
-		# (pas d'empilement d'effet actif pendant un combat).
+		# de l'inventaire du personnage), coûte 1 action. Part INSTANTANÉE (pv/pm) ET part
+		# à DURÉE (buffs/régén/esquive) s'appliquent — une potion d'armure vaut en combat
+		# autant que le sort équivalent.
 		if not item or not est_consommable(item) or not effet_instantane(item):
 			return {"error": "Cet objet ne peut pas être consommé en combat."}
 		eff = effets_de(item)
+		# Empilé AVANT la part instantanée : un buff de R relève pv_max, dans lequel le
+		# soin de la même potion peut alors se loger (miroir d'appliquer_instantane).
+		effet_pose = _empiler_effet_combat(joueur, item, eff, combat_doc["tour"])
 		avant_pv, avant_pm = joueur["currentPV"], joueur["currentPM"]
 		joueur["currentPV"] = min(joueur["pv_max"], avant_pv + eff["pv"])
 		joueur["currentPM"] = min(joueur["pm_max"], avant_pm + eff["pm"])
@@ -1661,6 +1863,7 @@ def resolve_action(
 		gains = " / ".join(s for s in (
 			f"+{pv_rendu} PV" if pv_rendu else "",
 			f"+{pm_rendu} PM" if pm_rendu else "",
+			f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
 		) if s) or "aucun effet"
 		combat_doc["log"].append({
 			"tour": combat_doc["tour"],
@@ -1669,22 +1872,23 @@ def resolve_action(
 			"texte": f"{joueur['nom']} consomme {item.get('nom', 'un objet')} ({gains}).",
 		})
 		result = {"consomme": True, "item": item.get("nom"),
-				  "pv_rendu": pv_rendu, "pm_rendu": pm_rendu, "charge": joueur["charge"]}
+				  "pv_rendu": pv_rendu, "pm_rendu": pm_rendu, "charge": joueur["charge"],
+				  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
 
 	elif action_type == "sort":
 		# Lancer un sort connu, coûte 1 action + cout_pm PM. Le router injecte
 		# `sort = {doc (normalisé), effets (fusionnés avec les bonus des composants
 		# engagés), composants_engages, poids_consommes}` — les composants consommés
-		# ont déjà été retirés du sac du personnage en mémoire. Seule la part
-		# INSTANTANÉE (degats/pv/pm, ou furtivité = état posé instantanément) s'applique
-		# en combat : buffs/régén d'un sort mixte sont perdus (règle consommables).
+		# ont déjà été retirés du sac du personnage en mémoire. S'appliquent la part
+		# INSTANTANÉE (degats/pv/pm, ou furtivité = état posé instantanément) ET la part
+		# à DURÉE (buffs/régén/esquive), empilée sur les effets vivants du snapshot.
 		if not sort or not sort.get("doc"):
 			return {"error": "Sort invalide."}
 		sdoc = sort["doc"]
 		effets = sort.get("effets") or {}
 		cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
 		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")
-				or int(effets.get("furtivite", 0) or 0) > 0):
+				or int(effets.get("furtivite", 0) or 0) > 0 or part_durative(effets)):
 			return {"error": "Ce sort n'a aucun effet utilisable en combat."}
 		if joueur["currentPM"] < cout_pm:
 			return {"error": "PM insuffisants."}
@@ -1777,9 +1981,13 @@ def resolve_action(
 			joueur["currentPM"] = min(joueur["pm_max"], avant_pm + int(effets.get("pm", 0) or 0))
 			pv_rendu = joueur["currentPV"] - avant_pv
 			pm_rendu = joueur["currentPM"] - avant_pm
+			# Part à DURÉE : empilée sur les effets vivants du snapshot (buffs de caract,
+			# régén, esquive), qui recalcule aussitôt les dérivées du lanceur.
+			effet_pose = _empiler_effet_combat(joueur, sdoc, effets, combat_doc["tour"])
 			gains = " / ".join(s for s in (
 				f"+{pv_rendu} PV" if pv_rendu else "",
 				f"+{pm_rendu} PM" if pm_rendu else "",
+				f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
 			) if s) or "aucun effet"
 			combat_doc["log"].append({
 				"tour": combat_doc["tour"],
@@ -1792,7 +2000,8 @@ def resolve_action(
 			if int(effets.get("furtivite", 0) or 0) > 0:
 				_activer_furtivite(combat_doc, joueur, int(effets["furtivite"]))
 			result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
-					  "furtif": bool(joueur.get("furtif"))}
+					  "furtif": bool(joueur.get("furtif")),
+					  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
 
 		# Les composants consommés quittent le sac → la charge portée baisse.
 		poids_consommes = float(sort.get("poids_consommes", 0) or 0)
@@ -1812,16 +2021,16 @@ def resolve_action(
 	elif action_type == "competence":
 		# Utiliser une compétence ACTIVE connue, coûte 1 action + cout_pm PM (souvent 0 :
 		# une compétence martiale ne consomme pas de magie). Le router injecte la compétence
-		# normalisée. Comme pour les sorts et les consommables, seule la part INSTANTANÉE
-		# (degats/pv/pm) s'applique en combat : la part buffs/durée est perdue (pas de tick
-		# en combat). Les compétences PASSIVES n'arrivent jamais ici — leur bonus est déjà
-		# intégré au snapshot (competences_bonus → caracts_avec_buffs).
+		# normalisée. Comme pour les sorts et les consommables, part INSTANTANÉE
+		# (degats/pv/pm) ET part à DURÉE s'appliquent. Les compétences PASSIVES n'arrivent
+		# jamais ici — leur bonus est déjà intégré au snapshot (competences_bonus →
+		# caracts_avec_buffs, replié dans `caracts_base`).
 		if not competence:
 			return {"error": "Compétence invalide."}
 		effets = competence.get("effets") or {}
 		cout_pm = max(0, int(competence.get("cout_pm", 0) or 0))
 		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")
-				or int(effets.get("furtivite", 0) or 0) > 0):
+				or int(effets.get("furtivite", 0) or 0) > 0 or part_durative(effets)):
 			return {"error": "Cette compétence n'a aucun effet utilisable en combat."}
 		if joueur["currentPM"] < cout_pm:
 			return {"error": "PM insuffisants."}
@@ -1921,9 +2130,12 @@ def resolve_action(
 			joueur["currentPM"] = min(joueur["pm_max"], avant_pm + int(effets.get("pm", 0) or 0))
 			pv_rendu = joueur["currentPV"] - avant_pv
 			pm_rendu = joueur["currentPM"] - avant_pm
+			# Part à DURÉE : même traitement que pour un sort (cf. branche "sort").
+			effet_pose = _empiler_effet_combat(joueur, competence, effets, combat_doc["tour"])
 			gains = " / ".join(s for s in (
 				f"+{pv_rendu} PV" if pv_rendu else "",
 				f"+{pm_rendu} PM" if pm_rendu else "",
+				f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
 			) if s) or "aucun effet"
 			combat_doc["log"].append({
 				"tour": combat_doc["tour"],
@@ -1936,7 +2148,8 @@ def resolve_action(
 			if int(effets.get("furtivite", 0) or 0) > 0:
 				_activer_furtivite(combat_doc, joueur, int(effets["furtivite"]))
 			result = {"competence": nom, "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
-					  "furtif": bool(joueur.get("furtif"))}
+					  "furtif": bool(joueur.get("furtif")),
+					  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
 
 		result["currentPM"] = joueur["currentPM"]
 		joueur["competences"] = joueur.get("competences", 0) + 1
@@ -2078,6 +2291,20 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 	# PM réappliqués pour TOUTES les issues (le PM n'est pas la ressource de KO ; une
 	# potion de PM bue en combat doit persister).
 	doc["currentPM"] = max(0, joueur.get("currentPM", doc.get("currentPM", 0)))
+
+	# Effets à durée encore vivants : reversés sur le personnage, où le tick d'exploration
+	# (_apply_world_turn_regen) les reprend. Un buff est un buff — qu'il ait été lancé
+	# avant le combat ou pendant, il ne meurt pas avec lui. `pose_tour` n'a de sens qu'en
+	# combat et ne suit pas.
+	restants = [
+		{k: v for k, v in eff.items() if k != "pose_tour"}
+		for eff in joueur.get("effets_actifs") or []
+		if _eff_int(eff.get("restants")) > 0
+	]
+	# Écrasement (pas d'extend) : ces entrées SONT celles du personnage, copiées à l'entrée
+	# en combat puis décrémentées — les rajouter les dupliquerait.
+	if restants or joueur.get("effets_actifs") is not None:
+		doc["effets_actifs"] = restants
 
 	# Butin ramassé en plein combat (action « ramasser ») : conservé quelle que soit
 	# l'issue, dans le sac du membre qui l'a saisi. Ajouté dans le MÊME doc que l'XP

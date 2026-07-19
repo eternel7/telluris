@@ -170,26 +170,40 @@ def effets_effectifs(sort: dict, composants_engages: list) -> dict:
 	return fusionner_effets((sort or {}).get("effets") or {}, bonus)
 
 
+def part_durative(effets: dict) -> bool:
+	"""Vrai si `effets` porte quelque chose à empiler sur la durée : une `duree` > 0 ET
+	au moins un bénéfice prolongé (buffs de caract, régén, esquive).
+
+	SOURCE UNIQUE de ce test — utilisée par les éligibilités combat/exploration des sorts,
+	des compétences et des consommables, et par les deux `empiler_effet_*`. Un critère qui
+	diverge entre « lançable » et « empilable » produirait un sort accepté puis sans effet.
+	"""
+	eff = effets or {}
+	return _as_int(eff.get("duree")) > 0 and bool(
+		eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm"))
+		or _as_int(eff.get("esquive")))
+
+
 def sort_utilisable_combat(sort: dict) -> bool:
-	"""Éligibilité combat : le sort doit avoir une part instantanée (dégâts, PV, PM —
-	ou furtivité, qui est un état de combat posé instantanément). La part buffs/durée
-	d'un sort mixte est perdue en combat (règle consommables)."""
+	"""Éligibilité combat : une part instantanée (dégâts, PV, PM — ou furtivité, état de
+	combat posé instantanément) OU une part à DURÉE. Depuis que le snapshot porte ses
+	effets vivants et les décrémente au tour de son porteur, un buff pur (« Armure de
+	givre ») est lançable en combat exactement comme en exploration."""
 	eff = (sort or {}).get("effets") or {}
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
-			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0)
+			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
+			or part_durative(eff))
 
 
 def sort_utilisable_exploration(sort: dict) -> bool:
 	"""Éligibilité exploration : ciblé sur soi ET au moins un effet applicable hors
-	combat (soin/PM instantanés, ou buffs/régén à durée)."""
+	combat (soin/PM instantanés, ou buffs/régén/esquive à durée)."""
 	s = sort or {}
 	if (s.get("cible") or "soi") != "soi":
 		return False
 	eff = s.get("effets") or {}
 	instant = _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0
-	duratif = _as_int(eff.get("duree")) > 0 and bool(
-		eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm")))
-	return instant or duratif
+	return instant or part_durative(eff)
 
 
 def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None:
@@ -197,9 +211,7 @@ def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None
 	character["effets_actifs"] (mute en place, NE SAUVEGARDE PAS). Même forme d'entrée
 	que les consommables → tick_effets/caracts_avec_buffs/regen_bonus/chips inchangés."""
 	eff = effets or {}
-	if _as_int(eff.get("duree")) <= 0 or not (
-			eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm"))
-			or _as_int(eff.get("esquive"))):
+	if not part_durative(eff):
 		return None
 	entry = {
 		"sort_id": (sort or {}).get("id", ""),

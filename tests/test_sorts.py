@@ -143,8 +143,15 @@ def test_effets_effectifs_engages_partiels():
 def test_sort_utilisable_combat():
     assert sort_utilisable_combat(normaliser_sort(_sort()))                       # dégâts
     assert sort_utilisable_combat(normaliser_sort(_sort(cible="soi", effets={"pv": 10})))
+    # Buff pur (« Armure de givre ») : utilisable en combat, le snapshot porte l'effet
+    # vivant et le décrémente au tour de son porteur.
+    assert sort_utilisable_combat(normaliser_sort(
+        _sort(cible="soi", effets={"buffs": {"F": 10}, "duree": 3})))
+    assert sort_utilisable_combat(normaliser_sort(
+        _sort(cible="soi", effets={"esquive": 10, "duree": 3})))
+    # Sans durée, un buff n'a rien à empiler : toujours refusé.
     assert not sort_utilisable_combat(normaliser_sort(
-        _sort(cible="soi", effets={"buffs": {"F": 10}, "duree": 3})))             # buff pur
+        _sort(cible="soi", effets={"buffs": {"F": 10}})))
 
 
 def test_sort_utilisable_exploration():
@@ -415,12 +422,16 @@ def test_sort_retro_compat_pm_def_absent(monkeypatch):
     assert res["hit"] is True
 
 
-def test_sort_buff_pur_refuse_en_combat():
+def test_sort_buff_pur_accepte_en_combat():
+    # Un sort à durée pure s'empile sur les effets vivants du snapshot et coûte ses PM.
     combat = _combat()
     sort_doc = _sort(cible="soi", effets={"buffs": {"F": 10}, "duree": 3})
     res = resolve_action(combat, "sort", sort=_sort_arg(sort_doc))
-    assert "error" in res
-    assert combat["joueurs"][0]["currentPM"] == 20
+    assert "error" not in res
+    assert combat["joueurs"][0]["currentPM"] < 20
+    effets = combat["joueurs"][0]["effets_actifs"]
+    assert [e["restants"] for e in effets] == [3]
+    assert effets[0]["buffs"] == {"F": 10}
 
 
 # ── Sorts épinglés (accès rapide en combat) ──────────────────────────────────────

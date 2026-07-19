@@ -1871,7 +1871,7 @@
 			letter-spacing: 0.02em;
 			font-family: "EB Garamond", Cinzel, serif;
 			background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
-			border-left: 3px solid rgb(205, 163, 73);
+			border-left: 3px solid var(--accent, #b98c4a);
 			padding: 1.5rem 2rem;
 			border-radius: 0px 8px 8px 0px;
 			margin-bottom: 1rem;
@@ -3711,6 +3711,7 @@ function _renderEffetsActifs(list) {
 		for (const [k, v] of Object.entries(e.buffs || {})) details.push(`${v > 0 ? '+' : ''}${v} ${k}`);
 		if (e.regen_pv) details.push(`+${e.regen_pv} PV/tour`);
 		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
+		if (e.esquive) details.push(`+${e.esquive} esquive`);
 		return `<span class="sh-effet-chip">${e.icon || '✨'} ${e.nom || 'Effet'}${details.length ? ' (' + details.join(', ') + ')' : ''}<span class="sh-effet-restants">⏳${e.restants}</span></span>`;
 	}).join('');
 	['sh-effets-actifs', 'sh-effets-actifs-stats', 'sh-effets-actifs-panel'].forEach(id => {

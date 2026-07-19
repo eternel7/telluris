@@ -38,8 +38,11 @@ def test_consommable_actif():
 def test_effet_instantane_eligibilite_combat():
     assert effet_instantane(_potion(pv=40))
     assert effet_instantane(_potion(pm=15))
-    assert not effet_instantane(_potion(buffs={"F": 10}, duree=5))  # buff pur → hors combat
-    assert not effet_instantane(_potion(regen_pv=2, duree=3))
+    # Les effets à durée valent aussi en combat (empilés sur le snapshot du porteur).
+    assert effet_instantane(_potion(buffs={"F": 10}, duree=5))
+    assert effet_instantane(_potion(regen_pv=2, duree=3))
+    # Sans durée, un buff n'a rien à empiler.
+    assert not effet_instantane(_potion(buffs={"F": 10}))
 
 
 def test_effets_de_normalise_valeurs_invalides():
@@ -313,11 +316,12 @@ def test_consommer_refuse_sans_item():
     assert "error" in resolve_action(doc, "consommer", item=None)
 
 
-def test_consommer_refuse_item_buff_pur():
+def test_consommer_empile_un_item_buff_pur():
     doc = _combat_doc()
     res = resolve_action(doc, "consommer", item=_potion(buffs={"F": 10}, duree=5))
-    assert "error" in res
-    assert doc["joueurs"][0]["consommes"] == 0
+    assert "error" not in res
+    assert doc["joueurs"][0]["consommes"] == 1
+    assert [e["restants"] for e in doc["joueurs"][0]["effets_actifs"]] == [5]
 
 
 def test_consommer_applique_et_decompte():

@@ -1,9 +1,10 @@
 # utils/consommables.py
 # Consommables à effet de gameplay : un item `categorie:"consommable"` porte un champ
 # `effets` {pv, pm, regen_pv, regen_pm, buffs:{caract:+delta}, duree} (tous optionnels).
-# pv/pm = instantanés (seuls utilisables en combat) ; buffs/regen_* = effet actif empilé
-# sur character["effets_actifs"], décrémenté à chaque tour monde (move_character), jamais
-# pendant un combat (le snapshot d'entrée fige le bénéfice).
+# pv/pm = instantanés ; buffs/regen_* = effet actif empilé sur character["effets_actifs"],
+# décrémenté à chaque tour monde (move_character). Un effet à durée vaut AUSSI en combat :
+# le snapshot en porte une copie vivante, décrémentée au tour de son porteur puis reversée
+# sur le personnage en fin de combat (cf. utils/combat._tick_effets_combat / _finalize_membre).
 #
 # Logique pure (resolve_ref injecté), ne sauvegarde jamais — l'endpoint persiste.
 # Les buffs sont volontairement EXCLUS de charge_max_of, des plafonds/coûts d'XP et de
@@ -52,44 +53,61 @@ def est_consommable(item_doc) -> bool:
 
 
 def effet_instantane(item_doc) -> bool:
-	"""Éligibilité combat : seul un effet instantané (pv ou pm) est applicable en combat
-	(pas d'empilement d'effet actif pendant un combat — la part buffs/régén est perdue)."""
+	"""Éligibilité combat : une part instantanée (pv/pm) OU un effet à DURÉE (buffs/régén/
+	esquive), désormais empilable en combat comme en exploration. Nom historique conservé —
+	c'est le prédicat « utilisable en combat », miroir de sorts.sort_utilisable_combat."""
 	eff = effets_de(item_doc)
-	return eff["pv"] > 0 or eff["pm"] > 0
+	if eff["pv"] > 0 or eff["pm"] > 0:
+		return True
+	return eff["duree"] > 0 and bool(
+		eff["buffs"] or eff["regen_pv"] or eff["regen_pm"] or eff["esquive"])
 
 
-def _sources_de_buffs_detaillees(character: dict) -> list:
+ORIGINES_BUFFS: tuple = ("effet", "equipement", "competence")
+
+
+def _sources_de_buffs_detaillees(character: dict, origines: tuple = ORIGINES_BUFFS) -> list:
 	"""Toutes les sources de buffs/régén, étiquetées par origine : [(origine, entrée), …].
 
 	origine ∈ "effet" (consommables/sorts/compétences actives — TEMPORAIRE, décrémenté au
-	tour monde), "equipement" (`equipment_bonus`, dénormalisé par
-	utils/characters.sync_equipment_bonus) et "competence" (`competences_bonus`, passives
-	permanentes, dénormalisé par utils/competences.recompute_competences_bonus).
+	tour monde ET, depuis les effets en combat, au tour du porteur), "equipement"
+	(`equipment_bonus`, dénormalisé par utils/characters.sync_equipment_bonus) et
+	"competence" (`competences_bonus`, passives permanentes, dénormalisé par
+	utils/competences.recompute_competences_bonus).
+
+	`origines` restreint le repli à un sous-ensemble. Seul le snapshot de combat s'en sert,
+	pour obtenir la base PERMANENTE (équipement + passives) : les effets temporaires y
+	deviennent vivants, portés par le snapshot lui-même et recalculés à chaque tour
+	(cf. utils/combat._refresh_snapshot_stats). Partout ailleurs, le défaut s'applique.
 
 	Toutes les entrées ont le même format {buffs, regen_pv, regen_pm, esquive} — celles qui
 	n'en portent qu'une partie (l'équipement n'a que `buffs`) sont neutres pour le reste.
 	"""
 	character = character or {}
-	sources = [("effet", eff) for eff in (character.get("effets_actifs") or [])]
+	sources = []
+	if "effet" in origines:
+		sources += [("effet", eff) for eff in (character.get("effets_actifs") or [])]
 	for origine, cle in (("equipement", "equipment_bonus"), ("competence", "competences_bonus")):
+		if origine not in origines:
+			continue
 		entree = character.get(cle)
 		if entree:
 			sources.append((origine, entree))
 	return sources
 
 
-def _sources_de_buffs(character: dict) -> list:
+def _sources_de_buffs(character: dict, origines: tuple = ORIGINES_BUFFS) -> list:
 	"""Chokepoint unique : tout ce qui buffe un personnage passe ici, donc par
 	caracts_avec_buffs / regen_bonus / esquive_bonus."""
-	return [eff for _, eff in _sources_de_buffs_detaillees(character)]
+	return [eff for _, eff in _sources_de_buffs_detaillees(character, origines)]
 
 
-def caracts_avec_buffs(character: dict) -> dict:
+def caracts_avec_buffs(character: dict, origines: tuple = ORIGINES_BUFFS) -> dict:
 	"""COPIE de caracteristiques_current + somme des buffs (clamp ≥ 0). N'applique que les
 	caracts déjà présentes. V incluse : une dague +1 V accélère bel et bien le personnage
 	(deltas de V à son échelle 1-10, comme dans les données d'items)."""
 	caracts = dict((character or {}).get("caracteristiques_current") or {})
-	for eff in _sources_de_buffs(character):
+	for eff in _sources_de_buffs(character, origines):
 		for k, delta in (eff.get("buffs") or {}).items():
 			if k not in caracts:
 				continue
@@ -132,22 +150,22 @@ def caracts_detail(character: dict) -> dict:
 	return detail
 
 
-def regen_bonus(character: dict) -> tuple[int, int]:
+def regen_bonus(character: dict, origines: tuple = ORIGINES_BUFFS) -> tuple[int, int]:
 	"""(Σ regen_pv, Σ regen_pm) des effets actifs et des passives — s'ajoute à la régén
 	naturelle."""
 	pv = pm = 0
-	for eff in _sources_de_buffs(character):
+	for eff in _sources_de_buffs(character, origines):
 		pv += _as_int(eff.get("regen_pv"))
 		pm += _as_int(eff.get("regen_pm"))
 	return pv, pm
 
 
-def esquive_bonus(character: dict) -> int:
+def esquive_bonus(character: dict, origines: tuple = ORIGINES_BUFFS) -> int:
 	"""Σ `esquive` des effets actifs et des passives — malus au seuil de toucher
 	PHYSIQUE (cc/cd) des attaques subies en combat (la magie se résout sur pm_def,
-	jamais réduite par l'esquive). Snapshotté à l'entrée en combat."""
+	jamais réduite par l'esquive)."""
 	total = 0
-	for eff in _sources_de_buffs(character):
+	for eff in _sources_de_buffs(character, origines):
 		total += _as_int(eff.get("esquive"))
 	return total
 
@@ -224,6 +242,8 @@ def liste_consommables_combat(character: dict, resolve_ref_fn) -> list:
 			"icon": doc.get("icon", "🧪"),
 			"pv": eff["pv"],
 			"pm": eff["pm"],
+			# Durée > 0 = potion à effet prolongé : l'UI l'annonce autrement qu'un soin sec.
+			"duree": eff["duree"],
 			"poids": doc.get("poids", 0),
 		})
 	return out

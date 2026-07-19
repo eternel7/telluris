@@ -9,10 +9,10 @@
 # par utils/consommables.caracts_avec_buffs / regen_bonus — le seul chokepoint des buffs, donc
 # une passive est effective partout (fiche, exploration, snapshot de combat) sans autre code.
 #
-# ACTIVE = coûte 1 action (+ cout_pm PM). En COMBAT, seule la part instantanée s'applique
-# (degats/pv/pm) : comme pour les consommables et les sorts, la part buffs/durée d'un effet
-# mixte est perdue (pas de tick en combat). En EXPLORATION, une active `cible:"soi"` applique
-# sa part instantanée et empile ses buffs/régén sur character["effets_actifs"].
+# ACTIVE = coûte 1 action (+ cout_pm PM). Une active `cible:"soi"` applique sa part
+# instantanée ET empile ses buffs/régén — sur character["effets_actifs"] en EXPLORATION,
+# sur le snapshot du porteur en COMBAT (décrémenté à son tour, reversé sur le personnage à
+# la fin du combat). Même mécanique des deux côtés, comme pour les consommables et les sorts.
 # Une active `cible:"ennemi"` porte son jet dans la donnée (`jet`: cc / cd / magique).
 #
 # Apprentissage : character["competences_connues"] (liste d'ids). Coût en points de
@@ -26,7 +26,7 @@
 
 from models import character_stats
 from utils.consommables import _as_int
-from utils.sorts import _bonus_dict
+from utils.sorts import _bonus_dict, part_durative
 
 MODES = ("passive", "active")
 JETS = ("cc", "cd", "magique")
@@ -85,26 +85,26 @@ def est_active(comp: dict) -> bool:
 
 
 def competence_utilisable_combat(comp: dict) -> bool:
-	"""Éligibilité combat : active ET part instantanée (dégâts, PV, PM — ou furtivité,
-	qui est un état de combat posé instantanément). La part buffs/durée d'une compétence
-	mixte est perdue en combat (règle consommables)."""
+	"""Éligibilité combat : active ET (part instantanée — dégâts, PV, PM, ou furtivité,
+	état de combat posé instantanément — OU part à DURÉE). Miroir exact de
+	sorts.sort_utilisable_combat : un buff pur est désormais utilisable en combat, le
+	snapshot le portant et le décrémentant au tour de son porteur."""
 	if not est_active(comp):
 		return False
 	eff = (comp or {}).get("effets") or {}
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
-			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0)
+			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
+			or part_durative(eff))
 
 
 def competence_utilisable_exploration(comp: dict) -> bool:
 	"""Éligibilité exploration : active, ciblée sur soi, et au moins un effet applicable
-	hors combat (soin/PM instantanés, ou buffs/régén à durée)."""
+	hors combat (soin/PM instantanés, ou buffs/régén/esquive à durée)."""
 	if not est_active(comp) or (comp or {}).get("cible", "soi") != "soi":
 		return False
 	eff = (comp or {}).get("effets") or {}
 	instant = _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0
-	duratif = _as_int(eff.get("duree")) > 0 and bool(
-		eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm")))
-	return instant or duratif
+	return instant or part_durative(eff)
 
 
 def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
@@ -112,9 +112,7 @@ def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 	character["effets_actifs"] (mute en place, NE SAUVEGARDE PAS). Même forme d'entrée que
 	les consommables/sorts → tick_effets/caracts_avec_buffs/regen_bonus/chips inchangés."""
 	eff = (comp or {}).get("effets") or {}
-	if _as_int(eff.get("duree")) <= 0 or not (
-			eff.get("buffs") or _as_int(eff.get("regen_pv")) or _as_int(eff.get("regen_pm"))
-			or _as_int(eff.get("esquive"))):
+	if not part_durative(eff):
 		return None
 	entry = {
 		"competence_id": (comp or {}).get("id", ""),
