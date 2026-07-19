@@ -27,6 +27,7 @@ from utils import bois
 from utils import consommables
 from utils import sorts as sorts_util
 from utils import competences as competences_util
+from utils import slots_actions
 from utils import focalisation
 from utils import pnj as pnj_util
 from utils import intro as intro_util
@@ -822,14 +823,13 @@ async def get_combat_page(
 			# Sorts connus utilisables en combat (part instantanée degats/pv/pm), avec
 			# disponibilité des composants — resynchronisés par la réponse de l'action « sort ».
 			"sorts": sorts_util.liste_sorts_payload(acteur, get_doc, "combat"),
-			# Sorts épinglés en accès rapide (icônes directement cliquables de la barre
-			# d'action) — sous-ensemble ordonné des sorts connus.
-			"sorts_epingles": sorts_util.sorts_epingles_effectifs(acteur),
 			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/
 			# furtivité) — les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
 			"competences": competences_util.liste_competences_payload(acteur, get_doc, "combat"),
-			# Compétences épinglées en accès rapide (miroir des sorts épinglés).
-			"competences_epinglees": competences_util.competences_epinglees_effectives(acteur, get_doc),
+			# Barre d'action : grille de slots à positions STABLES, propre à l'acteur —
+			# resynchronisée par GET /api/combat/{id}/acteur au changement de tour.
+			"slots": slots_actions.slots_payload(acteur, get_doc),
+			"slots_max": slots_actions.slots_max(),
 			# Portraits du groupe (tokens alliés + panneau du membre actif côté client).
 			"portraits_joueurs": portraits_joueurs,
 		},

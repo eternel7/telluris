@@ -22,6 +22,7 @@ from utils import recrutement
 from utils import montures
 from utils import sorts as sorts_util
 from utils import competences as competences_util
+from utils import slots_actions
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
@@ -284,9 +285,11 @@ async def combat_acteur(
         "image": doc.get("image", ""),
         "consommables": liste_consommables_combat(doc, resolve_item_ref),
         "sorts": liste_sorts_payload(doc, get_doc, "combat"),
-        "sorts_epingles": sorts_util.sorts_epingles_effectifs(doc),
         "competences": liste_competences_payload(doc, get_doc, "combat"),
-        "competences_epinglees": competences_util.competences_epinglees_effectives(doc, get_doc),
+        # Barre d'action : les slots appartiennent à l'ACTEUR — chaque membre du groupe
+        # a sa propre disposition, rechargée à chaque changement de tour.
+        "slots": slots_actions.slots_payload(doc, get_doc),
+        "slots_max": slots_actions.slots_max(),
     }
 
 

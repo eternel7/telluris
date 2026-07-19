@@ -18,6 +18,7 @@ from utils.characters import sync_equipment_bonus, charge_max_of, resolve_item_r
 from utils import consommables
 from utils import sorts as sorts_util
 from utils import competences as competences_util
+from utils import slots_actions
 
 
 CARACTS = ["V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"]
@@ -85,8 +86,13 @@ def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = No
 			character, find_docs_fn, resolve_item_ref, vocations
 		),
 		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
-		"sorts_epingles": sorts_util.sorts_epingles_effectifs(character),
 		"competences": competences_util.liste_competences_payload(character, get_doc_fn, "exploration"),
 		"competences_apprenables": competences_util.competences_apprenables(character, find_docs_fn),
-		"competences_epinglees": competences_util.competences_epinglees_effectives(character, get_doc_fn),
+		# Barre de combat : une seule liste ordonnée remplace les deux listes d'épinglés.
+		# ⚠️ Clé `barre_slots` et non `slots` : ce bloc est fusionné dans le payload d'un
+		# compagnon (`routers/recrutement._recrue_view`), où `slots` désigne déjà son
+		# ÉQUIPEMENT — l'écraser viderait son paperdoll.
+		"barre_slots": slots_actions.slots_payload(character, get_doc_fn),
+		"barre_slots_max": slots_actions.slots_max(),
+		"consommables": consommables.liste_consommables_combat(character, resolve_item_ref),
 	}

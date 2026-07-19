@@ -321,14 +321,15 @@ def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
 
 def _refresh_actions(actor: dict) -> None:
 	"""Recalcule actions_restantes = actions_max - attaques - ramassages - consommations
-	- sorts - compétences - pénalités - AP_déplacement.
+	- sorts - compétences - éditions de barre - pénalités - AP_déplacement.
 
 	`penalites` = actions perdues sur échec critique (cf. _appliquer_fumble). Comme
 	actions_restantes est TOUJOURS recalculé ici, une pénalité doit être un compteur :
 	poser actions_restantes = 0 à la main serait écrasé au prochain appel."""
 	used = (actor.get("attaques", 0) + actor.get("ramasses", 0)
 			+ actor.get("consommes", 0) + actor.get("sorts", 0)
-			+ actor.get("competences", 0) + actor.get("penalites", 0)
+			+ actor.get("competences", 0) + actor.get("editions", 0)
+			+ actor.get("penalites", 0)
 			+ _move_ap_used_for(actor, actor.get("cells_moved", 0)))
 	actor["actions_restantes"] = max(0, actor["actions_max"] - used)
 
@@ -348,6 +349,9 @@ def _reset_turn_budget(actor: dict, combat_doc: dict | None = None) -> None:
 	actor["consommes"] = 0
 	actor["sorts"] = 0
 	actor["competences"] = 0
+	# ⚠️ Compté dans _refresh_actions ET remis à zéro ICI : sans cette ligne, réorganiser
+	# sa barre serait gratuit dès le deuxième tour.
+	actor["editions"] = 0
 	# Une dette d'action (échec critique commis alors qu'il ne restait rien à perdre)
 	# se paie MAINTENANT : elle devient la pénalité du nouveau tour, puis s'efface.
 	actor["penalites"] = actor.get("dette_actions", 0)
@@ -1874,6 +1878,24 @@ def resolve_action(
 		result = {"consomme": True, "item": item.get("nom"),
 				  "pv_rendu": pv_rendu, "pm_rendu": pm_rendu, "charge": joueur["charge"],
 				  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
+
+	elif action_type == "editer_barre":
+		# Réorganiser sa barre d'action sous le feu coûte 1 action : improviser un plan
+		# a un prix. C'est l'ENTRÉE en mode édition qui est facturée, pas chaque case —
+		# une fois le temps pris, on réarrange autant qu'on veut.
+		#
+		# Aucune mutation du personnage ici : le CONTENU des cases vit sur le doc
+		# `character:*`/`aventurier:*` et reste écrit par /api/slot_action, qui n'a pas
+		# à connaître le combat. Le moteur ne débite que le temps passé.
+		joueur["editions"] = joueur.get("editions", 0) + 1
+		_refresh_actions(joueur)
+		combat_doc["log"].append({
+			"tour": combat_doc["tour"],
+			"acteur": joueur["nom"],
+			"kind": "sys",
+			"texte": f"{joueur['nom']} réorganise sa barre d'action.",
+		})
+		result = {"edition_barre": True}
 
 	elif action_type == "sort":
 		# Lancer un sort connu, coûte 1 action + cout_pm PM. Le router injecte

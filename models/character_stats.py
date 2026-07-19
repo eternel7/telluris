@@ -107,6 +107,13 @@ CRIT_ECHEC_MIN: int = 96
 # la Chance pèse ; 0 = mécanique désactivée (fenêtres fixes).
 CRIT_CHANCE_DIVISEUR: int = 10
 
+# Nombre de cases de la barre d'action de combat (grille 10 colonnes × 2 rangées).
+# Chaque personnage y range ses actions à une position STABLE — c'est ce qui permet la
+# mémoire musculaire. Trois entrées sont obligatoires (mêlée, ramasser, fuir) : elles se
+# déplacent librement mais ne peuvent jamais être retirées. Réduire cette valeur tronque
+# la barre par la fin ; les entrées au-delà sont oubliées à la première écriture.
+COMBAT_SLOTS_MAX: int = 20
+
 # ── Relation marchand (marchandage volontaire) ───────────────────────────────────
 # La relation perso×lieu (doc `type:"relation"`) est un entier sur 0–100, neutre à
 # 50. Elle pondère le prix de base (sans marchander : médian à 50, meilleur au-dessus,
@@ -460,6 +467,7 @@ def current_world_variables() -> dict:
 		"CRIT_REUSSITE_MAX": CRIT_REUSSITE_MAX,
 		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
 		"CRIT_CHANCE_DIVISEUR": CRIT_CHANCE_DIVISEUR,
+		"COMBAT_SLOTS_MAX": COMBAT_SLOTS_MAX,
 		"RELATION_INITIALE": RELATION_INITIALE,
 		"RELATION_SEUIL_COEFF": RELATION_SEUIL_COEFF,
 		"MARCHANDAGE_BLOCAGE_SECONDES": MARCHANDAGE_BLOCAGE_SECONDES,
@@ -543,7 +551,7 @@ def load_world_variables() -> dict:
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
-	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN, CRIT_CHANCE_DIVISEUR
+	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN, CRIT_CHANCE_DIVISEUR, COMBAT_SLOTS_MAX
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	global PNJ_REPUTATION_SEUIL
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
@@ -614,6 +622,7 @@ def load_world_variables() -> dict:
 	CRIT_REUSSITE_MAX            = int(v.get("CRIT_REUSSITE_MAX", CRIT_REUSSITE_MAX))
 	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))
 	CRIT_CHANCE_DIVISEUR         = int(v.get("CRIT_CHANCE_DIVISEUR", CRIT_CHANCE_DIVISEUR))
+	COMBAT_SLOTS_MAX             = int(v.get("COMBAT_SLOTS_MAX", COMBAT_SLOTS_MAX))
 	RELATION_INITIALE            = int(v.get("RELATION_INITIALE", RELATION_INITIALE))
 	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
 	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))

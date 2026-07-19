@@ -221,7 +221,6 @@
 	.move-section { left: 50%;
 	  transform: translateX(-50%);
 	}
-	.btn-row .atk-mode-btn { order: 1; }
 }
 .character-card { grid-area: perso; display: flex; flex-direction: column; }
 .combat-center  { grid-area: center; }
@@ -341,9 +340,11 @@
 }
 
 .action-bar {
+	position: relative;
 	border-radius: 10px; 
-    margin: 10px;
-	padding: 12px; display: flex; flex-direction: column; gap: 10px;
+    margin: 5px;
+	padding: 5px;
+	display: flex; flex-direction: column; gap: 10px;
 }
 /* Sépare visuellement la zone de déplacement de la zone d'attaque/fuite. */
 .move-section {
@@ -398,22 +399,80 @@
 .move_btn:disabled > svg { display: none; }   /* direction indisponible → la flèche disparaît */
 .controls .btn:disabled { cursor: default; }
 .controls .btn.center:disabled { opacity: 0.35; }
-.atk-mode-btn.hidden-selecting { display: none; }
-#target-row, #conso-row, #sort-row, #comp-row {
+/* ── Barre d'action : cases à positions STABLES ────────────────────────────────── */
+#btn-slots-edit {
+	position: absolute;
+	bottom: 5px;
+	left: 5px;
+	width: 45px;
+	z-index: 10;
+}
+.slot-grid {
+	display: flex; flex-wrap: wrap;
+	justify-content: center; align-content: flex-start;
+	gap: 5px; width: calc(100% - 80px);
+	margin: 0 auto;
+}
+.slot-btn {
+	order: var(--o);
+	flex: 0 0 auto; 
+	width: clamp(28px, calc(90% / 20 - 5px), 60px);  
+	flex-shrink: 1;
+	position: relative; aspect-ratio: 1;
+	display: flex; align-items: center; justify-content: center;
+	font-size: 1.3rem; line-height: 1;
+	border: 1px solid #555; border-radius: 8px;
+	background: #2a2a2a; color: #eee; cursor: pointer; padding: 0;
+	transition: background 0.15s, transform 0.1s;
+	-webkit-tap-highlight-color: transparent;
+	/* Le clic long doit pouvoir glisser sans que le défilement de la page vole le geste.
+	   Une case n'est pas une surface de défilement : la contrepartie est nulle. */
+	touch-action: none;
+	user-select: none;
+}
+.slot-btn:hover:not(:disabled) { background: #3a3a3a; }
+.slot-btn:active:not(:disabled) { transform: scale(0.94); }
+.slot-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+/* Case vide : un emplacement, pas un bouton — visible mais inerte hors édition. */
+.slot-btn.empty { border-style: dashed; border-color: #3a3a3a; background: transparent; cursor: default; }
+/* Numéro de la case : repère d'apprentissage, discret une fois la barre mémorisée. */
+.slot-num {
+	position: absolute; top: 1px; right: 3px;
+	font-size: 9px; color: #777; font-weight: bold; pointer-events: none;
+}
+/* « + » : ce sort dépensera ses composants CONSOMMÉS. Le badge disparaît quand il n'en
+   reste plus en sac — la case reste jouable, simplement sans eux. */
+.slot-plus {
+	position: absolute; bottom: 0; right: 3px;
+	font-size: 11px; color: #b26bff; font-weight: bold; pointer-events: none;
+	text-shadow: 0 0 3px rgba(0,0,0,0.8);
+}
+.slot-btn.oblig  { border-color: #6b5836; }
+.slot-btn.atk    { border-color: #cc3333; color: #ff8080; }
+.slot-btn.atk:hover:not(:disabled) { background: #3a1a1a; }
+.slot-btn.loot   { border-color: #8a6d2f; color: #cda349; }
+.slot-btn.flee   { border-color: #666; color: #999; }
+.slot-btn.hidden-selecting { visibility: hidden; }
+/* Mode édition : la grille ne joue plus, on y change le CONTENU des cases. */
+.slot-grid.editing .slot-btn { cursor: pointer; opacity: 1; border-style: dashed; }
+/* Glisser-déposer par clic long — disponible EN PERMANENCE, pas seulement en édition :
+   réordonner sa barre est gratuit, seul changer son contenu coûte une action. */
+.slot-btn.dragging { opacity: 0.5; transform: scale(1.12); z-index: 10; }
+.slot-btn.drag-over { border-color: #cda349; background: #2e2510; }
+.slot-edit-bar { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.slot-edit-hint { font-size: 12px; color: #cbb98a; }
+@media (max-width: 768px) {
+	/* Ordre TOTALEMENT inversé (20→1) : le slot 1 tombe sous le pouce, en bas à droite. */
+	.slot-btn { order: var(--o-rev); }
+}
+#target-row {
 	display: none; gap: 8px; align-items: center; justify-content: center;
 }
-#target-select, #conso-select, #sort-select, #comp-select {
+#target-select, #slot-assign-select {
 	flex: 1; max-width: 200px; padding: 6px 10px;
 	background: #1a1a1a; color: #eee;
 	border: 1px solid #555; border-radius: 6px; font-size: 13px;
 }
-#sort-comp-label {
-	display: flex; align-items: center; gap: 4px;
-	font-size: 12px; color: #cbb98a; cursor: pointer; white-space: nowrap;
-}
-/* Sorts/compétences épinglés (accès rapide) : icônes cliquables dans la barre d'action. */
-#quick-sorts, #quick-comps { display: inline-flex; gap: 6px; align-items: center; }
-#quick-sorts .quick-sort-btn, #quick-comps .quick-sort-btn { padding: 6px 10px; font-size: 1.15rem; line-height: 1; }
 /* Badge d'état furtif du joueur (🥷) dans l'en-tête de tour. */
 #furtif-badge { font-size: 1.05rem; margin-left: 6px; filter: drop-shadow(0 0 4px #b26bff); }
 /* Œil barré sur le badge d'un ennemi qui ne vous a pas encore repéré (joueur furtif). */
@@ -680,34 +739,20 @@
 		</div>
 
 		<div class="action-bar">
-			<div class="btn-row">
-				<button class="action-btn attack-btn atk-mode-btn" data-mode="cac" id="btn-atk-cac" onclick="triggerAttack('cac')">⚔</button>
-				<button class="action-btn attack-btn atk-mode-btn" data-mode="jet" id="btn-atk-jet" onclick="triggerAttack('jet')">🪃</button>
-				<button class="action-btn attack-btn atk-mode-btn" data-mode="tir" id="btn-atk-tir" onclick="triggerAttack('tir')">🏹</button>
-				<div id="quick-sorts"></div>
-				<button class="action-btn" id="btn-sorts" onclick="triggerSort()" title="Lancer un sort (1 action + PM ; composants optionnels = effet renforcé)">🔮</button>
-				<div id="quick-comps"></div>
-				<button class="action-btn" id="btn-comps" onclick="triggerComp()" title="Utiliser une compétence active (1 action + PM éventuels)">⚡</button>
-				<button class="action-btn" id="btn-consommer" onclick="triggerConsume()" title="Consommer un objet du sac (1 action ; effets instantanés PV/PM seulement)">🧪</button>
-				<button class="action-btn loot-btn" id="btn-ramasser" onclick="doAction('ramasser', null)" title="Ramasser une carcasse adjacente (1 action, hors corps à corps)">🫳</button>
-				<button class="action-btn flee-btn" id="btn-fuir" onclick="doAction('fuir', null)">🏃</button>
+			<button class="action-btn" id="btn-slots-edit" onclick="toggleSlotEdit()" title="Réorganiser le contenu de la barre — coûte 1 action. (Échanger deux cases est gratuit : clic long sur une case, puis glisser.)">⚙</button>
+			<!-- Grille de slots : rendue 100 % client (renderSlots), positions stables par
+			     personnage. C'est le SEUL accès aux sorts, compétences et consommables —
+			     ce qui n'a pas été préparé ne se joue pas, sauf à passer par ⚙ (1 action). -->
+			<div class="slot-grid" id="slot-grid"></div>
+			<div class="slot-edit-bar" id="slot-edit-row" style="display:none">
+				<select id="slot-assign-select"></select>
+				<button class="action-btn" id="btn-slot-assign" onclick="confirmSlotAssign()">✓ Affecter</button>
+				<button class="action-btn flee-btn" id="btn-slot-done" onclick="fermerModeEdition()" title="Quitter le mode réorganisation (gratuit)">Terminer</button>
+				<span class="slot-edit-hint" id="slot-edit-hint"></span>
 			</div>
 			<div id="target-row">
 				<select id="target-select"></select>
 				<button class="action-btn attack-btn" id="btn-confirm" onclick="confirmAttack()">✓ Confirmer</button>
-			</div>
-			<div id="conso-row">
-				<select id="conso-select"></select>
-				<button class="action-btn" id="btn-conso-confirm" onclick="confirmConsume()">✓ Consommer</button>
-			</div>
-			<div id="sort-row">
-				<select id="sort-select"></select>
-				<label id="sort-comp-label" title="Engager les composants disponibles (les consommés sont dépensés, les catalyseurs restent)"><input type="checkbox" id="sort-comp-check" checked>Composants</label>
-				<button class="action-btn" id="btn-sort-confirm" onclick="confirmSort()">✓ Lancer</button>
-			</div>
-			<div id="comp-row">
-				<select id="comp-select"></select>
-				<button class="action-btn" id="btn-comp-confirm" onclick="confirmComp()">✓ Utiliser</button>
 			</div>
 		</div>
 		<!-- Tour header + Initiative strip -->
@@ -846,6 +891,9 @@
 // ─── State ────────────────────────────────────────────────────────
 const SERVER_DATA = {
 	combat_id:            {{ combat._id | tojson | safe }},
+	// Doc du personnage PRINCIPAL. Sert à savoir si l'acteur courant est un compagnon :
+	// les écritures de slots doivent viser SON doc, pas celui du principal (cf. _acteur).
+	character_id:         {{ combat.character_id | tojson | safe }},
 	status:               {{ combat.status | tojson | safe }},
 	joueurs:              {{ combat.joueurs | tojson | safe }},
 	monstres:             {{ combat.monstres | tojson | safe }},
@@ -872,11 +920,6 @@ let CONSOS = {{ consommables | tojson | safe }};
 // Sorts connus utilisables en combat (part instantanée degats/pv/pm + composants avec
 // disponibilité) — resynchronisés par la réponse de l'action « sort ».
 let SORTS = {{ sorts | tojson | safe }};
-// Sorts épinglés en accès rapide (ids ordonnés, sous-ensemble des connus) : icônes
-// directement cliquables dans la barre d'action. Épinglage géré dans l'onglet ⚡
-// de play_town ; un sort épinglé absent de SORTS (pas d'effet instantané) est ignoré.
-// `let` : remplacés par ceux du MEMBRE ACTIF au changement d'acteur (fetch /acteur).
-let SORTS_EPINGLES = {{ sorts_epingles | tojson | safe }};
 // Sort offensif confirmé en attente de cible : {sort_id, composants, portee} — les
 // badges/tokens passent en liseré violet et leur clic lance le sort au lieu d'attaquer.
 let pendingSort = null;
@@ -884,10 +927,15 @@ let pendingSort = null;
 // Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/furtivité) —
 // la liste ne change pas en combat (pas de composants, rien n'est consommé du sac).
 let COMPS = {{ competences | tojson | safe }};
-// Compétences épinglées en accès rapide (miroir des sorts épinglés, onglet ⚡ play_town).
-let COMPS_EPINGLEES = {{ competences_epinglees | tojson | safe }};
 // Compétence offensive confirmée en attente de cible — même mécanisme violet que pendingSort.
 let pendingComp = null;
+
+// Barre d'action : une entrée par case (position, type, ref, nom, icon, disponible,
+// obligatoire, index pour un consommable). Source = utils/slots_actions.slots_payload.
+// `let` : remplacée par celle du MEMBRE ACTIF au changement d'acteur (fetch /acteur) —
+// chaque compagnon a SA disposition.
+let SLOTS = {{ slots | tojson | safe }};
+const SLOTS_MAX = {{ slots_max | tojson | safe }};
 
 // L'image de fond couvre exactement dims.x × dims.y cases (sinon l'art ne s'aligne
 // plus avec les coordonnées de la grille). Piloté par GRID.dims, plus de 30 en dur.
@@ -1302,6 +1350,17 @@ function revealNext() {
 	setTimeout(revealNext, 450);
 }
 
+// Message système immédiat (hors file d'animation du log) : sert aux refus d'édition
+// de la barre, qui ne sont pas des événements de combat et ne doivent pas attendre.
+function logSys(texte) {
+	const container = document.getElementById('combat-log');
+	const div = document.createElement('div');
+	div.className = 'log-entry sys';
+	div.textContent = texte;
+	container.appendChild(div);
+	container.scrollTop = container.scrollHeight;
+}
+
 function isPlayerTurn(data) {
 	const actor = data.ordre_initiative[data.acteur_courant_index];
 	return !!actor && actor.startsWith('joueur_');
@@ -1349,13 +1408,15 @@ function targetableMonsters(mode) {
 	}
 	return list;
 }
-// Affiche les boutons d'attaque (modes équipés seulement).
+// Modes d'attaque réellement équipés par le membre actif. Un slot d'attaque dont le
+// mode manque reste VISIBLE mais grisé : c'est tout l'intérêt d'une grille fixe — la
+// case ne bouge pas quand on change d'arme (ni entre deux membres du groupe).
+function modesEquipes(data) {
+	return ((activePlayer(data) || {}).attaque_profils || []).map(a => a.mode);
+}
 function updateAttackButtons(data) {
-	const modes = ((activePlayer(data) || {}).attaque_profils || []).map(a => a.mode);
+	const modes = modesEquipes(data);
 	if (!modes.includes(currentMode)) currentMode = modes[0] || 'cac';
-	document.querySelectorAll('.atk-mode-btn').forEach(b => {
-		b.style.display = modes.includes(b.dataset.mode) ? '' : 'none';
-	});
 }
 
 function chebyJM(j, m) {
@@ -1390,17 +1451,11 @@ function sortTargets(s) {
 	return list;
 }
 // Sort lançable maintenant ? PM suffisants, et pour un sort offensif au moins une cible.
-// Partagé entre le sélecteur 🔮 (castableSorts) et les icônes d'accès rapide.
+// Consommé par slotJouable (état de la case) et par activerSlot (refus au clic).
 function sortCastable(s) {
 	const j = me() || {};
 	return (j.currentPM || 0) >= s.cout_pm
 		&& (s.cible !== 'ennemi' || sortTargets(s).length > 0);
-}
-function castableSorts() { return SORTS.filter(sortCastable); }
-function canCast(data) {
-	const j = activePlayer(data);
-	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
-		&& castableSorts().length > 0;
 }
 
 // ── Compétences actives (1 action + PM éventuels) — miroir exact des sorts ──────
@@ -1411,12 +1466,6 @@ function compCastable(c) {
 	const j = me() || {};
 	return (j.currentPM || 0) >= c.cout_pm
 		&& (c.cible !== 'ennemi' || compTargets(c).length > 0);
-}
-function castableComps() { return COMPS.filter(compCastable); }
-function canComp(data) {
-	const j = activePlayer(data);
-	return data.status === 'active' && isPlayerTurn(data) && j.actions_restantes > 0
-		&& castableComps().length > 0;
 }
 
 // ── Disponibilité d'une direction : miroir exact de la validation serveur `deplacer`.
@@ -1482,36 +1531,43 @@ function updateButtons(data) {
 			: !dirAvailable(data, parseInt(b.dataset.sdx), parseInt(b.dataset.sdy));
 	});
 	document.getElementById('btn-passer').disabled   = !(isActive && isPlayer);
-	document.querySelectorAll('.atk-mode-btn').forEach(b => {
-		b.disabled = !canAct || targetableMonsters(b.dataset.mode).length === 0;
-	});
 	document.getElementById('btn-confirm').disabled  = !canAct || targetableMonsters(currentMode).length === 0;
-	document.getElementById('btn-fuir').disabled     = !isActive || !isPlayer;
-	document.getElementById('btn-ramasser').disabled = !canLoot(data);
-	document.getElementById('btn-consommer').disabled = !canConsume(data);
-	document.getElementById('btn-conso-confirm').disabled = !canConsume(data);
-	if (!canConsume(data)) document.getElementById('conso-row').style.display = 'none';
-	// 🔮 : masqué si le perso ne connaît aucun sort de combat, grisé si rien de lançable.
-	const btnSorts = document.getElementById('btn-sorts');
-	btnSorts.style.display = SORTS.length ? '' : 'none';
-	btnSorts.disabled = !canCast(data);
-	document.getElementById('btn-sort-confirm').disabled = !canCast(data);
-	if (!canCast(data)) document.getElementById('sort-row').style.display = 'none';
-	// Icônes d'accès rapide : même prédicat que le 🔮, par sort.
-	document.querySelectorAll('#quick-sorts .quick-sort-btn').forEach(b => {
-		const s = SORTS.find(x => x.sort_id === b.dataset.sort);
-		b.disabled = !canAct || !s || !sortCastable(s);
+	// ⚙ : entrer en édition COÛTE UNE ACTION → même condition qu'une action jouée.
+	// Exception : en édition, le bouton doit rester actif — c'est le seul moyen d'en sortir.
+	document.getElementById('btn-slots-edit').disabled = !slotEditing && !canAct;
+	// ⚠️ Ces deux-là sont des .action-btn : doAction les désactive avec les autres, et
+	// seul ce passage les rallume. Sans ces lignes ils resteraient grisés à vie dès la
+	// première action jouée.
+	document.getElementById('btn-slot-assign').disabled = !slotEditing;
+	document.getElementById('btn-slot-done').disabled   = !slotEditing;
+	// Cases de la barre : en édition tout est cliquable (on réarrange, on ne joue pas).
+	const modes = modesEquipes(data);
+	document.querySelectorAll('#slot-grid .slot-btn').forEach(b => {
+		const slot = SLOTS.find(s => s.position === parseInt(b.dataset.slot, 10));
+		b.disabled = slotEditing ? false : !slotJouable(slot, data, canAct, modes);
 	});
-	// ⚡ : masqué si aucune compétence active de combat, grisé si rien d'utilisable.
-	const btnComps = document.getElementById('btn-comps');
-	btnComps.style.display = COMPS.length ? '' : 'none';
-	btnComps.disabled = !canComp(data);
-	document.getElementById('btn-comp-confirm').disabled = !canComp(data);
-	if (!canComp(data)) document.getElementById('comp-row').style.display = 'none';
-	document.querySelectorAll('#quick-comps .quick-sort-btn').forEach(b => {
-		const c = COMPS.find(x => x.competence_id === b.dataset.comp);
-		b.disabled = !canAct || !c || !compCastable(c);
-	});
+}
+
+// Un slot est-il jouable maintenant ? Chaque type délègue au prédicat qui pilotait déjà
+// son ancien bouton nommé — aucune règle de combat n'est réécrite ici.
+function slotJouable(slot, data, canAct, modes) {
+	if (!slot || !slot.type) return false;
+	switch (slot.type) {
+		case 'attaque':
+			return canAct && modes.includes(slot.ref) && targetableMonsters(slot.ref).length > 0;
+		case 'ramasser':    return canLoot(data);
+		case 'fuir':        return data.status === 'active' && isPlayerTurn(data);
+		case 'consommable': return canConsume(data) && !!slotConso(slot);
+		case 'sort': {
+			const s = slotSort(slot);
+			return canAct && !!s && sortCastable(s);
+		}
+		case 'competence': {
+			const c = slotComp(slot);
+			return canAct && !!c && compCastable(c);
+		}
+	}
+	return false;
 }
 
 function refreshTargetSelect() {
@@ -1534,11 +1590,10 @@ async function syncActorResources() {
 		const data = await res.json();
 		CONSOS = data.consommables || [];
 		SORTS = data.sorts || [];
-		SORTS_EPINGLES = data.sorts_epingles || [];
 		COMPS = data.competences || [];
-		COMPS_EPINGLEES = data.competences_epinglees || [];
-		renderQuickSorts();
-		renderQuickComps();
+		// La barre appartient à l'ACTEUR : chaque membre du groupe a SA disposition.
+		SLOTS = data.slots || SLOTS;
+		renderSlots();
 		if (window._combatReady) { updateButtons(state); refreshTargetSelect(); }
 	} catch (e) { /* réseau : les ressources du membre précédent restent affichées */ }
 }
@@ -1581,16 +1636,12 @@ function doRotate(sens) {
 	doAction('tourner', null, null, null, sens);
 }
 
-// Ferme les lignes de sélection (cible + consommable + sort) et restaure les boutons
-// d'attaque (masqués tant que le sélecteur de cible est ouvert). Appelé par tout
-// clic de bouton : doAction (actions) et les triggers. Annule aussi
-// un éventuel ciblage de sort en attente (les badges/tokens redeviennent « attaque »).
+// Ferme le sélecteur de cible et restaure les cases d'attaque (effacées tant qu'il est
+// ouvert). Appelé par tout clic de bouton : doAction et les triggers. Annule aussi un
+// éventuel ciblage de sort en attente (les badges/tokens redeviennent « attaque »).
 function closeSelectors() {
 	document.getElementById('target-row').style.display = 'none';
-	document.getElementById('conso-row').style.display = 'none';
-	document.getElementById('sort-row').style.display = 'none';
-	document.getElementById('comp-row').style.display = 'none';
-	document.querySelectorAll('.atk-mode-btn').forEach(b => b.classList.remove('hidden-selecting'));
+	document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('hidden-selecting'));
 	if (pendingSort || pendingComp) {
 		pendingSort = null;
 		pendingComp = null;
@@ -1612,7 +1663,9 @@ function triggerAttack(mode) {
 	} else {
 		refreshTargetSelect();
 		document.getElementById('target-row').style.display = 'flex';
-		document.querySelectorAll('.atk-mode-btn').forEach(b => b.classList.add('hidden-selecting'));
+		// Les cases d'ATTAQUE s'effacent pendant le choix de cible (visibility, pas
+		// display : la grille garde sa forme, les autres cases ne se déplacent pas).
+		document.querySelectorAll('#slot-grid .slot-btn.atk').forEach(b => b.classList.add('hidden-selecting'));
 	}
 }
 
@@ -1621,9 +1674,7 @@ function confirmAttack() {
 	doAction('attaquer', cibleId, null, null, null, currentMode);
 }
 
-// ── Consommer (1 action) : direct si un seul choix, sinon sélecteur.
-// Les exemplaires identiques (même nom + mêmes effets pv/pm ; poids d'instance ignoré)
-// sont regroupés en une seule entrée « (n) » ; consommer prend le premier du groupe.
+// Libellé d'un consommable — infobulle de sa case (cf. slotTitle).
 function consoLabel(c) {
 	const gains = [];
 	if (c.pv) gains.push(`+${c.pv} PV`);
@@ -1632,41 +1683,8 @@ function consoLabel(c) {
 	if (c.duree) gains.push(`⏳${c.duree} tours`);
 	return `${c.icon || '🧪'} ${c.nom}${gains.length ? ' (' + gains.join(', ') + ')' : ''}`;
 }
-function consoGroups() {
-	const groups = new Map();
-	for (const c of CONSOS) {
-		const key = `${c.nom}|${c.pv}|${c.pm}|${c.duree || 0}`;
-		const g = groups.get(key);
-		if (g) g.count++;
-		else groups.set(key, { ...c, count: 1 });
-	}
-	return [...groups.values()];
-}
-// Groupes affichés au moment de l'ouverture du sélecteur — confirmConsume relit
-// exactement cette liste (pas de recalcul si CONSOS a été resynchronisé entre-temps).
-let consoOptions = [];
-function triggerConsume() {
-	closeSelectors();
-	consoOptions = consoGroups();
-	if (!consoOptions.length) return;
-	if (consoOptions.length === 1) {
-		doAction('consommer', null, null, null, null, null,
-			{ index: consoOptions[0].index, item_id: consoOptions[0].item_id });
-		return;
-	}
-	const sel = document.getElementById('conso-select');
-	sel.innerHTML = consoOptions.map((c, i) =>
-		`<option value="${i}">${consoLabel(c)}${c.count > 1 ? ` (${c.count})` : ''}</option>`
-	).join('');
-	document.getElementById('conso-row').style.display = 'flex';
-}
-function confirmConsume() {
-	const c = consoOptions[parseInt(document.getElementById('conso-select').value, 10)];
-	if (c) doAction('consommer', null, null, null, null, null, { index: c.index, item_id: c.item_id });
-	else closeSelectors();
-}
 
-// ── Lancer un sort (1 action + PM) : sélecteur puis, pour un sort offensif à
+// ── Lancer un sort (1 action + PM) : depuis sa case, puis pour un sort offensif à
 // plusieurs cibles possibles, ciblage par badge/token (liseré violet, pendingSort).
 function sortLabel(s) {
 	const parts = [];
@@ -1679,19 +1697,9 @@ function sortLabel(s) {
 		+ (parts.length ? ` (${parts.join(', ')})` : '')
 		+ (compos ? ` [${compos} compo]` : '');
 }
-// Sorts affichés au moment de l'ouverture — confirmSort relit exactement cette liste.
-let sortOptions = [];
-function triggerSort() {
-	closeSelectors();
-	sortOptions = castableSorts();
-	if (!sortOptions.length) return;
-	const sel = document.getElementById('sort-select');
-	sel.innerHTML = sortOptions.map((s, i) => `<option value="${i}">${sortLabel(s)}</option>`).join('');
-	document.getElementById('sort-row').style.display = 'flex';
-}
 // Lance le sort `s` avec les composants engagés : cast direct (soi / 1 cible) ou
-// passage des badges/tokens en mode ciblage violet (plusieurs cibles). Partagé entre
-// le sélecteur 🔮 (confirmSort) et les icônes d'accès rapide (quickCastSort).
+// passage des badges/tokens en mode ciblage violet (plusieurs cibles). Appelé depuis
+// la case du sort (activerSlot), qui décide des composants à engager.
 function startSortCast(s, composants) {
 	if (s.cible === 'ennemi') {
 		const cibles = sortTargets(s);
@@ -1703,42 +1711,188 @@ function startSortCast(s, composants) {
 		// Plusieurs cibles : les badges/tokens passent en mode ciblage de sort.
 		// (Ne PAS passer par closeSelectors ici : il annulerait pendingSort.)
 		pendingSort = { sort_id: s.sort_id, composants, sort: s };
-		document.getElementById('sort-row').style.display = 'none';
 		renderTokens();
 		refreshBadgeTargets();
 	} else {
 		doAction('sort', null, null, null, null, null, { sort_id: s.sort_id, composants });
 	}
 }
-function confirmSort() {
-	const s = sortOptions[parseInt(document.getElementById('sort-select').value, 10)];
-	if (!s) { closeSelectors(); return; }
-	// « Engager tout ce qui est disponible », débrayable par la checkbox (économiser
-	// ses composants consommables) — le serveur re-vérifie de toute façon.
-	const engager = document.getElementById('sort-comp-check').checked;
-	const composants = engager ? (s.composants || []).filter(c => c.disponible).map(c => c.item) : [];
-	startSortCast(s, composants);
+
+// ── Barre d'action : grille de slots ─────────────────────────────────────────────
+// Reconstruite quand SORTS/CONSOS sont resynchronisés (composants consommés, potion
+// bue → tooltip et disponibilité à jour) ; l'état enabled/disabled est géré par
+// updateButtons, qui réutilise tels quels les prédicats sortCastable/compCastable/…
+// L'ordre CSS est porté par deux variables : --o (desktop) et --o-rev (mobile, 20→1).
+function slotSort(slot)  { return SORTS.find(s => s.sort_id === slot.ref); }
+function slotComp(slot)  { return COMPS.find(c => c.competence_id === slot.ref); }
+function slotConso(slot) { return CONSOS.find(c => c.item_id === slot.ref); }
+
+// Libellé de survol : délègue aux labels existants quand le payload détaillé est là
+// (PM, dégâts, composants), sinon le nom seul suffit.
+function slotTitle(slot) {
+	if (!slot || !slot.type) return 'Emplacement libre';
+	if (slot.type === 'sort') {
+		const s = slotSort(slot);
+		if (!s) return slot.nom;
+		return sortLabel(s) + (slot.composants ? ' — avec composants' : ' — sans composants');
+	}
+	if (slot.type === 'competence')  { const c = slotComp(slot);  return c ? compLabel(c)  : slot.nom; }
+	if (slot.type === 'consommable') { const c = slotConso(slot); return c ? consoLabel(c) : slot.nom + ' (épuisé)'; }
+	if (slot.type === 'attaque') return { cac: 'Attaque au corps à corps', jet: 'Attaque en jet', tir: 'Attaque au tir' }[slot.ref];
+	if (slot.type === 'ramasser') return 'Ramasser une carcasse adjacente (1 action, hors corps à corps)';
+	if (slot.type === 'fuir') return 'Fuir le combat';
+	return slot.nom;
+}
+// Classe de couleur : reprend le code visuel des anciens boutons nommés.
+function slotClass(slot) {
+	if (slot.type === 'attaque')  return 'atk';
+	if (slot.type === 'ramasser') return 'loot';
+	if (slot.type === 'fuir')     return 'flee';
+	return '';
 }
 
-// ── Accès rapide : icônes des sorts épinglés, directement cliquables ─
-// Reconstruites quand SORTS est resynchronisé (composants consommés → tooltip à jour) ;
-// l'état enabled/disabled est géré par updateButtons (même prédicat que le 🔮).
-function renderQuickSorts() {
-	const box = document.getElementById('quick-sorts');
-	box.innerHTML = SORTS_EPINGLES
-		.map(id => SORTS.find(s => s.sort_id === id))
-		.filter(Boolean)
-		.map(s => `<button class="action-btn quick-sort-btn" data-sort="${s.sort_id}"
-			title="${sortLabel(s)}" onclick="quickCastSort('${s.sort_id}')">${s.icon || '🔮'}</button>`)
-		.join('');
+// ── Glisser-déposer par CLIC LONG ────────────────────────────────────────────────
+// Pointer Events plutôt que le drag & drop HTML5 : celui-ci ne fonctionne pas au doigt,
+// et l'appui long est justement le geste tactile attendu. Un seul code pour la souris
+// et le tactile. Disponible EN PERMANENCE (pas seulement en mode édition) : réordonner
+// sa barre est gratuit, seul changer le contenu d'une case coûte une action.
+const DRAG_DELAI_MS = 400;   // au-delà : c'est un appui long, pas un clic
+const DRAG_TOLERANCE = 10;   // px avant l'armement : au-delà c'est un défilement
+let dragJustEnded = false;   // avale le `click` qui suit un appui long
+
+function attacherDragLong(el, position, selecteurCase, onDrop) {
+	let timer = null, arme = false, depart = null, survolee = null;
+
+	const nettoyer = () => {
+		clearTimeout(timer); timer = null;
+		el.classList.remove('dragging');
+		if (survolee) survolee.classList.remove('drag-over');
+		survolee = null; arme = false; depart = null;
+	};
+
+	el.addEventListener('pointerdown', e => {
+		if (e.button !== undefined && e.button !== 0) return;   // clic droit ignoré
+		depart = { x: e.clientX, y: e.clientY };
+		timer = setTimeout(() => {
+			arme = true;
+			el.classList.add('dragging');
+			// Sans capture, sortir de l'élément couperait le flux de pointermove.
+			try { el.setPointerCapture(e.pointerId); } catch (_) {}
+		}, DRAG_DELAI_MS);
+	});
+
+	el.addEventListener('pointermove', e => {
+		if (!depart) return;
+		if (!arme) {
+			// Trop de mouvement avant l'armement = l'utilisateur fait défiler la page.
+			if (Math.hypot(e.clientX - depart.x, e.clientY - depart.y) > DRAG_TOLERANCE) nettoyer();
+			return;
+		}
+		const sous = document.elementFromPoint(e.clientX, e.clientY);
+		const cible = sous && sous.closest(selecteurCase);
+		if (cible !== survolee) {
+			if (survolee) survolee.classList.remove('drag-over');
+			survolee = (cible && cible !== el) ? cible : null;
+			if (survolee) survolee.classList.add('drag-over');
+		}
+	});
+
+	const relacher = e => {
+		if (!arme) { nettoyer(); return; }
+		const sous = document.elementFromPoint(e.clientX, e.clientY);
+		const cible = sous && sous.closest(selecteurCase);
+		const dest = cible && cible !== el ? parseInt(cible.dataset.slot, 10) : null;
+		nettoyer();
+		// Le `click` synthétique suit immédiatement : sans ce drapeau, relâcher sur sa
+		// case d'origine déclencherait son action.
+		dragJustEnded = true;
+		setTimeout(() => { dragJustEnded = false; }, 0);
+		if (dest && dest !== position) onDrop(position, dest);
+	};
+	el.addEventListener('pointerup', relacher);
+	el.addEventListener('pointercancel', nettoyer);
 }
-function quickCastSort(sortId) {
-	const s = SORTS.find(x => x.sort_id === sortId);
-	if (!s || !sortCastable(s)) return;
-	closeSelectors();
-	// Composants engagés par défaut (même comportement que la checkbox 🔮 cochée).
-	const composants = (s.composants || []).filter(c => c.disponible).map(c => c.item);
-	startSortCast(s, composants);
+function renderSlots() {
+	const box = document.getElementById('slot-grid');
+	box.innerHTML = SLOTS.map(slot => {
+		const n = slot.position;
+		const ordres = `--o:${n}; --o-rev:${SLOTS_MAX - n + 1}`;
+		if (!slot.type) {
+			return `<button class="slot-btn empty" data-slot="${n}" style="${ordres}"
+				title="Emplacement libre"><span class="slot-num">${n}</span></button>`;
+		}
+		const cls = [slotClass(slot), slot.obligatoire ? 'oblig' : ''].filter(Boolean).join(' ');
+		const plus = slotCompoPlus(slot) ? '<span class="slot-plus">+</span>' : '';
+		return `<button class="slot-btn ${cls}" data-slot="${n}" style="${ordres}"
+			title="${slotTitle(slot).replace(/"/g, '&quot;')}"
+			>${slot.icon}<span class="slot-num">${n}</span>${plus}</button>`;
+	}).join('');
+	box.querySelectorAll('.slot-btn').forEach(b => {
+		const n = parseInt(b.dataset.slot, 10);
+		b.addEventListener('click', () => onSlotClick(n));
+		attacherDragLong(b, n, '.slot-btn', deplacerSlot);
+	});
+}
+
+// « + » : ce lancement dépensera des composants CONSOMMÉS. Les catalyseurs, eux, partent
+// toujours — ils ne se consomment pas, s'en priver n'aurait aucune contrepartie —, donc
+// ils n'entrent pas dans le badge. Le « + » s'éteint dès qu'il ne reste plus de composant
+// consommable en sac : la case reste jouable, simplement sans eux.
+function slotCompoPlus(slot) {
+	if (slot.type !== 'sort' || !slot.composants) return false;
+	const s = slotSort(slot);
+	return !!s && (s.composants || []).some(c => c.consomme && c.disponible);
+}
+
+// Composants engagés au lancement depuis cette case : les catalyseurs toujours, les
+// consommés seulement si la case a été configurée « avec ».
+function slotComposants(slot, s) {
+	return (s.composants || [])
+		.filter(c => c.disponible && (c.consomme ? !!slot.composants : true))
+		.map(c => c.item);
+}
+
+// Clic sur une case : joue l'action, ou l'affecte si l'on est en mode édition.
+function onSlotClick(position) {
+	if (dragJustEnded) return;          // fin d'un appui long, pas un clic
+	const slot = SLOTS.find(s => s.position === position);
+	if (!slot) return;
+	if (slotEditing) { ouvrirAffectation(position); return; }
+	activerSlot(slot);
+}
+
+// Dispatch vers les chemins d'action EXISTANTS : la grille ne fait qu'aiguiller, toute
+// la logique (cast direct vs ciblage violet, portée, composants) reste où elle était.
+function activerSlot(slot) {
+	switch (slot.type) {
+		case 'attaque':
+			triggerAttack(slot.ref);
+			break;
+		case 'sort': {
+			const s = slotSort(slot);
+			if (!s || !sortCastable(s)) return;
+			closeSelectors();
+			startSortCast(s, slotComposants(slot, s));
+			break;
+		}
+		case 'competence': {
+			const c = slotComp(slot);
+			if (!c || !compCastable(c)) return;
+			closeSelectors();
+			startCompUse(c);
+			break;
+		}
+		case 'consommable': {
+			// Le slot référence un TYPE d'objet ; l'exemplaire (index) est résolu au moment
+			// du clic sur la liste courante du sac — un index mémorisé serait périmé.
+			const c = slotConso(slot);
+			if (!c) return;
+			doAction('consommer', null, null, null, null, null, { index: c.index, item_id: c.item_id });
+			break;
+		}
+		case 'ramasser': doAction('ramasser', null); break;
+		case 'fuir':     doAction('fuir', null); break;
+	}
 }
 
 // ── Utiliser une compétence active (1 action + PM éventuels) — miroir du 🔮 ──────
@@ -1751,19 +1905,8 @@ function compLabel(c) {
 	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${c.cout_pm} PM` : ''}`
 		+ (parts.length ? ` (${parts.join(', ')})` : '');
 }
-// Compétences affichées à l'ouverture — confirmComp relit exactement cette liste.
-let compOptions = [];
-function triggerComp() {
-	closeSelectors();
-	compOptions = castableComps();
-	if (!compOptions.length) return;
-	if (compOptions.length === 1) { startCompUse(compOptions[0]); return; }
-	const sel = document.getElementById('comp-select');
-	sel.innerHTML = compOptions.map((c, i) => `<option value="${i}">${compLabel(c)}</option>`).join('');
-	document.getElementById('comp-row').style.display = 'flex';
-}
 // Utilise la compétence `c` : direct (soi / 1 cible) ou ciblage violet (plusieurs cibles).
-// Partagé entre le sélecteur ⚡ (confirmComp) et les icônes d'accès rapide (quickUseComp).
+// Appelé depuis la case de la compétence (activerSlot).
 function startCompUse(c) {
 	if (c.cible === 'ennemi') {
 		const cibles = compTargets(c);
@@ -1774,43 +1917,150 @@ function startCompUse(c) {
 		}
 		// Plusieurs cibles : badges/tokens en mode ciblage violet (comme pendingSort).
 		pendingComp = { competence_id: c.competence_id, comp: c };
-		document.getElementById('comp-row').style.display = 'none';
 		renderTokens();
 		refreshBadgeTargets();
 	} else {
 		doAction('competence', null, null, null, null, null, { competence_id: c.competence_id });
 	}
 }
-function confirmComp() {
-	const c = compOptions[parseInt(document.getElementById('comp-select').value, 10)];
-	if (!c) { closeSelectors(); return; }
-	startCompUse(c);
+
+// ── Mode édition de la barre (⚙) ─────────────────────────────────────────────────
+// La configuration « au calme » se fait dans l'onglet ⚡ de la fiche ; ici, en plein
+// combat, ENTRER dans ce mode coûte UNE ACTION — improviser un plan a un prix. Une fois
+// payé, on réarrange autant de cases qu'on veut jusqu'à en sortir (gratuit).
+// ⚠️ Le glisser-déposer, lui, n'exige PAS ce mode et ne coûte rien (cf. attacherDragLong).
+let slotEditing = false;
+let slotEditPosition = null;
+
+async function toggleSlotEdit() {
+	if (slotEditing) { fermerModeEdition(); return; }
+
+	// L'action est débitée AVANT d'ouvrir : si le moteur la refuse (pas le tour du
+	// joueur, budget épuisé), le mode ne s'ouvre pas. ⚠️ Un refus revient en 200 avec
+	// `action_result.error` — tester `res.ok` seul ouvrirait le mode sans avoir payé.
+	const data = await doAction('editer_barre', null);
+	if (!data || (data.action_result || {}).error) return;
+
+	slotEditing = true;
+	document.getElementById('slot-grid').classList.add('editing');
+	document.getElementById('btn-slots-edit').classList.add('attack-btn');
+	document.getElementById('slot-edit-row').style.display = 'flex';
+	document.getElementById('slot-edit-hint').textContent =
+		'Cliquez une case pour changer son contenu — autant que vous voulez, l’action est déjà payée.';
+	slotEditPosition = null;
+	updateButtons(state);
 }
 
-// Accès rapide : icônes des compétences épinglées, mêmes règles que les sorts.
-function renderQuickComps() {
-	const box = document.getElementById('quick-comps');
-	box.innerHTML = COMPS_EPINGLEES
-		.map(id => COMPS.find(c => c.competence_id === id))
-		.filter(Boolean)
-		.map(c => `<button class="action-btn quick-sort-btn" data-comp="${c.competence_id}"
-			title="${compLabel(c)}" onclick="quickUseComp('${c.competence_id}')">${c.icon || '⚡'}</button>`)
-		.join('');
-}
-function quickUseComp(compId) {
-	const c = COMPS.find(x => x.competence_id === compId);
-	if (!c || !compCastable(c)) return;
+function fermerModeEdition() {
+	slotEditing = false;
+	slotEditPosition = null;
 	closeSelectors();
-	startCompUse(c);
+	document.getElementById('slot-grid').classList.remove('editing');
+	document.getElementById('btn-slots-edit').classList.remove('attack-btn');
+	document.getElementById('slot-edit-row').style.display = 'none';
+	document.getElementById('slot-edit-hint').textContent = '';
+	updateButtons(state);
 }
 
+// Toutes les actions affectables : les 3 modes d'attaque, puis TOUT ce que le personnage
+// connaît (sorts/compétences/consommables de combat) — c'est la soupape qui rattrape une
+// barre mal préparée. « Vider » n'est proposé que si la case n'est pas obligatoire
+// (miroir exact du 422 de vider_slot).
+function actionsAffectables(slot) {
+	const opts = [
+		{ label: '⚔ Corps à corps', entree: { type: 'attaque', ref: 'cac' } },
+		{ label: '🪃 Jet',          entree: { type: 'attaque', ref: 'jet' } },
+		{ label: '🏹 Tir',          entree: { type: 'attaque', ref: 'tir' } },
+		{ label: '🫳 Ramasser',     entree: { type: 'ramasser' } },
+		{ label: '🏃 Fuir',         entree: { type: 'fuir' } },
+	];
+	// Deux entrées par sort à composants consommables : dépenser ou économiser. Un sort
+	// qui n'en a aucun n'aurait qu'une variante fantôme — on ne propose alors que la
+	// version simple. (Les catalyseurs partent toujours : ils ne se consomment pas.)
+	SORTS.forEach(s => {
+		opts.push({ label: `${s.icon || '🔮'} ${s.nom}`,
+		            entree: { type: 'sort', ref: s.sort_id, composants: false } });
+		if ((s.composants || []).some(c => c.consomme)) {
+			opts.push({ label: `${s.icon || '🔮'} ${s.nom} +  (avec composants)`,
+			            entree: { type: 'sort', ref: s.sort_id, composants: true } });
+		}
+	});
+	COMPS.forEach(c => opts.push({ label: `${c.icon || '⚡'} ${c.nom}`, entree: { type: 'competence', ref: c.competence_id } }));
+	// Un type d'objet une seule fois : le slot vise le TYPE, pas l'exemplaire.
+	const vus = new Set();
+	CONSOS.forEach(c => {
+		if (vus.has(c.item_id)) return;
+		vus.add(c.item_id);
+		opts.push({ label: `${c.icon || '🧪'} ${c.nom}`, entree: { type: 'consommable', ref: c.item_id } });
+	});
+	if (slot && !slot.obligatoire && slot.type) opts.unshift({ label: '— Vider la case', entree: null });
+	return opts;
+}
+
+let slotAssignOptions = [];
+function ouvrirAffectation(position) {
+	const slot = SLOTS.find(s => s.position === position);
+	slotEditPosition = position;
+	slotAssignOptions = actionsAffectables(slot);
+	const sel = document.getElementById('slot-assign-select');
+	sel.innerHTML = slotAssignOptions.map((o, i) => `<option value="${i}">${o.label}</option>`).join('');
+	document.getElementById('slot-edit-row').style.display = 'flex';
+	document.getElementById('slot-edit-hint').textContent = `Case ${position}`;
+}
+
+async function confirmSlotAssign() {
+	if (slotEditPosition == null) return;
+	const opt = slotAssignOptions[parseInt(document.getElementById('slot-assign-select').value, 10)];
+	if (!opt) return;
+	await postSlots('/api/slot_action', { position: slotEditPosition, entree: opt.entree });
+}
+async function deplacerSlot(source, cible) {
+	await postSlots('/api/slot_deplacer', { source, cible });
+}
+// Écriture des slots : un seul chemin réseau, une seule resynchro. Le serveur renvoie
+// la barre RECALCULÉE (invariante réparée) — on ne la reconstruit jamais côté client.
+// ⚠️ Porteur visé par une écriture de slots : l'ACTEUR COURANT, pas le principal.
+// `/api/slot_action` passe par le chokepoint `_acteur`, qui SANS `compagnon_id` retombe
+// silencieusement sur le personnage principal — écrire la barre d'un compagnon partirait
+// alors sur le mauvais doc, et la réponse renverrait la barre du principal, que le client
+// afficherait comme celle du compagnon. C'est exactement ce mélange qu'on évite ici.
+//
+// Résolu à CHAQUE appel (jamais figé) : la barre affichée est toujours celle de
+// `activePlayer(state)` — resynchronisée par `syncActorResources` au changement d'acteur —,
+// donc cible d'écriture et affichage restent le même personnage même si le tour a tourné
+// entre-temps (entrer en mode ⚙ avec une seule action restante rend la main).
+// Repli sur `joueurs[0]` pendant un tour de monstre : miroir exact du repli serveur
+// `_actor_character_id` et de celui d'`activePlayer`.
+function acteurCompagnonId() {
+	const cid = (activePlayer(state) || {}).character_id;
+	return (cid && cid !== SERVER_DATA.character_id) ? cid : null;
+}
+
+async function postSlots(url, body) {
+	try {
+		const compagnonId = acteurCompagnonId();
+		const res = await fetch(url, {
+			method: 'POST', headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(compagnonId ? { ...body, compagnon_id: compagnonId } : body),
+		});
+		const data = await res.json();
+		if (!res.ok) { logSys(data.detail || 'Modification impossible'); return; }
+		SLOTS = data.slots || SLOTS;
+		renderSlots();
+		updateButtons(state);
+	} catch (e) { console.error('Erreur slots', e); }
+}
+
+// Renvoie le corps de la réponse (ou null si l'action n'est pas passée). ⚠️ Une erreur
+// de `resolve_action` revient en 200 avec `action_result.error` — c'est ce champ qu'un
+// appelant doit tester, pas le seul statut HTTP (cf. toggleSlotEdit).
 async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode = null, extra = null) {
-	if (busy) return;
+	if (busy) return null;
 	closeSelectors();
 	// Le portrait droit suit la cible que le joueur attaque (ou vise d'un sort/compétence).
 	if ((type === 'attaquer' || type === 'sort' || type === 'competence') && cibleId) lastEnemyId = cibleId;
 	busy = true;
-	document.querySelectorAll('#move-controls .btn, .action-btn')
+	document.querySelectorAll('#move-controls .btn, .action-btn, .slot-btn')
 		.forEach(el => el.disabled = true);
 	try {
 		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/action`, {
@@ -1820,9 +2070,13 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 		});
 		if (res.ok) {
 			const data = await res.json();
+			// Potion bue / composant dépensé : la barre doit refléter le sac tout de suite
+			// (un slot de consommable épuisé se grise, et son index change).
 			if (data.consommables) CONSOS = data.consommables;
-			if (data.sorts) { SORTS = data.sorts; renderQuickSorts(); }
+			if (data.sorts) SORTS = data.sorts;
+			if (data.consommables || data.sorts) renderSlots();
 			updateUI(data.combat);
+			return data;
 		} else if (res.status === 409) {
 			// Conflit de sauvegarde : recharger l'état réel du combat depuis le serveur.
 			const fresh = await fetch(`/api/combat/${SERVER_DATA.combat_id}`);
@@ -1837,6 +2091,7 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 		busy = false;
 		updateButtons(state);
 	}
+	return null;
 }
 
 // ─── End Overlay ──────────────────────────────────────────────────
@@ -2023,9 +2278,8 @@ syncViewSize();
 renderTokens();
 refreshBadgeTargets();
 updateCamera();
-updateAttackButtons(state);  // révèle les boutons cac/jet/tir équipés dès le chargement (sinon visibles qu'après la 1re action)
-renderQuickSorts();          // icônes des sorts épinglés (avant updateButtons qui règle leur état)
-renderQuickComps();          // icônes des compétences épinglées (idem)
+updateAttackButtons(state);  // aligne currentMode sur un mode réellement équipé
+renderSlots();               // grille de la barre d'action (avant updateButtons, qui règle l'état de chaque case)
 refreshTargetSelect();
 updateButtons(state);
 updateJoueur(activePlayer(state));

@@ -837,17 +837,41 @@
 		.sh-sort-uselbl { display: flex; align-items: center; gap: 3px; font-size: 0.75rem;
 			color: var(--muted); cursor: pointer; white-space: nowrap; }
 		.sh-sort-grim { font-size: 0.8rem; flex-shrink: 0; }
-		/* Épinglage en accès rapide (barre d'icônes en combat) : 📌 neutre, doré si actif. */
-		.sh-pin-btn {
-			background: transparent; border: 1px solid #6b5836; color: #cda349;
-			border-radius: 5px; padding: 2px 6px; font-size: 11px; cursor: pointer;
-			opacity: 0.55;
+		/* Affectation à une case de la barre de combat (cf. utils/slots_actions.py) :
+		   le sélecteur remplace l'ancien 📌, qui ne disait pas OÙ l'action atterrissait. */
+		.sh-slot-select {
+			background: #1a1a1a; color: #cda349; border: 1px solid #6b5836;
+			border-radius: 5px; padding: 2px 4px; font-size: 11px; cursor: pointer;
 		}
-		.sh-pin-btn:hover { background: #2e2510; opacity: 1; }
-		.sh-pin-btn.active {
-			opacity: 1; color: var(--accent-color); border-color: var(--accent-color);
-			background: rgba(255,215,0,0.08);
+		.sh-slot-select.active { color: var(--accent-color); border-color: var(--accent-color); }
+		/* Marque le second sélecteur d'un sort : la variante qui DÉPENSE les composants. */
+		.sh-compo-lbl { color: #b26bff; font-weight: bold; font-size: 12px; margin-left: 3px; }
+		/* Aperçu éditable de la barre de combat. ⚠️ Classes préfixées `sh-barre-` et NON
+		   `sh-slot-` : `.sh-slot` désigne déjà les emplacements d'ÉQUIPEMENT du paperdoll
+		   (cf. plus haut) — réutiliser ce nom ferait fuir aspect-ratio, curseur et
+		   police sur la silhouette.
+		   Même mise en page que l'écran de combat : wrap + case plafonnée en largeur,
+		   donc 10 par rangée en colonne étroite, davantage si la place le permet. */
+		.sh-barre-grid {
+			display: flex; flex-wrap: wrap; justify-content: center;
+			gap: 5px; margin: 8px 0;
 		}
+		.sh-barre-slot {
+			flex: 0 0 auto;
+			width: clamp(24px, calc((100% - 45px) / 10), 44px);
+			position: relative; aspect-ratio: 1;
+			display: flex; align-items: center; justify-content: center;
+			font-size: 1.1rem; line-height: 1; cursor: pointer;
+			border: 1px solid #555; border-radius: 8px; background: #2a2a2a; color: #eee;
+			touch-action: none; user-select: none;   /* le clic long doit pouvoir glisser */
+		}
+		.sh-barre-slot.empty { border-style: dashed; border-color: #3a3a3a; background: transparent; }
+		.sh-barre-slot.oblig { border-color: #6b5836; }
+		.sh-barre-slot.dragging { opacity: 0.5; transform: scale(1.12); z-index: 10; }
+		.sh-barre-slot.drag-over { border-color: var(--accent-color); background: #2e2510; }
+		.sh-barre-num { position: absolute; top: 1px; right: 3px; font-size: 9px; color: #777; font-weight: bold; }
+		.sh-barre-plus { position: absolute; bottom: 0; right: 3px; font-size: 10px; color: #b26bff; font-weight: bold; }
+		.sh-barre-hint { font-size: 0.75rem; color: var(--muted); }
 		.sh-relation { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 2px solid var(--border-color); }
 		.sh-relation.clickable { cursor: pointer; }
 		.sh-rel-portrait { width: 100%; height: 100%;  overflow: hidden; background: #333; border: 1px solid var(--border-color); flex-shrink: 0; }
@@ -1552,6 +1576,12 @@
 
 					<!-- ── COMPETENCES ── -->
 					<div class="sheet-panel" id="sh-competences"><div style="color:#2ed573; font-size:.85rem; float: right;">Points : <span id="sh-comp-points">{{ character.get("attribute_points", 0) }}</span></div>
+						{# Barre de combat : la disposition se compose ICI, au calme (le mode ⚙
+						   de l'écran de combat n'en est qu'un raccourci). Rendue 100 % client
+						   par _renderBarreSlots depuis le payload `slots`. #}
+						<div class="sh-section" style="margin-top:14px">🎯 Barre de combat</div>
+						<div class="sh-barre-grid" id="sh-slot-grid"></div>
+						<div class="sh-barre-hint">Clic long sur une case puis glisser pour échanger deux cases. Les actions ⚔ 🫳 🏃 se déplacent mais ne se retirent pas.</div>
 						{# Compétences : mêmes règles que les sorts, rendues 100 % côté client
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
@@ -3265,8 +3295,13 @@ function _refreshInventaire() {
 		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
 		const dropHtml = `<button class="sh-drop-btn" onclick="dropItem(${idx},'${item._id}')" title="Poser au sol">Poser</button>`;
 		const couperHtml = _estCoupable(item) ? _couperBtn(idx, item._id, 'sac') : '';
+		// Un consommable utilisable EN COMBAT peut prendre une case de la barre. Le slot
+		// vise le TYPE d'objet (item_id) : le sac bouge, la case reste — d'où le
+		// sélecteur sur la ligne et non sur l'exemplaire (l'index n'est pas persisté).
+		const assignable = _estConsommable(item) && _consosCombat.some(c => c.item_id === item._id);
 		const consoHtml = _estConsommable(item)
-			? `<button class="sh-drop-btn" onclick="consommerItem(${idx},'${item._id}',this)" title="Consommer">🍽️ Consommer</button>`
+			? (assignable ? _slotSelect('consommable', item._id) : '')
+			  + `<button class="sh-drop-btn" onclick="consommerItem(${idx},'${item._id}',this)" title="Consommer">🍽️ Consommer</button>`
 			: '';
 		return `<div class="sh-inv-item">
 			<span class="sh-inv-open" onclick="openItemDetail('sac',${idx})" title="Voir la fiche">${item.icon || '📦'}</span>
@@ -3750,7 +3785,146 @@ async function consommerItem(index, itemId, btn) {
 let _sorts            = {{ sorts | tojson | safe }};
 let _sortsApprenables = {{ sorts_apprenables | tojson | safe }};
 let _sortsMagies      = {{ sorts_magies | tojson | safe }};      // écoles pratiquées + achetables
-let _sortsEpingles    = {{ sorts_epingles | tojson | safe }};   // accès rapide combat (ids ordonnés)
+
+// ── Barre de combat : grille de slots (utils/slots_actions.py) ────────────────────
+// Une entrée par case ; `_barreSlots` remplace les deux anciennes listes d'épinglés, qui
+// disaient « en accès rapide » sans jamais dire À QUELLE PLACE.
+let _barreSlots      = {{ barre_slots | tojson | safe }};
+let _barreSlotsMax   = {{ barre_slots_max | tojson | safe }};
+let _consosCombat = {{ consommables | tojson | safe }};   // consommables assignables (effet instantané)
+
+// Case occupée par CETTE entrée, ou undefined. Pour un sort, `composants` fait partie de
+// l'identité : « Trait de feu » et « Trait de feu + » sont deux entrées distinctes, qui
+// peuvent occuper deux cases à la fois.
+function _caseDe(type, ref, composants) {
+	return _barreSlots.find(s => s.type === type && s.ref === ref
+		&& (composants === undefined || !!s.composants === composants));
+}
+
+// Options du sélecteur d'une entrée : « — » (non assignée) + les cases LIBRES, plus la
+// case courante. Une case occupée par une obligatoire n'est pas proposée : la déplacer
+// est un geste de la grille (échange), pas une affectation qui l'écraserait.
+function _slotOptions(type, ref, composants) {
+	const courante = _caseDe(type, ref, composants);
+	const opts = [`<option value="">—</option>`];
+	for (const s of _barreSlots) {
+		if (s.obligatoire) continue;
+		const estCourante = courante && s.position === courante.position;
+		if (s.type && !estCourante) continue;      // occupée par autre chose
+		opts.push(`<option value="${s.position}" ${estCourante ? 'selected' : ''}>${s.position}</option>`);
+	}
+	return { html: opts.join(''), assignee: !!courante };
+}
+// Sélecteur rendu à côté d'un sort / d'une compétence / d'un consommable.
+// `composants` : undefined hors sorts ; true/false pour distinguer les deux variantes.
+function _slotSelect(type, ref, composants, titre) {
+	const { html, assignee } = _slotOptions(type, ref, composants);
+	const arg = composants === undefined ? 'undefined' : String(composants);
+	return `<select class="sh-slot-select${assignee ? ' active' : ''}"
+		title="${titre || 'Case de la barre de combat'}"
+		onchange="affecterSlot('${type}', '${ref}', ${arg}, this)">${html}</select>`;
+}
+
+// Affectation depuis un sélecteur : vider l'ancienne case si l'on repasse à « — »,
+// sinon poser l'entrée à la position choisie (le serveur gère déplacement et échange).
+async function affecterSlot(type, ref, composants, sel) {
+	const position = sel.value;
+	const courante = _caseDe(type, ref, composants);
+	if (!position) {
+		if (!courante) return;
+		await _postSlots('api/slot_action', { position: courante.position, entree: null });
+	} else {
+		const entree = { type, ref };
+		if (composants !== undefined) entree.composants = composants;
+		await _postSlots('api/slot_action', { position: parseInt(position, 10), entree });
+	}
+}
+async function _deplacerSlot(source, cible) {
+	await _postSlots('api/slot_deplacer', { source, cible });
+}
+// Chemin d'écriture unique. Le serveur renvoie la barre RECALCULÉE (invariante des
+// obligatoires réparée) — on ne la reconstruit jamais côté client. `_actionBody` y
+// injecte le compagnon_id : configurer depuis la fiche d'un compagnon écrit sur SON doc.
+async function _postSlots(url, body) {
+	try {
+		const res = await fetch(url, {
+			method: 'POST', headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(_actionBody(body)),
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); _renderBarreSlots(); return; }
+		_barreSlots = data.slots || _barreSlots;
+		_renderBarreSlots();
+		_renderSorts(); _renderCompetences(); _refreshInventaire();
+	} catch (err) { console.error('Erreur slots', err); }
+}
+
+// ── Glisser-déposer par CLIC LONG (miroir de attacherDragLong côté combat) ──────────
+// Pointer Events plutôt que le drag & drop HTML5 : celui-ci ne fonctionne pas au doigt.
+// Un seul code pour la souris et le tactile.
+const _DRAG_DELAI_MS = 400;
+const _DRAG_TOLERANCE = 10;
+
+function _attacherDragLong(el, position, selecteur, onDrop) {
+	let timer = null, arme = false, depart = null, survolee = null;
+	const nettoyer = () => {
+		clearTimeout(timer); timer = null;
+		el.classList.remove('dragging');
+		if (survolee) survolee.classList.remove('drag-over');
+		survolee = null; arme = false; depart = null;
+	};
+	el.addEventListener('pointerdown', e => {
+		if (e.button !== undefined && e.button !== 0) return;
+		depart = { x: e.clientX, y: e.clientY };
+		timer = setTimeout(() => {
+			arme = true;
+			el.classList.add('dragging');
+			try { el.setPointerCapture(e.pointerId); } catch (_) {}
+		}, _DRAG_DELAI_MS);
+	});
+	el.addEventListener('pointermove', e => {
+		if (!depart) return;
+		if (!arme) {
+			// Trop de mouvement avant l'armement = défilement de la page, pas un appui long.
+			if (Math.hypot(e.clientX - depart.x, e.clientY - depart.y) > _DRAG_TOLERANCE) nettoyer();
+			return;
+		}
+		const sous = document.elementFromPoint(e.clientX, e.clientY);
+		const cible = sous && sous.closest(selecteur);
+		if (cible !== survolee) {
+			if (survolee) survolee.classList.remove('drag-over');
+			survolee = (cible && cible !== el) ? cible : null;
+			if (survolee) survolee.classList.add('drag-over');
+		}
+	});
+	el.addEventListener('pointerup', e => {
+		if (!arme) { nettoyer(); return; }
+		const sous = document.elementFromPoint(e.clientX, e.clientY);
+		const cible = sous && sous.closest(selecteur);
+		const dest = cible && cible !== el ? parseInt(cible.dataset.slot, 10) : null;
+		nettoyer();
+		if (dest && dest !== position) onDrop(position, dest);
+	});
+	el.addEventListener('pointercancel', nettoyer);
+}
+
+// Aperçu éditable de la barre : glisser-déposer par clic long (l'affectation passe par
+// les sélecteurs des listes) — c'est le seul geste capable de bouger une obligatoire.
+function _renderBarreSlots() {
+	const box = document.getElementById('sh-slot-grid');
+	if (!box) return;
+	box.innerHTML = _barreSlots.map(s => {
+		const cls = ['sh-barre-slot', s.type ? '' : 'empty', s.obligatoire ? 'oblig' : ''].filter(Boolean).join(' ');
+		const titre = s.type ? `${s.nom}${s.disponible ? '' : ' (indisponible)'}` : 'Emplacement libre';
+		// « + » : ce sort est réglé pour dépenser ses composants consommés.
+		const plus = (s.type === 'sort' && s.composants) ? '<span class="sh-barre-plus">+</span>' : '';
+		return `<div class="${cls}" data-slot="${s.position}" title="${titre.replace(/"/g, '&quot;')}"
+			style="${s.type && !s.disponible ? 'opacity:.4' : ''}">${s.icon || ''}<span class="sh-barre-num">${s.position}</span>${plus}</div>`;
+	}).join('');
+	box.querySelectorAll('.sh-barre-slot').forEach(el => {
+		_attacherDragLong(el, parseInt(el.dataset.slot, 10), '.sh-barre-slot', _deplacerSlot);
+	});
+}
 
 function _sortEffetsLabel(e) {
 	if (!e) return '';
@@ -3781,10 +3955,15 @@ function _renderSorts(list) {
 			`<span class="sh-sort-compo${c.disponible ? '' : ' off'}" title="${c.consomme ? 'Consommé au lancement' : 'Catalyseur (non consommé, il suffit de le porter)'}">${c.consomme ? '⚗️' : '💎'} ${c.icon || ''} ${c.nom}${_sortEffetsLabel(c.bonus) ? ' → ' + _sortEffetsLabel(c.bonus) : ''}</span>`
 		).join('');
 		const hasCompo = (s.composants || []).some(c => c.disponible);
-		const pinned = _sortsEpingles.includes(s.sort_id);
-		const pin = `<button type="button" class="sh-pin-btn${pinned ? ' active' : ''}"
-			title="${pinned ? 'Retirer de l\'accès rapide (barre de combat)' : 'Épingler en accès rapide (barre de combat)'}"
-			onclick="epinglerSort('${s.sort_id}', this)">📌</button>`;
+		// Deux cases possibles pour un sort à composants CONSOMMABLES : une qui les
+		// dépense (« + »), une qui les économise. Les catalyseurs partent toujours, ils
+		// ne créent donc pas de variante. Sans composant consommable, un seul sélecteur.
+		const aCompoConso = (s.composants || []).some(c => c.consomme);
+		const pin = _slotSelect('sort', s.sort_id, false, 'Case de la barre — sans dépenser de composant')
+			+ (aCompoConso
+				? '<span class="sh-compo-lbl" title="Variante qui dépense les composants">+</span>'
+				  + _slotSelect('sort', s.sort_id, true, 'Case de la barre — en dépensant les composants')
+				: '');
 		const actions = pin + (s.lancable
 			? `<label class="sh-sort-uselbl" title="Engager les composants disponibles (renforce le sort ; les consommés sont dépensés)"><input type="checkbox" id="sortchk-${_sortDomId(s.sort_id)}" checked ${hasCompo ? '' : 'disabled'}>compo</label>
 			   <button type="button" class="sh-drop-btn" onclick="lancerSort('${s.sort_id}', this)">Lancer</button>`
@@ -3953,7 +4132,6 @@ async function apprendreSort(sortId, btn) {
 // client, resynchronisées par les réponses de utiliser_competence / apprendre_competence.
 let _competences            = {{ competences | tojson | safe }};
 let _competencesApprenables = {{ competences_apprenables | tojson | safe }};
-let _competencesEpinglees   = {{ competences_epinglees | tojson | safe }};   // accès rapide combat (ids ordonnés)
 
 function _renderCompetences(list) {
 	if (Array.isArray(list)) _competences = list;
@@ -3964,11 +4142,9 @@ function _renderCompetences(list) {
 		return;
 	}
 	box.innerHTML = _competences.map(c => {
-		// Une passive n'a ni action ni pin : son bonus est permanent (inclus dans les dérivées).
-		const pinned = _competencesEpinglees.includes(c.competence_id);
-		const pin = c.mode === 'active' ? `<button type="button" class="sh-pin-btn${pinned ? ' active' : ''}"
-			title="${pinned ? 'Retirer de l\'accès rapide (barre de combat)' : 'Épingler en accès rapide (barre de combat)'}"
-			onclick="epinglerCompetence('${c.competence_id}', this)">📌</button>` : '';
+		// Une passive n'a ni action ni case de barre : son bonus est permanent (inclus
+		// dans les dérivées), il n'y a rien à déclencher.
+		const pin = c.mode === 'active' ? _slotSelect('competence', c.competence_id) : '';
 		const actions = c.mode === 'passive'
 			? '<span class="sh-skill-lvl" title="Bonus permanent, déjà inclus dans vos caractéristiques">🛡 passive</span>'
 			: pin + (c.utilisable
@@ -3986,22 +4162,6 @@ function _renderCompetences(list) {
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;
 	}).join('');
-}
-
-// Toggle épinglage d'une compétence active en accès rapide (persisté sur le personnage).
-async function epinglerCompetence(competenceId, btn) {
-	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
-	const epingle = !_competencesEpinglees.includes(competenceId);
-	try {
-		const res = await fetch('api/epingler_competence', {
-			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify(_actionBody({ competence_id: competenceId, epingle }))
-		});
-		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
-		_competencesEpinglees = data.competences_epinglees || [];
-		_renderCompetences(_competences);   // ré-affiche les états 📌
-	} catch(err) { console.error('Erreur épinglage compétence', err); if (btn) btn.disabled = false; }
 }
 
 function _renderCompetencesApprenables(list) {
@@ -4070,22 +4230,6 @@ async function apprendreCompetence(competenceId, btn) {
 		const a = data.appris || {};
 		showToast(`${a.icon || '⚡'} ${a.nom || 'Compétence'} apprise !`);
 	} catch(err) { console.error('Erreur apprentissage compétence', err); if (btn) btn.disabled = false; }
-}
-
-// Toggle épinglage d'un sort en accès rapide (persisté sur le personnage).
-async function epinglerSort(sortId, btn) {
-	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
-	const epingle = !_sortsEpingles.includes(sortId);
-	try {
-		const res = await fetch('api/epingler_sort', {
-			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify(_actionBody({ sort_id: sortId, epingle }))
-		});
-		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
-		_sortsEpingles = data.sorts_epingles || [];
-		_renderSorts(_sorts);   // ré-affiche les états 📌
-	} catch(err) { console.error('Erreur épinglage', err); if (btn) btn.disabled = false; }
 }
 
 async function dropItem(index, itemId) {
@@ -4187,6 +4331,7 @@ _renderSortsMagies();
 _renderSortsApprenables();
 _renderCompetences();
 _renderCompetencesApprenables();
+_renderBarreSlots();
 
 // ── Vente au marchand ────────────────────────────────────────────────
 function formatPrix(prix) {
@@ -5587,6 +5732,7 @@ function _sheetRendreTout() {
 	_renderSortsApprenables();
 	_renderCompetences();
 	_renderCompetencesApprenables();
+	_renderBarreSlots();
 	_syncPoints(_attributePoints);
 }
 
@@ -5609,8 +5755,8 @@ async function openCompagnonSheet(avId) {
 			xpTotal: _xpTotal, niveau: _niveau, xpNivPrev: _xpNivPrev, xpNivNext: _xpNivNext,
 			raceNom: _raceNom, vocId: _vocId, sexe: _sexe,
 			sorts: _sorts, sortsApprenables: _sortsApprenables, sortsMagies: _sortsMagies,
-			sortsEpingles: _sortsEpingles, competences: _competences,
-			competencesApprenables: _competencesApprenables, competencesEpinglees: _competencesEpinglees,
+			competences: _competences, competencesApprenables: _competencesApprenables,
+			barreSlots: _barreSlots, consosCombat: _consosCombat,
 			htmlGauche: els.gauche ? els.gauche.innerHTML : '',
 			imgGauche: els.imgGauche ? els.imgGauche.getAttribute('src') : '',
 			// La CARTE de la fiche n'est pas snapshottée : elle se reconstruit du joueur
@@ -5630,9 +5776,10 @@ async function openCompagnonSheet(avId) {
 		_xpNivPrev = p.xp_niv_prev; _xpNivNext = p.xp_niv_next;
 		_raceNom = p.race; _vocId = p.voc; _sexe = p.sex;
 		_sorts = p.sorts; _sortsApprenables = p.sorts_apprenables; _sortsMagies = p.sorts_magies;
-		_sortsEpingles = p.sorts_epingles; _competences = p.competences;
-		_competencesApprenables = p.competences_apprenables;
-		_competencesEpinglees = p.competences_epinglees;
+		_competences = p.competences; _competencesApprenables = p.competences_apprenables;
+		// La barre de combat appartient au PORTEUR : configurer depuis la fiche d'un
+		// compagnon écrit sur SON doc (chokepoint `_acteur` côté serveur).
+		_barreSlots = p.barre_slots || _barreSlots; _consosCombat = p.consommables || [];
 
 		document.body.classList.add('sheet-compagnon');
 		_applySheetIdentite(p);
@@ -5663,9 +5810,8 @@ function closeCompagnonSheet() {
 		_xpNivPrev = s.xpNivPrev; _xpNivNext = s.xpNivNext;
 		_raceNom = s.raceNom; _vocId = s.vocId; _sexe = s.sexe;
 		_sorts = s.sorts; _sortsApprenables = s.sortsApprenables; _sortsMagies = s.sortsMagies;
-		_sortsEpingles = s.sortsEpingles; _competences = s.competences;
-		_competencesApprenables = s.competencesApprenables;
-		_competencesEpinglees = s.competencesEpinglees;
+		_competences = s.competences; _competencesApprenables = s.competencesApprenables;
+		_barreSlots = s.barreSlots; _consosCombat = s.consosCombat;
 
 		const els = _sheetIdentiteEls();
 		if (els.gauche) els.gauche.innerHTML = s.htmlGauche;

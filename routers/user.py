@@ -32,6 +32,7 @@ from utils import bois
 from utils import consommables
 from utils import sorts as sorts_util
 from utils import competences as competences_util
+from utils import slots_actions
 from utils import focalisation
 from utils import intro
 from utils import transport
@@ -1309,61 +1310,51 @@ async def monter_magie(
 	}
 
 
-@user_router.post("/epingler_sort")
-async def epingler_sort(
+@user_router.post("/slot_action")
+async def slot_action(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Épingle/désépingle un sort connu en accès rapide (barre d'icônes en combat).
-	Matérialise d'abord la liste effective (défaut = premier sort connu auto-épinglé,
-	cf. `sorts_epingles_effectifs`) pour que le choix du joueur reste explicite."""
+	"""Pose (ou vide) une action dans une case de la barre de combat.
+
+	Corps : `{position, entree: {type, ref} | null, compagnon_id?}` — `entree: null`
+	vide la case. Les trois actions obligatoires (mêlée, ramasser, fuir) ne se vident
+	pas : elles se DÉPLACENT (`/slot_deplacer`), d'où le 422 renvoyé par `vider_slot`."""
 	character, _principal = _acteur(current_user, body)
 
-	sort_id = body.get("sort_id")
-	if sort_id not in (character.get("sorts_connus") or []):
-		raise HTTPException(status_code=422, detail="Sort inconnu du personnage")
+	try:
+		entree = body.get("entree")
+		if entree is None:
+			slots_actions.vider_slot(character, body.get("position"), get_doc)
+		else:
+			slots_actions.poser_slot(character, body.get("position"), entree, get_doc)
+	except ValueError as err:
+		raise HTTPException(status_code=422, detail=str(err))
 
-	epingles = list(sorts_util.sorts_epingles_effectifs(character))
-	if bool(body.get("epingle")):
-		if sort_id not in epingles:
-			epingles.append(sort_id)
-	else:
-		epingles = [s for s in epingles if s != sort_id]
-	character["sorts_epingles"] = epingles
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
-	return {"sorts_epingles": epingles}
+	return {"slots": slots_actions.slots_payload(character, get_doc)}
 
 
-@user_router.post("/epingler_competence")
-async def epingler_competence(
+@user_router.post("/slot_deplacer")
+async def slot_deplacer(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Épingle/désépingle une compétence ACTIVE connue en accès rapide (barre d'icônes
-	en combat) — miroir d'epingler_sort. Matérialise d'abord la liste effective (défaut
-	= première active connue auto-épinglée, cf. competences_epinglees_effectives)."""
+	"""Échange deux cases de la barre (glisser-déposer). Seul geste capable de bouger une
+	action obligatoire — l'échange garantit qu'aucune ne peut être perdue au passage."""
 	character, _principal = _acteur(current_user, body)
 
-	competence_id = body.get("competence_id")
-	if competence_id not in (character.get("competences_connues") or []):
-		raise HTTPException(status_code=422, detail="Compétence inconnue du personnage")
-	comp = competences_util.normaliser_competence(get_doc(competence_id))
-	if not comp or not competences_util.est_active(comp):
-		raise HTTPException(status_code=422, detail="Seule une compétence active s'épingle")
+	try:
+		slots_actions.deplacer_slot(character, body.get("source"), body.get("cible"), get_doc)
+	except ValueError as err:
+		raise HTTPException(status_code=422, detail=str(err))
 
-	epingles = list(competences_util.competences_epinglees_effectives(character, get_doc))
-	if bool(body.get("epingle")):
-		if competence_id not in epingles:
-			epingles.append(competence_id)
-	else:
-		epingles = [c for c in epingles if c != competence_id]
-	character["competences_epinglees"] = epingles
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
-	return {"competences_epinglees": epingles}
+	return {"slots": slots_actions.slots_payload(character, get_doc)}
 
 
 @user_router.post("/recolter")
