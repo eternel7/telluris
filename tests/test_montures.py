@@ -74,7 +74,7 @@ def monde(monkeypatch):
 	monkeypatch.setattr(characters_util, "get_doc", get_doc_fn)
 	monkeypatch.setattr(character_stats, "MONTURE_GROUPE_MAX", 2)
 	monkeypatch.setattr(character_stats, "MONTURE_CHARGE_MULT_DEFAUT", 3.0)
-	monkeypatch.setattr(character_stats, "MONTURE_PRIX_DEFAUT", 200000)
+	monkeypatch.setattr(character_stats, "MONTURE_PRIX_DEFAUT", 2000)
 	return docs
 
 

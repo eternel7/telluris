@@ -265,7 +265,7 @@ AFFINITE_REDUC_PART: int = 10
 # comme un compagnon.
 MONTURE_GROUPE_MAX: int = 2
 MONTURE_CHARGE_MULT_DEFAUT: float = 3.0
-MONTURE_PRIX_DEFAUT: int = 200000
+MONTURE_PRIX_DEFAUT: int = 2000
 MONTURE_MORT_DEFINITIVE: bool = True
 
 # ── Récolte & découpe du bois ────────────────────────────────────────────────────
