@@ -507,6 +507,16 @@ def groupe_effectif(character: dict, get_doc_fn=None) -> list:
 	return out
 
 
+def porteurs_effectifs(character: dict, get_doc_fn=None) -> list:
+	"""Tous ceux qui portent des objets pour le joueur : compagnons PUIS montures.
+	SOURCE UNIQUE de « qui porte pour moi » — la preuve d'appartenance est la même des
+	deux côtés (statut + lien vers CE personnage : `embauche`/`embauche_par` pour un
+	compagnon, `acquise`/`acquise_par` pour une monture). L'ordre compte : le client
+	range les montures en fin de liste."""
+	return (groupe_effectif(character, get_doc_fn)
+			+ montures.montures_effectives(character, get_doc_fn))
+
+
 # ── Inventaire du groupe : transfert d'objets ────────────────────────────────────
 
 def _localiser_ref(refs: list, idx, item_id) -> int | None:

@@ -125,9 +125,13 @@ def test_proprietes_lues_sur_l_espece(monde):
 
 
 def test_replis_si_proprietes_vides(monde):
-	"""Une espèce non encore peuplée reste utilisable : replis world-vars."""
-	assert montures.charge_mult(POULAIN) == 3.0
-	assert montures.prix_de(POULAIN) == 200000
+	"""Une espèce non encore peuplée reste utilisable : replis world-vars.
+
+	⚠️ Le prix attendu est LU sur la world-var (que la fixture monkeypatche) et non écrit
+	en dur : c'est un réglage d'équilibrage qui bouge, et le figer ici ferait échouer le
+	test à chaque retouche du tarif."""
+	assert montures.charge_mult(POULAIN) == character_stats.MONTURE_CHARGE_MULT_DEFAUT
+	assert montures.prix_de(POULAIN) == character_stats.MONTURE_PRIX_DEFAUT
 
 
 def test_charge_mult_plancher_a_un(monde):
@@ -136,8 +140,8 @@ def test_charge_mult_plancher_a_un(monde):
 
 
 def test_proprietes_illisibles_tombent_sur_le_repli(monde):
-	assert montures.charge_mult({"proprietes": {"charge_mult": "beaucoup"}}) == 3.0
-	assert montures.prix_de({"proprietes": {"prix_cuivre": None}}) == 200000
+	assert montures.charge_mult({"proprietes": {"charge_mult": "beaucoup"}}) == character_stats.MONTURE_CHARGE_MULT_DEFAUT
+	assert montures.prix_de({"proprietes": {"prix_cuivre": None}}) == character_stats.MONTURE_PRIX_DEFAUT
 
 
 # ── Création ─────────────────────────────────────────────────────────────────────
@@ -243,6 +247,26 @@ def test_montures_effectives_filtre_appartenance(monde):
 	p["montures"] = [mienne["_id"], autrui["_id"], morte["_id"], "monture:fantome"]
 
 	assert [m["_id"] for m in montures.montures_effectives(p)] == [mienne["_id"]]
+
+
+def test_porteurs_effectifs_compagnons_puis_montures(monde):
+	"""Source unique de « qui porte pour moi » : l'ordre compte (le client range les
+	montures en fin de liste) et les mêmes filtres d'appartenance s'appliquent aux deux."""
+	p = perso()
+	compagnon = {"_id": "aventurier:c1", "type": "aventurier", "prenom": "Alric",
+				 "statut": "embauche", "embauche_par": p["_id"]}
+	parti = {"_id": "aventurier:c2", "type": "aventurier", "prenom": "Bran",
+			 "statut": "parti", "embauche_par": p["_id"]}
+	mienne = montures.creer_monture(ANE, ETABLE, p)
+	relachee = montures.creer_monture(CHEVAL, ETABLE, p)
+	relachee["statut"] = "relachee"
+	for d in (compagnon, parti, mienne, relachee):
+		monde[d["_id"]] = d
+	p["groupe"] = [compagnon["_id"], parti["_id"]]
+	p["montures"] = [mienne["_id"], relachee["_id"]]
+
+	ids = [x["_id"] for x in recrutement.porteurs_effectifs(p, monde.get)]
+	assert ids == [compagnon["_id"], mienne["_id"]]
 
 
 def test_peut_acquerir_plafond_avant_bourse(monde):

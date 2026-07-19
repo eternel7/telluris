@@ -654,13 +654,15 @@ def _vitals_payload(character: dict) -> dict:
 
 def _acteur(current_user, body: dict) -> tuple[dict, dict]:
 	"""Résout le PORTEUR d'une action de fiche : le personnage sélectionné, ou l'un de ses
-	compagnons si le corps porte un `compagnon_id`. Renvoie `(porteur, principal)` — les
-	deux sont le MÊME dict hors mode compagnon (un seul `save_doc` suffit alors).
+	compagnons — ou l'une de ses montures — si le corps porte un `compagnon_id`. Renvoie
+	`(porteur, principal)` — les deux sont le MÊME dict hors mode compagnon (un seul
+	`save_doc` suffit alors).
 
-	Un doc `aventurier:*` est un miroir du character (mêmes champs), donc tous les helpers
-	de ce module s'y appliquent tels quels — c'est déjà ce que fait `_apply_world_turn_groupe`
-	et, en combat, `_actor_character_id`. Il n'a en revanche PAS de `user_id` : l'unique
-	preuve d'appartenance est `groupe_effectif` (statut « embauche » + `embauche_par`)."""
+	Un doc `aventurier:*` comme un doc `monture:*` est un miroir du character (mêmes champs),
+	donc tous les helpers de ce module s'y appliquent tels quels — c'est déjà ce que fait
+	`_apply_world_turn_groupe` et, en combat, `_actor_character_id`. Ni l'un ni l'autre n'a
+	de `user_id` : l'unique preuve d'appartenance est `porteurs_effectifs` (statut + lien
+	vers CE personnage — « embauche »/`embauche_par`, « acquise »/`acquise_par`)."""
 	principal = get_selected_character(current_user)
 	if not principal:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
@@ -670,11 +672,11 @@ def _acteur(current_user, body: dict) -> tuple[dict, dict]:
 		return principal, principal
 
 	av = next(
-		(a for a in recrutement.groupe_effectif(principal, get_doc) if a.get("_id") == compagnon_id),
+		(a for a in recrutement.porteurs_effectifs(principal, get_doc) if a.get("_id") == compagnon_id),
 		None,
 	)
 	if av is None:
-		raise HTTPException(status_code=403, detail="Ce compagnon ne fait pas partie de votre groupe")
+		raise HTTPException(status_code=403, detail="Ce porteur ne fait pas partie de votre groupe")
 	return av, principal
 
 
@@ -1489,20 +1491,24 @@ def _find_ref(refs: list, idx, item_id):
 
 
 def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None = None,
-						compagnons: list | None = None) -> list:
+						porteurs_tiers: list | None = None) -> list:
 	"""Liste des items que le marchand du lieu achète, **agrégée sur toute l'expédition** :
-	le sac du personnage principal PUIS celui de chaque compagnon. Chaque entrée porte son
-	prix courant (négocié ou base pondéré relation) et sa fourchette min–max. Adressée par
-	`index` (dans le sac de SON porteur, vérifié par item_id : deux exemplaires peuvent
-	peser/valoir différemment) + `compagnon_id` (None = principal → le porteur de l'objet).
-	La relation/le marchandage restent ceux du principal : c'est lui qui traite et encaisse."""
-	# (compagnon_id, doc, nom affiché) — None pour le principal (objets non badgés côté UI).
-	porteurs = [(None, character, "")]
-	for c in (compagnons or []):
-		porteurs.append((c.get("_id"), c, c.get("prenom") or c.get("nom") or "Compagnon"))
+	le sac du personnage principal PUIS celui de chaque porteur — compagnon OU monture (une
+	bête de somme est là pour rapporter du butin lourd : ce qu'elle porte doit être vendable
+	sans transfert préalable). Chaque entrée porte son prix courant (négocié ou base pondéré
+	relation) et sa fourchette min–max. Adressée par `index` (dans le sac de SON porteur,
+	vérifié par item_id : deux exemplaires peuvent peser/valoir différemment) +
+	`compagnon_id` (None = principal → le porteur de l'objet). La relation/le marchandage
+	restent ceux du principal : c'est lui qui traite et encaisse."""
+	# (compagnon_id, doc, nom affiché, icône) — None pour le principal (objets non badgés
+	# côté UI). Une monture n'a pas de `prenom`, seulement un `nom`.
+	porteurs = [(None, character, "", "")]
+	for c in (porteurs_tiers or []):
+		icon = "🐴" if montures.est_monture(c) else "👤"
+		porteurs.append((c.get("_id"), c, c.get("prenom") or c.get("nom") or "Porteur", icon))
 
 	vendables = []
-	for compagnon_id, porteur, nom in porteurs:
+	for compagnon_id, porteur, nom, porteur_icon in porteurs:
 		for idx, ref in enumerate(porteur.get("inventaire", [])):
 			item = resolve_item_ref(ref)
 			if not item or not lieu_buys(lieu_doc, item):
@@ -1516,6 +1522,7 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 				"index": idx,
 				"compagnon_id": compagnon_id,
 				"porteur_nom": nom,
+				"porteur_icon": porteur_icon,
 				"item_id": item_id,
 				"nom": item.get("nom"),
 				"icon": item.get("icon"),
@@ -1540,10 +1547,10 @@ async def marchand_quotes(
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 	lieu_doc = _current_lieu_doc(character)
 	relation = get_relation(character, lieu_doc)
-	compagnons = recrutement.groupe_effectif(character, get_doc)
+	porteurs = recrutement.porteurs_effectifs(character, get_doc)
 	return {
 		"lieu_label": (lieu_doc or {}).get("label"),
-		"vendables": _marchand_vendables(character, lieu_doc, relation, compagnons),
+		"vendables": _marchand_vendables(character, lieu_doc, relation, porteurs),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"cha_marchand": merchant_cha(lieu_doc),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
@@ -1603,10 +1610,10 @@ async def sell_item(
 	_save_acteur(porteur, principal)
 	save_doc(lieu_doc)  # best-effort : le stock du lieu est une commodité monde
 
-	compagnons = recrutement.groupe_effectif(principal, get_doc)
+	porteurs = recrutement.porteurs_effectifs(principal, get_doc)
 	payload = _inventory_payload(principal)
 	payload["purse"] = purse
-	payload["vendables"] = _marchand_vendables(principal, lieu_doc, relation, compagnons)
+	payload["vendables"] = _marchand_vendables(principal, lieu_doc, relation, porteurs)
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
 	payload["vendu"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
 	payload["relation"] = relation_value(relation)
@@ -1666,7 +1673,7 @@ async def buy_item(
 
 	payload = _inventory_payload(character)
 	payload["purse"] = purse
-	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation, recrutement.groupe_effectif(character, get_doc))
+	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation, recrutement.porteurs_effectifs(character, get_doc))
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
 	payload["achete"] = {"nom": item.get("nom"), "prix": cuivre_to_purse(prix)}
 	payload["relation"] = relation_value(relation)

@@ -487,7 +487,8 @@
 			margin-left: auto;
 		}
 		.sh-marchander-btn:disabled { opacity: .4; cursor: not-allowed; }
-		/* Badge « objet d'un compagnon » dans la liste de vente (biens mis en commun). */
+		/* Badge « objet d'un compagnon ou d'une monture » dans la liste de vente
+		   (biens mis en commun ; l'icône vient du serveur, cf. `porteur_icon`). */
 		.sell-owner {
 			margin-left: 6px; padding: 0 6px; border-radius: 8px;
 			font-size: 0.72rem; color: #cbb98a;
@@ -3634,7 +3635,7 @@ function openMarchandDetail(sens, arrIdx) {
 function _renderMarchandDetail(st) {
 	const it = st.item;
 	let html = `<h3>${it.icon || '📦'} ${it.nom || '—'}</h3>`;
-	if (it.compagnon_id) html += `<div class="item-cmp-slotsel"><span>Porteur :</span><strong>👤 ${it.porteur_nom || 'Compagnon'}</strong></div>`;
+	if (it.compagnon_id) html += `<div class="item-cmp-slotsel"><span>Porteur :</span><strong>${it.porteur_icon || '👤'} ${it.porteur_nom || 'Porteur'}</strong></div>`;
 	if (it.prix) html += `<div class="item-cmp-slotsel"><span>Prix :</span><strong>${it.negocie ? '🤝 ' : ''}${formatPrix(it.prix)}</strong></div>`;
 	if (st.slots.length) {
 		const equipped = _slots[st.slot] || null;
@@ -4387,8 +4388,8 @@ function updateRelationBadge() {
 	el.textContent = '🤝 Relation : ' + r + (isMarchBlocked() ? ' · marchandage bloqué (~' + blocRemainingMin() + ' min)' : '');
 }
 
-// Sérialise un compagnon_id en argument d'onclick : `'aventurier:xxx'` ou le littéral null
-// (objet du personnage principal).
+// Sérialise l'id du PORTEUR en argument d'onclick — compagnon (`'aventurier:xxx'`) ou
+// monture (`'monture:xxx'`) —, ou le littéral null (objet du personnage principal).
 function _cgArg(id) { return id ? `'${id}'` : 'null'; }
 
 function marchBtn(index, itemId, sens, compagnonId) {
@@ -4416,7 +4417,7 @@ function renderSellList(data) {
 	}
 	list.innerHTML = _sortedOrder(vendables, _sellSort).map(idx => {
 		const v = vendables[idx];
-		const owner = v.compagnon_id ? `<span class="sell-owner" title="Objet de ${v.porteur_nom}">👤 ${v.porteur_nom}</span>` : '';
+		const owner = v.compagnon_id ? `<span class="sell-owner" title="Objet de ${v.porteur_nom}">${v.porteur_icon || '👤'} ${v.porteur_nom}</span>` : '';
 		return `<li class="sh-inv-item">
 		<span class="sh-inv-open" onclick="openMarchandDetail('vente',${idx})" title="Voir la fiche">${v.icon || '📦'}</span>
 		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('vente',${idx})" title="Voir la fiche">${v.nom || '—'}${owner}</span>

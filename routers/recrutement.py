@@ -248,10 +248,8 @@ def _compagnon(character: dict, av_id: str) -> dict:
 
 
 def _porteurs_du_groupe(character: dict) -> list:
-	"""Tous ceux qui peuvent porter un objet pour le joueur : compagnons PUIS montures.
-	L'ordre compte — le client range les montures en fin de liste."""
-	return (recrutement.groupe_effectif(character, get_doc)
-			+ montures.montures_effectives(character, get_doc))
+	"""Tous ceux qui peuvent porter un objet pour le joueur : compagnons PUIS montures."""
+	return recrutement.porteurs_effectifs(character, get_doc)
 
 
 def _porteur_du_groupe(character: dict, porteur_id: str) -> dict:
