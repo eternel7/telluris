@@ -10,3 +10,7 @@ Thumbs.db
 /.env
 __pycache__
 /item.json
+
+# Node : dépendances de test uniquement (jsdom). package.json / package-lock.json, eux,
+# restent SUIVIS — ce sont eux qui permettent de reconstituer node_modules (npm install).
+node_modules/
