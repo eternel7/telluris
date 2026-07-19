@@ -30,6 +30,7 @@
 			--border-color: #4a4a5a;
 			--accent-color: #ffd700;
 			--text-color: #e0e0e0;
+			--text-card-color: #aaa;
 			--btn-bg: #3a3a4a;
 			--inv-row-h: 26px;
 		}
@@ -336,7 +337,7 @@
 		}
 		.zoom-bar .z-icon {
 			color: var(--muted);
-			font-size: 11px;
+			font-size: 12px;
 			user-select: none;
 		}
 		.zoom-slider {
@@ -377,7 +378,7 @@
 			min-width: 0;
 		}
 		.char-name { font-weight: bold; color: #ff4757; font-size: 16px; margin-bottom: 2px; }
-		.char-class { color: #aaa; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+		.char-class { color: var(--text-card-color, #aaa); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
 
 		/* ── Emplacements libres de la carte (part de butin, spécialité, boutons…) ─────
 		   Vides = invisibles : une carte sans pied ni actions (sidebar, fiche) ne montre rien. */
@@ -467,7 +468,7 @@
 		.board-panel .sh-inv-item:last-child { border-bottom: none; }
 		.sell-prix { font-weight: bold; color: var(--accent-color); white-space: nowrap; }
 		.sell-empty { opacity: .7; padding: 12px 0; }
-		.q-desc { display: block; white-space: normal; color: #9a8a66; font-size: .85rem; margin: 2px 0; }
+		.q-desc { display: block; white-space: normal; color: var(--text-card-color, #aaa); font-size: .85rem; margin: 2px 0; }
 		.sell-relation {
 			display: flex;
 			align-items: center;
@@ -652,13 +653,13 @@
 		#charge-fill { width: 0%; transition: width .15s ease, background .15s ease; }
 		#charge-fill.over-half { background: linear-gradient(90deg, #a86a2e 0%, #e0902f 100%); }
 		#charge-fill.over-max  { background: linear-gradient(90deg, #a83232 0%, #e04a4a 100%); }
-		.sh-charge-label { font-size: 11px; color: #c9b27a; margin-top: 3px; min-height: 14px; }
+		.sh-charge-label { font-size: 12px; color: #c9b27a; margin-top: 3px; min-height: 14px; }
 		.sh-charge-label .warn { color: #e0902f; }
 		.sh-charge-label .err  { color: #e04a4a; font-weight: bold; }
-		.sh-inv-poids { color: #9a8a66; font-size: 11px; margin: 0 4px; white-space: nowrap; }
+		.sh-inv-poids { color: #9a8a66; font-size: 12px; margin: 0 4px; white-space: nowrap; }
 		.sh-drop-btn, .sh-pickup-btn {
 			background: transparent; border: 1px solid #6b5836; color: #cda349;
-			border-radius: 5px; padding: 2px 8px; font-size: 11px; cursor: pointer;
+			border-radius: 5px; padding: 2px 8px; font-size: 12px; cursor: pointer;
 		}
 		.sh-drop-btn:hover, .sh-pickup-btn:hover { background: #2e2510; }
 		/* Mise en exergue dorée PARTAGÉE (accent) : bouton « Terminer » d'une quête complète,
@@ -1817,14 +1818,25 @@
 		.mnt-offres { display: flex; flex-direction: column; gap: .5rem; }
 		.mnt-offre {
 			display: flex; align-items: center; gap: .75rem; padding: .5rem;
-			border: 1px solid var(--border-color, #6b5836); border-radius: 6px;
+			border-radius: 6px;  background: rgba(255, 255, 255, 0.03);
+			backdrop-filter: blur(10px);
+			border: 1px solid var(--border-color, #6b5836);
+			box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 15px;
+			padding: 12px 16px;
+			transition: transform 0.2s, background 0.2s;
 		}
 		.mnt-offre-img {
-			width: 84px; height: 84px; object-fit: contain; flex: 0 0 auto;
+			width: 120px;
+			height: auto;
+			filter: drop-shadow(rgba(255, 255, 255, 0.2) 0px 0px 8px) brightness(1.1) contrast(1.1);
+			transition: transform 0.3s, filter 0.3s;
+			cursor: pointer;
+			object-fit: contain; flex: 0 0 auto;
 		}
 		.mnt-offre-txt { display: flex; flex-direction: column; gap: .15rem; flex: 1 1 auto; }
 		@media (max-width: 720px) {
 			.mnt-offre { flex-wrap: wrap; }
+			.mnt-offre-img { display: block; margin-left: auto; margin-right: auto; }
 			.mnt-offre-txt { flex-basis: 100%; }
 		}
 		/* Fiche d'un compagnon : les onglets propres au personnage principal disparaissent
@@ -1850,8 +1862,18 @@
 		.pnj-dialogue { min-width: 0; }
 		.pnj-ambiance { font-style: italic; opacity: .85; font-size: .9rem; margin-bottom: .6rem; }
 		#pnj-noeud-texte {
-			margin: 0 0 .6rem; padding: .8rem 1rem; border-radius: 8px;
-			background: rgba(0, 0, 0, .18); line-height: 1.45;
+			font-size: 1.1rem;
+			line-height: 1.7;
+			color: rgb(240, 230, 210);
+			max-width: 65ch;
+			text-shadow: rgba(0, 0, 0, 0.8) 1px 1px 2px;
+			letter-spacing: 0.02em;
+			font-family: "EB Garamond", Cinzel, serif;
+			background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+			border-left: 3px solid rgb(205, 163, 73);
+			padding: 1.5rem 2rem;
+			border-radius: 0px 8px 8px 0px;
+			margin-bottom: 1rem;
 		}
 		@media (max-width: 760px) {
 			.pnj-corps { grid-template-columns: 1fr; gap: 1rem; }
