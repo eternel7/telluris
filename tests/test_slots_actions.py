@@ -232,8 +232,9 @@ def test_poser_un_sort_dans_une_case_libre():
 
 def test_poser_une_obligatoire_ailleurs_la_deplace_sans_dupliquer():
     perso = _perso(slots_actions=[CAC, RAMASSER, FUIR])
-    slots = sa.poser_slot(perso, 20, CAC, get_doc)
-    assert slots[19] == CAC
+    derniere = sa.slots_max()          # jamais un littéral : COMBAT_SLOTS_MAX est réglable
+    slots = sa.poser_slot(perso, derniere, CAC, get_doc)
+    assert slots[derniere - 1] == CAC
     assert slots[0] is None            # l'ancienne case s'est libérée
     assert slots.count(CAC) == 1
 

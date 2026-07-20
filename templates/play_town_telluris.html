@@ -1,6 +1,9 @@
 {# Carte de personnage : source unique du markup, partagée par la sidebar, la fiche, la liste
    du groupe et le board de recrutement (les deux dernières la clonent depuis <template>). #}
 {% import "part-character-card.html" as cards %}
+{# Barre de slots : CSS partagé avec l'écran de combat (macro paramétrée par les sélecteurs,
+   les deux pages ne portant pas les mêmes noms de classes). #}
+{% import "part-slot-bar-css.html" as slotbar %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -857,32 +860,13 @@
 		/* Aperçu éditable de la barre de combat. ⚠️ Classes préfixées `sh-barre-` et NON
 		   `sh-slot-` : `.sh-slot` désigne déjà les emplacements d'ÉQUIPEMENT du paperdoll
 		   (cf. plus haut) — réutiliser ce nom ferait fuir aspect-ratio, curseur et
-		   police sur la silhouette.
-		   Même mise en page que l'écran de combat : wrap + case plafonnée en largeur,
-		   donc 10 par rangée en colonne étroite, davantage si la place le permet. */
+		   police sur la silhouette. C'est aussi pourquoi le CSS partagé avec l'écran de
+		   combat est une MACRO paramétrée par les sélecteurs, et non un include figé. */
+{{ slotbar.slot_bar_css('.sh-barre-grid', '.sh-barre-slot', barre_slots_max, '.sh-barre-plus-pos') }}
 		.sh-barre-grid {
-			display: flex; flex-wrap: wrap; justify-content: center;
-			gap: 5px; margin: 8px 0;
+			margin: 8px 0;
 		}
-		.sh-barre-slot {
-			flex: 0 0 auto;
-			width: clamp(24px, calc((100% - 45px) / 10), 44px);
-			position: relative; aspect-ratio: 1;
-			display: flex; align-items: center; justify-content: center;
-			font-size: 1.1rem; line-height: 1; cursor: pointer;
-			border: 1px solid #555; border-radius: 8px; background: #2a2a2a; color: #eee;
-			touch-action: none; user-select: none;   /* le clic long doit pouvoir glisser */
-		}
-		.sh-barre-slot.empty { border-style: dashed; border-color: #3a3a3a; background: transparent; }
-		.sh-barre-slot.oblig { border-color: var(--accent); }
-		.sh-barre-slot.dragging { opacity: 0.5; transform: scale(1.12); z-index: 10; }
-		.sh-barre-slot.drag-over { border-color: var(--accent-color); background: #2e2510; }
-		.sh-barre-num { position: absolute; top: 1px; right: 3px; font-size: 9px; color: #777; font-weight: bold; }
-		/* Retirer l'action d'une case — pastille ✕ au survol, reprise de `.char-delete-btn`
-		   de user_home_telluris.html. ⚠️ Palette locale : play_town n'inclut pas
-		   part-root-css.html, donc --ink/--parch/--bronze y sont INDÉFINIES. Taille réduite
-		   à 18px (contre 22) : la case fait au plus 44px, une pastille de 22px en couvrirait
-		   la moitié. Jamais sur une case obligatoire ni sur une case vide (cf. :not() plus bas). */
+		/* Retirer l'action d'une case — pastille ✕ au survol */
 		.sh-barre-del {
 			display: none;
 			position: absolute; top: -8px; left: -6px;
@@ -898,7 +882,8 @@
 		.sh-barre-del:hover { background: #8b1a1a; border-color: #8b1a1a; color: #fff; }
 		/* Pendant un glisser, la pastille ne doit ni s'afficher ni capter le pointeur. */
 		.sh-barre-slot.dragging .sh-barre-del { display: none; }
-		.sh-barre-plus-pos { position: absolute; bottom: 0; right: 3px;	}
+		/* `.sh-barre-plus-pos` (le placement du badge) vient du CSS partagé ; `.sh-barre-plus`
+		   ne porte QUE le glyphe doré — il sert aussi aux sélecteurs de l'onglet ⚡, hors barre. */
 		.sh-barre-plus {
 			font-size: 18px;
 			font-weight: 900;
@@ -1016,7 +1001,7 @@
 		.sh-quest-reward { display: flex; gap: 8px; margin-top: 6px; font-size: 0.9rem; }
 		.sh-journal-entry { padding: 10px; background: var(--btn-bg); border-left: 3px solid var(--accent-color); margin-bottom: 8px; font-size: 0.95rem; }
 		.sh-journal-date { font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
-		.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px; color: var(--muted); font-size: 1rem; }
+		.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0px; color: var(--muted); font-size: 1rem; }
 		.sh-empty-icon { font-size: 2.1rem; }
 		.sh-xp-btn {
 			width: 100%; margin-top: 5px; padding: 3px 5px;
@@ -4017,7 +4002,7 @@ function _renderBarreSlots() {
 				aria-label="Retirer ${(s.nom || '').replace(/"/g, '&quot;')} de la case ${s.position}">✕</button>`
 			: '';
 		return `<div class="${cls}" data-slot="${s.position}" title="${titre.replace(/"/g, '&quot;')}"
-			style="${s.type && !s.disponible ? 'opacity:.4' : ''}">${s.icon || ''}<span class="sh-barre-num">${s.position}</span>${plus}${del}</div>`;
+			style="${s.type && !s.disponible ? 'opacity:.4' : ''}">${s.icon || ''}${plus}${del}</div>`;
 	}).join('');
 	box.querySelectorAll('.sh-barre-slot').forEach(el => {
 		const n = parseInt(el.dataset.slot, 10);

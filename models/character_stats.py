@@ -112,7 +112,7 @@ CRIT_CHANCE_DIVISEUR: int = 10
 # mémoire musculaire. Trois entrées sont obligatoires (mêlée, ramasser, fuir) : elles se
 # déplacent librement mais ne peuvent jamais être retirées. Réduire cette valeur tronque
 # la barre par la fin ; les entrées au-delà sont oubliées à la première écriture.
-COMBAT_SLOTS_MAX: int = 20
+COMBAT_SLOTS_MAX: int = 15
 
 # ── Relation marchand (marchandage volontaire) ───────────────────────────────────
 # La relation perso×lieu (doc `type:"relation"`) est un entier sur 0–100, neutre à

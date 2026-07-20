@@ -1,3 +1,4 @@
+{% import "part-slot-bar-css.html" as slotbar %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -222,11 +223,6 @@
 		max-width: 280px;
 	}
 }
-@media (max-width: 768px) {
-	.move-section { left: 50%;
-	  transform: translateX(-50%);
-	}
-}
 .character-card { grid-area: perso; display: flex; flex-direction: column; }
 .combat-center  { grid-area: center; }
 .enemy-panel    { grid-area: ennemis; display: flex; flex-direction: column; gap: 12px; margin: 10px; align-items: center;}
@@ -245,6 +241,15 @@
 	display: flex;
 	flex-direction: column;
 }
+@media (max-width: 768px) {
+	.enemy-portrait-wrap {
+		display: none;
+	}
+	.move-section { left: 50%;
+	  transform: translateX(-50%);
+	}
+}
+	
 .enemy-portrait.dead { opacity: 0.4; filter: grayscale(1); }
 
 /* ─── Portrait + barres PV/PM verticales (repris de play_town) ─── */
@@ -412,47 +417,14 @@
 	width: 45px;
 	z-index: 10;
 }
+{{ slotbar.slot_bar_css('.slot-grid', '.slot-btn', slots_max, '.slot-plus') }}
+/* Écarts propres au combat : la grille laisse la place au ⚙ (positionné en absolu à
+   gauche), et la case y est plus grande que dans la fiche — on la vise sous le feu. */
 .slot-grid {
-	display: flex; flex-wrap: wrap;
-	justify-content: center; align-content: flex-start;
-	gap: 5px; width: calc(100% - 80px);
+	align-content: flex-start;
+	width: calc(100% - 80px);
 	margin: 0 auto;
 }
-.slot-btn {
-	order: var(--o);
-	flex: 0 0 auto; 
-	width: clamp(28px, calc(90% / 20 - 5px), 60px);  
-	flex-shrink: 1;
-	position: relative; aspect-ratio: 1;
-	display: flex; align-items: center; justify-content: center;
-	font-size: 1.3rem; line-height: 1;
-	border: 1px solid #555; border-radius: 8px;
-	background: #2a2a2a; color: #eee; cursor: pointer; padding: 0;
-	transition: background 0.15s, transform 0.1s;
-	-webkit-tap-highlight-color: transparent;
-	/* Le clic long doit pouvoir glisser sans que le défilement de la page vole le geste.
-	   Une case n'est pas une surface de défilement : la contrepartie est nulle. */
-	touch-action: none;
-	user-select: none;
-}
-.slot-btn:hover:not(:disabled) { background: #3a3a3a; }
-.slot-btn:active:not(:disabled) { transform: scale(0.94); }
-.slot-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-/* Case vide : un emplacement, pas un bouton — visible mais inerte hors édition. */
-.slot-btn.empty { border-style: dashed; border-color: #3a3a3a; background: transparent; cursor: default; }
-/* Numéro de la case : repère d'apprentissage, discret une fois la barre mémorisée. */
-.slot-num {
-	position: absolute; top: 1px; right: 3px;
-	font-size: 9px; color: #777; font-weight: bold; pointer-events: none;
-}
-/* « + » : ce sort dépensera ses composants CONSOMMÉS. Le badge disparaît quand il n'en
-   reste plus en sac — la case reste jouable, simplement sans eux. */
-.slot-plus {
-	position: absolute; bottom: 0; right: 3px;
-	font-size: 11px; color: #b26bff; font-weight: bold; pointer-events: none;
-	text-shadow: 0 0 3px rgba(0,0,0,0.8);
-}
-.slot-btn.oblig  { border-color: #6b5836; }
 .slot-btn.atk    { border-color: #cc3333; color: #ff8080; }
 .slot-btn.atk:hover:not(:disabled) { background: #3a1a1a; }
 .slot-btn.loot   { border-color: #8a6d2f; color: #cda349; }
@@ -460,10 +432,6 @@
 .slot-btn.hidden-selecting { visibility: hidden; }
 /* Mode édition : la grille ne joue plus, on y change le CONTENU des cases. */
 .slot-grid.editing .slot-btn { cursor: pointer; opacity: 1; border-style: dashed; }
-/* Glisser-déposer par clic long — disponible EN PERMANENCE, pas seulement en édition :
-   réordonner sa barre est gratuit, seul changer son contenu coûte une action. */
-.slot-btn.dragging { opacity: 0.5; transform: scale(1.12); z-index: 10; }
-.slot-btn.drag-over { border-color: #cda349; background: #2e2510; }
 .slot-edit-bar { display: flex; align-items: center; justify-content: center; gap: 10px; }
 .slot-edit-hint { font-size: 12px; color: #cbb98a; }
 #target-row {
@@ -1771,7 +1739,6 @@ function startSortCast(s, composants) {
 // Reconstruite quand SORTS/CONSOS sont resynchronisés (composants consommés, potion
 // bue → tooltip et disponibilité à jour) ; l'état enabled/disabled est géré par
 // updateButtons, qui réutilise tels quels les prédicats sortCastable/compCastable/…
-// L'ordre CSS est porté par deux variables : --o (desktop) et --o-rev (mobile, 20→1).
 function slotSort(slot)  { return SORTS.find(s => s.sort_id === slot.ref); }
 function slotComp(slot)  { return COMPS.find(c => c.competence_id === slot.ref); }
 function slotConso(slot) { return CONSOS.find(c => c.item_id === slot.ref); }
@@ -1865,16 +1832,16 @@ function renderSlots() {
 	const box = document.getElementById('slot-grid');
 	box.innerHTML = SLOTS.map(slot => {
 		const n = slot.position;
-		const ordres = `--o:${n}; --o-rev:${SLOTS_MAX - n + 1}`;
+		const ordres = `--o:${n};`;
 		if (!slot.type) {
 			return `<button class="slot-btn empty" data-slot="${n}" style="${ordres}"
-				title="Emplacement libre"><span class="slot-num">${n}</span></button>`;
+				title="Emplacement libre"></button>`;
 		}
 		const cls = [slotClass(slot), slot.obligatoire ? 'oblig' : ''].filter(Boolean).join(' ');
 		const plus = slotCompoPlus(slot) ? '<span class="slot-plus">+</span>' : '';
 		return `<button class="slot-btn ${cls}" data-slot="${n}" style="${ordres}"
 			title="${slotTitle(slot).replace(/"/g, '&quot;')}"
-			>${slot.icon}<span class="slot-num">${n}</span>${plus}</button>`;
+			>${slot.icon}${plus}</button>`;
 	}).join('');
 	box.querySelectorAll('.slot-btn').forEach(b => {
 		const n = parseInt(b.dataset.slot, 10);

@@ -1,0 +1,94 @@
+{#
+  Barre de slots d'action — CSS SOURCE UNIQUE, pour l'écran de combat ET la fiche perso.
+
+  La même barre est rendue à deux endroits : `.slot-grid` en combat (on JOUE les cases) et
+  `.sh-barre-grid` dans l'onglet ⚡ de la fiche (on les CONFIGURE). Même géométrie, même
+  clic long, même sémantique de case — mais deux jeux de classes et deux palettes.
+
+  ⚠️ Les noms de classes ne sont PAS unifiés, et c'est délibéré : `.sh-slot` désigne déjà
+  les emplacements d'ÉQUIPEMENT du paperdoll, d'où le préfixe `.sh-barre-` côté fiche
+  (cf. CLAUDE.md § Barre d'action de combat). D'où une MACRO paramétrée par les sélecteurs
+  plutôt qu'un `{% raw %}{% include %}{% endraw %}` de règles figées : chaque page garde
+  ses noms, et rien ne fuit d'une page à l'autre puisque seule sa propre paire est émise.
+
+  Usage :
+    {% raw %}{% import "part-slot-bar-css.html" as slotbar %}{% endraw %}
+    {% raw %}{{ slotbar.slot_bar_css('.slot-grid', '.slot-btn', slots_max, '.slot-plus') }}{% endraw %}
+
+  ⚠️ `slots_max` est la taille EFFECTIVE de la barre (`slots_actions.slots_max()`, planchée
+  à 3), jamais un littéral : `COMBAT_SLOTS_MAX` est une variable de monde réglable à chaud.
+  Le contexte l'expose sous `slots_max` en combat et `barre_slots_max` dans la fiche
+  (la clé `slots` y désignerait l'équipement du compagnon — cf. CLAUDE.md).
+
+  Réglages : la macro pose ses valeurs par défaut en CUSTOM PROPERTIES sur le conteneur.
+  Une page qui veut s'en écarter les redéclare sur son propre sélecteur APRÈS l'appel —
+  aucune signature à rallonger quand une nuance de plus apparaît.
+#}
+
+{% macro slot_bar_css(grid, slot, slots_max, plus=None) %}
+/* ── Barre de slots : {{ grid }} / {{ slot }} (part-slot-bar-css.html) ─────────── */
+{{ grid }} {
+	--slot-gap: 5px;
+	--slot-max: 50px;
+	--slot-font: 1.2rem;
+	--slot-bg: #2a2a2a;
+	--slot-ink: #eee;
+	--slot-border: #555;
+	--slot-empty-border: #999;
+	--slot-oblig-border: #c8a96e;
+	--slot-drag-border: #ffd700;
+	--slot-drag-bg: #2e2510;
+	--slot-plus-color: #b26bff;
+	--slot-plus-size: 11px;
+
+	display: flex; flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--slot-gap);
+}
+/* Mise en page par WRAP, jamais par grille figée : la case vaut 1/(moitié+1) du conteneur,
+   plafonnée en largeur — soit DEUX RANGÉES quelle que soit la taille de la barre, et
+   davantage par rangée dès que la place le permet. Le diviseur est calculé ICI, une seule
+   fois : c'est ce qui garde les deux barres identiques quand la world-var bouge. */
+{{ slot }} {
+	order: var(--o, 0);
+	flex: 0 0 auto;
+	flex-shrink: 1;
+	width: clamp(28px, calc(100% / {{ slots_max // 2 + 1 }} - var(--slot-gap)), var(--slot-max));
+	position: relative; aspect-ratio: 1;
+	display: flex; align-items: center; justify-content: center;
+	font-size: var(--slot-font); line-height: 1;
+	border: 1px solid var(--slot-border); border-radius: 8px;
+	background: var(--slot-bg); color: var(--slot-ink);
+	cursor: pointer; padding: 0;
+	transition: background 0.15s, transform 0.1s;
+	-webkit-tap-highlight-color: transparent;
+	/* Le clic long doit pouvoir glisser sans que le défilement de la page vole le geste.
+	   Une case n'est pas une surface de défilement : la contrepartie est nulle. */
+	touch-action: none;
+	user-select: none;
+}
+{{ slot }}:hover:not(:disabled) { background: #3a3a3a; }
+{{ slot }}:active:not(:disabled) { transform: scale(0.94); }
+{{ slot }}:disabled { opacity: 0.35; cursor: not-allowed; }
+/* Case vide : un emplacement, pas un bouton — visible mais inerte hors édition. */
+{{ slot }}.empty {
+	border-style: dashed; border-color: var(--slot-empty-border);
+	background: transparent; cursor: default;
+}
+/* Une obligatoire (⚔ 🫳 🏃) se déplace mais ne se retire jamais : sa bordure la signale. */
+{{ slot }}.oblig { border-color: var(--slot-oblig-border); }
+/* Glisser-déposer par clic long — disponible EN PERMANENCE, pas seulement en édition :
+   réordonner sa barre est gratuit, seul changer son contenu coûte une action. */
+{{ slot }}.dragging { opacity: 0.5; transform: scale(1.12); z-index: 10; }
+{{ slot }}.drag-over { border-color: var(--slot-drag-border); background: var(--slot-drag-bg); }
+{% if plus %}
+/* « + » : ce sort dépensera ses composants CONSOMMÉS. Le badge disparaît quand il n'en
+   reste plus en sac — la case reste jouable, simplement sans eux. */
+{{ plus }} {
+	position: absolute; bottom: 0; right: 3px;
+	font-size: var(--slot-plus-size); color: var(--slot-plus-color);
+	font-weight: bold; pointer-events: none;
+	text-shadow: 0 0 3px rgba(0,0,0,0.8);
+}
+{% endif %}
+{% endmacro %}
