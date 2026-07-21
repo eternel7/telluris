@@ -295,3 +295,46 @@ def test_debuff_sur_une_monture_ne_la_remet_pas_en_marche():
 	combat_mod._empiler_effet_combat(
 		monture, {"nom": "Cri", "icon": "📣"}, {"buffs": {"V": -1}, "duree": 2}, 1)
 	assert monture["deplacement"] == 0
+
+
+# ── Non-cumul (cf. utils/consommables : poser_effet / cumul_effets) ───────────────
+
+def test_relancer_le_meme_debuff_ne_l_empile_pas(monkeypatch):
+	# Une source = une entrée, sur la cible comme sur soi : re-lancer le même sort
+	# rafraîchit le debuff au lieu d'en ajouter un second qui doublerait le malus.
+	_touche_toujours(monkeypatch)
+	snap, m = build_joueur_snapshot(_character()), _monstre()
+	combat = _combat(snap, [m])
+	ag_avant = m["ag"]
+
+	resolve_action(combat, "sort", cible_id="monstre_0",
+				   sort=_sort(buffs={"Ag": -10}, duree=2))
+	assert m["ag"] == ag_avant - 10
+
+	_reset_turn_budget(snap, combat)          # nouveau tour du joueur, budget rendu
+	resolve_action(combat, "sort", cible_id="monstre_0",
+				   sort=_sort(buffs={"Ag": -10}, duree=2))
+
+	assert len(m["effets_actifs"]) == 1
+	assert m["effets_actifs"][0]["restants"] == 2
+	assert m["ag"] == ag_avant - 10           # PAS -20
+
+
+def test_deux_debuffs_differents_ne_se_cumulent_pas_sur_la_meme_caract(monkeypatch):
+	# Deux sorts distincts coexistent, mais seul le PIRE malus s'applique.
+	_touche_toujours(monkeypatch)
+	snap, m = build_joueur_snapshot(_character()), _monstre()
+	combat = _combat(snap, [m])
+	ag_avant = m["ag"]
+
+	resolve_action(combat, "sort", cible_id="monstre_0",
+				   sort=_sort(nom="Givre", buffs={"Ag": -10}, duree=2))
+	_reset_turn_budget(snap, combat)
+	resolve_action(combat, "sort", cible_id="monstre_0",
+				   sort={"doc": {"_id": "sort:vase", "nom": "Vase", "icon": "🪣",
+								 "cible": "ennemi", "cout_pm": 0, "portee": 1,
+								 "effets": {"buffs": {"Ag": -4}, "duree": 5}},
+						 "effets": {"buffs": {"Ag": -4}, "duree": 5}})
+
+	assert len(m["effets_actifs"]) == 2
+	assert m["ag"] == ag_avant - 10           # le pire, pas -14

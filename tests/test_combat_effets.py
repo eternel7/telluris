@@ -312,3 +312,67 @@ def test_un_compagnon_beneficie_de_son_propre_buff():
     # Le buff du compagnon ne déteint pas sur le principal.
     assert principal.get("effets_actifs") == []
     assert principal["cc"] == cc_principal
+
+
+# ── Non-cumul en combat (cf. utils/consommables : poser_effet / cumul_effets) ─────
+
+def test_relancer_le_meme_sort_remplace_l_entree():
+    # Une source = une entrée : relancer le même sort ne double pas le buff, il repart
+    # de zéro (durée relancée). Sinon deux tours de cast suffiraient à empiler sans fin.
+    snap = build_joueur_snapshot(_character())
+    combat = _combat(snap)
+    _empiler_effet_combat(snap, _sort_doc(), {"buffs": {"F": 20}, "duree": 3}, tour=1)
+    cc_bufffe = snap["cc"]
+
+    combat["tour"] = 2
+    _tick_effets_combat(combat, snap)
+    assert snap["effets_actifs"][0]["restants"] == 2
+    _empiler_effet_combat(snap, _sort_doc(), {"buffs": {"F": 20}, "duree": 3}, tour=2)
+
+    assert len(snap["effets_actifs"]) == 1
+    assert snap["effets_actifs"][0]["restants"] == 3      # durée relancée
+    assert snap["cc"] == cc_bufffe                        # le buff n'a PAS doublé
+
+
+def test_deux_sorts_differents_ne_se_cumulent_pas_sur_la_meme_caract():
+    # Deux sources différentes coexistent, mais sur une même caract seul le meilleur
+    # compte — et l'expiration du plus fort fait ressortir le plus faible.
+    char = _character()
+    base = build_joueur_snapshot(_character())["cc"]
+    snap = build_joueur_snapshot(char)
+    combat = _combat(snap)
+    _empiler_effet_combat(snap, {"id": "sort:faible", "nom": "Vigueur", "icon": "💪"},
+                          {"buffs": {"F": 10}, "duree": 5}, tour=1)
+    faible = snap["cc"]
+    _empiler_effet_combat(snap, {"id": "sort:fort", "nom": "Force du géant", "icon": "🗿"},
+                          {"buffs": {"F": 20}, "duree": 1}, tour=1)
+    fort = snap["cc"]
+    assert fort > faible > base
+
+    combat["tour"] = 2
+    _tick_effets_combat(combat, snap)        # le plus fort expire, le plus faible tient
+    assert [e["nom"] for e in snap["effets_actifs"]] == ["Vigueur"]
+    assert snap["cc"] == faible
+
+
+def test_regen_non_cumulee_au_tick():
+    # Deux régénérations en cours : seule la meilleure rend des PV/PM par tour.
+    snap = build_joueur_snapshot(_character(currentPV=10, currentPM=0))
+    combat = _combat(snap)
+    _empiler_effet_combat(snap, {"id": "sort:a", "nom": "Régénération", "icon": "🌿"},
+                          {"regen_pv": 5, "regen_pm": 3, "duree": 5}, tour=1)
+    _empiler_effet_combat(snap, {"id": "sort:b", "nom": "Sève", "icon": "🍃"},
+                          {"regen_pv": 2, "regen_pm": 4, "duree": 5}, tour=1)
+    _tick_effets_combat(combat, snap)
+    assert snap["currentPV"] == 15        # 10 + 5 (le meilleur), pas 10 + 7
+    assert snap["currentPM"] == 4         # 0 + 4 (le meilleur), pas 0 + 7
+
+
+def test_esquive_non_cumulee():
+    snap = build_joueur_snapshot(_character())
+    esquive_base = snap["esquive"]
+    _empiler_effet_combat(snap, {"id": "sort:a", "nom": "Voile", "icon": "🌫️"},
+                          {"esquive": 20, "duree": 3}, tour=1)
+    _empiler_effet_combat(snap, {"id": "sort:b", "nom": "Brume", "icon": "💨"},
+                          {"esquive": 15, "duree": 3}, tour=1)
+    assert snap["esquive"] == esquive_base + 20

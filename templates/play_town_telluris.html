@@ -645,7 +645,9 @@
 			box-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
 		}
 
-		/* Le repère (Pip) représentant le max actuel du personnage */
+		/* Le repère (Pip) : le max NATUREL de la race — ou le sous-plafond quand le quota de
+		   maxima le rabaisse (.subcap). Jamais au-delà : un personnage qui a engagé son bonus
+		   de dépassement doit se voir passer DEVANT le repère. */
 		.sh-stat-pip {
 			position: absolute;
 			top: -3px; /* Dépasse légèrement en haut et en bas */
@@ -1012,6 +1014,13 @@
 		.sh-xp-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 		.sh-xp-btn.subcap { border-color: rgba(197,197,197,0.2); color: var(--muted); }
 		.sh-stat-pip.subcap { background-color: var(--muted); box-shadow: 0 0 2px rgba(197,197,197,0.4); }
+		/* Dépassement du max racial : unique et IRRÉVERSIBLE — il ne doit pas se confondre
+		   avec le bouton d'XP ordinaire, doré comme tout le reste de la fiche. */
+		.sh-bonus-btn {
+			margin-top: 3px; border-color: rgba(150,120,220,0.45);
+			color: #b9a3ee; background: rgba(150,120,220,0.10);
+		}
+		.sh-bonus-btn:hover:not(:disabled) { background: rgba(150,120,220,0.22); border-color: #b9a3ee; }
 		.sh-xp-cost { font-size: 0.75rem; }
 
 		/* ── Sheet panel layout ──────────────────────────────────── */
@@ -1501,17 +1510,27 @@
 {% set at_cap        = val >= cap %}
 {% set is_accessible = cap >= maxRace %}
 {% set can_afford    = attribute_points >= cost_next %}
+{# Échelle de la jauge : le max racial, SAUF si le bonus de dépassement a été engagé ici —
+   le plafond passe alors AU-DESSUS et le remplissage sortirait de la barre.
+   Le pip, lui, reste PLANTÉ au max naturel de la race : c'est le repère que le
+   remplissage doit visiblement franchir. Il ne descend en-dessous que lorsque le quota
+   de maxima rabaisse le plafond (`subcap`) — jamais au-dessus. #}
+{% set echelle       = [maxRace, cap] | max %}
+{% set pip_val       = [cap, maxRace] | min %}
+{# `max_bonus` / `max_bonus_used` viennent de bloc_fiche, comme stat_caps : même source que
+   celle que lit la fiche d'un compagnon (qui, elle, ne reçoit pas `race`). #}
+{% set bonus_depass  = max_bonus.get(code, 0) %}
 							<div class="sh-stat-box" onclick="showCaractTooltip(event, '{{ code }}')">
 								<span class="sh-stat-lbl">{{ nom }}</span>
 								<div class="sh-stat-val" id="sh-sv-{{ code }}">
-									{{ val }}<span class="sh-stat-max-sep">/{{ cap }}</span>
+									{{ val }}<span class="sh-stat-max-sep">/{{ maxRace | int }}</span>
 								</div>
 								<div class="sh-stat-val sh-mod-val" id="sh-mod-{{ code }}"></div>
 								<div class="sh-stat-bar-wrapper">
 									<div class="sh-stat-bar">
-										<div class="sh-stat-fill" id="sh-stat-bar-{{ code }}" style="width: {{ (val / maxRace * 100) | int }}%" data-maxrace="{{ maxRace | int }}"></div>
+										<div class="sh-stat-fill" id="sh-stat-bar-{{ code }}" style="width: {{ (val / echelle * 100) | int }}%" data-maxrace="{{ maxRace | int }}"></div>
 										<div class="sh-stat-pip{% if not is_accessible %} subcap{% endif %}"
-											 style="left: {{ (cap / maxRace * 100) | int }}%"></div>
+											 style="left: {{ (pip_val / echelle * 100) | int }}%"></div>
 									</div>
 								</div>
 								<button class="sh-xp-btn{% if not is_accessible %} subcap{% endif %}"
@@ -1521,6 +1540,21 @@
 										onclick="spendXp('{{ code }}')">
 									- <span class="sh-xp-cost">{{ cost_next }} P<small>oints</small></span>
 								</button>
+								{# Dépassement du max racial (humain) : offert sur les seules caracts BLOQUÉES
+								   (au max racial, ou coincées au sous-plafond par le quota de maxima). Le
+								   bouton est rendu même quand il n'est pas offert, en `display:none` : une
+								   caract peut se bloquer en cours de session (montée jusqu'au max, ou quota
+								   qui se remplit et rabaisse un autre plafond) et `_refreshStatBoxes`
+								   l'allume par `getElementById` — sans l'élément, il n'aurait rien à allumer. #}
+								{% if bonus_depass > 0 and not max_bonus_used and at_cap and attribute_points > 0 %}
+								<button class="sh-xp-btn sh-bonus-btn" id="sh-bonus-{{ code }}"
+										{% if not can_afford %}disabled{% endif %}
+										onclick="demanderMaxBonus('{{ code }}')">
+									✦ Dépasser <span class="sh-xp-cost">+{{ bonus_depass }}</span>
+								</button>
+								{% else %}
+								<button class="sh-xp-btn sh-bonus-btn" id="sh-bonus-{{ code }}" style="display:none"></button>
+								{% endif %}
 							</div>
 							{% endfor %}
 						</div>
@@ -2087,6 +2121,17 @@
 			border-bottom: 1px solid rgba(74, 74, 90, .3); line-height: 1.4;
 		}
 		.clauses-avert { color: var(--muted); font-size: .85rem; font-style: italic; }
+		/* ── Dépassement du maximum racial (bonus humain) ──
+		   Encore le même calque : une décision bloquante de plus, et celle-ci est
+		   définitive — un personnage ne dépasse qu'une seule fois, sur une seule caract. */
+		#max-bonus-overlay {
+			position: fixed; inset: 0; z-index: 9400;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#max-bonus-overlay.clauses-hidden { display: none; }
+		#max-bonus-overlay .item-detail-card { max-width: 460px; }
+		.max-bonus-cap { color: #b9a3ee; font-size: 1.1rem; margin: .2rem 0 .8rem; }
 	</style>
 	<div id="pnj-panel" class="panel-hidden panel-frame board-panel" aria-label="Dialogue avec un personnage">
 		<div class="sell-topbar">
@@ -2153,6 +2198,16 @@
 			<div id="cible-allie-body"></div>
 		</div>
 	</div><!-- /#cible-allie-overlay -->
+	{# Dépassement du maximum racial : UNIQUE et IRRÉVERSIBLE pour le personnage.
+	   ✕ / Échap / clic hors carte = annuler sans rien engager — seul le bouton
+	   « Dépasser » de la carte envoie `use_max_bonus`. #}
+	<div id="max-bonus-overlay" class="clauses-hidden" aria-label="Dépasser le maximum racial"
+		 onclick="if(event.target===this)closeMaxBonus()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeMaxBonus()" title="Annuler">✕</button>
+			<div id="max-bonus-body"></div>
+		</div>
+	</div><!-- /#max-bonus-overlay -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
@@ -2864,6 +2919,10 @@ document.addEventListener('keydown', e => {
 	// sinon le lancement resterait suspendu et son bouton désactivé pour toujours.
 	const cibleAllie = document.getElementById('cible-allie-overlay');
 	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
+	// Dépassement du max racial : rien n'est en attente, Échap se contente de refermer —
+	// le bonus n'est engagé que par le bouton « Dépasser » de la carte.
+	const maxBonus = document.getElementById('max-bonus-overlay');
+	if (maxBonus && !maxBonus.classList.contains('clauses-hidden')) { closeMaxBonus(); return; }
 	const clauses = document.getElementById('clauses-overlay');
 	if (clauses && !clauses.classList.contains('clauses-hidden')) { closeClauses(); return; }
 	const qmap = document.getElementById('quest-map-overlay');
@@ -2904,6 +2963,11 @@ let _RACE_MIN  = {{ race["stats"]     | tojson | safe }};
 let _RACE_MAX  = {{ race["stats_max"] | tojson | safe }};
 let _charStats   = {{ character["caracteristiques_current"] | tojson | safe }};
 let _statCaps    = {{ stat_caps | tojson | safe }};
+// Bonus racial de dépassement : {code: Δ} (vide hors humain) et la caract sur laquelle il a
+// déjà été brûlé (null = encore libre). `let` comme les bornes raciales : un compagnon peut
+// être d'une autre race que le joueur (openCompagnonSheet les remplace).
+let _MAX_BONUS     = {{ max_bonus | tojson | safe }};
+let _maxBonusUsed  = {{ max_bonus_used | tojson | safe }};
 let _attributePoints = {{ character.get("attribute_points", 0) | tojson | safe }};
 let _vocNiveau   = {{ character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0) | tojson | safe }};
 const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
@@ -2935,6 +2999,13 @@ function _xpCostNext(statKey) {
 	const raceMin = _RACE_MIN[statKey]  || 0;
 	const coeff   = _STAT_COEFF[statKey] || 1;
 	return Math.max(0, (cur + 1 - raceMin) * coeff);
+}
+
+// Échelle (100 %) des jauges de caract : le max racial, SAUF si le bonus de dépassement a
+// été engagé ici — le plafond passe alors au-dessus, et le pip comme le remplissage
+// sortiraient de la barre (qui est en overflow:visible). Miroir du `echelle` de Jinja.
+function _statEchelle(code) {
+	return Math.max(_RACE_MAX[code] || 1, _statCaps[code] || 0);
 }
 
 // Bloc ✦ Expérience (XP totale, niveau de race, jauge, vocation) — mêmes formules que le
@@ -2975,12 +3046,15 @@ function _refreshStatBoxes() {
 
 			// Jauge et repère de plafond : mêmes formules que le rendu Jinja initial.
 			const box     = svEl.closest('.sh-stat-box');
-			const maxRace = _RACE_MAX[code] || 1;
+			const echelle = _statEchelle(code);
 			const fill = box && box.querySelector('.sh-stat-fill');
-			if (fill) fill.style.width = Math.round(val / maxRace * 100) + '%';
+			if (fill) fill.style.width = Math.round(val / echelle * 100) + '%';
 			const pip = box && box.querySelector('.sh-stat-pip');
 			if (pip) {
-				pip.style.left = Math.round(cap / maxRace * 100) + '%';
+				// Le pip reste planté au max NATUREL de la race — c'est le repère que le
+				// remplissage doit visiblement franchir quand le bonus de dépassement a été
+				// engagé. Il ne descend que sous l'effet du quota de maxima (`subcap`).
+				pip.style.left = Math.round(Math.min(cap, _RACE_MAX[code] || cap) / echelle * 100) + '%';
 				pip.classList.toggle('subcap', !isAccessible);
 			}
 		}
@@ -2991,6 +3065,22 @@ function _refreshStatBoxes() {
 			btn.classList.toggle('subcap', !isAccessible);
 			const costEl = btn.querySelector('.sh-xp-cost');
 			if (costEl) costEl.innerHTML = cost + ' P<small>oints</small>';
+		}
+		// Dépassement du max racial : offert sur les seules caracts BLOQUÉES (au max racial
+		// ou coincées au sous-plafond par le quota), tant que le bonus n'a pas été brûlé.
+		// Le bouton existe toujours dans le DOM, même caché : une caract peut se bloquer en
+		// cours de session, et c'est ici qu'on le rallume.
+		const bBtn = document.getElementById('sh-bonus-' + code);
+		if (bBtn) {
+			const bonus  = (_MAX_BONUS || {})[code] || 0;
+			const offert = bonus > 0 && !_maxBonusUsed && val >= cap && _attributePoints > 0;
+			bBtn.style.display = offert ? '' : 'none';
+			if (offert) {
+				bBtn.disabled  = _attributePoints < cost;
+				bBtn.innerHTML = '✦ Dépasser <span class="sh-xp-cost">+' + bonus + '</span>';
+				// Posé ici et pas seulement en Jinja : le bouton du cas « non offert » naît vide.
+				bBtn.onclick   = () => demanderMaxBonus(code);
+			}
 		}
 	}
 	const btn = document.getElementById('sh-btn-voc-niveau');
@@ -3009,10 +3099,14 @@ function _caractTooltipLignes(code, nom) {
 	const lignes = [`${nom} : ${d.base}`,
 					`Max racial : ${_RACE_MAX[code] || 0} \nCourant : ${d.total || d.base}`];
 	// Sources regroupées par origine, dans l'ordre Équipement/Compétences/Effets.
+	// `actif === false` = effet à durée DOMINÉ par un autre sur cette caract (non-cumul :
+	// seuls le meilleur bonus et le pire malus s'appliquent) — listé, mais dit ignoré,
+	// sinon le joueur chercherait dans son total un Δ qui n'y est pas.
 	for (const origine of ['equipement', 'competence', 'effet']) {
 		for (const s of (d.sources || []).filter(s => s.origine === origine)) {
 			const sd = s.delta > 0 ? '+' + s.delta : '−' + Math.abs(s.delta);
-			lignes.push(`${_ORIGINE_LBL[origine]} · ${s.icon} ${s.nom} ${sd}`);
+			const ignore = s.actif === false ? ' (ignoré)' : '';
+			lignes.push(`${_ORIGINE_LBL[origine]} · ${s.icon} ${s.nom} ${sd}${ignore}`);
 		}
 	}
 	if (!d.delta) lignes.push('Aucun modificateur');
@@ -3047,10 +3141,11 @@ function _renderCaractsMod(detail) {
 		}
 		const bar = document.getElementById('sh-stat-bar-' + code);
 		if (!bar) continue;
-		// Échelle = plafond RACIAL du personnage affiché : _RACE_MAX suit le compagnon en
-		// mode compagnon (le data-attribut, lui, est figé sur la race du joueur par Jinja).
-		const maxRace = _RACE_MAX[code] || parseInt(bar.dataset.maxrace, 10);
-		if (maxRace) bar.style.width = (d.total / maxRace * 100) + '%';
+		// Échelle = plafond du personnage affiché : _RACE_MAX suit le compagnon en mode
+		// compagnon (le data-attribut, lui, est figé sur la race du joueur par Jinja), et
+		// _statEchelle l'élargit si le bonus de dépassement a été engagé sur cette caract.
+		const echelle = _RACE_MAX[code] ? _statEchelle(code) : parseInt(bar.dataset.maxrace, 10);
+		if (echelle) bar.style.width = (d.total / echelle * 100) + '%';
 	}
 }
 
@@ -3109,7 +3204,37 @@ async function spendXpVocation() {
 	} catch (err) { console.error('Erreur spend_xp_vocation', err); }
 }
 
-async function spendXp(statKey) {
+function closeMaxBonus() {
+	document.getElementById('max-bonus-overlay').classList.add('clauses-hidden');
+}
+
+// Le dépassement est unique par personnage et sans retour arrière : on le fait confirmer
+// en nommant la caract, son nouveau plafond, et ce à quoi on renonce ailleurs.
+function demanderMaxBonus(code) {
+	const bonus = (_MAX_BONUS || {})[code] || 0;
+	if (!bonus || _maxBonusUsed) return;
+	const nom     = (_CARACT_NOMS.find(([c]) => c === code) || [code, code])[1];
+	const maxRace = _RACE_MAX[code] || 0;
+	const cost    = _xpCostNext(code);
+	document.getElementById('max-bonus-body').innerHTML = `
+		<h3>✦ Dépasser le maximum racial</h3>
+		<div class="max-bonus-cap">${nom} : ${maxRace} → <strong>${maxRace + bonus}</strong></div>
+		<p>Votre lignée ne l'autorise <strong>qu'une seule fois</strong> : aucune autre
+		   caractéristique ne pourra jamais dépasser son maximum.</p>
+		<p class="clauses-avert">La montée immédiate coûte ${cost} points.</p>
+		<div class="item-detail-actions">
+			<button onclick="closeMaxBonus()">Annuler</button>
+			<button class="sh-bonus-btn" onclick="confirmerMaxBonus('${code}')">✦ Dépasser</button>
+		</div>`;
+	document.getElementById('max-bonus-overlay').classList.remove('clauses-hidden');
+}
+
+function confirmerMaxBonus(code) {
+	closeMaxBonus();
+	spendXp(code, true);
+}
+
+async function spendXp(statKey, useMaxBonus = false) {
 	const newVal = (_charStats[statKey] || 0) + 1;
 	const cost   = _xpCostNext(statKey);
 	if (_attributePoints < cost) { alert('Points insuffisants'); return; }
@@ -3118,7 +3243,11 @@ async function spendXp(statKey) {
 		const res = await fetch('api/spend_xp', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify(_actionBody({stat: statKey, new_value: newVal}))
+			body: JSON.stringify(_actionBody(
+				useMaxBonus
+					? {stat: statKey, new_value: newVal, use_max_bonus: true}
+					: {stat: statKey, new_value: newVal}
+			))
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
@@ -3126,6 +3255,9 @@ async function spendXp(statKey) {
 		_charStats[statKey]  = newVal;
 		_attributePoints     = data.attribute_points;
 		_statCaps = data.stat_caps;
+		// Le bonus vient peut-être d'être brûlé : sans ça, les boutons ✦ des AUTRES caracts
+		// resteraient offerts jusqu'au prochain chargement de /play.
+		if (data.max_bonus_used !== undefined) _maxBonusUsed = data.max_bonus_used;
 		_refreshStatBoxes();
 		_refreshDerivedStats(data.derived_stats);
 		_renderCaractsMod(data.caracts_detail);
@@ -5937,6 +6069,7 @@ async function openCompagnonSheet(avId) {
 		_sheetSnap = {
 			inventaire: _inventaire, slots: _slots, chargeMax: _chargeMax,
 			effetsActifs: _effetsActifs, charStats: _charStats, statCaps: _statCaps,
+			maxBonus: _MAX_BONUS, maxBonusUsed: _maxBonusUsed,
 			attributePoints: _attributePoints, vocNiveau: _vocNiveau, caractsDetail: _caractsDetail,
 			derived: _derivedCur, raceMin: _RACE_MIN, raceMax: _RACE_MAX,
 			xpTotal: _xpTotal, niveau: _niveau, xpNivPrev: _xpNivPrev, xpNivNext: _xpNivNext,
@@ -5956,6 +6089,9 @@ async function openCompagnonSheet(avId) {
 		_inventaire = p.inventaire; _slots = p.slots; _objetsAuSol = p.objets_au_sol;
 		_chargeMax = p.charge_max; _effetsActifs = p.effets_actifs;
 		_charStats = p.caracteristiques_current; _statCaps = p.stat_caps;
+		// Le dépassement racial appartient au COMPAGNON (sa race, son bonus déjà brûlé ou non) :
+		// la montée passe par le chokepoint `_acteur`, elle écrit sur SON doc.
+		_MAX_BONUS = p.max_bonus || {}; _maxBonusUsed = p.max_bonus_used || null;
 		_attributePoints = p.attribute_points; _vocNiveau = p.voc_niveau;
 		_caractsDetail = p.caracts_detail; _derivedCur = p.derived_stats;
 		_RACE_MIN = p.race_min; _RACE_MAX = p.race_max;
@@ -5990,6 +6126,7 @@ function closeCompagnonSheet() {
 		_inventaire = s.inventaire; _slots = s.slots;   // `_objetsAuSol` : cf. openCompagnonSheet
 		_chargeMax = s.chargeMax; _effetsActifs = s.effetsActifs;
 		_charStats = s.charStats; _statCaps = s.statCaps;
+		_MAX_BONUS = s.maxBonus; _maxBonusUsed = s.maxBonusUsed;
 		_attributePoints = s.attributePoints; _vocNiveau = s.vocNiveau;
 		_caractsDetail = s.caractsDetail; _derivedCur = s.derived;
 		_RACE_MIN = s.raceMin; _RACE_MAX = s.raceMax;

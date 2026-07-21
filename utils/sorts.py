@@ -19,7 +19,7 @@
 
 from models import character_stats
 from utils.characters import item_ref_id
-from utils.consommables import _as_int
+from utils.consommables import _as_int, poser_effet
 
 # Jet de toucher d'un effet offensif, porté par la DONNÉE. SOURCE UNIQUE, partagée avec
 # les compétences (utils/competences.py l'importe) — les deux familles se résolvent par
@@ -242,7 +242,9 @@ def sort_utilisable_exploration(sort: dict) -> bool:
 def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None:
 	"""Empile la part à durée (buffs/régén) des effets FUSIONNÉS sur
 	character["effets_actifs"] (mute en place, NE SAUVEGARDE PAS). Même forme d'entrée
-	que les consommables → tick_effets/caracts_avec_buffs/regen_bonus/chips inchangés."""
+	que les consommables → tick_effets/caracts_avec_buffs/regen_bonus/chips inchangés.
+	⚠️ Relancer le MÊME sort ne cumule pas : `poser_effet` remplace l'entrée précédente
+	(seuls les effets du dernier lancement comptent — composants engagés compris)."""
 	eff = effets or {}
 	if not part_durative(eff):
 		return None
@@ -256,8 +258,7 @@ def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None
 		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}
-	character.setdefault("effets_actifs", []).append(entry)
-	return entry
+	return poser_effet(character, entry)
 
 
 # ── Apprentissage ────────────────────────────────────────────────────────────────

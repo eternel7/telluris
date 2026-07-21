@@ -829,6 +829,9 @@ async def spend_xp(
 		"new_value":     new_value,
 		"attribute_points": character["attribute_points"],
 		"stat_caps":     new_caps,
+		# Le bonus racial vient peut-être d'être consommé : sans ce retour, le client
+		# continuerait à offrir le geste sur les AUTRES caracts jusqu'au prochain /play.
+		"max_bonus_used": character.get("max_bonus_used"),
 		"derived_stats": derived.model_dump(),
 		"caracts_detail": consommables.caracts_detail(character),
 	}

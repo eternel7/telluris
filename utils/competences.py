@@ -25,7 +25,7 @@
 # Logique pure (get_doc/find_docs injectés), ne sauvegarde jamais — les endpoints persistent.
 
 from models import character_stats
-from utils.consommables import _as_int
+from utils.consommables import _as_int, poser_effet
 from utils.sorts import CIBLE_DEFAUT, CIBLES, JETS, _bonus_dict, part_durative
 
 MODES = ("passive", "active")
@@ -115,7 +115,9 @@ def competence_utilisable_exploration(comp: dict) -> bool:
 def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 	"""Empile la part à durée (buffs/régén) d'une compétence active sur
 	character["effets_actifs"] (mute en place, NE SAUVEGARDE PAS). Même forme d'entrée que
-	les consommables/sorts → tick_effets/caracts_avec_buffs/regen_bonus/chips inchangés."""
+	les consommables/sorts → tick_effets/caracts_avec_buffs/regen_bonus/chips inchangés.
+	⚠️ Réutiliser la MÊME compétence ne cumule pas : `poser_effet` remplace l'entrée
+	précédente (durée relancée depuis le dernier usage)."""
 	eff = (comp or {}).get("effets") or {}
 	if not part_durative(eff):
 		return None
@@ -129,8 +131,7 @@ def empiler_effet_competence(character: dict, comp: dict) -> dict | None:
 		"esquive": _as_int(eff.get("esquive")),
 		"restants": _as_int(eff.get("duree")),
 	}
-	character.setdefault("effets_actifs", []).append(entry)
-	return entry
+	return poser_effet(character, entry)
 
 
 # ── Passives : bonus permanent dénormalisé ───────────────────────────────────────

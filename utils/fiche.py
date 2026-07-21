@@ -75,6 +75,11 @@ def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = No
 	niveau = compute_character_level(character.get("xp_total", 0))
 	return {
 		"stat_caps": stat_caps(character, race),
+		# Bonus racial de dépassement (humain) : le montant par caract, et la caract sur
+		# laquelle il a déjà été brûlé (None = encore libre). `stat_caps` en tient déjà
+		# compte, mais le client a besoin des deux pour PROPOSER le geste.
+		"max_bonus": dict(race.get("max_bonus") or {}),
+		"max_bonus_used": character.get("max_bonus_used"),
 		"xp_coeff": character_stats.XP_COEFF,
 		"xp_voc_coeff": character_stats.XP_VOC_COEFF,
 		"xp_niv_prev": xp_seuil_niveau(niveau),

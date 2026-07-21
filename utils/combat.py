@@ -13,7 +13,7 @@ from utils.characters import (
 )
 from utils.consommables import (
 	caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus,
-	_as_int as _eff_int,
+	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
 )
 from utils.sorts import part_durative
 from utils.quetes import maj_progress_kills, maj_progress_chasse
@@ -66,15 +66,10 @@ def _recompute_player_deplacement(joueur: dict) -> None:
 
 
 def _buffs_des_effets(acteur: dict) -> dict:
-	"""Σ des buffs de caract portés par les effets vivants du snapshot."""
-	total: dict = {}
-	for eff in acteur.get("effets_actifs") or []:
-		for code, delta in (eff.get("buffs") or {}).items():
-			try:
-				total[str(code)] = total.get(str(code), 0) + int(delta)
-			except (TypeError, ValueError):
-				continue
-	return total
+	"""Buffs de caract portés par les effets vivants du snapshot — NON CUMULATIFS (meilleur
+	bonus + pire malus par caract, cf. utils/consommables.cumul_effets). Les permanents
+	(équipement, passives) sont déjà figés dans `caracts_base` : rien à scinder ici."""
+	return cumul_effets(acteur.get("effets_actifs") or [])["buffs"]
 
 
 def _refresh_snapshot_stats(acteur: dict) -> None:
@@ -120,9 +115,10 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 	acteur["pv_max"] = max(1, derived.pv_max)
 	acteur["pm_max"] = max(0, derived.pm_max)
 	acteur["deplacement_base"] = derived.deplacement
-	# Esquive = passives permanentes (figées à l'entrée) + effets vivants.
-	acteur["esquive"] = acteur.get("esquive_base", 0) + sum(
-		_eff_int(eff.get("esquive")) for eff in acteur.get("effets_actifs") or [])
+	# Esquive = passives permanentes (figées à l'entrée) + la MEILLEURE des effets vivants
+	# (non-cumul : deux dissimulations ne s'additionnent pas).
+	acteur["esquive"] = acteur.get("esquive_base", 0) + cumul_effets(
+		acteur.get("effets_actifs") or [])["esquive"]
 
 	# `attaque_profils` reste FIGÉ lui aussi : les recalculer relirait les docs d'items en
 	# base (_weapon_attacks fait un get_doc par slot) à chaque tour, dans ce qui doit rester
@@ -160,11 +156,17 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 	L'entrée a EXACTEMENT la forme de celles de character["effets_actifs"] (plus un
 	`pose_tour` retiré à la sortie du combat) : c'est ce qui permet à _finalize_membre de
 	la reverser telle quelle sur le personnage, où le tick d'exploration la reprendra.
+
+	⚠️ Non-cumul : `poser_effet` remplace toute entrée de MÊME SOURCE (`source_id`, timbré
+	ici faute de clé de famille à ce niveau — le snapshot ne sait pas s'il pose un sort, une
+	compétence ou une potion). Vaut aussi pour les debuffs posés sur une cible : relancer le
+	même sort sur le même monstre le rafraîchit au lieu de l'empiler.
 	"""
 	eff = effets or {}
 	if not part_durative(eff):
 		return None
 	entry = {
+		"source_id": identite_source(source),
 		"nom": (source or {}).get("nom", "Effet"),
 		"icon": (source or {}).get("icon", "✨"),
 		"buffs": dict(eff.get("buffs") or {}),
@@ -176,7 +178,7 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 		# son propre tour perdrait un point avant d'avoir servi.
 		"pose_tour": int(tour or 0),
 	}
-	acteur.setdefault("effets_actifs", []).append(entry)
+	poser_effet(acteur, entry)
 	_refresh_snapshot_stats(acteur)
 	return entry
 
@@ -289,8 +291,9 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	tour = int(combat_doc.get("tour", 0) or 0)
 
 	# 1. Régénération (avant le décrément : un effet à 1 restant soigne une dernière fois).
-	pv = sum(_eff_int(eff.get("regen_pv")) for eff in actifs)
-	pm = sum(_eff_int(eff.get("regen_pm")) for eff in actifs)
+	# Non-cumul : seule la MEILLEURE régén compte, pas la somme des effets en cours.
+	cumul = cumul_effets(actifs)
+	pv, pm = cumul["regen_pv"], cumul["regen_pm"]
 	if pv or pm:
 		avant_pv, avant_pm = acteur.get("currentPV", 0), acteur.get("currentPM", 0)
 		acteur["currentPV"] = min(acteur.get("pv_max", avant_pv), avant_pv + pv)

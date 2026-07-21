@@ -64,13 +64,15 @@ def _perso(**extra):
     return base
 
 
-def test_buffs_sommes_multi_effets():
+def test_buffs_non_cumules_entre_effets():
+    # Non-cumul : sur une même caract, seul le MEILLEUR effet à durée s'applique (F : 10,
+    # pas 15). Les caracts que le second est seul à toucher passent normalement (Ag).
     perso = _perso(effets_actifs=[
         {"buffs": {"F": 10}, "restants": 3},
         {"buffs": {"F": 5, "Ag": 10}, "restants": 1},
     ])
     buffed = caracts_avec_buffs(perso)
-    assert buffed["F"] == 55 and buffed["Ag"] == 40
+    assert buffed["F"] == 50 and buffed["Ag"] == 40
     assert buffed["R"] == 40  # non buffé, inchangé
 
 
@@ -152,7 +154,7 @@ def test_caracts_detail_ventile_les_sources_par_origine():
     assert detail["Ag"]["base"] == 30 and detail["Ag"]["total"] == 33
     assert detail["Ag"]["delta"] == 3
     assert detail["Ag"]["sources"] == [
-        {"origine": "equipement", "nom": "Dague", "icon": "🗡️", "delta": 3}]
+        {"origine": "equipement", "nom": "Dague", "icon": "🗡️", "delta": 3, "actif": True}]
 
     assert detail["F"]["total"] == 54 and detail["F"]["delta"] == 14
     origines = {(s["origine"], s["nom"], s["delta"]) for s in detail["F"]["sources"]}
@@ -212,13 +214,17 @@ def test_empiler_effet_instantane_pur_ne_cree_rien():
     assert perso.get("effets_actifs", []) == []
 
 
-def test_empilement_deux_exemplaires():
+def test_deuxieme_exemplaire_remplace():
+    # Non-cumul : reboire la MÊME potion ne crée pas une seconde entrée, elle remplace la
+    # première (durée relancée). Sinon le buff s'empilerait sans limite.
     perso = _perso()
     item = _potion(buffs={"F": 10}, duree=5)
     empiler_effet(perso, item)
+    perso["effets_actifs"][0]["restants"] = 1
     empiler_effet(perso, item)
-    assert len(perso["effets_actifs"]) == 2
-    assert caracts_avec_buffs(perso)["F"] == 60
+    assert len(perso["effets_actifs"]) == 1
+    assert perso["effets_actifs"][0]["restants"] == 5
+    assert caracts_avec_buffs(perso)["F"] == 50
 
 
 def test_appliquer_instantane_clampe_aux_max():
@@ -245,12 +251,14 @@ def test_tick_sans_champ_no_op():
     assert tick_effets(perso) == []
 
 
-def test_regen_bonus_somme():
+def test_regen_bonus_prend_la_meilleure():
+    # Non-cumul : deux régénérations en cours ne s'additionnent pas, seule la meilleure
+    # de chaque type compte (2 et 3 PV/tour → 3, pas 5).
     perso = _perso(effets_actifs=[
         {"regen_pv": 2, "regen_pm": 1, "restants": 3},
         {"regen_pv": 3, "restants": 1},
     ])
-    assert regen_bonus(perso) == (5, 1)
+    assert regen_bonus(perso) == (3, 1)
 
 
 def test_effets_actifs_payload_copies():
