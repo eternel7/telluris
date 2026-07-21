@@ -174,7 +174,7 @@ def _generer_chasse(guild_doc: dict, parent_doc: dict, cible) -> dict | None:
 		return None
 	profil = get_doc(profil_id) or {}
 	niv = int(profil.get("niveau", 1))
-	grade = profil.get("nom", "élite")
+	grade = chasse.qualificatif_de(profil)
 	nom = espece_doc.get("nom") or _nom_espece(espece_id)
 	lieu_nom = lieu_doc.get("label") or lieu_doc.get("nom") or (lieu_id or "").split(":", 1)[-1]
 

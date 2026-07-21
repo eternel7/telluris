@@ -212,6 +212,20 @@ def promouvoir(character: dict, cite_id: str) -> str:
 
 # ── Offre de rang au comptoir (miroir simplifié du transport authoré) ─────────────
 
+# Qualificatifs de l'élite traquée, INDEXÉS PAR NIVEAU DE PROFIL (1 → 6). Le `nom` du doc
+# `profil:*` est taillé pour un aventurier (« Novice », « Seigneur mage ») : collé sur une bête,
+# il sonne faux. On lui substitue ici, POUR LES QUÊTES DE CHASSE SEULEMENT, une échelle de
+# bestiaire. Le doc profil n'est pas modifié (son `nom` sert partout ailleurs).
+QUALIFICATIFS = ["Vicieux", "Sanguinaire", "Farouche", "Impitoyable", "Fléau", "Apocalypse"]
+
+
+def qualificatif_de(profil: dict | None) -> str:
+	"""Qualificatif d'élite d'un profil, d'après son `niveau` (borné aux deux extrémités : un
+	profil de niveau 0 ou > 6 retombe sur le premier / le dernier de l'échelle)."""
+	niv = int((profil or {}).get("niveau", 1) or 1)
+	return QUALIFICATIFS[max(0, min(len(QUALIFICATIFS) - 1, niv - 1))]
+
+
 def _narration_rang(nom: str, grade: str) -> str:
 	"""Texte d'ambiance pré-combat quand l'élite recherchée est enfin débusquée (l'espèce
 	varie → généré à la volée, pas figé dans un nœud de dialogue)."""
@@ -235,7 +249,7 @@ def _construire_quete_rang(comptoir_doc: dict, cite: str, lieu_doc: dict, espece
 	"""Doc `quete:*` d'une épreuve de rang (non persisté ; l'accept en fait un snapshot)."""
 	profil = get_doc_fn(profil_id) or {}
 	niv = int(profil.get("niveau", 1))
-	grade = profil.get("nom", "élite")
+	grade = qualificatif_de(profil)
 	nom = espece_doc.get("nom", "créature")
 	lieu_nom = _lieu_nom(lieu_doc)
 	rang_vise = rang_suivant(rang_courant)

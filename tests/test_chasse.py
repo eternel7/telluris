@@ -190,6 +190,19 @@ def test_offre_rang_tire_une_epreuve_max():
 	assert offre["objectif"]["profil"] == "profil:veteran"   # grade MAX
 	assert offre["rang_vise"] == "E"
 	assert offre["narration"]
+	# Le libellé de l'élite vient de l'échelle de bestiaire (niveau 3 → « Farouche »), JAMAIS
+	# du `nom` du doc profil, taillé pour un aventurier (« Vétéran »).
+	assert "Farouche" in offre["titre"]
+	assert "Vétéran" not in offre["titre"]
+	assert "Farouche" in offre["description"]
+	assert "Farouche" in offre["narration"]
+
+
+def test_qualificatif_par_niveau_et_bornage():
+	assert [chasse.qualificatif_de({"niveau": n}) for n in range(1, 7)] == chasse.QUALIFICATIFS
+	assert chasse.qualificatif_de({"niveau": 99}) == "Apocalypse"   # borné en haut
+	assert chasse.qualificatif_de({"niveau": 0}) == "Vicieux"       # borné en bas
+	assert chasse.qualificatif_de(None) == "Vicieux"                # profil introuvable
 
 
 def test_offre_rang_none_si_rang_max():

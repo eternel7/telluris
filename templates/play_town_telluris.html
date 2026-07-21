@@ -703,7 +703,8 @@
 		.sh-finance .amt { font-weight: bold; color: var(--accent-color); }
 		.sh-slots-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 		.sh-slot { background: var(--btn-bg); border: 1px solid var(--border-color); padding: 6px 8px; font-size: 0.9rem; }
-		.sh-slot-lbl { color: var(--muted); font-size: 0.8rem; display: block; margin-bottom: 2px; }
+		.sh-slot-lbl, .sh-slot-choice { color: var(--muted); font-size: 0.8rem; display: block; margin-bottom: 2px; }
+		.sh-slot-choice { text-align: right; }
 		.sh-slot-empty { color: var(--muted); font-style: italic; }
 		/* Paperdoll équipement */
 		.sh-paperdoll {
@@ -752,7 +753,8 @@
 		}
 		.sh-paperdoll .sh-unequip-btn:hover { background: #ff4757; }
 		.sh-inv-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(74,74,90,0.3); font-size: 0.95rem; flex-wrap: wrap; }
-		.sh-inv-item>span {min-width: 5vw; }
+		.sh-inv-item>span {min-width: 2vw; }
+		.sh-inv-name {min-width: 10vw; }
 		.sh-inv-open { cursor: pointer; }
 		.sh-inv-name.sh-inv-open:hover { color: var(--accent-color); text-decoration: underline; }
 		.sh-paperdoll .sh-slot.occupied { cursor: pointer; }
@@ -769,7 +771,7 @@
 		   Même présentation pour les deux via la classe partagée .sh-inv-box. */
 		/* flex-shrink 0 : les listes Vente/Achat sont aussi des .sub-locations-list (flex
 		   colonne) — sans ça, les lignes se compressent sous max-height au lieu de scroller. */
-		.sh-inv-box .sh-inv-item { flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; }
+		.sh-inv-box .sh-inv-item { flex-wrap: wrap; overflow: hidden; flex-shrink: 0; }
 		.sh-inv-box .sh-inv-name {
 			flex: 1 1 0;
 			min-width: 50px;
@@ -784,7 +786,18 @@
 			scrollbar-width: thin;
 			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
+		/* Onglet 🎒 : paperdoll et sac côte à côte hors mobile (même recette que
+		   .grp-inv-wrap du panneau Groupe). Sous 768px — seuil « mobile » de la fiche —
+		   ils se réempilent. min-width:0 : sans lui, l'ellipsis des noms d'objet
+		   ferait déborder la colonne au lieu de tronquer. */
+		.sh-inv-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; align-items: start; }
+		.sh-inv-col  { min-width: 0; }
+		@media (max-width: 768px) { .sh-inv-wrap { grid-template-columns: 1fr; } }
 		.sh-inv-scroll { position: relative; height: 260px;}
+		@media (min-width: 768px) {
+			#sh-sac-scroll { height : 60vh; }
+			#sh-inv-sac { max-height: stretch; }
+		}
 		/* Marge de scroll d'1 ligne : le dernier objet reste entièrement visible en bas. */
 		.sh-inv-scroll.scrollable .sh-inv-box { padding-bottom: var(--inv-row-h); }
 		/* Ombre sur la demi-ligne du bas quand il reste des objets à scroller. */
@@ -1587,6 +1600,11 @@
 							<div class="sh-finance">🟤 <span class="amt" id="amt-cuivre">{{ character.get("cuivre",0) }}</span> Cuivre</div>
 						</div>
 
+						{# Deux colonnes hors mobile (.sh-inv-wrap) : la silhouette à gauche, le sac
+						   à droite — équiper depuis le sac ne demande plus de faire défiler l'onglet.
+						   Charge et « Au sol » restent en pleine largeur, dessous. #}
+						<div class="sh-inv-wrap">
+						<div class="sh-inv-col">
 						<div class="sh-section">🛡 Équipement</div>
 						{% set slots = character.get("slots",{}) %}
 						<div class="sh-paperdoll">
@@ -1614,6 +1632,19 @@
 							</div>
 							{% endfor %}
 						</div>
+						</div><!-- /.sh-inv-col (équipement) -->
+
+						<div class="sh-inv-col">
+						{# Pas de margin-top ici : en deux colonnes cet en-tête doit s'aligner sur
+						   celui de l'équipement (la marge par défaut de .sh-section suffit). #}
+						<div class="sh-section" style="display:flex; align-items:center; justify-content:space-between">
+							<span>🎒 Sac</span>
+							<button type="button" id="inv-sort-btn" class="sh-drop-btn" onclick="cycleInvSort()"
+								title="Trier le sac par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+						</div>
+						<div class="sh-inv-scroll sh-scroll" id="sh-sac-scroll"><div id="sh-inv-sac" class="sh-inv-box"></div></div>
+						</div><!-- /.sh-inv-col (sac) -->
+						</div><!-- /.sh-inv-wrap -->
 
 						<div class="sh-section">⚖️ Charge</div>
 						<div class="sh-stat-bar-wrapper" title="Charge portée. Le repère marque la moitié de la charge max (seuil de pénalité en combat).">
@@ -1623,13 +1654,7 @@
 							</div>
 						</div>
 						<div id="charge-label" class="sh-charge-label"></div>
-						
-						<div class="sh-section" style="margin-top:14px; display:flex; align-items:center; justify-content:space-between">
-							<span>🎒 Sac</span>
-							<button type="button" id="inv-sort-btn" class="sh-drop-btn" onclick="cycleInvSort()"
-								title="Trier le sac par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
-						</div>
-						<div class="sh-inv-scroll sh-scroll" id="sh-sac-scroll"><div id="sh-inv-sac" class="sh-inv-box"></div></div>
+
 						<div class="sh-section" id="sh-sol-section" style="margin-top:14px;display:none; align-items:center; justify-content:space-between">
 								<span>⬇️ Au sol</span>
 								<button type="button" id="sol-sort-btn" class="sh-drop-btn" onclick="cycleSolSort()"
@@ -3509,14 +3534,14 @@ function _refreshInventaire() {
 		// sélecteur sur la ligne et non sur l'exemplaire (l'index n'est pas persisté).
 		const assignable = _estConsommable(item) && _consosCombat.some(c => c.item_id === item._id);
 		const consoHtml = _estConsommable(item)
-			? (assignable ? _slotSelect('consommable', item._id) : '')
+			? (assignable ? `<span class='sh-slot-choice'>case: </span>`+_slotSelect('consommable', item._id) : '')
 			  + `<button class="sh-drop-btn" onclick="consommerItem(${idx},'${item._id}',this)" title="Consommer">🍽️ Consommer</button>`
 			: '';
 		return `<div class="sh-inv-item">
 			<span class="sh-inv-open" onclick="openItemDetail('sac',${idx})" title="Voir la fiche">${item.icon || '📦'}</span>
 			<span class="sh-inv-name sh-inv-open" onclick="openItemDetail('sac',${idx})" title="Voir la fiche">${item.nom || '—'}</span>
 			${poidsHtml}
-			${rarHtml}${equipHtml}<span class="sh-inv-actions">${consoHtml}${couperHtml}${dropHtml}</span>
+			${rarHtml}<span class="sh-inv-actions">${dropHtml}</span>${consoHtml}${couperHtml}${equipHtml}
 		</div>`;
 	}).join('');
 	if (scrollEl) scrollEl.classList.toggle('scrollable', _inventaire.length > INV_VISIBLE);
