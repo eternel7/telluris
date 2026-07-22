@@ -779,12 +779,10 @@
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
-		/* 10 objets visibles puis scroll vertical. */
+		/* 10 objets visibles puis scroll vertical (le défilement lui-même est réglé
+		   par la brique commune plus bas, partagée avec les listes de la fiche). */
 		.sh-inv-box {
 			max-height: calc(var(--inv-row-h) * 10);
-			overflow-y: auto;
-			scrollbar-width: thin;
-			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
 		/* Onglet 🎒 : paperdoll et sac côte à côte hors mobile (même recette que
 		   .grp-inv-wrap du panneau Groupe). Sous 768px — seuil « mobile » de la fiche —
@@ -793,22 +791,36 @@
 		.sh-inv-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; align-items: start; }
 		.sh-inv-col  { min-width: 0; }
 		@media (max-width: 768px) { .sh-inv-wrap { grid-template-columns: 1fr; } }
-		.sh-inv-scroll { position: relative; height: 260px;}
+		.sh-inv-scroll { height: 260px;}
 		@media (min-width: 768px) {
 			#sh-sac-scroll { height : 60vh; }
 			#sh-inv-sac { max-height: stretch; }
 		}
 		/* Marge de scroll d'1 ligne : le dernier objet reste entièrement visible en bas. */
 		.sh-inv-scroll.scrollable .sh-inv-box { padding-bottom: var(--inv-row-h); }
-		/* Ombre sur la demi-ligne du bas quand il reste des objets à scroller. */
-		.sh-inv-scroll.sh-scroll.scrollable::after {
-			height: calc(var(--inv-row-h) / 2);
-		}
-		.sh-scroll.scrollable::after {
-			height: 20px;
+
+		/* ── Ombre de bas de liste — brique PARTAGÉE par TOUTES les listes longues ──
+		   Un wrapper .sh-scroll qui NE DÉFILE PAS (sa hauteur est donnée par son
+		   enfant) + UN enfant qui défile. L'ombre est un ::after en absolute sur le
+		   WRAPPER : posée sur l'élément qui défile, elle remonterait avec le contenu
+		   — ne jamais remettre la règle sur le scroller lui-même.
+		   .scrollable = « il reste quelque chose à faire défiler » : bascule comptée
+		   en JS pour les sacs (length > INV_VISIBLE), posée EN DUR dans le markup
+		   pour les listes de la fiche (hauteur en vh, aucun compteur ne s'applique). */
+		.sh-scroll { position: relative; }
+		.sh-scroll.scrollable:not(:has(.sh-empty))::after {
 			content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+			height: 20px;
 			background: linear-gradient(to bottom, transparent, var(--panel-bg));
 			pointer-events: none;
+		}
+		/* Sacs : l'ombre vaut une demi-ligne d'objet. */
+		.sh-inv-scroll.sh-scroll.scrollable::after { height: calc(var(--inv-row-h) / 2); }
+		/* Réglages communs à TOUT enfant qui défile (sacs + listes de la fiche). */
+		.sh-inv-box, .sh-rel-scroll {
+			overflow-y: auto;
+			scrollbar-width: thin;
+			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
 		/* Groupe des boutons d'action d'une ligne (sac/sol) → reste solidaire à droite. */
 		.sh-inv-actions { display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; }
@@ -944,14 +956,10 @@
 			background: var(--input-bg, #1c1c1c); color: inherit;
 			border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem;
 		}
-		/* Conteneur scrollable GÉNÉRIQUE des listes longues de la fiche (relations,
-		   quêtes, sorts, compétences…). Une classe de HAUTEUR l'accompagne par
-		   famille de liste ; le dernier enfant doit être .sh-list-shadow-overlay. */
-		.sh-rel-scroll { max-height: 45vh; overflow-y: auto; overflow-x: hidden;
-			position: relative;
-			scrollbar-width: thin;
-			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-		}
+		/* Scroller GÉNÉRIQUE des listes longues de la fiche (relations, quêtes,
+		   sorts, compétences…). Il est TOUJOURS l'enfant d'un wrapper .sh-scroll,
+		   qui porte l'ombre et la classe de HAUTEUR de sa famille de liste. */
+		.sh-rel-scroll { max-height: 45vh; overflow-x: hidden; }
 		.sh-ville { border-bottom: 2px solid var(--border-color); }
 		.sh-ville.hidden { display: none; }
 		.sh-ville-head {
@@ -978,22 +986,13 @@
 		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: nowrap; }
 		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
-		.sh-quest-list-active.sh-rel-scroll { max-height : 40vh; }
-		.sh-quest-list-ended.sh-rel-scroll { max-height : 35vh; }
-		/* Listes de l'onglet ⚡ (sorts, écoles, compétences, apprentissages) : le
-		   contenu est réécrit en innerHTML dans le div INTERNE, l'ombre vit donc
-		   dans le wrapper et survit à chaque rendu client. */
-		.sh-capa-list.sh-rel-scroll { max-height: 35vh; }
-		div.sh-list-shadow-overlay {
-			position: sticky;
-			bottom: 0px;
-			left: 0px;
-			width: 100%;
-			height: 20px;
-			pointer-events: none;
-			background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
-			z-index: 10;
-		}
+		/* Hauteurs par famille de liste : la classe est portée par le WRAPPER, la
+		   contrainte s'applique au scroller. Listes de l'onglet ⚡ (sorts, écoles,
+		   compétences, apprentissages) : le contenu est réécrit en innerHTML dans
+		   le scroller, l'ombre vit dans le wrapper et survit à chaque rendu client. */
+		.sh-quest-list-active > .sh-rel-scroll { max-height : 40vh; }
+		.sh-quest-list-ended > .sh-rel-scroll { max-height : 34vh; }
+		.sh-capa-list > .sh-rel-scroll { max-height: 34vh; }
 		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
 		.sh-quest-title { flex: 1; min-width: 200px; font-weight: bold; font-size: 1rem; }
@@ -1675,33 +1674,28 @@
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
 						<div class="sh-section" style="margin-top:14px">⚡ Compétences</div>
-						<div class="sh-capa-list sh-rel-scroll">
-							<div id="sh-competences-connues"></div>
-							<div class="sh-list-shadow-overlay"></div>
+						<div class="sh-capa-list sh-scroll scrollable">
+							<div id="sh-competences-connues" class="sh-rel-scroll"></div>
 						</div>
 						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
-						<div class="sh-capa-list sh-rel-scroll">
-							<div id="sh-competences-apprenables"></div>
-							<div class="sh-list-shadow-overlay"></div>
+						<div class="sh-capa-list sh-scroll scrollable">
+							<div id="sh-competences-apprenables" class="sh-rel-scroll"></div>
 						</div>
 						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
 						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
 						<div class="sh-section" style="display:flex; align-items:center; justify-content:space-between">
 							<span>🔮 Sorts connus</span>
 						</div>
-						<div class="sh-capa-list sh-rel-scroll">
-							<div id="sh-sorts-connus"></div>
-							<div class="sh-list-shadow-overlay"></div>
+						<div class="sh-capa-list sh-scroll scrollable">
+							<div id="sh-sorts-connus" class="sh-rel-scroll"></div>
 						</div>
 						<div class="sh-section" style="margin-top:14px">🏫 Écoles de magie</div>
-						<div class="sh-capa-list sh-rel-scroll">
-							<div id="sh-sorts-magies"></div>
-							<div class="sh-list-shadow-overlay"></div>
+						<div class="sh-capa-list sh-scroll scrollable">
+							<div id="sh-sorts-magies" class="sh-rel-scroll"></div>
 						</div>
 						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
-						<div class="sh-capa-list sh-rel-scroll">
-							<div id="sh-sorts-apprenables"></div>
-							<div class="sh-list-shadow-overlay"></div>
+						<div class="sh-capa-list sh-scroll scrollable">
+							<div id="sh-sorts-apprenables" class="sh-rel-scroll"></div>
 						</div>
 					</div>
 
@@ -1719,9 +1713,8 @@
 						   renderFicheRelations (RELATIONS_LIEUX_INIT à l'init + resync marchandage). #}
 					   <div class="sh-section">🏪 Lieux connus</div>
 						<input id="sh-rel-filter" class="sh-rel-filter" type="search" placeholder="🔍 Filtrer les lieux…" autocomplete="off">
-						<div id="sh-rel-lieux-scroll" class="sh-rel-scroll">
-							<div id="sh-rel-lieux"><!-- rendu par renderFicheRelations --></div>
-							<div class="sh-list-shadow-overlay"></div>
+						<div id="sh-rel-lieux-scroll" class="sh-scroll scrollable">
+							<div id="sh-rel-lieux" class="sh-rel-scroll"><!-- rendu par renderFicheRelations --></div>
 						</div>
 
 						{# Compagnons recrutés (affinités 0–100, neutre 50, alignée sur les lieux) :
@@ -1736,8 +1729,9 @@
 						{% set qa = character.get("quetes_actives_detail",[]) %}
 						{% set qt = character.get("quetes_terminees_detail",[]) %}
 						{% if qa %}
-							<div class="sh-section">📜 Actives</div>							
-							<div class="sh-quest-list-active sh-rel-scroll">
+							<div class="sh-section">📜 Actives</div>
+							<div class="sh-quest-list-active sh-scroll scrollable">
+							<div class="sh-rel-scroll">
 							{% for q in qa %}
 							<div class="sh-quest {{ q.get('rang','F') }}">
 								<div class="sh-quest-hdr">
@@ -1756,18 +1750,19 @@
 								{% if q.get("recompenses") %}<div class="sh-quest-reward">{% if q.recompenses.get("or") %}<span>🟡 {{ q.recompenses.or }} or</span>{% endif %}{% if q.recompenses.get("argent") %}<span>⚪ {{ q.recompenses.argent }} ar</span>{% endif %}{% if q.recompenses.get("xp") %}<span>✨ {{ q.recompenses.xp }} XP</span>{% endif %}</div>{% endif %}
 							</div>
 							{% endfor %}
-							<div class="sh-list-shadow-overlay"></div>
+							</div>
 							</div>
 						{% endif %}
 						{% if qt %}
 							<div class="sh-section" style="opacity:0.6">✓ Terminées ({{ qt|length }})</div>
-							<div class="sh-quest-list-ended sh-rel-scroll">
+							<div class="sh-quest-list-ended sh-scroll scrollable">
+							<div class="sh-rel-scroll">
 							{% for q in qt %}
 							<div class="sh-quest {{ q.get('rang','F') }}" style="opacity:0.5">
 								<div class="sh-quest-hdr"><span class="sh-quest-rang">{{ q.get("rang","F") }}</span><span class="sh-quest-title">{{ q.get("titre","—") }}</span><span class="sh-quest-status termine">Terminée</span></div>
 							</div>
 							{% endfor %}
-							<div class="sh-list-shadow-overlay"></div>
+							</div>
 							</div>
 						{% endif %}
 						{% if not qa and not qt %}<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>{% endif %}
@@ -1809,13 +1804,13 @@
 			<button type="button" id="sell-sort-btn" class="sh-drop-btn" onclick="cycleSellSort()"
 				title="Trier la vente par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
 		</div>
-		<div class="sh-inv-scroll" id="sell-scroll"><ul id="sell-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+		<div class="sh-inv-scroll sh-scroll" id="sell-scroll"><ul id="sell-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
 		<div style="display:flex;align-items:center;justify-content:space-between;margin:1rem 0 0">
 			<h2 style="margin:0">💸 Achat</h2>
 			<button type="button" id="buy-sort-btn" class="sh-drop-btn" onclick="cycleBuySort()"
 				title="Trier l'achat par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
 		</div>
-		<div class="sh-inv-scroll" id="buy-scroll"><ul id="buy-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+		<div class="sh-inv-scroll sh-scroll" id="buy-scroll"><ul id="buy-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
 	</div><!-- /#sell-panel -->
 	<div id="quetes-panel" class="panel-hidden panel-frame board-panel" aria-label="Tableau des quêtes de la guilde">
 		<div class="sell-topbar">
@@ -1890,14 +1885,14 @@
 							<strong id="grp-inv-nom-principal">Vous</strong>
 							<span class="sh-inv-poids" id="grp-inv-charge-principal"></span>
 						</div>
-						<div class="sh-inv-scroll sh-scroll scrollable"><div id="grp-inv-principal" class="sh-inv-box"></div></div>
+						<div class="sh-inv-scroll sh-scroll"><div id="grp-inv-principal" class="sh-inv-box"></div></div>
 					</div>
 					<div class="grp-inv-col">
 						<div class="grp-inv-head">
 							<select id="grp-inv-select" onchange="onGroupeInvSelect(this.value)"></select>
 							<span class="sh-inv-poids" id="grp-inv-charge-compagnon"></span>
 						</div>
-						<div class="sh-inv-scroll sh-scroll scrollable"><div id="grp-inv-compagnon" class="sh-inv-box"></div></div>
+						<div class="sh-inv-scroll sh-scroll"><div id="grp-inv-compagnon" class="sh-inv-box"></div></div>
 					</div>
 				</div>
 			</div>
@@ -5177,7 +5172,9 @@ function renderFicheQuetes(data) {
 	let html = '';
 	if (qa.length) {
 		html += '<div class="sh-section">📜 Actives</div>';
-		html += `<div class="sh-quest-list-active sh-rel-scroll">`;
+		// ⚠️ Double rendu : ce markup doit rester STRICTEMENT identique à celui de
+		// l'onglet 📜 côté Jinja (wrapper .sh-scroll qui porte l'ombre + scroller).
+		html += `<div class="sh-quest-list-active sh-scroll scrollable"><div class="sh-rel-scroll">`;
 		html += qa.map(q => {
 			const rang = q.rang || 'F';
 			const rew = q.recompenses || {};
@@ -5214,18 +5211,18 @@ function renderFicheQuetes(data) {
 				${reward ? `<div class="sh-quest-reward">${reward}</div>` : ''}
 			</div>`;
 		}).join('');
-		html += `<div class="sh-list-shadow-overlay"></div></div>`;
+		html += `</div></div>`;
 	}
 	if (qt.length) {
 		html += `<div class="sh-section" style="opacity:0.6">✓ Terminées (${qt.length})</div>`;
-		html += `<div class="sh-quest-list-ended sh-rel-scroll">`;
+		html += `<div class="sh-quest-list-ended sh-scroll scrollable"><div class="sh-rel-scroll">`;
 		html += qt.map(q => {
 			const rang = q.rang || 'F';
 			return `<div class="sh-quest ${rang}" style="opacity:0.5">
 				<div class="sh-quest-hdr"><span class="sh-quest-rang">${rang}</span><span class="sh-quest-title">${q.titre || '—'}</span><span class="sh-quest-status termine">Terminée</span></div>
 			</div>`;
 		}).join('');
-		html += `<div class="sh-list-shadow-overlay"></div></div>`;
+		html += `</div></div>`;
 	}
 	if (!qa.length && !qt.length) {
 		html = '<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>';
@@ -5869,10 +5866,17 @@ function renderGroupeInventaire() {
 	const compagnon = (data.sacs || {})[_grpSelId] || {inventaire: [], charge: 0, charge_max: 0};
 	_grpCharge('grp-inv-charge-principal', principal);
 	_grpCharge('grp-inv-charge-compagnon', compagnon);
-	document.getElementById('grp-inv-principal').innerHTML =
-		_grpSac(principal.inventaire, compagnon, 'vers_compagnon');
-	document.getElementById('grp-inv-compagnon').innerHTML =
-		_grpSac(compagnon.inventaire, principal, 'vers_principal');
+	_grpRemplirSac('grp-inv-principal', principal.inventaire, _grpSac(principal.inventaire, compagnon, 'vers_compagnon'));
+	_grpRemplirSac('grp-inv-compagnon', compagnon.inventaire, _grpSac(compagnon.inventaire, principal, 'vers_principal'));
+}
+
+// Un sac du panneau Groupe : même bascule comptée que le sac de la fiche et que le
+// marchand — l'ombre du wrapper .sh-scroll ne s'allume que s'il reste à faire défiler.
+function _grpRemplirSac(elId, inventaire, html) {
+	const box = document.getElementById(elId);
+	if (!box) return;
+	box.innerHTML = html;
+	if (box.parentElement) box.parentElement.classList.toggle('scrollable', (inventaire || []).length > INV_VISIBLE);
 }
 
 function _grpCharge(elId, porteur) {
