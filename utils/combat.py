@@ -15,7 +15,7 @@ from utils.consommables import (
 	caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus,
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
 )
-from utils.sorts import part_durative
+from utils.sorts import part_durative, effets_d_arme
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
@@ -212,6 +212,31 @@ def _appliquer_effet_sur_cible(combat_doc: dict, cible: dict, source: dict,
 				 f"{entry.get('nom', 'un effet')} ({entry['restants']} tour(s)).",
 	})
 	return entry
+
+
+def _appliquer_effet_arme(combat_doc: dict, attaquant: dict, cible: dict,
+						  profil: dict) -> dict | None:
+	"""Empile la part à durée portée par l'ARME à l'impact — bolas qui entravent, lame
+	qui affaiblit, hampe qui étourdit.
+
+	N'appelle que des chokepoints existants : un effet d'arme se pose exactement comme un
+	effet de sort, sur le même bloc `effets`, avec la même durée en tours de celui qui le
+	subit. À n'appeler qu'après une TOUCHE (le seuil de toucher est le seul jet ; il n'y a
+	pas de résistance propre à l'effet) et après la mise à jour de `vivant` : le
+	chokepoint refuse une cible morte, on ne ralentit pas un cadavre.
+
+	`effets_cible` décide de QUI subit — `ennemi` (le défaut) ou `soi`, une arme qui
+	nourrit celui qui la manie. `_empiler_effet_combat` timbre l'identité de la source, si
+	bien qu'une arme frappant deux fois **relance** son effet au lieu de l'empiler
+	(non-cumul : une source = une entrée)."""
+	effets = profil.get("effets")
+	if not effets:
+		return None
+	source = {"nom": profil.get("label", "Arme"), "icon": "⚔️",
+			  "id": profil.get("effets_source_id") or ""}
+	if profil.get("effets_cible") == "soi":
+		return _empiler_effet_combat(attaquant, source, effets, combat_doc["tour"])
+	return _appliquer_effet_sur_cible(combat_doc, cible, source, effets, combat_doc["tour"])
 
 
 def _lancer_sur_allie(combat_doc: dict, lanceur: dict, cible: dict, source: dict,
@@ -815,15 +840,33 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 	- cac : toucher cc, dégâts degats_cc (basé F), portée = item.portee (>=1).
 	- jet : toucher cd, dégâts degats_cc (basé F), portée = item.portee + F//JET_PORTEE_F_DIV.
 	- tir : toucher cd, dégâts degats_cd (basé Ag), portée = item.portee.
+
+	Un profil emporte aussi la part DURATIVE du bloc `effets` de l'arme qui l'a gagné
+	(`effets`/`effets_cible`), appliquée à l'impact par `_appliquer_effet_arme`. C'est le
+	seul moment où les docs d'items sont relus : `attaque_profils` reste ensuite FIGÉ dans
+	le snapshot (cf. `_refresh_snapshot_stats`), donc l'effet d'une arme est arrêté à
+	l'entrée en combat comme sa portée et ses dégâts. Un profil sans `effets` (arme
+	ordinaire, ou combat déjà en base) ne déclenche rien : aucune migration.
 	"""
 	jet_div = max(1, character_stats.JET_PORTEE_F_DIV)
 	best: dict = {}
 
-	def consider(mode, portee, ranged, toucher, degats, label):
+	def consider(mode, portee, ranged, toucher, degats, item):
 		cur = best.get(mode)
-		if cur is None or portee > cur["portee"]:
-			best[mode] = {"mode": mode, "portee": max(1, int(portee)), "ranged": ranged,
-						  "toucher": toucher, "degats": degats, "label": label}
+		if cur is not None and portee <= cur["portee"]:
+			return
+		profil = {"mode": mode, "portee": max(1, int(portee)), "ranged": ranged,
+				  "toucher": toucher, "degats": degats, "label": item.get("nom", "Arme")}
+		# La part durative SEULE : les dégâts d'une arme passent par ses `bonus_degats*`,
+		# pas par ce bloc. Rien à empiler ⇒ pas de clé, donc pas de test à l'impact.
+		effets, cible = effets_d_arme(item)
+		if part_durative(effets):
+			profil["effets"] = effets
+			profil["effets_cible"] = cible
+			# Identité de non-cumul ancrée sur l'ID de l'arme, pas sur son nom : deux docs
+			# peuvent partager un `nom`, jamais un `_id` (cf. cle_source).
+			profil["effets_source_id"] = item.get("_id", "")
+		best[mode] = profil
 
 	for ref in (character.get("slots") or {}).values():
 		item_id = item_ref_id(ref)
@@ -834,13 +877,12 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 			continue
 		tags = set(item.get("tags", []))
 		base_portee = int(item.get("portee", 1) or 1)
-		nom = item.get("nom", "Arme")
 		if "tir" in tags:
-			consider("tir", base_portee, True, "cd", "degats_cd", nom)
+			consider("tir", base_portee, True, "cd", "degats_cd", item)
 		elif "jet" in tags:
-			consider("jet", base_portee + base.f // jet_div, True, "cd", "degats_cc", nom)
+			consider("jet", base_portee + base.f // jet_div, True, "cd", "degats_cc", item)
 		else:  # cac par défaut (inclut les armes d'hast, portee >= 2)
-			consider("cac", base_portee, False, "cc", "degats_cc", nom)
+			consider("cac", base_portee, False, "cc", "degats_cc", item)
 
 	best.setdefault("cac", {"mode": "cac", "portee": 1, "ranged": False,
 							"toucher": "cc", "degats": "degats_cc", "label": "Mains nues"})
@@ -1875,8 +1917,13 @@ def resolve_action(
 						f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
 					),
 				})
+			# Après la mise à jour de `vivant` : le chokepoint refuse une cible morte.
+			effet_arme = _appliquer_effet_arme(combat_doc, joueur, monstre, profil)
 			result = {"hit": True, "dmg": dmg, "critique": jet["critique"],
 					  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
+			if effet_arme:
+				result["effet_arme"] = {"nom": effet_arme.get("nom"),
+										"restants": effet_arme.get("restants")}
 		else:
 			combat_doc["log"].append({
 				"tour": combat_doc["tour"],

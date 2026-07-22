@@ -64,15 +64,18 @@ def test_normaliser_defauts_et_champs():
     assert s["composants"] == []
 
 
-def test_normaliser_purge_buff_V_et_composant_sans_item():
+def test_normaliser_conserve_buff_V_et_purge_composant_sans_item():
+    # V n'est plus filtrée : elle se buffe à SON échelle (1-10), y compris via un
+    # composant. Le filtre historique protégeait d'une faute d'échelle, mais il rendait
+    # inexprimable tout effet portant sur le déplacement (entrave, hâte).
     s = normaliser_sort(_sort(
         effets={"buffs": {"V": 3, "F": 10}, "duree": 4},
         composants=[{"consomme": True, "bonus": {"pv": 5}},  # pas d'item → ignoré
                     {"item": "item:os", "bonus": {"buffs": {"V": 2, "Vol": 5}}}],
     ))
-    assert s["effets"]["buffs"] == {"F": 10}
+    assert s["effets"]["buffs"] == {"V": 3, "F": 10}
     assert len(s["composants"]) == 1
-    assert s["composants"][0]["bonus"]["buffs"] == {"Vol": 5}
+    assert s["composants"][0]["bonus"]["buffs"] == {"V": 2, "Vol": 5}
 
 
 # ── Fusion des effets + bonus ────────────────────────────────────────────────────

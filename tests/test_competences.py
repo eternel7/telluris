@@ -79,10 +79,13 @@ def test_mode_et_jet_inconnus_retombent_sur_les_defauts():
     assert comp["mode"] == "passive" and comp["jet"] == "cc"
 
 
-def test_buff_sur_v_filtre():
-    # V est sur l'échelle 1-10 : jamais bufffé (règle partagée avec sorts/consommables).
+def test_buff_sur_v_conserve_a_son_echelle():
+    # V passe désormais comme les autres (règle partagée avec sorts/consommables), MAIS
+    # sur son échelle 1-10 : ici +3 V = +3 cases de déplacement, là où +5 F est un
+    # cinquième de F. C'est la donnée qui porte l'ordre de grandeur, pas le normaliseur —
+    # l'ancien filtre rendait toute entrave (bolas) impossible à exprimer.
     comp = normaliser_competence(_passive(effets={"buffs": {"V": 3, "F": 5}}))
-    assert comp["effets"]["buffs"] == {"F": 5}
+    assert comp["effets"]["buffs"] == {"V": 3, "F": 5}
 
 
 def test_buff_negatif_conserve():

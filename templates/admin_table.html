@@ -120,8 +120,16 @@
 		tbody tr { cursor: pointer; }
 		tbody tr:hover td { background: rgba(75,143,200,0.08); }
 		tbody tr.selected td { background: rgba(200,168,75,0.16); }
+		/* Après `.selected` (même spécificité, la dernière gagne) : une ligne ouverte dans
+		   l'éditeur doit quand même montrer qu'elle est promise à la suppression. */
+		tbody tr.checked td { background: rgba(200,75,75,0.14); }
 		.muted-cell { color: var(--muted); font-style: italic; }
 		.count { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; }
+
+		/* Colonne des cases à cocher : largeur fixe, ni triable ni redimensionnable. */
+		.check-col { width: 34px; text-align: center; padding: 6px 4px; }
+		.check-col input { accent-color: var(--accent); cursor: pointer; }
+		.table-foot { display: flex; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
 
 		/* Éditeur JSON en overlay fixe à droite : le tableau reste scrollable/utilisable dessous. */
 		#editor-card {
@@ -180,6 +188,11 @@
 					<tbody id="data-body"></tbody>
 				</table>
 			</div>
+			<div class="table-foot">
+				<button class="btn danger" type="button" id="bulk-delete-btn" disabled
+					title="Supprimer définitivement les lignes cochées et affichées">🗑 Supprimer la sélection (0)</button>
+				<span class="status" id="bulk-status" style="margin-top:0"></span>
+			</div>
 		</div>
 
 		<!-- Éditeur JSON -->
@@ -214,6 +227,7 @@ let filters = {};        // { colonne: texte }
 let widths  = {};        // { colonne: largeur px } (redimensionnement)
 let dragCol = null;      // colonne en cours de glisser-déposer (réordonnancement)
 let selected = null;     // index dans docs[] de la ligne ouverte dans l'éditeur
+let checked = new Set(); // _id des lignes cochées — JAMAIS des index : un splice les décale
 let currentType = null;  // type actuellement chargé (clé de persistance)
 const DEFAULT_W = 150;   // largeur de colonne par défaut (px)
 const LS_KEY = 'telluris.admin_table.v1.';   // préfixe localStorage (par type)
@@ -240,6 +254,7 @@ async function loadType() {
 		currentType = t;
 		initColumns();
 		restoreState(t);   // applique les préférences mémorisées pour ce type (ou les défauts)
+		checked.clear();   // la sélection est transitoire (jamais persistée), comme `selected`
 		closeEditor();
 		$('cols-card').style.display = docs.length ? '' : 'none';
 		$('table-card').style.display = docs.length ? '' : 'none';
@@ -372,7 +387,17 @@ function renderHead() {
 	const filterThs = visible.map(c =>
 		`<th><input class="filter-input" data-col="${esc(c)}" value="${esc(filters[c] || '')}" placeholder="filtrer…"></th>`
 	).join('');
-	head.innerHTML = `<tr>${ths}</tr><tr class="filters">${filterThs}</tr>`;
+	// Colonne des cases à cocher en tête des DEUX lignes (l'alignement des colonnes sticky en dépend).
+	const checkTh = '<th class="check-col"><input type="checkbox" id="check-all"'
+		+ ' title="Tout cocher / décocher (lignes affichées)"></th>';
+	head.innerHTML = `<tr>${checkTh}${ths}</tr><tr class="filters"><th class="check-col"></th>${filterThs}</tr>`;
+
+	// Tout cocher / décocher : n'agit que sur les lignes AFFICHÉES (comme la suppression et les exports).
+	$('check-all').addEventListener('change', e => {
+		const ids = computeVisibleRows().map(r => docs[r.i] && docs[r.i]._id).filter(Boolean);
+		ids.forEach(id => { if (e.target.checked) checked.add(id); else checked.delete(id); });
+		renderBody();
+	});
 
 	// Tri : clic sur le libellé (pas sur la poignée).
 	head.querySelectorAll('.th-label').forEach(lbl => {
@@ -419,6 +444,32 @@ function computeVisibleRows() {
 	return rows;
 }
 
+// Lignes cochées ET actuellement affichées (filtres appliqués) — miroir de ce que font
+// les exports. SOURCE UNIQUE du compteur du bouton, de son état et de la suppression :
+// une coche masquée par un filtre survit dans `checked`, mais n'est pas supprimée.
+function visibleCheckedIds() {
+	return computeVisibleRows()
+		.map(r => docs[r.i] && docs[r.i]._id)
+		.filter(id => id && checked.has(id));
+}
+
+// La case « tout cocher » dépend du filtre courant → recalculée à chaque rendu du corps.
+function syncCheckAll() {
+	const box = $('check-all');
+	if (!box) return;
+	const ids = computeVisibleRows().map(r => docs[r.i] && docs[r.i]._id).filter(Boolean);
+	const n = ids.filter(id => checked.has(id)).length;
+	box.checked = n > 0 && n === ids.length;
+	box.indeterminate = n > 0 && n < ids.length;
+}
+
+function refreshDeleteBtn() {
+	const n = visibleCheckedIds().length;
+	const btn = $('bulk-delete-btn');
+	btn.textContent = '🗑 Supprimer la sélection (' + n + ')';
+	btn.disabled = !n;
+}
+
 // ── Rendu : corps (filtré puis trié) ───────────────────────────────
 function renderBody() {
 	const rows = computeVisibleRows();
@@ -429,13 +480,34 @@ function renderBody() {
 			const cls = (r.d[c] === undefined || r.d[c] === null || r.d[c] === '') ? ' class="muted-cell"' : '';
 			return `<td${cls} title="${esc(fullText(r.d[c]))}">${esc(txt)}</td>`;
 		}).join('');
-		return `<tr data-idx="${r.i}"${r.i === selected ? ' class="selected"' : ''}>${tds}</tr>`;
+		// Une ligne sans `_id` n'est ni cochable ni supprimable.
+		const id = r.d && r.d._id;
+		const check = `<td class="check-col"><input type="checkbox" class="row-check"`
+			+ (id ? ` data-id="${esc(id)}"${checked.has(id) ? ' checked' : ''}` : ' disabled')
+			+ `></td>`;
+		const cls = [r.i === selected ? 'selected' : '', id && checked.has(id) ? 'checked' : '']
+			.filter(Boolean).join(' ');
+		return `<tr data-idx="${r.i}"${cls ? ` class="${cls}"` : ''}>${check}${tds}</tr>`;
 	}).join('');
 
 	$('data-body').querySelectorAll('tr').forEach(tr => {
 		tr.addEventListener('click', () => openEditor(parseInt(tr.dataset.idx, 10)));
 	});
+	// La cellule ENTIÈRE avale le clic : cliquer à côté de la case ouvrirait sinon l'éditeur.
+	$('data-body').querySelectorAll('td.check-col').forEach(td => {
+		td.addEventListener('click', e => e.stopPropagation());
+	});
+	$('data-body').querySelectorAll('input.row-check').forEach(cb => {
+		cb.addEventListener('change', () => {
+			const id = cb.dataset.id;
+			if (!id) return;
+			if (cb.checked) checked.add(id); else checked.delete(id);
+			cb.closest('tr').classList.toggle('checked', cb.checked);
+			syncCheckAll(); refreshDeleteBtn();   // pas de renderBody() : on perdrait le focus
+		});
+	});
 	$('row-count').textContent = rows.length + ' / ' + docs.length + ' ligne(s)';
+	syncCheckAll(); refreshDeleteBtn();
 }
 
 // ── Valeurs : affichage / filtre / tri ─────────────────────────────
@@ -526,6 +598,7 @@ $('json-delete').addEventListener('click', async () => {
 		const data = await res.json().catch(() => ({}));
 		if (!res.ok) { setStatus($('editor-status'), 'Échec : ' + (data.detail || res.status), 'err'); return; }
 		docs.splice(selected, 1);
+		checked.delete(id);     // sinon un id fantôme fausserait le compteur de la sélection
 		closeEditor();          // remet selected à null : l'index n'a plus de sens après le splice
 		mergeColumns();         // une clé peut disparaître avec le dernier doc qui la portait
 		renderCols(); renderHead(); renderBody(); persistState();
@@ -536,6 +609,52 @@ $('json-delete').addEventListener('click', async () => {
 		$('json-delete').disabled = false;
 	}
 });
+
+// ── Suppression groupée ────────────────────────────────────────────
+// Une seule confirmation pour toutes les lignes cochées ET affichées, puis un appel
+// par document sur l'endpoint unitaire existant (DELETE /admin/doc), en séquence :
+// il relit le `_rev` en base et vérifie la suppression par relecture, et l'on obtient
+// un décompte succès/échec ligne par ligne. Les lignes partent localement, sans
+// rechargement du type (scroll, tri, filtres et largeurs conservés), comme après un Save.
+async function bulkDelete() {
+	const ids = visibleCheckedIds();
+	if (!ids.length) return;
+
+	const apercu = ids.slice(0, 15).join('\n')
+		+ (ids.length > 15 ? '\n… et ' + (ids.length - 15) + ' autre(s)' : '');
+	if (!confirm(`Supprimer définitivement ${ids.length} document(s) ?\n\n${apercu}`)) return;
+
+	const btn = $('bulk-delete-btn');
+	btn.disabled = true;
+	const supprimes = new Set();
+	let echecs = 0, premiereErreur = '';
+	try {
+		for (const id of ids) {
+			setStatus($('bulk-status'), `Suppression… ${supprimes.size + echecs}/${ids.length}`);
+			try {
+				const res = await fetch('/admin/doc?id=' + encodeURIComponent(id), { method: 'DELETE' });
+				const data = await res.json().catch(() => ({}));
+				if (res.ok) supprimes.add(id);
+				else { echecs++; if (!premiereErreur) premiereErreur = (data.detail || res.status) + ' (' + id + ')'; }
+			} catch (e) {
+				echecs++; if (!premiereErreur) premiereErreur = e.message + ' (' + id + ')';
+			}
+		}
+
+		const idOuvert = (selected !== null && docs[selected]) ? docs[selected]._id : null;
+		docs = docs.filter(d => !supprimes.has(d && d._id));
+		supprimes.forEach(id => checked.delete(id));
+		if (idOuvert && supprimes.has(idOuvert)) closeEditor();
+		else if (idOuvert) selected = docs.findIndex(d => d && d._id === idOuvert);   // l'index a glissé
+		mergeColumns();         // une clé peut disparaître avec le dernier doc qui la portait
+		renderCols(); renderHead(); renderBody(); persistState();
+
+		if (echecs) setStatus($('bulk-status'), `${supprimes.size} supprimé(s), ${echecs} échec(s) : ${premiereErreur}`, 'err');
+		else setStatus($('bulk-status'), `✓ ${supprimes.size} document(s) supprimé(s) de la base.`, 'ok');
+	} finally {
+		refreshDeleteBtn();   // rétablit l'état du bouton selon la sélection restante
+	}
+}
 
 // ── Export ─────────────────────────────────────────────────────────
 // Segment de nom de fichier : minuscule, [a-z0-9] conservés, tout le reste
@@ -626,6 +745,7 @@ async function exportVisibleXlsx() {
 }
 
 // ── Init ───────────────────────────────────────────────────────────
+$('bulk-delete-btn').addEventListener('click', bulkDelete);
 $('export-btn').addEventListener('click', exportVisible);
 $('export-xlsx-btn').addEventListener('click', exportVisibleXlsx);
 $('load-btn').addEventListener('click', loadType);

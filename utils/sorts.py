@@ -43,8 +43,19 @@ CIBLE_DEFAUT = "soi"
 
 
 def _bonus_dict(raw) -> dict:
-	"""Normalise un bloc d'effets/bonus : degats str, entiers ≥ 0, buffs {caract:int}
-	(V exclu — échelle 1-10, incompatible avec des deltas ×10), duree ≥ 0.
+	"""Normalise un bloc d'effets/bonus : degats str, entiers ≥ 0, buffs {caract:int},
+	duree ≥ 0.
+
+	⚠️ **V est buffable, mais à SON échelle (1-10), pas à celle des autres (×10).** Elle
+	en était exclue par prudence — un auteur écrivant `{V: 10}` en pensant « +1 case »
+	aurait immobilisé puis catapulté sa cible. L'exclusion a été levée quand il a fallu
+	entraver les jambes d'une cible (bolas) : elle ne protégeait aucun contenu (aucun doc
+	du jeu n'écrivait de buff de V) et elle rendait l'entrave **impossible à exprimer**,
+	alors que toute la chaîne aval la gère déjà (`_refresh_snapshot_stats` recompose
+	`deplacement_base` depuis V, l'IA monstre lit `deplacement`). Ordres de grandeur :
+	**−2 = un tiers du déplacement d'un humain**, −5 l'immobilise à peu près. Deux
+	planchers bornent la casse : V ne descend pas sous 0 (`_refresh_snapshot_stats`) et
+	`deplacement = max(1, V)` — une cible entravée avance toujours d'une case.
 
 	Clés de combat partagées sorts/compétences :
 	- `esquive`  : malus au seuil de toucher PHYSIQUE (cc/cd) des attaques subies —
@@ -54,8 +65,6 @@ def _bonus_dict(raw) -> dict:
 	raw = raw or {}
 	buffs = {}
 	for k, v in (raw.get("buffs") or {}).items():
-		if str(k) == "V":
-			continue
 		try:
 			buffs[str(k)] = int(v)
 		except (TypeError, ValueError):
@@ -76,6 +85,28 @@ def _bonus_dict(raw) -> dict:
 def effets_de_sort(sort_doc) -> dict:
 	"""Champ `effets` du sort, normalisé (clés toujours présentes)."""
 	return _bonus_dict((sort_doc or {}).get("effets"))
+
+
+# Une ARME porte le même bloc `effets` qu'un sort, mais ne sait viser que deux personnes :
+# celui qu'elle frappe, ou celui qui la tient. `allie` n'a pas de sens pour un coup porté
+# (aucun jet de toucher n'a désigné d'allié) → il retombe sur `ennemi` plutôt que d'ouvrir
+# un troisième comportement silencieux, exactement comme `normaliser_sort` clampe `cible`.
+CIBLES_ARME = ("ennemi", "soi")
+CIBLE_ARME_DEFAUT = "ennemi"
+
+
+def effets_d_arme(item_doc) -> tuple[dict, str]:
+	"""`(effets normalisés, cible)` d'un doc `item:*` — le bloc `effets` d'une arme.
+
+	Même normalisation que les sorts et les compétences (source unique `_bonus_dict`) :
+	un effet d'arme se décrit exactement comme un effet de sort, et se pose par les mêmes
+	chokepoints. Seule la **part durative** est exploitée à l'impact (`part_durative`) ;
+	`degats`/`pv`/`pm` d'une arme passent par ses `bonus_degats*`, pas par ce bloc."""
+	doc = item_doc or {}
+	cible = str(doc.get("cible") or CIBLE_ARME_DEFAUT)
+	if cible not in CIBLES_ARME:
+		cible = CIBLE_ARME_DEFAUT
+	return _bonus_dict(doc.get("effets")), cible
 
 
 def normaliser_sort(sort_doc) -> dict | None:

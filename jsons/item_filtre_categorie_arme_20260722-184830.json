@@ -1,0 +1,1158 @@
+[
+  {
+    "_id": "item:Arbalete",
+    "_rev": "6-67b586ba4a44c03d82aa1cd3e3e0919f",
+    "type": "item",
+    "nom": "Arbalète",
+    "sous_categorie": "",
+    "icon": "🏹",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": [
+      2.5,
+      4.5
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 8,
+    "restriction": {
+      "Ag": 15,
+      "F": 10
+    },
+    "bonus_cd": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Arbalete_de_poing",
+    "_rev": "5-13e505f5f9a37275e673d839ec4aa9f7",
+    "type": "item",
+    "nom": "Arbalète de poing",
+    "sous_categorie": "",
+    "icon": "🏹",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": [
+      0.5,
+      0.9
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 5,
+    "restriction": {
+      "Ag": 25
+    },
+    "bonus_cd": 6,
+    "bonus_degats": 1
+  },
+  {
+    "_id": "item:Arbalete_legere",
+    "_rev": "13-8b873afedc1f5a3e6af80c894b27ec96",
+    "type": "item",
+    "nom": "Arbalète légère",
+    "sous_categorie": "",
+    "icon": "🏹",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": [
+      1.5,
+      2.5
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 7,
+    "restriction": {
+      "Ag": 10
+    },
+    "bonus_cd": 7,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Arbalete_lourde",
+    "_rev": "7-217d76260a67d2905c6a3b323411b438",
+    "type": "item",
+    "nom": "Arbalète lourde",
+    "sous_categorie": "",
+    "icon": "🏹",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": [
+      4.5,
+      7.5
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 9,
+    "restriction": {
+      "Ag": 25,
+      "F": 20
+    },
+    "bonus_cd": 4,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 10,
+    "bonus_malus_depl": -2
+  },
+  {
+    "_id": "item:Arc",
+    "_rev": "7-06a4e466fca6f5472b16cceca066115d",
+    "type": "item",
+    "nom": "Arc",
+    "sous_categorie": "",
+    "icon": "🏹",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": [
+      0.6,
+      1.1
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 7,
+    "restriction": {
+      "Ag": 15
+    },
+    "bonus_cd": 6,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 3,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Arc_court",
+    "_rev": "9-5a39ede1ddf54875e5b2da52960007cc",
+    "type": "item",
+    "nom": "Arc court",
+    "sous_categorie": "",
+    "icon": "🏹",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": [
+      0.4,
+      0.8
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 6,
+    "restriction": {
+      "Ag": 10
+    },
+    "bonus_cd": 5,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Arc_long",
+    "_rev": "6-46c763ebe444a9db398b36046155a784",
+    "type": "item",
+    "nom": "Arc long",
+    "sous_categorie": "",
+    "icon": "🏹",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": [
+      1.2,
+      2
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 8,
+    "restriction": {
+      "Ag": 20
+    },
+    "bonus_cd": 8,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:Baguette_houx",
+    "_rev": "7-e9ef22790f3855aada45b62930c6892b",
+    "type": "item",
+    "nom": "Baguette de bois de houx",
+    "sous_categorie": "",
+    "icon": "🪄",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.2,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_pm": 6,
+    "bonus": {
+      "Int": 3
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 10
+    }
+  },
+  {
+    "_id": "item:Baton_bois_vivant",
+    "_rev": "7-7926be2d44f8b55c5c315e33b570c617",
+    "type": "item",
+    "nom": "Bâton de bois vivant",
+    "sous_categorie": "",
+    "icon": "🌿",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_pm": 8,
+    "bonus": {
+      "Int": 4,
+      "Vol": 2
+    },
+    "restriction": {
+      "Int": 12,
+      "Vol": 10
+    }
+  },
+  {
+    "_id": "item:Baton_canalisateur",
+    "_rev": "7-f076183e70dc4f904e1dae6185f0f15d",
+    "type": "item",
+    "nom": "Bâton canalisateur",
+    "sous_categorie": "",
+    "icon": "🪄",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_pm": 6,
+    "bonus": {
+      "Int": 3
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 8
+    }
+  },
+  {
+    "_id": "item:Baton_cornu",
+    "_rev": "7-c6817c2379afa93e854a049983529251",
+    "type": "item",
+    "nom": "Bâton cornu",
+    "sous_categorie": "",
+    "icon": "😈",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.3,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_pm": 7,
+    "bonus": {
+      "Vol": 4
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 12
+    }
+  },
+  {
+    "_id": "item:Baton_de_combat",
+    "_rev": "8-9c65559166dda34b56be129176e7001e",
+    "type": "item",
+    "nom": "Bâton de combat",
+    "sous_categorie": "",
+    "icon": "🥢",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.2,
+    "tags": [
+      "cac"
+    ],
+    "restriction": {
+      "Ag": 15
+    },
+    "portee": 2
+  },
+  {
+    "_id": "item:Bec_de_corbin",
+    "_rev": "1-70fcc624efbd94f48cb91467287230fd",
+    "type": "item",
+    "nom": "Bec de corbin grossier",
+    "sous_categorie": "",
+    "icon": "⛏️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -2
+  },
+  {
+    "_id": "item:Canne_ferree",
+    "_rev": "7-7eae07ec4c5aed5ac5648ca8c1f565c3",
+    "type": "item",
+    "nom": "Canne de marche ferrée",
+    "sous_categorie": "",
+    "icon": "🦯",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.9,
+    "bonus_degats": 1,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1
+  },
+  {
+    "_id": "item:Couteau_de_chasse",
+    "_rev": "7-7538c56bb67fda66ddc94899ee9e1ad4",
+    "type": "item",
+    "nom": "Couteau de chasse",
+    "sous_categorie": "",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_cc": 5,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Dague",
+    "_rev": "8-7facc4ca280ffd30027a0f7aa33c5171",
+    "type": "item",
+    "nom": "Dague",
+    "sous_categorie": "",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_cc": 6,
+    "bonus_degats": 1,
+    "bonus_initiative": 3,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:Dague_de_parade",
+    "_rev": "9-5e90f17b0cc586ab3b60e0b84611d6d2",
+    "type": "item",
+    "nom": "Dague de parade",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_cc": 5,
+    "bonus_pa": 2,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene",
+    "_rev": "7-ae16086d67c038aedeb85262c426f705",
+    "type": "item",
+    "nom": "Dague de scène",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.2,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_cc": 4,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:dague_rituelle",
+    "_rev": "7-2293fe613026334258ab6542029ade0c",
+    "type": "item",
+    "nom": "Dague rituelle",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.4,
+    "bonus_cc": 1,
+    "bonus_degats": 1,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus": {
+      "Vol": 2,
+      "Int": 1
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 10
+    }
+  },
+  {
+    "_id": "item:Epee_argent",
+    "_rev": "7-4a56f699320fba75d0357ad95f0d642b",
+    "type": "item",
+    "nom": "Épée d'argent",
+    "sous_categorie": "",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.3,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_pm": 4,
+    "bonus": {
+      "Int": 2
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 8
+    }
+  },
+  {
+    "_id": "item:Epee_courte",
+    "_rev": "12-d64685cb186105ce57f4c803f99f5bf4",
+    "type": "item",
+    "nom": "Épée courte",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "bonus_cc": 1,
+    "bonus_degats": 3,
+    "poids": 1.5,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1
+  },
+  {
+    "_id": "item:Epee_courte_rune",
+    "_rev": "7-4e6840497577ceb5916ddc5a06361141",
+    "type": "item",
+    "nom": "Épée courte enchantée",
+    "sous_categorie": "",
+    "icon": "✨",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_pm": 5,
+    "bonus_degats": 2,
+    "bonus": {
+      "Int": 3
+    },
+    "restriction": {
+      "Int": 12,
+      "Vol": 8
+    }
+  },
+  {
+    "_id": "item:Epee_longue",
+    "_rev": "9-6c604e13b5d706571b2a0b5c8473199e",
+    "type": "item",
+    "nom": "Épée longue",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Epee_longue_ordre",
+    "_rev": "8-5f18c8b101e64449cf4781ad3c2f513c",
+    "type": "item",
+    "nom": "Épée longue d'ordre",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 2,
+    "bonus_pm": 2,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Epee_une_main_benie",
+    "_rev": "6-b5d2f9d84493bd6411c0a0b607bb5d91",
+    "type": "item",
+    "nom": "Épée à une main bénie",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.2,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1
+  },
+  {
+    "_id": "item:Faucharde",
+    "_rev": "1-2d92066c5859640908efd04a2f068401",
+    "type": "item",
+    "nom": "Faucharde grossière",
+    "sous_categorie": "",
+    "icon": "🌾",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Fleau_monte",
+    "_rev": "1-a22927e594c3861452982151414ffc5b",
+    "type": "item",
+    "nom": "Fléau d'armes monté grossier",
+    "sous_categorie": "",
+    "icon": "⛓️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.8,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15,
+      "Ag": 10
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2
+  },
+  {
+    "_id": "item:Guisarme",
+    "_rev": "1-66c63b08a970e3c45f5221b741222afd",
+    "type": "item",
+    "nom": "Guisarme grossière",
+    "sous_categorie": "",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 12
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Hache_de_bucheron",
+    "_rev": "6-423f07408da3855cf5c5061b06cc3d08",
+    "type": "item",
+    "nom": "Hache de bucheron",
+    "sous_categorie": "outil",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "outil_coupe_bois",
+      "cac"
+    ],
+    "poids": 2.5,
+    "portee": 1,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "restriction": {
+      "F": 12
+    }
+  },
+  {
+    "_id": "item:Hache_de_guerre",
+    "_rev": "10-27745e491d0edfa246d4d7f25a123a30",
+    "type": "item",
+    "nom": "Hache de guerre",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "outil_coupe_bois",
+      "cac"
+    ],
+    "poids": 2.5,
+    "portee": 1,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "restriction": {
+      "F": 14
+    }
+  },
+  {
+    "_id": "item:Hallebarde",
+    "_rev": "1-6f1ec7826c22ecfd8233140a6cefae13",
+    "type": "item",
+    "nom": "Hallebarde grossière",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Ji",
+    "_rev": "1-001019707e803718a959b5db8db89e0a",
+    "type": "item",
+    "nom": "Ji grossier",
+    "sous_categorie": "",
+    "icon": "🀄",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.6,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 15
+    },
+    "bonus_cc": 4,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Lame_courte",
+    "_rev": "7-3b205a5a44280a7df0a32f655d324803",
+    "type": "item",
+    "nom": "Lame courte",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_cc": 3,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Lance_rituelle",
+    "_rev": "7-9f1de59f1c4b5576a0b16f0a269f29a9",
+    "type": "item",
+    "nom": "Lance rituelle",
+    "sous_categorie": "",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2,
+    "tags": [
+      "cac"
+    ],
+    "portee": 2,
+    "bonus_degats": 2,
+    "bonus": {
+      "Int": 2,
+      "Vol": 1
+    },
+    "restriction": {
+      "Int": 15,
+      "Vol": 10
+    }
+  },
+  {
+    "_id": "item:Masse_benie",
+    "_rev": "9-4bac48d43ccb02ee72ad0c3277df5c3d",
+    "type": "item",
+    "nom": "Masse d'armes bénie",
+    "sous_categorie": "",
+    "icon": "🔨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "restriction": {
+      "F": 12,
+      "Vol": 8
+    }
+  },
+  {
+    "_id": "item:Naginata",
+    "_rev": "1-09d7e7c6e5bddef9f39637bfd6c2a673",
+    "type": "item",
+    "nom": "Naginata grossier",
+    "sous_categorie": "",
+    "icon": "🎌",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.4,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 10,
+      "Ag": 18
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:Omukuba",
+    "_rev": "1-b1c2d5a4b589f9cba1b894464472ddc7",
+    "type": "item",
+    "nom": "Omukuba grossier",
+    "sous_categorie": "",
+    "icon": "🗿",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.2,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_cc": 1,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Pata_a_hampe",
+    "_rev": "1-0de7a4b127451e9adacff1afda7c500e",
+    "type": "item",
+    "nom": "Pata à hampe grossier",
+    "sous_categorie": "",
+    "icon": "🤺",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.6,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 16
+    },
+    "bonus_cc": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Pique",
+    "_rev": "1-44340f94f124a1dffa35747e7c500a19",
+    "type": "item",
+    "nom": "Pique grossière",
+    "sous_categorie": "",
+    "icon": "📍",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2
+  },
+  {
+    "_id": "item:Rapiere",
+    "_rev": "8-c4b813aae993a93bc932226eae7191ed",
+    "type": "item",
+    "nom": "Rapière",
+    "sous_categorie": "",
+    "icon": "🤺",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_cc": 4,
+    "bonus_degats": 1,
+    "bonus_initiative": 5,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Sarbacane",
+    "_rev": "9-3dc989121d353dca9b9023424f4292ee",
+    "type": "item",
+    "nom": "Sarbacane à fléchettes",
+    "sous_categorie": "",
+    "icon": "💨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.2,
+    "tags": [
+      "tir"
+    ],
+    "portee": 4,
+    "restriction": {
+      "Ag": 10
+    },
+    "bonus_cd": 4,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Sceptre_os",
+    "_rev": "7-4ea049281ef30cd0ae272a4c43ea14e8",
+    "type": "item",
+    "nom": "Sceptre d'os",
+    "sous_categorie": "",
+    "icon": "💀",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_pm": 6,
+    "bonus": {
+      "Vol": 3,
+      "Int": 2
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 10
+    }
+  },
+  {
+    "_id": "item:Trident_barbele",
+    "_rev": "1-f599f2eea61199be95c4e5f057c10a1a",
+    "type": "item",
+    "nom": "Trident barbelé grossier",
+    "sous_categorie": "",
+    "icon": "🔱",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.8,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Woludo",
+    "_rev": "1-7a8ee565536b0b0d9915d6f30e25f38f",
+    "type": "item",
+    "nom": "Woludo grossier",
+    "sous_categorie": "",
+    "icon": "🌀",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  }
+]

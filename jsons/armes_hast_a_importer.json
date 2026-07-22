@@ -1,0 +1,977 @@
+[
+  {
+    "_id": "item:hampe",
+    "type": "item",
+    "nom": "Hampe",
+    "description": "Long fût de bois dégrossi et poli, trop grand pour un manche d'outil : c'est la pièce maîtresse de toute arme d'hast.",
+    "icon": "🪵",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "hampe",
+    "slots": [],
+    "tags": [
+      "bois"
+    ],
+    "poids": 1.2
+  },
+  {
+    "_id": "item:argent",
+    "type": "item",
+    "nom": "Lingot d'argent",
+    "description": "Métal blanc, tendre et cher, que les armuriers réservent aux incrustations, aux runes et aux lames dites bénies.",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "sous_categorie": "argent",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 20
+      }
+    ]
+  },
+
+  {
+    "_id": "recette:hampe_de_bois01",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "hampe",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "rondin",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:hampe_de_bois02",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "hampe",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gros_rondin",
+        "quantite": 1
+      }
+    ]
+  },
+
+  {
+    "_id": "item:Hallebarde",
+    "type": "item",
+    "nom": "Hallebarde grossière",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Guisarme",
+    "type": "item",
+    "nom": "Guisarme grossière",
+    "sous_categorie": "",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 12
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Bec_de_corbin",
+    "type": "item",
+    "nom": "Bec de corbin grossier",
+    "sous_categorie": "",
+    "icon": "⛏️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -2
+  },
+  {
+    "_id": "item:Pique",
+    "type": "item",
+    "nom": "Pique grossière",
+    "sous_categorie": "",
+    "icon": "📍",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2
+  },
+  {
+    "_id": "item:Faucharde",
+    "type": "item",
+    "nom": "Faucharde grossière",
+    "sous_categorie": "",
+    "icon": "🌾",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Fleau_monte",
+    "type": "item",
+    "nom": "Fléau d'armes monté grossier",
+    "sous_categorie": "",
+    "icon": "⛓️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.8,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15,
+      "Ag": 10
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2
+  },
+  {
+    "_id": "item:Trident_barbele",
+    "type": "item",
+    "nom": "Trident barbelé grossier",
+    "sous_categorie": "",
+    "icon": "🔱",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.8,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Ji",
+    "type": "item",
+    "nom": "Ji grossier",
+    "sous_categorie": "",
+    "icon": "🀄",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.6,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 15
+    },
+    "bonus_cc": 4,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Naginata",
+    "type": "item",
+    "nom": "Naginata grossier",
+    "sous_categorie": "",
+    "icon": "🎌",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.4,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 10,
+      "Ag": 18
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:Omukuba",
+    "type": "item",
+    "nom": "Omukuba grossier",
+    "sous_categorie": "",
+    "icon": "🗿",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.2,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_cc": 1,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Pata_a_hampe",
+    "type": "item",
+    "nom": "Pata à hampe grossier",
+    "sous_categorie": "",
+    "icon": "🤺",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.6,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 16
+    },
+    "bonus_cc": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Woludo",
+    "type": "item",
+    "nom": "Woludo grossier",
+    "sous_categorie": "",
+    "icon": "🌀",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+
+  {
+    "_id": "recette:arme_hallebarde",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Hallebarde",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_guisarme",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Guisarme",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_bec_de_corbin",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Bec_de_corbin",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_pique",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Pique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_faucharde",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Faucharde",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_fleau_monte",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Fleau_monte",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_trident_barbele",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Trident_barbele",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_ji",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Ji",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_naginata",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Naginata",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_omukuba",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Omukuba",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "plumes",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_pata_a_hampe",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Pata_a_hampe",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_woludo",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Woludo",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "crins",
+        "quantite": 1
+      }
+    ]
+  },
+
+  {
+    "_id": "recette:arme_arbalete",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Arbalete",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_arbalete_de_poing",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Arbalete_de_poing",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_arbalete_lourde",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Arbalete_lourde",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_dague_de_scene",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Dague_de_scene",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "bronze",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_epee_argent",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epee_argent",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "argent",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_epee_courte_rune",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epee_courte_rune",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "argent",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_epee_une_main_benie",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epee_une_main_benie",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "argent",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_masse_benie",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Masse_benie",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "argent",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_lance_rituelle",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Lance_rituelle",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "crocs",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_baguette_houx",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "Baguette_houx",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "branche",
+        "quantite": 1
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_baton_canalisateur",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "Baton_canalisateur",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_baton_bois_vivant",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "Baton_bois_vivant",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "branche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "item": "item:Seve_de_chene",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_baton_cornu",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "Baton_cornu",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "crocs",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "os",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "sang",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:arme_sceptre_os",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "Sceptre_os",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "os",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "crane",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  }
+]
