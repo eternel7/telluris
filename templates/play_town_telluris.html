@@ -710,14 +710,19 @@
 		.sh-paperdoll {
 			position: relative;
 			width: 100%;
-			max-width: 340px;
+			max-width: 450px;
 			margin: 0 auto;
 			user-select: none;
+			display: flex;
+			justify-content: center;
+			align-items: center;
 		}
 		.sh-paperdoll-img {
-			width: 100%;
+			max-height: 62vh;
 			display: block;
 			pointer-events: none;
+			margin-left: 0px;
+			margin-right: 0px;
 		}
 		.sh-paperdoll .sh-slot {
 			position: absolute;
@@ -4402,6 +4407,11 @@ function _syncPoints(pts) {
 	_attributePoints = pts;
 	const a = document.getElementById('sh-attribute-points'); if (a) a.textContent = pts;
 	const b = document.getElementById('sh-comp-points');      if (b) b.textContent = pts;
+	// Les points sont une BOURSE COMMUNE : les dépenser en sorts/écoles/compétences change
+	// ce que l'onglet ⚔ peut encore offrir (bouton d'XP affiché/désactivé, ✦ Dépasser,
+	// montée de vocation). Sans ce rappel, les boutons de stats restent tels quels jusqu'au
+	// prochain /play et proposent une dépense que le serveur refusera.
+	if (a) _refreshStatBoxes();
 }
 
 async function apprendreMagie(ecole, btn) {
