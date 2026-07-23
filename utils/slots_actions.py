@@ -45,6 +45,17 @@ ENTREES_OBLIGATOIRES = (
 	{"type": "fuir", "ref": ""},
 )
 
+# Socle de la barre DÉRIVÉE (personnage qui n'a jamais configuré ses slots) : la barre
+# d'avant la refonte portait les TROIS modes d'attaque en boutons fixes. N'y placer que
+# les obligatoires priverait un archer de sa case 🏹 sans qu'aucun geste hors combat ne
+# permette de l'ajouter — le mode ⚙ du combat coûte une action, et les sélecteurs de la
+# fiche ne couvrent que sorts/compétences/consommables. Jet et tir ne sont PAS
+# obligatoires pour autant : une fois la barre configurée, le joueur peut les retirer.
+ENTREES_DERIVEES = ENTREES_OBLIGATOIRES + (
+	{"type": "attaque", "ref": "jet"},
+	{"type": "attaque", "ref": "tir"},
+)
+
 # Icônes de repli des actions sans doc à interroger.
 ICONES_DEFAUT = {
 	"cac": "⚔", "jet": "🪃", "tir": "🏹",
@@ -131,14 +142,14 @@ def _entree_possedee(entree: dict, character: dict, get_doc) -> bool:
 
 
 def _slots_derives(character: dict, get_doc, taille: int) -> list:
-	"""Barre d'un personnage qui n'a JAMAIS configuré ses slots : le socle obligatoire aux
-	trois premières cases, puis les anciens épinglés (sorts d'abord, compétences ensuite)
-	à la suite. C'est la migration à la lecture — elle reproduit exactement la barre que
-	le joueur avait avant la refonte, sans toucher à la base."""
+	"""Barre d'un personnage qui n'a JAMAIS configuré ses slots : le socle des cinq actions
+	fixes d'avant la refonte (⚔🫳🏃 puis 🪃🏹), puis les anciens épinglés (sorts d'abord,
+	compétences ensuite) à la suite. C'est la migration à la lecture — elle reproduit la
+	barre que le joueur avait avant la refonte, sans toucher à la base."""
 	slots = [None] * taille
-	for i, obligatoire in enumerate(ENTREES_OBLIGATOIRES):
+	for i, entree in enumerate(ENTREES_DERIVEES):
 		if i < taille:
-			slots[i] = dict(obligatoire)
+			slots[i] = dict(entree)
 
 	# Normalisées comme celles qui viennent de la base : sans quoi une barre migrée
 	# livrerait des entrées de sort SANS le flag `composants`, et deux formes

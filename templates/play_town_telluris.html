@@ -827,6 +827,9 @@
 			scrollbar-width: thin;
 			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 		}
+		#sh-rel-lieux {
+			max-height: 54vh;
+		}
 		/* Groupe des boutons d'action d'une ligne (sac/sol) → reste solidaire à droite. */
 		.sh-inv-actions { display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; }
 		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
@@ -1675,6 +1678,12 @@
 						<div class="sh-section" style="margin-top:14px">🎯 Barre de combat</div>
 						<div class="sh-barre-grid" id="sh-slot-grid"></div>
 						<div class="sh-barre-hint">Clic long sur une case puis glisser pour échanger deux cases. Les actions ⚔ 🫳 🏃 se déplacent mais ne se retirent pas.</div>
+						{# Modes d'attaque : ⚔ est obligatoire (toujours sur la barre), 🪃 et 🏹
+						   s'ajoutent et se retirent librement. Sans ces sélecteurs, seul le
+						   mode ⚙ de l'écran de combat — qui coûte UNE ACTION — permettrait de
+						   poser sa case de tir : un archer restait sans bouton pour tirer. #}
+						<div class="sh-section" style="margin-top:14px">🏹 Modes d'attaque</div>
+						<div id="sh-modes-attaque"></div>
 						{# Compétences : mêmes règles que les sorts, rendues 100 % côté client
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
@@ -4170,6 +4179,28 @@ function _renderBarreSlots() {
 		del.addEventListener('pointerdown', e => e.stopPropagation());
 		del.addEventListener('click', e => { e.stopPropagation(); _viderCaseBarre(n); });
 	});
+	_renderModesAttaque();
+}
+
+// Les deux modes d'attaque OPTIONNELS. ⚔ n'y figure pas : il est obligatoire, donc
+// toujours sur la barre — son sélecteur n'aurait qu'une seule issue. Une case de mode
+// se grise en combat quand l'arme correspondante n'est pas équipée : elle s'assigne
+// donc ici sans avoir l'arme en main, et reste en place d'une arme à l'autre.
+const _MODES_ATTAQUE = [
+	['jet', '🪃', 'Jet', "Lancer une arme de jet (portée de l'arme + F/20)"],
+	['tir', '🏹', 'Tir', "Tirer à l'arc (portée de l'arme)"],
+];
+function _renderModesAttaque() {
+	const box = document.getElementById('sh-modes-attaque');
+	if (!box) return;
+	box.innerHTML = _MODES_ATTAQUE.map(([ref, icon, nom, desc]) => `<div class="sh-skill">
+		<span class="sh-skill-icon">${icon}</span>
+		<div class="sh-skill-info">
+			<div class="sh-skill-name">${nom}</div>
+			<div class="sh-skill-desc">${desc}</div>
+		</div>
+		<div class="sh-inv-actions"><span class='sh-slot-choice'>case: </span>${_slotSelect('attaque', ref, undefined, 'Case de la barre de combat')}</div>
+	</div>`).join('');
 }
 
 // Retire l'action d'une case, sur confirmation. Le serveur refuse déjà (422) de vider

@@ -52,6 +52,8 @@ def _perso(**overrides):
 CAC = {"type": "attaque", "ref": "cac"}
 RAMASSER = {"type": "ramasser", "ref": ""}
 FUIR = {"type": "fuir", "ref": ""}
+JET = {"type": "attaque", "ref": "jet"}
+TIR = {"type": "attaque", "ref": "tir"}
 
 
 def _sort(ref, composants=True):
@@ -84,17 +86,29 @@ def test_champ_absent_derive_du_socle_et_des_anciens_epingles():
     assert slots[0] == CAC
     assert slots[1] == RAMASSER
     assert slots[2] == FUIR
-    assert slots[3] == _sort("sort:trait")
-    assert slots[4] == {"type": "competence", "ref": "competence:frappe"}
-    assert all(s is None for s in slots[5:])
+    assert slots[3] == JET
+    assert slots[4] == TIR
+    assert slots[5] == _sort("sort:trait")
+    assert slots[6] == {"type": "competence", "ref": "competence:frappe"}
+    assert all(s is None for s in slots[7:])
+
+
+def test_champ_absent_derive_les_trois_modes_d_attaque():
+    """La barre d'avant la refonte portait les TROIS modes en boutons fixes. Ne dériver
+    que les obligatoires priverait un archer de sa case 🏹 sans aucun geste hors combat
+    pour l'ajouter (le mode ⚙ du combat coûte une action)."""
+    slots = sa.slots_effectifs(_perso(), get_doc)
+    assert JET in slots and TIR in slots
+    # …optionnels pour autant : une fois la barre configurée, ils se retirent.
+    assert not sa.est_obligatoire(JET) and not sa.est_obligatoire(TIR)
 
 
 def test_champ_absent_sans_epingles_auto_pin_historique():
     """Sans champ d'épinglage non plus, l'auto-pin d'avant la refonte s'applique :
     premier sort connu + première compétence ACTIVE (la passive est sautée)."""
     slots = sa.slots_effectifs(_perso(), get_doc)
-    assert slots[3] == _sort("sort:trait")
-    assert slots[4] == {"type": "competence", "ref": "competence:frappe"}
+    assert slots[5] == _sort("sort:trait")
+    assert slots[6] == {"type": "competence", "ref": "competence:frappe"}
 
 
 def test_champ_present_vide_ne_repeuple_pas_les_libres():
