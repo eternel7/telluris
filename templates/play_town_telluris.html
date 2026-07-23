@@ -3214,7 +3214,6 @@ async function spendXpVocation() {
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 
 		_vocNiveau       = data.voc_niveau;
-		_attributePoints = data.attribute_points;
 		// Le niveau de vocation monté est celui du PORTEUR : ne le recopier que sur SES cartes
 		// (+ l'onglet Stats et la colonne gauche, qui affichent le porteur de la fiche).
 		const nivEls = [
@@ -3225,7 +3224,7 @@ async function spendXpVocation() {
 		nivEls.forEach(el => { el.textContent = _vocNiveau; });
 		const elCout = document.getElementById('sh-voc-cout');
 		if (elCout) elCout.textContent = data.xp_cout_next;
-		_refreshStatBoxes();
+		_syncPoints(data.attribute_points);
 	} catch (err) { console.error('Erreur spend_xp_vocation', err); }
 }
 
@@ -3278,12 +3277,12 @@ async function spendXp(statKey, useMaxBonus = false) {
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
 
 		_charStats[statKey]  = newVal;
-		_attributePoints     = data.attribute_points;
 		_statCaps = data.stat_caps;
 		// Le bonus vient peut-être d'être brûlé : sans ça, les boutons ✦ des AUTRES caracts
 		// resteraient offerts jusqu'au prochain chargement de /play.
 		if (data.max_bonus_used !== undefined) _maxBonusUsed = data.max_bonus_used;
-		_refreshStatBoxes();
+		// Après les caps et le bonus : `_syncPoints` déclenche `_refreshStatBoxes`, qui les lit.
+		_syncPoints(data.attribute_points);
 		_refreshDerivedStats(data.derived_stats);
 		_renderCaractsMod(data.caracts_detail);
 	} catch (err) { console.error('Erreur spend_xp', err); }
@@ -4407,11 +4406,18 @@ function _syncPoints(pts) {
 	_attributePoints = pts;
 	const a = document.getElementById('sh-attribute-points'); if (a) a.textContent = pts;
 	const b = document.getElementById('sh-comp-points');      if (b) b.textContent = pts;
-	// Les points sont une BOURSE COMMUNE : les dépenser en sorts/écoles/compétences change
-	// ce que l'onglet ⚔ peut encore offrir (bouton d'XP affiché/désactivé, ✦ Dépasser,
-	// montée de vocation). Sans ce rappel, les boutons de stats restent tels quels jusqu'au
-	// prochain /play et proposent une dépense que le serveur refusera.
+	// ⚠️ Les points sont une BOURSE COMMUNE aux caracts, à la vocation, aux sorts, aux
+	// écoles et aux compétences : DÉPENSER D'UN CÔTÉ CHANGE CE QUI EST OFFERT DE L'AUTRE.
+	// `_syncPoints` est donc le chokepoint unique de « les points ont bougé » et rafraîchit
+	// TOUS les boutons qui s'en gardent — sinon l'onglet ⚔ (bouton d'XP, ✦ Dépasser, montée
+	// de vocation) et les listes d'apprentissage restent tels quels jusqu'au prochain /play
+	// et proposent une dépense que le serveur refusera.
 	if (a) _refreshStatBoxes();
+	// Les trois renderers gardent leur liste en cache : sans argument ils re-rendent l'état
+	// courant, seul le `disabled` des boutons change.
+	_renderSortsApprenables();
+	_renderSortsMagies();
+	_renderCompetencesApprenables();
 }
 
 async function apprendreMagie(ecole, btn) {
