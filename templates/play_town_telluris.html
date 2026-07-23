@@ -22,6 +22,7 @@
 			--portraitW: 100;
 			--portraitH: 100;
 			--dist-view: 10;
+			--map-anim: 260ms;   /* glissement de la carte à chaque pas */
 			--bg: #0e0e0e;
 			--surface: #181818;
 			--border: #2a2a2a;
@@ -1136,11 +1137,25 @@
 		img#bg-image {
 			position: absolute;
 			display: block;
-			top: calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px);
-			left: calc((var(--dist-view)/2 - var(--x)) * var(--dim_x) * 1px);
+			top: 0;
+			left: 0;
+			/* Décalage porté par `transform` et non plus par top/left : c'est la seule
+			   propriété que le compositeur peut animer sans relayout — et la transition
+			   ci-dessous était déclarée sur elle depuis toujours, sans que rien ne la
+			   fasse varier (le pas sautait donc d'une case à l'autre).
+			   ⚠️ `--x`/`--y` ne sont pas des custom properties enregistrées (@property),
+			   donc non interpolables — mais on ne les anime pas : c'est la valeur
+			   CALCULÉE de `transform` qui est interpolée à chaque `setProperty` de move(). */
+			transform: translate3d(
+				calc((var(--dist-view)/2 - var(--x)) * var(--dim_x) * 1px),
+				calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px),
+				0);
 			max-width: none;
-			transition: transform 0.2s ease-out;
+			transition: transform var(--map-anim, 260ms) ease-out;
 			will-change: transform;
+		}
+		@media (prefers-reduced-motion: reduce) {
+			img#bg-image { transition: none; }
 		}
 		img#bg-image-fit {
 			width : 56vw;

@@ -39,6 +39,10 @@
 		   que la case (x,y) corresponde au bon pixel (défaut = repli grille ouverte). */
 		--bg-w: 13;
 		--bg-h: 11;
+		/* Glissement d'un pas : carte ET jetons partagent la MÊME durée, sans quoi
+		   un déplacement du joueur (la carte bouge, les jetons se décalent d'autant)
+		   se verrait en deux temps. Même nom que dans play_town_telluris.html. */
+		--map-anim: 260ms;
 	}
 
 	* { box-sizing: border-box; }
@@ -86,7 +90,11 @@
 	width: calc(var(--step) * var(--bg-w));
 	height: calc(var(--step) * var(--bg-h));
 	max-width: none;
+	/* Recadrage posé en JS par updateCamera() : le joueur reste fixe, c'est le monde
+	   qui coulisse sous lui. La transition anime donc le PAS du joueur. */
 	transform: translate(-50%, -50%);
+	transition: transform var(--map-anim, 260ms) ease-out;
+	will-change: transform;
 }
 .player-token {
 	position: absolute;
@@ -105,12 +113,21 @@
 }
 /* Tokens monstres positionnés relativement au joueur (centré) */
 #tokens-layer { position: absolute; inset: 0; z-index: 9; pointer-events: none; }
-.monster-token {
+/* Ancre commune aux jetons : left/bottom FIXES, l'écart à l'acteur actif est porté par
+   `transform` (posé en JS par _placerToken). C'est ce qui rend le pas animable sans
+   relayout — et le `transition` ci-dessous n'anime que si le jeton SURVIT d'un rendu
+   à l'autre, d'où la réutilisation des éléments dans renderTokens(). */
+.monster-token, .ally-token {
 	position: absolute;
-	width: var(--step); height: var(--step);
+	left: 50%;
+	bottom: calc(var(--step) * var(--floor));
 	transform: translateX(-50%);
+	transition: transform var(--map-anim, 260ms) ease-out;
+}
+.monster-token {
+	width: var(--step); height: var(--step);
 	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-	transition: left 0.25s ease, bottom 0.25s ease;
+	z-index: 1;
 	pointer-events: auto; cursor: pointer;
 }
 .monster-token .mt-portrait {
@@ -130,11 +147,11 @@
 /* Alliés : membres du groupe NON actifs, rendus relativement au membre actif comme les
    monstres. Bleus (couleur joueur du bandeau), non ciblables en v1 (pas de soin d'allié). */
 .ally-token {
-	position: absolute;
 	width: var(--step); height: var(--step);
-	transform: translateX(-50%);
 	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-	transition: left 0.25s ease, bottom 0.25s ease;
+	/* Au-dessus des monstres : les jetons n'étant plus recréés à chaque rendu, l'ordre
+	   du DOM ne suit plus celui de l'état — le z-index le fixe explicitement. */
+	z-index: 2;
 	pointer-events: none;
 }
 .ally-token .at-portrait {
@@ -161,6 +178,18 @@
 .ally-token.monture .mt-hp-fill { background: #b98c4a; }
 .ally-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
 .ally-token .mt-hp-fill { height: 100%; background: #2e86de; }
+
+/* Re-cadrage qui n'est PAS un mouvement de jeu (redimensionnement : --step change,
+   donc TOUTES les positions ; premier cadrage à l'ouverture) : tout doit sauter d'un
+   bloc. Posée le temps d'une frame par sansAnimationCarte(). Le pivot du monde au
+   changement d'acteur, lui, est bel et bien animé (cf. angleCamera / _placerToken). */
+#viewport.no-anim #bg-image,
+#viewport.no-anim .monster-token,
+#viewport.no-anim .ally-token { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+	#bg-image, .monster-token, .ally-token { transition: none; }
+}
 
 /* ─── Tour Header ──────────────────────────────────────────────── */
 .tour-header {
@@ -933,12 +962,14 @@ function syncViewSize() {
 }
 syncViewSize();
 if (window.ResizeObserver) {
-	const _ro = new ResizeObserver(() => { syncViewSize(); if (window._combatReady) { renderTokens(); updateCamera(); } });
+	// Un redimensionnement change --step, donc toutes les positions : à faire sauter
+	// d'un bloc, sinon les jetons glisseraient pendant que l'on étire la fenêtre.
+	const _ro = new ResizeObserver(() => { sansAnimationCarte(); syncViewSize(); if (window._combatReady) { renderTokens(); updateCamera(); } });
 	const center = document.querySelector('.combat-center');
 	if (center) _ro.observe(center);
 }
 // La hauteur de fenêtre (budget hauteur) n'est pas captée par le ResizeObserver sur la colonne.
-window.addEventListener('resize', () => { syncViewSize(); if (window._combatReady) { renderTokens(); updateCamera(); } });
+window.addEventListener('resize', () => { sansAnimationCarte(); syncViewSize(); if (window._combatReady) { renderTokens(); updateCamera(); } });
 
 // Portraits des membres du groupe : la portion d'image cadrée dans play_town (zoom +
 // déplacement) est reproduite dans les jetons via background-size/-position en %
@@ -1221,13 +1252,72 @@ function rot(x, y, deg) {
 	return [x, y];
 }
 function facingDeg() { return (me() || {}).facing || 0; }
-// Écran → monde (pour envoyer un déplacement absolu) et monde → écran (pour le rendu).
+// Écran → monde (pour envoyer un déplacement absolu). Le sens inverse (monde → écran)
+// n'est plus calculé en JS : il est porté par le `rotate()` des transforms, seule façon
+// de faire tourner la carte ET les jetons du même mouvement (cf. angleCamera).
 function screenToWorld(sdx, sdy) { return rot(sdx, sdy, facingDeg()); }
-function worldToScreen(wdx, wdy) { return rot(wdx, wdy, -facingDeg()); }
+
+// Angle CUMULÉ de la caméra, en degrés CSS. `facing` repasse par 0 après 270°, et
+// interpoler rotate(-270deg) → rotate(0deg) ferait faire au monde trois quarts de tour
+// à l'envers : on mémorise donc un angle continu, avancé du plus court chemin.
+// ⚠️ Idempotent (facing inchangé ⇒ écart nul) : renderTokens et updateCamera peuvent
+// l'appeler l'un après l'autre dans le même rendu sans le faire dériver.
+let _angleCam = null;
+function angleCamera() {
+	const cible = -facingDeg();
+	if (_angleCam === null) return (_angleCam = cible);
+	let d = (cible - _angleCam) % 360;
+	if (d > 180) d -= 360;
+	else if (d <= -180) d += 360;
+	return (_angleCam += d);
+}
 
 function chebyToPlayer(m) {
 	const j = me();
 	return Math.max(Math.abs(m.pos.x - j.pos.x), Math.abs(m.pos.y - j.pos.y));
+}
+
+// ── Glissement des jetons & de la carte ───────────────────────────
+// Jetons PERSISTANTS, indexés par id d'acteur : une transition CSS n'a rien à
+// interpoler sur un élément qui vient de naître. Tant que renderTokens() vidait
+// #tokens-layer à chaque rendu, le `transition` déclaré sur .monster-token était
+// une déclaration morte et les jetons se téléportaient.
+const _tokens = new Map();
+
+// Position d'un jeton : portée par `transform` (animable par le compositeur, sans
+// relayout) et non plus par left/bottom. L'ancre left:50% / bottom:--floor pose déjà
+// son centre SUR le pivot (la case de l'acteur actif) ; l'écart est un vecteur MONDE
+// (wx, wy), tourné par le rotate de la caméra.
+//
+// ⚠️ La structure `rotate(a) translate(w) rotate(-a)` n'est pas décorative :
+//   • `rotate(a) translate(w)` place le jeton en R(a)·w, exactement là où l'ancien
+//     worldToScreen le mettait — mais le vecteur interpolé est le vecteur MONDE, qui
+//     ne bouge PAS pendant un pivot. Seul l'angle varie ⇒ le jeton décrit un ARC
+//     autour du pivot, du même mouvement que la carte. Un translate en coordonnées
+//     écran, lui, aurait interpolé la corde : les jetons auraient coupé au plus court
+//     pendant que le décor tournait.
+//   • le `rotate(-a)` final annule la rotation subie par le jeton lui-même : le portrait
+//     reste debout pendant tout le quart de tour (les deux angles s'interpolant au
+//     même rythme, ils se compensent à chaque instant).
+//   • `translateX(-50%)` reste EN TÊTE, hors rotation : c'est un recentrage sur la
+//     largeur propre du jeton, le tourner le décalerait.
+function _placerToken(tok, wx, wy) {
+	const a = angleCamera();
+	tok.style.transform = `translateX(-50%) rotate(${a}deg)`
+		+ ` translate(calc(var(--step) * ${wx}), calc(var(--step) * ${wy}))`
+		+ ` rotate(${-a}deg)`;
+}
+
+// Coupe l'animation le temps d'une frame, pour un re-rendu qui n'est PAS un mouvement
+// de jeu : redimensionnement (--step change, donc toutes les positions), premier
+// cadrage. Le double rAF laisse le navigateur peindre les nouvelles positions sans
+// transition avant de rétablir la classe (les valeurs ne bougeant plus, rien ne
+// s'anime au retrait).
+function sansAnimationCarte() {
+	const vp = document.getElementById('viewport');
+	if (!vp || vp.classList.contains('no-anim')) return;
+	vp.classList.add('no-anim');
+	requestAnimationFrame(() => requestAnimationFrame(() => vp.classList.remove('no-anim')));
 }
 
 function renderTokens() {
@@ -1242,29 +1332,39 @@ function renderTokens() {
 	const targetable = new Set((casting
 		? capaCibles(capa)
 		: targetableMonsters(currentMode)).map(m => m.id));
-	layer.innerHTML = '';
+	// ⚠️ Plus de `layer.innerHTML = ''` : les jetons SURVIVENT d'un rendu à l'autre
+	// (cf. _tokens), sans quoi rien ne pourrait glisser. Ce qui varie — classes,
+	// position, barre de PV, gestionnaire de clic — est réécrit à chaque passage ;
+	// ce qui est figé (portrait, structure interne) n'est bâti qu'à la création.
+	const vus = new Set();
 	state.monstres.forEach(m => {
 		if (!m.pos) return;
+		vus.add(m.id);
 		const adj = targetable.has(m.id) && !versAllies;
-		const [sx, sy] = worldToScreen(m.pos.x - j.pos.x, m.pos.y - j.pos.y);
-		const tok = document.createElement('div');
+		let tok = _tokens.get(m.id);
+		const neuf = !tok;
+		if (neuf) {
+			tok = document.createElement('div');
+			const portrait = m.image
+				? `<div class="mt-portrait" style="background-image:url('/monsters/${m.image}')"></div>`
+				: `<div class="mt-portrait">${(m.nom || '?').charAt(0).toUpperCase()}</div>`;
+			tok.innerHTML = portrait + `<div class="mt-hp"><div class="mt-hp-fill"></div></div>`;
+			_tokens.set(m.id, tok);
+		}
 		tok.className = 'monster-token' + (m.vivant ? '' : ' dead')
 			+ (adj ? (casting ? ' spellcast' : ' adjacent') : '');
-		tok.style.left   = `calc(50% + var(--step) * ${sx})`;
-		tok.style.bottom = `calc(var(--step) * (var(--floor) - (${sy})))`;
-		const portrait = m.image
-			? `<div class="mt-portrait" style="background-image:url('/monsters/${m.image}')"></div>`
-			: `<div class="mt-portrait">${(m.nom || '?').charAt(0).toUpperCase()}</div>`;
-		tok.innerHTML = portrait +
-			`<div class="mt-hp"><div class="mt-hp-fill" style="width:${pct(m.currentPV, m.pv_max)}%"></div></div>`;
-		if (adj) tok.onclick = casting
+		_placerToken(tok, m.pos.x - j.pos.x, m.pos.y - j.pos.y);
+		tok.querySelector('.mt-hp-fill').style.width = pct(m.currentPV, m.pv_max) + '%';
+		// Jeton réutilisé ⇒ remettre explicitement à null : un `if (adj)` laisserait
+		// en place le gestionnaire du rendu précédent sur une cible devenue hors portée.
+		tok.onclick = !adj ? null : (casting
 			? (pendingSort
 				? () => doAction('sort', m.id, null, null, null, null,
 					{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
 				: () => doAction('competence', m.id, null, null, null, null,
 					{ competence_id: pendingComp.competence_id }))
-			: () => doAction('attaquer', m.id, null, null, null, currentMode);
-		layer.appendChild(tok);
+			: () => doAction('attaquer', m.id, null, null, null, currentMode));
+		if (neuf) layer.appendChild(tok);   // posé APRÈS son placement : pas de transition à la naissance
 	});
 	// Alliés : les membres du groupe NON actifs, aux coords relatives au membre actif
 	// (le token central, lui, montre toujours le membre actif). Ciblables UNIQUEMENT
@@ -1272,39 +1372,55 @@ function renderTokens() {
 	// tir ami dans ce jeu).
 	(state.joueurs || []).forEach(p => {
 		if (!p.pos || p.id === j.id) return;
+		vus.add(p.id);
 		const vise = versAllies && targetable.has(p.id);
-		const [sx, sy] = worldToScreen(p.pos.x - j.pos.x, p.pos.y - j.pos.y);
-		const tok = document.createElement('div');
+		let tok = _tokens.get(p.id);
+		const neuf = !tok;
+		if (neuf) {
+			tok = document.createElement('div');
+			const inner = document.createElement('div');
+			inner.className = 'at-portrait';
+			const st = portraitStyle(p.id);
+			if (st) applyPortraitTo(inner, st);
+			else inner.textContent = (p.nom || '?').charAt(0).toUpperCase();
+			tok.appendChild(inner);
+			const hp = document.createElement('div');
+			hp.className = 'mt-hp';
+			hp.innerHTML = `<div class="mt-hp-fill"></div>`;
+			tok.appendChild(hp);
+			_tokens.set(p.id, tok);
+		}
 		tok.className = 'ally-token' + ((p.currentPV || 0) > 0 ? '' : ' ko')
 					  + (p.est_monture ? ' monture' : '')
 					  + (vise ? ' spellcast' : '');
-		tok.style.left   = `calc(50% + var(--step) * ${sx})`;
-		tok.style.bottom = `calc(var(--step) * (var(--floor) - (${sy})))`;
-		const inner = document.createElement('div');
-		inner.className = 'at-portrait';
-		const st = portraitStyle(p.id);
-		if (st) applyPortraitTo(inner, st);
-		else inner.textContent = (p.nom || '?').charAt(0).toUpperCase();
-		tok.appendChild(inner);
-		const hp = document.createElement('div');
-		hp.className = 'mt-hp';
-		hp.innerHTML = `<div class="mt-hp-fill" style="width:${pct(p.currentPV, p.pv_max)}%"></div>`;
-		tok.appendChild(hp);
-		if (vise) tok.onclick = pendingSort
+		_placerToken(tok, p.pos.x - j.pos.x, p.pos.y - j.pos.y);
+		tok.querySelector('.mt-hp-fill').style.width = pct(p.currentPV, p.pv_max) + '%';
+		tok.onclick = !vise ? null : (pendingSort
 			? () => doAction('sort', p.id, null, null, null, null,
 				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
 			: () => doAction('competence', p.id, null, null, null, null,
-				{ competence_id: pendingComp.competence_id });
-		layer.appendChild(tok);
+				{ competence_id: pendingComp.competence_id }));
+		if (neuf) layer.appendChild(tok);
 	});
+	// Jeton devenu sans objet : l'acteur qui prend la main (il a le jeton central fixe),
+	// une monture perdue, un monstre disparu de l'état.
+	_tokens.forEach((tok, id) => { if (!vus.has(id)) { tok.remove(); _tokens.delete(id); } });
 }
 
+// Même recomposition que _placerToken, et pour la même raison : `rotate` AVANT le
+// `translate`, en coordonnées MONDE. À l'arrêt la matrice est rigoureusement celle
+// d'avant — T(-50%,-50%)·R(a)·T(u) = T(-50%,-50%)·T(R(a)·u)·R(a) — mais l'interpolation,
+// elle, n'est plus la même : le vecteur u ne bougeant pas pendant un pivot, seul l'angle
+// varie et la carte tourne AUTOUR de la case du joueur, à la même vitesse angulaire que
+// les jetons. `translate(-50%,-50%)` reste en tête, hors rotation (recentrage sur la
+// taille propre de l'image).
 function updateCamera() {
 	const j = me();
 	const dims = (GRID && GRID.dims) || { x: 13, y: 11 };
-	const [ox, oy] = worldToScreen((dims.x - 1) / 2 - j.pos.x, (dims.y - 1) / 2 - j.pos.y);
+	const ux = (dims.x - 1) / 2 - j.pos.x, uy = (dims.y - 1) / 2 - j.pos.y;
 	document.getElementById('bg-image').style.transform =
-		`translate(-50%, -50%) translate(calc(var(--step) * ${ox}), calc(var(--step) * ${oy})) rotate(${-facingDeg()}deg)`;
+		`translate(-50%, -50%) rotate(${angleCamera()}deg)`
+		+ ` translate(calc(var(--step) * ${ux}), calc(var(--step) * ${uy}))`;
 }
 
 // ─── Log : colorisation par `kind` + révélation progressive ───────
@@ -2291,6 +2407,10 @@ lastActorId = (activePlayer(state) || {}).id || null;
 applyPlayerPortrait();
 applyBadgePortraits();   // portraits des badges joueurs du bandeau (un par membre)
 syncViewSize();
+// Premier cadrage : la carte part du centre (transform de la feuille de style) pour
+// rejoindre la position du joueur. Si le navigateur a déjà peint, animer ce saut
+// ferait glisser le décor à l'ouverture du combat — on le pose d'un bloc.
+sansAnimationCarte();
 renderTokens();
 refreshBadgeTargets();
 updateCamera();
