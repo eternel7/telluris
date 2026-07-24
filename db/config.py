@@ -21,6 +21,7 @@ try:
 	# Indexes voulus dans CouchDB
 	db.put_index(fields=["type"], name="idx-tables", ddoc="design_tables")
 	db.put_index(fields=["type", "user_id"], name="idx-tables-by-user", ddoc="design_tables")
+	db.put_index(fields=["type", "giver"], name="idx-tables-by-giver", ddoc="design_tables")
 except Exception:
 	# CouchDB injoignable (ex. pytest en local, hors conteneur) : l'import doit
 	# rester possible pour les tests purs ; les helpers ci-dessous renvoient None.

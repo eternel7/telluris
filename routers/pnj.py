@@ -478,10 +478,17 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 		# Le rang affiché est désormais le NOUVEAU (après promotion).
 		dits["rang"] = resultat["promu"]
+		rangs_guilde = character.get("rangs_guilde") or {}
 		reponse["rang"] = {
 			"promu": resultat["promu"],
 			"xp": resultat["recompenses"]["xp"].get("xp_gain", 0),
 			"niveau_up": resultat["recompenses"]["xp"].get("niveau_up", False),
+			# Le MEILLEUR rang toutes villes confondues + son détail : même calcul que /play
+			# (utils/chasse), pour que la carte du joueur se resynchronise sans reload — une
+			# promotion à Rhemi ne fait pas forcément remonter l'affichage si Auxerre est
+			# déjà mieux classée.
+			"meilleur": chasse.meilleur_rang(rangs_guilde),
+			"detail": chasse.rangs_guilde_title(rangs_guilde, get_doc),
 		}
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 		reponse["vitals"] = _vitals_payload(character)

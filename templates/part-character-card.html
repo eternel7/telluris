@@ -21,7 +21,7 @@
   `_acteur` refuserait la sauvegarde (403) — on ne montre pas un éditeur qui ne peut pas écrire.
 #}
 {% macro character_card(card_id='', porteur_id='', nom='', voc_icon='', voc_label='',
-                        voc_niveau=0, race='', niveau=0, rang='', pv=0, pv_max=0,
+                        voc_niveau=0, race='', niveau=0, rang='', rang_title='', pv=0, pv_max=0,
                         pm=0, pm_max=0, image='', zoom=100, editable=true, classes='') %}
 {% set _pv_max = pv_max or 1 %}
 {% set _pm_max = pm_max or 1 %}
@@ -64,7 +64,7 @@
 		</div>
 		<div class="char-identity" data-role="identity">
 			<div class="char-name" data-role="nom">{{ nom }}</div>
-			<div class="char-class" data-role="classe">{{ voc_icon }} {{ voc_label }} Niv.<span class="voc-niveau niveau-nb" data-role="voc-niveau">{{ voc_niveau }}</span> - <span data-role="race">{{ race }}</span> Niv.<span class="race-niveau niveau-nb" data-role="race-niveau">{{ niveau }}</span> · Rang <span data-role="rang">{{ rang }}</span></div>
+			<div class="char-class" data-role="classe">{{ voc_icon }} {{ voc_label }} Niv.<span class="voc-niveau niveau-nb" data-role="voc-niveau">{{ voc_niveau }}</span> - <span data-role="race">{{ race }}</span> Niv.<span class="race-niveau niveau-nb" data-role="race-niveau">{{ niveau }}</span> · <span data-role="rang"{% if rang_title %} title="{{ rang_title }}"{% endif %}>Rang <span data-role="rang-val">{{ rang }}</span></span></div>
 			<div class="char-vitals">
 				<span class="pv-val" data-role="pv-val">PV <span data-role="pv">{{ pv }}</span>/<span data-role="pv-max">{{ pv_max or "—" }}</span></span>
 				<span class="pm-val" data-role="pm-val">PM <span data-role="pm">{{ pm }}</span>/<span data-role="pm-max">{{ pm_max or "—" }}</span></span>

@@ -24,6 +24,19 @@ def now_epoch() -> int:
 	return int(time.time())
 
 
+def _cached_getter(fn):
+	"""Mémoïse `fn(doc_id)` (typiquement `get_doc`) dans un dict LOCAL À L'APPEL — jamais partagé
+	entre requêtes (pas de staleness), juste évite de re-fetcher le même lieu/espèce/profil/zone
+	plusieurs fois dans une même passe de génération (ex. `_candidats_chasse` relit les mêmes
+	docs zone/profil à chaque espèce d'un même lieu)."""
+	cache: dict = {}
+	def get(doc_id):
+		if doc_id not in cache:
+			cache[doc_id] = fn(doc_id)
+		return cache[doc_id]
+	return get
+
+
 def _carcasse_item_id(espece_id: str) -> str | None:
 	"""item:<sub_id> depuis 'espece:<sub_id>' (1-pour-1 avec les carcasses du bestiaire)."""
 	if not espece_id or not espece_id.startswith("espece:"):
@@ -53,10 +66,11 @@ def ressources_du_parent(parent_doc: dict) -> list:
 	return out
 
 
-def cibles_collect(parent_doc: dict) -> list:
+def cibles_collect(parent_doc: dict, get_doc_fn=None) -> list:
 	"""Items collectables : ressources du lieu PLUS carcasses des espèces rencontrables, bornés à
 	`QUETE_COLLECT_POIDS_MAX` par objet. Un item bois coupable (ex. un arbre) n'est PAS réclamé tel
 	quel mais remplacé par les pièces transportables (≤ limite) de la même essence."""
+	get_doc_fn = get_doc_fn or get_doc
 	limite = character_stats.QUETE_COLLECT_POIDS_MAX
 	raw = list(ressources_du_parent(parent_doc))
 	for eid in especes_du_parent(parent_doc):
@@ -66,7 +80,7 @@ def cibles_collect(parent_doc: dict) -> list:
 
 	out = []
 	for iid in raw:
-		doc = get_doc(iid)
+		doc = get_doc_fn(iid)
 		if not doc:
 			continue
 		# Bois coupable (arbre/tronc/gros rondin…) : on cible les pièces ≤ limite de l'essence.
@@ -81,8 +95,9 @@ def cibles_collect(parent_doc: dict) -> list:
 	return out
 
 
-def niveau_representatif(parent_doc: dict) -> int:
+def niveau_representatif(parent_doc: dict, get_doc_fn=None) -> int:
 	"""Niveau de profil « moyen » du lieu, pondéré par `profil_weights` (repli 1)."""
+	get_doc_fn = get_doc_fn or get_doc
 	weights = (parent_doc or {}).get("profil_weights") or {}
 	total_w = 0.0
 	acc = 0.0
@@ -93,7 +108,7 @@ def niveau_representatif(parent_doc: dict) -> int:
 			continue
 		if w <= 0:
 			continue
-		prof = get_doc(pid)
+		prof = get_doc_fn(pid)
 		if not prof:
 			continue
 		acc += float(prof.get("niveau", 1)) * w
@@ -141,12 +156,13 @@ def _xp_unitaire(espece_doc: dict, niveau: int) -> int:
 	return max(1, int(niveau) * 4 + int(somme) // 10)
 
 
-def _xp_unitaire_item(item_doc: dict, niveau: int) -> int:
+def _xp_unitaire_item(item_doc: dict, niveau: int, get_doc_fn=None) -> int:
 	"""Valeur unitaire d'une cible de collecte. Carcasse (item lié à une espèce) → XP de
 	chasse de l'espèce ; ressource brute → effort de récolte modéré pondéré par la rareté."""
+	get_doc_fn = get_doc_fn or get_doc
 	src = (item_doc or {}).get("source_espece")
 	if src:
-		esp = get_doc(src)
+		esp = get_doc_fn(src)
 		if esp:
 			return _xp_unitaire(esp, niveau)
 	rarete = (item_doc or {}).get("rarete", "commun")
@@ -159,20 +175,21 @@ _TITRES_COLLECT = ["Récolte : {nom}", "Rapporter du {nom}", "Collecte de {nom}"
 _TITRES_CHASSE = ["Traquer le {nom} « {grade} »", "Abattre le {nom} « {grade} »", "La tête du {nom} « {grade} »"]
 
 
-def _generer_chasse(guild_doc: dict, parent_doc: dict, cible) -> dict | None:
+def _generer_chasse(guild_doc: dict, parent_doc: dict, cible, get_doc_fn=None) -> dict | None:
 	"""Doc `quete:*` d'une quête de chasse `board` (grade `max−1`) : `cible = (lieu_id, espece_id)`.
 	Le grade est RÉSOLU ICI (à la génération), nommé dans le titre. None si aucun grade compatible."""
 	from utils import chasse  # import paresseux : chasse dépend de ce module
+	get_doc_fn = get_doc_fn or get_doc
 	lieu_id, espece_id = cible
-	lieu_doc = get_doc(lieu_id)
-	espece_doc = get_doc(espece_id)
+	lieu_doc = get_doc_fn(lieu_id)
+	espece_doc = get_doc_fn(espece_id)
 	if not lieu_doc or not espece_doc:
 		return None
 	position = chasse.position_de_chasse(lieu_doc, espece_doc)
-	profil_id = chasse.resoudre_profil_chasse(lieu_doc, espece_doc, chasse.TIER_MAX_MOINS_1, position, get_doc)
+	profil_id = chasse.resoudre_profil_chasse(lieu_doc, espece_doc, chasse.TIER_MAX_MOINS_1, position, get_doc_fn)
 	if not profil_id:
 		return None
-	profil = get_doc(profil_id) or {}
+	profil = get_doc_fn(profil_id) or {}
 	niv = int(profil.get("niveau", 1))
 	grade = chasse.qualificatif_de(profil)
 	nom = espece_doc.get("nom") or _nom_espece(espece_id)
@@ -207,20 +224,21 @@ def _generer_chasse(guild_doc: dict, parent_doc: dict, cible) -> dict | None:
 	}
 
 
-def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible, niveau: int) -> dict | None:
+def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible, niveau: int, get_doc_fn=None) -> dict | None:
 	"""Construit un doc `quete:*` (non persisté) pour une cible donnée. Renvoie None si une
 	quête `chasse` ne peut être résolue (aucun grade compatible) — l'appelant saute la cible."""
+	get_doc_fn = get_doc_fn or get_doc
 	if type_obj == "chasse":
-		return _generer_chasse(guild_doc, parent_doc, cible)
+		return _generer_chasse(guild_doc, parent_doc, cible, get_doc_fn)
 	if type_obj == "kill":
-		esp = get_doc(cible)
+		esp = get_doc_fn(cible)
 		xp_unit = _xp_unitaire(esp, niveau) if esp else max(1, int(niveau) * 4)
 		nom = (esp.get("nom") if esp else None) or _nom_espece(cible)
 		titre = random.choice(_TITRES_KILL).format(nom=nom)
 		desc_tpl = "La guilde demande d'abattre {q} {nom} qui rôdent dans les environs d'Auxerre."
 	else:  # collect
-		item = get_doc(cible)
-		xp_unit = _xp_unitaire_item(item, niveau)
+		item = get_doc_fn(cible)
+		xp_unit = _xp_unitaire_item(item, niveau, get_doc_fn)
 		nom = (item.get("nom") if item else None) or _nom_item(cible)
 		titre = random.choice(_TITRES_COLLECT).format(nom=nom)
 		desc_tpl = "Rapportez {q} {nom} à la guilde."
@@ -299,12 +317,12 @@ def purger_offres_perimees(offres: list, now: int, delete_doc_fn=None) -> list:
 
 
 def offres_du_giver(guild_id: str) -> list:
-	"""Offres ouvertes (`statut:"offerte"`) d'une guilde — générées ET authorées."""
-	docs = find_docs({"type": "quete"}) or []
-	return [
-		d for d in docs
-		if d.get("giver") == guild_id and d.get("statut", "offerte") == "offerte"
-	]
+	"""Offres ouvertes (`statut:"offerte"`) d'une guilde — générées ET authorées. Filtre `giver`
+	posé DANS le selector Mango (pas en Python après coup) : sans lui, CouchDB renvoie tous les
+	`quete:*` de TOUTES les guildes du jeu sur le réseau à chaque ouverture du tableau — un coût
+	qui grandit avec le nombre de guildes/quêtes déjà générées, pour ne garder que celles d'ICI."""
+	docs = find_docs({"type": "quete", "giver": guild_id}) or []
+	return [d for d in docs if d.get("statut", "offerte") == "offerte"]
 
 
 def remplir_tableau(guild_doc: dict) -> list:
@@ -323,11 +341,15 @@ def remplir_tableau(guild_doc: dict) -> list:
 	manquantes = max(0, int(character_stats.QUETE_BOARD_TAILLE) - len(generees))
 
 	if manquantes > 0 and parent_doc:
-		niveau = niveau_representatif(parent_doc)
+		# Cache mémoïsé LOCAL à cette passe : `_candidats_chasse` relit les mêmes docs
+		# lieu/espèce/zone/profil à chaque paire (lieu, espèce) — sans lui, un tableau à
+		# compléter revisite la même douzaine de docs des dizaines de fois.
+		get_doc_c = _cached_getter(get_doc)
+		niveau = niveau_representatif(parent_doc, get_doc_c)
 		existants = {_offre_key(o["objectif"]) for o in offres if o.get("objectif")}
 		candidats = [("kill", eid) for eid in especes_du_parent(parent_doc)]
-		candidats += [("collect", iid) for iid in cibles_collect(parent_doc)]
-		candidats += _candidats_chasse(parent_id)
+		candidats += [("collect", iid) for iid in cibles_collect(parent_doc, get_doc_c)]
+		candidats += _candidats_chasse(parent_id, get_doc_c)
 		random.shuffle(candidats)
 		for type_obj, cible in candidats:
 			if manquantes <= 0:
@@ -335,7 +357,7 @@ def remplir_tableau(guild_doc: dict) -> list:
 			key = ("chasse", cible) if type_obj == "chasse" else (type_obj, cible)
 			if key in existants:
 				continue
-			q = generer_quete(guild_doc, parent_doc, type_obj, cible, niveau)
+			q = generer_quete(guild_doc, parent_doc, type_obj, cible, niveau, get_doc_c)
 			if q is None or save_doc(q) is None:
 				continue
 			offres.append(q)
@@ -353,20 +375,21 @@ def _offre_key(objectif: dict):
 	return (objectif.get("type"), objectif.get("cible"))
 
 
-def _candidats_chasse(cite_id: str) -> list:
+def _candidats_chasse(cite_id: str, get_doc_fn=None) -> list:
 	"""Candidats `("chasse", (lieu_id, espece_id))` du tableau : élites d'un lieu de la cité,
 	résolvables au grade `max−1`. Balaie les lieux de chasse × leurs rencontres."""
 	from utils import chasse  # import paresseux : chasse dépend de ce module
+	get_doc_fn = get_doc_fn or get_doc
 	out = []
-	for L in chasse.lieux_chasse_de(cite_id, get_doc, find_docs):
+	for L in chasse.lieux_chasse_de(cite_id, get_doc_fn, find_docs):
 		for eid in especes_du_parent(L):
-			espece = get_doc(eid)
+			espece = get_doc_fn(eid)
 			if not espece:
 				continue
 			position = chasse.position_de_chasse(L, espece)
 			if position is None:
 				continue
-			if chasse.resoudre_profil_chasse(L, espece, chasse.TIER_MAX_MOINS_1, position, get_doc):
+			if chasse.resoudre_profil_chasse(L, espece, chasse.TIER_MAX_MOINS_1, position, get_doc_fn):
 				out.append(("chasse", (L["_id"], eid)))
 	return out
 
@@ -444,6 +467,7 @@ def quete_detail(character: dict, q: dict) -> dict:
 	qte = int(obj.get("quantite", 0) or 0)
 	rec = q.get("recompenses", {}) or {}
 	purse = cuivre_to_purse(rec.get("cuivre", 0))
+	lieu_doc_chasse = None
 	if obj.get("type") == "transport":
 		if q.get("livree_at"):
 			# Course à retour : la marchandise est remise, il reste à en rendre compte au donneur.
@@ -452,7 +476,8 @@ def quete_detail(character: dict, q: dict) -> dict:
 		else:
 			progress_txt = f"Livraison à {_cible_nom(obj)}"
 	elif obj.get("type") == "chasse":
-		lieu_doc = get_doc(obj.get("lieu")) if obj.get("lieu") else None
+		lieu_doc_chasse = get_doc(obj.get("lieu")) if obj.get("lieu") else None
+		lieu_doc = lieu_doc_chasse
 		lieu_nom = (lieu_doc.get("label") or lieu_doc.get("nom")) if lieu_doc else None
 		lieu_nom = lieu_nom or (obj.get("lieu") or "").split(":", 1)[-1]
 		compteur = min(prog, qte) if qte else prog
@@ -487,7 +512,7 @@ def quete_detail(character: dict, q: dict) -> dict:
 		detail["now"] = now_epoch()
 	# Quête de chasse localisée : de quoi dessiner le crop 3×3 de la carte centré sur la cible.
 	if obj.get("type") == "chasse" and obj.get("position"):
-		carte = _carte_chasse(obj, q.get("giver"))
+		carte = _carte_chasse(obj, q.get("giver"), lieu_doc_chasse)
 		if carte:
 			detail["carte"] = carte
 	return detail
@@ -502,12 +527,13 @@ def _phrase_direction(direction: str) -> str:
 	return f"{prep}{direction} du bâtiment de la guilde"
 
 
-def _carte_chasse(objectif: dict, giver_id: str | None = None) -> dict | None:
+def _carte_chasse(objectif: dict, giver_id: str | None = None, lieu_doc: dict | None = None) -> dict | None:
 	"""Données du bouton 🗺️ d'une quête de chasse : l'image servable du lieu + ses dimensions
 	en cases + la position cible → le client recadre un 3×3 centré sur la case. None si le lieu
 	n'a pas d'image servable ou pas de grille (le bouton est alors masqué). Ajoute une ligne
-	d'orientation « Au <direction> du bâtiment de la guilde » si le donneur est joignable."""
-	lieu = get_doc(objectif.get("lieu")) if objectif.get("lieu") else None
+	d'orientation « Au <direction> du bâtiment de la guilde » si le donneur est joignable.
+	`lieu_doc` réutilise le doc déjà fetché par `quete_detail` (même lieu) au lieu de le relire."""
+	lieu = lieu_doc if lieu_doc is not None else (get_doc(objectif.get("lieu")) if objectif.get("lieu") else None)
 	dims = (lieu or {}).get("dimensions")
 	if not lieu or not dims:
 		return None

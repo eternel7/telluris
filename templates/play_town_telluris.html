@@ -1436,6 +1436,7 @@
 			"voc_niveau": character.get("vocations_niveaux", {}).get(character.get("voc",""), 0),
 			"race": character["race"], "niveau": character.get("niveau", 0),
 			"rang": character.get("rang", "aucun"),
+			"rang_title": character.get("rangs_guilde_title", ""),
 			"pv": _pv, "pv_max": d.get("pv_max", 0), "pm": _pm, "pm_max": d.get("pm_max", 0),
 			"image": character["image"], "zoom": character.get("portrait_zoom", 100),
 		} %}
@@ -1469,7 +1470,7 @@
 				</div>
 				<div class="sheet-left-info">
 					<div class="char-name">{{character["prenom"]}} {{character["nom"]}}</div>
-					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> · Rang {{character.get("rang",'aucun')}}</div>
+					<div class="char-class">{{vocation["icon"]}} {{vocation["label"]}} Niv.<span id="niv-voc-left-info" class="voc-niveau niveau-nb">{{character.get("vocations_niveaux", {}).get(character.get("voc",""), 0)}}</span> - {{character["race"]}} Niv.<span id="niv-left-info" class="race-niveau niveau-nb">{{character.get("niveau",'0')}}</span> ·<span id="rang-left-info"{% if character.get("rangs_guilde_title") %} title="{{ character['rangs_guilde_title'] }}"{% endif %}> Rang {{character.get("rang",'aucun')}}</span></div>
 					<div class="char-vitals" style="margin-top:8px">
 						<span class="pv-val">PV {{_pv}}/<span id="stat-left-drv-pv_max">{{d.get("pv_max","—")}}</span></span>
 						<span class="pm-val">PM {{_pm}}/<span id="stat-left-drv-pm_max">{{d.get("pm_max","—")}}</span></span>
@@ -2383,6 +2384,29 @@
 		if (cible === porteurActifId()) _setLeftColVitals(v);
 	}
 
+	// Rang de guilde affiché — même logique de propriété que les vitaux (miroir de
+	// updateVitals) : seul le JOUEUR peut le voir changer en jeu (promotion au comptoir de
+	// guilde), mais générique par cohérence si un jour un compagnon en gagne un.
+	function updateRang(rang, rangDetail, porteurId) {
+		if (!rang) return;
+		const cible = porteurId || PRINCIPAL_ID;
+		if (cible === PRINCIPAL_ID) {
+			IDENTITE_JOUEUR.rang = rang;
+			IDENTITE_JOUEUR.rang_detail = rangDetail || '';
+			const leftEl = document.getElementById('rang-left-info');
+			if (leftEl) {
+				leftEl.textContent = ' Rang ' + rang;
+				if (rangDetail) leftEl.title = rangDetail; else leftEl.removeAttribute('title');
+			}
+		}
+		cartesDuPorteur(cible).forEach(card => {
+			const valEl = _q(card, 'rang-val');
+			if (valEl) valEl.textContent = rang;
+			const rangEl = _q(card, 'rang');
+			if (rangEl) { if (rangDetail) rangEl.title = rangDetail; else rangEl.removeAttribute('title'); }
+		});
+	}
+
 	async function move(viewDx, viewDy) {
 		if (isMoving) return;
 		isMoving = true;
@@ -2608,6 +2632,7 @@ const IDENTITE_JOUEUR = {
 	voc:    {{ character.get("voc", "") | tojson | safe }},
 	race:   {{ character["race"] | tojson | safe }},
 	rang:   {{ character.get("rang", "aucun") | tojson | safe }},
+	rang_detail: {{ character.get("rangs_guilde_title", "") | tojson | safe }},
 };
 // Vitaux courants du joueur, tenus à jour par updateVitals (la fiche peut être partie chez un
 // compagnon entre-temps : sans mémoire, on ne saurait pas quoi réafficher au retour).
@@ -2891,7 +2916,11 @@ function _setCardIdentite(card, p) {
 	set('voc-niveau', p.voc_niveau !== undefined ? p.voc_niveau : 0);
 	set('race', p.race || '');
 	set('race-niveau', p.niveau !== undefined ? p.niveau : 0);
-	set('rang', p.rang || 'aucun');
+	set('rang-val', p.rang || 'aucun');
+	// Détail par ville en infobulle — seul le joueur le porte (`rang_detail`) ; un
+	// compagnon/recrue n'a qu'un rang scalaire, sans ville : rien à survoler, on efface.
+	const rangEl = _q(card, 'rang');
+	if (rangEl) { if (p.rang_detail) rangEl.title = p.rang_detail; else rangEl.removeAttribute('title'); }
 	// La ligne « ⚔ Guerrier Niv.<span> - <race> Niv.<span> · Rang <span> » : seul son premier
 	// nœud TEXTE porte l'icône et le libellé de vocation (le reste est déjà en data-role).
 	const classeEl = _q(card, 'classe');
@@ -6167,6 +6196,7 @@ function _identiteJoueur() {
 		id: PRINCIPAL_ID,
 		prenom: IDENTITE_JOUEUR.prenom, nom: IDENTITE_JOUEUR.nom,
 		voc: IDENTITE_JOUEUR.voc, race: IDENTITE_JOUEUR.race, rang: IDENTITE_JOUEUR.rang,
+		rang_detail: IDENTITE_JOUEUR.rang_detail,
 		voc_niveau: _vocNiveau, niveau: _niveau,
 		image: SUJET_JOUEUR.image,
 		portrait_zoom: SUJET_JOUEUR.portrait_zoom,
@@ -6364,6 +6394,16 @@ async function choisirPnj(choixId) {
 			}
 			if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
 			renderFicheQuetes(data);
+		}
+		if (data.rang) {
+			if (data.rang.accepte) showToast('🎯 Épreuve de rang acceptée : ' + data.rang.accepte);
+			if (data.rang.promu) {
+				showToast('🏅 Rang de guilde : ' + data.rang.promu + (data.rang.niveau_up ? ' — ⭐ Niveau supérieur !' : ''));
+				// `meilleur`/`detail` = le MEILLEUR rang toutes villes confondues et son détail par
+				// ville (même calcul que /play, cf. utils/chasse.meilleur_rang) : la promotion d'UNE
+				// ville ne fait pas forcément remonter l'affichage si une autre était déjà meilleure.
+				updateRang(data.rang.meilleur, data.rang.detail);
+			}
 		}
 		if (data.noeud) renderPnjNoeud(data.noeud);
 		else closePnjPanel();

@@ -190,6 +190,24 @@ def rang_de(character: dict, cite_id: str) -> str:
 	return (character or {}).get("rangs_guilde", {}).get(cite_id, RANGS[0])
 
 
+def meilleur_rang(rangs_guilde: dict) -> str:
+	"""Le rang le plus élevé obtenu par le personnage, toutes cités confondues (RANGS =
+	échelle croissante F→S+). 'aucun' si le personnage n'a encore aucun rang."""
+	if not rangs_guilde:
+		return "aucun"
+	return max(rangs_guilde.values(), key=lambda r: RANGS.index(r) if r in RANGS else -1)
+
+
+def rangs_guilde_title(rangs_guilde: dict, get_doc_fn) -> str:
+	"""Détail par ville du rang affiché (infobulle du `meilleur_rang`) : une ligne
+	'Ville : Rang' par cité, triées par id de lieu. `get_doc_fn` résout le nom de chaque
+	cité (DB injectée, comme le reste du module)."""
+	return "\n".join(
+		f"{(get_doc_fn(lid) or {}).get('nom', lid)} : {r}"
+		for lid, r in sorted((rangs_guilde or {}).items())
+	)
+
+
 def rang_suivant(rang: str) -> str:
 	"""Rang immédiatement au-dessus (plafonné au sommet). Rang inconnu → premier de l'échelle."""
 	try:

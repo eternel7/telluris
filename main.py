@@ -619,6 +619,12 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	character["derived_stats"] = fiche_util.derived_de(character)
 	character["niveau"] = compute_character_level(character.get("xp_total", 0))
 
+	# Rang de guilde affiché = le MEILLEUR obtenu, toutes cités confondues (`rangs_guilde`
+	# est par cité) ; le détail par ville alimente l'infobulle au survol.
+	rangs_guilde = character.get("rangs_guilde") or {}
+	character["rang"] = chasse_util.meilleur_rang(rangs_guilde)
+	character["rangs_guilde_title"] = chasse_util.rangs_guilde_title(rangs_guilde, get_doc)
+
 	# Résolution inventaire : références → documents complets (poids d'instance inclus)
 	character["inventaire"] = [
 		doc for ref in character.get("inventaire", [])

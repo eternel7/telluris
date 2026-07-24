@@ -178,6 +178,37 @@ def test_promouvoir_mute_et_monte():
 	assert character["rangs_guilde"]["lieu:auxerre"] == "D"
 
 
+def test_meilleur_rang_aucun_si_vide():
+	assert chasse.meilleur_rang({}) == "aucun"
+	assert chasse.meilleur_rang(None) == "aucun"
+
+
+def test_meilleur_rang_seule_ville():
+	assert chasse.meilleur_rang({"lieu:auxerre": "E"}) == "E"
+
+
+def test_meilleur_rang_prend_le_plus_haut():
+	# C > E > F dans l'échelle RANGS, quel que soit l'ordre d'insertion du dict.
+	assert chasse.meilleur_rang({"lieu:auxerre": "E", "lieu:rhemi": "C", "lieu:lutecia": "F"}) == "C"
+
+
+def test_rangs_guilde_title_vide():
+	assert chasse.rangs_guilde_title({}, lambda lid: None) == ""
+
+
+def test_rangs_guilde_title_resout_nom_et_trie():
+	noms = {"lieu:rhemi": {"nom": "Rhemi"}, "lieu:auxerre": {"nom": "Auxerre"}}
+	title = chasse.rangs_guilde_title(
+		{"lieu:rhemi": "C", "lieu:auxerre": "E"}, lambda lid: noms.get(lid)
+	)
+	# Trié par id de lieu (auxerre < rhemi), pas par rang ni par ordre d'insertion.
+	assert title == "Auxerre : E\nRhemi : C"
+
+
+def test_rangs_guilde_title_repli_sur_id_si_lieu_introuvable():
+	assert chasse.rangs_guilde_title({"lieu:inconnu": "F"}, lambda lid: None) == "lieu:inconnu : F"
+
+
 # ── offre_rang_pour ──────────────────────────────────────────────────────────────
 
 def test_offre_rang_tire_une_epreuve_max():
