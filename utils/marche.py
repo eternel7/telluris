@@ -451,8 +451,11 @@ def appliquer_marchandage(relation_doc: dict, item_id: str, sens: str, deal: dic
 						  now: int) -> dict:
 	"""Applique l'issue d'un marchandage au doc relation (mute en place, NE SAUVEGARDE
 	PAS). Crit réussite (roll ≤ MAX) → +1 relation ; crit échec (roll ≥ MIN) → −1 relation
-	et blocage du marchandage ; réussite simple → persiste le prix négocié. Renvoie un
-	résumé {crit, relation, prix_negocie, bloque_jusqu}."""
+	et blocage du marchandage ; réussite simple → persiste le prix négocié, SEULEMENT s'il
+	est plus favorable au joueur que celui déjà négocié (une réussite de justesse ne doit
+	jamais dégrader un prix déjà obtenu). Renvoie un résumé
+	{crit, relation, prix_negocie, bloque_jusqu} — `prix_negocie` reflète toujours le prix
+	réellement applicable après l'appel, gagnant compris."""
 	roll = int(deal.get("roll", 50))
 	val = relation_value(relation_doc)
 	crit = None
@@ -468,16 +471,24 @@ def appliquer_marchandage(relation_doc: dict, item_id: str, sens: str, deal: dic
 
 	neg = None
 	if deal.get("succes"):
-		pn = relation_doc.setdefault("prix_negocies", {})
-		# On persiste la FRACTION de la fourchette (rejouée contre le poids de chaque
-		# instance), pas le montant fixe — sinon deux exemplaires de poids différents
-		# auraient le même prix. Repli sur l'absolu si un deal n'expose pas de frac.
-		frac = deal.get("frac")
-		if isinstance(frac, (int, float)) and not isinstance(frac, bool):
-			pn.setdefault(item_id, {})[sens] = {"frac": float(frac)}
+		nouveau_prix = int(deal["prix"])
+		prix_actuel = prix_negocie(relation_doc, item_id, sens, deal["min"], deal["max"])
+		meilleur = prix_actuel is None or (
+			nouveau_prix < prix_actuel if sens == "achat" else nouveau_prix > prix_actuel
+		)
+		if meilleur:
+			pn = relation_doc.setdefault("prix_negocies", {})
+			# On persiste la FRACTION de la fourchette (rejouée contre le poids de chaque
+			# instance), pas le montant fixe — sinon deux exemplaires de poids différents
+			# auraient le même prix. Repli sur l'absolu si un deal n'expose pas de frac.
+			frac = deal.get("frac")
+			if isinstance(frac, (int, float)) and not isinstance(frac, bool):
+				pn.setdefault(item_id, {})[sens] = {"frac": float(frac)}
+			else:
+				pn.setdefault(item_id, {})[sens] = nouveau_prix
+			neg = nouveau_prix
 		else:
-			pn.setdefault(item_id, {})[sens] = int(deal["prix"])
-		neg = int(deal["prix"])
+			neg = prix_actuel
 
 	return {
 		"crit": crit,

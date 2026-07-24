@@ -11,7 +11,7 @@ from utils import marche
 from models import character_stats
 from utils.marche import (
     recette_matieres, matiere_item_id, _executer_production_batch, ecouler_produits_pnj,
-    depecage_carcasse,
+    depecage_carcasse, appliquer_marchandage,
 )
 
 
@@ -216,3 +216,68 @@ def test_ecoulement_pnj_proba_nulle_ne_fait_rien(monkeypatch):
     lieu = {"stock_vente": [{"item_id": "item:A", "qty": 10}]}
     assert ecouler_produits_pnj(lieu) == []
     assert lieu["stock_vente"][0]["qty"] == 10
+
+
+# ── appliquer_marchandage : une réussite ne dégrade jamais un prix déjà négocié ─────
+
+def test_marchandage_reussi_persiste_le_prix():
+    # pmin=50, pmax=150 ; frac 0.2 → prix = 50 + 100*0.2 = 70 (cohérent avec la formule
+    # de marchander(), pour que la comparaison de favorabilité du 2e test soit valide).
+    relation = {"value": 50}
+    deal = {"prix": 70, "frac": 0.2, "roll": 40, "seuil": 50, "succes": True,
+            "min": 50, "max": 150}
+
+    issue = appliquer_marchandage(relation, "item:X", "achat", deal, now=1000)
+
+    assert relation["prix_negocies"]["item:X"]["achat"] == {"frac": 0.2}
+    assert issue["prix_negocie"] == 70
+
+
+def test_marchandage_achat_reussi_mais_moins_favorable_ne_degrade_pas():
+    # Le joueur a déjà 70 (frac 0.2). Un second jet, réussi mais de justesse (frac 0.7,
+    # prix 120 > 70), ne doit PAS remplacer le bon prix par un moins bon — c'est le bug
+    # signalé : une « réussite » ne doit jamais augmenter un prix d'achat déjà négocié.
+    relation = {"value": 50, "prix_negocies": {"item:X": {"achat": {"frac": 0.2}}}}
+    deal = {"prix": 120, "frac": 0.7, "roll": 45, "seuil": 50, "succes": True,
+            "min": 50, "max": 150}
+
+    issue = appliquer_marchandage(relation, "item:X", "achat", deal, now=1001)
+
+    assert relation["prix_negocies"]["item:X"]["achat"] == {"frac": 0.2}  # inchangé
+    assert issue["prix_negocie"] == 70  # l'ancien prix reste applicable, pas 120
+
+
+def test_marchandage_achat_reussi_et_plus_favorable_ecrase_lancien():
+    relation = {"value": 50, "prix_negocies": {"item:X": {"achat": {"frac": 0.2}}}}
+    deal = {"prix": 60, "frac": 0.1, "roll": 10, "seuil": 50, "succes": True,
+            "min": 50, "max": 150}
+
+    issue = appliquer_marchandage(relation, "item:X", "achat", deal, now=1002)
+
+    assert relation["prix_negocies"]["item:X"]["achat"] == {"frac": 0.1}
+    assert issue["prix_negocie"] == 60
+
+
+def test_marchandage_vente_reussi_mais_moins_favorable_ne_degrade_pas():
+    # Symétrique côté vente : plus favorable au joueur = prix plus HAUT. Le joueur a
+    # déjà 130 (frac 0.8) ; un second jet réussi mais moins bon (frac 0.3 → 80) ne doit
+    # pas remplacer 130 par 80.
+    relation = {"value": 50, "prix_negocies": {"item:X": {"vente": {"frac": 0.8}}}}
+    deal = {"prix": 80, "frac": 0.3, "roll": 45, "seuil": 50, "succes": True,
+            "min": 50, "max": 150}
+
+    issue = appliquer_marchandage(relation, "item:X", "vente", deal, now=1003)
+
+    assert relation["prix_negocies"]["item:X"]["vente"] == {"frac": 0.8}  # inchangé
+    assert issue["prix_negocie"] == 130  # ancien prix (pmin + (pmax-pmin)*0.8) conservé
+
+
+def test_marchandage_echec_ne_touche_pas_prix_negocies():
+    relation = {"value": 50}
+    deal = {"prix": 999, "frac": 0.99, "roll": 80, "seuil": 50, "succes": False,
+            "min": 50, "max": 150}
+
+    issue = appliquer_marchandage(relation, "item:Y", "achat", deal, now=1004)
+
+    assert relation.get("prix_negocies", {}) == {}
+    assert issue["prix_negocie"] is None
