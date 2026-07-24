@@ -749,6 +749,7 @@
 			opacity: 0.5;
 		}
 		.sh-paperdoll .sh-slot.occupied { border-color: var(--accent-color); }
+		.sh-paperdoll .sh-slot.blocked { opacity: .5; cursor: default; }
 		.sh-paperdoll .sh-slot-name { font-size: 0.7rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 		.sh-paperdoll .sh-unequip-btn {
 			position: absolute; top: 1px; right: 1px;
@@ -839,6 +840,11 @@
 		.sh-skill-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; }
 		.sh-skill-desc { font-size: 0.85rem; color: var(--muted); }
 		.sh-skill-lvl { font-size: 0.85rem; color: var(--accent-color); flex-shrink: 0; }
+		.sh-skill.expanded { background: rgba(126,200,255,0.08); border-radius: 6px; }
+		.sh-skill-toggle { cursor: pointer; }
+		.sh-skill-toggle:hover .sh-skill-name { text-decoration: underline; }
+		.sh-skill-full-desc { font-size: 0.85rem; color: var(--muted); margin-top: 6px;
+			padding-top: 6px; border-top: 1px dashed rgba(74,74,90,0.4); white-space: pre-line; }
 		/* Mobile : ne pas tronquer le sac / le sol. Le contenu (icône, nom, poids, rareté)
 		   passe sur autant de lignes que nécessaire ; les boutons restent groupés à droite. */
 		@media (max-width: 768px) {
@@ -3522,9 +3528,26 @@ function _refreshPaperdoll() {
 			if (nameEl) { nameEl.textContent = '—'; nameEl.className = 'sh-slot-name sh-slot-empty'; }
 			if (unequipEl) unequipEl.style.display = 'none';
 			el.classList.remove('occupied');
+			el.classList.remove('blocked');
 			el.title = '';
 		}
 	}
+	// Arme à deux mains : la main vide en face reste littéralement vide en base (pas de
+	// double comptage du poids/des bonus, cf. equip_item), mais s'afficherait sinon comme
+	// une case libre sans explication — surchargée ici après coup pour la seule paire de
+	// mains. `resolve_item_ref` copie tout le doc item, `deux_mains` est donc déjà présent.
+	const mainD = _slots['main_droite'], mainG = _slots['main_gauche'];
+	[['main_droite', mainG], ['main_gauche', mainD]].forEach(([key, autre]) => {
+		const el = document.getElementById('slot-' + key);
+		if (!el) return;
+		const bloque = !_slots[key] && autre && autre.deux_mains;
+		el.classList.toggle('blocked', !!bloque);
+		if (bloque) {
+			const nameEl = el.querySelector('.sh-slot-name');
+			if (nameEl) { nameEl.textContent = `Occupée (${autre.nom || 'arme à deux mains'})`; nameEl.className = 'sh-slot-name sh-slot-empty'; }
+			el.title = 'Main occupée par une arme à deux mains';
+		}
+	});
 }
 
 function _refreshInventaire() {
@@ -4043,6 +4066,21 @@ let _sorts            = {{ sorts | tojson | safe }};
 let _sortsApprenables = {{ sorts_apprenables | tojson | safe }};
 let _sortsMagies      = {{ sorts_magies | tojson | safe }};      // écoles pratiquées + achetables
 
+// Description complète dépliée au clic — connue si on connaît déjà le sort, ou si on
+// porte son grimoire (sinon rien à débloquer). État purement client, pas persisté ;
+// survit à un resync (lancer/apprendre) puisque les deux rendus le relisent à chaque appel.
+let _sortsDescOuvertes = new Set();
+function _toggleSortDesc(sortId) {
+	_sortsDescOuvertes.has(sortId) ? _sortsDescOuvertes.delete(sortId) : _sortsDescOuvertes.add(sortId);
+	_renderSorts(); _renderSortsApprenables();
+}
+// Classe + onclick à injecter sur .sh-skill-info si la description est consultable.
+function _sortInfoAttrs(sortId, peutVoir) {
+	return peutVoir
+		? ` class="sh-skill-info sh-skill-toggle" onclick="_toggleSortDesc('${sortId}')"`
+		: ' class="sh-skill-info"';
+}
+
 // ── Barre de combat : grille de slots (utils/slots_actions.py) ────────────────────
 // Une entrée par case ; `_barreSlots` remplace les deux anciennes listes d'épinglés, qui
 // disaient « en accès rapide » sans jamais dire À QUELLE PLACE.
@@ -4269,12 +4307,16 @@ function _renderSorts(list) {
 			? `<label class="sh-sort-uselbl" title="Engager les composants disponibles (renforce le sort ; les consommés sont dépensés)"><input type="checkbox" id="sortchk-${_sortDomId(s.sort_id)}" checked ${hasCompo ? '' : 'disabled'}>compo</label>
 			   <button type="button" class="sh-drop-btn" onclick="lancerSort('${s.sort_id}', this)">Lancer</button>`
 			: `<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>`);
-		return `<div class="sh-skill">
+		// Sort déjà connu → sa description complète est toujours consultable (s'il y en a une).
+		const peutVoir = !!s.description;
+		const ouvert = peutVoir && _sortsDescOuvertes.has(s.sort_id);
+		return `<div class="sh-skill${ouvert ? ' expanded' : ''}">
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
-			<div class="sh-skill-info">
+			<div${_sortInfoAttrs(s.sort_id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span></div>
 				<div class="sh-skill-desc">${_sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
 				${compos ? `<div class="sh-sort-compos">${compos}</div>` : ''}
+				${ouvert ? `<div class="sh-skill-full-desc">${s.description}</div>` : ''}
 			</div>
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;
@@ -4294,11 +4336,16 @@ function _renderSortsApprenables(list) {
 		const grim = s.grimoire_ok
 			? '<span class="sh-sort-grim" title="Grimoire porté">📖✔</span>'
 			: '<span class="sh-sort-grim" title="Il vous faut le grimoire qui enseigne ce sort (sac ou équipé)">📖✖</span>';
-		return `<div class="sh-skill">
+		// Description consultable seulement si le grimoire enseignant est porté — sans
+		// lui, rien à débloquer avant d'avoir les moyens d'apprendre le sort.
+		const peutVoir = !!s.description && s.grimoire_ok;
+		const ouvert = peutVoir && _sortsDescOuvertes.has(s.id);
+		return `<div class="sh-skill${ouvert ? ' expanded' : ''}">
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
-			<div class="sh-skill-info">
+			<div${_sortInfoAttrs(s.id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span> ${grim}</div>
 				<div class="sh-skill-desc">Niv. ${s.niveau} · ${_sortEffetsLabel(s.effets)}</div>
+				${ouvert ? `<div class="sh-skill-full-desc">${s.description}</div>` : ''}
 			</div>
 			<div class="sh-inv-actions">
 				<button type="button" class="sh-drop-btn" onclick="apprendreSort('${s.id}', this)" ${ok ? '' : 'disabled'}>Apprendre (${s.cout_points} pts)</button>

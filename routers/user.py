@@ -14,6 +14,7 @@ from utils.characters import (
 	get_user_characters, get_selected_character, grant_xp,
 	sync_equipment_bonus, carried_weight, charge_max_of,
 	restriction_satisfaite,
+	main_occupee_par_deux_mains, liberer_pour_deux_mains,
 	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds,
 	money_to_cuivre, cuivre_to_purse, credit_character,
 )
@@ -876,9 +877,25 @@ async def equip_item(
 
 	slots = character.get("slots", {})
 
+	# Arme à deux mains dans l'AUTRE main : rien n'est stocké dans le slot bloqué (pas de
+	# double comptage du poids/des bonus), donc c'est ici, à la lecture, qu'on le refuse.
+	bloquant = main_occupee_par_deux_mains(slots, lambda r: get_doc(item_ref_id(r)), slot)
+	if bloquant:
+		raise HTTPException(
+			status_code=422,
+			detail=f"Main occupée par {bloquant.get('nom', 'une arme à deux mains')} — déséquipez-la d'abord.",
+		)
+
 	displaced = slots.get(slot)
 	if displaced:
 		inventaire.append(displaced)
+
+	# Une arme à deux mains libère l'AUTRE main en s'équipant : son éventuel occupant
+	# repart au sac, comme le displaced du slot cible ci-dessus.
+	autre = liberer_pour_deux_mains(slots, item, slot)
+	if autre and slots.get(autre):
+		inventaire.append(slots[autre])
+		slots[autre] = None
 
 	slots[slot] = ref          # garde la référence (poids d'instance préservé)
 	inventaire.remove(ref)

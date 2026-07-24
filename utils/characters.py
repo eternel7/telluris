@@ -235,6 +235,38 @@ def restriction_satisfaite(restriction: dict | None, caracs: dict) -> tuple[bool
 	return (not manque), manque
 
 
+_MAINS = ("main_droite", "main_gauche")
+
+
+def autre_main(slot: str) -> str:
+	"""L'autre emplacement de main, pour un slot qui EST une main (appelant garde)."""
+	return "main_gauche" if slot == "main_droite" else "main_droite"
+
+
+def main_occupee_par_deux_mains(slots: dict, resolve_item_fn, slot: str) -> dict | None:
+	"""Doc de l'arme à deux mains qui bloque `slot` (portée par l'AUTRE main), ou None
+	si `slot` n'est pas une main, l'autre main est vide, ou son occupant n'est pas
+	`deux_mains`. `resolve_item_fn(ref) -> dict|None` résout une référence en doc item
+	(DB injectée par l'appelant : `lambda ref: get_doc(item_ref_id(ref))`). Helper pur
+	(sans DB) → partagé par l'équipement et testable, même précédent que
+	`restriction_satisfaite`."""
+	if slot not in _MAINS:
+		return None
+	autre_ref = slots.get(autre_main(slot))
+	if not autre_ref:
+		return None
+	item = resolve_item_fn(autre_ref)
+	return item if item and item.get("deux_mains") else None
+
+
+def liberer_pour_deux_mains(slots: dict, item: dict, slot: str) -> str | None:
+	"""Si `item` est une arme à deux mains posée dans `slot`, l'AUTRE main à libérer en
+	plus (son éventuel occupant retourne au sac) ; None sinon."""
+	if slot not in _MAINS or not (item or {}).get("deux_mains"):
+		return None
+	return autre_main(slot)
+
+
 def grant_xp(character: dict, amount: int) -> dict:
 	"""Ajoute `amount` XP au personnage et attribue les points de montée de niveau.
 
