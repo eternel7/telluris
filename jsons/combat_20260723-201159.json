@@ -1,0 +1,494 @@
+[
+  {
+    "_id": "combat:75b9e2d39328447a8c68432fb5834327",
+    "_rev": "1-a713b8826fa8c63127311494fc32e385",
+    "type": "combat",
+    "user_id": "user:eternel7@gmail.com",
+    "character_id": "character:user:eternel7@gmail.com_ed660438-dcad-4ab9-9d37-5b52b8ffd2d2",
+    "status": "active",
+    "tour": 1,
+    "ordre_initiative": [
+      "joueur_0",
+      "joueur_2",
+      "joueur_1",
+      "monstre_1",
+      "monstre_2",
+      "monstre_0"
+    ],
+    "acteur_courant_index": 0,
+    "map_image": "map0002.jpg",
+    "zone_tags": [
+      "voleur",
+      "faune_locale"
+    ],
+    "joueurs": [
+      {
+        "id": "joueur_0",
+        "character_id": "character:user:eternel7@gmail.com_ed660438-dcad-4ab9-9d37-5b52b8ffd2d2",
+        "nom": "Le Guellec",
+        "voc": "forestier",
+        "race": "elfe",
+        "image": "forestier_f_elfe05.jpg",
+        "currentPV": 80,
+        "pv_max": 80,
+        "currentPM": 16,
+        "pm_max": 140,
+        "actions_restantes": 4,
+        "actions_max": 4,
+        "cc": 34,
+        "cd": 41,
+        "ag": 32,
+        "ch": 10,
+        "pa": 1,
+        "pm_def": 25,
+        "toucher_magique": 37,
+        "degats_cc": "1D4+1D2+3",
+        "degats_cd": "1D6+1D2+3",
+        "initiative": 44,
+        "deplacement": 5,
+        "deplacement_base": 5,
+        "charge": 4.85,
+        "charge_max": 100,
+        "portee": 1,
+        "attaque_profils": [
+          {
+            "mode": "cac",
+            "portee": 1,
+            "ranged": false,
+            "toucher": "cc",
+            "degats": "degats_cc",
+            "label": "Couteau de chasse"
+          },
+          {
+            "mode": "tir",
+            "portee": 6,
+            "ranged": true,
+            "toucher": "cd",
+            "degats": "degats_cd",
+            "label": "Arc court"
+          }
+        ],
+        "pos": {
+          "x": 6,
+          "y": 12
+        },
+        "facing": 0,
+        "cells_moved": 0,
+        "attaques": 0,
+        "ramasses": 0,
+        "consommes": 0,
+        "sorts": 0,
+        "competences": 0,
+        "penalites": 0,
+        "dette_actions": 0,
+        "esquive": 0,
+        "esquive_base": 0,
+        "caracts_base": {
+          "V": 5,
+          "F": 20,
+          "R": 20,
+          "Ag": 32,
+          "Vol": 30,
+          "Int": 40,
+          "Cha": 30,
+          "Ch": 10
+        },
+        "equipment_bonus": {
+          "pv": 0,
+          "pm": 0,
+          "pa": 0,
+          "malus_depl": 0,
+          "cc_bonus": 5,
+          "cd_bonus": 5,
+          "degats_bonus": 2,
+          "degats_dice": "1D2",
+          "initiative": 0,
+          "buffs": {
+            "Ag": 4
+          },
+          "buffs_sources": [
+            {
+              "nom": "Arc court",
+              "icon": "🏹",
+              "buffs": {
+                "Ag": 2
+              }
+            },
+            {
+              "nom": "Couteau de chasse",
+              "icon": "🔪",
+              "buffs": {
+                "Ag": 2
+              }
+            }
+          ]
+        },
+        "voc_niveau": 0,
+        "effets_actifs": [],
+        "furtif": true,
+        "furtivite_bonus": 1,
+        "butin_ramasse": [],
+        "editions": 0
+      },
+      {
+        "id": "joueur_1",
+        "character_id": "aventurier:le_bastion_de_l_yonne_interieur_af67f05697ea",
+        "nom": "Barbeforge",
+        "voc": "assassin",
+        "race": "nain",
+        "image": "assassin_m_nain02.jpg",
+        "currentPV": 109,
+        "pv_max": 117,
+        "currentPM": 178,
+        "pm_max": 178,
+        "actions_restantes": 3,
+        "actions_max": 3,
+        "cc": 31,
+        "cd": 27,
+        "ag": 23,
+        "ch": 21,
+        "pa": 1,
+        "pm_def": 35,
+        "toucher_magique": 40,
+        "degats_cc": "1D6+3",
+        "degats_cd": "1D6+3",
+        "initiative": 37,
+        "deplacement": 2,
+        "deplacement_base": 4,
+        "charge": 61.6,
+        "charge_max": 105,
+        "portee": 1,
+        "attaque_profils": [
+          {
+            "mode": "cac",
+            "portee": 1,
+            "ranged": false,
+            "toucher": "cc",
+            "degats": "degats_cc",
+            "label": "Lame courte"
+          }
+        ],
+        "pos": {
+          "x": 7,
+          "y": 12
+        },
+        "facing": 0,
+        "cells_moved": 0,
+        "attaques": 0,
+        "ramasses": 0,
+        "consommes": 0,
+        "sorts": 0,
+        "competences": 0,
+        "penalites": 0,
+        "dette_actions": 0,
+        "esquive": 0,
+        "esquive_base": 0,
+        "caracts_base": {
+          "V": 4,
+          "F": 21,
+          "R": 32,
+          "Ag": 23,
+          "Vol": 53,
+          "Int": 36,
+          "Cha": 23,
+          "Ch": 21
+        },
+        "equipment_bonus": {
+          "pv": 0,
+          "pm": 0,
+          "pa": 0,
+          "malus_depl": 0,
+          "cc_bonus": 9,
+          "cd_bonus": 0,
+          "degats_bonus": 2,
+          "degats_dice": "",
+          "initiative": 3,
+          "buffs": {
+            "Ag": 5
+          },
+          "buffs_sources": [
+            {
+              "nom": "Lame courte",
+              "icon": "🗡️",
+              "buffs": {
+                "Ag": 2
+              }
+            },
+            {
+              "nom": "Dague",
+              "icon": "🔪",
+              "buffs": {
+                "Ag": 3
+              }
+            }
+          ]
+        },
+        "voc_niveau": 2,
+        "effets_actifs": [],
+        "furtif": false,
+        "furtivite_bonus": 0,
+        "butin_ramasse": []
+      },
+      {
+        "id": "joueur_2",
+        "character_id": "aventurier:le_bastion_de_l_yonne_interieur_7995ca217cd3",
+        "nom": "de Hautterre",
+        "voc": "demoniste",
+        "race": "humain",
+        "image": "demoniste_f_humain05.jpg",
+        "currentPV": 81,
+        "pv_max": 81,
+        "currentPM": 141,
+        "pm_max": 141,
+        "actions_restantes": 4,
+        "actions_max": 4,
+        "cc": 21,
+        "cd": 29,
+        "ag": 22,
+        "ch": 21,
+        "pa": 1,
+        "pm_def": 25,
+        "toucher_magique": 32,
+        "degats_cc": "1D6+1",
+        "degats_cd": "1D6+1",
+        "initiative": 40,
+        "deplacement": 5,
+        "deplacement_base": 5,
+        "charge": 3.75,
+        "charge_max": 105,
+        "portee": 1,
+        "attaque_profils": [
+          {
+            "mode": "cac",
+            "portee": 1,
+            "ranged": false,
+            "toucher": "cc",
+            "degats": "degats_cc",
+            "label": "Bâton cornu"
+          }
+        ],
+        "pos": {
+          "x": 7,
+          "y": 11
+        },
+        "facing": 0,
+        "cells_moved": 0,
+        "attaques": 0,
+        "ramasses": 0,
+        "consommes": 0,
+        "sorts": 0,
+        "competences": 0,
+        "penalites": 0,
+        "dette_actions": 0,
+        "esquive": 0,
+        "esquive_base": 0,
+        "caracts_base": {
+          "V": 5,
+          "F": 21,
+          "R": 20,
+          "Ag": 22,
+          "Vol": 36,
+          "Int": 31,
+          "Cha": 31,
+          "Ch": 21
+        },
+        "equipment_bonus": {
+          "pv": 0,
+          "pm": 7,
+          "pa": 0,
+          "malus_depl": 0,
+          "cc_bonus": 0,
+          "cd_bonus": 0,
+          "degats_bonus": 0,
+          "degats_dice": "",
+          "initiative": 0,
+          "buffs": {
+            "Vol": 4
+          },
+          "buffs_sources": [
+            {
+              "nom": "Bâton cornu",
+              "icon": "😈",
+              "buffs": {
+                "Vol": 4
+              }
+            }
+          ]
+        },
+        "voc_niveau": 0,
+        "effets_actifs": [],
+        "furtif": false,
+        "furtivite_bonus": 0,
+        "butin_ramasse": []
+      }
+    ],
+    "monstres": [
+      {
+        "id": "monstre_0",
+        "nom": "Lièvre",
+        "espece_id": "espece:lievre",
+        "caracts_base": {
+          "V": 3,
+          "F": 7,
+          "R": 5,
+          "Ag": 20,
+          "Vol": 14,
+          "Int": 7,
+          "Cha": 0,
+          "Ch": 0
+        },
+        "voc_niveau": 1,
+        "esquive_base": 0,
+        "effets_actifs": [],
+        "profil_id": "profil:novice",
+        "image": "lievre_transparent.png",
+        "currentPV": 22,
+        "pv_max": 22,
+        "actions_restantes": 2,
+        "actions_max": 2,
+        "cc": 16,
+        "ag": 20,
+        "vol": 14,
+        "int": 7,
+        "ch": 0,
+        "pa": 0,
+        "pm_def": 8,
+        "degats_cc": "1D4",
+        "initiative": 26,
+        "deplacement": 3,
+        "portee": 1,
+        "pos": {
+          "x": 21,
+          "y": 20
+        },
+        "cells_moved": 0,
+        "attaques": 0,
+        "penalites": 0,
+        "dette_actions": 0,
+        "vivant": true,
+        "tags": [
+          "animal",
+          "proie",
+          "petite_taille"
+        ],
+        "detecte": false,
+        "xp_reward": 9,
+        "niveau": 1
+      },
+      {
+        "id": "monstre_1",
+        "nom": "Lapin",
+        "espece_id": "espece:petits_animaux_divers",
+        "caracts_base": {
+          "V": 3,
+          "F": 5,
+          "R": 9,
+          "Ag": 21,
+          "Vol": 14,
+          "Int": 8,
+          "Cha": 0,
+          "Ch": 0
+        },
+        "voc_niveau": 1,
+        "esquive_base": 0,
+        "effets_actifs": [],
+        "profil_id": "profil:novice",
+        "image": "lapin_transparent.png",
+        "currentPV": 32,
+        "pv_max": 32,
+        "actions_restantes": 3,
+        "actions_max": 3,
+        "cc": 17,
+        "ag": 21,
+        "vol": 14,
+        "int": 8,
+        "ch": 0,
+        "pa": 0,
+        "pm_def": 9,
+        "degats_cc": "1D4",
+        "initiative": 27,
+        "deplacement": 3,
+        "portee": 1,
+        "pos": {
+          "x": 13,
+          "y": 4
+        },
+        "cells_moved": 0,
+        "attaques": 0,
+        "penalites": 0,
+        "dette_actions": 0,
+        "vivant": true,
+        "tags": [
+          "animal",
+          "petite_taille",
+          "proie"
+        ],
+        "detecte": false,
+        "xp_reward": 10,
+        "niveau": 1
+      },
+      {
+        "id": "monstre_2",
+        "nom": "Ecureuil",
+        "espece_id": "espece:ecureuil",
+        "caracts_base": {
+          "V": 3,
+          "F": 5,
+          "R": 5,
+          "Ag": 21,
+          "Vol": 12,
+          "Int": 8,
+          "Cha": 0,
+          "Ch": 0
+        },
+        "voc_niveau": 1,
+        "esquive_base": 0,
+        "effets_actifs": [],
+        "profil_id": "profil:novice",
+        "image": "ecureuil_transparent.png",
+        "currentPV": 20,
+        "pv_max": 20,
+        "actions_restantes": 3,
+        "actions_max": 3,
+        "cc": 17,
+        "ag": 21,
+        "vol": 12,
+        "int": 8,
+        "ch": 0,
+        "pa": 0,
+        "pm_def": 8,
+        "degats_cc": "1D4",
+        "initiative": 27,
+        "deplacement": 3,
+        "portee": 1,
+        "pos": {
+          "x": 19,
+          "y": 12
+        },
+        "cells_moved": 0,
+        "attaques": 0,
+        "penalites": 0,
+        "dette_actions": 0,
+        "vivant": true,
+        "tags": [
+          "animal",
+          "proie",
+          "petite_taille"
+        ],
+        "detecte": false,
+        "xp_reward": 9,
+        "niveau": 1
+      }
+    ],
+    "log": [
+      {
+        "tour": 1,
+        "acteur": "Système",
+        "kind": "sys",
+        "texte": "Le combat commence !"
+      }
+    ],
+    "xp_gagnee": 0,
+    "battle_map_id": "lieu:chemin1"
+  }
+]
