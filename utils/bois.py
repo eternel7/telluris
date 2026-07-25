@@ -9,6 +9,7 @@
 
 from models import character_stats
 from utils.characters import item_ref_id, item_ref_weight, poids_bounds
+from utils import expedition
 
 
 def _item_tags(item_doc) -> list:
@@ -120,16 +121,12 @@ def a_outil_coupe(character, get_doc_fn, compagnons=None) -> bool:
 	Compétences/équipements partagés en exploration : si `compagnons` (liste de docs
 	`aventurier:*` du groupe) est fournie, il suffit qu'UN membre de l'expédition — le
 	personnage OU un compagnon — porte l'outil. `None` → seul le personnage est scanné
-	(comportement historique inchangé)."""
-	tag = character_stats.OUTIL_COUPE_BOIS_TAG.lower()
-	for porteur in [character, *(compagnons or [])]:
-		refs = list((porteur or {}).get("inventaire", []) or [])
-		refs += [r for r in ((porteur or {}).get("slots", {}) or {}).values() if r]
-		for ref in refs:
-			item_id = item_ref_id(ref)
-			if not item_id:
-				continue
-			doc = get_doc_fn(item_id)
-			if doc and tag in _item_tags(doc):
-				return True
-	return False
+	(comportement historique inchangé).
+
+	Le scan lui-même vit dans `expedition.porteur_avec_tag` (mise en commun des capacités,
+	partagée avec les autres tags à venir). ⚠️ Signature CONSERVÉE au profit de ses deux
+	appelants et de tests/test_bois.py — le test de non-régression de la mise en commun :
+	la liste des porteurs est passée explicitement, là où `expedition.membres` la résout
+	depuis la base."""
+	return expedition.porteur_avec_tag(
+		get_doc_fn, [character, *(compagnons or [])], character_stats.OUTIL_COUPE_BOIS_TAG)

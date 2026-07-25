@@ -39,6 +39,7 @@ from utils import intro
 from utils import transport
 from utils import recrutement
 from utils import montures
+from utils import expedition
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -1640,9 +1641,21 @@ async def marchand_quotes(
 	}
 
 
-def _player_cha(character: dict) -> int:
-	"""Cha courant du personnage (échelle ×10), 0 si absent."""
-	return int((character.get("caracteristiques_current") or {}).get("Cha", 0) or 0)
+def _negociateur(character: dict) -> tuple[dict, int, bool]:
+	"""Qui mène le marchandage : le membre de l'expédition au plus haut Cha BUFFÉ.
+
+	Une capacité mise en commun (cf. utils/expedition.py) : le groupe laisse parler son
+	beau parleur, à condition que sa confiance atteigne MARCHANDAGE_COMPAGNON_AFFINITE_MIN.
+	⚠️ Seul le JET change — la relation, le blocage de marchandage et le prix négocié
+	restent ceux du principal (c'est lui qui a la cote auprès du marchand).
+
+	⚠️ `sync_equipment_bonus` sur CHAQUE membre avant tout `caracts_avec_buffs` : le
+	champ dénormalisé qu'il lit serait sinon celui du dernier calcul (même précédent que
+	`combat.py` et `recrutement._derives_de`)."""
+	membres = expedition.membres(character, get_doc)
+	for m in membres:
+		sync_equipment_bonus(m)
+	return expedition.meilleur_negociateur(character, membres[1:])
 
 
 @user_router.post("/sell_item")
@@ -1809,7 +1822,8 @@ async def marchander_item(
 		pmin, pmax = prix_range_cuivre(item, item_id)
 
 	seuil_bonus = _relation_seuil_bonus(relation_value(relation))
-	deal = marchander(pmin, pmax, _player_cha(character), merchant_cha(lieu_doc), sens, seuil_bonus)
+	nego, nego_cha, nego_compagnon = _negociateur(character)
+	deal = marchander(pmin, pmax, nego_cha, merchant_cha(lieu_doc), sens, seuil_bonus)
 	issue = appliquer_marchandage(relation, item_id, sens, deal, now)
 
 	if save_doc(relation) is None:
@@ -1823,7 +1837,19 @@ async def marchander_item(
 		"prix_negocie": cuivre_to_purse(issue["prix_negocie"]) if issue["prix_negocie"] is not None else None,
 		"bloque_jusqu": issue["bloque_jusqu"],
 		"now": now,
-		"vendables": _marchand_vendables(character, lieu_doc, relation, recrutement.groupe_effectif(character, get_doc)),
+		# Une règle invisible n'existe pas : quand c'est un compagnon qui a parlé, le toast
+		# doit le NOMMER. Cas nominal (le joueur négocie lui-même) → `compagnon: False`, le
+		# client se tait plutôt que de commenter chaque marchandage.
+		"negociateur": {
+			"nom": nego.get("prenom") or nego.get("nom") or "Un compagnon",
+			"cha": nego_cha,
+			"compagnon": nego_compagnon,
+		},
+		# ⚠️ `porteurs_effectifs` comme les 3 autres endpoints du marchand : avec
+		# `groupe_effectif`, les objets portés par une MONTURE disparaissaient de la liste
+		# de vente juste après un marchandage.
+		"vendables": _marchand_vendables(character, lieu_doc, relation,
+										 recrutement.porteurs_effectifs(character, get_doc)),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"relations_lieux": relations_lieux_payload(character),

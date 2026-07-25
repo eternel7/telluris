@@ -10,7 +10,9 @@
 # Le contrat dure jusqu'au congédiement (+ départ de lui-même si l'affinité tombe sous
 # AFFINITE_SEUIL_DEPART). Embauche gratuite ; la recrue exige une PART du butin,
 # prélevée sur le cuivre des récompenses de quête au turn-in (`regler_part_butin`,
-# chokepoint unique — la phase 2 « compagnie permanente » s'y branchera). Les clauses
+# chokepoint unique) — sauf s'il est engagé DURABLEMENT : au-delà d'AFFINITE_SEUIL_ENGAGEMENT
+# il renonce à sa part, sort du plafond de groupe et rejoint la COMPAGNIE du joueur
+# (`engager_permanent`), que seul un congédiement coûteux dénoue. Les clauses
 # de conduite doivent être ACCEPTÉES pour que l'embauche ait lieu : les refuser retire la
 # recrue du tableau (`retirer_du_tableau`). Leur respect n'est pas détecté en jeu (v1) —
 # elles engagent le joueur moralement, pas mécaniquement.
@@ -577,29 +579,54 @@ def affinite_de(character: dict, av_id: str) -> int:
 def conditions_effectives(av: dict, affinite: int) -> dict:
 	"""Exigences EFFECTIVES pour ce personnage : la part de butin baisse de 1 point par
 	AFFINITE_REDUC_PART points d'affinité au-dessus de 50 (plancher = PART_BUTIN_MIN) —
-	un compagnon qui vous apprécie rogne moins la bourse. Clauses inchangées."""
+	un compagnon qui vous apprécie rogne moins la bourse. Clauses inchangées.
+
+	⚠️ Un compagnon PERMANENT ne prend RIEN, et la sortie est immédiate : passer par le
+	calcul ordinaire ferait remonter sa part au plancher PART_BUTIN_MIN. Ce chokepoint est
+	traversé par `regler_part_butin` — il n'y a donc rien d'autre à brancher."""
 	exigences = av.get("exigences", {}) or {}
+	if (av or {}).get("permanent"):
+		return {"part_butin_pct": 0, "clauses": list(exigences.get("clauses", []) or [])}
 	part = int(exigences.get("part_butin_pct", character_stats.RECRUTEMENT_PART_BUTIN_MIN) or 0)
 	reduc = max(0, int(affinite) - 50) // max(1, int(character_stats.AFFINITE_REDUC_PART))
 	part = max(int(character_stats.RECRUTEMENT_PART_BUTIN_MIN), part - reduc)
 	return {"part_butin_pct": part, "clauses": list(exigences.get("clauses", []) or [])}
 
 
-def peut_embaucher(character: dict, av: dict) -> tuple[bool, str]:
-	"""(ok, raison) : la recrue doit être offerte, et le groupe sous le plafond."""
+def places_occupees(character: dict, get_doc_fn=None) -> int:
+	"""Places du groupe RÉELLEMENT prises = compagnons actifs NON PERMANENTS.
+
+	Un compagnon engagé durablement sort du plafond : il n'occupe plus une place de
+	contrat, il fait partie de la compagnie. ⚠️ Compter sur les DOCS (et non sur
+	`len(character["groupe"])`) est ce qui rend le plafond juste — le flag `permanent` vit
+	sur le doc du compagnon, comme `statut`. Le client recopie ce nombre : la liste et le
+	garde doivent bouger ENSEMBLE."""
+	return sum(1 for av in groupe_effectif(character, get_doc_fn) if not av.get("permanent"))
+
+
+def peut_embaucher(character: dict, av: dict, get_doc_fn=None) -> tuple[bool, str]:
+	"""(ok, raison) : la recrue doit être offerte, et le groupe sous le plafond — plafond
+	qui ne compte QUE les compagnons non permanents (cf. `places_occupees`).
+
+	`get_doc_fn=None` retombe sur le `get_doc` du module (précédent exact :
+	`montures.peut_acquerir`), ce qui laisse les appelants existants inchangés."""
 	if (av or {}).get("statut") != "offert":
 		return False, "Cette recrue n'est plus disponible."
-	if len(character.get("groupe", []) or []) >= taille_max_groupe():
+	if places_occupees(character, get_doc_fn) >= taille_max_groupe():
 		return False, "Votre groupe est au complet."
 	return True, ""
 
 
-def embaucher(character: dict, av: dict) -> tuple[bool, str]:
+def embaucher(character: dict, av: dict, get_doc_fn=None) -> tuple[bool, str]:
 	"""Embauche (gratuite) : statuts + groupe + mémoire du lien. Mute les DEUX docs en
 	place, NE SAUVEGARDE PAS (l'endpoint persiste : character puis av, best-effort)."""
-	ok, raison = peut_embaucher(character, av)
+	ok, raison = peut_embaucher(character, av, get_doc_fn)
 	if not ok:
 		return False, raison
+	# ⚠️ Filet : un ancien permanent congédié puis ré-embauché repart sur un contrat
+	# ORDINAIRE. Sans ce pop, le flag survivrait à la rupture du lien et l'engagement
+	# (part nulle + hors plafond) se retrouverait gratuit à la deuxième signature.
+	av.pop("permanent", None)
 	av["statut"] = "embauche"
 	av["embauche_par"] = character.get("_id")
 	av["embauche_at"] = now_epoch()
@@ -616,26 +643,101 @@ def embaucher(character: dict, av: dict) -> tuple[bool, str]:
 def congedier(character: dict, av: dict) -> tuple[bool, str]:
 	"""Congédie un compagnon actif : retiré du groupe, statut `parti` (doc CONSERVÉ —
 	il porte la mémoire du lien et peut être ré-offert). Le renvoi froisse
-	(AFFINITE_DELTA_CONGEDIE), davantage en pleine quête (…_EN_QUETE). Mute sans save."""
+	(AFFINITE_DELTA_CONGEDIE), davantage en pleine quête (…_EN_QUETE). Mute sans save.
+
+	⚠️ Rompre un engagement DURABLE coûte AFFINITE_DELTA_CONGEDIE_PERMANENT, et les deltas
+	NE SE CUMULENT PAS : un seul s'applique, priorité au permanent (renvoyer un compagnon
+	engagé blesse davantage que d'interrompre un contrat, quête en cours ou non). Le flag
+	`permanent` est retiré — le lien est rompu, la compagnie ne l'est pas
+	(`character["compagnie"]` survit, cf. `engager_permanent`)."""
 	groupe = character.get("groupe", []) or []
 	if not av or av.get("_id") not in groupe:
 		return False, "Ce compagnon ne fait pas partie de votre groupe."
 	groupe.remove(av["_id"])
 	character["groupe"] = groupe
 	av["statut"] = "parti"
-	delta = (character_stats.AFFINITE_DELTA_CONGEDIE_EN_QUETE
-			 if character.get("quetes_actives") else character_stats.AFFINITE_DELTA_CONGEDIE)
+	if av.pop("permanent", None):
+		delta = character_stats.AFFINITE_DELTA_CONGEDIE_PERMANENT
+	else:
+		delta = (character_stats.AFFINITE_DELTA_CONGEDIE_EN_QUETE
+				 if character.get("quetes_actives") else character_stats.AFFINITE_DELTA_CONGEDIE)
 	ajuster_affinite(character, av["_id"], delta)
+	return True, ""
+
+
+# ── Engagement durable (compagnie) ───────────────────────────────────────────────
+# Au-delà d'AFFINITE_SEUIL_ENGAGEMENT (palier « Dévoué »), le compagnon cesse d'être un
+# contrat : il renonce à sa part de butin (`conditions_effectives`), sort du plafond de
+# groupe (`places_occupees`) et rejoint la COMPAGNIE du joueur, qu'il baptise au premier
+# engagement. Le flag vit sur le doc du compagnon (comme `statut`), la compagnie sur celui
+# du joueur — c'est une identité, elle survit au départ de tous ses membres.
+
+def nettoyer_nom_compagnie(brut) -> str:
+	"""Nom de compagnie assaini : caractères de contrôle retirés, blancs écrasés, borné à
+	40 signes. Renvoie "" si rien d'affichable ne reste (l'endpoint en fait un 422).
+
+	⚠️ On BORNE au serveur, on ÉCHAPPE au rendu : pas d'échappement HTML ici, sinon le nom
+	serait doublement échappé à l'affichage (le client passe par escapeHtml avant de
+	l'interpoler dans son innerHTML). `<`, `&` et `'` traversent donc intacts."""
+	texte = "" if brut is None else str(brut)
+	texte = "".join(" " if c in "\t\n\r\f\v" else c
+					for c in texte if c.isprintable() or c in "\t\n\r\f\v")
+	return " ".join(texte.split())[:40]
+
+
+def peut_engager(character: dict, av: dict) -> tuple[bool, str]:
+	"""(ok, raison) : compagnon actif, pas déjà permanent, confiance au seuil."""
+	if (av or {}).get("permanent"):
+		return False, "Ce compagnon est déjà engagé durablement."
+	if not av or av.get("_id") not in (character.get("groupe", []) or []):
+		return False, "Ce compagnon ne fait pas partie de votre groupe."
+	if affinite_de(character, av["_id"]) < int(character_stats.AFFINITE_SEUIL_ENGAGEMENT):
+		return False, "Ce compagnon ne vous est pas assez dévoué."
+	return True, ""
+
+
+def engager_permanent(character: dict, av: dict, nom_compagnie=None) -> tuple[bool, str]:
+	"""Engage durablement un compagnon. Mute les DEUX docs, NE SAUVEGARDE PAS.
+
+	La compagnie n'est BAPTISÉE qu'au premier engagement : `nom_compagnie` est ignoré si
+	elle existe déjà (les suivants la REJOIGNENT — le renommage a son propre endpoint).
+	Un nom est donc exigé par l'appelant seulement quand `character["compagnie"]` manque."""
+	ok, raison = peut_engager(character, av)
+	if not ok:
+		return False, raison
+	if not character.get("compagnie"):
+		nom = nettoyer_nom_compagnie(nom_compagnie)
+		if not nom:
+			return False, "Donnez un nom à votre compagnie."
+		character["compagnie"] = {"nom": nom, "fondee_at": now_epoch()}
+	av["permanent"] = True
+	return True, ""
+
+
+def renommer_compagnie(character: dict, nom) -> tuple[bool, str]:
+	"""Renomme une compagnie EXISTANTE (on ne fonde pas une compagnie sans membre)."""
+	if not character.get("compagnie"):
+		return False, "Vous n'avez pas de compagnie."
+	nom = nettoyer_nom_compagnie(nom)
+	if not nom:
+		return False, "Donnez un nom à votre compagnie."
+	character["compagnie"]["nom"] = nom
 	return True, ""
 
 
 def departs_volontaires(character: dict, get_doc_fn=None) -> list:
 	"""Check PARESSEUX (board / /play) : tout compagnon actif dont l'affinité est
 	tombée sous AFFINITE_SEUIL_DEPART quitte le groupe de lui-même (statut `parti`).
-	Mute character + docs ; renvoie les docs partis (l'appelant les persiste + toast)."""
+	Mute character + docs ; renvoie les docs partis (l'appelant les persiste + toast).
+
+	⚠️ Un compagnon PERMANENT ne part JAMAIS de lui-même : l'engagement l'emporte sur
+	l'humeur, et seul le joueur peut rompre (`congedier`). Sans cette exception, le flag
+	quitterait le groupe avec lui et un ré-engagement serait gratuit."""
 	seuil = int(character_stats.AFFINITE_SEUIL_DEPART)
 	partis = []
 	for av in groupe_effectif(character, get_doc_fn):
+		if av.get("permanent"):
+			continue
 		if affinite_de(character, av["_id"]) < seuil:
 			character["groupe"].remove(av["_id"])
 			av["statut"] = "parti"
@@ -704,6 +806,10 @@ def affinites_detail_payload(character: dict, get_doc_fn=None) -> list:
 		}
 		if av and av_id in actifs:
 			entry["exigences_effectives"] = conditions_effectives(av, entry["affinite"])
+			# L'onglet 👥 offre le congédiement : il doit savoir s'il rompt un ENGAGEMENT
+			# (confirmation et sanction différentes) — sans quoi la même croix ✕ ferait deux
+			# choses très différentes sous le même libellé.
+			entry["permanent"] = bool(av.get("permanent"))
 			entry.update(vitaux_de(av))
 		out.append(entry)
 	out.sort(key=lambda e: (not e["actif"], -e["affinite"]))

@@ -107,6 +107,14 @@ def resolve_item_ref(ref):
 	doc = dict(doc)
 	doc["poids"] = item_ref_weight(ref)
 	doc["item"] = item_id
+	# Un grimoire n'a pas d'école propre : elle vit sur les sorts qu'il enseigne. Résolue
+	# ICI et pas côté client, qui ne connaît que les sorts qu'il peut apprendre — soit
+	# précisément PAS ceux d'une école qui lui est fermée, là où l'information est la plus
+	# utile. Import tardif : utils.sorts dépend de ce module. Ne coûte des lectures qu'aux
+	# grimoires, les autres items ne paient que le test de sous-catégorie.
+	from utils.sorts import est_grimoire, ecoles_de_grimoire
+	if est_grimoire(doc):
+		doc["magies"] = ecoles_de_grimoire(doc, get_doc, get_doc("rules:vocations"))
 	if (lieu_id := item_ref_lieu(ref)):
 		doc["lieu_parent"] = lieu_id
 		doc["nom"] = item_label(doc.get("nom") or item_id, get_doc(lieu_id))

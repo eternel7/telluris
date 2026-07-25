@@ -15,6 +15,7 @@ from utils.sorts import (
     sorts_epingles_effectifs,
     ecole_native, magie_de_sort, niveau_ecole, magies_pratiquees,
     ecoles_du_monde, peut_apprendre_magie, ecoles_achetables, cout_ecole,
+    ecoles_de_grimoire,
 )
 
 
@@ -236,6 +237,30 @@ def test_ecole_native_et_fallback_magie():
     s2 = normaliser_sort(_sort(vocation="pretre"))
     assert s2["magie"] is None
     assert magie_de_sort(s2, _RULES_VOCS) == "Sainte"
+
+
+def test_ecoles_de_grimoire():
+    sorts = {
+        "sort:feu":   _sort(_id="sort:feu", magie="Élémentaire"),
+        "sort:givre": _sort(_id="sort:givre", magie="Élémentaire"),
+        # Sans champ `magie` → école dérivée de la vocation (rétro-compat).
+        "sort:soin":  _sort(_id="sort:soin", vocation="pretre"),
+        # Vocation non magique → aucune école à annoncer.
+        "sort:cri":   _sort(_id="sort:cri", vocation="guerrier"),
+    }
+    get_doc = lambda i: sorts.get(i)
+    grim = lambda ids: {"_id": "item:g", "sous_categorie": "grimoire", "sorts": ids}
+
+    # Union triée, dédupliquée, ids morts ignorés.
+    assert ecoles_de_grimoire(grim(["sort:feu", "sort:givre"]), get_doc, _RULES_VOCS) == ["Élémentaire"]
+    assert ecoles_de_grimoire(grim(["sort:feu", "sort:soin"]), get_doc, _RULES_VOCS) \
+        == ["Sainte", "Élémentaire"]
+    assert ecoles_de_grimoire(grim(["sort:feu", "sort:mort"]), get_doc, _RULES_VOCS) == ["Élémentaire"]
+    # École non résoluble, grimoire vide, item qui n'est pas un grimoire → [].
+    assert ecoles_de_grimoire(grim(["sort:cri"]), get_doc, _RULES_VOCS) == []
+    assert ecoles_de_grimoire(grim([]), get_doc, _RULES_VOCS) == []
+    assert ecoles_de_grimoire({"_id": "item:epee", "sorts": ["sort:feu"]}, get_doc, _RULES_VOCS) == []
+    assert ecoles_de_grimoire(None, get_doc, _RULES_VOCS) == []
 
 
 def test_niveau_ecole_native_achetee_absente():

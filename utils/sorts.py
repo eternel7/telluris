@@ -378,6 +378,24 @@ def magie_de_sort(sort: dict, rules_vocations) -> str | None:
 	return _vocation_magie_map(rules_vocations).get(str((sort or {}).get("vocation") or ""), "") or None
 
 
+def ecoles_de_grimoire(item_doc: dict, get_doc, rules_vocations) -> list:
+	"""Écoles de magie enseignées par un grimoire = union des écoles de ses sorts, triée.
+
+	Un grimoire ne porte AUCUNE école en propre : elle vit sur les sorts de son champ
+	`sorts`. Un id mort est ignoré, un sort dont l'école n'est pas résoluble (vocation
+	non magique) ne contribue rien — un grimoire peut donc légitimement rendre []."""
+	if not est_grimoire(item_doc):
+		return []
+	out = set()
+	for sort_id in (item_doc.get("sorts") or []):
+		doc = get_doc(sort_id)
+		if not doc:
+			continue
+		if (ecole := magie_de_sort(doc, rules_vocations)):
+			out.add(ecole)
+	return sorted(out)
+
+
 def niveau_ecole(character: dict, ecole, rules_vocations) -> int | None:
 	"""Niveau effectif d'une école POUR CE PERSONNAGE, ou None si non pratiquée.
 	École native → niveau de la vocation native ; école achetée → magies_apprises."""

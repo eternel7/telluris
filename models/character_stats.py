@@ -124,6 +124,11 @@ COMBAT_SLOTS_MAX: int = 15
 RELATION_INITIALE: int = 50
 RELATION_SEUIL_COEFF: float = 2.0
 MARCHANDAGE_BLOCAGE_SECONDES: int = 3600
+# Le jet de marchandage est mené par le membre du groupe au plus haut Cha (buffs compris) :
+# un compagnon ne prend la parole à la place du joueur que si sa confiance atteint ce seuil.
+# ⚠️ Ne concerne QUE les compagnons (le principal n'a pas d'affinité envers lui-même) : 0 =
+# tous les compagnons éligibles, PAS « principal seul » (miroir de QUETE_TRANSPORT_RELATION_MIN).
+MARCHANDAGE_COMPAGNON_AFFINITE_MIN: int = 50
 # Seuil de « bonne réputation » par défaut pour les PNJ (services gratuits/améliorés,
 # conditions de dialogue relation_min) — 70 = palier « Estimé ». Surchargable par PNJ
 # dans la donnée (`gratuit_si.seuil`, `condition.relation_min.seuil`).
@@ -231,7 +236,10 @@ COMPETENCE_COUT_COEFF: int = 2
 # quête au turn-in (tirée dans [MIN, MAX], biaisée haut avec le niveau), réduite par
 # l'affinité (1 pt de part par AFFINITE_REDUC_PART pts d'affinité au-dessus de 50).
 # CARTE_REQUISE : le tableau n'est visible qu'avec la carte d'aventurier de la cité
-# en sac. CAUTION_CUIVRE = porte de la phase 2 (compagnie permanente), inerte à 0.
+# en sac. CAUTION_CUIVRE = porte restée inerte à 0 : l'engagement durable est gratuit,
+# il se paie en confiance (cf. AFFINITE_SEUIL_ENGAGEMENT).
+# ⚠️ GROUPE_TAILLE_MAX ne plafonne que les compagnons NON PERMANENTS : un compagnon
+# engagé durablement sort du décompte (`recrutement.places_occupees`).
 RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE: dict[str, dict] = {
 	"capitale": {"nb": 6, "niveau_max": 3},
 	"ville":    {"nb": 4, "niveau_max": 2},
@@ -249,14 +257,20 @@ RECRUTEMENT_CAUTION_CUIVRE: int = 0
 # Mémorisée sur le character (`affinites`), elle survit au congédiement : un ancien
 # compagnon apprécié (≥ SEUIL_REMISE) réapparaît au tableau de son giver ; sous
 # SEUIL_DEPART, un compagnon actif quitte le groupe de lui-même.
+# À SEUIL_ENGAGEMENT (palier « Dévoué »), le joueur peut l'engager DURABLEMENT : il
+# renonce à sa part de butin et sort du plafond de groupe, mais le renvoyer coûte
+# DELTA_CONGEDIE_PERMANENT au lieu des deltas ordinaires (la rupture d'un engagement
+# blesse davantage qu'un contrat qui s'achève).
 AFFINITE_INITIALE: int = 50
 AFFINITE_DELTA_QUETE: int = 2
 AFFINITE_DELTA_VICTOIRE: int = 1
 AFFINITE_DELTA_KO: int = -5
 AFFINITE_DELTA_CONGEDIE: int = -1
 AFFINITE_DELTA_CONGEDIE_EN_QUETE: int = -3
+AFFINITE_DELTA_CONGEDIE_PERMANENT: int = -15
 AFFINITE_SEUIL_DEPART: int = 30
 AFFINITE_SEUIL_REMISE: int = 60
+AFFINITE_SEUIL_ENGAGEMENT: int = 90
 AFFINITE_REDUC_PART: int = 10
 
 # ── Montures de transport ────────────────────────────────────────────────────────
@@ -471,6 +485,7 @@ def current_world_variables() -> dict:
 		"RELATION_INITIALE": RELATION_INITIALE,
 		"RELATION_SEUIL_COEFF": RELATION_SEUIL_COEFF,
 		"MARCHANDAGE_BLOCAGE_SECONDES": MARCHANDAGE_BLOCAGE_SECONDES,
+		"MARCHANDAGE_COMPAGNON_AFFINITE_MIN": MARCHANDAGE_COMPAGNON_AFFINITE_MIN,
 		"PNJ_REPUTATION_SEUIL": PNJ_REPUTATION_SEUIL,
 		"QUETE_BOARD_TAILLE": QUETE_BOARD_TAILLE,
 		"QUETE_QTE_MIN": QUETE_QTE_MIN,
@@ -512,8 +527,10 @@ def current_world_variables() -> dict:
 		"AFFINITE_DELTA_KO": AFFINITE_DELTA_KO,
 		"AFFINITE_DELTA_CONGEDIE": AFFINITE_DELTA_CONGEDIE,
 		"AFFINITE_DELTA_CONGEDIE_EN_QUETE": AFFINITE_DELTA_CONGEDIE_EN_QUETE,
+		"AFFINITE_DELTA_CONGEDIE_PERMANENT": AFFINITE_DELTA_CONGEDIE_PERMANENT,
 		"AFFINITE_SEUIL_DEPART": AFFINITE_SEUIL_DEPART,
 		"AFFINITE_SEUIL_REMISE": AFFINITE_SEUIL_REMISE,
+		"AFFINITE_SEUIL_ENGAGEMENT": AFFINITE_SEUIL_ENGAGEMENT,
 		"AFFINITE_REDUC_PART": AFFINITE_REDUC_PART,
 		"MONTURE_GROUPE_MAX": MONTURE_GROUPE_MAX,
 		"MONTURE_CHARGE_MULT_DEFAUT": MONTURE_CHARGE_MULT_DEFAUT,
@@ -553,6 +570,7 @@ def load_world_variables() -> dict:
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN, CRIT_CHANCE_DIVISEUR, COMBAT_SLOTS_MAX
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
+	global MARCHANDAGE_COMPAGNON_AFFINITE_MIN
 	global PNJ_REPUTATION_SEUIL
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
 	global QUETE_COLLECT_POIDS_MAX, QUETE_BOARD_DUREE_SECONDES, QUETE_BOARD_DUREE_JITTER
@@ -567,7 +585,9 @@ def load_world_variables() -> dict:
 	global RECRUTEMENT_CARTE_REQUISE, RECRUTEMENT_CAUTION_CUIVRE
 	global AFFINITE_INITIALE, AFFINITE_DELTA_QUETE, AFFINITE_DELTA_VICTOIRE, AFFINITE_DELTA_KO
 	global AFFINITE_DELTA_CONGEDIE, AFFINITE_DELTA_CONGEDIE_EN_QUETE
+	global AFFINITE_DELTA_CONGEDIE_PERMANENT
 	global AFFINITE_SEUIL_DEPART, AFFINITE_SEUIL_REMISE, AFFINITE_REDUC_PART
+	global AFFINITE_SEUIL_ENGAGEMENT
 	global MONTURE_GROUPE_MAX, MONTURE_CHARGE_MULT_DEFAUT, MONTURE_PRIX_DEFAUT
 	global MONTURE_MORT_DEFINITIVE
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
@@ -626,6 +646,7 @@ def load_world_variables() -> dict:
 	RELATION_INITIALE            = int(v.get("RELATION_INITIALE", RELATION_INITIALE))
 	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
 	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))
+	MARCHANDAGE_COMPAGNON_AFFINITE_MIN = int(v.get("MARCHANDAGE_COMPAGNON_AFFINITE_MIN", MARCHANDAGE_COMPAGNON_AFFINITE_MIN))
 	PNJ_REPUTATION_SEUIL         = int(v.get("PNJ_REPUTATION_SEUIL", PNJ_REPUTATION_SEUIL))
 
 	QUETE_BOARD_TAILLE  = int(v.get("QUETE_BOARD_TAILLE", QUETE_BOARD_TAILLE))
@@ -679,8 +700,10 @@ def load_world_variables() -> dict:
 	AFFINITE_DELTA_KO = int(v.get("AFFINITE_DELTA_KO", AFFINITE_DELTA_KO))
 	AFFINITE_DELTA_CONGEDIE = int(v.get("AFFINITE_DELTA_CONGEDIE", AFFINITE_DELTA_CONGEDIE))
 	AFFINITE_DELTA_CONGEDIE_EN_QUETE = int(v.get("AFFINITE_DELTA_CONGEDIE_EN_QUETE", AFFINITE_DELTA_CONGEDIE_EN_QUETE))
+	AFFINITE_DELTA_CONGEDIE_PERMANENT = int(v.get("AFFINITE_DELTA_CONGEDIE_PERMANENT", AFFINITE_DELTA_CONGEDIE_PERMANENT))
 	AFFINITE_SEUIL_DEPART = int(v.get("AFFINITE_SEUIL_DEPART", AFFINITE_SEUIL_DEPART))
 	AFFINITE_SEUIL_REMISE = int(v.get("AFFINITE_SEUIL_REMISE", AFFINITE_SEUIL_REMISE))
+	AFFINITE_SEUIL_ENGAGEMENT = int(v.get("AFFINITE_SEUIL_ENGAGEMENT", AFFINITE_SEUIL_ENGAGEMENT))
 	AFFINITE_REDUC_PART = max(1, int(v.get("AFFINITE_REDUC_PART", AFFINITE_REDUC_PART)))
 
 	MONTURE_GROUPE_MAX = max(0, int(v.get("MONTURE_GROUPE_MAX", MONTURE_GROUPE_MAX)))

@@ -127,6 +127,26 @@
 			margin-bottom: 8px;
 			color: var(--accent-color);
 		}
+		/* Texte d'ambiance du lieu (champ `texte` du doc lieu:*), en tête du panneau, au-dessus
+		   des Actions et des Lieux. `pre-line` respecte les retours à la ligne de la donnée
+		   (listes à puces « - … »), comme #intro-texte. Il défile CHEZ LUI : le panneau est en
+		   overflow:hidden, un texte long pousserait sinon la liste des lieux hors du cadre. */
+		.loc-texte {
+			font-size: 1rem;
+			line-height: 1.4;
+			padding: 10px;
+			white-space: pre-line;
+			box-shadow: rgba(0, 0, 0, 0.8) 0px -20px 20px -20px inset;
+			position: relative;
+			color: var(--text, rgb(224, 224, 224));
+			max-height: 22vh;
+			overflow-y: auto;
+			flex-shrink: 0;
+			margin-bottom: 10px;
+			border-bottom: 1px dashed var(--border-color);
+			scrollbar-width: thin;
+			scrollbar-color: var(--border-color) transparent;
+		}
 		.sub-locations-list {
 			list-style: none;
 			display: flex;
@@ -845,11 +865,17 @@
 		.sh-skill-toggle:hover .sh-skill-name { text-decoration: underline; }
 		.sh-skill-full-desc { font-size: 0.85rem; color: var(--muted); margin-top: 6px;
 			padding-top: 6px; border-top: 1px dashed rgba(74,74,90,0.4); white-space: pre-line; }
+		/* Les 2 modes optionnels (🪃 Jet, 🏹 Tir) tiennent côte à côte dès que la place le
+		   permet — le conteneur wrap, chaque case garde une largeur mini plutôt que de
+		   forcer toute la largeur du panneau comme une ligne de sac/sort ordinaire. */
+		#sh-modes-attaque { display: flex; flex-wrap: wrap; gap: 4px 50px; }
+		#sh-modes-attaque .sh-skill { flex: 1 1 220px; border: 1px solid var(--border-color); padding: 10px;}
 		/* Mobile : ne pas tronquer le sac / le sol. Le contenu (icône, nom, poids, rareté)
 		   passe sur autant de lignes que nécessaire ; les boutons restent groupés à droite. */
 		@media (max-width: 768px) {
 			.sh-skill { display: flex; flex-wrap: wrap; flex-direction: row; }
 			.sh-inv-box .sh-inv-item { flex-wrap: wrap; overflow: visible; }
+			#sh-modes-attaque .sh-skill { flex: 1 1 220px; border: none; padding: 5px;}
 			.sh-inv-box .sh-inv-name, .sh-skill .sh-skill-name, .sh-skill .sh-skill-desc  { white-space: normal; overflow: visible; text-overflow: clip; }
 			.sh-inv-box .sh-inv-actions, .sh-skill .sh-inv-actions { 
 				display: flex; margin-left: auto; flex-wrap: wrap; gap: 5px; 
@@ -1355,6 +1381,9 @@
 		</main>
 		<aside class="sidebar">
 			<section class="sub-locations-panel">
+				{% if lieu_texte %}
+				<div class="loc-texte">{{ lieu_texte }}</div>
+				{% endif %}
 				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or pnj_present %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
@@ -2151,6 +2180,23 @@
 		}
 		#clauses-overlay.clauses-hidden { display: none; }
 		#clauses-overlay .item-detail-card { max-width: 520px; }
+		/* ── Engagement durable d'un compagnon ────────────────────────────────────
+		   Même calque et mêmes briques de carte que les clauses : décision bloquante,
+		   et celle-ci fonde une compagnie. z-index AU-DESSUS des clauses — il porte un
+		   champ de saisie, il doit se fermer le premier sous Échap. */
+		#engagement-overlay {
+			position: fixed; inset: 0; z-index: 9450;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#engagement-overlay.clauses-hidden { display: none; }
+		#engagement-overlay .item-detail-card { max-width: 520px; }
+		#engagement-overlay input {
+			width: 100%; box-sizing: border-box; margin: .4rem 0 .2rem;
+			padding: .45rem .6rem; border-radius: 6px;
+			border: 1px solid rgba(220, 200, 160, .35);
+			background: rgba(0, 0, 0, .35); color: inherit; font: inherit;
+		}
 		/* ── Choix de la cible d'un effet bénéfique (sort/compétence `cible: allie`) ──
 		   Même calque et mêmes briques de carte que les clauses : c'est aussi une
 		   décision bloquante, et refermer sans choisir ne doit RIEN lancer. */
@@ -2245,6 +2291,16 @@
 			<div id="clauses-body"></div>
 		</div>
 	</div><!-- /#clauses-overlay -->
+	<!-- Engagement durable : ✕/Échap/backdrop FERMENT sans engager. L'engagement est
+	     réversible (congédier) mais coûteux, et il fonde la compagnie — il ne doit jamais
+	     partir d'un geste de sortie. -->
+	<div id="engagement-overlay" class="clauses-hidden" aria-label="Engagement durable"
+		 onclick="if(event.target===this)closeEngagement()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeEngagement()" title="Fermer sans engager">✕</button>
+			<div id="engagement-body"></div>
+		</div>
+	</div><!-- /#engagement-overlay -->
 	{# Cible d'un sort/compétence bénéfique : ✕ / Échap / clic hors carte = ANNULER,
 	   jamais « lancer sur quelqu'un par défaut » — les PM sont dépensés à l'envoi. #}
 	<div id="cible-allie-overlay" class="clauses-hidden" aria-label="Choisir la cible"
@@ -3007,6 +3063,10 @@ document.addEventListener('keydown', e => {
 	// le bonus n'est engagé que par le bouton « Dépasser » de la carte.
 	const maxBonus = document.getElementById('max-bonus-overlay');
 	if (maxBonus && !maxBonus.classList.contains('clauses-hidden')) { closeMaxBonus(); return; }
+	// Engagement durable AVANT les clauses : il porte un champ de saisie, c'est lui que le
+	// joueur cherche à fermer en premier. Rien n'est engagé tant qu'il n'a pas validé.
+	const engagement = document.getElementById('engagement-overlay');
+	if (engagement && !engagement.classList.contains('clauses-hidden')) { closeEngagement(); return; }
 	const clauses = document.getElementById('clauses-overlay');
 	if (clauses && !clauses.classList.contains('clauses-hidden')) { closeClauses(); return; }
 	const qmap = document.getElementById('quest-map-overlay');
@@ -3704,6 +3764,12 @@ function _catText(item) {
 	const sc = item.sous_categorie || '';
 	return sc && sc !== c ? `${c} · ${sc}` : c;
 }
+// Écoles enseignées par un grimoire (`magies`, résolu serveur dans resolve_item_ref :
+// l'école vit sur les sorts du grimoire, pas sur l'item). Vide pour tout autre objet.
+function _magiesText(item) {
+	const m = (item && item.magies) || [];
+	return m.length ? m.join(' · ') : '';
+}
 function _weaponModeText(item) {
 	if (!item || item.categorie !== 'arme') return '';
 	const m = _itemMode(item);
@@ -3826,6 +3892,7 @@ function _renderCmpTable(left, right, roleLeft, roleRight) {
 	hd += `</div>`;
 	let rows = '';
 	rows += _textRow('Catégorie', _catText(left), compare ? _catText(right) : null, compare);
+	rows += _textRow('🏫 École', _magiesText(left), compare ? _magiesText(right) : null, compare);
 	rows += _textRow('Mode', _weaponModeText(left), compare ? _weaponModeText(right) : null, compare);
 	rows += _numRows(left, right, compare);
 	rows += _textRow('Dés de dégâts', left && _diceText(left.bonus_degats_dice),
@@ -5096,12 +5163,23 @@ function _appliedMarchPrice(data, index, itemId, sens, compagnonId) {
 	return e ? e.prix : null;
 }
 
+// Le groupe laisse parler son beau parleur (serveur : `_negociateur`). On ne le mentionne
+// QUE si c'est un compagnon : le cas nominal — le joueur négocie lui-même — n'a rien à
+// annoncer, et commenter chaque marchandage rendrait le toast bavard pour rien.
+// ⚠️ Pas d'échappement ici : `showToast` écrit en textContent, pas en innerHTML — on
+// n'échappe QUE là où l'on écrit du HTML (cf. escapeHtml, côté cartes de compagnon).
+function _negoPrefixe(d) {
+	const n = d.negociateur;
+	return (n && n.compagnon) ? n.nom + ' négocie pour vous — ' : '';
+}
+
 function marchToast(d, applied) {
 	const deal = d.deal || {};
-	if (d.crit === 'reussite') return 'Marchandage brillant ! Relation +1 (désormais ' + d.relation + ').';
-	if (d.crit === 'echec')    return 'Marchandage désastreux ! Relation −1 (désormais ' + d.relation + '). Le marchand refuse de négocier pendant 1 h.';
-	if (deal.succes)           return 'Marchandage réussi 🤝' + (applied ? ' — nouveau prix : ' + formatPrix(applied) : '');
-	return 'Marchandage raté — prix inchangé.';
+	const par  = _negoPrefixe(d);
+	if (d.crit === 'reussite') return par + 'Marchandage brillant ! Relation +1 (désormais ' + d.relation + ').';
+	if (d.crit === 'echec')    return par + 'Marchandage désastreux ! Relation −1 (désormais ' + d.relation + '). Le marchand refuse de négocier pendant 1 h.';
+	if (deal.succes)           return par + 'Marchandage réussi 🤝' + (applied ? ' — nouveau prix : ' + formatPrix(applied) : '');
+	return par + 'Marchandage raté — prix inchangé.';
 }
 
 async function marchanderItem(index, itemId, sens, compagnonId) {
@@ -5528,6 +5606,17 @@ function _affLabel(sc) {
 		: sc >= 45 ? 'Neutre' : sc >= 30 ? 'Méfiant' : sc >= 10 ? 'Hostile' : 'Ennemi';
 }
 
+// Tout le rendu client de cette page passe par des template literals dans `innerHTML` :
+// une chaîne SAISIE PAR LE JOUEUR (le nom de sa compagnie, seule à ce jour) doit être
+// échappée avant d'y être interpolée. Le serveur, lui, se contente de BORNER
+// (`nettoyer_nom_compagnie`) — échapper des deux côtés doublerait l'échappement.
+// ⚠️ JAMAIS dans un onclick="…('${x}')" : `'` devient &#39; et casse la chaîne JS.
+// ⚠️ Inutile (et nuisible) pour showToast, qui écrit en textContent.
+function escapeHtml(s) {
+	return String(s == null ? '' : s).replace(/[&<>"']/g,
+		c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+}
+
 // Onglet 🤝 section 👥 : tous les compagnons CONNUS (mémo du perso), actifs d'abord.
 function renderFicheCompagnons(list) {
 	const box = document.getElementById('sh-rel-compagnons');
@@ -5543,6 +5632,10 @@ function renderFicheCompagnons(list) {
 		const sc = (r.affinite === null || r.affinite === undefined) ? 50 : r.affinite;
 		const cls = sc > 50 ? 'pos' : sc < 50 ? 'neg' : 'neu';
 		const part = (r.exigences_effectives || {}).part_butin_pct;
+		// Un permanent ne prend rien : « part 0% » serait la bonne valeur mais la mauvaise
+		// information — ce qui le caractérise, c'est son engagement (miroir de _piedCompagnon).
+		const contrat = r.permanent ? ` · ✦ engagé`
+			: (part !== undefined ? ` · part ${part}%` : '');
 		// Vitaux : présents pour les compagnons ACTIFS seulement (le mémo d'un parti n'en porte pas).
 		const vit = r.pv_max !== undefined
 			? ` · ❤️ ${r.currentPV}/${r.pv_max} · 🔵 ${r.currentPM}/${r.pm_max}` : '';
@@ -5550,13 +5643,13 @@ function renderFicheCompagnons(list) {
 			<strong>${r.actif ? '⚔' : '·'}</strong>
 			<div class="sh-rel-info">
 				<div class="sh-rel-name">${r.prenom || '?'} ${r.nom || ''}${r.actif ? ' <span style="opacity:.6;font-size:.75em">(dans le groupe)</span>' : ''}</div>
-				<div class="sh-rel-class">${r.voc || ''} · ${r.race || ''} · rang ${r.rang || 'F'}${part !== undefined ? ` · part ${part}%` : ''}${vit}</div>
+				<div class="sh-rel-class">${r.voc || ''} · ${r.race || ''} · rang ${r.rang || 'F'}${contrat}${vit}</div>
 			</div>
 			<div>
 				<div class="sh-rel-score ${cls}">${sc}<span style="opacity:.5;font-size:.7em">/100</span></div>
 				<div class="sh-rel-lbl">${_affLabel(sc)}</div>
 			</div>
-			${r.actif ? `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${r.id}')" title="Congédier ce compagnon">✕</button>` : ''}
+			${r.actif ? `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${r.id}', ${!!r.permanent})" title="${r.permanent ? 'Rompre l\'engagement' : 'Congédier ce compagnon'}">✕</button>` : ''}
 			<div class="sh-rel-portrait">
 				${r.image ? `<img src="/characters/${r.image}" alt="" class="collapsed compagnon-portrait">`
 					: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">👤</div>'}
@@ -5572,15 +5665,52 @@ function renderFicheCompagnons(list) {
 
 // Pied d'un compagnon : ce que la carte ne dit pas DÉJÀ — ses PV/PM sont dans ses barres et sa
 // ligne de vitaux, inutile de les répéter. Restent le contrat (part de butin) et le lien (affinité).
+// Nom de la compagnie du joueur — hors de portée de `_piedCompagnon`, qui ne reçoit qu'une
+// carte. Une globale plutôt que de répéter la compagnie dans CHAQUE `_recrue_view` : elle
+// appartient au joueur, pas à ses compagnons. Posée par tout payload qui la porte.
+let _compagnieNom = {{ (compagnie.nom if compagnie else '') | tojson }};
+
+function _majCompagnie(data) {
+	if (data && 'compagnie' in data) _compagnieNom = (data.compagnie || {}).nom || '';
+}
+
 function _piedCompagnon(c) {
 	const aff = (c.affinite === null || c.affinite === undefined) ? 50 : c.affinite;
 	const part = (c.exigences_effectives || {}).part_butin_pct;
-	return `<span>💰 part ${part}%</span><span>🤝 ${aff} — ${_affLabel(aff)}</span>`;
+	// Un permanent ne prend RIEN : afficher « part 0% » serait la bonne valeur mais la
+	// mauvaise information — ce qui le caractérise, c'est son appartenance à la compagnie.
+	const contrat = c.permanent
+		? `<span title="Engagé durablement : aucune part de butin">✦ ${escapeHtml(_compagnieNom || 'Compagnie')}</span>`
+		: `<span>💰 part ${part}%</span>`;
+	return contrat + `<span>🤝 ${aff} — ${_affLabel(aff)}</span>`;
 }
 
-function _btnCongedier(id) {
-	return `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${id}')"
-		title="Congédier (le lien est conservé)">✕ Congédier</button>`;
+// Prend la CARTE (et non un id) pour transporter `c.permanent` jusqu'à la confirmation :
+// rompre un engagement durable ne se demande pas dans les mêmes termes qu'un congédiement.
+function _btnCongedier(c) {
+	const perm = !!c.permanent;
+	return `<button class="sh-drop-btn sh-abandon-btn"
+		onclick="congedierAventurier('${c.id}', ${perm})"
+		title="${perm ? 'Rompre l\'engagement (blesse durablement)' : 'Congédier (le lien est conservé)'}"
+		>${perm ? '✕ Rompre l\'engagement' : '✕ Congédier'}</button>`;
+}
+
+// Offert au seul compagnon assez DÉVOUÉ et pas encore engagé. ⚠️ `c.affinite` peut être
+// `null` (valeur brute du payload) → repli sur le neutre 50, comme dans `_piedCompagnon` ;
+// sans ce repli, la comparaison `null >= 90` serait fausse par accident et non par règle.
+function _btnEngager(c, seuil) {
+	const aff = (c.affinite === null || c.affinite === undefined) ? 50 : c.affinite;
+	if (c.permanent || seuil === undefined || aff < seuil) return '';
+	return `<button class="sh-drop-btn" onclick="ouvrirEngagement('${c.id}')"
+		title="L'attacher durablement à votre compagnie">✦ Engager durablement</button>`;
+}
+
+// Places du plafond RÉELLEMENT prises : le serveur les compte (les permanents en sortent),
+// le client ne fait que les lire. Repli sur `groupe.length` pour un payload d'avant la
+// feature — le compteur reste juste tant qu'aucun compagnon n'est engagé.
+function _placesOccupees(data) {
+	return (data.places_occupees !== undefined && data.places_occupees !== null)
+		? data.places_occupees : (data.groupe || []).length;
 }
 
 // Une liste de cartes de compagnons. `actions(c)` compose les boutons propres à l'endroit.
@@ -5605,12 +5735,17 @@ function _rendreCartesCompagnons(container, groupe, actions) {
 let _recEtat = {};
 
 function renderRecrutement(data) {
+	_majCompagnie(data);
+	// ⚠️ `places_occupees` (serveur), jamais `groupe.length` : un compagnon engagé
+	// durablement fait partie du groupe SANS occuper de place. Recompter ici afficherait
+	// un plafond que le serveur n'applique pas — la liste et le garde doivent s'accorder.
+	const places = _placesOccupees(data);
 	const plafondEl = document.getElementById('rec-plafond');
-	if (plafondEl) plafondEl.textContent = `${(data.groupe || []).length}/${data.plafond}`;
-	const full = (data.groupe || []).length >= (data.plafond || 0);
+	if (plafondEl) plafondEl.textContent = `${places}/${data.plafond}`;
+	const full = places >= (data.plafond || 0);
 
 	_rendreCartesCompagnons(document.getElementById('rec-groupe-list'), data.groupe || [],
-		c => _btnCongedier(c.id));
+		c => _btnCongedier(c));
 
 	const rl = document.getElementById('rec-recrues-list');
 	if (rl) {
@@ -5813,6 +5948,77 @@ function closeClauses() {
 function _clausesAccepter(id) { closeClauses(); embaucherAventurier(id); }
 function _clausesRefuser(id)  { closeClauses(); refuserAventurier(id); }
 
+// ── Engagement durable d'un compagnon (✦) ────────────────────────────────────────
+// Le compagnon cesse d'être un contrat : plus de part de butin, hors plafond de groupe,
+// et il rejoint la compagnie — que le joueur BAPTISE au tout premier engagement. Les
+// contreparties sont rappelées ici : l'engagement est réversible, mais la rupture se paie.
+
+function ouvrirEngagement(avId) {
+	const c = ((_grpEtat || {}).groupe || []).find(x => x.id === avId);
+	const ov = document.getElementById('engagement-overlay');
+	if (!c || !ov) return;
+	const premier = !_compagnieNom;
+	const nom = `${c.prenom || ''} ${c.nom || ''}`.trim();
+	document.getElementById('engagement-body').innerHTML =
+		`<h3>Engagement durable — ${escapeHtml(nom)}</h3>`
+		+ `<div>« Je ne compte plus mes parts. Où vous irez, j'irai. »</div>`
+		+ `<ul class="clauses-list">`
+		+ `<li>• Il renonce à toute part de butin.</li>`
+		+ `<li>• Il ne compte plus dans la taille de votre groupe.</li>`
+		+ `<li>• Il ne vous quittera plus de lui-même, quoi qu'il pense de vous.</li>`
+		+ `</ul>`
+		+ (premier
+			? `<div>Donnez un nom à votre compagnie :</div>`
+			  + `<input id="engagement-nom" maxlength="40" placeholder="La Main d'Argent"`
+			  + ` onkeydown="if(event.key==='Enter'){event.preventDefault();_engagementValider('${c.id}');}">`
+			: `<div class="clauses-part">✦ Il rejoint <strong>${escapeHtml(_compagnieNom)}</strong>.</div>`)
+		+ `<div class="clauses-avert">Rompre cet engagement plus tard le blessera durablement.</div>`
+		+ `<div class="item-detail-actions">`
+		+ `<button class="sh-drop-btn sh-abandon-btn" onclick="closeEngagement()"`
+		+ ` title="Fermer sans engager">✕ Pas maintenant</button>`
+		+ `<button class="sh-equip-btn" onclick="_engagementValider('${c.id}')"`
+		+ ` title="Engager durablement ce compagnon">✦ Engager</button>`
+		+ `</div>`;
+	ov.classList.remove('clauses-hidden');
+	const champ = document.getElementById('engagement-nom');
+	if (champ) champ.focus();
+}
+
+// ⚠️ Fermer ≠ décider, comme pour les clauses : ✕, Échap et clic hors carte n'engagent rien.
+function closeEngagement() {
+	document.getElementById('engagement-overlay').classList.add('clauses-hidden');
+}
+
+// ⚠️ Le nom est lu depuis l'<input> EN JS, jamais interpolé dans un onclick : escapeHtml
+// transformerait `'` en &#39; et casserait la chaîne. Le serveur le borne, le rendu l'échappe.
+function _engagementValider(avId) {
+	const champ = document.getElementById('engagement-nom');
+	const nom = champ ? champ.value.trim() : null;
+	if (champ && !nom) { showToast('Donnez un nom à votre compagnie.'); champ.focus(); return; }
+	closeEngagement();
+	engagerAventurier(avId, nom);
+}
+
+async function engagerAventurier(avId, nomCompagnie) {
+	try {
+		const body = { aventurier_id: avId };
+		if (nomCompagnie) body.nom_compagnie = nomCompagnie;
+		const res = await fetch('api/recrutement/engager', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(body)
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
+		// Le payload d'engagement ne porte pas les INVENTAIRES : on re-tire l'état complet
+		// du panneau, comme le fait le congédiement — sinon la section 🎒 se viderait.
+		_majCompagnie(data);
+		const r2 = await fetch('api/groupe');
+		if (r2.ok) renderGroupe(await r2.json());
+		if (data.engage) showToast(`✦ ${data.engage.nom} rejoint ${data.engage.compagnie} !`);
+	} catch (err) { console.error('Erreur engagement', err); }
+}
+
 // Le refus retire la recrue du tableau (serveur) ; la réponse est le board reconstruit,
 // place déjà repeuplée — même forme que l'embauche.
 async function refuserAventurier(avId) {
@@ -5845,8 +6051,13 @@ async function embaucherAventurier(avId) {
 
 // Congédier est autorisé PARTOUT (onglet 🤝 ou panneau) : hors lieu recruteur, le
 // payload ne porte pas de recrues → seuls groupe + fiche 👥 sont resynchronisés.
-async function congedierAventurier(avId) {
-	if (!confirm('Congédier ce compagnon ? Il gardera le souvenir de vos aventures.')) return;
+// `permanent` : rompre un ENGAGEMENT n'est pas résilier un contrat — la confirmation doit
+// dire ce que ça coûte, sinon le joueur découvre la sanction après coup.
+async function congedierAventurier(avId, permanent) {
+	const question = permanent
+		? 'Rompre votre engagement avec ce compagnon ? Il quitte la compagnie, et le blesse durablement.'
+		: 'Congédier ce compagnon ? Il gardera le souvenir de vos aventures.';
+	if (!confirm(question)) return;
 	try {
 		const res = await fetch('api/recrutement/congedier', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -5897,14 +6108,18 @@ function toggleGroupeSection(id) {
 
 function renderGroupe(data) {
 	_grpEtat = data;
+	_majCompagnie(data);
 	const groupe = data.groupe || [];
 	const plafond = document.getElementById('grp-plafond');
-	if (plafond) plafond.textContent = `${groupe.length}/${data.plafond}`;
+	if (plafond) plafond.textContent = `${_placesOccupees(data)}/${data.plafond}`;
 
 	// Chaque compagnon s'affiche avec la MÊME carte que le joueur (portrait cadré, barres
 	// PV/PM, identité) ; son pied ne dit que ce qu'elle n'a pas : la part de butin et l'affinité.
+	// ⚠️ Le bouton d'engagement n'est offert QUE dans le panneau 👥, jamais au tableau de
+	// recrutement : on n'engage pas durablement quelqu'un qu'on vient d'embaucher.
+	const seuil = data.seuil_engagement;
 	_rendreCartesCompagnons(document.getElementById('grp-compagnons-list'), groupe,
-		c => _btnCongedier(c.id));
+		c => _btnEngager(c, seuil) + _btnCongedier(c));
 	// La carte entière ouvre la fiche du compagnon (le bouton 📋 Fiche faisait doublon). Restent
 	// exclus : la barre d'actions (→ Congédier) et les contrôles d'édition du portrait.
 	document.querySelectorAll('#grp-compagnons-list .character-card').forEach(card => {
@@ -6111,23 +6326,33 @@ async function transfererItem(sens, index, itemId) {
 	} catch (err) { console.error('Erreur transfert', err); }
 }
 
-async function openGroupe() {
+// Séparé en DEUX temps (fetch / affichage) pour closeCompagnonSheet : il a besoin
+// d'attendre la réponse AVANT de toucher au moindre panneau (cf. son commentaire), ce que
+// `openGroupe` seul ne permet pas puisqu'il bascule les panneaux dès sa réponse reçue.
+async function _fetchGroupeData() {
 	try {
 		const res = await fetch('api/groupe');
 		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
-		renderGroupe(data);
-		if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
-		(data.departs || []).forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
-		const ouverte = _grpLsGet(GRP_SECTION_KEY);
-		['compagnons', 'inventaire'].forEach(s => {
-			document.getElementById('grp-head-' + s).parentElement
-				.classList.toggle('open', s === (ouverte === null ? 'compagnons' : ouverte));
-		});
-		document.getElementById('game-container').classList.add('panel-hidden');
-		document.getElementById('groupe-panel').classList.remove('panel-hidden');
-		window.scrollTo({ top: 0, behavior: 'instant' });
-	} catch (err) { console.error('Erreur panneau groupe', err); }
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return null; }
+		return data;
+	} catch (err) { console.error('Erreur panneau groupe', err); return null; }
+}
+function _renderGroupePanel(data) {
+	renderGroupe(data);
+	if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
+	(data.departs || []).forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+	const ouverte = _grpLsGet(GRP_SECTION_KEY);
+	['compagnons', 'inventaire'].forEach(s => {
+		document.getElementById('grp-head-' + s).parentElement
+			.classList.toggle('open', s === (ouverte === null ? 'compagnons' : ouverte));
+	});
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('groupe-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+async function openGroupe() {
+	const data = await _fetchGroupeData();
+	if (data) _renderGroupePanel(data);
 }
 
 function closeGroupe() {
@@ -6285,7 +6510,20 @@ async function openCompagnonSheet(avId) {
 
 // Retour au joueur : on restaure l'état mis de côté, puis on rouvre le panneau du groupe
 // (les charges ont pu changer — équipement, objets posés).
-function closeCompagnonSheet() {
+// ⚠️ Ordre délicat, deux écueils déjà rencontrés ici :
+//  1. Attendre `GET /api/groupe` APRÈS avoir masqué `#sheet-panel` ouvre une fenêtre sans
+//     AUCUN panneau visible (simples frères en flux normal, pas des calques superposés) →
+//     flash sur le fond nu de la page le temps de l'aller-retour réseau.
+//  2. Restaurer/re-rendre la fiche du JOUEUR avant cet aller-retour la rend brièvement
+//     visible (le panneau reste affiché pendant l'attente) → flash sur SA fiche alors que
+//     l'intention du joueur est de revenir au groupe, pas de se regarder.
+// Solution : précharger les données du groupe D'ABORD, pendant que `#sheet-panel` affiche
+// encore la fiche du COMPAGNON telle quelle (rien ne change à l'écran) ; restaurer l'état
+// + re-rendre la fiche joueur + masquer `#sheet-panel` + afficher `#groupe-panel` ensuite,
+// d'un bloc synchrone (aucun `await` entre les deux) pour qu'aucune frame intermédiaire
+// ne soit peinte entre les deux bascules.
+async function closeCompagnonSheet() {
+	const data = await _fetchGroupeData();
 	const s = _sheetSnap;
 	_compagnonActif = null;
 	_sheetSnap = null;
@@ -6316,7 +6554,7 @@ function closeCompagnonSheet() {
 		_sheetRendreTout();
 	}
 	document.getElementById('sheet-panel').classList.add('panel-hidden');
-	openGroupe();
+	if (data) _renderGroupePanel(data);
 }
 
 // ── Dialogue PNJ (🗣) ───────────────────────────────────────────────────────

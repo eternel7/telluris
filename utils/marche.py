@@ -28,7 +28,8 @@ def _clamp(x, lo, hi):
 # instance pour la vente → on ne les réécrase pas ici).
 _FICHE_ITEM_KEYS = (
 	"categorie", "sous_categorie", "rarete", "tags", "portee", "restriction", "slots", "effets",
-	"bonus",
+	# `magies` = écoles enseignées, posé sur les seuls grimoires par resolve_item_ref.
+	"bonus", "magies",
 	"bonus_pa", "bonus_pv", "bonus_pm", "bonus_cc", "bonus_cd",
 	"bonus_degats", "bonus_degats_dice", "bonus_initiative", "bonus_malus_depl",
 )

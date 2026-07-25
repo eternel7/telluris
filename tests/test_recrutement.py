@@ -320,10 +320,27 @@ def test_embauche_nominale(monde):
 	assert av["_id"] in c["compagnons_connus"]
 
 
+def _embauche(monde, av_id="aventurier:a", **champs):
+	"""Compagnon ACTIF déjà en base — le plafond compte désormais les DOCS (places
+	réellement occupées), plus une liste d'ids qui pourrait contenir des références mortes."""
+	av = recrue(av_id, statut="embauche", embauche_par="character:u_1", **champs)
+	monde["docs"][av["_id"]] = av
+	return av
+
+
 def test_embauche_refusee_au_plafond(monde):
-	c = perso(groupe=["aventurier:a", "aventurier:b"])
+	a, b = _embauche(monde, "aventurier:a"), _embauche(monde, "aventurier:b")
+	c = perso(groupe=[a["_id"], b["_id"]])
 	ok, raison = recrutement.embaucher(c, recrue())
 	assert not ok and "complet" in raison
+
+
+def test_un_id_perime_ne_retient_plus_une_place(monde):
+	"""Le plafond lit les docs : un compagnon disparu de la base (ou repassé `parti`) ne
+	bloque plus une place, là où `len(groupe)` la retenait indéfiniment."""
+	c = perso(groupe=["aventurier:disparu", "aventurier:aussi_disparu"])
+	ok, _ = recrutement.embaucher(c, recrue())
+	assert ok
 
 
 def test_embauche_refusee_si_plus_offerte(monde):
@@ -366,6 +383,165 @@ def test_departs_volontaires_sous_le_seuil(monde, monkeypatch):
 	partis = recrutement.departs_volontaires(c)
 	assert [a["_id"] for a in partis] == [av["_id"]]
 	assert c["groupe"] == [] and av["statut"] == "parti"
+
+
+# ── Engagement durable (compagnie) ───────────────────────────────────────────────
+
+def _permanent(monde, c, av_id="aventurier:fidele", affinite=95):
+	"""Compagnon actif porté à l'engagement durable (part nulle, hors plafond)."""
+	av = _embauche(monde, av_id)
+	c["groupe"] = list(c.get("groupe", [])) + [av["_id"]]
+	c.setdefault("affinites", {})[av["_id"]] = affinite
+	ok, raison = recrutement.engager_permanent(c, av, "La Main d'Argent")
+	assert ok, raison
+	return av
+
+
+def test_engager_fonde_la_compagnie(monde):
+	c = perso()
+	av = _permanent(monde, c)
+	assert av["permanent"] is True
+	assert c["compagnie"]["nom"] == "La Main d'Argent"
+	assert c["compagnie"]["fondee_at"] == 1000
+
+
+def test_engager_refuse_sous_le_seuil(monde, monkeypatch):
+	monkeypatch.setattr(character_stats, "AFFINITE_SEUIL_ENGAGEMENT", 90)
+	c = perso()
+	av = _embauche(monde)
+	c["groupe"] = [av["_id"]]
+	c["affinites"] = {av["_id"]: 89}
+	ok, raison = recrutement.engager_permanent(c, av, "Trop Tôt")
+	assert not ok and "dévoué" in raison
+	assert "compagnie" not in c and "permanent" not in av
+
+
+def test_second_engagement_rejoint_sans_renommer(monde):
+	"""Les suivants REJOIGNENT la compagnie : le nom proposé est ignoré, pas appliqué."""
+	c = perso()
+	_permanent(monde, c, "aventurier:un")
+	second = _embauche(monde, "aventurier:deux")
+	c["groupe"].append(second["_id"])
+	c["affinites"][second["_id"]] = 95
+	ok, _ = recrutement.engager_permanent(c, second, "Autre nom")
+	assert ok and second["permanent"] is True
+	assert c["compagnie"]["nom"] == "La Main d'Argent"
+
+
+def test_engager_sans_nom_au_premier_engagement_refuse(monde):
+	c = perso()
+	av = _embauche(monde)
+	c["groupe"] = [av["_id"]]
+	c["affinites"] = {av["_id"]: 95}
+	ok, raison = recrutement.engager_permanent(c, av, "   ")
+	assert not ok and "nom" in raison
+	assert "compagnie" not in c and "permanent" not in av
+
+
+def test_engager_refuse_deux_fois(monde):
+	c = perso()
+	av = _permanent(monde, c)
+	ok, raison = recrutement.engager_permanent(c, av, None)
+	assert not ok and "déjà" in raison
+
+
+def test_permanent_hors_plafond(monde):
+	"""Le parcours qui prouve la cohérence : 2 compagnons = complet ; engager l'un des
+	deux LIBÈRE sa place."""
+	a, b = _embauche(monde, "aventurier:a"), _embauche(monde, "aventurier:b")
+	c = perso(groupe=[a["_id"], b["_id"]], affinites={a["_id"]: 95})
+	assert recrutement.places_occupees(c) == 2
+	assert recrutement.embaucher(c, recrue())[0] is False
+
+	recrutement.engager_permanent(c, a, "La Main d'Argent")
+
+	assert recrutement.places_occupees(c) == 1
+	assert recrutement.embaucher(c, recrue())[0] is True
+
+
+def test_permanent_ne_prend_aucune_part_de_butin(monde):
+	"""⚠️ 0, pas le plancher PART_BUTIN_MIN : `conditions_effectives` sort AVANT le calcul."""
+	c = perso()
+	av = _permanent(monde, c, affinite=95)
+	av["exigences"] = {"part_butin_pct": 30, "clauses": ["Ne pas fuir."]}
+	cond = recrutement.conditions_effectives(av, 50)  # même à affinité NEUTRE
+	assert cond["part_butin_pct"] == 0
+	assert cond["clauses"] == ["Ne pas fuir."]  # les clauses, elles, tiennent toujours
+
+	res = recrutement.regler_part_butin(c, [av], 1000)
+	assert res["parts"][av["_id"]] == 0 and res["reste"] == 1000
+	assert av["cuivre"] == 0
+
+
+def test_permanent_ne_part_jamais_de_lui_meme(monde, monkeypatch):
+	monkeypatch.setattr(character_stats, "AFFINITE_SEUIL_DEPART", 30)
+	c = perso()
+	av = _permanent(monde, c)
+	c["affinites"][av["_id"]] = 5  # il vous déteste — l'engagement tient quand même
+	assert recrutement.departs_volontaires(c) == []
+	assert c["groupe"] == [av["_id"]] and av["permanent"] is True
+
+
+def test_congedier_un_permanent_coute_plus_cher(monde, monkeypatch):
+	monkeypatch.setattr(character_stats, "AFFINITE_DELTA_CONGEDIE_PERMANENT", -15)
+	c = perso()
+	av = _permanent(monde, c, affinite=95)
+	ok, _ = recrutement.congedier(c, av)
+	assert ok and av["statut"] == "parti"
+	assert c["affinites"][av["_id"]] == 95 - 15
+	assert "permanent" not in av           # le lien est rompu…
+	assert c["compagnie"]["nom"] == "La Main d'Argent"   # …la compagnie, non
+
+
+def test_congedier_permanent_ne_cumule_pas_avec_en_quete(monde, monkeypatch):
+	monkeypatch.setattr(character_stats, "AFFINITE_DELTA_CONGEDIE_PERMANENT", -15)
+	c = perso(quetes_actives=[{"id": "quete:x"}])
+	av = _permanent(monde, c, affinite=95)
+	recrutement.congedier(c, av)
+	assert c["affinites"][av["_id"]] == 95 - 15  # un SEUL delta, priorité au permanent
+
+
+def test_ancien_permanent_reembauche_repart_sur_un_contrat(monde):
+	"""Sans ce filet, l'engagement (part nulle + hors plafond) serait gratuit à la
+	deuxième signature."""
+	c = perso()
+	av = _permanent(monde, c)
+	recrutement.congedier(c, av)
+	av["statut"] = "offert"
+	ok, _ = recrutement.embaucher(c, av)
+	assert ok and "permanent" not in av
+	assert recrutement.places_occupees(c) == 1
+
+
+@pytest.mark.parametrize("brut, attendu", [
+	("  La Main d'Argent  ", "La Main d'Argent"),
+	("Les\tLoups\ndu Nord", "Les Loups du Nord"),
+	("Les   Trois   Dagues", "Les Trois Dagues"),
+	("A" * 60, "A" * 40),
+	("   ", ""),
+	(None, ""),
+	("​", ""),
+])
+def test_nettoyer_nom_compagnie(brut, attendu):
+	assert recrutement.nettoyer_nom_compagnie(brut) == attendu
+
+
+def test_nettoyer_nom_compagnie_n_echappe_pas_le_html():
+	"""⚠️ On BORNE au serveur, on ÉCHAPPE au rendu — échapper ici doublerait l'échappement."""
+	assert recrutement.nettoyer_nom_compagnie("<b>Test</b>&'") == "<b>Test</b>&'"
+
+
+def test_renommer_compagnie(monde):
+	c = perso()
+	_permanent(monde, c)
+	assert recrutement.renommer_compagnie(c, "  Les Loups gris ")[0] is True
+	assert c["compagnie"]["nom"] == "Les Loups gris"
+	assert c["compagnie"]["fondee_at"] == 1000  # la fondation ne bouge pas
+
+
+def test_renommer_sans_compagnie_refuse():
+	ok, raison = recrutement.renommer_compagnie(perso(), "Fantôme")
+	assert not ok and "compagnie" in raison
 
 
 # ── Affinités ────────────────────────────────────────────────────────────────────

@@ -724,6 +724,9 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# caracts_detail, sorts*, competences* — cf. utils/fiche.bloc_fiche.
 			**fiche_bloc,
 			"lieu_categorie": grid_doc.get("categorie"),
+			# Texte d'ambiance libre porté par le doc `lieu:*` (champ `texte`) : affiché en tête
+			# de la sidebar, au-dessus des Actions et des Lieux. Champ absent = rien de rendu.
+			"lieu_texte": grid_doc.get("texte"),
 			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,
 			"est_recrutement": est_recrutement,
@@ -731,6 +734,9 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.
 			"affinites_detail": recrutement_util.affinites_detail_payload(character, get_doc),
+			# La compagnie du joueur (badge ✦ sur les cartes de compagnons engagés) : servie
+			# ici, sinon elle n'apparaîtrait qu'après ouverture du panneau 👥.
+			"compagnie": character.get("compagnie"),
 			# Compagnons partis d'eux-mêmes pendant l'absence (affinité sous le seuil) : toast.
 			"compagnons_partis": [
 				f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in compagnons_partis

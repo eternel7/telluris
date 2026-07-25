@@ -27,6 +27,7 @@ from routers.montures import _monture_view
 # recopier — précédent : routers/combat.py importe déjà `_take_ref` du même module.
 from routers.user import _inventory_payload
 from models.character_stats import compute_character_level
+from models import character_stats
 
 recrutement_router = APIRouter()
 
@@ -95,6 +96,7 @@ def _recrue_view(character: dict, av: dict) -> dict:
 		"exigences_effectives": recrutement.conditions_effectives(
 			av, recrutement.affinite_de(character, av["_id"])),
 		"affinite": affinite_brute,
+		"permanent": bool(av.get("permanent")),
 		"deja_connu": av["_id"] in (character.get("compagnons_connus", {}) or {}),
 		# Vitaux : la carte les affiche (barres + ligne PV/PM) pour un compagnon comme pour une
 		# recrue — son doc est la source, ses max se recalculent comme ceux du joueur.
@@ -122,6 +124,13 @@ def _payload(character: dict, recrues: list | None = None) -> dict:
 	payload = {
 		"groupe": _groupe_view(character),
 		"plafond": recrutement.taille_max_groupe(),
+		# ⚠️ Le client ne RECOMPTE plus le groupe : un compagnon engagé durablement en fait
+		# partie sans occuper de place. Liste et garde bougent ensemble — les deux
+		# compteurs (`#rec-plafond`, `#grp-plafond`) et le `disabled` d'Embaucher lisent
+		# ce nombre, jamais `groupe.length`.
+		"places_occupees": recrutement.places_occupees(character, get_doc),
+		"seuil_engagement": int(character_stats.AFFINITE_SEUIL_ENGAGEMENT),
+		"compagnie": character.get("compagnie"),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"affinites_detail": recrutement.affinites_detail_payload(character, get_doc),
 		# Les montures voyagent avec le groupe mais n'en sont pas membres (ni affinité, ni
@@ -228,6 +237,65 @@ async def recrutement_congedier(
 	payload = _payload(character, recrues)
 	payload["congedie"] = {"nom": _nom_de(av)}
 	return payload
+
+
+@recrutement_router.post("/recrutement/engager")
+async def recrutement_engager(
+	current_user: Annotated[dict, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Engagement DURABLE d'un compagnon dévoué : il renonce à sa part de butin, sort du
+	plafond de groupe et rejoint la compagnie du joueur — qu'il BAPTISE si elle n'existe
+	pas encore (les engagements suivants la rejoignent sans re-saisie).
+
+	Autorisé PARTOUT, comme congédier : c'est un geste privé entre le joueur et son
+	compagnon, on ne le renvoie pas à la guilde pour cela. Les gardes sont ordonnées du
+	plus général au plus précis, pour que le premier message soit le vrai motif."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	av = _compagnon(character, body.get("aventurier_id"))  # 403 si hors groupe
+
+	# Déjà engagé / pas assez dévoué AVANT le contrôle du nom : le nom manquant ne doit
+	# pas masquer le vrai motif du refus.
+	ok, raison = recrutement.peut_engager(character, av)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+
+	nom = body.get("nom_compagnie")
+	if not character.get("compagnie") and not recrutement.nettoyer_nom_compagnie(nom):
+		raise HTTPException(status_code=422, detail="Donnez un nom à votre compagnie.")
+
+	ok, raison = recrutement.engager_permanent(character, av, nom)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	save_doc(av)  # best-effort, comme l'embauche
+
+	payload = _payload(character)
+	payload["engage"] = {"nom": _nom_de(av), "compagnie": character["compagnie"]["nom"]}
+	return payload
+
+
+@recrutement_router.post("/groupe/compagnie")
+async def groupe_renommer_compagnie(
+	current_user: Annotated[dict, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Renomme la compagnie. Elle doit EXISTER (409 sinon) : on ne fonde pas une compagnie
+	sans membre — elle naît du premier engagement, et lui survit ensuite."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	ok, raison = recrutement.renommer_compagnie(character, body.get("nom"))
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	return _payload(character)
 
 
 # ── Gestion du groupe hors combat (panneau 👥) ────────────────────────────────────
