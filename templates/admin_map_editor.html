@@ -145,7 +145,8 @@
 	}
 	select:focus { border-color: var(--accent); }
 	
-	input[type="number"] {
+	input[type="number"],
+	input[type="text"] {
 		width: 100%;
 		background: #0d0f14;
 		border: 1px solid var(--border);
@@ -157,7 +158,8 @@
 		outline: none;
 		transition: border-color 0.2s;
 	}
-	input[type="number"]:focus { border-color: var(--accent); }
+	input[type="number"]:focus,
+	input[type="text"]:focus { border-color: var(--accent); }
 
 	.btn {
 		width: 100%;
@@ -234,48 +236,11 @@
 	}
 	.custom-val button:hover { background: rgba(75,143,200,0.15); }
 	
+	/* Sélecteur de mode d'édition (remplace l'ancienne barre d'onglets .mode-tabs,
+	   qui prenait deux lignes dans un panneau de 30vw). */
+	#mode-select { margin-bottom: 12px; }
+
 	/* Nav bitmask */
-	.mode-tabs {
-		display: flex;
-		gap: 6px;
-		margin-bottom: 12px;
-		overflow-x: auto;
-		white-space: nowrap;
-		scrollbar-width: thin; /* Rend la barre plus fine */
-		scrollbar-color: #4d4d4d transparent;
-	}
-	/* Pour Chrome, Edge et Safari */
-	.mode-tabs::-webkit-scrollbar {
-		height: 6px; /* Ajustez la hauteur ici */
-	}
-
-	.mode-tabs::-webkit-scrollbar-thumb {
-		background: #4d4d4d; /* Couleur de la barre */
-		border-radius: 10px;
-	}
-
-	.mode-tabs::-webkit-scrollbar-track {
-		background: transparent; /* Couleur du fond de la barre */
-	}
-
-	.mode-tab {
-		flex: 1;
-		padding: 5px;
-		border: 1px solid var(--border);
-		border-radius: 4px;
-		background: #0d0f14;
-		color: var(--muted);
-		font-family: 'Share Tech Mono', monospace;
-		font-size: 0.7rem;
-		cursor: pointer;
-		text-align: center;
-		transition: all 0.15s;
-	}
-	.mode-tab.active {
-		border-color: var(--accent);
-		color: var(--accent);
-		background: rgba(200,168,75,0.1);
-	}
 	.dir-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 40px);
@@ -479,6 +444,70 @@
 	#lieu-fiche-overlay .lf-subbtn:hover {
 		background: var(--gold2); border-color: var(--gold); color: var(--ink);
 	}
+
+	/* ── Création d'un sous-lieu (overlay, thème admin sombre) ──
+	   z-index au-dessus de la fiche : Échap doit fermer celui-ci en premier. */
+	#lieu-add-overlay {
+		position: fixed; inset: 0; z-index: 300;
+		display: flex; align-items: flex-start; justify-content: center;
+		background: rgba(0,0,0,0.72); padding: 24px 12px; overflow-y: auto;
+	}
+	#lieu-add-overlay.la-hidden { display: none; }
+	.la-panel {
+		background: var(--panel); border: 1px solid var(--accent); border-radius: 6px;
+		box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+		width: min(580px, 100%); padding: 18px; margin: auto 0;
+	}
+	.la-topbar {
+		display: flex; align-items: center; gap: 10px;
+		border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 14px;
+	}
+	.la-topbar h2 {
+		flex: 1; font-family: 'Cinzel', serif; font-size: 0.9rem;
+		letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase;
+	}
+	.la-field { margin-bottom: 12px; }
+	.la-field > label { margin-bottom: 4px; }
+	.la-row { display: flex; gap: 8px; align-items: flex-end; }
+	.la-row > * { min-width: 0; }
+	.la-check {
+		display: flex; align-items: center; gap: 6px;
+		font-size: 0.68rem; color: var(--muted); cursor: pointer; margin: 4px 0;
+	}
+	.la-check input { cursor: pointer; }
+	.la-readonly {
+		font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+		color: var(--accent2); background: #0d0f14;
+		border: 1px dashed var(--border); border-radius: 4px;
+		padding: 6px 8px; word-break: break-all;
+	}
+	.la-thumb {
+		display: block; max-width: 100%; max-height: 120px; margin-top: 6px;
+		border: 1px solid var(--border); border-radius: 4px; background: #0d0f14;
+	}
+	.la-warn { color: var(--danger); font-size: 0.66rem; margin-top: 4px; min-height: 1em; }
+	.la-preview {
+		background: #0d0f14; border: 1px solid var(--border); border-radius: 4px;
+		padding: 8px; font-size: 0.66rem; color: var(--muted);
+		max-height: 200px; overflow: auto; white-space: pre; margin-bottom: 12px;
+	}
+	.la-actions { display: flex; gap: 8px; }
+
+	/* Éditeurs JSON dépliés sous une connexion (panneau Lieux) */
+	.lj-box { border-top: 1px dashed var(--border); margin-top: 6px; padding-top: 6px; }
+	.lj-head {
+		display: flex; align-items: center; gap: 6px;
+		font-size: 0.64rem; color: var(--accent); margin: 6px 0 4px;
+	}
+	.lj-head span { flex: 1; }
+	.lj-area {
+		width: 100%; min-height: 130px; resize: vertical;
+		background: #0d0f14; border: 1px solid var(--border); border-radius: 4px;
+		color: var(--text); font-family: 'Share Tech Mono', monospace;
+		font-size: 0.64rem; padding: 6px; outline: none;
+	}
+	.lj-area:focus { border-color: var(--accent); }
+	.lj-msg { font-size: 0.62rem; min-height: 1em; margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -509,14 +538,14 @@
 		<!-- Node mask + Value selector -->
 		<div class="card">
 			<div class="card-title">🎯 Mode d'édition</div>
-			<div class="mode-tabs">
-				<div class="mode-tab active" id="mode-terrain">Terrain</div>
-				<div class="mode-tab" id="mode-nav">Navigation</div>
-				<div class="mode-tab" id="mode-zones">Zones</div>
-				<div class="mode-tab" id="mode-rencontres">Rencontres</div>
-				<div class="mode-tab" id="mode-ressources">Ressources</div>
-				<div class="mode-tab" id="mode-lieux">Lieux</div>
-			</div>
+			<select id="mode-select">
+				<option value="terrain" selected>Terrain</option>
+				<option value="nav">Navigation</option>
+				<option value="zones">Zones</option>
+				<option value="rencontres">Rencontres</option>
+				<option value="ressources">Ressources</option>
+				<option value="lieux">Lieux</option>
+			</select>
 
 			<!-- Panneau Terrain -->
 			<div id="panel-terrain">
@@ -637,7 +666,8 @@
 
 			<!-- Panneau Lieux -->
 			<div id="panel-lieux" style="display:none;">
-				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez un point pour filtrer, puis 📄 Fiche pour voir le lieu de destination.</div>
+				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, 🧾 JSON édite ses documents, ➕ crée un sous-lieu sur cette case.</div>
+				<div id="lieu-add-section" style="margin-bottom:8px;"></div>
 				<div id="lieux-conn-list" style="max-height:320px;overflow-y:auto;font-size:.68rem;"></div>
 			</div>
 		</div>
@@ -734,9 +764,7 @@ const valGrid		= document.getElementById('val-grid');
 const customInput	= document.getElementById('custom-val-input');
 const customBtn		= document.getElementById('custom-val-btn');
 const legendEl		= document.getElementById('legend');
-const modeTerrain	= document.getElementById('mode-terrain');
-const modeNav		= document.getElementById('mode-nav');
-const modeZones		= document.getElementById('mode-zones');
+const modeSelect	= document.getElementById('mode-select');
 const panelTerrain	= document.getElementById('panel-terrain');
 const panelNav		= document.getElementById('panel-nav');
 const panelZones	= document.getElementById('panel-zones');
@@ -752,21 +780,19 @@ const zoneXEl		= document.getElementById('zone-x');
 const zoneYEl		= document.getElementById('zone-y');
 const zoneListEl	= document.getElementById('zone-list');
 const saveZonesBtn	= document.getElementById('save-zones-btn');
-const modeRencontres	= document.getElementById('mode-rencontres');
 const panelRencontres	= document.getElementById('panel-rencontres');
 const especeSelect		= document.getElementById('espece-select');
 const addEspeceBtn		= document.getElementById('add-espece-btn');
 const rencontreListEl	= document.getElementById('rencontre-list');
 const saveRencontresBtn	= document.getElementById('save-rencontres-btn');
-const modeRessources	= document.getElementById('mode-ressources');
 const panelRessources	= document.getElementById('panel-ressources');
 const ressourceSelect	= document.getElementById('ressource-select');
 const addRessourceBtn	= document.getElementById('add-ressource-btn');
 const ressourceListEl	= document.getElementById('ressource-list');
 const saveRessourcesBtn	= document.getElementById('save-ressources-btn');
-const modeLieux			= document.getElementById('mode-lieux');
 const panelLieux		= document.getElementById('panel-lieux');
 const lieuxConnListEl	= document.getElementById('lieux-conn-list');
+const lieuAddSectionEl	= document.getElementById('lieu-add-section');
 
 // ── ZONES STATE ────────────────────────────────────────────────────────────
 let zonesPlacements = [];    // zone_influences array for current lieu
@@ -776,6 +802,10 @@ let selectedZoneIdx = -1;    // index in zonesPlacements of selected placement
 // ── LIEUX STATE ────────────────────────────────────────────────────────────
 let lieuxConnections = [];   // connexions du lieu courant (enrichies details)
 let lieuxSelectedCell = null; // {cx, cy} de la case cliquée (filtre la liste)
+let lieuxJsonOuvert = null;  // _id de la connexion dont les JSON sont dépliés
+let lieuxDocCache = {};      // lieu_id -> doc lieu (alimente l'éditeur JSON)
+let creationOptions = null;  // payload de /api/lieux/creation_options
+let nlNomTouche = false;     // le nom du PNJ a-t-il été saisi à la main ?
 
 const ZONE_COLORS = [
 	'rgba(255,80,80,0.35)',  'rgba(80,160,255,0.35)', 'rgba(80,255,120,0.35)',
@@ -909,6 +939,8 @@ lieuSelect.addEventListener('change', async (e) => {
 			renderRessourceList();
 			lieuxConnections = [];
 			lieuxSelectedCell = null;
+			lieuxJsonOuvert = null;
+			lieuxDocCache = {};
 			fetchLieuxConnections();
 			dropZone.classList.add('hidden');
 			gridCont.classList.add('visible');
@@ -985,12 +1017,16 @@ function scheduleGridSend() {
 	debounceTimer = setTimeout(() => sendGrid(), 800);
 }
 
-// Battle map : masque les onglets Zones/Rencontres (un lieu de combat n'en a pas).
+// Battle map : masque les modes Zones/Rencontres (un lieu de combat n'en a pas).
 // À l'activation → bascule en Terrain ; à la désactivation → réaffiche sans changer le mode.
+// `disabled` en plus de `hidden` : Safari ignore `hidden` sur une <option>.
 function updateBattleMapTabs(isBattle) {
-	modeZones.style.display = isBattle ? 'none' : '';
-	modeRencontres.style.display = isBattle ? 'none' : '';
-	modeRessources.style.display = isBattle ? 'none' : '';
+	['zones', 'rencontres', 'ressources'].forEach(m => {
+		const opt = modeSelect.querySelector(`option[value="${m}"]`);
+		if (!opt) return;
+		opt.hidden = isBattle;
+		opt.disabled = isBattle;
+	});
 	if (isBattle) setMode('terrain');
 }
 
@@ -1335,12 +1371,7 @@ function selectVal(v) {
 // ── MODE TABS ──────────────────────────────────────────────────────────────
 function setMode(mode) {
 	editMode = mode;
-	modeTerrain.classList.toggle('active', mode === 'terrain');
-	modeNav.classList.toggle('active', mode === 'nav');
-	modeZones.classList.toggle('active', mode === 'zones');
-	modeRencontres.classList.toggle('active', mode === 'rencontres');
-	modeRessources.classList.toggle('active', mode === 'ressources');
-	modeLieux.classList.toggle('active', mode === 'lieux');
+	modeSelect.value = mode;
 	panelTerrain.style.display = mode === 'terrain' ? '' : 'none';
 	panelNav.style.display = mode === 'nav' ? '' : 'none';
 	panelZones.style.display = mode === 'zones' ? '' : 'none';
@@ -1349,16 +1380,11 @@ function setMode(mode) {
 	panelLieux.style.display = mode === 'lieux' ? '' : 'none';
 	if (mode === 'rencontres') renderRencontreList();  // puces = zones réellement utilisées
 	if (mode === 'ressources') renderRessourceList();  // mêmes puces de zones
-	if (mode === 'lieux') { lieuxSelectedCell = null; fetchLieuxConnections(); renderLieuxConnList(); }
+	if (mode === 'lieux') { lieuxSelectedCell = null; lieuxJsonOuvert = null; fetchLieuxConnections(); renderLieuxConnList(); }
 	if (mode !== 'nav') navSelectedCell = null;
 	if (grid.length) renderGrid();
 }
-modeTerrain.addEventListener('click', () => setMode('terrain'));
-modeNav.addEventListener('click', () => setMode('nav'));
-modeZones.addEventListener('click', () => setMode('zones'));
-modeRencontres.addEventListener('click', () => setMode('rencontres'));
-modeRessources.addEventListener('click', () => setMode('ressources'));
-modeLieux.addEventListener('click', () => setMode('lieux'));
+modeSelect.addEventListener('change', (e) => setMode(e.target.value));
 
 // ── LIEUX : connexions du lieu courant + fiche de destination ──────────────
 async function fetchLieuxConnections() {
@@ -1379,7 +1405,22 @@ function _connDest(conn) {
 	return nodes.find(n => n.lieu !== currentLocId) || nodes[0];
 }
 
+function _escHtml(s) {
+	return String(s == null ? '' : s)
+		.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Copie d'une connexion PRIVÉE de ses `details` : get_lieu_connections injecte le
+// doc du lieu dans chaque node à la volée (utils/lieux.py) — réécrire l'objet tel
+// quel persisterait cette copie enrichie en base.
+function _connNu(conn) {
+	const c = JSON.parse(JSON.stringify(conn || {}));
+	(c.nodes || []).forEach(n => { delete n.details; });
+	return c;
+}
+
 function renderLieuxConnList() {
+	renderLieuAddSection();
 	if (!lieuxConnListEl) return;
 	let list = lieuxConnections;
 	if (lieuxSelectedCell) {
@@ -1402,19 +1443,452 @@ function renderLieuxConnList() {
 		const node = (conn.nodes || []).find(x => x.lieu === currentLocId);
 		const pos = node && node.pos ? `[${node.pos[0]},${node.pos[1]}]` : '';
 		const destId = dest ? dest.lieu : '';
+		const ouvert = lieuxJsonOuvert === conn._id;
 		return `<div style="border:1px solid var(--border);border-radius:4px;padding:6px;margin-bottom:6px;">
-			<div><b>➔ ${label}</b></div>
-			<div style="color:#888;">${type} ${pos}</div>
-			<button class="btn btn-inline" style="margin-top:4px;font-size:.62rem;" onclick="openLieuFiche('${destId}')">📄 Fiche</button>
+			<div><b>➔ ${_escHtml(label)}</b></div>
+			<div style="color:#888;">${_escHtml(type)} ${pos}</div>
+			<div style="display:flex;gap:6px;margin-top:4px;">
+				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuFiche('${destId}')">📄 Fiche</button>
+				<button class="btn btn-inline" style="font-size:.62rem;" onclick="toggleSousLieuJson('${conn._id}','${destId}')">${ouvert ? '▲ Fermer' : '🧾 JSON'}</button>
+			</div>
+			${ouvert ? _sousLieuJsonHtml(conn, destId) : ''}
 		</div>`;
 	}).join('') || `<div style="color:#888;">Aucune connexion ici.</div>`;
 	lieuxConnListEl.innerHTML = header + rows;
+}
+
+// Les deux éditeurs JSON d'un sous-lieu déplié : le doc du lieu de destination
+// et le doc de la connexion qui l'accroche à la case courante.
+function _sousLieuJsonHtml(conn, destId) {
+	const doc = lieuxDocCache[destId];
+	const docTxt = doc ? JSON.stringify(doc, null, 2) : 'Document introuvable.';
+	const connTxt = JSON.stringify(_connNu(conn), null, 2);
+	return `<div class="lj-box">
+		<div class="lj-head">
+			<span>📄 ${_escHtml(destId)}</span>
+			<button class="btn btn-inline" style="font-size:.6rem;" onclick="sauverDocJson('lieu','${destId}')" ${doc ? '' : 'disabled'}>💾</button>
+			<button class="btn btn-inline danger" style="font-size:.6rem;" onclick="supprimerDocJson('lieu','${destId}')" ${doc ? '' : 'disabled'}>🗑</button>
+		</div>
+		<textarea class="lj-area" id="lj-area-lieu" ${doc ? '' : 'disabled'}>${_escHtml(docTxt)}</textarea>
+		<div class="lj-msg" id="lj-msg-lieu"></div>
+		<div class="lj-head">
+			<span>🔗 ${_escHtml(conn._id)}</span>
+			<button class="btn btn-inline" style="font-size:.6rem;" onclick="sauverDocJson('conn','${destId}')">💾</button>
+			<button class="btn btn-inline danger" style="font-size:.6rem;" onclick="supprimerDocJson('conn','${destId}')">🗑</button>
+		</div>
+		<textarea class="lj-area" id="lj-area-conn">${_escHtml(connTxt)}</textarea>
+		<div class="lj-msg" id="lj-msg-conn"></div>
+	</div>`;
+}
+
+async function toggleSousLieuJson(connId, destId) {
+	if (lieuxJsonOuvert === connId) { lieuxJsonOuvert = null; renderLieuxConnList(); return; }
+	await _chargerDocLieu(destId);
+	lieuxJsonOuvert = connId;
+	renderLieuxConnList();
+}
+
+async function _chargerDocLieu(destId) {
+	try {
+		const res = await fetch(`/api/lieu/${encodeURIComponent(destId)}`);
+		lieuxDocCache[destId] = res.ok ? await res.json() : null;
+	} catch (err) {
+		lieuxDocCache[destId] = null;
+	}
+}
+
+function _ljMsg(kind, texte, erreur) {
+	const el = document.getElementById(`lj-msg-${kind}`);
+	if (el) { el.textContent = texte; el.style.color = erreur ? 'var(--danger)' : 'var(--accent2)'; }
+}
+
+async function sauverDocJson(kind, destId) {
+	const area = document.getElementById(`lj-area-${kind}`);
+	if (!area) return;
+	let doc;
+	try {
+		doc = JSON.parse(area.value);
+	} catch (err) {
+		_ljMsg(kind, `JSON invalide : ${err.message}`, true);
+		return;
+	}
+	if (!doc || !doc._id) { _ljMsg(kind, "Champ '_id' requis.", true); return; }
+	_ljMsg(kind, 'Enregistrement…', false);
+	try {
+		const res = await fetch('/admin/doc', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(doc)
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			_ljMsg(kind, `✗ ${err.detail || res.status}`, true);
+			return;
+		}
+		if (kind === 'lieu') await _chargerDocLieu(destId);
+		await fetchLieuxConnections();
+		renderLieuxConnList();
+		if (grid.length) renderGrid();
+		_ljMsg(kind, '✓ Enregistré.', false);
+		setStatus(`Document <span>${doc._id}</span> enregistré.`);
+	} catch (err) {
+		_ljMsg(kind, `✗ ${err.message}`, true);
+	}
+}
+
+// Supprimer la connexion ≠ supprimer le lieu : retirer une porte n'efface pas la
+// boutique. Deux boutons distincts, deux confirmations nommées.
+async function supprimerDocJson(kind, destId) {
+	const area = document.getElementById(`lj-area-${kind}`);
+	if (!area) return;
+	let docId;
+	try {
+		docId = JSON.parse(area.value)._id;
+	} catch (err) {
+		_ljMsg(kind, `JSON invalide : ${err.message}`, true);
+		return;
+	}
+	const quoi = kind === 'lieu' ? 'le LIEU' : 'la CONNEXION';
+	if (!confirm(`Supprimer définitivement ${quoi} ${docId} ?`)) return;
+	try {
+		const res = await fetch(`/admin/doc?id=${encodeURIComponent(docId)}`, { method: 'DELETE' });
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			_ljMsg(kind, `✗ ${err.detail || res.status}`, true);
+			return;
+		}
+		lieuxJsonOuvert = null;
+		delete lieuxDocCache[destId];
+		await fetchLieuxConnections();
+		renderLieuxConnList();
+		if (grid.length) renderGrid();
+		setStatus(`Document <span>${docId}</span> supprimé.`);
+	} catch (err) {
+		_ljMsg(kind, `✗ ${err.message}`, true);
+	}
 }
 
 function clearLieuxCell() {
 	lieuxSelectedCell = null;
 	renderLieuxConnList();
 	if (grid.length) renderGrid();
+}
+
+// ── LIEUX : création d'un sous-lieu sur la case sélectionnée ───────────────
+function renderLieuAddSection() {
+	if (!lieuAddSectionEl) return;
+	if (!currentLocId) { lieuAddSectionEl.innerHTML = ''; return; }
+	if (!lieuxSelectedCell) {
+		lieuAddSectionEl.innerHTML = `<div style="font-size:.66rem;color:#666;">Cliquez une case de la grille pour pouvoir y ajouter un lieu.</div>`;
+		return;
+	}
+	lieuAddSectionEl.innerHTML = `<button class="btn" style="font-size:.68rem;" onclick="openLieuAdd()">➕ Ajouter un lieu en [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]</button>`;
+}
+
+// Marques diacritiques combinantes (échappées : ce fichier voyage en UTF-8 mais
+// une plage écrite en clair y serait illisible et fragile).
+const _DIACRITIQUES = new RegExp('[\\u0300-\\u036f]', 'g');
+
+// « Le Chaudron des Brumes » → « le_chaudron_des_brumes »
+function _slugLieu(label) {
+	return String(label || '')
+		.normalize('NFD').replace(_DIACRITIQUES, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '_')
+		.replace(/_+/g, '_')
+		.replace(/^_|_$/g, '');
+}
+
+function _escRe(s) { return String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+// Jetons significatifs d'un nom de catégorie ou de fichier : extension, suffixe
+// numérique (europe01 → europe), mots-outils et régions écartés.
+const _NL_STOP = new Set(['de','du','des','la','le','les','aux','europe','japon','auxerre','vide','png','jpg']);
+function _nlJetons(s) {
+	return String(s || '')
+		.toLowerCase()
+		.normalize('NFD').replace(_DIACRITIQUES, '')
+		.replace(/\.[a-z0-9]+$/, '')
+		.split(/[^a-z0-9]+/)
+		.map(t => t.replace(/\d+$/, ''))
+		.filter(t => t.length >= 3 && !_NL_STOP.has(t));
+}
+
+// La convention de nommage des images N'EST PAS fiable (laboratoire_d_alchimie →
+// cabinet_alchimie_europe01.png, fletcher → archerie_europe01.png) : on retient
+// les fichiers partageant au moins un jeton avec la catégorie, et on retombe sur
+// la liste complète quand le filtre ne rend rien — jamais de liste vide.
+function _imagesPourCategorie(cat) {
+	const toutes = (creationOptions && creationOptions.images) || [];
+	const jetons = _nlJetons(cat);
+	if (!jetons.length) return toutes;
+	const filtrees = toutes.filter(f => _nlJetons(f).some(t => jetons.includes(t)));
+	return filtrees.length ? filtrees : toutes;
+}
+
+// Le suffixe des portraits, lui, est fiable : marchand_<prenom>_<nom>_<categorie>.png
+function _portraitsPourCategorie(cat) {
+	const tous = (creationOptions && creationOptions.portraits) || [];
+	const c = String(cat || '').toLowerCase();
+	if (!c) return tous;
+	const filtres = tous.filter(f => f.toLowerCase().includes('_' + c + '.'));
+	return filtres.length ? filtres : tous;
+}
+
+// marchand_thalindra_serevent_laboratoire_d_alchimie.png → « Thalindra Serevent »
+// Deux conventions cohabitent dans templates/resources/pnj/ : le tenancier NOMMÉ
+// (ci-dessus) et le GÉNÉRIQUE marchand_<race>_<sexe>_<categorie>.png. Le second ne
+// porte pas de nom : on rend '' pour laisser nom_effectif retomber sur le doc PNJ,
+// plutôt que d'écrire « Elfe F » dans le lieu.
+function _nomDepuisPortrait(fichier, cat) {
+	let base = String(fichier || '').replace(/\.[^.]+$/, '').replace(/^marchand_/, '');
+	const c = String(cat || '').toLowerCase();
+	if (c && base.toLowerCase().endsWith('_' + c)) base = base.slice(0, -(c.length + 1));
+	const mots = base.split(/[_\s]+/).filter(Boolean);
+	if (mots.length === 2 && /^[mf]$/i.test(mots[1])) return '';
+	return mots.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(' ');
+}
+
+// link:<categorie><NN>_to_<parent> — convention de la base (link:apothicairerie01_to_auxerre).
+// Le lien à créer ayant par construction le lieu courant pour node, une collision
+// serait forcément déjà visible dans lieuxConnections : le contrôle client suffit.
+function _prochainLinkId(cat, parentId) {
+	const parent = String(parentId || '').replace(/^lieu:/, '');
+	if (!cat || !parent) return '';
+	const re = new RegExp('^link:' + _escRe(cat) + '(\\d+)_to_' + _escRe(parent) + '$');
+	let max = 0;
+	lieuxConnections.forEach(c => {
+		const m = re.exec(c._id || '');
+		if (m) max = Math.max(max, parseInt(m[1], 10) || 0);
+	});
+	const n = max + 1;
+	return `link:${cat}${n < 10 ? '0' + n : n}_to_${parent}`;
+}
+
+function _nlEl(id) { return document.getElementById(id); }
+
+function _nlCategorie() {
+	const sel = _nlEl('nl-categorie');
+	if (sel && sel.value === '__libre__') return (_nlEl('nl-categorie-libre').value || '').trim();
+	return sel ? sel.value : '';
+}
+
+async function openLieuAdd() {
+	if (!currentLocId || !lieuxSelectedCell) return;
+	_nlCabler();
+	const overlay = _nlEl('lieu-add-overlay');
+	_nlEl('nl-error').textContent = 'Chargement des options…';
+	overlay.classList.remove('la-hidden');
+	try {
+		const res = await fetch('/api/lieux/creation_options');
+		if (!res.ok) throw new Error('options indisponibles');
+		creationOptions = await res.json();
+	} catch (err) {
+		_nlEl('nl-error').textContent = `✗ ${err.message}`;
+		return;
+	}
+	_nlEl('nl-error').textContent = '';
+	// Champs remis à neuf à chaque ouverture (l'overlay est réutilisé).
+	_nlEl('nl-label').value = '';
+	_nlEl('nl-categorie-libre').value = '';
+	_nlEl('nl-categorie-libre').style.display = 'none';
+	_nlEl('nl-pnj-on').checked = true;
+	_nlEl('nl-pnj-bloc').style.display = '';
+	_nlEl('nl-pnj-nom').value = '';
+	_nlEl('nl-image-all').checked = false;
+	_nlEl('nl-pnj-portrait-all').checked = false;
+	nlNomTouche = false;
+	const catSel = _nlEl('nl-categorie');
+	catSel.innerHTML = `<option value="" disabled selected>-- Choisir une catégorie --</option>`
+		+ (creationOptions.categories || []).map(c => `<option value="${_escHtml(c)}">${_escHtml(c)}</option>`).join('')
+		+ `<option value="__libre__">« autre… »</option>`;
+	_nlRepeuplerImages();
+	_nlRepeuplerPnj();
+	_nlRefreshApercu();
+}
+
+function closeLieuAdd() {
+	_nlEl('lieu-add-overlay').classList.add('la-hidden');
+}
+
+function _nlRepeuplerImages() {
+	const sel = _nlEl('nl-image');
+	const cat = _nlCategorie();
+	const toutes = _nlEl('nl-image-all').checked;
+	const liste = toutes ? ((creationOptions && creationOptions.images) || []) : _imagesPourCategorie(cat);
+	const avant = sel.value;
+	sel.innerHTML = `<option value="" disabled selected>-- Choisir une image --</option>`
+		+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(f)}</option>`).join('');
+	if (avant && liste.includes(avant)) sel.value = avant;
+	_nlMajVignetteImage();
+}
+
+function _nlMajVignetteImage() {
+	const img = _nlEl('nl-image-thumb');
+	const f = _nlEl('nl-image').value;
+	if (!f) { img.style.display = 'none'; img.removeAttribute('src'); return; }
+	img.src = `{{ url_for('towns', path='') }}${f}`;
+	img.style.display = 'block';
+}
+
+function _nlRepeuplerPnj() {
+	const cat = _nlCategorie();
+	const attendu = cat ? `pnj:marchand_${cat}` : '';
+	const pnjs = (creationOptions && creationOptions.pnj) || [];
+	const connu = pnjs.some(p => p._id === attendu);
+	const sel = _nlEl('nl-pnj-character');
+	// Le doc marchand peut ne pas exister encore : on l'offre quand même, avec
+	// un avertissement — pnj_payload le résoudrait à vide.
+	// Sans catégorie il n'y a rien à déduire : un placeholder, plutôt que de
+	// laisser le navigateur présélectionner silencieusement le premier PNJ venu.
+	sel.innerHTML = (attendu ? '' : `<option value="" disabled selected>-- Choisir d'abord une catégorie --</option>`)
+		+ (attendu && !connu ? `<option value="${_escHtml(attendu)}">${_escHtml(attendu)} (doc absent)</option>` : '')
+		+ pnjs.map(p => `<option value="${_escHtml(p._id)}">${_escHtml(p._id)} — ${_escHtml(p.nom)}</option>`).join('');
+	if (attendu) sel.value = attendu;
+	_nlEl('nl-pnj-warn').textContent = (attendu && !connu)
+		? `⚠ Aucun document ${attendu} en base.` : '';
+	_nlRepeuplerPortraits();
+}
+
+function _nlRepeuplerPortraits() {
+	const sel = _nlEl('nl-pnj-portrait');
+	const cat = _nlCategorie();
+	const tous = _nlEl('nl-pnj-portrait-all').checked;
+	const liste = tous ? ((creationOptions && creationOptions.portraits) || []) : _portraitsPourCategorie(cat);
+	const avant = sel.value;
+	sel.innerHTML = `<option value="" disabled selected>-- Choisir un portrait --</option>`
+		+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(f)}</option>`).join('');
+	if (avant && liste.includes(avant)) sel.value = avant;
+	_nlMajPortrait();
+}
+
+function _nlMajPortrait() {
+	const img = _nlEl('nl-pnj-thumb');
+	const f = _nlEl('nl-pnj-portrait').value;
+	if (!f) { img.style.display = 'none'; img.removeAttribute('src'); return; }
+	img.src = `{{ url_for('pnj', path='') }}${f}`;
+	img.style.display = 'block';
+	// Le nom se déduit du portrait tant que l'utilisateur n'y a pas touché.
+	if (!nlNomTouche) _nlEl('nl-pnj-nom').value = _nomDepuisPortrait(f, _nlCategorie());
+}
+
+// Les deux docs à écrire, tels qu'ils partiront en base (aussi l'aperçu).
+function _docsNouveauLieu() {
+	const cat = _nlCategorie();
+	const label = (_nlEl('nl-label').value || '').trim();
+	const slug = _slugLieu(label);
+	const lieu = {
+		_id: `lieu:${slug}`,
+		type: 'lieu',
+		label: label,
+		image: _nlEl('nl-image').value,
+		categorie: cat,
+	};
+	if (_nlEl('nl-pnj-on').checked) {
+		// Les champs vides ne sont pas écrits : `nom`/`portrait` absents font
+		// retomber pnj_payload sur ceux du doc PNJ, ce qui est le comportement voulu.
+		const entree = { character: _nlEl('nl-pnj-character').value };
+		const nom = (_nlEl('nl-pnj-nom').value || '').trim();
+		const portrait = _nlEl('nl-pnj-portrait').value;
+		if (nom) entree.nom = nom;
+		if (portrait) entree.portrait = portrait;
+		lieu.pnj = [entree];
+	}
+	lieu.lieu_parent = currentLocId;
+	const cell = lieuxSelectedCell || { cx: 0, cy: 0 };
+	const link = {
+		_id: _prochainLinkId(cat, currentLocId),
+		type: 'connection',
+		nodes: [
+			{ lieu: currentLocId, pos: [cell.cx, cell.cy] },
+			{ lieu: lieu._id, pos: [0, 0] },
+		],
+		metadata: { type: cat, status: 'ouvert' },
+	};
+	return { lieu, link };
+}
+
+function _nlRefreshApercu() {
+	const { lieu, link } = _docsNouveauLieu();
+	_nlEl('nl-id').textContent = lieu._id;
+	_nlEl('nl-link-id').textContent = link._id || 'link:… (catégorie requise)';
+	const pris = ((creationOptions && creationOptions.lieu_ids) || []).includes(lieu._id);
+	_nlEl('nl-id-warn').textContent = (pris && lieu._id !== 'lieu:') ? `⚠ ${lieu._id} existe déjà en base.` : '';
+	_nlEl('nl-preview').textContent = JSON.stringify([lieu, link], null, 2);
+}
+
+async function creerSousLieu() {
+	const err = _nlEl('nl-error');
+	if (!currentLocId || !lieuxSelectedCell) { err.textContent = 'Aucune case sélectionnée.'; return; }
+	const { lieu, link } = _docsNouveauLieu();
+	if (!lieu.categorie) { err.textContent = 'Catégorie requise.'; return; }
+	if (!lieu.label) { err.textContent = 'Label requis.'; return; }
+	if (!lieu.image) { err.textContent = 'Image requise.'; return; }
+	if (lieu.pnj && !lieu.pnj[0].character) { err.textContent = 'PNJ (character) requis, ou décochez « avec un PNJ ».'; return; }
+	if (((creationOptions && creationOptions.lieu_ids) || []).includes(lieu._id)) {
+		err.textContent = `${lieu._id} existe déjà — changez le label.`;
+		return;
+	}
+	const btn = _nlEl('nl-create-btn');
+	btn.disabled = true;
+	err.textContent = 'Création…';
+	try {
+		// Le lieu D'ABORD : une connexion orpheline ferait échouer l'enrichissement
+		// `details` de get_lieu_connections.
+		await _putDoc(lieu);
+		await _putDoc(link);
+	} catch (e) {
+		err.textContent = `✗ ${e.message}`;
+		btn.disabled = false;
+		return;
+	}
+	btn.disabled = false;
+	closeLieuAdd();
+	await fetchLieuxConnections();
+	renderLieuxConnList();
+	if (grid.length) renderGrid();
+	setStatus(`Lieu <span>${lieu._id}</span> créé et connecté (${link._id}).`);
+}
+
+async function _putDoc(doc) {
+	const res = await fetch('/admin/doc', {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(doc)
+	});
+	if (!res.ok) {
+		const e = await res.json().catch(() => ({}));
+		throw new Error(`${doc._id} : ${e.detail || res.status}`);
+	}
+	return res.json();
+}
+
+// Câblage du formulaire : la catégorie repeuple images/PNJ/portraits, tout le
+// reste ne fait que recalculer l'aperçu et les identifiants.
+// ⚠ Posé À LA PREMIÈRE OUVERTURE, pas au chargement du script : le markup de
+// l'overlay vit après la balise script, comme celui de la fiche.
+let _nlCable = false;
+function _nlCabler() {
+	if (_nlCable) return;
+	_nlCable = true;
+	_nlEl('nl-categorie').addEventListener('change', () => {
+		_nlEl('nl-categorie-libre').style.display = _nlEl('nl-categorie').value === '__libre__' ? '' : 'none';
+		_nlRepeuplerImages(); _nlRepeuplerPnj(); _nlRefreshApercu();
+	});
+	_nlEl('nl-categorie-libre').addEventListener('input', () => {
+		_nlRepeuplerImages(); _nlRepeuplerPnj(); _nlRefreshApercu();
+	});
+	_nlEl('nl-image-all').addEventListener('change', () => { _nlRepeuplerImages(); _nlRefreshApercu(); });
+	_nlEl('nl-image').addEventListener('change', () => { _nlMajVignetteImage(); _nlRefreshApercu(); });
+	_nlEl('nl-label').addEventListener('input', _nlRefreshApercu);
+	_nlEl('nl-pnj-on').addEventListener('change', () => {
+		_nlEl('nl-pnj-bloc').style.display = _nlEl('nl-pnj-on').checked ? '' : 'none';
+		_nlRefreshApercu();
+	});
+	_nlEl('nl-pnj-character').addEventListener('change', _nlRefreshApercu);
+	_nlEl('nl-pnj-portrait-all').addEventListener('change', () => { _nlRepeuplerPortraits(); _nlRefreshApercu(); });
+	_nlEl('nl-pnj-portrait').addEventListener('change', () => { _nlMajPortrait(); _nlRefreshApercu(); });
+	_nlEl('nl-pnj-nom').addEventListener('input', () => { nlNomTouche = true; _nlRefreshApercu(); });
 }
 
 // Résout l'URL image d'un lieu (cascade towns → battle_maps → maps).
@@ -1481,10 +1955,12 @@ function closeLieuFiche() {
 }
 
 document.addEventListener('keydown', (e) => {
-	if (e.key === 'Escape') {
-		const ov = document.getElementById('lieu-fiche-overlay');
-		if (ov && !ov.classList.contains('lieu-fiche-hidden')) closeLieuFiche();
-	}
+	if (e.key !== 'Escape') return;
+	// L'overlay de création est au-dessus de la fiche : il se ferme en premier.
+	const add = document.getElementById('lieu-add-overlay');
+	if (add && !add.classList.contains('la-hidden')) { closeLieuAdd(); return; }
+	const ov = document.getElementById('lieu-fiche-overlay');
+	if (ov && !ov.classList.contains('lieu-fiche-hidden')) closeLieuFiche();
 });
 
 // ── ZONE PROPERTY EDITORS ──────────────────────────────────────────────────
@@ -1870,6 +2346,65 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 		<div class="lf-body">
 			<div id="lf-map"></div>
 			<div id="lf-sublist" class="lf-sublocs"></div>
+		</div>
+	</div>
+</div>
+
+<!-- Création d'un sous-lieu sur la case sélectionnée (mode Lieux) -->
+<div id="lieu-add-overlay" class="la-hidden" onclick="if(event.target===this)closeLieuAdd()">
+	<div class="la-panel">
+		<div class="la-topbar">
+			<h2>➕ Nouveau lieu</h2>
+			<button class="btn btn-inline" style="font-size:.62rem;" onclick="closeLieuAdd()">✕ Fermer</button>
+		</div>
+
+		<div class="la-field">
+			<label for="nl-categorie">Catégorie</label>
+			<select id="nl-categorie" style="margin-bottom:6px;"></select>
+			<input type="text" id="nl-categorie-libre" placeholder="catégorie libre…" style="display:none;">
+		</div>
+
+		<div class="la-field">
+			<label for="nl-image">Image du lieu</label>
+			<select id="nl-image" style="margin-bottom:0;"></select>
+			<label class="la-check"><input type="checkbox" id="nl-image-all"> toutes les images</label>
+			<img id="nl-image-thumb" class="la-thumb" alt="" style="display:none;">
+		</div>
+
+		<div class="la-field">
+			<label for="nl-label">Label</label>
+			<input type="text" id="nl-label" placeholder="Le Chaudron des Brumes">
+			<div class="la-readonly" id="nl-id" style="margin-top:6px;">lieu:</div>
+			<div class="la-warn" id="nl-id-warn"></div>
+		</div>
+
+		<div class="la-field">
+			<label class="la-check"><input type="checkbox" id="nl-pnj-on" checked> avec un PNJ</label>
+			<div id="nl-pnj-bloc">
+				<label for="nl-pnj-character">PNJ (character — déduit de la catégorie)</label>
+				<select id="nl-pnj-character" style="margin-bottom:0;"></select>
+				<div class="la-warn" id="nl-pnj-warn"></div>
+				<label for="nl-pnj-portrait" style="margin-top:8px;">Portrait</label>
+				<select id="nl-pnj-portrait" style="margin-bottom:0;"></select>
+				<label class="la-check"><input type="checkbox" id="nl-pnj-portrait-all"> tous les portraits</label>
+				<img id="nl-pnj-thumb" class="la-thumb" alt="" style="display:none;">
+				<label for="nl-pnj-nom" style="margin-top:8px;">Nom du PNJ</label>
+				<input type="text" id="nl-pnj-nom" placeholder="Thalindra Serevent">
+			</div>
+		</div>
+
+		<div class="la-field">
+			<label>Connexion</label>
+			<div class="la-readonly" id="nl-link-id">link:</div>
+		</div>
+
+		<label>Aperçu</label>
+		<div class="la-preview" id="nl-preview"></div>
+
+		<div class="la-warn" id="nl-error" style="margin-bottom:8px;"></div>
+		<div class="la-actions">
+			<button class="btn" id="nl-create-btn" onclick="creerSousLieu()">➕ Créer</button>
+			<button class="btn danger" onclick="closeLieuAdd()">Annuler</button>
 		</div>
 	</div>
 </div>

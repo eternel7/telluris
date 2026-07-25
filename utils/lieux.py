@@ -1,10 +1,16 @@
+import os
 from typing import Annotated
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from urllib.parse import unquote
 from pydantic import BaseModel
-from db.config import db, get_doc, save_doc
+from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
+
+# Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
+TOWNS_IMAGES_PATH = "templates/resources/towns"
+PNJ_IMAGES_PATH = "templates/resources/pnj"
+IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
 
 class User(BaseModel):
 	email: str
@@ -182,6 +188,52 @@ async def get_lieu_connections(
 
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Erreur CouchDB : {str(e)}")
+
+def _lister_images(chemin: str) -> list[str]:
+	"""Fichiers image d'un répertoire de ressources (miroir de bestiaire.list_monster_images).
+
+	Le filtre d'extension écarte au passage les Thumbs.db et les .md qui traînent
+	dans templates/resources/pnj/."""
+	if not os.path.exists(chemin):
+		return []
+	return sorted(
+		f for f in os.listdir(chemin)
+		if os.path.isfile(os.path.join(chemin, f))
+		and f.lower().endswith(IMAGE_EXTENSIONS)
+	)
+
+@lieu_router.get("/lieux/creation_options")
+async def get_creation_options(
+	current_user: Annotated[User, Depends(get_current_user)]):
+	"""Tout ce dont le formulaire « Ajouter un lieu » de l'éditeur a besoin, en un appel.
+
+	Les find_docs sont PROJETÉS (`fields`) : lister les lieux sans projection
+	rapatrierait les `cells` de chaque carte.
+	`lieu_ids` sert au contrôle de collision d'_id côté client — `GET /lieu/{id}`
+	ne peut pas le faire, son 404 étant ravalé en 500 par son propre try/except.
+	"""
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1 ):
+		raise HTTPException(status_code=403, detail="Admin only")
+
+	lieux = find_docs({"type": "lieu"}, fields=["_id", "categorie"]) or []
+	recettes = find_docs({"type": "recette"}, fields=["lieu_categorie"]) or []
+	pnjs = find_docs({"type": "pnj"}, fields=["_id", "nom"]) or []
+
+	categories = {str(d["categorie"]).strip() for d in lieux if d.get("categorie")}
+	categories |= {str(r["lieu_categorie"]).strip() for r in recettes if r.get("lieu_categorie")}
+
+	return {
+		"categories": sorted(categories),
+		"images": _lister_images(TOWNS_IMAGES_PATH),
+		"portraits": _lister_images(PNJ_IMAGES_PATH),
+		"pnj": sorted(
+			({"_id": p.get("_id"), "nom": p.get("nom") or p.get("_id")} for p in pnjs),
+			key=lambda p: p["_id"] or ""
+		),
+		"lieu_ids": sorted(d["_id"] for d in lieux if d.get("_id")),
+	}
 
 @lieu_router.put("/update_cells")
 async def update_cells(
