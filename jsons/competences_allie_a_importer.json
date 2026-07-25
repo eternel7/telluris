@@ -1,0 +1,73 @@
+[
+  {
+    "_id": "competence:imposition_des_mains",
+    "type": "competence",
+    "nom": "Imposition des mains",
+    "icon": "🙌",
+    "description": "Les deux paumes à plat sur la blessure d'un autre. Ce que le serment promet, le corps le paie : la chair se referme sous la pression.",
+    "vocation": "paladin",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "pv": 16
+    }
+  },
+  {
+    "_id": "competence:refrain_de_ralliement",
+    "type": "competence",
+    "nom": "Refrain de ralliement",
+    "icon": "🎵",
+    "description": "Un couplet lancé par-dessus la mêlée, à l'adresse d'un seul. Celui qui l'entend redresse la garde et cesse de compter ses plaies.",
+    "vocation": "menestrel",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 8,
+    "cible": "allie",
+    "portee": 4,
+    "effets": {
+      "buffs": {
+        "Vol": 10,
+        "Cha": 5
+      },
+      "regen_pv": 2,
+      "duree": 3
+    }
+  },
+  {
+    "_id": "competence:souffle_partage",
+    "type": "competence",
+    "nom": "Souffle partagé",
+    "icon": "🌬️",
+    "description": "Front contre front, une longue expiration. Le moine cède une part de son souffle intérieur : il en perd plus qu'il n'en donne, et c'est le principe même du don.",
+    "vocation": "moine",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "pm": 8
+    }
+  },
+  {
+    "_id": "competence:baume_de_campagne",
+    "type": "competence",
+    "nom": "Baume de campagne",
+    "icon": "🌿",
+    "description": "Deux feuilles mâchées, un linge serré, et on repart. Le forestier ne guérit pas : il rafistole assez pour tenir jusqu'au camp.",
+    "vocation": "forestier",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 6,
+    "cible": "allie",
+    "portee": 2,
+    "effets": {
+      "pv": 8,
+      "regen_pv": 2,
+      "duree": 3
+    }
+  }
+]

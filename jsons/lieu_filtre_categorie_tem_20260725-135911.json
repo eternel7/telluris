@@ -1,0 +1,55 @@
+[
+  {
+    "_id": "lieu:temple_de_malakor",
+    "_rev": "11-b7518cd4a28edf9080a88fdd3b4b5e07",
+    "type": "lieu",
+    "label": "Les marches du temple de Saint-Eusèbe",
+    "image": "pnj_pasteur_ogre_temple01_vide.png",
+    "categorie": "temple",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:reverend_malakor",
+        "portrait": "ogre_m_pretre01.png",
+        "image": "pnj_pasteur_ogre_temple01.png",
+        "probabilite": 0.7,
+        "description": "Le révérend Malakor est un prêtre ogre à la carrure efflanquée et à la peau diaphane, veille sur le parvis du temple d'Auxerre, imposant le respect par sa stature colossale plutôt que par la force brute. Ayant choisi de transcender la nature impulsive de son peuple, il a troqué la facilité de la violence pour la rigueur de la foi et la contemplation, devenant un guide spirituel dont la présence silencieuse suffit à apaiser les tensions au sein de cette cité cosmopolite où ogres, elfes et humains se côtoient quotidiennement."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:temple_de_malakor02",
+    "_rev": "9-9c4d55a6eaecfead243e0878dfe411b6",
+    "type": "lieu",
+    "label": "Temple de Saint-Eusèbe",
+    "image": "pnj_pasteur_ogre_temple02_vide.png",
+    "categorie": "temple",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:reverend_malakor",
+        "portrait": "ogre_m_pretre01.png",
+        "image": "pnj_pasteur_ogre_temple02.png",
+        "probabilite": 0.3,
+        "description": "Lorsque le révérend Malakor se tient dans le temple de Saint-Eusèbe, l'édifice s'imprègne d'une solennité singulière. Sa stature colossale et sa présence silencieuse apaisent instantanément l'atmosphère, transformant cet espace en un sanctuaire où la rigueur de sa foi transcende les différences raciales. Sous son regard, le temple devient un havre de contemplation pour les habitants de la cité d'Auxerre, un lieu où la violence est oubliée au profit d'une sérénité partagée."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:temple_portail_de_saint_austrelin",
+    "_rev": "3-3bb5f3f1523024441b1022d57c5bcefa",
+    "type": "lieu",
+    "label": "Temple‑Portail de Saint‑Austrelin",
+    "image": "temple_europe01.png",
+    "categorie": "temple_portail",
+    "pnj": [
+      {
+        "character": "pnj:templier_nain_m_01",
+        "nom": "George Dourdan",
+        "portrait": "templier_george_dourdan_temple_portail.png"
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "texte": "Autour du temple, la vie est un mélange de sacré et de quotidien :\n- Des marchands vendent des lampes de mine enchantées.\n- Des artisans réparent les outils des aventuriers.\n- Des druides marchands proposent des talismans de protection.\n- Des forts à bras se proposent en tant que porteurs ou gardes auxiliaires.\n- Les templiers organisent les expéditions et tiennent les registres.\n\nLe temple est ainsi devenu le cœur économique, militaire et mystique d’Auxerre."
+  }
+]
