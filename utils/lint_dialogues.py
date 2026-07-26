@@ -42,7 +42,10 @@ FLAGS_CONNUS = {
 	"transport_offert", "transport_a_livrer", "transport_a_rapporter",
 	"transport_en_cours", "transport_accompli", "transport_mefiance",
 	"rang_offert", "rang_a_rapporter", "rang_max",
-	"acces_ouvrable", "acces_refuse", "acces_ouvert",
+	"acces_ouvrable", "acces_refuse", "acces_ouvert", "acces_accompli",
+	# Complémentaires : l'un ou l'autre, jamais les deux (cf. `_contexte`).
+	"acces_libere", "acces_menace",
+	"commission_offerte", "commission_en_cours", "commission_a_rapporter",
 }
 
 # Nœuds de résultat que le ROUTER va chercher par leur clé. Les absents laissent le
@@ -54,6 +57,7 @@ NOEUDS_REQUIS = {
 	"soin": {"fait", "sans_fonds", "inutile"},
 	"don":  {"fait", "sans_fonds", "trop_charge"},
 	"rang": {"accepte", "rapporte"},
+	"commission": {"accepte", "rapporte"},
 	# `deja` reste optionnel — un gardien peut ne pas reconnaître les habitués.
 	"acces": {"ouvre", "refus"},
 }
@@ -77,6 +81,7 @@ ACTIONS_A_CONDITIONNER = {
 	("transport", "livrer"):    "transport_a_livrer",
 	("transport", "rapporter"): "transport_a_rapporter",
 	("rang", "rapporter"):      "rang_a_rapporter",
+	("commission", "rapporter"): "commission_a_rapporter",
 	("acces", "passer"):        "acces_ouvrable",
 }
 
@@ -226,6 +231,15 @@ def analyser_doc(doc: dict) -> list:
 				if cle not in FLAGS_CONNUS:
 					erreur(f"choix `{cid}` : condition `{cle}` inconnue du moteur. Un flag "
 						   f"absent vaut False → ce choix ne s'affichera JAMAIS.", nid)
+
+			# Hook de déplacement automatique : `"deplacer": "lieu:xxx"`. On ne peut pas
+			# vérifier que le lieu EXISTE (pas de DB ici), mais un `true`/`"bureau"`/id sans
+			# préfixe ne déplacerait jamais personne — et en silence, puisque le router
+			# omet simplement le champ quand il ne résout aucun lien.
+			dep = choix.get("deplacer")
+			if dep is not None and not (isinstance(dep, str) and dep.startswith("lieu:")):
+				erreur(f"choix `{cid}` : `deplacer` doit être un id de lieu (`lieu:...`), "
+					   f"reçu {dep!r} — le déplacement serait ignoré en silence.", nid)
 
 			action = choix.get("action") or {}
 			attendu = ACTIONS_A_CONDITIONNER.get((action.get("service"), action.get("op")))

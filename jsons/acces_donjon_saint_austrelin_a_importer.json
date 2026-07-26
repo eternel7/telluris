@@ -1,0 +1,956 @@
+[
+  {
+    "_id": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+    "_rev": "3-7769068363e84d24357277cb11344d64",
+    "type": "lieu",
+    "label": "Bureau de Gautier de Valcroix, Maitre de la Guilde d'Aventuriers d'Auxerre",
+    "image": "guilde_bureau_maitre_de_guilde_europe01.png",
+    "categorie": "bureau_maitre_guilde",
+    "pnj": [
+      {
+        "character": "pnj:gautier_de_valcroix",
+        "nom": "Gautier de Valcroix",
+        "portrait": "humain_m_guerrier01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "acces": {
+      "gardien": "pnj:borin_barbe_de_jais",
+      "refus": "Borin Barbe-de-Jais barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:auxerre",
+            "rang": "D"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "pnj:borin_barbe_de_jais",
+    "_rev": "8-2d377008fbe231734414d6fcaba94ea8",
+    "type": "pnj",
+    "nom": "Borin Barbe-de-Jais",
+    "race": "nain",
+    "vocation": "marchand",
+    "portrait": "nain_m_receptioniste01.png",
+    "description": "Réceptionniste du Bastion de l'Yonne. Ses yeux pétillent d'une malice bienveillante, mais rien n'échappe à son regard.",
+    "services": {
+      "transport": {
+        "offre": {
+          "id": "quete:transport_borin_premiere_mission",
+          "destination": "lieu:fumee_de_l_yonne",
+          "cargaison": [
+            {
+              "item": "item:viande_sanglier_gobelin",
+              "quantite": 2,
+              "poids": 5
+            }
+          ],
+          "duree": 3600,
+          "proba": 1,
+          "unique": true,
+          "retour": true,
+          "rang": "F",
+          "titre": "Première mission : les caisses du Bastion",
+          "description": "Borin Barbe-de-Jais vous confie deux caisses de viande de sanglier-gobelin — dix bons kilos — à porter au fumoir de la Guilde, Fumée de l'Yonne. Elles y deviendront les provisions des expéditions. Revenez ensuite lui en rendre compte au comptoir : ce n'est pas la viande qu'il met à l'épreuve.",
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 200,
+            "items": [
+              {
+                "item": "item:carte_aventurier",
+                "poids": 0.05,
+                "lieu_parent": "auto"
+              }
+            ]
+          }
+        },
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "rapporte": "transport_rapporte"
+        }
+      },
+      "rang": {
+        "noeuds": {
+          "propose": "rang_propose",
+          "accepte": "rang_accepte",
+          "rapporte": "rang_rapporte"
+        }
+      },
+      "acces": {
+        "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus",
+          "deja": "acces_deja"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le nain vous observe quelques secondes avant d'esquisser un sourire. « Bienvenue au Bastion de l'Yonne ! Approche donc, {prenom}. Tu viens chercher fortune, ou simplement vérifier que les histoires sont vraies ? »",
+          "choix": [
+            {
+              "id": "mission",
+              "label": "Je voudrais devenir aventurier.",
+              "next": "premiere_mission",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "rapport",
+              "label": "C'est fait. {destinataire} a sa viande.",
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              },
+              "condition": {
+                "transport_a_rapporter": true
+              }
+            },
+            {
+              "id": "relance",
+              "label": "Où en est ma livraison, déjà ?",
+              "next": "transport_relance",
+              "condition": {
+                "transport_en_cours": true
+              }
+            },
+            {
+              "id": "veteran",
+              "label": "Vous vous souvenez de moi ?",
+              "next": "transport_veteran",
+              "condition": {
+                "transport_accompli": true
+              }
+            },
+            {
+              "id": "rang_proposer",
+              "label": "Une épreuve pour m'élever dans la Guilde ?",
+              "next": "rang_propose",
+              "condition": {
+                "rang_offert": true
+              }
+            },
+            {
+              "id": "rang_rapporter",
+              "label": "C'est fait. Le « {rang_vise} » a fini couché.",
+              "action": {
+                "service": "rang",
+                "op": "rapporter"
+              },
+              "condition": {
+                "rang_a_rapporter": true
+              }
+            },
+            {
+              "id": "rang_sommet",
+              "label": "Reste-t-il une épreuve à ma hauteur ?",
+              "next": "rang_sommet",
+              "condition": {
+                "rang_max": true
+              }
+            },
+            {
+              "id": "acces_passer",
+              "label": "« Je voudrais voir le maître de la Guilde. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "acces_deja",
+              "label": "« Je remonte au bureau. »",
+              "condition": {
+                "acces_ouvert": true
+              },
+              "next": "acces_deja"
+            },
+            {
+              "id": "acces_pourquoi",
+              "label": "« Qui dirige la Guilde, ici ? »",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "premiere_mission": {
+          "texte": "« Beaucoup le disent. Peu comprennent ce que cela signifie. » Il ouvre un grand registre relié de cuir et y inscrit soigneusement ton nom. « Les recrues pensent souvent que leur première mission sera de tuer un monstre. C'est faux. Avant de savoir combattre, il faut apprendre à être digne de confiance. »",
+          "choix": [
+            {
+              "id": "ecouter",
+              "label": "Qu'attendez-vous de moi ?",
+              "next": "transport_propose"
+            },
+            {
+              "id": "refuser",
+              "label": "Je préfère chercher fortune ailleurs.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "Borin disparaît derrière une porte donnant sur les réserves, et revient avec {colis} solides caisses de bois fermées par des courroies de cuir. Une odeur puissante s'en échappe. « {poids} kilos de viande de sanglier-gobelin, toute fraîche. Tu la livreras au fumoir de la Guilde. Destination : {destination}. Tu as {delai} minutes — après, la marchandise ne vaut plus rien, et ce ne sont pas deux caisses qui disparaissent : ce sont les provisions de tes futurs compagnons. » Il glisse un jeton de cuivre dans ta main. « {xp} points d'expérience et {prime} pièces de cuivre à ton retour. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Ce n'est... qu'une livraison.",
+              "next": "transport_lecon"
+            }
+          ]
+        },
+        "transport_lecon": {
+          "texte": "Le sourire du nain s'efface doucement. « Tu crois ? » Il se penche vers toi. « Les plus grands héros commencent rarement en terrassant un dragon. Ils commencent en accomplissant parfaitement une tâche que tout le monde croit ordinaire. » Puis il reprend son éternel sourire. « Et entre nous... l'odeur attirera sans doute quelques renards, des chiens errants, peut-être même un jeune loup ou deux. Tu devras garder la tête froide. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "Donnez-moi ces caisses.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas aujourd'hui.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "Il pose un doigt épais sur une carte de la région. « Tu quitteras la ville et tu suivras la route : c'est {direction}. Le bâtiment de pierre aux hautes cheminées, tu ne peux pas le manquer. Présente le jeton à {destinataire} : on saura que tu viens de notre part. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "Borin contourne le comptoir et t'aide à charger les {colis} caisses dans une solide hotte de portage. « Destination : {destination}, dans les {delai} minutes. Et reviens me voir ensuite : je veux te l'entendre dire. Tu découvriras bientôt une vérité que tous les vétérans connaissent, petit. » Il t'adresse un clin d'œil et referme son registre.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_rapporte": {
+          "texte": "Le vieux nain rouvre son grand registre et trace une ligne à côté de ton nom. « Les caisses sont arrivées, et à l'heure. » Il fait glisser sur le chêne une plaque de cuir bouilli frappée du blason du Bastion, puis {prime} pièces de cuivre. « Ce n'était pas la viande que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. Les aventuriers capables de protéger une simple cargaison sont souvent ceux à qui l'on confiera, un jour, des compagnons... et peut-être le destin d'une cité entière. » Il désigne le grand tableau de la salle commune. « Va choisir ta prochaine quête. Tu es des nôtres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "Le nain soupèse ton barda d'un regard et éclate de rire. « Par les enclumes des anciens ! Tu ploies déjà sous ton propre bagage, {prenom}. Déleste-toi et reviens : la viande ne s'envolera pas... enfin, pas tout de suite. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_relance": {
+          "texte": "Borin lève un sourcil au-dessus de son registre. « Toujours là ? Ces caisses ne se porteront pas toutes seules. Destination : {destination}, c'est {direction}. Il te reste {delai} minutes, et la viande n'attend pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y cours.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_veteran": {
+          "texte": "« Si je me souviens de toi ? » Le vieux nain caresse distraitement une tresse de sa barbe noire de jais. « {destinataire} a reçu sa viande, et à l'heure. Ce n'était pas la marchandise que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. » Il désigne du menton le grand tableau couvert de parchemins, dans la salle commune. « Va donc voir ce qu'on y épingle. Tu as gagné le droit de choisir. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_propose": {
+          "texte": "Borin referme son registre et te jauge d'un œil neuf. « Tu veux t'élever dans la Guilde, {prenom} ? Alors il te faut une prise digne de ce nom. Nos éclaireurs ont repéré un {espece} d'exception qui écume {lieu} — une bête énorme, couverte du sang de ses victimes. Ramène-moi sa dépouille et le rang {rang_vise} sera à toi. {xp} points d'expérience à la clef, et la fierté qui va avec. »",
+          "choix": [
+            {
+              "id": "rang_accepter",
+              "label": "Je m'en occupe.",
+              "action": {
+                "service": "rang",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_reflechir",
+              "label": "Une telle bête... laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_accepte": {
+          "texte": "« Bien. » Le nain grave quelque chose à côté de ton nom. « La bête rôde du côté de {lieu}. Ne reviens pas sans sa dépouille — et reviens entier, {prenom}, ce serait un comble de perdre une recrue prometteuse sur une épreuve de rang. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_rapporte": {
+          "texte": "Borin examine la dépouille encore fumante, hoche lentement la tête, puis trace une marque nette sur ta plaque de cuir bouilli. « Peu en reviennent, {prenom}. Toi, si. » Il repousse le registre. « Te voilà rang {rang}. La Guilde n'oublie pas ceux qui montent — et elle en attend d'autant plus. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_sommet": {
+          "texte": "Le vieux nain éclate d'un rire franc qui fait trembler sa barbe de jais. « Une épreuve à ta hauteur ? {prenom}, tu es au sommet de ce que cette guilde peut t'offrir. Désormais, ce sont les légendes qu'on envoie sur les grandes chasses... et tu en es une. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un honneur.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "« Rang {rang}, et mon registre en témoigne. » Borin repose sa plume, se hisse sur la pointe des pieds et désigne l'escalier du fond. « Monte. C'est là-haut : {portail}. Frappe, entre, et surtout — écoute. On ne ressort jamais de ce bureau sans avoir appris quelque chose, même quand on croyait n'y venir que pour un contrat. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "Le nain referme son registre d'un coup sec. « Le maître de la Guilde, {prenom} ? Son bureau n'est pas une salle d'attente. On y monte quand la Guilde sait ce qu'on vaut — rang D, pas moins. Tu en es à {rang}. » Il se radoucit et tapote la couverture de cuir. « Fais allonger la ligne à côté de ton nom. Je t'y conduirai moi-même. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y travaille.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_deja": {
+          "texte": "« Je sais, je sais — tu connais le chemin. » Il agite sa plume vers l'escalier du fond sans même relever la tête. « Monte, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "link:bastion_bureau_maitre_to_bastion_comptoir",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:temple_portail_de_saint_austrelin_interieur",
+    "_rev": "11-9e48f0b05c215a23b468f1d9e9f3ca39",
+    "type": "lieu",
+    "label": "Le portail du Temple‑Portail de Saint‑Austrelin",
+    "image": "portail_de_temple_europe01.png",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "texte": "Dans la nef du Temple‑Portail de Saint‑Austrelin, le portail noir pulse faiblement derrière la muraille intérieure, tandis qu’Armand de Vaucremont contrôle avec rigueur les papiers d’une compagnie de mineurs venue demander l’accès. Les templiers restent en position devant l’arche, empêchant toute entrée tant que la commission d’éradication, menée par des aventuriers, n’a pas confirmé que les galeries du donjon‑mine sont sécurisées.",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:templier_armand_de_vaucremont_01",
+        "nom": "Armand de Vaucremont",
+        "portrait": "templier_armand_de_vaucremont_temple_portail.png"
+      }
+    ],
+    "acces": {
+      "gardien": "pnj:templier_nain_m_01",
+      "refus": "Un templier en armure barre l'escalier du portail : la descente est réservée aux compagnies mandatées par la guilde.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "chasse"
+            ],
+            "giver_categorie": "bureau_maitre_guilde"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:temple_portail_saint_austrelin_interieur_to_exterieur",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:temple_portail_de_saint_austrelin",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre sur le parvis"
+      },
+      {
+        "lieu": "lieu:temple_portail_de_saint_austrelin_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "franchir le seuil du sanctuaire"
+      }
+    ],
+    "metadata": {
+      "type": "temple",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "pnj:templier_nain_m_01",
+    "_rev": "3-0b56b015567da947d480633a3068968f",
+    "type": "pnj",
+    "nom": "George Dourdan",
+    "race": "nain",
+    "vocation": "garde",
+    "portrait": "templier_nain_m_garde_temple02.png",
+    "description": "George Dourdan est un nain templier robuste et sévère, chargé de réguler l'accès au temple-portail de Saint‑Austrelin. Il se tient au sommet des marches, barrant l'entrée du sanctuaire dont le seuil laisse entrevoir une lueur mystique.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:temple_portail_de_saint_austrelin_interieur",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus",
+          "deja": "acces_deja"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "{pnj} vous toise du haut des marches, la main posée sur le pommeau de son arme. « Halte, voyageur. »",
+          "choix": [
+            {
+              "id": "passer",
+              "label": "« Laissez-moi passer. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "deja",
+              "label": "« C'est moi — vous me reconnaissez. »",
+              "condition": {
+                "acces_ouvert": true
+              },
+              "next": "acces_deja"
+            },
+            {
+              "id": "pourquoi",
+              "label": "« Pourquoi ce passage est-il gardé ? »",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "registre",
+              "label": "« Que gardez-vous, au juste ? »",
+              "next": "registre"
+            },
+            {
+              "id": "danger",
+              "label": "« Qu'y a-t-il derrière ce portail ? »",
+              "next": "danger"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien, je repars. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "{pnj} s'écarte d'un pas et vous laisse le passage. « Allez-y. La guilde répond de vous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Descendre.",
+              "next": "fin",
+              "deplacer": "lieu:temple_portail_de_saint_austrelin_interieur"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "« {portail} est réservé aux compagnies mandatées par la guilde d'aventuriers. Présentez-vous une commission d'éradication, et je vous laisserai descendre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "S'en aller.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_deja": {
+          "texte": "« Ah, c'est vous. La guilde vous a déjà mandaté — passez, {prenom}. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Descendre.",
+              "next": "fin",
+              "deplacer": "lieu:temple_portail_de_saint_austrelin_interieur"
+            }
+          ]
+        },
+        "registre": {
+          "texte": "« Les templiers tiennent le registre des compagnies autorisées à descendre. Chaque expédition close, le donjon se réinitialise et les travailleurs qui s'y étaient risqués sont expulsés avant la relève. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "danger": {
+          "texte": "« Les dangers d'en bas dépendent de la couleur du portail. Plus elle est sombre, moins on en revient parler. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:templier_armand_de_vaucremont_01",
+    "type": "pnj",
+    "nom": "Armand de Vaucremont",
+    "race": "humain",
+    "vocation": "garde",
+    "portrait": "templier_armand_de_vaucremont_temple_portail.png",
+    "description": "Templier de la garde intérieure du Temple-Portail de Saint-Austrelin. Armand de Vaucremont tient le registre des descentes : c'est lui qui compte ceux qui entrent dans les galeries, et ceux qui en remontent. Il n'a jamais aimé que les deux nombres diffèrent.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:la_mine_aux_cristaux",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Derrière l'arche, le portail noir pulse faiblement derrière un cordon de templiers en armes. {pnj} lève une main gantée sans quitter des yeux le grand registre ouvert devant lui. « Les papiers. »",
+          "choix": [
+            {
+              "id": "passer",
+              "label": "« J'ai une commission de la Guilde. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "accompli",
+              "label": "« C'est fait. La chose est morte. »",
+              "condition": {
+                "acces_accompli": true
+              },
+              "next": "acces_accompli"
+            },
+            {
+              "id": "pourquoi",
+              "label": "« Pourquoi cette arche est-elle fermée ? »",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "registre",
+              "label": "« Que notez-vous dans ce registre ? »",
+              "condition": {
+                "acces_accompli": false
+              },
+              "next": "registre"
+            },
+            {
+              "id": "registre_open",
+              "label": "« Que notez-vous dans ce registre ? »",
+              "condition": {
+                "acces_accompli": true
+              },
+              "next": "registre_open"
+            },
+            {
+              "id": "mineurs",
+              "label": "« Et ces mineurs qui attendent ? »",
+              "condition": {
+                "acces_menace": true
+              },
+              "next": "mineurs"
+            },
+            {
+              "id": "mineurs_libres",
+              "label": "« Et ces mineurs qui attendent ? »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "mineurs_libres"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je regardais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "Il compare le sceau de la Guilde à celui de son registre, hoche la tête une fois, puis trace une croix nette à côté de votre nom. « Commission enregistrée. » Un geste sec : le cordon de templiers s'ouvre sur l'arche. « En bas, c'est {portail}. Descendez tant que le portail est calme — et sachez-le tout de suite : personne n'ira vous chercher. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Franchir l'arche.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "« Pas de commission, pas de descente. » Armand repousse le registre du plat de la main. « {portail} est fermée sur ordre du temple : les galeries ne rouvriront qu'une fois l'éradication confirmée par une compagnie mandatée. Et ce n'est pas moi qui délivre les mandats, {prenom} — c'est la Guilde d'Aventuriers. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "S'écarter.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_accompli": {
+          "texte": "Pour la première fois, Armand referme son registre. « Nous avons entendu, d'en haut. Puis nous n'avons plus rien entendu du tout — et c'est à ce silence qu'on reconnaît le travail fait. » Il s'écarte de l'arche, mais d'un geste large qui vous invite à remonter, pas à descendre. « Ne redescendez pas, {prenom} : les galeries ne sont plus votre affaire, ce sont les mineurs qui attendent leur tour. Portez votre rapport à la Guilde — c'est lui, maintenant, qui rouvrira le chantier. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Remonter faire mon rapport.",
+              "next": "fin"
+            }
+          ]
+        },
+        "registre": {
+          "texte": "« Deux colonnes. » Il tourne le registre vers vous sans le lâcher. « À gauche, ceux qui descendent. À droite, ceux qui remontent. Mon travail consiste à ce que les deux colonnes aient la même longueur. » Un silence. « Elles ne l'ont pas eue depuis trois semaines. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "registre_open": {
+          "texte": "« Dans ce registre, je note ceux qui descendent et ceux qui remontent. Deux colonnes : la gauche pour les mineurs qui entrent, la droite pour ceux qui reviennent. Mon rôle, c’est de m’assurer qu’elles restent équilibrées. »\nIl effleure la colonne de droite, longtemps restée vide.\n« Ce soir, j’y inscrirai vingt‑deux retours. Pour la première fois depuis des semaines, je peux écrire ce chiffre sans me mentir… grâce à vous. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "mineurs": {
+          "texte": "Il jette un regard vers la compagnie de mineurs qui piétine au fond de la nef, lampes éteintes. « Ils viennent chaque matin demander l'accès, et chaque matin je le refuse. Ce ne sont pas des combattants : les envoyer maintenant, ce serait les envoyer mourir avec leurs pics. Le chantier attend des aventuriers. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "mineurs_libres": {
+          "texte": "Les lampes sont allumées, cette fois. La compagnie s'engage sous l'arche en file lente, pics à l'épaule, et {pnj} les compte à voix basse en cochant son registre. « Vingt-deux descendus. » Il laisse courir son doigt jusqu'à la colonne de droite, encore vide, et la tapote une fois. « Vingt-deux qui remonteront ce soir. C'est la première fois depuis des semaines que j'écris ce chiffre sans me mentir — et c'est votre ouvrage. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:gautier_de_valcroix",
+    "type": "pnj",
+    "nom": "Gautier de Valcroix",
+    "race": "humain",
+    "vocation": "guerrier",
+    "portrait": "humain_m_guerrier01.jpg",
+    "description": "L'homme qui dirige la Guilde des Aventuriers d'Auxerre est connu de tous sous le nom de Gautier de Valcroix, que l'on surnomme parfois le Gardien des Cartes.\nAncien capitaine d'une compagnie d'éclaireurs, il ne s'est jamais distingué par sa force, mais par son jugement. Les murs de son bureau sont couverts de cartes annotées, de rapports d'expéditions et de trophées rapportés par ceux qui ont survécu à leurs premières missions. On raconte qu'aucun aventurier ne quitte son bureau sans avoir appris quelque chose, même lorsqu'il croit n'être venu que chercher un contrat.",
+    "services": {
+      "commission": {
+        "donjon": "donjon:mine_de_saint_austrelin",
+        "noeuds": {
+          "accepte": "commission_accepte",
+          "rapporte": "commission_rapporte"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le bureau sent le vélin et la cire. Penché sur une carte hérissée d'épingles, {pnj} ne lève pas les yeux tout de suite — il termine d'annoter une marge, pose sa plume, et vous regarde enfin. « {prenom}. Borin vous a fait monter, donc vous valez le déplacement. Asseyez-vous. »",
+          "choix": [
+            {
+              "id": "commission",
+              "label": "« Vous avez du travail pour moi ? »",
+              "condition": {
+                "commission_offerte": true
+              },
+              "next": "commission_propose"
+            },
+            {
+              "id": "commission_rapport",
+              "label": "« C'est fait. La bête ne tient plus les galeries. »",
+              "condition": {
+                "commission_a_rapporter": true
+              },
+              "action": {
+                "service": "commission",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "commission_relance",
+              "label": "« Où en étais-je, déjà ? »",
+              "condition": {
+                "commission_en_cours": true
+              },
+              "next": "commission_relance"
+            },
+            {
+              "id": "cartes",
+              "label": "« Toutes ces cartes... »",
+              "next": "cartes"
+            },
+            {
+              "id": "trophees",
+              "label": "« Et ces trophées, au mur ? »",
+              "next": "trophees"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je voulais voir le bureau. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_propose": {
+          "texte": "Il fait glisser vers vous un parchemin déjà scellé. « Une commission d'éradication. Le temple a fermé un chantier : {lieu}. Ce n'est pas la vermine ordinaire qui l'inquiète, c'est ce qui la commande — un {espece} d'exception, assez vieux pour avoir fait des galeries son territoire. » Il repose son doigt sur la carte, exactement sur l'épingle noire. « Abattez-le. Les mineurs feront le reste. {xp} points d'expérience et {prime} pièces de cuivre à votre retour — et le chantier vous devra sa réouverture. »",
+          "choix": [
+            {
+              "id": "commission_details",
+              "label": "« Qui garde l'entrée ? »",
+              "next": "commission_details"
+            },
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Pas ce chantier-là. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_details": {
+          "texte": "« Les templiers de Saint-Austrelin. » Il hausse un sourcil, amusé. « Deux barrages : l'un au sommet des marches, qui vérifie que la Guilde répond de vous ; l'autre devant l'arche, qui vérifie que c'est bien de CE chantier qu'on vous a chargé. Ils sont tatillons, et ils ont raison de l'être : le sceau que je vous donne est la seule chose qui ouvre les deux. »",
+          "choix": [
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_accepte": {
+          "texte": "Il presse son cachet sur la cire, souffle dessus, et vous tend le parchemin. « Vous cherchez un {espece} dans {lieu}. Une seule consigne, et elle n'est pas dans le texte : ce qui a tenu des galeries entières ne se laisse pas surprendre. » Il reprend sa plume et se penche déjà sur une autre carte. « Revenez me le dire vous-même. J'aime tenir mes registres à jour. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_relance": {
+          "texte": "Il suit du doigt une ligne de son registre. « Vous. Un {espece}, dans {lieu}. » Il relève les yeux. « Le chantier est toujours fermé, {prenom}, et les mineurs comptent les jours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_rapporte": {
+          "texte": "Gautier écoute jusqu'au bout sans vous interrompre une seule fois, puis prend une épingle blanche et remplace la noire sur sa carte. « {lieu} : rouvert. » Il pousse vers vous {prime} pièces de cuivre, et {xp} points portés à votre nom sur le registre. « Vous avez rapporté le fait, pas la légende — c'est plus rare que vous ne croyez, et c'est ce qui me dira, la prochaine fois, à qui confier un chantier plus profond. » Il désigne le mur couvert de cartes. « Il en reste. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cartes": {
+          "texte": "« Elles ne valent rien. » Il dit cela sans quitter des yeux le mur qu'il a passé vingt ans à couvrir. « Une carte est le souvenir de ce qu'un homme a vu un jour donné. Les galeries s'effondrent, les rivières changent de lit, les monstres déménagent. Ce qui vaut quelque chose, c'est l'aventurier qui revient corriger la mienne. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "trophees": {
+          "texte": "Il jette un œil à la rangée de crânes, de griffes et de mâchoires clouées au-dessus de la cheminée. « Aucun n'est de moi. Chacun a été rapporté par une recrue qui pensait ne pas revenir. » Un silence. « Je garde aussi la liste de celles qui n'ont rien rapporté. Elle est plus longue, et je la relis plus souvent. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "donjon:mine_de_saint_austrelin",
+    "type": "donjon",
+    "nom": "Le donjon-mine de Saint-Austrelin",
+    "description": "Sous le Temple-Portail de Saint-Austrelin, les galeries d'un ancien filon de cristal s'enfoncent au-delà de ce que les registres du temple savent décrire. Le chantier est fermé : quelque chose y a pris ses quartiers.",
+    "portail": "lieu:temple_portail_de_saint_austrelin_interieur",
+    "niveau_max": 3,
+    "battle_maps": [
+      {
+        "lieu": "lieu:la_mine_aux_cristaux",
+        "especes": [
+          "espece:gobelin",
+          "espece:gobelin_chamanique",
+          "espece:rat_geant",
+          "espece:chauve_souris_geante",
+          "espece:araignee_geante"
+        ]
+      }
+    ]
+  }
+]

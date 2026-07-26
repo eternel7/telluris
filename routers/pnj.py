@@ -25,6 +25,13 @@ from utils import chasse
 from utils import quetes
 from utils import focalisation
 from utils import acces
+from utils import donjon
+from utils import recrutement
+from utils import montures
+from utils.combat import (
+	instantiate_monsters, build_monster_snapshot, create_combat_doc,
+	resolve_first_turns, finalize_combat,
+)
 from utils.lieux import get_lieu_links
 from routers.user import _derived_from_character, _vitals_payload, _inventory_payload
 
@@ -113,6 +120,25 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			placeholders["rang"] = rang_courant
 			if offre_rang or a_rapporter:
 				placeholders.update(_placeholders_rang(offre_rang or a_rapporter, rang_courant))
+		# Commissions d'éradication (maître de guilde) : `services.commission.donjon` est le
+		# SEUL lien PNJ → donjon. L'offre est REBÂTIE à chaque affichage (pas de champ
+		# transitoire `*_offert`, cf. `donjon.offre_commission_pour`) → les placeholders
+		# {espece}/{lieu}/{xp} viennent de l'offre courante, ou de la commission en cours
+		# quand il n'y a plus rien à proposer (c'est elle que le PNJ relance ou solde).
+		commission_conf = (pnj_doc.get("services") or {}).get("commission") or {}
+		donjon_doc = get_doc(commission_conf["donjon"]) if commission_conf.get("donjon") else None
+		if donjon_doc:
+			en_cours = donjon.commission_active(character)
+			a_solder = donjon.commission_a_rapporter(character)
+			offre_com = donjon.offre_commission_pour(
+				character, lieu_doc, donjon_doc, get_doc, find_docs)
+			flags["commission_offerte"] = bool(offre_com)
+			flags["commission_a_rapporter"] = bool(a_solder)
+			# « en cours » exclut « à rapporter » : l'élite abattue, ce n'est plus une relance
+			# qu'il faut proposer mais un rapport à rendre (miroir de `transport_en_cours`).
+			flags["commission_en_cours"] = bool(en_cours and not a_solder)
+			if offre_com or en_cours:
+				placeholders.update(_placeholders_commission(offre_com or en_cours))
 		# Accès conditionné à un lieu (PNJ gardien) : `services.acces.lieu` est le SEUL
 		# lien PNJ → lieu gardé (aucun find_docs, aucun id en dur ici). `{portail}` = le
 		# label du lieu gardé, pour que George puisse le nommer sans le citer en dur.
@@ -121,11 +147,52 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		if lieu_garde:
 			deja = acces.laissez_passer_valide(character, lieu_garde)
 			ok, _raison = acces.acces_autorise(character, lieu_garde, get_doc)
+			# Mission REMPLIE mais pas encore rapportée : la barrière vient de se refermer
+			# (`objectif_atteint: false` côté condition), et le gardien doit pouvoir le dire
+			# AUTREMENT qu'en récitant son refus générique — le joueur a fait le travail, lui
+			# répondre « pas de commission, pas de descente » serait absurde.
+			q_finie = donjon.commission_active_pour_lieu(character, lieu_garde["_id"])
+			accompli = bool(q_finie and quetes.objectif_atteint(character, q_finie))
 			flags["acces_ouvrable"] = ok and not deja
-			flags["acces_refuse"] = not ok
+			flags["acces_accompli"] = accompli
+			# ⚠️ `acces_refuse` EXCLUT le cas accompli, sinon les deux choix s'afficheraient
+			# ensemble (le refus ET les félicitations).
+			flags["acces_refuse"] = not ok and not accompli
 			flags["acces_ouvert"] = deja
+			# La menace derrière la porte est-elle éliminée ? Reste vrai APRÈS le rapport,
+			# contrairement à `acces_accompli` — c'est l'état du LIEU, pas celui de la quête :
+			# le gardien peut ainsi parler du monde qui a changé (les mineurs descendent
+			# enfin) même une fois la commission archivée.
+			# ⚠️ DEUX flags complémentaires, et non un seul : `condition_ok` n'a pas de
+			# négation (une condition doit être VRAIE pour afficher son choix), donc « la
+			# menace court toujours » a besoin de son propre flag pour porter la variante
+			# inverse du même dialogue.
+			libere = donjon.donjon_purge(character, lieu_garde["_id"])
+			flags["acces_libere"] = libere
+			flags["acces_menace"] = not libere
 			placeholders["portail"] = lieu_garde.get("label") or lieu_garde.get("nom") or ""
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders)
+
+
+def _lien_vers(current_user: dict, lieu_courant: str, destination: str) -> str | None:
+	"""`_id` du doc `connection` reliant le lieu COURANT à `destination`, ou None s'il n'y en a
+	pas — c'est ce que le hook `deplacer` d'un choix de dialogue rend au client.
+
+	⚠️ On ne déplace PAS le personnage ici. Le client rappelle `moveTo(link_id)`, donc l'unique
+	endpoint de déplacement (`/api/move_character`), qui porte une quinzaine d'effets de bord
+	(quêtes `visite`, focalisation, XP de découverte, sol transitoire, événement de zone,
+	conclusion d'intro, courses échues, régén de tour…). Les recopier ici garantirait la
+	divergence ; et la garde 403 de `move_character` reste la seule autorité sur le passage —
+	un `deplacer` mal placé dans un dialogue ne peut donc pas forcer une porte fermée.
+
+	`filtrer_acces=False` : la barrière est revérifiée par le déplaceur, et au moment où l'on
+	résout ce lien le laissez-passer vient peut-être tout juste d'être posé."""
+	if not destination or destination == lieu_courant:
+		return None
+	for link in (get_lieu_links(current_user, filtrer_acces=False) or []):
+		if any(n.get("lieu") == destination for n in link.get("nodes", [])):
+			return link.get("_id")
+	return None
 
 
 def _nom_pnj(lieu_id: str | None) -> str | None:
@@ -295,6 +362,13 @@ async def pnj_dialogue_choix(
 		# refiltre les choix sur les nouveaux flags, en conservant les placeholders de l'action.
 		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 		contexte["placeholders"].update(dits)
+	elif action.get("service") == "commission":
+		suivant, dits = _resoudre_commission(character, pnj_doc, lieu_doc,
+											 action.get("op"), reponse)
+		# Même raison que le rang : la commission vient d'être prise ou soldée → refiltrer
+		# les choix sur les nouveaux flags, en conservant les placeholders de l'action.
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+		contexte["placeholders"].update(dits)
 	elif action.get("service") == "acces":
 		suivant, dits = _resoudre_acces(current_user, character, pnj_doc, lieu_doc,
 										 action.get("op"), reponse)
@@ -303,6 +377,18 @@ async def pnj_dialogue_choix(
 	else:
 		suivant = choix.get("next")
 
+	# Hook de DÉPLACEMENT AUTOMATIQUE, utilisable par n'importe quel choix de n'importe quel
+	# dialogue : `"deplacer": "lieu:xxx"` → le client enchaîne sur son déplacement normal
+	# (`moveTo`), donc sur `/api/move_character` et tous ses effets de bord. Résolu APRÈS
+	# l'action : quand c'est un gardien qui vous fait entrer, le laissez-passer doit déjà être
+	# posé, sinon le déplaceur refuserait en 403.
+	# ⚠️ Un lien manquant est SILENCIEUX ici (`deplacer` absent de la réponse) : le dialogue se
+	# déroule normalement, le joueur va au lieu à pied. C'est voulu — un contenu qui vise un
+	# lieu non relié ne doit pas casser la conversation. Le contrôle est le linter + le BFS.
+	if choix.get("deplacer"):
+		link_id = _lien_vers(current_user, character.get("lieu"), choix["deplacer"])
+		if link_id:
+			reponse["deplacer"] = link_id
 	if not suivant or suivant == "fin":
 		reponse["noeud"] = None
 	else:
@@ -517,11 +603,164 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 	raise HTTPException(status_code=422, detail="Action de rang inconnue.")
 
 
+def _placeholders_commission(q: dict) -> dict:
+	"""Placeholders qu'un nœud du service `commission` peut citer : l'espèce à éradiquer, la
+	salle du donjon où elle tient ses galeries, et l'XP promise. Mêmes clés que le service
+	`rang` (`{espece}`/`{lieu}`/`{xp}`) — c'est le même geste, traquer une élite désignée."""
+	obj = (q or {}).get("objectif") or {}
+	espece_doc = get_doc(obj.get("cible")) if obj.get("cible") else None
+	lieu_cible = get_doc(obj.get("lieu")) if obj.get("lieu") else None
+	rec = (q or {}).get("recompenses") or {}
+	return {
+		"espece": (espece_doc or {}).get("nom") or (obj.get("cible") or "").split(":", 1)[-1],
+		"lieu": (lieu_cible or {}).get("label") or (lieu_cible or {}).get("nom")
+		or (obj.get("lieu") or "").split(":", 1)[-1],
+		"xp": rec.get("xp", 0),
+		"prime": rec.get("cuivre", 0),
+	}
+
+
+def _resoudre_commission(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
+						 reponse: dict) -> tuple[str | None, dict]:
+	"""Exécute une action du service `commission` (maître de guilde) :
+	`accepter` : il confie une commission d'éradication (quête `chasse` visant une salle de
+	  donjon — c'est elle qui, seule, ouvrira la porte gardée du donjon).
+	`rapporter`: il solde une commission accomplie → XP + prime (aucune promotion de rang,
+	  contrairement au service `rang` : une commission paie, elle n'élève pas).
+	Renvoie (nœud de résultat, placeholders que ce nœud peut citer). Miroir de `_resoudre_rang`."""
+	commission_conf = (pnj_doc.get("services") or {}).get("commission") or {}
+	noeuds = commission_conf.get("noeuds") or {}
+	donjon_doc = get_doc(commission_conf["donjon"]) if commission_conf.get("donjon") else None
+	if not donjon_doc:
+		raise HTTPException(status_code=422, detail="Ce personnage ne mandate aucune commission.")
+
+	if op == "accepter":
+		# ⚠️ L'offre est RETIRÉE ici (`offre_commission_pour` la rebâtit à chaque appel, elle
+		# n'est jamais mémorisée) : la cible acceptée est celle de CE tirage, pas celle que le
+		# joueur croyait avoir lue au nœud précédent s'il a rechargé entre-temps. Assumé — le
+		# nœud de résultat récite la cible réellement engagée.
+		offre = donjon.offre_commission_pour(character, lieu_doc, donjon_doc, get_doc, find_docs)
+		if not offre:
+			raise HTTPException(status_code=422, detail="Aucune commission à prendre ici.")
+		dits = _placeholders_commission(offre)
+		q = donjon.accepter_commission(character, offre)
+		if not q:
+			raise HTTPException(status_code=422, detail="Aucune commission à prendre ici.")
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		reponse["commission"] = {"accepte": q.get("titre")}
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		return noeuds.get("accepte"), dits
+
+	if op == "rapporter":
+		q = donjon.commission_a_rapporter(character)
+		if not q:
+			raise HTTPException(status_code=422, detail="Aucune commission à solder ici.")
+		# Calculés AVANT la mutation : la quête quitte `quetes_actives` au soldement, mais le
+		# nœud de résultat doit encore pouvoir nommer la bête et la prime.
+		dits = _placeholders_commission(q)
+		resultat = donjon.solder_commission(character, q.get("id") or q.get("_id"))
+		if not resultat:
+			raise HTTPException(status_code=422, detail="Commission non accomplie.")
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		reponse["commission"] = {
+			"rapporte": q.get("titre"),
+			"xp": resultat["recompenses"]["xp"].get("xp_gain", 0),
+			"niveau_up": resultat["recompenses"]["xp"].get("niveau_up", False),
+		}
+		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+		reponse["vitals"] = _vitals_payload(character)
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		return noeuds.get("rapporte"), dits
+
+	raise HTTPException(status_code=422, detail="Action de commission inconnue.")
+
+
+def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
+	"""Ouvre le combat d'une salle de donjon, et renvoie son id (None si le donjon n'a rien à
+	opposer). Miroir SIMPLIFIÉ de `routers.combat.start_combat` — trois différences assumées :
+
+	· le pool d'espèces vient du doc `donjon:*` (curaté), pas des zones du lieu ;
+	· l'élite de la commission est GARANTIE présente, là où `start_combat` ne la marque que si
+	  le tirage naturel l'a fait apparaître (ici, franchir la porte EST l'événement de chasse) ;
+	· aucune furtivité d'entrée : on descend par un escalier gardé, annoncé, pas en embuscade.
+
+	Anti-doublon repris tel quel : un combat déjà actif est REPRIS plutôt que doublé, sinon
+	repasser devant le gardien laisserait des combats orphelins en base."""
+	for c in (find_docs({"type": "combat", "user_id": character["user_id"]}) or []):
+		if c.get("character_id") == character["_id"] and c.get("status") == "active":
+			return c["_id"]
+
+	donjon_doc = donjon.donjon_de_lieu(lieu_garde.get("_id"), find_docs)
+	if not donjon_doc:
+		return None
+	pool_especes = donjon.especes_de_salle(donjon_doc, lieu_garde["_id"], get_doc)
+	if not pool_especes:
+		return None
+	# ⚠️ Le plafond de grade de la salle vaut pour TOUTE la salle, pas seulement pour l'élite :
+	# sans lui, les monstres d'accompagnement seraient tirés parmi tous les grades de la base
+	# (jusqu'au niveau 6) et pèseraient plus lourd que la cible mandatée elle-même.
+	profils = donjon._profils_sous_plafond(
+		find_docs({"type": "profil"}) or [],
+		donjon.niveau_max_de(donjon_doc, lieu_garde["_id"]),
+	)
+
+	compagnons = recrutement.groupe_effectif(character, get_doc)
+	montures_groupe = montures.montures_effectives(character, get_doc)
+	nb_monstres = 3 + len(compagnons) // 2
+	# zone_tags vide : les espèces sont déjà choisies à la main, pas à filtrer par terrain.
+	monstres = instantiate_monsters(pool_especes, profils, nb_monstres, [])
+	if not monstres:
+		return None
+
+	# L'élite mandatée, imposée sur le premier monstre de son espèce — et à défaut sur le
+	# premier tout court : sans elle le joueur nettoierait la salle sans jamais pouvoir
+	# compléter sa commission (le combat est à usage unique, il n'y a pas de seconde chance).
+	q = donjon.commission_active_pour_lieu(character, lieu_garde["_id"])
+	narration = None
+	if q:
+		obj = q.get("objectif") or {}
+		espece_doc = next((e for e in pool_especes if e["_id"] == obj.get("cible")), None)
+		profil_doc = get_doc(obj.get("profil")) if obj.get("profil") else None
+		if espece_doc and profil_doc:
+			idx = next(
+				(i for i, m in enumerate(monstres) if m.get("espece_id") == obj.get("cible")),
+				0,
+			)
+			ancien = monstres[idx]
+			elite = build_monster_snapshot(espece_doc, profil_doc, idx)
+			elite["id"] = ancien["id"]
+			elite["pos"] = ancien.get("pos", elite["pos"])
+			elite["quete_chasse"] = q.get("id") or q.get("_id")
+			monstres[idx] = elite
+			narration = q.get("narration")
+
+	combat_doc = create_combat_doc(
+		character, monstres, list(lieu_garde.get("tags") or []),
+		lieu_garde.get("image", ""), battle_map=lieu_garde,
+		compagnons=compagnons, montures=montures_groupe,
+	)
+	if narration:
+		combat_doc["chasse_narration"] = narration
+	resolve_first_turns(combat_doc)
+	if combat_doc["status"] != "active":
+		finalize_combat(combat_doc)
+	save_doc(combat_doc)
+	return combat_doc["_id"]
+
+
 def _resoudre_acces(current_user: dict, character: dict, pnj_doc: dict, lieu_doc: dict,
 					 op: str, reponse: dict) -> tuple[str | None, dict]:
-	"""Exécute l'action `passer` du service `acces` (PNJ gardien d'un lieu) : pose un
-	laissez-passer si les conditions sont remplies. Miroir strict de `_resoudre_rang`.
-	Renvoie (nœud de résultat, placeholders que ce nœud peut citer)."""
+	"""Exécute l'action `passer` du service `acces` (PNJ gardien d'un lieu). Miroir strict de
+	`_resoudre_rang`. Renvoie (nœud de résultat, placeholders que ce nœud peut citer).
+
+	DEUX natures de porte, selon le lieu gardé :
+	· un lieu EXPLORABLE → on pose un laissez-passer, et le lieu apparaît dans la liste des
+	  sous-lieux (comportement d'origine : le temple-portail de Saint-Austrelin) ;
+	· une SALLE DE DONJON (`categorie:"battle_map"`) → il n'y a rien à « visiter » (ni
+	  `connection`, ni grille d'exploration, ni zones) : franchir la porte OUVRE LE COMBAT.
+	  Aucun laissez-passer n'est donc posé — chaque descente est un engagement neuf."""
 	acces_conf = (pnj_doc.get("services") or {}).get("acces") or {}
 	noeuds = acces_conf.get("noeuds") or {}
 	lieu_garde = get_doc(acces_conf["lieu"]) if acces_conf.get("lieu") else None
@@ -535,6 +774,16 @@ def _resoudre_acces(current_user: dict, character: dict, pnj_doc: dict, lieu_doc
 		ok, _raison = acces.acces_autorise(character, lieu_garde, get_doc)
 		if not ok:
 			return noeuds.get("refus"), dits
+		if lieu_garde.get("categorie") == "battle_map":
+			# ⚠️ `_declencher_combat_donjon` SAUVEGARDE le doc combat, jamais le character :
+			# rien n'a été muté sur lui (aucun laissez-passer posé), il n'y a donc rien à
+			# persister ici — et surtout rien à écraser sur un `_rev` déjà relu.
+			combat_id = _declencher_combat_donjon(character, lieu_garde)
+			if not combat_id:
+				raise HTTPException(status_code=422,
+									detail="Ce passage ne mène à aucun danger connu.")
+			reponse["combat_id"] = combat_id
+			return noeuds.get("ouvre"), dits
 		acces.poser_laissez_passer(character, lieu_garde, pnj_doc.get("_id"))
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")

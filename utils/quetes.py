@@ -537,10 +537,17 @@ def _carte_chasse(objectif: dict, giver_id: str | None = None, lieu_doc: dict | 
 	dims = (lieu or {}).get("dimensions")
 	if not lieu or not dims:
 		return None
+	# Pas de case visée ⇒ pas de carte : tout l'objet de l'overlay est « va sur CETTE case ».
+	# Sans ce garde, un objectif sans `position` recadrerait sur (0,0) et enverrait le joueur
+	# au mauvais endroit. Aucune régression : les chasses générées ne posent `position` que
+	# lorsque le lieu a une grille, et sans grille on est déjà sorti juste au-dessus — c'est
+	# une commission de donjon (lieu `battle_map`, où l'on entre par un PNJ) qui l'exerce.
+	pos = objectif.get("position") or {}
+	if not pos:
+		return None
 	image, route = marche._lieu_image_route(lieu)
 	if not image or not route:
 		return None
-	pos = objectif.get("position") or {}
 	carte = {
 		"position": dict(pos),
 		"dimensions": dims,

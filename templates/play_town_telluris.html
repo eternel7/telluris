@@ -6649,6 +6649,22 @@ async function choisirPnj(choixId) {
 			// gardé n'apparaîtrait qu'au prochain rechargement de /play.
 			if (Array.isArray(data.links)) { LINKS = data.links; buildLocationslist(); }
 		}
+		if (data.commission) {
+			if (data.commission.accepte) showToast('⚔️ Commission acceptée : ' + data.commission.accepte);
+			if (data.commission.rapporte) {
+				showToast('🏅 Commission accomplie — ✨ +' + data.commission.xp + ' XP'
+					+ (data.commission.niveau_up ? ' — ⭐ Niveau supérieur !' : ''));
+			}
+			renderFicheQuetes(data);
+		}
+		// Une porte de donjon n'ouvre pas un lieu : elle ouvre un COMBAT (le gardien nous fait
+		// descendre). On quitte la page — inutile de rendre le nœud suivant, on ne le verra pas.
+		if (data.combat_id) { window.location.href = '/combat/' + data.combat_id; return; }
+		// Hook de déplacement automatique (`deplacer` sur un choix) : le PNJ nous fait entrer.
+		// On réutilise `moveTo` — donc l'unique endpoint de déplacement et TOUS ses effets de
+		// bord (quêtes `visite`, XP de découverte, événement de zone, régén de tour…) ; il
+		// recharge la page, ce qui ferme le dialogue de lui-même.
+		if (data.deplacer) { closePnjPanel(); await moveTo(data.deplacer); return; }
 		if (data.noeud) renderPnjNoeud(data.noeud);
 		else closePnjPanel();
 	} catch(err) { console.error('Erreur choix de dialogue', err); }

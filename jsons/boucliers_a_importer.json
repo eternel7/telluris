@@ -1,0 +1,333 @@
+[
+  {
+    "_id": "item:Bocle",
+    "type": "item",
+    "nom": "Bocle",
+    "sous_categorie": "",
+    "icon": "🛡️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "bonus_pa": 3
+  },
+  {
+    "_id": "item:Rondache",
+    "type": "item",
+    "nom": "Rondache",
+    "sous_categorie": "",
+    "icon": "🛡️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 1.5,
+    "bonus_pa": 5
+  },
+  {
+    "_id": "item:Targe",
+    "type": "item",
+    "nom": "Targe",
+    "sous_categorie": "",
+    "icon": "🛡️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 2.0,
+    "bonus_pa": 6
+  },
+  {
+    "_id": "item:Pelta",
+    "type": "item",
+    "nom": "Pelta",
+    "sous_categorie": "",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 1.2,
+    "bonus_pa": 4,
+    "bonus": {
+      "Ag": 1
+    }
+  },
+  {
+    "_id": "item:Bouclier_chauffe",
+    "type": "item",
+    "nom": "Bouclier chauffe",
+    "sous_categorie": "",
+    "icon": "🛡️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "bonus_pa": 9
+  },
+  {
+    "_id": "item:Bouclier_cerf_volant",
+    "type": "item",
+    "nom": "Bouclier cerf-volant",
+    "sous_categorie": "",
+    "icon": "🛡️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 4.5,
+    "bonus_pa": 10
+  },
+  {
+    "_id": "item:Bouclier_normand",
+    "type": "item",
+    "nom": "Bouclier normand",
+    "sous_categorie": "",
+    "icon": "🛡️",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 4.8,
+    "bonus_pa": 11
+  },
+  {
+    "_id": "item:Ecu_de_joute",
+    "type": "item",
+    "nom": "Écu de joute",
+    "sous_categorie": "",
+    "icon": "🏇",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 4.0,
+    "bonus_pa": 8
+  },
+  {
+    "_id": "item:Pavois",
+    "type": "item",
+    "nom": "Pavois",
+    "sous_categorie": "",
+    "icon": "🛡️",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 6.0,
+    "bonus_pa": 14
+  },
+  {
+    "_id": "recette:bouclier_ecu",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Ecu",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_bocle",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Bocle",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_rondache",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Rondache",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_targe",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Targe",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_pelta",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Pelta",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "cuir",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "tendons",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_chauffe",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Bouclier_chauffe",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_cerf_volant",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Bouclier_cerf_volant",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_normand",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Bouclier_normand",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "acier",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_ecu_de_joute",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Ecu_de_joute",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "argent",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:bouclier_pavois",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Pavois",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      }
+    ]
+  }
+]

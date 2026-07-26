@@ -1,0 +1,55 @@
+[
+  {
+    "_id": "lieu:temple_portail_de_saint_austrelin_interieur",
+    "_rev": "9-8a117ada7453338a65c50d2aa931fd4b",
+    "type": "lieu",
+    "label": "Le portail du Temple‑Portail de Saint‑Austrelin",
+    "image": "portail_de_temple_europe01.png",
+    "categorie": "portail",
+    "sous_categorie": "temple",
+    "texte": "Dans la nef du Temple‑Portail de Saint‑Austrelin, le portail noir pulse faiblement derrière la muraille intérieure, tandis qu’Armand de Vaucremont contrôle avec rigueur les papiers d’une compagnie de mineurs venue demander l’accès. Les templiers restent en position devant l’arche, empêchant toute entrée tant que la commission d’éradication, menée par des aventuriers, n’a pas confirmé que les galeries du donjon‑mine sont sécurisées.",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:templier_armand_de_vaucremont_01",
+        "nom": "Armand de Vaucremont",
+        "portrait": "templier_armand_de_vaucremont_temple_portail.png"
+      }
+    ],
+    "acces": {
+      "gardien": "pnj:templier_armand_de_vaucremont_01",
+      "refus": "Armand de Vaucremont barre l'accès à l'arche menant au portail : la descente est réservée aux compagnies mandatées par la guilde.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "lieu": "lieu:temple_portail_de_saint_austrelin_interieur",
+            "types": [
+              "eradication",
+              "chasse"
+            ],
+            "giver_categorie": "guilde_aventurier"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:temple_portail_de_saint_austrelin",
+    "_rev": "4-d391b7a536222cea1036d2b41239ae02",
+    "type": "lieu",
+    "label": "Temple‑Portail de Saint‑Austrelin",
+    "image": "temple_europe01.png",
+    "categorie": "temple_portail",
+    "sous_categorie": "temple",
+    "pnj": [
+      {
+        "character": "pnj:templier_nain_m_01",
+        "nom": "George Dourdan",
+        "portrait": "templier_george_dourdan_temple_portail.png"
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "texte": "Autour du temple, la vie est un mélange de sacré et de quotidien :\n- Des marchands vendent des lampes de mine enchantées.\n- Des artisans réparent les outils des aventuriers.\n- Des druides marchands proposent des talismans de protection.\n- Des forts à bras se proposent en tant que porteurs ou gardes auxiliaires.\n- Les templiers organisent les expéditions et tiennent les registres.\n\nLe temple est ainsi devenu le cœur économique, militaire et mystique d’Auxerre."
+  }
+]
