@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
+from utils import acces
 
 # Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
 TOWNS_IMAGES_PATH = "templates/resources/towns"
@@ -19,10 +20,19 @@ class User(BaseModel):
 	
 lieu_router = APIRouter()
 
-def get_lieu_links(current_user: dict = Body(...)):
+def get_lieu_links(current_user: dict = Body(...), filtrer_acces: bool = True):
+	"""Connexions de la case courante. `filtrer_acces` (défaut True) écarte toute
+	connexion dont le nœud DESTINATION est verrouillé (utils.acces) : le portail d'un
+	gardien n'apparaît pas dans la liste des sous-lieux tant que ses conditions ne sont
+	pas remplies. Le lieu courant n'est jamais filtré (on ne s'expulse pas soi-même).
+
+	⚠️ Ce filtre d'affichage n'est PAS un verrou : le déplaceur (routers/user.py,
+	move_character) doit appeler avec `filtrer_acces=False` et poser sa propre garde
+	403 explicite — sinon l'enforcement serait un effet de bord d'une fonction de
+	rendu, et le message d'erreur serait « Incorrect movement info »."""
 	if not current_user:
 		return None
-		
+
 	character = get_selected_character(current_user)
 	if not character:
 		return None
@@ -31,17 +41,25 @@ def get_lieu_links(current_user: dict = Body(...)):
 	target_key = [ lieu, position["x"], position["y"] ]
 	links = db.view("reseau", "liens_cases", key=target_key)
 	connections = [row.value for row in links]
-	
+
+	out = []
 	for conn in connections:
+		ferme = False
 		for node in conn["nodes"]:
 			doc = get_doc(node["lieu"])
+			if (filtrer_acces and node["lieu"] != lieu
+					and not acces.acces_autorise(character, doc, get_doc)[0]):
+				ferme = True
 			doc.pop("cells",None)
 			doc.pop("_rev",None)
 			doc.pop("_id",None)
+			doc.pop("acces",None)
 			node["details"] = doc
 			node["details"]["label"] = node.get("label") or doc.get("label")
-			
-	return connections
+		if not ferme:
+			out.append(conn)
+
+	return out
 	
 # [bit, dx, dy, opposé]
 # 1: HAUT, 2: HAUT_DROITE, 4: DROITE, 8: BAS_DROITE, 16: BAS, 32: BAS_GAUCHE, 64: GAUCHE, 128: HAUT_GAUCHE

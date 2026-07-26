@@ -15,6 +15,8 @@
 
 import re
 
+from utils import acces
+
 # ── Ce que le moteur connaît ─────────────────────────────────────────────────────
 
 # Placeholders substituables : {prenom}/{cout} (utils/pnj._substituer) + tout ce que le
@@ -28,6 +30,8 @@ PLACEHOLDERS_CONNUS = {
 	"colis", "poids", "delai", "xp", "prime",
 	# Quêtes de chasse / rang de guilde.
 	"espece", "lieu", "rang", "rang_vise",
+	# Accès conditionné à un lieu (PNJ gardien) : le label du lieu gardé.
+	"portail",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -38,6 +42,7 @@ FLAGS_CONNUS = {
 	"transport_offert", "transport_a_livrer", "transport_a_rapporter",
 	"transport_en_cours", "transport_accompli", "transport_mefiance",
 	"rang_offert", "rang_a_rapporter", "rang_max",
+	"acces_ouvrable", "acces_refuse", "acces_ouvert",
 }
 
 # Nœuds de résultat que le ROUTER va chercher par leur clé. Les absents laissent le
@@ -49,6 +54,8 @@ NOEUDS_REQUIS = {
 	"soin": {"fait", "sans_fonds", "inutile"},
 	"don":  {"fait", "sans_fonds", "trop_charge"},
 	"rang": {"accepte", "rapporte"},
+	# `deja` reste optionnel — un gardien peut ne pas reconnaître les habitués.
+	"acces": {"ouvre", "refus"},
 }
 
 # Le transport a DEUX rôles, et presque aucun PNJ ne tient les deux :
@@ -70,6 +77,7 @@ ACTIONS_A_CONDITIONNER = {
 	("transport", "livrer"):    "transport_a_livrer",
 	("transport", "rapporter"): "transport_a_rapporter",
 	("rang", "rapporter"):      "rang_a_rapporter",
+	("acces", "passer"):        "acces_ouvrable",
 }
 
 # Sentinelle de fin : `routers/pnj.py` fait `if not suivant or suivant == "fin"` → nœud
@@ -128,13 +136,12 @@ def _atteignables(noeuds: dict, entrees: set) -> set:
 def analyser_doc(doc: dict) -> list:
 	"""Anomalies d'UN document. Renvoie une liste de
 	`{doc_id, niveau: "erreur"|"avertissement", noeud, message}`, vide si tout va bien.
-	Un doc sans bloc `dialogue` n'est pas concerné (ce n'est pas une faute : la plupart des
-	documents du jeu n'en ont pas) — l'appelant le compte comme « ignoré »."""
+	Un doc sans bloc `dialogue` NI bloc `acces` n'est pas concerné (ce n'est pas une
+	faute : la plupart des documents du jeu n'ont ni l'un ni l'autre) — l'appelant le
+	compte alors comme « ignoré ». Un `lieu:*` gardé porte `acces` mais typiquement
+	AUCUN `dialogue` (c'est son gardien qui en a un) : il est quand même analysé, pour
+	le seul contrôle qui le concerne (`acces.conditions_invalides`)."""
 	doc_id = doc.get("_id", "?")
-	dialogue = doc.get("dialogue") or {}
-	if not dialogue:
-		return []
-
 	trouvailles = []
 
 	def signaler(niveau, message, noeud=None):
@@ -146,6 +153,19 @@ def analyser_doc(doc: dict) -> list:
 
 	def avertir(message, noeud=None):
 		signaler("avertissement", message, noeud)
+
+	# Barrière d'accès (utils/acces.py) : une clé de condition hors vocabulaire connu
+	# refuserait TOUJOURS l'accès (fail-closed, silencieusement) — c'est le typo que le
+	# moteur ne peut pas rattraper lui-même. Un `lieu:*` gardé n'a le plus souvent AUCUN
+	# `dialogue` (c'est son gardien qui en porte un) : ce contrôle doit donc s'exécuter
+	# même quand le doc n'a rien d'autre à analyser.
+	for cle in acces.conditions_invalides(doc):
+		erreur(f"acces.conditions : clé `{cle}` inconnue du vocabulaire — fail-closed, "
+			   f"ce lieu refusera TOUJOURS l'accès.")
+
+	dialogue = doc.get("dialogue") or {}
+	if not dialogue:
+		return trouvailles
 
 	noeuds = dialogue.get("noeuds") or {}
 	depart = dialogue.get("noeud_depart")
@@ -275,7 +295,7 @@ def analyser(payload) -> dict:
 		if not isinstance(doc, dict):
 			ignores += 1
 			continue
-		if not (doc.get("dialogue") or {}):
+		if not (doc.get("dialogue") or {}) and not (doc.get("acces") or {}):
 			ignores += 1
 			continue
 		analyses += 1

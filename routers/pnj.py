@@ -24,6 +24,8 @@ from utils import transport
 from utils import chasse
 from utils import quetes
 from utils import focalisation
+from utils import acces
+from utils.lieux import get_lieu_links
 from routers.user import _derived_from_character, _vitals_payload, _inventory_payload
 
 pnj_router = APIRouter()
@@ -111,6 +113,18 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			placeholders["rang"] = rang_courant
 			if offre_rang or a_rapporter:
 				placeholders.update(_placeholders_rang(offre_rang or a_rapporter, rang_courant))
+		# Accès conditionné à un lieu (PNJ gardien) : `services.acces.lieu` est le SEUL
+		# lien PNJ → lieu gardé (aucun find_docs, aucun id en dur ici). `{portail}` = le
+		# label du lieu gardé, pour que George puisse le nommer sans le citer en dur.
+		acces_conf = (pnj_doc.get("services") or {}).get("acces") or {}
+		lieu_garde = get_doc(acces_conf["lieu"]) if acces_conf.get("lieu") else None
+		if lieu_garde:
+			deja = acces.laissez_passer_valide(character, lieu_garde)
+			ok, _raison = acces.acces_autorise(character, lieu_garde, get_doc)
+			flags["acces_ouvrable"] = ok and not deja
+			flags["acces_refuse"] = not ok
+			flags["acces_ouvert"] = deja
+			placeholders["portail"] = lieu_garde.get("label") or lieu_garde.get("nom") or ""
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders)
 
 
@@ -279,6 +293,11 @@ async def pnj_dialogue_choix(
 		suivant, dits = _resoudre_rang(character, pnj_doc, lieu_doc, action.get("op"), reponse)
 		# Même raison que le transport : le contexte a changé (épreuve prise / soldée) → on
 		# refiltre les choix sur les nouveaux flags, en conservant les placeholders de l'action.
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+		contexte["placeholders"].update(dits)
+	elif action.get("service") == "acces":
+		suivant, dits = _resoudre_acces(current_user, character, pnj_doc, lieu_doc,
+										 action.get("op"), reponse)
 		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 		contexte["placeholders"].update(dits)
 	else:
@@ -496,6 +515,37 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		return noeuds.get("rapporte"), dits
 
 	raise HTTPException(status_code=422, detail="Action de rang inconnue.")
+
+
+def _resoudre_acces(current_user: dict, character: dict, pnj_doc: dict, lieu_doc: dict,
+					 op: str, reponse: dict) -> tuple[str | None, dict]:
+	"""Exécute l'action `passer` du service `acces` (PNJ gardien d'un lieu) : pose un
+	laissez-passer si les conditions sont remplies. Miroir strict de `_resoudre_rang`.
+	Renvoie (nœud de résultat, placeholders que ce nœud peut citer)."""
+	acces_conf = (pnj_doc.get("services") or {}).get("acces") or {}
+	noeuds = acces_conf.get("noeuds") or {}
+	lieu_garde = get_doc(acces_conf["lieu"]) if acces_conf.get("lieu") else None
+	if not lieu_garde:
+		raise HTTPException(status_code=422, detail="Ce personnage ne garde aucun accès.")
+	dits = {"portail": lieu_garde.get("label") or lieu_garde.get("nom") or ""}
+
+	if op == "passer":
+		if acces.laissez_passer_valide(character, lieu_garde):
+			return noeuds.get("deja"), dits
+		ok, _raison = acces.acces_autorise(character, lieu_garde, get_doc)
+		if not ok:
+			return noeuds.get("refus"), dits
+		acces.poser_laissez_passer(character, lieu_garde, pnj_doc.get("_id"))
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		reponse["acces"] = {"lieu": lieu_garde.get("_id"), "nom": dits["portail"]}
+		# Sans ceci le portail n'apparaîtrait qu'au prochain rechargement de /play : le
+		# laissez-passer vient d'être posé, mais la liste des sous-lieux a été rendue à
+		# l'ouverture de la page.
+		reponse["links"] = get_lieu_links(current_user)
+		return noeuds.get("ouvre"), dits
+
+	raise HTTPException(status_code=422, detail="Action d'accès inconnue.")
 
 
 @pnj_router.post("/intro/raison")

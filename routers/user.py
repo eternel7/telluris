@@ -38,6 +38,7 @@ from utils import focalisation
 from utils import intro
 from utils import transport
 from utils import recrutement
+from utils import acces
 from utils import montures
 from utils import expedition
 from models import character_stats
@@ -424,7 +425,9 @@ async def move_character(
 			raise HTTPException(status_code=409, detail="Trop chargé pour vous déplacer — déposez un objet.")
 
 		if "link" in move:
-			links = get_lieu_links(current_user)
+			# Non filtré : le filtre d'affichage de get_lieu_links n'est pas un verrou —
+			# la garde 403 explicite ci-dessous l'est.
+			links = get_lieu_links(current_user, filtrer_acces=False)
 			target_id = move["link"]
 			# 1. Trouver le bon lien par son _id
 			link = next((l for l in links if l["_id"] == target_id), None)
@@ -436,6 +439,9 @@ async def move_character(
 					destination = node["lieu"]
 					lieu_doc = get_doc(destination)
 					if lieu_doc:
+						ok, raison = acces.acces_autorise(character_to_update, lieu_doc, get_doc)
+						if not ok:
+							raise HTTPException(status_code=403, detail=raison)
 						destination_pos = {"x": node["pos"][0], "y": node["pos"][1] }
 						print("move to ", destination, destination_pos)
 						character_to_update["lieu"] = destination

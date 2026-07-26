@@ -6643,6 +6643,12 @@ async function choisirPnj(choixId) {
 				updateRang(data.rang.meilleur, data.rang.detail);
 			}
 		}
+		if (data.acces) {
+			showToast('🗝️ ' + data.acces.nom + ' — le passage vous est ouvert.');
+			// Le laissez-passer vient d'être posé : sans resynchroniser LINKS ici, le lieu
+			// gardé n'apparaîtrait qu'au prochain rechargement de /play.
+			if (Array.isArray(data.links)) { LINKS = data.links; buildLocationslist(); }
+		}
 		if (data.noeud) renderPnjNoeud(data.noeud);
 		else closePnjPanel();
 	} catch(err) { console.error('Erreur choix de dialogue', err); }

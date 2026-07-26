@@ -289,6 +289,13 @@ MONTURE_CHARGE_MULT_DEFAUT: float = 1.2
 MONTURE_PRIX_DEFAUT: int = 2000
 MONTURE_MORT_DEFINITIVE: bool = True
 
+# ── Accès (barrières PNJ gardiennes) ──────────────────────────────────────────────
+# Un lieu peut porter un bloc `acces` (gardien, conditions, cycle) qui en interdit
+# l'entrée tant que les conditions ne sont pas remplies — cf. utils/acces.py.
+# False = déverrouillage d'urgence (toutes les barrières tombent), utile si un joueur
+# s'enferme dehors ou pour isoler un bug de rendu d'un bug de condition.
+ACCES_GARDIEN_ACTIF: bool = True
+
 # ── Récolte & découpe du bois ────────────────────────────────────────────────────
 # Échelle des tailles de bois, du plus petit au plus grand. Couper un item « a_couper »
 # produit des pièces du tier immédiatement plus petit (même `essence`), poids conservé.
@@ -536,6 +543,7 @@ def current_world_variables() -> dict:
 		"MONTURE_CHARGE_MULT_DEFAUT": MONTURE_CHARGE_MULT_DEFAUT,
 		"MONTURE_PRIX_DEFAUT": MONTURE_PRIX_DEFAUT,
 		"MONTURE_MORT_DEFINITIVE": MONTURE_MORT_DEFINITIVE,
+		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
 		"COUPE_MAX_PIECES": COUPE_MAX_PIECES,
@@ -590,6 +598,7 @@ def load_world_variables() -> dict:
 	global AFFINITE_SEUIL_ENGAGEMENT
 	global MONTURE_GROUPE_MAX, MONTURE_CHARGE_MULT_DEFAUT, MONTURE_PRIX_DEFAUT
 	global MONTURE_MORT_DEFINITIVE
+	global ACCES_GARDIEN_ACTIF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
@@ -712,6 +721,7 @@ def load_world_variables() -> dict:
 	MONTURE_CHARGE_MULT_DEFAUT = max(1.0, float(v.get("MONTURE_CHARGE_MULT_DEFAUT", MONTURE_CHARGE_MULT_DEFAUT)))
 	MONTURE_PRIX_DEFAUT = max(0, int(v.get("MONTURE_PRIX_DEFAUT", MONTURE_PRIX_DEFAUT)))
 	MONTURE_MORT_DEFINITIVE = bool(v.get("MONTURE_MORT_DEFINITIVE", MONTURE_MORT_DEFINITIVE))
+	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):
 		BOIS_A_COUPER[:] = [str(x) for x in v["BOIS_A_COUPER"]]
