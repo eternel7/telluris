@@ -1,0 +1,1724 @@
+{
+  "db": "telluris",
+  "type": "zone_influence",
+  "exported_at": "2026-07-29T18:41:28.228229Z",
+  "doc_count": 31,
+  "docs": [
+    {
+      "_id": "zone::coeur_capitale",
+      "_rev": "3-c4c4fc241d1cc154a42ac50363d1f97a",
+      "type": "zone_influence",
+      "nom": "Cœur de capitale",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "rue",
+        "place"
+      ],
+      "intensite_max": 1,
+      "table_evenements": [
+        {
+          "type": "quete",
+          "poids": 35,
+          "tags": [
+            "mission_royale",
+            "complot_etat",
+            "ambassade",
+            "conclave"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 30,
+          "tags": [
+            "roi",
+            "conseiller",
+            "noble_haut_rang",
+            "ambassadeur",
+            "garde_royale"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 20,
+          "tags": [
+            "tresor_royal",
+            "monopole",
+            "licence_commerciale",
+            "brevet"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 15,
+          "tags": [
+            "couronnement",
+            "declaration_guerre",
+            "fete_nationale",
+            "execution_noble"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -5,
+        "visibilite": 3,
+        "prix": -3,
+        "reputation": 4
+      }
+    },
+    {
+      "_id": "zone::coeur_cite",
+      "_rev": "3-470b8efbe68696679d741807098923e0",
+      "type": "zone_influence",
+      "nom": "Cœur de cité-état",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "rue",
+        "place"
+      ],
+      "intensite_max": 0.9,
+      "table_evenements": [
+        {
+          "type": "quete",
+          "poids": 30,
+          "tags": [
+            "contrat_officiel",
+            "mission_politique",
+            "ambassade",
+            "complot"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 30,
+          "tags": [
+            "magistrat",
+            "officier",
+            "noble",
+            "ambassadeur",
+            "espion"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 25,
+          "tags": [
+            "haute_finance",
+            "encheres",
+            "importation",
+            "guilde_majeure"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 15,
+          "tags": [
+            "ceremonie_officielle",
+            "jugement_public",
+            "annonce_royale"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -4,
+        "visibilite": 2,
+        "prix": -2,
+        "reputation": 2
+      }
+    },
+    {
+      "_id": "zone::coeur_hameau",
+      "_rev": "4-c48b8d2c8229b7cec7fc73406db024f9",
+      "type": "zone_influence",
+      "nom": "Cœur de hameau",
+      "terrain_tags": [
+        "village",
+        "rural",
+        "ferme",
+        "chemin"
+      ],
+      "intensite_max": 0.5,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 50,
+          "tags": [
+            "paysan",
+            "vieillard",
+            "enfant",
+            "fermier"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 20,
+          "tags": [
+            "troc",
+            "produit_local",
+            "oeuf",
+            "lait"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 20,
+          "tags": [
+            "rumeur",
+            "aide_locale",
+            "enfant_perdu",
+            "bete_nuisible"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 10,
+          "tags": [
+            "veillée",
+            "dispute_voisins",
+            "fête_moisson"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -1,
+        "visibilite": 0,
+        "prix": 1,
+        "reputation": 0
+      }
+    },
+    {
+      "_id": "zone::coeur_village",
+      "_rev": "3-de1f609b2329aafa410692b0d5ddaefc",
+      "type": "zone_influence",
+      "nom": "Cœur de village",
+      "terrain_tags": [
+        "village",
+        "rural",
+        "place",
+        "chemin"
+      ],
+      "intensite_max": 0.6,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 35,
+          "tags": [
+            "paysan",
+            "artisan",
+            "notable_local",
+            "pretre"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 30,
+          "tags": [
+            "marche_hebdo",
+            "forge_basique",
+            "moulin",
+            "produit_local"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 25,
+          "tags": [
+            "rumeur",
+            "contrat_local",
+            "dispute_terrain",
+            "creature_nuisible"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 10,
+          "tags": [
+            "fete_village",
+            "enterrement",
+            "procès_populaire"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -2,
+        "visibilite": 1,
+        "prix": 0,
+        "reputation": 0
+      }
+    },
+    {
+      "_id": "zone::coeur_ville",
+      "_rev": "4-4880be18457b14de94783bb1acf657ad",
+      "type": "zone_influence",
+      "nom": "Cœur de ville",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "rue",
+        "place"
+      ],
+      "intensite_max": 0.8,
+      "table_evenements": [
+        {
+          "type": "commerce",
+          "poids": 35,
+          "tags": [
+            "marchand",
+            "artisan_specialise",
+            "marche",
+            "comptoir"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 25,
+          "tags": [
+            "tableau_guilde",
+            "contrat",
+            "rumeur",
+            "enquete"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 25,
+          "tags": [
+            "notable",
+            "garde",
+            "informateur",
+            "clerc",
+            "avocat"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 15,
+          "tags": [
+            "fete",
+            "execution",
+            "mariage",
+            "parade_militaire"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -3,
+        "visibilite": 1,
+        "prix": -1,
+        "reputation": 1
+      }
+    },
+    {
+      "_id": "zone::faubourg_hameau",
+      "_rev": "3-4adb38ab8c19775f304dfcf59a473c67",
+      "type": "zone_influence",
+      "nom": "Abords de hameau",
+      "terrain_tags": [
+        "rural",
+        "ferme",
+        "champ",
+        "chemin"
+      ],
+      "intensite_max": 0.3,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 40,
+          "tags": [
+            "paysan_aux_champs",
+            "berger",
+            "braconnier"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 35,
+          "tags": [
+            "legume",
+            "bois_coupe",
+            "pierre"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 15,
+          "tags": [
+            "chien_de_garde",
+            "fumee_de_cheminee"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": -1,
+        "visibilite": 1
+      }
+    },
+    {
+      "_id": "zone::faubourg_village",
+      "_rev": "3-871c3abefa9ef7cb046eb0d95493e97a",
+      "type": "zone_influence",
+      "nom": "Faubourgs de village",
+      "terrain_tags": [
+        "village",
+        "rural",
+        "faubourg",
+        "chemin"
+      ],
+      "intensite_max": 0.35,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 40,
+          "tags": [
+            "artisan",
+            "journalier",
+            "mendiant"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 25,
+          "tags": [
+            "echoppe_basique",
+            "troc"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 20,
+          "tags": [
+            "rumeur",
+            "petit_contrat"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 10,
+          "tags": [
+            "marche_aux_bestiaux",
+            "rixe_taverne"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": -1,
+        "visibilite": 0
+      }
+    },
+    {
+      "_id": "zone::faubourg_ville",
+      "_rev": "5-44df1221691630ed3935ac3c215ae05d",
+      "type": "zone_influence",
+      "nom": "Faubourgs de ville",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "faubourg",
+        "ruelle"
+      ],
+      "intensite_max": 0.45,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 40,
+          "tags": [
+            "mendiant",
+            "artisan_pauvre",
+            "recruteur_guilde",
+            "refugie"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 20,
+          "tags": [
+            "marche_noir",
+            "receleur",
+            "echoppe_douteuse"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 25,
+          "tags": [
+            "commission",
+            "message",
+            "enquete_basse_fosse"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 10,
+          "tags": [
+            "rixe",
+            "arrestation",
+            "incendie"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": -1
+      }
+    },
+    {
+      "_id": "zone::quartier_bas_capitale",
+      "_rev": "3-f5a5bcd916618fd128dba6d8d68510aa",
+      "type": "zone_influence",
+      "nom": "Bas-fonds de capitale",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "ruelle",
+        "taudis"
+      ],
+      "intensite_max": 0.8,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 30,
+          "tags": [
+            "maitre_guilde_voleurs",
+            "assassin",
+            "noble_dechue",
+            "espion_etranger"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 35,
+          "tags": [
+            "complot",
+            "assassinat_commande",
+            "fuite",
+            "reseau_espionnage"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 20,
+          "tags": [
+            "arme_illegale",
+            "poison_rare",
+            "identite_false",
+            "information_etat"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 10,
+          "tags": [
+            "embuscade_organisee",
+            "gang_organise"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 5,
+          "tags": [
+            "soulèvement",
+            "emeute",
+            "execution_clandestine"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": 4,
+        "visibilite": -3,
+        "prix": 3,
+        "reputation": -2
+      }
+    },
+    {
+      "_id": "zone::quartier_bas_cite",
+      "_rev": "4-b5f4f67ce1efebddfd58e666abd30590",
+      "type": "zone_influence",
+      "nom": "Bas-quartiers de cité",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "ruelle",
+        "taudis"
+      ],
+      "intensite_max": 0.7,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 35,
+          "tags": [
+            "voleur",
+            "prostituee",
+            "informateur",
+            "tueur_a_gage"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 30,
+          "tags": [
+            "travail_sale",
+            "contrebande",
+            "chantage",
+            "evasion"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 20,
+          "tags": [
+            "marche_noir",
+            "arme_illegale",
+            "drogue",
+            "information"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 10,
+          "tags": [
+            "guet_apens",
+            "gang",
+            "milice_corrompue"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 5,
+          "tags": [
+            "meurtre",
+            "course_poursuite",
+            "incendie_volontaire"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": 3,
+        "visibilite": -2,
+        "prix": 2,
+        "reputation": -1
+      }
+    },
+    {
+      "_id": "zone::quartier_marchand_ville",
+      "_rev": "3-25a94e824aa01f77d84f563b6188c8d9",
+      "type": "zone_influence",
+      "nom": "Quartier marchand",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "rue",
+        "place",
+        "marche"
+      ],
+      "intensite_max": 0.65,
+      "table_evenements": [
+        {
+          "type": "commerce",
+          "poids": 60,
+          "tags": [
+            "negociant",
+            "entrepot",
+            "caravane",
+            "banquier"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 20,
+          "tags": [
+            "courtier",
+            "contrebandier",
+            "crieur"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 15,
+          "tags": [
+            "livraison",
+            "escorte_marchandise",
+            "fraude"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 5,
+          "tags": [
+            "vol_a_la_tire",
+            "litige_commercial"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -2,
+        "visibilite": 0,
+        "prix": -1
+      }
+    },
+    {
+      "_id": "zone::quartier_noble_cite",
+      "_rev": "3-532b549e9d68ddda8f75f430e80295c3",
+      "type": "zone_influence",
+      "nom": "Quartier noble",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "rue",
+        "jardin"
+      ],
+      "intensite_max": 0.85,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 45,
+          "tags": [
+            "noble",
+            "serviteur",
+            "garde_privee",
+            "tuteur"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 35,
+          "tags": [
+            "intrigue_politique",
+            "faveur_noble",
+            "duel_honneur",
+            "heritage"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 10,
+          "tags": [
+            "objet_luxe",
+            "oeuvre_art",
+            "information"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 10,
+          "tags": [
+            "banquet",
+            "complot",
+            "scandale",
+            "tournoi"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -3,
+        "visibilite": 1,
+        "prix": -3,
+        "reputation": 3,
+        "acces_restreint": true
+      }
+    },
+    {
+      "_id": "zone::quartier_politique_capitale",
+      "_rev": "4-8020e71c5578e17fb6008369005ee24f",
+      "type": "zone_influence",
+      "nom": "Quartier politique et palais",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "palais",
+        "jardin"
+      ],
+      "intensite_max": 0.95,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 40,
+          "tags": [
+            "ministre",
+            "diplomate",
+            "garde_elite",
+            "secretaire_royal"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 40,
+          "tags": [
+            "intrigue_royale",
+            "trahison",
+            "mission_secrete",
+            "alliance"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 15,
+          "tags": [
+            "audience_royale",
+            "conseil_guerre",
+            "negociation_paix"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 5,
+          "tags": [
+            "assassinat",
+            "coup_etat"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -4,
+        "visibilite": 3,
+        "reputation": 5,
+        "acces_restreint": true
+      }
+    },
+    {
+      "_id": "zone::remparts_capitale",
+      "_rev": "3-d0fcacb737170116aae4bc21b3b89947",
+      "type": "zone_influence",
+      "nom": "Remparts et fortifications de capitale",
+      "terrain_tags": [
+        "ville",
+        "rempart",
+        "muraille",
+        "pierre"
+      ],
+      "intensite_max": 0.9,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 50,
+          "tags": [
+            "garde_elite",
+            "capitaine_remparts",
+            "ingenieur_militaire"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 25,
+          "tags": [
+            "defense_ville",
+            "sabotage",
+            "signal_secret"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 15,
+          "tags": [
+            "alerte_invasion",
+            "manoeuvre_militaire",
+            "releve_garde"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 10,
+          "tags": [
+            "siege",
+            "incursion_ennemie"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -3,
+        "visibilite": 3,
+        "reputation": 1
+      }
+    },
+    {
+      "_id": "zone::remparts_cite",
+      "_rev": "3-406b0e874bb0fd6942a2c6123305fea6",
+      "type": "zone_influence",
+      "nom": "Remparts et portes de cité",
+      "terrain_tags": [
+        "ville",
+        "rempart",
+        "muraille",
+        "pierre"
+      ],
+      "intensite_max": 0.75,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 50,
+          "tags": [
+            "garde_porte",
+            "douanier",
+            "sentinelle",
+            "passeur"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 25,
+          "tags": [
+            "contrebande",
+            "avis_recherche",
+            "passage_interdit"
+          ]
+        },
+        {
+          "type": "ambiance",
+          "poids": 15,
+          "tags": [
+            "controle_identite",
+            "fermeture_porte",
+            "alerte"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 10,
+          "tags": [
+            "tentative_fuite",
+            "attaque_convoi"
+          ]
+        }
+      ],
+      "modificateurs": {
+        "danger": -2,
+        "visibilite": 2,
+        "reputation": 0
+      }
+    },
+    {
+      "_id": "zone:campement_bandit",
+      "_rev": "3-c2ddbe1035663b57b3cd284ed062458c",
+      "type": "zone_influence",
+      "nom": "Campement de bandits",
+      "terrain_tags": [
+        "camp",
+        "clariere",
+        "foret",
+        "bois"
+      ],
+      "intensite_max": 0.95,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 70,
+          "tags": [
+            "bandit",
+            "chef_bandit",
+            "mercenaire_renégat"
+          ]
+        },
+        {
+          "type": "tresor",
+          "poids": 15,
+          "tags": [
+            "butin",
+            "piece_or",
+            "objet_vole"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 10,
+          "tags": [
+            "otage",
+            "prisonnier",
+            "espion"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 4,
+        "visibilite": -1
+      }
+    },
+    {
+      "_id": "zone:faubourg",
+      "_rev": "4-48737658f838158ee0448ea151a200e2",
+      "type": "zone_influence",
+      "nom": "Faubourgs de cité",
+      "terrain_tags": [
+        "ville",
+        "urbain",
+        "faubourg",
+        "ruelle"
+      ],
+      "intensite_max": 0.45,
+      "table_evenements": [
+        {
+          "type": "pnj",
+          "poids": 55,
+          "tags": [
+            "mendiant",
+            "artisan",
+            "recruteur_guilde"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 5,
+          "tags": [
+            "voleur",
+            "ivrogne_agressif",
+            "milice_corrompue"
+          ]
+        },
+        {
+          "type": "quete",
+          "poids": 20,
+          "tags": [
+            "commission",
+            "message",
+            "enquete"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 5,
+          "tags": [
+            "objet_perdu",
+            "marchandise_tombee"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 15
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 0
+      }
+    },
+    {
+      "_id": "zone:foret_coniferes",
+      "_rev": "3-f5793e9c15a9f31ef039cc1f4592ac41",
+      "type": "zone_influence",
+      "nom": "Forêt de conifères",
+      "terrain_tags": [
+        "foret",
+        "bois",
+        "conifere",
+        "chemin"
+      ],
+      "intensite_max": 0.8,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 45,
+          "tags": [
+            "conifere_vert",
+            "pin_gris",
+            "resine"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 35,
+          "tags": [
+            "araignee_geante",
+            "loup"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 10,
+          "tags": [
+            "herboriste"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": -1
+      }
+    },
+    {
+      "_id": "zone:foret_dense",
+      "_rev": "5-b70446c255f204b541bb530149bcdc01",
+      "type": "zone_influence",
+      "nom": "Forêt dense",
+      "terrain_tags": [
+        "foret",
+        "bois",
+        "chemin"
+      ],
+      "intensite_max": 0.9,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 50,
+          "tags": [
+            "loup",
+            "brigand"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 35,
+          "tags": [
+            "bois",
+            "herbe"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 10,
+          "tags": [
+            "ermite"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": -1
+      }
+    },
+    {
+      "_id": "zone:foret_feuillus",
+      "_rev": "5-cd0a21f7995e685e380355e863fc3bc7",
+      "type": "zone_influence",
+      "nom": "Forêt de feuillus",
+      "terrain_tags": [
+        "foret",
+        "bois",
+        "clariere",
+        "chemin"
+      ],
+      "intensite_max": 0.5,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 50,
+          "tags": [
+            "bois",
+            "champignon",
+            "plante"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 25,
+          "tags": [
+            "voleur",
+            "faune_locale"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "marchand_ambulant",
+            "voyageur"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 0
+      }
+    },
+    {
+      "_id": "zone:foret_persistante",
+      "_rev": "3-d41058fa4a5baafc70e359bc3a5af34c",
+      "type": "zone_influence",
+      "nom": "Forêt à feuilles persistantes",
+      "terrain_tags": [
+        "foret",
+        "bois",
+        "conifere",
+        "chemin"
+      ],
+      "intensite_max": 0.6,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 50,
+          "tags": [
+            "pin_vert",
+            "buisson_vert",
+            "gibier"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 30,
+          "tags": [
+            "brigand",
+            "sanglier"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 15,
+          "tags": [
+            "garde_forestier"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 0
+      }
+    },
+    {
+      "_id": "zone:foret_petrifiee",
+      "_rev": "3-8862058ad0de26c5a08691df5ca17ca5",
+      "type": "zone_influence",
+      "nom": "Forêt pétrifiée",
+      "terrain_tags": [
+        "foret",
+        "pierre",
+        "ruines",
+        "desolation"
+      ],
+      "intensite_max": 0.9,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 55,
+          "tags": [
+            "golem_pierre",
+            "elementaire",
+            "mort_vivant"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 25,
+          "tags": [
+            "bois_fossilise",
+            "mineral_rare",
+            "pierre"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "archeologue"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 15
+        }
+      ],
+      "modificateurs": {
+        "danger": 4,
+        "visibilite": -1
+      }
+    },
+    {
+      "_id": "zone:foret_temperee_humide",
+      "_rev": "3-0d591ad7b1107393615101a27ffadd64",
+      "type": "zone_influence",
+      "nom": "Forêt tempérée humide",
+      "terrain_tags": [
+        "foret",
+        "bois",
+        "riviere",
+        "chemin"
+      ],
+      "intensite_max": 0.8,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 60,
+          "tags": [
+            "conifere",
+            "pin",
+            "buisson_vert",
+            "eau_douce"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 25,
+          "tags": [
+            "ours",
+            "faune_locale"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 10,
+          "tags": [
+            "chasseur"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": -1
+      }
+    },
+    {
+      "_id": "zone:jungle",
+      "_rev": "3-8359b5e8eefd6ffe0921f689bbe770a7",
+      "type": "zone_influence",
+      "nom": "Jungle",
+      "terrain_tags": [
+        "jungle",
+        "foret",
+        "tropical"
+      ],
+      "intensite_max": 0.95,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 50,
+          "tags": [
+            "predateur_tropical",
+            "serpent",
+            "insectes"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 35,
+          "tags": [
+            "bois_exotique",
+            "plante_tropicale",
+            "fruit"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "explorateur"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 3,
+        "visibilite": -2
+      }
+    },
+    {
+      "_id": "zone:mangrove",
+      "_rev": "3-33bc9f0c1cf6c3501de3caa9cce25641",
+      "type": "zone_influence",
+      "nom": "Mangrove",
+      "terrain_tags": [
+        "mangrove",
+        "marais",
+        "eau",
+        "tropical"
+      ],
+      "intensite_max": 0.75,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 45,
+          "tags": [
+            "paletuvier",
+            "crabe",
+            "eau_salee"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 35,
+          "tags": [
+            "crocodile",
+            "monstre_aquatique"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "pecheur"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 15
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": -1
+      }
+    },
+    {
+      "_id": "zone:marais",
+      "_rev": "3-fafac933342f56aa87a8322f76fab0fa",
+      "type": "zone_influence",
+      "nom": "Marais putride",
+      "terrain_tags": [
+        "marais",
+        "eau",
+        "boue"
+      ],
+      "intensite_max": 0.85,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 45,
+          "tags": [
+            "serpent",
+            "grenouille_geante",
+            "mort_vivant"
+          ]
+        },
+        {
+          "type": "malus",
+          "poids": 25,
+          "tags": [
+            "maladie",
+            "empoisonnement",
+            "enlisement"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 20,
+          "tags": [
+            "plante_toxique",
+            "tourbe",
+            "minerai_noir"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "sorciere",
+            "fugitif"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 3,
+        "visibilite": -2,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:montagne",
+      "_rev": "3-5300d948b0a3b6477250abec4cc3d956",
+      "type": "zone_influence",
+      "nom": "Montagne escarpée",
+      "terrain_tags": [
+        "montagne",
+        "falaise",
+        "pierre",
+        "chemin"
+      ],
+      "intensite_max": 0.8,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 40,
+          "tags": [
+            "aigle_geant",
+            "troll",
+            "brigand_montagnard"
+          ]
+        },
+        {
+          "type": "malus",
+          "poids": 20,
+          "tags": [
+            "chute_pierres",
+            "blizzard",
+            "altitude"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 30,
+          "tags": [
+            "minerai",
+            "pierre_precieuse",
+            "herbe_rare"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "nain",
+            "ascete"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 3,
+        "visibilite": 1,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:plaine_ouverte",
+      "_rev": "3-ce049235b17342c507e79d88fc563ef8",
+      "type": "zone_influence",
+      "nom": "Plaine ouverte",
+      "terrain_tags": [
+        "plaine",
+        "herbe",
+        "champ",
+        "chemin"
+      ],
+      "intensite_max": 0.3,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 20,
+          "tags": [
+            "bandit",
+            "animal_sauvage"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 40,
+          "tags": [
+            "herbe",
+            "fleur",
+            "pierre"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 25,
+          "tags": [
+            "paysan",
+            "berger",
+            "messager"
+          ]
+        },
+        {
+          "type": "meteo",
+          "poids": 10,
+          "tags": [
+            "tempete",
+            "brouillard"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 0,
+        "visibilite": 2
+      }
+    },
+    {
+      "_id": "zone:riviere",
+      "_rev": "3-4c2209c9f6a25493f276444281d23c5c",
+      "type": "zone_influence",
+      "nom": "Rivière et berges",
+      "terrain_tags": [
+        "riviere",
+        "eau",
+        "berge",
+        "bois"
+      ],
+      "intensite_max": 0.5,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 45,
+          "tags": [
+            "poisson",
+            "eau_fraiche",
+            "plante_aquatique"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 20,
+          "tags": [
+            "crocodile",
+            "sirene",
+            "sangsue_geante"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 25,
+          "tags": [
+            "pecheur",
+            "passeur",
+            "lavandiere"
+          ]
+        },
+        {
+          "type": "malus",
+          "poids": 5,
+          "tags": [
+            "noyade",
+            "courant_fort"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 0,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:ruines_maudites",
+      "_rev": "3-4a9530c92070e229e95ee4cb9d49b780",
+      "type": "zone_influence",
+      "nom": "Ruines maudites",
+      "terrain_tags": [
+        "ruines",
+        "pierre",
+        "souterrain"
+      ],
+      "intensite_max": 0.95,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 55,
+          "tags": [
+            "mort_vivant",
+            "spectre",
+            "golem_pierre"
+          ]
+        },
+        {
+          "type": "tresor",
+          "poids": 20,
+          "tags": [
+            "artefact",
+            "piece_ancienne",
+            "parchemin"
+          ]
+        },
+        {
+          "type": "piege",
+          "poids": 15,
+          "tags": [
+            "lame_cachee",
+            "rune_explosive",
+            "fosse"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "pilleur_tombe",
+            "cultiste"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 4,
+        "visibilite": -1,
+        "moral": -1
+      }
+    },
+    {
+      "_id": "zone:taiga",
+      "_rev": "3-073ae5e707dee1825cffe1b5c8951ebb",
+      "type": "zone_influence",
+      "nom": "Taïga",
+      "terrain_tags": [
+        "foret",
+        "bois",
+        "conifere",
+        "neige"
+      ],
+      "intensite_max": 0.7,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 40,
+          "tags": [
+            "loup_des_neiges",
+            "creature_polaire"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 30,
+          "tags": [
+            "pin_enneige",
+            "fourrure"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 10,
+          "tags": [
+            "trappeur"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 20
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": -1
+      }
+    }
+  ]
+}

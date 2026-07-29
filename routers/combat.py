@@ -16,7 +16,10 @@ from utils.competences import (
     furtivite_passive,
 )
 from routers.user import _take_ref
-from utils.zones import load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights
+from utils.zones import (
+    load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
+    terrain_tags_actifs,
+)
 from utils import focalisation
 from utils import recrutement
 from utils import montures
@@ -43,15 +46,17 @@ def _is_town_lieu(lieu: dict | None) -> bool:
     return bool(img) and os.path.exists(os.path.join(TOWNS_IMAGES_PATH, img))
 
 
-def _active_zone_placements(lieu: dict, character: dict) -> list:
-    """Placements de zone actifs (intensité > 0) à la position du personnage.
+def _active_zone_placements(lieu: dict, character: dict) -> tuple[list, dict]:
+    """Placements de zone actifs (intensité > 0) à la position du personnage, ET les
+    zone-defs chargées pour les résoudre.
 
     On renvoie les placements eux-mêmes (pas seulement les ids de def) pour pouvoir
-    lire un éventuel `profil_weights` propre à l'instance de zone.
+    lire un éventuel `profil_weights` propre à l'instance de zone ; et les defs, que
+    l'appelant relirait sinon en base pour rien (`terrain_tags` du décor).
     """
     placements = lieu.get("zone_influences", [])
     if not placements:
-        return []
+        return [], {}
     pos = character.get("position", {})
     px, py = pos.get("x", 0), pos.get("y", 0)
     zone_defs = load_zone_defs_for_lieu(lieu, get_doc)
@@ -60,7 +65,7 @@ def _active_zone_placements(lieu: dict, character: dict) -> list:
         zone_def = zone_defs.get(placement.get("zone"))
         if zone_def and compute_zone_intensity(px, py, placement, zone_def) > 0.0:
             actifs.append(placement)
-    return actifs
+    return actifs, zone_defs
 
 
 def _actor_character_id(combat_doc: dict) -> str:
@@ -140,7 +145,9 @@ async def start_combat(
 
     # Espèces rencontrables = celles du lieu dont une zone concernée est active à la
     # position du personnage (rencontres: [{espece, zones:[zone_def_id]}]).
-    active_placements = _active_zone_placements(depart_lieu, character) if depart_lieu else []
+    active_placements, zone_defs = (
+        _active_zone_placements(depart_lieu, character) if depart_lieu else ([], {})
+    )
     actives = {p.get("zone") for p in active_placements}
     rencontres = (depart_lieu or {}).get("rencontres", [])
     espece_ids = {
@@ -215,12 +222,17 @@ async def start_combat(
             if q.get("source") == "rang" and q.get("narration"):
                 chasse_narration = q["narration"]
 
-    # Sélection pondérée d'une battle map (lieu) selon les tags de la zone + lieu de départ.
-    battle_map = select_battle_map(body.tags, depart_lieu)
+    # Sélection pondérée d'une battle map (lieu) selon le TERRAIN des zones actives.
+    # ⚠️ Surtout pas `body.tags` : pour un événement `combat` ce sont des noms de
+    # créatures (loup, brigand…), qui ne recoupent jamais un tag de carte — le tirage
+    # devenait uniforme et la mine sortait en pleine forêt. Le terrain est dérivé ICI,
+    # côté serveur, plutôt que renvoyé par le client : même information, sans confiance.
+    terrain = terrain_tags_actifs(active_placements, zone_defs)
+    battle_map = select_battle_map(terrain, depart_lieu)
     map_image = battle_map.get("image") if battle_map else random.choice(BATTLE_MAPS)
     # Furtivité passive à l'entrée en combat : conditions de terrain évaluées contre les
     # tags de la battle map ∪ tags de zone (ex. Furtivité sylvestre du forestier en forêt).
-    map_tags = set((battle_map or {}).get("tags", [])) | set(body.tags or [])
+    map_tags = set((battle_map or {}).get("tags", [])) | set(terrain)
     furtivite = furtivite_passive(character, get_doc, map_tags)
     # Le combat référence le lieu battle map (cells non dupliqué) ; repli grille ouverte.
     combat_doc = create_combat_doc(character, monstres, body.tags, map_image,

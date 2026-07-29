@@ -221,6 +221,29 @@ def resolve_profil_weights(active_placements: list, lieu: dict) -> dict | None:
     return (lieu or {}).get("profil_weights") or None
 
 
+def terrain_tags_actifs(active_placements: list, zone_defs: dict) -> list:
+    """Tags de TERRAIN des zones actives — union des `terrain_tags` de leurs zone-defs.
+
+    ⚠️ DEUX VOCABULAIRES DE TAGS COEXISTENT SUR UN ZONE-DEF, à ne jamais confondre :
+    `terrain_tags` décrit le DÉCOR (foret, ville, falaise, chemin…) et sert à choisir la
+    battle map d'un combat (`combat.select_battle_map`) ; les `tags` d'une entrée de
+    `table_evenements` décrivent le CONTENU de l'événement tiré — pour une entrée
+    `type:"combat"` ce sont des noms de créatures (loup, brigand…). Nourrir la sélection
+    de décor avec les seconds ne produit jamais aucun recoupement : c'est ce bug qui
+    faisait tirer la mine aux cristaux en pleine forêt.
+
+    Pur (aucun accès DB), même forme que `resolve_profil_weights` : les placements
+    actifs sont résolus par l'appelant, qui a déjà chargé les defs.
+    """
+    tags: list = []
+    for placement in active_placements or []:
+        zone_def = (zone_defs or {}).get(placement.get("zone")) or {}
+        for tag in zone_def.get("terrain_tags") or []:
+            if tag and tag not in tags:
+                tags.append(tag)
+    return tags
+
+
 def load_zone_defs_for_lieu(lieu_doc: dict, get_doc_fn) -> dict:
     """Batch-fetch all zone definition documents referenced by lieu_doc's zone_influences."""
     ids = {p["zone"] for p in lieu_doc.get("zone_influences", []) if "zone" in p}

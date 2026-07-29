@@ -26,6 +26,11 @@ BATTLE_MAPS = [
 	"map0005.jpg", "map0006.jpg", "map0007.jpg", "abandonned_church01.webp",
 ]
 
+# Tag qui retire une battle map du tirage de décor ordinaire (`select_battle_map`) :
+# une salle de donjon ne s'atteint que par son gardien. Filtre de DONNÉE — préféré à
+# `donjon.donjon_de_lieu`, qui coûterait un find_docs à chaque entrée en combat.
+TAG_BATTLE_MAP_EXCLU = "donjon"
+
 
 def _compute_actions_max(ag: int, v: int) -> int:
 	"""Nombre d'actions par tour dérivé des stats : max(1, ceil(Ag/40 + V/2))."""
@@ -736,21 +741,40 @@ def _place_actors(combat_doc: dict, grid: dict) -> None:
 		occupied.add(pos)
 
 
-def select_battle_map(zone_tags: list, depart_lieu: dict | None) -> dict | None:
-	"""Sélection pondérée d'un lieu battle map selon le recoupement de tags.
+def select_battle_map(terrain_tags: list, depart_lieu: dict | None) -> dict | None:
+	"""Sélection pondérée d'un lieu battle map selon le recoupement de tags de TERRAIN.
 
-	Poids = nb de tags communs entre la battle map et (tags zone ∪ tags lieu départ),
-	avec un minimum de 1 pour rester tirable. Retourne le lieu ou None si aucun.
+	`terrain_tags` = décor des zones actives (`zones.terrain_tags_actifs`), PAS les
+	`tags` de l'événement tiré : ceux-là nomment des créatures pour un événement
+	`combat` (loup, brigand…) et ne recoupent jamais un tag de carte — le tirage était
+	donc uniforme, et la mine sortait en pleine forêt une fois sur quatre.
+
+	Trois règles :
+	  1. une salle de donjon (tag `donjon`) n'est JAMAIS tirée comme décor ordinaire —
+	     on n'y descend que par son gardien (cf. § Donjons) ;
+	  2. au moins UN tag commun est exigé, et le poids est le nombre de tags communs ;
+	  3. repli si rien ne matche : tirage uniforme sur tout le pool hors donjon. Une
+	     zone dont le terrain n'a pas encore de carte (urbaine, marais…) garde ainsi le
+	     comportement historique au lieu de tomber sur la grille ouverte, et l'import
+	     d'une carte au bon tag l'active sans toucher au code.
+
+	Retourne le lieu, ou None si aucune carte exploitable (l'appelant retombe alors sur
+	la grille ouverte de `get_combat_grid`).
 	"""
 	candidates = [
 		b for b in (find_docs({"type": "lieu", "categorie": "battle_map"}) or [])
-		if b.get("cells")
+		if b.get("cells") and TAG_BATTLE_MAP_EXCLU not in (b.get("tags") or [])
 	]
 	if not candidates:
 		return None
-	pool_tags = set(zone_tags or []) | set((depart_lieu or {}).get("tags", []))
-	weights = [max(1, len(set(b.get("tags", [])) & pool_tags)) for b in candidates]
-	return random.choices(candidates, weights=weights, k=1)[0]
+	# Les tags du lieu de départ restent dans le pool : ils permettent à un auteur de
+	# taguer un lieu d'exploration pour surcharger le décor de ses combats.
+	pool_tags = set(terrain_tags or []) | set((depart_lieu or {}).get("tags", []))
+	communs = [len(set(b.get("tags", [])) & pool_tags) for b in candidates]
+	matching = [(b, n) for b, n in zip(candidates, communs) if n > 0]
+	if not matching:
+		return random.choice(candidates)
+	return random.choices([b for b, _ in matching], weights=[n for _, n in matching], k=1)[0]
 
 
 def get_combat_grid(combat_doc: dict) -> dict:
