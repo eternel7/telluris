@@ -11,7 +11,7 @@ from utils import marche
 from models import character_stats
 from utils.marche import (
     recette_matieres, matiere_item_id, _executer_production_batch, ecouler_produits_pnj,
-    depecage_carcasse, appliquer_marchandage,
+    depecage_carcasse, appliquer_marchandage, compter_transaction,
 )
 
 
@@ -281,3 +281,108 @@ def test_marchandage_echec_ne_touche_pas_prix_negocies():
 
     assert relation.get("prix_negocies", {}) == {}
     assert issue["prix_negocie"] is None
+
+
+# ── Fidélité marchande ──────────────────────────────────────────────────────────
+# Commercer répare une relation dégradée : +1 tous les RELATION_FIDELITE_TRANSACTIONS
+# échanges (ventes ET achats confondus), tant que la relation est SOUS le seuil. Le
+# compteur ne tourne que sous le seuil et repart de zéro au-dessus.
+
+@pytest.fixture
+def fidelite(monkeypatch):
+    """Réglage nominal : 10 transactions, seuil au neutre (50)."""
+    monkeypatch.setattr(character_stats, "RELATION_FIDELITE_TRANSACTIONS", 10)
+    monkeypatch.setattr(character_stats, "RELATION_FIDELITE_SEUIL", 50)
+
+
+def test_fidelite_sous_le_palier_ne_donne_rien(fidelite):
+    relation = {"value": 40}
+
+    for _ in range(9):
+        issue = compter_transaction(relation)
+
+    assert issue == {"compteur": 9, "restant": 1, "gain": False, "relation": 40, "modifie": True}
+    assert relation["fidelite_transactions"] == 9
+    assert relation["value"] == 40
+
+
+def test_fidelite_dixieme_transaction_rend_un_point(fidelite):
+    relation = {"value": 40, "fidelite_transactions": 9}
+
+    issue = compter_transaction(relation)
+
+    assert issue["gain"] is True
+    assert issue["relation"] == 41
+    assert relation["value"] == 41
+    assert relation["fidelite_transactions"] == 0  # le compteur repart pour 10
+
+
+def test_fidelite_au_dessus_du_seuil_remet_le_compteur_a_zero(fidelite):
+    # Un client déjà bien vu ne capitalise pas d'avance : le compteur accumulé pendant la
+    # brouille est effacé dès que la relation repasse au-dessus du seuil.
+    relation = {"value": 60, "fidelite_transactions": 7}
+
+    issue = compter_transaction(relation)
+
+    assert issue["gain"] is False
+    assert issue["modifie"] is True  # le compteur a bougé (7 → 0) → l'appelant doit sauver
+    assert relation["fidelite_transactions"] == 0
+    assert relation["value"] == 60
+
+
+def test_fidelite_au_dessus_du_seuil_sans_compteur_ne_modifie_rien(fidelite):
+    # Rien à écrire : l'appelant ne doit pas sauver le doc relation à chaque transaction.
+    relation = {"value": 60}
+
+    issue = compter_transaction(relation)
+
+    assert issue["modifie"] is False
+    assert "fidelite_transactions" not in relation
+
+
+def test_fidelite_s_arrete_en_atteignant_le_seuil(fidelite):
+    # 49 → 50 au 10e échange, puis plus rien : le seuil (neutre par défaut) est un plafond.
+    relation = {"value": 49, "fidelite_transactions": 9}
+
+    assert compter_transaction(relation)["relation"] == 50
+
+    for _ in range(10):
+        issue = compter_transaction(relation)
+
+    assert issue["gain"] is False
+    assert relation["value"] == 50
+
+
+def test_fidelite_seuil_au_dessus_du_neutre(fidelite, monkeypatch):
+    # Le seuil est une variable de monde : réglé à 70, la fidélité mène jusqu'à « Estimé ».
+    monkeypatch.setattr(character_stats, "RELATION_FIDELITE_SEUIL", 70)
+    relation = {"value": 55, "fidelite_transactions": 9}
+
+    issue = compter_transaction(relation)
+
+    assert issue["gain"] is True
+    assert relation["value"] == 56
+
+
+def test_fidelite_desactivee_par_world_var(fidelite, monkeypatch):
+    monkeypatch.setattr(character_stats, "RELATION_FIDELITE_TRANSACTIONS", 0)
+    relation = {"value": 40}
+
+    for _ in range(20):
+        issue = compter_transaction(relation)
+
+    assert issue == {"compteur": 0, "restant": 0, "gain": False, "relation": 40, "modifie": False}
+    assert "fidelite_transactions" not in relation
+    assert relation["value"] == 40
+
+
+def test_fidelite_ne_releve_pas_un_banni(fidelite):
+    # Relation 0 = transactions interdites (403 côté endpoints) : la fidélité ne doit pas
+    # devenir la porte de sortie d'un bannissement.
+    relation = {"value": 0}
+
+    for _ in range(20):
+        issue = compter_transaction(relation)
+
+    assert issue["gain"] is False
+    assert relation["value"] == 0

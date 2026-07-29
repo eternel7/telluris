@@ -4886,6 +4886,12 @@ function formatPrix(prix) {
 	return parts.length ? parts.join(' ') : '0 cu';
 }
 
+// « Vendu : X (3 ar) · 🤝 fidélité +1 (relation 42) » — un seul #toast, on suffixe.
+function _fideliteSuffixe(data) {
+	const f = data && data.fidelite;
+	return (f && f.gain) ? ' · 🤝 fidélité +1 (relation ' + f.relation + ')' : '';
+}
+
 function updatePurse(purse) {
 	if (!purse) return;
 	const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
@@ -5237,7 +5243,7 @@ async function sellItem(index, itemId, compagnonId) {
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
-		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')');
+		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')' + _fideliteSuffixe(data));
 	} catch(err) { console.error('Erreur vente', err); }
 }
 
@@ -5254,7 +5260,7 @@ async function buyItem(itemId) {
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
-		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')');
+		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')' + _fideliteSuffixe(data));
 	} catch(err) { console.error('Erreur achat', err); }
 }
 

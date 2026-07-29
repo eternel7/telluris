@@ -23,6 +23,7 @@ from utils.marche import (
 	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
 	fiche_item_fields,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
+	compter_transaction,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 	relations_lieux_payload,
 )
@@ -1664,6 +1665,23 @@ def _negociateur(character: dict) -> tuple[dict, int, bool]:
 	return expedition.meilleur_negociateur(character, membres[1:])
 
 
+def _appliquer_fidelite(character: dict, relation: dict, payload: dict) -> None:
+	"""Compte la transaction dans la fidélité du marchand et resynchronise le payload.
+	Chokepoint unique de sell_item/buy_item. Le doc relation est ANNEXE → écrit en
+	best-effort (comme lieu_doc) et SEULEMENT s'il a bougé.
+	⚠️ À appeler APRÈS le calcul du prix (la transaction se règle à la cote d'avant) et
+	AVANT `_marchand_vendables`/`resolve_stock_vente`, pour que les listes renvoyées
+	reflètent la nouvelle cote (Conventions §10)."""
+	fid = compter_transaction(relation)
+	if fid["modifie"]:
+		save_doc(relation)
+	payload["fidelite"] = fid
+	if fid["gain"]:
+		# Une relation a bougé → l'onglet 🤝 doit se resynchroniser. Calculé SEULEMENT en
+		# cas de gain : relations_lieux_payload relit tous les docs relation + lieu.
+		payload["relations_lieux"] = relations_lieux_payload(character)
+
+
 @user_router.post("/sell_item")
 async def sell_item(
 	current_user: Annotated[User, Depends(get_current_user)],
@@ -1710,6 +1728,7 @@ async def sell_item(
 
 	porteurs = recrutement.porteurs_effectifs(principal, get_doc)
 	payload = _inventory_payload(principal)
+	_appliquer_fidelite(principal, relation, payload)
 	payload["purse"] = purse
 	payload["vendables"] = _marchand_vendables(principal, lieu_doc, relation, porteurs)
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)
@@ -1770,6 +1789,7 @@ async def buy_item(
 	save_doc(lieu_doc)  # best-effort : décrément du stock monde
 
 	payload = _inventory_payload(character)
+	_appliquer_fidelite(character, relation, payload)
 	payload["purse"] = purse
 	payload["vendables"] = _marchand_vendables(character, lieu_doc, relation, recrutement.porteurs_effectifs(character, get_doc))
 	payload["achetables"] = resolve_stock_vente(lieu_doc, relation)

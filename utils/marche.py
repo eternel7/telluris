@@ -443,6 +443,41 @@ def ajuster_relation(relation_doc: dict, delta: int) -> int:
 	return val
 
 
+def compter_transaction(relation_doc: dict) -> dict:
+	"""Compte UNE transaction (vente OU achat) avec ce marchand. Tous les
+	RELATION_FIDELITE_TRANSACTIONS échanges, la fidélité rend +1 de relation TANT QUE
+	celle-ci est SOUS RELATION_FIDELITE_SEUIL — commercer répare une brouille, sans
+	remplacer le marchandage. Mute en place, NE SAUVEGARDE PAS (l'appelant persiste).
+
+	⚠️ Le compteur n'avance QUE sous le seuil et repart de zéro au-dessus : il faut 10
+	échanges DEPUIS la brouille pour regagner un point (un client déjà bien vu ne capitalise
+	pas d'avance). Renvoie {compteur, restant, gain, relation, modifie} — `modifie` dit à
+	l'appelant s'il a quelque chose à sauver."""
+	palier = int(character_stats.RELATION_FIDELITE_TRANSACTIONS or 0)
+	seuil  = int(character_stats.RELATION_FIDELITE_SEUIL or 0)
+	val = relation_value(relation_doc)
+	compteur = int((relation_doc or {}).get("fidelite_transactions", 0) or 0)
+	inerte = {"compteur": compteur, "restant": 0, "gain": False, "relation": val, "modifie": False}
+	if palier <= 0:                 # kill-switch (miroir de CRIT_CHANCE_DIVISEUR = 0)
+		return inerte
+	# Au-dessus du seuil : rien à gagner, et le compteur repart de zéro. Un BANNI (0) est
+	# exclu aussi : les endpoints lui refusent déjà toute transaction, la fidélité ne doit
+	# pas devenir la porte de sortie d'un bannissement.
+	if val >= seuil or val <= 0:
+		if compteur:
+			relation_doc["fidelite_transactions"] = 0
+			return {**inerte, "compteur": 0, "modifie": True}
+		return inerte
+	compteur += 1
+	if compteur < palier:
+		relation_doc["fidelite_transactions"] = compteur
+		return {"compteur": compteur, "restant": palier - compteur, "gain": False,
+				"relation": val, "modifie": True}
+	relation_doc["fidelite_transactions"] = 0
+	return {"compteur": 0, "restant": palier, "gain": True,
+			"relation": ajuster_relation(relation_doc, +1), "modifie": True}
+
+
 def marchandage_bloque(relation_doc: dict, now: int) -> bool:
 	"""Le marchand refuse-t-il de négocier (blocage après crit échec encore actif) ?"""
 	return now < int((relation_doc or {}).get("marchandage_bloque_jusqu", 0) or 0)

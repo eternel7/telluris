@@ -129,6 +129,14 @@ MARCHANDAGE_BLOCAGE_SECONDES: int = 3600
 # ⚠️ Ne concerne QUE les compagnons (le principal n'a pas d'affinité envers lui-même) : 0 =
 # tous les compagnons éligibles, PAS « principal seul » (miroir de QUETE_TRANSPORT_RELATION_MIN).
 MARCHANDAGE_COMPAGNON_AFFINITE_MIN: int = 50
+# Fidélité : commercer régulièrement répare une relation dégradée. Tous les
+# RELATION_FIDELITE_TRANSACTIONS échanges (ventes ET achats confondus) avec le MÊME lieu,
+# +1 de relation tant qu'elle est SOUS RELATION_FIDELITE_SEUIL.
+# ⚠️ Le compteur ne tourne QUE sous le seuil (remis à zéro au-dessus) : il faut 10 échanges
+# depuis la brouille pour regagner un point. 0 transaction = mécanique désactivée.
+# Le seuil peut être réglé AU-DESSUS du neutre (50) pour que la fidélité mène plus haut.
+RELATION_FIDELITE_TRANSACTIONS: int = 10
+RELATION_FIDELITE_SEUIL: int = 50
 # Seuil de « bonne réputation » par défaut pour les PNJ (services gratuits/améliorés,
 # conditions de dialogue relation_min) — 70 = palier « Estimé ». Surchargable par PNJ
 # dans la donnée (`gratuit_si.seuil`, `condition.relation_min.seuil`).
@@ -493,6 +501,8 @@ def current_world_variables() -> dict:
 		"RELATION_SEUIL_COEFF": RELATION_SEUIL_COEFF,
 		"MARCHANDAGE_BLOCAGE_SECONDES": MARCHANDAGE_BLOCAGE_SECONDES,
 		"MARCHANDAGE_COMPAGNON_AFFINITE_MIN": MARCHANDAGE_COMPAGNON_AFFINITE_MIN,
+		"RELATION_FIDELITE_TRANSACTIONS": RELATION_FIDELITE_TRANSACTIONS,
+		"RELATION_FIDELITE_SEUIL": RELATION_FIDELITE_SEUIL,
 		"PNJ_REPUTATION_SEUIL": PNJ_REPUTATION_SEUIL,
 		"QUETE_BOARD_TAILLE": QUETE_BOARD_TAILLE,
 		"QUETE_QTE_MIN": QUETE_QTE_MIN,
@@ -579,6 +589,7 @@ def load_world_variables() -> dict:
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN, CRIT_CHANCE_DIVISEUR, COMBAT_SLOTS_MAX
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	global MARCHANDAGE_COMPAGNON_AFFINITE_MIN
+	global RELATION_FIDELITE_TRANSACTIONS, RELATION_FIDELITE_SEUIL
 	global PNJ_REPUTATION_SEUIL
 	global QUETE_BOARD_TAILLE, QUETE_QTE_MIN, QUETE_QTE_MAX, QUETE_XP_FACTEUR, QUETE_CUIVRE_PAR_XP
 	global QUETE_COLLECT_POIDS_MAX, QUETE_BOARD_DUREE_SECONDES, QUETE_BOARD_DUREE_JITTER
@@ -656,6 +667,8 @@ def load_world_variables() -> dict:
 	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
 	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))
 	MARCHANDAGE_COMPAGNON_AFFINITE_MIN = int(v.get("MARCHANDAGE_COMPAGNON_AFFINITE_MIN", MARCHANDAGE_COMPAGNON_AFFINITE_MIN))
+	RELATION_FIDELITE_TRANSACTIONS = int(v.get("RELATION_FIDELITE_TRANSACTIONS", RELATION_FIDELITE_TRANSACTIONS))
+	RELATION_FIDELITE_SEUIL        = int(v.get("RELATION_FIDELITE_SEUIL", RELATION_FIDELITE_SEUIL))
 	PNJ_REPUTATION_SEUIL         = int(v.get("PNJ_REPUTATION_SEUIL", PNJ_REPUTATION_SEUIL))
 
 	QUETE_BOARD_TAILLE  = int(v.get("QUETE_BOARD_TAILLE", QUETE_BOARD_TAILLE))
