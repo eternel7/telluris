@@ -196,6 +196,11 @@ QUETE_TRANSPORT_STOCK_PROBA: float = 0.50
 # QUETE_CHASSE_PROBA_RANG donne la chance de se voir proposer une épreuve de rang (grade `max`).
 QUETE_CHASSE_XP_FACTEUR: float = 3.0
 QUETE_CHASSE_PROBA_RANG: float = 0.5
+# Rang le plus élevé qu'un comptoir de guilde peut délivrer quand son doc lieu ne porte pas de
+# `rang_max`. Une guilde ne promeut pas au-delà de ce que son bestiaire justifie : monter plus
+# haut demande la guilde d'une autre cité. ⚠️ Valeur hors de recrutement.RANGS ⇒ plus aucune
+# promotion nulle part (symptôme bruyant, préféré à un plafond silencieusement trop permissif).
+RANG_GUILDE_MAX_DEFAUT: str = "D"
 
 # ── Focalisation ─────────────────────────────────────────────────────────────────
 # Le personnage peut se focaliser sur une quête active : les tirages aléatoires sont
@@ -522,6 +527,7 @@ def current_world_variables() -> dict:
 		"QUETE_TRANSPORT_STOCK_PROBA": QUETE_TRANSPORT_STOCK_PROBA,
 		"QUETE_CHASSE_XP_FACTEUR": QUETE_CHASSE_XP_FACTEUR,
 		"QUETE_CHASSE_PROBA_RANG": QUETE_CHASSE_PROBA_RANG,
+		"RANG_GUILDE_MAX_DEFAUT": RANG_GUILDE_MAX_DEFAUT,
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
 		"SORT_COUT_COEFF": SORT_COUT_COEFF,
@@ -596,7 +602,7 @@ def load_world_variables() -> dict:
 	global QUETE_TRANSPORT_PROBA, QUETE_TRANSPORT_DUREE_SECONDES, QUETE_TRANSPORT_POIDS_MAX
 	global QUETE_TRANSPORT_NB_MAX, QUETE_TRANSPORT_XP, QUETE_TRANSPORT_RELATION_DELTA
 	global QUETE_TRANSPORT_STOCK_PROBA, QUETE_TRANSPORT_RELATION_MIN
-	global QUETE_CHASSE_XP_FACTEUR, QUETE_CHASSE_PROBA_RANG
+	global QUETE_CHASSE_XP_FACTEUR, QUETE_CHASSE_PROBA_RANG, RANG_GUILDE_MAX_DEFAUT
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
 	global RECRUTEMENT_GROUPE_TAILLE_MAX, RECRUTEMENT_BOARD_DUREE_SECONDES, RECRUTEMENT_BOARD_DUREE_JITTER
@@ -689,6 +695,7 @@ def load_world_variables() -> dict:
 	QUETE_TRANSPORT_STOCK_PROBA = float(v.get("QUETE_TRANSPORT_STOCK_PROBA", QUETE_TRANSPORT_STOCK_PROBA))
 	QUETE_CHASSE_XP_FACTEUR = float(v.get("QUETE_CHASSE_XP_FACTEUR", QUETE_CHASSE_XP_FACTEUR))
 	QUETE_CHASSE_PROBA_RANG = float(v.get("QUETE_CHASSE_PROBA_RANG", QUETE_CHASSE_PROBA_RANG))
+	RANG_GUILDE_MAX_DEFAUT  = str(v.get("RANG_GUILDE_MAX_DEFAUT", RANG_GUILDE_MAX_DEFAUT))
 
 	FOCUS_EVENEMENT_MULT = float(v.get("FOCUS_EVENEMENT_MULT", FOCUS_EVENEMENT_MULT))
 	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))

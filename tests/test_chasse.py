@@ -171,6 +171,41 @@ def test_rang_suivant_et_max():
 	assert chasse.rang_max_atteint("F") is False
 
 
+def test_rang_max_de_defaut_et_champ_du_comptoir():
+	# Comptoir sans `rang_max` ⇒ world-var par défaut (D) : une guilde ne promeut pas plus haut
+	# que ce que son bestiaire justifie, sans qu'on ait à poser la donnée partout.
+	assert chasse.rang_max_de(COMPTOIR) == character_stats.RANG_GUILDE_MAX_DEFAUT == "D"
+	assert chasse.rang_max_de({**COMPTOIR, "rang_max": "B"}) == "B"
+	assert chasse.rang_max_de({}) == "D"
+	assert chasse.rang_max_de(None) == "D"
+
+
+def test_rang_max_de_hors_echelle_ne_devient_pas_permissif():
+	# Un plafond illisible RETOMBE sur le défaut, jamais sur le sommet : une donnée fautive ne
+	# doit pas ouvrir la promotion jusqu'à S+ en silence.
+	assert chasse.rang_max_de({**COMPTOIR, "rang_max": "Z"}) == "D"
+
+
+def test_rang_max_de_world_var_hors_echelle_ferme_tout(monkeypatch):
+	# Même esprit pour la world-var elle-même : illisible ⇒ RANGS[0], donc plus aucune offre
+	# nulle part — symptôme bruyant, préféré à un plafond silencieusement trop haut.
+	monkeypatch.setattr(character_stats, "RANG_GUILDE_MAX_DEFAUT", "???")
+	assert chasse.rang_max_de(COMPTOIR) == RANGS[0]
+
+
+def test_rang_plafond_atteint():
+	assert chasse.rang_plafond_atteint("F", COMPTOIR) is False
+	assert chasse.rang_plafond_atteint("E", COMPTOIR) is False
+	assert chasse.rang_plafond_atteint("D", COMPTOIR) is True     # plafond par défaut atteint
+	assert chasse.rang_plafond_atteint("C", COMPTOIR) is True     # au-delà du plafond
+	# Un comptoir plus prestigieux repousse le plafond sans une ligne de code.
+	haut = {**COMPTOIR, "rang_max": "B"}
+	assert chasse.rang_plafond_atteint("D", haut) is False
+	assert chasse.rang_plafond_atteint("B", haut) is True
+	# Rang courant illisible ⇒ traité comme le premier de l'échelle (miroir de `rang_suivant`).
+	assert chasse.rang_plafond_atteint("inconnu", COMPTOIR) is False
+
+
 def test_promouvoir_mute_et_monte():
 	character = {}
 	assert chasse.promouvoir(character, "lieu:auxerre") == "E"
@@ -236,9 +271,22 @@ def test_qualificatif_par_niveau_et_bornage():
 	assert chasse.qualificatif_de(None) == "Vicieux"                # profil introuvable
 
 
-def test_offre_rang_none_si_rang_max():
+def test_offre_rang_none_si_plafond_guilde():
+	# Sommet de l'échelle : plus rien nulle part.
 	character = {"rangs_guilde": {"lieu:auxerre": RANGS[-1]}}
 	assert chasse.offre_rang_pour(character, COMPTOIR, _get_doc, _find_docs) is None
+	# Et surtout : le PLAFOND DE LA GUILDE coupe bien avant le sommet du monde. À D, le comptoir
+	# d'Auxerre n'a plus rien à offrir — c'est le bug d'origine (il proposait D → C pour des loups).
+	character = {"rangs_guilde": {"lieu:auxerre": "D"}}
+	assert chasse.offre_rang_pour(character, COMPTOIR, _get_doc, _find_docs) is None
+
+
+def test_offre_rang_reprend_au_dessus_du_defaut_si_comptoir_plus_prestigieux():
+	random.seed(1)
+	character = {"rangs_guilde": {"lieu:auxerre": "D"}}
+	offre = chasse.offre_rang_pour(character, {**COMPTOIR, "rang_max": "B"}, _get_doc, _find_docs)
+	assert offre is not None
+	assert offre["rang_vise"] == "C"
 
 
 def test_offre_rang_none_si_deja_active():

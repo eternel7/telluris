@@ -109,6 +109,9 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		# Épreuves de RANG de guilde (comptoir seulement) : flags qui montrent les choix
 		# « une épreuve pour moi ? » / « c'est fait » et placeholders ({espece}/{lieu}/{rang}/
 		# {rang_vise}) que le maître d'armes récite. Le rang est propre à la CITÉ (lieu_parent).
+		# ⚠️ `rang_max` = « CE COMPTOIR a atteint son plafond » (`rang_max` de son doc lieu, défaut
+		# `RANG_GUILDE_MAX_DEFAUT`), et NON « sommet de l'échelle » : une guilde s'arrête à ce que
+		# son bestiaire justifie, et son nœud dit bien « ce que cette guilde peut t'offrir ».
 		if chasse.est_comptoir(lieu_doc):
 			cite = lieu_doc.get("lieu_parent")
 			rang_courant = chasse.rang_de(character, cite)
@@ -116,7 +119,7 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			a_rapporter = chasse.rang_a_rapporter(character, cite)
 			flags["rang_offert"] = bool(offre_rang)
 			flags["rang_a_rapporter"] = bool(a_rapporter)
-			flags["rang_max"] = chasse.rang_max_atteint(rang_courant)
+			flags["rang_max"] = chasse.rang_plafond_atteint(rang_courant, lieu_doc)
 			placeholders["rang"] = rang_courant
 			if offre_rang or a_rapporter:
 				placeholders.update(_placeholders_rang(offre_rang or a_rapporter, rang_courant))

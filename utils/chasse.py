@@ -18,6 +18,12 @@
 # mécanique encore. L'offre de rang est tirée à l'entrée du comptoir et persistée en champ
 # transitoire `character["rang_offert"]` — même sémantique que `transport_offert`/`pnj_present`.
 #
+# ⚠️ Chaque guilde a son PLAFOND (`rang_max` sur le doc du comptoir, défaut world-var
+# `RANG_GUILDE_MAX_DEFAUT = "D"`) : elle ne promeut pas au-delà de ce que son bestiaire justifie.
+# Sans lui, le comptoir d'Auxerre proposait de passer D → C pour des loups et des sangliers.
+# Aller plus haut demande la guilde d'une AUTRE cité — c'est le plafond, et non le sommet de
+# l'échelle, qui coupe les offres (`rang_plafond_atteint`) et arme le flag de dialogue `rang_max`.
+#
 # Logique pure (DB injectée : get_doc_fn / find_docs_fn), mute sans save — l'endpoint persiste.
 # Pattern de utils/transport.py. World-vars lues via le module (jamais from-import).
 
@@ -286,7 +292,41 @@ def rang_suivant(rang: str) -> str:
 
 
 def rang_max_atteint(rang: str) -> bool:
+	"""Le SOMMET DU MONDE (`RANGS[-1]`) est-il atteint ? Repère de l'échelle, PAS le garde de
+	production : ce qui décide si une guilde a encore quelque chose à offrir est
+	`rang_plafond_atteint`, borné par le comptoir et non par l'échelle entière."""
 	return rang == RANGS[-1]
+
+
+def _index_rang(rang: str) -> int:
+	"""Position d'un rang sur l'échelle ; rang inconnu → 0 (miroir de `rang_suivant`, qui retombe
+	sur `RANGS[0]`) : un rang illisible n'est pas un rang élevé."""
+	try:
+		return RANGS.index(rang)
+	except ValueError:
+		return 0
+
+
+def rang_max_de(comptoir_doc: dict) -> str:
+	"""Rang le plus élevé que CE comptoir peut délivrer : champ `rang_max` de son doc lieu, repli
+	sur la world-var `RANG_GUILDE_MAX_DEFAUT`. Une guilde ne promeut pas au-delà de ce que son
+	bestiaire justifie — monter plus haut demande la guilde d'une autre cité.
+
+	⚠️ Valeur hors échelle (côté donnée comme côté world-var) → `RANGS[0]`, donc plus aucune offre
+	ici : un plafond qu'on ne sait pas lire ne doit pas devenir PERMISSIF. Le symptôme est bruyant
+	(le comptoir ne propose plus rien), là où un repli sur le sommet passerait inaperçu."""
+	brut = (comptoir_doc or {}).get("rang_max")
+	if brut in RANGS:
+		return brut
+	defaut = character_stats.RANG_GUILDE_MAX_DEFAUT
+	return defaut if defaut in RANGS else RANGS[0]
+
+
+def rang_plafond_atteint(rang_courant: str, comptoir_doc: dict) -> bool:
+	"""Ce comptoir n'a-t-il plus rien à offrir au personnage ? (rang courant ≥ son plafond).
+	C'est ce prédicat — et non `rang_max_atteint` — qui coupe les offres d'épreuve et qui arme le
+	flag de dialogue `rang_max` (« au sommet de ce que CETTE guilde peut t'offrir »)."""
+	return _index_rang(rang_courant) >= _index_rang(rang_max_de(comptoir_doc))
 
 
 def promouvoir(character: dict, cite_id: str) -> str:
@@ -380,14 +420,15 @@ def _rang_deja_actif(character: dict, cite: str) -> bool:
 
 
 def offre_rang_pour(character: dict, comptoir_doc: dict, get_doc_fn, find_docs_fn) -> dict | None:
-	"""Construit une épreuve de rang au comptoir, ou `None` si : pas de `lieu_parent`, rang
-	max déjà atteint, épreuve de rang de cette cité déjà active, ou aucune cible résolvable au
-	grade MAX. Ne tire PAS la probabilité (c'est `poser_rang_offert` qui la gère)."""
+	"""Construit une épreuve de rang au comptoir, ou `None` si : pas de `lieu_parent`, PLAFOND DE
+	CE COMPTOIR déjà atteint (`rang_max_de`, défaut `D` — pas le sommet du monde), épreuve de rang
+	de cette cité déjà active, ou aucune cible résolvable au grade MAX. Ne tire PAS la probabilité
+	(c'est `poser_rang_offert` qui la gère)."""
 	cite = (comptoir_doc or {}).get("lieu_parent")
 	if not cite:
 		return None
 	rang_courant = rang_de(character, cite)
-	if rang_max_atteint(rang_courant):
+	if rang_plafond_atteint(rang_courant, comptoir_doc):
 		return None
 	if _rang_deja_actif(character, cite):
 		return None
