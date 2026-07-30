@@ -467,7 +467,7 @@ def quete_detail(character: dict, q: dict) -> dict:
 	qte = int(obj.get("quantite", 0) or 0)
 	rec = q.get("recompenses", {}) or {}
 	purse = cuivre_to_purse(rec.get("cuivre", 0))
-	lieu_doc_chasse = None
+	carte_chasse = None
 	if obj.get("type") == "transport":
 		if q.get("livree_at"):
 			# Course à retour : la marchandise est remise, il reste à en rendre compte au donneur.
@@ -476,12 +476,21 @@ def quete_detail(character: dict, q: dict) -> dict:
 		else:
 			progress_txt = f"Livraison à {_cible_nom(obj)}"
 	elif obj.get("type") == "chasse":
-		lieu_doc_chasse = get_doc(obj.get("lieu")) if obj.get("lieu") else None
-		lieu_doc = lieu_doc_chasse
+		lieu_doc = get_doc(obj.get("lieu")) if obj.get("lieu") else None
 		lieu_nom = (lieu_doc.get("label") or lieu_doc.get("nom")) if lieu_doc else None
 		lieu_nom = lieu_nom or (obj.get("lieu") or "").split(":", 1)[-1]
 		compteur = min(prog, qte) if qte else prog
-		progress_txt = f"Traquer l'élite : {_cible_nom(obj)} ({lieu_nom}) — {compteur}/{qte}"
+		if obj.get("position"):
+			carte_chasse = _carte_chasse(obj, q.get("giver"), lieu_doc)
+		# ⚠️ Deux chasses au même gibier et au même grade portent un titre et une description
+		# RIGOUREUSEMENT identiques (figés à la génération) : sans le repère d'orientation, le
+		# joueur n'a aucun moyen de les distinguer dans sa fiche et croit en voir une seule qui
+		# oscille. C'est la case visée — donc la direction — qui les sépare.
+		repere = (carte_chasse or {}).get("direction_texte")
+		progress_txt = (
+			f"Traquer l'élite : {_cible_nom(obj)} ({lieu_nom}) — {compteur}/{qte}"
+			+ (f" · {repere}" if repere else "")
+		)
 	else:
 		progress_txt = f"{_cible_nom(obj)} : {min(prog, qte) if qte else prog}/{qte}"
 	detail = {
@@ -510,11 +519,10 @@ def quete_detail(character: dict, q: dict) -> dict:
 	if q.get("expire_at"):
 		detail["expire_at"] = int(q["expire_at"])
 		detail["now"] = now_epoch()
-	# Quête de chasse localisée : de quoi dessiner le crop 3×3 de la carte centré sur la cible.
-	if obj.get("type") == "chasse" and obj.get("position"):
-		carte = _carte_chasse(obj, q.get("giver"), lieu_doc_chasse)
-		if carte:
-			detail["carte"] = carte
+	# Quête de chasse localisée : de quoi dessiner le crop 3×3 de la carte centré sur la cible
+	# (déjà calculé plus haut — le libellé de progression en tire son repère d'orientation).
+	if carte_chasse:
+		detail["carte"] = carte_chasse
 	return detail
 
 
@@ -681,8 +689,9 @@ def maj_progress_kills(character: dict, monstres: list) -> None:
 def maj_progress_chasse(character: dict, monstres: list) -> None:
 	"""Complète les quêtes `chasse` actives dont l'élite MARQUÉE est tombée : un monstre mort
 	(`not vivant`) portant `quete_chasse == q.id`. Les autres monstres de la même espèce ne
-	comptent pas — seule la cible marquée. Mute en place. À appeler dans finalize_combat, juste
-	après maj_progress_kills (même fenêtre d'idempotence, garde `combats_recompenses`)."""
+	comptent pas — seule la cible marquée, et une bête ne porte JAMAIS qu'un seul contrat
+	(cf. `chasse.marquer_elites`). Mute en place. À appeler dans finalize_combat, juste après
+	maj_progress_kills (même fenêtre d'idempotence, garde `combats_recompenses`)."""
 	actives = character.get("quetes_actives", [])
 	if not actives:
 		return

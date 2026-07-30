@@ -380,6 +380,90 @@ def test_dans_zone_chasse_position_joueur_absente():
 	assert chasse.dans_zone_chasse(obj, {}) is False
 
 
+# ── marquer_elites : DEUX chasses au même gibier ─────────────────────────────────
+# Le bug de référence : une chasse ACCOMPLIE mais pas encore rendue restait dans
+# `quetes_actives`, réclamait encore son élite et la VOLAIT à la chasse encore à faire
+# visant la même espèce. Le joueur abattait la bête, le crédit retombait sur le contrat
+# déjà rempli, et les deux quêtes semblaient s'annuler l'une l'autre.
+
+def _chasse(qid, profil="profil:combattant", position=(5, 5), progress=0, **extra):
+	obj = {"type": "chasse", "cible": "espece:loup", "lieu": "lieu:auxerre",
+	       "profil": profil, "quantite": 1}
+	if position is not None:
+		obj["position"] = {"x": position[0], "y": position[1]}
+	return {"id": qid, "objectif": obj, "progress": progress, **extra}
+
+
+def _loups(n):
+	"""n loups ordinaires (profil novice), tels qu'`instantiate_monsters` les produirait."""
+	return [dict(combat.build_monster_snapshot(LOUP, NOVICE, i), pos={"x": i, "y": 0})
+	        for i in range(n)]
+
+
+def _marquer(character, monstres):
+	return chasse.marquer_elites(character, monstres, "lieu:auxerre", [LOUP],
+	                             _get_doc, combat.build_monster_snapshot)
+
+
+def test_chasse_accomplie_quantite_defaut_1():
+	# ⚠️ `quantite` absente ⇒ 1 (et non 0, qui rendrait toute chasse « accomplie » d'emblée).
+	assert chasse.chasse_accomplie({"objectif": {"type": "chasse"}, "progress": 0}) is False
+	assert chasse.chasse_accomplie(_chasse("q", progress=1)) is True
+	assert chasse.chasse_accomplie(_chasse("q", progress=0)) is False
+
+
+def test_marquer_elites_deux_chasses_deux_betes():
+	character = {"position": {"x": 5, "y": 5},
+	             "quetes_actives": [_chasse("qA"), _chasse("qB")]}
+	monstres = _loups(3)
+	_marquer(character, monstres)
+	# Une bête par contrat, aucune partagée — le 3ᵉ loup reste un loup ordinaire.
+	assert [m.get("quete_chasse") for m in monstres] == ["qA", "qB", None]
+	assert monstres[0]["profil_id"] == "profil:combattant"
+
+
+def test_marquer_elites_la_chasse_accomplie_ne_vole_plus_lelite():
+	"""Le cœur du bug : qA est faite (pas encore rendue), qB reste à faire, et le combat
+	n'offre qu'UN loup — il doit revenir à qB."""
+	character = {"position": {"x": 5, "y": 5},
+	             "quetes_actives": [_chasse("qA", progress=1), _chasse("qB")]}
+	monstres = _loups(1)
+	_marquer(character, monstres)
+	assert monstres[0]["quete_chasse"] == "qB"
+	# … et le kill crédite bien la quête encore à faire, pas celle déjà remplie.
+	monstres[0]["vivant"] = False
+	quetes.maj_progress_chasse(character, monstres)
+	assert [q["progress"] for q in character["quetes_actives"]] == [1, 1]
+
+
+def test_marquer_elites_une_bete_un_contrat():
+	"""Deux contrats en cours, un seul spécimen : il n'en honore QU'UN. Le second n'a pas de
+	cible dans CE combat — il attend le suivant plutôt que de partager la bête."""
+	character = {"position": {"x": 5, "y": 5},
+	             "quetes_actives": [_chasse("qA"), _chasse("qB")]}
+	monstres = _loups(1)
+	_marquer(character, monstres)
+	assert monstres[0]["quete_chasse"] == "qA"
+	monstres[0]["vivant"] = False
+	quetes.maj_progress_chasse(character, monstres)
+	assert [q["progress"] for q in character["quetes_actives"]] == [1, 0]
+
+
+def test_marquer_elites_hors_zone_ne_marque_rien():
+	character = {"position": {"x": 12, "y": 12},
+	             "quetes_actives": [_chasse("qA"), _chasse("qB")]}
+	monstres = _loups(2)
+	_marquer(character, monstres)
+	assert all(not m.get("quete_chasse") for m in monstres)
+
+
+def test_marquer_elites_narration_de_rang():
+	character = {"position": {"x": 5, "y": 5},
+	             "quetes_actives": [_chasse("qR", source="rang", narration="Une odeur de charnier…")]}
+	monstres = _loups(1)
+	assert _marquer(character, monstres) == "Une odeur de charnier…"
+
+
 # ── _carte_chasse (payload du bouton 🗺️) ─────────────────────────────────────────
 
 def test_carte_chasse_payload(quetes_db, monkeypatch):

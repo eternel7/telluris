@@ -188,39 +188,15 @@ async def start_combat(
     # monstre de cette espèce est promu en élite — on lui applique le profil déjà résolu à la
     # génération (pas de re-résolution ici). On ne force PAS l'espèce à apparaître : si elle
     # n'est pas au pool, rien n'est marqué. La variante « rang » (comptoir) porte une narration
-    # pré-combat, affichée en overlay au chargement du combat.
+    # pré-combat, affichée en overlay au chargement du combat. Toute la règle (chasses encore à
+    # faire, une bête par contrat, partage en dernier recours) vit dans `chasse.marquer_elites`,
+    # pur et testable.
     chasse_narration = None
     if depart_lieu:
-        marques = set()
-        for q in chasse.quetes_chasse_actives(character, depart_lieu["_id"]):
-            obj = q.get("objectif", {})
-            espece_id, profil_id = obj.get("cible"), obj.get("profil")
-            if not espece_id or not profil_id:
-                continue
-            # L'élite ne surgit que si le combat se déclenche dans la zone 3×3 autour de la
-            # position de la quête (la carte 🗺️ y mène le joueur). Sans position → lieu seul.
-            if not chasse.dans_zone_chasse(obj, character.get("position")):
-                continue
-            idx = next(
-                (i for i, m in enumerate(monstres)
-                 if m.get("espece_id") == espece_id and m["id"] not in marques),
-                None,
-            )
-            if idx is None:
-                continue
-            espece_doc = next((e for e in pool_especes if e["_id"] == espece_id), None)
-            profil_doc = get_doc(profil_id)
-            if not espece_doc or not profil_doc:
-                continue
-            ancien = monstres[idx]
-            elite = build_monster_snapshot(espece_doc, profil_doc, idx)
-            elite["id"] = ancien["id"]
-            elite["pos"] = ancien.get("pos", elite["pos"])
-            elite["quete_chasse"] = q.get("id") or q.get("_id")
-            monstres[idx] = elite
-            marques.add(elite["id"])
-            if q.get("source") == "rang" and q.get("narration"):
-                chasse_narration = q["narration"]
+        chasse_narration = chasse.marquer_elites(
+            character, monstres, depart_lieu["_id"], pool_especes,
+            get_doc, build_monster_snapshot,
+        )
 
     # Sélection pondérée d'une battle map (lieu) selon le TERRAIN des zones actives.
     # ⚠️ Surtout pas `body.tags` : pour un événement `combat` ce sont des noms de

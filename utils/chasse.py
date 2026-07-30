@@ -183,6 +183,74 @@ def dans_zone_chasse(objectif: dict, position_joueur: dict | None) -> bool:
 	return abs(int(jx) - int(pq.get("x", 0))) <= 1 and abs(int(jy) - int(pq.get("y", 0))) <= 1
 
 
+def chasse_accomplie(q: dict) -> bool:
+	"""L'élite de cette chasse est-elle déjà tombée ? Une quête accomplie RESTE dans
+	`quetes_actives` jusqu'à ce que le joueur la rende à son donneur — il faut donc pouvoir la
+	distinguer de celle qui est encore à faire.
+
+	⚠️ `quantite` par défaut **1** et non 0 (contrairement à `quetes.objectif_atteint`, générique) :
+	une chasse vise toujours une cible, et `0 >= 0` ferait passer pour accomplie une quête dont
+	l'objectif ne porte pas le champ."""
+	obj = (q or {}).get("objectif") or {}
+	return int((q or {}).get("progress", 0) or 0) >= int(obj.get("quantite", 1) or 1)
+
+
+def marquer_elites(character: dict, monstres: list, lieu_id: str, pool_especes: list,
+                   get_doc_fn, snapshot_fn) -> str | None:
+	"""Promeut en élite un monstre par chasse EN COURS dans ce lieu, dont la zone 3×3 contient
+	le joueur : le grade a été résolu à la génération, on l'applique tel quel (`snapshot_fn` =
+	`combat.build_monster_snapshot`, injecté pour garder ce module pur). Mute `monstres` en
+	place ; renvoie la narration pré-combat de la variante « rang », s'il y en a une. On ne
+	force JAMAIS l'apparition de l'espèce : si elle n'est pas au pool, rien n'est marqué.
+
+	⚠️ Une chasse ACCOMPLIE mais pas encore rendue reste dans `quetes_actives` : sans le filtre
+	`chasse_accomplie`, elle réclamerait encore son élite et la VOLERAIT au contrat encore à
+	faire visant la même espèce (le premier de la liste gagne, et `promus` interdit de servir
+	deux fois le même monstre). Le joueur abattait bien la bête, mais le crédit retombait sur le
+	contrat déjà rempli : deux chasses au même gibier devenaient inachevables l'une après
+	l'autre — chaque kill semblait annuler le résultat de la précédente.
+
+	⚠️ **UNE BÊTE, UN CONTRAT** : `promus` interdit de servir deux fois le même spécimen. Si le
+	combat n'en offre pas un par contrat, le contrat non servi n'a simplement pas de cible ICI —
+	il attend le combat suivant. Un monstre ne porte donc jamais qu'un seul `quete_chasse`."""
+	especes = {e["_id"]: e for e in (pool_especes or []) if e.get("_id")}
+	narration = None
+	promus = set()          # ids des monstres déjà promus dans cette passe
+	for q in quetes_chasse_actives(character, lieu_id):
+		if chasse_accomplie(q):
+			continue
+		obj = q.get("objectif", {})
+		espece_id, profil_id = obj.get("cible"), obj.get("profil")
+		qid = q.get("id") or q.get("_id")
+		if not espece_id or not profil_id or not qid:
+			continue
+		# L'élite ne surgit que si le combat se déclenche dans la zone 3×3 autour de la
+		# position de la quête (la carte 🗺️ y mène le joueur). Sans position → lieu seul.
+		if not dans_zone_chasse(obj, character.get("position")):
+			continue
+		idx = next(
+			(i for i, m in enumerate(monstres)
+			 if m.get("espece_id") == espece_id and m["id"] not in promus),
+			None,
+		)
+		if idx is None:
+			continue
+		espece_doc = especes.get(espece_id)
+		profil_doc = get_doc_fn(profil_id)
+		if not espece_doc or not profil_doc:
+			continue
+		ancien = monstres[idx]
+		elite = snapshot_fn(espece_doc, profil_doc, idx)
+		elite["id"] = ancien["id"]
+		elite["pos"] = ancien.get("pos", elite["pos"])
+		elite["quete_chasse"] = qid
+		monstres[idx] = elite
+		promus.add(elite["id"])
+		if q.get("source") == "rang" and q.get("narration"):
+			narration = q["narration"]
+	return narration
+
+
 # ── Rang de guilde (par cité) ────────────────────────────────────────────────────
 
 def rang_de(character: dict, cite_id: str) -> str:
