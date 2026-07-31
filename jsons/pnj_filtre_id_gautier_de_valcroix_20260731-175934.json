@@ -1,0 +1,164 @@
+[
+  {
+    "_id": "pnj:gautier_de_valcroix",
+    "_rev": "8-54bf52967a095532fa26951521aa4728",
+    "type": "pnj",
+    "nom": "Gautier de Valcroix",
+    "race": "humain",
+    "vocation": "guerrier",
+    "portrait": "humain_m_guerrier01.jpg",
+    "description": "L'homme qui dirige la Guilde des Aventuriers d'Auxerre est connu de tous sous le nom de Gautier de Valcroix, que l'on surnomme parfois le Gardien des Cartes.\nAncien capitaine d'une compagnie d'éclaireurs, il ne s'est jamais distingué par sa force, mais par son jugement. Les murs de son bureau sont couverts de cartes annotées, de rapports d'expéditions et de trophées rapportés par ceux qui ont survécu à leurs premières missions. On raconte qu'aucun aventurier ne quitte son bureau sans avoir appris quelque chose, même lorsqu'il croit n'être venu que chercher un contrat.",
+    "services": {
+      "commission": {
+        "donjon": "donjon:mine_de_saint_austrelin",
+        "noeuds": {
+          "accepte": "commission_accepte",
+          "rapporte": "commission_rapporte"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le bureau sent le vélin et la cire. Penché sur une carte hérissée d'épingles, {pnj} ne lève pas les yeux tout de suite — il termine d'annoter une marge, pose sa plume, et vous regarde enfin. « {prenom}. Borin vous a fait monter, donc vous valez le déplacement. Asseyez-vous. »",
+          "choix": [
+            {
+              "id": "commission",
+              "label": "« Vous avez du travail pour moi ? »",
+              "condition": {
+                "commission_offerte": true
+              },
+              "next": "commission_propose"
+            },
+            {
+              "id": "commission_rapport",
+              "label": "« C'est fait. La bête ne tient plus les galeries. »",
+              "condition": {
+                "commission_a_rapporter": true
+              },
+              "action": {
+                "service": "commission",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "commission_relance",
+              "label": "« Où en étais-je, déjà ? »",
+              "condition": {
+                "commission_en_cours": true
+              },
+              "next": "commission_relance"
+            },
+            {
+              "id": "cartes",
+              "label": "« Toutes ces cartes... »",
+              "next": "cartes"
+            },
+            {
+              "id": "trophees",
+              "label": "« Et ces trophées, au mur ? »",
+              "next": "trophees"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je voulais voir le bureau. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_propose": {
+          "texte": "Il fait glisser vers vous un parchemin déjà scellé. « Une commission d'éradication. Le temple a fermé un chantier : {lieu}. Ce n'est pas la vermine ordinaire qui l'inquiète, c'est ce qui la commande — un {espece} d'exception, assez vieux pour avoir fait des galeries son territoire. » Il repose son doigt sur la carte, exactement sur l'épingle noire. « Abattez-le. Les mineurs feront le reste. {xp} points d'expérience et {prime} pièces de cuivre à votre retour — et le chantier vous devra sa réouverture. »",
+          "choix": [
+            {
+              "id": "commission_details",
+              "label": "« Qui garde l'entrée ? »",
+              "next": "commission_details"
+            },
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Pas ce chantier-là. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_details": {
+          "texte": "« Les templiers de Saint-Austrelin. » Il hausse un sourcil, amusé. « Deux barrages : l'un au sommet des marches, qui vérifie que la Guilde répond de vous ; l'autre devant l'arche, qui vérifie que c'est bien de CE chantier qu'on vous a chargé. Ils sont tatillons, et ils ont raison de l'être : le sceau que je vous donne est la seule chose qui ouvre les deux. »",
+          "choix": [
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_accepte": {
+          "texte": "Il presse son cachet sur la cire, souffle dessus, et vous tend le parchemin. « Vous cherchez un {espece} dans {lieu}. Une seule consigne, et elle n'est pas dans le texte : ce qui a tenu des galeries entières ne se laisse pas surprendre. » Il reprend sa plume et se penche déjà sur une autre carte. « Revenez me le dire vous-même. J'aime tenir mes registres à jour. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_relance": {
+          "texte": "Il suit du doigt une ligne de son registre. « Vous. Un {espece}, dans {lieu}. » Il relève les yeux. « Le chantier est toujours fermé, {prenom}, et les mineurs comptent les jours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_rapporte": {
+          "texte": "Gautier écoute jusqu'au bout sans vous interrompre une seule fois, puis prend une épingle blanche et remplace la noire sur sa carte. « {lieu} : rouvert. » Il pousse vers vous {prime} pièces de cuivre, et {xp} points portés à votre nom sur le registre. « Vous avez rapporté le fait, pas la légende — c'est plus rare que vous ne croyez, et c'est ce qui me dira, la prochaine fois, à qui confier un chantier plus profond. » Il désigne le mur couvert de cartes. « Il en reste. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cartes": {
+          "texte": "« Elles ne valent rien. » Il dit cela sans quitter des yeux le mur qu'il a passé vingt ans à couvrir. « Une carte est le souvenir de ce qu'un homme a vu un jour donné. Les galeries s'effondrent, les rivières changent de lit, les monstres déménagent. Ce qui vaut quelque chose, c'est l'aventurier qui revient corriger la mienne. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "trophees": {
+          "texte": "Il jette un œil à la rangée de crânes, de griffes et de mâchoires clouées au-dessus de la cheminée. « Aucun n'est de moi. Chacun a été rapporté par une recrue qui pensait ne pas revenir. » Un silence. « Je garde aussi la liste de celles qui n'ont rien rapporté. Elle est plus longue, et je la relis plus souvent. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

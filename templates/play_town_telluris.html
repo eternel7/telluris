@@ -4361,10 +4361,12 @@ function _viderCaseBarre(position) {
 	_postSlots('api/slot_action', { position, entree: null });
 }
 
-function _sortEffetsLabel(e) {
+// `prefixeDegats` : '+' pour une compétence de corps à corps, dont les dés S'AJOUTENT à ceux
+// de l'arme (cf. combat._degats_competence). Sans lui le joueur lirait le bonus comme un total.
+function _sortEffetsLabel(e, prefixeDegats) {
 	if (!e) return '';
 	const parts = [];
-	if (e.degats) parts.push(`${e.degats} dég.`);
+	if (e.degats) parts.push(`${prefixeDegats || ''}${e.degats} dég.`);
 	if (e.pv) parts.push(`+${e.pv} PV`);
 	if (e.pm) parts.push(`+${e.pm} PM`);
 	for (const [k, v] of Object.entries(e.buffs || {})) parts.push(`${v > 0 ? '+' : ''}${v} ${k}`);
@@ -4687,12 +4689,15 @@ function _renderCompetences(list) {
 		let portee = '';
 		if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
 		else if (c.mode === 'active' && c.cible === 'allie') portee = ' · 🤝 sur un allié';
+		// Frappe de contact : ses dés s'ajoutent à ceux de l'arme équipée.
+		const arme = c.mode === 'active' && c.cible === 'ennemi' && c.jet === 'cc' && c.effets && c.effets.degats;
+		const armeTitre = arme ? ' title="Ces dés s\'ajoutent aux dégâts de votre arme"' : '';
 		return `<div class="sh-skill">
 			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${c.nom}${pm}</div>
 				<div class="sh-skill-desc">${c.description || ''}</div>
-				<div class="sh-skill-desc">${_sortEffetsLabel(c.effets)}${portee}</div>
+				<div class="sh-skill-desc"${armeTitre}>${_sortEffetsLabel(c.effets, arme ? '+' : '')}${portee}</div>
 			</div>
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;

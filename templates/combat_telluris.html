@@ -2030,7 +2030,10 @@ function activerSlot(slot) {
 // ── Utiliser une compétence active (1 action + PM éventuels) — miroir du 🔮 ──────
 function compLabel(c) {
 	const parts = [];
-	if (c.effets.degats) parts.push(`${c.effets.degats} dég.`);
+	// Frappe de contact : ses dés S'AJOUTENT à ceux de l'arme (cf. combat._degats_competence),
+	// d'où le '+' — sans lui le joueur lirait le bonus comme un total.
+	if (c.effets.degats) parts.push(
+		`${c.cible === 'ennemi' && c.jet === 'cc' ? '+' : ''}${c.effets.degats} dég.`);
 	if (c.effets.pv) parts.push(`+${c.effets.pv} PV`);
 	if (c.effets.pm) parts.push(`+${c.effets.pm} PM`);
 	if (c.effets.furtivite) parts.push('🥷 furtivité');

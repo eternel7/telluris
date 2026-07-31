@@ -6,11 +6,15 @@
 # ne re-tire jamais (character:None = « tirage fait, PNJ absent »).
 #
 # Le doc PNJ (`type:"pnj"`) porte :
-# - `dialogue` : {"noeud_depart": id, "noeuds": {id: {texte, texte_gratuit?, choix:[...]}}}
+# - `dialogue` : {"noeud_depart": id, "noeud_attente"?: id,
+#                 "noeuds": {id: {texte, texte_gratuit?, delai_min?, choix:[...]}}}
 #   Chaque choix = {id, label, next?, action:{"service":"soin"}?, condition?}. Les choix
 #   sont FILTRÉS côté serveur par condition (le client n'adresse que des choix visibles,
 #   par `choix_id`). Conditions v1 : {"relation_min": {"lieux":[...], "seuil": n}} (OU
 #   logique sur les lieux) et {"intro_raison": "<id>"}.
+#   `delai_min` (secondes, sur un NŒUD) ferme le dialogue de ce PNJ le temps voulu, et
+#   `noeud_attente` (sur la RACINE) est ce qu'il répond entre-temps — cf. section
+#   « Délai de réouverture ».
 # - `services.soin` : {cout_cuivre, fraction_pv, gratuit_si:{lieux, seuil, fraction_pv},
 #   noeuds:{fait, sans_fonds, inutile}} — data-driven, seuil par défaut en world-var
 #   PNJ_REPUTATION_SEUIL.
@@ -27,7 +31,8 @@
 # Placeholders substitués serveur dans texte/label : {prenom}, {cout}, plus toute clé de
 # `contexte["placeholders"]` posée par le router — {pnj} (le nom EFFECTIF de celui à qui l'on
 # parle, cf. `nom_effectif`), {destinataire} / {donneur} (les PNJ des deux bouts d'une course),
-# {destination}, {direction}, {repere}, {colis}, {poids}, {delai}, {xp}, {prime}, {expediteur}.
+# {destination}, {direction}, {repere}, {colis}, {poids}, {delai}, {xp}, {prime}, {expediteur},
+# {attente} (minutes restant avant qu'un dialogue en délai puisse rouvrir).
 # ⚠️ RÈGLE : un dialogue ne cite JAMAIS un nom de PNJ en dur. Les docs `pnj:marchand_*` sont
 # GÉNÉRIQUES (un par catégorie, partagé par toutes les boutiques) et chaque lieu peut renommer
 # son tenancier via `nom` dans son entrée `pnj` — un nom écrit dans un texte mentirait.
@@ -272,6 +277,72 @@ def choix_valide(pnj_doc: dict, noeud_id: str, choix_id: str, contexte: dict) ->
 		if choix.get("id") == choix_id:
 			return choix if condition_ok(choix.get("condition"), contexte) else None
 	return None
+
+
+# ---------------------------------------------------------------------------
+# Délai de réouverture
+# ---------------------------------------------------------------------------
+# Un nœud peut porter `delai_min` (secondes) : l'atteindre ferme le dialogue de CE PNJ pour
+# ce temps-là. La racine peut porter `noeud_attente`, servi à la place de `noeud_depart` tant
+# que le délai court (refus PARLÉ — un silence serait indiscernable d'un bug).
+#
+# ⚠️ Le moteur ne connaît AUCUN « nœud de fin » : `fin` est une sentinelle de chaîne lue par
+# le router, et le serveur ne sait jamais qu'une conversation s'achève — il sait seulement
+# quel nœud il vient de RENDRE. Le délai s'arme donc au rendu du nœud qui le porte.
+#
+# État : character["dialogues_delais"][pnj_id] = {"jusqu": epoch, "noeud": id qui a armé} —
+# une entrée par PNJ, écrasée à chaque armement. Forme calquée sur `laissez_passer` ;
+# péremption PARESSEUSE par comparaison d'epoch (miroir de marche.marchandage_bloque), aucun
+# tick de fond, aucune purge : une entrée échue est inerte. Champ absent ⇒ aucun délai.
+
+
+def delai_min_de(pnj_doc: dict, noeud_id: str) -> int:
+	"""Délai de réouverture (secondes) déclaré par ce nœud. 0 = aucun (champ absent, non
+	numérique ou ≤ 0 — une valeur illisible ne verrouille rien)."""
+	noeuds = (((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {})
+	try:
+		return max(0, int((noeuds.get(noeud_id) or {}).get("delai_min", 0) or 0))
+	except (TypeError, ValueError):
+		return 0
+
+
+def armer_delai(character: dict, pnj_id: str, pnj_doc: dict, noeud_id: str,
+				now: int) -> dict | None:
+	"""Arme le délai de ce PNJ si `noeud_id` en déclare un. Renvoie l'entrée posée, ou None
+	si le nœud n'en porte pas — dans ce cas RIEN n'est écrit (pas même le dictionnaire).
+	Mute sans sauvegarder : l'appelant persiste."""
+	delai = delai_min_de(pnj_doc, noeud_id)
+	if not delai or not pnj_id:
+		return None
+	entree = {"jusqu": int(now) + delai, "noeud": noeud_id}
+	character.setdefault("dialogues_delais", {})[pnj_id] = entree
+	return entree
+
+
+def delai_restant(character: dict, pnj_id: str, now: int) -> int:
+	"""Secondes restant avant que le dialogue de ce PNJ puisse rouvrir ; 0 = libre (aucun
+	délai posé, ou déjà échu). ⚠️ Ne mute pas : un getter ne purge pas."""
+	entree = ((character or {}).get("dialogues_delais") or {}).get(pnj_id) or {}
+	try:
+		return max(0, int(entree.get("jusqu", 0) or 0) - int(now))
+	except (TypeError, ValueError):
+		return 0
+
+
+def noeud_depart_effectif(pnj_doc: dict, restant: int) -> str:
+	"""Nœud par lequel ouvrir le dialogue : `noeud_attente` tant que le délai court,
+	`noeud_depart` sinon.
+
+	⚠️ Repli fail-OPEN assumé quand `noeud_attente` désigne un nœud INEXISTANT : `noeud_client`
+	renverrait None, donc un PNJ muet dont le panneau se referme aussitôt — injouable, et
+	indiscernable d'un bug. Le flag `dialogue_en_attente` reste posé de toute façon (les
+	conditions verrouillent quand même) et c'est le linter qui attrape la référence morte."""
+	dialogue = (pnj_doc or {}).get("dialogue") or {}
+	depart = dialogue.get("noeud_depart", "accueil")
+	attente = dialogue.get("noeud_attente")
+	if restant > 0 and attente and attente in (dialogue.get("noeuds") or {}):
+		return attente
+	return depart
 
 
 # ---------------------------------------------------------------------------

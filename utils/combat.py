@@ -15,7 +15,7 @@ from utils.consommables import (
 	caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus,
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
 )
-from utils.sorts import part_durative, effets_d_arme
+from utils.sorts import part_durative, effets_d_arme, concat_degats
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
@@ -1258,6 +1258,27 @@ def _defense_physique(defenseur: dict) -> int:
 	return int(defenseur.get("ag", 0) or 0) + int(defenseur.get("esquive", 0) or 0)
 
 
+def _degats_competence(joueur: dict, competence: dict, effets: dict) -> str:
+	"""Notation de dégâts d'une compétence — SOURCE UNIQUE.
+
+	Une frappe de CORPS À CORPS (`jet: "cc"`) est un coup PORTÉ AVEC l'arme, pas un effet à
+	côté : elle AJOUTE les dégâts d'arme du porteur (`degats_cc` du snapshot = dé de Force +
+	dés et bonus de l'arme équipée) à ses propres dés. Sans quoi une active coûtant 1 action
+	ET des PM frappait moins fort qu'une attaque ordinaire gratuite.
+
+	⚠️ `cd` et `magique` en sont EXCLUS : un tir emprunte déjà l'arc par son jet, et une
+	frappe magique ne se négocie pas au poids de la hache.
+	⚠️ Une compétence SANS dés (pur debuff : entrave, cri de guerre) reste sans dés — sinon
+	une prise qui ne blesse pas deviendrait une attaque.
+	⚠️ Snapshot sans `degats_cc` (combat déjà en base) ⇒ la compétence garde ses seuls dés :
+	aucune migration.
+	"""
+	base = (effets or {}).get("degats", "")
+	if not base or (competence or {}).get("jet", "cc") != "cc":
+		return base
+	return concat_degats(joueur.get("degats_cc", ""), base)
+
+
 def _magic_hit_threshold(toucher_magique: int, cible_pm_def: int) -> int:
 	"""Seuil de réussite d'un sort offensif sur d100 (miroir de _hit_threshold) :
 	50 + toucher magique − défense magique de la cible, clampé [5, 95]. La défense
@@ -2341,19 +2362,25 @@ def resolve_action(
 			# l'Ag de la cible (PA soustraits comme une attaque d'arme) ; une compétence
 			# magique se résout sous toucher_magique contre la pm_def (sans soustraction de PA,
 			# l'armure physique n'arrête pas la magie).
+			# Le jet est aussi ce qui décide si les dégâts d'ARME s'ajoutent (cf.
+			# _degats_competence) : une frappe `cc` est portée avec l'arme en main.
 			jet = competence.get("jet", "cc")
 			if jet == "magique":
 				seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
 			else:
 				skill = joueur["cd"] if jet == "cd" else joueur["cc"]
-				seuil = _hit_threshold(skill, monstre.get("ag", 0))
+				seuil = _hit_threshold(skill, _defense_physique(monstre))
 			resultat_jet = _resoudre_jet(joueur, monstre, seuil)
 			roll = resultat_jet["roll"]
 			if resultat_jet["touche"]:
 				# Le critique double les dés ; les PA ne sont soustraits qu'après, et
 				# seulement pour une frappe martiale (l'armure n'arrête pas la magie).
 				if effets.get("degats"):
-					degats_bruts = roll_dice(effets["degats"]) * resultat_jet["mult_degats"]
+					# Notation = dés de la compétence, PLUS les dégâts d'arme si c'est une
+					# frappe de contact. Le critique double le total avant les PA, exactement
+					# comme une attaque d'arme ordinaire.
+					notation = _degats_competence(joueur, competence, effets)
+					degats_bruts = roll_dice(notation) * resultat_jet["mult_degats"]
 					dmg = max(1, degats_bruts if jet == "magique" else degats_bruts - monstre["pa"])
 				else:
 					dmg = 0   # compétence de pur debuff : elle touche sans blesser

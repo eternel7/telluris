@@ -32,6 +32,8 @@ PLACEHOLDERS_CONNUS = {
 	"espece", "lieu", "rang", "rang_vise",
 	# Accès conditionné à un lieu (PNJ gardien) : le label du lieu gardé.
 	"portail",
+	# Délai de réouverture : minutes restant avant que le dialogue rouvre.
+	"attente",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -46,6 +48,10 @@ FLAGS_CONNUS = {
 	# Complémentaires : l'un ou l'autre, jamais les deux (cf. `_contexte`).
 	"acces_libere", "acces_menace",
 	"commission_offerte", "commission_en_cours", "commission_a_rapporter",
+	# Délai de réouverture d'un dialogue (`delai_min` sur un nœud). Se teste dans les DEUX
+	# sens : `condition_ok` compare `bool(flag) is not bool(attendu)`, donc
+	# `{"dialogue_en_attente": false}` est le verrou d'un choix qui doit disparaître.
+	"dialogue_en_attente",
 }
 
 # Nœuds de résultat que le ROUTER va chercher par leur clé. Les absents laissent le
@@ -114,10 +120,14 @@ def _textes_du_noeud(noeud: dict) -> list:
 
 
 def _entrees(doc: dict, noeuds: dict) -> set:
-	"""Points d'entrée de l'arbre : le nœud de départ ET tous les nœuds de service (le
-	router y saute directement après une action — ils ne sont atteints par aucun `next`)."""
-	depart = ((doc.get("dialogue") or {}).get("noeud_depart"))
+	"""Points d'entrée de l'arbre : le nœud de départ, le nœud d'attente (servi à sa place
+	pendant un délai de réouverture) ET tous les nœuds de service (le router y saute
+	directement après une action — ils ne sont atteints par aucun `next`)."""
+	dialogue = doc.get("dialogue") or {}
+	depart = dialogue.get("noeud_depart")
 	entrees = {depart} if depart else set()
+	if dialogue.get("noeud_attente"):
+		entrees.add(dialogue["noeud_attente"])
 	for conf in (doc.get("services") or {}).values():
 		entrees |= {nid for nid in (conf.get("noeuds") or {}).values() if nid}
 	return {e for e in entrees if e in noeuds}
@@ -185,6 +195,41 @@ def analyser_doc(doc: dict) -> list:
 		erreur("`dialogue.noeud_depart` absent.")
 	elif depart not in noeuds:
 		erreur(f"`noeud_depart` désigne `{depart}`, qui n'existe pas.")
+
+	# Délai de réouverture (`delai_min` sur un nœud, `noeud_attente` sur la racine). Rien
+	# n'est typé à l'import : une valeur illisible ne verrouille rien et un nœud d'attente
+	# mort laisse le moteur retomber sur le départ — dans les deux cas le contenu ment en
+	# silence, et c'est ici qu'on l'attrape.
+	attente = dialogue.get("noeud_attente")
+	if attente and attente not in noeuds:
+		erreur(f"`noeud_attente` désigne `{attente}`, qui n'existe pas : le dialogue rouvrira "
+			   f"sur son nœud de départ malgré le délai.")
+	avec_delai = []
+	for nid, noeud in noeuds.items():
+		brut = (noeud or {}).get("delai_min")
+		if brut is None:
+			continue
+		try:
+			valeur = int(brut)
+		except (TypeError, ValueError):
+			valeur = 0
+		if valeur <= 0:
+			erreur(f"`delai_min` vaut {brut!r} : il doit être un entier de secondes > 0, "
+				   f"sinon il ne verrouille rien.", nid)
+			continue
+		avec_delai.append(nid)
+		if nid == depart or (attente and nid == attente):
+			role = "de départ" if nid == depart else "d'attente"
+			erreur(f"`delai_min` sur le nœud {role} : ce PNJ se verrouillerait lui-même à "
+				   f"chaque ouverture.", nid)
+	if avec_delai and not attente:
+		# Le délai serait alors totalement muet : ni nœud d'attente, ni choix conditionné —
+		# le joueur ne verrait qu'un PNJ qui ne propose plus rien, sans savoir pourquoi.
+		conditionne = any("dialogue_en_attente" in (c.get("condition") or {})
+						  for n in noeuds.values() for c in n.get("choix") or [])
+		if not conditionne:
+			avertir("un `delai_min` est déclaré sans `noeud_attente` ni aucune condition "
+					"`dialogue_en_attente` : le délai sera invisible pour le joueur.")
 
 	# Un dialogue générique ne doit citer aucun nom : le lieu rebaptise son tenancier.
 	noms_interdits = _noms_propres(doc.get("nom")) if doc_id.startswith("pnj:marchand_") else set()

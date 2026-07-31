@@ -3,7 +3,7 @@
 # de l'arbre de dialogue (conditions, placeholders), service de soin (payant/gratuit
 # selon relation). Aucun accès DB — tout est passé en dicts.
 
-from utils import pnj
+from utils import lint_dialogues, pnj
 
 
 # ---------------------------------------------------------------------------
@@ -233,6 +233,94 @@ def test_choix_valide_revalide_serveur():
 
 
 # ---------------------------------------------------------------------------
+# Délai de réouverture
+# ---------------------------------------------------------------------------
+
+def _doc_delai(delai=1800, attente="repos"):
+    """Arbre minimal : `adieu` ferme le dialogue pour un temps, `repos` est ce que le PNJ
+    répond entre-temps."""
+    dialogue = {
+        "noeud_depart": "accueil",
+        "noeuds": {
+            "accueil": {"texte": "Bonjour.", "choix": [{"id": "ok", "next": "adieu"}]},
+            "adieu": {"texte": "Repassez.", "delai_min": delai,
+                      "choix": [{"id": "ok", "next": "fin"}]},
+            "repos": {"texte": "Pas maintenant.", "choix": [{"id": "ok", "next": "fin"}]},
+        },
+    }
+    if attente is not None:
+        dialogue["noeud_attente"] = attente
+    return {"_id": "pnj:gautier", "type": "pnj", "dialogue": dialogue}
+
+
+def test_delai_min_de_lit_le_noeud():
+    doc = _doc_delai()
+    assert pnj.delai_min_de(doc, "adieu") == 1800
+    assert pnj.delai_min_de(doc, "accueil") == 0        # champ absent
+    assert pnj.delai_min_de(doc, "nexiste_pas") == 0
+    assert pnj.delai_min_de({}, "adieu") == 0
+
+
+def test_delai_min_illisible_ne_verrouille_rien():
+    # Une valeur qu'on ne sait pas lire ne doit pas verrouiller un PNJ en silence.
+    for brut in (None, 0, -60, "beaucoup", [1800]):
+        assert pnj.delai_min_de(_doc_delai(delai=brut), "adieu") == 0
+
+
+def test_armer_delai_pose_l_entree():
+    doc, character = _doc_delai(), {}
+    entree = pnj.armer_delai(character, "pnj:gautier", doc, "adieu", 1000)
+    assert entree == {"jusqu": 2800, "noeud": "adieu"}
+    assert character["dialogues_delais"]["pnj:gautier"] == entree
+
+
+def test_armer_delai_n_ecrit_rien_sans_delai():
+    # ⚠️ Pas même le dictionnaire : un nœud ordinaire ne doit laisser aucune trace.
+    character = {}
+    assert pnj.armer_delai(character, "pnj:gautier", _doc_delai(), "accueil", 1000) is None
+    assert pnj.armer_delai(character, "pnj:gautier", _doc_delai(), None, 1000) is None
+    assert pnj.armer_delai(character, "pnj:gautier", _doc_delai(), "fin", 1000) is None
+    assert "dialogues_delais" not in character
+
+
+def test_delai_restant_est_paresseux():
+    assert pnj.delai_restant({}, "pnj:gautier", 1000) == 0
+    character = {"dialogues_delais": {"pnj:gautier": {"jusqu": 2800, "noeud": "adieu"}}}
+    assert pnj.delai_restant(character, "pnj:gautier", 1000) == 1800
+    assert pnj.delai_restant(character, "pnj:gautier", 2800) == 0     # échu pile
+    assert pnj.delai_restant(character, "pnj:gautier", 9999) == 0
+    assert pnj.delai_restant(character, "pnj:autre", 1000) == 0
+    # ⚠️ Un getter ne purge pas : l'entrée échue reste en base, inerte.
+    assert "pnj:gautier" in character["dialogues_delais"]
+
+
+def test_noeud_depart_effectif_devie_pendant_le_delai():
+    doc = _doc_delai()
+    assert pnj.noeud_depart_effectif(doc, 1800) == "repos"
+    assert pnj.noeud_depart_effectif(doc, 0) == "accueil"
+
+
+def test_noeud_depart_effectif_replis():
+    # Sans `noeud_attente` déclaré : le départ ordinaire (seul le flag agira).
+    assert pnj.noeud_depart_effectif(_doc_delai(attente=None), 1800) == "accueil"
+    # ⚠️ Nœud d'attente MORT → repli fail-open sur le départ. Le renvoyer quand même donnerait
+    # un `noeud_client` à None, donc un PNJ muet dont le panneau se referme aussitôt.
+    assert pnj.noeud_depart_effectif(_doc_delai(attente="disparu"), 1800) == "accueil"
+    assert pnj.noeud_depart_effectif({}, 1800) == "accueil"
+
+
+def test_condition_dialogue_en_attente_se_teste_dans_les_deux_sens():
+    # C'est `{"flag": false}` qui verrouille un choix pendant le délai — sans lui, revenir à
+    # l'accueil par une branche annexe reproposerait la mission.
+    libre = _ctx()
+    bloque = _ctx()
+    bloque["flags"] = {"dialogue_en_attente": True}
+    assert pnj.condition_ok({"dialogue_en_attente": False}, libre) is True
+    assert pnj.condition_ok({"dialogue_en_attente": False}, bloque) is False
+    assert pnj.condition_ok({"dialogue_en_attente": True}, bloque) is True
+
+
+# ---------------------------------------------------------------------------
 # Service de soin
 # ---------------------------------------------------------------------------
 
@@ -309,3 +397,49 @@ def test_appliquer_don_ajoute_references_inventaire():
     assert pnj.appliquer_don(character, "item:Bougie", 0.1, 0) == 1
     assert len(character["inventaire"]) == 3
     assert character["inventaire"][-1] == {"item": "item:Bougie", "poids": 0.1}
+
+
+# ---------------------------------------------------------------------------
+# Linter — contrôles du délai de réouverture
+# ---------------------------------------------------------------------------
+# Un délai est de la donnée muette : une faute ne se verrait qu'en jouant la branche.
+
+def _messages(doc, niveau=None):
+    return [t["message"] for t in lint_dialogues.analyser_doc(doc)
+            if niveau is None or t["niveau"] == niveau]
+
+
+def test_lint_noeud_attente_valide_est_atteignable():
+    # Le nœud d'attente n'est atteint par aucun `next` : sans son ajout aux points d'entrée
+    # du BFS, il serait signalé « inatteignable ».
+    assert lint_dialogues.analyser_doc(_doc_delai()) == []
+
+
+def test_lint_noeud_attente_mort():
+    msgs = _messages(_doc_delai(attente="disparu"), "erreur")
+    assert any("noeud_attente" in m and "disparu" in m for m in msgs)
+
+
+def test_lint_delai_min_illisible():
+    doc = _doc_delai(delai="beaucoup")
+    assert any("delai_min" in m for m in _messages(doc, "erreur"))
+
+
+def test_lint_delai_min_sur_le_noeud_de_depart():
+    # Le PNJ se verrouillerait lui-même à chaque ouverture — et le GET n'arme jamais, donc
+    # rien en jeu ne rendrait la faute visible.
+    doc = _doc_delai()
+    doc["dialogue"]["noeuds"]["accueil"]["delai_min"] = 600
+    assert any("se verrouillerait" in m for m in _messages(doc, "erreur"))
+    doc = _doc_delai()
+    doc["dialogue"]["noeuds"]["repos"]["delai_min"] = 600
+    assert any("se verrouillerait" in m for m in _messages(doc, "erreur"))
+
+
+def test_lint_delai_invisible_est_signale():
+    # Ni nœud d'attente, ni choix conditionné : le joueur ne verrait qu'un PNJ devenu muet.
+    doc = _doc_delai(attente=None)
+    assert any("invisible" in m for m in _messages(doc, "avertissement"))
+    # Une condition `dialogue_en_attente` quelque part suffit à lever l'avertissement.
+    doc["dialogue"]["noeuds"]["accueil"]["choix"][0]["condition"] = {"dialogue_en_attente": False}
+    assert not any("invisible" in m for m in _messages(doc, "avertissement"))

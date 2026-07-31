@@ -1,0 +1,658 @@
+[
+  {
+    "_id": "competence:affinite_elementaire",
+    "_rev": "1-8565346d4ee524cd0ad37544ef59c27d",
+    "type": "competence",
+    "nom": "Affinité élémentaire",
+    "icon": "🔥",
+    "description": "Les éléments lui répondent avant même qu'il ne les appelle.",
+    "vocation": "elementaliste",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Int": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:affinite_morbide",
+    "_rev": "1-dd6dae66b108bb4c99dbfecc6ea2e911",
+    "type": "competence",
+    "nom": "Affinité morbide",
+    "icon": "💀",
+    "description": "La mort lui est familière ; elle le mord moins qu'un autre.",
+    "vocation": "necromancien",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Vol": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:aura_sacree",
+    "_rev": "1-c392cf66b23031dfd3ec952f49fa313b",
+    "type": "competence",
+    "nom": "Aura sacrée",
+    "icon": "😇",
+    "description": "Une lumière discrète le suit ; les créatures impies reculent devant elle.",
+    "vocation": "paladin",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Cha": 3,
+        "Vol": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:aura_sympathique",
+    "_rev": "1-54cc48633e115600458b0d473da65dc6",
+    "type": "competence",
+    "nom": "Aura sympathique",
+    "icon": "🎵",
+    "description": "On lui ouvre les portes sans trop savoir pourquoi.",
+    "vocation": "menestrel",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Cha": 5
+      }
+    }
+  },
+  {
+    "_id": "competence:ballade_inspirante",
+    "_rev": "1-fad260da97a6701debd4e96e68c9555f",
+    "type": "competence",
+    "nom": "Ballade inspirante",
+    "icon": "🎶",
+    "description": "Un air entêtant qui redresse les échines et fait oublier les plaies.",
+    "vocation": "menestrel",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 5,
+    "cible": "soi",
+    "portee": 1,
+    "effets": {
+      "pv": 6,
+      "buffs": {
+        "Cha": 5
+      },
+      "regen_pv": 1,
+      "duree": 5
+    }
+  },
+  {
+    "_id": "competence:bouclier_arcanique",
+    "_rev": "1-91beca50141d2a550c2e3091f869f303",
+    "type": "competence",
+    "nom": "Bouclier arcanique",
+    "icon": "🛡️",
+    "description": "Une pellicule d'arcanes épouse sa peau et amortit les coups.",
+    "vocation": "mage",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "R": 3,
+        "Vol": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:coup_de_fureur",
+    "_rev": "2-1158eece5fe63e73452b50ba3f469498",
+    "type": "competence",
+    "nom": "Coup de fureur",
+    "icon": "🪓",
+    "description": "Une abattée sauvage, née de la rage plus que de la technique.",
+    "vocation": "barbare",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": {
+      "degats": "1D15"
+    }
+  },
+  {
+    "_id": "competence:discipline_interieure",
+    "_rev": "1-6bc0f9f78641b0f760fae2e7fc5608b9",
+    "type": "competence",
+    "nom": "Discipline intérieure",
+    "icon": "☯️",
+    "description": "L'esprit tenu droit comme une lame : ni la peur ni la douleur n'y trouvent prise.",
+    "vocation": "moine",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Vol": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:discipline_militaire",
+    "_rev": "1-71d9ae2b047bc41790d78f256fcf107f",
+    "type": "competence",
+    "nom": "Discipline militaire",
+    "icon": "🛡️",
+    "description": "Formé au rang et à l'ordre : rien ne le désarçonne.",
+    "vocation": "templier",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "R": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:doigts_agiles",
+    "_rev": "1-722270d7e85e0029781a2971171801a2",
+    "type": "competence",
+    "nom": "Doigts agiles",
+    "icon": "🤏",
+    "description": "Serrures, poches et pièges n'ont pas de secret pour ses mains.",
+    "vocation": "voleur",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 3,
+        "Ch": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:esprit_protecteur",
+    "_rev": "1-6ce2f05055ba60d24fba9e3458bd5b08",
+    "type": "competence",
+    "nom": "Esprit protecteur",
+    "icon": "🐺",
+    "description": "Un esprit mineur se love en lui et referme ses plaies.",
+    "vocation": "chaman",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 6,
+    "cible": "soi",
+    "portee": 1,
+    "effets": {
+      "pv": 10
+    }
+  },
+  {
+    "_id": "competence:esquive",
+    "_rev": "1-d4e3ce2026c35bd36d1bdc9af1147cc8",
+    "type": "competence",
+    "nom": "Esquive",
+    "icon": "💨",
+    "description": "Un pas de côté au dernier instant : les lames et les traits le manquent plus souvent qu'à leur tour. La magie, elle, ne s'esquive pas.",
+    "vocation": "voleur",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "esquive": 10
+    }
+  },
+  {
+    "_id": "competence:fente",
+    "_rev": "2-1de08bad712f3af8a3e64b38fc2ab4c2",
+    "type": "competence",
+    "nom": "Fente",
+    "icon": "⚡",
+    "description": "Une allonge fulgurante, la pointe cherchant l'interstice de l'armure.",
+    "vocation": "duelliste",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": {
+      "degats": "1D8+2"
+    }
+  },
+  {
+    "_id": "competence:foi_inebranlable",
+    "_rev": "1-f544bb2cfe281c11660c1298fe142788",
+    "type": "competence",
+    "nom": "Foi inébranlable",
+    "icon": "✝️",
+    "description": "Sa foi est un mur : malédictions et corruptions s'y brisent.",
+    "vocation": "pretre",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Vol": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:frappe_puissante",
+    "_rev": "2-0e2bbb09c9f40ce6e4494def9ec417fa",
+    "type": "competence",
+    "nom": "Frappe puissante",
+    "icon": "⚔️",
+    "description": "Un coup asséné de tout son poids, quitte à s'ouvrir la garde.",
+    "vocation": "guerrier",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": {
+      "degats": "1D8+2"
+    }
+  },
+  {
+    "_id": "competence:frappe_sournoise",
+    "_rev": "2-75a98b8d65880a66bb423d3cead1a709",
+    "type": "competence",
+    "nom": "Frappe sournoise",
+    "icon": "🔪",
+    "description": "La lame entre là où l'armure ne va pas, sans un bruit.",
+    "vocation": "assassin",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": {
+      "degats": "1D10+5"
+    }
+  },
+  {
+    "_id": "competence:furtivite",
+    "_rev": "1-1b45c954cc8fbb0c934cc91086116bad",
+    "type": "competence",
+    "nom": "Furtivité",
+    "icon": "🥷",
+    "description": "Il s'efface : tant qu'il ne frappe pas, les ennemis doivent le repérer avant de venir à lui. Frapper le révèle — mais il peut se fondre à nouveau dans les ombres.",
+    "vocation": "assassin",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 0,
+    "cible": "soi",
+    "portee": 1,
+    "effets": {
+      "furtivite": 1
+    }
+  },
+  {
+    "_id": "competence:furtivite_sylvestre",
+    "_rev": "1-78077846fb30f265bc3274be32b705d9",
+    "type": "competence",
+    "nom": "Furtivité sylvestre",
+    "icon": "🌲",
+    "description": "Sous les frondaisons, il n'est qu'une ombre parmi les ombres : en forêt ou dans les bois, les ennemis ne viennent pas à lui tant qu'ils ne l'ont pas repéré.",
+    "vocation": "forestier",
+    "niveau": 0,
+    "mode": "passive",
+    "condition": {
+      "battle_map_tags": [
+        "foret",
+        "bois"
+      ]
+    },
+    "effets": {
+      "furtivite": 1
+    }
+  },
+  {
+    "_id": "competence:jeu_de_jambes",
+    "_rev": "1-f53c32327e8dac07b9c6a98bb5163480",
+    "type": "competence",
+    "nom": "Jeu de jambes",
+    "icon": "🤺",
+    "description": "Toujours en mouvement, jamais là où le coup tombe.",
+    "vocation": "duelliste",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:litanie_protectrice",
+    "_rev": "1-d24bdca190d9de29745dfde6c121ec7a",
+    "type": "competence",
+    "nom": "Litanie protectrice",
+    "icon": "📿",
+    "description": "Une litanie sourde, répétée jusqu'à ce que la peau devienne armure.",
+    "vocation": "templier",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 6,
+    "cible": "soi",
+    "portee": 1,
+    "effets": {
+      "pv": 8,
+      "buffs": {
+        "R": 6
+      },
+      "duree": 4
+    }
+  },
+  {
+    "_id": "competence:maitrise_martiale",
+    "_rev": "1-dec64a901bda4e29673166def4d26a00",
+    "type": "competence",
+    "nom": "Maîtrise martiale",
+    "icon": "🗡️",
+    "description": "Le métier des armes, appris jusque dans les muscles : ses coups portent plus fort.",
+    "vocation": "guerrier",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "F": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:memoire_encyclopedique",
+    "_rev": "1-e26f90aeb27e1c3558da581d760f9162",
+    "type": "competence",
+    "nom": "Mémoire encyclopédique",
+    "icon": "📚",
+    "description": "Il n'a jamais rien oublié de ce qu'il a lu — et il a beaucoup lu.",
+    "vocation": "lettre",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Int": 5
+      }
+    }
+  },
+  {
+    "_id": "competence:oeil_du_chasseur",
+    "_rev": "1-51fa1651a482571cd24956fd623006a6",
+    "type": "competence",
+    "nom": "Œil du chasseur",
+    "icon": "🦅",
+    "description": "Il lit la piste, le vent et la distance sans y penser.",
+    "vocation": "forestier",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:oeil_du_predateur",
+    "_rev": "1-0a6d94444aa6893e15fcb05073ca9321",
+    "type": "competence",
+    "nom": "Œil du prédateur",
+    "icon": "🗡️",
+    "description": "Il voit d'un coup d'œil où frapper pour que ça compte.",
+    "vocation": "assassin",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:pacte_obscur",
+    "_rev": "1-8c599bef80bdd5180d356e0520c1985f",
+    "type": "competence",
+    "nom": "Pacte obscur",
+    "icon": "😈",
+    "description": "Quelque chose, quelque part, lui souffle les mots justes — et se paie sur son âme.",
+    "vocation": "demoniste",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Int": 3,
+        "Vol": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:paume_de_force",
+    "_rev": "2-b1462697b64f4c88a3d1830281fda785",
+    "type": "competence",
+    "nom": "Paume de force",
+    "icon": "👊",
+    "description": "Toute l'énergie du corps rassemblée dans une seule paume ouverte.",
+    "vocation": "moine",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": {
+      "degats": "1D6+3"
+    }
+  },
+  {
+    "_id": "competence:poudre_aveuglante",
+    "_rev": "2-91fcb5a0a77bc5491e211c96faec7f5f",
+    "type": "competence",
+    "nom": "Poudre aveuglante",
+    "icon": "💨",
+    "description": "Une poignée de poudre à la figure, puis la dague.",
+    "vocation": "voleur",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "jet": "cd",
+    "portee": 3,
+    "effets": {
+      "degats": "1D6"
+    }
+  },
+  {
+    "_id": "competence:presence_des_esprits",
+    "_rev": "1-e1664aff287ad0a657d5bda2e60b9dd8",
+    "type": "competence",
+    "nom": "Présence des esprits",
+    "icon": "👻",
+    "description": "Les esprits l'entourent et murmurent : rien de ce qui rôde ne lui échappe.",
+    "vocation": "chaman",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Vol": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:sang_chaud",
+    "_rev": "1-2f4d16171299b93165964211432cbab9",
+    "type": "competence",
+    "nom": "Sang chaud",
+    "icon": "🩸",
+    "description": "La douleur le réveille au lieu de l'abattre : sa carcasse encaisse ce que d'autres ne survivent pas.",
+    "vocation": "barbare",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "R": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:sentence",
+    "_rev": "2-5f2cf9da01cbe5425e870e3e4285f5d2",
+    "type": "competence",
+    "nom": "Sentence",
+    "icon": "⚖️",
+    "description": "Il désigne sa cible et la frappe comme on exécute un verdict.",
+    "vocation": "repurgateur",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": {
+      "degats": "1D6+2"
+    }
+  },
+  {
+    "_id": "competence:sixieme_sens",
+    "_rev": "1-4d382f5be831282c2a80393472bdc10e",
+    "type": "competence",
+    "nom": "Sixième sens",
+    "icon": "👁️",
+    "description": "Il sent la présence des choses qui ne devraient pas exister.",
+    "vocation": "repurgateur",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ch": 3,
+        "Vol": 2
+      }
+    }
+  },
+  {
+    "_id": "competence:symbiose_naturelle",
+    "_rev": "1-7f6ccf4019cb0e43885745e5a8a2f531",
+    "type": "competence",
+    "nom": "Symbiose naturelle",
+    "icon": "🌿",
+    "description": "La nature le soigne lentement, comme elle referme l'écorce d'un arbre blessé.",
+    "vocation": "druide",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "R": 2
+      },
+      "regen_pv": 1
+    }
+  },
+  {
+    "_id": "competence:tir_precis",
+    "_rev": "2-afdd8495ad0f5cc0042230f4f1d098bc",
+    "type": "competence",
+    "nom": "Tir précis",
+    "icon": "🏹",
+    "description": "Il retient son souffle, laisse passer un battement de cœur, puis décoche.",
+    "vocation": "forestier",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "ennemi",
+    "jet": "cd",
+    "portee": 8,
+    "effets": {
+      "degats": "1D8+2"
+    }
+  },
+  {
+    "_id": "competence:voile_d_illusion",
+    "_rev": "1-02036fa1e50cbf8ab12ed6eb50ea1c66",
+    "type": "competence",
+    "nom": "Voile d'illusion",
+    "icon": "🌫️",
+    "description": "Sa silhouette tremble légèrement : l'œil qui le vise ne sait jamais tout à fait où il est.",
+    "vocation": "illusionniste",
+    "niveau": 0,
+    "mode": "passive",
+    "effets": {
+      "buffs": {
+        "Ag": 4
+      }
+    }
+  },
+  {
+    "_id": "competence:baume_de_campagne",
+    "_rev": "1-439fab7c47a9e40876a9a0a939526f1b",
+    "type": "competence",
+    "nom": "Baume de campagne",
+    "icon": "🌿",
+    "description": "Deux feuilles mâchées, un linge serré, et on repart. Le forestier ne guérit pas : il rafistole assez pour tenir jusqu'au camp.",
+    "vocation": "forestier",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 6,
+    "cible": "allie",
+    "portee": 2,
+    "effets": {
+      "pv": 8,
+      "regen_pv": 2,
+      "duree": 3
+    }
+  },
+  {
+    "_id": "competence:imposition_des_mains",
+    "_rev": "1-ef50ee715fa29a94ec672381cb089855",
+    "type": "competence",
+    "nom": "Imposition des mains",
+    "icon": "🙌",
+    "description": "Les deux paumes à plat sur la blessure d'un autre. Ce que le serment promet, le corps le paie : la chair se referme sous la pression.",
+    "vocation": "paladin",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "pv": 16
+    }
+  },
+  {
+    "_id": "competence:refrain_de_ralliement",
+    "_rev": "1-1d957e40c6c02e0bbe98080c779f7816",
+    "type": "competence",
+    "nom": "Refrain de ralliement",
+    "icon": "🎵",
+    "description": "Un couplet lancé par-dessus la mêlée, à l'adresse d'un seul. Celui qui l'entend redresse la garde et cesse de compter ses plaies.",
+    "vocation": "menestrel",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 8,
+    "cible": "allie",
+    "portee": 4,
+    "effets": {
+      "buffs": {
+        "Vol": 10,
+        "Cha": 5
+      },
+      "regen_pv": 2,
+      "duree": 3
+    }
+  },
+  {
+    "_id": "competence:souffle_partage",
+    "_rev": "1-ce9b7eaf7584053c5b5db8fac13af64d",
+    "type": "competence",
+    "nom": "Souffle partagé",
+    "icon": "🌬️",
+    "description": "Front contre front, une longue expiration. Le moine cède une part de son souffle intérieur : il en perd plus qu'il n'en donne, et c'est le principe même du don.",
+    "vocation": "moine",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 10,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "pm": 8
+    }
+  }
+]

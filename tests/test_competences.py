@@ -359,6 +359,66 @@ def test_competence_magique_ignore_les_pa(monkeypatch):
     assert combat["joueurs"][0]["currentPM"] == 16
 
 
+def test_competence_cc_ajoute_les_degats_d_arme(monkeypatch):
+    # Une frappe de contact est un coup PORTÉ AVEC l'arme : ses dés s'ajoutent à `degats_cc`.
+    # d100 à 50 = touche ordinaire (seuil 70), dés à 1 → "2D6+5" (7) + "1D8+2" (3) = 10, − 5 PA.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
+    combat = _combat(joueur_extra={"degats_cc": "2D6+5"})
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(_comp(effets={"degats": "1D8+2"})))
+    assert res["hit"] is True and res["dmg"] == 5
+    assert combat["monstres"][0]["currentPV"] == 15
+
+
+def test_competence_sans_degats_d_arme_au_snapshot(monkeypatch):
+    # Aucune migration : un combat déjà en base n'a pas de `degats_cc` sur son snapshot —
+    # la compétence garde alors ses seuls dés au lieu de planter.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
+    combat = _combat(monstres=[_monstre("monstre_0", 3, 4, pa=0)])
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(_comp(effets={"degats": "1D8+2"})))
+    assert res["dmg"] == 3
+
+
+@pytest.mark.parametrize("jet", ["cd", "magique"])
+def test_competence_cd_et_magique_ignorent_l_arme(monkeypatch, jet):
+    # Seul le corps à corps emprunte l'arme : un tir la tient déjà par son jet, et une frappe
+    # magique ne se négocie pas au poids de la hache.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
+    combat = _combat(joueur_extra={"degats_cc": "2D6+5"},
+                     monstres=[_monstre("monstre_0", 3, 4, pa=0)])
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(
+                             _comp(jet=jet, effets={"degats": "1D8+2"})))
+    assert res["hit"] is True and res["dmg"] == 3   # "1D8+2" seul, l'arme n'entre pas
+
+
+def test_competence_debuff_pur_ne_gagne_pas_les_degats_d_arme(monkeypatch):
+    # Une prise qui ne blesse pas ne doit pas devenir une attaque parce qu'une arme est en main.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
+    combat = _combat(joueur_extra={"degats_cc": "2D6+5"})
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(
+                             _comp(effets={"buffs": {"F": -4}, "duree": 2})))
+    assert res["hit"] is True and res["dmg"] == 0
+    assert combat["monstres"][0]["currentPV"] == 20
+
+
+def test_competence_martiale_compte_l_esquive(monkeypatch):
+    # Régression : la branche compétence lisait `monstre["ag"]` seul, alors que l'arme et les
+    # sorts de contact passent par _defense_physique (Ag + esquive). 50 + 50 − (30 + 20) = 50.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 60 if b == 100 else 1)
+    combat = _combat(monstres=[_monstre("monstre_0", 3, 4, esquive=20)])
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(_comp()))
+    assert res["hit"] is False and res["seuil"] == 50
+    # Sans esquive, le même jet passerait (seuil 70).
+    combat = _combat()
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(_comp()))
+    assert res["hit"] is True
+
+
 def test_competence_pm_insuffisants():
     combat = _combat(joueur_extra={"currentPM": 3})
     res = resolve_action(combat, "competence", cible_id="monstre_0",

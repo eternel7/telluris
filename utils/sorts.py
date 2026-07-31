@@ -156,8 +156,10 @@ def normaliser_sort(sort_doc) -> dict | None:
 	}
 
 
-def _concat_degats(a: str, b: str) -> str:
-	"""Concatène deux notations de dés/bonus plats ("2D6" + "1D6" → "2D6+1D6")."""
+def concat_degats(a: str, b: str) -> str:
+	"""Concatène deux notations de dés/bonus plats ("2D6" + "1D6" → "2D6+1D6"). Publique :
+	partagée par les composants de sort (fusionner_effets) et par les compétences de corps à
+	corps, qui ajoutent les dégâts d'arme du porteur aux leurs (combat._degats_competence)."""
 	a, b = (a or "").strip(), (b or "").strip()
 	if not a:
 		return b
@@ -182,7 +184,7 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 	}
 	for bonus in bonus_list or []:
 		bonus = bonus or {}
-		out["degats"] = _concat_degats(out["degats"], bonus.get("degats", ""))
+		out["degats"] = concat_degats(out["degats"], bonus.get("degats", ""))
 		for key in ("pv", "pm", "regen_pv", "regen_pm", "duree", "esquive", "furtivite"):
 			out[key] += _as_int(bonus.get(key))
 		for k, delta in (bonus.get("buffs") or {}).items():

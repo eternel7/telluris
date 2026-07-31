@@ -73,13 +73,23 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 
 	flags: dict = {}
 	placeholders: dict = {"pnj": pnj.nom_effectif(entree or {}, pnj_doc)}
+	# Délai de réouverture : posé HORS du bloc `if lieu_doc`, comme {pnj} — il ne dépend que du
+	# PNJ. `dialogue_en_attente` est le seul verrou (aucun service n'est refusé en dur) : c'est
+	# la donnée qui conditionne ses choix, comme le fait déjà `transport_mefiance`.
+	restant = pnj.delai_restant(character, pnj_doc.get("_id"), quetes.now_epoch())
+	flags["dialogue_en_attente"] = restant > 0
+	if restant > 0:
+		# Même unité et même formule que {delai} du transport : des minutes, jamais 0.
+		placeholders["attente"] = max(1, restant // 60)
 	if lieu_doc:
 		offre = transport.offre_courante(character, lieu_doc)
 		a_livrer = transport.transport_a_livrer(character, lieu_doc.get("_id"))
 		en_cours = transport.course_du_donneur(character, lieu_doc.get("_id"))
 		a_rapporter = transport.retour_attendu(character, lieu_doc.get("_id"))
 		spec = transport.offre_spec(pnj_doc)
-		flags = {
+		# ⚠️ `update` et non `flags = {…}` : les drapeaux posés avant ce bloc (le délai de
+		# réouverture, qui ne dépend pas du lieu) seraient effacés par une réassignation.
+		flags.update({
 			"transport_offert": bool(offre),
 			"transport_a_livrer": bool(a_livrer),
 			# Course livrée dont il reste à rendre compte ici (courses `retour`) : c'est le donneur
@@ -93,7 +103,7 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			# sanction serait invisible).
 			"transport_mefiance": transport.mefiance(character, lieu_doc, pnj_doc, get_doc,
 													 quetes.now_epoch()),
-		}
+		})
 		# Une course déjà confiée se raconte avec les mêmes mots qu'une offre (le snapshot a la
 		# même forme) : le donneur peut rappeler la destination et le temps qu'il reste.
 		if offre or en_cours:
@@ -254,7 +264,11 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)])
 	if echues:
 		save_doc(character)
 	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
-	depart = (pnj_doc.get("dialogue") or {}).get("noeud_depart", "accueil")
+	# Un dialogue encore sous délai s'ouvre sur son `noeud_attente` (refus parlé) et non sur son
+	# nœud de départ. ⚠️ Le GET n'ARME jamais : un `delai_min` porté par le nœud de départ
+	# verrouillerait le PNJ dès la première ouverture — c'est une faute que le linter signale.
+	depart = pnj.noeud_depart_effectif(
+		pnj_doc, pnj.delai_restant(character, pnj_doc.get("_id"), quetes.now_epoch()))
 	return {
 		"pnj": pnj.pnj_payload(entree, pnj_doc),
 		"noeud": pnj.noeud_client(pnj_doc, depart, contexte, pnj.soin_effectif(pnj_doc, contexte)),
@@ -392,6 +406,18 @@ async def pnj_dialogue_choix(
 		link_id = _lien_vers(current_user, character.get("lieu"), choix["deplacer"])
 		if link_id:
 			reponse["deplacer"] = link_id
+	# Le nœud qu'on s'apprête à rendre ferme-t-il le dialogue pour un temps ? Le moteur ne
+	# connaît aucune « fin » (cf. utils/pnj, section Délai de réouverture) : le délai s'arme au
+	# RENDU du nœud qui le porte. Le doc personnage est ici ANNEXE — un service vient peut-être
+	# de le sauver et c'est lui qui portait l'autorité — donc best-effort, jamais de 409.
+	if pnj.armer_delai(character, pnj_doc.get("_id"), pnj_doc, suivant, quetes.now_epoch()):
+		save_doc(character)
+		# Même raison que les branches de service ci-dessus : sans reconstruction, le nœud qui
+		# arme le délai afficherait {attente} en clair et filtrerait ses propres choix sur le
+		# flag périmé. Les placeholders de l'action sont réinjectés par-dessus, comme elles.
+		dits_courants = dict(contexte.get("placeholders") or {})
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+		contexte["placeholders"].update(dits_courants)
 	if not suivant or suivant == "fin":
 		reponse["noeud"] = None
 	else:

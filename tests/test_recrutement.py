@@ -168,14 +168,32 @@ def test_pivot_build_joueur_snapshot(monde):
 	assert "cac" in modes  # l'épée équipée (ou les poings) donne un profil de mêlée
 
 
-def test_choisir_portrait_replis():
-	pool = ["assassin_f_elfe01.jpg", "assassin_m_nain01.jpg", "voleur_m_humain01.jpg"]
+def test_choisir_portrait_sexe_et_race_stricts():
+	pool = ["assassin_f_elfe01.jpg", "assassin_m_nain01.jpg", "voleur_m_humain01.jpg",
+			"voleur_m_nain01.jpg"]
 	assert recrutement.choisir_portrait("assassin", "F", "elfe", pool) == "assassin_f_elfe01.jpg"
-	# Pas de nain F assassin → repli sexe, puis vocation.
-	assert recrutement.choisir_portrait("assassin", "F", "nain", pool) == "assassin_f_elfe01.jpg"
-	assert recrutement.choisir_portrait("assassin", "M", "ogre", pool) == "assassin_m_nain01.jpg"
-	assert recrutement.choisir_portrait("barbare", "M", "ogre", pool) in pool
-	assert recrutement.choisir_portrait("barbare", "M", "ogre", []) == ""
+	# Repli de VOCATION seulement : pas de voleur nain M ? si → sinon même sexe + race.
+	assert recrutement.choisir_portrait("barbare", "M", "nain", pool) in (
+		"assassin_m_nain01.jpg", "voleur_m_nain01.jpg")
+	# Aucun portrait de la race (ou du sexe) demandé ⇒ RIEN, jamais une autre race.
+	assert recrutement.choisir_portrait("assassin", "F", "nain", pool) == ""
+	assert recrutement.choisir_portrait("assassin", "M", "ogre", pool) == ""
+	assert recrutement.choisir_portrait("assassin", "M", "elfe", pool) == ""
+	assert recrutement.choisir_portrait("barbare", "M", "nain", []) == ""
+	# Nom hors règle : ignoré, jamais tiré par défaut.
+	assert recrutement.choisir_portrait("assassin", "F", "elfe", ["portrait.jpg"]) == ""
+
+
+def test_generer_aventurier_portrait_de_sa_race(monde):
+	pool = [f"{v}_{s}_{r}01.jpg"
+			for v in ("guerrier", "voleur") for s in ("f", "m") for r in ("humain", "elfe")]
+	for _ in range(20):
+		av = recrutement.generer_aventurier(GUILDE, VILLE, 1, portraits=pool)
+		image = av["image"]
+		if not image:
+			continue
+		voc, sexe, race = recrutement.decomposer_portrait(image)
+		assert race == av["race"] and sexe == av["sex"].lower()
 
 
 # ── Éligibilité du lieu ──────────────────────────────────────────────────────────

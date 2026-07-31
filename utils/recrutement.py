@@ -198,16 +198,40 @@ def acces_autorise(character: dict, lieu_doc: dict) -> tuple[bool, str]:
 
 # ── Génération procédurale d'une recrue ──────────────────────────────────────────
 
+def decomposer_portrait(fichier: str) -> tuple | None:
+	"""`{voc}_{sexe}_{race}NN.ext` → `(voc, sexe, race)`, en minuscules. None si le fichier
+	ne suit pas la règle de nommage (il est alors ignoré, jamais tiré au hasard)."""
+	base = os.path.splitext(fichier)[0].lower()
+	morceaux = base.split("_")
+	if len(morceaux) != 3:
+		return None
+	voc, sexe, reste = morceaux
+	race = reste.rstrip("0123456789")
+	if not voc or not sexe or not race:
+		return None
+	return voc, sexe, race
+
+
 def choisir_portrait(voc: str, sex: str, race: str, portraits: list) -> str:
-	"""Portrait par filtre de préfixe sur le nommage `{voc}_{sexe}_{race}NN.jpg`
-	(742 fichiers existants, zéro asset nouveau). Replis successifs : même vocation +
-	sexe, même vocation, n'importe lequel. Chaîne vide si le pool est vide."""
+	"""Portrait par nommage `{voc}_{sexe}_{race}NN.jpg` (zéro asset nouveau).
+
+	⚠️ SEXE et RACE sont STRICTS : ils sont écrits partout ailleurs sur la recrue (fiche,
+	carte, jeton de combat), un portrait d'une autre race mentirait. Seule la VOCATION se
+	relâche — elle ne se lit qu'à la tenue. Repli unique : même sexe + même race, autre
+	vocation. Chaîne vide si ce couple n'a aucun portrait — un visage juste ou rien."""
 	s = (sex or "M").lower()
-	for prefixe in (f"{voc}_{s}_{race}", f"{voc}_{s}_", f"{voc}_"):
-		candidats = [p for p in portraits if p.startswith(prefixe)]
-		if candidats:
-			return random.choice(candidats)
-	return random.choice(portraits) if portraits else ""
+	r = (race or "").lower()
+	v = (voc or "").lower()
+	memes, exacts = [], []
+	for p in portraits:
+		infos = decomposer_portrait(p)
+		if not infos or infos[1] != s or infos[2] != r:
+			continue
+		memes.append(p)
+		if infos[0] == v:
+			exacts.append(p)
+	pool = exacts or memes
+	return random.choice(pool) if pool else ""
 
 
 def portraits_disponibles() -> list:
