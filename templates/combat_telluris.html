@@ -179,6 +179,19 @@
 .ally-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
 .ally-token .mt-hp-fill { height: 100%; background: #2e86de; }
 
+/* Sprite d'animation d'impact : posé comme un jeton (même ancre left/bottom, même
+   transform par _placerToken) puis retiré à la fin de la boucle d'images. z-index 3 =
+   au-dessus des jetons (monstres 1, alliés 2), sous le jeton du joueur et la vignette.
+   Aucune `transition` : ce n'est pas un déplacement, c'est un défilé de frames. */
+.vfx-sprite {
+	position: absolute;
+	left: 50%;
+	bottom: calc(var(--step) * var(--floor));
+	pointer-events: none;
+	z-index: 3;
+	background-repeat: no-repeat;
+}
+
 /* Re-cadrage qui n'est PAS un mouvement de jeu (redimensionnement : --step change,
    donc TOUTES les positions ; premier cadrage à l'ouverture) : tout doit sauter d'un
    bloc. Posée le temps d'une frame par sansAnimationCarte(). Le pivot du monde au
@@ -187,8 +200,11 @@
 #viewport.no-anim .monster-token,
 #viewport.no-anim .ally-token { transition: none; }
 
+/* ⚠️ Cette page n'inclut PAS part-accessibility-css.html : elle porte sa propre garde.
+   Le sprite d'impact n'est même pas créé dans ce mode (cf. jouerVfx) ; la règle reste
+   le filet de sécurité si l'un venait à être posé par un autre chemin. */
 @media (prefers-reduced-motion: reduce) {
-	#bg-image, .monster-token, .ally-token { transition: none; }
+	#bg-image, .monster-token, .ally-token, .vfx-sprite { transition: none; animation: none; }
 }
 
 /* ─── Tour Header ──────────────────────────────────────────────── */
@@ -911,6 +927,14 @@ const SERVER_DATA = {
 // en cache ici une fois. Les réponses d'action ne la renvoient pas.
 const GRID = {{ grid | tojson | safe }};
 
+// Catalogue des animations d'impact ACTIVES : {id: {fichier, colonnes, lignes,
+// sens_lignes, sens_colonnes, debut, fin, duree_ms, echelle, decalage_y, ancrage,
+// largeur, hauteur}}.
+// Le journal ne porte que l'ID (`entry.vfx.anim`) et l'id de snapshot de la cible — c'est
+// le SEUL canal possible, un tour de monstre étant résolu entièrement côté serveur.
+// Une animation absente du catalogue (brouillon, doc supprimé) ne joue rien.
+const ANIMATIONS = {{ animations | tojson | safe }};
+
 // Consommables du sac utilisables en combat (effet instantané pv/pm, index d'origine
 // dans l'inventaire) — resynchronisés par la réponse de l'action « consommer ».
 let CONSOS = {{ consommables | tojson | safe }};
@@ -1438,6 +1462,88 @@ function logClass(entry) {
 	}
 }
 
+// ── Animations d'impact ───────────────────────────────────────────────────────
+// Découpe : MÊME arithmétique que utils/animations.frame_position et que l'aperçu de
+// /admin/animations (gauche → droite, puis haut → bas par défaut). Les trois doivent
+// montrer exactement la même chose, sinon régler une découpe ne veut plus rien dire.
+function _vfxFrame(el, anim, i) {
+	const cols = Math.max(1, parseInt(anim.colonnes, 10) || 1);
+	const lgs  = Math.max(1, parseInt(anim.lignes, 10) || 1);
+	i = Math.min(Math.max(0, i), cols * lgs - 1);
+	const rangCol = i % cols;
+	const rang = Math.floor(i / cols);
+	// Deux axes INDÉPENDANTS : les inverser tous les deux joue la feuille à l'envers.
+	const col = anim.sens_colonnes === 'droite_gauche' ? (cols - 1 - rangCol) : rangCol;
+	const ligne = anim.sens_lignes === 'bas_haut' ? (lgs - 1 - rang) : rang;
+	el.style.backgroundSize = (cols * 100) + '% ' + (lgs * 100) + '%';
+	// Pourcentages : la garde à 0 évite la division par zéro d'une bande d'une seule
+	// colonne (ou d'une seule ligne).
+	el.style.backgroundPosition =
+		(cols > 1 ? (col / (cols - 1)) * 100 : 0) + '% ' +
+		(lgs > 1 ? (ligne / (lgs - 1)) * 100 : 0) + '%';
+}
+
+// Joue l'animation portée par une entrée de journal, sur la case de sa cible.
+// → Promise<durée en ms> (0 = rien joué), ce qui laisse revealNext décider de l'attente.
+function jouerVfx(v) {
+	const anim = v && ANIMATIONS ? ANIMATIONS[v.anim] : null;
+	if (!anim) return Promise.resolve(0);
+	// Mouvement réduit : aucun sprite, et le journal garde son rythme de lecture.
+	if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		return Promise.resolve(0);
+	}
+	// `ancrage` décide de QUI porte le sprite : la cible du coup (défaut) ou celui qui
+	// agit — l'entrée porte les deux ids quand ils diffèrent.
+	const ancre = (anim.ancrage === 'acteur' && v.acteur) ? v.acteur : v.cible;
+	const sujet = (state.monstres || []).find(m => m.id === ancre)
+			   || (state.joueurs || []).find(p => p.id === ancre);
+	// Cible disparue (monture retirée, snapshot inconnu) : on ne joue rien plutôt que de
+	// poser un sprite au hasard sur la carte.
+	if (!sujet || !sujet.pos) return Promise.resolve(0);
+
+	const layer = document.getElementById('tokens-layer');
+	if (!layer) return Promise.resolve(0);
+	const el = document.createElement('div');
+	el.className = 'vfx-sprite';
+	const cols = Math.max(1, parseInt(anim.colonnes, 10) || 1);
+	const lgs  = Math.max(1, parseInt(anim.lignes, 10) || 1);
+	// Largeur en multiples de --step ; hauteur au RATIO D'UNE FRAME, jamais de la feuille :
+	// un sprite étiré ne ressemblerait plus à ce que montrait l'aperçu.
+	const step = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--step')) || 32;
+	const fw = anim.largeur ? anim.largeur / cols : 1;
+	const fh = anim.hauteur ? anim.hauteur / lgs : 1;
+	const w = step * (parseFloat(anim.echelle) || 1);
+	const h = fw > 0 ? w * (fh / fw) : w;
+	el.style.width = w + 'px';
+	el.style.height = h + 'px';
+	el.style.backgroundImage = "url('/icons/effects/" + encodeURIComponent(anim.fichier) + "')";
+	const dy = parseFloat(anim.decalage_y) || 0;
+	if (dy) el.style.bottom = 'calc(var(--step) * (var(--floor) + ' + dy + '))';
+	const j = me();
+	// ⚠️ Placé par _placerToken et pas à la main : c'est la recette
+	// `rotate(a) translate(MONDE) rotate(-a)` qui fait tomber le sprite sur la bonne case
+	// quand la caméra a pivoté (changement d'acteur dans un groupe).
+	_vfxFrame(el, anim, anim.debut);
+	_placerToken(el, sujet.pos.x - j.pos.x, sujet.pos.y - j.pos.y);
+	layer.appendChild(el);
+
+	const debut = Math.max(0, parseInt(anim.debut, 10) || 0);
+	const fin = Math.max(debut, parseInt(anim.fin, 10) || 0);
+	const nb = fin - debut + 1;
+	const duree = Math.max(1, parseInt(anim.duree_ms, 10) || 600);
+	return new Promise(resolve => {
+		let t0 = 0;
+		const tick = (t) => {
+			if (!t0) t0 = t;
+			const ecoule = t - t0;
+			if (ecoule >= duree) { el.remove(); resolve(duree); return; }
+			_vfxFrame(el, anim, debut + Math.min(nb - 1, Math.floor(ecoule / duree * nb)));
+			requestAnimationFrame(tick);
+		};
+		requestAnimationFrame(tick);
+	});
+}
+
 let logQueue  = [];
 let revealing = false;
 function enqueueLogs(log) {
@@ -1445,7 +1551,7 @@ function enqueueLogs(log) {
 	logLen = log.length;
 	if (!revealing) revealNext();
 }
-function revealNext() {
+async function revealNext() {
 	if (!logQueue.length) { revealing = false; return; }
 	revealing = true;
 	const entry = logQueue.shift();
@@ -1461,7 +1567,13 @@ function revealNext() {
 	div.textContent = entry.texte || '';
 	container.appendChild(div);
 	container.scrollTop = container.scrollHeight;
-	setTimeout(revealNext, 450);
+	// Le journal ATTEND la fin de l'animation : chaque coup se lit ET se voit. Une seule
+	// animation à la fois, donc — pas de superposition, c'est le choix retenu.
+	// ⚠️ Le rythme total d'une ligne est `max(450, duree)`, pas `duree + 450` : l'attente
+	// de l'animation est DÉJÀ passée quand on arrive ici, la déduire est ce qui empêche
+	// une ligne animée de durer deux fois plus longtemps qu'annoncé.
+	const duree = entry.vfx ? await jouerVfx(entry.vfx) : 0;
+	setTimeout(revealNext, Math.max(0, 450 - duree));
 }
 
 // Message système immédiat (hors file d'animation du log) : sert aux refus d'édition

@@ -114,6 +114,22 @@ CRIT_CHANCE_DIVISEUR: int = 10
 # la barre par la fin ; les entrées au-delà sont oubliées à la première écriture.
 COMBAT_SLOTS_MAX: int = 15
 
+# ── Animations de combat (feuilles de sprites `animation:*`) ─────────────────────
+# Animation jouée SUR LA CIBLE quand un coup porte, par CANAL. Un doc de contenu
+# (`sort:*`, `competence:*`, `item:*`, `espece:*`) peut porter son propre champ
+# `animation` : il prime toujours (cf. animations.animation_pour). Cette table n'est que
+# le REPLI, canal par canal.
+# ⚠️ Valeurs vides par défaut : aucun fichier du dossier `icons/effects` n'a de découpe
+# garantie sans configuration, et une animation mal découpée est pire que pas d'animation.
+# Le contenu se règle en base (/admin → variables de monde), jamais dans le code.
+COMBAT_ANIMATIONS_DEFAUT: dict[str, str] = {
+	"cac": "", "jet": "", "tir": "",        # modes d'attaque du joueur
+	"monstre": "",                          # attaque de monstre sans animation d'espèce
+	"sort": "", "competence": "", "consommable": "",
+	"soin": "", "buff": "", "debuff": "",   # effets sans dégâts
+	"miss": "", "fumble": "", "dissipation": "",
+}
+
 # ── Relation marchand (marchandage volontaire) ───────────────────────────────────
 # La relation perso×lieu (doc `type:"relation"`) est un entier sur 0–100, neutre à
 # 50. Elle pondère le prix de base (sans marchander : médian à 50, meilleur au-dessus,
@@ -502,6 +518,7 @@ def current_world_variables() -> dict:
 		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
 		"CRIT_CHANCE_DIVISEUR": CRIT_CHANCE_DIVISEUR,
 		"COMBAT_SLOTS_MAX": COMBAT_SLOTS_MAX,
+		"COMBAT_ANIMATIONS_DEFAUT": dict(COMBAT_ANIMATIONS_DEFAUT),
 		"RELATION_INITIALE": RELATION_INITIALE,
 		"RELATION_SEUIL_COEFF": RELATION_SEUIL_COEFF,
 		"MARCHANDAGE_BLOCAGE_SECONDES": MARCHANDAGE_BLOCAGE_SECONDES,
@@ -669,6 +686,12 @@ def load_world_variables() -> dict:
 	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))
 	CRIT_CHANCE_DIVISEUR         = int(v.get("CRIT_CHANCE_DIVISEUR", CRIT_CHANCE_DIVISEUR))
 	COMBAT_SLOTS_MAX             = int(v.get("COMBAT_SLOTS_MAX", COMBAT_SLOTS_MAX))
+	# Dict MUTÉ EN PLACE (modèle de DEPECAGE_TAGS) : `utils/animations` le lit par
+	# attribut de module à chaque résolution — une réassignation le laisserait sur
+	# l'ancien objet et le réglage à chaud n'aurait aucun effet.
+	if isinstance(v.get("COMBAT_ANIMATIONS_DEFAUT"), dict):
+		COMBAT_ANIMATIONS_DEFAUT.clear()
+		COMBAT_ANIMATIONS_DEFAUT.update({str(k): str(x or "") for k, x in v["COMBAT_ANIMATIONS_DEFAUT"].items()})
 	RELATION_INITIALE            = int(v.get("RELATION_INITIALE", RELATION_INITIALE))
 	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
 	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))

@@ -18,6 +18,7 @@ from routers.quetes import quetes_router
 from routers.pnj import pnj_router
 from routers.recrutement import recrutement_router
 from routers.montures import montures_router
+from routers.animations import animations_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
 from utils.auth import get_current_user
@@ -36,6 +37,7 @@ from utils import chasse as chasse_util
 from utils import recrutement as recrutement_util
 from utils import montures as montures_util
 from utils import fiche as fiche_util
+from utils import animations as animations_util
 from utils import lint_dialogues
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
@@ -104,6 +106,9 @@ app.include_router(quetes_router, prefix="/api")
 app.include_router(pnj_router, prefix="/api")
 app.include_router(recrutement_router, prefix="/api")
 app.include_router(montures_router, prefix="/api")
+# Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en
+# lecture, `/admin/...` en écriture, comme les endpoints d'admin de main.py).
+app.include_router(animations_router)
 app.include_router(oauth_router)
 	
 @app.get("/", response_class=HTMLResponse)
@@ -177,6 +182,19 @@ def admin_exports(request: Request, current_user: Annotated[User, Depends(get_cu
 		request=request,
 		name="admin_exports.html",
 		context={"title": "Exports", "doc_types": _distinct_doc_types()}
+	)
+
+@app.get("/admin/animations", response_class=HTMLResponse)
+def admin_animations(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Écran « Animations de combat » : scan du dossier de feuilles de sprites, réglage de
+	la découpe avec aperçu animé, et liaison au contenu (sorts, compétences, items, espèces)."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_animations.html",
+		context={"title": "Animations de combat"}
 	)
 
 @app.get("/admin/table", response_class=HTMLResponse)
@@ -844,6 +862,9 @@ async def get_combat_page(
 			"slots_max": slots_actions.slots_max(),
 			# Portraits du groupe (tokens alliés + panneau du membre actif côté client).
 			"portraits_joueurs": portraits_joueurs,
+			# Catalogue des animations ACTIVES : le journal porte l'id (`vfx.anim`), le
+			# client y lit la découpe de la feuille. Les brouillons en sont exclus.
+			"animations": animations_util.catalogue_payload(find_docs({"type": "animation"}) or []),
 		},
 		headers={"Cache-Control": "no-store"},
 	)

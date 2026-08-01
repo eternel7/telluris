@@ -84,6 +84,16 @@
 		letter-spacing: 0.08em;
 	}
 
+	/* `margin-left:auto` plutôt que `justify-content:space-between` : le titre et son
+	   sous-titre doivent rester collés, seul le retour part à droite. */
+	header a {
+		margin-left: auto;
+		color: var(--muted);
+		font-size: 0.8rem;
+		text-decoration: none;
+	}
+	header a:hover { color: var(--accent); }
+
 	.main {
 		display: flex;
 		gap: 0;
@@ -515,6 +525,7 @@
 <header>
 	<h1>🗺️ Battlemap Grid Editor</h1>
 	<span>— Éditeur de grille de déplacement</span>
+	<a href="/admin">← Retour à l'administration</a>
 </header>
 
 <div class="main">

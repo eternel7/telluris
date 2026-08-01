@@ -1031,8 +1031,8 @@
 		   contrainte s'applique au scroller. Listes de l'onglet ⚡ (sorts, écoles,
 		   compétences, apprentissages) : le contenu est réécrit en innerHTML dans
 		   le scroller, l'ombre vit dans le wrapper et survit à chaque rendu client. */
-		.sh-quest-list-active > .sh-rel-scroll { max-height : 40vh; }
-		.sh-quest-list-ended > .sh-rel-scroll { max-height : 34vh; }
+		.sh-quest-list-active > .sh-rel-scroll { min-height: 35vh; max-height : 38vh; }
+		.sh-quest-list-ended > .sh-rel-scroll { max-height : 35vh; }
 		.sh-capa-list > .sh-rel-scroll { max-height: 34vh; }
 		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }

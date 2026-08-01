@@ -360,6 +360,42 @@
 			border-color: #8b1a1a;
 			color: #fff;
 		}
+		/* ── ACCÈS ADMIN (pastille flottante) ─────────────────────
+		   Simple raccourci, jamais un verrou : /admin garde sa propre garde
+		   serveur (`_require_admin_page`). ⚠️ z-index SOUS le wizard (2000),
+		   sinon la pastille flotterait par-dessus la création de personnage. */
+		.admin-fab {
+			position: fixed;
+			right: 20px;
+			bottom: 20px;
+			z-index: 900;
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 10px 16px;
+			background: var(--ink);
+			border: 1px solid var(--gold);
+			border-radius: 2px;
+			color: var(--gold2);
+			font-family: 'Cinzel', serif;
+			font-size: 12px;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			text-decoration: none;
+			box-shadow: 0 4px 18px rgba(0,0,0,0.6);
+			transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+		}
+		.admin-fab:hover, .admin-fab:focus-visible {
+			color: var(--gold3);
+			border-color: var(--gold2);
+			box-shadow: 0 4px 22px rgba(240,192,74,0.25);
+		}
+		/* Téléphone : le libellé mangerait la largeur, l'icône suffit. */
+		@media (max-width: 600px) {
+			.admin-fab { padding: 10px 12px; }
+			.admin-fab .admin-fab-txt { display: none; }
+		}
+
 		/* ── WIZARD CRÉATION ──────────────────────────────────────── */
 		.wizard-overlay {
 			display: none;
@@ -1057,6 +1093,11 @@
 		</div>
 		</section>
 	</main>
+	{% if user_doc and user_doc.get("admin") == 1 %}
+	<a class="admin-fab" href="/admin" title="Administration">
+		<span aria-hidden="true">⚙</span><span class="admin-fab-txt">Administration</span>
+	</a>
+	{% endif %}
 	<!-- ══════════════ WIZARD CRÉATION DE PERSONNAGE ══════════════ -->
 	<div class="wizard-overlay" id="wizard-overlay" role="dialog" aria-modal="true" aria-labelledby="wizard-heading">
 

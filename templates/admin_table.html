@@ -26,8 +26,11 @@
 		header {
 			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
 			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 16px;
 		}
 		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+		header a:hover { color: var(--accent); }
 		.main { width: 100%; max-width: none; padding: 24px; }
 		.card {
 			background: var(--panel); border: 1px solid var(--border);
@@ -148,7 +151,10 @@
 	</style>
 </head>
 <body>
-	<header><h1>▦ Mise à jour en tableau — administration</h1></header>
+	<header>
+		<h1>▦ Mise à jour en tableau — administration</h1>
+		<a href="/admin">← Retour à l'administration</a>
+	</header>
 	<div class="main">
 		<!-- Sélection du type (obligatoire) -->
 		<div class="card">

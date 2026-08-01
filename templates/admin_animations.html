@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #7ec8ff;
+			--text: #fff;
+			--muted: #9aa3b2;
+			--ok: #4cd97b;
+			--err: #ff6b6b;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+		header a:hover { color: var(--accent); }
+		.main { width: 100%; max-width: 1180px; padding: 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-title {
+			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		.dl-btn {
+			display: inline-flex; align-items: center; gap: 8px;
+			padding: 9px 16px; border: 1px solid var(--accent); border-radius: 6px;
+			background: rgba(200,168,75,0.1); color: var(--accent);
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+			text-decoration: none; cursor: pointer; transition: all 0.2s;
+		}
+		.dl-btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+		.dl-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+		.dl-btn.danger { border-color: #7a3030; color: #ff9a9a; background: rgba(122,48,48,0.12); }
+		.status { font-size: 0.78rem; color: var(--muted); margin-top: 10px; min-height: 1.1em; white-space: pre-wrap; }
+		.status.ok { color: var(--ok); }
+		.status.err { color: var(--err); }
+		code { color: var(--accent2); }
+
+		/* ── Éditeur : liste à gauche, réglages + aperçus à droite ── */
+		.edit-layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; }
+		@media (max-width: 900px) { .edit-layout { grid-template-columns: 1fr; } }
+		.anim-list {
+			border: 1px solid var(--border); border-radius: 6px; background: var(--bg);
+			max-height: 520px; overflow-y: auto;
+		}
+		.anim-list::-webkit-scrollbar { width: 8px; }
+		.anim-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+		.anim-row {
+			padding: 8px 10px; border-bottom: 1px solid rgba(42,48,64,0.6);
+			cursor: pointer; font-size: 0.78rem; display: flex; align-items: center; gap: 8px;
+		}
+		.anim-row:hover { background: rgba(200,168,75,0.08); }
+		.anim-row.sel { background: rgba(200,168,75,0.16); color: var(--accent); }
+		.anim-row .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; flex: 0 0 auto; }
+		.anim-row.actif .dot { background: var(--ok); }
+		.anim-row .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+		.anim-filter {
+			width: 100%; padding: 8px 10px; margin-bottom: 8px;
+			border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.8rem;
+		}
+		.anim-filter:focus { outline: none; border-color: var(--accent); }
+
+		.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+		.field { display: flex; flex-direction: column; gap: 4px; }
+		.field label { font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+		.field input, .field select {
+			padding: 7px 9px; border: 1px solid var(--border); border-radius: 5px;
+			background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.8rem;
+		}
+		.field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+		/* Lecture seule : grisé pour se distinguer d'un champ saisissable, mais bien un
+		   <input> — l'id doit rester sélectionnable pour être copié ailleurs. */
+		.field input[readonly] {
+			color: var(--accent2); background: rgba(42,48,64,0.35); border-style: dashed;
+		}
+		.field.wide { grid-column: 1 / -1; }
+		.row-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+		.previews { display: grid; grid-template-columns: 220px 1fr; gap: 16px; margin-top: 16px; align-items: start; }
+		@media (max-width: 760px) { .previews { grid-template-columns: 1fr; } }
+		.preview-box {
+			border: 1px solid var(--border); border-radius: 6px; background: #05070b;
+			padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+		}
+		.preview-box .lbl { font-size: 0.68rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+		/* Damier : un sprite est transparent, sur fond noir on ne voit pas ses bords. */
+		.sprite-stage {
+			width: 190px; height: 190px; position: relative;
+			background-image:
+				linear-gradient(45deg, #1a1d26 25%, transparent 25%),
+				linear-gradient(-45deg, #1a1d26 25%, transparent 25%),
+				linear-gradient(45deg, transparent 75%, #1a1d26 75%),
+				linear-gradient(-45deg, transparent 75%, #1a1d26 75%);
+			background-size: 16px 16px;
+			background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+		}
+		#apercu-sprite {
+			position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+			background-repeat: no-repeat;
+		}
+		/* Feuille complète + grille de découpe superposée : c'est cet aperçu qui rend le
+		   réglage possible — sans lui on règle une découpe à l'aveugle. */
+		.sheet-wrap { position: relative; display: inline-block; max-width: 100%; line-height: 0; }
+		.sheet-wrap img { max-width: 100%; height: auto; display: block; }
+		.sheet-grid { position: absolute; inset: 0; }
+		.sheet-cell {
+			position: absolute; border: 1px solid rgba(255,255,255,0.18);
+			font-size: 9px; color: rgba(255,255,255,0.55); line-height: 1.1;
+			padding: 1px 2px; font-family: inherit;
+		}
+		.sheet-cell.on { border-color: var(--accent); background: rgba(200,168,75,0.16); color: var(--accent); }
+
+		/* ── Liaisons ── */
+		table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+		th, td { padding: 7px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+		th { color: var(--muted); font-weight: normal; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; }
+		td select { width: 100%; padding: 5px 7px; border: 1px solid var(--border); border-radius: 5px;
+			background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.75rem; }
+		.liaison-scroll { max-height: 440px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
+		.type-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>✨ Animations de combat</h1>
+		<a href="/admin">← Retour à l'administration</a>
+	</header>
+	<div class="main">
+
+		<!-- ── 1. Scan ─────────────────────────────────────────────────────── -->
+		<div class="card">
+			<div class="card-title">▶ Scanner le dossier</div>
+			<div class="card-desc">
+				Crée un document <code>animation:*</code> pour chaque feuille de
+				<code>templates/resources/icons/effects</code> qui n'en a pas encore : dimensions
+				lues sur l'image, grille <strong>devinée</strong>, et <code>actif: false</code>.
+				Le scan <strong>n'écrase jamais</strong> un document existant — il est donc
+				relançable après tout ajout de fichier.
+			</div>
+			<button class="dl-btn" id="btn-scan" type="button">▶ Scanner</button>
+			<div class="status" id="scan-status"></div>
+		</div>
+
+		<!-- ── 2. Éditeur ──────────────────────────────────────────────────── -->
+		<div class="card">
+			<div class="card-title">✂ Découpe &amp; aperçu</div>
+			<div class="card-desc">
+				Régler colonnes / lignes / sens de lecture jusqu'à ce que l'aperçu boucle
+				proprement, puis cocher <strong>Actif</strong> : seules les animations actives
+				sont servies au combat. <strong>⧉ Dupliquer</strong> crée une seconde animation
+				sur la <em>même</em> feuille (autre plage d'images).
+			</div>
+			<div class="edit-layout">
+				<div>
+					<input class="anim-filter" id="anim-filter" placeholder="filtrer…" autocomplete="off">
+					<div class="anim-list" id="anim-list"></div>
+				</div>
+				<div>
+					<div class="form-grid" id="anim-form">
+						<!-- L'`_id` est la clé du document ET ce que les liaisons de contenu
+						     stockent : il se lit et se copie, il ne se saisit pas — ⧉ Dupliquer
+						     est le seul geste qui en crée un. -->
+						<div class="field wide">
+							<label for="f-id">Identifiant (lecture seule)</label>
+							<input id="f-id" type="text" readonly>
+						</div>
+						<div class="field wide">
+							<label for="f-nom">Nom</label>
+							<input id="f-nom" type="text">
+						</div>
+						<div class="field wide">
+							<label for="f-fichier">Fichier (icons/effects)</label>
+							<input id="f-fichier" type="text" list="fichiers-list">
+							<datalist id="fichiers-list"></datalist>
+						</div>
+						<div class="field"><label for="f-colonnes">Colonnes</label><input id="f-colonnes" type="number" min="1"></div>
+						<div class="field"><label for="f-lignes">Lignes</label><input id="f-lignes" type="number" min="1"></div>
+						<!-- Deux AXES séparés : une feuille peut avoir besoin des deux, et les
+						     inverser tous les deux joue la planche entière à l'envers. -->
+						<div class="field">
+							<label for="f-sens-cols">Sens des colonnes</label>
+							<select id="f-sens-cols">
+								<option value="gauche_droite">gauche → droite</option>
+								<option value="droite_gauche">droite → gauche</option>
+							</select>
+						</div>
+						<div class="field">
+							<label for="f-sens">Sens des lignes</label>
+							<select id="f-sens">
+								<option value="haut_bas">haut → bas</option>
+								<option value="bas_haut">bas → haut</option>
+							</select>
+						</div>
+						<div class="field"><label for="f-debut">Début</label><input id="f-debut" type="number" min="0"></div>
+						<div class="field"><label for="f-fin">Fin</label><input id="f-fin" type="number" min="0"></div>
+						<div class="field"><label for="f-duree">Durée (ms)</label><input id="f-duree" type="number" min="1" step="50"></div>
+						<div class="field"><label for="f-echelle">Échelle (× case)</label><input id="f-echelle" type="number" min="0.1" step="0.1"></div>
+						<div class="field"><label for="f-decalage">Décalage Y (case)</label><input id="f-decalage" type="number" step="0.05"></div>
+						<div class="field">
+							<label for="f-ancrage">Ancrage</label>
+							<select id="f-ancrage">
+								<option value="cible">cible</option>
+								<option value="acteur">acteur</option>
+							</select>
+						</div>
+						<div class="field">
+							<label for="f-actif">Actif</label>
+							<select id="f-actif">
+								<option value="0">brouillon</option>
+								<option value="1">actif</option>
+							</select>
+						</div>
+					</div>
+					<div class="row-btns">
+						<button class="dl-btn" id="btn-save" type="button">💾 Enregistrer</button>
+						<button class="dl-btn" id="btn-dup" type="button">⧉ Dupliquer</button>
+						<button class="dl-btn danger" id="btn-del" type="button">🗑 Supprimer</button>
+					</div>
+					<div class="status" id="edit-status"></div>
+
+					<div class="previews">
+						<div class="preview-box">
+							<div class="lbl">Aperçu animé</div>
+							<div class="sprite-stage"><div id="apercu-sprite"></div></div>
+							<div class="lbl" id="apercu-info">—</div>
+						</div>
+						<div class="preview-box">
+							<div class="lbl">Feuille &amp; découpe</div>
+							<div class="sheet-wrap" id="sheet-wrap">
+								<img id="sheet-img" alt="">
+								<div class="sheet-grid" id="sheet-grid"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ── 3. Liaisons ─────────────────────────────────────────────────── -->
+		<div class="card">
+			<div class="card-title">🔗 Liaisons au contenu</div>
+			<div class="card-desc">
+				Associer une animation à un sort, une compétence, un objet (arme
+				<em>ou</em> consommable) ou une espèce. Sans liaison, le combat retombe sur le
+				défaut du canal — variable de monde <code>COMBAT_ANIMATIONS_DEFAUT</code>,
+				réglable depuis <code>/admin</code>.
+			</div>
+			<div class="type-row">
+				<select id="liaison-type" class="anim-filter" style="max-width:220px;margin:0">
+					<option value="sort">sort</option>
+					<option value="competence">competence</option>
+					<option value="item">item</option>
+					<option value="espece">espece</option>
+				</select>
+				<button class="dl-btn" id="btn-liaisons" type="button">↻ Charger</button>
+			</div>
+			<div class="status" id="liaison-status"></div>
+			<div class="liaison-scroll" style="margin-top:12px">
+				<table>
+					<thead><tr><th style="width:45%">Document</th><th>Animation</th></tr></thead>
+					<tbody id="liaison-body"></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+<script>
+// ── État ─────────────────────────────────────────────────────────────────────
+let DOCS = [];        // docs `animation:*` (actifs ET brouillons)
+let FICHIERS = [];    // feuilles présentes sur le disque {fichier, largeur, hauteur, docs[]}
+let courant = null;   // doc en cours d'édition (objet complet, _rev inclus)
+
+const $ = (id) => document.getElementById(id);
+
+function setStatus(el, msg, ton) {
+	el.textContent = msg || '';
+	el.className = 'status' + (ton ? ' ' + ton : '');
+}
+
+function escapeHtml(s) {
+	return String(s == null ? '' : s)
+		.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// ── Découpe : MÊME arithmétique que le combat et que utils/animations.frame_position
+// (gauche→droite, puis haut→bas par défaut). Les deux aperçus et le jeu doivent montrer
+// exactement la même chose, sinon le réglage ne vaut rien.
+function posFrame(anim, i) {
+	const cols = Math.max(1, parseInt(anim.colonnes, 10) || 1);
+	const lgs  = Math.max(1, parseInt(anim.lignes, 10) || 1);
+	i = Math.min(Math.max(0, i), cols * lgs - 1);
+	const rangCol = i % cols;
+	const rang = Math.floor(i / cols);
+	// Deux axes INDÉPENDANTS : les inverser tous les deux joue la feuille à l'envers.
+	const col = anim.sens_colonnes === 'droite_gauche' ? (cols - 1 - rangCol) : rangCol;
+	const ligne = anim.sens_lignes === 'bas_haut' ? (lgs - 1 - rang) : rang;
+	return [col, ligne, cols, lgs];
+}
+
+// Pose la i-ème image sur un élément : la feuille est agrandie à (colonnes × lignes)
+// fois la fenêtre, et `background-position` en POURCENTAGES fait défiler la case voulue
+// (garde à 0 quand il n'y a qu'une colonne/ligne — la division serait par zéro).
+function poserFrame(el, anim, i) {
+	const [col, ligne, cols, lgs] = posFrame(anim, i);
+	el.style.backgroundSize = (cols * 100) + '% ' + (lgs * 100) + '%';
+	el.style.backgroundPosition =
+		(cols > 1 ? (col / (cols - 1)) * 100 : 0) + '% ' +
+		(lgs > 1 ? (ligne / (lgs - 1)) * 100 : 0) + '%';
+}
+
+// ── Liste ────────────────────────────────────────────────────────────────────
+function renderListe() {
+	const filtre = ($('anim-filter').value || '').trim().toLowerCase();
+	const cont = $('anim-list');
+	const vus = DOCS.filter(d => !filtre
+		|| String(d._id || '').toLowerCase().includes(filtre)
+		|| String(d.nom || '').toLowerCase().includes(filtre)
+		|| String(d.fichier || '').toLowerCase().includes(filtre));
+	cont.innerHTML = vus.map(d =>
+		`<div class="anim-row${d.actif ? ' actif' : ''}${courant && courant._id === d._id ? ' sel' : ''}" data-id="${escapeHtml(d._id)}">`
+		+ `<span class="dot"></span><span class="nm">${escapeHtml(d.nom || d._id)}</span></div>`
+	).join('') || '<div class="anim-row"><span class="nm">— aucune animation —</span></div>';
+	cont.querySelectorAll('.anim-row[data-id]').forEach(row => {
+		row.onclick = () => selectionner(row.dataset.id);
+	});
+	$('fichiers-list').innerHTML = FICHIERS.map(f =>
+		`<option value="${escapeHtml(f.fichier)}"></option>`).join('');
+}
+
+function selectionner(id) {
+	const doc = DOCS.find(d => d._id === id);
+	if (!doc) return;
+	courant = doc;
+	remplirFormulaire(doc);
+	renderListe();
+	setStatus($('edit-status'), '');
+}
+
+function remplirFormulaire(d) {
+	$('f-id').value       = d._id || '';
+	$('f-nom').value      = d.nom || '';
+	$('f-fichier').value  = d.fichier || '';
+	$('f-colonnes').value = d.colonnes != null ? d.colonnes : 1;
+	$('f-lignes').value   = d.lignes != null ? d.lignes : 1;
+	// Défauts haut → bas / gauche → droite, comme animations.SENS_DEFAUT et
+	// SENS_COLONNES_DEFAUT : un doc sans le champ doit s'AFFICHER exactement comme le
+	// moteur le jouera.
+	$('f-sens').value      = d.sens_lignes === 'bas_haut' ? 'bas_haut' : 'haut_bas';
+	$('f-sens-cols').value = d.sens_colonnes === 'droite_gauche' ? 'droite_gauche' : 'gauche_droite';
+	$('f-debut').value    = d.debut != null ? d.debut : 0;
+	$('f-fin').value      = d.fin != null ? d.fin : (Math.max(1, d.colonnes || 1) * Math.max(1, d.lignes || 1) - 1);
+	$('f-duree').value    = d.duree_ms != null ? d.duree_ms : 600;
+	$('f-echelle').value  = d.echelle != null ? d.echelle : 1.5;
+	$('f-decalage').value = d.decalage_y != null ? d.decalage_y : 0;
+	$('f-ancrage').value  = d.ancrage === 'acteur' ? 'acteur' : 'cible';
+	$('f-actif').value    = d.actif ? '1' : '0';
+	rafraichirApercu();
+}
+
+// Lecture du formulaire — bornée comme utils/animations.normaliser_animation, pour que
+// l'aperçu ne montre jamais une découpe que le serveur refuserait.
+function lireFormulaire() {
+	const cols = Math.max(1, parseInt($('f-colonnes').value, 10) || 1);
+	const lgs  = Math.max(1, parseInt($('f-lignes').value, 10) || 1);
+	const total = cols * lgs;
+	const debut = Math.min(Math.max(0, parseInt($('f-debut').value, 10) || 0), total - 1);
+	let fin = parseInt($('f-fin').value, 10);
+	if (isNaN(fin)) fin = total - 1;
+	fin = Math.min(Math.max(debut, fin), total - 1);
+	return {
+		nom: $('f-nom').value.trim(),
+		fichier: $('f-fichier').value.trim(),
+		colonnes: cols, lignes: lgs,
+		sens_lignes: $('f-sens').value,
+		sens_colonnes: $('f-sens-cols').value,
+		debut: debut, fin: fin,
+		duree_ms: Math.max(1, parseInt($('f-duree').value, 10) || 600),
+		echelle: Math.max(0.1, parseFloat($('f-echelle').value) || 1.5),
+		decalage_y: parseFloat($('f-decalage').value) || 0,
+		ancrage: $('f-ancrage').value,
+		actif: $('f-actif').value === '1',
+	};
+}
+
+// ── Aperçus ──────────────────────────────────────────────────────────────────
+let apercuRAF = null;
+let apercuDebut = 0;
+
+function rafraichirApercu() {
+	const a = lireFormulaire();
+	const sprite = $('apercu-sprite');
+	const img = $('sheet-img');
+	if (!a.fichier) {
+		sprite.style.backgroundImage = '';
+		img.removeAttribute('src');
+		$('sheet-grid').innerHTML = '';
+		$('apercu-info').textContent = '—';
+		return;
+	}
+	const url = '/icons/effects/' + encodeURIComponent(a.fichier);
+	sprite.style.backgroundImage = `url('${url}')`;
+	if (img.getAttribute('src') !== url) img.setAttribute('src', url);
+
+	// Taille du sprite : la fenêtre d'aperçu, au RATIO d'une image de la feuille (le
+	// combat fait pareil à partir de --step) — une frame étirée mentirait sur le rendu.
+	const meta = FICHIERS.find(f => f.fichier === a.fichier);
+	const fw = meta && meta.largeur ? meta.largeur / a.colonnes : 1;
+	const fh = meta && meta.hauteur ? meta.hauteur / a.lignes : 1;
+	const cote = 170;
+	const w = fw >= fh ? cote : cote * (fw / fh);
+	const h = fw >= fh ? cote * (fh / fw) : cote;
+	sprite.style.width = w + 'px';
+	sprite.style.height = h + 'px';
+
+	const nb = a.fin - a.debut + 1;
+	$('apercu-info').textContent = nb + ' image(s) — ' + a.duree_ms + ' ms';
+	dessinerGrille(a);
+
+	// Boucle d'aperçu : une seule, relancée à chaque changement de réglage.
+	if (apercuRAF) cancelAnimationFrame(apercuRAF);
+	apercuDebut = 0;
+	const tick = (t) => {
+		if (!apercuDebut) apercuDebut = t;
+		const ecoule = (t - apercuDebut) % a.duree_ms;
+		const i = a.debut + Math.min(nb - 1, Math.floor(ecoule / a.duree_ms * nb));
+		poserFrame(sprite, a, i);
+		apercuRAF = requestAnimationFrame(tick);
+	};
+	apercuRAF = requestAnimationFrame(tick);
+}
+
+// Grille de découpe superposée à la feuille, avec les images retenues surlignées :
+// c'est ce qui permet de VOIR que colonnes/lignes tombent juste.
+function dessinerGrille(a) {
+	const grille = $('sheet-grid');
+	const cellules = [];
+	for (let i = 0; i < a.colonnes * a.lignes; i++) {
+		const [col, ligne, cols, lgs] = posFrame(a, i);
+		const on = i >= a.debut && i <= a.fin;
+		cellules.push(
+			`<div class="sheet-cell${on ? ' on' : ''}" style="`
+			+ `left:${(col / cols) * 100}%;top:${(ligne / lgs) * 100}%;`
+			+ `width:${100 / cols}%;height:${100 / lgs}%">${i}</div>`);
+	}
+	grille.innerHTML = cellules.join('');
+}
+
+// ── Chargement ───────────────────────────────────────────────────────────────
+async function charger(selId) {
+	const r = await fetch('/api/admin/animations');
+	if (!r.ok) { setStatus($('edit-status'), 'Chargement impossible (' + r.status + ')', 'err'); return; }
+	const data = await r.json();
+	DOCS = data.docs || [];
+	FICHIERS = data.fichiers || [];
+	const cible = selId || (courant && courant._id);
+	courant = DOCS.find(d => d._id === cible) || DOCS[0] || null;
+	renderListe();
+	// Plus aucun doc (dernière animation supprimée) : l'id affiché doit partir avec lui,
+	// sinon le formulaire montrerait la clé d'un document qui n'existe plus.
+	if (courant) remplirFormulaire(courant);
+	else { $('f-id').value = ''; rafraichirApercu(); }
+}
+
+// ── Scan ─────────────────────────────────────────────────────────────────────
+$('btn-scan').addEventListener('click', async () => {
+	const btn = $('btn-scan');
+	btn.disabled = true;
+	setStatus($('scan-status'), 'Scan en cours…');
+	try {
+		const r = await fetch('/admin/animations/scan', { method: 'POST' });
+		const data = await r.json();
+		if (!r.ok) { setStatus($('scan-status'), 'Échec : ' + (data.detail || r.status), 'err'); return; }
+		const bouts = [(data.crees || []).length + ' créée(s)',
+					   (data.existants || []).length + ' déjà connue(s)'];
+		if ((data.illisibles || []).length) bouts.push((data.illisibles).length + ' illisible(s)');
+		setStatus($('scan-status'), '✓ ' + bouts.join(', ') + '.',
+			(data.illisibles || []).length ? 'err' : 'ok');
+		await charger();
+	} catch (e) {
+		setStatus($('scan-status'), 'Erreur réseau : ' + e.message, 'err');
+	} finally {
+		btn.disabled = false;
+	}
+});
+
+// ── Enregistrer / dupliquer / supprimer ──────────────────────────────────────
+// CRUD par les endpoints GÉNÉRIQUES de main.py : le `_rev` y est relu en base, jamais
+// pris du client.
+async function putDoc(doc) {
+	const r = await fetch('/admin/doc', {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(doc),
+	});
+	const data = await r.json().catch(() => ({}));
+	if (!r.ok) throw new Error(data.detail || ('HTTP ' + r.status));
+	return data;
+}
+
+$('btn-save').addEventListener('click', async () => {
+	if (!courant) return;
+	const a = lireFormulaire();
+	if (!a.fichier) { setStatus($('edit-status'), 'Un fichier est requis.', 'err'); return; }
+	const meta = FICHIERS.find(f => f.fichier === a.fichier);
+	const doc = Object.assign({}, courant, a, { type: 'animation' });
+	// Dimensions de la feuille : LUES sur l'image, jamais saisies — elles suivent le
+	// fichier si on en change.
+	if (meta) { doc.largeur = meta.largeur; doc.hauteur = meta.hauteur; }
+	try {
+		await putDoc(doc);
+		setStatus($('edit-status'), '✓ Enregistré.', 'ok');
+		await charger(doc._id);
+	} catch (e) {
+		setStatus($('edit-status'), 'Échec : ' + e.message, 'err');
+	}
+});
+
+$('btn-dup').addEventListener('click', async () => {
+	if (!courant) return;
+	const a = lireFormulaire();
+	// Même feuille, nouvel id : deuxième animation d'une même planche. On descend les
+	// suffixes jusqu'à un id libre, comme le scan.
+	const base = String(courant._id).replace(/_[a-z]$/, '');
+	let nouvel = '';
+	for (const s of 'abcdefghijklmnopqrstuvwxyz') {
+		const cand = base + '_' + s;
+		if (!DOCS.some(d => d._id === cand)) { nouvel = cand; break; }
+	}
+	if (!nouvel) { setStatus($('edit-status'), 'Plus d\'identifiant libre pour cette feuille.', 'err'); return; }
+	const meta = FICHIERS.find(f => f.fichier === a.fichier);
+	const doc = Object.assign({}, courant, a, { type: 'animation', _id: nouvel, actif: false });
+	delete doc._rev;
+	if (meta) { doc.largeur = meta.largeur; doc.hauteur = meta.hauteur; }
+	try {
+		await putDoc(doc);
+		setStatus($('edit-status'), '✓ Dupliquée : ' + nouvel, 'ok');
+		await charger(nouvel);
+	} catch (e) {
+		setStatus($('edit-status'), 'Échec : ' + e.message, 'err');
+	}
+});
+
+$('btn-del').addEventListener('click', async () => {
+	if (!courant) return;
+	if (!confirm('Supprimer ' + courant._id + ' ?')) return;
+	try {
+		const r = await fetch('/admin/doc?id=' + encodeURIComponent(courant._id), { method: 'DELETE' });
+		const data = await r.json().catch(() => ({}));
+		if (!r.ok) { setStatus($('edit-status'), 'Échec : ' + (data.detail || r.status), 'err'); return; }
+		courant = null;
+		await charger();
+		setStatus($('edit-status'), '✓ Supprimée.', 'ok');
+	} catch (e) {
+		setStatus($('edit-status'), 'Erreur réseau : ' + e.message, 'err');
+	}
+});
+
+// Tout changement de réglage relance l'aperçu (c'est lui qui sert à régler).
+['f-fichier','f-colonnes','f-lignes','f-sens','f-sens-cols','f-debut','f-fin','f-duree','f-echelle']
+	.forEach(id => $(id).addEventListener('input', rafraichirApercu));
+// Les <select> n'émettent pas `input` partout : `change` est ce qui les rend réactifs.
+$('f-sens').addEventListener('change', rafraichirApercu);
+$('f-sens-cols').addEventListener('change', rafraichirApercu);
+$('anim-filter').addEventListener('input', renderListe);
+
+// ── Liaisons ─────────────────────────────────────────────────────────────────
+function optionsAnimations(valeur) {
+	const opts = ['<option value="">— aucune —</option>'];
+	DOCS.forEach(d => {
+		const label = (d.nom || d._id) + (d.actif ? '' : ' (brouillon)');
+		opts.push(`<option value="${escapeHtml(d._id)}"${d._id === valeur ? ' selected' : ''}>`
+			+ escapeHtml(label) + '</option>');
+	});
+	// Une liaison vers un doc supprimé doit rester VISIBLE, sinon la sauvegarde suivante
+	// l'effacerait à l'insu de l'admin.
+	if (valeur && !DOCS.some(d => d._id === valeur)) {
+		opts.push(`<option value="${escapeHtml(valeur)}" selected>${escapeHtml(valeur)} (introuvable)</option>`);
+	}
+	return opts.join('');
+}
+
+async function chargerLiaisons() {
+	const type = $('liaison-type').value;
+	setStatus($('liaison-status'), 'Chargement…');
+	try {
+		const r = await fetch('/api/admin/animations/liaisons?type=' + encodeURIComponent(type));
+		const data = await r.json().catch(() => ({}));
+		if (!r.ok) { setStatus($('liaison-status'), 'Échec : ' + (data.detail || r.status), 'err'); return; }
+		const docs = data.docs || [];
+		$('liaison-body').innerHTML = docs.map(d =>
+			`<tr><td>${escapeHtml((d.icon ? d.icon + ' ' : '') + (d.nom || d._id))}`
+			+ `<div style="color:var(--muted);font-size:0.68rem">${escapeHtml(d._id)}</div></td>`
+			+ `<td><select data-doc="${escapeHtml(d._id)}">${optionsAnimations(d.animation || '')}</select></td></tr>`
+		).join('') || '<tr><td colspan="2">— aucun document —</td></tr>';
+		$('liaison-body').querySelectorAll('select[data-doc]').forEach(sel => {
+			sel.onchange = () => lier(sel.dataset.doc, sel.value);
+		});
+		setStatus($('liaison-status'), docs.length + ' document(s).', 'ok');
+	} catch (e) {
+		setStatus($('liaison-status'), 'Erreur réseau : ' + e.message, 'err');
+	}
+}
+
+async function lier(docId, animation) {
+	setStatus($('liaison-status'), 'Enregistrement…');
+	try {
+		const r = await fetch('/admin/animations/lier', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ doc_id: docId, animation: animation }),
+		});
+		const data = await r.json().catch(() => ({}));
+		if (!r.ok) { setStatus($('liaison-status'), 'Échec : ' + (data.detail || r.status), 'err'); return; }
+		setStatus($('liaison-status'), '✓ ' + docId + (animation ? ' → ' + animation : ' : liaison retirée'), 'ok');
+	} catch (e) {
+		setStatus($('liaison-status'), 'Erreur réseau : ' + e.message, 'err');
+	}
+}
+
+$('btn-liaisons').addEventListener('click', chargerLiaisons);
+$('liaison-type').addEventListener('change', chargerLiaisons);
+
+charger();
+</script>
+</body>
+</html>

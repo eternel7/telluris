@@ -49,6 +49,10 @@
 		text-shadow: 0 0 20px rgba(200,168,75,0.3);
 	}
 	header span { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em; }
+	/* `margin-left:auto` plutôt que `justify-content:space-between` : le titre et son
+	   sous-titre doivent rester collés, seul le retour part à droite. */
+	header a { margin-left: auto; color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+	header a:hover { color: var(--accent); }
 
 	.main {
 		display: flex;
@@ -266,6 +270,7 @@
 <header>
 	<h1>🐉 Bestiary Editor</h1>
 	<span>— Éditeur de Bestiaire</span>
+	<a href="/admin">← Retour à l'administration</a>
 </header>
 
 <div class="main">

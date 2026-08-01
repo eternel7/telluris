@@ -153,6 +153,10 @@ def normaliser_sort(sort_doc) -> dict | None:
 		# Condition d'activation optionnelle (partagée avec les compétences) :
 		# {"battle_map_tags": [...]} — évaluée en combat via condition_remplie.
 		"condition": dict(doc.get("condition") or {}),
+		# Animation de combat (doc `animation:*`), optionnelle : le router passe la vue
+		# normalisée à resolve_action, donc sans ce champ EXPLICITE la liaison serait
+		# perdue avant d'atteindre le moteur (cette vue est une liste blanche).
+		"animation": str(doc.get("animation") or ""),
 	}
 
 

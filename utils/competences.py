@@ -66,6 +66,9 @@ def normaliser_competence(doc) -> dict | None:
 		# compétence n'agit en combat que si la carte porte l'un de ces tags
 		# (condition_remplie). Absente = toujours active.
 		"condition": dict(doc.get("condition") or {}),
+		# Animation de combat (doc `animation:*`), optionnelle — même liste blanche, même
+		# piège que pour les sorts : sans ce champ, la liaison n'atteint jamais le moteur.
+		"animation": str(doc.get("animation") or ""),
 	}
 
 
