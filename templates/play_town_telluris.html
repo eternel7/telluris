@@ -2059,7 +2059,10 @@
 		}
 		.pnj-dialogue { min-width: 0; }
 		.pnj-ambiance { font-style: italic; opacity: .85; font-size: .9rem; margin-bottom: .6rem; }
-		#pnj-noeud-texte {
+		/* ⚠️ SOURCE UNIQUE de la bulle de réplique : le panneau PNJ l'adresse par son id,
+		   les dialogues rendus en overlay (conditions d'engagement d'une recrue) par la
+		   classe. Un PNJ et une recrue qui posent leurs conditions doivent se ressembler. */
+		#pnj-noeud-texte, .pnj-replique {
 			font-size: 1.1rem;
 			line-height: 1.7;
 			color: rgb(240, 230, 210);
@@ -2173,16 +2176,35 @@
 		.item-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: flex-end; }
 		.item-detail-actions button { margin: 0; }
 		.item-detail-actions button:disabled { opacity: .5; cursor: not-allowed; }
-		/* ── Conditions d'engagement d'une recrue (clauses à accepter) ──
-		   Réutilise .item-detail-card / .item-detail-close / .item-detail-actions ;
-		   seul le calque est neuf (au-dessus des autres : décision bloquante). */
+		/* ── Conditions d'engagement d'une recrue (exigences à accepter) ──
+		   Réutilise .item-detail-card / .item-detail-close ; seul le calque est neuf
+		   (au-dessus des autres : décision bloquante). Le CONTENU emprunte au panneau
+		   PNJ (portrait + bulle de réplique + choix .sub-loc-btn) : une recrue pose ses
+		   conditions comme un PNJ tient son arbre de dialogue. */
 		#clauses-overlay {
 			position: fixed; inset: 0; z-index: 9400;
 			background: rgba(10, 8, 5, .78);
 			display: flex; align-items: center; justify-content: center; padding: 1rem;
 		}
 		#clauses-overlay.clauses-hidden { display: none; }
-		#clauses-overlay .item-detail-card { max-width: 520px; }
+		#clauses-overlay .item-detail-card { max-width: 700px; }
+		/* Bulle plus sobre qu'en plein panneau : on est dans une carte, pas dans une page. */
+		#clauses-overlay .pnj-replique { font-size: 1rem; padding: 1rem 1.2rem; margin-bottom: .8rem; }
+		/* Deux colonnes, miroir de .pnj-corps : portrait à gauche, réplique et choix à droite. */
+		.rec-dial {
+			display: grid; grid-template-columns: minmax(130px, 175px) 1fr;
+			gap: 1rem; align-items: start; margin-top: .6rem;
+		}
+		.rec-dial-portrait {
+			width: 100%; height: auto; display: block; border-radius: 10px;
+			border: 2px solid var(--accent, #b98c4a);
+		}
+		.rec-dial-corps { min-width: 0; }
+		.rec-dial-choix { list-style: none; padding: 0; margin: .2rem 0 .8rem; }
+		@media (max-width: 620px) {
+			.rec-dial { grid-template-columns: 1fr; }
+			.rec-dial-portrait { max-width: 200px; margin: 0 auto; }
+		}
 		/* ── Engagement durable d'un compagnon ────────────────────────────────────
 		   Même calque et mêmes briques de carte que les clauses : décision bloquante,
 		   et celle-ci fonde une compagnie. z-index AU-DESSUS des clauses — il porte un
@@ -2286,8 +2308,9 @@
 			<div class="qmap-view" id="qmap-view"></div>
 		</div>
 	</div><!-- /#quest-map-overlay -->
-	<!-- Conditions d'engagement : ✕/Échap/backdrop FERMENT sans décider — seul le bouton
-	     « Refuser » écarte la recrue, et ce geste est irréversible. -->
+	<!-- Conditions d'engagement : TOUTE embauche y passe (la part de butin est une exigence,
+	     même sans clause). ✕/Échap/backdrop FERMENT sans décider — seul le choix
+	     « Vos conditions ne me conviennent pas » écarte la recrue, et ce geste est irréversible. -->
 	<div id="clauses-overlay" class="clauses-hidden" aria-label="Conditions d'engagement" onclick="if(event.target===this)closeClauses()">
 		<div class="item-detail-card">
 			<button class="item-detail-close" onclick="closeClauses()" title="Fermer sans décider">✕</button>
@@ -5906,7 +5929,7 @@ function renderRecrutement(data) {
 					+ aff + clauses,
 				actions: `<button class="sh-drop-btn"
 					${full ? 'disabled title="Votre groupe est au complet"'
-						   : 'title="Embaucher (gratuit — payé en part de butin de quête)"'}
+						   : 'title="Entendre ses conditions — rien n\'est engagé avant votre réponse"'}
 					onclick="demanderEmbauche('${r.id}')">Embaucher</button>`,
 			});
 		});
@@ -6046,13 +6069,12 @@ async function relacherMonture(monture_id) {
 }
 
 // ── Conditions d'engagement ──────────────────────────────────────────────────────
-// Une recrue qui pose des CLAUSES de conduite ne s'embauche qu'après les avoir acceptées.
-// Sans clause, rien à négocier : embauche directe, comme avant.
-function demanderEmbauche(avId) {
-	const clauses = ((_recEtat[avId] || {}).exigences_effectives || {}).clauses || [];
-	if (!clauses.length) return embaucherAventurier(avId);
-	openClauses(avId);
-}
+// ⚠️ TOUTE embauche passe par ce dialogue, clauses ou pas : la PART DE BUTIN est une
+// exigence à part entière, et le joueur ne doit jamais s'engager sans l'avoir lue et
+// validée. C'est un dialogue comme celui d'un PNJ — la recrue parle, le joueur répond
+// par un choix — mais rendu en overlay : la recrue n'a pas de doc `pnj:*` ni d'arbre,
+// elle est générée, et sa seule réplique est le contrat qu'elle propose.
+function demanderEmbauche(avId) { openClauses(avId); }
 
 function openClauses(avId) {
 	const r = _recEtat[avId];
@@ -6060,18 +6082,30 @@ function openClauses(avId) {
 	if (!r || !ov) return;
 	const ex = r.exigences_effectives || {};
 	const nom = `${r.prenom || ''} ${r.nom || ''}`.trim();
+	const clauses = ex.clauses || [];
+	const part = ex.part_butin_pct;
+	// ⚠️ Aucun pronom genré : une recrue est M ou F, la réplique doit valoir pour les deux.
+	const replique = clauses.length
+		? `« Je vous suis volontiers — à mes conditions : ${part} % du butin, et quelques principes auxquels je ne déroge pas. »`
+		: `« Je vous suis volontiers — à mes conditions : ${part} % du butin. Rien d'autre à négocier. »`;
 	document.getElementById('clauses-body').innerHTML =
-		`<h3>Conditions d'engagement — ${nom}</h3>`
-		+ `<div class="clauses-part">💰 Part de butin exigée : <strong>${ex.part_butin_pct} %</strong></div>`
-		+ `<div>« Je vous accompagne, mais à mes conditions : »</div>`
-		+ `<ul class="clauses-list">${(ex.clauses || []).map(c => `<li>• ${c}</li>`).join('')}</ul>`
-		+ `<div class="clauses-avert">Refuser ses conditions la vexe : elle quittera le tableau.</div>`
-		+ `<div class="item-detail-actions">`
-		+ `<button class="sh-drop-btn sh-abandon-btn" onclick="_clausesRefuser('${r.id}')"`
-		+ ` title="Elle quitte le tableau — c'est sans retour">✕ Refuser ses conditions</button>`
-		+ `<button class="sh-equip-btn" onclick="_clausesAccepter('${r.id}')"`
-		+ ` title="Accepter les clauses et embaucher">✔ Accepter et embaucher</button>`
-		+ `</div>`;
+		`<h3>🗣 ${escapeHtml(nom)}</h3>`
+		+ `<div class="rec-dial">`
+		+ (r.image ? `<img class="rec-dial-portrait" src="/characters/${escapeHtml(r.image)}" alt="">` : '')
+		+ `<div class="rec-dial-corps">`
+		+ (r.specialite ? `<div class="pnj-ambiance">${escapeHtml(r.specialite)}</div>` : '')
+		+ `<div class="pnj-replique">${escapeHtml(replique)}</div>`
+		+ `<div class="clauses-part">💰 Part de butin : <strong>${part} %</strong></div>`
+		+ (clauses.length
+			? `<ul class="clauses-list">${clauses.map(c => `<li>• ${escapeHtml(c)}</li>`).join('')}</ul>`
+			: '')
+		+ `<ul class="rec-dial-choix">`
+		+ `<li><button class="sub-loc-btn" onclick="_clausesAccepter('${r.id}')">✔ « J'accepte vos conditions. »</button></li>`
+		+ `<li><button class="sub-loc-btn" onclick="_clausesRefuser('${r.id}')">✕ « Vos conditions ne me conviennent pas. »</button></li>`
+		+ `<li><button class="sub-loc-btn" onclick="closeClauses()">↩ « Laissez-moi y réfléchir. »</button></li>`
+		+ `</ul>`
+		+ `<div class="clauses-avert">Écarter ses conditions clôt l'entretien : la recrue quitte le tableau, sans retour.</div>`
+		+ `</div></div>`;
 	ov.classList.remove('clauses-hidden');
 }
 

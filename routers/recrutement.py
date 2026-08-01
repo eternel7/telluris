@@ -162,7 +162,8 @@ async def recrutement_embaucher(
 	body: dict = Body(...),
 ):
 	"""Embauche = ACCEPTATION des conditions de la recrue (part de butin + clauses de
-	conduite) : le client ne l'appelle qu'après validation du dialogue de clauses."""
+	conduite) : le client ne l'appelle qu'après validation du dialogue d'engagement, par
+	lequel passe TOUTE embauche — la part de butin est une exigence même sans clause."""
 	character, lieu_doc = _acces_tableau(current_user)
 	av = _recrue_du_tableau(lieu_doc, body)
 
