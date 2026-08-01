@@ -1061,32 +1061,6 @@ let state    = JSON.parse(JSON.stringify(SERVER_DATA));
 let logLen   = state.log.length;
 let busy     = false;
 
-// ─── Isometric Viewport Clip-paths ────────────────────────────────
-function buildViewportClipPath(mh) {
-	const s = 'var(--step)', pts = [];
-	for (let r = 0; r < mh; r++) {
-		const hw = (mh - 1 - r) * 2 + 0.5;
-		pts.push(`calc(50% + ${s} * ${hw}) calc(${s} * ${r})`);
-		if (r < mh - 1) {
-			const hwN = (mh - 1 - (r + 1)) * 2 + 0.5;
-			pts.push(`calc(50% + ${s} * ${hwN}) calc(${s} * ${r + 1})`);
-		}
-	}
-	pts.push(`calc(50% + ${s} * 0.5) 100%`, `calc(50% - ${s} * 0.5) 100%`);
-	for (let r = mh - 1; r >= 0; r--) {
-		const hw = (mh - 1 - r) * 2 + 0.5;
-		if (r < mh - 1) {
-			const hwN = (mh - 1 - (r + 1)) * 2 + 0.5;
-			pts.push(`calc(50% - ${s} * ${hwN}) calc(${s} * ${r + 1})`);
-		}
-		pts.push(`calc(50% - ${s} * ${hw}) calc(${s} * ${r})`);
-	}
-	return `polygon(${pts.join(', ')})`;
-}
-const _vpStyle = document.createElement('style');
-_vpStyle.textContent = `.viewport { clip-path: ${buildViewportClipPath(MAX_H)}; }`;
-document.head.appendChild(_vpStyle);
-
 // ─── UI Helpers ───────────────────────────────────────────────────
 const pct = (cur, max) => max > 0 ? Math.round(cur / max * 100) : 0;
 

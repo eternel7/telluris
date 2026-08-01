@@ -74,65 +74,6 @@ function startGame() {
     resetPos();
 }
 
-// ─── Génération des clip-paths ──────────────────────────────────────────────
-
-function buildViewportClipPath(mh) {
-    const s = 'var(--step)';
-    const pts = [];
-    for (let r = 0; r < mh; r++) {
-        const hw = (mh - 1 - r) * 2 + 0.5;
-        pts.push(`calc(50% + ${s} * ${hw}) calc(${s} * ${r})`);
-        if (r < mh - 1) {
-            const hwNext = (mh - 1 - (r + 1)) * 2 + 0.5;
-            pts.push(`calc(50% + ${s} * ${hwNext}) calc(${s} * ${r + 1})`);
-        }
-    }
-    pts.push(`calc(50% + ${s} * 0.5) 100%`);
-    pts.push(`calc(50% - ${s} * 0.5) 100%`);
-    for (let r = mh - 1; r >= 0; r--) {
-        const hw = (mh - 1 - r) * 2 + 0.5;
-        if (r < mh - 1) {
-            const hwNext = (mh - 1 - (r + 1)) * 2 + 0.5;
-            pts.push(`calc(50% - ${s} * ${hwNext}) calc(${s} * ${r + 1})`);
-        }
-        pts.push(`calc(50% - ${s} * ${hw}) calc(${s} * ${r})`);
-    }
-    return `polygon(${pts.join(', ')})`;
-}
-
-function buildBlurClipPath(mh, bd) {
-    const s = 'var(--step)';
-    const blurStart = mh - bd;
-    const outer = `0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%`;
-    const inner = [];
-    inner.push(`calc(50% + ${s} * 0.5) calc(${s} * ${blurStart})`);
-    inner.push(`calc(50% - ${s} * 0.5) calc(${s} * ${blurStart})`);
-    for (let r = blurStart; r < mh; r++) {
-        const hw = 0.5 + (r - blurStart);
-        inner.push(`calc(50% - ${s} * ${hw}) calc(${s} * ${r})`);
-        inner.push(`calc(50% - ${s} * ${hw + 1}) calc(${s} * ${r + 1})`);
-    }
-    const hwBottom = bd + 1.5;
-    inner.push(`calc(50% - ${s} * ${hwBottom}) calc(${s} * ${mh})`);
-    inner.push(`calc(50% + ${s} * ${hwBottom}) calc(${s} * ${mh})`);
-    for (let r = mh - 1; r >= blurStart; r--) {
-        const hw = 0.5 + (r - blurStart);
-        inner.push(`calc(50% + ${s} * ${hw + 1}) calc(${s} * ${r + 1})`);
-        inner.push(`calc(50% + ${s} * ${hw}) calc(${s} * ${r})`);
-    }
-    inner.push(`calc(50% + ${s} * 0.5) calc(${s} * ${blurStart})`);
-    return `polygon(${outer}, ${inner.join(', ')})`;
-}
-
-const viewport = document.querySelector('.viewport');
-const viewportStyle = document.createElement('style');
-viewportStyle.textContent = `
-    .viewport { clip-path: ${buildViewportClipPath(MAX_HEIGHT)}; }
-    .viewport::after { clip-path: ${buildBlurClipPath(MAX_HEIGHT, BLUR_DIST)}; }
-`;
-document.head.appendChild(viewportStyle);
-
-
 // ─── Logique de déplacement ─────────────────────────────────────────────────
 function updateStep() {
     const width = window.innerWidth;
