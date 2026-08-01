@@ -714,7 +714,11 @@ def traiter_expirations(character: dict, now: int, get_doc_fn, save_doc_fn, find
 def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int) -> dict:
 	"""Solde la course : récompenses (XP + prime + items), archivage, +1 relation avec le DONNEUR
 	(jamais le destinataire). Le doc `relation` est ANNEXE (hors character) : il est persisté ici ;
-	le character est muté sans save — l'endpoint le sauvegarde."""
+	le character est muté sans save — l'endpoint le sauvegarde.
+
+	⚠️ `compagnie` remonte tel quel : ce sont des docs `aventurier:*` mutés (la compagnie a
+	gagné la même XP), et ils sont ANNEXES comme la relation — mais persistés par l'ENDPOINT,
+	APRÈS son save du personnage, jamais ici (un 409 rejoué les paierait deux fois)."""
 	recap = quetes.appliquer_recompenses(character, q)
 	archiver(character, q, echec=False, now=now)
 	relation_val = None
@@ -725,7 +729,8 @@ def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int) -> dict
 			relation, int(character_stats.QUETE_TRANSPORT_RELATION_DELTA)
 		)
 		save_doc_fn(relation)
-	return {"xp": recap["xp"], "purse": recap["purse"], "relation": relation_val}
+	return {"xp": recap["xp"], "purse": recap["purse"], "relation": relation_val,
+			"compagnie": recap["compagnie"]}
 
 
 def _ranger_chez_le_destinataire(q: dict, lieu_doc: dict, get_doc_fn, save_doc_fn, rand_fn) -> dict:

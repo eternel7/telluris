@@ -69,7 +69,9 @@ def _get_doc(doc_id):
 	return _DOCS.get(doc_id)
 
 
-def _find_docs(query):
+def _find_docs(query, fields=None):
+	# `fields` = projection Mango (lieux_chasse_de la demande pour ne pas rapatrier les
+	# `cells`) — ignorée ici : un faux qui rend TOUT le doc est le pire cas honnête.
 	if query.get("type") == "lieu" and "lieu_parent" in query:
 		return [d for d in _DOCS.values()
 		        if d.get("type") == "lieu" and d.get("lieu_parent") == query["lieu_parent"]]

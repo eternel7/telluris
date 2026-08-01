@@ -32,7 +32,7 @@ from models import character_stats
 from models.character_stats import BaseStats, compute_derived_stats, xp_seuil_niveau
 from utils.characters import (
 	item_ref_id, item_ref_lieu, item_ref_weight, resolve_item_ref, sync_equipment_bonus,
-	credit_character, carried_weight, charge_max_of,
+	credit_character, carried_weight, charge_max_of, grant_xp,
 )
 from utils.consommables import caracts_avec_buffs
 from utils import montures
@@ -626,6 +626,58 @@ def places_occupees(character: dict, get_doc_fn=None) -> int:
 	sur le doc du compagnon, comme `statut`. Le client recopie ce nombre : la liste et le
 	garde doivent bouger ENSEMBLE."""
 	return sum(1 for av in groupe_effectif(character, get_doc_fn) if not av.get("permanent"))
+
+
+def compagnie_effective(character: dict, get_doc_fn=None) -> list:
+	"""Docs des compagnons de la COMPAGNIE : membres actifs du groupe portant `permanent`.
+
+	Complément exact de ce que compte `places_occupees` — même source (`groupe_effectif`),
+	même filtre. ⚠️ `permanent` EST l'appartenance à la compagnie : il n'y a pas de nom de
+	compagnie par compagnon (`character["compagnie"]` appartient au JOUEUR), donc on ne
+	relit jamais ce champ pour décider qui est de la maison."""
+	return [av for av in groupe_effectif(character, get_doc_fn) if av.get("permanent")]
+
+
+def partager_xp(character: dict, xp: int, compagnons: list | None = None,
+				get_doc_fn=None) -> list:
+	"""Chaque membre de la COMPAGNIE gagne la MÊME XP que le principal — pas une part.
+
+	C'est la contrepartie de l'engagement : un contrat s'achète (part de butin), un
+	engagement se PARTAGE — le permanent y a renoncé, il progresse avec vous à la place.
+	⚠️ Un compagnon sous CONTRAT n'y a pas droit : l'XP de COMBAT lui reste acquise (il la
+	gagne au feu, cf. `combat._finalize_membre`), l'exploration et les contrats non.
+
+	Mute les docs, NE SAUVEGARDE PAS : l'appelant les persiste APRÈS son save autoritatif
+	du personnage — un 409 rejoué les paierait sinon deux fois (même précaution que
+	`regler_part_butin` dans `routers/quetes.py`).
+
+	⚠️ `compagnons` = docs DÉJÀ chargés par l'appelant. Les repasser est OBLIGATOIRE partout
+	où la requête en tient déjà (`routers/quetes` les paie, `_apply_world_turn_groupe` les
+	régénère) : les recharger rendrait un SECOND dict du même document, et deux `save_doc`
+	sur le même `_rev` perdent silencieusement une des deux écritures.
+
+	Renvoie les docs qui ont gagné de l'XP (vide si `xp` ≤ 0 ou pas de compagnie)."""
+	xp = max(0, int(xp or 0))
+	if xp <= 0:
+		return []
+	docs = ([av for av in compagnons if (av or {}).get("permanent")]
+			if compagnons is not None else compagnie_effective(character, get_doc_fn))
+	for av in docs:
+		grant_xp(av, xp)
+	return docs
+
+
+def xp_compagnie_payload(docs: list, xp: int) -> dict | None:
+	"""Ce que le client a besoin de dire en une demi-phrase, ou None s'il n'y a rien à
+	annoncer — source unique des cinq mentions (quête, rang, commission, transport,
+	découverte de lieu).
+
+	⚠️ Filtre sur `permanent` COMME `partager_xp`, un seul prédicat pour les deux : on peut
+	donc lui passer indifféremment les docs déjà partagés (`recap["compagnie"]`) ou la liste
+	brute du groupe (`_apply_world_turn_groupe`), sans jamais annoncer un contrat."""
+	xp = max(0, int(xp or 0))
+	membres = sum(1 for av in (docs or []) if (av or {}).get("permanent"))
+	return {"membres": membres, "xp": xp} if (membres and xp) else None
 
 
 def peut_embaucher(character: dict, av: dict, get_doc_fn=None) -> tuple[bool, str]:

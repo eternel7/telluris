@@ -25,7 +25,7 @@ from utils.marche import (
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	compter_transaction,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
-	relations_lieux_payload,
+	relations_lieux_payload, lieu_recettes,
 )
 from utils.lieux import get_lieu_links, get_lieu_directions
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
@@ -479,17 +479,22 @@ async def move_character(
 						# Intro : une arrivée par porte peut déposer directement en zone
 						# sûre de la cité (le reload affichera la conclusion via sessionStorage).
 						intro_terminee = intro.conclure_si_en_securite(character_to_update, lieu_doc)
+						xp_partage = xp_gain
 						if intro_terminee and intro_terminee.get("xp"):
 							info = grant_xp(character_to_update, intro_terminee["xp"])
 							niveau_up = niveau_up or info["niveau_up"]
 							niveau_new = info["niveau_apres"]
+							xp_partage += int(intro_terminee["xp"] or 0)
 						# Courses de transport échues (expiration paresseuse : pas de tick de fond).
 						transports_echoues = transport.traiter_expirations(
 							character_to_update, quetes.now_epoch(), get_doc, save_doc)
 						_apply_world_turn_regen(character_to_update)
-						_apply_world_turn_groupe(character_to_update)
 						save_doc(character_to_update)
-						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+						# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage (régén +
+						# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
+						xp_compagnie = recrutement.xp_compagnie_payload(
+							_apply_world_turn_groupe(character_to_update, xp_partage), xp_partage)
+						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -522,15 +527,19 @@ async def move_character(
 				# Intro : conclusion quand le pas atteint la zone de sécurité de la cité.
 				intro_terminee = intro.conclure_si_en_securite(character_to_update, lieu_doc)
 				intro_xp = {"gain": 0, "niveau_up": False, "niveau": None}
+				xp_partage = 0
 				if intro_terminee and intro_terminee.get("xp"):
 					info = grant_xp(character_to_update, intro_terminee["xp"])
 					intro_xp = {"gain": intro_terminee["xp"], "niveau_up": info["niveau_up"], "niveau": info["niveau_apres"]}
+					xp_partage = int(intro_terminee["xp"] or 0)
 				# Courses de transport échues (expiration paresseuse : pas de tick de fond).
 				transports_echoues = transport.traiter_expirations(
 					character_to_update, quetes.now_epoch(), get_doc, save_doc)
 				_apply_world_turn_regen(character_to_update)
-				_apply_world_turn_groupe(character_to_update)
 				save_doc(character_to_update)
+				# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage. Un pas ne
+				# rapporte pas d'XP — seule une conclusion d'intro peut en partager ici.
+				_apply_world_turn_groupe(character_to_update, xp_partage)
 				links = get_lieu_links(current_user)
 				# Un pas ne recharge pas la page : la sanction de réputation (−1 chez le donneur ET
 				# sa maison) doit repartir avec la réponse, sinon l'onglet 🤝 — rendu 100 % client —
@@ -627,7 +636,7 @@ def _apply_world_turn_regen(character: dict) -> None:
         character["currentPM"] = min(character["currentPM"], derived.pm_max)
 
 
-def _apply_world_turn_groupe(character: dict) -> list:
+def _apply_world_turn_groupe(character: dict, xp_partage: int = 0) -> list:
     """Le tour monde vaut pour TOUT le groupe : chaque compagnon régénère PV/PM et
     décrémente ses effets actifs exactement comme le joueur — un doc `aventurier:*` est
     un miroir du character, `_apply_world_turn_regen` s'y applique tel quel. Les docs
@@ -635,8 +644,17 @@ def _apply_world_turn_groupe(character: dict) -> list:
 
     Les MONTURES régénèrent au même titre : leur doc est le même miroir, elles pansent
     donc leurs plaies en marchant comme le reste de l'expédition. Elles ne sont pas
-    renvoyées — l'appelant ne se sert du retour que pour les compagnons."""
+    renvoyées — l'appelant ne se sert du retour que pour les compagnons.
+
+    ⚠️ `xp_partage` (XP de découverte + d'intro de CE déplacement) est appliqué ICI et
+    nulle part ailleurs : cette fonction est le SEUL endroit du chemin de déplacement qui
+    charge ET sauve les docs compagnons. Les recharger en amont pour y écrire l'XP rendrait
+    un SECOND dict du même document — deux `save_doc` sur le même `_rev`, une écriture
+    perdue en silence. Le retour reste la liste des compagnons ACTIFS : c'est
+    `xp_compagnie_payload` qui y isole la compagnie, avec le même prédicat que
+    `partager_xp`."""
     compagnons = recrutement.groupe_effectif(character, get_doc)
+    recrutement.partager_xp(character, xp_partage, compagnons=compagnons)
     for porteur in compagnons + montures.montures_effectives(character, get_doc):
         _apply_world_turn_regen(porteur)
         save_doc(porteur)
@@ -1625,10 +1643,23 @@ def _marchand_vendables(character: dict, lieu_doc: dict, relation: dict | None =
 
 
 @user_router.get("/marchand/quotes")
-async def marchand_quotes(
+def marchand_quotes(
 	current_user: Annotated[User, Depends(get_current_user)],
 ):
-	"""Liste initiale du panneau Vente : objets vendables ici + bourse + relation au lieu."""
+	"""Liste initiale du panneau Vente : objets vendables ici + bourse + relation au lieu.
+
+	⚠️ `def` et non `async def` (lecture PURE : `get_relation` renvoie l'existant ou un dict
+	frais NON sauvé) → FastAPI le bascule sur le threadpool et la boucle d'événements cesse
+	d'être bloquée pendant les lectures. `sell_item`/`buy_item`/`marchander` restent
+	`async def` : ils écrivent, et `save_doc(lieu_doc)` est best-effort par conception — du
+	parallélisme réel ouvrirait une fenêtre où deux joueurs achètent le même dernier
+	exemplaire.
+
+	⚠️ Pas de `relations_lieux` ici : l'endpoint ne mute AUCUNE relation, et ce payload relit
+	tous les docs relation + un doc lieu COMPLET (jusqu'à ~29 Ko avec `cells`) par lieu connu.
+	L'onglet 🤝 est semé par `RELATIONS_LIEUX_INIT` au chargement de /play et resynchronisé
+	par les endpoints qui font vraiment bouger une relation (fidélité, crit de marchandage,
+	dialogue PNJ, course échue)."""
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
@@ -1644,7 +1675,6 @@ async def marchand_quotes(
 		"relation": relation_value(relation),
 		"bloque_jusqu": int(relation.get("marchandage_bloque_jusqu", 0) or 0),
 		"now": now_epoch(),
-		"relations_lieux": relations_lieux_payload(character),
 	}
 
 
@@ -1785,7 +1815,7 @@ async def buy_item(
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	# Tick marché à l'achat aussi (approvisionnement + production + écoulement PNJ), comme à la
 	# vente et à l'entrée du lieu — l'achat vient de retirer du stock à reconstituer.
-	tick_atelier(lieu_doc)
+	tick_atelier(lieu_doc, lieu_recettes(lieu_doc.get("categorie")))
 	save_doc(lieu_doc)  # best-effort : décrément du stock monde
 
 	payload = _inventory_payload(character)
@@ -1878,7 +1908,12 @@ async def marchander_item(
 										 recrutement.porteurs_effectifs(character, get_doc)),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
-		"relations_lieux": relations_lieux_payload(character),
+		# ⚠️ Recalculé SEULEMENT sur un crit, comme `_appliquer_fidelite` : seul le critique
+		# fait bouger la cote (±1) et le blocage, les deux champs que ce payload publie. Une
+		# réussite simple ne touche que `prix_negocies`, qui n'y figure pas et repart déjà
+		# via `vendables`/`achetables`. Côté client, `Array.isArray(null)` est faux ⇒ pas de
+		# rendu — et ce payload relit tous les docs relation + lieu.
+		"relations_lieux": relations_lieux_payload(character) if issue["crit"] else None,
 	}
 
 

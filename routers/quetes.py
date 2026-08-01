@@ -7,7 +7,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
 
-from db.config import get_doc, save_doc, find_docs
+from db.config import get_doc, save_doc, find_docs, delete_doc
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre,
@@ -69,19 +69,27 @@ def _fiche_payload(character: dict) -> dict:
 	}
 
 
-def _board_payload(character: dict, lieu_doc: dict) -> dict:
-	"""Offres du tableau + quêtes actives (détaillées) de ce donneur + bourse."""
-	offres = quetes.remplir_tableau(lieu_doc)
+def _board_payload(character: dict, lieu_doc: dict, completer: bool = False) -> dict:
+	"""Offres du tableau + quêtes actives (détaillées) de ce donneur + bourse.
+
+	⚠️ `completer=True` UNIQUEMENT là où une place peut être libre : l'ouverture du tableau
+	et l'acceptation. `terminer`/`déposer`/`abandonner` ne retirent AUCUNE offre — la quête
+	a quitté le tableau à l'acceptation —, ils se contentent donc de lister l'existant
+	(`lister_offres`) au lieu de payer une génération complète pour un tableau identique."""
+	offres = quetes.remplir_tableau(lieu_doc) if completer else quetes.lister_offres(lieu_doc)
 	giver = lieu_doc.get("_id")
-	actives = [
-		quetes.quete_detail(character, q)
-		for q in character.get("quetes_actives", [])
-		if q.get("giver") == giver
-	]
+	fiche = _fiche_payload(character)
+	# ⚠️ `actives` est un SOUS-ENSEMBLE de `fiche_actives` : les recalculer était une seconde
+	# passe de `quete_detail` sur les mêmes quêtes — donc une relecture de plus, par quête de
+	# chasse, du doc `lieu:*` complet (28 Ko pour Auxerre). On filtre au lieu de refaire.
+	ids_giver = {
+		q.get("id") or q.get("_id")
+		for q in character.get("quetes_actives", []) if q.get("giver") == giver
+	}
 	return {
-		**_fiche_payload(character),
+		**fiche,
 		"offres": [_offre_view(o) for o in offres],
-		"actives": actives,
+		"actives": [d for d in fiche["fiche_actives"] if d.get("id") in ids_giver],
 		"lieu_parent": lieu_doc.get("lieu_parent"),
 	}
 
@@ -92,7 +100,7 @@ async def quetes_board(current_user: Annotated[dict, Depends(get_current_user)])
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 	lieu_doc = _guild_lieu(character)
-	return _board_payload(character, lieu_doc)
+	return _board_payload(character, lieu_doc, completer=True)
 
 
 @quetes_router.post("/quetes/accepter")
@@ -124,11 +132,27 @@ async def quetes_accepter(
 
 	# L'offre quitte le tableau (best-effort : un échec ici n'annule pas l'acceptation,
 	# le filtre `quete_active` empêche un double-accept côté joueur).
-	quete_doc["statut"] = "acceptee"
-	quete_doc["accepte_par"] = character["_id"]
-	save_doc(quete_doc)
+	#
+	# ⚠️ Une offre GÉNÉRÉE est SUPPRIMÉE, pas marquée : le personnage en garde un snapshot
+	# (`snapshot_quete`) et plus personne ne relit ce doc — `accepte_par` était écrit sans
+	# jamais être lu. La laisser en base faisait grossir SANS BORNE ce que `offres_du_giver`
+	# rapatrie à chaque ouverture du tableau (112 docs morts pour 6 vivants sur la base de
+	# référence) : c'est cela qui rendait le tableau de plus en plus lent avec le temps.
+	# Même geste que `purger_offres_perimees`, même motif.
+	# ⚠️ Une quête AUTHORÉE n'est JAMAIS supprimée — c'est une mission ÉCRITE, qu'on doit
+	# pouvoir remettre au tableau à la main : elle garde le marquage historique.
+	# ⚠️ Conséquence assumée : un second POST sur la même quête répond 404 « introuvable »
+	# au lieu de 409 « déjà prise ». La garde qui compte (`quete_active` → 409 plus haut)
+	# est intacte, et le bouton se désactive désormais pendant la requête.
+	if quete_doc.get("source") == "genere":
+		delete_doc(quete_doc)
+	else:
+		quete_doc["statut"] = "acceptee"
+		quete_doc["accepte_par"] = character["_id"]
+		save_doc(quete_doc)
 
-	payload = _board_payload(character, lieu_doc)
+	# Une place vient de se libérer : c'est le seul endpoint, avec l'ouverture, qui recomplète.
+	payload = _board_payload(character, lieu_doc, completer=True)
 	payload["accepte"] = {"titre": quete_doc.get("titre", "—")}
 	return payload
 
@@ -152,15 +176,20 @@ async def quetes_terminer(
 	if not quetes.objectif_atteint(character, q):
 		raise HTTPException(status_code=422, detail="Objectif non rempli.")
 
+	# ⚠️ Le groupe est chargé AVANT la récompense et repassé à `appliquer_recompenses` : ce
+	# sont les MÊMES dicts que la part de butin crédite et que la boucle de save persiste.
+	# Les recharger dans le chokepoint d'XP rendrait un second dict du même document, donc
+	# deux `save_doc` sur le même `_rev` — une des deux écritures serait perdue en silence.
+	groupe = recrutement.groupe_effectif(character, get_doc)
+
 	# Les collectes ont déjà été consommées au fil des dépôts (`/api/quetes/deposer`) ; le
 	# turn-in ne fait que valider la progression et donner la récompense.
-	recap = quetes.appliquer_recompenses(character, q)
+	recap = quetes.appliquer_recompenses(character, q, compagnons=groupe)
 
 	# Part de butin des compagnons : chaque membre du groupe prélève sa part EFFECTIVE
 	# (affinité déduite) sur le CUIVRE de la récompense, créditée à SON doc ; et une
 	# quête réussie ensemble resserre les liens (chokepoint recrutement).
 	parts_info = None
-	groupe = recrutement.groupe_effectif(character, get_doc)
 	if groupe:
 		cuivre_total = int((q.get("recompenses", {}) or {}).get("cuivre", 0) or 0)
 		reglement = recrutement.regler_part_butin(character, groupe, cuivre_total)
@@ -199,9 +228,11 @@ async def quetes_terminer(
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
-	# Bourses des compagnons (annexes, best-effort) : persistées APRÈS le save du
-	# personnage — le turn-in est acquis (quête retirée des actives), un rejeu ne
+	# Bourses des compagnons + XP de la compagnie (annexes, best-effort) : persistées APRÈS
+	# le save du personnage — le turn-in est acquis (quête retirée des actives), un rejeu ne
 	# peut plus les créditer deux fois ; un échec ici leur fait juste perdre leur part.
+	# ⚠️ `groupe` couvre les DEUX (les permanents en font partie, `engager_permanent` laisse
+	# `statut` à "embauche") : rien à sauver en plus pour `recap["compagnie"]`.
 	for av in groupe:
 		save_doc(av)
 
@@ -212,6 +243,9 @@ async def quetes_terminer(
 		"niveau_up": recap["xp"].get("niveau_up", False),
 		"recompenses": q.get("recompenses", {}),
 		"parts_compagnons": parts_info,
+		# La compagnie a touché la MÊME XP : une règle invisible n'existe pas.
+		"xp_compagnie": recrutement.xp_compagnie_payload(
+			recap["compagnie"], recap["xp"].get("xp_gain", 0)),
 	}
 	# Liens resserrés par la quête réussie ensemble → resync de l'onglet 🤝 section 👥.
 	if groupe:

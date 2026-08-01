@@ -1807,7 +1807,7 @@
 									<span class="sh-inv-actions">
 										{% if q.get("focalisable") %}<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>{% endif %}
 										{% if q.get("carte") %}<button class="sh-drop-btn" data-carte='{{ q.carte | tojson }}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">Carte</button>{% endif %}
-										<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('{{ q.get('id') }}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
+										<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('{{ q.get('id') }}',this)" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 									</span>
 								</div>
 								<div class="sh-quest-desc">{{ q.get("description","") }}</div>
@@ -1858,10 +1858,13 @@
 		</div>
 		<div class="sh-finance-row">
 			<div class="sell-relation" id="sell-relation">🤝 Relation : —</div>
+			{# Bourse semée par Jinja comme le bloc jumeau de la fiche (#amt-*) : le panneau
+			   s'ouvre AVANT la réponse de `quotes`, et un « 0 Or » en dur clignoterait le
+			   temps de l'aller-retour. `updatePurse` écrase ensuite avec la valeur serveur. #}
 			<div id="purse">
-				<div class="sh-finance">🟡 <span class="amt" id="sell-amt-or">0</span> Or</div>
-				<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">0</span> Argent</div>
-				<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">0</span> Cuivre</div>
+				<div class="sh-finance">🟡 <span class="amt" id="sell-amt-or">{{ character.get("or",0) }}</span> Or</div>
+				<div class="sh-finance">⚪ <span class="amt" id="sell-amt-argent">{{ character.get("argent",0) }}</span> Argent</div>
+				<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">{{ character.get("cuivre",0) }}</span> Cuivre</div>
 			</div>
 		</div>
 		<div style="display:flex;align-items:center;justify-content:space-between;margin:.6rem 0 0">
@@ -2629,6 +2632,11 @@
 				if (data.niveau_up) {
 					sessionStorage.setItem('niveau_up_notif', data.niveau);
 				}
+				if (data.xp_compagnie) {
+					// Les compagnons engagés durablement ont touché la même XP (même pattern
+					// que xp_gain_notif : le changement de lieu recharge la page).
+					sessionStorage.setItem('xp_compagnie_notif', JSON.stringify(data.xp_compagnie));
+				}
 				if (data.focalisation_atteinte) {
 					// Arrivée au lieu focalisé : toast affiché après le reload (pattern xp_gain_notif).
 					sessionStorage.setItem('focus_arrive_notif', data.focalisation_atteinte.nom || '');
@@ -3033,6 +3041,9 @@ window.addEventListener('resize', () => {
 
 // ── FICHE PERSONNAGE ────────────────────────────────────────
 function openSheet() {
+	// Filet : si un rendu d'inventaire a été différé pendant que le panneau marchand était
+	// ouvert (cf. _applyInventoryPayload), on le vidange avant d'afficher la fiche.
+	_viderRenduInventaireDiffere();
 	document.getElementById('game-container').classList.add('panel-hidden');
 	document.getElementById('sheet-panel').classList.remove('panel-hidden');
 	sheetTab('stats', document.querySelector('.sheet-tab-btn'));
@@ -3439,10 +3450,33 @@ async function spendXp(statKey, useMaxBonus = false) {
 		t.classList.add('show');
 		setTimeout(() => t.classList.remove('show'), 3500);
 	}
+	// Un engagement se PARTAGE : les compagnons de la COMPAGNIE touchent la même XP que le
+	// joueur (serveur : `recrutement.partager_xp`). Une règle invisible n'existe pas — mais
+	// on SUFFIXE le toast existant plutôt que d'en émettre un second : `#toast` est unique,
+	// un deuxième appel écraserait le premier (même précaution que `_fideliteSuffixe`).
+	// ⚠️ Déclarée ICI et pas dans le grand bloc plus bas : ce bloc-ci s'EXÉCUTE avant que le
+	// suivant ne soit parsé, et les notifs de découverte ci-dessous s'en servent.
+	// Pas d'escapeHtml : `showToast` écrit en textContent, et ce payload n'a que des nombres.
+	function _xpCompagnieSuffixe(info) {
+		if (!info || !info.membres) return '';
+		return ' · ⚔ ' + info.membres + ' compagnon' + (info.membres > 1 ? 's' : '')
+			+ ' +' + info.xp + ' XP';
+	}
+
+	// Le déplacement par porte recharge la page : la mention passe donc par sessionStorage,
+	// comme l'XP de découverte. Clé SÉPARÉE — une conclusion d'intro peut partager de l'XP
+	// sans qu'aucun lieu ne soit découvert, donc sans toast auquel se raccrocher.
+	let _xpCompagnieNotif = null;
+	try { _xpCompagnieNotif = JSON.parse(sessionStorage.getItem('xp_compagnie_notif') || 'null'); }
+	catch (e) { _xpCompagnieNotif = null; }
+	sessionStorage.removeItem('xp_compagnie_notif');
+
 	const _xpNotif = sessionStorage.getItem('xp_gain_notif');
 	if (_xpNotif) {
 		sessionStorage.removeItem('xp_gain_notif');
-		showToast('Nouveau lieu découvert ! +' + _xpNotif + ' XP');
+		showToast('Nouveau lieu découvert ! +' + _xpNotif + ' XP' + _xpCompagnieSuffixe(_xpCompagnieNotif));
+	} else if (_xpCompagnieNotif) {
+		showToast('⚔ Votre compagnie progresse avec vous' + _xpCompagnieSuffixe(_xpCompagnieNotif));
 	}
 	const _niveauUpNotif = sessionStorage.getItem('niveau_up_notif');
 	if (_niveauUpNotif) {
@@ -4812,15 +4846,40 @@ async function pickupItem(index, itemId) {
 }
 
 // Applique la réponse partagée des endpoints drop/pickup (inventaire/sol/slots + charge).
+//
+// ⚠️ Les DONNÉES sont toujours prises (Conventions §10 — jamais de resync sauté) ; seul le
+// RENDU est différé quand `#sell-panel` est ouvert : `#game-container` porte alors
+// `panel-hidden`, et les trois sous-arbres réécrits (silhouette, sac, sol) sont invisibles.
+// Une vente déclenchait ainsi 5 reconstructions `innerHTML` dont 3 pour personne.
+let _invRenderDiffere = false;
+
+function _sellPanelOuvert() {
+	const p = document.getElementById('sell-panel');
+	return !!p && !p.classList.contains('panel-hidden');
+}
+
+function _renderInventairePayload() {
+	_refreshPaperdoll();
+	_refreshInventaire();
+	_refreshSol();
+	_refreshChargeGauge();
+}
+
+// Vidange du rendu en attente — appelée en tête de `closeSellPanel` (avant que le
+// conteneur ne redevienne visible) et, par précaution, à l'ouverture de la fiche.
+function _viderRenduInventaireDiffere() {
+	if (!_invRenderDiffere) return;
+	_invRenderDiffere = false;
+	_renderInventairePayload();
+}
+
 function _applyInventoryPayload(data) {
 	_inventaire  = data.inventaire;
 	_objetsAuSol = data.objets_au_sol;
 	_slots       = data.slots;
 	if (typeof data.charge_max === 'number') _chargeMax = data.charge_max;
-	_refreshPaperdoll();
-	_refreshInventaire();
-	_refreshSol();
-	_refreshChargeGauge();
+	if (_sellPanelOuvert()) { _invRenderDiffere = true; return; }
+	_renderInventairePayload();
 }
 
 function equipFromSac(itemId, btn) {
@@ -4925,7 +4984,9 @@ function setMarchandState(data) {
 
 // Onglet 🤝 Relations : rendu client de TOUS les lieux connus, regroupés par ville
 // (lieu_parent → lieu categorie:"ville") en accordéon. Alimenté par RELATIONS_LIEUX_INIT
-// à l'init et resynchronisé après quotes/marchander (data.relations_lieux). La ville
+// à l'init et resynchronisé par les SEULS endpoints qui font bouger une relation
+// (gain de fidélité, CRIT de marchandage, dialogue PNJ, course échue) — `quotes` ne mute
+// rien et ne porte donc plus ce payload, qui relit tous les docs relation + lieu. La ville
 // ouverte est retenue par personnage dans localStorage.
 function relLieuLabel(v) {
 	if (v <= 0)  return 'Banni';
@@ -5095,7 +5156,7 @@ function _cgArg(id) { return id ? `'${id}'` : 'null'; }
 
 function marchBtn(index, itemId, sens, compagnonId) {
 	const idxArg = (index === null || index === undefined) ? 'null' : index;
-	return `<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="marchanderItem(${idxArg},'${itemId}','${sens}',${_cgArg(compagnonId)})" title="Marchander">🤝</button>`;
+	return `<button class="sh-marchander-btn" ${isMarchBlocked() ? 'disabled' : ''} onclick="marchanderItem(${idxArg},'${itemId}','${sens}',${_cgArg(compagnonId)},this)" title="Marchander">🤝</button>`;
 }
 
 // Tri par nom + scroll : même pattern que le sac/le sol (_sortedOrder rend un ordre
@@ -5125,7 +5186,7 @@ function renderSellList(data) {
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
-			<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}',${_cgArg(v.compagnon_id)})" title="Vendre">Vendre</button>
+			<button class="sh-drop-btn" onclick="sellItem(${v.index},'${v.item_id}',${_cgArg(v.compagnon_id)},this)" title="Vendre">Vendre</button>
 			${marchBtn(v.index, v.item_id, 'vente', v.compagnon_id)}
 		</span>
 	</li>`;
@@ -5152,7 +5213,7 @@ function renderBuyList(data) {
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${v.negocie ? '🤝 ' : ''}${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
-			<button class="sh-drop-btn" onclick="buyItem('${v.item_id}')" title="Acheter">Acheter</button>
+			<button class="sh-drop-btn" onclick="buyItem('${v.item_id}',this)" title="Acheter">Acheter</button>
 			${marchBtn(null, v.item_id, 'achat')}
 		</span>
 	</li>`;
@@ -5193,8 +5254,11 @@ function marchToast(d, applied) {
 	return par + 'Marchandage raté — prix inchangé.';
 }
 
-async function marchanderItem(index, itemId, sens, compagnonId) {
+// ⚠️ `btn` est ici plus qu'un confort : deux jets partis d'un double-clic, ce sont deux
+// chances de crit d'échec, donc de blocage du marchandage pendant une heure.
+async function marchanderItem(index, itemId, sens, compagnonId, btn) {
 	if (isMarchBlocked()) { showToast('Le marchand boude — revenez dans ~' + blocRemainingMin() + ' min.'); return; }
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	try {
 		const body = {index, item_id: itemId, sens};
 		if (compagnonId) body.compagnon_id = compagnonId;
@@ -5203,37 +5267,70 @@ async function marchanderItem(index, itemId, sens, compagnonId) {
 			body: JSON.stringify(body)
 		});
 		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		// Réactivé sur erreur SEULEMENT : le succès reconstruit la liste, donc le bouton.
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		setMarchandState(data);
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
 		showToast(marchToast(data, _appliedMarchPrice(data, index, itemId, sens, compagnonId)));
-	} catch(err) { console.error('Erreur marchandage', err); }
+	} catch(err) { console.error('Erreur marchandage', err); if (btn) btn.disabled = false; }
+}
+
+// Le panneau est révélé AVANT le fetch : l'attendre laissait l'écran figé pendant tout
+// l'aller-retour, sans le moindre retour visuel. Les deux listes affichent « Chargement… »
+// puis sont remplacées par le rendu réel. `_sellLoading` couvre le double-clic sur 🏷️
+// (le bouton, lui, disparaît avec `game-container`).
+let _sellLoading = false;
+function _sellChargement() {
+	['sell-list', 'buy-list'].forEach(id => {
+		const el = document.getElementById(id);
+		if (el) el.innerHTML = '<li class="sell-empty">Chargement…</li>';
+	});
+	// Pas encore de liste à faire défiler : l'ombre de bas de cadre n'aurait rien à annoncer.
+	['sell-scroll', 'buy-scroll'].forEach(id => {
+		const el = document.getElementById(id);
+		if (el) el.classList.remove('scrollable');
+	});
+	// La cote affichée est celle du marchand PRÉCÉDENT tant que `quotes` n'a pas répondu.
+	const rel = document.getElementById('sell-relation');
+	if (rel) { rel.classList.remove('relation-bad'); rel.textContent = '🤝 Relation : —'; }
 }
 
 async function openSellPanel() {
+	if (_sellLoading) return;
+	_sellLoading = true;
+	_sellChargement();
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('sell-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
 	try {
 		const res  = await fetch('api/marchand/quotes');
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		// Le panneau est déjà ouvert : sur échec on le referme, comme quand il ne s'ouvrait pas.
+		if (!res.ok) { showToast('Erreur : ' + data.detail); closeSellPanel(); return; }
 		setMarchandState(data);
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
-		document.getElementById('game-container').classList.add('panel-hidden');
-		document.getElementById('sell-panel').classList.remove('panel-hidden');
-		window.scrollTo({ top: 0, behavior: 'instant' });
-	} catch(err) { console.error('Erreur quotes', err); }
+	} catch(err) {
+		console.error('Erreur quotes', err);
+		showToast('Le marchand ne répond pas.');
+		closeSellPanel();
+	} finally { _sellLoading = false; }
 }
 
 function closeSellPanel() {
+	// ⚠️ AVANT de retirer `panel-hidden` : le rendu différé écrit dans le sac / le sol /
+	// la silhouette, qui redeviennent visibles juste après (cf. _renderInventaireDiffere).
+	_viderRenduInventaireDiffere();
 	document.getElementById('game-container').classList.remove('panel-hidden');
 	document.getElementById('sell-panel').classList.add('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function sellItem(index, itemId, compagnonId) {
+async function sellItem(index, itemId, compagnonId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	try {
 		const body = {index, item_id: itemId};
 		if (compagnonId) body.compagnon_id = compagnonId;
@@ -5242,31 +5339,33 @@ async function sellItem(index, itemId, compagnonId) {
 			body: JSON.stringify(body)
 		});
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		// Réactivé sur erreur SEULEMENT : le succès reconstruit la liste, donc le bouton.
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		_applyInventoryPayload(data);
 		setMarchandState(data);
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
 		if (data.vendu) showToast('Vendu : ' + data.vendu.nom + ' (' + formatPrix(data.vendu.prix) + ')' + _fideliteSuffixe(data));
-	} catch(err) { console.error('Erreur vente', err); }
+	} catch(err) { console.error('Erreur vente', err); if (btn) btn.disabled = false; }
 }
 
-async function buyItem(itemId) {
+async function buyItem(itemId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	try {
 		const res  = await fetch('api/buy_item', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({item_id: itemId})
 		});
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		_applyInventoryPayload(data);
 		setMarchandState(data);
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
 		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')' + _fideliteSuffixe(data));
-	} catch(err) { console.error('Erreur achat', err); }
+	} catch(err) { console.error('Erreur achat', err); if (btn) btn.disabled = false; }
 }
 
 // ── Tableau des quêtes (guilde) ───────────────────────────────────────
@@ -5430,7 +5529,7 @@ function renderFicheQuetes(data) {
 					<span class="sh-inv-actions">
 						${mapBtn}
 						${focusBtn}
-						<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
+						<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}',this)" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 					</span>
 				</div>
 				<div class="sh-quest-desc">${q.description || ''}</div>
@@ -5484,9 +5583,9 @@ function renderQuetesActives(data) {
 			<span class="sell-prix">✨ ${q.recompenses.xp} XP · ${formatPrix(q.recompenses)}</span>
 		</span>
 		${q.focalisable ? `<button class="sh-drop-btn${_focusEst('quete', q.id) ? ' btn-highlight' : ''}" data-focus-key="quete|${q.id}" onclick="focaliserQuete('${q.id}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>` : ''}
-		${(q.objectif && q.objectif.type === 'collect' && !q.complete) ? `<button class="sh-drop-btn" onclick="deposerQuete('${q.id}')" title="Déposer les pièces portées (en plusieurs voyages si besoin)">📥 Déposer</button>` : ''}
-		<button class="sh-drop-btn quest-done-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}')" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
-		<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}')" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
+		${(q.objectif && q.objectif.type === 'collect' && !q.complete) ? `<button class="sh-drop-btn" onclick="deposerQuete('${q.id}',this)" title="Déposer les pièces portées (en plusieurs voyages si besoin)">📥 Déposer</button>` : ''}
+		<button class="sh-drop-btn quest-done-btn" ${q.complete ? '' : 'disabled'} onclick="terminerQuete('${q.id}',this)" title="Terminer la quête">${q.complete ? 'Terminer' : 'En cours'}</button>
+		<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('${q.id}',this)" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
 	</li>`).join('');
 }
 
@@ -5501,23 +5600,43 @@ function renderQuetesOffres(data) {
 			<span class="q-desc">${o.description}</span>
 			<span class="sell-prix">✨ ${o.recompenses.xp} XP · ${formatPrix(o.recompenses)}</span>
 		</span>
-		<button class="sh-drop-btn" onclick="accepterQuete('${o.id}')" title="Accepter la quête">Accepter</button>
+		<button class="sh-drop-btn" onclick="accepterQuete('${o.id}',this)" title="Accepter la quête">Accepter</button>
 	</li>`).join('');
 }
 
+// Le panneau est révélé AVANT le fetch : l'attendre laissait l'écran figé pendant tout
+// l'aller-retour, sans le moindre retour visuel (même défaut, même correctif que
+// `openSellPanel`). `_quetesLoading` couvre le double-clic sur 📜 — le bouton, lui,
+// disparaît avec `game-container`.
+let _quetesLoading = false;
+function _quetesChargement() {
+	['quetes-actives-list', 'quetes-offres-list'].forEach(id => {
+		const el = document.getElementById(id);
+		if (el) el.innerHTML = '<li class="sell-empty">Chargement…</li>';
+	});
+}
+
 async function openQuetesBoard() {
+	if (_quetesLoading) return;
+	_quetesLoading = true;
+	_quetesChargement();
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('quetes-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
 	try {
 		const res = await fetch('api/quetes/board');
 		const data = await res.json();
-		if (!res.ok) { alert('Erreur : ' + data.detail); return; }
+		// Le panneau est déjà ouvert : sur échec on le referme, comme quand il ne s'ouvrait pas.
+		if (!res.ok) { showToast('Erreur : ' + data.detail); closeQuetesPanel(); return; }
 		updatePurse(data.purse);
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);
-		document.getElementById('game-container').classList.add('panel-hidden');
-		document.getElementById('quetes-panel').classList.remove('panel-hidden');
-		window.scrollTo({ top: 0, behavior: 'instant' });
-	} catch(err) { console.error('Erreur tableau de quêtes', err); }
+	} catch(err) {
+		console.error('Erreur tableau de quêtes', err);
+		showToast('Le tableau des quêtes ne répond pas.');
+		closeQuetesPanel();
+	} finally { _quetesLoading = false; }
 }
 
 function closeQuetesPanel() {
@@ -5526,30 +5645,33 @@ function closeQuetesPanel() {
 	window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function accepterQuete(queteId) {
+async function accepterQuete(queteId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	try {
 		const res = await fetch('api/quetes/accepter', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({ quete_id: queteId })
 		});
 		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		// Réactivé sur erreur SEULEMENT : le succès reconstruit la liste, donc le bouton.
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		updatePurse(data.purse);
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);
 		if (data.accepte) showToast('Quête acceptée : ' + data.accepte.titre);
-	} catch(err) { console.error('Erreur acceptation quête', err); }
+	} catch(err) { console.error('Erreur acceptation quête', err); if (btn) btn.disabled = false; }
 }
 
-async function terminerQuete(queteId) {
+async function terminerQuete(queteId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	try {
 		const res = await fetch('api/quetes/terminer', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({ quete_id: queteId })
 		});
 		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		updatePurse(data.purse);
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
@@ -5557,6 +5679,7 @@ async function terminerQuete(queteId) {
 		if (data.termine) {
 			let msg = 'Quête terminée : ' + data.termine.titre + ' (+' + data.termine.xp + ' XP)';
 			if (data.termine.niveau_up) msg += ' — Niveau supérieur !';
+			msg += _xpCompagnieSuffixe(data.termine.xp_compagnie);
 			showToast(msg);
 			// Parts de butin des compagnons, prélevées sur le cuivre de la récompense.
 			const pc = data.termine.parts_compagnons;
@@ -5565,37 +5688,39 @@ async function terminerQuete(queteId) {
 			});
 		}
 		if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
-	} catch(err) { console.error('Erreur fin de quête', err); }
+	} catch(err) { console.error('Erreur fin de quête', err); if (btn) btn.disabled = false; }
 }
 
 // Abandon d'une quête active. Autorisé PARTOUT (backend assoupli) : depuis le tableau de la guilde
 // OU l'onglet 📜 de la fiche. Hors guilde le payload est allégé (fiche + bourse + focalisation) ;
 // renderQuetesActives/Offres sont alors des no-op (panneau guilde fermé, garde `if (!list) return`).
-async function abandonnerQuete(queteId) {
+async function abandonnerQuete(queteId, btn) {
 	if (!confirm('Abandonner cette quête ? La progression sera perdue.')) return;
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	try {
 		const res = await fetch('api/quetes/abandonner', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({ quete_id: queteId })
 		});
 		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		if (data.purse) updatePurse(data.purse);
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);   // resync fiche + focalisation (via `'focalisation' in data`)
 		showToast('Quête abandonnée' + (data.abandonne ? ' : ' + data.abandonne.titre : ''));
-	} catch(err) { console.error('Erreur abandon de quête', err); }
+	} catch(err) { console.error('Erreur abandon de quête', err); if (btn) btn.disabled = false; }
 }
 
-async function deposerQuete(queteId) {
+async function deposerQuete(queteId, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
 	try {
 		const res = await fetch('api/quetes/deposer', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({ quete_id: queteId })
 		});
 		const data = await res.json();
-		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return; }
 		_applyInventoryPayload(data);   // le dépôt a retiré des pièces du sac
 		updatePurse(data.purse);
 		renderQuetesActives(data);
@@ -5604,7 +5729,7 @@ async function deposerQuete(queteId) {
 		if (data.depose) {
 			showToast('Déposé : ' + data.depose.n + ' pièce(s)' + (data.depose.complete ? ' — objectif atteint, à terminer !' : ''));
 		}
-	} catch(err) { console.error('Erreur dépôt de quête', err); }
+	} catch(err) { console.error('Erreur dépôt de quête', err); if (btn) btn.disabled = false; }
 }
 
 // ── Recrutement d'aventuriers (🤝) ──────────────────────────────────────────
@@ -6636,7 +6761,8 @@ async function choisirPnj(choixId) {
 				if (data.transport.en_rayon) showToast('🏷️ ' + data.transport.en_rayon + ' colis mis en rayon ici.');
 			}
 			if (data.transport.livre) {
-				showToast('📦 Livré ! ✨ +' + data.transport.xp + ' XP, 🤝 relation ' + data.transport.relation);
+				showToast('📦 Livré ! ✨ +' + data.transport.xp + ' XP, 🤝 relation ' + data.transport.relation
+					+ _xpCompagnieSuffixe(data.transport.xp_compagnie));
 				if (data.transport.en_rayon) showToast('🏷️ ' + data.transport.en_rayon + ' colis mis en rayon ici.');
 				(data.transport.items || []).forEach(nom => showToast('🎁 ' + nom));
 				if (data.transport.niveau_up) showToast('⭐ Niveau supérieur !');
@@ -6647,7 +6773,8 @@ async function choisirPnj(choixId) {
 		if (data.rang) {
 			if (data.rang.accepte) showToast('🎯 Épreuve de rang acceptée : ' + data.rang.accepte);
 			if (data.rang.promu) {
-				showToast('🏅 Rang de guilde : ' + data.rang.promu + (data.rang.niveau_up ? ' — ⭐ Niveau supérieur !' : ''));
+				showToast('🏅 Rang de guilde : ' + data.rang.promu + (data.rang.niveau_up ? ' — ⭐ Niveau supérieur !' : '')
+					+ _xpCompagnieSuffixe(data.rang.xp_compagnie));
 				// `meilleur`/`detail` = le MEILLEUR rang toutes villes confondues et son détail par
 				// ville (même calcul que /play, cf. utils/chasse.meilleur_rang) : la promotion d'UNE
 				// ville ne fait pas forcément remonter l'affichage si une autre était déjà meilleure.
@@ -6664,7 +6791,8 @@ async function choisirPnj(choixId) {
 			if (data.commission.accepte) showToast('⚔️ Commission acceptée : ' + data.commission.accepte);
 			if (data.commission.rapporte) {
 				showToast('🏅 Commission accomplie — ✨ +' + data.commission.xp + ' XP'
-					+ (data.commission.niveau_up ? ' — ⭐ Niveau supérieur !' : ''));
+					+ (data.commission.niveau_up ? ' — ⭐ Niveau supérieur !' : '')
+					+ _xpCompagnieSuffixe(data.commission.xp_compagnie));
 			}
 			renderFicheQuetes(data);
 		}

@@ -208,6 +208,27 @@ def _lien_vers(current_user: dict, lieu_courant: str, destination: str) -> str |
 	return None
 
 
+def _sauver_compagnie(recap: dict) -> None:
+	"""Persiste les docs `aventurier:*` que `quetes.appliquer_recompenses` a crédités de la
+	MÊME XP que le principal (compagnons ENGAGÉS DURABLEMENT seulement).
+
+	⚠️ À appeler APRÈS le `save_doc(character)` autoritatif, jamais avant : le turn-in est
+	alors acquis (la quête a quitté `quetes_actives`), donc un 409 rejoué ne peut plus les
+	payer deux fois. Best-effort, comme les docs `relation`/`lieu` — un échec ici ne coûte
+	que l'XP d'un compagnon, pas la quête du joueur."""
+	for av in (recap or {}).get("compagnie") or []:
+		save_doc(av)
+
+
+def _xp_compagnie(recap: dict) -> dict | None:
+	"""Mention client de l'XP partagée (None = rien à annoncer). Source unique commune aux
+	trois services qui soldent une quête : transport, rang, commission."""
+	return recrutement.xp_compagnie_payload(
+		(recap or {}).get("compagnie") or [],
+		((recap or {}).get("xp") or {}).get("xp_gain", 0),
+	)
+
+
 def _nom_pnj(lieu_id: str | None) -> str | None:
 	"""Nom du PNJ qui tient ce lieu (le tenancier implicite d'un magasin y compris), sans y
 	être : c'est ainsi que le donneur peut nommer la personne à qui livrer, et le destinataire
@@ -496,10 +517,12 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		focalisation.effacer_si_quete(character, q.get("id"))
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		_sauver_compagnie(recap)
 		reponse["transport"] = {
 			"livre": q.get("titre"),
 			"xp": recap["xp"].get("xp_gain", 0),
 			"niveau_up": recap["xp"].get("niveau_up", False),
+			"xp_compagnie": _xp_compagnie(recap),
 			"relation": recap["relation"],
 			# Nombre de colis effectivement montés en rayon (le reste part en arrière-boutique).
 			"en_rayon": sum(recap["rayon"].values()),
@@ -534,6 +557,7 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		focalisation.effacer_si_quete(character, q.get("id"))
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		_sauver_compagnie(recap)
 		# Les items de récompense (la carte d'aventurier) sont entrés au sac avec la prime.
 		# `resolve_item_ref` — pas `get_doc` — pour que le toast porte le nom de l'INSTANCE :
 		# « Carte d'aventurier (Auxerre) », pas le nom nu du doc générique.
@@ -541,6 +565,7 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			"livre": q.get("titre"),
 			"xp": recap["xp"].get("xp_gain", 0),
 			"niveau_up": recap["xp"].get("niveau_up", False),
+			"xp_compagnie": _xp_compagnie(recap),
 			"relation": recap["relation"],
 			"items": [
 				(resolve_item_ref(ref) or {}).get("nom") or item_ref_id(ref)
@@ -610,6 +635,7 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			raise HTTPException(status_code=422, detail="Épreuve de rang non accomplie.")
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		_sauver_compagnie(resultat["recompenses"])
 		# Le rang affiché est désormais le NOUVEAU (après promotion).
 		dits["rang"] = resultat["promu"]
 		rangs_guilde = character.get("rangs_guilde") or {}
@@ -617,6 +643,7 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			"promu": resultat["promu"],
 			"xp": resultat["recompenses"]["xp"].get("xp_gain", 0),
 			"niveau_up": resultat["recompenses"]["xp"].get("niveau_up", False),
+			"xp_compagnie": _xp_compagnie(resultat["recompenses"]),
 			# Le MEILLEUR rang toutes villes confondues + son détail : même calcul que /play
 			# (utils/chasse), pour que la carte du joueur se resynchronise sans reload — une
 			# promotion à Rhemi ne fait pas forcément remonter l'affichage si Auxerre est
@@ -693,10 +720,12 @@ def _resoudre_commission(character: dict, pnj_doc: dict, lieu_doc: dict, op: str
 			raise HTTPException(status_code=422, detail="Commission non accomplie.")
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		_sauver_compagnie(resultat["recompenses"])
 		reponse["commission"] = {
 			"rapporte": q.get("titre"),
 			"xp": resultat["recompenses"]["xp"].get("xp_gain", 0),
 			"niveau_up": resultat["recompenses"]["xp"].get("niveau_up", False),
+			"xp_compagnie": _xp_compagnie(resultat["recompenses"]),
 		}
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 		reponse["vitals"] = _vitals_payload(character)

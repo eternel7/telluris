@@ -92,14 +92,30 @@ def prix_range_cuivre(item_doc: dict, ref=None) -> tuple[int, int]:
 _recipe_map: dict | None = None   # objet_final_item_id → [recettes le produisant]
 _cout_memo: dict[str, int] = {}
 _marche_map: dict | None = None   # {"besoins": {cat: set}, "feuilles": set} dérivé des recettes
+_recettes_all: list | None = None          # toutes les recettes (UNE lecture par process)
+_recettes_par_lieu: dict | None = None     # lieu_categorie → [recettes]
 
 
 def reset_prix_cache() -> None:
 	"""Vide les caches de coût de revient (à appeler quand recettes/items/MARGE changent)."""
-	global _recipe_map, _marche_map
+	global _recipe_map, _marche_map, _recettes_all, _recettes_par_lieu, _image_route_memo
 	_recipe_map = None
 	_marche_map = None
+	_recettes_all = None
+	_recettes_par_lieu = None
+	_image_route_memo = {}
 	_cout_memo.clear()
+
+
+def _all_recettes() -> list:
+	"""Toutes les recettes, lues UNE fois par process (vidé par reset_prix_cache).
+	Source unique des trois index dérivés (`_recipe_map`, `_marche_map`, `lieu_recettes`) :
+	ils étaient déjà des caches process, `lieu_recettes` était le seul à refaire un
+	`find_docs` non indexé à chaque vente/achat."""
+	global _recettes_all
+	if _recettes_all is None:
+		_recettes_all = find_docs({"type": "recette"}) or []
+	return _recettes_all
 
 
 def _get_recipe_map() -> dict:
@@ -107,7 +123,7 @@ def _get_recipe_map() -> dict:
 	global _recipe_map
 	if _recipe_map is None:
 		m: dict[str, list] = {}
-		for r in (find_docs({"type": "recette"}) or []):
+		for r in _all_recettes():
 			oid = objet_final_item_id(r.get("objet_final", ""))
 			if oid:
 				m.setdefault(oid, []).append(r)
@@ -133,7 +149,7 @@ def _get_marche_map() -> dict:
 		produits: dict[str, set] = {}
 		outputs: set = set()
 		inputs_all: set = set()
-		for r in (find_docs({"type": "recette"}) or []):
+		for r in _all_recettes():
 			cat = r.get("lieu_categorie")
 			outputs.add(r.get("objet_final"))
 			if cat:
@@ -543,15 +559,27 @@ _IMAGE_ROUTES = (
 )
 
 
+# Mémo process PAR NOM DE FICHIER (la même image sert souvent plusieurs lieux) : jusqu'à
+# 3 `os.path.exists` par lieu ET par parent à chaque `relations_lieux_payload`. Aucun
+# endpoint d'upload n'existe — les images sont livrées avec le code (cf. les `app.mount`
+# de main.py) —, donc le disque ne bouge pas à chaud. Vidé par `reset_prix_cache`.
+_image_route_memo: dict[str, tuple[str | None, str | None]] = {}
+
+
 def _lieu_image_route(lieu_doc: dict) -> tuple[str | None, str | None]:
 	"""(image, route) servable pour un doc lieu : première route dont le fichier existe
 	sur disque (towns → maps → battle_maps), sinon (None, None)."""
 	img = (lieu_doc or {}).get("image")
-	if img:
+	if not img:
+		return None, None
+	if img not in _image_route_memo:
+		trouve = (None, None)
 		for route, path in _IMAGE_ROUTES:
 			if os.path.exists(os.path.join(path, img)):
-				return img, route
-	return None, None
+				trouve = (img, route)
+				break
+		_image_route_memo[img] = trouve
+	return _image_route_memo[img]
 
 
 def relations_lieux_payload(character: dict) -> list[dict]:
@@ -746,10 +774,24 @@ _CONVERSION_CAP = 100  # bornes le nombre de cuissons de recette par vente (anti
 
 
 def lieu_recettes(lieu_categorie: str) -> list:
-	"""Recettes de transformation associées à une catégorie de lieu (atelier)."""
+	"""Recettes de transformation associées à une catégorie de lieu (atelier).
+
+	Servi depuis l'index process bâti sur `_all_recettes` — sémantique inchangée :
+	`_recipe_map`/`_marche_map` sont DÉJÀ des caches process, donc `lieu_buys`/
+	`besoins_categorie` étaient déjà figés jusqu'à `reset_prix_cache()` ; on ne fait
+	qu'aligner `lieu_recettes` sur eux. Effet de bord positif : renvoie `[]` et non `None`
+	quand la lecture échoue (`_executer_production_batch` plantait dessus)."""
+	global _recettes_par_lieu
 	if not lieu_categorie:
 		return []
-	return find_docs({"type": "recette", "lieu_categorie": lieu_categorie})
+	if _recettes_par_lieu is None:
+		index: dict[str, list] = {}
+		for r in _all_recettes():
+			cat = r.get("lieu_categorie")
+			if cat:
+				index.setdefault(cat, []).append(r)
+		_recettes_par_lieu = index
+	return _recettes_par_lieu.get(lieu_categorie, [])
 
 
 def _stock_vente_add(stock_vente: list, item_id: str, qty: int) -> None:

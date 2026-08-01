@@ -630,6 +630,91 @@ def test_regler_part_butin_groupe_vide(monde):
 	assert res == {"parts": {}, "reste": 100}
 
 
+# ── XP partagée avec la COMPAGNIE ────────────────────────────────────────────────
+# Un contrat s'achète (part de butin), un engagement se PARTAGE : le compagnon permanent y
+# a renoncé, il gagne la MÊME XP que le joueur à la place. Le compagnon sous contrat garde
+# l'XP de COMBAT (utils/combat) et rien d'autre.
+
+def test_partager_xp_permanent_gagne_la_meme_xp(monde):
+	permanent = recrue("aventurier:a", statut="embauche", permanent=True, xp_total=0)
+	contrat   = recrue("aventurier:b", statut="embauche", xp_total=0)
+	rendus = recrutement.partager_xp(perso(), 30, compagnons=[permanent, contrat])
+	assert [av["_id"] for av in rendus] == ["aventurier:a"]
+	assert permanent["xp_total"] == 30
+	assert contrat.get("xp_total", 0) == 0
+
+
+def test_partager_xp_monte_le_niveau_et_donne_les_points(monde):
+	av = recrue("aventurier:a", statut="embauche", permanent=True, xp_total=0,
+				attribute_points=0)
+	recrutement.partager_xp(perso(), 10_000, compagnons=[av])
+	assert av["attribute_points"] > 0   # même règle de montée que le joueur (grant_xp)
+
+
+def test_partager_xp_nulle_ne_touche_rien(monde):
+	av = recrue("aventurier:a", statut="embauche", permanent=True, xp_total=7)
+	assert recrutement.partager_xp(perso(), 0, compagnons=[av]) == []
+	assert recrutement.partager_xp(perso(), -5, compagnons=[av]) == []
+	assert av["xp_total"] == 7
+
+
+def test_partager_xp_ne_relit_pas_les_docs_fournis(monde):
+	"""⚠️ Garde du SECOND dict : recharger un doc que l'appelant tient déjà donnerait deux
+	`save_doc` sur le même `_rev`, donc une écriture perdue en silence."""
+	av = recrue("aventurier:a", statut="embauche", permanent=True, xp_total=0)
+	def _interdit(_doc_id):
+		raise AssertionError("aucune lecture ne doit avoir lieu quand les docs sont fournis")
+	recrutement.partager_xp(perso(groupe=["aventurier:a"]), 5, compagnons=[av],
+							get_doc_fn=_interdit)
+	assert av["xp_total"] == 5
+
+
+def test_compagnie_effective_ne_garde_que_les_permanents(monde):
+	docs = monde["docs"]
+	docs["aventurier:a"] = recrue("aventurier:a", statut="embauche",
+								  embauche_par="character:u_1", permanent=True)
+	docs["aventurier:b"] = recrue("aventurier:b", statut="embauche",
+								  embauche_par="character:u_1")
+	c = perso(groupe=["aventurier:a", "aventurier:b"])
+	assert [av["_id"] for av in recrutement.compagnie_effective(c)] == ["aventurier:a"]
+	# Complément exact de places_occupees : seul le contrat occupe une place.
+	assert recrutement.places_occupees(c) == 1
+
+
+def test_partager_xp_sans_groupe_ne_lit_rien(monde):
+	def _interdit(_doc_id):
+		raise AssertionError("un personnage sans groupe ne doit émettre aucune lecture")
+	assert recrutement.partager_xp(perso(), 10, get_doc_fn=_interdit) == []
+
+
+def test_xp_compagnie_payload(monde):
+	permanent = recrue("aventurier:a", statut="embauche", permanent=True)
+	contrat   = recrue("aventurier:b", statut="embauche")
+	# Filtre le MÊME prédicat que partager_xp : on peut lui passer la liste brute du groupe.
+	assert recrutement.xp_compagnie_payload([permanent, contrat], 30) == {"membres": 1, "xp": 30}
+	assert recrutement.xp_compagnie_payload([], 30) is None
+	assert recrutement.xp_compagnie_payload([contrat], 30) is None
+	assert recrutement.xp_compagnie_payload([permanent], 0) is None   # rien à annoncer
+
+
+def test_appliquer_recompenses_partage_avec_la_compagnie(monde):
+	from utils import quetes
+	permanent = recrue("aventurier:a", statut="embauche", permanent=True, xp_total=0)
+	contrat   = recrue("aventurier:b", statut="embauche", xp_total=0)
+	c = perso(affinites={"aventurier:a": 50, "aventurier:b": 50})
+	q = {"recompenses": {"xp": 40, "cuivre": 100}}
+
+	recap = quetes.appliquer_recompenses(c, q, compagnons=[permanent, contrat])
+
+	assert c["xp_total"] == 40
+	assert [av["_id"] for av in recap["compagnie"]] == ["aventurier:a"]
+	assert permanent["xp_total"] == 40 and contrat.get("xp_total", 0) == 0
+	# ⚠️ L'XP n'est pas une part : le permanent ne prend toujours RIEN sur le cuivre.
+	reglement = recrutement.regler_part_butin(c, [permanent, contrat], 100)
+	assert reglement["parts"]["aventurier:a"] == 0
+	assert reglement["parts"]["aventurier:b"] == 20
+
+
 def test_tirer_exigences_bornes(monde):
 	for niveau in (0, 3):
 		for _ in range(10):
@@ -688,6 +773,26 @@ def test_tour_monde_groupe_regenere_les_membres_actifs(tour_monde, monde):
 	assert [av["_id"] for av in rendus] == ["aventurier:a"]  # parti + id périmé ignorés
 	assert docs["aventurier:a"]["currentPV"] > 1   # régénéré ET persisté
 	assert docs["aventurier:b"]["currentPV"] == 1  # un ex-compagnon ne récupère pas
+
+
+def test_tour_monde_groupe_partage_l_xp_de_decouverte(tour_monde, monde):
+	"""⚠️ L'XP de découverte doit être écrite sur les MÊMES dicts que ceux que cette
+	fonction sauve : c'est le seul endroit du déplacement qui charge et persiste les docs
+	compagnons — un second chargement en amont perdrait une des deux écritures."""
+	docs = monde["docs"]
+	permanent = recrutement.generer_aventurier(GUILDE, VILLE, 1, portraits=PORTRAITS)
+	permanent.update({"_id": "aventurier:a", "statut": "embauche",
+					  "embauche_par": "character:u_1", "permanent": True, "xp_total": 0})
+	contrat = dict(permanent, _id="aventurier:b", xp_total=0)
+	contrat.pop("permanent")
+	docs["aventurier:a"], docs["aventurier:b"] = permanent, contrat
+	c = perso(groupe=["aventurier:a", "aventurier:b"])
+
+	tour_monde._apply_world_turn_groupe(c, 25)
+
+	assert docs["aventurier:a"]["xp_total"] == 25   # la compagnie progresse avec le joueur
+	assert docs["aventurier:b"]["xp_total"] == 0    # le contrat ne gagne que l'XP de combat
+	assert docs["aventurier:a"]["currentPV"] >= 1   # et la régén a bien été persistée aussi
 
 
 def test_vitaux_de_expose_courants_et_max(tour_monde, monde):

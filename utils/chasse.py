@@ -54,12 +54,20 @@ def lieux_chasse_de(cite_id: str, get_doc_fn, find_docs_fn) -> list:
 	"""Lieux où une quête de chasse de la cité peut se dérouler : la cité elle-même PLUS
 	ses lieux rattachés (`lieu_parent == cité`) qui portent à la fois `rencontres` et
 	`zone_influences` (sans quoi ni espèce à traquer, ni zone où résoudre le grade).
-	Aujourd'hui seule la cité Auxerre remplit ça ; l'ouverture aux enfants est future-proof."""
+	Aujourd'hui seule la cité Auxerre remplit ça ; l'ouverture aux enfants est future-proof.
+
+	⚠️ Requête PROJETÉE sur les seuls champs consommés en aval — sans quoi elle rapatrie les
+	`cells` de chaque enfant de la cité (44 docs, ~30 Ko à Auxerre) pour n'en garder que des
+	`_id`. Les champs listés sont exactement ceux que lisent `especes_du_parent`,
+	`position_de_chasse`, `_profils_compatibles` et `_construire_quete_rang` (`label`)."""
 	out = []
 	cite = get_doc_fn(cite_id) if cite_id else None
 	if cite is not None:
 		out.append(cite)
-	enfants = (find_docs_fn({"type": "lieu", "lieu_parent": cite_id}) or []) if cite_id else []
+	enfants = (find_docs_fn(
+		{"type": "lieu", "lieu_parent": cite_id},
+		["_id", "type", "label", "nom", "rencontres", "zone_influences", "profil_weights", "dimensions"],
+	) or []) if cite_id else []
 	for l in enfants:
 		if l.get("_id") == cite_id:
 			continue

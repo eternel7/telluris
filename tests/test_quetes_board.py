@@ -42,7 +42,7 @@ def board(monkeypatch):
 	supprimes = []
 
 	monkeypatch.setattr(quetes, "get_doc", lambda doc_id: docs.get(doc_id))
-	monkeypatch.setattr(quetes, "find_docs", lambda selector: [
+	monkeypatch.setattr(quetes, "find_docs", lambda selector, fields=None: [
 		d for d in docs.values() if d.get("type") == selector.get("type")
 	])
 
@@ -184,3 +184,86 @@ def test_une_quete_authoree_ancienne_reste_au_tableau(board):
 	assert "quete:borin" in {o["_id"] for o in offres}
 	assert board["supprimes"] == []
 	assert len([o for o in offres if o.get("source") == "genere"]) == 6
+
+
+# ── Lister ≠ recompléter ─────────────────────────────────────────────────────────
+# `terminer`/`déposer`/`abandonner` ne libèrent AUCUNE place (la quête a quitté le tableau à
+# l'acceptation) : ils listent, ils ne génèrent pas.
+
+def test_lister_offres_purge_mais_ne_genere_rien(board):
+	docs = board["docs"]
+	docs["quete:vieille"] = offre("quete:vieille", expire_at=1)
+	docs["quete:fraiche"] = offre("quete:fraiche", expire_at=5000)
+	saves = []
+	vrai_save = quetes.save_doc
+	quetes.save_doc = lambda d: saves.append(d) or vrai_save(d)
+	try:
+		offres = quetes.lister_offres(GUILDE)
+	finally:
+		quetes.save_doc = vrai_save
+
+	assert [o["_id"] for o in offres] == ["quete:fraiche"]   # une seule, PAS recomplétée à 6
+	assert [d["_id"] for d in board["supprimes"]] == ["quete:vieille"]  # la purge, elle, opère
+	assert saves == []                                       # aucune génération persistée
+
+
+def test_remplir_tableau_complete_la_ou_lister_se_tait(board):
+	"""Même départ que le test précédent : c'est bien la COMPLÉTION qui les sépare."""
+	board["docs"]["quete:fraiche"] = offre("quete:fraiche", expire_at=5000)
+	assert len(quetes.remplir_tableau(GUILDE)) == 6
+
+
+# ── Mémoïsation des find_docs (le poste le plus cher du remplissage) ─────────────
+
+def _foret_de_chene() -> dict:
+	"""Un item de chêne par tier de BOIS_A_COUPER. Seule la `branche` est transportable
+	(≤ QUETE_COLLECT_POIDS_MAX) et terminale (pas de tag `a_couper`) — miroir d'Auxerre,
+	dont les ressources comptent plusieurs tailles de bois coupables de la même essence."""
+	out = {}
+	for i, tier in enumerate(character_stats.BOIS_A_COUPER):
+		tags = ["essence_chene"] + ([] if tier == "branche" else ["a_couper"])
+		out[tier] = {
+			"_id": f"item:chene_{tier}", "type": "item", "nom": f"Chêne ({tier})",
+			"poids": 2 if tier == "branche" else 100 * (i + 1),
+			"sous_categorie": tier, "tags": tags,
+		}
+	return out
+
+
+def test_cibles_collect_memoise_les_requetes_de_bois(board):
+	"""⚠️ Le mémo est indispensable, pas cosmétique : `bois.pieces_legeres` fait UNE requête
+	PAR TIER de BOIS_A_COUPER, et `cibles_collect` l'appelle une fois par ressource coupable
+	— cinq tailles de chêne redemandaient cinq fois les mêmes six listes."""
+	docs = board["docs"]
+	foret = _foret_de_chene()
+	docs.update({d["_id"]: d for d in foret.values()})
+	coupables = [d for d in foret.values() if "a_couper" in d["tags"]]
+	parent = dict(VILLE, rencontres=[],
+				  ressources=[{"ressource": d["_id"]} for d in coupables])
+
+	appels = []
+	def compte(selector, fields=None):
+		appels.append(selector.get("sous_categorie"))
+		return [d for d in docs.values()
+				if d.get("type") == "item" and d.get("sous_categorie") == selector.get("sous_categorie")]
+
+	nu = quetes.cibles_collect(parent, lambda i: docs.get(i), compte)
+	nb_nu = len(appels)
+	appels.clear()
+	memo = quetes.cibles_collect(parent, lambda i: docs.get(i), quetes._cached_finder(compte))
+
+	assert memo == nu                                          # même résultat, au doc près
+	assert memo == [foret["branche"]["_id"]]                    # seule la pièce légère est visée
+	assert len(appels) == len(character_stats.BOIS_A_COUPER)    # une requête par tier, pas plus
+	assert nb_nu == len(appels) * len(coupables)                # sans le mémo : × le nb de ressources
+	assert nb_nu > len(appels)                                  # …et c'était bien un gaspillage
+
+
+def test_cached_finder_distingue_les_selectors(board):
+	"""Le mémo est local à la passe et n'a pas le droit de confondre deux requêtes."""
+	appels = []
+	finder = quetes._cached_finder(lambda sel, fields=None: appels.append(sel) or [sel])
+	finder({"type": "item", "sous_categorie": "a"})
+	finder({"type": "item", "sous_categorie": "a"})
+	finder({"type": "item", "sous_categorie": "b"})
+	assert len(appels) == 2

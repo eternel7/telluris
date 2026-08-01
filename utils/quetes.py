@@ -18,6 +18,9 @@ from db.config import get_doc, find_docs, save_doc, delete_doc
 from models import character_stats
 from utils.characters import item_ref_id, grant_xp, credit_character, cuivre_to_purse, poids_bounds
 from utils import bois, marche
+# ⚠️ Acyclique, et déjà tiré transitivement (quetes → bois → expedition → recrutement) :
+# `recrutement` n'importe que characters/consommables/montures, jamais quetes.
+from utils import recrutement
 
 
 def now_epoch() -> int:
@@ -35,6 +38,22 @@ def _cached_getter(fn):
 			cache[doc_id] = fn(doc_id)
 		return cache[doc_id]
 	return get
+
+
+def _cached_finder(fn):
+	"""Frère de `_cached_getter` pour `find_docs` — mémo LOCAL À L'APPEL, jamais partagé.
+
+	⚠️ `_cached_getter` ne couvrait que `get_doc`, et c'est par les `find_docs` que fuyait
+	l'essentiel : `cibles_collect` appelle `bois.pieces_legeres` pour CHAQUE ressource
+	coupable du lieu, et chacune refait UNE requête PAR TIER de `BOIS_A_COUPER` — six
+	ressources × six tiers = 36 requêtes non indexées pour six résultats distincts."""
+	cache: dict = {}
+	def find(selector, fields=None):
+		cle = (repr(sorted(selector.items())), repr(fields))
+		if cle not in cache:
+			cache[cle] = fn(selector, fields) if fields is not None else fn(selector)
+		return cache[cle]
+	return find
 
 
 def _carcasse_item_id(espece_id: str) -> str | None:
@@ -66,11 +85,17 @@ def ressources_du_parent(parent_doc: dict) -> list:
 	return out
 
 
-def cibles_collect(parent_doc: dict, get_doc_fn=None) -> list:
+def cibles_collect(parent_doc: dict, get_doc_fn=None, find_docs_fn=None) -> list:
 	"""Items collectables : ressources du lieu PLUS carcasses des espèces rencontrables, bornés à
 	`QUETE_COLLECT_POIDS_MAX` par objet. Un item bois coupable (ex. un arbre) n'est PAS réclamé tel
-	quel mais remplacé par les pièces transportables (≤ limite) de la même essence."""
+	quel mais remplacé par les pièces transportables (≤ limite) de la même essence.
+
+	⚠️ `find_docs_fn` est le poste le plus cher de tout le tableau : `bois.pieces_legeres` fait
+	UNE requête PAR TIER de `BOIS_A_COUPER`, et on l'appelle une fois par ressource coupable.
+	L'appelant doit passer un finder MÉMOÏSÉ (`_cached_finder`) — six ressources d'une même
+	essence redemandent sinon exactement les mêmes six listes."""
 	get_doc_fn = get_doc_fn or get_doc
+	find_docs_fn = find_docs_fn or find_docs
 	limite = character_stats.QUETE_COLLECT_POIDS_MAX
 	raw = list(ressources_du_parent(parent_doc))
 	for eid in especes_du_parent(parent_doc):
@@ -85,7 +110,7 @@ def cibles_collect(parent_doc: dict, get_doc_fn=None) -> list:
 			continue
 		# Bois coupable (arbre/tronc/gros rondin…) : on cible les pièces ≤ limite de l'essence.
 		if bois.item_est_coupable(doc):
-			for pid in bois.pieces_legeres(doc, find_docs, limite):
+			for pid in bois.pieces_legeres(doc, find_docs_fn, limite):
 				if pid not in out:
 					out.append(pid)
 			continue
@@ -325,31 +350,43 @@ def offres_du_giver(guild_id: str) -> list:
 	return [d for d in docs if d.get("statut", "offerte") == "offerte"]
 
 
+def lister_offres(guild_doc: dict) -> list:
+	"""Offres ouvertes du tableau, PÉRIMÉES PURGÉES, **sans complétion**.
+
+	Pour les endpoints qui ne libèrent AUCUNE place — terminer, déposer, abandonner : la quête
+	a quitté le tableau à l'ACCEPTATION, il n'y a rien à recompléter, seulement à afficher.
+	Y appeler `remplir_tableau` faisait payer à chacun une génération complète (jusqu'à 38
+	requêtes) pour un tableau rigoureusement identique."""
+	return purger_offres_perimees(offres_du_giver(guild_doc.get("_id")), now_epoch())
+
+
 def remplir_tableau(guild_doc: dict) -> list:
 	"""Périme les offres générées trop vieilles (prises par d'autres aventuriers) PUIS garantit
 	QUETE_BOARD_TAILLE offres GÉNÉRÉES au tableau (complétées à la volée), persiste les
 	nouvelles, et renvoie toutes les offres ouvertes (générées + authorées). Le nombre d'offres
 	générées est borné par le nombre de cibles distinctes du parent."""
-	guild_id = guild_doc.get("_id")
 	parent_id = guild_doc.get("lieu_parent")
 	parent_doc = get_doc(parent_id) if parent_id else None
 
 	# Péremption PARESSEUSE (aucun tick de fond dans le jeu) : les places libérées sont
 	# aussitôt repeuplées par la complétion ci-dessous.
-	offres = purger_offres_perimees(offres_du_giver(guild_id), now_epoch())
+	offres = lister_offres(guild_doc)
 	generees = [o for o in offres if o.get("source") == "genere"]
 	manquantes = max(0, int(character_stats.QUETE_BOARD_TAILLE) - len(generees))
 
 	if manquantes > 0 and parent_doc:
-		# Cache mémoïsé LOCAL à cette passe : `_candidats_chasse` relit les mêmes docs
+		# Caches mémoïsés LOCAUX à cette passe : `_candidats_chasse` relit les mêmes docs
 		# lieu/espèce/zone/profil à chaque paire (lieu, espèce) — sans lui, un tableau à
-		# compléter revisite la même douzaine de docs des dizaines de fois.
+		# compléter revisite la même douzaine de docs des dizaines de fois. ⚠️ Le finder est
+		# tout aussi indispensable que le getter : `cibles_collect` refaisait 36 requêtes
+		# non indexées (6 ressources coupables × 6 tiers de bois) pour 6 listes distinctes.
 		get_doc_c = _cached_getter(get_doc)
+		find_docs_c = _cached_finder(find_docs)
 		niveau = niveau_representatif(parent_doc, get_doc_c)
 		existants = {_offre_key(o["objectif"]) for o in offres if o.get("objectif")}
 		candidats = [("kill", eid) for eid in especes_du_parent(parent_doc)]
-		candidats += [("collect", iid) for iid in cibles_collect(parent_doc, get_doc_c)]
-		candidats += _candidats_chasse(parent_id, get_doc_c)
+		candidats += [("collect", iid) for iid in cibles_collect(parent_doc, get_doc_c, find_docs_c)]
+		candidats += _candidats_chasse(parent_id, get_doc_c, find_docs_c)
 		random.shuffle(candidats)
 		for type_obj, cible in candidats:
 			if manquantes <= 0:
@@ -375,13 +412,14 @@ def _offre_key(objectif: dict):
 	return (objectif.get("type"), objectif.get("cible"))
 
 
-def _candidats_chasse(cite_id: str, get_doc_fn=None) -> list:
+def _candidats_chasse(cite_id: str, get_doc_fn=None, find_docs_fn=None) -> list:
 	"""Candidats `("chasse", (lieu_id, espece_id))` du tableau : élites d'un lieu de la cité,
 	résolvables au grade `max−1`. Balaie les lieux de chasse × leurs rencontres."""
 	from utils import chasse  # import paresseux : chasse dépend de ce module
 	get_doc_fn = get_doc_fn or get_doc
+	find_docs_fn = find_docs_fn or find_docs
 	out = []
-	for L in chasse.lieux_chasse_de(cite_id, get_doc_fn, find_docs):
+	for L in chasse.lieux_chasse_de(cite_id, get_doc_fn, find_docs_fn):
 		for eid in especes_du_parent(L):
 			espece = get_doc_fn(eid)
 			if not espece:
@@ -460,8 +498,16 @@ def _focalisable(q: dict) -> bool:
 	return quete_focalisable(q)
 
 
-def quete_detail(character: dict, q: dict) -> dict:
-	"""Vue d'affichage d'une quête active (onglet fiche + tableau) : progression + récompenses."""
+def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
+	"""Vue d'affichage d'une quête active (onglet fiche + tableau) : progression + récompenses.
+
+	⚠️ `get_doc_fn` sert aux seules lectures de docs `lieu:*` — les plus GROSSES du jeu
+	(`lieu:auxerre` ≈ 28 Ko avec ses `cells`) et les seules que le cache de requête ne peut
+	pas amortir (cf. CLAUDE.md : copie de surface vs mutations imbriquées du stock). Trois
+	chasses dans le même lieu le relisaient trois fois : `fiche_details` passe un getter
+	mémoïsé pour toute la passe. `_cible_nom` garde le `get_doc` du module — il ne lit que
+	des `espece:`/`item:`, déjà amortis."""
+	lire = get_doc_fn or get_doc
 	obj = q.get("objectif", {})
 	prog = progress_courant(character, q)
 	qte = int(obj.get("quantite", 0) or 0)
@@ -471,12 +517,12 @@ def quete_detail(character: dict, q: dict) -> dict:
 	if obj.get("type") == "transport":
 		if q.get("livree_at"):
 			# Course à retour : la marchandise est remise, il reste à en rendre compte au donneur.
-			giver = get_doc(q.get("giver")) if q.get("giver") else None
+			giver = lire(q.get("giver")) if q.get("giver") else None
 			progress_txt = f"Rendre compte : {(giver or {}).get('label') or 'au donneur'}"
 		else:
 			progress_txt = f"Livraison à {_cible_nom(obj)}"
 	elif obj.get("type") == "chasse":
-		lieu_doc = get_doc(obj.get("lieu")) if obj.get("lieu") else None
+		lieu_doc = lire(obj.get("lieu")) if obj.get("lieu") else None
 		lieu_nom = (lieu_doc.get("label") or lieu_doc.get("nom")) if lieu_doc else None
 		lieu_nom = lieu_nom or (obj.get("lieu") or "").split(":", 1)[-1]
 		compteur = min(prog, qte) if qte else prog
@@ -576,11 +622,15 @@ def _carte_chasse(objectif: dict, giver_id: str | None = None, lieu_doc: dict | 
 	return carte
 
 
-def fiche_details(character: dict) -> tuple:
+def fiche_details(character: dict, get_doc_fn=None) -> tuple:
 	"""Détails affichables des quêtes du perso, TOUS donneurs confondus (onglet 📜 de la
 	fiche). Renvoie (actives_detail, terminees). Partagé par /play et les endpoints quêtes
-	pour que la fiche reflète accept/terminer sans rechargement."""
-	actives = [quete_detail(character, q) for q in character.get("quetes_actives", [])]
+	pour que la fiche reflète accept/terminer sans rechargement.
+
+	UN getter mémoïsé pour toute la passe : plusieurs chasses dans le même lieu ne relisent
+	plus le même (gros) doc `lieu:*` une fois chacune."""
+	lire = get_doc_fn or _cached_getter(get_doc)
+	actives = [quete_detail(character, q, lire) for q in character.get("quetes_actives", [])]
 	terminees = list(character.get("quetes_terminees", []))
 	return actives, terminees
 
@@ -600,18 +650,31 @@ def retirer_items(character: dict, item_id: str, quantite: int) -> int:
 	return retire
 
 
-def appliquer_recompenses(character: dict, q: dict) -> dict:
+def appliquer_recompenses(character: dict, q: dict, compagnons: list | None = None,
+						  get_doc_fn=None) -> dict:
 	"""Crédite XP + cuivre (+ items éventuels) d'une quête (mute en place, NE SAUVEGARDE
-	PAS — l'endpoint persiste). Renvoie un récap {xp, purse}."""
+	PAS — l'endpoint persiste). Renvoie un récap {xp, purse, compagnie}.
+
+	CHOKEPOINT UNIQUE des récompenses de quête (tableau de guilde, épreuve de rang,
+	commission de donjon, course de transport) : c'est donc ici — et nulle part ailleurs —
+	que la COMPAGNIE touche la même XP que le principal (`recrutement.partager_xp`).
+
+	⚠️ `compagnie` = les docs `aventurier:*` MUTÉS, **à persister par l'appelant** après son
+	`save_doc(character)` autoritatif. Un compagnon sous contrat n'y figure jamais ; la part
+	de butin n'est pas concernée (un permanent reste à 0, cf. `conditions_effectives`).
+	⚠️ `compagnons` : docs déjà chargés par l'appelant, à repasser pour ne pas obtenir un
+	second dict du même document."""
 	rec = q.get("recompenses", {}) or {}
-	xp_info = grant_xp(character, rec.get("xp", 0))
+	xp = rec.get("xp", 0)
+	xp_info = grant_xp(character, xp)
+	compagnie = recrutement.partager_xp(character, xp, compagnons, get_doc_fn)
 	purse = credit_character(character, rec.get("cuivre", 0))
 	items = rec.get("items") or []
 	if items:
 		inv = character.get("inventaire", [])
 		inv.extend(items)
 		character["inventaire"] = inv
-	return {"xp": xp_info, "purse": purse}
+	return {"xp": xp_info, "purse": purse, "compagnie": compagnie}
 
 
 # ── Renoncement : la maison du donneur encaisse d'un bloc ────────────────────────

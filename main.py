@@ -20,7 +20,7 @@ from routers.recrutement import recrutement_router
 from routers.montures import montures_router
 from routers.animations import animations_router
 from utils.combat import get_combat_grid, finalize_combat
-from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs
+from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of
 from utils import quetes
@@ -39,7 +39,7 @@ from utils import montures as montures_util
 from utils import fiche as fiche_util
 from utils import animations as animations_util
 from utils import lint_dialogues
-from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
+from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload, lieu_recettes
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
@@ -53,6 +53,11 @@ if not logger.handlers:
 	logger.addHandler(_log_handler)
 logger.setLevel(logging.INFO)
 logger.propagate = False
+
+
+# Types de docs dont l'écriture périme les caches process de `utils/marche.py`
+# (coût de revient, besoins/feuilles dérivés des recettes, recettes par catégorie).
+_TYPES_PRIX = {"recette", "item"}
 
 
 @app.on_event("startup")
@@ -77,6 +82,10 @@ app.add_middleware(
 	same_site="none",
 	https_only=False,
 )
+# Cache de `get_doc` à portée requête + instrumentation des accès base (cf. db/config.py).
+# Middleware ASGI PUR : BaseHTTPMiddleware exécuterait l'aval dans une tâche anyio distincte
+# et casserait la propagation du ContextVar. Coupé sur /admin (import-bulk lit ET écrit).
+app.add_middleware(RequestDocCacheMiddleware)
 
 # Definit ou se trouvent les fichiers HTML
 templates = Jinja2Templates(directory="templates")
@@ -245,6 +254,8 @@ def admin_update_doc(
 	saved = save_doc(payload)
 	if saved is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — rechargez et réessayez.")
+	if payload.get("type") in _TYPES_PRIX:
+		reset_prix_cache()   # cf. admin_import_bulk : caches process de prix/recettes
 	return {"saved": True, "doc": payload}
 
 @app.delete("/admin/doc")
@@ -563,7 +574,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# ne pourrait jamais s'amorcer) ; on ne persiste que si quelque chose a changé.
 	if grid_doc and (grid_doc.get("stock_matieres") or grid_doc.get("stock_vente")
 			or appro_leaves_categorie(grid_doc.get("categorie"))):
-		if tick_atelier(grid_doc):
+		# Recettes passées explicitement, comme sell_item / convertir_apres_achat.
+		if tick_atelier(grid_doc, lieu_recettes(grid_doc.get("categorie"))):
 			save_doc(grid_doc)
 	# Courses de transport échues : l'expiration est PARESSEUSE (aucun tick de fond dans le
 	# jeu) — on la solde à chaque point de passage. La sanction de réputation part avec.
@@ -947,6 +959,12 @@ def admin_import_bulk(
 			"Import bulk terminé par %s : %d importé(s), %d échec(s), %d au total.",
 			who, saved, failed, total,
 		)
+		# Recettes et items alimentent des caches process (coût de revient, besoins/feuilles
+		# de marché, recettes par catégorie de lieu). Sans ce vidage, importer une recette
+		# n'avait AUCUN effet tant qu'on ne rechargeait pas les variables de monde.
+		if any(isinstance(d, dict) and d.get("type") in _TYPES_PRIX for d in docs):
+			reset_prix_cache()
+
 		yield json.dumps({
 			"event": "done", "imported": saved, "failed": failed,
 			"total": total, "errors": errors[:20],
