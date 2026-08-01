@@ -2489,11 +2489,33 @@
 		});
 	}
 
+	// SOURCE UNIQUE d'écriture de la position de carte. `--x`/`--y` n'ont qu'un seul
+	// consommateur : le transform de #bg-image (la transition `--map-anim` porte sur sa
+	// valeur CALCULÉE). Réécrire la MÊME valeur ne relance aucune transition — c'est ce
+	// qui rend la confirmation serveur visuellement gratuite quand la prédiction était juste.
+	function _ecrireCarte(x, y) {
+		root.style.setProperty('--x', x);
+		root.style.setProperty('--y', y);
+	}
 	async function move(viewDx, viewDy) {
 		if (isMoving) return;
 		isMoving = true;
 		setMoveButtonsDisabled(true);
 		const moveData = {x: viewDx, y: viewDy};
+		// Animation OPTIMISTE : la carte part dès le clic et le fetch roule en parallèle,
+		// sinon le joueur paie RTT + 260 ms de glissement au lieu de max(RTT, 260 ms) —
+		// et le round-trip entier est sans le moindre retour visuel.
+		// C'est sûr parce que `updateControls` grise DÉJÀ toute flèche que le serveur
+		// refuserait (bornes via ACCESS.access, direction via nav, surcharge miroir de la
+		// garde 409) : un clic sur une flèche active passe, le rollback reste l'exception.
+		// ⚠️ POSITIONS n'est PAS touché ici : c'est la position CONFIRMÉE par le serveur,
+		// base de la prédiction suivante ET du rollback ; elle n'est écrite qu'au retour.
+		const confirme = {x: POSITIONS["x"], y: POSITIONS["y"]};
+		// Math.sign = miroir exact de la normalisation serveur `(x>0)-(x<0)`.
+		const prevu = {x: confirme.x + Math.sign(viewDx), y: confirme.y + Math.sign(viewDy)};
+		// waitTurn() appelle move(0,0) : aucun mouvement, donc ni glissement ni rollback.
+		const optimiste = (prevu.x !== confirme.x || prevu.y !== confirme.y);
+		if (optimiste) _ecrireCarte(prevu.x, prevu.y);
 		try {
 			const response = await fetch('api/move_character', {
 				method: 'POST',
@@ -2502,8 +2524,9 @@
 			});
 			if (response.ok) {
 				rep = await response.json();
-				root.style.setProperty('--x', rep.position["x"]);
-				root.style.setProperty('--y', rep.position["y"]);
+				// Confirmation autoritative : identique à la prédiction dans le cas nominal
+				// (aucun repaint), corrige le glissement sinon.
+				_ecrireCarte(rep.position["x"], rep.position["y"]);
 				LINKS = rep.links;
 				POSITIONS = {"x" : rep.position["x"], "y": rep.position["y"]};
 				ACCESS = rep.access;
@@ -2562,9 +2585,20 @@
 			} else {
 				const error = await response.json();
 				console.log(error.detail)
-				alert("Erreur : " + error.detail);
+				// ⚠️ Rollback AVANT le message, et par toast et NON par alert() : alert() gèle
+				// le thread principal et empêche le navigateur de peindre le retour — la carte
+				// ne se remettrait en place qu'après le clic sur « OK », ce qui annule tout
+				// l'intérêt du rebond. showToast écrit en textContent (Conventions §9).
+				if (optimiste) _ecrireCarte(confirme.x, confirme.y);
+				showToast("Erreur : " + error.detail);
 			}
-		} catch (err) { console.error("Erreur de connexion", err); }
+		} catch (err) {
+			// Coupure réseau (ou réponse illisible) : sans ce rollback, la carte resterait
+			// sur la position PRÉDITE, désynchronisée du serveur jusqu'au prochain pas réussi.
+			console.error("Erreur de connexion", err);
+			if (optimiste) _ecrireCarte(confirme.x, confirme.y);
+			showToast("Connexion perdue — déplacement annulé.");
+		}
 		finally {
 			isMoving = false;
 			updateControls();
