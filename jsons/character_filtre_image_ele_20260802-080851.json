@@ -1,0 +1,1869 @@
+[
+  {
+    "_id": "character:user:eternel7@gmail.com_6ca82e79-1144-4ebc-9544-aed5895ac6c9",
+    "_rev": "8328-5848b41c676b3adf04d1ade154a9329f",
+    "user_id": "user:eternel7@gmail.com",
+    "type": "character",
+    "sex": "M",
+    "race": "nain",
+    "voc": "elementaliste",
+    "image": "elementaliste_m_nain01.jpg",
+    "prenom": "Baal",
+    "nom": "Hazgard",
+    "cite": "lieu:auxerre",
+    "lieu": "lieu:le_mithril_de_saint_germain",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "caracteristiques_current": {
+      "V": 4,
+      "F": 20,
+      "R": 30,
+      "Ag": 15,
+      "Vol": 53,
+      "Int": 37,
+      "Cha": 22,
+      "Ch": 21
+    },
+    "currentPV": 110,
+    "currentPM": 110,
+    "lieux_visites": [
+      "lieu:auxerre",
+      "lieu:fumee_de_l_yonne",
+      "lieu:auxerre_porte_douve_exterieur03",
+      "lieu:auxerre_porte_douve_interieur03",
+      "lieu:temple_de_malakor02",
+      "lieu:temple_de_malakor",
+      "lieu:le_bastion_de_l_yonne",
+      "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu:l_athanor_de_saint_germain",
+      "lieu:le_cellier_sale",
+      "lieu:l_enclume_du_rempart",
+      "lieu:les_etalages_d_autessiodurum",
+      "lieu:l_officine_des_simples",
+      "lieu:la_fleche_d_argent",
+      "lieu:auxerre_porte_douve_interieur02",
+      "lieu:auxerre_porte_douve_exterieur02",
+      "lieu:l_encre_des_arcanes",
+      "lieu:le_codex_eternel",
+      "lieu:auxerre_porte_pont_interieur02",
+      "lieu:auxerre_porte_pont_exterieur02",
+      "lieu:la_tannerie_des_remparts",
+      "lieu:boucherie_de_la_tour_de_l_horloge",
+      "lieu:la_couronne_de_mandragore",
+      "lieu:le_garde_manger_des_3_fees",
+      "lieu:la_corde_tendue",
+      "lieu:le_bastion_de_l_yonne_comptoir",
+      "lieu:aux_ouvrages_d_os_et_d_ivoire",
+      "lieu:l_echope_du_cuir_d_auxerre",
+      "lieu:atelier_de_l_artisan_des_os",
+      "lieu:festin_de_la_joyeuse_halfling",
+      "lieu:le_mithril_de_saint_germain",
+      "lieu:la_couronne_des_pierres_vives",
+      "lieu:auxerre_porte_douve_interieur01",
+      "lieu:auxerre_porte_douve_exterieur01",
+      "lieu:l_etable_des_compagnons",
+      "lieu:le_relais_des_montures_rustiques",
+      "lieu:au_sabot_de_l_aventure",
+      "lieu:le_chaudron_des_brumes",
+      "lieu:auxerre_porte_pont_exterieur",
+      "lieu:auxerre_porte_pont_interieur",
+      "lieu:le_joyau_d_auxerre",
+      "lieu:temple_portail_de_saint_austrelin",
+      "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+      "lieu:temple_portail_de_saint_austrelin_interieur"
+    ],
+    "xp_total": 4421,
+    "attribute_points": 0,
+    "vocations_niveaux": {
+      "elementaliste": 1
+    },
+    "inventaire": [
+      {
+        "item": "item:Eau_benite",
+        "poids": 0.3
+      },
+      {
+        "item": "item:carte_aventurier_auxerre",
+        "poids": 0.05
+      },
+      {
+        "item": "item:carte_aventurier",
+        "poids": 0.05,
+        "lieu_parent": "lieu:auxerre"
+      },
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      "item:saucisses",
+      {
+        "item": "item:Cristal_canalisation",
+        "poids": 0.1
+      },
+      "item:saucisses",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      "item:Soufre",
+      {
+        "item": "item:Herbes_a_bruler",
+        "poids": 0.1
+      },
+      "item:cuir_brut",
+      "item:cuir_brut",
+      "item:cuir_brut",
+      "item:cuir_brut",
+      "item:cuir_brut",
+      "item:cuir_brut",
+      "item:cuir_brut",
+      "item:cuir_brut",
+      "item:cuir_brut",
+      "item:sang",
+      "item:sang",
+      "item:sang",
+      "item:sang",
+      "item:sang",
+      "item:sang",
+      "item:sang",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:os",
+      "item:griffes"
+    ],
+    "slots": {
+      "main_droite": "item:Lance_rituelle",
+      "main_gauche": "item:dague_rituelle",
+      "torse": "item:Armure_cuir_runee",
+      "tete": null,
+      "jambes": null,
+      "pieds": null,
+      "mains": "item:gants",
+      "anneau_1": "item:bijou",
+      "anneau_2": "item:bijou",
+      "cou": "item:collier",
+      "ceinture": "item:ceinture"
+    },
+    "equipment_bonus": {
+      "pv": 0,
+      "pm": 12,
+      "pa": 6,
+      "malus_depl": 0,
+      "cc_bonus": 1,
+      "cd_bonus": 0,
+      "degats_bonus": 3,
+      "degats_dice": "",
+      "initiative": 0,
+      "buffs": {
+        "Int": 3,
+        "Vol": 3,
+        "Cha": 10
+      },
+      "buffs_sources": [
+        {
+          "nom": "Lance rituelle",
+          "icon": "🔱",
+          "buffs": {
+            "Int": 2,
+            "Vol": 1
+          }
+        },
+        {
+          "nom": "Dague rituelle",
+          "icon": "🗡️",
+          "buffs": {
+            "Vol": 2,
+            "Int": 1
+          }
+        },
+        {
+          "nom": "Collier",
+          "icon": "📿",
+          "buffs": {
+            "Cha": 5
+          }
+        },
+        {
+          "nom": "Ceinture",
+          "icon": "🧷",
+          "buffs": {
+            "Cha": 5
+          }
+        }
+      ]
+    },
+    "or": 1,
+    "argent": 16,
+    "cuivre": 84,
+    "quetes_actives": [
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_278fbc579363",
+        "titre": "Abattre le Gobelin « Novice »",
+        "description": "Un Gobelin d'exception — un « Novice » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:gobelin",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 83,
+            "y": 15
+          }
+        },
+        "recompenses": {
+          "xp": 51,
+          "cuivre": 153,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1784481139
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_fbcb10455e14",
+        "titre": "La tête du Lapin « Vicieux »",
+        "description": "Un Lapin d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:petits_animaux_divers",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 2,
+            "y": 33
+          }
+        },
+        "recompenses": {
+          "xp": 33,
+          "cuivre": 99,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785593465
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_e412860222be",
+        "titre": "Traquer le Lièvre « Vicieux »",
+        "description": "Un Lièvre d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:lievre",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 12,
+            "y": 2
+          }
+        },
+        "recompenses": {
+          "xp": 33,
+          "cuivre": 99,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785593470
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_565f9a564e5b",
+        "titre": "Réguler les Grand Sanglier",
+        "description": "La guilde demande d'abattre 5 Grand Sanglier qui rôdent dans les environs d'Auxerre.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "kill",
+          "cible": "espece:grand_sanglier",
+          "quantite": 5
+        },
+        "recompenses": {
+          "xp": 172,
+          "cuivre": 516,
+          "items": []
+        },
+        "progress": 5,
+        "accepte_at": 1785593494
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_f47655f59572",
+        "titre": "Abattre le Grand Sanglier « Vicieux »",
+        "description": "Un Grand Sanglier d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:grand_sanglier",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 13,
+            "y": 46
+          }
+        },
+        "recompenses": {
+          "xp": 69,
+          "cuivre": 207,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785593507
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_2654238ac3e7",
+        "titre": "Réguler les Lapin",
+        "description": "La guilde demande d'abattre 6 Lapin qui rôdent dans les environs d'Auxerre.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "kill",
+          "cible": "espece:petits_animaux_divers",
+          "quantite": 6
+        },
+        "recompenses": {
+          "xp": 99,
+          "cuivre": 297,
+          "items": []
+        },
+        "progress": 2,
+        "accepte_at": 1785595541
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_9f66bfac02e9",
+        "titre": "Réguler les Ecureuil",
+        "description": "La guilde demande d'abattre 5 Ecureuil qui rôdent dans les environs d'Auxerre.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "kill",
+          "cible": "espece:ecureuil",
+          "quantite": 5
+        },
+        "recompenses": {
+          "xp": 75,
+          "cuivre": 225,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785595553
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_eebd04e26eec",
+        "titre": "Éliminer les Cerf",
+        "description": "La guilde demande d'abattre 4 Cerf qui rôdent dans les environs d'Auxerre.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "kill",
+          "cible": "espece:cerf",
+          "quantite": 4
+        },
+        "recompenses": {
+          "xp": 102,
+          "cuivre": 306,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785595560
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_94e236de0558",
+        "titre": "Abattre le Serpent « Vicieux »",
+        "description": "Un Serpent d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:serpent",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 35,
+            "y": 7
+          }
+        },
+        "recompenses": {
+          "xp": 45,
+          "cuivre": 135,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785595565
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_670a2e859ad1",
+        "titre": "Abattre le Gobelin « Vicieux »",
+        "description": "Un Gobelin d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:gobelin",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 61,
+            "y": 47
+          }
+        },
+        "recompenses": {
+          "xp": 51,
+          "cuivre": 153,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785595570
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_0d636d2f0950",
+        "titre": "Traquer le Cerf « Vicieux »",
+        "description": "Un Cerf d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:cerf",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 86,
+            "y": 32
+          }
+        },
+        "recompenses": {
+          "xp": 51,
+          "cuivre": 153,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785613015
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_0b4ebf9424f3",
+        "titre": "Abattre le Serpent « Vicieux »",
+        "description": "Un Serpent d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:serpent",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 23,
+            "y": 46
+          }
+        },
+        "recompenses": {
+          "xp": 45,
+          "cuivre": 135,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785613018
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_e98d047c68b4",
+        "titre": "Traquer le Gobelin « Vicieux »",
+        "description": "Un Gobelin d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:gobelin",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 83,
+            "y": 15
+          }
+        },
+        "recompenses": {
+          "xp": 51,
+          "cuivre": 153,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785613022
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_2cb8253f7e6a",
+        "titre": "Chasse aux Cerf",
+        "description": "La guilde demande d'abattre 2 Cerf qui rôdent dans les environs d'Auxerre.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "kill",
+          "cible": "espece:cerf",
+          "quantite": 2
+        },
+        "recompenses": {
+          "xp": 51,
+          "cuivre": 153,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1785613026
+      }
+    ],
+    "quetes_terminees": [
+      {
+        "id": "quete:transport_38234283f7a7",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783800301
+      },
+      {
+        "id": "quete:transport_c78207d9e709",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783800957
+      },
+      {
+        "id": "quete:transport_1eec8cef079f",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783801025
+      },
+      {
+        "id": "quete:transport_c2fceb638a43",
+        "titre": "Livraison : L'Officine des Simples",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783801095
+      },
+      {
+        "id": "quete:transport_9db0b5c7c9a2",
+        "titre": "Livraison : La Couronne de Mandragore",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783801820
+      },
+      {
+        "id": "quete:transport_20b1a2c21bc5",
+        "titre": "Livraison : L'Officine des Simples",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783801857
+      },
+      {
+        "id": "quete:transport_8790c5b1d56a",
+        "titre": "Livraison : La Flèche d'Argent",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783804335
+      },
+      {
+        "id": "quete:transport_9a51312a5afb",
+        "titre": "Livraison : L'Enclume du Rempart",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783807608
+      },
+      {
+        "id": "quete:transport_4e9a50456f4e",
+        "titre": "Livraison : La Couronne de Mandragore",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783807894
+      },
+      {
+        "id": "quete:transport_292d21e55b97",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783808050
+      },
+      {
+        "id": "quete:transport_03f7cfa89347",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783808181
+      },
+      {
+        "id": "quete:transport_c784611ca393",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783808249
+      },
+      {
+        "id": "quete:transport_17e901b77760",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783857049
+      },
+      {
+        "id": "quete:transport_1e8d8e1041da",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783857129
+      },
+      {
+        "id": "quete:transport_791eb5c575a6",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783857218
+      },
+      {
+        "id": "quete:transport_borin_premiere_mission",
+        "titre": "Première mission : les caisses du Bastion",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 30,
+          "cuivre": 200,
+          "items": [
+            {
+              "item": "item:carte_aventurier",
+              "poids": 0.05,
+              "lieu_parent": "lieu:auxerre"
+            }
+          ]
+        },
+        "termine_at": 1783865175
+      },
+      {
+        "id": "quete:transport_cdcf154330c2",
+        "titre": "Livraison : L'Enclume du Rempart",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783873086
+      },
+      {
+        "id": "quete:transport_e7ee520b5797",
+        "titre": "Livraison : Le Garde-Manger des 3 Fées",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783892316
+      },
+      {
+        "id": "quete:transport_5abab09b7f48",
+        "titre": "Livraison : La Couronne de Mandragore",
+        "rang": "F",
+        "echec": true,
+        "recompenses": {},
+        "termine_at": 1783929554
+      },
+      {
+        "id": "quete:transport_826bd95392cf",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783929958
+      },
+      {
+        "id": "quete:transport_2313fa56f12e",
+        "titre": "Livraison : La Couronne de Mandragore",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783930080
+      },
+      {
+        "id": "quete:transport_aeadf2266acf",
+        "titre": "Livraison : L'Enclume du Rempart",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783930210
+      },
+      {
+        "id": "quete:transport_c23ae0ff6655",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783953556
+      },
+      {
+        "id": "quete:transport_2ad311a4141d",
+        "titre": "Livraison : Aux Ouvrages d’Os et d’Ivoire",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783965879
+      },
+      {
+        "id": "quete:transport_e9930df9d1bf",
+        "titre": "Livraison : La Flèche d'Argent",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1783966201
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_f158bff2fa6f",
+        "titre": "Réguler les Serpent",
+        "rang": "F",
+        "recompenses": {
+          "xp": 90,
+          "cuivre": 270,
+          "items": []
+        },
+        "termine_at": 1783966693
+      },
+      {
+        "id": "quete:transport_da267d4664eb",
+        "titre": "Livraison : La Flèche d'Argent",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784058361
+      },
+      {
+        "id": "quete:transport_4202acd62e7b",
+        "titre": "Livraison : Le Garde-Manger des 3 Fées",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784142112
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_13e7ee56f95d",
+        "titre": "Réguler les Renard",
+        "rang": "F",
+        "recompenses": {
+          "xp": 90,
+          "cuivre": 270,
+          "items": []
+        },
+        "termine_at": 1784142166
+      },
+      {
+        "id": "quete:transport_f66903a641c0",
+        "titre": "Livraison : L'Enclume du Rempart",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784148369
+      },
+      {
+        "id": "quete:transport_f1bfccdd3122",
+        "titre": "Livraison : Le Mithril de Saint-Germain",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784148625
+      },
+      {
+        "id": "quete:transport_7d900bd1988b",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784149006
+      },
+      {
+        "id": "quete:transport_e34fa4b827d2",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784149069
+      },
+      {
+        "id": "quete:transport_4cd09478db8c",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784149134
+      },
+      {
+        "id": "quete:transport_58227624b636",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784149201
+      },
+      {
+        "id": "quete:transport_9303eb44a878",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784149259
+      },
+      {
+        "id": "quete:transport_f2220214c4b7",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784178396
+      },
+      {
+        "id": "quete:transport_b64989f84558",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784201102
+      },
+      {
+        "id": "quete:transport_cf4588541d45",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784201390
+      },
+      {
+        "id": "quete:transport_cda0df803cb1",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784320197
+      },
+      {
+        "id": "quete:transport_5bce3a9052aa",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784320272
+      },
+      {
+        "id": "quete:transport_18808a6129af",
+        "titre": "Livraison : Le Mithril de Saint-Germain",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784389006
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_55edf26065fa",
+        "titre": "Collecte de Herbes à brûler",
+        "rang": "F",
+        "recompenses": {
+          "xp": 9,
+          "cuivre": 27,
+          "items": []
+        },
+        "termine_at": 1784451486
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_79ace75659b1",
+        "titre": "Éliminer les Ecureuil",
+        "rang": "F",
+        "recompenses": {
+          "xp": 30,
+          "cuivre": 90,
+          "items": []
+        },
+        "termine_at": 1784453203
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_8094d8ab9bde",
+        "titre": "Collecte de Herbes médicinales",
+        "rang": "F",
+        "recompenses": {
+          "xp": 22,
+          "cuivre": 66,
+          "items": []
+        },
+        "termine_at": 1784453209
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_23ab6a78ca9f",
+        "titre": "Abattre le Loup « Novice »",
+        "rang": "F",
+        "recompenses": {
+          "xp": 57,
+          "cuivre": 171,
+          "items": []
+        },
+        "termine_at": 1784453213
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_comptoir_rang_9be7a45762f9",
+        "titre": "Épreuve de rang : traquer le Gobelin « Combattant »",
+        "rang": "E",
+        "termine_at": 1784453229
+      },
+      {
+        "id": "quete:transport_c05140ba74a8",
+        "titre": "Livraison : La Couronne de Mandragore",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784454134
+      },
+      {
+        "id": "quete:transport_1c72a56b47d4",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784454256
+      },
+      {
+        "id": "quete:transport_c80dda9c701f",
+        "titre": "Livraison : Le Mithril de Saint-Germain",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784461855
+      },
+      {
+        "id": "quete:transport_f9d1a5308bda",
+        "titre": "Livraison : Atelier de l'Artisan des Os",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784475394
+      },
+      {
+        "id": "quete:transport_95cfb134990e",
+        "titre": "Livraison : Atelier de l'Artisan des Os",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784475458
+      },
+      {
+        "id": "quete:transport_1d74aba2ea45",
+        "titre": "Livraison : L'Athanor de Saint-Germain",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784479277
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_f0c6f9798d12",
+        "titre": "Éliminer les Ecureuil",
+        "rang": "F",
+        "recompenses": {
+          "xp": 75,
+          "cuivre": 225,
+          "items": []
+        },
+        "termine_at": 1784481103
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_43b20f08aed5",
+        "titre": "Traquer le Ecureuil « Novice »",
+        "rang": "F",
+        "recompenses": {
+          "xp": 30,
+          "cuivre": 90,
+          "items": []
+        },
+        "termine_at": 1784545094
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_0805fb2551cd",
+        "titre": "Traquer le Serpent « Novice »",
+        "rang": "F",
+        "recompenses": {
+          "xp": 45,
+          "cuivre": 135,
+          "items": []
+        },
+        "termine_at": 1784565328
+      },
+      {
+        "id": "quete:transport_f29065d92a18",
+        "titre": "Livraison : L'Enclume du Rempart",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784566391
+      },
+      {
+        "id": "quete:transport_e0087083cab2",
+        "titre": "Livraison : L'Encre des Arcanes",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784573518
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_6f843194c749",
+        "titre": "La tête du Sanglier « Novice »",
+        "rang": "F",
+        "recompenses": {
+          "xp": 54,
+          "cuivre": 162,
+          "items": []
+        },
+        "termine_at": 1784574194
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_d0805773de6f",
+        "titre": "La tête du Gobelin « Novice »",
+        "rang": "F",
+        "recompenses": {
+          "xp": 51,
+          "cuivre": 153,
+          "items": []
+        },
+        "termine_at": 1784640194
+      },
+      {
+        "id": "quete:transport_5b3987ac74aa",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784640423
+      },
+      {
+        "id": "quete:transport_24896b46718c",
+        "titre": "Livraison : La Flèche d'Argent",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784754220
+      },
+      {
+        "id": "quete:transport_c3168b6eea79",
+        "titre": "Livraison : Le Mithril de Saint-Germain",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784754296
+      },
+      {
+        "id": "quete:transport_2ae9760ed2ae",
+        "titre": "Livraison : L'Enclume du Rempart",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784754402
+      },
+      {
+        "id": "quete:transport_914cd73e1471",
+        "titre": "Livraison : La Corde Tendue",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784789818
+      },
+      {
+        "id": "quete:transport_dc594e4742a5",
+        "titre": "Livraison : Le Codex Éternel",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784790350
+      },
+      {
+        "id": "quete:transport_6650d2c66931",
+        "titre": "Livraison : Aux Ouvrages d’Os et d’Ivoire",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784874546
+      },
+      {
+        "id": "quete:transport_40169d55aabd",
+        "titre": "Livraison : L'Athanor de Saint-Germain",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1784904779
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_010d8ef3c89f",
+        "titre": "Collecte de Sève de chêne",
+        "rang": "F",
+        "recompenses": {
+          "xp": 9,
+          "cuivre": 27,
+          "items": []
+        },
+        "termine_at": 1784904895
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_d67dd01eec69",
+        "titre": "Récolte : Carcasse de Lapin",
+        "rang": "F",
+        "recompenses": {
+          "xp": 66,
+          "cuivre": 198,
+          "items": []
+        },
+        "termine_at": 1784912291
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_1c62c80fcada",
+        "titre": "Collecte de Herbes à brûler",
+        "rang": "F",
+        "recompenses": {
+          "xp": 32,
+          "cuivre": 96,
+          "items": []
+        },
+        "termine_at": 1784922454
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_fc2181263888",
+        "titre": "Récolte : Herbes médicinales",
+        "rang": "F",
+        "recompenses": {
+          "xp": 32,
+          "cuivre": 96,
+          "items": []
+        },
+        "termine_at": 1784979185
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_comptoir_rang_3ee178665023",
+        "titre": "Épreuve de rang : traquer le Cerf « Sanguinaire »",
+        "rang": "D",
+        "termine_at": 1785059435
+      },
+      {
+        "id": "quete:bureau_du_maitre_de_guilde_d_auxerre_commission_6ce3367f22f4",
+        "titre": "Commission d'éradication : le Araignee Geante « Farouche »",
+        "rang": "D",
+        "source": "commission",
+        "lieu": "lieu:la_mine_aux_cristaux",
+        "termine_at": 1785074202
+      },
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_29f5708923d1",
+        "titre": "Éliminer les Grand Sanglier",
+        "rang": "F",
+        "recompenses": {
+          "xp": 172,
+          "cuivre": 516,
+          "items": []
+        },
+        "termine_at": 1785613000
+      },
+      {
+        "id": "quete:transport_34637da2fffc",
+        "titre": "Livraison : Le Mithril de Saint-Germain",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1785618808
+      }
+    ],
+    "sorts_connus": [
+      "sort:trait_de_flamme",
+      "sort:armure_de_givre",
+      "sort:jet_d_eau",
+      "sort:lame_de_vent",
+      "sort:eclat_de_givre",
+      "sort:eclat_rocheux"
+    ],
+    "intro": {
+      "statut": "terminee",
+      "raison": "pillage"
+    },
+    "pnj_present": {
+      "lieu": "lieu:le_mithril_de_saint_germain",
+      "character": "pnj:marchand_armurerie"
+    },
+    "objets_au_sol": [],
+    "ressource_recoltable": null,
+    "portrait_translate": {
+      "x": -73.8462,
+      "y": -40.8792
+    },
+    "portrait_zoom": 14,
+    "combats_recompenses": [
+      "combat:20d38cb9f4a24e81ac7db573bb347610",
+      "combat:476687f7707a4c328eb1e986a0231865",
+      "combat:47a07b31df944399ad786da0437f9d18",
+      "combat:6bab4a3211cd4ad39ba857435bc76f14",
+      "combat:2eccfc5ba8b242f59194ff82099101b4",
+      "combat:45b4d2e7d69348aa801a8b6ae4d3db74",
+      "combat:741214f0080c4f2f9490f47dafb728a4",
+      "combat:9b0912af346a43d49697707a1d4f2889",
+      "combat:ccee887c09684e668162906119c6c25f",
+      "combat:1f1ca27c87714a5bad306dba6ebb594c",
+      "combat:becb2a48266c4912b4087ab34557a93e",
+      "combat:becfc0ebf8c94c4b988912af4d1b5804",
+      "combat:1d4065b4a17845c98594439730d5ec95",
+      "combat:68dcdffa4ae5489899fc9a6978a0a6e6",
+      "combat:a2a954e1e8d54d16bc8a1b3418d34a12",
+      "combat:fa63004f912a47e3971bbef8323d7999",
+      "combat:7379a98acbc545279e0c79aded82ef74",
+      "combat:ae654a37919b484cbb35413b599a9705",
+      "combat:0d0a0b2d0153430494cf8329dfc153ec",
+      "combat:8e58d8c93e6f4973bc463e96466aa184",
+      "combat:f15b82e082934ce4a46aa8336df430b2",
+      "combat:d749f89db9624d4fb33b6a15bec7b9a8",
+      "combat:b9062d9df3534e46bf3350235841f37a",
+      "combat:6e22aa0fceaf466782f2f41204cc6f76",
+      "combat:c951e745bd7c44059accd9613b2f2b2d",
+      "combat:541d52f591ee4fd6977707204a3e6757",
+      "combat:65c6ba889e384924a963542a17aab771",
+      "combat:ec69a0524bfc4303a1ba43d10265e1b8",
+      "combat:64a690252ceb46bd99d98148971e8046",
+      "combat:8b6fc74fffd24db2b98a2d28500b5c9e",
+      "combat:f25f904850f343f7bd8780a8dce3aa15",
+      "combat:dc176a3de03645c59a8efb4f746925dd",
+      "combat:ab2f2401d5ab4309924ba21b4fcca8cd",
+      "combat:f72951cf25e74f5a8f180d7794713787",
+      "combat:5c313adaa4244454818a48d6879929f2",
+      "combat:6a4b6ef6c03f4433b89e4e16ca460922",
+      "combat:8a053b7e8df34e58b80cc14212f0bab9",
+      "combat:04f9f20bd1944d92860952a810bede85",
+      "combat:02c8a1ed76a94d7c95527a745fcdfe88",
+      "combat:3f7e49560bd1464ba2a1ea804e46cb01",
+      "combat:118c89df36df4256a39715c9e1ac2f2a",
+      "combat:5e52d6debfde4c14a8d3e555acaaee95",
+      "combat:6749f2350d6f4322b2e0b12cd920f029",
+      "combat:b0c8eb0f4f3f447989c897e2f0a7d666",
+      "combat:401eb4e3170e48b392181d6ebd740990",
+      "combat:69550b40172f456d9cf16ca802ad2f58",
+      "combat:f1522a7657524b8a916f2163e14dea38",
+      "combat:fc5517b5aa064e0d8ceeb40e8163f33f",
+      "combat:d47ccba8de7f4100a7ca577238988fe4",
+      "combat:7c0345fd500e4d6b9c8e9cc757306574"
+    ],
+    "butin_collectes": {
+      "combat:1bf96ac1fc704db7ad6404b71d270aeb": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:75a3d617865d46dc98ed5b04c1395126": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:c5130bf1c8ad45328337424abb64c835": [
+        "monstre_0"
+      ],
+      "combat:17c3f34a183842a49b0e0f58ba87add4": [
+        "monstre_1"
+      ],
+      "combat:f3f5df6a2d5940ef86c2659d5e2b345c": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:c43aeda17e5b4e00b208a538c8f42cc6": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:47a07b31df944399ad786da0437f9d18": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:6bab4a3211cd4ad39ba857435bc76f14": [
+        "monstre_0",
+        "monstre_2"
+      ],
+      "combat:2eccfc5ba8b242f59194ff82099101b4": [
+        "monstre_1"
+      ],
+      "combat:45b4d2e7d69348aa801a8b6ae4d3db74": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:741214f0080c4f2f9490f47dafb728a4": [
+        "monstre_0"
+      ],
+      "combat:9b0912af346a43d49697707a1d4f2889": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:ccee887c09684e668162906119c6c25f": [
+        "monstre_1"
+      ],
+      "combat:1f1ca27c87714a5bad306dba6ebb594c": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:becb2a48266c4912b4087ab34557a93e": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:becfc0ebf8c94c4b988912af4d1b5804": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:1d4065b4a17845c98594439730d5ec95": [
+        "monstre_0"
+      ],
+      "combat:68dcdffa4ae5489899fc9a6978a0a6e6": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:a2a954e1e8d54d16bc8a1b3418d34a12": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:fa63004f912a47e3971bbef8323d7999": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:7379a98acbc545279e0c79aded82ef74": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:ae654a37919b484cbb35413b599a9705": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:0d0a0b2d0153430494cf8329dfc153ec": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:8e58d8c93e6f4973bc463e96466aa184": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:f15b82e082934ce4a46aa8336df430b2": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:d749f89db9624d4fb33b6a15bec7b9a8": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:b9062d9df3534e46bf3350235841f37a": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:6e22aa0fceaf466782f2f41204cc6f76": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:c951e745bd7c44059accd9613b2f2b2d": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:541d52f591ee4fd6977707204a3e6757": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:ec69a0524bfc4303a1ba43d10265e1b8": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:64a690252ceb46bd99d98148971e8046": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:8b6fc74fffd24db2b98a2d28500b5c9e": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:f25f904850f343f7bd8780a8dce3aa15": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:dc176a3de03645c59a8efb4f746925dd": [
+        "monstre_1"
+      ],
+      "combat:ab2f2401d5ab4309924ba21b4fcca8cd": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:f72951cf25e74f5a8f180d7794713787": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:5c313adaa4244454818a48d6879929f2": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:6a4b6ef6c03f4433b89e4e16ca460922": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:8a053b7e8df34e58b80cc14212f0bab9": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:04f9f20bd1944d92860952a810bede85": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:02c8a1ed76a94d7c95527a745fcdfe88": [
+        "monstre_0"
+      ],
+      "combat:3f7e49560bd1464ba2a1ea804e46cb01": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:118c89df36df4256a39715c9e1ac2f2a": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:5e52d6debfde4c14a8d3e555acaaee95": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:6749f2350d6f4322b2e0b12cd920f029": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:b0c8eb0f4f3f447989c897e2f0a7d666": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:401eb4e3170e48b392181d6ebd740990": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:69550b40172f456d9cf16ca802ad2f58": [
+        "monstre_0",
+        "monstre_1"
+      ],
+      "combat:f1522a7657524b8a916f2163e14dea38": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:fc5517b5aa064e0d8ceeb40e8163f33f": [
+        "monstre_0",
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:d47ccba8de7f4100a7ca577238988fe4": [
+        "monstre_1",
+        "monstre_2"
+      ],
+      "combat:7c0345fd500e4d6b9c8e9cc757306574": [
+        "monstre_1",
+        "monstre_2"
+      ]
+    },
+    "competences_connues": [
+      "competence:affinite_elementaire"
+    ],
+    "competences_bonus": {
+      "buffs": {
+        "Int": 4
+      },
+      "regen_pv": 0,
+      "regen_pm": 0,
+      "esquive": 0,
+      "buffs_sources": [
+        {
+          "nom": "Affinité élémentaire",
+          "icon": "🔥",
+          "buffs": {
+            "Int": 4
+          }
+        }
+      ]
+    },
+    "focalisation": null,
+    "transport_offert": {
+      "lieu": "lieu:le_mithril_de_saint_germain",
+      "quete": null
+    },
+    "effets_actifs": [],
+    "groupe": [
+      "aventurier:le_bastion_de_l_yonne_interieur_495530ba124a"
+    ],
+    "affinites": {
+      "aventurier:le_bastion_de_l_yonne_interieur_495530ba124a": 100,
+      "aventurier:le_bastion_de_l_yonne_interieur_06cd8359fe28": 47
+    },
+    "compagnons_connus": {
+      "aventurier:le_bastion_de_l_yonne_interieur_495530ba124a": {
+        "prenom": "Blanche",
+        "nom": "de Hautterre",
+        "voc": "repurgateur",
+        "race": "humain",
+        "image": "repurgateur_f_humain01.jpg",
+        "rang": "F"
+      },
+      "aventurier:le_bastion_de_l_yonne_interieur_06cd8359fe28": {
+        "prenom": "Bertrand",
+        "nom": "Pied-Léger",
+        "voc": "voleur",
+        "race": "hobbit",
+        "image": "voleur_m_hobbit01.jpg",
+        "rang": "F"
+      }
+    },
+    "sorts_epingles": [
+      "sort:trait_de_flamme",
+      "sort:armure_de_givre"
+    ],
+    "montures": [
+      "monture:sanglier_apprivoise_33ecea0b4623"
+    ],
+    "rangs_guilde": {
+      "lieu:auxerre": "D"
+    },
+    "slots_actions": [
+      {
+        "type": "fuir",
+        "ref": ""
+      },
+      null,
+      {
+        "type": "ramasser",
+        "ref": ""
+      },
+      null,
+      null,
+      {
+        "type": "consommable",
+        "ref": "item:saucisses"
+      },
+      {
+        "type": "consommable",
+        "ref": "item:Tisane_concentration"
+      },
+      {
+        "type": "consommable",
+        "ref": "item:encens"
+      },
+      null,
+      {
+        "type": "sort",
+        "ref": "sort:trait_de_flamme",
+        "composants": true
+      },
+      {
+        "type": "sort",
+        "ref": "sort:eclat_rocheux",
+        "composants": true
+      },
+      {
+        "type": "sort",
+        "ref": "sort:eclat_de_givre",
+        "composants": true
+      },
+      {
+        "type": "sort",
+        "ref": "sort:lame_de_vent",
+        "composants": true
+      },
+      {
+        "type": "sort",
+        "ref": "sort:jet_d_eau",
+        "composants": true
+      },
+      {
+        "type": "attaque",
+        "ref": "cac"
+      }
+    ],
+    "compagnie": {
+      "nom": "La Main d'Argent",
+      "fondee_at": 1784987551
+    },
+    "laissez_passer": {
+      "lieu:bureau_du_maitre_de_guilde_d_auxerre": {
+        "pose_at": 1785069292,
+        "par": "pnj:borin_barbe_de_jais",
+        "cycle": 1
+      },
+      "lieu:temple_portail_de_saint_austrelin_interieur": {
+        "pose_at": 1785070512,
+        "par": "pnj:templier_nain_m_01",
+        "cycle": 1
+      }
+    }
+  }
+]

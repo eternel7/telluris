@@ -3866,6 +3866,16 @@ function _weaponModeText(item) {
 	const m = _itemMode(item);
 	return m === 'tir' ? 'Tir' : (m === 'jet' ? 'Jet' : 'Corps à corps');
 }
+// Prise : `deux_mains` est un booléen du doc item (absent ⇒ une main), tandis que `slots`
+// liste les emplacements ACCEPTÉS. Un objet qui ne se tient pas en main n'a pas de prise
+// à afficher — la ligne disparaît d'elle-même (`_textRow` masque les valeurs vides).
+// ⚠️ Le prédicat porte sur `slots` et non sur `categorie === 'arme'` : un bouclier ou une
+// torche se tient aussi en main.
+const _SLOTS_MAINS = ['main_droite', 'main_gauche'];
+function _priseText(item) {
+	if (!item || !(item.slots || []).some(s => _SLOTS_MAINS.includes(s))) return '';
+	return item.deux_mains ? '✋✋ Deux mains' : 'Une main';
+}
 function _effetsChips(item) {
 	const e = (item && item.effets) || {};
 	const chips = [];
@@ -3985,6 +3995,7 @@ function _renderCmpTable(left, right, roleLeft, roleRight) {
 	rows += _textRow('Catégorie', _catText(left), compare ? _catText(right) : null, compare);
 	rows += _textRow('🏫 École', _magiesText(left), compare ? _magiesText(right) : null, compare);
 	rows += _textRow('Mode', _weaponModeText(left), compare ? _weaponModeText(right) : null, compare);
+	rows += _textRow('Prise', _priseText(left), compare ? _priseText(right) : null, compare);
 	rows += _numRows(left, right, compare);
 	rows += _textRow('Dés de dégâts', left && _diceText(left.bonus_degats_dice),
 		compare ? (right && _diceText(right.bonus_degats_dice)) : null, compare);
