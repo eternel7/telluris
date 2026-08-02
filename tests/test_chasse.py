@@ -96,6 +96,140 @@ def test_position_none_sans_grille():
 	assert chasse.position_de_chasse(sans_grille, LOUP) is None
 
 
+# ── borner_position : la case visée doit tomber DANS la carte ────────────────────
+
+def _lieu_avec_placement(x, y):
+	"""AUXERRE (20×20) dont l'unique placement de la zone du loup est centré en (x, y)."""
+	return dict(AUXERRE, zone_influences=[dict(PLACEMENT, x=x, y=y)])
+
+
+def test_position_bornee_si_centre_hors_grille():
+	# Cas réel de `lieu:auxerre` : un placement centré SUR le bord droit (x == dimensions.x),
+	# donc hors des cases valides 0..19 → ramené à 20−1−2 = 17.
+	pos = chasse.position_de_chasse(_lieu_avec_placement(20, 10), LOUP)
+	assert pos == {"x": 17, "y": 10}
+
+
+def test_position_bornee_si_centre_colle_au_bord():
+	# Dans la grille mais sans marge : la zone 3×3 déborderait et l'overlay 🗺️ serait à moitié vide.
+	pos = chasse.position_de_chasse(_lieu_avec_placement(0, 0), LOUP)
+	assert pos == {"x": 2, "y": 2}
+
+
+def test_borner_position_laisse_un_centre_valide_intact():
+	assert chasse.borner_position({"x": 5, "y": 5}, {"x": 20, "y": 20}) == {"x": 5, "y": 5}
+
+
+def test_borner_position_carte_trop_petite_pour_la_marge():
+	# 3 cases de large : `[2, 0]` serait un intervalle croisé → milieu de l'axe, jamais hors grille.
+	assert chasse.borner_position({"x": 9, "y": 9}, {"x": 3, "y": 3}) == {"x": 1, "y": 1}
+
+
+def test_borner_position_passe_plat():
+	# Objectif sans position (donjon) ou lieu sans grille : rien à borner.
+	assert chasse.borner_position(None, {"x": 20, "y": 20}) is None
+	assert chasse.borner_position({"x": 99, "y": 99}, None) == {"x": 99, "y": 99}
+	assert chasse.borner_position({"x": 99, "y": 99}, {"x": 0, "y": 0}) == {"x": 99, "y": 99}
+
+
+# ── case_praticable_proche : la case visée doit être FRANCHISSABLE ───────────────
+
+def _cells(w, h, val=1):
+	return [[val] * w for _ in range(h)]
+
+
+def _lieu_avec_cells(cells, x, y):
+	"""AUXERRE dont la grille RÉELLE est `cells` et le placement du loup centré en (x, y)."""
+	h, w = len(cells), len(cells[0])
+	return dict(AUXERRE, cells=cells, dimensions={"x": w, "y": h},
+	            zone_influences=[dict(PLACEMENT, x=x, y=y)])
+
+
+def test_case_praticable_laisse_une_case_deja_franchissable():
+	lieu = _lieu_avec_cells(_cells(20, 20), 8, 8)
+	assert chasse.position_de_chasse(lieu, LOUP) == {"x": 8, "y": 8}
+
+
+def test_case_praticable_fuit_un_mur():
+	# Tout est praticable sauf la case visée (0 = mur) → on glisse d'une case.
+	cells = _cells(20, 20)
+	cells[8][8] = 0
+	pos = chasse.position_de_chasse(_lieu_avec_cells(cells, 8, 8), LOUP)
+	assert pos != {"x": 8, "y": 8}
+	assert cells[pos["y"]][pos["x"]] >= 1
+	assert max(abs(pos["x"] - 8), abs(pos["y"] - 8)) == 1  # la PLUS PROCHE
+
+
+def test_case_praticable_fuit_une_falaise():
+	# La falaise est transparente à la vision mais pas franchissable : elle doit être évitée.
+	cells = _cells(20, 20)
+	cells[8][8] = combat.TERRAIN_FALAISE
+	pos = chasse.position_de_chasse(_lieu_avec_cells(cells, 8, 8), LOUP)
+	assert pos != {"x": 8, "y": 8}
+
+
+def test_case_praticable_traverse_une_zone_bloquee():
+	# Un bloc de murs 5×5 autour de la cible : la spirale doit en sortir, pas abandonner.
+	cells = _cells(20, 20)
+	for y in range(6, 11):
+		for x in range(6, 11):
+			cells[y][x] = 0
+	pos = chasse.position_de_chasse(_lieu_avec_cells(cells, 8, 8), LOUP)
+	assert cells[pos["y"]][pos["x"]] >= 1
+
+
+def test_case_praticable_ne_sort_jamais_de_la_marge():
+	# Seule la colonne du bord est praticable → elle est INTERDITE par la marge : repli sur la
+	# position bornée plutôt que de coller la cible au bord.
+	cells = _cells(20, 20, 0)
+	for y in range(20):
+		cells[y][0] = 1
+	pos = chasse.position_de_chasse(_lieu_avec_cells(cells, 5, 5), LOUP)
+	assert pos == {"x": 5, "y": 5}  # inchangée : aucune case praticable dans [2, 17]
+
+
+def test_case_praticable_repli_sans_cells():
+	# Lieu sans grille réelle (doc projeté par `lieux_chasse_de`) : bornage seul, comme avant.
+	sans_cells = dict(AUXERRE, zone_influences=[dict(PLACEMENT, x=20, y=10)])
+	sans_cells.pop("cells")
+	assert chasse.position_de_chasse(sans_cells, LOUP) == {"x": 17, "y": 10}
+
+
+def test_case_praticable_passe_plat():
+	assert chasse.case_praticable_proche(None, AUXERRE) is None
+	assert chasse.case_praticable_proche({"x": 5, "y": 5}, {}) == {"x": 5, "y": 5}
+
+
+def test_position_praticable_quel_que_soit_le_placement():
+	# Invariante complète : dans la carte, à 2 cases des bords, ET sur une case franchissable.
+	cells = _cells(30, 30)
+	for y in range(30):  # une diagonale de murs qui croise plusieurs placements
+		cells[y][y] = 0
+	lieu = dict(AUXERRE, cells=cells, dimensions={"x": 30, "y": 30}, zone_influences=[
+		dict(PLACEMENT, x=x, y=y)
+		for x, y in ((-5, -5), (0, 0), (7, 7), (15, 15), (29, 29), (40, 40))
+	])
+	for seed in range(30):
+		random.seed(seed)
+		pos = chasse.position_de_chasse(lieu, LOUP)
+		assert 2 <= pos["x"] <= 27 and 2 <= pos["y"] <= 27
+		assert cells[pos["y"]][pos["x"]] >= 1
+
+
+def test_position_toujours_dans_la_carte_quel_que_soit_le_placement():
+	# Invariante : quel que soit le tirage, la case visée est dans [2, dim−3] sur les deux axes.
+	lieu = dict(AUXERRE, zone_influences=[
+		dict(PLACEMENT, x=x, y=y)
+		for x, y in ((-5, -5), (0, 10), (10, 0), (19, 19), (20, 32), (99, 99))
+	])
+	dx, dy = lieu["dimensions"]["x"], lieu["dimensions"]["y"]
+	for seed in range(30):
+		random.seed(seed)
+		pos = chasse.position_de_chasse(lieu, LOUP)
+		assert 2 <= pos["x"] <= dx - 3
+		assert 2 <= pos["y"] <= dy - 3
+
+
 # ── resoudre_profil_chasse ───────────────────────────────────────────────────────
 
 def test_profil_max_est_le_plus_haut_compatible():

@@ -91,6 +91,10 @@ ACTIONS_A_CONDITIONNER = {
 	("acces", "passer"):        "acces_ouvrable",
 }
 
+# Clés du bloc `relation` d'un nœud (utils/pnj.recompense_relation_de). Tout le reste y est
+# ignoré en silence — une récompense qu'on croit avoir écrite et qui ne se verse jamais.
+RELATION_CLES = {"lieu", "delta", "unique"}
+
 # Sentinelle de fin : `routers/pnj.py` fait `if not suivant or suivant == "fin"` → nœud
 # None → le panneau se ferme. Ce n'est donc PAS un nœud à déclarer.
 FIN = "fin"
@@ -230,6 +234,51 @@ def analyser_doc(doc: dict) -> list:
 		if not conditionne:
 			avertir("un `delai_min` est déclaré sans `noeud_attente` ni aucune condition "
 					"`dialogue_en_attente` : le délai sera invisible pour le joueur.")
+
+	# Récompense de relation portée par un nœud (`relation`), et levée de son unicité
+	# (`relation_reinit`). Mêmes enjeux que `delai_min` : rien n'est typé à l'import, donc un
+	# bloc mal orthographié est IGNORÉ en silence (la réputation ne monte simplement jamais).
+	# ⚠️ La levée est le contrôle le plus important : si elle ne désigne rien, la récompense
+	# reste fermée POUR TOUJOURS et le dialogue se déroule pourtant normalement.
+	for nid, noeud in noeuds.items():
+		bloc = (noeud or {}).get("relation")
+		if bloc is not None and not isinstance(bloc, dict):
+			erreur(f"`relation` vaut {bloc!r} : attendu un objet {{delta, lieu?, unique?}} — "
+				   f"ce nœud ne versera aucune réputation.", nid)
+		elif isinstance(bloc, dict):
+			for cle in sorted(set(bloc) - RELATION_CLES):
+				erreur(f"`relation.{cle}` : clé inconnue du moteur, elle sera ignorée.", nid)
+			try:
+				delta = int(bloc.get("delta", 1))
+			except (TypeError, ValueError):
+				delta = 0
+			if not delta:
+				erreur(f"`relation.delta` vaut {bloc.get('delta')!r} : il doit être un entier "
+					   f"non nul, sinon ce nœud ne versera rien.", nid)
+			lieu = bloc.get("lieu")
+			if lieu is not None and not (isinstance(lieu, str) and lieu.startswith("lieu:")):
+				erreur(f"`relation.lieu` doit être un id de lieu (`lieu:...`), reçu {lieu!r} — "
+					   f"la récompense irait sur une relation fantôme.", nid)
+			unique = bloc.get("unique")
+			if unique is not None and not (isinstance(unique, str) and unique):
+				erreur(f"`relation.unique` doit être une chaîne non vide, reçu {unique!r} : la "
+					   f"clé retomberait silencieusement sur celle dérivée du nœud.", nid)
+
+		brut = (noeud or {}).get("relation_reinit")
+		if brut is None:
+			continue
+		cibles = [brut] if isinstance(brut, str) else brut
+		if not isinstance(cibles, list) or not all(isinstance(c, str) for c in cibles):
+			erreur(f"`relation_reinit` vaut {brut!r} : attendu un id de nœud, ou une liste "
+				   f"d'ids de nœuds.", nid)
+			continue
+		for cible in cibles:
+			if cible not in noeuds:
+				erreur(f"`relation_reinit` désigne `{cible}`, qui n'existe pas : la récompense "
+					   f"ne se rouvrira JAMAIS.", nid)
+			elif not isinstance((noeuds[cible] or {}).get("relation"), dict):
+				erreur(f"`relation_reinit` désigne `{cible}`, qui ne porte aucun bloc "
+					   f"`relation` : cette levée ne lève rien.", nid)
 
 	# Un dialogue générique ne doit citer aucun nom : le lieu rebaptise son tenancier.
 	noms_interdits = _noms_propres(doc.get("nom")) if doc_id.startswith("pnj:marchand_") else set()

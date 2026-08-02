@@ -321,6 +321,92 @@ def test_condition_dialogue_en_attente_se_teste_dans_les_deux_sens():
 
 
 # ---------------------------------------------------------------------------
+# Récompense de relation portée par un nœud
+# ---------------------------------------------------------------------------
+
+_DEFAUT = object()
+
+
+def _doc_relation(bloc=_DEFAUT, reinit="merci"):
+    """Arbre minimal : `merci` verse la réputation, `porte` rouvre ce versement."""
+    bloc = {"delta": 1} if bloc is _DEFAUT else bloc
+    noeuds = {
+        "accueil": {"texte": "Oui ?", "choix": [{"id": "ok", "next": "merci"},
+                                                {"id": "go", "next": "porte"}]},
+        "merci": {"texte": "Beau travail.", "choix": [{"id": "ok", "next": "fin"}]},
+        "porte": {"texte": "Descendez.", "choix": [{"id": "ok", "next": "fin"}]},
+    }
+    if bloc is not None:
+        noeuds["merci"]["relation"] = bloc
+    if reinit is not None:
+        noeuds["porte"]["relation_reinit"] = reinit
+    return {"_id": "pnj:armand", "type": "pnj",
+            "dialogue": {"noeud_depart": "accueil", "noeuds": noeuds}}
+
+
+def test_recompense_relation_normalisee():
+    doc = _doc_relation()
+    # `lieu` absent = le lieu courant (c'est le router qui tranche) ; la clé est DÉRIVÉE, donc
+    # un auteur qui n'écrit pas `unique` obtient quand même le comportement sûr.
+    assert pnj.recompense_relation_de(doc, "merci") == {
+        "lieu": None, "delta": 1, "cle": "pnj:armand:merci"}
+    explicite = _doc_relation({"delta": -2, "lieu": "lieu:auxerre", "unique": "partage"})
+    assert pnj.recompense_relation_de(explicite, "merci") == {
+        "lieu": "lieu:auxerre", "delta": -2, "cle": "partage"}
+
+
+def test_recompense_relation_absente_ou_illisible():
+    doc = _doc_relation()
+    assert pnj.recompense_relation_de(doc, "accueil") is None       # aucun bloc
+    assert pnj.recompense_relation_de(doc, "nexiste_pas") is None
+    assert pnj.recompense_relation_de({}, "merci") is None
+    # Un delta nul ou qu'on ne sait pas lire ne verse rien plutôt que de lever.
+    for brut in ({"delta": 0}, {"delta": "beaucoup"}, {"delta": None}, "non", [1]):
+        assert pnj.recompense_relation_de(_doc_relation(brut), "merci") is None
+    # `unique` non textuel retombe silencieusement sur la clé dérivée (le linter le signale).
+    assert pnj.recompense_relation_de(_doc_relation({"delta": 1, "unique": True}),
+                                      "merci")["cle"] == "pnj:armand:merci"
+
+
+def test_marqueur_de_versement_est_unique_et_ne_mute_pas_en_lecture():
+    character = {}
+    assert pnj.relation_deja_versee(character, "pnj:armand:merci") is False
+    assert "dialogues_relations" not in character          # ⚠️ un getter n'initialise rien
+    pnj.marquer_relation_versee(character, "pnj:armand:merci", 1000)
+    assert character["dialogues_relations"] == {"pnj:armand:merci": 1000}
+    assert pnj.relation_deja_versee(character, "pnj:armand:merci") is True
+    assert pnj.relation_deja_versee(character, "pnj:armand:autre") is False
+
+
+def test_relations_a_reinitialiser_resout_la_cle_du_noeud_nomme():
+    # On nomme un NŒUD, jamais une clé brute : `unique` explicite et clé dérivée marchent pareil.
+    assert pnj.relations_a_reinitialiser(_doc_relation(), "porte") == ["pnj:armand:merci"]
+    liste = _doc_relation(reinit=["merci", "merci"])
+    assert pnj.relations_a_reinitialiser(liste, "porte") == ["pnj:armand:merci"]   # dédoublonné
+    nomme = _doc_relation({"delta": 1, "unique": "partage"})
+    assert pnj.relations_a_reinitialiser(nomme, "porte") == ["partage"]
+    # ⚠️ Fail-soft : une cible morte est ignorée en jeu (c'est le linter qui la signale).
+    assert pnj.relations_a_reinitialiser(_doc_relation(reinit="disparu"), "porte") == []
+    assert pnj.relations_a_reinitialiser(_doc_relation(bloc=None), "porte") == []
+    assert pnj.relations_a_reinitialiser(_doc_relation(reinit=None), "porte") == []
+    assert pnj.relations_a_reinitialiser(_doc_relation(reinit=42), "porte") == []
+
+
+def test_cycle_verser_lever_verser():
+    # C'est toute la boucle du donjon : la seconde commission doit pouvoir rapporter à nouveau.
+    doc, character = _doc_relation(), {}
+    cle = pnj.recompense_relation_de(doc, "merci")["cle"]
+    pnj.marquer_relation_versee(character, cle, 1000)
+    assert pnj.relation_deja_versee(character, cle) is True
+    assert pnj.oublier_relations_versees(
+        character, pnj.relations_a_reinitialiser(doc, "porte")) is True
+    assert pnj.relation_deja_versee(character, cle) is False
+    # Rien à retirer → rien n'a bougé : l'appelant n'a pas à sauvegarder.
+    assert pnj.oublier_relations_versees(character, [cle]) is False
+    assert pnj.oublier_relations_versees({}, ["pnj:armand:merci"]) is False
+
+
+# ---------------------------------------------------------------------------
 # Service de soin
 # ---------------------------------------------------------------------------
 
@@ -443,3 +529,41 @@ def test_lint_delai_invisible_est_signale():
     # Une condition `dialogue_en_attente` quelque part suffit à lever l'avertissement.
     doc["dialogue"]["noeuds"]["accueil"]["choix"][0]["condition"] = {"dialogue_en_attente": False}
     assert not any("invisible" in m for m in _messages(doc, "avertissement"))
+
+
+# ---------------------------------------------------------------------------
+# Linter — récompense de relation portée par un nœud
+# ---------------------------------------------------------------------------
+
+def test_lint_relation_valide_est_silencieuse():
+    assert lint_dialogues.analyser_doc(_doc_relation()) == []
+
+
+def test_lint_relation_bloc_fautif():
+    assert any("clé inconnue" in m
+               for m in _messages(_doc_relation({"delta": 1, "valeur": 3}), "erreur"))
+    assert any("delta" in m for m in _messages(_doc_relation({"delta": 0}), "erreur"))
+    assert any("delta" in m for m in _messages(_doc_relation({"delta": "bcp"}), "erreur"))
+    assert any("lieu" in m
+               for m in _messages(_doc_relation({"delta": 1, "lieu": "auxerre"}), "erreur"))
+    assert any("unique" in m
+               for m in _messages(_doc_relation({"delta": 1, "unique": True}), "erreur"))
+    assert any("attendu un objet" in m for m in _messages(_doc_relation("oui"), "erreur"))
+
+
+def test_lint_relation_reinit_qui_ne_leve_rien():
+    # ⚠️ Le contrôle qui compte : une levée morte laisse la récompense fermée POUR TOUJOURS,
+    # et le dialogue se déroule pourtant normalement — rien ne le montrerait en jeu.
+    assert any("ne se rouvrira JAMAIS" in m
+               for m in _messages(_doc_relation(reinit="disparu"), "erreur"))
+    assert any("ne lève rien" in m
+               for m in _messages(_doc_relation(bloc=None, reinit="merci"), "erreur"))
+    assert any("attendu un id de nœud" in m
+               for m in _messages(_doc_relation(reinit=42), "erreur"))
+
+
+def test_lint_relation_reinit_sur_soi_meme_est_legitime():
+    # Une récompense volontairement répétable à chaque lecture : pas une faute.
+    doc = _doc_relation(reinit=None)
+    doc["dialogue"]["noeuds"]["merci"]["relation_reinit"] = "merci"
+    assert lint_dialogues.analyser_doc(doc) == []

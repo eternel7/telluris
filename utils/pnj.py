@@ -15,6 +15,9 @@
 #   `delai_min` (secondes, sur un NŒUD) ferme le dialogue de ce PNJ le temps voulu, et
 #   `noeud_attente` (sur la RACINE) est ce qu'il répond entre-temps — cf. section
 #   « Délai de réouverture ».
+#   `relation` (sur un NŒUD) = {delta, lieu?, unique?} : le RENDRE fait bouger la réputation
+#   du joueur, UNE SEULE FOIS ; `relation_reinit` (sur un autre nœud) rouvre ce versement —
+#   cf. section « Récompense de relation portée par un nœud ».
 # - `services.soin` : {cout_cuivre, fraction_pv, gratuit_si:{lieux, seuil, fraction_pv},
 #   noeuds:{fait, sans_fonds, inutile}} — data-driven, seuil par défaut en world-var
 #   PNJ_REPUTATION_SEUIL.
@@ -299,9 +302,8 @@ def choix_valide(pnj_doc: dict, noeud_id: str, choix_id: str, contexte: dict) ->
 def delai_min_de(pnj_doc: dict, noeud_id: str) -> int:
 	"""Délai de réouverture (secondes) déclaré par ce nœud. 0 = aucun (champ absent, non
 	numérique ou ≤ 0 — une valeur illisible ne verrouille rien)."""
-	noeuds = (((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {})
 	try:
-		return max(0, int((noeuds.get(noeud_id) or {}).get("delai_min", 0) or 0))
+		return max(0, int(_noeud(pnj_doc, noeud_id).get("delai_min", 0) or 0))
 	except (TypeError, ValueError):
 		return 0
 
@@ -329,6 +331,11 @@ def delai_restant(character: dict, pnj_id: str, now: int) -> int:
 		return 0
 
 
+def _noeud(pnj_doc: dict, noeud_id: str) -> dict:
+	"""Le nœud demandé, ou un dict vide (aucun accès à l'arbre ne doit lever)."""
+	return (((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {}).get(noeud_id) or {}
+
+
 def noeud_depart_effectif(pnj_doc: dict, restant: int) -> str:
 	"""Nœud par lequel ouvrir le dialogue : `noeud_attente` tant que le délai court,
 	`noeud_depart` sinon.
@@ -343,6 +350,96 @@ def noeud_depart_effectif(pnj_doc: dict, restant: int) -> str:
 	if restant > 0 and attente and attente in (dialogue.get("noeuds") or {}):
 		return attente
 	return depart
+
+
+# ---------------------------------------------------------------------------
+# Récompense de relation portée par un NŒUD
+# ---------------------------------------------------------------------------
+# Un nœud peut porter `relation` = {delta, lieu?, unique?} : le RENDRE fait bouger la
+# réputation du joueur. C'est le seul chemin par lequel un auteur de dialogue peut toucher
+# une relation depuis la DONNÉE (tous les autres — transport, marchandage, fidélité,
+# renoncement — sont des chemins spécialisés écrits en dur).
+#
+# ⚠️ VERSÉ UNE SEULE FOIS. Un nœud reste atteignable tant que sa condition tient (le flag
+# `acces_accompli` vaut vrai jusqu'au rapport à la guilde) : sans garde, fermer et rouvrir le
+# panneau monterait la relation à 100. La clé du marqueur est DÉRIVÉE par défaut
+# (`<pnj_id>:<noeud_id>`), donc un auteur qui n'y pense pas obtient quand même le
+# comportement sûr ; `unique` (chaîne) la force quand deux nœuds partagent la récompense.
+#
+# La récompense se ROUVRE explicitement : un autre nœud porte `relation_reinit` = un id de
+# nœud (ou une liste), et le rendre OUBLIE le versement — chez le gardien du donjon, c'est le
+# nœud par lequel il fait descendre le joueur : redescendre, c'est repartir pour un tour.
+# ⚠️ On nomme un NŒUD, jamais une clé brute : la clé est relue par `recompense_relation_de`,
+# donc `unique` explicite et clé dérivée marchent pareil, et le linter peut vérifier la cible.
+#
+# État : character["dialogues_relations"] = {cle: epoch}. Forme calquée sur
+# `dialogues_delais`/`laissez_passer` ; champ absent ⇒ rien n'a été versé, AUCUNE migration.
+
+
+def recompense_relation_de(pnj_doc: dict, noeud_id: str) -> dict | None:
+	"""Bloc `relation` de ce nœud, NORMALISÉ en `{lieu, delta, cle}` — `lieu` à None = le lieu
+	courant (le router tranche), `cle` = l'identité du versement.
+
+	None si le nœud n'existe pas, ne porte pas de bloc, ou si le `delta` est nul ou illisible :
+	miroir de `delai_min_de`, une valeur qu'on ne sait pas lire ne fait rien plutôt que de
+	lever — c'est le linter qui signale le bloc fautif, pas le moteur en pleine conversation."""
+	bloc = _noeud(pnj_doc, noeud_id).get("relation")
+	if not isinstance(bloc, dict):
+		return None
+	try:
+		delta = int(bloc.get("delta", 1))
+	except (TypeError, ValueError):
+		return None
+	if not delta:
+		return None
+	unique = bloc.get("unique")
+	cle = unique if isinstance(unique, str) and unique else f"{(pnj_doc or {}).get('_id')}:{noeud_id}"
+	lieu = bloc.get("lieu")
+	return {"lieu": lieu if isinstance(lieu, str) and lieu else None, "delta": delta, "cle": cle}
+
+
+def relation_deja_versee(character: dict, cle: str) -> bool:
+	"""Cette récompense a-t-elle déjà été encaissée ? ⚠️ Ne mute pas : un getter ne purge pas
+	(même règle que `delai_restant`)."""
+	return cle in ((character or {}).get("dialogues_relations") or {})
+
+
+def marquer_relation_versee(character: dict, cle: str, now: int) -> None:
+	"""Note le versement (mute sans sauvegarder : l'appelant persiste). L'epoch n'est lu par
+	personne — il est là pour qu'un marqueur reste diagnosticable en base."""
+	character.setdefault("dialogues_relations", {})[cle] = int(now)
+
+
+def relations_a_reinitialiser(pnj_doc: dict, noeud_id: str) -> list:
+	"""Clés de versement que le rendu de ce nœud doit OUBLIER (champ `relation_reinit`, chaîne
+	ou liste d'ids de nœuds du même doc).
+
+	⚠️ Fail-SOFT : un id qui ne désigne aucun nœud, ou un nœud sans bloc `relation`, est ignoré
+	en silence — le moteur ne casse pas une conversation pour une référence morte, et le linter
+	la signale avant l'import (une levée qui ne lève rien laisserait une récompense fermée pour
+	toujours, sans le moindre symptôme en jeu)."""
+	brut = _noeud(pnj_doc, noeud_id).get("relation_reinit")
+	if isinstance(brut, str):
+		brut = [brut]
+	if not isinstance(brut, list):
+		return []
+	cles = []
+	for cible in brut:
+		recompense = recompense_relation_de(pnj_doc, cible) if isinstance(cible, str) else None
+		if recompense and recompense["cle"] not in cles:
+			cles.append(recompense["cle"])
+	return cles
+
+
+def oublier_relations_versees(character: dict, cles) -> bool:
+	"""Retire ces marqueurs : les récompenses redeviennent versables une fois. Mute sans
+	sauvegarder ; renvoie True si quelque chose a bougé (l'appelant décide de persister)."""
+	versees = (character or {}).get("dialogues_relations") or {}
+	modifie = False
+	for cle in cles or []:
+		if versees.pop(cle, None) is not None:
+			modifie = True
+	return modifie
 
 
 # ---------------------------------------------------------------------------

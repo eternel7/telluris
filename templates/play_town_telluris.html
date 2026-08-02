@@ -1797,7 +1797,8 @@
 							<div class="sh-section">📜 Actives</div>
 							<div class="sh-quest-list-active sh-scroll scrollable">
 							<div class="sh-rel-scroll">
-							{% for q in qa %}
+							{# La plus récemment acceptée en premier : quetes_actives est empilée par ordre chronologique. #}
+							{% for q in qa|reverse %}
 							<div class="sh-quest {{ q.get('rang','F') }}">
 								<div class="sh-quest-hdr">
 									<span class="sh-quest-rang">{{ q.get("rang","F") }}</span>
@@ -1822,7 +1823,8 @@
 							<div class="sh-section" style="opacity:0.6">✓ Terminées ({{ qt|length }})</div>
 							<div class="sh-quest-list-ended sh-scroll scrollable">
 							<div class="sh-rel-scroll">
-							{% for q in qt %}
+							{# La plus récemment terminée en premier : quetes_terminees est empilée par ordre chronologique. #}
+							{% for q in qt|reverse %}
 							<div class="sh-quest {{ q.get('rang','F') }}" style="opacity:0.5">
 								<div class="sh-quest-hdr"><span class="sh-quest-rang">{{ q.get("rang","F") }}</span><span class="sh-quest-title">{{ q.get("titre","—") }}</span><span class="sh-quest-status termine">Terminée</span></div>
 							</div>
@@ -5569,7 +5571,8 @@ function renderFicheQuetes(data) {
 		// ⚠️ Double rendu : ce markup doit rester STRICTEMENT identique à celui de
 		// l'onglet 📜 côté Jinja (wrapper .sh-scroll qui porte l'ombre + scroller).
 		html += `<div class="sh-quest-list-active sh-scroll scrollable"><div class="sh-rel-scroll">`;
-		html += qa.map(q => {
+		// Plus récemment acceptée en premier ; slice() pour ne pas retourner la liste du payload.
+		html += qa.slice().reverse().map(q => {
 			const rang = q.rang || 'F';
 			const rew = q.recompenses || {};
 			let reward = '';
@@ -5610,7 +5613,8 @@ function renderFicheQuetes(data) {
 	if (qt.length) {
 		html += `<div class="sh-section" style="opacity:0.6">✓ Terminées (${qt.length})</div>`;
 		html += `<div class="sh-quest-list-ended sh-scroll scrollable"><div class="sh-rel-scroll">`;
-		html += qt.map(q => {
+		// Plus récemment terminée en premier ; slice() pour ne pas retourner la liste du payload.
+		html += qt.slice().reverse().map(q => {
 			const rang = q.rang || 'F';
 			return `<div class="sh-quest ${rang}" style="opacity:0.5">
 				<div class="sh-quest-hdr"><span class="sh-quest-rang">${rang}</span><span class="sh-quest-title">${q.titre || '—'}</span><span class="sh-quest-status termine">Terminée</span></div>
@@ -6777,6 +6781,14 @@ async function closeCompagnonSheet() {
 // renvoie le nœud suivant déjà filtré/substitué côté serveur ; `noeud: null` = fin.
 let _pnjNoeudCourant = null;
 
+// Récompense de réputation posée sur un nœud de dialogue (`relation` côté donnée). Le signe
+// est explicite : le même mécanisme sert à punir. ⚠️ `showToast` écrit en textContent — aucun
+// échappement à faire (Conventions §9).
+function _relationGainTexte(g) {
+	const signe = g.delta > 0 ? '+' + g.delta : String(g.delta);
+	return '🤝 ' + (g.nom || 'Relation') + ' — relation ' + signe + ' (' + g.valeur + ')';
+}
+
 function renderPnjNoeud(noeud) {
 	_pnjNoeudCourant = noeud ? noeud.id : null;
 	const texte = document.getElementById('pnj-noeud-texte');
@@ -6794,8 +6806,10 @@ async function openPnjDialogue() {
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
 		// Une course a pu périmer à l'ouverture du dialogue (expiration paresseuse) : le serveur
-		// renvoie alors les relations à jour, sanction comprise.
+		// renvoie alors les relations à jour, sanction comprise. Un nœud d'accueil peut aussi
+		// porter une récompense de réputation (versée une seule fois, cf. `relation_gain`).
 		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
+		if (data.relation_gain) showToast(_relationGainTexte(data.relation_gain));
 		renderPnjNoeud(data.noeud);
 		document.getElementById('game-container').classList.add('panel-hidden');
 		document.getElementById('pnj-panel').classList.remove('panel-hidden');
@@ -6823,6 +6837,9 @@ async function choisirPnj(choixId) {
 		// Une course livrée/rapportée fait monter la relation du donneur : l'onglet 🤝 est rendu
 		// client, il ne se met à jour que si le serveur renvoie le payload complet.
 		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
+		// Récompense de réputation portée par le nœud qu'on vient d'atteindre (versée une seule
+		// fois par personnage, tant qu'un autre nœud n'a pas levé sa clé).
+		if (data.relation_gain) showToast(_relationGainTexte(data.relation_gain));
 		if (data.soin) {
 			showToast('✨ +' + data.soin.pv_rendu + ' PV' + (data.soin.gratuit ? ' — offert' : ''));
 		}

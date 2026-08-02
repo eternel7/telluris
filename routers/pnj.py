@@ -16,7 +16,8 @@ from utils.characters import (
 	poids_bounds, carried_weight, charge_max_of, item_ref_id, resolve_item_ref,
 )
 from utils.marche import (
-	debit_character, get_relation, relation_value, relations_lieux_payload,
+	ajuster_relation, debit_character, get_relation, relation_value,
+	relations_lieux_payload,
 )
 from utils import pnj
 from utils import intro
@@ -208,6 +209,73 @@ def _lien_vers(current_user: dict, lieu_courant: str, destination: str) -> str |
 	return None
 
 
+def _verser_relation_noeud(character: dict, pnj_doc: dict, lieu_doc: dict | None,
+						   noeud_id: str) -> dict | None:
+	"""Marque (SANS créditer) la récompense de relation portée par le nœud qu'on s'apprête à
+	rendre. Renvoie `{lieu_id, delta}`, ou None s'il n'y en a pas / si elle a déjà été versée.
+
+	⚠️ Le marqueur est posé AVANT le crédit, et l'appelant n'encaisse que si le character a été
+	sauvegardé : un conflit coûte au pire une récompense non versée, jamais une récompense
+	versée deux fois."""
+	recompense = pnj.recompense_relation_de(pnj_doc, noeud_id)
+	if not recompense or pnj.relation_deja_versee(character, recompense["cle"]):
+		return None
+	# `lieu` absent = le lieu où l'on parle : c'est le cas courant, et c'est ce qui rend le
+	# bloc réutilisable tel quel dans le dialogue d'un autre PNJ.
+	lieu_id = recompense["lieu"] or (lieu_doc or {}).get("_id")
+	if not lieu_id:
+		return None
+	pnj.marquer_relation_versee(character, recompense["cle"], quetes.now_epoch())
+	return {"lieu_id": lieu_id, "delta": recompense["delta"]}
+
+
+def _crediter_relation(character: dict, gain: dict, reponse: dict) -> None:
+	"""Applique le delta au doc `relation` visé et publie de quoi rafraîchir l'onglet 🤝.
+	Le doc `relation` est ANNEXE (hors character) : sauvé ici, best-effort, comme dans
+	`transport.reussir_transport`.
+
+	⚠️ `relations_lieux_payload` relit TOUS les docs relation et un doc lieu complet par lieu
+	connu : il n'est calculé que quand une relation a réellement bougé (cf. le même arbitrage
+	dans les endpoints du marchand)."""
+	lieu = get_doc(gain["lieu_id"]) or {"_id": gain["lieu_id"]}
+	relation = get_relation(character, lieu)
+	valeur = ajuster_relation(relation, gain["delta"])
+	save_doc(relation)
+	reponse["relation_gain"] = {
+		"lieu": gain["lieu_id"],
+		"nom": lieu.get("label") or lieu.get("nom") or "",
+		"delta": gain["delta"],
+		"valeur": valeur,
+	}
+	reponse["relations_lieux"] = relations_lieux_payload(character)
+
+
+def _appliquer_effets_noeud(character: dict, pnj_doc: dict, lieu_doc: dict | None,
+							noeud_id: str, reponse: dict, armer: bool) -> bool:
+	"""Effets de bord du RENDU d'un nœud, dans l'ordre : verser sa récompense de relation,
+	LEVER celles qu'il rouvre (`relation_reinit`), puis armer son délai de réouverture.
+	Renvoie True si le contexte doit être reconstruit avant de rendre le nœud.
+
+	⚠️ Verser d'abord, lever ensuite : un nœud peut ainsi récompenser ET se rouvrir lui-même.
+	⚠️ `armer=False` au GET — un `delai_min` porté par le nœud de départ verrouillerait le PNJ
+	dès la première ouverture (cf. utils/pnj, section Délai de réouverture). La RÉCOMPENSE, elle,
+	s'applique des deux côtés : c'est le seul moyen qu'un nœud d'accueil paie la première visite,
+	et le garde d'unicité rend les ouvertures suivantes inertes.
+	⚠️ Le character est ANNEXE ici (un service vient peut-être de le sauver et c'est lui qui
+	portait l'autorité) : sauvegarde best-effort, jamais de 409. La levée, elle, est MUETTE —
+	aucun payload, aucun toast : le joueur n'a pas à savoir qu'un compteur s'est rouvert."""
+	gain = _verser_relation_noeud(character, pnj_doc, lieu_doc, noeud_id)
+	oublie = pnj.oublier_relations_versees(
+		character, pnj.relations_a_reinitialiser(pnj_doc, noeud_id))
+	armee = pnj.armer_delai(character, pnj_doc.get("_id"), pnj_doc, noeud_id,
+						   quetes.now_epoch()) if armer else None
+	if not (gain or oublie or armee):
+		return False
+	if save_doc(character) is not None and gain:
+		_crediter_relation(character, gain, reponse)
+	return bool(gain or armee)
+
+
 def _sauver_compagnie(recap: dict) -> None:
 	"""Persiste les docs `aventurier:*` que `quetes.appliquer_recompenses` a crédités de la
 	MÊME XP que le principal (compagnons ENGAGÉS DURABLEMENT seulement).
@@ -290,13 +358,20 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)])
 	# verrouillerait le PNJ dès la première ouverture — c'est une faute que le linter signale.
 	depart = pnj.noeud_depart_effectif(
 		pnj_doc, pnj.delai_restant(character, pnj_doc.get("_id"), quetes.now_epoch()))
-	return {
-		"pnj": pnj.pnj_payload(entree, pnj_doc),
-		"noeud": pnj.noeud_client(pnj_doc, depart, contexte, pnj.soin_effectif(pnj_doc, contexte)),
+	reponse = {
 		# Une course a pu périmer en ouvrant le dialogue : la sanction de réputation est déjà
 		# appliquée en base, l'onglet 🤝 (rendu client) doit la voir.
 		"relations_lieux": relations_lieux_payload(character) if echues else None,
 	}
+	# Le nœud d'ouverture peut porter une récompense de relation (jamais un armement de délai :
+	# il se verrouillerait lui-même). Si elle est versée, les conditions `relation_min` de ses
+	# propres choix doivent être filtrées sur la NOUVELLE cote.
+	if _appliquer_effets_noeud(character, pnj_doc, lieu_doc, depart, reponse, armer=False):
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+	reponse["pnj"] = pnj.pnj_payload(entree, pnj_doc)
+	reponse["noeud"] = pnj.noeud_client(pnj_doc, depart, contexte,
+										pnj.soin_effectif(pnj_doc, contexte))
+	return reponse
 
 
 @pnj_router.post("/pnj/dialogue/choix")
@@ -427,15 +502,14 @@ async def pnj_dialogue_choix(
 		link_id = _lien_vers(current_user, character.get("lieu"), choix["deplacer"])
 		if link_id:
 			reponse["deplacer"] = link_id
-	# Le nœud qu'on s'apprête à rendre ferme-t-il le dialogue pour un temps ? Le moteur ne
-	# connaît aucune « fin » (cf. utils/pnj, section Délai de réouverture) : le délai s'arme au
-	# RENDU du nœud qui le porte. Le doc personnage est ici ANNEXE — un service vient peut-être
-	# de le sauver et c'est lui qui portait l'autorité — donc best-effort, jamais de 409.
-	if pnj.armer_delai(character, pnj_doc.get("_id"), pnj_doc, suivant, quetes.now_epoch()):
-		save_doc(character)
+	# Effets de bord du nœud qu'on s'apprête à rendre : sa récompense de relation, la levée
+	# qu'il déclare, et son délai de réouverture. Le moteur ne connaît aucune « fin » (cf.
+	# utils/pnj) : tout cela s'arme au RENDU du nœud qui le porte.
+	if _appliquer_effets_noeud(character, pnj_doc, lieu_doc, suivant, reponse, armer=True):
 		# Même raison que les branches de service ci-dessus : sans reconstruction, le nœud qui
 		# arme le délai afficherait {attente} en clair et filtrerait ses propres choix sur le
-		# flag périmé. Les placeholders de l'action sont réinjectés par-dessus, comme elles.
+		# flag périmé — et celui qui vient d'offrir de la réputation les filtrerait sur la cote
+		# d'avant. Les placeholders de l'action sont réinjectés par-dessus, comme elles.
 		dits_courants = dict(contexte.get("placeholders") or {})
 		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 		contexte["placeholders"].update(dits_courants)

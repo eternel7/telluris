@@ -42,6 +42,12 @@ from utils import quetes
 TIER_MAX = "max"
 TIER_MAX_MOINS_1 = "max_moins_1"
 
+# Marge de sécurité, en cases, entre la position d'une chasse et le bord de la carte : le joueur
+# doit pouvoir tourner autour de la case cible (zone 3×3 de `dans_zone_chasse`) sans buter sur le
+# vide, et l'overlay 🗺️ recadre une fenêtre CENTRÉE dessus — collée au bord, elle serait à moitié
+# hors image.
+MARGE_BORDS = 2
+
 
 def est_comptoir(lieu_doc: dict) -> bool:
 	"""Le lieu est-il un comptoir de guilde (donneur des quêtes de RANG) ?"""
@@ -84,8 +90,86 @@ def _zones_de_lespece(lieu_doc: dict, espece_id: str) -> set:
 	}
 
 
+def _borner_axe(v: int, taille: int, marge: int) -> int:
+	"""Coordonnée ramenée dans `[marge, taille−1−marge]`. ⚠️ Sur une carte trop étroite pour la
+	marge (intervalle vide), on retombe sur le MILIEU de l'axe plutôt que de croiser les bornes :
+	mieux vaut une case centrale qu'une case hors grille."""
+	hi = taille - 1 - marge
+	if hi < marge:
+		return max(0, (taille - 1) // 2)
+	return max(marge, min(hi, v))
+
+
+def borner_position(pos: dict | None, dimensions: dict | None, marge: int = MARGE_BORDS) -> dict | None:
+	"""Position `{x,y}` ramenée DANS la grille du lieu, à `marge` cases des bords.
+	`dimensions` = comptes de cases (`{"x":86,"y":48}` ⇒ indices valides 0..85 / 0..47) — convention
+	de `combat._iter_cells` et du client, pas la borne inclusive de `move_character`.
+	`pos` à None (objectif sans position) ou `dimensions` absentes/nulles ⇒ renvoyé tel quel."""
+	if not pos or not dimensions:
+		return pos
+	w, h = int(dimensions.get("x", 0) or 0), int(dimensions.get("y", 0) or 0)
+	if w <= 0 or h <= 0:
+		return pos
+	return {
+		"x": _borner_axe(int(pos.get("x", 0)), w, marge),
+		"y": _borner_axe(int(pos.get("y", 0)), h, marge),
+	}
+
+
+def _anneau(x0: int, y0: int, r: int):
+	"""Cases à distance de Chebyshev EXACTEMENT `r` de (x0, y0), sans doublon (`r=0` → le centre).
+	Ne parcourt que le PÉRIMÈTRE de l'anneau : la recherche en spirale reste en O(rayon²) au total
+	au lieu de l'O(rayon³) d'un balayage carré par rayon."""
+	if r <= 0:
+		yield (x0, y0)
+		return
+	for dx in range(-r, r + 1):
+		yield (x0 + dx, y0 - r)
+		yield (x0 + dx, y0 + r)
+	for dy in range(-r + 1, r):
+		yield (x0 - r, y0 + dy)
+		yield (x0 + r, y0 + dy)
+
+
+def case_praticable_proche(pos: dict | None, lieu_doc: dict, marge: int = MARGE_BORDS) -> dict | None:
+	"""Case PRATICABLE la plus proche de `pos` (spirale de Chebyshev), sans jamais sortir de la
+	fenêtre `[marge, dim−1−marge]` — un point borné ne doit pas être repoussé contre le bord par
+	la recherche.
+
+	Praticabilité déléguée à `combat._walkable` (`>= 1` et pas une falaise), **source unique** du
+	terrain franchissable : c'est déjà le prédicat du déplacement joueur en exploration, via l'A*
+	de `focalisation.direction_vers`. Import PARESSEUX, comme là-bas — `utils.combat` importe
+	`utils.quetes`, dont dépend ce module, et `chasse` tient à ne pas tirer le moteur de combat.
+
+	⚠️ Repli sur `pos` INCHANGÉE si le lieu n'a pas de `cells` ou si la fenêtre n'offre aucune case
+	praticable : la position reste bornée (comportement d'avant), on ne supprime jamais la quête
+	pour autant. Une carte dont les `cells` manquent ou sont toutes bloquées est un problème
+	d'authoring — le prix à payer ne doit pas être la disparition silencieuse des chasses.
+	⚠️ La case rendue est praticable, pas forcément DANS la forme de la zone ni CONNECTÉE à la
+	région du joueur (`nav` et enclaves ignorés) — cf. la limitation documentée dans CLAUDE.md."""
+	cells = (lieu_doc or {}).get("cells")
+	if not pos or not cells or not cells[0]:
+		return pos
+	from utils.combat import _walkable  # import paresseux (cf. focalisation.direction_vers)
+	# Fenêtre autorisée dérivée de la grille RÉELLE, la seule que `_walkable` sait indexer.
+	w, h = len(cells[0]), len(cells)
+	lo_x, hi_x = _borner_axe(0, w, marge), _borner_axe(w - 1, w, marge)
+	lo_y, hi_y = _borner_axe(0, h, marge), _borner_axe(h - 1, h, marge)
+	x0, y0 = int(pos.get("x", 0)), int(pos.get("y", 0))
+	# Rayon max = distance de Chebyshev au coin le plus éloigné de la fenêtre → celle-ci est
+	# balayée ENTIÈREMENT avant de renoncer, même si `dimensions` et `cells` se contredisent
+	# (le point de départ est alors hors de la grille réelle).
+	rmax = max(abs(x0 - lo_x), abs(x0 - hi_x), abs(y0 - lo_y), abs(y0 - hi_y))
+	for r in range(0, rmax + 1):
+		for x, y in _anneau(x0, y0, r):
+			if lo_x <= x <= hi_x and lo_y <= y <= hi_y and _walkable(cells, x, y):
+				return {"x": x, "y": y}
+	return pos
+
+
 def position_de_chasse(lieu_doc: dict, espece_doc: dict) -> dict | None:
-	"""Centre `{x,y}` d'un placement d'une zone qui CONTIENT l'espèce (tiré au hasard), pour
+	"""Centre `{x,y}` d'un placement d'une zone qui CONTIENT l'espèce (tiré au hasard), BORNÉ à la
+	grille du lieu à `MARGE_BORDS` cases des bords puis ramené sur une case PRATICABLE, pour
 	stocker dans l'objectif et résoudre le grade. `None` si le lieu n'a pas de grille
 	(`dimensions`) ou si aucune zone de l'espèce n'est placée."""
 	if not lieu_doc or not lieu_doc.get("dimensions"):
@@ -99,7 +183,16 @@ def position_de_chasse(lieu_doc: dict, espece_doc: dict) -> dict | None:
 	if not placements:
 		return None
 	p = random.choice(placements)
-	return {"x": p.get("x", 0), "y": p.get("y", 0)}
+	# ⚠️ Le centre d'un placement n'est PAS garanti dans la grille : une zone d'influence peut
+	# légitimement déborder du bord (bbox négatives fréquentes), et rien ne valide les bornes ni
+	# dans l'éditeur ni dans `PUT /lieu/{id}/zone_influences`. `lieu:auxerre` porte ainsi un
+	# placement centré en x=86 sur une carte de 86 cases : la chasse envoyait le joueur sur une
+	# case fantôme, hors image.
+	pos = borner_position({"x": p.get("x", 0), "y": p.get("y", 0)}, lieu_doc.get("dimensions"))
+	# ⚠️ Borner ne suffit pas : une case DANS la carte peut être un mur ou une falaise, et le
+	# joueur ne pourrait alors jamais entrer dans le 3×3 de `dans_zone_chasse`. On repart donc
+	# sur la case praticable la plus proche.
+	return case_praticable_proche(pos, lieu_doc)
 
 
 def _profils_compatibles(lieu_doc: dict, espece_doc: dict, position: dict | None, get_doc_fn) -> list:
@@ -121,7 +214,10 @@ def _profils_compatibles(lieu_doc: dict, espece_doc: dict, position: dict | None
 		]
 		# Si aucun placement de la cible n'est actif au point tiré, on retombe sur tous
 		# les placements de l'espèce (le point est le centre de l'un d'eux, mais un point
-		# hors des autres formes ne doit pas rétrécir la distribution à vide).
+		# hors des autres formes ne doit pas rétrécir la distribution à vide). C'est aussi
+		# ce repli qui absorbe le BORNAGE de `position_de_chasse` : un centre ramené dans la
+		# grille peut sortir de sa propre forme (zone débordant du bord de carte), et le grade
+		# doit rester celui des placements de l'espèce.
 		placements = actifs or placements
 	pw = resolve_profil_weights(placements, lieu_doc)
 	if not pw:
