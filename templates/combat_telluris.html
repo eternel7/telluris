@@ -1518,6 +1518,66 @@ function jouerVfx(v) {
 	});
 }
 
+// ─── Révélation différée : c'est le JOURNAL qui commande l'affichage ──────────
+// Le serveur résout tout d'un bloc (un tour de monstre entier arrive dans UNE réponse).
+// Appliquer l'état final dès la réponse montrerait le résultat AVANT le coup : le monstre
+// déjà arrivé, les PV déjà tombés, la bête déjà couchée au moment où la ligne s'écrit.
+// Les champs que le client PEINT sont donc rembobinés à leur valeur d'avant, puis dégelés
+// ligne par ligne par la clé `etat` posée sur l'entrée de journal (jumelle de `vfx`, et
+// pour la même raison : le journal est le seul canal capable de porter la chronologie).
+const CHAMPS_ETAT = ['currentPV', 'currentPM', 'vivant', 'morte', 'pos', 'facing'];
+let etatFinal   = null;   // vérité mise de côté pendant la révélation (filet de réconciliation)
+let finDeCombat = null;   // overlay de fin, en attente de la fin du journal
+
+function _acteursParId(data) {
+	const m = new Map();
+	(data.joueurs || []).forEach(a => m.set(a.id, a));
+	(data.monstres || []).forEach(a => m.set(a.id, a));
+	return m;
+}
+function _lireEtat(a) {
+	const v = {};
+	if (!a) return v;
+	CHAMPS_ETAT.forEach(k => { if (k in a) v[k] = (k === 'pos' && a[k]) ? { ...a[k] } : a[k]; });
+	return v;
+}
+function _ecrireEtat(a, v) { if (a && v) Object.assign(a, v); }
+
+// Gèle les acteurs que les NOUVELLES lignes vont expliquer : leur affichage repart de la
+// valeur d'avant, la vraie est mise de côté pour la réconciliation de fin de file.
+// ⚠️ À appeler avec l'ancien `state` en main et AVANT enqueueLogs — seul à faire avancer
+// logLen. Un acteur qu'aucune ligne ne nomme n'est PAS gelé : il suit l'état final tout de
+// suite, comme avant. Une couverture partielle dégrade donc vers « immédiat », pas vers « faux ».
+function _gelerActeurs(avant, data) {
+	const geles = new Set();
+	data.log.slice(logLen).forEach(e => Object.keys(e.etat || {}).forEach(id => geles.add(id)));
+	etatFinal = new Map();
+	if (!geles.size) return;
+	_acteursParId(data).forEach((a, id) => {
+		if (!geles.has(id) || !avant.has(id)) return;
+		etatFinal.set(id, _lireEtat(a));              // la vérité, restituée en fin de file
+		_ecrireEtat(a, _lireEtat(avant.get(id)));     // l'affichage, rembobiné
+	});
+}
+
+// Repeint tout ce qui dépend des champs gelés : vitaux du membre actif, portrait ennemi,
+// bandeau d'initiative, jetons, caméra. ⚠️ renderTokens et updateCamera vont ENSEMBLE —
+// les jetons sont placés relativement à me().pos, bouger l'un sans l'autre décalerait
+// toute la carte d'une case.
+function _rafraichirAffichage() {
+	updateJoueur(activePlayer(state));
+	renderEnemyPortrait(state);
+	updateInitiativeStrip(state);
+	renderTokens();
+	updateCamera();
+}
+function _appliquerEtat(etat) {
+	if (!etat) return;
+	const par = _acteursParId(state);
+	Object.entries(etat).forEach(([id, v]) => _ecrireEtat(par.get(id), v));
+	_rafraichirAffichage();
+}
+
 let logQueue  = [];
 let revealing = false;
 function enqueueLogs(log) {
@@ -1525,11 +1585,10 @@ function enqueueLogs(log) {
 	logLen = log.length;
 	if (!revealing) revealNext();
 }
-async function revealNext() {
-	if (!logQueue.length) { revealing = false; return; }
-	revealing = true;
-	const entry = logQueue.shift();
-	// Un coup porté par un monstre fait passer son portrait au panneau droit.
+
+// Écrit une ligne dans le journal (et fait passer au panneau droit le portrait du monstre
+// qui vient de frapper).
+function _ecrireLigne(entry) {
 	if ((entry.kind === 'hit' || entry.kind === 'crit')
 		&& entry.acteur && !playerNames().includes(entry.acteur)) {
 		const m = state.monstres.find(x => x.nom === entry.acteur);
@@ -1541,13 +1600,53 @@ async function revealNext() {
 	div.textContent = entry.texte || '';
 	container.appendChild(div);
 	container.scrollTop = container.scrollHeight;
-	// Le journal ATTEND la fin de l'animation : chaque coup se lit ET se voit. Une seule
-	// animation à la fois, donc — pas de superposition, c'est le choix retenu.
-	// ⚠️ Le rythme total d'une ligne est `max(450, duree)`, pas `duree + 450` : l'attente
-	// de l'animation est DÉJÀ passée quand on arrive ici, la déduire est ce qui empêche
-	// une ligne animée de durer deux fois plus longtemps qu'annoncé.
-	const duree = entry.vfx ? await jouerVfx(entry.vfx) : 0;
+}
+
+async function revealNext() {
+	if (!logQueue.length) { revealing = false; _finDeRevelation(); return; }
+	revealing = true;
+	const entry = logQueue.shift();
+	let duree = 0;
+	try {
+		// 1. le coup se VOIT — 2. puis se lit — 3. puis se paie (jeton, PV, PM).
+		duree = entry.vfx ? await jouerVfx(entry.vfx) : 0;
+		_ecrireLigne(entry);
+		_appliquerEtat(entry.etat);
+	} catch (e) {
+		// ⚠️ Filet indispensable : sans lui, une exception laisserait `revealing` à true,
+		// donc les commandes verrouillées définitivement.
+		console.error('révélation du journal :', e);
+	}
+	// ⚠️ Plus rien à révéler ⇒ on rend la main SANS attendre la pause de lecture : elle
+	// sépare deux lignes, elle n'a rien à séparer ici. Sans cette sortie, chaque pas du
+	// joueur (une seule ligne, aucune animation) coûterait 450 ms de commandes verrouillées.
+	if (!logQueue.length) { revealing = false; _finDeRevelation(); return; }
+	// Une seule animation à la fois — pas de superposition, c'est le choix retenu.
+	// ⚠️ Le rythme d'une ligne est `max(450, duree)` et non `duree + 450` : l'attente de
+	// l'animation est DÉJÀ passée ici, la déduire empêche une ligne animée de durer deux
+	// fois plus longtemps qu'annoncé.
 	setTimeout(revealNext, Math.max(0, 450 - duree));
+}
+
+// File vidée : on restitue l'état autoritatif (aucune divergence durable possible, même si
+// une ligne n'a pas porté son `etat`), on rend la main au joueur, et l'overlay de fin peut
+// enfin s'afficher — pas pendant que les coups s'animent encore.
+function _finDeRevelation() {
+	if (etatFinal && etatFinal.size && window._combatReady) {
+		const par = _acteursParId(state);
+		etatFinal.forEach((v, id) => _ecrireEtat(par.get(id), v));
+		_rafraichirAffichage();
+	}
+	etatFinal = null;
+	if (!window._combatReady) return;
+	updateButtons(state);
+	refreshTargetSelect();
+	refreshBadgeTargets();
+	if (finDeCombat) {
+		const fin = finDeCombat;
+		finDeCombat = null;
+		setTimeout(() => showEndOverlay(fin.status, fin.xp), 700);
+	}
 }
 
 // Message système immédiat (hors file d'animation du log) : sert aux refus d'édition
@@ -1738,6 +1837,16 @@ function dirAvailable(data, sdx, sdy) {
 }
 
 function updateButtons(data) {
+	// ⚠️ Pendant la révélation du journal, l'affichage RETARDE volontairement sur l'état
+	// autoritatif : une cible peut être peinte debout alors qu'elle est déjà morte côté
+	// serveur. On garde donc la main jusqu'au bout de la file — c'est _finDeRevelation qui
+	// rallume tout (et `doAction` qui couvre les jetons/badges, dont le clic ne passe pas
+	// par `disabled`).
+	if (revealing) {
+		document.querySelectorAll('#move-controls .btn, .action-btn, .slot-btn')
+			.forEach(el => el.disabled = true);
+		return;
+	}
 	const j        = activePlayer(data);
 	const isPlayer = isPlayerTurn(data);
 	const isActive = data.status === 'active';
@@ -1818,7 +1927,12 @@ async function syncActorResources() {
 }
 
 function updateUI(data) {
+	// Ce qui est PEINT (vitaux, mort, position) est gelé à sa valeur d'avant pour les
+	// acteurs que les nouvelles lignes de journal vont expliquer : `avant` doit donc être
+	// lu sur l'état actuellement AFFICHÉ, et le gel posé avant tout rendu.
+	const avant = _acteursParId(state);
 	state = data;
+	_gelerActeurs(avant, data);
 	// Changement d'acteur (le monde re-pivote autour du nouveau membre actif).
 	const act = activePlayer(data) || {};
 	if (act.id && act.id !== lastActorId) {
@@ -1837,12 +1951,13 @@ function updateUI(data) {
 	renderTokens();
 	refreshBadgeTargets();
 	updateCamera();
+	// ⚠️ Posé AVANT enqueueLogs : si la file se vide dans la foulée (aucune ligne neuve),
+	// c'est _finDeRevelation qui déclenche l'overlay. Il ne doit jamais s'ouvrir pendant
+	// que les derniers coups s'animent encore.
+	finDeCombat = data.status !== 'active' ? { status: data.status, xp: data.xp_gagnee } : null;
 	enqueueLogs(data.log);
 	updateButtons(data);
 	refreshTargetSelect();
-	if (data.status !== 'active') {
-		setTimeout(() => showEndOverlay(data.status, data.xp_gagnee), 700);
-	}
 }
 
 // ─── Actions ─────────────────────────────────────────────────────
@@ -2276,7 +2391,10 @@ async function postSlots(url, body) {
 // de `resolve_action` revient en 200 avec `action_result.error` — c'est ce champ qu'un
 // appelant doit tester, pas le seul statut HTTP (cf. toggleSlotEdit).
 async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode = null, extra = null) {
-	if (busy) return null;
+	// `revealing` : le journal n'a pas fini de s'égrener, donc ce que le joueur VOIT n'est
+	// pas encore l'état du serveur. Les onclick des jetons et des badges ne passant pas par
+	// `disabled`, ce garde-ci est le seul qui les couvre.
+	if (busy || revealing) return null;
 	closeSelectors();
 	// Le portrait droit suit la cible que le joueur attaque (ou vise d'un sort/compétence).
 	if ((type === 'attaquer' || type === 'sort' || type === 'competence') && cibleId) lastEnemyId = cibleId;

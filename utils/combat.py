@@ -205,6 +205,41 @@ def _avec_vfx(entree: dict, canal: str, cible_id: str, source_anim=None, acteur_
 	return entree
 
 
+# Champs d'un snapshot que le CLIENT PEINT, et qui doivent donc attendre la ligne de
+# journal qui les explique : vitalité, mort, position. Tout le reste (compteurs d'action,
+# effets, détection, charge) suit l'état autoritatif immédiatement.
+CHAMPS_ETAT = ("currentPV", "currentPM", "vivant", "morte", "pos", "facing")
+
+
+def _avec_etat(entree: dict, *acteurs: dict) -> dict:
+	"""Ajoute à une entrée de journal l'état des acteurs QU'ELLE VIENT DE CHANGER.
+
+	Même canal et même motif que `_avec_vfx`, pour la même raison : le journal ne porte
+	aucun id, et un tour de monstre est entièrement résolu avant la réponse HTTP. Sans
+	cette charge, le client ne peut pas savoir quelle ligne explique quelle perte de PV —
+	il n'a d'autre choix que de tout appliquer d'un bloc, donc AVANT les animations, et le
+	joueur voit le résultat avant le coup.
+
+	⚠️ À appeler APRÈS la mutation : on photographie l'acteur tel qu'il est, pas un delta.
+	⚠️ `pos` est COPIÉ — le snapshot garde son dict d'un pas à l'autre.
+	⚠️ Un acteur qu'AUCUNE entrée ne nomme n'est jamais gelé côté client : il suit l'état
+	final tout de suite. Une couverture partielle dégrade donc vers « immédiat », jamais
+	vers « faux ». Clé absente si aucun acteur (un combat déjà en base tourne à l'identique).
+	"""
+	etat: dict = {}
+	for acteur in acteurs:
+		aid = str((acteur or {}).get("id") or "")
+		if not acteur or not aid:
+			continue
+		vue = {k: acteur[k] for k in CHAMPS_ETAT if k in acteur}
+		if isinstance(vue.get("pos"), dict):
+			vue["pos"] = dict(vue["pos"])
+		etat[aid] = vue
+	if etat:
+		entree["etat"] = etat
+	return entree
+
+
 def _appliquer_effet_sur_cible(combat_doc: dict, cible: dict, source: dict,
 							   effets: dict, tour: int, hostile: bool = True) -> dict | None:
 	"""Empile la part à durée d'un sort/compétence OFFENSIF sur la CIBLE touchée.
@@ -225,14 +260,16 @@ def _appliquer_effet_sur_cible(combat_doc: dict, cible: dict, source: dict,
 	entry = _empiler_effet_combat(cible, source, effets, tour)
 	if not entry:
 		return None
-	combat_doc.setdefault("log", []).append(_avec_vfx({
+	# `cible` en état : poser l'effet est passé par _refresh_snapshot_stats, qui re-clampe
+	# ses PV/PM (un debuff de R abaisse pv_max).
+	combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
 		"tour": int(tour or 0),
 		"acteur": cible.get("nom", "?"),
 		"kind": "sys",
 		"texte": f"{entry.get('icon', '✨')} {cible.get('nom', '?')} "
 				 f"{'subit' if hostile else 'bénéficie de'} "
 				 f"{entry.get('nom', 'un effet')} ({entry['restants']} tour(s)).",
-	}, "debuff" if hostile else "buff", cible.get("id", "")))
+	}, "debuff" if hostile else "buff", cible.get("id", "")), cible))
 	return entry
 
 
@@ -310,13 +347,16 @@ def _lancer_sur_allie(combat_doc: dict, lanceur: dict, cible: dict, source: dict
 		f"+{pm_rendu} PM" if pm_rendu else "",
 		f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
 	) if s) or "aucun effet"
-	combat_doc.setdefault("log", []).append(_avec_vfx({
+	# ⚠️ Le LANCEUR n'est pas en état : ses PM sont débités par l'appelant APRÈS ce retour
+	# (branche `sort`/`competence` de resolve_action). Le nommer ici gèlerait son affichage
+	# sur une valeur d'avant le débit ; ne pas le nommer le laisse suivre l'état final.
+	combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
 		"tour": combat_doc["tour"],
 		"acteur": lanceur["nom"],
 		"kind": "sys",
 		"texte": f"{lanceur['nom']} lance {source.get('nom', 'un effet')} "
 				 f"sur {cible['nom']} ({gains}).",
-	}, "soin", cible.get("id", ""), (source or {}).get("animation"), lanceur.get("id", "")))
+	}, "soin", cible.get("id", ""), (source or {}).get("animation"), lanceur.get("id", "")), cible))
 	return {
 		"cible": cible["nom"], "cible_id": cible.get("id"),
 		"cible_pv": cible["currentPV"], "cible_pv_max": cible.get("pv_max"),
@@ -350,10 +390,10 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 			f"+{acteur['currentPM'] - avant_pm} PM" if acteur["currentPM"] != avant_pm else "",
 		) if s)
 		if gains:
-			combat_doc.setdefault("log", []).append({
+			combat_doc.setdefault("log", []).append(_avec_etat({
 				"tour": tour, "acteur": acteur.get("nom", "?"), "kind": "sys",
 				"texte": f"{acteur.get('nom', '?')} régénère ({gains}).",
-			})
+			}, acteur))
 
 	# 2. Décrément + purge. Une entrée posée CE tour-ci est épargnée.
 	restants, expires = [], []
@@ -365,16 +405,18 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 		(restants if eff["restants"] > 0 else expires).append(eff)
 	acteur["effets_actifs"] = restants
 
+	# 3. Les dérivées suivent (un buff expiré doit cesser de compter immédiatement).
+	# ⚠️ AVANT les lignes de dissipation : elles portent l'état de l'acteur, qui n'est
+	# arrêté qu'une fois les max recalculés et les PV/PM re-clampés.
+	if expires:
+		_refresh_snapshot_stats(acteur)
+
 	for eff in expires:
-		combat_doc.setdefault("log", []).append(_avec_vfx({
+		combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
 			"tour": tour, "acteur": acteur.get("nom", "?"), "kind": "sys",
 			"texte": f"{eff.get('icon', '✨')} {eff.get('nom', 'Effet')} se dissipe "
 					 f"({acteur.get('nom', '?')}).",
-		}, "dissipation", acteur.get("id", "")))
-
-	# 3. Les dérivées suivent (un buff expiré doit cesser de compter immédiatement).
-	if expires:
-		_refresh_snapshot_stats(acteur)
+		}, "dissipation", acteur.get("id", "")), acteur))
 
 
 # ── Grille de combat ─────────────────────────────────────────────────────────
@@ -1415,7 +1457,10 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 		defenseur["currentPV"] = max(0, defenseur["currentPV"] - dmg)
 		# Un tour de monstre est entièrement résolu côté serveur : sans cette charge sur
 		# l'entrée de journal, un coup encaissé par le joueur ne pourrait jamais s'animer.
-		combat_doc["log"].append(_avec_vfx({
+		# ⚠️ L'ATTAQUANT est en état lui aussi, alors que ses PV ne bougent pas : c'est sa
+		# POSITION qui compte. Un prédateur qui fond sur sa proie (_chasse_ou_erre) n'écrit
+		# aucune ligne de déplacement — sans lui ici, il n'aurait aucune ligne où arriver.
+		combat_doc["log"].append(_avec_etat(_avec_vfx({
 			"tour": combat_doc["tour"],
 			"acteur": attaquant["nom"],
 			"kind": "crit" if jet["critique"] else "hit",
@@ -1426,24 +1471,26 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 				f"{attaquant['nom']} touche {defenseur['nom']} pour {dmg} dégâts ! "
 				f"(PV : {defenseur['currentPV']}/{defenseur['pv_max']})"
 			),
-		}, "monstre", defenseur.get("id", ""), attaquant.get("animation"), attaquant.get("id", "")))
+		}, "monstre", defenseur.get("id", ""), attaquant.get("animation"), attaquant.get("id", "")),
+			attaquant, defenseur))
 		if defenseur["currentPV"] <= 0:
 			if est_joueur:
 				# KO d'un membre du groupe : le combat continue tant qu'il reste un
 				# joueur debout — la défaite n'arrive que TOUS à terre.
 				est_monture = defenseur.get("est_monture")
-				combat_doc["log"].append({
+				# La cargaison vit sur le DOC de la monture, pas sur son snapshot : on se
+				# contente de la marquer ici, `finalize_combat` déversera son sac dans le
+				# butin disponible (là où le doc est chargé, et sauvé).
+				# ⚠️ Marqué AVANT la ligne, qui porte l'état de la monture (`morte`).
+				if est_monture:
+					defenseur["morte"] = True
+				combat_doc["log"].append(_avec_etat({
 					"tour": combat_doc["tour"],
 					"acteur": "Système",
 					"kind": "sys",
 					"texte": (f"{defenseur['nom']} s'effondre — sa charge se répand au sol !"
 							  if est_monture else f"{defenseur['nom']} est à terre !"),
-				})
-				# La cargaison vit sur le DOC de la monture, pas sur son snapshot : on se
-				# contente de la marquer ici, `finalize_combat` déversera son sac dans le
-				# butin disponible (là où le doc est chargé, et sauvé).
-				if est_monture:
-					defenseur["morte"] = True
+				}, defenseur))
 				# ⚠️ `_combattants_vivants` et non la liste brute : une monture debout ne
 				# doit pas empêcher la défaite d'être déclarée (plus personne ne joue).
 				if not _combattants_vivants(combat_doc):
@@ -1460,15 +1507,17 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 				defenseur["vivant"] = False
 				defenseur["tue_par_monstre"] = True
 				defenseur["xp_reward"] = 0
-				combat_doc["log"].append({
+				combat_doc["log"].append(_avec_etat({
 					"tour": combat_doc["tour"],
 					"acteur": attaquant["nom"],
 					"kind": "kill",
 					"texte": f"{attaquant['nom']} abat {defenseur['nom']} !",
-				})
+				}, defenseur))
 				_check_victory(combat_doc)
 	else:
-		combat_doc["log"].append(_avec_vfx({
+		# Rien n'a changé chez le défenseur, mais l'attaquant vient peut-être d'arriver
+		# (chasse d'une proie, sans ligne de déplacement) : sa position doit se poser ici.
+		combat_doc["log"].append(_avec_etat(_avec_vfx({
 			"tour": combat_doc["tour"],
 			"acteur": attaquant["nom"],
 			"kind": "fumble" if jet["fumble"] else "miss",
@@ -1478,7 +1527,7 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 				f"{attaquant['nom']} rate son attaque ! (jet {roll} / seuil {seuil})"
 			),
 		}, "fumble" if jet["fumble"] else "miss", defenseur.get("id", ""),
-			acteur_id=attaquant.get("id", "")))
+			acteur_id=attaquant.get("id", "")), attaquant))
 		if jet["fumble"]:
 			_appliquer_fumble(combat_doc, attaquant)
 
@@ -1712,12 +1761,12 @@ def _chasse_ou_erre(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			break
 		steps += 1
 	if steps > 0:
-		combat_doc["log"].append({
+		combat_doc["log"].append(_avec_etat({
 			"tour": combat_doc["tour"],
 			"acteur": monstre["nom"],
 			"kind": "move",
 			"texte": f"{monstre['nom']} erre en cherchant du regard ({steps} case(s)).",
-		})
+		}, monstre))
 
 
 def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
@@ -1757,12 +1806,15 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			break
 		steps += 1
 	if steps > 0:
-		combat_doc["log"].append({
+		# Le jeton ne saute plus à sa case d'arrivée dès la réponse : il y glisse quand
+		# cette ligne est révélée, puis frappe. Le chemin case par case n'est pas rejoué
+		# (un seul log `move` agrégé par tour) — c'est un glissement, pas une marche.
+		combat_doc["log"].append(_avec_etat({
 			"tour": combat_doc["tour"],
 			"acteur": monstre["nom"],
 			"kind": "move",
 			"texte": f"{monstre['nom']} avance vers {joueur['nom']} ({steps} case(s)).",
-		})
+		}, monstre))
 
 	# Phase attaque : frapper tant qu'à portée et qu'il reste des actions. Si la cible
 	# tombe (KO) en cours de tour, le monstre se rabat sur le joueur visible suivant.
@@ -1891,12 +1943,12 @@ def resolve_action(
 		joueur["pos"] = {"x": nx, "y": ny}
 		joueur["cells_moved"] += 1
 		_refresh_actions(joueur)
-		combat_doc["log"].append({
+		combat_doc["log"].append(_avec_etat({
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "move",
 			"texte": f"{joueur['nom']} se déplace en [{nx},{ny}].",
-		})
+		}, joueur))
 		result = {"moved": True, "pos": joueur["pos"]}
 
 	elif action_type == "tourner":
@@ -1913,12 +1965,12 @@ def resolve_action(
 		joueur["facing"] = (joueur.get("facing", 0) + sens * 90) % 360
 		joueur["cells_moved"] += 1
 		_refresh_actions(joueur)
-		combat_doc["log"].append({
+		combat_doc["log"].append(_avec_etat({
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "move",
 			"texte": f"{joueur['nom']} pivote ({'droite' if sens > 0 else 'gauche'}).",
-		})
+		}, joueur))
 		result = {"turned": True, "facing": joueur["facing"]}
 
 	elif action_type == "attaquer":
@@ -1972,7 +2024,7 @@ def resolve_action(
 			anim_arme = profil.get("animation")
 			if monstre["currentPV"] <= 0:
 				monstre["vivant"] = False
-				combat_doc["log"].append(_avec_vfx({
+				combat_doc["log"].append(_avec_etat(_avec_vfx({
 					"tour": combat_doc["tour"],
 					"acteur": joueur["nom"],
 					"kind": "kill",
@@ -1981,9 +2033,10 @@ def resolve_action(
 						if jet["critique"] else
 						f"{joueur['nom']} élimine {monstre['nom']} !"
 					),
-				}, profil.get("mode", "cac"), monstre.get("id", ""), anim_arme, joueur.get("id", "")))
+				}, profil.get("mode", "cac"), monstre.get("id", ""), anim_arme, joueur.get("id", "")),
+					monstre))
 			else:
-				combat_doc["log"].append(_avec_vfx({
+				combat_doc["log"].append(_avec_etat(_avec_vfx({
 					"tour": combat_doc["tour"],
 					"acteur": joueur["nom"],
 					"kind": "crit" if jet["critique"] else "hit",
@@ -1994,7 +2047,8 @@ def resolve_action(
 						f"{joueur['nom']} touche {monstre['nom']} pour {dmg} dégâts ! "
 						f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
 					),
-				}, profil.get("mode", "cac"), monstre.get("id", ""), anim_arme, joueur.get("id", "")))
+				}, profil.get("mode", "cac"), monstre.get("id", ""), anim_arme, joueur.get("id", "")),
+					monstre))
 			# Après la mise à jour de `vivant` : le chokepoint refuse une cible morte.
 			effet_arme = _appliquer_effet_arme(combat_doc, joueur, monstre, profil)
 			result = {"hit": True, "dmg": dmg, "critique": jet["critique"],
@@ -2127,12 +2181,12 @@ def resolve_action(
 			f"+{pm_rendu} PM" if pm_rendu else "",
 			f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
 		) if s) or "aucun effet"
-		combat_doc["log"].append(_avec_vfx({
+		combat_doc["log"].append(_avec_etat(_avec_vfx({
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "sys",
 			"texte": f"{joueur['nom']} consomme {item.get('nom', 'un objet')} ({gains}).",
-		}, "consommable", joueur.get("id", ""), item.get("animation")))
+		}, "consommable", joueur.get("id", ""), item.get("animation")), joueur))
 		result = {"consomme": True, "item": item.get("nom"),
 				  "pv_rendu": pv_rendu, "pm_rendu": pm_rendu, "charge": joueur["charge"],
 				  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
@@ -2236,7 +2290,7 @@ def resolve_action(
 				anim_sort = sdoc.get("animation")
 				if dmg and monstre["currentPV"] <= 0:
 					monstre["vivant"] = False
-					combat_doc["log"].append(_avec_vfx({
+					combat_doc["log"].append(_avec_etat(_avec_vfx({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
 						"kind": "kill",
@@ -2246,9 +2300,9 @@ def resolve_action(
 							if jet["critique"] else
 							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} et élimine {monstre['nom']} !"
 						),
-					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")))
+					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")), joueur, monstre))
 				elif dmg:
-					combat_doc["log"].append(_avec_vfx({
+					combat_doc["log"].append(_avec_etat(_avec_vfx({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
 						"kind": "crit" if jet["critique"] else "hit",
@@ -2260,17 +2314,17 @@ def resolve_action(
 							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {monstre['nom']} "
 							f"subit {dmg} dégâts ! (PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						),
-					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")))
+					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")), joueur, monstre))
 				else:
 					# Sort de pur debuff : il touche sans blesser. La ligne posée juste
 					# après par _appliquer_effet_sur_cible dit ce que la cible encaisse.
-					combat_doc["log"].append(_avec_vfx({
+					combat_doc["log"].append(_avec_etat(_avec_vfx({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
 						"kind": "hit",
 						"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} "
 								 f"sur {monstre['nom']} : le sort prend.",
-					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")))
+					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")), joueur))
 				# Part à DURÉE sur la CIBLE : posée seulement si le sort a TOUCHÉ, et jamais
 				# sur une cible que le même coup vient d'abattre.
 				effet_cible = _appliquer_effet_sur_cible(
@@ -2280,7 +2334,9 @@ def resolve_action(
 						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"],
 						  "effet_cible": dict(effet_cible) if effet_cible else None}
 			else:
-				combat_doc["log"].append(_avec_vfx({
+				# Le lanceur en état : les PM sont débités AVANT le jet (raté = dépensés),
+				# la ligne qui annonce l'échec est donc celle qui doit les faire baisser.
+				combat_doc["log"].append(_avec_etat(_avec_vfx({
 					"tour": combat_doc["tour"],
 					"acteur": joueur["nom"],
 					"kind": "fumble" if jet["fumble"] else "miss",
@@ -2292,7 +2348,7 @@ def resolve_action(
 						f" mais le sort se dissipe ! (jet {roll} / seuil {seuil})"
 					),
 				}, "fumble" if jet["fumble"] else "miss", monstre.get("id", ""),
-					acteur_id=joueur.get("id", "")))
+					acteur_id=joueur.get("id", "")), joueur))
 				result = {"sort": sdoc.get("nom"), "hit": False, "fumble": jet["fumble"],
 						  "roll": roll, "seuil": seuil}
 
@@ -2315,12 +2371,12 @@ def resolve_action(
 				f"+{pm_rendu} PM" if pm_rendu else "",
 				f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
 			) if s) or "aucun effet"
-			combat_doc["log"].append({
+			combat_doc["log"].append(_avec_etat({
 				"tour": combat_doc["tour"],
 				"acteur": joueur["nom"],
 				"kind": "sys",
 				"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} ({gains}).",
-			})
+			}, joueur))
 			# Sort de dissimulation (effets.furtivite > 0) : pose l'état furtif et
 			# remet la détection de tous les monstres à zéro.
 			if int(effets.get("furtivite", 0) or 0) > 0:
@@ -2424,7 +2480,7 @@ def resolve_action(
 				anim_comp = competence.get("animation")
 				if dmg and monstre["currentPV"] <= 0:
 					monstre["vivant"] = False
-					combat_doc["log"].append(_avec_vfx({
+					combat_doc["log"].append(_avec_etat(_avec_vfx({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
 						"kind": "kill",
@@ -2433,9 +2489,10 @@ def resolve_action(
 							if resultat_jet["critique"] else
 							f"{joueur['nom']} utilise {nom} et élimine {monstre['nom']} !"
 						),
-					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")))
+					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")),
+						joueur, monstre))
 				elif dmg:
-					combat_doc["log"].append(_avec_vfx({
+					combat_doc["log"].append(_avec_etat(_avec_vfx({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
 						"kind": "crit" if resultat_jet["critique"] else "hit",
@@ -2446,16 +2503,17 @@ def resolve_action(
 							f"{joueur['nom']} utilise {nom} : {monstre['nom']} subit {dmg} dégâts ! "
 							f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						),
-					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")))
+					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")),
+						joueur, monstre))
 				else:
 					# Compétence de pur debuff : elle touche sans blesser. La ligne posée
 					# juste après par _appliquer_effet_sur_cible dit ce que la cible encaisse.
-					combat_doc["log"].append(_avec_vfx({
+					combat_doc["log"].append(_avec_etat(_avec_vfx({
 						"tour": combat_doc["tour"],
 						"acteur": joueur["nom"],
 						"kind": "hit",
 						"texte": f"{joueur['nom']} utilise {nom} sur {monstre['nom']} : la prise porte.",
-					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")))
+					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")), joueur))
 				# Part à DURÉE sur la CIBLE : posée seulement si la compétence a TOUCHÉ, et
 				# jamais sur une cible que le même coup vient d'abattre.
 				effet_cible = _appliquer_effet_sur_cible(
@@ -2465,7 +2523,7 @@ def resolve_action(
 						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"],
 						  "effet_cible": dict(effet_cible) if effet_cible else None}
 			else:
-				combat_doc["log"].append(_avec_vfx({
+				combat_doc["log"].append(_avec_etat(_avec_vfx({
 					"tour": combat_doc["tour"],
 					"acteur": joueur["nom"],
 					"kind": "fumble" if resultat_jet["fumble"] else "miss",
@@ -2477,7 +2535,7 @@ def resolve_action(
 						f" mais manque son coup ! (jet {roll} / seuil {seuil})"
 					),
 				}, "fumble" if resultat_jet["fumble"] else "miss", monstre.get("id", ""),
-					acteur_id=joueur.get("id", "")))
+					acteur_id=joueur.get("id", "")), joueur))
 				result = {"competence": nom, "hit": False, "fumble": resultat_jet["fumble"],
 						  "roll": roll, "seuil": seuil}
 
@@ -2499,12 +2557,12 @@ def resolve_action(
 				f"+{pm_rendu} PM" if pm_rendu else "",
 				f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
 			) if s) or "aucun effet"
-			combat_doc["log"].append({
+			combat_doc["log"].append(_avec_etat({
 				"tour": combat_doc["tour"],
 				"acteur": joueur["nom"],
 				"kind": "sys",
 				"texte": f"{joueur['nom']} utilise {nom} ({gains}).",
-			})
+			}, joueur))
 			# Compétence de dissimulation (ex. Furtivité de l'assassin) : pose l'état
 			# furtif et remet la détection de tous les monstres à zéro.
 			if int(effets.get("furtivite", 0) or 0) > 0:
