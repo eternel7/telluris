@@ -16,6 +16,7 @@ from utils.characters import (
 from utils import quetes
 from utils import focalisation
 from utils import recrutement
+from utils import escorte
 from utils.marche import debit_character
 from models import character_stats
 
@@ -323,11 +324,20 @@ async def quetes_abandonner(
 	for av in recrutement.groupe_effectif(character, get_doc):
 		recrutement.ajuster_affinite(character, av["_id"],
 									 -abs(character_stats.AFFINITE_DELTA_CONGEDIE))
+	# Une ESCORTE abandonnée laisse des docs `protege:*` accrochés au groupe : ils
+	# continueraient d'apparaître dans les combats et dans le panneau 👥. On les détache
+	# (docs ANNEXES, persistés après le save autoritatif). La sanction de réputation, elle,
+	# vient d'être appliquée juste au-dessus, comme pour n'importe quelle quête.
+	proteges_liberes = []
+	if (q.get("objectif") or {}).get("type") == "escorte":
+		proteges_liberes = escorte.liberer_proteges(character, q, get_doc)
 	character["quetes_actives"] = [
 		a for a in character.get("quetes_actives", []) if a.get("id") != quete_id
 	]
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	for doc in proteges_liberes:
+		save_doc(doc)
 	# À la guilde → payload complet (tableau à jour) ; ailleurs → payload léger (fiche + bourse +
 	# focalisation), suffisant pour resynchroniser l'onglet 📜.
 	payload = _board_payload(character, lieu_doc) if est_guilde else _fiche_payload(character)

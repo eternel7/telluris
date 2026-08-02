@@ -287,6 +287,68 @@ def test_construire_commission_nomme_le_grade_et_le_lieu():
 	assert grade in q["narration"] and "La mine aux cristaux" in q["narration"]
 
 
+# ── Rang de la commission = le rang qui commande son accès ──────────────────────
+
+def _garde_rang(lieu, rang):
+	"""Copie du lieu, gardée par une barrière `rang_min`."""
+	return dict(lieu, acces={"gardien": "pnj:x", "cycle": 1,
+							 "conditions": [{"rang_min": {"cite": "lieu:auxerre",
+														  "rang": rang}}]})
+
+
+def _garde_mandat(lieu):
+	"""Copie du lieu gardée par un MANDAT (pas par un rang) — la barrière réelle de la mine."""
+	return dict(lieu, acces={"gardien": "pnj:x", "cycle": 1,
+							 "conditions": [{"quete_active": {"types": ["chasse"]}}]})
+
+
+def test_rang_commission_defaut_sans_barriere():
+	"""Rétro-compat : aucune barrière de rang ⇒ la valeur historique, rien ne bouge."""
+	assert donjon.rang_commission(BUREAU, MINE) == donjon.RANG_COMMISSION_DEFAUT
+	assert _offre()["rang"] == "D"
+
+
+def test_rang_commission_suit_la_barriere_du_bureau():
+	"""LE cas réel : la mine est gardée par un mandat, c'est le BUREAU qui porte le
+	`rang_min` (la porte de Borin). Lire la seule salle rendrait la règle inerte."""
+	assert donjon.rang_commission(_garde_rang(BUREAU, "E"), _garde_mandat(MINE)) == "E"
+
+
+def test_rang_commission_suit_la_barriere_de_la_salle():
+	assert donjon.rang_commission(BUREAU, _garde_rang(MINE, "C")) == "C"
+
+
+def test_rang_commission_prend_le_plus_eleve_des_deux():
+	"""Le prix d'entrée est la porte la PLUS stricte — un repli en cascade afficherait le
+	plus faible des deux, donc un mensonge."""
+	assert donjon.rang_commission(_garde_rang(BUREAU, "D"), _garde_rang(MINE, "B")) == "B"
+	assert donjon.rang_commission(_garde_rang(BUREAU, "B"), _garde_rang(MINE, "D")) == "B"
+
+
+def test_rang_commission_seuil_illisible_retombe_sur_le_defaut():
+	"""Même bornage que le comparateur : un rang hors échelle ne devient pas un cran inventé."""
+	assert donjon.rang_commission(_garde_rang(BUREAU, "Z"), MINE) == donjon.RANG_COMMISSION_DEFAUT
+
+
+def test_construire_commission_porte_le_rang_de_la_barriere():
+	cible = donjon.tirer_cible(DONJON, get_doc, find_docs)
+	q = donjon.construire_commission(_garde_rang(BUREAU, "E"), cible)
+	assert q["rang"] == "E"
+
+
+def test_le_rang_survit_a_l_acceptation_et_a_l_archivage():
+	"""Le snapshot et l'archive recopient le rang : E de bout en bout."""
+	cible = donjon.tirer_cible(DONJON, get_doc, find_docs)
+	offre = donjon.construire_commission(_garde_rang(BUREAU, "E"), cible)
+	c = {"_id": "character:u", "quetes_actives": [], "quetes_terminees": [],
+		 "xp_total": 0, "or": 0, "argent": 0, "cuivre": 0, "inventaire": []}
+	snap = donjon.accepter_commission(c, offre)
+	assert snap["rang"] == "E"
+	snap["progress"] = 1
+	donjon.solder_commission(c, snap["id"])
+	assert c["quetes_terminees"][0]["rang"] == "E"
+
+
 def test_construire_commission_cible_incomplete():
 	assert donjon.construire_commission(BUREAU, None) is None
 	assert donjon.construire_commission(BUREAU, {"lieu": "lieu:mine"}) is None

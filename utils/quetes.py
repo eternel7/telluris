@@ -521,6 +521,32 @@ def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
 			progress_txt = f"Rendre compte : {(giver or {}).get('label') or 'au donneur'}"
 		else:
 			progress_txt = f"Livraison à {_cible_nom(obj)}"
+	elif obj.get("type") == "escorte":
+		# Deux temps, deux libellés : tant qu'on ne l'a pas retrouvée, c'est une recherche
+		# (et la carte 🗺️ mène au rendez-vous) ; ensuite c'est une livraison de personne.
+		# Import PARESSEUX : `escorte` dépend de ce module, jamais l'inverse (cf. `_focalisable`).
+		from utils.escorte import noms_proteges
+		qui = noms_proteges(q.get("proteges") or []) or "votre protégé"
+		if q.get("rencontre_at"):
+			progress_txt = f"Escorter {qui} jusqu'à : {_cible_nom(obj)}"
+		else:
+			rdv = obj.get("rencontre") or {}
+			rdv_doc = lire(rdv.get("lieu")) if rdv.get("lieu") else None
+			rdv_nom = ((rdv_doc or {}).get("label") or (rdv_doc or {}).get("nom")
+					   or (rdv.get("lieu") or "").split(":", 1)[-1])
+			if rdv.get("position"):
+				# ⚠️ `_carte_chasse` est réutilisée SANS être modifiée : on lui passe un
+				# objectif SYNTHÉTIQUE `{lieu, position}` bâti depuis `rencontre`. L'ancre du
+				# repère est le donneur — un temple n'est pas « le bâtiment de la guilde ».
+				giver_doc = lire(q.get("giver")) if q.get("giver") else None
+				carte_chasse = _carte_chasse(
+					{"lieu": rdv["lieu"], "position": rdv["position"]},
+					q.get("giver"), rdv_doc, ancre=_ancre_de(giver_doc))
+			repere = (carte_chasse or {}).get("direction_texte")
+			progress_txt = (
+				f"Retrouver {qui}" + (f" ({rdv_nom})" if rdv_nom else "")
+				+ (f" — {repere}" if repere else "")
+			)
 	elif obj.get("type") == "chasse":
 		lieu_doc = lire(obj.get("lieu")) if obj.get("lieu") else None
 		lieu_nom = (lieu_doc.get("label") or lieu_doc.get("nom")) if lieu_doc else None
@@ -572,16 +598,28 @@ def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
 	return detail
 
 
-def _phrase_direction(direction: str) -> str:
+ANCRE_DEFAUT = "du bâtiment de la guilde"
+
+
+def _ancre_de(giver_doc: dict | None) -> str:
+	"""Groupe nominal désignant le donneur dans la ligne d'orientation (« du temple de
+	Saint-Eusèbe »). Repli sur l'ancre historique quand le donneur n'est pas joignable."""
+	nom = (giver_doc or {}).get("label") or (giver_doc or {}).get("nom")
+	return f"de {nom}" if nom else ANCRE_DEFAUT
+
+
+def _phrase_direction(direction: str, ancre: str = ANCRE_DEFAUT) -> str:
 	"""Ligne d'orientation de l'overlay carte à partir d'une direction cardinale (« sud-est »…).
-	Gère la préposition : « À l'est/ouest » (pur E/O), « Au … » sinon (nord/sud, composés)."""
+	Gère la préposition : « À l'est/ouest » (pur E/O), « Au … » sinon (nord/sud, composés).
+	`ancre` = le repère de départ ; défaut inchangé pour les chasses (guilde)."""
 	if not direction:
-		return "Sur l'emplacement du bâtiment de la guilde"
+		return f"Sur l'emplacement {ancre}"
 	prep = "À l'" if direction[0] in ("e", "o") else "Au "
-	return f"{prep}{direction} du bâtiment de la guilde"
+	return f"{prep}{direction} {ancre}"
 
 
-def _carte_chasse(objectif: dict, giver_id: str | None = None, lieu_doc: dict | None = None) -> dict | None:
+def _carte_chasse(objectif: dict, giver_id: str | None = None, lieu_doc: dict | None = None,
+				  ancre: str = ANCRE_DEFAUT) -> dict | None:
 	"""Données du bouton 🗺️ d'une quête de chasse : l'image servable du lieu + ses dimensions
 	en cases + la position cible → le client recadre un 3×3 centré sur la case. None si le lieu
 	n'a pas d'image servable ou pas de grille (le bouton est alors masqué). Ajoute une ligne
@@ -618,7 +656,7 @@ def _carte_chasse(objectif: dict, giver_id: str | None = None, lieu_doc: dict | 
 		if etape and etape.get("porte"):
 			direction = chasse.direction_cardinale_simple(
 				etape["porte"], (int(pos.get("x", 0)), int(pos.get("y", 0))))
-			carte["direction_texte"] = _phrase_direction(direction)
+			carte["direction_texte"] = _phrase_direction(direction, ancre)
 	return carte
 
 

@@ -20,6 +20,7 @@ from utils.quetes import maj_progress_kills, maj_progress_chasse
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
 from utils import montures as montures_util
+from utils import escorte as escorte_util
 from utils import animations as animations_util
 
 BATTLE_MAPS = [
@@ -137,8 +138,9 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 	acteur["currentPM"] = min(int(acteur.get("currentPM", acteur["pm_max"]) or 0), acteur["pm_max"])
 	# ⚠️ Une monture est immobilisée à l'entrée (`deplacement: 0`, hors ordre d'initiative) :
 	# recalculer son déplacement depuis V la remettrait en marche. Elle est dans `joueurs`,
-	# donc CIBLABLE — un debuff qui la touche ne doit pas la « réveiller ».
-	if acteur.get("est_monture"):
+	# donc CIBLABLE — un debuff qui la touche ne doit pas la « réveiller ». Même raison, même
+	# traitement, pour une personne ESCORTÉE.
+	if acteur.get("est_monture") or acteur.get("est_protege"):
 		acteur["deplacement"] = 0
 	else:
 		_recompute_player_deplacement(acteur)
@@ -1214,6 +1216,7 @@ def create_combat_doc(
 	furtivite_initiale: int = 0,
 	compagnons: list | None = None,
 	montures: list | None = None,
+	proteges: list | None = None,
 ) -> dict:
 	joueur = build_joueur_snapshot(character, joueur_index=0)
 	# Furtivité passive à l'entrée (conditions de terrain déjà évaluées par l'appelant
@@ -1247,6 +1250,21 @@ def create_combat_doc(
 		snap["charge_max"] = montures_util.charge_max_porteur(m)
 		montures_snaps.append(snap)
 	joueurs += montures_snaps
+
+	# Personnes ESCORTÉES : même traitement qu'une monture — elles suivent le groupe, sont
+	# sur la carte donc CIBLABLES, mais ne jouent pas. C'est tout l'enjeu de la quête : elles
+	# n'ont aucun moyen de se défendre, et le joueur doit s'interposer.
+	# ⚠️ Pas de `charge_max` recalculé, contrairement aux montures : un protégé ne porte pas
+	# pour le groupe (il est absent de `porteurs_effectifs`), la dérivée standard suffit.
+	proteges_snaps = []
+	for i, p in enumerate(proteges or []):
+		snap = build_joueur_snapshot(p, joueur_index=len(joueurs) + i)
+		snap["jouable"] = False
+		snap["est_protege"] = True
+		snap["deplacement"] = 0
+		snap["deplacement_base"] = 0
+		proteges_snaps.append(snap)
+	joueurs += proteges_snaps
 
 	# ⚠️ `ordre_initiative` n'accueille QUE les jouables : une monture qui y figurerait
 	# obtiendrait un tour que personne ne peut jouer (_resolve_until_player rendrait la
@@ -1478,18 +1496,29 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 				# KO d'un membre du groupe : le combat continue tant qu'il reste un
 				# joueur debout — la défaite n'arrive que TOUS à terre.
 				est_monture = defenseur.get("est_monture")
+				est_protege = defenseur.get("est_protege")
 				# La cargaison vit sur le DOC de la monture, pas sur son snapshot : on se
 				# contente de la marquer ici, `finalize_combat` déversera son sac dans le
-				# butin disponible (là où le doc est chargé, et sauvé).
-				# ⚠️ Marqué AVANT la ligne, qui porte l'état de la monture (`morte`).
-				if est_monture:
+				# butin disponible (là où le doc est chargé, et sauvé). Une personne ESCORTÉE
+				# porte le même marqueur `morte` — c'est `_finalize_protege` qui en tirera la
+				# mort et l'échec de la quête, au même endroit et pour la même raison.
+				# ⚠️ Marqué AVANT la ligne, qui porte l'état du défenseur (`morte`).
+				if est_monture or est_protege:
 					defenseur["morte"] = True
+				if est_monture:
+					texte_ko = f"{defenseur['nom']} s'effondre — sa charge se répand au sol !"
+				elif est_protege:
+					# ⚠️ Tournure NEUTRE en genre : le snapshot ne porte pas le sexe, et une
+					# escorte peut viser n'importe qui — un accord fautif se verrait à chaque
+					# partie. (Même précaution que la règle « aucun pronom genré » des dialogues.)
+					texte_ko = f"{defenseur['nom']} s'effondre… La promesse n'aura pas tenu."
+				else:
+					texte_ko = f"{defenseur['nom']} est à terre !"
 				combat_doc["log"].append(_avec_etat({
 					"tour": combat_doc["tour"],
 					"acteur": "Système",
 					"kind": "sys",
-					"texte": (f"{defenseur['nom']} s'effondre — sa charge se répand au sol !"
-							  if est_monture else f"{defenseur['nom']} est à terre !"),
+					"texte": texte_ko,
 				}, defenseur))
 				# ⚠️ `_combattants_vivants` et non la liste brute : une monture debout ne
 				# doit pas empêcher la défaite d'être déclarée (plus personne ne joue).
@@ -2796,6 +2825,56 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 	return save_doc(doc) is not None
 
 
+def _finalize_protege(combat_doc: dict, snap: dict, doc: dict, status: str,
+					  character: dict) -> bool:
+	"""Applique l'issue du combat au doc d'UNE personne escortée. Passe DÉDIÉE, hors de la
+	boucle des compagnons — sinon elle toucherait de l'XP, une affinité, et serait relevée à
+	1 PV alors que tout l'enjeu de la quête est qu'elle puisse mourir.
+
+	Tombée à 0 PV, elle MEURT (world-var ESCORTE_MORT_DEFINITIVE) : elle quitte le groupe et
+	l'escorte est archivée EN ÉCHEC, avec la sanction de réputation chez le donneur ET toute
+	sa maison (`escorte.echouer` → `quetes.sanctionner_renoncement`). Rien ne tombe au sol :
+	son sac part avec elle — ce ne serait pas un butin, ce serait un dépouillement.
+
+	⚠️ Le personnage est muté ICI mais sauvé par `_finalize_membre` juste après (même save
+	que l'XP), exactement comme `_finalize_monture` — c'est ce qui rend l'archivage de la
+	quête atomique avec le reste de la finalisation.
+
+	Même garde d'idempotence PAR DOC que `_finalize_membre` : une re-finalisation ne peut ni
+	ressusciter la personne ni sanctionner deux fois."""
+	combat_id = combat_doc.get("_id")
+	rewarded = doc.get("combats_recompenses", [])
+	if combat_id in rewarded:
+		return False
+
+	if snap.get("morte") and character_stats.ESCORTE_MORT_DEFINITIVE:
+		escorte_util.tuer(character, doc)
+		q = next(
+			(x for x in escorte_util.escortes_actives(character)
+			 if (x.get("id") or x.get("_id")) == doc.get("quete")),
+			None,
+		)
+		if q is not None:
+			escorte_util.echouer(character, q, get_doc, save_doc, find_docs)
+	else:
+		# Survivante (ou mort désactivée) : relevée comme un membre du groupe.
+		doc["currentPV"] = max(1, snap.get("currentPV", 0))
+		doc["currentPM"] = max(0, snap.get("currentPM", doc.get("currentPM", 0)))
+		# Effets à durée encore vivants (un soin lancé sur elle par un allié) : reversés,
+		# comme pour un membre du groupe — son doc est un miroir du character.
+		restants = [
+			{k: v for k, v in eff.items() if k != "pose_tour"}
+			for eff in snap.get("effets_actifs") or []
+			if _eff_int(eff.get("restants")) > 0
+		]
+		if restants or snap.get("effets_actifs") is not None:
+			doc["effets_actifs"] = restants
+
+	rewarded.append(combat_id)
+	doc["combats_recompenses"] = rewarded[-50:]
+	return save_doc(doc) is not None
+
+
 def finalize_combat(combat_doc: dict) -> bool:
 	"""Applique l'issue du combat (XP/PV/butin) à TOUS les membres du groupe en base —
 	compagnons (docs `aventurier:*`) d'abord, personnage principal en dernier.
@@ -2825,6 +2904,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# par leur propre garde d'idempotence.
 	compagnons_traites = []
 	montures_traitees = []
+	proteges_traites = []
 	joueur_principal = None
 	for j in combat_doc["joueurs"]:
 		cid = j.get("character_id")
@@ -2839,6 +2919,11 @@ def finalize_combat(combat_doc: dict) -> bool:
 		# appliquerait les trois — elle a sa propre passe, plus bas.
 		if j.get("est_monture"):
 			montures_traitees.append((j, doc))
+			continue
+		# ⚠️ Ni une personne ESCORTÉE : elle ne gagne pas d'XP, n'a pas d'affinité, et à 0 PV
+		# elle meurt (et fait échouer sa quête) au lieu d'être relevée. Passe dédiée, plus bas.
+		if j.get("est_protege"):
+			proteges_traites.append((j, doc))
 			continue
 		_finalize_membre(combat_doc, j, doc, status)
 		compagnons_traites.append((j, doc))
@@ -2868,6 +2953,12 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# le principal juste en dessous).
 	for j, doc in montures_traitees:
 		_finalize_monture(combat_doc, j, doc, status, character)
+
+	# Personnes escortées — même place, même motif que les montures : le personnage est muté
+	# ici (retrait du groupe, archivage de la quête en échec) et sauvé par `_finalize_membre`
+	# juste en dessous, dans le même save que l'XP.
+	for j, doc in proteges_traites:
+		_finalize_protege(combat_doc, j, doc, status, character)
 
 	# Progression des quêtes de chasse : compte les monstres tués (toute issue), sous le
 	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.

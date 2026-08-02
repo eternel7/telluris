@@ -1,0 +1,494 @@
+[
+  {
+    "_id": "pnj:reverend_malakor",
+    "type": "pnj",
+    "nom": "Révérend Malakor",
+    "race": "ogre",
+    "vocation": "pretre",
+    "portrait": "ogre_m_pretre01.png",
+    "description": "Prêtre ogre du temple de Saint-Eusèbe à Auxerre — une carrure colossale, une voix douce, un calme que rien ne semble pouvoir troubler.",
+    "services": {
+      "soin": {
+        "cout_cuivre": 1,
+        "fraction_pv": 0.5,
+        "gratuit_si": {
+          "lieux": [
+            "lieu:auxerre",
+            "lieu:le_bastion_de_l_yonne_interieur"
+          ],
+          "seuil": 70,
+          "fraction_pv": 1
+        },
+        "noeuds": {
+          "fait": "soin_fait",
+          "sans_fonds": "soin_sans_fonds",
+          "inutile": "soin_inutile"
+        }
+      },
+      "don": {
+        "item": "item:Eau_benite",
+        "quantite": 1,
+        "cout_cuivre": 5,
+        "gratuit_si": {
+          "lieux": [
+            "lieu:auxerre",
+            "lieu:le_bastion_de_l_yonne_interieur"
+          ],
+          "seuil": 70
+        },
+        "noeuds": {
+          "fait": "eau_benite_fait",
+          "sans_fonds": "eau_benite_sans_fonds",
+          "trop_charge": "eau_benite_trop_charge"
+        }
+      },
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_aline_varnepierre",
+          "titre": "Escorte : Aline Varnepierre",
+          "description": "La fille de l'apothicaire d'Auxerre est partie cueillir des herbes sous les feuillus, hors des remparts, et n'est pas rentrée. Retrouvez-la et ramenez-la vivante à son père, à L'Athanor de Saint-Germain.",
+          "destination": "lieu:l_athanor_de_saint_germain",
+          "rencontre": {
+            "lieu": "lieu:auxerre",
+            "zones": [
+              "zone:foret_feuillus"
+            ]
+          },
+          "proteges": [
+            {
+              "prenom": "Aline",
+              "nom": "Varnepierre",
+              "race": "humain",
+              "sex": "F",
+              "image": "druide_f_humain03.jpg",
+              "description": "La fille de l'apothicaire d'Auxerre. Elle connaît les herbes mieux que personne — et les loups bien moins qu'elle ne le croyait.",
+              "inventaire": [
+                {
+                  "item": "item:Herbes_medicinales",
+                  "poids": 0.1
+                }
+              ]
+            }
+          ],
+          "unique": true,
+          "rang_min": {
+            "cite": "lieu:auxerre",
+            "rang": "E"
+          },
+          "recompenses": {
+            "xp": 40,
+            "cuivre": 10000
+          }
+        },
+        "noeuds": {
+          "accepte": "escorte_acceptee"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Que la paix de Saint-Eusèbe soit sur toi, voyageur. Je suis le révérend Malakor, gardien de ce temple. Prends le temps de souffler : ces murs n'ont jamais repoussé personne. Que puis-je pour toi ?",
+          "choix": [
+            {
+              "id": "escorte_offre",
+              "label": "Vous semblez soucieux, révérend.",
+              "next": "escorte_propose",
+              "condition": {
+                "escorte_offerte": true
+              }
+            },
+            {
+              "id": "escorte_rang",
+              "label": "Vous semblez soucieux, révérend.",
+              "next": "escorte_rang_insuffisant",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              }
+            },
+            {
+              "id": "escorte_relance",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_relance",
+              "condition": {
+                "escorte_en_cours": true
+              }
+            },
+            {
+              "id": "escorte_merci",
+              "label": "Vous vous souvenez de {protege} ?",
+              "next": "escorte_merci",
+              "condition": {
+                "escorte_accomplie": true
+              }
+            },
+            {
+              "id": "guilde",
+              "label": "Je cherche la guilde des aventuriers.",
+              "next": "guilde"
+            },
+            {
+              "id": "conseils",
+              "label": "Auriez-vous un conseil pour un nouveau venu ?",
+              "next": "conseils"
+            },
+            {
+              "id": "soin",
+              "label": "Pouvez-vous soigner mes blessures ? ({cout})",
+              "next": "soin_propose"
+            },
+            {
+              "id": "eau_benite",
+              "label": "Auriez-vous une fiole d'eau bénite ?",
+              "next": "eau_benite_propose"
+            },
+            {
+              "id": "fin",
+              "label": "Je vais reprendre ma route.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "escorte_propose": {
+          "texte": "Soucieux… oui. Une famille est venue prier ici ce matin, et elle priait mal — comme on prie quand on ne sait plus quoi faire d'autre. {protege} n'est pas rentrée. Elle est partie hier au petit jour cueillir sous les feuillus, du côté de {lieu_rencontre}, et son panier devait être plein bien avant les vêpres.",
+          "choix": [
+            {
+              "id": "suite",
+              "label": "Que craignez-vous, exactement ?",
+              "next": "escorte_dangers"
+            },
+            {
+              "id": "refus",
+              "label": "Ce n'est pas mon affaire, révérend.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_dangers": {
+          "texte": "Ce que craint tout le monde ici, {prenom}. Les feuillus sont beaux au matin et tout autres le soir venu : loups, gobelins, et des choses qu'on préfère ne pas nommer sous un toit béni. Elle connaît les plantes mieux que quiconque — elle ne connaît rien des crocs. Si elle vit encore, elle vit terrée quelque part, et elle ne rentrera pas seule.",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "J'irai la chercher.",
+              "next": "escorte_engagement"
+            },
+            {
+              "id": "refus",
+              "label": "Je ne suis pas de taille pour cela.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_engagement": {
+          "texte": "Alors écoute-moi bien, car ce n'est pas un colis que je te confie. Cherche-la {direction} — sous les feuillus, en te tenant loin des futaies denses. Quand tu la trouveras, elle marchera derrière toi : elle ne se battra pas, elle ne pourra pas fuir, et chaque coup qu'on lui portera sera un coup que tu n'auras pas arrêté. Ramène-la à son père — {destinataire}, à : {destination}. Il a promis une pièce d'or à qui la lui rendrait vivante ; moi, je te promets seulement que Saint-Eusèbe s'en souviendra.",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "Je vous la ramènerai vivante.",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "refus",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_acceptee": {
+          "texte": "Que la route te soit clémente. Ne perds pas de temps en chemin : sous les feuillus, une nuit de plus vaut une semaine ailleurs. Et quand tu l'auras, ne joue pas les héros — la ramener vaut mieux que venger quoi que ce soit.",
+          "choix": [
+            {
+              "id": "partir",
+              "label": "J'y vais de ce pas.",
+              "next": "au_revoir"
+            },
+            {
+              "id": "retour",
+              "label": "Encore une chose, révérend…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_rang_insuffisant": {
+          "texte": "Soucieux… oui, mais ce n'est pas un souci que je peux partager avec toi. Une famille attend une nouvelle, et ce qu'il faudrait pour la leur rapporter, ce n'est pas de la bonne volonté — c'est un nom que la guilde a déjà éprouvé. Va au Bastion de l'Yonne, prends leurs contrats, monte jusqu'au rang {rang_requis}. Reviens me voir ce jour-là : je te dirai tout, et j'espère qu'il ne sera pas trop tard.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y travaillerai, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "guilde",
+              "label": "Où trouve-t-on cette guilde ?",
+              "next": "guilde"
+            },
+            {
+              "id": "fin",
+              "label": "Je reviendrai.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "escorte_relance": {
+          "texte": "Rien de neuf, hélas. Cherche-la {direction}, sous les feuillus — et si elle est déjà à ton côté, cesse de me parler et conduis-la à : {destination}. Son père n'a pas fermé l'œil.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y retourne.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en occupe.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "escorte_merci": {
+          "texte": "Si je m'en souviens… Son père a fait dire une messe, et il a pleuré tout du long comme un enfant. {protege} vient allumer un cierge ici chaque semaine, maintenant. Tu as ramené quelqu'un du bois, {prenom} — peu de gens dans cette cité peuvent en dire autant.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "C'était la moindre des choses.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Que la paix soit sur vous, révérend.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "guilde": {
+          "texte": "La guilde des aventuriers ? Tu y es presque, mon enfant. Longe le mur du temple : le Bastion de l'Yonne se trouve sur le côté, vers l'arrière. Dis-leur que tu viens de ma part — ils ont bon cœur, même s'ils parlent fort.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Merci, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "J'y vais de ce pas.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "conseils": {
+          "texte": "Bien sûr. Les anciens disent que la sagesse pèse moins lourd qu'une armure, et protège parfois davantage. Que veux-tu savoir ?",
+          "choix": [
+            {
+              "id": "zones",
+              "label": "Les environs sont-ils sûrs ?",
+              "next": "conseil_zones"
+            },
+            {
+              "id": "reputation",
+              "label": "Comment me faire une place ici ?",
+              "next": "conseil_reputation"
+            },
+            {
+              "id": "repos",
+              "label": "Comment reprendre des forces ?",
+              "next": "conseil_repos"
+            },
+            {
+              "id": "retour",
+              "label": "C'est tout ce que je voulais savoir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "conseil_zones": {
+          "texte": "Le cœur d'Auxerre est sûr ; ses forêts ne le sont pas. Loups, gobelins, serpents… Ne t'enfonce pas sous les feuillus sans forces, et méfie-toi des futaies denses du sud — même nos chasseurs les évitent seuls.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Autre chose ?",
+              "next": "conseils"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en souviendrai.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "conseil_reputation": {
+          "texte": "Rends service. Le tableau du Bastion de l'Yonne affiche toujours des contrats, et cette cité a la mémoire longue — pour le bien comme pour le reste. Un nom qu'on respecte ouvre plus de portes qu'une bourse pleine.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Autre chose ?",
+              "next": "conseils"
+            },
+            {
+              "id": "fin",
+              "label": "Voilà qui est dit.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "conseil_repos": {
+          "texte": "Marche calmement et le corps se répare de lui-même ; les herbes des sous-bois font aussi de bonnes tisanes entre les mains d'un apothicaire. Et si le mal est plus profond, le temple soigne pour une petite offrande.",
+          "choix": [
+            {
+              "id": "soin",
+              "label": "Justement… pouvez-vous me soigner ? ({cout})",
+              "next": "soin_propose"
+            },
+            {
+              "id": "retour",
+              "label": "Autre chose ?",
+              "next": "conseils"
+            },
+            {
+              "id": "fin",
+              "label": "Merci du conseil.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "soin_propose": {
+          "texte": "Approche. Une offrande d'une pièce de cuivre suffira — elle ira aux plus démunis de la cité.",
+          "texte_gratuit": "Ta bonté envers cette cité te précède, {prenom}. Approche : je te soignerai de bon cœur, sans rien te demander.",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "J'accepte. ({cout})",
+              "action": {
+                "service": "soin"
+              }
+            },
+            {
+              "id": "refuser",
+              "label": "Une autre fois, peut-être.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "soin_fait": {
+          "texte": "Voilà. Respire… La douleur s'éloigne déjà. Va en paix, et prends soin de toi.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Merci, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je me sens mieux. Adieu.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "soin_sans_fonds": {
+          "texte": "Tu n'as pas même une piécette ?… Garde ton bien, alors. Reviens quand tu pourras faire une offrande — ou rends service à la cité : Saint-Eusèbe voit tout.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Je reviendrai.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "…",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "soin_inutile": {
+          "texte": "Des blessures ? Je n'en vois aucune, mon enfant. Ménage plutôt tes forces — elles te serviront mieux que mes prières.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Vous avez raison.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Au revoir, révérend.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "au_revoir": {
+          "texte": "Va en paix. Et si le chemin devient sombre, souviens-toi : la porte du temple reste ouverte.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Adieu.",
+              "next": "fin"
+            }
+          ]
+        },
+        "eau_benite_propose": {
+          "texte": "L'eau bénite de Saint-Eusèbe ? Le temple en partage volontiers. Aux âmes que la cité tient en estime, je la donne sans rien demander ; aux autres, une offrande de cinq cuivres soutient l'ouvrage. En veux-tu une fiole ?",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "Volontiers, révérend.",
+              "action": {
+                "service": "don"
+              }
+            },
+            {
+              "id": "refuser",
+              "label": "Pas aujourd'hui, merci.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "eau_benite_fait": {
+          "texte": "Tiens, mon enfant. Que cette eau bénie garde ton cœur ferme et ton bras sûr. Va, et fais-en bon usage.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Merci, révérend.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Qu'elle me protège. Adieu.",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "eau_benite_sans_fonds": {
+          "texte": "Pas même cinq cuivres ?… Garde ta bourse, alors. Reviens quand tu le pourras — ou gagne l'estime de la cité, et l'eau bénite te sera offerte.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Je reviendrai.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "…",
+              "next": "au_revoir"
+            }
+          ]
+        },
+        "eau_benite_trop_charge": {
+          "texte": "Tu ploies déjà sous ton fardeau, mon enfant — pas même une main libre pour une fiole. Allège-toi d'abord, puis reviens la chercher.",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Vous avez raison.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "J'y penserai. Adieu.",
+              "next": "au_revoir"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

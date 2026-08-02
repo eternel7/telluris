@@ -36,6 +36,7 @@ from utils import transport as transport_util
 from utils import chasse as chasse_util
 from utils import recrutement as recrutement_util
 from utils import montures as montures_util
+from utils import escorte as escorte_util
 from utils import fiche as fiche_util
 from utils import animations as animations_util
 from utils import lint_dialogues
@@ -595,6 +596,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Offre de course : tirée à l'entrée, persistée (même sémantique que pnj_present).
 	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc,
 													pnj_doc=pnj_doc)
+	# Offre d'ESCORTE : même sémantique, même PNJ déjà résolu. Toujours ÉCRITE (aucune
+	# branche « générée » : on n'improvise pas une personne à protéger).
+	change |= escorte_util.poser_escorte_offerte(character, grid_doc, find_docs, get_doc,
+												 pnj_doc=pnj_doc)
 	# Compagnons : départs volontaires paresseux (affinité tombée sous le seuil pendant
 	# l'absence) — les docs `aventurier:*` sont annexes, persistés séparément ; le retrait
 	# du groupe part avec le save du personnage ci-dessous. Toast au rendu.

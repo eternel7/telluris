@@ -143,11 +143,16 @@ def _condition_item(character: dict, filtre: dict) -> bool:
 	return False
 
 
-def _condition_rang_min(character: dict, filtre: dict) -> bool:
+def rang_min_satisfait(character: dict, filtre: dict) -> bool:
 	"""Le rang de guilde du perso DANS CETTE CITÉ atteint-il le seuil ? Rang courant absent
 	⇒ le premier de l'échelle (miroir de `chasse.rang_de`). Un `cite`/`rang` manquant, ou un
 	rang hors échelle (côté donnée comme côté perso), REFUSE — même esprit fail-closed que
-	la clé inconnue : on n'ouvre pas une porte sur une comparaison qu'on ne sait pas faire."""
+	la clé inconnue : on n'ouvre pas une porte sur une comparaison qu'on ne sait pas faire.
+
+	PUBLIQUE parce que la barrière de lieu n'est plus le seul client : une offre écrite peut
+	elle aussi exiger un rang (`services.escorte.offre.rang_min`). Un seul comparateur, donc
+	un seul vocabulaire `{cite, rang}` et une seule sémantique fail-closed dans tout le jeu —
+	le dupliquer ouvrirait la porte à deux comportements divergents sur la même donnée."""
 	cite = (filtre or {}).get("cite")
 	seuil = (filtre or {}).get("rang")
 	if not cite or not seuil or seuil not in RANGS:
@@ -156,6 +161,77 @@ def _condition_rang_min(character: dict, filtre: dict) -> bool:
 	if courant not in RANGS:
 		return False
 	return RANGS.index(courant) >= RANGS.index(seuil)
+
+
+def rang_min_de(filtre: dict) -> str | None:
+	"""Le rang EXIGÉ par un filtre `rang_min`, ou None si le filtre est absent/illisible.
+
+	Sert à faire porter à une quête le rang qui commande son accès : une mission réservée au
+	rang E EST une mission de rang E — l'annoncer « F » dans la fiche serait mentir au joueur
+	sur le palier auquel il vient d'accéder. Le contrôle d'accès, lui, reste
+	`rang_min_satisfait` : ce helper ne décide de RIEN, il ne fait que lire l'étiquette.
+
+	⚠️ Même bornage que le comparateur (`rang not in RANGS` ⇒ None) : un seuil illisible ne
+	doit pas devenir un rang d'affichage inventé. L'appelant retombe alors sur son défaut."""
+	rang = (filtre or {}).get("rang")
+	return rang if rang in RANGS else None
+
+
+def rang_min_du_lieu(lieu_doc: dict) -> str | None:
+	"""Le rang exigé par la BARRIÈRE de ce lieu (`acces.conditions[].rang_min`), ou None si
+	le lieu est libre / gardé par autre chose. Lecture seule : ne décide de rien, c'est
+	`conditions_remplies` qui garde la porte.
+
+	Sert à étiqueter une quête du rang qui commande réellement son accès — cf.
+	`donjon.rang_commission`. Plusieurs `rang_min` sur un même lieu (cas non écrit à ce jour,
+	mais la liste est un ET logique) ⇒ le plus élevé, seul cohérent avec la conjonction."""
+	gate = gate_de(lieu_doc)
+	if not gate:
+		return None
+	rangs = [
+		rang_min_de(condition.get("rang_min"))
+		for condition in gate.get("conditions") or []
+		if isinstance(condition, dict) and condition.get("rang_min")
+	]
+	return rang_le_plus_eleve(*rangs)
+
+
+def rang_le_plus_eleve(*rangs) -> str | None:
+	"""Le plus haut de plusieurs rangs sur l'échelle `RANGS`. Les `None` et les valeurs hors
+	échelle sont IGNORÉS (même bornage que `rang_min_de`) ; aucun rang lisible ⇒ None.
+
+	⚠️ C'est ici — et pas chez l'appelant — que vit la comparaison, pour que l'échelle reste
+	lue à sa source. Elle est déjà passée de 7 à 8 crans une fois : un module qui la
+	recopierait pour trier deviendrait faux en silence."""
+	connus = [r for r in rangs if r in RANGS]
+	return max(connus, key=RANGS.index) if connus else None
+
+
+def rang_de_quete(explicite: str | None, *seuils, defaut: str) -> str:
+	"""Rang AFFICHÉ d'une quête générée — **SOURCE UNIQUE, sans exception** : commissions de
+	donjon comme offres écrites passent par ici, et par rien d'autre.
+
+	Ordre, invariable :
+	1. `explicite` — le `rang` écrit par l'auteur ; il a le dernier mot ;
+	2. sinon le **PLUS ÉLEVÉ** des `seuils` qui commandent l'accès à la quête (les
+	   `rang_min` de sa spec et des barrières qu'il faut franchir pour l'obtenir ou la
+	   rendre) : une mission réservée au rang E EST une mission de rang E ;
+	3. sinon `defaut`.
+
+	⚠️ Le **MAXIMUM**, jamais un repli en cascade : le prix d'entrée d'une quête, c'est la
+	porte la plus stricte du chemin. Un « celle-ci sinon celle-là » afficherait le plus
+	FAIBLE des deux dès qu'une seconde barrière monte, donc un mensonge.
+
+	⚠️ **Le bornage vaut AUSSI pour `explicite`** (`rang_le_plus_eleve` filtre sur `RANGS`) :
+	un rang hors échelle écrit à la main retombe sur les seuils puis sur le défaut, au lieu
+	de peindre un cran qui n'existe pas. C'est la même sévérité que partout ailleurs sur ce
+	vocabulaire — une exception ici rouvrirait deux comportements sur la même donnée."""
+	return rang_le_plus_eleve(explicite) or rang_le_plus_eleve(*seuils) or defaut
+
+
+def _condition_rang_min(character: dict, filtre: dict) -> bool:
+	"""Condition `rang_min` d'une barrière de lieu — délègue au comparateur partagé."""
+	return rang_min_satisfait(character, filtre)
 
 
 def conditions_remplies(character: dict, lieu_doc: dict, get_doc_fn) -> tuple[bool, str]:

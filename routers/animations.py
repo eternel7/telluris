@@ -80,7 +80,12 @@ async def liste_animations(current_user: Annotated[dict, Depends(get_current_use
 		largeur, hauteur = _dimensions(os.path.join(EFFECTS_PATH, f))
 		fichiers.append({"fichier": f, "largeur": largeur, "hauteur": hauteur,
 						 "docs": par_fichier.get(f, [])})
-	return {"docs": sorted(docs, key=lambda d: str(d.get("_id") or "")), "fichiers": fichiers}
+	# ⚠️ Les docs partent BRUTS : le formulaire édite la valeur STOCKÉE. Les bases de décalage
+	# sont publiées à côté pour que l'aperçu de scène montre la position réellement jouée,
+	# sans que le client ait à recopier les constantes.
+	return {"docs": sorted(docs, key=lambda d: str(d.get("_id") or "")), "fichiers": fichiers,
+			"decalage_x_base": animations_util.DECALAGE_X_BASE,
+			"decalage_y_base": animations_util.DECALAGE_Y_BASE}
 
 
 @animations_router.post("/admin/animations/scan")
@@ -135,6 +140,7 @@ async def scanner_animations(current_user: Annotated[dict, Depends(get_current_u
 			"fin": colonnes * lignes - 1,
 			"duree_ms": animations_util.DUREE_DEFAUT_MS,
 			"echelle": animations_util.ECHELLE_DEFAUT,
+			"decalage_x": 0.0,
 			"decalage_y": 0.0,
 			"ancrage": animations_util.ANCRAGE_DEFAUT,
 			# Brouillon : rien n'est jamais actif sans confirmation humaine.

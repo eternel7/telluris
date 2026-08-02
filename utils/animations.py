@@ -53,13 +53,28 @@ ANCRAGE_DEFAUT = "cible"
 DUREE_DEFAUT_MS = 600
 ECHELLE_DEFAUT = 1.5
 
+# Décalage vertical de BASE, en cases, appliqué à TOUTES les animations. Un sprite calé sur
+# le sol de sa case flotte au-dessus du personnage : la demi-case le ramène sur lui.
+#
+# ⚠️ C'est un décalage de RENDU, posé sur le PAYLOAD et jamais écrit dans un doc : le champ
+# `decalage_y` d'un document reste exactement ce que l'auteur a saisi, et son zéro EST cette
+# base. Aucune donnée à retoucher, aucune migration — un doc déjà réglé se décale d'une
+# demi-case vers le bas, ce qui est précisément l'effet voulu.
+DECALAGE_Y_BASE = -0.5
+
+# Miroir horizontal du précédent, en cases. Base **0** : un sprite est déjà centré sur la
+# case de son porteur, il n'y a rien à corriger par défaut — le champ ne sert qu'aux
+# feuilles dont le dessin n'est pas centré dans sa frame. Même règle que pour Y : décalage
+# de RENDU appliqué au payload, jamais écrit dans un doc, champ absent ⇒ 0.
+DECALAGE_X_BASE = 0.0
+
 EXTENSIONS_IMAGE = (".png", ".jpg", ".jpeg", ".webp")
 
 # Clés publiées au client (catalogue de `/combat/{id}` et aperçu de l'éditeur) : tout ce
 # qu'il faut pour découper et jouer la feuille, rien de plus.
 CLES_PAYLOAD = (
 	"fichier", "largeur", "hauteur", "colonnes", "lignes", "sens_lignes", "sens_colonnes",
-	"debut", "fin", "duree_ms", "echelle", "decalage_y", "ancrage",
+	"debut", "fin", "duree_ms", "echelle", "decalage_x", "decalage_y", "ancrage",
 )
 
 
@@ -133,6 +148,7 @@ def normaliser_animation(doc) -> dict | None:
 		"fin": fin,
 		"duree_ms": max(1, _as_int(d.get("duree_ms"), DUREE_DEFAUT_MS)),
 		"echelle": echelle,
+		"decalage_x": _as_float(d.get("decalage_x"), 0.0),
 		"decalage_y": _as_float(d.get("decalage_y"), 0.0),
 		"ancrage": ancrage,
 		# Brouillon tant qu'un humain n'a pas confirmé la découpe à l'aperçu : absent du
@@ -164,18 +180,41 @@ def frame_position(anim: dict, i: int) -> tuple:
 	return col, ligne
 
 
+def decalage_y_effectif(decalage_y) -> float:
+	"""Décalage vertical RÉELLEMENT joué = base commune + réglage du doc.
+
+	Source unique de l'arithmétique : le payload de combat passe par ici, et l'aperçu de
+	`/admin/animations` rejoue la même addition côté client (la base lui est publiée par
+	`GET /api/admin/animations`) — sinon on réglerait un décalage que le jeu ne montrerait
+	pas."""
+	return DECALAGE_Y_BASE + _as_float(decalage_y, 0.0)
+
+
+def decalage_x_effectif(decalage_x) -> float:
+	"""Miroir horizontal de `decalage_y_effectif`. Base nulle ⇒ le champ absent ne décale
+	rien, mais il passe par le même chemin : le jour où la base bougerait, elle bougerait
+	pour tout le monde d'un seul endroit."""
+	return DECALAGE_X_BASE + _as_float(decalage_x, 0.0)
+
+
 def catalogue_payload(docs) -> dict:
 	"""`{id: {…clés de rendu…}}` des animations ACTIVES seulement.
 
 	Un brouillon (grille non confirmée) reste invisible du jeu : le contenu qui le
 	référencerait ne jouerait rien, ce qui est le comportement voulu — mieux vaut aucun
-	sprite qu'une découpe fantaisiste."""
+	sprite qu'une découpe fantaisiste.
+
+	⚠️ `decalage_x`/`decalage_y` y sont les décalages EFFECTIFS (base comprise), pas les
+	valeurs du doc : le client rend ce qu'on lui donne, il n'a pas à connaître la règle."""
 	catalogue = {}
 	for doc in docs or []:
 		anim = normaliser_animation(doc)
 		if not anim or not anim["actif"] or not anim["id"]:
 			continue
-		catalogue[anim["id"]] = {cle: anim[cle] for cle in CLES_PAYLOAD}
+		charge = {cle: anim[cle] for cle in CLES_PAYLOAD}
+		charge["decalage_x"] = decalage_x_effectif(anim["decalage_x"])
+		charge["decalage_y"] = decalage_y_effectif(anim["decalage_y"])
+		catalogue[anim["id"]] = charge
 	return catalogue
 
 

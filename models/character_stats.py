@@ -318,6 +318,17 @@ MONTURE_CHARGE_MULT_DEFAUT: float = 1.2
 MONTURE_PRIX_DEFAUT: int = 2000
 MONTURE_MORT_DEFINITIVE: bool = True
 
+# ── Escortes (personnes à protéger) ──────────────────────────────────────────────
+# Une quête d'escorte confie au joueur une ou plusieurs personnes à retrouver puis à
+# ramener VIVANTES. En combat, une personne protégée se comporte comme une monture :
+# snapshot dans `joueurs` (donc ciblable), non jouable, immobile, hors initiative.
+# MORT_DEFINITIVE : à 0 PV elle MEURT et la quête échoue (sanction de réputation chez
+# le donneur et toute sa maison) ; à False elle est seulement KO, relevée à 1 PV comme
+# un compagnon, et la quête survit. Miroir exact de MONTURE_MORT_DEFINITIVE — c'est le
+# seul réglage du système : le rendez-vous, la récompense et l'unicité sont de la DONNÉE
+# (la spec `services.escorte.offre`), et la sanction réutilise QUETE_TRANSPORT_RELATION_DELTA.
+ESCORTE_MORT_DEFINITIVE: bool = True
+
 # ── Accès (barrières PNJ gardiennes) ──────────────────────────────────────────────
 # Un lieu peut porter un bloc `acces` (gardien, conditions, cycle) qui en interdit
 # l'entrée tant que les conditions ne sont pas remplies — cf. utils/acces.py.
@@ -576,6 +587,7 @@ def current_world_variables() -> dict:
 		"MONTURE_CHARGE_MULT_DEFAUT": MONTURE_CHARGE_MULT_DEFAUT,
 		"MONTURE_PRIX_DEFAUT": MONTURE_PRIX_DEFAUT,
 		"MONTURE_MORT_DEFINITIVE": MONTURE_MORT_DEFINITIVE,
+		"ESCORTE_MORT_DEFINITIVE": ESCORTE_MORT_DEFINITIVE,
 		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
@@ -632,6 +644,7 @@ def load_world_variables() -> dict:
 	global AFFINITE_SEUIL_ENGAGEMENT
 	global MONTURE_GROUPE_MAX, MONTURE_CHARGE_MULT_DEFAUT, MONTURE_PRIX_DEFAUT
 	global MONTURE_MORT_DEFINITIVE
+	global ESCORTE_MORT_DEFINITIVE
 	global ACCES_GARDIEN_ACTIF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
@@ -764,6 +777,7 @@ def load_world_variables() -> dict:
 	MONTURE_CHARGE_MULT_DEFAUT = max(1.0, float(v.get("MONTURE_CHARGE_MULT_DEFAUT", MONTURE_CHARGE_MULT_DEFAUT)))
 	MONTURE_PRIX_DEFAUT = max(0, int(v.get("MONTURE_PRIX_DEFAUT", MONTURE_PRIX_DEFAUT)))
 	MONTURE_MORT_DEFINITIVE = bool(v.get("MONTURE_MORT_DEFINITIVE", MONTURE_MORT_DEFINITIVE))
+	ESCORTE_MORT_DEFINITIVE = bool(v.get("ESCORTE_MORT_DEFINITIVE", ESCORTE_MORT_DEFINITIVE))
 	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):

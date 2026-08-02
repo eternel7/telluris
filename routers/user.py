@@ -41,6 +41,7 @@ from utils import transport
 from utils import recrutement
 from utils import acces
 from utils import montures
+from utils import escorte
 from utils import expedition
 from models import character_stats
 from models.character_stats import (
@@ -488,13 +489,28 @@ async def move_character(
 						# Courses de transport échues (expiration paresseuse : pas de tick de fond).
 						transports_echoues = transport.traiter_expirations(
 							character_to_update, quetes.now_epoch(), get_doc, save_doc)
+						# ESCORTES (même motif : traitement paresseux à chaque point de
+						# passage). C'est CETTE branche qui solde la dépose — la seule qui
+						# change de lieu. Les docs `protege:*` et `relation` sont ANNEXES et
+						# persistés par le chokepoint ; le personnage reste autoritatif.
+						escorte_maj = escorte.traiter_deplacement(
+							character_to_update, lieu_doc, destination_pos,
+							get_doc, save_doc, find_docs)
+						if escorte_maj["depose"]:
+							# ⚠️ L'XP de la dépose est créditée au principal par
+							# `appliquer_recompenses(compagnons=[])` ; elle est PARTAGÉE avec la
+							# compagnie par `_apply_world_turn_groupe`, seul endroit du chemin
+							# de déplacement qui charge ET sauve les docs compagnons.
+							xp_partage += int(escorte_maj["depose"].get("xp") or 0)
+							niveau_up = niveau_up or bool(escorte_maj["depose"].get("niveau_up"))
+							niveau_new = compute_character_level(character_to_update.get("xp_total", 0))
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
 						# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage (régén +
 						# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
 						xp_compagnie = recrutement.xp_compagnie_payload(
 							_apply_world_turn_groupe(character_to_update, xp_partage), xp_partage)
-						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -535,6 +551,14 @@ async def move_character(
 				# Courses de transport échues (expiration paresseuse : pas de tick de fond).
 				transports_echoues = transport.traiter_expirations(
 					character_to_update, quetes.now_epoch(), get_doc, save_doc)
+				# ESCORTES : c'est ici que se joue la RENCONTRE — le 3×3 du rendez-vous est
+				# dans la grille du lieu courant, donc atteint par un pas, sans rechargement
+				# de page (le toast part avec la réponse).
+				escorte_maj = escorte.traiter_deplacement(
+					character_to_update, lieu_doc, character_to_update["position"],
+					get_doc, save_doc, find_docs)
+				if escorte_maj["depose"]:
+					xp_partage += int(escorte_maj["depose"].get("xp") or 0)
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage. Un pas ne
@@ -545,8 +569,12 @@ async def move_character(
 				# sa maison) doit repartir avec la réponse, sinon l'onglet 🤝 — rendu 100 % client —
 				# resterait sur le payload injecté au chargement. Payload calculé seulement en cas
 				# d'échec (il relit les docs relation) ; la branche « lien », elle, recharge /play.
-				relations_lieux = relations_lieux_payload(character_to_update) if transports_echoues else None
-				return {"transports_echoues": _echecs_payload(transports_echoues), "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
+				# Une dépose d'escorte fait aussi monter la relation du donneur : même arbitrage,
+				# le payload n'est calculé que s'il a quelque chose à dire (il relit tous les
+				# docs relation + un doc lieu complet par lieu connu).
+				relations_lieux = (relations_lieux_payload(character_to_update)
+								   if (transports_echoues or escorte_maj["depose"]) else None)
+				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 

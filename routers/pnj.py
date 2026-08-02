@@ -29,6 +29,7 @@ from utils import acces
 from utils import donjon
 from utils import recrutement
 from utils import montures
+from utils import escorte
 from utils.combat import (
 	instantiate_monsters, build_monster_snapshot, create_combat_doc,
 	resolve_first_turns, finalize_combat,
@@ -117,6 +118,40 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			apercu = transport.generer_transport_authore(spec, lieu_doc, find_docs, get_doc)
 			if apercu:
 				placeholders.update(_placeholders_offre(apercu, lieu_doc))
+		# ESCORTES : une personne à retrouver puis à ramener vivante. L'offre est toujours
+		# ÉCRITE (`services.escorte.offre`) — on n'improvise pas quelqu'un à protéger —, donc
+		# n'importe quel PNJ peut en confier une, comme pour une course écrite.
+		# ⚠️ Il n'y a pas de flag « à livrer » : la dépose est AUTOMATIQUE, elle se solde en
+		# passant la porte du lieu de destination (cf. `escorte.traiter_deplacement`), sans
+		# repasser par un dialogue. Le seul geste de dialogue est l'acceptation.
+		spec_esc = escorte.offre_spec(pnj_doc)
+		offre_esc = escorte.offre_courante(character, lieu_doc)
+		en_cours_esc = escorte.escorte_du_donneur(character, lieu_doc.get("_id"))
+		flags.update({
+			"escorte_offerte": bool(offre_esc),
+			"escorte_en_cours": bool(en_cours_esc),
+			"escorte_accomplie": bool(spec_esc and escorte.deja_reussie(character, spec_esc.get("id"))),
+			# Le donneur ne confie pas sa mission à un inconnu : le refus est PARLÉ, sinon le
+			# choix disparaîtrait sans un mot — indiscernable d'un « rien à proposer », et le
+			# joueur n'apprendrait jamais ce qu'on attend de lui (miroir de `transport_mefiance`).
+			"escorte_rang_insuffisant": escorte.rang_insuffisant(character, pnj_doc),
+		})
+		# Le rang EXIGÉ est un placeholder à part de `{rang}` (le rang COURANT, posé par le
+		# seul comptoir de guilde) : ce sont deux valeurs, et les confondre ferait dire au
+		# donneur l'inverse de ce qu'il veut dire.
+		rang_esc = escorte.rang_requis(spec_esc)
+		if rang_esc:
+			placeholders["rang_requis"] = rang_esc.get("rang", "")
+		if offre_esc or en_cours_esc:
+			placeholders.update(_placeholders_escorte(offre_esc or en_cours_esc, lieu_doc))
+		elif spec_esc:
+			# Une escorte écrite se raconte même quand elle n'est plus vivante : le nœud de
+			# remerciement ne s'affiche QU'APRÈS la réussite (l'offre a disparu, la quête est
+			# archivée) et doit encore pouvoir nommer la personne et la destination. Rien n'y
+			# est tiré au sort SAUF la case du rendez-vous, sans effet sur ces placeholders.
+			apercu = escorte.generer_escorte_authoree(spec_esc, lieu_doc, find_docs, get_doc)
+			if apercu:
+				placeholders.update(_placeholders_escorte(apercu, lieu_doc))
 		# Épreuves de RANG de guilde (comptoir seulement) : flags qui montrent les choix
 		# « une épreuve pour moi ? » / « c'est fait » et placeholders ({espece}/{lieu}/{rang}/
 		# {rang_vise}) que le maître d'armes récite. Le rang est propre à la CITÉ (lieu_parent).
@@ -337,6 +372,70 @@ def _placeholders_offre(offre: dict, lieu_doc: dict) -> dict:
 	}
 
 
+def _placeholders_escorte(q: dict, lieu_doc: dict) -> dict:
+	"""Valeurs récitées par le donneur d'une escorte. Fonctionne aussi bien sur une offre
+	(pas encore acceptée) que sur le snapshot d'une escorte active — les deux ont la même
+	forme. `{destination}`/`{lieu_rencontre}` sont des ENSEIGNES (lieux), `{protege}` une
+	PERSONNE : ne jamais confondre, et ne jamais écrire de nom en dur (règle commune à tous
+	les dialogues, cf. utils/lint_dialogues)."""
+	obj = q.get("objectif") or {}
+	dest_id = obj.get("cible")
+	indice = transport.indice_destination(lieu_doc, dest_id, find_docs, get_doc)
+	rdv_id = (obj.get("rencontre") or {}).get("lieu")
+	rdv_doc = get_doc(rdv_id) if rdv_id else None
+	rec = q.get("recompenses") or {}
+	return {
+		"protege": escorte.noms_proteges(q.get("proteges") or []),
+		"destination": indice["nom"],
+		"destinataire": _nom_pnj(dest_id) or indice["nom"],
+		"direction": transport.texte_indice(indice),
+		"repere": indice.get("repere") or indice["nom"],
+		# Le lieu du rendez-vous : absent quand la personne attend chez le donneur (elle
+		# rejoint le groupe à l'acceptation), auquel cas on nomme le lieu où l'on parle.
+		"lieu_rencontre": (
+			(rdv_doc or {}).get("label") or (rdv_doc or {}).get("nom")
+			or lieu_doc.get("label") or lieu_doc.get("nom") or ""
+		),
+		"xp": rec.get("xp", 0),
+		"prime": rec.get("cuivre", 0),
+	}
+
+
+def _resoudre_escorte(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
+					  reponse: dict) -> tuple[str | None, dict]:
+	"""Exécute une action du service `escorte`. Il n'y a QU'UNE opération — `accepter` : la
+	dépose se solde toute seule en franchissant la porte du lieu de destination, sans
+	dialogue (`escorte.traiter_deplacement`, appelé par le déplaceur). Miroir simplifié de
+	`_resoudre_transport`, sans `livrer` ni `rapporter`.
+
+	Aucun contrôle de charge : on n'emporte pas une personne dans son sac."""
+	noeuds = ((pnj_doc.get("services") or {}).get("escorte") or {}).get("noeuds") or {}
+
+	if op == "accepter":
+		offre = escorte.offre_courante(character, lieu_doc)
+		if not offre:
+			raise HTTPException(status_code=422, detail="Aucune escorte à prendre ici.")
+		# Calculés AVANT la mutation : l'offre disparaît du lieu une fois acceptée, mais le
+		# nœud « je compte sur vous » doit encore pouvoir nommer la personne et la destination.
+		dits = _placeholders_escorte(offre, lieu_doc)
+		q, docs = escorte.accepter_escorte(character, offre, get_doc)
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		# Les docs `protege:*` sont ANNEXES : persistés APRÈS le save autoritatif, comme les
+		# docs de la compagnie. Ils ne naissent ici que si la personne attend chez le donneur
+		# (spec sans `rencontre`) ; sinon ils naîtront au rendez-vous.
+		for doc in docs:
+			save_doc(doc)
+		reponse["escorte"] = {
+			"accepte": q.get("titre"),
+			"rejoint": [escorte.nom_complet(d) for d in docs],
+		}
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		return noeuds.get("accepte"), dits
+
+	raise HTTPException(status_code=422, detail="Action d'escorte inconnue.")
+
+
 @pnj_router.get("/pnj/dialogue")
 async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)]):
 	"""État initial du panneau de dialogue : PNJ présent + nœud de départ (choix filtrés)."""
@@ -467,6 +566,12 @@ async def pnj_dialogue_choix(
 		# sur les nouveaux FLAGS, sinon le marchand reproposerait la course qu'il vient de
 		# confier. Les PLACEHOLDERS, eux, viennent de l'action : l'offre n'existe plus une fois
 		# acceptée, mais le nœud de résultat doit encore pouvoir citer le délai et la destination.
+		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+		contexte["placeholders"].update(dits)
+	elif action.get("service") == "escorte":
+		suivant, dits = _resoudre_escorte(character, pnj_doc, lieu_doc, action.get("op"), reponse)
+		# Même raison que le transport : l'escorte vient d'être prise → refiltrer les choix sur
+		# les nouveaux flags, en conservant les placeholders de l'action.
 		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
 		contexte["placeholders"].update(dits)
 	elif action.get("service") == "rang":
@@ -840,6 +945,7 @@ def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
 
 	compagnons = recrutement.groupe_effectif(character, get_doc)
 	montures_groupe = montures.montures_effectives(character, get_doc)
+	proteges_groupe = escorte.proteges_effectifs(character, get_doc)
 	nb_monstres = 3 + len(compagnons) // 2
 	# zone_tags vide : les espèces sont déjà choisies à la main, pas à filtrer par terrain.
 	monstres = instantiate_monsters(pool_especes, profils, nb_monstres, [])
@@ -871,7 +977,7 @@ def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
 	combat_doc = create_combat_doc(
 		character, monstres, list(lieu_garde.get("tags") or []),
 		lieu_garde.get("image", ""), battle_map=lieu_garde,
-		compagnons=compagnons, montures=montures_groupe,
+		compagnons=compagnons, montures=montures_groupe, proteges=proteges_groupe,
 	)
 	if narration:
 		combat_doc["chasse_narration"] = narration

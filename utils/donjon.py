@@ -48,7 +48,13 @@ import random
 import uuid
 
 from models import character_stats
-from utils import chasse, quetes
+from utils import acces, chasse, quetes
+
+
+# Rang d'une commission quand AUCUNE barrière `rang_min` ne la commande (cf.
+# `rang_commission`). Valeur historique, conservée pour ne rien changer au contenu déjà en
+# base : un donjon libre d'accès reste étiqueté `D`.
+RANG_COMMISSION_DEFAUT = "D"
 
 
 # ── Lecture du doc donjon ────────────────────────────────────────────────────────
@@ -179,6 +185,29 @@ def tirer_cible(donjon_doc: dict, get_doc_fn, find_docs_fn) -> dict | None:
 
 # ── Construction de la commission ───────────────────────────────────────────────
 
+def rang_commission(bureau_doc: dict, lieu_doc: dict) -> str:
+	"""Rang AFFICHÉ d'une commission : **le rang qui commande réellement son accès**, pris
+	sur les barrières de la chaîne — la SALLE visée et le BUREAU qui la mandate —, le plus
+	élevé des deux l'emportant. Aucune barrière de rang ⇒ `RANG_COMMISSION_DEFAUT`.
+
+	⚠️ Lire la seule salle ne suffirait pas, et c'est le cœur du sujet : dans la chaîne
+	écrite, la mine est gardée par un `quete_active` (« montre ton mandat »), et c'est le
+	BUREAU du maître de guilde qui porte le `rang_min` (la porte de Borin). Le prix d'entrée
+	d'une commission, c'est la porte la plus stricte qu'il faut franchir pour l'obtenir —
+	pas seulement celle qui se trouve au bout.
+
+	Une commission n'a pas de `rang` d'auteur (elle est générée) : le premier argument de
+	`acces.rang_de_quete` est donc None. Tout le reste de la règle — maximum des seuils,
+	bornage sur l'échelle, repli — vit là-bas, en SOURCE UNIQUE partagée avec les offres
+	écrites (`escorte.rang_de_offre`) : aucune exception, aucun comportement à faire diverger."""
+	return acces.rang_de_quete(
+		None,
+		acces.rang_min_du_lieu(lieu_doc),
+		acces.rang_min_du_lieu(bureau_doc),
+		defaut=RANG_COMMISSION_DEFAUT,
+	)
+
+
 def construire_commission(bureau_doc: dict, cible: dict) -> dict | None:
 	"""Doc `quete:*` d'une commission d'éradication (NON persisté : l'acceptation en fait un
 	snapshot, comme les épreuves de rang). None si la cible est incomplète.
@@ -211,7 +240,7 @@ def construire_commission(bureau_doc: dict, cible: dict) -> dict | None:
 			f"La Guilde mandate une compagnie pour purger {lieu_nom}. Un {nom} « {grade} » y "
 			f"tient les galeries : abattez-le, et le rapport suffira à rouvrir le chantier."
 		),
-		"rang": "D",
+		"rang": rang_commission(bureau_doc, lieu_doc),
 		"objectif": {
 			"type": "chasse",
 			"cible": espece_doc["_id"],

@@ -148,6 +148,44 @@ def test_catalogue_ne_publie_que_les_actives():
     assert cat["animation:a"]["largeur"] == 738   # le client en tire le ratio d'une frame
 
 
+# ── Décalage vertical de base ────────────────────────────────────────────────────
+
+def test_decalage_y_effectif_part_de_la_base():
+    """Le zéro d'un doc N'EST PAS le sol : le réglage saisi est un ÉCART à la base."""
+    assert anim.decalage_y_effectif(0) == anim.DECALAGE_Y_BASE
+    assert anim.decalage_y_effectif(0.5) == anim.DECALAGE_Y_BASE + 0.5
+    assert anim.decalage_y_effectif("-0.25") == anim.DECALAGE_Y_BASE - 0.25
+    # Champ absent ou illisible ⇒ base seule : c'est ce qui rend la règle sans migration.
+    assert anim.decalage_y_effectif(None) == anim.DECALAGE_Y_BASE
+    assert anim.decalage_y_effectif("plus haut") == anim.DECALAGE_Y_BASE
+
+
+def test_decalage_x_effectif_part_de_zero():
+    """Miroir horizontal, base NULLE : un sprite est déjà centré sur sa case."""
+    assert anim.DECALAGE_X_BASE == 0
+    assert anim.decalage_x_effectif(0) == 0
+    assert anim.decalage_x_effectif(0.25) == 0.25
+    assert anim.decalage_x_effectif(None) == anim.DECALAGE_X_BASE
+    assert anim.decalage_x_effectif("à droite") == anim.DECALAGE_X_BASE
+
+
+def test_catalogue_publie_le_decalage_effectif():
+    """Le client rend ce qu'on lui donne : la base est déjà DANS le payload, il n'a pas à
+    connaître la règle — et le doc, lui, n'est pas touché."""
+    doc = _doc(_id="animation:a", actif=True, decalage_y=0.25, decalage_x=-0.5)
+    cat = anim.catalogue_payload([doc])
+    assert cat["animation:a"]["decalage_y"] == anim.DECALAGE_Y_BASE + 0.25
+    assert cat["animation:a"]["decalage_x"] == anim.DECALAGE_X_BASE - 0.5
+    assert doc["decalage_y"] == 0.25 and doc["decalage_x"] == -0.5
+    # Doc sans les champs : il descend quand même d'une demi-case, et ne bouge pas en X.
+    sans = _doc(_id="animation:b", actif=True)
+    sans.pop("decalage_y", None)
+    sans.pop("decalage_x", None)
+    charge = anim.catalogue_payload([sans])["animation:b"]
+    assert charge["decalage_y"] == anim.DECALAGE_Y_BASE
+    assert charge["decalage_x"] == anim.DECALAGE_X_BASE
+
+
 # ── Cascade contenu → défaut de canal ────────────────────────────────────────────
 
 @pytest.fixture

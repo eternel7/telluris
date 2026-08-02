@@ -23,6 +23,7 @@ from utils.zones import (
 from utils import focalisation
 from utils import recrutement
 from utils import montures
+from utils import escorte
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
@@ -174,6 +175,10 @@ async def start_combat(
     # Les montures suivent le groupe sur la carte mais ne combattent pas : elles ne
     # relèvent donc PAS l'opposition (ce serait punir le joueur d'emmener son barda).
     montures_groupe = montures.montures_effectives(character, get_doc)
+    # Les personnes ESCORTÉES suivent aussi le groupe, et pour la même raison ne relèvent pas
+    # l'opposition : accepter de protéger quelqu'un ne doit pas rendre les rencontres plus
+    # dures — c'est déjà une cible de plus à couvrir.
+    proteges_groupe = escorte.proteges_effectifs(character, get_doc)
     nb_monstres = max(1, round(body.intensite * 3)) + len(compagnons) // 2
     # Espèces déjà filtrées par zone → pas de re-filtrage par tags (zone_tags vide).
     # Focalisation : l'espèce ciblée pèse plus lourd dans le tirage (si présente au pool).
@@ -213,7 +218,8 @@ async def start_combat(
     # Le combat référence le lieu battle map (cells non dupliqué) ; repli grille ouverte.
     combat_doc = create_combat_doc(character, monstres, body.tags, map_image,
                                    battle_map=battle_map, furtivite_initiale=furtivite,
-                                   compagnons=compagnons, montures=montures_groupe)
+                                   compagnons=compagnons, montures=montures_groupe,
+                                   proteges=proteges_groupe)
     if chasse_narration:
         combat_doc["chasse_narration"] = chasse_narration
     resolve_first_turns(combat_doc)  # no-op if player goes first
@@ -317,9 +323,13 @@ async def collect_loot(
     # Une monture VIVANTE en est un — c'est même le meilleur porteur du groupe ; une
     # monture MORTE non : elle a quitté le troupeau, lui attribuer une carcasse la ferait
     # disparaître dans un doc que plus personne ne lit.
+    # ⚠️ Une personne ESCORTÉE n'en est JAMAIS un, vivante ou non : elle n'est pas une
+    # porteuse (absente de `porteurs_effectifs`), on ne lui transfère rien, et son doc quitte
+    # le jeu à la dépose — la carcasse partirait avec elle.
     snap_par_cid = {
         j["character_id"]: j
-        for j in combat_doc.get("joueurs", []) if j.get("character_id") and not j.get("morte")
+        for j in combat_doc.get("joueurs", [])
+        if j.get("character_id") and not j.get("morte") and not j.get("est_protege")
     }
 
     guard = character.get("butin_collectes", {})

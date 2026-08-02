@@ -17,6 +17,7 @@ from utils.characters import (
 )
 from utils import recrutement
 from utils import montures
+from utils import escorte
 from utils import fiche as fiche_util
 # Une monture est un porteur du groupe : le panneau 👥 la rend avec la même carte que les
 # compagnons. On réutilise sa vue plutôt que de la recopier — même précédent que
@@ -104,6 +105,29 @@ def _recrue_view(character: dict, av: dict) -> dict:
 	}
 
 
+def _protege_view(p: dict) -> dict:
+	"""Vue d'une personne sous protection. Mêmes clés que `_recrue_view` là où le client les
+	partage (`id`/`prenom`/`nom`/`race`/`image`/vitaux) : c'est la même carte de personnage.
+	`est_protege` permet au client de la ranger sous son propre sous-titre 🛡️ et de ne lui
+	offrir AUCUNE action — on ne congédie pas quelqu'un qu'on a promis de ramener.
+
+	⚠️ Carte NON éditable et NON cliquable : une escortée est hors de `groupe_effectif`,
+	donc `_acteur` refuserait (403) d'enregistrer son cadrage de portrait, et elle n'a pas de
+	fiche (ni équipement, ni sorts, ni XP). Elle n'apparaît pas non plus dans la section 🎒 :
+	`porteurs_effectifs` ne la contient pas — on ne lui transfère rien."""
+	return {
+		"id": p["_id"],
+		"prenom": p.get("prenom", ""),
+		"nom": p.get("nom", ""),
+		"race": p.get("race", ""),
+		"sex": p.get("sex", ""),
+		"image": p.get("image", ""),
+		"description": p.get("description", ""),
+		"est_protege": True,
+		**escorte.vitaux_de(p),
+	}
+
+
 def _groupe_view(character: dict) -> list:
 	"""Le groupe actif (même vue que les recrues : `_recrue_view` porte déjà les vitaux)."""
 	return [_recrue_view(character, av) for av in recrutement.groupe_effectif(character, get_doc)]
@@ -139,6 +163,11 @@ def _payload(character: dict, recrues: list | None = None) -> dict:
 		"montures": [_monture_view(m)
 					 for m in montures.montures_effectives(character, get_doc)],
 		"montures_plafond": montures.plafond_montures(),
+		# Les personnes escortées ferment la marche : ni membres du groupe (pas d'affinité,
+		# pas de part de butin, pas de plafond), ni porteuses. Elles n'ont ni plafond ni
+		# action — elles sont là tant que la quête dure.
+		"proteges": [_protege_view(p)
+					 for p in escorte.proteges_effectifs(character, get_doc)],
 	}
 	if recrues is not None:
 		payload["recrues"] = [_recrue_view(character, av) for av in recrues]

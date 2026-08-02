@@ -131,6 +131,50 @@
 		}
 		.sheet-cell.on { border-color: var(--accent); background: rgba(200,168,75,0.16); color: var(--accent); }
 
+		/* ── Mini-scène de combat ──
+		   L'aperçu animé montre la DÉCOUPE (une frame remplit sa fenêtre) ; il ne dit rien
+		   de la taille réelle du sprite ni de sa position par rapport à un personnage. La
+		   scène rejoue donc les mêmes règles de pose que `combat_telluris.html` : jeton
+		   ancré au BAS de sa case, sprite centré sur la case de la CIBLE, `echelle` et
+		   `decalage_y` comptés en cases (`--sstep` y tient le rôle de `--step`). */
+		.scene-layout { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; }
+		@media (max-width: 760px) { .scene-layout { grid-template-columns: 1fr; } }
+		.scene-stage {
+			--sstep: 62px;
+			position: relative; overflow: hidden;
+			border: 1px solid var(--border); border-radius: 6px;
+			background:
+				repeating-linear-gradient(to right, rgba(255,255,255,0.06) 0 1px, transparent 1px var(--sstep)),
+				repeating-linear-gradient(to bottom, rgba(255,255,255,0.06) 0 1px, transparent 1px var(--sstep)),
+				linear-gradient(180deg, #1b2030 0%, #080a10 100%);
+		}
+		.scene-token {
+			position: absolute; z-index: 1;
+			width: var(--sstep); height: var(--sstep);
+			display: flex; align-items: flex-end; justify-content: center;
+		}
+		.scene-token .st-rond {
+			width: 70%; height: 70%; border-radius: 50%;
+			display: flex; align-items: center; justify-content: center;
+			font-size: 15px; font-weight: bold;
+		}
+		/* Mêmes couleurs qu'en combat : doré = personnage principal, bleu = compagnon,
+		   rouge = ennemi. */
+		.scene-token.joueur    .st-rond { background: #3a3113; border: 2px solid var(--accent); color: #ffe9ac; box-shadow: 0 0 8px rgba(200,168,75,0.6); }
+		.scene-token.compagnon .st-rond { background: #1a3a5a; border: 2px solid #2e86de;      color: #7ec8ff; box-shadow: 0 0 8px rgba(46,134,222,0.6); }
+		.scene-token.ennemi    .st-rond { background: #4a1a1a; border: 2px solid #aa3333;      color: #ffaaaa; box-shadow: 0 0 8px rgba(170,51,51,0.6); }
+		/* Case qui PORTE le sprite (cible, ou acteur si l'ancrage le dit) : sans ce repère
+		   on ne sait pas si un sprite décalé est bien posé ou mal réglé. */
+		.scene-token.porteur .st-rond { outline: 2px dashed var(--accent2); outline-offset: 3px; }
+		.scene-token .st-nom {
+			position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+			font-size: 8.5px; letter-spacing: 0.06em; color: var(--muted); white-space: nowrap;
+		}
+		/* Au-dessus des jetons, comme .vfx-sprite en combat (monstres 1, alliés 2, sprite 3). */
+		.scene-vfx { position: absolute; z-index: 3; pointer-events: none; background-repeat: no-repeat; }
+		.scene-legend { font-size: 0.7rem; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+		.dl-btn.on { background: rgba(200,168,75,0.3); box-shadow: 0 0 10px rgba(200,168,75,0.25); }
+
 		/* ── Liaisons ── */
 		table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
 		th, td { padding: 7px 8px; border-bottom: 1px solid var(--border); text-align: left; }
@@ -216,7 +260,8 @@
 						<div class="field"><label for="f-fin">Fin</label><input id="f-fin" type="number" min="0"></div>
 						<div class="field"><label for="f-duree">Durée (ms)</label><input id="f-duree" type="number" min="1" step="50"></div>
 						<div class="field"><label for="f-echelle">Échelle (× case)</label><input id="f-echelle" type="number" min="0.1" step="0.1"></div>
-						<div class="field"><label for="f-decalage">Décalage Y (case)</label><input id="f-decalage" type="number" step="0.05"></div>
+						<div class="field"><label for="f-decalage-x">Décalage X</label><input id="f-decalage-x" type="number" step="0.05"></div>
+						<div class="field"><label for="f-decalage">Décalage Y</label><input id="f-decalage" type="number" step="0.05"></div>
 						<div class="field">
 							<label for="f-ancrage">Ancrage</label>
 							<select id="f-ancrage">
@@ -257,7 +302,64 @@
 			</div>
 		</div>
 
-		<!-- ── 3. Liaisons ─────────────────────────────────────────────────── -->
+		<!-- ── 3. Mini-scène ───────────────────────────────────────────────── -->
+		<div class="card">
+			<div class="card-title">🎬 Mini-scène de combat</div>
+			<div class="card-desc">
+				L'animation <strong>en cours d'édition</strong> jouée sur une scène de
+				5 × 5 cases : personnage principal et compagnon d'un côté, ennemi en face.
+				Un sort <strong>offensif</strong> s'anime sur l'<strong>ennemi</strong>, un sort
+				<strong>défensif</strong> sur le <strong>compagnon</strong> ou sur le
+				<strong>principal</strong>. C'est le seul aperçu qui montre la
+				<em>taille</em> du sprite par rapport à un personnage et l'effet réel
+				d'<code>echelle</code> et des deux décalages — l'aperçu ci-dessus, lui,
+				remplit sa fenêtre. Le <strong>décalage X</strong> (base <strong>0</strong>)
+				pousse le sprite vers la droite, le <strong>décalage Y</strong> le monte, tous
+				deux comptés en cases. ⚠️ Toutes les animations partent d'un décalage Y de base
+				de <strong>−0,5 case</strong> : la valeur saisie est un <em>écart</em> à cette
+				base, et aucune donnée n'a été retouchée. ⚠️ Un <code>ancrage: acteur</code> déplace le sprite sur le
+				<strong>lanceur</strong> (le principal), exactement comme en combat.
+			</div>
+			<div class="scene-layout">
+				<div>
+					<div class="scene-stage" id="scene-stage">
+						<div class="scene-token joueur" id="scene-joueur">
+							<div class="st-nom">principal</div><div class="st-rond">P</div>
+						</div>
+						<div class="scene-token compagnon" id="scene-compagnon">
+							<div class="st-nom">compagnon</div><div class="st-rond">C</div>
+						</div>
+						<div class="scene-token ennemi" id="scene-ennemi">
+							<div class="st-nom">ennemi</div><div class="st-rond">E</div>
+						</div>
+					</div>
+					<div class="scene-legend" id="scene-coords">—</div>
+				</div>
+				<div>
+					<div class="field">
+						<label for="scene-role">Rôle de l'animation</label>
+						<select id="scene-role">
+							<option value="offensif">offensif → sur l'ennemi</option>
+							<option value="defensif_allie">défensif → sur le compagnon</option>
+							<option value="defensif_soi">défensif → sur le principal</option>
+						</select>
+					</div>
+					<div class="row-btns">
+						<button class="dl-btn" id="btn-scene-play" type="button">▶ Jouer</button>
+						<button class="dl-btn" id="btn-scene-loop" type="button">⟳ Boucler</button>
+					</div>
+					<div class="status" id="scene-status"></div>
+					<div class="scene-legend">
+						Le lanceur est toujours le <strong>principal</strong> : c'est lui qui porte le
+						sprite quand l'ancrage vaut <code>acteur</code> et que la cible est
+						quelqu'un d'autre. Le cercle en pointillés marque la case qui porte le
+						sprite.
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ── 4. Liaisons ─────────────────────────────────────────────────── -->
 		<div class="card">
 			<div class="card-title">🔗 Liaisons au contenu</div>
 			<div class="card-desc">
@@ -290,6 +392,13 @@
 let DOCS = [];        // docs `animation:*` (actifs ET brouillons)
 let FICHIERS = [];    // feuilles présentes sur le disque {fichier, largeur, hauteur, docs[]}
 let courant = null;   // doc en cours d'édition (objet complet, _rev inclus)
+// Décalage vertical de BASE, en cases, appliqué à toutes les animations — publié par le
+// serveur (`utils/animations.DECALAGE_Y_BASE`) et jamais recopié en dur : le champ
+// `decalage_y` du formulaire est un ÉCART À CETTE BASE, son zéro n'est pas le sol.
+let DECALAGE_Y_BASE = -0.5;
+// Miroir horizontal, base nulle : un sprite est déjà centré sur sa case, le champ ne sert
+// qu'aux dessins décentrés dans leur frame.
+let DECALAGE_X_BASE = 0;
 
 const $ = (id) => document.getElementById(id);
 
@@ -373,6 +482,7 @@ function remplirFormulaire(d) {
 	$('f-fin').value      = d.fin != null ? d.fin : (Math.max(1, d.colonnes || 1) * Math.max(1, d.lignes || 1) - 1);
 	$('f-duree').value    = d.duree_ms != null ? d.duree_ms : 600;
 	$('f-echelle').value  = d.echelle != null ? d.echelle : 1.5;
+	$('f-decalage-x').value = d.decalage_x != null ? d.decalage_x : 0;
 	$('f-decalage').value = d.decalage_y != null ? d.decalage_y : 0;
 	$('f-ancrage').value  = d.ancrage === 'acteur' ? 'acteur' : 'cible';
 	$('f-actif').value    = d.actif ? '1' : '0';
@@ -398,6 +508,7 @@ function lireFormulaire() {
 		debut: debut, fin: fin,
 		duree_ms: Math.max(1, parseInt($('f-duree').value, 10) || 600),
 		echelle: Math.max(0.1, parseFloat($('f-echelle').value) || 1.5),
+		decalage_x: parseFloat($('f-decalage-x').value) || 0,
 		decalage_y: parseFloat($('f-decalage').value) || 0,
 		ancrage: $('f-ancrage').value,
 		actif: $('f-actif').value === '1',
@@ -417,6 +528,7 @@ function rafraichirApercu() {
 		img.removeAttribute('src');
 		$('sheet-grid').innerHTML = '';
 		$('apercu-info').textContent = '—';
+		arreterScene();
 		return;
 	}
 	const url = '/icons/effects/' + encodeURIComponent(a.fichier);
@@ -449,6 +561,10 @@ function rafraichirApercu() {
 		apercuRAF = requestAnimationFrame(tick);
 	};
 	apercuRAF = requestAnimationFrame(tick);
+
+	// Scène en boucle : elle rejoue le réglage COURANT (changement d'animation dans la
+	// liste, échelle, décalage…) — sans quoi elle continuerait de montrer l'ancien.
+	if (sceneLoop) jouerScene();
 }
 
 // Grille de découpe superposée à la feuille, avec les images retenues surlignées :
@@ -474,6 +590,8 @@ async function charger(selId) {
 	const data = await r.json();
 	DOCS = data.docs || [];
 	FICHIERS = data.fichiers || [];
+	if (data.decalage_y_base != null) DECALAGE_Y_BASE = parseFloat(data.decalage_y_base) || 0;
+	if (data.decalage_x_base != null) DECALAGE_X_BASE = parseFloat(data.decalage_x_base) || 0;
 	const cible = selId || (courant && courant._id);
 	courant = DOCS.find(d => d._id === cible) || DOCS[0] || null;
 	renderListe();
@@ -577,13 +695,149 @@ $('btn-del').addEventListener('click', async () => {
 	}
 });
 
-// Tout changement de réglage relance l'aperçu (c'est lui qui sert à régler).
-['f-fichier','f-colonnes','f-lignes','f-sens','f-sens-cols','f-debut','f-fin','f-duree','f-echelle']
+// Tout changement de réglage relance l'aperçu (c'est lui qui sert à régler). Les deux
+// décalages n'ont aucun effet sur l'aperçu animé — ils en ont un sur la MINI-SCÈNE, que
+// rafraichirApercu relance quand elle tourne en boucle : sans eux ici, on les réglerait
+// sans rien voir bouger.
+['f-fichier','f-colonnes','f-lignes','f-sens','f-sens-cols','f-debut','f-fin','f-duree',
+ 'f-echelle','f-decalage-x','f-decalage']
 	.forEach(id => $(id).addEventListener('input', rafraichirApercu));
 // Les <select> n'émettent pas `input` partout : `change` est ce qui les rend réactifs.
 $('f-sens').addEventListener('change', rafraichirApercu);
 $('f-sens-cols').addEventListener('change', rafraichirApercu);
 $('anim-filter').addEventListener('input', renderListe);
+
+// ── Mini-scène de combat ─────────────────────────────────────────────────────
+// Rejoue les règles de pose de `combat_telluris.html` : le jeton est ancré au BAS de sa
+// case, le sprite est CENTRÉ sur la case de son porteur, et `echelle` / `decalage_y` se
+// comptent en CASES (ici `--sstep`, là-bas `--step`). Une scène qui poserait le sprite
+// autrement mentirait sur le réglage qu'on est en train de faire.
+//
+// ⚠️ La position demandée pour l'ennemi était (3,5), soit une rangée SOUS une grille
+// 5×5 : il est posé sur la dernière rangée (3,4), même colonne que le principal, donc
+// bien en face de lui. Changer `dims` suffit à le remettre en (3,5).
+const SCENE = {
+	dims: { x: 5, y: 5 },
+	joueur:    { x: 2, y: 0 },
+	compagnon: { x: 3, y: 0 },
+	ennemi:    { x: 2, y: 4 },
+};
+const SCENE_ELS = { joueur: 'scene-joueur', compagnon: 'scene-compagnon', ennemi: 'scene-ennemi' };
+
+let sceneRAF = null;
+let sceneLoop = false;
+
+// Qui lance, qui reçoit. Le lanceur est TOUJOURS le principal (c'est lui qu'on joue) :
+// un sort offensif part sur l'ennemi, un sort défensif sur un allié — le compagnon ou
+// lui-même, auquel cas acteur et cible se confondent, comme un `cible: "soi"` en combat.
+function sceneRoles() {
+	const role = $('scene-role').value;
+	if (role === 'defensif_soi')   return { acteur: 'joueur', cible: 'joueur' };
+	if (role === 'defensif_allie') return { acteur: 'joueur', cible: 'compagnon' };
+	return { acteur: 'joueur', cible: 'ennemi' };
+}
+
+// Même arbitrage que jouerVfx() en combat : `ancrage: "acteur"` ne déplace le sprite que
+// si l'acteur DIFFÈRE de la cible — l'entrée de journal ne porte l'acteur qu'à cette
+// condition.
+function scenePorteur() {
+	const { acteur, cible } = sceneRoles();
+	return ($('f-ancrage').value === 'acteur' && acteur !== cible) ? acteur : cible;
+}
+
+// Pose des jetons + taille de la scène : tout en `calc(var(--sstep) * n)`, donc rien à
+// mesurer en pixels et une scène qui suit `--sstep` si on la change dans la feuille.
+function placerScene() {
+	const stage = $('scene-stage');
+	stage.style.width  = 'calc(var(--sstep) * ' + SCENE.dims.x + ')';
+	stage.style.height = 'calc(var(--sstep) * ' + SCENE.dims.y + ')';
+	const porteur = scenePorteur();
+	Object.keys(SCENE_ELS).forEach(role => {
+		const el = $(SCENE_ELS[role]);
+		const p = SCENE[role];
+		el.style.left = 'calc(var(--sstep) * ' + p.x + ')';
+		el.style.top  = 'calc(var(--sstep) * ' + p.y + ')';
+		el.classList.toggle('porteur', role === porteur);
+	});
+	const p = SCENE[porteur];
+	$('scene-coords').textContent =
+		'Grille ' + SCENE.dims.x + '×' + SCENE.dims.y + ' — principal (' + SCENE.joueur.x + ',' + SCENE.joueur.y + '), '
+		+ 'compagnon (' + SCENE.compagnon.x + ',' + SCENE.compagnon.y + '), '
+		+ 'ennemi (' + SCENE.ennemi.x + ',' + SCENE.ennemi.y + ') — sprite sur ' + porteur
+		+ ' (' + p.x + ',' + p.y + ').';
+}
+
+function arreterScene() {
+	if (sceneRAF) cancelAnimationFrame(sceneRAF);
+	sceneRAF = null;
+	$('scene-stage').querySelectorAll('.scene-vfx').forEach(el => el.remove());
+}
+
+function jouerScene() {
+	const a = lireFormulaire();
+	arreterScene();
+	if (!a.fichier) { setStatus($('scene-status'), 'Un fichier est requis.', 'err'); return; }
+
+	const porteur = scenePorteur();
+	const p = SCENE[porteur];
+	const el = document.createElement('div');
+	el.className = 'scene-vfx';
+	el.style.backgroundImage = `url('/icons/effects/${encodeURIComponent(a.fichier)}')`;
+
+	// Largeur = échelle × case ; hauteur au RATIO D'UNE FRAME et jamais de la feuille —
+	// même calcul qu'en combat, sinon le sprite serait étiré ici et pas là-bas.
+	const meta = FICHIERS.find(f => f.fichier === a.fichier);
+	const fw = meta && meta.largeur ? meta.largeur / a.colonnes : 1;
+	const fh = meta && meta.hauteur ? meta.hauteur / a.lignes : 1;
+	const ratio = fw > 0 ? fh / fw : 1;
+	el.style.width  = 'calc(var(--sstep) * ' + a.echelle + ')';
+	el.style.height = 'calc(var(--sstep) * ' + (a.echelle * ratio) + ')';
+	// Centré sur la case (translateX(-50%), comme l'ancre left:50% des jetons de combat),
+	// et posé sur le BAS de la case : le décalage Y monte le sprite d'autant de cases, le
+	// décalage X le pousse vers la droite.
+	// ⚠️ Décalages EFFECTIFS = base commune + réglage du doc, mêmes additions que
+	// `animations.decalage_x_effectif`/`_y_effectif` — c'est ce que le combat recevra dans
+	// son payload. ⚠️ Le X est un recadrage d'ÉCRAN, comme en combat (il est posé sur
+	// `left`) : ce n'est pas un déplacement de case, et il ne pivote pas avec la caméra.
+	const dx = DECALAGE_X_BASE + a.decalage_x;
+	const dy = DECALAGE_Y_BASE + a.decalage_y;
+	el.style.left = 'calc(var(--sstep) * ' + (p.x + 0.5 + dx) + ')';
+	el.style.transform = 'translateX(-50%)';
+	el.style.bottom = 'calc(var(--sstep) * ' + (SCENE.dims.y - 1 - p.y + dy) + ')';
+
+	const nb = a.fin - a.debut + 1;
+	poserFrame(el, a, a.debut);
+	$('scene-stage').appendChild(el);
+	setStatus($('scene-status'), '▶ ' + nb + ' image(s) sur ' + porteur + ' — ' + a.duree_ms + ' ms'
+		+ ', décalage X ' + (dx > 0 ? '+' : '') + dx.toFixed(2)
+		+ ' / Y ' + (dy > 0 ? '+' : '') + dy.toFixed(2) + ' case(s)'
+		+ (sceneLoop ? ' (en boucle)' : ''), 'ok');
+
+	let t0 = 0;
+	const tick = (t) => {
+		if (!t0) t0 = t;
+		const ecoule = t - t0;
+		// Un coup joue UNE fois et le sprite disparaît, comme en combat ; la boucle n'est
+		// qu'une commodité de réglage.
+		if (ecoule >= a.duree_ms && !sceneLoop) { el.remove(); sceneRAF = null; return; }
+		const cycle = ecoule % a.duree_ms;
+		poserFrame(el, a, a.debut + Math.min(nb - 1, Math.floor(cycle / a.duree_ms * nb)));
+		sceneRAF = requestAnimationFrame(tick);
+	};
+	sceneRAF = requestAnimationFrame(tick);
+}
+
+$('btn-scene-play').addEventListener('click', jouerScene);
+$('btn-scene-loop').addEventListener('click', () => {
+	sceneLoop = !sceneLoop;
+	$('btn-scene-loop').classList.toggle('on', sceneLoop);
+	if (sceneLoop) jouerScene();
+	else setStatus($('scene-status'), '');
+});
+// Le rôle et l'ancrage changent le PORTEUR du sprite : le repère de case et la lecture
+// en cours doivent suivre, sinon on règle en regardant la mauvaise case.
+$('scene-role').addEventListener('change', () => { placerScene(); if (sceneLoop) jouerScene(); });
+$('f-ancrage').addEventListener('change', () => { placerScene(); if (sceneLoop) jouerScene(); });
 
 // ── Liaisons ─────────────────────────────────────────────────────────────────
 function optionsAnimations(valeur) {
@@ -642,6 +896,7 @@ async function lier(docId, animation) {
 $('btn-liaisons').addEventListener('click', chargerLiaisons);
 $('liaison-type').addEventListener('change', chargerLiaisons);
 
+placerScene();
 charger();
 </script>
 </body>

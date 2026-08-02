@@ -1939,6 +1939,11 @@
 				   de butin, ni plafond commun). Titre masqué tant qu'il n'y en a aucune. #}
 				<h3 id="grp-montures-titre" class="grp-sous-titre" style="display:none">🐴 Montures</h3>
 				<div id="grp-montures-list" class="cards-list"></div>
+				{# Les personnes SOUS PROTECTION ferment la marche : elles ne sont ni membres
+				   du groupe ni porteuses (absentes de la section 🎒), et n'offrent AUCUNE
+				   action — on ne congédie pas quelqu'un qu'on a promis de ramener. #}
+				<h3 id="grp-proteges-titre" class="grp-sous-titre" style="display:none">🛡️ Sous votre protection</h3>
+				<div id="grp-proteges-list" class="cards-list"></div>
 			</div>
 		</section>
 		<section class="grp-section">
@@ -2539,6 +2544,9 @@
 				updateControls();
 				updateVitals(rep.vitals);
 				_notifierTransportsEchoues(rep);
+				// Escorte : c'est le PAS qui fait entrer dans le 3×3 du rendez-vous — on
+				// annonce la rencontre sans rechargement de page.
+				_notifierEscorte(rep.escorte);
 				// Course échue = réputation en baisse chez le donneur et sa maison : l'onglet 🤝
 				// n'en sait rien sans ce resync (le pas ne recharge pas la page).
 				if (Array.isArray(rep.relations_lieux)) renderFicheRelations(rep.relations_lieux);
@@ -2707,6 +2715,11 @@
 				if ((data.transports_echoues || []).length) {
 					// Le changement de lieu recharge la page : le toast doit survivre au reload.
 					sessionStorage.setItem('transports_echoues_notif', JSON.stringify(data.transports_echoues));
+				}
+				if (data.escorte && ((data.escorte.rencontres || []).length || data.escorte.depose)) {
+					// Même patron qu'`intro_fin_notif` : la branche « lien » recharge la page,
+					// donc le toast de DÉPOSE (« +1 or, quête accomplie ») ne survivrait pas.
+					sessionStorage.setItem('escorte_notif', JSON.stringify(data.escorte));
 				}
 				if (data.zone_event && data.zone_event.type === 'combat') {
 					const cr = await fetch('/api/combat/start', {
@@ -5455,6 +5468,26 @@ function _notifierTransportsEchoues(rep) {
 	});
 }
 
+// Escorte : la rencontre (on entre dans le 3×3 du rendez-vous) et la dépose (on franchit la
+// porte de la destination) sont AUTOMATIQUES — aucune UI, aucun bouton : seul un toast dit
+// au joueur ce qui vient de se produire.
+// ⚠️ `showToast` écrit en textContent : rien à échapper ici (cf. règle XSS de CLAUDE.md).
+function _notifierEscorte(esc) {
+	if (!esc) return;
+	(esc.rencontres || []).forEach(r => {
+		showToast('🛡️ ' + (r.noms || 'Votre protégé') + ' vous rejoint — ramenez-la saine et sauve.');
+	});
+	const d = esc.depose;
+	if (!d) return;
+	showToast('🛡️ ' + (d.noms || 'Votre protégé') + ' est arrivé à bon port : ' + (d.titre || '—'));
+	const p = d.purse || {};
+	const prime = [p.or ? p.or + ' or' : '', p.argent ? p.argent + ' ag' : '',
+				   p.cuivre ? p.cuivre + ' cu' : ''].filter(Boolean).join(' ');
+	if (prime) showToast('💰 Récompense : ' + prime);
+	if (d.niveau_up) showToast('Niveau atteint !');
+	else if (d.xp > 0) showToast('+' + d.xp + ' XP');
+}
+
 function _deadlineLocale(expireAt, nowServeur) {
 	const now = Number.isFinite(nowServeur) ? nowServeur : Math.floor(Date.now() / 1000);
 	return Date.now() + Math.max(0, expireAt - now) * 1000;
@@ -5641,6 +5674,14 @@ _notifierTransportsEchoues({ transports_echoues: {{ transports_echoues | tojson 
 	if (!differe) return;
 	sessionStorage.removeItem('transports_echoues_notif');
 	try { _notifierTransportsEchoues({ transports_echoues: JSON.parse(differe) }); } catch (e) {}
+})();
+// Escorte rejointe / déposée pendant un changement de lieu : le toast a été mis de côté
+// avant le reload (même patron que ci-dessus et qu'`intro_fin_notif`).
+(function () {
+	const differe = sessionStorage.getItem('escorte_notif');
+	if (!differe) return;
+	sessionStorage.removeItem('escorte_notif');
+	try { _notifierEscorte(JSON.parse(differe)); } catch (e) {}
 })();
 
 function renderQuetesActives(data) {
@@ -6354,6 +6395,13 @@ function renderGroupe(data) {
 		m => _btnRelacher(m));
 	const titreMnt = document.getElementById('grp-montures-titre');
 	if (titreMnt) titreMnt.style.display = (data.montures || []).length ? '' : 'none';
+	// Personnes escortées : même composant, même règle (non éditable, non cliquable), mais
+	// AUCUNE action — leur seul « bouton » est de les ramener vivantes à destination.
+	const proteges = data.proteges || [];
+	_rendreCartesMontures(document.getElementById('grp-proteges-list'), proteges,
+		p => '', p => _piedProtege(p));
+	const titreProt = document.getElementById('grp-proteges-titre');
+	if (titreProt) titreProt.style.display = proteges.length ? '' : 'none';
 	renderGroupeInventaire();
 }
 
@@ -6387,15 +6435,23 @@ function _btnRelacher(m) {
 // Les cartes de montures : même composant que les compagnons, mais NON éditable (une monture
 // n'est pas dans `groupe_effectif`, `_acteur` refuserait d'enregistrer son cadrage) et non
 // cliquable (elle n'a pas de fiche de personnage — pas de stats à dépenser, pas de sorts).
-function _rendreCartesMontures(container, liste, actions) {
+// Les personnes ESCORTÉES tombent exactement sous la même règle : d'où le `pied` paramétrable
+// plutôt qu'un second renderer copié-collé.
+function _rendreCartesMontures(container, liste, actions, pied) {
 	if (!container) return;
 	clearCharacterCards(container);
 	if (!liste.length) return;   // le titre est masqué par l'appelant : pas de « aucune »
 	liste.forEach(m => renderCharacterCard(container, m, {
 		editable: false,
-		footer: _piedMonture(m),
+		footer: (pied || _piedMonture)(m),
 		actions: actions(m),
 	}));
+}
+
+// Pied d'une carte de personne escortée : ce que le joueur doit surveiller, ce sont ses PV —
+// la carte les affiche déjà. On y met donc l'enjeu, pas une statistique de plus.
+function _piedProtege(p) {
+	return `<span>🛡️ Sous votre protection</span>`;
 }
 
 // Sacs côte à côte. Le compagnon affiché à droite est le dernier choisi (mémorisé), à

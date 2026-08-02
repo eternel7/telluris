@@ -176,6 +176,17 @@
     background-repeat: no-repeat;
 }
 .ally-token.monture .mt-hp-fill { background: #b98c4a; }
+/* Personne ESCORTÉE : anneau DORÉ, là où la monture est ocre et le compagnon bleu. Même
+   statut mécanique qu'une monture (ciblable, pas de tour), mais un enjeu tout autre — sa
+   mort fait échouer la quête, elle doit sauter aux yeux. */
+.ally-token.protege .at-portrait {
+	background-color: #3b3218; border-color: #f0c453;
+	box-shadow: 0 0 10px rgba(240,196,83,0.85); color: #ffe9ac;
+	background-size: cover;
+	background-position: center top;
+	background-repeat: no-repeat;
+}
+.ally-token.protege .mt-hp-fill { background: #f0c453; }
 .ally-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
 .ally-token .mt-hp-fill { height: 100%; background: #2e86de; }
 
@@ -928,8 +939,10 @@ const SERVER_DATA = {
 const GRID = {{ grid | tojson | safe }};
 
 // Catalogue des animations d'impact ACTIVES : {id: {fichier, colonnes, lignes,
-// sens_lignes, sens_colonnes, debut, fin, duree_ms, echelle, decalage_y, ancrage,
-// largeur, hauteur}}.
+// sens_lignes, sens_colonnes, debut, fin, duree_ms, echelle, decalage_x, decalage_y,
+// ancrage, largeur, hauteur}}.
+// ⚠️ Les deux décalages arrivent EFFECTIFS (base commune déjà ajoutée par
+// `animations.catalogue_payload`) : rien à recalculer ici.
 // Le journal ne porte que l'ID (`entry.vfx.anim`) et l'id de snapshot de la cible — c'est
 // le SEUL canal possible, un tour de monstre étant résolu entièrement côté serveur.
 // Une animation absente du catalogue (brouillon, doc supprimé) ne joue rien.
@@ -1390,6 +1403,7 @@ function renderTokens() {
 		}
 		tok.className = 'ally-token' + ((p.currentPV || 0) > 0 ? '' : ' ko')
 					  + (p.est_monture ? ' monture' : '')
+					  + (p.est_protege ? ' protege' : '')
 					  + (vise ? ' spellcast' : '');
 		_placerToken(tok, p.pos.x - j.pos.x, p.pos.y - j.pos.y);
 		tok.querySelector('.mt-hp-fill').style.width = pct(p.currentPV, p.pv_max) + '%';
@@ -1493,6 +1507,13 @@ function jouerVfx(v) {
 	el.style.backgroundImage = "url('/icons/effects/" + encodeURIComponent(anim.fichier) + "')";
 	const dy = parseFloat(anim.decalage_y) || 0;
 	if (dy) el.style.bottom = 'calc(var(--step) * (var(--floor) + ' + dy + '))';
+	// ⚠️ Décalage X posé sur `left`, comme le Y l'est sur `bottom` : c'est un recadrage
+	// d'ÉCRAN (le dessin n'est pas centré dans sa frame), pas un déplacement de case. Le
+	// passer à _placerToken en ferait un vecteur MONDE, qui pivoterait avec la caméra —
+	// le sprite changerait de côté au changement d'acteur. `translateX(-50%)` du transform
+	// continue de le centrer sur sa propre largeur.
+	const dx = parseFloat(anim.decalage_x) || 0;
+	if (dx) el.style.left = 'calc(50% + var(--step) * ' + dx + ')';
 	const j = me();
 	// ⚠️ Placé par _placerToken et pas à la main : c'est la recette
 	// `rotate(a) translate(MONDE) rotate(-a)` qui fait tomber le sprite sur la bonne case
@@ -2462,8 +2483,10 @@ function showEndOverlay(status, xp) {
 
 // Membres du combat = bénéficiaires possibles du butin (principal en tête). Un compagnon
 // peut porter sa part : ses compétences ET son sac servent l'expédition (cf. CLAUDE.md).
+// ⚠️ Une personne ESCORTÉE en est exclue — miroir exact du filtre serveur de /collect : on
+// ne lui transfère rien, et son doc quitte le jeu à la dépose.
 function lootMembers() {
-	return (state.joueurs || []).filter(j => j && j.character_id);
+	return (state.joueurs || []).filter(j => j && j.character_id && !j.est_protege);
 }
 
 // Une pastille-portrait cliquable par membre : reproduit le cadrage de play_town via

@@ -30,6 +30,11 @@ PLACEHOLDERS_CONNUS = {
 	"colis", "poids", "delai", "xp", "prime",
 	# Quêtes de chasse / rang de guilde.
 	"espece", "lieu", "rang", "rang_vise",
+	# Escortes : la PERSONNE à protéger + l'enseigne où on la retrouve. ({destination},
+	# {direction}, {repere}, {xp}, {prime} sont partagés avec le transport.)
+	# ⚠️ `rang_requis` (le rang EXIGÉ par une offre) est distinct de `rang` (le rang COURANT,
+	# posé par le seul comptoir) : deux valeurs, deux placeholders.
+	"protege", "lieu_rencontre", "rang_requis",
 	# Accès conditionné à un lieu (PNJ gardien) : le label du lieu gardé.
 	"portail",
 	# Délai de réouverture : minutes restant avant que le dialogue rouvre.
@@ -44,6 +49,12 @@ FLAGS_CONNUS = {
 	"transport_offert", "transport_a_livrer", "transport_a_rapporter",
 	"transport_en_cours", "transport_accompli", "transport_mefiance",
 	"rang_offert", "rang_a_rapporter", "rang_max",
+	# Escortes. ⚠️ Pas de flag « à déposer » : la dépose est AUTOMATIQUE (elle se solde en
+	# franchissant la porte du lieu de destination), le dialogue n'a qu'un geste — accepter.
+	"escorte_offerte", "escorte_en_cours", "escorte_accomplie",
+	# Refus PARLÉ d'une offre réservée à un rang de guilde (`offre.rang_min`), miroir de
+	# `transport_mefiance` : sans lui le choix disparaîtrait sans un mot.
+	"escorte_rang_insuffisant",
 	"acces_ouvrable", "acces_refuse", "acces_ouvert", "acces_accompli",
 	# Complémentaires : l'un ou l'autre, jamais les deux (cf. `_contexte`).
 	"acces_libere", "acces_menace",
@@ -64,6 +75,9 @@ NOEUDS_REQUIS = {
 	"don":  {"fait", "sans_fonds", "trop_charge"},
 	"rang": {"accepte", "rapporte"},
 	"commission": {"accepte", "rapporte"},
+	# Une escorte n'a QUE `accepte` : le donneur ne revoit pas le joueur pour solder — la
+	# dépose se fait chez le destinataire, en passant la porte, sans dialogue.
+	"escorte": {"accepte"},
 	# `deja` reste optionnel — un gardien peut ne pas reconnaître les habitués.
 	"acces": {"ouvre", "refus"},
 }
