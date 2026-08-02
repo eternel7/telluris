@@ -775,6 +775,9 @@ function placerScene() {
 		const p = SCENE[role];
 		el.style.left = 'calc(var(--sstep) * ' + p.x + ')';
 		el.style.top  = 'calc(var(--sstep) * ' + p.y + ')';
+		el.style.display = 'flex';
+		el.style.justifyContent = 'center';
+		el.style.alignItems = 'center';
 		el.classList.toggle('porteur', role === porteur);
 	});
 	const p = SCENE[porteur];
