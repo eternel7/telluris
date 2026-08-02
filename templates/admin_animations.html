@@ -179,8 +179,14 @@
 		table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
 		th, td { padding: 7px 8px; border-bottom: 1px solid var(--border); text-align: left; }
 		th { color: var(--muted); font-weight: normal; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; }
-		td select { width: 100%; padding: 5px 7px; border: 1px solid var(--border); border-radius: 5px;
+		td select, td input { width: 100%; padding: 5px 7px; border: 1px solid var(--border); border-radius: 5px;
 			background: var(--bg); color: var(--text); font-family: inherit; font-size: 0.75rem; }
+		td input:focus { outline: none; border-color: var(--accent); }
+		/* Champ de liaison : un <input>+<datalist> et NON un <select>, parce qu'on doit
+		   pouvoir COLLER un identifiant (un select refuse le collage). Il garde
+		   l'autocomplétion du select, et la couleur dit d'un coup d'œil où en est la ligne. */
+		.liaison-input.lie { color: var(--accent2); }
+		.liaison-input.invalide { border-color: var(--err); color: var(--err); }
 		.liaison-scroll { max-height: 440px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
 		.type-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 	</style>
@@ -324,13 +330,13 @@
 				<div>
 					<div class="scene-stage" id="scene-stage">
 						<div class="scene-token joueur" id="scene-joueur">
-							<div class="st-nom">principal</div><div class="st-rond">P</div>
+							<div  title="principal" class="st-rond">P</div>
 						</div>
 						<div class="scene-token compagnon" id="scene-compagnon">
-							<div class="st-nom">compagnon</div><div class="st-rond">C</div>
+							<div title="compagnon" class="st-rond">C</div>
 						</div>
 						<div class="scene-token ennemi" id="scene-ennemi">
-							<div class="st-nom">ennemi</div><div class="st-rond">E</div>
+							<div title="ennemi" class="st-rond">E</div>
 						</div>
 					</div>
 					<div class="scene-legend" id="scene-coords">—</div>
@@ -367,7 +373,16 @@
 				<em>ou</em> consommable) ou une espèce. Sans liaison, le combat retombe sur le
 				défaut du canal — variable de monde <code>COMBAT_ANIMATIONS_DEFAUT</code>,
 				réglable depuis <code>/admin</code>.
+				<br>Chaque ligne est un champ de <strong>saisie</strong> : on peut y
+				<strong>coller</strong> un identifiant (celui du champ <em>Identifiant</em> de
+				l'éditeur ci-dessus, sélectionnable et copiable) ou le choisir dans la liste
+				proposée. L'enregistrement part quand le champ perd le focus ou à la touche
+				Entrée ; un identifiant inconnu est signalé en rouge et <strong>rien n'est
+				écrit</strong>. Vider le champ retire la liaison.
 			</div>
+			<!-- Une SEULE liste pour toutes les lignes : elle suit DOCS et donc le chargement
+			     comme le scan. -->
+			<datalist id="animations-list"></datalist>
 			<div class="type-row">
 				<select id="liaison-type" class="anim-filter" style="max-width:220px;margin:0">
 					<option value="sort">sort</option>
@@ -456,6 +471,9 @@ function renderListe() {
 	});
 	$('fichiers-list').innerHTML = FICHIERS.map(f =>
 		`<option value="${escapeHtml(f.fichier)}"></option>`).join('');
+	// La liste proposée aux champs de liaison suit le MÊME catalogue : une animation créée
+	// par le scan ou par ⧉ Dupliquer doit s'y trouver sans recharger la page.
+	majDatalistAnimations();
 }
 
 function selectionner(id) {
@@ -840,19 +858,46 @@ $('scene-role').addEventListener('change', () => { placerScene(); if (sceneLoop)
 $('f-ancrage').addEventListener('change', () => { placerScene(); if (sceneLoop) jouerScene(); });
 
 // ── Liaisons ─────────────────────────────────────────────────────────────────
-function optionsAnimations(valeur) {
-	const opts = ['<option value="">— aucune —</option>'];
-	DOCS.forEach(d => {
+// ⚠️ Le champ est un <input list=…> et NON un <select> : un select ne se COLLE pas, et
+// remplir vingt lignes avec la même animation passe par un copier-coller. Le datalist
+// rend l'autocomplétion qu'on perdrait sinon ; l'id reste la valeur, comme avant.
+function majDatalistAnimations() {
+	$('animations-list').innerHTML = DOCS.map(d => {
 		const label = (d.nom || d._id) + (d.actif ? '' : ' (brouillon)');
-		opts.push(`<option value="${escapeHtml(d._id)}"${d._id === valeur ? ' selected' : ''}>`
-			+ escapeHtml(label) + '</option>');
-	});
-	// Une liaison vers un doc supprimé doit rester VISIBLE, sinon la sauvegarde suivante
-	// l'effacerait à l'insu de l'admin.
-	if (valeur && !DOCS.some(d => d._id === valeur)) {
-		opts.push(`<option value="${escapeHtml(valeur)}" selected>${escapeHtml(valeur)} (introuvable)</option>`);
-	}
-	return opts.join('');
+		return `<option value="${escapeHtml(d._id)}">${escapeHtml(label)}</option>`;
+	}).join('');
+	// Le catalogue vient peut-être de changer (scan, duplication, suppression) alors que le
+	// tableau est déjà affiché : ce qui était inconnu peut être devenu valide, et l'inverse.
+	$('liaison-body').querySelectorAll('input[data-doc]')
+		.forEach(champ => _marquerLiaison(champ, champ.value));
+}
+
+// Une liaison vers un doc supprimé reste VISIBLE (l'input affiche sa valeur brute) et
+// n'est jamais réécrite toute seule : elle ne part que si l'admin touche au champ.
+function animationConnue(id) {
+	return !id || DOCS.some(d => d._id === id);
+}
+
+// `name` dérivé du `data-doc` : il rend la ligne identifiable par le navigateur (autofill,
+// gestionnaires de formulaire, extensions) et lisible dans le DOM. Les caractères hors
+// jeu sûr sont remplacés — l'autorité reste `data-doc`, qui porte l'id EXACT.
+function nomChampLiaison(docId) {
+	return 'anim_' + String(docId || '').replace(/[^A-Za-z0-9_.:-]+/g, '_');
+}
+
+// Un collage traîne souvent une espace ou un retour à la ligne : on nettoie AVANT de
+// juger la valeur, sinon un id parfaitement bon serait refusé.
+function _valeurCollee(el) {
+	const val = el.value.replace(/\s+/g, '');
+	if (el.value !== val) el.value = val;
+	return val;
+}
+
+function _marquerLiaison(el, val) {
+	const ok = animationConnue(val);
+	el.classList.toggle('invalide', !ok);
+	el.classList.toggle('lie', ok && !!val);
+	return ok;
 }
 
 async function chargerLiaisons() {
@@ -863,13 +908,32 @@ async function chargerLiaisons() {
 		const data = await r.json().catch(() => ({}));
 		if (!r.ok) { setStatus($('liaison-status'), 'Échec : ' + (data.detail || r.status), 'err'); return; }
 		const docs = data.docs || [];
+		majDatalistAnimations();
 		$('liaison-body').innerHTML = docs.map(d =>
 			`<tr><td>${escapeHtml((d.icon ? d.icon + ' ' : '') + (d.nom || d._id))}`
 			+ `<div style="color:var(--muted);font-size:0.68rem">${escapeHtml(d._id)}</div></td>`
-			+ `<td><select data-doc="${escapeHtml(d._id)}">${optionsAnimations(d.animation || '')}</select></td></tr>`
+			+ `<td><input class="liaison-input" type="text" list="animations-list" spellcheck="false"`
+			+ ` autocomplete="off" placeholder="— aucune —"`
+			+ ` data-doc="${escapeHtml(d._id)}" name="${escapeHtml(nomChampLiaison(d._id))}"`
+			+ ` value="${escapeHtml(d.animation || '')}"></td></tr>`
 		).join('') || '<tr><td colspan="2">— aucun document —</td></tr>';
-		$('liaison-body').querySelectorAll('select[data-doc]').forEach(sel => {
-			sel.onchange = () => lier(sel.dataset.doc, sel.value);
+		$('liaison-body').querySelectorAll('input[data-doc]').forEach(champ => {
+			_marquerLiaison(champ, champ.value);
+			// Repère en direct pendant la frappe/le collage, mais AUCUNE écriture : on
+			// n'enregistre pas un id à moitié tapé.
+			champ.addEventListener('input', () => _marquerLiaison(champ, _valeurCollee(champ)));
+			// `change` = perte de focus ou Entrée — c'est là qu'on écrit. Un id inconnu est
+			// signalé et RIEN n'est envoyé : une liaison morte ne joue aucune animation et
+			// ne se voit qu'en jouant.
+			champ.addEventListener('change', () => {
+				const val = _valeurCollee(champ);
+				if (!_marquerLiaison(champ, val)) {
+					setStatus($('liaison-status'),
+						'✗ Animation inconnue : ' + val + " — rien n'a été enregistré.", 'err');
+					return;
+				}
+				lier(champ.dataset.doc, val);
+			});
 		});
 		setStatus($('liaison-status'), docs.length + ' document(s).', 'ok');
 	} catch (e) {
