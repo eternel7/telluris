@@ -46,9 +46,16 @@ SENS_COLONNES = ("gauche_droite", "droite_gauche")
 SENS_COLONNES_DEFAUT = "gauche_droite"
 
 # Sur qui le sprite est posé : la CIBLE du coup (défaut) ou l'acteur qui agit
-# (consommable, buff sur soi).
+# (consommable, buff sur soi). Avec une trajectoire, c'est le point d'ARRIVÉE.
 ANCRAGES = ("cible", "acteur")
 ANCRAGE_DEFAUT = "cible"
+
+# Point de DÉPART d'une animation qui VOYAGE (flèche, boule de feu, caillou lancé).
+# ⚠️ La chaîne VIDE est le défaut et vaut « aucune trajectoire » : le sprite est posé sur
+# son ancrage d'arrivée, exactement comme avant. C'est ce qui rend tout ce dispositif sans
+# migration — un doc qui ne porte pas le champ ne bouge pas d'un pixel.
+DEPART_ANCRAGES = ("", "cible", "acteur")
+DEPART_ANCRAGE_DEFAUT = ""
 
 DUREE_DEFAUT_MS = 600
 ECHELLE_DEFAUT = 1.5
@@ -68,13 +75,31 @@ DECALAGE_Y_BASE = -0.5
 # de RENDU appliqué au payload, jamais écrit dans un doc, champ absent ⇒ 0.
 DECALAGE_X_BASE = 0.0
 
+# Orientation du sprite. `rotation` corrige le sens dans lequel la PLANCHE est dessinée —
+# ⚠️ convention : **0° = le dessin pointe vers la DROITE de l'écran**, donc une flèche
+# dessinée vers le haut se corrige par `rotation: 90`. `rotation_auto` y ajoute l'angle
+# départ → arrivée (à défaut de trajectoire, l'angle acteur → cible : un impact peut vouloir
+# se tourner vers celui qui frappe) ; si l'un des deux bouts manque, l'angle vaut 0.
+ROTATION_DEFAUT = 0.0
+
 EXTENSIONS_IMAGE = (".png", ".jpg", ".jpeg", ".webp")
+# Sons servis par le mount `/sounds` (`templates/resources/sounds`). Une animation peut
+# n'être QU'un son : c'est ainsi que se traitent les canaux qui n'ont rien à montrer
+# (`miss`, `fumble`) — un coup qui rate ne mérite pas un sprite, mais mérite un bruit.
+EXTENSIONS_SON = (".mp3", ".ogg", ".wav", ".m4a")
+VOLUME_DEFAUT = 1.0
 
 # Clés publiées au client (catalogue de `/combat/{id}` et aperçu de l'éditeur) : tout ce
 # qu'il faut pour découper et jouer la feuille, rien de plus.
 CLES_PAYLOAD = (
 	"fichier", "largeur", "hauteur", "colonnes", "lignes", "sens_lignes", "sens_colonnes",
 	"debut", "fin", "duree_ms", "echelle", "decalage_x", "decalage_y", "ancrage",
+	# Trajectoire + orientation. Champs absents ⇒ sprite posé, droit : le comportement
+	# d'avant, sans migration.
+	"depart_ancrage", "depart_decalage_x", "depart_decalage_y",
+	"duree_trajet_ms", "arc", "rotation", "rotation_auto",
+	# Son. Champ absent ⇒ animation muette, comme avant.
+	"son", "son_debut_ms", "son_fin_ms", "son_volume",
 )
 
 
@@ -99,14 +124,19 @@ def normaliser_animation(doc) -> dict | None:
 
 	Borne tout ce qui pourrait faire diverger le rendu : `colonnes`/`lignes` ≥ 1,
 	`debut ≤ fin < colonnes×lignes`, `duree_ms` > 0, `echelle` > 0. `sens_lignes`,
-	`sens_colonnes` et `ancrage` sont WHITELISTÉS (miroir de `normaliser_sort`) — une
-	faute de frappe retombe sur le défaut au lieu de créer un troisième comportement
-	silencieux.
+	`sens_colonnes`, `ancrage` et `depart_ancrage` sont WHITELISTÉS (miroir de
+	`normaliser_sort`) — une faute de frappe retombe sur le défaut au lieu de créer un
+	troisième comportement silencieux. ⚠️ Pour `depart_ancrage`, ce défaut est la chaîne
+	vide, donc « pas de trajectoire » : une valeur illisible ne peut pas faire VOLER un
+	sprite qui devait rester posé.
 
-	Un doc sans `fichier` n'est pas jouable : il n'y a rien à découper."""
+	⚠️ **Ni image NI son ⇒ rien à jouer** : c'est la seule condition de rejet. Une animation
+	peut n'être qu'un SON (canaux `miss`/`fumble`, qui n'ont rien à montrer) — la grille et
+	les décalages restent alors sans objet, mais ils ne gênent pas."""
 	d = doc if isinstance(doc, dict) else {}
 	fichier = str(d.get("fichier") or "").strip()
-	if not fichier:
+	son = str(d.get("son") or "").strip()
+	if not fichier and not son:
 		return None
 
 	colonnes = max(1, _as_int(d.get("colonnes"), 1))
@@ -122,6 +152,9 @@ def normaliser_animation(doc) -> dict | None:
 	ancrage = str(d.get("ancrage") or ANCRAGE_DEFAUT)
 	if ancrage not in ANCRAGES:
 		ancrage = ANCRAGE_DEFAUT
+	depart = str(d.get("depart_ancrage") or DEPART_ANCRAGE_DEFAUT)
+	if depart not in DEPART_ANCRAGES:
+		depart = DEPART_ANCRAGE_DEFAUT
 
 	debut = min(max(0, _as_int(d.get("debut"), 0)), total - 1)
 	# `fin` absent ⇒ toute la feuille : c'est ce que le scan sème, et c'est la lecture
@@ -132,9 +165,32 @@ def normaliser_animation(doc) -> dict | None:
 	if echelle <= 0:
 		echelle = ECHELLE_DEFAUT
 
+	# Temps de VOL, distinct de la durée d'une passe d'images (les images bouclent pendant
+	# le trajet — un projectile de 4 images peut voler une seconde sans défiler au ralenti).
+	# ⚠️ 0 ou illisible ⇒ repli sur `duree_ms` : c'est le réglage naturel d'une animation
+	# qu'on vient de faire voyager, et le champ peut rester vide dans l'éditeur.
+	duree_ms = max(1, _as_int(d.get("duree_ms"), DUREE_DEFAUT_MS))
+	duree_trajet = _as_int(d.get("duree_trajet_ms"), 0)
+	if duree_trajet <= 0:
+		duree_trajet = duree_ms
+
+	# Points de lecture DANS LE FICHIER son, en ms comme toutes les durées du document.
+	# ⚠️ `son_fin_ms = 0` (le défaut) vaut « jusqu'au bout du fichier » et NON « ne rien
+	# jouer » : la durée réelle d'un son n'est connue que du navigateur, le serveur ne peut
+	# pas la borner. Une fin AVANT le début est ramenée au début (segment vide plutôt
+	# qu'inversé), même règle que `debut`/`fin` des images.
+	son_debut = max(0, _as_int(d.get("son_debut_ms"), 0))
+	son_fin = max(0, _as_int(d.get("son_fin_ms"), 0))
+	if son_fin and son_fin < son_debut:
+		son_fin = son_debut
+	volume = _as_float(d.get("son_volume"), VOLUME_DEFAUT)
+	volume = min(1.0, max(0.0, volume))
+
 	return {
 		"id": str(d.get("_id") or ""),
-		"nom": str(d.get("nom") or fichier),
+		# Un doc son-seul n'a pas de `fichier` : son nom de repli est celui du SON, sinon la
+		# liste de l'éditeur afficherait une ligne vide.
+		"nom": str(d.get("nom") or fichier or son),
 		"fichier": fichier,
 		# Dimensions de la FEUILLE, lues par le scan (Pillow) et jamais saisies. Le client
 		# en dérive le rapport d'aspect d'une frame, pour ne pas déformer le sprite.
@@ -146,11 +202,26 @@ def normaliser_animation(doc) -> dict | None:
 		"sens_colonnes": sens_cols,
 		"debut": debut,
 		"fin": fin,
-		"duree_ms": max(1, _as_int(d.get("duree_ms"), DUREE_DEFAUT_MS)),
+		"duree_ms": duree_ms,
 		"echelle": echelle,
 		"decalage_x": _as_float(d.get("decalage_x"), 0.0),
 		"decalage_y": _as_float(d.get("decalage_y"), 0.0),
 		"ancrage": ancrage,
+		# ── Trajectoire ──
+		"depart_ancrage": depart,
+		"depart_decalage_x": _as_float(d.get("depart_decalage_x"), 0.0),
+		"depart_decalage_y": _as_float(d.get("depart_decalage_y"), 0.0),
+		"duree_trajet_ms": duree_trajet,
+		# Hauteur de la cloche en CASES (0 = ligne droite) : c'est ce qui distingue une
+		# flèche tendue d'un caillou lancé. Négatif = cloche vers le bas, assumé.
+		"arc": _as_float(d.get("arc"), 0.0),
+		"rotation": _as_float(d.get("rotation"), ROTATION_DEFAUT),
+		"rotation_auto": bool(d.get("rotation_auto")),
+		# ── Son ──
+		"son": son,
+		"son_debut_ms": son_debut,
+		"son_fin_ms": son_fin,
+		"son_volume": volume,
 		# Brouillon tant qu'un humain n'a pas confirmé la découpe à l'aperçu : absent du
 		# catalogue servi au combat.
 		"actif": bool(d.get("actif")),
@@ -205,7 +276,9 @@ def catalogue_payload(docs) -> dict:
 	sprite qu'une découpe fantaisiste.
 
 	⚠️ `decalage_x`/`decalage_y` y sont les décalages EFFECTIFS (base comprise), pas les
-	valeurs du doc : le client rend ce qu'on lui donne, il n'a pas à connaître la règle."""
+	valeurs du doc : le client rend ce qu'on lui donne, il n'a pas à connaître la règle.
+	⚠️ Les décalages de DÉPART passent par les mêmes bases — les deux bouts d'un vol doivent
+	se poser sur un personnage de la même façon, sinon le sprite sauterait au décollage."""
 	catalogue = {}
 	for doc in docs or []:
 		anim = normaliser_animation(doc)
@@ -214,6 +287,8 @@ def catalogue_payload(docs) -> dict:
 		charge = {cle: anim[cle] for cle in CLES_PAYLOAD}
 		charge["decalage_x"] = decalage_x_effectif(anim["decalage_x"])
 		charge["decalage_y"] = decalage_y_effectif(anim["decalage_y"])
+		charge["depart_decalage_x"] = decalage_x_effectif(anim["depart_decalage_x"])
+		charge["depart_decalage_y"] = decalage_y_effectif(anim["depart_decalage_y"])
 		catalogue[anim["id"]] = charge
 	return catalogue
 
@@ -231,6 +306,18 @@ def animation_pour(canal: str, source_anim: str | None = None) -> str:
 		return directe
 	defauts = character_stats.COMBAT_ANIMATIONS_DEFAUT or {}
 	return str(defauts.get(str(canal or ""), "") or "").strip()
+
+
+def defauts_canaux() -> dict:
+	"""Copie de la table des défauts par CANAL, pour l'AFFICHER (rappel de `/admin/animations`).
+
+	⚠️ Lue **via le module** comme `animation_pour`, jamais par `from … import` : la world-var
+	est réglable à chaud, une valeur figée à l'import n'aurait jamais l'air de bouger — et un
+	rappel qui ment est pire que pas de rappel. ⚠️ COPIE, jamais l'exemplaire mémorisé : ce
+	dict est muté EN PLACE au chargement des variables de monde, un appelant qui écrirait
+	dedans changerait le comportement du combat depuis un écran de lecture."""
+	defauts = character_stats.COMBAT_ANIMATIONS_DEFAUT or {}
+	return {str(cle): str(val or "") for cle, val in defauts.items()}
 
 
 def vfx(canal: str, cible_id: str, source_anim: str | None = None,
@@ -354,3 +441,10 @@ def slug_animation(fichier: str, suffixe: str = "a") -> str:
 def est_image(nom: str) -> bool:
 	"""Extension servable par le mount `/icons` (le dossier contient aussi un Thumbs.db)."""
 	return str(nom or "").lower().endswith(EXTENSIONS_IMAGE)
+
+
+def est_son(nom: str) -> bool:
+	"""Extension servable par le mount `/sounds`, miroir d'`est_image` : le dossier peut
+	contenir autre chose (licences, .txt), et un fichier non jouable ne doit pas devenir un
+	doc d'animation."""
+	return str(nom or "").lower().endswith(EXTENSIONS_SON)

@@ -164,8 +164,11 @@
 		.scene-token.compagnon .st-rond { background: #1a3a5a; border: 2px solid #2e86de;      color: #7ec8ff; box-shadow: 0 0 8px rgba(46,134,222,0.6); }
 		.scene-token.ennemi    .st-rond { background: #4a1a1a; border: 2px solid #aa3333;      color: #ffaaaa; box-shadow: 0 0 8px rgba(170,51,51,0.6); }
 		/* Case qui PORTE le sprite (cible, ou acteur si l'ancrage le dit) : sans ce repère
-		   on ne sait pas si un sprite décalé est bien posé ou mal réglé. */
+		   on ne sait pas si un sprite décalé est bien posé ou mal réglé. Avec une
+		   trajectoire, c'est l'ARRIVÉE ; le DÉPART a son propre repère, plus discret, pour
+		   qu'on lise le sens du vol d'un coup d'œil. */
 		.scene-token.porteur .st-rond { outline: 2px dashed var(--accent2); outline-offset: 3px; }
+		.scene-token.depart .st-rond { outline: 2px dotted var(--ok); outline-offset: 6px; }
 		.scene-token .st-nom {
 			position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
 			font-size: 8.5px; letter-spacing: 0.06em; color: var(--muted); white-space: nowrap;
@@ -205,6 +208,9 @@
 				Crée un document <code>animation:*</code> pour chaque feuille de
 				<code>templates/resources/icons/effects</code> qui n'en a pas encore : dimensions
 				lues sur l'image, grille <strong>devinée</strong>, et <code>actif: false</code>.
+				<strong>Et pour chaque son</strong> de <code>templates/resources/sounds</code> :
+				un document <em>sans images</em>, à régler à l'oreille — c'est la forme voulue
+				par les canaux qui n'ont rien à montrer (<code>miss</code>, <code>fumble</code>).
 				Le scan <strong>n'écrase jamais</strong> un document existant — il est donc
 				relançable après tout ajout de fichier.
 			</div>
@@ -220,6 +226,14 @@
 				proprement, puis cocher <strong>Actif</strong> : seules les animations actives
 				sont servies au combat. <strong>⧉ Dupliquer</strong> crée une seconde animation
 				sur la <em>même</em> feuille (autre plage d'images).
+				<br><strong>Son</strong> — une animation peut porter un son, avec un
+				<em>point de départ</em> et un <em>point d'arrêt</em> dans le fichier (en ms,
+				fin vide = jusqu'au bout) : une planche sonore contient souvent plusieurs
+				bruits, comme une feuille de sprites contient plusieurs images. La durée réelle
+				du fichier s'affiche à côté du champ. ⚠️ Une animation peut n'avoir
+				<strong>aucune image</strong> et n'être qu'un son ; il faut seulement l'un
+				<em>ou</em> l'autre. Le son ne commande jamais le tempo du journal : il sonne
+				librement, même après la fin des images.
 			</div>
 			<div class="edit-layout">
 				<div>
@@ -244,6 +258,18 @@
 							<input id="f-fichier" type="text" list="fichiers-list">
 							<datalist id="fichiers-list"></datalist>
 						</div>
+						<!-- ── Son ──
+						     Une animation peut n'être QU'un son (aucune image) : c'est la forme
+						     voulue pour les canaux qui n'ont rien à montrer (miss, fumble).
+						     Points de lecture DANS LE FICHIER, en ms comme le reste. -->
+						<div class="field wide">
+							<label for="f-son">Son (resources/sounds) — <span id="f-son-info">aucun</span></label>
+							<input id="f-son" type="text" list="sons-list" placeholder="aucun (animation muette)">
+							<datalist id="sons-list"></datalist>
+						</div>
+						<div class="field"><label for="f-son-debut">Son — début (ms)</label><input id="f-son-debut" type="number" min="0" step="50"></div>
+						<div class="field"><label for="f-son-fin">Son — fin (ms)</label><input id="f-son-fin" type="number" min="0" step="50" placeholder="= fin du fichier"></div>
+						<div class="field"><label for="f-son-volume">Volume (0–1)</label><input id="f-son-volume" type="number" min="0" max="1" step="0.05"></div>
 						<div class="field"><label for="f-colonnes">Colonnes</label><input id="f-colonnes" type="number" min="1"></div>
 						<div class="field"><label for="f-lignes">Lignes</label><input id="f-lignes" type="number" min="1"></div>
 						<!-- Deux AXES séparés : une feuille peut avoir besoin des deux, et les
@@ -269,10 +295,33 @@
 						<div class="field"><label for="f-decalage-x">Décalage X</label><input id="f-decalage-x" type="number" step="0.05"></div>
 						<div class="field"><label for="f-decalage">Décalage Y</label><input id="f-decalage" type="number" step="0.05"></div>
 						<div class="field">
-							<label for="f-ancrage">Ancrage</label>
+							<label for="f-ancrage">Ancrage (arrivée)</label>
 							<select id="f-ancrage">
 								<option value="cible">cible</option>
 								<option value="acteur">acteur</option>
+							</select>
+						</div>
+						<!-- ── Trajectoire : le sprite VOYAGE d'un point à l'autre. ⚠️ « aucun »
+						     (le défaut) = sprite posé, donc rigoureusement le comportement
+						     d'avant : rien à migrer, rien à retoucher en base. -->
+						<div class="field">
+							<label for="f-depart">Départ (trajectoire)</label>
+							<select id="f-depart">
+								<option value="">aucun (posé)</option>
+								<option value="acteur">acteur</option>
+								<option value="cible">cible</option>
+							</select>
+						</div>
+						<div class="field"><label for="f-depart-x">Départ — décalage X</label><input id="f-depart-x" type="number" step="0.05"></div>
+						<div class="field"><label for="f-depart-y">Départ — décalage Y</label><input id="f-depart-y" type="number" step="0.05"></div>
+						<div class="field"><label for="f-trajet">Durée du vol (ms)</label><input id="f-trajet" type="number" min="0" step="50" placeholder="= durée images"></div>
+						<div class="field"><label for="f-arc">Arc (cases)</label><input id="f-arc" type="number" step="0.1"></div>
+						<div class="field"><label for="f-rotation">Rotation (°)</label><input id="f-rotation" type="number" step="5"></div>
+						<div class="field">
+							<label for="f-rotation-auto">Aligner sur l'axe</label>
+							<select id="f-rotation-auto">
+								<option value="0">non</option>
+								<option value="1">oui</option>
 							</select>
 						</div>
 						<div class="field">
@@ -325,6 +374,15 @@
 				de <strong>−0,5 case</strong> : la valeur saisie est un <em>écart</em> à cette
 				base, et aucune donnée n'a été retouchée. ⚠️ Un <code>ancrage: acteur</code> déplace le sprite sur le
 				<strong>lanceur</strong> (le principal), exactement comme en combat.
+				<br><strong>Trajectoire</strong> — donner un <em>Départ</em> fait <strong>voyager</strong>
+				le sprite jusqu'à son ancrage d'arrivée (repère vert au départ, bleu à l'arrivée) :
+				les images <strong>bouclent</strong> pendant le vol, dont la durée est réglée à part
+				(vide = la durée des images), et l'<em>Arc</em> creuse une cloche en cases.
+				<strong>Rotation</strong> — <code>0° = le dessin pointe vers la DROITE</code> ;
+				<em>Aligner sur l'axe</em> ajoute l'angle du vol, ou à défaut celui de
+				l'axe lanceur → cible, ce qui tourne aussi un impact vers celui qui frappe.
+				⚠️ En combat, le journal attend la fin de l'animation avant d'écrire sa ligne :
+				un vol long retarde d'autant les conséquences du coup.
 			</div>
 			<div class="scene-layout">
 				<div>
@@ -400,12 +458,35 @@
 				</table>
 			</div>
 		</div>
+
+		<!-- ── 5. Rappel des variables de monde (LECTURE SEULE) ───────────────── -->
+		<div class="card">
+			<div class="card-title">🌍 Variables de monde — rappel (lecture seule)</div>
+			<div class="card-desc">
+				<code>COMBAT_ANIMATIONS_DEFAUT</code> : ce que le combat joue par <strong>canal</strong>
+				quand le contenu touché (sort, compétence, arme, consommable, espèce) ne porte
+				<em>pas</em> de champ <code>animation</code> — une liaison de contenu prime
+				toujours. Vide ⇒ aucune animation sur ce canal.
+				⚠️ Ces valeurs <strong>ne se règlent pas ici</strong> : elles vivent dans
+				<code>rules:world_variables</code> et s'éditent depuis
+				<a href="/admin">l'administration</a>. Cette carte n'en est qu'un rappel, relu à
+				chaque chargement de la page.
+			</div>
+			<div class="liaison-scroll" style="max-height:none">
+				<table>
+					<thead><tr><th style="width:30%">Canal</th><th>Animation par défaut</th></tr></thead>
+					<tbody id="wv-body"></tbody>
+				</table>
+			</div>
+			<div class="scene-legend" id="wv-bases">—</div>
+		</div>
 	</div>
 
 <script>
 // ── État ─────────────────────────────────────────────────────────────────────
 let DOCS = [];        // docs `animation:*` (actifs ET brouillons)
 let FICHIERS = [];    // feuilles présentes sur le disque {fichier, largeur, hauteur, docs[]}
+let SONS = [];        // sons présents sur le disque (noms de fichiers)
 let courant = null;   // doc en cours d'édition (objet complet, _rev inclus)
 // Décalage vertical de BASE, en cases, appliqué à toutes les animations — publié par le
 // serveur (`utils/animations.DECALAGE_Y_BASE`) et jamais recopié en dur : le champ
@@ -414,6 +495,9 @@ let DECALAGE_Y_BASE = -0.5;
 // Miroir horizontal, base nulle : un sprite est déjà centré sur sa case, le champ ne sert
 // qu'aux dessins décentrés dans leur frame.
 let DECALAGE_X_BASE = 0;
+// Rappel LECTURE SEULE de `COMBAT_ANIMATIONS_DEFAUT` (canal → id d'animation) : cette page
+// ne l'écrit jamais, elle l'affiche — le réglage vit dans /admin → variables de monde.
+let DEFAUTS_CANAUX = {};
 
 const $ = (id) => document.getElementById(id);
 
@@ -471,6 +555,8 @@ function renderListe() {
 	});
 	$('fichiers-list').innerHTML = FICHIERS.map(f =>
 		`<option value="${escapeHtml(f.fichier)}"></option>`).join('');
+	$('sons-list').innerHTML = SONS.map(s =>
+		`<option value="${escapeHtml(s)}"></option>`).join('');
 	// La liste proposée aux champs de liaison suit le MÊME catalogue : une animation créée
 	// par le scan ou par ⧉ Dupliquer doit s'y trouver sans recharger la page.
 	majDatalistAnimations();
@@ -503,6 +589,24 @@ function remplirFormulaire(d) {
 	$('f-decalage-x').value = d.decalage_x != null ? d.decalage_x : 0;
 	$('f-decalage').value = d.decalage_y != null ? d.decalage_y : 0;
 	$('f-ancrage').value  = d.ancrage === 'acteur' ? 'acteur' : 'cible';
+	// Trajectoire — mêmes whitelists que animations.DEPART_ANCRAGES : une valeur illisible
+	// s'AFFICHE « aucun », donc comme le moteur la jouera (sprite posé).
+	$('f-depart').value   = (d.depart_ancrage === 'acteur' || d.depart_ancrage === 'cible')
+		? d.depart_ancrage : '';
+	$('f-depart-x').value = d.depart_decalage_x != null ? d.depart_decalage_x : 0;
+	$('f-depart-y').value = d.depart_decalage_y != null ? d.depart_decalage_y : 0;
+	// ⚠️ Champ VIDE quand la durée de vol n'est pas réglée : « 0 » se lirait comme un vol
+	// instantané, alors que le repli est « la durée des images ». Le placeholder le dit.
+	$('f-trajet').value   = d.duree_trajet_ms ? d.duree_trajet_ms : '';
+	$('f-arc').value      = d.arc != null ? d.arc : 0;
+	$('f-rotation').value = d.rotation != null ? d.rotation : 0;
+	$('f-rotation-auto').value = d.rotation_auto ? '1' : '0';
+	$('f-son').value      = d.son || '';
+	$('f-son-debut').value = d.son_debut_ms != null ? d.son_debut_ms : 0;
+	// ⚠️ Champ VIDE quand il n'y a pas de point d'arrêt : « 0 » se lirait comme « ne rien
+	// jouer », alors que le repli est « jusqu'au bout du fichier ».
+	$('f-son-fin').value  = d.son_fin_ms ? d.son_fin_ms : '';
+	$('f-son-volume').value = d.son_volume != null ? d.son_volume : 1;
 	$('f-actif').value    = d.actif ? '1' : '0';
 	rafraichirApercu();
 }
@@ -517,6 +621,10 @@ function lireFormulaire() {
 	let fin = parseInt($('f-fin').value, 10);
 	if (isNaN(fin)) fin = total - 1;
 	fin = Math.min(Math.max(debut, fin), total - 1);
+	// ⚠️ Champ de volume VIDE ⇒ 1 et non 0 : `|| 0` rendrait muette toute animation dont on
+	// n'a jamais touché le volume.
+	let vol = parseFloat($('f-son-volume').value);
+	if (isNaN(vol)) vol = 1;
 	return {
 		nom: $('f-nom').value.trim(),
 		fichier: $('f-fichier').value.trim(),
@@ -529,8 +637,83 @@ function lireFormulaire() {
 		decalage_x: parseFloat($('f-decalage-x').value) || 0,
 		decalage_y: parseFloat($('f-decalage').value) || 0,
 		ancrage: $('f-ancrage').value,
+		depart_ancrage: $('f-depart').value,
+		depart_decalage_x: parseFloat($('f-depart-x').value) || 0,
+		depart_decalage_y: parseFloat($('f-depart-y').value) || 0,
+		// 0 ⇒ repli sur `duree_ms`, comme normaliser_animation : le champ peut rester vide.
+		duree_trajet_ms: Math.max(0, parseInt($('f-trajet').value, 10) || 0),
+		arc: parseFloat($('f-arc').value) || 0,
+		rotation: parseFloat($('f-rotation').value) || 0,
+		rotation_auto: $('f-rotation-auto').value === '1',
+		son: $('f-son').value.trim(),
+		son_debut_ms: Math.max(0, parseInt($('f-son-debut').value, 10) || 0),
+		// 0 ⇒ jusqu'au bout du fichier, comme normaliser_animation : le champ peut rester vide.
+		son_fin_ms: Math.max(0, parseInt($('f-son-fin').value, 10) || 0),
+		son_volume: Math.min(1, Math.max(0, vol)),
 		actif: $('f-actif').value === '1',
 	};
+}
+
+// ── Son ──────────────────────────────────────────────────────────────────────
+// MÊME lecture qu'en combat (`jouerSon` de combat_telluris.html) : un seul lecteur, un
+// point de départ et un point d'arrêt en ms dans le fichier. Sans aperçu sonore ici, on
+// réglerait ces deux points à l'aveugle.
+const audioApercu = new Audio();
+let sonTimer = null;
+
+function arreterSon() {
+	if (sonTimer) { clearTimeout(sonTimer); sonTimer = null; }
+	audioApercu.pause();
+}
+
+function sonEnCours() {
+	return !!audioApercu.src && !audioApercu.paused && !audioApercu.ended;
+}
+
+function jouerSon(a) {
+	const fichier = (a && a.son) ? String(a.son) : '';
+	if (!fichier) return;
+	arreterSon();
+	const url = '/sounds/' + encodeURIComponent(fichier);
+	// ⚠️ `src` réassigné seulement s'il change (sinon rechargement réseau à chaque coup), et
+	// `currentTime` posé APRÈS les métadonnées — plus tôt, la valeur est ignorée.
+	if (!audioApercu.src.endsWith(url)) audioApercu.src = url;
+	audioApercu.volume = Math.min(1, Math.max(0, a.son_volume != null ? a.son_volume : 1));
+	const debut = Math.max(0, a.son_debut_ms || 0);
+	const fin = Math.max(0, a.son_fin_ms || 0);
+	const lancer = () => {
+		try { audioApercu.currentTime = debut / 1000; } catch (e) { /* format sans seek */ }
+		// ⚠️ `play()` REJETTE tant que la page n'a pas reçu de geste utilisateur : avaler.
+		const p = audioApercu.play();
+		if (p && p.catch) p.catch(() => {});
+		if (fin > debut) sonTimer = setTimeout(() => { audioApercu.pause(); sonTimer = null; }, fin - debut);
+	};
+	if (audioApercu.readyState >= 1) lancer();
+	else audioApercu.addEventListener('loadedmetadata', lancer, { once: true });
+}
+
+// Durée RÉELLE du fichier, affichée à côté du champ : c'est le repère sans lequel un point
+// d'arrêt se règle au hasard. Le navigateur est seul à la connaître (aucune dépendance
+// audio côté serveur) — d'où un élément dédié, qui ne sert qu'à mesurer.
+const audioMesure = new Audio();
+let sonMesure = '';
+function majInfoSon(fichier) {
+	const info = $('f-son-info');
+	if (!fichier) { sonMesure = ''; info.textContent = 'aucun'; info.style.color = ''; return; }
+	if (fichier === sonMesure) return;
+	sonMesure = fichier;
+	info.textContent = 'lecture…';
+	info.style.color = '';
+	audioMesure.src = '/sounds/' + encodeURIComponent(fichier);
+	audioMesure.addEventListener('loadedmetadata', () => {
+		if (sonMesure !== fichier) return;   // l'admin a déjà changé de fichier
+		info.textContent = Math.round(audioMesure.duration * 1000) + ' ms';
+	}, { once: true });
+	audioMesure.addEventListener('error', () => {
+		if (sonMesure !== fichier) return;
+		info.textContent = 'introuvable';
+		info.style.color = 'var(--err)';
+	}, { once: true });
 }
 
 // ── Aperçus ──────────────────────────────────────────────────────────────────
@@ -541,12 +724,17 @@ function rafraichirApercu() {
 	const a = lireFormulaire();
 	const sprite = $('apercu-sprite');
 	const img = $('sheet-img');
+	majInfoSon(a.son);
+	// ⚠️ Pas d'images n'est plus une impasse : une animation SON SEUL doit rester réglable
+	// (et écoutable). Les deux aperçus visuels le disent, et seule l'absence des DEUX
+	// arrête la scène.
 	if (!a.fichier) {
 		sprite.style.backgroundImage = '';
 		img.removeAttribute('src');
 		$('sheet-grid').innerHTML = '';
-		$('apercu-info').textContent = '—';
-		arreterScene();
+		$('apercu-info').textContent = a.son ? '— son seul —' : '—';
+		if (!a.son) arreterScene();
+		else if (sceneLoop) jouerScene();
 		return;
 	}
 	const url = '/icons/effects/' + encodeURIComponent(a.fichier);
@@ -608,8 +796,11 @@ async function charger(selId) {
 	const data = await r.json();
 	DOCS = data.docs || [];
 	FICHIERS = data.fichiers || [];
+	SONS = data.sons || [];
 	if (data.decalage_y_base != null) DECALAGE_Y_BASE = parseFloat(data.decalage_y_base) || 0;
 	if (data.decalage_x_base != null) DECALAGE_X_BASE = parseFloat(data.decalage_x_base) || 0;
+	DEFAUTS_CANAUX = data.defauts_canaux || {};
+	renderWorldVars();
 	const cible = selId || (courant && courant._id);
 	courant = DOCS.find(d => d._id === cible) || DOCS[0] || null;
 	renderListe();
@@ -658,7 +849,10 @@ async function putDoc(doc) {
 $('btn-save').addEventListener('click', async () => {
 	if (!courant) return;
 	const a = lireFormulaire();
-	if (!a.fichier) { setStatus($('edit-status'), 'Un fichier est requis.', 'err'); return; }
+	// ⚠️ Une image OU un son : une animation son seul est légitime (miss, fumble) ; sans
+	// l'un des deux, il n'y a rien à jouer — c'est exactement la règle de
+	// `animations.normaliser_animation`.
+	if (!a.fichier && !a.son) { setStatus($('edit-status'), 'Une image ou un son est requis.', 'err'); return; }
 	const meta = FICHIERS.find(f => f.fichier === a.fichier);
 	const doc = Object.assign({}, courant, a, { type: 'animation' });
 	// Dimensions de la feuille : LUES sur l'image, jamais saisies — elles suivent le
@@ -718,7 +912,8 @@ $('btn-del').addEventListener('click', async () => {
 // rafraichirApercu relance quand elle tourne en boucle : sans eux ici, on les réglerait
 // sans rien voir bouger.
 ['f-fichier','f-colonnes','f-lignes','f-sens','f-sens-cols','f-debut','f-fin','f-duree',
- 'f-echelle','f-decalage-x','f-decalage']
+ 'f-echelle','f-decalage-x','f-decalage','f-depart-x','f-depart-y','f-trajet','f-arc',
+ 'f-rotation','f-son','f-son-debut','f-son-fin','f-son-volume']
 	.forEach(id => $(id).addEventListener('input', rafraichirApercu));
 // Les <select> n'émettent pas `input` partout : `change` est ce qui les rend réactifs.
 $('f-sens').addEventListener('change', rafraichirApercu);
@@ -744,6 +939,7 @@ const SCENE_ELS = { joueur: 'scene-joueur', compagnon: 'scene-compagnon', ennemi
 
 let sceneRAF = null;
 let sceneLoop = false;
+let sonBoucle = null;   // minuteur de relance d'une animation SON SEUL en boucle
 
 // Qui lance, qui reçoit. Le lanceur est TOUJOURS le principal (c'est lui qu'on joue) :
 // un sort offensif part sur l'ennemi, un sort défensif sur un allié — le compagnon ou
@@ -755,12 +951,17 @@ function sceneRoles() {
 	return { acteur: 'joueur', cible: 'ennemi' };
 }
 
-// Même arbitrage que jouerVfx() en combat : `ancrage: "acteur"` ne déplace le sprite que
-// si l'acteur DIFFÈRE de la cible — l'entrée de journal ne porte l'acteur qu'à cette
-// condition.
-function scenePorteur() {
+// Les deux bouts du sprite, MÊME arbitrage que jouerVfx() en combat :
+//   • arrivée — `ancrage: "acteur"` ne déplace le sprite que si l'acteur DIFFÈRE de la
+//     cible (l'entrée de journal ne porte l'acteur qu'à cette condition) ;
+//   • départ  — `depart_ancrage` vide, ou confondu avec l'arrivée ⇒ `depart: null`, donc
+//     sprite POSÉ, exactement comme avant la trajectoire.
+function sceneTrajet() {
 	const { acteur, cible } = sceneRoles();
-	return ($('f-ancrage').value === 'acteur' && acteur !== cible) ? acteur : cible;
+	const arrivee = ($('f-ancrage').value === 'acteur' && acteur !== cible) ? acteur : cible;
+	const choix = $('f-depart').value;
+	const depart = !choix ? '' : (choix === 'acteur' ? acteur : cible);
+	return { depart: (depart && depart !== arrivee) ? depart : null, arrivee: arrivee, acteur: acteur };
 }
 
 // Pose des jetons + taille de la scène : tout en `calc(var(--sstep) * n)`, donc rien à
@@ -769,7 +970,7 @@ function placerScene() {
 	const stage = $('scene-stage');
 	stage.style.width  = 'calc(var(--sstep) * ' + SCENE.dims.x + ')';
 	stage.style.height = 'calc(var(--sstep) * ' + SCENE.dims.y + ')';
-	const porteur = scenePorteur();
+	const { depart, arrivee } = sceneTrajet();
 	Object.keys(SCENE_ELS).forEach(role => {
 		const el = $(SCENE_ELS[role]);
 		const p = SCENE[role];
@@ -778,29 +979,55 @@ function placerScene() {
 		el.style.display = 'flex';
 		el.style.justifyContent = 'center';
 		el.style.alignItems = 'center';
-		el.classList.toggle('porteur', role === porteur);
+		el.classList.toggle('porteur', role === arrivee);
+		el.classList.toggle('depart', role === depart);
 	});
-	const p = SCENE[porteur];
-	$('scene-coords').textContent =
-		'Grille ' + SCENE.dims.x + '×' + SCENE.dims.y + ' — principal (' + SCENE.joueur.x + ',' + SCENE.joueur.y + '), '
+	const b = SCENE[arrivee];
+	const cases = 'Grille ' + SCENE.dims.x + '×' + SCENE.dims.y
+		+ ' — principal (' + SCENE.joueur.x + ',' + SCENE.joueur.y + '), '
 		+ 'compagnon (' + SCENE.compagnon.x + ',' + SCENE.compagnon.y + '), '
-		+ 'ennemi (' + SCENE.ennemi.x + ',' + SCENE.ennemi.y + ') — sprite sur ' + porteur
-		+ ' (' + p.x + ',' + p.y + ').';
+		+ 'ennemi (' + SCENE.ennemi.x + ',' + SCENE.ennemi.y + ') — ';
+	$('scene-coords').textContent = cases + (depart
+		? 'vol de ' + depart + ' (' + SCENE[depart].x + ',' + SCENE[depart].y + ')'
+			+ ' vers ' + arrivee + ' (' + b.x + ',' + b.y + ').'
+		: 'sprite posé sur ' + arrivee + ' (' + b.x + ',' + b.y + ').');
 }
 
 function arreterScene() {
 	if (sceneRAF) cancelAnimationFrame(sceneRAF);
 	sceneRAF = null;
+	if (sonBoucle) { clearTimeout(sonBoucle); sonBoucle = null; }
+	// ⚠️ Le SON n'est pas arrêté ici : comme en combat, il sonne librement par-dessus la
+	// suite. Seuls ▶ Jouer et ⟳ Boucler le coupent, parce que ce sont des gestes explicites.
 	$('scene-stage').querySelectorAll('.scene-vfx').forEach(el => el.remove());
 }
 
 function jouerScene() {
 	const a = lireFormulaire();
 	arreterScene();
-	if (!a.fichier) { setStatus($('scene-status'), 'Un fichier est requis.', 'err'); return; }
+	if (!a.fichier && !a.son) { setStatus($('scene-status'), 'Une image ou un son est requis.', 'err'); return; }
 
-	const porteur = scenePorteur();
-	const p = SCENE[porteur];
+	// ⚠️ Le son ne repart QUE s'il est fini : rejoué à chaque tour de boucle (ou à chaque
+	// frappe dans un champ), un son de 2 s deviendrait une mitraillette. Le bouton ▶ Jouer,
+	// lui, coupe d'abord — un geste explicite doit toujours redémarrer le son.
+	if (a.son && !sonEnCours()) jouerSon(a);
+
+	// Animation SON SEUL : rien à peindre. Le statut le dit, la scène reste vide, et c'est
+	// exactement ce que le combat fera (cf. jouerVfx).
+	if (!a.fichier) {
+		setStatus($('scene-status'), '▶ son seul — ' + a.son
+			+ (a.son_fin_ms ? ' [' + a.son_debut_ms + ' → ' + a.son_fin_ms + ' ms]'
+							: ' [depuis ' + a.son_debut_ms + ' ms]')
+			+ ', volume ' + a.son_volume
+			+ (sceneLoop ? ' (en boucle)' : ''), 'ok');
+		// En boucle, un minuteur suffit à revenir : il n'y a aucune image à défiler.
+		if (sceneLoop) sonBoucle = setTimeout(jouerScene, Math.max(1, a.duree_ms));
+		return;
+	}
+
+	const { depart, arrivee, acteur } = sceneTrajet();
+	const A = SCENE[depart || arrivee];
+	const B = SCENE[arrivee];
 	const el = document.createElement('div');
 	el.className = 'scene-vfx';
 	el.style.backgroundImage = `url('/icons/effects/${encodeURIComponent(a.fichier)}')`;
@@ -813,52 +1040,122 @@ function jouerScene() {
 	const ratio = fw > 0 ? fh / fw : 1;
 	el.style.width  = 'calc(var(--sstep) * ' + a.echelle + ')';
 	el.style.height = 'calc(var(--sstep) * ' + (a.echelle * ratio) + ')';
-	// Centré sur la case (translateX(-50%), comme l'ancre left:50% des jetons de combat),
-	// et posé sur le BAS de la case : le décalage Y monte le sprite d'autant de cases, le
-	// décalage X le pousse vers la droite.
-	// ⚠️ Décalages EFFECTIFS = base commune + réglage du doc, mêmes additions que
-	// `animations.decalage_x_effectif`/`_y_effectif` — c'est ce que le combat recevra dans
-	// son payload. ⚠️ Le X est un recadrage d'ÉCRAN, comme en combat (il est posé sur
-	// `left`) : ce n'est pas un déplacement de case, et il ne pivote pas avec la caméra.
-	const dx = DECALAGE_X_BASE + a.decalage_x;
-	const dy = DECALAGE_Y_BASE + a.decalage_y;
-	el.style.left = 'calc(var(--sstep) * ' + (p.x + 0.5 + dx) + ')';
-	el.style.transform = 'translateX(-50%)';
-	el.style.bottom = 'calc(var(--sstep) * ' + (SCENE.dims.y - 1 - p.y + dy) + ')';
+
+	// ⚠️ Décalages EFFECTIFS = base commune + réglage du doc, aux DEUX bouts, mêmes additions
+	// que `animations.decalage_x_effectif`/`_y_effectif` — c'est ce que le combat recevra
+	// dans son payload. Le décalage X pousse vers la droite, le Y monte ; ce sont des
+	// recadrages d'ÉCRAN (le dessin n'est pas centré dans sa frame), pas des cases.
+	const ctx = {
+		ax: A.x, ay: A.y, bx: B.x, by: B.y,
+		oax: depart ? DECALAGE_X_BASE + a.depart_decalage_x : DECALAGE_X_BASE + a.decalage_x,
+		oay: depart ? DECALAGE_Y_BASE + a.depart_decalage_y : DECALAGE_Y_BASE + a.decalage_y,
+		obx: DECALAGE_X_BASE + a.decalage_x,
+		oby: DECALAGE_Y_BASE + a.decalage_y,
+		arc: depart ? a.arc : 0,
+		rotation: a.rotation,
+		auto: a.rotation_auto,
+		dirx: 0, diry: 0,
+	};
+	// Direction de l'orientation, SÉPARÉE de la position : avec un trajet c'est le vol ;
+	// sans trajet, l'axe acteur → cible (un impact tourné vers celui qui frappe), le sprite
+	// restant sur son ancre.
+	if (a.rotation_auto) {
+		const src = depart ? A : (acteur !== arrivee ? SCENE[acteur] : null);
+		if (src) { ctx.dirx = B.x - src.x; ctx.diry = B.y - src.y; }
+	}
 
 	const nb = a.fin - a.debut + 1;
+	// Deux durées distinctes, comme en combat : `duree_ms` = UNE passe d'images,
+	// `duree_trajet_ms` = le temps de vol, sur lequel les images BOUCLENT.
+	const vol = depart ? Math.max(1, a.duree_trajet_ms || a.duree_ms) : a.duree_ms;
 	poserFrame(el, a, a.debut);
+	_poserScene(el, ctx, 0);
 	$('scene-stage').appendChild(el);
-	setStatus($('scene-status'), '▶ ' + nb + ' image(s) sur ' + porteur + ' — ' + a.duree_ms + ' ms'
-		+ ', décalage X ' + (dx > 0 ? '+' : '') + dx.toFixed(2)
-		+ ' / Y ' + (dy > 0 ? '+' : '') + dy.toFixed(2) + ' case(s)'
+	setStatus($('scene-status'), '▶ ' + nb + ' image(s) — ' + a.duree_ms + ' ms'
+		+ (depart ? ', vol ' + depart + ' → ' + arrivee + ' en ' + vol + ' ms'
+					+ (a.arc ? ' (arc ' + a.arc + ')' : '')
+				  : ' sur ' + arrivee)
+		+ ', décalage X ' + _signe(ctx.obx) + ' / Y ' + _signe(ctx.oby) + ' case(s)'
+		+ (a.rotation || a.rotation_auto
+			? ', rotation ' + _signe(a.rotation) + '°' + (a.rotation_auto ? ' + axe' : '') : '')
+		+ (a.son ? ', 🔊 ' + a.son : '')
 		+ (sceneLoop ? ' (en boucle)' : ''), 'ok');
 
 	let t0 = 0;
+	let cycleVu = 0;
 	const tick = (t) => {
 		if (!t0) t0 = t;
 		const ecoule = t - t0;
 		// Un coup joue UNE fois et le sprite disparaît, comme en combat ; la boucle n'est
 		// qu'une commodité de réglage.
-		if (ecoule >= a.duree_ms && !sceneLoop) { el.remove(); sceneRAF = null; return; }
-		const cycle = ecoule % a.duree_ms;
-		poserFrame(el, a, a.debut + Math.min(nb - 1, Math.floor(cycle / a.duree_ms * nb)));
+		if (ecoule >= vol && !sceneLoop) { el.remove(); sceneRAF = null; return; }
+		// Nouveau tour de boucle : le son repart AVEC le sprite, mais seulement s'il est
+		// fini (cf. la règle anti-mitraillette).
+		const cycle = Math.floor(ecoule / vol);
+		if (cycle !== cycleVu) {
+			cycleVu = cycle;
+			if (a.son && !sonEnCours()) jouerSon(a);
+		}
+		poserFrame(el, a, a.debut + Math.min(nb - 1, Math.floor((ecoule % a.duree_ms) / a.duree_ms * nb)));
+		if (depart) _poserScene(el, ctx, (ecoule % vol) / vol);
 		sceneRAF = requestAnimationFrame(tick);
 	};
 	sceneRAF = requestAnimationFrame(tick);
 }
 
-$('btn-scene-play').addEventListener('click', jouerScene);
+function _signe(v) { return (v > 0 ? '+' : '') + Number(v).toFixed(2).replace(/\.00$/, ''); }
+
+// Pose du sprite à l'instant `t` du vol (0 = départ, 1 = arrivée) — MÊME arithmétique que
+// `_poserVfx` en combat, sans caméra (l'angle y vaut 0, la scène ne pivote pas) :
+// position en cases interpolée, décalages d'écran interpolés, cloche de l'arc, puis
+// orientation. Si les deux montrent des choses différentes, régler ici ne veut plus rien
+// dire — c'est la même règle que pour la découpe (posFrame ↔ _vfxFrame).
+function _poserScene(el, ctx, t) {
+	const px = ctx.ax + (ctx.bx - ctx.ax) * t;
+	const py = ctx.ay + (ctx.by - ctx.ay) * t;
+	const ox = ctx.oax + (ctx.obx - ctx.oax) * t;
+	// Cloche : nulle aux deux bouts, sommet = `arc` au milieu du vol.
+	const oy = ctx.oay + (ctx.oby - ctx.oay) * t + ctx.arc * 4 * t * (1 - t);
+	el.style.left   = 'calc(var(--sstep) * ' + (px + 0.5 + ox) + ')';
+	el.style.bottom = 'calc(var(--sstep) * ' + (SCENE.dims.y - 1 - py + oy) + ')';
+	// `translateX(-50%)` centre le sprite sur sa propre largeur ; la rotation vient après,
+	// donc elle ne déplace pas ce recentrage.
+	// ⚠️ L'angle d'axe n'entre QUE si `rotation_auto` : sans lui, un arc ou des décalages
+	// différents aux deux bouts feraient tourner un sprite qui doit rester droit.
+	const angle = ctx.rotation + (ctx.auto ? _angleScene(ctx, t) : 0);
+	el.style.transform = 'translateX(-50%) rotate(' + angle + 'deg)';
+}
+
+// Angle À L'ÉCRAN suivi par le sprite (0° = vers la droite, sens horaire — la convention de
+// `rotation`, et celle de CSS puisque y croît vers le BAS). C'est la TANGENTE du mouvement :
+// direction en cases + dérivée de la part d'écran (décalages et cloche de l'arc).
+// ⚠️ Sans le terme d'arc, une flèche en cloche pointerait tout droit pendant qu'elle monte.
+function _angleScene(ctx, t) {
+	// `oy` MONTE le sprite alors que l'écran descend ⇒ signe inversé.
+	const dy = -((ctx.oby - ctx.oay) + ctx.arc * 4 * (1 - 2 * t));
+	if (!ctx.dirx && !ctx.diry && !dy) return 0;   // aucune direction à suivre
+	return Math.atan2(ctx.diry + dy, ctx.dirx) * 180 / Math.PI;
+}
+
+// ⚠️ Les deux boutons COUPENT le son avant d'agir : ce sont les seuls gestes explicites, et
+// un clic sur ▶ doit toujours faire repartir le son du début (partout ailleurs, la règle
+// anti-mitraillette l'en empêche).
+$('btn-scene-play').addEventListener('click', () => { arreterSon(); jouerScene(); });
 $('btn-scene-loop').addEventListener('click', () => {
 	sceneLoop = !sceneLoop;
 	$('btn-scene-loop').classList.toggle('on', sceneLoop);
+	arreterSon();
 	if (sceneLoop) jouerScene();
-	else setStatus($('scene-status'), '');
+	// Sortir de la boucle doit AUSSI désarmer le minuteur d'une animation son seul, sinon
+	// elle continuerait de se relancer toute seule.
+	else { arreterScene(); setStatus($('scene-status'), ''); }
 });
-// Le rôle et l'ancrage changent le PORTEUR du sprite : le repère de case et la lecture
-// en cours doivent suivre, sinon on règle en regardant la mauvaise case.
-$('scene-role').addEventListener('change', () => { placerScene(); if (sceneLoop) jouerScene(); });
-$('f-ancrage').addEventListener('change', () => { placerScene(); if (sceneLoop) jouerScene(); });
+// Le rôle, l'ancrage et le point de départ changent les BOUTS du sprite : les repères de
+// case et la lecture en cours doivent suivre, sinon on règle en regardant la mauvaise case.
+['scene-role', 'f-ancrage', 'f-depart'].forEach(id =>
+	$(id).addEventListener('change', () => { placerScene(); if (sceneLoop) jouerScene(); }));
+// L'alignement sur l'axe ne déplace rien : il suffit de relancer la lecture.
+$('f-rotation-auto').addEventListener('change', () => { if (sceneLoop) jouerScene(); });
 
 // ── Liaisons ─────────────────────────────────────────────────────────────────
 // ⚠️ Le champ est un <input list=…> et NON un <select> : un select ne se COLLE pas, et
@@ -958,6 +1255,43 @@ async function lier(docId, animation) {
 	} catch (e) {
 		setStatus($('liaison-status'), 'Erreur réseau : ' + e.message, 'err');
 	}
+}
+
+// ── Rappel des variables de monde (LECTURE SEULE) ────────────────────────────
+// ⚠️ Aucun writer ici, et c'est volontaire : `COMBAT_ANIMATIONS_DEFAUT` vit dans
+// `rules:world_variables` et s'édite depuis /admin. Deux écrans qui écriraient la même
+// world-var finiraient par se contredire — celui-ci ne fait que la RAPPELER.
+// ⚠️ Un défaut qui pointe vers un BROUILLON ne joue rien (`catalogue_payload` exclut les
+// brouillons) : c'est exactement le genre de réglage qui semble fait et ne l'est pas, d'où
+// le signalement en rouge plutôt qu'une simple ligne de plus.
+function renderWorldVars() {
+	const canaux = Object.keys(DEFAUTS_CANAUX);
+	$('wv-body').innerHTML = canaux.length ? canaux.map(canal => {
+		const id = String(DEFAUTS_CANAUX[canal] || '');
+		const doc = id ? DOCS.find(d => d._id === id) : null;
+		let valeur;
+		if (!id) {
+			valeur = '<span style="color:var(--muted)">— aucune —</span>';
+		} else if (!doc) {
+			valeur = `<code>${escapeHtml(id)}</code>`
+				+ ` <span style="color:var(--err)">⚠ introuvable</span>`;
+		} else {
+			valeur = `<code>${escapeHtml(id)}</code>`
+				+ ` <span style="color:var(--muted)">${escapeHtml(doc.nom || '')}</span>`
+				+ (doc.actif ? '' : ' <span style="color:var(--err)">⚠ brouillon : jamais joué</span>');
+		}
+		return `<tr><td>${escapeHtml(canal)}</td><td>${valeur}</td></tr>`;
+	}).join('') : '<tr><td colspan="2">— aucun canal —</td></tr>';
+
+	// Les deux bases de décalage ne sont PAS des variables de monde (ce sont des constantes
+	// de `utils/animations.py`) : les mélanger à la table laisserait croire qu'on peut les
+	// régler dans /admin. D'où une ligne à part, qui le dit.
+	const c = (v) => (v > 0 ? '+' : '') + Number(v);
+	$('wv-bases').textContent =
+		'Décalages de base appliqués à TOUTES les animations : X ' + c(DECALAGE_X_BASE)
+		+ ' / Y ' + c(DECALAGE_Y_BASE) + ' case(s) — constantes de rendu '
+		+ '(animations.DECALAGE_X_BASE / _Y_BASE), pas des variables de monde : elles ne se '
+		+ 'règlent pas depuis /admin.';
 }
 
 $('btn-liaisons').addEventListener('click', chargerLiaisons);

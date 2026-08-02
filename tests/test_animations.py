@@ -85,9 +85,43 @@ def _doc(**extra):
     return base
 
 
-def test_normaliser_sans_fichier_est_none():
+def test_normaliser_sans_fichier_ni_son_est_none():
+    """⚠️ La seule condition de rejet : NI image NI son ⇒ rien à jouer."""
     assert anim.normaliser_animation({"_id": "animation:x", "colonnes": 2}) is None
     assert anim.normaliser_animation(None) is None
+    assert anim.normaliser_animation({"_id": "animation:x", "fichier": "", "son": ""}) is None
+
+
+def test_normaliser_son_seul_est_jouable():
+    """Une animation peut n'être QU'un son : c'est la forme voulue pour `miss`/`fumble`,
+    qui n'ont rien à montrer. Le nom retombe alors sur le fichier son, sans quoi la liste
+    de l'éditeur afficherait une ligne vide."""
+    a = anim.normaliser_animation({"_id": "animation:clang_a", "son": "sword sound.wav"})
+    assert a is not None
+    assert a["fichier"] == "" and a["son"] == "sword sound.wav"
+    assert a["nom"] == "sword sound.wav"
+
+
+def test_normaliser_son_defauts_et_bornes():
+    a = anim.normaliser_animation(_doc())
+    assert a["son"] == "" and a["son_debut_ms"] == 0 and a["son_fin_ms"] == 0
+    assert a["son_volume"] == anim.VOLUME_DEFAUT
+    # Fin AVANT le début ⇒ ramenée au début (segment vide plutôt qu'inversé).
+    b = anim.normaliser_animation(_doc(son="x.wav", son_debut_ms=900, son_fin_ms=100))
+    assert (b["son_debut_ms"], b["son_fin_ms"]) == (900, 900)
+    # 0 = jusqu'au bout du fichier : la valeur passe telle quelle, pas de borne serveur.
+    assert anim.normaliser_animation(_doc(son="x.wav", son_fin_ms=0))["son_fin_ms"] == 0
+    # Volume borné [0,1], illisible ⇒ défaut.
+    assert anim.normaliser_animation(_doc(son_volume=5))["son_volume"] == 1.0
+    assert anim.normaliser_animation(_doc(son_volume=-2))["son_volume"] == 0.0
+    assert anim.normaliser_animation(_doc(son_volume="fort"))["son_volume"] == anim.VOLUME_DEFAUT
+
+
+def test_est_son():
+    assert anim.est_son("sword sound.wav") and anim.est_son("TownTheme.MP3")
+    assert anim.est_son("swamp.ogg") and anim.est_son("x.m4a")
+    assert not anim.est_son("Thumbs.db") and not anim.est_son("vfx_slash1.png")
+    assert not anim.est_son("") and not anim.est_son(None)
 
 
 def test_normaliser_defauts():
@@ -124,6 +158,46 @@ def test_normaliser_borne_la_grille_et_la_plage():
     # fin hors grille ⇒ dernière case
     c = anim.normaliser_animation(_doc(colonnes=3, lignes=2, fin=999))
     assert c["fin"] == 5
+
+
+def test_normaliser_trajectoire_defauts():
+    """Champs absents ⇒ sprite POSÉ et DROIT : c'est ce qui rend la trajectoire sans
+    migration — un doc déjà en base ne se met pas à voler."""
+    a = anim.normaliser_animation(_doc())
+    assert a["depart_ancrage"] == ""
+    assert a["depart_decalage_x"] == 0 and a["depart_decalage_y"] == 0
+    assert a["arc"] == 0
+    assert a["rotation"] == 0
+    assert a["rotation_auto"] is False
+    # Durée de vol absente ⇒ celle des images.
+    assert a["duree_trajet_ms"] == a["duree_ms"]
+
+
+def test_normaliser_depart_ancrage_whitelist():
+    """⚠️ Le défaut est la chaîne VIDE : une valeur illisible ne peut pas faire voler un
+    sprite qui devait rester posé (à l'inverse d'`ancrage`, qui retombe sur `cible`)."""
+    assert anim.normaliser_animation(_doc(depart_ancrage="acteur"))["depart_ancrage"] == "acteur"
+    assert anim.normaliser_animation(_doc(depart_ancrage="cible"))["depart_ancrage"] == "cible"
+    assert anim.normaliser_animation(_doc(depart_ancrage="de_biais"))["depart_ancrage"] == ""
+    assert anim.normaliser_animation(_doc(depart_ancrage=None))["depart_ancrage"] == ""
+
+
+def test_normaliser_duree_trajet_replie_sur_les_images():
+    """0, absent ou illisible ⇒ `duree_ms` : le champ peut rester vide dans l'éditeur."""
+    assert anim.normaliser_animation(_doc(duree_ms=400, duree_trajet_ms=0))["duree_trajet_ms"] == 400
+    assert anim.normaliser_animation(_doc(duree_ms=400, duree_trajet_ms=-5))["duree_trajet_ms"] == 400
+    assert anim.normaliser_animation(_doc(duree_ms=400, duree_trajet_ms="vite"))["duree_trajet_ms"] == 400
+    assert anim.normaliser_animation(_doc(duree_ms=400, duree_trajet_ms=1200))["duree_trajet_ms"] == 1200
+
+
+def test_normaliser_arc_et_rotation():
+    a = anim.normaliser_animation(_doc(arc="1.5", rotation="90", rotation_auto=1))
+    assert a["arc"] == 1.5
+    assert a["rotation"] == 90.0
+    assert a["rotation_auto"] is True
+    # Illisible ⇒ neutre, jamais une exception : la donnée est saisie à la main.
+    b = anim.normaliser_animation(_doc(arc="haut", rotation="de_biais"))
+    assert b["arc"] == 0 and b["rotation"] == 0
 
 
 def test_normaliser_valeurs_de_rendu():
@@ -186,6 +260,38 @@ def test_catalogue_publie_le_decalage_effectif():
     assert charge["decalage_x"] == anim.DECALAGE_X_BASE
 
 
+def test_catalogue_publie_le_son():
+    doc = _doc(_id="animation:a", actif=True, son="melee sound.wav",
+               son_debut_ms=250, son_fin_ms=900, son_volume=0.4)
+    charge = anim.catalogue_payload([doc])["animation:a"]
+    assert charge["son"] == "melee sound.wav"
+    assert (charge["son_debut_ms"], charge["son_fin_ms"]) == (250, 900)
+    assert charge["son_volume"] == 0.4
+    # Doc sans son : publié MUET, pas absent — le client teste `anim.son`.
+    muet = anim.catalogue_payload([_doc(_id="animation:b", actif=True)])["animation:b"]
+    assert muet["son"] == "" and muet["son_fin_ms"] == 0
+
+
+def test_catalogue_publie_une_animation_son_seul():
+    """Sans images, elle doit rester dans le catalogue servi au combat : c'est tout l'intérêt
+    pour `miss`/`fumble`."""
+    cat = anim.catalogue_payload([{"_id": "animation:clang_a", "actif": True,
+                                   "son": "sword sound.wav"}])
+    assert cat["animation:clang_a"]["fichier"] == ""
+    assert cat["animation:clang_a"]["son"] == "sword sound.wav"
+
+
+def test_catalogue_publie_le_decalage_de_depart_effectif():
+    """Les DEUX bouts d'un vol passent par les mêmes bases : sinon le sprite sauterait au
+    décollage, d'une demi-case exactement."""
+    doc = _doc(_id="animation:a", actif=True, depart_ancrage="acteur",
+               depart_decalage_x=0.5, depart_decalage_y=0.25)
+    charge = anim.catalogue_payload([doc])["animation:a"]
+    assert charge["depart_decalage_x"] == anim.DECALAGE_X_BASE + 0.5
+    assert charge["depart_decalage_y"] == anim.DECALAGE_Y_BASE + 0.25
+    assert doc["depart_decalage_y"] == 0.25   # le doc n'est pas muté
+
+
 # ── Cascade contenu → défaut de canal ────────────────────────────────────────────
 
 @pytest.fixture
@@ -196,6 +302,16 @@ def defauts_vierges():
     yield character_stats.COMBAT_ANIMATIONS_DEFAUT
     character_stats.COMBAT_ANIMATIONS_DEFAUT.clear()
     character_stats.COMBAT_ANIMATIONS_DEFAUT.update(avant)
+
+
+def test_defauts_canaux_est_une_copie_lue_via_le_module(defauts_vierges):
+    """Rappel LECTURE SEULE de `/admin/animations` : il suit le réglage à chaud (lecture via
+    le module) et ne peut pas être muté depuis l'écran qui l'affiche."""
+    defauts_vierges["cac"] = "animation:epee_a"
+    vue = anim.defauts_canaux()
+    assert vue["cac"] == "animation:epee_a"
+    vue["cac"] = "animation:pirate"
+    assert character_stats.COMBAT_ANIMATIONS_DEFAUT["cac"] == "animation:epee_a"
 
 
 def test_animation_pour_doc_prime_sur_defaut(defauts_vierges):

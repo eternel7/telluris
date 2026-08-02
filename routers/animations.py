@@ -23,6 +23,9 @@ animations_router = APIRouter()
 # Servi par le mount `/icons` (main.py) : `/icons/effects/<fichier>` est déjà accessible,
 # il n'y a aucun mount à ajouter.
 EFFECTS_PATH = "templates/resources/icons/effects"
+# Servi par le mount `/sounds` (main.py). Une animation peut n'être QU'un son — c'est ce
+# que veulent les canaux `miss`/`fumble`, qui n'ont rien à montrer.
+SOUNDS_PATH = "templates/resources/sounds"
 
 # Types de docs auxquels une animation peut être liée. `item` couvre les armes ET les
 # consommables — c'est le même champ, lu à deux endroits différents du combat.
@@ -59,6 +62,20 @@ def _fichiers_effets() -> list:
 	)
 
 
+def _fichiers_sons() -> list:
+	"""Sons présents sur le disque, triés — jumeau de `_fichiers_effets`.
+
+	⚠️ Aucune lecture de métadonnées ici, contrairement aux images : un son n'a pas de
+	dimensions, et sa DURÉE n'est lisible que par le navigateur (aucune dépendance audio
+	côté serveur). C'est l'éditeur qui l'affiche, à partir de l'élément `<audio>`."""
+	if not os.path.isdir(SOUNDS_PATH):
+		return []
+	return sorted(
+		f for f in os.listdir(SOUNDS_PATH)
+		if os.path.isfile(os.path.join(SOUNDS_PATH, f)) and animations_util.est_son(f)
+	)
+
+
 def _docs_animations() -> list:
 	return find_docs({"type": "animation"}) or []
 
@@ -82,16 +99,23 @@ async def liste_animations(current_user: Annotated[dict, Depends(get_current_use
 						 "docs": par_fichier.get(f, [])})
 	# ⚠️ Les docs partent BRUTS : le formulaire édite la valeur STOCKÉE. Les bases de décalage
 	# sont publiées à côté pour que l'aperçu de scène montre la position réellement jouée,
-	# sans que le client ait à recopier les constantes.
+	# sans que le client ait à recopier les constantes. `defauts_canaux` n'est qu'un RAPPEL en
+	# lecture seule (la world-var se règle dans /admin) — relu à chaque appel, donc il suit un
+	# réglage à chaud sans rechargement de page.
 	return {"docs": sorted(docs, key=lambda d: str(d.get("_id") or "")), "fichiers": fichiers,
+			"sons": _fichiers_sons(),
 			"decalage_x_base": animations_util.DECALAGE_X_BASE,
-			"decalage_y_base": animations_util.DECALAGE_Y_BASE}
+			"decalage_y_base": animations_util.DECALAGE_Y_BASE,
+			"defauts_canaux": animations_util.defauts_canaux()}
 
 
 @animations_router.post("/admin/animations/scan")
 async def scanner_animations(current_user: Annotated[dict, Depends(get_current_user)]):
-	"""Crée un doc `animation:*` par fichier NOUVEAU (dimensions lues par Pillow, grille
-	devinée, `actif: false`).
+	"""Crée un doc `animation:*` par fichier NOUVEAU — **feuilles d'effets ET sons**.
+
+	Images : dimensions lues par Pillow, grille devinée. Sons : rien à deviner, le doc porte
+	le seul `son` et se règle à l'oreille (une animation peut n'être QU'un son). Dans les
+	deux cas `actif: false`.
 
 	⚠️ **N'écrase JAMAIS un doc existant** : le scan est donc idempotent et relançable
 	après tout ajout de fichier, sans jamais perdre une découpe réglée à la main. Un
@@ -101,8 +125,21 @@ async def scanner_animations(current_user: Annotated[dict, Depends(get_current_u
 	confirme à l'aperçu animé de l'éditeur."""
 	_require_admin(current_user)
 	existants_docs = _docs_animations()
+	# ⚠️ DEUX ensembles distincts, et c'est indispensable : un doc son-seul n'a pas de
+	# `fichier`, un doc image n'a pas de `son`. Avec un seul ensemble, aucun son ne serait
+	# jamais reconnu comme couvert et chaque scan recréerait toute la sonothèque.
 	couverts = {str(d.get("fichier") or "") for d in existants_docs}
+	couverts_sons = {str(d.get("son") or "") for d in existants_docs}
 	ids_pris = {str(d.get("_id") or "") for d in existants_docs}
+
+	# Deux fichiers peuvent produire le même slug (« Hit-Yellow.png » et « hit - yellow.png ») :
+	# on descend les suffixes jusqu'à un id libre.
+	def _id_libre(nom: str) -> str:
+		for suffixe in "abcdefghijklmnopqrstuvwxyz":
+			candidat = animations_util.slug_animation(nom, suffixe)
+			if candidat not in ids_pris and get_doc(candidat) is None:
+				return candidat
+		return ""
 
 	crees, existants, illisibles = [], [], []
 	for fichier in _fichiers_effets():
@@ -113,14 +150,7 @@ async def scanner_animations(current_user: Annotated[dict, Depends(get_current_u
 		if largeur <= 0 or hauteur <= 0:
 			illisibles.append(fichier)
 			continue
-		# Deux fichiers peuvent produire le même slug (« Hit-Yellow.png » et
-		# « hit - yellow.png ») : on descend les suffixes jusqu'à un id libre.
-		doc_id = ""
-		for suffixe in "abcdefghijklmnopqrstuvwxyz":
-			candidat = animations_util.slug_animation(fichier, suffixe)
-			if candidat not in ids_pris and get_doc(candidat) is None:
-				doc_id = candidat
-				break
+		doc_id = _id_libre(fichier)
 		if not doc_id:
 			illisibles.append(fichier)
 			continue
@@ -143,6 +173,15 @@ async def scanner_animations(current_user: Annotated[dict, Depends(get_current_u
 			"decalage_x": 0.0,
 			"decalage_y": 0.0,
 			"ancrage": animations_util.ANCRAGE_DEFAUT,
+			# Trajectoire : semée NEUTRE. `depart_ancrage` vide = sprite posé, comme avant —
+			# une feuille fraîchement scannée ne se met pas à voler toute seule.
+			"depart_ancrage": animations_util.DEPART_ANCRAGE_DEFAUT,
+			"depart_decalage_x": 0.0,
+			"depart_decalage_y": 0.0,
+			"duree_trajet_ms": 0,
+			"arc": 0.0,
+			"rotation": animations_util.ROTATION_DEFAUT,
+			"rotation_auto": False,
 			# Brouillon : rien n'est jamais actif sans confirmation humaine.
 			"actif": False,
 		}
@@ -151,6 +190,38 @@ async def scanner_animations(current_user: Annotated[dict, Depends(get_current_u
 			continue
 		ids_pris.add(doc_id)
 		couverts.add(fichier)
+		crees.append(doc_id)
+
+	# ── Sons ──
+	# Un doc par son NOUVEAU, SANS images : c'est la forme qu'attendent les canaux qui n'ont
+	# rien à montrer (`miss`, `fumble`). Rien à deviner ici — pas de grille, pas de
+	# dimensions, et les points de lecture se règlent à l'oreille dans l'éditeur.
+	for son in _fichiers_sons():
+		if son in couverts_sons:
+			existants.append(son)
+			continue
+		doc_id = _id_libre(son)
+		if not doc_id:
+			illisibles.append(son)
+			continue
+		doc = {
+			"_id": doc_id,
+			"type": "animation",
+			"nom": os.path.splitext(son)[0],
+			"son": son,
+			"son_debut_ms": 0,
+			# 0 = jusqu'au bout du fichier : le serveur ne connaît pas la durée d'un son.
+			"son_fin_ms": 0,
+			"son_volume": animations_util.VOLUME_DEFAUT,
+			# Brouillon : rien n'est jamais actif sans confirmation humaine — ici, sans
+			# l'avoir ÉCOUTÉ.
+			"actif": False,
+		}
+		if save_doc(doc) is None:
+			illisibles.append(son)
+			continue
+		ids_pris.add(doc_id)
+		couverts_sons.add(son)
 		crees.append(doc_id)
 
 	return {"crees": crees, "existants": existants, "illisibles": illisibles}

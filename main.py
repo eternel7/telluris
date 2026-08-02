@@ -106,6 +106,11 @@ MONSTERS_IMAGES_PATH = "templates/resources/monsters"
 app.mount("/monsters", StaticFiles(directory=MONSTERS_IMAGES_PATH), name="monsters")
 PNJ_IMAGES_PATH = "templates/resources/pnj"
 app.mount("/pnj", StaticFiles(directory=PNJ_IMAGES_PATH), name="pnj")
+# Sons des animations de combat — servis au COMBAT comme à l'éditeur (/admin/animations).
+# ⚠️ Des noms de fichiers contiennent des espaces (« melee sound.wav ») : côté client, tout
+# passe par encodeURIComponent, comme les feuilles d'effets.
+SOUNDS_PATH = "templates/resources/sounds"
+app.mount("/sounds", StaticFiles(directory=SOUNDS_PATH), name="sounds")
 
 app.include_router(user_router, prefix="/api")
 app.include_router(lieu_router, prefix="/api")

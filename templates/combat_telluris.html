@@ -244,6 +244,15 @@
 .init-badge.monstre.spellcast  { border-color: #b26bff; box-shadow: 0 0 9px rgba(178,107,255,0.7); cursor: pointer; }
 .init-badge.joueur.spellcast   { border-color: #4cd97b; box-shadow: 0 0 9px rgba(76,217,123,0.7); cursor: pointer; }
 .init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.12); }
+/* Coupe-son : discret par défaut, franchement éteint quand il coupe — l'état doit se lire
+   sans survol, c'est le seul repère qu'a le joueur pour savoir pourquoi il n'entend rien. */
+.son-btn {
+	flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+	background: #2a2a36; border: 1.5px solid var(--border-color);
+	color: var(--muted); font-size: 15px; line-height: 1; cursor: pointer;
+}
+.son-btn:hover { border-color: var(--accent-color); }
+.son-btn.muet { opacity: 0.55; filter: grayscale(1); }
 .init-badge.dead    { opacity: 0.3; filter: grayscale(1); }
 
 /* ── Portrait/image + anneau de vitalité (partagés badge initiative ↔ player-token) ── */
@@ -821,8 +830,16 @@
 					{% endif %}
 				{% endfor %}
 			</div>
+			<!-- Coupe-son : premier réglage audio du jeu. Son état vit dans localStorage
+			     (par navigateur, pas par personnage) et il coupe AUSSI le son en cours. -->
+			<button type="button" id="btn-son" class="son-btn" title="Couper / rétablir les sons de combat">🔊</button>
 		</div>
 		</div><!-- /combat-center -->
+
+		<!-- Lecteur des sons d'animation : UN SEUL, caché. Le journal ne révèle qu'une
+		     animation à la fois (cf. revealNext), donc un nouveau son coupe le précédent —
+		     et c'est le comportement voulu, pas une limite subie. -->
+		<audio id="vfx-audio" preload="auto" hidden></audio>
 
 	<!-- Panel droit : portrait du dernier ennemi ciblé/attaquant + liste -->
 	{% set m_first = (combat.monstres | selectattr('vivant') | first) or (combat.monstres | first) %}
@@ -940,8 +957,11 @@ const GRID = {{ grid | tojson | safe }};
 
 // Catalogue des animations d'impact ACTIVES : {id: {fichier, colonnes, lignes,
 // sens_lignes, sens_colonnes, debut, fin, duree_ms, echelle, decalage_x, decalage_y,
-// ancrage, largeur, hauteur}}.
-// ⚠️ Les deux décalages arrivent EFFECTIFS (base commune déjà ajoutée par
+// ancrage, largeur, hauteur, depart_ancrage, depart_decalage_x, depart_decalage_y,
+// duree_trajet_ms, arc, rotation, rotation_auto, son, son_debut_ms, son_fin_ms,
+// son_volume}}.
+// ⚠️ `fichier` peut être VIDE : une animation peut n'être qu'un SON (canaux miss/fumble).
+// ⚠️ Les quatre décalages arrivent EFFECTIFS (base commune déjà ajoutée par
 // `animations.catalogue_payload`) : rien à recalculer ici.
 // Le journal ne porte que l'ID (`entry.vfx.anim`) et l'id de snapshot de la cible — c'est
 // le SEUL canal possible, un tour de monstre étant résolu entièrement côté serveur.
@@ -1473,21 +1493,168 @@ function _vfxFrame(el, anim, i) {
 
 // Joue l'animation portée par une entrée de journal, sur la case de sa cible.
 // → Promise<durée en ms> (0 = rien joué), ce qui laisse revealNext décider de l'attente.
+// ── Son d'une animation ───────────────────────────────────────────────────────
+// Un seul lecteur, caché dans le markup : le journal ne révèle qu'une animation à la fois.
+// Le fichier est joué d'un POINT DE DÉPART à un POINT D'ARRÊT (en ms, comme toutes les
+// durées du document) — une planche sonore contient souvent plusieurs bruits, exactement
+// comme une feuille de sprites contient plusieurs images.
+const SON_CLE = 'telluris.combat.son';
+let sonCoupe = false;
+let sonTimer = null;
+
+function _audioVfx() { return document.getElementById('vfx-audio'); }
+
+function arreterSon() {
+	if (sonTimer) { clearTimeout(sonTimer); sonTimer = null; }
+	const a = _audioVfx();
+	if (a) a.pause();
+}
+
+// ⚠️ Ne bloque JAMAIS l'appelant : aucune attente, aucune promesse rendue. Le tempo du
+// journal reste commandé par `duree_ms` (cf. jouerVfx) — un son plus long finit de résonner
+// par-dessus les lignes suivantes, un son qui ne part pas ne retarde rien.
+function jouerSon(anim) {
+	const fichier = anim && anim.son ? String(anim.son) : '';
+	const a = _audioVfx();
+	if (!fichier || !a || sonCoupe) return;
+	arreterSon();   // un nouveau coup coupe le précédent
+
+	const url = '/sounds/' + encodeURIComponent(fichier);
+	// ⚠️ Ne réassigner `src` que s'il CHANGE : le refaire à chaque coup relancerait un
+	// chargement réseau et ferait sauter le début du son.
+	if (!a.src.endsWith(url)) a.src = url;
+	a.volume = Math.min(1, Math.max(0, parseFloat(anim.son_volume != null ? anim.son_volume : 1) || 0));
+
+	const debut = Math.max(0, parseInt(anim.son_debut_ms, 10) || 0);
+	const fin = Math.max(0, parseInt(anim.son_fin_ms, 10) || 0);
+	const lancer = () => {
+		// ⚠️ `currentTime` ne se pose qu'une fois les métadonnées là : plus tôt, la valeur
+		// est ignorée et le son repart du début du fichier.
+		try { a.currentTime = debut / 1000; } catch (e) { /* format sans seek : on prend au début */ }
+		// ⚠️ `play()` REJETTE quand le navigateur bloque l'autoplay (aucun geste utilisateur
+		// encore, cas du tout premier rendu de la page) : avaler, jamais propager.
+		const p = a.play();
+		if (p && p.catch) p.catch(() => {});
+		// Point d'arrêt : `son_fin_ms = 0` ⇒ aucun timer, le fichier va au bout.
+		if (fin > debut) sonTimer = setTimeout(() => { a.pause(); sonTimer = null; }, fin - debut);
+	};
+	if (a.readyState >= 1) lancer();
+	else a.addEventListener('loadedmetadata', lancer, { once: true });
+}
+
+function majBoutonSon() {
+	const btn = document.getElementById('btn-son');
+	if (!btn) return;
+	btn.textContent = sonCoupe ? '🔇' : '🔊';
+	btn.classList.toggle('muet', sonCoupe);
+}
+
+(function initSon() {
+	try { sonCoupe = localStorage.getItem(SON_CLE) === '0'; } catch (e) { sonCoupe = false; }
+	const btn = document.getElementById('btn-son');
+	if (btn) btn.onclick = () => {
+		sonCoupe = !sonCoupe;
+		try { localStorage.setItem(SON_CLE, sonCoupe ? '0' : '1'); } catch (e) { /* mode privé */ }
+		// ⚠️ Couper doit faire taire ce qui sonne DÉJÀ : sans ça le clic reste sans effet
+		// audible pendant une seconde, et on le croit cassé.
+		if (sonCoupe) arreterSon();
+		majBoutonSon();
+	};
+	majBoutonSon();
+})();
+
+// Acteur d'un id de snapshot (`monstre_N` / `joueur_N`), monstres ET joueurs confondus.
+function _acteurVfx(id) {
+	if (!id) return null;
+	return (state.monstres || []).find(m => m.id === id)
+		|| (state.joueurs || []).find(p => p.id === id)
+		|| null;
+}
+
+// Pose le sprite d'impact à l'instant `t` du vol (t ∈ [0,1] ; 0 = départ, 1 = arrivée).
+// TOUT tient dans UN `transform` — plus de `left`/`bottom` —, parce qu'une trajectoire
+// mélange deux espaces qu'il ne faut surtout pas confondre :
+//
+//   translateX(-50%) translate(ÉCRAN) rotate(a) translate(MONDE) rotate(angle)
+//
+//   • MONDE (cases) : il passe par le `rotate(a)` de la caméra, donc la trajectoire tourne
+//     avec le décor, exactement comme les jetons (cf. _placerToken).
+//   • ÉCRAN : les décalages de recadrage (le dessin n'est pas centré dans sa frame) et la
+//     cloche de l'arc. Ils ne pivotent PAS — un `decalage_y` monte le sprite à l'écran,
+//     quelle que soit l'orientation de la caméra.
+//   • `angle` = le terme qui décide de l'orientation du dessin (cf. plus bas).
+//
+// ⚠️ En statique, cette chaîne rend RIGOUREUSEMENT ce que faisaient `left: calc(50% + …)` et
+// `bottom: calc(… + dy)` : des translations commutent, et `translateX(-50%)` reste en tête.
+// Les animations déjà réglées ne bougent pas d'un pixel.
+//
+// ⚠️ `_placerToken` n'est pas réutilisable ici : il lui manque le décalage d'écran interpolé
+// ET l'angle propre du sprite (elle annule toujours la rotation caméra, ce qui est ce qu'on
+// veut pour un portrait, jamais pour une flèche).
+function _poserVfx(el, ctx, t) {
+	const a = angleCamera();
+	const wx = ctx.ax + (ctx.bx - ctx.ax) * t;
+	const wy = ctx.ay + (ctx.by - ctx.ay) * t;
+	const ox = ctx.oax + (ctx.obx - ctx.oax) * t;
+	// Cloche : nulle aux deux bouts, sommet = `arc` au milieu du vol.
+	const oy = ctx.oay + (ctx.oby - ctx.oay) * t + ctx.arc * 4 * t * (1 - t);
+	// Net visuel d'une chaîne CSS = somme de ses rotate ⇒ net = a + angle. On veut
+	// `rotation + θ_écran`, d'où le `− a` ici. Sans rotation ni `rotation_auto`, il reste
+	// `−a` : le sprite est droit, exactement comme avant.
+	const angle = ctx.rotation + (ctx.auto ? _angleVfx(ctx, t, a) : 0) - a;
+	el.style.transform = `translateX(-50%)`
+		+ ` translate(calc(var(--step) * ${ox}), calc(var(--step) * ${-oy}))`
+		+ ` rotate(${a}deg)`
+		+ ` translate(calc(var(--step) * ${wx}), calc(var(--step) * ${wy}))`
+		+ ` rotate(${angle}deg)`;
+}
+
+// Angle À L'ÉCRAN suivi par le sprite à l'instant `t`, en degrés (0° = vers la droite, sens
+// horaire — la convention de `rotation`, et celle de CSS puisque y croît vers le BAS).
+// C'est la TANGENTE du mouvement : direction monde tournée par la caméra, PLUS la dérivée
+// de la part d'écran (décalages + cloche de l'arc), qui elle ne tourne pas.
+// ⚠️ Sans le terme d'arc, une flèche en cloche pointerait tout droit pendant qu'elle monte ;
+// sans le `rot()`, elle pointerait à côté dès que la caméra a pivoté (changement d'acteur).
+function _angleVfx(ctx, t, a) {
+	const [sx, sy] = rot(ctx.dirx, ctx.diry, a);
+	// d(oy)/dt, ramené en y ÉCRAN : `oy` MONTE le sprite, l'écran descend ⇒ signe inversé.
+	const dy = -((ctx.oby - ctx.oay) + ctx.arc * 4 * (1 - 2 * t));
+	if (!sx && !sy && !dy) return 0;   // aucune direction à suivre (deux bouts confondus)
+	return Math.atan2(sy + dy, sx) * 180 / Math.PI;
+}
+
 function jouerVfx(v) {
 	const anim = v && ANIMATIONS ? ANIMATIONS[v.anim] : null;
 	if (!anim) return Promise.resolve(0);
+	// ⚠️ Le SON part EN PREMIER et sans condition : il ne dépend ni d'un sprite, ni d'une
+	// position, ni du mouvement réduit (on protège le mouvement, pas l'audio). C'est ce qui
+	// rend possible une animation SANS IMAGES — la forme voulue pour `miss`/`fumble`.
+	jouerSon(anim);
+	// Tempo du journal, inchangé : la durée des images (ou celle du vol). Le son, lui,
+	// sonne librement par-dessus les lignes suivantes.
+	const dureeVue = Math.max(1, parseInt(anim.duree_ms, 10) || 600);
 	// Mouvement réduit : aucun sprite, et le journal garde son rythme de lecture.
 	if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return Promise.resolve(0);
 	}
-	// `ancrage` décide de QUI porte le sprite : la cible du coup (défaut) ou celui qui
-	// agit — l'entrée porte les deux ids quand ils diffèrent.
+	// Animation SON SEUL : rien à peindre, mais le tempo reste celui du document.
+	if (!anim.fichier) return Promise.resolve(dureeVue);
+	// `ancrage` décide de QUI porte le sprite à l'ARRIVÉE : la cible du coup (défaut) ou
+	// celui qui agit — l'entrée porte les deux ids quand ils diffèrent.
 	const ancre = (anim.ancrage === 'acteur' && v.acteur) ? v.acteur : v.cible;
-	const sujet = (state.monstres || []).find(m => m.id === ancre)
-			   || (state.joueurs || []).find(p => p.id === ancre);
-	// Cible disparue (monture retirée, snapshot inconnu) : on ne joue rien plutôt que de
-	// poser un sprite au hasard sur la carte.
-	if (!sujet || !sujet.pos) return Promise.resolve(0);
+	const sujet = _acteurVfx(ancre);
+	// Cible disparue (monture retirée, snapshot inconnu) : on ne pose pas un sprite au
+	// hasard sur la carte — le son, lui, a déjà été joué.
+	if (!sujet || !sujet.pos) return Promise.resolve(dureeVue);
+
+	// Point de DÉPART, s'il y en a un. ⚠️ Repli FAIL-SOFT sur « posé », jamais sur « rien » :
+	// départ non demandé, id absent (les canaux buff/debuff/dissipation/consommable n'ont
+	// pas d'acteur distinct — l'effet s'applique au sujet lui-même), acteur disparu, ou
+	// départ CONFONDU avec l'arrivée ⇒ le sprite se joue sur place, comme avant.
+	const idDepart = !anim.depart_ancrage ? ''
+		: (anim.depart_ancrage === 'acteur' ? (v.acteur || '') : (v.cible || ''));
+	const source = (idDepart && idDepart !== ancre) ? _acteurVfx(idDepart) : null;
+	const trajet = !!(source && source.pos);
 
 	const layer = document.getElementById('tokens-layer');
 	if (!layer) return Promise.resolve(0);
@@ -1505,34 +1672,60 @@ function jouerVfx(v) {
 	el.style.width = w + 'px';
 	el.style.height = h + 'px';
 	el.style.backgroundImage = "url('/icons/effects/" + encodeURIComponent(anim.fichier) + "')";
-	const dy = parseFloat(anim.decalage_y) || 0;
-	if (dy) el.style.bottom = 'calc(var(--step) * (var(--floor) + ' + dy + '))';
-	// ⚠️ Décalage X posé sur `left`, comme le Y l'est sur `bottom` : c'est un recadrage
-	// d'ÉCRAN (le dessin n'est pas centré dans sa frame), pas un déplacement de case. Le
-	// passer à _placerToken en ferait un vecteur MONDE, qui pivoterait avec la caméra —
-	// le sprite changerait de côté au changement d'acteur. `translateX(-50%)` du transform
-	// continue de le centrer sur sa propre largeur.
-	const dx = parseFloat(anim.decalage_x) || 0;
-	if (dx) el.style.left = 'calc(50% + var(--step) * ' + dx + ')';
+
+	// Les deux bouts, en coordonnées MONDE relatives à l'acteur actif (l'ancre du viewport),
+	// et leurs décalages d'ÉCRAN. Sans trajet, les deux bouts sont le même point : la
+	// même formule sert les deux cas, et `t` n'a plus aucun effet.
 	const j = me();
-	// ⚠️ Placé par _placerToken et pas à la main : c'est la recette
-	// `rotate(a) translate(MONDE) rotate(-a)` qui fait tomber le sprite sur la bonne case
-	// quand la caméra a pivoté (changement d'acteur dans un groupe).
+	const dx = parseFloat(anim.decalage_x) || 0;
+	const dy = parseFloat(anim.decalage_y) || 0;
+	const ctx = {
+		ax: (trajet ? source.pos.x : sujet.pos.x) - j.pos.x,
+		ay: (trajet ? source.pos.y : sujet.pos.y) - j.pos.y,
+		bx: sujet.pos.x - j.pos.x,
+		by: sujet.pos.y - j.pos.y,
+		oax: trajet ? (parseFloat(anim.depart_decalage_x) || 0) : dx,
+		oay: trajet ? (parseFloat(anim.depart_decalage_y) || 0) : dy,
+		obx: dx, oby: dy,
+		arc: trajet ? (parseFloat(anim.arc) || 0) : 0,
+		rotation: parseFloat(anim.rotation) || 0,
+		auto: !!anim.rotation_auto,
+		dirx: 0, diry: 0,
+	};
+	// Direction que suit l'orientation — SÉPARÉE de la position, parce que les deux ne
+	// coïncident pas toujours : avec un trajet c'est le vol lui-même ; SANS trajet, c'est
+	// l'axe acteur → cible, ce qui tourne un impact vers celui qui frappe alors que le
+	// sprite, lui, ne bouge pas de son ancre.
+	if (trajet) {
+		ctx.dirx = ctx.bx - ctx.ax;
+		ctx.diry = ctx.by - ctx.ay;
+	} else if (ctx.auto && v.acteur && v.acteur !== ancre) {
+		const autre = _acteurVfx(v.acteur);
+		if (autre && autre.pos) {
+			ctx.dirx = sujet.pos.x - autre.pos.x;
+			ctx.diry = sujet.pos.y - autre.pos.y;
+		}
+	}
 	_vfxFrame(el, anim, anim.debut);
-	_placerToken(el, sujet.pos.x - j.pos.x, sujet.pos.y - j.pos.y);
+	_poserVfx(el, ctx, 0);
 	layer.appendChild(el);
 
 	const debut = Math.max(0, parseInt(anim.debut, 10) || 0);
 	const fin = Math.max(debut, parseInt(anim.fin, 10) || 0);
 	const nb = fin - debut + 1;
+	// Deux durées distinctes : `duree_ms` = UNE passe d'images, `duree_trajet_ms` = le temps
+	// de vol (les images BOUCLENT dessus). Sans trajet, le vol vaut la passe d'images et le
+	// sprite meurt exactement quand avant.
 	const duree = Math.max(1, parseInt(anim.duree_ms, 10) || 600);
+	const vol = trajet ? Math.max(1, parseInt(anim.duree_trajet_ms, 10) || duree) : duree;
 	return new Promise(resolve => {
 		let t0 = 0;
 		const tick = (t) => {
 			if (!t0) t0 = t;
 			const ecoule = t - t0;
-			if (ecoule >= duree) { el.remove(); resolve(duree); return; }
-			_vfxFrame(el, anim, debut + Math.min(nb - 1, Math.floor(ecoule / duree * nb)));
+			if (ecoule >= vol) { el.remove(); resolve(vol); return; }
+			_vfxFrame(el, anim, debut + Math.min(nb - 1, Math.floor((ecoule % duree) / duree * nb)));
+			if (trajet) _poserVfx(el, ctx, ecoule / vol);
 			requestAnimationFrame(tick);
 		};
 		requestAnimationFrame(tick);
