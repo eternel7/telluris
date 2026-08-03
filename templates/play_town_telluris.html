@@ -716,6 +716,15 @@
 		}
 		.sh-derived-lbl { color: var(--muted); }
 		.sh-derived-val { font-weight: bold; color: var(--text-color); }
+		/* Points d'attribut à répartir : UNE seule couleur, partagée par les trois endroits qui
+		   en parlent (compteur de l'onglet ⚔, compteur de l'onglet 📖 et pastille des boutons
+		   du pied de page) — c'est ce vert qui fait le lien entre « il me reste des points »
+		   et l'endroit où on les dépense. */
+		.pts-dispo { color: #2ed573; }
+		/* Pastille « points à répartir » sur les boutons 👤 Personnage / 👥 Groupe. Rendue en
+		   dur dans le markup et masquée par `hidden` : les points peuvent tomber à zéro (ou
+		   revenir) en cours de session, et `_majIndicateursPoints` n'a rien à créer. */
+		.pts-indic { margin-left: 6px; font-size: 0.9rem; line-height: 1; vertical-align: middle; }
 		.sh-xp-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; font-size: 0.95rem; }
 		.sh-xp-bar { height: 8px; background: #111; border-radius: 4px; overflow: hidden; }
 		.sh-xp-fill { height: 100%; background: var(--accent-color); border-radius: 4px; }
@@ -1477,8 +1486,17 @@
 		{% endcall %}
 		</section>
 		<footer class="management-footer">
-			<button class="manage-btn" onclick="openSheet()">👤 Personnage</button>
-			<button class="manage-btn" onclick="openGroupe()">👥 Groupe</button>
+			{# Pastille verte = des points d'attribut attendent d'être répartis (le joueur pour
+			   👤, n'importe quel compagnon pour 👥). Rendue TOUJOURS, masquée par `hidden` :
+			   `_majIndicateursPoints` n'a alors qu'à basculer l'attribut. L'état initial vient
+			   du serveur — `compagnons_points` évite d'avoir à ouvrir le panneau 👥 pour
+			   apprendre qu'un compagnon a des points. #}
+			<button class="manage-btn" onclick="openSheet()">👤 Personnage<span
+				class="pts-indic pts-dispo" id="pts-indic-perso" title="Points d'attribut à répartir"
+				{% if character.get("attribute_points", 0) <= 0 %}hidden{% endif %}>●</span></button>
+			<button class="manage-btn" onclick="openGroupe()">👥 Groupe<span
+				class="pts-indic pts-dispo" id="pts-indic-groupe" title="Un compagnon a des points d'attribut à répartir"
+				{% if not compagnons_points %}hidden{% endif %}>●</span></button>
 		</footer>
 	</div><!-- /#game-container -->
 	<div id="sheet-panel" class="panel-hidden panel-frame" aria-label="Fiche personnage">
@@ -1545,7 +1563,7 @@
 							     donc ce bloc est entièrement re-rendu côté client par _renderXp(). -->
 							<div class="sh-xp-header">
 								<span>XP totale : <strong id="sh-xp-total" style="color:var(--accent-color)">{{ xp_total }}</strong></span>
-								<span style="color:#2ed573">Points : <span id="sh-attribute-points">{{ attribute_points }}</span></span>
+								<span class="pts-dispo">Points : <span id="sh-attribute-points">{{ attribute_points }}</span></span>
 							</div>
 							<div class="val-niveau">
 								<span><span id="sh-race-label">{{character["race"]}}</span> Niv. : <strong id="sh-race-niveau" class="race-niveau niveau-nb">{{ niveau }}</strong></span>
@@ -1722,7 +1740,7 @@
 					</div>
 
 					<!-- ── COMPETENCES ── -->
-					<div class="sheet-panel" id="sh-competences"><div style="color:#2ed573; font-size:.85rem; float: right;">Points : <span id="sh-comp-points">{{ character.get("attribute_points", 0) }}</span></div>
+					<div class="sheet-panel" id="sh-competences"><div class="pts-dispo" style="font-size:.85rem; float: right;">Points : <span id="sh-comp-points">{{ character.get("attribute_points", 0) }}</span></div>
 						{# Barre de combat : la disposition se compose ICI, au calme (le mode ⚙
 						   de l'écran de combat n'en est qu'un raccourci). Rendue 100 % client
 						   par _renderBarreSlots depuis le payload `slots`. #}
@@ -3197,6 +3215,31 @@ let _MAX_BONUS     = {{ max_bonus | tojson | safe }};
 let _maxBonusUsed  = {{ max_bonus_used | tojson | safe }};
 let _attributePoints = {{ character.get("attribute_points", 0) | tojson | safe }};
 let _vocNiveau   = {{ character.get("vocations_niveaux", {}).get(character.get("voc", ""), 0) | tojson | safe }};
+
+// ── Pastilles « points à répartir » (boutons 👤 Personnage / 👥 Groupe) ────────────────
+// ⚠️ `_attributePoints` suit le personnage AFFICHÉ dans la fiche — en mode compagnon, c'est
+// celui du COMPAGNON. La pastille 👤 ne parle que du JOUEUR : elle a donc sa propre globale,
+// écrite par le seul chemin « les points du principal ont bougé » (_syncPoints hors mode
+// compagnon). Celle du groupe est dérivée du dernier payload de GET api/groupe, dont
+// `renderGroupe` est l'unique writer ; l'état initial vient du serveur pour que la pastille
+// soit là SANS avoir à ouvrir le panneau.
+let _pointsPrincipal  = {{ character.get("attribute_points", 0) | tojson | safe }};
+let _pointsCompagnons = {{ compagnons_points | tojson | safe }};
+
+function _majIndicateursPoints() {
+	const perso = document.getElementById('pts-indic-perso');
+	if (perso) perso.hidden = !(_pointsPrincipal > 0);
+	const grp = document.getElementById('pts-indic-groupe');
+	if (grp) grp.hidden = !_pointsCompagnons;
+}
+
+// Un compagnon a-t-il de quoi dépenser ? Recalculé à chaque payload de groupe — c'est le
+// seul moment où l'on connaît TOUS les compagnons (dépenser depuis la fiche de l'un ne dit
+// rien de ce qu'il reste aux autres).
+function _majPointsCompagnons(groupe) {
+	_pointsCompagnons = (groupe || []).some(c => (c.attribute_points || 0) > 0);
+	_majIndicateursPoints();
+}
 const _STAT_COEFF = {{ xp_coeff | tojson | safe }};
 const _VOC_COEFF = {{ xp_voc_coeff | tojson | safe }};
 // Grille « Profil modifié » : {code: {base, total, delta, sources:[{origine,nom,icon,delta}]}}
@@ -4721,6 +4764,14 @@ function _syncPoints(pts) {
 	// de vocation) et les listes d'apprentissage restent tels quels jusqu'au prochain /play
 	// et proposent une dépense que le serveur refusera.
 	if (a) _refreshStatBoxes();
+	// Pastille du pied de page : les points appartiennent à celui dont la fiche est ouverte
+	// (chokepoint `_acteur` côté serveur — en mode compagnon, c'est SON doc qui a été débité).
+	// ⚠️ On ne touche PAS `_pointsCompagnons` ici : dépenser les points d'un compagnon ne dit
+	// rien de ce qu'il reste aux autres. `closeCompagnonSheet` refait un GET api/groupe, qui
+	// repasse par `renderGroupe` — seul writer de la pastille 👥.
+	if (_compagnonActif) _compagnonActif.attribute_points = pts;
+	else                 _pointsPrincipal = pts;
+	_majIndicateursPoints();
 	// Les trois renderers gardent leur liste en cache : sans argument ils re-rendent l'état
 	// courant, seul le `disabled` des boutons change.
 	_renderSortsApprenables();
@@ -6370,6 +6421,7 @@ function renderGroupe(data) {
 	_grpEtat = data;
 	_majCompagnie(data);
 	const groupe = data.groupe || [];
+	_majPointsCompagnons(groupe);
 	const plafond = document.getElementById('grp-plafond');
 	if (plafond) plafond.textContent = `${_placesOccupees(data)}/${data.plafond}`;
 

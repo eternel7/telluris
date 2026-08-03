@@ -638,6 +638,17 @@ def compagnie_effective(character: dict, get_doc_fn=None) -> list:
 	return [av for av in groupe_effectif(character, get_doc_fn) if av.get("permanent")]
 
 
+def compagnons_a_repartir(character: dict, get_doc_fn=None, compagnons: list | None = None) -> bool:
+	"""Un compagnon actif a-t-il des points d'attribut non dépensés ?
+
+	Sert la pastille verte du bouton 👥 Groupe : sans elle, rien ne signale qu'un compagnon a
+	monté de niveau — sa fiche est à deux clics et personne ne va la rouvrir sans raison.
+	⚠️ `compagnons` = docs DÉJÀ chargés par l'appelant, à repasser quand la requête en tient
+	(même précaution que `partager_xp` : les recharger doublerait les lectures)."""
+	membres = groupe_effectif(character, get_doc_fn) if compagnons is None else compagnons
+	return any(int(av.get("attribute_points", 0) or 0) > 0 for av in membres)
+
+
 def partager_xp(character: dict, xp: int, compagnons: list | None = None,
 				get_doc_fn=None) -> list:
 	"""Chaque membre de la COMPAGNIE gagne la MÊME XP que le principal — pas une part.

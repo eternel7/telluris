@@ -1,0 +1,62 @@
+[
+	{
+		"_id": "item:branche",
+		"type": "item",
+		"nom": "Branche",
+		"icon": "🌿",
+		"description": "Branche de bois tout-venant, essence indifférente : la mesure du marchand.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "branche",
+		"slots": [],
+		"tags": [
+			"bois"
+		],
+		"poids": 0.6
+	},
+	{
+		"_id": "item:petit_rondin",
+		"type": "item",
+		"nom": "Petit rondin",
+		"icon": "🪵",
+		"description": "Petit rondin de bois tout-venant, essence indifférente : la mesure du marchand.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "petit_rondin",
+		"slots": [],
+		"tags": [
+			"bois"
+		],
+		"poids": 10
+	},
+	{
+		"_id": "item:rondin",
+		"type": "item",
+		"nom": "Rondin",
+		"icon": "🪵",
+		"description": "Rondin de bois tout-venant, essence indifférente : la mesure du marchand.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "rondin",
+		"slots": [],
+		"tags": [
+			"bois"
+		],
+		"poids": 20
+	},
+	{
+		"_id": "item:gros_rondin",
+		"type": "item",
+		"nom": "Gros rondin",
+		"icon": "🪵",
+		"description": "Gros rondin de bois tout-venant, essence indifférente : la mesure du marchand.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "gros_rondin",
+		"slots": [],
+		"tags": [
+			"bois"
+		],
+		"poids": 60
+	}
+]

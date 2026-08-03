@@ -1,0 +1,831 @@
+[
+	{
+		"_id": "item:graines",
+		"type": "item",
+		"nom": "Graines",
+		"icon": "🌾",
+		"description": "Sachet de semences potagères et de simples, trié par le jardinier.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "graines",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.05
+	},
+	{
+		"_id": "item:Chou_pomme",
+		"type": "item",
+		"nom": "Chou pommé",
+		"icon": "🥬",
+		"description": "Un chou dense et serré, qui tient tout l'hiver en cave.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "legume",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 1.0,
+		"effets": {
+			"pv": 6
+		}
+	},
+	{
+		"_id": "item:Panais_de_sillon",
+		"type": "item",
+		"nom": "Panais de sillon",
+		"icon": "🥕",
+		"description": "Racine sucrée des sillons de bord de champ, meilleure après les gelées.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "legume",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.4,
+		"effets": {
+			"pv": 5
+		}
+	},
+	{
+		"_id": "item:Feves_de_carreau",
+		"type": "item",
+		"nom": "Fèves de carreau",
+		"icon": "🫘",
+		"description": "Fèves plates semées au carreau ; nourrissent longtemps le marcheur.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "legume",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.3,
+		"effets": {
+			"pv": 4,
+			"duree": 3,
+			"regen_pv": 1
+		}
+	},
+	{
+		"_id": "item:Ail_des_moines",
+		"type": "item",
+		"nom": "Ail des moines",
+		"icon": "🧄",
+		"description": "Ail de cloître, si piquant qu'on le dit capable d'assainir une plaie.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "legume",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.1,
+		"effets": {
+			"pv": 3
+		}
+	},
+	{
+		"_id": "item:Pomme_de_verger",
+		"type": "item",
+		"nom": "Pomme de verger",
+		"icon": "🍎",
+		"description": "Pomme de plein vent, dure et acide, qui se garde jusqu'au carême.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "fruit",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.2,
+		"effets": {
+			"pv": 5
+		}
+	},
+	{
+		"_id": "item:Prunelles_de_haie",
+		"type": "item",
+		"nom": "Prunelles de haie",
+		"icon": "🫐",
+		"description": "Petites prunes noires de haie vive, âpres tant qu'elles n'ont pas gelé.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "fruit",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.1,
+		"effets": {
+			"pv": 3,
+			"pm": 3
+		}
+	},
+	{
+		"_id": "item:Racine_de_mandragore",
+		"type": "item",
+		"nom": "Racine de mandragore",
+		"icon": "🌱",
+		"description": "Racine fourchue arrachée de nuit, réputée crier. Base de bien des philtres.",
+		"rarete": "peu_commun",
+		"categorie": "composant",
+		"sous_categorie": "racine",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.3,
+		"valeur": [
+			{
+				"cu": 60
+			}
+		]
+	},
+	{
+		"_id": "item:Fleur_de_souci",
+		"type": "item",
+		"nom": "Fleur de souci",
+		"icon": "🌼",
+		"description": "Fleur orange du potager, séchée en corolles pour les tisanes et les baumes.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "fleur",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.05,
+		"valeur": [
+			{
+				"cu": 6
+			}
+		]
+	},
+	{
+		"_id": "item:Capsules_de_pavot",
+		"type": "item",
+		"nom": "Capsules de pavot",
+		"icon": "🥀",
+		"description": "Têtes de pavot cueillies vertes ; leur lait endort la douleur.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "herbe",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.05,
+		"valeur": [
+			{
+				"cu": 8
+			}
+		]
+	},
+	{
+		"_id": "item:Feuilles_d_absinthe",
+		"type": "item",
+		"nom": "Feuilles d'absinthe",
+		"icon": "🍃",
+		"description": "Feuilles argentées d'une amertume tenace, chères aux distillateurs.",
+		"rarete": "commun",
+		"categorie": "composant",
+		"sous_categorie": "herbe",
+		"slots": [],
+		"tags": [
+			"plante"
+		],
+		"poids": 0.05,
+		"valeur": [
+			{
+				"cu": 6
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_chou_pomme_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Chou_pomme",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_chou_pomme_serree",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Chou_pomme",
+		"quantite_produite": 5,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_panais_de_sillon_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Panais_de_sillon",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_panais_de_sillon_serree",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Panais_de_sillon",
+		"quantite_produite": 7,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_feves_de_carreau_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Feves_de_carreau",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_feves_de_carreau_serree",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Feves_de_carreau",
+		"quantite_produite": 8,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_ail_des_moines_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Ail_des_moines",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_ail_des_moines_serree",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Ail_des_moines",
+		"quantite_produite": 6,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_pomme_de_verger_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Pomme_de_verger",
+		"quantite_produite": 3,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_pomme_de_verger_serree",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Pomme_de_verger",
+		"quantite_produite": 7,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_prunelles_de_haie_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Prunelles_de_haie",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_prunelles_de_haie_serree",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Prunelles_de_haie",
+		"quantite_produite": 6,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_racine_de_mandragore_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Racine_de_mandragore",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_racine_de_mandragore_fumee",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Racine_de_mandragore",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			},
+			{
+				"item": "item:engrais",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_fleur_de_souci_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Fleur_de_souci",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_fleur_de_souci_fumee",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Fleur_de_souci",
+		"quantite_produite": 6,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			},
+			{
+				"item": "item:engrais",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_capsules_de_pavot_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Capsules_de_pavot",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_capsules_de_pavot_fumee",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Capsules_de_pavot",
+		"quantite_produite": 5,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			},
+			{
+				"item": "item:engrais",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_feuilles_d_absinthe_semis",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Feuilles_d_absinthe",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:jardin_feuilles_d_absinthe_fumee",
+		"type": "recette",
+		"lieu_categorie": "jardinier",
+		"objet_final": "Feuilles_d_absinthe",
+		"quantite_produite": 6,
+		"matieres_premieres": [
+			{
+				"sous_categorie": "graines",
+				"quantite": 1
+			},
+			{
+				"item": "item:engrais",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "item:Tisane_de_souci",
+		"type": "item",
+		"nom": "Tisane de souci",
+		"icon": "🍵",
+		"description": "Infusion de fleurs de souci : referme les petites plaies et calme la fièvre.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1,
+		"effets": {
+			"pv": 8,
+			"duree": 4,
+			"regen_pv": 2
+		}
+	},
+	{
+		"_id": "item:Sirop_de_pavot",
+		"type": "item",
+		"nom": "Sirop de pavot",
+		"icon": "🍯",
+		"description": "Sirop épais au lait de pavot. Endort la douleur ; à doser d'une main sûre.",
+		"rarete": "peu_commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"effets": {
+			"pv": 10,
+			"duree": 6,
+			"regen_pv": 4
+		}
+	},
+	{
+		"_id": "item:Emplatre_d_ail",
+		"type": "item",
+		"nom": "Emplâtre d'ail",
+		"icon": "🧄",
+		"description": "Cataplasme d'ail pilé dans la graisse, appliqué brûlant sur la blessure.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"effets": {
+			"pv": 14
+		}
+	},
+	{
+		"_id": "item:Compote_fortifiante",
+		"type": "item",
+		"nom": "Compote fortifiante",
+		"icon": "🥣",
+		"description": "Fruits du verger longuement cuits : un repas de convalescent qui tient au corps.",
+		"rarete": "peu_commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.4,
+		"effets": {
+			"pv": 20,
+			"duree": 8,
+			"buffs": {
+				"R": 5
+			}
+		}
+	},
+	{
+		"_id": "item:Tisane_du_marcheur",
+		"type": "item",
+		"nom": "Tisane du marcheur",
+		"icon": "🫖",
+		"description": "Amère et brûlante, elle délie les jambes pour une bonne partie du chemin.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1,
+		"effets": {
+			"duree": 6,
+			"buffs": {
+				"V": 1
+			}
+		}
+	},
+	{
+		"_id": "item:Extrait_de_mandragore",
+		"type": "item",
+		"nom": "Extrait de mandragore",
+		"icon": "⚗️",
+		"description": "Suc de racine réduit à froid, matière première des philtres du sommeil.",
+		"rarete": "peu_commun",
+		"categorie": "composant",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.1
+	},
+	{
+		"_id": "item:Philtre_de_songe",
+		"type": "item",
+		"nom": "Philtre de songe",
+		"icon": "🌙",
+		"description": "Le buveur dort les yeux ouverts et rien ne semble plus pouvoir l'atteindre.",
+		"rarete": "peu_commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"effets": {
+			"duree": 8,
+			"buffs": {
+				"Vol": 10
+			}
+		}
+	},
+	{
+		"_id": "item:Absinthe_verte",
+		"type": "item",
+		"nom": "Absinthe verte",
+		"icon": "🍸",
+		"description": "Distillat vert pâle, amer à faire pleurer, qui rouvre les canaux de la magie.",
+		"rarete": "peu_commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"effets": {
+			"pm": 25,
+			"duree": 4,
+			"regen_pm": 3
+		}
+	},
+	{
+		"_id": "item:Vinaigre_des_quatre_voleurs",
+		"type": "item",
+		"nom": "Vinaigre des quatre voleurs",
+		"icon": "🫙",
+		"description": "Macération d'ail et d'absinthe dont on se frotte avant d'entrer chez les pestiférés.",
+		"rarete": "peu_commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.3,
+		"effets": {
+			"pv": 12,
+			"duree": 6,
+			"regen_pv": 2
+		}
+	},
+	{
+		"_id": "item:Eau_de_prunelle",
+		"type": "item",
+		"nom": "Eau de prunelle",
+		"icon": "🥃",
+		"description": "Eau-de-vie de prunelles, tirée au bain-marie sous l'œil de l'alchimiste.",
+		"rarete": "commun",
+		"categorie": "consommable",
+		"sous_categorie": "",
+		"slots": [],
+		"tags": [],
+		"poids": 0.2,
+		"effets": {
+			"pm": 15,
+			"duree": 5,
+			"regen_pm": 2
+		}
+	},
+	{
+		"_id": "recette:apothicaire_tisane_de_souci",
+		"type": "recette",
+		"lieu_categorie": "apothicairerie",
+		"objet_final": "Tisane_de_souci",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Fleur_de_souci",
+				"quantite": 2
+			},
+			{
+				"item": "item:Herbes_medicinales",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:apothicaire_sirop_de_pavot",
+		"type": "recette",
+		"lieu_categorie": "apothicairerie",
+		"objet_final": "Sirop_de_pavot",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Capsules_de_pavot",
+				"quantite": 2
+			},
+			{
+				"item": "item:sirop_de_seve",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:apothicaire_emplatre_d_ail",
+		"type": "recette",
+		"lieu_categorie": "apothicairerie",
+		"objet_final": "Emplatre_d_ail",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Ail_des_moines",
+				"quantite": 2
+			},
+			{
+				"sous_categorie": "graisse",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:apothicaire_compote_fortifiante",
+		"type": "recette",
+		"lieu_categorie": "apothicairerie",
+		"objet_final": "Compote_fortifiante",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Pomme_de_verger",
+				"quantite": 2
+			},
+			{
+				"item": "item:Prunelles_de_haie",
+				"quantite": 2
+			}
+		]
+	},
+	{
+		"_id": "recette:apothicaire_tisane_du_marcheur",
+		"type": "recette",
+		"lieu_categorie": "apothicairerie",
+		"objet_final": "Tisane_du_marcheur",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Feuilles_d_absinthe",
+				"quantite": 1
+			},
+			{
+				"item": "item:Fleur_de_souci",
+				"quantite": 1
+			},
+			{
+				"item": "item:Herbes_medicinales",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:alchimie_extrait_de_mandragore",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Extrait_de_mandragore",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Racine_de_mandragore",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:alchimie_philtre_de_songe",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Philtre_de_songe",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Capsules_de_pavot",
+				"quantite": 2
+			},
+			{
+				"item": "item:Extrait_de_mandragore",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:alchimie_absinthe_verte",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Absinthe_verte",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Feuilles_d_absinthe",
+				"quantite": 3
+			},
+			{
+				"item": "item:Reactif_brut",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:alchimie_vinaigre_quatre_voleurs",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Vinaigre_des_quatre_voleurs",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Ail_des_moines",
+				"quantite": 3
+			},
+			{
+				"item": "item:Feuilles_d_absinthe",
+				"quantite": 1
+			}
+		]
+	},
+	{
+		"_id": "recette:alchimie_eau_de_prunelle",
+		"type": "recette",
+		"lieu_categorie": "laboratoire_d_alchimie",
+		"objet_final": "Eau_de_prunelle",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:Prunelles_de_haie",
+				"quantite": 4
+			},
+			{
+				"item": "item:Reactif_brut",
+				"quantite": 1
+			}
+		]
+	}
+]

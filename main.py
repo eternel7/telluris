@@ -777,6 +777,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# La compagnie du joueur (badge ✦ sur les cartes de compagnons engagés) : servie
 			# ici, sinon elle n'apparaîtrait qu'après ouverture du panneau 👥.
 			"compagnie": character.get("compagnie"),
+			# Pastille verte du bouton 👥 : un compagnon a-t-il des points d'attribut à
+			# répartir ? Servie ici pour la même raison que la compagnie — sans elle, il
+			# faudrait ouvrir le panneau pour apprendre qu'il y a quelque chose à y faire.
+			"compagnons_points": recrutement_util.compagnons_a_repartir(character, get_doc),
 			# Compagnons partis d'eux-mêmes pendant l'absence (affinité sous le seuil) : toast.
 			"compagnons_partis": [
 				f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in compagnons_partis

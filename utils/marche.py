@@ -654,12 +654,22 @@ def relations_lieux_payload(character: dict) -> list[dict]:
 # ── Résolution objet_final → item ───────────────────────────────────────────────
 # Quelques produits de recette réutilisent un item legacy (cf. add_item.json) ; les
 # autres résolvent vers `item:<objet_final>`.
+#
+# ⚠️ La table sert AUSSI aux clés MATIÈRE (via `matiere_item_id`) : une sous-catégorie
+# consommée par une recette y est valorisée. Une clé qui ne trouve pas son doc est
+# valorisée à **1 cu** en silence (doc absent ⇒ poids 0 ⇒ plancher) — aucune erreur,
+# aucun symptôme, seulement un prix faux propagé à tout ce qui en dérive par la marge
+# de transformation. D'où l'entrée à ajouter DÈS qu'un doc générique porte un autre id
+# que `item:<sous_categorie>`.
 _OBJET_FINAL_ITEM_ID: dict[str, str] = {
 	"bougie": "item:Bougie",
 	"encre": "item:Encre",
 	"poudre_d_os": "item:Poudre_os",
 	"viande_sechee": "item:Viande_sechee",
 	"plume_a_ecrire": "item:Plume_d_oie",
+	# Matières consommées dont le doc générique existe sous un id capitalisé.
+	"chiffon": "item:Chiffon",
+	"reactif_brut": "item:Reactif_brut",
 }
 
 

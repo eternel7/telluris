@@ -98,6 +98,10 @@ def _recrue_view(character: dict, av: dict) -> dict:
 			av, recrutement.affinite_de(character, av["_id"])),
 		"affinite": affinite_brute,
 		"permanent": bool(av.get("permanent")),
+		# Points d'attribut non dépensés : le client en dérive la pastille verte du bouton
+		# 👥 Groupe (`_majPointsCompagnons`). Servi ici parce que ce payload est la SEULE vue
+		# qui liste tous les compagnons à la fois — la fiche d'un compagnon ne dit rien des autres.
+		"attribute_points": av.get("attribute_points", 0),
 		"deja_connu": av["_id"] in (character.get("compagnons_connus", {}) or {}),
 		# Vitaux : la carte les affiche (barres + ligne PV/PM) pour un compagnon comme pour une
 		# recrue — son doc est la source, ses max se recalculent comme ceux du joueur.

@@ -361,6 +361,35 @@ def test_un_id_perime_ne_retient_plus_une_place(monde):
 	assert ok
 
 
+def test_points_a_repartir_signale_un_compagnon(monde):
+	"""Pastille du bouton 👥 : elle s'allume dès qu'UN compagnon actif a des points."""
+	_embauche(monde, "aventurier:a")
+	b = _embauche(monde, "aventurier:b")
+	c = perso(groupe=["aventurier:a", "aventurier:b"])
+	assert not recrutement.compagnons_a_repartir(c)
+	b["attribute_points"] = 3
+	assert recrutement.compagnons_a_repartir(c)
+
+
+def test_points_a_repartir_ignore_un_ancien_compagnon(monde):
+	"""Même filtre que le reste du groupe : un doc `parti` n'est plus des nôtres, ses points
+	ne doivent pas allumer une pastille que rien ne permet d'éteindre."""
+	av = _embauche(monde, "aventurier:a", attribute_points=5)
+	c = perso(groupe=[av["_id"]])
+	assert recrutement.compagnons_a_repartir(c)
+	av["statut"] = "parti"
+	assert not recrutement.compagnons_a_repartir(c)
+
+
+def test_points_a_repartir_reutilise_les_docs_deja_charges(monde):
+	"""`compagnons` = docs déjà en main : aucune relecture (mêmes précautions que partager_xp)."""
+	av = recrue("aventurier:a", statut="embauche", embauche_par="character:u_1")
+	av["attribute_points"] = 1
+	c = perso(groupe=[av["_id"]])           # le doc n'est PAS en base : sans la liste, rien
+	assert not recrutement.compagnons_a_repartir(c)
+	assert recrutement.compagnons_a_repartir(c, compagnons=[av])
+
+
 def test_embauche_refusee_si_plus_offerte(monde):
 	ok, _ = recrutement.embaucher(perso(), recrue(statut="embauche"))
 	assert not ok

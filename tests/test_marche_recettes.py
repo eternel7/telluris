@@ -30,6 +30,23 @@ def test_matiere_item_id_override_legacy():
     assert matiere_item_id("bougie") == "item:Bougie"
 
 
+def test_matiere_item_id_matieres_au_doc_capitalise():
+    # `chiffon` et `reactif_brut` sont CONSOMMÉS par des recettes (scriptorium,
+    # laboratoire d'alchimie) et leur doc générique porte un id capitalisé. Sans
+    # l'override, `get_doc` rend None et la matière est valorisée au plancher de
+    # 1 cu EN SILENCE — prix faux propagé à tout ce qui en dérive.
+    assert matiere_item_id("chiffon") == "item:Chiffon"
+    assert matiere_item_id("reactif_brut") == "item:Reactif_brut"
+
+
+def test_matiere_item_id_bois_reste_derive():
+    # Les quatre calibres de bois n'ont PAS d'override : leur doc générique est
+    # `item:<sous_categorie>` (cf. dev/gen_matieres_generiques_bois.py), les docs
+    # par essence (item:Branche_de_Chene…) ne sont pas des génériques.
+    for sc in ("branche", "petit_rondin", "rondin", "gros_rondin"):
+        assert matiere_item_id(sc) == "item:" + sc
+
+
 # ── Dépeçage : loot de matière ciblée par clé item-ref (sang de démon) ──────────
 
 def test_depecage_demon_donne_sang_demon_seche():

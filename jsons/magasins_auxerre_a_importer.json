@@ -1,0 +1,1367 @@
+[
+	{
+		"_id": "lieu:l_etabli_du_faubourg",
+		"type": "lieu",
+		"label": "L'Établi du Faubourg",
+		"image": "atelier_d_artisan_europe01.png",
+		"categorie": "atelier_d_artisan",
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_d_artisan"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:atelier_d_artisan02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					34,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:l_etabli_du_faubourg",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_d_artisan",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_meche_de_sainte_colombe",
+		"type": "lieu",
+		"label": "La Mèche de Sainte-Colombe",
+		"image": "atelier_de_cirier_europe01.png",
+		"categorie": "atelier_de_cirier",
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_cirier"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:atelier_de_cirier01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					46,
+					16
+				]
+			},
+			{
+				"lieu": "lieu:la_meche_de_sainte_colombe",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_de_cirier",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_cierge_d_auxerre",
+		"type": "lieu",
+		"label": "Le Cierge d'Auxerre",
+		"image": "atelier_de_cirier_europe02.png",
+		"categorie": "atelier_de_cirier",
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_cirier"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:atelier_de_cirier02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					30,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:le_cierge_d_auxerre",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_de_cirier",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_plume_et_l_encoche",
+		"type": "lieu",
+		"label": "La Plume et l'Encoche",
+		"image": "atelier_de_l_empenneur_europe01.png",
+		"categorie": "atelier_de_l_empenneur",
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_l_empenneur"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:atelier_de_l_empenneur01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					30,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:la_plume_et_l_encoche",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_de_l_empenneur",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_empennage_du_rempart",
+		"type": "lieu",
+		"label": "L'Empennage du Rempart",
+		"image": "atelier_de_l_empenneur_europe02.png",
+		"categorie": "atelier_de_l_empenneur",
+		"pnj": [
+			{
+				"character": "pnj:marchand_atelier_de_l_empenneur"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:atelier_de_l_empenneur02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					29,
+					11
+				]
+			},
+			{
+				"lieu": "lieu:l_empennage_du_rempart",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "atelier_de_l_empenneur",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_harnais_de_l_yonne",
+		"type": "lieu",
+		"label": "Le Harnais de l'Yonne",
+		"image": "bourrellerie_europe01.png",
+		"categorie": "bourrellerie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_bourrellerie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:bourrellerie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					31,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:le_harnais_de_l_yonne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "bourrellerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_bricole_et_le_collier",
+		"type": "lieu",
+		"label": "La Bricole et le Collier",
+		"image": "bourrellerie_europe02.png",
+		"categorie": "bourrellerie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_bourrellerie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:bourrellerie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					43,
+					18
+				]
+			},
+			{
+				"lieu": "lieu:la_bricole_et_le_collier",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "bourrellerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_corde_de_boyau",
+		"type": "lieu",
+		"label": "La Corde de Boyau",
+		"image": "boyauderie_europe01.png",
+		"categorie": "boyauderie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_boyauderie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:boyauderie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					44,
+					28
+				]
+			},
+			{
+				"lieu": "lieu:la_corde_de_boyau",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "boyauderie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_fil_du_tripier",
+		"type": "lieu",
+		"label": "Le Fil du Tripier",
+		"image": "boyauderie_europe02.png",
+		"categorie": "boyauderie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_boyauderie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:boyauderie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					30,
+					11
+				]
+			},
+			{
+				"lieu": "lieu:le_fil_du_tripier",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "boyauderie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_soie_et_le_crin",
+		"type": "lieu",
+		"label": "La Soie et le Crin",
+		"image": "brosserie_europe01.png",
+		"categorie": "brosserie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_brosserie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:brosserie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					32,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:la_soie_et_le_crin",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "brosserie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_balai_de_saint_germain",
+		"type": "lieu",
+		"label": "Le Balai de Saint-Germain",
+		"image": "brosserie_europe02.png",
+		"categorie": "brosserie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_brosserie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:brosserie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					48,
+					29
+				]
+			},
+			{
+				"lieu": "lieu:le_balai_de_saint_germain",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "brosserie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_chanvre_tresse",
+		"type": "lieu",
+		"label": "Le Chanvre Tressé",
+		"image": "corderie_europe01.png",
+		"categorie": "corderie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_corderie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:corderie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					55,
+					36
+				]
+			},
+			{
+				"lieu": "lieu:le_chanvre_tresse",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "corderie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:les_cables_de_l_yonne",
+		"type": "lieu",
+		"label": "Les Câbles de l'Yonne",
+		"image": "corderie_europe02.png",
+		"categorie": "corderie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_corderie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:corderie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					28,
+					11
+				]
+			},
+			{
+				"lieu": "lieu:les_cables_de_l_yonne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "corderie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_soulier_de_saint_crepin",
+		"type": "lieu",
+		"label": "Le Soulier de Saint-Crépin",
+		"image": "cordonnerie_europe01.png",
+		"categorie": "cordonnerie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_cordonnerie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:cordonnerie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					27,
+					30
+				]
+			},
+			{
+				"lieu": "lieu:le_soulier_de_saint_crepin",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cordonnerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_semelle_du_pelerin",
+		"type": "lieu",
+		"label": "La Semelle du Pèlerin",
+		"image": "cordonnerie_europe02.png",
+		"categorie": "cordonnerie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_cordonnerie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:cordonnerie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					47,
+					29
+				]
+			},
+			{
+				"lieu": "lieu:la_semelle_du_pelerin",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cordonnerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_marmite_du_guet",
+		"type": "lieu",
+		"label": "La Marmite du Guet",
+		"image": "epicerie_europe01.png",
+		"categorie": "cuisine",
+		"pnj": [
+			{
+				"character": "pnj:marchand_cuisine"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:cuisine02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					30,
+					28
+				]
+			},
+			{
+				"lieu": "lieu:la_marmite_du_guet",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "cuisine",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_haloir_des_remparts",
+		"type": "lieu",
+		"label": "Le Hâloir des Remparts",
+		"image": "fumoir_europe02.png",
+		"categorie": "fumoir",
+		"pnj": [
+			{
+				"character": "pnj:marchand_fumoir"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:fumoir02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					29,
+					24
+				]
+			},
+			{
+				"lieu": "lieu:le_haloir_des_remparts",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "fumoir",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_clos_des_simples",
+		"type": "lieu",
+		"label": "Le Clos des Simples",
+		"image": "jardinier_europe01.png",
+		"categorie": "jardinier",
+		"pnj": [
+			{
+				"character": "pnj:marchand_jardinier"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:jardinier01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					31,
+					16
+				]
+			},
+			{
+				"lieu": "lieu:le_clos_des_simples",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "jardinier",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_jardin_de_saint_germain",
+		"type": "lieu",
+		"label": "Le Jardin de Saint-Germain",
+		"image": "jardinier_europe02.png",
+		"categorie": "jardinier",
+		"pnj": [
+			{
+				"character": "pnj:marchand_jardinier"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:jardinier02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					28,
+					13
+				]
+			},
+			{
+				"lieu": "lieu:le_jardin_de_saint_germain",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "jardinier",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_vielle_et_le_luth",
+		"type": "lieu",
+		"label": "La Vielle et le Luth",
+		"image": "lutherie_europe01.png",
+		"categorie": "lutherie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_lutherie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:lutherie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					26,
+					25
+				]
+			},
+			{
+				"lieu": "lieu:la_vielle_et_le_luth",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "lutherie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:les_cordes_d_autessiodurum",
+		"type": "lieu",
+		"label": "Les Cordes d'Autessiodurum",
+		"image": "lutherie_europe02.png",
+		"categorie": "lutherie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_lutherie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:lutherie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					39,
+					22
+				]
+			},
+			{
+				"lieu": "lieu:les_cordes_d_autessiodurum",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "lutherie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_gibeciere_d_auxerre",
+		"type": "lieu",
+		"label": "La Gibecière d'Auxerre",
+		"image": "maroquinerie_europe01.png",
+		"categorie": "maroquinerie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_maroquinerie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:maroquinerie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					44,
+					16
+				]
+			},
+			{
+				"lieu": "lieu:la_gibeciere_d_auxerre",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "maroquinerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_suaire_de_cendres",
+		"type": "lieu",
+		"label": "Le Suaire de Cendres",
+		"image": "necromancie_europe01.png",
+		"categorie": "necromancie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_necromancie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:necromancie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					30,
+					14
+				]
+			},
+			{
+				"lieu": "lieu:le_suaire_de_cendres",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "necromancie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_ossuaire_muet",
+		"type": "lieu",
+		"label": "L'Ossuaire Muet",
+		"image": "necromancie_europe02.png",
+		"categorie": "necromancie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_necromancie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:necromancie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					34,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:l_ossuaire_muet",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "necromancie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_duvet_d_oie",
+		"type": "lieu",
+		"label": "Le Duvet d'Oie",
+		"image": "plumasserie_europe01.png",
+		"categorie": "plumasserie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_plumasserie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:plumasserie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					46,
+					16
+				]
+			},
+			{
+				"lieu": "lieu:le_duvet_d_oie",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "plumasserie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_panache_de_l_yonne",
+		"type": "lieu",
+		"label": "Le Panache de l'Yonne",
+		"image": "plumasserie_europe02.png",
+		"categorie": "plumasserie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_plumasserie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:plumasserie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					30,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:le_panache_de_l_yonne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "plumasserie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_saloir_du_pont",
+		"type": "lieu",
+		"label": "Le Saloir du Pont",
+		"image": "salaison_europe01.png",
+		"categorie": "salaison",
+		"pnj": [
+			{
+				"character": "pnj:marchand_salaison"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:salaison02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					30,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:le_saloir_du_pont",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "salaison",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_cuve_de_cendre",
+		"type": "lieu",
+		"label": "La Cuve de Cendre",
+		"image": "savonnerie_europe01.png",
+		"categorie": "savonnerie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_savonnerie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:savonnerie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					29,
+					11
+				]
+			},
+			{
+				"lieu": "lieu:la_cuve_de_cendre",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "savonnerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_savon_de_saint_etienne",
+		"type": "lieu",
+		"label": "Le Savon de Saint-Étienne",
+		"image": "savonnerie_europe02.png",
+		"categorie": "savonnerie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_savonnerie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:savonnerie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					31,
+					17
+				]
+			},
+			{
+				"lieu": "lieu:le_savon_de_saint_etienne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "savonnerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:l_ivoire_et_le_buis",
+		"type": "lieu",
+		"label": "L'Ivoire et le Buis",
+		"image": "tabletterie_europe02.png",
+		"categorie": "tabletterie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_tabletterie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:tabletterie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					43,
+					18
+				]
+			},
+			{
+				"lieu": "lieu:l_ivoire_et_le_buis",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "tabletterie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_tan_de_l_yonne",
+		"type": "lieu",
+		"label": "Le Tan de l'Yonne",
+		"image": "tannerie_europe01.png",
+		"categorie": "tannerie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_tannerie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:tannerie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					44,
+					28
+				]
+			},
+			{
+				"lieu": "lieu:le_tan_de_l_yonne",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "tannerie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_trophee_de_chasse",
+		"type": "lieu",
+		"label": "Le Trophée de Chasse",
+		"image": "taxidermie_europe01.png",
+		"categorie": "taxidermie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_taxidermie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:taxidermie01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					30,
+					11
+				]
+			},
+			{
+				"lieu": "lieu:le_trophee_de_chasse",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "taxidermie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:les_yeux_de_verre",
+		"type": "lieu",
+		"label": "Les Yeux de Verre",
+		"image": "taxidermie_europe02.png",
+		"categorie": "taxidermie",
+		"pnj": [
+			{
+				"character": "pnj:marchand_taxidermie"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:taxidermie02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					32,
+					26
+				]
+			},
+			{
+				"lieu": "lieu:les_yeux_de_verre",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "taxidermie",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:la_navette_d_auxerre",
+		"type": "lieu",
+		"label": "La Navette d'Auxerre",
+		"image": "tissage_europe01.png",
+		"categorie": "tissage",
+		"pnj": [
+			{
+				"character": "pnj:marchand_tissage"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:tissage01_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					48,
+					29
+				]
+			},
+			{
+				"lieu": "lieu:la_navette_d_auxerre",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "tissage",
+			"status": "ouvert"
+		}
+	},
+	{
+		"_id": "lieu:le_metier_de_haute_lisse",
+		"type": "lieu",
+		"label": "Le Métier de Haute Lisse",
+		"image": "tissage_europe02.png",
+		"categorie": "tissage",
+		"pnj": [
+			{
+				"character": "pnj:marchand_tissage"
+			}
+		],
+		"lieu_parent": "lieu:auxerre",
+		"stock_matieres": {},
+		"stock_vente": []
+	},
+	{
+		"_id": "link:tissage02_to_auxerre",
+		"type": "connection",
+		"nodes": [
+			{
+				"lieu": "lieu:auxerre",
+				"pos": [
+					55,
+					36
+				]
+			},
+			{
+				"lieu": "lieu:le_metier_de_haute_lisse",
+				"pos": [
+					0,
+					0
+				]
+			}
+		],
+		"metadata": {
+			"type": "tissage",
+			"status": "ouvert"
+		}
+	}
+]
