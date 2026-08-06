@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--danger: #c84b4b;
+			--success: #4bc87a;
+			--text: #fff;
+			--muted: #9aa3b2;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+		header a:hover { color: var(--accent); }
+		.main { width: 100%; max-width: 1200px; padding: 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-title {
+			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		code { color: var(--accent2); }
+
+		.run-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+		select {
+			flex: 1 1 320px; min-width: 220px;
+			padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text);
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.03em; cursor: pointer;
+		}
+		select:focus { outline: none; border-color: var(--accent); }
+
+		.btn {
+			display: inline-flex; align-items: center; gap: 8px;
+			padding: 10px 18px; border-radius: 6px;
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+			cursor: pointer; transition: all 0.2s;
+			border: 1px solid var(--accent); background: rgba(200,168,75,0.1); color: var(--accent);
+		}
+		.btn:hover:not(:disabled) { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+		.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+		.btn.danger { border-color: var(--danger); background: rgba(200,75,75,0.1); color: var(--danger); }
+		.btn.danger:hover:not(:disabled) { background: rgba(200,75,75,0.22); }
+		.btn.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
+		.btn.secondary:hover:not(:disabled) { background: rgba(75,143,200,0.22); }
+
+		/* Fiche de l'outil sélectionné : ce qu'il FAIT et ce qu'il ÉCRIT, avant de lancer. */
+		.outil-info { margin-top: 12px; font-size: 0.78rem; line-height: 1.55; color: var(--muted); }
+		.outil-ecrit {
+			display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 4px;
+			border: 1px solid var(--border); background: #0f131b; color: var(--accent2);
+		}
+		.outil-ecrit.danger { border-color: var(--danger); color: var(--danger); }
+
+		.status { font-size: 0.78rem; margin-top: 12px; min-height: 1.2em; color: var(--muted); }
+		.status.ok { color: var(--success); }
+		.status.err { color: var(--danger); }
+		.status.run { color: var(--accent); }
+
+		/* Le « notepad » : sortie brute, police fixe, fond noir, défilement propre.
+		   `white-space: pre-wrap` — une ligne longue s'enroule au lieu d'imposer un
+		   défilement horizontal à tout le bloc. */
+		#log {
+			height: 55vh; min-height: 260px; overflow: auto;
+			background: #07090d; border: 1px solid var(--border); border-radius: 6px;
+			padding: 12px; font-family: 'Share Tech Mono', monospace;
+			font-size: 0.76rem; line-height: 1.45; color: #cfe3d0;
+			white-space: pre-wrap; word-break: break-word;
+		}
+		#log:empty::before { content: 'Aucune sortie — choisissez un outil et cliquez ▶ Lancer.'; color: var(--muted); }
+		.log-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+		.log-bar label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.74rem; color: var(--muted); cursor: pointer; }
+		.log-bar input { accent-color: var(--accent); }
+		.log-title { flex: 1; font-size: 0.74rem; color: var(--muted); }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>🛠 Outils de développement — administration</h1>
+		<a href="/admin">← Retour à l'administration</a>
+	</header>
+	<div class="main">
+		<div class="card">
+			<div class="card-title">Lancer un outil de <code>dev/</code></div>
+			<div class="card-desc">
+				Les scripts tournent <strong>dans le conteneur</strong>, à la racine du dépôt, et
+				leur sortie s'affiche ci-dessous en direct. <strong>Un seul à la fois.</strong>
+				La liste est une <strong>liste blanche</strong> écrite dans
+				<code>utils/dev_tools.py</code> : rien d'autre ne peut être lancé d'ici.
+			</div>
+			<div class="run-row">
+				<select id="outil-select">
+					{% for o in outils %}<option value="{{ o.id }}">{{ o.label }}</option>{% endfor %}
+				</select>
+				<button class="btn" type="button" id="run-btn">▶ Lancer</button>
+				<button class="btn danger" type="button" id="stop-btn" disabled>✕ Arrêter</button>
+			</div>
+			<div class="outil-info" id="outil-info"></div>
+			<div class="status" id="run-status"></div>
+		</div>
+
+		<div class="card">
+			<div class="log-bar">
+				<span class="log-title" id="log-title">Journal</span>
+				<label><input type="checkbox" id="suivre" checked> Suivre la fin (tail)</label>
+				<button class="btn secondary" type="button" id="clear-btn" style="padding:5px 12px;font-size:0.74rem;">Effacer l'affichage</button>
+			</div>
+			<pre id="log"></pre>
+		</div>
+	</div>
+
+<script>
+// Catalogue injecté par le serveur — SANS argv (le client n'a aucune raison de connaître la
+// ligne de commande, et la publier inviterait à la renvoyer).
+const OUTILS = {{ outils | tojson | safe }};
+const PAR_ID = Object.fromEntries(OUTILS.map(o => [o.id, o]));
+const $ = id => document.getElementById(id);
+
+let offset = 0;        // index ABSOLU de la prochaine ligne attendue
+let timer = null;      // scrutation en cours
+const PERIODE = 700;   // ms
+
+function setStatus(msg, kind) {
+	$('run-status').textContent = msg;
+	$('run-status').className = 'status' + (kind ? ' ' + kind : '');
+}
+
+// ── Fiche de l'outil sélectionné ───────────────────────────────────────────
+function majInfo() {
+	const o = PAR_ID[$('outil-select').value];
+	if (!o) { $('outil-info').textContent = ''; return; }
+	$('outil-info').innerHTML = '';
+	const desc = document.createElement('div');
+	desc.textContent = o.description || '';
+	const ecrit = document.createElement('span');
+	ecrit.className = 'outil-ecrit' + (o.danger ? ' danger' : '');
+	ecrit.textContent = o.ecrit || '';
+	$('outil-info').append(desc, ecrit);
+}
+
+// ── Écriture dans le notepad ───────────────────────────────────────────────
+// ⚠️ `textContent` et jamais `innerHTML` : ce qui défile ici est la sortie BRUTE d'un
+// script (donc des chemins, du JSON, des messages d'erreur). L'interpréter comme du HTML
+// n'apporterait rien et ouvrirait une injection par un simple nom de fichier.
+function ecrire(lignes) {
+	if (!lignes.length) return;
+	const log = $('log');
+	// « Suivre » ne doit pas ARRACHER le défilement à qui est remonté lire : on ne recolle
+	// au bas que si on y était déjà (à quelques pixels près), comportement d'un vrai tail.
+	const colle = $('suivre').checked
+		&& (log.scrollHeight - log.scrollTop - log.clientHeight) < 40;
+	log.textContent += lignes.join('\n') + '\n';
+	if (colle) log.scrollTop = log.scrollHeight;
+}
+
+// ── Scrutation ─────────────────────────────────────────────────────────────
+async function tirerJournal() {
+	try {
+		const res = await fetch('/admin/dev-tools/log?offset=' + offset);
+		if (!res.ok) { arreterScrutation(); setStatus('Erreur de lecture du journal : ' + res.status, 'err'); return; }
+		const data = await res.json();
+		if (!data.actif) { arreterScrutation(); return; }
+		if (data.perdu) ecrire(['[… ' + data.perdu + ' ligne(s) perdue(s) : tampon plein …]']);
+		ecrire(data.lignes || []);
+		offset = data.offset;
+		$('log-title').textContent = 'Journal — ' + (data.label || data.outil || '');
+		if (data.fini) {
+			arreterScrutation();
+			const ok = data.code === 0;
+			setStatus(ok ? '✓ Terminé (code 0).' : '✗ Terminé avec le code ' + data.code + '.', ok ? 'ok' : 'err');
+			majBoutons(false);
+		}
+	} catch (e) {
+		arreterScrutation();
+		setStatus('Erreur réseau : ' + e.message, 'err');
+		majBoutons(false);
+	}
+}
+
+function demarrerScrutation() {
+	if (timer) return;
+	timer = setInterval(tirerJournal, PERIODE);
+	tirerJournal();   // première passe tout de suite, sans attendre la période
+}
+
+function arreterScrutation() {
+	if (timer) { clearInterval(timer); timer = null; }
+}
+
+function majBoutons(enCours) {
+	$('run-btn').disabled = enCours;
+	$('stop-btn').disabled = !enCours;
+	$('outil-select').disabled = enCours;
+}
+
+// ── Lancement ──────────────────────────────────────────────────────────────
+async function lancer() {
+	const id = $('outil-select').value;
+	const o = PAR_ID[id];
+	if (!o) return;
+	// Un outil qui écrit en base demande un oui explicite : le sélecteur seul ne suffit pas.
+	if (o.danger && !confirm('« ' + o.label + " »\n\n" + (o.ecrit || '')
+			+ "\n\nLancer quand même ?")) return;
+	majBoutons(true);
+	setStatus('Lancement…', 'run');
+	try {
+		const res = await fetch('/admin/dev-tools/lancer', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ outil: id }),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) {
+			setStatus('Échec : ' + (data.detail || res.status), 'err');
+			majBoutons(false);
+			return;
+		}
+		// Nouveau run = nouveau journal : on repart de l'offset 0 et on vide l'affichage,
+		// sinon la sortie précédente se lirait comme le début de celle-ci.
+		offset = 0;
+		$('log').textContent = '';
+		setStatus('En cours — ' + data.label, 'run');
+		demarrerScrutation();
+	} catch (e) {
+		setStatus('Erreur réseau : ' + e.message, 'err');
+		majBoutons(false);
+	}
+}
+
+async function arreter() {
+	$('stop-btn').disabled = true;
+	setStatus('Arrêt demandé…', 'run');
+	try { await fetch('/admin/dev-tools/arreter', { method: 'POST' }); }
+	catch (e) { setStatus('Erreur réseau : ' + e.message, 'err'); }
+	// On NE remet pas les boutons ici : c'est la scrutation qui verra `fini` et conclura,
+	// avec le vrai code de sortie — un SIGTERM n'est pas instantané.
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+$('outil-select').addEventListener('change', majInfo);
+$('run-btn').addEventListener('click', lancer);
+$('stop-btn').addEventListener('click', arreter);
+$('clear-btn').addEventListener('click', () => { $('log').textContent = ''; });
+majInfo();
+
+// Le tampon vit dans le SERVEUR, pas dans la page : un rechargement (ou un second onglet)
+// retrouve le run en cours et reprend le fil depuis le début. C'est le principal avantage
+// de la scrutation par offset sur un flux ouvert.
+(async () => {
+	try {
+		const res = await fetch('/admin/dev-tools/log?offset=0');
+		if (!res.ok) return;
+		const data = await res.json();
+		if (!data.actif) return;
+		ecrire(data.lignes || []);
+		offset = data.offset;
+		$('log-title').textContent = 'Journal — ' + (data.label || data.outil || '');
+		if (data.fini) {
+			const ok = data.code === 0;
+			setStatus(ok ? '✓ Terminé (code 0).' : '✗ Terminé avec le code ' + data.code + '.', ok ? 'ok' : 'err');
+		} else {
+			const sel = $('outil-select');
+			if (data.outil && PAR_ID[data.outil]) { sel.value = data.outil; majInfo(); }
+			majBoutons(true);
+			setStatus('En cours — ' + (data.label || ''), 'run');
+			demarrerScrutation();
+		}
+	} catch (e) { /* page ouverte hors ligne : rien à reprendre */ }
+})();
+</script>
+</body>
+</html>

@@ -40,6 +40,7 @@ from utils import escorte as escorte_util
 from utils import fiche as fiche_util
 from utils import animations as animations_util
 from utils import lint_dialogues
+from utils import dev_tools
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload, lieu_recettes
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
 from models import character_stats
@@ -999,3 +1000,58 @@ def admin_lint_dialogues(
 	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
 		raise HTTPException(status_code=403, detail="Admin only")
 	return lint_dialogues.analyser(payload)
+
+
+# ── Outils de dev/ ───────────────────────────────────────────────────────────
+# Écran « Outils de développement » : lancer un script de `dev/` et suivre sa sortie en
+# direct. ⚠️ Le client n'envoie qu'un `id` du catalogue (`utils/dev_tools`) — jamais un
+# chemin ni une commande : cf. la liste blanche, seule chose qui sépare cet écran d'une
+# exécution de code arbitraire derrière un cookie admin.
+
+@app.get("/admin/dev-tools", response_class=HTMLResponse)
+def admin_dev_tools(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_dev_tools.html",
+		context={"title": "Outils de développement", "outils": dev_tools.catalogue_payload()},
+	)
+
+
+@app.post("/admin/dev-tools/lancer")
+def admin_dev_tools_lancer(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: dict = Body(...),
+):
+	"""Démarre un outil du catalogue. 409 si un autre tourne encore (un seul run à la fois :
+	deux générateurs écrivent volontiers le même fichier)."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	run, erreur = dev_tools.lancer(str(payload.get("outil", "")))
+	if erreur:
+		raise HTTPException(status_code=erreur[0], detail=erreur[1])
+	return {"run_id": run["run_id"], "label": run["label"], "fini": run["fini"]}
+
+
+@app.get("/admin/dev-tools/log")
+def admin_dev_tools_log(
+	current_user: Annotated[User, Depends(get_current_user)],
+	offset: int = Query(0),
+):
+	"""Tail : les lignes à partir d'`offset` (index absolu), et l'offset suivant à renvoyer.
+
+	Scrutation plutôt que SSE — le client réattaque avec l'offset qu'on lui a donné, donc une
+	requête perdue ne troue pas le journal et un rechargement de page reprend le fil."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	return dev_tools.journal(offset)
+
+
+@app.post("/admin/dev-tools/arreter")
+def admin_dev_tools_arreter(current_user: Annotated[User, Depends(get_current_user)]):
+	"""SIGTERM sur le run courant — sans quoi un script qui pend verrouillerait l'écran."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	return {"arrete": dev_tools.arreter()}
