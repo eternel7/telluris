@@ -17,8 +17,14 @@ def get_user_characters(current_user: dict = Body(...)):
 		"user_id": current_user["_id"]
 	}
 	characters = find_docs(selector)
+	# Rang affiché = le MEILLEUR obtenu, toutes cités confondues : `rangs_guilde` est par
+	# cité et aucun doc `character:*` ne porte de champ `rang` (celui des `aventurier:*` est
+	# le rang d'une RECRUE, autre chose). Même dénormalisation que /play (main.py).
+	# ⚠️ Import PARESSEUX : `chasse` → `recrutement` → CE module, un import de tête boucle.
+	from utils.chasse import meilleur_rang
 	for c in characters:
 		c["niveau"] = compute_character_level(c.get("xp_total", 0))
+		c["rang"] = meilleur_rang(c.get("rangs_guilde") or {})
 	return characters
 	
 def get_selected_character(current_user: dict = Body(...)):

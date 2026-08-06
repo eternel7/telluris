@@ -1,0 +1,252 @@
+[
+  {
+    "_id": "character:user:eternel7@gmail.com_fc6a8ae7-b9e2-4789-b847-895cf9719f1e",
+    "_rev": "236-884c958d81b7d24aa2b5764ec18dd21e",
+    "user_id": "user:eternel7@gmail.com",
+    "type": "character",
+    "sex": "F",
+    "race": "nain",
+    "voc": "barbare",
+    "image": "barbare_f_nain05.jpg",
+    "prenom": "Grita",
+    "nom": "Hazgard",
+    "cite": "lieu:auxerre",
+    "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "caracteristiques_current": {
+      "V": 4,
+      "F": 23,
+      "R": 31,
+      "Ag": 17,
+      "Vol": 50,
+      "Int": 30,
+      "Cha": 20,
+      "Ch": 20
+    },
+    "currentPV": 128,
+    "currentPM": 160,
+    "lieux_visites": [
+      "lieu:auxerre",
+      "lieu:fumee_de_l_yonne",
+      "lieu:auxerre_porte_douve_exterieur03",
+      "lieu:auxerre_porte_douve_interieur03",
+      "lieu:festin_de_la_joyeuse_halfling",
+      "lieu:le_fil_du_tripier",
+      "lieu:la_corde_de_boyau",
+      "lieu:le_tan_de_l_yonne",
+      "lieu:boucherie_de_la_tour_de_l_horloge",
+      "lieu:le_cellier_sale",
+      "lieu:la_vielle_et_le_luth",
+      "lieu:le_bastion_de_l_yonne",
+      "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu:le_bastion_de_l_yonne_comptoir"
+    ],
+    "xp_total": 206,
+    "attribute_points": 3,
+    "vocations_niveaux": {
+      "barbare": 0
+    },
+    "inventaire": [
+      {
+        "item": "item:carte_aventurier",
+        "poids": 0.05,
+        "lieu_parent": "lieu:auxerre"
+      }
+    ],
+    "slots": {
+      "main_droite": "item:Hache_de_guerre",
+      "main_gauche": null,
+      "torse": null,
+      "tete": null,
+      "jambes": null,
+      "pieds": null,
+      "mains": null,
+      "anneau_1": null,
+      "anneau_2": null,
+      "cou": null,
+      "ceinture": null
+    },
+    "equipment_bonus": {
+      "pv": 0,
+      "pm": 0,
+      "pa": 0,
+      "malus_depl": -1,
+      "cc_bonus": 0,
+      "cd_bonus": 0,
+      "degats_bonus": 4,
+      "degats_dice": "1D6",
+      "initiative": 0,
+      "buffs": {
+        "V": -1
+      },
+      "buffs_sources": [
+        {
+          "nom": "Hache de guerre",
+          "icon": "🪓",
+          "buffs": {
+            "V": -1
+          }
+        }
+      ]
+    },
+    "or": 0,
+    "argent": 2,
+    "cuivre": 86,
+    "quetes_actives": [
+      {
+        "id": "quete:le_bastion_de_l_yonne_interieur_7ef42f526826",
+        "titre": "La tête du Lièvre « Vicieux »",
+        "description": "Un Lièvre d'exception — un « Vicieux » — écume Auxerre. La guilde met sa tête à prix : traquez-le et abattez-le.",
+        "rang": "F",
+        "giver": "lieu:le_bastion_de_l_yonne_interieur",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:lievre",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:novice",
+          "quantite": 1,
+          "position": {
+            "x": 47,
+            "y": 2
+          }
+        },
+        "recompenses": {
+          "xp": 33,
+          "cuivre": 99,
+          "items": []
+        },
+        "progress": 0,
+        "accepte_at": 1786040258
+      }
+    ],
+    "quetes_terminees": [
+      {
+        "id": "quete:transport_d51e92cf8d85",
+        "titre": "Livraison : La Corde de Boyau",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1786040153
+      },
+      {
+        "id": "quete:transport_cd90df0fbcd6",
+        "titre": "Livraison : Le cellier salé",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 10,
+          "cuivre": 30,
+          "items": []
+        },
+        "termine_at": 1786040212
+      },
+      {
+        "id": "quete:transport_borin_premiere_mission",
+        "titre": "Première mission : les caisses du Bastion",
+        "rang": "F",
+        "echec": false,
+        "recompenses": {
+          "xp": 30,
+          "cuivre": 200,
+          "items": [
+            {
+              "item": "item:carte_aventurier",
+              "poids": 0.05,
+              "lieu_parent": "lieu:auxerre"
+            }
+          ]
+        },
+        "termine_at": 1786040396
+      }
+    ],
+    "rangs_guilde": {},
+    "sorts_connus": [],
+    "competences_connues": [
+      "competence:sang_chaud"
+    ],
+    "competences_bonus": {
+      "buffs": {
+        "R": 4
+      },
+      "regen_pv": 0,
+      "regen_pm": 0,
+      "esquive": 0,
+      "buffs_sources": [
+        {
+          "nom": "Sang chaud",
+          "icon": "🩸",
+          "buffs": {
+            "R": 4
+          }
+        }
+      ]
+    },
+    "intro": {
+      "statut": "terminee",
+      "raison": "famine"
+    },
+    "pnj_present": {
+      "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+      "character": "pnj:borin_barbe_de_jais"
+    },
+    "portrait_translate": {
+      "x": -109.286,
+      "y": -19.0167
+    },
+    "portrait_zoom": 39,
+    "objets_au_sol": [],
+    "ressource_recoltable": null,
+    "effets_actifs": [],
+    "combats_recompenses": [
+      "combat:171a92faa1904bc3a4722c1b42061492"
+    ],
+    "butin_collectes": {
+      "combat:171a92faa1904bc3a4722c1b42061492": [
+        "monstre_0"
+      ]
+    },
+    "transport_offert": {
+      "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+      "quete": null
+    },
+    "rang_offert": {
+      "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+      "quete": {
+        "_id": "quete:le_bastion_de_l_yonne_comptoir_rang_32be3a25db87",
+        "type": "quete",
+        "source": "rang",
+        "giver": "lieu:le_bastion_de_l_yonne_comptoir",
+        "lieu_parent": "lieu:auxerre",
+        "titre": "Épreuve de rang : traquer le Ecureuil « Sanguinaire »",
+        "description": "Le maître d'armes exige une preuve : traquez et abattez ce Ecureuil « Sanguinaire », l'élite qui écume Auxerre, pour prétendre au rang E.",
+        "rang": "E",
+        "objectif": {
+          "type": "chasse",
+          "cible": "espece:ecureuil",
+          "lieu": "lieu:auxerre",
+          "profil": "profil:combattant",
+          "quantite": 1,
+          "position": {
+            "x": 29,
+            "y": 39
+          }
+        },
+        "recompenses": {
+          "xp": 42,
+          "cuivre": 126,
+          "items": []
+        },
+        "rang_vise": "E",
+        "narration": "Une odeur de charnier flotte dans l'air. La créature qui vous fait face — Ecureuil, le spécimen « Sanguinaire » que la guilde vous a chargé d'abattre — est encore couverte du sang de ses victimes. Aucun doute : c'est elle. L'épreuve commence.",
+        "statut": "offerte"
+      }
+    }
+  }
+]

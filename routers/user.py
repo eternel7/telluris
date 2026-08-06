@@ -27,7 +27,7 @@ from utils.marche import (
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 	relations_lieux_payload, lieu_recettes,
 )
-from utils.lieux import get_lieu_links, get_lieu_directions
+from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
 from utils import quetes
 from utils import bois
@@ -123,6 +123,21 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			or not os.path.isfile(os.path.join(characters_dir, image))):
 		raise HTTPException(status_code=422, detail="Un portrait valide est requis pour créer un personnage.")
 
+	# La cité de départ est obligatoire, au même titre que le portrait : sans elle le
+	# personnage naît HORS DU MONDE (`cite`/`lieu` vides, position 0,0) et n'est plus jouable.
+	# ⚠️ `get_doc("")` ne rend PAS None : `couchdb2` construit l'URL en joignant les segments,
+	# donc un id vide interroge la RACINE de la base et rend son document d'info — un dict,
+	# sans `default_position`. Le repli `{"x":0,"y":0}` avalait donc la faute jusqu'au bout,
+	# sans la moindre exception.
+	# ⚠️ On exige une cité RÉELLEMENT PROPOSÉE (`lieux.est_cite_de_depart`, la source unique
+	# qui alimente aussi la grille de l'écran de création) et pas seulement un `lieu:*` qui
+	# existe : sinon une requête forgée ferait naître un personnage dans une boutique ou une
+	# salle de donjon.
+	cite = characterinfo.get("cite") if characterinfo else None
+	if not est_cite_de_depart(cite, get_doc):
+		raise HTTPException(status_code=422, detail="Une cité de départ valide est requise pour créer un personnage.")
+	lieu = get_doc(cite)
+
 	if (characterinfo and "bonusStats" in characterinfo):
 		caractUp = characterinfo["bonusStats"]
 		points_depenses = sum(
@@ -148,7 +163,6 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			ch=caract.get("Ch", 0),
 		)
 		derived = compute_derived_stats(base=base, niveau=0)
-		lieu = get_doc(characterinfo["cite"])
 		position = lieu.get("default_position",{"x" : 0, "y" : 0})
 		vocations = get_doc("rules:vocations")
 		vocation = next((v for v in vocations["value"] if v["id"] == characterinfo["voc"]), None)

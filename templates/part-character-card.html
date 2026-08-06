@@ -22,7 +22,7 @@
 #}
 {% macro character_card(card_id='', porteur_id='', nom='', voc_icon='', voc_label='',
                         voc_niveau=0, race='', niveau=0, rang='', rang_title='', pv=0, pv_max=0,
-                        pm=0, pm_max=0, image='', zoom=100, editable=true, classes='') %}
+                        pm=0, pm_max=0, image='', zoom=50, editable=true, classes='') %}
 {% set _pv_max = pv_max or 1 %}
 {% set _pm_max = pm_max or 1 %}
 {% set pv_pct = [(pv / _pv_max * 100)|int, 100]|min %}

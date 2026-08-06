@@ -41,7 +41,7 @@ from utils import fiche as fiche_util
 from utils import animations as animations_util
 from utils import lint_dialogues
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload, lieu_recettes
-from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, lieu_router
+from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
 
@@ -481,24 +481,13 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 					"race": race,
 					"url": str(file_url)
 				})
-	# towns images : 
-	towns_images = []
-	if os.path.exists(TOWNS_IMAGES_PATH):
-		for filename in os.listdir(TOWNS_IMAGES_PATH):
-			if "_start_" in filename:
-				full_path = os.path.join(TOWNS_IMAGES_PATH, filename)
-				if (os.path.isfile(full_path) and filename.lower().endswith(valid_extensions) and filename[:]):
-					name = filename[:filename.index("_")]
-					lieu_id = "lieu:"+ name
-					if get_doc(lieu_id):
-						file_url = request.url_for("towns", path=filename)
-						towns_images.append({
-							"id": "lieu:"+ name,
-							"label": name,
-							"blurb": name,
-							"filename": filename,
-							"url": str(file_url)
-						})
+	# towns images : les cités de départ viennent de `lieux.cites_de_depart` (source unique,
+	# partagée avec la garde d'`add_character`) — la page n'ajoute que l'URL servable, qui
+	# demande le `Request` et n'a donc pas sa place dans le helper.
+	towns_images = [
+		{**c, "blurb": c["label"], "url": str(request.url_for("towns", path=c["filename"]))}
+		for c in cites_de_depart(get_doc)
+	]
 	return templates.TemplateResponse(
 		request=request,
 		name ="user_home_telluris.html",

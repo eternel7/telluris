@@ -440,6 +440,37 @@ def promouvoir(character: dict, cite_id: str) -> str:
 	return rangs[cite_id]
 
 
+def crediter_rang(character: dict, spec) -> str | None:
+	"""INSCRIT le personnage à un rang de guilde porté par la récompense d'une quête (mute,
+	sans save). `spec` = `{"cite": "lieu:x", "rang": "F"}`, déjà RÉSOLU à la génération de
+	l'offre — le module ne relit aucun doc.
+
+	C'est le pendant de `promouvoir` pour l'ENTRÉE dans la guilde : l'épreuve de rang monte
+	d'un cran, une première mission inscrit à un cran donné. Sans elle, un personnage qui
+	vient de recevoir sa carte d'aventurier restait à `rangs_guilde == {}`, donc « aucun » à
+	l'affichage — alors que tout le moteur le traitait déjà comme `RANGS[0]` (`rang_de`,
+	`acces.rang_min_satisfait`) et que le comptoir lui proposait déjà l'épreuve suivante.
+
+	⚠️ Ne RÉTROGRADE JAMAIS : on garde le plus élevé des deux crans. Une mission d'inscription
+	rejouée (ou copiée dans une guilde où l'on est déjà mieux classé) ne peut rien retirer.
+	⚠️ FAIL-CLOSED : cité manquante ou rang hors `RANGS` ⇒ rien n'est écrit (même refus qu'un
+	seuil illisible dans `acces`) — on n'invente pas un cran sur une donnée qu'on ne sait pas
+	lire. Renvoie le rang effectif si le doc a CHANGÉ, None sinon (rien à faire, ou déjà
+	mieux classé : c'est ce qui rend la récompense inoffensive une seconde fois)."""
+	if not isinstance(spec, dict):
+		return None
+	cite = spec.get("cite")
+	rang = spec.get("rang")
+	if not cite or rang not in RANGS:
+		return None
+	rangs = character.setdefault("rangs_guilde", {})
+	courant = rangs.get(cite)
+	if courant in RANGS and _index_rang(courant) >= _index_rang(rang):
+		return None
+	rangs[cite] = rang
+	return rang
+
+
 # ── Offre de rang au comptoir (miroir simplifié du transport authoré) ─────────────
 
 # Qualificatifs de l'élite traquée, INDEXÉS PAR NIVEAU DE PROFIL (1 → 6). Le `nom` du doc

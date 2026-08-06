@@ -439,6 +439,24 @@ def items_recompense(spec_items: list, giver_doc: dict) -> list:
 	return sortie
 
 
+def rang_guilde_recompense(spec_rang, giver_doc: dict) -> dict:
+	"""Récompense de RANG DE GUILDE d'une offre écrite, résolue en `{"cite", "rang"}`.
+
+	Miroir exact d'`items_recompense` et pour la même raison : la spec écrit un simple
+	`"rang_guilde": "F"` et la CITÉ est dérivée du `lieu_parent` du donneur — la même mission
+	copiée dans la guilde d'une autre cité inscrit donc à SA cité. Un `{"cite", "rang"}`
+	explicite est recopié tel quel (inscrire ailleurs que chez soi reste possible).
+	Renvoie `{}` — donc rien à fusionner — si la spec est vide ou si aucune cité ne se résout."""
+	if not spec_rang:
+		return {}
+	if isinstance(spec_rang, dict):
+		return {"rang_guilde": dict(spec_rang)} if spec_rang.get("cite") else {}
+	parent = (giver_doc or {}).get("lieu_parent") or (giver_doc or {}).get("_id")
+	if not parent:
+		return {}
+	return {"rang_guilde": {"cite": parent, "rang": spec_rang}}
+
+
 def generer_transport_authore(spec: dict, giver_doc: dict, find_docs_fn, get_doc_fn) -> dict | None:
 	"""Construit l'offre décrite par la spec du PNJ — même structure que `generer_transport`,
 	mais rien n'est tiré au sort : destination, cargaison, délai et récompenses sont écrits.
@@ -471,6 +489,7 @@ def generer_transport_authore(spec: dict, giver_doc: dict, find_docs_fn, get_doc
 		"recompenses": {
 			"xp": xp, "cuivre": cuivre,
 			"items": items_recompense(rec.get("items"), giver_doc),
+			**rang_guilde_recompense(rec.get("rang_guilde"), giver_doc),
 		},
 		# `retour` : la course ne se solde PAS chez le destinataire — il faut revenir en rendre
 		# compte au donneur, qui paie (et remet ses items de récompense : la carte d'aventurier).
@@ -729,8 +748,12 @@ def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int) -> dict
 			relation, int(character_stats.QUETE_TRANSPORT_RELATION_DELTA)
 		)
 		save_doc_fn(relation)
-	return {"xp": recap["xp"], "purse": recap["purse"], "relation": relation_val,
-			"compagnie": recap["compagnie"]}
+	# ⚠️ On PROPAGE le récap du chokepoint (`**recap`) au lieu de le recopier clé par clé :
+	# une clé ajoutée en amont — l'inscription au rang de guilde (`rang`) — serait sinon
+	# perdue ICI, en silence. Le personnage porterait bien son rang neuf, mais l'endpoint ne
+	# l'apprendrait jamais, donc aucun payload de resynchronisation : l'affichage resterait
+	# figé sur l'ancien rang jusqu'au prochain rechargement de /play (cf. Conventions §10).
+	return {**recap, "relation": relation_val}
 
 
 def _ranger_chez_le_destinataire(q: dict, lieu_doc: dict, get_doc_fn, save_doc_fn, rand_fn) -> dict:

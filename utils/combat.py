@@ -213,6 +213,21 @@ def _avec_vfx(entree: dict, canal: str, cible_id: str, source_anim=None, acteur_
 CHAMPS_ETAT = ("currentPV", "currentPM", "vivant", "morte", "pos", "facing")
 
 
+# Profondeur des DEUX gardes d'idempotence indexées par id de combat : `combats_recompenses`
+# (finalisation : XP/PV/butin ramassé, un par doc de membre) et `butin_collectes` (butin de
+# victoire encaissé par /collect, sur le principal seul).
+#
+# ⚠️ C'est une FENÊTRE anti-doublon, jamais un journal : un doc `combat:*` terminé est
+# finalisé PUIS SUPPRIMÉ au passage suivant à /play (main.py), donc un id sorti de la fenêtre
+# ne peut plus jamais revenir se faire payer. Les dimensionner ensemble est délibéré — elles
+# reposent sur ce même fait ; `butin_collectes` n'était pas borné du tout et grossissait
+# d'une clé par combat pillé (70 sur un personnage de la base de référence).
+#
+# ⚠️ Aucune migration : un doc déjà en base dépasse la borne jusqu'à sa prochaine écriture,
+# qui le retaille toute seule.
+MEMOIRE_COMBATS_MAX = 10
+
+
 def _avec_etat(entree: dict, *acteurs: dict) -> dict:
 	"""Ajoute à une entrée de journal l'état des acteurs QU'ELLE VIENT DE CHANGER.
 
@@ -2767,7 +2782,7 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 	# Idempotence atomique : le combat est enregistré dans le doc du membre,
 	# sauvegardé avec l'XP. Borné pour éviter une croissance illimitée.
 	rewarded.append(combat_id)
-	doc["combats_recompenses"] = rewarded[-50:]
+	doc["combats_recompenses"] = rewarded[-MEMOIRE_COMBATS_MAX:]
 	return save_doc(doc) is not None
 
 
@@ -2821,7 +2836,7 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 			doc["effets_actifs"] = restants
 
 	rewarded.append(combat_id)
-	doc["combats_recompenses"] = rewarded[-50:]
+	doc["combats_recompenses"] = rewarded[-MEMOIRE_COMBATS_MAX:]
 	return save_doc(doc) is not None
 
 
@@ -2871,7 +2886,7 @@ def _finalize_protege(combat_doc: dict, snap: dict, doc: dict, status: str,
 			doc["effets_actifs"] = restants
 
 	rewarded.append(combat_id)
-	doc["combats_recompenses"] = rewarded[-50:]
+	doc["combats_recompenses"] = rewarded[-MEMOIRE_COMBATS_MAX:]
 	return save_doc(doc) is not None
 
 

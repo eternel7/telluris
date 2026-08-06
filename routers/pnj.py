@@ -751,6 +751,16 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 				for ref in (rec.get("items") or [])
 			],
 		}
+		# Inscription à la guilde portée par la récompense (première mission) : MÊME payload
+		# que la promotion du comptoir, donc le client n'a rien de neuf à savoir — toast +
+		# `updateRang(meilleur, detail)`. Émis seulement si le rang a réellement bougé.
+		if recap.get("rang"):
+			rangs_guilde = character.get("rangs_guilde") or {}
+			reponse["rang"] = {
+				"promu": recap["rang"],
+				"meilleur": chasse.meilleur_rang(rangs_guilde),
+				"detail": chasse.rangs_guilde_title(rangs_guilde, get_doc),
+			}
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 		reponse["vitals"] = _vitals_payload(character)
 		reponse["inventaire_payload"] = _inventory_payload(character)

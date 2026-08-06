@@ -1476,7 +1476,7 @@
 			"rang": character.get("rang", "aucun"),
 			"rang_title": character.get("rangs_guilde_title", ""),
 			"pv": _pv, "pv_max": d.get("pv_max", 0), "pm": _pm, "pm_max": d.get("pm_max", 0),
-			"image": character["image"], "zoom": character.get("portrait_zoom", 100),
+			"image": character["image"], "zoom": character.get("portrait_zoom", 50),
 		} %}
 		<section class="character-panel">
 		{% call cards.character_card(card_id="sidebar", **carte_joueur) %}
@@ -1493,10 +1493,10 @@
 			   apprendre qu'un compagnon a des points. #}
 			<button class="manage-btn" onclick="openSheet()">👤 Personnage<span
 				class="pts-indic pts-dispo" id="pts-indic-perso" title="Points d'attribut à répartir"
-				{% if character.get("attribute_points", 0) <= 0 %}hidden{% endif %}>●</span></button>
+				{% if character.get("attribute_points", 0) <= 0 %}hidden{% endif %}>🎖️</span></button>
 			<button class="manage-btn" onclick="openGroupe()">👥 Groupe<span
 				class="pts-indic pts-dispo" id="pts-indic-groupe" title="Un compagnon a des points d'attribut à répartir"
-				{% if not compagnons_points %}hidden{% endif %}>●</span></button>
+				{% if not compagnons_points %}hidden{% endif %}>🎖️</span></button>
 		</footer>
 	</div><!-- /#game-container -->
 	<div id="sheet-panel" class="panel-hidden panel-frame" aria-label="Fiche personnage">

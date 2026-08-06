@@ -30,6 +30,7 @@ from utils import slots_actions
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
+    MEMOIRE_COMBATS_MAX,
 )
 from utils import chasse
 from models import character_stats
@@ -387,8 +388,14 @@ async def collect_loot(
 
     # Garde d'idempotence sur le principal : on MÉMORISE les carcasses encaissées (au lieu
     # de purger) → sans atomicité multi-docs, une reprise ne peut pas re-créditer.
+    # Bornée à `MEMOIRE_COMBATS_MAX` combats, comme sa jumelle `combats_recompenses` : un doc
+    # `combat:*` terminé est supprimé au passage suivant à /play, donc une clé évincée ne peut
+    # plus jamais servir. ⚠️ `pop` AVANT l'écriture — réassigner une clé existante ne la
+    # déplace pas en fin de dict, et l'ordre d'insertion EST l'ordre de récence qui décide de
+    # l'éviction : un second /collect sur le même combat le laisserait vieillir à sa place.
+    guard.pop(combat_id, None)
     guard[combat_id] = sorted(encaisses)
-    character["butin_collectes"] = guard
+    character["butin_collectes"] = dict(list(guard.items())[-MEMOIRE_COMBATS_MAX:])
 
     # Principal d'abord (il porte la garde) : si le save d'un compagnon échoue ensuite, la
     # garde est déjà posée → au pire une carcasse de compagnon est perdue, jamais dupliquée.

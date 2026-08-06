@@ -220,6 +220,43 @@ def _lister_images(chemin: str) -> list[str]:
 		and f.lower().endswith(IMAGE_EXTENSIONS)
 	)
 
+CITE_DEPART_MARQUEUR = "_start_"
+
+
+def cites_de_depart(get_doc_fn=get_doc) -> list[dict]:
+	"""Les cités où un personnage PEUT NAÎTRE — SOURCE UNIQUE de l'écran de création.
+
+	La règle est un NOMMAGE de fichier : `<nom>_start_*.<ext>` dans le dossier des images
+	de villes, ET un doc `lieu:<nom>` qui existe réellement en base. L'image sans le doc
+	(ou l'inverse) ne propose rien — c'est ce qui rend l'ouverture d'une cité de départ
+	purement déclarative : déposer l'image et importer le lieu suffit, sans une ligne de code.
+
+	Renvoie `[{id, label, filename}]`, trié par nom de fichier (`_lister_images`).
+	⚠️ Aucune URL : la construire demande le `Request` de la requête (`url_for`), qui n'a
+	rien à faire dans un helper — c'est l'appelant qui l'ajoute.
+	⚠️ Le filtre d'extension est celui de `_lister_images` (`IMAGE_EXTENSIONS`), donc sans
+	`.gif` : brique partagée plutôt que liste recopiée par appelant."""
+	cites = []
+	for filename in _lister_images(TOWNS_IMAGES_PATH):
+		if CITE_DEPART_MARQUEUR not in filename:
+			continue
+		label = filename[:filename.index("_")]
+		lieu_id = "lieu:" + label
+		if get_doc_fn(lieu_id):
+			cites.append({"id": lieu_id, "label": label, "filename": filename})
+	return cites
+
+
+def est_cite_de_depart(cite_id, get_doc_fn=get_doc) -> bool:
+	"""Cette cité est-elle RÉELLEMENT proposée à la création ? Garde serveur d'`add_character` :
+	vérifier que le `lieu:*` existe ne suffit pas, sinon une requête forgée ferait naître un
+	personnage dans n'importe quel lieu — une boutique, une salle de donjon, une carte de
+	combat. Le client ne propose que cette liste : le serveur exige la même."""
+	if not isinstance(cite_id, str) or not cite_id:
+		return False
+	return any(c["id"] == cite_id for c in cites_de_depart(get_doc_fn))
+
+
 @lieu_router.get("/lieux/creation_options")
 async def get_creation_options(
 	current_user: Annotated[User, Depends(get_current_user)]):

@@ -1243,7 +1243,10 @@
 	   ÉTAT
 	══════════════════════════════════════════════════════════ */
 	const statNames = { V:'Vitesse', F:'Force', R:'Résistance', Ag:'Agilité', Vol:'Volonté', Int:'Intelligence', Cha:'Charisme', Ch:'Chance'};
-	let wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'', cite:'' , sort_initial:null, competence_initiale:null,
+	// ⚠️ `cite` s'initialise à null, comme sex/race/voc/image : `validateStep` teste
+	// `!== null`, donc une chaîne vide validait l'étape 5 SANS qu'aucune cité soit choisie —
+	// et le personnage naissait hors du monde (cf. la garde 422 d'`add_character`).
+	let wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'', cite:null , sort_initial:null, competence_initiale:null,
 				bonusStats: { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, Cha: 0, Ch: 0}};
 	const MAX_BONUS_POINTS = 10;
 	const STAT_COEFF = {{ xp_coeff | tojson | safe }};
@@ -1261,7 +1264,8 @@
 	   WIZARD NAVIGATION
 	══════════════════════════════════════════════════════════ */
 	function openWizard() {
-		wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'' , cite:'', sort_initial:null, competence_initiale:null};
+		wiz = { step:1, sex:null, race:null, voc:null, image:null, prenom:'', nom:'' , cite:null, sort_initial:null, competence_initiale:null,
+				bonusStats: { V: 0, F:0, R: 0, Ag: 0, Vol: 0, Int: 0, Cha: 0, Ch: 0}};
 		document.getElementById('wizard-overlay').classList.add('open');
 		document.body.style.overflow = 'hidden';
 		renderStep(1);
@@ -1660,6 +1664,29 @@
 		submitBtn.disabled = false;
 		closeWizard();
 	}
+	/* Barème des rangs de guilde — MÊME table que la section « Les rangs de la Guilde »
+	   de la page d'accueil (home_telluris.html) : un métal et sa gemme par cran de
+	   `recrutement.RANGS` (F→S+). ⚠️ Le rouge de l'Adamantite fait partie de la règle
+	   (la page d'accueil pose le même `color:red` sur son ⚫).
+	   ⚠️ « aucun » (personnage sans `rangs_guilde`) et tout rang illisible retombent sur le
+	   PREMIER cran, donc sur le Cuivre — même repli que le moteur, qui rend `RANGS[0]` pour
+	   un rang absent (`chasse.rang_de`, `acces.rang_min_satisfait`). */
+	const RANG_BAREME = {
+		'F':  { gem: '🟤', metal: 'Cuivre' },
+		'E':  { gem: '🔩', metal: 'Fer' },
+		'D':  { gem: '🔘', metal: 'Argent' },
+		'C':  { gem: '✨', metal: 'Or' },
+		'B':  { gem: '💠', metal: 'Platine' },
+		'A':  { gem: '🔷', metal: 'Mythril' },
+		'S':  { gem: '🌟', metal: 'Orichalque' },
+		'S+': { gem: '⚫', metal: 'Adamantite', couleur: 'red' },
+	};
+	function rangGemme(rang) {
+		const r = RANG_BAREME[rang] || RANG_BAREME['F'];
+		const style = r.couleur ? ` style="color:${r.couleur}"` : '';
+		return `<span class="char-rank-gem"${style} title="${r.metal}" aria-hidden="true">${r.gem}</span> `;
+	}
+
 	/*  mise a jour des characters */
 	function buildCharacterslist() {
 		const grid = document.getElementById('characters-list');
@@ -1683,7 +1710,7 @@
 						<p class="char-name"> ${c.prenom} ${c.nom}</p>
 						<p class="char-meta">${c.voc} · Niveau ${niveau}</p>
 					</div>
-					<div class="char-rank">🟤 ${rang}</div>
+					<div class="char-rank">${rangGemme(rang)}${rang}</div>
 					</div>
 				</a>`;
 			}).join('');

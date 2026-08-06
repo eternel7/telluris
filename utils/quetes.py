@@ -712,7 +712,15 @@ def appliquer_recompenses(character: dict, q: dict, compagnons: list | None = No
 		inv = character.get("inventaire", [])
 		inv.extend(items)
 		character["inventaire"] = inv
-	return {"xp": xp_info, "purse": purse, "compagnie": compagnie}
+	# Inscription à un rang de guilde portée par la récompense (`{cite, rang}`, résolu à la
+	# génération de l'offre) : c'est ainsi qu'une PREMIÈRE MISSION fait entrer le joueur dans
+	# la guilde, là où l'épreuve de rang le fait MONTER (`chasse.promouvoir`).
+	# ⚠️ Import PARESSEUX : `chasse` importe ce module, un import de tête boucle.
+	rang = None
+	if rec.get("rang_guilde"):
+		from utils.chasse import crediter_rang
+		rang = crediter_rang(character, rec["rang_guilde"])
+	return {"xp": xp_info, "purse": purse, "compagnie": compagnie, "rang": rang}
 
 
 # ── Renoncement : la maison du donneur encaisse d'un bloc ────────────────────────
