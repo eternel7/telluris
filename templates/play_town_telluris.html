@@ -5982,7 +5982,15 @@ function _piedCompagnon(c) {
 	const contrat = c.permanent
 		? `<span title="Engagé durablement : aucune part de butin">✦ ${escapeHtml(_compagnieNom || 'Compagnie')}</span>`
 		: `<span>💰 part ${part}%</span>`;
-	return contrat + `<span>🤝 ${aff} — ${_affLabel(aff)}</span>`;
+	// ★ Points d'attribut non dépensés — MÊME symbole et MÊME vert (`.pts-dispo`) que la
+	// pastille du bouton 👥, qui ne dit que « quelqu'un en a » : c'est ici, sur la carte,
+	// qu'on apprend DE QUI il s'agit et combien. Rien à afficher quand il n'y a rien à
+	// dépenser (contrairement aux pastilles des boutons, rendues en dur puis masquées :
+	// une carte est reconstruite à chaque payload, il n'y a pas d'état à basculer).
+	const pts = +(c.attribute_points || 0);
+	const points = pts > 0
+		? `<span class="pts-dispo" title="Points d'attribut à répartir">★ ${pts}</span>` : '';
+	return points + contrat + `<span>🤝 ${aff} — ${_affLabel(aff)}</span>`;
 }
 
 // Prend la CARTE (et non un id) pour transporter `c.permanent` jusqu'à la confirmation :

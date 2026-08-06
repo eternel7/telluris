@@ -503,21 +503,46 @@
 	}
 	.la-actions { display: flex; gap: 8px; }
 
-	/* Éditeurs JSON dépliés sous une connexion (panneau Lieux) */
-	.lj-box { border-top: 1px dashed var(--border); margin-top: 6px; padding-top: 6px; }
+	/* Éditeurs JSON d'une connexion (panneau Lieux) — overlay fixe à droite, calqué sur
+	   `#editor-card` d'admin_table.html : même géométrie, même ombre, même ✕. La carte et
+	   le panneau restent utilisables dessous (ce n'est PAS un modal à backdrop, contrairement
+	   à #lieu-fiche-overlay) — on édite un doc en gardant la grille sous les yeux. */
+	#lj-overlay {
+		position: fixed; top: 70px; right: 14px; bottom: 14px;
+		width: min(460px, 94vw); z-index: 60;
+		display: flex; flex-direction: column; overflow: auto;
+		box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+	}
+	#lj-overlay.lj-hidden { display: none; }
+	.lj-title { display: flex; align-items: flex-start; gap: 10px; }
+	.lj-title .card-title { flex: 1; margin-bottom: 0; overflow-wrap: anywhere; }
+	.lj-close {
+		background: none; border: none; color: var(--muted);
+		font-size: 1rem; line-height: 1; cursor: pointer; padding: 2px 6px;
+	}
+	.lj-close:hover { color: var(--danger); }
+	.lj-desc { font-size: 0.66rem; color: #9aa3b2; line-height: 1.5; margin: 8px 0 4px; }
+	/* Les deux éditeurs se partagent la hauteur restante de l'overlay. */
+	#lj-body { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
 	.lj-head {
 		display: flex; align-items: center; gap: 6px;
 		font-size: 0.64rem; color: var(--accent); margin: 6px 0 4px;
 	}
-	.lj-head span { flex: 1; }
+	.lj-head span { flex: 1; overflow-wrap: anywhere; }
 	.lj-area {
-		width: 100%; min-height: 130px; resize: vertical;
+		width: 100%; flex: 1 1 auto; min-height: 130px; resize: vertical;
 		background: #0d0f14; border: 1px solid var(--border); border-radius: 4px;
 		color: var(--text); font-family: 'Share Tech Mono', monospace;
 		font-size: 0.64rem; padding: 6px; outline: none;
 	}
 	.lj-area:focus { border-color: var(--accent); }
 	.lj-msg { font-size: 0.62rem; min-height: 1em; margin-top: 3px; }
+	/* Outil de repositionnement : le bouton armé et sa consigne. */
+	.lj-repos-on { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
+	.lj-repos-hint {
+		font-size: 0.62rem; color: var(--accent2); line-height: 1.4;
+		border: 1px dashed var(--accent2); border-radius: 4px; padding: 4px 6px; margin-bottom: 4px;
+	}
 </style>
 </head>
 <body>
@@ -813,7 +838,12 @@ let selectedZoneIdx = -1;    // index in zonesPlacements of selected placement
 // ── LIEUX STATE ────────────────────────────────────────────────────────────
 let lieuxConnections = [];   // connexions du lieu courant (enrichies details)
 let lieuxSelectedCell = null; // {cx, cy} de la case cliquée (filtre la liste)
-let lieuxJsonOuvert = null;  // _id de la connexion dont les JSON sont dépliés
+let lieuxJsonOuvert = null;  // _id de la connexion dont les JSON sont ouverts dans l'overlay
+let lieuxJsonDest = null;    // lieu de destination de cette connexion (le doc édité à côté)
+// Repositionnement armé : {connId, destId}. L'outil n'existe QUE pendant que l'overlay est
+// ouvert sur cette connexion, et le nœud visé est toujours celui du lieu COURANT — le seul
+// dont la `pos` ait un sens sur la carte affichée.
+let lieuxRepos = null;
 let lieuxDocCache = {};      // lieu_id -> doc lieu (alimente l'éditeur JSON)
 let creationOptions = null;  // payload de /api/lieux/creation_options
 let nlNomTouche = false;     // le nom du PNJ a-t-il été saisi à la main ?
@@ -951,6 +981,10 @@ lieuSelect.addEventListener('change', async (e) => {
 			lieuxConnections = [];
 			lieuxSelectedCell = null;
 			lieuxJsonOuvert = null;
+			lieuxJsonDest = null;
+			lieuxRepos = null;
+			canvas.style.cursor = '';
+			renderLieuJsonOverlay();   // changer de lieu ferme l'éditeur : ses docs ne sont plus les bons
 			lieuxDocCache = {};
 			fetchLieuxConnections();
 			dropZone.classList.add('hidden');
@@ -1069,15 +1103,29 @@ function renderGrid() {
 	const showTerrain = (editMode === 'terrain' || editMode === 'nav');
 	const showZones   = (editMode === 'zones' || editMode === 'rencontres' || editMode === 'ressources');
 	const showLieux   = (editMode === 'lieux');
+	// Repositionnement armé : le mode Lieux ne peint pas le terrain, l'admin ne verrait donc
+	// pas où il a le droit de poser sa porte. On le rallume le temps de viser.
+	const showRepos   = (showLieux && !!lieuxRepos);
 
 	// Draw cell fills
-	if (showTerrain) for (let y = 0; y < rows; y++) {
+	if (showTerrain || showRepos) for (let y = 0; y < rows; y++) {
 		for (let x = 0; x < cols; x++) {
 			const v = grid[y][x];
 			const col = valColor(v);
 			if (col) {
 				ctx.fillStyle = col;
 				ctx.fillRect(x * cw, y * ch, cw, ch);
+			}
+		}
+	}
+
+	// Voile des cases REFUSÉES pendant un repositionnement : c'est le « disabled » visible du
+	// second clic — le prédicat peint et le prédicat qui accepte sont le même (`_caseAccessible`).
+	if (showRepos) {
+		ctx.fillStyle = 'rgba(200,40,40,0.42)';
+		for (let y = 0; y < rows; y++) {
+			for (let x = 0; x < cols; x++) {
+				if (!_caseAccessible(x, y)) ctx.fillRect(x * cw, y * ch, cw, ch);
 			}
 		}
 	}
@@ -1096,6 +1144,21 @@ function renderGrid() {
 		ctx.moveTo(0, y * ch);
 		ctx.lineTo(W, y * ch);
 		ctx.stroke();
+	}
+
+	// Aperçu de visée pendant un repositionnement : cadre VERT si la case est acceptée, ROUGE
+	// sinon. Branche à part et non détournement du survol de peinture ci-dessous, qui affiche
+	// la couleur et la valeur de `selectedVal` — sans rapport ici.
+	if (hoverCell && showRepos) {
+		const {cx, cy} = hoverCell;
+		const ok = _caseAccessible(cx, cy);
+		ctx.save();
+		ctx.strokeStyle = ok ? 'rgba(60,220,120,1)' : 'rgba(240,70,70,1)';
+		ctx.shadowColor = ctx.strokeStyle;
+		ctx.shadowBlur = 10;
+		ctx.lineWidth = 3;
+		ctx.strokeRect(cx * cw + 1.5, cy * ch + 1.5, cw - 3, ch - 3);
+		ctx.restore();
 	}
 
 	// Draw hover highlight
@@ -1323,6 +1386,17 @@ function paint(e) {
 		updateLegend();
 		scheduleGridSend();
 	} else if (editMode === 'lieux') {
+		// Outil de repositionnement armé : le clic lui appartient, il ne touche plus au filtre.
+		if (lieuxRepos) {
+			if (!_caseAccessible(cx, cy)) {
+				// Le « disabled » du second clic : on refuse et on RESTE armé, l'admin vise à côté.
+				_ljMsg('conn', `✗ Case [${cx},${cy}] inaccessible (terrain ${grid[cy][cx]}) — porte non déplacée.`, true);
+				setStatus(`<span style="color:var(--danger)">Case [${cx}, ${cy}] inaccessible : la porte n'y serait jamais atteignable.</span>`);
+				return;
+			}
+			_poserPorte(cx, cy);
+			return;
+		}
 		// Lecture seule : sélectionne la case (filtre la liste), ne mute jamais grid.
 		lieuxSelectedCell = {cx, cy};
 		renderGrid();
@@ -1344,7 +1418,12 @@ canvas.addEventListener('mousemove', e => {
 		renderGrid();
 	}
 	if (!isPainting) {
-		if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]} - ${currentRev}.`);
+		if (c && lieuxRepos) {
+			const ok = _caseAccessible(c.cx, c.cy);
+			setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]} — `
+				+ (ok ? '<span>porte posable ici</span>'
+					  : '<span style="color:var(--danger)">INACCESSIBLE</span>'));
+		} else if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]} - ${currentRev}.`);
 		return;
 	}
 	if (editMode === 'lieux') return; // click-only, pas de sélection au drag
@@ -1391,7 +1470,12 @@ function setMode(mode) {
 	panelLieux.style.display = mode === 'lieux' ? '' : 'none';
 	if (mode === 'rencontres') renderRencontreList();  // puces = zones réellement utilisées
 	if (mode === 'ressources') renderRessourceList();  // mêmes puces de zones
-	if (mode === 'lieux') { lieuxSelectedCell = null; lieuxJsonOuvert = null; fetchLieuxConnections(); renderLieuxConnList(); }
+	// ⚠️ L'overlay JSON est fermé DANS LES DEUX SENS : il est en `position:fixed`, il flotterait
+	// donc au-dessus d'un mode où le panneau Lieux n'est même plus affiché. Le repositionnement
+	// part avec lui — armé, le clic du mode d'arrivée lui reviendrait.
+	lieuxRepos = null; canvas.style.cursor = '';
+	if (mode !== 'lieux') { lieuxJsonOuvert = null; lieuxJsonDest = null; renderLieuJsonOverlay(); }
+	if (mode === 'lieux') { lieuxSelectedCell = null; lieuxJsonOuvert = null; lieuxJsonDest = null; renderLieuJsonOverlay(); fetchLieuxConnections(); renderLieuxConnList(); }
 	if (mode !== 'nav') navSelectedCell = null;
 	if (grid.length) renderGrid();
 }
@@ -1460,22 +1544,25 @@ function renderLieuxConnList() {
 			<div style="color:#888;">${_escHtml(type)} ${pos}</div>
 			<div style="display:flex;gap:6px;margin-top:4px;">
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuFiche('${destId}')">📄 Fiche</button>
-				<button class="btn btn-inline" style="font-size:.62rem;" onclick="toggleSousLieuJson('${conn._id}','${destId}')">${ouvert ? '▲ Fermer' : '🧾 JSON'}</button>
+				<button class="btn btn-inline" style="font-size:.62rem;" onclick="toggleSousLieuJson('${conn._id}','${destId}')">${ouvert ? '✕ Fermer' : '🧾 JSON'}</button>
 			</div>
-			${ouvert ? _sousLieuJsonHtml(conn, destId) : ''}
 		</div>`;
 	}).join('') || `<div style="color:#888;">Aucune connexion ici.</div>`;
 	lieuxConnListEl.innerHTML = header + rows;
 }
 
-// Les deux éditeurs JSON d'un sous-lieu déplié : le doc du lieu de destination
-// et le doc de la connexion qui l'accroche à la case courante.
+// Les deux éditeurs JSON d'une connexion : le doc du lieu de destination et le doc de la
+// connexion qui l'accroche à la case courante. Ils vivent dans l'overlay `#lj-overlay`
+// (fixe à droite, comme l'éditeur d'admin_table) et non plus dépliés dans la liste : le
+// panneau de gauche fait 30 vw, un JSON de lieu n'y était lisible qu'à travers une meurtrière.
 function _sousLieuJsonHtml(conn, destId) {
 	const doc = lieuxDocCache[destId];
 	const docTxt = doc ? JSON.stringify(doc, null, 2) : 'Document introuvable.';
 	const connTxt = JSON.stringify(_connNu(conn), null, 2);
-	return `<div class="lj-box">
-		<div class="lj-head">
+	// L'état armé est porté par le BOUTON lui-même : le corps de l'overlay étant réécrit à
+	// chaque rendu, il n'y a rien à basculer, seulement à composer depuis `lieuxRepos`.
+	const repos = !!(lieuxRepos && lieuxRepos.connId === conn._id);
+	return `<div class="lj-head">
 			<span>📄 ${_escHtml(destId)}</span>
 			<button class="btn btn-inline" style="font-size:.6rem;" onclick="sauverDocJson('lieu','${destId}')" ${doc ? '' : 'disabled'}>💾</button>
 			<button class="btn btn-inline danger" style="font-size:.6rem;" onclick="supprimerDocJson('lieu','${destId}')" ${doc ? '' : 'disabled'}>🗑</button>
@@ -1484,19 +1571,113 @@ function _sousLieuJsonHtml(conn, destId) {
 		<div class="lj-msg" id="lj-msg-lieu"></div>
 		<div class="lj-head">
 			<span>🔗 ${_escHtml(conn._id)}</span>
+			${repos
+				? `<button class="btn btn-inline lj-repos-on" style="font-size:.6rem;" onclick="desarmerRepositionnement()" title="Annuler le repositionnement">✕ Annuler</button>`
+				: `<button class="btn btn-inline" style="font-size:.6rem;" onclick="armerRepositionnement('${conn._id}','${destId}')" title="Déplacer la porte : cliquez ensuite une case de la carte">🎯 Repositionner</button>`}
 			<button class="btn btn-inline" style="font-size:.6rem;" onclick="sauverDocJson('conn','${destId}')">💾</button>
 			<button class="btn btn-inline danger" style="font-size:.6rem;" onclick="supprimerDocJson('conn','${destId}')">🗑</button>
 		</div>
+		${repos ? `<div class="lj-repos-hint">Cliquez une case de la carte pour y poser la porte —
+			l'enregistrement est immédiat. Les cases voilées de rouge sont refusées.</div>` : ''}
 		<textarea class="lj-area" id="lj-area-conn">${_escHtml(connTxt)}</textarea>
-		<div class="lj-msg" id="lj-msg-conn"></div>
-	</div>`;
+		<div class="lj-msg" id="lj-msg-conn"></div>`;
+}
+
+// Peint l'overlay depuis l'état (`lieuxJsonOuvert` + `lieuxJsonDest`), ou le masque si rien
+// n'est ouvert. ⚠️ La connexion est RE-RÉSOLUE par son `_id` à chaque passe : `fetchLieuxConnections`
+// remplace le tableau après chaque enregistrement, et garder l'objet d'ouverture rendrait un
+// `_rev` périmé — donc un 409 au prochain 💾.
+function renderLieuJsonOverlay() {
+	const ov = document.getElementById('lj-overlay');
+	if (!ov) return;
+	const conn = lieuxJsonOuvert ? lieuxConnections.find(c => c._id === lieuxJsonOuvert) : null;
+	if (!conn) { ov.classList.add('lj-hidden'); return; }
+	document.getElementById('lj-dest').textContent = lieuxJsonDest || '';
+	document.getElementById('lj-body').innerHTML = _sousLieuJsonHtml(conn, lieuxJsonDest);
+	ov.classList.remove('lj-hidden');
 }
 
 async function toggleSousLieuJson(connId, destId) {
-	if (lieuxJsonOuvert === connId) { lieuxJsonOuvert = null; renderLieuxConnList(); return; }
+	if (lieuxJsonOuvert === connId) { closeLieuJson(); return; }
 	await _chargerDocLieu(destId);
 	lieuxJsonOuvert = connId;
+	lieuxJsonDest = destId;
+	renderLieuxConnList();      // le bouton de la ligne passe à « ✕ Fermer »
+	renderLieuJsonOverlay();
+}
+
+// Fermer = abandonner les modifications non enregistrées, comme le ✕ d'admin_table.
+function closeLieuJson() {
+	lieuxJsonOuvert = null;
+	lieuxJsonDest = null;
+	lieuxRepos = null;          // ⚠️ sinon un clic sur la carte écrirait dans un doc parti de l'écran
+	canvas.style.cursor = '';
+	renderLieuJsonOverlay();
 	renderLieuxConnList();
+	if (grid.length) renderGrid();
+}
+
+// ── LIEUX : repositionnement d'une porte ───────────────────────────────────
+// Déplacer une connexion, c'est réécrire la `pos` du nœud QUI PORTE LE LIEU COURANT — la case
+// que le joueur doit occuper pour voir le lien (get_lieu_links est scopé à sa case). La saisir
+// à la main dans le JSON revenait à deviner des coordonnées sans voir où l'on pose la porte.
+
+// Case où l'on peut poser une porte : terrain praticable (`>= 1`), miroir de `combat._walkable`.
+// 0 (inaccessible) et 9 (bloqué) sont refusés, les terrains difficiles 2/3/5 sont admis.
+// ⚠️ Écart ASSUMÉ avec les flèches de déplacement de play_town, qui se grisent dès que
+// `loc_access !== 1` : une porte sur une case difficile est atteignable par le guidage 🧭,
+// pas par les flèches. Ne pas « corriger » l'un sans l'autre.
+// SOURCE UNIQUE des trois endroits qui doivent s'accorder : le voile rouge, l'aperçu au
+// survol et le refus du clic — un prédicat divergent entre ce qui est peint et ce qui est
+// accepté est exactement le défaut que cet outil doit éviter.
+function _caseAccessible(cx, cy) {
+	if (!grid.length || cy < 0 || cy >= rows || cx < 0 || cx >= cols) return false;
+	return Number(grid[cy][cx]) >= 1;
+}
+
+function armerRepositionnement(connId, destId) {
+	if (!grid.length) { _ljMsg('conn', "Ce lieu n'a pas de grille : aucune case où poser la porte.", true); return; }
+	lieuxRepos = { connId, destId };
+	canvas.style.cursor = 'crosshair';
+	renderLieuJsonOverlay();
+	renderGrid();
+	setStatus('Repositionnement : cliquez la case de la porte.');
+}
+
+function desarmerRepositionnement() {
+	if (!lieuxRepos) return;
+	lieuxRepos = null;
+	canvas.style.cursor = '';
+	renderLieuJsonOverlay();
+	if (grid.length) renderGrid();
+}
+
+// Clic accepté : on écrit la nouvelle position et on ENREGISTRE tout de suite.
+// ⚠️ On part de la ZONE DE TEXTE et non de l'objet `conn` : elle porte déjà la copie privée
+// de ses `details` (`_connNu`) — réécrire l'objet enrichi persisterait le doc lieu injecté à
+// la volée par get_lieu_connections. Bénéfice au passage : une retouche manuelle en cours
+// part avec le repositionnement au lieu d'être écrasée par le re-rendu qui suit.
+async function _poserPorte(cx, cy) {
+	const destId = lieuxRepos.destId;
+	const area = document.getElementById('lj-area-conn');
+	if (!area) { desarmerRepositionnement(); return; }
+	let doc;
+	try { doc = JSON.parse(area.value); }
+	catch (err) { _ljMsg('conn', `JSON invalide : ${err.message}`, true); return; }
+	const node = (doc.nodes || []).find(n => n.lieu === currentLocId);
+	if (!node) { _ljMsg('conn', "Aucun nœud de ce lieu dans le JSON.", true); return; }
+	node.pos = [cx, cy];
+	area.value = JSON.stringify(doc, null, 2);   // affichage ; l'écriture, elle, part de `doc`
+	// ⚠️ AVANT le save : la liste de gauche est filtrée par la case sélectionnée — la connexion
+	// en disparaîtrait à la seconde même où on vient de la déplacer.
+	lieuxSelectedCell = { cx, cy };
+	// ⚠️ Désarmement à CRU, sans passer par `desarmerRepositionnement()` : celui-ci re-rend
+	// l'overlay, ce qui rebâtirait le `<textarea>` depuis `lieuxConnections` — donc avec
+	// l'ANCIENNE position. C'est ce qui faisait enregistrer un JSON inchangé. Le re-rendu
+	// (bouton désarmé, voile retiré) est fait par `sauverDocJson` juste après.
+	lieuxRepos = null;
+	canvas.style.cursor = '';
+	await sauverDocJson('conn', destId, doc);   // PUT + refetch + re-rendu + message ✓/✗
 }
 
 async function _chargerDocLieu(destId) {
@@ -1513,15 +1694,21 @@ function _ljMsg(kind, texte, erreur) {
 	if (el) { el.textContent = texte; el.style.color = erreur ? 'var(--danger)' : 'var(--accent2)'; }
 }
 
-async function sauverDocJson(kind, destId) {
-	const area = document.getElementById(`lj-area-${kind}`);
-	if (!area) return;
-	let doc;
-	try {
-		doc = JSON.parse(area.value);
-	} catch (err) {
-		_ljMsg(kind, `JSON invalide : ${err.message}`, true);
-		return;
+// `docPret` = document DÉJÀ construit par l'appelant, qui court-circuite la zone de texte.
+// ⚠️ Indispensable pour le repositionnement : tout re-rendu de l'overlay REBÂTIT le
+// `<textarea>` depuis `lieuxConnections`, donc écrase une mutation qui n'est pas encore
+// partie en base. Passer le doc en argument affranchit l'écriture de l'ordre des rendus.
+async function sauverDocJson(kind, destId, docPret) {
+	let doc = docPret;
+	if (!doc) {
+		const area = document.getElementById(`lj-area-${kind}`);
+		if (!area) return;
+		try {
+			doc = JSON.parse(area.value);
+		} catch (err) {
+			_ljMsg(kind, `JSON invalide : ${err.message}`, true);
+			return;
+		}
 	}
 	if (!doc || !doc._id) { _ljMsg(kind, "Champ '_id' requis.", true); return; }
 	_ljMsg(kind, 'Enregistrement…', false);
@@ -1539,8 +1726,9 @@ async function sauverDocJson(kind, destId) {
 		if (kind === 'lieu') await _chargerDocLieu(destId);
 		await fetchLieuxConnections();
 		renderLieuxConnList();
+		renderLieuJsonOverlay();   // repeint les deux zones : le `_rev` vient de changer
 		if (grid.length) renderGrid();
-		_ljMsg(kind, '✓ Enregistré.', false);
+		_ljMsg(kind, '✓ Enregistré.', false);   // ⚠️ APRÈS le rendu, qui vient d'écraser la zone de message
 		setStatus(`Document <span>${doc._id}</span> enregistré.`);
 	} catch (err) {
 		_ljMsg(kind, `✗ ${err.message}`, true);
@@ -1569,9 +1757,13 @@ async function supprimerDocJson(kind, destId) {
 			return;
 		}
 		lieuxJsonOuvert = null;
+		lieuxJsonDest = null;
+		lieuxRepos = null;         // le document visé n'existe plus : plus rien à repositionner
+		canvas.style.cursor = '';
 		delete lieuxDocCache[destId];
 		await fetchLieuxConnections();
 		renderLieuxConnList();
+		renderLieuJsonOverlay();   // le document édité n'existe plus : l'overlay se referme
 		if (grid.length) renderGrid();
 		setStatus(`Document <span>${docId}</span> supprimé.`);
 	} catch (err) {
@@ -1971,7 +2163,12 @@ document.addEventListener('keydown', (e) => {
 	const add = document.getElementById('lieu-add-overlay');
 	if (add && !add.classList.contains('la-hidden')) { closeLieuAdd(); return; }
 	const ov = document.getElementById('lieu-fiche-overlay');
-	if (ov && !ov.classList.contains('lieu-fiche-hidden')) closeLieuFiche();
+	if (ov && !ov.classList.contains('lieu-fiche-hidden')) { closeLieuFiche(); return; }
+	// L'éditeur JSON vient en dernier : les deux précédents sont des modals qui le recouvrent.
+	// Armé, Échap annule d'abord la visée et laisse l'overlay ouvert — sinon on perdrait
+	// l'éditeur pour avoir voulu renoncer à un clic.
+	if (lieuxRepos) { desarmerRepositionnement(); return; }
+	if (lieuxJsonOuvert) closeLieuJson();
 });
 
 // ── ZONE PROPERTY EDITORS ──────────────────────────────────────────────────
@@ -2346,6 +2543,22 @@ function setStatus(html) {
 // ── RESIZE ────────────────────────────────────────────────────────────────
 window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 </script>
+
+<!-- Éditeurs JSON d'une connexion du mode Lieux (overlay fixe à droite, cf. admin_table).
+     Rendu par renderLieuJsonOverlay() : `#lj-body` est réécrit à chaque ouverture ET après
+     chaque enregistrement (le `_rev` a changé) — rien n'est semé ici. -->
+<div id="lj-overlay" class="card lj-hidden">
+	<div class="lj-title">
+		<div class="card-title">🧾 JSON — <span id="lj-dest"></span></div>
+		<button type="button" class="lj-close" onclick="closeLieuJson()" title="Fermer (sans enregistrer)">✕</button>
+	</div>
+	<div class="lj-desc">
+		Éditez puis <b>💾</b> (enregistre en base) ; <b>🗑</b> supprime définitivement, après
+		confirmation. Supprimer la <b>connexion</b> n'efface pas le <b>lieu</b> : deux documents,
+		deux boutons.
+	</div>
+	<div id="lj-body"></div>
+</div>
 
 <!-- Overlay fiche du lieu (réplique play_town, lecture seule) -->
 <div id="lieu-fiche-overlay" class="lieu-fiche-hidden" onclick="if(event.target===this)closeLieuFiche()">
