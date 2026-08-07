@@ -1,0 +1,488 @@
+[
+  {
+    "_id": "item:Cire_d_abeille",
+    "type": "item",
+    "nom": "Cire d'abeille",
+    "icon": "🍯",
+    "description": "Pains de cire fondue et coulée, blonde et odorante, achetés aux ruchers des faubourgs.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "cire",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 6
+      }
+    ]
+  },
+  {
+    "_id": "item:Meche",
+    "type": "item",
+    "nom": "Mèche tressée",
+    "icon": "🧵",
+    "description": "Fil de chiffon tressé serré et passé à la cire : il boit la flamme sans la noyer.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "meche",
+    "slots": [],
+    "tags": [],
+    "poids": 0.02
+  },
+  {
+    "_id": "item:Bougie_chamanique",
+    "type": "item",
+    "nom": "Bougie chamanique",
+    "icon": "🕯️",
+    "description": "Suif battu d'herbes à brûler et d'une mèche de poil de bête. Sa fumée grise appelle les esprits, et l'esprit du veilleur s'ouvre avec elle.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15,
+    "effets": {
+      "duree": 8,
+      "regen_pm": 2,
+      "buffs": {
+        "Vol": 5
+      }
+    }
+  },
+  {
+    "_id": "item:Bougie_arcanique",
+    "type": "item",
+    "nom": "Bougie arcanique",
+    "icon": "🕯️",
+    "description": "Cire blonde chargée de sels et de poudre de miroir : la flamme y prend un éclat froid sous lequel les formules se relisent sans peine.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15,
+    "effets": {
+      "duree": 8,
+      "regen_pm": 3,
+      "buffs": {
+        "Int": 5
+      }
+    }
+  },
+  {
+    "_id": "item:Cire_a_cacheter",
+    "type": "item",
+    "nom": "Cire à cacheter",
+    "icon": "🔴",
+    "description": "Bâtonnets de cire poissée, à fondre au-dessus d'un pli pour y écraser un sceau.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05
+  },
+  {
+    "_id": "item:Tablette_de_cire",
+    "type": "item",
+    "nom": "Tablette de cire",
+    "icon": "📋",
+    "description": "Planchette évidée et coulée de cire : on y écrit au stylet, on lisse, on recommence.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.3
+  },
+  {
+    "_id": "item:Fil_poisse",
+    "type": "item",
+    "nom": "Fil poissé",
+    "icon": "🧶",
+    "description": "Crin retors passé à la poix, imperméable et coupant : le fil des selliers et des bourreliers, qui tient sous la pluie.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05
+  },
+  {
+    "_id": "item:Poupee_de_cire",
+    "type": "item",
+    "nom": "Poupée de cire",
+    "icon": "🪆",
+    "description": "Figurine de cire grossièrement modelée, une mèche de poil prise dans la poitrine. Vendue vierge — ce qu'on en fait ne regarde pas le cirier.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2
+  },
+  {
+    "_id": "item:Fetiche_envoutement",
+    "type": "item",
+    "nom": "Fétiche d'envoûtement",
+    "icon": "🪬",
+    "description": "Poupée de cire nouée de sel noir et de poil, éveillée par une nuit de veille. Elle attend un nom.",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.25
+  },
+  {
+    "_id": "item:Bougie_noire",
+    "type": "item",
+    "nom": "Bougie noire",
+    "sous_categorie": "",
+    "icon": "🕯️",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "slots": [],
+    "poids": 0.1,
+    "description": "Suif noirci d'os broyé et de sel noir. On la brûle pour ce qu'on n'ose pas dire tout haut, et la chance s'en détourne.",
+    "effets": {
+      "duree": 6,
+      "buffs": {
+        "Vol": 8,
+        "Ch": -5
+      }
+    }
+  },
+  {
+    "_id": "item:Bougie_rouge",
+    "type": "item",
+    "nom": "Bougie rouge",
+    "sous_categorie": "",
+    "icon": "🕯️",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "slots": [],
+    "poids": 0.1,
+    "description": "Suif teint au sang et piqué de soufre. Elle chauffe le bras et brouille le jugement.",
+    "effets": {
+      "duree": 6,
+      "buffs": {
+        "F": 8,
+        "Int": -5
+      }
+    }
+  },
+  {
+    "_id": "item:Cierge",
+    "type": "item",
+    "nom": "Cierge",
+    "sous_categorie": "",
+    "icon": "🕯️",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "slots": [],
+    "poids": 0.1,
+    "description": "Long cierge de cire pure, à mèche unique. Il brûle une nuit entière sans couler, et veiller à sa lumière repose le corps comme l'esprit.",
+    "effets": {
+      "duree": 12,
+      "regen_pv": 1,
+      "regen_pm": 1
+    }
+  },
+  {
+    "_id": "recette:cirier_meche",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Meche",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:Chiffon",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_bougie_chamanique",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Bougie_chamanique",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "graisse",
+        "quantite": 2
+      },
+      {
+        "item": "item:Herbes_a_bruler",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "poils",
+        "quantite": 1
+      },
+      {
+        "item": "item:Meche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_bougie_arcanique",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Bougie_arcanique",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 2
+      },
+      {
+        "item": "item:Reactif_brut",
+        "quantite": 1
+      },
+      {
+        "item": "item:Poudre_de_miroir",
+        "quantite": 1
+      },
+      {
+        "item": "item:Meche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_bougie_noire",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Bougie_noire",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "graisse",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "poudre_d_os",
+        "quantite": 2
+      },
+      {
+        "item": "item:Sel_noir",
+        "quantite": 1
+      },
+      {
+        "item": "item:Meche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_bougie_rouge",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Bougie_rouge",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "graisse",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "sang",
+        "quantite": 2
+      },
+      {
+        "item": "item:Soufre",
+        "quantite": 1
+      },
+      {
+        "item": "item:Meche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_cierge",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Cierge",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 3
+      },
+      {
+        "item": "item:Meche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_torche",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Torche",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "branche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      },
+      {
+        "item": "item:Chiffon",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_huile_entretien",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Huile_entretien",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "graisse",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_cire_a_cacheter",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Cire_a_cacheter",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_tablette_de_cire",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Tablette_de_cire",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "petit_rondin",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_fil_poisse",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Fil_poisse",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "crins",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_poupee_de_cire",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Poupee_de_cire",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poils",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:scriptorium_sceau_ordre",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "Sceau_ordre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_a_cacheter",
+        "quantite": 1
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:maroquinerie_petite_bourse",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Petite_bourse_vide",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "item": "item:Fil_poisse",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:necromancie_fetiche_envoutement",
+    "type": "recette",
+    "lieu_categorie": "necromancie",
+    "objet_final": "Fetiche_envoutement",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Poupee_de_cire",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel_noir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poils",
+        "quantite": 1
+      }
+    ]
+  }
+]

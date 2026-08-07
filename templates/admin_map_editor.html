@@ -293,7 +293,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 5px;
-		max-height: 140px;
+		max-height: 240px;   /* la légende du mode Lieux compte 6 pastilles + une note */
 		overflow-y: auto;
 	}
 	.legend-item {
@@ -443,6 +443,10 @@
 	#lieu-fiche-overlay .lf-sublocs h3 {
 		font-family: 'Cinzel', Georgia, serif; color: var(--gold); font-size: 1rem; margin-bottom: 8px;
 	}
+	/* Deuxième section (PNJ) : on la décolle de la liste des lieux au-dessus. */
+	#lieu-fiche-overlay .lf-sublocs h3.lf-h3-suite {
+		margin-top: 14px; border-top: 1px solid var(--bronze); padding-top: 10px;
+	}
 	#lieu-fiche-overlay .lf-sublist { list-style: none; display: flex; flex-direction: column; gap: 6px; }
 	#lieu-fiche-overlay .lf-subitem { list-style: none; }
 	#lieu-fiche-overlay .lf-subbtn {
@@ -453,6 +457,35 @@
 	}
 	#lieu-fiche-overlay .lf-subbtn:hover {
 		background: var(--gold2); border-color: var(--gold); color: var(--ink);
+	}
+	/* PNJ du lieu : un bouton par PNJ (vignette + nom) quand il a un portrait,
+	   une simple ligne grisée sinon — le clic remplace l'image du lieu par le portrait. */
+	#lieu-fiche-overlay .lf-pnjbtn {
+		display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+	}
+	#lieu-fiche-overlay .lf-pnjbtn.lf-pnjbtn-on { cursor: pointer; }
+	#lieu-fiche-overlay .lf-pnjbtn-off {
+		cursor: default; opacity: .65;
+	}
+	#lieu-fiche-overlay .lf-pnjbtn-off:hover {
+		background: var(--parch3); border-color: var(--bronze); color: var(--ink);
+	}
+	#lieu-fiche-overlay .lf-pnj-thumb {
+		width: 34px; height: 34px; object-fit: cover; flex: 0 0 auto;
+		border: 1px solid var(--bronze); border-radius: 4px; background: #0002;
+	}
+	#lieu-fiche-overlay .lf-pnj-nom { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+	#lieu-fiche-overlay .lf-pnj-sansportrait {
+		display: block; font-size: .75rem; color: #6b5a3a; font-style: italic;
+	}
+	#lieu-fiche-overlay .lf-backbtn {
+		display: inline-block; margin-bottom: 8px; cursor: pointer;
+		background: var(--parch3); color: var(--ink); border: 1px solid var(--bronze);
+		border-radius: 5px; padding: 6px 12px; font-family: Georgia, serif; font-size: .9rem;
+	}
+	#lieu-fiche-overlay .lf-backbtn:hover { background: var(--gold2); border-color: var(--gold); }
+	#lieu-fiche-overlay .lf-portrait-nom {
+		font-family: 'Cinzel', Georgia, serif; color: var(--gold); margin-bottom: 6px;
 	}
 
 	/* ── Création d'un sous-lieu (overlay, thème admin sombre) ──
@@ -737,7 +770,7 @@
 
 		<!-- Légende couleurs -->
 		<div class="card">
-			<div class="card-title">🎨 Légende</div>
+			<div class="card-title" id="legend-title">🎨 Légende</div>
 			<div class="legend" id="legend"></div>
 		</div>
 
@@ -787,6 +820,21 @@ const LEGEND_LABELS = {
 	9: 'Bloqué (∞)',
 };
 
+// ── Mode Lieux : ce qu'un point de connexion dit du PNJ du lieu de destination ──
+// Cinq états = la combinatoire complète de « a un PNJ » × « il a un nom » × « il a un
+// portrait » (sans PNJ, les deux autres questions ne se posent pas). L'ordre de la liste
+// EST la priorité d'affichage d'une case qui porte plusieurs lieux : le plus incomplet
+// gagne, sinon un lieu bien renseigné masquerait celui qui réclame du travail.
+const LIEUX_PNJ_ETATS = [
+	{ cle: 'pnj_nu',       couleur: 'rgba(220,75,75,0.92)',   label: 'PNJ sans nom ni portrait' },
+	{ cle: 'pnj_nom',      couleur: 'rgba(230,145,55,0.92)',  label: 'PNJ nommé, sans portrait' },
+	{ cle: 'pnj_portrait', couleur: 'rgba(175,110,225,0.92)', label: 'PNJ avec portrait, sans nom' },
+	{ cle: 'pnj_complet',  couleur: 'rgba(85,200,115,0.92)',  label: 'PNJ nommé ET avec portrait' },
+	{ cle: 'sans_pnj',     couleur: 'rgba(75,143,200,0.90)',  label: 'Aucun PNJ dans ce lieu' },
+];
+const LIEUX_PNJ_COULEURS = Object.fromEntries(LIEUX_PNJ_ETATS.map(e => [e.cle, e.couleur]));
+const LIEUX_PNJ_RANG = Object.fromEntries(LIEUX_PNJ_ETATS.map((e, i) => [e.cle, i]));
+
 // ── ELEMENTS ───────────────────────────────────────────────────────────────
 const lieuSelect	= document.getElementById('lieu-select');
 const loadError		= document.getElementById('load-error');
@@ -800,6 +848,7 @@ const valGrid		= document.getElementById('val-grid');
 const customInput	= document.getElementById('custom-val-input');
 const customBtn		= document.getElementById('custom-val-btn');
 const legendEl		= document.getElementById('legend');
+const legendTitleEl	= document.getElementById('legend-title');
 const modeSelect	= document.getElementById('mode-select');
 const panelTerrain	= document.getElementById('panel-terrain');
 const panelNav		= document.getElementById('panel-nav');
@@ -1291,7 +1340,13 @@ function renderGrid() {
 			const node = (conn.nodes || []).find(n => n.lieu === currentLocId);
 			if (!node || !node.pos) return;
 			const key = `${node.pos[0]},${node.pos[1]}`;
-			(byCell[key] = byCell[key] || { x: node.pos[0], y: node.pos[1], conns: [] }).conns.push(conn);
+			const cell = (byCell[key] = byCell[key] || { x: node.pos[0], y: node.pos[1], conns: [], etat: null });
+			cell.conns.push(conn);
+			// Couleur portée par le lieu de DESTINATION (le point marque la porte qui y mène) :
+			// une case qui en porte plusieurs prend le plus incomplet (cf. LIEUX_PNJ_ETATS).
+			const dest = (conn.nodes || []).find(n => n.lieu !== currentLocId) || null;
+			const etat = etatPnjDeLieu(dest && dest.details);
+			if (cell.etat === null || LIEUX_PNJ_RANG[etat] < LIEUX_PNJ_RANG[cell.etat]) cell.etat = etat;
 		});
 		Object.values(byCell).forEach(cell => {
 			const cx = cell.x * cw + cw / 2;
@@ -1301,9 +1356,12 @@ function renderGrid() {
 			ctx.save();
 			ctx.beginPath();
 			ctx.arc(cx, cy, r, 0, Math.PI * 2);
-			ctx.fillStyle = sel ? 'rgba(220,180,75,0.95)' : 'rgba(75,143,200,0.9)';
-			ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-			ctx.lineWidth = sel ? 3 : 2;
+			// ⚠️ La sélection passe par le CONTOUR (doré, épais) et non plus par le
+			// remplissage : le disque doit garder sa couleur d'état, sinon sélectionner
+			// une case ferait disparaître l'information qu'on est venu y lire.
+			ctx.fillStyle = LIEUX_PNJ_COULEURS[cell.etat] || LIEUX_PNJ_COULEURS.sans_pnj;
+			ctx.strokeStyle = sel ? 'rgba(220,180,75,0.98)' : 'rgba(255,255,255,0.9)';
+			ctx.lineWidth = sel ? 4 : 2;
 			ctx.fill();
 			ctx.stroke();
 			if (cell.conns.length > 1) {
@@ -1477,6 +1535,7 @@ function setMode(mode) {
 	if (mode !== 'lieux') { lieuxJsonOuvert = null; lieuxJsonDest = null; renderLieuJsonOverlay(); }
 	if (mode === 'lieux') { lieuxSelectedCell = null; lieuxJsonOuvert = null; lieuxJsonDest = null; renderLieuJsonOverlay(); fetchLieuxConnections(); renderLieuxConnList(); }
 	if (mode !== 'nav') navSelectedCell = null;
+	updateLegend();   // la légende explique le mode COURANT : terrain ailleurs, couleurs des points en Lieux
 	if (grid.length) renderGrid();
 }
 modeSelect.addEventListener('change', (e) => setMode(e.target.value));
@@ -1491,7 +1550,7 @@ async function fetchLieuxConnections() {
 	} catch (err) {
 		lieuxConnections = [];
 	}
-	if (editMode === 'lieux') { renderLieuxConnList(); if (grid.length) renderGrid(); }
+	if (editMode === 'lieux') { renderLieuxConnList(); updateLegend(); if (grid.length) renderGrid(); }
 }
 
 // Renvoie l'"autre" node (destination) d'une connexion vue depuis le lieu courant.
@@ -1539,8 +1598,13 @@ function renderLieuxConnList() {
 		const pos = node && node.pos ? `[${node.pos[0]},${node.pos[1]}]` : '';
 		const destId = dest ? dest.lieu : '';
 		const ouvert = lieuxJsonOuvert === conn._id;
+		// Même pastille que sur la carte : la ligne et son point se reconnaissent l'un l'autre.
+		const etat = etatPnjDeLieu(dest && dest.details);
+		const pastille = `<span title="${_escHtml((LIEUX_PNJ_ETATS.find(e => e.cle === etat) || {}).label || '')}"`
+			+ ` style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;`
+			+ `background:${LIEUX_PNJ_COULEURS[etat]};border:1px solid rgba(255,255,255,0.5);"></span>`;
 		return `<div style="border:1px solid var(--border);border-radius:4px;padding:6px;margin-bottom:6px;">
-			<div><b>➔ ${_escHtml(label)}</b></div>
+			<div>${pastille}<b>➔ ${_escHtml(label)}</b></div>
 			<div style="color:#888;">${_escHtml(type)} ${pos}</div>
 			<div style="display:flex;gap:6px;margin-top:4px;">
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuFiche('${destId}')">📄 Fiche</button>
@@ -2109,6 +2173,48 @@ function lieuImageUrl(image, cb) {
 	probe.src = urls[0];
 }
 
+// État de la fiche ouverte : l'image du lieu (URL déjà résolue par `lieuImageUrl`,
+// qui sonde trois dossiers) et les PNJ listés. Sans lui, revenir à l'image du lieu
+// après un portrait re-sonderait les dossiers à chaque aller-retour.
+let lfEtat = { imgUrl: null, fit: true, pnjs: [], portraitAffiche: false };
+let lfGen = 0;   // génération de fiche : une résolution d'image en vol ne doit pas repeindre la suivante
+
+// État PNJ d'un lieu, depuis le `details` injecté dans les nodes par get_lieu_connections.
+// ⚠️ On lit UNIQUEMENT l'entrée `pnj` du doc lieu — aucun repli sur le doc `pnj:*` : la
+// couleur dit ce que le lieu porte lui-même, c'est précisément ce qu'on vient y vérifier.
+function etatPnjDeLieu(details) {
+	const entrees = (details && details.pnj) || [];
+	if (!entrees.length) return 'sans_pnj';
+	let pire = null;
+	entrees.forEach(e => {
+		const nom = !!(e && e.nom);
+		const portrait = !!(e && e.portrait);
+		const cle = nom && portrait ? 'pnj_complet' : (nom ? 'pnj_nom' : (portrait ? 'pnj_portrait' : 'pnj_nu'));
+		if (pire === null || LIEUX_PNJ_RANG[cle] < LIEUX_PNJ_RANG[pire]) pire = cle;
+	});
+	return pire || 'pnj_nu';
+}
+
+function _lfRendreMap(html) { document.getElementById('lf-map').innerHTML = html; }
+
+function lfImageLieu() {
+	lfEtat.portraitAffiche = false;
+	if (!lfEtat.imgUrl) { _lfRendreMap(`<div class="lf-noimg">Image indisponible</div>`); return; }
+	_lfRendreMap(`<div class="lf-map-scroll"><img class="${lfEtat.fit ? 'lf-img-fit' : 'lf-img'}" src="${lfEtat.imgUrl}" alt=""></div>`);
+}
+
+// Portrait à la place de l'image du lieu — le retour est DANS la vue portrait :
+// il n'existe que là où il a un sens, et ne peut pas rester affiché à contretemps.
+function lfVoirPortrait(i) {
+	const p = lfEtat.pnjs[i];
+	if (!p || !p.portrait) return;
+	lfEtat.portraitAffiche = true;
+	_lfRendreMap(
+		`<button class="lf-backbtn" onclick="lfImageLieu()">⬅ Revenir à l'image du lieu</button>`
+		+ `<div class="lf-portrait-nom">${_escHtml(p.nom)}</div>`
+		+ `<div class="lf-map-scroll"><img class="lf-img-fit" src="{{ url_for('pnj', path='') }}${encodeURIComponent(p.portrait)}" alt="${_escHtml(p.nom)}"></div>`);
+}
+
 async function openLieuFiche(destId) {
 	if (!destId) return;
 	const overlay = document.getElementById('lieu-fiche-overlay');
@@ -2118,6 +2224,8 @@ async function openLieuFiche(destId) {
 	titleEl.textContent = 'Chargement…';
 	mapEl.innerHTML = '';
 	subEl.innerHTML = '';
+	lfEtat = { imgUrl: null, fit: true, pnjs: [], portraitAffiche: false };
+	const gen = ++lfGen;
 	overlay.classList.remove('lieu-fiche-hidden');
 	try {
 		const [docRes, connRes] = await Promise.all([
@@ -2128,10 +2236,14 @@ async function openLieuFiche(destId) {
 		const conns = connRes.ok ? (await connRes.json() || []) : [];
 		titleEl.textContent = (doc && doc.label) || destId;
 		// Image
+		// ⚠ Le sondage des dossiers d'images est asynchrone : on mémorise TOUJOURS
+		// l'URL (le bouton de retour en a besoin) mais on ne repeint que si la fiche
+		// est encore celle-ci ET qu'un portrait n'a pas déjà pris la place.
 		lieuImageUrl(doc && doc.image, (url) => {
-			if (!url) { mapEl.innerHTML = `<div class="lf-noimg">Image indisponible</div>`; return; }
-			const fit = !(doc && doc.dimensions && doc.cells);
-			mapEl.innerHTML = `<div class="lf-map-scroll"><img class="${fit ? 'lf-img-fit' : 'lf-img'}" src="${url}" alt=""></div>`;
+			if (gen !== lfGen) return;
+			lfEtat.imgUrl = url || null;
+			lfEtat.fit = !(doc && doc.dimensions && doc.cells);
+			if (!lfEtat.portraitAffiche) lfImageLieu();
 		});
 		// Sous-lieux (miroir de buildLocationslist, exclut destId) — cliquables :
 		// ouvrent le lieu connecté dans la même fiche.
@@ -2143,10 +2255,30 @@ async function openLieuFiche(destId) {
 				if (n.lieu !== destId && l && !seen.has(l)) { seen.add(l); items.push({ label: l, id: n.lieu }); }
 			});
 		});
+		// PNJ du lieu — ce que porte l'entrée `pnj` du doc lieu, et RIEN d'autre :
+		// pas de repli sur le doc `pnj:*` (même règle que la couleur des points).
+		lfEtat.pnjs = ((doc && doc.pnj) || []).map(e => ({
+			id: (e && e.character) || '',
+			nom: (e && e.nom) || (e && e.character) || 'PNJ',
+			portrait: (e && e.portrait) || '',
+		}));
+		// Les PNJ sont adressés par INDICE dans `lfEtat.pnjs` et jamais par leur nom
+		// dans l'onclick : un nom porte volontiers une apostrophe, qui casserait la
+		// chaîne JS (cf. Conventions §9).
+		const pnjHtml = `<h3 class="lf-h3-suite">PNJ</h3>` + (lfEtat.pnjs.length
+			? `<ul class="lf-sublist">${lfEtat.pnjs.map((p, i) => `<li class="lf-subitem">` + (p.portrait
+				? `<button class="lf-subbtn lf-pnjbtn lf-pnjbtn-on" onclick="lfVoirPortrait(${i})">`
+					+ `<img class="lf-pnj-thumb" src="{{ url_for('pnj', path='') }}${encodeURIComponent(p.portrait)}" alt="">`
+					+ `<span class="lf-pnj-nom">🗣 ${_escHtml(p.nom)}</span></button>`
+				: `<div class="lf-subbtn lf-pnjbtn lf-pnjbtn-off"><span class="lf-pnj-nom">🗣 ${_escHtml(p.nom)}`
+					+ `<span class="lf-pnj-sansportrait">aucun portrait</span></span></div>`)
+				+ `</li>`).join('')}</ul>`
+			: `<div class="lf-empty">Aucun</div>`);
 		subEl.innerHTML = `<h3>Lieux</h3>` + (items.length
 			? `<ul class="lf-sublist">${items.map(it =>
 				`<li class="lf-subitem"><button class="lf-subbtn" onclick="openLieuFiche('${it.id}')">➔ ${it.label}</button></li>`).join('')}</ul>`
-			: `<div class="lf-empty">Aucun</div>`);
+			: `<div class="lf-empty">Aucun</div>`)
+			+ pnjHtml;
 	} catch (err) {
 		titleEl.textContent = 'Erreur';
 		subEl.innerHTML = `<div class="lf-empty">Impossible de charger la fiche.</div>`;
@@ -2220,6 +2352,9 @@ navClearBtn.addEventListener('click', () => {
 
 // ── LEGEND ────────────────────────────────────────────────────────────────
 function updateLegend() {
+	// Le mode Lieux ne peint pas le terrain : sa légende est celle des COULEURS DE POINTS.
+	if (editMode === 'lieux') { updateLegendLieux(); return; }
+	legendTitleEl.textContent = '🎨 Légende';
 	const usedVals = new Set();
 	for (let y = 0; y < rows; y++)
 		for (let x = 0; x < cols; x++)
@@ -2234,6 +2369,28 @@ function updateLegend() {
 		item.innerHTML = `<div class="legend-dot" style="background:${col === null ? 'rgba(75,143,200,0.25)' : col}; border:1px solid rgba(255,255,255,0.1)"></div><span>${v} — ${label}</span>`;
 		legendEl.appendChild(item);
 	});
+}
+
+// Légende du mode Lieux : ce que dit la couleur d'un point de connexion.
+function updateLegendLieux() {
+	legendTitleEl.textContent = '🎨 Légende — points de connexion';
+	legendEl.innerHTML = '';
+	const ligne = (couleur, texte, bordure) => {
+		const item = document.createElement('div');
+		item.className = 'legend-item';
+		item.innerHTML = `<div class="legend-dot" style="background:${couleur};border-radius:50%;`
+			+ `border:${bordure || '1px solid rgba(255,255,255,0.6)'}"></div><span>${_escHtml(texte)}</span>`;
+		legendEl.appendChild(item);
+	};
+	LIEUX_PNJ_ETATS.forEach(e => ligne(e.couleur, e.label));
+	ligne('rgba(120,120,130,0.35)', 'Case sélectionnée (contour doré)', '2px solid rgba(220,180,75,0.98)');
+	const note = document.createElement('div');
+	note.className = 'legend-item';
+	note.style.color = '#888';
+	note.innerHTML = `<span>Nom et portrait lus sur l'entrée <code>pnj</code> du <b>doc lieu</b> `
+		+ `(aucun repli sur le doc <code>pnj:*</code>). Un point portant plusieurs lieux prend la `
+		+ `couleur du plus incomplet ; le chiffre au centre en donne le nombre.</span>`;
+	legendEl.appendChild(note);
 }
 
 // ── ZONES UI ───────────────────────────────────────────────────────────────
