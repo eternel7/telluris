@@ -1,0 +1,682 @@
+[
+  {
+    "_id": "item:Table_d_harmonie",
+    "type": "item",
+    "nom": "Table d'harmonie",
+    "icon": "🪵",
+    "description": "Planche de bois fendue au fil, amincie et mise à sécher des mois durant. C'est elle qui chante — le reste n'est que menuiserie.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "table_d_harmonie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.4
+  },
+  {
+    "_id": "item:Archet",
+    "type": "item",
+    "nom": "Archet",
+    "icon": "🏹",
+    "description": "Baguette cintrée tendue de crins passés à la poix : sans lui, un rebec n'est qu'une boîte à cordes.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "archet",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2
+  },
+  {
+    "_id": "item:Cliquettes",
+    "type": "item",
+    "nom": "Cliquettes",
+    "icon": "🥢",
+    "description": "Deux lattes de bois dur claquées entre les doigts. Le premier instrument de tout jongleur, et le dernier qu'il revend.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 0.3,
+    "bonus": {
+      "Cha": 2
+    },
+    "valeur": [
+      {
+        "cu": 40
+      }
+    ]
+  },
+  {
+    "_id": "item:Tambourin",
+    "type": "item",
+    "nom": "Tambourin",
+    "icon": "🪘",
+    "description": "Cercle de bois tendu d'une peau, cerclé de sonnailles de bronze. On le tient d'une main et on danse de l'autre.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 0.5,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Cha": 3,
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Chalemie",
+    "type": "item",
+    "nom": "Chalemie",
+    "icon": "🪈",
+    "description": "Hautbois à anche double, si perçant qu'on l'entend d'un bout à l'autre d'une foire.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 0.4,
+    "bonus": {
+      "Cha": 4
+    },
+    "restriction": {
+      "Cha": 25
+    }
+  },
+  {
+    "_id": "item:Olifant",
+    "type": "item",
+    "nom": "Olifant",
+    "icon": "📯",
+    "description": "Corne évidée, cerclée de bronze et pendue au baudrier. Son appel court plus loin qu'un cri et retourne l'estomac de ceux qu'il vise.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 0.8,
+    "bonus_degats": 1,
+    "bonus": {
+      "Cha": 5
+    },
+    "restriction": {
+      "Cha": 30
+    },
+    "effets": {
+      "buffs": {
+        "Vol": -4,
+        "Cha": -3
+      },
+      "duree": 2
+    },
+    "cible": "ennemi"
+  },
+  {
+    "_id": "item:Psalterion",
+    "type": "item",
+    "nom": "Psaltérion",
+    "icon": "🎼",
+    "description": "Caisse plate en trapèze aux cordes pincées à même la table, tenue contre la poitrine. On y lit la musique comme on lit un livre.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 1.8,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Cha": 5,
+      "Int": 2
+    },
+    "restriction": {
+      "Cha": 30
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Rebec",
+    "type": "item",
+    "nom": "Rebec",
+    "icon": "🎻",
+    "description": "Petite vielle piriforme à trois cordes, jouée à l'archet contre l'épaule. Sa voix nasillarde porte au-dessus des tavernes.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 1.2,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Cha": 5,
+      "Ag": 2
+    },
+    "restriction": {
+      "Cha": 30
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Vielle_a_roue",
+    "type": "item",
+    "nom": "Vielle à roue",
+    "icon": "🎡",
+    "description": "Une roue poissée frotte les cordes pendant que les touches les raccourcissent : un orchestre entier tenu sur les genoux d'un seul homme.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 3.0,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus": {
+      "Cha": 6,
+      "Vol": 2
+    },
+    "restriction": {
+      "Cha": 35
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Harpe",
+    "type": "item",
+    "nom": "Harpe",
+    "icon": "🎵",
+    "description": "Harpe de genou à colonne de frêne, vingt-six cordes tendues à la main. Rien n'ouvre plus grand la porte d'un seigneur.",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 4.0,
+    "bonus_degats_dice": 3,
+    "bonus": {
+      "Cha": 7
+    },
+    "restriction": {
+      "Cha": 40
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Cornemuse",
+    "type": "item",
+    "nom": "Cornemuse",
+    "icon": "🎐",
+    "description": "Outre de peau, bourdons de buis, anche criarde : on ne la joue pas, on l'impose. Les bêtes fuient et les hommes serrent les dents.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 2.5,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Cha": 4
+    },
+    "restriction": {
+      "Cha": 30
+    },
+    "deux_mains": true,
+    "effets": {
+      "buffs": {
+        "Vol": -4
+      },
+      "duree": 2
+    },
+    "cible": "ennemi"
+  },
+  {
+    "_id": "item:Tambour_de_guerre",
+    "type": "item",
+    "nom": "Tambour de guerre",
+    "icon": "🥁",
+    "description": "Fût de bois sanglé de cuir, porté au ventre. Il ne fait pas de musique : il donne le pas, et le bras suit la cadence.",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "instrument",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "poids": 3.5,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus": {
+      "Cha": 3,
+      "F": 2
+    },
+    "restriction": {
+      "Cha": 25
+    },
+    "deux_mains": true,
+    "effets": {
+      "buffs": {
+        "F": 4
+      },
+      "duree": 2
+    },
+    "cible": "soi"
+  },
+  {
+    "_id": "item:Luth",
+    "type": "item",
+    "nom": "Luth",
+    "sous_categorie": "instrument",
+    "icon": "🪕",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.5,
+    "description": "Caisse bombée en côtes de bois, manche renversé, cordes de boyau doublées. L'instrument des cours — et des espions qu'on y laisse entrer.",
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "deux_mains": true,
+    "bonus_degats_dice": 2,
+    "bonus": {
+      "Cha": 5
+    },
+    "restriction": {
+      "Cha": 25
+    }
+  },
+  {
+    "_id": "item:flute",
+    "type": "item",
+    "nom": "Flûte",
+    "sous_categorie": "instrument",
+    "icon": "🪈",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.2,
+    "description": "Flûte à bec taillée dans un os long et percée de six trous. Le premier air qu'apprend un enfant, et celui qu'on siffle en marchant.",
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus": {
+      "Cha": 2
+    },
+    "valeur": [
+      {
+        "cu": 45
+      }
+    ]
+  },
+  {
+    "_id": "item:Tambour_rituel",
+    "type": "item",
+    "nom": "Tambour rituel",
+    "sous_categorie": "instrument",
+    "icon": "🥁",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "description": "Peau tendue sur un cercle de saule, frappée d'un maillet gainé de poil. Sa pulsation sourde tient la transe éveillée.",
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus": {
+      "Cha": 2,
+      "Vol": 4
+    },
+    "restriction": {
+      "Vol": 25
+    }
+  },
+  {
+    "_id": "recette:lutherie_table_d_harmonie",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Table_d_harmonie",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "petit_rondin",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_archet",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Archet",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "branche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "crins",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_cliquettes",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Cliquettes",
+    "quantite_produite": 4,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "petit_rondin",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_tambourin",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Tambourin",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Table_d_harmonie",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "bronze",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_chalemie",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Chalemie",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "branche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "bronze",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_olifant",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Olifant",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "os",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "bronze",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_tambour_rituel",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Tambour_rituel",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Table_d_harmonie",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "poils",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_luth",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Luth",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Table_d_harmonie",
+        "quantite": 2
+      },
+      {
+        "item": "item:cordes_d_instrument",
+        "quantite": 4
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_psalterion",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Psalterion",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Table_d_harmonie",
+        "quantite": 2
+      },
+      {
+        "item": "item:cordes_d_instrument",
+        "quantite": 6
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_rebec",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Rebec",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Table_d_harmonie",
+        "quantite": 2
+      },
+      {
+        "item": "item:cordes_d_instrument",
+        "quantite": 3
+      },
+      {
+        "item": "item:Archet",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_vielle_a_roue",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Vielle_a_roue",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Table_d_harmonie",
+        "quantite": 3
+      },
+      {
+        "item": "item:cordes_d_instrument",
+        "quantite": 4
+      },
+      {
+        "sous_categorie": "crins",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "bronze",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_harpe",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Harpe",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Table_d_harmonie",
+        "quantite": 3
+      },
+      {
+        "item": "item:cordes_d_instrument",
+        "quantite": 8
+      },
+      {
+        "sous_categorie": "bronze",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_cornemuse",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Cornemuse",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "branche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:lutherie_tambour_de_guerre",
+    "type": "recette",
+    "lieu_categorie": "lutherie",
+    "objet_final": "Tambour_de_guerre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Table_d_harmonie",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  }
+]
