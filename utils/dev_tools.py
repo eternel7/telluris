@@ -124,12 +124,34 @@ CATALOGUE = [
 			"dump figé et n'y injecte que ce champ : régénération idempotente.",
 	},
 	{
+		"id": "gen_coherence_france",
+		"label": "🗺️ Corriger la cohérence de lieu:france",
+		"argv": _py("gen_coherence_france.py"),
+		"ecrit": "Écrit jsons/france_coherence_a_importer.json et …/profils_tag_magique_….",
+		"description": "La carte du monde n'avait AUCUNE ressource récoltable (tout événement "
+			"`ressource` était un no-op) et trois zones posées — marais, collines, glacier — "
+			"n'avaient aucune espèce, donc aucun combat. Ajoute les deux, dédoublonne les "
+			"placements, et corrige `restriction_tags: [\"magie\"]` → `[\"magique\"]` sur les "
+			"4 profils concernés (aucune espèce ne portait `magie`). Relit les docs depuis les "
+			"sources figées : régénération idempotente.",
+	},
+	{
 		"id": "gen_armures",
 		"label": "🛡️ Générer la passe « armures »",
 		"argv": _py("gen_armures.py"),
 		"ecrit": "Écrit jsons/armures_recettes_a_importer.json et …_bonus_pa_….",
 		"description": "item:peaux (matière feuille) + recettes de fabrication, et bonus_pa "
 			"renseigné sur les docs armure.",
+	},
+	{
+		"id": "gen_epaulieres",
+		"label": "🛡️ Générer les pièces d'épaules",
+		"argv": _py("gen_epaulieres.py"),
+		"ecrit": "Écrit jsons/epaulieres_a_importer.json.",
+		"description": "L'emplacement « Epaules » de la silhouette n'avait AUCUN item à "
+			"porter : 21 pièces (plates, mailles, cuir, fourrure, os, plumes) + leurs "
+			"recettes, sur des matières auto-approvisionnées pour que les ateliers "
+			"puissent réellement les produire.",
 	},
 	{
 		"id": "gen_jardinerie",
@@ -154,6 +176,16 @@ CATALOGUE = [
 		"ecrit": "Écrit jsons/matieres_generiques_bois_a_importer.json.",
 		"description": "Un doc générique par calibre (branche, petit_rondin, rondin, "
 			"gros_rondin) — sans lui le prix retombe au plancher de 1 cu, sans aucune erreur.",
+	},
+	{
+		"id": "gen_loot_immateriel",
+		"label": "🦴 Donner un débouché aux butins immatériels",
+		"argv": _py("gen_loot_immateriel.py"),
+		"ecrit": "Écrit jsons/loot_immateriel_a_importer.json.",
+		"description": "32 butins d'espèces (esprits, morts-vivants, constructs) ont une "
+			"sous_categorie VIDE : aucune recette ne les consomme, donc aucun marchand ne "
+			"les rachète. Leur pose une sous-catégorie par famille + les recettes qui les "
+			"transforment.",
 	},
 	{
 		"id": "gen_recettes_empenneur_archerie",

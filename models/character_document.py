@@ -56,6 +56,7 @@ class CharacterDocument(BaseModel):
         "main_gauche":  None,   # bouclier ou arme secondaire
         "torse":        None,   # armure
         "tete":         None,
+        "epaules":      None,
         "jambes":       None,
         "pieds":        None,
         "mains":        None,

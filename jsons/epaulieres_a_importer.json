@@ -1,0 +1,708 @@
+[
+  {
+    "_id": "item:Epaulieres_de_plates",
+    "type": "item",
+    "nom": "Épaulières de plates",
+    "description": "Deux plaques d'acier articulées qui couvrent l'épaule jusqu'au haut du bras. Elles arrêtent une hache ; elles interdisent aussi de lever le bras bien haut.",
+    "icon": "🛡️",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 4.0,
+    "bonus_pa": 8,
+    "bonus_malus_depl": -1,
+    "restriction": {
+      "F": 24
+    }
+  },
+  {
+    "_id": "recette:epauliere_epaulieres_de_plates",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epaulieres_de_plates",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epaulieres_acier_gravees",
+    "type": "item",
+    "nom": "Épaulières d'acier gravées",
+    "description": "Le graveur a couru l'argent en volutes sur l'acier. On les reconnaît de loin, ce qui est tout l'objet de la dépense.",
+    "icon": "⚜️",
+    "rarete": "rare",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 3.5,
+    "bonus_pa": 7,
+    "bonus": {
+      "Cha": 2
+    }
+  },
+  {
+    "_id": "recette:epauliere_epaulieres_acier_gravees",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epaulieres_acier_gravees",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "argent",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epaulieres_benies",
+    "type": "item",
+    "nom": "Épaulières bénies",
+    "description": "Bénies au temple avant d'être rivetées. L'argent y tient moins pour l'ornement que pour ce qu'il repousse.",
+    "icon": "✨",
+    "rarete": "rare",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 3.0,
+    "bonus_pa": 6,
+    "bonus_pm": 5
+  },
+  {
+    "_id": "recette:epauliere_epaulieres_benies",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epaulieres_benies",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "argent",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Mantelet_de_mailles",
+    "type": "item",
+    "nom": "Mantelet de mailles",
+    "description": "Une pèlerine de maille rivetée qui tombe sur les deux épaules. Lourde à porter toute une journée, précieuse au premier coup de taille.",
+    "icon": "⛓️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 3.0,
+    "bonus_pa": 6,
+    "restriction": {
+      "F": 18
+    }
+  },
+  {
+    "_id": "recette:epauliere_mantelet_de_mailles",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Mantelet_de_mailles",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Camail_de_mailles",
+    "type": "item",
+    "nom": "Camail de mailles",
+    "description": "Court capuchon de maille couvrant la nuque et le haut des épaules, lacé sous le heaume. Ce que le heaume laisse passer, il l'attrape.",
+    "icon": "⛓️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 2.5,
+    "bonus_pa": 5
+  },
+  {
+    "_id": "recette:epauliere_camail_de_mailles",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Camail_de_mailles",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epaulieres_de_fer",
+    "type": "item",
+    "nom": "Épaulières de fer",
+    "description": "Ouvrage de forge honnête, martelé sur le patron le plus courant de la ville. Rien d'élégant, et rien à redire.",
+    "icon": "🛡️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 3.0,
+    "bonus_pa": 6
+  },
+  {
+    "_id": "recette:epauliere_epaulieres_de_fer",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epaulieres_de_fer",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epaulieres_de_bronze",
+    "type": "item",
+    "nom": "Épaulières de bronze",
+    "description": "Vieille facture, d'un bronze qui verdit. Le métal est plus doux que le fer : il encaisse en se déformant plutôt qu'en cassant.",
+    "icon": "🟠",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 2.5,
+    "bonus_pa": 5
+  },
+  {
+    "_id": "recette:epauliere_epaulieres_de_bronze",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epaulieres_de_bronze",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "bronze",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Rondelles_d_epaule",
+    "type": "item",
+    "nom": "Rondelles d'épaule",
+    "description": "Deux disques de fer lacés à l'emmanchure, juste devant le creux de l'aisselle — le seul endroit qu'une pointe cherche vraiment.",
+    "icon": "💠",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 1.0,
+    "bonus_pa": 2
+  },
+  {
+    "_id": "recette:epauliere_rondelles_d_epaule",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Rondelles_d_epaule",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epaulieres_cuir_cloutees",
+    "type": "item",
+    "nom": "Épaulières de cuir cloutées",
+    "description": "Cuir épais semé de clous à large tête. Le compromis du soudard : on la porte tout le jour et elle mord quand même la lame.",
+    "icon": "🟤",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 2.0,
+    "bonus_pa": 4
+  },
+  {
+    "_id": "recette:epauliere_epaulieres_cuir_cloutees",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epaulieres_cuir_cloutees",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epaulieres_cuir_bouilli",
+    "type": "item",
+    "nom": "Épaulières de cuir bouilli",
+    "description": "Cuir trempé bouillant puis moulé sur la forme, dur comme une écaille. Il craint la flamme autant qu'il protège du tranchant.",
+    "icon": "🟫",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 1.8,
+    "bonus_pa": 3
+  },
+  {
+    "_id": "recette:epauliere_epaulieres_cuir_bouilli",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epaulieres_cuir_bouilli",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Baudrier_de_cuir",
+    "type": "item",
+    "nom": "Baudrier de cuir",
+    "description": "Sangle passée d'une épaule à la hanche opposée. Ce qu'elle porte tombe dans la main sans qu'on ait à le chercher.",
+    "icon": "🪢",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 0.6,
+    "bonus_pa": 1,
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "recette:epauliere_baudrier_de_cuir",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Baudrier_de_cuir",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Bandouliere_a_fioles",
+    "type": "item",
+    "nom": "Bandoulière à fioles",
+    "description": "Une rangée de gaines cousues au poitrail, chacune à la taille d'un flacon. L'alchimiste y compte ses doses sans baisser les yeux.",
+    "icon": "🧪",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 0.5,
+    "bonus_pa": 1,
+    "bonus_pm": 3
+  },
+  {
+    "_id": "recette:epauliere_bandouliere_a_fioles",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Bandouliere_a_fioles",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Pelerine_de_cuir",
+    "type": "item",
+    "nom": "Pèlerine de cuir",
+    "description": "Courte cape de peau souple qui couvre les épaules et le haut du dos. Elle prend la pluie pour vous.",
+    "icon": "🧥",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 1.2,
+    "bonus_pa": 2
+  },
+  {
+    "_id": "recette:epauliere_pelerine_de_cuir",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Pelerine_de_cuir",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Mantelet_de_chasse",
+    "type": "item",
+    "nom": "Mantelet de chasse",
+    "description": "Coupé court à droite pour dégager la corde. Un archer reconnaît le vêtement avant de reconnaître celui qui le porte.",
+    "icon": "🏹",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 1.0,
+    "bonus_pa": 1,
+    "bonus_cd": 2
+  },
+  {
+    "_id": "recette:epauliere_mantelet_de_chasse",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Mantelet_de_chasse",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Manteau_de_loup",
+    "type": "item",
+    "nom": "Manteau de loup",
+    "description": "La dépouille entière jetée sur les épaules, la tête retombant sur la poitrine. On dort dedans, et on tient le froid des routes du nord.",
+    "icon": "🐺",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 2.5,
+    "bonus_pa": 2,
+    "bonus": {
+      "R": 2
+    }
+  },
+  {
+    "_id": "recette:epauliere_manteau_de_loup",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Manteau_de_loup",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:Etole_de_fourrure",
+    "type": "item",
+    "nom": "Étole de fourrure",
+    "description": "Bande de fourrure lustrée portée en travers des épaules. Elle ne protège de rien qu'on puisse craindre en combat, et de tout ce qui se juge en salle.",
+    "icon": "🧣",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 1.0,
+    "bonus_pa": 1,
+    "bonus": {
+      "Cha": 2
+    }
+  },
+  {
+    "_id": "recette:epauliere_etole_de_fourrure",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Etole_de_fourrure",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Epaulieres_d_os",
+    "type": "item",
+    "nom": "Épaulières d'os",
+    "description": "Plaques d'os poli lacées côte à côte comme des écailles. Léger, bruyant, et assez laid pour qu'on hésite à s'approcher.",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 1.5,
+    "bonus_pa": 2
+  },
+  {
+    "_id": "recette:epauliere_epaulieres_d_os",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "Epaulieres_d_os",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "os",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Harnais_d_ossements",
+    "type": "item",
+    "nom": "Harnais d'ossements",
+    "description": "Une cage d'os montée sur sangles, qui monte des épaules jusqu'à la nuque. Ceux qui la portent ont cessé de se soucier de l'accueil qu'on leur fait.",
+    "icon": "☠️",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 2.0,
+    "bonus_pa": 3,
+    "bonus": {
+      "Cha": -1,
+      "Vol": 2
+    }
+  },
+  {
+    "_id": "recette:epauliere_harnais_d_ossements",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "Harnais_d_ossements",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "os",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Mantelet_de_plumes",
+    "type": "item",
+    "nom": "Mantelet de plumes",
+    "description": "Des centaines de plumes cousues en rangs serrés, montées en courtes ailes sur les épaules. Un ouvrage de mois, qu'une averse suffit à ruiner.",
+    "icon": "🪶",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 0.6,
+    "bonus": {
+      "Cha": 3
+    }
+  },
+  {
+    "_id": "recette:epauliere_mantelet_de_plumes",
+    "type": "recette",
+    "lieu_categorie": "plumasserie",
+    "objet_final": "Mantelet_de_plumes",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "plumes",
+        "quantite": 5
+      }
+    ]
+  },
+  {
+    "_id": "item:Cape_de_plumes_noires",
+    "type": "item",
+    "nom": "Cape de plumes noires",
+    "description": "Plumes de corneille montées à plat, sans un reflet. Elle ne pèse rien et avale le peu de lumière qui aurait pu vous trahir.",
+    "icon": "🌑",
+    "rarete": "rare",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 0.5,
+    "bonus": {
+      "Ag": 1
+    },
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "recette:epauliere_cape_de_plumes_noires",
+    "type": "recette",
+    "lieu_categorie": "plumasserie",
+    "objet_final": "Cape_de_plumes_noires",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "plumes",
+        "quantite": 4
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Mantelet_de_feutre",
+    "type": "item",
+    "nom": "Mantelet de feutre",
+    "description": "Feutre foulé épais, taillé en carré et fendu pour la tête. Le vêtement du pauvre et du berger : il tient chaud même trempé.",
+    "icon": "🧵",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "epaules"
+    ],
+    "tags": [],
+    "poids": 0.8,
+    "bonus_pa": 1
+  },
+  {
+    "_id": "recette:epauliere_mantelet_de_feutre",
+    "type": "recette",
+    "lieu_categorie": "tissage",
+    "objet_final": "Mantelet_de_feutre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "poils",
+        "quantite": 3
+      }
+    ]
+  }
+]

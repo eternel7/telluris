@@ -700,7 +700,8 @@
 		.quest-done-btn:not(:disabled) {
 			border-color: var(--accent-color); color: var(--accent-color);
 			background: rgba(255, 215, 0, 0.08);
-			box-shadow: 0 0 6px rgba(255, 215, 0, 0.25);
+			box-shadow: 0 0 15px 4px rgba(255, 215, 0, 0.25);
+			filter: brightness(1.2);
 			font-weight: bold;
 		}
 		.btn-highlight:hover,
@@ -3697,7 +3698,7 @@ async function spendXp(statKey, useMaxBonus = false) {
 <script>
 // ── Équipement ──────────────────────────────────────────────────────────
 const SLOT_LABELS = {
-	tete: "Tête", cou: "Cou", torse: "Torse",
+	tete: "Tête", cou: "Cou", epaules: "Epaules", torse: "Torse",
 	mains: "Bras", pieds: "Pieds",
 	anneau_1: "Anneau 1", anneau_2: "Anneau 2", ceinture: "Ceinture",
 	jambes: "Jambes", main_droite: "Main D.", main_gauche: "Main G."

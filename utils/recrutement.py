@@ -48,7 +48,7 @@ CARTE_AVENTURIER_ITEM_ID = "item:carte_aventurier"
 
 # Slots d'équipement d'un personnage (miroir exact d'add_character, routers/user.py).
 SLOTS_PERSONNAGE = [
-	"main_droite", "main_gauche", "torse", "tete", "jambes", "pieds",
+	"main_droite", "main_gauche", "torse", "tete", "epaules", "jambes", "pieds",
 	"mains", "anneau_1", "anneau_2", "cou", "ceinture",
 ]
 

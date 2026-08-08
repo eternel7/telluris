@@ -1,0 +1,694 @@
+[
+  {
+    "_id": "item:banshee",
+    "type": "item",
+    "nom": "Résidu spectral de Banshee",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Résidu éthéré laissé par Banshee une fois vaincu(e).",
+    "source_espece": "espece:banshee",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:chevalier_du_sang",
+    "type": "item",
+    "nom": "Ossements de Chevalier du Sang",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 11.5,
+    "description": "Ossements et reliquats récupérés sur Chevalier du Sang après sa destruction.",
+    "source_espece": "espece:chevalier_du_sang",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:comte_vampire",
+    "type": "item",
+    "nom": "Ossements de Comte Vampire",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 13.0,
+    "description": "Ossements et reliquats récupérés sur Comte Vampire après sa destruction.",
+    "source_espece": "espece:comte_vampire",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:corneille_noire",
+    "type": "item",
+    "nom": "Ossements de Corneille Noire",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Ossements et reliquats récupérés sur Corneille Noire après sa destruction.",
+    "source_espece": "espece:corneille_noire",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:dragon_zombie",
+    "type": "item",
+    "nom": "Ossements de Dragon Zombie",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 15.0,
+    "description": "Ossements et reliquats récupérés sur Dragon Zombie après sa destruction.",
+    "source_espece": "espece:dragon_zombie",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:dryade",
+    "type": "item",
+    "nom": "Résidu spectral de Dryade",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Résidu éthéré laissé par Dryade une fois vaincu(e).",
+    "source_espece": "espece:dryade",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:elementaux",
+    "type": "item",
+    "nom": "Débris d'Elementaux",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 10.0,
+    "description": "Fragments inertes récupérés sur Elementaux une fois mis(e) hors d'état.",
+    "source_espece": "espece:elementaux",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:fantome",
+    "type": "item",
+    "nom": "Résidu spectral de Fantome",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 2.0,
+    "description": "Résidu éthéré laissé par Fantome une fois vaincu(e).",
+    "source_espece": "espece:fantome",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:genie",
+    "type": "item",
+    "nom": "Débris de Genie",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 6.0,
+    "description": "Fragments inertes récupérés sur Genie une fois mis(e) hors d'état.",
+    "source_espece": "espece:genie",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:golem_de_chair",
+    "type": "item",
+    "nom": "Débris de Golem de Chair",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 12.0,
+    "description": "Fragments inertes récupérés sur Golem de Chair une fois mis(e) hors d'état.",
+    "source_espece": "espece:golem_de_chair",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:golem_de_fer",
+    "type": "item",
+    "nom": "Débris de Golem de Fer",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 14.0,
+    "description": "Fragments inertes récupérés sur Golem de Fer une fois mis(e) hors d'état.",
+    "source_espece": "espece:golem_de_fer",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:golem_de_pierre",
+    "type": "item",
+    "nom": "Débris de Golem de Pierre",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 12.0,
+    "description": "Fragments inertes récupérés sur Golem de Pierre une fois mis(e) hors d'état.",
+    "source_espece": "espece:golem_de_pierre",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:goule",
+    "type": "item",
+    "nom": "Ossements de Goule",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 6.5,
+    "description": "Ossements et reliquats récupérés sur Goule après sa destruction.",
+    "source_espece": "espece:goule",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:horreur",
+    "type": "item",
+    "nom": "Ossements d'Horreur",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 10.5,
+    "description": "Ossements et reliquats récupérés sur Horreur après sa destruction.",
+    "source_espece": "espece:horreur",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:lhamia",
+    "type": "item",
+    "nom": "Ossements de Lhamia",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 8.0,
+    "description": "Ossements et reliquats récupérés sur Lhamia après sa destruction.",
+    "source_espece": "espece:lhamia",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:liche",
+    "type": "item",
+    "nom": "Ossements de Liche",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 5.5,
+    "description": "Ossements et reliquats récupérés sur Liche après sa destruction.",
+    "source_espece": "espece:liche",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:momie",
+    "type": "item",
+    "nom": "Ossements de Momie",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 8.0,
+    "description": "Ossements et reliquats récupérés sur Momie après sa destruction.",
+    "source_espece": "espece:momie",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:monture_squelette",
+    "type": "item",
+    "nom": "Ossements de Monture Squelette",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 5.5,
+    "description": "Ossements et reliquats récupérés sur Monture Squelette après sa destruction.",
+    "source_espece": "espece:monture_squelette",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:naiade",
+    "type": "item",
+    "nom": "Résidu spectral de Naiade",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Résidu éthéré laissé par Naiade une fois vaincu(e).",
+    "source_espece": "espece:naiade",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:nereide",
+    "type": "item",
+    "nom": "Résidu spectral de Nereide",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Résidu éthéré laissé par Nereide une fois vaincu(e).",
+    "source_espece": "espece:nereide",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:nosferatu",
+    "type": "item",
+    "nom": "Ossements de Nosferatu",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 11.5,
+    "description": "Ossements et reliquats récupérés sur Nosferatu après sa destruction.",
+    "source_espece": "espece:nosferatu",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:oceanide",
+    "type": "item",
+    "nom": "Résidu spectral d'Oceanide",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Résidu éthéré laissé par Oceanide une fois vaincu(e).",
+    "source_espece": "espece:oceanide",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:oreade",
+    "type": "item",
+    "nom": "Résidu spectral d'Oreade",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Résidu éthéré laissé par Oreade une fois vaincu(e).",
+    "source_espece": "espece:oreade",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:reine_lhamia",
+    "type": "item",
+    "nom": "Ossements de Reine Lhamia",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 10.5,
+    "description": "Ossements et reliquats récupérés sur Reine Lhamia après sa destruction.",
+    "source_espece": "espece:reine_lhamia",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:revenant",
+    "type": "item",
+    "nom": "Résidu spectral de Revenant",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 5.5,
+    "description": "Résidu éthéré laissé par Revenant une fois vaincu(e).",
+    "source_espece": "espece:revenant",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:roi_des_tombes",
+    "type": "item",
+    "nom": "Ossements de Roi des Tombes",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 10.5,
+    "description": "Ossements et reliquats récupérés sur Roi des Tombes après sa destruction.",
+    "source_espece": "espece:roi_des_tombes",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:roi_liche",
+    "type": "item",
+    "nom": "Ossements de Roi Liche",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 8.0,
+    "description": "Ossements et reliquats récupérés sur Roi Liche après sa destruction.",
+    "source_espece": "espece:roi_liche",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:seigneur_du_sang",
+    "type": "item",
+    "nom": "Ossements de Seigneur du Sang",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 14.0,
+    "description": "Ossements et reliquats récupérés sur Seigneur du Sang après sa destruction.",
+    "source_espece": "espece:seigneur_du_sang",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:spectre",
+    "type": "item",
+    "nom": "Résidu spectral de Spectre",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 3.0,
+    "description": "Résidu éthéré laissé par Spectre une fois vaincu(e).",
+    "source_espece": "espece:spectre",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:squelette",
+    "type": "item",
+    "nom": "Ossements de Squelette",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 4.5,
+    "description": "Ossements et reliquats récupérés sur Squelette après sa destruction.",
+    "source_espece": "espece:squelette",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:vampire",
+    "type": "item",
+    "nom": "Ossements de Vampire",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 9.5,
+    "description": "Ossements et reliquats récupérés sur Vampire après sa destruction.",
+    "source_espece": "espece:vampire",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:zombie",
+    "type": "item",
+    "nom": "Ossements de Zombie",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 5.5,
+    "description": "Ossements et reliquats récupérés sur Zombie après sa destruction.",
+    "source_espece": "espece:zombie",
+    "loot_defaut": true
+  },
+  {
+    "_id": "item:residu_spectral",
+    "type": "item",
+    "nom": "Résidu spectral",
+    "sous_categorie": "residu_spectral",
+    "icon": "👻",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.2,
+    "description": "Voile éthéré condensé, encore tiède d'une présence disparue."
+  },
+  {
+    "_id": "item:ossements",
+    "type": "item",
+    "nom": "Ossements",
+    "sous_categorie": "ossements",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.5,
+    "description": "Ossements dépareillés arrachés à une carcasse qui marchait encore."
+  },
+  {
+    "_id": "item:debris_anime",
+    "type": "item",
+    "nom": "Débris animés",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.8,
+    "description": "Fragments inertes d'un corps que rien de vivant n'habitait."
+  },
+  {
+    "_id": "recette:ossements_relique_necromancie",
+    "type": "recette",
+    "lieu_categorie": "necromancie",
+    "objet_final": "relique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:ossements_focus_magique_necromancie",
+    "type": "recette",
+    "lieu_categorie": "necromancie",
+    "objet_final": "focus_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "recette:ossements_trophee_taxidermie",
+    "type": "recette",
+    "lieu_categorie": "taxidermie",
+    "objet_final": "trophee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "recette:ossements_manche_tabletterie",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "manche",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:ossements_de_tabletterie",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "de",
+    "quantite_produite": 4,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:ossements_poudre_d_os_atelier_d_artisan",
+    "type": "recette",
+    "lieu_categorie": "atelier_d_artisan",
+    "objet_final": "poudre_d_os",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:ossements_bijou_atelier_d_artisan",
+    "type": "recette",
+    "lieu_categorie": "atelier_d_artisan",
+    "objet_final": "bijou",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:ossements_talisman_bijouterie",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "talisman",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:residu_spectral_reactif_magique_laboratoire_d_alchimie",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "reactif_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "residu_spectral",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:residu_spectral_catalyseur_magique_laboratoire_d_alchimie",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "catalyseur_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "residu_spectral",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:residu_spectral_composant_rituel_necromancie",
+    "type": "recette",
+    "lieu_categorie": "necromancie",
+    "objet_final": "composant_rituel",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "residu_spectral",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:residu_spectral_pigment_scriptorium",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "pigment",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "residu_spectral",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:debris_anime_acier_plisse_armurerie",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "acier_plisse",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "debris_anime",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "recette:debris_anime_poudre_alchimique_laboratoire_d_alchimie",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "poudre_alchimique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "debris_anime",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:debris_anime_catalyseur_magique_laboratoire_d_alchimie",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "catalyseur_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "debris_anime",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:debris_anime_focus_magique_necromancie",
+    "type": "recette",
+    "lieu_categorie": "necromancie",
+    "objet_final": "focus_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "debris_anime",
+        "quantite": 2
+      }
+    ]
+  }
+]

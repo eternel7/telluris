@@ -1,0 +1,1290 @@
+{
+  "docs": [
+    {
+      "_id": "zone:littoral",
+      "type": "zone_influence",
+      "nom": "Littoral",
+      "terrain_tags": [
+        "cote",
+        "mer",
+        "plage",
+        "rocher"
+      ],
+      "intensite_max": 0.45,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 40,
+          "tags": [
+            "coquillage",
+            "algue",
+            "poisson",
+            "sel"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 25,
+          "tags": [
+            "pecheur",
+            "marin",
+            "ramasseur_coquillage"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 15,
+          "tags": [
+            "poisson",
+            "sel",
+            "marchandise_importee"
+          ]
+        },
+        {
+          "type": "meteo",
+          "poids": 15,
+          "tags": [
+            "brouillard",
+            "vent_marin",
+            "tempete"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 1,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:plage",
+      "type": "zone_influence",
+      "nom": "Plage",
+      "terrain_tags": [
+        "cote",
+        "mer",
+        "sable",
+        "plage"
+      ],
+      "intensite_max": 0.35,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 45,
+          "tags": [
+            "coquillage",
+            "algue",
+            "crustace"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 20,
+          "tags": [
+            "pecheur",
+            "naufrage",
+            "voyageur"
+          ]
+        },
+        {
+          "type": "tresor",
+          "poids": 15,
+          "tags": [
+            "objet_echoue",
+            "epave",
+            "coffre"
+          ]
+        },
+        {
+          "type": "meteo",
+          "poids": 10,
+          "tags": [
+            "maree",
+            "vent_fort"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 0,
+        "visibilite": 2,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:falaise_cotiere",
+      "type": "zone_influence",
+      "nom": "Falaise côtière",
+      "terrain_tags": [
+        "cote",
+        "mer",
+        "falaise",
+        "rocher"
+      ],
+      "intensite_max": 0.6,
+      "table_evenements": [
+        {
+          "type": "malus",
+          "poids": 35,
+          "tags": [
+            "chute",
+            "vent_fort",
+            "eboulement"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 25,
+          "tags": [
+            "nid_oiseau",
+            "algue",
+            "minerai"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 15,
+          "tags": [
+            "oiseau_geant",
+            "monstre_marin"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 10,
+          "tags": [
+            "guetteur",
+            "ermite"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 15
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": 2,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:estuaire",
+      "type": "zone_influence",
+      "nom": "Estuaire",
+      "terrain_tags": [
+        "cote",
+        "riviere",
+        "mer",
+        "eau",
+        "berge"
+      ],
+      "intensite_max": 0.6,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 45,
+          "tags": [
+            "poisson",
+            "crustace",
+            "eau",
+            "algue"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 25,
+          "tags": [
+            "pecheur",
+            "marin",
+            "passeur"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 15,
+          "tags": [
+            "port",
+            "transport",
+            "marchandise"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 10,
+          "tags": [
+            "monstre_aquatique",
+            "pirate"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 1,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:delta",
+      "type": "zone_influence",
+      "nom": "Delta fluvial",
+      "terrain_tags": [
+        "riviere",
+        "delta",
+        "eau",
+        "marais",
+        "berge"
+      ],
+      "intensite_max": 0.65,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 50,
+          "tags": [
+            "poisson",
+            "roseau",
+            "plante_aquatique",
+            "bois"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 20,
+          "tags": [
+            "pecheur",
+            "batelier",
+            "passeur"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 20,
+          "tags": [
+            "crocodile",
+            "serpent",
+            "monstre_aquatique"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": -1,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:lagune",
+      "type": "zone_influence",
+      "nom": "Lagune côtière",
+      "terrain_tags": [
+        "cote",
+        "lagune",
+        "eau",
+        "sable",
+        "marais"
+      ],
+      "intensite_max": 0.55,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 55,
+          "tags": [
+            "poisson",
+            "crustace",
+            "coquillage",
+            "algue"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 20,
+          "tags": [
+            "pecheur",
+            "ramasseur_coquillage"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 15,
+          "tags": [
+            "crocodile",
+            "serpent",
+            "monstre_aquatique"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 0,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:mer_cotiere",
+      "type": "zone_influence",
+      "nom": "Mer côtière",
+      "terrain_tags": [
+        "mer",
+        "eau",
+        "cote"
+      ],
+      "intensite_max": 0.7,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 30,
+          "tags": [
+            "monstre_marin",
+            "pirate",
+            "corsaire"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 30,
+          "tags": [
+            "poisson",
+            "algue",
+            "coquillage"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 20,
+          "tags": [
+            "marin",
+            "pecheur",
+            "marchand"
+          ]
+        },
+        {
+          "type": "meteo",
+          "poids": 15,
+          "tags": [
+            "tempete",
+            "brouillard",
+            "forte_houle"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 3,
+        "visibilite": 0,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:collines",
+      "type": "zone_influence",
+      "nom": "Collines",
+      "terrain_tags": [
+        "colline",
+        "herbe",
+        "pente",
+        "chemin"
+      ],
+      "intensite_max": 0.4,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 40,
+          "tags": [
+            "herbe",
+            "fleur",
+            "pierre",
+            "bois"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 20,
+          "tags": [
+            "loup",
+            "sanglier",
+            "bandit"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 25,
+          "tags": [
+            "berger",
+            "paysan",
+            "voyageur"
+          ]
+        },
+        {
+          "type": "meteo",
+          "poids": 10,
+          "tags": [
+            "brouillard",
+            "orage"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 1,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:plateau",
+      "type": "zone_influence",
+      "nom": "Plateau",
+      "terrain_tags": [
+        "plateau",
+        "herbe",
+        "roche",
+        "pente"
+      ],
+      "intensite_max": 0.45,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 40,
+          "tags": [
+            "herbe",
+            "plante",
+            "pierre",
+            "minerai"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 25,
+          "tags": [
+            "rapace",
+            "loup",
+            "bandit"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 20,
+          "tags": [
+            "berger",
+            "mineur",
+            "voyageur"
+          ]
+        },
+        {
+          "type": "meteo",
+          "poids": 10,
+          "tags": [
+            "vent_fort",
+            "orage"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 2,
+        "deplacement": -1
+      }
+    },
+    {
+      "_id": "zone:contreforts",
+      "type": "zone_influence",
+      "nom": "Contreforts montagneux",
+      "terrain_tags": [
+        "montagne",
+        "colline",
+        "pente",
+        "roche",
+        "foret"
+      ],
+      "intensite_max": 0.6,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 40,
+          "tags": [
+            "minerai",
+            "pierre",
+            "bois",
+            "herbe_rare"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 30,
+          "tags": [
+            "loup",
+            "ours",
+            "brigand_montagnard"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 15,
+          "tags": [
+            "mineur",
+            "bucheron",
+            "berger"
+          ]
+        },
+        {
+          "type": "malus",
+          "poids": 10,
+          "tags": [
+            "eboulement",
+            "pente_raide"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": 1,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:vallee",
+      "type": "zone_influence",
+      "nom": "Vallée",
+      "terrain_tags": [
+        "vallee",
+        "plaine",
+        "riviere",
+        "herbe",
+        "pente"
+      ],
+      "intensite_max": 0.35,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 40,
+          "tags": [
+            "eau_douce",
+            "herbe",
+            "bois",
+            "argile"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 30,
+          "tags": [
+            "paysan",
+            "berger",
+            "voyageur"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 15,
+          "tags": [
+            "route",
+            "caravane",
+            "village"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 10,
+          "tags": [
+            "bandit",
+            "animal_sauvage"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 0,
+        "visibilite": 1,
+        "deplacement": 0
+      }
+    },
+    {
+      "_id": "zone:gorge",
+      "type": "zone_influence",
+      "nom": "Gorge",
+      "terrain_tags": [
+        "montagne",
+        "gorge",
+        "roche",
+        "falaise"
+      ],
+      "intensite_max": 0.7,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 35,
+          "tags": [
+            "troll",
+            "bandit",
+            "monstre_rocheux"
+          ]
+        },
+        {
+          "type": "malus",
+          "poids": 30,
+          "tags": [
+            "eboulement",
+            "chute",
+            "crue"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 20,
+          "tags": [
+            "minerai",
+            "pierre",
+            "cristal"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 15
+        }
+      ],
+      "modificateurs": {
+        "danger": 3,
+        "visibilite": -1,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:desert",
+      "type": "zone_influence",
+      "nom": "Désert",
+      "terrain_tags": [
+        "desert",
+        "sable",
+        "aride"
+      ],
+      "intensite_max": 0.8,
+      "table_evenements": [
+        {
+          "type": "malus",
+          "poids": 35,
+          "tags": [
+            "chaleur",
+            "soif",
+            "tempete_sable"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 25,
+          "tags": [
+            "minerai",
+            "pierre",
+            "plante_desertique"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 20,
+          "tags": [
+            "scorpion_geant",
+            "serpent",
+            "predateur_desert"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 10,
+          "tags": [
+            "nomade",
+            "marchand"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 3,
+        "visibilite": 1,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:oasis",
+      "type": "zone_influence",
+      "nom": "Oasis",
+      "terrain_tags": [
+        "desert",
+        "oasis",
+        "eau",
+        "vegetation"
+      ],
+      "intensite_max": 0.5,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 40,
+          "tags": [
+            "eau_douce",
+            "datte",
+            "fruit",
+            "plante"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 30,
+          "tags": [
+            "nomade",
+            "marchand",
+            "voyageur"
+          ]
+        },
+        {
+          "type": "commerce",
+          "poids": 20,
+          "tags": [
+            "ravitaillement",
+            "caravane",
+            "troc"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": -1,
+        "visibilite": 1,
+        "deplacement": 0
+      }
+    },
+    {
+      "_id": "zone:steppe",
+      "type": "zone_influence",
+      "nom": "Steppe",
+      "terrain_tags": [
+        "steppe",
+        "plaine",
+        "herbe",
+        "aride"
+      ],
+      "intensite_max": 0.45,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 30,
+          "tags": [
+            "loup",
+            "meute",
+            "predateur"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 30,
+          "tags": [
+            "herbe",
+            "plante",
+            "gibier"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 25,
+          "tags": [
+            "nomade",
+            "berger",
+            "cavalier"
+          ]
+        },
+        {
+          "type": "meteo",
+          "poids": 10,
+          "tags": [
+            "vent_fort",
+            "orage"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 3,
+        "deplacement": 0
+      }
+    },
+    {
+      "_id": "zone:savane",
+      "type": "zone_influence",
+      "nom": "Savane",
+      "terrain_tags": [
+        "savane",
+        "plaine",
+        "herbe",
+        "tropical"
+      ],
+      "intensite_max": 0.65,
+      "table_evenements": [
+        {
+          "type": "combat",
+          "poids": 40,
+          "tags": [
+            "lion",
+            "hyene",
+            "predateur"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 30,
+          "tags": [
+            "herbe",
+            "fruit",
+            "gibier"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 15,
+          "tags": [
+            "chasseur",
+            "nomade",
+            "berger"
+          ]
+        },
+        {
+          "type": "meteo",
+          "poids": 10,
+          "tags": [
+            "orage",
+            "secheresse"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": 2,
+        "deplacement": 0
+      }
+    },
+    {
+      "_id": "zone:toundra",
+      "type": "zone_influence",
+      "nom": "Toundra",
+      "terrain_tags": [
+        "toundra",
+        "neige",
+        "froid",
+        "plaine"
+      ],
+      "intensite_max": 0.65,
+      "table_evenements": [
+        {
+          "type": "malus",
+          "poids": 35,
+          "tags": [
+            "froid",
+            "gel",
+            "blizzard"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 30,
+          "tags": [
+            "loup_des_neiges",
+            "ours_polaire",
+            "predateur_polaire"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 25,
+          "tags": [
+            "fourrure",
+            "lichen",
+            "plante_polaire"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "trappeur",
+            "nomade"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": -1,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:glacier",
+      "type": "zone_influence",
+      "nom": "Glacier",
+      "terrain_tags": [
+        "glacier",
+        "montagne",
+        "neige",
+        "glace"
+      ],
+      "intensite_max": 0.9,
+      "table_evenements": [
+        {
+          "type": "malus",
+          "poids": 50,
+          "tags": [
+            "froid_extreme",
+            "crevasse",
+            "avalanche",
+            "blizzard"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 20,
+          "tags": [
+            "glace",
+            "cristal",
+            "minerai"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 20,
+          "tags": [
+            "creature_polaire",
+            "elementaire_glace"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 4,
+        "visibilite": -2,
+        "deplacement": -3
+      }
+    },
+    {
+      "_id": "zone:haute_montagne",
+      "type": "zone_influence",
+      "nom": "Haute montagne",
+      "terrain_tags": [
+        "montagne",
+        "roche",
+        "neige",
+        "falaise"
+      ],
+      "intensite_max": 0.9,
+      "table_evenements": [
+        {
+          "type": "malus",
+          "poids": 40,
+          "tags": [
+            "altitude",
+            "avalanche",
+            "blizzard",
+            "chute"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 30,
+          "tags": [
+            "aigle_geant",
+            "dragon",
+            "yeti"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 20,
+          "tags": [
+            "minerai_rare",
+            "cristal",
+            "pierre_precieuse"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 5,
+          "tags": [
+            "ascete",
+            "mineur"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 5
+        }
+      ],
+      "modificateurs": {
+        "danger": 4,
+        "visibilite": 0,
+        "deplacement": -3
+      }
+    },
+    {
+      "_id": "zone:volcan",
+      "type": "zone_influence",
+      "nom": "Zone volcanique",
+      "terrain_tags": [
+        "volcan",
+        "roche",
+        "cendre",
+        "lave"
+      ],
+      "intensite_max": 0.95,
+      "table_evenements": [
+        {
+          "type": "malus",
+          "poids": 40,
+          "tags": [
+            "chaleur_extreme",
+            "lave",
+            "eruption",
+            "gaz_toxique"
+          ]
+        },
+        {
+          "type": "ressource",
+          "poids": 30,
+          "tags": [
+            "obsidienne",
+            "soufre",
+            "minerai",
+            "cristal"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 20,
+          "tags": [
+            "elementaire_feu",
+            "dragon",
+            "creature_volcanique"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 5,
+        "visibilite": -1,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:grotte",
+      "type": "zone_influence",
+      "nom": "Grotte naturelle",
+      "terrain_tags": [
+        "grotte",
+        "roche",
+        "souterrain"
+      ],
+      "intensite_max": 0.7,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 30,
+          "tags": [
+            "minerai",
+            "cristal",
+            "champignon"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 40,
+          "tags": [
+            "chauve_souris_geante",
+            "araignee_geante",
+            "ours"
+          ]
+        },
+        {
+          "type": "tresor",
+          "poids": 15,
+          "tags": [
+            "objet_abandonne",
+            "coffre",
+            "mineral_rare"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 15
+        }
+      ],
+      "modificateurs": {
+        "danger": 2,
+        "visibilite": -3,
+        "deplacement": -2
+      }
+    },
+    {
+      "_id": "zone:recif",
+      "type": "zone_influence",
+      "nom": "Récif côtier",
+      "terrain_tags": [
+        "mer",
+        "recif",
+        "eau",
+        "cote"
+      ],
+      "intensite_max": 0.75,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 45,
+          "tags": [
+            "corail",
+            "poisson",
+            "coquillage",
+            "algue"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 25,
+          "tags": [
+            "requin",
+            "monstre_marin",
+            "serpent_de_mer"
+          ]
+        },
+        {
+          "type": "tresor",
+          "poids": 15,
+          "tags": [
+            "epave",
+            "coffre",
+            "objet_noye"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 15
+        }
+      ],
+      "modificateurs": {
+        "danger": 3,
+        "visibilite": 1,
+        "deplacement": -3
+      }
+    },
+    {
+      "_id": "zone:ile",
+      "type": "zone_influence",
+      "nom": "Île",
+      "terrain_tags": [
+        "ile",
+        "mer",
+        "cote",
+        "vegetation"
+      ],
+      "intensite_max": 0.55,
+      "table_evenements": [
+        {
+          "type": "ressource",
+          "poids": 35,
+          "tags": [
+            "fruit",
+            "bois",
+            "poisson",
+            "plante"
+          ]
+        },
+        {
+          "type": "pnj",
+          "poids": 25,
+          "tags": [
+            "pecheur",
+            "ermite",
+            "naufrage"
+          ]
+        },
+        {
+          "type": "tresor",
+          "poids": 20,
+          "tags": [
+            "epave",
+            "coffre",
+            "ruines"
+          ]
+        },
+        {
+          "type": "combat",
+          "poids": 10,
+          "tags": [
+            "pirate",
+            "monstre"
+          ]
+        },
+        {
+          "type": "rien",
+          "poids": 10
+        }
+      ],
+      "modificateurs": {
+        "danger": 1,
+        "visibilite": 1,
+        "deplacement": 0
+      }
+    }
+  ]
+}

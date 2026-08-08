@@ -243,7 +243,7 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'attribute_points': 0,
 			'vocations_niveaux': {characterinfo["voc"]: 0},
 			'inventaire': list(inventaire_de_base),
-			'slots': {s: None for s in ['main_droite', 'main_gauche', 'torse', 'tete', 'jambes', 'pieds', 'mains', 'anneau_1', 'anneau_2', 'cou', 'ceinture']},
+			'slots': {s: None for s in ['main_droite', 'main_gauche', 'torse', 'tete', 'epaules', 'jambes', 'pieds', 'mains', 'anneau_1', 'anneau_2', 'cou', 'ceinture']},
 			'equipment_bonus': {},
 			'or': 0,
 			'argent': 0,
@@ -650,7 +650,7 @@ async def focaliser(
 _VALID_STATS = {"V", "F", "R", "Ag", "Vol", "Int", "Cha", "Ch"}
 
 _VALID_SLOTS = {
-    "main_droite", "main_gauche", "torse", "tete", "jambes",
+    "main_droite", "main_gauche", "torse", "tete", "epaules", "jambes",
     "pieds", "mains", "anneau_1", "anneau_2", "cou", "ceinture",
 }
 
