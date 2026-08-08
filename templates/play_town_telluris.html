@@ -3529,11 +3529,31 @@ async function spendXp(statKey, useMaxBonus = false) {
 
 </script>
 <style>
-	#toast {
+	/* `#toast` est un CONTENEUR, pas une bulle : chaque appel de showToast y ajoute la
+	   sienne, avec sa propre durée de vie. Un élément unique écrasait son contenu à chaque
+	   appel — deux messages coup sur coup n'en laissaient voir qu'un (c'est ce qui rendait
+	   la dépose d'escorte invisible, et ce que contournaient `_fideliteSuffixe` et
+	   `_xpCompagnieSuffixe`). DEUX ancrages : l'ordinaire en bas, le MAJEUR haut et centré. */
+	#toast, #toast-major {
 		position: fixed;
-		bottom: 2rem;
 		left: 50%;
-		transform: translateX(-50%) translateY(4rem);
+		transform: translateX(-50%);
+		display: flex;
+		/* `column` et non `column-reverse` : le conteneur est ancré par le BAS, donc le plus
+		   récent naît près de l'ancre (là où l'œil est) et la pile grandit vers le haut.
+		   Surtout, les toasts expirent du plus ANCIEN au plus récent, c.-à-d. par le HAUT :
+		   les survivants ne bougent pas d'un pixel. En `column-reverse` chaque expiration
+		   ferait glisser toute la pile vers le bas. */
+		flex-direction: column;
+		align-items: center;
+		gap: .5rem;
+		pointer-events: none;
+		z-index: 9999;
+	}
+	#toast { bottom: 2rem; }
+	/* Sous les overlays modaux (9000+), qui eux couvrent l'écran. */
+	#toast-major { top: 22vh; z-index: 9998; }
+	.toast-item {
 		background: #2c2c38;
 		border: 1px solid var(--accent);
 		color: var(--text);
@@ -3545,24 +3565,63 @@ async function spendXp(statKey, useMaxBonus = false) {
 		white-space: pre-line;
 		text-align: left;
 		opacity: 0;
+		transform: translateY(1rem);
 		transition: opacity .4s, transform .4s;
 		pointer-events: none;
-		z-index: 9999;
 	}
-	#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+	.toast-item.show { opacity: 1; transform: none; }
+	/* Le poids visuel d'un moment de jeu : une escorte ramenée vivante ne doit pas passer
+	   pour un accusé de réception de vente. */
+	.toast-item.toast-major {
+		font-size: 1.15rem;
+		line-height: 1.5;
+		padding: 1.1rem 1.8rem;
+		max-width: min(34rem, 92vw);
+		text-align: center;
+		border-width: 2px;
+		box-shadow: 0 8px 40px rgba(0, 0, 0, .6), 0 0 26px rgba(185, 140, 74, .28);
+		transform: translateY(1rem) scale(.96);
+	}
+	.toast-item.toast-major.show { transform: none; }
+	/* ⚠️ Garde LOCALE : ce template n'inclut pas `part-accessibility-css.html` (cf. la garde
+	   jumelle de `img#bg-image` plus haut). */
+	@media (prefers-reduced-motion: reduce) {
+		.toast-item { transition: none; }
+	}
 </style>
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="toast-major" role="status" aria-live="polite"></div>
 <script>
-	function showToast(msg) {
-		const t = document.getElementById('toast');
-		t.textContent = msg;
-		t.classList.add('show');
-		setTimeout(() => t.classList.remove('show'), 3500);
+	// Une rafale (plusieurs courses échues d'un coup) ne doit pas remplir l'écran.
+	const TOAST_MAX = 4;
+	// `opts.major` = un moment de jeu, pas un accusé de réception : bulle haute, centrée,
+	// grande, 7 s. La signature reste `showToast(msg)` — les ~100 appels existants ne
+	// bougent pas.
+	// ⚠️ textContent et jamais innerHTML : c'est ce qui dispense d'échapper les noms saisis
+	// par le joueur partout où l'on toaste (règle XSS, CLAUDE.md §9).
+	function showToast(msg, opts) {
+		const major = !!(opts && opts.major);
+		const pile = document.getElementById(major ? 'toast-major' : 'toast');
+		if (!pile) return;
+		const el = document.createElement('div');
+		el.className = 'toast-item' + (major ? ' toast-major' : '');
+		el.textContent = msg;
+		pile.appendChild(el);
+		while (pile.children.length > TOAST_MAX) pile.firstElementChild.remove();
+		// ⚠️ Double rAF : une transition n'a rien à interpoler sur un élément qui vient de
+		// naître (même piège que les jetons de combat) — sans lui, la bulle apparaît sèchement.
+		requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+		setTimeout(() => {
+			el.classList.remove('show');
+			setTimeout(() => el.remove(), 600);   // > durée de la transition
+		}, major ? 7000 : 3500);
 	}
 	// Un engagement se PARTAGE : les compagnons de la COMPAGNIE touchent la même XP que le
 	// joueur (serveur : `recrutement.partager_xp`). Une règle invisible n'existe pas — mais
-	// on SUFFIXE le toast existant plutôt que d'en émettre un second : `#toast` est unique,
-	// un deuxième appel écraserait le premier (même précaution que `_fideliteSuffixe`).
+	// on SUFFIXE le toast existant plutôt que d'en émettre un second : la découverte et le
+	// partage d'XP sont UN événement, pas deux (même parti pris que `_fideliteSuffixe`).
+	// ⚠️ Ce n'est plus une contrainte technique depuis que `#toast` empile — c'est un choix
+	// de rédaction, à garder tel quel.
 	// ⚠️ Déclarée ICI et pas dans le grand bloc plus bas : ce bloc-ci s'EXÉCUTE avant que le
 	// suivant ne soit parsé, et les notifs de découverte ci-dessous s'en servent.
 	// Pas d'escapeHtml : `showToast` écrit en textContent, et ce payload n'a que des nombres.
@@ -5065,7 +5124,8 @@ function formatPrix(prix) {
 	return parts.length ? parts.join(' ') : '0 cu';
 }
 
-// « Vendu : X (3 ar) · 🤝 fidélité +1 (relation 42) » — un seul #toast, on suffixe.
+// « Vendu : X (3 ar) · 🤝 fidélité +1 (relation 42) » — une vente et son bonus de fidélité
+// sont UN événement : on suffixe plutôt que d'empiler deux bulles.
 function _fideliteSuffixe(data) {
 	const f = data && data.fidelite;
 	return (f && f.gain) ? ' · 🤝 fidélité +1 (relation ' + f.relation + ')' : '';
@@ -5504,20 +5564,33 @@ function _notifierTransportsEchoues(rep) {
 // porte de la destination) sont AUTOMATIQUES — aucune UI, aucun bouton : seul un toast dit
 // au joueur ce qui vient de se produire.
 // ⚠️ `showToast` écrit en textContent : rien à échapper ici (cf. règle XSS de CLAUDE.md).
+// Le récap d'une dépose tient en UN message : arrivée, quête, puis les gains sur une ligne.
+// Quatre `showToast` d'affilée n'en laissaient voir qu'un — le dernier, « +30 XP » —, donc
+// jamais l'arrivée, qui est pourtant le paiement narratif de toute la quête.
+// ⚠️ `d.relation` est la VALEUR de réputation après gain (`quetes.recompenser_lieux` renvoie
+// les cotes, pas les deltas), d'où « réputation 53 » et non « +1 ».
+function _escorteDeposeTexte(d) {
+	const lignes = ['🛡️ ' + (d.noms || 'Votre protégé') + ' est de retour à bon port.'];
+	if (d.titre) lignes.push(d.titre);
+	const gains = [];
+	const prime = formatPrix(d.purse || {});
+	if (prime !== '0 cu') gains.push('💰 ' + prime);
+	if (d.xp > 0) gains.push('✨ +' + d.xp + ' XP');
+	if (typeof d.relation === 'number') gains.push('🤝 réputation ' + d.relation);
+	if (gains.length) lignes.push('', gains.join('   '));
+	if (d.niveau_up) lignes.push('🎉 Niveau atteint !');
+	return lignes.join('\n');
+}
+
 function _notifierEscorte(esc) {
 	if (!esc) return;
+	// ⚠️ AUCUN accord de genre : `sex` est facultatif dans la donnée de progéniture et le
+	// protégé peut être de l'un ou l'autre (même règle que les dialogues autour de {protege}).
 	(esc.rencontres || []).forEach(r => {
-		showToast('🛡️ ' + (r.noms || 'Votre protégé') + ' vous rejoint — ramenez-la saine et sauve.');
+		showToast('🛡️ ' + (r.noms || 'Votre protégé') + ' vous rejoint.\n'
+			+ 'Ramenez cette personne vivante : ' + (r.titre || '—'));
 	});
-	const d = esc.depose;
-	if (!d) return;
-	showToast('🛡️ ' + (d.noms || 'Votre protégé') + ' est arrivé à bon port : ' + (d.titre || '—'));
-	const p = d.purse || {};
-	const prime = [p.or ? p.or + ' or' : '', p.argent ? p.argent + ' ag' : '',
-				   p.cuivre ? p.cuivre + ' cu' : ''].filter(Boolean).join(' ');
-	if (prime) showToast('💰 Récompense : ' + prime);
-	if (d.niveau_up) showToast('Niveau atteint !');
-	else if (d.xp > 0) showToast('+' + d.xp + ' XP');
+	if (esc.depose) showToast(_escorteDeposeTexte(esc.depose), {major: true});
 }
 
 function _deadlineLocale(expireAt, nowServeur) {
