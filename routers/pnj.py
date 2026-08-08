@@ -125,12 +125,28 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		# passant la porte du lieu de destination (cf. `escorte.traiter_deplacement`), sans
 		# repasser par un dialogue. Le seul geste de dialogue est l'acceptation.
 		spec_esc = escorte.offre_spec(pnj_doc)
+		# La PROGÉNITURE d'un magasin : le bloc vit sur l'ENTRÉE du lieu (un `pnj:marchand_*`
+		# est générique et partagé par plusieurs boutiques), avec repli sur le doc.
+		bloc_esc = escorte.progeniture_de(entree, pnj_doc)
 		offre_esc = escorte.offre_courante(character, lieu_doc)
 		en_cours_esc = escorte.escorte_du_donneur(character, lieu_doc.get("_id"))
+		# Une escorte à DÉPOSER ici, quel qu'en soit le donneur : c'est ainsi que le parent a
+		# un mot pour l'enfant que la GUILDE lui ramène — sans quoi il resterait muet pendant
+		# toute la mission menée en son nom.
+		vers_esc = escorte.escorte_vers(character, lieu_doc.get("_id"))
 		flags.update({
 			"escorte_offerte": bool(offre_esc),
 			"escorte_en_cours": bool(en_cours_esc),
-			"escorte_accomplie": bool(spec_esc and escorte.deja_reussie(character, spec_esc.get("id"))),
+			"escorte_progeniture_en_cours": bool(vers_esc) and vers_esc.get("giver") != lieu_doc.get("_id"),
+			"escorte_accomplie": bool(
+				(spec_esc and escorte.deja_reussie(character, spec_esc.get("id")))
+				or (bloc_esc and escorte.progeniture_accomplie(character, lieu_doc.get("_id"), bloc_esc))
+			),
+			# Le tenancier ne parle pas de sa famille à un inconnu : refus PARLÉ, miroir exact
+			# de `transport_mefiance`. Sans lui le choix disparaîtrait sans un mot, et le
+			# joueur n'apprendrait jamais qu'il lui faut d'abord gagner cette confiance.
+			"escorte_mefiance": escorte.mefiance(character, lieu_doc, entree, pnj_doc, get_doc,
+												 quetes.now_epoch()),
 			# Le donneur ne confie pas sa mission à un inconnu : le refus est PARLÉ, sinon le
 			# choix disparaîtrait sans un mot — indiscernable d'un « rien à proposer », et le
 			# joueur n'apprendrait jamais ce qu'on attend de lui (miroir de `transport_mefiance`).
@@ -139,16 +155,20 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		# Le rang EXIGÉ est un placeholder à part de `{rang}` (le rang COURANT, posé par le
 		# seul comptoir de guilde) : ce sont deux valeurs, et les confondre ferait dire au
 		# donneur l'inverse de ce qu'il veut dire.
-		rang_esc = escorte.rang_requis(spec_esc)
+		rang_esc = escorte.rang_requis(spec_esc) or escorte.rang_requis(escorte.recherche_spec(pnj_doc))
 		if rang_esc:
 			placeholders["rang_requis"] = rang_esc.get("rang", "")
-		if offre_esc or en_cours_esc:
-			placeholders.update(_placeholders_escorte(offre_esc or en_cours_esc, lieu_doc))
+		if offre_esc or en_cours_esc or vers_esc:
+			placeholders.update(_placeholders_escorte(offre_esc or en_cours_esc or vers_esc, lieu_doc))
 		elif spec_esc:
 			# Une escorte écrite se raconte même quand elle n'est plus vivante : le nœud de
 			# remerciement ne s'affiche QU'APRÈS la réussite (l'offre a disparu, la quête est
 			# archivée) et doit encore pouvoir nommer la personne et la destination. Rien n'y
 			# est tiré au sort SAUF la case du rendez-vous, sans effet sur ces placeholders.
+			# ⚠️ AUCUN aperçu pour la progéniture ni pour le registre de guilde : `_contexte`
+			# est rappelé à CHAQUE rendu de nœud, et rejouer `familles_de_la_cite` y coûterait
+			# un `find_docs` plus une lecture par boutique à chaque clic. Ces sources tirent au
+			# sort, donc un aperçu mentirait de toute façon sur l'enfant réellement engagé.
 			apercu = escorte.generer_escorte_authoree(spec_esc, lieu_doc, find_docs, get_doc)
 			if apercu:
 				placeholders.update(_placeholders_escorte(apercu, lieu_doc))
@@ -825,6 +845,10 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 		_sauver_compagnie(resultat["recompenses"])
+		# L'épreuve réussie monte la réputation chez son donneur. ⚠️ APRÈS le save autoritatif :
+		# la quête a quitté `quetes_actives` en base, un 409 rejoué ne peut pas payer deux fois.
+		relation_gain = quetes.recompenser_donneur(
+			character, get_doc(q.get("giver")) if q.get("giver") else None, get_doc, save_doc)
 		# Le rang affiché est désormais le NOUVEAU (après promotion).
 		dits["rang"] = resultat["promu"]
 		rangs_guilde = character.get("rangs_guilde") or {}
@@ -843,6 +867,10 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 		reponse["vitals"] = _vitals_payload(character)
 		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		# ⚠️ Seulement en cas de gain : ce payload relit tous les docs relation + un doc lieu
+		# COMPLET par lieu connu (cf. la branche `livrer` du transport, même motif).
+		if relation_gain is not None:
+			reponse["relations_lieux"] = relations_lieux_payload(character)
 		return noeuds.get("rapporte"), dits
 
 	raise HTTPException(status_code=422, detail="Action de rang inconnue.")
@@ -910,6 +938,10 @@ def _resoudre_commission(character: dict, pnj_doc: dict, lieu_doc: dict, op: str
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 		_sauver_compagnie(resultat["recompenses"])
+		# Même chokepoint que le tableau et l'épreuve de rang : le +1 va au DONNEUR de la
+		# commission (le bureau du maître), que `relation_lieu` route vers son comptoir.
+		relation_gain = quetes.recompenser_donneur(
+			character, get_doc(q.get("giver")) if q.get("giver") else None, get_doc, save_doc)
 		reponse["commission"] = {
 			"rapporte": q.get("titre"),
 			"xp": resultat["recompenses"]["xp"].get("xp_gain", 0),
@@ -919,6 +951,8 @@ def _resoudre_commission(character: dict, pnj_doc: dict, lieu_doc: dict, op: str
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 		reponse["vitals"] = _vitals_payload(character)
 		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		if relation_gain is not None:
+			reponse["relations_lieux"] = relations_lieux_payload(character)
 		return noeuds.get("rapporte"), dits
 
 	raise HTTPException(status_code=422, detail="Action de commission inconnue.")

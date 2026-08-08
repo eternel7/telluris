@@ -6,8 +6,12 @@ tenancier de la catégorie du lieu. Il suffit donc que ces docs existent en base
 `lieu:*` n'est à modifier.
 
 Chaque marchand porte le MÊME arbre de dialogue (le squelette de la quête de transport,
-piloté par les flags `transport_offert` / `transport_a_livrer`), avec un texte d'accueil
-propre à son métier. La liste des catégories est lue dans l'export des recettes — la même
+piloté par les flags `transport_offert` / `transport_a_livrer`, PLUS celui de l'escorte de
+progéniture — cf. NOEUDS_DIALOGUE_ESCORTE), avec un texte d'accueil propre à son métier.
+
+⚠️ Le doc générique ne porte AUCUN enfant : la `progeniture` vit sur l'entrée `pnj` du lieu
+(`dev/gen_progeniture.py`), sans quoi les deux boutiques d'un même métier auraient la même
+famille. Ce fichier ne fournit que la MACHINERIE de dialogue, commune à tous. La liste des catégories est lue dans l'export des recettes — la même
 source que `marche.besoins_categorie`, pour ne jamais diverger.
 
 ⚠️ Le `nom` d'un doc généré n'est qu'un REPLI : chaque boutique peut rebaptiser son tenancier
@@ -91,6 +95,124 @@ CHOIX_PRENDRE = [
 ] + CHOIX_DECIDER
 
 
+# ── Escortes de PROGÉNITURE ──────────────────────────────────────────────────────
+# Un tenancier dont l'entrée `pnj` de son lieu déclare une `progeniture` peut demander qu'on
+# retrouve son enfant. Le doc générique ne porte QUE les nœuds : les enfants, eux, vivent sur
+# l'entrée du lieu — deux boutiques d'un même métier partagent ce doc et ne peuvent pas avoir
+# la même famille (cf. `escorte.progeniture_de`).
+#
+# ⚠️ AUCUN PRONOM GENRÉ, ni pour le tenancier (qui peut être une femme) ni pour l'enfant
+# (`sex` est facultatif dans la donnée) : « on l'a vu », « mon enfant », jamais « il/elle est
+# parti(e) ». Le linter contrôle les noms en dur, pas les accords — c'est à l'auteur d'y tenir.
+#
+# ⚠️ `{protege}` n'est posé que lorsqu'une escorte est OFFERTE, EN COURS, ou à déposer ici :
+# les deux nœuds qui parlent hors de ce cas (`escorte_mefiance`, `escorte_merci`) n'ont donc
+# le droit d'employer QUE `{prenom}` — un `{protege}` y resterait affiché tel quel.
+NOEUDS_ESCORTE = {
+	"accepte": "escorte_acceptee",
+	"mefiance": "escorte_mefiance",
+}
+
+CHOIX_ACCUEIL_ESCORTE = [
+	{"id": "escorte_offre", "label": "Quelque chose vous tracasse ?",
+	 "next": "escorte_propose", "condition": {"escorte_offerte": True}},
+	# Même label, conditions complémentaires : le joueur n'en voit jamais qu'un seul.
+	{"id": "escorte_refus", "label": "Quelque chose vous tracasse ?",
+	 "next": "escorte_mefiance", "condition": {"escorte_mefiance": True}},
+	{"id": "escorte_relance", "label": "Au sujet de {protege}…",
+	 "next": "escorte_relance", "condition": {"escorte_en_cours": True}},
+	# La guilde a confié la recherche : le parent doit avoir un mot, sinon il resterait muet
+	# pendant toute la mission menée en son nom.
+	{"id": "escorte_attente", "label": "Au sujet de {protege}…",
+	 "next": "escorte_attente", "condition": {"escorte_progeniture_en_cours": True}},
+	{"id": "escorte_merci", "label": "Comment va votre famille ?",
+	 "next": "escorte_merci", "condition": {"escorte_accomplie": True}},
+]
+
+NOEUDS_DIALOGUE_ESCORTE = {
+	"escorte_propose": {
+		"texte": (
+			"« Vous tombez mal, {prenom}. » Le regard va vers la porte, puis revient sur vous. "
+			"« Je suis sans nouvelles de {protege} depuis hier matin. On l'a vu prendre le "
+			"chemin qui sort de {lieu_rencontre}, et personne ne l'a revu depuis. »"
+		),
+		"choix": [
+			{"id": "escorte_details", "label": "Où faut-il chercher ?", "next": "escorte_details"},
+			{"id": "escorte_refuser", "label": "Je ne peux rien pour vous.", "next": "accueil"},
+		],
+	},
+	"escorte_details": {
+		"texte": (
+			"« {direction}. » Un doigt trace une ligne sur le comptoir. « Ramenez-moi mon "
+			"enfant vivant, {prenom}, et je ne l'oublierai pas. {xp} points d'expérience et "
+			"{prime} pièces de cuivre — et vous serez toujours le bienvenu sous ce toit. »"
+		),
+		"choix": [
+			{"id": "escorte_accepter", "label": "J'y vais.",
+			 "action": {"service": "escorte", "op": "accepter"}},
+			{"id": "escorte_refuser", "label": "Laissez-moi y réfléchir.", "next": "accueil"},
+		],
+	},
+	"escorte_acceptee": {
+		"texte": (
+			"« Que les dieux vous entendent. » Une main serre la vôtre, un peu trop fort. "
+			"« {protege} n'a pas d'arme et ne sait pas courir : s'il faut se battre, "
+			"battez-vous à sa place. Ramenez-moi mon enfant ici, à : {destination}. »"
+		),
+		"choix": [
+			{"id": "partir", "label": "Je pars maintenant.", "next": "fin"},
+			{"id": "retour", "label": "Encore une chose…", "next": "accueil"},
+		],
+	},
+	"escorte_relance": {
+		"texte": (
+			"« Toujours rien ? » Les mains s'essuient machinalement sur le tablier. "
+			"« Cherchez {direction}. Et si {protege} est déjà avec vous, ne perdez pas votre "
+			"temps ici : ramenez-moi mon enfant. »"
+		),
+		"choix": [
+			{"id": "retour", "label": "J'y retourne.", "next": "accueil"},
+			{"id": "fin", "label": "Je m'en occupe.", "next": "fin"},
+		],
+	},
+	"escorte_attente": {
+		"texte": (
+			"« La guilde m'a fait dire que quelqu'un s'en chargeait. C'est vous ? » Un silence. "
+			"« Alors allez-y, {prenom}. Cherchez {direction}, et ramenez-moi {protege}. Je ne "
+			"dors plus depuis que ce chemin existe. »"
+		),
+		"choix": [
+			{"id": "retour", "label": "Je vous le ramènerai.", "next": "accueil"},
+			{"id": "fin", "label": "J'y vais.", "next": "fin"},
+		],
+	},
+	"escorte_merci": {
+		"texte": (
+			"« Vous ? » Le visage s'éclaire d'un coup, et l'ouvrage reste en plan. « Vous "
+			"m'avez rendu mon enfant, {prenom}. Ici, vous êtes chez vous — et ce que vous "
+			"cherchez, si je ne l'ai pas, je le trouverai. »"
+		),
+		"choix": [
+			{"id": "retour", "label": "C'était la moindre des choses.", "next": "accueil"},
+			{"id": "fin", "label": "Portez-vous bien.", "next": "fin"},
+		],
+	},
+	# Refus faute de CONFIANCE (flag `escorte_mefiance`) : cote sous le seuil OU brouille
+	# fraîche d'un marchandage raté. Un seul nœud pour les deux causes — le texte parle donc
+	# d'entente, jamais d'une cause précise, et reste vrai dans les deux cas.
+	# ⚠️ Ni `{protege}` ni `{destination}` ici : aucune offre n'est posée, ils resteraient
+	# affichés tels quels.
+	"escorte_mefiance": {
+		"texte": (
+			"« Ce qui me tracasse ne vous regarde pas, {prenom}. » Le ton reste poli et la "
+			"porte reste close. « On ne confie pas ces choses-là à un visage qu'on connaît "
+			"mal. Revenez — achetez, vendez, tenez parole — et nous verrons. »"
+		),
+		"choix": [{"id": "ok", "label": "Comme vous voudrez.", "next": "fin"}],
+	},
+}
+
+
 def dialogue(metier: str, ambiance: str) -> dict:
 	return {
 		"noeud_depart": "accueil",
@@ -109,6 +231,7 @@ def dialogue(metier: str, ambiance: str) -> dict:
 					# simplement n'avoir pas de chance.
 					{"id": "course_refus", "label": "Vous auriez une course pour moi ?",
 					 "next": "transport_mefiance", "condition": {"transport_mefiance": True}},
+				] + [dict(c) for c in CHOIX_ACCUEIL_ESCORTE] + [
 					{"id": "rien", "label": "Je ne faisais que passer.", "next": "fin"},
 				],
 			},
@@ -184,6 +307,7 @@ def dialogue(metier: str, ambiance: str) -> dict:
 				),
 				"choix": [{"id": "ok", "label": "Je vais arranger ça.", "next": "fin"}],
 			},
+			**{k: json.loads(json.dumps(v)) for k, v in NOEUDS_DIALOGUE_ESCORTE.items()},
 		},
 	}
 
@@ -192,10 +316,16 @@ def categories_marchandes() -> list:
 	"""Catégories ayant des recettes — même source que `marche.besoins_categorie`."""
 	exports = sorted(glob.glob(os.path.join(RACINE, "jsons", "recette-*.json")))
 	if not exports:
-		raise SystemExit("Aucun export `jsons/recette-*.json` — exporter le type `recette` depuis /admin.")
+		# Repli sur le dump complet : les recettes y sont, et c'est la source unique du
+		# projet. Sans lui, ce générateur serait injouable hors d'un export ciblé frais.
+		exports = sorted(glob.glob(os.path.join(RACINE, "jsons", "telluris-dump-*.json")))
+	if not exports:
+		raise SystemExit("Ni `jsons/recette-*.json` ni `jsons/telluris-dump-*.json` — "
+						 "exporter le type `recette` depuis /admin.")
 	brut = json.load(open(exports[-1], encoding="utf-8"))
 	docs = brut["docs"] if isinstance(brut, dict) and "docs" in brut else brut
-	return sorted({r.get("lieu_categorie") for r in docs if r.get("lieu_categorie")})
+	return sorted({r.get("lieu_categorie") for r in docs
+				   if r.get("lieu_categorie") and r.get("type", "recette") == "recette"})
 
 
 def main() -> None:
@@ -216,7 +346,10 @@ def main() -> None:
 			"race": "humain",
 			"vocation": "marchand",
 			"portrait": PORTRAITS[i % len(PORTRAITS)],
-			"services": {"transport": {"noeuds": dict(NOEUDS_TRANSPORT)}},
+			"services": {
+				"transport": {"noeuds": dict(NOEUDS_TRANSPORT)},
+				"escorte": {"noeuds": dict(NOEUDS_ESCORTE)},
+			},
 			"dialogue": dialogue(metier, ambiance),
 		})
 	with open(SORTIE, "w", encoding="utf-8") as f:

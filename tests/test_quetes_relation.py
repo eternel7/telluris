@@ -208,3 +208,170 @@ def test_expiration_dune_course_de_guilde_fache_toute_la_maison(perso, db, monke
 	assert relations == {"lieu:bastion_comptoir": 49, "lieu:bastion_interieur": 49}
 	# La cargaison reste dans le sac : le joueur garde la marchandise, seule sa réputation paie.
 	assert echues[0]["cargaison"] == [{"item": "item:viande", "poids": 2}]
+
+
+# ══════════════════════════════════════════════════════════════════════════════════
+# Consolidation : `relation_lieu` fait porter par UN lieu la réputation de plusieurs
+# ══════════════════════════════════════════════════════════════════════════════════
+# Même monde, mais façade / réception / bureau délèguent leur relation au COMPTOIR. Le bureau
+# du maître n'a PAS de `sous_categorie` (il n'est solidaire que de lui-même) : c'est
+# `relation_lieu` — et lui seul — qui le fait encaisser chez le comptoir.
+
+RECEPTION_C = {**RECEPTION, "relation_lieu": COMPTOIR["_id"]}
+FACADE_C = {**FACADE, "relation_lieu": COMPTOIR["_id"]}
+BUREAU_C = {
+	"_id": "lieu:bureau_du_maitre", "type": "lieu", "label": "Le bureau du maître de guilde",
+	"categorie": "bureau_maitre_guilde",  # ⚠️ pas de `sous_categorie`, et il n'en faut pas
+	"lieu_parent": "lieu:auxerre",
+	"relation_lieu": COMPTOIR["_id"],
+}
+
+MONDE_CONSOLIDE = [RECEPTION_C, COMPTOIR, FACADE_C, BUREAU_C, BOUCHERIE, GUILDE_AILLEURS]
+
+
+# ── lieu_de_relation / relation_doc_id ───────────────────────────────────────────
+
+def test_sans_relation_lieu_un_lieu_porte_sa_propre_relation():
+	"""Champ absent ⇒ comportement d'avant, aucune migration."""
+	assert marche.lieu_de_relation(BOUCHERIE) == "lieu:boucherie"
+	assert marche.lieu_de_relation(COMPTOIR) == COMPTOIR["_id"]
+
+
+def test_relation_lieu_deplace_la_relation_sur_le_porteur():
+	assert marche.lieu_de_relation(BUREAU_C) == COMPTOIR["_id"]
+	assert marche.lieu_de_relation(RECEPTION_C) == COMPTOIR["_id"]
+
+
+def test_un_seul_saut_jamais_de_chaine():
+	"""Le porteur ne relaie pas : un cycle A vers B vers A ferait boucler TOUTE lecture."""
+	a = {"_id": "lieu:a", "relation_lieu": "lieu:b"}
+	b = {"_id": "lieu:b", "relation_lieu": "lieu:a"}
+	assert marche.lieu_de_relation(a) == "lieu:b"
+	assert marche.lieu_de_relation(b) == "lieu:a"
+
+
+def test_valeur_illisible_ou_auto_reference_ignoree():
+	"""Fail-soft : on retombe sur le lieu lui-même plutôt que de fabriquer un doc orphelin."""
+	assert marche.lieu_de_relation({"_id": "lieu:x", "relation_lieu": "lieu:x"}) == "lieu:x"
+	assert marche.lieu_de_relation({"_id": "lieu:x", "relation_lieu": "pnj:borin"}) == "lieu:x"
+	assert marche.lieu_de_relation({"_id": "lieu:x", "relation_lieu": ""}) == "lieu:x"
+	assert marche.lieu_de_relation({"_id": "lieu:x", "relation_lieu": None}) == "lieu:x"
+
+
+def test_deux_lieux_consolides_partagent_UN_doc_relation(perso):
+	assert marche.relation_doc_id(perso, BUREAU_C) == marche.relation_doc_id(perso, COMPTOIR)
+	assert marche.relation_doc_id(perso, RECEPTION_C) == marche.relation_doc_id(perso, COMPTOIR)
+	# Un magasin garde le sien.
+	assert marche.relation_doc_id(perso, BOUCHERIE) != marche.relation_doc_id(perso, COMPTOIR)
+
+
+def test_doc_relation_frais_nomme_le_lieu_PORTEUR(perso):
+	"""`relations_lieux_payload` indexe par `lieu_id` : un doc frais qui nommerait le délégant
+	y serait orphelin, et l'onglet Relations afficherait la valeur neutre."""
+	rel = marche.get_relation(perso, BUREAU_C, lambda _id: None)
+	assert rel["lieu_id"] == COMPTOIR["_id"]
+
+
+# ── LE test qui compte : la sanction ne doit pas compter DOUBLE ──────────────────
+
+def test_la_sanction_ne_frappe_quUNE_fois_par_doc_relation(perso, db, monkeypatch):
+	"""Réception et comptoir résolvent vers le MÊME doc. Sans dédup par doc, le second
+	`get_relation` relirait celui que le premier vient de sauver : −2 pour un seul abandon."""
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_DELTA", 1)
+	monkeypatch.setattr(character_stats, "RELATION_INITIALE", 50)
+
+	valeurs = quetes.sanctionner_renoncement(
+		perso, RECEPTION_C, db["get"], db["save"], make_find_docs(MONDE_CONSOLIDE))
+
+	# UN seul doc sauvé, celui du comptoir, à 49 — et NON 48.
+	assert len(db["sauves"]) == 1
+	assert db["sauves"][0]["_id"] == marche.relation_doc_id(perso, COMPTOIR)
+	assert marche.relation_value(db["sauves"][0]) == 49
+	# Le retour reste indexé par LIEU : les deux lieux montrent la même cote, c'est exact.
+	assert valeurs == {"lieu:bastion_interieur": 49, "lieu:bastion_comptoir": 49}
+
+
+def test_abandonner_une_commission_du_bureau_frappe_le_comptoir(perso, db, monkeypatch):
+	"""Le bureau n'a pas de `sous_categorie` : sans `relation_lieu`, il encaisserait seul dans
+	son coin et la guilde ne s'apercevrait de rien."""
+	monkeypatch.setattr(character_stats, "QUETE_TRANSPORT_RELATION_DELTA", 1)
+	monkeypatch.setattr(character_stats, "RELATION_INITIALE", 50)
+
+	valeurs = quetes.sanctionner_renoncement(
+		perso, BUREAU_C, db["get"], db["save"], make_find_docs(MONDE_CONSOLIDE))
+
+	assert len(db["sauves"]) == 1
+	assert db["sauves"][0]["_id"] == marche.relation_doc_id(perso, COMPTOIR)
+	assert valeurs == {"lieu:bureau_du_maitre": 49}
+
+
+# ── recompenser_donneur ──────────────────────────────────────────────────────────
+
+def test_le_gain_ne_va_quAU_donneur(perso, db, monkeypatch):
+	"""Asymétrie VOULUE : la maison punit collectivement, elle ne remercie pas collectivement."""
+	monkeypatch.setattr(character_stats, "QUETE_REUSSITE_RELATION_DELTA", 1)
+	monkeypatch.setattr(character_stats, "RELATION_INITIALE", 50)
+
+	assert quetes.recompenser_donneur(perso, RECEPTION, db["get"], db["save"]) == 51
+
+	assert len(db["sauves"]) == 1
+	assert db["sauves"][0]["_id"] == marche.relation_doc_id(perso, RECEPTION)
+
+
+def test_le_gain_repart_de_la_relation_existante(perso, db, monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_REUSSITE_RELATION_DELTA", 1)
+	doc_id = marche.relation_doc_id(perso, COMPTOIR)
+	db["docs"][doc_id] = {"_id": doc_id, "type": "relation", "character_id": perso["_id"],
+						  "lieu_id": COMPTOIR["_id"], "value": 72}
+	assert quetes.recompenser_donneur(perso, COMPTOIR, db["get"], db["save"]) == 73
+
+
+def test_le_gain_est_borne_a_cent(perso, db, monkeypatch):
+	monkeypatch.setattr(character_stats, "QUETE_REUSSITE_RELATION_DELTA", 1)
+	doc_id = marche.relation_doc_id(perso, COMPTOIR)
+	db["docs"][doc_id] = {"_id": doc_id, "type": "relation", "character_id": perso["_id"],
+						  "lieu_id": COMPTOIR["_id"], "value": 100}
+	assert quetes.recompenser_donneur(perso, COMPTOIR, db["get"], db["save"]) == 100
+
+
+def test_pas_de_donneur_pas_de_gain(perso, db):
+	"""Une quête sans donneur (ou dont le doc a disparu) ne doit rien créer ni planter."""
+	assert quetes.recompenser_donneur(perso, None, db["get"], db["save"]) is None
+	assert db["sauves"] == []
+
+
+def test_le_gain_suit_la_consolidation(perso, db, monkeypatch):
+	"""Réussir au tableau (réception) puis une commission (bureau) : MÊME doc, +2."""
+	monkeypatch.setattr(character_stats, "QUETE_REUSSITE_RELATION_DELTA", 1)
+	monkeypatch.setattr(character_stats, "RELATION_INITIALE", 50)
+
+	quetes.recompenser_donneur(perso, RECEPTION_C, db["get"], db["save"])
+	assert quetes.recompenser_donneur(perso, BUREAU_C, db["get"], db["save"]) == 52
+	assert len(db["docs"]) == 1
+	assert marche.relation_doc_id(perso, COMPTOIR) in db["docs"]
+
+
+# ── Affichage : les 4 lignes du Bastion montrent la MÊME cote ────────────────────
+
+def test_les_lieux_consolides_affichent_la_meme_valeur(perso, monkeypatch):
+	"""Sans passer par `lieu_de_relation`, la façade / la réception / le bureau afficheraient
+	la valeur neutre pendant que le comptoir en montre une autre."""
+	monkeypatch.setattr(character_stats, "RELATION_INITIALE", 50)
+	docs = {d["_id"]: d for d in MONDE_CONSOLIDE}
+	rel_id = marche.relation_doc_id(perso, COMPTOIR)
+	relation = {"_id": rel_id, "type": "relation", "character_id": perso["_id"],
+				"lieu_id": COMPTOIR["_id"], "value": 55}
+
+	monkeypatch.setattr(marche, "get_doc", lambda doc_id: docs.get(doc_id))
+	monkeypatch.setattr(marche, "find_docs", lambda selector: [relation])
+
+	perso["lieux_visites"] = [FACADE_C["_id"], RECEPTION_C["_id"], COMPTOIR["_id"],
+							  BUREAU_C["_id"], BOUCHERIE["_id"]]
+	payload = {r["lieu_id"]: r["value"] for r in marche.relations_lieux_payload(perso)}
+
+	assert payload[FACADE_C["_id"]] == 55
+	assert payload[RECEPTION_C["_id"]] == 55
+	assert payload[COMPTOIR["_id"]] == 55
+	assert payload[BUREAU_C["_id"]] == 55
+	# Un lieu qui ne délègue pas garde sa cote propre (ici : neutre, aucune relation en base).
+	assert payload[BOUCHERIE["_id"]] == 50

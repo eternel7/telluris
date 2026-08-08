@@ -757,14 +757,75 @@ def sanctionner_renoncement(character: dict, giver_doc: dict, get_doc_fn, save_d
 	"""Renoncer à une quête (abandon volontaire ou délai laissé filer) coûte
 	QUETE_TRANSPORT_RELATION_DELTA de réputation chez le donneur ET chez tous les lieux de sa
 	maison : lâcher la mission du comptoir fâche aussi la réception. Les docs `relation` sont
-	ANNEXES (hors character) → persistés ici, un par lieu. Renvoie {lieu_id: nouvelle_valeur}."""
+	ANNEXES (hors character) → persistés ici, un par DOC relation. Renvoie
+	{lieu_id: nouvelle_valeur}."""
 	delta = -int(character_stats.QUETE_TRANSPORT_RELATION_DELTA)
 	valeurs = {}
+	# ⚠️ Dédup par DOC RELATION et non par id de lieu : deux lieux d'une maison peuvent
+	# déléguer leur réputation au même porteur (`marche.lieu_de_relation`) — les traiter
+	# séparément appliquerait le malus DEUX fois, le second `get_relation` relisant le doc que
+	# le premier vient de sauver. Le retour reste indexé par LIEU (même valeur pour les lieux
+	# qui partagent une relation : c'est exact, ils la partagent).
+	docs: dict[str, dict] = {}
 	for lieu in lieux_solidaires(giver_doc, find_docs_fn):
-		relation = marche.get_relation(character, lieu, get_doc_fn)
-		valeurs[lieu.get("_id")] = marche.ajuster_relation(relation, delta)
-		save_doc_fn(relation)
+		doc_id = marche.relation_doc_id(character, lieu)
+		relation = docs.get(doc_id)
+		if relation is None:
+			relation = marche.get_relation(character, lieu, get_doc_fn)
+			docs[doc_id] = relation
+			marche.ajuster_relation(relation, delta)
+			save_doc_fn(relation)
+		valeurs[lieu.get("_id")] = marche.relation_value(relation)
 	return valeurs
+
+
+def recompenser_lieux(character: dict, lieux_docs: list, get_doc_fn, save_doc_fn) -> dict:
+	"""Monte de QUETE_REUSSITE_RELATION_DELTA (borné 0–100) la réputation de CHACUN des lieux
+	remerciés par une quête réussie. Implémentation unique de `recompenser_donneur`, qui n'en
+	est que le cas à un lieu.
+
+	⚠️ **Dédup par DOC RELATION et non par id de lieu** — c'est tout l'intérêt d'un chokepoint
+	ici. Deux cas le rendent indispensable : une escorte de progéniture confiée par le magasin
+	LUI-MÊME a le même lieu pour donneur et pour destination (elle paierait +2), et deux lieux
+	d'une maison peuvent déléguer leur réputation au même porteur (`marche.lieu_de_relation`).
+	Dans les deux cas le second `get_relation` relirait le doc que le premier vient de sauver.
+	Même précaution, même forme que `sanctionner_renoncement`.
+
+	Les docs `relation` sont ANNEXES (hors character) : persistés ici, un par DOC relation ; le
+	personnage est laissé à son appelant. Renvoie {lieu_id: nouvelle_valeur} — même valeur pour
+	les lieux qui partagent une relation, c'est exact : ils la partagent."""
+	delta = int(character_stats.QUETE_REUSSITE_RELATION_DELTA)
+	valeurs: dict = {}
+	docs: dict[str, dict] = {}
+	for lieu in lieux_docs or []:
+		if not lieu:
+			continue
+		doc_id = marche.relation_doc_id(character, lieu)
+		relation = docs.get(doc_id)
+		if relation is None:
+			relation = marche.get_relation(character, lieu, get_doc_fn)
+			docs[doc_id] = relation
+			marche.ajuster_relation(relation, delta)
+			save_doc_fn(relation)
+		valeurs[lieu.get("_id")] = marche.relation_value(relation)
+	return valeurs
+
+
+def recompenser_donneur(character: dict, giver_doc: dict, get_doc_fn, save_doc_fn) -> int | None:
+	"""Réussir une quête monte la réputation chez son DONNEUR de
+	QUETE_REUSSITE_RELATION_DELTA (borné 0–100). Pendant positif de
+	`sanctionner_renoncement`, et chokepoint unique des CINQ turn-in : tableau de guilde,
+	épreuve de rang, commission de donjon, course de transport, escorte.
+
+	⚠️ **Asymétrie VOULUE** : la maison punit collectivement (`lieux_solidaires`), elle ne
+	remercie que le donneur — c'est `relation_lieu` qui route le gain vers le consolidateur
+	quand la donnée le demande. Une quête qui veut remercier un SECOND lieu (l'escorte de
+	progéniture remercie la guilde ET le magasin) passe par `recompenser_lieux`, dont ceci
+	n'est que le cas à un lieu. Renvoie la nouvelle valeur, `None` sans donneur."""
+	if not giver_doc:
+		return None
+	valeurs = recompenser_lieux(character, [giver_doc], get_doc_fn, save_doc_fn)
+	return valeurs.get(giver_doc.get("_id"))
 
 
 # ── Hooks de progression (appelés par combat / déplacement) ──────────────────────

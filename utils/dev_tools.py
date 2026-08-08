@@ -81,12 +81,47 @@ CATALOGUE = [
 			"de la quête de transport.",
 	},
 	{
+		"id": "gen_escorte_marchands",
+		"label": "🧵 Ouvrir l'escorte de progéniture chez les tenanciers",
+		"argv": _py("gen_escorte_marchands.py"),
+		"ecrit": "Écrit jsons/marchands_escorte_a_importer.json.",
+		"description": "Pose les nœuds de dialogue de l'escorte sur les 29 `pnj:marchand_*`. "
+			"Relit les docs depuis le dump figé et n'y injecte que ce fragment : régénération "
+			"idempotente. Sans familles écrites, ces nœuds restent inatteignables.",
+	},
+	{
+		"id": "gen_progeniture",
+		"label": "👪 Donner une famille aux tenanciers d'Auxerre",
+		"argv": _py("gen_progeniture.py"),
+		"ecrit": "Écrit jsons/progeniture_a_importer.json.",
+		"description": "Pose le bloc `progeniture` sur l'entrée `pnj` d'une dizaine de "
+			"boutiques : c'est le contenu qui allume les escortes d'enfants perdus, chez le "
+			"parent comme au comptoir de la guilde.",
+	},
+	{
+		"id": "gen_escorte_guilde",
+		"label": "📖 Ouvrir le registre des disparitions au comptoir",
+		"argv": _py("gen_escorte_guilde.py"),
+		"ecrit": "Écrit jsons/borin_recherche_escorte_a_importer.json.",
+		"description": "Pose `services.escorte.recherche` sur Borin : la guilde recense les "
+			"familles de la cité qui attendent un enfant et en confie la recherche.",
+	},
+	{
 		"id": "gen_acces_donjon",
 		"label": "🗝️ Générer la chaîne d'accès du donjon-mine",
 		"argv": _py("gen_acces_donjon.py"),
 		"ecrit": "Écrit 3 fichiers jsons/*_a_importer.json.",
 		"description": "Rang D → Borin → Gautier → George → Armand. Relit les docs depuis le "
 			"dump figé et n'y injecte que le champ ajouté : régénération idempotente.",
+	},
+	{
+		"id": "gen_relation_guilde",
+		"label": "🏛️ Consolider la réputation de la guilde sur son comptoir",
+		"argv": _py("gen_relation_guilde.py"),
+		"ecrit": "Écrit jsons/relation_guilde_a_importer.json.",
+		"description": "Pose `relation_lieu` sur la façade, la réception et le bureau du maître "
+			"du Bastion : les quatre lieux partagent alors UNE cote. Relit les docs depuis le "
+			"dump figé et n'y injecte que ce champ : régénération idempotente.",
 	},
 	{
 		"id": "gen_armures",

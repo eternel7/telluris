@@ -2574,26 +2574,22 @@
 					_refreshSol();
 					_refreshChargeGauge();
 				}
-				if (rep.zone_event) {
-					if (rep.zone_event.type === 'combat') {
-						const cr = await fetch('/api/combat/start', {
-							method: 'POST',
-							headers: {'Content-Type': 'application/json'},
-							body: JSON.stringify({
-								tags: rep.zone_event.tags || [],
-								intensite: rep.zone_event.intensite || 0.5,
-								modificateurs: rep.zone_event.modificateurs || {}
-							})
-						});
-						if (cr.ok) {
-							const cd = await cr.json();
-							if (cd.combat_id) {
-								window.location.href = '/combat/' + cd.combat_id;
-								return;
-							}
+				if (rep.zone_event && rep.zone_event.type === 'combat') {
+					const cr = await fetch('/api/combat/start', {
+						method: 'POST',
+						headers: {'Content-Type': 'application/json'},
+						body: JSON.stringify({
+							tags: rep.zone_event.tags || [],
+							intensite: rep.zone_event.intensite || 0.5,
+							modificateurs: rep.zone_event.modificateurs || {}
+						})
+					});
+					if (cr.ok) {
+						const cd = await cr.json();
+						if (cd.combat_id) {
+							window.location.href = '/combat/' + cd.combat_id;
+							return;
 						}
-					} else {
-						showZoneEvent(rep.zone_event);
 					}
 				}
 				// Bouton « Récolter » de la sidebar (déplacement par lien = SPA, pas de reload).
@@ -2756,8 +2752,6 @@
 							return;
 						}
 					}
-				} else if (data.zone_event && data.zone_event.type !== 'rien') {
-					sessionStorage.setItem('zone_event_notif', JSON.stringify(data.zone_event));
 				}
 				window.location.reload(true);
 			} else {
@@ -3603,11 +3597,6 @@ async function spendXp(statKey, useMaxBonus = false) {
 		sessionStorage.removeItem('focus_arrive_notif');
 		showToast('🧭 Vous êtes arrivé : ' + _focusArrive);
 	}
-	const _zoneEvt = sessionStorage.getItem('zone_event_notif');
-	if (_zoneEvt) {
-		sessionStorage.removeItem('zone_event_notif');
-		showZoneEvent(JSON.parse(_zoneEvt));
-	}
 	// ── Intro narrative : choix de la raison + conclusion ─────────────────────
 	async function choisirRaisonIntro(raisonId) {
 		try {
@@ -3644,14 +3633,6 @@ async function spendXp(statKey, useMaxBonus = false) {
 	if (_introFin) {
 		sessionStorage.removeItem('intro_fin_notif');
 		showIntroConclusion(JSON.parse(_introFin));
-	}
-	function _zoneEventLabel(evt) {
-		const icons = { combat: '⚔', ressource: '🌿', pnj: '🧙', rien: '…' };
-		return (icons[evt.type] || '❓') + ' ' + ((evt.tags || []).join(', ') || evt.type);
-	}
-	function showZoneEvent(evt) {
-		if (!evt || evt.type === 'rien') return;
-		showToast(_zoneEventLabel(evt));
 	}
 </script>
 <script>
@@ -5852,6 +5833,9 @@ async function terminerQuete(queteId, btn) {
 			});
 		}
 		if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
+		// La réussite a monté la cote du donneur — l'onglet 🤝 est rendu 100 % client, sans ce
+		// resync il resterait figé sur les valeurs du dernier chargement de /play.
+		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
 	} catch(err) { console.error('Erreur fin de quête', err); if (btn) btn.disabled = false; }
 }
 
@@ -5872,6 +5856,8 @@ async function abandonnerQuete(queteId, btn) {
 		renderQuetesActives(data);
 		renderQuetesOffres(data);
 		renderFicheQuetes(data);   // resync fiche + focalisation (via `'focalisation' in data`)
+		// Renoncer fâche toute la maison du donneur : même resync que la réussite.
+		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
 		showToast('Quête abandonnée' + (data.abandonne ? ' : ' + data.abandonne.titre : ''));
 	} catch(err) { console.error('Erreur abandon de quête', err); if (btn) btn.disabled = false; }
 }

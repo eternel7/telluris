@@ -1,0 +1,702 @@
+[
+  {
+    "_id": "lieu:l_athanor_de_saint_germain",
+    "_rev": "992-5a9d032cfee0bf4c0b61f642bbbf4c7c",
+    "type": "lieu",
+    "label": "L'Athanor de Saint-Germain",
+    "image": "cabinet_alchimie_europe02.png",
+    "categorie": "laboratoire_d_alchimie",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:marchand_laboratoire_d_alchimie",
+        "nom": "Clément Varnepierre ",
+        "portrait": "marchand_clement_varnepierre_laboratoire_d_alchimie.png",
+        "progeniture": {
+          "nom": "Varnepierre",
+          "race": "humain",
+          "enfants": [
+            {
+              "prenom": "Girard",
+              "sex": "M",
+              "image": "druide_m_humain01.jpg",
+              "description": "Le cadet de l'alchimiste. Il connaît les mélanges de son père par cœur et le bois pas du tout.",
+              "inventaire": [
+                {
+                  "item": "item:Herbes_medicinales",
+                  "poids": 0.1
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "stock_matieres": {
+      "graisse": 53,
+      "item:Herbes_a_bruler": 1,
+      "griffes": 1,
+      "reactif_brut": 45,
+      "item:Reactif_brut": 15
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:reactif_alchimique",
+        "qty": 15
+      },
+      {
+        "item_id": "item:composant_rituel",
+        "qty": 57
+      },
+      {
+        "item_id": "item:potion",
+        "qty": 67
+      },
+      {
+        "item_id": "item:poudre_alchimique",
+        "qty": 7
+      },
+      {
+        "item_id": "item:herbe",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Poudre_de_miroir",
+        "qty": 111
+      },
+      {
+        "item_id": "item:Sang_demon_seche",
+        "qty": 113
+      },
+      {
+        "item_id": "item:Soufre",
+        "qty": 50
+      },
+      {
+        "item_id": "item:Cristal_canalisation",
+        "qty": 125
+      },
+      {
+        "item_id": "item:Sel_noir",
+        "qty": 120
+      },
+      {
+        "item_id": "item:catalyseur_magique",
+        "qty": 1
+      },
+      {
+        "item_id": "item:reactif_magique",
+        "qty": 2
+      },
+      {
+        "item_id": "item:potion_de_vision",
+        "qty": 2
+      }
+    ]
+  },
+  {
+    "_id": "lieu:fumee_de_l_yonne",
+    "_rev": "72-93515d639b935675c3d93708f7b52222",
+    "type": "lieu",
+    "label": "Fumée de l'Yonne",
+    "image": "fumoir_europe01.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "fumoir",
+    "stock_matieres": {},
+    "stock_vente": [
+      {
+        "item_id": "item:viande_fumee",
+        "qty": 19
+      }
+    ],
+    "pnj": [
+      {
+        "character": "pnj:marchand_fumoir",
+        "nom": "Hermine Valcorbe",
+        "portrait": "marchand_humain_f_fumoir.png",
+        "progeniture": {
+          "nom": "Valcorbe",
+          "race": "humain",
+          "enfants": [
+            {
+              "prenom": "Perrote",
+              "sex": "F",
+              "image": "druide_f_humain04.jpg",
+              "description": "Elle porte le bois au hâloir depuis qu'elle sait marcher, et s'éloigne un peu plus loin chaque jour."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "_id": "lieu:l_enclume_du_rempart",
+    "_rev": "331-f57805e68f64b9dd9701d23771ee1e44",
+    "type": "lieu",
+    "label": "L'Enclume du Rempart",
+    "image": "armurerie_europe03.png",
+    "categorie": "armurerie",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:marchand_armurerie",
+        "nom": "George Dubois",
+        "portrait": "marchand_george_dubois_armurerie.png",
+        "progeniture": {
+          "nom": "Dubois",
+          "race": "humain",
+          "enfants": [
+            {
+              "prenom": "Colin",
+              "sex": "M",
+              "image": "menestrel_m_humain01.jpg",
+              "description": "L'aîné de l'armurier, qui préfère les chansons à l'enclume — et les chemins de traverse à la forge."
+            }
+          ]
+        }
+      }
+    ],
+    "stock_matieres": {
+      "acier": 135,
+      "bronze": 1431,
+      "fer": 164,
+      "branche": 893,
+      "petit_rondin": 855,
+      "argent": 748,
+      "gros_rondin": 693,
+      "plomb": 762,
+      "poix": 481,
+      "rondin": 689,
+      "item:Seve_de_chene": 5,
+      "crocs": 1,
+      "plumes": 12,
+      "peaux": 40
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:Sarbacane",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Dague",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Lame_courte",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Hache_de_bucheron",
+        "qty": 101
+      },
+      {
+        "item_id": "item:Canne_ferree",
+        "qty": 1
+      },
+      {
+        "item_id": "item:fourreau",
+        "qty": 13
+      },
+      {
+        "item_id": "item:ligatures",
+        "qty": 26
+      },
+      {
+        "item_id": "item:manche",
+        "qty": 101
+      },
+      {
+        "item_id": "item:Arc_court",
+        "qty": 8
+      },
+      {
+        "item_id": "item:Epee_courte",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Epee_longue_ordre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Arbalete_legere",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Epee_longue",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Rapiere",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Dague_de_scene",
+        "qty": 40
+      },
+      {
+        "item_id": "item:hampe",
+        "qty": 100
+      },
+      {
+        "item_id": "item:Plumbata",
+        "qty": 69
+      },
+      {
+        "item_id": "item:Masse_cannelee_perse",
+        "qty": 31
+      },
+      {
+        "item_id": "item:Poincon_de_jet",
+        "qty": 112
+      },
+      {
+        "item_id": "item:acier_plisse",
+        "qty": 125
+      },
+      {
+        "item_id": "item:Shuriken",
+        "qty": 135
+      },
+      {
+        "item_id": "item:Morgenstern",
+        "qty": 35
+      },
+      {
+        "item_id": "item:Nzappa_zap",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Francisque",
+        "qty": 23
+      },
+      {
+        "item_id": "item:Kunai",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Masse_benie",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Hunga_munga",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Epee_argent",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Kanabo",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Naginata",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Falarique",
+        "qty": 110
+      },
+      {
+        "item_id": "item:Lance_rituelle",
+        "qty": 25
+      },
+      {
+        "item_id": "item:Angon",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Trident_barbele",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Heaume_de_fer",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Bottes_de_fer",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Jambières_de_plates",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Arbalete_de_poing",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Cotte_mailles_benie",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Rondache",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Bouclier_ordre",
+        "qty": 2
+      },
+      {
+        "item_id": "item:armure_de_cuir",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Cotte_de_mailles",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Hallebarde",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Jambières_cuir",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Cuirasse_cuir_brut",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Armure_cuir_souple_N",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Heaume_de_plates",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Armure_plates_surcoat",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Pelta",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Pourpoint_cuir_renf",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Jambières_cuir_renf",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Gantelets_de_plates",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Heaume_ouvert_grave",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Gantelets_acier",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Gants_runiques",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Cuirasse_cuir_noir",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Pavois",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_chanvre_tresse",
+    "_rev": "3-4567d7c0beb130308f0fc2b2f9a733a7",
+    "type": "lieu",
+    "label": "Le Chanvre Tressé",
+    "image": "corderie_europe01.png",
+    "categorie": "corderie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_corderie",
+        "portrait": "marchand_humain_m_corderie.png",
+        "nom": "Géraud des Vignes",
+        "progeniture": {
+          "nom": "des Vignes",
+          "race": "humain",
+          "enfants": [
+            {
+              "prenom": "Jehanne",
+              "sex": "F",
+              "image": "druide_f_humain05.jpg",
+              "description": "Elle va couper le chanvre sauvage au bord de l'eau, seule, et revient toujours plus tard qu'annoncé."
+            }
+          ]
+        }
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:la_navette_d_auxerre",
+    "_rev": "4-10ce6cf9bbfa562c020cfffa73da5940",
+    "type": "lieu",
+    "label": "La Navette d'Auxerre",
+    "image": "tissage_europe01.png",
+    "categorie": "tissage",
+    "pnj": [
+      {
+        "character": "pnj:marchand_tissage",
+        "portrait": "marchand_elfe_f_tissage.png",
+        "nom": "Alix Vaugrenière",
+        "progeniture": {
+          "nom": "Vaugrenière",
+          "race": "elfe",
+          "enfants": [
+            {
+              "prenom": "Sylvain",
+              "sex": "M",
+              "image": "druide_m_elfe01.jpg",
+              "description": "Il cueille les plantes à teindre lui-même et jure que la forêt ne fera jamais de mal à un elfe."
+            }
+          ]
+        }
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "stock_matieres": {},
+    "stock_vente": [
+      {
+        "item_id": "item:rembourrage",
+        "qty": 2
+      },
+      {
+        "item_id": "item:feutre",
+        "qty": 5
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_clos_des_simples",
+    "_rev": "7-07f082045ac09627c682bc72ce81640f",
+    "type": "lieu",
+    "label": "Le Clos des Simples",
+    "image": "jardinier_europe01.png",
+    "categorie": "jardinier",
+    "pnj": [
+      {
+        "character": "pnj:marchand_jardinier",
+        "portrait": "marchand_clos_des_simples_jardinerie.png",
+        "nom": "Héva du Serein",
+        "progeniture": {
+          "nom": "du Serein",
+          "race": "humain",
+          "enfants": [
+            {
+              "prenom": "Ysabel",
+              "sex": "F",
+              "image": "druide_f_humain06.jpg",
+              "description": "Elle rapporte des boutures que personne n'a jamais vues, et ne dit jamais d'où elles viennent."
+            }
+          ]
+        }
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "stock_matieres": {
+      "graines": 25
+    },
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:la_semelle_du_pelerin",
+    "_rev": "12-ea73e570a9073f0320f8ae8494050705",
+    "type": "lieu",
+    "label": "La Semelle du Pèlerin",
+    "image": "cordonnerie_europe02.png",
+    "categorie": "cordonnerie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_cordonnerie",
+        "portrait": "marchand_nain_m_cordonnerie.png",
+        "nom": "Damien de Cravant",
+        "progeniture": {
+          "nom": "de Cravant",
+          "race": "nain",
+          "enfants": [
+            {
+              "prenom": "Durand",
+              "sex": "M",
+              "image": "forestier_m_nain01.jpg",
+              "description": "Il suit les pèlerins sur la route pour leur vendre des semelles, et pousse chaque fois un peu plus loin."
+            }
+          ]
+        }
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "stock_matieres": {
+      "peaux": 50,
+      "tendons": 2
+    },
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:le_duvet_d_oie",
+    "_rev": "3-fabf18fd6773cf6c05b922db8b119497",
+    "type": "lieu",
+    "label": "Le Duvet d'Oie",
+    "image": "plumasserie_europe01.png",
+    "categorie": "plumasserie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_plumasserie",
+        "portrait": "marchand_hobbit_f_plumasserie.png",
+        "nom": "Jacquette Lormière",
+        "progeniture": {
+          "nom": "Lormière",
+          "race": "hobbit",
+          "enfants": [
+            {
+              "prenom": "Alison",
+              "sex": "F",
+              "image": "druide_f_hobbit01.jpg",
+              "description": "Elle ramasse les plumes tombées sous les arbres à oiseaux, là où nul hobbit sensé ne s'aventure."
+            }
+          ]
+        }
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "stock_matieres": {},
+    "stock_vente": [
+      {
+        "item_id": "item:parure",
+        "qty": 4
+      },
+      {
+        "item_id": "item:oreiller",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Coiffe_plumes",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "_id": "lieu:la_marmite_du_guet",
+    "_rev": "2-a4e05d57bfb35492982f00e39d0ed826",
+    "type": "lieu",
+    "label": "La Marmite du Guet",
+    "image": "epicerie_europe01.png",
+    "categorie": "cuisine",
+    "pnj": [
+      {
+        "character": "pnj:marchand_cuisine",
+        "nom": "Lalie Chantepie",
+        "portrait": "marchand_hobbit_f_cuisine01.png",
+        "progeniture": {
+          "nom": "Chantepie",
+          "race": "hobbit",
+          "enfants": [
+            {
+              "prenom": "Robinet",
+              "sex": "M",
+              "image": "druide_m_hobbit01.jpg",
+              "description": "Il cherche des champignons pour la marmite et ne sait pas encore lesquels cherchent le promeneur."
+            }
+          ]
+        }
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:les_etalages_d_autessiodurum",
+    "_rev": "1423-ae2ac4d5a2dd1e3011fef5c7613d806c",
+    "type": "lieu",
+    "label": "Les Étalages d'Autessiodurum",
+    "image": "boucherie_europe02.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "boucherie",
+    "stock_matieres": {},
+    "pnj": [
+      {
+        "character": "pnj:marchand_boucherie",
+        "nom": "Aelis de Bourgogne",
+        "portrait": "marchand_aelis_de_bourgogne_boucherie.png",
+        "progeniture": {
+          "nom": "de Bourgogne",
+          "race": "humain",
+          "enfants": [
+            {
+              "prenom": "Marguet",
+              "sex": "F",
+              "image": "druide_f_humain07.jpg",
+              "description": "L'aînée de la bouchère. Elle mène les bêtes au pré et ne compte plus les heures."
+            },
+            {
+              "prenom": "Guyot",
+              "sex": "M",
+              "image": "menestrel_m_humain02.jpg",
+              "description": "Le cadet, qui suit sa sœur partout et rentre rarement avec elle."
+            }
+          ]
+        }
+      }
+    ],
+    "stock_vente": [
+      {
+        "item_id": "item:viande",
+        "qty": 139
+      },
+      {
+        "item_id": "item:os",
+        "qty": 135
+      },
+      {
+        "item_id": "item:sang",
+        "qty": 117
+      },
+      {
+        "item_id": "item:graisse",
+        "qty": 105
+      },
+      {
+        "item_id": "item:cuir_brut",
+        "qty": 138
+      },
+      {
+        "item_id": "item:crocs",
+        "qty": 103
+      },
+      {
+        "item_id": "item:poils",
+        "qty": 104
+      },
+      {
+        "item_id": "item:tendons",
+        "qty": 173
+      },
+      {
+        "item_id": "item:crins",
+        "qty": 113
+      },
+      {
+        "item_id": "item:yeux",
+        "qty": 48
+      },
+      {
+        "item_id": "item:plumes",
+        "qty": 4
+      },
+      {
+        "item_id": "item:griffes",
+        "qty": 4
+      }
+    ]
+  }
+]

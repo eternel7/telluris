@@ -393,6 +393,18 @@ def _set_ressource_recoltable(character: dict, zone_event: dict | None, lieu_doc
 	character["ressource_recoltable"] = {"item": item_id, "poids": poids}
 
 
+def _zone_event_payload(zone_event: dict | None) -> dict | None:
+	"""Événement de zone tel que le client le CONSOMME — c'est-à-dire le combat, et rien
+	d'autre. Le type « ressource » a déjà son canal (`ressource_recoltable`) ; tous les
+	autres (`pnj`, `ambiance`, `quete`, `commerce`, `tresor`…) n'ont AUCUN code derrière et
+	ne servaient qu'à un toast d'ambiance, retiré. ⚠️ Ils restent dans `table_evenements` :
+	ils y pèsent comme « il ne se passe rien » et les enlever ferait monter d'autant la
+	fréquence des combats aléatoires."""
+	if zone_event and zone_event.get("type") == "combat":
+		return zone_event
+	return None
+
+
 def _echecs_payload(echues: list) -> list:
 	"""Courses de transport dont le délai vient d'expirer, pour le toast client."""
 	return [{"titre": q.get("titre", "—")} for q in echues or []]
@@ -524,7 +536,7 @@ async def move_character(
 						# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
 						xp_compagnie = recrutement.xp_compagnie_payload(
 							_apply_world_turn_groupe(character_to_update, xp_partage), xp_partage)
-						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -588,7 +600,7 @@ async def move_character(
 				# docs relation + un doc lieu complet par lieu connu).
 				relations_lieux = (relations_lieux_payload(character_to_update)
 								   if (transports_echoues or escorte_maj["depose"]) else None)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "access": access, "zone_event": zone_event, "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
+				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "access": access, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 

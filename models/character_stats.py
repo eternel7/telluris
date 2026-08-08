@@ -196,6 +196,12 @@ QUETE_TRANSPORT_POIDS_MAX: float = 100.0
 QUETE_TRANSPORT_NB_MAX: int = 10
 QUETE_TRANSPORT_XP: int = 10
 QUETE_TRANSPORT_RELATION_DELTA: int = 1
+# Réussir une quête monte la réputation chez son DONNEUR (tous canaux : tableau de guilde,
+# épreuve de rang, commission de donjon, course, escorte). Variable DISTINCTE de la sanction
+# ci-dessus : le gain s'applique à un canal répétable (le tableau), la sanction non — il faut
+# pouvoir baisser l'un sans toucher à l'autre. ⚠️ Asymétrie voulue : la maison punit
+# collectivement (`lieux_solidaires`), elle ne remercie QUE le donneur.
+QUETE_REUSSITE_RELATION_DELTA: int = 1
 # On ne confie pas sa marchandise à quelqu'un qu'on voit d'un mauvais œil : sous ce seuil de
 # relation, le tenancier ne propose AUCUNE course générée (0 = garde-fou désactivé). Ne concerne
 # pas les courses ÉCRITES (`services.transport.offre`), que le scénario décide de confier.
@@ -328,6 +334,23 @@ MONTURE_MORT_DEFINITIVE: bool = True
 # seul réglage du système : le rendez-vous, la récompense et l'unicité sont de la DONNÉE
 # (la spec `services.escorte.offre`), et la sanction réutilise QUETE_TRANSPORT_RELATION_DELTA.
 ESCORTE_MORT_DEFINITIVE: bool = True
+
+# Escortes de PROGÉNITURE — la seule source d'escorte GÉNÉRÉE. Un tenancier dont l'entrée
+# `pnj` du lieu déclare une `progeniture` peut demander qu'on retrouve son enfant, et le
+# comptoir de la guilde centralise ces disparitions (bloc `services.escorte.recherche`).
+# PROBA : tirage à l'ENTRÉE dans la boutique — « faible » par conception, on ne perd pas un
+#   enfant tous les jours ; le bloc de donnée peut la surcharger boutique par boutique.
+# RELATION_MIN : un marchand ne confie pas sa famille au premier venu. Comparateur `>=`,
+#   comme QUETE_TRANSPORT_RELATION_MIN — deux comparateurs divergents pour la même notion
+#   de confiance seraient une source de bug bien plus coûteuse que le point d'écart. 0 =
+#   garde-fou désactivé.
+# GUILDE_PROBA : le comptoir, lui, recense TOUTES les disparitions de la cité — il en a
+#   donc bien plus souvent une à confier qu'un tenancier isolé.
+# XP : récompense par défaut, surchargée par `recompenses.xp` du bloc.
+ESCORTE_PROGENITURE_PROBA: float = 0.05
+ESCORTE_PROGENITURE_RELATION_MIN: int = 60
+ESCORTE_GUILDE_PROBA: float = 0.25
+ESCORTE_PROGENITURE_XP: int = 25
 
 # ── Accès (barrières PNJ gardiennes) ──────────────────────────────────────────────
 # Un lieu peut porter un bloc `acces` (gardien, conditions, cycle) qui en interdit
@@ -551,6 +574,7 @@ def current_world_variables() -> dict:
 		"QUETE_TRANSPORT_NB_MAX": QUETE_TRANSPORT_NB_MAX,
 		"QUETE_TRANSPORT_XP": QUETE_TRANSPORT_XP,
 		"QUETE_TRANSPORT_RELATION_DELTA": QUETE_TRANSPORT_RELATION_DELTA,
+		"QUETE_REUSSITE_RELATION_DELTA": QUETE_REUSSITE_RELATION_DELTA,
 		"QUETE_TRANSPORT_RELATION_MIN": QUETE_TRANSPORT_RELATION_MIN,
 		"QUETE_TRANSPORT_STOCK_PROBA": QUETE_TRANSPORT_STOCK_PROBA,
 		"QUETE_CHASSE_XP_FACTEUR": QUETE_CHASSE_XP_FACTEUR,
@@ -588,6 +612,10 @@ def current_world_variables() -> dict:
 		"MONTURE_PRIX_DEFAUT": MONTURE_PRIX_DEFAUT,
 		"MONTURE_MORT_DEFINITIVE": MONTURE_MORT_DEFINITIVE,
 		"ESCORTE_MORT_DEFINITIVE": ESCORTE_MORT_DEFINITIVE,
+		"ESCORTE_PROGENITURE_PROBA": ESCORTE_PROGENITURE_PROBA,
+		"ESCORTE_PROGENITURE_RELATION_MIN": ESCORTE_PROGENITURE_RELATION_MIN,
+		"ESCORTE_GUILDE_PROBA": ESCORTE_GUILDE_PROBA,
+		"ESCORTE_PROGENITURE_XP": ESCORTE_PROGENITURE_XP,
 		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
@@ -630,6 +658,7 @@ def load_world_variables() -> dict:
 	global QUETE_COLLECT_POIDS_MAX, QUETE_BOARD_DUREE_SECONDES, QUETE_BOARD_DUREE_JITTER
 	global QUETE_TRANSPORT_PROBA, QUETE_TRANSPORT_DUREE_SECONDES, QUETE_TRANSPORT_POIDS_MAX
 	global QUETE_TRANSPORT_NB_MAX, QUETE_TRANSPORT_XP, QUETE_TRANSPORT_RELATION_DELTA
+	global QUETE_REUSSITE_RELATION_DELTA
 	global QUETE_TRANSPORT_STOCK_PROBA, QUETE_TRANSPORT_RELATION_MIN
 	global QUETE_CHASSE_XP_FACTEUR, QUETE_CHASSE_PROBA_RANG, RANG_GUILDE_MAX_DEFAUT
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
@@ -645,6 +674,8 @@ def load_world_variables() -> dict:
 	global MONTURE_GROUPE_MAX, MONTURE_CHARGE_MULT_DEFAUT, MONTURE_PRIX_DEFAUT
 	global MONTURE_MORT_DEFINITIVE
 	global ESCORTE_MORT_DEFINITIVE
+	global ESCORTE_PROGENITURE_PROBA, ESCORTE_PROGENITURE_RELATION_MIN
+	global ESCORTE_GUILDE_PROBA, ESCORTE_PROGENITURE_XP
 	global ACCES_GARDIEN_ACTIF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
@@ -727,6 +758,7 @@ def load_world_variables() -> dict:
 	QUETE_TRANSPORT_NB_MAX  = int(v.get("QUETE_TRANSPORT_NB_MAX", QUETE_TRANSPORT_NB_MAX))
 	QUETE_TRANSPORT_XP      = int(v.get("QUETE_TRANSPORT_XP", QUETE_TRANSPORT_XP))
 	QUETE_TRANSPORT_RELATION_DELTA = int(v.get("QUETE_TRANSPORT_RELATION_DELTA", QUETE_TRANSPORT_RELATION_DELTA))
+	QUETE_REUSSITE_RELATION_DELTA = int(v.get("QUETE_REUSSITE_RELATION_DELTA", QUETE_REUSSITE_RELATION_DELTA))
 	QUETE_TRANSPORT_RELATION_MIN = int(v.get("QUETE_TRANSPORT_RELATION_MIN", QUETE_TRANSPORT_RELATION_MIN))
 	QUETE_TRANSPORT_STOCK_PROBA = float(v.get("QUETE_TRANSPORT_STOCK_PROBA", QUETE_TRANSPORT_STOCK_PROBA))
 	QUETE_CHASSE_XP_FACTEUR = float(v.get("QUETE_CHASSE_XP_FACTEUR", QUETE_CHASSE_XP_FACTEUR))
@@ -778,6 +810,10 @@ def load_world_variables() -> dict:
 	MONTURE_PRIX_DEFAUT = max(0, int(v.get("MONTURE_PRIX_DEFAUT", MONTURE_PRIX_DEFAUT)))
 	MONTURE_MORT_DEFINITIVE = bool(v.get("MONTURE_MORT_DEFINITIVE", MONTURE_MORT_DEFINITIVE))
 	ESCORTE_MORT_DEFINITIVE = bool(v.get("ESCORTE_MORT_DEFINITIVE", ESCORTE_MORT_DEFINITIVE))
+	ESCORTE_PROGENITURE_PROBA = float(v.get("ESCORTE_PROGENITURE_PROBA", ESCORTE_PROGENITURE_PROBA))
+	ESCORTE_PROGENITURE_RELATION_MIN = int(v.get("ESCORTE_PROGENITURE_RELATION_MIN", ESCORTE_PROGENITURE_RELATION_MIN))
+	ESCORTE_GUILDE_PROBA = float(v.get("ESCORTE_GUILDE_PROBA", ESCORTE_GUILDE_PROBA))
+	ESCORTE_PROGENITURE_XP = max(0, int(v.get("ESCORTE_PROGENITURE_XP", ESCORTE_PROGENITURE_XP)))
 	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):

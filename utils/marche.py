@@ -421,10 +421,35 @@ def now_epoch() -> int:
 	return int(time.time())
 
 
-def relation_doc_id(character: dict, lieu_doc: dict) -> str:
-	char_id = (character or {}).get("_id") or ""
+def lieu_de_relation(lieu_doc: dict) -> str:
+	"""Id du lieu qui PORTE la réputation de `lieu_doc` — lui-même par défaut.
+
+	Un champ optionnel **`relation_lieu`** délègue la relation à un autre lieu : les quatre
+	lieux du Bastion (façade, réception, comptoir, bureau du maître) partagent ainsi UNE seule
+	cote, consolidée par le comptoir. Champ absent ⇒ comportement d'avant, aucune migration.
+
+	⚠️ **UN SEUL SAUT**, jamais de chaîne : un cycle A→B→A ferait boucler toute lecture de
+	relation. Fail-soft — une valeur qui n'est pas un `lieu:…`, ou qui pointe sur le lieu
+	lui-même, est ignorée. Aucune lecture DB : seul l'id est nécessaire, et l'appelant tient
+	déjà le doc lieu."""
 	lieu_id = (lieu_doc or {}).get("_id") or ""
-	return "relation:" + char_id + "::" + lieu_id
+	cible = str((lieu_doc or {}).get("relation_lieu") or "").strip()
+	if not cible or not cible.startswith("lieu:") or cible == lieu_id:
+		return lieu_id
+	return cible
+
+
+def relation_doc_id(character: dict, lieu_doc: dict) -> str:
+	"""Id du doc `relation` d'un couple perso × lieu — CHOKEPOINT de la consolidation
+	(`lieu_de_relation`) : tous les consommateurs de `get_relation` en profitent d'un coup
+	(gain, sanction, `relation_min` des dialogues, confiance d'une course, `gratuit_si` d'un
+	service, blocage de marchandage).
+
+	⚠️ Conséquence assumée : `prix_negocies` et `marchandage_bloque_jusqu` vivent sur le même
+	doc — deux lieux qui délèguent partagent donc leurs prix négociés. Sans effet pour une
+	guilde, qui ne vend rien."""
+	char_id = (character or {}).get("_id") or ""
+	return "relation:" + char_id + "::" + lieu_de_relation(lieu_doc)
 
 
 def get_relation(character: dict, lieu_doc: dict, get_doc_fn=None) -> dict:
@@ -439,7 +464,9 @@ def get_relation(character: dict, lieu_doc: dict, get_doc_fn=None) -> dict:
 		"_id": doc_id,
 		"type": "relation",
 		"character_id": (character or {}).get("_id"),
-		"lieu_id": (lieu_doc or {}).get("_id"),
+		# ⚠️ Le lieu PORTEUR, pas celui où l'on parle : `relations_lieux_payload` indexe les
+		# docs relation par cette clé, un doc frais qui nommerait le délégant y serait orphelin.
+		"lieu_id": lieu_de_relation(lieu_doc),
 		"value": int(character_stats.RELATION_INITIALE),
 		"prix_negocies": {},
 		"marchandage_bloque_jusqu": 0,
@@ -618,7 +645,10 @@ def relations_lieux_payload(character: dict) -> list[dict]:
 		lieu_doc = get_doc(lieu_id)
 		if not lieu_doc:
 			continue
-		rel = rels_by_lieu.get(lieu_id)
+		# ⚠️ Via le lieu PORTEUR : un lieu qui délègue (`relation_lieu`) afficherait sinon la
+		# valeur neutre pendant que son consolidateur en montre une autre. Le doc lieu est déjà
+		# lu — aucune lecture de plus.
+		rel = rels_by_lieu.get(lieu_de_relation(lieu_doc))
 		img, img_route = _lieu_image_route(lieu_doc)
 		parent_id = lieu_doc.get("lieu_parent")
 		parent_nom = parent_img = parent_route = None

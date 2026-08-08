@@ -55,6 +55,13 @@ FLAGS_CONNUS = {
 	# Refus PARLÉ d'une offre réservée à un rang de guilde (`offre.rang_min`), miroir de
 	# `transport_mefiance` : sans lui le choix disparaîtrait sans un mot.
 	"escorte_rang_insuffisant",
+	# Progéniture d'un tenancier : sa porte à lui est la CONFIANCE (relation), pas le rang —
+	# d'où un second refus parlé, exactement calqué sur `transport_mefiance`.
+	"escorte_mefiance",
+	# Un enfant de CE magasin est sous escorte, mais c'est la GUILDE qui l'a confiée : sans ce
+	# flag le parent resterait muet pendant toute la mission menée en son nom.
+	# Complémentaire de `escorte_en_cours`, qui ne vaut que si le lieu est le DONNEUR.
+	"escorte_progeniture_en_cours",
 	"acces_ouvrable", "acces_refuse", "acces_ouvert", "acces_accompli",
 	# Complémentaires : l'un ou l'autre, jamais les deux (cf. `_contexte`).
 	"acces_libere", "acces_menace",
@@ -92,6 +99,12 @@ NOEUDS_REQUIS = {
 TRANSPORT_DONNEUR = {"accepte", "trop_charge"}
 TRANSPORT_DESTINATAIRE = {"livre", "incomplet"}
 TRANSPORT_RETOUR = {"rapporte"}   # course `retour` : le donneur solde au retour
+
+# Même raisonnement pour l'escorte : `mefiance` n'a de sens que là où la CONFIANCE est la
+# porte, c'est-à-dire chez un tenancier qui déclare une progéniture. L'exiger de tous ferait
+# crier au défaut sur un donneur d'escorte ÉCRITE parfaitement correct (le révérend n'a pas
+# de cote à faire monter avant de parler d'une disparue).
+ESCORTE_MEFIANCE = {"mefiance"}
 
 # Actions qui n'ont de sens QUE si quelque chose est en cours, et le flag qui l'atteste.
 # Sans lui, le PNJ propose « Je vous apporte une livraison » à un joueur qui n'a rien à
@@ -381,6 +394,11 @@ def analyser_doc(doc: dict) -> list:
 			# Destinataire : réservé aux tenanciers de magasin (cf. commentaire plus haut).
 			if doc_id.startswith("pnj:marchand_"):
 				attendus |= TRANSPORT_DESTINATAIRE
+		elif service == "escorte":
+			attendus = set(NOEUDS_REQUIS["escorte"])
+			# Le tenancier générique est le seul à qui la confiance puisse manquer.
+			if doc_id.startswith("pnj:marchand_"):
+				attendus |= ESCORTE_MEFIANCE
 		else:
 			attendus = NOEUDS_REQUIS.get(service, set())
 		for cle in attendus - set(declares):

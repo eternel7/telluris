@@ -27,7 +27,7 @@
 #                               une chasse (`chasse.dans_zone_chasse`, à qui l'on passe le
 #                               bloc `rencontre` tel quel — il porte déjà `position`).
 #
-# ⚠️ Chaîne d'import : `escorte` importe `chasse` + `quetes` + `marche`, JAMAIS `combat`
+# ⚠️ Chaîne d'import : `escorte` importe `chasse` + `quetes`, JAMAIS `combat`
 # (c'est `combat` qui importera `escorte`). `chasse` fait déjà exactement ce détour, par
 # import paresseux, pour `_walkable`.
 #
@@ -36,6 +36,7 @@
 # via le module (jamais from-import) : elles sont réglables à chaud depuis /admin.
 
 import random
+import unicodedata
 import uuid
 
 from models import character_stats
@@ -119,9 +120,13 @@ def rang_insuffisant(character: dict, pnj_doc: dict) -> bool:
 	disparaîtrait purement et simplement, indiscernable d'un « rien à proposer aujourd'hui »,
 	et le joueur n'aurait aucun moyen d'apprendre ce qu'on attend de lui.
 
-	Faux dès qu'il n'y a rien à refuser : pas d'offre écrite, pas de seuil, escorte déjà en
-	cours, ou mission déjà accomplie."""
-	spec = offre_spec(pnj_doc)
+	Vaut pour l'offre ÉCRITE comme pour le REGISTRE de la guilde (`recherche`), qui peut lui
+	aussi réserver ses disparitions à un rang. ⚠️ Pas pour la progéniture d'un magasin : sa
+	porte à lui est la CONFIANCE, et c'est `mefiance` qui la met en mots.
+
+	Faux dès qu'il n'y a rien à refuser : pas d'offre, pas de seuil, escorte déjà en cours,
+	ou mission déjà accomplie."""
+	spec = offre_spec(pnj_doc) or recherche_spec(pnj_doc)
 	if not spec or not rang_requis(spec):
 		return False
 	if escortes_actives(character) or deja_reussie(character, spec.get("id")):
@@ -234,6 +239,14 @@ def generer_escorte_authoree(spec: dict, giver_doc: dict, find_docs_fn, get_doc_
 	rdv = bloc_rencontre(spec, get_doc_fn)
 	if rdv:
 		objectif["rencontre"] = rdv
+	recompenses = {"xp": xp, "cuivre": cuivre, "items": list(rec.get("items") or [])}
+	# Lieux REMERCIÉS en plus du donneur (`quetes.recompenser_lieux`). Une escorte de
+	# progéniture confiée par la guilde remercie AUSSI le magasin dont on ramène l'enfant ;
+	# une escorte écrite peut faire de même en le déclarant. Champ absent ⇒ seul le donneur
+	# encaisse, comportement d'avant.
+	autres = [x for x in (rec.get("relation_lieux") or []) if x]
+	if autres:
+		recompenses["relation_lieux"] = autres
 	return {
 		"id": spec.get("id") or ("quete:escorte_" + uuid.uuid4().hex[:12]),
 		"type_quete": "escorte",
@@ -252,15 +265,14 @@ def generer_escorte_authoree(spec: dict, giver_doc: dict, find_docs_fn, get_doc_
 		# Les SPECS des personnes, pas encore incarnées — miroir de `cargaison`. Les docs
 		# `protege:*` naissent à la rencontre, pas à l'offre.
 		"proteges": [dict(p) for p in proteges],
-		"recompenses": {"xp": xp, "cuivre": cuivre, "items": list(rec.get("items") or [])},
+		"recompenses": recompenses,
 		"progress": 0,
 	}
 
 
 def _indice(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) -> dict:
 	"""Indices d'orientation vers le lieu de dépose. Délégué à `transport.indice_destination`
-	par import PARESSEUX : `transport` importe `quetes`/`marche`/`focalisation` comme nous,
-	mais rien n'oblige ce module à en dépendre au chargement."""
+	par import PARESSEUX : rien n'oblige ce module à dépendre de `transport` au chargement."""
 	from utils import transport
 	return transport.indice_destination(giver_doc, dest_id, find_docs_fn, get_doc_fn)
 
@@ -268,6 +280,267 @@ def _indice(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) -> dict:
 def _texte_indice(indice: dict) -> str:
 	from utils import transport
 	return transport.texte_indice(indice)
+
+
+# ---------------------------------------------------------------------------
+# PROGÉNITURE — la seule source d'escorte GÉNÉRÉE
+# ---------------------------------------------------------------------------
+# Un magasin dont l'entrée `pnj` du lieu déclare une `progeniture` peut demander qu'on
+# retrouve son enfant ; le comptoir de la guilde, lui, recense ces disparitions pour toute
+# la cité (`services.escorte.recherche`).
+#
+# ⚠️ RIEN N'EST DUPLIQUÉ DU MOTEUR : cette source SYNTHÉTISE une spec à la forme EXACTE de
+# `services.escorte.offre`, puis passe par `generer_escorte_authoree`. Acceptation,
+# incarnation, rendez-vous, combat, dépose, solde, dialogue et carte 🗺️ ne savent pas d'où
+# vient l'offre, et n'ont pas à le savoir.
+#
+# ⚠️ L'information de nommage vit sur l'ENTRÉE du lieu, pas sur le doc PNJ : un
+# `pnj:marchand_*` est GÉNÉRIQUE (deux boutiques d'un même métier partagent le même doc), et
+# elles ne peuvent pas avoir le même enfant. Priorité entrée → doc, miroir exact de
+# `pnj.nom_effectif` ; le repli sur le doc laisse un PNJ nommé et unique la porter lui-même.
+
+
+def _slug(txt: str) -> str:
+	"""Fragment d'identifiant stable : sans accent, sans ponctuation, en minuscules."""
+	base = unicodedata.normalize("NFKD", str(txt or ""))
+	base = "".join(c for c in base if not unicodedata.combining(c))
+	brut = "".join(c if c.isalnum() else "_" for c in base.lower())
+	return "_".join(x for x in brut.split("_") if x)
+
+
+def _enfants_de(bloc: dict | None) -> list:
+	return [e for e in (bloc or {}).get("enfants") or []
+			if isinstance(e, dict) and str(e.get("prenom") or "").strip()]
+
+
+def progeniture_de(entree: dict | None, pnj_doc: dict | None) -> dict | None:
+	"""Le bloc `progeniture` qui vaut ICI — l'entrée du lieu prime, le doc PNJ sert de repli
+	(miroir de `pnj.nom_effectif`). None si personne n'y est nommé : une famille sans enfant
+	nommé n'ouvre aucune quête, et c'est ainsi qu'une boutique reste muette tant qu'on ne lui
+	a rien écrit."""
+	candidats = (
+		(entree or {}),
+		(((pnj_doc or {}).get("services") or {}).get("escorte") or {}),
+	)
+	for source in candidats:
+		bloc = source.get("progeniture")
+		if isinstance(bloc, dict) and _enfants_de(bloc):
+			return bloc
+	return None
+
+
+def id_enfant(lieu_id: str, enfant: dict) -> str:
+	"""Identifiant de la quête qui ramène CET enfant.
+
+	⚠️ Bâti sur le lieu du MAGASIN et jamais sur le donneur : la même disparition, confiée
+	par le père ou par le comptoir de la guilde, doit porter le MÊME id — sinon
+	`deja_reussie` laisserait ramener deux fois le même enfant, une fois par canal."""
+	return ("quete:escorte_progeniture_"
+			+ _slug(str(lieu_id or "").split(":", 1)[-1]) + "_" + _slug(enfant.get("prenom")))
+
+
+def enfants_a_retrouver(character: dict, lieu_id: str, bloc: dict | None) -> list:
+	"""Les enfants de cette famille qui ne sont pas encore rentrés. Un ÉCHEC ne consomme rien
+	(`deja_reussie` ignore les archives en échec) : le parent repropose. Liste vide ⇒ plus
+	aucune offre pour cette maison, et le gain de réputation est donc borné par le nombre
+	d'enfants ÉCRITS."""
+	return [e for e in _enfants_de(bloc) if not deja_reussie(character, id_enfant(lieu_id, e))]
+
+
+def progeniture_accomplie(character: dict, lieu_id: str, bloc: dict | None) -> bool:
+	"""Au moins un enfant de cette maison a été ramené — de quoi laisser le parent remercier
+	(flag `escorte_accomplie` côté magasin)."""
+	return any(deja_reussie(character, id_enfant(lieu_id, e)) for e in _enfants_de(bloc))
+
+
+def zones_dangereuses(lieu_doc: dict, get_doc_fn) -> list:
+	"""Zones placées sur cette carte où un enfant peut se perdre : celles dont le doc `zone:*`
+	porte `modificateurs.danger > 0` (forêts, rivière — le cœur de ville est à −3). C'est ce
+	qui rend le rendez-vous DÉRIVÉ : aucune donnée à écrire par boutique, et une zone ajoutée
+	à la carte devient un lieu de disparition sans une ligne de code.
+
+	⚠️ Repli EN CASCADE, jamais de disparition silencieuse : aucune zone dangereuse ⇒ toutes
+	les zones placées ; aucune zone du tout ⇒ liste vide, et l'appelant retombe sur la
+	contrainte de lieu seule. Une carte muette est un défaut d'authoring, son prix ne doit pas
+	être l'évaporation du contenu.
+
+	⚠️ Les docs `zone:*` ne sont PAS dans le cache de requête : au plus une poignée de
+	lectures, et seulement à la POSE de l'offre (une fois par entrée dans le lieu)."""
+	placees = []
+	for p in (lieu_doc or {}).get("zone_influences") or []:
+		zid = p.get("zone")
+		if zid and zid not in placees:
+			placees.append(zid)
+	dangereuses = []
+	for zid in placees:
+		doc = get_doc_fn(zid) or {}
+		try:
+			danger = float((doc.get("modificateurs") or {}).get("danger", 0) or 0)
+		except (TypeError, ValueError):
+			danger = 0.0
+		if danger > 0:
+			dangereuses.append(zid)
+	return dangereuses or placees
+
+
+def _rencontre_progeniture(bloc: dict, magasin_doc: dict, get_doc_fn) -> dict | None:
+	"""Le bloc `rencontre` de la spec synthétisée : celui écrit dans la donnée s'il y est,
+	sinon la CITÉ du magasin et ses zones dangereuses."""
+	ecrit = bloc.get("rencontre")
+	if isinstance(ecrit, dict) and ecrit.get("lieu"):
+		return dict(ecrit)
+	cite = (magasin_doc or {}).get("lieu_parent")
+	if not cite:
+		return None
+	rdv = {"lieu": cite}
+	zones = zones_dangereuses(get_doc_fn(cite), get_doc_fn)
+	if zones:
+		rdv["zones"] = zones
+	return rdv
+
+
+def spec_progeniture(character: dict, magasin_doc: dict, bloc: dict, get_doc_fn,
+					 pnj_doc: dict | None = None, choix_fn=random.choice,
+					 recompenses_defaut: dict | None = None) -> dict | None:
+	"""Une spec à la forme EXACTE de `services.escorte.offre`, tirée de la progéniture d'un
+	magasin. None quand tous les enfants sont rentrés.
+
+	Le magasin est à la fois le lieu de DÉPOSE (on ramène l'enfant chez lui) et le lieu
+	remercié (`recompenses.relation_lieux`) — quand c'est LUI qui confie la mission, donneur
+	et remercié sont le même lieu, et c'est `quetes.recompenser_lieux` qui garantit alors un
+	+1 et non un +2."""
+	lieu_id = (magasin_doc or {}).get("_id")
+	restants = enfants_a_retrouver(character, lieu_id, bloc)
+	if not lieu_id or not restants:
+		return None
+	# Mémo partagé avec `generer_escorte_authoree` : sans lui le doc de la CITÉ (le plus gros
+	# du jeu, ~28 Ko avec ses `cells`, et exclu du cache de requête) serait relu deux fois —
+	# une pour ses zones, une pour la case du rendez-vous.
+	get_doc_fn = quetes._cached_getter(get_doc_fn)
+	enfant = choix_fn(restants)
+	protege = dict(enfant)
+	protege.setdefault("nom", str(bloc.get("nom") or "").strip())
+	protege.setdefault("race", bloc.get("race") or (pnj_doc or {}).get("race") or "humain")
+	qui = _nom_protege(protege)
+	enseigne = (magasin_doc.get("label") or magasin_doc.get("nom") or "").strip()
+	rec = dict(bloc.get("recompenses") or recompenses_defaut or {})
+	xp = int(rec.get("xp", character_stats.ESCORTE_PROGENITURE_XP))
+	rec["xp"] = xp
+	rec["cuivre"] = int(rec.get("cuivre", max(0, round(xp * float(character_stats.QUETE_CUIVRE_PAR_XP)))))
+	rec["relation_lieux"] = [lieu_id]
+	spec = {
+		"id": id_enfant(lieu_id, enfant),
+		"destination": lieu_id,
+		"proteges": [protege],
+		# Un enfant ramené ne se reperd pas : l'unicité est PAR ENFANT, portée par l'id.
+		"unique": True,
+		"titre": bloc.get("titre") or f"Disparition : {qui}",
+		# ⚠️ Formulation NEUTRE en genre : `sex` est facultatif dans la donnée, et « cet
+		# enfant » accorde correctement quel que soit le sexe de l'enfant. Les enseignes
+		# portent leur article : deux-points, jamais de préposition (règle du transport).
+		"description": bloc.get("description") or (
+			f"{qui} n'a pas reparu. Retrouvez la trace de cet enfant et ramenez-le sain et "
+			f"sauf à : {enseigne}."
+		),
+		"recompenses": rec,
+	}
+	if bloc.get("rang_min"):
+		spec["rang_min"] = bloc["rang_min"]
+	rdv = _rencontre_progeniture(bloc, magasin_doc, get_doc_fn)
+	if rdv:
+		spec["rencontre"] = rdv
+	return spec
+
+
+def generer_escorte_progeniture(character: dict, magasin_doc: dict, bloc: dict, giver_doc: dict,
+								find_docs_fn, get_doc_fn, pnj_doc: dict | None = None,
+								choix_fn=random.choice,
+								recompenses_defaut: dict | None = None) -> dict | None:
+	"""Synthétise la spec puis la passe au générateur d'offre ÉCRITE, inchangé. `giver_doc`
+	est le magasin (le parent se saisit lui-même) OU le comptoir de la guilde (le registre des
+	disparitions) : c'est la seule différence entre les deux canaux."""
+	spec = spec_progeniture(character, magasin_doc, bloc, get_doc_fn, pnj_doc, choix_fn,
+							recompenses_defaut)
+	if not spec:
+		return None
+	return generer_escorte_authoree(spec, giver_doc, find_docs_fn, get_doc_fn)
+
+
+# ── La confiance du tenancier ────────────────────────────────────────────────────
+
+def confiance_suffisante(character: dict, lieu_doc: dict, get_doc_fn,
+						 now: int | None = None) -> bool:
+	"""Le tenancier a-t-il assez confiance pour parler de sa famille ? Miroir de
+	`transport.confiance_suffisante`, avec son propre seuil (on confie plus volontiers un
+	colis qu'un enfant) : relation < ESCORTE_PROGENITURE_RELATION_MIN, ou marchandage bloqué
+	— une brouille datée ferme la porte même à cote suffisante, et même garde-fou désactivé.
+
+	⚠️ Comparateur `>=`, comme le transport : deux comparateurs divergents pour la même notion
+	de confiance coûteraient bien plus cher que le point d'écart avec « > 60 »."""
+	relation = marche.get_relation(character, lieu_doc, get_doc_fn)
+	now = int(quetes.now_epoch() if now is None else now)
+	if marche.marchandage_bloque(relation, now):
+		return False
+	seuil = int(character_stats.ESCORTE_PROGENITURE_RELATION_MIN)
+	if seuil <= 0:
+		return True
+	return marche.relation_value(relation) >= seuil
+
+
+def mefiance(character: dict, lieu_doc: dict, entree: dict | None, pnj_doc: dict | None,
+			 get_doc_fn, now: int | None = None) -> bool:
+	"""Le tenancier refuse-t-il de parler de sa progéniture, faute de confiance ? Pendant
+	PARLANT de `confiance_suffisante`, miroir de `transport.mefiance` : sans lui le choix
+	disparaîtrait sans un mot, indiscernable d'un tirage négatif, et le joueur n'apprendrait
+	jamais ce qu'on attend de lui.
+
+	MUET dès qu'il n'y a plus rien à refuser : pas de progéniture écrite, tous les enfants
+	rentrés, offre déjà posée, ou escorte en cours."""
+	bloc = progeniture_de(entree, pnj_doc)
+	if not bloc or offre_spec(pnj_doc):
+		return False
+	if not enfants_a_retrouver(character, (lieu_doc or {}).get("_id"), bloc):
+		return False
+	if offre_courante(character, lieu_doc) or escortes_actives(character):
+		return False
+	return not confiance_suffisante(character, lieu_doc, get_doc_fn, now)
+
+
+# ── Le registre de la guilde ─────────────────────────────────────────────────────
+
+def recherche_spec(pnj_doc: dict | None) -> dict | None:
+	"""Le bloc `services.escorte.recherche` : le comptoir recense les disparitions de la
+	cité. Frère de `offre`, qui reste prioritaire — une mission ÉCRITE passe avant."""
+	bloc = ((pnj_doc or {}).get("services") or {}).get("escorte") or {}
+	rec = bloc.get("recherche")
+	return rec if isinstance(rec, dict) else None
+
+
+def familles_de_la_cite(character: dict, cite_id: str, find_docs_fn, get_doc_fn) -> list:
+	"""Les `(lieu, entree, bloc)` des maisons de la cité qui attendent encore un enfant.
+
+	⚠️ `find_docs` PROJETÉ (index `["type","lieu_parent"]` déjà posé) : sans projection on
+	rapatrierait les `cells` de chaque carte. Les docs `pnj:*` lus au passage sont, eux, dans
+	le cache de requête. Le doc `lieu` COMPLET n'est relu que pour la famille finalement
+	tirée, par l'appelant."""
+	if not cite_id or not find_docs_fn:
+		return []
+	selector = {"type": "lieu", "lieu_parent": cite_id}
+	champs = ["_id", "label", "nom", "categorie", "sous_categorie", "lieu_parent", "pnj"]
+	try:
+		docs = find_docs_fn(selector, fields=champs)
+	except TypeError:
+		# Finder injecté sans projection (tests purs) : le comportement reste correct.
+		docs = find_docs_fn(selector)
+	sorties = []
+	for d in docs or []:
+		for entree in d.get("pnj") or []:
+			pnj_id = entree.get("character")
+			bloc = progeniture_de(entree, get_doc_fn(pnj_id) if pnj_id else None)
+			if bloc and enfants_a_retrouver(character, d.get("_id"), bloc):
+				sorties.append((d, entree, bloc))
+				break
+	return sorties
 
 
 # ---------------------------------------------------------------------------
@@ -281,19 +554,60 @@ def escortes_actives(character: dict) -> list:
 	]
 
 
-def poser_escorte_offerte(character: dict, lieu_doc: dict, find_docs_fn, get_doc_fn,
-						  rand_fn=random.random, pnj_doc: dict | None = None) -> bool:
-	"""Tire (une seule fois par entrée) l'escorte écrite du PNJ présent et la pose dans le
-	champ transitoire `escorte_offerte` (mute sans save). Miroir mot pour mot de
-	`transport.poser_transport_offert`, sans branche « générée » : une escorte est toujours
-	ÉCRITE — on n'improvise pas une personne à protéger.
+def _offre_du_registre(character: dict, lieu_doc: dict, recherche: dict, find_docs_fn,
+					   get_doc_fn, rand_fn, choix_fn) -> dict | None:
+	"""Une disparition tirée du registre de la guilde : la cité est balayée, une maison qui
+	attend encore un enfant est choisie, et l'offre est bâtie comme si le parent l'avait
+	confiée — seul le `giver` change (le comptoir), et c'est lui qui encaissera le +1 en plus
+	du magasin."""
+	if not rang_suffisant(character, recherche):
+		return None
+	if rand_fn() >= float(recherche.get("proba", character_stats.ESCORTE_GUILDE_PROBA)):
+		return None
+	cite = recherche.get("cite") or (lieu_doc or {}).get("lieu_parent")
+	familles = familles_de_la_cite(character, cite, find_docs_fn, get_doc_fn)
+	if not familles:
+		return None
+	magasin, entree_m, bloc = choix_fn(familles)
+	# Le doc COMPLET du magasin retenu : `familles_de_la_cite` ne rend qu'une projection, et
+	# `generer_escorte_authoree` a besoin du lieu entier (indices d'orientation, barrière de
+	# rang du lieu de dépose).
+	magasin_complet = get_doc_fn(magasin.get("_id")) or magasin
+	pnj_id = (entree_m or {}).get("character")
+	return generer_escorte_progeniture(
+		character, magasin_complet, bloc, lieu_doc, find_docs_fn, get_doc_fn,
+		get_doc_fn(pnj_id) if pnj_id else None, choix_fn,
+		recompenses_defaut=recherche.get("recompenses"))
 
-	No-op si le tirage a déjà été fait pour ce lieu → un refresh ne re-tire pas, ressortir
-	et rentrer re-tire. Aucune offre tant qu'une escorte est en cours (pas d'empilement).
-	Renvoie True si le champ a changé (l'appelant décide de sauvegarder)."""
+
+def poser_escorte_offerte(character: dict, lieu_doc: dict, find_docs_fn, get_doc_fn,
+						  rand_fn=random.random, pnj_doc: dict | None = None,
+						  entree: dict | None = None, choix_fn=random.choice,
+						  now: int | None = None) -> bool:
+	"""Tire (une seule fois par entrée) l'escorte que ce lieu peut confier et la pose dans le
+	champ transitoire `escorte_offerte` (mute sans save). Miroir de
+	`transport.poser_transport_offert`, avec TROIS branches ordonnées au lieu de deux :
+
+	1. **écrite** — `services.escorte.offre` : le scénario décide de tout, rien n'est tiré au
+	   sort sauf la case du rendez-vous. Prioritaire : le contenu existant ne bouge pas ;
+	2. **progéniture** — le tenancier se saisit lui-même du cas de son enfant. Exige la
+	   CONFIANCE (`confiance_suffisante`) en plus du tirage ;
+	3. **registre de guilde** — `services.escorte.recherche` : le comptoir recense les
+	   disparitions de toute la cité.
+
+	No-op si le tirage a déjà été fait pour ce lieu → un refresh ne re-tire pas, ressortir et
+	rentrer re-tire. Aucune offre tant qu'une escorte est en cours (pas d'empilement).
+	Renvoie True si le champ a changé (l'appelant décide de sauvegarder).
+
+	⚠️ Les garde-fous (rang, confiance) sont contrôlés ICI, à la POSE, et pas seulement dans
+	le dialogue : sans offre posée, `offre_courante` rend None et `_resoudre_escorte` refuse
+	en 422. Une requête forgée sur le nœud d'acceptation ne contourne donc rien, là où un
+	simple choix conditionné n'aurait masqué que le bouton."""
 	lieu_id = (lieu_doc or {}).get("_id")
 	spec = offre_spec(pnj_doc)
-	if not lieu_id or not spec:
+	bloc = progeniture_de(entree, pnj_doc)
+	recherche = recherche_spec(pnj_doc)
+	if not lieu_id or not (spec or bloc or recherche):
 		# Lieu sans donneur : on nettoie l'offre restée sur l'ancien lieu.
 		if (character.get("escorte_offerte") or {}).get("lieu"):
 			character["escorte_offerte"] = None
@@ -304,13 +618,20 @@ def poser_escorte_offerte(character: dict, lieu_doc: dict, find_docs_fn, get_doc
 		return False
 	quete = None
 	if not escortes_actives(character):
-		deja = bool(spec.get("unique")) and deja_reussie(character, spec.get("id"))
-		# ⚠️ Le rang est contrôlé ICI, à la POSE de l'offre, et pas seulement dans le
-		# dialogue : sans offre posée, `offre_courante` rend None et `_resoudre_escorte`
-		# refuse en 422. Une requête forgée sur le nœud d'acceptation ne peut donc pas
-		# contourner le seuil — un simple choix conditionné, lui, n'aurait masqué que le bouton.
-		if not deja and rang_suffisant(character, spec) and rand_fn() < float(spec.get("proba", 1.0)):
-			quete = generer_escorte_authoree(spec, lieu_doc, find_docs_fn, get_doc_fn)
+		if spec:
+			deja = bool(spec.get("unique")) and deja_reussie(character, spec.get("id"))
+			if not deja and rang_suffisant(character, spec) and rand_fn() < float(spec.get("proba", 1.0)):
+				quete = generer_escorte_authoree(spec, lieu_doc, find_docs_fn, get_doc_fn)
+		elif bloc:
+			proba = float(bloc.get("proba", character_stats.ESCORTE_PROGENITURE_PROBA))
+			if (rang_suffisant(character, bloc)
+					and confiance_suffisante(character, lieu_doc, get_doc_fn, now)
+					and rand_fn() < proba):
+				quete = generer_escorte_progeniture(character, lieu_doc, bloc, lieu_doc,
+													find_docs_fn, get_doc_fn, pnj_doc, choix_fn)
+		else:
+			quete = _offre_du_registre(character, lieu_doc, recherche, find_docs_fn, get_doc_fn,
+									   rand_fn, choix_fn)
 	character["escorte_offerte"] = {"lieu": lieu_id, "quete": quete}
 	return True
 
@@ -322,6 +643,16 @@ def offre_courante(character: dict, lieu_doc: dict) -> dict | None:
 	if not lieu_id or offert.get("lieu") != lieu_id:
 		return None
 	return offert.get("quete") or None
+
+
+def escorte_vers(character: dict, lieu_id: str) -> dict | None:
+	"""L'escorte active qu'il faut DÉPOSER ici, quel qu'en soit le donneur — de quoi laisser
+	le parent dire un mot d'un enfant que la GUILDE lui ramène. Sans elle il resterait muet
+	pendant toute la mission menée en son nom, et `{protege}` serait vide dans sa bouche."""
+	for q in escortes_actives(character):
+		if (q.get("objectif") or {}).get("cible") == lieu_id:
+			return q
+	return None
 
 
 def escorte_du_donneur(character: dict, lieu_id: str) -> dict | None:
@@ -591,14 +922,21 @@ def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int) -> dict
 	`xp_partage`, comme celle de découverte."""
 	recap = quetes.appliquer_recompenses(character, q, compagnons=[])
 	archiver(character, q, echec=False, now=now)
-	relation_val = None
-	giver_doc = get_doc_fn(q.get("giver")) if q.get("giver") else None
-	if giver_doc:
-		relation = marche.get_relation(character, giver_doc, get_doc_fn)
-		relation_val = marche.ajuster_relation(
-			relation, int(character_stats.QUETE_TRANSPORT_RELATION_DELTA))
-		save_doc_fn(relation)
-	return {"xp": recap["xp"], "purse": recap["purse"], "relation": relation_val}
+	giver_id = q.get("giver")
+	giver_doc = get_doc_fn(giver_id) if giver_id else None
+	lieux = [giver_doc] if giver_doc else []
+	# Lieux remerciés EN PLUS du donneur : une escorte de progéniture confiée par la guilde
+	# fait aussi monter la réputation du magasin dont on ramène l'enfant. Le pré-filtre sur
+	# `giver_id` n'économise qu'une lecture — c'est `recompenser_lieux` qui garantit qu'un
+	# lieu à la fois donneur ET remercié n'encaisse qu'UN seul +1.
+	for lid in (q.get("recompenses") or {}).get("relation_lieux") or []:
+		if lid and lid != giver_id:
+			doc = get_doc_fn(lid)
+			if doc:
+				lieux.append(doc)
+	valeurs = quetes.recompenser_lieux(character, lieux, get_doc_fn, save_doc_fn)
+	return {"xp": recap["xp"], "purse": recap["purse"],
+			"relation": valeurs.get(giver_id), "relations": valeurs}
 
 
 # ---------------------------------------------------------------------------

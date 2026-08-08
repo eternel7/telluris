@@ -740,14 +740,8 @@ def _solder(character: dict, q: dict, get_doc_fn, save_doc_fn, now: int) -> dict
 	APRÈS son save du personnage, jamais ici (un 409 rejoué les paierait deux fois)."""
 	recap = quetes.appliquer_recompenses(character, q)
 	archiver(character, q, echec=False, now=now)
-	relation_val = None
 	giver_doc = get_doc_fn(q.get("giver")) if q.get("giver") else None
-	if giver_doc:
-		relation = marche.get_relation(character, giver_doc, get_doc_fn)
-		relation_val = marche.ajuster_relation(
-			relation, int(character_stats.QUETE_TRANSPORT_RELATION_DELTA)
-		)
-		save_doc_fn(relation)
+	relation_val = quetes.recompenser_donneur(character, giver_doc, get_doc_fn, save_doc_fn)
 	# ⚠️ On PROPAGE le récap du chokepoint (`**recap`) au lieu de le recopier clé par clé :
 	# une clé ajoutée en amont — l'inscription au rang de guilde (`rang`) — serait sinon
 	# perdue ICI, en silence. Le personnage porterait bien son rang neuf, mais l'endpoint ne

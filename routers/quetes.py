@@ -18,6 +18,7 @@ from utils import focalisation
 from utils import recrutement
 from utils import escorte
 from utils.marche import debit_character
+from utils import marche
 from models import character_stats
 
 quetes_router = APIRouter()
@@ -237,6 +238,11 @@ async def quetes_terminer(
 	for av in groupe:
 		save_doc(av)
 
+	# Réussir une quête monte la réputation chez son donneur. ⚠️ APRÈS le save autoritatif :
+	# la quête a quitté `quetes_actives` en base, donc un 409 rejoué ne peut pas payer deux
+	# fois. Le donneur EST le lieu courant — la garde 403 plus haut l'exige.
+	relation_gain = quetes.recompenser_donneur(character, lieu_doc, get_doc, save_doc)
+
 	payload = _board_payload(character, lieu_doc)
 	payload["termine"] = {
 		"titre": q.get("titre", "—"),
@@ -251,6 +257,11 @@ async def quetes_terminer(
 	# Liens resserrés par la quête réussie ensemble → resync de l'onglet 🤝 section 👥.
 	if groupe:
 		payload["affinites_detail"] = recrutement.affinites_detail_payload(character, get_doc)
+	# La cote du donneur a bougé → resync de l'onglet 🤝 section 🏪 (Conventions §10).
+	# ⚠️ Seulement en cas de gain : ce payload relit tous les docs relation + un doc lieu
+	# COMPLET par lieu connu.
+	if relation_gain is not None:
+		payload["relations_lieux"] = marche.relations_lieux_payload(character)
 	return payload
 
 
@@ -318,8 +329,9 @@ async def quetes_abandonner(
 	# et sa MAISON encaisse d'un bloc (lâcher la mission du comptoir fâche aussi la réception).
 	# Une cargaison de transport, elle, reste dans le sac : le joueur garde la marchandise.
 	giver_doc = get_doc(q.get("giver")) if q.get("giver") else None
+	sanction = None
 	if giver_doc:
-		quetes.sanctionner_renoncement(character, giver_doc, get_doc, save_doc, find_docs)
+		sanction = quetes.sanctionner_renoncement(character, giver_doc, get_doc, save_doc, find_docs)
 	# Les compagnons aussi tiquent quand on renonce : petit malus d'affinité de groupe.
 	for av in recrutement.groupe_effectif(character, get_doc):
 		recrutement.ajuster_affinite(character, av["_id"],
@@ -342,4 +354,10 @@ async def quetes_abandonner(
 	# focalisation), suffisant pour resynchroniser l'onglet 📜.
 	payload = _board_payload(character, lieu_doc) if est_guilde else _fiche_payload(character)
 	payload["abandonne"] = {"titre": q.get("titre", "—")}
+	# La sanction a fait bouger la réputation de toute la maison du donneur → resync de
+	# l'onglet 🤝 (Conventions §10) : sans lui, l'onglet resterait figé sur les cotes du
+	# dernier chargement de /play. ⚠️ Seulement quand quelque chose a bougé — ce payload
+	# relit tous les docs relation + un doc lieu COMPLET par lieu connu.
+	if sanction:
+		payload["relations_lieux"] = marche.relations_lieux_payload(character)
 	return payload

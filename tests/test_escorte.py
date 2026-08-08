@@ -603,6 +603,376 @@ def test_proteges_effectifs_ignore_un_lien_rompu(db):
 	assert escorte_util.proteges_effectifs(c, db["get"]) == []
 
 
+# ── PROGÉNITURE : les enfants des tenanciers ────────────────────────────────────
+#
+# La seule source d'escorte GÉNÉRÉE. Deux canaux, un seul moteur : le parent se saisit
+# lui-même du cas de son enfant (sous condition de CONFIANCE), ou le comptoir de la guilde
+# recense la disparition. Dans les deux cas, la spec synthétisée repasse par
+# `generer_escorte_authoree` — c'est ce que ces tests épinglent en premier.
+
+from utils import marche as marche_util          # noqa: E402
+from utils import quetes as quetes_util          # noqa: E402
+
+
+ZONE_FORET = {"_id": "zone:foret", "type": "zone_influence", "nom": "Forêt",
+			  "modificateurs": {"danger": 1, "visibilite": 0}}
+ZONE_VILLE = {"_id": "zone::coeur", "type": "zone_influence", "nom": "Cœur de ville",
+			  "modificateurs": {"danger": -3, "visibilite": 1}}
+
+# Cité avec DEUX zones placées : une dangereuse, une sûre. Le rendez-vous dérivé ne doit
+# jamais tomber au milieu des étals.
+CITE_ZONES = dict(CITE, zone_influences=[
+	{"zone": "zone:foret", "x": 6, "y": 4},
+	{"zone": "zone::coeur", "x": 2, "y": 2},
+])
+
+FAMILLE = {
+	"nom": "Varnepierre",
+	"race": "humain",
+	"enfants": [
+		{"prenom": "Girard", "sex": "M", "image": "druide_m_humain01.jpg",
+		 "inventaire": [{"item": "item:Herbes_medicinales"}]},
+		{"prenom": "Perrote", "sex": "F"},
+	],
+}
+
+MARCHAND_PNJ = {"_id": "pnj:marchand_laboratoire_d_alchimie", "type": "pnj",
+				"nom": "Le tenancier", "race": "humain",
+				"services": {"escorte": {"noeuds": {"accepte": "escorte_acceptee"}}}}
+
+MAGASIN = dict(ATHANOR, pnj=[{"character": "pnj:marchand_laboratoire_d_alchimie",
+							  "nom": "Clément Varnepierre",
+							  "progeniture": FAMILLE}])
+
+COMPTOIR = {"_id": "lieu:comptoir", "type": "lieu", "label": "Le Bastion",
+			"categorie": "guilde_aventurier_comptoir", "lieu_parent": "lieu:auxerre",
+			"pnj": [{"character": "pnj:borin"}]}
+
+BORIN = {"_id": "pnj:borin", "type": "pnj", "nom": "Borin",
+		 "services": {"escorte": {"recherche": {"cite": "lieu:auxerre", "proba": 1.0},
+								  "noeuds": {"accepte": "escorte_acceptee"}}}}
+
+
+@pytest.fixture
+def dbp(db):
+	"""Le monde de `db`, plus une boutique dotée d'une famille et le comptoir de la guilde."""
+	for d in (ZONE_FORET, ZONE_VILLE, MARCHAND_PNJ, MAGASIN, COMPTOIR, BORIN):
+		db["docs"][d["_id"]] = dict(d)
+	db["docs"]["lieu:auxerre"] = dict(CITE_ZONES)
+	return db
+
+
+def _relation(db, character, lieu_doc, valeur):
+	"""Pose une cote en base pour ce couple perso × lieu (le doc n'existe pas par défaut :
+	`get_relation` en fabrique un neutre à 50, sous le seuil de confiance)."""
+	doc_id = marche_util.relation_doc_id(character, lieu_doc)
+	db["docs"][doc_id] = {"_id": doc_id, "type": "relation",
+						  "character_id": character["_id"],
+						  "lieu_id": marche_util.lieu_de_relation(lieu_doc),
+						  "value": valeur, "prix_negocies": {},
+						  "marchandage_bloque_jusqu": 0}
+	return db["docs"][doc_id]
+
+
+def _toujours(valeur):
+	return lambda *a, **k: valeur
+
+
+def _premier(seq):
+	return list(seq)[0]
+
+
+# ── Où vit l'information de nommage ──────────────────────────────────────────────
+
+def test_progeniture_lue_sur_l_entree_du_lieu_en_priorite():
+	# Le doc PNJ est GÉNÉRIQUE : deux boutiques d'un même métier le partagent, donc c'est
+	# l'entrée du lieu qui doit gagner — sinon elles auraient le même enfant.
+	doc = {"services": {"escorte": {"progeniture": {"nom": "Doc", "enfants": [{"prenom": "A"}]}}}}
+	entree = {"progeniture": {"nom": "Entree", "enfants": [{"prenom": "B"}]}}
+	assert escorte_util.progeniture_de(entree, doc)["nom"] == "Entree"
+	assert escorte_util.progeniture_de({}, doc)["nom"] == "Doc"
+	assert escorte_util.progeniture_de(None, None) is None
+
+
+def test_progeniture_sans_enfant_nomme_n_ouvre_rien():
+	# Une famille vide, ou dont aucun enfant n'a de prénom, ne doit pas produire d'offre.
+	assert escorte_util.progeniture_de({"progeniture": {"nom": "X", "enfants": []}}, None) is None
+	assert escorte_util.progeniture_de({"progeniture": {"enfants": [{"sex": "F"}]}}, None) is None
+
+
+def test_id_enfant_est_le_meme_quel_que_soit_le_canal():
+	# ⚠️ L'id est bâti sur le MAGASIN, jamais sur le donneur : sinon le comptoir et le père
+	# proposeraient deux quêtes distinctes pour le même enfant.
+	# (le lieu de test est `lieu:athanor`)
+	attendu = "quete:escorte_progeniture_athanor_girard"
+	assert escorte_util.id_enfant("lieu:athanor", {"prenom": "Girard"}) == attendu
+	# Accents et ponctuation ne changent pas l'id d'une régénération à l'autre.
+	assert (escorte_util.id_enfant("lieu:l_athanor", {"prenom": "Élo\u00efse-Marie"})
+			== "quete:escorte_progeniture_l_athanor_eloise_marie")
+
+
+def test_un_enfant_ramene_ne_se_repropose_plus(dbp):
+	perso = character()
+	assert len(escorte_util.enfants_a_retrouver(perso, "lieu:athanor", FAMILLE)) == 2
+	assert not escorte_util.progeniture_accomplie(perso, "lieu:athanor", FAMILLE)
+	perso["quetes_terminees"] = [
+		{"id": escorte_util.id_enfant("lieu:athanor", FAMILLE["enfants"][0]), "echec": False}]
+	restants = escorte_util.enfants_a_retrouver(perso, "lieu:athanor", FAMILLE)
+	assert [e["prenom"] for e in restants] == ["Perrote"]
+	assert escorte_util.progeniture_accomplie(perso, "lieu:athanor", FAMILLE)
+
+
+def test_un_echec_ne_consomme_pas_l_enfant(dbp):
+	perso = character(quetes_terminees=[
+		{"id": escorte_util.id_enfant("lieu:athanor", FAMILLE["enfants"][0]), "echec": True}])
+	assert len(escorte_util.enfants_a_retrouver(perso, "lieu:athanor", FAMILLE)) == 2
+
+
+# ── Le rendez-vous dérivé des zones dangereuses ──────────────────────────────────
+
+def test_zones_dangereuses_ne_retient_que_le_danger_positif(dbp):
+	zones = escorte_util.zones_dangereuses(dbp["docs"]["lieu:auxerre"], dbp["get"])
+	assert zones == ["zone:foret"]
+
+
+def test_zones_dangereuses_repli_sur_toutes_les_zones(dbp):
+	# Carte sans aucune zone dangereuse : plutôt que de faire disparaître le contenu, on
+	# retombe sur les zones placées — une carte muette est un défaut d'authoring.
+	sans = dict(CITE_ZONES, zone_influences=[{"zone": "zone::coeur", "x": 2, "y": 2}])
+	assert escorte_util.zones_dangereuses(sans, dbp["get"]) == ["zone::coeur"]
+	# Aucune zone du tout : liste vide, l'appelant retombe sur la contrainte de lieu seule.
+	assert escorte_util.zones_dangereuses(dict(CITE_ZONES, zone_influences=[]), dbp["get"]) == []
+
+
+def test_rendez_vous_derive_tombe_dans_la_zone_dangereuse(dbp):
+	spec = escorte_util.spec_progeniture(character(), dbp["docs"]["lieu:athanor"],
+										 FAMILLE, dbp["get"], choix_fn=_premier)
+	assert spec["rencontre"]["lieu"] == "lieu:auxerre"
+	assert spec["rencontre"]["zones"] == ["zone:foret"]
+	assert spec["destination"] == "lieu:athanor"
+
+
+def test_rendez_vous_ecrit_prime_sur_le_derive(dbp):
+	famille = dict(FAMILLE, rencontre={"lieu": "lieu:auxerre", "zones": ["zone::coeur"]})
+	spec = escorte_util.spec_progeniture(character(), dbp["docs"]["lieu:athanor"],
+										 famille, dbp["get"], choix_fn=_premier)
+	assert spec["rencontre"]["zones"] == ["zone::coeur"]
+
+
+# ── La spec synthétisée repasse par le générateur d'offre ÉCRITE ─────────────────
+
+def test_offre_de_progeniture_a_la_forme_d_une_offre_ecrite(dbp):
+	q = escorte_util.generer_escorte_progeniture(
+		character(), dbp["docs"]["lieu:athanor"], FAMILLE, dbp["docs"]["lieu:athanor"],
+		dbp["find"], dbp["get"], MARCHAND_PNJ, choix_fn=_premier)
+	assert q["objectif"] == {"type": "escorte", "cible": "lieu:athanor", "quantite": 1,
+							 "rencontre": q["objectif"]["rencontre"]}
+	assert q["objectif"]["rencontre"]["position"] is not None
+	assert q["giver"] == "lieu:athanor"
+	# L'enfant hérite du nom de famille et de la race de la fratrie.
+	assert q["proteges"][0]["nom"] == "Varnepierre"
+	assert q["proteges"][0]["race"] == "humain"
+	# Le magasin est REMERCIÉ en plus du donneur (ici le même : `recompenser_lieux` dédupe).
+	assert q["recompenses"]["relation_lieux"] == ["lieu:athanor"]
+	assert q["recompenses"]["xp"] == character_stats.ESCORTE_PROGENITURE_XP
+
+
+# ── La confiance du tenancier ────────────────────────────────────────────────────
+
+def test_le_tenancier_ne_parle_pas_de_sa_famille_a_un_inconnu(dbp):
+	perso = character()                       # relation absente ⇒ neutre (50) < 60
+	escorte_util.poser_escorte_offerte(
+		perso, dbp["docs"]["lieu:athanor"], dbp["find"], dbp["get"],
+		rand_fn=_toujours(0.0), pnj_doc=MARCHAND_PNJ,
+		entree=MAGASIN["pnj"][0], choix_fn=_premier)
+	# Le champ est bien posé (le tirage a eu lieu pour ce lieu), mais SANS quête.
+	assert perso["escorte_offerte"] == {"lieu": "lieu:athanor", "quete": None}
+	# …et il le DIT : sans refus parlé, le joueur croirait n'avoir pas eu de chance.
+	assert escorte_util.mefiance(perso, dbp["docs"]["lieu:athanor"], MAGASIN["pnj"][0],
+								 MARCHAND_PNJ, dbp["get"], now=0)
+
+
+def test_au_dessus_du_seuil_la_course_est_offerte(dbp):
+	perso = character()
+	_relation(dbp, perso, dbp["docs"]["lieu:athanor"],
+			  character_stats.ESCORTE_PROGENITURE_RELATION_MIN)
+	assert escorte_util.poser_escorte_offerte(
+		perso, dbp["docs"]["lieu:athanor"], dbp["find"], dbp["get"],
+		rand_fn=_toujours(0.0), pnj_doc=MARCHAND_PNJ,
+		entree=MAGASIN["pnj"][0], choix_fn=_premier)
+	q = perso["escorte_offerte"]["quete"]
+	assert q and q["proteges"][0]["prenom"] == "Girard"
+	# Plus rien à refuser : le tenancier a parlé.
+	assert not escorte_util.mefiance(perso, dbp["docs"]["lieu:athanor"], MAGASIN["pnj"][0],
+									 MARCHAND_PNJ, dbp["get"], now=0)
+
+
+def test_une_brouille_ferme_la_porte_meme_a_bonne_cote(dbp):
+	perso = character()
+	rel = _relation(dbp, perso, dbp["docs"]["lieu:athanor"], 90)
+	rel["marchandage_bloque_jusqu"] = 10_000
+	assert not escorte_util.confiance_suffisante(perso, dbp["docs"]["lieu:athanor"],
+												 dbp["get"], now=1)
+	assert escorte_util.mefiance(perso, dbp["docs"]["lieu:athanor"], MAGASIN["pnj"][0],
+								 MARCHAND_PNJ, dbp["get"], now=1)
+
+
+def test_seuil_a_zero_desactive_le_garde_fou(dbp, monkeypatch):
+	monkeypatch.setattr(character_stats, "ESCORTE_PROGENITURE_RELATION_MIN", 0)
+	assert escorte_util.confiance_suffisante(character(), dbp["docs"]["lieu:athanor"],
+											 dbp["get"], now=0)
+
+
+def test_mefiance_muette_quand_tous_les_enfants_sont_rentres(dbp):
+	perso = character(quetes_terminees=[
+		{"id": escorte_util.id_enfant("lieu:athanor", e), "echec": False}
+		for e in FAMILLE["enfants"]])
+	assert not escorte_util.mefiance(perso, dbp["docs"]["lieu:athanor"], MAGASIN["pnj"][0],
+									 MARCHAND_PNJ, dbp["get"], now=0)
+
+
+# ── Le registre de la guilde ─────────────────────────────────────────────────────
+
+def test_la_guilde_ne_recense_que_les_familles_ecrites(dbp):
+	perso = character()
+	familles = escorte_util.familles_de_la_cite(perso, "lieu:auxerre", dbp["find"], dbp["get"])
+	assert [lieu["_id"] for lieu, _e, _b in familles] == ["lieu:athanor"]
+	# Une fois les deux enfants rentrés, la maison sort du registre.
+	perso["quetes_terminees"] = [{"id": escorte_util.id_enfant("lieu:athanor", e), "echec": False}
+								 for e in FAMILLE["enfants"]]
+	assert escorte_util.familles_de_la_cite(perso, "lieu:auxerre", dbp["find"], dbp["get"]) == []
+
+
+def test_le_comptoir_confie_la_recherche_sans_condition_de_relation(dbp):
+	# Aucune relation posée : la guilde n'exige pas la confiance du marchand, seulement
+	# d'être inscrit chez elle.
+	perso = character()
+	assert escorte_util.poser_escorte_offerte(
+		perso, COMPTOIR, dbp["find"], dbp["get"], rand_fn=_toujours(0.0),
+		pnj_doc=BORIN, choix_fn=_premier)
+	q = perso["escorte_offerte"]["quete"]
+	assert q["giver"] == "lieu:comptoir"                 # le donneur est le comptoir…
+	assert q["objectif"]["cible"] == "lieu:athanor"      # …mais on dépose chez le parent
+	assert q["recompenses"]["relation_lieux"] == ["lieu:athanor"]
+
+
+def test_l_offre_ecrite_prime_sur_les_deux_sources_generees(dbp):
+	# Un PNJ qui porte les trois blocs ne doit servir que le plus spécifique : l'écrit.
+	pnj_doc = dict(BORIN)
+	pnj_doc["services"] = {"escorte": dict(BORIN["services"]["escorte"],
+										   offre=dict(SPEC, id="quete:ecrite"))}
+	perso = character()
+	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
+									   rand_fn=_toujours(0.0), pnj_doc=pnj_doc,
+									   choix_fn=_premier)
+	assert perso["escorte_offerte"]["quete"]["id"] == "quete:ecrite"
+
+
+# ── Le solde : +1 chez le donneur ET chez le magasin ─────────────────────────────
+
+def test_recompenser_lieux_dedouble_par_doc_relation(dbp):
+	# ⚠️ LE PIÈGE : donneur et destination sont le MÊME lieu quand le parent confie
+	# lui-même la mission — sans dédup il encaisserait +2 d'un seul coup.
+	perso = character()
+	magasin = dbp["docs"]["lieu:athanor"]
+	valeurs = quetes_util.recompenser_lieux(perso, [magasin, magasin], dbp["get"], dbp["save"])
+	assert valeurs["lieu:athanor"] == character_stats.RELATION_INITIALE + 1
+
+
+def test_deux_lieux_qui_delegue_leur_relation_ne_comptent_qu_une_fois(dbp):
+	# Même mécanisme via `relation_lieu` : la réception délègue au comptoir.
+	perso = character()
+	reception = {"_id": "lieu:reception", "type": "lieu",
+				 "relation_lieu": "lieu:comptoir", "lieu_parent": "lieu:auxerre"}
+	valeurs = quetes_util.recompenser_lieux(perso, [COMPTOIR, reception], dbp["get"], dbp["save"])
+	assert valeurs["lieu:comptoir"] == valeurs["lieu:reception"] == \
+		character_stats.RELATION_INITIALE + 1
+
+
+def _mener_a_bien(dbp, perso, q):
+	"""Incarne les protégés puis dépose la quête à destination — le chemin complet."""
+	for doc in escorte_util.incarner(perso, q, dbp["get"]):
+		dbp["save"](doc)
+	cible = dbp["docs"][q["objectif"]["cible"]]
+	return escorte_util.traiter_deplacement(perso, cible, None, dbp["get"], dbp["save"],
+											dbp["find"], now=1000)
+
+
+def test_une_escorte_de_guilde_monte_les_DEUX_reputations(dbp):
+	perso = character()
+	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
+									   rand_fn=_toujours(0.0), pnj_doc=BORIN,
+									   choix_fn=_premier)
+	q, _docs = escorte_util.accepter_escorte(perso, perso["escorte_offerte"]["quete"],
+											 dbp["get"], now=1)
+	maj = _mener_a_bien(dbp, perso, q)
+	assert maj["depose"] is not None
+	base = character_stats.RELATION_INITIALE
+	comptoir = dbp["docs"]["relation:" + perso["_id"] + "::lieu:comptoir"]
+	magasin = dbp["docs"]["relation:" + perso["_id"] + "::lieu:athanor"]
+	assert comptoir["value"] == base + 1     # la guilde qui a confié
+	assert magasin["value"] == base + 1      # la famille à qui l'on rend l'enfant
+
+
+def test_une_escorte_confiee_par_le_parent_ne_paie_qu_une_fois(dbp):
+	perso = character()
+	_relation(dbp, perso, dbp["docs"]["lieu:athanor"],
+			  character_stats.ESCORTE_PROGENITURE_RELATION_MIN)
+	escorte_util.poser_escorte_offerte(perso, dbp["docs"]["lieu:athanor"], dbp["find"],
+									   dbp["get"], rand_fn=_toujours(0.0),
+									   pnj_doc=MARCHAND_PNJ, entree=MAGASIN["pnj"][0],
+									   choix_fn=_premier)
+	q, _docs = escorte_util.accepter_escorte(perso, perso["escorte_offerte"]["quete"],
+											 dbp["get"], now=1)
+	_mener_a_bien(dbp, perso, q)
+	rel = dbp["docs"]["relation:" + perso["_id"] + "::lieu:athanor"]
+	assert rel["value"] == character_stats.ESCORTE_PROGENITURE_RELATION_MIN + 1
+
+
+def test_l_enfant_ramene_disparait_des_deux_canaux(dbp):
+	perso = character()
+	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
+									   rand_fn=_toujours(0.0), pnj_doc=BORIN,
+									   choix_fn=_premier)
+	q, _docs = escorte_util.accepter_escorte(perso, perso["escorte_offerte"]["quete"],
+											 dbp["get"], now=1)
+	prenom = q["proteges"][0]["prenom"]
+	_mener_a_bien(dbp, perso, q)
+	restants = escorte_util.enfants_a_retrouver(perso, "lieu:athanor", FAMILLE)
+	assert prenom not in [e["prenom"] for e in restants]
+	# Le père ne le redemande pas non plus : l'id est le même des deux côtés.
+	assert escorte_util.deja_reussie(perso, escorte_util.id_enfant("lieu:athanor",
+																   {"prenom": prenom}))
+
+
+def test_une_escorte_en_cours_empeche_toute_autre_offre(dbp):
+	perso = character()
+	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
+									   rand_fn=_toujours(0.0), pnj_doc=BORIN,
+									   choix_fn=_premier)
+	escorte_util.accepter_escorte(perso, perso["escorte_offerte"]["quete"], dbp["get"], now=1)
+	_relation(dbp, perso, dbp["docs"]["lieu:athanor"], 90)
+	escorte_util.poser_escorte_offerte(perso, dbp["docs"]["lieu:athanor"], dbp["find"],
+									   dbp["get"], rand_fn=_toujours(0.0),
+									   pnj_doc=MARCHAND_PNJ, entree=MAGASIN["pnj"][0],
+									   choix_fn=_premier)
+	assert perso["escorte_offerte"]["quete"] is None
+
+
+def test_escorte_vers_retrouve_la_quete_a_deposer_ici(dbp):
+	perso = character()
+	escorte_util.poser_escorte_offerte(perso, COMPTOIR, dbp["find"], dbp["get"],
+									   rand_fn=_toujours(0.0), pnj_doc=BORIN,
+									   choix_fn=_premier)
+	q, _docs = escorte_util.accepter_escorte(perso, perso["escorte_offerte"]["quete"],
+											 dbp["get"], now=1)
+	# Chez le parent : c'est `escorte_vers` qui lui donne un mot, pas `escorte_du_donneur`
+	# (le donneur, ici, c'est la guilde).
+	assert escorte_util.escorte_vers(perso, "lieu:athanor")["id"] == q["id"]
+	assert escorte_util.escorte_du_donneur(perso, "lieu:athanor") is None
+	assert escorte_util.escorte_du_donneur(perso, "lieu:comptoir")["id"] == q["id"]
+
+
 # ── Combat ───────────────────────────────────────────────────────────────────────
 
 def protege_doc(pid="protege:aline", **champs):

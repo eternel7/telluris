@@ -591,10 +591,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Offre de course : tirée à l'entrée, persistée (même sémantique que pnj_present).
 	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc,
 													pnj_doc=pnj_doc)
-	# Offre d'ESCORTE : même sémantique, même PNJ déjà résolu. Toujours ÉCRITE (aucune
-	# branche « générée » : on n'improvise pas une personne à protéger).
+	# Offre d'ESCORTE : même sémantique, même PNJ déjà résolu. L'ENTRÉE du lieu part avec —
+	# c'est elle qui porte la `progeniture` d'un tenancier (le doc `pnj:marchand_*` est
+	# générique, deux boutiques d'un même métier le partagent).
 	change |= escorte_util.poser_escorte_offerte(character, grid_doc, find_docs, get_doc,
-												 pnj_doc=pnj_doc)
+												 pnj_doc=pnj_doc, entree=pnj_entree)
 	# Compagnons : départs volontaires paresseux (affinité tombée sous le seuil pendant
 	# l'absence) — les docs `aventurier:*` sont annexes, persistés séparément ; le retrait
 	# du groupe part avec le save du personnage ci-dessous. Toast au rendu.

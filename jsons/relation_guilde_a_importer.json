@@ -1,0 +1,56 @@
+[
+  {
+    "_id": "lieu:le_bastion_de_l_yonne",
+    "_rev": "4-3f58ab677616591d7a44f33d20fc1935",
+    "type": "lieu",
+    "label": "Le Bastion de l'Yonne",
+    "image": "guilde_aventuriers_exterieur_europe01.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "guilde_aventurier_exterieur",
+    "relation_lieu": "lieu:le_bastion_de_l_yonne_comptoir"
+  },
+  {
+    "_id": "lieu:le_bastion_de_l_yonne_interieur",
+    "_rev": "6-35338ff1f02bb940d6f32b581d806d85",
+    "type": "lieu",
+    "label": "Le Bastion de l'Yonne - reception",
+    "image": "guilde_aventuriers_interieur_europe01.png",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:auxerre",
+    "tags": [
+      "recrutement"
+    ],
+    "relation_lieu": "lieu:le_bastion_de_l_yonne_comptoir"
+  },
+  {
+    "_id": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+    "_rev": "10-0ab5e757859f69bdc86362b2257ad55d",
+    "type": "lieu",
+    "label": "Bureau de Gautier de Valcroix, Maitre de la Guilde d'Aventuriers d'Auxerre",
+    "image": "guilde_bureau_maitre_de_guilde_europe01.png",
+    "categorie": "bureau_maitre_guilde",
+    "pnj": [
+      {
+        "character": "pnj:gautier_de_valcroix",
+        "nom": "Gautier de Valcroix",
+        "portrait": "humain_m_guerrier01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "acces": {
+      "gardien": "pnj:borin_barbe_de_jais",
+      "refus": "Borin Barbe-de-Jais barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:auxerre",
+            "rang": "D"
+          }
+        }
+      ]
+    },
+    "relation_lieu": "lieu:le_bastion_de_l_yonne_comptoir"
+  }
+]
