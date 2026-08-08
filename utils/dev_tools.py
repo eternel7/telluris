@@ -136,6 +136,28 @@ CATALOGUE = [
 			"sources figées : régénération idempotente.",
 	},
 	{
+		"id": "gen_grades_france",
+		"label": "⚔️ Confiner les hauts grades à la zone dangereuse (France)",
+		"argv": _py("gen_grades_france.py"),
+		"ecrit": "Écrit jsons/france_grades_a_importer.json.",
+		"description": "Les 6 profils de niveau 5-6 étaient dans le `profil_weights` du LIEU : "
+			"23 % de TOUS les monstres de la France, gobelins de la plaine compris. Les descend "
+			"sur les 36 placements de `zone:tres_dangereuse` — seul endroit où "
+			"`resolve_profil_weights` les lira. ⚠️ La table d'un placement REMPLACE celle du "
+			"lieu, elle doit donc rester complète.",
+	},
+	{
+		"id": "gen_lutecia",
+		"label": "🏰 Donner ses zones à la capitale Lutèce",
+		"argv": _py("gen_lutecia.py"),
+		"ecrit": "Écrit jsons/lutecia_zones_a_importer.json.",
+		"description": "Lutèce n'avait que 10 placements de forêt (6 % de la carte) et ses "
+			"rencontres, copiées d'Auxerre, citaient des zones jamais posées. Ajoute les zones "
+			"urbaines de capitale (cœur, politique, bas quartiers, remparts), la Seine, les "
+			"faubourgs et la campagne, calés sur paris_capital.png — et contrôle que les "
+			"4 portes venant de la France tombent bien dans une zone.",
+	},
+	{
 		"id": "gen_armures",
 		"label": "🛡️ Générer la passe « armures »",
 		"argv": _py("gen_armures.py"),
