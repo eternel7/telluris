@@ -2,6 +2,8 @@
 # Modèles Pydantic pour les stats de personnage Telluris / Légende
 
 from pydantic import BaseModel, Field
+import contextlib
+import contextvars
 import math
 import re
 
@@ -26,6 +28,54 @@ WORLD_VARIABLES_DOC_ID: str = "rules:world_variables"
 # stats décident plus vite l'issue ; l'augmenter rapproche le combat des seuls
 # dés + chances de toucher. C'est le levier pour régler le nombre de rounds.
 FACTEUR_DEGATS_ARMURE: int = 20
+
+# ── Facteur SIMULÉ (banc d'essai /admin/simulateur) ──────────────────────
+# Le simulateur doit pouvoir répondre à « et si le facteur valait 10 ? » SANS toucher ni
+# la base ni la partie des joueurs. Un simple `character_stats.FACTEUR_DEGATS_ARMURE = 10`
+# le temps du calcul contaminerait tout le serveur : un joueur qui résout un combat
+# pendant la seconde du run verrait ses dégâts changer sans rien avoir demandé.
+#
+# D'où un ContextVar, comme le cache de documents (cf. RequestDocCacheMiddleware) : un
+# endpoint `def` tourne dans le threadpool avec une COPIE du contexte, donc un `set()`
+# fait pendant la requête n'est vu que par ELLE. Aucun verrou nécessaire, aucune fenêtre
+# de contamination.
+#
+# ⚠️ Toujours lire le facteur par `facteur_degats_armure()` dans un CALCUL de dérivée.
+# La globale reste la valeur du monde : c'est elle que publie `current_world_variables()`
+# et que recharge `load_world_variables()` — un facteur simulé ne doit jamais fuiter vers
+# l'écran des variables de monde ni vers le doc CouchDB.
+_FACTEUR_ARMURE_SIMULE: contextvars.ContextVar = contextvars.ContextVar(
+	"_facteur_armure_simule", default=None)
+
+
+def facteur_degats_armure() -> int:
+	"""Facteur EFFECTIF ici et maintenant : celui du monde, ou celui d'une simulation en
+	cours dans CETTE requête. Planché à 1 — un facteur nul serait une division par zéro
+	dans les trois dérivées qui l'utilisent (PA, dégâts cc, dégâts cd)."""
+	simule = _FACTEUR_ARMURE_SIMULE.get()
+	return max(1, int(simule if simule else FACTEUR_DEGATS_ARMURE))
+
+
+@contextlib.contextmanager
+def facteur_degats_armure_simule(valeur):
+	"""Le temps du bloc, les dérivées se calculent avec `valeur` — pour la requête
+	courante seulement. `None`, 0 ou la valeur du monde ⇒ rien n'est posé (le contexte
+	reste vierge et l'on repart exactement sur le comportement d'avant)."""
+	try:
+		voulu = int(valeur or 0)
+	except (TypeError, ValueError):
+		voulu = 0
+	# ⚠️ Le plancher à 1 ne s'applique qu'APRÈS ce test : le poser avant ferait d'un
+	# champ vide (0, None) une simulation à facteur 1, soit la létalité maximale, là où
+	# l'on veut ne rien surcharger du tout.
+	if voulu <= 0 or voulu == int(FACTEUR_DEGATS_ARMURE):
+		yield
+		return
+	jeton = _FACTEUR_ARMURE_SIMULE.set(voulu)
+	try:
+		yield
+	finally:
+		_FACTEUR_ARMURE_SIMULE.reset(jeton)
 
 # Bonus de portée des armes de JET dérivé de la Force : portee_jet = item.portee + F // JET_PORTEE_F_DIV.
 # Sur l'échelle ×10 (F ≈ 10-100), un diviseur de 20 donne +0 à +5 cases selon la puissance.
@@ -917,7 +967,7 @@ def compute_derived_stats(
 	cd = ((3*base.ag) + (base.v *10)) // 4 + equipment.cd_bonus
 
 	# ── Armure ───────────────────────────────────────────────────────
-	pa = (base.r // FACTEUR_DEGATS_ARMURE) + equipment.pa
+	pa = (base.r // facteur_degats_armure()) + equipment.pa
 
 	# ── Défense magique ───────────────────────────────────────────────
 	pm_def = (base.vol // 2) + (base.int_ // 4)
@@ -932,13 +982,13 @@ def compute_derived_stats(
 	# de caractéristiques égales s'annulent, et ce sont les armes (+x / +1DX) qui
 	# font la différence de dégâts.
 	degats_cc = _format_damage(
-		_caract_to_dice_(base.f), base.f // FACTEUR_DEGATS_ARMURE, equipment
+		_caract_to_dice_(base.f), base.f // facteur_degats_armure(), equipment
 	)
 
 	# ── Dégâts à distance ─────────────────────────────────────────────
 	# Même logique : la puissance du tir suit l'Ag (Ag//FACTEUR), miroir des PA.
 	degats_cd = _format_damage(
-		_caract_to_dice_(base.ag), base.ag // FACTEUR_DEGATS_ARMURE, equipment
+		_caract_to_dice_(base.ag), base.ag // facteur_degats_armure(), equipment
 	)
 
 	# ── Charge max ────────────────────────────────────────────────────

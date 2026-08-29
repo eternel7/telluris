@@ -1080,7 +1080,10 @@ def admin_simulateur(request: Request, current_user: Annotated[User, Depends(get
 	return templates.TemplateResponse(
 		request=request,
 		name="admin_simulateur.html",
-		context={"title": "Simulateur de duel", "battle_maps": battle_maps},
+		context={"title": "Simulateur de duel", "battle_maps": battle_maps,
+				 # Valeur du MONDE (jamais un facteur simulé) : l'écran la pré-remplit et
+				 # l'affiche en repère à côté du champ d'essai.
+				 "facteur_armure": character_stats.FACTEUR_DEGATS_ARMURE},
 	)
 
 
@@ -1102,14 +1105,15 @@ def admin_simulateur_run(
 	# Terrain = tags de battle_map (furtivité d'entrée + conditions d'arsenal). Bornés :
 	# une liste forgée ne doit pas gonfler les logs ni le payload.
 	terrain = [str(t).strip()[:40] for t in (payload.get("terrain") or [])[:12] if str(t).strip()]
-	try:
-		bel_a = simulateur_util.construire_belligerant(payload.get("a"), get_doc, tuple(terrain))
-		bel_b = simulateur_util.construire_belligerant(payload.get("b"), get_doc, tuple(terrain))
-	except ValueError as e:
-		raise HTTPException(status_code=422, detail=str(e))
-	except LookupError as e:
-		raise HTTPException(status_code=404, detail=str(e))
-	resultats = simulateur_util.simuler_belligerants(bel_a, bel_b, distance, passes)
+	# Facteur de létalité ESSAYÉ le temps de ce run : il ne touche ni la base ni la partie
+	# des joueurs (ContextVar, isolé à cette requête — cf. character_stats). Il doit
+	# envelopper la CONSTRUCTION des belligérants autant que le duel : PA et dégâts sont
+	# figés dans les snapshots, les calculer avant l'override ne changerait rien.
+	facteur_reel = int(character_stats.FACTEUR_DEGATS_ARMURE)
+	facteur = max(1, min(200, int(payload.get("facteur_armure") or facteur_reel)))
+	# Objets (consommables du sac) autorisés ou non — clé absente ⇒ autorisés, le
+	# comportement d'avant.
+	objets = bool(payload.get("objets", True))
 
 	def _potentiels(bel):
 		return {
@@ -1117,10 +1121,27 @@ def admin_simulateur_run(
 			"support": potentiel_util.potentiel_support(bel["snapshot_reference"], bel["arsenal"]),
 		}
 
+	with character_stats.facteur_degats_armure_simule(facteur):
+		try:
+			bel_a = simulateur_util.construire_belligerant(payload.get("a"), get_doc,
+														  tuple(terrain), objets)
+			bel_b = simulateur_util.construire_belligerant(payload.get("b"), get_doc,
+														  tuple(terrain), objets)
+		except ValueError as e:
+			raise HTTPException(status_code=422, detail=str(e))
+		except LookupError as e:
+			raise HTTPException(status_code=404, detail=str(e))
+		resultats = simulateur_util.simuler_belligerants(bel_a, bel_b, distance, passes)
+		potentiels = {"a": _potentiels(bel_a), "b": _potentiels(bel_b)}
+
 	return {
 		"resultats": resultats,
-		"potentiels": {"a": _potentiels(bel_a), "b": _potentiels(bel_b)},
+		"potentiels": potentiels,
 		"terrain": terrain,
+		"objets": objets,
+		# Le facteur essayé ET celui du monde : l'écran doit pouvoir dire qu'il a dévié.
+		"facteur_armure": facteur,
+		"facteur_armure_reel": facteur_reel,
 		# Les pondérations affichées à l'écran — la règle éditable vit dans utils/potentiel.
 		"regles": potentiel_util.REGLES_POTENTIEL,
 	}

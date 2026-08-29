@@ -101,6 +101,18 @@
 
 		.params-row { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
 		.params-row .champ .lbl { font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
+		/* Valeur du monde, en repère à côté du champ d'essai. */
+		.reel { color: var(--accent2); }
+		/* Le champ vire à l'orange dès qu'il s'écarte du jeu : une simulation faite avec
+		   un facteur exotique ne doit pas passer pour un résultat de production. */
+		input.devie { border-color: var(--accent); color: var(--accent); }
+		/* Case à cocher : même hauteur que les champs voisins de la rangée. */
+		.params-row label.case {
+			display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+			padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); font-size: 0.85rem; white-space: nowrap;
+		}
+		.params-row label.case input { accent-color: var(--accent); cursor: pointer; }
 
 		/* Résultats. */
 		.vs-bar {
@@ -218,6 +230,14 @@
 					<div class="lbl">Passes Monte Carlo</div>
 					<input type="number" id="passes" value="500" min="1" max="5000">
 				</div>
+				<div class="champ">
+					<div class="lbl">
+						Facteur dégâts/armure —
+						<span class="reel">jeu : {{ facteur_armure }}</span>
+					</div>
+					<input type="number" id="facteur-armure" value="{{ facteur_armure }}" min="1" max="200"
+						title="Essayé pour cette simulation seulement : ni la base ni la partie des joueurs ne changent.">
+				</div>
 				<div class="champ" style="min-width:280px;flex:1;">
 					<div class="lbl">Type de lieu (tags du terrain — furtivité et conditions)</div>
 					<select id="terrain">
@@ -226,6 +246,12 @@
 						<option value="{{ bm.tags | join(',') }}">{{ bm.nom or bm._id }} ({{ bm.tags | join(', ') }})</option>
 						{% endfor %}
 					</select>
+				</div>
+				<div class="champ">
+					<div class="lbl">Ressources</div>
+					<label class="case" title="Décoché : les deux camps se battent sans potions ni élixirs. Sorts, compétences et équipement restent en place.">
+						<input type="checkbox" id="objets" checked> 🧪 Objets autorisés
+					</label>
 				</div>
 				<button class="btn" type="button" id="run-btn">▶ Simuler</button>
 			</div>
@@ -248,6 +274,12 @@
 
 <script>
 const $ = id => document.getElementById(id);
+
+// Facteur de létalité EN JEU (world-var côté serveur). Il sert de valeur de départ du
+// champ d'essai et de repère : le champ n'est PAS mémorisé d'une visite à l'autre, on
+// repart toujours des règles réelles — une simulation faite sans s'en apercevoir avec un
+// facteur exotique serait pire qu'inutile.
+const FACTEUR_ARMURE_JEU = {{ facteur_armure }};
 
 // Ce qui défile ici vient de la base (noms d'espèces, de personnages, de sorts) :
 // tout ce qui part dans un template literal innerHTML passe par escapeHtml.
@@ -363,6 +395,7 @@ function sauverSelection() {
 			};
 		}
 		etat.terrain = $('terrain').value;
+		etat.objets = $('objets').checked;
 		localStorage.setItem(LS_KEY, JSON.stringify(etat));
 	} catch (e) { /* stockage indisponible : pas de mémoire, rien à faire */ }
 }
@@ -388,6 +421,9 @@ function restaurerSelection() {
 		_poserSelect($('character-' + camp), c.character);
 	}
 	_poserSelect($('terrain'), etat.terrain);
+	// Condition d'expérience mémorisée comme le terrain (≠ du facteur, qui repart
+	// toujours des règles du jeu) : une case cochée ou non se voit d'un coup d'œil.
+	if (etat.objets !== undefined) $('objets').checked = !!etat.objets;
 }
 
 function specDe(camp) {
@@ -518,6 +554,13 @@ function renduResultats(data) {
 	const r = data.resultats, pots = data.potentiels;
 	const terrainTxt = (data.terrain || []).length
 		? 'terrain : ' + escapeHtml(data.terrain.join(', ')) : 'terrain nu';
+	// Un run mené avec un facteur d'essai doit le DIRE : sans ça, on comparerait
+	// plus tard ses chiffres à ceux du jeu sans savoir qu'ils ne parlent pas des
+	// mêmes règles.
+	const facteurTxt = data.facteur_armure !== data.facteur_armure_reel
+		? ` · ⚠ facteur dégâts/armure simulé ${data.facteur_armure} (jeu : ${data.facteur_armure_reel})`
+		: ` · facteur ${data.facteur_armure}`;
+	const objetsTxt = data.objets === false ? ' · 🚫 sans objets' : '';
 	const tauxA = r.a.taux, tauxB = r.b.taux, tauxN = Math.max(0, 1 - tauxA - tauxB);
 	const maxCombat = Math.max(pots.a.combat.total, pots.b.combat.total);
 	const maxSurvie = Math.max(pots.a.combat.survie, pots.b.combat.survie, 1);
@@ -538,7 +581,7 @@ function renduResultats(data) {
 			<div class="stat-box"><div class="v">${r.rounds.moyen}</div><div class="l">rounds en moyenne</div></div>
 			<div class="stat-box"><div class="v">${r.rounds.mediane}</div><div class="l">rounds (médiane)</div></div>
 			<div class="stat-box"><div class="v">${r.rounds.min}–${r.rounds.max}</div><div class="l">rounds (min–max)</div></div>
-			<div class="stat-box"><div class="v">${r.passes}</div><div class="l">passes · distance ${r.distance} · ${terrainTxt}</div></div>
+			<div class="stat-box"><div class="v">${r.passes}</div><div class="l">passes · distance ${r.distance} · ${terrainTxt}${facteurTxt}${objetsTxt}</div></div>
 		</div>
 		<div class="duel-grid" style="margin-top:16px;">
 			${renduCamp('a', r.a, pots.a, maxCombat, maxSurvie, maxSupport)}
@@ -570,6 +613,8 @@ async function simuler() {
 				distance: parseInt($('distance').value, 10) || 5,
 				passes: parseInt($('passes').value, 10) || 500,
 				terrain: $('terrain').value.split(',').map(t => t.trim()).filter(Boolean),
+				facteur_armure: parseInt($('facteur-armure').value, 10) || FACTEUR_ARMURE_JEU,
+					objets: $('objets').checked,
 			}),
 		});
 		const data = await res.json().catch(() => ({}));
@@ -594,6 +639,13 @@ for (const camp of ['a', 'b']) {
 	}
 }
 $('terrain').addEventListener('change', sauverSelection);
+// Signalement visuel dès que le champ s'écarte des règles du jeu.
+function majFacteur() {
+	const v = parseInt($('facteur-armure').value, 10);
+	$('facteur-armure').classList.toggle('devie', !!v && v !== FACTEUR_ARMURE_JEU);
+}
+$('facteur-armure').addEventListener('input', majFacteur);
+$('objets').addEventListener('change', sauverSelection);
 $('run-btn').addEventListener('click', simuler);
 chargerListes();
 </script>

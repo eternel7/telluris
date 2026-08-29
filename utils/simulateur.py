@@ -159,14 +159,19 @@ def _profil_borne(espece: dict, borne: str) -> dict:
 			"nom": borne, "niveau": 1, "attributs_modifier": mods}
 
 
-def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=()) -> dict:
+def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=(), objets: bool = True) -> dict:
 	"""Ce que le personnage ENGAGE dans le duel = sa barre d'action (slots_actions).
 	Sorts/compétences offensifs (`cible: ennemi`), soutiens (`soi`/`allie` — en duel,
 	l'allié c'est soi), consommables du sac (stock = nb d'exemplaires du TYPE). Les
 	passives sont déjà dans le snapshot (competences_bonus, esquive) — jamais recomptées.
 	Deux cases d'un même sort (avec/sans composants) = UNE option : les composants sont
 	ignorés par le simulateur. Un sort/une compétence à `condition` (battle_map_tags)
-	n'est retenu que si le TERRAIN la remplit (condition_remplie du moteur)."""
+	n'est retenu que si le TERRAIN la remplit (condition_remplie du moteur).
+
+	`objets=False` prive les deux camps de leurs CONSOMMABLES (potions, élixirs) : on
+	mesure alors ce que valent des belligérants sur leurs seules ressources propres —
+	stats, armes, sorts et compétences. Sorts et compétences ne sont PAS des objets et
+	restent en place ; l'équipement non plus (un duel aux poings ne se demande pas)."""
 	sorts_off, comps_off, soutiens, consommables = [], [], [], []
 	vus = set()
 	for entree in slots_effectifs(character, get_doc_fn):
@@ -199,6 +204,8 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=()) -> dict:
 								 "icon": comp["icon"], "cout_pm": comp["cout_pm"],
 								 "effets": eff, "compteur": "competences", "source": comp})
 		elif type_ == "consommable":
+			if not objets:
+				continue        # objets interdits pour ce duel
 			doc = get_doc_fn(ref)
 			if not doc or not est_consommable(doc) or not effet_instantane(doc):
 				continue
@@ -213,7 +220,7 @@ def _arsenal_de_barre(character: dict, get_doc_fn, map_tags=()) -> dict:
 			"soutiens": soutiens, "consommables": consommables}
 
 
-def construire_belligerant(spec: dict, get_doc_fn, map_tags=()) -> dict:
+def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = True) -> dict:
 	"""`spec = {"type": "espece"|"character", "id", "profil"?}` → belligérant prêt à
 	dueller : `fabrique()` rend un snapshot FRAIS à chaque passe (les snapshots sont
 	MUTÉS par le duel — espèce re-tirée, character deepcopié), `snapshot_reference` un
@@ -221,6 +228,7 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=()) -> dict:
 
 	`map_tags` = le TERRAIN du duel (tags de battle_map) : il pose la furtivité d'entrée
 	des passives conditionnées (comme start_combat) et filtre l'arsenal conditionné.
+	`objets=False` retire les consommables de l'arsenal (cf. `_arsenal_de_barre`).
 
 	Lève ValueError (spec malformée) ou LookupError (doc absent / mauvais type)."""
 	spec = spec or {}
@@ -290,7 +298,7 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=()) -> dict:
 		if bonus_furtif > 0:
 			base["furtif"] = True
 			base["furtivite_bonus"] = bonus_furtif
-		arsenal = _arsenal_de_barre(character, get_doc_fn, map_tags)
+		arsenal = _arsenal_de_barre(character, get_doc_fn, map_tags, objets)
 		# Stock de consommables PAR PASSE : porté par le snapshot (deepcopié avec lui),
 		# jamais par l'arsenal partagé — une passe ne doit pas vider les fioles de la
 		# suivante.
@@ -419,8 +427,10 @@ def _meilleure_offensive(actor: dict, cible: dict, arsenal: dict, distance: int)
 	meilleure, meilleur_score = None, -1.0
 	for option in _options_jouables(actor, arsenal, distance):
 		p = _seuil_de(actor, cible, option) / 100.0
-		pa = 0 if option["jet"] == "magique" else int(cible.get("pa", 0) or 0)
-		score = p * max(1.0, moyenne_de_des(option["notation"]) - pa)
+		# Même formule que le coup réel, l'espérance des dés remplaçant le tirage : le
+		# score classe les options selon ce qu'elles feront VRAIMENT.
+		score = p * combat.calculer_degats(actor, cible, option["notation"],
+										   1, option["jet"], des_fn=moyenne_de_des)
 		if score > meilleur_score:
 			meilleure, meilleur_score = option, score
 	return meilleure
@@ -447,8 +457,10 @@ def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> Non
 	actor[option["compteur"]] = actor.get(option["compteur"], 0) + 1
 	combat._refresh_actions(actor)
 	if jet["touche"]:
-		pa = 0 if option["jet"] == "magique" else int(cible.get("pa", 0) or 0)
-		dmg = max(1, combat.roll_dice(option["notation"]) * jet["mult_degats"] - pa)
+		# Formule PARTAGÉE avec le moteur (combat.calculer_degats) : un duel simulé et un
+		# coup joué en jeu doivent blesser exactement pareil.
+		dmg = combat.calculer_degats(actor, cible, option["notation"],
+									 jet["mult_degats"], option["jet"])
 		cible["currentPV"] = max(0, int(cible.get("currentPV", 0)) - dmg)
 		cible["vivant"] = cible["currentPV"] > 0
 		suffixe = " — CRITIQUE ×2" if jet["critique"] else ""
@@ -671,10 +683,10 @@ def _recap_arsenal(bel: dict) -> dict:
 
 
 def simuler_duel(spec_a: dict, spec_b: dict, distance: int, passes: int, get_doc_fn,
-				 plafond_rounds: int = PLAFOND_ROUNDS, map_tags=()) -> dict:
+				 plafond_rounds: int = PLAFOND_ROUNDS, map_tags=(), objets: bool = True) -> dict:
 	"""N passes Monte Carlo du duel A vs B à `distance` cases (specs → belligérants)."""
-	return simuler_belligerants(construire_belligerant(spec_a, get_doc_fn, map_tags),
-								construire_belligerant(spec_b, get_doc_fn, map_tags),
+	return simuler_belligerants(construire_belligerant(spec_a, get_doc_fn, map_tags, objets),
+								construire_belligerant(spec_b, get_doc_fn, map_tags, objets),
 								distance, passes, plafond_rounds)
 
 

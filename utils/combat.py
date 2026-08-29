@@ -129,8 +129,8 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 
 	# `attaque_profils` reste FIGÉ lui aussi : les recalculer relirait les docs d'items en
 	# base (_weapon_attacks fait un get_doc par slot) à chaque tour, dans ce qui doit rester
-	# du calcul pur. Le seul effet perdu est la portée d'une arme de jet (F // 20, soit +1
-	# case pour +20 de Force) — négligeable au regard du coût.
+	# du calcul pur. Le seul effet perdu est la portée d'une arme de jet (F // FACTEUR_DEGATS_ARMURE, soit +1
+	# case pour 20 de Force et FACTEUR_DEGATS_ARMURE = 20) — négligeable au regard du coût.
 
 	# Un buff de R/Vol qui expire abaisse les max : on re-clampe plutôt que de laisser
 	# des PV au-dessus du plafond (l'inverse — un buff qui monte le max — ne soigne pas).
@@ -899,6 +899,51 @@ def roll_dice(notation: str) -> int:
 	return max(1, total)
 
 
+def calculer_degats(attaquant: dict, defenseur: dict, notation: str,
+					mult_degats: int = 1, jet: str = "cc", des_fn=None):
+	"""SOURCE UNIQUE des dégâts d'un coup qui TOUCHE — le seul endroit à modifier pour
+	changer la façon dont une frappe blesse.
+
+	Traversée par les cinq sites qui portent un coup (attaque de monstre, arme du joueur,
+	sort, compétence, duel du simulateur) ET par les deux qui l'ESTIMENT (choix d'option
+	du simulateur, offense des potentiels). Une formule recopiée ailleurs ferait diverger
+	le jeu de son propre banc d'essai — c'est exactement ce que ce chokepoint supprime.
+
+	Règle actuelle : dés × multiplicateur de critique, PUIS soustraction des PA, plancher
+	à 1. Le critique double le COUP, pas la pénétration d'armure ; la magie ignore les PA
+	(la défense magique a déjà joué dans le seuil de toucher).
+
+	`des_fn` évalue la notation : `roll_dice` pour jouer un coup (défaut, rend un `int`),
+	`simulateur.moyenne_de_des` pour l'espérer (rend un `float`). Même injection que les
+	`get_doc_fn`/`rand_fn` du projet — c'est ce qui garde scores et coups sur UNE formule.
+	⚠️ Le défaut est résolu DANS LE CORPS et non en valeur par défaut du paramètre : une
+	valeur par défaut est évaluée à la DÉFINITION du module, donc elle figerait la
+	référence et les nombreux tests qui monkeypatchent `roll_dice` ne l'atteindraient
+	plus — ils verraient les vrais dés tomber sans rien pouvoir y faire.
+
+	⚠️ QUATRE POINTS À CONNAÎTRE AVANT DE TOUCHER À LA FORMULE :
+
+	1. `attaquant` est passé bien qu'inutilisé par la règle d'aujourd'hui. C'est
+	   délibéré : ajouter demain la Force au coup ne changera ni cette signature ni les
+	   sept sites d'appel. Ne pas le retirer comme paramètre mort.
+	2. Les caractéristiques BRUTES ne sont pas au premier niveau d'un snapshot : ni `F`
+	   ni `R` n'y existent. Elles vivent dans `attaquant["caracts_base"]["F"]` et
+	   `defenseur["caracts_base"]["R"]` (avec `.get`, un snapshot d'avant la feature des
+	   effets à durée n'en porte pas).
+	3. L'arithmétique se fait sur le RÉSULTAT du tirage, jamais dans la notation :
+	   `des_fn` attend une chaîne (`"1D6+2"`), pas un nombre.
+	4. F et R sont DÉJÀ comptées une fois — la Force dans la taille du dé
+	   (`_caract_to_dice_`) plus `F // FACTEUR_DEGATS_ARMURE` de bonus plat, la Résistance dans les PA
+	   (`R // FACTEUR_DEGATS_ARMURE`). Les rajouter brutes les compterait deux fois, et à
+	   l'échelle ×10 des caracts ce serait un terme de ±50 sur un dé qui rend 5 : le dé ne
+	   pèserait plus rien. Passer par les world-vars ou par `jet` (ne pas donner la Force
+	   à un sort) plutôt que par une addition brute.
+	"""
+	bruts = (des_fn or roll_dice)(notation) * mult_degats
+	pa = 0 if jet == "magique" else int(defenseur.get("pa", 0) or 0)
+	return max(1, bruts - pa)
+
+
 def roll_monster_stats(espece: dict, profil: dict) -> BaseStats:
 	base = espece.get("base_attributes", {})
 	mods = profil.get("attributs_modifier", {})
@@ -1484,9 +1529,9 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 	attaquant["attaques"] = attaquant.get("attaques", 0) + 1
 	_refresh_actions(attaquant)
 	if jet["touche"]:
-		# Le multiplicateur de critique double le COUP, pas la pénétration d'armure :
-		# il s'applique aux dés avant la soustraction des PA.
-		dmg = max(1, roll_dice(attaquant["degats_cc"]) * jet["mult_degats"] - defenseur["pa"])
+		# Formule partagée avec le joueur, les sorts, les compétences et le simulateur.
+		dmg = calculer_degats(attaquant, defenseur, attaquant["degats_cc"],
+							  jet["mult_degats"], "cc")
 		defenseur["currentPV"] = max(0, defenseur["currentPV"] - dmg)
 		# Un tour de monstre est entièrement résolu côté serveur : sans cette charge sur
 		# l'entrée de journal, un coup encaissé par le joueur ne pourrait jamais s'animer.
@@ -2059,9 +2104,8 @@ def resolve_action(
 		jet = _resoudre_jet(joueur, monstre, seuil)
 		roll = jet["roll"]
 		if jet["touche"]:
-			# Le critique double les dés AVANT la soustraction des PA : il double le coup,
-			# pas la pénétration d'armure.
-			dmg = max(1, roll_dice(notation) * jet["mult_degats"] - monstre["pa"])
+			dmg = calculer_degats(joueur, monstre, notation, jet["mult_degats"],
+								  profil.get("toucher", "cc"))
 			monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 			# L'animation suit le MODE de l'arme (cac/jet/tir), avec celle de l'arme elle-même
 			# en priorité : le profil la porte depuis le snapshot, aucun doc n'est relu ici.
@@ -2319,15 +2363,12 @@ def resolve_action(
 			jet = _resoudre_jet(joueur, monstre, seuil)
 			roll = jet["roll"]
 			if jet["touche"]:
-				# Pas de soustraction de PA : l'armure physique n'arrête pas la magie
-				# (la défense magique joue déjà dans le seuil). Le critique double donc
-				# des dégâts déjà bruts.
+				# `mode_jet` porte tout : la magie ignore les PA (la pm_def a déjà joué
+				# dans le seuil), un sort à jet MARTIAL les subit — sinon `jet: "cc"`
+				# serait un pur gain, contourner la pm_def sans rien payer en retour.
 				if effets.get("degats"):
-					bruts = roll_dice(effets["degats"]) * jet["mult_degats"]
-					# Un sort qui passe par un jet MARTIAL passe aussi par l'armure : même
-					# contrat que les compétences, sinon `jet: "cc"` serait un pur gain
-					# (contourner la pm_def sans rien payer en retour).
-					dmg = max(1, bruts if mode_jet == "magique" else bruts - monstre["pa"])
+					dmg = calculer_degats(joueur, monstre, effets["degats"],
+										  jet["mult_degats"], mode_jet)
 				else:
 					dmg = 0
 				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
@@ -2509,15 +2550,13 @@ def resolve_action(
 			resultat_jet = _resoudre_jet(joueur, monstre, seuil)
 			roll = resultat_jet["roll"]
 			if resultat_jet["touche"]:
-				# Le critique double les dés ; les PA ne sont soustraits qu'après, et
-				# seulement pour une frappe martiale (l'armure n'arrête pas la magie).
 				if effets.get("degats"):
 					# Notation = dés de la compétence, PLUS les dégâts d'arme si c'est une
-					# frappe de contact. Le critique double le total avant les PA, exactement
-					# comme une attaque d'arme ordinaire.
+					# frappe de contact. Le reste (critique avant les PA, magie sans PA)
+					# est la formule commune.
 					notation = _degats_competence(joueur, competence, effets)
-					degats_bruts = roll_dice(notation) * resultat_jet["mult_degats"]
-					dmg = max(1, degats_bruts if jet == "magique" else degats_bruts - monstre["pa"])
+					dmg = calculer_degats(joueur, monstre, notation,
+										  resultat_jet["mult_degats"], jet)
 				else:
 					dmg = 0   # compétence de pur debuff : elle touche sans blesser
 				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)

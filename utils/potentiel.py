@@ -61,17 +61,24 @@ def potentiel_combat(snapshot: dict, arsenal: dict, regles: dict | None = None) 
 	actions_max = max(1, int(snapshot.get("actions_max", 1) or 1))
 	pm_max = int(snapshot.get("pm_max", 0) or 0)
 
+	# Adversaire ÉTALON, sous la forme d'un dict de défenseur : c'est lui que reçoit
+	# `combat.calculer_degats`. ⚠️ Si la formule se met un jour à lire les caracts brutes
+	# de la cible (`caracts_base`), c'est ICI qu'il faudra les lui donner.
+	etalon = {"pa": r["pa_reference"], "ag": r["defense_reference"],
+			  "pm_def": r["pm_def_reference"], "caracts_base": {}}
+
 	meilleure, option_retenue = 0.0, ""
 	for opt in options_offensives_statiques(snapshot, arsenal):
 		if opt["jet"] == "magique":
 			seuil = combat._magic_hit_threshold(
 				snapshot.get("toucher_magique", 0), r["pm_def_reference"])
-			pa = 0
 		else:
 			skill = snapshot.get("cd", 0) if opt["jet"] == "cd" else snapshot.get("cc", 0)
 			seuil = combat._hit_threshold(skill, r["defense_reference"])
-			pa = r["pa_reference"]
-		par_coup = (seuil / 100.0) * max(1.0, moyenne_de_des(opt["notation"]) - pa)
+		# Dégâts par la formule PARTAGÉE (espérance des dés au lieu du tirage) : changer
+		# la règle du jeu met ce score à jour tout seul.
+		par_coup = (seuil / 100.0) * combat.calculer_degats(
+			snapshot, etalon, opt["notation"], 1, opt["jet"], des_fn=moyenne_de_des)
 		par_round = par_coup * actions_max * (1 + r["bonus_portee"] * (opt["portee"] - 1))
 		if opt["cout_pm"] > 0:
 			castabilite = min(1.0, pm_max / (opt["cout_pm"] * actions_max)) if pm_max else 0.0

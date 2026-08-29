@@ -243,6 +243,35 @@ def test_soin_part_avant_l_attaque(jets_surs):
 	assert any(l["kind"] == "hit" for l in pseudo["log"])
 
 
+# ── Objets autorisés ou non ──────────────────────────────────────────────────────────
+
+def test_objets_interdits_retire_les_consommables_seulement():
+	"""Décocher « objets » prive des potions, PAS des sorts, compétences ni armes."""
+	avec = simulateur.construire_belligerant(
+		{"type": "character", "id": CHARACTER["_id"]}, get_doc)
+	sans = simulateur.construire_belligerant(
+		{"type": "character", "id": CHARACTER["_id"]}, get_doc, objets=False)
+
+	assert [c["id"] for c in avec["arsenal"]["consommables"]] == ["item:potion_test"]
+	assert sans["arsenal"]["consommables"] == []
+	# Le soin par SORT, lui, reste disponible dans les deux cas.
+	assert [s["kind"] for s in avec["arsenal"]["soutiens"]].count("consommable") == 1
+	assert [s["kind"] for s in sans["arsenal"]["soutiens"]].count("consommable") == 0
+	assert [s["kind"] for s in sans["arsenal"]["soutiens"]].count("sort") == 1
+	# Les armes viennent du snapshot, jamais de l'arsenal : intactes.
+	assert sans["fabrique"]()["attaque_profils"] == avec["fabrique"]()["attaque_profils"]
+	# Plus aucun stock à porter dans le snapshot.
+	assert sans["fabrique"]()["_sim_stocks"] == {}
+
+
+def test_une_espece_ignore_le_reglage_des_objets():
+	"""Une espèce n'a pas de sac : le réglage ne peut rien lui retirer."""
+	for objets in (True, False):
+		bel = simulateur.construire_belligerant(
+			{"type": "espece", "id": "espece:ours_test"}, get_doc, objets=objets)
+		assert bel["arsenal"]["consommables"] == []
+
+
 # ── Bornes de l'espèce (le pire / le meilleur spécimen) ──────────────────────────────
 
 def test_bornes_donnent_les_extremes_de_la_fourchette():
