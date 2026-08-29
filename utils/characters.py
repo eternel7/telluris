@@ -127,6 +127,24 @@ def resolve_item_ref(ref):
 	return doc
 
 
+# ── Zones du corps et emplacements qui les couvrent ──────────────────────────────
+# Table de correspondance de la LOCALISATION DES TOUCHES : le d100 rend une zone
+# (cf. character_stats.LOCALISATION_TOUCHES), on cherche ici quelle pièce la protège.
+#
+# ⚠️ « bras » est le slot `mains` — ce n'est pas une erreur : la silhouette du paperdoll
+# libelle déjà cet emplacement « Bras » (play_town_telluris.html), et ce sont bien les
+# gantelets qui couvrent les avant-bras.
+# Tout emplacement ABSENT de cette table protège PARTOUT (cf. `pa_hors_zone`) : le
+# bouclier de la main gauche intercepte où que porte le coup, le collier et la ceinture
+# ne couvrent aucune zone identifiable. Les armes (main_droite) n'ont normalement pas de
+# `bonus_pa`, sauf les dagues de parade — traitées comme un bouclier, ce qui est juste.
+ZONE_SLOT = {
+	"tete": "tete", "epaules": "epaules", "torse": "torse",
+	"bras": "mains", "jambes": "jambes", "pieds": "pieds",
+}
+SLOT_ZONE = {slot: zone for zone, slot in ZONE_SLOT.items()}
+
+
 def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 	"""Cumule les bonus des items équipés en relisant chaque doc depuis CouchDB.
 
@@ -134,16 +152,27 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 	{item, poids}. Les valeurs sont relues à chaque appel (`get_doc`) pour que toute
 	modif d'un item en base soit reflétée sans ré-équiper. Partagé par /play (fiche),
 	le snapshot de combat et equip/unequip — jamais servi depuis un cache.
+
+	⚠️ Itère sur `.items()` et non `.values()` : le NOM du slot est nécessaire pour
+	ventiler les PA par zone du corps (localisation des touches). Invariant tenu ici et
+	épinglé par les tests : `pa == pa_hors_zone + somme(pa_zones)`.
 	"""
 	bonus = EquipmentBonus()
-	for ref in slots.values():
+	for slot, ref in slots.items():
 		item_id = item_ref_id(ref)
 		if not item_id:
 			continue
 		item = get_doc(item_id)
 		if not item:
 			continue
-		bonus.pa           += item.get("bonus_pa", 0)
+		pa_item = item.get("bonus_pa", 0) or 0
+		bonus.pa += pa_item
+		if pa_item:
+			zone = SLOT_ZONE.get(str(slot))
+			if zone:
+				bonus.pa_zones[zone] = bonus.pa_zones.get(zone, 0) + pa_item
+			else:
+				bonus.pa_hors_zone += pa_item
 		bonus.pv           += item.get("bonus_pv", 0)
 		bonus.pm           += item.get("bonus_pm", 0)
 		bonus.malus_depl   += item.get("bonus_malus_depl", 0)

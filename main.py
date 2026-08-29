@@ -1083,7 +1083,10 @@ def admin_simulateur(request: Request, current_user: Annotated[User, Depends(get
 		context={"title": "Simulateur de duel", "battle_maps": battle_maps,
 				 # Valeur du MONDE (jamais un facteur simulé) : l'écran la pré-remplit et
 				 # l'affiche en repère à côté du champ d'essai.
-				 "facteur_armure": character_stats.FACTEUR_DEGATS_ARMURE},
+				 "facteur_armure": character_stats.FACTEUR_DEGATS_ARMURE,
+				 # Clés que l'overlay peut forcer — la liste vient du module pur, jamais
+				 # recopiée dans le template.
+				 "stats_forcables": list(simulateur_util.STATS_FORCABLES)},
 	)
 
 
@@ -1139,12 +1142,46 @@ def admin_simulateur_run(
 		"potentiels": potentiels,
 		"terrain": terrain,
 		"objets": objets,
+		# Les clés réellement forcées par camp — un run truqué doit le dire à l'écran.
+		"stats_forcees": {
+			camp: sorted((simulateur_util.normaliser_stats_forcees(
+				(payload.get(camp) or {}).get("stats")) or {}).keys())
+			for camp in ("a", "b")
+		},
 		# Le facteur essayé ET celui du monde : l'écran doit pouvoir dire qu'il a dévié.
 		"facteur_armure": facteur,
 		"facteur_armure_reel": facteur_reel,
 		# Les pondérations affichées à l'écran — la règle éditable vit dans utils/potentiel.
 		"regles": potentiel_util.REGLES_POTENTIEL,
 	}
+
+
+@app.post("/admin/simulateur/profil")
+def admin_simulateur_profil(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: dict = Body(...),
+):
+	"""Stats dérivées d'UN belligérant, telles que le duel les jouerait.
+
+	C'est ce qui permet à l'overlay « stats forcées » de s'ouvrir pré-rempli avec les
+	vraies valeurs, sans avoir à lancer une simulation d'abord. Même terrain et même
+	facteur simulé que le run, sinon les PA affichés ne seraient pas ceux qu'on va jouer."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	terrain = [str(t).strip()[:40] for t in (payload.get("terrain") or [])[:12] if str(t).strip()]
+	facteur = max(1, min(200, int(payload.get("facteur_armure")
+								  or character_stats.FACTEUR_DEGATS_ARMURE)))
+	with character_stats.facteur_degats_armure_simule(facteur):
+		try:
+			bel = simulateur_util.construire_belligerant(payload.get("spec"), get_doc,
+														 tuple(terrain),
+														 bool(payload.get("objets", True)))
+		except ValueError as e:
+			raise HTTPException(status_code=422, detail=str(e))
+		except LookupError as e:
+			raise HTTPException(status_code=404, detail=str(e))
+		return {"label": bel["label"],
+				"profil": simulateur_util.fiche_snapshot(bel["snapshot_reference"])}
 
 
 @app.get("/admin/simulateur/potentiels")

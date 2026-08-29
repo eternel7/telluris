@@ -77,6 +77,22 @@ def facteur_degats_armure_simule(valeur):
 	finally:
 		_FACTEUR_ARMURE_SIMULE.reset(jeton)
 
+# ── Localisation des touches ─────────────────────────────────────────────────
+# Un jet de d100 décide OÙ le coup porte, et seuls les PA de la pièce couvrant cette
+# zone s'appliquent (plus ceux qui protègent partout : armure naturelle, bouclier).
+#
+# Forme = BORNES HAUTES CUMULÉES, et non des paires min/max : une table de bornes ne
+# peut ni laisser de trou ni se chevaucher. Le jet tombe dans la première zone dont la
+# borne est ≥ lui. Tête 01-07, Épaules 08-15, Torse 16-50, Bras 51-73, Jambes 74-89,
+# Pieds 90-100.
+#
+# ⚠️ Les clés sont des ZONES, pas des slots : la correspondance zone → emplacement
+# d'équipement vit dans `utils/characters.ZONE_SLOT` (« bras » y est le slot `mains`).
+# Vider ce dict désactive la mécanique — les PA agrégés d'avant s'appliquent alors.
+LOCALISATION_TOUCHES: dict[str, int] = {
+	"tete": 7, "epaules": 15, "torse": 50, "bras": 73, "jambes": 89, "pieds": 100,
+}
+
 # Bonus de portée des armes de JET dérivé de la Force : portee_jet = item.portee + F // JET_PORTEE_F_DIV.
 # Sur l'échelle ×10 (F ≈ 10-100), un diviseur de 20 donne +0 à +5 cases selon la puissance.
 JET_PORTEE_F_DIV: int = 20
@@ -573,6 +589,7 @@ def current_world_variables() -> dict:
 	"""Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
 	return {
 		"FACTEUR_DEGATS_ARMURE": FACTEUR_DEGATS_ARMURE,
+		"LOCALISATION_TOUCHES": dict(LOCALISATION_TOUCHES),
 		"JET_PORTEE_F_DIV": JET_PORTEE_F_DIV,
 		"DETECTION_DISTANCE_FACTEUR": DETECTION_DISTANCE_FACTEUR,
 		"XP_DECOUVERTE_LIEU": XP_DECOUVERTE_LIEU,
@@ -786,6 +803,18 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("COMBAT_ANIMATIONS_DEFAUT"), dict):
 		COMBAT_ANIMATIONS_DEFAUT.clear()
 		COMBAT_ANIMATIONS_DEFAUT.update({str(k): str(x or "") for k, x in v["COMBAT_ANIMATIONS_DEFAUT"].items()})
+	# Idem, MUTÉ EN PLACE : `utils/combat.tirer_localisation` lit la table par attribut
+	# de module à chaque coup porté. Les bornes illisibles sont écartées plutôt que de
+	# faire tomber le chargement — une table vide désactive proprement la mécanique.
+	if isinstance(v.get("LOCALISATION_TOUCHES"), dict):
+		bornes = {}
+		for zone, borne in v["LOCALISATION_TOUCHES"].items():
+			try:
+				bornes[str(zone)] = int(borne)
+			except (TypeError, ValueError):
+				continue
+		LOCALISATION_TOUCHES.clear()
+		LOCALISATION_TOUCHES.update(bornes)
 	RELATION_INITIALE            = int(v.get("RELATION_INITIALE", RELATION_INITIALE))
 	RELATION_SEUIL_COEFF         = float(v.get("RELATION_SEUIL_COEFF", RELATION_SEUIL_COEFF))
 	MARCHANDAGE_BLOCAGE_SECONDES = int(v.get("MARCHANDAGE_BLOCAGE_SECONDES", MARCHANDAGE_BLOCAGE_SECONDES))
@@ -896,7 +925,15 @@ class EquipmentBonus(BaseModel):
 	"""Bonus cumulés de tous les équipements portés."""
 	pv:			int = 0	# Bonus PV (objets magiques)
 	pm:			int = 0	# Bonus PM
-	pa:			int = 0	# Valeur d'armure totale
+	pa:			int = 0	# Valeur d'armure TOTALE (toutes pièces confondues)
+	# Ventilation de ce même total par ZONE DU CORPS, pour la localisation des touches :
+	# seuls les PA de la pièce couvrant la zone frappée s'appliquent au coup.
+	# ⚠️ INVARIANT : pa == pa_hors_zone + somme(pa_zones) — un PA ne doit jamais
+	# disparaître de la ventilation (cf. utils/characters.recompute_equipment_bonus).
+	pa_zones:	dict[str, int] = Field(default_factory=dict)
+	# PA des pièces qui ne couvrent AUCUNE zone (bouclier, cou, ceinture, anneaux) :
+	# elles protègent partout, comme l'armure naturelle.
+	pa_hors_zone: int = 0
 	malus_depl:	int = 0	# Delta de V des armures (négatif = lourde) — replié dans `buffs`
 	cc_bonus:	  int = 0	# Bonus attaque CàC (arme)
 	cd_bonus:	  int = 0	# Bonus attaque distance (arme)
@@ -925,7 +962,12 @@ class DerivedStats(BaseModel):
 	deplacement: int   # cases par action
 	cc:		  int   # compétence corps à corps
 	cd:		  int   # compétence à distance
-	pa:		  int   # points d'armure
+	pa:		  int   # points d'armure TOTAUX (armure naturelle + toutes les pièces)
+	# Localisation des touches : ce qui protège PARTOUT (armure naturelle + bouclier,
+	# cou, ceinture) et ce qui ne protège qu'une zone. `pa` reste le total, lu par la
+	# fiche, les potentiels et tout snapshot d'avant la feature.
+	pa_global:   int = 0
+	pa_zones:	dict[str, int] = Field(default_factory=dict)
 	pm_def:	  int   # défense magique
 	toucher_magique: int   # compétence de lancer de sorts offensifs
 	degats_cc:   str   # ex: "1D6+3"
@@ -968,6 +1010,10 @@ def compute_derived_stats(
 
 	# ── Armure ───────────────────────────────────────────────────────
 	pa = (base.r // facteur_degats_armure()) + equipment.pa
+	# Localisation : l'armure naturelle protège PARTOUT, comme le bouclier et les pièces
+	# qui ne couvrent aucune zone. Le reste ne vaut que pour la zone frappée.
+	pa_global = (base.r // facteur_degats_armure()) + equipment.pa_hors_zone
+	pa_zones = dict(equipment.pa_zones)
 
 	# ── Défense magique ───────────────────────────────────────────────
 	pm_def = (base.vol // 2) + (base.int_ // 4)
@@ -1006,6 +1052,8 @@ def compute_derived_stats(
 		cc=cc,
 		cd=cd,
 		pa=pa,
+		pa_global=pa_global,
+		pa_zones=pa_zones,
 		pm_def=pm_def,
 		toucher_magique=toucher_magique,
 		degats_cc=degats_cc,

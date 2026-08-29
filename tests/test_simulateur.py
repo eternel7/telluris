@@ -243,6 +243,80 @@ def test_soin_part_avant_l_attaque(jets_surs):
 	assert any(l["kind"] == "hit" for l in pseudo["log"])
 
 
+# ── Stats forcées (overlay JSON de l'écran) ──────────────────────────────────────────
+
+def test_les_cles_forcables_sont_celles_que_la_fiche_affiche():
+	"""Les deux listes doivent vivre et mourir ensemble : offrir dans l'overlay une clé
+	que le duel ne lit pas serait une promesse en l'air."""
+	bel = simulateur.construire_belligerant({"type": "espece", "id": "espece:ours_test"}, get_doc)
+	# La fiche affiche aussi des valeurs qu'on NE PEUT PAS forcer, et c'est délibéré :
+	# `caracts` et `pa_zones` ne sont pas des scalaires, et `pa_global` est DÉRIVÉ
+	# (`pa` − Σ zones) — l'offrir à la saisie serait promettre un réglage sans effet.
+	non_forcables = {"caracts", "pa_zones", "pa_global"}
+	affichees = set(simulateur.fiche_snapshot(bel["snapshot_reference"])) - non_forcables
+	assert affichees == set(simulateur.STATS_FORCABLES)
+
+
+def test_stats_forcees_validation():
+	assert simulateur.normaliser_stats_forcees(None) == {}
+	assert simulateur.normaliser_stats_forcees({"pv_max": "300"}) == {"pv_max": 300}
+	assert simulateur.normaliser_stats_forcees({"degats_cc": " 2D6+8 "}) == {"degats_cc": "2D6+8"}
+	# Planchers repris de _refresh_snapshot_stats.
+	assert simulateur.normaliser_stats_forcees({"pv_max": 0})["pv_max"] == 1
+	assert simulateur.normaliser_stats_forcees({"actions_max": -5})["actions_max"] == 1
+	assert simulateur.normaliser_stats_forcees({"esquive": -3})["esquive"] == 0
+	# ⚠️ Une faute de frappe doit se VOIR, pas être ignorée en silence.
+	with pytest.raises(ValueError):
+		simulateur.normaliser_stats_forcees({"pv": 300})
+	with pytest.raises(ValueError):
+		simulateur.normaliser_stats_forcees({"pv_max": "beaucoup"})
+	with pytest.raises(ValueError):
+		simulateur.normaliser_stats_forcees([1, 2])
+
+
+def test_stats_forcees_ecrasent_le_snapshot_et_la_reference():
+	bel = simulateur.construire_belligerant(
+		{"type": "espece", "id": "espece:ours_test",
+		 "stats": {"pv_max": 500, "pa": 12, "degats_cc": "2D6+8"}}, get_doc)
+	snap = bel["fabrique"]()
+	assert snap["pv_max"] == 500 and snap["pa"] == 12 and snap["degats_cc"] == "2D6+8"
+	# Forcer pv_max remplit la barre de vie : le banc d'essai part à pleine forme.
+	assert snap["currentPV"] == 500
+	# La référence porte les mêmes valeurs → les potentiels décrivent ce qui est simulé.
+	assert bel["snapshot_reference"]["pv_max"] == 500
+	assert simulateur.fiche_snapshot(bel["snapshot_reference"])["pa"] == 12
+
+
+def test_une_stat_forcee_survit_a_la_pose_d_un_effet():
+	"""LE piège : `_refresh_snapshot_stats` recompose les dérivées depuis `caracts_base`
+	dès qu'un effet est posé. Sans ré-application, la valeur saisie disparaîtrait au
+	premier buff, en plein duel et sans un mot."""
+	bel = simulateur.construire_belligerant(
+		{"type": "espece", "id": "espece:ours_test", "stats": {"pv_max": 500, "cc": 99}}, get_doc)
+	snap = bel["fabrique"]()
+	# Un buff de Force : le moteur recalcule cc, pv_max, degats_cc…
+	combat._empiler_effet_combat(snap, {"id": "sort:test", "nom": "Fureur"},
+								 {"buffs": {"F": 20}, "duree": 3}, 1)
+	assert snap["cc"] != 99          # le moteur a bien recalculé…
+	simulateur._refiger(snap)         # …et le simulateur refige la valeur saisie
+	assert snap["cc"] == 99 and snap["pv_max"] == 500
+	# ⚠️ Refiger ne doit PAS resoigner : les PV courants sont re-clampés, pas remis au max.
+	snap["currentPV"] = 42
+	simulateur._refiger(snap)
+	assert snap["currentPV"] == 42
+
+
+def test_un_duel_avec_stats_forcees_se_joue_jusqu_au_bout(jets_surs):
+	"""Bout en bout : un rat à 500 PV et 99 de CC bat l'ours, l'inverse du duel normal."""
+	res = simulateur.simuler_duel(
+		{"type": "espece", "id": "espece:ours_test"},
+		{"type": "espece", "id": "espece:rat_test",
+		 "stats": {"pv_max": 500, "degats_cc": "1D6+50"}},
+		distance=1, passes=3, get_doc_fn=get_doc)
+	assert res["b"]["taux"] == 1.0
+	assert res["b"]["profil"]["pv_max"] == 500
+
+
 # ── Objets autorisés ou non ──────────────────────────────────────────────────────────
 
 def test_objets_interdits_retire_les_consommables_seulement():

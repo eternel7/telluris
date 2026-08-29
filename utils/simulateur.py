@@ -130,6 +130,72 @@ def _snapshot_median(espece: dict, profil: dict | None) -> dict:
 	return _normaliser_snapshot(combat.build_monster_snapshot(espece, profil_median, 0))
 
 
+# ── Stats FORCÉES (overlay JSON de l'écran) ──────────────────────────────────────────
+# « Et si cet ours avait 300 PV ? » — le banc d'essai doit pouvoir écraser une dérivée
+# pour un run, sans créer de doc de test en base. Les clés sont exactement celles que la
+# fiche affiche (cf. `fiche_snapshot` moins `caracts`) : offrir une clé que le duel ne
+# lit pas serait une promesse en l'air, d'où le test qui épingle les deux listes ensemble.
+STATS_FORCABLES_NUM = ("pv_max", "pm_max", "cc", "cd", "initiative", "actions_max",
+					   "deplacement", "pa", "pm_def", "toucher_magique", "esquive")
+STATS_FORCABLES_TEXTE = ("degats_cc", "degats_cd")
+STATS_FORCABLES = STATS_FORCABLES_NUM + STATS_FORCABLES_TEXTE
+
+# Planchers repris de `_refresh_snapshot_stats` : un pv_max à 0 tuerait l'acteur au
+# re-clamp sans lever `vivant` (cadavre debout, duel bloqué) et un acteur sans action
+# ne jouerait jamais.
+STATS_PLANCHER_1 = ("pv_max", "actions_max")
+
+
+def normaliser_stats_forcees(brut) -> dict:
+	"""Vue validée d'un bloc de stats forcées, ou `{}` si rien n'est demandé.
+
+	⚠️ Whitelist FAIL-CLOSED : une clé inconnue lève `ValueError` au lieu d'être ignorée.
+	Une faute de frappe (`pv` pour `pv_max`) doit se voir tout de suite — silencieusement
+	écartée, elle produirait un run où l'on croit avoir forcé quelque chose."""
+	if not brut:
+		return {}
+	if not isinstance(brut, dict):
+		raise ValueError("Les stats forcées doivent être un objet JSON")
+	out = {}
+	for cle, valeur in brut.items():
+		cle = str(cle)
+		if cle not in STATS_FORCABLES:
+			raise ValueError(f"Stat inconnue : {cle!r} (attendu : {', '.join(STATS_FORCABLES)})")
+		if cle in STATS_FORCABLES_TEXTE:
+			out[cle] = str(valeur or "").strip()
+			continue
+		try:
+			nombre = int(valeur)
+		except (TypeError, ValueError):
+			raise ValueError(f"La stat {cle!r} attend un entier, reçu {valeur!r}")
+		out[cle] = max(1 if cle in STATS_PLANCHER_1 else 0, nombre)
+	return out
+
+
+def _appliquer_stats_forcees(snap: dict, plein: bool = False) -> dict:
+	"""Écrase les dérivées du snapshot par celles qu'on a forcées (`_sim_stats`).
+
+	⚠️ Appelée à la construction ET après chaque recalcul du moteur : une valeur forcée
+	doit être FIGÉE. `_refresh_snapshot_stats` recompose les dérivées depuis `caracts_base`
+	dès qu'un effet est posé ou expire — sans cette ré-application, la valeur saisie
+	disparaîtrait au premier buff, en plein duel et sans un mot. Contrepartie assumée :
+	un buff de caractéristique ne fait plus bouger une stat forcée.
+
+	⚠️ `plein=True` à la CONSTRUCTION seulement : les PV/PM courants sont remis au max
+	(le banc d'essai part à pleine forme). En cours de duel ils sont simplement
+	RE-CLAMPÉS — les remettre au max à chaque ré-application soignerait l'acteur à tous
+	les tours, et le duel ne finirait jamais."""
+	forcees = snap.get("_sim_stats") or {}
+	if not forcees:
+		return snap
+	snap.update(forcees)
+	for maximum, courant in (("pv_max", "currentPV"), ("pm_max", "currentPM")):
+		if maximum in forcees:
+			snap[courant] = (forcees[maximum] if plein
+							 else min(int(snap.get(courant, 0) or 0), forcees[maximum]))
+	return snap
+
+
 # Bornes d'une espèce offertes dans la liste des profils de l'écran, à côté du point
 # médian : le PIRE et le MEILLEUR spécimen possible, sans profil.
 BORNES = ("min", "max")
@@ -234,6 +300,14 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 	spec = spec or {}
 	type_ = str(spec.get("type") or "")
 	doc_id = str(spec.get("id") or "")
+	# Dérivées forcées pour ce run (overlay JSON de l'écran) — validées AVANT toute
+	# lecture de doc : une clé fautive doit être signalée, pas noyée dans un 404.
+	stats_forcees = normaliser_stats_forcees(spec.get("stats"))
+
+	def _fini(snap: dict) -> dict:
+		"""Snapshot prêt : normalisé, puis les stats forcées posées à pleine forme."""
+		snap["_sim_stats"] = dict(stats_forcees)
+		return _appliquer_stats_forcees(_normaliser_snapshot(snap), plein=True)
 
 	if type_ == "espece":
 		if not doc_id.startswith("espece:"):
@@ -270,13 +344,16 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 		def fabrique():
 			# Re-tirage PAR PASSE : fidèle au jeu, où chaque rencontre re-tire les stats.
 			# Avec une borne, le profil synthétique rend ce tirage déterministe.
-			return _normaliser_snapshot(combat.build_monster_snapshot(espece, profil, 0))
+			return _fini(combat.build_monster_snapshot(espece, profil, 0))
 
 		return {"type": "espece", "label": label, "fabrique": fabrique,
 				"arsenal": {"sorts": [], "competences": [], "soutiens": [], "consommables": []},
 				# Avec une borne, la référence est le snapshot BORNÉ lui-même : les
 				# potentiels doivent décrire ce qui est simulé, pas le médian.
-				"snapshot_reference": (fabrique() if borne else _snapshot_median(espece, profil)),
+				# La référence porte les mêmes stats forcées : les potentiels doivent
+				# décrire ce qui est simulé.
+				"snapshot_reference": (fabrique() if borne
+									   else _fini(_snapshot_median(espece, profil))),
 				# Route servable de l'image — c'est le SERVEUR qui sait où elle vit
 				# (mount /monsters), le client ne fait que la rendre.
 				"image_route": f"/monsters/{espece['image']}" if espece.get("image") else ""}
@@ -292,6 +369,7 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 		base = _normaliser_snapshot(combat.build_joueur_snapshot(character))
 		base["currentPV"] = base["pv_max"]     # banc d'essai = pleine forme
 		base["currentPM"] = base["pm_max"]
+		base = _fini(base)                     # dérivées forcées par-dessus
 		# Furtivité d'entrée : passives conditionnées évaluées contre le terrain — le
 		# même chemin que start_combat (c'est LE cas du forestier en forêt).
 		bonus_furtif = furtivite_passive(character, get_doc_fn, map_tags)
@@ -436,6 +514,15 @@ def _meilleure_offensive(actor: dict, cible: dict, arsenal: dict, distance: int)
 	return meilleure
 
 
+def _refiger(*acteurs) -> None:
+	"""Repose les stats forcées après un recalcul du moteur (`_refresh_snapshot_stats`,
+	déclenché par la pose ou l'expiration d'un effet). Sans appel ici, une valeur saisie
+	dans l'overlay disparaîtrait au premier buff du duel."""
+	for acteur in acteurs:
+		if acteur and acteur.get("_sim_stats"):
+			_appliquer_stats_forcees(acteur)
+
+
 def _poser_positions(actor: dict, adversaire: dict, distance: int) -> None:
 	"""Positions 1D posées sur les snapshots pour que les helpers de furtivité du moteur
 	(_detection_threshold via _cheby) mesurent la vraie distance du duel."""
@@ -458,14 +545,16 @@ def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> Non
 	combat._refresh_actions(actor)
 	if jet["touche"]:
 		# Formule PARTAGÉE avec le moteur (combat.calculer_degats) : un duel simulé et un
-		# coup joué en jeu doivent blesser exactement pareil.
+		# coup joué en jeu doivent blesser exactement pareil — localisation comprise.
+		zone = combat.tirer_localisation()
+		ou = f" {combat.ZONE_LIBELLE[zone]}" if zone in combat.ZONE_LIBELLE else ""
 		dmg = combat.calculer_degats(actor, cible, option["notation"],
-									 jet["mult_degats"], option["jet"])
+									 jet["mult_degats"], option["jet"], zone=zone)
 		cible["currentPV"] = max(0, int(cible.get("currentPV", 0)) - dmg)
 		cible["vivant"] = cible["currentPV"] > 0
 		suffixe = " — CRITIQUE ×2" if jet["critique"] else ""
 		_log(pseudo, actor, "crit" if jet["critique"] else "hit",
-			 f"{actor.get('nom', '?')} touche {cible.get('nom', '?')} avec "
+			 f"{actor.get('nom', '?')} touche {cible.get('nom', '?')}{ou} avec "
 			 f"{option['label']} : {dmg} dégâts{suffixe} "
 			 f"({cible['currentPV']}/{cible.get('pv_max', '?')} PV).")
 		effets = option.get("effets")
@@ -474,6 +563,8 @@ def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> Non
 				combat._empiler_effet_combat(actor, option["source"], effets, pseudo["tour"])
 			else:
 				combat._appliquer_effet_sur_cible(pseudo, cible, option["source"], effets, pseudo["tour"])
+			# Poser un effet a recalculé les dérivées du porteur : refiger.
+			_refiger(actor, cible)
 	else:
 		_log(pseudo, actor, "miss",
 			 f"{actor.get('nom', '?')} manque {cible.get('nom', '?')} ({option['label']}, "
@@ -513,6 +604,7 @@ def _utiliser_soutien(actor: dict, soutien: dict, pseudo: dict) -> bool:
 			gains.append(f"+{actor['currentPM'] - avant} PM")
 	if part_durative(eff):
 		combat._empiler_effet_combat(actor, soutien["source"], eff, pseudo["tour"])
+		_refiger(actor)
 	actor[soutien["compteur"]] = actor.get(soutien["compteur"], 0) + 1
 	combat._refresh_actions(actor)
 	detail = f" ({', '.join(gains)})" if gains else ""
@@ -579,6 +671,7 @@ def _jouer_tour(actor: dict, adversaire: dict, arsenal: dict, etat: dict, round_
 	pseudo = etat["pseudo"]
 	# Tick des effets (régén, décrément, expiration → _refresh_snapshot_stats) + budget.
 	combat._reset_turn_budget(actor, pseudo)
+	_refiger(actor)   # une expiration vient peut-être de recomposer les dérivées
 	# Adversaire furtif non repéré : UN jet de détection par tour, comme au début d'un
 	# tour de monstre (_run_monster_turn) — réussite définitive.
 	if adversaire.get("furtif") and not actor.get("detecte"):
@@ -656,6 +749,12 @@ def fiche_snapshot(snap: dict) -> dict:
 		"actions_max": int(snap.get("actions_max", 1) or 1),
 		"deplacement": int(snap.get("deplacement", 1) or 1),
 		"pa": int(snap.get("pa", 0) or 0),
+		# Localisation des touches : le total ne dit plus ce qu'un coup rencontre —
+		# l'écran affiche donc la ventilation, et la part globale DÉRIVÉE (jamais
+		# stockée à côté du total, cf. combat.pa_de_zone).
+		"pa_zones": dict(snap.get("pa_zones") or {}),
+		"pa_global": int(snap.get("pa", 0) or 0)
+					 - sum(int(v or 0) for v in (snap.get("pa_zones") or {}).values()),
 		"pm_def": int(snap.get("pm_def", 0) or 0),
 		"toucher_magique": int(snap.get("toucher_magique", 0) or 0),
 		"esquive": int(snap.get("esquive", 0) or 0),

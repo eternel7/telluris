@@ -81,7 +81,7 @@ def test_le_simulateur_et_le_moteur_partagent_la_formule(monkeypatch):
 	recopiait au lieu de l'appeler, il échapperait au piège et le test tomberait."""
 	appels = []
 
-	def _mouchard(att, dfn, notation, mult=1, jet="cc", des_fn=None):
+	def _mouchard(att, dfn, notation, mult=1, jet="cc", des_fn=None, zone=None):
 		appels.append((notation, mult, jet))
 		return 42
 
@@ -123,7 +123,7 @@ def test_les_potentiels_passent_par_la_formule(monkeypatch):
 	"""L'offense affichée par l'écran doit suivre un changement de formule."""
 	vu = []
 	monkeypatch.setattr(combat, "calculer_degats",
-						lambda att, dfn, notation, mult=1, jet="cc", des_fn=None: (
+						lambda att, dfn, notation, mult=1, jet="cc", des_fn=None, zone=None: (
 							vu.append(jet) or 8.0))
 	snapshot = {"actions_max": 1, "pm_max": 0, "pv_max": 100, "pa": 0, "ag": 40,
 				"esquive": 0, "cc": 50, "cd": 0, "toucher_magique": 0, "degats_cc": "1D6",

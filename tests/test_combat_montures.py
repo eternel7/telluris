@@ -123,7 +123,20 @@ def test_monture_est_une_cible_valide(db):
 
 # ── Défaite : LE piège ───────────────────────────────────────────────────────────
 
-def test_monture_debout_n_empeche_pas_la_defaite(db):
+def _coup_qui_porte(monkeypatch):
+	"""Force le jet à toucher, sans critique ni fumble.
+
+	⚠️ `_hit_threshold` est clampé à 95 : même à cc 100 contre une cible immobile, un
+	coup rate 5 % du temps. Les tests ci-dessous vérifient ce qui se passe APRÈS un
+	coup porté (monture à terre, cargaison répandue, statut du combat) — laisser le
+	hasard décider les rendrait intermittents, et le prochain appel à `random` ajouté
+	ailleurs dans le moteur suffirait à les faire tomber."""
+	monkeypatch.setattr(combat_util, "_resoudre_jet", lambda a, d, seuil: {
+		"roll": 1, "seuil": seuil, "touche": True, "critique": False,
+		"fumble": False, "mult_degats": 1})
+
+
+def test_monture_debout_n_empeche_pas_la_defaite(db, monkeypatch):
 	"""RÉGRESSION CRITIQUE : si la monture comptait comme un survivant, la défaite ne
 	serait jamais déclarée et, plus personne ne pouvant jouer, le combat resterait
 	bloqué pour toujours."""
@@ -132,6 +145,7 @@ def test_monture_debout_n_empeche_pas_la_defaite(db):
 	m = monstre_snap(x=0, y=1, cc=100, degats_cc="100D6")
 	doc = combat_doc([j0, mont], [m])
 
+	_coup_qui_porte(monkeypatch)
 	combat_util._do_attack_on(doc, m, j0)
 
 	assert j0["currentPV"] == 0
@@ -148,13 +162,14 @@ def test_combattants_vivants_exclut_la_monture(db):
 	assert combat_util._combattants_vivants(doc) == []
 
 
-def test_monture_morte_ne_termine_pas_le_combat(db):
+def test_monture_morte_ne_termine_pas_le_combat(db, monkeypatch):
 	"""Symétrique : abattre la bête ne fait pas perdre tant qu'il reste un combattant."""
 	j0 = joueur_snap("joueur_0", "character:u_1", x=0, y=0, pv=50)
 	mont = monture_snap(x=1, y=1, pv=1)
 	m = monstre_snap(x=1, y=2, cc=100, degats_cc="100D6")
 	doc = combat_doc([j0, mont], [m])
 
+	_coup_qui_porte(monkeypatch)
 	combat_util._do_attack_on(doc, m, mont)
 
 	assert mont["currentPV"] == 0 and mont["morte"] is True

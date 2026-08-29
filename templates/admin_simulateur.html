@@ -114,6 +114,41 @@
 		}
 		.params-row label.case input { accent-color: var(--accent); cursor: pointer; }
 
+		/* Bouton d'édition des stats d'un camp + son overlay JSON, calqués sur
+		   l'éditeur de documents d'admin_table.html (#editor-card). */
+		.btn.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
+		.btn.secondary:hover:not(:disabled) { background: rgba(75,143,200,0.22); box-shadow: 0 0 12px rgba(75,143,200,0.25); }
+		.stats-btn { margin-top: 10px; width: 100%; justify-content: center; font-size: 0.78rem; padding: 7px 12px; }
+		.stats-btn.actif { border-color: var(--accent); background: rgba(200,168,75,0.14); color: var(--accent); }
+		#stats-overlay {
+			position: fixed; top: 70px; right: 14px; bottom: 14px;
+			width: min(460px, 94vw); margin: 0; z-index: 60;
+			display: flex; flex-direction: column; overflow: auto;
+			box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+		}
+		/* ⚠️ INDISPENSABLE : `display: flex` ci-dessus écrase l'attribut `hidden`, qui
+		   n'est qu'un `display: none` de la feuille par défaut du navigateur — donc moins
+		   spécifique qu'un sélecteur d'id. Sans cette règle, le panneau reste affiché au
+		   chargement et ✕ ne le ferme jamais. `#id[attr]` (1,1,0) l'emporte sur `#id`
+		   (1,0,0). Les autres blocs à `hidden` de cette page (#resultats-card, les
+		   aperçus) n'ont pas de `display` en CSS : eux se cachent tout seuls. */
+		#stats-overlay[hidden] { display: none; }
+		#stats-overlay textarea {
+			flex: 1 1 auto; min-height: 160px; width: 100%; resize: vertical;
+			background: #0d0f14; border: 1px solid var(--border); border-radius: 6px;
+			color: var(--text); font-family: 'Share Tech Mono', monospace;
+			font-size: 0.8rem; line-height: 1.5; padding: 12px; outline: none;
+		}
+		#stats-overlay textarea:focus { border-color: var(--accent); }
+		#stats-overlay textarea.invalid { border-color: var(--danger); }
+		.overlay-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+		.overlay-close {
+			background: none; border: none; color: var(--muted);
+			font-size: 1rem; line-height: 1; cursor: pointer; padding: 2px 6px;
+		}
+		.overlay-close:hover { color: var(--danger); }
+		.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
 		/* Résultats. */
 		.vs-bar {
 			display: flex; height: 26px; border-radius: 6px; overflow: hidden;
@@ -202,6 +237,7 @@
 						<div class="lbl">Personnage</div>
 						<select id="character-a"></select>
 					</div>
+					<button class="btn secondary stats-btn" type="button" id="stats-btn-a">✎ Stats</button>
 					<div class="camp-apercu"><img id="apercu-a" alt="" hidden></div>
 				</div>
 				<div class="camp b">
@@ -218,6 +254,7 @@
 						<div class="lbl">Personnage</div>
 						<select id="character-b"></select>
 					</div>
+					<button class="btn secondary stats-btn" type="button" id="stats-btn-b">✎ Stats</button>
 					<div class="camp-apercu"><img id="apercu-b" alt="" hidden></div>
 				</div>
 			</div>
@@ -270,6 +307,27 @@
 				<div class="regles" id="regles"></div>
 			</details>
 		</div>
+
+		<!-- Overlay des stats forcées (un seul, il sait quel camp il édite) -->
+		<div class="card" id="stats-overlay" hidden>
+			<div class="overlay-head">
+				<div class="card-title" style="margin-bottom:0">Stats forcées — <span id="stats-camp"></span></div>
+				<button type="button" class="overlay-close" id="stats-close" title="Fermer sans appliquer">✕</button>
+			</div>
+			<div class="card-desc">
+				Valeurs réelles du belligérant. Modifiez ce que vous voulez essayer puis
+				<strong>Appliquer</strong> : <strong>seules les valeurs CHANGÉES sont forcées</strong>,
+				le reste est laissé au moteur. Une stat forcée est <strong>figée pour tout le
+				duel</strong> — les buffs ne la font plus bouger. Rien n'est écrit en base.
+			</div>
+			<textarea id="stats-json" spellcheck="false"></textarea>
+			<div class="btn-row">
+				<button class="btn" type="button" id="stats-apply">💾 Appliquer</button>
+				<button class="btn secondary" type="button" id="stats-cancel">✕ Annuler</button>
+				<button class="btn secondary" type="button" id="stats-reset">↺ Réinitialiser</button>
+			</div>
+			<div class="status" id="stats-status"></div>
+		</div>
 	</div>
 
 <script>
@@ -280,6 +338,11 @@ const $ = id => document.getElementById(id);
 // repart toujours des règles réelles — une simulation faite sans s'en apercevoir avec un
 // facteur exotique serait pire qu'inutile.
 const FACTEUR_ARMURE_JEU = {{ facteur_armure }};
+
+// Dérivées que l'overlay accepte de forcer — publiées par le SERVEUR
+// (simulateur.STATS_FORCABLES) : recopier la liste ici la ferait diverger de ce que le
+// duel sait vraiment écraser, et l'écran promettrait des clés sans effet.
+const STATS_CLES = {{ stats_forcables | tojson | safe }};
 
 // Ce qui défile ici vient de la base (noms d'espèces, de personnages, de sorts) :
 // tout ce qui part dans un template literal innerHTML passe par escapeHtml.
@@ -426,18 +489,116 @@ function restaurerSelection() {
 	if (etat.objets !== undefined) $('objets').checked = !!etat.objets;
 }
 
-function specDe(camp) {
+function specDe(camp, avecStats = true) {
 	const type = document.querySelector(`input[name="type-${camp}"]:checked`).value;
+	let spec;
 	if (type === 'character') {
-		return { type: 'character', id: $('character-' + camp).value };
+		spec = { type: 'character', id: $('character-' + camp).value };
+	} else {
+		spec = { type: 'espece', id: $('espece-' + camp).value };
+		// La borne part dans son PROPRE champ : `profil` reste « un id de doc, ou rien »,
+		// et la validation de préfixe du serveur n'a pas à connaître les sentinelles.
+		const choix = $('profil-' + camp).value;
+		if (choix === 'min' || choix === 'max') spec.borne = choix;
+		else if (choix) spec.profil = choix;
 	}
-	const spec = { type: 'espece', id: $('espece-' + camp).value };
-	// La borne part dans son PROPRE champ : `profil` reste « un id de doc, ou rien »,
-	// et la validation de préfixe du serveur n'a pas à connaître les sentinelles.
-	const choix = $('profil-' + camp).value;
-	if (choix === 'min' || choix === 'max') spec.borne = choix;
-	else if (choix) spec.profil = choix;
+	// ⚠️ `avecStats=false` pour l'overlay : il demande le profil RÉEL du belligérant,
+	// celui qu'on va justement modifier. Le lui envoyer déjà forcé rendrait les valeurs
+	// saisies indiscernables des vraies dès la deuxième ouverture.
+	if (avecStats && Object.keys(STATS_FORCEES[camp]).length) spec.stats = STATS_FORCEES[camp];
 	return spec;
+}
+
+// ── Stats forcées : overlay JSON par camp ────────────────────────────────────
+// Rien n'est écrit en base — ces valeurs ne vivent que dans la page et le run.
+// Pas de mémoire localStorage (comme le facteur de létalité) : des stats forcées
+// oubliées d'une visite à l'autre fausseraient tous les runs suivants en silence.
+const STATS_FORCEES = { a: {}, b: {} };
+let statsCamp = null;      // camp en cours d'édition
+let statsReference = {};   // profil réel, pour ne retenir QUE ce qui a changé
+
+function majBoutonStats(camp) {
+	const n = Object.keys(STATS_FORCEES[camp]).length;
+	const btn = $('stats-btn-' + camp);
+	btn.textContent = n ? `✎ Stats (${n})` : '✎ Stats';
+	btn.classList.toggle('actif', n > 0);
+}
+
+function setStatsStatus(msg, kind) {
+	const el = $('stats-status');
+	el.textContent = msg || '';
+	el.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+async function ouvrirStats(camp) {
+	statsCamp = camp;
+	statsReference = {};
+	$('stats-camp').textContent = camp === 'a' ? '◈ A' : '◈ B';
+	$('stats-json').value = '';
+	$('stats-json').classList.remove('invalid');
+	$('stats-overlay').hidden = false;
+	setStatsStatus('Lecture du profil…', 'run');
+	try {
+		const res = await fetch('/admin/simulateur/profil', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				spec: specDe(camp, false),
+				terrain: $('terrain').value.split(',').map(t => t.trim()).filter(Boolean),
+				facteur_armure: parseInt($('facteur-armure').value, 10) || FACTEUR_ARMURE_JEU,
+				objets: $('objets').checked,
+			}),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) { setStatsStatus('Échec : ' + (data.detail || res.status), 'err'); return; }
+		// `caracts` n'est pas forçable : on ne montre que ce qui l'est.
+		const profil = data.profil || {};
+		statsReference = {};
+		STATS_CLES.forEach(k => { if (profil[k] !== undefined) statsReference[k] = profil[k]; });
+		// Ce qui est déjà forcé prime, pour pouvoir corriger une saisie précédente.
+		$('stats-json').value = JSON.stringify(
+			{ ...statsReference, ...STATS_FORCEES[camp] }, null, 2);
+		setStatsStatus(data.label || '', 'ok');
+	} catch (e) {
+		setStatsStatus('Erreur réseau : ' + e, 'err');
+	}
+}
+
+function fermerStats() { $('stats-overlay').hidden = true; statsCamp = null; }
+
+function appliquerStats() {
+	if (!statsCamp) return;
+	const ta = $('stats-json');
+	let obj;
+	try { obj = JSON.parse(ta.value || '{}'); ta.classList.remove('invalid'); }
+	catch (e) { ta.classList.add('invalid'); setStatsStatus('JSON invalide : ' + e.message, 'err'); return; }
+	if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+		ta.classList.add('invalid'); setStatsStatus('Un objet JSON est attendu.', 'err'); return;
+	}
+	const inconnues = Object.keys(obj).filter(k => !STATS_CLES.includes(k));
+	if (inconnues.length) {
+		ta.classList.add('invalid');
+		setStatsStatus('Stat inconnue : ' + inconnues.join(', '), 'err');
+		return;
+	}
+	// ⚠️ SEULES les valeurs qui DIFFÈRENT du profil réel sont forcées. Sans ce tri,
+	// ouvrir puis appliquer sans rien changer figerait les 13 stats et neutraliserait
+	// tous les buffs du duel, sans que rien ne le signale.
+	const forcees = {};
+	for (const [k, v] of Object.entries(obj)) {
+		if (statsReference[k] === undefined || String(statsReference[k]) !== String(v)) forcees[k] = v;
+	}
+	STATS_FORCEES[statsCamp] = forcees;
+	majBoutonStats(statsCamp);
+	fermerStats();
+}
+
+function reinitStats() {
+	if (!statsCamp) return;
+	STATS_FORCEES[statsCamp] = {};
+	majBoutonStats(statsCamp);
+	$('stats-json').value = JSON.stringify(statsReference, null, 2);
+	setStatsStatus('Aucune stat forcée pour ce camp.', 'ok');
 }
 
 // ── Rendu des résultats ──────────────────────────────────────────────────────
@@ -478,6 +639,20 @@ function renduNiveaux(n) {
 }
 
 const CARACTS_ORDRE = ['V', 'F', 'R', 'Ag', 'Vol', 'Int', 'Cha', 'Ch'];
+const ZONES_ORDRE = ['tete', 'epaules', 'torse', 'bras', 'jambes', 'pieds'];
+const ZONES_LIBELLE = { tete: 'tête', epaules: 'épaules', torse: 'torse',
+						bras: 'bras', jambes: 'jambes', pieds: 'pieds' };
+
+// Localisation des touches : le PA total n'est plus ce qu'un coup rencontre. On montre
+// donc ce qui protège PARTOUT (armure naturelle + bouclier) et ce que couvre chaque
+// pièce. Une espèce n'a pas d'équipement → aucune ventilation, rien à afficher.
+function renduPaZones(p) {
+	const zones = p.pa_zones || {};
+	const detail = ZONES_ORDRE.filter(z => zones[z])
+		.map(z => `${ZONES_LIBELLE[z]} ${zones[z]}`).join(', ');
+	if (!detail) return '';
+	return ` <span class="reel">(${p.pa_global ?? 0} partout + ${escapeHtml(detail)})</span>`;
+}
 
 function renduProfil(p) {
 	if (!p) return '';
@@ -488,7 +663,7 @@ function renduProfil(p) {
 		`PV <b>${p.pv_max}</b>`, `PM <b>${p.pm_max}</b>`,
 		`CC <b>${p.cc}</b>`, `CD <b>${p.cd}</b>`,
 		`Init <b>${p.initiative}</b>`, `Actions <b>${p.actions_max}</b>`,
-		`Dépl. <b>${p.deplacement}</b>`, `PA <b>${p.pa}</b>`,
+		`Dépl. <b>${p.deplacement}</b>`, `PA <b>${p.pa}</b>${renduPaZones(p)}`,
 		`Déf. mag. <b>${p.pm_def}</b>`, `Toucher mag. <b>${p.toucher_magique}</b>`,
 		`Esquive <b>${p.esquive}</b>`,
 		`Dégâts cc <b>${escapeHtml(p.degats_cc || '—')}</b>`,
@@ -561,6 +736,12 @@ function renduResultats(data) {
 		? ` · ⚠ facteur dégâts/armure simulé ${data.facteur_armure} (jeu : ${data.facteur_armure_reel})`
 		: ` · facteur ${data.facteur_armure}`;
 	const objetsTxt = data.objets === false ? ' · 🚫 sans objets' : '';
+	// Un camp dont les stats ont été truquées doit le dire, comme le facteur simulé.
+	const forcees = data.stats_forcees || {};
+	const statsTxt = ['a', 'b']
+		.filter(c => (forcees[c] || []).length)
+		.map(c => ` · ✎ ${c.toUpperCase()} : ${escapeHtml((forcees[c] || []).join(', '))}`)
+		.join('');
 	const tauxA = r.a.taux, tauxB = r.b.taux, tauxN = Math.max(0, 1 - tauxA - tauxB);
 	const maxCombat = Math.max(pots.a.combat.total, pots.b.combat.total);
 	const maxSurvie = Math.max(pots.a.combat.survie, pots.b.combat.survie, 1);
@@ -581,7 +762,7 @@ function renduResultats(data) {
 			<div class="stat-box"><div class="v">${r.rounds.moyen}</div><div class="l">rounds en moyenne</div></div>
 			<div class="stat-box"><div class="v">${r.rounds.mediane}</div><div class="l">rounds (médiane)</div></div>
 			<div class="stat-box"><div class="v">${r.rounds.min}–${r.rounds.max}</div><div class="l">rounds (min–max)</div></div>
-			<div class="stat-box"><div class="v">${r.passes}</div><div class="l">passes · distance ${r.distance} · ${terrainTxt}${facteurTxt}${objetsTxt}</div></div>
+			<div class="stat-box"><div class="v">${r.passes}</div><div class="l">passes · distance ${r.distance} · ${terrainTxt}${facteurTxt}${objetsTxt}${statsTxt}</div></div>
 		</div>
 		<div class="duel-grid" style="margin-top:16px;">
 			${renduCamp('a', r.a, pots.a, maxCombat, maxSurvie, maxSupport)}
@@ -614,7 +795,7 @@ async function simuler() {
 				passes: parseInt($('passes').value, 10) || 500,
 				terrain: $('terrain').value.split(',').map(t => t.trim()).filter(Boolean),
 				facteur_armure: parseInt($('facteur-armure').value, 10) || FACTEUR_ARMURE_JEU,
-					objets: $('objets').checked,
+				objets: $('objets').checked,
 			}),
 		});
 		const data = await res.json().catch(() => ({}));
@@ -635,9 +816,28 @@ brancherBascule('a');
 brancherBascule('b');
 for (const camp of ['a', 'b']) {
 	for (const prefixe of ['espece-', 'profil-', 'character-']) {
-		$(prefixe + camp).addEventListener('change', () => { majApercu(camp); sauverSelection(); });
+		$(prefixe + camp).addEventListener('change', () => {
+			majApercu(camp);
+			// ⚠️ Changer de belligérant PURGE ses stats forcées : des valeurs saisies
+			// pour un ours n'ont aucun sens sur un rat, et les garder en douce truquerait
+			// le run suivant.
+			if (Object.keys(STATS_FORCEES[camp]).length) {
+				STATS_FORCEES[camp] = {};
+				majBoutonStats(camp);
+			}
+			sauverSelection();
+		});
 	}
+	$('stats-btn-' + camp).addEventListener('click', () => ouvrirStats(camp));
 }
+$('stats-apply').addEventListener('click', appliquerStats);
+$('stats-cancel').addEventListener('click', fermerStats);
+$('stats-close').addEventListener('click', fermerStats);
+$('stats-reset').addEventListener('click', reinitStats);
+// Échap ferme sans appliquer — un geste de sortie n'engage jamais rien.
+document.addEventListener('keydown', e => {
+	if (e.key === 'Escape' && !$('stats-overlay').hidden) fermerStats();
+});
 $('terrain').addEventListener('change', sauverSelection);
 // Signalement visuel dès que le champ s'écarte des règles du jeu.
 function majFacteur() {

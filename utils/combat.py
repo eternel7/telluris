@@ -111,6 +111,9 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 	acteur["ag"] = base.ag
 	acteur["ch"] = base.ch
 	acteur["pa"] = derived.pa
+	# Localisation : seule la VENTILATION est portée par le snapshot ; la part globale
+	# s'en déduit (`pa` − Σ zones), donc un debuff de R la fait bouger toute seule.
+	acteur["pa_zones"] = dict(derived.pa_zones)
 	acteur["pm_def"] = derived.pm_def
 	acteur["toucher_magique"] = derived.toucher_magique
 	acteur["degats_cc"] = derived.degats_cc
@@ -899,8 +902,87 @@ def roll_dice(notation: str) -> int:
 	return max(1, total)
 
 
+# ── Localisation des touches ─────────────────────────────────────────────────
+# Un d100 décide OÙ le coup porte ; seuls les PA de la pièce couvrant cette zone
+# s'appliquent, plus ceux qui protègent partout (armure naturelle, bouclier).
+
+# Libellés de journal — c'est par là que la mécanique devient visible en jeu.
+ZONE_LIBELLE = {
+	"tete": "à la tête", "epaules": "à l'épaule", "torse": "au torse",
+	"bras": "au bras", "jambes": "à la jambe", "pieds": "au pied",
+}
+
+
+def _table_localisation() -> list:
+	"""Bornes hautes triées, lues à chaud (`character_stats.LOCALISATION_TOUCHES`).
+	Bornes ≤ 0 écartées : elles ne pourraient jamais gagner et fausseraient les parts."""
+	table = [(int(b), str(z)) for z, b in
+			 (character_stats.LOCALISATION_TOUCHES or {}).items() if int(b) > 0]
+	return sorted(table)
+
+
+def tirer_localisation(rand_fn=None) -> str | None:
+	"""Zone frappée par ce coup — d100 contre la table des bornes hautes.
+
+	`None` = pas de localisation (table vide ou illisible) : l'appelant retombe alors
+	sur les PA agrégés, c'est-à-dire le comportement d'avant la feature.
+	⚠️ `rand_fn` résolue À L'APPEL (même piège que `des_fn` de `calculer_degats`) : une
+	valeur par défaut figerait la référence et les tests qui monkeypatchent `random`
+	ne l'atteindraient plus."""
+	table = _table_localisation()
+	if not table:
+		return None
+	roll = (rand_fn or random.randint)(1, 100)
+	for borne, zone in table:
+		if roll <= borne:
+			return zone
+	return table[-1][1]   # jet au-delà de la dernière borne : la table ne monte pas à 100
+
+
+def _parts_de_zone() -> dict:
+	"""Part de chaque zone dans le d100 (largeur de sa tranche / 100). Sert à l'ESPÉRANCE
+	des PA, celle que consomment les estimations du simulateur et des potentiels."""
+	table = _table_localisation()
+	if not table:
+		return {}
+	parts, precedent = {}, 0
+	for borne, zone in table:
+		parts[zone] = max(0, borne - precedent) / 100.0
+		precedent = borne
+	return parts
+
+
+def pa_de_zone(defenseur: dict, zone: str | None = None):
+	"""Points d'armure à opposer à un coup, selon l'endroit frappé.
+
+	⚠️ La part GLOBALE (armure naturelle + bouclier, cou, ceinture) est DÉRIVÉE de
+	`pa − Σ pa_zones`, jamais stockée à côté. Deux champs indépendants divergeraient dès
+	que `pa` est surchargé — ce que font les stats forcées du simulateur et nombre de
+	tests, qui posent un `pa` à la main sur un snapshot. Ici, forcer `pa` déplace le
+	global et la ventilation reste vraie.
+
+	Trois régimes :
+	  • `pa_zones` absent ou vide (monstre, combat déjà en base, étalon des potentiels)
+		⇒ tout est global : le `pa` agrégé s'applique, exactement comme avant la
+		feature — aucune migration, et l'armure NATURELLE d'un monstre est bien
+		uniforme ;
+	  • `zone is None` ⇒ ESPÉRANCE : global + Σ (part de la tranche × PA de la zone).
+		C'est ce qu'il faut aux estimations, qui doivent rester déterministes ;
+	  • sinon ⇒ global + PA de la pièce couvrant cette zone (0 si elle est nue).
+	"""
+	total = int(defenseur.get("pa", 0) or 0)
+	zones = {z: int(v or 0) for z, v in (defenseur.get("pa_zones") or {}).items()}
+	global_ = total - sum(zones.values())
+	if not zones:
+		return total
+	if zone is None:
+		return global_ + sum(part * zones.get(z, 0) for z, part in _parts_de_zone().items())
+	return global_ + zones.get(zone, 0)
+
+
 def calculer_degats(attaquant: dict, defenseur: dict, notation: str,
-					mult_degats: int = 1, jet: str = "cc", des_fn=None):
+					mult_degats: int = 1, jet: str = "cc", des_fn=None,
+					zone: str | None = None):
 	"""SOURCE UNIQUE des dégâts d'un coup qui TOUCHE — le seul endroit à modifier pour
 	changer la façon dont une frappe blesse.
 
@@ -921,7 +1003,7 @@ def calculer_degats(attaquant: dict, defenseur: dict, notation: str,
 	référence et les nombreux tests qui monkeypatchent `roll_dice` ne l'atteindraient
 	plus — ils verraient les vrais dés tomber sans rien pouvoir y faire.
 
-	⚠️ QUATRE POINTS À CONNAÎTRE AVANT DE TOUCHER À LA FORMULE :
+	⚠️ CINQ POINTS À CONNAÎTRE AVANT DE TOUCHER À LA FORMULE :
 
 	1. `attaquant` est passé bien qu'inutilisé par la règle d'aujourd'hui. C'est
 	   délibéré : ajouter demain la Force au coup ne changera ni cette signature ni les
@@ -938,9 +1020,13 @@ def calculer_degats(attaquant: dict, defenseur: dict, notation: str,
 	   l'échelle ×10 des caracts ce serait un terme de ±50 sur un dé qui rend 5 : le dé ne
 	   pèserait plus rien. Passer par les world-vars ou par `jet` (ne pas donner la Force
 	   à un sort) plutôt que par une addition brute.
+	5. Les PA opposés dépendent de la ZONE frappée : passer par `pa_de_zone`, jamais
+	   par `defenseur["pa"]`, qui reste le total toutes pièces confondues.
 	"""
 	bruts = (des_fn or roll_dice)(notation) * mult_degats
-	pa = 0 if jet == "magique" else int(defenseur.get("pa", 0) or 0)
+	# `zone` = l'endroit frappé (cf. `tirer_localisation`). Absente ⇒ espérance des PA,
+	# ce qu'attendent les estimations ; la magie, elle, n'oppose aucune armure.
+	pa = 0 if jet == "magique" else pa_de_zone(defenseur, zone)
 	return max(1, bruts - pa)
 
 
@@ -1094,6 +1180,10 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		# (_seuils_critiques). Valeur AVEC buffs, comme le reste du snapshot.
 		"ch": base.ch,
 		"pa": derived.pa,
+		# Localisation des touches : ce que chaque pièce couvre. `pa` reste le TOTAL —
+		# ce qui protège partout s'en déduit (cf. `pa_de_zone`), pour qu'un `pa`
+		# surchargé (stats forcées du simulateur) reste cohérent.
+		"pa_zones": dict(derived.pa_zones),
 		"pm_def": derived.pm_def,
 		"toucher_magique": derived.toucher_magique,
 		"degats_cc": derived.degats_cc,
@@ -1248,6 +1338,9 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		# d'espèces ont encore Ch = 0 en base → delta large en faveur du joueur.
 		"ch": base_stats.ch,
 		"pa": derived.pa,
+		# Un monstre n'a pas d'équipement : son armure est NATURELLE, donc uniforme.
+		# `pa_zones` vide ⇒ tout est global, la localisation ne change rien pour lui.
+		"pa_zones": {},
 		"pm_def": derived.pm_def,
 		"degats_cc": derived.degats_cc,
 		"initiative": derived.initiative,
@@ -1530,8 +1623,11 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 	_refresh_actions(attaquant)
 	if jet["touche"]:
 		# Formule partagée avec le joueur, les sorts, les compétences et le simulateur.
+		# La zone frappée décide des PA opposés (pièce couvrante + protections globales).
+		zone = tirer_localisation()
+		ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
 		dmg = calculer_degats(attaquant, defenseur, attaquant["degats_cc"],
-							  jet["mult_degats"], "cc")
+							  jet["mult_degats"], "cc", zone=zone)
 		defenseur["currentPV"] = max(0, defenseur["currentPV"] - dmg)
 		# Un tour de monstre est entièrement résolu côté serveur : sans cette charge sur
 		# l'entrée de journal, un coup encaissé par le joueur ne pourrait jamais s'animer.
@@ -1543,10 +1639,10 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 			"acteur": attaquant["nom"],
 			"kind": "crit" if jet["critique"] else "hit",
 			"texte": (
-				f"{attaquant['nom']} porte un COUP CRITIQUE à {defenseur['nom']} : {dmg} dégâts ! "
+				f"{attaquant['nom']} porte un COUP CRITIQUE à {defenseur['nom']}{ou} : {dmg} dégâts ! "
 				f"(PV : {defenseur['currentPV']}/{defenseur['pv_max']})"
 				if jet["critique"] else
-				f"{attaquant['nom']} touche {defenseur['nom']} pour {dmg} dégâts ! "
+				f"{attaquant['nom']} touche {defenseur['nom']}{ou} pour {dmg} dégâts ! "
 				f"(PV : {defenseur['currentPV']}/{defenseur['pv_max']})"
 			),
 		}, "monstre", defenseur.get("id", ""), attaquant.get("animation"), attaquant.get("id", "")),
@@ -2104,8 +2200,10 @@ def resolve_action(
 		jet = _resoudre_jet(joueur, monstre, seuil)
 		roll = jet["roll"]
 		if jet["touche"]:
+			zone = tirer_localisation()
+			ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
 			dmg = calculer_degats(joueur, monstre, notation, jet["mult_degats"],
-								  profil.get("toucher", "cc"))
+								  profil.get("toucher", "cc"), zone=zone)
 			monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 			# L'animation suit le MODE de l'arme (cac/jet/tir), avec celle de l'arme elle-même
 			# en priorité : le profil la porte depuis le snapshot, aucun doc n'est relu ici.
@@ -2129,10 +2227,10 @@ def resolve_action(
 					"acteur": joueur["nom"],
 					"kind": "crit" if jet["critique"] else "hit",
 					"texte": (
-						f"{joueur['nom']} porte un COUP CRITIQUE à {monstre['nom']} : {dmg} dégâts ! "
+						f"{joueur['nom']} porte un COUP CRITIQUE à {monstre['nom']}{ou} : {dmg} dégâts ! "
 						f"(jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						if jet["critique"] else
-						f"{joueur['nom']} touche {monstre['nom']} pour {dmg} dégâts ! "
+						f"{joueur['nom']} touche {monstre['nom']}{ou} pour {dmg} dégâts ! "
 						f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
 					),
 				}, profil.get("mode", "cac"), monstre.get("id", ""), anim_arme, joueur.get("id", "")),
@@ -2366,9 +2464,12 @@ def resolve_action(
 				# `mode_jet` porte tout : la magie ignore les PA (la pm_def a déjà joué
 				# dans le seuil), un sort à jet MARTIAL les subit — sinon `jet: "cc"`
 				# serait un pur gain, contourner la pm_def sans rien payer en retour.
+				ou = ""
 				if effets.get("degats"):
+					zone = tirer_localisation()
+					ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
 					dmg = calculer_degats(joueur, monstre, effets["degats"],
-										  jet["mult_degats"], mode_jet)
+										  jet["mult_degats"], mode_jet, zone=zone)
 				else:
 					dmg = 0
 				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
@@ -2393,11 +2494,11 @@ def resolve_action(
 						"kind": "crit" if jet["critique"] else "hit",
 						"texte": (
 							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} d'une puissance CRITIQUE : "
-							f"{monstre['nom']} subit {dmg} dégâts ! "
+							f"{monstre['nom']} encaisse{ou} {dmg} dégâts ! "
 							f"(jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
 							if jet["critique"] else
 							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {monstre['nom']} "
-							f"subit {dmg} dégâts ! (PV : {monstre['currentPV']}/{monstre['pv_max']})"
+							f"encaisse{ou} {dmg} dégâts ! (PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						),
 					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")), joueur, monstre))
 				else:
@@ -2550,13 +2651,16 @@ def resolve_action(
 			resultat_jet = _resoudre_jet(joueur, monstre, seuil)
 			roll = resultat_jet["roll"]
 			if resultat_jet["touche"]:
+				ou = ""
 				if effets.get("degats"):
 					# Notation = dés de la compétence, PLUS les dégâts d'arme si c'est une
 					# frappe de contact. Le reste (critique avant les PA, magie sans PA)
 					# est la formule commune.
 					notation = _degats_competence(joueur, competence, effets)
+					zone = tirer_localisation()
+					ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
 					dmg = calculer_degats(joueur, monstre, notation,
-										  resultat_jet["mult_degats"], jet)
+										  resultat_jet["mult_degats"], jet, zone=zone)
 				else:
 					dmg = 0   # compétence de pur debuff : elle touche sans blesser
 				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
@@ -2580,10 +2684,10 @@ def resolve_action(
 						"acteur": joueur["nom"],
 						"kind": "crit" if resultat_jet["critique"] else "hit",
 						"texte": (
-							f"{joueur['nom']} utilise {nom} — coup CRITIQUE : {monstre['nom']} subit "
+							f"{joueur['nom']} utilise {nom} — coup CRITIQUE : {monstre['nom']} encaisse{ou} "
 							f"{dmg} dégâts ! (jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
 							if resultat_jet["critique"] else
-							f"{joueur['nom']} utilise {nom} : {monstre['nom']} subit {dmg} dégâts ! "
+							f"{joueur['nom']} utilise {nom} : {monstre['nom']} encaisse{ou} {dmg} dégâts ! "
 							f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
 						),
 					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")),
