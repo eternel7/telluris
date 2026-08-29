@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--camp-a: #c8a84b;
+			--camp-b: #4b9cc8;
+			--danger: #c84b4b;
+			--success: #4bc87a;
+			--text: #fff;
+			--muted: #9aa3b2;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+		header a:hover { color: var(--accent); }
+		.main { width: 100%; max-width: 1200px; padding: 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-title {
+			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		code { color: var(--accent2); }
+
+		select, input[type="number"] {
+			padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text);
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.03em;
+		}
+		select { cursor: pointer; width: 100%; }
+		select:focus, input:focus { outline: none; border-color: var(--accent); }
+		input[type="number"] { width: 110px; }
+
+		.btn {
+			display: inline-flex; align-items: center; gap: 8px;
+			padding: 10px 18px; border-radius: 6px;
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+			cursor: pointer; transition: all 0.2s;
+			border: 1px solid var(--accent); background: rgba(200,168,75,0.1); color: var(--accent);
+		}
+		.btn:hover:not(:disabled) { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+		.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+		.status { font-size: 0.78rem; margin-top: 12px; min-height: 1.2em; color: var(--muted); }
+		.status.ok { color: var(--success); }
+		.status.err { color: var(--danger); }
+		.status.run { color: var(--accent); }
+
+		/* Deux colonnes de sélection symétriques, teintées par camp. */
+		.duel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+		@media (max-width: 760px) { .duel-grid { grid-template-columns: 1fr; } }
+		.camp {
+			border: 1px solid var(--border); border-radius: 8px; padding: 14px;
+			background: #0f131b;
+		}
+		.camp h3 { font-size: 0.8rem; letter-spacing: 0.12em; margin-bottom: 10px; }
+		.camp.a h3 { color: var(--camp-a); }
+		.camp.b h3 { color: var(--camp-b); }
+		.camp label.radio {
+			display: inline-flex; align-items: center; gap: 6px;
+			font-size: 0.78rem; color: var(--muted); margin-right: 14px; cursor: pointer;
+		}
+		.camp input[type="radio"] { accent-color: var(--accent); }
+		.camp .champ { margin-top: 10px; }
+		.camp .champ .lbl { font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
+		.camp-apercu { margin-top: 10px; text-align: center; min-height: 0; }
+		.camp-apercu img {
+			max-height: 130px; max-width: 100%; object-fit: contain;
+			border: 1px solid var(--border); border-radius: 6px; background: #0b0e13; padding: 4px;
+		}
+
+		/* Portrait d'un camp dans les résultats, à côté du titre. */
+		.camp-tete { display: flex; align-items: center; gap: 10px; }
+		.camp-portrait {
+			width: 56px; height: 56px; object-fit: contain; flex: none;
+			border: 1px solid var(--border); border-radius: 6px; background: #0b0e13; padding: 2px;
+		}
+
+		.params-row { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+		.params-row .champ .lbl { font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
+
+		/* Résultats. */
+		.vs-bar {
+			display: flex; height: 26px; border-radius: 6px; overflow: hidden;
+			border: 1px solid var(--border); margin: 10px 0 6px;
+		}
+		.vs-bar .seg-a { background: var(--camp-a); }
+		.vs-bar .seg-n { background: #3a4152; }
+		.vs-bar .seg-b { background: var(--camp-b); }
+		.vs-legende { display: flex; justify-content: space-between; font-size: 0.78rem; }
+		.vs-legende .la { color: var(--camp-a); }
+		.vs-legende .ln { color: var(--muted); }
+		.vs-legende .lb { color: var(--camp-b); }
+
+		.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+		.stat-box { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; background: #0f131b; }
+		.stat-box .v { font-size: 1.15rem; color: var(--text); }
+		.stat-box .l { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+
+		.pot-row { margin-top: 10px; }
+		.pot-row .pot-lbl { display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--muted); margin-bottom: 3px; }
+		.pot-track { height: 12px; border: 1px solid var(--border); border-radius: 6px; background: #0b0e13; overflow: hidden; }
+		.pot-fill { height: 100%; border-radius: 5px; }
+		.camp-a-col .pot-fill { background: var(--camp-a); }
+		.camp-b-col .pot-fill { background: var(--camp-b); }
+		.pot-detail { font-size: 0.7rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+		.arsenal { font-size: 0.74rem; color: var(--muted); line-height: 1.6; margin-top: 10px; }
+		.arsenal b { color: var(--text); font-weight: normal; }
+		.arsenal .titre { color: var(--accent2); }
+
+		/* Profil du belligérant : caracts en table compacte + dérivées en ligne. */
+		.fiche { margin-top: 10px; }
+		.fiche table { width: 100%; border-collapse: collapse; text-align: center; }
+		.fiche th, .fiche td { border: 1px solid var(--border); padding: 3px 4px; font-size: 0.72rem; }
+		.fiche th { color: var(--muted); font-weight: normal; background: #0b0e13; }
+		.fiche td { color: var(--text); }
+		.fiche-derives { font-size: 0.72rem; color: var(--muted); line-height: 1.7; margin-top: 6px; }
+		.fiche-derives b { color: var(--text); font-weight: normal; }
+
+		details { margin-top: 14px; }
+		details summary { cursor: pointer; font-size: 0.78rem; color: var(--muted); }
+		#journal {
+			max-height: 45vh; overflow: auto; margin-top: 8px;
+			background: #07090d; border: 1px solid var(--border); border-radius: 6px;
+			padding: 12px; font-size: 0.74rem; line-height: 1.5;
+			white-space: pre-wrap; word-break: break-word;
+		}
+		#journal .l-hit { color: #cfe3d0; }
+		#journal .l-crit { color: var(--accent); }
+		#journal .l-miss { color: #6d7789; }
+		#journal .l-fumble { color: var(--danger); }
+		#journal .l-sys { color: var(--accent2); }
+		#journal .l-tour { color: var(--muted); }
+
+		.regles { font-size: 0.7rem; color: var(--muted); line-height: 1.6; }
+		.regles code { color: var(--accent2); }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>⚔️ Simulateur de duel — administration</h1>
+		<a href="/admin">← Retour à l'administration</a>
+	</header>
+	<div class="main">
+		<div class="card">
+			<div class="card-title">Belligérants</div>
+			<div class="card-desc">
+				Duel <strong>1D Monte Carlo</strong> sur les vraies formules du moteur (seuils,
+				critiques, budget d'actions, PA, PM). Un <strong>character</strong> engage sa barre
+				d'action et ses armes équipées, à pleine forme ; une <strong>espèce</strong> est
+				re-tirée à chaque passe (avec profil : tirage du modificateur, comme en jeu).
+				Les règles des potentiels s'éditent dans <code>utils/potentiel.py</code>.
+			</div>
+			<div class="duel-grid">
+				<div class="camp a">
+					<h3>◈ Camp A</h3>
+					<label class="radio"><input type="radio" name="type-a" value="espece" checked> Espèce</label>
+					<label class="radio"><input type="radio" name="type-a" value="character"> Personnage</label>
+					<div class="champ" id="bloc-espece-a">
+						<div class="lbl">Espèce</div>
+						<select id="espece-a"></select>
+						<div class="lbl" style="margin-top:8px;">Profil</div>
+						<select id="profil-a"></select>
+					</div>
+					<div class="champ" id="bloc-character-a" hidden>
+						<div class="lbl">Personnage</div>
+						<select id="character-a"></select>
+					</div>
+					<div class="camp-apercu"><img id="apercu-a" alt="" hidden></div>
+				</div>
+				<div class="camp b">
+					<h3>◈ Camp B</h3>
+					<label class="radio"><input type="radio" name="type-b" value="espece" checked> Espèce</label>
+					<label class="radio"><input type="radio" name="type-b" value="character"> Personnage</label>
+					<div class="champ" id="bloc-espece-b">
+						<div class="lbl">Espèce</div>
+						<select id="espece-b"></select>
+						<div class="lbl" style="margin-top:8px;">Profil</div>
+						<select id="profil-b"></select>
+					</div>
+					<div class="champ" id="bloc-character-b" hidden>
+						<div class="lbl">Personnage</div>
+						<select id="character-b"></select>
+					</div>
+					<div class="camp-apercu"><img id="apercu-b" alt="" hidden></div>
+				</div>
+			</div>
+			<div class="params-row" style="margin-top:16px;">
+				<div class="champ">
+					<div class="lbl">Distance de départ (cases)</div>
+					<input type="number" id="distance" value="5" min="1" max="50">
+				</div>
+				<div class="champ">
+					<div class="lbl">Passes Monte Carlo</div>
+					<input type="number" id="passes" value="500" min="1" max="5000">
+				</div>
+				<div class="champ" style="min-width:280px;flex:1;">
+					<div class="lbl">Type de lieu (tags du terrain — furtivité et conditions)</div>
+					<select id="terrain">
+						<option value="">— terrain nu (aucun tag) —</option>
+						{% for bm in battle_maps %}
+						<option value="{{ bm.tags | join(',') }}">{{ bm.nom or bm._id }} ({{ bm.tags | join(', ') }})</option>
+						{% endfor %}
+					</select>
+				</div>
+				<button class="btn" type="button" id="run-btn">▶ Simuler</button>
+			</div>
+			<div class="status" id="run-status"></div>
+		</div>
+
+		<div class="card" id="resultats-card" hidden>
+			<div class="card-title">Résultats</div>
+			<div id="resultats"></div>
+			<details>
+				<summary>Journal de la première passe</summary>
+				<div id="journal"></div>
+			</details>
+			<details>
+				<summary>Pondérations des potentiels (utils/potentiel.py)</summary>
+				<div class="regles" id="regles"></div>
+			</details>
+		</div>
+	</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// Ce qui défile ici vient de la base (noms d'espèces, de personnages, de sorts) :
+// tout ce qui part dans un template literal innerHTML passe par escapeHtml.
+function escapeHtml(s) {
+	return String(s ?? '').replace(/[&<>"']/g, c => ({
+		'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+	}[c]));
+}
+
+function setStatus(msg, kind) {
+	const el = $('run-status');
+	el.textContent = msg || '';
+	el.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+// ── Chargement des listes (endpoints existants, aucun endpoint neuf) ──────────
+async function chargerListes() {
+	setStatus('Chargement des listes…', 'run');
+	try {
+		const [espRes, profRes, charRes] = await Promise.all([
+			fetch('/api/especes'),
+			fetch('/api/profils'),
+			fetch('/admin/table/data?type=character'),
+		]);
+		if (!espRes.ok || !profRes.ok || !charRes.ok) {
+			setStatus('Échec du chargement des listes (' + [espRes, profRes, charRes]
+				.filter(r => !r.ok).map(r => r.status).join(', ') + ')', 'err');
+			return;
+		}
+		const especes = (await espRes.json() || []).sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
+		const profils = (await profRes.json() || []).sort((a, b) => (a.niveau || 0) - (b.niveau || 0));
+		const chars = ((await charRes.json()).docs || []).sort((a, b) =>
+			((a.prenom || '') + (a.nom || '')).localeCompare((b.prenom || '') + (b.nom || '')));
+
+		const optEsp = especes.map(e =>
+			`<option value="${escapeHtml(e._id)}">${escapeHtml(e.nom || e._id)}</option>`).join('');
+		// Les bornes de l'espèce (le pire / le meilleur spécimen) sont des entrées SŒURS
+		// du point médian : elles remplacent le profil, elles ne s'y ajoutent pas.
+		// Sentinelles « min »/« max » — aucune collision, un id de profil est préfixé.
+		const optProf = '<option value="">— aucun (point médian) —</option>'
+			+ '<option value="min">— aucun (minimum) —</option>'
+			+ '<option value="max">— aucun (maximum) —</option>'
+			+ profils.map(p =>
+			`<option value="${escapeHtml(p._id)}">${escapeHtml(p.nom || p._id)} (niv. ${p.niveau || '?'})</option>`).join('');
+		const optChar = chars.map(c =>
+			`<option value="${escapeHtml(c._id)}">${escapeHtml(((c.prenom || '') + ' ' + (c.nom || '')).trim() || c._id)}` +
+			` — ${escapeHtml(c.voc || '?')}</option>`).join('');
+
+		// Images pour l'aperçu de sélection (les routes /monsters et /characters sont
+		// celles que le serveur pose lui-même dans image_route au moment du run).
+		IMAGES.espece = Object.fromEntries(especes.map(e =>
+			[e._id, e.image ? '/monsters/' + e.image : '']));
+		IMAGES.character = Object.fromEntries(chars.map(c =>
+			[c._id, c.image ? '/characters/' + c.image : '']));
+
+		for (const camp of ['a', 'b']) {
+			$('espece-' + camp).innerHTML = optEsp;
+			$('profil-' + camp).innerHTML = optProf;
+			$('character-' + camp).innerHTML = optChar || '<option value="">(aucun personnage en base)</option>';
+		}
+		// Les options existent : on peut reposer la dernière sélection mémorisée.
+		restaurerSelection();
+		majApercu('a');
+		majApercu('b');
+		setStatus(especes.length + ' espèces, ' + profils.length + ' profils, '
+			+ chars.length + ' personnages chargés.', 'ok');
+	} catch (e) {
+		setStatus('Échec du chargement des listes : ' + e, 'err');
+	}
+}
+
+// ── Aperçu du belligérant sélectionné ────────────────────────────────────────
+// id → route d'image, rempli par chargerListes ; image absente ou introuvable sur le
+// disque → l'aperçu se cache (onerror), jamais d'icône cassée.
+const IMAGES = { espece: {}, character: {} };
+
+function majApercu(camp) {
+	const img = $('apercu-' + camp);
+	const type = document.querySelector(`input[name="type-${camp}"]:checked`).value;
+	const route = (IMAGES[type] || {})[$((type === 'character' ? 'character-' : 'espece-') + camp).value] || '';
+	img.hidden = !route;
+	if (route && img.getAttribute('src') !== route) img.src = route;
+}
+
+// ── Bascule espèce / personnage par camp ─────────────────────────────────────
+function appliquerBascule(camp) {
+	const type = document.querySelector(`input[name="type-${camp}"]:checked`).value;
+	$('bloc-espece-' + camp).hidden = type !== 'espece';
+	$('bloc-character-' + camp).hidden = type === 'espece';
+}
+
+function brancherBascule(camp) {
+	document.querySelectorAll(`input[name="type-${camp}"]`).forEach(radio => {
+		radio.addEventListener('change', () => { appliquerBascule(camp); majApercu(camp); sauverSelection(); });
+	});
+}
+
+// ── Mémoire de la dernière sélection (localStorage, par navigateur) ──────────
+// Tout accès au stockage est sous try/catch (navigation privée, stockage bloqué) :
+// sans mémoire, l'écran marche exactement comme avant. Une valeur mémorisée qui a
+// disparu de la base (personnage supprimé, espèce renommée) est ignorée en silence.
+const LS_KEY = 'telluris.admin_simulateur.v1';
+
+function sauverSelection() {
+	try {
+		const etat = {};
+		for (const camp of ['a', 'b']) {
+			etat[camp] = {
+				type: document.querySelector(`input[name="type-${camp}"]:checked`).value,
+				espece: $('espece-' + camp).value,
+				profil: $('profil-' + camp).value,
+				character: $('character-' + camp).value,
+			};
+		}
+		etat.terrain = $('terrain').value;
+		localStorage.setItem(LS_KEY, JSON.stringify(etat));
+	} catch (e) { /* stockage indisponible : pas de mémoire, rien à faire */ }
+}
+
+function _poserSelect(sel, valeur) {
+	if (valeur && [...sel.options].some(o => o.value === valeur)) sel.value = valeur;
+}
+
+function restaurerSelection() {
+	let etat = null;
+	try { etat = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return; }
+	if (!etat) return;
+	for (const camp of ['a', 'b']) {
+		const c = etat[camp] || {};
+		const type = c.type === 'character' ? 'character' : 'espece';
+		const radio = document.querySelector(`input[name="type-${camp}"][value="${type}"]`);
+		if (radio) {
+			radio.checked = true;
+			appliquerBascule(camp);
+		}
+		_poserSelect($('espece-' + camp), c.espece);
+		_poserSelect($('profil-' + camp), c.profil);
+		_poserSelect($('character-' + camp), c.character);
+	}
+	_poserSelect($('terrain'), etat.terrain);
+}
+
+function specDe(camp) {
+	const type = document.querySelector(`input[name="type-${camp}"]:checked`).value;
+	if (type === 'character') {
+		return { type: 'character', id: $('character-' + camp).value };
+	}
+	const spec = { type: 'espece', id: $('espece-' + camp).value };
+	// La borne part dans son PROPRE champ : `profil` reste « un id de doc, ou rien »,
+	// et la validation de préfixe du serveur n'a pas à connaître les sentinelles.
+	const choix = $('profil-' + camp).value;
+	if (choix === 'min' || choix === 'max') spec.borne = choix;
+	else if (choix) spec.profil = choix;
+	return spec;
+}
+
+// ── Rendu des résultats ──────────────────────────────────────────────────────
+function pct(x) { return (x * 100).toFixed(1) + ' %'; }
+
+function renduArsenal(recap) {
+	const lignes = [];
+	for (const a of recap.attaques || []) {
+		lignes.push(`<span class="titre">⚔ ${escapeHtml(a.mode)}</span> <b>${escapeHtml(a.label)}</b>`
+			+ ` — ${escapeHtml(a.degats || '?')} · portée ${a.portee}`);
+	}
+	for (const s of recap.sorts || []) {
+		lignes.push(`<span class="titre">🔮 sort</span> <b>${escapeHtml(s.label)}</b>`
+			+ ` — ${escapeHtml(s.degats || 'sans dés')} · portée ${s.portee} · ${s.cout_pm} PM`);
+	}
+	for (const c of recap.competences || []) {
+		lignes.push(`<span class="titre">⚡ comp.</span> <b>${escapeHtml(c.label)}</b>`
+			+ ` — ${escapeHtml(c.degats || 'sans dés')} · portée ${c.portee} · ${c.cout_pm} PM`);
+	}
+	for (const s of recap.soutiens || []) {
+		const cout = s.stock != null ? `stock ${s.stock}` : `${s.cout_pm} PM`;
+		lignes.push(`<span class="titre">✨ soutien</span> <b>${escapeHtml(s.label)}</b> — ${cout}`);
+	}
+	return lignes.join('<br>') || '<i>rien</i>';
+}
+
+// Niveaux d'un PERSONNAGE (une espèce n'en a pas → bloc absent, rien à rendre) :
+// race, niveau global (dérivé de l'XP) et niveau de chaque vocation.
+function renduNiveaux(n) {
+	if (!n) return '';
+	const parts = [];
+	if (n.race) parts.push(`Race <b>${escapeHtml(n.race)}</b>`);
+	if (n.niveau != null) parts.push(`Niveau <b>${n.niveau}</b>`);
+	const vocs = Object.entries(n.vocations || {})
+		.map(([voc, niv]) => `<b>${escapeHtml(voc)} ${niv}</b>`).join(', ');
+	if (vocs) parts.push('Vocations : ' + vocs);
+	return parts.length ? `<div class="fiche-derives">${parts.join(' · ')}</div>` : '';
+}
+
+const CARACTS_ORDRE = ['V', 'F', 'R', 'Ag', 'Vol', 'Int', 'Cha', 'Ch'];
+
+function renduProfil(p) {
+	if (!p) return '';
+	const caracts = p.caracts || {};
+	const ths = CARACTS_ORDRE.map(c => `<th>${c}</th>`).join('');
+	const tds = CARACTS_ORDRE.map(c => `<td>${caracts[c] ?? '—'}</td>`).join('');
+	const derives = [
+		`PV <b>${p.pv_max}</b>`, `PM <b>${p.pm_max}</b>`,
+		`CC <b>${p.cc}</b>`, `CD <b>${p.cd}</b>`,
+		`Init <b>${p.initiative}</b>`, `Actions <b>${p.actions_max}</b>`,
+		`Dépl. <b>${p.deplacement}</b>`, `PA <b>${p.pa}</b>`,
+		`Déf. mag. <b>${p.pm_def}</b>`, `Toucher mag. <b>${p.toucher_magique}</b>`,
+		`Esquive <b>${p.esquive}</b>`,
+		`Dégâts cc <b>${escapeHtml(p.degats_cc || '—')}</b>`,
+		`Dégâts cd <b>${escapeHtml(p.degats_cd || '—')}</b>`,
+	].join(' · ');
+	return `
+		<div class="fiche">
+			<table><tr>${ths}</tr><tr>${tds}</tr></table>
+			<div class="fiche-derives">${derives}</div>
+		</div>`;
+}
+
+function renduPotentiel(nom, pot, maxTotal) {
+	const largeur = maxTotal > 0 ? Math.max(2, (pot.total / maxTotal) * 100) : 0;
+	return `
+		<div class="pot-row">
+			<div class="pot-lbl"><span>${nom}</span><span>${pot.total}</span></div>
+			<div class="pot-track"><div class="pot-fill" style="width:${largeur.toFixed(1)}%"></div></div>
+		</div>`;
+}
+
+function renduCamp(camp, cote, pots, maxCombat, maxSurvie, maxSupport) {
+	const pvTxt = cote.pv_restants_moyens != null
+		? `${cote.pv_restants_moyens} / ${cote.pv_max_reference}` : '—';
+	const combat = pots.combat, support = pots.support;
+	// La survie a sa PROPRE barre : la retirer du détail du combat, sinon la même
+	// valeur serait dite deux fois.
+	const detailCombat = `offense ${combat.offense}`
+		+ (combat.option_retenue ? ` · option : ${escapeHtml(combat.option_retenue)}` : '');
+	// Les trois termes de la formule de survie (utils/potentiel.potentiel_combat).
+	const p = cote.profil || {};
+	const detailSurvie = `PV max ${p.pv_max ?? '—'} · PA ${p.pa ?? '—'}`
+		+ ` · Ag+esquive ${(p.ag ?? 0) + (p.esquive ?? 0)}`;
+	const detailSupport = (support.detail || []).slice(0, 4)
+		.map(d => `${escapeHtml(d.label)} (${d.points})`).join(' · ') || 'aucun soutien';
+	const portrait = cote.image_route
+		? `<img class="camp-portrait" src="${escapeHtml(cote.image_route)}" alt="" onerror="this.hidden=true">`
+		: '';
+	return `
+		<div class="camp-${camp}-col">
+			<div class="camp-tete">
+				${portrait}
+				<h3 style="color:var(--camp-${camp});font-size:0.85rem;letter-spacing:0.1em;">
+					${camp === 'a' ? '◈ A' : '◈ B'} — ${escapeHtml(cote.label)}</h3>
+			</div>
+			${renduNiveaux(cote.niveaux)}
+			${renduProfil(cote.profil)}
+			<div class="stat-grid">
+				<div class="stat-box"><div class="v">${pct(cote.taux)}</div><div class="l">victoires (${cote.victoires})</div></div>
+				<div class="stat-box"><div class="v">${pvTxt}</div><div class="l">PV restants moyens en cas de victoire</div></div>
+			</div>
+			${renduPotentiel('Potentiel de combat', combat, maxCombat)}
+			<div class="pot-detail">${detailCombat}</div>
+			${renduPotentiel('Potentiel de survie', { total: combat.survie }, maxSurvie)}
+			<div class="pot-detail">${detailSurvie}</div>
+			${renduPotentiel('Potentiel de support', support, maxSupport)}
+			<div class="pot-detail">${detailSupport}</div>
+			<div class="arsenal">${renduArsenal(cote.arsenal)}</div>
+		</div>`;
+}
+
+function renduResultats(data) {
+	const r = data.resultats, pots = data.potentiels;
+	const terrainTxt = (data.terrain || []).length
+		? 'terrain : ' + escapeHtml(data.terrain.join(', ')) : 'terrain nu';
+	const tauxA = r.a.taux, tauxB = r.b.taux, tauxN = Math.max(0, 1 - tauxA - tauxB);
+	const maxCombat = Math.max(pots.a.combat.total, pots.b.combat.total);
+	const maxSurvie = Math.max(pots.a.combat.survie, pots.b.combat.survie, 1);
+	const maxSupport = Math.max(pots.a.support.total, pots.b.support.total, 1);
+
+	$('resultats').innerHTML = `
+		<div class="vs-bar">
+			<div class="seg-a" style="width:${(tauxA * 100).toFixed(1)}%"></div>
+			<div class="seg-n" style="width:${(tauxN * 100).toFixed(1)}%"></div>
+			<div class="seg-b" style="width:${(tauxB * 100).toFixed(1)}%"></div>
+		</div>
+		<div class="vs-legende">
+			<span class="la">A ${pct(tauxA)}</span>
+			<span class="ln">${r.nuls ? 'nuls ' + pct(tauxN) : ''}</span>
+			<span class="lb">B ${pct(tauxB)}</span>
+		</div>
+		<div class="stat-grid">
+			<div class="stat-box"><div class="v">${r.rounds.moyen}</div><div class="l">rounds en moyenne</div></div>
+			<div class="stat-box"><div class="v">${r.rounds.mediane}</div><div class="l">rounds (médiane)</div></div>
+			<div class="stat-box"><div class="v">${r.rounds.min}–${r.rounds.max}</div><div class="l">rounds (min–max)</div></div>
+			<div class="stat-box"><div class="v">${r.passes}</div><div class="l">passes · distance ${r.distance} · ${terrainTxt}</div></div>
+		</div>
+		<div class="duel-grid" style="margin-top:16px;">
+			${renduCamp('a', r.a, pots.a, maxCombat, maxSurvie, maxSupport)}
+			${renduCamp('b', r.b, pots.b, maxCombat, maxSurvie, maxSupport)}
+		</div>`;
+
+	$('journal').innerHTML = (r.journal || []).map(l =>
+		`<div class="l-${escapeHtml(l.kind || 'sys')}"><span class="l-tour">[T${l.tour}]</span> ${escapeHtml(l.texte)}</div>`
+	).join('') || '<i>journal vide</i>';
+
+	$('regles').innerHTML = Object.entries(data.regles || {})
+		.map(([k, v]) => `<code>${escapeHtml(k)}</code> = ${escapeHtml(v)}`).join(' · ');
+
+	$('resultats-card').hidden = false;
+}
+
+// ── Lancement ────────────────────────────────────────────────────────────────
+async function simuler() {
+	const btn = $('run-btn');
+	btn.disabled = true;
+	setStatus('Simulation en cours…', 'run');
+	try {
+		const res = await fetch('/admin/simulateur/run', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				a: specDe('a'),
+				b: specDe('b'),
+				distance: parseInt($('distance').value, 10) || 5,
+				passes: parseInt($('passes').value, 10) || 500,
+				terrain: $('terrain').value.split(',').map(t => t.trim()).filter(Boolean),
+			}),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) {
+			setStatus('Échec : ' + (data.detail || res.status), 'err');
+			return;
+		}
+		renduResultats(data);
+		setStatus(data.resultats.passes + ' passes jouées.', 'ok');
+	} catch (e) {
+		setStatus('Échec : ' + e, 'err');
+	} finally {
+		btn.disabled = false;
+	}
+}
+
+brancherBascule('a');
+brancherBascule('b');
+for (const camp of ['a', 'b']) {
+	for (const prefixe of ['espece-', 'profil-', 'character-']) {
+		$(prefixe + camp).addEventListener('change', () => { majApercu(camp); sauverSelection(); });
+	}
+}
+$('terrain').addEventListener('change', sauverSelection);
+$('run-btn').addEventListener('click', simuler);
+chargerListes();
+</script>
+</body>
+</html>

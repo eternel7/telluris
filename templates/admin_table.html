@@ -238,6 +238,13 @@ let currentType = null;  // type actuellement chargé (clé de persistance)
 const DEFAULT_W = 150;   // largeur de colonne par défaut (px)
 const LS_KEY = 'telluris.admin_table.v1.';   // préfixe localStorage (par type)
 
+// Colonnes CALCULÉES (potentiels du simulateur, types espece/character seulement) :
+// des colonnes VIRTUELLES — les valeurs vivent dans `potentiels` (par _id), jamais dans
+// les docs, sinon un Save de l'éditeur JSON persisterait des dérivées en base.
+const VIRTUAL_COLS = ['potentiel_combat', 'potentiel_survie', 'potentiel_support'];
+let potentiels = {};        // { _id: { potentiel_combat, potentiel_support } }
+let virtualActive = false;  // vrai si le type courant a des potentiels chargés
+
 const $ = id => document.getElementById(id);
 
 function setStatus(el, msg, kind) { el.textContent = msg; el.className = 'status' + (kind ? ' ' + kind : ''); }
@@ -256,10 +263,28 @@ async function loadType() {
 		}
 		const data = await res.json();
 		docs = data.docs || [];
-		setStatus($('load-status'), docs.length + ' document(s) de type « ' + t + ' ».', 'ok');
+		let note = '';
+		// Potentiels du simulateur (colonnes calculées) — seulement là où ils ont un sens.
+		potentiels = {}; virtualActive = false;
+		if (t === 'espece' || t === 'character') {
+			try {
+				const pRes = await fetch('/admin/simulateur/potentiels?type=' + encodeURIComponent(t));
+				if (pRes.ok) {
+					potentiels = ((await pRes.json()).potentiels) || {};
+					virtualActive = true;
+				} else { note = ' (potentiels indisponibles : ' + pRes.status + ')'; }
+			} catch (e) { note = ' (potentiels indisponibles)'; }
+		}
+		setStatus($('load-status'), docs.length + ' document(s) de type « ' + t + ' ».' + note, 'ok');
 		currentType = t;
 		initColumns();
-		restoreState(t);   // applique les préférences mémorisées pour ce type (ou les défauts)
+		const stored = restoreState(t);   // préférences mémorisées pour ce type (ou défauts)
+		// Colonnes calculées jamais vues pour ce type → affichées d'office ; ensuite le
+		// choix mémorisé de l'utilisateur (les masquer, les déplacer) fait foi.
+		if (virtualActive) {
+			const connues = new Set((stored && stored.columns) || []);
+			VIRTUAL_COLS.forEach(c => { if (!connues.has(c) && !visible.includes(c)) visible.push(c); });
+		}
 		checked.clear();   // la sélection est transitoire (jamais persistée), comme `selected`
 		closeEditor();
 		$('cols-card').style.display = docs.length ? '' : 'none';
@@ -272,13 +297,15 @@ async function loadType() {
 }
 
 // Union des clés de 1er niveau (_id en tête, le reste trié). Colonnes visibles par
-// défaut : _id + jusqu'à 6 colonnes suivantes.
+// défaut : _id + jusqu'à 6 colonnes suivantes. Les colonnes calculées (potentiels)
+// s'ajoutent en fin quand elles existent pour ce type.
 function initColumns() {
 	const keys = new Set();
 	docs.forEach(d => Object.keys(d || {}).forEach(k => keys.add(k)));
 	keys.delete('_id');
 	columns = ['_id', ...Array.from(keys).sort()];
 	visible = columns.slice(0, 7);
+	if (virtualActive) VIRTUAL_COLS.forEach(c => { if (!columns.includes(c)) columns.push(c); });
 }
 
 // Fusion NON destructive après une sauvegarde : conserve l'ordre des colonnes, la
@@ -287,6 +314,9 @@ function initColumns() {
 function mergeColumns() {
 	const keys = new Set();
 	docs.forEach(d => Object.keys(d || {}).forEach(k => keys.add(k)));
+	// Les colonnes calculées ne vivent pas dans les docs : les déclarer connues, sinon
+	// la fusion les éliminerait à chaque Save.
+	if (virtualActive) VIRTUAL_COLS.forEach(c => keys.add(c));
 	const next = columns.filter(c => keys.has(c));   // colonnes courantes encore présentes (ordre gardé)
 	keys.forEach(k => { if (!next.includes(k)) next.push(k); });   // nouvelles clés à la fin
 	columns = next;
@@ -305,11 +335,13 @@ function persistState() {
 }
 
 // Restaure les préférences pour `type`, réconciliées avec les colonnes réellement
-// présentes dans les docs (les nouvelles clés sont ajoutées en fin, les disparues ignorées).
+// présentes dans les docs (les nouvelles clés sont ajoutées en fin, les disparues
+// ignorées). Renvoie l'état mémorisé brut (null si aucun) — l'appelant s'en sert pour
+// savoir si une colonne calculée est vue pour la première fois.
 function restoreState(type) {
 	let s = null;
 	try { s = JSON.parse(localStorage.getItem(LS_KEY + type) || 'null'); } catch (e) { s = null; }
-	if (!s) { filters = {}; sortCol = null; sortDir = 1; widths = {}; return; }
+	if (!s) { filters = {}; sortCol = null; sortDir = 1; widths = {}; return null; }
 	const known = new Set(columns);
 	const ordered = (s.columns || []).filter(c => known.has(c));   // ordre mémorisé encore valide
 	columns.forEach(c => { if (!ordered.includes(c)) ordered.push(c); });   // + nouvelles clés à la fin
@@ -322,16 +354,19 @@ function restoreState(type) {
 	for (const k in (s.filters || {})) if (known.has(k)) filters[k] = s.filters[k];
 	widths = {};
 	for (const k in (s.widths || {})) if (known.has(k)) widths[k] = Number(s.widths[k]) || DEFAULT_W;
+	return s;
 }
 
 // ── Rendu : sélecteur de colonnes (cocher = affichée ; glisser = réordonner) ──
 function renderCols() {
-	$('cols-box').innerHTML = columns.map(c =>
-		`<div class="col-item" draggable="true" data-col="${esc(c)}">
+	$('cols-box').innerHTML = columns.map(c => {
+		const calc = VIRTUAL_COLS.includes(c)
+			? ' <span title="Colonne calculée (potentiels du simulateur) — absente des documents">✧</span>' : '';
+		return `<div class="col-item" draggable="true" data-col="${esc(c)}">
 			<span class="drag-handle" title="Glisser pour réordonner">⠿</span>
-			<label><input type="checkbox" data-col="${esc(c)}" ${visible.includes(c) ? 'checked' : ''}>${esc(c)}</label>
-		</div>`
-	).join('');
+			<label><input type="checkbox" data-col="${esc(c)}" ${visible.includes(c) ? 'checked' : ''}>${esc(c)}${calc}</label>
+		</div>`;
+	}).join('');
 
 	$('cols-box').querySelectorAll('input[data-col]').forEach(cb => {
 		cb.addEventListener('change', () => {
@@ -436,6 +471,17 @@ function renderHead() {
 	});
 }
 
+// Valeur d'une cellule : colonne calculée → table `potentiels` (par _id), sinon le doc.
+// SOURCE UNIQUE du rendu, du filtre et du tri — un accès direct r.d[c] ignorerait les
+// colonnes virtuelles.
+function valDe(d, c) {
+	if (VIRTUAL_COLS.includes(c)) {
+		const p = d && d._id ? potentiels[d._id] : null;
+		return p ? p[c] : undefined;
+	}
+	return d ? d[c] : undefined;
+}
+
 // Lignes actuellement affichées (filtrées puis triées), sous la forme { d, i }
 // où `i` est l'index d'origine dans docs[]. Source unique pour le rendu et l'export.
 function computeVisibleRows() {
@@ -443,10 +489,10 @@ function computeVisibleRows() {
 	// Filtres (substring insensible à la casse, par colonne visible).
 	for (const c of visible) {
 		const f = (filters[c] || '').trim().toLowerCase();
-		if (f) rows = rows.filter(r => filterText(r.d[c]).includes(f));
+		if (f) rows = rows.filter(r => filterText(valDe(r.d, c)).includes(f));
 	}
 	// Tri.
-	if (sortCol) rows.sort((a, b) => sortDir * cmp(a.d[sortCol], b.d[sortCol]));
+	if (sortCol) rows.sort((a, b) => sortDir * cmp(valDe(a.d, sortCol), valDe(b.d, sortCol)));
 	return rows;
 }
 
@@ -482,9 +528,10 @@ function renderBody() {
 
 	$('data-body').innerHTML = rows.map(r => {
 		const tds = visible.map(c => {
-			const txt = cellText(r.d[c]);
-			const cls = (r.d[c] === undefined || r.d[c] === null || r.d[c] === '') ? ' class="muted-cell"' : '';
-			return `<td${cls} title="${esc(fullText(r.d[c]))}">${esc(txt)}</td>`;
+			const v = valDe(r.d, c);
+			const txt = cellText(v);
+			const cls = (v === undefined || v === null || v === '') ? ' class="muted-cell"' : '';
+			return `<td${cls} title="${esc(fullText(v))}">${esc(txt)}</td>`;
 		}).join('');
 		// Une ligne sans `_id` n'est ni cochable ni supprimable.
 		const id = r.d && r.d._id;
@@ -726,7 +773,10 @@ async function exportVisibleXlsx() {
 		const res = await fetch('/admin/table/export.xlsx', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ filename: name, columns, rows: out }),
+			// Colonnes calculées exclues : les rows sont les docs bruts, une colonne
+			// « potentiel » vide dans le tableur serait un mensonge.
+			body: JSON.stringify({ filename: name,
+				columns: columns.filter(c => !VIRTUAL_COLS.includes(c)), rows: out }),
 		});
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));

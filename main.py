@@ -41,6 +41,8 @@ from utils import fiche as fiche_util
 from utils import animations as animations_util
 from utils import lint_dialogues
 from utils import dev_tools
+from utils import simulateur as simulateur_util
+from utils import potentiel as potentiel_util
 from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload, lieu_recettes
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
 from models import character_stats
@@ -1056,3 +1058,115 @@ def admin_dev_tools_arreter(current_user: Annotated[User, Depends(get_current_us
 	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
 		raise HTTPException(status_code=403, detail="Admin only")
 	return {"arrete": dev_tools.arreter()}
+
+
+# ── Simulateur de duel ───────────────────────────────────────────────────────
+# Banc d'essai d'équilibrage : deux belligérants (espèce ± profil, ou character), un
+# duel 1D Monte Carlo sur les vraies formules du moteur (utils/simulateur), et les
+# potentiels de combat/support dont les règles vivent dans utils/potentiel.
+
+@app.get("/admin/simulateur", response_class=HTMLResponse)
+def admin_simulateur(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	# Types de lieu proposés = les battle maps réelles et leurs tags (c'est contre eux
+	# que condition_remplie et la furtivité d'entrée s'évaluent en jeu). ⚠️ find_docs
+	# PROJETÉ : sans fields, chaque doc arriverait avec ses `cells`.
+	battle_maps = sorted(
+		find_docs({"type": "lieu", "categorie": "battle_map"},
+				  fields=["_id", "nom", "tags"]) or [],
+		key=lambda d: str(d.get("nom") or d.get("_id", "")))
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_simulateur.html",
+		context={"title": "Simulateur de duel", "battle_maps": battle_maps},
+	)
+
+
+@app.post("/admin/simulateur/run")
+def admin_simulateur_run(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: dict = Body(...),
+):
+	"""Lance N passes de duel + calcule les potentiels des deux camps.
+
+	Body : {"a": {"type": "espece"|"character", "id", "profil"?}, "b": {…},
+	"distance": int, "passes": int}. Bornes serveur sur distance/passes — un admin ne
+	doit pas pouvoir pendre le process. Les belligérants sont construits UNE fois
+	(build_joueur_snapshot lit la base) et repassés au duel comme aux potentiels."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	distance = max(1, min(50, int(payload.get("distance") or 5)))
+	passes = max(1, min(5000, int(payload.get("passes") or 500)))
+	# Terrain = tags de battle_map (furtivité d'entrée + conditions d'arsenal). Bornés :
+	# une liste forgée ne doit pas gonfler les logs ni le payload.
+	terrain = [str(t).strip()[:40] for t in (payload.get("terrain") or [])[:12] if str(t).strip()]
+	try:
+		bel_a = simulateur_util.construire_belligerant(payload.get("a"), get_doc, tuple(terrain))
+		bel_b = simulateur_util.construire_belligerant(payload.get("b"), get_doc, tuple(terrain))
+	except ValueError as e:
+		raise HTTPException(status_code=422, detail=str(e))
+	except LookupError as e:
+		raise HTTPException(status_code=404, detail=str(e))
+	resultats = simulateur_util.simuler_belligerants(bel_a, bel_b, distance, passes)
+
+	def _potentiels(bel):
+		return {
+			"combat": potentiel_util.potentiel_combat(bel["snapshot_reference"], bel["arsenal"]),
+			"support": potentiel_util.potentiel_support(bel["snapshot_reference"], bel["arsenal"]),
+		}
+
+	return {
+		"resultats": resultats,
+		"potentiels": {"a": _potentiels(bel_a), "b": _potentiels(bel_b)},
+		"terrain": terrain,
+		# Les pondérations affichées à l'écran — la règle éditable vit dans utils/potentiel.
+		"regles": potentiel_util.REGLES_POTENTIEL,
+	}
+
+
+@app.get("/admin/simulateur/potentiels")
+def admin_simulateur_potentiels(
+	current_user: Annotated[User, Depends(get_current_user)],
+	doc_type: str = Query("", alias="type"),
+):
+	"""Potentiels de combat/support de TOUS les docs d'un type — colonnes calculées de
+	l'écran /admin/table (espece et character seulement).
+
+	⚠️ Les valeurs restent HORS des docs : le tableau les affiche en colonnes virtuelles,
+	sinon un Save de l'éditeur JSON persisterait des dérivées en base. Espèce = snapshot
+	médian sans profil (baseline comparable) ; character = pleine forme, barre d'action.
+	Un doc invalide est simplement absent du résultat — sa ligne reste dans le tableau."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	t = (doc_type or "").strip()
+	if t not in ("espece", "character"):
+		raise HTTPException(status_code=422,
+							detail="Potentiels calculables pour 'espece' ou 'character' seulement")
+	docs = [d for d in (find_docs({"type": t}) or [])
+			if not str(d.get("_id", "")).startswith("user:")]
+	# Les docs sont déjà en main : construire_belligerant les relit par ce getter local
+	# (une espèce ne relit qu'elle-même ; un character relit aussi ses items équipés,
+	# eux via la base).
+	locaux = {d["_id"]: d for d in docs if d.get("_id")}
+	def _get_doc_local(doc_id):
+		return locaux.get(doc_id) or get_doc(doc_id)
+	potentiels = {}
+	for d in docs:
+		did = d.get("_id")
+		if not did:
+			continue
+		try:
+			bel = simulateur_util.construire_belligerant({"type": t, "id": did}, _get_doc_local)
+			# UN seul appel : `survie` est le sous-score défensif de potentiel_combat.
+			combat_pot = potentiel_util.potentiel_combat(bel["snapshot_reference"], bel["arsenal"])
+			potentiels[did] = {
+				"potentiel_combat": combat_pot["total"],
+				"potentiel_survie": combat_pot["survie"],
+				"potentiel_support": potentiel_util.potentiel_support(
+					bel["snapshot_reference"], bel["arsenal"])["total"],
+			}
+		except Exception:
+			continue
+	return {"type": t, "potentiels": potentiels}
