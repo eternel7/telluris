@@ -149,6 +149,42 @@
 		.overlay-close:hover { color: var(--danger); }
 		.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 
+		/* Paperdoll d'équipement — repris de la silhouette de play_town_telluris.html
+		   (mêmes 12 emplacements, mêmes coordonnées en %). Classes préfixées `.pd-` :
+		   l'original s'appuie sur des variables CSS (--btn-bg, --accent-color) que cette
+		   page n'a pas, et `.sh-slot` y désigne aussi autre chose. */
+		#equip-overlay {
+			position: fixed; top: 70px; right: 14px; bottom: 14px;
+			width: min(460px, 94vw); margin: 0; z-index: 60;
+			display: flex; flex-direction: column; overflow: auto;
+			box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+		}
+		#equip-overlay[hidden] { display: none; }   /* cf. #stats-overlay : `display` écrase `hidden` */
+		.pd { position: relative; width: 100%; margin: 0 auto; user-select: none;
+			  display: flex; justify-content: center; align-items: center; }
+		.pd-img { max-height: 46vh; display: block; pointer-events: none; }
+		.pd-slot {
+			position: absolute; width: 30%; height: 15%; max-height: 44px;
+			padding: 2px 4px; font-size: 0.72rem; cursor: pointer; overflow: hidden;
+			background: rgba(13,15,20,0.9); border: 1px solid var(--border);
+		}
+		.pd-slot:hover { border-color: var(--accent2); }
+		.pd-slot.occupied { border-color: var(--accent); }
+		.pd-slot.bloque { opacity: 0.45; cursor: default; }
+		.pd-lbl { display: block; color: var(--muted); font-size: 0.66rem;
+				  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.pd-nom { display: block; font-size: 0.68rem;
+				  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.pd-nom.vide { color: var(--muted); opacity: 0.5; }
+		.pd-x {
+			position: absolute; top: 1px; right: 1px; width: 14px; height: 14px;
+			background: rgba(200,75,75,0.7); border: none; border-radius: 2px;
+			color: #fff; font-size: 10px; line-height: 14px; text-align: center;
+			padding: 0; cursor: pointer; z-index: 2;
+		}
+		.pd-x:hover { background: var(--danger); }
+		.avert { color: var(--accent); }
+
 		/* Résultats. */
 		.vs-bar {
 			display: flex; height: 26px; border-radius: 6px; overflow: hidden;
@@ -238,6 +274,7 @@
 						<select id="character-a"></select>
 					</div>
 					<button class="btn secondary stats-btn" type="button" id="stats-btn-a">✎ Stats</button>
+					<button class="btn secondary stats-btn" type="button" id="equip-btn-a" hidden>🛡 Équipement</button>
 					<div class="camp-apercu"><img id="apercu-a" alt="" hidden></div>
 				</div>
 				<div class="camp b">
@@ -255,6 +292,7 @@
 						<select id="character-b"></select>
 					</div>
 					<button class="btn secondary stats-btn" type="button" id="stats-btn-b">✎ Stats</button>
+					<button class="btn secondary stats-btn" type="button" id="equip-btn-b" hidden>🛡 Équipement</button>
 					<div class="camp-apercu"><img id="apercu-b" alt="" hidden></div>
 				</div>
 			</div>
@@ -328,6 +366,32 @@
 			</div>
 			<div class="status" id="stats-status"></div>
 		</div>
+
+		<!-- Paperdoll d'équipement d'une espèce humanoïde (un seul, il sait quel camp) -->
+		<div class="card" id="equip-overlay" hidden>
+			<div class="overlay-head">
+				<div class="card-title" style="margin-bottom:0">Équipement — <span id="equip-camp"></span></div>
+				<button type="button" class="overlay-close" id="equip-close" title="Fermer">✕</button>
+			</div>
+			<div class="card-desc">
+				Cliquez un emplacement pour l'équiper. Seules les pièces que l'espèce peut
+				<strong>réellement porter</strong> sont proposées (restrictions de
+				caractéristiques appliquées comme en jeu). Rien n'est écrit en base.
+				<span class="avert">⚠ Un humanoïde équipé d'un arc <strong>tire</strong> dans
+				le simulateur, alors qu'en jeu un monstre charge toujours au contact.</span>
+			</div>
+			<div class="pd">
+				<img class="pd-img" id="equip-img" src="/icons/equipement_humain_m.png" alt="Silhouette">
+			</div>
+			<div class="champ" id="equip-choix" style="margin-top:10px;" hidden>
+				<div class="lbl" id="equip-choix-lbl"></div>
+				<select id="equip-select"></select>
+			</div>
+			<div class="btn-row">
+				<button class="btn secondary" type="button" id="equip-reset">↺ Tout retirer</button>
+			</div>
+			<div class="status" id="equip-status"></div>
+		</div>
 	</div>
 
 <script>
@@ -395,6 +459,8 @@ async function chargerListes() {
 		// celles que le serveur pose lui-même dans image_route au moment du run).
 		IMAGES.espece = Object.fromEntries(especes.map(e =>
 			[e._id, e.image ? '/monsters/' + e.image : '']));
+		// Les tags arrivent déjà dans la réponse : c'est `humanoide` qui ouvre le paperdoll.
+		especes.forEach(e => { TAGS_ESPECE[e._id] = e.tags || []; });
 		IMAGES.character = Object.fromEntries(chars.map(c =>
 			[c._id, c.image ? '/characters/' + c.image : '']));
 
@@ -407,6 +473,8 @@ async function chargerListes() {
 		restaurerSelection();
 		majApercu('a');
 		majApercu('b');
+		majBoutonEquip('a');
+		majBoutonEquip('b');
 		setStatus(especes.length + ' espèces, ' + profils.length + ' profils, '
 			+ chars.length + ' personnages chargés.', 'ok');
 	} catch (e) {
@@ -418,6 +486,8 @@ async function chargerListes() {
 // id → route d'image, rempli par chargerListes ; image absente ou introuvable sur le
 // disque → l'aperçu se cache (onerror), jamais d'icône cassée.
 const IMAGES = { espece: {}, character: {} };
+// id d'espèce → ses tags, pour savoir si le paperdoll s'ouvre (tag `humanoide`).
+const TAGS_ESPECE = {};
 
 function majApercu(camp) {
 	const img = $('apercu-' + camp);
@@ -436,7 +506,11 @@ function appliquerBascule(camp) {
 
 function brancherBascule(camp) {
 	document.querySelectorAll(`input[name="type-${camp}"]`).forEach(radio => {
-		radio.addEventListener('change', () => { appliquerBascule(camp); majApercu(camp); sauverSelection(); });
+		radio.addEventListener('change', () => {
+			appliquerBascule(camp); majApercu(camp);
+			EQUIP[camp] = {}; majBoutonEquip(camp);
+			sauverSelection();
+		});
 	});
 }
 
@@ -506,6 +580,8 @@ function specDe(camp, avecStats = true) {
 	// celui qu'on va justement modifier. Le lui envoyer déjà forcé rendrait les valeurs
 	// saisies indiscernables des vraies dès la deuxième ouverture.
 	if (avecStats && Object.keys(STATS_FORCEES[camp]).length) spec.stats = STATS_FORCEES[camp];
+	// Équipement d'une espèce humanoïde (jamais pour un character : il a ses vrais slots).
+	if (spec.type === 'espece' && Object.keys(EQUIP[camp]).length) spec.slots = EQUIP[camp];
 	return spec;
 }
 
@@ -600,6 +676,150 @@ function reinitStats() {
 	$('stats-json').value = JSON.stringify(statsReference, null, 2);
 	setStatsStatus('Aucune stat forcée pour ce camp.', 'ok');
 }
+
+// ── Équipement d'une espèce humanoïde (paperdoll) ────────────────────────────
+// Les 12 emplacements et leurs coordonnées sont ceux de la silhouette de
+// play_town_telluris.html — même disposition, pour qu'on reconnaisse le paperdoll du jeu.
+// ⚠️ « Bras » est le slot `mains` (gantelets), comme en jeu et comme la localisation des
+// touches : ce n'est pas une faute de libellé.
+const PD_SLOTS = [
+	['tete', 'Tête', '0%', '5%'], ['epaules', 'Epaules', '0%', '17%'],
+	['torse', 'Torse', '0%', '29%'], ['mains', 'Bras', '0%', '41%'],
+	['jambes', 'Jambes', '0%', '75%'], ['pieds', 'Pieds', '0%', '85%'],
+	['cou', 'Cou', '70%', '5%'], ['anneau_1', 'Anneau 1', '70%', '17%'],
+	['anneau_2', 'Anneau 2', '70%', '29%'], ['ceinture', 'Ceinture', '70%', '41%'],
+	['main_droite', 'Main D.', '5%', '55%'], ['main_gauche', 'Main G.', '65%', '55%'],
+];
+
+// Équipement en cours, par camp. Comme les stats forcées : jamais mémorisé, purgé au
+// changement d'espèce — un équipement oublié fausserait tous les runs suivants.
+const EQUIP = { a: {}, b: {} };
+let ITEMS = [];            // docs items équipables (GET /api/items), chargés une fois
+let equipCamp = null;      // camp en cours d'habillage
+let equipCaracts = {};     // caracts de l'espèce : filtre les restrictions comme en jeu
+
+function estHumanoide(camp) {
+	const type = document.querySelector(`input[name="type-${camp}"]:checked`).value;
+	if (type !== 'espece') return false;
+	return (TAGS_ESPECE[$('espece-' + camp).value] || []).includes('humanoide');
+}
+
+function majBoutonEquip(camp) {
+	const btn = $('equip-btn-' + camp);
+	const n = Object.keys(EQUIP[camp]).length;
+	btn.hidden = !estHumanoide(camp);
+	btn.textContent = n ? `🛡 Équipement (${n})` : '🛡 Équipement';
+	btn.classList.toggle('actif', n > 0);
+}
+
+// Restriction de caractéristique : même règle qu'`equip_item` en jeu (ET logique sur
+// les minimums). Le serveur la revérifie — ici c'est pour ne pas proposer l'impossible.
+function _portable(item) {
+	const r = item.restriction || {};
+	return Object.entries(r).every(([c, min]) => (equipCaracts[c] ?? 0) >= min);
+}
+
+function _candidats(slot) {
+	return ITEMS.filter(i => (i.slots || []).includes(slot) && _portable(i))
+		.sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
+}
+
+// Une arme à deux mains occupe l'autre main : la case s'y grise, comme dans le jeu.
+function _bloquePar(slot) {
+	if (slot !== 'main_droite' && slot !== 'main_gauche') return null;
+	const autre = slot === 'main_droite' ? 'main_gauche' : 'main_droite';
+	const id = EQUIP[equipCamp][autre];
+	const item = id && ITEMS.find(i => i._id === id);
+	return (item && item.deux_mains) ? item : null;
+}
+
+function renduPaperdoll() {
+	const cases = PD_SLOTS.map(([slot, lbl, left, top]) => {
+		const id = EQUIP[equipCamp][slot];
+		const item = id && ITEMS.find(i => i._id === id);
+		const bloque = !item && _bloquePar(slot);
+		const cls = ['pd-slot', item ? 'occupied' : '', bloque ? 'bloque' : ''].filter(Boolean).join(' ');
+		const croix = item
+			? `<button class="pd-x" data-retirer="${escapeHtml(slot)}" title="Retirer">×</button>` : '';
+		const nom = item ? escapeHtml(item.nom || id)
+					     : (bloque ? escapeHtml(bloque.nom || 'occupé') : '—');
+		return `<div class="${cls}" data-slot="${escapeHtml(slot)}" style="left:${left};top:${top}">
+			${croix}<span class="pd-lbl">${escapeHtml(lbl)}</span>
+			<span class="pd-nom${item ? '' : ' vide'}">${nom}</span></div>`;
+	}).join('');
+	const pd = document.querySelector('#equip-overlay .pd');
+	// L'image reste en place (jamais réécrite) : seules les cases sont re-rendues.
+	pd.querySelectorAll('.pd-slot').forEach(el => el.remove());
+	pd.insertAdjacentHTML('beforeend', cases);
+	pd.querySelectorAll('.pd-slot').forEach(el => {
+		el.addEventListener('click', () => ouvrirChoix(el.dataset.slot));
+	});
+	pd.querySelectorAll('.pd-x').forEach(el => {
+		el.addEventListener('click', e => {
+			e.stopPropagation();          // sinon le clic ouvrirait aussi la liste
+			delete EQUIP[equipCamp][el.dataset.retirer];
+			renduPaperdoll(); majBoutonEquip(equipCamp);
+		});
+	});
+}
+
+function ouvrirChoix(slot) {
+	if (!EQUIP[equipCamp][slot] && _bloquePar(slot)) return;   // main bloquée : rien à choisir
+	const cands = _candidats(slot);
+	const bloc = $('equip-choix');
+	$('equip-choix-lbl').textContent =
+		(PD_SLOTS.find(s => s[0] === slot) || [, slot])[1] + ' — ' + cands.length + ' objet(s)';
+	$('equip-select').innerHTML = '<option value="">— rien —</option>' + cands.map(i =>
+		`<option value="${escapeHtml(i._id)}">${escapeHtml(i.nom || i._id)}`
+		+ (i.bonus_pa ? ` (PA ${i.bonus_pa})` : '')
+		+ (i.categorie === 'arme' ? ` [${escapeHtml((i.tags || []).includes('tir') ? 'tir'
+			: (i.tags || []).includes('jet') ? 'jet' : 'cac')} ${i.portee || 1}]` : '')
+		+ '</option>').join('');
+	$('equip-select').value = EQUIP[equipCamp][slot] || '';
+	$('equip-select').dataset.slot = slot;
+	bloc.hidden = false;
+	$('equip-select').focus();
+}
+
+async function ouvrirEquip(camp) {
+	equipCamp = camp;
+	$('equip-camp').textContent = camp === 'a' ? '◈ A' : '◈ B';
+	$('equip-choix').hidden = true;
+	$('equip-overlay').hidden = false;
+	setEquipStatus('Lecture du profil…', 'run');
+	try {
+		if (!ITEMS.length) {
+			const res = await fetch('/api/items');
+			if (!res.ok) { setEquipStatus('Échec du chargement des objets : ' + res.status, 'err'); return; }
+			// Seuls les items portables nous intéressent (241 sur 702 en base).
+			ITEMS = (await res.json() || []).filter(i => (i.slots || []).length);
+		}
+		// Les caracts de l'espèce filtrent les restrictions — le même profil que
+		// l'overlay des stats, donc rien de neuf côté serveur.
+		const res = await fetch('/admin/simulateur/profil', {
+			method: 'POST', headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				spec: { ...specDe(camp, false), slots: undefined },
+				terrain: [], facteur_armure: FACTEUR_ARMURE_JEU, objets: true,
+			}),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) { setEquipStatus('Échec : ' + (data.detail || res.status), 'err'); return; }
+		equipCaracts = (data.profil || {}).caracts || {};
+		renduPaperdoll();
+		setEquipStatus(`${data.label || ''} — ${ITEMS.length} objets portables en base.`, 'ok');
+	} catch (e) {
+		setEquipStatus('Erreur réseau : ' + e, 'err');
+	}
+}
+
+function setEquipStatus(msg, kind) {
+	const el = $('equip-status');
+	el.textContent = msg || '';
+	el.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+function fermerEquip() { $('equip-overlay').hidden = true; equipCamp = null; }
 
 // ── Rendu des résultats ──────────────────────────────────────────────────────
 function pct(x) { return (x * 100).toFixed(1) + ' %'; }
@@ -742,6 +962,12 @@ function renduResultats(data) {
 		.filter(c => (forcees[c] || []).length)
 		.map(c => ` · ✎ ${c.toUpperCase()} : ${escapeHtml((forcees[c] || []).join(', '))}`)
 		.join('');
+	// Un camp équipé doit le dire aussi : ses PA et ses armes ne sont pas ceux de l'espèce.
+	const equipes = data.equipement || {};
+	const equipTxt = ['a', 'b']
+		.filter(c => (equipes[c] || []).length)
+		.map(c => ` · 🛡 ${c.toUpperCase()} : ${escapeHtml((equipes[c] || []).join(', '))}`)
+		.join('');
 	const tauxA = r.a.taux, tauxB = r.b.taux, tauxN = Math.max(0, 1 - tauxA - tauxB);
 	const maxCombat = Math.max(pots.a.combat.total, pots.b.combat.total);
 	const maxSurvie = Math.max(pots.a.combat.survie, pots.b.combat.survie, 1);
@@ -762,7 +988,7 @@ function renduResultats(data) {
 			<div class="stat-box"><div class="v">${r.rounds.moyen}</div><div class="l">rounds en moyenne</div></div>
 			<div class="stat-box"><div class="v">${r.rounds.mediane}</div><div class="l">rounds (médiane)</div></div>
 			<div class="stat-box"><div class="v">${r.rounds.min}–${r.rounds.max}</div><div class="l">rounds (min–max)</div></div>
-			<div class="stat-box"><div class="v">${r.passes}</div><div class="l">passes · distance ${r.distance} · ${terrainTxt}${facteurTxt}${objetsTxt}${statsTxt}</div></div>
+			<div class="stat-box"><div class="v">${r.passes}</div><div class="l">passes · distance ${r.distance} · ${terrainTxt}${facteurTxt}${objetsTxt}${statsTxt}${equipTxt}</div></div>
 		</div>
 		<div class="duel-grid" style="margin-top:16px;">
 			${renduCamp('a', r.a, pots.a, maxCombat, maxSurvie, maxSupport)}
@@ -825,18 +1051,40 @@ for (const camp of ['a', 'b']) {
 				STATS_FORCEES[camp] = {};
 				majBoutonStats(camp);
 			}
+			// Idem pour l'équipement : une cotte taillée pour un orc n'a aucun sens sur
+			// un gobelin, et la garder en douce truquerait le run suivant.
+			EQUIP[camp] = {};
+			majBoutonEquip(camp);
 			sauverSelection();
 		});
 	}
 	$('stats-btn-' + camp).addEventListener('click', () => ouvrirStats(camp));
+	$('equip-btn-' + camp).addEventListener('click', () => ouvrirEquip(camp));
 }
+$('equip-close').addEventListener('click', fermerEquip);
+$('equip-reset').addEventListener('click', () => {
+	if (!equipCamp) return;
+	EQUIP[equipCamp] = {};
+	renduPaperdoll(); majBoutonEquip(equipCamp);
+	setEquipStatus('Équipement retiré.', 'ok');
+});
+$('equip-select').addEventListener('change', e => {
+	const slot = e.target.dataset.slot;
+	if (!slot || !equipCamp) return;
+	if (e.target.value) EQUIP[equipCamp][slot] = e.target.value;
+	else delete EQUIP[equipCamp][slot];
+	renduPaperdoll(); majBoutonEquip(equipCamp);
+	$('equip-choix').hidden = true;
+});
 $('stats-apply').addEventListener('click', appliquerStats);
 $('stats-cancel').addEventListener('click', fermerStats);
 $('stats-close').addEventListener('click', fermerStats);
 $('stats-reset').addEventListener('click', reinitStats);
 // Échap ferme sans appliquer — un geste de sortie n'engage jamais rien.
 document.addEventListener('keydown', e => {
-	if (e.key === 'Escape' && !$('stats-overlay').hidden) fermerStats();
+	if (e.key !== 'Escape') return;
+	if (!$('stats-overlay').hidden) fermerStats();
+	else if (!$('equip-overlay').hidden) fermerEquip();
 });
 $('terrain').addEventListener('change', sauverSelection);
 // Signalement visuel dès que le champ s'écarte des règles du jeu.

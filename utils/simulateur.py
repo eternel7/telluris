@@ -50,9 +50,10 @@ import math
 import random
 import re
 
-from models.character_stats import compute_character_level
+from models.character_stats import BaseStats, compute_character_level
 from utils import combat
-from utils.characters import item_ref_id
+from utils.characters import (SLOT_ZONE, item_ref_id, main_occupee_par_deux_mains,
+							  recompute_equipment_bonus, restriction_satisfaite)
 from utils.competences import (competence_utilisable_combat, condition_remplie,
 							   furtivite_passive, normaliser_competence)
 from utils.consommables import effet_instantane, est_consommable
@@ -196,6 +197,108 @@ def _appliquer_stats_forcees(snap: dict, plein: bool = False) -> dict:
 	return snap
 
 
+# ── Équiper une espèce HUMANOÏDE (paperdoll de l'écran) ──────────────────────────────
+# Un monstre n'a pas d'équipement en jeu ; le banc d'essai, lui, doit pouvoir répondre à
+# « et si cet orc portait une cotte de mailles et une hache ? ». Rien n'est écrit en base
+# et le moteur n'est pas touché : on habille le SNAPSHOT, avec les helpers existants.
+
+# Les 12 emplacements du paperdoll (miroir de `_VALID_SLOTS`, routers/user.py).
+SLOTS_EQUIPABLES = ("tete", "epaules", "torse", "mains", "jambes", "pieds",
+					"cou", "anneau_1", "anneau_2", "ceinture",
+					"main_droite", "main_gauche")
+# Seul le tag qui ouvre le paperdoll — une espèce sans lui reste nue.
+TAG_EQUIPABLE = "humanoide"
+
+
+def espece_equipable(espece: dict) -> bool:
+	"""Cette espèce peut-elle porter un équipement dans le simulateur ?"""
+	return TAG_EQUIPABLE in ((espece or {}).get("tags") or [])
+
+
+def normaliser_slots_equipes(brut, get_doc_fn, caracts: dict) -> dict:
+	"""Vue validée d'un équipement `{slot: item_id}`, ou `{}` si rien n'est porté.
+
+	⚠️ FAIL-CLOSED, comme `equip_item` en jeu : slot inconnu, item introuvable, item
+	incompatible avec le slot, restriction de caractéristique non tenue ou arme à deux
+	mains dont l'autre main est occupée ⇒ `ValueError` (→ 422). Une pièce silencieusement
+	écartée donnerait un run qu'on croirait équipé.
+
+	⚠️ `caracts` = celles du snapshot de RÉFÉRENCE (médian ou borné), jamais celles d'une
+	passe : une espèce est re-tirée à chaque passe, donc une même pièce passerait ou non
+	selon le tirage — l'équipement doit être décidé une fois pour toutes."""
+	if not brut:
+		return {}
+	if not isinstance(brut, dict):
+		raise ValueError("L'équipement doit être un objet JSON {slot: item_id}")
+	slots = {}
+	for slot, ref in brut.items():
+		slot = str(slot)
+		if not ref:
+			continue
+		if slot not in SLOTS_EQUIPABLES:
+			raise ValueError(f"Emplacement inconnu : {slot!r}")
+		item_id = str(ref)
+		item = get_doc_fn(item_id)
+		if not item or item.get("type") != "item":
+			raise LookupError(f"Objet introuvable : {item_id}")
+		if slot not in (item.get("slots") or []):
+			raise ValueError(f"{item.get('nom', item_id)} ne se porte pas à « {slot} »")
+		ok, manque = restriction_satisfaite(item.get("restriction"), caracts)
+		if not ok:
+			exige = ", ".join(f"{c} {v}" for c, v in manque.items())
+			raise ValueError(f"{item.get('nom', item_id)} exige {exige}")
+		slots[slot] = item_id
+	# Deux mains : contrôlé APRÈS coup, l'ordre des clés d'un dict ne dit rien de
+	# l'intention et une hache posée avant le bouclier doit refuser tout autant.
+	for slot in ("main_droite", "main_gauche"):
+		bloqueur = main_occupee_par_deux_mains(
+			slots, lambda r: get_doc_fn(item_ref_id(r)), slot)
+		if slots.get(slot) and bloqueur:
+			raise ValueError(f"{bloqueur.get('nom', 'Une arme à deux mains')} occupe les deux mains")
+	return slots
+
+
+def _equiper_snapshot(snap: dict, slots: dict) -> dict:
+	"""Habille un snapshot d'espèce : PA ventilés par zone, bonus d'arme, modes cac/jet/tir.
+
+	Ne duplique AUCUNE formule — tout passe par les helpers du moteur :
+	  • `recompute_equipment_bonus(slots)` prend un dict de slots, pas un character ;
+	  • `_refresh_snapshot_stats` recompose les dérivées, y compris `cd`, `degats_cd`,
+		`toucher_magique` et `pm_max` — absents d'un snapshot monstre, et indispensables
+		dès qu'on équipe un arc ;
+	  • `_weapon_attacks` ne lit que `character["slots"]` : un dict synthétique suffit.
+
+	⚠️ `caracts_base` ET `equipment_bonus` sont posés sur le snapshot, tous les deux :
+	c'est ce que relit `_refresh_snapshot_stats` à chaque pose ou expiration d'effet.
+	Sans eux, l'équipement se volatiliserait au premier buff du duel — même piège que les
+	stats forcées, résolu ici en donnant au monstre la forme d'un snapshot de joueur.
+
+	⚠️ `attaque_profils` est posé APRÈS le refresh : le moteur le laisse volontairement
+	figé (le recalculer relirait les docs d'items à chaque tour)."""
+	if not slots:
+		return snap
+	equipment = recompute_equipment_bonus(slots)
+	caracts = dict(snap.get("caracts_base") or {})
+	for code, delta in (equipment.buffs or {}).items():
+		if code in caracts:
+			caracts[code] = max(0, int(caracts[code] or 0) + int(delta))
+	snap["caracts_base"] = caracts
+	snap["equipment_bonus"] = equipment.model_dump()
+	snap["esquive_base"] = snap.get("esquive_base", 0)
+	combat._refresh_snapshot_stats(snap)
+	snap["currentPV"], snap["currentPM"] = snap["pv_max"], snap["pm_max"]
+
+	base = BaseStats(v=caracts.get("V", 0), f=caracts.get("F", 0), r=caracts.get("R", 0),
+					 ag=caracts.get("Ag", 0), vol=caracts.get("Vol", 0),
+					 int_=caracts.get("Int", 0), cha=caracts.get("Cha", 0),
+					 ch=caracts.get("Ch", 0))
+	profils = combat._weapon_attacks({"slots": slots}, base)
+	snap["attaque_profils"] = profils
+	snap["portee"] = next((p["portee"] for p in profils if p["mode"] == "cac"), 1)
+	snap["_sim_equipement"] = dict(slots)
+	return snap
+
+
 # Bornes d'une espèce offertes dans la liste des profils de l'écran, à côté du point
 # médian : le PIRE et le MEILLEUR spécimen possible, sans profil.
 BORNES = ("min", "max")
@@ -304,10 +407,19 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 	# lecture de doc : une clé fautive doit être signalée, pas noyée dans un 404.
 	stats_forcees = normaliser_stats_forcees(spec.get("stats"))
 
+	# Équipement d'une espèce humanoïde — validé plus bas (il faut les caracts de
+	# référence), posé par `_fini`. Vide pour un character : il a déjà ses vrais slots.
+	equipement: dict = {}
+
 	def _fini(snap: dict) -> dict:
-		"""Snapshot prêt : normalisé, puis les stats forcées posées à pleine forme."""
+		"""Snapshot prêt : normalisé, ÉQUIPÉ, puis les stats forcées à pleine forme.
+
+		⚠️ L'ordre compte : la normalisation pose un `attaque_profils` par défaut
+		(« Attaque naturelle ») que l'équipement doit écraser, et une valeur saisie à la
+		main doit primer sur tout le reste."""
 		snap["_sim_stats"] = dict(stats_forcees)
-		return _appliquer_stats_forcees(_normaliser_snapshot(snap), plein=True)
+		snap = _equiper_snapshot(_normaliser_snapshot(snap), equipement)
+		return _appliquer_stats_forcees(snap, plein=True)
 
 	if type_ == "espece":
 		if not doc_id.startswith("espece:"):
@@ -340,6 +452,17 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 			label += f" ({'minimum' if borne == 'min' else 'maximum'})"
 		elif profil:
 			label += f" ({profil.get('nom', profil_id)})"
+
+		# Équipement : validé contre les caracts de RÉFÉRENCE (le snapshot nu, médian ou
+		# borné), donc une seule fois — pas contre le tirage d'une passe.
+		if spec.get("slots"):
+			if not espece_equipable(espece):
+				raise ValueError(
+					f"{espece.get('nom', doc_id)} n'est pas humanoïde : rien à équiper")
+			nu = (_normaliser_snapshot(combat.build_monster_snapshot(espece, profil, 0))
+				  if borne else _snapshot_median(espece, profil))
+			equipement = normaliser_slots_equipes(
+				spec.get("slots"), get_doc_fn, nu.get("caracts_base") or {})
 
 		def fabrique():
 			# Re-tirage PAR PASSE : fidèle au jeu, où chaque rencontre re-tire les stats.
@@ -761,6 +884,12 @@ def fiche_snapshot(snap: dict) -> dict:
 		"degats_cc": snap.get("degats_cc", "") or "",
 		"degats_cd": snap.get("degats_cd", "") or "",
 	}
+
+
+def equipement_du_snapshot(snap: dict) -> dict:
+	"""Ce que porte un belligérant : `{slot: item_id}` — vide pour un character (il a
+	ses vrais slots) comme pour une espèce nue."""
+	return dict((snap or {}).get("_sim_equipement") or {})
 
 
 def _recap_arsenal(bel: dict) -> dict:

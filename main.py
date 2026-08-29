@@ -1148,6 +1148,11 @@ def admin_simulateur_run(
 				(payload.get(camp) or {}).get("stats")) or {}).keys())
 			for camp in ("a", "b")
 		},
+		# Emplacements réellement équipés (lus sur le snapshot, donc APRÈS validation).
+		"equipement": {
+			camp: sorted((bel["snapshot_reference"].get("_sim_equipement") or {}).keys())
+			for camp, bel in (("a", bel_a), ("b", bel_b))
+		},
 		# Le facteur essayé ET celui du monde : l'écran doit pouvoir dire qu'il a dévié.
 		"facteur_armure": facteur,
 		"facteur_armure_reel": facteur_reel,
