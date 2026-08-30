@@ -10,6 +10,7 @@ from models.character_stats import (
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
 	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id, item_ref_weight,
+	lieu_label,
 )
 from utils.consommables import (
 	caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus,
@@ -23,6 +24,7 @@ from utils import recrutement
 from utils import montures as montures_util
 from utils import escorte as escorte_util
 from utils import animations as animations_util
+from utils import journal
 
 BATTLE_MAPS = [
 	"map0001.jpg", "map0002.jpg", "map0003.jpg", "map0004.jpg",
@@ -3146,6 +3148,23 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# Quêtes de « chasse » (élite marquée) : complétées si le monstre porteur du quete_chasse
 	# est tombé. Même fenêtre d'idempotence que les kills ci-dessus.
 	maj_progress_chasse(character, combat_doc.get("monstres", []))
+	# Bestiaire du carnet (onglet 📖) : TOUTES les espèces de ce combat, tuées OU NON — c'est
+	# un carnet d'observation, une bête qu'on a fuie a bien été rencontrée. D'où un hook à
+	# part de `maj_progress_kills`, qui ne retient que les morts.
+	# ⚠️ Ici et pas dans `start_combat` : celui-ci ne sauve JAMAIS le doc personnage, alors
+	# que cette zone-ci est déjà sous le garde exactly-once `combats_recompenses` et sera
+	# persistée par le `_finalize_membre` du principal, plus bas — donc coût zéro. Et rien
+	# n'échappe au hook : /play interdit d'abandonner un combat actif et re-finalise les
+	# combats terminés.
+	# ⚠️ Le doc `lieu:*` (le plus gros du jeu, hors cache de requête) n'est relu QUE si une
+	# espèce de ce combat n'a pas encore ce lieu à son actif : un combat répété au même
+	# endroit ne coûte aucune lecture.
+	lieu_id = character.get("lieu", "")
+	monstres = combat_doc.get("monstres", [])
+	label = ""
+	if journal.lieux_a_nommer(character, monstres, lieu_id):
+		label = lieu_label(get_doc(lieu_id), lieu_id)
+	journal.noter_rencontres(character, monstres, lieu_id, label)
 	# Focalisation : objectif de la quête focalisée atteint → effacée (même save).
 	effacer_si_objectif_atteint(character)
 

@@ -40,6 +40,7 @@ from utils import montures as montures_util
 from utils import auberge as auberge_util
 from utils import escorte as escorte_util
 from utils import fiche as fiche_util
+from utils import journal as journal_util
 from utils import animations as animations_util
 from utils import lint_dialogues
 from utils import dev_tools
@@ -804,6 +805,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"intro": intro_payload,
 			"ressource_recoltable": ressource_recoltable,
 			"relations_lieux": relations_lieux,
+			# Onglet 📖 : le carnet du personnage + son bestiaire. ⚠️ Clé de PREMIER NIVEAU et
+			# non `bloc_fiche` : ce bloc-là est fusionné dans le payload d'un compagnon, or
+			# l'onglet est `tab-principal-only` — le journal n'appartient qu'au principal.
+			"journal": journal_util.journal_payload(character, get_doc),
 			"focalisation": focalisation_payload,
 			"guidage": guidage_payload,
 		},

@@ -1042,6 +1042,7 @@
 		.sh-quest-list-active > .sh-rel-scroll { min-height: 35vh; max-height : 38vh; }
 		.sh-quest-list-ended > .sh-rel-scroll { max-height : 35vh; }
 		.sh-capa-list > .sh-rel-scroll { max-height: 34vh; }
+		.sh-jnl-list          > .sh-rel-scroll { max-height: 34vh; }
 		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
 		.sh-quest-title { flex: 1; min-width: 200px; font-weight: bold; font-size: 1rem; }
@@ -1064,6 +1065,28 @@
 		.sh-quest-reward { display: flex; gap: 8px; margin-top: 6px; font-size: 0.9rem; }
 		.sh-journal-entry { padding: 10px; background: var(--btn-bg); border-left: 3px solid var(--accent-color); margin-bottom: 8px; font-size: 0.95rem; }
 		.sh-journal-date { font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
+		/* ⚠️ pre-wrap : une entrée est MULTI-LIGNE et `auberge.nettoyer_texte` préserve ses
+		   sauts de ligne — les écraser au rendu annulerait le soin pris au serveur (même
+		   règle, même raison que `.aub-msg-txt` pour une annonce de taverne). */
+		.sh-journal-txt { white-space: pre-wrap; overflow-wrap: anywhere; }
+		/* Bestiaire : une ligne par espèce — vignette servie par le mount /monsters. */
+		.jnl-best { display: flex; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--border-color); }
+		.jnl-best:last-child { border-bottom: 0; }
+		.jnl-best-img {
+			width: 64px; height: 64px; flex: 0 0 64px; border-radius: 6px;
+			background: rgba(0,0,0,.25) center/contain no-repeat;
+			border: 1px solid var(--border-color);
+		}
+		.jnl-best-corps { flex: 1 1 auto; min-width: 0; }
+		.jnl-best-nom { font-weight: bold; }
+		.jnl-best-compte { font-size: .82rem; color: var(--muted); font-weight: normal; }
+		.jnl-best-desc { font-size: .88rem; color: var(--muted); margin: 3px 0; }
+		.jnl-best-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+		.jnl-best-tag {
+			font-size: .72rem; padding: 1px 6px; border-radius: 9px;
+			background: rgba(255,255,255,.06); border: 1px solid var(--border-color);
+		}
+		.jnl-best-lieux { font-size: .8rem; color: var(--muted); margin-top: 3px; }
 		.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0px; color: var(--muted); font-size: 1rem; }
 		.sh-empty-icon { font-size: 2.1rem; }
 		.sh-xp-btn {
@@ -1860,16 +1883,48 @@
 					</div>
 
 					<!-- ── JOURNAL ── -->
+					{# Deux sections en ACCORDÉON (brique `.acc-*`, partagée avec le panneau 👥) :
+					   ce que le personnage écrit, et ce qu'il a croisé. Rendu 100 % CLIENT par
+					   renderFicheJournal (JOURNAL_INIT à l'init + resync après chaque écriture) —
+					   la coquille ci-dessous n'émet que les conteneurs vides. Rendre les listes
+					   ici EN PLUS les peindrait deux fois, et l'ombre de défilement sauterait au
+					   premier resync (cf. § listes scrollables). #}
 					<div class="sheet-panel" id="sh-journal">
-						{% set jnl = character.get("journal",[]) %}
-						{% if jnl %}
-							{% for e in jnl|reverse %}
-							<div class="sh-journal-entry">
-								<div class="sh-journal-date">{{ e.get("date","—") }}{% if e.get("lieu") %} · {{ e.lieu }}{% endif %}</div>
-								{{ e.get("texte","") }}
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-carnet"
+									onclick="toggleAccordeon(JNL_SECTIONS, 'carnet', JNL_SECTION_KEY)">
+								<span>✍️ Carnet</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-carnet">
+								<div class="aub-ecrire">
+									<div id="jnl-fournitures" class="aub-fournitures"></div>
+									<textarea id="jnl-txt" class="aub-annonce-txt" rows="4"
+											  placeholder="Ce que vous voulez consigner…"
+											  maxlength="{{ journal.longueur_max }}"></textarea>
+									<div class="aub-ecrire-bas">
+										<span id="jnl-reste"></span>
+										<button class="sub-loc-btn" id="jnl-btn" onclick="ecrireJournal()">🖋️ Consigner</button>
+									</div>
+								</div>
+								{# Wrapper qui NE DÉFILE PAS (il porte l'ombre ::after) + UN enfant
+								   qui défile : le renderer écrase l'INTÉRIEUR du scroller, jamais
+								   le wrapper — sinon l'ombre partirait au premier rendu. #}
+								<div class="sh-jnl-list sh-scroll scrollable">
+									<div id="jnl-entrees" class="sh-rel-scroll"></div>
+								</div>
 							</div>
-							{% endfor %}
-						{% else %}<div class="sh-empty"><span class="sh-empty-icon">📖</span>Le journal est vide.</div>{% endif %}
+						</section>
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-bestiaire"
+									onclick="toggleAccordeon(JNL_SECTIONS, 'bestiaire', JNL_SECTION_KEY)">
+								<span>🐾 Bestiaire (<span id="jnl-best-compte">0</span>)</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-bestiaire">
+								<div class="sh-jnl-list sh-scroll scrollable">
+									<div id="jnl-bestiaire" class="sh-rel-scroll"></div>
+								</div>
+							</div>
+						</section>
 					</div>
 				</div><!-- /.sheet-body -->
 			</div><!-- /.sheet-right-col -->
@@ -1984,11 +2039,11 @@
 			<button class="sheet-tab-btn close-sheet-btn" onclick="closeGroupe()" role="button">✕ Fermer</button>
 		</div>
 		<!-- Accordéon : une section ouverte à la fois (choix mémorisé par personnage). -->
-		<section class="grp-section">
-			<button type="button" class="grp-head" id="grp-head-compagnons" onclick="toggleGroupeSection('compagnons')">
-				<span>👥 Compagnons</span><span class="grp-chevron">▾</span>
+		<section class="acc-section">
+			<button type="button" class="acc-head" id="acc-head-compagnons" onclick="toggleGroupeSection('compagnons')">
+				<span>👥 Compagnons</span><span class="acc-chevron">▾</span>
 			</button>
-			<div class="grp-body" id="grp-body-compagnons">
+			<div class="acc-body" id="acc-body-compagnons">
 				{# Une CARTE par compagnon (renderCharacterCard clone le <template> ci-dessous) :
 				   même visualisation que la fiche du joueur, pied « part / affinité » en plus. #}
 				<div id="grp-compagnons-list" class="cards-list"></div>
@@ -2004,11 +2059,11 @@
 				<div id="grp-proteges-list" class="cards-list"></div>
 			</div>
 		</section>
-		<section class="grp-section">
-			<button type="button" class="grp-head" id="grp-head-inventaire" onclick="toggleGroupeSection('inventaire')">
-				<span>🎒 Inventaire du groupe</span><span class="grp-chevron">▾</span>
+		<section class="acc-section">
+			<button type="button" class="acc-head" id="acc-head-inventaire" onclick="toggleGroupeSection('inventaire')">
+				<span>🎒 Inventaire du groupe</span><span class="acc-chevron">▾</span>
 			</button>
-			<div class="grp-body" id="grp-body-inventaire">
+			<div class="acc-body" id="acc-body-inventaire">
 				<div id="grp-inv-vide" class="sh-empty" style="display:none">
 					<span class="sh-empty-icon">👥</span>Ni compagnon ni monture : rien à échanger.
 				</div>
@@ -2044,17 +2099,17 @@
 		/* (La vignette ronde `.rec-portrait` des listes a disparu : recrues et compagnons
 		   s'affichent désormais avec la CARTE de personnage, portrait cadré compris.) */
 		/* ── Panneau 👥 Groupe ────────────────────────────────────────────────── */
-		.grp-section { border: 1px solid var(--border-color, #6b5836); border-radius: 6px; overflow: hidden; }
-		.grp-head {
+		.acc-section { border: 1px solid var(--border-color, #6b5836); border-radius: 6px; overflow: hidden; }
+		.acc-head {
 			width: 100%; display: flex; align-items: center; justify-content: space-between;
 			padding: .6rem .8rem; background: rgba(0,0,0,.18); border: 0; cursor: pointer;
 			color: inherit; font: inherit; font-weight: 700;
 		}
-		.grp-head:hover { background: rgba(0,0,0,.28); }
-		.grp-chevron { transition: transform .15s ease; }
-		.grp-section.open .grp-chevron { transform: rotate(180deg); }
-		.grp-body { display: none; padding: .7rem .8rem; }
-		.grp-section.open .grp-body { display: block; }
+		.acc-head:hover { background: rgba(0,0,0,.28); }
+		.acc-chevron { transition: transform .15s ease; }
+		.acc-section.open .acc-chevron { transform: rotate(180deg); }
+		.acc-body { display: none; padding: .7rem .8rem; }
+		.acc-section.open .acc-body { display: block; }
 		/* Les deux sacs côte à côte ; en dessous de 720px ils s'empilent (les flèches
 		   gardent leur sens : ← / → restent lisibles en colonne). */
 		.grp-inv-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
@@ -5500,6 +5555,229 @@ function applyRelFilter(q) {
 
 // Init : rendu de la liste des lieux connus + branchement du filtre.
 renderFicheRelations(RELATIONS_LIEUX_INIT);
+
+// ── Accordéon PARTAGÉ ────────────────────────────────────────────────────────────
+// Brique commune au panneau 👥 Groupe et à l'onglet 📖 Journal : une seule section ouverte
+// par accordéon, le choix mémorisé par personnage. Chaque section s'adresse par l'id de son
+// EN-TÊTE (`acc-head-<id>`) ; c'est le PARENT (`.acc-section`) qui porte la classe `open`.
+//
+// ⚠️ `toggleVilleGroup` (accordéon des relations) reste DÉLIBÉRÉMENT à part : chevron ▶ et
+// rotation de 90°, pas de cadre, sections générées en JS (`data-ville-id`), et surtout une
+// sémantique de mémorisation différente — il SUPPRIME sa clé quand rien n'est ouvert, là où
+// celui-ci écrit ''. Les fusionner mélangerait deux conventions pour un gain cosmétique.
+function _accLsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function _accLsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+function _accAppliquer(ids, ouverte) {
+	(ids || []).forEach(s => {
+		const tete = document.getElementById('acc-head-' + s);
+		if (tete) tete.parentElement.classList.toggle('open', s === ouverte);
+	});
+}
+
+function toggleAccordeon(ids, id, cle) {
+	const tete = document.getElementById('acc-head-' + id);
+	if (!tete) return;
+	const ouvrir = !tete.parentElement.classList.contains('open');
+	_accAppliquer(ids, ouvrir ? id : '');
+	if (cle) _accLsSet(cle, ouvrir ? id : '');
+}
+
+// ⚠️ `defaut` ne s'applique QUE si rien n'a jamais été mémorisé (`null`) : une chaîne vide
+// est un choix explicite du joueur — « tout replié » —, et le rouvrir serait le contredire.
+function _accRestaurer(ids, cle, defaut) {
+	const ouverte = cle ? _accLsGet(cle) : null;
+	_accAppliquer(ids, ouverte === null ? defaut : ouverte);
+}
+
+// ── Onglet 📖 Journal ────────────────────────────────────────────────────────────
+// Le CARNET du personnage (ce qu'il écrit) et son BESTIAIRE (ce qu'il a croisé).
+// ⚠️ Ici « journal » = un carnet, PAS un log — le mot désigne partout ailleurs dans le
+// projet le journal de combat.
+// Rendu 100 % client, patron renderFicheRelations : payload JOURNAL_INIT à l'init, puis
+// resync par la réponse de POST /api/journal (Convention §10).
+const JOURNAL_INIT = {{ (journal or {}) | tojson | safe }};
+const JNL_SECTIONS = ['carnet', 'bestiaire'];
+const JNL_SECTION_KEY = 'telluris.play.journal_section.' + REL_CHAR_ID;
+let _jnlEtat = null;
+
+// Fournitures + état du bouton : UNE seule fonction pour les deux, comme `_aubMajEcriture`.
+// C'est le même relevé qui décide de ce qu'on affiche et de ce qu'on autorise — les séparer
+// laisserait le bouton actif au-dessus d'une ligne barrée.
+// ⚠️ Le serveur reste seul juge : ce grisage est indicatif, le 422 est la vraie garde.
+function _jnlMajEcriture() {
+	const dispo = (_jnlEtat && _jnlEtat.fournitures) || {};
+	const four = document.getElementById('jnl-fournitures');
+	if (four) {
+		// Le papier et l'encre PARTENT avec la page, la plume reste : on le dit avant le clic,
+		// pas après. La distinction est déjà dans la donnée (`composant` vs `outil`).
+		const noms = { papier: '📄 papier', encre: '🖊️ encre', plume_a_ecrire: '🪶 plume' };
+		const consommee = { papier: true, encre: true };
+		four.innerHTML = 'Pour écrire : ' + Object.keys(noms).map(k =>
+			`<span class="aub-fourniture${dispo[k] ? '' : ' manque'}">${noms[k]}${consommee[k] ? ' <span class="aub-depense">(dépensé)</span>' : ''}</span>`
+		).join(' · ');
+	}
+	const btn = document.getElementById('jnl-btn');
+	if (btn) btn.disabled = !Object.keys(dispo).length || !Object.values(dispo).every(Boolean);
+}
+
+function _jnlReste() {
+	const zone = document.getElementById('jnl-txt');
+	const reste = document.getElementById('jnl-reste');
+	if (!zone || !reste || !_jnlEtat) return;
+	reste.textContent = `${zone.value.length}/${_jnlEtat.longueur_max}`;
+}
+
+// ⚠️ Lignes bâties en DOM (`createElement` + `textContent`) et non en template literal : le
+// texte est saisi par le joueur, et `textContent` l'échappe sans qu'on ait à y penser
+// (même chemin que les messages de taverne).
+function _jnlEntreeNode(e) {
+	const quand = new Date((e.cree_at || 0) * 1000).toLocaleString([], {
+		day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+	});
+	const ligne = document.createElement('div');
+	ligne.className = 'sh-journal-entry';
+	const tete = document.createElement('div');
+	tete.className = 'sh-journal-date';
+	tete.textContent = quand + (e.lieu ? ' · ' + e.lieu : '');
+	const txt = document.createElement('div');
+	txt.className = 'sh-journal-txt';
+	txt.textContent = e.texte || '';
+	ligne.appendChild(tete);
+	ligne.appendChild(txt);
+	return ligne;
+}
+
+function _jnlBestNode(b) {
+	const ligne = document.createElement('div');
+	ligne.className = 'jnl-best';
+	const img = document.createElement('div');
+	img.className = 'jnl-best-img';
+	// ⚠️ Mount `/monsters` (comme les jetons de combat et les offres d'étable) : le serveur
+	// publie un nom de fichier nu, jamais un chemin.
+	if (b.image) img.style.backgroundImage = `url('/monsters/${encodeURIComponent(b.image)}')`;
+	const corps = document.createElement('div');
+	corps.className = 'jnl-best-corps';
+
+	const nom = document.createElement('div');
+	nom.className = 'jnl-best-nom';
+	nom.textContent = b.nom || '?';
+	const compte = document.createElement('span');
+	compte.className = 'jnl-best-compte';
+	// « rencontres » et « abattus » sont DEUX comptes : on entre au bestiaire pour avoir vu
+	// la bête, pas pour l'avoir tuée.
+	compte.textContent = ` · ${b.combats} rencontre${b.combats > 1 ? 's' : ''}`
+		+ (b.tues ? `, ${b.tues} abattu${b.tues > 1 ? 's' : ''}` : '');
+	nom.appendChild(compte);
+	corps.appendChild(nom);
+
+	if (b.description) {
+		const d = document.createElement('div');
+		d.className = 'jnl-best-desc';
+		d.textContent = b.description;
+		corps.appendChild(d);
+	}
+	if ((b.lieux || []).length) {
+		const l = document.createElement('div');
+		l.className = 'jnl-best-lieux';
+		l.textContent = '📍 ' + b.lieux.join(', ');
+		corps.appendChild(l);
+	}
+	if ((b.tags || []).length) {
+		const tb = document.createElement('div');
+		tb.className = 'jnl-best-tags';
+		for (const t of b.tags) {
+			const chip = document.createElement('span');
+			chip.className = 'jnl-best-tag';
+			chip.textContent = t;
+			tb.appendChild(chip);
+		}
+		corps.appendChild(tb);
+	}
+	ligne.appendChild(img);
+	ligne.appendChild(corps);
+	return ligne;
+}
+
+function _jnlVide(icone, texte) {
+	const box = document.createElement('div');
+	box.className = 'sh-empty';
+	const i = document.createElement('span');
+	i.className = 'sh-empty-icon';
+	i.textContent = icone;
+	box.appendChild(i);
+	box.appendChild(document.createTextNode(texte));
+	return box;
+}
+
+function renderFicheJournal(data) {
+	if (!data) return;
+	_jnlEtat = data;
+
+	const entrees = document.getElementById('jnl-entrees');
+	if (entrees) {
+		entrees.innerHTML = '';
+		const liste = data.entrees || [];
+		if (!liste.length) {
+			entrees.appendChild(_jnlVide('📖', 'Le carnet est vierge.'));
+		} else {
+			// Le serveur les renvoie DÉJÀ de la plus récente à la plus ancienne : le client
+			// ne réordonne rien (c'est l'ordre de lecture d'un carnet).
+			for (const e of liste) entrees.appendChild(_jnlEntreeNode(e));
+		}
+	}
+
+	const best = document.getElementById('jnl-bestiaire');
+	if (best) {
+		best.innerHTML = '';
+		const liste = data.bestiaire || [];
+		if (!liste.length) {
+			best.appendChild(_jnlVide('🐾', "Aucune créature rencontrée pour l'instant."));
+		} else {
+			for (const b of liste) best.appendChild(_jnlBestNode(b));
+		}
+	}
+	const compte = document.getElementById('jnl-best-compte');
+	if (compte) compte.textContent = (data.bestiaire || []).length;
+
+	_jnlMajEcriture();
+	_jnlReste();
+	// ⚠️ Ré-appliquer l'accordéon APRÈS le rendu, comme renderFicheRelations ré-applique son
+	// filtre : le carnet ouvert par défaut, le joueur vient là pour écrire.
+	_accRestaurer(JNL_SECTIONS, JNL_SECTION_KEY, 'carnet');
+}
+
+async function ecrireJournal() {
+	const zone = document.getElementById('jnl-txt');
+	if (!zone || !zone.value.trim()) return;
+	const btn = document.getElementById('jnl-btn');
+	if (btn) btn.disabled = true;          // une page ne s'écrit pas deux fois d'un double-clic
+	try {
+		const res = await fetch('api/journal', {
+			method: 'POST', headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ texte: zone.value }),
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		zone.value = '';
+		renderFicheJournal(data);
+		// Le papier et l'encre viennent d'être dépensés : sans ce resync, l'onglet 🎒
+		// montrerait encore une feuille que le joueur n'a plus (Convention §10).
+		if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+		showToast('🖋️ Consigné. (papier et encre dépensés)');
+	} catch (err) {
+		console.error('Erreur journal', err);
+	} finally {
+		// ⚠️ `_jnlMajEcriture` et non `disabled = false` : après une écriture réussie il ne
+		// reste peut-être plus de papier, et le bouton doit alors RESTER grisé.
+		_jnlMajEcriture();
+	}
+}
+
+renderFicheJournal(JOURNAL_INIT);
+document.addEventListener('input', e => {
+	if (e.target && e.target.id === 'jnl-txt') _jnlReste();
+});
 (function () {
 	const f = document.getElementById('sh-rel-filter');
 	if (f) f.addEventListener('input', () => applyRelFilter(f.value));
@@ -7178,17 +7456,15 @@ let _grpSelId = null;         // compagnon affiché dans la colonne de droite de
 
 const GRP_SECTION_KEY = 'telluris.play.groupe_section.' + REL_CHAR_ID;
 const GRP_INV_KEY     = 'telluris.play.groupe_inv.' + REL_CHAR_ID;
+const GRP_SECTIONS    = ['compagnons', 'inventaire'];
 function _grpLsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function _grpLsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
-// Accordéon : une seule section ouverte, mémorisée par personnage.
+// Accordéon : une seule section ouverte, mémorisée par personnage. La mécanique vit dans
+// `toggleAccordeon` (brique `.acc-*` partagée avec l'onglet 📖) ; il ne reste ici que le nom
+// du groupe et sa clé — c'est tout ce qui distingue un accordéon d'un autre.
 function toggleGroupeSection(id) {
-	const ouvrir = !document.getElementById('grp-head-' + id).parentElement.classList.contains('open');
-	['compagnons', 'inventaire'].forEach(s => {
-		document.getElementById('grp-head-' + s).parentElement
-			.classList.toggle('open', s === id && ouvrir);
-	});
-	_grpLsSet(GRP_SECTION_KEY, ouvrir ? id : '');
+	toggleAccordeon(GRP_SECTIONS, id, GRP_SECTION_KEY);
 }
 
 function renderGroupe(data) {
@@ -7442,11 +7718,7 @@ function _renderGroupePanel(data) {
 	renderGroupe(data);
 	if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
 	(data.departs || []).forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
-	const ouverte = _grpLsGet(GRP_SECTION_KEY);
-	['compagnons', 'inventaire'].forEach(s => {
-		document.getElementById('grp-head-' + s).parentElement
-			.classList.toggle('open', s === (ouverte === null ? 'compagnons' : ouverte));
-	});
+	_accRestaurer(GRP_SECTIONS, GRP_SECTION_KEY, 'compagnons');
 	document.getElementById('game-container').classList.add('panel-hidden');
 	document.getElementById('groupe-panel').classList.remove('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'instant' });

@@ -44,6 +44,7 @@ from utils import montures
 from utils import escorte
 from utils import expedition
 from utils import auberge
+from utils import journal as journal_util
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -2016,3 +2017,65 @@ async def spend_xp_vocation(
 		"voc_niveau":    voc_niveau + 1,
 		"xp_cout_next":  (voc_niveau + 2) * 5,
 	}
+
+
+@user_router.post("/journal")
+async def ecrire_journal(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Consigne une entrée dans le carnet du personnage (onglet 📖).
+
+	⚠️ Le carnet appartient au PRINCIPAL et à lui seul — pas de `_acteur` ici, contrairement
+	aux autres actions de fiche : l'onglet est `tab-principal-only` (un compagnon n'a ni
+	quêtes, ni relations marchandes, ni journal), et l'on écrit son journal avec SA propre
+	plume, jamais avec celle d'un compagnon.
+
+	⚠️ Exige papier + encre + plume et DÉPENSE le papier et l'encre — la plume est un `outil`,
+	elle sert et ressert. C'est la règle du tableau d'information de l'auberge, réutilisée
+	telle quelle (`utils/auberge.py`) : deux règles d'écriture divergentes seraient un défaut.
+
+	⚠️ MÊME SÉQUENCE que `consommer` / `lancer_sort` / `poser_annonce` : contrôle du texte
+	AVANT la dépense (une saisie vide ne coûte pas une feuille), retrait en MÉMOIRE, puis un
+	seul `save_doc`. Un échec laisse donc le sac intact en base."""
+	if not current_user:
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	manquantes = auberge.fournitures_manquantes(get_doc, [character])
+	if manquantes:
+		libelles = {"papier": "du papier", "encre": "de l'encre",
+					"plume_a_ecrire": "une plume à écrire"}
+		raise HTTPException(
+			status_code=422,
+			detail="Il vous manque " + ", ".join(libelles.get(m, m) for m in manquantes) + ".")
+
+	texte = auberge.nettoyer_texte(body.get("texte"), journal_util.longueur_max())
+	if not texte:
+		raise HTTPException(status_code=422, detail="Une page blanche ne s'écrit pas.")
+
+	retire, _ = auberge.retirer_fournitures(get_doc, character)
+	if not retire:
+		# Le contrôle vient de passer : on ne tombe ici qu'en cas de course entre deux
+		# écritures. Mieux vaut un refus qu'une entrée gratuite.
+		raise HTTPException(status_code=409, detail="Vos fournitures viennent de vous manquer.")
+
+	# Le lieu est consigné sous son LIBELLÉ : les docs `lieu:*` sont les plus gros du jeu et
+	# hors du cache de requête — le résoudre au rendu coûterait une lecture par entrée
+	# affichée (même dénormalisation qu'`auteur_nom` sur un message de taverne).
+	lieu_id = character.get("lieu", "")
+	journal_util.nouvelle_entree(character, texte,
+								 lieu_label(get_doc(lieu_id), lieu_id) if lieu_id else "")
+
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+
+	payload = journal_util.journal_payload(character, get_doc)
+	payload["consomme"] = list(auberge.FOURNITURES_CONSOMMEES)
+	# ⚠️ Le SAC vient de changer (Convention §10) : sans ce bloc, l'onglet 🎒 resterait figé
+	# sur l'inventaire du dernier chargement de /play et le joueur y verrait encore sa feuille.
+	payload["inventaire_payload"] = _inventory_payload(character)
+	return payload

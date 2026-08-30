@@ -436,6 +436,19 @@ AUBERGE_TABLE_MESSAGES_MAX: int = 10
 AUBERGE_TABLES_MAX: int = 8
 AUBERGE_ANNONCE_LONGUEUR_MAX: int = 800
 
+# ── Journal du personnage (onglet 📖) ─────────────────────────────────────────────
+# Le CARNET, pas un log. ⚠️ Écrire une entrée suit EXACTEMENT la règle du tableau
+# d'information d'une auberge : papier + encre + plume exigés, papier et encre dépensés
+# (cf. auberge.FOURNITURES_ANNONCE / FOURNITURES_CONSOMMEES — une seule règle d'écriture
+# dans tout le jeu). Les trois réglages ci-dessous sont donc INDÉPENDANTS de ceux de la
+# taverne : on peut vouloir un avis public court et un carnet intime long.
+# LONGUEUR_MAX : signes d'une entrée. ENTREES_MAX : mémo borné, les plus ANCIENNES sautent.
+# BESTIAIRE_LIEUX_MAX : lieux retenus par espèce — le carnet dit où l'on a commencé à la
+#   croiser, il n'a pas à devenir un journal de bord.
+JOURNAL_LONGUEUR_MAX: int = 800
+JOURNAL_ENTREES_MAX: int = 50
+JOURNAL_BESTIAIRE_LIEUX_MAX: int = 5
+
 # ── Accès (barrières PNJ gardiennes) ──────────────────────────────────────────────
 # Un lieu peut porter un bloc `acces` (gardien, conditions, cycle) qui en interdit
 # l'entrée tant que les conditions ne sont pas remplies — cf. utils/acces.py.
@@ -719,6 +732,9 @@ def current_world_variables() -> dict:
 		"AUBERGE_TABLE_MESSAGES_MAX": AUBERGE_TABLE_MESSAGES_MAX,
 		"AUBERGE_TABLES_MAX": AUBERGE_TABLES_MAX,
 		"AUBERGE_ANNONCE_LONGUEUR_MAX": AUBERGE_ANNONCE_LONGUEUR_MAX,
+		"JOURNAL_LONGUEUR_MAX": JOURNAL_LONGUEUR_MAX,
+		"JOURNAL_ENTREES_MAX": JOURNAL_ENTREES_MAX,
+		"JOURNAL_BESTIAIRE_LIEUX_MAX": JOURNAL_BESTIAIRE_LIEUX_MAX,
 		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
@@ -782,6 +798,7 @@ def load_world_variables() -> dict:
 	global AUBERGE_NUIT_COUT_CUIVRE, AUBERGE_NUIT_PASSES_ATELIER
 	global AUBERGE_MESSAGE_DUREE_SECONDES, AUBERGE_TABLE_MESSAGES_MAX
 	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
+	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
 	global ACCES_GARDIEN_ACTIF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
@@ -942,6 +959,11 @@ def load_world_variables() -> dict:
 	AUBERGE_TABLE_MESSAGES_MAX = max(1, int(v.get("AUBERGE_TABLE_MESSAGES_MAX", AUBERGE_TABLE_MESSAGES_MAX)))
 	AUBERGE_TABLES_MAX = max(1, int(v.get("AUBERGE_TABLES_MAX", AUBERGE_TABLES_MAX)))
 	AUBERGE_ANNONCE_LONGUEUR_MAX = max(1, int(v.get("AUBERGE_ANNONCE_LONGUEUR_MAX", AUBERGE_ANNONCE_LONGUEUR_MAX)))
+	# Planchers à 1 : un carnet qui ne retient rien, ou dont les entrées ne peuvent rien
+	# contenir, ne serait pas un carnet.
+	JOURNAL_LONGUEUR_MAX = max(1, int(v.get("JOURNAL_LONGUEUR_MAX", JOURNAL_LONGUEUR_MAX)))
+	JOURNAL_ENTREES_MAX = max(1, int(v.get("JOURNAL_ENTREES_MAX", JOURNAL_ENTREES_MAX)))
+	JOURNAL_BESTIAIRE_LIEUX_MAX = max(1, int(v.get("JOURNAL_BESTIAIRE_LIEUX_MAX", JOURNAL_BESTIAIRE_LIEUX_MAX)))
 	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):
