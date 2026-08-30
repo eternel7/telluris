@@ -375,3 +375,24 @@ def test_les_lieux_consolides_affichent_la_meme_valeur(perso, monkeypatch):
 	assert payload[BUREAU_C["_id"]] == 55
 	# Un lieu qui ne délègue pas garde sa cote propre (ici : neutre, aucune relation en base).
 	assert payload[BOUCHERIE["_id"]] == 50
+
+
+def test_une_ligne_sans_label_s_intitule_par_son_slug_jamais_par_son_id(perso, monkeypatch):
+	"""Le titre d'une ligne de l'onglet 🤝 retombait sur l'identifiant brut (`label` par
+	défaut du `.get`). Tous les lieux en base portent un `label`, mais un import qui
+	l'oublierait afficherait « lieu:sans_enseigne » au joueur."""
+	monkeypatch.setattr(character_stats, "RELATION_INITIALE", 50)
+	muet = {"_id": "lieu:sans_enseigne", "type": "lieu", "categorie": "boucherie",
+			"lieu_parent": "lieu:nulle_part"}
+	docs = {muet["_id"]: muet, "lieu:nulle_part": {"_id": "lieu:nulle_part", "type": "lieu",
+													"categorie": "ville"}}
+
+	monkeypatch.setattr(marche, "get_doc", lambda doc_id: docs.get(doc_id))
+	monkeypatch.setattr(marche, "find_docs", lambda selector: [])
+
+	perso["lieux_visites"] = [muet["_id"]]
+	ligne = marche.relations_lieux_payload(perso)[0]
+
+	assert ligne["nom"] == "sans_enseigne"
+	assert ligne["parent_nom"] == "nulle_part"
+	assert "lieu:" not in ligne["nom"]

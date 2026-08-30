@@ -48,6 +48,7 @@ import random
 import uuid
 
 from models import character_stats
+from utils.characters import lieu_label
 from utils import acces, chasse, quetes
 
 
@@ -222,10 +223,7 @@ def construire_commission(bureau_doc: dict, cible: dict) -> dict | None:
 	niv = int(profil.get("niveau", 1) or 1)
 	grade = chasse.qualificatif_de(profil)
 	nom = espece_doc.get("nom") or (espece_doc.get("_id") or "").split(":", 1)[-1]
-	lieu_nom = (
-		lieu_doc.get("label") or lieu_doc.get("nom")
-		or (cible.get("lieu") or "").split(":", 1)[-1]
-	)
+	lieu_nom = lieu_label(lieu_doc, cible.get("lieu") or "")
 	xp = max(1, round(quetes._xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
 	cuivre = max(0, round(xp * character_stats.QUETE_CUIVRE_PAR_XP))
 	sub = (bureau_doc.get("_id", "") or "").split(":", 1)[-1]

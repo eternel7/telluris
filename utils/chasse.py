@@ -34,6 +34,7 @@ from models import character_stats
 from utils.zones import (
 	load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
 )
+from utils.characters import lieu_label
 from utils.recrutement import RANGS
 from utils import quetes
 
@@ -498,11 +499,10 @@ def _narration_rang(nom: str, grade: str) -> str:
 
 
 def _lieu_nom(lieu_doc: dict) -> str:
-	return (
-		(lieu_doc or {}).get("label")
-		or (lieu_doc or {}).get("nom")
-		or ((lieu_doc or {}).get("_id") or "").split(":", 1)[-1]
-	)
+	"""Délègue au chokepoint de nommage (`characters.lieu_label`) : la formule ne doit vivre
+	qu'à un seul endroit — c'est de l'avoir recopiée qu'un type de quête a fini par afficher
+	un `_id` au joueur."""
+	return lieu_label(lieu_doc)
 
 
 def _construire_quete_rang(comptoir_doc: dict, cite: str, lieu_doc: dict, espece_doc: dict,

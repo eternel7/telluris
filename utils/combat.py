@@ -13,6 +13,7 @@ from utils.characters import (
 )
 from utils.consommables import (
 	caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus,
+	regen_bonus,
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
 )
 from utils.sorts import part_durative, effets_d_arme, concat_degats
@@ -393,14 +394,24 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	compte les déplacements), et indépendante du nombre de combattants.
 	"""
 	actifs = acteur.get("effets_actifs") or []
-	if not actifs:
+	# Régén PERMANENTE portée par le snapshot (objet équipé, passives) : elle joue à CHAQUE
+	# tour, y compris sans le moindre effet à durée en cours — sortir en tête sur `not actifs`
+	# la ferait disparaître dès qu'un focus magique est la seule source du porteur.
+	# ⚠️ `.get(..., 0)` : un combat déjà en base n'a pas ces champs (aucune migration).
+	base_pv = _eff_int(acteur.get("regen_pv_base"))
+	base_pm = _eff_int(acteur.get("regen_pm_base"))
+	if not actifs and not (base_pv or base_pm):
 		return
 	tour = int(combat_doc.get("tour", 0) or 0)
 
 	# 1. Régénération (avant le décrément : un effet à 1 restant soigne une dernière fois).
-	# Non-cumul : seule la MEILLEURE régén compte, pas la somme des effets en cours.
+	# ⚠️ Même arithmétique que `consommables.regen_bonus`, dont ceci est le pendant en
+	# combat : les sources PERMANENTES s'ADDITIONNENT, le non-cumul (meilleure régén seule)
+	# ne joue qu'ENTRE effets à durée. Les faire cumuler autrement ferait diverger la régén
+	# d'un tour de combat de celle d'un tour de monde, pour un même porteur.
 	cumul = cumul_effets(actifs)
-	pv, pm = cumul["regen_pv"], cumul["regen_pm"]
+	pv = base_pv + cumul["regen_pv"]
+	pm = base_pm + cumul["regen_pm"]
 	if pv or pm:
 		avant_pv, avant_pm = acteur.get("currentPV", 0), acteur.get("currentPM", 0)
 		acteur["currentPV"] = min(acteur.get("pv_max", avant_pv), avant_pv + pv)
@@ -1144,6 +1155,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# `stats` ci-dessus = caracts_base + Σ buffs des effets entrants → le snapshot construit
 	# ici et un refresh immédiat donnent exactement les mêmes valeurs.
 	caracts_base = caracts_avec_buffs(character, origines=("equipement", "competence"))
+	_regen_permanente = regen_bonus(character, origines=("equipement", "competence"))
 	base = BaseStats(
 		v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
 		ag=stats.get("Ag", 0), vol=stats.get("Vol", 0), int_=stats.get("Int", 0),
@@ -1213,6 +1225,14 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		# Part PERMANENTE seule : _refresh_snapshot_stats y rajoute celle des effets
 		# vivants, qui varie au fil du combat.
 		"esquive_base": esquive_bonus(character, origines=("equipement", "competence")),
+		# Régén PERMANENTE (objet porté + passives), appliquée à chaque tour du porteur par
+		# _tick_effets_combat. Part permanente SEULE, comme `esquive_base` : celle des effets
+		# à durée vit dans `effets_actifs` et varie au fil du combat.
+		# ⚠️ Elle N'INCLUT PAS la régén naturelle (ceil(R/20) PV, ceil(Vol/20) PM) du tour de
+		# monde : on ne se soigne pas de soi-même sous le feu, seul un objet ou une passive
+		# le fait. Ne pas la rajouter ici en croyant aligner les deux tours.
+		"regen_pv_base": _regen_permanente[0],
+		"regen_pm_base": _regen_permanente[1],
 		# ── De quoi RECALCULER les dérivées quand un effet est posé ou expire ──
 		"caracts_base": caracts_base,
 		"equipment_bonus": equipment.model_dump() if hasattr(equipment, "model_dump") else dict(equipment or {}),
@@ -1318,6 +1338,8 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		},
 		"voc_niveau": niveau,
 		"esquive_base": 0,
+		"regen_pv_base": 0,
+		"regen_pm_base": 0,
 		"effets_actifs": [],
 		"profil_id": profil_id,
 		"image": espece.get("image", ""),

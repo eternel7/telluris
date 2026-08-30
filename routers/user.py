@@ -15,7 +15,7 @@ from utils.characters import (
 	sync_equipment_bonus, carried_weight, charge_max_of,
 	restriction_satisfaite,
 	main_occupee_par_deux_mains, liberer_pour_deux_mains,
-	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds,
+	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds, lieu_label,
 	money_to_cuivre, cuivre_to_purse, credit_character,
 )
 from utils.marche import (
@@ -536,7 +536,7 @@ async def move_character(
 						# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
 						xp_compagnie = recrutement.xp_compagnie_payload(
 							_apply_world_turn_groupe(character_to_update, xp_partage), xp_partage)
-						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_doc.get("label", destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
+						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
 			and isinstance(move["x"], int) and isinstance(move["y"], int)):
@@ -1721,7 +1721,7 @@ def marchand_quotes(
 	relation = get_relation(character, lieu_doc)
 	porteurs = recrutement.porteurs_effectifs(character, get_doc)
 	return {
-		"lieu_label": (lieu_doc or {}).get("label"),
+		"lieu_label": lieu_label(lieu_doc),
 		"vendables": _marchand_vendables(character, lieu_doc, relation, porteurs),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"cha_marchand": merchant_cha(lieu_doc),

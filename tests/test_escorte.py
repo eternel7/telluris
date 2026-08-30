@@ -15,6 +15,7 @@ from utils import recrutement as recrutement_util
 from utils import expedition as expedition_util
 from utils import combat as combat_util
 from utils import characters as characters_util
+from utils import quetes as quetes_util
 
 from tests.test_combat_groupe import (
 	character as combat_character, joueur_snap, monstre_snap, combat_doc,
@@ -1144,3 +1145,34 @@ def test_finalize_protege_idempotent(dbc):
 	combat_util.finalize_combat(doc)
 
 	assert len(perso["quetes_terminees"]) == 1
+
+
+# ── Le nom affiché est le LABEL du lieu, jamais son identifiant ──────────────────
+
+def test_la_fiche_nomme_la_destination_par_son_label(db, monkeypatch):
+	"""DÉFAUT CORRIGÉ — la fiche annonçait « Escorter … jusqu'à : lieu:athanor ».
+
+	`quetes._cible_nom` n'aiguillait que sur kill/chasse/collect/visite/transport : le type
+	`escorte` tombait sur le repli final, qui rend la cible telle quelle, c'est-à-dire l'id.
+	"""
+	monkeypatch.setattr(quetes_util, "get_doc", db["get"])
+	c = character()
+	q, _ = escorte_util.accepter_escorte(c, _offre(db), db["get"], now=1000)
+	q["rencontre_at"] = 1000   # la personne est retrouvée : la fiche passe en « Escorter … »
+
+	txt = quetes_util.quete_detail(c, q, get_doc_fn=db["get"])["progress_txt"]
+
+	assert "L'Athanor" in txt
+	assert "lieu:" not in txt
+
+
+def test_la_fiche_nomme_le_rendez_vous_par_son_label(db, monkeypatch):
+	"""Avant la rencontre, c'est le lieu du RENDEZ-VOUS qui est cité — même exigence."""
+	monkeypatch.setattr(quetes_util, "get_doc", db["get"])
+	c = character()
+	q, _ = escorte_util.accepter_escorte(c, _offre(db), db["get"], now=1000)
+
+	txt = quetes_util.quete_detail(c, q, get_doc_fn=db["get"])["progress_txt"]
+
+	assert "Auxerre" in txt
+	assert "lieu:" not in txt

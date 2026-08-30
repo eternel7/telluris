@@ -15,6 +15,7 @@ from utils.characters import (
 	resolve_item_ref,
 	money_to_cuivre, cuivre_to_purse,
 	item_sous_categorie, item_sale_price_cuivre, valeur_entry_to_cuivre,
+	lieu_label,
 )
 
 
@@ -657,7 +658,7 @@ def relations_lieux_payload(character: dict) -> list[dict]:
 				parent_cache[parent_id] = get_doc(parent_id)
 			pdoc = parent_cache[parent_id]
 			if pdoc:
-				parent_nom = pdoc.get("label", parent_id)
+				parent_nom = lieu_label(pdoc, parent_id)
 				parent_img, parent_route = _lieu_image_route(pdoc)
 				
 		if lieu_doc.get("cells"):
@@ -665,7 +666,7 @@ def relations_lieux_payload(character: dict) -> list[dict]:
 			img_route = None
 		relations.append({
 			"lieu_id": lieu_id,
-			"nom": lieu_doc.get("label", lieu_id),
+			"nom": lieu_label(lieu_doc, lieu_id),
 			"categorie": lieu_doc.get("categorie", "") or "",
 			"est_ville": lieu_doc.get("categorie") == "ville",
 			"image": img,

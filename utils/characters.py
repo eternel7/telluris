@@ -97,6 +97,28 @@ def item_label(nom: str, lieu_doc: dict | None) -> str:
 	return f"{nom} ({label})" if label else nom
 
 
+def lieu_label(lieu_doc: dict | None, lieu_id: str = "") -> str:
+	"""« L'Athanor » — le nom AFFICHABLE d'un lieu, jamais `lieu:athanor`.
+
+	Pendant de `item_label` pour les lieux, et **source unique** : le nom d'un lieu part
+	dans les libellés de quêtes, les placeholders de dialogue, l'onglet 🤝 et le guidage 🧭.
+	La formule était recopiée à sept endroits, dont un l'a oubliée (le type `escorte` de
+	`quetes._cible_nom`, qui rendait l'identifiant brut au joueur).
+
+	⚠️ Les docs `lieu:*` portent **`label` et lui seul** (90 sur 90 dans le dump, aucun `nom`,
+	aucune `description`) : le repli sur `nom` ne sert qu'aux docs d'un autre type qu'on
+	passerait ici. Dernier repli = le **slug** de l'id, jamais l'id entier — un identifiant
+	affiché est un défaut, un slug reste lisible.
+
+	⚠️ Prend le **DOC**, pas l'id : les `lieu:*` sont les plus gros documents du jeu et sont
+	EXCLUS du cache de requête (ils portent un état de partie). Tout appelant tient déjà le
+	doc ; `lieu_id` ne sert qu'à nommer le repli quand la lecture n'a rien rendu.
+	"""
+	doc = lieu_doc or {}
+	return (doc.get("label") or doc.get("nom")
+			or (doc.get("_id") or lieu_id or "").split(":", 1)[-1])
+
+
 def resolve_item_ref(ref):
 	"""Référence → doc item complet, avec `poids` écrasé par le poids effectif de
 	l'instance (nombre) et `_id`/`item` conservés. None si l'item n'existe plus.
@@ -143,6 +165,21 @@ ZONE_SLOT = {
 	"bras": "mains", "jambes": "jambes", "pieds": "pieds",
 }
 SLOT_ZONE = {slot: zone for zone, slot in ZONE_SLOT.items()}
+
+
+# Catégories dont le champ `effets` est consommé AILLEURS et ne doit donc jamais être
+# replié dans le bonus d'équipement : `consommable` (effet de la potion, appliqué à
+# l'ingestion) et `arme` (effet du coup, appliqué à la CIBLE — cf. utils/sorts.effets_d_arme).
+CATEGORIES_EFFETS_A_L_USAGE = ("arme", "consommable")
+
+
+def _effet_int(val) -> int:
+	"""Entier tolérant, miroir local de `consommables._as_int` — que ce module ne peut pas
+	importer : `utils.consommables` dépend de lui."""
+	try:
+		return int(val or 0)
+	except (TypeError, ValueError):
+		return 0
 
 
 def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
@@ -211,6 +248,23 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 				"icon":  item.get("icon", "⚔"),
 				"buffs": buffs,
 			})
+
+		# Régén et esquive conférées par l'objet PORTÉ (focus magique, talisman…) : tant
+		# qu'il est équipé, elles jouent en permanence — à chaque tour de monde comme de
+		# combat pour la régén, à chaque attaque physique subie pour l'esquive.
+		# ⚠️ Elles se déclarent dans `effets`, JAMAIS dans `bonus` : ce dernier ne porte que
+		# des CARACTÉRISTIQUES, et `caracts_avec_buffs` écarte toute clé absente de
+		# `caracteristiques_current` — un `bonus:{esquive:3}` serait silencieusement inerte.
+		# ⚠️ Le champ `effets` a DÉJÀ deux autres sens, qu'il ne faut pas rejouer ici :
+		# sur un `consommable` c'est l'effet de la potion (utils/consommables), sur une
+		# `arme` c'est l'effet porté par le coup, dont la cible par DÉFAUT est l'ENNEMI
+		# (utils/sorts.effets_d_arme) — replier les bolas ici donnerait à leur porteur un
+		# −2 en V permanent. D'où la liste d'exclusion, et elle seule.
+		if str(item.get("categorie") or "") not in CATEGORIES_EFFETS_A_L_USAGE:
+			effets_portes = item.get("effets") or {}
+			bonus.regen_pv += _effet_int(effets_portes.get("regen_pv"))
+			bonus.regen_pm += _effet_int(effets_portes.get("regen_pm"))
+			bonus.esquive  += _effet_int(effets_portes.get("esquive"))
 	return bonus
 
 

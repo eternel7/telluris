@@ -14,6 +14,7 @@ from utils.characters import (
 	get_selected_character, sync_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
 	poids_bounds, carried_weight, charge_max_of, item_ref_id, resolve_item_ref,
+	lieu_label,
 )
 from utils.marche import (
 	ajuster_relation, debit_character, get_relation, relation_value,
@@ -239,7 +240,7 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			libere = donjon.donjon_purge(character, lieu_garde["_id"])
 			flags["acces_libere"] = libere
 			flags["acces_menace"] = not libere
-			placeholders["portail"] = lieu_garde.get("label") or lieu_garde.get("nom") or ""
+			placeholders["portail"] = lieu_label(lieu_garde)
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders)
 
 
@@ -298,7 +299,7 @@ def _crediter_relation(character: dict, gain: dict, reponse: dict) -> None:
 	save_doc(relation)
 	reponse["relation_gain"] = {
 		"lieu": gain["lieu_id"],
-		"nom": lieu.get("label") or lieu.get("nom") or "",
+		"nom": lieu_label(lieu),
 		"delta": gain["delta"],
 		"valeur": valeur,
 	}
@@ -412,10 +413,8 @@ def _placeholders_escorte(q: dict, lieu_doc: dict) -> dict:
 		"repere": indice.get("repere") or indice["nom"],
 		# Le lieu du rendez-vous : absent quand la personne attend chez le donneur (elle
 		# rejoint le groupe à l'acceptation), auquel cas on nomme le lieu où l'on parle.
-		"lieu_rencontre": (
-			(rdv_doc or {}).get("label") or (rdv_doc or {}).get("nom")
-			or lieu_doc.get("label") or lieu_doc.get("nom") or ""
-		),
+		"lieu_rencontre": (lieu_label(rdv_doc, rdv_id or "") if rdv_doc
+						   else lieu_label(lieu_doc)),
 		"xp": rec.get("xp", 0),
 		"prime": rec.get("cuivre", 0),
 	}
@@ -685,9 +684,9 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 			raise HTTPException(status_code=422, detail="Aucune livraison attendue ici.")
 		giver_doc = get_doc(q.get("giver")) if q.get("giver") else None
 		rec = q.get("recompenses") or {}
-		expediteur = (giver_doc or {}).get("label") or (giver_doc or {}).get("nom") or "l'expéditeur"
+		expediteur = lieu_label(giver_doc) or "l'expéditeur"
 		dits = {
-			"destination": lieu_doc.get("label") or lieu_doc.get("nom") or "",
+			"destination": lieu_label(lieu_doc),
 			# {expediteur} = l'enseigne d'où part la marchandise ; {donneur} = qui l'a confiée.
 			"expediteur": expediteur,
 			"donneur": _nom_pnj(q.get("giver")) or expediteur,
@@ -746,8 +745,8 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		dest_doc = get_doc(dest_id) if dest_id else None
 		dits = {
 			# Le donneur peut citer celle qui a pris livraison (« {destinataire} a sa viande »).
-			"destination": (dest_doc or {}).get("label") or (dest_doc or {}).get("nom") or "",
-			"destinataire": _nom_pnj(dest_id) or (dest_doc or {}).get("label") or "",
+			"destination": lieu_label(dest_doc, dest_id or ""),
+			"destinataire": _nom_pnj(dest_id) or lieu_label(dest_doc, dest_id or ""),
 			"colis": len(q.get("cargaison") or []),
 			"xp": rec.get("xp", 0),
 			"prime": rec.get("cuivre", 0),
@@ -801,8 +800,7 @@ def _placeholders_rang(q: dict, rang_courant: str) -> dict:
 	rec = q.get("recompenses") or {}
 	return {
 		"espece": (espece_doc or {}).get("nom") or (obj.get("cible") or "").split(":", 1)[-1],
-		"lieu": (lieu_cible or {}).get("label") or (lieu_cible or {}).get("nom")
-		or (obj.get("lieu") or "").split(":", 1)[-1],
+		"lieu": lieu_label(lieu_cible, obj.get("lieu") or ""),
 		"rang": rang_courant,
 		"rang_vise": q.get("rang_vise") or chasse.rang_suivant(rang_courant),
 		"xp": rec.get("xp", 0),
@@ -886,8 +884,7 @@ def _placeholders_commission(q: dict) -> dict:
 	rec = (q or {}).get("recompenses") or {}
 	return {
 		"espece": (espece_doc or {}).get("nom") or (obj.get("cible") or "").split(":", 1)[-1],
-		"lieu": (lieu_cible or {}).get("label") or (lieu_cible or {}).get("nom")
-		or (obj.get("lieu") or "").split(":", 1)[-1],
+		"lieu": lieu_label(lieu_cible, obj.get("lieu") or ""),
 		"xp": rec.get("xp", 0),
 		"prime": rec.get("cuivre", 0),
 	}
@@ -1048,7 +1045,7 @@ def _resoudre_acces(current_user: dict, character: dict, pnj_doc: dict, lieu_doc
 	lieu_garde = get_doc(acces_conf["lieu"]) if acces_conf.get("lieu") else None
 	if not lieu_garde:
 		raise HTTPException(status_code=422, detail="Ce personnage ne garde aucun accès.")
-	dits = {"portail": lieu_garde.get("label") or lieu_garde.get("nom") or ""}
+	dits = {"portail": lieu_label(lieu_garde)}
 
 	if op == "passer":
 		if acces.laissez_passer_valide(character, lieu_garde):

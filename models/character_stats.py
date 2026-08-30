@@ -946,6 +946,17 @@ class EquipmentBonus(BaseModel):
 	buffs:		 dict[str, int] = Field(default_factory=dict)
 	# Détail nommé du même agrégat, pour le tooltip de la fiche : [{nom, icon, buffs}].
 	buffs_sources: list[dict] = Field(default_factory=list)
+	# Régénération PERMANENTE conférée par les objets PORTÉS (champ item `effets`, cf.
+	# utils/characters.recompute_equipment_bonus). Repliée par
+	# utils/consommables._sources_de_buffs comme n'importe quelle source de régén : elle
+	# s'ADDITIONNE aux passives, et le non-cumul (max) ne joue qu'entre effets à durée.
+	regen_pv:	  int = 0
+	regen_pm:	  int = 0
+	# Esquive PERMANENTE conférée par les objets portés (même canal `effets`) : malus au
+	# seuil de toucher PHYSIQUE des attaques subies. Repliée par consommables.esquive_bonus,
+	# qui la lit au PREMIER NIVEAU de l'agrégat — d'où un champ à part, et non une entrée
+	# de `buffs` (où `esquive` n'est pas une caractéristique et serait ignorée en silence).
+	esquive:	  int = 0
 
 
 # ── Stats dérivées calculées ──────────────────────────────────────────────────

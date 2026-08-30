@@ -3793,7 +3793,12 @@ function _refreshPaperdollImg() {
 
 function _refreshPaperdoll() {
 	_refreshPaperdollImg();
-	for (const [slot, item] of Object.entries(_slots)) {
+	// ⚠️ Itérer sur les slots CONNUS et non sur les clés présentes : un doc antérieur au
+	// 12ᵉ emplacement `epaules` n'a pas la clé (aucune migration), et la case garderait
+	// alors ce que le rendu précédent y avait mis — l'épaulière du joueur resterait
+	// affichée sur la fiche d'un compagnon qui n'en porte pas.
+	for (const slot of Object.keys(SLOT_LABELS)) {
+		const item = _slots[slot];
 		const el = document.getElementById('slot-' + slot);
 		if (!el) continue;
 		const nameEl    = el.querySelector('.sh-slot-name');

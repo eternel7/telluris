@@ -41,7 +41,7 @@ import random
 import uuid
 
 from models import character_stats
-from utils.characters import item_ref_id, poids_bounds
+from utils.characters import item_ref_id, poids_bounds, lieu_label
 from utils import focalisation, marche, quetes
 
 
@@ -149,7 +149,7 @@ def repere_proche(cible_id: str, portes: dict, get_doc_fn, exclure: set | None =
 			continue
 		d = (porte[0] - cible_porte[0]) ** 2 + (porte[1] - cible_porte[1]) ** 2
 		if meilleure_d is None or d < meilleure_d:
-			meilleur, meilleure_d = (doc.get("label") or doc.get("nom") or lieu_id), d
+			meilleur, meilleure_d = lieu_label(doc, lieu_id), d
 	return meilleur
 
 
@@ -160,7 +160,7 @@ def indice_destination(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) 
 	seule échelle où une direction cardinale a un sens) ; sinon on nomme la ville et on
 	donne la distance en nombre d'étapes."""
 	dest_doc = get_doc_fn(dest_id) or {}
-	nom = dest_doc.get("label") or dest_doc.get("nom") or dest_id
+	nom = lieu_label(dest_doc, dest_id)
 	parent_x = (giver_doc or {}).get("lieu_parent")
 	parent_y = dest_doc.get("lieu_parent")
 	graphe = focalisation.charger_graphe(find_docs_fn)
@@ -182,7 +182,7 @@ def indice_destination(giver_doc: dict, dest_id: str, find_docs_fn, get_doc_fn) 
 		repere = repere_proche(dest_id, portes, get_doc_fn, exclure={(giver_doc or {}).get("_id")})
 	else:
 		ville_doc = get_doc_fn(parent_y) if parent_y else None
-		ville_nom = (ville_doc or {}).get("label") or (ville_doc or {}).get("nom")
+		ville_nom = lieu_label(ville_doc) if ville_doc else None
 
 	return {
 		"nom": nom,

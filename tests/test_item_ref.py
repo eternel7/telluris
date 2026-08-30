@@ -41,6 +41,30 @@ def test_item_label():
 	assert characters.item_label("Carte d'aventurier", {}) == "Carte d'aventurier"
 
 
+def test_lieu_label():
+	"""Pendant de `item_label` pour les lieux — et SOURCE UNIQUE : c'est d'avoir recopié la
+	formule qu'un type de quête a fini par afficher `lieu:athanor` au joueur."""
+	assert characters.lieu_label(ITEMS["lieu:auxerre"]) == "Auxerre"
+	# Les docs `lieu:*` ne portent QUE `label` ; `nom` n'est qu'une tolérance pour un autre type.
+	assert characters.lieu_label({"nom": "Le Temple"}) == "Le Temple"
+	# Doc sans nom d'affichage : on rend le SLUG, jamais l'id — un id affiché est un défaut.
+	assert characters.lieu_label({"_id": "lieu:athanor"}) == "athanor"
+	# Lieu introuvable : le repli se nomme depuis l'id demandé, toujours sans son préfixe.
+	assert characters.lieu_label(None, "lieu:le_saloir") == "le_saloir"
+	assert characters.lieu_label(None) == ""
+
+
+@pytest.mark.parametrize("doc,lieu_id", [
+	({"label": "Auxerre"}, "lieu:auxerre"),
+	({"nom": "Temple"}, "lieu:temple"),
+	({"_id": "lieu:athanor"}, ""),
+	({}, "lieu:le_saloir"),
+	(None, "lieu:x"),
+])
+def test_lieu_label_ne_rend_jamais_un_identifiant(doc, lieu_id):
+	assert not characters.lieu_label(doc, lieu_id).startswith("lieu:")
+
+
 def test_resolve_item_ref_nomme_la_guilde_qui_a_delivre_l_instance():
 	doc = characters.resolve_item_ref(
 		{"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": "lieu:auxerre"}

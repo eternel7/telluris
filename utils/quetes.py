@@ -16,7 +16,8 @@ import uuid
 
 from db.config import get_doc, find_docs, save_doc, delete_doc
 from models import character_stats
-from utils.characters import item_ref_id, grant_xp, credit_character, cuivre_to_purse, poids_bounds
+from utils.characters import (item_ref_id, grant_xp, credit_character, cuivre_to_purse,
+							  poids_bounds, lieu_label)
 from utils import bois, marche
 # ⚠️ Acyclique, et déjà tiré transitivement (quetes → bois → expedition → recrutement) :
 # `recrutement` n'importe que characters/consommables/montures, jamais quetes.
@@ -155,16 +156,24 @@ def _nom_item(item_id: str) -> str:
 	return (doc.get("nom") if doc else None) or (item_id or "").split(":", 1)[-1]
 
 
-def _cible_nom(objectif: dict) -> str:
+def _cible_nom(objectif: dict, lire=None) -> str:
+	"""Nom AFFICHABLE de la cible d'un objectif — jamais un `_id`.
+
+	⚠️ Tout type dont la cible est un LIEU doit figurer dans le tuple ci-dessous : `escorte`
+	y manquait et retombait sur le `return` final, si bien que la fiche annonçait « Escorter
+	X jusqu'à : lieu:athanor ». Le repli terminal reste, mais il ne doit plus servir.
+
+	⚠️ `lire` = le getter MÉMOÏSÉ de la passe (`quete_detail`), et non le `get_doc` du
+	module : cette branche lit un `lieu:*`, le plus gros doc du jeu et le seul que le cache
+	de requête n'amortit pas. Les branches espèce/objet gardent `get_doc`, déjà amorti."""
 	t = objectif.get("type")
 	cible = objectif.get("cible", "")
 	if t in ("kill", "chasse"):
 		return _nom_espece(cible)
 	if t == "collect":
 		return _nom_item(cible)
-	if t in ("visite", "transport"):
-		doc = get_doc(cible)
-		return (doc.get("label") if doc else None) or (cible or "").split(":", 1)[-1]
+	if t in ("visite", "transport", "escorte"):
+		return lieu_label((lire or get_doc)(cible) if cible else None, cible)
 	return cible
 
 
@@ -218,7 +227,7 @@ def _generer_chasse(guild_doc: dict, parent_doc: dict, cible, get_doc_fn=None) -
 	niv = int(profil.get("niveau", 1))
 	grade = chasse.qualificatif_de(profil)
 	nom = espece_doc.get("nom") or _nom_espece(espece_id)
-	lieu_nom = lieu_doc.get("label") or lieu_doc.get("nom") or (lieu_id or "").split(":", 1)[-1]
+	lieu_nom = lieu_label(lieu_doc, lieu_id)
 
 	xp = max(1, round(_xp_unitaire(espece_doc, niv) * character_stats.QUETE_CHASSE_XP_FACTEUR))
 	cuivre = max(0, round(xp * character_stats.QUETE_CUIVRE_PAR_XP))
@@ -505,8 +514,9 @@ def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
 	(`lieu:auxerre` ≈ 28 Ko avec ses `cells`) et les seules que le cache de requête ne peut
 	pas amortir (cf. CLAUDE.md : copie de surface vs mutations imbriquées du stock). Trois
 	chasses dans le même lieu le relisaient trois fois : `fiche_details` passe un getter
-	mémoïsé pour toute la passe. `_cible_nom` garde le `get_doc` du module — il ne lit que
-	des `espece:`/`item:`, déjà amortis."""
+	mémoïsé pour toute la passe. `_cible_nom` reçoit ce même getter dès que la cible est un
+	LIEU (transport, escorte) ; ses branches espèce/objet gardent le `get_doc` du module,
+	déjà amorti par le cache de requête."""
 	lire = get_doc_fn or get_doc
 	obj = q.get("objectif", {})
 	prog = progress_courant(character, q)
@@ -520,7 +530,7 @@ def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
 			giver = lire(q.get("giver")) if q.get("giver") else None
 			progress_txt = f"Rendre compte : {(giver or {}).get('label') or 'au donneur'}"
 		else:
-			progress_txt = f"Livraison à {_cible_nom(obj)}"
+			progress_txt = f"Livraison à {_cible_nom(obj, lire)}"
 	elif obj.get("type") == "escorte":
 		# Deux temps, deux libellés : tant qu'on ne l'a pas retrouvée, c'est une recherche
 		# (et la carte 🗺️ mène au rendez-vous) ; ensuite c'est une livraison de personne.
@@ -528,12 +538,11 @@ def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
 		from utils.escorte import noms_proteges
 		qui = noms_proteges(q.get("proteges") or []) or "votre protégé"
 		if q.get("rencontre_at"):
-			progress_txt = f"Escorter {qui} jusqu'à : {_cible_nom(obj)}"
+			progress_txt = f"Escorter {qui} jusqu'à : {_cible_nom(obj, lire)}"
 		else:
 			rdv = obj.get("rencontre") or {}
 			rdv_doc = lire(rdv.get("lieu")) if rdv.get("lieu") else None
-			rdv_nom = ((rdv_doc or {}).get("label") or (rdv_doc or {}).get("nom")
-					   or (rdv.get("lieu") or "").split(":", 1)[-1])
+			rdv_nom = lieu_label(rdv_doc, rdv.get("lieu") or "")
 			if rdv.get("position"):
 				# ⚠️ `_carte_chasse` est réutilisée SANS être modifiée : on lui passe un
 				# objectif SYNTHÉTIQUE `{lieu, position}` bâti depuis `rencontre`. L'ancre du
@@ -549,8 +558,7 @@ def quete_detail(character: dict, q: dict, get_doc_fn=None) -> dict:
 			)
 	elif obj.get("type") == "chasse":
 		lieu_doc = lire(obj.get("lieu")) if obj.get("lieu") else None
-		lieu_nom = (lieu_doc.get("label") or lieu_doc.get("nom")) if lieu_doc else None
-		lieu_nom = lieu_nom or (obj.get("lieu") or "").split(":", 1)[-1]
+		lieu_nom = lieu_label(lieu_doc, obj.get("lieu") or "")
 		compteur = min(prog, qte) if qte else prog
 		if obj.get("position"):
 			carte_chasse = _carte_chasse(obj, q.get("giver"), lieu_doc)
@@ -645,7 +653,7 @@ def _carte_chasse(objectif: dict, giver_id: str | None = None, lieu_doc: dict | 
 		"dimensions": dims,
 		"image": image,
 		"image_route": route,
-		"lieu_nom": lieu.get("label") or lieu.get("nom") or (lieu.get("_id") or "").split(":", 1)[-1],
+		"lieu_nom": lieu_label(lieu),
 	}
 	# Orientation depuis le bâtiment donneur : porte du 1er lien vers le donneur, dans la grille
 	# de CE lieu (BFS multi-hop → marche même si le comptoir est imbriqué derrière une façade).

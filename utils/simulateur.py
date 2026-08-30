@@ -284,7 +284,15 @@ def _equiper_snapshot(snap: dict, slots: dict) -> dict:
 			caracts[code] = max(0, int(caracts[code] or 0) + int(delta))
 	snap["caracts_base"] = caracts
 	snap["equipment_bonus"] = equipment.model_dump()
-	snap["esquive_base"] = snap.get("esquive_base", 0)
+	snap["esquive_base"] = snap.get("esquive_base", 0) + equipment.esquive
+	# Régén conférée par l'équipement d'essai (focus magique…) : `_tick_effets_combat` la
+	# lit sur le snapshot. Sans ces deux lignes, essayer un objet à `regen_*` au banc ne
+	# rendrait rien alors qu'il rend en jeu — un banc qui ment sur ce qu'il mesure.
+	# ⚠️ Aucun double comptage possible : ce chemin ne sert qu'aux belligérants ESPÈCE,
+	# qui n'ont ni équipement ni passive (un `character` passe par build_joueur_snapshot,
+	# qui a déjà compté les siens).
+	snap["regen_pv_base"] = equipment.regen_pv
+	snap["regen_pm_base"] = equipment.regen_pm
 	combat._refresh_snapshot_stats(snap)
 	snap["currentPV"], snap["currentPM"] = snap["pv_max"], snap["pm_max"]
 

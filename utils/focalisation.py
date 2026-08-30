@@ -21,6 +21,7 @@ import time
 from collections import deque
 
 import models.character_stats as character_stats
+from utils.characters import lieu_label
 from utils.lieux import _DIR_BIT
 from utils.quetes import quete_active, objectif_atteint
 
@@ -257,7 +258,7 @@ def guidage(character: dict, lieu_doc: dict, find_docs_fn, get_doc_fn) -> dict |
 	if lieu_courant == cible:
 		return None  # déjà sur place (l'effacement se fait à l'arrivée ; défensif)
 	cible_doc = get_doc_fn(cible) or {}
-	cible_nom = cible_doc.get("label") or cible_doc.get("nom") or cible
+	cible_nom = lieu_label(cible_doc, cible)
 	etape = prochaine_etape(charger_graphe(find_docs_fn), lieu_courant, cible)
 	if not etape:
 		return {"cible": cible, "cible_nom": cible_nom, "injoignable": True}
@@ -266,7 +267,7 @@ def guidage(character: dict, lieu_doc: dict, find_docs_fn, get_doc_fn) -> dict |
 		"cible": cible,
 		"cible_nom": cible_nom,
 		"etape": etape["suivant"],
-		"etape_nom": suivant_doc.get("label") or suivant_doc.get("nom") or etape["suivant"],
+		"etape_nom": lieu_label(suivant_doc, etape["suivant"]),
 		"link_id": etape["link_id"],
 		"porte": {"x": etape["porte"][0], "y": etape["porte"][1]},
 		"direction": direction_vers(lieu_doc, (character or {}).get("position") or {}, etape["porte"]),

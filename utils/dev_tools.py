@@ -254,9 +254,8 @@ CATALOGUE = [
 		"ecrit": "Lecture seule.",
 		"description": "Logique Python PURE : stats, combat, marché/recettes, consommables, "
 			"sorts, quêtes, escortes… Aucune dépendance base (db/config tolère l'absence de "
-			"CouchDB à l'import). ⚠️ `pytest` n'est PAS dans le pip install du "
-			"docker-compose : depuis cette page l'outil échouera en « No module named pytest » "
-			"tant qu'il n'y sera pas ajouté.",
+			"CouchDB à l'import). `pytest` est dans le pip install du docker-compose : "
+			"l'entrée tourne depuis cette page.",
 	},
 	{
 		"id": "check_js",
