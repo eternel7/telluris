@@ -347,6 +347,146 @@ def test_une_annonce_vide_est_refusee(monde):
 	assert e.value.status_code == 422
 
 
+# ── Qui tient la plume ───────────────────────────────────────────────────────────
+# Écrire n'est pas un privilège du principal : un compagnon qui a SES fournitures signe son
+# propre avis. Trois choses cassent en silence si on ne les épingle pas — la signature (le
+# tableau doit porter le nom du compagnon, pas celui du joueur), le SAC dépensé (chacun le
+# sien : les fournitures ne se mettent pas en commun comme la hache), et l'appartenance
+# (une monture porte le papier, elle ne l'écrit pas).
+
+def _compagnon(monde, principal, **champs):
+	"""Un compagnon embauché PAR ce personnage, inscrit des deux côtés du lien."""
+	av = {
+		"_id": champs.pop("_id", "aventurier:bran"),
+		"type": "aventurier", "statut": "embauche",
+		"embauche_par": principal["_id"],
+		"prenom": "Bran", "nom": "Osier",
+		"inventaire": [], "slots": {},
+		"caracteristiques_current": dict(CARACTS),
+	}
+	av.update(champs)
+	monde["docs"][av["_id"]] = av
+	principal.setdefault("groupe", []).append(av["_id"])
+	return av
+
+
+def test_un_COMPAGNON_ecrit_et_l_avis_porte_SA_signature(monde):
+	ra = monde["ra"]
+	char = _perso()
+	bran = _compagnon(monde, char,
+					  inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	data = _appel(monde, char, ra.poser_annonce, None,
+				  {"texte": "Cherche escorte", "ecrivain_id": bran["_id"]})
+	assert [m["auteur_nom"] for m in data["tableau"]] == ["Bran Osier"]
+	assert data["ecrivain"] == "Bran Osier" and data["ecrivain_compagnon"] is True
+
+
+def test_c_est_le_SAC_DU_COMPAGNON_qui_est_depense(monde):
+	"""⚠️ Chacun écrit avec sa propre plume : les fournitures ne se mettent PAS en commun
+	comme la hache de `bois.a_outil_coupe`, sinon le compagnon signerait un avis payé par
+	le sac du joueur."""
+	ra = monde["ra"]
+	sac_joueur = ["item:Papier", "item:Encre", "item:Plume_d_oie"]
+	char = _perso(inventaire=list(sac_joueur))
+	bran = _compagnon(monde, char,
+					  inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	_appel(monde, char, ra.poser_annonce, None,
+		   {"texte": "avis", "ecrivain_id": bran["_id"]})
+	assert bran["inventaire"] == ["item:Plume_d_oie"]
+	assert char["inventaire"] == sac_joueur          # intact, il n'a pas écrit
+
+
+def test_un_compagnon_SANS_fournitures_est_refuse_MEME_si_le_joueur_en_a(monde):
+	"""Le refus doit NOMMER l'écrivain : « il vous manque » serait faux, le joueur a tout."""
+	from fastapi import HTTPException
+	ra = monde["ra"]
+	char = _perso(inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	bran = _compagnon(monde, char, inventaire=["item:Papier"])
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, ra.poser_annonce, None,
+			   {"texte": "avis", "ecrivain_id": bran["_id"]})
+	assert e.value.status_code == 422
+	assert "Bran Osier" in e.value.detail
+	assert "encre" in e.value.detail and "plume" in e.value.detail
+	assert char["inventaire"] == ["item:Papier", "item:Encre", "item:Plume_d_oie"]
+
+
+def test_une_MONTURE_ne_peut_pas_ecrire(monde):
+	"""⚠️ `expedition.membres` et non `porteurs_effectifs` (Convention §7) : une bête porte
+	le papier, elle ne le noircit pas."""
+	from fastapi import HTTPException
+	ra = monde["ra"]
+	char = _perso(montures=["monture:mule"])
+	monde["docs"]["monture:mule"] = {
+		"_id": "monture:mule", "type": "monture", "statut": "acquise",
+		"acquise_par": char["_id"], "nom": "Mule",
+		"inventaire": ["item:Papier", "item:Encre", "item:Plume_d_oie"], "slots": {},
+	}
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, ra.poser_annonce, None,
+			   {"texte": "hihan", "ecrivain_id": "monture:mule"})
+	assert e.value.status_code == 403
+
+
+def test_un_ecrivain_ETRANGER_au_groupe_est_refuse(monde):
+	"""Un doc `aventurier:*` n'a pas de `user_id` : le lien vers CE personnage est la seule
+	preuve d'appartenance."""
+	from fastapi import HTTPException
+	ra = monde["ra"]
+	char = _perso()
+	monde["docs"]["aventurier:inconnu"] = {
+		"_id": "aventurier:inconnu", "type": "aventurier", "statut": "embauche",
+		"embauche_par": "character:quelqu_un_d_autre", "prenom": "Nul", "nom": "Part",
+		"inventaire": ["item:Papier", "item:Encre", "item:Plume_d_oie"], "slots": {},
+	}
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, ra.poser_annonce, None,
+			   {"texte": "avis", "ecrivain_id": "aventurier:inconnu"})
+	assert e.value.status_code == 403
+
+
+def test_sans_ecrivain_id_c_est_le_PRINCIPAL_qui_ecrit(monde):
+	"""Comportement d'avant, aucune migration : un client qui ignore le champ marche."""
+	ra = monde["ra"]
+	char = _perso(inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	_compagnon(monde, char, inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	data = _appel(monde, char, ra.poser_annonce, None, {"texte": "avis"})
+	assert [m["auteur_nom"] for m in data["tableau"]] == ["Greta Hazgard"]
+	assert data["ecrivain_compagnon"] is False
+	assert char["inventaire"] == ["item:Plume_d_oie"]
+
+
+def test_le_payload_liste_les_ecrivains_avec_LEUR_releve(monde):
+	"""Le principal EN TÊTE (id vide — son `_id` porte l'adresse e-mail), puis les
+	compagnons, chacun avec ce qu'il a dans son sac."""
+	ra = monde["ra"]
+	char = _perso(inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	bran = _compagnon(monde, char, inventaire=["item:Papier"])
+	data = _appel(monde, char, ra.salle, None)
+	assert [e["id"] for e in data["ecrivains"]] == ["", bran["_id"]]
+	assert [e["nom"] for e in data["ecrivains"]] == ["Greta Hazgard", "Bran Osier"]
+	assert [e["peut_ecrire"] for e in data["ecrivains"]] == [True, False]
+	assert data["ecrivains"][1]["manquantes"] == ["encre", "plume_a_ecrire"]
+
+
+def test_apres_l_ecriture_d_un_compagnon_le_releve_est_A_JOUR_et_le_choix_RESTE_offert(monde):
+	"""⚠️ Deux pièges d'un coup. Le payload doit repasser les docs DÉJÀ mutés (les relire
+	rendrait un second dict, donc un relevé pris AVANT la dépense) — et il doit continuer
+	d'offrir TOUS les écrivains, sans quoi écrire une fois ferait disparaître le compagnon
+	du sélecteur."""
+	ra = monde["ra"]
+	char = _perso(inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	bran = _compagnon(monde, char,
+					  inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	data = _appel(monde, char, ra.poser_annonce, None,
+				  {"texte": "avis", "ecrivain_id": bran["_id"]})
+	assert [e["id"] for e in data["ecrivains"]] == ["", bran["_id"]]
+	assert [e["peut_ecrire"] for e in data["ecrivains"]] == [True, False]
+	# ⚠️ Le sac du PRINCIPAL n'a pas bougé : lui renvoyer un `inventaire_payload` (celui du
+	# compagnon !) mélangerait durablement les deux états dans les globales de la fiche.
+	assert "inventaire_payload" not in data
+
+
 def test_n_IMPORTE_QUI_dans_l_auberge_peut_decrocher_un_avis(monde):
 	"""Aucun contrôle de propriété : c'est le geste physique d'un tableau de village."""
 	ra = monde["ra"]

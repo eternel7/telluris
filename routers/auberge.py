@@ -10,8 +10,8 @@
 # message parce qu'on n'a pas le droit de relire le `character:*` d'autrui.
 #
 # ⚠️ `GET /auberge/salle` est en `def` (lecture ⇒ threadpool, la boucle d'événements n'est
-# pas bloquée — c'est la cible du sondage). Les écrivains restent `async def`, donc
-# SÉRIALISÉS : la nuit écrit une soixantaine de docs lieu, et deux nuits en parallèle
+# pas bloquée — c'est la cible du sondage). Les endpoints d'ÉCRITURE restent `async def`,
+# donc SÉRIALISÉS : la nuit écrit une soixantaine de docs lieu, et deux nuits en parallèle
 # ouvriraient une fenêtre où deux joueurs approvisionnent le même étal.
 
 from typing import Annotated
@@ -43,6 +43,40 @@ def _acces_auberge(current_user: dict) -> tuple[dict, dict]:
 	if not lieu_doc or not auberge.lieu_est_taverne(lieu_doc):
 		raise HTTPException(status_code=403, detail="Il n'y a pas de salle commune ici.")
 	return character, lieu_doc
+
+
+def _ecrivain(character: dict, body: dict) -> tuple[dict, list]:
+	"""Qui tient la plume — `(ecrivain, membres)`. Sans `ecrivain_id`, le personnage
+	sélectionné : comportement d'avant, aucune migration, aucun changement de client requis.
+
+	⚠️ Le nom du champ est `ecrivain_id` et NON `compagnon_id` (Convention §1) : `_actionBody`
+	injecte automatiquement le second avec le porteur ACTIF de la fiche, qui n'a aucune raison
+	d'être celui à qui l'on tend la plume. Deux choix distincts, deux champs distincts.
+
+	⚠️ La preuve d'appartenance est `auberge.ecrivains` (→ `expedition.membres`) et jamais
+	`porteurs_effectifs` : une monture porte le papier, elle ne l'écrit pas. Un doc
+	`aventurier:*` n'ayant pas de `user_id`, c'est la seule attestation du lien avec CE
+	personnage — 403 sinon.
+
+	⚠️ On renvoie AUSSI la liste des membres — ou `None` quand on n'a pas eu à la charger —,
+	pour que l'appelant la repasse au payload plutôt que de la relire : relire rendrait un
+	SECOND dict de l'écrivain qu'on vient de muter, donc un relevé de fournitures pris AVANT
+	la dépense (et, si l'on sauvait, une écriture perdue sur le même `_rev`). ⚠️ `None` et
+	surtout pas `[character]` : le payload doit continuer d'offrir TOUS les écrivains au
+	choix, sinon écrire une fois ferait disparaître les compagnons du sélecteur."""
+	ecrivain_id = (body or {}).get("ecrivain_id") or ""
+	if not ecrivain_id or ecrivain_id == character.get("_id"):
+		# Le principal : le dict est DÉJÀ en main, inutile de payer un `groupe_effectif` pour
+		# le retrouver. Même précaution que `_cible_alliee`, qui teste le lanceur en premier.
+		# Le payload chargera la liste lui-même — `expedition.membres` remet CE dict en tête,
+		# jamais une relecture, donc la dépense qu'on vient de faire y est bien visible.
+		return character, None
+	membres = auberge.ecrivains(character, get_doc)
+	membre = next((m for m in membres if m.get("_id") == ecrivain_id), None)
+	if membre is None:
+		raise HTTPException(status_code=403,
+							detail="Ce compagnon n'écrit pas pour vous.")
+	return membre, membres
 
 
 def _message_view(m: dict, character_id: str) -> dict:
@@ -85,12 +119,17 @@ def _table_view(t: dict, messages: list, character_id: str) -> dict:
 	}
 
 
-def _payload(character: dict, lieu_doc: dict, tables=None, messages=None) -> dict:
+def _payload(character: dict, lieu_doc: dict, tables=None, messages=None,
+			 membres=None) -> dict:
 	"""TOUT le bloc « salle commune », recalculé (Convention §10) : sans lui, le panneau
 	resterait figé sur l'état du dernier chargement.
 
 	⚠️ `now` part avec le payload — le client dérive ses horodatages de l'horloge SERVEUR et
-	jamais de la sienne, qui dérive (même précaution que les chronos de quêtes)."""
+	jamais de la sienne, qui dérive (même précaution que les chronos de quêtes).
+
+	⚠️ `membres` = les docs DÉJÀ chargés par la requête, à repasser quand l'appelant en a muté
+	un : les relire rendrait un second dict du même document, donc un relevé de fournitures
+	pris AVANT la dépense — le joueur verrait son papier encore là."""
 	lieu_id = lieu_doc.get("_id", "")
 	char_id = character.get("_id", "")
 	if tables is None or messages is None:
@@ -98,6 +137,7 @@ def _payload(character: dict, lieu_doc: dict, tables=None, messages=None) -> dic
 	# ⚠️ Une table où ce personnage a DORMI ne lui est plus montrée du tout — c'est le sens
 	# d'`anciens`. Elle existe toujours pour les convives restés attablés.
 	visibles = [t for t in tables if not auberge.table_fermee_pour(t, char_id)]
+	ecrivains = membres if membres is not None else auberge.ecrivains(character, get_doc)
 	return {
 		"now": auberge.now_epoch(),
 		"tables": [_table_view(t, messages, char_id) for t in visibles],
@@ -111,9 +151,15 @@ def _payload(character: dict, lieu_doc: dict, tables=None, messages=None) -> dic
 					for m in auberge.de_support(messages, auberge.SUPPORT_TABLEAU)],
 		"annonce_max": int(character_stats.AUBERGE_ANNONCE_LONGUEUR_MAX),
 		"messages_max": int(character_stats.AUBERGE_TABLE_MESSAGES_MAX),
-		# Détail et non booléen : le refus doit pouvoir dire CE QUI manque, sinon le joueur
-		# ne sait pas quoi aller acheter. ⚠️ Testé sur le personnage SEUL — on écrit avec sa
-		# propre plume ; passer `expedition.membres(...)` la partagerait comme la hache.
+		# Qui peut prendre la plume — le principal puis ses compagnons, chacun avec SON
+		# relevé de fournitures. ⚠️ Chacun écrit avec SA propre plume : on ne met pas les
+		# fournitures en commun comme la hache de `bois.a_outil_coupe`, sinon le compagnon
+		# signerait un avis payé par le sac du joueur.
+		# ⚠️ Coût sur le chemin du SONDAGE : une lecture par compagnon (les `aventurier:*`
+		# sont hors du cache de requête) toutes les 4 s. C'est le prix d'un bloc toujours
+		# présent (Convention §10) ; les items relus, eux, tombent dans le cache.
+		"ecrivains": [auberge.ecrivain_view(get_doc, m, character) for m in ecrivains],
+		# Conservé à côté : le relevé du PRINCIPAL, tel qu'avant l'arrivée du choix d'écrivain.
 		"fournitures": auberge.fournitures_presentes(get_doc, [character]),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"cout_nuit": auberge.cout_nuit(lieu_doc),
@@ -270,16 +316,29 @@ async def poser_annonce(
 ):
 	"""Épingler une annonce au tableau d'information. Exige papier, encre ET plume d'oie, et
 	DÉPENSE le papier et l'encre — la plume est un `outil`, elle sert et ressert. Écrire
-	coûte donc à chaque fois, et le scriptorium y gagne un débouché."""
-	character, lieu_doc = _acces_auberge(current_user)
+	coûte donc à chaque fois, et le scriptorium y gagne un débouché.
 
-	manquantes = auberge.fournitures_manquantes(get_doc, [character])
+	⚠️ Le joueur n'est pas seul à savoir écrire : un COMPAGNON qui a ses propres fournitures
+	prend la plume à sa place (`ecrivain_id`), et l'avis porte alors SA signature — nom et
+	portrait, dénormalisés par `nouveau_message` comme pour n'importe quel message.
+
+	⚠️ Chacun écrit avec SON sac : on ne met pas les fournitures en commun (contrairement à
+	la hache de `bois.a_outil_coupe`). Contrôle ET dépense portent sur le seul écrivain —
+	un contrôle plus large que la dépense ferait accepter l'annonce sans rien retirer, et
+	écrire redeviendrait gratuit en silence."""
+	character, lieu_doc = _acces_auberge(current_user)
+	ecrivain, membres = _ecrivain(character, body)
+	soi = ecrivain is character
+
+	manquantes = auberge.fournitures_manquantes(get_doc, [ecrivain])
 	if manquantes:
 		libelles = {"papier": "du papier", "encre": "de l'encre",
 					"plume_a_ecrire": "une plume à écrire"}
+		sujet = ("Il vous manque " if soi
+				 else f"Il manque à {auberge.nom_affichable(ecrivain)} ")
 		raise HTTPException(
 			status_code=422,
-			detail="Il vous manque " + ", ".join(libelles.get(m, m) for m in manquantes) + ".")
+			detail=sujet + ", ".join(libelles.get(m, m) for m in manquantes) + ".")
 
 	texte = auberge.nettoyer_texte(body.get("texte"),
 								   int(character_stats.AUBERGE_ANNONCE_LONGUEUR_MAX))
@@ -289,24 +348,35 @@ async def poser_annonce(
 	# ⚠️ MÊME SÉQUENCE que `consommer` / `lancer_sort` : on retire en MÉMOIRE, on sauve
 	# l'objet produit, puis le personnage. Un échec du premier save laisse donc le sac
 	# intact en base — le joueur ne perd jamais ses fournitures sans avoir son avis.
-	retire, _ = auberge.retirer_fournitures(get_doc, character)
+	retire, _ = auberge.retirer_fournitures(get_doc, ecrivain)
 	if not retire:
 		# Le contrôle vient de passer : on ne tombe ici qu'en cas de course entre deux
 		# écritures. Mieux vaut un refus qu'une annonce gratuite.
-		raise HTTPException(status_code=409, detail="Vos fournitures viennent de vous manquer.")
+		raise HTTPException(status_code=409,
+							detail="Les fournitures viennent de manquer.")
 
-	doc = auberge.nouveau_message(lieu_doc.get("_id", ""), character, texte,
+	doc = auberge.nouveau_message(lieu_doc.get("_id", ""), ecrivain, texte,
 								  support=auberge.SUPPORT_TABLEAU)
 	if save_doc(doc) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	if save_doc(character) is None:
+	# ⚠️ Seul l'ÉCRIVAIN est muté et sauvé — le principal ne l'est pas quand un compagnon
+	# écrit, et le sauver pour rien bousculerait son `_rev` sans aucune raison. Quand
+	# l'écrivain EST le principal, c'est mot pour mot la séquence d'avant.
+	if save_doc(ecrivain) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 
-	payload = _payload(character, lieu_doc)
+	payload = _payload(character, lieu_doc, membres=membres)
 	payload["consomme"] = list(auberge.FOURNITURES_CONSOMMEES)
+	payload["ecrivain"] = auberge.nom_affichable(ecrivain)
+	payload["ecrivain_compagnon"] = not soi
 	# ⚠️ Le SAC vient de changer (Convention §10) : sans ce bloc, la fiche resterait figée sur
 	# l'inventaire du dernier chargement de /play et le joueur y verrait encore son papier.
-	payload["inventaire_payload"] = _inventory_payload(character)
+	# ⚠️ Publié SEULEMENT quand c'est le principal qui a écrit : `_applyInventoryPayload`
+	# écrase les globales de la fiche sans savoir à qui elles appartiennent — y verser le sac
+	# d'un compagnon les mélangerait durablement (Convention §1). Le sac du principal, lui,
+	# n'a pas bougé ; c'est le bloc `ecrivains` du payload qui resynchronise le panneau.
+	if soi:
+		payload["inventaire_payload"] = _inventory_payload(character)
 	return payload
 
 

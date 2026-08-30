@@ -580,6 +580,80 @@ def test_fournitures_manquantes_nomme_ce_qui_manque():
 	assert auberge.fournitures_manquantes(_get_doc, [complet]) == []
 
 
+# ── Qui tient la plume ───────────────────────────────────────────────────────────
+
+def _compagnon(pid="aventurier:bran", principal="character:moi", **kw):
+	base = {"_id": pid, "type": "aventurier", "statut": "embauche",
+			"embauche_par": principal, "prenom": "Bran", "nom": "Osier",
+			"inventaire": [], "slots": {}}
+	base.update(kw)
+	return base
+
+
+def test_les_ecrivains_sont_le_principal_PUIS_ses_compagnons():
+	"""L'ordre compte : le joueur ouvre la liste, c'est lui le choix par défaut."""
+	bran = _compagnon()
+	perso = _perso(groupe=[bran["_id"]])
+	docs = {bran["_id"]: bran}
+	assert auberge.ecrivains(perso, docs.get) == [perso, bran]
+
+
+def test_une_MONTURE_n_est_JAMAIS_un_ecrivain():
+	"""⚠️ `expedition.membres` et non `recrutement.porteurs_effectifs` (Convention §7) : une
+	bête PORTE le papier, elle ne l'écrit pas. Les confondre mettrait une mule dans le
+	sélecteur — et lui ferait signer un avis."""
+	mule = {"_id": "monture:mule", "type": "monture", "statut": "acquise",
+			"acquise_par": "character:moi", "nom": "Mule",
+			"inventaire": ["item:Papier", "item:Encre", "item:Plume_d_oie"], "slots": {}}
+	perso = _perso(montures=[mule["_id"]])
+	docs = {mule["_id"]: mule}
+	assert auberge.ecrivains(perso, docs.get) == [perso]
+
+
+def test_le_principal_figure_comme_LE_MEME_dict_et_non_une_relecture():
+	"""⚠️ Deux dicts d'un même document, ce sont deux `save_doc` sur le même `_rev` — et,
+	ici, un relevé de fournitures pris AVANT la dépense qu'on vient de faire."""
+	perso = _perso(inventaire=["item:Papier"])
+	assert auberge.ecrivains(perso, lambda _id: None)[0] is perso
+
+
+def test_ecrivain_view_ne_publie_PAS_l_id_du_principal():
+	"""⚠️ Un `_id` de personnage s'écrit `character:user:<email>_<uuid>` : le tenir hors des
+	payloads est la règle de ce module. `""` = le principal, convention du `compagnon_id`."""
+	perso = _perso(inventaire=["item:Papier", "item:Encre", "item:Plume_d_oie"])
+	vue = auberge.ecrivain_view(_get_doc, perso, perso)
+	assert vue["id"] == "" and vue["compagnon"] is False
+	assert vue["nom"] == "Greta Hazgard"
+	assert vue["peut_ecrire"] is True and vue["manquantes"] == []
+
+
+def test_ecrivain_view_dit_CE_QUI_manque_a_un_compagnon():
+	perso = _perso()
+	bran = _compagnon(inventaire=["item:Papier"])
+	vue = auberge.ecrivain_view(_get_doc, bran, perso)
+	assert vue["id"] == "aventurier:bran" and vue["compagnon"] is True
+	assert vue["peut_ecrire"] is False
+	assert vue["manquantes"] == ["encre", "plume_a_ecrire"]
+	assert vue["fournitures"] == {"papier": True, "encre": False, "plume_a_ecrire": False}
+
+
+def test_ecrivain_view_voit_les_slots_comme_le_sac():
+	"""Une plume est le plus souvent EN MAIN — le relevé offert au choix doit voir
+	exactement ce que verra la dépense, sinon le sélecteur mentirait."""
+	perso = _perso()
+	bran = _compagnon(inventaire=["item:Papier", "item:Encre"],
+					  slots={"main_droite": "item:Plume_d_oie"})
+	assert auberge.ecrivain_view(_get_doc, bran, perso)["peut_ecrire"] is True
+
+
+def test_manquantes_de_est_la_source_unique_du_ce_qui_manque():
+	"""Un seul « ce qui manque », lu par le refus comme par le sélecteur : deux formulations
+	divergentes finiraient par ne pas nommer la même chose."""
+	presentes = auberge.fournitures_presentes(_get_doc, [_perso(inventaire=["item:Encre"])])
+	assert auberge.manquantes_de(presentes) == ["papier", "plume_a_ecrire"]
+	assert auberge.manquantes_de({}) == list(auberge.FOURNITURES_ANNONCE)
+
+
 # ── Lecture de la salle ──────────────────────────────────────────────────────────
 
 def test_find_docs_qui_echoue_ne_fait_pas_tomber_la_salle():

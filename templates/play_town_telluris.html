@@ -1953,6 +1953,12 @@
 		<div id="aub-tables-list" class="aub-tables"></div>
 		<h2 style="margin:1rem 0 0">📌 Tableau d'information</h2>
 		<div class="aub-ecrire">
+			<!-- Qui signe l'avis. La rangée reste MASQUÉE tant que le joueur voyage seul :
+				 un sélecteur à une seule entrée ne pose qu'une question sans réponse. -->
+			<div id="aub-ecrivain-ligne" class="aub-ecrivain-ligne" hidden>
+				<label for="aub-ecrivain">✒️ Écrit par</label>
+				<select id="aub-ecrivain" class="aub-ecrivain-sel"></select>
+			</div>
 			<div id="aub-fournitures" class="aub-fournitures"></div>
 			<textarea id="aub-annonce-txt" class="aub-annonce-txt" rows="4"
 					  placeholder="Votre annonce…" maxlength="800"></textarea>
@@ -2165,6 +2171,19 @@
 		.aub-ecrire-bas {
 			display: flex; align-items: center; justify-content: space-between;
 			gap: .6rem; margin-top: .35rem; font-size: .85em; opacity: .8;
+		}
+		.aub-ecrivain-ligne {
+			display: flex; align-items: center; gap: .4rem;
+			font-size: .85em; margin-bottom: .35rem;
+		}
+		/* ⚠️ Indispensable : un `display` d'auteur l'emporte sur le `[hidden]{display:none}`
+		   de la feuille du navigateur — sans cette règle, la rangée resterait visible
+		   quoi qu'on écrive dans `.hidden`, et le joueur solitaire verrait un sélecteur
+		   à une seule entrée. */
+		.aub-ecrivain-ligne[hidden] { display: none; }
+		.aub-ecrivain-sel {
+			flex: 0 1 auto; min-width: 0; max-width: 100%;
+			padding: .15rem .3rem; font: inherit;
 		}
 		.aub-fournitures { font-size: .85em; margin-bottom: .35rem; }
 		.aub-fourniture.manque { opacity: .55; text-decoration: line-through; }
@@ -6575,6 +6594,71 @@ function _aubMajCoutNuit(cout) {
 }
 _aubMajCoutNuit(AUBERGE_NUIT.cout);
 
+// Qui tient la plume — l'id du compagnon choisi, `''` pour le personnage principal (même
+// convention que `compagnon_id`, absent ⇒ le principal). ⚠️ Mémorisé HORS de `_aubEtat` :
+// `renderAuberge` est rejoué après chaque écriture et écraserait le choix du joueur, qui
+// n'a aucune raison de repasser au principal parce que son compagnon vient de signer.
+let _aubEcrivain = '';
+
+// L'entrée d'écrivain choisie, avec repli sur la première (le principal). Le choix peut
+// devenir caduc entre deux rendus — un compagnon congédié depuis un autre onglet, par
+// exemple : on ne laisse alors pas le panneau pointer sur quelqu'un qui n'est plus là.
+function _aubEcrivainCourant() {
+	const liste = (_aubEtat && _aubEtat.ecrivains) || [];
+	const choisi = liste.find(e => (e.id || '') === _aubEcrivain);
+	if (!choisi && liste.length) _aubEcrivain = liste[0].id || '';
+	return choisi || liste[0] || null;
+}
+
+// Fournitures de l'écrivain COURANT + état du bouton. ⚠️ Une seule fonction pour les deux :
+// c'est le même relevé qui décide de ce qu'on affiche et de ce qu'on autorise — les séparer
+// laisserait le bouton actif au-dessus d'une ligne barrée.
+function _aubMajEcriture() {
+	const qui = _aubEcrivainCourant();
+	const four = document.getElementById('aub-fournitures');
+	if (four) {
+		// Le papier et l'encre PARTENT avec l'avis, la plume reste : on le dit avant le clic,
+		// pas après. La plume est un `outil`, les deux autres des `composant` — l'affichage
+		// ne fait que rendre visible une distinction qui est déjà dans la donnée.
+		const noms = { papier: '📄 papier', encre: '🖊️ encre', plume_a_ecrire: '🪶 plume' };
+		const consommee = { papier: true, encre: true };
+		const dispo = (qui && qui.fournitures) || {};
+		four.innerHTML = 'Pour écrire : ' + Object.keys(noms).map(k =>
+			`<span class="aub-fourniture${dispo[k] ? '' : ' manque'}">${noms[k]}${consommee[k] ? ' <span class="aub-depense">(dépensé)</span>' : ''}</span>`
+		).join(' · ');
+	}
+	const btnAnnonce = document.getElementById('aub-annonce-btn');
+	if (btnAnnonce) btnAnnonce.disabled = !(qui && qui.peut_ecrire);
+}
+
+// Le sélecteur d'écrivain. ⚠️ Il n'est REBÂTI que si la liste a changé (nom, id, capacité
+// à écrire) : le reconstruire à chaque rendu refermerait la liste déroulante sous le doigt
+// du joueur, exactement comme le champ « Dire quelque chose… » que le sondage détruisait.
+function _aubMajEcrivains(data) {
+	const ligne = document.getElementById('aub-ecrivain-ligne');
+	const sel = document.getElementById('aub-ecrivain');
+	const liste = data.ecrivains || [];
+	if (!ligne || !sel) return;
+	// Seul à bord : rien à choisir, on ne montre pas la question.
+	ligne.hidden = liste.length < 2;
+	const sig = liste.map(e => `${e.id}${e.nom}${e.peut_ecrire ? 1 : 0}`).join('');
+	if (sel.dataset.sig !== sig) {
+		sel.dataset.sig = sig;
+		// ⚠️ Construit en DOM et jamais en template literal : `nom` est saisi par le joueur
+		// à la création de son personnage, et un `<option>` composé à la chaîne l'injecterait
+		// tel quel (Convention §9 ; `textContent` échappe sans qu'on ait à y penser).
+		sel.innerHTML = '';
+		for (const e of liste) {
+			const opt = document.createElement('option');
+			opt.value = e.id || '';
+			opt.textContent = e.nom + (e.peut_ecrire ? '' : ' — sans fournitures');
+			sel.appendChild(opt);
+		}
+	}
+	_aubEcrivainCourant();          // recale `_aubEcrivain` si le choix n'existe plus
+	sel.value = _aubEcrivain;
+}
+
 function renderAuberge(data) {
 	if (!data) return;
 	_aubEtat = data;
@@ -6630,20 +6714,9 @@ function renderAuberge(data) {
 		_aubSigsOcc = new Map(tables.map(t => [t.id, _aubSigOcc(t)]));
 	}
 
-	const four = document.getElementById('aub-fournitures');
-	if (four) {
-		// Le papier et l'encre PARTENT avec l'avis, la plume reste : on le dit avant le clic,
-		// pas après. La plume est un `outil`, les deux autres des `composant` — l'affichage
-		// ne fait que rendre visible une distinction qui est déjà dans la donnée.
-		const noms = { papier: '📄 papier', encre: '🖊️ encre', plume_a_ecrire: '🪶 plume' };
-		const consommee = { papier: true, encre: true };
-		four.innerHTML = 'Pour écrire : ' + Object.keys(noms).map(k =>
-			`<span class="aub-fourniture${(data.fournitures || {})[k] ? '' : ' manque'}">${noms[k]}${consommee[k] ? ' <span class="aub-depense">(dépensé)</span>' : ''}</span>`
-		).join(' · ');
-	}
-	const btnAnnonce = document.getElementById('aub-annonce-btn');
-	const complet = Object.values(data.fournitures || {}).every(Boolean);
-	if (btnAnnonce) btnAnnonce.disabled = !complet;
+	// Qui signe, puis ce que CET écrivain a dans son sac : le second dépend du premier.
+	_aubMajEcrivains(data);
+	_aubMajEcriture();
 	_aubReste();
 
 	// Une annonce a un auteur comme un message de table : même ligne, même portrait. Purge
@@ -6796,14 +6869,21 @@ async function direATable() {
 async function poserAnnonce() {
 	const zone = document.getElementById('aub-annonce-txt');
 	if (!zone || !zone.value.trim()) return;
-	const data = await _aubFetch('api/auberge/annonce', { texte: zone.value });
+	// `ecrivain_id` et non `compagnon_id` : c'est un choix propre au tableau, que
+	// `_actionBody` n'a pas à écraser avec le porteur actif de la fiche.
+	const data = await _aubFetch('api/auberge/annonce',
+								 { texte: zone.value, ecrivain_id: _aubEcrivain });
 	if (!data) return;
 	zone.value = '';
 	renderAuberge(data);
 	// Le papier et l'encre viennent d'être dépensés : sans ce resync, la fiche montrerait
-	// encore une feuille que le joueur n'a plus (Convention §10).
+	// encore une feuille que le joueur n'a plus (Convention §10). ⚠️ Le serveur ne l'envoie
+	// que lorsque c'est le PRINCIPAL qui a écrit — le sac d'un compagnon n'a rien à faire
+	// dans les globales de la fiche.
 	if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
-	showToast('📌 Votre avis est affiché. (papier et encre dépensés)');
+	showToast(data.ecrivain_compagnon
+		? `📌 ${data.ecrivain} affiche son avis. (papier et encre dépensés)`
+		: '📌 Votre avis est affiché. (papier et encre dépensés)');
 }
 
 async function retirerAnnonce(messageId) {
@@ -6829,6 +6909,14 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('input', e => {
 	if (e.target && e.target.id === 'aub-annonce-txt') _aubReste();
+});
+// Changer d'écrivain ne touche QUE la ligne de fournitures et le bouton : le brouillon reste
+// dans la zone de saisie, on ne fait que décider qui le signera.
+document.addEventListener('change', e => {
+	if (e.target && e.target.id === 'aub-ecrivain') {
+		_aubEcrivain = e.target.value || '';
+		_aubMajEcriture();
+	}
 });
 
 // ── La nuit ──────────────────────────────────────────────────────────────────────

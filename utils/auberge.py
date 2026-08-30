@@ -446,10 +446,55 @@ def fournitures_presentes(get_doc_fn, porteurs: list) -> dict:
 			for sc in FOURNITURES_ANNONCE}
 
 
+def manquantes_de(presentes: dict) -> list:
+	"""Les sous-catégories qui font défaut, dans l'ordre de `FOURNITURES_ANNONCE`, à partir
+	d'un relevé DÉJÀ FAIT. Source unique du « ce qui manque » : `fournitures_manquantes` la
+	rejoue après son propre scan, `ecrivain_view` la rejoue sur le sien — sans elle, décrire
+	un écrivain coûterait DEUX parcours de son sac et de ses slots pour la même réponse."""
+	return [sc for sc in FOURNITURES_ANNONCE if not (presentes or {}).get(sc)]
+
+
 def fournitures_manquantes(get_doc_fn, porteurs: list) -> list:
 	"""Les sous-catégories qui font défaut, dans l'ordre de `FOURNITURES_ANNONCE`."""
-	presentes = fournitures_presentes(get_doc_fn, porteurs)
-	return [sc for sc in FOURNITURES_ANNONCE if not presentes.get(sc)]
+	return manquantes_de(fournitures_presentes(get_doc_fn, porteurs))
+
+
+# ── Qui tient la plume ──────────────────────────────────────────────────────────
+# Écrire n'est pas un privilège du personnage principal : un compagnon qui a son papier, son
+# encre et sa plume peut épingler son propre avis, et c'est SA signature (nom et portrait
+# dénormalisés par `nouveau_message`) que le tableau portera.
+
+def ecrivains(character: dict, get_doc_fn=None) -> list:
+	"""Qui peut prendre la plume : le principal EN TÊTE, puis ses compagnons.
+
+	⚠️ `expedition.membres` et JAMAIS `recrutement.porteurs_effectifs` (Convention §7) : une
+	monture PORTE le papier, elle ne l'écrit pas. C'est exactement la distinction « qui agit »
+	vs « qui porte » — et l'ordre compte, le joueur ouvre la liste.
+
+	⚠️ Le principal y figure comme le MÊME dict que celui reçu, pas une relecture : l'appelant
+	qui mute l'écrivain choisi et le repasse ensuite au payload ne manipule qu'un seul objet
+	par document (deux dicts d'un même doc, ce sont deux `save_doc` sur le même `_rev`)."""
+	return expedition.membres(character, get_doc_fn)
+
+
+def ecrivain_view(get_doc_fn, porteur: dict, principal: dict) -> dict:
+	"""Vue client d'un écrivain possible — ce qu'il faut pour l'offrir au choix ET pour dire
+	pourquoi il ne peut pas écrire.
+
+	⚠️ L'`id` du PRINCIPAL n'est jamais publié : il vaut `""`, et c'est la convention du
+	`compagnon_id` (absent ⇒ le principal). Un `_id` de personnage s'écrit
+	`character:user:<email>_<uuid>` — le tenir hors des payloads est la règle de ce module,
+	même quand celui-ci ne part qu'à son propre propriétaire."""
+	presentes = fournitures_presentes(get_doc_fn, [porteur])
+	manquantes = manquantes_de(presentes)
+	return {
+		"id": "" if porteur is principal else (porteur or {}).get("_id", ""),
+		"nom": nom_affichable(porteur),
+		"compagnon": porteur is not principal,
+		"fournitures": presentes,
+		"manquantes": manquantes,
+		"peut_ecrire": not manquantes,
+	}
 
 
 def _emplacement_fourniture(get_doc_fn, porteur: dict, sous_categorie: str):
