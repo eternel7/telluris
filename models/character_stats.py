@@ -577,7 +577,19 @@ ATELIER_TRANSFO_PROBA: float = 0.10
 # ±PRIX_AMPLITUDE_STOCK et le prix final reste dans [pmin, pmax]. Le stock cible est défini
 # PAR LIEU (champ `stock_cible` : {item|sous_categorie|categorie → cible}), STOCK_CIBLE_DEFAUT
 # servant de repli ultime.
-STOCK_CIBLE_DEFAUT: int = 100
+#
+# ⚠️ 25 et non 100 (la valeur d'origine) : la cible ne règle PAS le niveau des prix — sur un
+# panier fixe des 512 lignes de rayon du dump, passer de 100 à 25 ne bouge le prix total que
+# de −3 %. Elle règle le NIVEAU DE STOCK, et deux mécaniques entières en dépendaient :
+#   · à 100, 46 % des lignes se vendaient au PLAFOND (+PRIX_AMPLITUDE_STOCK) — la boutique se
+#     comportait comme en pénurie permanente, alors que son stock médian est de 4 ; à 25, plus
+#     aucune ;
+#   · l'écoulement PNJ et le chaînage des ateliers n'opèrent QUE sur le surplus au-dessus de la
+#     cible : à 100 seules 64 des 512 lignes y étaient éligibles (×5 à 25), et un atelier devait
+#     empiler 100 exemplaires d'un intermédiaire avant sa première pièce chaînée.
+# Descendre plus bas (12, 8, 5) ne gagne presque plus rien et vide les vitrines.
+# Réglable à chaud depuis /admin, comme toutes les variables de monde.
+STOCK_CIBLE_DEFAUT: int = 25
 PRIX_AMPLITUDE_STOCK: float = 0.30
 # Écoulement PNJ des produits finis : à chaque vente/visite, proba de vendre aux PNJ une
 # fraction de l'excédent (au-dessus de la cible) de chaque produit en rayon.

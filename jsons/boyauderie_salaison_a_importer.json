@@ -1,0 +1,237 @@
+[
+  {
+    "_id": "item:fil_de_boyau",
+    "type": "item",
+    "nom": "Fil de boyau",
+    "icon": "🧵",
+    "description": "Boyau refendu, étiré et séché en un fil nerveux qui ne pourrit pas. On en coud ce que le lin ne tiendrait pas.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "fil_de_boyau",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05
+  },
+  {
+    "_id": "item:baudruche",
+    "type": "item",
+    "nom": "Baudruche",
+    "icon": "🫧",
+    "description": "Membrane de boyau grattée jusqu'à la transparence, tendue sur un cadre pour sécher. Légère, souple, étanche.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "baudruche",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15
+  },
+  {
+    "_id": "item:outre_de_baudruche",
+    "type": "item",
+    "nom": "Outre de baudruche",
+    "icon": "🫗",
+    "description": "Deux baudruches cousues au fil de boyau, poissées aux coutures. Elle tient l'eau une saison, le vin une seule route.",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "sous_categorie": "outre_de_baudruche",
+    "slots": [],
+    "tags": [],
+    "poids": 0.4
+  },
+  {
+    "_id": "item:andouille",
+    "type": "item",
+    "nom": "Andouille",
+    "icon": "🌭",
+    "description": "Boyaux emboîtés les uns dans les autres et ficelés serré, fumés au bois vert. Ça se mange froid, sur le pouce.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "poids": 0.3,
+    "effets": {"duree": 4, "pv": 9, "regen_pv": 1}
+  },
+  {
+    "_id": "item:tripes_mijotees",
+    "type": "item",
+    "nom": "Tripes mijotées",
+    "icon": "🥘",
+    "description": "Un pot de tripes tenues au coin du feu depuis la veille. Le tripier en sert une louche à qui apporte son écuelle.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "poids": 0.4,
+    "effets": {"duree": 5, "pv": 12, "regen_pv": 2}
+  },
+  {
+    "_id": "item:saumure",
+    "type": "item",
+    "nom": "Saumure",
+    "icon": "🧂",
+    "description": "Eau saturée de sel jusqu'à porter un œuf. Le saloir en garde des cuves entières, et les remonte à chaque salaison.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "saumure",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5
+  },
+  {
+    "_id": "item:saucisson_sec",
+    "type": "item",
+    "nom": "Saucisson sec",
+    "icon": "🥖",
+    "description": "Poussé au boyau, salé, puis pendu six semaines au cellier. Il voyage mieux que celui qui le porte.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "poids": 0.25,
+    "effets": {"duree": 8, "pv": 7, "regen_pv": 1}
+  },
+  {
+    "_id": "item:lard_sale",
+    "type": "item",
+    "nom": "Lard salé",
+    "icon": "🥓",
+    "description": "Une bande de gras prise au gros sel, dure comme une planche. On en coupe des lichettes qu'on fait fondre sur la braise.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "poids": 0.3,
+    "effets": {"duree": 6, "pv": 6, "regen_pv": 2}
+  },
+  {
+    "_id": "item:jambon_de_montagne",
+    "type": "item",
+    "nom": "Jambon de montagne",
+    "icon": "🍖",
+    "description": "Une cuisse entière noyée en saumure tout l'hiver, puis séchée au vent d'altitude. Le saloir ne s'en sépare pas volontiers.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "poids": 0.5,
+    "effets": {"duree": 10, "pv": 18, "regen_pv": 2}
+  },
+  {
+    "_id": "item:coeur_confit",
+    "type": "item",
+    "nom": "Cœur confit",
+    "icon": "❤️",
+    "description": "Un cœur cuit et scellé dans sa propre graisse, salé à cru. On dit qu'il tient au corps de qui doit veiller.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "poids": 0.3,
+    "effets": {"duree": 8, "pv": 12, "buffs": {"R": 5}}
+  },
+
+  {
+    "_id": "recette:boyauderie_fil_de_boyau",
+    "type": "recette",
+    "lieu_categorie": "boyauderie",
+    "objet_final": "fil_de_boyau",
+    "quantite_produite": 3,
+    "matieres_premieres": [{"sous_categorie": "boyaux", "quantite": 2}]
+  },
+  {
+    "_id": "recette:boyauderie_baudruche",
+    "type": "recette",
+    "lieu_categorie": "boyauderie",
+    "objet_final": "baudruche",
+    "quantite_produite": 4,
+    "matieres_premieres": [{"sous_categorie": "boyaux", "quantite": 3}]
+  },
+  {
+    "_id": "recette:boyauderie_andouille",
+    "type": "recette",
+    "lieu_categorie": "boyauderie",
+    "objet_final": "andouille",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {"item": "item:boyaux_pour_saucisses", "quantite": 1},
+      {"sous_categorie": "viande", "quantite": 2}
+    ]
+  },
+  {
+    "_id": "recette:boyauderie_tripes_mijotees",
+    "type": "recette",
+    "lieu_categorie": "boyauderie",
+    "objet_final": "tripes_mijotees",
+    "quantite_produite": 4,
+    "matieres_premieres": [
+      {"sous_categorie": "boyaux", "quantite": 2},
+      {"sous_categorie": "graisse", "quantite": 1}
+    ]
+  },
+  {
+    "_id": "recette:boyauderie_outre_de_baudruche",
+    "type": "recette",
+    "lieu_categorie": "boyauderie",
+    "objet_final": "outre_de_baudruche",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {"sous_categorie": "baudruche", "quantite": 2},
+      {"sous_categorie": "fil_de_boyau", "quantite": 1}
+    ]
+  },
+
+  {
+    "_id": "recette:salaison_saumure",
+    "type": "recette",
+    "lieu_categorie": "salaison",
+    "objet_final": "saumure",
+    "quantite_produite": 2,
+    "matieres_premieres": [{"item": "item:Sel", "quantite": 2}]
+  },
+  {
+    "_id": "recette:salaison_saucisson_sec",
+    "type": "recette",
+    "lieu_categorie": "salaison",
+    "objet_final": "saucisson_sec",
+    "quantite_produite": 4,
+    "matieres_premieres": [
+      {"item": "item:boyaux_pour_saucisses", "quantite": 1},
+      {"sous_categorie": "viande", "quantite": 2},
+      {"item": "item:Sel", "quantite": 1}
+    ]
+  },
+  {
+    "_id": "recette:salaison_lard_sale",
+    "type": "recette",
+    "lieu_categorie": "salaison",
+    "objet_final": "lard_sale",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {"sous_categorie": "graisse", "quantite": 2},
+      {"item": "item:Sel", "quantite": 1}
+    ]
+  },
+  {
+    "_id": "recette:salaison_jambon_de_montagne",
+    "type": "recette",
+    "lieu_categorie": "salaison",
+    "objet_final": "jambon_de_montagne",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {"sous_categorie": "viande", "quantite": 3},
+      {"sous_categorie": "saumure", "quantite": 1}
+    ]
+  },
+  {
+    "_id": "recette:salaison_coeur_confit",
+    "type": "recette",
+    "lieu_categorie": "salaison",
+    "objet_final": "coeur_confit",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {"sous_categorie": "coeur", "quantite": 1},
+      {"sous_categorie": "graisse", "quantite": 2},
+      {"item": "item:Sel", "quantite": 1}
+    ]
+  }
+]

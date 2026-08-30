@@ -124,6 +124,17 @@ CATALOGUE = [
 			"dump figé et n'y injecte que ce champ : régénération idempotente.",
 	},
 	{
+		"id": "gen_stock_cible_ateliers",
+		"label": "🏺 Débloquer le chaînage des ateliers (stock_cible)",
+		"argv": _py("gen_stock_cible_ateliers.py"),
+		"ecrit": "Écrit jsons/stock_cible_ateliers_a_importer.json.",
+		"description": "Abaisse à 12 la cible de vitrine des intermédiaires qu'un atelier "
+			"fabrique pour lui-même (manche, Table_d_harmonie, saumure…), sous le défaut de 25 : "
+			"un intermédiaire est un en-cours, pas de la marchandise. Divise encore par deux le "
+			"démarrage du chaînage (1re pièce à la visite 5 au lieu de 10). Dérivé du graphe de "
+			"recettes, relit le dump figé et n'injecte que `stock_cible` : idempotent.",
+	},
+	{
 		"id": "gen_coherence_france",
 		"label": "🗺️ Corriger la cohérence de lieu:france",
 		"argv": _py("gen_coherence_france.py"),
