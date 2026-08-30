@@ -19,10 +19,18 @@
   `editable` = le portrait porte son éditeur (curseur de zoom + ✏️/💾). À réserver aux porteurs
   dont le cadrage est enregistrable : une recrue seulement OFFERTE n'est pas dans le groupe,
   `_acteur` refuserait la sauvegarde (403) — on ne montre pas un éditeur qui ne peut pas écrire.
+
+  `vitaux` / `identite` = la carte se DÉCLINE en retirant les barres PV/PM superposées et le
+  bloc identité. ⚠️ Les deux valent `true` par DÉFAUT : les ajouter ne change rien aux usages
+  existants. Le portrait seul (`vitaux=false, identite=false`) sert les avatars du chat de
+  taverne — les PV d'un AUTRE joueur y seraient à la fois privés et faux (figés à l'envoi).
+  ⚠️ `.card-footer` et `.card-actions` restent émis dans tous les cas : `renderCharacterCard`
+  les résout par `_q`, qui rend `null` sans broncher si on venait à les retirer aussi.
 #}
 {% macro character_card(card_id='', porteur_id='', nom='', voc_icon='', voc_label='',
                         voc_niveau=0, race='', niveau=0, rang='', rang_title='', pv=0, pv_max=0,
-                        pm=0, pm_max=0, image='', zoom=50, editable=true, classes='') %}
+                        pm=0, pm_max=0, image='', zoom=50, editable=true, classes='',
+                        vitaux=true, identite=true) %}
 {% set _pv_max = pv_max or 1 %}
 {% set _pm_max = pm_max or 1 %}
 {% set pv_pct = [(pv / _pv_max * 100)|int, 100]|min %}
@@ -31,6 +39,7 @@
 	<div class="char-header">
 		<div class="char-portrait" data-role="scale-root">
 			<div class="viewport-wrapper" data-role="vp">
+				{% if vitaux %}
 				<div class="portrait-overlay-bars">
 					<div class="portrait-stat-bar pv-side">
 						<div class="bar-fill{% if pv > _pv_max %} is-overflow{% endif %}" data-role="pv-bar" style="height:{{ pv_pct }}%"></div>
@@ -39,6 +48,7 @@
 						<div class="bar-fill{% if pm > _pm_max %} is-overflow{% endif %}" data-role="pm-bar" style="height:{{ pm_pct }}%"></div>
 					</div>
 				</div>
+				{% endif %}
 				{# `src` définitif posé par makePortraitViewport, qui MESURE l'image avant de la cadrer. #}
 				<img data-role="img" src="{% if image %}/characters/{{ image }}{% endif %}" alt="" draggable="false">
 				{% if editable %}
@@ -62,6 +72,7 @@
 				{% endif %}
 			</div>
 		</div>
+		{% if identite %}
 		<div class="char-identity" data-role="identity">
 			<div class="char-name" data-role="nom">{{ nom }}</div>
 			<div class="char-class" data-role="classe">{{ voc_icon }} {{ voc_label }} Niv.<span class="voc-niveau niveau-nb" data-role="voc-niveau">{{ voc_niveau }}</span> - <span data-role="race">{{ race }}</span> Niv.<span class="race-niveau niveau-nb" data-role="race-niveau">{{ niveau }}</span> · <span data-role="rang"{% if rang_title %} title="{{ rang_title }}"{% endif %}>Rang <span data-role="rang-val">{{ rang }}</span></span></div>
@@ -70,6 +81,7 @@
 				<span class="pm-val" data-role="pm-val">PM <span data-role="pm">{{ pm }}</span>/<span data-role="pm-max">{{ pm_max or "—" }}</span></span>
 			</div>
 		</div>
+		{% endif %}
 	</div>
 	{# Pied de carte : ce qui n'est pas de l'identité (part de butin, affinité, spécialité…). #}
 	<div class="card-footer" data-role="footer"></div>

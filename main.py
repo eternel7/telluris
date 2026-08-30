@@ -18,6 +18,7 @@ from routers.quetes import quetes_router
 from routers.pnj import pnj_router
 from routers.recrutement import recrutement_router
 from routers.montures import montures_router
+from routers.auberge import auberge_router
 from routers.animations import animations_router
 from utils.combat import get_combat_grid, finalize_combat
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
@@ -36,6 +37,7 @@ from utils import transport as transport_util
 from utils import chasse as chasse_util
 from utils import recrutement as recrutement_util
 from utils import montures as montures_util
+from utils import auberge as auberge_util
 from utils import escorte as escorte_util
 from utils import fiche as fiche_util
 from utils import animations as animations_util
@@ -124,6 +126,7 @@ app.include_router(quetes_router, prefix="/api")
 app.include_router(pnj_router, prefix="/api")
 app.include_router(recrutement_router, prefix="/api")
 app.include_router(montures_router, prefix="/api")
+app.include_router(auberge_router, prefix="/api")
 # Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en
 # lecture, `/admin/...` en écriture, comme les endpoints d'admin de main.py).
 app.include_router(animations_router)
@@ -700,6 +703,19 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# que de l'argent, contrairement au tableau de recrutement.
 	est_etable = montures_util.lieu_vend_montures(grid_doc)
 
+	# Taverne : `est_auberge` conditionne le bouton « Salle commune ». Aucun contrôle d'accès
+	# non plus — on entre dans une auberge comme dans une étable ; c'est l'écriture d'une
+	# annonce qui demande quelque chose (papier, encre, plume), pas la porte.
+	est_auberge = auberge_util.lieu_est_taverne(grid_doc)
+	# « Passer la nuit » est une action de la SIDEBAR, pas du panneau : elle doit donc être
+	# servie ici. Le log part avec — le client l'égrène PENDANT que le POST est en vol, et
+	# il ne l'aurait pas en main s'il fallait d'abord ouvrir la salle commune. Même raison
+	# que la `compagnie` : sinon l'information n'apparaîtrait qu'après ouverture du panneau.
+	auberge_nuit = ({
+		"cout": auberge_util.cout_nuit(grid_doc),
+		"log": auberge_util.messages_nuit(grid_doc, auberge_util.NUIT_LOG_LIGNES),
+	} if est_auberge else None)
+
 	# Ressource récoltable (événement de zone « ressource ») : résolue pour l'affichage initial
 	# du bouton « Récolter » dans la sidebar (champ transitoire posé par move_character).
 	ressource_recoltable = None
@@ -764,6 +780,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"est_guilde": est_guilde,
 			"est_recrutement": est_recrutement,
 			"est_etable": est_etable,
+			"est_auberge": est_auberge,
+			"auberge_nuit": auberge_nuit,
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.
 			"affinites_detail": recrutement_util.affinites_detail_payload(character, get_doc),
@@ -839,6 +857,11 @@ async def get_combat_page(
 		# Une monture est illustrée par l'image de son ESPÈCE, servie par /monsters : ni le
 		# dossier ni le mount ne sont ceux d'un portrait de personnage.
 		est_monture = bool(j.get("est_monture"))
+		# ⚠️ Portrait ENTIER (jamais recadré) pour ce qui n'est pas un aventurier : une bête
+		# comme une personne escortée n'a pas de cadrage de fiche (`portrait_zoom` /
+		# `portrait_translate` absents) — le cadrage par défaut zoomerait sur un fragment.
+		# C'est le SERVEUR qui le dit : le client ne doit pas le déduire du dossier d'image.
+		entier = est_monture or bool(j.get("est_protege"))
 		dossier = MONSTERS_IMAGES_PATH if est_monture else CHARACTERS_IMAGES_PATH
 		try:
 			with Image.open(dossier + "/" + img) as p:
@@ -848,6 +871,7 @@ async def get_combat_page(
 		portraits_joueurs[j["id"]] = {
 			"image": img,
 			"base": "/monsters" if est_monture else "/characters",
+			"entier": entier,
 			"largeur": largeur,
 			"hauteur": hauteur,
 			"portrait_zoom": (cdoc or {}).get("portrait_zoom"),

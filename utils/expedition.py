@@ -13,7 +13,7 @@
 # lues via le module character_stats (jamais from-import).
 
 from models import character_stats
-from utils.characters import item_ref_id
+from utils.characters import item_ref_id, item_sous_categorie
 from utils.consommables import caracts_avec_buffs
 from utils import recrutement
 
@@ -43,6 +43,31 @@ def porteur_avec_tag(get_doc_fn, porteurs: list, tag: str) -> bool:
 				continue
 			doc = get_doc_fn(item_id)
 			if doc and besoin in [str(t).lower() for t in (doc.get("tags") or [])]:
+				return True
+	return False
+
+
+def porteur_avec_sous_categorie(get_doc_fn, porteurs: list, sous_categorie: str) -> bool:
+	"""True si UN des porteurs a un item de cette SOUS-CATÉGORIE dans son sac OU dans son
+	équipement. Frère de `porteur_avec_tag` — même parcours (les slots comptent autant que
+	l'inventaire : une plume est le plus souvent en main), autre prédicat.
+
+	⚠️ Le test passe par `characters.item_sous_categorie` et JAMAIS par `doc["sous_categorie"]`
+	lu à la main : ce chokepoint retombe sur la `categorie` quand la sous-catégorie est vide.
+	C'est ce qui faisait passer les encres pour de simples « composant » avant qu'elles ne
+	reçoivent la leur, et c'est la seule lecture qui s'accorde avec le marché."""
+	besoin = str(sous_categorie or "").lower()
+	if not besoin:
+		return False
+	for porteur in porteurs or []:
+		refs = list((porteur or {}).get("inventaire", []) or [])
+		refs += [r for r in ((porteur or {}).get("slots", {}) or {}).values() if r]
+		for ref in refs:
+			item_id = item_ref_id(ref)
+			if not item_id:
+				continue
+			doc = get_doc_fn(item_id)
+			if doc and str(item_sous_categorie(doc) or "").lower() == besoin:
 				return True
 	return False
 

@@ -3,6 +3,7 @@
 # de l'arbre de dialogue (conditions, placeholders), service de soin (payant/gratuit
 # selon relation). Aucun accès DB — tout est passé en dicts.
 
+from models import character_stats
 from utils import lint_dialogues, pnj
 
 
@@ -426,10 +427,14 @@ def test_soin_effectif_sans_service():
 
 
 def test_soin_effectif_seuil_defaut_world_var():
+    """⚠️ Le seuil est lu SUR LE MODULE et jamais recopié en dur : c'est une variable de monde,
+    réglable à chaud depuis `/admin`. Un littéral ici ferait échouer le test à la première
+    retouche d'équilibrage — pour un comportement rigoureusement correct."""
+    seuil = int(character_stats.PNJ_REPUTATION_SEUIL)
     doc = _pnj_doc()
-    del doc["services"]["soin"]["gratuit_si"]["seuil"]    # → défaut PNJ_REPUTATION_SEUIL (70)
-    assert pnj.soin_effectif(doc, _ctx({"lieu:auxerre": 70}))["gratuit"] is True
-    assert pnj.soin_effectif(doc, _ctx({"lieu:auxerre": 69}))["gratuit"] is False
+    del doc["services"]["soin"]["gratuit_si"]["seuil"]    # → défaut PNJ_REPUTATION_SEUIL
+    assert pnj.soin_effectif(doc, _ctx({"lieu:auxerre": seuil}))["gratuit"] is True
+    assert pnj.soin_effectif(doc, _ctx({"lieu:auxerre": seuil - 1}))["gratuit"] is False
 
 
 def test_appliquer_soin_fraction_et_clamp():
@@ -466,10 +471,12 @@ def test_don_effectif_sans_service_ou_sans_item():
 
 
 def test_don_effectif_seuil_defaut_world_var():
+    """Même règle que pour le soin : le seuil se lit sur le module, il ne se recopie pas."""
+    seuil = int(character_stats.PNJ_REPUTATION_SEUIL)
     doc = _pnj_doc()
-    del doc["services"]["don"]["gratuit_si"]["seuil"]     # → défaut PNJ_REPUTATION_SEUIL (70)
-    assert pnj.don_effectif(doc, _ctx({"lieu:auxerre": 70}))["gratuit"] is True
-    assert pnj.don_effectif(doc, _ctx({"lieu:auxerre": 69}))["gratuit"] is False
+    del doc["services"]["don"]["gratuit_si"]["seuil"]     # → défaut PNJ_REPUTATION_SEUIL
+    assert pnj.don_effectif(doc, _ctx({"lieu:auxerre": seuil}))["gratuit"] is True
+    assert pnj.don_effectif(doc, _ctx({"lieu:auxerre": seuil - 1}))["gratuit"] is False
 
 
 def test_appliquer_don_ajoute_references_inventaire():

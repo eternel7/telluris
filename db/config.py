@@ -36,6 +36,11 @@ try:
 	# (["type"]) : CouchDB lisait TOUS les items / TOUS les lieux et filtrait en mémoire.
 	db.put_index(fields=["type", "sous_categorie"], name="idx-tables-by-souscat", ddoc="design_tables")
 	db.put_index(fields=["type", "lieu_parent"], name="idx-tables-by-parent", ddoc="design_tables")
+	# `{"type": "message", "lieu": …}` et `{"type": "table", "lieu": …}` (la salle commune
+	# d'une auberge, SONDÉE toutes les quelques secondes tant qu'un joueur y est) : sans cet
+	# index, idx-tables (["type"]) ferait lire à CouchDB TOUS les messages du monde à chaque
+	# rafraîchissement. Même faute, même remède que les cinq index ci-dessus.
+	db.put_index(fields=["type", "lieu"], name="idx-tables-by-lieu", ddoc="design_tables")
 except Exception:
 	# CouchDB injoignable (ex. pytest en local, hors conteneur) : l'import doit
 	# rester possible pour les tests purs ; les helpers ci-dessous renvoient None.

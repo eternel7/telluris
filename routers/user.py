@@ -43,6 +43,7 @@ from utils import acces
 from utils import montures
 from utils import escorte
 from utils import expedition
+from utils import auberge
 from models import character_stats
 from models.character_stats import (
 	BaseStats, EquipmentBonus, compute_derived_stats, DerivedStats,
@@ -138,6 +139,16 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 		raise HTTPException(status_code=422, detail="Une cité de départ valide est requise pour créer un personnage.")
 	lieu = get_doc(cite)
 
+	# Prénom et nom étaient écrits BRUTS : ni longueur maximale, ni retrait des caractères de
+	# contrôle, et aucun `maxlength` côté client. C'est le nom que la salle commune d'une
+	# taverne fige dans `auteur_nom` et montre à TOUS LES AUTRES JOUEURS — il doit être borné
+	# AVANT d'y entrer. ⚠️ On BORNE sans échapper (Convention §9) : c'est `escapeHtml` qui
+	# neutralise au rendu, échapper ici produirait un double échappement.
+	prenom = auberge.nettoyer_ligne(characterinfo.get("prenom") if characterinfo else "", 30)
+	nom = auberge.nettoyer_ligne(characterinfo.get("nom") if characterinfo else "", 30)
+	if not prenom or not nom:
+		raise HTTPException(status_code=422, detail="Un prénom et un nom sont requis pour créer un personnage.")
+
 	if (characterinfo and "bonusStats" in characterinfo):
 		caractUp = characterinfo["bonusStats"]
 		points_depenses = sum(
@@ -230,8 +241,8 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			'race': characterinfo["race"],
 			'voc': characterinfo["voc"],
 			'image': characterinfo["image"],
-			'prenom': characterinfo["prenom"],
-			'nom': characterinfo["nom"],
+			'prenom': prenom,
+			'nom': nom,
 			'cite': characterinfo["cite"],
 			'lieu': characterinfo["cite"],
 			'position': position,
@@ -522,6 +533,11 @@ async def move_character(
 						escorte_maj = escorte.traiter_deplacement(
 							character_to_update, lieu_doc, destination_pos,
 							get_doc, save_doc, find_docs)
+						# Taverne : sortir de l'auberge, c'est se lever de table — ses messages
+						# partent avec lui et la table s'efface si elle se vide. ⚠️ Coût NUL sans le
+						# marqueur `taverne_table` : la quasi-totalité des déplacements sort aussitôt.
+						auberge.traiter_deplacement(
+							character_to_update, get_doc, save_doc, delete_doc, find_docs)
 						if escorte_maj["depose"]:
 							# ⚠️ L'XP de la dépose est créditée au principal par
 							# `appliquer_recompenses(compagnons=[])` ; elle est PARTAGÉE avec la

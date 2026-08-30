@@ -182,8 +182,12 @@
 .ally-token.protege .at-portrait {
 	background-color: #3b3218; border-color: #f0c453;
 	box-shadow: 0 0 10px rgba(240,196,83,0.85); color: #ffe9ac;
-	background-size: cover;
-	background-position: center top;
+	/* ⚠️ `contain` et non `cover` : une personne escortée n'a pas de cadrage de fiche,
+	   son image est un personnage EN PIED — la recadrer montrerait un fragment (souvent
+	   le buste, parfois rien d'identifiable). Elle doit tenir entière dans le jeton,
+	   comme la monture. */
+	background-size: contain;
+	background-position: center center;
 	background-repeat: no-repeat;
 }
 .ally-token.protege .mt-hp-fill { background: #f0c453; }
@@ -1036,12 +1040,10 @@ const PORTRAITS_JOUEURS = {{ portraits_joueurs | tojson | safe }};
 function portraitStyle(jid) {
 	const p = PORTRAITS_JOUEURS[jid];
 	if (!p || !p.image || !p.largeur || !p.hauteur) return null;
-	console.log(jid, p);
-	if(p.base=='/monsters') {
-		return {
-			img:  `${p.base}/${p.image}`
-		};
-	}
+	// Portrait ENTIER (monture, personne escortée) : aucun cadrage à reproduire — on ne
+	// pose ni `size` ni `pos`, et c'est la feuille de style qui fait tenir l'image
+	// complète dans le jeton (`background-size: contain`). Le drapeau vient du SERVEUR.
+	if (p.entier) return { img: `${p.base || '/characters'}/${p.image}` };
 	const zoom = p.portrait_zoom || 100;
 	const imgW = p.largeur * zoom / 100, imgH = p.hauteur * zoom / 100;
 	const t = p.portrait_translate;
@@ -1056,8 +1058,10 @@ function portraitStyle(jid) {
 function applyPortraitTo(el, st) {
 	if (!el || !st) return;
 	el.style.backgroundImage    = `url('${st.img}')`;
-	el.style.backgroundSize     = st.size;
-	el.style.backgroundPosition = st.pos;
+	// ⚠️ Sans cadrage (portrait entier), on EFFACE les valeurs en ligne au lieu d'écrire
+	// `undefined` : c'est la règle CSS du jeton qui doit reprendre la main.
+	el.style.backgroundSize     = st.size || '';
+	el.style.backgroundPosition = st.pos || '';
 }
 // Portrait du MEMBRE ACTIF : panneau gauche + token central (re-appliqué à chaque
 // changement d'acteur — le monde re-pivote autour de lui).

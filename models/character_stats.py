@@ -218,11 +218,11 @@ MARCHANDAGE_COMPAGNON_AFFINITE_MIN: int = 50
 # depuis la brouille pour regagner un point. 0 transaction = mécanique désactivée.
 # Le seuil peut être réglé AU-DESSUS du neutre (50) pour que la fidélité mène plus haut.
 RELATION_FIDELITE_TRANSACTIONS: int = 10
-RELATION_FIDELITE_SEUIL: int = 50
+RELATION_FIDELITE_SEUIL: int = 55
 # Seuil de « bonne réputation » par défaut pour les PNJ (services gratuits/améliorés,
-# conditions de dialogue relation_min) — 70 = palier « Estimé ». Surchargable par PNJ
+# conditions de dialogue relation_min) = palier « Estimé ». Surchargable par PNJ
 # dans la donnée (`gratuit_si.seuil`, `condition.relation_min.seuil`).
-PNJ_REPUTATION_SEUIL: int = 70
+PNJ_REPUTATION_SEUIL: int = 56
 
 # ── Quêtes (guilde + moteur de génération) ───────────────────────────────────────
 # Le tableau d'une guilde maintient un pool de QUETE_BOARD_TAILLE offres générées
@@ -417,6 +417,24 @@ ESCORTE_PROGENITURE_PROBA: float = 0.05
 ESCORTE_PROGENITURE_RELATION_MIN: int = 60
 ESCORTE_GUILDE_PROBA: float = 0.25
 ESCORTE_PROGENITURE_XP: int = 25
+
+# ── Tavernes (tables, tableau d'information, nuit) ───────────────────────────────
+# Une auberge (`categorie: "auberge"` ou tag `taverne`) offre trois choses : des TABLES
+# où les joueurs se parlent, un TABLEAU d'information où l'on épingle une annonce, et la
+# NUIT — PV/PM au maximum, étals de la cité réapprovisionnés, tableau de recrues renouvelé.
+# ⚠️ Aucune horloge, aucun temps partagé : passer la nuit est un geste LOCAL au personnage.
+# NUIT_COUT_CUIVRE : prix de la chambre — 0 rend la nuit gratuite sans toucher au code.
+# NUIT_PASSES_ATELIER : passes de `tick_atelier` par magasin de la cité. C'est le bouton de
+#   générosité de la nuit ; le monter renchérit d'autant le coût de l'endpoint (une passe =
+#   une chance d'approvisionner, de produire et d'écouler PAR magasin).
+# MESSAGE_DUREE_SECONDES : durée de vie d'un message de TABLE (86400 = un jour). ⚠️ Ne vaut
+#   PAS pour une annonce du tableau, qui ne périme jamais et ne part qu'à la main.
+AUBERGE_NUIT_COUT_CUIVRE: int = 50
+AUBERGE_NUIT_PASSES_ATELIER: int = 2
+AUBERGE_MESSAGE_DUREE_SECONDES: int = 86400
+AUBERGE_TABLE_MESSAGES_MAX: int = 10
+AUBERGE_TABLES_MAX: int = 8
+AUBERGE_ANNONCE_LONGUEUR_MAX: int = 800
 
 # ── Accès (barrières PNJ gardiennes) ──────────────────────────────────────────────
 # Un lieu peut porter un bloc `acces` (gardien, conditions, cycle) qui en interdit
@@ -695,6 +713,12 @@ def current_world_variables() -> dict:
 		"ESCORTE_PROGENITURE_RELATION_MIN": ESCORTE_PROGENITURE_RELATION_MIN,
 		"ESCORTE_GUILDE_PROBA": ESCORTE_GUILDE_PROBA,
 		"ESCORTE_PROGENITURE_XP": ESCORTE_PROGENITURE_XP,
+		"AUBERGE_NUIT_COUT_CUIVRE": AUBERGE_NUIT_COUT_CUIVRE,
+		"AUBERGE_NUIT_PASSES_ATELIER": AUBERGE_NUIT_PASSES_ATELIER,
+		"AUBERGE_MESSAGE_DUREE_SECONDES": AUBERGE_MESSAGE_DUREE_SECONDES,
+		"AUBERGE_TABLE_MESSAGES_MAX": AUBERGE_TABLE_MESSAGES_MAX,
+		"AUBERGE_TABLES_MAX": AUBERGE_TABLES_MAX,
+		"AUBERGE_ANNONCE_LONGUEUR_MAX": AUBERGE_ANNONCE_LONGUEUR_MAX,
 		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
@@ -755,6 +779,9 @@ def load_world_variables() -> dict:
 	global ESCORTE_MORT_DEFINITIVE
 	global ESCORTE_PROGENITURE_PROBA, ESCORTE_PROGENITURE_RELATION_MIN
 	global ESCORTE_GUILDE_PROBA, ESCORTE_PROGENITURE_XP
+	global AUBERGE_NUIT_COUT_CUIVRE, AUBERGE_NUIT_PASSES_ATELIER
+	global AUBERGE_MESSAGE_DUREE_SECONDES, AUBERGE_TABLE_MESSAGES_MAX
+	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
 	global ACCES_GARDIEN_ACTIF
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	try:
@@ -905,6 +932,16 @@ def load_world_variables() -> dict:
 	ESCORTE_PROGENITURE_RELATION_MIN = int(v.get("ESCORTE_PROGENITURE_RELATION_MIN", ESCORTE_PROGENITURE_RELATION_MIN))
 	ESCORTE_GUILDE_PROBA = float(v.get("ESCORTE_GUILDE_PROBA", ESCORTE_GUILDE_PROBA))
 	ESCORTE_PROGENITURE_XP = max(0, int(v.get("ESCORTE_PROGENITURE_XP", ESCORTE_PROGENITURE_XP)))
+	AUBERGE_NUIT_COUT_CUIVRE = max(0, int(v.get("AUBERGE_NUIT_COUT_CUIVRE", AUBERGE_NUIT_COUT_CUIVRE)))
+	# Plancher à 1 : zéro passe rendrait la nuit muette côté marché — les étals ne
+	# bougeraient pas d'un pouce, et c'est la moitié de ce qu'on vient y chercher.
+	AUBERGE_NUIT_PASSES_ATELIER = max(1, int(v.get("AUBERGE_NUIT_PASSES_ATELIER", AUBERGE_NUIT_PASSES_ATELIER)))
+	# Plancher à 60 s : une durée nulle ferait mourir un message avant d'être lu une fois.
+	AUBERGE_MESSAGE_DUREE_SECONDES = max(60, int(v.get("AUBERGE_MESSAGE_DUREE_SECONDES", AUBERGE_MESSAGE_DUREE_SECONDES)))
+	# Planchers à 1 : une table sans message ni place ne serait pas une table.
+	AUBERGE_TABLE_MESSAGES_MAX = max(1, int(v.get("AUBERGE_TABLE_MESSAGES_MAX", AUBERGE_TABLE_MESSAGES_MAX)))
+	AUBERGE_TABLES_MAX = max(1, int(v.get("AUBERGE_TABLES_MAX", AUBERGE_TABLES_MAX)))
+	AUBERGE_ANNONCE_LONGUEUR_MAX = max(1, int(v.get("AUBERGE_ANNONCE_LONGUEUR_MAX", AUBERGE_ANNONCE_LONGUEUR_MAX)))
 	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):

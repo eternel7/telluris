@@ -234,17 +234,26 @@ def params_vente_lieu(lieu_doc: dict, item_doc: dict, item_id: str, ref=None) ->
 	"""Paramètres du côté **vente** (joueur→lieu) : `(pmin, pmax, stock)` à passer à
 	`prix_marche(..., "vente", stock, cible)`. Source unique pour `_marchand_vendables`,
 	`sell_item` et `marchander` (sens vente) → prix affiché/appliqué/marchandé cohérents.
-	- **Rachat** d'un bien produit par le lieu (`lieu_produit`) : bande plafonnée au coût de
-	  revient → `(round(pmin × RACHAT_FACTEUR), pmin)`, stock = qty en rayon (`stock_vente`).
+	- **Rachat de ce que le lieu VEND** — bien qu'il produit (`lieu_produit`) **ou** matière
+	  qu'il a mise au comptoir (`approvisionner`) : bande plafonnée au coût de revient →
+	  `(round(pmin × RACHAT_FACTEUR), pmin)`, stock = qty en rayon (`stock_vente`).
 	  Garantit rachat ≤ pmin ≤ prix de vente (le prix d'achat joueur est toujours ≥ pmin).
 	- **Intrant brut** (sinon) : fourchette normale `(pmin, pmax)`, stock = `stock_matieres[clé]`
-	  (clé = item id si une recette du lieu référence cet item, sinon sous-catégorie)."""
+	  (clé = item id si une recette du lieu référence cet item, sinon sous-catégorie).
+
+	⚠️ **Le critère est « le lieu l'a-t-il en rayon », pas seulement « le produit-il »** — sans
+	quoi une matière que le comptoir vend serait RACHETÉE sur la fourchette pleine, et l'aller
+	-retour deviendrait une **machine à or** : à relation 60 le joueur achetait le lingot de fer
+	80 cu et le revendait 98 dans la foulée (+55 à relation 70), indéfiniment. C'est exactement
+	le trou que `RACHAT_FACTEUR` bouche depuis toujours pour les biens produits ; il ne s'ouvrait
+	pas avant parce qu'aucune matière première n'était vendue nulle part. Épinglé par
+	`tests/test_appro_comptoir.py::test_aucun_arbitrage_...`."""
 	pmin, pmax = prix_range_cuivre(item_doc, ref if ref is not None else item_id)
-	if lieu_produit(lieu_doc, item_doc):
+	en_rayon = next((int(e.get("qty", 0)) for e in (lieu_doc or {}).get("stock_vente", [])
+					 if e.get("item_id") == item_id), 0)
+	if en_rayon > 0 or lieu_produit(lieu_doc, item_doc):
 		pmin_r = max(1, int(round(pmin * float(character_stats.RACHAT_FACTEUR))))
-		stock = next((int(e.get("qty", 0)) for e in (lieu_doc or {}).get("stock_vente", [])
-					  if e.get("item_id") == item_id), 0)
-		return pmin_r, pmin, stock
+		return pmin_r, pmin, en_rayon
 	cle = cle_matiere_lieu((lieu_doc or {}).get("categorie"), item_doc)
 	stock = int(((lieu_doc or {}).get("stock_matieres", {}) or {}).get(cle, 0))
 	return pmin, pmax, stock
@@ -1033,20 +1042,51 @@ def _appro_debit_pour(cle: str) -> int:
 
 
 def approvisionner(lieu_doc: dict) -> bool:
-	"""Approvisionnement automatique du lieu : injecte dans `stock_matieres` les matières
-	« feuilles » dérivées de ses recettes (`appro_leaves_categorie`, typiquement les métaux
-	pour l'armurerie), au débit `_appro_debit_pour(cle)` (`APPRO_DEBIT`, repli item→sous-cat,
-	sinon `APPRO_DEBIT_DEFAUT`). Mute `lieu_doc` ; True si quelque chose a été ajouté."""
+	"""Approvisionnement automatique du lieu : injecte les matières « feuilles » dérivées de
+	ses recettes (`appro_leaves_categorie`, typiquement les métaux pour l'armurerie), au débit
+	`_appro_debit_pour(cle)` (`APPRO_DEBIT`, repli item→sous-cat, sinon `APPRO_DEBIT_DEFAUT`).
+	Mute `lieu_doc` ; True si quelque chose a été ajouté.
+
+	**Deux destinations, l'ATELIER et le COMPTOIR.** Le fournisseur livre : une part passe en
+	réserve (`stock_matieres`, ce que la production consomme) et une part monte en vitrine
+	(`stock_vente`, ce que le joueur peut acheter). Sans la seconde, un intrant brut n'était
+	achetable NULLE PART — les quatre payloads du marchand ne lisent que `resolve_stock_vente`,
+	et rien ne fait jamais passer une matière de la réserve au rayon (la passe « produits
+	finis » de `_executer_production_batch` ne prend que les matières qu'AUCUNE recette du lieu
+	ne consomme, donc jamais une feuille). Aucun armurier ne vendait de fer.
+
+	⚠️ **La vitrine est regarnie JUSQU'AU stock cible et JAMAIS au-dessus** — c'est cette
+	invariante qui rend le comptoir neutre pour l'atelier, et il ne faut pas la rogner : à la
+	cible exactement, le surplus est nul, donc ni la production (`_vente_surplus_entries`, qui
+	ne puise que dans le surplus du rayon) ni l'écoulement PNJ ne peuvent y toucher. Un achat
+	fait descendre la ligne d'un cran, l'appro suivante la remonte : auto-réparant. Épinglé
+	par tests/test_appro_comptoir.py.
+
+	⚠️ **Fail-soft sur un doc générique absent** : `matiere_item_id` peut rendre un id qui
+	n'existe pas (`item:branche`, `item:rondin`…). On ne met alors rien en vitrine — la
+	matière reste consommable en production, elle n'est simplement pas vendue. Une clé à débit
+	nul (`APPRO_DEBIT["herbe"] = 0`, récolte joueur) n'y monte pas non plus, faute de livraison.
+	"""
 	feuilles = appro_leaves_categorie((lieu_doc or {}).get("categorie"))
 	if not feuilles:
 		return False
 	stock = lieu_doc.setdefault("stock_matieres", {})
+	rayon = lieu_doc.setdefault("stock_vente", [])
 	changed = False
 	for cle in feuilles:
 		q = _appro_debit_pour(cle)
-		if q > 0:
-			stock[cle] = int(stock.get(cle, 0)) + q
-			changed = True
+		if q <= 0:
+			continue
+		stock[cle] = int(stock.get(cle, 0)) + q
+		changed = True
+		item_id = matiere_item_id(cle)
+		item = resolve_item_ref(item_id)
+		if not item:
+			continue
+		actuel = next((int(e.get("qty", 0)) for e in rayon if e.get("item_id") == item_id), 0)
+		manque = min(q, stock_cible_pour(lieu_doc, item) - actuel)
+		if manque > 0:
+			_stock_vente_add(rayon, item_id, manque)
 	return changed
 
 

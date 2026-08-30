@@ -190,8 +190,6 @@
 		}
 		.char-portrait {
 			flex-shrink: 0;
-		}
-		.char-portrait {
 			transform-origin: top center;
 		}
 
@@ -1394,7 +1392,7 @@
 				{% if lieu_texte %}
 				<div class="loc-texte">{{ lieu_texte }}</div>
 				{% endif %}
-				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or pnj_present %}
+				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or pnj_present %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
 					{% if achat_sous_categories %}
@@ -1408,6 +1406,13 @@
 					{% endif %}
 					{% if est_etable %}
 					<li><button class="sub-loc-btn" onclick="openEtable()">🐴 Montures</button></li>
+					{% endif %}
+					{% if est_auberge %}
+					<li><button class="sub-loc-btn" onclick="openAuberge()">🍺 Salle commune</button></li>
+					{# Passer la nuit est une action du LIEU, pas de la salle commune : on ne
+					   traverse pas les tables pour aller se coucher. Le coût est rendu ici, le
+					   log de nuit est servi par le contexte (cf. AUBERGE_NUIT). #}
+					<li><button class="sub-loc-btn" id="aub-nuit-btn" onclick="passerLaNuit()">🌙 Passer la nuit{% if auberge_nuit and auberge_nuit.cout %} <span class="aub-nuit-cout" id="aub-nuit-cout"></span>{% endif %}</button></li>
 					{% endif %}
 					{% if pnj_present %}
 					<li><button class="sub-loc-btn" onclick="openPnjDialogue()">🗣 Parler à {{pnj_present.nom}}</button></li>
@@ -1937,6 +1942,34 @@
 		<h2 style="margin:1rem 0 0">🗒️ À vendre</h2>
 		<div id="mnt-offres-list" class="mnt-offres"></div>
 	</div><!-- /#montures-panel -->
+	<div id="auberge-panel" class="panel-hidden panel-frame board-panel" aria-label="Salle commune">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Salle commune">
+			<h2>🍺 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeAuberge()" role="button">✕ Fermer</button>
+		</div>
+		<h2 style="margin:.6rem 0 0">🪑 Les tables (<span id="aub-tables-compte"></span>)</h2>
+		<div id="aub-tables-list" class="aub-tables"></div>
+		<h2 style="margin:1rem 0 0">📌 Tableau d'information</h2>
+		<div class="aub-ecrire">
+			<div id="aub-fournitures" class="aub-fournitures"></div>
+			<textarea id="aub-annonce-txt" class="aub-annonce-txt" rows="4"
+					  placeholder="Votre annonce…" maxlength="800"></textarea>
+			<div class="aub-ecrire-bas">
+				<span id="aub-annonce-reste"></span>
+				<button class="sub-loc-btn" id="aub-annonce-btn" onclick="poserAnnonce()">📌 Afficher</button>
+			</div>
+		</div>
+		<div id="aub-tableau-list" class="aub-tableau"></div>
+	</div><!-- /#auberge-panel -->
+	<div id="aub-nuit-overlay" class="clauses-hidden" aria-label="La nuit passe">
+		<div class="item-detail-card">
+			<h3 style="margin:.2rem 0 .6rem">🌙 La nuit passe…</h3>
+			<div id="aub-nuit-log" class="aub-nuit-log"></div>
+			<button class="sub-loc-btn" id="aub-nuit-fin" onclick="fermerNuit()" disabled>Au matin</button>
+		</div>
+	</div>
 	<div id="groupe-panel" class="panel-hidden panel-frame board-panel" aria-label="Gestion du groupe">
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Gestion du groupe">
@@ -1994,10 +2027,12 @@
 	</div><!-- /#groupe-panel -->
 
 	{# Gabarits clonés par renderCharacterCard : la macro est la SEULE à écrire du markup de
-	   carte — le JS ne fait que cloner et remplir les [data-role]. Deux variantes, parce que le
-	   portrait n'est éditable que là où son cadrage peut être ENREGISTRÉ (cf. part-character-card). #}
+	   carte — le JS ne fait que cloner et remplir les [data-role]. Trois variantes, parce que le
+	   portrait n'est éditable que là où son cadrage peut être ENREGISTRÉ (cf. part-character-card),
+	   et qu'un avatar de chat n'est ni éditable, ni porteur des vitaux d'autrui. #}
 	<template id="tpl-character-card"><div>{{ cards.character_card(classes="card-list", editable=true) }}</div></template>
 	<template id="tpl-character-card-ro"><div>{{ cards.character_card(classes="card-list", editable=false) }}</div></template>
+	<template id="tpl-character-portrait"><div>{{ cards.character_card(classes="card-chat", editable=false, vitaux=false, identite=false) }}</div></template>
 
 	<style>
 		/* (La vignette ronde `.rec-portrait` des listes a disparu : recrues et compagnons
@@ -2062,6 +2097,113 @@
 			.mnt-offre { flex-wrap: wrap; }
 			.mnt-offre-img { display: block; margin-left: auto; margin-right: auto; }
 			.mnt-offre-txt { flex-basis: 100%; }
+		}
+		/* ── Salle commune d'une taverne ──────────────────────────────────────────
+		   Tables (chatrooms) + tableau d'information. */
+		.aub-nuit-cout { opacity: .7; font-size: .9em; }
+		.aub-tables { display: flex; flex-direction: column; gap: .5rem; }
+		.aub-table {
+			border: 1px solid rgba(220, 200, 160, .28); border-radius: 10px;
+			padding: .5rem .7rem; background: rgba(0, 0, 0, .18);
+		}
+		.aub-table.assis { border-color: var(--accent, #b98c4a); }
+		.aub-table-tete {
+			display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+			margin-bottom: .35rem;
+		}
+		.aub-table-titre { font-weight: 600; }
+		.aub-table-occ { opacity: .7; font-size: .85em; }
+		.aub-msgs { max-height: 30vh; overflow-y: auto; scrollbar-width: thin; }
+		.aub-msg {
+			padding: .25rem 0; border-top: 1px solid rgba(220, 200, 160, .12);
+			display: flex; gap: .5rem; align-items: flex-start;
+		}
+		.aub-msg:first-child { border-top: 0; }
+		.aub-msg-corps { flex: 1 1 auto; min-width: 0; }
+		/* ── Avatar de l'auteur ───────────────────────────────────────────────────
+		   ⚠️ La fenêtre du portrait est FIXÉE à 100×100 côté JS (PORTRAIT_W1/H1) et
+		   `applyScale()` écrit un `transform: scale()` INLINE sur [data-role="scale-root"] :
+		   une règle CSS posée là serait écrasée à chaque setSujet et à chaque resize. On
+		   réduit donc en scalant la CARTE, depuis un conteneur qui la recadre — le calcul de
+		   cadrage, lui, continue de raisonner en 100×100 et reste juste. */
+		/* ⚠️ Surtout PAS de centrage flex ici : la carte occupe son gabarit NON scalé (100 px
+		   de large), donc `justify-content:center` la poserait à x = (44−100)/2 = −28 px, et
+		   le `scale()` — dont l'origine est `top left` — partirait de cette position déjà
+		   décalée. Le portrait sortait alors du cadre, en haut à gauche. La carte doit être
+		   ancrée au coin du conteneur ; c'est le `transform` seul qui la met à l'échelle. */
+		.aub-msg-portrait {
+			flex: 0 0 auto; width: 44px; height: 44px; overflow: hidden;
+			border-radius: 6px; background: rgba(0, 0, 0, .25);
+		}
+		/* Le repli 👤 n'est pas une carte : il porte SON propre centrage. */
+		.aub-msg-anon {
+			width: 100%; height: 100%; font-size: 22px; opacity: .55;
+			display: flex; align-items: center; justify-content: center;
+		}
+		.character-card.card-chat {
+			transform: scale(.44); transform-origin: top left;
+			padding: 0; border: 0; background: none; font-size: inherit;
+		}
+		.character-card.card-chat .char-header { margin-bottom: 0; gap: 0; }
+		/* Ombre calibrée pour un portrait de 100 px : absurde sous 44. */
+		.character-card.card-chat .viewport-wrapper { box-shadow: none; border-radius: 6px; }
+		/* Emplacements libres de la carte : rien à y mettre pour un avatar. */
+		.character-card.card-chat .card-footer,
+		.character-card.card-chat .card-actions { display: none; }
+		.aub-msg-tete { font-size: .8em; opacity: .7; }
+		/* ⚠️ pre-wrap : une annonce est MULTI-LIGNE et `nettoyer_texte` préserve ses sauts
+		   de ligne — les écraser au rendu annulerait le soin pris côté serveur. */
+		.aub-msg-txt { white-space: pre-wrap; overflow-wrap: anywhere; }
+		.aub-msg-vide { opacity: .55; font-style: italic; padding: .3rem 0; }
+		.aub-ecrire { margin: .5rem 0 .8rem; }
+		.aub-annonce-txt {
+			width: 100%; box-sizing: border-box; resize: vertical;
+			padding: .45rem .6rem; border-radius: 6px;
+			border: 1px solid rgba(220, 200, 160, .35);
+			background: rgba(0, 0, 0, .35); color: inherit; font: inherit;
+		}
+		.aub-ecrire-bas {
+			display: flex; align-items: center; justify-content: space-between;
+			gap: .6rem; margin-top: .35rem; font-size: .85em; opacity: .8;
+		}
+		.aub-fournitures { font-size: .85em; margin-bottom: .35rem; }
+		.aub-fourniture.manque { opacity: .55; text-decoration: line-through; }
+		.aub-depense { opacity: .6; font-size: .9em; }
+		.aub-dire { display: flex; gap: .4rem; margin-top: .4rem; }
+		.aub-dire input {
+			flex: 1 1 auto; min-width: 100; padding: .4rem .55rem; border-radius: 6px;
+			border: 1px solid rgba(220, 200, 160, .35);
+			background: rgba(0, 0, 0, .35); color: inherit; font: inherit;
+		}
+		.aub-dire-btn { 
+			flex: 0 0 auto; 
+			width: auto;
+		}
+		.aub-tableau { display: flex; flex-direction: column; gap: .45rem; }
+		.aub-annonce {
+			border: 1px solid rgba(220, 200, 160, .28); border-radius: 10px;
+			padding: .5rem .7rem; background: rgba(0, 0, 0, .18);
+			display: flex; gap: .6rem; align-items: flex-start;
+		}
+		.aub-annonce-corps { flex: 1 1 auto; min-width: 0; }
+		/* Le calque de la nuit : même facture que les autres décisions bloquantes. */
+		#aub-nuit-overlay {
+			position: fixed; inset: 0; z-index: 9400;
+			background: rgba(6, 5, 12, .92);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#aub-nuit-overlay.clauses-hidden { display: none; }
+		#aub-nuit-overlay .item-detail-card { max-width: 520px; }
+		.aub-nuit-log { min-height: 8rem; margin-bottom: .8rem; }
+		.aub-nuit-ligne {
+			opacity: 0; transform: translateY(4px);
+			transition: opacity .5s ease, transform .5s ease;
+			padding: .2rem 0;
+		}
+		.aub-nuit-ligne.vue { opacity: .9; transform: none; }
+		/* ⚠️ Ce template n'inclut PAS part-accessibility-css.html : la garde est LOCALE. */
+		@media (prefers-reduced-motion: reduce) {
+			.aub-nuit-ligne { transition: none; }
 		}
 		/* Fiche d'un compagnon : les onglets propres au personnage principal disparaissent
 		   (un compagnon n'a ni quêtes, ni relations marchandes, ni journal). Le SOL reste
@@ -2897,6 +3039,13 @@ function makePortraitViewport(card) {
 	// Un portrait SANS éditeur (une recrue) n'est jamais cadré par personne : on l'affiche
 	// ENTIER (zoomFit, centré par `bornes`) plutôt qu'en gros plan sur un fragment d'image —
 	// c'est le moment où l'on regarde qui l'on embauche.
+	//
+	// ⚠️ `sujet.cadre` DISSOCIE « porter l'éditeur » de « avoir un cadrage à appliquer ». Un
+	// avatar de chat doit montrer le cadrage choisi par le joueur sans offrir de le modifier ;
+	// sans ce drapeau, `portrait_zoom`/`portrait_translate` seraient purement et simplement
+	// JETÉS ici, et la dénormalisation du portrait sur le message ne servirait à rien.
+	// ⚠️ Ne PAS déduire l'intention de la présence de `portrait_zoom` : les cartes de
+	// compagnons et de recrues en portent déjà, elles basculeraient toutes en gros plan.
 	async function setSujet(s) {
 		sujet = s || SUJET_JOUEUR;
 		zoomPct = parseInt(sujet.portrait_zoom, 10) || 100;
@@ -2910,8 +3059,9 @@ function makePortraitViewport(card) {
 		try { if (!img.complete || !img.naturalWidth) await img.decode(); } catch (e) {}
 		W = img.naturalWidth  || W1;
 		H = img.naturalHeight || H1;
-		if (!editable) zoomPct = zoomFit();
-		const d = editable ? defaultOffset() : { x: 0, y: 0 };   // hors cadrage : `bornes` centre
+		const cadrer = editable || !!sujet.cadre;
+		if (!cadrer) zoomPct = zoomFit();
+		const d = cadrer ? defaultOffset() : { x: 0, y: 0 };     // hors cadrage : `bornes` centre
 		applyOffset(d.x, d.y, false);
 		applyScale();
 	}
@@ -3083,7 +3233,10 @@ function _setCardIdentite(card, p) {
 // cadrage. `opts` = { editable, footer (html), actions (html) }.
 function renderCharacterCard(container, p, opts) {
 	opts = opts || {};
-	const tpl = document.getElementById(opts.editable ? 'tpl-character-card' : 'tpl-character-card-ro');
+	// `opts.tpl` force un gabarit précis du pool (l'avatar de chat, qui n'a ni vitaux ni
+	// identité). Sans lui, le choix reste celui d'avant : éditable ou lecture seule.
+	const tpl = document.getElementById(
+		opts.tpl || (opts.editable ? 'tpl-character-card' : 'tpl-character-card-ro'));
 	if (!container || !tpl) return null;
 	const card = tpl.content.firstElementChild.firstElementChild.cloneNode(true);
 	_setCardIdentite(card, p);
@@ -3101,6 +3254,10 @@ function renderCharacterCard(container, p, opts) {
 			base: p.image_base,          // /monsters pour une monture, /characters par défaut
 			portrait_zoom: p.portrait_zoom,
 			portrait_translate: p.portrait_translate,
+			// APPLIQUER le cadrage enregistré sans offrir de quoi l'éditer : c'est le cas de
+			// l'avatar de chat. Sans ce drapeau, une carte en lecture seule affiche l'image
+			// ENTIÈRE (cf. setSujet) — voulu pour une recrue, faux pour un portrait de message.
+			cadre: !!opts.cadre,
 			// Le cadrage n'est enregistrable que sur un doc qui nous appartient (groupe_effectif) :
 			// une carte non éditable n'a de toute façon ni curseur ni bouton 💾.
 			compagnon_id: opts.editable ? p.id : null,
@@ -3175,6 +3332,17 @@ document.addEventListener('keydown', e => {
 	if (groupe && !groupe.classList.contains('panel-hidden')) { closeGroupe(); return; }
 	const etable = document.getElementById('montures-panel');
 	if (etable && !etable.classList.contains('panel-hidden')) { closeEtable(); return; }
+	// ⚠️ L'overlay de la nuit AVANT le panneau qui le porte : c'est lui qui est au premier
+	// plan. Il n'est fermable que quand la nuit est passée (son bouton est armé) — sortir
+	// pendant que le serveur écrit laisserait le joueur devant un état à moitié appliqué.
+	const nuit = document.getElementById('aub-nuit-overlay');
+	if (nuit && !nuit.classList.contains('clauses-hidden')) {
+		const fin = document.getElementById('aub-nuit-fin');
+		if (fin && !fin.disabled) fermerNuit();
+		return;
+	}
+	const auberge = document.getElementById('auberge-panel');
+	if (auberge && !auberge.classList.contains('panel-hidden')) { closeAuberge(); return; }
 	closeSheet();
 });
 
@@ -6007,8 +6175,8 @@ function renderFicheCompagnons(list) {
 		return `<div class="sh-relation">
 			<strong>${r.actif ? '⚔' : '·'}</strong>
 			<div class="sh-rel-info">
-				<div class="sh-rel-name">${r.prenom || '?'} ${r.nom || ''}${r.actif ? ' <span style="opacity:.6;font-size:.75em">(dans le groupe)</span>' : ''}</div>
-				<div class="sh-rel-class">${r.voc || ''} · ${r.race || ''} · rang ${r.rang || 'F'}${contrat}${vit}</div>
+				<div class="sh-rel-name">${escapeHtml(r.prenom || '?')} ${escapeHtml(r.nom || '')}${r.actif ? ' <span style="opacity:.6;font-size:.75em">(dans le groupe)</span>' : ''}</div>
+				<div class="sh-rel-class">${escapeHtml(r.voc || '')} · ${escapeHtml(r.race || '')} · rang ${escapeHtml(r.rang || 'F')}${contrat}${vit}</div>
 			</div>
 			<div>
 				<div class="sh-rel-score ${cls}">${sc}<span style="opacity:.5;font-size:.7em">/100</span></div>
@@ -6016,7 +6184,7 @@ function renderFicheCompagnons(list) {
 			</div>
 			${r.actif ? `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${r.id}', ${!!r.permanent})" title="${r.permanent ? 'Rompre l\'engagement' : 'Congédier ce compagnon'}">✕</button>` : ''}
 			<div class="sh-rel-portrait">
-				${r.image ? `<img src="/characters/${r.image}" alt="" class="collapsed compagnon-portrait">`
+				${r.image ? `<img src="/characters/${encodeURIComponent(r.image)}" alt="" class="collapsed compagnon-portrait">`
 					: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">👤</div>'}
 			</div>
 		</div>`;
@@ -6280,6 +6448,446 @@ async function relacherMonture(monture_id) {
 			openGroupe();
 		}
 	} catch (err) { console.error('Erreur relâchement', err); }
+}
+
+// ── Salle commune d'une taverne ──────────────────────────────────────────────────
+// Tables (chatrooms) + tableau d'information + la nuit.
+//
+// ⚠️ SONDAGE et non WebSocket : `uvicorn` tourne sans `[standard]`, il n'y a pas de support
+// WebSocket dans l'image, et un intervalle de 4 s suffit largement pour 10 messages par
+// table. `_aubTimer` DOIT être arrêté à la fermeture, sinon le panneau continue d'interroger
+// le serveur pour une salle qu'on a quittée.
+//
+// ⚠️ Tout ce qui vient d'un joueur (`texte`, `auteur_nom`) passe par escapeHtml avant
+// d'entrer dans un innerHTML, et JAMAIS dans un onclick="…('${x}')" : les boutons adressent
+// par data-id + délégation.
+let _aubEtat = null;
+let _aubTimer = null;
+// Coût et log de la nuit, servis par /play : le bouton 🌙 vit dans la SIDEBAR et doit
+// marcher sans qu'on ait jamais ouvert la salle commune. `_aubEtat` les reporte quand il
+// existe (il est plus frais), mais il peut parfaitement être null.
+const AUBERGE_NUIT = {{ (auberge_nuit or {}) | tojson }};
+// Signature des messages DÉJÀ PEINTS, par table. C'est elle qui permet au sondage de ne
+// rien réécrire tant que rien n'est arrivé : un message est immuable une fois posté, la
+// liste de ses ids suffit donc à décrire l'état affiché.
+let _aubSigs = new Map();
+// Idem pour les ATTABLÉS. Deux signatures et non une : la conversation et la tête bougent
+// séparément, et les fusionner ferait repeindre l'une chaque fois que l'autre change.
+let _aubSigsOcc = new Map();
+const AUB_PERIODE = 4000;
+
+function _aubSigTable(t) {
+	return (t.messages || []).map(m => m.id).join(',');
+}
+
+// Signature de la TÊTE, distincte de celle des messages : la tête et la conversation bougent
+// indépendamment, et le sondage doit pouvoir repeindre l'une sans toucher l'autre.
+// ⚠️ Elle couvre le COMPTEUR de messages autant que les noms : le même span porte les deux,
+// et l'oublier figerait le « 3/10 » tant que personne ne s'assied ni ne se lève.
+function _aubSigOcc(t) {
+	return (t.noms || []).join('|') + '#' + t.occupants + '#' + (t.messages || []).length;
+}
+
+// Qui est attablé — source unique du libellé, lue par le rendu complet ET par le sondage.
+// ⚠️ `escapeHtml` obligatoire : ce sont des noms saisis par des joueurs, et le libellé part en
+// `innerHTML` (Convention §9).
+// ⚠️ Repli sur le compte quand `noms` est plus court que `occupants` : une table déjà en base
+// n'a pas le nom de ceux qui s'y étaient assis avant, et une tête vide la ferait paraître
+// déserte alors qu'elle est occupée.
+function _aubOccupants(t) {
+	const noms = t.noms || [];
+	if (!noms.length || noms.length < t.occupants) return `${t.occupants} attablé(s)`;
+	return noms.map(escapeHtml).join(', ');
+}
+
+// ⚠️ Les lignes de message sont bâties en DOM (`createElement` + `textContent`), plus en
+// template literal : `renderCharacterCard` APPEND une carte dans un conteneur, elle ne rend
+// pas de chaîne. Bénéfice au passage — le texte et le nom d'un joueur n'ont plus besoin
+// d'`escapeHtml` du tout, c'est le chemin que CLAUDE.md recommande pour un chat.
+function _aubDiv(cls, texte) {
+	const el = document.createElement('div');
+	el.className = cls;
+	if (texte !== undefined) el.textContent = texte;
+	return el;
+}
+
+function _aubMsgVide(quoi) {
+	return _aubDiv('aub-msg-vide', quoi || "Personne n'a encore rien dit ici.");
+}
+
+// Portrait de l'AUTEUR, cloné du gabarit `tpl-character-portrait` (rendu par la macro Jinja
+// `cards.character_card` : le JS n'écrit jamais de markup de carte). `cadre: true` applique
+// le cadrage que l'auteur s'est choisi — sans lui, la carte étant en lecture seule, on
+// verrait sa silhouette entière. Sans image (message hérité), on retombe sur une silhouette.
+function _aubPortrait(m) {
+	const boite = _aubDiv('aub-msg-portrait');
+	if (!m.auteur_image) {
+		boite.appendChild(_aubDiv('aub-msg-anon', '👤'));
+		return boite;
+	}
+	// ⚠️ AUCUN id d'auteur n'est transmis, et ce n'est pas un oubli : un `_id` de personnage
+	// s'écrit `character:user:<email>_<uuid>` — le publier livrerait l'ADRESSE E-MAIL de
+	// chaque joueur à toute la salle. Le serveur ne l'expose donc pas (il calcule `mien`
+	// lui-même), et l'on efface ici le `data-porteur` que `_setCardIdentite` remplit sinon
+	// avec PRINCIPAL_ID : cette carte n'appartient à personne qu'on ait le droit de nommer.
+	const carte = renderCharacterCard(boite, {
+		image: m.auteur_image,
+		portrait_zoom: m.auteur_zoom,
+		portrait_translate: m.auteur_translate,
+	}, { tpl: 'tpl-character-portrait', editable: false, cadre: true });
+	if (carte) carte.dataset.porteur = '';
+	return boite;
+}
+
+function _aubMsgNode(m) {
+	const quand = new Date((m.cree_at || 0) * 1000)
+		.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	const ligne = _aubDiv('aub-msg');
+	ligne.appendChild(_aubPortrait(m));
+	const corps = _aubDiv('aub-msg-corps');
+	corps.appendChild(_aubDiv('aub-msg-tete', `${m.auteur_nom || '?'} · ${quand}`));
+	corps.appendChild(_aubDiv('aub-msg-txt', m.texte || ''));
+	ligne.appendChild(corps);
+	return ligne;
+}
+
+// Peint une liste de messages dans un conteneur. ⚠️ `clearCharacterCards` et NON un simple
+// `innerHTML = ''` : chaque portrait a inscrit son viewport dans `_cardViewports` (Map dont
+// la CLÉ est la carte). Sans la purge, le sondage y accumulerait des cartes détachées pour
+// toute la session, et le handler `resize` finirait par itérer sur des nœuds morts.
+function _aubPeindreMessages(box, messages, vide) {
+	if (!box) return;
+	clearCharacterCards(box);
+	if (!(messages || []).length) { box.appendChild(_aubMsgVide(vide)); return; }
+	for (const m of messages) box.appendChild(_aubMsgNode(m));
+}
+
+// Le prix de la chambre s'affiche DANS le bouton de la sidebar : il doit être posé au
+// chargement de la page, pas seulement à l'ouverture de la salle commune.
+function _aubMajCoutNuit(cout) {
+	const el = document.getElementById('aub-nuit-cout');
+	if (el) el.textContent = cout ? `(${_prixTexte(cout)})` : '';
+}
+_aubMajCoutNuit(AUBERGE_NUIT.cout);
+
+function renderAuberge(data) {
+	if (!data) return;
+	_aubEtat = data;
+	_aubMajCoutNuit(data.cout_nuit);
+	const compte = document.getElementById('aub-tables-compte');
+	// ⚠️ `tables_total` et non `tables.length` : les tables où ce personnage a dormi ne
+	// lui sont plus montrées, mais elles occupent la salle tout de même.
+	if (compte) compte.textContent = `${data.tables_total}/${data.tables_max}`;
+
+	const liste = document.getElementById('aub-tables-list');
+	if (liste) {
+		const tables = data.tables || [];
+		let html = tables.map(t => {
+			const cls = 'aub-table' + (t.assis ? ' assis' : '');
+			// Une table fermée ne l'est QUE pour ce personnage : il y a dormi. Les autres
+			// convives la voient normalement — la soirée ne s'achève que pour le dormeur.
+			// Une table où l'on a dormi n'arrive plus jusqu'ici : le serveur la retire de
+			// la salle de CE personnage (`anciens`). Il n'y a donc plus d'état « fermée ».
+			const bouton = t.assis
+				? '<span class="aub-table-occ">vous y êtes</span>'
+				: `<button class="sub-loc-btn" data-aub-table="${t.id}">S'y asseoir</button>`;
+			const dire = t.assis ? `<div class="aub-dire">
+					<input type="text" id="aub-dire-txt" maxlength="${data.annonce_max}"
+						   placeholder="Dire quelque chose…">
+					<button class="sub-loc-btn aub-dire-btn" data-aub-dire="1">Dire</button>
+				</div>` : '';
+			return `<div class="${cls}" data-table="${t.id}">
+				<div class="aub-table-tete">
+					<span class="aub-table-titre">🪑 Table ${t.numero}</span>
+					<span class="aub-table-occ">${_aubOccupants(t)} · ${(t.messages || []).length}/${data.messages_max}</span>
+					${bouton}
+				</div>
+				<div class="aub-msgs"></div>
+				${dire}
+			</div>`;
+		}).join('');
+		if (data.tables_total < data.tables_max) {
+			html += `<div><button class="sub-loc-btn" data-aub-nouvelle="1">➕ Prendre une nouvelle table</button></div>`;
+		}
+		// ⚠️ Purger AVANT d'écraser : la liste porte les portraits, donc des viewports
+		// inscrits dans `_cardViewports`. Un `innerHTML =` sec les y laisserait à jamais.
+		clearCharacterCards(liste);
+		liste.innerHTML = html;
+		// La structure est posée avec des `.aub-msgs` VIDES ; les messages, eux, sont peints
+		// en DOM (ils contiennent des cartes clonées, qu'aucune chaîne ne peut porter).
+		for (const t of tables) {
+			_aubPeindreMessages(liste.querySelector(`.aub-table[data-table="${t.id}"] .aub-msgs`),
+								t.messages);
+		}
+		// Le rendu complet fait foi : on resème les signatures pour que le prochain sondage
+		// n'ait rien à réécrire tant que personne n'a parlé.
+		_aubSigs = new Map(tables.map(t => [t.id, _aubSigTable(t)]));
+		_aubSigsOcc = new Map(tables.map(t => [t.id, _aubSigOcc(t)]));
+	}
+
+	const four = document.getElementById('aub-fournitures');
+	if (four) {
+		// Le papier et l'encre PARTENT avec l'avis, la plume reste : on le dit avant le clic,
+		// pas après. La plume est un `outil`, les deux autres des `composant` — l'affichage
+		// ne fait que rendre visible une distinction qui est déjà dans la donnée.
+		const noms = { papier: '📄 papier', encre: '🖊️ encre', plume_a_ecrire: '🪶 plume' };
+		const consommee = { papier: true, encre: true };
+		four.innerHTML = 'Pour écrire : ' + Object.keys(noms).map(k =>
+			`<span class="aub-fourniture${(data.fournitures || {})[k] ? '' : ' manque'}">${noms[k]}${consommee[k] ? ' <span class="aub-depense">(dépensé)</span>' : ''}</span>`
+		).join(' · ');
+	}
+	const btnAnnonce = document.getElementById('aub-annonce-btn');
+	const complet = Object.values(data.fournitures || {}).every(Boolean);
+	if (btnAnnonce) btnAnnonce.disabled = !complet;
+	_aubReste();
+
+	// Une annonce a un auteur comme un message de table : même ligne, même portrait. Purge
+	// obligatoire ici aussi — ces portraits sont des cartes.
+	const tab = document.getElementById('aub-tableau-list');
+	if (tab) {
+		clearCharacterCards(tab);
+		if (!(data.tableau || []).length) {
+			tab.appendChild(_aubMsgVide('Le tableau est nu.'));
+		} else {
+			for (const m of data.tableau) {
+				const avis = _aubDiv('aub-annonce');
+				const corps = _aubDiv('aub-annonce-corps');
+				corps.appendChild(_aubMsgNode(m));
+				avis.appendChild(corps);
+				const btn = document.createElement('button');
+				btn.className = 'sh-drop-btn';
+				btn.title = 'Décrocher cet avis';
+				btn.textContent = '✕';
+				btn.setAttribute('data-aub-retirer', m.id);
+				avis.appendChild(btn);
+				tab.appendChild(avis);
+			}
+		}
+	}
+}
+
+function _aubReste() {
+	const zone = document.getElementById('aub-annonce-txt');
+	const reste = document.getElementById('aub-annonce-reste');
+	if (!zone || !reste || !_aubEtat) return;
+	reste.textContent = `${zone.value.length}/${_aubEtat.annonce_max}`;
+}
+
+async function _aubFetch(url, body) {
+	const opts = body === undefined ? {} : {
+		method: 'POST', headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(body)
+	};
+	const res = await fetch(url, opts);
+	const data = await res.json();
+	if (!res.ok) { showToast('Erreur : ' + data.detail); return null; }
+	return data;
+}
+
+// ⚠️ Le sondage n'appelle JAMAIS `renderAuberge` : il n'écrit que dans DEUX zones précises —
+// les `.aub-msgs` (la conversation) et le `.aub-table-occ` de tête (qui est attablé) —, et
+// seulement pour les tables dont la signature correspondante a bougé. Tout le reste — champs
+// de saisie, boutons, fournitures, bourse, tableau d'information — est laissé intact.
+//
+// Un rendu complet à chaque tour détruisait puis recréait le champ « Dire quelque chose… » :
+// le joueur perdait sa phrase et son curseur toutes les 4 s. Le rattraper en recopiant le
+// brouillon marchait, mais soignait le symptôme — le vrai remède est de ne pas toucher ce
+// qui n'a pas changé. Corollaire assumé : une table OUVERTE par un autre joueur et une annonce
+// épinglée n'apparaissent toujours qu'au prochain rendu complet (une action, ou la réouverture
+// du panneau) ; la conversation et les convives, eux, sont bien en temps réel.
+function _aubMajMessages(data) {
+	for (const t of data.tables || []) {
+		const carte = document.querySelector(`.aub-table[data-table="${t.id}"]`);
+		if (!carte) continue;    // table pas encore peinte : au prochain rendu complet
+
+		// La tête : ⚠️ le PREMIER `.aub-table-occ` seulement. La classe sert aussi au libellé
+		// « vous y êtes », posé après lui dans la même tête — les réécrire tous l'effacerait.
+		const sigOcc = _aubSigOcc(t);
+		if (_aubSigsOcc.get(t.id) !== sigOcc) {
+			const occ = carte.querySelector('.aub-table-occ');
+			if (occ) {
+				occ.innerHTML = `${_aubOccupants(t)} · ${(t.messages || []).length}/${data.messages_max}`;
+				_aubSigsOcc.set(t.id, sigOcc);
+			}
+		}
+
+		const sig = _aubSigTable(t);
+		if (_aubSigs.get(t.id) === sig) continue;      // rien de neuf à cette table
+		const box = carte.querySelector('.aub-msgs');
+		if (!box) continue;
+		// « Déjà en bas » se mesure AVANT d'écrire. On ne rattrape le fil que si le joueur y
+		// était — le tirer vers le bas pendant qu'il relit plus haut serait pire que de le
+		// laisser où il est.
+		const enBas = box.scrollHeight - box.scrollTop - box.clientHeight < 24;
+		_aubPeindreMessages(box, t.messages);
+		if (enBas) box.scrollTop = box.scrollHeight;
+		_aubSigs.set(t.id, sig);
+	}
+}
+
+async function rafraichirSalle() {
+	// Sondage SILENCIEUX : une erreur réseau passagère ne doit ni alerter ni couper
+	// l'intervalle — le tour suivant réessaiera.
+	try {
+		const res = await fetch('api/auberge/salle');
+		if (!res.ok) return;
+		const data = await res.json();
+		// L'état en mémoire suit (il porte `nuit_log` et `annonce_max`) — mettre à jour un
+		// objet JS ne touche pas le DOM, c'est le rendu qu'on veut éviter, pas l'état.
+		_aubEtat = data;
+		_aubMajMessages(data);
+	} catch (err) { /* silencieux : le prochain tour réessaiera */ }
+}
+
+async function openAuberge() {
+	const data = await _aubFetch('api/auberge/salle');
+	if (!data) return;
+	updatePurse(data.purse);
+	renderAuberge(data);
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('auberge-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+	if (_aubTimer) clearInterval(_aubTimer);
+	_aubTimer = setInterval(rafraichirSalle, AUB_PERIODE);
+}
+
+function closeAuberge() {
+	// ⚠️ Arrêter le sondage AVANT tout le reste : sans ce clearInterval, le panneau fermé
+	// continuerait d'interroger le serveur pour toute la durée de la session.
+	if (_aubTimer) { clearInterval(_aubTimer); _aubTimer = null; }
+	// Les portraits partent avec le panneau : sans cette purge, leurs viewports resteraient
+	// inscrits dans `_cardViewports` alors que plus rien ne les affiche, et le handler
+	// `resize` les recalculerait pour rien jusqu'à la fin de la session.
+	clearCharacterCards(document.getElementById('aub-tables-list'));
+	clearCharacterCards(document.getElementById('aub-tableau-list'));
+	_aubSigs = new Map();
+	_aubSigsOcc = new Map();
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('auberge-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function prendreTable(tableId) {
+	const data = await _aubFetch('api/auberge/table', tableId ? { table_id: tableId } : {});
+	if (data) renderAuberge(data);
+}
+
+async function direATable() {
+	const champ = document.getElementById('aub-dire-txt');
+	if (!champ || !champ.value.trim()) return;
+	const texte = champ.value;
+	champ.value = '';
+	const data = await _aubFetch('api/auberge/message', { texte });
+	if (!data) { champ.value = texte; return; }   // refusé : on rend sa phrase au joueur
+	renderAuberge(data);
+	// Le rendu complet a recréé le champ : sans cela le joueur perdrait le curseur à chaque
+	// phrase envoyée et devrait recliquer pour enchaîner.
+	const neuf = document.getElementById('aub-dire-txt');
+	if (neuf) neuf.focus();
+	const box = document.querySelector(`.aub-table[data-table="${data.ma_table}"] .aub-msgs`);
+	if (box) box.scrollTop = box.scrollHeight;
+}
+
+async function poserAnnonce() {
+	const zone = document.getElementById('aub-annonce-txt');
+	if (!zone || !zone.value.trim()) return;
+	const data = await _aubFetch('api/auberge/annonce', { texte: zone.value });
+	if (!data) return;
+	zone.value = '';
+	renderAuberge(data);
+	// Le papier et l'encre viennent d'être dépensés : sans ce resync, la fiche montrerait
+	// encore une feuille que le joueur n'a plus (Convention §10).
+	if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+	showToast('📌 Votre avis est affiché. (papier et encre dépensés)');
+}
+
+async function retirerAnnonce(messageId) {
+	const data = await _aubFetch('api/auberge/annonce/retirer', { message_id: messageId });
+	if (data) { renderAuberge(data); showToast('Avis décroché.'); }
+}
+
+// Délégation : les ids de table et de message viennent du serveur, mais on ne les
+// interpole JAMAIS dans un onclick — un `'` échappé en `&#39;` y casserait la chaîne JS.
+document.addEventListener('click', e => {
+	const asseoir = e.target.closest('[data-aub-table]');
+	if (asseoir) { prendreTable(asseoir.getAttribute('data-aub-table')); return; }
+	if (e.target.closest('[data-aub-nouvelle]')) { prendreTable(null); return; }
+	if (e.target.closest('[data-aub-dire]')) { direATable(); return; }
+	const retirer = e.target.closest('[data-aub-retirer]');
+	if (retirer) { retirerAnnonce(retirer.getAttribute('data-aub-retirer')); return; }
+});
+document.addEventListener('keydown', e => {
+	if (e.key === 'Enter' && e.target && e.target.id === 'aub-dire-txt') {
+		e.preventDefault();
+		direATable();
+	}
+});
+document.addEventListener('input', e => {
+	if (e.target && e.target.id === 'aub-annonce-txt') _aubReste();
+});
+
+// ── La nuit ──────────────────────────────────────────────────────────────────────
+// Le log est déjà EN MAIN (payload de la salle) : on l'égrène pendant que le POST est en
+// vol. Le bouton « Au matin » ne s'arme que quand les DEUX sont finis — la révélation ne
+// doit pas laisser croire que c'est terminé alors que le serveur écrit encore.
+async function passerLaNuit() {
+	// ⚠️ AUCUNE garde sur `_aubEtat` : le bouton vit dans la sidebar, on peut monter se
+	// coucher sans avoir mis les pieds dans la salle commune.
+	const btn = document.getElementById('aub-nuit-btn');
+	if (btn) btn.disabled = true;
+	if (_aubTimer) { clearInterval(_aubTimer); _aubTimer = null; }
+
+	const overlay = document.getElementById('aub-nuit-overlay');
+	const log = document.getElementById('aub-nuit-log');
+	const fin = document.getElementById('aub-nuit-fin');
+	if (log) log.innerHTML = '';
+	if (fin) fin.disabled = true;
+	if (overlay) overlay.classList.remove('clauses-hidden');
+
+	const lignes = (_aubEtat && _aubEtat.nuit_log) || AUBERGE_NUIT.log || [];
+	const recit = (async () => {
+		for (const ligne of lignes) {
+			const el = document.createElement('div');
+			el.className = 'aub-nuit-ligne';
+			el.textContent = ligne;                 // texte d'auteur : rien à interpréter
+			if (log) log.appendChild(el);
+			// ⚠️ Double requestAnimationFrame : une transition n'a rien à interpoler sur un
+			// élément qui vient de naître (même piège que les toasts et les jetons).
+			requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('vue')));
+			await new Promise(r => setTimeout(r, 900));
+		}
+	})();
+
+	const [data] = await Promise.all([_aubFetch('api/auberge/nuit', {}), recit]);
+	if (fin) fin.disabled = false;
+	if (!data) {                                   // refus (fonds, conflit) : on referme
+		if (overlay) overlay.classList.add('clauses-hidden');
+		if (btn) btn.disabled = false;
+		// ⚠️ On ne relance le sondage QUE si la salle est ouverte : la nuit se passe aussi
+		// depuis la sidebar, et interroger le serveur toutes les 4 s pour un panneau fermé
+		// est exactement ce que `closeAuberge` s'emploie à éviter.
+		const panneau = document.getElementById('auberge-panel');
+		if (panneau && !panneau.classList.contains('panel-hidden')) {
+			_aubTimer = setInterval(rafraichirSalle, AUB_PERIODE);
+		}
+		return;
+	}
+	const bilan = [];
+	if (data.cout) bilan.push(`−${_prixTexte(data.cout)}`);
+	bilan.push('PV et PM au maximum');
+	if (data.magasins) bilan.push(`${data.magasins} étal(s) réapprovisionné(s)`);
+	if (data.recrues) bilan.push(`${data.recrues} recrue(s) au tableau`);
+	const el = document.createElement('div');
+	el.className = 'aub-nuit-ligne';
+	el.textContent = '— ' + bilan.join(' · ');
+	if (log) log.appendChild(el);
+	requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('vue')));
+}
+
+function fermerNuit() {
+	// Stocks, vitaux, sidebar et champs transitoires ont tous bougé : on recharge, comme
+	// le fait déjà la branche « lien » d'un déplacement.
+	window.location.reload();
 }
 
 // ── Conditions d'engagement ──────────────────────────────────────────────────────
