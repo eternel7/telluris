@@ -284,13 +284,36 @@ def test_les_noms_suivent_l_ordre_d_arrivee():
 
 
 def test_un_participant_sans_nom_connu_est_omis():
-	"""Table déjà en base, assise avant que le champ n'existe : aucune migration. C'est cette
-	liste plus courte que `participants` qui fait retomber le client sur « N attablé(s) »."""
+	"""Table déjà en base, assise avant que le champ n'existe : aucune migration. La liste est
+	plus courte que `participants` — c'est au client de compter le reste, pas de tout jeter."""
 	t = _table("table:a", 1, participants=["character:ancien", "character:moi"],
 			   noms={"character:moi": "Greta Hazgard"})
 	assert auberge.noms_attables(t) == ["Greta Hazgard"]
 	# Et une table entièrement héritée ne lève pas : elle ne dit simplement aucun nom.
 	assert auberge.noms_attables(_table("table:b", 2, participants=["character:x"])) == []
+
+
+def test_rafraichir_mon_nom_repare_une_table_heritee():
+	"""⚠️ `asseoir` n'écrit le nom que de CELUI QUI S'ASSIED : sans cette réparation à la
+	lecture, quelqu'un déjà attablé ne serait jamais rattrapé."""
+	t = _table("table:a", 1, participants=["character:autre", "character:moi"])
+	assert auberge.rafraichir_mon_nom([t], _perso()) == [t]
+	assert t["noms"] == {"character:moi": "Greta Hazgard"}
+	# ⚠️ On ne répare QUE le sien : lire le `character:*` d'autrui est interdit.
+	assert auberge.noms_attables(t) == ["Greta Hazgard"]
+
+
+def test_rafraichir_mon_nom_n_ecrit_rien_quand_c_est_deja_bon():
+	"""⚠️ Appelée sur le chemin du SONDAGE (toutes les 4 s) : elle ne doit écrire qu'une fois."""
+	t = _table("table:a", 1, participants=["character:moi"],
+			   noms={"character:moi": "Greta Hazgard"})
+	assert auberge.rafraichir_mon_nom([t], _perso()) == []
+
+
+def test_rafraichir_mon_nom_ignore_les_tables_ou_l_on_n_est_pas():
+	t = _table("table:a", 1, participants=["character:autre"])
+	assert auberge.rafraichir_mon_nom([t], _perso()) == []
+	assert "noms" not in t
 
 
 def test_une_table_ou_l_on_a_dormi_est_refusee():

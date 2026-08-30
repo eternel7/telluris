@@ -61,6 +61,30 @@ MESSAGES_NUIT = [
 	"Les premiers chariots des étals roulent vers la place, avant l'aube.",
 	"Une odeur de pain chaud monte des cuisines.",
 	"Le jour se lève gris sur les toits ; la nuit vous a lavé les jambes.",
+	"Le dernier client éteint sa chandelle et monte l'escalier.",
+	"Une chaise grince dans la salle commune, puis tout redevient silencieux.",
+	"Le bois humide crépite faiblement dans l'âtre.",
+	"Une porte se ferme doucement à l'autre bout du couloir.",
+	"On entend les pas lourds du tenancier vérifier les chambres.",
+	"Une odeur de bière renversée flotte encore près du comptoir.",
+	"Quelqu'un tousse derrière une cloison avant de retomber dans le sommeil.",
+	"Le vent siffle sous la porte et fait trembler la flamme de votre bougie.",
+	"Un cheval tape du sabot dans l'écurie située sous la fenêtre.",
+	"Les chaînes d'une armure suspendue tintent lorsque quelqu'un passe dans le couloir.",
+	"Un rat détale sous les planches avant de disparaître dans l'ombre.",
+	"Le plancher craque régulièrement sous les pas du tenancier qui fait sa ronde.",
+	"Dans la chambre voisine, on chuchote encore avant que les voix ne s'éteignent.",
+	"Une odeur de soupe refroidie flotte dans l'escalier.",
+	"Quelqu'un descend chercher de l'eau, puis remonte en faisant grincer les marches.",
+	"Une bûche s'effondre dans l'âtre avec un bref nuage d'étincelles.",
+	"Les chevaux soufflent doucement dans l'écurie tandis que la nuit avance.",
+	"Un volet mal fermé claque contre son battant avant d'être finalement attaché.",
+	"Au loin, une cloche sonne l'heure et réveille brièvement les dormeurs.",
+	"Le ronflement d'un voyageur traverse les murs trop fins de l'auberge.",
+	"Une goutte tombe régulièrement d'une gouttière sur la pierre de la cour.",
+	"Le tenancier range les dernières chopes avant de monter se coucher.",
+	"Une faible lumière filtre sous la porte de la cuisine, puis disparaît.",
+	"Les premières voix du matin montent de la rue tandis que l'auberge s'éveille.",
 ]
 
 
@@ -353,6 +377,39 @@ def noms_attables(table: dict) -> list:
 		if nom:
 			sortie.append(nom)
 	return sortie
+
+
+def rafraichir_mon_nom(tables: list, character: dict) -> list:
+	"""Répare À LA LECTURE le nom du personnage COURANT sur les tables où il est assis —
+	rend les tables modifiées, mute sans sauver.
+
+	⚠️ Sans cette réparation, `asseoir` n'écrit le nom que de CELUI QUI S'ASSIED : quelqu'un
+	déjà attablé avant que le champ n'existe n'aurait **jamais** été rattrapé, et sa table
+	serait restée à moitié muette jusqu'à ce qu'il se relève. C'est le même remède qu'ailleurs
+	dans le projet (`slots_effectifs` → `_reparer_obligatoires`) : aucune migration, on répare
+	au moment où quelqu'un regarde.
+
+	⚠️ On ne peut réparer QUE le sien : le nom d'autrui demanderait de lire son `character:*`,
+	ce que la garde d'appartenance interdit. Chaque convive répare le sien en ouvrant la salle,
+	donc une table héritée se recompose d'elle-même en une visite par personne.
+
+	⚠️ Ne rend une table que si elle a VRAIMENT changé : appelée sur le chemin du sondage
+	(toutes les 4 s), elle ne doit écrire qu'une fois."""
+	character_id = (character or {}).get("_id", "")
+	if not character_id:
+		return []
+	nom = nom_affichable(character)
+	modifiees = []
+	for table in tables or []:
+		if character_id not in (table.get("participants") or []):
+			continue
+		if (table.get("noms") or {}).get(character_id) == nom:
+			continue
+		noms = dict(table.get("noms") or {})
+		noms[character_id] = nom
+		table["noms"] = noms
+		modifiees.append(table)
+	return modifiees
 
 
 # ── Écriture ────────────────────────────────────────────────────────────────────

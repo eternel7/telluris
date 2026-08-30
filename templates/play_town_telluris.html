@@ -6491,13 +6491,18 @@ function _aubSigOcc(t) {
 // Qui est attablé — source unique du libellé, lue par le rendu complet ET par le sondage.
 // ⚠️ `escapeHtml` obligatoire : ce sont des noms saisis par des joueurs, et le libellé part en
 // `innerHTML` (Convention §9).
-// ⚠️ Repli sur le compte quand `noms` est plus court que `occupants` : une table déjà en base
-// n'a pas le nom de ceux qui s'y étaient assis avant, et une tête vide la ferait paraître
-// déserte alors qu'elle est occupée.
+//
+// ⚠️ Le repli est PARTIEL, jamais tout-ou-rien : une table où un seul convive s'est assis avant
+// que le champ `noms` n'existe a moins de noms que d'occupants, et jeter alors les noms CONNUS
+// (ce que faisait la première version) rendait la tête muette pour tout le monde. On montre donc
+// ce qu'on sait et l'on COMPTE le reste. Le serveur répare le sien à chaque ouverture de la
+// salle (`rafraichir_mon_nom`), donc le « + N autre(s) » s'efface de lui-même.
 function _aubOccupants(t) {
-	const noms = t.noms || [];
-	if (!noms.length || noms.length < t.occupants) return `${t.occupants} attablé(s)`;
-	return noms.map(escapeHtml).join(', ');
+	const noms = (t.noms || []).map(escapeHtml);
+	const inconnus = Math.max(0, (t.occupants || 0) - noms.length);
+	if (!noms.length) return `${t.occupants} attablé(s)`;
+	if (inconnus) noms.push(`+ ${inconnus} autre${inconnus > 1 ? 's' : ''}`);
+	return noms.join(', ');
 }
 
 // ⚠️ Les lignes de message sont bâties en DOM (`createElement` + `textContent`), plus en
@@ -6854,7 +6859,7 @@ async function passerLaNuit() {
 			// ⚠️ Double requestAnimationFrame : une transition n'a rien à interpoler sur un
 			// élément qui vient de naître (même piège que les toasts et les jetons).
 			requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('vue')));
-			await new Promise(r => setTimeout(r, 900));
+			await new Promise(r => setTimeout(r, 1200));
 		}
 	})();
 

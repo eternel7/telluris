@@ -160,9 +160,18 @@ def _purger_tables_vides(tables: list, messages: list) -> tuple[list, list]:
 @auberge_router.get("/auberge/salle")
 def salle(current_user: Annotated[dict, Depends(get_current_user)]):
 	"""Cible du SONDAGE (~4 s tant que le panneau est ouvert). En `def` : lecture pure côté
-	jeu, donc threadpool. Deux `find_docs` indexés par `(type, lieu)`."""
+	jeu, donc threadpool. Deux `find_docs` indexés par `(type, lieu)`.
+
+	⚠️ Une écriture PARESSEUSE s'y greffe — comme la purge des messages échus de `_salle` :
+	le personnage courant y (re)pose son nom sur les tables où il est assis. Sans elle, un
+	convive attablé AVANT que le champ `noms` n'existe ne serait jamais rattrapé et sa table
+	resterait à moitié muette. Best-effort et **une seule fois** : `rafraichir_mon_nom` ne rend
+	que ce qui a vraiment changé, donc les sondages suivants n'écrivent plus rien."""
 	character, lieu_doc = _acces_auberge(current_user)
-	return _payload(character, lieu_doc)
+	tables, messages = _salle(lieu_doc.get("_id", ""))
+	for table in auberge.rafraichir_mon_nom(tables, character):
+		save_doc(table)      # annexe : un conflit se rejouera au sondage suivant
+	return _payload(character, lieu_doc, tables, messages)
 
 
 @auberge_router.post("/auberge/table")

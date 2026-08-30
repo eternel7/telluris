@@ -1,7 +1,7 @@
 {
   "db": "telluris",
-  "exported_at": "2026-08-30T12:43:08.112762Z",
-  "doc_count": 2125,
+  "exported_at": "2026-08-30T18:52:21.843325Z",
+  "doc_count": 2129,
   "docs": [
     {
       "_id": "_design/characters",
@@ -25,7 +25,7 @@
     },
     {
       "_id": "_design/design_tables",
-      "_rev": "6-7d8f641a861546f4de0d9e76ca5837c0",
+      "_rev": "7-67ece0fbaaa994b35919997864b8e76b",
       "language": "query",
       "views": {
         "idx-tables": {
@@ -130,6 +130,24 @@
               "fields": [
                 "type",
                 "lieu_parent"
+              ]
+            }
+          }
+        },
+        "idx-tables-by-lieu": {
+          "map": {
+            "fields": {
+              "type": "asc",
+              "lieu": "asc"
+            },
+            "partial_filter_selector": {}
+          },
+          "reduce": "_count",
+          "options": {
+            "def": {
+              "fields": [
+                "type",
+                "lieu"
               ]
             }
           }
@@ -4026,7 +4044,7 @@
     },
     {
       "_id": "aventurier:le_bastion_de_l_yonne_interieur_06c5d01dc6be",
-      "_rev": "3907-78cc7a9756b1182fef3873540feec14b",
+      "_rev": "4078-44faf01957c6551ba8cd71d8dfb89c2b",
       "type": "aventurier",
       "statut": "embauche",
       "giver": "lieu:le_bastion_de_l_yonne_interieur",
@@ -4052,11 +4070,36 @@
       "vocations_niveaux": {
         "mage": 1
       },
-      "xp_total": 3187,
-      "attribute_points": 1,
+      "xp_total": 3237,
+      "attribute_points": 9,
       "inventaire": [
         "item:Soufre",
         "item:Bougie",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Sel",
+        "item:Sel",
+        "item:Cristal_canalisation",
+        "item:encens",
+        "item:encens",
+        "item:encens",
+        "item:encens",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
+        "item:Soufre",
         "item:Soufre",
         "item:Soufre",
         "item:Soufre",
@@ -4424,8 +4467,101 @@
       "embauche_at": 1785524055
     },
     {
+      "_id": "aventurier:le_bastion_de_l_yonne_interieur_454ffbb76444",
+      "_rev": "1-7f5ec23831f72e94fa3f0d7b2bdc355f",
+      "type": "aventurier",
+      "statut": "offert",
+      "giver": "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu_parent": "lieu:auxerre",
+      "prenom": "Grimnur",
+      "nom": "Cœur-d'Acier",
+      "sex": "M",
+      "race": "nain",
+      "voc": "mage",
+      "image": "mage_m_nain06.jpg",
+      "caracteristiques_current": {
+        "V": 5,
+        "F": 22,
+        "R": 32,
+        "Ag": 16,
+        "Vol": 50,
+        "Int": 34,
+        "Cha": 22,
+        "Ch": 21
+      },
+      "currentPV": 118,
+      "currentPM": 180,
+      "vocations_niveaux": {
+        "mage": 2
+      },
+      "xp_total": 201,
+      "attribute_points": 0,
+      "inventaire": [],
+      "slots": {
+        "main_droite": "item:Baton_canalisateur",
+        "main_gauche": null,
+        "torse": null,
+        "tete": null,
+        "epaules": null,
+        "jambes": null,
+        "pieds": null,
+        "mains": null,
+        "anneau_1": null,
+        "anneau_2": null,
+        "cou": null,
+        "ceinture": null
+      },
+      "equipment_bonus": {
+        "pv": 0,
+        "pm": 6,
+        "pa": 0,
+        "pa_zones": {},
+        "pa_hors_zone": 0,
+        "malus_depl": 0,
+        "cc_bonus": 0,
+        "cd_bonus": 0,
+        "degats_bonus": 1,
+        "degats_dice": "1D2",
+        "initiative": 0,
+        "buffs": {
+          "Int": 3
+        },
+        "buffs_sources": [
+          {
+            "nom": "Bâton canalisateur",
+            "icon": "🪄",
+            "buffs": {
+              "Int": 3
+            }
+          }
+        ],
+        "regen_pv": 0,
+        "regen_pm": 0,
+        "esquive": 0
+      },
+      "sorts_connus": [],
+      "competences_connues": [],
+      "competences_bonus": {},
+      "effets_actifs": [],
+      "or": 0,
+      "argent": 0,
+      "cuivre": 0,
+      "combats_recompenses": [],
+      "rang": "D",
+      "specialite": "La magie au service de la guerre. Enchantements d'armes, boucliers arcaniques.",
+      "exigences": {
+        "part_butin_pct": 16,
+        "clauses": [
+          "Ne travaille pas si le groupe compte plus d'un magicien.",
+          "Exige que les frais de guérison soient intégralement pris en charge par l'employeur."
+        ]
+      },
+      "genere_at": 1788102400,
+      "expire_at": 1788111375
+    },
+    {
       "_id": "aventurier:le_bastion_de_l_yonne_interieur_495530ba124a",
-      "_rev": "4693-6823ef5df0ef680b345a8f269ea2420f",
+      "_rev": "4719-e7cdcf64f569bc9bce82676f039e86ea",
       "type": "aventurier",
       "statut": "embauche",
       "giver": "lieu:le_bastion_de_l_yonne_interieur",
@@ -4451,7 +4587,7 @@
       "vocations_niveaux": {
         "repurgateur": 0
       },
-      "xp_total": 4223,
+      "xp_total": 4233,
       "attribute_points": 2,
       "inventaire": [
         {
@@ -4505,6 +4641,13 @@
         "pv": 3,
         "pm": 2,
         "pa": 13,
+        "pa_zones": {
+          "torse": 5,
+          "jambes": 1,
+          "pieds": 2,
+          "bras": 1
+        },
+        "pa_hors_zone": 4,
         "malus_depl": -1,
         "cc_bonus": 0,
         "cd_bonus": 0,
@@ -4538,7 +4681,10 @@
               "Cha": 5
             }
           }
-        ]
+        ],
+        "regen_pv": 0,
+        "regen_pm": 0,
+        "esquive": 0
       },
       "sorts_connus": [
         "sort:soin_mineur",
@@ -4952,8 +5098,88 @@
       "embauche_at": 1785524043
     },
     {
+      "_id": "aventurier:le_bastion_de_l_yonne_interieur_59acd70fa659",
+      "_rev": "1-562838c4fdbee256b6afedbf53628033",
+      "type": "aventurier",
+      "statut": "offert",
+      "giver": "lieu:le_bastion_de_l_yonne_interieur",
+      "lieu_parent": "lieu:auxerre",
+      "prenom": "Belladone",
+      "nom": "Bonpré",
+      "sex": "F",
+      "race": "hobbit",
+      "voc": "guerrier",
+      "image": "guerrier_f_hobbit04.jpg",
+      "caracteristiques_current": {
+        "V": 5,
+        "F": 16,
+        "R": 21,
+        "Ag": 32,
+        "Vol": 50,
+        "Int": 31,
+        "Cha": 30,
+        "Ch": 31
+      },
+      "currentPV": 79,
+      "currentPM": 162,
+      "vocations_niveaux": {
+        "guerrier": 1
+      },
+      "xp_total": 51,
+      "attribute_points": 0,
+      "inventaire": [],
+      "slots": {
+        "main_droite": "item:Epee_courte",
+        "main_gauche": null,
+        "torse": null,
+        "tete": null,
+        "epaules": null,
+        "jambes": null,
+        "pieds": null,
+        "mains": null,
+        "anneau_1": null,
+        "anneau_2": null,
+        "cou": null,
+        "ceinture": null
+      },
+      "equipment_bonus": {
+        "pv": 0,
+        "pm": 0,
+        "pa": 0,
+        "pa_zones": {},
+        "pa_hors_zone": 0,
+        "malus_depl": 0,
+        "cc_bonus": 1,
+        "cd_bonus": 0,
+        "degats_bonus": 2,
+        "degats_dice": "1D3",
+        "initiative": 0,
+        "buffs": {},
+        "buffs_sources": [],
+        "regen_pv": 0,
+        "regen_pm": 0,
+        "esquive": 0
+      },
+      "sorts_connus": [],
+      "competences_connues": [],
+      "competences_bonus": {},
+      "effets_actifs": [],
+      "or": 0,
+      "argent": 0,
+      "cuivre": 0,
+      "combats_recompenses": [],
+      "rang": "E",
+      "specialite": "Maître des armes blanches. Robuste, polyvalent, le pilier de toute troupe.",
+      "exigences": {
+        "part_butin_pct": 25,
+        "clauses": []
+      },
+      "genere_at": 1788102400,
+      "expire_at": 1788112512
+    },
+    {
       "_id": "aventurier:le_bastion_de_l_yonne_interieur_6035918e8ba0",
-      "_rev": "2666-a4afb0862ef3099411515fc229c54882",
+      "_rev": "2813-9a03606d4679a5a75fbda001d9fdae12",
       "type": "aventurier",
       "statut": "embauche",
       "giver": "lieu:le_bastion_de_l_yonne_interieur",
@@ -4979,7 +5205,7 @@
       "vocations_niveaux": {
         "pretre": 0
       },
-      "xp_total": 2153,
+      "xp_total": 2203,
       "attribute_points": 0,
       "inventaire": [
         {
@@ -4989,6 +5215,10 @@
         {
           "item": "item:Eau_benite",
           "poids": 0.3
+        },
+        {
+          "item": "item:Herbes_medicinales",
+          "poids": 0.1
         }
       ],
       "slots": {
@@ -5420,127 +5650,38 @@
       ]
     },
     {
-      "_id": "aventurier:le_bastion_de_l_yonne_interieur_81edfac0656b",
-      "_rev": "1-5f41866711487f235b3aed02d3d6f25b",
+      "_id": "aventurier:le_bastion_de_l_yonne_interieur_ab04c0ca1b09",
+      "_rev": "1-8d024d07e8e6992986cf1a83c560e62c",
       "type": "aventurier",
       "statut": "offert",
       "giver": "lieu:le_bastion_de_l_yonne_interieur",
       "lieu_parent": "lieu:auxerre",
-      "prenom": "Thibaut",
-      "nom": "Rochefort",
-      "sex": "M",
-      "race": "humain",
-      "voc": "necromancien",
-      "image": "necromancien_m_humain01.jpg",
+      "prenom": "Yavielle",
+      "nom": "Ventelame",
+      "sex": "F",
+      "race": "elfe",
+      "voc": "menestrel",
+      "image": "menestrel_f_elfe05.jpg",
       "caracteristiques_current": {
         "V": 5,
-        "F": 24,
-        "R": 22,
-        "Ag": 21,
-        "Vol": 33,
-        "Int": 32,
-        "Cha": 31,
-        "Ch": 21
+        "F": 23,
+        "R": 21,
+        "Ag": 23,
+        "Vol": 32,
+        "Int": 42,
+        "Cha": 33,
+        "Ch": 10
       },
-      "currentPV": 90,
-      "currentPM": 146,
+      "currentPV": 86,
+      "currentPM": 148,
       "vocations_niveaux": {
-        "necromancien": 1
+        "menestrel": 1
       },
       "xp_total": 51,
       "attribute_points": 0,
       "inventaire": [],
       "slots": {
-        "main_droite": "item:Sceptre_os",
-        "main_gauche": null,
-        "torse": null,
-        "tete": null,
-        "epaules": null,
-        "jambes": null,
-        "pieds": null,
-        "mains": null,
-        "anneau_1": null,
-        "anneau_2": null,
-        "cou": null,
-        "ceinture": null
-      },
-      "equipment_bonus": {
-        "pv": 0,
-        "pm": 6,
-        "pa": 0,
-        "malus_depl": 0,
-        "cc_bonus": 0,
-        "cd_bonus": 0,
-        "degats_bonus": 0,
-        "degats_dice": "",
-        "initiative": 0,
-        "buffs": {
-          "Vol": 3,
-          "Int": 2
-        },
-        "buffs_sources": [
-          {
-            "nom": "Sceptre d'os",
-            "icon": "💀",
-            "buffs": {
-              "Vol": 3,
-              "Int": 2
-            }
-          }
-        ]
-      },
-      "sorts_connus": [],
-      "competences_connues": [],
-      "competences_bonus": {},
-      "effets_actifs": [],
-      "or": 0,
-      "argent": 0,
-      "cuivre": 0,
-      "combats_recompenses": [],
-      "rang": "E",
-      "specialite": "Maître de la nécromancie. Sa voie ultime mène vers la Liche.",
-      "exigences": {
-        "part_butin_pct": 24,
-        "clauses": []
-      },
-      "genere_at": 1787865161,
-      "expire_at": 1787875457
-    },
-    {
-      "_id": "aventurier:le_bastion_de_l_yonne_interieur_ad2c4ae344ef",
-      "_rev": "1-4761019568274434ed2900f029cdbe53",
-      "type": "aventurier",
-      "statut": "offert",
-      "giver": "lieu:le_bastion_de_l_yonne_interieur",
-      "lieu_parent": "lieu:auxerre",
-      "prenom": "Gautier",
-      "nom": "Pousse-Rocs",
-      "sex": "M",
-      "race": "ogre",
-      "voc": "assassin",
-      "image": "barbare_m_ogre10.jpg",
-      "caracteristiques_current": {
-        "V": 4,
-        "F": 43,
-        "R": 41,
-        "Ag": 15,
-        "Vol": 20,
-        "Int": 21,
-        "Cha": 11,
-        "Ch": 21
-      },
-      "currentPV": 166,
-      "currentPM": 82,
-      "vocations_niveaux": {
-        "assassin": 0
-      },
-      "xp_total": 0,
-      "attribute_points": 0,
-      "inventaire": [
-        "item:Lame_courte"
-      ],
-      "slots": {
-        "main_droite": "item:Dague",
+        "main_droite": "item:Dague_de_scene",
         "main_gauche": null,
         "torse": null,
         "tete": null,
@@ -5557,24 +5698,29 @@
         "pv": 0,
         "pm": 0,
         "pa": 0,
+        "pa_zones": {},
+        "pa_hors_zone": 0,
         "malus_depl": 0,
-        "cc_bonus": 6,
+        "cc_bonus": 4,
         "cd_bonus": 0,
         "degats_bonus": 1,
         "degats_dice": "",
-        "initiative": 3,
+        "initiative": 0,
         "buffs": {
           "Ag": 3
         },
         "buffs_sources": [
           {
-            "nom": "Dague",
-            "icon": "🔪",
+            "nom": "Dague de scène",
+            "icon": "🗡️",
             "buffs": {
               "Ag": 3
             }
           }
-        ]
+        ],
+        "regen_pv": 0,
+        "regen_pm": 0,
+        "esquive": 0
       },
       "sorts_connus": [],
       "competences_connues": [],
@@ -5584,17 +5730,14 @@
       "argent": 0,
       "cuivre": 0,
       "combats_recompenses": [],
-      "rang": "F",
-      "specialite": "L'ombre faite chair. Spécialiste de l'élimination silencieuse et des poisons.",
+      "rang": "E",
+      "specialite": "Chanteur, espion, négociateur. Sa musique ouvre des portes que les épées ne peuvent forcer.",
       "exigences": {
-        "part_butin_pct": 27,
-        "clauses": [
-          "Ne partage jamais ses provisions personnelles avec un membre du groupe.",
-          "Refuse de travailler dans une région frappée par une épidémie sans protection appropriée."
-        ]
+        "part_butin_pct": 13,
+        "clauses": []
       },
-      "genere_at": 1787865099,
-      "expire_at": 1787868757
+      "genere_at": 1788102400,
+      "expire_at": 1788110484
     },
     {
       "_id": "aventurier:le_bastion_de_l_yonne_interieur_af67f05697ea",
@@ -5744,95 +5887,6 @@
       ]
     },
     {
-      "_id": "aventurier:le_bastion_de_l_yonne_interieur_b1c1e211505b",
-      "_rev": "1-68e924be326d3935e6992cb854d2a89f",
-      "type": "aventurier",
-      "statut": "offert",
-      "giver": "lieu:le_bastion_de_l_yonne_interieur",
-      "lieu_parent": "lieu:auxerre",
-      "prenom": "Enguerrand",
-      "nom": "Leloup",
-      "sex": "M",
-      "race": "humain",
-      "voc": "chaman",
-      "image": "chaman_m_humain04.jpg",
-      "caracteristiques_current": {
-        "V": 5,
-        "F": 21,
-        "R": 20,
-        "Ag": 22,
-        "Vol": 32,
-        "Int": 30,
-        "Cha": 30,
-        "Ch": 22
-      },
-      "currentPV": 81,
-      "currentPM": 144,
-      "vocations_niveaux": {
-        "chaman": 0
-      },
-      "xp_total": 0,
-      "attribute_points": 0,
-      "inventaire": [],
-      "slots": {
-        "main_droite": "item:Baton_bois_vivant",
-        "main_gauche": null,
-        "torse": null,
-        "tete": null,
-        "epaules": null,
-        "jambes": null,
-        "pieds": null,
-        "mains": null,
-        "anneau_1": null,
-        "anneau_2": null,
-        "cou": null,
-        "ceinture": null
-      },
-      "equipment_bonus": {
-        "pv": 0,
-        "pm": 8,
-        "pa": 0,
-        "malus_depl": 0,
-        "cc_bonus": 0,
-        "cd_bonus": 0,
-        "degats_bonus": 1,
-        "degats_dice": "1D2",
-        "initiative": 0,
-        "buffs": {
-          "Int": 4,
-          "Vol": 2
-        },
-        "buffs_sources": [
-          {
-            "nom": "Bâton de bois vivant",
-            "icon": "🌿",
-            "buffs": {
-              "Int": 4,
-              "Vol": 2
-            }
-          }
-        ]
-      },
-      "sorts_connus": [],
-      "competences_connues": [],
-      "competences_bonus": {},
-      "effets_actifs": [],
-      "or": 0,
-      "argent": 0,
-      "cuivre": 0,
-      "combats_recompenses": [],
-      "rang": "F",
-      "specialite": "Se métamorphose en esprit totem: Ours, Loup, Sanglier, Chat sauvage ou Faucon.",
-      "exigences": {
-        "part_butin_pct": 17,
-        "clauses": [
-          "Exige une part du butin supplémentaire lorsqu'il assure seul la garde du camp."
-        ]
-      },
-      "genere_at": 1787865100,
-      "expire_at": 1787871687
-    },
-    {
       "_id": "aventurier:le_bastion_de_l_yonne_interieur_b71988944003",
       "_rev": "402-c111de2f04755c3a5585dfab2410ed0b",
       "type": "aventurier",
@@ -5935,34 +5989,34 @@
       "portrait_zoom": 32
     },
     {
-      "_id": "aventurier:le_bastion_de_l_yonne_interieur_ede826b0f68e",
-      "_rev": "1-a868f6ddc06a02aa0064df3db2469a0a",
+      "_id": "aventurier:le_bastion_de_l_yonne_interieur_fb476b3d48f4",
+      "_rev": "1-313d1ad9b2ca1b03f0cd9008b6509c32",
       "type": "aventurier",
       "statut": "offert",
       "giver": "lieu:le_bastion_de_l_yonne_interieur",
       "lieu_parent": "lieu:auxerre",
-      "prenom": "Sylvaine",
-      "nom": "Ventelame",
+      "prenom": "Isabeau",
+      "nom": "Morvan",
       "sex": "F",
-      "race": "elfe",
-      "voc": "illusionniste",
-      "image": "illusionniste_f_elfe07.jpg",
+      "race": "humain",
+      "voc": "mage",
+      "image": "mage_f_humain13.jpg",
       "caracteristiques_current": {
         "V": 5,
-        "F": 23,
-        "R": 23,
+        "F": 20,
+        "R": 26,
         "Ag": 21,
-        "Vol": 32,
-        "Int": 41,
-        "Cha": 33,
-        "Ch": 11
+        "Vol": 35,
+        "Int": 35,
+        "Cha": 31,
+        "Ch": 21
       },
-      "currentPV": 92,
-      "currentPM": 158,
+      "currentPV": 98,
+      "currentPM": 152,
       "vocations_niveaux": {
-        "illusionniste": 1
+        "mage": 2
       },
-      "xp_total": 51,
+      "xp_total": 201,
       "attribute_points": 0,
       "inventaire": [],
       "slots": {
@@ -5983,6 +6037,8 @@
         "pv": 0,
         "pm": 6,
         "pa": 0,
+        "pa_zones": {},
+        "pa_hors_zone": 0,
         "malus_depl": 0,
         "cc_bonus": 0,
         "cd_bonus": 0,
@@ -6000,7 +6056,10 @@
               "Int": 3
             }
           }
-        ]
+        ],
+        "regen_pv": 0,
+        "regen_pm": 0,
+        "esquive": 0
       },
       "sorts_connus": [],
       "competences_connues": [],
@@ -6010,17 +6069,17 @@
       "argent": 0,
       "cuivre": 0,
       "combats_recompenses": [],
-      "rang": "E",
-      "specialite": "Manipulateur de perceptions. Ses illusions peuvent détourner des armées.",
+      "rang": "D",
+      "specialite": "La magie au service de la guerre. Enchantements d'armes, boucliers arcaniques.",
       "exigences": {
-        "part_butin_pct": 21,
+        "part_butin_pct": 27,
         "clauses": [
-          "Refuse de servir de garde du corps à une personne qu'il juge manifestement coupable d'un crime.",
-          "Exige d'être informé de toute présence connue de vampires avant le départ."
+          "Exige une avance d'au moins un quart de la récompense avant le départ.",
+          "Exige que les frais de guérison soient intégralement pris en charge par l'employeur."
         ]
       },
-      "genere_at": 1787865099,
-      "expire_at": 1787874387
+      "genere_at": 1788102400,
+      "expire_at": 1788106506
     },
     {
       "_id": "aventurier:le_bastion_de_l_yonne_interieur_fe9bd65ada07",
@@ -6388,7 +6447,7 @@
     },
     {
       "_id": "character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092",
-      "_rev": "8608-80b7de49d3fe1112d20f3860a472e862",
+      "_rev": "8865-6b131f64f6adfb6d82a39f72f8b4a11f",
       "user_id": "user:eternel7@gmail.com",
       "type": "character",
       "sex": "F",
@@ -6398,7 +6457,7 @@
       "prenom": "Greta",
       "nom": "Hazgard",
       "cite": "lieu:auxerre",
-      "lieu": "lieu:la_corde_de_boyau",
+      "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
       "position": {
         "x": 0,
         "y": 0
@@ -6493,9 +6552,10 @@
         "lieu:auxerre_porte_pont_exterieur",
         "lieu:bureau_du_maitre_de_guilde_d_auxerre",
         "lieu:temple_portail_de_saint_austrelin_interieur",
-        "lieu:france"
+        "lieu:france",
+        "lieu:auberge_de_la_tour_de_l_horloge"
       ],
-      "xp_total": 5153,
+      "xp_total": 5203,
       "attribute_points": 0,
       "vocations_niveaux": {
         "barbare": 0
@@ -6534,27 +6594,7 @@
         "item:potion_de_vision",
         "item:potion_de_vision",
         "item:potion_de_vision",
-        "item:potion_de_vision",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        "item:sang",
-        {
-          "item": "item:Herbes_a_bruler",
-          "poids": 0.1
-        },
-        {
-          "item": "item:Herbes_medicinales",
-          "poids": 0.1
-        }
+        "item:potion_de_vision"
       ],
       "slots": {
         "main_droite": "item:Naginata",
@@ -6617,8 +6657,8 @@
         "esquive": 0
       },
       "or": 3,
-      "argent": 35,
-      "cuivre": 32,
+      "argent": 33,
+      "cuivre": 85,
       "quetes_actives": [
         {
           "id": "quete:le_bastion_de_l_yonne_interieur_744adc3d2927",
@@ -7453,6 +7493,54 @@
             "items": []
           },
           "termine_at": 1787865262
+        },
+        {
+          "id": "quete:transport_b863d5e6fa77",
+          "titre": "Livraison : A la truffe d'Or",
+          "rang": "F",
+          "echec": false,
+          "recompenses": {
+            "xp": 10,
+            "cuivre": 30,
+            "items": []
+          },
+          "termine_at": 1788096043
+        },
+        {
+          "id": "quete:transport_8b99bc9f80a2",
+          "titre": "Livraison : L'Ossuaire Muet",
+          "rang": "F",
+          "echec": false,
+          "recompenses": {
+            "xp": 10,
+            "cuivre": 30,
+            "items": []
+          },
+          "termine_at": 1788097539
+        },
+        {
+          "id": "quete:transport_d55540e8eaf5",
+          "titre": "Livraison : Le cellier salé",
+          "rang": "F",
+          "echec": false,
+          "recompenses": {
+            "xp": 10,
+            "cuivre": 30,
+            "items": []
+          },
+          "termine_at": 1788102710
+        },
+        {
+          "id": "quete:transport_421a78e3bc48",
+          "titre": "Livraison : La Navette d'Auxerre",
+          "rang": "F",
+          "echec": false,
+          "recompenses": {
+            "xp": 10,
+            "cuivre": 30,
+            "items": []
+          },
+          "termine_at": 1788102854
         }
       ],
       "rangs_guilde": {
@@ -7485,8 +7573,8 @@
         "raison": "pillage"
       },
       "pnj_present": {
-        "lieu": "lieu:la_corde_de_boyau",
-        "character": "pnj:marchand_boyauderie"
+        "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+        "character": null
       },
       "portrait_translate": {
         "x": -78.3877,
@@ -7533,10 +7621,7 @@
           "ref": "cac"
         }
       ],
-      "transport_offert": {
-        "lieu": "lieu:la_corde_de_boyau",
-        "quete": null
-      },
+      "transport_offert": null,
       "escorte_offerte": null,
       "focalisation": {
         "type": "quete",
@@ -7672,11 +7757,12 @@
           "jusqu": 1787866850,
           "noeud": "commission_rapporte"
         }
-      }
+      },
+      "taverne_table": "table:5bc94abc4a36"
     },
     {
       "_id": "character:user:eternel7@gmail.com_6ca82e79-1144-4ebc-9544-aed5895ac6c9",
-      "_rev": "10114-dce0caf3d33288cdfc0ff84b9da39751",
+      "_rev": "10146-cb30c9ad77045ad480cc67d7334ce34d",
       "user_id": "user:eternel7@gmail.com",
       "type": "character",
       "sex": "M",
@@ -7686,7 +7772,7 @@
       "prenom": "Baal",
       "nom": "Hazgard",
       "cite": "lieu:auxerre",
-      "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+      "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
       "position": {
         "x": 0,
         "y": 0
@@ -7771,9 +7857,10 @@
         "lieu:le_suaire_de_cendres",
         "lieu:la_plume_et_l_encoche",
         "lieu:le_saloir_du_pont",
-        "lieu:le_metier_de_haute_lisse"
+        "lieu:le_metier_de_haute_lisse",
+        "lieu:auberge_de_la_tour_de_l_horloge"
       ],
-      "xp_total": 6401,
+      "xp_total": 6411,
       "attribute_points": 0,
       "vocations_niveaux": {
         "elementaliste": 1
@@ -7844,12 +7931,18 @@
         "pv": 0,
         "pm": 12,
         "pa": 7,
+        "pa_zones": {
+          "torse": 5,
+          "pieds": 1,
+          "bras": 1
+        },
+        "pa_hors_zone": 0,
         "malus_depl": 0,
         "cc_bonus": 1,
         "cd_bonus": 0,
         "degats_bonus": 2,
         "degats_dice": "1D2",
-        "initiative": 0,
+        "initiative": 3,
         "buffs": {
           "Int": 3,
           "Vol": 3,
@@ -7893,11 +7986,14 @@
               "Cha": 5
             }
           }
-        ]
+        ],
+        "regen_pv": 0,
+        "regen_pm": 0,
+        "esquive": 0
       },
       "or": 3,
-      "argent": 16,
-      "cuivre": 3,
+      "argent": 15,
+      "cuivre": 53,
       "quetes_actives": [
         {
           "id": "quete:le_bastion_de_l_yonne_interieur_278fbc579363",
@@ -9307,8 +9403,8 @@
         "raison": "pillage"
       },
       "pnj_present": {
-        "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
-        "character": "pnj:gautier_de_valcroix"
+        "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+        "character": null
       },
       "objets_au_sol": [],
       "ressource_recoltable": null,
@@ -9801,7 +9897,8 @@
         }
       },
       "escorte_offerte": null,
-      "proteges": []
+      "proteges": [],
+      "taverne_table": "table:5bc94abc4a36"
     },
     {
       "_id": "character:user:eternel7@gmail.com_a6b275c6-5fd0-40e4-8df4-2c2ce85019e7",
@@ -34434,23 +34531,25 @@
     },
     {
       "_id": "lieu:atelier_de_l_artisan_des_os",
-      "_rev": "119-d067744eae276f232101fa506336edde",
+      "_rev": "123-c9ad324bb21d7f3263fa07cb3827a95d",
       "type": "lieu",
       "label": "Atelier de l'Artisan des Os",
       "image": "atelier_d_artisan_europe02.png",
       "categorie": "atelier_d_artisan",
       "lieu_parent": "lieu:auxerre",
-      "stock_matieres": {
-        "ossements": 30
-      },
+      "stock_matieres": {},
       "stock_vente": [
         {
           "item_id": "item:Poudre_os",
-          "qty": 96
+          "qty": 138
         },
         {
           "item_id": "item:bijou",
-          "qty": 88
+          "qty": 164
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 40
         }
       ],
       "pnj": [
@@ -34495,7 +34594,7 @@
     },
     {
       "_id": "lieu:aux_ouvrages_d_os_et_d_ivoire",
-      "_rev": "174-d7da712ee20f439ebf3f762f8b1ced80",
+      "_rev": "178-18675c4e1e7ba702cf1c5df8c45d2b59",
       "type": "lieu",
       "label": "Aux Ouvrages d’Os et d’Ivoire",
       "image": "tabletterie_europe01.png",
@@ -34509,17 +34608,17 @@
         }
       ],
       "stock_matieres": {
-        "petit_rondin": 235,
-        "peaux": 155,
-        "ossements": 68,
+        "petit_rondin": 275,
+        "peaux": 195,
+        "ossements": 108,
         "cuir": 3,
         "sang": 4,
-        "branche": 25
+        "branche": 65
       },
       "stock_vente": [
         {
           "item_id": "item:de",
-          "qty": 119
+          "qty": 103
         },
         {
           "item_id": "item:dague_rituelle",
@@ -34539,7 +34638,7 @@
         },
         {
           "item_id": "item:manche",
-          "qty": 46
+          "qty": 29
         },
         {
           "item_id": "item:Bracelets_os",
@@ -34552,6 +34651,14 @@
         {
           "item_id": "item:Couronne_branchages",
           "qty": 102
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 40
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -40152,7 +40259,7 @@
     },
     {
       "_id": "lieu:boucherie_de_la_tour_de_l_horloge",
-      "_rev": "421-b9cba219a5810f4567b6716e824e61e6",
+      "_rev": "424-bc2f12af9b4ce18dae90ab63a25dbec3",
       "type": "lieu",
       "label": "La Boucherie du Cadran",
       "image": "boucherie_europe01.png",
@@ -40169,7 +40276,7 @@
       "stock_vente": [
         {
           "item_id": "item:viande",
-          "qty": 114
+          "qty": 107
         },
         {
           "item_id": "item:os",
@@ -40193,11 +40300,11 @@
         },
         {
           "item_id": "item:cuir_brut",
-          "qty": 107
+          "qty": 101
         },
         {
           "item_id": "item:tendons",
-          "qty": 107
+          "qty": 103
         },
         {
           "item_id": "item:crins",
@@ -42748,7 +42855,7 @@
     },
     {
       "_id": "lieu:festin_de_la_joyeuse_halfling",
-      "_rev": "701-67facdaf5a9c2fe468c0c20af3ba4d01",
+      "_rev": "704-5c567184a1ed1a381cc615d0852f133b",
       "type": "lieu",
       "label": "Le Festin de la Joyeuse Halfling",
       "image": "boucherie_europe03.png",
@@ -42769,7 +42876,7 @@
         },
         {
           "item_id": "item:os",
-          "qty": 183
+          "qty": 141
         },
         {
           "item_id": "item:sang",
@@ -42789,7 +42896,7 @@
         },
         {
           "item_id": "item:cuir_brut",
-          "qty": 121
+          "qty": 103
         },
         {
           "item_id": "item:plumes",
@@ -51024,19 +51131,17 @@
     },
     {
       "_id": "lieu:fumee_de_l_yonne",
-      "_rev": "85-e7b6e3614394d1525771042f7a5e9a61",
+      "_rev": "86-56a2a49b5024f12cba0290678e19b761",
       "type": "lieu",
       "label": "Fumée de l'Yonne",
       "image": "fumoir_europe01.png",
       "lieu_parent": "lieu:auxerre",
       "categorie": "fumoir",
-      "stock_matieres": {
-        "viande": 8
-      },
+      "stock_matieres": {},
       "stock_vente": [
         {
           "item_id": "item:viande_fumee",
-          "qty": 23
+          "qty": 31
         }
       ],
       "pnj": [
@@ -51061,7 +51166,7 @@
     },
     {
       "_id": "lieu:l_athanor_de_saint_germain",
-      "_rev": "1126-bbbef47e1974431d11035fc28ed4866a",
+      "_rev": "1135-829910c0fa61b6de9c298448d2857dfb",
       "type": "lieu",
       "label": "L'Athanor de Saint-Germain",
       "image": "cabinet_alchimie_europe02.png",
@@ -51106,14 +51211,15 @@
       ],
       "stock_matieres": {
         "graisse": 56,
-        "griffes": 5,
-        "item:Reactif_brut": 655,
+        "griffes": 1,
+        "item:Reactif_brut": 720,
         "item:Seve_de_chene": 1,
-        "debris_anime": 141,
-        "reactif_brut": 140,
-        "residu_spectral": 140,
+        "debris_anime": 150,
+        "reactif_brut": 103,
+        "residu_spectral": 175,
         "item:Herbes_a_bruler": 1,
-        "coeur": 7
+        "coeur": 2,
+        "sang": 3
       },
       "stock_vente": [
         {
@@ -51122,7 +51228,7 @@
         },
         {
           "item_id": "item:composant_rituel",
-          "qty": 59
+          "qty": 60
         },
         {
           "item_id": "item:potion",
@@ -51130,7 +51236,7 @@
         },
         {
           "item_id": "item:poudre_alchimique",
-          "qty": 103
+          "qty": 109
         },
         {
           "item_id": "item:herbe",
@@ -51138,35 +51244,47 @@
         },
         {
           "item_id": "item:Poudre_de_miroir",
-          "qty": 107
+          "qty": 103
         },
         {
           "item_id": "item:Sang_demon_seche",
-          "qty": 101
+          "qty": 107
         },
         {
           "item_id": "item:Soufre",
-          "qty": 100
+          "qty": 106
         },
         {
           "item_id": "item:Cristal_canalisation",
-          "qty": 101
+          "qty": 112
         },
         {
           "item_id": "item:Sel_noir",
-          "qty": 103
+          "qty": 117
         },
         {
           "item_id": "item:catalyseur_magique",
-          "qty": 103
+          "qty": 135
         },
         {
           "item_id": "item:reactif_magique",
-          "qty": 101
+          "qty": 105
         },
         {
           "item_id": "item:potion_de_vision",
           "qty": 5
+        },
+        {
+          "item_id": "item:debris_anime",
+          "qty": 65
+        },
+        {
+          "item_id": "item:Reactif_brut",
+          "qty": 100
+        },
+        {
+          "item_id": "item:residu_spectral",
+          "qty": 65
         }
       ],
       "stock_cible": {
@@ -51177,17 +51295,17 @@
     },
     {
       "_id": "lieu:l_echope_du_cuir_d_auxerre",
-      "_rev": "166-e8eb341f81ce8d8ad980966ca235bdbc",
+      "_rev": "170-6957c7d68b3ef37b22c3723d6d074e7b",
       "type": "lieu",
       "label": "L'échope du cuir d'Auxerre",
       "image": "maroquinerie_auxerre01.png",
       "categorie": "maroquinerie",
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "item:Chiffon": 6,
-        "poix": 113,
+        "item:Chiffon": 26,
+        "poix": 153,
         "cuir": 2,
-        "peaux": 5
+        "peaux": 25
       },
       "stock_vente": [
         {
@@ -51200,7 +51318,7 @@
         },
         {
           "item_id": "item:gants",
-          "qty": 19
+          "qty": 21
         },
         {
           "item_id": "item:Veste_cuir_souple",
@@ -51208,7 +51326,7 @@
         },
         {
           "item_id": "item:Bandages_de_poing",
-          "qty": 142
+          "qty": 152
         },
         {
           "item_id": "item:Braies_fourrure",
@@ -51232,7 +51350,7 @@
         },
         {
           "item_id": "item:Pantalon_cuir",
-          "qty": 14
+          "qty": 15
         },
         {
           "item_id": "item:Gants_sans_doigts",
@@ -51240,7 +51358,7 @@
         },
         {
           "item_id": "item:Chausses_cuir",
-          "qty": 8
+          "qty": 9
         },
         {
           "item_id": "item:Gants_fins",
@@ -51248,11 +51366,11 @@
         },
         {
           "item_id": "item:Gants_prestidigi",
-          "qty": 9
+          "qty": 10
         },
         {
           "item_id": "item:Gants_archer",
-          "qty": 8
+          "qty": 9
         },
         {
           "item_id": "item:Bandouliere_a_fioles",
@@ -51260,19 +51378,19 @@
         },
         {
           "item_id": "item:Gants_peau_noire",
-          "qty": 5
+          "qty": 6
         },
         {
           "item_id": "item:Pelerine_de_cuir",
-          "qty": 5
+          "qty": 6
         },
         {
           "item_id": "item:Mantelet_de_chasse",
-          "qty": 3
+          "qty": 5
         },
         {
           "item_id": "item:Manteau_de_loup",
-          "qty": 8
+          "qty": 9
         },
         {
           "item_id": "item:Gants_cuir_epais",
@@ -51285,6 +51403,18 @@
         {
           "item_id": "item:Baudrier_de_cuir",
           "qty": 3
+        },
+        {
+          "item_id": "item:Chiffon",
+          "qty": 40
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
+        },
+        {
+          "item_id": "item:poix",
+          "qty": 40
         }
       ],
       "pnj": [
@@ -51297,7 +51427,7 @@
     },
     {
       "_id": "lieu:l_empennage_du_rempart",
-      "_rev": "19-a473f7a1648d1ef3fd6ab522197d8b18",
+      "_rev": "23-02ee6655fb96b37cdb8f81a2026d0273",
       "type": "lieu",
       "label": "L'Empennage du Rempart",
       "image": "atelier_de_l_empenneur_europe02.png",
@@ -51311,22 +51441,49 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "argent": 65,
-        "bronze": 65,
-        "fer": 65,
-        "plomb": 65,
-        "tendons": 2,
-        "branche": 20,
-        "petit_rondin": 20
+        "argent": 105,
+        "bronze": 71,
+        "fer": 73,
+        "plomb": 105,
+        "branche": 41,
+        "petit_rondin": 47
       },
       "stock_vente": [
         {
           "item_id": "item:manche",
-          "qty": 92
+          "qty": 14
         },
         {
           "item_id": "item:Arc_court",
           "qty": 6
+        },
+        {
+          "item_id": "item:argent",
+          "qty": 40
+        },
+        {
+          "item_id": "item:bronze",
+          "qty": 40
+        },
+        {
+          "item_id": "item:fer",
+          "qty": 40
+        },
+        {
+          "item_id": "item:plomb",
+          "qty": 40
+        },
+        {
+          "item_id": "item:Javelot_polynesien",
+          "qty": 2
+        },
+        {
+          "item_id": "item:Lancelette",
+          "qty": 64
+        },
+        {
+          "item_id": "item:Darts_de_cavalerie",
+          "qty": 102
         }
       ],
       "stock_cible": {
@@ -51338,7 +51495,7 @@
     },
     {
       "_id": "lieu:l_enclume_du_rempart",
-      "_rev": "398-3c7ae4cfb1d8a44e224ce333b42061ca",
+      "_rev": "403-cc21e14a9be5d020eaf05d3e3b4e574c",
       "type": "lieu",
       "label": "L'Enclume du Rempart",
       "image": "armurerie_europe03.png",
@@ -51364,22 +51521,22 @@
         }
       ],
       "stock_matieres": {
-        "bronze": 1662,
-        "branche": 1146,
-        "petit_rondin": 1094,
-        "argent": 1013,
-        "gros_rondin": 937,
-        "plomb": 1063,
-        "poix": 636,
-        "rondin": 931,
+        "bronze": 1707,
+        "branche": 1191,
+        "petit_rondin": 1139,
+        "argent": 1058,
+        "gros_rondin": 982,
+        "plomb": 1108,
+        "poix": 681,
+        "rondin": 976,
         "item:Seve_de_chene": 8,
         "plumes": 12,
         "crins": 5,
-        "debris_anime": 122,
+        "debris_anime": 167,
         "crocs": 12,
-        "acier": 72,
-        "fer": 120,
-        "peaux": 120,
+        "acier": 99,
+        "fer": 165,
+        "peaux": 165,
         "tendons": 1
       },
       "stock_vente": [
@@ -51413,7 +51570,7 @@
         },
         {
           "item_id": "item:manche",
-          "qty": 101
+          "qty": 57
         },
         {
           "item_id": "item:Arc_court",
@@ -51441,7 +51598,7 @@
         },
         {
           "item_id": "item:Dague_de_scene",
-          "qty": 103
+          "qty": 101
         },
         {
           "item_id": "item:hampe",
@@ -51457,11 +51614,11 @@
         },
         {
           "item_id": "item:Poincon_de_jet",
-          "qty": 103
+          "qty": 101
         },
         {
           "item_id": "item:acier_plisse",
-          "qty": 113
+          "qty": 63
         },
         {
           "item_id": "item:Shuriken",
@@ -51501,7 +51658,7 @@
         },
         {
           "item_id": "item:Falarique",
-          "qty": 129
+          "qty": 115
         },
         {
           "item_id": "item:Lance_rituelle",
@@ -51674,6 +51831,38 @@
         {
           "item_id": "item:Bouclier_cerf_volant",
           "qty": 1
+        },
+        {
+          "item_id": "item:acier",
+          "qty": 27
+        },
+        {
+          "item_id": "item:argent",
+          "qty": 45
+        },
+        {
+          "item_id": "item:bronze",
+          "qty": 45
+        },
+        {
+          "item_id": "item:debris_anime",
+          "qty": 45
+        },
+        {
+          "item_id": "item:fer",
+          "qty": 45
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 45
+        },
+        {
+          "item_id": "item:plomb",
+          "qty": 45
+        },
+        {
+          "item_id": "item:poix",
+          "qty": 45
         }
       ],
       "stock_cible": {
@@ -51686,7 +51875,7 @@
     },
     {
       "_id": "lieu:l_encre_des_arcanes",
-      "_rev": "253-5571667c43ae85c739c5bba7b52cbefe",
+      "_rev": "257-f8a17bcd7d52992e3dc12209047865dd",
       "type": "lieu",
       "label": "L'Encre des Arcanes",
       "image": "scriptorium_europe01.png",
@@ -51700,8 +51889,8 @@
         }
       ],
       "stock_matieres": {
-        "chiffon": 21,
-        "residu_spectral": 20
+        "chiffon": 11,
+        "residu_spectral": 10
       },
       "stock_vente": [
         {
@@ -51710,11 +51899,11 @@
         },
         {
           "item_id": "item:pigment",
-          "qty": 186
+          "qty": 286
         },
         {
           "item_id": "item:Papier",
-          "qty": 115
+          "qty": 190
         },
         {
           "item_id": "item:grimoire_souffle_ancestral",
@@ -51955,6 +52144,14 @@
         {
           "item_id": "item:grimoire_soin_du_compagnon",
           "qty": 1
+        },
+        {
+          "item_id": "item:Chiffon",
+          "qty": 40
+        },
+        {
+          "item_id": "item:residu_spectral",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -51991,7 +52188,7 @@
     },
     {
       "_id": "lieu:l_etabli_du_faubourg",
-      "_rev": "23-c829ce426e007eb589c9bae85d051e6f",
+      "_rev": "27-39855836b0faf4cc62821862096e3fa4",
       "type": "lieu",
       "label": "L'Établi du Faubourg",
       "image": "atelier_d_artisan_europe01.png",
@@ -52005,7 +52202,7 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "ossements": 10
+        "ossements": 50
       },
       "stock_vente": [
         {
@@ -52015,12 +52212,16 @@
         {
           "item_id": "item:bijou",
           "qty": 78
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 40
         }
       ]
     },
     {
       "_id": "lieu:l_ivoire_et_le_buis",
-      "_rev": "45-b5b37a14bb3e1545a4e6648a90e710a6",
+      "_rev": "49-514756648476fcf37ffa24fce3613595",
       "type": "lieu",
       "label": "L'Ivoire et le Buis",
       "image": "tabletterie_europe02.png",
@@ -52034,16 +52235,16 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "peaux": 190,
-        "petit_rondin": 190,
+        "peaux": 230,
+        "petit_rondin": 230,
         "sang": 5,
-        "branche": 43,
-        "ossements": 68
+        "branche": 83,
+        "ossements": 108
       },
       "stock_vente": [
         {
           "item_id": "item:manche",
-          "qty": 41
+          "qty": 27
         },
         {
           "item_id": "item:Couronne_branchages",
@@ -52072,6 +52273,14 @@
         {
           "item_id": "item:Bracelets_os",
           "qty": 1
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 40
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -52082,7 +52291,7 @@
     },
     {
       "_id": "lieu:l_officine_des_simples",
-      "_rev": "91-a672bd5feae1c09abfa1043772bd23fc",
+      "_rev": "92-85cf3d2a510adf8cbe5ab0c3725e7973",
       "type": "lieu",
       "label": "L'Officine des Simples",
       "image": "apothicairerie_europe02.png",
@@ -52096,7 +52305,7 @@
       ],
       "stock_matieres": {
         "item:Prunelles_de_haie": 5,
-        "item:Herbes_medicinales": 3
+        "item:Herbes_medicinales": 1
       },
       "lieu_parent": "lieu:auxerre",
       "stock_vente": [
@@ -52119,6 +52328,10 @@
         {
           "item_id": "item:cataplasme",
           "qty": 1
+        },
+        {
+          "item_id": "item:Tisane_concentration",
+          "qty": 1
         }
       ],
       "stock_cible": {
@@ -52129,7 +52342,7 @@
     },
     {
       "_id": "lieu:l_ossuaire_muet",
-      "_rev": "26-418c4dce9fa4dfb939b7c2ffb08626f5",
+      "_rev": "32-1ce9844570a3646954a909d66d0f37e5",
       "type": "lieu",
       "label": "L'Ossuaire Muet",
       "image": "necromancie_europe02.png",
@@ -52144,15 +52357,14 @@
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
         "item:Sel_noir": 3,
-        "debris_anime": 75,
-        "ossements": 75,
-        "residu_spectral": 75,
-        "crane": 2
+        "debris_anime": 6,
+        "residu_spectral": 24,
+        "ossements": 5
       },
       "stock_vente": [
         {
           "item_id": "item:relique",
-          "qty": 7
+          "qty": 28
         },
         {
           "item_id": "item:Fetiche_envoutement",
@@ -52160,17 +52372,29 @@
         },
         {
           "item_id": "item:focus_magique",
-          "qty": 19
+          "qty": 101
         },
         {
           "item_id": "item:composant_rituel",
-          "qty": 41
+          "qty": 167
+        },
+        {
+          "item_id": "item:debris_anime",
+          "qty": 45
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 45
+        },
+        {
+          "item_id": "item:residu_spectral",
+          "qty": 45
         }
       ]
     },
     {
       "_id": "lieu:la_bricole_et_le_collier",
-      "_rev": "14-c4b73f5c20a079744cf83b7546feff45",
+      "_rev": "18-3f24d1e84622eb14c56568c9835c1c3a",
       "type": "lieu",
       "label": "La Bricole et le Collier",
       "image": "bourrellerie_europe02.png",
@@ -52184,16 +52408,20 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "peaux": 41
+        "peaux": 36
       },
       "stock_vente": [
         {
           "item_id": "item:harnais",
-          "qty": 4
+          "qty": 19
         },
         {
           "item_id": "item:outres",
           "qty": 3
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
         }
       ]
     },
@@ -52232,7 +52460,7 @@
     },
     {
       "_id": "lieu:la_corde_tendue",
-      "_rev": "37-d0e62b904bab667a9c52375e5d81b71d",
+      "_rev": "41-b5b2d0178be8b3116ebaf706f24ed3d4",
       "type": "lieu",
       "label": "La Corde Tendue",
       "image": "archerie_europe01.png",
@@ -52246,14 +52474,12 @@
         }
       ],
       "stock_matieres": {
-        "branche": 85,
-        "petit_rondin": 96,
-        "tendons": 1,
-        "argent": 85,
-        "bronze": 85,
-        "fer": 85,
-        "plomb": 85,
-        "cuir": 5
+        "branche": 107,
+        "petit_rondin": 119,
+        "argent": 124,
+        "bronze": 92,
+        "fer": 93,
+        "plomb": 125
       },
       "stock_vente": [
         {
@@ -52262,11 +52488,11 @@
         },
         {
           "item_id": "item:Javelot_ethiopien",
-          "qty": 1
+          "qty": 2
         },
         {
           "item_id": "item:Darts_de_cavalerie",
-          "qty": 2
+          "qty": 98
         },
         {
           "item_id": "item:Javelot_polynesien",
@@ -52274,11 +52500,43 @@
         },
         {
           "item_id": "item:manche",
-          "qty": 104
+          "qty": 41
         },
         {
           "item_id": "item:Arc_court",
           "qty": 3
+        },
+        {
+          "item_id": "item:argent",
+          "qty": 40
+        },
+        {
+          "item_id": "item:bronze",
+          "qty": 40
+        },
+        {
+          "item_id": "item:fer",
+          "qty": 40
+        },
+        {
+          "item_id": "item:plomb",
+          "qty": 40
+        },
+        {
+          "item_id": "item:Azagay",
+          "qty": 3
+        },
+        {
+          "item_id": "item:Lancelette",
+          "qty": 58
+        },
+        {
+          "item_id": "item:Kestros",
+          "qty": 2
+        },
+        {
+          "item_id": "item:Boomerang_de_chasse",
+          "qty": 1
         }
       ],
       "stock_cible": {
@@ -52354,7 +52612,7 @@
     },
     {
       "_id": "lieu:la_couronne_des_pierres_vives",
-      "_rev": "69-ec1845822b9b728f342d6a583e974e69",
+      "_rev": "73-5bca4e2c5b38bbd3cc0c49b2a262e1b2",
       "type": "lieu",
       "label": "La Couronne des Pierres Vives",
       "image": "bijouterie_europe01.png",
@@ -52367,7 +52625,9 @@
           "portrait": "marchand_thierry_bagou_bijouterie.png"
         }
       ],
-      "stock_matieres": {},
+      "stock_matieres": {
+        "ossements": 40
+      },
       "stock_vente": [
         {
           "item_id": "item:talisman",
@@ -52380,6 +52640,10 @@
         {
           "item_id": "item:collier",
           "qty": 4
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 40
         }
       ]
     },
@@ -52408,24 +52672,24 @@
     },
     {
       "_id": "lieu:la_fleche_d_argent",
-      "_rev": "169-972d89d73d8cd7c4e2e36af60cb06f0c",
+      "_rev": "173-8ba87a9513cec053dc25991f87db5f19",
       "type": "lieu",
       "label": "La Flèche d'Argent",
       "image": "archerie_europe02.png",
       "lieu_parent": "lieu:auxerre",
       "categorie": "fletcher",
       "stock_matieres": {
-        "branche": 249,
-        "petit_rondin": 208,
-        "argent": 202,
-        "plomb": 205,
-        "bronze": 73,
-        "fer": 74
+        "branche": 289,
+        "petit_rondin": 248,
+        "argent": 242,
+        "plomb": 245,
+        "bronze": 113,
+        "fer": 114
       },
       "stock_vente": [
         {
           "item_id": "item:manche",
-          "qty": 102
+          "qty": 35
         },
         {
           "item_id": "item:Arc_court",
@@ -52441,7 +52705,7 @@
         },
         {
           "item_id": "item:cordes_d_arc",
-          "qty": 14
+          "qty": 13
         },
         {
           "item_id": "item:Javelot_ethiopien",
@@ -52453,7 +52717,7 @@
         },
         {
           "item_id": "item:Lancelette",
-          "qty": 256
+          "qty": 139
         },
         {
           "item_id": "item:Darts_de_cavalerie",
@@ -52462,6 +52726,22 @@
         {
           "item_id": "item:Bolas",
           "qty": 1
+        },
+        {
+          "item_id": "item:argent",
+          "qty": 40
+        },
+        {
+          "item_id": "item:bronze",
+          "qty": 40
+        },
+        {
+          "item_id": "item:fer",
+          "qty": 40
+        },
+        {
+          "item_id": "item:plomb",
+          "qty": 40
         }
       ],
       "pnj": [
@@ -52480,7 +52760,7 @@
     },
     {
       "_id": "lieu:la_gibeciere_d_auxerre",
-      "_rev": "24-b19cf028a8f0d7ef62f3825403e85476",
+      "_rev": "28-1f76ded0dc14ea02b7431e563e9b8457",
       "type": "lieu",
       "label": "La Gibecière d'Auxerre",
       "image": "maroquinerie_europe01.png",
@@ -52494,9 +52774,9 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "poix": 79,
-        "item:Chiffon": 35,
-        "peaux": 35
+        "poix": 119,
+        "item:Chiffon": 75,
+        "peaux": 75
       },
       "stock_vente": [
         {
@@ -52566,12 +52846,24 @@
         {
           "item_id": "item:Gants_cuir_epais",
           "qty": 1
+        },
+        {
+          "item_id": "item:Chiffon",
+          "qty": 40
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
+        },
+        {
+          "item_id": "item:poix",
+          "qty": 40
         }
       ]
     },
     {
       "_id": "lieu:la_marmite_du_guet",
-      "_rev": "51-46c770e5f7bdf0e528cbb6601ded5351",
+      "_rev": "52-f24a8ca41ffc21e846372ba3d05eda43",
       "type": "lieu",
       "label": "La Marmite du Guet",
       "image": "epicerie_europe01.png",
@@ -52596,25 +52888,25 @@
         }
       ],
       "lieu_parent": "lieu:auxerre",
-      "stock_matieres": {
-        "viande": 7,
-        "coeur": 4,
-        "foie": 3
-      },
+      "stock_matieres": {},
       "stock_vente": [
         {
           "item_id": "item:repas_cuisine",
-          "qty": 22
+          "qty": 29
         },
         {
           "item_id": "item:plat_raffine",
-          "qty": 1
+          "qty": 4
+        },
+        {
+          "item_id": "item:mets_rare",
+          "qty": 4
         }
       ]
     },
     {
       "_id": "lieu:la_meche_de_sainte_colombe",
-      "_rev": "14-b54596e93bba1bbd211ab2683920548e",
+      "_rev": "18-bdab7252108742814d4360652921a527",
       "type": "lieu",
       "label": "La Mèche de Sainte-Colombe",
       "image": "atelier_de_cirier_europe01.png",
@@ -52628,12 +52920,12 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "branche": 27,
-        "item:Reactif_brut": 40,
-        "petit_rondin": 27,
-        "item:Chiffon": 15,
-        "item:Cire_d_abeille": 15,
-        "poix": 15
+        "branche": 67,
+        "item:Reactif_brut": 80,
+        "petit_rondin": 67,
+        "item:Chiffon": 55,
+        "item:Cire_d_abeille": 55,
+        "poix": 55
       },
       "stock_vente": [
         {
@@ -52663,6 +52955,22 @@
         {
           "item_id": "item:Tablette_de_cire",
           "qty": 26
+        },
+        {
+          "item_id": "item:Chiffon",
+          "qty": 40
+        },
+        {
+          "item_id": "item:Cire_d_abeille",
+          "qty": 40
+        },
+        {
+          "item_id": "item:Reactif_brut",
+          "qty": 40
+        },
+        {
+          "item_id": "item:poix",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -55365,7 +55673,7 @@
     },
     {
       "_id": "lieu:la_navette_d_auxerre",
-      "_rev": "8-e7009308e9233446c9cb93fd4550c242",
+      "_rev": "9-e5cf850ac77956db020858c381af248f",
       "type": "lieu",
       "label": "La Navette d'Auxerre",
       "image": "tissage_europe01.png",
@@ -55394,21 +55702,21 @@
       "stock_vente": [
         {
           "item_id": "item:rembourrage",
-          "qty": 2
+          "qty": 3
         },
         {
           "item_id": "item:feutre",
-          "qty": 7
+          "qty": 8
         },
         {
           "item_id": "item:Mantelet_de_feutre",
-          "qty": 3
+          "qty": 4
         }
       ]
     },
     {
       "_id": "lieu:la_plume_et_l_encoche",
-      "_rev": "24-556610c97dc90636a5e634f9bf6e7a68",
+      "_rev": "28-17f67b6646793ee432b5bf3d49299dc6",
       "type": "lieu",
       "label": "La Plume et l'Encoche",
       "image": "atelier_de_l_empenneur_europe01.png",
@@ -55422,19 +55730,18 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "argent": 90,
-        "bronze": 69,
-        "fer": 69,
-        "plomb": 90,
-        "branche": 20,
-        "petit_rondin": 20,
-        "boyaux": 1,
-        "cuir": 1
+        "argent": 130,
+        "bronze": 74,
+        "fer": 80,
+        "plomb": 130,
+        "branche": 42,
+        "petit_rondin": 42,
+        "boyaux": 1
       },
       "stock_vente": [
         {
           "item_id": "item:manche",
-          "qty": 100
+          "qty": 42
         },
         {
           "item_id": "item:Boomerang_de_chasse",
@@ -55442,11 +55749,31 @@
         },
         {
           "item_id": "item:Darts_de_cavalerie",
-          "qty": 63
+          "qty": 133
         },
         {
           "item_id": "item:Lancelette",
-          "qty": 42
+          "qty": 100
+        },
+        {
+          "item_id": "item:argent",
+          "qty": 40
+        },
+        {
+          "item_id": "item:bronze",
+          "qty": 40
+        },
+        {
+          "item_id": "item:fer",
+          "qty": 40
+        },
+        {
+          "item_id": "item:plomb",
+          "qty": 40
+        },
+        {
+          "item_id": "item:Kestros",
+          "qty": 2
         }
       ],
       "stock_cible": {
@@ -55458,7 +55785,7 @@
     },
     {
       "_id": "lieu:la_semelle_du_pelerin",
-      "_rev": "27-6859caaa221f98efdac3414efe3a8317",
+      "_rev": "31-16b46da94592e10b91177871908c05e5",
       "type": "lieu",
       "label": "La Semelle du Pèlerin",
       "image": "cordonnerie_europe02.png",
@@ -55484,7 +55811,7 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "peaux": 15
+        "peaux": 55
       },
       "stock_vente": [
         {
@@ -55546,6 +55873,10 @@
         {
           "item_id": "item:Bottines_legeres",
           "qty": 2
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
         }
       ]
     },
@@ -55578,7 +55909,7 @@
     },
     {
       "_id": "lieu:la_tannerie_des_remparts",
-      "_rev": "450-1f6127e0fe6ae59d41b0ea4489687998",
+      "_rev": "451-9d76d1cb07efb75027ea38592a034fd9",
       "type": "lieu",
       "label": "La Tannerie des Remparts",
       "image": "tannerie_europe05.png",
@@ -55591,19 +55922,17 @@
           "portrait": "marchand_elfe_m_tannerie.png"
         }
       ],
-      "stock_matieres": {
-        "cuir_brut": 3
-      },
+      "stock_matieres": {},
       "stock_vente": [
         {
           "item_id": "item:cuir",
-          "qty": 67
+          "qty": 70
         }
       ]
     },
     {
       "_id": "lieu:la_vielle_et_le_luth",
-      "_rev": "27-37c12f8c727f43943271e6e3328f540d",
+      "_rev": "31-68dcedc3576a31e98722317e2af86679",
       "type": "lieu",
       "label": "La Vielle et le Luth",
       "image": "lutherie_europe01.png",
@@ -55617,13 +55946,12 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "bronze": 95,
-        "peaux": 105,
-        "poix": 95,
-        "branche": 85,
-        "petit_rondin": 85,
-        "crins": 2,
-        "os": 7
+        "peaux": 74,
+        "poix": 75,
+        "branche": 6,
+        "petit_rondin": 56,
+        "os": 7,
+        "bronze": 5
       },
       "stock_vente": [
         {
@@ -55632,11 +55960,11 @@
         },
         {
           "item_id": "item:Cliquettes",
-          "qty": 42
+          "qty": 170
         },
         {
           "item_id": "item:Table_d_harmonie",
-          "qty": 31
+          "qty": 71
         },
         {
           "item_id": "item:Tambour_de_guerre",
@@ -55648,7 +55976,7 @@
         },
         {
           "item_id": "item:Chalemie",
-          "qty": 10
+          "qty": 69
         },
         {
           "item_id": "item:Rebec",
@@ -55657,6 +55985,26 @@
         {
           "item_id": "item:Cornemuse",
           "qty": 1
+        },
+        {
+          "item_id": "item:bronze",
+          "qty": 40
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
+        },
+        {
+          "item_id": "item:poix",
+          "qty": 40
+        },
+        {
+          "item_id": "item:Tambourin",
+          "qty": 142
+        },
+        {
+          "item_id": "item:Archet",
+          "qty": 2
         }
       ],
       "stock_cible": {
@@ -55729,7 +56077,7 @@
     },
     {
       "_id": "lieu:le_cellier_sale",
-      "_rev": "597-5d7897c9c55088dad463bc403167499f",
+      "_rev": "602-3a156957223e28bfcbfad92ec38e9563",
       "type": "lieu",
       "label": "Le cellier salé",
       "image": "salaison_europe02.png",
@@ -55743,16 +56091,24 @@
         }
       ],
       "stock_matieres": {
-        "viande": 5
+        "item:Sel": 5
       },
       "stock_vente": [
         {
           "item_id": "item:saucisses",
-          "qty": 80
+          "qty": 92
         },
         {
           "item_id": "item:Viande_sechee",
-          "qty": 105
+          "qty": 103
+        },
+        {
+          "item_id": "item:Sel",
+          "qty": 45
+        },
+        {
+          "item_id": "item:saumure",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -55803,7 +56159,7 @@
     },
     {
       "_id": "lieu:le_chaudron_des_brumes",
-      "_rev": "138-89903c01ac0fdc030c3dadf90ae5971e",
+      "_rev": "176-f6dc78803002b152ce5eef1a11b6c7a4",
       "type": "lieu",
       "label": "Le Chaudron des Brumes",
       "image": "cabinet_alchimie_europe01.png",
@@ -55817,44 +56173,43 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "graisse": 12,
+        "graisse": 11,
         "item:Herbes_medicinales": 1,
         "item:Seve_de_chene": 1,
-        "item:Reactif_brut": 384,
+        "item:Reactif_brut": 594,
         "item:Ail_des_moines": 3,
         "item:Capsules_de_pavot": 5,
         "item:Prunelles_de_haie": 3,
         "yeux": 1,
-        "debris_anime": 31,
+        "debris_anime": 113,
         "griffes": 1,
-        "residu_spectral": 53,
-        "item:Herbes_a_bruler": 1,
-        "reactif_brut": 30
+        "residu_spectral": 189,
+        "reactif_brut": 74
       },
       "stock_vente": [
         {
           "item_id": "item:Sel_noir",
-          "qty": 75
+          "qty": 104
         },
         {
           "item_id": "item:Sang_demon_seche",
-          "qty": 87
+          "qty": 106
         },
         {
           "item_id": "item:Poudre_de_miroir",
-          "qty": 73
+          "qty": 95
         },
         {
           "item_id": "item:Cristal_canalisation",
-          "qty": 70
+          "qty": 82
         },
         {
           "item_id": "item:potion",
-          "qty": 8
+          "qty": 12
         },
         {
           "item_id": "item:Soufre",
-          "qty": 80
+          "qty": 90
         },
         {
           "item_id": "item:composant_rituel",
@@ -55862,7 +56217,7 @@
         },
         {
           "item_id": "item:reactif_magique",
-          "qty": 68
+          "qty": 84
         },
         {
           "item_id": "item:reactif_alchimique",
@@ -55870,11 +56225,11 @@
         },
         {
           "item_id": "item:poudre_alchimique",
-          "qty": 91
+          "qty": 116
         },
         {
           "item_id": "item:catalyseur_magique",
-          "qty": 125
+          "qty": 134
         },
         {
           "item_id": "item:elixir_revigorant",
@@ -55885,15 +56240,27 @@
           "qty": 1
         },
         {
-          "item_id": "item:encens",
-          "qty": 4
-        },
-        {
           "item_id": "item:potion_de_vision",
           "qty": 1
         },
         {
           "item_id": "item:Extrait_de_mandragore",
+          "qty": 2
+        },
+        {
+          "item_id": "item:debris_anime",
+          "qty": 100
+        },
+        {
+          "item_id": "item:Reactif_brut",
+          "qty": 100
+        },
+        {
+          "item_id": "item:residu_spectral",
+          "qty": 100
+        },
+        {
+          "item_id": "item:encens",
           "qty": 2
         }
       ],
@@ -55905,7 +56272,7 @@
     },
     {
       "_id": "lieu:le_cierge_d_auxerre",
-      "_rev": "54-2123456302b56ab5348e06ceb189f025",
+      "_rev": "58-cbfb3e60616e4cb88e56989f2aa73515",
       "type": "lieu",
       "label": "Le Cierge d'Auxerre",
       "image": "atelier_de_cirier_europe02.png",
@@ -55919,15 +56286,15 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "branche": 103,
-        "item:Reactif_brut": 240,
-        "petit_rondin": 175,
+        "branche": 82,
+        "item:Reactif_brut": 280,
+        "petit_rondin": 210,
         "item:Herbes_a_bruler": 2,
         "crins": 1,
         "sang": 10,
-        "poix": 49,
-        "item:Chiffon": 35,
-        "item:Cire_d_abeille": 35
+        "poix": 23,
+        "item:Chiffon": 5,
+        "item:Cire_d_abeille": 5
       },
       "stock_vente": [
         {
@@ -55936,19 +56303,19 @@
         },
         {
           "item_id": "item:Tablette_de_cire",
-          "qty": 130
+          "qty": 140
         },
         {
           "item_id": "item:Cire_a_cacheter",
-          "qty": 120
+          "qty": 135
         },
         {
           "item_id": "item:Torche",
-          "qty": 187
+          "qty": 309
         },
         {
           "item_id": "item:Meche",
-          "qty": 130
+          "qty": 45
         },
         {
           "item_id": "item:Huile_entretien",
@@ -55960,7 +56327,23 @@
         },
         {
           "item_id": "item:Cierge",
-          "qty": 48
+          "qty": 88
+        },
+        {
+          "item_id": "item:Chiffon",
+          "qty": 40
+        },
+        {
+          "item_id": "item:Cire_d_abeille",
+          "qty": 40
+        },
+        {
+          "item_id": "item:Reactif_brut",
+          "qty": 40
+        },
+        {
+          "item_id": "item:poix",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -55971,7 +56354,7 @@
     },
     {
       "_id": "lieu:le_clos_des_simples",
-      "_rev": "28-54cf2e6c4704183f6a3c3f25a5a2d99a",
+      "_rev": "32-e822c8d13607f4377d4c98ef40bb6192",
       "type": "lieu",
       "label": "Le Clos des Simples",
       "image": "jardinier_europe01.png",
@@ -55997,7 +56380,7 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "graines": 40
+        "graines": 80
       },
       "stock_vente": [
         {
@@ -56043,6 +56426,10 @@
         {
           "item_id": "item:Feuilles_d_absinthe",
           "qty": 1
+        },
+        {
+          "item_id": "item:graines",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -56053,7 +56440,7 @@
     },
     {
       "_id": "lieu:le_codex_eternel",
-      "_rev": "137-8e8d83816f7a60ed19413632cd73a67a",
+      "_rev": "141-f6127d860a031722dc07bf7522d15729",
       "type": "lieu",
       "label": "Le Codex Éternel",
       "image": "scriptorium_europe03.png",
@@ -56067,21 +56454,21 @@
         }
       ],
       "stock_matieres": {
-        "chiffon": 6,
-        "residu_spectral": 5
+        "chiffon": 46,
+        "residu_spectral": 45
       },
       "stock_vente": [
         {
           "item_id": "item:Papier",
-          "qty": 208
+          "qty": 37
         },
         {
           "item_id": "item:Encre",
-          "qty": 15
+          "qty": 13
         },
         {
           "item_id": "item:pigment",
-          "qty": 42
+          "qty": 19
         },
         {
           "item_id": "item:grimoire_trait_de_flamme",
@@ -56178,6 +56565,14 @@
         {
           "item_id": "item:grimoire_amitie_des_betes",
           "qty": 1
+        },
+        {
+          "item_id": "item:Chiffon",
+          "qty": 40
+        },
+        {
+          "item_id": "item:residu_spectral",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -56191,7 +56586,7 @@
     },
     {
       "_id": "lieu:le_duvet_d_oie",
-      "_rev": "17-553377944084352911105a745b00538c",
+      "_rev": "21-64ef4bd4793ee961f19125d0c2be71c2",
       "type": "lieu",
       "label": "Le Duvet d'Oie",
       "image": "plumasserie_europe01.png",
@@ -56217,7 +56612,7 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "peaux": 45
+        "peaux": 85
       },
       "stock_vente": [
         {
@@ -56243,6 +56638,10 @@
         {
           "item_id": "item:Cape_de_plumes_noires",
           "qty": 1
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
         }
       ]
     },
@@ -56339,7 +56738,7 @@
     },
     {
       "_id": "lieu:le_harnais_de_l_yonne",
-      "_rev": "14-7e512f12df132dd26f9eaf440301c81c",
+      "_rev": "18-ba9a72bf46bc1c8367d190d8ce7ee0f4",
       "type": "lieu",
       "label": "Le Harnais de l'Yonne",
       "image": "bourrellerie_europe01.png",
@@ -56353,22 +56752,26 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "peaux": 50
+        "peaux": 27
       },
       "stock_vente": [
         {
           "item_id": "item:harnais",
-          "qty": 2
+          "qty": 23
         },
         {
           "item_id": "item:outres",
           "qty": 1
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
         }
       ]
     },
     {
       "_id": "lieu:le_jardin_de_saint_germain",
-      "_rev": "55-2df6c25de743fcae9c25117ac78584f8",
+      "_rev": "59-4fd669077666d4c307eee5a2388bcafa",
       "type": "lieu",
       "label": "Le Jardin de Saint-Germain",
       "image": "jardinier_europe02.png",
@@ -56382,7 +56785,7 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "graines": 95
+        "graines": 135
       },
       "stock_vente": [
         {
@@ -56424,6 +56827,10 @@
         {
           "item_id": "item:Feves_de_carreau",
           "qty": 80
+        },
+        {
+          "item_id": "item:graines",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -56434,7 +56841,7 @@
     },
     {
       "_id": "lieu:le_joyau_d_auxerre",
-      "_rev": "22-cdb6452a9b5c68cf0630e4a5f798438e",
+      "_rev": "26-1b00d9ac1b1a6cdae4f66a3ac9e11227",
       "type": "lieu",
       "label": "Le Joyau d'Auxerre",
       "image": "bijouterie_europe03.png",
@@ -56454,17 +56861,21 @@
         },
         {
           "item_id": "item:talisman",
-          "qty": 31
+          "qty": 41
         },
         {
           "item_id": "item:amulette",
           "qty": 7
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 40
         }
       ],
       "stock_matieres": {
         "griffes": 1,
-        "ossements": 6,
-        "crocs": 1
+        "crocs": 1,
+        "ossements": 26
       }
     },
     {
@@ -56496,7 +56907,7 @@
     },
     {
       "_id": "lieu:le_mithril_de_saint_germain",
-      "_rev": "237-85e5a71f74b070a3ac852cc5f912b723",
+      "_rev": "241-231a36bd5d20a50a878fd9519b637edd",
       "type": "lieu",
       "label": "Le Mithril de Saint-Germain",
       "image": "armurerie_europe02.png",
@@ -56510,21 +56921,21 @@
         }
       ],
       "stock_matieres": {
-        "bronze": 762,
-        "fer": 93,
-        "branche": 346,
-        "petit_rondin": 342,
-        "argent": 333,
-        "gros_rondin": 283,
-        "plomb": 355,
-        "rondin": 272,
+        "bronze": 802,
+        "fer": 133,
+        "branche": 386,
+        "petit_rondin": 382,
+        "argent": 373,
+        "gros_rondin": 323,
+        "plomb": 395,
+        "rondin": 312,
         "crocs": 1,
         "plumes": 1,
         "cuir": 7,
-        "acier": 54,
-        "peaux": 90,
-        "poix": 90,
-        "debris_anime": 45
+        "acier": 78,
+        "peaux": 130,
+        "poix": 130,
+        "debris_anime": 85
       },
       "stock_vente": [
         {
@@ -56561,7 +56972,7 @@
         },
         {
           "item_id": "item:manche",
-          "qty": 103
+          "qty": 23
         },
         {
           "item_id": "item:Lame_courte",
@@ -56573,7 +56984,7 @@
         },
         {
           "item_id": "item:hampe",
-          "qty": 101
+          "qty": 35
         },
         {
           "item_id": "item:Ji",
@@ -56601,11 +57012,11 @@
         },
         {
           "item_id": "item:Poincon_de_jet",
-          "qty": 113
+          "qty": 107
         },
         {
           "item_id": "item:acier_plisse",
-          "qty": 101
+          "qty": 35
         },
         {
           "item_id": "item:Masse_cannelee_perse",
@@ -56758,6 +57169,38 @@
         {
           "item_id": "item:Bouclier_normand",
           "qty": 1
+        },
+        {
+          "item_id": "item:acier",
+          "qty": 24
+        },
+        {
+          "item_id": "item:argent",
+          "qty": 40
+        },
+        {
+          "item_id": "item:bronze",
+          "qty": 40
+        },
+        {
+          "item_id": "item:debris_anime",
+          "qty": 40
+        },
+        {
+          "item_id": "item:fer",
+          "qty": 40
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
+        },
+        {
+          "item_id": "item:plomb",
+          "qty": 40
+        },
+        {
+          "item_id": "item:poix",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -56770,7 +57213,7 @@
     },
     {
       "_id": "lieu:le_panache_de_l_yonne",
-      "_rev": "15-981912d7b34412494ff5260db4d80f0d",
+      "_rev": "19-cd451fcc32b78e1bddd94eeff2c22add",
       "type": "lieu",
       "label": "Le Panache de l'Yonne",
       "image": "plumasserie_europe02.png",
@@ -56785,7 +57228,7 @@
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
         "plumes": 2,
-        "peaux": 45
+        "peaux": 85
       },
       "stock_vente": [
         {
@@ -56803,6 +57246,10 @@
         {
           "item_id": "item:oreiller",
           "qty": 1
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
         }
       ]
     },
@@ -56831,7 +57278,7 @@
     },
     {
       "_id": "lieu:le_saloir_du_pont",
-      "_rev": "14-f11dd411e113b35379540a2018206ebb",
+      "_rev": "21-628037c4a5c2b5f9918763cf00c1dfcb",
       "type": "lieu",
       "label": "A la truffe d'Or",
       "image": "salaison_europe01.png",
@@ -56845,7 +57292,7 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "viande": 1
+        "item:Sel": 35
       },
       "stock_vente": [
         {
@@ -56854,7 +57301,15 @@
         },
         {
           "item_id": "item:saucisses",
-          "qty": 2
+          "qty": 5
+        },
+        {
+          "item_id": "item:Sel",
+          "qty": 53
+        },
+        {
+          "item_id": "item:saumure",
+          "qty": 20
         }
       ],
       "stock_cible": {
@@ -56888,7 +57343,7 @@
     },
     {
       "_id": "lieu:le_soulier_de_saint_crepin",
-      "_rev": "20-3ccdcad5610b61ec276cbb8e0e8f1aee",
+      "_rev": "24-cae0fbc1f89777feaa3809f26a0987dd",
       "type": "lieu",
       "label": "Le Soulier de Saint-Crépin",
       "image": "cordonnerie_europe01.png",
@@ -56902,7 +57357,7 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "peaux": 10
+        "peaux": 50
       },
       "stock_vente": [
         {
@@ -56960,12 +57415,16 @@
         {
           "item_id": "item:Bottines_de_scene",
           "qty": 2
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
         }
       ]
     },
     {
       "_id": "lieu:le_suaire_de_cendres",
-      "_rev": "19-7d0e9e2b3d7ddbd18c127ec42ea92ae4",
+      "_rev": "23-9cc573b4851a95d73257f12d70348081",
       "type": "lieu",
       "label": "Le Suaire de Cendres",
       "image": "necromancie_europe01.png",
@@ -56979,9 +57438,9 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "debris_anime": 55,
-        "ossements": 55,
-        "residu_spectral": 55,
+        "debris_anime": 95,
+        "ossements": 95,
+        "residu_spectral": 95,
         "crane": 3
       },
       "stock_vente": [
@@ -57000,6 +57459,18 @@
         {
           "item_id": "item:Fetiche_envoutement",
           "qty": 2
+        },
+        {
+          "item_id": "item:debris_anime",
+          "qty": 40
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 40
+        },
+        {
+          "item_id": "item:residu_spectral",
+          "qty": 40
         }
       ]
     },
@@ -57025,7 +57496,7 @@
     },
     {
       "_id": "lieu:le_trophee_de_chasse",
-      "_rev": "10-4a72d8e7b3814d25ce4f332805d4f9d6",
+      "_rev": "14-4f0045aaa48e2603ebbe3d140c006298",
       "type": "lieu",
       "label": "Le Trophée de Chasse",
       "image": "taxidermie_europe01.png",
@@ -57039,12 +57510,16 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "ossements": 25
+        "ossements": 65
       },
       "stock_vente": [
         {
           "item_id": "item:trophee",
           "qty": 7
+        },
+        {
+          "item_id": "item:ossements",
+          "qty": 40
         }
       ]
     },
@@ -57073,7 +57548,7 @@
     },
     {
       "_id": "lieu:les_cordes_d_autessiodurum",
-      "_rev": "26-c108cfe62b5b700121726a67babfd5de",
+      "_rev": "30-e8ba16ad0a0610883c7d1b6fba2d1f03",
       "type": "lieu",
       "label": "Les Cordes d'Autessiodurum",
       "image": "lutherie_europe02.png",
@@ -57087,17 +57562,17 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "branche": 21,
-        "bronze": 57,
-        "peaux": 77,
-        "poix": 53,
+        "branche": 61,
+        "bronze": 97,
+        "peaux": 117,
+        "poix": 93,
         "cuir": 2,
-        "petit_rondin": 20
+        "petit_rondin": 60
       },
       "stock_vente": [
         {
           "item_id": "item:cordes_d_instrument",
-          "qty": 16
+          "qty": 14
         },
         {
           "item_id": "item:Cornemuse",
@@ -57105,7 +57580,7 @@
         },
         {
           "item_id": "item:Cliquettes",
-          "qty": 115
+          "qty": 103
         },
         {
           "item_id": "item:Harpe",
@@ -57122,6 +57597,18 @@
         {
           "item_id": "item:Chalemie",
           "qty": 28
+        },
+        {
+          "item_id": "item:bronze",
+          "qty": 40
+        },
+        {
+          "item_id": "item:peaux",
+          "qty": 40
+        },
+        {
+          "item_id": "item:poix",
+          "qty": 40
         }
       ],
       "stock_cible": {
@@ -57134,7 +57621,7 @@
     },
     {
       "_id": "lieu:les_etalages_d_autessiodurum",
-      "_rev": "1836-057b3e032671fbbf4efd19075c059c1d",
+      "_rev": "1840-cfb75473c019a6bbd1905f9d897c4c56",
       "type": "lieu",
       "label": "Les Étalages d'Autessiodurum",
       "image": "boucherie_europe02.png",
@@ -57181,23 +57668,23 @@
         },
         {
           "item_id": "item:graisse",
-          "qty": 123
+          "qty": 111
         },
         {
           "item_id": "item:cuir_brut",
-          "qty": 181
+          "qty": 141
         },
         {
           "item_id": "item:crocs",
-          "qty": 102
+          "qty": 101
         },
         {
           "item_id": "item:poils",
-          "qty": 125
+          "qty": 113
         },
         {
           "item_id": "item:tendons",
-          "qty": 235
+          "qty": 167
         },
         {
           "item_id": "item:crins",
@@ -57205,7 +57692,7 @@
         },
         {
           "item_id": "item:yeux",
-          "qty": 123
+          "qty": 111
         },
         {
           "item_id": "item:plumes",
@@ -57215,7 +57702,7 @@
     },
     {
       "_id": "lieu:les_yeux_de_verre",
-      "_rev": "6-08ef605f4e208fc6f79f9aa675eaf46c",
+      "_rev": "11-d2f7a6cd98cff7e6fd7f6edaaf6d86a5",
       "type": "lieu",
       "label": "Les Yeux de Verre",
       "image": "taxidermie_europe02.png",
@@ -57229,9 +57716,18 @@
       ],
       "lieu_parent": "lieu:auxerre",
       "stock_matieres": {
-        "ossements": 20
+        "ossements": 17
       },
-      "stock_vente": []
+      "stock_vente": [
+        {
+          "item_id": "item:ossements",
+          "qty": 45
+        },
+        {
+          "item_id": "item:trophee",
+          "qty": 16
+        }
+      ]
     },
     {
       "_id": "lieu:lutecia",
@@ -65552,8 +66048,46 @@
       }
     },
     {
+      "_id": "message:20c39f08f81b4d06",
+      "_rev": "1-80658f276e571e3662fd4566ca0e4353",
+      "type": "message",
+      "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+      "support": "table",
+      "auteur": "character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092",
+      "auteur_nom": "Greta Hazgard",
+      "auteur_image": "barbare_f_nain05.jpg",
+      "auteur_zoom": 31,
+      "auteur_translate": {
+        "x": -78.3877,
+        "y": 0.0
+      },
+      "texte": "coucou",
+      "cree_at": 1788115802,
+      "table": "table:5bc94abc4a36",
+      "expire_at": 1788202202
+    },
+    {
+      "_id": "message:f35c9b9399154142",
+      "_rev": "1-dc3a3dc0324ec0931f9226d67a2424ba",
+      "type": "message",
+      "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+      "support": "table",
+      "auteur": "character:user:eternel7@gmail.com_6ca82e79-1144-4ebc-9544-aed5895ac6c9",
+      "auteur_nom": "Baal Hazgard",
+      "auteur_image": "elementaliste_m_nain01.jpg",
+      "auteur_zoom": 14,
+      "auteur_translate": {
+        "x": -73.8462,
+        "y": -40.8792
+      },
+      "texte": "moi",
+      "cree_at": 1788112783,
+      "table": "table:5bc94abc4a36",
+      "expire_at": 1788199183
+    },
+    {
       "_id": "monture:mulet_e54074aee56f",
-      "_rev": "1959-db7db8fa7441da54ff2d998a0029a820",
+      "_rev": "2101-160f71abf7b24a5d91ecde3be14ce7a8",
       "type": "monture",
       "espece": "espece:mulet",
       "statut": "acquise",
@@ -65615,7 +66149,7 @@
     },
     {
       "_id": "monture:sanglier_apprivoise_33ecea0b4623",
-      "_rev": "3638-565260b6769764a8de61934f9835b7a5",
+      "_rev": "3664-0a134519f046cf93e426a414282cd1b6",
       "type": "monture",
       "espece": "espece:sanglier_apprivoise",
       "statut": "acquise",
@@ -65643,6 +66177,8 @@
         "pv": 0,
         "pm": 0,
         "pa": 0,
+        "pa_zones": {},
+        "pa_hors_zone": 0,
         "malus_depl": 0,
         "cc_bonus": 0,
         "cd_bonus": 0,
@@ -65650,7 +66186,10 @@
         "degats_dice": "",
         "initiative": 0,
         "buffs": {},
-        "buffs_sources": []
+        "buffs_sources": [],
+        "regen_pv": 0,
+        "regen_pm": 0,
+        "esquive": 0
       },
       "competences_bonus": {},
       "effets_actifs": [],
@@ -85939,6 +86478,16 @@
       "marchandage_bloque_jusqu": 0
     },
     {
+      "_id": "relation:character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092::lieu:la_corde_de_boyau",
+      "_rev": "2-fe82413919c4cb4007fd4b7a6d6581aa",
+      "type": "relation",
+      "character_id": "character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092",
+      "lieu_id": "lieu:la_corde_de_boyau",
+      "value": 52,
+      "prix_negocies": {},
+      "marchandage_bloque_jusqu": 0
+    },
+    {
       "_id": "relation:character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092::lieu:la_couronne_des_pierres_vives",
       "_rev": "1-1a931ae361fca4dbd8b8fbd868d52efd",
       "type": "relation",
@@ -86077,11 +86626,11 @@
     },
     {
       "_id": "relation:character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092::lieu:le_chaudron_des_brumes",
-      "_rev": "1-b15fcef225142afc1ba977460a31ae36",
+      "_rev": "2-8134ca773366b7cbfd915ca43729f693",
       "type": "relation",
       "character_id": "character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092",
       "lieu_id": "lieu:le_chaudron_des_brumes",
-      "value": 51,
+      "value": 52,
       "prix_negocies": {},
       "marchandage_bloque_jusqu": 0
     },
@@ -86137,11 +86686,11 @@
     },
     {
       "_id": "relation:character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092::lieu:le_metier_de_haute_lisse",
-      "_rev": "1-6edfc6a6fcec2298bf77f44e012f45b7",
+      "_rev": "2-172fd9b4a32f2d13ad4f5b99f26c0024",
       "type": "relation",
       "character_id": "character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092",
       "lieu_id": "lieu:le_metier_de_haute_lisse",
-      "value": 51,
+      "value": 52,
       "prix_negocies": {},
       "marchandage_bloque_jusqu": 0
     },
@@ -90291,6 +90840,23 @@
           }
         }
       ]
+    },
+    {
+      "_id": "table:5bc94abc4a36",
+      "_rev": "14-32ab8aea5f2fc663f13c3466ff82ace6",
+      "type": "table",
+      "lieu": "lieu:auberge_de_la_tour_de_l_horloge",
+      "numero": 3,
+      "participants": [
+        "character:user:eternel7@gmail.com_6ca82e79-1144-4ebc-9544-aed5895ac6c9",
+        "character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092"
+      ],
+      "anciens": [],
+      "cree_at": 1788112587,
+      "activite_at": 1788115802,
+      "noms": {
+        "character:user:eternel7@gmail.com_367a21cf-1df1-481e-ab57-9213bfaa4092": "Greta Hazgard"
+      }
     },
     {
       "_id": "zone::coeur_capitale",
