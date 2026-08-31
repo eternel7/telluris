@@ -285,6 +285,15 @@ CATALOGUE = [
 		"description": "⚠️ Exige `node` (cf. ci-dessus). Exécute les fonctions PURES extraites "
 			"du template de combat dans un contexte vm.",
 	},
+	{
+		"id": "test_resize_client",
+		"label": "🧪 Tests d'exécution du redimensionnement de grille (node)",
+		"argv": _node("test_resize_client.js"),
+		"ecrit": "Lecture seule.",
+		"description": "⚠️ Exige `node` (cf. ci-dessus). Exécute les fonctions PURES du "
+			"redimensionnement de carte (éditeur /admin/editor) : rééchantillonnage de `cells`, "
+			"remappage du dict creux `nav`, recalage des zones et des portes.",
+	},
 ]
 
 _PAR_ID = OrderedDict((o["id"], o) for o in CATALOGUE)

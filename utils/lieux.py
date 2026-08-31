@@ -290,6 +290,32 @@ async def get_creation_options(
 		"lieu_ids": sorted(d["_id"] for d in lieux if d.get("_id")),
 	}
 
+def dimensions_coherentes(dimensions, cells) -> dict:
+	"""Valide une `dimensions` soumise AVEC ses `cells`, et la renvoie normalisée.
+
+	⚠️ `dimensions` se lit en COMPTES DE CASES (`{"x":86,"y":48}` ⇒ indices 0..85 / 0..47),
+	convention de `chasse.borner_position` et du client. On exige donc `len(cells) == y` et
+	`len(ligne) == x` pour chaque ligne : `update_cells` est la SEULE écriture du jeu capable de
+	désynchroniser les deux champs (l'éditeur de carte sait redimensionner une grille), et des docs
+	où ils se contredisent existent déjà en base — `utils/chasse.py` balaie la grille entière pour
+	s'en prémunir. On refuse d'en produire un de plus.
+	"""
+	if not isinstance(dimensions, dict):
+		raise HTTPException(status_code=422, detail="`dimensions` doit être un objet {x, y}.")
+	try:
+		x, y = int(dimensions.get("x")), int(dimensions.get("y"))
+	except (TypeError, ValueError):
+		raise HTTPException(status_code=422, detail="`dimensions.x` et `dimensions.y` doivent être des entiers.")
+	if x < 1 or y < 1:
+		raise HTTPException(status_code=422, detail="`dimensions` doit valoir au moins 1×1.")
+	if not isinstance(cells, list) or not cells or not isinstance(cells[0], list):
+		raise HTTPException(status_code=422, detail="`cells` doit être une matrice non vide pour porter des `dimensions`.")
+	if len(cells) != y or any(len(ligne) != x for ligne in cells):
+		raise HTTPException(status_code=422, detail=(
+			f"`dimensions` ({x}×{y}) et `cells` ({len(cells[0])}×{len(cells)}) se contredisent."))
+	return {"x": x, "y": y}
+
+
 @lieu_router.put("/update_cells")
 async def update_cells(
 	response: Response,
@@ -305,15 +331,27 @@ async def update_cells(
 		cells = cells_info["cells"]
 		nav = cells_info["nav"]
 		lieu_id = cells_info["_id"]
+		# Redimensionnement de la grille (éditeur de carte). ⚠️ Contrôlé AVANT la moindre lecture :
+		# une taille incohérente doit être refusée sans avoir touché à la base. Clé ABSENTE ⇒ champ
+		# jamais écrit — c'est le chemin de l'auto-sauvegarde du pinceau, rigoureusement inchangé.
+		dimensions = (dimensions_coherentes(cells_info["dimensions"], cells)
+			if "dimensions" in cells_info else None)
 		lieu_doc = get_doc(lieu_id)
 		if lieu_doc:
 			lieu_doc["cells"] = cells
 			lieu_doc["nav"] = nav
+			if dimensions:
+				lieu_doc["dimensions"] = dimensions
 			# Métadonnées battle map (optionnelles) : tags + catégorie pour la sélection pondérée.
 			if "tags" in cells_info:
 				lieu_doc["tags"] = cells_info["tags"]
 			if "categorie" in cells_info:
 				lieu_doc["categorie"] = cells_info["categorie"]
-			save_doc(lieu_doc)
+			# ⚠️ `save_doc` AVALE le conflit de révision et renvoie None (db/config.py) : sans ce
+			# contrôle, l'endpoint répondait 200 avec le doc d'AVANT écriture. Le client en déduisait
+			# un `_rev` périmé, et surtout le redimensionnement enchaînait zones et portes sur une
+			# grille qui n'avait pas bougé — l'incohérence même que `dimensions_coherentes` refuse.
+			if save_doc(lieu_doc) is None:
+				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — rechargez et réessayez.")
 			return lieu_doc
 	raise HTTPException(status_code=404, detail="Incorrect location grid info")

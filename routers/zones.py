@@ -99,7 +99,11 @@ async def update_lieu_zone_influences(
         else:
             p.pop("profil_weights", None)
     lieu_doc["zone_influences"] = placements
-    save_doc(lieu_doc)
+    # ⚠️ `save_doc` avale le conflit de révision et renvoie None : sans ce contrôle, l'endpoint
+    # répondait 200 sans avoir rien écrit. Le redimensionnement de grille enchaîne sur cet appel
+    # et doit pouvoir dire à l'admin que les zones n'ont PAS suivi la carte.
+    if save_doc(lieu_doc) is None:
+        raise HTTPException(status_code=409, detail="Conflit de sauvegarde — rechargez et réessayez.")
     return {"saved": len(placements), "zone_influences": placements}
 
 

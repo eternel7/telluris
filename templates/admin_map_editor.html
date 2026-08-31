@@ -570,6 +570,17 @@
 	}
 	.lj-area:focus { border-color: var(--accent); }
 	.lj-msg { font-size: 0.62rem; min-height: 1em; margin-top: 3px; }
+	/* Redimensionnement : le bandeau d'attente reprend le pointillé de .lj-repos-hint —
+	   même sens (« quelque chose est armé, il reste un geste à faire »), en couleur d'alerte. */
+	.dim-warn {
+		font-size: 0.66rem; color: var(--danger); line-height: 1.4;
+		border: 1px dashed var(--danger); border-radius: 4px;
+		padding: 5px 7px; margin: 8px 0 6px;
+	}
+	.dim-msg { font-size: 0.66rem; min-height: 1em; margin-top: 6px; line-height: 1.4; }
+	/* ⚠️ Le `display:flex`/`block` d'auteur l'emporterait sur le [hidden] de la feuille du
+	   navigateur (même piège que .aub-ecrivain-ligne dans play_town). */
+	#dim-card[hidden], #dim-attente[hidden] { display: none; }
 	/* Outil de repositionnement : le bouton armé et sa consigne. */
 	.lj-repos-on { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
 	.lj-repos-hint {
@@ -732,7 +743,6 @@
 					<button class="btn danger" id="nav-clear-btn" style="font-size:0.7rem;padding:6px;">Effacer restrictions cellule</button>
 				</div>
 			</div>
-
 			<!-- Panneau Lieux -->
 			<div id="panel-lieux" style="display:none;">
 				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, 🧾 JSON édite ses documents, ➕ crée un sous-lieu sur cette case.</div>
@@ -740,6 +750,36 @@
 				<div id="lieux-conn-list" style="max-height:320px;overflow-y:auto;font-size:.68rem;"></div>
 			</div>
 		</div>
+		<!-- Redimensionnement de la grille. Hors des sous-panneaux de #mode-select : la taille
+		     d'une carte ne dépend d'aucun mode d'édition. Deux temps — ↔ n'écrit RIEN, 💾 est le
+		     seul écrivain. -->
+		<div class="card" id="dim-card" hidden>
+			<div class="card-title">📐 Dimensions</div>
+			<div class="nav-info" style="margin-bottom:8px;">Actuel : <span id="dim-actuel">—</span></div>
+			<div style="display:flex;gap:6px;margin-bottom:8px;">
+				<div style="flex:1;min-width:0;">
+					<label for="dim-x">Largeur (x)</label>
+					<input type="number" id="dim-x" min="1" max="512" step="1">
+				</div>
+				<div style="flex:1;min-width:0;">
+					<label for="dim-y">Hauteur (y)</label>
+					<input type="number" id="dim-y" min="1" max="512" step="1">
+				</div>
+			</div>
+			<div class="nav-info" style="margin-bottom:8px;">
+				Rééchantillonnage au plus proche voisin. <b>Zones et portes suivent.</b>
+				Ne suivent PAS : la position des personnages présents, <code>intro.position_depart</code>,
+				les positions figées dans les quêtes en cours, et un combat ouvert sur cette carte.
+			</div>
+			<button class="btn" id="dim-appliquer-btn">↔ Appliquer (aperçu)</button>
+			<div id="dim-attente" hidden>
+				<div class="dim-warn" id="dim-warn"></div>
+				<button class="btn" id="dim-save-btn" style="margin-bottom:6px;">💾 Enregistrer la nouvelle taille</button>
+				<button class="btn danger" id="dim-annuler-btn">↺ Annuler</button>
+			</div>
+			<div class="dim-msg" id="dim-msg"></div>
+		</div>
+
 	</div>
 
 	<!-- RIGHT: canvas + json -->
@@ -811,6 +851,14 @@ function valColor(v) {
 	return VALUE_COLORS[v] ?? DEFAULT_COLOR;
 }
 
+// [bit, dx, dy] — miroir de VALID_MOVES (utils/lieux.py) et de templates/scripts/nav.js, que
+// cette page ne charge pas. Mêmes valeurs que le `1 << DIRS[dir]` du rendu des bordures nav.
+// Passé en ARGUMENT à _resizeNav pour que celle-ci reste pure (donc testable hors DOM).
+const NAV_DIRS = [
+	[1, 0, -1], [2, 1, -1], [4, 1, 0], [8, 1, 1],
+	[16, 0, 1], [32, -1, 1], [64, -1, 0], [128, -1, -1],
+];
+
 const LEGEND_LABELS = {
 	0: 'Inaccessible',
 	1: 'Libre (défaut)',
@@ -878,6 +926,25 @@ const saveRessourcesBtn	= document.getElementById('save-ressources-btn');
 const panelLieux		= document.getElementById('panel-lieux');
 const lieuxConnListEl	= document.getElementById('lieux-conn-list');
 const lieuAddSectionEl	= document.getElementById('lieu-add-section');
+const dimCard		= document.getElementById('dim-card');
+const dimActuelEl	= document.getElementById('dim-actuel');
+const dimXEl		= document.getElementById('dim-x');
+const dimYEl		= document.getElementById('dim-y');
+const dimAttenteEl	= document.getElementById('dim-attente');
+const dimWarnEl		= document.getElementById('dim-warn');
+const dimMsgEl		= document.getElementById('dim-msg');
+
+// ── REDIMENSIONNEMENT STATE ────────────────────────────────────────────────
+// Posé par appliquerRedimensionnement, effacé par 💾 réussi / ↺ Annuler / changement de lieu.
+//   { ancien: {x, y}, connIds: Set, origines: Map }
+// ⚠️ `ancien` = la taille CHARGÉE depuis la base, jamais celle d'un aperçu intermédiaire, et
+// `origines` garde la `pos` d'ORIGINE de chaque porte : ces deux-là, ensemble, rendent le recalage
+// des portes IDEMPOTENT (cf. `_reappliquerPortes`), ce qu'exigent les rappels de
+// `fetchLieuxConnections` et un second « Appliquer ».
+let redimEnAttente = null;
+// Bornes de saisie. ⚠️ Le plafond n'est pas cosmétique : rien n'empêcherait de taper 10000×10000,
+// soit cent millions de cases à peindre puis un document CouchDB de plusieurs centaines de Mo.
+const DIM_MAX = 512;
 
 // ── ZONES STATE ────────────────────────────────────────────────────────────
 let zonesPlacements = [];    // zone_influences array for current lieu
@@ -999,6 +1066,10 @@ lieuSelect.addEventListener('change', async (e) => {
 		cols = 0;
 		rows = 0;
 		grid = [];
+		// La carte 📐 est masquée le temps du chargement : elle annoncerait sinon la taille du
+		// lieu PRÉCÉDENT, et la branche « image introuvable » de mapImg.onerror ne la rouvrira
+		// jamais — sans grille chargée, il n'y a rien à redimensionner. `_dimMaj()` la rouvre.
+		if (dimCard) dimCard.hidden = true;
 		imgLoaded = false;
 		mapImg.removeAttribute('src');
 		const urlTowns = `{{ url_for('towns', path='') }}${lieuData.image}`;
@@ -1032,6 +1103,10 @@ lieuSelect.addEventListener('change', async (e) => {
 			lieuxJsonOuvert = null;
 			lieuxJsonDest = null;
 			lieuxRepos = null;
+			// Changer de lieu abandonne un aperçu non enregistré : ses cotes ne veulent plus rien dire
+			// ici, et le laisser posé verrouillerait l'auto-sauvegarde du lieu SUIVANT.
+			redimEnAttente = null;
+			_dimMsg('', false);
 			canvas.style.cursor = '';
 			renderLieuJsonOverlay();   // changer de lieu ferme l'éditeur : ses docs ne sont plus les bons
 			lieuxDocCache = {};
@@ -1043,6 +1118,7 @@ lieuSelect.addEventListener('change', async (e) => {
 				renderGrid();
 				setStatus(`Lieu <span>${lieuData.label}</span> (${cols}×${rows}) chargé - ${currentRev}.`);
 				updateLegend();
+				_dimMaj();
 			});
 		};
 
@@ -1107,6 +1183,15 @@ async function sendGrid() {
 }
 
 function scheduleGridSend() {
+	// ⚠️ VERROU du redimensionnement, posé ICI et pas dans paint() : trois appelants passent par
+	// cette fonction (le pinceau, la case « battle map », les tags). `sendGrid` n'envoie PAS de
+	// `dimensions` — un seul de ces gestes après un aperçu écrirait donc des `cells` à la nouvelle
+	// taille sous les anciennes `dimensions`, l'incohérence même que le serveur refuse désormais.
+	if (redimEnAttente) {
+		setStatus(`<span style="color:var(--danger)">Redimensionnement en attente : `
+			+ `enregistrement automatique suspendu jusqu'au 💾 de la carte 📐 Dimensions.</span>`);
+		return;
+	}
 	clearTimeout(debounceTimer);
 	debounceTimer = setTimeout(() => sendGrid(), 800);
 }
@@ -1158,8 +1243,10 @@ function renderGrid() {
 
 	// Draw cell fills
 	if (showTerrain || showRepos) for (let y = 0; y < rows; y++) {
+		const ligneY = grid[y] || [];
 		for (let x = 0; x < cols; x++) {
-			const v = grid[y][x];
+			const v = ligneY[x];
+			if (v === undefined) continue;   // `dimensions` plus grand que `cells` : rien à peindre
 			const col = valColor(v);
 			if (col) {
 				ctx.fillStyle = col;
@@ -1404,6 +1491,7 @@ function paint(e) {
 	const {cx, cy} = c;
 
 	if (editMode === 'terrain') {
+		if (!grid[cy]) return;   // hors de la grille RÉELLE (doc dont `dimensions` ment)
 		if (grid[cy][cx] !== selectedVal) {
 			grid[cy][cx] = selectedVal;
 			renderGrid();
@@ -1540,6 +1628,11 @@ function setMode(mode) {
 }
 modeSelect.addEventListener('change', (e) => setMode(e.target.value));
 
+// ── REDIMENSIONNEMENT : écouteurs ──────────────────────────────────────────
+document.getElementById('dim-appliquer-btn').addEventListener('click', appliquerRedimensionnement);
+document.getElementById('dim-save-btn').addEventListener('click', enregistrerRedimensionnement);
+document.getElementById('dim-annuler-btn').addEventListener('click', annulerRedimensionnement);
+
 // ── LIEUX : connexions du lieu courant + fiche de destination ──────────────
 async function fetchLieuxConnections() {
 	if (!currentLocId) { lieuxConnections = []; renderLieuxConnList(); return; }
@@ -1550,6 +1643,12 @@ async function fetchLieuxConnections() {
 	} catch (err) {
 		lieuxConnections = [];
 	}
+	// ⚠️ Ce fetch REMPLACE les connexions par les docs de la base — donc par leurs positions
+	// d'origine. Tant qu'un redimensionnement est en aperçu, il faut les recaler à nouveau, sinon un
+	// simple passage par le mode Lieux (setMode l'appelle) ramènerait les portes à l'ancienne
+	// échelle et le 💾 les réécrirait inchangées, sans le moindre symptôme. `_reappliquerPortes`
+	// est idempotente : la rejouer ne dérive jamais.
+	if (redimEnAttente) _reappliquerPortes();
 	if (editMode === 'lieux') { renderLieuxConnList(); updateLegend(); if (grid.length) renderGrid(); }
 }
 
@@ -1681,6 +1780,391 @@ function closeLieuJson() {
 	if (grid.length) renderGrid();
 }
 
+// ── REDIMENSIONNEMENT : fonctions PURES ────────────────────────────────────
+// Aucune de ces fonctions ne lit une globale : elles sont extraites par NOM et exécutées dans un
+// contexte `vm` nu par dev/test_resize_client.js (même méthode que dev/test_slots_client.js).
+// Déclarées en `function` et non en `const … = () =>` : l'extracteur cherche « function <nom>( ».
+
+// SOURCE UNIQUE de l'indexation. `Math.floor` et non `| 0` ni `Math.trunc` : c'est le miroir
+// exact de l'`int()` du script Python de référence, dont dépendent CELLS ET NAV — deux formules
+// même équivalentes finiraient par diverger, et terrain et navigation ne viendraient plus de la
+// même case source.
+function _resizeIndex(i, nouveau, ancien) {
+	return Math.floor(i * ancien / nouveau);
+}
+
+// Taille RÉELLE d'une matrice `cells`. ⚠️ SOURCE DE VÉRITÉ du redimensionnement : le champ
+// `dimensions` d'un doc peut le contredire (des docs réels le font, cf. utils/chasse.py), et
+// corriger cet écart est justement une des raisons d'être de l'outil — c'est donc la grille qui
+// fait foi, jamais l'annonce. ⚠️ La largeur est le MAXIMUM des longueurs de ligne et non celle de
+// la première : sur une grille irrégulière, prendre `m[0]` rognerait en silence les lignes plus
+// longues.
+function _grilleTaille(m) {
+	const lignes = Array.isArray(m) ? m : [];
+	let x = 0;
+	for (const l of lignes) if (Array.isArray(l) && l.length > x) x = l.length;
+	return { x, y: lignes.length };
+}
+
+// Rééchantillonnage au plus proche voisin de `cells` (matrice [y][x]).
+// ⚠️ `defaut` bouche les trous d'une grille irrégulière plutôt que d'y semer des `undefined` :
+// une case absente n'a jamais été peinte, donc elle vaut le même « libre » que celui dont on
+// remplit une grille neuve. Sans ce repli, réparer un doc abîmé en produirait un pire.
+function _resizeMatrice(m, nx, ny, defaut) {
+	const { x: ox, y: oy } = _grilleTaille(m);
+	const remplissage = (defaut === undefined) ? 1 : defaut;
+	const out = [];
+	for (let y = 0; y < ny; y++) {
+		const source = m[_resizeIndex(y, ny, oy)] || [];
+		const ligne = [];
+		for (let x = 0; x < nx; x++) {
+			const v = source[_resizeIndex(x, nx, ox)];
+			ligne.push(v === undefined ? remplissage : v);
+		}
+		out.push(ligne);
+	}
+	return out;
+}
+
+// ⚠️ `nav` est un DICT CREUX `{"x,y": masque}` et NON une matrice — le script de référence, lui,
+// supposait une matrice, forme qu'aucun doc du jeu ne porte. On reconstruit donc depuis la grille
+// de DESTINATION (pour chaque nouvelle case, lire la clé source), jamais en remappant les entrées
+// existantes : le remappage direct entrerait en collision à la réduction et laisserait des trous à
+// l'agrandissement, et surtout il désynchroniserait `nav` de `cells`.
+//
+// ⚠️ ET SURTOUT : un masque nav décrit des ARÊTES, pas une case. Dupliqué tel quel à
+// l'agrandissement, un bit DROITE porté par la case k se retrouverait sur 2k ET 2k+1 — celui de
+// 2k fermant alors la frontière 2k→2k+1, c'est-à-dire un mur À L'INTÉRIEUR de ce qui était une
+// seule case ouverte : un ×2 découperait la carte en bandes d'une case de large, et
+// `get_final_mask` l'appliquerait sans broncher. D'où la règle : on ne garde le bit d'une
+// direction que si le voisin dans cette direction vient d'une AUTRE case source (ou sort de la
+// carte — le bord, lui, est un vrai mur), et pour une DIAGONALE il faut que les deux axes
+// traversent à la fois. À taille égale, deux voisins viennent toujours de cases sources
+// distinctes : la règle est alors l'identité.
+function _resizeNav(nav, nx, ny, ox, oy, dirs) {
+	const out = {};
+	if (!nav || ox < 1 || oy < 1) return out;
+	for (let y = 0; y < ny; y++) {
+		const sy = _resizeIndex(y, ny, oy);
+		for (let x = 0; x < nx; x++) {
+			const sx = _resizeIndex(x, nx, ox);
+			const masque = nav[sx + ',' + sy];
+			if (!masque) continue;
+			let garde = 0;
+			for (const [bit, dx, dy] of dirs) {
+				if (!(masque & bit)) continue;
+				const vx = x + dx, vy = y + dy;
+				if (vx < 0 || vx >= nx || vy < 0 || vy >= ny) { garde |= bit; continue; }
+				// ⚠️ ET sur les composantes NON NULLES, jamais OU : pour une diagonale, il faut que le
+				// pas franchisse une frontière sur LES DEUX axes à la fois. Avec un OU, un bit
+				// BAS_DROITE agrandi ×2 se poserait aussi sur les cases qui ne traversent qu'en x ou
+				// qu'en y — c'est-à-dire sur des pas que la source autorisait (ceux qui mènent au
+				// bloc de DROITE ou à celui du BAS, et non au bloc diagonal).
+				const croiseX = (dx === 0) || (_resizeIndex(vx, nx, ox) !== sx);
+				const croiseY = (dy === 0) || (_resizeIndex(vy, ny, oy) !== sy);
+				if (croiseX && croiseY) garde |= bit;
+			}
+			if (garde) out[x + ',' + y] = garde;
+		}
+	}
+	return out;
+}
+
+// Zones d'influence : `x/y/w/h` suivent l'échelle, `rot` ne bouge pas.
+// ⚠️ `bbox` est RETIRÉ et non recalculé : le serveur le refait (routers/zones.py), et le client
+// ne le lit jamais — en garder un périmé serait la seule façon de le voir repartir en base.
+// ⚠️ À 90°/270° les axes de la forme sont ÉCHANGÉS : c'est `h` qui suit fx et `w` qui suit fy.
+// Aux autres angles avec fx ≠ fy, une ellipse tournée devient une ellipse d'un AUTRE angle, que
+// (w, h, rot) ne sait pas exprimer : `_zonesDeformees` les nomme à l'admin plutôt que de mentir.
+function _resizeZones(placements, fx, fy) {
+	return (placements || []).map(p => {
+		const q = Object.assign({}, p);
+		const rot = ((Number(p.rot) || 0) % 360 + 360) % 360;
+		const echange = (rot === 90 || rot === 270);
+		const sw = echange ? fy : fx;
+		const sh = echange ? fx : fy;
+		q.x = Math.round((Number(p.x) || 0) * fx);
+		q.y = Math.round((Number(p.y) || 0) * fy);
+		q.w = Math.max(1, Math.round((Number(p.w) || 1) * sw));
+		q.h = Math.max(1, Math.round((Number(p.h) || 1) * sh));
+		delete q.bbox;
+		return q;
+	});
+}
+
+// Placements dont la forme ne survit PAS exactement à une mise à l'échelle anisotrope.
+function _zonesDeformees(placements, fx, fy) {
+	if (fx === fy) return [];
+	return (placements || []).filter(p => (((Number(p.rot) || 0) % 90) + 90) % 90 !== 0);
+}
+
+// `pos` d'un nœud de connexion : mise à l'échelle puis bornage dans la grille.
+function _resizePos(pos, fx, fy, nx, ny) {
+	const px = Math.round((Number(pos[0]) || 0) * fx);
+	const py = Math.round((Number(pos[1]) || 0) * fy);
+	return [
+		Math.min(nx - 1, Math.max(0, px)),
+		Math.min(ny - 1, Math.max(0, py)),
+	];
+}
+
+// Spirale de Chebyshev (anneaux de PÉRIMÈTRE) vers la première case acceptée — miroir client de
+// `chasse.case_praticable_proche`. ⚠️ Le prédicat est INJECTÉ : le lier à `_caseAccessible`, qui
+// ferme sur les globales `grid`/`cols`/`rows`, rendrait la fonction intestable hors DOM.
+// Aucune case acceptée nulle part ⇒ on rend la case d'origine : perdre la porte serait pire.
+function _caseLibreProche(cx, cy, nx, ny, estAccessible) {
+	if (estAccessible(cx, cy)) return [cx, cy];
+	const rayonMax = Math.max(nx, ny);
+	for (let r = 1; r <= rayonMax; r++) {
+		for (let dy = -r; dy <= r; dy++) {
+			for (let dx = -r; dx <= r; dx++) {
+				if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;   // périmètre seul
+				const x = cx + dx, y = cy + dy;
+				if (x < 0 || x >= nx || y < 0 || y >= ny) continue;
+				if (estAccessible(x, y)) return [x, y];
+			}
+		}
+	}
+	return [cx, cy];
+}
+
+// ── REDIMENSIONNEMENT : orchestration ──────────────────────────────────────
+
+// État de la carte 📐 : taille courante, bornes, bandeau d'attente. Une seule fonction pour la
+// ligne « Actuel », les champs et le bandeau — les séparer laisserait le bandeau d'alerte affiché
+// au-dessus de boutons qui ne concernent plus rien.
+function _dimMaj() {
+	if (!dimCard) return;
+	dimCard.hidden = !currentLocId;
+	if (!currentLocId) return;
+	// ⚠️ La taille annoncée est celle de la GRILLE, pas celle du champ `dimensions` : c'est la
+	// grille qui fait foi, et un doc où les deux divergent doit le DIRE — c'est un des écarts que
+	// l'outil sait réparer, il serait absurde de le masquer derrière la valeur douteuse.
+	const g = _grilleTaille(grid);
+	const desaccord = (g.x !== cols || g.y !== rows);
+	dimActuelEl.textContent = `${g.x} × ${g.y} (cells)`
+		+ (desaccord ? ` — ⚠️ le champ dimensions annonce ${cols}×${rows} ; le 💾 les remettra d'accord` : '');
+	dimActuelEl.style.color = desaccord ? 'var(--danger)' : '';
+	if (document.activeElement !== dimXEl) dimXEl.value = g.x;
+	if (document.activeElement !== dimYEl) dimYEl.value = g.y;
+	dimAttenteEl.hidden = !redimEnAttente;
+	if (redimEnAttente) {
+		const a = redimEnAttente.ancien;
+		dimWarnEl.textContent = `⚠️ ${a.x}×${a.y} → ${cols}×${rows} en attente. `
+			+ `Rien n'est encore écrit, et l'enregistrement automatique du pinceau est SUSPENDU `
+			+ `jusqu'au 💾.`;
+	}
+}
+
+function _dimMsg(texte, erreur) {
+	if (!dimMsgEl) return;
+	dimMsgEl.textContent = texte;
+	dimMsgEl.style.color = erreur ? 'var(--danger)' : 'var(--accent2)';
+}
+
+// ⚠️ SEUL endroit qui écrive la `pos` d'une porte pendant un redimensionnement, et il repart
+// TOUJOURS de `redimEnAttente.ancien` — donc de la taille chargée depuis la base, jamais d'un
+// aperçu intermédiaire. Deux raisons, et la seconde est un piège silencieux :
+//   1. deux « Appliquer » de suite se composent correctement ;
+//   2. `setMode('lieux')` rappelle `fetchLieuxConnections()`, qui REMPLACE `lieuxConnections` par
+//      les docs de la base. Sans un recalage idempotent rejoué après chaque fetch, un simple
+//      passage par le mode Lieux ramènerait les portes à leur position d'origine et le 💾 les
+//      réécrirait inchangées : carte redimensionnée, portes restées à l'ancienne échelle, et
+//      aucun symptôme.
+// Renvoie le compte des portes réellement déplacées.
+function _reappliquerPortes() {
+	if (!redimEnAttente) return 0;
+	const a = redimEnAttente.ancien;
+	const fx = cols / a.x, fy = rows / a.y;
+	let bouges = 0;
+	(lieuxConnections || []).forEach(conn => {
+		(conn.nodes || []).forEach((node, i) => {
+			// ⚠️ Boucle sur TOUS les nœuds et non `find` : rien n'interdit deux nœuds sur ce lieu.
+			// Le nœud de l'AUTRE lieu, lui, n'est jamais touché — sa `pos` est indexée sur SA grille.
+			if (node.lieu !== currentLocId || !Array.isArray(node.pos)) return;
+			// ⚠️ On ne rescale JAMAIS `node.pos` : on rescale l'ORIGINE mémorisée. Sans cela, la
+			// fonction composerait avec elle-même — une seconde passe diviserait encore une position
+			// déjà divisée. La première fois qu'un nœud est vu, sa `pos` EST l'originale : soit on
+			// sort du chargement, soit d'un `fetchLieuxConnections` qui vient de la relire en base.
+			const cle = conn._id + '#' + i;
+			if (!redimEnAttente.origines.has(cle)) redimEnAttente.origines.set(cle, [...node.pos]);
+			const borne = _resizePos(redimEnAttente.origines.get(cle), fx, fy, cols, rows);
+			const cible = _caseLibreProche(borne[0], borne[1], cols, rows, _caseAccessible);
+			if (node.pos[0] !== cible[0] || node.pos[1] !== cible[1]) {
+				node.pos = cible;
+				redimEnAttente.connIds.add(conn._id);
+				bouges++;
+			}
+		});
+	});
+	return bouges;
+}
+
+function appliquerRedimensionnement() {
+	if (!currentLocId || !grid.length) { _dimMsg("Chargez d'abord un lieu.", true); return; }
+	const nx = parseInt(dimXEl.value, 10), ny = parseInt(dimYEl.value, 10);
+	if (!Number.isInteger(nx) || !Number.isInteger(ny) || nx < 1 || ny < 1) {
+		_dimMsg('Largeur et hauteur doivent être des entiers ≥ 1.', true); return;
+	}
+	if (nx > DIM_MAX || ny > DIM_MAX) {
+		_dimMsg(`Plafond à ${DIM_MAX} cases par axe : au-delà, la carte est injouable et le document illisible.`, true);
+		return;
+	}
+	// ⚠️ La TAILLE SOURCE est celle de la GRILLE, jamais le champ `dimensions` — qui peut la
+	// contredire (des docs réels le font, cf. utils/chasse.py), et dont la remise d'accord est
+	// justement une des raisons d'être de cet outil : refuser ici fermerait la porte au cas
+	// d'usage même. Zones et portes suivent le MÊME facteur — elles ont été posées du temps où le
+	// document était cohérent, donc dans l'espace de `cells`.
+	const { x: ox, y: oy } = _grilleTaille(grid);
+	if (ox < 1 || oy < 1) { _dimMsg('Grille vide : rien à rééchantillonner.', true); return; }
+	const desaccord = (ox !== cols || oy !== rows);
+	// ⚠️ Relevé AVANT que `cols`/`rows` ne prennent la nouvelle taille : c'est l'annonce
+	// D'ORIGINE du doc, celle que le message doit citer.
+	const annonce = { x: cols, y: rows };
+	if (nx === ox && ny === oy && !desaccord) { _dimMsg('Taille inchangée.', false); return; }
+	const reparation = desaccord
+		? `\n\nAu passage : le champ dimensions annonce ${cols}×${rows} alors que la grille en fait `
+			+ `${ox}×${oy}. Le 💾 remettra les deux d'accord.`
+		: '';
+	if (!confirm(`Redimensionner la grille de ${ox}×${oy} vers ${nx}×${ny} ?\n\n`
+		+ `Rééchantillonnage au plus proche voisin : à la réduction, des cases de terrain et des `
+		+ `restrictions de navigation DISPARAISSENT définitivement.${reparation}\n\n`
+		+ `Rien ne sera écrit en base avant le 💾.`)) return;
+
+	// ⚠️ Le debounce d'auto-sauvegarde est DÉSARMÉ, pas seulement bloqué pour la suite : un coup de
+	// pinceau donné juste avant ce clic a armé un timer de 800 ms qui, en se déclenchant après,
+	// lirait `grid`/`nav` DÉJÀ redimensionnés et les écrirait sous les ANCIENNES `dimensions`.
+	clearTimeout(debounceTimer);
+	debounceTimer = null;
+
+	const fx = nx / ox, fy = ny / oy;
+	const deformees = _zonesDeformees(zonesPlacements, fx, fy);
+	const irreguliere = grid.some(l => (l || []).length !== ox);
+
+	grid = _resizeMatrice(grid, nx, ny, 1);
+	nav = _resizeNav(nav, nx, ny, ox, oy, NAV_DIRS);
+	cols = nx; rows = ny;
+	zonesPlacements = _resizeZones(zonesPlacements, fx, fy);
+	selectedZoneIdx = -1;
+
+	// ⚠️ `ancien` = la taille de la GRILLE, l'espace où vivent les positions de portes ;
+	// `annonce` = ce que le champ `dimensions` prétendait, gardé pour le seul message.
+	if (!redimEnAttente) redimEnAttente = {
+		ancien: { x: ox, y: oy }, annonce,
+		connIds: new Set(), origines: new Map(),
+	};
+	const portes = _reappliquerPortes();
+
+	// Ces quatre-là désignent des cases qui n'existent peut-être plus.
+	hoverCell = null;
+	navSelectedCell = null;
+	lieuxSelectedCell = null;
+	lieuxRepos = null;
+	canvas.style.cursor = '';
+
+	renderGrid();
+	updateLegend();
+	renderZoneList();
+	renderZoneProfilWeights();
+	renderLieuxConnList();
+	_dimMaj();
+	let avert = deformees.length
+		? ` ⚠️ ${deformees.length} zone(s) tournée(s) déformée(s) par l'échelle inégale : à revoir à la main.`
+		: '';
+	if (desaccord) {
+		const an = redimEnAttente.annonce;
+		avert += ` ✔ Le champ dimensions annonçait ${an.x}×${an.y} : il sera remis d'accord avec la grille.`;
+	}
+	if (irreguliere) avert += ' ⚠️ Grille irrégulière : les cases manquantes ont été comblées en 1 (libre).';
+	_dimMsg(`Aperçu ${ox}×${oy} → ${nx}×${ny} — ${zonesPlacements.length} zone(s) recalée(s), `
+		+ `${portes} porte(s) déplacée(s). Rien n'est enregistré.${avert}`, false);
+	setStatus(`Aperçu de redimensionnement <span>${ox}×${oy} → ${nx}×${ny}</span> — non enregistré.`);
+}
+
+// 💾 — les trois écritures, dans cet ordre. La grille est AUTORITATIVE : si elle échoue, on ne
+// touche ni aux zones ni aux portes, qui seraient sinon recalées sur une carte qui n'a pas bougé.
+// ⚠️ Séquentiel et jamais en `Promise.all` : les deux premiers endpoints font chacun leur propre
+// `get_doc → mutation → save_doc` sur le MÊME doc lieu (exclu du cache de requête), donc
+// paralléliser ferait lire à la seconde écriture un document d'avant la première — écriture perdue
+// en silence. Les connexions sont d'autres documents : elles n'entrent pas dans cette course.
+async function enregistrerRedimensionnement() {
+	if (!redimEnAttente || !currentLocId) return;
+	_dimMsg('Enregistrement…', false);
+	try {
+		const res = await fetch('/api/update_cells', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				_id: currentLocId,
+				_rev: currentRev,
+				cells: grid,
+				nav: nav,
+				dimensions: { x: cols, y: rows },
+				categorie: document.getElementById('bm-categorie').checked ? 'battle_map' : '',
+				tags: document.getElementById('bm-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+			}),
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			_dimMsg(`✗ Grille non enregistrée (${err.detail || res.status}) — zones et portes laissées intactes.`, true);
+			return;
+		}
+		const lieuData = await res.json();
+		currentRev = lieuData._rev;
+
+		const rapport = [`${cols}×${rows}`];
+		if (zonesPlacements.length) {
+			const rz = await fetch(`/api/lieu/${encodeURIComponent(currentLocId)}/zone_influences`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ zone_influences: zonesPlacements }),
+			});
+			if (rz.ok) {
+				const dz = await rz.json();
+				zonesPlacements = dz.zone_influences || zonesPlacements;   // bbox recalculés serveur
+				rapport.push(`${zonesPlacements.length} zone(s)`);
+			} else {
+				rapport.push('⚠️ zones NON enregistrées');
+			}
+		}
+
+		let portesOk = 0;
+		const portesKo = [];
+		for (const conn of (lieuxConnections || [])) {
+			if (!redimEnAttente.connIds.has(conn._id)) continue;
+			const r = await fetch('/admin/doc', {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(_connNu(conn)),   // ⚠️ sans les `details` injectés à la lecture
+			});
+			if (r.ok) portesOk++; else portesKo.push(conn._id);
+		}
+		if (portesOk) rapport.push(`${portesOk} porte(s)`);
+		if (portesKo.length) rapport.push(`⚠️ portes NON enregistrées : ${portesKo.join(', ')}`);
+
+		redimEnAttente = null;      // AVANT le refetch : il n'a plus rien à recaler
+		await fetchLieuxConnections();
+		renderLieuxConnList();
+		renderZoneList();
+		_dimMaj();
+		_dimMsg(`✓ Enregistré — ${rapport.join(', ')}.`, portesKo.length > 0);
+		setStatus(`Lieu <span>${_escHtml(currentLocId)}</span> redimensionné en ${cols}×${rows} - ${currentRev}.`);
+	} catch (err) {
+		_dimMsg(`✗ ${err.message}`, true);
+	}
+}
+
+// ↺ — on ne « défait » rien en mémoire : on relit le lieu. Le handler de #lieu-select réinitialise
+// déjà grid/nav/zones/connexions et redessine ; dupliquer ce chargement le condamnerait à diverger.
+// ⚠️ `redimEnAttente` est effacé AVANT, sinon le `fetchLieuxConnections` du rechargement recalerait
+// les portes qu'on vient justement de renoncer à déplacer.
+function annulerRedimensionnement() {
+	if (!redimEnAttente) return;
+	if (!confirm('Abandonner le redimensionnement et recharger le lieu depuis la base ?')) return;
+	redimEnAttente = null;
+	_dimMsg('Rechargement…', false);
+	lieuSelect.dispatchEvent(new Event('change'));
+}
 // ── LIEUX : repositionnement d'une porte ───────────────────────────────────
 // Déplacer une connexion, c'est réécrire la `pos` du nœud QUI PORTE LE LIEU COURANT — la case
 // que le joueur doit occuper pour voir le lien (get_lieu_links est scopé à sa case). La saisir
@@ -1696,11 +2180,22 @@ function closeLieuJson() {
 // accepté est exactement le défaut que cet outil doit éviter.
 function _caseAccessible(cx, cy) {
 	if (!grid.length || cy < 0 || cy >= rows || cx < 0 || cx >= cols) return false;
-	return Number(grid[cy][cx]) >= 1;
+	// ⚠️ `grid[cy] || []` : sur un doc dont `dimensions` dépasse `cells`, la ligne peut ne pas
+	// exister. `Number(undefined)` vaut NaN, et NaN >= 1 est faux — la case est refusée, ce qui
+	// est le bon défaut pour une case qui n'existe pas.
+	return Number((grid[cy] || [])[cx]) >= 1;
 }
 
 function armerRepositionnement(connId, destId) {
 	if (!grid.length) { _ljMsg('conn', "Ce lieu n'a pas de grille : aucune case où poser la porte.", true); return; }
+	// ⚠️ Refusé pendant un redimensionnement en aperçu : cet outil écrit la porte EN BASE tout de
+	// suite, alors que la grille, elle, n'est pas encore enregistrée. La position posée à la main
+	// serait ensuite reprise pour une origine et re-mise à l'échelle par `_reappliquerPortes`.
+	if (redimEnAttente) {
+		_ljMsg('conn', "Redimensionnement en attente : enregistrez-le (💾) ou annulez-le avant de "
+			+ "déplacer une porte à la main.", true);
+		return;
+	}
 	lieuxRepos = { connId, destId };
 	canvas.style.cursor = 'crosshair';
 	renderLieuJsonOverlay();
@@ -2358,7 +2853,7 @@ function updateLegend() {
 	const usedVals = new Set();
 	for (let y = 0; y < rows; y++)
 		for (let x = 0; x < cols; x++)
-			usedVals.add(grid[y][x]);
+			if (grid[y] && grid[y][x] !== undefined) usedVals.add(grid[y][x]);
 
 	legendEl.innerHTML = '';
 	[...usedVals].sort((a,b) => a-b).forEach(v => {
