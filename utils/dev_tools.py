@@ -294,6 +294,15 @@ CATALOGUE = [
 			"redimensionnement de carte (éditeur /admin/editor) : rééchantillonnage de `cells`, "
 			"remappage du dict creux `nav`, recalage des zones et des portes.",
 	},
+	{
+		"id": "test_deplacement_client",
+		"label": "🧪 Tests d'exécution des règles de marche (node)",
+		"argv": _node("test_deplacement_client.js"),
+		"ecrit": "Lecture seule.",
+		"description": "⚠️ Exige `node` (cf. ci-dessus). Exécute `templates/scripts/deplacement.js`, "
+			"partagé par play_town, le combat et le mode test de l'éditeur. C'est son SEUL test : "
+			"la règle de marche (terrain, `nav`, bornes) n'existe NULLE PART côté serveur.",
+	},
 ]
 
 _PAR_ID = OrderedDict((o["id"], o) for o in CATALOGUE)

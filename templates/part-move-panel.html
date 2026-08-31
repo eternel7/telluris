@@ -1,0 +1,160 @@
+{#
+  Pavé de déplacement — SOURCE UNIQUE du markup ET du CSS des 9 cases directionnelles.
+
+  Le même pavé est rendu à TROIS endroits : la sidebar de `play_town` (on MARCHE dans le
+  lieu), la page de combat (on se déplace d'une case, et les deux coins bas pivotent la
+  caméra) et le mode « test de déplacement » de `/admin/editor` (on éprouve une carte qu'on
+  vient d'éditer). Même géométrie, même sémantique de flèche — mais trois palettes, deux
+  tailles de case et deux formes (avec ou sans boutons de rotation).
+
+  ⚠️ Nommage : `part-nav-*` est déjà pris par la barre de navigation du site. Le pavé, c'est
+  « move » (comme `.move_btn` et `.move-section`, qui existaient avant lui).
+
+  Usage :
+    {% raw %}{% import "part-move-panel.html" as movepanel %}{% endraw %}
+    CSS  : {% raw %}{{ movepanel.move_panel_css('.navigation-panel', '.controls') }}{% endraw %}
+    HTML : {% raw %}{{ movepanel.move_panel('controls', fn='move', centre={...}) }}{% endraw %}
+
+  ⚠️ Une macro est importée SANS CONTEXTE (convention du projet) : aucun `url_for` ici, tout
+  passe par les arguments.
+#}
+
+{#- SVG des huit directions, du sablier et des deux rotations. Écrits UNE fois : ils étaient
+    recopiés à l'identique dans play_town et dans combat, à la virgule près.
+    ⚠️ Tous émis en `| safe` : `Jinja2Templates` monte `select_autoescape`, donc un `.html`
+    ÉCHAPPE par défaut — sans le filtre, chaque bouton afficherait le source de son SVG en
+    toutes lettres. Ces chaînes-ci sont du markup écrit ICI, jamais une saisie de joueur. -#}
+{% set _SVG = {
+	'-1,-1': '<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.71 16.29L9.42 8H15a1 1 0 0 0 0-2H7.05a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1H7a1 1 0 0 0 1-1V9.45l8.26 8.26a1 1 0 0 0 1.42 0 1 1 0 0 0 .03-1.42z"/></svg>',
+	'0,-1':  '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+	'1,-1':  '<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"/></svg>',
+	'-1,0':  '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+	'1,0':   '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+	'-1,1':  '<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z" transform="rotate(180 12 12)"/></svg>',
+	'0,1':   '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+	'1,1':   '<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z" transform="rotate(90 12 12)"/></svg>',
+	'sablier': '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"/><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"/><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"/></svg>',
+	'rot-1': '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.70711 13.2929C10.0976 13.6834 10.0976 14.3166 9.70711 14.7071C9.31658 15.0976 8.68342 15.0976 8.29289 14.7071L3.29289 9.70711C2.90237 9.31658 2.90237 8.68342 3.29289 8.29289L8.29289 3.29289C8.68342 2.90237 9.31658 2.90237 9.70711 3.29289C10.0976 3.68342 10.0976 4.31658 9.70711 4.70711L6.41421 8H16C17.3261 8 18.5979 8.52678 19.5355 9.46447C20.4732 10.4021 21 11.6739 21 13V20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20V13C19 12.2044 18.6839 11.4413 18.1213 10.8787C17.5587 10.3161 16.7957 10 16 10H6.41421L9.70711 13.2929Z" fill="#f1f1f1"/></svg>',
+	'rot1':  '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.2929 13.2929C13.9024 13.6834 13.9024 14.3166 14.2929 14.7071C14.6834 15.0976 15.3166 15.0976 15.7071 14.7071L20.7071 9.70711C21.0976 9.31658 21.0976 8.68342 20.7071 8.29289L15.7071 3.29289C15.3166 2.90237 14.6834 2.90237 14.2929 3.29289C13.9024 3.68342 13.9024 4.31658 14.2929 4.70711L17.5858 8H8C6.67392 8 5.40215 8.52678 4.46447 9.46447C3.52678 10.4021 3 11.6739 3 13V20C3 20.5523 3.44771 21 4 21C4.55229 21 5 20.5523 5 20V13C5 12.2044 5.31607 11.4413 5.87868 10.8787C6.44129 10.3161 7.20435 10 8 10H17.5858L14.2929 13.2929Z" fill="#f1f1f1"/></svg>'
+} %}
+
+{#- Une flèche. ⚠️ Elle porte `data-sdx`/`data-sdy` (schéma de COMBAT) et AUCUN `id` : c'est
+    par ces attributs que `majFleches` (scripts/deplacement.js) la retrouve, sur les trois
+    pages à la fois. ⚠️ Ce sont des directions d'ÉCRAN, pas de monde — le combat les convertit
+    par `screenToWorld` (sa caméra pivote), play_town et l'éditeur ont écran = monde. -#}
+{% macro _fleche(dx, dy, fn) -%}
+<button class="btn move_btn" data-sdx="{{ dx }}" data-sdy="{{ dy }}" onclick="{{ fn }}({{ dx }},{{ dy }})">{{ _SVG[dx ~ ',' ~ dy] | safe }}</button>
+{%- endmacro %}
+
+{#
+  Les 9 cases.
+
+  `centre` = `{classes, id, onclick, title, svg}` ou `None` (l'éditeur n'a aucun tour à
+  passer : une case VIDE garde alors la croix du pavé, un `<span>` occupant sa cellule).
+  ⚠️ `classes` est un ARGUMENT et non `'btn move_btn'` en dur : le bouton central de combat
+  (`#btn-passer`) ne porte PAS `move_btn`, celui de play_town SI. Le lui poser ferait entrer
+  « Passer » dans la boucle `#move-controls .move_btn` de combat, qui l'évaluerait par
+  `dirAvailable(data, NaN, NaN)` — donc grisé à vie.
+
+  `rotation=true` : les coins bas-gauche et bas-droit deviennent les deux boutons de rotation
+  du combat (il n'y a alors ni ↙ ni ↘ — 6 flèches seulement). Ils ne portent pas `data-sdx`,
+  donc `majFleches` ne les touche jamais : le combat garde sa propre ligne de grisage.
+#}
+{% macro move_panel(controls_id, fn='move', centre=None, rotation=false, rot_fn='doRotate', classes='controls') %}
+<div class="{{ classes }}" id="{{ controls_id }}">
+	{{ _fleche(-1, -1, fn) }}
+	{{ _fleche(0, -1, fn) }}
+	{{ _fleche(1, -1, fn) }}
+	{{ _fleche(-1, 0, fn) }}
+	{%- if centre %}
+	<button class="{{ centre.get('classes') or 'btn center' }}"{% if centre.get('id') %} id="{{ centre.get('id') }}"{% endif %}{% if centre.get('onclick') %} onclick="{{ centre.get('onclick') }}"{% endif %}{% if centre.get('title') %} title="{{ centre.get('title') }}"{% endif %}>{{ (centre.get('svg') or _SVG['sablier']) | safe }}</button>
+	{%- else %}
+	<span class="move-spacer" aria-hidden="true"></span>
+	{%- endif %}
+	{{ _fleche(1, 0, fn) }}
+	{%- if rotation %}
+	<button class="btn move_btn rot-btn" data-sens="-1" onclick="{{ rot_fn }}(-1)" title="Pivoter à gauche (1 mvt)">{{ _SVG['rot-1'] | safe }}</button>
+	{{ _fleche(0, 1, fn) }}
+	<button class="btn move_btn rot-btn" data-sens="1" onclick="{{ rot_fn }}(1)" title="Pivoter à droite (1 mvt)">{{ _SVG['rot1'] | safe }}</button>
+	{%- else %}
+	{{ _fleche(-1, 1, fn) }}
+	{{ _fleche(0, 1, fn) }}
+	{{ _fleche(1, 1, fn) }}
+	{%- endif %}
+</div>
+{% endmacro %}
+
+{#
+  Le CSS du pavé. Même parti pris que `slot_bar_css` : les SÉLECTEURS sont des arguments,
+  parce que les trois pages gardent leurs propres noms de classes et que rien ne doit fuir
+  de l'une à l'autre.
+
+  ⚠️ SÉLECTEURS À DEUX CLASSES OBLIGATOIRES (`{% raw %}{{ controls }}{% endraw %} .btn`,
+  spécificité 0,2,0) : un `.btn` NU existe dans play_town (50×50) ET dans l'éditeur, où il
+  vaut `width:100%`. Un sélecteur simple laisserait l'ORDRE DES RÈGLES décider, et le pavé
+  s'étirerait sur toute la largeur du panneau d'administration. `:hover`/`:active` sont émis
+  pour la même raison : le `.btn:active` nu de play_town a la même spécificité qu'un
+  `.btn:active` de macro, et le départage retomberait sur l'ordre de source.
+
+  ⚠️ Couleurs en `var(--panel-bg, var(--panel))` : l'éditeur porte la palette admin
+  (`--panel`/`--border`), pas celle du jeu (`--panel-bg`/`--border-color`). Le repli d'une
+  custom property se déclenche quand elle n'est PAS DÉFINIE — exactement ce cas.
+
+  ⚠️ On n'émet JAMAIS un `.btn-highlight` NU : dans play_town cette classe est GÉNÉRIQUE
+  (`.sub-loc-btn`, `.sh-drop-btn`, les boutons de focalisation, « Terminer »). Seule la
+  variante scopée appartient au pavé ; une règle nue repeindrait la moitié du jeu.
+
+  `svg` = taille du pictogramme (combat : 26) ; absent ⇒ aucune règle émise, le SVG garde son
+  dimensionnement par défaut (le comportement historique de play_town).
+  `flottant=true` ⇒ la section est fixée en bas de l'écran et centrée sous 768 px — c'est la
+  règle de `.move-section` du combat, reprise telle quelle par l'éditeur.
+#}
+{% macro move_panel_css(section, controls, cellule=50, svg=None, flottant=false) %}
+/* ── Pavé de déplacement : {{ section }} / {{ controls }} (part-move-panel.html) ──── */
+{% if flottant %}
+{{ section }} {
+	position: fixed;
+	z-index: 100;
+	bottom: 10px;
+	background: var(--panel-bg, var(--panel));
+	border: 1.5px solid var(--border-color, var(--border));
+	box-shadow: 10px 10px 20px 5px rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+	padding: 10px;
+}
+@media (max-width: 768px) {
+	{{ section }} { left: 50%; transform: translateX(-50%); }
+}
+{% endif %}
+{{ controls }} {
+	display: grid; grid-template-columns: repeat(3, {{ cellule }}px);
+	gap: 8px; justify-content: center; margin: 0 auto;
+}
+{{ controls }} .btn {
+	width: {{ cellule }}px; height: {{ cellule }}px;
+	background: #222; border: 1px solid #444; border-radius: 12px;
+	cursor: pointer; padding: 0;
+	display: flex; align-items: center; justify-content: center;
+	user-select: none; -webkit-tap-highlight-color: transparent;
+}
+{{ controls }} .btn:hover:not(:disabled) { background: #333; }
+{{ controls }} .btn:active:not(:disabled) { background: #444; }
+{{ controls }} .btn.center {
+	background: #333; border-color: #444;
+	font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.04em; color: #cbb98a;
+}
+{% if svg %}
+{{ controls }} .btn > svg { width: {{ svg }}px; height: {{ svg }}px; }
+{% endif %}
+/* « Flèche grisée » = le bouton RESTE, son icône disparaît. Perdre cette règle changerait
+   l'aspect des trois pages d'un coup. */
+{{ controls }} .move_btn:disabled > svg { display: none; }
+{{ controls }} .btn:disabled { cursor: default; }
+{{ controls }} .btn.center:disabled { opacity: 0.35; }
+/* Flèche recommandée par le guidage 🧭 : renforce le liseré, l'icône restant claire.
+   SCOPÉE, jamais nue (cf. l'avertissement ci-dessus). */
+{{ controls }} .btn.btn-highlight { border-width: 2px; }
+/* Cellule vide du centre quand la page n'a pas de tour à passer : elle occupe sa case pour
+   que la croix garde sa forme. */
+{{ controls }} .move-spacer { display: block; }
+{% endmacro %}

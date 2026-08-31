@@ -31,20 +31,36 @@ function neutraliserJinja(src) {
 		.replace(/\{#[\s\S]*?#\}/g, '');       // {# commentaire #}
 }
 
+// ⚠️ `templates/scripts/*.js` en PLUS des templates. Les `<script src="…">` sont sautés
+// ci-dessous (ils n'ont pas de corps dans la page), si bien que `nav.js`, `battle_map.js` et
+// `deplacement.js` — la RÈGLE DE MARCHE du jeu, qui n'existe nulle part côté serveur —
+// n'étaient contrôlés par rien. Rien d'autre à changer : `neutraliserJinja` est inerte sur du
+// JS pur, et `new vm.Script` marche tel quel.
 function fichiersAControler(args) {
 	if (args.length) return args;
-	const dir = path.join(__dirname, '..', 'templates');
-	return fs.readdirSync(dir)
+	const racine = path.join(__dirname, '..', 'templates');
+	const templates = fs.readdirSync(racine)
 		.filter(f => f.endsWith('.html'))
 		.map(f => path.join('templates', f));
+	const scriptsDir = path.join(racine, 'scripts');
+	const scripts = fs.existsSync(scriptsDir)
+		? fs.readdirSync(scriptsDir)
+			.filter(f => f.endsWith('.js'))
+			.map(f => path.join('templates', 'scripts', f))
+		: [];
+	return [...templates, ...scripts];
 }
 
 let erreurs = 0, blocsOk = 0, lignesOk = 0;
 
 for (const fichier of fichiersAControler(process.argv.slice(2))) {
 	const html = fs.readFileSync(fichier, 'utf8');
-	// Les <script src="..."> n'ont pas de corps à contrôler ici (scripts/ est servi tel quel).
-	const blocs = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
+	// Un `.js` de scripts/ n'a pas de balise : le fichier ENTIER est son unique bloc — d'où la
+	// forme `{1: code, index: 0}`, celle que la boucle attend d'une correspondance de regex.
+	// Les <script src="..."> d'un template, eux, n'ont pas de corps à contrôler ici.
+	const blocs = fichier.endsWith('.js')
+		? [{ 1: html, index: 0 }]
+		: [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
 	if (!blocs.length) continue;
 
 	for (const [i, m] of blocs.entries()) {

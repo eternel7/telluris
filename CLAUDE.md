@@ -18,15 +18,17 @@ FastAPI sur `http://localhost:8000`, CouchDB sur `http://localhost:5984`. Le com
 
 ```bash
 python -m pytest tests/          # logique Python pure, aucune dépendance base
-node dev/check_js.js             # syntaxe du JS inline de TOUS les templates/*.html
-node dev/test_slots_client.js    # exécution des fonctions pures de la barre de slots
-node dev/test_resize_client.js   # exécution du redimensionnement de grille (éditeur de carte)
+node dev/check_js.js               # syntaxe du JS inline des templates/*.html ET de templates/scripts/*.js
+node dev/test_slots_client.js      # exécution des fonctions pures de la barre de slots
+node dev/test_resize_client.js     # exécution du redimensionnement de grille (éditeur de carte)
+node dev/test_deplacement_client.js # exécution des règles de MARCHE partagées (scripts/deplacement.js)
 ```
 
-Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les trois harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
+Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les quatre harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
 
-- `check_js.js` neutralise les expressions Jinja avant de passer le code au parseur de Node — ⚠️ en `(0)` et non `0`, sinon `{{ liste | tojson }}.forEach(...)` deviendrait `0.forEach(...)`, faux positif garanti.
+- `check_js.js` neutralise les expressions Jinja avant de passer le code au parseur de Node — ⚠️ en `(0)` et non `0`, sinon `{{ liste | tojson }}.forEach(...)` deviendrait `0.forEach(...)`, faux positif garanti. ⚠️ Il contrôle **aussi `templates/scripts/*.js`** : les `<script src=…>` sont sautés (ils n'ont pas de corps dans la page), si bien que `nav.js`, `battle_map.js` et `deplacement.js` n'étaient couverts par **rien**. Un `.js` n'ayant pas de balise, le fichier entier est traité comme un unique bloc.
 - `test_slots_client.js` extrait les fonctions **pures** du template (par nom, accolades équilibrées) et les exécute dans un contexte `vm` : il ferme la classe de bug « à qui appartient ce que j'affiche et ce que j'écris ? », qu'aucun test pytest ne peut atteindre. **Hors de portée sans jsdom** : rendu DOM, clic long, ordre inversé en mobile — à vérifier en jeu.
+- `test_deplacement_client.js` est le seul des quatre à **charger directement un `.js`** (`scripts/nav.js` puis `scripts/deplacement.js`) : il n'y a rien à extraire d'un template. Il est aussi le **seul test des règles de marche du jeu**, et ce n'est pas une commodité — ⚠️ **il n'existe AUCUNE règle de marche côté serveur** : la branche x/y de `move_character` ne valide que les bornes, ni terrain ni `nav`. `deplacement.js` ne double donc pas le serveur, **il EST la règle**.
 - `test_resize_client.js` suit la même méthode pour le redimensionnement de carte (`admin_map_editor.html`) — ⚠️ mais avec **`vm.runInThisContext`** et non `vm.createContext` : un contexte séparé est un autre *realm*, donc ses tableaux ont un autre prototype `Array` et `deepStrictEqual` les refuse tous. Ces fonctions-ci n'ayant besoin d'aucune globale, les évaluer dans le realm du test suffit — et permet au passage de semer sur `globalThis` les quelques globales dont `_reappliquerPortes` dépend, seul moyen d'éprouver son idempotence.
 
 **Environnement local de l'agent** : Node dans `C:\Program Files\nodejs\`, Python dans `C:\Python314\`. ⚠️ Les deux peuvent être **hors du `PATH`** — appeler Node par son chemin complet (`"/c/Program Files/nodejs/node.exe"` depuis Bash) et pytest par `python -m pytest` (l'exe vit dans `~/AppData/Roaming/Python/Python314/Scripts`, hors `PATH`). Dépendances nécessaires **rien que pour collecter** les tests purs (ils importent `utils/*` → `routers/*`) : `pytest` + la ligne du `docker-compose.yml` **sans `uvicorn` ni `Pillow`** (`fastapi Jinja2 couchdb2 bcrypt pyjwt[crypto] authlib httpx itsdangerous`). CouchDB est injoignable en local : `db/config.py` tolère l'absence de connexion à l'import (`server`/`db` = `None`, les helpers renvoient `None`) pour que les tests purs se collectent. Docker et l'app tournent côté utilisateur.
@@ -94,8 +96,10 @@ models/
   character_document.py  # Pydantic spec d'un doc personnage (référence seule — cf. note ci-dessous)
 templates/
   *.html                 # Jinja2 pages (play_town, combat, fiche perso, admin, éditeurs)
-  part-*.html            # fragments partagés inclus via {% include %}
-  scripts/               # JS files (battle_map.js, nav.js — bitmask nav partagé)
+  part-*.html            # fragments partagés : {% include %} de markup OU macros paramétrées
+                         #   (part-character-card, part-slot-bar-css, part-move-panel)
+  scripts/               # JS partagé, servi par le mount /scripts
+                         #   battle_map.js · nav.js (bitmask nav) · deplacement.js (règles de marche)
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
   export_bestiaire.py    # export d'équilibrage (writer OOXML → utils/xlsx.py)
@@ -112,8 +116,9 @@ dev/
   gen_lutecia.py         # donne ses zones d'influence à la capitale (urbain, Seine, faubourgs, campagne)
   lint_dialogues.py      # CLI de contrôle des dialogues PNJ (→ utils/lint_dialogues.py)
   purge_quetes_acceptees.py # purge ONE-SHOT des docs `quete:*` générés acceptés (poids mort)
-  check_js.js            # contrôle SYNTAXIQUE du JS inline des templates (node, sans dépendance)
+  check_js.js            # contrôle SYNTAXIQUE du JS des templates ET de templates/scripts/ (node)
   test_slots_client.js   # tests d'EXÉCUTION du JS de la barre de slots (node, sans dépendance)
+  test_deplacement_client.js # tests d'EXÉCUTION des règles de marche (scripts/deplacement.js)
 tests/                   # tests purs, un fichier par système
 ```
 
@@ -972,6 +977,74 @@ Le `character` du PNJ est déduit en `pnj:marchand_<categorie>` (avertissement s
 **Repositionner une porte** (`🎯`, dans la rangée de boutons de la CONNEXION) : arme une visée, et le clic suivant sur la carte réécrit la `pos` du nœud **qui porte le lieu courant** — la case que le joueur doit occuper pour voir le lien (`get_lieu_links` est scopé à sa case) — puis **enregistre aussitôt**. La mutation est faite **dans la zone de texte** (elle porte déjà la copie privée de `details`) puis passée à `sauverDocJson`, donc aucun code réseau dupliqué. Le mode Lieux **rallume les fills de terrain** le temps de la visée : sans eux, on ne verrait pas où l'on a le droit de poser. **Case acceptée = `_caseAccessible` = valeur `>= 1`** — SOURCE UNIQUE du voile rouge, du cadre de visée et du refus du clic (un prédicat divergent entre ce qui est peint et ce qui est accepté est le défaut même que l'outil doit éviter) ; un clic refusé **laisse l'outil armé**. ⚠️ **Écart ASSUMÉ avec les flèches de `play_town`** (`loc_access !== 1`) : `>= 1` est le prédicat de `combat._walkable`, donc du guidage 🧭 — une porte posée sur un terrain difficile (2/3/5) est atteignable par le guidage mais pas par les flèches. ⚠️ `lieuxSelectedCell` est déplacé sur la nouvelle case **AVANT** le save (la liste latérale est filtrée par cette case : la connexion en disparaîtrait à la seconde où on la déplace) et l'outil est **désarmé avant l'`await`** (le save re-rend l'overlay, donc le bouton). Désarmement dans **tous** les chemins de sortie — ✕, `setMode` dans les deux sens, changement de lieu, suppression du doc, et `Escape` **avant** la fermeture de l'overlay.
 
 **`GET /api/lieux/creation_options`** (admin) = source unique du formulaire : catégories (distinct `lieu.categorie` ∪ `recette.lieu_categorie`), fichiers de `templates/resources/towns` et `/pnj`, docs `pnj:*`, `lieu_ids`. ⚠️ **`lieu_ids` sert au contrôle de collision d'`_id`** parce que `GET /api/lieu/{id}` ne peut pas le faire : son `raise HTTPException(404)` est *dans* son propre `try/except Exception` et ressort en **500**. ⚠️ Les `find_docs` y sont **projetés** (`fields=[...]`) — sans quoi lister les lieux rapatrierait les `cells` de chaque carte.
+
+### Pavé de déplacement partagé — et le mode « test de déplacement » de l'éditeur
+
+Les 9 cases directionnelles existaient en **deux exemplaires quasi identiques** (`play_town`, `combat`), SVG compris. Elles n'en font plus qu'un : **`templates/part-move-panel.html`** (markup + CSS), **`templates/scripts/deplacement.js`** (les règles et le grisage) et **`GET /api/lieu/{id}/placement_test`** (le placement initial, qui reste du Python).
+
+#### ⚠️ Les TROIS règles de case, et aucune ne vit côté serveur
+
+| régime | prédicat | où |
+|---|---|---|
+| **exploration** (marcher) | destination **`=== 1`** exactement | `caseType1` — miroir de `combat._is_type1` |
+| **combat / guidage 🧭 / placement** | **`>= 1`** et pas une falaise (`3`) | `caseFranchissable` — miroir de `combat._walkable` |
+| **voile du mode Lieux** (éditeur) | **`>= 1`** | `_caseAccessible`, dans le template |
+
+Elles sont **volontairement différentes** : en exploration on ne marche pas sur le terrain difficile (2/3/5), alors que le guidage et le placement le traversent. ⚠️ **IL N'Y A AUCUNE RÈGLE DE MARCHE CÔTÉ SERVEUR** — la branche x/y de `move_character` (`routers/user.py`) ne valide **que les bornes**. `deplacement.js` ne « double » donc pas le serveur, **il est la règle**, et `dev/test_deplacement_client.js` en est le seul test. (Corollaire : une requête forgée traverse les murs — à traiter avec les trous d'auth déjà listés.) ⚠️ Le garde serveur teste en plus `position.x <= dimensions.x`, borne **inclusive** alors que `cells` s'indexe `0..dim-1` (défaut déjà documenté dans `utils/chasse.py`) : le client, lui, suit **`< cols`**, ce que le joueur peut réellement cliquer.
+
+#### Les deux pièces partagées
+
+**`part-move-panel.html`** — deux macros, même parti pris que `slot_bar_css` : les **sélecteurs sont des arguments**, chaque page gardant ses noms de classes.
+- `move_panel(controls_id, fn, centre, rotation, rot_fn, classes)` émet les 9 cases. Chaque flèche porte **`data-sdx`/`data-sdy`** et **aucun `id`** — c'est par là que `majFleches` la retrouve sur les trois pages. ⚠️ Ce sont des directions d'**ÉCRAN** : le combat les convertit par `screenToWorld` (sa caméra pivote), play_town et l'éditeur ont écran = monde. `rotation=true` remplace ↙/↘ par les deux `rot-btn` (6 flèches seulement) ; `centre=None` laisse un `<span class="move-spacer">` qui garde la forme de la croix.
+- ⚠️ **Les classes du centre sont un ARGUMENT** : `#btn-passer` (combat) ne porte **pas** `move_btn`, celui de play_town SI. Le lui poser ferait entrer « Passer » dans la boucle `#move-controls .move_btn` du combat, qui l'évaluerait par `dirAvailable(data, NaN, NaN)` — **grisé à vie**.
+- ⚠️ **Tous les SVG sont émis en `| safe`** : `Jinja2Templates` monte `select_autoescape`, donc un `.html` échappe par défaut et chaque bouton afficherait le **source** de son icône en toutes lettres.
+- `move_panel_css(section, controls, cellule, svg, flottant)` — ⚠️ **sélecteurs à DEUX classes obligatoires** (`{controls} .btn`, spécificité 0,2,0) : un `.btn` nu existe dans play_town (50×50) **et dans l'éditeur, où il vaut `width:100%`** ; un sélecteur simple laisserait l'ordre des règles décider et le pavé s'étirerait sur toute la largeur. `:hover`/`:active` sont émis pour la même raison. ⚠️ Couleurs en **`var(--panel-bg, var(--panel))`** — le repli d'une custom property se déclenche quand elle n'est **pas définie**, ce qui est exactement le cas de la palette admin. ⚠️ **Jamais de `.btn-highlight` NU** : dans play_town cette classe est **générique** (`.sub-loc-btn`, `.sh-drop-btn`, focalisation, « Terminer ») — seule la variante scopée appartient au pavé. ⚠️ La macro emporte **`.move_btn:disabled > svg { display:none }`** : « la flèche grisée », c'est le bouton qui reste et l'icône qui disparaît.
+
+**`scripts/deplacement.js`** — chargé **après `nav.js`**, globales simples (convention `nav.js`, pas de module) : `caseType1`, `caseFranchissable`, `pasAutoriseLocal`, `majFleches`, `verrouillerFleches`.
+- ⚠️ **`pasAutoriseLocal` rend un MOTIF, pas un booléen** (`{ok, raison}` : `"mur nav"`, `"terrain 3"`, `"hors carte"`, `"case absente de cells"`). Toute la valeur du mode test est de répondre à « *pourquoi* cette flèche est-elle grise ? » — un booléen jette la seule information qu'on est venu chercher. play_town ignore `raison`, l'éditeur l'affiche.
+- ⚠️ **`majFleches` prend des PRÉDICATS, pas des données.** C'est le seul joint qui réconcilie deux régimes : play_town lit `ACCESS.access` (matrice 3×3) et `ACCESS.nav` (masque **scalaire**) **résolus par le serveur** (`get_lieu_directions`), tandis que le combat et l'éditeur résolvent `cells`/`nav` **en local**. Lui passer une grille obligerait play_town à en reconstruire une qu'il n'a pas. Ce qui est mutualisé, c'est le **parcours du DOM**.
+- ⚠️ **`exergue` est optionnel** : absent ⇒ `.btn-highlight` n'est pas touchée. Ni le combat ni l'éditeur n'ont de guidage, et l'éditeur ne définit même pas la classe.
+- ⚠️ `nav` est **bidirectionnel** (`getFinalMask` vérifie source **et** cible) : toujours `navAllows`, jamais un `mask & bit` maison.
+
+#### Les trois consommateurs
+
+| | `play_town` | `combat` | `admin_map_editor` |
+|---|---|---|---|
+| section / contrôles | `.navigation-panel` (statique, sidebar) / `#controls` | `.move-section` (flottante) / `#move-controls` | `.dep-section` (flottante) / `#dep-controls` |
+| case | 50 px | 54 px (+ SVG 26 px) | 50 px |
+| centre | ⌛ `waitTurn()` | ⌛ `#btn-passer` | **absent** (aucun tour) |
+| coins bas | ↙ ↘ | 2 `rot-btn` | ↙ ↘ |
+| `autorise` | `!surcharge && access[dy+1][dx+1]===1 && (nav & DIR_BIT)` | `dirAvailable(data, sdx, sdy)` | `pasAutoriseLocal(...)` |
+
+- **play_town** : `updateControls` se réduit à un `majFleches` avec ses deux prédicats, `setMoveButtonsDisabled` à `verrouillerFleches`. **`move()` n'est pas touché** (il enchaîne quatorze fonctions de page). ⚠️ La media query portrait (`order:2`, fond arrondi de `.controls`) reste **dans play_town** — elle décrit sa sidebar, pas le pavé, et vise le sélecteur **nu `.controls`** : c'est donc bien `'.controls'` qu'il faut passer à la macro, sinon ce bloc cesse de s'appliquer en silence. ⚠️ Le `{% if dimensions %}` reste **à l'extérieur** de l'appel de macro : un lieu sans grille afficherait sinon un pavé mort.
+- **combat** : ⚠️ **deux lignes de grisage et non une** — `majFleches` n'interroge que les `[data-sdx]`, que les `rot-btn` ne portent pas ; leur disponibilité (`!canMoveBudget`) reste au combat, comme `#btn-passer` et le court-circuit `revealing` (qui désactive `#move-controls .btn`, les **neuf** boutons). Son `cellWalkable` délègue désormais à `caseFranchissable` et ne garde que ce qui lui est propre (bornes sur `GRID.dims`, vol de l'acteur actif). **Comptabilité honnête** : le combat gagne le markup et le CSS, et à peu près **une ligne** de JS — ne pas forcer le reste dans `majFleches`.
+
+#### Le mode « test de déplacement » (`/admin/editor`)
+
+Marcher dans le lieu qu'on vient d'éditer, **sans lancer de partie**. Entrée par `🚶 Tester le déplacement`, sur la `.status-bar`, offert aux mêmes conditions que la carte 📐.
+
+- ⚠️ **`.status-bar` a dû être restructurée** : `setStatus` y écrit en `innerHTML`, un bouton placé dedans serait effacé au premier message. Elle est devenue un conteneur flex portant `#status` **+** le bouton. ⚠️ `#status` reste un `<div>` : la règle `.status-bar span { color: var(--accent2) }` colorerait sinon tout le texte.
+- ⚠️ **Drapeau `modeDeplacement` séparé, surtout PAS une valeur d'`editMode`.** Une valeur inconnue rendrait bien `paint()` inerte, mais `renderGrid` dérive `showTerrain = (editMode === 'terrain' || editMode === 'nav')` : le terrain, les zones, les bordures `nav` et les points de lieux **disparaîtraient tous** — et l'admin ne verrait plus *pourquoi* une flèche est grise, ce qui est tout l'objet du mode.
+- ⚠️ **On masque en `display:none`, on ne retire ni ne vide rien** (`#left-panel`, `#bm-card`, `#legend-card`) : toutes les références DOM de la page sont des `const` capturées au chargement, et `renderZoneList`, `updateLegend`, `navInfo.textContent`… continuent de travailler sur des nœuds cachés sans broncher.
+- ⚠️ **La peinture est coupée** : le drapeau sort en tête des **cinq** écouteurs du canvas (`mousedown`, `mousemove`, `touchstart`, `touchmove`, et `paint` en ceinture) — pas seulement de `paint`, parce que `mousemove` réécrit `setStatus` à chaque pixel et écraserait les messages du mode.
+- ⚠️ **Le test se ferme sur le GESTE de l'admin** (`modeSelect` change, ✕, Échap) et **jamais dans `setMode`** : `updateBattleMapTabs` y appelle `setMode('terrain')` toute seule au chargement d'une salle de donjon — franchir une porte vers une battle map ferait sinon sauter le mode en pleine marche.
+- ⚠️ **Refusé tant qu'un redimensionnement est en aperçu** : les deux modes se disputent la même grille, et l'un des deux n'est pas enregistré.
+- **Le jeton** (`.dep-token`) est positionné **en POURCENTAGES** (`left: x/cols*100%`) et non en pixels : la carte est fluide (`#map-img{width:100%}`), un placement en pixels demanderait de rejouer le calcul à chaque `resize`. Il résout parce que `renderGrid` pose une `height` explicite sur `.grid-container`. ⚠️ Ne pas le créer avant le premier `renderGrid()` (hauteur 0). ⚠️ `.grid-container` est en `overflow:hidden` : un halo débordant serait rogné. Garde `prefers-reduced-motion` **locale** (cette page n'inclut aucun `part-*-css`).
+- **Bascule exploration / combat** : un seul prédicat change, et c'est précisément l'écart que le mode doit rendre visible. ⚠️ **Le jeton peut naître ENFERMÉ sans que ce soit un bug** — `_reachable_region` inonde avec `_walkable` (`>= 1`, le terrain difficile servant de tissu conjonctif) alors que l'exploration exige `=== 1` : une case type 1 dont toutes les sorties sont en type 2 est *joignable en combat* et *injoignable à pied*. Le placement est correct, les huit flèches sont grises, et sans la bascule et le rappel de la règle appliquée l'admin conclurait que l'outil est cassé.
+- **Les portes** : `lieuxConnections` est déjà chargé à la sélection du lieu (`chargerLieu` appelle `fetchLieuxConnections`, sans dépendre du mode Lieux). ⚠️ `conn.nodes[].pos` est un **tableau `[x, y]`**, pas un `{x, y}`. Arriver sur une case à connexion **l'annonce ET la rend cliquable** → `lieuSelect.value = destId; dispatchEvent('change')`. ⚠️ **Vérifier que l'`<option>` existe** : le sélecteur est bâti par `get_lieux_ids`, qui filtre sur `cells` — une boutique n'y figure pas, et poser une valeur absente la ramène à `""`, ce qui **vide l'éditeur** sans un mot. ⚠️ Après la porte, le jeton se pose à la **`pos` de l'AUTRE nœud** (fidèlement à la branche « lien » de `move_character`), pas sur un nouveau tirage — et comme `chargerLieu` remet à zéro `grid`/`nav`/`cols`/`rows`/`lieuxConnections` **sans rien savoir du mode test**, c'est `depApresChargement()` (appelée depuis son `requestAnimationFrame`) qui repose le jeton, faute de quoi il resterait à des coordonnées périmées sur une carte d'une autre taille.
+- ⚠️ La **surcharge** (garde 409) n'a pas de sens sans personnage : le mode ne la simule pas, et **le dit** dans son aide plutôt que de laisser croire qu'il simule tout.
+- L'overlay est en **z-index 100**, donc **sous** la fiche de lieu (200) et l'éditeur JSON (300) : c'est le bon ordre, ces deux-là doivent le recouvrir. Échap le ferme **en dernier**.
+- ⚠️ **Son markup est AVANT les balises de script, pas avec les autres overlays en fin de fichier.** Ceux-là (`#lj-overlay`, `#lieu-fiche-overlay`, `#lieu-add-overlay`) ne résolvent leurs éléments que **dans des fonctions**, donc au clic ; le mode test capture les siens en **`const` à l'évaluation du script** — placé après, `getElementById` rend `null` et la page **casse net** sur le premier `addEventListener`, éditeur compris. Sa position dans le DOM n'a aucun effet visuel (`position:fixed`). ⚠️ Et **ne jamais écrire une balise de script en toutes lettres dans un commentaire HTML** de ces templates : `check_js.js` la prend pour une vraie ouverture de bloc et va contrôler du texte français.
+
+#### `GET /api/lieu/{id}/placement_test` — le placement RESTE du Python
+
+Il ne réimplémente rien : il rebâtit le `grid` **exactement comme `create_combat_doc`** (`{dims, cells, nav}`) et appelle **`combat._place_actors`**. Une règle de placement recopiée en JS divergerait du jeu au premier réglage.
+
+- ⚠️ **Import PARESSEUX de `utils.combat`, dans le corps** : `utils/combat.py` importe `utils/lieux.py` (`nav_allows`, `MOVE_OFFSETS`) — un import de tête créerait un cycle. Même remède que `chasse.py` et `focalisation.py`.
+- ⚠️ **`?monstres=N` (défaut 0) n'est pas décoratif.** Avec `monstres: []`, `need` vaut 1 et la région d'une case type 1 la contient toujours : la boucle de candidats **casse sur le premier** et ne fait qu'un seul flood fill. Le coût est nul, mais la fidélité aussi — on n'éprouve jamais « la région est-elle assez grande ? », ni l'étape 4 (dispersion des monstres). À N > 0 la vraie règle est exercée ; c'est ce que couvre `tests/test_placement_test.py`. Borné à 20.
+- ⚠️ **Gardes d'entrée** : `grid["dims"]` lèverait un `KeyError` sur un lieu sans `dimensions`, et `cells` peut manquer — **400** explicite dans les deux cas, jamais un 500. ⚠️ Le joueur ne se pose que sur du terrain **exactement 1** (`_is_type1`), pas sur du `>= 1` (réservé aux monstres) : ne pas « simplifier » vers `_walkable`.
+
+Tests : `tests/test_placement_test.py` + `dev/test_deplacement_client.js`.
 
 ### Redimensionner la grille d'un lieu (carte 📐 de `/admin/editor`)
 Rééchantillonnage **au plus proche voisin** de la carte d'un lieu : `dimensions`, `cells`, `nav`, les **zones d'influence** et les **portes** des connexions. Carte `#dim-card` du panneau de gauche, **hors des sous-panneaux de `#mode-select`** (la taille ne dépend d'aucun mode d'édition), masquée tant qu'aucune grille n'est chargée. Fonctions **PURES** dans le template (`_resizeIndex`, `_resizeMatrice`, `_resizeNav`, `_resizeZones`, `_zonesDeformees`, `_resizePos`, `_caseLibreProche`), testées par `dev/test_resize_client.js`.

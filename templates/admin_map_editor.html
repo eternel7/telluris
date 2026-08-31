@@ -1,3 +1,6 @@
+{# Pavé de déplacement : markup ET CSS partagés avec play_town et la page de combat.
+   Ici, le mode « test de déplacement » — même pavé, mêmes règles, aucun personnage. #}
+{% import "part-move-panel.html" as movepanel %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -383,15 +386,21 @@
 		cursor: crosshair;
 	}
 
-	/* Status bar */
+	/* Status bar — conteneur flex : le texte à gauche, le bouton du mode test à droite. */
 	.status-bar {
 		font-size: 0.68rem;
 		color: var(--muted);
 		padding: 4px 0;
 		letter-spacing: 0.05em;
 		min-height: 1.2em;
+		display: flex; align-items: center; gap: 10px;
 	}
+	.status-bar > #status { flex: 1; min-width: 0; }
 	.status-bar span { color: var(--accent2); }
+	/* ⚠️ Le `display:flex` d'auteur ci-dessus l'emporterait sur le [hidden] du navigateur —
+	   `#status` n'étant pas flex, seul le bouton a besoin de la règle. */
+	#dep-open-btn { flex: 0 0 auto; width: auto; white-space: nowrap; }
+	#dep-open-btn[hidden] { display: none; }
 
 	/* Scrollbar */
 	::-webkit-scrollbar { width: 5px; }
@@ -587,6 +596,67 @@
 		font-size: 0.62rem; color: var(--accent2); line-height: 1.4;
 		border: 1px dashed var(--accent2); border-radius: 4px; padding: 4px 6px; margin-bottom: 4px;
 	}
+/* ── Mode « test de déplacement » ─────────────────────────────────────────────────────
+   On MARCHE dans le lieu qu'on vient d'éditer, avec les règles réelles du jeu. Le pavé et
+   son cadre flottant viennent de part-move-panel.html — mêmes flèches que play_town et le
+   combat, à la palette près (la macro replie `--panel-bg` sur `--panel`, cf. son en-tête).
+
+   ⚠️ On MASQUE en display:none, on ne retire ni ne vide RIEN : toutes les références DOM de
+   cette page sont des `const` capturées au chargement, et `renderZoneList`, `updateLegend`,
+   `navInfo.textContent`… continuent de travailler sur des nœuds cachés sans broncher. */
+body.mode-deplacement #left-panel,
+body.mode-deplacement #bm-card,
+body.mode-deplacement #legend-card { display: none; }
+body.mode-deplacement .main { grid-template-columns: 1fr; }
+body.mode-deplacement #grid-canvas { cursor: default; }
+
+{{ movepanel.move_panel_css('.dep-section', '.dep-controls', flottant=true) }}
+/* ⚠️ z-index 100 (posé par la macro) : l'overlay reste SOUS la fiche de lieu (200) et sous
+   l'éditeur JSON (300) — c'est le bon ordre, ces deux-là doivent le recouvrir. */
+.dep-section { right: 10px; width: 260px; max-width: calc(100vw - 20px); }
+/* ⚠️ Le `.btn:hover` de l'éditeur pose un halo doré (`box-shadow`) que la macro n'écrase pas :
+   elle ne redéfinit que le fond. Sur une flèche, ce halo n'a aucun sens — on l'éteint ici. */
+.dep-controls .btn:hover { box-shadow: none; }
+.dep-section[hidden] { display: none; }
+.dep-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.dep-title { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--accent); letter-spacing: 0.08em; }
+.dep-close { background: none; border: none; color: var(--muted); font-size: 1rem; cursor: pointer; line-height: 1; padding: 0 2px; }
+.dep-close:hover { color: var(--danger); }
+.dep-info { font-size: 0.64rem; color: var(--muted); line-height: 1.45; margin-top: 8px; }
+.dep-info b { color: var(--accent2); }
+.dep-regle { font-size: 0.62rem; color: var(--accent2); border: 1px dashed var(--accent2);
+	border-radius: 4px; padding: 4px 6px; margin-bottom: 8px; line-height: 1.4; }
+.dep-portes { font-size: 0.64rem; margin-top: 8px; }
+.dep-porte { display: block; width: 100%; text-align: left; margin-top: 4px; padding: 5px 6px;
+	border: 1px solid var(--accent); border-radius: 4px; background: rgba(200,168,75,0.08);
+	color: var(--accent); font-size: 0.64rem; cursor: pointer; }
+.dep-porte:hover:not(:disabled) { background: rgba(200,168,75,0.2); }
+.dep-porte:disabled { border-color: var(--border); color: var(--muted); background: transparent; cursor: default; }
+.dep-row { display: flex; gap: 6px; margin-top: 8px; }
+.dep-row .btn { width: auto; flex: 1; padding: 6px; font-size: 0.66rem; }
+.dep-bascule { display: flex; align-items: center; gap: 6px; font-size: 0.64rem; color: var(--muted); margin-top: 8px; }
+
+/* Le jeton. ⚠️ Positionné en POURCENTAGES et non en pixels : la carte est fluide
+   (`#map-img{width:100%}`), un placement en pixels demanderait de rejouer le calcul à chaque
+   `resize` — le pourcentage n'a rien à rejouer. Il résout bien parce que `renderGrid` pose
+   une `height` explicite sur `.grid-container`. ⚠️ `.grid-container` est en `overflow:hidden`
+   (un halo débordant serait rogné au bord de la carte) : on garde le halo au ras du jeton. */
+.dep-token {
+	position: absolute; z-index: 10; pointer-events: none;
+	box-sizing: border-box;
+	border: 3px solid red; border-radius: 30%;
+	display: flex; align-items: center; justify-content: center;
+	transition: left 0.16s ease, top 0.16s ease;
+}
+.dep-token::after {
+	content: ''; width: 45%; height: 45%;
+	background: #ff4757; border-radius: 50%; border: 2px solid red;
+	box-shadow: 0 0 8px #ff4757;
+}
+/* ⚠️ Garde LOCALE : cette page n'inclut aucun part-*-css.html. */
+@media (prefers-reduced-motion: reduce) {
+	.dep-token { transition: none; }
+}
 </style>
 </head>
 <body>
@@ -600,7 +670,7 @@
 <div class="main">
 
 	<!-- LEFT PANEL -->
-	<div class="panel">
+	<div class="panel" id="left-panel">
 
 		<!-- Image & dimensions -->
 		<div class="card">
@@ -795,10 +865,19 @@
 			<canvas id="grid-canvas"></canvas>
 		</div>
 
-		<div class="status-bar" id="status"></div>
+		<!-- ⚠️ `.status-bar` est un CONTENEUR, `#status` la zone de texte. `setStatus` y écrit
+		     en innerHTML : un bouton placé DANS `#status` serait effacé au premier message.
+		     ⚠️ Et `#status` reste un <div>, jamais un <span> — la règle `.status-bar span`
+		     colorerait sinon tout le texte de la barre. -->
+		<div class="status-bar">
+			<div id="status"></div>
+			<button class="btn btn-inline" id="dep-open-btn" hidden
+				title="Marcher dans ce lieu avec les règles réelles du jeu">🚶 Tester le déplacement</button>
+		</div>
 
-		<!-- Battle map (sous l'image) -->
-		<div class="card">
+		<!-- Battle map (sous l'image). ⚠️ `id` ajouté pour que le mode test puisse la masquer :
+		     cette carte n'en avait pas. -->
+		<div class="card" id="bm-card">
 			<div class="card-title">⚔️ Battle map</div>
 			<input type="text" id="bm-tags" placeholder="tags séparés par des virgules"
 				style="width:100%;box-sizing:border-box;font-size:0.8rem;padding:6px;">
@@ -808,8 +887,8 @@
 			</label>
 		</div>
 
-		<!-- Légende couleurs -->
-		<div class="card">
+		<!-- Légende couleurs. ⚠️ `id` ajouté pour la même raison que #bm-card. -->
+		<div class="card" id="legend-card">
 			<div class="card-title" id="legend-title">🎨 Légende</div>
 			<div class="legend" id="legend"></div>
 		</div>
@@ -818,6 +897,43 @@
 	</div>
 </div>
 
+<!-- ── Mode « test de déplacement » ────────────────────────────────────────────────────
+     Panneau flottant en bas à droite : le pavé (part-move-panel.html, partagé avec play_town
+     et le combat), la règle appliquée, le motif de chaque flèche refusée, et les portes de la
+     case courante. Aucun réseau, aucun document muté — sauf le tirage du placement, qui reste
+     du PYTHON (`GET /api/lieu/{id}/placement_test`).
+
+     ⚠️ IL EST ICI, AVANT LES BALISES DE SCRIPT, ET PAS AVEC LES AUTRES OVERLAYS EN FIN DE
+     FICHIER. Ceux-là (#lj-overlay, #lieu-fiche-overlay, #lieu-add-overlay) ne résolvent leurs
+     éléments que DANS des fonctions, donc au clic ; le mode test, lui, capture les siens en
+     `const` à l'évaluation du script — placé après, `getElementById` rend `null` et la page
+     casse net sur le premier `addEventListener`. Sa position dans le DOM n'a aucun effet
+     visuel : il est en `position:fixed`.
+     (Et pas de balise de script écrite en toutes lettres dans ce commentaire : `check_js.js`
+     la prendrait pour une vraie ouverture de bloc et contrôlerait du texte français.) -->
+<div class="dep-section" id="dep-section" hidden>
+	<div class="dep-head">
+		<span class="dep-title">🚶 Test de déplacement</span>
+		<button class="dep-close" id="dep-close-btn" title="Quitter le mode test">✕</button>
+	</div>
+	<div class="dep-regle" id="dep-regle"></div>
+	{{ movepanel.move_panel('dep-controls', fn='depPas', classes='dep-controls') }}
+	<label class="dep-bascule">
+		<input type="checkbox" id="dep-regle-combat"> Règles de COMBAT (terrain difficile franchissable)
+	</label>
+	<div class="dep-info" id="dep-info"></div>
+	<div class="dep-portes" id="dep-portes"></div>
+	<div class="dep-row">
+		<button class="btn" id="dep-replacer-btn" title="Re-tirer un placement de départ">↻ Replacer</button>
+	</div>
+</div>
+
+<!-- ⚠️ nav.js D'ABORD : `pasAutoriseLocal` y prend `navAllows`, dont la vérification est
+     BIDIRECTIONNELLE (source ET cible). Cette page recopiait jusqu'ici la table `VALID_MOVES`
+     sous le nom `NAV_DIRS` pour le seul redimensionnement ; les règles de MARCHE, elles, ne
+     sont écrites qu'une fois — dans deplacement.js, partagé avec play_town et le combat. -->
+<script src="{{ url_for('scripts', path='nav.js') }}"></script>
+<script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────────
 let grid = [];					// 2D array [y][x]
@@ -851,9 +967,11 @@ function valColor(v) {
 	return VALUE_COLORS[v] ?? DEFAULT_COLOR;
 }
 
-// [bit, dx, dy] — miroir de VALID_MOVES (utils/lieux.py) et de templates/scripts/nav.js, que
-// cette page ne charge pas. Mêmes valeurs que le `1 << DIRS[dir]` du rendu des bordures nav.
-// Passé en ARGUMENT à _resizeNav pour que celle-ci reste pure (donc testable hors DOM).
+// [bit, dx, dy] — miroir de VALID_MOVES (utils/lieux.py et templates/scripts/nav.js).
+// ⚠️ RECOPIÉ À DESSEIN alors que la page charge désormais nav.js : `_resizeNav` le reçoit en
+// ARGUMENT pour rester PURE, donc exécutable hors DOM par `dev/test_resize_client.js`, qui
+// n'évalue que les fonctions extraites du template. Les RÈGLES de marche, elles, ne sont pas
+// recopiées : elles viennent de deplacement.js.
 const NAV_DIRS = [
 	[1, 0, -1], [2, 1, -1], [4, 1, 0], [8, 1, 1],
 	[16, 0, 1], [32, -1, 1], [64, -1, 0], [128, -1, -1],
@@ -945,6 +1063,18 @@ let redimEnAttente = null;
 // Bornes de saisie. ⚠️ Le plafond n'est pas cosmétique : rien n'empêcherait de taper 10000×10000,
 // soit cent millions de cases à peindre puis un document CouchDB de plusieurs centaines de Mo.
 const DIM_MAX = 512;
+
+// ── MODE « TEST DE DÉPLACEMENT » : état ────────────────────────────────────
+// ⚠️ Drapeau SÉPARÉ et surtout PAS une valeur de `editMode`. Une valeur inconnue rendrait
+// bien `paint()` inerte (aucune de ses quatre branches ne matcherait), mais `renderGrid`
+// dérive `showTerrain = (editMode === 'terrain' || editMode === 'nav')` : le terrain, les
+// zones, les bordures `nav` et les points de lieux disparaîtraient TOUS — et l'admin ne
+// verrait plus POURQUOI une flèche est grise, ce qui est tout l'objet du mode.
+let modeDeplacement = false;
+let depPos = null;            // {x, y} du jeton, en cases
+let depToken = null;          // l'élément .dep-token (créé au premier placement)
+let depReglesCombat = false;  // bascule exploration (=== 1) / combat (>= 1 && != 3)
+let depArriveeAttendue = null; // porte franchie : ou reposer le jeton apres chargerLieu
 
 // ── ZONES STATE ────────────────────────────────────────────────────────────
 let zonesPlacements = [];    // zone_influences array for current lieu
@@ -1119,6 +1249,10 @@ lieuSelect.addEventListener('change', async (e) => {
 				setStatus(`Lieu <span>${lieuData.label}</span> (${cols}×${rows}) chargé - ${currentRev}.`);
 				updateLegend();
 				_dimMaj();
+				// ⚠️ `chargerLieu` remet à zéro grid/nav/cols/rows/lieuxConnections sans rien savoir
+				// du mode test : sans ce rappel, le jeton resterait à des coordonnées périmées sur
+				// une carte d'une autre taille. Il se pose à l'arrivée de la porte, sinon re-tire.
+				depApresChargement();
 			});
 		};
 
@@ -1328,8 +1462,11 @@ function renderGrid() {
 	}
 	// Draw nav exceptions
 	if (showTerrain && Object.keys(nav).length > 0) {
-		const DIRS = { N:0, NE:1, E:2, SE:3, S:4, SW:5, W:6, NW:7 };
-		const blocked = (mask, dir) => !!(mask & (1 << DIRS[dir]));
+		// ⚠️ `DIR_INDEX` et non `DIRS` : depuis que cette page charge nav.js, un `DIRS` global
+		// existe — et il porte des BITS (HAUT = 1), là où celui-ci porte des INDICES de
+		// décalage (N = 0). Le shadowing marchait, mais la confusion aurait fini par coûter.
+		const DIR_INDEX = { N:0, NE:1, E:2, SE:3, S:4, SW:5, W:6, NW:7 };
+		const blocked = (mask, dir) => !!(mask & (1 << DIR_INDEX[dir]));
 
 		for (const [key, mask] of Object.entries(nav)) {
 			if (!mask) continue;
@@ -1486,6 +1623,7 @@ function cellAt(e) {
 }
 
 function paint(e) {
+	if (modeDeplacement) return;   // ceinture : le mode test ne peint jamais
 	const c = cellAt(e);
 	if (!c) return;
 	const {cx, cy} = c;
@@ -1550,12 +1688,16 @@ function paint(e) {
 	}
 }
 
+// ⚠️ Le drapeau `modeDeplacement` sort en tête des CINQ écouteurs, pas seulement de `paint` :
+// un clic écrirait du terrain sous le jeton (avec l'auto-sauvegarde derrière), et `mousemove`
+// réécrit `setStatus` à chaque pixel — il écraserait les messages du mode test.
 canvas.addEventListener('mousedown', e => {
-	if (!grid.length) return;
+	if (modeDeplacement || !grid.length) return;
 	isPainting = true;
 	paint(e);
 });
 canvas.addEventListener('mousemove', e => {
+	if (modeDeplacement) return;
 	const c = cellAt(e);
 	const prev = hoverCell;
 	hoverCell = c;
@@ -1564,12 +1706,17 @@ canvas.addEventListener('mousemove', e => {
 		renderGrid();
 	}
 	if (!isPainting) {
+		// ⚠️ `grid[c.cy]` peut ne pas exister : `cellAt` borne sur `cols`/`rows`, c'est-à-dire sur
+		// `dimensions` — or sur un doc où `dimensions` dépasse `cells`, survoler la carte levait.
+		// Même classe de défaut que celle déjà colmatée dans renderGrid/paint/_caseAccessible.
+		const _v = c ? (grid[c.cy] || [])[c.cx] : undefined;
+		const _txt = _v === undefined ? '(hors cells)' : _v;
 		if (c && lieuxRepos) {
 			const ok = _caseAccessible(c.cx, c.cy);
-			setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]} — `
+			setStatus(`Cellule [${c.cx}, ${c.cy}] = ${_txt} — `
 				+ (ok ? '<span>porte posable ici</span>'
 					  : '<span style="color:var(--danger)">INACCESSIBLE</span>'));
-		} else if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${grid[c.cy][c.cx]} - ${currentRev}.`);
+		} else if (c) setStatus(`Cellule [${c.cx}, ${c.cy}] = ${_txt} - ${currentRev}.`);
 		return;
 	}
 	if (editMode === 'lieux') return; // click-only, pas de sélection au drag
@@ -1579,8 +1726,8 @@ canvas.addEventListener('mouseup',		() => { isPainting = false; });
 canvas.addEventListener('mouseleave', () => { isPainting = false; hoverCell = null; if (grid.length) renderGrid(); });
 
 // Touch support
-canvas.addEventListener('touchstart', e => { e.preventDefault(); isPainting = true; paint(e.touches[0]); }, {passive:false});
-canvas.addEventListener('touchmove',	e => { e.preventDefault(); if (editMode === 'lieux') return; paint(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchstart', e => { if (modeDeplacement) return; e.preventDefault(); isPainting = true; paint(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchmove',	e => { if (modeDeplacement) return; e.preventDefault(); if (editMode === 'lieux') return; paint(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchend',	 () => { isPainting = false; });
 
 // ── VALUE SELECTION ────────────────────────────────────────────────────────
@@ -1626,7 +1773,14 @@ function setMode(mode) {
 	updateLegend();   // la légende explique le mode COURANT : terrain ailleurs, couleurs des points en Lieux
 	if (grid.length) renderGrid();
 }
-modeSelect.addEventListener('change', (e) => setMode(e.target.value));
+modeSelect.addEventListener('change', (e) => {
+	// ⚠️ Le test se ferme ICI, sur le GESTE de l'admin, et surtout pas dans `setMode` :
+	// `updateBattleMapTabs` y appelle `setMode('terrain')` toute seule au chargement d'une
+	// salle de donjon — franchir une porte vers une battle map ferait sinon sauter le mode
+	// test en pleine marche. `fermerModeDeplacement` sort d'elle-même si rien n'est actif.
+	fermerModeDeplacement();
+	setMode(e.target.value);
+});
 
 // ── REDIMENSIONNEMENT : écouteurs ──────────────────────────────────────────
 document.getElementById('dim-appliquer-btn').addEventListener('click', appliquerRedimensionnement);
@@ -1934,6 +2088,9 @@ function _caseLibreProche(cx, cy, nx, ny, estAccessible) {
 // ligne « Actuel », les champs et le bandeau — les séparer laisserait le bandeau d'alerte affiché
 // au-dessus de boutons qui ne concernent plus rien.
 function _dimMaj() {
+	// Le bouton du mode test suit la MÊME bascule que la carte 📐 : sans grille chargée, il n'y
+	// a ni taille à changer ni case où marcher.
+	if (depOpenBtn) depOpenBtn.hidden = !(currentLocId && grid.length);
 	if (!dimCard) return;
 	dimCard.hidden = !currentLocId;
 	if (!currentLocId) return;
@@ -2795,7 +2952,10 @@ document.addEventListener('keydown', (e) => {
 	// Armé, Échap annule d'abord la visée et laisse l'overlay ouvert — sinon on perdrait
 	// l'éditeur pour avoir voulu renoncer à un clic.
 	if (lieuxRepos) { desarmerRepositionnement(); return; }
-	if (lieuxJsonOuvert) closeLieuJson();
+	if (lieuxJsonOuvert) { closeLieuJson(); return; }
+	// Le mode test vient en dernier : son overlay est en z-index 100, sous les deux modals et
+	// sous l'éditeur JSON — c'est donc lui qu'on ferme quand il ne reste plus que lui.
+	if (modeDeplacement) fermerModeDeplacement();
 });
 
 // ── ZONE PROPERTY EDITORS ──────────────────────────────────────────────────
@@ -3186,6 +3346,263 @@ function renderLieuProfilWeights() {
 		},
 		false);
 }
+
+// ── MODE « TEST DE DÉPLACEMENT » ───────────────────────────────────────────
+// Marcher dans le lieu qu'on vient d'éditer, avec les RÈGLES RÉELLES du jeu — sans se
+// connecter, sans personnage, sans rien écrire en base.
+//
+// ⚠️ Les règles ne sont PAS réécrites ici : `caseType1`, `caseFranchissable` et
+// `pasAutoriseLocal` viennent de `templates/scripts/deplacement.js`, le même fichier que
+// charge play_town. Un mode test qui aurait sa propre copie validerait des chemins que le jeu
+// refuse — exactement le défaut qu'il est censé détecter.
+//
+// ⚠️ La SURCHARGE (garde 409 du serveur) n'a aucun sens sans personnage : le mode ne la simule
+// pas, et le DIT dans son aide plutôt que de laisser croire qu'il simule tout.
+
+const depSection   = document.getElementById('dep-section');
+const depControls  = document.getElementById('dep-controls');
+const depOpenBtn   = document.getElementById('dep-open-btn');
+const depRegleEl   = document.getElementById('dep-regle');
+const depInfoEl    = document.getElementById('dep-info');
+const depPortesEl  = document.getElementById('dep-portes');
+const depCombatEl  = document.getElementById('dep-regle-combat');
+
+const DEP_FLECHES = {
+	'-1,-1': '↖', '0,-1': '↑', '1,-1': '↗', '-1,0': '←',
+	'1,0': '→', '-1,1': '↙', '0,1': '↓', '1,1': '↘',
+};
+const DEP_DIRS = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+
+// Le prédicat COURANT — source unique du grisage, du pas et du texte d'aide.
+function depPasAutorise(dx, dy) {
+	if (!depPos) return { ok: false, raison: 'aucun jeton' };
+	if (!depReglesCombat) {
+		return pasAutoriseLocal(grid, nav, { x: cols, y: rows }, depPos.x, depPos.y, dx, dy);
+	}
+	// Régime COMBAT : même géométrie, seul le prédicat de CASE change. C'est cet écart-là que
+	// le mode doit rendre visible — une case type 1 dont toutes les sorties sont en terrain 2
+	// est joignable en combat et INJOIGNABLE à pied. Le jeton peut donc naître ENFERMÉ, huit
+	// flèches grises, sans que ce soit un bug : `_reachable_region` inonde avec `_walkable`
+	// (>= 1, le terrain difficile servant de tissu conjonctif) là où l'exploration exige `=== 1`.
+	const nx = depPos.x + dx, ny = depPos.y + dy;
+	if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return { ok: false, raison: 'hors carte' };
+	if (!caseFranchissable(grid, nx, ny)) {
+		const v = (grid[ny] || [])[nx];
+		return { ok: false, raison: v === undefined ? 'case absente de cells' : 'terrain ' + v };
+	}
+	if (!navAllows(nav, depPos.x, depPos.y, dx, dy)) return { ok: false, raison: 'mur nav' };
+	return { ok: true, raison: '' };
+}
+
+function depMajFleches() {
+	// ⚠️ La bannière de règle est écrite AVANT tout retour anticipé : c'est elle qui explique
+	// pourquoi une flèche est grise, et le cas « aucun jeton » est justement celui où l'admin
+	// a le plus besoin de savoir ce qui s'applique.
+	depRegleEl.innerHTML = depReglesCombat
+		? 'Règle <b>COMBAT</b> : destination <b>&ge; 1</b> et pas une falaise (3). C\'est aussi celle du guidage 🧭 et du placement.'
+		: 'Règle <b>EXPLORATION</b> : destination <b>=== 1</b> exactement — le terrain difficile (2/3/5) est <b>infranchissable à pied</b>.';
+	// ⚠️ Sans jeton (placement refusé, réseau coupé), on VERROUILLE : huit flèches actives qui
+	// ne font rien seraient indiscernables d'un outil cassé.
+	if (!depPos) {
+		verrouillerFleches(depControls, true);
+		depInfoEl.innerHTML = 'Aucun jeton posé — utilisez <b>↻ Replacer</b>.';
+		return;
+	}
+	// Pas d'`exergue` : il n'y a pas de guidage 🧭 ici, et cette page ne définit même pas
+	// `.btn-highlight`.
+	majFleches(depControls, { autorise: (dx, dy) => depPasAutorise(dx, dy) });
+	// Le motif de chaque direction refusée : c'est CE que le mode est venu répondre.
+	const motifs = [];
+	for (const [dx, dy] of DEP_DIRS) {
+		const r = depPasAutorise(dx, dy);
+		if (!r.ok) motifs.push(DEP_FLECHES[dx + ',' + dy] + ' ' + r.raison);
+	}
+	const v = (grid[depPos.y] || [])[depPos.x];
+	depInfoEl.innerHTML = 'Case <b>[' + depPos.x + ', ' + depPos.y + ']</b> — terrain <b>'
+		+ (v === undefined ? '?' : v) + '</b>'
+		+ (motifs.length
+			? '<br>Fermé : ' + motifs.map(m => '<span>' + m + '</span>').join(' · ')
+			: '<br>Toutes les directions sont ouvertes.')
+		+ '<br>⚠️ La <b>surcharge</b> (garde 409 du serveur) n\'est pas simulée : ce mode n\'a pas de personnage.';
+}
+
+// Le jeton, en POURCENTAGES du conteneur (cf. le commentaire CSS de `.dep-token`).
+// ⚠️ Ne PAS le créer avant le premier `renderGrid()` : `.grid-container` a une hauteur de 0
+// tant que l'image n'est pas posée, et le jeton naîtrait invisible.
+function depPlacerToken() {
+	if (!depPos || !cols || !rows) return;
+	if (!depToken) {
+		depToken = document.createElement('div');
+		depToken.className = 'dep-token';
+		gridCont.appendChild(depToken);
+	}
+	depToken.style.width  = (100 / cols) + '%';
+	depToken.style.height = (100 / rows) + '%';
+	depToken.style.left   = (depPos.x * 100 / cols) + '%';
+	depToken.style.top    = (depPos.y * 100 / rows) + '%';
+}
+
+function depRetirerToken() {
+	if (depToken) { depToken.remove(); depToken = null; }
+}
+
+// Les portes de la case courante. ⚠️ `conn.nodes[].pos` est un TABLEAU `[x, y]`, pas un
+// `{x, y}`. `lieuxConnections` est déjà chargé à la sélection du lieu (`chargerLieu` appelle
+// `fetchLieuxConnections`), sans dépendre du mode Lieux.
+function depPortesIci() {
+	if (!depPos) return [];
+	return (lieuxConnections || []).filter(conn =>
+		(conn.nodes || []).some(n => n.lieu === currentLocId
+			&& Array.isArray(n.pos) && n.pos[0] === depPos.x && n.pos[1] === depPos.y));
+}
+
+function depRendrePortes() {
+	const portes = depPortesIci();
+	if (!portes.length) { depPortesEl.innerHTML = ''; return; }
+	let html = '<div style="color:var(--accent);">🚪 Sur cette case :</div>';
+	portes.forEach(conn => {
+		const dest = _connDest(conn);
+		const nom = (dest.details && dest.details.label) || dest.lieu;
+		// ⚠️ Le sélecteur de lieux est bâti par `get_lieux_ids`, qui FILTRE SUR `cells` : une
+		// boutique n'y figure pas. Poser une valeur absente la ramène à "" — ce qui VIDE
+		// l'éditeur sans un mot. On vérifie donc l'<option> avant d'offrir le clic.
+		const dispo = !!lieuSelect.querySelector('option[value="' + CSS.escape(dest.lieu) + '"]');
+		html += '<button class="dep-porte" data-dep-dest="' + dest.lieu + '"'
+			+ (dispo ? '' : ' disabled') + '>➔ ' + nom
+			+ (dispo ? '' : ' — sans grille, pas éditable ici') + '</button>';
+	});
+	depPortesEl.innerHTML = html;
+}
+
+// Franchir une porte : fidèlement à la branche « lien » de `move_character`, le jeton atterrit
+// à la `pos` de l'AUTRE nœud de la connexion — pas sur un nouveau tirage de /placement_test.
+// ⚠️ `chargerLieu` remet à zéro `grid`, `nav`, `cols`, `rows` et `lieuxConnections` SANS rien
+// savoir du mode test : c'est à son gestionnaire de `change` de reposer le jeton, faute de quoi
+// il resterait à des coordonnées périmées sur une carte d'une autre taille. D'où ce relais.
+depPortesEl.addEventListener('click', (e) => {
+	const btn = e.target.closest('[data-dep-dest]');
+	if (!btn || btn.disabled) return;
+	const destId = btn.dataset.depDest;
+	const conn = depPortesIci().find(c => _connDest(c).lieu === destId);
+	const arrivee = conn ? _connDest(conn).pos : null;
+	depArriveeAttendue = Array.isArray(arrivee) ? { x: arrivee[0], y: arrivee[1] } : null;
+	lieuSelect.value = destId;
+	lieuSelect.dispatchEvent(new Event('change'));
+});
+
+// Reprise après un changement de lieu, appelée par `chargerLieu` une fois la grille en place.
+// Trois cas : on n'est pas en mode test (rien) ; on vient de franchir une porte (on se pose à
+// l'arrivée mémorisée, si elle tient dans la carte) ; sinon on re-tire un placement.
+async function depApresChargement() {
+	if (!modeDeplacement) return;
+	const a = depArriveeAttendue;
+	depArriveeAttendue = null;
+	if (a && a.x >= 0 && a.x < cols && a.y >= 0 && a.y < rows) {
+		depPos = a;
+		depPlacerToken();
+		depMajFleches();
+		depRendrePortes();
+		setStatus('🚶 Arrivé en <span>[' + depPos.x + ', ' + depPos.y + ']</span> par la porte.');
+		return;
+	}
+	await depReplacer();
+}
+
+// Placement initial — le SEUL appel réseau du mode. ⚠️ Il RESTE DU PYTHON : l'endpoint rebâtit
+// le `grid` comme `create_combat_doc` et délègue à `combat._place_actors`. Une règle de
+// placement recopiée ici divergerait du jeu au premier réglage. Le mode centre/bordure étant un
+// 50/50, ↻ Replacer repose le jeton ailleurs — c'est ce qu'un admin veut éprouver.
+async function depReplacer() {
+	if (!currentLocId || !grid.length) return;
+	try {
+		const res = await fetch('/api/lieu/' + encodeURIComponent(currentLocId) + '/placement_test');
+		if (!res.ok) {
+			const d = await res.json().catch(() => ({}));
+			setStatus('<span style="color:var(--danger)">Placement impossible : ' + (d.detail || res.status) + '</span>');
+			depEchec();
+			return;
+		}
+		const data = await res.json();
+		depPos = { x: data.pos.x, y: data.pos.y };
+	} catch (err) {
+		setStatus('<span style="color:var(--danger)">Placement impossible (réseau).</span>');
+		depEchec();
+		return;
+	}
+	depPlacerToken();
+	depMajFleches();
+	depRendrePortes();
+	setStatus('🚶 Jeton posé en <span>[' + depPos.x + ', ' + depPos.y + ']</span> — terrain '
+		+ (grid[depPos.y] || [])[depPos.x] + '.');
+}
+
+// Placement refusé : on ne laisse ni jeton fantôme (il serait resté du lieu précédent) ni
+// flèches actives. La bannière de règle et le motif restent, eux : ils expliquent.
+function depEchec() {
+	depPos = null;
+	depRetirerToken();
+	depPortesEl.innerHTML = '';
+	depMajFleches();
+}
+
+// Un pas. Purement LOCAL : aucun réseau, aucun document muté.
+function depPas(dx, dy) {
+	if (!modeDeplacement || !depPos) return;
+	const r = depPasAutorise(dx, dy);
+	if (!r.ok) {
+		setStatus('<span style="color:var(--danger)">' + DEP_FLECHES[dx + ',' + dy]
+			+ ' refusé : ' + r.raison + '.</span>');
+		return;
+	}
+	depPos = { x: depPos.x + dx, y: depPos.y + dy };
+	depPlacerToken();
+	depMajFleches();
+	depRendrePortes();
+	setStatus('🚶 <span>[' + depPos.x + ', ' + depPos.y + ']</span> — terrain '
+		+ (grid[depPos.y] || [])[depPos.x] + '.');
+}
+
+async function ouvrirModeDeplacement() {
+	if (!currentLocId || !grid.length) return;
+	// ⚠️ Refusé pendant un aperçu de redimensionnement : les deux modes se disputent la même
+	// grille, et l'un des deux n'est pas enregistré.
+	if (redimEnAttente) {
+		setStatus('<span style="color:var(--danger)">Redimensionnement en attente : enregistrez-le (💾) '
+			+ 'ou annulez-le (↺) avant de tester le déplacement.</span>');
+		return;
+	}
+	modeDeplacement = true;
+	document.body.classList.add('mode-deplacement');
+	depSection.hidden = false;
+	depCombatEl.checked = depReglesCombat;
+	canvas.style.cursor = 'default';
+	// La largeur du conteneur change (le panneau de gauche disparaît) : la grille se redessine.
+	renderGrid();
+	depPos = null;
+	depMajFleches();          // règle affichée et flèches verrouillées pendant l'aller-retour
+	await depReplacer();
+}
+
+function fermerModeDeplacement() {
+	if (!modeDeplacement) return;
+	modeDeplacement = false;
+	document.body.classList.remove('mode-deplacement');
+	depSection.hidden = true;
+	depRetirerToken();
+	depPos = null;
+	depArriveeAttendue = null;
+	depPortesEl.innerHTML = '';
+	canvas.style.cursor = '';
+	if (grid.length) renderGrid();   // la carte reprend le rendu de son mode d'édition
+}
+
+depOpenBtn.addEventListener('click', ouvrirModeDeplacement);
+document.getElementById('dep-close-btn').addEventListener('click', fermerModeDeplacement);
+document.getElementById('dep-replacer-btn').addEventListener('click', depReplacer);
+depCombatEl.addEventListener('change', () => {
+	depReglesCombat = depCombatEl.checked;
+	depMajFleches();
+});
 
 // ── STATUS ─────────────────────────────────────────────────────────────────
 function setStatus(html) {

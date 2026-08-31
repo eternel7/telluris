@@ -207,6 +207,62 @@ async def get_lieu_connections(
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Erreur CouchDB : {str(e)}")
 
+
+@lieu_router.get("/lieu/{lieu_id}/placement_test")
+async def get_placement_test(
+	response: Response,
+	current_user: Annotated[User, Depends(get_current_user)],
+	lieu_id: str,
+	monstres: int = 0):
+	"""Où un acteur naîtrait-il sur cette carte ? (admin, mode « test de déplacement »).
+
+	Le placement RESTE DU PYTHON : cet endpoint ne réimplémente rien, il rebâtit le `grid`
+	EXACTEMENT comme `create_combat_doc` et appelle `combat._place_actors`, qui écrit les
+	`pos`. Une règle de placement recopiée en JS divergerait du jeu au premier réglage.
+
+	⚠️ Import PARESSEUX de `utils.combat`, DANS LE CORPS : `utils/combat.py` importe ce
+	module-ci (`nav_allows`, `MOVE_OFFSETS`) — un import de tête créerait un cycle. Même
+	remède que `utils/chasse.py` et `utils/focalisation.py`.
+
+	⚠️ `?monstres=N` (défaut 0) n'est pas décoratif. Avec `monstres: []`, `need` vaut 1 et la
+	région d'une case type 1 contient au minimum cette case : la boucle de candidats CASSE
+	TOUJOURS sur le premier et ne fait qu'un seul flood fill. Le coût est nul, mais la
+	fidélité aussi — on n'éprouve jamais « la région est-elle assez grande ? », ni l'étape 4
+	(dispersion des monstres). À N > 0, la vraie règle est exercée et le mode test peut poser
+	des jetons rouges. Défaut 0 parce que la demande courante est « un jeton ».
+
+	⚠️ Le JOUEUR ne se pose que sur du terrain EXACTEMENT 1 (`_is_type1`), pas sur du `>= 1`
+	(réservé aux monstres) — ne pas « simplifier » vers `_walkable`.
+	"""
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1):
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+
+	from utils import combat as combat_mod   # cf. ⚠️ ci-dessus
+
+	decoded_id = unquote(lieu_id)
+	doc = get_doc(decoded_id)
+	if not doc:
+		raise HTTPException(status_code=404, detail="Lieu introuvable")
+	# ⚠️ Gardes d'ENTRÉE : `grid["dims"]` lèverait un KeyError sur un lieu sans `dimensions`,
+	# et `cells` peut manquer. 400 explicite dans les deux cas, jamais un 500.
+	dimensions, cells = doc.get("dimensions"), doc.get("cells")
+	if not isinstance(dimensions, dict) or "x" not in dimensions or "y" not in dimensions:
+		raise HTTPException(status_code=400, detail="Ce lieu n'a pas de `dimensions` : aucune grille où placer un acteur.")
+	if not isinstance(cells, list) or not cells:
+		raise HTTPException(status_code=400, detail="Ce lieu n'a pas de `cells` : aucune grille où placer un acteur.")
+
+	nb = max(0, min(int(monstres or 0), 20))
+	grid = {"dims": dimensions, "cells": cells, "nav": doc.get("nav", {})}
+	faux_combat = {"joueurs": [{}], "monstres": [{} for _ in range(nb)]}
+	combat_mod._place_actors(faux_combat, grid)
+	return {
+		"pos": faux_combat["joueurs"][0]["pos"],
+		"monstres": [m["pos"] for m in faux_combat["monstres"]],
+	}
+
+
 def _lister_images(chemin: str) -> list[str]:
 	"""Fichiers image d'un répertoire de ressources (miroir de bestiaire.list_monster_images).
 

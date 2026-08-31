@@ -4,6 +4,9 @@
 {# Barre de slots : CSS partagé avec l'écran de combat (macro paramétrée par les sélecteurs,
    les deux pages ne portant pas les mêmes noms de classes). #}
 {% import "part-slot-bar-css.html" as slotbar %}
+{# Pavé de déplacement : markup ET CSS partagés avec la page de combat et le mode « test de
+   déplacement » de l'éditeur de carte. #}
+{% import "part-move-panel.html" as movepanel %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -704,8 +707,8 @@
 		}
 		.btn-highlight:hover,
 		.quest-done-btn:not(:disabled):hover { background: rgba(255, 215, 0, 0.18); }
-		/* Flèche recommandée : renforce le liseré (l'icône SVG reste claire). */
-		.move_btn.btn-highlight { border-width: 2px; }
+		/* ⚠️ La flèche recommandée (`.move_btn.btn-highlight`, liseré renforcé) est passée dans
+		   part-move-panel.html avec le reste du pavé — elle y est SCOPÉE au conteneur. */
 		.sh-derived-row {
 			display: flex;
 			justify-content: space-between;
@@ -1246,16 +1249,11 @@
 			box-shadow: 0 0 10px #ff4757;
 		}
 
-		.controls { 
-			display: grid; 
-			grid-template-columns: repeat(3, 50px); 
-			gap: 8px;
-		}
-		.btn { width: 50px; height: 50px; background: #222; border: 1px solid #444; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-tap-highlight-color: transparent; }
-		.btn:active { background: #444; }
-		.move_btn:disabled>svg {
-			display: none;
-		}
+		/* Pavé de déplacement — SOURCE UNIQUE (part-move-panel.html), partagée avec la page de
+		   combat et le mode test de l'éditeur. ⚠️ Les règles sont désormais SCOPÉES en
+		   `.controls .btn` : `.btn` était global ici, mais il n'est porté que par les neuf
+		   flèches (vérifié) — et un `.btn` nu existe dans l'éditeur, où il vaut `width:100%`. */
+{{ movepanel.move_panel_css('.navigation-panel', '.controls') }}
 		#personnage {
 			display: none;
 		}
@@ -1449,42 +1447,12 @@
 				</ul>
 			</section>
 			{% if dimensions %}
+			<!-- Pavé de déplacement : markup et CSS viennent de part-move-panel.html, partagés avec
+			     la page de combat et le mode test de l'éditeur de carte. ⚠️ Le `{% raw %}{% if dimensions %}{% endraw %}`
+			     reste À L'EXTÉRIEUR : un lieu sans grille afficherait sinon un pavé mort. -->
 			<section class="navigation-panel">
-				<div class="controls" id="controls">
-					<button class="btn move_btn" id="move_1_1" onclick="move(-1, -1)">
-						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.71 16.29L9.42 8H15a1 1 0 0 0 0-2H7.05a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1H7a1 1 0 0 0 1-1V9.45l8.26 8.26a1 1 0 0 0 1.42 0 1 1 0 0 0 .03-1.42z"></path></svg>
-					</button>
-					<button class="btn move_btn" id="move0_1" onclick="move(0, -1)">
-						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 6L7 11M12 6L17 11" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-					</button>
-					<button class="btn move_btn" id="move1_1" onclick="move(1, -1)">
-						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"></path></svg>
-					</button>
-					<button class="btn move_btn" id="move_10" onclick="move(-1, 0)">
-						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-					</button>
-					<button class="btn move_btn" onclick="waitTurn()">
-						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 2h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"></path><path d="M4 22h16" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round"></path><path d="M6 2 Q6 9 12 13 Q6 17 6 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><path d="M18 2 Q18 9 12 13 Q18 17 18 22" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><path d="M6.5 3.5 Q12 7.5 17.5 3.5 Q15 10.5 12 12 Q9 10.5 6.5 3.5 Z" fill="#f1f1f1"></path><path d="M10 20.5 Q12 18.5 14 20.5 Q13 21.5 12 21.5 Q11 21.5 10 20.5 Z" fill="#f1f1f1"></path></svg>
-					</button>
-					<button class="btn move_btn" id="move10" onclick="move(1, 0)">
-						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-					</button>
-					<button class="btn move_btn" id="move_11" onclick="move(-1, 1)">
-						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-						  <path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"
-								transform="rotate(180 12 12)"/>
-						</svg>
-					</button>
-					<button class="btn move_btn" id="move01" onclick="move(0, 1)">
-						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#f1f1f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-					</button>
-					<button class="btn move_btn" id="move11" onclick="move(1, 1)">
-						<svg fill="#f1f1f1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-						  <path d="M18 7.05a1 1 0 0 0-1-1L9 6a1 1 0 0 0 0 2h5.56l-8.27 8.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L16 9.42V15a1 1 0 0 0 1 1 1 1 0 0 0 1-1z"
-								transform="rotate(90 12 12)"/>
-						</svg>
-					</button>
-				</div>
+				{{ movepanel.move_panel('controls', fn='move',
+					centre={'classes': 'btn move_btn', 'onclick': 'waitTurn()', 'title': 'Attendre un tour'}) }}
 			</section>
 			{% endif %}
 		</aside>
@@ -2589,6 +2557,10 @@
 		</div>
 	</div><!-- /#max-bonus-overlay -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
+{# ⚠️ APRÈS nav.js : `pasAutoriseLocal` y prend `navAllows`. Cette page-ci n'appelle que
+   `majFleches`/`verrouillerFleches` (son accès lui est RÉSOLU PAR LE SERVEUR), mais le
+   fichier est un tout — c'est la même règle de marche des trois côtés. #}
+<script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};
@@ -2869,44 +2841,36 @@
 		}).join('') || `<li>Aucun</li>`;
 	}
 	buildLocationslist();
+	// Les deux fonctions ci-dessous ne font plus que POSER LEURS PRÉDICATS : le parcours du
+	// DOM vit dans `templates/scripts/deplacement.js`, partagé avec le combat et le mode test
+	// de l'éditeur (cf. CLAUDE.md § Pavé de déplacement partagé).
 	function setMoveButtonsDisabled(disabled) {
-		['move_1_1','move_10','move_11','move01','move11','move10','move1_1','move0_1'].forEach(id => {
-			const el = document.getElementById(id);
-			if (el) el.disabled = disabled;
-		});
+		verrouillerFleches(document.getElementById('controls'), disabled);
 	}
 	function updateControls() {
 		const controls = document.getElementById('controls');
-		if(controls) {
-			const boutons = [
-				{ element: document.getElementById('move_1_1'), x: -1, y: -1 , dir : DIRS.HAUT_GAUCHE},
-				{ element: document.getElementById('move_10'),  x: -1, y: 0  , dir : DIRS.GAUCHE},
-				{ element: document.getElementById('move_11'),  x: -1, y: 1  , dir : DIRS.BAS_GAUCHE},
-				{ element: document.getElementById('move01'),   x: 0,  y: 1  , dir : DIRS.BAS},
-				{ element: document.getElementById('move11'),   x: 1,  y: 1  , dir : DIRS.BAS_DROITE},
-				{ element: document.getElementById('move10'),   x: 1,  y: 0  , dir : DIRS.DROITE},
-				{ element: document.getElementById('move1_1'),  x: 1,  y: -1 , dir : DIRS.HAUT_DROITE},
-				{ element: document.getElementById('move0_1'),  x: 0,  y: -1 , dir : DIRS.HAUT}
-			];
-			let access = ACCESS.access;
-			let nav = ACCESS.nav;
-			// Surcharge : poids porté > charge max → déplacement impossible (miroir de la
-			// garde serveur). Le guard `typeof` évite l'erreur au 1er appel (les variables
-			// de charge sont déclarées dans un script chargé après celui-ci).
-			const surcharge = (typeof _currentCharge === 'function' && typeof _chargeMax !== 'undefined')
-				&& _currentCharge() > _chargeMax + 1e-6;
-			boutons.forEach(({ element, x, y, dir }) => {
-				if (element) {
-					const loc_access = access[y + 1][x + 1];
-					// access en fonction du type de lieu et des directions disponibles
-					element.disabled = surcharge || (loc_access !== 1) || ((nav & dir) === 0);
-					// Guidage 🧭 : la flèche du premier pas vers la cible est mise en exergue.
-					element.classList.toggle('btn-highlight', !element.disabled
-						&& !!(_guidage && _guidage.direction
-							&& _guidage.direction.dx === x && _guidage.direction.dy === y));
-				}
-			});
-		}
+		if (!controls) return;
+		// ⚠️ Régime PROPRE à play_town : l'accès lui est RÉSOLU PAR LE SERVEUR — `ACCESS.access`
+		// est une matrice 3×3 autour du personnage et `ACCESS.nav` un masque SCALAIRE déjà
+		// calculé (`get_lieu_directions`). Le combat et l'éditeur, eux, résolvent `cells`/`nav`
+		// en local. C'est cette divergence qui impose des PRÉDICATS plutôt qu'une grille.
+		const access = ACCESS.access;
+		const nav = ACCESS.nav;
+		// Surcharge : poids porté > charge max → déplacement impossible (miroir de la
+		// garde serveur). Le guard `typeof` évite l'erreur au 1er appel (les variables
+		// de charge sont déclarées dans un script chargé après celui-ci).
+		const surcharge = (typeof _currentCharge === 'function' && typeof _chargeMax !== 'undefined')
+			&& _currentCharge() > _chargeMax + 1e-6;
+		majFleches(controls, {
+			// ⚠️ `loc_access !== 1` : en exploration on ne marche PAS sur le terrain difficile,
+			// contrairement au guidage 🧭 et au voile du mode Lieux de l'éditeur (`>= 1`).
+			autorise: (dx, dy) => !surcharge
+				&& access[dy + 1][dx + 1] === 1
+				&& (nav & DIR_BIT[`${dx},${dy}`]) !== 0,
+			// Guidage 🧭 : la flèche du premier pas vers la cible est mise en exergue.
+			exergue: (dx, dy) => !!(_guidage && _guidage.direction
+				&& _guidage.direction.dx === dx && _guidage.direction.dy === dy),
+		});
 	}
 	updateControls();
 	async function waitTurn(){

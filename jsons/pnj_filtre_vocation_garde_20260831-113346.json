@@ -1,0 +1,293 @@
+[
+  {
+    "_id": "pnj:templier_armand_de_vaucremont_01",
+    "_rev": "9-93735ee07a6e72c471391fa96bd83ff3",
+    "type": "pnj",
+    "nom": "Armand de Vaucremont",
+    "race": "humain",
+    "vocation": "garde",
+    "portrait": "templier_armand_de_vaucremont_temple_portail.png",
+    "description": "Templier de la garde intérieure du Temple-Portail de Saint-Austrelin. Armand de Vaucremont tient le registre des descentes : c'est lui qui compte ceux qui entrent dans les galeries, et ceux qui en remontent. Il n'a jamais aimé que les deux nombres diffèrent.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:la_mine_aux_cristaux",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Derrière l'arche, le portail noir pulse faiblement derrière un cordon de templiers en armes. {pnj} lève une main gantée sans quitter des yeux le grand registre ouvert devant lui. « Les papiers. »",
+          "choix": [
+            {
+              "id": "passer",
+              "label": "« J'ai une commission de la Guilde. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "accompli",
+              "label": "« C'est fait. La chose est morte. »",
+              "condition": {
+                "acces_accompli": true
+              },
+              "next": "acces_accompli"
+            },
+            {
+              "id": "pourquoi",
+              "label": "« Pourquoi cette arche est-elle fermée ? »",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "registre",
+              "label": "« Que notez-vous dans ce registre ? »",
+              "condition": {
+                "acces_accompli": false
+              },
+              "next": "registre"
+            },
+            {
+              "id": "registre_open",
+              "label": "« Que notez-vous dans ce registre ? »",
+              "condition": {
+                "acces_accompli": true
+              },
+              "next": "registre_open"
+            },
+            {
+              "id": "mineurs",
+              "label": "« Et ces mineurs qui attendent ? »",
+              "condition": {
+                "acces_menace": true
+              },
+              "next": "mineurs"
+            },
+            {
+              "id": "mineurs_libres",
+              "label": "« Et ces mineurs qui attendent ? »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "mineurs_libres"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je regardais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "Il compare le sceau de la Guilde à celui de son registre, hoche la tête une fois, puis trace une croix nette à côté de votre nom. « Commission enregistrée. » Un geste sec : le cordon de templiers s'ouvre sur l'arche. « En bas, c'est {portail}. Descendez tant que le portail est calme — et sachez-le tout de suite : personne n'ira vous chercher. »",
+          "relation_reinit": "acces_accompli",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Franchir l'arche.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "« Pas de commission, pas de descente. » Armand repousse le registre du plat de la main. « {portail} est fermée sur ordre du temple : les galeries ne rouvriront qu'une fois l'éradication confirmée par une compagnie mandatée. Et ce n'est pas moi qui délivre les mandats, {prenom} — c'est la Guilde d'Aventuriers. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "S'écarter.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_accompli": {
+          "texte": "Pour la première fois, Armand referme son registre. « Nous avons entendu, d'en haut. Puis nous n'avons plus rien entendu du tout — et c'est à ce silence qu'on reconnaît le travail fait. » Il s'écarte de l'arche, mais d'un geste large qui vous invite à remonter, pas à descendre. « Ne redescendez pas, {prenom} : les galeries ne sont plus votre affaire, ce sont les mineurs qui attendent leur tour. Portez votre rapport à la Guilde — c'est lui, maintenant, qui rouvrira le chantier. »",
+          "relation": {
+            "delta": 1
+          },
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Remonter faire mon rapport.",
+              "next": "fin"
+            }
+          ]
+        },
+        "registre": {
+          "texte": "« Deux colonnes. » Il tourne le registre vers vous sans le lâcher. « À gauche, ceux qui descendent. À droite, ceux qui remontent. Mon travail consiste à ce que les deux colonnes aient la même longueur. » Un silence. « Elles ne l'ont pas eue depuis trois semaines. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "registre_open": {
+          "texte": "« Dans ce registre, je note ceux qui descendent et ceux qui remontent. Deux colonnes : la gauche pour les mineurs qui entrent, la droite pour ceux qui reviennent. Mon rôle, c’est de m’assurer qu’elles restent équilibrées. »\nIl effleure la colonne de droite, longtemps restée vide.\n« Ce soir, j’y inscrirai vingt‑deux retours. Pour la première fois depuis des semaines, je peux écrire ce chiffre sans me mentir… grâce à vous. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "mineurs": {
+          "texte": "Il jette un regard vers la compagnie de mineurs qui piétine au fond de la nef, lampes éteintes. « Ils viennent chaque matin demander l'accès, et chaque matin je le refuse. Ce ne sont pas des combattants : les envoyer maintenant, ce serait les envoyer mourir avec leurs pics. Le chantier attend des aventuriers. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "mineurs_libres": {
+          "texte": "Les lampes sont allumées, cette fois. La compagnie s'engage sous l'arche en file lente, pics à l'épaule, et {pnj} les compte à voix basse en cochant son registre. « Vingt-deux descendus. » Il laisse courir son doigt jusqu'à la colonne de droite, encore vide, et la tapote une fois. « Vingt-deux qui remonteront ce soir. C'est la première fois depuis des semaines que j'écris ce chiffre sans me mentir — et c'est votre ouvrage. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:templier_nain_m_01",
+    "_rev": "9-426ea8e0550dbbf0da19aed8ab1001bc",
+    "type": "pnj",
+    "nom": "George Dourdan",
+    "race": "nain",
+    "vocation": "garde",
+    "portrait": "templier_nain_m_garde_temple02.png",
+    "description": "George Dourdan est un nain templier robuste et sévère, chargé de réguler l'accès au temple-portail de Saint‑Austrelin. Il se tient au sommet des marches, barrant l'entrée du sanctuaire dont le seuil laisse entrevoir une lueur mystique.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:temple_portail_de_saint_austrelin_interieur",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus",
+          "deja": "acces_deja"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "{pnj} vous toise du haut des marches, la main posée sur le pommeau de son arme. « Halte, voyageur. »",
+          "choix": [
+            {
+              "id": "passer",
+              "label": "« Laissez-moi passer. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "deja",
+              "label": "« C'est moi — vous me reconnaissez. »",
+              "condition": {
+                "acces_ouvert": true
+              },
+              "next": "acces_deja"
+            },
+            {
+              "id": "pourquoi",
+              "label": "« Pourquoi ce passage est-il gardé ? »",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "registre",
+              "label": "« Que gardez-vous, au juste ? »",
+              "next": "registre"
+            },
+            {
+              "id": "danger",
+              "label": "« Qu'y a-t-il derrière ce portail ? »",
+              "next": "danger"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien, je repars. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "{pnj} s'écarte d'un pas et vous laisse le passage. « Allez-y. La guilde répond de vous. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Descendre.",
+              "next": "fin",
+              "deplacer": "lieu:temple_portail_de_saint_austrelin_interieur"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "« {portail} est réservé aux compagnies mandatées par la guilde d'aventuriers. Présentez-vous une commission d'éradication, et je vous laisserai descendre. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "S'en aller.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_deja": {
+          "texte": "« Ah, c'est vous. La guilde vous a déjà mandaté — passez, {prenom}. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Descendre.",
+              "next": "fin",
+              "deplacer": "lieu:temple_portail_de_saint_austrelin_interieur"
+            }
+          ]
+        },
+        "registre": {
+          "texte": "« Les templiers tiennent le registre des compagnies autorisées à descendre. Chaque expédition close, le donjon se réinitialise et les travailleurs qui s'y étaient risqués sont expulsés avant la relève. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "danger": {
+          "texte": "« Les dangers d'en bas dépendent de la couleur du portail. Plus elle est sombre, moins on en revient parler. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        }
+      }
+    }
+  }
+]
