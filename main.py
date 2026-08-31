@@ -1262,3 +1262,39 @@ def admin_simulateur_potentiels(
 		except Exception:
 			continue
 	return {"type": t, "potentiels": potentiels}
+
+# ── Pages legal ───────────────────────────────────────────────────────
+
+@app.get("/mentions", response_class=HTMLResponse)
+def mentions_legales(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	return templates.TemplateResponse(
+		request=request,
+		name="mentions_legales_telluris.html",
+		context={"title": "Mentions légales"},
+	)
+
+@app.get("/contact", response_class=HTMLResponse)
+def contact_info(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	return templates.TemplateResponse(
+		request=request,
+		name="contact_telluris.html",
+		context={"title": "Contact"},
+	)
+	
+@app.get("/confidentialite", response_class=HTMLResponse)
+def confidentialite_info(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	return templates.TemplateResponse(
+		request=request,
+		name="confidentialite_telluris.html",
+		context={"title": "Confidentialité"},
+	)
+	
+@app.get("/presse", response_class=HTMLResponse)
+def presse_info(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	return templates.TemplateResponse(
+		request=request,
+		name="presse_telluris.html",
+		context={"title": "Presse"},
+	)
+	
+	

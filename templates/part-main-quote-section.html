@@ -1,0 +1,14 @@
+{% macro render_footer(quote) %}
+<section class="quote-section" role="complementary" aria-label="Information">
+	<blockquote class="quote-text">
+		«&nbsp;{{ quote }}&nbsp;»
+	</blockquote>
+	<p class="quote-source">Telluris — <span lang="la">Ubi Chartae Finiunt</span></p>
+</section>
+<section class="section" style="padding-top: 0;">
+	<div class="hero-cta">
+		<a href="/" class="btn-secondary">Retour à Telluris</a>
+		<a href="/auth" class="btn-primary">Jouer</a>
+	</div>
+</section>
+{% endmacro %}

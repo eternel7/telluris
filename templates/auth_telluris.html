@@ -331,20 +331,7 @@
 		</section>
 	</main>
 
-	<footer role="contentinfo">
-		<div>
-			<a href="/">
-				<p class="footer-logo">Telluris</p>
-				<p class="footer-sub" lang="la">Ubi Chartae Finiunt</p>
-			</a>
-		</div>
-		<ul class="footer-links">
-			<li><a href="#">Mentions légales</a></li>
-			<li><a href="#">Confidentialité</a></li>
-			<li><a href="#">Contact</a></li>
-			<li><a href="#">Presse</a></li>
-		</ul>
-	</footer>
+	{% include "part-main-footer.html" without context %}
 
 	<script>
 		const tellurisSousTitres = [

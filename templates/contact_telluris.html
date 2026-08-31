@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+	<style>
+	{% include "part-root-css.html" without context %}
+	{% include "part-footer-css.html" without context %}
+	{% include "part-nav-css.html" without context %}
+	{% include "part-accessibility-css.html" without context %}
+
+	/* ── SECTIONS & TYPOGRAPHIE ────────────────────────────────── */
+	.section {
+		position: relative;
+		padding: 80px 48px;
+		max-width: 1210px;
+		margin: 0 auto;
+	}
+
+	.section-eyebrow {
+		font-family: 'Cinzel', serif;
+		font-size: 12px;
+		letter-spacing: 0.3em;
+		color: var(--gold2);
+		text-transform: uppercase;
+		text-align: center;
+		margin-bottom: 12px;
+	}
+
+	.section-title {
+		font-family: 'Cinzel', serif;
+		font-size: clamp(22px, 4vw, 34px);
+		font-weight: 500;
+		color: var(--parch);
+		text-align: center;
+		margin-bottom: 16px;
+		letter-spacing: 0.05em;
+	}
+
+	.section-divider {
+		width: 80px;
+		height: 0.5px;
+		background: linear-gradient(90deg, transparent, var(--gold), transparent);
+		margin: 0 auto 60px;
+	}
+
+	/* ── DISPOSITION CONTACT & FORMULAIRE ────────────────────── */
+	.contact-grid {
+		display: grid;
+		grid-template-columns: 1fr 2fr;
+		gap: 32px;
+	}
+
+	.contact-info-cards {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.feature-card {
+		background: rgba(37, 61, 41, 0.08);
+		border: 0.5px solid rgba(201, 146, 42, 0.15);
+		padding: 32px 24px;
+		position: relative;
+		transition: background 0.3s, border-color 0.3s;
+		display: flex;
+		flex-direction: column;
+	}
+	.feature-card:hover {
+		background: rgba(37, 61, 41, 0.15);
+		border-color: rgba(201, 146, 42, 0.35);
+	}
+	.feature-card::before {
+		content: '';
+		position: absolute;
+		top: 0; left: 0;
+		width: 2px;
+		height: 0;
+		background: var(--gold);
+		transition: height 0.3s;
+	}
+	.feature-card:hover::before { height: 100%; }
+
+	.feature-title {
+		font-family: 'Cinzel', serif;
+		font-size: 14px;
+		letter-spacing: 0.1em;
+		color: var(--gold2);
+		text-transform: uppercase;
+		margin-bottom: 12px;
+	}
+
+	.feature-text {
+		font-family: 'IM Fell English', serif;
+		font-size: 16px;
+		line-height: 1.8;
+		color: var(--parch3);
+		margin-bottom: 12px;
+	}
+	.feature-text:last-child { margin-bottom: 0; }
+
+	.feature-link {
+		color: var(--gold2);
+		text-decoration: none;
+		border-bottom: 1px dotted var(--gold2);
+		transition: color 0.2s, border-color 0.2s;
+	}
+	.feature-link:hover {
+		color: var(--parch);
+		border-bottom-style: solid;
+	}
+
+	/* ── FORMULAIRE ────────────────────────────────────────────── */
+	.contact-form {
+		background: rgba(14, 11, 8, 0.4);
+		border: 0.5px solid rgba(201, 146, 42, 0.15);
+		padding: 32px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.form-label {
+		font-family: 'Cinzel', serif;
+		font-size: 12px;
+		letter-spacing: 0.15em;
+		color: var(--gold2);
+		text-transform: uppercase;
+	}
+
+	.form-input,
+	.form-select,
+	.form-textarea {
+		background: rgba(37, 61, 41, 0.08);
+		border: 0.5px solid rgba(201, 146, 42, 0.2);
+		color: var(--parch);
+		font-family: 'IM Fell English', serif;
+		font-size: 16px;
+		padding: 12px 16px;
+		outline: none;
+		transition: border-color 0.3s, background 0.3s;
+		box-sizing: border-box;
+		width: 100%;
+	}
+
+	.form-input:focus,
+	.form-select:focus,
+	.form-textarea:focus {
+		background: rgba(37, 61, 41, 0.15);
+		border-color: var(--gold);
+	}
+
+	.form-select option {
+		background: var(--ink);
+		color: var(--parch);
+	}
+
+	.form-textarea {
+		resize: vertical;
+		min-height: 140px;
+	}
+
+	/* ── CITATION ────────────────────────────────────────────── */
+	.quote-section {
+		border-top: 0.5px solid rgba(201, 146, 42, 0.1);
+		border-bottom: 0.5px solid rgba(201, 146, 42, 0.1);
+		padding: 60px 48px;
+		text-align: center;
+		background: rgba(14, 11, 8, 0.4);
+		margin: 40px 0;
+	}
+
+	.quote-text {
+		font-family: 'IM Fell English', serif;
+		font-size: clamp(18px, 2.5vw, 24px);
+		font-style: italic;
+		color: var(--parch);
+		max-width: 750px;
+		margin: 0 auto 16px;
+		line-height: 1.75;
+	}
+
+	.quote-source {
+		font-family: 'Cinzel', serif;
+		font-size: 12px;
+		letter-spacing: 0.3em;
+		color: var(--gold2);
+		text-transform: uppercase;
+	}
+
+	/* ── BOUTONS & CTA ───────────────────────────────────────── */
+	.hero-cta {
+		display: flex;
+		gap: 16px;
+		margin-top: 20px;
+		justify-content: center;
+		width: 100%;
+		box-sizing: border-box;
+	}
+	.btn-primary, .btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		font-family: 'Cinzel', serif;
+		font-size: 13px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		padding: 14px 25px;
+		cursor: pointer;
+		text-decoration: none;
+		min-height: 44px;
+	}
+	.btn-primary {
+		color: var(--ink);
+		background: var(--gold2);
+		font-weight: bold;
+		border: none;
+		transition: background 0.2s, transform 0.15s;
+	}
+	.btn-primary:hover {
+		background: var(--gold3);
+		transform: translateY(-1px);
+	}
+	.btn-primary:active { transform: translateY(0); }
+
+	.btn-secondary {
+		color: var(--parch);
+		background: transparent;
+		border: 1px solid var(--gold);
+		transition: border-color 0.2s, color 0.2s, transform 0.15s;
+	}
+	.btn-secondary:hover {
+		border-color: var(--gold2);
+		color: var(--gold2);
+		transform: translateY(-1px);
+	}
+
+	/* ── RESPONSIVE ───────────────────────────────────────────── */
+	@media (max-width: 900px) {
+		.contact-grid { grid-template-columns: 1fr; }
+	}
+	@media (max-width: 600px) {
+		.section { padding: 50px 20px; }
+		.quote-section { padding: 40px 20px; }
+		.hero-cta { flex-direction: column; align-items: stretch; }
+		.contact-form { padding: 20px; }
+	}
+	</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+<nav role="navigation" aria-label="Menu principal">
+	<a href="/" class="nav-logo">Telluris</a>
+	<ul class="nav-links">
+		<li><a href="/#monde">Le monde</a></li>
+		<li><a href="/#races">Races</a></li>
+		<li><a href="/#guildes">Guildes</a></li>
+		<li><a href="/#vocations">Vocations</a></li>
+		<li><a href="/auth">Jouer</a></li>
+	</ul>
+</nav>
+
+<main id="main-content">
+	<section class="section" aria-labelledby="contact-title">
+		<p class="section-eyebrow">Transmission & Messagerie</p>
+		<h1 id="contact-title" class="section-title">Nous contacter</h1>
+		<div class="section-divider" role="presentation"></div>
+
+		<div class="contact-grid">
+			<aside class="contact-info-cards">
+				<article class="feature-card">
+					<h2 class="feature-title">Support & Assistance</h2>
+					<p class="feature-text">
+						Une question sur votre compte ou un problème en jeu ? Envoyez un message directement à l'équipe.
+					</p>
+					<p class="feature-text">
+						Courriel : <a href="mailto:support@telluris.fr" class="feature-link">support@telluris.fr</a>
+					</p>
+				</article>
+
+				<article class="feature-card">
+					<h2 class="feature-title">Communauté</h2>
+					<p class="feature-text">
+						Rejoignez les érudits et aventuriers de Telluris pour échanger en direct avec l'équipe et les joueurs.
+					</p>
+					<p class="feature-text">
+						<a href="#" class="feature-link">Rejoindre le Discord</a>
+					</p>
+				</article>
+			</aside>
+
+			<form class="contact-form" action="/contact" method="POST">
+				<div class="form-group">
+					<label for="name" class="form-label">Nom ou Pseudonyme</label>
+					<input type="text" id="name" name="name" class="form-input" required placeholder="Ex. Eternel7">
+				</div>
+
+				<div class="form-group">
+					<label for="email" class="form-label">Adresse courriel</label>
+					<input type="email" id="email" name="email" class="form-input" required placeholder="votre@email.fr">
+				</div>
+
+				<div class="form-group">
+					<label for="subject" class="form-label">Sujet du message</label>
+					<select id="subject" name="subject" class="form-select" required>
+						<option value="" disabled selected>Choisissez une catégorie</option>
+						<option value="support">Assistance technique</option>
+						<option value="bug">Signalement de bug</option>
+						<option value="partnership">Presse & Partenariats</option>
+						<option value="other">Autre demande</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label for="message" class="form-label">Votre message</label>
+					<textarea id="message" name="message" class="form-textarea" required placeholder="Rédigez votre missive ici..."></textarea>
+				</div>
+
+				<button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 10px;">Envoyer la missive</button>
+			</form>
+		</div>
+	</section>
+
+	{% import "part-main-quote-section.html" as footer %}
+	{{ footer.render_footer("Toute plume trouve son encre, et chaque voix traverse la brume pour atteindre la garde.") }}
+
+</main>
+
+{% include "part-main-footer.html" without context %}>
+
+</body>
+</html>

@@ -860,7 +860,7 @@
 
 		<p class="races-cohab reveal reveal-delay-2">Parce que le dehors est un sanctuaire de dangers mortels, les Anthropes ont appris à cohabiter par pure nécessité de survie. Derrière les murailles des Cités-États, la distinction se fait par la richesse et le rang, jamais par la Lignée — et c'est au sein de la Guilde des Aventuriers que ce métissage atteint son paroxysme : face aux zones blanches de la carte, nul ne peut se payer le luxe des préjugés.</p>
 	</section>
-
+	
 	<div class="quote-section" role="complementary" aria-label="Citation">
 		<blockquote class="quote-text reveal">"Nul ne devient héros entre les remparts. La gloire attend là où les cartes deviennent blanches."</blockquote>
 		<p class="quote-source reveal reveal-delay-1">Aldric von Brunn — Guerrier, Rang Or</p>
@@ -1106,7 +1106,7 @@
 		<p class="section-eyebrow reveal">Votre aventure commence</p>
 		<h2 id="cta-title" class="section-title reveal reveal-delay-1">Êtes-vous prêt à sortir des remparts ?</h2>
 		<div class="section-divider reveal reveal-delay-2" role="presentation"></div>
-		<p style="font-family:'IM Fell English',serif; color:var(--parch3); max-width:500px; margin: 0 auto 40px; line-height:1.85; font-size:17px" class="reveal reveal-delay-2">
+		<p style="color:var(--parch3); max-width:500px; margin: 0 auto 40px; line-height:1.85; font-size:17px" class="reveal reveal-delay-2">
 			Rejoignez la Guilde. Accomplissez des quêtes. Forgez des alliances. Fondez peut-être votre propre cité-état. Telluris attend ceux qui osent.
 		</p>
 		<div class="hero-cta reveal reveal-delay-3">
@@ -1116,20 +1116,7 @@
 	</section>
 </main>
 
-<footer role="contentinfo">
-	<div>
-		<a href="#">
-			<p class="footer-logo">Telluris</p>
-			<p class="footer-sub" lang="la">Ubi Chartae Finiunt</p>
-		</a>
-	</div>
-	<ul class="footer-links">
-		<li><a href="#">Mentions légales</a></li>
-		<li><a href="#">Confidentialité</a></li>
-		<li><a href="#">Contact</a></li>
-		<li><a href="#">Presse</a></li>
-	</ul>
-</footer>
+{% include "part-main-footer.html" without context %}
 
 <script>
 const reveals = document.querySelectorAll('.reveal');
