@@ -1,0 +1,5030 @@
+[
+  {
+    "_id": "item:aigle_geant_tete",
+    "type": "item",
+    "nom": "Tête d'Aigle Geant",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      25.0,
+      55.0
+    ],
+    "description": "Tête d'Aigle Geant, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:aigle_geant",
+    "portion_de": "item:aigle_geant",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:aigle_geant_corps",
+    "type": "item",
+    "nom": "Corps d'Aigle Geant",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      112.5,
+      247.5
+    ],
+    "description": "Corps d'Aigle Geant, débité sur place.",
+    "tags": [
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:aigle_geant",
+    "portion_de": "item:aigle_geant",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:aigle_geant_aile",
+    "type": "item",
+    "nom": "Aile d'Aigle Geant",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      25.0,
+      55.0
+    ],
+    "description": "Aile d'Aigle Geant, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_aile",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:aigle_geant",
+    "portion_de": "item:aigle_geant",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:aigle_geant_patte",
+    "type": "item",
+    "nom": "Patte d'Aigle Geant",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      17.5,
+      38.5
+    ],
+    "description": "Patte d'Aigle Geant, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:aigle_geant",
+    "portion_de": "item:aigle_geant",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:aigle_geant_queue",
+    "type": "item",
+    "nom": "Queue d'Aigle Geant",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      27.5,
+      60.5
+    ],
+    "description": "Queue d'Aigle Geant, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:aigle_geant",
+    "portion_de": "item:aigle_geant",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:aigle_geant",
+    "_rev": "5-3eceb19007372e1375001d01fa688f1f",
+    "type": "item",
+    "nom": "Carcasse d'Aigle Geant",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      250,
+      550
+    ],
+    "description": "Dépouille d'Aigle Geant récupérée à l'issue du combat.",
+    "source_espece": "espece:aigle_geant",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:aigle_geant_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:aigle_geant_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:aigle_geant_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:aigle_geant_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:aigle_geant_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:ange_de_la_connaissance_tete",
+    "type": "item",
+    "nom": "Tête d'Ange de la Connaissance",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      6.0,
+      9.6
+    ],
+    "description": "Tête d'Ange de la Connaissance, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "magique",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_connaissance",
+    "portion_de": "item:ange_de_la_connaissance",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_connaissance_corps",
+    "type": "item",
+    "nom": "Corps d'Ange de la Connaissance",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      31.5,
+      50.4
+    ],
+    "description": "Corps d'Ange de la Connaissance, débité sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "magique",
+      "partie_corps",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_connaissance",
+    "portion_de": "item:ange_de_la_connaissance",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_connaissance_aile",
+    "type": "item",
+    "nom": "Aile d'Ange de la Connaissance",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      6.0,
+      9.6
+    ],
+    "description": "Aile d'Ange de la Connaissance, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "magique",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_connaissance",
+    "portion_de": "item:ange_de_la_connaissance",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_connaissance_bras",
+    "type": "item",
+    "nom": "Bras d'Ange de la Connaissance",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      4.12,
+      6.6
+    ],
+    "description": "Bras d'Ange de la Connaissance, débité sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "magique",
+      "partie_bras",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_connaissance",
+    "portion_de": "item:ange_de_la_connaissance",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_connaissance_jambe",
+    "type": "item",
+    "nom": "Jambe d'Ange de la Connaissance",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      8.62,
+      13.8
+    ],
+    "description": "Jambe d'Ange de la Connaissance, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "magique",
+      "partie_jambe",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_connaissance",
+    "portion_de": "item:ange_de_la_connaissance",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_connaissance",
+    "_rev": "6-fc283decb88480d41455f8d2016a4931",
+    "type": "item",
+    "nom": "Carcasse d'Ange de la Connaissance",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      75,
+      120
+    ],
+    "description": "Dépouille d'Ange de la Connaissance récupérée à l'issue du combat.",
+    "source_espece": "espece:ange_de_la_connaissance",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:ange_de_la_connaissance_tete",
+        "quantite": 1,
+        "fraction": 0.08
+      },
+      {
+        "item": "item:ange_de_la_connaissance_corps",
+        "quantite": 1,
+        "fraction": 0.42
+      },
+      {
+        "item": "item:ange_de_la_connaissance_aile",
+        "quantite": 2,
+        "fraction": 0.16
+      },
+      {
+        "item": "item:ange_de_la_connaissance_bras",
+        "quantite": 2,
+        "fraction": 0.11
+      },
+      {
+        "item": "item:ange_de_la_connaissance_jambe",
+        "quantite": 2,
+        "fraction": 0.23
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:ange_de_la_justice_tete",
+    "type": "item",
+    "nom": "Tête d'Ange de la Justice",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      6.0,
+      9.6
+    ],
+    "description": "Tête d'Ange de la Justice, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_justice",
+    "portion_de": "item:ange_de_la_justice",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_justice_corps",
+    "type": "item",
+    "nom": "Corps d'Ange de la Justice",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      31.5,
+      50.4
+    ],
+    "description": "Corps d'Ange de la Justice, débité sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "partie_corps",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_justice",
+    "portion_de": "item:ange_de_la_justice",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_justice_aile",
+    "type": "item",
+    "nom": "Aile d'Ange de la Justice",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      6.0,
+      9.6
+    ],
+    "description": "Aile d'Ange de la Justice, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_justice",
+    "portion_de": "item:ange_de_la_justice",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_justice_bras",
+    "type": "item",
+    "nom": "Bras d'Ange de la Justice",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      4.12,
+      6.6
+    ],
+    "description": "Bras d'Ange de la Justice, débité sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "partie_bras",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_justice",
+    "portion_de": "item:ange_de_la_justice",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_justice_jambe",
+    "type": "item",
+    "nom": "Jambe d'Ange de la Justice",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      8.62,
+      13.8
+    ],
+    "description": "Jambe d'Ange de la Justice, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "partie_jambe",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_justice",
+    "portion_de": "item:ange_de_la_justice",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:ange_de_la_justice",
+    "_rev": "5-7b9d141d52b33e1dd2f934581dc7e050",
+    "type": "item",
+    "nom": "Carcasse d'Ange de la Justice",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      75,
+      120
+    ],
+    "description": "Dépouille d'Ange de la Justice récupérée à l'issue du combat.",
+    "source_espece": "espece:ange_de_la_justice",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:ange_de_la_justice_tete",
+        "quantite": 1,
+        "fraction": 0.08
+      },
+      {
+        "item": "item:ange_de_la_justice_corps",
+        "quantite": 1,
+        "fraction": 0.42
+      },
+      {
+        "item": "item:ange_de_la_justice_aile",
+        "quantite": 2,
+        "fraction": 0.16
+      },
+      {
+        "item": "item:ange_de_la_justice_bras",
+        "quantite": 2,
+        "fraction": 0.11
+      },
+      {
+        "item": "item:ange_de_la_justice_jambe",
+        "quantite": 2,
+        "fraction": 0.23
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:araignee_geante_tete",
+    "type": "item",
+    "nom": "Tête d'Araignee Geante",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      11.25,
+      18.0
+    ],
+    "description": "Tête d'Araignee Geante, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "venin"
+    ],
+    "source_espece": "espece:araignee_geante",
+    "portion_de": "item:araignee_geante",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:araignee_geante_corps",
+    "type": "item",
+    "nom": "Corps d'Araignee Geante",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      33.75,
+      54.0
+    ],
+    "description": "Corps d'Araignee Geante, débité sur place.",
+    "tags": [
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "venin"
+    ],
+    "source_espece": "espece:araignee_geante",
+    "portion_de": "item:araignee_geante",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:araignee_geante_patte",
+    "type": "item",
+    "nom": "Patte d'Araignee Geante",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      3.75,
+      6.0
+    ],
+    "description": "Patte d'Araignee Geante, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "venin"
+    ],
+    "source_espece": "espece:araignee_geante",
+    "portion_de": "item:araignee_geante",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:araignee_geante",
+    "_rev": "5-45298ac18f331df8eb6ee7734112c2b4",
+    "type": "item",
+    "nom": "Carcasse d'Araignee Geante",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      75,
+      120
+    ],
+    "description": "Dépouille d'Araignee Geante récupérée à l'issue du combat.",
+    "source_espece": "espece:araignee_geante",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:araignee_geante_tete",
+        "quantite": 1,
+        "fraction": 0.15
+      },
+      {
+        "item": "item:araignee_geante_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:araignee_geante_patte",
+        "quantite": 8,
+        "fraction": 0.4
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:archange_de_l_ordre_tete",
+    "type": "item",
+    "nom": "Tête d'Archange de l Ordre",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6.0,
+      17.6
+    ],
+    "description": "Tête d'Archange de l Ordre, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:archange_de_l_ordre",
+    "portion_de": "item:archange_de_l_ordre",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_de_l_ordre_corps",
+    "type": "item",
+    "nom": "Corps d'Archange de l Ordre",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      31.5,
+      92.4
+    ],
+    "description": "Corps d'Archange de l Ordre, débité sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "partie_corps",
+      "vol"
+    ],
+    "source_espece": "espece:archange_de_l_ordre",
+    "portion_de": "item:archange_de_l_ordre",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_de_l_ordre_aile",
+    "type": "item",
+    "nom": "Aile d'Archange de l Ordre",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6.0,
+      17.6
+    ],
+    "description": "Aile d'Archange de l Ordre, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:archange_de_l_ordre",
+    "portion_de": "item:archange_de_l_ordre",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_de_l_ordre_bras",
+    "type": "item",
+    "nom": "Bras d'Archange de l Ordre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      4.12,
+      12.1
+    ],
+    "description": "Bras d'Archange de l Ordre, débité sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "partie_bras",
+      "vol"
+    ],
+    "source_espece": "espece:archange_de_l_ordre",
+    "portion_de": "item:archange_de_l_ordre",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_de_l_ordre_jambe",
+    "type": "item",
+    "nom": "Jambe d'Archange de l Ordre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      8.62,
+      25.3
+    ],
+    "description": "Jambe d'Archange de l Ordre, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "partie_jambe",
+      "vol"
+    ],
+    "source_espece": "espece:archange_de_l_ordre",
+    "portion_de": "item:archange_de_l_ordre",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_de_l_ordre",
+    "_rev": "6-b17dd1ec24cb463d9c890b6a0a7f8bd1",
+    "type": "item",
+    "nom": "Carcasse d'Archange de l Ordre",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      75,
+      220
+    ],
+    "description": "Dépouille d'Archange de l Ordre récupérée à l'issue du combat.",
+    "source_espece": "espece:archange_de_l_ordre",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:archange_de_l_ordre_tete",
+        "quantite": 1,
+        "fraction": 0.08
+      },
+      {
+        "item": "item:archange_de_l_ordre_corps",
+        "quantite": 1,
+        "fraction": 0.42
+      },
+      {
+        "item": "item:archange_de_l_ordre_aile",
+        "quantite": 2,
+        "fraction": 0.16
+      },
+      {
+        "item": "item:archange_de_l_ordre_bras",
+        "quantite": 2,
+        "fraction": 0.11
+      },
+      {
+        "item": "item:archange_de_l_ordre_jambe",
+        "quantite": 2,
+        "fraction": 0.23
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:archange_du_savoir_tete",
+    "type": "item",
+    "nom": "Tête d'Archange du Savoir",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6.0,
+      12.0
+    ],
+    "description": "Tête d'Archange du Savoir, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "magique",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:archange_du_savoir",
+    "portion_de": "item:archange_du_savoir",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_du_savoir_corps",
+    "type": "item",
+    "nom": "Corps d'Archange du Savoir",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      31.5,
+      63.0
+    ],
+    "description": "Corps d'Archange du Savoir, débité sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "magique",
+      "partie_corps",
+      "vol"
+    ],
+    "source_espece": "espece:archange_du_savoir",
+    "portion_de": "item:archange_du_savoir",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_du_savoir_aile",
+    "type": "item",
+    "nom": "Aile d'Archange du Savoir",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6.0,
+      12.0
+    ],
+    "description": "Aile d'Archange du Savoir, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "magique",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:archange_du_savoir",
+    "portion_de": "item:archange_du_savoir",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_du_savoir_bras",
+    "type": "item",
+    "nom": "Bras d'Archange du Savoir",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      4.12,
+      8.25
+    ],
+    "description": "Bras d'Archange du Savoir, débité sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "magique",
+      "partie_bras",
+      "vol"
+    ],
+    "source_espece": "espece:archange_du_savoir",
+    "portion_de": "item:archange_du_savoir",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_du_savoir_jambe",
+    "type": "item",
+    "nom": "Jambe d'Archange du Savoir",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      8.62,
+      17.25
+    ],
+    "description": "Jambe d'Archange du Savoir, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "magique",
+      "partie_jambe",
+      "vol"
+    ],
+    "source_espece": "espece:archange_du_savoir",
+    "portion_de": "item:archange_du_savoir",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:archange_du_savoir",
+    "_rev": "5-a25d9ac0032d57a9f4181e1bebb9050a",
+    "type": "item",
+    "nom": "Carcasse d'Archange du Savoir",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      75,
+      150
+    ],
+    "description": "Dépouille d'Archange du Savoir récupérée à l'issue du combat.",
+    "source_espece": "espece:archange_du_savoir",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:archange_du_savoir_tete",
+        "quantite": 1,
+        "fraction": 0.08
+      },
+      {
+        "item": "item:archange_du_savoir_corps",
+        "quantite": 1,
+        "fraction": 0.42
+      },
+      {
+        "item": "item:archange_du_savoir_aile",
+        "quantite": 2,
+        "fraction": 0.16
+      },
+      {
+        "item": "item:archange_du_savoir_bras",
+        "quantite": 2,
+        "fraction": 0.11
+      },
+      {
+        "item": "item:archange_du_savoir_jambe",
+        "quantite": 2,
+        "fraction": 0.23
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:avatar_tete",
+    "type": "item",
+    "nom": "Tête d'Avatar",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      4.4,
+      9.6
+    ],
+    "description": "Tête d'Avatar, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "divin",
+      "humanoide",
+      "legendaire",
+      "partie_tete"
+    ],
+    "source_espece": "espece:avatar",
+    "portion_de": "item:avatar",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:avatar_corps",
+    "type": "item",
+    "nom": "Corps d'Avatar",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      27.5,
+      60.0
+    ],
+    "description": "Corps d'Avatar, débité sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "divin",
+      "humanoide",
+      "legendaire",
+      "partie_corps"
+    ],
+    "source_espece": "espece:avatar",
+    "portion_de": "item:avatar",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:avatar_bras",
+    "type": "item",
+    "nom": "Bras d'Avatar",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      3.3,
+      7.2
+    ],
+    "description": "Bras d'Avatar, débité sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "divin",
+      "humanoide",
+      "legendaire",
+      "partie_bras"
+    ],
+    "source_espece": "espece:avatar",
+    "portion_de": "item:avatar",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:avatar_jambe",
+    "type": "item",
+    "nom": "Jambe d'Avatar",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      8.25,
+      18.0
+    ],
+    "description": "Jambe d'Avatar, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "divin",
+      "humanoide",
+      "legendaire",
+      "partie_jambe"
+    ],
+    "source_espece": "espece:avatar",
+    "portion_de": "item:avatar",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:avatar",
+    "_rev": "5-e17bb2457b3c38bec83d5f25277abf80",
+    "type": "item",
+    "nom": "Carcasse d'Avatar",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      55,
+      120
+    ],
+    "description": "Dépouille d'Avatar récupérée à l'issue du combat.",
+    "source_espece": "espece:avatar",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:avatar_tete",
+        "quantite": 1,
+        "fraction": 0.08
+      },
+      {
+        "item": "item:avatar_corps",
+        "quantite": 1,
+        "fraction": 0.5
+      },
+      {
+        "item": "item:avatar_bras",
+        "quantite": 2,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:avatar_jambe",
+        "quantite": 2,
+        "fraction": 0.3
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:basilic_tete",
+    "type": "item",
+    "nom": "Tête de Basilic",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      69.0,
+      146.4
+    ],
+    "description": "Tête de Basilic, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "petrification"
+    ],
+    "source_espece": "espece:basilic",
+    "portion_de": "item:basilic",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:basilic_corps",
+    "type": "item",
+    "nom": "Corps de Basilic",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      299.0,
+      634.4
+    ],
+    "description": "Corps de Basilic, débité sur place.",
+    "tags": [
+      "monstre",
+      "partie_corps",
+      "petrification"
+    ],
+    "source_espece": "espece:basilic",
+    "portion_de": "item:basilic",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:basilic_patte",
+    "type": "item",
+    "nom": "Patte de Basilic",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      40.25,
+      85.4
+    ],
+    "description": "Patte de Basilic, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_patte",
+      "petrification"
+    ],
+    "source_espece": "espece:basilic",
+    "portion_de": "item:basilic",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:basilic_queue",
+    "type": "item",
+    "nom": "Queue de Basilic",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      46.0,
+      97.6
+    ],
+    "description": "Queue de Basilic, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_queue",
+      "petrification"
+    ],
+    "source_espece": "espece:basilic",
+    "portion_de": "item:basilic",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:basilic",
+    "_rev": "5-32df65f106104b4772d6074865711018",
+    "type": "item",
+    "nom": "Carcasse de Basilic",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      575,
+      1220
+    ],
+    "description": "Dépouille de Basilic récupérée à l'issue du combat.",
+    "source_espece": "espece:basilic",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:basilic_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:basilic_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:basilic_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:basilic_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:cerf_tete",
+    "type": "item",
+    "nom": "Tête de Cerf",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      12.0,
+      30.0
+    ],
+    "description": "Tête de Cerf, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_tete",
+      "proie"
+    ],
+    "source_espece": "espece:cerf",
+    "portion_de": "item:cerf",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:cerf_corps",
+    "type": "item",
+    "nom": "Corps de Cerf",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      52.0,
+      130.0
+    ],
+    "description": "Corps de Cerf, débité sur place.",
+    "tags": [
+      "animal",
+      "partie_corps",
+      "proie"
+    ],
+    "source_espece": "espece:cerf",
+    "portion_de": "item:cerf",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:cerf_patte",
+    "type": "item",
+    "nom": "Patte de Cerf",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      7.0,
+      17.5
+    ],
+    "description": "Patte de Cerf, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_patte",
+      "proie"
+    ],
+    "source_espece": "espece:cerf",
+    "portion_de": "item:cerf",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:cerf_queue",
+    "type": "item",
+    "nom": "Queue de Cerf",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      8.0,
+      20.0
+    ],
+    "description": "Queue de Cerf, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_queue",
+      "proie"
+    ],
+    "source_espece": "espece:cerf",
+    "portion_de": "item:cerf",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:cerf",
+    "_rev": "2-d3a86b417e86c9683b0cf121c32f841f",
+    "type": "item",
+    "nom": "Carcasse de Cerf",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      100,
+      250
+    ],
+    "description": "Dépouille de Cerf récupérée à l'issue du combat.",
+    "source_espece": "espece:cerf",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:cerf_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:cerf_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:cerf_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:cerf_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_tete",
+    "type": "item",
+    "nom": "Tête de Dragon",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      16.0,
+      85.0
+    ],
+    "description": "Tête de Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon",
+    "portion_de": "item:dragon",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_corps",
+    "type": "item",
+    "nom": "Corps de Dragon",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      72.0,
+      382.5
+    ],
+    "description": "Corps de Dragon, débité sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon",
+    "portion_de": "item:dragon",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_aile",
+    "type": "item",
+    "nom": "Aile de Dragon",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      16.0,
+      85.0
+    ],
+    "description": "Aile de Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_aile",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon",
+    "portion_de": "item:dragon",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_patte",
+    "type": "item",
+    "nom": "Patte de Dragon",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      11.2,
+      59.5
+    ],
+    "description": "Patte de Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon",
+    "portion_de": "item:dragon",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_queue",
+    "type": "item",
+    "nom": "Queue de Dragon",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      17.6,
+      93.5
+    ],
+    "description": "Queue de Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon",
+    "portion_de": "item:dragon",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon",
+    "_rev": "5-da2e2175fc7e068f03e6ec39dec76b51",
+    "type": "item",
+    "nom": "Carcasse de Dragon",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      160,
+      850
+    ],
+    "description": "Dépouille de Dragon récupérée à l'issue du combat.",
+    "source_espece": "espece:dragon",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:dragon_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:dragon_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:dragon_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:dragon_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:dragon_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:dragon_empereur_tete",
+    "type": "item",
+    "nom": "Tête de Dragon Empereur",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      75.0,
+      285.0
+    ],
+    "description": "Tête de Dragon Empereur, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_empereur",
+    "portion_de": "item:dragon_empereur",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_empereur_corps",
+    "type": "item",
+    "nom": "Corps de Dragon Empereur",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      337.5,
+      1282.5
+    ],
+    "description": "Corps de Dragon Empereur, débité sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_empereur",
+    "portion_de": "item:dragon_empereur",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_empereur_aile",
+    "type": "item",
+    "nom": "Aile de Dragon Empereur",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      75.0,
+      285.0
+    ],
+    "description": "Aile de Dragon Empereur, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_aile",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_empereur",
+    "portion_de": "item:dragon_empereur",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_empereur_patte",
+    "type": "item",
+    "nom": "Patte de Dragon Empereur",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      52.5,
+      199.5
+    ],
+    "description": "Patte de Dragon Empereur, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_empereur",
+    "portion_de": "item:dragon_empereur",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_empereur_queue",
+    "type": "item",
+    "nom": "Queue de Dragon Empereur",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      82.5,
+      313.5
+    ],
+    "description": "Queue de Dragon Empereur, débitée sur place.",
+    "tags": [
+      "boss",
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:dragon_empereur",
+    "portion_de": "item:dragon_empereur",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:dragon_empereur",
+    "_rev": "5-074a52828dba4266c40603f18f0121c0",
+    "type": "item",
+    "nom": "Carcasse de Dragon Empereur",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      750,
+      2850
+    ],
+    "description": "Dépouille de Dragon Empereur récupérée à l'issue du combat.",
+    "source_espece": "espece:dragon_empereur",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:dragon_empereur_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:dragon_empereur_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:dragon_empereur_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:dragon_empereur_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:dragon_empereur_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:grand_dragon_tete",
+    "type": "item",
+    "nom": "Tête de Grand Dragon",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      50.0,
+      120.0
+    ],
+    "description": "Tête de Grand Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:grand_dragon",
+    "portion_de": "item:grand_dragon",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_dragon_corps",
+    "type": "item",
+    "nom": "Corps de Grand Dragon",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      225.0,
+      540.0
+    ],
+    "description": "Corps de Grand Dragon, débité sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:grand_dragon",
+    "portion_de": "item:grand_dragon",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_dragon_aile",
+    "type": "item",
+    "nom": "Aile de Grand Dragon",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      50.0,
+      120.0
+    ],
+    "description": "Aile de Grand Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_aile",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:grand_dragon",
+    "portion_de": "item:grand_dragon",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_dragon_patte",
+    "type": "item",
+    "nom": "Patte de Grand Dragon",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35.0,
+      84.0
+    ],
+    "description": "Patte de Grand Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:grand_dragon",
+    "portion_de": "item:grand_dragon",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_dragon_queue",
+    "type": "item",
+    "nom": "Queue de Grand Dragon",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      55.0,
+      132.0
+    ],
+    "description": "Queue de Grand Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "souffle",
+      "vol"
+    ],
+    "source_espece": "espece:grand_dragon",
+    "portion_de": "item:grand_dragon",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_dragon",
+    "_rev": "5-d0da12dc784ca4280a6bc00d6f7d41ad",
+    "type": "item",
+    "nom": "Carcasse de Grand Dragon",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      500,
+      1200
+    ],
+    "description": "Dépouille de Grand Dragon récupérée à l'issue du combat.",
+    "source_espece": "espece:grand_dragon",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:grand_dragon_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:grand_dragon_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:grand_dragon_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:grand_dragon_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:grand_dragon_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:grand_sanglier_tete",
+    "type": "item",
+    "nom": "Tête de Grand Sanglier",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      15.6,
+      30.0
+    ],
+    "description": "Tête de Grand Sanglier, débitée sur place.",
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "partie_tete",
+      "proie"
+    ],
+    "source_espece": "espece:grand_sanglier",
+    "portion_de": "item:grand_sanglier",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_sanglier_corps",
+    "type": "item",
+    "nom": "Corps de Grand Sanglier",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      67.6,
+      130.0
+    ],
+    "description": "Corps de Grand Sanglier, débité sur place.",
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "partie_corps",
+      "proie"
+    ],
+    "source_espece": "espece:grand_sanglier",
+    "portion_de": "item:grand_sanglier",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "crins",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_sanglier_patte",
+    "type": "item",
+    "nom": "Patte de Grand Sanglier",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      9.1,
+      17.5
+    ],
+    "description": "Patte de Grand Sanglier, débitée sur place.",
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "partie_patte",
+      "proie"
+    ],
+    "source_espece": "espece:grand_sanglier",
+    "portion_de": "item:grand_sanglier",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_sanglier_queue",
+    "type": "item",
+    "nom": "Queue de Grand Sanglier",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      10.4,
+      20.0
+    ],
+    "description": "Queue de Grand Sanglier, débitée sur place.",
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "partie_queue",
+      "proie"
+    ],
+    "source_espece": "espece:grand_sanglier",
+    "portion_de": "item:grand_sanglier",
+    "partie": "queue",
+    "depecage": [
+      [
+        "crins",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:grand_sanglier",
+    "_rev": "5-d5f2b4fdcf8ea4730d1924cb778d4cc9",
+    "type": "item",
+    "nom": "Carcasse de Grand Sanglier",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      130,
+      250
+    ],
+    "description": "Dépouille de Grand Sanglier récupérée à l'issue du combat.",
+    "source_espece": "espece:grand_sanglier",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:grand_sanglier_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:grand_sanglier_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:grand_sanglier_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:grand_sanglier_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:homme_arbre_tete",
+    "type": "item",
+    "nom": "Tête d'Homme Arbre",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      44.0,
+      200.0
+    ],
+    "description": "Tête d'Homme Arbre, débitée sur place.",
+    "tags": [
+      "foret",
+      "lent",
+      "monstre",
+      "partie_tete"
+    ],
+    "source_espece": "espece:homme_arbre",
+    "portion_de": "item:homme_arbre",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:homme_arbre_corps",
+    "type": "item",
+    "nom": "Corps d'Homme Arbre",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      275.0,
+      1250.0
+    ],
+    "description": "Corps d'Homme Arbre, débité sur place.",
+    "tags": [
+      "foret",
+      "lent",
+      "monstre",
+      "partie_corps"
+    ],
+    "source_espece": "espece:homme_arbre",
+    "portion_de": "item:homme_arbre",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:homme_arbre_bras",
+    "type": "item",
+    "nom": "Bras d'Homme Arbre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      33.0,
+      150.0
+    ],
+    "description": "Bras d'Homme Arbre, débité sur place.",
+    "tags": [
+      "foret",
+      "lent",
+      "monstre",
+      "partie_bras"
+    ],
+    "source_espece": "espece:homme_arbre",
+    "portion_de": "item:homme_arbre",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:homme_arbre_jambe",
+    "type": "item",
+    "nom": "Jambe d'Homme Arbre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      82.5,
+      375.0
+    ],
+    "description": "Jambe d'Homme Arbre, débitée sur place.",
+    "tags": [
+      "foret",
+      "lent",
+      "monstre",
+      "partie_jambe"
+    ],
+    "source_espece": "espece:homme_arbre",
+    "portion_de": "item:homme_arbre",
+    "partie": "jambe",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:homme_arbre",
+    "_rev": "5-38c7e26e802f37d030bbd5aa78cd18aa",
+    "type": "item",
+    "nom": "Carcasse d'Homme Arbre",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      550,
+      2500
+    ],
+    "description": "Dépouille d'Homme Arbre récupérée à l'issue du combat.",
+    "source_espece": "espece:homme_arbre",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:homme_arbre_tete",
+        "quantite": 1,
+        "fraction": 0.08
+      },
+      {
+        "item": "item:homme_arbre_corps",
+        "quantite": 1,
+        "fraction": 0.5
+      },
+      {
+        "item": "item:homme_arbre_bras",
+        "quantite": 2,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:homme_arbre_jambe",
+        "quantite": 2,
+        "fraction": 0.3
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:hydre_tete",
+    "type": "item",
+    "nom": "Tête d'Hydre",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      12.0,
+      72.0
+    ],
+    "description": "Tête d'Hydre, débitée sur place.",
+    "tags": [
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "regeneration"
+    ],
+    "source_espece": "espece:hydre",
+    "portion_de": "item:hydre",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:hydre_corps",
+    "type": "item",
+    "nom": "Corps d'Hydre",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      52.0,
+      312.0
+    ],
+    "description": "Corps d'Hydre, débité sur place.",
+    "tags": [
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "regeneration"
+    ],
+    "source_espece": "espece:hydre",
+    "portion_de": "item:hydre",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:hydre_patte",
+    "type": "item",
+    "nom": "Patte d'Hydre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      7.0,
+      42.0
+    ],
+    "description": "Patte d'Hydre, débitée sur place.",
+    "tags": [
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "regeneration"
+    ],
+    "source_espece": "espece:hydre",
+    "portion_de": "item:hydre",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:hydre_queue",
+    "type": "item",
+    "nom": "Queue d'Hydre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      8.0,
+      48.0
+    ],
+    "description": "Queue d'Hydre, débitée sur place.",
+    "tags": [
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "regeneration"
+    ],
+    "source_espece": "espece:hydre",
+    "portion_de": "item:hydre",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:hydre",
+    "_rev": "5-afbb2419b3d290f763458215b9166077",
+    "type": "item",
+    "nom": "Carcasse d'Hydre",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      100,
+      600
+    ],
+    "description": "Dépouille d'Hydre récupérée à l'issue du combat.",
+    "source_espece": "espece:hydre",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:hydre_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:hydre_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:hydre_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:hydre_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:mammouth_tete",
+    "type": "item",
+    "nom": "Tête de Mammouth",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      600.0,
+      1440.0
+    ],
+    "description": "Tête de Mammouth, débitée sur place.",
+    "tags": [
+      "animal",
+      "grande_taille",
+      "partie_tete",
+      "proie"
+    ],
+    "source_espece": "espece:mammouth",
+    "portion_de": "item:mammouth",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:mammouth_corps",
+    "type": "item",
+    "nom": "Corps de Mammouth",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      2600.0,
+      6240.0
+    ],
+    "description": "Corps de Mammouth, débité sur place.",
+    "tags": [
+      "animal",
+      "grande_taille",
+      "partie_corps",
+      "proie"
+    ],
+    "source_espece": "espece:mammouth",
+    "portion_de": "item:mammouth",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:mammouth_patte",
+    "type": "item",
+    "nom": "Patte de Mammouth",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      350.0,
+      840.0
+    ],
+    "description": "Patte de Mammouth, débitée sur place.",
+    "tags": [
+      "animal",
+      "grande_taille",
+      "partie_patte",
+      "proie"
+    ],
+    "source_espece": "espece:mammouth",
+    "portion_de": "item:mammouth",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:mammouth_queue",
+    "type": "item",
+    "nom": "Queue de Mammouth",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      400.0,
+      960.0
+    ],
+    "description": "Queue de Mammouth, débitée sur place.",
+    "tags": [
+      "animal",
+      "grande_taille",
+      "partie_queue",
+      "proie"
+    ],
+    "source_espece": "espece:mammouth",
+    "portion_de": "item:mammouth",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:mammouth",
+    "_rev": "5-a4c8cec1b4d0bb86f02bd7befb432be8",
+    "type": "item",
+    "nom": "Carcasse de Mammouth",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      5000,
+      12000
+    ],
+    "description": "Dépouille de Mammouth récupérée à l'issue du combat.",
+    "source_espece": "espece:mammouth",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:mammouth_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:mammouth_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:mammouth_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:mammouth_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:petit_dragon_tete",
+    "type": "item",
+    "nom": "Tête de Petit Dragon",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      10.0,
+      16.0
+    ],
+    "description": "Tête de Petit Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:petit_dragon",
+    "portion_de": "item:petit_dragon",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:petit_dragon_corps",
+    "type": "item",
+    "nom": "Corps de Petit Dragon",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      45.0,
+      72.0
+    ],
+    "description": "Corps de Petit Dragon, débité sur place.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "partie_corps",
+      "vol"
+    ],
+    "source_espece": "espece:petit_dragon",
+    "portion_de": "item:petit_dragon",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:petit_dragon_aile",
+    "type": "item",
+    "nom": "Aile de Petit Dragon",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      10.0,
+      16.0
+    ],
+    "description": "Aile de Petit Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:petit_dragon",
+    "portion_de": "item:petit_dragon",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:petit_dragon_patte",
+    "type": "item",
+    "nom": "Patte de Petit Dragon",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      7.0,
+      11.2
+    ],
+    "description": "Patte de Petit Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "partie_patte",
+      "vol"
+    ],
+    "source_espece": "espece:petit_dragon",
+    "portion_de": "item:petit_dragon",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:petit_dragon_queue",
+    "type": "item",
+    "nom": "Queue de Petit Dragon",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      11.0,
+      17.6
+    ],
+    "description": "Queue de Petit Dragon, débitée sur place.",
+    "tags": [
+      "draconique",
+      "monstre",
+      "partie_queue",
+      "vol"
+    ],
+    "source_espece": "espece:petit_dragon",
+    "portion_de": "item:petit_dragon",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:petit_dragon",
+    "_rev": "5-8398011762be1a36a0cbe6f1886935cf",
+    "type": "item",
+    "nom": "Carcasse de Petit Dragon",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      100,
+      160
+    ],
+    "description": "Dépouille de Petit Dragon récupérée à l'issue du combat.",
+    "source_espece": "espece:petit_dragon",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:petit_dragon_tete",
+        "quantite": 1,
+        "fraction": 0.1
+      },
+      {
+        "item": "item:petit_dragon_corps",
+        "quantite": 1,
+        "fraction": 0.45
+      },
+      {
+        "item": "item:petit_dragon_aile",
+        "quantite": 2,
+        "fraction": 0.2
+      },
+      {
+        "item": "item:petit_dragon_patte",
+        "quantite": 2,
+        "fraction": 0.14
+      },
+      {
+        "item": "item:petit_dragon_queue",
+        "quantite": 1,
+        "fraction": 0.11
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:sanglier_tete",
+    "type": "item",
+    "nom": "Tête de Sanglier",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      7.2,
+      15.6
+    ],
+    "description": "Tête de Sanglier, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_tete"
+    ],
+    "source_espece": "espece:sanglier",
+    "portion_de": "item:sanglier",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:sanglier_corps",
+    "type": "item",
+    "nom": "Corps de Sanglier",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      31.2,
+      67.6
+    ],
+    "description": "Corps de Sanglier, débité sur place.",
+    "tags": [
+      "animal",
+      "partie_corps"
+    ],
+    "source_espece": "espece:sanglier",
+    "portion_de": "item:sanglier",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:sanglier_patte",
+    "type": "item",
+    "nom": "Patte de Sanglier",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      4.2,
+      9.1
+    ],
+    "description": "Patte de Sanglier, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_patte"
+    ],
+    "source_espece": "espece:sanglier",
+    "portion_de": "item:sanglier",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:sanglier_queue",
+    "type": "item",
+    "nom": "Queue de Sanglier",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      4.8,
+      10.4
+    ],
+    "description": "Queue de Sanglier, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_queue"
+    ],
+    "source_espece": "espece:sanglier",
+    "portion_de": "item:sanglier",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:sanglier",
+    "_rev": "5-ff1c16d63b7b5e96479aeccb5519303e",
+    "type": "item",
+    "nom": "Carcasse de Sanglier",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      60,
+      130
+    ],
+    "description": "Dépouille de Sanglier récupérée à l'issue du combat.",
+    "source_espece": "espece:sanglier",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:sanglier_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:sanglier_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:sanglier_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:sanglier_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:tarasque_tete",
+    "type": "item",
+    "nom": "Tête de Tarasque",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      120.0,
+      240.0
+    ],
+    "description": "Tête de Tarasque, débitée sur place.",
+    "tags": [
+      "gardien",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "souffle"
+    ],
+    "source_espece": "espece:tarasque",
+    "portion_de": "item:tarasque",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:tarasque_corps",
+    "type": "item",
+    "nom": "Corps de Tarasque",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      520.0,
+      1040.0
+    ],
+    "description": "Corps de Tarasque, débité sur place.",
+    "tags": [
+      "gardien",
+      "legendaire",
+      "monstre",
+      "partie_corps",
+      "souffle"
+    ],
+    "source_espece": "espece:tarasque",
+    "portion_de": "item:tarasque",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "coeur",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:tarasque_patte",
+    "type": "item",
+    "nom": "Patte de Tarasque",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      70.0,
+      140.0
+    ],
+    "description": "Patte de Tarasque, débitée sur place.",
+    "tags": [
+      "gardien",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "souffle"
+    ],
+    "source_espece": "espece:tarasque",
+    "portion_de": "item:tarasque",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:tarasque_queue",
+    "type": "item",
+    "nom": "Queue de Tarasque",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      80.0,
+      160.0
+    ],
+    "description": "Queue de Tarasque, débitée sur place.",
+    "tags": [
+      "gardien",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "souffle"
+    ],
+    "source_espece": "espece:tarasque",
+    "portion_de": "item:tarasque",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:tarasque",
+    "_rev": "5-0a66f326e5769686548603537899e574",
+    "type": "item",
+    "nom": "Carcasse de Tarasque",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      1000,
+      2000
+    ],
+    "description": "Dépouille de Tarasque récupérée à l'issue du combat.",
+    "source_espece": "espece:tarasque",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:tarasque_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:tarasque_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:tarasque_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:tarasque_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  },
+  {
+    "_id": "item:taureau_tete",
+    "type": "item",
+    "nom": "Tête de Taureau",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      52.8,
+      180.0
+    ],
+    "description": "Tête de Taureau, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_tete"
+    ],
+    "source_espece": "espece:taureau",
+    "portion_de": "item:taureau",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:taureau_corps",
+    "type": "item",
+    "nom": "Corps de Taureau",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      228.8,
+      780.0
+    ],
+    "description": "Corps de Taureau, débité sur place.",
+    "tags": [
+      "animal",
+      "partie_corps"
+    ],
+    "source_espece": "espece:taureau",
+    "portion_de": "item:taureau",
+    "partie": "corps",
+    "depecage": [
+      [
+        "boyaux",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "foie",
+        1
+      ],
+      [
+        "graisse",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "sang",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:taureau_patte",
+    "type": "item",
+    "nom": "Patte de Taureau",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      30.8,
+      105.0
+    ],
+    "description": "Patte de Taureau, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_patte"
+    ],
+    "source_espece": "espece:taureau",
+    "portion_de": "item:taureau",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ]
+  },
+  {
+    "_id": "item:taureau_queue",
+    "type": "item",
+    "nom": "Queue de Taureau",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      35.2,
+      120.0
+    ],
+    "description": "Queue de Taureau, débitée sur place.",
+    "tags": [
+      "animal",
+      "partie_queue"
+    ],
+    "source_espece": "espece:taureau",
+    "portion_de": "item:taureau",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "poils",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ]
+  },
+  {
+    "_id": "item:taureau",
+    "_rev": "5-454dfc07b6e50dcfc77f3f632dda9bcd",
+    "type": "item",
+    "nom": "Carcasse de Taureau",
+    "sous_categorie": "carcasse",
+    "icon": "🥩",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": [
+      440,
+      1500
+    ],
+    "description": "Dépouille de Taureau récupérée à l'issue du combat.",
+    "source_espece": "espece:taureau",
+    "loot_defaut": true,
+    "decoupe": [
+      {
+        "item": "item:taureau_tete",
+        "quantite": 1,
+        "fraction": 0.12
+      },
+      {
+        "item": "item:taureau_corps",
+        "quantite": 1,
+        "fraction": 0.52
+      },
+      {
+        "item": "item:taureau_patte",
+        "quantite": 4,
+        "fraction": 0.28
+      },
+      {
+        "item": "item:taureau_queue",
+        "quantite": 1,
+        "fraction": 0.08
+      }
+    ],
+    "decoupe_poids_min": 100.0
+  }
+]

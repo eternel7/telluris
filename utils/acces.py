@@ -41,7 +41,7 @@
 import time
 
 from models import character_stats
-from utils.characters import item_ref_id, item_ref_lieu
+from utils.characters import item_ref_id, item_ref_lieu, victoire_acquise
 # L'échelle des rangs de guilde est lue à sa SOURCE (jamais recopiée : elle est passée de
 # 7 à 8 crans une fois déjà). `utils.recrutement` la définit ; `utils.chasse` fait le même
 # import — on ne passe pas par lui, qui tirerait zones + quetes dans ce module minimal.
@@ -53,16 +53,22 @@ def now_epoch() -> int:
 
 # Clés de condition reconnues par `conditions_remplies`. Toute autre clé fait échouer
 # `conditions_invalides` (signalée par le linter) ET `conditions_remplies` (fail-closed).
-CONDITIONS_CONNUES = {"quete_active", "item", "rang_min"}
+CONDITIONS_CONNUES = {"quete_active", "item", "rang_min", "combat_gagne", "lieu_visite"}
 
 # Sous-filtres reconnus par condition. ⚠️ Les valider AUSSI : une clé de premier niveau
 # inconnue refuse (fail-closed, donc visible en jeu), mais un SOUS-filtre inconnu était
 # simplement ignoré — donc PERMISSIF, donc invisible. Un `objectifatteint` mal orthographié
 # rouvrirait la boucle du donjon sans que rien ne le signale. C'est le linter qui les attrape.
 SOUS_FILTRES_CONNUS = {
-	"quete_active": {"lieu", "types", "giver_categorie", "cible", "objectif_atteint"},
+	# `attendu` = la NÉGATION, absente jusqu'ici : « tant qu'AUCUNE quête active ne satisfait
+	# ce filtre ». C'est ce qui permet de masquer un lieu PENDANT une quête (la grotte vide,
+	# le temps qu'on aille dans celle qui est habitée). Même mot, même sémantique que la
+	# condition de dialogue `quete_reussie.attendu` : un seul vocabulaire de négation.
+	"quete_active": {"lieu", "types", "giver_categorie", "cible", "objectif_atteint", "attendu"},
 	"item": {"item", "lieu_parent"},
 	"rang_min": {"cite", "rang"},
+	"combat_gagne": {"lieu", "attendu"},
+	"lieu_visite": {"lieu", "attendu"},
 }
 
 
@@ -125,8 +131,35 @@ def _quete_satisfait(q: dict, filtre: dict, character: dict, get_doc_fn) -> bool
 
 
 def _condition_quete_active(character: dict, filtre: dict, get_doc_fn) -> bool:
+	"""Une quête active satisfait-elle ce filtre ? `attendu: false` inverse la réponse
+	(« tant qu'aucune ne le satisfait »).
+
+	⚠️ `attendu` est RETIRÉ du filtre avant le test : ce n'est pas un champ de quête, et
+	`_quete_satisfait` l'ignorerait en silence — ce serait une négation qu'on croit avoir
+	écrite et qui ne s'applique jamais."""
+	filtre = dict(filtre or {})
+	attendu = filtre.pop("attendu", True)
+	if not isinstance(attendu, bool):
+		return False   # fail-closed, comme une clé inconnue
 	actives = (character or {}).get("quetes_actives") or []
-	return any(_quete_satisfait(q, filtre or {}, character, get_doc_fn) for q in actives)
+	return any(_quete_satisfait(q, filtre, character, get_doc_fn) for q in actives) is attendu
+
+
+def _condition_combat_gagne(character: dict, filtre: dict) -> bool:
+	"""Le combat d'entrée de cette SALLE GARDÉE a-t-il été remporté ? `attendu: false` pour
+	l'inverse — c'est ainsi qu'une porte de combat ne s'ouvre qu'une fois.
+
+	⚠️ `lieu` est OBLIGATOIRE, et fail-closed s'il manque : pas de défaut implicite « la
+	salle qui porte la barrière », qui serait juste pour la porte du combat et faux pour
+	toute barrière conditionnée sur le combat d'UN AUTRE lieu (la clairière dégagée devant
+	la grotte est gardée par la victoire remportée dans `lieu:grotte_en_foret`)."""
+	lieu_id = (filtre or {}).get("lieu")
+	if not lieu_id or not isinstance(lieu_id, str):
+		return False
+	attendu = (filtre or {}).get("attendu", True)
+	if not isinstance(attendu, bool):
+		return False
+	return victoire_acquise(character, lieu_id) is attendu
 
 
 def _condition_item(character: dict, filtre: dict) -> bool:
@@ -141,6 +174,29 @@ def _condition_item(character: dict, filtre: dict) -> bool:
 			continue
 		return True
 	return False
+
+
+def _condition_lieu_visite(character: dict, filtre: dict) -> bool:
+	"""Le joueur a-t-il déjà mis les pieds dans ce lieu ? `attendu: false` pour l'inverse —
+	c'est ainsi qu'un lieu ne se traverse QU'UNE FOIS.
+
+	`character["lieux_visites"]` est écrit par le déplaceur à la première arrivée
+	(`routers/user.move_character`, celui-là même qui verse l'XP de découverte) : on ne
+	mémorise donc rien de neuf, on lit une trace qui existait déjà.
+
+	⚠️ Un lieu qui se referme sur son visiteur reste QUITTABLE : `get_lieu_links` ne filtre
+	jamais le lieu COURANT (« on ne s'expulse pas soi-même ») et la garde 403 de
+	`move_character` porte sur la DESTINATION. Le joueur y entre, la porte se referme
+	derrière lui, et il ressort par où il veut.
+
+	⚠️ `lieu` obligatoire, fail-closed s'il manque — même règle que `combat_gagne`."""
+	lieu_id = (filtre or {}).get("lieu")
+	if not lieu_id or not isinstance(lieu_id, str):
+		return False
+	attendu = (filtre or {}).get("attendu", True)
+	if not isinstance(attendu, bool):
+		return False
+	return (lieu_id in ((character or {}).get("lieux_visites") or [])) is attendu
 
 
 def rang_min_satisfait(character: dict, filtre: dict) -> bool:
@@ -250,6 +306,10 @@ def conditions_remplies(character: dict, lieu_doc: dict, get_doc_fn) -> tuple[bo
 			ok = _condition_item(character, filtre or {})
 		elif cle == "rang_min":
 			ok = _condition_rang_min(character, filtre or {})
+		elif cle == "combat_gagne":
+			ok = _condition_combat_gagne(character, filtre or {})
+		elif cle == "lieu_visite":
+			ok = _condition_lieu_visite(character, filtre or {})
 		else:
 			# Fail-closed : une clé inconnue refuse toujours (typo ≠ porte ouverte).
 			ok = False

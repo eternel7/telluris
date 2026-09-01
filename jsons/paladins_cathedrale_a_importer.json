@@ -1,0 +1,407 @@
+[
+  {
+    "_id": "pnj:dame_eleonore_de_rochefort",
+    "type": "pnj",
+    "nom": "Dame Éléonore de Rochefort",
+    "race": "elfe",
+    "vocation": "paladin",
+    "portrait": "paladin_Dame_Eleonore_de_Rochefort_elfe_f.jpg",
+    "description": "Paladine, commandante des convois de cristaux de mana d'Auxerre vers Lutecia. C'est elle qui signe les registres de la cathédrale et qui décide du jour où l'on prend la route. Elle parle peu, et jamais pour ne rien dire.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Sur le parvis, une file de mineurs remonte de la rue basse sous la garde de quatre templiers, chacun ployant sous une caisse de bois cerclée et scellée au sceau d'Auxerre. Une paladine en haubert clair les compte à voix basse, un registre ouvert sur l'avant-bras, et fait ouvrir les caisses une à une. Sous les couvercles, une lueur pâle bat comme un pouls. Elle referme, marque une croix à l'encre, et relève enfin les yeux. « Éléonore de Rochefort. Écartez-vous de la file, {prenom}, elle est plus lourde qu'elle n'en a l'air. »",
+          "choix": [
+            {
+              "id": "caisses",
+              "label": "« Que contiennent ces caisses ? »",
+              "next": "caisses"
+            },
+            {
+              "id": "cathedrale",
+              "label": "« Pourquoi entreposer cela dans une cathédrale ? »",
+              "next": "cathedrale"
+            },
+            {
+              "id": "convois",
+              "label": "« Et ensuite ? Elles restent ici ? »",
+              "next": "convois"
+            },
+            {
+              "id": "voyage_demande",
+              "label": "« Auriez-vous besoin d'une lame de plus sur la route ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "voyage_refus"
+            },
+            {
+              "id": "voyage_offre",
+              "label": "« On m'a dit que le prochain convoi partait bientôt. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+              "next": "voyage_offre"
+            },
+            {
+              "id": "guilde",
+              "label": "« Je cherche la guilde des aventuriers. »",
+              "next": "guilde"
+            },
+            {
+              "id": "fin",
+              "label": "« Je vous laisse à vos registres. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "caisses": {
+          "texte": "« Des cristaux de mana. La production de la mine, remontée par ces hommes-là. » Elle referme le registre sur son doigt. « Un cristal pur ne se contente pas de briller : il exhale. Et ce qu'il exhale s'entend de loin — les bêtes des bois le sentent avant nous, et les hommes savent lire une caisse scellée aussi bien que moi. » Elle rouvre le registre. « C'est pourquoi on ne les laisse jamais dormir dans un entrepôt. »",
+          "choix": [
+            {
+              "id": "cathedrale",
+              "label": "« Et une cathédrale, c'est mieux ? »",
+              "next": "cathedrale"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "cathedrale": {
+          "texte": "« Parce que celle-ci n'a pas de portail. » Elle le dit comme une évidence de métier. « Aucune brèche, aucun passage : rien qui puisse répondre à ce que les cristaux appellent. Et sous la nef, des salles fortifiées où l'office ne s'interrompt jamais — la prière de l'ordre tient leurs émanations serrées comme un couvercle tient une braise. » Un regard vers les portes. « Une cathédrale de paladins est le seul coffre que je connaisse qui referme aussi les choses invisibles. »",
+          "choix": [
+            {
+              "id": "convois",
+              "label": "« Elles y restent longtemps ? »",
+              "next": "convois"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "convois": {
+          "texte": "« Jusqu'au prochain convoi. » Elle rend le registre à un frère servant et regarde la file s'engouffrer sous le porche. « Ce n'est pas du charroi de marchandise, quoi qu'en disent les comptes. Une cargaison doit arriver à Lutecia sans avoir traîné derrière elle la moitié des bois de l'Yonne, ni donné à quiconque le loisir d'en estimer le prix. » Elle boucle une sangle d'un coup sec. « Le jour où l'on part, je suis la seule à le savoir, et je le sais tard. »",
+          "choix": [
+            {
+              "id": "voyage_demande",
+              "label": "« Auriez-vous besoin d'une lame de plus sur la route ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "voyage_refus"
+            },
+            {
+              "id": "voyage_offre",
+              "label": "« On m'a dit que le prochain convoi partait bientôt. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+			"next": "voyage_offre"},
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "guilde": {
+          "texte": "Elle indique du menton l'angle de la place. « Traversez la place pour accéder au Temple de Saint-Eusèbe, puis prenez à main droite après le temple : le Bastion de l'Yonne a une bannière qu'on ne rate pas. L'autre direction mène à un quartier de marchands. » Un temps. « Demandez le nain au comptoir, il inscrit tout le monde. C'est là que se font les noms, {prenom}, et un nom est ce qui manque le plus à qui n'en a pas encore. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Merci, dame paladine. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« J'y vais de ce pas. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "voyage_refus": {
+          "texte": "Elle vous regarde un instant de trop, et ce n'est pas de la méfiance : c'est un inventaire. « Non. » Le registre se referme. « Je ne mets pas d'inconnu entre ces caisses et les bois. Ce n'est pas votre bras que je mets en doute — c'est que je ne sais rien de vous, et sur cette route, ce que j'ignore pèse plus lourd que ce que j'emporte. » Elle repart vers la file, puis s'arrête. « Faites vos preuves quelque part où l'on tient des registres, vous aussi. La guilde en tient d'excellents. »",
+          "choix": [
+            {
+              "id": "guilde",
+              "label": "« Où la trouve-t-on ? »",
+              "next": "guilde"
+            },
+            {
+              "id": "retour",
+              "label": "« C'est de bonne guerre. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "voyage_offre": {
+          "texte": "« Bientôt, oui. Et vous en serez. » Elle appuie le registre contre sa hanche. « On m'a rapporté ce que vous êtes allé chercher dans les bois du nord-ouest, et dans quel état vous l'avez ramené : entier. C'est le seul mot qui m'intéresse dans un rapport. » Elle désigne les portes de la nef. « La dernière livraison de l'année part pour Lutecia, et cette fois nous ne serons pas seuls à voyager. »",
+          "choix": [
+            {
+              "id": "aelis",
+              "label": "« L'architecte part avec nous ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+              "next": "aelis"
+            },
+            {
+              "id": "depart",
+              "label": "« Quel est l'ordre de marche ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+              "next": "depart"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "aelis": {
+          "texte": "« Elle part avec nous, et elle a déjà demandé à voir les salles basses — deux fois. » Un pli au coin de la bouche, qui n'est pas tout à fait un sourire. « Elle prétend qu'on entrepose mal, et je crains qu'elle n'ait raison. » Puis le visage se ferme. « Deux frères d'armes sont tombés sur cette route en la protégeant, avant vous. Je ne les ai pas connus. Je relèverai leur poste quand même : c'est ainsi qu'on relève un poste. »",
+          "choix": [
+            {
+              "id": "depart",
+              "label": "« Quel est l'ordre de marche ? »",
+              "next": "depart"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "depart": {
+          "texte": "« La route basse jusqu'au fleuve, puis plein nord. » Elle trace le trajet dans l'air, brièvement. « Frère Martin ferme la marche, je tiens la tête. Vous ferez ce que vous jugerez utile entre les deux — on m'a dit que vous aviez l'habitude de juger correctement. » Elle rouvre son registre. « Tenez-vous prêt. Je vous l'ai dit : le jour du départ, je le sais tard. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je serai là. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:frere_martin_de_clairvaux",
+    "type": "pnj",
+    "nom": "Frère Martin de Clairvaux",
+    "race": "hobbit",
+    "vocation": "paladin",
+    "portrait": "paladin_Frere_Martin_de_Clairvaux_hobbit_m.jpg",
+    "description": "Paladin hobbit, second de Dame Éléonore de Rochefort. Il vérifie les sceaux, compte les caisses deux fois et connaît le nom de tous les mulets d'Auxerre. Sur la route, il ferme la marche.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Accroupi au bas des marches, un hobbit en cotte de mailles fait glisser son pouce sur la cire d'un sceau, le compare à celui de la caisse suivante, et grommelle. « Sept. » Il relève le nez vers vous, un fusain coincé derrière l'oreille. « Sept caisses descendues, sept sceaux intacts, et un mineur qui boite — ce qui ne figure sur aucun registre mais me regarde quand même. Frère Martin de Clairvaux. Ne marchez pas dans la craie, {prenom}, j'ai mis une heure à la tracer. »",
+          "choix": [
+            {
+              "id": "sceaux",
+              "label": "« Vous comptez les sceaux un par un ? »",
+              "next": "sceaux"
+            },
+            {
+              "id": "emanations",
+              "label": "« Cette lueur, sous les couvercles… »",
+              "next": "emanations"
+            },
+            {
+              "id": "route",
+              "label": "« La route jusqu'à la capitale est longue ? »",
+              "next": "route"
+            },
+            {
+              "id": "voyage_demande",
+              "label": "« Prenez-vous des bras supplémentaires ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "voyage_refus"
+            },
+            {
+              "id": "voyage_offre",
+              "label": "« Il paraît que je pars avec vous. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+              "next": "voyage_offre"
+            },
+            {
+              "id": "guilde",
+              "label": "« Je cherche la guilde des aventuriers. »",
+              "next": "guilde"
+            },
+            {
+              "id": "fin",
+              "label": "« Bonne journée, frère. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "sceaux": {
+          "texte": "« Un par un, et deux fois. » Il souffle sur la craie. « Une caisse de cristaux ne se vole pas dans un chemin creux : ça se remplace sur un quai, entre deux registres, par une caisse de cailloux du même poids. J'ai vu la chose se faire ailleurs. » Il tapote le couvercle. « Depuis, je pèse aussi. Dame Éléonore trouve que je perds du temps. Elle a raison, et je continue. »",
+          "choix": [
+            {
+              "id": "emanations",
+              "label": "« Et cette lueur ? »",
+              "next": "emanations"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "emanations": {
+          "texte": "« N'y mettez pas le nez trop longtemps. » Il rabat le couvercle sans brusquerie. « Ça ne brûle pas, ça ne pique pas, ça appelle. Laissez une caisse ouverte une nuit dans une grange et au matin vous aurez de la compagnie : d'abord ce qui rampe, ensuite ce qui mord. » Il montre les portes de la nef. « En bas, la prière ne s'arrête jamais, et sous la prière, ça se tait. C'est tout ce que je sais de la théologie, et ça me suffit. »",
+          "choix": [
+            {
+              "id": "route",
+              "label": "« Et sur la route, qui les fait taire ? »",
+              "next": "route"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "route": {
+          "texte": "« Nous. Mal, mais nous. » Il ramasse son fusain. « À l'allure des chariots, comptez plusieurs jours, et je ne promets rien à qui me demande un chiffre. Dame Éléonore dira le contraire — elle dit toujours le contraire, et pourtant c'est elle qui a raison sur les distances et moi sur les essieux. L'ordre marche bien parce que chacun s'occupe de ce qui casse. »",
+          "choix": [
+            {
+              "id": "voyage_demande",
+              "label": "« Prenez-vous des bras supplémentaires ? »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre",
+                  "attendu": false
+                }
+              },
+              "next": "voyage_refus"
+            },
+            {
+              "id": "voyage_offre",
+              "label": "« Il paraît que je pars avec vous. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+			"next": "voyage_offre"},
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "guilde": {
+          "texte": "« La guilde ? » Il pointe son fusain vers le flanc de la cathédrale. « Traversez la place pour accéder au Temple de Saint-Eusèbe, tournez ensuite à votre droite, vous verrez la bannière du Bastion de l'Yonne avant de voir la porte. » Il se remet à sa craie. « Le nain du comptoir vous inscrira. Prévenez-le que vous venez du parvis : il vous servira une bière et une remarque sur les paladins. Les deux valent le déplacement. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Merci, frère. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« J'y vais. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "voyage_refus": {
+          "texte": "« Des bras ? J'en ai. » Il compte sur ses doigts pleins de craie. « Des templiers, des mineurs, deux charretiers et une paladine qui vaut trois hommes de mauvaise humeur. Ce qui me manque, ce sont des gens dont je connais le nom. » Il hausse une épaule, sans malice. « Ne le prenez pas mal : moi non plus, on ne m'a rien confié le premier jour. On m'a envoyé compter des sacs de grain pendant un hiver. »",
+          "choix": [
+            {
+              "id": "guilde",
+              "label": "« Et où se fait-on un nom, dans cette ville ? »",
+              "next": "guilde"
+            },
+            {
+              "id": "retour",
+              "label": "« Je comprends. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "voyage_offre": {
+          "texte": "« On me l'a dit aussi. » Il vous détaille des pieds à la tête avec l'application qu'il met à ses sceaux. « Vous êtes celui du nord-ouest. Trois bûcherons et la demoiselle, ramenés sur leurs jambes. » Il hoche la tête une fois, ce qui chez lui semble considérable. « Alors je vais vous dire ce que je dis à tout le monde avant un départ, et vous m'écouterez jusqu'au bout. »",
+          "choix": [
+            {
+              "id": "consignes",
+              "label": "« Je vous écoute. »",
+              "condition": {
+                "quete_reussie": {
+                  "id": "quete:escorte_bucherons_d_auxerre"
+                }
+              },
+              "next": "consignes"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "consignes": {
+          "texte": "« Un : on ne ralentit pas pour un blessé, on s'arrête ou on continue, jamais entre les deux. Deux : personne n'ouvre une caisse en chemin, pas même moi, pas même pour vérifier. Trois : si ça tourne mal, ce sont les caisses qu'on abandonne, jamais les gens. » Il range son fusain. « La demoiselle a discuté le point trois pendant un quart d'heure. Elle a fini par céder. Vous, vous ne discuterez pas. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Entendu, frère. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Trois. Je m'en souviendrai. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

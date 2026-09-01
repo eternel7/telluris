@@ -862,6 +862,14 @@ def _matieres_entrantes(item_doc: dict, qmap: dict | None = None,
 	objet apporte 1 unité sous sa clé matière pour ce lieu (`cle_matiere_lieu` : id
 	d'item si une recette de la catégorie le référence directement, sinon sous-catégorie)."""
 	if item_sous_categorie(item_doc) == "carcasse":
+		# PORTION LOCALISÉE (tête, patte, aile…) : le doc item porte SA PROPRE table
+		# `depecage`, bakée espèce par espèce et partie par partie à la génération
+		# (`dev/gen_carcasses_parties.py`). On la lit telle quelle — `depecage_carcasse`
+		# traite déjà cet override — au lieu de chercher une `espece:<…>_tete` qui n'existe
+		# pas : sans cette branche, une portion se vendrait au boucher sans rien lui
+		# apporter, donc en silence et sans que rien ne le signale.
+		if (item_doc or {}).get("depecage"):
+			return depecage_carcasse(item_doc, qmap, (item_doc or {}).get("poids"))
 		item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id") or ""
 		sub = item_id[len("item:"):] if item_id.startswith("item:") else ""
 		espece = get_doc("espece:" + sub) if sub else None

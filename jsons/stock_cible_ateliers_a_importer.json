@@ -1,0 +1,60 @@
+[
+  {
+    "_id": "lieu:la_corde_de_boyau",
+    "_rev": "82-b5bd52019855177d1757d8eb663922fe",
+    "type": "lieu",
+    "label": "La Corde de Boyau",
+    "image": "boyauderie_europe01.png",
+    "categorie": "boyauderie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_boyauderie",
+        "portrait": "marchand_ogre_m_boyauderie.png",
+        "nom": "Firmin du Ravillon"
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "stock_matieres": {
+      "graisse": 20,
+      "viande": 28
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:boyaux_pour_saucisses",
+        "qty": 7
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:baudruche": 2,
+        "item:boyaux_pour_saucisses": 2,
+        "item:fil_de_boyau": 2
+      }
+    }
+  },
+  {
+    "_id": "lieu:le_fil_du_tripier",
+    "_rev": "4-eba509abea634c5989f426ee209f56a0",
+    "type": "lieu",
+    "label": "Le Fil du Tripier",
+    "image": "boyauderie_europe02.png",
+    "categorie": "boyauderie",
+    "pnj": [
+      {
+        "character": "pnj:marchand_boyauderie",
+        "nom": "Wallerand Chanteroy",
+        "portrait": "marchand_hobbit_m_boyauderie.png"
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "stock_matieres": {},
+    "stock_vente": [],
+    "stock_cible": {
+      "item": {
+        "item:baudruche": 2,
+        "item:boyaux_pour_saucisses": 2,
+        "item:fil_de_boyau": 2
+      }
+    }
+  }
+]

@@ -8,8 +8,10 @@
 #     "_id": "donjon:xxx", "type": "donjon", "nom": "...",
 #     "portail": "lieu:yyy",                    # informatif (lore) : d'où l'on descend
 #     "niveau_max": 3,                          # plafond de GRADE (optionnel, cf. plus bas)
+#     "niveau_min": 2,                          # plancher de GRADE (optionnel, même cascade)
 #     "battle_maps": [                          # les salles, et QUI y vit
-#       {"lieu": "lieu:zzz", "especes": ["espece:a", "espece:b"], "niveau_max": 4}
+#       {"lieu": "lieu:zzz", "especes": ["espece:a", "espece:b"],
+#        "niveau_max": 4, "niveau_min": 2}
 #     ]
 #   }
 #
@@ -20,6 +22,12 @@
 # donne des monstres à 5 points d'armure et ~400 PV : mathématiquement imbattable pour qui
 # vient de décrocher son rang D. Le plafond se pose par SALLE (elle prime) ou pour le donjon
 # entier ; absent = aucune borne (comportement historique, à réserver aux donjons profonds).
+#
+# ⚠️ `niveau_min` est son SYMÉTRIQUE, et suit la MÊME cascade (salle → donjon → aucune) : il
+# empêche une salle de fin d'opposer encore des Novices. Les deux bornes valent pour toute la
+# salle — l'ÉLITE mandatée comme son ESCORTE (`_profils_dans_fourchette`). Elles ne sont
+# toutefois pas symétriques en cas de conflit : le plancher CÈDE au plafond plutôt que de
+# vider la salle (cf. `_profils_dans_fourchette`).
 #
 # ⚠️ POURQUOI un doc à part, et pas des `rencontres`/`zone_influences` sur le lieu : une
 # salle de donjon est un lieu `categorie:"battle_map"` — il n'a ni `connection`, ni
@@ -48,8 +56,9 @@ import random
 import uuid
 
 from models import character_stats
-from utils.characters import lieu_label
+from utils.characters import lieu_label, victoire_acquise
 from utils import acces, chasse, quetes
+from utils.zones import profils_compatibles
 
 
 # Rang d'une commission quand AUCUNE barrière `rang_min` ne la commande (cf.
@@ -88,36 +97,81 @@ def donjon_de_lieu(lieu_id: str, find_docs_fn) -> dict | None:
 	return None
 
 
-def niveau_max_de(donjon_doc: dict, lieu_id: str = None) -> int | None:
-	"""Plafond de grade applicable à cette salle : son `niveau_max` s'il en a un, sinon celui
-	du donjon, sinon None (aucune borne). La salle PRIME — une antichambre et le fond d'une
-	mine n'ont aucune raison d'opposer la même chose."""
+def _niveau(profil: dict) -> int:
+	"""Niveau d'un profil, défaut 1 — lu partout par la même formule (un `niveau: 0` ou
+	`null` vaut 1, comme dans le reste du moteur)."""
+	return int((profil or {}).get("niveau", 1) or 1)
+
+
+def _borne_de(donjon_doc: dict, lieu_id: str | None, cle: str) -> int | None:
+	"""Cascade d'une borne de grade : la SALLE prime, le donjon sert de défaut, sinon None.
+
+	⚠️ Écrite UNE fois pour les deux bornes. `niveau_max` et `niveau_min` doivent se résoudre
+	exactement pareil — deux cascades séparées finiraient par diverger (l'une tolérant une
+	valeur illisible que l'autre refuse), et un contenu se retrouverait avec un plancher lu
+	sur la salle et un plafond lu sur le donjon sans que rien ne le signale."""
 	entree = battle_map_entry(donjon_doc, lieu_id) if lieu_id else None
 	for source in (entree, donjon_doc):
-		brut = (source or {}).get("niveau_max")
+		brut = (source or {}).get(cle)
 		if brut is not None:
 			try:
 				return int(brut)
 			except (TypeError, ValueError):
-				# Donnée illisible : on ne DEVINE pas un plafond (ni 0, qui bloquerait tout,
-				# ni « pas de plafond », qui rendrait le donjon imbattable en silence). On
+				# Donnée illisible : on ne DEVINE pas une borne (ni 0, qui bloquerait tout,
+				# ni « pas de borne », qui rendrait le donjon imbattable en silence). On
 				# passe à la source suivante, et le linter du contenu reste le garde-fou.
 				continue
 	return None
 
 
-def _profils_sous_plafond(profils: list, niveau_max: int | None) -> list:
-	"""Les profils utilisables sous le plafond de grade. Un plafond si bas qu'il n'admet
-	AUCUN profil retombe sur les profils de plus bas niveau disponibles : mieux vaut un
-	donjon trop facile qu'un donjon vide de monstres (`instantiate_monsters` sans profil
-	retomberait sur le point médian de l'espèce, tous grades confondus)."""
+def niveau_max_de(donjon_doc: dict, lieu_id: str = None) -> int | None:
+	"""Plafond de grade applicable à cette salle : son `niveau_max` s'il en a un, sinon celui
+	du donjon, sinon None (aucune borne). La salle PRIME — une antichambre et le fond d'une
+	mine n'ont aucune raison d'opposer la même chose."""
+	return _borne_de(donjon_doc, lieu_id, "niveau_max")
+
+
+def niveau_min_de(donjon_doc: dict, lieu_id: str = None) -> int | None:
+	"""Plancher de grade applicable à cette salle — même cascade que `niveau_max_de`.
+
+	Il répond au besoin inverse du plafond : empêcher qu'une salle de fin de donjon oppose
+	encore des Novices. Champ absent ⇒ aucun plancher, donc le comportement d'avant à la
+	lettre (aucune migration)."""
+	return _borne_de(donjon_doc, lieu_id, "niveau_min")
+
+
+def _profils_dans_fourchette(profils: list, niveau_max: int | None,
+							 niveau_min: int | None = None) -> list:
+	"""Les profils utilisables dans la fourchette de grade `[niveau_min, niveau_max]`.
+
+	⚠️ LES DEUX BORNES SONT DES SOUHAITS, PAS DES GARDES — et elles ne se valent pas en cas
+	de conflit. La règle, dans l'ordre :
+
+	1. le PLAFOND s'applique ; s'il est si bas qu'il n'admet aucun profil, on retombe sur
+	   les profils de plus bas niveau disponibles (règle d'origine, inchangée) ;
+	2. le PLANCHER s'applique ensuite ; s'il ne laisse rien (plancher au-dessus du plafond,
+	   ou aucun profil compatible à ce niveau), il est IGNORÉ et l'on garde le résultat du
+	   plafond.
+
+	Le plancher cède donc toujours au plafond. C'est délibéré et c'est le prolongement du
+	choix déjà fait pour le plafond : mieux vaut un donjon trop facile qu'un donjon VIDE de
+	monstres — `instantiate_monsters` sans profil retomberait sur le point médian de
+	l'espèce, tous grades confondus, ce qui est précisément ce que ces bornes cherchent à
+	éviter. Un donjon trop tendre est un défaut visible en jeu ; un donjon sans opposition
+	est un blocage, et un `niveau_min: 4` posé par erreur sous un `niveau_max: 2` ne doit pas
+	vider la salle en silence.
+	"""
 	if niveau_max is None:
-		return list(profils or [])
-	sous = [p for p in (profils or []) if int(p.get("niveau", 1) or 1) <= niveau_max]
-	if sous or not profils:
+		sous = list(profils or [])
+	else:
+		sous = [p for p in (profils or []) if _niveau(p) <= niveau_max]
+		if not sous and profils:
+			plancher = min(_niveau(p) for p in profils)
+			sous = [p for p in profils if _niveau(p) == plancher]
+	if niveau_min is None:
 		return sous
-	plancher = min(int(p.get("niveau", 1) or 1) for p in profils)
-	return [p for p in profils if int(p.get("niveau", 1) or 1) == plancher]
+	hauts = [p for p in sous if _niveau(p) >= niveau_min]
+	return hauts or sous
 
 
 def especes_de_salle(donjon_doc: dict, lieu_id: str, get_doc_fn) -> list:
@@ -145,11 +199,9 @@ def _profil_max_compatible(espece_doc: dict, profils: list) -> dict | None:
 	il n'y a ni zone d'influence ni position dans un donjon. Le contenu étant curaté à la
 	main, l'élite est simplement « ce que la base sait faire de plus redoutable » pour cette
 	espèce — un donjon n'est pas censé être tendre."""
-	tags = set((espece_doc or {}).get("tags") or [])
-	compat = [
-		p for p in (profils or [])
-		if set(p.get("restriction_tags") or []) <= tags
-	]
+	# Prédicat PARTAGÉ (`zones.profil_compatible`), jamais recopié : c'est la même règle qui
+	# borne l'ACCOMPAGNEMENT dans `instantiate_monsters` et le grade d'une élite de chasse.
+	compat = profils_compatibles(profils, espece_doc)
 	if not compat:
 		return None
 	niv_max = max(int(p.get("niveau", 1) or 1) for p in compat)
@@ -164,14 +216,21 @@ def tirer_cible(donjon_doc: dict, get_doc_fn, find_docs_fn) -> dict | None:
 	`create_combat_doc` retomberait sur une carte ouverte générique et le décor du donjon
 	serait perdu. Une espèce ne compte que si un profil lui est compatible.
 
-	Le grade de l'élite est le plus haut SOUS LE PLAFOND de la salle (`niveau_max_de`)."""
+	Le grade de l'élite est le plus haut de la FOURCHETTE de la salle (`niveau_min_de` /
+	`niveau_max_de`). Le plancher ne la change qu'au cas limite : elle prend déjà le plus
+	haut grade compatible, il ne joue donc que si le plafond de la salle admettait des
+	profils qu'aucune espèce ne peut porter et que le repli descendait trop bas."""
 	profils = find_docs_fn({"type": "profil"}) or []
 	candidats = []
 	for entree in battle_maps_de(donjon_doc):
 		lieu_doc = get_doc_fn(entree["lieu"])
 		if not lieu_doc or not lieu_doc.get("cells"):
 			continue
-		dispo = _profils_sous_plafond(profils, niveau_max_de(donjon_doc, entree["lieu"]))
+		dispo = _profils_dans_fourchette(
+			profils,
+			niveau_max_de(donjon_doc, entree["lieu"]),
+			niveau_min_de(donjon_doc, entree["lieu"]),
+		)
 		for espece_doc in especes_de_salle(donjon_doc, entree["lieu"], get_doc_fn):
 			profil = _profil_max_compatible(espece_doc, dispo)
 			if profil:
@@ -362,6 +421,13 @@ def donjon_purge(character: dict, lieu_id: str) -> bool:
 	n'est pas détectable — dégradation gracieuse assumée (le gardien parle alors comme si la
 	mine était encore infestée), aucune migration.
 	"""
+	# Une VICTOIRE remportée dans la salle est, littéralement, la menace éliminée. C'est la
+	# trace la plus directe des trois, et la seule qui ne suppose aucune commission : elle
+	# rend `acces_libere` / `acces_menace` utilisables par TOUT lieu gardé, pas seulement par
+	# un donjon mandaté — sans quoi un gardien réciterait son refus générique à un joueur qui
+	# vient d'abattre ce qu'il gardait.
+	if victoire_acquise(character, lieu_id):
+		return True
 	q = commission_active_pour_lieu(character, lieu_id)
 	if q and quetes.objectif_atteint(character, q):
 		return True

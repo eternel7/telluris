@@ -70,7 +70,7 @@ from utils.marche import recette_matieres, objet_final_item_id   # noqa: E402
 # SOURCE UNIQUE : le dump complet de la base. ⚠️ Figé explicitement (et non « le glob le plus
 # récent ») pour que régénérer donne toujours le même résultat ; à mettre à jour à la main
 # après un nouveau dump.
-SRC_DUMP = "jsons/telluris-dump-20260830-074221.json"
+SRC_DUMP = "jsons/telluris-dump-20260831-122931.json"
 
 # Recettes pas encore importées, à prendre en compte comme si elles l'étaient : sans elles, un
 # atelier dont le chaînage arrive avec un fichier d'import ne serait pas vu par ce script.
@@ -83,7 +83,27 @@ SRC_EXTRA = ["jsons/boyauderie_salaison_a_importer.json"]
 # réunir de quoi produire (contrôlé plus bas, le script sort en erreur).
 CIBLE = 12
 
+# Surcharge PAR CATÉGORIE de lieu, quand la cible générale est encore trop haute pour que
+# l'atelier chaîne. ⚠️ La BOYAUDERIE est le seul métier du jeu SANS aucune feuille d'appro
+# (`marche.appro_leaves_categorie("boyauderie")` → `[]`) : rien ne lui est livré, tout vient
+# du sac du joueur. Ses en-cours arrivent donc à l'unité, pas par charrettes — à 12 en
+# vitrine, ses 7 boyaux pour saucisses n'ouvraient aucun surplus et la recette d'andouille
+# restait inapplicable alors que la matière était là, sous les yeux du joueur. À 2, deux
+# passes suffisent à amorcer la chaîne. Le contrôle « la cible couvre la plus grosse quantité
+# exigée » (plus bas) s'applique catégorie par catégorie : ici l'outre demande 2 baudruches,
+# donc 2 est exactement le plancher admissible.
+CIBLE_PAR_CATEGORIE: dict[str, int] = {
+	"boyauderie": 2,
+}
+
 SORTIE = "jsons/stock_cible_ateliers_a_importer.json"
+
+
+def cible_de(categorie: str) -> int:
+	"""Cible de vitrine des intermédiaires de cette catégorie de lieu. SOURCE UNIQUE — lue par
+	le contrôle de plancher ET par l'écriture, un écart entre les deux laisserait passer une
+	cible trop basse pour la recette qu'elle doit servir."""
+	return int(CIBLE_PAR_CATEGORIE.get(categorie, CIBLE))
 
 
 def charger(chemin: str) -> list:
@@ -123,11 +143,14 @@ def intermediaires_par_categorie(docs: list) -> dict:
 				# On garde la plus grosse quantité exigée : c'est elle que la cible doit couvrir.
 				besoins[cat][iid] = max(besoins[cat].get(iid, 0), int(qte))
 
-	# Contrôle de la cible AVANT d'écrire quoi que ce soit.
-	trop = [(cat, iid, q) for cat, m in besoins.items() for iid, q in m.items() if q > CIBLE]
+	# Contrôle de la cible AVANT d'écrire quoi que ce soit, CATÉGORIE PAR CATÉGORIE (une
+	# surcharge de CIBLE_PAR_CATEGORIE doit être vérifiée comme la cible générale).
+	trop = [(cat, iid, q) for cat, m in besoins.items() for iid, q in m.items()
+			if q > cible_de(cat)]
 	if trop:
-		lignes = "\n".join(f"   {cat} : {iid} exige {q}" for cat, iid, q in trop)
-		sys.exit(f"ERREUR : CIBLE={CIBLE} est sous la quantite exigee par une recette :\n{lignes}")
+		lignes = "\n".join(f"   {cat} : {iid} exige {q} > cible {cible_de(cat)}"
+						   for cat, iid, q in trop)
+		sys.exit(f"ERREUR : cible sous la quantite exigee par une recette :\n{lignes}")
 
 	# Un intermédiaire dont le doc item n'existe pas serait une cible posée sur du vide.
 	inconnus = [iid for m in besoins.values() for iid in m if iid not in par_id]
@@ -167,8 +190,9 @@ def main() -> None:
 		bloc = dict(doc.get("stock_cible") or {})
 		par_item = dict(bloc.get("item") or {})
 		avant = dict(par_item)
+		cible = cible_de(doc.get("categorie"))
 		for iid in sorted(cibles):
-			par_item[iid] = CIBLE
+			par_item[iid] = cible
 		if par_item == avant:
 			inchanges += 1
 		bloc["item"] = par_item
@@ -181,11 +205,15 @@ def main() -> None:
 		f.write("\n")
 
 	print(f"ecrit {SORTIE}")
-	print(f"   {len(sortie)} lieu(x), cible {CIBLE} ({inchanges} deja a jour - reimport sans effet)")
+	print(f"   {len(sortie)} lieu(x), cible par defaut {CIBLE} "
+		  f"({inchanges} deja a jour - reimport sans effet)")
 	for cat in sorted(interm):
 		n = sum(1 for d in sortie if d.get("categorie") == cat)
 		noms = ", ".join(sorted(i.split(":", 1)[1] for i in interm[cat]))
-		print(f"   {cat:24} {n:>2} lieu(x)   {noms}")
+		marque = " *" if cat in CIBLE_PAR_CATEGORIE else "  "
+		print(f"   {cat:24} {n:>2} lieu(x)   cible {cible_de(cat):>2}{marque} {noms}")
+	if CIBLE_PAR_CATEGORIE:
+		print("   * cible surchargee (CIBLE_PAR_CATEGORIE)")
 
 
 if __name__ == "__main__":

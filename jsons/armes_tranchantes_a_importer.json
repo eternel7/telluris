@@ -1,0 +1,1094 @@
+[
+  {
+    "_id": "item:Couteau_de_chasse",
+    "_rev": "7-7538c56bb67fda66ddc94899ee9e1ad4",
+    "type": "item",
+    "nom": "Couteau de chasse",
+    "sous_categorie": "",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_cc": 5,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Couteau_de_jet_africain",
+    "_rev": "2-d3e8d1ac21c32c24e8adb2dee34cbfe2",
+    "type": "item",
+    "nom": "Couteau de jet africain",
+    "sous_categorie": "",
+    "icon": "🔀",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 14
+    },
+    "bonus_cd": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Dague",
+    "_rev": "8-7facc4ca280ffd30027a0f7aa33c5171",
+    "type": "item",
+    "nom": "Dague",
+    "sous_categorie": "",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_cc": 6,
+    "bonus_degats": 1,
+    "bonus_initiative": 3,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:Dague_de_jet",
+    "_rev": "2-10f050b3b6267b5a87c4f3b7a607e5f4",
+    "type": "item",
+    "nom": "Dague de jet",
+    "sous_categorie": "",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 0.35,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 14
+    },
+    "bonus_cd": 4,
+    "bonus_pa": 1,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Dague_de_parade",
+    "_rev": "9-5e90f17b0cc586ab3b60e0b84611d6d2",
+    "type": "item",
+    "nom": "Dague de parade",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_cc": 5,
+    "bonus_pa": 2,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Dague_de_scene",
+    "_rev": "7-ae16086d67c038aedeb85262c426f705",
+    "type": "item",
+    "nom": "Dague de scène",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.2,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_cc": 4,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 3
+    }
+  },
+  {
+    "_id": "item:dague_rituelle",
+    "_rev": "7-2293fe613026334258ab6542029ade0c",
+    "type": "item",
+    "nom": "Dague rituelle",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.4,
+    "bonus_cc": 1,
+    "bonus_degats": 1,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus": {
+      "Vol": 2,
+      "Int": 1
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 10
+    }
+  },
+  {
+    "_id": "item:Kunai",
+    "_rev": "2-d9f6e3e4e87c469cf30b0892c36e8ba5",
+    "type": "item",
+    "nom": "Kunai",
+    "sous_categorie": "",
+    "icon": "🔧",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 12
+    },
+    "bonus_cd": 3,
+    "bonus_cc": 3,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4
+  },
+  {
+    "_id": "item:Lame_courte",
+    "_rev": "7-3b205a5a44280a7df0a32f655d324803",
+    "type": "item",
+    "nom": "Lame courte",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_cc": 3,
+    "bonus_degats": 1,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Da_dao",
+    "_rev": "2-2b0b88ad24a5ff7474ae8d97f66aaa76",
+    "type": "item",
+    "nom": "Da dao",
+    "sous_categorie": "",
+    "icon": "🐲",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 16
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 5,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Epee_argent",
+    "_rev": "9-e7b82ea27edf29ecc4e82750024b11c1",
+    "type": "item",
+    "nom": "Épée d'argent",
+    "sous_categorie": "",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.3,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_degats_dice": 4,
+    "bonus_degats": 2,
+    "bonus_pm": 4,
+    "bonus": {
+      "Int": 2
+    },
+    "restriction": {
+      "Int": 10,
+      "Vol": 8
+    }
+  },
+  {
+    "_id": "item:Epee_courte",
+    "_rev": "13-f8d13b86eb0e5a51cf60ae7754a9708b",
+    "type": "item",
+    "nom": "Épée courte",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "bonus_cc": 1,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 3,
+    "poids": 1.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1
+  },
+  {
+    "_id": "item:Epee_courte_rune",
+    "_rev": "8-f31a78432df79fcbab9f2cc1b21088b3",
+    "type": "item",
+    "nom": "Épée courte enchantée",
+    "sous_categorie": "",
+    "icon": "✨",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_pm": 5,
+    "bonus_degats_dice": 3,
+    "bonus_degats": 2,
+    "bonus": {
+      "Int": 3
+    },
+    "restriction": {
+      "Int": 12,
+      "Vol": 8
+    }
+  },
+  {
+    "_id": "item:Epee_longue",
+    "_rev": "9-6c604e13b5d706571b2a0b5c8473199e",
+    "type": "item",
+    "nom": "Épée longue",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Epee_longue_ordre",
+    "_rev": "8-5f18c8b101e64449cf4781ad3c2f513c",
+    "type": "item",
+    "nom": "Épée longue d'ordre",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 2,
+    "bonus_pm": 2,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "item:Epee_une_main_benie",
+    "_rev": "9-073b652cd7ad42685ddb958c78842d01",
+    "type": "item",
+    "nom": "Épée à une main bénie",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.2,
+    "bonus_degats_dice": 4,
+    "bonus_degats": 2,
+    "bonus_pm": 2,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1
+  },
+  {
+    "_id": "item:Gladius",
+    "_rev": "1-aa87f9ceb91103e93a1a4dba775632c8",
+    "type": "item",
+    "nom": "Gladius",
+    "sous_categorie": "",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Jian",
+    "_rev": "1-a9ede0ce2f9cf979aea14cac08f8cca2",
+    "type": "item",
+    "nom": "Jian",
+    "sous_categorie": "",
+    "icon": "🐉",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 16
+    },
+    "bonus_cc": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_initiative": 3,
+    "bonus": {
+      "Ag": 2,
+      "Cha": 2
+    }
+  },
+  {
+    "_id": "item:Katana",
+    "_rev": "1-9be0a6bd86f1e9de2258af04e33129d3",
+    "type": "item",
+    "nom": "Katana",
+    "sous_categorie": "",
+    "icon": "🌸",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.1,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12,
+      "Ag": 14
+    },
+    "bonus_cc": 4,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "item:Rapiere",
+    "_rev": "9-ab32b79f29d42a40679addb868a0ac85",
+    "type": "item",
+    "nom": "Rapière",
+    "sous_categorie": "",
+    "icon": "🤺",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_cc": 4,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 6,
+    "bonus_initiative": 5,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Schiavona",
+    "_rev": "2-5517163df6abaad59e77e4e2aa8c5a14",
+    "type": "item",
+    "nom": "Schiavona",
+    "sous_categorie": "",
+    "icon": "🤺",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.4,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_cc": 2,
+    "bonus_pa": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Talwar",
+    "_rev": "1-bf422cccff1c9302c713c5354843cb2c",
+    "type": "item",
+    "nom": "Talwar",
+    "sous_categorie": "",
+    "icon": "☪️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.2,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 13,
+      "Ag": 12
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Francisque",
+    "_rev": "2-9bf84d59d23af99632ae52115031be13",
+    "type": "item",
+    "nom": "Francisque",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.2,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Hache_apparat_amerindienne",
+    "_rev": "2-a59368bf59f10d5e9b1520ea05f6ec3a",
+    "type": "item",
+    "nom": "Hache d'apparat amérindienne",
+    "sous_categorie": "",
+    "icon": "🧿",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_cd": 2,
+    "bonus_cc": 2,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Cha": 2
+    }
+  },
+  {
+    "_id": "item:Hache_de_bucheron",
+    "_rev": "6-423f07408da3855cf5c5061b06cc3d08",
+    "type": "item",
+    "nom": "Hache de bucheron",
+    "sous_categorie": "outil",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "outil_coupe_bois",
+      "cac",
+      "tranchant"
+    ],
+    "poids": 2.5,
+    "portee": 1,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "restriction": {
+      "F": 12
+    }
+  },
+  {
+    "_id": "item:Hache_de_guerre",
+    "_rev": "10-27745e491d0edfa246d4d7f25a123a30",
+    "type": "item",
+    "nom": "Hache de guerre",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite"
+    ],
+    "tags": [
+      "outil_coupe_bois",
+      "cac",
+      "tranchant"
+    ],
+    "poids": 2.5,
+    "portee": 1,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "restriction": {
+      "F": 14
+    }
+  },
+  {
+    "_id": "item:Hachette_scandinave",
+    "_rev": "2-6b342ab38349aed62e6eed5ca6948bea",
+    "type": "item",
+    "nom": "Hachette de lancer scandinave",
+    "sous_categorie": "",
+    "icon": "⚒️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_cd": 2,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_initiative": 3
+  },
+  {
+    "_id": "item:Nzappa_zap",
+    "_rev": "2-98d2bd33960bcf4f4cf28cb1c9d751c1",
+    "type": "item",
+    "nom": "Nzappa zap",
+    "sous_categorie": "",
+    "icon": "🏺",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.1,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_cd": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Cha": 3
+    }
+  },
+  {
+    "_id": "item:Sagaris",
+    "_rev": "1-d426b9aab7e217f659bb36d655c751ef",
+    "type": "item",
+    "nom": "Sagaris",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.3,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12,
+      "Ag": 12
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 4
+  },
+  {
+    "_id": "item:Tomahawk",
+    "_rev": "2-6b87ea6a980ec3eda9f939966375c1b7",
+    "type": "item",
+    "nom": "Tomahawk",
+    "sous_categorie": "",
+    "icon": "🪶",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_cd": 1,
+    "bonus_cc": 2,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Chakram",
+    "_rev": "2-c37bed11e1f041069e237509cda38b20",
+    "type": "item",
+    "nom": "Chakram",
+    "sous_categorie": "",
+    "icon": "⭕",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.3,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 4,
+    "restriction": {
+      "Ag": 18
+    },
+    "bonus_cd": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "item:Hunga_munga",
+    "_rev": "2-f389d2af749a5588c62ec49e6275f66f",
+    "type": "item",
+    "nom": "Hunga munga",
+    "sous_categorie": "",
+    "icon": "🗡️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.7,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 12
+    },
+    "bonus_cd": 3,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8
+  },
+  {
+    "_id": "item:Kpinga",
+    "_rev": "2-dca5c23f9e7ba11f6ddb9b6460fd6ca1",
+    "type": "item",
+    "nom": "Kpinga",
+    "sous_categorie": "",
+    "icon": "⚜️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13,
+      "Ag": 14
+    },
+    "bonus_cd": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "item:Mambele",
+    "_rev": "2-325977a3f312f6340dff1f83bfaa62c2",
+    "type": "item",
+    "nom": "Mambele",
+    "sous_categorie": "",
+    "icon": "🦅",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 3,
+    "restriction": {
+      "Ag": 13
+    },
+    "bonus_cd": 4,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "item:Faucharde",
+    "_rev": "4-7211dee942b32f15887e81bcf93d54ea",
+    "type": "item",
+    "nom": "Faucharde",
+    "sous_categorie": "",
+    "icon": "🌾",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_cc": 2,
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Guisarme",
+    "_rev": "4-abf80256bd365327ff5ee4c35cd483ab",
+    "type": "item",
+    "nom": "Guisarme",
+    "sous_categorie": "",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 12
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Hallebarde",
+    "_rev": "4-c03bb4f396cdb40a04a7452dd5b967fa",
+    "type": "item",
+    "nom": "Hallebarde",
+    "sous_categorie": "",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Ji",
+    "_rev": "4-9c9887dfacf43a486b9ab5e236100d58",
+    "type": "item",
+    "nom": "Ji",
+    "sous_categorie": "",
+    "icon": "🀄",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.6,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 15
+    },
+    "bonus_cc": 4,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1,
+    "bonus": {
+      "Ag": 2
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Naginata",
+    "_rev": "4-f46c0c1ee8ed8e681c3f23f3cef02b98",
+    "type": "item",
+    "nom": "Naginata",
+    "sous_categorie": "",
+    "icon": "🎌",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.4,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 10,
+      "Ag": 18
+    },
+    "bonus_cc": 3,
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus": {
+      "Ag": 3
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "item:Pata_a_hampe",
+    "_rev": "4-acc4d11d1d162a806c86434af01efb67",
+    "type": "item",
+    "nom": "Pata à hampe",
+    "sous_categorie": "",
+    "icon": "🤺",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.6,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12,
+      "Ag": 16
+    },
+    "bonus_cc": 5,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "bonus": {
+      "Ag": 2
+    },
+    "deux_mains": true
+  }
+]

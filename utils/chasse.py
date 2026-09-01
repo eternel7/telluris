@@ -33,6 +33,7 @@ import uuid
 from models import character_stats
 from utils.zones import (
 	load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
+	profils_compatibles,
 )
 from utils.characters import lieu_label
 from utils.recrutement import RANGS
@@ -223,13 +224,10 @@ def _profils_compatibles(lieu_doc: dict, espece_doc: dict, position: dict | None
 	pw = resolve_profil_weights(placements, lieu_doc)
 	if not pw:
 		return []
-	tags = set((espece_doc or {}).get("tags", []))
-	compat = []
-	for pid in pw:
-		p = get_doc_fn(pid)
-		if p and set(p.get("restriction_tags") or []) <= tags:
-			compat.append(p)
-	return compat
+	# Prédicat PARTAGÉ (`zones.profil_compatible`) — surtout pas une copie locale : la même
+	# règle décide du grade d'une élite ici, de l'accompagnement dans `instantiate_monsters`
+	# et de la cible d'une commission dans `utils/donjon.py`.
+	return profils_compatibles([p for p in (get_doc_fn(pid) for pid in pw) if p], espece_doc)
 
 
 def resoudre_profil_chasse(lieu_doc: dict, espece_doc: dict, tier: str,

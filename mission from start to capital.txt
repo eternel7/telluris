@@ -1,0 +1,901 @@
+# Mission RPG — Retrouver les bûcherons d'Auxerre
+
+Tu dois créer **un fichier JSON directement importable**.
+
+## Consigne principale
+
+À partir des fichiers JSON de référence que je vais te fournir, respecte **strictement le schéma, les noms de champs, les types de données, les conventions d'identifiants, les relations entre objets et la structure JSON** utilisés par mon jeu.
+Ne crée pas un nouveau format arbitraire.
+Le résultat doit être directement exploitable par le moteur du jeu.
+Si les fichiers de référence contiennent plusieurs exemples similaires, utilise celui qui correspond le mieux à une **mission/quête scénarisée avec PNJ, objectifs, dialogues, lieux, combats et évolution de l'état de la quête**.
+
+### Contraintes de sortie
+
+* Retourne uniquement le JSON final.
+* Pas de Markdown.
+* Pas de commentaires dans le JSON.
+* Pas d'explication avant ou après le JSON.
+* Le JSON doit être valide.
+* Tous les identifiants doivent être uniques et cohérents.
+* Les références entre objets doivent utiliser les mêmes conventions que les fichiers de référence.
+* N'invente pas de champs qui n'existent pas dans le modèle fourni.
+* Si une information nécessaire au scénario n'existe pas explicitement dans les exemples, adapte-la au champ existant le plus approprié.
+* Ne supprime aucune information narrative importante sous prétexte de simplifier.
+* Les dialogues doivent être suffisamment détaillés pour pouvoir être utilisés directement dans le jeu.
+
+# Mission
+
+La mission consiste initialement à :
+
+**Retrouver trois bûcherons d'Auxerre qui ne sont pas revenus d'une expédition en forêt.**
+
+La mission est donnée par :
+
+Nom : Gautier de Valcroix
+Fonction : maître de la Guilde des aventuriers d'Auxerre
+Race : humain
+Sexe : masculin
+Lieu : Bastion de l'Yonne, Auxerre
+Rôle : donneur de mission et supérieur de Borin Barbe-de-Jais.
+
+Le personnage joueur n'est pas directement convoqué par Gautier au début.
+
+La mission commence lorsque :
+
+Nom : Borin Barbe-de-Jais
+Fonction : réceptionniste de la Guilde des aventuriers d'Auxerre
+Race : nain
+Sexe : masculin
+Lieu : réception du Bastion de l'Yonne
+Rôle : déclencheur de la mission.
+
+Borin informe le personnage que **Gautier de Valcroix le cherche pour une mission importante**. Le dialogue n'est accessible que si le personnage et de rang D et a fait au moins une quête d'"id": "quete:bureau_du_maitre_de_guilde_d_auxerre_commission_xxxxxxxxx".
+
+---
+
+# Personnages
+
+## Borin Barbe-de-Jais
+
+Nom : Borin Barbe-de-Jais
+Fonction : réceptionniste de la Guilde des aventuriers d'Auxerre
+Race : nain
+Sexe : masculin
+Lieu : réception du Bastion de l'Yonne
+Rôle : déclencheur de la mission.
+---
+
+## Gautier de Valcroix
+
+Nom : Gautier de Valcroix
+Fonction : maître de la Guilde des aventuriers d'Auxerre
+Race : humain
+Sexe : masculin
+Lieu : Bastion de l'Yonne, bureau du maître de guilde
+Rôle : donneur de mission.
+
+---
+
+# Les trois bûcherons disparus
+
+Créer trois PNJ distincts.
+Ils travaillent pour Auxerre et connaissent bien les forêts environnantes.
+Ils étaient partis couper du bois avec leur équipement habituel mais ne sont jamais revenus.
+Ils se sont finalement réfugiés dans une grotte après avoir étaient chassés par trois loup géant dans la forêt.
+Créer les personnages suivants.
+
+---
+
+## Armand Renaud
+
+Nom : Armand Renaud
+Fonction : bûcheron
+Race : humain
+Sexe : masculin
+Lieu : grotte forestière au nord-ouest d'Auxerre
+Rôle : chef de fait du groupe de bûcherons et témoin principal.
+Image : @templates/resources/pnj/bucheron_Armand_Renaud_humain_m.jpg 
+
+---
+
+## Étienne Morel
+
+Nom : Étienne Morel
+Fonction : bûcheron
+Race : nain
+Sexe : masculin
+Lieu : grotte forestière au nord-ouest d'Auxerre
+Rôle : bûcheron du groupe, blessé légèrement lors de la fuite.
+Image : @templates/resources/pnj/bucheron_Étienne_Morel_nain_m.jpg 
+
+---
+
+## Matthieu Perrin
+
+Nom : Matthieu Perrin
+Fonction : bûcheron
+Race : ogre
+Sexe : masculin
+Lieu : grotte forestière au nord-ouest d'Auxerre
+Rôle : troisième bûcheron, connaît l'emplacement exact de la grotte.
+Image : @ @templates/resources/pnj/bucheron_Matthieu_Perrin_ogre_m.jpg
+
+---
+
+# Aélis de Montfaucon
+
+Créer ce personnage comme un PNJ majeur.
+
+Nom : Aélis de Montfaucon
+Fonction : jeune architecte et chercheuse spécialisée dans l'étude des cristaux de mana
+Race : humaine
+Sexe : féminin
+Lieu initial : grotte forestière au nord-ouest d'Auxerre
+Destination : Auxerre puis Lutecia
+Image : @templates/resources/pnj/architecte_Aélis_de_Montfaucon_humain_f03.jpg
+
+## Histoire
+
+Aélis est une jeune architecte humaine qui devait rejoindre Auxerre afin d'y étudier les cristaux de mana.
+Elle possède des connaissances particulières dans leur utilisation pour l'architecture et souhaite notamment comprendre comment les cristaux peuvent être intégrés à des constructions, des systèmes de protection et des infrastructures.
+Elle voyageait sous escorte paladine vers Auxerre lorsqu'elle a été confrontée à un problème sur la route. Les deux paladins la protégeant ont été tués, les un après les autres par une longue traque de trois loup géants (_id : espece:loup_geant)
+Elle a finalement trouvé refuge auprès des trois bûcherons.
+Le groupe s'est retrouvé bloqué dans une grotte forestière.
+Aélis a volontairement évité de sortir de la grotte car **trois Loups Géants rôdent devant l'entrée**.
+Les loups sont trop grands pour se faufiler à l'intérieur de la grotte.
+Ils restent à faible distance de l'entrée, attendant que les anthropes sortent.
+Les trois bûcherons et Aélis sont donc prisonniers de la grotte.
+Aélis doit être présentée comme intelligente, déterminée et rationnelle, mais clairement soulagée lorsqu'elle comprend que les aventuriers sont venus les secourir.
+Elle n'est pas une combattante expérimentée.
+
+---
+
+# Déroulement de la mission
+
+La mission doit être structurée en plusieurs étapes cohérentes.
+
+## Étape 1 — L'appel de la guilde
+
+Le personnage se trouve au Bastion de l'Yonne.
+
+Borin Barbe-de-Jais l'interpelle et lui explique que Gautier de Valcroix souhaite le voir.
+
+Dialogue attendu :
+
+Borin :
+"Ah, vous voilà. Le maître de la guilde vous cherche."
+
+Le personnage demande pourquoi.
+
+Borin explique que trois bûcherons partis dans les environs d'Auxerre ne sont pas revenus et que Gautier veut confier l'affaire au personnage.
+
+Le dialogue doit rester naturel et médiéval-fantastique, sans langage moderne.
+
+---
+
+## Étape 2 — Entretien avec Gautier de Valcroix
+
+Le personnage rejoint le bureau de Gautier.
+
+Gautier explique :
+
+* trois bûcherons ne sont pas revenus ;
+* leur absence devient inquiétante ;
+* ils connaissent bien la forêt ;
+* une simple recherche aurait normalement dû permettre leur retour ;
+* la guilde veut éviter d'envoyer une grande troupe ;
+* le personnage est chargé de retrouver les disparus ;
+* s'ils sont vivants, il faut les ramener à Auxerre.
+
+Gautier ne connaît pas encore l'existence d'Aélis.
+
+Il peut également mentionner qu'une voyageuse devait arriver récemment à Auxerre et que sa disparition pourrait être liée à la situation, mais cette information ne doit être qu'un indice secondaire si cela reste cohérent avec le schéma du jeu.
+
+Gautier donne la zone générale où les bûcherons travaillaient.
+
+---
+
+## Étape 3 — Voyage dans la forêt
+
+Le personnage doit se rendre dans la zone forestière.
+
+Prévoir éventuellement des descriptions ou événements de voyage :
+
+* traces de pas ;
+* branches cassées ;
+* outils abandonnés ;
+* traces de lutte ou de fuite ;
+* empreintes de grands canidés ;
+* silence inhabituel de la forêt ;
+* découverte progressive de la piste menant à la grotte.
+
+Ne transforme pas cette étape en combat obligatoire si le modèle de mission permet plusieurs types d'événements.
+
+---
+
+# Étape 4 — La grotte
+
+Le personnage découvre finalement une grotte : "_id": "lieu:grotte_dans_foret_humide" . 
+Il peut :
+ - rentrer dedans "_id": "lieu:grotte_dans_foret_humide_interieur01" et pas "_id": "lieu:grotte_dans_foret_humide_interieur" qui sera accessible si la quête n'est pas en cours.
+ - s'adresser aux murmures qui en proviennent (dialogues depuis l'extérieur). 
+À proximité de l'entrée se trouvent **trois Loups Géants**.
+Ils rôdent à faible distance.
+Ils grondent lorsque le personnage approche.
+Ils ne peuvent pas entrer dans la grotte car l'ouverture est trop étroite pour leur taille.
+À l'intérieur, le personnage découvre :
+
+* Armand Renaud ;
+* Étienne Morel ;
+* Matthieu Perrin ;
+* Aélis de Montfaucon.
+
+Les quatre personnes sont vivantes.
+Les bûcherons sont épuisés.
+Aélis est particulièrement inquiète car elle comprend que les loups empêchent toute sortie.
+Prévoir une rencontre permettant au personnage de comprendre progressivement ce qui s'est passé.
+
+---
+
+# Étape 5 — Affrontement avec les Loups Géants
+
+Le personnage doit pouvoir combattre les trois Loups Géants afin de libérer la sortie.
+Utiliser l'espèce existante : espece:loup_geant
+Les trois loups doivent occuper la zone extérieure devant l'entrée de la grotte. Le groupe d'aventurier a pu rentrer dans la grotte ou parler depuis l'exterieur mais le combat ce déclenche dès que le personnage ressort de la grotte ou fini le dialogue alors qu'il est devant la grotte.
+-> Utiliser la battle map pour le combat : lieu:grotte_en_foret
+Après leur défaite, les survivants peuvent sortir. Après le combat réussi, le personnage est dans un lieu avec l'image  @templates/resources/towns/Retrouver_les_bûcherons_d_Auxerre_victoire_combat.jpg et peut en sortir pour lieu:auxerre et la mission devient une mission d'escorte des 4 pnj jusqu'au bureau du maitre de la guilde d'aventurier.
+
+---
+
+# Étape 6 — Retour vers Auxerre
+
+Le personnage ramène :
+
+* Armand Renaud ;
+* Étienne Morel ;
+* Matthieu Perrin ;
+* Aélis de Montfaucon.
+
+À Auxerre, les bûcherons sont accueillis par la guilde.
+Aélis se présente à Gautier de Valcroix.
+Gautier comprend rapidement que sa présence est importante.
+Il apprend qu'elle est venue pour étudier les cristaux de mana.
+
+---
+
+# La dernière livraison de cristaux de mana
+
+La mission doit alors évoluer.
+La Guilde possède une **dernière livraison de cristaux de mana destinée à Lutecia**.
+Cette livraison doit être escortée jusqu'à la cité.
+La présence d'Aélis change la nature de la mission.
+Elle doit maintenant se rendre à Lutecia pour poursuivre ses recherches et rencontrer les personnes susceptibles de l'aider dans ses travaux.
+
+Gautier décide donc de proposer au personnage une nouvelle étape :
+
+**escorter Aélis et la dernière livraison de cristaux de mana jusqu'à Lutecia.**
+Cette partie doit être intégrée à la fin de la mission comme une transition narrative vers une prochaine mission ou un nouveau chapitre.
+
+---
+
+# Les paladins
+
+Créer au moins deux paladins chargés d'accompagner le convoi.
+Ils sont présents à Auxerre lorsque la décision du voyage vers Lutecia est prise.
+
+Créer les personnages suivants :
+
+## Dame Éléonore de Rochefort
+
+Nom : Dame Éléonore de Rochefort
+Fonction : paladine, commandante de l'escorte vers Lutecia
+Race : humaine
+Sexe : elfe
+Lieu : Auxerre, Bastion de l'Yonne puis route vers Lutecia
+Rôle : commandante de l'escorte.
+Image : @templates/resources/pnj/paladin_Frère_Martin_de_Clairvaux_hobbit_m.jpg
+
+---
+
+## Frère Martin de Clairvaux
+
+Nom : Frère Martin de Clairvaux
+Fonction : paladin et protecteur de l'escorte
+Race : hobbit
+Sexe : masculin
+Lieu : Auxerre, Bastion de l'Yonne puis route vers Lutecia
+Rôle : second de l'escorte.
+Image : @templates/resources/pnj/paladin_Frère_Martin_de_Clairvaux_hobbit_m.jpg
+
+---
+
+# Dialogues
+
+Voici une version structurée comme une **quête complète de RPG**, avec les étapes, les objectifs, les personnages et les dialogues. J’ai conservé le rôle central d’Auxerre comme point de départ et préparé la conclusion qui ouvre naturellement sur le voyage vers Lutecia.
+
+# 1. Le maître de la Guilde cherche le personnage
+
+Lorsque le personnage revient au **Bastion de l’Yonne**, Borin Barbe-de-Jais l'interpelle depuis son comptoir.
+
+### Dialogue — Borin Barbe-de-Jais
+
+**Borin :**
+
+> « Hé ! Toi. Oui, toi. Le maître de la guilde te cherche. »
+
+Le nain pose le registre qu'il était en train de consulter et se penche légèrement par-dessus le comptoir.
+
+> « Et avant que tu demandes : non, ce n'est pas pour une histoire de dette, de bagarre dans une taverne ou de poulet volé. »
+
+Il marque une pause.
+
+> « Cette fois, c'est sérieux. »
+
+**Personnage :**
+
+> « Que veut-il ? »
+
+**Borin :**
+
+> « Il ne m'a rien expliqué. Il a seulement dit de t'envoyer le voir dès que tu mettrais les pieds ici. »
+
+Puis, avec un air plus grave :
+
+> « Ça concerne des gens qui ne sont pas revenus de la forêt. »
+
+**Personnage :**
+
+> « Des aventuriers ? »
+
+**Borin :**
+
+> « Des bûcherons. Trois hommes. Ils travaillent pour plusieurs exploitants de la région. Leur absence commence à devenir inquiétante. »
+
+Il désigne l'escalier menant à l'étage.
+
+> « Le maître de la guilde est dans son bureau. Va le voir. Il t'expliquera le reste. »
+
+# 2. Entretien avec Gautier de Valcroix
+
+Le bureau de Gautier est sobre. Une grande carte de la région d'Auxerre couvre une partie du mur. Plusieurs routes forestières y sont annotées.
+
+Gautier se tient devant la carte.
+
+### Dialogue — Gautier de Valcroix
+
+**Gautier :**
+
+> « Entre. Ferme la porte derrière toi. »
+
+Il attend que le personnage s'approche.
+
+> « J'ai une mission pour toi. Elle n'a rien d'exceptionnel en apparence, mais les circonstances me préoccupent. »
+
+Il montre trois marques sur la carte.
+
+> « Trois bûcherons ne sont pas rentrés depuis plusieurs jours. Ils avaient quitté Auxerre pour travailler dans une zone forestière au nord-ouest de la cité. »
+
+**Personnage :**
+
+> « Depuis combien de temps sont-ils absents ? »
+
+**Gautier :**
+
+> « Suffisamment longtemps pour que leur employeur demande de l'aide. Ils auraient dû revenir depuis deux jours. »
+
+Il pointe un chemin forestier.
+
+> « Leur dernière destination connue se trouve ici. Ils devaient abattre plusieurs arbres et ramener le bois avant de reprendre la route. »
+
+**Personnage :**
+
+> « Vous pensez qu'ils ont été attaqués ? »
+
+**Gautier :**
+
+> « C'est possible. Les routes hors des murs ne sont jamais totalement sûres. Mais je n'ai trouvé aucun témoignage signalant une attaque. »
+
+Il se tourne vers le personnage.
+
+> « Je veux que tu retrouves ces hommes. »
+
+### Objectif
+
+**Retrouver les trois bûcherons disparus.**
+
+
+## Une information supplémentaire
+
+Gautier hésite avant de poursuivre.
+
+> « Il y a autre chose. »
+
+Il ouvre un document posé sur son bureau.
+
+> « Une jeune femme devait également rejoindre Auxerre depuis quelques jours. Une architecte. »
+
+**Personnage :**
+
+> « Quel rapport avec les bûcherons ? »
+
+**Gautier :**
+
+> « Aucun rapport connu. C'est justement ce qui m'inquiète. »
+
+Il lit le document.
+
+> « Aélis de Montfaucon. Jeune architecte humaine. Elle souhaitait venir à Auxerre pour étudier nos cristaux de mana et les techniques de construction qui utilisent leur énergie. »
+
+Il referme le document.
+
+> « Elle n'est jamais arrivée. »
+
+**Personnage :**
+
+> « Vous pensez qu'elle se trouve avec les bûcherons ? »
+
+**Gautier :**
+
+> « Je ne pense rien. Je constate simplement que deux disparitions ont lieu dans la même région et à peu près au même moment. »
+
+Il montre de nouveau la carte.
+
+> « Si tu trouves cette jeune femme, ramène-la également à Auxerre. »
+
+
+# 3. Les instructions
+
+**Gautier :**
+
+> « Ta priorité reste les bûcherons. Ils connaissent la forêt et savent normalement éviter les endroits dangereux. »
+
+> « Si tu trouves Aélis de Montfaucon, protège-la. Elle n'est pas une aventurière et n'a probablement aucune expérience du terrain. »
+
+Puis il ajoute :
+
+> « Et ne prends pas de risques inutiles. Nous ne savons pas ce qui les a empêchés de rentrer. »
+
+**Personnage :**
+
+> « Où dois-je commencer mes recherches ? »
+
+**Gautier :**
+
+> « Suis la route forestière vers le nord-ouest. Le dernier campement connu des bûcherons se trouve à environ une demi-journée de marche d'Auxerre. »
+
+> « Cherche leurs traces, leurs outils, leur campement. N'importe quoi qui puisse nous dire où ils sont allés. »
+
+### Quête activée
+
+**Les bûcherons disparus**
+
+> Retrouver Hugues, Martin et Étienne, trois bûcherons portés disparus dans les environs d'Auxerre.
+
+
+# 4. Sur les traces des bûcherons
+
+Pas de dialogues
+
+# 5. La grotte
+
+Le personnage découvre finalement une grotte naturelle.
+
+À l'entrée se trouvent **trois Loups Géants**.
+
+Ils ne peuvent pas entrer dans la grotte : l'ouverture est trop étroite pour leurs corps massifs.
+
+Ils rôdent néanmoins devant l'entrée, empêchant quiconque à l'intérieur de sortir.
+
+Lorsque le personnage approche, les trois créatures se tournent vers lui.
+
+Un grondement profond résonne dans la forêt.
+
+### Situation
+
+Les loups ne poursuivent pas le personnage très loin de l'entrée de la grotte. Ils semblent avoir établi leur territoire autour de celle-ci.
+
+### Combat
+
+**Objectif :**
+Éliminer les trois **Loups Géants**.
+
+Une fois les trois créatures vaincues, le personnage peut pénétrer dans la grotte.
+
+---
+
+# 6. Les bûcherons sont vivants
+
+Dans les profondeurs de la grotte, le personnage découvre trois hommes regroupés autour d'un petit feu.
+
+Hugues se lève immédiatement, une hache à la main.
+
+**Hugues :**
+
+> « Qui va là ?! »
+
+Puis il aperçoit le personnage.
+
+> « Par les anciens chemins... Vous êtes venu nous chercher ? »
+
+**Personnage :**
+
+> « Vous êtes Hugues ? »
+
+**Hugues :**
+
+> « Oui. Hugues. Et voici Martin et Étienne. »
+
+Martin lève la main en guise de salut.
+
+Étienne semble épuisé.
+
+**Martin :**
+
+> « On commençait à croire que personne ne viendrait. »
+
+**Personnage :**
+
+> « Pourquoi êtes-vous restés dans cette grotte ? »
+
+Hugues désigne l'entrée.
+
+> « Ces saletés de loups. Ils nous ont surpris alors qu'on travaillait. »
+
+> « On a réussi à rejoindre la grotte, mais ils nous ont suivis jusqu'ici. Ils étaient trop gros pour entrer. »
+
+**Martin :**
+
+> « On a attendu qu'ils partent. Ils ne sont jamais partis. »
+
+**Étienne :**
+
+> « Ça fait... deux nuits maintenant. »
+
+---
+
+# 7. La révélation : Aélis
+
+Le personnage remarque alors qu'une quatrième personne se trouve dans la grotte.
+
+Une jeune femme est assise un peu à l'écart. Elle porte des vêtements de voyage couverts de poussière et tient contre elle un carnet rempli de notes.
+
+Elle observe le personnage avec soulagement.
+
+**Hugues :**
+
+> « Et elle, c'est Aélis. »
+
+La jeune femme se lève.
+
+**Aélis :**
+
+> « Aélis de Montfaucon. »
+
+**Personnage :**
+
+> « Vous êtes l'architecte que nous recherchons ? »
+
+**Aélis :**
+
+> « Vous me cherchiez ? »
+
+**Personnage :**
+
+> « Le maître de la guilde d'Auxerre vous attend. Vous deviez arriver depuis plusieurs jours. »
+
+Aélis baisse légèrement les yeux.
+
+> « Je sais. J'essayais justement d'atteindre Auxerre. »
+
+---
+
+# 8. Comment Aélis s'est retrouvée ici
+
+Aélis explique son histoire.
+
+**Aélis :**
+
+> « Je suis partie seule. Je voulais arriver rapidement à Auxerre. »
+
+> « Je savais que les routes étaient dangereuses, mais je ne pensais pas rencontrer autant de difficultés. »
+
+Elle montre son carnet.
+
+> « Je suis architecte. Je travaille sur les propriétés structurelles des cristaux de mana. »
+
+**Personnage :**
+
+> « Et vous avez rencontré les bûcherons ? »
+
+**Aélis :**
+
+> « Oui. »
+
+> « J'avais perdu le chemin dans la forêt. Je suis tombée sur leur chantier. Ils m'ont proposé de voyager avec eux jusqu'à la prochaine route. »
+
+Hugues intervient.
+
+**Hugues :**
+
+> « On n'allait quand même pas laisser une jeune femme seule dans cette forêt. »
+
+Aélis esquisse un sourire.
+
+**Aélis :**
+
+> « Ils m'ont donc accompagnée. Et c'est là que nous avons rencontré les loups. »
+
+---
+
+# 9. Pourquoi elle voulait venir à Auxerre
+
+Le personnage peut lui demander pourquoi elle s'intéresse autant aux cristaux de mana.
+
+**Aélis :**
+
+> « Les cristaux d'Auxerre sont différents de ceux que j'ai étudiés jusqu'ici. »
+
+> « Leur pureté permet d'alimenter des structures beaucoup plus complexes. Des bâtiments entiers peuvent être conçus autour de leur utilisation. »
+
+Elle ouvre son carnet et montre plusieurs dessins.
+
+> « Regardez. »
+
+On y voit des plans de bâtiments comportant des cristaux au centre de leur structure.
+
+> « Je veux comprendre comment les bâtisseurs d'Auxerre les utilisent. »
+
+Puis elle ajoute :
+
+> « Et peut-être découvrir comment améliorer leur rendement. »
+
+---
+
+# 10. Retour à Auxerre
+
+Le groupe quitte la grotte.
+
+La route du retour se déroule sans incident majeur.
+
+À leur arrivée au **Bastion de l'Yonne**, Borin aperçoit le groupe.
+
+### Dialogue — Borin
+
+**Borin :**
+
+> « Eh bien ! Voilà une tête que je commençais à croire perdue. »
+
+Il regarde les trois bûcherons.
+
+> « Et vous êtes donc les fameux disparus. »
+
+Puis il remarque Aélis.
+
+> « Et vous devez être Aélis de Montfaucon. »
+
+**Aélis :**
+
+> « C'est bien moi. »
+
+Borin pousse un soupir.
+
+> « Le maître de la guilde va être content. Enfin... autant qu'il puisse l'être. »
+
+---
+
+# 11. Rapport à Gautier
+
+Gautier écoute le récit sans interrompre le personnage.
+
+Lorsque celui-ci termine, il regarde Aélis.
+
+**Gautier :**
+
+> « Mademoiselle de Montfaucon. Votre voyage aura été plus mouvementé que prévu. »
+
+**Aélis :**
+
+> « Je le reconnais. »
+
+**Gautier :**
+
+> « Vous êtes néanmoins arrivée à Auxerre. C'est l'essentiel. »
+
+Puis il se tourne vers le personnage.
+
+> « Quant à toi, bon travail. Les trois hommes sont vivants et nous avons retrouvé leur compagne de voyage. »
+
+Il marque une pause.
+
+> « Mais cette histoire arrive à un moment particulier. »
+
+---
+
+# 12. La dernière livraison
+
+Gautier ouvre un registre.
+
+**Gautier :**
+
+> « Auxerre doit encore envoyer une dernière livraison de cristaux de mana à Lutecia. »
+
+Aélis relève immédiatement la tête.
+
+**Aélis :**
+
+> « Lutecia ? »
+
+**Gautier :**
+
+> « Oui. »
+
+Il regarde le personnage.
+
+> « Cette livraison doit partir prochainement. Elle devait normalement être confiée à une caravane marchande. »
+
+Il referme le registre.
+
+> « Mais les événements récents rendent ce voyage plus délicat. »
+
+---
+
+# 13. Une nouvelle proposition
+
+**Gautier :**
+
+> « Les cristaux sont trop précieux pour être laissés sans protection. Et nous avons maintenant une personne supplémentaire qui doit se rendre à Lutecia. »
+
+Aélis intervient.
+
+**Aélis :**
+
+> « Je souhaite effectivement poursuivre mon voyage. »
+
+**Gautier :**
+
+> « Alors nous allons faire d'une pierre deux coups. »
+
+Il regarde le personnage.
+
+> « Tu accompagneras la livraison jusqu'à Lutecia. »
+
+**Personnage :**
+
+> « Seul ? »
+
+Gautier secoue la tête.
+
+> « Non. Cette fois, la guilde ne prendra aucun risque. »
+
+---
+
+# 14. L'escorte des paladins
+
+La porte du bureau s'ouvre.
+
+Deux paladins entrent, suivis d'un troisième homme portant les couleurs de leur ordre.
+
+**Gautier :**
+
+> « Une escorte de paladins accompagnera le convoi. »
+
+Il désigne les hommes.
+
+> « Leur mission sera de protéger les cristaux et Mademoiselle de Montfaucon jusqu'à Lutecia. »
+
+Puis il revient vers le personnage.
+
+> « Toi, tu seras chargé de les accompagner et de veiller à ce que le voyage se déroule correctement. »
+
+Aélis sourit légèrement.
+
+**Aélis :**
+
+> « Il semblerait que je sois finalement arrivée à Auxerre au meilleur moment. »
+
+**Gautier :**
+
+> « Ou au pire. Cela dépendra de ce que nous trouverons sur la route de Lutecia. »
+
+---
+
+# 15. Dernier dialogue avant le départ
+
+À la sortie de la guilde, Aélis rejoint le personnage.
+
+Elle tient toujours son carnet contre elle.
+
+**Aélis :**
+
+> « Je dois vous remercier. Sans vous, je serais probablement encore dans cette grotte. »
+
+**Personnage :**
+
+> « Et maintenant ? »
+
+**Aélis :**
+
+> « Maintenant, je vais enfin voir les cristaux d'Auxerre. »
+
+Elle regarde en direction des portes de la cité.
+
+> « Et ensuite Lutecia. »
+
+Un paladin passe derrière eux et vérifie les sangles de son équipement.
+
+**Aélis :**
+
+> « J'ai le sentiment que ce voyage sera plus intéressant que je ne l'avais prévu. »
+
+Puis elle ajoute, avec un léger sourire :
+
+> « J'espère simplement que nous rencontrerons moins de loups géants cette fois. »
+
+---
+
+# Fin de mission
+
+### Récompense
+
+* Expérience pour le personnage.
+* Réputation auprès de la Guilde des aventuriers d'Auxerre ("_id": "lieu:bureau_du_maitre_de_guilde_d_auxerre").
+* Récompense monétaire de Gautier de Valcroix.
+* Déblocage d'Aélis de Montfaucon comme **PNJ important**.
+* Déblocage de la mission suivante.
+
+### Nouvelle mission
+
+**La dernière livraison vers Lutecia**
+
+> Accompagner la dernière livraison de cristaux de mana d'Auxerre jusqu'à Lutecia sous la protection d'une escorte de paladins.
+
+**Objectifs :**
+
+1. Rejoindre le convoi.
+2. Protéger les cristaux de mana.
+3. Accompagner Aélis de Montfaucon.
+4. Voyager jusqu'à Lutecia.
+5. Remettre la livraison à son destinataire.
+6. Permettre à Aélis de commencer ses recherches sur les cristaux de mana.
+
+Cette mission permet ainsi de faire de la quête des **bûcherons disparus** un véritable **pont narratif entre l'arc d'Auxerre et l'arc de Lutecia**, tout en introduisant Aélis comme personnage récurrent et en donnant une raison concrète au groupe de prendre la route vers la cité.
+
+
+---
+
+# Résultat attendu
+
+Génère maintenant le **JSON complet et directement importable dans le jeu**, en utilisant strictement le schéma des fichiers de référence fournis.
+
+Le JSON doit contenir, lorsque le schéma le permet :
+
+1. la définition de la mission ;
+2. son identifiant unique ;
+3. son titre ;
+4. sa description ;
+5. ses objectifs ;
+6. ses étapes ;
+7. les PNJ impliqués ;
+8. les trois bûcherons ;
+9. Aélis de Montfaucon ;
+10. Gautier de Valcroix ;
+11. Borin Barbe-de-Jais ;
+12. Dame Éléonore de Rochefort ;
+13. Frère Martin de Clairvaux ;
+14. les trois Loups Géants ;
+15. les lieux nécessaires ;
+16. les conditions de déclenchement ;
+17. les conditions de progression ;
+18. les conditions de réussite ;
+19. les dialogues complets ;
+20. les conséquences de la découverte d'Aélis ;
+21. la récupération des bûcherons ;
+22. le retour à Auxerre ;
+23. la remise de la mission d'escorte ;
+24. la dernière livraison de cristaux de mana ;
+25. la destination Lutecia ;
+26. toutes les références nécessaires entre les différents objets.
+
+La mission doit se terminer narrativement au moment où **le personnage, Aélis de Montfaucon, Dame Éléonore de Rochefort, Frère Martin de Clairvaux et la dernière livraison de cristaux de mana sont prêts à quitter Auxerre pour prendre la route de Lutecia**.
+
+La suite du voyage vers Lutecia pourra être traitée comme une mission distincte.

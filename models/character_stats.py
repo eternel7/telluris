@@ -29,6 +29,22 @@ WORLD_VARIABLES_DOC_ID: str = "rules:world_variables"
 # dés + chances de toucher. C'est le levier pour régler le nombre de rounds.
 FACTEUR_DEGATS_ARMURE: int = 20
 
+# ── Attaques NATURELLES des créatures non humanoïdes ─────────────────────
+# Un humanoïde frappe avec ce qu'il tient : ses dégâts viennent de son arme
+# (`equipment.degats_dice`), et son dé de Force n'est qu'un socle. Une bête n'a pas
+# d'arme à équiper — crocs, griffes, cornes et masse sont SON armement, et rien dans
+# le modèle ne le comptait : un loup et un bandit désarmé de même Force frappaient
+# exactement pareil. D'où un dé de base SUPPLÉMENTAIRE au corps à corps, de la même
+# taille que celui dérivé de la Force (`_caract_to_dice_`), pour toute espèce SANS le
+# tag `humanoide`.
+#
+# ⚠️ Ne concerne QUE le corps à corps : les monstres n'ont pas d'attaque à distance
+# (cf. CLAUDE.md § Attaques par mode), et `degats_cd` d'une espèce ne sert à rien.
+# ⚠️ Levier d'équilibrage MASSIF — il touche tous les combats du jeu. À **1**, le
+# comportement d'avant est restauré à la lettre (plancher : zéro dé n'aurait pas de sens).
+TAG_HUMANOIDE: str = "humanoide"
+MONSTRE_DES_CC_NATURELS: int = 2
+
 # ── Facteur SIMULÉ (banc d'essai /admin/simulateur) ──────────────────────
 # Le simulateur doit pouvoir répondre à « et si le facteur valait 10 ? » SANS toucher ni
 # la base ni la partie des joueurs. Un simple `character_stats.FACTEUR_DEGATS_ARMURE = 10`
@@ -456,6 +472,14 @@ JOURNAL_BESTIAIRE_LIEUX_MAX: int = 5
 # s'enferme dehors ou pour isoler un bug de rendu d'un bug de condition.
 ACCES_GARDIEN_ACTIF: bool = True
 
+# ── Indicateurs « ! » / « ? » (offres et remises) ─────────────────────────────────
+# Marques posées sur les boutons de sous-lieux, le bouton 🗣 et les choix de dialogue :
+# « ! » = une offre neuve attend le joueur, « ? » = une quête en cours attend une remise
+# ou une rencontre ici. False = tout disparaît (ni marque de lieu, ni badge PNJ, ni marque
+# de choix). Le badge du 🗣 est le seul calcul non gratuit et il tombe sur le chemin le plus
+# chaud du jeu (/play) : il doit pouvoir se couper sans toucher au code.
+INDICATEURS_ACTIFS: bool = True
+
 # ── Récolte & découpe du bois ────────────────────────────────────────────────────
 # Échelle des tailles de bois, du plus petit au plus grand. Couper un item « a_couper »
 # produit des pièces du tier immédiatement plus petit (même `essence`), poids conservé.
@@ -465,6 +489,22 @@ ACCES_GARDIEN_ACTIF: bool = True
 BOIS_A_COUPER: list = ["branche", "petit_rondin", "rondin", "gros_rondin", "tronc", "arbre"]
 OUTIL_COUPE_BOIS_TAG: str = "outil_coupe_bois"
 COUPE_MAX_PIECES: int = 40
+
+# ── Découpe des grosses carcasses en portions localisées ─────────────────────────
+# Une carcasse trop lourde pour être emportée (`charge_max = F×5`, soit 250–500 kg en
+# pratique) peut être débitée SUR PLACE en portions anatomiques — tête, corps, pattes,
+# queue, ailes — que l'on choisit d'emporter ou d'abandonner. Même geste que la coupe du
+# bois (`POST /api/couper`, bouton 🪓), même mise en commun de l'outil dans le groupe
+# (`expedition.porteur_avec_tag`), mais un AUTRE outil : il faut une lame, pas une hache
+# de bûcheron — d'où un tag distinct.
+#
+# ⚠️ La table anatomique n'est PAS ici : elle est BAKÉE dans la donnée, champ `decoupe` du
+# doc carcasse (`dev/gen_carcasses_parties.py`). Une carcasse sans ce champ n'est pas
+# découpable, quel que soit son poids — aucune migration, et l'auteur garde la main
+# espèce par espèce. Le seuil ci-dessous ne sert donc qu'au GÉNÉRATEUR (quelles espèces
+# méritent des portions) et au libellé côté client.
+CARCASSE_TRANCHANT_TAG: str = "tranchant"
+CARCASSE_DECOUPE_POIDS_MIN: float = 100.0
 
 # ── Dépeçage des carcasses (boucherie) ──────────────────────────────────────────
 # Une carcasse vendue à une boucherie est décomposée en matières premières selon les
@@ -479,6 +519,15 @@ COUPE_MAX_PIECES: int = 40
 # pour cibler un item précis (ex. `item:Sang_demon_seche` sur `demon`) : elle circule
 # telle quelle jusqu'au rayon (matiere_item_id la laisse intacte), sans passer par la
 # résolution sous_cat→item.
+#
+# ⚠️ `boyaux` est sur `_charnu_base` (et redit sur `animal`) et PAS seulement sur
+# `geant`/`grande_taille` : ces deux tags-là ne portent que 3 espèces sur 139, si bien
+# qu'aucune boucherie n'en mettait en rayon — or la BOYAUDERIE n'a AUCUNE feuille
+# d'appro (tous ses intrants sortent de recettes de boucherie, cf.
+# `marche.appro_leaves_categorie`), donc `approvisionner` ne lui livre rien et 4 de ses
+# 6 recettes sur 6 attendaient des boyaux qui n'existaient nulle part. La redite sur
+# `animal` est sans effet arithmétique (on prend le MAX par sous-cat, pas la somme) :
+# elle documente la matière là où on la cherche, et survivrait à un retrait de la base.
 DEPECAGE_TAGS: dict[str, list] = {
 	"_charnu_base": [
 	  "viande",
@@ -486,37 +535,57 @@ DEPECAGE_TAGS: dict[str, list] = {
 	  "os",
 	  "sang",
 	  "graisse",
-	  "tendons"
+	  "tendons",
+	  "boyaux",
+	  "foie",
+	  "crane"
 	],
 	"animal": [
 	  "cuir_brut",
 	  "crocs",
 	  "poils",
-	  "tendons"
+	  "tendons",
+	  "boyaux",
+	  "foie",
+	  "crane"
 	],
 	"monstre": [
 	  "cuir_brut",
-	  "crocs"
+	  "crocs",
+	  "boyaux",
+	  "foie",
+	  "crane"
 	],
 	"humanoide": [
-	  "cuir_brut"
+	  "cuir_brut",
+	  "foie",
+	  "crane"
 	],
 	"monture": [
 	  "cuir_brut",
 	  "crins",
-	  "tendons"
+	  "tendons",
+	  "boyaux",
+	  "foie",
+	  "crane"
 	],
 	"bete_de_somme": [
 	  "cuir_brut",
 	  "crins",
-	  "tendons"
+	  "tendons",
+	  "boyaux",
+	  "foie",
+	  "crane"
 	],
 	"draconique": [
 	  "cuir_brut",
 	  "crocs",
 	  "griffes",
 	  "tendons",
-	  "coeur"
+	  "coeur",
+	  "boyaux",
+	  "foie",
+	  "crane"
 	],
 	"reptile": [
 	  "cuir_brut",
@@ -527,7 +596,9 @@ DEPECAGE_TAGS: dict[str, list] = {
 	  "crocs",
 	  "griffes",
 	  "coeur",
-	  "item:Sang_demon_seche"
+	  "item:Sang_demon_seche",
+	  "foie",
+	  "crane"
 	],
 	"infernal": [
 	  "griffes",
@@ -540,7 +611,9 @@ DEPECAGE_TAGS: dict[str, list] = {
 	"ange": [
 	  "plumes",
 	  "coeur",
-	  "tendons"
+	  "tendons",
+	  "foie",
+	  "crane"
 	],
 	"vol": [
 	  "plumes",
@@ -564,7 +637,9 @@ DEPECAGE_TAGS: dict[str, list] = {
 	  "crane"
 	],
 	"grande_taille": [
-	  "boyaux"
+	  "boyaux",
+	  "tendons",
+	  "crane"
 	],
 	"boss": [
 	  "coeur",
@@ -589,7 +664,8 @@ DEPECAGE_TAGS: dict[str, list] = {
 	],
 	"non_mort": [
 	  "os",
-	  "os"
+	  "os",
+	  "crane"
 	]
   }
 
@@ -632,6 +708,7 @@ def current_world_variables() -> dict:
 	"""Snapshot des variables de monde effectives (telles qu'appliquées en mémoire)."""
 	return {
 		"FACTEUR_DEGATS_ARMURE": FACTEUR_DEGATS_ARMURE,
+		"MONSTRE_DES_CC_NATURELS": MONSTRE_DES_CC_NATURELS,
 		"LOCALISATION_TOUCHES": dict(LOCALISATION_TOUCHES),
 		"JET_PORTEE_F_DIV": JET_PORTEE_F_DIV,
 		"DETECTION_DISTANCE_FACTEUR": DETECTION_DISTANCE_FACTEUR,
@@ -736,9 +813,12 @@ def current_world_variables() -> dict:
 		"JOURNAL_ENTREES_MAX": JOURNAL_ENTREES_MAX,
 		"JOURNAL_BESTIAIRE_LIEUX_MAX": JOURNAL_BESTIAIRE_LIEUX_MAX,
 		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
+		"INDICATEURS_ACTIFS": INDICATEURS_ACTIFS,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
 		"OUTIL_COUPE_BOIS_TAG": OUTIL_COUPE_BOIS_TAG,
 		"COUPE_MAX_PIECES": COUPE_MAX_PIECES,
+		"CARCASSE_TRANCHANT_TAG": CARCASSE_TRANCHANT_TAG,
+		"CARCASSE_DECOUPE_POIDS_MIN": CARCASSE_DECOUPE_POIDS_MIN,
 	}
 
 
@@ -764,6 +844,7 @@ def load_world_variables() -> dict:
 	côté importateurs ; les scalaires sont réassignés (à lire via le module).
 	Retourne le snapshot effectif.
 	"""
+	global MONSTRE_DES_CC_NATURELS
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
@@ -799,8 +880,9 @@ def load_world_variables() -> dict:
 	global AUBERGE_MESSAGE_DUREE_SECONDES, AUBERGE_TABLE_MESSAGES_MAX
 	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
-	global ACCES_GARDIEN_ACTIF
+	global ACCES_GARDIEN_ACTIF, INDICATEURS_ACTIFS
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
+	global CARCASSE_TRANCHANT_TAG, CARCASSE_DECOUPE_POIDS_MIN
 	try:
 		from db.config import get_doc  # import paresseux : pas de dépendance DB à l'import
 		doc = get_doc(WORLD_VARIABLES_DOC_ID)
@@ -809,6 +891,8 @@ def load_world_variables() -> dict:
 	v = (doc or {}).get("value") or {}
 
 	FACTEUR_DEGATS_ARMURE      = int(v.get("FACTEUR_DEGATS_ARMURE", FACTEUR_DEGATS_ARMURE))
+	# Plancher à 1 : une attaque naturelle sans le moindre dé ne serait plus une attaque.
+	MONSTRE_DES_CC_NATURELS = max(1, int(v.get("MONSTRE_DES_CC_NATURELS", MONSTRE_DES_CC_NATURELS)))
 	JET_PORTEE_F_DIV           = max(1, int(v.get("JET_PORTEE_F_DIV", JET_PORTEE_F_DIV)))
 	DETECTION_DISTANCE_FACTEUR = max(0, int(v.get("DETECTION_DISTANCE_FACTEUR", DETECTION_DISTANCE_FACTEUR)))
 	XP_DECOUVERTE_LIEU         = int(v.get("XP_DECOUVERTE_LIEU", XP_DECOUVERTE_LIEU))
@@ -965,11 +1049,16 @@ def load_world_variables() -> dict:
 	JOURNAL_ENTREES_MAX = max(1, int(v.get("JOURNAL_ENTREES_MAX", JOURNAL_ENTREES_MAX)))
 	JOURNAL_BESTIAIRE_LIEUX_MAX = max(1, int(v.get("JOURNAL_BESTIAIRE_LIEUX_MAX", JOURNAL_BESTIAIRE_LIEUX_MAX)))
 	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))
+	INDICATEURS_ACTIFS = bool(v.get("INDICATEURS_ACTIFS", INDICATEURS_ACTIFS))
 
 	if isinstance(v.get("BOIS_A_COUPER"), list):
 		BOIS_A_COUPER[:] = [str(x) for x in v["BOIS_A_COUPER"]]
 	OUTIL_COUPE_BOIS_TAG = str(v.get("OUTIL_COUPE_BOIS_TAG", OUTIL_COUPE_BOIS_TAG))
 	COUPE_MAX_PIECES     = int(v.get("COUPE_MAX_PIECES", COUPE_MAX_PIECES))
+	CARCASSE_TRANCHANT_TAG = str(v.get("CARCASSE_TRANCHANT_TAG", CARCASSE_TRANCHANT_TAG))
+	# Planché à 0 : un seuil négatif rendrait « découpable » tout ce qui pèse quelque chose,
+	# alors que le champ `decoupe` reste seul juge en jeu.
+	CARCASSE_DECOUPE_POIDS_MIN = max(0.0, float(v.get("CARCASSE_DECOUPE_POIDS_MIN", CARCASSE_DECOUPE_POIDS_MIN)))
 
 	return current_world_variables()
 
@@ -1063,10 +1152,17 @@ def compute_derived_stats(
 	base:	  BaseStats,
 	niveau:	int,
 	equipment: EquipmentBonus = EquipmentBonus(),
+	des_cc:	int = 1,
 ) -> DerivedStats:
 	"""
 	Calcule toutes les stats dérivées à partir des stats de base,
 	du niveau et de l'équipement.
+
+	`des_cc` = nombre de dés de Force au CORPS À CORPS. **1 pour tout le monde**, sauf
+	l'attaque naturelle d'une espèce sans le tag `humanoide` (cf. `build_monster_snapshot`) :
+	une bête n'a pas d'arme à équiper, ses crocs sont son armement. ⚠️ Défaut à 1 : aucun
+	appelant existant ne change de comportement, et le tir (`degats_cd`) n'est jamais
+	concerné — les monstres n'attaquent qu'au contact.
 	"""
 	# ── PV max ──────────────────────────────────────────────────────
 	pv_max = (base.r * 3) + base.f + equipment.pv
@@ -1110,7 +1206,8 @@ def compute_derived_stats(
 	# de caractéristiques égales s'annulent, et ce sont les armes (+x / +1DX) qui
 	# font la différence de dégâts.
 	degats_cc = _format_damage(
-		_caract_to_dice_(base.f), base.f // facteur_degats_armure(), equipment
+		_caract_to_dice_(base.f), base.f // facteur_degats_armure(), equipment,
+		base_count=des_cc
 	)
 
 	# ── Dégâts à distance ─────────────────────────────────────────────
@@ -1247,19 +1344,22 @@ def normalize_dice(raw) -> str:
 	return s
 
 
-def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus) -> str:
-	"""Assemble la notation de dégâts : dé de base + dés d'arme + modificateur plat.
+def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus,
+				   base_count: int = 1) -> str:
+	"""Assemble la notation de dégâts : dé(s) de base + dés d'arme + modificateur plat.
 
 	- `base_die`	: dé dérivé de la caractéristique (F au CàC, Ag au tir).
+	- `base_count`  : COMBIEN de ce dé-là. 1 partout, sauf l'attaque naturelle d'une
+	  créature non humanoïde (cf. `MONSTRE_DES_CC_NATURELS`) : ses crocs SONT son arme.
 	- `stat_bonus`  : bonus de puissance physique = caract // FACTEUR (miroir des PA).
 	- `equipment.degats_dice` : dés additionnels de l'arme (+1DX), concaténables.
 	- `equipment.degats_bonus`: modificateur plat de l'arme (+x).
 
 	Les dés de MÊME taille sont regroupés (1D6 + 1D6 → "2D6"), dans l'ordre d'apparition
 	(le dé de caract d'abord). Ex : F=24 sans arme → "1D6+1" ; avec une hache +4/+1D6 →
-	"2D6+5" ; avec une épée +1/+1D4 → "1D6+1D4+2".
+	"2D6+5" ; avec une épée +1/+1D4 → "1D6+1D4+2". Un loup de F=24 → "2D6+1".
 	"""
-	dice: dict[int, int] = {base_die: 1}
+	dice: dict[int, int] = {base_die: max(1, int(base_count or 1))}
 	for n, sides in _DICE_RE.findall(equipment.degats_dice or ""):
 		sides = int(sides)
 		dice[sides] = dice.get(sides, 0) + int(n or "1")

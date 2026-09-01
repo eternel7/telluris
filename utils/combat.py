@@ -10,7 +10,7 @@ from models.character_stats import (
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
 	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id, item_ref_weight,
-	lieu_label,
+	lieu_label, noter_victoire,
 )
 from utils.consommables import (
 	caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus,
@@ -19,6 +19,8 @@ from utils.consommables import (
 )
 from utils.sorts import part_durative, effets_d_arme, concat_degats
 from utils.quetes import maj_progress_kills, maj_progress_chasse
+# `utils/zones.py` est une FEUILLE (math/random seulement) : aucun cycle possible.
+from utils.zones import profils_compatibles
 from utils.focalisation import effacer_si_objectif_atteint
 from utils import recrutement
 from utils import montures as montures_util
@@ -107,7 +109,12 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 		cha=stats.get("Cha", 0), ch=stats.get("Ch", 0),
 	)
 	equipment = _equipment_bonus_de(acteur)
-	derived = compute_derived_stats(base, niveau=acteur.get("voc_niveau", 0), equipment=equipment)
+	# ⚠️ `des_cc_base` DOIT être repassé : sans lui, le premier effet posé ou expiré
+	# recomposerait `degats_cc` à 1 dé et retirerait au monstre son attaque naturelle, en
+	# silence et pour le reste du combat. Absent ⇒ 1, donc un combat déjà en base garde
+	# rigoureusement le comportement d'avant (aucune migration).
+	derived = compute_derived_stats(base, niveau=acteur.get("voc_niveau", 0), equipment=equipment,
+									des_cc=int(acteur.get("des_cc_base", 1) or 1))
 
 	acteur["cc"] = derived.cc
 	acteur["cd"] = derived.cd
@@ -1291,16 +1298,43 @@ def instantiate_monsters(
 		if sum(poids_especes) <= 0:
 			poids_especes = None
 
+	# ⚠️ Le filtre `restriction_tags` est appliqué APRÈS le tirage de l'espèce, et pas une
+	# fois pour toute la fournée : un pool peut mêler des espèces aux tags différents (le
+	# donjon-mine oppose gobelins, rats, chauves-souris et araignées dans la même salle), et
+	# un profil `distance` légitime sur le gobelin ne l'est pas sur le rat. Filtrer en amont
+	# reviendrait à appliquer à tout le monde la contrainte de la plus pauvre en tags.
+	# Mémoïsé par espèce : `nb` peut valoir une dizaine de monstres pour un pool de deux.
+	compat: dict = {}
 	monstres = []
 	for i in range(nb):
 		espece = (
 			random.choices(pool, weights=poids_especes, k=1)[0]
 			if poids_especes else random.choice(pool)
 		)
-		profil = _pick_profil(profils, profil_weights)
+		eid = espece.get("_id")
+		if eid not in compat:
+			compat[eid] = profils_compatibles(profils, espece)
+		# Aucun compatible ⇒ `None`, donc le point médian de l'espèce (cf.
+		# `build_monster_snapshot`) — exactement ce que produisait déjà un `profils` vide.
+		# ⚠️ Ne JAMAIS replier ici sur la liste non filtrée : ce serait rouvrir le défaut.
+		profil = _pick_profil(compat[eid], profil_weights)
 		monstres.append(build_monster_snapshot(espece, profil, i))
 
 	return monstres
+
+
+def des_cc_espece(espece: dict) -> int:
+	"""Nombre de dés de Force au corps à corps pour l'attaque NATURELLE de cette espèce.
+
+	SEUL point de décision : une espèce sans le tag `humanoide` frappe avec ce qu'elle a
+	sur elle (crocs, griffes, cornes) et gagne un dé de base supplémentaire — un humanoïde,
+	lui, tire ses dégâts de l'arme qu'il équipe. La valeur est ensuite RECOPIÉE dans le
+	snapshot (`des_cc_base`), parce que `_refresh_snapshot_stats` recompose `degats_cc` à
+	chaque effet posé ou expiré : sans elle en mémoire, le premier debuff venu retirerait
+	le dé en silence et il faudrait relire le doc espèce à chaque tour."""
+	if character_stats.TAG_HUMANOIDE in ((espece or {}).get("tags") or []):
+		return 1
+	return max(1, int(character_stats.MONSTRE_DES_CC_NATURELS or 1))
 
 
 def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
@@ -1317,7 +1351,8 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		niveau = 1
 		profil_id = None
 
-	derived = compute_derived_stats(base_stats, niveau=niveau)
+	des_cc = des_cc_espece(espece)
+	derived = compute_derived_stats(base_stats, niveau=niveau, des_cc=des_cc)
 	# XP dérivée de la difficulté : niveau du profil + somme des stats du monstre.
 	sum_stats = (
 		base_stats.v + base_stats.f + base_stats.r + base_stats.ag
@@ -1339,6 +1374,10 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 			"Ch": base_stats.ch,
 		},
 		"voc_niveau": niveau,
+		# Dés de Force de son attaque naturelle (2 hors `humanoide`). FIGÉ à l'entrée comme
+		# les autres `*_base`, et relu par `_refresh_snapshot_stats` : c'est ce qui fait
+		# survivre le dé supplémentaire à un buff ou à un debuff de Force.
+		"des_cc_base": des_cc,
 		"esquive_base": 0,
 		"regen_pv_base": 0,
 		"regen_pm_base": 0,
@@ -3165,6 +3204,15 @@ def finalize_combat(combat_doc: dict) -> bool:
 	if journal.lieux_a_nommer(character, monstres, lieu_id):
 		label = lieu_label(get_doc(lieu_id), lieu_id)
 	journal.noter_rencontres(character, monstres, lieu_id, label)
+	# Salle gardée nettoyée : la porte par laquelle on est entré ne se rouvrira plus, et une
+	# barrière peut s'ouvrir derrière (la clairière dégagée devant la grotte aux loups).
+	# ⚠️ `salle_gardee` et JAMAIS `battle_map_id` : cf. `characters.noter_victoire` — la même
+	# carte sert de décor aux combats de zone, qui ne franchissent aucune porte.
+	# ⚠️ Même place et même motif que le bestiaire ci-dessus : déjà sous le garde
+	# exactly-once `combats_recompenses`, persisté par le `_finalize_membre` du principal —
+	# donc aucun `save_doc` ajouté.
+	if status == "victoire" and combat_doc.get("salle_gardee"):
+		noter_victoire(character, combat_doc["salle_gardee"])
 	# Focalisation : objectif de la quête focalisée atteint → effacée (même save).
 	effacer_si_objectif_atteint(character)
 

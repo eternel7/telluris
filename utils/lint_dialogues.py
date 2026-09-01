@@ -44,7 +44,17 @@ PLACEHOLDERS_CONNUS = {
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
 # booléen du contexte (utils/pnj.condition_ok). Un flag inconnu vaut False → le choix
 # disparaît pour toujours, silencieusement : c'est la faute la plus coûteuse à diagnostiquer.
-CONDITIONS_STRUCTUREES = {"relation_min", "intro_raison"}
+# ⚠️ Miroir EXACT de `utils.pnj.CONDITIONS_STRUCTUREES` (épinglé par un test) : une clé
+# structurée oubliée ici serait signalée comme flag inconnu sur du contenu correct, et une
+# clé de trop laisserait passer une vraie faute.
+CONDITIONS_STRUCTUREES = {"relation_min", "intro_raison", "quete_reussie"}
+
+# Sous-clés de `quete_reussie`. ⚠️ Les valider est le contrôle qui COMPTE, exactement comme
+# pour `acces.SOUS_FILTRES_CONNUS` : une clé de premier niveau inconnue est refusée par le
+# moteur (donc visible en jeu), tandis qu'une SOUS-clé fautive est ignorée en silence — un
+# `attendus: false` mal orthographié rendrait la condition positive, et le choix qui devait
+# rester caché s'afficherait, révélant l'intrigue sans le moindre symptôme.
+QUETE_REUSSIE_CLES = {"id", "attendu"}
 FLAGS_CONNUS = {
 	"transport_offert", "transport_a_livrer", "transport_a_rapporter",
 	"transport_en_cours", "transport_accompli", "transport_mefiance",
@@ -352,6 +362,29 @@ def analyser_doc(doc: dict) -> list:
 				if cle not in FLAGS_CONNUS:
 					erreur(f"choix `{cid}` : condition `{cle}` inconnue du moteur. Un flag "
 						   f"absent vaut False → ce choix ne s'affichera JAMAIS.", nid)
+
+			# `quete_reussie` : la SEULE condition qui nomme une quête, donc la seule dont
+			# une faute de frappe passe inaperçue en jeu — le choix reste simplement caché
+			# pour toujours (ou s'affiche toujours, dans la forme `attendu: false`).
+			if "quete_reussie" in conditions:
+				filtre = (choix.get("condition") or {}).get("quete_reussie")
+				if not isinstance(filtre, dict):
+					erreur(f"choix `{cid}` : `quete_reussie` doit être un objet "
+						   f"`{{\"id\": \"quete:...\", \"attendu\": true|false}}` — "
+						   f"fail-closed, le choix ne s'affichera JAMAIS.", nid)
+				else:
+					qid = filtre.get("id")
+					if not isinstance(qid, str) or not qid.startswith("quete:"):
+						erreur(f"choix `{cid}` : `quete_reussie.id` doit être un id de quête "
+							   f"(`quete:...`) — fail-closed, le choix ne s'affichera "
+							   f"JAMAIS.", nid)
+					for sous in set(filtre) - QUETE_REUSSIE_CLES:
+						erreur(f"choix `{cid}` : `quete_reussie.{sous}` inconnue. Une "
+							   f"sous-clé fautive est IGNORÉE en silence — la condition "
+							   f"redevient positive et le choix s'affiche à tort.", nid)
+					if "attendu" in filtre and not isinstance(filtre["attendu"], bool):
+						erreur(f"choix `{cid}` : `quete_reussie.attendu` doit être un "
+							   f"booléen (`true`/`false`).", nid)
 
 			# Hook de déplacement automatique : `"deplacer": "lieu:xxx"`. On ne peut pas
 			# vérifier que le lieu EXISTE (pas de DB ici), mais un `true`/`"bureau"`/id sans

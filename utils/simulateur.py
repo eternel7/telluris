@@ -50,6 +50,7 @@ import math
 import random
 import re
 
+from models import character_stats
 from models.character_stats import BaseStats, compute_character_level
 from utils import combat
 from utils.characters import (SLOT_ZONE, item_ref_id, main_occupee_par_deux_mains,
@@ -206,8 +207,12 @@ def _appliquer_stats_forcees(snap: dict, plein: bool = False) -> dict:
 SLOTS_EQUIPABLES = ("tete", "epaules", "torse", "mains", "jambes", "pieds",
 					"cou", "anneau_1", "anneau_2", "ceinture",
 					"main_droite", "main_gauche")
-# Seul le tag qui ouvre le paperdoll — une espèce sans lui reste nue.
-TAG_EQUIPABLE = "humanoide"
+# Seul le tag qui ouvre le paperdoll — une espèce sans lui reste nue. ⚠️ SOURCE UNIQUE
+# `character_stats.TAG_HUMANOIDE`, et non une seconde chaîne en dur : c'est exactement le
+# même tag qui décide qu'une espèce frappe avec son ARME plutôt qu'avec ses crocs
+# (cf. `combat.des_cc_espece`). Deux copies finiraient par diverger, et le banc d'essai
+# habillerait une bête qui garderait son dé d'attaque naturelle.
+TAG_EQUIPABLE = character_stats.TAG_HUMANOIDE
 
 
 def espece_equipable(espece: dict) -> bool:

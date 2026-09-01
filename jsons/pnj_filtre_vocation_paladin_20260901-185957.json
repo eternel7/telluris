@@ -1,0 +1,187 @@
+[
+  {
+    "_id": "pnj:dame_eleonore_de_rochefort",
+    "_rev": "1-dad481ae75369f9de6aaf6c5d3330ba2",
+    "type": "pnj",
+    "nom": "Dame Éléonore de Rochefort",
+    "race": "elfe",
+    "vocation": "paladin",
+    "portrait": "paladin_Dame_Éléonore_de_Rochefort_elfe_f.jpg",
+    "description": "Paladine, commandante de l'escorte chargée de conduire la dernière livraison de cristaux de mana d'Auxerre jusqu'à Lutecia. Elle parle peu, et jamais pour ne rien dire.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Dans la cour du Bastion, une paladine en haubert clair vérifie une à une les sangles d'un bât. Elle ne lève pas les yeux tout de suite ; quand elle les lève, elle prend votre mesure en une seconde. « Éléonore de Rochefort. Je commande l'escorte de la livraison. » Un signe du menton vers trois caisses cerclées de fer. « Vous êtes {prenom}, je suppose. On m'a parlé de vous. »",
+          "choix": [
+            {
+              "id": "convoi",
+              "label": "« Quelle livraison ? »",
+              "next": "convoi"
+            },
+            {
+              "id": "route",
+              "label": "« Quelle route prendrez-vous ? »",
+              "next": "route"
+            },
+            {
+              "id": "ordre",
+              "label": "« Pourquoi votre ordre se mêle-t-il d'un convoi marchand ? »",
+              "next": "ordre"
+            },
+            {
+              "id": "fin",
+              "label": "« Nous nous reverrons au départ. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "convoi": {
+          "texte": "« La dernière de l'année. » Elle repose la sangle. « Des cristaux de mana d'Auxerre, taillés et scellés, pour Lutecia. Ce qui tient dans ces trois caisses vaut plus que ce que cette cour a vu passer en dix ans, et la moitié de la province le sait. » Un regard circulaire, sans illusion. « C'est pour cela qu'on ne la confie plus à une caravane. »",
+          "choix": [
+            {
+              "id": "route",
+              "label": "« Et la route ? »",
+              "next": "route"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "route": {
+          "texte": "« La route basse jusqu'au fleuve, puis plein nord. » Elle trace le trajet dans l'air, brièvement. « Frère Martin ferme la marche, je tiens la tête. Vous ferez ce que vous jugerez utile entre les deux — on m'a dit que vous aviez l'habitude de juger correctement. » Une pause. « Nous emmenons aussi la demoiselle de Montfaucon. Elle vaut, elle aussi, qu'on la mène entière. »",
+          "choix": [
+            {
+              "id": "aelis",
+              "label": "« Vous savez ce qui est arrivé à sa première escorte. »",
+              "next": "aelis"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "aelis": {
+          "texte": "Le visage de la paladine ne bouge pas, mais sa main s'immobilise sur le cuir. « Deux frères d'armes, tombés sur une route qu'on disait sûre, pour protéger une femme qui portait un carnet. » Elle reprend son geste. « Je ne les ai pas connus. Je relèverai leur poste quand même : c'est ainsi qu'on relève un poste. Cette fois, la demoiselle arrivera. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Saluer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "ordre": {
+          "texte": "« Parce qu'un convoi marchand se défend jusqu'à ce que ce ne soit plus rentable. » Elle boucle la sangle d'un coup sec. « Nous, nous n'avons rien à calculer. C'est toute la différence, et c'est exactement ce que la Guilde achète en nous appelant. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« C'est entendu. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:frere_martin_de_clairvaux",
+    "_rev": "1-99ae9658d873c78ae4fbc2a0da0250d9",
+    "type": "pnj",
+    "nom": "Frère Martin de Clairvaux",
+    "race": "hobbit",
+    "vocation": "paladin",
+    "portrait": "paladin_Frère_Martin_de_Clairvaux_hobbit_m.jpg",
+    "description": "Paladin hobbit, second de Dame Éléonore de Rochefort sur la route de Lutecia. Il ferme la marche, compte les têtes, et connaît le nom de tous les mulets.",
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Un hobbit en cotte de mailles, à peine plus haut que la roue du chariot qu'il inspecte, tapote un moyeu d'un air soupçonneux. « Ah — vous êtes le renfort. » Il s'essuie les mains à un pan de surcot immaculé, ce qui ne l'améliore pas. « Frère Martin de Clairvaux. Je ferme la marche : c'est la place où l'on voit tomber les gens, donc c'est la place qui compte. »",
+          "choix": [
+            {
+              "id": "cristaux",
+              "label": "« Que transportez-vous exactement ? »",
+              "next": "cristaux"
+            },
+            {
+              "id": "marche",
+              "label": "« Combien de temps jusqu'à la capitale ? »",
+              "next": "marche"
+            },
+            {
+              "id": "peur",
+              "label": "« La route vous inquiète ? »",
+              "next": "peur"
+            },
+            {
+              "id": "fin",
+              "label": "« Bonne route, frère. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cristaux": {
+          "texte": "« Trois caisses. Cerclées, scellées, plombées au sceau de la Guilde. » Il compte sur ses doigts avec application. « Et une quatrième, plus petite, que la demoiselle refuse de laisser charger : ses instruments. J'ai renoncé à discuter — je crois qu'elle dormirait dessus. »",
+          "choix": [
+            {
+              "id": "marche",
+              "label": "« Et la route ? »",
+              "next": "marche"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "marche": {
+          "texte": "« À l'allure des chariots ? Plusieurs jours, et je ne promets rien à qui me demande un chiffre. » Il relève le nez. « Dame Éléonore dira le contraire, elle dit toujours le contraire, et pourtant c'est elle qui a raison sur les distances et moi sur les essieux. L'ordre marche bien parce que chacun s'occupe de ce qui casse. »",
+          "choix": [
+            {
+              "id": "peur",
+              "label": "« Et qu'est-ce qui casse, sur cette route ? »",
+              "next": "peur"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "peur": {
+          "texte": "Le hobbit cesse un instant de s'agiter. « Deux des nôtres sont restés sur cette route, à escorter une seule voyageuse sans bagage. » Il tapote la roue, doucement, cette fois. « Alors non, je ne suis pas inquiet : je suis attentif. Ce n'est pas le même métier, mais ça se ressemble beaucoup vu de l'extérieur. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Attentif, donc. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

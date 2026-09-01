@@ -28,6 +28,40 @@ def now_epoch() -> int:
 	return int(time.time())
 
 
+# ---------------------------------------------------------------------------
+# « Cette quête a-t-elle été menée à bien ? » — SOURCE UNIQUE
+# ---------------------------------------------------------------------------
+# ⚠️ La règle est UNE : l'id figure dans `quetes_terminees` ET l'archive ne porte pas
+# `echec`. Un ÉCHEC ne compte pas — le donneur repropose, on ne condamne pas un joueur pour
+# une perte ou un retard (c'est ce qui rend les offres `unique` rejouables après un revers).
+#
+# Elle avait DEUX implémentations identiques (`escorte.deja_reussie`,
+# `transport.deja_reussie`), qui délèguent maintenant ici. `quetes_terminees` est écrit par
+# quatre archiveurs (escorte, transport, chasse, donjon) au même format : le prédicat est
+# donc générique, et c'est ce qui permet à un dialogue de tester N'IMPORTE QUELLE quête.
+
+def quete_reussie(character: dict, quete_id: str) -> bool:
+	"""Cette quête a-t-elle été MENÉE À BIEN par le personnage ? Id vide ⇒ False."""
+	if not quete_id:
+		return False
+	return any(
+		t.get("id") == quete_id and not t.get("echec")
+		for t in (character or {}).get("quetes_terminees", [])
+	)
+
+
+def quetes_reussies(character: dict) -> set:
+	"""Les ids de toutes les quêtes menées à bien — la forme que consomme le contexte de
+	dialogue (`pnj.condition_ok`, condition `quete_reussie`).
+
+	⚠️ Aucune lecture DB : `quetes_terminees` vit sur le doc personnage, déjà chargé par la
+	requête. C'est ce qui rend la condition gratuite à chaque rendu de nœud."""
+	return {
+		t.get("id") for t in (character or {}).get("quetes_terminees", [])
+		if t.get("id") and not t.get("echec")
+	}
+
+
 def _cached_getter(fn):
 	"""Mémoïse `fn(doc_id)` (typiquement `get_doc`) dans un dict LOCAL À L'APPEL — jamais partagé
 	entre requêtes (pas de staleness), juste évite de re-fetcher le même lieu/espèce/profil/zone

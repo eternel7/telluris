@@ -31,6 +31,7 @@ from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
 from utils import quetes
 from utils import bois
+from utils import carcasse
 from utils import consommables
 from utils import sorts as sorts_util
 from utils import competences as competences_util
@@ -42,6 +43,7 @@ from utils import recrutement
 from utils import acces
 from utils import montures
 from utils import escorte
+from utils import indicateurs
 from utils import expedition
 from utils import auberge
 from utils import journal as journal_util
@@ -617,7 +619,7 @@ async def move_character(
 				# docs relation + un doc lieu complet par lieu connu).
 				relations_lieux = (relations_lieux_payload(character_to_update)
 								   if (transports_echoues or escorte_maj["depose"]) else None)
-				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "access": access, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
+				return {"transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "relations_lieux": relations_lieux, "position": character_to_update["position"], "links": links, "lieux_marques": indicateurs.marques_lieux(character_to_update), "access": access, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ground_cleared": ground_cleared, "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "affinites_detail": recrutement.affinites_detail_payload(character_to_update, get_doc), "guidage": focalisation.guidage(character_to_update, lieu_doc, find_docs, get_doc), "intro_terminee": intro_terminee, "intro_xp": intro_xp}
 	raise HTTPException(status_code=404, detail="Incorrect movement info")
 
 
@@ -1604,14 +1606,21 @@ async def couper_item(
 	current_user: Annotated[User, Depends(get_current_user)],
 	body: dict = Body(...),
 ):
-	"""Coupe un item « a_couper » (bois) d'un niveau : retire la source du sac (du personnage
-	OU d'un compagnon via `compagnon_id`) OU du sol, et dépose au SOL du principal les pièces du
-	tier immédiatement plus petit (poids conservé). Nécessite un outil de coupe (item taggé),
-	PARTAGÉ par le groupe. Body : {index, item_id, source:"sac"|"sol", compagnon_id?}."""
-	porteur, principal = _acteur(current_user, body)
+	"""Débite un objet et dépose les morceaux au SOL du principal (poids conservé). Retire la
+	source du sac (du personnage OU d'un compagnon via `compagnon_id`) OU du sol. Body :
+	{index, item_id, source:"sac"|"sol", compagnon_id?}.
 
-	if not bois.a_outil_coupe(principal, get_doc, recrutement.groupe_effectif(principal, get_doc)):
-		raise HTTPException(status_code=409, detail="Il faut un outil de coupe (hache, scie…).")
+	DEUX découpes derrière UN seul geste (le bouton 🪓), aiguillées par le doc source :
+	  · **carcasse** portant un champ `decoupe` → portions localisées (tête, corps, pattes…),
+	    outil = une **arme tranchante** ;
+	  · **bois** « a_couper » → pièces du tier immédiatement plus petit, outil = une hache.
+	Les deux outils sont PARTAGÉS par le groupe (`expedition.porteur_avec_tag`).
+
+	⚠️ L'aiguillage se fait sur le DOC SOURCE et l'outil n'est exigé qu'après : tester la hache
+	d'abord refuserait de débiter un cerf au couteau, avec en prime un message qui parle de
+	scie. La carcasse passe en premier — un item ne porte jamais les deux champs, mais si cela
+	arrivait, c'est la découpe la plus spécifique qui doit gagner."""
+	porteur, principal = _acteur(current_user, body)
 
 	source = body.get("source")
 	# Le sac coupé est celui du PORTEUR (compagnon si `compagnon_id`) ; le sol est TOUJOURS
@@ -1622,7 +1631,20 @@ async def couper_item(
 	target_ref = _find_ref(refs, idx, item_id)
 	if target_ref is None:
 		raise HTTPException(status_code=422, detail="Objet introuvable.")
-	pieces = bois.couper_ref(target_ref, get_doc(item_ref_id(target_ref)), find_docs)
+
+	source_doc = get_doc(item_ref_id(target_ref))
+	compagnons = recrutement.groupe_effectif(principal, get_doc)
+	# ⚠️ Le poids de l'INSTANCE, pas celui du doc : deux carcasses du même item pèsent
+	# rarement pareil, et c'est ce poids-là que le seuil de découpe doit départager.
+	if carcasse.item_est_decoupable(source_doc, item_ref_weight(target_ref)):
+		if not carcasse.a_arme_tranchante(principal, get_doc, compagnons):
+			raise HTTPException(status_code=409,
+								detail="Il faut une arme tranchante (couteau, épée, hache…).")
+		pieces = carcasse.decouper_ref(target_ref, source_doc)
+	else:
+		if not bois.a_outil_coupe(principal, get_doc, compagnons):
+			raise HTTPException(status_code=409, detail="Il faut un outil de coupe (hache, scie…).")
+		pieces = bois.couper_ref(target_ref, source_doc, find_docs)
 	if not pieces:
 		raise HTTPException(status_code=422, detail="Cet objet ne peut pas être coupé davantage.")
 
@@ -1647,6 +1669,23 @@ async def couper_item(
 		"nom": cible_doc.get("nom", "pièces") if cible_doc else "pièces",
 		"taille": cible_doc.get("sous_categorie", "") if cible_doc else "",
 	}
+	# Une découpe de carcasse rend des pièces HÉTÉROGÈNES (1 tête, 4 pattes, 1 queue…) : le
+	# résumé mono-item de `coupe` ne saurait pas le dire. On publie donc le détail en plus,
+	# jamais à la place — les toasts de la coupe du bois lisent `coupe` et ne bougent pas.
+	# ⚠️ Un seul `get_doc` par item DISTINCT : les docs `item:*` sont dans le cache de requête,
+	# mais 4 pattes ne justifient pas 4 appels.
+	if len({p["item"] for p in pieces}) > 1:
+		noms: dict[str, str] = {}
+		detail: list[dict] = []
+		for p in pieces:
+			if p["item"] not in noms:
+				doc = get_doc(p["item"]) or {}
+				noms[p["item"]] = doc.get("nom") or p["item"]
+				detail.append({"item": p["item"], "nom": noms[p["item"]], "n": 0, "poids": 0.0})
+			ligne = next(d for d in detail if d["item"] == p["item"])
+			ligne["n"] += 1
+			ligne["poids"] = round(ligne["poids"] + float(p.get("poids", 0) or 0), 2)
+		payload["decoupe"] = detail
 	return payload
 
 

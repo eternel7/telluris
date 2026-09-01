@@ -709,6 +709,23 @@
 		.quest-done-btn:not(:disabled):hover { background: rgba(255, 215, 0, 0.18); }
 		/* ⚠️ La flèche recommandée (`.move_btn.btn-highlight`, liseré renforcé) est passée dans
 		   part-move-panel.html avec le reste du pavé — elle y est SCOPÉE au conteneur. */
+		/* Indicateurs « ! » / « ? » (offres et remises). Même famille dorée que l'exergue
+		   ci-dessus, mais une SÉMANTIQUE DIFFÉRENTE : `.btn-highlight` dit « c'est là que tu
+		   voulais aller » (guidage choisi par le joueur), la pastille dit « quelque chose
+		   t'attend » (état du monde). Les deux peuvent se cumuler sur un même bouton.
+		   ⚠️ NE JAMAIS styler `.sub-loc-btn` nu : la classe est partagée par une vingtaine de
+		   boutons de la page (achat/vente, quêtes, recrues, montures, auberge, tables, choix
+		   d'intro, choix de dialogue). Tout passe par `.loc-marque`. */
+		.loc-marque {
+			display: inline-block; width: 16px; height: 16px; line-height: 16px;
+			margin-right: 6px; border-radius: 50%; flex-shrink: 0;
+			font-weight: bold; font-size: 12px; text-align: center;
+			border: 1px solid var(--accent-color);
+		}
+		/* « ! » — une offre NEUVE : disque plein, le plus visible des deux. */
+		.loc-marque.neuf { background: var(--accent-color); color: #1a1508; }
+		/* « ? » — une quête en cours attend une remise : contour seul, plus discret. */
+		.loc-marque.rendu { background: transparent; color: var(--accent-color); }
 		.sh-derived-row {
 			display: flex;
 			justify-content: space-between;
@@ -1436,7 +1453,12 @@
 					<li><button class="sub-loc-btn" id="aub-nuit-btn" onclick="passerLaNuit()">🌙 Passer la nuit{% if auberge_nuit and auberge_nuit.cout %} <span class="aub-nuit-cout" id="aub-nuit-cout"></span>{% endif %}</button></li>
 					{% endif %}
 					{% if pnj_present %}
-					<li><button class="sub-loc-btn" onclick="openPnjDialogue()">🗣 Parler à {{pnj_present.nom}}</button></li>
+					{# Pastille « ! »/« ? » du PNJ : rendue en Jinja au chargement, réécrite en JS
+					   par `_majPnjMarque` après chaque choix de dialogue (accepter une course doit
+					   faire disparaître le « ! » sans recharger la page). Le <span> est TOUJOURS
+					   émis, vide quand il n'y a rien : sans l'élément, le JS n'aurait rien à
+					   allumer (même patron que `.sh-bonus-btn`). #}
+					<li><button class="sub-loc-btn" id="pnj-talk-btn" onclick="openPnjDialogue()"><span id="pnj-talk-marque">{% if pnj_marque %}<span class="loc-marque {% if pnj_marque == '!' %}neuf{% else %}rendu{% endif %}">{{ pnj_marque }}</span>{% endif %}</span>🗣 Parler à {{pnj_present.nom}}</button></li>
 					{% endif %}
 				</ul>
 				{% endif %}
@@ -2564,6 +2586,31 @@
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};
+	// ── Indicateurs « ! » / « ? » ──────────────────────────────────────────────
+	// `_lieuxMarques` = {lieu_id: "?"} — les lieux où une quête active attend une remise ou
+	// une rencontre. Le serveur renvoie TOUS les lieux concernés (courant compris) : c'est ici
+	// qu'on l'intersecte avec les portes réellement affichées. Gratuit côté serveur (0 lecture),
+	// donc republié par le déplacement, le dialogue et les endpoints de quêtes.
+	// ⚠️ Il n'y a JAMAIS de « ! » sur un bouton de sous-lieu : une offre est tirée à l'ENTRÉE
+	// dans le lieu, la connaître d'avance demanderait de rejouer le tirage (cf. utils/indicateurs).
+	let _lieuxMarques = {{ lieux_marques | tojson | safe }} || {};
+	// Un seul point d'entrée pour le resync, sinon on oublie un site d'appel.
+	function _majLieuxMarques(data) {
+		if (!data || !data.lieux_marques) return false;
+		_lieuxMarques = data.lieux_marques;
+		return true;
+	}
+	// Pastille prête à concaténer dans un template literal. HTML CONSTANT (le glyphe vient
+	// d'une liste fermée côté serveur) : rien à échapper ici.
+	function _marquePastille(m) {
+		if (m !== '!' && m !== '?') return '';
+		return `<span class="loc-marque ${m === '!' ? 'neuf' : 'rendu'}">${m}</span>`;
+	}
+	// Badge du bouton 🗣, réécrit sans toucher au reste du libellé.
+	function _majPnjMarque(m) {
+		const el = document.getElementById('pnj-talk-marque');
+		if (el) el.innerHTML = _marquePastille(m);
+	}
 	let ACCESS = {{ access | tojson | safe }};
 	// Ressource récoltable (événement de zone « ressource ») : posée par le serveur au
 	// déplacement, transitoire (remplacée/effacée au déplacement suivant, consommée à la récolte).
@@ -2742,6 +2789,9 @@
 				// (aucun repaint), corrige le glissement sinon.
 				_ecrireCarte(rep.position["x"], rep.position["y"]);
 				LINKS = rep.links;
+				// Marques « ? » : à jour AVANT buildLocationslist, comme le guidage — un pas peut
+				// achever un objectif (kill/collect/visite) ou une rencontre d'escorte.
+				_majLieuxMarques(rep);
 				POSITIONS = {"x" : rep.position["x"], "y": rep.position["y"]};
 				ACCESS = rep.access;
 				// Guidage 🧭 : à jour AVANT buildLocationslist/updateControls (exergues flèche+lien).
@@ -2836,7 +2886,11 @@
 					}
 					return false;
 				})
-				.map(l => `<li><button class="sub-loc-btn${_guidage && link._id === _guidage.link_id ? ' btn-highlight' : ''}" onclick="moveTo('${link._id}')">➔ ${l.details.label}</button></li>`)
+				// ⚠️ Marque indexée par `l.lieu` et JAMAIS par `link._id` : la boucle ci-dessus
+				// dédoublonne par `l.details.label`, donc deux portes vers le même lieu ne
+				// produisent qu'un bouton et le premier `link._id` gagne — une marque indexée
+				// par lien se rattacherait au mauvais bouton.
+				.map(l => `<li><button class="sub-loc-btn${_guidage && link._id === _guidage.link_id ? ' btn-highlight' : ''}" onclick="moveTo('${link._id}')">${_marquePastille(_lieuxMarques[l.lieu])}➔ ${l.details.label}</button></li>`)
 				.join('');
 		}).join('') || `<li>Aucun</li>`;
 	}
@@ -4064,7 +4118,7 @@ function _refreshInventaire() {
 		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
 		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
 		const dropHtml = `<button class="sh-drop-btn" onclick="dropItem(${idx},'${item._id}')" title="Poser au sol">Poser</button>`;
-		const couperHtml = _estCoupable(item) ? _couperBtn(idx, item._id, 'sac') : '';
+		const couperHtml = (_estCoupable(item) || _estDecoupable(item)) ? _couperBtn(idx, item._id, 'sac', item) : '';
 		// Un consommable utilisable EN COMBAT peut prendre une case de la barre. Le slot
 		// vise le TYPE d'objet (item_id) : le sac bouge, la case reste — d'où le
 		// sélecteur sur la ligne et non sur l'exemplaire (l'index n'est pas persisté).
@@ -4103,7 +4157,7 @@ function _refreshSol() {
 			<span class="sh-inv-open" onclick="openItemDetail('sol',${idx})" title="Voir la fiche">${item.icon || '📦'}</span>
 			<span class="sh-inv-name sh-inv-open" onclick="openItemDetail('sol',${idx})" title="Voir la fiche">${item.nom || '—'}</span>
 			${poidsHtml}${rarHtml}
-			<span class="sh-inv-actions">${_estCoupable(item) ? _couperBtn(idx, item._id, 'sol') : ''}<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button></span>
+			<span class="sh-inv-actions">${(_estCoupable(item) || _estDecoupable(item)) ? _couperBtn(idx, item._id, 'sol', item) : ''}<button class="sh-pickup-btn" onclick="pickupItem(${idx},'${item._id}')" title="Prendre du sol">Prendre</button></span>
 		</div>`;
 	}).join('');
 	if (scrollEl) scrollEl.classList.toggle('scrollable', _objetsAuSol.length > INV_VISIBLE);
@@ -4318,9 +4372,16 @@ function _renderCmpTable(left, right, roleLeft, roleRight) {
 function _restrictionTitle(chk) {
 	return chk.ok ? '' : `title="Restriction non satisfaite : ${Object.entries(chk.manque).map(([k, v]) => k + ' ' + v).join(', ')}"`;
 }
-function _cardCouperBtn(idx, itemId, source) {
-	const tool = _hasOutilCoupe();
-	return `<button class="sh-drop-btn" ${tool ? '' : 'disabled'} onclick="_cardCouper(${idx},'${itemId}','${source}')" title="${tool ? 'Couper en pièces plus petites' : 'Outil de coupe requis'}">🪓 Couper</button>`;
+function _cardCouperBtn(idx, itemId, source, item) {
+	// Jumeau de `_couperBtn` pour la fiche objet — même aiguillage bois/carcasse, seul
+	// l'`onclick` diffère (il referme l'overlay avant d'agir).
+	const carc = _estDecoupable(item);
+	const tool = carc ? _hasArmeTranchante() : _hasOutilCoupe();
+	const label = carc ? '🔪 Découper' : '🪓 Couper';
+	const titre = tool
+		? (carc ? 'Débiter en quartiers (tête, pattes…)' : 'Couper en pièces plus petites')
+		: (carc ? 'Arme tranchante requise' : 'Outil de coupe requis');
+	return `<button class="sh-drop-btn" ${tool ? '' : 'disabled'} onclick="_cardCouper(${idx},'${itemId}','${source}')" title="${titre}">${label}</button>`;
 }
 
 function _renderMono(st) {
@@ -4330,10 +4391,10 @@ function _renderMono(st) {
 	const acts = [];
 	if (st.source === 'sac') {
 		if (_estConsommable(item)) acts.push(`<button class="sh-equip-btn" onclick="_cardConsommer(${st.idx},'${item._id}')">🍽️ Consommer</button>`);
-		if (_estCoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sac'));
+		if (_estCoupable(item) || _estDecoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sac', item));
 		acts.push(`<button class="sh-drop-btn" onclick="_cardDrop(${st.idx},'${item._id}')">Poser</button>`);
 	} else if (st.source === 'sol') {
-		if (_estCoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sol'));
+		if (_estCoupable(item) || _estDecoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sol', item));
 		acts.push(`<button class="sh-equip-btn" onclick="_cardPickup(${st.idx},'${item._id}')">Prendre</button>`);
 	}
 	else if (st.source in _GRP_SENS) {
@@ -4482,23 +4543,46 @@ function _cardSell(index, itemId, compagnonId)        { closeItemDetail(); sellI
 function _cardBuy(itemId)                             { closeItemDetail(); buyItem(itemId); }
 function _cardMarch(index, itemId, sens, compagnonId) { closeItemDetail(); marchanderItem(index, itemId, sens, compagnonId); }
 
-// ── Découpe du bois ───────────────────────────────────────────────────
+// ── Découpe du bois & des grosses carcasses ───────────────────────────
+// UN seul bouton 🪓 pour DEUX découpes, exactement comme côté serveur (`POST /api/couper`
+// aiguille sur le doc source). Ce qui change : l'outil exigé (hache vs lame) et le libellé.
+// ⚠️ Le prédicat de carcasse passe EN PREMIER, comme l'aiguillage serveur — un prédicat
+// client divergent afficherait un bouton actif que le serveur refuse, ou l'inverse.
+function _estDecoupable(item) {
+	// Miroir de carcasse.item_est_decoupable : c'est la DONNÉE (`decoupe`) qui décide, ni la
+	// sous-catégorie ni le poids. Le champ arrive tel quel — `resolve_item_ref` rend le doc
+	// item COMPLET, rien à ajouter au payload.
+	if (!item || !Array.isArray(item.decoupe) || !item.decoupe.length) return false;
+	// `item.poids` est DÉJÀ le poids de l'instance (resolve_item_ref l'écrase) et le seuil
+	// est baké sur le doc : rien à publier en plus, et le client grise exactement ce que le
+	// serveur refuse.
+	const seuil = Number(item.decoupe_poids_min);
+	return !(seuil > 0) || Number(item.poids || 0) >= seuil;
+}
 function _estCoupable(item) {
 	return !!item && (item.tags || []).some(t => String(t).toLowerCase() === 'a_couper');
 }
-function _hasOutilCoupe() {
-	const hasTag = o => o && (o.tags || []).some(t => String(t).toLowerCase() === 'outil_coupe_bois');
+// Scan du sac ET de l'équipement pour un tag donné. L'outil est PARTAGÉ par le groupe
+// (miroir de expedition.porteur_avec_tag côté serveur). En mode compagnon, _inventaire/_slots
+// sont ceux du compagnon affiché ; le principal (qui porte souvent la hache ou le couteau)
+// est rangé dans le snapshot — on l'inclut pour ne pas griser à tort.
+function _porteLeTag(tag) {
+	const hasTag = o => o && (o.tags || []).some(t => String(t).toLowerCase() === tag);
 	const scan = (inv, slots) => (inv || []).some(hasTag) || Object.values(slots || {}).some(hasTag);
 	if (scan(_inventaire, _slots)) return true;
-	// L'outil est PARTAGÉ par le groupe (miroir de bois.a_outil_coupe côté serveur). En mode
-	// compagnon, _inventaire/_slots sont ceux du compagnon affiché ; le principal (qui porte
-	// souvent la hache) est rangé dans le snapshot — on l'inclut pour ne pas griser à tort.
 	if (_compagnonActif && _sheetSnap && scan(_sheetSnap.inventaire, _sheetSnap.slots)) return true;
 	return false;
 }
-function _couperBtn(idx, itemId, source) {
-	const tool = _hasOutilCoupe();
-	return `<button class="sh-drop-btn" ${tool ? '' : 'disabled'} onclick="couperItem(${idx},'${itemId}','${source}')" title="${tool ? 'Couper en pièces plus petites' : 'Outil de coupe requis'}">🪓 Couper</button>`;
+function _hasOutilCoupe()    { return _porteLeTag('outil_coupe_bois'); }
+function _hasArmeTranchante(){ return _porteLeTag('tranchant'); }
+function _couperBtn(idx, itemId, source, item) {
+	const carc = _estDecoupable(item);
+	const tool = carc ? _hasArmeTranchante() : _hasOutilCoupe();
+	const label = carc ? '🔪 Découper' : '🪓 Couper';
+	const titre = tool
+		? (carc ? 'Débiter en quartiers (tête, pattes…)' : 'Couper en pièces plus petites')
+		: (carc ? 'Arme tranchante requise' : 'Outil de coupe requis');
+	return `<button class="sh-drop-btn" ${tool ? '' : 'disabled'} onclick="couperItem(${idx},'${itemId}','${source}')" title="${titre}">${label}</button>`;
 }
 async function couperItem(index, itemId, source) {
 	try {
@@ -4514,7 +4598,15 @@ async function couperItem(index, itemId, source) {
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
 		_applyInventoryPayload(data);
-		if (data.coupe) showToast('Coupé : ' + data.coupe.n + ' × ' + (data.coupe.nom || data.coupe.taille));
+		// `decoupe` (carcasse) prime sur `coupe` (bois) : les pièces sont hétérogènes, un
+		// « 6 × Tête de cerf » serait faux. Toast MAJEUR — débiter une carcasse est un moment
+		// de jeu, pas un accusé de réception, et la ligne fait plusieurs lignes.
+		if (data.decoupe) {
+			const lignes = data.decoupe.map(d => `${d.n} × ${d.nom} (${d.poids} kg)`);
+			showToast('Découpé, au sol :\n' + lignes.join('\n'), {major: true});
+		} else if (data.coupe) {
+			showToast('Coupé : ' + data.coupe.n + ' × ' + (data.coupe.nom || data.coupe.taille));
+		}
 	} catch(err) { console.error('Erreur coupe', err); }
 }
 
@@ -6129,6 +6221,10 @@ function closeQuestMap() {
 
 function renderFicheQuetes(data) {
 	const panel = document.getElementById('sh-quetes');
+	// Marques « ? » des lieux : AVANT le garde ci-dessous, et avant tout `return` — accepter,
+	// rendre ou abandonner une quête les fait bouger, et c'est le seul resync que reçoivent
+	// les quatre endpoints de quêtes. Idempotent : le dialogue PNJ le fait déjà de son côté.
+	if (_majLieuxMarques(data)) buildLocationslist();
 	if (!panel || !data || (!data.fiche_actives && !data.fiche_terminees)) return;
 	// Resync focalisation : les réponses du tableau la portent (terminer/abandonner l'effacent).
 	if ('focalisation' in data) {
@@ -7913,8 +8009,11 @@ function renderPnjNoeud(noeud) {
 	const liste = document.getElementById('pnj-choix');
 	if (!noeud) { texte.textContent = ''; liste.innerHTML = ''; return; }
 	texte.textContent = noeud.texte || '';
+	// La pastille « ! »/« ? » précède le ✨ existant : les deux sémantiques coexistent —
+	// ✨ dit « ce choix déclenche une action », la pastille dit « il y a là quelque chose
+	// pour toi ». Elle est dérivée de la CONDITION du choix côté serveur, donc exacte.
 	liste.innerHTML = (noeud.choix || []).map(c =>
-		`<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${c.action ? '✨ ' : ''}${c.label}</button></li>`
+		`<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${_marquePastille(c.marque)}${c.action ? '✨ ' : ''}${c.label}</button></li>`
 	).join('') || '<li><button class="sub-loc-btn" onclick="closePnjPanel()">✕ Prendre congé</button></li>';
 }
 
@@ -7928,6 +8027,11 @@ async function openPnjDialogue() {
 		// porter une récompense de réputation (versée une seule fois, cf. `relation_gain`).
 		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
 		if (data.relation_gain) showToast(_relationGainTexte(data.relation_gain));
+		// Badge du 🗣 et marques de lieux : une course a pu périmer à l'ouverture, l'offre
+		// d'hier n'est peut-être plus là. Le panneau masque la sidebar, mais elle réapparaît
+		// à la fermeture — elle doit être juste avant, pas après.
+		_majPnjMarque(data.pnj_marque);
+		if (_majLieuxMarques(data)) buildLocationslist();
 		renderPnjNoeud(data.noeud);
 		document.getElementById('game-container').classList.add('panel-hidden');
 		document.getElementById('pnj-panel').classList.remove('panel-hidden');
@@ -8010,6 +8114,11 @@ async function choisirPnj(choixId) {
 			}
 			renderFicheQuetes(data);
 		}
+		// Marques « ! »/« ? » : le serveur les recalcule sur le contexte D'APRÈS l'action.
+		// Indispensable — accepter une course doit faire disparaître le « ! » du 🗣 et poser
+		// le « ? » sur la porte du destinataire, sans attendre un rechargement de page.
+		if ('pnj_marque' in data) _majPnjMarque(data.pnj_marque);
+		if (_majLieuxMarques(data)) buildLocationslist();
 		// Une porte de donjon n'ouvre pas un lieu : elle ouvre un COMBAT (le gardien nous fait
 		// descendre). On quitte la page — inutile de rendre le nœud suivant, on ne le verra pas.
 		if (data.combat_id) { window.location.href = '/combat/' + data.combat_id; return; }

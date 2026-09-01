@@ -131,8 +131,39 @@ CATALOGUE = [
 		"description": "Abaisse à 12 la cible de vitrine des intermédiaires qu'un atelier "
 			"fabrique pour lui-même (manche, Table_d_harmonie, saumure…), sous le défaut de 25 : "
 			"un intermédiaire est un en-cours, pas de la marchandise. Divise encore par deux le "
-			"démarrage du chaînage (1re pièce à la visite 5 au lieu de 10). Dérivé du graphe de "
-			"recettes, relit le dump figé et n'injecte que `stock_cible` : idempotent.",
+			"démarrage du chaînage (1re pièce à la visite 5 au lieu de 10). La BOYAUDERIE, seul "
+			"métier sans aucune feuille d'appro, descend à 2 (CIBLE_PAR_CATEGORIE). Dérivé du "
+			"graphe de recettes, relit le dump figé et n'injecte que `stock_cible` : idempotent.",
+	},
+	{
+		"id": "gen_depecage_tags",
+		"label": "🍖 Publier la table de dépeçage (DEPECAGE_TAGS)",
+		"argv": _py("gen_depecage_tags.py"),
+		"ecrit": "Écrit jsons/depecage_tags_a_importer.json (doc rules:world_variables).",
+		"description": "Pousse `DEPECAGE_TAGS` + les réglages de découpe des carcasses du défaut "
+			"de code vers `rules:world_variables` — le doc GAGNE toujours, donc éditer le code "
+			"seul ne change rien en jeu. Imprime le diff avant d'écrire. ⚠️ Après l'import, "
+			"/admin → Recharger les variables de monde, PUIS relancer la génération des "
+			"portions de carcasse (leur dépeçage est baké).",
+	},
+	{
+		"id": "gen_carcasses_parties",
+		"label": "🔪 Débiter les grosses carcasses en portions",
+		"argv": _py("gen_carcasses_parties.py"),
+		"ecrit": "Écrit jsons/carcasses_parties_a_importer.json.",
+		"description": "Les 20 carcasses de plus de 100 kg sont intransportables (charge = F×5) "
+			"et ne rapportaient donc RIEN. Crée une portion par partie du corps (tête, corps, "
+			"pattes, queue, ailes) avec sa propre table de dépeçage, et pose `decoupe` sur la "
+			"carcasse source — le champ qui la rend découpable en jeu, à l'arme tranchante.",
+	},
+	{
+		"id": "gen_armes_tranchantes",
+		"label": "🗡️ Taguer les armes qui ont un fil (tranchant)",
+		"argv": _py("gen_armes_tranchantes.py"),
+		"ecrit": "Écrit jsons/armes_tranchantes_a_importer.json.",
+		"description": "Pose `tranchant` sur les 40 armes capables d'ouvrir une bête (épées, "
+			"couteaux, haches, lames de jet, hast à fer tranchant). Liste explicite : les armes "
+			"n'ont ni sous-catégorie ni description d'où « a un fil » se déduirait.",
 	},
 	{
 		"id": "gen_coherence_france",

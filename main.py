@@ -15,7 +15,7 @@ from routers.zones import zones_router
 from routers.bestiaire import bestiaire_router
 from routers.combat import combat_router, _actor_character_id
 from routers.quetes import quetes_router
-from routers.pnj import pnj_router
+from routers.pnj import pnj_router, marque_pnj as pnj_router_marque_pnj
 from routers.recrutement import recrutement_router
 from routers.montures import montures_router
 from routers.auberge import auberge_router
@@ -39,6 +39,7 @@ from utils import recrutement as recrutement_util
 from utils import montures as montures_util
 from utils import auberge as auberge_util
 from utils import escorte as escorte_util
+from utils import indicateurs as indicateurs_util
 from utils import fiche as fiche_util
 from utils import journal as journal_util
 from utils import animations as animations_util
@@ -616,6 +617,13 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	if change:
 		save_doc(character)
 	pnj_present = pnj_util.pnj_payload(pnj_entree, pnj_doc) if (pnj_entree and pnj_doc) else None
+	# Indicateurs « ! » / « ? ». Le badge du 🗣 est la plus forte marque des choix visibles du
+	# nœud d'ouverture — donc EXACT par construction, contrairement à un « ! » posé sur une
+	# porte voisine (dont l'offre n'est tirée qu'à l'entrée : cf. utils/indicateurs). ⚠️ Chemin
+	# LECTURE SEULE : il n'arme aucun `delai_min` et ne verse aucune récompense de relation.
+	pnj_marque = (pnj_router_marque_pnj(character, pnj_doc, grid_doc, pnj_entree)
+				  if (pnj_entree and pnj_doc) else None)
+	lieux_marques = indicateurs_util.marques_lieux(character)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
 	# Gestion de la grille
@@ -798,6 +806,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 				f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in compagnons_partis
 			],
 			"pnj_present": pnj_present,
+			# Marques « ! »/« ? » : badge du bouton 🗣 et map {lieu_id: "?"} des lieux où une
+			# quête active attend une remise. La map porte TOUS les lieux concernés (courant
+			# compris) — c'est le client qui l'intersecte avec les portes qu'il affiche.
+			"pnj_marque": pnj_marque,
+			"lieux_marques": lieux_marques,
 			# Courses échues pendant l'absence du joueur : toast d'échec au rendu.
 			"transports_echoues": [
 				{"titre": q.get("titre", "—")} for q in transports_echoues

@@ -1,0 +1,3841 @@
+[
+  {
+    "_id": "pnj:armand_renaud",
+    "type": "pnj",
+    "nom": "Armand Renaud",
+    "race": "humain",
+    "vocation": "forestier",
+    "portrait": "bucheron_Armand_Renaud_humain_m.jpg",
+    "description": "Bûcheron d'Auxerre, chef de fait de l'équipe partie couper au nord de la cité. Une voix rauque, une hache ébréchée, et deux nuits sans dormir derrière un éboulis.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:grotte_en_foret",
+        "noeuds": {
+          "ouvre": "loups_charge",
+          "refus": "grotte_silencieuse"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "L'entrée de la grotte n'est qu'une fente noire entre deux dalles de roche, à demi mangée par les fougères. Quelque chose remue là-dedans. Puis une voix d'homme, basse, râpée par la soif : « Ne bougez plus. Ne bougez surtout plus. »",
+          "choix": [
+            {
+              "id": "parler",
+              "label": "« Qui êtes-vous ? Je viens de la Guilde d'Auxerre. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "next": "presentation"
+            },
+            {
+              "id": "sortis",
+              "label": "« C'est fini. Sortez de là. »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres_les_loups"
+            },
+            {
+              "id": "ecouter",
+              "label": "Tendre l'oreille vers la fente.",
+              "condition": {
+                "acces_refuse": true,
+                "acces_menace": true
+              },
+              "next": "grotte_silencieuse"
+            },
+            {
+              "id": "fin",
+              "label": "Reculer sans un bruit.",
+              "next": "fin"
+            }
+          ]
+        },
+        "presentation": {
+          "texte": "Un raclement de pierre, et un visage apparaît dans l'ombre — barbu, creusé, les yeux rouges de fumée. « D'Auxerre… » Il ferme un instant les paupières. « Par les anciens chemins. Armand Renaud, bûcheron. Nous sommes trois là-dedans. Trois, et la demoiselle. » Sa main se crispe sur un manche de hache qu'il ne lâche visiblement plus depuis deux jours. « Ne restez pas planté là, {prenom}. Elles vous ont déjà senti. »",
+          "choix": [
+            {
+              "id": "recit",
+              "label": "« Que s'est-il passé ? »",
+              "next": "recit"
+            },
+            {
+              "id": "demoiselle",
+              "label": "« Quelle demoiselle ? »",
+              "next": "aelis_evoquee"
+            },
+            {
+              "id": "loups",
+              "label": "« Qui, elles ? »",
+              "next": "les_loups"
+            }
+          ]
+        },
+        "recit": {
+          "texte": "« On coupait du charme, à trois cents pas d'ici. Un chantier propre, du bois marqué, rien qui appelle les ennuis. » Il crache de la poussière. « Elles sont sorties des fougères sans un aboiement. Trois. Grosses comme des veaux. Matthieu connaissait ce trou dans la roche — c'est lui qui nous y a poussés, et il a bien fait : l'ouverture est trop étroite pour elles. » Un silence. « Nos outils sont restés là-bas. Étienne a la jambe ouverte. Et voilà deux nuits qu'on écoute respirer des bêtes qui ne partent pas. »",
+          "choix": [
+            {
+              "id": "demoiselle",
+              "label": "« Et la demoiselle ? »",
+              "next": "aelis_evoquee"
+            },
+            {
+              "id": "loups",
+              "label": "« Elles sont toujours dehors ? »",
+              "next": "les_loups"
+            },
+            {
+              "id": "retour",
+              "label": "« Tenez bon. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "aelis_evoquee": {
+          "texte": "« Elle est arrivée sur notre chantier la veille, seule, la robe en loques et un carnet serré contre elle comme un enfant. » Armand baisse la voix. « Elle voyageait avec deux hommes en armes — des paladins, à ce qu'elle dit. Elle est la seule des trois à être encore debout. Nous n'allions pas la laisser dans ce bois. » Il hausse une épaule. « On l'a prise avec nous. Une heure après, les bêtes étaient sur nous. Faites-en ce que vous voudrez : moi, je n'ai pas d'avis. »",
+          "choix": [
+            {
+              "id": "recit",
+              "label": "« Reprenons depuis le début. »",
+              "next": "recit"
+            },
+            {
+              "id": "loups",
+              "label": "« Parlez-moi de ces bêtes. »",
+              "next": "les_loups"
+            },
+            {
+              "id": "retour",
+              "label": "« J'entrerai la voir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "les_loups": {
+          "texte": "« Des loups géants. Trois, toujours les trois mêmes. » Sa voix descend encore d'un ton. « Elles ne s'éloignent jamais de plus de trente pas de la fente. Elles ne hurlent pas, elles ne creusent pas : elles attendent. C'est ce qui est le pire. Une bête qui attend, ça sait compter. » Le raclement d'une griffe sur la pierre, quelque part derrière vous. « Tant qu'elles tiennent ce seuil, personne ne sort d'ici vivant. Ni nous. Ni vous, si vous restez à découvert. »",
+          "choix": [
+            {
+              "id": "charger",
+              "label": "« Alors elles ne le tiendront plus. » — Dégainer.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "« Restez à l'abri. Je reviens. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "S'écarter du seuil.",
+              "next": "fin"
+            }
+          ]
+        },
+        "loups_charge": {
+          "texte": "Vous vous écartez de l'éboulis et les fougères s'ouvrent d'un coup. Trois masses grises se lèvent du couvert, l'échine hérissée, et le grondement qui monte de la clairière n'a plus rien d'un avertissement. Derrière vous, la voix d'Armand, dans la pierre : « Que les anciens chemins vous portent, {prenom} ! »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Faire face.",
+              "next": "fin"
+            }
+          ]
+        },
+        "grotte_silencieuse": {
+          "texte": "Vous approchez l'oreille de la fente. Rien — l'eau qui suinte, l'écho d'une goutte quelque part très bas, et le froid de la roche sur votre joue. Si quelqu'un s'est abrité là, ce n'était pas aujourd'hui.",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Se relever.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apres_les_loups": {
+          "texte": "Le vacarme est retombé sur la clairière. Armand écarte la dalle du seuil et sort en clignant des yeux, la hache pendante au bout du bras, incapable pour l'instant de dire autre chose que : « … Voilà. Voilà. » Derrière lui, on entend les autres bouger dans l'ombre, et une voix de femme qui répète qu'il ne faut pas oublier le carnet, surtout pas le carnet.",
+          "choix": [
+            {
+              "id": "route",
+              "label": "« Debout. On rentre à Auxerre. »",
+              "next": "route"
+            },
+            {
+              "id": "fin",
+              "label": "Leur laisser un instant.",
+              "next": "fin"
+            }
+          ]
+        },
+        "route": {
+          "texte": "« À Auxerre. » Armand répète le mot comme s'il en vérifiait le poids. « Étienne ne tiendra pas un long détour, alors nous prendrons la clairière et la route basse. » Il jette un regard aux fougères écrasées, puis à vous. « Menez, {prenom}. Nous vous suivons — et cette fois, nous ne nous arrêterons pas pour couper du bois. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Prendre la tête.",
+              "next": "fin",
+              "deplacer": "lieu:clairiere_de_la_grotte_liberee"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:etienne_morel",
+    "type": "pnj",
+    "nom": "Étienne Morel",
+    "race": "nain",
+    "vocation": "forestier",
+    "portrait": "bucheron_Étienne_Morel_nain_m.jpg",
+    "description": "Bûcheron nain d'Auxerre, la jambe ouverte depuis la fuite. Il tient le feu de la grotte parce que c'est la seule chose qu'il puisse encore tenir.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:grotte_en_foret",
+        "noeuds": {
+          "ouvre": "loups_charge",
+          "refus": "loups_absents"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Assis contre la paroi, le nain nourrit un feu maigre de brindilles comptées une à une. Sa jambe est serrée dans une manche de chemise nouée trop haut. « Ne me demandez pas de me lever, l'ami. Je me lèverai quand il faudra marcher, et pas une heure avant. »",
+          "choix": [
+            {
+              "id": "blessure",
+              "label": "« Montrez-moi cette jambe. »",
+              "next": "blessure"
+            },
+            {
+              "id": "fuite",
+              "label": "« Comment êtes-vous arrivés jusqu'ici ? »",
+              "next": "fuite"
+            },
+            {
+              "id": "feu",
+              "label": "« Vous gardez ce feu depuis deux nuits ? »",
+              "next": "feu"
+            },
+            {
+              "id": "charger",
+              "label": "« Gardez ce feu. Je vais chasser les loups. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "apres",
+              "label": "« Vous pouvez vous lever, maintenant. »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres_les_loups"
+            },
+            {
+              "id": "fin",
+              "label": "« Reposez-vous. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "loups_charge": {
+          "texte": "Le nain lâche ses brindilles. « Attendez — » Il essaie de se redresser, retombe, et jure entre ses dents. « Trois. Elles ne chargent jamais ensemble, c'est leur seule faute : il y en a toujours une qui reste en arrière à vous regarder. C'est celle-là qu'il faut prendre en premier. » Il vous saisit le poignet. « Je ne peux pas vous suivre. Je ne peux même pas vous regarder faire. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Sortir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "loups_absents": {
+          "texte": "« Chasser quoi ? » Le nain remue une braise sans lever les yeux. « Il n'y a plus rien dehors qui vaille qu'on se lève. Et croyez-moi, je suis le premier à le vérifier. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres_les_loups": {
+          "texte": "Il a déjà défait le garrot pour le renouer plus bas, proprement. « Deux nuits à compter des brindilles. » Il éteint le feu d'un revers de botte, ce qui lui arrache une grimace. « Je marcherai. Lentement, et en jurant beaucoup, mais je marcherai jusqu'à Auxerre. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Prenez votre temps. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Alors en route. »",
+              "next": "fin",
+              "deplacer": "lieu:grotte_dans_foret_humide"
+            }
+          ]
+        },
+        "blessure": {
+          "texte": "Il écarte le tissu sans un mot. Quatre entailles parallèles, propres, profondes, déjà mauvaises sur les bords. « La deuxième bête m'a eu au moment où je passais la fente. Un demi-pas de plus et elle m'avait la hanche. » Il rabat la manche. « Je ne me plains pas : Matthieu m'a tiré dedans par le col comme un sac de son. »",
+          "choix": [
+            {
+              "id": "fuite",
+              "label": "« Et les autres ? »",
+              "next": "fuite"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "fuite": {
+          "texte": "« On courait mal. On courait avec des haches, ce qui est la meilleure façon de courir lentement. » Il remue une braise. « Armand a fait passer la demoiselle d'abord, puis moi, puis Matthieu s'est mis en travers du trou avec un tronçon de charme jusqu'à ce qu'elles renoncent à y enfoncer la gueule. » Un silence. « Elles n'ont pas renoncé au reste. »",
+          "choix": [
+            {
+              "id": "feu",
+              "label": "« Et depuis ? »",
+              "next": "feu"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "feu": {
+          "texte": "« Deux nuits. » Il montre du menton un tas de brindilles ridicule. « Il y a de l'eau au fond, c'est toujours ça. Pour le bois, nous sommes trois bûcherons enfermés dans une caverne de pierre — riez, allez. La demoiselle a ri aussi. C'est même la seule fois. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Tenez bon. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:matthieu_perrin",
+    "type": "pnj",
+    "nom": "Matthieu Perrin",
+    "race": "ogre",
+    "vocation": "forestier",
+    "portrait": "bucheron_Matthieu_Perrin_ogre_m.jpg",
+    "description": "Bûcheron ogre d'Auxerre. Il connaît les creux de roche du nord mieux que les chemins, et c'est ce qui a sauvé trois vies.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:grotte_en_foret",
+        "noeuds": {
+          "ouvre": "loups_charge",
+          "refus": "loups_absents"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "loups_charge": {
+          "texte": "L'ogre se lève, et le boyau paraît soudain deux fois plus étroit. « Enfin. » Il pèse son tronçon de charme, hésite, puis vous le tend des deux mains comme on passe un flambeau. « Prenez ça. Moi je reste au seuil : si l'une d'elles vous contourne, elle voudra entrer, et il faudra bien que quelqu'un soit assis là. » Un grondement bas. « Ne les laissez pas vous séparer de la fente. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Sortir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "loups_absents": {
+          "texte": "L'ogre ne bouge pas d'un pouce. « Il n'y a rien à charger. Écoutez donc : plus un souffle, plus une griffe sur la pierre. Ce silence-là, je le connais — c'est celui d'avant. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres_les_loups": {
+          "texte": "Pour la première fois en deux jours, l'ogre a tourné le dos à l'entrée. Le tronçon de charme est posé en travers de ses genoux, inutile. « Vous pouvez vous asseoir, maintenant », dit-il, et il faut un moment pour comprendre qu'il se parle à lui-même. Puis, en vous regardant : « Elles ont attendu deux nuits. Vous, une heure. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Levez-vous. On rentre. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Dehors. Tout de suite. »",
+              "next": "fin",
+              "deplacer": "lieu:grotte_dans_foret_humide"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "L'ogre occupe à lui seul la moitié du boyau. Il est assis face à l'entrée, dos à ses compagnons, un tronçon de charme en travers des genoux — la place de celui qui a décidé que rien ne passerait. Il vous jauge longuement. « Vous sentez le dehors. C'est bien. »",
+          "choix": [
+            {
+              "id": "grotte",
+              "label": "« Comment connaissiez-vous ce trou ? »",
+              "next": "grotte"
+            },
+            {
+              "id": "seuil",
+              "label": "« Vous montez la garde depuis deux jours ? »",
+              "next": "seuil"
+            },
+            {
+              "id": "sortie",
+              "label": "« Y a-t-il une autre sortie ? »",
+              "next": "sortie"
+            },
+            {
+              "id": "charger",
+              "label": "« Tenez le seuil. Je m'occupe d'elles. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "apres",
+              "label": "« Vous pouvez poser ce tronçon. »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres_les_loups"
+            },
+            {
+              "id": "fin",
+              "label": "« Gardez le seuil. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "grotte": {
+          "texte": "« Je ramasse la pierre autant que le bois. Les creux de roche du nord, je les ai tous ouverts un jour ou l'autre. » Il tapote la paroi d'un doigt large comme un manche. « Celui-ci, je l'avais noté parce que la fente est étroite et la salle grande. Un bon abri de pluie. » Un grondement bref, qui pourrait être un rire. « Il s'avère que c'est aussi un bon abri de crocs. »",
+          "choix": [
+            {
+              "id": "seuil",
+              "label": "« Et vous tenez le seuil. »",
+              "next": "seuil"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "seuil": {
+          "texte": "« Quelqu'un doit être assis là. » Il ne bouge pas d'un pouce. « Elles ne peuvent pas entrer, c'est vrai. Mais un museau passe. Un museau, ça suffit pour prendre une jambe, et Étienne n'a plus de jambe à donner. » Il soulève à peine le tronçon de charme. « Alors je suis assis là. Je serai assis là jusqu'à ce que quelqu'un me dise que je peux me lever. »",
+          "choix": [
+            {
+              "id": "sortie",
+              "label": "« Bientôt. »",
+              "next": "sortie"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "sortie": {
+          "texte": "« Non. » L'ogre secoue lentement la tête. « J'ai cherché, la première nuit, avec une torche. Ça descend, ça se resserre, et ça s'arrête sur de l'eau noire. » Il fixe l'ouverture éclairée. « Il n'y a qu'une porte à cette maison, et il y a trois loups dessus. C'est simple. C'est ce qui est terrible. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je m'en occupe. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:aelis_de_montfaucon",
+    "type": "pnj",
+    "nom": "Aélis de Montfaucon",
+    "race": "humain",
+    "vocation": "lettre",
+    "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+    "description": "Jeune architecte et chercheuse, spécialiste des cristaux de mana et de leur emploi dans la structure des bâtiments. Elle devait rejoindre Auxerre pour y étudier les cristaux de la cité ; elle n'y est jamais arrivée.",
+    "services": {
+      "acces": {
+        "lieu": "lieu:grotte_en_foret",
+        "noeuds": {
+          "ouvre": "loups_charge",
+          "refus": "loups_absents"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "loups_charge": {
+          "texte": "Elle referme son carnet d'un coup sec et se lève, très pâle. « Alors écoutez-moi d'abord, parce que c'est la seule chose utile que je puisse vous donner. » Elle parle vite, sans trembler. « Je les observe depuis deux jours et je note leurs allées et venues. Elles tournent par la gauche — toujours par la gauche, sans exception, même quand le terrain s'y prête mal. Et elles ne dépassent jamais les grands hêtres : au-delà, elles reviennent. » Un souffle. « Voilà. Je n'ai que ça. »",
+          "choix": [
+            {
+              "id": "fin",
+              "label": "Sortir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "loups_absents": {
+          "texte": "« Il n'y a plus rien à charger. » Elle a rouvert son carnet, et sa main est redevenue sûre. « J'ai compté trois carcasses et vérifié deux fois. Je crois que je vais dormir, pour changer. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apres_les_loups": {
+          "texte": "Elle est déjà à l'entrée, penchée sur la roche, à mesurer du pouce l'écartement de la fente comme si la question restait d'actualité. « Onze pouces. J'avais raison. » Puis elle se redresse et vous regarde enfin. « Excusez-moi. C'est ce que je fais quand je ne sais pas quoi dire. » Elle serre le carnet contre elle. « Merci. Je vous suis, et je ne me plaindrai pas de la marche. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Rassemblez vos affaires. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« En route, alors. »",
+              "next": "fin",
+              "deplacer": "lieu:grotte_dans_foret_humide"
+            }
+          ]
+        },
+        "accueil": {
+          "texte": "Un peu à l'écart du feu, une jeune femme est assise sur une dalle, les genoux ramenés, un carnet épais serré contre elle. Ses vêtements de voyage sont gris de poussière et déchirés à l'ourlet. Elle vous regarde entrer sans crier, sans se lever — elle vous regarde comme on vérifie un calcul. Puis quelque chose cède dans ses épaules. « Vous n'êtes pas d'ici. Vous venez de la cité. »",
+          "choix": [
+            {
+              "id": "nom",
+              "label": "« Qui êtes-vous ? »",
+              "next": "presentation"
+            },
+            {
+              "id": "histoire",
+              "label": "« Comment êtes-vous arrivée dans cette grotte ? »",
+              "next": "voyage"
+            },
+            {
+              "id": "carnet",
+              "label": "« Ce carnet ne vous quitte pas. »",
+              "next": "cristaux"
+            },
+            {
+              "id": "charger",
+              "label": "« Restez au fond. Je sors les affronter. »",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "apres",
+              "label": "« Vous pouvez respirer : elles sont mortes. »",
+              "condition": {
+                "acces_libere": true
+              },
+              "next": "apres_les_loups"
+            },
+            {
+              "id": "fin",
+              "label": "« Restez ici. Je reviens. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "presentation": {
+          "texte": "Elle se lève enfin, et le fait proprement, comme on se présente dans une salle de conseil et non au fond d'un trou. « Aélis de Montfaucon. Architecte. » Une seconde d'hésitation. « On m'attend à Auxerre. On m'y attendait, du moins — j'ai six jours de retard et je doute qu'on m'attende encore. »",
+          "choix": [
+            {
+              "id": "attendue",
+              "label": "« On vous attend toujours. La Guilde vous cherche. »",
+              "next": "attendue"
+            },
+            {
+              "id": "histoire",
+              "label": "« Que vous est-il arrivé ? »",
+              "next": "voyage"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "attendue": {
+          "texte": "Elle reste un instant sans rien dire, et il faut la regarder de près pour voir sa mâchoire trembler une fois. « On me cherche. » Elle rouvre les yeux, parfaitement calme. « Bien. Alors nous n'avons pas perdu deux jours pour rien. Excusez-moi — je m'étais convaincue qu'il ne fallait compter que sur nous. C'était plus simple à tenir. »",
+          "choix": [
+            {
+              "id": "histoire",
+              "label": "« Racontez-moi la route. »",
+              "next": "voyage"
+            },
+            {
+              "id": "carnet",
+              "label": "« Pourquoi Auxerre ? »",
+              "next": "cristaux"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "voyage": {
+          "texte": "« Je ne voyageais pas seule. » Elle dit cela d'abord, avant tout le reste, et elle y met du soin. « Deux paladins m'escortaient depuis la vallée. Des gens sérieux. Ils ont vu les bêtes bien avant moi. » Ses doigts se referment sur la couverture du carnet. « Ce n'était pas une attaque. C'était une traque. Trois jours. Le premier est tombé au gué ; le second la nuit suivante, en me disant de courir vers la fumée d'un chantier. J'ai couru vers la fumée. C'étaient eux. » Elle désigne les bûcherons d'un mouvement de tête. « Ils auraient pu me renvoyer. Ils m'ont donné une capuche et un quignon de pain, et une heure plus tard les loups nous tenaient tous. »",
+          "choix": [
+            {
+              "id": "loups",
+              "label": "« Et depuis, elles attendent dehors. »",
+              "next": "les_loups"
+            },
+            {
+              "id": "carnet",
+              "label": "« Qu'est-ce qui vaut trois jours de traque ? »",
+              "next": "cristaux"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "les_loups": {
+          "texte": "« Elles attendent, oui. Et elles ont raison d'attendre. » Le ton est presque professionnel. « Nous avons de l'eau et pas de vivres ; elles ont la forêt entière. Le calcul ne joue pas pour nous : il leur suffit de tenir. » Elle relève la tête. « J'ai mesuré la fente le premier soir, faute de mieux. Onze pouces au plus étroit. C'est tout ce qui nous sépare d'elles, et c'est tout ce qui nous garde ici. »",
+          "choix": [
+            {
+              "id": "sortir",
+              "label": "« Elles ne tiendront pas ce seuil longtemps. »",
+              "next": "sortir"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "cristaux": {
+          "texte": "« Des cristaux de mana. » Elle ouvre le carnet sur ses genoux et le tourne vers vous sans hésiter, comme si le sujet la sortait physiquement de la grotte. « Je ne les étudie pas comme une magicienne : je les étudie comme une pierre de taille. Un cristal pur ne se contente pas d'alimenter — il porte. On peut bâtir autour de lui. »",
+          "choix": [
+            {
+              "id": "plans",
+              "label": "Regarder les plans.",
+              "next": "plans"
+            },
+            {
+              "id": "auxerre",
+              "label": "« Et les cristaux d'Auxerre ? »",
+              "next": "auxerre"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "plans": {
+          "texte": "Des coupes de bâtiments, tracées d'une main nette : une salle voûtée dont toutes les nervures convergent vers un fût de cristal planté au centre ; une courtine dont les créneaux sont chaînés par une veine lumineuse ; un pont sans pile centrale, avec une note en marge — « tient si la charge reste sous le seuil de saturation ; à vérifier ». « Des systèmes de protection, des adductions, des ouvrages d'art », dit-elle. « Tout ce qu'on fait aujourd'hui avec trois fois plus de pierre. »",
+          "choix": [
+            {
+              "id": "auxerre",
+              "label": "« Pourquoi venir jusqu'ici pour cela ? »",
+              "next": "auxerre"
+            },
+            {
+              "id": "retour",
+              "label": "Refermer le carnet.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "auxerre": {
+          "texte": "« Parce que les vôtres sont différents. » Elle referme le carnet d'un geste sec. « J'ai travaillé sur des cristaux de trois provinces. Ceux d'Auxerre ont une pureté que je n'explique pas — et une pureté, en architecture, cela ne veut pas dire joli : cela veut dire qu'on peut leur demander de porter des structures beaucoup plus complexes. » Un temps. « Je veux voir comment vos bâtisseurs les emploient. Et, avec de la chance, comprendre comment améliorer leur rendement. »",
+          "choix": [
+            {
+              "id": "sortir",
+              "label": "« Vous les verrez. Nous partons d'ici. »",
+              "next": "sortir"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "sortir": {
+          "texte": "« Vous allez sortir. » Ce n'est pas une question ; c'est une conclusion, et elle a l'air de lui coûter. « Alors écoutez-moi une fois, {prenom} : elles sont trois, elles ne fuient pas et elles ne se fatiguent pas. Je ne sais pas me battre — je ne serai d'aucun secours et je serai probablement dans le chemin. » Elle glisse le carnet contre sa poitrine. « Mais si vous ouvrez ce seuil, nous vous suivrons jusqu'à Auxerre, et je ne me plaindrai pas une seule fois de la marche. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Tenez-vous prête. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Ressortir vers la lumière.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:gautier_de_valcroix",
+    "type": "pnj",
+    "nom": "Gautier de Valcroix",
+    "race": "humain",
+    "vocation": "guerrier",
+    "portrait": "humain_m_guerrier01.jpg",
+    "description": "L'homme qui dirige la Guilde des Aventuriers d'Auxerre est connu de tous sous le nom de Gautier de Valcroix, que l'on surnomme parfois le Gardien des Cartes.\nAncien capitaine d'une compagnie d'éclaireurs, il ne s'est jamais distingué par sa force, mais par son jugement. Les murs de son bureau sont couverts de cartes annotées, de rapports d'expéditions et de trophées rapportés par ceux qui ont survécu à leurs premières missions. On raconte qu'aucun aventurier ne quitte son bureau sans avoir appris quelque chose, même lorsqu'il croit n'être venu que chercher un contrat.",
+    "services": {
+      "commission": {
+        "donjon": "donjon:mine_de_saint_austrelin",
+        "noeuds": {
+          "accepte": "commission_accepte",
+          "rapporte": "commission_rapporte"
+        }
+      },
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_bucherons_d_auxerre",
+          "titre": "Les bûcherons disparus",
+          "description": "Trois bûcherons d'Auxerre ne sont pas revenus d'une coupe au nord de la cité, et une voyageuse attendue à la même date n'y est jamais arrivée. Retrouvez-les, protégez-les, et ramenez-les vivants au bureau du maître de la Guilde.",
+          "destination": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+          "rencontre": {
+            "lieu": "lieu:grotte_dans_foret_humide_interieur01"
+          },
+          "proteges": [
+            {
+              "prenom": "Armand",
+              "nom": "Renaud",
+              "race": "humain",
+              "sex": "M",
+              "image": "bucheron_Armand_Renaud_humain_m.jpg",
+              "description": "Chef de fait des trois bûcherons d'Auxerre. Vingt ans de coupe dans les futaies du nord, et la voix qu'on écoute quand la forêt se tait."
+            },
+            {
+              "prenom": "Étienne",
+              "nom": "Morel",
+              "race": "nain",
+              "sex": "M",
+              "image": "bucheron_Étienne_Morel_nain_m.jpg",
+              "description": "Bûcheron nain, la jambe ouverte pendant la fuite. Il marche encore, mais il ne courra pas deux fois."
+            },
+            {
+              "prenom": "Matthieu",
+              "nom": "Perrin",
+              "race": "ogre",
+              "sex": "M",
+              "image": "bucheron_Matthieu_Perrin_ogre_m.jpg",
+              "description": "Bûcheron ogre. C'est lui qui connaissait la grotte, et lui qui y a poussé les autres quand les crocs sont sortis des fougères."
+            },
+            {
+              "prenom": "Aélis",
+              "nom": "de Montfaucon",
+              "race": "humain",
+              "sex": "F",
+              "image": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+              "description": "Jeune architecte, chercheuse en cristaux de mana. Elle voyageait vers Auxerre sous escorte paladine ; il ne lui reste que son carnet et son obstination."
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "rang_min": {
+            "cite": "lieu:auxerre",
+            "rang": "D"
+          },
+          "recompenses": {
+            "xp": 120,
+            "cuivre": 30000,
+            "items": [
+              {
+                "item": "item:Cristal_canalisation",
+                "poids": 0.1
+              }
+            ]
+          }
+        },
+        "noeuds": {
+          "accepte": "bucherons_acceptee"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeud_attente": "commission_repos",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le bureau sent le vélin et la cire. Penché sur une carte hérissée d'épingles, {pnj} ne lève pas les yeux tout de suite — il termine d'annoter une marge, pose sa plume, et vous regarde enfin. « {prenom}. Borin vous a fait monter, donc vous valez le déplacement. Asseyez-vous. »",
+          "choix": [
+            {
+              "id": "commission",
+              "label": "« Vous avez du travail pour moi ? »",
+              "condition": {
+                "commission_offerte": true,
+                "dialogue_en_attente": false
+              },
+              "next": "commission_propose"
+            },
+            {
+              "id": "commission_rapport",
+              "label": "« C'est fait. La bête ne tient plus les galeries. »",
+              "condition": {
+                "commission_a_rapporter": true
+              },
+              "action": {
+                "service": "commission",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "commission_relance",
+              "label": "« Où en étais-je, déjà ? »",
+              "condition": {
+                "commission_en_cours": true
+              },
+              "next": "commission_relance"
+            },
+            {
+              "id": "cartes",
+              "label": "« Toutes ces cartes... »",
+              "next": "cartes"
+            },
+            {
+              "id": "trophees",
+              "label": "« Et ces trophées, au mur ? »",
+              "next": "trophees"
+            },
+            {
+              "id": "bucherons_offre",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "bucherons_propose"
+            },
+            {
+              "id": "bucherons_rang",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "bucherons_rang_insuffisant"
+            },
+            {
+              "id": "bucherons_relance",
+              "label": "« Au sujet de {protege}… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "bucherons_relance"
+            },
+            {
+              "id": "bucherons_rapport",
+              "label": "« Vous avez vu qui je vous ramène. »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "bucherons_rapport"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je voulais voir le bureau. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_repos": {
+          "texte": "Il est debout devant son mur, une pile de feuillets sous le bras, et ne vous fait même pas asseoir. « Pas maintenant, {prenom}. Tant que le rapport n'est pas remonté au temple et que les épingles ne sont pas à jour, je ne confie rien à personne — c'est comme ça qu'on envoie des gens mourir sur une carte périmée. » Il désigne la porte du menton, sans dureté. « Repassez dans {attente} minutes. »",
+          "choix": [
+            {
+              "id": "cartes",
+              "label": "« Toutes ces cartes... »",
+              "next": "cartes"
+            },
+            {
+              "id": "trophees",
+              "label": "« Et ces trophées, au mur ? »",
+              "next": "trophees"
+            },
+            {
+              "id": "bucherons_offre",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "bucherons_propose"
+            },
+            {
+              "id": "bucherons_rang",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "bucherons_rang_insuffisant"
+            },
+            {
+              "id": "bucherons_relance",
+              "label": "« Au sujet de {protege}… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "bucherons_relance"
+            },
+            {
+              "id": "bucherons_rapport",
+              "label": "« Vous avez vu qui je vous ramène. »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "bucherons_rapport"
+            },
+            {
+              "id": "rien",
+              "label": "« Je repasserai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_propose": {
+          "texte": "Il fait glisser vers vous un parchemin déjà scellé. « Une commission d'éradication. Le temple a fermé un chantier : {lieu}. Ce n'est pas la vermine ordinaire qui l'inquiète, c'est ce qui la commande — un {espece} d'exception, assez vieux pour avoir fait des galeries son territoire. » Il repose son doigt sur la carte, exactement sur l'épingle noire. « Abattez-le. Les mineurs feront le reste. {xp} points d'expérience et {prime} pièces de cuivre à votre retour — et le chantier vous devra sa réouverture. »",
+          "choix": [
+            {
+              "id": "commission_details",
+              "label": "« Qui garde l'entrée ? »",
+              "next": "commission_details"
+            },
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Pas ce chantier-là. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_details": {
+          "texte": "« Les templiers de Saint-Austrelin. » Il hausse un sourcil, amusé. « Deux barrages : l'un au sommet des marches, qui vérifie que la Guilde répond de vous ; l'autre devant l'arche, qui vérifie que c'est bien de CE chantier qu'on vous a chargé. Ils sont tatillons, et ils ont raison de l'être : le sceau que je vous donne est la seule chose qui ouvre les deux. »",
+          "choix": [
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_accepte": {
+          "texte": "Il presse son cachet sur la cire, souffle dessus, et vous tend le parchemin. « Vous cherchez un {espece} dans {lieu}. Une seule consigne, et elle n'est pas dans le texte : ce qui a tenu des galeries entières ne se laisse pas surprendre. » Il reprend sa plume et se penche déjà sur une autre carte. « Revenez me le dire vous-même. J'aime tenir mes registres à jour. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_relance": {
+          "texte": "Il suit du doigt une ligne de son registre. « Vous. Un {espece}, dans {lieu}. » Il relève les yeux. « Le chantier est toujours fermé, {prenom}, et les mineurs comptent les jours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_rapporte": {
+          "delai_min": 1800,
+          "texte": "Gautier écoute jusqu'au bout sans vous interrompre une seule fois, puis prend une épingle blanche et remplace la noire sur sa carte. « {lieu} : rouvert. » Il pousse vers vous {prime} pièces de cuivre, et {xp} points portés à votre nom sur le registre. « Vous avez rapporté le fait, pas la légende — c'est plus rare que vous ne croyez, et c'est ce qui me dira, la prochaine fois, à qui confier un chantier plus profond. » Il désigne le mur couvert de cartes. « Il en reste. » Puis il rassemble ses feuillets. « Mais rien aujourd'hui : je dois faire remonter tout ceci au temple avant de rouvrir quoi que ce soit. Repassez dans {attente} minutes. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cartes": {
+          "texte": "« Elles ne valent rien. » Il dit cela sans quitter des yeux le mur qu'il a passé vingt ans à couvrir. « Une carte est le souvenir de ce qu'un homme a vu un jour donné. Les galeries s'effondrent, les rivières changent de lit, les monstres déménagent. Ce qui vaut quelque chose, c'est l'aventurier qui revient corriger la mienne. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "trophees": {
+          "texte": "Il jette un œil à la rangée de crânes, de griffes et de mâchoires clouées au-dessus de la cheminée. « Aucun n'est de moi. Chacun a été rapporté par une recrue qui pensait ne pas revenir. » Un silence. « Je garde aussi la liste de celles qui n'ont rien rapporté. Elle est plus longue, et je la relis plus souvent. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_propose": {
+          "texte": "« Je vous fais chercher depuis avant-hier. » Il repousse la carte des galeries et en déroule une autre : la cité, ses routes, la forêt du nord. Trois marques à l'encre rouge y forment un triangle serré. « Trois bûcherons. Partis couper au nord, attendus il y a deux jours, jamais rentrés. Leur employeur est venu réclamer de l'aide, et je n'aime pas ce que je ne comprends pas : ces hommes-là connaissent le bois mieux que mes éclaireurs. Une battue ordinaire aurait dû les ramener. »",
+          "choix": [
+            {
+              "id": "absence",
+              "label": "« Pourquoi ne pas envoyer une troupe ? »",
+              "next": "bucherons_absence"
+            },
+            {
+              "id": "architecte",
+              "label": "« Y a-t-il autre chose ? »",
+              "next": "bucherons_architecte"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            },
+            {
+              "id": "refus",
+              "label": "« Ce n'est pas pour moi, messire. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_absence": {
+          "texte": "« Parce qu'une troupe piétine, s'annonce à une lieue et rentre bredouille en ayant coûté trois jours de solde. » Il appuie un doigt sur la marque du milieu. « Et parce que si ces hommes sont vivants, ils sont terrés quelque part à attendre qu'on vienne — pas qu'on batte les fourrés autour d'eux. Une personne qui regarde vaut mieux que vingt qui marchent. C'est ma conviction, et elle m'a rarement trompé. »",
+          "choix": [
+            {
+              "id": "architecte",
+              "label": "« Y a-t-il autre chose ? »",
+              "next": "bucherons_architecte"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            }
+          ]
+        },
+        "bucherons_architecte": {
+          "texte": "Il hésite — chose rare — puis ouvre un pli posé au coin du bureau. « Il y a autre chose, oui, et j'ignore si cela a le moindre rapport. Une voyageuse devait rejoindre Auxerre cette semaine. Une architecte, recommandée par un chapitre du sud : elle venait étudier nos cristaux de mana et la façon dont nos bâtisseurs les emploient. » Il referme le pli. « Elle n'est jamais arrivée. Je ne prétends rien. Je constate que deux disparitions tombent dans la même semaine et dans la même direction. Si vous la trouvez, ramenez-la aussi — et protégez-la : ce n'est pas une aventurière. »",
+          "choix": [
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            },
+            {
+              "id": "absence",
+              "label": "« Pourquoi pas une troupe ? »",
+              "next": "bucherons_absence"
+            }
+          ]
+        },
+        "bucherons_instructions": {
+          "texte": "« Suivez la route forestière vers le nord. Leur dernier chantier connu est à une demi-journée de marche des murs. » Son doigt court le long d'un trait d'encre. « Cherchez leurs traces : des coupes fraîches, des outils laissés, un campement froid, des empreintes qui ne sont pas les leurs. Ce que la forêt vous montrera vaudra mieux que tout ce que je peux vous en dire d'ici. » Il vous regarde enfin vraiment. « S'ils vivent, ramenez-les-moi ici, dans ce bureau, sur leurs jambes. {xp} points d'expérience et {prime} pièces de cuivre à leur retour. Et ne prenez pas de risque inutile : nous ignorons encore ce qui les a empêchés de rentrer. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je vous les ramènerai. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "refus",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_acceptee": {
+          "texte": "Il note une ligne dans son registre, souffle sur l'encre et referme le volume. « Alors c'est votre affaire, {prenom}. Une dernière chose, qui n'est pas dans le contrat : ce ne sont pas des trophées. Une personne qu'on escorte ne se bat pas, ne fuit pas, et ne survit qu'à la mesure de ce que vous arrêtez avant elle. » Il vous rend votre salut. « Ramenez-les vivants. Le reste ne m'intéresse pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_rang_insuffisant": {
+          "texte": "« Je vous fais chercher, en effet. Et je vais vous décevoir. » Il croise les mains sur la carte. « Ce que j'ai là demande qu'on réponde de vous, et aujourd'hui la Guilde ne répond pas encore assez fort. Prenez les contrats du Bastion, montez jusqu'au rang {rang_requis}, et revenez me voir. » Une pause sans dureté. « Des hommes attendent quelque part dans ce bois. Je préfère les faire attendre un jour de plus que d'y envoyer quelqu'un qui n'en reviendra pas non plus. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« J'y travaillerai. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je reviendrai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_relance": {
+          "texte": "Il suit du doigt la ligne de son registre. « {protege}. » Il relève les yeux. « Toujours dans ce bois, donc. » Il repousse la carte vers vous, la forêt du nord bien au centre. « Ne me rapportez pas une histoire, {prenom}. Rapportez-moi des gens. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_rapport": {
+          "texte": "Gautier vous a écouté jusqu'au bout sans vous couper une seule fois — les loups, la fente de roche, les deux nuits, la demoiselle. Puis il prend une épingle blanche et la plante sur la forêt du nord, à la place des trois marques rouges. « Trois hommes vivants, et une voyageuse que je croyais perdue. » Il se tourne vers l'architecte, qui se tient très droite malgré la poussière. « Mademoiselle de Montfaucon. Votre voyage aura été plus mouvementé que prévu. » — « Je le reconnais. » — « Vous êtes arrivée à Auxerre. C'est l'essentiel. » Il revient à vous. « Quant à vous : bon travail. Mais cette histoire tombe à un moment particulier. »",
+          "choix": [
+            {
+              "id": "livraison",
+              "label": "« Particulier comment ? »",
+              "next": "bucherons_livraison"
+            },
+            {
+              "id": "fin",
+              "label": "« Je vous laisse à vos cartes. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_livraison": {
+          "texte": "Il ouvre un registre à couverture noire. « Auxerre doit encore envoyer une dernière livraison de cristaux de mana à Lutecia. » — « Lutecia ? » L'architecte a relevé la tête si vite que Gautier marque un temps. « Lutecia, mademoiselle. » Il referme le registre. « Elle devait partir avec une caravane marchande. Les cristaux sont trop précieux pour voyager sans protection, et les événements de cette semaine ne me disposent pas à l'optimisme. »",
+          "choix": [
+            {
+              "id": "proposition",
+              "label": "« Et vous pensez à moi. »",
+              "next": "bucherons_proposition"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "bucherons_rapport"
+            }
+          ]
+        },
+        "bucherons_proposition": {
+          "texte": "« Je pense à vous, oui. » Il s'appuie des deux mains sur le bureau. « Nous avons une livraison à conduire et, depuis ce matin, une personne de plus qui doit se rendre dans la même cité. » — « Je souhaite en effet poursuivre mon voyage », dit-elle, très posément. « Alors nous ferons d'une pierre deux coups. Vous accompagnerez la livraison jusqu'à Lutecia. » Vous demandez si ce sera seul. Gautier secoue la tête. « Non. Cette fois, la Guilde ne prendra aucun risque. »",
+          "choix": [
+            {
+              "id": "paladins",
+              "label": "« Qui d'autre ? »",
+              "next": "bucherons_paladins"
+            }
+          ]
+        },
+        "bucherons_paladins": {
+          "texte": "La porte s'ouvre. Deux paladins entrent — une elfe en haubert clair, un hobbit en cotte de mailles — et saluent sans un mot de trop. « Une escorte de l'ordre accompagnera le convoi », dit Gautier. « Leur charge : les cristaux et mademoiselle de Montfaucon, jusqu'à Lutecia. » Il revient à vous. « La vôtre : les accompagner, et veiller à ce que ce voyage se déroule correctement. » L'architecte esquisse un sourire. « Il semblerait que je sois arrivée à Auxerre au meilleur moment. » — « Ou au pire », répond Gautier sans se retourner. « Cela dépendra de ce que vous trouverez sur la route de Lutecia. »",
+          "choix": [
+            {
+              "id": "depart",
+              "label": "« Quand partons-nous ? »",
+              "next": "bucherons_depart"
+            }
+          ]
+        },
+        "bucherons_depart": {
+          "texte": "« Dès que les caisses seront sanglées. » Gautier reprend sa plume, ce qui est chez lui une façon de congédier. « Le convoi se forme dans la cour du Bastion : allez vous présenter à la commandante, elle vous dira le reste mieux que moi. » Puis, sans lever les yeux : « Et {prenom}… trois bûcherons ont dormi chez eux cette nuit parce que quelqu'un est allé regarder au lieu de battre les fourrés. Je le note aussi dans mes registres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Messire. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "pnj:borin_barbe_de_jais",
+    "type": "pnj",
+    "nom": "Borin Barbe-de-Jais",
+    "race": "nain",
+    "vocation": "receptionniste",
+    "portrait": "nain_m_receptioniste01.png",
+    "description": "Réceptionniste du Bastion de l'Yonne. Ses yeux pétillent d'une malice bienveillante, mais rien n'échappe à son regard.",
+    "services": {
+      "transport": {
+        "offre": {
+          "id": "quete:transport_borin_premiere_mission",
+          "destination": "lieu:fumee_de_l_yonne",
+          "cargaison": [
+            {
+              "item": "item:viande_sanglier_gobelin",
+              "quantite": 2,
+              "poids": 5
+            }
+          ],
+          "duree": 3600,
+          "proba": 1,
+          "unique": true,
+          "retour": true,
+          "rang": "F",
+          "titre": "Première mission : les caisses du Bastion",
+          "description": "Borin Barbe-de-Jais vous confie deux caisses de viande de sanglier-gobelin — dix bons kilos — à porter au fumoir de la Guilde, Fumée de l'Yonne. Elles y deviendront les provisions des expéditions. Revenez ensuite lui en rendre compte au comptoir : ce n'est pas la viande qu'il met à l'épreuve.",
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 200,
+            "items": [
+              {
+                "item": "item:carte_aventurier",
+                "poids": 0.05,
+                "lieu_parent": "auto"
+              }
+            ],
+            "rang_guilde": "F"
+          }
+        },
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "rapporte": "transport_rapporte"
+        }
+      },
+      "rang": {
+        "noeuds": {
+          "propose": "rang_propose",
+          "accepte": "rang_accepte",
+          "rapporte": "rang_rapporte"
+        }
+      },
+      "acces": {
+        "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus",
+          "deja": "acces_deja"
+        }
+      },
+      "escorte": {
+        "recherche": {
+          "cite": "lieu:auxerre",
+          "proba": 0.25,
+          "recompenses": {
+            "xp": 30,
+            "cuivre": 500
+          }
+        },
+        "noeuds": {
+          "accepte": "escorte_acceptee"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le nain vous observe quelques secondes avant d'esquisser un sourire. « Bienvenue au Bastion de l'Yonne ! Approche donc, {prenom}. Tu viens chercher fortune, ou simplement vérifier que les histoires sont vraies ? »",
+          "choix": [
+            {
+              "id": "mission",
+              "label": "Je voudrais devenir aventurier.",
+              "next": "premiere_mission",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "rapport",
+              "label": "C'est fait. {destinataire} a sa viande.",
+              "action": {
+                "service": "transport",
+                "op": "rapporter"
+              },
+              "condition": {
+                "transport_a_rapporter": true
+              }
+            },
+            {
+              "id": "relance",
+              "label": "Où en est ma livraison, déjà ?",
+              "next": "transport_relance",
+              "condition": {
+                "transport_en_cours": true
+              }
+            },
+            {
+              "id": "veteran",
+              "label": "Vous vous souvenez de moi ?",
+              "next": "transport_veteran",
+              "condition": {
+                "transport_accompli": true
+              }
+            },
+            {
+              "id": "rang_proposer",
+              "label": "Une épreuve pour m'élever dans la Guilde ?",
+              "next": "rang_propose",
+              "condition": {
+                "rang_offert": true
+              }
+            },
+            {
+              "id": "rang_rapporter",
+              "label": "C'est fait. Le « {espece} {rang_vise} » a fini couché.",
+              "action": {
+                "service": "rang",
+                "op": "rapporter"
+              },
+              "condition": {
+                "rang_a_rapporter": true
+              }
+            },
+            {
+              "id": "rang_sommet",
+              "label": "Reste-t-il une épreuve à ma hauteur ?",
+              "next": "rang_sommet",
+              "condition": {
+                "rang_max": true
+              }
+            },
+            {
+              "id": "acces_passer",
+              "label": "Je voudrais voir le maître de la Guilde.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "acces_deja",
+              "label": "Je remonte au bureau.",
+              "condition": {
+                "acces_ouvert": true
+              },
+              "next": "acces_deja"
+            },
+            {
+              "id": "acces_pourquoi",
+              "label": "Qui dirige la Guilde, ici ?",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "escorte_offre",
+              "label": "Un avis de recherche, peut-être ?",
+              "next": "escorte_propose",
+              "condition": {
+                "escorte_offerte": true
+              }
+            },
+            {
+              "id": "escorte_relance",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_relance",
+              "condition": {
+                "escorte_en_cours": true
+              }
+            },
+            {
+              "id": "bucherons_appel",
+              "label": "« On me dit que le maître de la Guilde me cherche ? »",
+              "condition": {
+                "acces_ouvrable": true,
+                "relation_min": {
+                  "lieux": [
+                    "lieu:le_bastion_de_l_yonne_comptoir"
+                  ],
+                  "seuil": 51
+                }
+              },
+              "next": "bucherons_appel"
+            },
+            {
+              "id": "bucherons_appel_habitue",
+              "label": "« On me dit que le maître de la Guilde me cherche ? »",
+              "condition": {
+                "acces_ouvert": true,
+                "relation_min": {
+                  "lieux": [
+                    "lieu:le_bastion_de_l_yonne_comptoir"
+                  ],
+                  "seuil": 51
+                }
+              },
+              "next": "bucherons_appel"
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "premiere_mission": {
+          "texte": "« Beaucoup le disent. Peu comprennent ce que cela signifie. » Il ouvre un grand registre relié de cuir et y inscrit soigneusement ton nom. « Les recrues pensent souvent que leur première mission sera de tuer un monstre. C'est faux. Avant de savoir combattre, il faut apprendre à être digne de confiance. »",
+          "choix": [
+            {
+              "id": "ecouter",
+              "label": "Qu'attendez-vous de moi ?",
+              "next": "transport_propose"
+            },
+            {
+              "id": "refuser",
+              "label": "Je préfère chercher fortune ailleurs.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "Borin disparaît derrière une porte donnant sur les réserves, et revient avec {colis} solides caisses de bois fermées par des courroies de cuir. Une odeur puissante s'en échappe. « {poids} kilos de viande de sanglier-gobelin, toute fraîche. Tu la livreras au fumoir de la Guilde. Destination : {destination}. Tu as {delai} minutes — après, la marchandise ne vaut plus rien, et ce ne sont pas deux caisses qui disparaissent : ce sont les provisions de tes futurs compagnons. » Il glisse un jeton de cuivre dans ta main. « {xp} points d'expérience et {prime} pièces de cuivre à ton retour. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Ce n'est... qu'une livraison.",
+              "next": "transport_lecon"
+            }
+          ]
+        },
+        "transport_lecon": {
+          "texte": "Le sourire du nain s'efface doucement. « Tu crois ? » Il se penche vers toi. « Les plus grands héros commencent rarement en terrassant un dragon. Ils commencent en accomplissant parfaitement une tâche que tout le monde croit ordinaire. » Puis il reprend son éternel sourire. « Et entre nous... l'odeur attirera sans doute quelques renards, des chiens errants, peut-être même un jeune loup ou deux. Tu devras garder la tête froide. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "Donnez-moi ces caisses.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas aujourd'hui.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "Il pose un doigt épais sur une carte de la région. « Tu quitteras la ville et tu suivras la route : c'est {direction}. Le bâtiment de pierre aux hautes cheminées, tu ne peux pas le manquer. Présente le jeton à {destinataire} : on saura que tu viens de notre part. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "Borin contourne le comptoir et t'aide à charger les {colis} caisses dans une solide hotte de portage. « Destination : {destination}, dans les {delai} minutes. Et reviens me voir ensuite : je veux te l'entendre dire. Tu découvriras bientôt une vérité que tous les vétérans connaissent, petit. » Il t'adresse un clin d'œil et referme son registre.",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_rapporte": {
+          "texte": "Le vieux nain rouvre son grand registre et trace une ligne à côté de ton nom. « Les caisses sont arrivées, et à l'heure. » Il fait glisser sur le chêne une plaque de cuir bouilli frappée du blason du Bastion, puis {prime} pièces de cuivre. « Ce n'était pas la viande que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. Les aventuriers capables de protéger une simple cargaison sont souvent ceux à qui l'on confiera, un jour, des compagnons... et peut-être le destin d'une cité entière. » Il désigne le grand tableau de la salle commune. « Rang Cuivre — le premier échelon, celui par lequel tout le monde a commencé. Va choisir ta prochaine quête. Tu es des nôtres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "Le nain soupèse ton barda d'un regard et éclate de rire. « Par les enclumes des anciens ! Tu ploies déjà sous ton propre bagage, {prenom}. Déleste-toi et reviens : la viande ne s'envolera pas... enfin, pas tout de suite. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_relance": {
+          "texte": "Borin lève un sourcil au-dessus de son registre. « Toujours là ? Ces caisses ne se porteront pas toutes seules. Destination : {destination}, c'est {direction}. Il te reste {delai} minutes, et la viande n'attend pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y cours.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_veteran": {
+          "texte": "« Si je me souviens de toi ? » Le vieux nain caresse distraitement une tresse de sa barbe noire de jais. « {destinataire} a reçu sa viande, et à l'heure. Ce n'était pas la marchandise que je mettais à l'épreuve, {prenom} : c'était ton sens des responsabilités. » Il désigne du menton le grand tableau couvert de parchemins, dans la salle commune. « Va donc voir ce qu'on y épingle. Tu as gagné le droit de choisir. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_propose": {
+          "texte": "Borin referme son registre et te jauge d'un œil neuf. « Tu veux t'élever dans la Guilde, {prenom} ? Alors il te faut une prise digne de ce nom. Nos éclaireurs ont repéré un {espece} d'exception qui écume {lieu} — une bête énorme, couverte du sang de ses victimes. Ramène-moi sa dépouille et le rang {rang_vise} sera à toi. {xp} points d'expérience à la clef, et la fierté qui va avec. »",
+          "choix": [
+            {
+              "id": "rang_accepter",
+              "label": "Je m'en occupe.",
+              "action": {
+                "service": "rang",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_reflechir",
+              "label": "Une telle bête... laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_accepte": {
+          "texte": "« Bien. » Le nain grave quelque chose à côté de ton nom. « La bête rôde du côté de {lieu}. Ne reviens pas sans sa dépouille — et reviens entier, {prenom}, ce serait un comble de perdre une recrue prometteuse sur une épreuve de rang. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_rapporte": {
+          "texte": "Borin examine la dépouille encore fumante, hoche lentement la tête, puis trace une marque nette sur ta plaque de cuir bouilli. « Peu en reviennent, {prenom}. Toi, si. » Il repousse le registre. « Te voilà rang {rang}. La Guilde n'oublie pas ceux qui montent — et elle en attend d'autant plus. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Borin.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_sommet": {
+          "texte": "Le vieux nain éclate d'un rire franc qui fait trembler sa barbe de jais. « Une épreuve à ta hauteur ? {prenom}, tu es rang {rang} — le plus haut que le Bastion sache reconnaître. » Il redevient sérieux et tapote la couverture de son registre. « Ce n'est pas de la fausse modestie : nos bois et nos collines n'abritent plus rien qui puisse te grandir. Pour monter au-delà, il te faudra une autre guilde, dans une autre cité, et du gibier à la mesure. Le Bastion, lui, gardera ton nom. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un honneur.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "« Rang {rang}, et mon registre en témoigne. » Borin repose sa plume, se hisse sur la pointe des pieds et désigne l'escalier du fond. « Monte. C'est là-haut : {portail}. Frappe, entre, et surtout — écoute. On ne ressort jamais de ce bureau sans avoir appris quelque chose, même quand on croyait n'y venir que pour un contrat. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "Le nain referme son registre d'un coup sec. « Le maître de la Guilde, {prenom} ? Son bureau n'est pas une salle d'attente. On y monte quand la Guilde sait ce qu'on vaut — rang D, pas moins. Tu en es à {rang}. » Il se radoucit et tapote la couverture de cuir. « Fais allonger la ligne à côté de ton nom. Je t'y conduirai moi-même. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y travaille.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_deja": {
+          "texte": "« Je sais, je sais — tu connais le chemin. » Il agite sa plume vers l'escalier du fond sans même relever la tête. « Monte, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:bureau_du_maitre_de_guilde_d_auxerre"
+            }
+          ]
+        },
+        "escorte_propose": {
+          "texte": "Borin fait glisser un registre plus mince que les autres et l'ouvre à une page cornée. « Celui-là, je n'aime pas le tenir. » Il tourne le livre vers vous. « {protege}. Une famille d'Auxerre, un enfant qui n'est pas rentré. On l'a vu du côté de {lieu_rencontre}. La Guilde paie ceux qui les ramènent — et elle se souvient de ceux qui les ramènent vivants. »",
+          "choix": [
+            {
+              "id": "escorte_details",
+              "label": "Où, exactement ?",
+              "next": "escorte_details"
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Ce n'est pas pour moi.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_details": {
+          "texte": "« {direction}. » Le doigt épais s'arrête et ne bouge plus. « Vous rendrez l'enfant à sa famille, pas à moi : {destinataire}, à : {destination}. Moi, je me contente d'inscrire que c'est fait — {xp} points d'expérience et {prime} pièces de cuivre ce jour-là. »",
+          "choix": [
+            {
+              "id": "escorte_accepter",
+              "label": "Je m'en charge.",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_acceptee": {
+          "texte": "Le nain trace une croix dans la marge et souffle sur l'encre. « C'est noté à votre nom. » Le sourire revient, un peu plus grave que d'habitude. « Une chose, {prenom} : {protege} ne se battra pas et ne pourra pas s'enfuir. Ce n'est pas un colis — ramenez l'enfant, pas son panier. »",
+          "choix": [
+            {
+              "id": "partir",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Encore une chose, Borin…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_relance": {
+          "texte": "« Toujours en chemin ? » Le registre reste ouvert à la page cornée. « Cherchez {direction}. Et souvenez-vous : c'est à : {destination} qu'on attend, pas ici. Une croix dans mon livre ne vaut rien tant que la porte ne s'est pas rouverte. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y retourne.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en occupe.",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_appel": {
+          "texte": "« Hé ! Vous. Oui, vous. » Le nain pose le registre qu'il compulsait et se penche par-dessus le comptoir. « Le maître de la guilde vous cherche. » Il lève une main avant que vous ayez ouvert la bouche. « Et avant que vous demandiez : non, ce n'est ni une histoire de dette, ni une bagarre de taverne, ni un poulet volé. » Il marque un temps. « Cette fois, c'est sérieux. »",
+          "choix": [
+            {
+              "id": "quoi",
+              "label": "« Que me veut-il ? »",
+              "next": "bucherons_appel_qui"
+            },
+            {
+              "id": "plus_tard",
+              "label": "« Il attendra. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_appel_qui": {
+          "texte": "« Il ne m'a rien expliqué. Il a seulement dit de vous envoyer le voir dès que vous mettriez les pieds ici. » Le ton descend d'un cran, et la malice avec. « Ça concerne des gens qui ne sont pas revenus de la forêt. »",
+          "choix": [
+            {
+              "id": "aventuriers",
+              "label": "« Des aventuriers ? »",
+              "next": "bucherons_appel_escalier"
+            },
+            {
+              "id": "monter",
+              "label": "« J'y vais. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_appel_escalier": {
+          "texte": "« Des bûcherons. Trois hommes. » Borin referme le registre d'un geste. « Ils coupent pour plusieurs exploitants de la région, ils connaissent ces bois depuis toujours, et voilà deux jours qu'on les attend. Ça commence à faire beaucoup de temps, pour des gens qui ne se perdent pas. » Il désigne du pouce l'escalier du fond. « Le maître de la guilde est dans son bureau. Montez. Il vous dira le reste. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« Merci, Borin. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Monter l'escalier.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:grotte_dans_foret_humide",
+    "type": "lieu",
+    "label": "Grotte dans la forêt humide",
+    "image": "grotte_dans_foret_humide.jpg",
+    "categorie": "grotte",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:armand_renaud",
+        "nom": "Armand Renaud",
+        "portrait": "bucheron_Armand_Renaud_humain_m.jpg",
+        "description": "Une voix d'homme, derrière l'éboulis qui ferme à demi l'entrée."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:grotte_dans_foret_humide_interieur01",
+    "type": "lieu",
+    "label": "Interieur de la grotte dans la forêt humide avec trois bucherons et une autre jeune femme",
+    "image": "grotte_retrouvailles_Retrouver_les_bûcherons_d_Auxerre.jpg",
+    "categorie": "grotte",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon",
+        "nom": "Aélis de Montfaucon",
+        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "probabilite": 0.5,
+        "description": "Une jeune femme assise à l'écart du feu, un carnet serré contre elle."
+      },
+      {
+        "character": "pnj:etienne_morel",
+        "nom": "Étienne Morel",
+        "portrait": "bucheron_Étienne_Morel_nain_m.jpg",
+        "probabilite": 0.5,
+        "description": "Un nain adossé à la paroi, la jambe serrée dans un garrot de fortune."
+      },
+      {
+        "character": "pnj:matthieu_perrin",
+        "nom": "Matthieu Perrin",
+        "portrait": "bucheron_Matthieu_Perrin_ogre_m.jpg",
+        "description": "Un ogre assis face à l'entrée, un tronçon de charme en travers des genoux."
+      }
+    ],
+    "acces": {
+      "refus": "La fente est trop étroite pour qu'on s'y glisse sans raison, et rien ne bouge au fond de l'ombre.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+            "giver_categorie": "bureau_maitre_guilde"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:grotte_dans_foret_humide_interieur",
+    "type": "lieu",
+    "label": "Interieur de la grotte dans la forêt humide",
+    "image": "grotte_dans_foret_humide_interieur.jpg",
+    "categorie": "grotte",
+    "lieu_parent": "lieu:auxerre",
+    "acces": {
+      "refus": "Des voix montent du fond de la grotte : ce n'est pas le moment d'y entrer en curieux.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+            "giver_categorie": "bureau_maitre_guilde",
+            "attendu": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:grotte_en_foret",
+    "type": "lieu",
+    "label": "L'entrée d'une grotte dans une forêt",
+    "image": "map0025.jpg",
+    "dimensions": {
+      "x": 60,
+      "y": 30
+    },
+    "cells": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        3,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        0,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5
+      ],
+      [
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        0,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5
+      ],
+      [
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        5,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        1,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        5,
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        1,
+        1,
+        5,
+        5,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        1,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        1,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        1,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "tags": [
+      "chemin",
+      "foret",
+      "bois",
+      "grotte",
+      "clariere"
+    ],
+    "categorie": "battle_map",
+    "nav": {},
+    "acces": {
+      "gardien": "pnj:armand_renaud",
+      "refus": "Rien ne rôde devant cette grotte, et rien ne vous y attend.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+            "giver_categorie": "bureau_maitre_guilde"
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:grotte_en_foret",
+            "attendu": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:clairiere_de_la_grotte_liberee",
+    "type": "lieu",
+    "label": "La clairière devant la grotte",
+    "image": "Retrouver_les_bûcherons_d_Auxerre_victoire_combat.jpg",
+    "categorie": "grotte",
+    "lieu_parent": "lieu:auxerre",
+    "acces": {
+      "refus": "Les fougères ont repris la clairière ; il n'y a plus rien à y voir.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+            "giver_categorie": "bureau_maitre_guilde"
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:grotte_en_foret"
+          }
+        },
+        {
+          "lieu_visite": {
+            "lieu": "lieu:clairiere_de_la_grotte_liberee",
+            "attendu": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "link:clairiere_de_la_grotte_liberee_to_grotte_dans_foret_humide",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:clairiere_de_la_grotte_liberee",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Gagner la clairière dégagée"
+      },
+      {
+        "lieu": "lieu:grotte_dans_foret_humide",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Remonter vers le seuil de la grotte"
+      }
+    ],
+    "metadata": {
+      "type": "grotte",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:clairiere_de_la_grotte_liberee_to_auxerre",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:clairiere_de_la_grotte_liberee",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "Revenir à la clairière"
+      },
+      {
+        "lieu": "lieu:auxerre",
+        "pos": [
+          61,
+          1
+        ],
+        "label": "Prendre la route basse vers la cité"
+      }
+    ],
+    "metadata": {
+      "type": "grotte",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "donjon:les_loups_de_la_grotte_humide",
+    "type": "donjon",
+    "nom": "La meute du seuil",
+    "description": "Trois loups géants ont fait de l'entrée d'une grotte du nord d'Auxerre leur territoire. Ils ne creusent pas, ils ne hurlent pas : l'ouverture est trop étroite pour leurs corps, alors ils attendent que ce qui s'est terré à l'intérieur finisse par en sortir.",
+    "portail": "lieu:grotte_dans_foret_humide",
+    "battle_maps": [
+      {
+        "lieu": "lieu:grotte_en_foret",
+        "especes": [
+          "espece:loup_geant"
+        ],
+        "niveau_max": 3,
+        "niveau_min": 2
+      }
+    ],
+    "niveau_max": 2
+  }
+]

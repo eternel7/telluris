@@ -221,6 +221,35 @@ def resolve_profil_weights(active_placements: list, lieu: dict) -> dict | None:
     return (lieu or {}).get("profil_weights") or None
 
 
+def profil_compatible(profil: dict, espece: dict) -> bool:
+    """Ce profil peut-il coiffer cette espèce ? `restriction_tags ⊆ tags de l'espèce`.
+
+    SOURCE UNIQUE de la règle, et la seule. Un profil SANS `restriction_tags` convient à
+    tout le monde (l'ensemble vide est inclus dans n'importe quel ensemble) : c'est ce qui
+    garde `novice`/`combattant`/`veteran`… universels et rend le filtre indolore sur le
+    contenu existant. Un profil `distance` ou `magique` exige au contraire que l'espèce
+    porte le tag correspondant — un loup ne tire pas à l'arc.
+
+    ⚠️ Pur, et volontairement dans ce module-ci : `utils/zones.py` est une FEUILLE de
+    l'arbre d'imports (il ne dépend que de `math`/`random`), donc `utils/combat.py`,
+    `utils/chasse.py` et `utils/donjon.py` peuvent tous les trois s'y brancher sans cycle.
+    La règle y rejoint `resolve_profil_weights`, qui décide déjà du grade d'un monstre.
+    """
+    return set((profil or {}).get("restriction_tags") or []) <= set((espece or {}).get("tags") or [])
+
+
+def profils_compatibles(profils: list, espece: dict) -> list:
+    """Les profils de `profils` compatibles avec `espece`, dans l'ordre reçu.
+
+    ⚠️ Peut rendre une liste VIDE — cas d'un contenu où l'on n'a passé que des profils
+    restreints. Les appelants doivent traiter ce cas comme ils traitent déjà « aucun
+    profil » (`instantiate_monsters` retombe alors sur le point médian de l'espèce), et
+    surtout PAS en repliant sur la liste non filtrée : ce repli rouvrirait exactement le
+    défaut que ce filtre ferme.
+    """
+    return [p for p in (profils or []) if profil_compatible(p, espece)]
+
+
 def terrain_tags_actifs(active_placements: list, zone_defs: dict) -> list:
     """Tags de TERRAIN des zones actives — union des `terrain_tags` de leurs zone-defs.
 

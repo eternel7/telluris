@@ -119,6 +119,45 @@ def lieu_label(lieu_doc: dict | None, lieu_id: str = "") -> str:
 			or (doc.get("_id") or lieu_id or "").split(":", 1)[-1])
 
 
+# ---------------------------------------------------------------------------
+# Salles gardées déjà nettoyées — « ce combat-là a été gagné »
+# ---------------------------------------------------------------------------
+# `character["battle_maps_gagnees"]` = ids des salles dont le joueur a remporté le combat
+# d'entrée. Champ absent ⇒ comportement d'avant à la lettre, AUCUNE migration.
+#
+# ⚠️ Ce qu'on y note est la SALLE GARDÉE (la porte franchie), jamais le `battle_map_id` du
+# doc combat. Une salle de donjon reste un lieu `battle_map` ordinaire, donc TIRABLE COMME
+# DÉCOR par `combat.select_battle_map` : `lieu:grotte_en_foret` porte les tags
+# `chemin/foret/bois`, si bien que la moindre escarmouche en forêt autour d'Auxerre peut s'y
+# dérouler. Marquer d'après le décor ferait « gagner » un combat de donjon qui n'a jamais eu
+# lieu — et refermerait sa porte pendant qu'une barrière conditionnée dessus s'ouvrirait.
+# C'est `routers/pnj._declencher_combat_donjon` qui timbre `combat_doc["salle_gardee"]` :
+# lui seul sait qu'on est entré PAR une porte.
+#
+# ⚠️ Ici et pas dans `utils/combat.py` : `utils/acces.py` doit LIRE ce champ et ne peut pas
+# importer le combat (cycle `combat` → `lieux` → `acces`). Les deux importent déjà ce
+# module-ci, qui est celui des helpers de document personnage.
+
+def victoire_acquise(character: dict, lieu_id: str) -> bool:
+	"""Le joueur a-t-il déjà remporté le combat d'entrée de cette salle gardée ?"""
+	if not lieu_id:
+		return False
+	return lieu_id in ((character or {}).get("battle_maps_gagnees") or [])
+
+
+def noter_victoire(character: dict, lieu_id: str) -> bool:
+	"""Enregistre la victoire sur une salle gardée (mute sans sauver — l'appelant persiste).
+	Renvoie True si le champ a changé. Dédoublonné, donc idempotent : rejouer la
+	finalisation d'un combat ne l'allonge pas."""
+	if character is None or not lieu_id:
+		return False
+	gagnees = character.setdefault("battle_maps_gagnees", [])
+	if lieu_id in gagnees:
+		return False
+	gagnees.append(lieu_id)
+	return True
+
+
 def resolve_item_ref(ref):
 	"""Référence → doc item complet, avec `poids` écrasé par le poids effectif de
 	l'instance (nombre) et `_id`/`item` conservés. None si l'item n'existe plus.

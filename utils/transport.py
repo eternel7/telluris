@@ -390,13 +390,10 @@ def offre_spec(pnj_doc: dict) -> dict | None:
 def deja_reussie(character: dict, quete_id: str) -> bool:
 	"""Cette quête a-t-elle déjà été MENÉE À BIEN par le personnage ? (Un échec ne compte
 	pas : le donneur repropose sa course — on ne condamne pas un joueur pour un retard.)
-	Gate des offres `unique`, d'où la nécessité d'un id STABLE sur la spec."""
-	if not quete_id:
-		return False
-	return any(
-		t.get("id") == quete_id and not t.get("echec")
-		for t in (character or {}).get("quetes_terminees", [])
-	)
+	Gate des offres `unique`, d'où la nécessité d'un id STABLE sur la spec.
+
+	⚠️ DÉLÉGUÉ à `quetes.quete_reussie`, la source unique (cf. `escorte.deja_reussie`)."""
+	return quetes.quete_reussie(character, quete_id)
 
 
 def cargaison_authoree(spec: dict, get_doc_fn) -> list:

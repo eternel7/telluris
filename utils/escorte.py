@@ -137,13 +137,13 @@ def rang_insuffisant(character: dict, pnj_doc: dict) -> bool:
 def deja_reussie(character: dict, quete_id: str) -> bool:
 	"""Cette escorte a-t-elle déjà été MENÉE À BIEN ? (Un échec ne compte pas : le donneur
 	repropose — on ne condamne pas un joueur pour une perte.) Gate des offres `unique`,
-	d'où la nécessité d'un id STABLE sur la spec. Miroir de `transport.deja_reussie`."""
-	if not quete_id:
-		return False
-	return any(
-		t.get("id") == quete_id and not t.get("echec")
-		for t in (character or {}).get("quetes_terminees", [])
-	)
+	d'où la nécessité d'un id STABLE sur la spec. Miroir de `transport.deja_reussie`.
+
+	⚠️ DÉLÉGUÉ à `quetes.quete_reussie`, la source unique : la même règle sert désormais aux
+	dialogues (condition `quete_reussie`, qui vise n'importe quelle quête depuis n'importe
+	quel PNJ). Le nom et la signature restent — ils sont appelés partout comme gate de
+	`unique`."""
+	return quetes.quete_reussie(character, quete_id)
 
 
 # ---------------------------------------------------------------------------
@@ -643,6 +643,21 @@ def offre_courante(character: dict, lieu_doc: dict) -> dict | None:
 	if not lieu_id or offert.get("lieu") != lieu_id:
 		return None
 	return offert.get("quete") or None
+
+
+def rencontre_attendue(character: dict, lieu_id: str) -> dict | None:
+	"""L'escorte active dont le RENDEZ-VOUS est ici et dont la personne n'a pas encore été
+	retrouvée, ou None. Miroir strict d'`escorte_vers`, pour l'étape d'AVANT.
+
+	⚠️ La garde `rencontre_at` est ce qui rend les deux étapes exclusives : une escorte dont
+	le rendez-vous et la dépose sont au même lieu ne doit pas réclamer les deux à la fois."""
+	for q in escortes_actives(character):
+		if q.get("rencontre_at"):
+			continue
+		rdv = (q.get("objectif") or {}).get("rencontre") or {}
+		if rdv.get("lieu") == lieu_id:
+			return q
+	return None
 
 
 def escorte_vers(character: dict, lieu_id: str) -> dict | None:

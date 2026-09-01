@@ -1,0 +1,328 @@
+[
+  {
+    "_id": "rules:world_variables",
+    "_rev": "66-cb002e9900cdb901ef10db02bcdec3ba",
+    "type": "rules",
+    "value": {
+      "FACTEUR_DEGATS_ARMURE": 20,
+      "LOCALISATION_TOUCHES": {
+        "tete": 7,
+        "epaules": 15,
+        "torse": 50,
+        "bras": 73,
+        "jambes": 89,
+        "pieds": 100
+      },
+      "JET_PORTEE_F_DIV": 20,
+      "DETECTION_DISTANCE_FACTEUR": 5,
+      "XP_DECOUVERTE_LIEU": 10,
+      "XP_NIVEAU_BASE": 50,
+      "XP_NIVEAU_INCREMENT": 100,
+      "TOWN_PROFIL_NIVEAU_MAX": 2,
+      "XP_COEFF": {
+        "V": 10
+      },
+      "XP_VOC_COEFF": 5,
+      "SUB_CAP_REDUCTION": {
+        "V": 1
+      },
+      "PRIX_DERIVE_BASE": 2,
+      "MULT_RARETE": {
+        "commun": 1,
+        "peu_commun": 10,
+        "rare": 30,
+        "tres_rare": 100,
+        "legendaire": 500,
+        "mythique": 1000,
+        "divin": 10000
+      },
+      "APPRO_DEBIT": {
+        "fer": 5,
+        "acier": 3,
+        "bronze": 5,
+        "mithril": 1,
+        "herbe": 0,
+        "seve": 0
+      },
+      "APPRO_DEBIT_DEFAUT": 5,
+      "CHA_MARCHAND": 50,
+      "CHA_MARCHAND_PAR_CATEGORIE": {
+        "bijouterie": 70
+      },
+      "PRIX_MAX_FACTEUR": 3,
+      "MARGE_TRANSFO": 5,
+      "RACHAT_FACTEUR": 0.6,
+      "DEPECAGE_TAGS": {
+        "_charnu_base": [
+          "viande",
+          "viande",
+          "os",
+          "sang",
+          "graisse",
+          "tendons",
+          "boyaux",
+          "foie",
+          "crane"
+        ],
+        "animal": [
+          "cuir_brut",
+          "crocs",
+          "poils",
+          "tendons",
+          "boyaux",
+          "foie",
+          "crane"
+        ],
+        "monstre": [
+          "cuir_brut",
+          "crocs",
+          "foie",
+          "crane"
+        ],
+        "humanoide": [
+          "cuir_brut",
+          "foie",
+          "crane"
+        ],
+        "monture": [
+          "cuir_brut",
+          "crins",
+          "tendons",
+          "boyaux",
+          "foie",
+          "crane"
+        ],
+        "bete_de_somme": [
+          "cuir_brut",
+          "crins",
+          "tendons",
+          "boyaux",
+          "foie",
+          "crane"
+        ],
+        "draconique": [
+          "cuir_brut",
+          "crocs",
+          "griffes",
+          "tendons",
+          "coeur",
+          "boyaux",
+          "foie",
+          "crane"
+        ],
+        "reptile": [
+          "cuir_brut",
+          "crocs"
+        ],
+        "demon": [
+          "cuir_brut",
+          "crocs",
+          "griffes",
+          "coeur",
+          "item:Sang_demon_seche",
+          "foie",
+          "crane"
+        ],
+        "infernal": [
+          "griffes",
+          "coeur"
+        ],
+        "celeste": [
+          "griffes",
+          "coeur"
+        ],
+        "ange": [
+          "plumes",
+          "coeur",
+          "tendons",
+          "foie",
+          "crane"
+        ],
+        "vol": [
+          "plumes",
+          "griffes"
+        ],
+        "venin": [
+          "crocs"
+        ],
+        "foret": [
+          "poils",
+          "tendons"
+        ],
+        "froid": [
+          "poils",
+          "tendons"
+        ],
+        "geant": [
+          "tendons",
+          "boyaux",
+          "foie",
+          "crane"
+        ],
+        "grande_taille": [
+          "boyaux",
+          "tendons",
+          "crane"
+        ],
+        "boss": [
+          "coeur",
+          "yeux",
+          "crane"
+        ],
+        "legendaire": [
+          "coeur",
+          "foie",
+          "yeux"
+        ],
+        "magique": [
+          "yeux"
+        ],
+        "petrification": [
+          "yeux"
+        ],
+        "undead": [
+          "os",
+          "os",
+          "crane"
+        ],
+        "non_mort": [
+          "os",
+          "os",
+          "crane"
+        ]
+      },
+      "DEPECAGE_POIDS_REF": 5,
+      "ATELIER_TRANSFO_PROBA": 0.1,
+      "STOCK_CIBLE_DEFAUT": 25,
+      "PRIX_AMPLITUDE_STOCK": 0.3,
+      "VENTE_PNJ_PROBA": 0.1,
+      "VENTE_PNJ_FRACTION": 0.5,
+      "CRIT_REUSSITE_MAX": 5,
+      "CRIT_ECHEC_MIN": 96,
+      "CRIT_CHANCE_DIVISEUR": 10,
+      "COMBAT_SLOTS_MAX": 15,
+      "COMBAT_ANIMATIONS_DEFAUT": {
+        "cac": "",
+        "jet": "",
+        "tir": "",
+        "monstre": "",
+        "sort": "",
+        "competence": "",
+        "consommable": "",
+        "soin": "",
+        "buff": "",
+        "debuff": "",
+        "miss": "",
+        "fumble": "",
+        "dissipation": ""
+      },
+      "RELATION_INITIALE": 50,
+      "RELATION_SEUIL_COEFF": 2,
+      "MARCHANDAGE_BLOCAGE_SECONDES": 3600,
+      "MARCHANDAGE_COMPAGNON_AFFINITE_MIN": 50,
+      "RELATION_FIDELITE_TRANSACTIONS": 10,
+      "RELATION_FIDELITE_SEUIL": 55,
+      "PNJ_REPUTATION_SEUIL": 56,
+      "QUETE_BOARD_TAILLE": 6,
+      "QUETE_QTE_MIN": 2,
+      "QUETE_QTE_MAX": 8,
+      "QUETE_XP_FACTEUR": 1.5,
+      "QUETE_CUIVRE_PAR_XP": 3,
+      "QUETE_COLLECT_POIDS_MAX": 100,
+      "QUETE_BOARD_DUREE_SECONDES": 3600,
+      "QUETE_BOARD_DUREE_JITTER": 0.5,
+      "QUETE_TRANSPORT_PROBA": 0.3,
+      "QUETE_TRANSPORT_DUREE_SECONDES": 3600,
+      "QUETE_TRANSPORT_POIDS_MAX": 100,
+      "QUETE_TRANSPORT_NB_MAX": 10,
+      "QUETE_TRANSPORT_XP": 10,
+      "QUETE_TRANSPORT_RELATION_DELTA": 1,
+      "QUETE_REUSSITE_RELATION_DELTA": 1,
+      "QUETE_TRANSPORT_RELATION_MIN": 50,
+      "QUETE_TRANSPORT_STOCK_PROBA": 0.5,
+      "QUETE_CHASSE_XP_FACTEUR": 3,
+      "QUETE_CHASSE_PROBA_RANG": 0.5,
+      "RANG_GUILDE_MAX_DEFAUT": "D",
+      "FOCUS_EVENEMENT_MULT": 3,
+      "FOCUS_CIBLE_MULT": 3,
+      "SORT_COUT_COEFF": 2,
+      "SORT_VOCATIONS_DEPART": [
+        "elementaliste",
+        "mage",
+        "illusionniste",
+        "lettre",
+        "druide",
+        "chaman",
+        "pretre",
+        "necromancien",
+        "demoniste"
+      ],
+      "MAGIE_POLYVALENTE_VOCATIONS": [
+        "lettre"
+      ],
+      "MAGIE_ECOLE_COUT_COEFF": 2,
+      "COMPETENCE_COUT_COEFF": 2,
+      "RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE": {
+        "capitale": {
+          "nb": 6,
+          "niveau_max": 3
+        },
+        "ville": {
+          "nb": 4,
+          "niveau_max": 2
+        },
+        "defaut": {
+          "nb": 2,
+          "niveau_max": 1
+        }
+      },
+      "RECRUTEMENT_GROUPE_TAILLE_MAX": 2,
+      "RECRUTEMENT_BOARD_DUREE_SECONDES": 7200,
+      "RECRUTEMENT_BOARD_DUREE_JITTER": 0.5,
+      "RECRUTEMENT_PART_BUTIN_MIN": 10,
+      "RECRUTEMENT_PART_BUTIN_MAX": 30,
+      "RECRUTEMENT_NIVEAU_POINTS_PAR_NIVEAU": 6,
+      "RECRUTEMENT_CARTE_REQUISE": true,
+      "RECRUTEMENT_CAUTION_CUIVRE": 0,
+      "AFFINITE_INITIALE": 50,
+      "AFFINITE_DELTA_QUETE": 2,
+      "AFFINITE_DELTA_VICTOIRE": 1,
+      "AFFINITE_DELTA_KO": -5,
+      "AFFINITE_DELTA_CONGEDIE": -1,
+      "AFFINITE_DELTA_CONGEDIE_EN_QUETE": -3,
+      "AFFINITE_DELTA_CONGEDIE_PERMANENT": -15,
+      "AFFINITE_SEUIL_DEPART": 30,
+      "AFFINITE_SEUIL_REMISE": 60,
+      "AFFINITE_SEUIL_ENGAGEMENT": 90,
+      "AFFINITE_REDUC_PART": 10,
+      "MONTURE_GROUPE_MAX": 2,
+      "MONTURE_CHARGE_MULT_DEFAUT": 1.2,
+      "MONTURE_PRIX_DEFAUT": 2000,
+      "MONTURE_MORT_DEFINITIVE": true,
+      "ESCORTE_MORT_DEFINITIVE": true,
+      "ESCORTE_PROGENITURE_PROBA": 0.05,
+      "ESCORTE_PROGENITURE_RELATION_MIN": 60,
+      "ESCORTE_GUILDE_PROBA": 0.25,
+      "ESCORTE_PROGENITURE_XP": 25,
+      "AUBERGE_NUIT_COUT_CUIVRE": 50,
+      "AUBERGE_NUIT_PASSES_ATELIER": 2,
+      "AUBERGE_MESSAGE_DUREE_SECONDES": 86400,
+      "AUBERGE_TABLE_MESSAGES_MAX": 10,
+      "AUBERGE_TABLES_MAX": 8,
+      "AUBERGE_ANNONCE_LONGUEUR_MAX": 800,
+      "ACCES_GARDIEN_ACTIF": true,
+      "BOIS_A_COUPER": [
+        "branche",
+        "petit_rondin",
+        "rondin",
+        "gros_rondin",
+        "tronc",
+        "arbre"
+      ],
+      "OUTIL_COUPE_BOIS_TAG": "outil_coupe_bois",
+      "COUPE_MAX_PIECES": 40,
+      "CARCASSE_TRANCHANT_TAG": "tranchant",
+      "CARCASSE_DECOUPE_POIDS_MIN": 100.0
+    }
+  }
+]

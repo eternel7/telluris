@@ -17,6 +17,7 @@ from utils import quetes
 from utils import focalisation
 from utils import recrutement
 from utils import escorte
+from utils import indicateurs
 from utils.marche import debit_character
 from utils import marche
 from models import character_stats
@@ -68,6 +69,10 @@ def _fiche_payload(character: dict) -> dict:
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		# État de la focalisation pour resynchroniser les boutons 🎯 côté client.
 		"focalisation": focalisation.payload_client(character, get_doc),
+		# Marques « ? » des lieux : accepter/rendre/abandonner une quête les fait bouger.
+		# Gratuit (0 lecture, cf. utils/indicateurs) — donc republié sans arbitrage,
+		# contrairement à `relations_lieux` (Conventions §10).
+		"lieux_marques": indicateurs.marques_lieux(character),
 	}
 
 

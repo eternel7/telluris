@@ -9,6 +9,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
 
 from db.config import get_doc, save_doc, find_docs
+from models import character_stats
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, sync_equipment_bonus,
@@ -31,6 +32,7 @@ from utils import donjon
 from utils import recrutement
 from utils import montures
 from utils import escorte
+from utils import indicateurs
 from utils.combat import (
 	instantiate_monsters, build_monster_snapshot, create_combat_doc,
 	resolve_first_turns, finalize_combat,
@@ -241,7 +243,35 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			flags["acces_libere"] = libere
 			flags["acces_menace"] = not libere
 			placeholders["portail"] = lieu_label(lieu_garde)
-	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders)
+	# Les quêtes MENÉES À BIEN, pour la condition `quete_reussie` : elle vise une quête
+	# nommée, donc n'importe quel PNJ peut réagir à ce qu'un autre a fait accomplir. Aucune
+	# lecture DB — `quetes_terminees` vit sur le doc personnage, déjà chargé.
+	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders,
+								 quetes.quetes_reussies(character))
+
+
+def marque_pnj(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
+			   entree: dict | None = None) -> str | None:
+	"""Marque « ! » / « ? » du bouton 🗣 : la plus forte marque des choix VISIBLES du nœud
+	par lequel ce PNJ ouvrirait maintenant (`noeud_depart_effectif`, donc `noeud_attente`
+	tant qu'un `delai_min` court → aucun badge).
+
+	⚠️ RIGOUREUSEMENT LECTURE SEULE. Le GET dialogue, lui, applique les effets du nœud de
+	départ (`_appliquer_effets_noeud(..., armer=False)`) ; ce chemin-ci ne doit ni armer un
+	`delai_min`, ni verser une récompense `relation` — sinon le simple affichage de `/play`
+	consommerait la récompense UNIQUE d'un nœud que le joueur n'a jamais vu.
+
+	⚠️ Helper de ROUTER partagé avec `main.py`, en tension assumée avec la convention §2
+	(« un helper partagé vit dans `utils/` ») : `_contexte` fait ~190 lignes et dépend de
+	`get_doc`/`find_docs` + transport/escorte/chasse/donjon/acces — le déplacer serait un
+	refactor sans rapport. Précédent dans le même fichier : `main.py` importe déjà
+	`_actor_character_id` de `routers.combat`."""
+	if not character_stats.INDICATEURS_ACTIFS or not pnj_doc:
+		return None
+	contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+	depart = pnj.noeud_depart_effectif(
+		pnj_doc, pnj.delai_restant(character, pnj_doc.get("_id"), quetes.now_epoch()))
+	return pnj.marque_noeud(pnj_doc, depart, contexte)
 
 
 def _lien_vers(current_user: dict, lieu_courant: str, destination: str) -> str | None:
@@ -489,6 +519,10 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)])
 	reponse["pnj"] = pnj.pnj_payload(entree, pnj_doc)
 	reponse["noeud"] = pnj.noeud_client(pnj_doc, depart, contexte,
 										pnj.soin_effectif(pnj_doc, contexte))
+	# Badge du bouton 🗣 : recalculé sur le contexte SERVI (une course échue vient peut-être
+	# de faire tomber une offre). Marque de lieux gratuite (0 lecture), cf. utils/indicateurs.
+	reponse["pnj_marque"] = pnj.marque_noeud(pnj_doc, depart, contexte)
+	reponse["lieux_marques"] = indicateurs.marques_lieux(character)
 	return reponse
 
 
@@ -641,6 +675,15 @@ async def pnj_dialogue_choix(
 		reponse["noeud"] = None
 	else:
 		reponse["noeud"] = pnj.noeud_client(pnj_doc, suivant, contexte, soin)
+	# Badge du 🗣 et marques de lieux, sur le contexte DÉJÀ reconstruit par les branches de
+	# service ci-dessus : aucune lecture supplémentaire. Indispensable — accepter une course
+	# doit faire DISPARAÎTRE le « ! » quand le joueur ferme le panneau, sinon le badge paraît
+	# cassé ; et la porte du destinataire doit prendre son « ? » dans le même geste.
+	if character_stats.INDICATEURS_ACTIFS:
+		depart = pnj.noeud_depart_effectif(
+			pnj_doc, pnj.delai_restant(character, pnj_doc.get("_id"), quetes.now_epoch()))
+		reponse["pnj_marque"] = pnj.marque_noeud(pnj_doc, depart, contexte)
+	reponse["lieux_marques"] = indicateurs.marques_lieux(character)
 	return reponse
 
 
@@ -976,12 +1019,15 @@ def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
 	pool_especes = donjon.especes_de_salle(donjon_doc, lieu_garde["_id"], get_doc)
 	if not pool_especes:
 		return None
-	# ⚠️ Le plafond de grade de la salle vaut pour TOUTE la salle, pas seulement pour l'élite :
-	# sans lui, les monstres d'accompagnement seraient tirés parmi tous les grades de la base
-	# (jusqu'au niveau 6) et pèseraient plus lourd que la cible mandatée elle-même.
-	profils = donjon._profils_sous_plafond(
+	# ⚠️ La fourchette de grade de la salle vaut pour TOUTE la salle, pas seulement pour
+	# l'élite : sans le PLAFOND, les monstres d'accompagnement seraient tirés parmi tous les
+	# grades de la base (jusqu'au niveau 6) et pèseraient plus lourd que la cible mandatée
+	# elle-même ; sans le PLANCHER, une salle de fin de donjon continuerait d'opposer des
+	# Novices autour d'une élite de niveau 5.
+	profils = donjon._profils_dans_fourchette(
 		find_docs({"type": "profil"}) or [],
 		donjon.niveau_max_de(donjon_doc, lieu_garde["_id"]),
+		donjon.niveau_min_de(donjon_doc, lieu_garde["_id"]),
 	)
 
 	compagnons = recrutement.groupe_effectif(character, get_doc)
@@ -1020,6 +1066,11 @@ def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
 		lieu_garde.get("image", ""), battle_map=lieu_garde,
 		compagnons=compagnons, montures=montures_groupe, proteges=proteges_groupe,
 	)
+	# ⚠️ Le seul endroit du jeu qui sache qu'on entre PAR UNE PORTE gardée. `finalize_combat`
+	# ne peut pas le déduire de `battle_map_id` : une salle de donjon reste tirable comme
+	# décor de combat ordinaire (`select_battle_map`), et une escarmouche en forêt tombée sur
+	# la même carte marquerait alors une victoire de donjon qui n'a pas eu lieu.
+	combat_doc["salle_gardee"] = lieu_garde["_id"]
 	if narration:
 		combat_doc["chasse_narration"] = narration
 	resolve_first_turns(combat_doc)

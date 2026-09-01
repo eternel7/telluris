@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "lieu:la_cathedrale_saint_etienne_d_auxerre",
+    "_rev": "1-920597bec5f0080941ad04b091c8dd06",
+    "type": "lieu",
+    "label": "La cathédrale Saint-Étienne d’Auxerre",
+    "image": "pnj_cathedrale_saint_etienne_auxerre_vide.jpg",
+    "categorie": "cathedral",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:dame_eleonore_de_rochefort",
+        "nom": "Dame Éléonore de Rochefort",
+        "portrait": "paladin_Dame_Eleonore_de_Rochefort_elfe_f.jpg",
+        "probabilite": 0.5,
+        "image": "pnj_paladin_Dame_Eleonore_de_Rochefort_elfe_f_cathedrale_saint_etienne_auxerre.jpg",
+        "description": "Une paladine en haubert clair, qui vérifie les sangles d'un bât."
+      },
+      {
+        "character": "pnj:frere_martin_de_clairvaux",
+        "nom": "Frère Martin de Clairvaux",
+        "probabilite": 0.5,
+        "image": "pnj_paladin_Frere_Martin_de_Clairvaux_hobbit_m_cathedrale_saint_etienne_auxerre.jpg",
+        "portrait": "paladin_Frere_Martin_de_Clairvaux_hobbit_m.jpg",
+        "description": "Un paladin hobbit qui inspecte le moyeu d'une roue de chariot."
+      }
+    ]
+  }
+]

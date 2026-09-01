@@ -165,18 +165,63 @@ def test_niveau_max_de_valeur_illisible_passe_a_la_source_suivante():
 	assert donjon.niveau_max_de(d, "lieu:a") == 3
 
 
-def test_profils_sous_plafond():
-	assert {p["_id"] for p in donjon._profils_sous_plafond(PROFILS, 2)} \
+def test_profils_dans_fourchette_plafond_seul():
+	assert {p["_id"] for p in donjon._profils_dans_fourchette(PROFILS, 2)} \
 		== {"profil:novice", "profil:combattant"}
 	# Sans plafond, tout passe.
-	assert len(donjon._profils_sous_plafond(PROFILS, None)) == len(PROFILS)
+	assert len(donjon._profils_dans_fourchette(PROFILS, None)) == len(PROFILS)
 
 
-def test_profils_sous_plafond_trop_bas_retombe_sur_le_plancher():
+def test_profils_dans_fourchette_plafond_trop_bas_retombe_sur_le_plancher():
 	# Mieux vaut un donjon trop facile qu'un donjon sans monstres : sans profil,
 	# instantiate_monsters retomberait sur le point médian de l'espèce, tous grades confondus.
-	assert [p["_id"] for p in donjon._profils_sous_plafond(PROFILS, 0)] == ["profil:novice"]
-	assert donjon._profils_sous_plafond([], 3) == []
+	assert [p["_id"] for p in donjon._profils_dans_fourchette(PROFILS, 0)] == ["profil:novice"]
+	assert donjon._profils_dans_fourchette([], 3) == []
+
+
+# ---------------------------------------------------------------------------
+# niveau_min — le symétrique du plafond (mais qui LUI CÈDE en cas de conflit)
+# ---------------------------------------------------------------------------
+
+def test_niveau_min_de_suit_la_meme_cascade_que_le_plafond():
+	d = {"niveau_min": 2, "battle_maps": [{"lieu": "lieu:a", "niveau_min": 4},
+										  {"lieu": "lieu:b"}]}
+	assert donjon.niveau_min_de(d, "lieu:a") == 4   # la salle prime
+	assert donjon.niveau_min_de(d, "lieu:b") == 2   # repli sur le donjon
+	assert donjon.niveau_min_de(d) == 2
+
+
+def test_niveau_min_absent_ne_change_RIEN():
+	"""Champ absent ⇒ comportement d'avant à la lettre — aucune migration."""
+	assert donjon.niveau_min_de(DONJON, "lieu:mine") is None
+	assert donjon.niveau_min_de({}, "lieu:mine") is None
+	assert donjon._profils_dans_fourchette(PROFILS, 2, None) \
+		== donjon._profils_dans_fourchette(PROFILS, 2)
+
+
+def test_niveau_min_de_valeur_illisible_passe_a_la_source_suivante():
+	# Même règle que le plafond : on ne devine pas une borne (cascade PARTAGÉE `_borne_de`).
+	d = {"niveau_min": 2, "battle_maps": [{"lieu": "lieu:a", "niveau_min": "beaucoup"}]}
+	assert donjon.niveau_min_de(d, "lieu:a") == 2
+
+
+def test_le_plancher_ecarte_les_bas_grades():
+	assert [p["_id"] for p in donjon._profils_dans_fourchette(PROFILS, None, 3)] \
+		== ["profil:seigneur", "profil:seigneur_mage"]
+	# Fourchette fermée des deux côtés.
+	assert [p["_id"] for p in donjon._profils_dans_fourchette(PROFILS, 2, 2)] \
+		== ["profil:combattant"]
+
+
+def test_un_plancher_qui_ne_laisse_rien_est_IGNORE_et_le_plafond_gagne():
+	"""⚠️ Le plancher CÈDE au plafond : un `niveau_min` posé par erreur au-dessus du
+	`niveau_max` ne doit pas vider la salle en silence — un donjon trop tendre est un défaut
+	visible, un donjon sans opposition est un blocage."""
+	assert [p["_id"] for p in donjon._profils_dans_fourchette(PROFILS, 2, 5)] \
+		== ["profil:novice", "profil:combattant"]
+	# Idem quand aucun profil n'atteint le plancher, même sans plafond.
+	assert len(donjon._profils_dans_fourchette(PROFILS, None, 99)) == len(PROFILS)
+	assert donjon._profils_dans_fourchette([], 3, 2) == []
 
 
 def test_tirer_cible_respecte_le_plafond_de_grade():

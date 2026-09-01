@@ -171,15 +171,24 @@ def _lieux_cites(pnj_doc: dict) -> set:
 
 
 def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
-					  flags: dict | None = None, placeholders: dict | None = None) -> dict:
+					  flags: dict | None = None, placeholders: dict | None = None,
+					  quetes_reussies: set | None = None) -> dict:
 	"""Contexte d'évaluation des conditions : relations du personnage avec les lieux
 	cités par l'arbre/les services (`relation_value_fn(lieu_id) -> int`, injectée par le
 	router) + raison d'intro éventuelle. Ajoute aussi `prenom` pour les placeholders.
 
 	`flags` = booléens d'état supplémentaires que les conditions peuvent tester (ex.
 	`transport_offert`, `transport_a_livrer`) ; `placeholders` = valeurs à substituer dans
-	les textes (ex. `{destination}`, `{direction}`). Les deux sont fournis par le router,
-	qui seul connaît le lieu courant et l'état des quêtes."""
+	les textes (ex. `{destination}`, `{direction}`) ; `quetes_reussies` = les ids des quêtes
+	menées à bien, que teste la condition `quete_reussie`. Les trois sont fournis par le
+	router, qui seul connaît le lieu courant et l'état des quêtes.
+
+	⚠️ `quetes_reussies` est INJECTÉ, jamais calculé ici (le router appelle
+	`quetes.quetes_reussies`) : ce module n'importe que `random` et `models.character_stats`,
+	et y brancher `utils.quetes` tirerait bois/marche/recrutement/db dans un module minimal.
+	Même arbitrage que le commentaire d'import de `utils/acces.py`, et même seam que
+	`relation_value_fn`. ⚠️ Paramètre en DERNIER avec défaut : `contexte_dialogue` est appelé
+	positionnellement par les tests existants."""
 	relations = {}
 	for lid in _lieux_cites(pnj_doc):
 		try:
@@ -192,14 +201,51 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 		"prenom": (character or {}).get("prenom", ""),
 		"flags": dict(flags or {}),
 		"placeholders": dict(placeholders or {}),
+		"quetes_reussies": set(quetes_reussies or ()),
 	}
+
+
+# Clés de `condition` traitées comme des FORMES STRUCTURÉES ; tout le reste est un flag
+# booléen du contexte. ⚠️ `utils/lint_dialogues.CONDITIONS_STRUCTUREES` doit rester le miroir
+# exact de cet ensemble (épinglé par un test) : une clé structurée absente de la liste du
+# linter serait signalée comme flag inconnu, et l'inverse ferait passer une faute en silence.
+CONDITIONS_STRUCTUREES = frozenset({"relation_min", "intro_raison", "quete_reussie"})
+
+
+def _quete_reussie_ok(filtre, contexte: dict) -> bool:
+	"""Condition `quete_reussie` = `{"id": "quete:xxx", "attendu": true|false}`.
+
+	Elle teste une quête NOMMÉE, et c'est ce qui la distingue des flags `escorte_accomplie` /
+	`transport_accompli` : ceux-là sont dérivés de l'offre portée par le PNJ à qui l'on parle,
+	donc toujours faux chez un tiers. Ici n'importe quel PNJ peut réagir à n'importe quelle
+	quête — c'est ce qui permet à deux paladins de ne parler d'une rescapée qu'une fois qu'un
+	autre PNJ l'a fait ramener.
+
+	`attendu` absent ⇒ True (« il faut qu'elle soit réussie »). La forme `attendu: false` est
+	le seul moyen d'exprimer une NÉGATION dans une condition de dialogue — `condition_ok` n'en
+	a pas pour les formes structurées, et le couple de flags complémentaires
+	(`acces_libere`/`acces_menace`) ne peut pas porter d'id.
+
+	⚠️ FAIL-CLOSED : un filtre mal formé (pas un dict, `id` absent ou non textuel) masque le
+	choix au lieu de l'afficher. Même arbitrage que pour un flag inconnu, et pour la même
+	raison : le garde-fou contre le contenu muet est le LINTER, pas une permissivité du
+	moteur — un choix qui s'affiche à tort révélerait l'intrigue, un choix masqué se voit."""
+	if not isinstance(filtre, dict):
+		return False
+	quete_id = filtre.get("id")
+	if not quete_id or not isinstance(quete_id, str):
+		return False
+	attendu = filtre.get("attendu", True)
+	reussie = quete_id in (contexte.get("quetes_reussies") or set())
+	return reussie is bool(attendu)
 
 
 def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	"""Évalue une condition de choix. Sans condition → True. `relation_min` = OU logique
-	sur les lieux (une relation ≥ seuil suffit) ; `intro_raison` = égalité stricte ; toute
-	autre clé est traitée comme un **flag booléen** du contexte (ex. `transport_offert`) —
-	un flag absent vaut False, ce qui masque le choix."""
+	sur les lieux (une relation ≥ seuil suffit) ; `intro_raison` = égalité stricte ;
+	`quete_reussie` = état d'une quête NOMMÉE ; toute autre clé est traitée comme un **flag
+	booléen** du contexte (ex. `transport_offert`) — un flag absent vaut False, ce qui masque
+	le choix."""
 	if not condition:
 		return True
 	rel_min = condition.get("relation_min")
@@ -211,9 +257,12 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	if "intro_raison" in condition:
 		if contexte.get("intro_raison") != condition["intro_raison"]:
 			return False
+	if "quete_reussie" in condition and not _quete_reussie_ok(
+			condition["quete_reussie"], contexte):
+		return False
 	flags = contexte.get("flags") or {}
 	for cle, attendu in condition.items():
-		if cle in ("relation_min", "intro_raison"):
+		if cle in CONDITIONS_STRUCTUREES:
 			continue
 		if bool(flags.get(cle)) is not bool(attendu):
 			return False
@@ -221,13 +270,130 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Marques « ! » / « ? » d'un choix et d'un nœud
+# ---------------------------------------------------------------------------
+# Convention MMO : « ! » = une offre neuve t'attend ici, « ? » = une quête en cours attend
+# une remise ou une rencontre. La marque d'un choix est DÉRIVÉE de sa condition, jamais
+# authorée : un choix n'est affiché que si `condition_ok` passe, donc si sa condition cite
+# `transport_offert`, c'est que le flag est vrai. Aucune donnée à éditer, aucune migration,
+# et la marque ne peut pas mentir.
+
+MARQUE_OFFRE = "!"
+MARQUE_RAPPORT = "?"
+
+# ⚠️ Sous-ensembles STRICTS de `lint_dialogues.FLAGS_CONNUS` (épinglé par un test) : un flag
+# mal orthographié ici vaudrait False en silence et la marque ne s'afficherait jamais.
+FLAGS_OFFRE = frozenset({
+	"transport_offert", "escorte_offerte", "rang_offert",
+	"commission_offerte", "acces_ouvrable",
+})
+FLAGS_RAPPORT = frozenset({
+	"transport_a_livrer", "transport_a_rapporter",
+	"rang_a_rapporter", "commission_a_rapporter", "acces_accompli",
+})
+
+
+def marque_de_condition(condition: dict | None) -> str | None:
+	"""La marque d'un choix, dérivée de sa CONDITION. None quand rien n'attend le joueur.
+
+	⚠️ `{"transport_offert": false}` est un VERROU, pas une offre : `condition_ok` compare
+	`bool(flags.get(cle)) is not bool(attendu)`, donc une condition peut exiger l'ABSENCE du
+	flag. Toute entrée dont `attendu` est faux est ignorée — sinon le nœud « rien à te
+	proposer aujourd'hui » porterait un « ! ».
+
+	⚠️ `relation_min` / `intro_raison` ne sont pas des flags : ils sortent d'eux-mêmes du
+	test `cle in FLAGS_*`, mais leur `attendu` est un dict (donc truthy) — c'est bien
+	l'appartenance aux deux frozensets qui décide, pas la véracité.
+
+	`!` prime sur `?` : un choix qui offre ET attend un rapport annonce l'offre."""
+	if not condition:
+		return None
+	rapport = False
+	for cle, attendu in condition.items():
+		if not attendu:
+			continue
+		if cle in FLAGS_OFFRE:
+			return MARQUE_OFFRE
+		if cle in FLAGS_RAPPORT:
+			rapport = True
+	return MARQUE_RAPPORT if rapport else None
+
+
+def _choix_visibles(pnj_doc: dict, noeud_id: str, contexte: dict) -> list:
+	"""Choix BRUTS (docs de donnée, pas la vue client) de ce nœud dont la condition passe.
+
+	⚠️ Filtre UNIQUE, consommé par `noeud_client` ET `marque_noeud` : deux boucles de
+	filtrage divergeraient un jour, et le badge cesserait de correspondre au contenu du
+	panneau."""
+	noeud = (((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {}).get(noeud_id)
+	if not noeud:
+		return []
+	return [
+		choix for choix in (noeud.get("choix") or [])
+		if choix.get("id") and condition_ok(choix.get("condition"), contexte)
+	]
+
+
+def marque_noeud(pnj_doc: dict, noeud_id: str, contexte: dict) -> str | None:
+	"""La plus forte marque des choix VISIBLES de ce nœud — donc la marque du bouton 🗣 quand
+	on la calcule sur le nœud de départ effectif.
+
+	⚠️ Dérivée des CHOIX et non des flags bruts : `any(flags[f] for f in FLAGS_OFFRE)`
+	promettrait un « ! » à un PNJ qui n'a aucune branche pour l'exploiter. La promesse tenue
+	est « badge ! ⇒ en entrant, je trouve un choix ! ». Bénéfice gratuit : sous `delai_min`,
+	`noeud_depart_effectif` sert `noeud_attente`, dont les choix ne portent rien → aucun badge."""
+	marque = None
+	for choix in _choix_visibles(pnj_doc, noeud_id, contexte):
+		m = marque_de_condition(choix.get("condition"))
+		if m == MARQUE_OFFRE:
+			return MARQUE_OFFRE
+		if m == MARQUE_RAPPORT:
+			marque = MARQUE_RAPPORT
+	return marque
+
+
+# ---------------------------------------------------------------------------
 # Navigation de l'arbre
 # ---------------------------------------------------------------------------
+
+# Espace insécable des guillemets français, posée AU RENDU et jamais dans la donnée : les
+# docs `pnj:*` gardent des espaces ordinaires, lisibles et éditables à la main dans /admin.
+#
+# ⚠️ C'est le CARACTÈRE U+00A0, surtout pas l'entité `&nbsp;` : le texte du nœud est écrit
+# par le client en **`textContent`** (`renderPnjNoeud`, play_town_telluris.html) — une entité
+# HTML y serait affichée telle quelle, « &nbsp;Bonjour » en toutes lettres, sur les 1874
+# guillemets du contenu. Les libellés de choix, eux, partent en `innerHTML` : le caractère
+# est la seule forme qui rende correctement dans LES DEUX chemins.
+#
+# ⚠️ U+00A0 et non U+202F (l'espace fine que préconise l'Imprimerie nationale) : c'est
+# l'équivalent exact de `&nbsp;`, et sa couverture est totale dans les polices. Changer de
+# finesse ne demande que de toucher cette constante.
+ESPACE_INSECABLE = " "
+
+
+def _espaces_insecables(texte: str) -> str:
+	"""Colle les guillemets français à ce qu'ils encadrent : `« ` → `« `, ` »` → ` »`.
+
+	Empêche un guillemet de se retrouver seul en fin de ligne. ⚠️ IDEMPOTENT : après la
+	première passe il ne reste plus d'espace ordinaire adjacente, donc rejouer ne fait rien
+	— et un texte déjà saisi avec des insécables n'est pas touché. ⚠️ Appliqué APRÈS la
+	substitution des placeholders : une enseigne ou un nom de PNJ injecté qui porterait des
+	guillemets en bénéficie aussi (`« Impitoyable »`, les qualificatifs de chasse)."""
+	if not texte:
+		return texte
+	return (texte
+			.replace("« ", "«" + ESPACE_INSECABLE)
+			.replace(" »", ESPACE_INSECABLE + "»"))
+
 
 def _substituer(texte: str, contexte: dict, soin: dict | None) -> str:
 	"""Placeholders {prenom} / {cout} (coût effectif du soin, « gratuit » si offert), plus
 	toute clé de `contexte["placeholders"]` posée par le router (ex. {destination},
-	{direction}, {repere}, {delai}, {xp} pour les quêtes de transport)."""
+	{direction}, {repere}, {delai}, {xp} pour les quêtes de transport).
+
+	CHOKEPOINT de rendu du texte de dialogue : le texte du nœud ET chaque libellé de choix y
+	passent (`noeud_client`), et rien d'autre n'atteint le client. C'est donc ici, et nulle
+	part ailleurs, que se pose la typographie."""
 	if not texte:
 		return ""
 	texte = texte.replace("{prenom}", str(contexte.get("prenom", "")))
@@ -239,13 +405,14 @@ def _substituer(texte: str, contexte: dict, soin: dict | None) -> str:
 		texte = texte.replace("{cout}", cout)
 	for cle, valeur in (contexte.get("placeholders") or {}).items():
 		texte = texte.replace("{" + str(cle) + "}", str(valeur))
-	return texte
+	return _espaces_insecables(texte)
 
 
 def noeud_client(pnj_doc: dict, noeud_id: str, contexte: dict, soin: dict | None = None) -> dict | None:
 	"""Nœud prêt à afficher : texte (variante `texte_gratuit` si le soin est offert),
 	placeholders substitués, choix filtrés par condition (id + label + marqueur action
-	booléen — jamais l'arbre entier ni les conditions). None si le nœud n'existe pas."""
+	booléen + `marque` « ! »/« ? » dérivée de la condition — jamais l'arbre entier ni les
+	conditions elles-mêmes). None si le nœud n'existe pas."""
 	noeuds = (((pnj_doc or {}).get("dialogue") or {}).get("noeuds") or {})
 	noeud = noeuds.get(noeud_id)
 	if not noeud:
@@ -253,15 +420,18 @@ def noeud_client(pnj_doc: dict, noeud_id: str, contexte: dict, soin: dict | None
 	texte = noeud.get("texte", "")
 	if soin and soin.get("gratuit") and noeud.get("texte_gratuit"):
 		texte = noeud["texte_gratuit"]
-	choix_visibles = []
-	for choix in noeud.get("choix") or []:
-		if not choix.get("id") or not condition_ok(choix.get("condition"), contexte):
-			continue
-		choix_visibles.append({
+	# ⚠️ Filtre PARTAGÉ avec `marque_noeud` : le badge du bouton 🗣 doit correspondre, choix
+	# pour choix, à ce que le panneau affichera une fois ouvert.
+	choix_visibles = [
+		{
 			"id": choix["id"],
 			"label": _substituer(choix.get("label", ""), contexte, soin),
 			"action": bool(choix.get("action")),
-		})
+			# Verdict de la condition, jamais la condition elle-même (on n'expose pas l'arbre).
+			"marque": marque_de_condition(choix.get("condition")),
+		}
+		for choix in _choix_visibles(pnj_doc, noeud_id, contexte)
+	]
 	return {
 		"id": noeud_id,
 		"texte": _substituer(texte, contexte, soin),
