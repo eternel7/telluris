@@ -1033,7 +1033,15 @@ def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
 	compagnons = recrutement.groupe_effectif(character, get_doc)
 	montures_groupe = montures.montures_effectives(character, get_doc)
 	proteges_groupe = escorte.proteges_effectifs(character, get_doc)
-	nb_monstres = 3 + len(compagnons) // 2
+	# Effectif de la salle : celui que l'auteur impose, sinon la règle d'équilibrage du moteur
+	# (un monstre de plus par tranche de deux compagnons). ⚠️ Un effectif écrit est FIXE —
+	# c'est tout son intérêt : quand trois dialogues répètent « trois, toujours les trois
+	# mêmes », un quatrième loup surgi du calcul dément le texte sous les yeux du joueur.
+	# ⚠️ Ni les montures ni les personnes escortées n'ont jamais compté dans le calcul par
+	# défaut, et c'est voulu : elles ne combattent pas.
+	nb_monstres = donjon.nb_monstres_de(donjon_doc, lieu_garde["_id"])
+	if nb_monstres is None:
+		nb_monstres = 3 + len(compagnons) // 2
 	# zone_tags vide : les espèces sont déjà choisies à la main, pas à filtrer par terrain.
 	monstres = instantiate_monsters(pool_especes, profils, nb_monstres, [])
 	if not monstres:

@@ -3833,6 +3833,7 @@
           "espece:loup_geant"
         ],
         "niveau_max": 3,
+        "nb_monstres": 3,
         "niveau_min": 2
       }
     ],

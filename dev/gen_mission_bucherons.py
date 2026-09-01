@@ -1214,25 +1214,33 @@ def connexions(base):
 # réimposée à la régénération : c'est le bouton d'équilibrage, il se règle en base ou dans
 # `/admin`, et un générateur qui le réécrirait annulerait le réglage EN SILENCE — exactement
 # ce que la relecture du dump évite pour tous les autres docs de ce fichier.
-BORNES_DEFAUT = {"niveau_max": 2}
+# ⚠️ `nb_monstres: 3` n'est PAS un réglage d'équilibrage, c'est une contrainte de RÉCIT :
+# Armand dit « Trois. Toujours les trois mêmes », Aélis en a compté trois, Matthieu parle de
+# trois bêtes. Sans ce champ le moteur applique `3 + compagnons // 2` et un quatrième loup
+# dément les trois dialogues sous les yeux du joueur. Le baisser ou le monter, c'est réécrire
+# ces répliques.
+BORNES_DEFAUT = {"niveau_max": 2, "nb_monstres": 3}
+
+# Ce que l'on considère comme du RÉGLAGE : posé une fois, puis réglé à la main en base ou
+# dans /admin. Le générateur ne le réimpose jamais — il réécrit le CONTENU (nom, description,
+# portail, pool d'espèces) et laisse la barre à l'auteur.
+REGLAGES_DONJON = ("niveau_max", "niveau_min", "nb_monstres")
 
 
 def donjon(base):
-	"""Le donjon d'une seule salle. Repris du dump s'il y est déjà (la fourchette de grade
-	réglée à la main survit) ; sinon créé avec `BORNES_DEFAUT`."""
+	"""Le donjon d'une seule salle. Les défauts d'auteur sont posés d'abord, puis ce qui est
+	déjà en base les écrase : un réglage retouché à la main survit à la régénération, et un
+	champ neuf (comme `nb_monstres`) arrive quand même sur un doc déjà importé."""
 	doc = _neuf_donjon()
+	doc["battle_maps"][0].update(BORNES_DEFAUT)
 	ancien = base.get(DONJON)
 	if ancien:
-		# On conserve ce qui est du RÉGLAGE (les bornes de grade, salle et donjon) et on
-		# réécrit ce qui est du CONTENU (nom, description, portail, pool d'espèces).
-		for cle in ("niveau_max", "niveau_min"):
+		bornes_salle = (nu(ancien).get("battle_maps") or [{}])[0]
+		for cle in REGLAGES_DONJON:
 			if cle in ancien:
 				doc[cle] = ancien[cle]
-			bornes_salle = (nu(ancien).get("battle_maps") or [{}])[0]
 			if cle in bornes_salle:
 				doc["battle_maps"][0][cle] = bornes_salle[cle]
-		return doc
-	doc["battle_maps"][0].update(BORNES_DEFAUT)
 	return doc
 
 

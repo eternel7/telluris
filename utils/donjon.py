@@ -11,7 +11,7 @@
 #     "niveau_min": 2,                          # plancher de GRADE (optionnel, même cascade)
 #     "battle_maps": [                          # les salles, et QUI y vit
 #       {"lieu": "lieu:zzz", "especes": ["espece:a", "espece:b"],
-#        "niveau_max": 4, "niveau_min": 2}
+#        "niveau_max": 4, "niveau_min": 2, "nb_monstres": 3}
 #     ]
 #   }
 #
@@ -28,6 +28,12 @@
 # salle — l'ÉLITE mandatée comme son ESCORTE (`_profils_dans_fourchette`). Elles ne sont
 # toutefois pas symétriques en cas de conflit : le plancher CÈDE au plafond plutôt que de
 # vider la salle (cf. `_profils_dans_fourchette`).
+#
+# ⚠️ `nb_monstres` (même cascade encore) fixe l'EFFECTIF de la salle, là où le moteur calcule
+# sinon `3 + compagnons // 2`. C'est ce qui permet à une fiction de COMPTER ses ennemis : dès
+# qu'un dialogue dit « trois, toujours les trois mêmes », le bonus de compagnons dément le
+# texte sous les yeux du joueur. L'effectif écrit est donc FIXE — la fiction l'emporte sur
+# l'équilibrage automatique, salle par salle, et seulement là où l'auteur le demande.
 #
 # ⚠️ POURQUOI un doc à part, et pas des `rencontres`/`zone_influences` sur le lieu : une
 # salle de donjon est un lieu `categorie:"battle_map"` — il n'a ni `connection`, ni
@@ -138,6 +144,33 @@ def niveau_min_de(donjon_doc: dict, lieu_id: str = None) -> int | None:
 	encore des Novices. Champ absent ⇒ aucun plancher, donc le comportement d'avant à la
 	lettre (aucune migration)."""
 	return _borne_de(donjon_doc, lieu_id, "niveau_min")
+
+
+# Garde-fou de l'effectif d'une salle. Ce n'est pas une devinette (le projet n'en fait pas
+# sur une donnée illisible) mais une borne : un `nb_monstres: 30` tapé pour `3` produirait un
+# combat injouable et un placement interminable, sans que rien ne le signale.
+NB_MONSTRES_MAX = 12
+
+
+def nb_monstres_de(donjon_doc: dict, lieu_id: str = None) -> int | None:
+	"""Effectif EXACT de la salle, ou None si l'auteur n'en impose aucun — même cascade que
+	les bornes de grade (la salle prime, le donjon sert de défaut).
+
+	⚠️ C'est le seul moyen de tenir une fiction qui COMPTE ses ennemis. Le défaut du moteur
+	(`3 + compagnons // 2`) est une règle d'équilibrage : elle ajoute un monstre par tranche
+	de deux compagnons, ce qui est juste pour un donjon générique et faux dès qu'un dialogue
+	dit « trois, toujours les trois mêmes ». Champ absent ⇒ le défaut s'applique, donc
+    comportement d'avant à la lettre et AUCUNE migration.
+
+	⚠️ L'effectif fixé est FIXE : le bonus de compagnons ne s'y ajoute pas. C'est le prix
+	assumé — on choisit la fiction contre l'équilibrage automatique, salle par salle.
+	⚠️ Planché à 1 : une salle gardée sans opposition rendrait `instantiate_monsters` vide,
+	donc un 422 « Ce passage ne mène à aucun danger connu » — une porte morte au lieu d'un
+	combat. Plafonné à `NB_MONSTRES_MAX`."""
+	brut = _borne_de(donjon_doc, lieu_id, "nb_monstres")
+	if brut is None:
+		return None
+	return max(1, min(NB_MONSTRES_MAX, brut))
 
 
 def _profils_dans_fourchette(profils: list, niveau_max: int | None,

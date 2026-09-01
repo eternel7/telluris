@@ -180,6 +180,44 @@ def test_profils_dans_fourchette_plafond_trop_bas_retombe_sur_le_plancher():
 
 
 # ---------------------------------------------------------------------------
+# nb_monstres — l'effectif que la FICTION impose au moteur
+# ---------------------------------------------------------------------------
+
+def test_nb_monstres_absent_laisse_la_regle_du_moteur():
+	"""Champ absent ⇒ None, et l'appelant retombe sur `3 + compagnons // 2` — comportement
+	d'avant à la lettre, aucune migration."""
+	assert donjon.nb_monstres_de(DONJON, "lieu:mine") is None
+	assert donjon.nb_monstres_de({}, "lieu:mine") is None
+
+
+def test_nb_monstres_suit_la_meme_cascade_que_les_bornes_de_grade():
+	d = {"nb_monstres": 5, "battle_maps": [{"lieu": "lieu:a", "nb_monstres": 3},
+										   {"lieu": "lieu:b"}]}
+	assert donjon.nb_monstres_de(d, "lieu:a") == 3   # la salle prime
+	assert donjon.nb_monstres_de(d, "lieu:b") == 5   # repli sur le donjon
+	assert donjon.nb_monstres_de(d) == 5
+
+
+def test_nb_monstres_est_borne():
+	"""⚠️ Planché à 1 : une salle gardée sans opposition rendrait `instantiate_monsters` vide,
+	donc un 422 « Ce passage ne mène à aucun danger connu » — une porte morte au lieu d'un
+	combat. Plafonné pour qu'un `30` tapé à la place de `3` ne produise pas un combat
+	injouable."""
+	assert donjon.nb_monstres_de({"battle_maps": [{"lieu": "lieu:a", "nb_monstres": 0}]},
+								 "lieu:a") == 1
+	assert donjon.nb_monstres_de({"battle_maps": [{"lieu": "lieu:a", "nb_monstres": -4}]},
+								 "lieu:a") == 1
+	assert donjon.nb_monstres_de({"battle_maps": [{"lieu": "lieu:a", "nb_monstres": 300}]},
+								 "lieu:a") == donjon.NB_MONSTRES_MAX
+
+
+def test_nb_monstres_illisible_passe_a_la_source_suivante():
+	# Cascade PARTAGÉE `_borne_de` : on ne devine pas un effectif.
+	d = {"nb_monstres": 3, "battle_maps": [{"lieu": "lieu:a", "nb_monstres": "trois"}]}
+	assert donjon.nb_monstres_de(d, "lieu:a") == 3
+
+
+# ---------------------------------------------------------------------------
 # niveau_min — le symétrique du plafond (mais qui LUI CÈDE en cas de conflit)
 # ---------------------------------------------------------------------------
 
