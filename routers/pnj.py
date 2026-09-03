@@ -48,7 +48,13 @@ def _pnj_du_lieu(character: dict) -> tuple[dict, dict, dict]:
 	`entree_marchand` fournit le tenancier implicite des magasins (aucun doc `lieu:*`
 	marchand ne porte de champ `pnj`)."""
 	lieu_doc = get_doc(character.get("lieu", ""))
-	entree = pnj.entree_pnj_active(character, lieu_doc or {}, transport.entree_marchand)
+	# ⚠️ Le filtre `conditions` de l'entrée est repassé ICI aussi : `pnj_present` est un champ
+	# transitoire PERSISTÉ, et sans lui le PNJ tiré quand sa condition tenait resterait
+	# joignable par l'endpoint après qu'elle a cessé de tenir — le bouton disparaît du /play
+	# mais la requête, elle, passe encore.
+	entree = pnj.entree_pnj_active(
+		character, lieu_doc or {}, transport.entree_marchand,
+		lambda conds: acces.clauses_remplies(character, conds, get_doc))
 	pnj_doc = get_doc(entree["character"]) if entree else None
 	if not entree or not pnj_doc:
 		raise HTTPException(status_code=404, detail="Personne à qui parler ici.")
@@ -243,11 +249,13 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			flags["acces_libere"] = libere
 			flags["acces_menace"] = not libere
 			placeholders["portail"] = lieu_label(lieu_garde)
-	# Les quêtes MENÉES À BIEN, pour la condition `quete_reussie` : elle vise une quête
-	# nommée, donc n'importe quel PNJ peut réagir à ce qu'un autre a fait accomplir. Aucune
-	# lecture DB — `quetes_terminees` vit sur le doc personnage, déjà chargé.
+	# Les quêtes MENÉES À BIEN et celles EN COURS, pour les conditions `quete_reussie` et
+	# `quete_active` : elles visent une quête NOMMÉE, donc n'importe quel PNJ peut réagir à ce
+	# qu'un autre a confié ou fait accomplir. Aucune lecture DB — `quetes_terminees` et
+	# `quetes_actives` vivent sur le doc personnage, déjà chargé.
 	return pnj.contexte_dialogue(character, pnj_doc, _rel, flags, placeholders,
-								 quetes.quetes_reussies(character))
+								 quetes.quetes_reussies(character),
+								 quetes.quetes_actives_ids(character))
 
 
 def marque_pnj(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,

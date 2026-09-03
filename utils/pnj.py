@@ -54,21 +54,47 @@ from models import character_stats
 # Présence dans le lieu
 # ---------------------------------------------------------------------------
 
-def entrees_pnj(lieu_doc: dict, marchand_fn=None) -> list:
+def entrees_pnj(lieu_doc: dict, marchand_fn=None, condition_fn=None) -> list:
 	"""Entrées `pnj` effectives du lieu : le champ explicite s'il existe, sinon le tenancier
 	implicite fourni par `marchand_fn(lieu_doc)` (les magasins ne portent pas de champ `pnj`
-	— leur tenancier est dérivé de leur catégorie, cf. utils/transport.entree_marchand)."""
+	— leur tenancier est dérivé de leur catégorie, cf. utils/transport.entree_marchand).
+	
+	CHOKEPOINT de la présence : le filtre `conditions` est posé ICI et nulle part ailleurs,
+	si bien que le tirage, la relecture du tirage persisté et le nommage à distance en
+	héritent d'un coup. Une entrée peut porter **`conditions: [...]`** — le vocabulaire des
+	barrières de lieu (`utils/acces.py`), évalué par le `condition_fn` INJECTÉ : ce module
+	n'importe que `random` + `character_stats`, y brancher `utils.acces` y tirerait
+	characters + recrutement (même arbitrage que `quetes_reussies`, injecté lui aussi).
+	
+	⚠️ FAIL-CLOSED : une entrée conditionnée est écartée quand aucun `condition_fn` n'est
+	fourni. Un appelant qui l'oublierait montrerait sinon le PNJ dans TOUS les états du
+	monde, en silence — la faute exactement inverse de celle qu'on veut. Corollaire
+	assumé : `nom_pnj_du_lieu` (qui nomme le tenancier d'un lieu où l'on n'est pas, sans
+	personnage sous la main) ne nomme jamais un PNJ conditionné, et passe au suivant.
+	
+	⚠️ Champ absent ⇒ entrée toujours présente : aucune migration."""
 	explicites = (lieu_doc or {}).get("pnj") or []
 	if explicites:
-		return explicites
+		return [e for e in explicites if _entree_visible(e, condition_fn)]
 	implicite = marchand_fn(lieu_doc) if marchand_fn else None
 	return [implicite] if implicite else []
 
 
-def tirer_pnj_present(lieu_doc: dict, rand_fn=random.random, marchand_fn=None) -> str | None:
+def _entree_visible(entree, condition_fn) -> bool:
+	"""L'entrée est-elle offerte dans l'état du monde courant ? Sans `conditions`, toujours."""
+	if not isinstance(entree, dict):
+		return False
+	conditions = entree.get("conditions")
+	if not conditions:
+		return True
+	return bool(condition_fn and condition_fn(conditions))
+
+
+def tirer_pnj_present(lieu_doc: dict, rand_fn=random.random, marchand_fn=None,
+					 condition_fn=None) -> str | None:
 	"""Tire le PNJ présent parmi les entrées `pnj` du lieu : la première entrée dont
 	`rand_fn() < probabilite` gagne (ordre de la liste = priorité). None si aucun."""
-	for entree in entrees_pnj(lieu_doc, marchand_fn):
+	for entree in entrees_pnj(lieu_doc, marchand_fn, condition_fn):
 		pnj_id = entree.get("character")
 		if not pnj_id:
 			continue
@@ -82,7 +108,7 @@ def tirer_pnj_present(lieu_doc: dict, rand_fn=random.random, marchand_fn=None) -
 
 
 def poser_pnj_present(character: dict, lieu_doc: dict, rand_fn=random.random,
-					  marchand_fn=None) -> bool:
+					  marchand_fn=None, condition_fn=None) -> bool:
 	"""Pose le champ transitoire `pnj_present` si le personnage vient d'entrer dans ce
 	lieu (mute sans save). No-op si le tirage a déjà été fait pour ce lieu (refresh
 	stable). Renvoie True si le champ a changé (l'appelant décide de sauvegarder)."""
@@ -94,20 +120,26 @@ def poser_pnj_present(character: dict, lieu_doc: dict, rand_fn=random.random,
 		return False
 	character["pnj_present"] = {
 		"lieu": lieu_id,
-		"character": tirer_pnj_present(lieu_doc, rand_fn, marchand_fn),
+		"character": tirer_pnj_present(lieu_doc, rand_fn, marchand_fn, condition_fn),
 	}
 	return True
 
 
-def entree_pnj_active(character: dict, lieu_doc: dict, marchand_fn=None) -> dict | None:
+def entree_pnj_active(character: dict, lieu_doc: dict, marchand_fn=None,
+					  condition_fn=None) -> dict | None:
 	"""L'entrée `pnj` du lieu correspondant au tirage persisté, ou None (tirage périmé,
-	PNJ absent, lieu sans pnj, entrée retirée de la donnée depuis le tirage)."""
+	PNJ absent, lieu sans pnj, entrée retirée de la donnée depuis le tirage).
+	
+	⚠️ Le filtre `conditions` joue ICI AUSSI, et pas seulement au tirage : `pnj_present` est
+	un champ TRANSITOIRE persisté, et `poser_pnj_present` est un no-op tant qu'on reste dans
+	le lieu. Un PNJ tiré alors que sa condition tenait continuerait donc de parler après
+	qu'elle a cessé de tenir. La condition est autoritative à la LECTURE."""
 	present = (character or {}).get("pnj_present") or {}
 	lieu_id = (lieu_doc or {}).get("_id")
 	pnj_id = present.get("character")
 	if not lieu_id or present.get("lieu") != lieu_id or not pnj_id:
 		return None
-	for entree in entrees_pnj(lieu_doc, marchand_fn):
+	for entree in entrees_pnj(lieu_doc, marchand_fn, condition_fn):
 		if entree.get("character") == pnj_id:
 			return entree
 	return None
@@ -172,23 +204,25 @@ def _lieux_cites(pnj_doc: dict) -> set:
 
 def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 					  flags: dict | None = None, placeholders: dict | None = None,
-					  quetes_reussies: set | None = None) -> dict:
+					  quetes_reussies: set | None = None,
+					  quetes_actives: set | None = None) -> dict:
 	"""Contexte d'évaluation des conditions : relations du personnage avec les lieux
 	cités par l'arbre/les services (`relation_value_fn(lieu_id) -> int`, injectée par le
 	router) + raison d'intro éventuelle. Ajoute aussi `prenom` pour les placeholders.
 
 	`flags` = booléens d'état supplémentaires que les conditions peuvent tester (ex.
 	`transport_offert`, `transport_a_livrer`) ; `placeholders` = valeurs à substituer dans
-	les textes (ex. `{destination}`, `{direction}`) ; `quetes_reussies` = les ids des quêtes
-	menées à bien, que teste la condition `quete_reussie`. Les trois sont fournis par le
-	router, qui seul connaît le lieu courant et l'état des quêtes.
+	les textes (ex. `{destination}`, `{direction}`) ; `quetes_reussies` / `quetes_actives` =
+	les ids des quêtes menées à bien et de celles EN COURS, que testent les conditions
+	`quete_reussie` et `quete_active`. Tous sont fournis par le router, qui seul connaît le
+	lieu courant et l'état des quêtes.
 
-	⚠️ `quetes_reussies` est INJECTÉ, jamais calculé ici (le router appelle
-	`quetes.quetes_reussies`) : ce module n'importe que `random` et `models.character_stats`,
-	et y brancher `utils.quetes` tirerait bois/marche/recrutement/db dans un module minimal.
-	Même arbitrage que le commentaire d'import de `utils/acces.py`, et même seam que
-	`relation_value_fn`. ⚠️ Paramètre en DERNIER avec défaut : `contexte_dialogue` est appelé
-	positionnellement par les tests existants."""
+	⚠️ Les deux ensembles de quêtes sont INJECTÉS, jamais calculés ici (le router appelle
+	`quetes.quetes_reussies` / `quetes.quetes_actives_ids`) : ce module n'importe que `random`
+	et `models.character_stats`, et y brancher `utils.quetes` tirerait bois/marche/
+	recrutement/db dans un module minimal. Même arbitrage que le commentaire d'import de
+	`utils/acces.py`, et même seam que `relation_value_fn`. ⚠️ Paramètres en DERNIER avec
+	défaut : `contexte_dialogue` est appelé positionnellement par les tests existants."""
 	relations = {}
 	for lid in _lieux_cites(pnj_doc):
 		try:
@@ -202,6 +236,7 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 		"flags": dict(flags or {}),
 		"placeholders": dict(placeholders or {}),
 		"quetes_reussies": set(quetes_reussies or ()),
+		"quetes_actives": set(quetes_actives or ()),
 	}
 
 
@@ -209,22 +244,37 @@ def contexte_dialogue(character: dict, pnj_doc: dict, relation_value_fn,
 # booléen du contexte. ⚠️ `utils/lint_dialogues.CONDITIONS_STRUCTUREES` doit rester le miroir
 # exact de cet ensemble (épinglé par un test) : une clé structurée absente de la liste du
 # linter serait signalée comme flag inconnu, et l'inverse ferait passer une faute en silence.
-CONDITIONS_STRUCTUREES = frozenset({"relation_min", "intro_raison", "quete_reussie"})
+CONDITIONS_STRUCTUREES = frozenset({
+	"relation_min", "intro_raison", "quete_reussie", "quete_active"})
+
+# Les deux conditions qui nomment une QUÊTE : même forme `{id, attendu}`, même sémantique
+# fail-closed, seul l'ensemble consulté change — d'où UN prédicat partagé plutôt que deux
+# copies qui finiraient par diverger sur le traitement d'un filtre mal formé.
+# ⚠️ Elles sont COMPLÉMENTAIRES et non contraires : une quête jamais acceptée est absente des
+# DEUX. C'est leur CONJONCTION en `attendu: false` qui dit « tant qu'on ne m'a pas encore
+# confié ceci » — `quete_reussie` seul laisserait le choix visible pendant toute la mission,
+# `quete_active` seul le laisserait revenir une fois la mission rendue.
+CONDITIONS_QUETE = {
+	"quete_reussie": "quetes_reussies",
+	"quete_active": "quetes_actives",
+}
 
 
-def _quete_reussie_ok(filtre, contexte: dict) -> bool:
-	"""Condition `quete_reussie` = `{"id": "quete:xxx", "attendu": true|false}`.
+def _quete_nommee_ok(filtre, ids) -> bool:
+	"""Prédicat PARTAGÉ de `quete_reussie` et `quete_active`, toutes deux de la forme
+	`{"id": "quete:xxx", "attendu": true|false}`.
 
-	Elle teste une quête NOMMÉE, et c'est ce qui la distingue des flags `escorte_accomplie` /
-	`transport_accompli` : ceux-là sont dérivés de l'offre portée par le PNJ à qui l'on parle,
-	donc toujours faux chez un tiers. Ici n'importe quel PNJ peut réagir à n'importe quelle
-	quête — c'est ce qui permet à deux paladins de ne parler d'une rescapée qu'une fois qu'un
-	autre PNJ l'a fait ramener.
+	Elles testent une quête NOMMÉE, et c'est ce qui les distingue des flags
+	`escorte_accomplie` / `transport_accompli` / `escorte_en_cours` : ceux-là sont dérivés de
+	l'offre portée par le PNJ à qui l'on PARLE, donc toujours faux chez un tiers. Ici
+	n'importe quel PNJ peut réagir à n'importe quelle quête — c'est ce qui permet à deux
+	paladins de ne parler d'une rescapée qu'une fois qu'un autre PNJ l'a fait ramener, et à
+	un réceptionniste de cesser d'annoncer une mission que son maître a déjà confiée.
 
-	`attendu` absent ⇒ True (« il faut qu'elle soit réussie »). La forme `attendu: false` est
-	le seul moyen d'exprimer une NÉGATION dans une condition de dialogue — `condition_ok` n'en
-	a pas pour les formes structurées, et le couple de flags complémentaires
-	(`acces_libere`/`acces_menace`) ne peut pas porter d'id.
+	`attendu` absent ⇒ True. La forme `attendu: false` est le seul moyen d'exprimer une
+	NÉGATION dans une condition de dialogue — `condition_ok` n'en a pas pour les formes
+	structurées, et le couple de flags complémentaires (`acces_libere`/`acces_menace`) ne peut
+	pas porter d'id.
 
 	⚠️ FAIL-CLOSED : un filtre mal formé (pas un dict, `id` absent ou non textuel) masque le
 	choix au lieu de l'afficher. Même arbitrage que pour un flag inconnu, et pour la même
@@ -236,14 +286,13 @@ def _quete_reussie_ok(filtre, contexte: dict) -> bool:
 	if not quete_id or not isinstance(quete_id, str):
 		return False
 	attendu = filtre.get("attendu", True)
-	reussie = quete_id in (contexte.get("quetes_reussies") or set())
-	return reussie is bool(attendu)
+	return (quete_id in (ids or set())) is bool(attendu)
 
 
 def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	"""Évalue une condition de choix. Sans condition → True. `relation_min` = OU logique
 	sur les lieux (une relation ≥ seuil suffit) ; `intro_raison` = égalité stricte ;
-	`quete_reussie` = état d'une quête NOMMÉE ; toute autre clé est traitée comme un **flag
+	`quete_reussie` / `quete_active` = état d'une quête NOMMÉE ; toute autre clé est un **flag
 	booléen** du contexte (ex. `transport_offert`) — un flag absent vaut False, ce qui masque
 	le choix."""
 	if not condition:
@@ -257,9 +306,9 @@ def condition_ok(condition: dict | None, contexte: dict) -> bool:
 	if "intro_raison" in condition:
 		if contexte.get("intro_raison") != condition["intro_raison"]:
 			return False
-	if "quete_reussie" in condition and not _quete_reussie_ok(
-			condition["quete_reussie"], contexte):
-		return False
+	for cle, source in CONDITIONS_QUETE.items():
+		if cle in condition and not _quete_nommee_ok(condition[cle], contexte.get(source)):
+			return False
 	flags = contexte.get("flags") or {}
 	for cle, attendu in condition.items():
 		if cle in CONDITIONS_STRUCTUREES:

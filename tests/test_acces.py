@@ -347,3 +347,88 @@ def test_kill_switch_desactive_toutes_les_barrieres(monkeypatch):
 	lieu = _lieu_garde([{"quete_active": {}}])
 	ok, raison = acces.acces_autorise(_character(), lieu, get_doc)
 	assert ok and raison == ""
+
+
+# ---------------------------------------------------------------------------
+# `ou` — la SEULE clause composite
+# ---------------------------------------------------------------------------
+# Elle n'existe que pour une chose : rendre exprimable le COMPLÉMENT d'une conjonction.
+# Deux docs de lieu qui se relaient (la grotte HABITÉE tant que la meute tient le seuil, la
+# grotte VIDE le reste du temps) ne sont complémentaires qu'ainsi — la grotte habitée demande
+# « quête active ET combat pas gagné », sa négation est un OU que le ET de `conditions` ne
+# sait pas dire.
+
+def _grotte_habitee():
+	return _lieu_garde([{"quete_active": {"types": ["escorte"]}},
+						{"combat_gagne": {"lieu": "lieu:salle", "attendu": False}}])
+
+
+def _grotte_vide():
+	return _lieu_garde([{"ou": [{"quete_active": {"types": ["escorte"], "attendu": False}},
+								{"combat_gagne": {"lieu": "lieu:salle", "attendu": True}}]}])
+
+
+def _etat(quete, gagne):
+	return _character(quetes_actives=[_quete(type_="escorte")] if quete else [],
+					  battle_maps_gagnees=["lieu:salle"] if gagne else [])
+
+
+@pytest.mark.parametrize("quete,gagne", [(False, False), (True, False), (True, True), (False, True)])
+def test_ou_rend_les_deux_grottes_STRICTEMENT_complementaires(quete, gagne):
+	"""L'invariante qui compte : exactement UNE des deux portes est ouverte, dans les quatre
+	états du monde. Deux ouvertes = deux boutons « Penetrer dans la grotte » ; zéro ouverte =
+	une grotte sans intérieur."""
+	etat = _etat(quete, gagne)
+	habitee = acces.conditions_remplies(etat, _grotte_habitee(), get_doc)[0]
+	vide = acces.conditions_remplies(etat, _grotte_vide(), get_doc)[0]
+	assert habitee is not vide
+	# La grotte n'est habitée QUE pendant la quête, tant que la meute tient le seuil.
+	assert habitee is (quete and not gagne)
+
+
+def test_ou_vrai_des_qu_UNE_branche_l_est():
+	lieu = _lieu_garde([{"ou": [{"item": {"item": "item:cle"}},
+								{"combat_gagne": {"lieu": "lieu:salle"}}]}])
+	assert acces.conditions_remplies(_character(battle_maps_gagnees=["lieu:salle"]), lieu, get_doc)[0]
+	assert not acces.conditions_remplies(_character(), lieu, get_doc)[0]
+
+
+def test_ou_reste_UNE_clause_du_ET():
+	"""`conditions` ne devient pas une disjonction : la clause `ou` s'ajoute aux autres."""
+	lieu = _lieu_garde([{"ou": [{"combat_gagne": {"lieu": "lieu:salle"}}]},
+						{"item": {"item": "item:cle"}}])
+	perso = _character(battle_maps_gagnees=["lieu:salle"])
+	assert not acces.conditions_remplies(perso, lieu, get_doc)[0]
+	perso["inventaire"] = ["item:cle"]
+	assert acces.conditions_remplies(perso, lieu, get_doc)[0]
+
+
+@pytest.mark.parametrize("valeur", [[], {}, None, "combat_gagne", [{"combat_gagne": {}}, "x"]])
+def test_ou_mal_forme_REFUSE(valeur):
+	"""Fail-closed à chaque étage. Le cas qui coûterait le plus cher est la liste VIDE :
+	« aucune raison d'entrer » ne doit jamais se lire « entrez »."""
+	lieu = _lieu_garde([{"ou": valeur}])
+	assert not acces.conditions_remplies(_character(battle_maps_gagnees=["lieu:salle"]), lieu, get_doc)[0]
+
+
+def test_ou_imbrique():
+	lieu = _lieu_garde([{"ou": [{"ou": [{"combat_gagne": {"lieu": "lieu:salle"}}]}]}])
+	assert acces.conditions_remplies(_character(battle_maps_gagnees=["lieu:salle"]), lieu, get_doc)[0]
+	assert not acces.conditions_remplies(_character(), lieu, get_doc)[0]
+
+
+def test_linter_descend_DANS_le_ou():
+	"""Une clé fautive enfouie dans une disjonction est encore moins visible qu'ailleurs : la
+	clause reste vraie par son autre branche, donc la barrière ne bronche pas."""
+	lieu = _lieu_garde([{"ou": [{"combat_gagne": {"lieu": "lieu:salle", "atendu": True}},
+								{"relation_min": {"seuil": 50}}]}])
+	assert acces.conditions_invalides(lieu) == ["ou.combat_gagne.atendu", "ou.relation_min"]
+
+
+@pytest.mark.parametrize("valeur", [[], "x", {}])
+def test_linter_signale_un_ou_mal_forme(valeur):
+	assert acces.conditions_invalides(_lieu_garde([{"ou": valeur}])) == ["ou"]
+
+
+def test_linter_accepte_un_ou_correct():
+	assert acces.conditions_invalides(_grotte_vide()) == []

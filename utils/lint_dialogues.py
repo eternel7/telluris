@@ -47,9 +47,14 @@ PLACEHOLDERS_CONNUS = {
 # ⚠️ Miroir EXACT de `utils.pnj.CONDITIONS_STRUCTUREES` (épinglé par un test) : une clé
 # structurée oubliée ici serait signalée comme flag inconnu sur du contenu correct, et une
 # clé de trop laisserait passer une vraie faute.
-CONDITIONS_STRUCTUREES = {"relation_min", "intro_raison", "quete_reussie"}
+CONDITIONS_STRUCTUREES = {
+	"relation_min", "intro_raison", "quete_reussie", "quete_active"}
 
-# Sous-clés de `quete_reussie`. ⚠️ Les valider est le contrôle qui COMPTE, exactement comme
+# Les conditions qui NOMMENT une quête. ⚠️ Miroir de `utils.pnj.CONDITIONS_QUETE` : elles
+# partagent la forme `{id, attendu}` et le même prédicat côté moteur, donc le même contrôle.
+CONDITIONS_QUETE = {"quete_reussie", "quete_active"}
+
+# Sous-clés de ces conditions. ⚠️ Les valider est le contrôle qui COMPTE, exactement comme
 # pour `acces.SOUS_FILTRES_CONNUS` : une clé de premier niveau inconnue est refusée par le
 # moteur (donc visible en jeu), tandis qu'une SOUS-clé fautive est ignorée en silence — un
 # `attendus: false` mal orthographié rendrait la condition positive, et le choix qui devait
@@ -219,6 +224,13 @@ def analyser_doc(doc: dict) -> list:
 		erreur(f"acces.conditions : clé `{cle}` inconnue du vocabulaire — fail-closed, "
 			   f"ce lieu refusera TOUJOURS l'accès.")
 
+	# Présence conditionnée d'un PNJ (`pnj[].conditions`, même vocabulaire) : fail-closed
+	# veut dire ici que le PNJ ne se montre JAMAIS. Sur un GARDIEN, c'est un lieu devenu
+	# inatteignable, et rien ne le dit en jeu — le seuil paraît simplement désert.
+	for cle in acces.conditions_pnj_invalides(doc):
+		erreur(f"{cle} : clé inconnue du vocabulaire — fail-closed, ce PNJ ne se montrera "
+			   f"JAMAIS (et s'il garde un lieu, ce lieu devient inatteignable).")
+
 	dialogue = doc.get("dialogue") or {}
 	if not dialogue:
 		return trouvailles
@@ -363,28 +375,29 @@ def analyser_doc(doc: dict) -> list:
 					erreur(f"choix `{cid}` : condition `{cle}` inconnue du moteur. Un flag "
 						   f"absent vaut False → ce choix ne s'affichera JAMAIS.", nid)
 
-			# `quete_reussie` : la SEULE condition qui nomme une quête, donc la seule dont
-			# une faute de frappe passe inaperçue en jeu — le choix reste simplement caché
-			# pour toujours (ou s'affiche toujours, dans la forme `attendu: false`).
-			if "quete_reussie" in conditions:
-				filtre = (choix.get("condition") or {}).get("quete_reussie")
+			# `quete_reussie` / `quete_active` : les SEULES conditions qui nomment une
+			# quête, donc les seules dont une faute de frappe passe inaperçue en jeu — le
+			# choix reste simplement caché pour toujours (ou s'affiche toujours, dans la
+			# forme `attendu: false`). Même forme, même prédicat moteur, même contrôle.
+			for cq in sorted(conditions & CONDITIONS_QUETE):
+				filtre = (choix.get("condition") or {}).get(cq)
 				if not isinstance(filtre, dict):
-					erreur(f"choix `{cid}` : `quete_reussie` doit être un objet "
+					erreur(f"choix `{cid}` : `{cq}` doit être un objet "
 						   f"`{{\"id\": \"quete:...\", \"attendu\": true|false}}` — "
 						   f"fail-closed, le choix ne s'affichera JAMAIS.", nid)
-				else:
-					qid = filtre.get("id")
-					if not isinstance(qid, str) or not qid.startswith("quete:"):
-						erreur(f"choix `{cid}` : `quete_reussie.id` doit être un id de quête "
-							   f"(`quete:...`) — fail-closed, le choix ne s'affichera "
-							   f"JAMAIS.", nid)
-					for sous in set(filtre) - QUETE_REUSSIE_CLES:
-						erreur(f"choix `{cid}` : `quete_reussie.{sous}` inconnue. Une "
-							   f"sous-clé fautive est IGNORÉE en silence — la condition "
-							   f"redevient positive et le choix s'affiche à tort.", nid)
-					if "attendu" in filtre and not isinstance(filtre["attendu"], bool):
-						erreur(f"choix `{cid}` : `quete_reussie.attendu` doit être un "
-							   f"booléen (`true`/`false`).", nid)
+					continue
+				qid = filtre.get("id")
+				if not isinstance(qid, str) or not qid.startswith("quete:"):
+					erreur(f"choix `{cid}` : `{cq}.id` doit être un id de quête "
+						   f"(`quete:...`) — fail-closed, le choix ne s'affichera "
+						   f"JAMAIS.", nid)
+				for sous in set(filtre) - QUETE_REUSSIE_CLES:
+					erreur(f"choix `{cid}` : `{cq}.{sous}` inconnue. Une "
+						   f"sous-clé fautive est IGNORÉE en silence — la condition "
+						   f"redevient positive et le choix s'affiche à tort.", nid)
+				if "attendu" in filtre and not isinstance(filtre["attendu"], bool):
+					erreur(f"choix `{cid}` : `{cq}.attendu` doit être un "
+						   f"booléen (`true`/`false`).", nid)
 
 			# Hook de déplacement automatique : `"deplacer": "lieu:xxx"`. On ne peut pas
 			# vérifier que le lieu EXISTE (pas de DB ici), mais un `true`/`"bureau"`/id sans
@@ -468,7 +481,13 @@ def analyser(payload) -> dict:
 		if not isinstance(doc, dict):
 			ignores += 1
 			continue
-		if not (doc.get("dialogue") or {}) and not (doc.get("acces") or {}):
+		# ⚠️ Un lieu peut n'avoir NI dialogue NI barrière et porter quand même une entrée `pnj`
+		# conditionnée — le seuil de la grotte est exactement ce cas. L'omettre reviendrait à
+		# ne jamais contrôler la donnée qui peut faire disparaître un gardien.
+		if (not (doc.get("dialogue") or {}) and not (doc.get("acces") or {})
+				and not acces.conditions_pnj_invalides(doc)
+				and not any(isinstance(e, dict) and e.get("conditions")
+						for e in (doc.get("pnj") or []))):
 			ignores += 1
 			continue
 		analyses += 1

@@ -236,7 +236,23 @@
 }
 .tour-label { font-family: 'Cinzel', serif; font-size: 12px; color: #c9c2b4; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 .tour-label span { color: var(--accent-color); font-weight: bold; }
-#initiative-strip { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+/* Bandeau sur UNE ligne qui DÉFILE, jamais un retour à la ligne : passé quelques ennemis,
+   le wrap faisait grandir le header en hauteur et repoussait la carte hors de l'écran.
+   ⚠️ `min-width: 0` : un item flex vaut `min-width: auto`, sans quoi le bandeau refuse de
+   rétrécir sous la largeur de son contenu et DÉBORDE au lieu de défiler ; ses deux voisins
+   ne cèdent rien (`.tour-label` est `nowrap`, `.son-btn` `flex-shrink: 0`), c'est donc bien
+   lui qui doit absorber la contrainte.
+   ⚠️ Le `padding` vertical n'est pas cosmétique : dès qu'`overflow-x` cesse d'être
+   `visible`, l'axe vertical est clippé lui aussi — et le badge actif déborde de sa case
+   (`scale(1.12)` + halo de 9 px), qui serait rogné en haut et en bas. */
+#initiative-strip {
+	display: flex; gap: 8px; flex-wrap: nowrap; align-items: center;
+	min-width: 0; overflow-x: auto; overflow-y: hidden;
+	padding: 8px 4px;
+	scrollbar-width: thin; scrollbar-color: var(--border-color) transparent;
+}
+#initiative-strip::-webkit-scrollbar { height: 6px; }
+#initiative-strip::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 .init-badge {
 	position: relative; flex-shrink: 0;
 	width: 42px; height: 42px; border-radius: 50%;
@@ -251,6 +267,18 @@
 .init-badge.monstre.targetable { border-color: #ff4757; box-shadow: 0 0 9px rgba(255,71,87,0.7); cursor: pointer; }
 .init-badge.monstre.spellcast  { border-color: #b26bff; box-shadow: 0 0 9px rgba(178,107,255,0.7); cursor: pointer; }
 .init-badge.joueur.spellcast   { border-color: #4cd97b; box-shadow: 0 0 9px rgba(76,217,123,0.7); cursor: pointer; }
+/* Hors ordre d'initiative : monture / personne escortée. Elles ne jouent pas (`jouable:
+   False` côté serveur, donc absentes d'`ordre_initiative`) mais elles sont CIBLABLES par un
+   soin ou un buff — d'où un badge, en fin de bandeau. Couleurs reprises de leurs jetons
+   (ocre / doré) : on ne doit jamais les confondre avec un combattant.
+   ⚠️ Règles de ciblage EXPLICITES plutôt que la classe `joueur` : dépendre de l'ordre des
+   déclarations pour écraser `.init-badge.joueur` serait fragile. */
+.init-badge.monture { background: #3a2f1a; border-color: #b98c4a; color: #e8c98a; }
+.init-badge.protege { background: #3b3218; border-color: #f0c453; color: #ffe9ac; }
+.init-badge.monture.spellcast,
+.init-badge.protege.spellcast  { border-color: #4cd97b; box-shadow: 0 0 9px rgba(76,217,123,0.7); cursor: pointer; }
+/* Séparateur : ces badges ne font pas partie de l'ordre du tour, la coupure doit se voir. */
+.init-sep { flex-shrink: 0; width: 1px; height: 26px; background: var(--border-color); margin: 0 4px; opacity: 0.7; }
 .init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.12); }
 /* Coupe-son : discret par défaut, franchement éteint quand il coupe — l'état doit se lire
    sans survol, c'est le seul repère qu'a le joueur pour savoir pourquoi il n'entend rien. */
@@ -266,6 +294,12 @@
 /* ── Portrait/image + anneau de vitalité (partagés badge initiative ↔ player-token) ── */
 .ib-img    { position: absolute; inset: 5px; border-radius: 50%; background-repeat: no-repeat; }
 .ib-letter { position: relative; z-index: 1; }
+/* ⚠️ Portrait ENTIER (`portraits_joueurs[...].entier` : monture, personne escortée) :
+   applyPortraitTo EFFACE alors background-size/position, et `.ib-img` n'en déclare aucun —
+   l'image s'afficherait à sa taille NATIVE, rognée dans un cercle de 32 px. Même remède que
+   sur les jetons alliés (`.ally-token.monture .at-portrait`). */
+.init-badge.monture .ib-img,
+.init-badge.protege .ib-img { background-size: contain; background-position: center; }
 /* Deux demi-arcs en bordure : gauche = PV (rouge), droite = PM (bleu). */
 .vit-ring  { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
 .vit-ring path, .vit-ring circle { fill: none; }
@@ -812,6 +846,33 @@
 						</div>
 					{% endif %}
 				{% endfor %}
+				{#- Acteurs HORS TOUR : montures et personnes escortées. Elles ne jouent pas, mais
+				   elles sont CIBLABLES par un soin ou un buff, et le jeton sur la carte était
+				   jusqu'ici leur seul canal. Le filtre reprend le critère du MOTEUR (`jouable:
+				   False`, utils/combat.py) et non `est_monture or est_protege` : c'est lui qui
+				   décide de l'absence d'`ordre_initiative`, les deux listes doivent rester
+				   complémentaires par construction.
+				   ⚠️ `selectattr('jouable', 'defined')` est indispensable : un joueur ordinaire ne
+				   PORTE PAS ce champ, un `rejectattr` seul les ramasserait tous et dupliquerait
+				   leurs badges. #}
+				{% set hors_tour = combat.joueurs | selectattr('jouable', 'defined') | rejectattr('jouable') | list %}
+				{% if hors_tour %}<span class="init-sep" aria-hidden="true"></span>{% endif %}
+				{% for jp in hors_tour %}
+					{# Ni `active` (ces acteurs n'ont pas de tour), ni œil barré (marqueur d'ENNEMI
+					   non détectant), ni anneau plein (forme des monstres) : ils sont du camp du
+					   joueur, donc deux demi-arcs PV/PM comme un compagnon. #}
+					<div class="init-badge {{ 'monture' if jp.est_monture else 'protege' }}{{ ' dead' if jp.currentPV <= 0 else '' }}"
+					     id="badge-{{ jp.id }}"
+					     title="{{ jp.nom }} — {{ 'monture' if jp.est_monture else 'sous votre protection' }} : ne combat pas, mais peut recevoir un soin ou un effet bénéfique.">
+						{% if portraits_joueurs.get(jp.id, {}).get('image') %}<div class="ib-img" id="badge-portrait-{{ jp.id }}"></div>{% else %}<div class="ib-letter">{{ jp.nom[0] | upper if jp.nom else '?' }}</div>{% endif %}
+						<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
+							<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
+							<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>
+							<path class="vit-pv" id="ib-pv-{{ jp.id }}" d="M21 38 A17 17 0 0 1 21 4"></path>
+							<path class="vit-pm" id="ib-pm-{{ jp.id }}" d="M21 38 A17 17 0 0 0 21 4"></path>
+						</svg>
+					</div>
+				{% endfor %}
 			</div>
 			<!-- Coupe-son : premier réglage audio du jeu. Son état vit dans localStorage
 			     (par navigateur, pas par personnage) et il coupe AUSSI le son en cours. -->
@@ -1158,6 +1219,16 @@ function updateChargeBar(j) {
 	txt.textContent = `${(+charge).toFixed(1)} / ${chargeMax} kg`;
 }
 
+// Anneaux PV/PM + classe KO d'un badge du camp du joueur. Partagé par la passe
+// `ordre_initiative` et par celle des acteurs HORS TOUR : trois lignes recopiées auraient
+// fini par diverger, et l'anneau d'une monture figé sur ses PV d'entrée ne se voit pas.
+function _majBadgeVitaux(el, p) {
+	if (!el || !p) return;
+	el.classList.toggle('dead', (p.currentPV || 0) <= 0);
+	setArc(document.getElementById(`ib-pv-${p.id}`), p.pv_max > 0 ? p.currentPV / p.pv_max : 0);
+	setArc(document.getElementById(`ib-pm-${p.id}`), p.pm_max > 0 ? p.currentPM / p.pm_max : 0);
+}
+
 function updateInitiativeStrip(data) {
 	// L'œil barré a un sens dès qu'UN membre vivant du groupe est furtif.
 	const furtif = (data.joueurs || []).some(j => (j.currentPV || 0) > 0 && j.furtif);
@@ -1167,12 +1238,7 @@ function updateInitiativeStrip(data) {
 		el.classList.toggle('active', i === data.acteur_courant_index);
 		if (id.startsWith('joueur_')) {
 			// Anneaux PV/PM + classe KO de chaque membre du groupe (ids DOM par acteur).
-			const p = data.joueurs.find(x => x.id === id);
-			if (p) {
-				el.classList.toggle('dead', (p.currentPV || 0) <= 0);
-				setArc(document.getElementById(`ib-pv-${id}`), p.pv_max > 0 ? p.currentPV / p.pv_max : 0);
-				setArc(document.getElementById(`ib-pm-${id}`), p.pm_max > 0 ? p.currentPM / p.pm_max : 0);
-			}
+			_majBadgeVitaux(el, data.joueurs.find(x => x.id === id));
 		}
 		if (id.startsWith('monstre_')) {
 			const m = data.monstres.find(x => x.id === id);
@@ -1184,6 +1250,12 @@ function updateInitiativeStrip(data) {
 			if (eye) eye.hidden = !(furtif && m && m.vivant && !m.detecte);
 		}
 	});
+	// Acteurs HORS TOUR (montures, personnes escortées) : leur badge vit en fin de bandeau,
+	// hors d'`ordre_initiative`, donc la boucle ci-dessus ne les voit pas. Jamais d'`active`
+	// — ils n'ont pas de tour — mais leurs anneaux doivent suivre : sans cela un soin lancé
+	// sur une monture ne se verrait nulle part et sa chute passerait inaperçue.
+	(data.joueurs || []).filter(p => p.jouable === false)
+		.forEach(p => _majBadgeVitaux(document.getElementById(`badge-${p.id}`), p));
 }
 
 // Badges ennemis du header = UI de ciblage : rouge + cliquables (attaque) uniquement quand
@@ -1202,8 +1274,11 @@ function refreshBadgeTargets() {
 		: (canAct ? targetableMonsters(currentMode) : []);
 	const targetable = new Set(targets.map(m => m.id));
 	// Badges ALLIÉS : cliquables (vert) seulement pendant une capacité bénéfique.
-	// ⚠️ Une monture n'est PAS dans `ordre_initiative` → elle n'a pas de badge ; on ne
-	// peut la viser que par son jeton. Le token reste donc le canal complet.
+	// ⚠️ Cette boucle balaie TOUT `state.joueurs`, montures et personnes escortées comprises :
+	// elles ne sont pas dans `ordre_initiative` mais leur badge existe, rendu en FIN de
+	// bandeau (cf. le markup) — c'était jusqu'ici le `getElementById` qui rendait `null`, et
+	// le jeton restait leur seul canal de ciblage. `capaCibles` demeure la source unique
+	// partagée avec `renderTokens` et le grisage des slots.
 	(state.joueurs || []).forEach(p => {
 		const el = document.getElementById(`badge-${p.id}`);
 		if (!el) return;

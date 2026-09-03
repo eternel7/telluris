@@ -1,0 +1,627 @@
+[
+  {
+    "_id": "pnj:gautier_de_valcroix",
+    "_rev": "12-377eebb02eea7bb050d803b7da4e306e",
+    "type": "pnj",
+    "nom": "Gautier de Valcroix",
+    "race": "humain",
+    "vocation": "guerrier",
+    "portrait": "humain_m_guerrier01.jpg",
+    "description": "L'homme qui dirige la Guilde des Aventuriers d'Auxerre est connu de tous sous le nom de Gautier de Valcroix, que l'on surnomme parfois le Gardien des Cartes.\nAncien capitaine d'une compagnie d'éclaireurs, il ne s'est jamais distingué par sa force, mais par son jugement. Les murs de son bureau sont couverts de cartes annotées, de rapports d'expéditions et de trophées rapportés par ceux qui ont survécu à leurs premières missions. On raconte qu'aucun aventurier ne quitte son bureau sans avoir appris quelque chose, même lorsqu'il croit n'être venu que chercher un contrat.",
+    "services": {
+      "commission": {
+        "donjon": "donjon:mine_de_saint_austrelin",
+        "noeuds": {
+          "accepte": "commission_accepte",
+          "rapporte": "commission_rapporte"
+        }
+      },
+      "escorte": {
+        "offre": {
+          "id": "quete:escorte_bucherons_d_auxerre",
+          "titre": "Les bûcherons disparus",
+          "description": "Trois bûcherons d'Auxerre ne sont pas revenus d'une coupe au nord de la cité, et une voyageuse attendue à la même date n'y est jamais arrivée. Retrouvez-les, protégez-les, et ramenez-les vivants au bureau du maître de la Guilde.",
+          "destination": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+          "rencontre": {
+            "lieu": "lieu:clairiere_de_la_grotte_liberee"
+          },
+          "proteges": [
+            {
+              "prenom": "Armand",
+              "nom": "Renaud",
+              "race": "humain",
+              "sex": "M",
+              "image": "bucheron_Armand_Renaud_humain_m.jpg",
+              "description": "Chef de fait des trois bûcherons d'Auxerre. Vingt ans de coupe dans les futaies du nord, et la voix qu'on écoute quand la forêt se tait."
+            },
+            {
+              "prenom": "Étienne",
+              "nom": "Morel",
+              "race": "nain",
+              "sex": "M",
+              "image": "bucheron_Étienne_Morel_nain_m.jpg",
+              "description": "Bûcheron nain, la jambe ouverte pendant la fuite. Il marche encore, mais il ne courra pas deux fois."
+            },
+            {
+              "prenom": "Matthieu",
+              "nom": "Perrin",
+              "race": "ogre",
+              "sex": "M",
+              "image": "bucheron_Matthieu_Perrin_ogre_m.jpg",
+              "description": "Bûcheron ogre. C'est lui qui connaissait la grotte, et lui qui y a poussé les autres quand les crocs sont sortis des fougères."
+            },
+            {
+              "prenom": "Aélis",
+              "nom": "de Montfaucon",
+              "race": "humain",
+              "sex": "F",
+              "image": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+              "description": "Jeune architecte, chercheuse en cristaux de mana. Elle voyageait vers Auxerre sous escorte paladine ; il ne lui reste que son carnet et son obstination."
+            }
+          ],
+          "unique": true,
+          "proba": 1,
+          "rang_min": {
+            "cite": "lieu:auxerre",
+            "rang": "D"
+          },
+          "recompenses": {
+            "xp": 120,
+            "cuivre": 30000,
+            "items": [
+              {
+                "item": "item:Cristal_canalisation",
+                "poids": 0.1
+              }
+            ]
+          }
+        },
+        "noeuds": {
+          "accepte": "bucherons_acceptee"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeud_attente": "commission_repos",
+      "noeuds": {
+        "accueil": {
+          "texte": "Le bureau sent le vélin et la cire. Penché sur une carte hérissée d'épingles, {pnj} ne lève pas les yeux tout de suite — il termine d'annoter une marge, pose sa plume, et vous regarde enfin. « {prenom}. Borin vous a fait monter, donc vous valez le déplacement. Asseyez-vous. »",
+          "choix": [
+            {
+              "id": "commission",
+              "label": "« Vous avez du travail pour moi ? »",
+              "condition": {
+                "commission_offerte": true,
+                "dialogue_en_attente": false
+              },
+              "next": "commission_propose"
+            },
+            {
+              "id": "commission_rapport",
+              "label": "« C'est fait. La bête ne tient plus les galeries. »",
+              "condition": {
+                "commission_a_rapporter": true
+              },
+              "action": {
+                "service": "commission",
+                "op": "rapporter"
+              }
+            },
+            {
+              "id": "commission_relance",
+              "label": "« Où en étais-je, déjà ? »",
+              "condition": {
+                "commission_en_cours": true
+              },
+              "next": "commission_relance"
+            },
+            {
+              "id": "cartes",
+              "label": "« Toutes ces cartes... »",
+              "next": "cartes"
+            },
+            {
+              "id": "trophees",
+              "label": "« Et ces trophées, au mur ? »",
+              "next": "trophees"
+            },
+            {
+              "id": "bucherons_offre",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "bucherons_propose"
+            },
+            {
+              "id": "bucherons_rang",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "bucherons_rang_insuffisant"
+            },
+            {
+              "id": "bucherons_relance",
+              "label": "« Au sujet de {protege}… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "bucherons_relance"
+            },
+            {
+              "id": "bucherons_rapport",
+              "label": "« Vous avez vu qui je vous ramène. »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "bucherons_rapport"
+            },
+            {
+              "id": "rien",
+              "label": "« Rien. Je voulais voir le bureau. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_repos": {
+          "texte": "Il est debout devant son mur, une pile de feuillets sous le bras, et ne vous fait même pas asseoir. « Pas maintenant, {prenom}. Tant que le rapport n'est pas remonté au temple et que les épingles ne sont pas à jour, je ne confie rien à personne — c'est comme ça qu'on envoie des gens mourir sur une carte périmée. » Il désigne la porte du menton, sans dureté. « Repassez dans {attente} minutes. »",
+          "choix": [
+            {
+              "id": "cartes",
+              "label": "« Toutes ces cartes... »",
+              "next": "cartes"
+            },
+            {
+              "id": "trophees",
+              "label": "« Et ces trophées, au mur ? »",
+              "next": "trophees"
+            },
+            {
+              "id": "bucherons_offre",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_offerte": true
+              },
+              "next": "bucherons_propose"
+            },
+            {
+              "id": "bucherons_rang",
+              "label": "« Vous me faites chercher, messire ? »",
+              "condition": {
+                "escorte_rang_insuffisant": true
+              },
+              "next": "bucherons_rang_insuffisant"
+            },
+            {
+              "id": "bucherons_relance",
+              "label": "« Au sujet de {protege}… »",
+              "condition": {
+                "escorte_en_cours": true
+              },
+              "next": "bucherons_relance"
+            },
+            {
+              "id": "bucherons_rapport",
+              "label": "« Vous avez vu qui je vous ramène. »",
+              "condition": {
+                "escorte_accomplie": true
+              },
+              "next": "bucherons_rapport"
+            },
+            {
+              "id": "rien",
+              "label": "« Je repasserai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_propose": {
+          "texte": "Il fait glisser vers vous un parchemin déjà scellé. « Une commission d'éradication. Le temple a fermé un chantier : {lieu}. Ce n'est pas la vermine ordinaire qui l'inquiète, c'est ce qui la commande — un {espece} d'exception, assez vieux pour avoir fait des galeries son territoire. » Il repose son doigt sur la carte, exactement sur l'épingle noire. « Abattez-le. Les mineurs feront le reste. {xp} points d'expérience et {prime} pièces de cuivre à votre retour — et le chantier vous devra sa réouverture. »",
+          "choix": [
+            {
+              "id": "commission_details",
+              "label": "« Qui garde l'entrée ? »",
+              "next": "commission_details"
+            },
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Pas ce chantier-là. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_details": {
+          "texte": "« Les templiers de Saint-Austrelin. » Il hausse un sourcil, amusé. « Deux barrages : l'un au sommet des marches, qui vérifie que la Guilde répond de vous ; l'autre devant l'arche, qui vérifie que c'est bien de CE chantier qu'on vous a chargé. Ils sont tatillons, et ils ont raison de l'être : le sceau que je vous donne est la seule chose qui ouvre les deux. »",
+          "choix": [
+            {
+              "id": "commission_accepter",
+              "label": "« Donnez-moi ce parchemin. »",
+              "action": {
+                "service": "commission",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "commission_refuser",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "commission_accepte": {
+          "texte": "Il presse son cachet sur la cire, souffle dessus, et vous tend le parchemin. « Vous cherchez un {espece} dans {lieu}. Une seule consigne, et elle n'est pas dans le texte : ce qui a tenu des galeries entières ne se laisse pas surprendre. » Il reprend sa plume et se penche déjà sur une autre carte. « Revenez me le dire vous-même. J'aime tenir mes registres à jour. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_relance": {
+          "texte": "Il suit du doigt une ligne de son registre. « Vous. Un {espece}, dans {lieu}. » Il relève les yeux. « Le chantier est toujours fermé, {prenom}, et les mineurs comptent les jours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "commission_rapporte": {
+          "delai_min": 1800,
+          "texte": "Gautier écoute jusqu'au bout sans vous interrompre une seule fois, puis prend une épingle blanche et remplace la noire sur sa carte. « {lieu} : rouvert. » Il pousse vers vous {prime} pièces de cuivre, et {xp} points portés à votre nom sur le registre. « Vous avez rapporté le fait, pas la légende — c'est plus rare que vous ne croyez, et c'est ce qui me dira, la prochaine fois, à qui confier un chantier plus profond. » Il désigne le mur couvert de cartes. « Il en reste. » Puis il rassemble ses feuillets. « Mais rien aujourd'hui : je dois faire remonter tout ceci au temple avant de rouvrir quoi que ce soit. Repassez dans {attente} minutes. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Merci, messire. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "cartes": {
+          "texte": "« Elles ne valent rien. » Il dit cela sans quitter des yeux le mur qu'il a passé vingt ans à couvrir. « Une carte est le souvenir de ce qu'un homme a vu un jour donné. Les galeries s'effondrent, les rivières changent de lit, les monstres déménagent. Ce qui vaut quelque chose, c'est l'aventurier qui revient corriger la mienne. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "trophees": {
+          "texte": "Il jette un œil à la rangée de crânes, de griffes et de mâchoires clouées au-dessus de la cheminée. « Aucun n'est de moi. Chacun a été rapporté par une recrue qui pensait ne pas revenir. » Un silence. « Je garde aussi la liste de celles qui n'ont rien rapporté. Elle est plus longue, et je la relis plus souvent. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_propose": {
+          "texte": "« Je vous fais chercher depuis avant-hier. » Il repousse la carte des galeries et en déroule une autre : la cité, ses routes, la forêt du nord. Trois marques à l'encre rouge y forment un triangle serré. « Trois bûcherons. Partis couper au nord, attendus il y a deux jours, jamais rentrés. Leur employeur est venu réclamer de l'aide, et je n'aime pas ce que je ne comprends pas : ces hommes-là connaissent le bois mieux que mes éclaireurs. Une battue ordinaire aurait dû les ramener. »",
+          "choix": [
+            {
+              "id": "absence",
+              "label": "« Pourquoi ne pas envoyer une troupe ? »",
+              "next": "bucherons_absence"
+            },
+            {
+              "id": "architecte",
+              "label": "« Y a-t-il autre chose ? »",
+              "next": "bucherons_architecte"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            },
+            {
+              "id": "refus",
+              "label": "« Ce n'est pas pour moi, messire. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_absence": {
+          "texte": "« Parce qu'une troupe piétine, s'annonce à une lieue et rentre bredouille en ayant coûté trois jours de solde. » Il appuie un doigt sur la marque du milieu. « Et parce que si ces hommes sont vivants, ils sont terrés quelque part à attendre qu'on vienne — pas qu'on batte les fourrés autour d'eux. Une personne qui regarde vaut mieux que vingt qui marchent. C'est ma conviction, et elle m'a rarement trompé. »",
+          "choix": [
+            {
+              "id": "architecte",
+              "label": "« Y a-t-il autre chose ? »",
+              "next": "bucherons_architecte"
+            },
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            }
+          ]
+        },
+        "bucherons_architecte": {
+          "texte": "Il hésite — chose rare — puis ouvre un pli posé au coin du bureau. « Il y a autre chose, oui, et j'ignore si cela a le moindre rapport. Une voyageuse devait rejoindre Auxerre cette semaine. Une architecte, recommandée par un chapitre du sud : elle venait étudier nos cristaux de mana et la façon dont nos bâtisseurs les emploient. » Il referme le pli. « Elle n'est jamais arrivée. Je ne prétends rien. Je constate que deux disparitions tombent dans la même semaine et dans la même direction. Si vous la trouvez, ramenez-la aussi — et protégez-la : ce n'est pas une aventurière. »",
+          "choix": [
+            {
+              "id": "instructions",
+              "label": "« Où dois-je commencer ? »",
+              "next": "bucherons_instructions"
+            },
+            {
+              "id": "absence",
+              "label": "« Pourquoi pas une troupe ? »",
+              "next": "bucherons_absence"
+            }
+          ]
+        },
+        "bucherons_instructions": {
+          "texte": "« Suivez la route forestière vers le nord. Leur dernier chantier connu est à une demi-journée de marche des murs. » Son doigt court le long d'un trait d'encre. « Cherchez leurs traces : des coupes fraîches, des outils laissés, un campement froid, des empreintes qui ne sont pas les leurs. Ce que la forêt vous montrera vaudra mieux que tout ce que je peux vous en dire d'ici. » Il vous regarde enfin vraiment. « S'ils vivent, ramenez-les-moi ici, dans ce bureau, sur leurs jambes. {xp} points d'expérience et {prime} pièces de cuivre à leur retour. Et ne prenez pas de risque inutile : nous ignorons encore ce qui les a empêchés de rentrer. »",
+          "choix": [
+            {
+              "id": "accepter",
+              "label": "« Je vous les ramènerai. »",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "refus",
+              "label": "« Laissez-moi y réfléchir. »",
+              "next": "accueil"
+            }
+          ]
+        },
+        "bucherons_acceptee": {
+          "texte": "Il note une ligne dans son registre, souffle sur l'encre et referme le volume. « Alors c'est votre affaire, {prenom}. Une dernière chose, qui n'est pas dans le contrat : ce ne sont pas des trophées. Une personne qu'on escorte ne se bat pas, ne fuit pas, et ne survit qu'à la mesure de ce que vous arrêtez avant elle. » Il vous rend votre salut. « Ramenez-les vivants. Le reste ne m'intéresse pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Ce sera fait. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_rang_insuffisant": {
+          "texte": "« Je vous fais chercher, en effet. Et je vais vous décevoir. » Il croise les mains sur la carte. « Ce que j'ai là demande qu'on réponde de vous, et aujourd'hui la Guilde ne répond pas encore assez fort. Prenez les contrats du Bastion, montez jusqu'au rang {rang_requis}, et revenez me voir. » Une pause sans dureté. « Des hommes attendent quelque part dans ce bois. Je préfère les faire attendre un jour de plus que d'y envoyer quelqu'un qui n'en reviendra pas non plus. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "« J'y travaillerai. »",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "« Je reviendrai. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_relance": {
+          "texte": "Il suit du doigt la ligne de son registre. « {protege}. » Il relève les yeux. « Toujours dans ce bois, donc. » Il repousse la carte vers vous, la forêt du nord bien au centre. « Ne me rapportez pas une histoire, {prenom}. Rapportez-moi des gens. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« J'y retourne. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_rapport": {
+          "texte": "Gautier vous a écouté jusqu'au bout sans vous couper une seule fois — les loups, la fente de roche, les deux nuits, la demoiselle. Puis il prend une épingle blanche et la plante sur la forêt du nord, à la place des trois marques rouges. « Trois hommes vivants, et une voyageuse que je croyais perdue. » Il se tourne vers l'architecte, qui se tient très droite malgré la poussière. « Mademoiselle de Montfaucon. Votre voyage aura été plus mouvementé que prévu. » — « Je le reconnais. » — « Vous êtes arrivée à Auxerre. C'est l'essentiel. » Il revient à vous. « Quant à vous : bon travail. Mais cette histoire tombe à un moment particulier. »",
+          "choix": [
+            {
+              "id": "livraison",
+              "label": "« Particulier comment ? »",
+              "next": "bucherons_livraison"
+            },
+            {
+              "id": "fin",
+              "label": "« Je vous laisse à vos cartes. »",
+              "next": "fin"
+            }
+          ]
+        },
+        "bucherons_livraison": {
+          "texte": "Il ouvre un registre à couverture noire. « Auxerre doit encore envoyer une dernière livraison de cristaux de mana à Lutecia. » — « Lutecia ? » L'architecte a relevé la tête si vite que Gautier marque un temps. « Lutecia, mademoiselle. » Il referme le registre. « Elle devait partir avec une caravane marchande. Les cristaux sont trop précieux pour voyager sans protection, et les événements de cette semaine ne me disposent pas à l'optimisme. »",
+          "choix": [
+            {
+              "id": "proposition",
+              "label": "« Et vous pensez à moi. »",
+              "next": "bucherons_proposition"
+            },
+            {
+              "id": "retour",
+              "label": "Revenir.",
+              "next": "bucherons_rapport"
+            }
+          ]
+        },
+        "bucherons_proposition": {
+          "texte": "« Je pense à vous, oui. » Il s'appuie des deux mains sur le bureau. « Nous avons une livraison à conduire et, depuis ce matin, une personne de plus qui doit se rendre dans la même cité. » — « Je souhaite en effet poursuivre mon voyage », dit-elle, très posément. « Alors nous ferons d'une pierre deux coups. Vous accompagnerez la livraison jusqu'à Lutecia. » Vous demandez si ce sera seul. Gautier secoue la tête. « Non. Cette fois, la Guilde ne prendra aucun risque. »",
+          "choix": [
+            {
+              "id": "paladins",
+              "label": "« Qui d'autre ? »",
+              "next": "bucherons_paladins"
+            }
+          ]
+        },
+        "bucherons_paladins": {
+          "texte": "La porte s'ouvre. Deux paladins entrent — une elfe en haubert clair, un hobbit en cotte de mailles — et saluent sans un mot de trop. « Une escorte de l'ordre accompagnera le convoi », dit Gautier. « Leur charge : les cristaux et mademoiselle de Montfaucon, jusqu'à Lutecia. » Il revient à vous. « La vôtre : les accompagner, et veiller à ce que ce voyage se déroule correctement. » L'architecte esquisse un sourire. « Il semblerait que je sois arrivée à Auxerre au meilleur moment. » — « Ou au pire », répond Gautier sans se retourner. « Cela dépendra de ce que vous trouverez sur la route de Lutecia. »",
+          "choix": [
+            {
+              "id": "depart",
+              "label": "« Quand partons-nous ? »",
+              "next": "bucherons_depart"
+            }
+          ]
+        },
+        "bucherons_depart": {
+          "texte": "« Dès que les caisses seront sanglées. » Gautier reprend sa plume, ce qui est chez lui une façon de congédier. « Le convoi se forme dans la cour du Bastion : allez vous présenter à la commandante, elle vous dira le reste mieux que moi. » Puis, sans lever les yeux : « Et {prenom}… trois bûcherons ont dormi chez eux cette nuit parce que quelqu'un est allé regarder au lieu de battre les fourrés. Je le note aussi dans mes registres. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "« Messire. »",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "lieu:clairiere_de_la_grotte_liberee",
+    "_rev": "5-8b2f3ae25172a4640f590da1e620d987",
+    "type": "lieu",
+    "label": "La clairière devant la grotte",
+    "image": "Retrouver_les_bûcherons_d_Auxerre_victoire_combat.jpg",
+    "categorie": "grotte",
+    "lieu_parent": "lieu:auxerre",
+    "acces": {
+      "refus": "Les fougères ont repris la clairière ; il n'y a plus rien à y voir.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+            "giver_categorie": "bureau_maitre_guilde"
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:grotte_en_foret"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:grotte_dans_foret_humide_interieur01",
+    "_rev": "6-fd863f1f1227ff921f410b141fa0b560",
+    "type": "lieu",
+    "label": "Interieur de la grotte dans la forêt humide avec trois bucherons et une autre jeune femme",
+    "image": "grotte_retrouvailles_Retrouver_les_bûcherons_d_Auxerre.jpg",
+    "categorie": "grotte",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:aelis_de_montfaucon",
+        "nom": "Aélis de Montfaucon",
+        "portrait": "architecte_Aélis_de_Montfaucon_humain_f03.jpg",
+        "probabilite": 0.5,
+        "description": "Une jeune femme assise à l'écart du feu, un carnet serré contre elle."
+      },
+      {
+        "character": "pnj:etienne_morel",
+        "nom": "Étienne Morel",
+        "portrait": "bucheron_Étienne_Morel_nain_m.jpg",
+        "probabilite": 0.5,
+        "description": "Un nain adossé à la paroi, la jambe serrée dans un garrot de fortune."
+      },
+      {
+        "character": "pnj:matthieu_perrin",
+        "nom": "Matthieu Perrin",
+        "portrait": "bucheron_Matthieu_Perrin_ogre_m.jpg",
+        "description": "Un ogre assis face à l'entrée, un tronçon de charme en travers des genoux."
+      }
+    ],
+    "acces": {
+      "refus": "La fente est trop étroite pour qu'on s'y glisse sans raison, et rien ne bouge au fond de l'ombre.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "quete_active": {
+            "types": [
+              "escorte"
+            ],
+            "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+            "giver_categorie": "bureau_maitre_guilde"
+          }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:grotte_en_foret",
+            "attendu": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:grotte_dans_foret_humide_interieur",
+    "_rev": "3-6c535a0f16a797d45e52d7d23ff092e7",
+    "type": "lieu",
+    "label": "Interieur de la grotte dans la forêt humide",
+    "image": "grotte_dans_foret_humide_interieur.jpg",
+    "categorie": "grotte",
+    "lieu_parent": "lieu:auxerre",
+    "acces": {
+      "refus": "Des voix montent du fond de la grotte : ce n'est pas le moment d'y entrer en curieux.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "ou": [
+            {
+              "quete_active": {
+                "types": [
+                  "escorte"
+                ],
+                "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+                "giver_categorie": "bureau_maitre_guilde",
+                "attendu": false
+              }
+            },
+            {
+              "combat_gagne": {
+                "lieu": "lieu:grotte_en_foret",
+                "attendu": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "_id": "lieu:grotte_dans_foret_humide",
+    "_rev": "4-4968e30d259308e23b3b06504ba46684",
+    "type": "lieu",
+    "label": "Grotte dans la forêt humide",
+    "image": "grotte_dans_foret_humide.jpg",
+    "categorie": "grotte",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:armand_renaud",
+        "nom": "Armand Renaud",
+        "portrait": "bucheron_Armand_Renaud_humain_m.jpg",
+        "description": "Une voix d'homme, derrière l'éboulis qui ferme à demi l'entrée.",
+        "conditions": [
+          {
+            "quete_active": {
+              "types": [
+                "escorte"
+              ],
+              "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+              "giver_categorie": "bureau_maitre_guilde"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

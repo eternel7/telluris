@@ -493,6 +493,25 @@ def snapshot_quete(q: dict) -> dict:
 	}
 
 
+def quetes_actives_ids(character: dict) -> set:
+	"""Les ids des quêtes EN COURS — pendant exact de `quetes_reussies`, et la forme que
+	consomme la condition de dialogue `quete_active`.
+
+	⚠️ Les deux ensembles sont COMPLÉMENTAIRES, jamais contraires : une quête jamais acceptée
+	est absente des DEUX, et c'est cette conjonction (`quete_active` et `quete_reussie` toutes
+	deux en `attendu: false`) qui exprime « tant qu'on ne m'a pas encore confié ceci ».
+
+	⚠️ Une quête dont l'objectif est ATTEINT y figure ENCORE : elle ne quitte `quetes_actives`
+	qu'au turn-in (cf. `objectif_atteint` côté barrières d'accès). Un PNJ qui annonce une
+	mission se tait donc dès l'ACCEPTATION, et pas seulement une fois le rapport rendu.
+
+	⚠️ Aucune lecture DB : `quetes_actives` vit sur le doc personnage, déjà chargé par la
+	requête — c'est ce qui rend la condition gratuite à chaque rendu de nœud."""
+	return {
+		q.get("id") for q in (character or {}).get("quetes_actives", []) if q.get("id")
+	}
+
+
 def quete_active(character: dict, quete_id: str) -> dict | None:
 	for q in character.get("quetes_actives", []):
 		if q.get("id") == quete_id:

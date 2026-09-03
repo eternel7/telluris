@@ -769,6 +769,12 @@
             "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
             "giver_categorie": "bureau_maitre_guilde"
           }
+        },
+        {
+          "combat_gagne": {
+            "lieu": "lieu:grotte_en_foret",
+            "attendu": false
+          }
         }
       ]
     }
@@ -785,14 +791,24 @@
       "cycle": 1,
       "conditions": [
         {
-          "quete_active": {
-            "types": [
-              "escorte"
-            ],
-            "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
-            "giver_categorie": "bureau_maitre_guilde",
-            "attendu": false
-          }
+          "ou": [
+            {
+              "quete_active": {
+                "types": [
+                  "escorte"
+                ],
+                "cible": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+                "giver_categorie": "bureau_maitre_guilde",
+                "attendu": false
+              }
+            },
+            {
+              "combat_gagne": {
+                "lieu": "lieu:grotte_en_foret",
+                "attendu": true
+              }
+            }
+          ]
         }
       ]
     }
@@ -2723,12 +2739,6 @@
         {
           "combat_gagne": {
             "lieu": "lieu:grotte_en_foret"
-          }
-        },
-        {
-          "lieu_visite": {
-            "lieu": "lieu:clairiere_de_la_grotte_liberee",
-            "attendu": false
           }
         }
       ]

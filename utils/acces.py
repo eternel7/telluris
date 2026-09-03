@@ -28,6 +28,18 @@
 #     (character["rangs_guilde"][cite], absent ⇒ le premier de l'échelle) atteint au moins
 #     `rang` sur l'échelle recrutement.RANGS. Une porte de prestige : le maître de guilde
 #     ne reçoit pas les novices.
+#   - ou: [clause, clause, …] — la SEULE clause composite : vraie dès qu'UNE des sous-clauses
+#     l'est. `conditions` restant un ET, c'est ce qui rend enfin exprimable un « A OU B ».
+#     ⚠️ Elle est née d'un besoin qu'aucune négation ne couvrait : deux docs de lieu qui se
+#     relaient (la grotte HABITÉE tant que la meute tient le seuil, la grotte VIDE le reste
+#     du temps) sont complémentaires sur une CONJONCTION — « pas de quête OU combat gagné ».
+#     Chaque sous-clause est une clause ordinaire, validée et fail-closed comme les autres
+#     (récursion) ; une liste absente, vide ou mal formée REFUSE.
+#
+# ⚠️ LE MÊME VOCABULAIRE SERT AILLEURS QU'AUX PORTES : une entrée `pnj` d'un doc lieu peut
+# porter `conditions: [...]`, évalué par `clauses_remplies` — c'est ce qui fait qu'un PNJ ne
+# se montre que dans un certain état du monde (Armand ne hèle le joueur au seuil de la grotte
+# que tant que la quête des bûcherons court). Un seul évaluateur, un seul fail-closed.
 #
 # ⚠️ FAIL-CLOSED : une clé de condition inconnue REFUSE l'accès (jamais un troisième
 # comportement silencieux). Le garde-fou contre le contenu muet est le linter
@@ -53,7 +65,7 @@ def now_epoch() -> int:
 
 # Clés de condition reconnues par `conditions_remplies`. Toute autre clé fait échouer
 # `conditions_invalides` (signalée par le linter) ET `conditions_remplies` (fail-closed).
-CONDITIONS_CONNUES = {"quete_active", "item", "rang_min", "combat_gagne", "lieu_visite"}
+CONDITIONS_CONNUES = {"quete_active", "item", "rang_min", "combat_gagne", "lieu_visite", "ou"}
 
 # Sous-filtres reconnus par condition. ⚠️ Les valider AUSSI : une clé de premier niveau
 # inconnue refuse (fail-closed, donc visible en jeu), mais un SOUS-filtre inconnu était
@@ -69,6 +81,9 @@ SOUS_FILTRES_CONNUS = {
 	"rang_min": {"cite", "rang"},
 	"combat_gagne": {"lieu", "attendu"},
 	"lieu_visite": {"lieu", "attendu"},
+	# `ou` porte une LISTE de clauses, pas un dict de sous-filtres : rien à valider ici,
+	# tout se joue par récursion dans `conditions_invalides`.
+	"ou": set(),
 }
 
 
@@ -92,19 +107,34 @@ def conditions_invalides(lieu_doc: dict) -> list[str]:
 	if not gate:
 		return []
 	invalides = []
-	for condition in gate.get("conditions") or []:
+	_invalides_des_clauses(gate.get("conditions") or [], invalides)
+	return invalides
+
+
+def _invalides_des_clauses(conditions, invalides: list, prefixe: str = "") -> None:
+	"""Remplit `invalides` en place. ⚠️ RÉCURSIVE : les sous-clauses d'un `ou` doivent
+	être contrôlées comme les autres — une clé fautive enfouie dans une disjonction est
+	encore moins visible qu'ailleurs, la clause restant vraie par son autre branche."""
+	for condition in conditions or []:
 		if not isinstance(condition, dict):
 			continue
 		for cle, filtre in condition.items():
+			nom = f"{prefixe}{cle}"
 			if cle not in CONDITIONS_CONNUES:
-				if cle not in invalides:
-					invalides.append(cle)
+				if nom not in invalides:
+					invalides.append(nom)
+				continue
+			if cle == "ou":
+				if not isinstance(filtre, list) or not filtre:
+					if nom not in invalides:
+						invalides.append(nom)
+					continue
+				_invalides_des_clauses(filtre, invalides, f"{nom}.")
 				continue
 			connus = SOUS_FILTRES_CONNUS.get(cle, set())
 			for sous in (filtre if isinstance(filtre, dict) else {}):
-				if sous not in connus and f"{cle}.{sous}" not in invalides:
-					invalides.append(f"{cle}.{sous}")
-	return invalides
+				if sous not in connus and f"{nom}.{sous}" not in invalides:
+					invalides.append(f"{nom}.{sous}")
 
 
 def _quete_satisfait(q: dict, filtre: dict, character: dict, get_doc_fn) -> bool:
@@ -290,32 +320,71 @@ def _condition_rang_min(character: dict, filtre: dict) -> bool:
 	return rang_min_satisfait(character, filtre)
 
 
+def _clause_remplie(character: dict, condition, get_doc_fn) -> bool:
+	"""UNE clause du ET. ⚠️ RÉCURSIVE par `ou` — et fail-closed à chaque étage : une
+	clause qui n'est pas un dict d'EXACTEMENT une clé refuse, une clé inconnue refuse, et
+	un `ou` dont la valeur n'est pas une liste NON VIDE refuse aussi. Une disjonction vide
+	serait le pire des cas : « aucune raison d'entrer » lue comme « entrez »."""
+	if not isinstance(condition, dict) or len(condition) != 1:
+		return False
+	(cle, filtre), = condition.items()
+	if cle == "quete_active":
+		return _condition_quete_active(character, filtre or {}, get_doc_fn)
+	if cle == "item":
+		return _condition_item(character, filtre or {})
+	if cle == "rang_min":
+		return _condition_rang_min(character, filtre or {})
+	if cle == "combat_gagne":
+		return _condition_combat_gagne(character, filtre or {})
+	if cle == "lieu_visite":
+		return _condition_lieu_visite(character, filtre or {})
+	if cle == "ou":
+		if not isinstance(filtre, list) or not filtre:
+			return False
+		return any(_clause_remplie(character, sous, get_doc_fn) for sous in filtre)
+	# Fail-closed : une clé inconnue refuse toujours (typo ≠ porte ouverte).
+	return False
+
+
+def clauses_remplies(character: dict, conditions, get_doc_fn) -> bool:
+	"""Le ET d'une liste de clauses, SANS bloc `acces` autour — vide/absente ⇒ True.
+	
+	Extrait de `conditions_remplies` pour que le MÊME vocabulaire (et le même fail-closed)
+	serve ailleurs qu'aux portes : c'est ce qui conditionne la PRÉSENCE d'un PNJ dans un
+	lieu (`pnj[].conditions`, cf. `utils/pnj.entrees_pnj`). Deux évaluateurs pour deux
+	formes de la même donnée finiraient par diverger."""
+	return all(_clause_remplie(character, c, get_doc_fn) for c in (conditions or []))
+
+
+def conditions_pnj_invalides(lieu_doc: dict) -> list[str]:
+	"""Clés fautives dans les `conditions` des entrées `pnj` du lieu, pour le linter.
+	
+	⚠️ Même danger qu'une barrière, à l'envers : fail-closed veut dire ici que le PNJ ne se
+	montre JAMAIS. Sur un gardien, c'est un lieu devenu inatteignable — et rien ne le dit
+	en jeu, le seuil paraît simplement désert."""
+	invalides = []
+	for i, entree in enumerate((lieu_doc or {}).get("pnj") or []):
+		if not isinstance(entree, dict):
+			continue
+		conditions = entree.get("conditions")
+		if not conditions:
+			continue
+		if not isinstance(conditions, list):
+			invalides.append(f"pnj[{i}].conditions")
+			continue
+		_invalides_des_clauses(conditions, invalides, f"pnj[{i}].conditions.")
+	return invalides
+
+
 def conditions_remplies(character: dict, lieu_doc: dict, get_doc_fn) -> tuple[bool, str]:
 	"""Toutes les conditions du lieu sont-elles remplies (ET logique) ? (ok, raison du
 	refus — le `refus` du lieu, ou un texte générique). Pas de barrière ⇒ (True, "")."""
 	gate = gate_de(lieu_doc)
 	if not gate:
 		return True, ""
-	for condition in gate.get("conditions") or []:
-		if not isinstance(condition, dict) or len(condition) != 1:
-			return False, gate.get("refus", "L'accès vous est refusé.")
-		(cle, filtre), = condition.items()
-		if cle == "quete_active":
-			ok = _condition_quete_active(character, filtre or {}, get_doc_fn)
-		elif cle == "item":
-			ok = _condition_item(character, filtre or {})
-		elif cle == "rang_min":
-			ok = _condition_rang_min(character, filtre or {})
-		elif cle == "combat_gagne":
-			ok = _condition_combat_gagne(character, filtre or {})
-		elif cle == "lieu_visite":
-			ok = _condition_lieu_visite(character, filtre or {})
-		else:
-			# Fail-closed : une clé inconnue refuse toujours (typo ≠ porte ouverte).
-			ok = False
-		if not ok:
-			return False, gate.get("refus", "L'accès vous est refusé.")
-	return True, ""
+	if clauses_remplies(character, gate.get("conditions"), get_doc_fn):
+		return True, ""
+	return False, gate.get("refus", "L'accès vous est refusé.")
 
 
 def laissez_passer_valide(character: dict, lieu_doc: dict) -> bool:

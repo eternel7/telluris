@@ -574,3 +574,84 @@ def test_lint_relation_reinit_sur_soi_meme_est_legitime():
     doc = _doc_relation(reinit=None)
     doc["dialogue"]["noeuds"]["merci"]["relation_reinit"] = "merci"
     assert lint_dialogues.analyser_doc(doc) == []
+
+
+# ---------------------------------------------------------------------------
+# Présence CONDITIONNÉE (`pnj[].conditions`)
+# ---------------------------------------------------------------------------
+# Le vocabulaire des barrières de lieu (utils/acces.py) appliqué à la PRÉSENCE : Armand ne
+# hèle le joueur au seuil de la grotte que tant que la quête des bûcherons court. L'évaluateur
+# est INJECTÉ (`condition_fn`) — `utils/pnj.py` n'importe que `random` + `character_stats`.
+
+CONDS = [{"quete_active": {"types": ["escorte"]}}]
+
+
+def _lieu_conditionne():
+    return _lieu([_entree("pnj:armand", proba=1.0, conditions=CONDS)])
+
+
+def _vrai(_conditions):
+    return True
+
+
+def _faux(_conditions):
+    return False
+
+
+def test_entree_conditionnee_presente_si_la_condition_tient():
+    lieu = _lieu_conditionne()
+    assert pnj.tirer_pnj_present(lieu, lambda: 0.0, None, _vrai) == "pnj:armand"
+
+
+def test_entree_conditionnee_absente_sinon():
+    lieu = _lieu_conditionne()
+    assert pnj.tirer_pnj_present(lieu, lambda: 0.0, None, _faux) is None
+
+
+def test_entree_conditionnee_FAIL_CLOSED_sans_evaluateur():
+    """Un appelant qui oublie `condition_fn` doit voir le PNJ DISPARAÎTRE, pas apparaître
+    dans tous les états du monde : la faute silencieusement permissive est la pire des deux."""
+    assert pnj.tirer_pnj_present(_lieu_conditionne(), lambda: 0.0) is None
+
+
+def test_entree_SANS_conditions_inchangee_sans_evaluateur():
+    """Aucune migration : la donnée existante ne porte pas le champ."""
+    assert pnj.tirer_pnj_present(_lieu([_entree(proba=1.0)]), lambda: 0.0) == "pnj:reverend"
+
+
+def test_entree_conditionnee_ecartee_A_LA_LECTURE_du_tirage_persiste():
+    """⚠️ Le cas qui compte : `pnj_present` est un champ transitoire PERSISTÉ et
+    `poser_pnj_present` est un no-op tant qu'on reste dans le lieu. Sans filtre à la lecture,
+    le PNJ tiré quand sa condition tenait continuerait de parler après qu'elle a cessé."""
+    lieu = _lieu_conditionne()
+    character = _character()
+    assert pnj.poser_pnj_present(character, lieu, lambda: 0.0, None, _vrai) is True
+    assert pnj.entree_pnj_active(character, lieu, None, _vrai)["character"] == "pnj:armand"
+    assert pnj.entree_pnj_active(character, lieu, None, _faux) is None
+
+
+def test_une_entree_conditionnee_laisse_la_place_a_la_suivante():
+    lieu = _lieu([_entree("pnj:armand", proba=1.0, conditions=CONDS),
+                  _entree("pnj:autre", proba=1.0)])
+    assert pnj.tirer_pnj_present(lieu, lambda: 0.0, None, _faux) == "pnj:autre"
+    assert pnj.tirer_pnj_present(lieu, lambda: 0.0, None, _vrai) == "pnj:armand"
+
+
+def test_nom_pnj_du_lieu_ne_nomme_pas_un_pnj_conditionne():
+    """Corollaire assumé du fail-closed : nommer le tenancier d'un lieu où l'on n'est PAS se
+    fait sans personnage sous la main, donc sans pouvoir évaluer quoi que ce soit."""
+    lieu = _lieu([_entree("pnj:armand", proba=1.0, conditions=CONDS)])
+    assert pnj.nom_pnj_du_lieu(lieu, lambda _id: {"nom": "Armand"}) is None
+
+
+def test_linter_signale_une_condition_pnj_fautive():
+    """Fail-closed veut dire ici que le PNJ ne se montre JAMAIS — et s'il garde un lieu, ce
+    lieu devient inatteignable sans le moindre symptôme."""
+    lieu = _lieu([_entree("pnj:armand", conditions=[{"quete_activ": {}}])])
+    res = lint_dialogues.analyser([lieu])
+    assert res["erreurs"] == 1
+    assert "pnj[0].conditions.quete_activ" in res["trouvailles"][0]["message"]
+
+
+def test_linter_accepte_une_condition_pnj_correcte():
+    assert lint_dialogues.analyser([_lieu_conditionne()])["erreurs"] == 0

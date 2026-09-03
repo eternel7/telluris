@@ -41,6 +41,7 @@ from utils import auberge as auberge_util
 from utils import escorte as escorte_util
 from utils import indicateurs as indicateurs_util
 from utils import fiche as fiche_util
+from utils import acces
 from utils import journal as journal_util
 from utils import animations as animations_util
 from utils import lint_dialogues
@@ -589,11 +590,18 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Écriture dans le GET assumée (précédent : tick_atelier) ; un conflit de save serait
 	# rejoué au prochain rendu, on ne lève pas de 409 ici.
 	change = bool(transports_echoues)
-	change |= pnj_util.poser_pnj_present(character, grid_doc, marchand_fn=transport_util.entree_marchand)
+	# Une entrée `pnj` peut être CONDITIONNÉE (`conditions`, vocabulaire des barrières de
+	# lieu) : Armand ne hèle le joueur au seuil de la grotte que tant que la quête des
+	# bûcherons court. L'évaluateur est INJECTÉ — `utils/pnj.py` reste un module minimal.
+	conditions_pnj = lambda conds: acces.clauses_remplies(character, conds, get_doc)
+	change |= pnj_util.poser_pnj_present(character, grid_doc,
+								  marchand_fn=transport_util.entree_marchand,
+								  condition_fn=conditions_pnj)
 	# Le PNJ arrêté pour cette entrée est résolu AVANT l'offre de course : c'est lui qui peut
 	# porter une course écrite (`services.transport.offre`), auquel cas le lieu n'a pas à être
 	# un magasin (le réceptionniste de la guilde confie sa mission d'initiation).
-	pnj_entree = pnj_util.entree_pnj_active(character, grid_doc, transport_util.entree_marchand)
+	pnj_entree = pnj_util.entree_pnj_active(character, grid_doc,
+								  transport_util.entree_marchand, conditions_pnj)
 	pnj_doc = get_doc(pnj_entree["character"]) if pnj_entree else None
 	# Offre de course : tirée à l'entrée, persistée (même sémantique que pnj_present).
 	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc,
