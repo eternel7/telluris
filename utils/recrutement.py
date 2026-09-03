@@ -141,24 +141,110 @@ CLAUSES_TYPES = [
 # famille dit une lignée, pas un voisinage.
 PRENOMS = {
     "humain": {
-        "M": ["Aldric", "Bertrand", "Corentin", "Enguerrand", "Gaultier", "Renaud", "Thibaut", "Amaury", "Baudouin", "Gautier", "Godefroy", "Josselin", "Lothaire", "Raoul"],
-        "F": ["Adélaïde", "Blanche", "Clotilde", "Héloïse", "Mathilde", "Rosamonde", "Ysabeau", "Aliénor", "Béatrice", "Emmeline", "Geneviève", "Gisèle", "Hermine", "Isabeau"]
+        "M": [
+            "Aldric", "Bertrand", "Corentin", "Enguerrand", "Gaultier", "Renaud",
+            "Thibaut", "Amaury", "Baudouin", "Gautier", "Godefroy", "Josselin",
+            "Lothaire", "Raoul",
+            "Ari", "Björn", "Einar", "Gunnar", "Hákon", "Jón", "Kjartan",
+            "Magnús", "Ólafur", "Ragnar", "Sigurður", "Þór", "Baldur", "Leifur",
+            "Liam", "Jack", "William", "Oliver", "Henry", "Thomas", "James",
+            "Charlie", "Noah", "Lucas", "Cooper", "Lachlan", "Hugh", "Angus",
+            "Wei", "Ming", "Jun", "Hao", "Jian", "Lei", "Tao", "Chen",
+            "Bo", "Feng", "Long", "Yong", "Qiang", "Guang",
+            "Akira", "Daichi", "Haruto", "Hiroshi", "Kenji", "Kaito", "Ren",
+            "Riku", "Satoshi", "Shinji", "Takumi", "Yuki", "Hikaru", "Masato",
+            "Ahyoka", "Bidziil", "Chayton", "Dakota", "Elan", "Hakan", "Kitchi",
+            "Koda", "Nashoba", "Takoda", "Tasunka", "Waya", "Wicasa", "Winona",
+            "Ahau", "Balam", "Chaac", "Ek", "Itzam", "Kan", "Kukulkan",
+            "Nacom", "Pakal", "Tepeu", "Tupak", "Uaxaclajuun", "Xaman", "Yaxkin",
+            "Baraka", "Dayo", "Jabari", "Kamau", "Kato", "Kip", "Mwangi",
+            "Njoroge", "Otieno", "Simba", "Tafari", "Wanjala", "Kofi", "Juma",
+            "Ahmed", "Ali", "Amine", "Béchir", "Fares", "Hédi", "Karim",
+            "Mehdi", "Nabil", "Omar", "Rachid", "Sami", "Yassine", "Zied",
+            "Alfred", "Arthur", "Edward", "Edmund", "George", "John",
+            "Richard", "Robert", "Walter", "Edwin",
+            "Adalbert", "Albrecht", "Bruno", "Conrad", "Dietrich", "Friedrich",
+            "Günther", "Heinrich", "Johann", "Konrad", "Ludwig", "Otto",
+            "Wilhelm", "Wolfgang", "Alonso", "Álvaro", "Andrés", "Diego",
+            "Fernando", "Gonzalo", "Hernán", "Íñigo",
+            "Javier", "Rodrigo", "Santiago", "Sebastián",
+            "Tomás", "Vicente", "Alessandro", "Alberto", "Andrea", "Carlo",
+            "Dante", "Enrico", "Federico", "Filippo",
+            "Francesco", "Giovanni", "Lorenzo", "Matteo",
+            "Niccolò", "Vittorio"
+        ],
+        "F": [
+            "Adélaïde", "Blanche", "Clotilde", "Héloïse", "Mathilde", "Rosamonde",
+            "Ysabeau", "Aliénor", "Béatrice", "Emmeline", "Geneviève", "Gisèle",
+            "Hermine", "Isabeau",
+            "Anna", "Ásta", "Bryndís", "Edda", "Elín", "Freydís", "Guðrún",
+            "Halla", "Hildur", "Inga", "Sigríður", "Sólveig", "Ragnheiður", "Þóra",
+            "Charlotte", "Olivia", "Amelia", "Isla", "Matilda", "Ruby", "Emily",
+            "Sophie", "Grace", "Chloe", "Ella", "Mia", "Harper", "Evie",
+            "Mei", "Ling", "Fang", "Li", "Yan", "Jing", "Xiu", "Hua",
+            "Na", "Ying", "Lan", "Qiao", "Rui", "Xin",
+            "Aiko", "Akari", "Emi", "Hana", "Haruka", "Kaori", "Keiko",
+            "Mika", "Naoko", "Rei", "Sakura", "Yui", "Yuna", "Ayumi",
+            "Aiyana", "Aponi", "Ayita", "Chenoa", "Kiona", "Kitchi", "Nokomis",
+            "Odina", "Peta", "Sik'is", "Tala", "Tiva", "Winona", "Zitkala",
+            "Ixchel", "Akna", "Izel", "Itzel", "Ixkik", "K'in", "Nicté",
+            "Sak", "Xunaxi", "Yatzil", "Zazil", "Ixmucané", "Nabé", "Yaretzi",
+            "Amani", "Asha", "Imani", "Jelani", "Kendi", "Makena", "Nia",
+            "Nyambura", "Pendo", "Safiya", "Wambui", "Zawadi", "Akinyi", "Neema",
+            "Aïcha", "Amel", "Asma", "Dorsaf", "Emna", "Fatma", "Hanen",
+            "Inès", "Leïla", "Meriem", "Nadia", "Rim", "Sabrine", "Yasmine",
+            "Alice", "Anne", "Beatrice", "Catherine", "Eleanor", "Elizabeth",
+            "Emma", "Evelyn", "Isabel", "Jane", "Margaret", "Rose", "Winifred",
+            "Adelheid", "Brigitte", "Clara", "Elsa", "Frieda", "Gertrud",
+            "Gisela", "Hedwig", "Helga", "Ingrid", "Liesel", "Margarete",
+            "Ursula", "Wilhelmine", "Alessandra", "Bianca", "Camilla",
+            "Caterina", "Chiara", "Eleonora", "Elisabetta",
+            "Francesca", "Isabella", "Lucia", "Maddalena",
+            "Serena", "Vittoria", "Aldonza", "Beatriz", "Catalina", "Elvira",
+            "Inés", "Jimena", "Leonor",
+            "Lucía", "María", "Teresa", "Valentina",
+            "Violante", "Ximena"
+        ]
     },
     "elfe": {
-        "M": ["Aelthir", "Caelun", "Faelor", "Lorandril", "Sylvarel", "Thalion", "Aerandir", "Earendil", "Finrod", "Haldir", "Lindir", "Valandil"],
-        "F": ["Aelwen", "Elenwë", "Lithrielle", "Nimloth", "Sylvaine", "Yavielle", "Celebrian", "Galadriel", "Idril", "Laurelin", "Melian", "Tinuviel"]
+        "M": [
+            "Aelthir", "Caelun", "Faelor", "Lorandril", "Sylvarel", "Thalion",
+            "Aerandir", "Earendil", "Finrod", "Haldir", "Lindir", "Valandil"
+        ],
+        "F": [
+            "Aelwen", "Elenwë", "Lithrielle", "Nimloth", "Sylvaine", "Yavielle",
+            "Celebrian", "Galadriel", "Idril", "Laurelin", "Melian", "Tinuviel"
+        ]
     },
     "nain": {
-        "M": ["Balrik", "Dorin", "Grimnur", "Kazrag", "Morgrim", "Thorgan", "Bofur", "Dwalin", "Gimli", "Gloin", "Kili", "Thorin"],
-        "F": ["Berga", "Dagna", "Helga", "Runa", "Sigrun", "Thyra", "Dis", "Frida", "Gerd", "Hilda", "Ingrid", "Sif"]
+        "M": [
+            "Balrik", "Dorin", "Grimnur", "Kazrag", "Morgrim", "Thorgan",
+            "Bofur", "Dwalin", "Gimli", "Gloin", "Kili", "Thorin"
+        ],
+        "F": [
+            "Berga", "Dagna", "Helga", "Runa", "Sigrun", "Thyra",
+            "Dis", "Frida", "Gerd", "Hilda", "Ingrid", "Sif"
+        ]
     },
     "ogre": {
-        "M": ["Brog", "Dhurk", "Gronk", "Krug", "Morg", "Thok", "Brag", "Gark", "Gor", "Krosh", "Ogg", "Urk"],
-        "F": ["Brakka", "Gruna", "Morga", "Ruk", "Thura", "Urga", "Garka", "Groka", "Morka", "Rakka", "Ugra", "Zouga"]
+        "M": [
+            "Brog", "Dhurk", "Gronk", "Krug", "Morg", "Thok",
+            "Brag", "Gark", "Gor", "Krosh", "Ogg", "Urk"
+        ],
+        "F": [
+            "Brakka", "Gruna", "Morga", "Ruk", "Thura", "Urga",
+            "Garka", "Groka", "Morka", "Rakka", "Ugra", "Zouga"
+        ]
     },
     "hobbit": {
-        "M": ["Bingo", "Drogon", "Falco", "Milo", "Podo", "Tolman", "Bungo", "Fastolf", "Flourdelys", "Olo", "Rufus", "Wilco"],
-        "F": ["Amaranthe", "Belladone", "Mirabelle", "Pervenche", "Primula", "Salvia", "Camélia", "Eglantine", "Lobelia", "Menthe", "Myrtille", "Pâquerette"]
+        "M": [
+            "Bingo", "Drogon", "Falco", "Milo", "Podo", "Tolman",
+            "Bungo", "Fastolf", "Flourdelys", "Olo", "Rufus", "Wilco"
+        ],
+        "F": [
+            "Amaranthe", "Belladone", "Mirabelle", "Pervenche", "Primula", "Salvia",
+            "Camélia", "Eglantine", "Lobelia", "Menthe", "Myrtille", "Pâquerette"
+        ]
     },
     "defaut": {
         "M": ["Jor", "Kel", "Mar", "Ren", "Dan", "Gor", "Mal", "Zor"],
@@ -166,18 +252,58 @@ PRENOMS = {
     },
 }
 NOMS = {
-    "humain": ["de Hautterre", "Ferrant", "Leloup", "Morvan", "du Guet", "Vaillancourt",
-		"Beauvisage", "Chassevent", "Dumont", "Grandpas", "Rochefort", "Valois"],
-    "elfe": ["Feuillargent", "Lunevoile", "Sombrefrêne", "Ventelame", "Écorcelune",
-        "Astrebrillant", "Briseflammes", "Cielazur", "Fleurépine", "Rondevalle"],
-    "nain": ["Barbeforge", "Fendroc", "Grave-Enclume", "Piochefer", "Rudemarteau",
-        "Brise-Mine", "Cœur-d'Acier", "Fort-Armure", "Fouille-Filons", "Lourde-Hache"],
-    "ogre": ["Brise-Os", "Croque-Pierre", "Deux-Massues", "Grande-Faim", "Tord-Boyaux",
-        "Avale-Tout", "Gros-Bide", "Lourde-Patte", "Mâche-Fer", "Pousse-Rocs"],
-    "hobbit": ["Bonpré", "Fouilleterre", "Pied-Léger", "Souscolline", "Troisquarts",
-        "Basse-Vallée", "Chaud-Chaudron", "Douce-Amande", "Petit-Pas", "Verte-Herbe"],
-    "defaut": ["Sans-Terre", "l'Errant", "du Chemin",
-        "l'Inconnu", "le Muet", "Sans-Nom"],
+    "humain": [
+		"de Hautterre", "Ferrant", "Leloup", "Morvan", "du Guet",
+		"Vaillancourt", "Beauvisage", "Chassevent", "Dumont", "Grandpas",
+		"Rochefort", "Valois",
+		"Jónsson", "Einarsson", "Gunnarsson", "Ólafsson", "Sigurðsson", "Magnússon",
+		"Anderson", "Bennett", "Campbell", "Collins", "Foster",
+		"Harrison", "Hughes", "Jackson", "McKenzie", "Morgan",
+		"Parker", "Taylor",
+		"Li", "Wang", "Zhang", "Liu", "Chen", "Yang", "Huang",
+		"Zhao", "Wu", "Zhou", "Xu", "Sun",
+		"Sato", "Suzuki", "Takahashi", "Tanaka", "Watanabe", "Ito",
+		"Yamamoto", "Nakamura", "Kobayashi", "Kato", "Yoshida", "Yamada",
+		"Aigle-Noir", "Cerf-Rouge", "Ciel-Bleu", "Danse-Avec-Les-Loups",
+		"Faucon-Blanc", "Feuille-de-Chêne", "Loup-Gris", "Lune-Rouge",
+		"Ours-Brun", "Plume-d'Aigle", "Soleil-Levant", "Vent-du-Nord",
+		"Balam", "Canek", "Cauich", "Chan", "Cocom", "Dzul",
+		"Ek", "Itza", "May", "Pech", "Tamay", "Xul",
+		"Kamau", "Kariuki", "Kipchoge", "Mwangi", "Njoroge", "Odhiambo",
+		"Ochieng", "Otieno", "Wanjala", "Wambui", "Kiptoo", "Mutua",
+		"Ben Ali", "Ben Amor", "Ben Salah", "Bennour", "Bouazizi",
+		"Chaabane", "Gharbi", "Jaziri", "Mansouri", "Trabelsi",
+		"Saïdi", "Khelifi", "Álvarez", "Castillo", "Cervantes", "Cortes",
+		"Delgado", "Fernández", "García", "Gómez",
+		"Hernández", "Navarro", "Pérez", "Rodríguez",
+		"Bianchi", "Bruno", "Conti", "De Luca",
+		"Ferrari", "Fontana", "Gallo", "Marino",
+		"Moretti", "Rinaldi", "Romano", "Rossi",
+		"Baker", "Blackwood", "Carter", "Cooper", "Fletcher", "Hawkins",
+		"Hunter", "Miller", "Shepherd", "Smith", "Thompson",
+		"Bauer", "Becker", "Fischer", "Hartmann", "Hoffmann", "Kaiser",
+		"Keller", "Klein", "Koch", "Krüger", "Müller", "Schneider"
+    ],
+    "elfe": [
+        "Feuillargent", "Lunevoile", "Sombrefrêne", "Ventelame", "Écorcelune",
+        "Astrebrillant", "Briseflammes", "Cielazur", "Fleurépine", "Rondevalle"
+    ],
+    "nain": [
+        "Barbeforge", "Fendroc", "Grave-Enclume", "Piochefer", "Rudemarteau",
+        "Brise-Mine", "Cœur-d'Acier", "Fort-Armure", "Fouille-Filons", "Lourde-Hache"
+    ],
+    "ogre": [
+        "Brise-Os", "Croque-Pierre", "Deux-Massues", "Grande-Faim", "Tord-Boyaux",
+        "Avale-Tout", "Gros-Bide", "Lourde-Patte", "Mâche-Fer", "Pousse-Rocs"
+    ],
+    "hobbit": [
+        "Bonpré", "Fouilleterre", "Pied-Léger", "Souscolline", "Troisquarts",
+        "Basse-Vallée", "Chaud-Chaudron", "Douce-Amande", "Petit-Pas", "Verte-Herbe"
+    ],
+    "defaut": [
+        "Sans-Terre", "l'Errant", "du Chemin",
+        "l'Inconnu", "le Muet", "Sans-Nom"
+    ],
 }
 
 # Race dont le répertoire de prénoms déborde sur les autres, et fréquence du débordement.
