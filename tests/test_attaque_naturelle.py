@@ -62,16 +62,16 @@ def test_le_tag_a_UNE_seule_source():
 def test_compute_derived_stats_defaut_inchange():
 	"""⚠️ `des_cc` par défaut à 1 : aucun des appelants existants (joueur, compagnon,
 	monture, fiche) ne change de comportement."""
-	assert compute_derived_stats(base(), niveau=1).degats_cc == "1D6+1"
+	assert compute_derived_stats(base(), niveau=1).degats_cc == "1D5+1"
 
 
 def test_le_de_supplementaire_est_de_la_MEME_taille():
 	"""« un dé correspondant à `_caract_to_dice_(base.f)` » : on double le dé de Force, on
 	n'en ajoute pas un d'une autre taille."""
-	assert compute_derived_stats(base(f=24), niveau=1, des_cc=2).degats_cc == "2D6+1"
+	assert compute_derived_stats(base(f=24), niveau=1, des_cc=2).degats_cc == "2D5+1"
 	# F=15 → dé D4 et bonus plat 15//20 = 0, que `_format_damage` n'écrit pas.
 	assert compute_derived_stats(base(f=15), niveau=1, des_cc=2).degats_cc == "2D4"
-	assert compute_derived_stats(base(f=95), niveau=1, des_cc=2).degats_cc == "2D20+4"
+	assert compute_derived_stats(base(f=95), niveau=1, des_cc=2).degats_cc == "2D25+4"
 
 
 def test_le_TIR_n_est_jamais_concerne():
@@ -83,20 +83,20 @@ def test_le_TIR_n_est_jamais_concerne():
 
 def test_zero_de_est_planche_a_un():
 	"""Une attaque sans le moindre dé ne serait plus une attaque."""
-	assert compute_derived_stats(base(), niveau=1, des_cc=0).degats_cc == "1D6+1"
+	assert compute_derived_stats(base(), niveau=1, des_cc=0).degats_cc == "1D5+1"
 
 
 # ── Le snapshot ──────────────────────────────────────────────────────────────────
 
 def test_snapshot_de_bete_porte_deux_des_et_le_champ_de_recalcul():
 	snap = combat_mod.build_monster_snapshot(espece(["predateur"]), None, 0)
-	assert snap["degats_cc"] == "2D6+1"
+	assert snap["degats_cc"] == "2D5+1"
 	assert snap["des_cc_base"] == 2
 
 
 def test_snapshot_dhumanoide_inchange():
 	snap = combat_mod.build_monster_snapshot(espece(["humanoide"]), None, 0)
-	assert snap["degats_cc"] == "1D6+1"
+	assert snap["degats_cc"] == "1D5+1"
 	assert snap["des_cc_base"] == 1
 
 
@@ -109,10 +109,10 @@ def test_le_de_naturel_SURVIT_a_un_buff_puis_a_son_expiration():
 	snap = combat_mod.build_monster_snapshot(espece(["predateur"]), None, 0)
 	snap["effets_actifs"] = [{"nom": "Rage", "buffs": {"F": 20}, "restants": 2}]
 	combat_mod._refresh_snapshot_stats(snap)
-	assert snap["degats_cc"] == "2D8+2"   # F 24→44 : le dé grandit, ils restent DEUX
+	assert snap["degats_cc"] == "2D8+2"   # F 24→44 : le dé grandit (D5→D8), ils restent DEUX
 	snap["effets_actifs"] = []
 	combat_mod._refresh_snapshot_stats(snap)
-	assert snap["degats_cc"] == "2D6+1"
+	assert snap["degats_cc"] == "2D5+1"
 
 
 def test_un_DEBUFF_ne_retire_pas_le_de_naturel():
@@ -128,7 +128,7 @@ def test_un_snapshot_SANS_le_champ_garde_le_comportement_davant():
 	snap = combat_mod.build_monster_snapshot(espece(["predateur"]), None, 0)
 	del snap["des_cc_base"]
 	combat_mod._refresh_snapshot_stats(snap)
-	assert snap["degats_cc"] == "1D6+1"
+	assert snap["degats_cc"] == "1D5+1"
 
 
 def test_un_joueur_ne_gagne_jamais_le_de_naturel():
@@ -147,7 +147,7 @@ def test_la_world_var_a_UN_restaure_le_comportement_davant(monkeypatch):
 	monkeypatch.setattr(character_stats, "MONSTRE_DES_CC_NATURELS", 1)
 	snap = combat_mod.build_monster_snapshot(espece(["predateur"]), None, 0)
 	assert snap["des_cc_base"] == 1
-	assert snap["degats_cc"] == "1D6+1"
+	assert snap["degats_cc"] == "1D5+1"
 
 
 def test_la_world_var_est_lue_A_CHAUD(monkeypatch):
@@ -155,4 +155,4 @@ def test_la_world_var_est_lue_A_CHAUD(monkeypatch):
 	sinon le réglage depuis /admin n'aurait aucun effet."""
 	monkeypatch.setattr(character_stats, "MONSTRE_DES_CC_NATURELS", 3)
 	assert combat_mod.des_cc_espece(espece(["predateur"])) == 3
-	assert combat_mod.build_monster_snapshot(espece(["predateur"]), None, 0)["degats_cc"] == "3D6+1"
+	assert combat_mod.build_monster_snapshot(espece(["predateur"]), None, 0)["degats_cc"] == "3D5+1"

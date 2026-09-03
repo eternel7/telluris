@@ -358,7 +358,7 @@ COMPETENCE_COUT_COEFF: int = 2
 # ⚠️ GROUPE_TAILLE_MAX ne plafonne que les compagnons NON PERMANENTS : un compagnon
 # engagé durablement sort du décompte (`recrutement.places_occupees`).
 RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE: dict[str, dict] = {
-	"capitale": {"nb": 6, "niveau_max": 3},
+	"capitale": {"nb": 6, "niveau_max": 5},
 	"ville":    {"nb": 4, "niveau_max": 2},
 	"defaut":   {"nb": 2, "niveau_max": 1},
 }
@@ -1374,8 +1374,11 @@ def _format_damage(base_die: int, stat_bonus: int, equipment: EquipmentBonus,
 def _caract_to_dice_(f: int) -> int:
 	"""Convertit une caracteristique en valeur de dé standard."""
 	if f <= 20:  return 4
+	if f <= 30:  return 5
 	if f <= 40:  return 6
-	if f <= 60:  return 8
-	if f <= 80:  return 10
-	if f <= 90:  return 12
-	return 20
+	if f <= 50:  return 8
+	if f <= 60:  return 10
+	if f <= 70:  return 12
+	if f <= 80:  return 15
+	if f <= 90:  return 20
+	return 25

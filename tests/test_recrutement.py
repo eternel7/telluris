@@ -7,6 +7,8 @@ sont des imports directs de `db.config` : on les monkeypatche sur le module — 
 `utils.characters` / `utils.combat` pour les helpers partagés (équipement, snapshot).
 """
 
+import random
+
 import pytest
 
 from models import character_stats
@@ -144,6 +146,45 @@ def test_generation_niveau_et_xp_coherents(monde):
 		niveau = av["vocations_niveaux"]["guerrier"]
 		assert 0 <= niveau <= 3
 		assert compute_character_level(av["xp_total"]) == niveau
+
+
+def test_generation_au_plafond_de_la_CAPITALE(monde):
+	"""Le plafond de la capitale est le plus haut du jeu : c'est LUI qui exerce le budget
+	de points de niveau (`RECRUTEMENT_NIVEAU_POINTS_PAR_NIVEAU` × niveau) contre les max
+	raciaux. `_monter_niveaux` doit saturer proprement plutôt que dépasser — sinon monter
+	le plafond d'un cran fabriquerait des recrues hors barème, sans le moindre symptôme."""
+	race = RACES["value"][0]
+	plafond = character_stats.RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE["capitale"]["niveau_max"]
+	vus = set()
+	# ⚠️ Graine posée puis RESTAURÉE : sans elle « le plafond est atteint » serait flaky ;
+	# sans la restauration, tout ce qui tire au sort ensuite hériterait de ce flux.
+	etat = random.getstate()
+	random.seed(20260903)
+	try:
+		for _ in range(40):
+			av = recrutement.generer_aventurier(GUILDE, VILLE, plafond, portraits=PORTRAITS)
+			niveau = av["vocations_niveaux"]["guerrier"]
+			assert 0 <= niveau <= plafond
+			assert compute_character_level(av["xp_total"]) == niveau
+			for k, v in av["caracteristiques_current"].items():
+				assert race["stats"][k] <= v <= race["stats_max"][k], k
+			# `rang = RANGS[min(niveau, len-1)]` : au plafond on doit encore lire un vrai cran.
+			assert av["rang"] in recrutement.RANGS
+			vus.add(niveau)
+	finally:
+		random.setstate(etat)
+	assert plafond in vus, "le tirage n'atteint jamais son propre plafond"
+
+
+def test_les_plafonds_de_lOFFRE_sont_ordonnes_et_dans_lechelle():
+	"""Invariante de réglage : une capitale offre au moins autant qu'une ville, qui offre
+	au moins autant que le défaut — et aucun plafond ne sort de l'échelle des rangs, que
+	`generer_aventurier` indexe pour poser le `rang` de la recrue."""
+	table = character_stats.RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE
+	capitale, ville, defaut = table["capitale"], table["ville"], table["defaut"]
+	assert capitale["niveau_max"] >= ville["niveau_max"] >= defaut["niveau_max"] >= 0
+	assert capitale["nb"] >= ville["nb"] >= defaut["nb"] >= 1
+	assert capitale["niveau_max"] < len(recrutement.RANGS)
 
 
 def test_generation_portrait_coherent(monde):

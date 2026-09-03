@@ -114,11 +114,28 @@ def test_degats_cc_format():
     assert stats.degats_cc.startswith("1D")
 
 def test_degats_cc_die_value():
-    # _caract_to_dice_ : ≤20→D4, ≤40→D6, ≤60→D8, ≤80→D10, ≤90→D12, sinon→D20
+    # _caract_to_dice_ : ≤20→D4, ≤30→D5, ≤40→D6, ≤50→D8, ≤60→D10,
+    #                   ≤70→D12, ≤80→D15, ≤90→D20, sinon→D25
     # + bonus de puissance F//20 (miroir des PA = R//20).
     assert compute_derived_stats(make_base(f=20), niveau=1).degats_cc == "1D4+1"
     assert compute_derived_stats(make_base(f=50), niveau=1).degats_cc == "1D8+2"
-    assert compute_derived_stats(make_base(f=100), niveau=1).degats_cc == "1D20+5"
+    assert compute_derived_stats(make_base(f=100), niveau=1).degats_cc == "1D25+5"
+
+
+def test_degats_cc_echelle_des_des_complete():
+    """L'échelle est un ESCALIER à bornes HAUTES : chaque palier se vérifie sur sa borne
+    et sur la valeur juste au-dessus, sinon un cran déplacé d'un point passerait inaperçu."""
+    paliers = [(20, 4), (30, 5), (40, 6), (50, 8), (60, 10), (70, 12), (80, 15), (90, 20)]
+    for borne, faces in paliers:
+        assert compute_derived_stats(make_base(f=borne), niveau=1).degats_cc.startswith(
+            f"1D{faces}"), f"F={borne} devrait rendre 1D{faces}"
+    # Au-delà du dernier palier, le dé ne grandit plus.
+    for f in (91, 100, 150):
+        assert compute_derived_stats(make_base(f=f), niveau=1).degats_cc.startswith("1D25")
+    # Chaque palier est STRICTEMENT plus grand que le précédent : une égalité rendrait
+    # un cran inutile, une inversion ferait cogner moins fort un personnage plus fort.
+    faces = [f for _, f in paliers] + [25]
+    assert faces == sorted(set(faces))
 
 def test_degats_cc_avec_bonus():
     base = make_base(f=50)
@@ -131,19 +148,19 @@ def test_degats_cc_avec_bonus():
 def test_degats_cc_dice_arme():
     # Une arme peut ajouter des dés (+1DX) en plus du modificateur plat. Dés de tailles
     # différentes → termes distincts, dans l'ordre (dé de caract d'abord).
-    base = make_base(f=24)  # D6, puissance F//20 = 1
+    base = make_base(f=24)  # D5, puissance F//20 = 1
     eq = EquipmentBonus(degats_dice="1D4", degats_bonus=1)
     stats = compute_derived_stats(base, niveau=1, equipment=eq)
-    assert stats.degats_cc == "1D6+1D4+2"
+    assert stats.degats_cc == "1D5+1D4+2"
 
 
 def test_degats_cc_dice_meme_taille_regroupes():
-    # Cas de la Hache de guerre (bonus_degats 4, bonus_degats_dice 6) sur un perso à 1D6+1 :
-    # le dé de l'arme a la MÊME taille que le dé de caract → "2D6+5", pas "1D6+1D6+5".
-    base = make_base(f=24)  # D6, puissance F//20 = 1
+    # Cas de la Hache de guerre (bonus_degats 4, bonus_degats_dice 6) sur un perso à 1D6+2 :
+    # le dé de l'arme a la MÊME taille que le dé de caract → "2D6+6", pas "1D6+1D6+6".
+    base = make_base(f=40)  # D6, puissance F//20 = 2
     eq = EquipmentBonus(degats_dice=normalize_dice(6), degats_bonus=4)
     stats = compute_derived_stats(base, niveau=1, equipment=eq)
-    assert stats.degats_cc == "2D6+5"
+    assert stats.degats_cc == "2D6+6"
 
 
 def test_normalize_dice():
