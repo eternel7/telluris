@@ -9,7 +9,7 @@ import random
 import time
 from collections import Counter
 
-from db.config import get_doc, find_docs
+from db.config import get_doc, find_docs, save_doc
 from models import character_stats
 from utils.characters import (
 	resolve_item_ref,
@@ -35,6 +35,11 @@ _FICHE_ITEM_KEYS = (
 	"bonus", "magies",
 	"bonus_pa", "bonus_pv", "bonus_pm", "bonus_cc", "bonus_cd",
 	"bonus_degats", "bonus_degats_dice", "bonus_initiative", "bonus_malus_depl",
+	# `description` : texte libre de l'objet (manuscrit, traité, recueil du scriptorium…) —
+	# sans elle, la fiche marchand n'affichait AUCUN texte d'objet, même pour un livre qu'on
+	# s'apprête à acheter. `carte` : bout de carte d'un livre_carte (mêmes clés que
+	# `quetes._carte_chasse`), pour le bouton 🗺️ générique de la fiche.
+	"description", "carte",
 )
 
 
@@ -1112,7 +1117,12 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:
 	"""Absorbe l'objet acheté en matières (`stock_matieres`) puis lance un `tick_atelier`
 	(production + écoulement PNJ, probabilistes). Mute `lieu_doc` en place (l'appelant
 	persiste). Renvoie True si quelque chose a changé."""
-	recettes = lieu_recettes(lieu_doc.get("categorie"))
+	# Import PARESSEUX : évite le cycle marche ⇄ scriptorium (utils/scriptorium.py importe
+	# `utils.marche` au niveau module). Ce site (« vente »/rachat) est le 4ᵉ des sites qui
+	# résolvent explicitement leurs recettes — un scriptorium y ajoute son petit lot de
+	# recettes virtuelles (sort/recette/carte), scopées à SON lieu_parent.
+	from utils import scriptorium
+	recettes = scriptorium.recettes_effectives(lieu_doc, find_docs, get_doc, save_doc)
 
 	# Rachat d'un bien que le lieu produit : il repart en rayon (re-vendable), pas en matières.
 	if lieu_produit(lieu_doc, item_doc):

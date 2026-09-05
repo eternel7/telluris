@@ -21,10 +21,11 @@ from db.config import get_doc, save_doc, delete_doc, find_docs
 from models import character_stats
 from utils.auth import get_current_user
 from utils.characters import get_selected_character, cuivre_to_purse, money_to_cuivre
-from utils.marche import debit_character, tick_atelier, lieu_recettes, appro_leaves_categorie
+from utils.marche import debit_character, tick_atelier, appro_leaves_categorie
 from utils import auberge
 from utils import recrutement
 from utils import montures
+from utils import scriptorium
 # ⚠️ Sens d'import : `routers/auberge` → `routers/user`, jamais l'inverse (précédent :
 # `routers/recrutement`). `routers/user` importe `utils/auberge`, pas ce module.
 from routers.user import _inventory_payload
@@ -438,7 +439,9 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 				or appro_leaves_categorie(categorie)):
 			continue
 		# `lieu_recettes` est mémoïsé par process : les dizaines d'appels touchent le mémo.
-		recettes = lieu_recettes(categorie)
+		# Un scriptorium y ajoute son petit lot de recettes virtuelles (sort/recette/carte),
+		# tiré UNE FOIS pour toute la nuit (pas rejoué à chaque passe).
+		recettes = scriptorium.recettes_effectives(boutique, find_docs, get_doc, save_doc)
 		change = False
 		for _ in range(passes):
 			change = tick_atelier(boutique, recettes) or change

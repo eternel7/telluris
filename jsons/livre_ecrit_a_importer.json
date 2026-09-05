@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "item:livre_ecrit",
+    "type": "item",
+    "nom": "Manuscrit relié",
+    "icon": "📖",
+    "categorie": "livre",
+    "sous_categorie": "livre_ecrit",
+    "rarete": "commun",
+    "slots": [],
+    "poids": 0.3,
+    "description": "Un manuscrit relié, aux pages encore vierges."
+  }
+]

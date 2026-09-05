@@ -19,6 +19,7 @@ from routers.pnj import pnj_router, marque_pnj as pnj_router_marque_pnj
 from routers.recrutement import recrutement_router
 from routers.montures import montures_router
 from routers.auberge import auberge_router
+from routers.scriptorium import scriptorium_router
 from routers.animations import animations_router
 from utils.combat import get_combat_grid, finalize_combat, verser_butin_au_sol
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
@@ -38,6 +39,7 @@ from utils import chasse as chasse_util
 from utils import recrutement as recrutement_util
 from utils import montures as montures_util
 from utils import auberge as auberge_util
+from utils import scriptorium as scriptorium_util
 from utils import escorte as escorte_util
 from utils import indicateurs as indicateurs_util
 from utils import fiche as fiche_util
@@ -48,7 +50,7 @@ from utils import lint_dialogues
 from utils import dev_tools
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
-from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload, lieu_recettes
+from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
@@ -130,6 +132,7 @@ app.include_router(pnj_router, prefix="/api")
 app.include_router(recrutement_router, prefix="/api")
 app.include_router(montures_router, prefix="/api")
 app.include_router(auberge_router, prefix="/api")
+app.include_router(scriptorium_router, prefix="/api")
 # Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en
 # lecture, `/admin/...` en écriture, comme les endpoints d'admin de main.py).
 app.include_router(animations_router)
@@ -589,8 +592,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# ne pourrait jamais s'amorcer) ; on ne persiste que si quelque chose a changé.
 	if grid_doc and (grid_doc.get("stock_matieres") or grid_doc.get("stock_vente")
 			or appro_leaves_categorie(grid_doc.get("categorie"))):
-		# Recettes passées explicitement, comme sell_item / convertir_apres_achat.
-		if tick_atelier(grid_doc, lieu_recettes(grid_doc.get("categorie"))):
+		# Recettes passées explicitement, comme sell_item / convertir_apres_achat. Un
+		# scriptorium y ajoute son petit lot de recettes VIRTUELLES (sort/recette/carte),
+		# scopées à SON lieu_parent — cf. utils/scriptorium.recettes_effectives.
+		if tick_atelier(grid_doc, scriptorium_util.recettes_effectives(grid_doc, find_docs, get_doc, save_doc)):
 			save_doc(grid_doc)
 	# Courses de transport échues : l'expiration est PARESSEUSE (aucun tick de fond dans le
 	# jeu) — on la solde à chaque point de passage. La sanction de réputation part avec.
@@ -746,6 +751,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# non plus — on entre dans une auberge comme dans une étable ; c'est l'écriture d'une
 	# annonce qui demande quelque chose (papier, encre, plume), pas la porte.
 	est_auberge = auberge_util.lieu_est_taverne(grid_doc)
+
+	# Scriptorium : `est_scriptorium` conditionne le bouton « Écrire ». Aucun contrôle
+	# d'accès (comme l'auberge/l'étable) — c'est l'écriture elle-même qui demande papier,
+	# encre et plume, pas la porte.
+	est_scriptorium = scriptorium_util.lieu_est_scriptorium(grid_doc)
 	# « Passer la nuit » est une action de la SIDEBAR, pas du panneau : elle doit donc être
 	# servie ici. Le log part avec — le client l'égrène PENDANT que le POST est en vol, et
 	# il ne l'aurait pas en main s'il fallait d'abord ouvrir la salle commune. Même raison
@@ -821,6 +831,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"lieu_de_guilde": lieu_de_guilde,
 			"est_etable": est_etable,
 			"est_auberge": est_auberge,
+			"est_scriptorium": est_scriptorium,
 			"auberge_nuit": auberge_nuit,
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.

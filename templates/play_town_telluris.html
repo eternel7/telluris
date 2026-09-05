@@ -1433,7 +1433,7 @@
 				{% if lieu_texte %}
 				<div class="loc-texte">{{ lieu_texte }}</div>
 				{% endif %}
-				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or pnj_present %}
+				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or pnj_present %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
 					{% if achat_sous_categories %}
@@ -1454,6 +1454,9 @@
 					   traverse pas les tables pour aller se coucher. Le coût est rendu ici, le
 					   log de nuit est servi par le contexte (cf. AUBERGE_NUIT). #}
 					<li><button class="sub-loc-btn" id="aub-nuit-btn" onclick="passerLaNuit()">🌙 Passer la nuit{% if auberge_nuit and auberge_nuit.cout %} <span class="aub-nuit-cout" id="aub-nuit-cout"></span>{% endif %}</button></li>
+					{% endif %}
+					{% if est_scriptorium %}
+					<li><button class="sub-loc-btn" onclick="openScriptorium()">🖋️ Écrire</button></li>
 					{% endif %}
 					{% if pnj_present %}
 					{# Pastille « ! »/« ? » du PNJ : rendue en Jinja au chargement, réécrite en JS
@@ -2017,6 +2020,30 @@
 		</div>
 		<div id="aub-tableau-list" class="aub-tableau"></div>
 	</div><!-- /#auberge-panel -->
+	<div id="scriptorium-panel" class="panel-hidden panel-frame board-panel" aria-label="Scriptorium">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Scriptorium">
+			<h2>🖋️ {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeScriptorium()" role="button">✕ Fermer</button>
+		</div>
+		<h2 style="margin:.6rem 0 0">✒️ Écrire un manuscrit</h2>
+		<div class="aub-ecrire">
+			{# Même règle qu'au tableau d'auberge : papier+encre+plume, et c'est le même
+			   sélecteur d'écrivain (un compagnon peut écrire avec SES propres fournitures). #}
+			<div id="scr-ecrivain-ligne" class="aub-ecrivain-ligne" hidden>
+				<label for="scr-ecrivain">✒️ Écrit par</label>
+				<select id="scr-ecrivain" class="aub-ecrivain-sel"></select>
+			</div>
+			<div id="scr-fournitures" class="aub-fournitures"></div>
+			<textarea id="scr-livre-txt" class="aub-annonce-txt" rows="6"
+					  placeholder="Votre texte…" maxlength="800"></textarea>
+			<div class="aub-ecrire-bas">
+				<span id="scr-livre-reste"></span>
+				<button class="sub-loc-btn" id="scr-ecrire-btn" onclick="ecrireLivre()">🖋️ Écrire</button>
+			</div>
+		</div>
+	</div><!-- /#scriptorium-panel -->
 	<div id="aub-nuit-overlay" class="clauses-hidden" aria-label="La nuit passe">
 		<div class="item-detail-card">
 			<h3 style="margin:.2rem 0 .6rem">🌙 La nuit passe…</h3>
@@ -2411,6 +2438,9 @@
 		.item-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: flex-end; }
 		.item-detail-actions button { margin: 0; }
 		.item-detail-actions button:disabled { opacity: .5; cursor: not-allowed; }
+		/* Texte libre d'un objet (manuscrit, traité, recueil…) — préserve les sauts de ligne,
+		   comme .sh-journal-txt : écraser le \n annulerait le soin pris au serveur. */
+		.item-detail-desc { white-space: pre-wrap; margin: .5rem 0; opacity: .85; font-size: .92rem; }
 		/* ── Conditions d'engagement d'une recrue (exigences à accepter) ──
 		   Réutilise .item-detail-card / .item-detail-close ; seul le calque est neuf
 		   (au-dessus des autres : décision bloquante). Le CONTENU emprunte au panneau
@@ -3475,6 +3505,8 @@ document.addEventListener('keydown', e => {
 	}
 	const auberge = document.getElementById('auberge-panel');
 	if (auberge && !auberge.classList.contains('panel-hidden')) { closeAuberge(); return; }
+	const scriptorium = document.getElementById('scriptorium-panel');
+	if (scriptorium && !scriptorium.classList.contains('panel-hidden')) { closeScriptorium(); return; }
 	closeSheet();
 });
 
@@ -4437,11 +4469,23 @@ function _cardCouperBtn(idx, itemId, source, item) {
 	return `<button class="sh-drop-btn" ${tool ? '' : 'disabled'} onclick="_cardCouper(${idx},'${itemId}','${source}')" title="${titre}">${label}</button>`;
 }
 
+// Bouton générique « Voir sur la carte » — dès qu'un item porte un champ `carte` (même
+// forme que `quetes._carte_chasse` : image/dimensions/position/lieu_nom), n'importe quel
+// item peut l'offrir, pas seulement un livre du scriptorium. Réutilise `showQuestMap` TEL
+// QUEL (mêmes `data-carte`/`_escAttr` que le bouton Carte des quêtes de chasse).
+function _carteBtn(item) {
+	if (!item || !item.carte) return '';
+	return `<button class="sh-equip-btn" data-carte='${_escAttr(JSON.stringify(item.carte))}' onclick="showQuestMap(this)">🗺️ Voir sur la carte</button>`;
+}
 function _renderMono(st) {
 	const item = st.item;
 	let html = `<h3>${item.icon || '📦'} ${item.nom || '—'}</h3>`;
+	// Texte libre (manuscrit personnel, ou détail d'un sort/recette produit par le
+	// scriptorium) — bâti hors innerHTML par escapeHtml, car un manuscrit peut porter le
+	// texte du JOUEUR (Convention §9).
+	if (item.description) html += `<div class="item-detail-desc">${escapeHtml(item.description)}</div>`;
 	html += _renderCmpTable(item, null, 'Objet', '');
-	const acts = [];
+	const acts = [_carteBtn(item)].filter(Boolean);
 	if (st.source === 'sac') {
 		if (_estConsommable(item)) acts.push(`<button class="sh-equip-btn" onclick="_cardConsommer(${st.idx},'${item._id}')">🍽️ Consommer</button>`);
 		if (_estCoupable(item) || _estDecoupable(item)) acts.push(_cardCouperBtn(st.idx, item._id, 'sac', item));
@@ -4572,6 +4616,7 @@ function openMarchandDetail(sens, arrIdx) {
 function _renderMarchandDetail(st) {
 	const it = st.item;
 	let html = `<h3>${it.icon || '📦'} ${it.nom || '—'}</h3>`;
+	if (it.description) html += `<div class="item-detail-desc">${escapeHtml(it.description)}</div>`;
 	if (it.compagnon_id) html += `<div class="item-cmp-slotsel"><span>Porteur :</span><strong>${it.porteur_icon || '👤'} ${it.porteur_nom || 'Porteur'}</strong></div>`;
 	if (it.prix) html += `<div class="item-cmp-slotsel"><span>Prix :</span><strong>${it.negocie ? '🤝 ' : ''}${formatPrix(it.prix)}</strong></div>`;
 	if (st.slots.length) {
@@ -4584,7 +4629,7 @@ function _renderMarchandDetail(st) {
 	} else {
 		html += _renderCmpTable(it, null, 'Objet', '');
 	}
-	const acts = [];
+	const acts = [_carteBtn(it)].filter(Boolean);
 	if (st.sens === 'vente') acts.push(`<button class="sh-drop-btn" onclick="_cardSell(${it.index},'${it.item_id}',${_cgArg(it.compagnon_id)})">Vendre</button>`);
 	else                     acts.push(`<button class="sh-equip-btn" onclick="_cardBuy('${it.item_id}')">Acheter</button>`);
 	const mIdx = st.sens === 'vente' ? it.index : 'null';
@@ -7371,6 +7416,114 @@ document.addEventListener('change', e => {
 	if (e.target && e.target.id === 'aub-ecrivain') {
 		_aubEcrivain = e.target.value || '';
 		_aubMajEcriture();
+	}
+});
+
+// ── Scriptorium : l'écrit personnel ───────────────────────────────────────────────
+// Même mécanique d'écrivain que le tableau d'auberge (papier+encre+plume, un compagnon
+// peut signer avec SES fournitures) — mais aucun sondage, aucune table : un panneau
+// d'écriture simple, sans rien de partagé entre joueurs. `_aubFetch` est réutilisé tel
+// quel (générique : GET sans body, POST sinon, toast sur erreur).
+let _scrEtat = null;
+let _scrEcrivain = '';
+
+function _scrEcrivainCourant() {
+	const liste = (_scrEtat && _scrEtat.ecrivains) || [];
+	const choisi = liste.find(e => (e.id || '') === _scrEcrivain);
+	if (!choisi && liste.length) _scrEcrivain = liste[0].id || '';
+	return choisi || liste[0] || null;
+}
+
+function _scrMajEcriture() {
+	const qui = _scrEcrivainCourant();
+	const four = document.getElementById('scr-fournitures');
+	if (four) {
+		const noms = { papier: '📄 papier', encre: '🖊️ encre', plume_a_ecrire: '🪶 plume' };
+		const consommee = { papier: true, encre: true };
+		const dispo = (qui && qui.fournitures) || {};
+		four.innerHTML = 'Pour écrire : ' + Object.keys(noms).map(k =>
+			`<span class="aub-fourniture${dispo[k] ? '' : ' manque'}">${noms[k]}${consommee[k] ? ' <span class="aub-depense">(dépensé)</span>' : ''}</span>`
+		).join(' · ');
+	}
+	const btn = document.getElementById('scr-ecrire-btn');
+	if (btn) btn.disabled = !(qui && qui.peut_ecrire);
+}
+
+function _scrMajEcrivains(data) {
+	const ligne = document.getElementById('scr-ecrivain-ligne');
+	const sel = document.getElementById('scr-ecrivain');
+	const liste = data.ecrivains || [];
+	if (!ligne || !sel) return;
+	ligne.hidden = liste.length < 2;
+	const sig = liste.map(e => `${e.id}${e.nom}${e.peut_ecrire ? 1 : 0}`).join('');
+	if (sel.dataset.sig !== sig) {
+		sel.dataset.sig = sig;
+		sel.innerHTML = '';
+		for (const e of liste) {
+			const opt = document.createElement('option');
+			opt.value = e.id || '';
+			opt.textContent = e.nom + (e.peut_ecrire ? '' : ' — sans fournitures');
+			sel.appendChild(opt);
+		}
+	}
+	_scrEcrivainCourant();
+	sel.value = _scrEcrivain;
+}
+
+function _scrReste() {
+	const zone = document.getElementById('scr-livre-txt');
+	const reste = document.getElementById('scr-livre-reste');
+	if (!zone || !reste || !_scrEtat) return;
+	reste.textContent = `${zone.value.length}/${_scrEtat.longueur_max}`;
+}
+
+function renderScriptorium(data) {
+	if (!data) return;
+	_scrEtat = data;
+	_scrMajEcrivains(data);
+	_scrMajEcriture();
+	_scrReste();
+}
+
+async function openScriptorium() {
+	const data = await _aubFetch('api/scriptorium');
+	if (!data) return;
+	renderScriptorium(data);
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('scriptorium-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function closeScriptorium() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('scriptorium-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function ecrireLivre() {
+	const zone = document.getElementById('scr-livre-txt');
+	if (!zone || !zone.value.trim()) return;
+	const data = await _aubFetch('api/scriptorium/ecrire',
+								 { texte: zone.value, ecrivain_id: _scrEcrivain });
+	if (!data) return;
+	zone.value = '';
+	// Le papier et l'encre viennent d'être dépensés : sans ce resync, la fiche montrerait
+	// encore une feuille que le joueur n'a plus (Convention §10) — publié seulement quand
+	// c'est le PRINCIPAL qui a écrit.
+	if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+	showToast(data.ecrivain_compagnon
+		? `🖋️ ${data.ecrivain} rédige « ${data.livre.nom} ». (papier et encre dépensés)`
+		: `🖋️ Vous rédigez « ${data.livre.nom} ». (papier et encre dépensés)`);
+	openScriptorium();   // resynchronise les fournitures affichées
+}
+
+document.addEventListener('input', e => {
+	if (e.target && e.target.id === 'scr-livre-txt') _scrReste();
+});
+document.addEventListener('change', e => {
+	if (e.target && e.target.id === 'scr-ecrivain') {
+		_scrEcrivain = e.target.value || '';
+		_scrMajEcriture();
 	}
 });
 

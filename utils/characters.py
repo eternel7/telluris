@@ -182,6 +182,13 @@ def resolve_item_ref(ref):
 	from utils.sorts import est_grimoire, ecoles_de_grimoire
 	if est_grimoire(doc):
 		doc["magies"] = ecoles_de_grimoire(doc, get_doc, get_doc("rules:vocations"))
+	# Manuscrit personnel (utils/scriptorium.py) : le texte du joueur vit sur la RÉFÉRENCE,
+	# jamais sur le doc générique — zéro lecture DB de plus, tout est déjà sur `ref`. Import
+	# tardif : ce module dépend de `characters` (item_sous_categorie, lieu_label).
+	from utils import scriptorium
+	if item_sous_categorie(doc) == scriptorium.SOUS_CATEGORIE_LIVRE_ECRIT and isinstance(ref, dict) and ref.get("texte"):
+		doc["description"] = ref.get("texte") or doc.get("description")
+		doc["nom"] = scriptorium.titre_livre(doc.get("nom") or item_id, ref)
 	if (lieu_id := item_ref_lieu(ref)):
 		doc["lieu_parent"] = lieu_id
 		doc["nom"] = item_label(doc.get("nom") or item_id, get_doc(lieu_id))

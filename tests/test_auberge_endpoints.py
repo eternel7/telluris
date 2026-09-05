@@ -609,7 +609,7 @@ def test_la_nuit_relance_les_etals_du_LIEU_PARENT(monde, monkeypatch):
 
 	appels = []
 	monkeypatch.setattr(ra, "tick_atelier", lambda doc, rec: appels.append(doc["_id"]) or True)
-	monkeypatch.setattr(ra, "lieu_recettes", lambda cat: [])
+	monkeypatch.setattr(ra.scriptorium, "recettes_effectives", lambda lieu, fd, gd, sd: [])
 	monkeypatch.setattr(ra, "appro_leaves_categorie", lambda cat: [])
 
 	data = _appel(monde, _perso(), ra.passer_la_nuit, None)

@@ -477,6 +477,16 @@ JOURNAL_LONGUEUR_MAX: int = 800
 JOURNAL_ENTREES_MAX: int = 50
 JOURNAL_BESTIAIRE_LIEUX_MAX: int = 5
 
+# ── Scriptorium (écrit personnel + production automatique de livres) ─────────────
+# LONGUEUR_MAX : signes d'un manuscrit personnel (même règle papier+encre+plume que
+# l'annonce/le journal, réglage INDÉPENDANT — cf. utils/scriptorium.py). PAPIER/ENCRE :
+# coût matière d'un livre auto-produit (sort/recette/carte) par le tick d'atelier du
+# scriptorium — leviers de RARETÉ : plus ils sont hauts, plus la production dispute la
+# même réserve de papier/encre que l'écriture des joueurs et se fait rare.
+SCRIPTORIUM_LIVRE_LONGUEUR_MAX: int = 800
+SCRIPTORIUM_LIVRE_PAPIER: int = 3
+SCRIPTORIUM_LIVRE_ENCRE: int = 2
+
 # ── Accès (barrières PNJ gardiennes) ──────────────────────────────────────────────
 # Un lieu peut porter un bloc `acces` (gardien, conditions, cycle) qui en interdit
 # l'entrée tant que les conditions ne sont pas remplies — cf. utils/acces.py.
@@ -828,6 +838,9 @@ def current_world_variables() -> dict:
 		"JOURNAL_LONGUEUR_MAX": JOURNAL_LONGUEUR_MAX,
 		"JOURNAL_ENTREES_MAX": JOURNAL_ENTREES_MAX,
 		"JOURNAL_BESTIAIRE_LIEUX_MAX": JOURNAL_BESTIAIRE_LIEUX_MAX,
+		"SCRIPTORIUM_LIVRE_LONGUEUR_MAX": SCRIPTORIUM_LIVRE_LONGUEUR_MAX,
+		"SCRIPTORIUM_LIVRE_PAPIER": SCRIPTORIUM_LIVRE_PAPIER,
+		"SCRIPTORIUM_LIVRE_ENCRE": SCRIPTORIUM_LIVRE_ENCRE,
 		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
 		"INDICATEURS_ACTIFS": INDICATEURS_ACTIFS,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
@@ -898,6 +911,7 @@ def load_world_variables() -> dict:
 	global AUBERGE_MESSAGE_DUREE_SECONDES, AUBERGE_TABLE_MESSAGES_MAX
 	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
+	global SCRIPTORIUM_LIVRE_LONGUEUR_MAX, SCRIPTORIUM_LIVRE_PAPIER, SCRIPTORIUM_LIVRE_ENCRE
 	global ACCES_GARDIEN_ACTIF, INDICATEURS_ACTIFS
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	global CARCASSE_TRANCHANT_TAG, CARCASSE_DECOUPE_POIDS_MIN
@@ -1071,6 +1085,11 @@ def load_world_variables() -> dict:
 	JOURNAL_LONGUEUR_MAX = max(1, int(v.get("JOURNAL_LONGUEUR_MAX", JOURNAL_LONGUEUR_MAX)))
 	JOURNAL_ENTREES_MAX = max(1, int(v.get("JOURNAL_ENTREES_MAX", JOURNAL_ENTREES_MAX)))
 	JOURNAL_BESTIAIRE_LIEUX_MAX = max(1, int(v.get("JOURNAL_BESTIAIRE_LIEUX_MAX", JOURNAL_BESTIAIRE_LIEUX_MAX)))
+	# Plancher à 1 : un manuscrit qui ne peut rien contenir ne serait pas un manuscrit ; un
+	# coût matière nul rendrait la production des livres gratuite (donc pas rare).
+	SCRIPTORIUM_LIVRE_LONGUEUR_MAX = max(1, int(v.get("SCRIPTORIUM_LIVRE_LONGUEUR_MAX", SCRIPTORIUM_LIVRE_LONGUEUR_MAX)))
+	SCRIPTORIUM_LIVRE_PAPIER = max(1, int(v.get("SCRIPTORIUM_LIVRE_PAPIER", SCRIPTORIUM_LIVRE_PAPIER)))
+	SCRIPTORIUM_LIVRE_ENCRE = max(1, int(v.get("SCRIPTORIUM_LIVRE_ENCRE", SCRIPTORIUM_LIVRE_ENCRE)))
 	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))
 	INDICATEURS_ACTIFS = bool(v.get("INDICATEURS_ACTIFS", INDICATEURS_ACTIFS))
 

@@ -25,7 +25,7 @@ from utils.marche import (
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	compter_transaction,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
-	relations_lieux_payload, lieu_recettes,
+	relations_lieux_payload,
 )
 from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
@@ -46,6 +46,7 @@ from utils import escorte
 from utils import indicateurs
 from utils import expedition
 from utils import auberge
+from utils import scriptorium
 from utils import journal as journal_util
 from models import character_stats
 from models.character_stats import (
@@ -1924,8 +1925,9 @@ async def buy_item(
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 	# Tick marché à l'achat aussi (approvisionnement + production + écoulement PNJ), comme à la
-	# vente et à l'entrée du lieu — l'achat vient de retirer du stock à reconstituer.
-	tick_atelier(lieu_doc, lieu_recettes(lieu_doc.get("categorie")))
+	# vente et à l'entrée du lieu — l'achat vient de retirer du stock à reconstituer. Un
+	# scriptorium y ajoute son petit lot de recettes virtuelles (sort/recette/carte).
+	tick_atelier(lieu_doc, scriptorium.recettes_effectives(lieu_doc, find_docs, get_doc, save_doc))
 	save_doc(lieu_doc)  # best-effort : décrément du stock monde
 
 	payload = _inventory_payload(character)
