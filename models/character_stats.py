@@ -702,7 +702,7 @@ PRIX_AMPLITUDE_STOCK: float = 0.30
 # Écoulement PNJ des produits finis : à chaque vente/visite, proba de vendre aux PNJ une
 # fraction de l'excédent (au-dessus de la cible) de chaque produit en rayon.
 VENTE_PNJ_PROBA: float = 0.10
-VENTE_PNJ_FRACTION: float = 0.50
+VENTE_PNJ_FRACTION: float = 0.05
 
 
 def current_world_variables() -> dict:
