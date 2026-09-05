@@ -1,0 +1,681 @@
+[
+  {
+    "_id": "item:Huile_vegetale",
+    "type": "item",
+    "nom": "Huile végétale",
+    "icon": "🫒",
+    "description": "Huile pressée à froid, tirée d'olives, de noix ou de graines — la base neutre de toute cosmétique.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "huile_vegetale",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2
+  },
+  {
+    "_id": "item:Cendres",
+    "type": "item",
+    "nom": "Cendres",
+    "icon": "🌫️",
+    "description": "Cendres de bois tamisées, prélevées dans l'âtre — la base de toute lessive.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "cendre",
+    "slots": [],
+    "tags": [],
+    "poids": 0.3
+  },
+  {
+    "_id": "item:Miel",
+    "type": "item",
+    "nom": "Miel",
+    "icon": "🍯",
+    "description": "Miel doré recueilli aux ruchers, prisé pour adoucir savons et onguents.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "miel",
+    "slots": [],
+    "tags": [],
+    "poids": 0.25
+  },
+  {
+    "_id": "item:Herbes_aromatiques",
+    "type": "item",
+    "nom": "Herbes aromatiques",
+    "icon": "🌿",
+    "description": "Thym, romarin, lavande et sauge séchés en bouquets — le parfum de toute savonnerie qui se respecte.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "herbe_aromatique",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15
+  },
+  {
+    "_id": "item:Savon_d_huile",
+    "type": "item",
+    "nom": "Savon d'huile",
+    "icon": "🧼",
+    "description": "Savon plus doux, fabriqué avec une huile végétale plutôt qu'avec de la graisse animale.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "effets": {
+      "duree": 8,
+      "buffs": {
+        "Cha": 3
+      }
+    }
+  },
+  {
+    "_id": "item:Savon_parfume",
+    "type": "item",
+    "nom": "Savon parfumé",
+    "icon": "🧼",
+    "description": "Savon enrichi de plantes et d'huiles aromatiques, qui laisse sur la peau un sillage qu'on remarque.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "effets": {
+      "duree": 10,
+      "buffs": {
+        "Cha": 7
+      }
+    }
+  },
+  {
+    "_id": "item:Savon_au_miel",
+    "type": "item",
+    "nom": "Savon au miel",
+    "icon": "🧼",
+    "description": "Savon doux contenant du miel, qui apaise la peau autant qu'il la nettoie.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.12,
+    "effets": {
+      "duree": 8,
+      "regen_pv": 1,
+      "buffs": {
+        "Cha": 4
+      }
+    }
+  },
+  {
+    "_id": "item:Savon_aux_herbes",
+    "type": "item",
+    "nom": "Savon aux herbes",
+    "icon": "🧼",
+    "description": "Parfumé au thym, au romarin, à la lavande ou à la sauge : un savon qui apaise autant qu'il embellit.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "effets": {
+      "duree": 8,
+      "buffs": {
+        "Vol": 4,
+        "Cha": 2
+      }
+    }
+  },
+  {
+    "_id": "item:Savon_medicinal",
+    "type": "item",
+    "nom": "Savon médicinal",
+    "icon": "🧼",
+    "description": "Savon destiné à nettoyer les plaies et la peau, sans fioriture ni parfum.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "effets": {
+      "duree": 6,
+      "regen_pv": 2
+    }
+  },
+  {
+    "_id": "item:Savon_detachant",
+    "type": "item",
+    "nom": "Savon détachant",
+    "icon": "🧼",
+    "description": "Savon particulièrement efficace pour le linge, formulé pour venir à bout des taches les plus tenaces.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15
+  },
+  {
+    "_id": "item:Lessive_de_cendres",
+    "type": "item",
+    "nom": "Lessive de cendres",
+    "icon": "🧺",
+    "description": "Solution alcaline obtenue en faisant couler de l'eau à travers des cendres tamisées, utilisée pour laver le linge.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.3
+  },
+  {
+    "_id": "item:Poudre_a_lessiver",
+    "type": "item",
+    "nom": "Poudre à lessiver",
+    "icon": "🧺",
+    "description": "Mélange de cendres, de sels et de poudres végétales, à diluer pour le grand lavage.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.25
+  },
+  {
+    "_id": "item:Cire_a_cheveux",
+    "type": "item",
+    "nom": "Cire à cheveux",
+    "icon": "💇",
+    "description": "Mélange de cire d'abeille et d'huiles, pour entretenir et coiffer la chevelure.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "effets": {
+      "duree": 8,
+      "buffs": {
+        "Cha": 5
+      }
+    }
+  },
+  {
+    "_id": "item:Pommade_corporelle",
+    "type": "item",
+    "nom": "Pommade corporelle",
+    "icon": "🧴",
+    "description": "Graisse parfumée aux herbes, destinée à protéger et adoucir la peau.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15,
+    "effets": {
+      "duree": 8,
+      "regen_pv": 1
+    }
+  },
+  {
+    "_id": "item:Huile_parfumee",
+    "type": "item",
+    "nom": "Huile parfumée",
+    "icon": "🧴",
+    "description": "Huile végétale infusée d'herbes aromatiques, utilisée pour le corps, les cheveux ou les vêtements.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15,
+    "effets": {
+      "duree": 8,
+      "buffs": {
+        "Cha": 5
+      }
+    }
+  },
+  {
+    "_id": "item:Parfum_solide",
+    "type": "item",
+    "nom": "Parfum solide",
+    "icon": "🌸",
+    "description": "Cire parfumée à appliquer sur la peau, qui fond doucement à la chaleur du corps.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05,
+    "effets": {
+      "duree": 10,
+      "buffs": {
+        "Cha": 8
+      }
+    }
+  },
+  {
+    "_id": "item:Eau_parfumee",
+    "type": "item",
+    "nom": "Eau parfumée",
+    "icon": "💧",
+    "description": "Eau aromatique destinée à la toilette ou à parfumer les vêtements.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15,
+    "effets": {
+      "duree": 6,
+      "buffs": {
+        "Cha": 3
+      }
+    }
+  },
+  {
+    "_id": "item:Sachet_parfume",
+    "type": "item",
+    "nom": "Sachet parfumé",
+    "icon": "👝",
+    "description": "Petit sachet de plantes séchées, destiné à parfumer les vêtements et les coffres.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05,
+    "effets": {
+      "duree": 12,
+      "buffs": {
+        "Cha": 2
+      }
+    }
+  },
+  {
+    "_id": "item:Bougie_parfumee",
+    "type": "item",
+    "nom": "Bougie parfumée",
+    "icon": "🕯️",
+    "description": "Bougie de cire d'abeille parfumée aux plantes, dont le fumet met les convives à l'aise.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15,
+    "effets": {
+      "duree": 8,
+      "buffs": {
+        "Cha": 4
+      }
+    }
+  },
+  {
+    "_id": "item:Cire_pour_cuir",
+    "type": "item",
+    "nom": "Cire pour cuir",
+    "icon": "🥾",
+    "description": "Produit servant à nourrir et imperméabiliser les chaussures et objets en cuir.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2
+  },
+  {
+    "_id": "item:Cire_pour_bois",
+    "type": "item",
+    "nom": "Cire pour bois",
+    "icon": "🪑",
+    "description": "Produit d'entretien pour meubles et objets en bois, qui en ravive le grain.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2
+  },
+  {
+    "_id": "item:Pate_a_polir",
+    "type": "item",
+    "nom": "Pâte à polir",
+    "icon": "✨",
+    "description": "Mélange abrasif doux, à base de sel et de cendres, pour nettoyer et faire briller.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15
+  },
+  {
+    "_id": "recette:savonnerie_savon_d_huile",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Savon_d_huile",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Huile_vegetale",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_savon_parfume",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Savon_parfume",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:savon",
+        "quantite": 1
+      },
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_savon_au_miel",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Savon_au_miel",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:savon",
+        "quantite": 1
+      },
+      {
+        "item": "item:Miel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_savon_aux_herbes",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Savon_aux_herbes",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:savon",
+        "quantite": 1
+      },
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_savon_medicinal",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Savon_medicinal",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:savon",
+        "quantite": 1
+      },
+      {
+        "item": "item:Herbes_medicinales",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_savon_detachant",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Savon_detachant",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:savon",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cendre",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_lessive_de_cendres",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Lessive_de_cendres",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "cendre",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_poudre_a_lessiver",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Poudre_a_lessiver",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Lessive_de_cendres",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      },
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_cire_a_cheveux",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Cire_a_cheveux",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 1
+      },
+      {
+        "item": "item:Huile_vegetale",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_pommade_corporelle",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Pommade_corporelle",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "graisse",
+        "quantite": 1
+      },
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_huile_parfumee",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Huile_parfumee",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Huile_vegetale",
+        "quantite": 1
+      },
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_parfum_solide",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Parfum_solide",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 1
+      },
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_eau_parfumee",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Eau_parfumee",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_sachet_parfume",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Sachet_parfume",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 2
+      },
+      {
+        "item": "item:Chiffon",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_bougie_parfumee",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Bougie_parfumee",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 2
+      },
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 1
+      },
+      {
+        "item": "item:Meche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_bougie_parfumee",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Bougie_parfumee",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 2
+      },
+      {
+        "item": "item:Herbes_aromatiques",
+        "quantite": 1
+      },
+      {
+        "item": "item:Meche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_cire_pour_cuir",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Cire_pour_cuir",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "graisse",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_cire_pour_bois",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Cire_pour_bois",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Cire_d_abeille",
+        "quantite": 1
+      },
+      {
+        "item": "item:poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:savonnerie_pate_a_polir",
+    "type": "recette",
+    "lieu_categorie": "savonnerie",
+    "objet_final": "Pate_a_polir",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "sel_gemme",
+        "quantite": 1
+      },
+      {
+        "item": "item:Cendres",
+        "quantite": 1
+      }
+    ]
+  }
+]

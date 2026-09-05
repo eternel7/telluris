@@ -116,7 +116,40 @@
 		display: flex;
 		flex-direction: column;
 		gap: 5px;
+		transition: max-width 0.2s ease, min-width 0.2s ease, width 0.2s ease;
 	}
+
+	/* Réduction du panneau de gauche et de la légende : voir la carte le plus grand possible
+	   est le cas d'usage principal de cet éditeur, donc les deux se replient jusqu'à ne garder
+	   qu'un bandeau de bouton. ⚠️ Le contenu est masqué en display:none, jamais retiré : les
+	   `const` DOM capturées au chargement du script continuent d'exister (même précaution que
+	   le mode déplacement, cf. body.mode-deplacement plus bas). */
+	.panel-toggle-bar { display: flex; justify-content: flex-end; }
+	.panel-toggle-btn {
+		flex-shrink: 0;
+		width: 26px; height: 26px;
+		display: flex; align-items: center; justify-content: center;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		color: var(--accent);
+		font-size: 0.75rem;
+		line-height: 1;
+		cursor: pointer;
+		transition: border-color 0.15s;
+	}
+	.panel-toggle-btn:hover { border-color: var(--accent); background: rgba(200,168,75,0.12); }
+	.panel.collapsed {
+		width: auto;
+		min-width: 0;
+		max-width: none;
+	}
+	.panel.collapsed .panel-body { display: none; }
+	.panel.collapsed .panel-toggle-bar { justify-content: center; }
+
+	.card-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+	#legend-card.collapsed .legend { display: none; }
+	#legend-card.collapsed .card-title-row { margin-bottom: 0; }
 
 	.card {
 		background: var(--panel);
@@ -672,6 +705,15 @@ body.mode-deplacement #grid-canvas { cursor: default; }
 	<!-- LEFT PANEL -->
 	<div class="panel" id="left-panel">
 
+		<!-- Réduction du panneau : donner le plus de place possible à la carte reste le cas
+		     d'usage principal de cet éditeur. Le corps est un enfant unique masqué en display:none
+		     (jamais retiré du DOM : mêmes `const` capturées au chargement que le mode déplacement,
+		     cf. plus bas). Le panneau replié ne garde que cette barre, largeur mini. -->
+		<div class="panel-toggle-bar">
+			<button class="panel-toggle-btn" id="left-panel-toggle-btn" title="Réduire le panneau">◀</button>
+		</div>
+		<div class="panel-body" id="left-panel-body">
+
 		<!-- Image & dimensions -->
 		<div class="card">
 			<div class="card-title">📍️ Sélection du Lieu</div>
@@ -850,6 +892,7 @@ body.mode-deplacement #grid-canvas { cursor: default; }
 			<div class="dim-msg" id="dim-msg"></div>
 		</div>
 
+		</div>
 	</div>
 
 	<!-- RIGHT: canvas + json -->
@@ -887,9 +930,14 @@ body.mode-deplacement #grid-canvas { cursor: default; }
 			</label>
 		</div>
 
-		<!-- Légende couleurs. ⚠️ `id` ajouté pour la même raison que #bm-card. -->
+		<!-- Légende couleurs. ⚠️ `id` ajouté pour la même raison que #bm-card. Réductible pour la
+		     même raison que #left-panel — ⚠️ elle vit dans .canvas-wrap : la replier ne change
+		     rien à la largeur de la carte, seulement à sa hauteur disponible. -->
 		<div class="card" id="legend-card">
-			<div class="card-title" id="legend-title">🎨 Légende</div>
+			<div class="card-title-row">
+				<div class="card-title" id="legend-title" style="margin-bottom:0;">🎨 Légende</div>
+				<button class="panel-toggle-btn" id="legend-toggle-btn" title="Réduire la légende">▾</button>
+			</div>
 			<div class="legend" id="legend"></div>
 		</div>
 
@@ -1051,6 +1099,28 @@ const dimYEl		= document.getElementById('dim-y');
 const dimAttenteEl	= document.getElementById('dim-attente');
 const dimWarnEl		= document.getElementById('dim-warn');
 const dimMsgEl		= document.getElementById('dim-msg');
+
+// ── PANNEAUX RÉDUCTIBLES ────────────────────────────────────────────────────
+// Voir la carte le plus grand possible est le cas d'usage principal de cet éditeur : le
+// panneau de gauche ET la légende se replient sur un simple bouton. `.panel-body`/`.legend`
+// sont masqués en display:none et RIEN n'est retiré du DOM — même précaution que le mode
+// déplacement (les `const` d'éléments restent valides sur des nœuds cachés).
+function togglePanel(el, btn, flecheOuvert, flecheFerme) {
+	const collapsed = el.classList.toggle('collapsed');
+	btn.textContent = collapsed ? flecheFerme : flecheOuvert;
+	btn.title = collapsed ? btn.dataset.titreOuvrir : btn.dataset.titreFermer;
+}
+const leftPanelEl		= document.getElementById('left-panel');
+const leftPanelToggleBtn	= document.getElementById('left-panel-toggle-btn');
+leftPanelToggleBtn.dataset.titreFermer = 'Réduire le panneau';
+leftPanelToggleBtn.dataset.titreOuvrir = 'Déployer le panneau';
+leftPanelToggleBtn.addEventListener('click', () => togglePanel(leftPanelEl, leftPanelToggleBtn, '◀', '▶'));
+
+const legendCardEl		= document.getElementById('legend-card');
+const legendToggleBtn	= document.getElementById('legend-toggle-btn');
+legendToggleBtn.dataset.titreFermer = 'Réduire la légende';
+legendToggleBtn.dataset.titreOuvrir = 'Déployer la légende';
+legendToggleBtn.addEventListener('click', () => togglePanel(legendCardEl, legendToggleBtn, '▾', '▸'));
 
 // ── REDIMENSIONNEMENT STATE ────────────────────────────────────────────────
 // Posé par appliquerRedimensionnement, effacé par 💾 réussi / ↺ Annuler / changement de lieu.
