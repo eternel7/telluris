@@ -9,7 +9,7 @@ from models.character_stats import (
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
-	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id, item_ref_weight,
+	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id,
 	lieu_label, noter_victoire,
 )
 from utils.consommables import (
@@ -1717,8 +1717,9 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 				est_monture = defenseur.get("est_monture")
 				est_protege = defenseur.get("est_protege")
 				# La cargaison vit sur le DOC de la monture, pas sur son snapshot : on se
-				# contente de la marquer ici, `finalize_combat` déversera son sac dans le
-				# butin disponible (là où le doc est chargé, et sauvé). Une personne ESCORTÉE
+				# contente de la marquer ici, `finalize_combat` déversera son sac AU SOL (là
+				# où le doc est chargé, et sauvé) — la ligne ci-dessous le dit déjà, il aura
+				# fallu le mécanisme du sol pour qu'elle cesse de mentir. Une personne ESCORTÉE
 				# porte le même marqueur `morte` — c'est `_finalize_protege` qui en tirera la
 				# mort et l'échec de la quête, au même endroit et pour la même raison.
 				# ⚠️ Marqué AVANT la ligne, qui porte l'état du défenseur (`morte`).
@@ -2937,6 +2938,70 @@ def _carcasse_payload(monstre: dict) -> dict | None:
 	}
 
 
+def verser_butin_au_sol(character: dict, combat_doc: dict, deja=None) -> list[dict]:
+	"""Verse au SOL du principal les carcasses de `butin_disponible` que personne n'a
+	emportées, et les inscrit dans la MÊME garde que l'encaissement. Mute `character`
+	(`objets_au_sol` + `butin_collectes`) et `combat_doc` (`butin_disponible` vidé) ;
+	ne sauvegarde RIEN — l'appelant persiste. Renvoie `[{nom, poids}]` de ce qui est tombé.
+
+	POURQUOI. Une carcasse est INDIVISIBLE tant qu'elle est dans le butin : l'overlay de fin
+	l'attribue entière à un membre, ou à personne. Un cerf de 180 kg qu'aucun membre ne peut
+	porter n'avait donc qu'une issue, disparaître — exactement le butin que `utils/carcasse.py`
+	existe pour rendre accessible (« on emporte la tête et les pattes, on abandonne le corps »).
+	Au sol, il redevient débitable (`POST /api/couper`, `source:"sol"`) puis emportable morceau
+	par morceau. Plus aucun geste ne détruit du butin : abandonner, c'est laisser par terre et
+	faire un pas.
+
+	⚠️ Le sol appartient au PERSONNAGE et non au lieu (champ transitoire, vidé au premier pas
+	par les DEUX branches de `move_character`) : il n'y a aucun cas particulier à écrire pour
+	une salle de donjon, où le joueur n'a de toute façon jamais bougé — ni `routers/combat.py`
+	ni `_declencher_combat_donjon` n'écrivent `lieu`/`position`, la salle n'est qu'un décor de
+	battle map. La pile l'attend là où il se tient, c.-à-d. au seuil.
+
+	⚠️ MÊME garde que l'encaissement (`butin_collectes[combat_id]`) : « déjà sorti du butin »
+	vaut pour un sac COMME pour le sol. Sans cela, un second /collect — ou le filet de /play
+	après un `save_doc(combat_doc)` best-effort échoué — reverserait la carcasse une seconde
+	fois. `deja` = ce que l'appelant vient d'encaisser, pas encore écrit dans la garde.
+
+	⚠️ Aucune lecture de doc : `butin_disponible` porte déjà `item_id`, `nom` et `poids`. Le
+	poids versé est celui de l'INSTANCE (tiré au butin), comme à l'encaissement — c'est lui que
+	`carcasse.item_est_decoupable(doc, poids)` compare au seuil de découpe.
+
+	⚠️ VICTOIRE SEULEMENT. `butin_disponible` n'a de sens qu'à la victoire — c'est là, et là
+	seulement, que `finalize_combat` le remplit —, et le garde interdit qu'une écriture
+	future y verse quoi que ce soit qui se retrouverait au sol sans qu'on l'ait décidé.
+	Précédent : la cargaison d'une monture tombée y transitait POUR TOUTES LES ISSUES, si
+	bien qu'un filet non gardé aurait rendu sur une défaite un butin délibérément perdu.
+	(Elle va désormais au sol directement, cf. `_finalize_monture`.)
+	"""
+	if combat_doc.get("status") != "victoire":
+		return []
+	combat_id = combat_doc.get("_id")
+	guard = character.get("butin_collectes", {})
+	if not isinstance(guard, dict):
+		guard = {}
+	traites = set(guard.get(combat_id, [])) | set(deja or ())
+
+	au_sol = character.get("objets_au_sol", [])
+	verses = []
+	for d in (combat_doc.get("butin_disponible") or []):
+		mid = d.get("monstre_id")
+		if not mid or mid in traites:
+			continue
+		au_sol.append({"item": d["item_id"], "poids": d["poids"]})
+		verses.append({"nom": d.get("nom", d["item_id"]), "poids": d["poids"]})
+		traites.add(mid)
+	character["objets_au_sol"] = au_sol
+
+	# ⚠️ `pop` AVANT l'écriture : réassigner une clé existante ne la déplace pas en fin de
+	# dict, et l'ordre d'insertion EST l'ordre de récence qui décide de l'éviction.
+	guard.pop(combat_id, None)
+	guard[combat_id] = sorted(traites)
+	character["butin_collectes"] = dict(list(guard.items())[-MEMOIRE_COMBATS_MAX:])
+	combat_doc["butin_disponible"] = []
+	return verses
+
+
 def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> bool:
 	"""Applique l'issue du combat au doc d'UN membre du groupe (principal ou compagnon,
 	les docs `aventurier:*` étant des miroirs du character) : PV (KO → relevé à 1),
@@ -2998,10 +3063,25 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 	elle ne se bat pas) et n'a pas d'affinité — seuls ses PV comptent, et sa survie.
 
 	Tombée à 0 PV, elle est PERDUE (world-var MONTURE_MORT_DEFINITIVE) : elle quitte le
-	troupeau et sa cargaison rejoint le butin disponible, pour que le joueur puisse la
-	récupérer dans l'overlay de fin plutôt que de la voir disparaître avec la bête.
-	⚠️ Cela suppose une victoire — `butin_disponible` n'est proposé que dans ce cas ; une
-	défaite emporte donc la cargaison, ce qui est le prix assumé du risque.
+	troupeau et sa cargaison se DÉVERSE AU SOL du principal (champ transitoire, perdu au
+	premier pas), d'où le joueur emporte ce qu'il peut porter et débite le reste.
+
+	⚠️ QUELLE QUE SOIT L'ISSUE, et c'est un changement délibéré : la cargaison passait par
+	`butin_disponible`, qui n'est proposé QU'À LA VICTOIRE — une défaite l'emportait donc
+	(« prix assumé du risque »). Le sol n'a pas cette contrainte : la bête tombe là où elle
+	tombe, sa charge s'y répand (le log du KO le dit déjà), et le groupe relevé à 1 PV la
+	retrouve sur place.
+
+	⚠️ C'est aussi le seul chemin qui préserve les RÉFÉRENCES telles quelles : le détour par
+	le butin les reconstruisait en `{item, poids}`, perdant `lieu_parent` (donc le libellé
+	« Carte d'aventurier (Auxerre) ») et aplatissant les réfs legacy en chaîne nue. Il
+	économise au passage une lecture de doc item par objet porté.
+
+	⚠️ La cargaison est versée sur le doc du PRINCIPAL, sauvé par `_finalize_membre` juste
+	après — donc sous SON garde exactly-once, là où le reste de cette fonction est sous
+	celui de la bête. Rien de neuf (`montures_util.tuer` mute déjà `character["montures"]`)
+	et rien à craindre : `finalize_combat` sort AVANT cette boucle quand le principal a
+	déjà été récompensé.
 
 	Même garde d'idempotence PAR DOC que `_finalize_membre` : une re-finalisation ne peut
 	ni ressusciter la bête ni dupliquer sa cargaison."""
@@ -3012,20 +3092,10 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 
 	if snap.get("morte") and character_stats.MONTURE_MORT_DEFINITIVE:
 		cargaison = montures_util.tuer(character, doc)
-		dispo = combat_doc.setdefault("butin_disponible", [])
-		for n, ref in enumerate(cargaison):
-			item = get_doc(item_ref_id(ref))
-			if not item:
-				continue
-			dispo.append({
-				# Id synthétique : /collect indexe le butin par `monstre_id` sans exiger
-				# qu'un monstre porte ce nom (la boucle de marquage ne trouvera rien, ce
-				# qui est sans effet).
-				"monstre_id": f"cargo_{snap['id']}_{n}",
-				"item_id": item["_id"],
-				"nom": item.get("nom", item["_id"]),
-				"poids": item_ref_weight(ref),
-			})
+		if cargaison:
+			au_sol = character.get("objets_au_sol", [])
+			au_sol.extend(cargaison)
+			character["objets_au_sol"] = au_sol
 	else:
 		# Survivante (ou mort désactivée) : relevée comme un membre du groupe.
 		doc["currentPV"] = max(1, snap.get("currentPV", 0))
@@ -3169,9 +3239,9 @@ def finalize_combat(combat_doc: dict) -> bool:
 				dispo.append(payload)
 		combat_doc["butin_disponible"] = dispo
 
-	# Montures — APRÈS l'affectation de `butin_disponible` ci-dessus, qui l'écraserait :
-	# la cargaison d'une bête tombée s'y ajoute (mute `character["montures"]`, sauvé avec
-	# le principal juste en dessous).
+	# Montures : une bête tombée quitte le troupeau et déverse sa cargaison au SOL du
+	# principal (elle ne passe plus par `butin_disponible`, qui n'est proposé qu'à la
+	# victoire — cf. `_finalize_monture`). Mute `character`, sauvé juste en dessous.
 	for j, doc in montures_traitees:
 		_finalize_monture(combat_doc, j, doc, status, character)
 

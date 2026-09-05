@@ -20,7 +20,7 @@ from routers.recrutement import recrutement_router
 from routers.montures import montures_router
 from routers.auberge import auberge_router
 from routers.animations import animations_router
-from utils.combat import get_combat_grid, finalize_combat
+from utils.combat import get_combat_grid, finalize_combat, verser_butin_au_sol
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of
@@ -556,15 +556,26 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Un combat actif → on y retourne ; les combats terminés → récompense (filet de
 	# sécurité, idempotent) puis nettoyage.
 	user_combats = find_docs({"type": "combat", "user_id": user_id}) or []
+	combats_termines = []
 	for c in user_combats:
 		if c.get("character_id") != character["_id"]:
 			continue
 		if c.get("status") == "active":
 			return RedirectResponse(url=f"/combat/{c['_id']}", headers=request.headers)
 		finalize_combat(c)  # filet de sécurité, idempotent
-		delete_doc(c)
+		# ⚠️ Le doc n'est PAS supprimé ici : il porte encore son `butin_disponible`, et le sol
+		# doit être persisté avant qu'il ne disparaisse (suppression après le save, plus bas).
+		combats_termines.append(c)
 	# Relire le personnage frais juste avant le rendu : issue d'un combat 
 	character = get_doc(character["_id"]) or character
+	# FILET : quitter la page de combat sans cliquer « Récupérer et continuer » ne perd plus le
+	# butin — ce que personne n'a emporté tombe au SOL (transitoire, perdu au premier pas), où
+	# une carcasse trop lourde redevient débitable. ⚠️ APRÈS la relecture ci-dessus :
+	# `finalize_combat` relit et sauve SA propre copie du personnage, muter la copie périmée
+	# écraserait l'XP qu'il vient d'écrire. Chemin SILENCIEUX (aucun toast) : la pile se voit
+	# dans la section « ⬇️ Au sol » de la fiche 🎒. La garde `butin_collectes` rend l'appel
+	# inerte quand /collect a déjà tout versé.
+	butin_au_sol = [v for c in combats_termines for v in verser_butin_au_sol(character, c)]
 
 	vocations = get_doc("rules:vocations")
 	vocation = next((v for v in vocations["value"] if v["id"] == character["voc"]), None)
@@ -589,7 +600,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# Un magasin n'a pas de champ `pnj` : son tenancier est dérivé de sa catégorie.
 	# Écriture dans le GET assumée (précédent : tick_atelier) ; un conflit de save serait
 	# rejoué au prochain rendu, on ne lève pas de 409 ici.
-	change = bool(transports_echoues)
+	change = bool(transports_echoues) or bool(butin_au_sol)
 	# Une entrée `pnj` peut être CONDITIONNÉE (`conditions`, vocabulaire des barrières de
 	# lieu) : Armand ne hèle le joueur au seuil de la grotte que tant que la quête des
 	# bûcherons court. L'évaluateur est INJECTÉ — `utils/pnj.py` reste un module minimal.
@@ -624,6 +635,11 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	change |= bool(compagnons_partis)
 	if change:
 		save_doc(character)
+	# Combats terminés : supprimés SEULEMENT une fois le personnage sauvé — sur conflit, le
+	# butin resté au doc combat sera reversé au sol au prochain /play plutôt que de partir
+	# avec lui. La garde `butin_collectes` rend ce rattrapage inoffensif s'il a déjà eu lieu.
+	for c in combats_termines:
+		delete_doc(c)
 	pnj_present = pnj_util.pnj_payload(pnj_entree, pnj_doc) if (pnj_entree and pnj_doc) else None
 	# Indicateurs « ! » / « ? ». Le badge du 🗣 est la plus forte marque des choix visibles du
 	# nœud d'ouverture — donc EXACT par construction, contrairement à un « ! » posé sur une

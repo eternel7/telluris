@@ -648,9 +648,12 @@
 }
 .loot-benef-btn.selected { border-color: #cda349; box-shadow: 0 0 6px rgba(205,163,73,0.55); }
 .loot-benef-btn.disabled { opacity: 0.28; cursor: not-allowed; }
-.loot-benef-none { color: #b9553f; font-size: 15px; line-height: 1; }
-.loot-benef-none.selected { border-color: #b9553f; box-shadow: 0 0 6px rgba(185,85,63,0.5); }
+/* « Laisser au sol » : ocre et non rouge — ce geste ne DÉTRUIT plus rien, il pose par terre
+   (le serveur verse au sol ce que personne n'emporte). Un rouge de suppression mentirait. */
+.loot-benef-none { color: #c9a24a; font-size: 15px; line-height: 1; }
+.loot-benef-none.selected { border-color: #c9a24a; box-shadow: 0 0 6px rgba(201,162,74,0.5); }
 /* Jauges de charge par membre (rendues sous la liste). */
+.loot-hint { font-size: 11px; color: #8c7c5a; line-height: 1.35; margin: -8px 0 12px; }
 .loot-charges { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 .loot-charge-row { display: flex; align-items: center; gap: 8px; }
 .loot-charge-row .lcr-portrait {
@@ -924,10 +927,15 @@
 
 		<!-- Butin : affiché uniquement à la victoire. Aucun objet n'est pris
 		     automatiquement — le joueur choisit QUI emporte chaque carcasse (défaut =
-		     personnage principal), borné par la charge de chaque membre. -->
+		     personnage principal), borné par la charge de chaque membre. Ce qui n'est
+		     attribué à personne n'est PAS détruit : le serveur le verse au SOL, où une
+		     carcasse trop lourde pour tous redevient débitable (🪓) puis emportable
+		     morceau par morceau — jusqu'au premier pas, qui vide le sol. -->
 		<div class="loot-section" id="loot-section" style="display:none">
 			<div class="loot-title">🎒 Butin — choisissez qui emporte quoi</div>
 			<div class="loot-list" id="loot-list"></div>
+			<div class="loot-hint">Ce qui n'est attribué à personne reste au sol : découpable
+				sur place (🪓), perdu au premier pas.</div>
 			<div class="loot-charges" id="loot-charges"></div>
 			<div class="charge-label" id="charge-label"></div>
 		</div>
@@ -2736,7 +2744,7 @@ function buildLootList(dispo) {
 			<span class="loot-poids">${(+d.poids).toFixed(1)} kg</span>
 			<div class="loot-benefs">
 				${membres.map(btnHtml).join('')}
-				<button type="button" class="loot-benef-btn loot-benef-none" data-benef="" title="Ne pas ramasser">✕</button>
+				<button type="button" class="loot-benef-btn loot-benef-none" data-benef="" title="Laisser au sol — récupérable et découpable ici tant que vous ne bougez pas">🫳</button>
 			</div>
 		</div>`
 	).join('');
@@ -2781,7 +2789,7 @@ function recomputeCharge() {
 		row.querySelectorAll('.loot-benef-btn').forEach(btn => {
 			const b = btn.dataset.benef;
 			btn.classList.toggle('selected', b === cur);
-			if (!b) { btn.classList.remove('disabled'); return; }   // « personne » : toujours dispo
+			if (!b) { btn.classList.remove('disabled'); return; }   // « au sol » : toujours dispo
 			const j = membres.find(m => m.character_id === b) || {};
 			const dejaSansCeLigne = (par[b] || 0) - (cur === b ? p : 0);
 			const surcharge = (j.charge || 0) + dejaSansCeLigne + p > (j.charge_max || 0) + 1e-6;
@@ -2818,8 +2826,12 @@ function renderLootCharges(membres, par) {
 	});
 }
 
-// Envoie la répartition (POST /collect) puis quitte vers la carte. Sans attribution, ou
-// hors victoire, quitte directement. Refuse localement toute surcharge (miroir serveur).
+// Envoie la répartition (POST /collect) puis quitte vers la carte. Hors victoire, quitte
+// directement. Refuse localement toute surcharge (miroir serveur).
+// ⚠️ On POSTe dès que la section butin est visible, MÊME sans aucune attribution : c'est
+// l'appel qui verse au sol ce que personne n'emporte. S'en remettre au filet de /play
+// marcherait, mais le joueur n'aurait alors aucun accusé de réception — et une carcasse
+// silencieusement tombée par terre est indiscernable d'une carcasse perdue.
 async function leaveCombat() {
 	const section = document.getElementById('loot-section');
 	if (section.style.display !== 'none') {
@@ -2835,27 +2847,31 @@ async function leaveCombat() {
 		const attributions = lootRows()
 			.filter(row => row.dataset.benef)
 			.map(row => ({ monstre_id: row.dataset.mid, beneficiaire_id: row.dataset.benef }));
-		if (attributions.length) {
-			const btn = document.getElementById('end-btn');
-			btn.disabled = true;
-			try {
-				const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/collect`, {
-					method:  'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body:    JSON.stringify({ attributions }),
-				});
-				if (!res.ok) {
-					const err = await res.json().catch(() => ({}));
-					document.getElementById('charge-label').innerHTML =
-						`<span class="err">${(err && err.detail) || 'Échec du ramassage'}</span>`;
-					btn.disabled = false;
-					return;
-				}
-			} catch (e) {
-				document.getElementById('charge-label').innerHTML = `<span class="err">Erreur réseau</span>`;
+		const btn = document.getElementById('end-btn');
+		btn.disabled = true;
+		try {
+			const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/collect`, {
+				method:  'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body:    JSON.stringify({ attributions }),
+			});
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				document.getElementById('charge-label').innerHTML =
+					`<span class="err">${(err && err.detail) || 'Échec du ramassage'}</span>`;
 				btn.disabled = false;
 				return;
 			}
+			// Le changement de page recharge /play : la mention passe donc par sessionStorage,
+			// comme les notifs de déplacement (patron `escorte_notif` / `intro_fin_notif`).
+			const data = await res.json().catch(() => ({}));
+			if (data && data.au_sol && data.au_sol.length) {
+				sessionStorage.setItem('butin_sol_notif', JSON.stringify(data.au_sol));
+			}
+		} catch (e) {
+			document.getElementById('charge-label').innerHTML = `<span class="err">Erreur réseau</span>`;
+			btn.disabled = false;
+			return;
 		}
 	}
 	window.location.href = '/play';

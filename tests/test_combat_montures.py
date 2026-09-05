@@ -179,8 +179,8 @@ def test_monture_morte_ne_termine_pas_le_combat(db, monkeypatch):
 
 # ── Finalisation ─────────────────────────────────────────────────────────────────
 
-def test_finalize_monture_morte_perdue_et_cargaison_au_butin(db):
-	"""La cargaison ne disparaît pas avec la bête : elle rejoint le butin proposé."""
+def test_finalize_monture_morte_perdue_et_cargaison_au_sol(db):
+	"""La cargaison ne disparaît pas avec la bête : elle se déverse au SOL du principal."""
 	perso = character(montures=["monture:ane_1"])
 	mont_doc = monture(inventaire=[{"item": "item:sac", "poids": 3},
 								   {"item": "item:enclume", "poids": 90}])
@@ -196,9 +196,45 @@ def test_finalize_monture_morte_perdue_et_cargaison_au_butin(db):
 	assert mont_doc["statut"] == "morte"
 	assert perso["montures"] == []          # retirée du troupeau
 	assert mont_doc["inventaire"] == []
-	cargo = [d for d in doc["butin_disponible"] if d["monstre_id"].startswith("cargo_")]
-	assert [d["item_id"] for d in cargo] == ["item:sac", "item:enclume"]
-	assert [d["poids"] for d in cargo] == [3, 90]
+	# Les RÉFÉRENCES telles quelles : le détour par `butin_disponible` les reconstruisait en
+	# `{item, poids}` et perdait au passage un éventuel `lieu_parent`.
+	assert perso["objets_au_sol"] == [{"item": "item:sac", "poids": 3},
+									  {"item": "item:enclume", "poids": 90}]
+	# Et surtout PLUS dans le butin de victoire, qui n'aurait rien rendu sur une défaite.
+	# (Celui-ci ne porte que la carcasse du monstre abattu, ce qui est sa raison d'être.)
+	assert [d["item_id"] for d in doc["butin_disponible"]] == ["item:rat"]
+
+
+def test_finalize_monture_morte_verse_au_sol_MEME_en_defaite(db):
+	"""Le cas qui a motivé le changement : `butin_disponible` n'est proposé qu'à la victoire,
+	si bien qu'une défaite emportait la cargaison. La bête tombe là où elle tombe."""
+	perso = character(montures=["monture:ane_1"])
+	mont_doc = monture(inventaire=[{"item": "item:enclume", "poids": 90}])
+	db[perso["_id"]] = perso
+	db[mont_doc["_id"]] = mont_doc
+	j0 = joueur_snap("joueur_0", perso["_id"], pv=0)
+	doc = combat_doc([j0, monture_snap(pv=0, morte=True)], [monstre_snap()],
+					 status="defaite", xp_gagnee=0)
+
+	combat_util.finalize_combat(doc)
+
+	assert perso["objets_au_sol"] == [{"item": "item:enclume", "poids": 90}]
+
+
+def test_finalize_monture_le_sol_deja_occupe_est_complete(db):
+	"""Le sol appartient au lieu où l'on se tient : ce qu'on y avait posé reste dessous."""
+	perso = character(montures=["monture:ane_1"])
+	perso["objets_au_sol"] = [{"item": "item:corde", "poids": 2}]
+	mont_doc = monture(inventaire=["item:sac"])   # réf legacy en chaîne nue : conservée telle quelle
+	db[perso["_id"]] = perso
+	db[mont_doc["_id"]] = mont_doc
+	j0 = joueur_snap("joueur_0", perso["_id"], pv=30)
+	doc = combat_doc([j0, monture_snap(pv=0, morte=True)], [monstre_snap(vivant=False)],
+					 status="victoire", xp_gagnee=10)
+
+	combat_util.finalize_combat(doc)
+
+	assert perso["objets_au_sol"] == [{"item": "item:corde", "poids": 2}, "item:sac"]
 
 
 def test_finalize_monture_ne_gagne_pas_d_xp(db):
@@ -247,12 +283,11 @@ def test_finalize_monture_idempotent(db):
 					 [monstre_snap(vivant=False)], status="victoire", xp_gagnee=10)
 
 	combat_util.finalize_combat(doc)
-	nb_cargo = len([d for d in doc["butin_disponible"] if d["monstre_id"].startswith("cargo_")])
+	nb_cargo = len(perso["objets_au_sol"])
 	combat_util.finalize_combat(doc)
 
 	assert nb_cargo == 1
-	assert len([d for d in doc["butin_disponible"]
-				if d["monstre_id"].startswith("cargo_")]) == 1
+	assert len(perso["objets_au_sol"]) == 1
 
 
 def test_finalize_monture_pas_d_affinite(db):

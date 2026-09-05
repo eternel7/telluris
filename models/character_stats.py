@@ -398,9 +398,10 @@ AFFINITE_REDUC_PART: int = 10
 # moyen d'augmenter durablement l'emport d'une expédition. Plafond SÉPARÉ de celui
 # des compagnons (une monture n'est pas une épée : les mettre en concurrence
 # forcerait un arbitrage absurde entre porter et se battre).
-# MORT_DEFINITIVE : à 0 PV la monture est perdue et sa cargaison tombe au sol
-# (proposée dans l'overlay de fin) ; à False elle est seulement KO, relevée à 1 PV
-# comme un compagnon.
+# MORT_DEFINITIVE : à 0 PV la monture est perdue et sa cargaison tombe AU SOL, où
+# elle se ramasse (ou se découpe) comme n'importe quel tas — QUELLE QUE SOIT l'issue
+# du combat, contrairement au butin de victoire ; à False elle est seulement KO,
+# relevée à 1 PV comme un compagnon.
 MONTURE_GROUPE_MAX: int = 2
 MONTURE_CHARGE_MULT_DEFAUT: float = 1.2
 MONTURE_PRIX_DEFAUT: int = 2000

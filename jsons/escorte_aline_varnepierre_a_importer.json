@@ -44,7 +44,7 @@
       },
       "escorte": {
         "offre": {
-          "id": "quete:escorte_aline_varnepierre",
+          "id": "quete:escorte_progeniture_l_athanor_de_saint_germain_aline",
           "titre": "Escorte : Aline Varnepierre",
           "description": "La fille de l'apothicaire d'Auxerre est partie cueillir des herbes sous les feuillus, hors des remparts, et n'est pas rentrée. Retrouvez-la et ramenez-la vivante à son père, à L'Athanor de Saint-Germain.",
           "destination": "lieu:l_athanor_de_saint_germain",

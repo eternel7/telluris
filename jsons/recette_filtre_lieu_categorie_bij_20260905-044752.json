@@ -1,0 +1,143 @@
+[
+  {
+    "_id": "recette:1f10bc9d-7f3f-4b6d-835a-e4975077b3c9",
+    "_rev": "1-909730d940601adcc185e22a1b90f314",
+    "matiere_premiere_sous_categorie": "crocs",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "collier",
+    "type": "recette",
+    "quantite_matiere": 4,
+    "quantite_produite": 1
+  },
+  {
+    "_id": "recette:20247e25-2ce6-49fe-8548-1fcb112d397f",
+    "_rev": "1-5d806fa9c6c25e9533ce7cbb35281db7",
+    "matiere_premiere_sous_categorie": "crocs",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "talisman",
+    "type": "recette",
+    "quantite_matiere": 2,
+    "quantite_produite": 1
+  },
+  {
+    "_id": "recette:414f2b13-068d-456d-b85b-6db7e4caed85",
+    "_rev": "1-f2f04dc55d6d826723ef524691dcc52c",
+    "matiere_premiere_sous_categorie": "griffes",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "talisman",
+    "type": "recette",
+    "quantite_matiere": 3,
+    "quantite_produite": 1
+  },
+  {
+    "_id": "recette:70f174ca-b706-4f53-b837-bae935ee2829",
+    "_rev": "1-2c1f662277c44c038d28d9176a160654",
+    "matiere_premiere_sous_categorie": "griffes",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "amulette",
+    "type": "recette",
+    "quantite_matiere": 2,
+    "quantite_produite": 1
+  },
+  {
+    "_id": "recette:ossements_bijou_bijouterie",
+    "_rev": "1-6de45f079962fe7cfe2601b268b4f5ba",
+    "matiere_premiere_sous_categorie": "os",
+    "lieu_categorie": "bijouterie",
+    "type": "recette",
+    "objet_final": "bijou",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:ossements_bijou_bijouterie01",
+    "_rev": "2-3c1c37448005c776fc10b4f4d235e7a9",
+    "matiere_premiere_sous_categorie": "os",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "bijou",
+    "type": "recette",
+    "quantite_matiere": 1,
+    "quantite_produite": 2
+  },
+  {
+    "_id": "recette:ossements_talisman_bijouterie",
+    "_rev": "2-82e6d56dd170b430f31ba1bf1353acf0",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "talisman",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "ossements",
+        "quantite": 2
+      }
+    ]
+  },{
+  "_id": "item:bijou",
+  "_rev": "2-74a8dd95391708f492095ee6fd363843",
+  "type": "item",
+  "nom": "Bijou",
+  "sous_categorie": "",
+  "icon": "💍",
+  "rarete": "peu_commun",
+  "categorie": "composant",
+  "slots": [
+    "anneau_1",
+    "anneau_2"
+  ],
+  "poids": 0.1,
+  "bonus_pm": 1
+},{
+  "_id": "item:amulette",
+  "_rev": "3-2515b908ea2aaad09af86ca75b1e581f",
+  "type": "item",
+  "nom": "Amulette",
+  "sous_categorie": "",
+  "icon": "📿",
+  "rarete": "peu_commun",
+  "categorie": "armure",
+  "slots": [
+    "cou"
+  ],
+  "poids": 0.1,
+  "bonus_pm": 2,
+  "bonus": {
+    "Cha": 2
+  }
+},{
+  "_id": "item:talisman",
+  "_rev": "2-bdc58894f167db9d583ea51b156b2349",
+  "type": "item",
+  "nom": "Talisman",
+  "sous_categorie": "",
+  "icon": "🧿",
+  "rarete": "peu_commun",
+  "categorie": "armure",
+  "slots": [
+    "cou"
+  ],
+  "poids": 0.1,
+  "bonus_pv": 3
+},{
+  "_id": "item:collier",
+  "_rev": "3-4e9f2f9f4d2d13bb2f9b164bad686e6f",
+  "type": "item",
+  "nom": "Collier",
+  "sous_categorie": "",
+  "icon": "📿",
+  "rarete": "peu_commun",
+  "categorie": "armure",
+  "slots": [
+    "cou"
+  ],
+  "poids": 0.2,
+  "bonus": {
+    "Cha": 5
+  }
+}
+]

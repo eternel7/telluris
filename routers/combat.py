@@ -30,7 +30,7 @@ from utils import slots_actions
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
-    MEMOIRE_COMBATS_MAX,
+    verser_butin_au_sol,
 )
 from utils import chasse
 from models import character_stats
@@ -300,8 +300,12 @@ async def collect_loot(
     `{monstre_id, beneficiaire_id}` (repli legacy `monstre_ids` → tout au principal).
     Chaque carcasse rejoint l'inventaire de SON bénéficiaire sous forme de référence
     {item, poids} (poids d'instance tiré au butin), borné par la charge max de ce membre.
-    La garde d'idempotence `butin_collectes[combat_id]` (sur le principal) mémorise les
-    carcasses encaissées → une reprise après échec partiel ne peut jamais les dupliquer.
+    ⚠️ Ce que personne n'emporte n'est PAS perdu : il tombe au SOL du principal
+    (`verser_butin_au_sol`), où une carcasse trop lourde redevient débitable (🪓) puis
+    emportable morceau par morceau — jusqu'au premier pas, qui vide le sol.
+    La garde d'idempotence `butin_collectes[combat_id]` (sur le principal) mémorise ce qui
+    est SORTI du butin, sac ou sol → une reprise après échec partiel ne peut jamais le
+    dupliquer.
     """
     if not current_user:
         raise HTTPException(status_code=401, detail="Non authentifié")
@@ -386,16 +390,14 @@ async def collect_loot(
             encaisses.add(mid)
         doc["inventaire"] = inventaire
 
-    # Garde d'idempotence sur le principal : on MÉMORISE les carcasses encaissées (au lieu
-    # de purger) → sans atomicité multi-docs, une reprise ne peut pas re-créditer.
-    # Bornée à `MEMOIRE_COMBATS_MAX` combats, comme sa jumelle `combats_recompenses` : un doc
-    # `combat:*` terminé est supprimé au passage suivant à /play, donc une clé évincée ne peut
-    # plus jamais servir. ⚠️ `pop` AVANT l'écriture — réassigner une clé existante ne la
-    # déplace pas en fin de dict, et l'ordre d'insertion EST l'ordre de récence qui décide de
-    # l'éviction : un second /collect sur le même combat le laisserait vieillir à sa place.
-    guard.pop(combat_id, None)
-    guard[combat_id] = sorted(encaisses)
-    character["butin_collectes"] = dict(list(guard.items())[-MEMOIRE_COMBATS_MAX:])
+    # Ce que PERSONNE n'a emporté tombe au SOL du principal (transitoire, perdu au premier
+    # pas) plutôt que de disparaître : une carcasse est indivisible dans l'overlay, mais au
+    # sol elle redevient débitable (bouton 🪓 → POST /api/couper, `source:"sol"`) puis
+    # emportable morceau par morceau. Le chokepoint écrit AUSSI la garde d'idempotence —
+    # « sorti du butin » vaut pour un sac comme pour le sol (cf. `verser_butin_au_sol`).
+    # ⚠️ AVANT le `save_doc(character)` autoritatif ci-dessous : c'est lui qui persiste les
+    # deux mutations (sac des bénéficiaires et sol du principal) d'un seul geste.
+    au_sol = verser_butin_au_sol(character, combat_doc, deja=encaisses)
 
     # Principal d'abord (il porte la garde) : si le save d'un compagnon échoue ensuite, la
     # garde est déjà posée → au pire une carcasse de compagnon est perdue, jamais dupliquée.
@@ -413,13 +415,10 @@ async def collect_loot(
         for m in combat_doc["monstres"]:
             if m["id"] == mid:
                 m["loote"] = True
-    combat_doc["butin_disponible"] = [
-        d for d in combat_doc.get("butin_disponible", []) if d["monstre_id"] not in encaisses
-    ]
     save_doc(combat_doc)
 
     par_membre = {cid: round(carried_weight(docs[cid]), 2) for cid in par_benef}
-    return {"collected": noms, "par_membre": par_membre}
+    return {"collected": noms, "au_sol": au_sol, "par_membre": par_membre}
 
 
 @combat_router.post("/combat/{combat_id}/action")

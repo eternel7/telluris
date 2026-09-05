@@ -1,7 +1,7 @@
 [
   {
     "_id": "lieu:l_athanor_de_saint_germain",
-    "_rev": "992-5a9d032cfee0bf4c0b61f642bbbf4c7c",
+    "_rev": "1189-cd34b6d7189b81eee9f6a77f832eafc1",
     "type": "lieu",
     "label": "L'Athanor de Saint-Germain",
     "image": "cabinet_alchimie_europe02.png",
@@ -27,17 +27,31 @@
                   "poids": 0.1
                 }
               ]
+            },
+            {
+              "prenom": "Aline",
+              "sex": "F",
+              "image": "druide_f_humain03.jpg",
+              "description": "La fille de l'apothicaire d'Auxerre. Elle connaît les herbes mieux que personne — et les loups bien moins qu'elle ne le croyait.",
+              "inventaire": [
+                {
+                  "item": "item:Herbes_medicinales",
+                  "poids": 0.1
+                }
+              ]
             }
           ]
         }
       }
     ],
     "stock_matieres": {
-      "graisse": 53,
-      "item:Herbes_a_bruler": 1,
+      "graisse": 58,
       "griffes": 1,
-      "reactif_brut": 45,
-      "item:Reactif_brut": 15
+      "item:Reactif_brut": 1020,
+      "item:Seve_de_chene": 1,
+      "debris_anime": 80,
+      "residu_spectral": 237,
+      "reactif_brut": 40
     },
     "stock_vente": [
       {
@@ -46,15 +60,15 @@
       },
       {
         "item_id": "item:composant_rituel",
-        "qty": 57
+        "qty": 34
       },
       {
         "item_id": "item:potion",
-        "qty": 67
+        "qty": 28
       },
       {
         "item_id": "item:poudre_alchimique",
-        "qty": 7
+        "qty": 70
       },
       {
         "item_id": "item:herbe",
@@ -62,41 +76,62 @@
       },
       {
         "item_id": "item:Poudre_de_miroir",
-        "qty": 111
+        "qty": 38
       },
       {
         "item_id": "item:Sang_demon_seche",
-        "qty": 113
+        "qty": 43
       },
       {
         "item_id": "item:Soufre",
-        "qty": 50
+        "qty": 48
       },
       {
         "item_id": "item:Cristal_canalisation",
-        "qty": 125
+        "qty": 84
       },
       {
         "item_id": "item:Sel_noir",
-        "qty": 120
+        "qty": 76
       },
       {
         "item_id": "item:catalyseur_magique",
-        "qty": 1
+        "qty": 106
       },
       {
         "item_id": "item:reactif_magique",
-        "qty": 2
+        "qty": 81
       },
       {
         "item_id": "item:potion_de_vision",
+        "qty": 3
+      },
+      {
+        "item_id": "item:debris_anime",
+        "qty": 44
+      },
+      {
+        "item_id": "item:Reactif_brut",
+        "qty": 100
+      },
+      {
+        "item_id": "item:residu_spectral",
+        "qty": 28
+      },
+      {
+        "item_id": "item:encens",
         "qty": 2
       }
-    ]
+    ],
+    "stock_cible": {
+      "item": {
+        "item:Extrait_de_mandragore": 12
+      }
+    }
   },
   {
     "_id": "lieu:fumee_de_l_yonne",
-    "_rev": "72-93515d639b935675c3d93708f7b52222",
+    "_rev": "87-ecdceed039dc995f2c061821c5a4dfff",
     "type": "lieu",
     "label": "Fumée de l'Yonne",
     "image": "fumoir_europe01.png",
@@ -106,7 +141,7 @@
     "stock_vente": [
       {
         "item_id": "item:viande_fumee",
-        "qty": 19
+        "qty": 28
       }
     ],
     "pnj": [
@@ -131,7 +166,7 @@
   },
   {
     "_id": "lieu:l_enclume_du_rempart",
-    "_rev": "331-f57805e68f64b9dd9701d23771ee1e44",
+    "_rev": "412-7a0f3a0f346c4663e63736fb0d1a987d",
     "type": "lieu",
     "label": "L'Enclume du Rempart",
     "image": "armurerie_europe03.png",
@@ -157,20 +192,22 @@
       }
     ],
     "stock_matieres": {
-      "acier": 135,
-      "bronze": 1431,
-      "fer": 164,
-      "branche": 893,
-      "petit_rondin": 855,
-      "argent": 748,
-      "gros_rondin": 693,
-      "plomb": 762,
-      "poix": 481,
-      "rondin": 689,
-      "item:Seve_de_chene": 5,
-      "crocs": 1,
+      "bronze": 1780,
+      "branche": 1266,
+      "petit_rondin": 1214,
+      "argent": 1112,
+      "gros_rondin": 1057,
+      "plomb": 1183,
+      "poix": 740,
+      "rondin": 1050,
+      "item:Seve_de_chene": 8,
       "plumes": 12,
-      "peaux": 40
+      "crins": 5,
+      "debris_anime": 236,
+      "crocs": 12,
+      "acier": 76,
+      "fer": 129,
+      "peaux": 65
     },
     "stock_vente": [
       {
@@ -187,7 +224,7 @@
       },
       {
         "item_id": "item:Hache_de_bucheron",
-        "qty": 101
+        "qty": 63
       },
       {
         "item_id": "item:Canne_ferree",
@@ -203,11 +240,11 @@
       },
       {
         "item_id": "item:manche",
-        "qty": 101
+        "qty": 12
       },
       {
         "item_id": "item:Arc_court",
-        "qty": 8
+        "qty": 9
       },
       {
         "item_id": "item:Epee_courte",
@@ -219,7 +256,7 @@
       },
       {
         "item_id": "item:Arbalete_legere",
-        "qty": 2
+        "qty": 3
       },
       {
         "item_id": "item:Epee_longue",
@@ -231,43 +268,43 @@
       },
       {
         "item_id": "item:Dague_de_scene",
-        "qty": 40
+        "qty": 101
       },
       {
         "item_id": "item:hampe",
-        "qty": 100
+        "qty": 12
       },
       {
         "item_id": "item:Plumbata",
-        "qty": 69
+        "qty": 81
       },
       {
         "item_id": "item:Masse_cannelee_perse",
-        "qty": 31
+        "qty": 38
       },
       {
         "item_id": "item:Poincon_de_jet",
-        "qty": 112
+        "qty": 107
       },
       {
         "item_id": "item:acier_plisse",
-        "qty": 125
+        "qty": 39
       },
       {
         "item_id": "item:Shuriken",
-        "qty": 135
+        "qty": 44
       },
       {
         "item_id": "item:Morgenstern",
-        "qty": 35
+        "qty": 44
       },
       {
         "item_id": "item:Nzappa_zap",
-        "qty": 26
+        "qty": 32
       },
       {
         "item_id": "item:Francisque",
-        "qty": 23
+        "qty": 30
       },
       {
         "item_id": "item:Kunai",
@@ -290,16 +327,12 @@
         "qty": 2
       },
       {
-        "item_id": "item:Naginata",
-        "qty": 1
-      },
-      {
         "item_id": "item:Falarique",
-        "qty": 110
+        "qty": 106
       },
       {
         "item_id": "item:Lance_rituelle",
-        "qty": 25
+        "qty": 29
       },
       {
         "item_id": "item:Angon",
@@ -307,19 +340,19 @@
       },
       {
         "item_id": "item:Trident_barbele",
-        "qty": 2
+        "qty": 5
       },
       {
         "item_id": "item:Heaume_de_fer",
-        "qty": 4
+        "qty": 7
       },
       {
         "item_id": "item:Bottes_de_fer",
-        "qty": 4
+        "qty": 6
       },
       {
         "item_id": "item:Jambières_de_plates",
-        "qty": 3
+        "qty": 11
       },
       {
         "item_id": "item:Arbalete_de_poing",
@@ -327,23 +360,23 @@
       },
       {
         "item_id": "item:Cotte_mailles_benie",
-        "qty": 4
+        "qty": 12
       },
       {
         "item_id": "item:Rondache",
-        "qty": 1
-      },
-      {
-        "item_id": "item:Bouclier_ordre",
         "qty": 2
       },
       {
-        "item_id": "item:armure_de_cuir",
+        "item_id": "item:Bouclier_ordre",
         "qty": 5
       },
       {
+        "item_id": "item:armure_de_cuir",
+        "qty": 15
+      },
+      {
         "item_id": "item:Cotte_de_mailles",
-        "qty": 6
+        "qty": 12
       },
       {
         "item_id": "item:Hallebarde",
@@ -351,65 +384,176 @@
       },
       {
         "item_id": "item:Jambières_cuir",
-        "qty": 2
+        "qty": 5
       },
       {
         "item_id": "item:Cuirasse_cuir_brut",
-        "qty": 2
+        "qty": 7
       },
       {
         "item_id": "item:Armure_cuir_souple_N",
-        "qty": 3
+        "qty": 6
       },
       {
         "item_id": "item:Heaume_de_plates",
-        "qty": 4
+        "qty": 13
       },
       {
         "item_id": "item:Armure_plates_surcoat",
-        "qty": 6
+        "qty": 18
       },
       {
         "item_id": "item:Pelta",
-        "qty": 1
-      },
-      {
-        "item_id": "item:Pourpoint_cuir_renf",
         "qty": 6
       },
       {
+        "item_id": "item:Pourpoint_cuir_renf",
+        "qty": 15
+      },
+      {
         "item_id": "item:Jambières_cuir_renf",
-        "qty": 2
+        "qty": 9
       },
       {
         "item_id": "item:Gantelets_de_plates",
-        "qty": 2
+        "qty": 7
       },
       {
         "item_id": "item:Heaume_ouvert_grave",
-        "qty": 3
+        "qty": 7
       },
       {
         "item_id": "item:Gantelets_acier",
-        "qty": 4
+        "qty": 5
       },
       {
         "item_id": "item:Gants_runiques",
-        "qty": 1
-      },
-      {
-        "item_id": "item:Cuirasse_cuir_noir",
         "qty": 2
       },
       {
+        "item_id": "item:Cuirasse_cuir_noir",
+        "qty": 11
+      },
+      {
         "item_id": "item:Pavois",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Epaulieres_de_bronze",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Epaulieres_de_fer",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Epaulieres_de_plates",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Gantelets_cuir",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Epaulieres_acier_gravees",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Epaulieres_benies",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Bottes_de_plates",
+        "qty": 6
+      },
+      {
+        "item_id": "item:Epaulieres_cuir_cloutees",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Mantelet_de_mailles",
+        "qty": 9
+      },
+      {
+        "item_id": "item:Calotte_cuir_rune",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Epaulieres_cuir_bouilli",
+        "qty": 7
+      },
+      {
+        "item_id": "item:Camail_de_mailles",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Rondelles_d_epaule",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Armure_cuir_runee",
+        "qty": 11
+      },
+      {
+        "item_id": "item:Bocle",
+        "qty": 5
+      },
+      {
+        "item_id": "item:Bouclier_cerf_volant",
+        "qty": 1
+      },
+      {
+        "item_id": "item:acier",
+        "qty": 57
+      },
+      {
+        "item_id": "item:argent",
+        "qty": 95
+      },
+      {
+        "item_id": "item:bronze",
+        "qty": 42
+      },
+      {
+        "item_id": "item:debris_anime",
+        "qty": 60
+      },
+      {
+        "item_id": "item:fer",
+        "qty": 95
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 95
+      },
+      {
+        "item_id": "item:plomb",
+        "qty": 95
+      },
+      {
+        "item_id": "item:poix",
+        "qty": 95
+      },
+      {
+        "item_id": "item:Ecu_de_joute",
+        "qty": 2
+      },
+      {
+        "item_id": "item:Ecu",
         "qty": 1
       }
-    ]
+    ],
+    "stock_cible": {
+      "item": {
+        "item:acier_plisse": 12,
+        "item:hampe": 12,
+        "item:manche": 12
+      }
+    }
   },
   {
     "_id": "lieu:le_chanvre_tresse",
-    "_rev": "3-4567d7c0beb130308f0fc2b2f9a733a7",
+    "_rev": "11-d16de174e68001560b6047ba0aa581ed",
     "type": "lieu",
     "label": "Le Chanvre Tressé",
     "image": "corderie_europe01.png",
@@ -435,11 +579,21 @@
     ],
     "lieu_parent": "lieu:auxerre",
     "stock_matieres": {},
-    "stock_vente": []
+    "stock_vente": [
+      {
+        "item_id": "item:cordes_d_arc",
+        "qty": 14
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:corde": 12
+      }
+    }
   },
   {
     "_id": "lieu:la_navette_d_auxerre",
-    "_rev": "4-10ce6cf9bbfa562c020cfffa73da5940",
+    "_rev": "9-e5cf850ac77956db020858c381af248f",
     "type": "lieu",
     "label": "La Navette d'Auxerre",
     "image": "tissage_europe01.png",
@@ -468,17 +622,21 @@
     "stock_vente": [
       {
         "item_id": "item:rembourrage",
-        "qty": 2
+        "qty": 3
       },
       {
         "item_id": "item:feutre",
-        "qty": 5
+        "qty": 8
+      },
+      {
+        "item_id": "item:Mantelet_de_feutre",
+        "qty": 4
       }
     ]
   },
   {
     "_id": "lieu:le_clos_des_simples",
-    "_rev": "7-07f082045ac09627c682bc72ce81640f",
+    "_rev": "38-33c47156432754ba1c711e73deee56c5",
     "type": "lieu",
     "label": "Le Clos des Simples",
     "image": "jardinier_europe01.png",
@@ -504,13 +662,67 @@
     ],
     "lieu_parent": "lieu:auxerre",
     "stock_matieres": {
-      "graines": 25
+      "graines": 140
     },
-    "stock_vente": []
+    "stock_vente": [
+      {
+        "item_id": "item:Chou_pomme",
+        "qty": 18
+      },
+      {
+        "item_id": "item:Pomme_de_verger",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Panais_de_sillon",
+        "qty": 56
+      },
+      {
+        "item_id": "item:Ail_des_moines",
+        "qty": 18
+      },
+      {
+        "item_id": "item:Prunelles_de_haie",
+        "qty": 19
+      },
+      {
+        "item_id": "item:Racine_de_mandragore",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Fleur_de_souci",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Capsules_de_pavot",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Feves_de_carreau",
+        "qty": 33
+      },
+      {
+        "item_id": "item:engrais",
+        "qty": 1
+      },
+      {
+        "item_id": "item:Feuilles_d_absinthe",
+        "qty": 1
+      },
+      {
+        "item_id": "item:graines",
+        "qty": 90
+      }
+    ],
+    "stock_cible": {
+      "item": {
+        "item:engrais": 12
+      }
+    }
   },
   {
     "_id": "lieu:la_semelle_du_pelerin",
-    "_rev": "12-ea73e570a9073f0320f8ae8494050705",
+    "_rev": "84-e82c8b559639164b2558c72e874bc744",
     "type": "lieu",
     "label": "La Semelle du Pèlerin",
     "image": "cordonnerie_europe02.png",
@@ -536,14 +748,78 @@
     ],
     "lieu_parent": "lieu:auxerre",
     "stock_matieres": {
-      "peaux": 50,
-      "tendons": 2
+      "peaux": 21
     },
-    "stock_vente": []
+    "stock_vente": [
+      {
+        "item_id": "item:Bottes_silencieuses",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Bottes_noires",
+        "qty": 25
+      },
+      {
+        "item_id": "item:bottes",
+        "qty": 30
+      },
+      {
+        "item_id": "item:Mocassins",
+        "qty": 12
+      },
+      {
+        "item_id": "item:Souliers_cuir",
+        "qty": 14
+      },
+      {
+        "item_id": "item:Bottes_de_chasse",
+        "qty": 27
+      },
+      {
+        "item_id": "item:Bottines_de_scene",
+        "qty": 20
+      },
+      {
+        "item_id": "item:fil_resistant",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Bottes_cuir_epais",
+        "qty": 26
+      },
+      {
+        "item_id": "item:Bottes_de_voyage",
+        "qty": 29
+      },
+      {
+        "item_id": "item:Sandales_moine",
+        "qty": 13
+      },
+      {
+        "item_id": "item:Bottes_lacees",
+        "qty": 30
+      },
+      {
+        "item_id": "item:Chaussons_cuir",
+        "qty": 10
+      },
+      {
+        "item_id": "item:Chaussons_silencieux",
+        "qty": 13
+      },
+      {
+        "item_id": "item:Bottines_legeres",
+        "qty": 20
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 25
+      }
+    ]
   },
   {
     "_id": "lieu:le_duvet_d_oie",
-    "_rev": "3-fabf18fd6773cf6c05b922db8b119497",
+    "_rev": "30-fd4f1cd9e6eb087752b0d1bb23c72300",
     "type": "lieu",
     "label": "Le Duvet d'Oie",
     "image": "plumasserie_europe01.png",
@@ -568,11 +844,13 @@
       }
     ],
     "lieu_parent": "lieu:auxerre",
-    "stock_matieres": {},
+    "stock_matieres": {
+      "peaux": 160
+    },
     "stock_vente": [
       {
         "item_id": "item:parure",
-        "qty": 4
+        "qty": 5
       },
       {
         "item_id": "item:oreiller",
@@ -581,12 +859,28 @@
       {
         "item_id": "item:Coiffe_plumes",
         "qty": 1
+      },
+      {
+        "item_id": "item:Chapeau_a_plume",
+        "qty": 3
+      },
+      {
+        "item_id": "item:Mantelet_de_plumes",
+        "qty": 4
+      },
+      {
+        "item_id": "item:Cape_de_plumes_noires",
+        "qty": 1
+      },
+      {
+        "item_id": "item:peaux",
+        "qty": 58
       }
     ]
   },
   {
     "_id": "lieu:la_marmite_du_guet",
-    "_rev": "2-a4e05d57bfb35492982f00e39d0ed826",
+    "_rev": "87-222293b78601c4a14c29122921540968",
     "type": "lieu",
     "label": "La Marmite du Guet",
     "image": "epicerie_europe01.png",
@@ -611,12 +905,27 @@
       }
     ],
     "lieu_parent": "lieu:auxerre",
-    "stock_matieres": {},
-    "stock_vente": []
+    "stock_matieres": {
+      "foie": 16
+    },
+    "stock_vente": [
+      {
+        "item_id": "item:repas_cuisine",
+        "qty": 28
+      },
+      {
+        "item_id": "item:plat_raffine",
+        "qty": 18
+      },
+      {
+        "item_id": "item:mets_rare",
+        "qty": 5
+      }
+    ]
   },
   {
     "_id": "lieu:les_etalages_d_autessiodurum",
-    "_rev": "1423-ae2ac4d5a2dd1e3011fef5c7613d806c",
+    "_rev": "1947-92890b9d9fd2072671cc81c10a9232ad",
     "type": "lieu",
     "label": "Les Étalages d'Autessiodurum",
     "image": "boucherie_europe02.png",
@@ -651,51 +960,59 @@
     "stock_vente": [
       {
         "item_id": "item:viande",
-        "qty": 139
+        "qty": 73
       },
       {
         "item_id": "item:os",
-        "qty": 135
+        "qty": 70
       },
       {
         "item_id": "item:sang",
-        "qty": 117
+        "qty": 47
       },
       {
         "item_id": "item:graisse",
-        "qty": 105
+        "qty": 53
       },
       {
         "item_id": "item:cuir_brut",
-        "qty": 138
+        "qty": 51
       },
       {
         "item_id": "item:crocs",
-        "qty": 103
+        "qty": 49
       },
       {
         "item_id": "item:poils",
-        "qty": 104
+        "qty": 69
       },
       {
         "item_id": "item:tendons",
-        "qty": 173
+        "qty": 40
       },
       {
         "item_id": "item:crins",
-        "qty": 113
+        "qty": 26
       },
       {
         "item_id": "item:yeux",
-        "qty": 48
+        "qty": 20
       },
       {
         "item_id": "item:plumes",
         "qty": 4
       },
       {
-        "item_id": "item:griffes",
-        "qty": 4
+        "item_id": "item:boyaux",
+        "qty": 41
+      },
+      {
+        "item_id": "item:foie",
+        "qty": 71
+      },
+      {
+        "item_id": "item:crane",
+        "qty": 37
       }
     ]
   }

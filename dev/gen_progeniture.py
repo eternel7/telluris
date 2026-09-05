@@ -18,9 +18,22 @@
 # `progeniture` dans son entrée `pnj` : régénérer est idempotent, et tout ce que la base a de
 # particulier (image, `acces`, `zone_influences`, `cells`…) survit intact.
 #
-# ⚠️ AUCUN doublon avec Aline Varnepierre : elle est la disparue de `services.escorte.offre`
-# du révérend Malakor (une mission ÉCRITE, id propre). L'Athanor confie donc son AUTRE
-# enfant — même famille, autre prénom, autre id de quête.
+# ⚠️ ALINE VARNEPIERRE EST DANS LES DEUX CANAUX, ET C'EST VOULU. Elle est aussi la disparue
+# de `services.escorte.offre` du révérend Malakor (une mission ÉCRITE, dialogue authoré,
+# `rang_min` E). Ce n'est PAS un doublon : les deux offres portent le MÊME id de quête —
+# celui que rend `escorte.id_enfant`, c'est-à-dire
+# `quete:escorte_progeniture_l_athanor_de_saint_germain_aline`, et le doc de Malakor le
+# reprend tel quel. Ramener Aline par l'un des canaux la retire donc de l'AUTRE
+# (`deja_reussie` compare des ids) : une seule disparition, deux façons d'en entendre parler.
+#
+# ⚠️ L'ID DE MALAKOR EST DONC DÉRIVÉ DE CETTE DONNÉE — slug du `_id` du magasin + slug du
+# prénom. Renommer `lieu:l_athanor_de_saint_germain` ou corriger « Aline » ici fait DIVERGER
+# les deux ids EN SILENCE, et la même enfant redevient sauvable deux fois, sans le moindre
+# symptôme. Les deux se retouchent ensemble, jamais l'un sans l'autre :
+# `jsons/escorte_aline_varnepierre_a_importer.json`.
+#
+# ⚠️ Portrait et description sont ALIGNÉS sur ceux de la mission écrite : c'est la même
+# enfant, elle doit avoir le même visage quel que soit le canal qui la confie.
 #
 # Usage : python dev/gen_progeniture.py
 # Sortie (à coller dans /admin -> Import en masse) :
@@ -34,7 +47,7 @@ RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SOURCE UNIQUE : le dump complet de la base. Figé explicitement (et non « le glob le plus
 # récent ») pour que régénérer donne toujours le même résultat ; à mettre à jour à la main
 # après un nouveau dump.
-SRC_DUMP = "jsons/telluris-dump-20260808-073319.json"
+SRC_DUMP = "jsons/telluris-dump-20260905-041008.json"
 SORTIE = "jsons/progeniture_a_importer.json"
 
 # Les familles. Le `nom` reprend celui du tenancier tel que son lieu le nomme, et la `race`
@@ -52,6 +65,14 @@ FAMILLES = {
 			{"prenom": "Girard", "sex": "M", "image": "druide_m_humain01.jpg",
 			 "description": "Le cadet de l'alchimiste. Il connaît les mélanges de son père "
 							"par cœur et le bois pas du tout.",
+			 "inventaire": [{"item": "item:Herbes_medicinales", "poids": 0.1}]},
+			# ⚠️ La disparue de la mission ÉCRITE du révérend Malakor — même id de quête,
+			# donc même enfant. Portrait et description RECOPIÉS de sa spec : la ramener
+			# par le père ou par le révérend doit montrer le même visage.
+			{"prenom": "Aline", "sex": "F", "image": "druide_f_humain03.jpg",
+			 "description": "La fille de l'apothicaire d'Auxerre. Elle connaît les herbes "
+							"mieux que personne — et les loups bien moins qu'elle ne le "
+							"croyait.",
 			 "inventaire": [{"item": "item:Herbes_medicinales", "poids": 0.1}]},
 		],
 	},
