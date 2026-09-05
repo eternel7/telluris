@@ -1,0 +1,244 @@
+[
+  {
+    "_id": "item:metaux_precieux",
+    "type": "item",
+    "nom": "Grenaille précieuse",
+    "description": "Petites larmes d'argent et d'or coulées au creuset. Le bijoutier ne travaille pas au lingot : il pèse sa grenaille au grain près.",
+    "icon": "🔸",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "sous_categorie": "metaux_precieux",
+    "slots": [],
+    "tags": ["metal"],
+    "poids": 0.1,
+    "valeur": [{ "cu": 30 }]
+  },
+  {
+    "_id": "item:gemmes",
+    "type": "item",
+    "nom": "Gemme brute",
+    "description": "Pierre de couleur tirée du gravier d'une rivière ou du fond d'une mine, encore mate. Il faudra la tailler avant qu'elle ne prenne feu.",
+    "icon": "💎",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "gemmes",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05,
+    "valeur": [{ "cu": 80 }]
+  },
+  {
+    "_id": "item:perles",
+    "type": "item",
+    "nom": "Perle",
+    "description": "Perle d'eau douce, ronde et laiteuse. Il en faut un plein cordon pour un sautoir, et une huître sur mille pour une perle.",
+    "icon": "⚪",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "perles",
+    "slots": [],
+    "tags": [],
+    "poids": 0.02,
+    "valeur": [{ "cu": 60 }]
+  },
+
+  {
+    "_id": "item:anneau",
+    "type": "item",
+    "nom": "Anneau",
+    "description": "Un jonc de métal précieux, sans ornement. On le porte pour ce qu'il vaut, et pour ce qu'il dit de celui qui le porte.",
+    "sous_categorie": "bijou",
+    "icon": "💍",
+    "rarete": "commun",
+    "categorie": "armure",
+    "slots": ["anneau_1", "anneau_2"],
+    "tags": [],
+    "poids": 0.05,
+    "bonus": { "Cha": 1 }
+  },
+  {
+    "_id": "item:bague",
+    "type": "item",
+    "nom": "Bague",
+    "description": "Un chaton sertit une gemme au-dessus de l'annulaire. Les lettrés prétendent que la pierre ordonne les pensées ; les bijoutiers ne les contredisent jamais.",
+    "sous_categorie": "bijou",
+    "icon": "💍",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "slots": ["anneau_1", "anneau_2"],
+    "tags": [],
+    "poids": 0.05,
+    "bonus": { "Int": 1 }
+  },
+  {
+    "_id": "item:chevaliere",
+    "type": "item",
+    "nom": "Chevalière",
+    "description": "Anneau à plateau gravé, lourd à la main. On le tend à baiser, on le presse dans la cire : c'est une signature qu'on porte au doigt.",
+    "sous_categorie": "bijou",
+    "icon": "💍",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "slots": ["anneau_1", "anneau_2"],
+    "tags": [],
+    "poids": 0.1,
+    "bonus": { "Cha": 2 }
+  },
+  {
+    "_id": "item:bracelet",
+    "type": "item",
+    "nom": "Bracelet",
+    "description": "Un cercle martelé qui tinte au poignet à chaque geste. Il se porte à même la peau, là où vont les gants — il faut choisir.",
+    "sous_categorie": "bijou",
+    "icon": "📿",
+    "rarete": "commun",
+    "categorie": "armure",
+    "slots": ["mains"],
+    "tags": [],
+    "poids": 0.1,
+    "bonus": { "Cha": 1 }
+  },
+  {
+    "_id": "item:pendentif",
+    "type": "item",
+    "nom": "Pendentif",
+    "description": "Une gemme montée sur chaîne, qui repose au creux de la gorge. Les mages disent qu'elle retient un peu de ce qu'on dépense.",
+    "sous_categorie": "bijou",
+    "icon": "📿",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "slots": ["cou"],
+    "tags": [],
+    "poids": 0.1,
+    "bonus_pm": 1
+  },
+  {
+    "_id": "item:diademe",
+    "type": "item",
+    "nom": "Diadème",
+    "description": "Bandeau de métal précieux serti de trois pierres, qui se pose au-dessus du front. On ne le porte pas sous un casque : il faut renoncer à l'un pour l'autre.",
+    "sous_categorie": "bijou",
+    "icon": "👑",
+    "rarete": "rare",
+    "categorie": "armure",
+    "slots": ["tete"],
+    "tags": [],
+    "poids": 0.3,
+    "bonus": { "Cha": 4 }
+  },
+  {
+    "_id": "item:epingle_cheveux",
+    "type": "item",
+    "nom": "Épingle à cheveux",
+    "description": "Longue aiguille ouvragée qui tient une coiffure — et, dit-on, qui a tenu lieu d'arme à plus d'une dame prise au dépourvu.",
+    "sous_categorie": "bijou",
+    "icon": "📍",
+    "rarete": "commun",
+    "categorie": "armure",
+    "slots": ["tete"],
+    "tags": [],
+    "poids": 0.05,
+    "bonus": { "Cha": 1 }
+  },
+  {
+    "_id": "item:sautoir",
+    "type": "item",
+    "nom": "Sautoir",
+    "description": "Un long rang de perles qui descend jusqu'au sternum. Il vaut le prix d'une bonne épée et ne pare aucun coup.",
+    "sous_categorie": "bijou",
+    "icon": "📿",
+    "rarete": "rare",
+    "categorie": "armure",
+    "slots": ["cou"],
+    "tags": [],
+    "poids": 0.2,
+    "bonus_pm": 2,
+    "bonus": { "Cha": 2 }
+  },
+
+  {
+    "_id": "recette:bijouterie_anneau",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "anneau",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "metaux_precieux", "quantite": 1 }
+    ]
+  },
+  {
+    "_id": "recette:bijouterie_epingle_cheveux",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "epingle_cheveux",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "metaux_precieux", "quantite": 1 }
+    ]
+  },
+  {
+    "_id": "recette:bijouterie_bracelet",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "bracelet",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "metaux_precieux", "quantite": 2 }
+    ]
+  },
+  {
+    "_id": "recette:bijouterie_bague",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "bague",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "metaux_precieux", "quantite": 1 },
+      { "sous_categorie": "gemmes", "quantite": 1 }
+    ]
+  },
+  {
+    "_id": "recette:bijouterie_pendentif",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "pendentif",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "metaux_precieux", "quantite": 1 },
+      { "sous_categorie": "gemmes", "quantite": 1 }
+    ]
+  },
+  {
+    "_id": "recette:bijouterie_chevaliere",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "chevaliere",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "metaux_precieux", "quantite": 2 },
+      { "sous_categorie": "gemmes", "quantite": 1 }
+    ]
+  },
+  {
+    "_id": "recette:bijouterie_sautoir",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "sautoir",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "perles", "quantite": 5 },
+      { "sous_categorie": "metaux_precieux", "quantite": 1 }
+    ]
+  },
+  {
+    "_id": "recette:bijouterie_diademe",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "diademe",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      { "sous_categorie": "metaux_precieux", "quantite": 4 },
+      { "sous_categorie": "gemmes", "quantite": 3 }
+    ]
+  }
+]
