@@ -76,6 +76,10 @@ def monde(monkeypatch):
 	monkeypatch.setattr(character_stats, "RECRUTEMENT_PART_BUTIN_MIN", 10)
 	monkeypatch.setattr(character_stats, "RECRUTEMENT_PART_BUTIN_MAX", 30)
 	monkeypatch.setattr(character_stats, "RECRUTEMENT_CARTE_REQUISE", True)
+	monkeypatch.setattr(character_stats, "RECRUTEMENT_MISSION_COUT_CUIVRE", 300)
+	monkeypatch.setattr(character_stats, "RECRUTEMENT_MISSION_COUT_PAR_NIVEAU", 200)
+	monkeypatch.setattr(character_stats, "RECRUTEMENT_MISSION_PART_FACTEUR", 0.5)
+	monkeypatch.setattr(character_stats, "RECRUTEMENT_MISSION_PART_MIN", 0)
 	return {"docs": docs, "supprimes": supprimes}
 
 
@@ -887,3 +891,321 @@ def test_affinites_detail_vitaux_pour_les_actifs_seuls(monde):
 
 	assert detail["aventurier:a"]["pv_max"] > 0 and "currentPM" in detail["aventurier:a"]
 	assert "pv_max" not in detail["aventurier:z"] and detail["aventurier:z"]["actif"] is False
+
+
+# ── Contrat d'UNE MISSION ────────────────────────────────────────────────────────
+# Troisième mode de lien : payé d'avance en cuivre contre une part de butin réduite, il
+# s'achève de lui-même à la première quête rendue DANS une maison de guilde. `contrat`
+# absent ⇒ comportement d'avant à la lettre (aucune migration).
+
+COMPTOIR = {"_id": "lieu:comptoir", "type": "lieu",
+			"categorie": "guilde_aventurier_comptoir", "sous_categorie": "guilde_aventurier"}
+FACADE = {"_id": "lieu:facade", "type": "lieu", "categorie": "guilde_aventurier_exterieur"}
+BUREAU = {"_id": "lieu:bureau", "type": "lieu", "categorie": "bureau_maitre_guilde"}
+BOUCHERIE = {"_id": "lieu:boucherie", "type": "lieu", "categorie": "boucherie"}
+
+
+def _mission(monde, c, av_id="aventurier:mission", part=20, affinite=50):
+	"""Compagnon actif lié par un contrat d'une mission, déjà attaché au personnage."""
+	av = recrue(av_id, exigences={"part_butin_pct": part, "clauses": []})
+	monde["docs"][av_id] = av
+	termes = recrutement.offre_mission(av)
+	ok, raison = recrutement.embaucher(
+		c, av, contrat={"mode": "mission", "part_butin_pct": termes["part_butin_pct"],
+						"cout_cuivre": termes["cout_cuivre"], "signe_at": 1000,
+						"giver": "lieu:guilde"})
+	assert ok, raison
+	c["affinites"][av_id] = affinite
+	return av
+
+
+def test_lieu_de_guilde_couvre_les_quatre_lieux_de_la_maison(monde):
+	# ⚠️ Les quatre docs ont des `categorie` DIFFÉRENTES, et le bureau du maître n'a même
+	# pas de `sous_categorie` : aucun prédicat existant ne les couvrait tous.
+	for lieu in (GUILDE, COMPTOIR, FACADE, BUREAU):
+		assert recrutement.lieu_de_guilde(lieu) is True, lieu["_id"]
+	assert recrutement.lieu_de_guilde(BOUCHERIE) is False
+	assert recrutement.lieu_de_guilde(None) is False
+
+
+def test_lieu_de_guilde_ouvert_par_le_tag(monde):
+	"""Le tag `guilde` ouvre la porte à une faction future SANS une ligne de code."""
+	assert recrutement.lieu_de_guilde({"categorie": "caserne", "tags": ["guilde"]}) is True
+
+
+def test_offre_mission_le_cout_suit_le_niveau(monde):
+	assert recrutement.offre_mission(recrue(xp_total=0))["cout_cuivre"] == 300
+	# Un niveau de plus = COUT_PAR_NIVEAU de plus (compute_character_level, pas de barème maison).
+	niveau = compute_character_level(400)
+	assert recrutement.offre_mission(recrue(xp_total=400))["cout_cuivre"] == 300 + 200 * niveau
+
+
+def test_offre_mission_part_reduite_depuis_la_part_BRUTE(monde):
+	"""⚠️ La part part de l'exigence BRUTE : la réduction d'affinité est appliquée UNE
+	seule fois, au règlement — la compter ici la déduirait deux fois."""
+	av = recrue(exigences={"part_butin_pct": 20, "clauses": []})
+	assert recrutement.offre_mission(av)["part_butin_pct"] == 10  # 20 × 0.5
+
+
+def test_offre_mission_part_plancheree(monde, monkeypatch):
+	monkeypatch.setattr(character_stats, "RECRUTEMENT_MISSION_PART_MIN", 8)
+	av = recrue(exigences={"part_butin_pct": 10, "clauses": []})
+	assert recrutement.offre_mission(av)["part_butin_pct"] == 8  # 10 × 0.5 = 5 → plancher
+
+
+def test_embaucher_avec_contrat_estampille_le_doc(monde):
+	c = perso()
+	av = _mission(monde, c)
+	assert av["contrat"]["mode"] == "mission"
+	assert av["contrat"]["part_butin_pct"] == 10 and av["contrat"]["cout_cuivre"] == 300
+	assert av["statut"] == "embauche" and c["groupe"] == [av["_id"]]
+
+
+def test_reembauche_sans_contrat_efface_un_contrat_perime(monde):
+	"""Miroir exact du filet `permanent` : sans ce pop, la deuxième signature serait
+	GRATUITE — le joueur garderait une part réduite sans avoir repayé."""
+	c = perso()
+	av = _mission(monde, c)
+	recrutement.congedier(c, av)
+	av["statut"] = "offert"
+	ok, _ = recrutement.embaucher(c, av)
+	assert ok and "contrat" not in av
+
+
+def test_conditions_effectives_part_de_mission_et_mode(monde):
+	c = perso()
+	av = _mission(monde, c, part=20)          # part de mission = 10
+	cond = recrutement.conditions_effectives(av, 50)
+	assert cond["part_butin_pct"] == 10 and cond["mode"] == "mission"
+	# Un contrat ordinaire garde sa part brute et un mode vide.
+	ord_av = recrue("aventurier:ord", exigences={"part_butin_pct": 20, "clauses": []})
+	assert recrutement.conditions_effectives(ord_av, 50) == {
+		"part_butin_pct": 20, "mode": "", "clauses": []}
+
+
+def test_conditions_effectives_l_affinite_rogne_encore_la_part_de_mission(monde):
+	c = perso()
+	av = _mission(monde, c, part=20)          # 10 après le facteur
+	# +30 d'affinité au-dessus du neutre ⇒ −3 points (AFFINITE_REDUC_PART = 10).
+	assert recrutement.conditions_effectives(av, 80)["part_butin_pct"] == 7
+
+
+def test_conditions_effectives_plancher_propre_au_contrat_de_mission(monde):
+	"""⚠️ Le plancher est MISSION_PART_MIN (0 par défaut), et surtout PAS PART_BUTIN_MIN :
+	celui-ci ferait REMONTER à 10 % une part déjà payée d'avance."""
+	c = perso()
+	av = _mission(monde, c, part=20)
+	assert recrutement.conditions_effectives(av, 100)["part_butin_pct"] == 5  # 10 − 5
+
+
+def test_un_permanent_l_emporte_sur_un_contrat_residuel(monde):
+	c = perso()
+	av = _mission(monde, c)
+	av["permanent"] = True                    # état impossible en jeu, garde de sécurité
+	cond = recrutement.conditions_effectives(av, 50)
+	assert cond["part_butin_pct"] == 0 and cond["mode"] == ""
+
+
+def test_engager_permanent_absorbe_le_contrat_de_mission(monde):
+	c = perso()
+	av = _mission(monde, c, affinite=95)
+	ok, raison = recrutement.engager_permanent(c, av, "La Main d'Argent")
+	assert ok, raison
+	assert av["permanent"] is True and "contrat" not in av
+
+
+def test_regler_part_butin_paie_la_part_reduite(monde):
+	"""Le chokepoint de règlement n'a PAS été modifié : il traverse déjà
+	`conditions_effectives`, qui aiguille seule vers la part du contrat."""
+	c = perso()
+	av = _mission(monde, c, part=20)          # 10 %
+	reglement = recrutement.regler_part_butin(c, [av], 1000)
+	assert reglement["parts"][av["_id"]] == 100 and reglement["reste"] == 900
+
+
+# ── Clôture des contrats au turn-in ──────────────────────────────────────────────
+
+def test_cloturer_ne_fait_rien_hors_guilde(monde):
+	c = perso()
+	av = _mission(monde, c)
+	assert recrutement.cloturer_contrats_mission(c, BOUCHERIE, compagnons=[av]) == []
+	assert c["groupe"] == [av["_id"]] and av["statut"] == "embauche"
+
+
+def test_cloturer_libere_le_contrat_de_mission_a_la_guilde(monde):
+	c = perso()
+	av = _mission(monde, c)
+	libres = recrutement.cloturer_contrats_mission(c, COMPTOIR, compagnons=[av])
+	assert libres == [av]
+	assert c["groupe"] == [] and av["statut"] == "parti"
+	assert av["contrat"]["echu_at"] == 1000          # le bloc SURVIT (il porte les termes)
+
+
+def test_cloturer_epargne_ordinaire_et_permanent(monde, monkeypatch):
+	# Trois compagnons actifs : le plafond par défaut (2) n'en laisserait pas passer trois.
+	monkeypatch.setattr(character_stats, "RECRUTEMENT_GROUPE_TAILLE_MAX", 3)
+	c = perso()
+	mission = _mission(monde, c, "aventurier:m")
+	ordinaire = recrue("aventurier:o")
+	monde["docs"]["aventurier:o"] = ordinaire
+	recrutement.embaucher(c, ordinaire)
+	permanent = recrue("aventurier:p")
+	monde["docs"]["aventurier:p"] = permanent
+	recrutement.embaucher(c, permanent)
+	c["affinites"]["aventurier:p"] = 95
+	recrutement.engager_permanent(c, permanent, "La Main d'Argent")
+
+	libres = recrutement.cloturer_contrats_mission(
+		c, GUILDE, compagnons=[mission, ordinaire, permanent])
+
+	assert libres == [mission]
+	assert ordinaire["statut"] == "embauche" and permanent["statut"] == "embauche"
+	assert set(c["groupe"]) == {"aventurier:o", "aventurier:p"}
+
+
+def test_cloturer_n_ajuste_aucune_affinite(monde):
+	"""Le contrat a été HONORÉ jusqu'à son terme : personne n'est froissé. C'est toute la
+	différence avec un congédiement."""
+	c = perso()
+	av = _mission(monde, c, affinite=64)
+	recrutement.cloturer_contrats_mission(c, GUILDE, compagnons=[av])
+	assert c["affinites"][av["_id"]] == 64
+
+
+def test_cloturer_est_idempotente(monde):
+	c = perso()
+	av = _mission(monde, c)
+	recrutement.cloturer_contrats_mission(c, GUILDE, compagnons=[av])
+	assert recrutement.cloturer_contrats_mission(c, GUILDE, compagnons=[av]) == []
+
+
+def test_invariant_un_permanent_ne_porte_jamais_de_contrat(monde):
+	"""LE test qui protège le câblage de `routers/pnj` : `cloturer_contrats_mission` y
+	charge le groupe elle-même pendant que `_sauver_compagnie` sauve les permanents. Les
+	deux ensembles doivent être DISJOINTS, sinon ce sont deux dicts du même document."""
+	c = perso()
+	av = _mission(monde, c, affinite=95)
+	recrutement.engager_permanent(c, av, "La Main d'Argent")
+	libres = recrutement.cloturer_contrats_mission(c, GUILDE, compagnons=[av])
+	partages = recrutement.partager_xp(c, 10, compagnons=[av])
+	assert libres == [] and partages == [av]
+
+
+# ── Rupture ──────────────────────────────────────────────────────────────────────
+
+def test_congedier_un_contrat_de_mission_est_gratuit_a_la_guilde(monde):
+	c = perso()
+	av = _mission(monde, c, affinite=55)
+	ok, _ = recrutement.congedier(c, av, COMPTOIR)
+	assert ok and c["affinites"][av["_id"]] == 55   # la clause de sortie fait partie du marché
+	assert "contrat" not in av
+
+
+def test_congedier_un_contrat_de_mission_coute_ailleurs(monde):
+	c = perso()
+	av = _mission(monde, c, affinite=55)
+	recrutement.congedier(c, av, BOUCHERIE)
+	assert c["affinites"][av["_id"]] == 55 + character_stats.AFFINITE_DELTA_CONGEDIE
+
+
+def test_congedier_sans_lieu_garde_le_comportement_d_avant(monde):
+	"""`lieu_doc=None` : les appelants d'avant sont inchangés à la lettre."""
+	c = perso()
+	av = _mission(monde, c, affinite=55)
+	recrutement.congedier(c, av)
+	assert c["affinites"][av["_id"]] == 55 + character_stats.AFFINITE_DELTA_CONGEDIE
+
+
+def test_congedier_un_ordinaire_garde_son_malus_a_la_guilde(monde):
+	"""La gratuité ne vaut QUE pour un contrat d'une mission : l'ordinaire n'a pas de terme,
+	le rompre reste un renvoi."""
+	c = perso(affinites={"aventurier:o": 55})
+	av = recrue("aventurier:o")
+	monde["docs"]["aventurier:o"] = av
+	recrutement.embaucher(c, av)
+	recrutement.congedier(c, av, COMPTOIR)
+	assert c["affinites"]["aventurier:o"] == 55 + character_stats.AFFINITE_DELTA_CONGEDIE
+
+
+def test_congedier_un_permanent_garde_son_malus_a_la_guilde(monde):
+	c = perso()
+	av = _permanent(monde, c, "aventurier:fidele", affinite=95)
+	recrutement.congedier(c, av, COMPTOIR)
+	assert c["affinites"][av["_id"]] == 95 + character_stats.AFFINITE_DELTA_CONGEDIE_PERMANENT
+
+
+# ── Reprise pour une mission de plus ─────────────────────────────────────────────
+
+def _echu(monde, c, av_id="aventurier:mission"):
+	av = _mission(monde, c, av_id)
+	recrutement.cloturer_contrats_mission(c, GUILDE, compagnons=[av])
+	return av
+
+
+def test_peut_reprendre_un_contrat_echu(monde):
+	c = perso()
+	av = _echu(monde, c)
+	assert recrutement.peut_reprendre(c, av, monde["docs"].get) == (True, "")
+
+
+def test_peut_reprendre_refuse_un_autre_employeur(monde):
+	"""`embauche_par` est la SEULE preuve du lien passé : un doc `aventurier:*` n'a pas
+	de `user_id`."""
+	c = perso()
+	av = _echu(monde, c)
+	av["embauche_par"] = "character:autre"
+	ok, raison = recrutement.peut_reprendre(c, av, monde["docs"].get)
+	assert not ok and "jamais" in raison
+
+
+def test_peut_reprendre_refuse_un_contrat_ordinaire(monde):
+	c = perso()
+	av = recrue("aventurier:o", statut="parti", embauche_par="character:u_1")
+	monde["docs"]["aventurier:o"] = av
+	ok, raison = recrutement.peut_reprendre(c, av, monde["docs"].get)
+	assert not ok and "mission" in raison
+
+
+def test_peut_reprendre_refuse_une_recrue_re_offerte(monde):
+	"""Cas limite ASSUMÉ : le tableau l'a repris entre-temps (statut `offert`) — le joueur
+	le ré-embauche alors par le tableau, pas par la reprise."""
+	c = perso()
+	av = _echu(monde, c)
+	av["statut"] = "offert"
+	assert recrutement.peut_reprendre(c, av, monde["docs"].get)[0] is False
+
+
+def test_peut_reprendre_refuse_un_groupe_complet(monde, monkeypatch):
+	monkeypatch.setattr(character_stats, "RECRUTEMENT_GROUPE_TAILLE_MAX", 1)
+	c = perso()
+	av = _echu(monde, c)
+	autre = recrue("aventurier:x")
+	monde["docs"]["aventurier:x"] = autre
+	recrutement.embaucher(c, autre)
+	ok, raison = recrutement.peut_reprendre(c, av, monde["docs"].get)
+	assert not ok and "complet" in raison
+
+
+def test_reprendre_rattache_avec_un_contrat_neuf(monde):
+	c = perso()
+	av = _echu(monde, c)
+	contrat = {"mode": "mission", "part_butin_pct": 10, "cout_cuivre": 500,
+			   "signe_at": 1000, "giver": "lieu:guilde"}
+	ok, raison = recrutement.reprendre(c, av, contrat, monde["docs"].get)
+	assert ok, raison
+	assert av["statut"] == "embauche" and c["groupe"] == [av["_id"]]
+	assert av["contrat"]["cout_cuivre"] == 500 and "echu_at" not in av["contrat"]
+
+
+def test_vue_contrat_echu_recalcule_les_termes(monde):
+	"""Reprendre, c'est signer un contrat NEUF : les termes suivent le niveau atteint, ils
+	ne sont pas relus du contrat échu."""
+	c = perso()
+	av = _echu(monde, c)
+	av["contrat"]["cout_cuivre"] = 1           # tarif périmé, jamais relu
+	av["xp_total"] = 400
+	vue = recrutement.vue_contrat_echu(av)
+	attendu = recrutement.offre_mission(av)
+	assert vue["cout_cuivre"] == attendu["cout_cuivre"] > 1
+	assert vue["part_butin_pct"] == attendu["part_butin_pct"]
+	assert vue["id"] == av["_id"] and vue["prenom"] == "Aldric"

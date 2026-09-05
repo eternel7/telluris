@@ -25,7 +25,7 @@
 			--portraitW: 100;
 			--portraitH: 100;
 			--dist-view: 10;
-			--map-anim: 1000ms;   /* glissement de la carte à chaque pas */
+			--map-anim: 600ms;   /* glissement de la carte à chaque pas */
 			--bg: #0e0e0e;
 			--surface: #181818;
 			--border: #2a2a2a;
@@ -1234,7 +1234,7 @@
 				calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px),
 				0);
 			max-width: none;
-			transition: transform var(--map-anim, 1000ms) ease-out;
+			transition: transform var(--map-anim, 600ms) ease-out;
 			will-change: transform;
 		}
 		@media (prefers-reduced-motion: reduce) {
@@ -2454,6 +2454,18 @@
 			border: 1px solid rgba(220, 200, 160, .35);
 			background: rgba(0, 0, 0, .35); color: inherit; font: inherit;
 		}
+		/* ── Fin d'un contrat d'UNE MISSION ───────────────────────────────────────
+		   Cloné de l'engagement durable (même calque, mêmes briques de carte). z-index
+		   AU-DESSUS de lui : il s'ouvre au retour d'un turn-in, par-dessus tout le reste.
+		   ⚠️ ✕ / Échap / backdrop = LAISSER PARTIR : le contrat est déjà clos côté serveur,
+		   la reprise est le geste positif — aucun geste de sortie n'engage rien. */
+		#contrat-overlay {
+			position: fixed; inset: 0; z-index: 9460;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#contrat-overlay.clauses-hidden { display: none; }
+		#contrat-overlay .item-detail-card { max-width: 520px; }
 		/* ── Choix de la cible d'un effet bénéfique (sort/compétence `cible: allie`) ──
 		   Même calque et mêmes briques de carte que les clauses : c'est aussi une
 		   décision bloquante, et refermer sans choisir ne doit RIEN lancer. */
@@ -2559,6 +2571,15 @@
 			<div id="engagement-body"></div>
 		</div>
 	</div><!-- /#engagement-overlay -->
+	<!-- Fin de contrat d'une mission : ✕/Échap/backdrop LAISSENT PARTIR. Le contrat est déjà
+	     clos par le serveur au turn-in ; seul « Le reprendre » engage (et repaie). -->
+	<div id="contrat-overlay" class="clauses-hidden" aria-label="Fin de contrat"
+		 onclick="if(event.target===this)_contratLaisser()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="_contratLaisser()" title="Le laisser partir">✕</button>
+			<div id="contrat-body"></div>
+		</div>
+	</div><!-- /#contrat-overlay -->
 	{# Cible d'un sort/compétence bénéfique : ✕ / Échap / clic hors carte = ANNULER,
 	   jamais « lancer sur quelqu'un par défaut » — les PM sont dépensés à l'envoi. #}
 	<div id="cible-allie-overlay" class="clauses-hidden" aria-label="Choisir la cible"
@@ -3402,6 +3423,11 @@ document.addEventListener('keydown', e => {
 	// Cascade ordonnée par z-index décroissant : le calque le plus haut se ferme d'abord.
 	// ⚠️ Le choix de cible est en attente d'une promesse : Échap doit la RÉSOUDRE (à null),
 	// sinon le lancement resterait suspendu et son bouton désactivé pour toujours.
+	// Fin de contrat EN PREMIER : c'est le calque le plus haut (9460), il s'ouvre par-dessus
+	// tout au retour d'un turn-in. Échap = laisser partir — rien n'est en attente, le contrat
+	// est déjà clos côté serveur ; c'est la REPRISE qui est le geste positif.
+	const contratOv = document.getElementById('contrat-overlay');
+	if (contratOv && !contratOv.classList.contains('clauses-hidden')) { _contratLaisser(); return; }
 	const cibleAllie = document.getElementById('cible-allie-overlay');
 	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
 	// Dépassement du max racial : rien n'est en attente, Échap se contente de refermer —
@@ -6453,6 +6479,10 @@ async function terminerQuete(queteId, btn) {
 		// La réussite a monté la cote du donneur — l'onglet 🤝 est rendu 100 % client, sans ce
 		// resync il resterait figé sur les valeurs du dernier chargement de /play.
 		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
+		// Contrats d'une mission arrivés à terme. ⚠️ EN DERNIER, après tous les rendus et
+		// tous les toasts de récompense : l'overlay se pose par-dessus une fiche déjà à jour,
+		// et le joueur a lu sa part de butin avant qu'on lui annonce le départ.
+		_contratsEchus(data);
 	} catch(err) { console.error('Erreur fin de quête', err); if (btn) btn.disabled = false; }
 }
 
@@ -6537,7 +6567,9 @@ function renderFicheCompagnons(list) {
 		const part = (r.exigences_effectives || {}).part_butin_pct;
 		// Un permanent ne prend rien : « part 0% » serait la bonne valeur mais la mauvaise
 		// information — ce qui le caractérise, c'est son engagement (miroir de _piedCompagnon).
+		const mission = _modeContrat(r) === 'mission';
 		const contrat = r.permanent ? ` · ✦ engagé`
+			: mission ? ` · 📜 mission — part ${part}%`
 			: (part !== undefined ? ` · part ${part}%` : '');
 		// Vitaux : présents pour les compagnons ACTIFS seulement (le mémo d'un parti n'en porte pas).
 		const vit = r.pv_max !== undefined
@@ -6552,7 +6584,7 @@ function renderFicheCompagnons(list) {
 				<div class="sh-rel-score ${cls}">${sc}<span style="opacity:.5;font-size:.7em">/100</span></div>
 				<div class="sh-rel-lbl">${_affLabel(sc)}</div>
 			</div>
-			${r.actif ? `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${r.id}', ${!!r.permanent})" title="${r.permanent ? 'Rompre l\'engagement' : 'Congédier ce compagnon'}">✕</button>` : ''}
+			${r.actif ? `<button class="sh-drop-btn sh-abandon-btn" onclick="congedierAventurier('${r.id}', ${!!r.permanent}, ${mission})" title="${r.permanent ? "Rompre l'engagement" : mission ? 'Mettre fin au contrat' : 'Congédier ce compagnon'}">✕</button>` : ''}
 			<div class="sh-rel-portrait">
 				${r.image ? `<img src="/characters/${encodeURIComponent(r.image)}" alt="" class="collapsed compagnon-portrait">`
 					: '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">👤</div>'}
@@ -6573,8 +6605,26 @@ function renderFicheCompagnons(list) {
 // appartient au joueur, pas à ses compagnons. Posée par tout payload qui la porte.
 let _compagnieNom = {{ (compagnie.nom if compagnie else '') | tojson }};
 
+// Sommes-nous dans une maison de guilde ? Un contrat d'UNE MISSION s'y signe, s'y rompt
+// sans frais et s'y achève. ⚠️ Toujours exact SANS resync : tout changement de lieu passe
+// par la branche « lien » de `moveTo`, qui recharge /play. Les payloads qui tiennent déjà le
+// doc lieu le renvoient quand même (`_majLieuDeGuilde`) — cela ne coûte aucune lecture.
+// ⚠️ Il ne pilote que des LIBELLÉS et du grisage : la garde reste le 403/409 du serveur.
+let LIEU_DE_GUILDE = {{ lieu_de_guilde | tojson }};
+
 function _majCompagnie(data) {
 	if (data && 'compagnie' in data) _compagnieNom = (data.compagnie || {}).nom || '';
+}
+
+function _majLieuDeGuilde(data) {
+	if (data && 'lieu_de_guilde' in data) LIEU_DE_GUILDE = !!data.lieu_de_guilde;
+}
+
+// Mode du contrat qui lie CE compagnon : "mission" ou "" (ordinaire). SOURCE UNIQUE — la
+// clé est posée par `recrutement.conditions_effectives`, donc présente dans les quatre vues
+// qui l'appellent (recrues, groupe, onglet 🤝, fiche de compagnon).
+function _modeContrat(c) {
+	return ((c || {}).exigences_effectives || {}).mode || '';
 }
 
 function _piedCompagnon(c) {
@@ -6582,8 +6632,13 @@ function _piedCompagnon(c) {
 	const part = (c.exigences_effectives || {}).part_butin_pct;
 	// Un permanent ne prend RIEN : afficher « part 0% » serait la bonne valeur mais la
 	// mauvaise information — ce qui le caractérise, c'est son appartenance à la compagnie.
+	// Trois modes de lien, trois pieds : engagement durable (compagnie), contrat d'UNE
+	// MISSION (payé d'avance, il s'achève à la prochaine quête rendue en guilde), contrat
+	// ordinaire (sans terme).
 	const contrat = c.permanent
 		? `<span title="Engagé durablement : aucune part de butin">✦ ${escapeHtml(_compagnieNom || 'Compagnie')}</span>`
+		: _modeContrat(c) === 'mission'
+		? `<span title="Contrat d'une mission : il vous quittera à la prochaine quête rendue à la guilde">📜 mission — part ${part}%</span>`
 		: `<span>💰 part ${part}%</span>`;
 	// ★ Points d'attribut non dépensés — MÊME symbole et MÊME vert (`.pts-dispo`) que la
 	// pastille du bouton 👥, qui ne dit que « quelqu'un en a » : c'est ici, sur la carte,
@@ -6600,10 +6655,18 @@ function _piedCompagnon(c) {
 // rompre un engagement durable ne se demande pas dans les mêmes termes qu'un congédiement.
 function _btnCongedier(c) {
 	const perm = !!c.permanent;
+	const mission = _modeContrat(c) === 'mission';
+	// Trois liens, trois libellés : rompre un ENGAGEMENT, mettre fin à un CONTRAT (qui a un
+	// terme, et se rompt sans frais à la guilde), ou congédier — la même croix ✕ ne peut pas
+	// dire trois choses aussi différentes sous le même mot.
+	const titre = perm ? "Rompre l'engagement (blesse durablement)"
+		: mission ? "Mettre fin au contrat (sans frais dans une guilde)"
+		: "Congédier (le lien est conservé)";
+	const label = perm ? "✕ Rompre l'engagement"
+		: mission ? "✕ Mettre fin au contrat" : "✕ Congédier";
 	return `<button class="sh-drop-btn sh-abandon-btn"
-		onclick="congedierAventurier('${c.id}', ${perm})"
-		title="${perm ? 'Rompre l\'engagement (blesse durablement)' : 'Congédier (le lien est conservé)'}"
-		>${perm ? '✕ Rompre l\'engagement' : '✕ Congédier'}</button>`;
+		onclick="congedierAventurier('${c.id}', ${perm}, ${mission})"
+		title="${titre}">${label}</button>`;
 }
 
 // Offert au seul compagnon assez DÉVOUÉ et pas encore engagé. ⚠️ `c.affinite` peut être
@@ -6644,9 +6707,15 @@ function _rendreCartesCompagnons(container, groupe, actions) {
 // d'embauche ne transporte qu'un id, et il faut relire les exigences à l'ouverture.
 // Repeuplé à CHAQUE rendu — une recrue disparue du tableau ne doit pas y survivre.
 let _recEtat = {};
+// Bourse du dernier rendu du tableau : le dialogue d'embauche en a besoin pour griser
+// l'accord PAYANT, et il ne reçoit qu'un id. Rafraîchie à chaque rendu — donc après chaque
+// embauche, refus ou congédiement, qui renvoient tous le payload complet.
+let _recPurse = null;
 
 function renderRecrutement(data) {
 	_majCompagnie(data);
+	_majLieuDeGuilde(data);
+	if (data.purse) _recPurse = data.purse;
 	// ⚠️ `places_occupees` (serveur), jamais `groupe.length` : un compagnon engagé
 	// durablement fait partie du groupe SANS occuper de place. Recompter ici afficherait
 	// un plafond que le serveur n'applique pas — la liste et le garde doivent s'accorder.
@@ -7350,6 +7419,23 @@ function openClauses(avId) {
 	const nom = `${r.prenom || ''} ${r.nom || ''}`.trim();
 	const clauses = ex.clauses || [];
 	const part = ex.part_butin_pct;
+	// L'accord se DÉDOUBLE quand la guilde offre un contrat d'une mission (`r.mission`,
+	// posé par le serveur SEULEMENT dans une maison de guilde) : payer d'avance contre une
+	// part réduite, ou s'engager sans terme. ⚠️ Le bouton payant se grise quand la bourse ne
+	// suit pas — grisage INDICATIF, le 409 « Fonds insuffisants » reste la vraie garde.
+	const m = r.mission;
+	// ⚠️ Bourse inconnue (payload d'avant) ⇒ on NE GRISE PAS : un bouton grisé à tort bloque
+	// le joueur, là où un 409 « Fonds insuffisants » ne fait que l'informer.
+	const bourse = _recPurse ? _purseEnCuivre(_recPurse) : Infinity;
+	const accords = (m
+		? `<li><button class="sub-loc-btn" ${m.cout_cuivre > bourse
+				? `disabled title="Vous n'avez pas de quoi payer"`
+				: `title="Il vous suit jusqu'à la prochaine quête rendue à la guilde"`}
+			onclick="_clausesAccepter('${r.id}', 'mission')"
+			>✔ « J'accepte — pour une mission. » (${_prixTexte(m.cout_cuivre)} · part ${m.part_butin_pct} %)</button></li>`
+		: '')
+		+ `<li><button class="sub-loc-btn" onclick="_clausesAccepter('${r.id}')"
+			>✔ « J'accepte${m ? ' — sans terme' : ' vos conditions'}. »${m ? ` (part ${part} %)` : ''}</button></li>`;
 	// ⚠️ Aucun pronom genré : une recrue est M ou F, la réplique doit valoir pour les deux.
 	const replique = clauses.length
 		? `« Je vous suis volontiers — à mes conditions : ${part} % du butin, et quelques principes auxquels je ne déroge pas. »`
@@ -7366,7 +7452,7 @@ function openClauses(avId) {
 			? `<ul class="clauses-list">${clauses.map(c => `<li>• ${escapeHtml(c)}</li>`).join('')}</ul>`
 			: '')
 		+ `<ul class="rec-dial-choix">`
-		+ `<li><button class="sub-loc-btn" onclick="_clausesAccepter('${r.id}')">✔ « J'accepte vos conditions. »</button></li>`
+		+ accords
 		+ `<li><button class="sub-loc-btn" onclick="_clausesRefuser('${r.id}')">✕ « Vos conditions ne me conviennent pas. »</button></li>`
 		+ `<li><button class="sub-loc-btn" onclick="closeClauses()">↩ « Laissez-moi y réfléchir. »</button></li>`
 		+ `</ul>`
@@ -7381,7 +7467,7 @@ function closeClauses() {
 	document.getElementById('clauses-overlay').classList.add('clauses-hidden');
 }
 
-function _clausesAccepter(id) { closeClauses(); embaucherAventurier(id); }
+function _clausesAccepter(id, mode) { closeClauses(); embaucherAventurier(id, mode); }
 function _clausesRefuser(id)  { closeClauses(); refuserAventurier(id); }
 
 // ── Engagement durable d'un compagnon (✦) ────────────────────────────────────────
@@ -7471,17 +7557,24 @@ async function refuserAventurier(avId) {
 	} catch(err) { console.error('Erreur refus', err); }
 }
 
-async function embaucherAventurier(avId) {
+// `mode` : absent ⇒ contrat ORDINAIRE (comportement d'avant à la lettre) ; "mission" ⇒
+// contrat d'UNE MISSION, payé d'avance — d'où le rappel du prix dans le toast.
+async function embaucherAventurier(avId, mode) {
 	try {
+		const body = { aventurier_id: avId };
+		if (mode) body.mode = mode;
 		const res = await fetch('api/recrutement/embaucher', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ aventurier_id: avId })
+			body: JSON.stringify(body)
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
 		updatePurse(data.purse);
 		renderRecrutement(data);
-		if (data.embauche) showToast('🤝 ' + data.embauche.nom + ' rejoint le groupe !');
+		if (data.embauche) {
+			showToast('🤝 ' + data.embauche.nom + ' rejoint le groupe !'
+				+ (data.embauche.mission ? " 📜 Contrat d'une mission — " + _prixTexte(data.embauche.cout) : ''));
+		}
 	} catch(err) { console.error('Erreur embauche', err); }
 }
 
@@ -7489,9 +7582,17 @@ async function embaucherAventurier(avId) {
 // payload ne porte pas de recrues → seuls groupe + fiche 👥 sont resynchronisés.
 // `permanent` : rompre un ENGAGEMENT n'est pas résilier un contrat — la confirmation doit
 // dire ce que ça coûte, sinon le joueur découvre la sanction après coup.
-async function congedierAventurier(avId, permanent) {
+async function congedierAventurier(avId, permanent, mission) {
+	// TROIS ruptures, trois confirmations : l'engagement blesse durablement ; le contrat
+	// d'une mission se rompt SANS FRAIS à la guilde (et coûte de l'affinité ailleurs — le
+	// dire ici est la seule occasion qu'a le joueur de l'apprendre AVANT) ; le congédiement
+	// ordinaire froisse.
 	const question = permanent
 		? 'Rompre votre engagement avec ce compagnon ? Il quitte la compagnie, et le blesse durablement.'
+		: mission
+		? (LIEU_DE_GUILDE
+			? "Mettre fin au contrat ici, à la guilde ? Le marché est rempli : il s'en ira sans rancune."
+			: "Rompre le contrat loin de la guilde ? Il le prendra mal — à la guilde, cela ne lui coûterait rien.")
 		: 'Congédier ce compagnon ? Il gardera le souvenir de vos aventures.';
 	if (!confirm(question)) return;
 	try {
@@ -7510,8 +7611,98 @@ async function congedierAventurier(avId, permanent) {
 			const r2 = await fetch('api/groupe');
 			if (r2.ok) renderGroupe(await r2.json());
 		}
-		if (data.congedie) showToast('👋 ' + data.congedie.nom + ' quitte le groupe.');
+		if (data.congedie) {
+			showToast('👋 ' + data.congedie.nom + ' quitte le groupe.'
+				+ (data.congedie.sans_frais ? ' 📜 Contrat rempli, sans rancune.' : ''));
+		}
 	} catch(err) { console.error('Erreur congédiement', err); }
+}
+
+// ── Fin d'un contrat d'une mission ───────────────────────────────────────────────
+// Le contrat est déjà CLOS côté serveur quand ce pop-up s'ouvre : le compagnon a touché sa
+// part de butin, puis a quitté le groupe, sans perte d'affinité — le marché a été rempli.
+// Le seul geste qui engage encore quelque chose est la REPRISE (qui repaie) ; ✕, Échap et
+// le backdrop laissent donc partir, sans rien demander.
+//
+// ⚠️ FILE d'attente : plusieurs contrats peuvent échoir sur la même quête rendue. Un
+// overlay à la fois, `_contratSuivant()` après chaque décision — empiler les cartes
+// n'afficherait que la dernière.
+let _contratsEchusFile = [];
+
+function _contratsEchus(data) {
+	const l = (data && data.contrats_echus) || [];
+	if (!l.length) return;
+	// Un TOAST par échéance en plus de l'overlay : si le joueur écarte le pop-up d'un geste
+	// distrait, l'information de son départ doit lui rester quelque part.
+	l.forEach(c => showToast('📜 Contrat rempli : ' + `${c.prenom || ''} ${c.nom || ''}`.trim()
+		+ ' vous quitte, sans rancune.'));
+	_contratsEchusFile = _contratsEchusFile.concat(l);
+	_contratSuivant();
+}
+
+function _contratSuivant() {
+	const ov = document.getElementById('contrat-overlay');
+	if (!ov) return;
+	const c = _contratsEchusFile.shift();
+	if (!c) { ov.classList.add('clauses-hidden'); return; }
+	const nom = `${c.prenom || ''} ${c.nom || ''}`.trim();
+	// ⚠️ On ne grise PAS le bouton sur la bourse : la reprise se fait à la guilde, où le
+	// joueur vient d'encaisser sa récompense — et le 409 « Fonds insuffisants » le dira.
+	document.getElementById('contrat-body').innerHTML =
+		`<h3>📜 ${escapeHtml(nom)}</h3>`
+		+ `<div class="rec-dial">`
+		+ (c.image ? `<img class="rec-dial-portrait" src="/characters/${escapeHtml(c.image)}" alt="">` : '')
+		+ `<div class="rec-dial-corps">`
+		+ (c.specialite ? `<div class="pnj-ambiance">${escapeHtml(c.specialite)}</div>` : '')
+		+ `<div class="pnj-replique">« Notre contrat s'achève ici. J'ai eu ma part, vous avez eu mon bras. »</div>`
+		+ `<div class="clauses-part">Le reprendre pour une mission de plus : `
+		+ `<strong>${_prixTexte(c.cout_cuivre)}</strong> · part ${c.part_butin_pct} %</div>`
+		+ `<div class="item-detail-actions">`
+		+ `<button class="sh-drop-btn sh-abandon-btn" onclick="_contratLaisser()"`
+		+ ` title="Il s'en va, sans rancune">✕ Le laisser partir</button>`
+		+ `<button class="sh-equip-btn" onclick="_contratReprendre('${c.id}')"`
+		+ ` title="Signer un nouveau contrat d'une mission">✔ Le reprendre</button>`
+		+ `</div></div></div>`;
+	ov.classList.remove('clauses-hidden');
+}
+
+// ⚠️ Laisser partir n'appelle AUCUN endpoint : le départ est déjà acquis en base.
+function _contratLaisser() { _contratSuivant(); }
+
+function _contratReprendre(avId) {
+	document.getElementById('contrat-overlay').classList.add('clauses-hidden');
+	reprendreAventurier(avId).finally(_contratSuivant);
+}
+
+// Reprise pour une mission de plus. Miroir de `congedierAventurier` pour le resync : le
+// panneau 👥 n'est re-tiré QUE s'il est ouvert (le payload de reprise ne porte pas les sacs).
+async function reprendreAventurier(avId) {
+	try {
+		const res = await fetch('api/recrutement/reprendre', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ aventurier_id: avId })
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		updatePurse(data.purse);
+		_majCompagnie(data);
+		_majLieuDeGuilde(data);
+		if (data.affinites_detail) renderFicheCompagnons(data.affinites_detail);
+		const rec = document.getElementById('recrutement-panel');
+		if (rec && !rec.classList.contains('panel-hidden')) {
+			const r2 = await fetch('api/recrutement/board');
+			if (r2.ok) renderRecrutement(await r2.json());
+		}
+		const grp = document.getElementById('groupe-panel');
+		if (grp && !grp.classList.contains('panel-hidden')) {
+			const r3 = await fetch('api/groupe');
+			if (r3.ok) renderGroupe(await r3.json());
+		}
+		if (data.reprise) {
+			showToast('📜 ' + data.reprise.nom + ' repart avec vous — '
+				+ _prixTexte(data.reprise.cout) + '.');
+		}
+	} catch (err) { console.error('Erreur reprise de contrat', err); }
 }
 
 // Rendu initial de l'onglet 🤝 section 👥 + toasts des départs volontaires (check
@@ -7543,6 +7734,7 @@ function toggleGroupeSection(id) {
 function renderGroupe(data) {
 	_grpEtat = data;
 	_majCompagnie(data);
+	_majLieuDeGuilde(data);
 	const groupe = data.groupe || [];
 	_majPointsCompagnons(groupe);
 	const plafond = document.getElementById('grp-plafond');
@@ -8132,6 +8324,11 @@ async function choisirPnj(choixId) {
 		// le « ? » sur la porte du destinataire, sans attendre un rechargement de page.
 		if ('pnj_marque' in data) _majPnjMarque(data.pnj_marque);
 		if (_majLieuxMarques(data)) buildLocationslist();
+		// Contrats d'une mission arrivés à terme (rang, commission, course rendue à la guilde).
+		// ⚠️ AVANT les sorties anticipées ci-dessous : un `combat_id` ou un `deplacer` quitte
+		// la fonction, et le pop-up ne s'ouvrirait jamais. Aucun relais `sessionStorage` n'est
+		// nécessaire — ces chemins-ci ne rechargent pas la page.
+		_contratsEchus(data);
 		// Une porte de donjon n'ouvre pas un lieu : elle ouvre un COMBAT (le gardien nous fait
 		// descendre). On quitte la page — inutile de rendre le nœud suivant, on ne le verra pas.
 		if (data.combat_id) { window.location.href = '/combat/' + data.combat_id; return; }

@@ -338,6 +338,30 @@ def lieu_recrute(lieu_doc: dict) -> bool:
 			or lieu_doc.get("categorie") == "guilde_aventurier")
 
 
+# ── Maison de guilde ─────────────────────────────────────────────────────────────
+# La maison est éclatée en quatre lieux aux `categorie` DIFFÉRENTES (réception, comptoir,
+# façade, bureau du maître) : aucun prédicat existant ne les couvre tous — `lieu_recrute`
+# rate le comptoir et le bureau, `quetes.lieux_solidaires` rate la façade et le bureau (qui
+# n'a pas de `sous_categorie`). ⚠️ Ne PAS harmoniser `categorie`/`sous_categorie` dans la
+# donnée pour s'en passer : celle du bureau est lue par les blocs `acces` de la mine et du
+# temple-portail (`quete_active.giver_categorie`) — la changer fermerait deux portes.
+GUILDE_SOUS_CATEGORIE = "guilde_aventurier"
+GUILDE_CATEGORIES = ("guilde_aventurier", "guilde_aventurier_comptoir",
+					 "guilde_aventurier_exterieur", "bureau_maitre_guilde")
+
+
+def lieu_de_guilde(lieu_doc: dict) -> bool:
+	"""Ce lieu appartient-il à une maison de guilde d'aventuriers ? SOURCE UNIQUE — le
+	contrat d'une mission s'y signe, s'y rompt sans frais et s'y achève.
+
+	Idiome de `lieu_recrute` (tag OU catégorie) pour qu'une faction future s'y branche par
+	la donnée seule : il suffira de poser le tag `guilde` sur ses lieux."""
+	d = lieu_doc or {}
+	return ("guilde" in (d.get("tags") or [])
+			or d.get("sous_categorie") == GUILDE_SOUS_CATEGORIE
+			or d.get("categorie") in GUILDE_CATEGORIES)
+
+
 def offre_du_lieu(lieu_doc: dict, parent_doc: dict | None) -> dict:
 	"""{nb, niveau_max} du tableau : entrée de RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE pour
 	la `sous_categorie` de la CITÉ (repli "defaut"), surchargée champ à champ par
@@ -785,11 +809,39 @@ def conditions_effectives(av: dict, affinite: int) -> dict:
 	traversé par `regler_part_butin` — il n'y a donc rien d'autre à brancher."""
 	exigences = av.get("exigences", {}) or {}
 	if (av or {}).get("permanent"):
-		return {"part_butin_pct": 0, "clauses": list(exigences.get("clauses", []) or [])}
-	part = int(exigences.get("part_butin_pct", character_stats.RECRUTEMENT_PART_BUTIN_MIN) or 0)
+		return {"part_butin_pct": 0, "mode": "",
+				"clauses": list(exigences.get("clauses", []) or [])}
+	# Un contrat d'UNE MISSION a été payé d'avance : sa part est déjà réduite (et son
+	# plancher est le sien), mais l'affinité continue de la rogner par-dessus.
+	contrat = (av or {}).get("contrat") or {}
+	mode = contrat.get("mode") if contrat.get("mode") == "mission" else ""
+	if mode:
+		base = int(contrat.get("part_butin_pct", 0) or 0)
+		plancher = int(character_stats.RECRUTEMENT_MISSION_PART_MIN)
+	else:
+		base = int(exigences.get("part_butin_pct", character_stats.RECRUTEMENT_PART_BUTIN_MIN) or 0)
+		plancher = int(character_stats.RECRUTEMENT_PART_BUTIN_MIN)
 	reduc = max(0, int(affinite) - 50) // max(1, int(character_stats.AFFINITE_REDUC_PART))
-	part = max(int(character_stats.RECRUTEMENT_PART_BUTIN_MIN), part - reduc)
-	return {"part_butin_pct": part, "clauses": list(exigences.get("clauses", []) or [])}
+	part = max(plancher, base - reduc)
+	return {"part_butin_pct": part, "mode": mode,
+			"clauses": list(exigences.get("clauses", []) or [])}
+
+
+def offre_mission(av: dict) -> dict:
+	"""Termes PROPOSÉS pour un contrat d'une mission : prix d'avance (fonction du niveau de
+	la recrue) et part de butin réduite. Pure — ne mute rien, ne lit aucun doc.
+
+	⚠️ La part part de l'exigence BRUTE et jamais de la part déjà réduite par l'affinité :
+	la réduction reste appliquée une seule fois, au règlement (`conditions_effectives`)."""
+	niveau = character_stats.compute_character_level((av or {}).get("xp_total", 0))
+	part = int(((av or {}).get("exigences") or {}).get(
+		"part_butin_pct", character_stats.RECRUTEMENT_PART_BUTIN_MIN) or 0)
+	return {
+		"cout_cuivre": (int(character_stats.RECRUTEMENT_MISSION_COUT_CUIVRE)
+						+ int(character_stats.RECRUTEMENT_MISSION_COUT_PAR_NIVEAU) * niveau),
+		"part_butin_pct": max(int(character_stats.RECRUTEMENT_MISSION_PART_MIN),
+							  round(part * float(character_stats.RECRUTEMENT_MISSION_PART_FACTEUR))),
+	}
 
 
 def places_occupees(character: dict, get_doc_fn=None) -> int:
@@ -879,16 +931,23 @@ def peut_embaucher(character: dict, av: dict, get_doc_fn=None) -> tuple[bool, st
 	return True, ""
 
 
-def embaucher(character: dict, av: dict, get_doc_fn=None) -> tuple[bool, str]:
-	"""Embauche (gratuite) : statuts + groupe + mémoire du lien. Mute les DEUX docs en
-	place, NE SAUVEGARDE PAS (l'endpoint persiste : character puis av, best-effort)."""
-	ok, raison = peut_embaucher(character, av, get_doc_fn)
-	if not ok:
-		return False, raison
-	# ⚠️ Filet : un ancien permanent congédié puis ré-embauché repart sur un contrat
-	# ORDINAIRE. Sans ce pop, le flag survivrait à la rupture du lien et l'engagement
-	# (part nulle + hors plafond) se retrouverait gratuit à la deuxième signature.
+def _attacher(character: dict, av: dict, contrat: dict | None = None) -> None:
+	"""Écrit le LIEN entre un personnage et un aventurier : statuts, groupe, affinité de
+	départ, mémoire du lien, et le mode de contrat. Mute les DEUX docs, NE SAUVEGARDE PAS.
+
+	Extrait du corps d'`embaucher` pour être partagé avec `reprendre` : deux gardes
+	différentes (recrue `offert` au tableau / ancien compagnon `parti`), un seul endroit
+	qui écrit le lien — sinon les deux chemins finiraient par diverger sur un champ.
+
+	⚠️ Les DEUX filets, `permanent` et `contrat`, sont indispensables et de même nature : un
+	flag survivant à la rupture du lien rendrait GRATUITE la deuxième signature (engagement
+	durable réacquis sans affinité, contrat de mission réacquis sans payer). `contrat` est
+	donc POSÉ ou RETIRÉ, jamais laissé en l'état."""
 	av.pop("permanent", None)
+	if contrat:
+		av["contrat"] = contrat
+	else:
+		av.pop("contrat", None)
 	av["statut"] = "embauche"
 	av["embauche_par"] = character.get("_id")
 	av["embauche_at"] = now_epoch()
@@ -899,10 +958,112 @@ def embaucher(character: dict, av: dict, get_doc_fn=None) -> tuple[bool, str]:
 	character["groupe"] = groupe
 	character.setdefault("affinites", {}).setdefault(av["_id"], int(character_stats.AFFINITE_INITIALE))
 	memo_compagnon(character, av)
+
+
+def embaucher(character: dict, av: dict, get_doc_fn=None, contrat: dict | None = None) -> tuple[bool, str]:
+	"""Embauche (gratuite) : statuts + groupe + mémoire du lien. Mute les DEUX docs en
+	place, NE SAUVEGARDE PAS (l'endpoint persiste : character puis av, best-effort).
+
+	`contrat` (optionnel) = le bloc d'un contrat d'UNE MISSION, déjà payé par l'appelant.
+	Absent ⇒ contrat ORDINAIRE, comportement d'avant à la lettre."""
+	ok, raison = peut_embaucher(character, av, get_doc_fn)
+	if not ok:
+		return False, raison
+	_attacher(character, av, contrat)
 	return True, ""
 
 
-def congedier(character: dict, av: dict) -> tuple[bool, str]:
+def peut_reprendre(character: dict, av: dict, get_doc_fn=None) -> tuple[bool, str]:
+	"""(ok, raison) : peut-on reprendre pour une mission de plus celui dont le contrat
+	vient d'échoir ? Statut `parti`, lien passé avec CE personnage, contrat de mission, et
+	groupe sous le plafond.
+
+	⚠️ `embauche_par` est la SEULE preuve du lien passé : un doc `aventurier:*` n'a pas de
+	`user_id`. ⚠️ Cas limite assumé : si le tableau l'a RÉ-OFFERT entre-temps
+	(`remplir_tableau_recrues` repropose les anciens compagnons appréciés), son statut est
+	repassé à `offert` et l'on refuse — le joueur le ré-embauche alors par le tableau."""
+	av = av or {}
+	if av.get("statut") != "parti":
+		return False, "Ce compagnon n'est plus disponible."
+	if av.get("embauche_par") != character.get("_id"):
+		return False, "Ce compagnon n'a jamais été des vôtres."
+	if ((av.get("contrat") or {}).get("mode")) != "mission":
+		return False, "Aucun contrat de mission à reprendre."
+	if places_occupees(character, get_doc_fn) >= taille_max_groupe():
+		return False, "Votre groupe est au complet."
+	return True, ""
+
+
+def reprendre(character: dict, av: dict, contrat: dict, get_doc_fn=None) -> tuple[bool, str]:
+	"""Reprend pour UNE MISSION DE PLUS un compagnon dont le contrat vient d'échoir. Mute
+	les DEUX docs, NE SAUVEGARDE PAS. Le `contrat` est NEUF (termes recalculés au niveau
+	atteint) : reprendre n'est pas prolonger un tarif ancien."""
+	ok, raison = peut_reprendre(character, av, get_doc_fn)
+	if not ok:
+		return False, raison
+	_attacher(character, av, contrat)
+	return True, ""
+
+
+def cloturer_contrats_mission(character: dict, lieu_doc: dict, compagnons: list | None = None,
+							  get_doc_fn=None) -> list:
+	"""Chokepoint UNIQUE de la fin d'un contrat d'une mission : appelé à CHAQUE turn-in de
+	quête, il ne fait quelque chose que si le rendu se fait DANS une maison de guilde.
+
+	La règle est littérale : un contrat court jusqu'à la prochaine quête rendue en guilde.
+	Une escorte déposée ailleurs ne rompt donc rien — le contrat s'achèvera au rendu suivant.
+
+	⚠️ AUCUN delta d'affinité : le contrat a été honoré jusqu'à son terme, personne n'est
+	froissé. C'est toute la différence avec `congedier`.
+	⚠️ Le bloc `contrat` est CONSERVÉ (seul `echu_at` s'y ajoute) : c'est lui qui porte les
+	termes que `vue_contrat_echu` récite au joueur pour lui proposer la reprise.
+	⚠️ `compagnons` = docs DÉJÀ chargés par l'appelant, à repasser (même précaution que
+	`partager_xp` : les recharger rendrait un SECOND dict du même document, donc deux
+	`save_doc` sur le même `_rev`).
+
+	Mute sans sauver — l'appelant persiste APRÈS son `save_doc(character)` autoritatif.
+	Idempotente : un second appel ne trouve plus personne dans le groupe."""
+	if not lieu_de_guilde(lieu_doc):
+		return []
+	membres = groupe_effectif(character, get_doc_fn) if compagnons is None else list(compagnons)
+	groupe = character.get("groupe", []) or []
+	libres = []
+	for av in membres:
+		if ((av or {}).get("contrat") or {}).get("mode") != "mission":
+			continue
+		# ⚠️ C'est l'appartenance AU GROUPE qui rend la fonction idempotente, pas le seul
+		# mode : un appelant qui repasserait la même liste (ou un second turn-in dans la
+		# même requête) referait sinon partir quelqu'un déjà parti — et l'annoncerait une
+		# seconde fois au joueur, qui verrait le pop-up d'un compagnon absent.
+		if av["_id"] not in groupe:
+			continue
+		groupe.remove(av["_id"])
+		av["statut"] = "parti"
+		av["contrat"]["echu_at"] = now_epoch()
+		libres.append(av)
+	character["groupe"] = groupe
+	return libres
+
+
+def vue_contrat_echu(av: dict) -> dict:
+	"""Ce qu'il faut au pop-up de fin de mission : de quoi reconnaître le compagnon et lire
+	les termes de la REPRISE. Pure, dans `utils/` — les routers ne s'importent pas entre eux.
+
+	Les termes sont RECALCULÉS (`offre_mission`) et non relus du contrat échu : reprendre,
+	c'est signer un contrat neuf, au tarif du niveau atteint."""
+	termes = offre_mission(av)
+	return {
+		"id": av.get("_id"),
+		"prenom": av.get("prenom", ""),
+		"nom": av.get("nom", ""),
+		"image": av.get("image", ""),
+		"specialite": av.get("specialite", ""),
+		"cout_cuivre": termes["cout_cuivre"],
+		"part_butin_pct": termes["part_butin_pct"],
+	}
+
+
+def congedier(character: dict, av: dict, lieu_doc: dict | None = None) -> tuple[bool, str]:
 	"""Congédie un compagnon actif : retiré du groupe, statut `parti` (doc CONSERVÉ —
 	il porte la mémoire du lien et peut être ré-offert). Le renvoi froisse
 	(AFFINITE_DELTA_CONGEDIE), davantage en pleine quête (…_EN_QUETE). Mute sans save.
@@ -911,18 +1072,27 @@ def congedier(character: dict, av: dict) -> tuple[bool, str]:
 	NE SE CUMULENT PAS : un seul s'applique, priorité au permanent (renvoyer un compagnon
 	engagé blesse davantage que d'interrompre un contrat, quête en cours ou non). Le flag
 	`permanent` est retiré — le lien est rompu, la compagnie ne l'est pas
-	(`character["compagnie"]` survit, cf. `engager_permanent`)."""
+	(`character["compagnie"]` survit, cf. `engager_permanent`).
+
+	⚠️ Rompre À LA GUILDE un contrat d'UNE MISSION est GRATUIT (delta 0) : c'est là qu'il
+	s'est signé, et la clause de sortie fait partie du marché. La gratuité ne vaut QUE pour
+	ce mode — l'ordinaire garde son malus partout, le permanent son −15 partout : ce n'est
+	pas un contrat qui s'achève. `lieu_doc=None` ⇒ hors guilde, comportement d'avant."""
 	groupe = character.get("groupe", []) or []
 	if not av or av.get("_id") not in groupe:
 		return False, "Ce compagnon ne fait pas partie de votre groupe."
 	groupe.remove(av["_id"])
 	character["groupe"] = groupe
 	av["statut"] = "parti"
+	mission = ((av.get("contrat") or {}).get("mode") == "mission")
 	if av.pop("permanent", None):
 		delta = character_stats.AFFINITE_DELTA_CONGEDIE_PERMANENT
+	elif mission and lieu_de_guilde(lieu_doc):
+		delta = 0
 	else:
 		delta = (character_stats.AFFINITE_DELTA_CONGEDIE_EN_QUETE
 				 if character.get("quetes_actives") else character_stats.AFFINITE_DELTA_CONGEDIE)
+	av.pop("contrat", None)
 	ajuster_affinite(character, av["_id"], delta)
 	return True, ""
 
@@ -972,6 +1142,11 @@ def engager_permanent(character: dict, av: dict, nom_compagnie=None) -> tuple[bo
 		if not nom:
 			return False, "Donnez un nom à votre compagnie."
 		character["compagnie"] = {"nom": nom, "fondee_at": now_epoch()}
+	# ⚠️ `permanent` et `contrat` sont MUTUELLEMENT EXCLUSIFS — un engagement durable
+	# ABSORBE le contrat court en cours. C'est cet invariant qui rend sûr le câblage des
+	# turn-in : `cloturer_contrats_mission` ne rend que des non-permanents, `partager_xp`
+	# que des permanents ; sans lui, les deux sauveraient deux dicts du même document.
+	av.pop("contrat", None)
 	av["permanent"] = True
 	return True, ""
 

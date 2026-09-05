@@ -731,6 +731,12 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# carte d'aventurier se fait à l'ouverture du board — 403 explicite).
 	est_recrutement = recrutement_util.lieu_recrute(grid_doc)
 
+	# Maison de guilde : un contrat d'UNE MISSION s'y signe, s'y rompt sans frais et s'y
+	# achève. ⚠️ Variable NOUVELLE — surtout pas `est_guilde`, qui doit rester strictement
+	# `categorie == "guilde_aventurier"` : c'est elle qui conditionne le bouton « Tableau
+	# des quêtes », et l'élargir ouvrirait un tableau là où il n'y en a pas.
+	lieu_de_guilde = recrutement_util.lieu_de_guilde(grid_doc)
+
 	# Étable : `est_etable` conditionne le bouton « Montures ». Pas de contrôle d'accès
 	# ici (ni carte, ni relation) — acheter une bête de somme ne demande rien d'autre
 	# que de l'argent, contrairement au tableau de recrutement.
@@ -812,6 +818,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
 			"est_guilde": est_guilde,
 			"est_recrutement": est_recrutement,
+			"lieu_de_guilde": lieu_de_guilde,
 			"est_etable": est_etable,
 			"est_auberge": est_auberge,
 			"auberge_nuit": auberge_nuit,

@@ -391,6 +391,27 @@ def _xp_compagnie(recap: dict) -> dict | None:
 	)
 
 
+def _cloturer_contrats(character: dict, lieu_doc: dict) -> list:
+	"""Fin des contrats d'UNE MISSION quand la quête est rendue DANS une guilde. Mute le
+	personnage et les docs compagnons ; À APPELER AVANT le `save_doc(character)` autoritatif.
+
+	⚠️ Il charge le groupe lui-même, et c'est SANS DANGER parce qu'il ne mute et ne renvoie
+	que des NON-PERMANENTS, là où `_sauver_compagnie` ne sauve que des permanents : les deux
+	ensembles sont disjoints (`engager_permanent` retire `contrat`, `_attacher` retire
+	`permanent`). Sans cet invariant, les deux tiendraient deux dicts du même document."""
+	return recrutement.cloturer_contrats_mission(character, lieu_doc)
+
+
+def _sauver_contrats(libres: list, reponse: dict) -> None:
+	"""Persiste les compagnons libérés et fait remonter de quoi bâtir le pop-up de reprise.
+	⚠️ APRÈS le save autoritatif, comme `_sauver_compagnie` : le turn-in est alors acquis,
+	un 409 rejoué ne peut plus rejouer le départ. Best-effort."""
+	for av in libres or []:
+		save_doc(av)
+	if libres:
+		reponse["contrats_echus"] = [recrutement.vue_contrat_echu(av) for av in libres]
+
+
 def _nom_pnj(lieu_id: str | None) -> str | None:
 	"""Nom du PNJ qui tient ce lieu (le tenancier implicite d'un magasin y compris), sans y
 	être : c'est ainsi que le donneur peut nommer la personne à qui livrer, et le destinataire
@@ -764,9 +785,11 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		# character est sauvé juste après — un conflit sur la relation n'annule pas la livraison.
 		recap = transport.reussir_transport(character, q, lieu_doc, get_doc, save_doc)
 		focalisation.effacer_si_quete(character, q.get("id"))
+		libres = _cloturer_contrats(character, lieu_doc)
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 		_sauver_compagnie(recap)
+		_sauver_contrats(libres, reponse)
 		reponse["transport"] = {
 			"livre": q.get("titre"),
 			"xp": recap["xp"].get("xp_gain", 0),
@@ -804,9 +827,11 @@ def _resoudre_transport(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		}
 		recap = transport.rapporter_transport(character, q, get_doc, save_doc)
 		focalisation.effacer_si_quete(character, q.get("id"))
+		libres = _cloturer_contrats(character, lieu_doc)
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 		_sauver_compagnie(recap)
+		_sauver_contrats(libres, reponse)
 		# Les items de récompense (la carte d'aventurier) sont entrés au sac avec la prime.
 		# `resolve_item_ref` — pas `get_doc` — pour que le toast porte le nom de l'INSTANCE :
 		# « Carte d'aventurier (Auxerre) », pas le nom nu du doc générique.
@@ -891,9 +916,11 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		resultat = chasse.solder_rang(character, q.get("id") or q.get("_id"))
 		if not resultat:
 			raise HTTPException(status_code=422, detail="Épreuve de rang non accomplie.")
+		libres = _cloturer_contrats(character, lieu_doc)
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 		_sauver_compagnie(resultat["recompenses"])
+		_sauver_contrats(libres, reponse)
 		# L'épreuve réussie monte la réputation chez son donneur. ⚠️ APRÈS le save autoritatif :
 		# la quête a quitté `quetes_actives` en base, un 409 rejoué ne peut pas payer deux fois.
 		relation_gain = quetes.recompenser_donneur(
@@ -983,9 +1010,11 @@ def _resoudre_commission(character: dict, pnj_doc: dict, lieu_doc: dict, op: str
 		resultat = donjon.solder_commission(character, q.get("id") or q.get("_id"))
 		if not resultat:
 			raise HTTPException(status_code=422, detail="Commission non accomplie.")
+		libres = _cloturer_contrats(character, lieu_doc)
 		if save_doc(character) is None:
 			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 		_sauver_compagnie(resultat["recompenses"])
+		_sauver_contrats(libres, reponse)
 		# Même chokepoint que le tableau et l'épreuve de rang : le +1 va au DONNEUR de la
 		# commission (le bureau du maître), que `relation_lieu` route vers son comptoir.
 		relation_gain = quetes.recompenser_donneur(

@@ -18,6 +18,7 @@ import asyncio
 import pytest
 
 from utils import quetes
+from utils.characters import money_to_cuivre
 
 
 GUILDE = {"_id": "lieu:guilde", "type": "lieu", "categorie": "guilde_aventurier",
@@ -177,3 +178,79 @@ def test_board_payload_ne_genere_rien_sans_completer(monde):
 
 	assert [o["id"] for o in payload["offres"]] == ["quete:g1"]
 	assert set(monde["docs"]) == avant            # aucun doc `quete:*` créé
+
+
+# ── Fin des contrats d'une mission au turn-in ────────────────────────────────────
+# Un contrat d'UNE MISSION s'achève à la première quête rendue DANS une guilde. L'ORDRE
+# est tout : le compagnon touche sa part de butin, PUIS il s'en va.
+#
+# ⚠️ Le cas « rendu HORS guilde » n'est pas atteignable ICI : `quetes_terminer` passe par
+# `_guild_lieu`, qui refuse en 403 tout lieu qui n'est pas une guilde. Il appartient aux
+# turn-in de `routers/pnj` (une course livrée en boutique) et au module pur, qui le couvre
+# (`test_cloturer_ne_fait_rien_hors_guilde`).
+
+def _compagnon_mission(monde, character, av_id="aventurier:m", part=20):
+	from utils import recrutement as ru
+	av = {
+		"_id": av_id, "type": "aventurier", "statut": "embauche",
+		"embauche_par": character["_id"], "prenom": "Aldric", "nom": "Ferrant",
+		"race": "humain", "voc": "guerrier", "image": "", "rang": "F",
+		"specialite": "Éclaireur", "xp_total": 0, "attribute_points": 0,
+		"vocations_niveaux": {"guerrier": 0}, "inventaire": [], "slots": {},
+		"caracteristiques_current": {"V": 5, "F": 20, "R": 20, "Ag": 20,
+									 "Vol": 30, "Int": 30, "Cha": 30, "Ch": 20},
+		"currentPV": 80, "currentPM": 120,
+		"exigences": {"part_butin_pct": part, "clauses": []},
+		"contrat": {"mode": "mission", "part_butin_pct": part // 2,
+					"cout_cuivre": 300, "signe_at": 1_000, "giver": "lieu:guilde"},
+		"or": 0, "argent": 0, "cuivre": 0,
+	}
+	monde["docs"][av_id] = av
+	character["groupe"] = list(character.get("groupe") or []) + [av_id]
+	return av
+
+
+def _terminer(monde, character, quete_id):
+	rq = monde["rq"]
+	monde["docs"][character["_id"]] = character
+	origine = rq.get_selected_character
+	try:
+		rq.get_selected_character = lambda _u: character
+		return asyncio.run(rq.quetes_terminer(None, {"quete_id": quete_id}))
+	finally:
+		rq.get_selected_character = origine
+
+
+def _quete_faite(qid="q1", giver="lieu:guilde"):
+	"""Snapshot d'une quête `kill` déjà accomplie, prête à être rendue."""
+	return {
+		"id": qid, "titre": qid, "giver": giver, "rang": "F", "description": "",
+		"objectif": {"type": "kill", "cible": "espece:loup", "quantite": 1},
+		"progress": 1, "recompenses": {"xp": 10, "cuivre": 1000},
+	}
+
+
+def test_turn_in_en_guilde_clot_le_contrat_APRES_la_part_de_butin(monde):
+	"""L'ordre est la seule chose que ce test protège : sortir le compagnon du groupe
+	avant `regler_part_butin` le priverait de la part qu'il a gagnée."""
+	char = _perso(quetes_actives=[_quete_faite()])
+	av = _compagnon_mission(monde, char)
+
+	payload = _terminer(monde, char, "q1")
+
+	# ⚠️ Bourse NORMALISÉE par `cuivre_to_purse` (100 cu = 1 argent) : on la lit en cuivre.
+	assert money_to_cuivre(av) == 100   # part de mission : 10 % de 1000, versée AVANT le départ
+	assert av["statut"] == "parti" and char["groupe"] == []
+	assert [c["id"] for c in payload["contrats_echus"]] == ["aventurier:m"]
+	assert payload["contrats_echus"][0]["prenom"] == "Aldric"
+
+
+def test_turn_in_epargne_un_contrat_ordinaire(monde):
+	char = _perso(quetes_actives=[_quete_faite()])
+	av = _compagnon_mission(monde, char)
+	av.pop("contrat")
+
+	payload = _terminer(monde, char, "q1")
+
+	assert av["statut"] == "embauche" and "contrats_echus" not in payload
+	assert money_to_cuivre(av) == 200   # part ORDINAIRE : 20 % de 1000

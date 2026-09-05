@@ -215,6 +215,14 @@ async def quetes_terminer(
 			"reste": reglement["reste"],
 		}
 
+	# Fin des contrats d'UNE MISSION : ils s'achèvent à la première quête rendue DANS une
+	# guilde. ⚠️ APRÈS `regler_part_butin` — le compagnon touche sa part PUIS s'en va — et
+	# AVANT le save autoritatif, pour que le départ parte avec le reste dans la même écriture.
+	# ⚠️ `compagnons=groupe` : ce sont les MÊMES dicts que la récompense et la part de butin
+	# ont servis, et que la boucle `for av in groupe: save_doc(av)` persiste plus bas — aucune
+	# I/O de plus, et jamais un second dict du même document.
+	contrats_echus = recrutement.cloturer_contrats_mission(character, lieu_doc, compagnons=groupe)
+
 	# Quête focalisée terminée → la focalisation tombe (même save).
 	focalisation.effacer_si_quete(character, quete_id)
 
@@ -259,6 +267,10 @@ async def quetes_terminer(
 		"xp_compagnie": recrutement.xp_compagnie_payload(
 			recap["compagnie"], recap["xp"].get("xp_gain", 0)),
 	}
+	# Contrats d'une mission arrivés à terme : le client en fait un pop-up par compagnon,
+	# proposant de le reprendre pour une mission de plus (ou de le laisser partir).
+	if contrats_echus:
+		payload["contrats_echus"] = [recrutement.vue_contrat_echu(av) for av in contrats_echus]
 	# Liens resserrés par la quête réussie ensemble → resync de l'onglet 🤝 section 👥.
 	if groupe:
 		payload["affinites_detail"] = recrutement.affinites_detail_payload(character, get_doc)

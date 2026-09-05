@@ -15,6 +15,9 @@ from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre,
 	carried_weight, charge_max_of, resolve_item_ref, item_ref_weight,
 )
+# ⚠️ `debit_character` vit dans utils/marche.py (et non dans utils/characters.py, où sont
+# `credit_character` et la bourse) : c'est le seul débit du jeu, il refuse en rendant None.
+from utils.marche import debit_character
 from utils import recrutement
 from utils import montures
 from utils import escorte
@@ -71,7 +74,7 @@ def _nom_de(av: dict) -> str:
 	return f"{av.get('prenom', '')} {av.get('nom', '')}".strip()
 
 
-def _recrue_view(character: dict, av: dict) -> dict:
+def _recrue_view(character: dict, av: dict, lieu_doc: dict | None = None) -> dict:
 	"""Vue d'une recrue pour le client : identité + conditions EFFECTIVES (affinité
 	déduite) + mémoire du lien (`affinite` brute — None si jamais rencontrée).
 
@@ -80,7 +83,7 @@ def _recrue_view(character: dict, av: dict) -> dict:
 	vocation et le cadrage du portrait — sans eux, la carte ne saurait ni afficher la ligne
 	d'identité complète ni recadrer l'image comme son porteur l'a réglée."""
 	affinite_brute = (character.get("affinites", {}) or {}).get(av["_id"])
-	return {
+	vue = {
 		"id": av["_id"],
 		"prenom": av.get("prenom", ""),
 		"nom": av.get("nom", ""),
@@ -107,6 +110,14 @@ def _recrue_view(character: dict, av: dict) -> dict:
 		# recrue — son doc est la source, ses max se recalculent comme ceux du joueur.
 		**recrutement.vitaux_de(av),
 	}
+	# Termes d'un contrat d'UNE MISSION, offerts SEULEMENT dans une maison de guilde : c'est
+	# là qu'il se signe. Le client en fait le second accord du dialogue d'embauche ; son
+	# absence est ce qui le réduit au seul accord ordinaire. ⚠️ Le mode d'un contrat DÉJÀ
+	# signé, lui, voyage dans `exigences_effectives.mode` — source unique, propagée par
+	# `conditions_effectives` aux quatre vues qui l'appellent.
+	if lieu_doc is not None and recrutement.lieu_de_guilde(lieu_doc):
+		vue["mission"] = recrutement.offre_mission(av)
+	return vue
 
 
 def _protege_view(p: dict) -> dict:
@@ -148,7 +159,13 @@ def _appliquer_departs(character: dict) -> list:
 	return [_nom_de(av) for av in partis]
 
 
-def _payload(character: dict, recrues: list | None = None) -> dict:
+def _payload(character: dict, recrues: list | None = None, lieu_doc: dict | None = None) -> dict:
+	"""État commun renvoyé par tous les endpoints du panneau.
+
+	⚠️ `lieu_doc` n'est passé QUE là où le lieu est déjà en main (board, embauche, refus,
+	congédiement, reprise) : le faire relire ici coûterait un doc `lieu:*`, les plus gros du
+	jeu et hors du cache de requête. `GET /groupe` s'en passe — le client tient le global
+	Jinja `LIEU_DE_GUILDE`, exact puisque tout changement de lieu recharge /play."""
 	payload = {
 		"groupe": _groupe_view(character),
 		"plafond": recrutement.taille_max_groupe(),
@@ -173,8 +190,12 @@ def _payload(character: dict, recrues: list | None = None) -> dict:
 		"proteges": [_protege_view(p)
 					 for p in escorte.proteges_effectifs(character, get_doc)],
 	}
+	if lieu_doc is not None:
+		# Un contrat d'une mission se signe, se rompt sans frais et s'achève ICI : le client
+		# en tire ses libellés (l'accord offert, le texte de la confirmation de rupture).
+		payload["lieu_de_guilde"] = recrutement.lieu_de_guilde(lieu_doc)
 	if recrues is not None:
-		payload["recrues"] = [_recrue_view(character, av) for av in recrues]
+		payload["recrues"] = [_recrue_view(character, av, lieu_doc) for av in recrues]
 	return payload
 
 
@@ -183,7 +204,7 @@ async def recrutement_board(current_user: Annotated[dict, Depends(get_current_us
 	character, lieu_doc = _acces_tableau(current_user)
 	departs = _appliquer_departs(character)
 	recrues = recrutement.remplir_tableau_recrues(lieu_doc, character)
-	payload = _payload(character, recrues)
+	payload = _payload(character, recrues, lieu_doc)
 	if departs:
 		payload["departs"] = departs
 	return payload
@@ -196,11 +217,33 @@ async def recrutement_embaucher(
 ):
 	"""Embauche = ACCEPTATION des conditions de la recrue (part de butin + clauses de
 	conduite) : le client ne l'appelle qu'après validation du dialogue d'engagement, par
-	lequel passe TOUTE embauche — la part de butin est une exigence même sans clause."""
+	lequel passe TOUTE embauche — la part de butin est une exigence même sans clause.
+
+	`mode` : absent ou "contrat" ⇒ contrat ORDINAIRE, comportement d'avant à la lettre ;
+	"mission" ⇒ contrat d'UNE MISSION, payé d'avance contre une part réduite, et qui
+	s'achèvera de lui-même à la première quête rendue dans une guilde.
+
+	⚠️ Gardes ORDONNÉES, contrôle AVANT la dépense (séquence de `consommer`/`don`) : le
+	groupe complet doit refuser avant tout débit, et un débit refusé laisse la bourse
+	intacte — rien n'est sauvé tant que les deux ont passé."""
 	character, lieu_doc = _acces_tableau(current_user)
 	av = _recrue_du_tableau(lieu_doc, body)
 
-	ok, raison = recrutement.embaucher(character, av)
+	contrat = None
+	if body.get("mode") == "mission":
+		if not recrutement.lieu_de_guilde(lieu_doc):
+			raise HTTPException(status_code=403, detail="Un contrat de mission se signe à la guilde.")
+		termes = recrutement.offre_mission(av)
+		ok, raison = recrutement.peut_embaucher(character, av)
+		if not ok:
+			raise HTTPException(status_code=409, detail=raison)
+		if debit_character(character, termes["cout_cuivre"]) is None:
+			raise HTTPException(status_code=409, detail="Fonds insuffisants.")
+		contrat = {"mode": "mission", "part_butin_pct": termes["part_butin_pct"],
+				   "cout_cuivre": termes["cout_cuivre"],
+				   "signe_at": recrutement.now_epoch(), "giver": lieu_doc.get("_id")}
+
+	ok, raison = recrutement.embaucher(character, av, contrat=contrat)
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	if save_doc(character) is None:
@@ -210,8 +253,57 @@ async def recrutement_embaucher(
 	save_doc(av)
 
 	recrues = recrutement.remplir_tableau_recrues(lieu_doc, character)
-	payload = _payload(character, recrues)
-	payload["embauche"] = {"nom": _nom_de(av)}
+	payload = _payload(character, recrues, lieu_doc)
+	payload["embauche"] = {"nom": _nom_de(av), "mission": bool(contrat),
+						   "cout": (contrat or {}).get("cout_cuivre", 0)}
+	return payload
+
+
+@recrutement_router.post("/recrutement/reprendre")
+async def recrutement_reprendre(
+	current_user: Annotated[dict, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Reprend pour UNE MISSION DE PLUS un compagnon dont le contrat vient d'échoir — le
+	geste positif du pop-up de fin de contrat. Se signe à la guilde, comme l'embauche.
+
+	Les termes sont NEUFS (`offre_mission` au niveau atteint), pas ceux du contrat échu.
+	⚠️ Gardes ordonnées du plus général au plus précis (404 perso → 404 doc → 403 lieu →
+	409 métier → 409 fonds), pour que le premier message soit le vrai motif ; et le débit
+	vient EN DERNIER — un refus ne laisse jamais la bourse entamée."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+
+	av_id = body.get("aventurier_id")
+	av = get_doc(av_id) if av_id else None
+	if not av or av.get("type") != "aventurier":
+		raise HTTPException(status_code=404, detail="Compagnon introuvable")
+
+	lieu_doc = get_doc(character.get("lieu", ""))
+	if not recrutement.lieu_de_guilde(lieu_doc):
+		raise HTTPException(status_code=403, detail="Un contrat de mission se signe à la guilde.")
+
+	ok, raison = recrutement.peut_reprendre(character, av, get_doc)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+
+	termes = recrutement.offre_mission(av)
+	if debit_character(character, termes["cout_cuivre"]) is None:
+		raise HTTPException(status_code=409, detail="Fonds insuffisants.")
+	contrat = {"mode": "mission", "part_butin_pct": termes["part_butin_pct"],
+			   "cout_cuivre": termes["cout_cuivre"],
+			   "signe_at": recrutement.now_epoch(), "giver": lieu_doc.get("_id")}
+
+	ok, raison = recrutement.reprendre(character, av, contrat, get_doc)
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	save_doc(av)  # best-effort, comme l'embauche
+
+	payload = _payload(character, lieu_doc=lieu_doc)
+	payload["reprise"] = {"nom": _nom_de(av), "cout": termes["cout_cuivre"]}
 	return payload
 
 
@@ -235,7 +327,7 @@ async def recrutement_refuser(
 	# La place libérée est aussitôt repeuplée (remplir_tableau_recrues complète jusqu'à
 	# offre.nb) : le tableau ne rétrécit pas, la recrue refusée est simplement remplacée.
 	recrues = recrutement.remplir_tableau_recrues(lieu_doc, character)
-	payload = _payload(character, recrues)
+	payload = _payload(character, recrues, lieu_doc)
 	payload["refus"] = {"nom": _nom_de(av)}
 	return payload
 
@@ -256,7 +348,13 @@ async def recrutement_congedier(
 	if not av or av.get("type") != "aventurier":
 		raise HTTPException(status_code=404, detail="Compagnon introuvable")
 
-	ok, raison = recrutement.congedier(character, av)
+	# ⚠️ Le lieu est lu AVANT le congédiement (il l'était déjà, plus bas, pour le payload —
+	# aucune lecture de plus) : rompre À LA GUILDE un contrat d'une mission est gratuit, et
+	# c'est `congedier` qui en décide. Le mode est relevé avant, le bloc étant retiré ensuite.
+	lieu_doc = get_doc(character.get("lieu", ""))
+	mission = ((av.get("contrat") or {}).get("mode") == "mission")
+
+	ok, raison = recrutement.congedier(character, av, lieu_doc)
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	if save_doc(character) is None:
@@ -264,12 +362,16 @@ async def recrutement_congedier(
 	save_doc(av)  # best-effort, comme l'embauche
 
 	# À un lieu recruteur → tableau à jour ; ailleurs → payload léger (groupe + 👥).
-	lieu_doc = get_doc(character.get("lieu", ""))
 	recrues = None
 	if lieu_doc and recrutement.lieu_recrute(lieu_doc) and recrutement.acces_autorise(character, lieu_doc)[0]:
 		recrues = recrutement.remplir_tableau_recrues(lieu_doc, character)
-	payload = _payload(character, recrues)
-	payload["congedie"] = {"nom": _nom_de(av)}
+	payload = _payload(character, recrues, lieu_doc)
+	payload["congedie"] = {
+		"nom": _nom_de(av),
+		# Une rupture sans frais est une information de jeu : sans elle, le joueur ne saurait
+		# pas que rompre ailleurs lui aurait coûté quelque chose.
+		"sans_frais": bool(mission and recrutement.lieu_de_guilde(lieu_doc)),
+	}
 	return payload
 
 
