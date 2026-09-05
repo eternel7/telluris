@@ -149,7 +149,9 @@
 .monster-token .mt-hp-fill { height: 100%; background: #ff4757; }
 
 /* Alliés : membres du groupe NON actifs, rendus relativement au membre actif comme les
-   monstres. Bleus (couleur joueur du bandeau), non ciblables en v1 (pas de soin d'allié). */
+   monstres. Bleus (couleur joueur du bandeau) ; ciblables SEULEMENT pendant le lancement
+   d'une capacité bénéfique (classe .spellcast), jamais autrement — hors ce moment ils ne
+   doivent pas voler le clic destiné à la carte ou au monstre qui se trouve dessous. */
 .ally-token {
 	width: var(--step); height: var(--step);
 	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -167,8 +169,14 @@
 }
 .ally-token.ko { opacity: 0.35; filter: grayscale(1); }
 /* Ciblage d'un sort/compétence BÉNÉFIQUE : le vert distingue l'entraide du ciblage
-   offensif (violet), pour qu'on ne confonde jamais « je soigne » et « je frappe ». */
-.ally-token.spellcast { cursor: pointer; }
+   offensif (violet), pour qu'on ne confonde jamais « je soigne » et « je frappe ».
+   ⚠️ `pointer-events: auto` est INDISPENSABLE et ne va pas de soi : `#tokens-layer` est
+   en `pointer-events: none` et chaque jeton doit le rouvrir pour lui-même (c'est ce que
+   fait `.monster-token`). Sans cette ligne, `renderTokens` posait bien un `onclick` sur
+   le jeton allié mais il n'était JAMAIS reçu — et `cursor` restait lui aussi inerte,
+   donc rien au survol non plus. Le soin ne partait que par le badge du bandeau
+   d'initiative, qui vit hors du calque et n'était donc pas concerné. */
+.ally-token.spellcast { pointer-events: auto; cursor: pointer; }
 .ally-token.spellcast .at-portrait { border-color: #4cd97b; box-shadow: 0 0 10px #4cd97b; }
 /* Monture : même jeton, anneau ocre plutôt que bleu — elle est du camp du joueur mais ne
    joue pas, et le joueur doit voir d'un coup d'œil que ce n'est pas un combattant. */
