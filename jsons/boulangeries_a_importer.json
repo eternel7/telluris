@@ -1,0 +1,1598 @@
+[
+  {
+    "_id": "pnj:marchand_boulangerie",
+    "type": "pnj",
+    "nom": "Maître Fromond",
+    "race": "humain",
+    "vocation": "marchand",
+    "portrait": "humain_m_guerrier01.jpg",
+    "services": {
+      "transport": {
+        "noeuds": {
+          "propose": "transport_propose",
+          "infos": "transport_infos",
+          "accepte": "transport_accepte",
+          "trop_charge": "transport_trop_charge",
+          "livre": "transport_livre",
+          "livre_retour": "transport_livre_retour",
+          "incomplet": "transport_incomplet",
+          "mefiance": "transport_mefiance"
+        }
+      },
+      "escorte": {
+        "noeuds": {
+          "accepte": "escorte_acceptee",
+          "mefiance": "escorte_mefiance"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "La chaleur du four vous prend au visage dès le seuil. « Bien le bonjour, {prenom}. Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "course",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_propose",
+              "condition": {
+                "transport_offert": true
+              }
+            },
+            {
+              "id": "livraison",
+              "label": "Je vous apporte une livraison.",
+              "action": {
+                "service": "transport",
+                "op": "livrer"
+              },
+              "condition": {
+                "transport_a_livrer": true
+              }
+            },
+            {
+              "id": "course_refus",
+              "label": "Vous auriez une course pour moi ?",
+              "next": "transport_mefiance",
+              "condition": {
+                "transport_mefiance": true
+              }
+            },
+            {
+              "id": "escorte_offre",
+              "label": "Quelque chose vous tracasse ?",
+              "next": "escorte_propose",
+              "condition": {
+                "escorte_offerte": true
+              }
+            },
+            {
+              "id": "escorte_refus",
+              "label": "Quelque chose vous tracasse ?",
+              "next": "escorte_mefiance",
+              "condition": {
+                "escorte_mefiance": true
+              }
+            },
+            {
+              "id": "escorte_relance",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_relance",
+              "condition": {
+                "escorte_en_cours": true
+              }
+            },
+            {
+              "id": "escorte_attente",
+              "label": "Au sujet de {protege}…",
+              "next": "escorte_attente",
+              "condition": {
+                "escorte_progeniture_en_cours": true
+              }
+            },
+            {
+              "id": "escorte_merci",
+              "label": "Comment va votre famille ?",
+              "next": "escorte_merci",
+              "condition": {
+                "escorte_accomplie": true
+              }
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_propose": {
+          "texte": "« Justement ! {colis} colis, {poids} kg. Destination : {destination}. Il me les faut là-bas dans les {delai} minutes — après, la marchandise ne vaut plus rien. {xp} points d'expérience et {prime} pièces de cuivre à votre retour, et vous grimperez dans mon estime. »",
+          "choix": [
+            {
+              "id": "transport_infos",
+              "label": "Où est-ce, exactement ?",
+              "next": "transport_infos"
+            },
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_mefiance": {
+          "texte": "« Une course ? » Le regard se fait plus froid, la main reste posée sur le registre. « Je ne confie pas mes colis à n'importe qui, {prenom}. Revenez quand nous nous entendrons mieux — achetez, vendez, tenez parole — et nous en reparlerons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "On en reparlera.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_infos": {
+          "texte": "« {destination} ? C'est {direction}. Vous ne pouvez pas la manquer. {delai} minutes, {prenom}, pas une de plus. »",
+          "choix": [
+            {
+              "id": "transport_accepter",
+              "label": "C'est entendu, je m'en charge.",
+              "action": {
+                "service": "transport",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "transport_refuser",
+              "label": "Pas cette fois.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "transport_accepte": {
+          "texte": "« Voilà la marchandise — {colis} colis, comptez-les. Destination : {destination}, dans les {delai} minutes. Ne me faites pas regretter. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_trop_charge": {
+          "texte": "« Vous ployez déjà sous votre barda, {prenom}. Délestez-vous et revenez : la marchandise ne s'envolera pas. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre": {
+          "texte": "« Ah, enfin ! {colis} colis, le compte y est. Voici votre dû — {prime} pièces de cuivre. Je fais porter le mot à l'expéditeur : {expediteur} saura qu'on peut compter sur vous. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un plaisir.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_livre_retour": {
+          "texte": "« {colis} colis, le compte y est. » Un reçu est griffonné, séché d'un souffle, et vous atterrit dans la main. « Je ne vous dois rien, l'ami : c'est {donneur} qui paie les siens. Rapportez-lui ce papier, il fait foi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y retourne de ce pas.",
+              "next": "fin"
+            }
+          ]
+        },
+        "transport_incomplet": {
+          "texte": "« Il manque des colis, {prenom}. Je ne signe rien tant que le compte n'y est pas — et le temps court toujours. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je vais arranger ça.",
+              "next": "fin"
+            }
+          ]
+        },
+        "escorte_propose": {
+          "texte": "« Vous tombez mal, {prenom}. » Le regard va vers la porte, puis revient sur vous. « Je suis sans nouvelles de {protege} depuis hier matin. On l'a vu prendre le chemin qui sort de {lieu_rencontre}, et personne ne l'a revu depuis. »",
+          "choix": [
+            {
+              "id": "escorte_details",
+              "label": "Où faut-il chercher ?",
+              "next": "escorte_details"
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Je ne peux rien pour vous.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_details": {
+          "texte": "« {direction}. » Un doigt trace une ligne sur le comptoir. « Ramenez-moi mon enfant vivant, {prenom}, et je ne l'oublierai pas. {xp} points d'expérience et {prime} pièces de cuivre — et vous serez toujours le bienvenu sous ce toit. »",
+          "choix": [
+            {
+              "id": "escorte_accepter",
+              "label": "J'y vais.",
+              "action": {
+                "service": "escorte",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "escorte_refuser",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_acceptee": {
+          "texte": "« Que les dieux vous entendent. » Une main serre la vôtre, un peu trop fort. « {protege} n'a pas d'arme et ne sait pas courir : s'il faut se battre, battez-vous à sa place. Ramenez-moi mon enfant ici, à : {destination}. »",
+          "choix": [
+            {
+              "id": "partir",
+              "label": "Je pars maintenant.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Encore une chose…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "escorte_relance": {
+          "texte": "« Toujours rien ? » Les mains s'essuient machinalement sur le tablier. « Cherchez {direction}. Et si {protege} est déjà avec vous, ne perdez pas votre temps ici : ramenez-moi mon enfant. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "J'y retourne.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Je m'en occupe.",
+              "next": "fin"
+            }
+          ]
+        },
+        "escorte_attente": {
+          "texte": "« La guilde m'a fait dire que quelqu'un s'en chargeait. C'est vous ? » Un silence. « Alors allez-y, {prenom}. Cherchez {direction}, et ramenez-moi {protege}. Je ne dors plus depuis que ce chemin existe. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Je vous le ramènerai.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "J'y vais.",
+              "next": "fin"
+            }
+          ]
+        },
+        "escorte_merci": {
+          "texte": "« Vous ? » Le visage s'éclaire d'un coup, et l'ouvrage reste en plan. « Vous m'avez rendu mon enfant, {prenom}. Ici, vous êtes chez vous — et ce que vous cherchez, si je ne l'ai pas, je le trouverai. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "C'était la moindre des choses.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Portez-vous bien.",
+              "next": "fin"
+            }
+          ]
+        },
+        "escorte_mefiance": {
+          "texte": "« Ce qui me tracasse ne vous regarde pas, {prenom}. » Le ton reste poli et la porte reste close. « On ne confie pas ces choses-là à un visage qu'on connaît mal. Revenez — achetez, vendez, tenez parole — et nous verrons. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Comme vous voudrez.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:grain_de_froment",
+    "type": "item",
+    "nom": "Grain de froment",
+    "icon": "🌾",
+    "description": "Froment battu et vanné, prêt pour la meule. Le grain des pains blancs.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "grain",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 2
+      },
+      {
+        "cu": 5
+      }
+    ]
+  },
+  {
+    "_id": "item:grain_de_seigle",
+    "type": "item",
+    "nom": "Grain de seigle",
+    "icon": "🌾",
+    "description": "Seigle des terres pauvres, qui donne un pain noir et qui tient au corps.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "grain",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 2
+      },
+      {
+        "cu": 4
+      }
+    ]
+  },
+  {
+    "_id": "item:grain_d_orge",
+    "type": "item",
+    "nom": "Grain d'orge",
+    "icon": "🌾",
+    "description": "Orge commune, celle du pain des pauvres et de la bière des soldats.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "grain",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 1
+      },
+      {
+        "cu": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:levain_de_chef",
+    "type": "item",
+    "nom": "Levain de chef",
+    "icon": "🫙",
+    "description": "Une pâte aigre entretenue de fournée en fournée ; certains la disent plus vieille que la ville.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "levain",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 6
+      },
+      {
+        "cu": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:miel_de_bruyere",
+    "type": "item",
+    "nom": "Miel de bruyère",
+    "icon": "🍯",
+    "description": "Miel sombre et fort des ruchers de lande, gardé en pot de grès.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "miel",
+    "slots": [],
+    "tags": [],
+    "poids": 0.4,
+    "valeur": [
+      {
+        "cu": 25
+      },
+      {
+        "cu": 60
+      }
+    ]
+  },
+  {
+    "_id": "item:oeufs_de_ferme",
+    "type": "item",
+    "nom": "Œufs de ferme",
+    "icon": "🥚",
+    "description": "Une douzaine d'œufs couchés dans la paille, à manier avec précaution.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "oeuf",
+    "slots": [],
+    "tags": [],
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 8
+      },
+      {
+        "cu": 20
+      }
+    ]
+  },
+  {
+    "_id": "item:motte_de_beurre",
+    "type": "item",
+    "nom": "Motte de beurre",
+    "icon": "🧈",
+    "description": "Beurre baratté du matin, moulé et marqué au sceau de la ferme.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "beurre",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 18
+      },
+      {
+        "cu": 45
+      }
+    ]
+  },
+  {
+    "_id": "item:cerneaux_de_noix",
+    "type": "item",
+    "nom": "Cerneaux de noix",
+    "icon": "🌰",
+    "description": "Noix décortiquées à la main, qu'on garde tout l'hiver dans un linge sec.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "fruit_sec",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2,
+    "valeur": [
+      {
+        "cu": 12
+      },
+      {
+        "cu": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:raisins_secs",
+    "type": "item",
+    "nom": "Raisins secs",
+    "icon": "🍇",
+    "description": "Grappes séchées au grenier ; elles sucrent les pâtes quand le miel manque.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "fruit_sec",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15,
+    "valeur": [
+      {
+        "cu": 10
+      },
+      {
+        "cu": 25
+      }
+    ]
+  },
+  {
+    "_id": "item:epices_douces",
+    "type": "item",
+    "nom": "Épices douces",
+    "icon": "🧂",
+    "description": "Cannelle et gingembre pilés ensemble, venus de si loin qu'on les compte au grain.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "epice",
+    "slots": [],
+    "tags": [],
+    "poids": 0.1,
+    "valeur": [
+      {
+        "cu": 40
+      },
+      {
+        "cu": 110
+      }
+    ]
+  },
+  {
+    "_id": "item:herbes_de_fournil",
+    "type": "item",
+    "nom": "Herbes de fournil",
+    "icon": "🌿",
+    "description": "Thym, sauge et romarin liés en bouquet, séchés à la chaleur du four.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "aromate",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05,
+    "valeur": [
+      {
+        "cu": 5
+      },
+      {
+        "cu": 14
+      }
+    ]
+  },
+  {
+    "_id": "item:farine_de_froment",
+    "type": "item",
+    "nom": "Farine de froment",
+    "icon": "🌾",
+    "description": "Fleur de froment blutée fin, blanche comme il se doit pour les pains de bourgeois.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "farine",
+    "slots": [],
+    "tags": [],
+    "poids": 0.4,
+    "valeur": [
+      {
+        "cu": 12
+      },
+      {
+        "cu": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:farine_de_seigle",
+    "type": "item",
+    "nom": "Farine de seigle",
+    "icon": "🌾",
+    "description": "Farine grise à l'odeur forte, qui donne au pain sa mie serrée.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "farine",
+    "slots": [],
+    "tags": [],
+    "poids": 0.4,
+    "valeur": [
+      {
+        "cu": 10
+      },
+      {
+        "cu": 26
+      }
+    ]
+  },
+  {
+    "_id": "item:farine_d_orge",
+    "type": "item",
+    "nom": "Farine d'orge",
+    "icon": "🌾",
+    "description": "Mouture rustique, un peu grossière, dont on fait galettes et pains de ménage.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "farine",
+    "slots": [],
+    "tags": [],
+    "poids": 0.4,
+    "valeur": [
+      {
+        "cu": 8
+      },
+      {
+        "cu": 20
+      }
+    ]
+  },
+  {
+    "_id": "item:Poire_de_verger",
+    "type": "item",
+    "nom": "Poire de verger",
+    "icon": "🍐",
+    "description": "Poire de plein vent, ferme et granuleuse, qu'on cueille avant qu'elle ne blettisse.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "fruit",
+    "slots": [],
+    "tags": [
+      "plante"
+    ],
+    "poids": 0.25,
+    "effets": {
+      "pv": 5
+    }
+  },
+  {
+    "_id": "recette:jardinier_poire_de_verger",
+    "type": "recette",
+    "lieu_categorie": "jardinier",
+    "objet_final": "Poire_de_verger",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "graines",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:jardinier_poire_de_verger_lot",
+    "type": "recette",
+    "lieu_categorie": "jardinier",
+    "objet_final": "Poire_de_verger",
+    "quantite_produite": 7,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "graines",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "recette:boulangerie_farine_de_froment",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "farine_de_froment",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:grain_de_froment",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "recette:boulangerie_farine_de_seigle",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "farine_de_seigle",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:grain_de_seigle",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "recette:boulangerie_farine_d_orge",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "farine_d_orge",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:grain_d_orge",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:pain_froment",
+    "type": "item",
+    "nom": "Pain de froment",
+    "icon": "🍞",
+    "description": "Pain blanc courant fabriqué avec de la farine de blé.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.7,
+    "valeur": [
+      {
+        "cu": 12
+      },
+      {
+        "cu": 28
+      }
+    ],
+    "effets": {
+      "pv": 9
+    }
+  },
+  {
+    "_id": "recette:boulangerie_pain_froment",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "pain_froment",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 2
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:pain_seigle",
+    "type": "item",
+    "nom": "Pain de seigle",
+    "icon": "🍞",
+    "description": "Pain sombre et dense, nourrissant et apprécié dans les régions froides.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.8,
+    "valeur": [
+      {
+        "cu": 9
+      },
+      {
+        "cu": 20
+      }
+    ],
+    "effets": {
+      "pv": 8,
+      "duree": 4,
+      "regen_pv": 1
+    }
+  },
+  {
+    "_id": "recette:boulangerie_pain_seigle",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "pain_seigle",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_seigle",
+        "quantite": 2
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:pain_orge",
+    "type": "item",
+    "nom": "Pain d'orge",
+    "icon": "🍞",
+    "description": "Pain rustique, nourrissant et peu coûteux.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.7,
+    "valeur": [
+      {
+        "cu": 6
+      },
+      {
+        "cu": 14
+      }
+    ],
+    "effets": {
+      "pv": 6
+    }
+  },
+  {
+    "_id": "recette:boulangerie_pain_orge",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "pain_orge",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_d_orge",
+        "quantite": 2
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:pain_meteil",
+    "type": "item",
+    "nom": "Pain de méteil",
+    "icon": "🍞",
+    "description": "Pain fabriqué avec un mélange de farine de blé et de seigle.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.75,
+    "valeur": [
+      {
+        "cu": 10
+      },
+      {
+        "cu": 24
+      }
+    ],
+    "effets": {
+      "pv": 8,
+      "duree": 3,
+      "regen_pv": 1
+    }
+  },
+  {
+    "_id": "recette:boulangerie_pain_meteil",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "pain_meteil",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 1
+      },
+      {
+        "item": "item:farine_de_seigle",
+        "quantite": 1
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:pain_noix",
+    "type": "item",
+    "nom": "Pain aux noix",
+    "icon": "🥖",
+    "description": "Pain rustique contenant des noix concassées.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.7,
+    "valeur": [
+      {
+        "cu": 20
+      },
+      {
+        "cu": 48
+      }
+    ],
+    "effets": {
+      "pv": 12,
+      "duree": 6,
+      "buffs": {
+        "F": 5
+      }
+    }
+  },
+  {
+    "_id": "recette:boulangerie_pain_noix",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "pain_noix",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 1
+      },
+      {
+        "item": "item:farine_de_seigle",
+        "quantite": 1
+      },
+      {
+        "item": "item:cerneaux_de_noix",
+        "quantite": 2
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:pain_herbes",
+    "type": "item",
+    "nom": "Pain aux herbes",
+    "icon": "🥖",
+    "description": "Petit pain parfumé avec des herbes locales comme le thym, la sauge ou le romarin.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 14
+      },
+      {
+        "cu": 32
+      }
+    ],
+    "effets": {
+      "pv": 7,
+      "duree": 6,
+      "buffs": {
+        "Vol": 5
+      }
+    }
+  },
+  {
+    "_id": "recette:boulangerie_pain_herbes",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "pain_herbes",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 1
+      },
+      {
+        "item": "item:herbes_de_fournil",
+        "quantite": 2
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:petit_pain",
+    "type": "item",
+    "nom": "Petit pain",
+    "icon": "🥖",
+    "description": "Portion individuelle de pain blanc, pratique pour les voyageurs et les soldats.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.15,
+    "valeur": [
+      {
+        "cu": 5
+      },
+      {
+        "cu": 12
+      }
+    ],
+    "effets": {
+      "pv": 4
+    }
+  },
+  {
+    "_id": "recette:boulangerie_petit_pain",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "petit_pain",
+    "quantite_produite": 4,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 1
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:galette_cereales",
+    "type": "item",
+    "nom": "Galette de céréales",
+    "icon": "🫓",
+    "description": "Galette plate préparée avec des céréales et cuite sur une plaque ou une pierre chaude.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.3,
+    "valeur": [
+      {
+        "cu": 7
+      },
+      {
+        "cu": 16
+      }
+    ],
+    "effets": {
+      "pv": 6,
+      "duree": 3,
+      "regen_pv": 1
+    }
+  },
+  {
+    "_id": "recette:boulangerie_galette_cereales",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "galette_cereales",
+    "quantite_produite": 4,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_d_orge",
+        "quantite": 1
+      },
+      {
+        "item": "item:farine_de_seigle",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:fouace_miel",
+    "type": "item",
+    "nom": "Fouace au miel",
+    "icon": "🍥",
+    "description": "Pain moelleux légèrement sucré au miel, souvent préparé pour les jours de fête.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 26
+      },
+      {
+        "cu": 60
+      }
+    ],
+    "effets": {
+      "pv": 14,
+      "duree": 6,
+      "regen_pv": 2
+    }
+  },
+  {
+    "_id": "recette:boulangerie_fouace_miel",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "fouace_miel",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 2
+      },
+      {
+        "item": "item:miel_de_bruyere",
+        "quantite": 1
+      },
+      {
+        "item": "item:motte_de_beurre",
+        "quantite": 1
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:brioche_miel",
+    "type": "item",
+    "nom": "Brioche au miel",
+    "icon": "🍮",
+    "description": "Pâte riche en œufs et en beurre, légèrement sucrée au miel.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.6,
+    "valeur": [
+      {
+        "cu": 45
+      },
+      {
+        "cu": 105
+      }
+    ],
+    "effets": {
+      "pv": 18,
+      "pm": 6,
+      "duree": 8,
+      "buffs": {
+        "Cha": 10
+      }
+    }
+  },
+  {
+    "_id": "recette:boulangerie_brioche_miel",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "brioche_miel",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 2
+      },
+      {
+        "item": "item:oeufs_de_ferme",
+        "quantite": 2
+      },
+      {
+        "item": "item:motte_de_beurre",
+        "quantite": 2
+      },
+      {
+        "item": "item:miel_de_bruyere",
+        "quantite": 1
+      },
+      {
+        "item": "item:levain_de_chef",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:tourte_pommes",
+    "type": "item",
+    "nom": "Tourte aux pommes",
+    "icon": "🥧",
+    "description": "Pâte garnie de pommes coupées et légèrement sucrées.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "valeur": [
+      {
+        "cu": 34
+      },
+      {
+        "cu": 80
+      }
+    ],
+    "effets": {
+      "pv": 16,
+      "duree": 6,
+      "buffs": {
+        "Cha": 5
+      }
+    }
+  },
+  {
+    "_id": "recette:boulangerie_tourte_pommes",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "tourte_pommes",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 2
+      },
+      {
+        "item": "item:Pomme_de_verger",
+        "quantite": 3
+      },
+      {
+        "item": "item:motte_de_beurre",
+        "quantite": 1
+      },
+      {
+        "item": "item:miel_de_bruyere",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:tourte_poires",
+    "type": "item",
+    "nom": "Tourte aux poires",
+    "icon": "🥧",
+    "description": "Tourte garnie de poires et parfois parfumée avec des épices.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 1.0,
+    "valeur": [
+      {
+        "cu": 36
+      },
+      {
+        "cu": 85
+      }
+    ],
+    "effets": {
+      "pv": 16,
+      "duree": 6,
+      "buffs": {
+        "Ch": 5
+      }
+    }
+  },
+  {
+    "_id": "recette:boulangerie_tourte_poires",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "tourte_poires",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 2
+      },
+      {
+        "item": "item:Poire_de_verger",
+        "quantite": 3
+      },
+      {
+        "item": "item:motte_de_beurre",
+        "quantite": 1
+      },
+      {
+        "item": "item:epices_douces",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:galette_fruits_secs",
+    "type": "item",
+    "nom": "Galette aux fruits secs",
+    "icon": "🍪",
+    "description": "Galette garnie de noix, noisettes, raisins secs ou autres fruits séchés.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.35,
+    "valeur": [
+      {
+        "cu": 30
+      },
+      {
+        "cu": 70
+      }
+    ],
+    "effets": {
+      "pv": 12,
+      "duree": 8,
+      "regen_pv": 2
+    }
+  },
+  {
+    "_id": "recette:boulangerie_galette_fruits_secs",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "galette_fruits_secs",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 1
+      },
+      {
+        "item": "item:cerneaux_de_noix",
+        "quantite": 1
+      },
+      {
+        "item": "item:raisins_secs",
+        "quantite": 2
+      },
+      {
+        "item": "item:miel_de_bruyere",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:biscuits_voyage",
+    "type": "item",
+    "nom": "Biscuits de voyage",
+    "icon": "🍘",
+    "description": "Biscuits très secs et résistants conçus pour être conservés plusieurs semaines.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.4,
+    "valeur": [
+      {
+        "cu": 16
+      },
+      {
+        "cu": 38
+      }
+    ],
+    "effets": {
+      "pv": 6,
+      "duree": 12,
+      "regen_pv": 1
+    }
+  },
+  {
+    "_id": "recette:boulangerie_biscuits_voyage",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "biscuits_voyage",
+    "quantite_produite": 5,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_froment",
+        "quantite": 2
+      },
+      {
+        "item": "item:farine_d_orge",
+        "quantite": 1
+      },
+      {
+        "item": "item:Sel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:pain_epices_miel",
+    "type": "item",
+    "nom": "Pain d'épices au miel",
+    "icon": "🍯",
+    "description": "Pain dense et parfumé au miel, à la cannelle et au gingembre.",
+    "rarete": "peu_commun",
+    "categorie": "consommable",
+    "sous_categorie": "boulangerie",
+    "slots": [],
+    "tags": [],
+    "poids": 0.5,
+    "valeur": [
+      {
+        "cu": 55
+      },
+      {
+        "cu": 130
+      }
+    ],
+    "effets": {
+      "pv": 15,
+      "pm": 10,
+      "duree": 10,
+      "buffs": {
+        "Vol": 10
+      }
+    }
+  },
+  {
+    "_id": "recette:boulangerie_pain_epices_miel",
+    "type": "recette",
+    "lieu_categorie": "boulangerie",
+    "objet_final": "pain_epices_miel",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:farine_de_seigle",
+        "quantite": 2
+      },
+      {
+        "item": "item:miel_de_bruyere",
+        "quantite": 3
+      },
+      {
+        "item": "item:epices_douces",
+        "quantite": 2
+      },
+      {
+        "item": "item:oeufs_de_ferme",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_four_banal_de_saint_germain",
+    "type": "lieu",
+    "label": "Le Four Banal de Saint-Germain",
+    "image": "boulangerie_europe01.png",
+    "categorie": "boulangerie",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:marchand_boulangerie",
+        "nom": "Aubry Chaufour"
+      }
+    ],
+    "stock_matieres": {
+      "item:grain_de_froment": 24,
+      "item:grain_de_seigle": 18,
+      "item:grain_d_orge": 15,
+      "item:levain_de_chef": 8,
+      "item:Sel": 8,
+      "item:miel_de_bruyere": 6,
+      "item:motte_de_beurre": 6,
+      "item:oeufs_de_ferme": 6,
+      "item:cerneaux_de_noix": 6,
+      "item:raisins_secs": 6,
+      "item:epices_douces": 4,
+      "item:herbes_de_fournil": 6,
+      "item:Pomme_de_verger": 12,
+      "item:Poire_de_verger": 12
+    },
+    "stock_vente": [],
+    "stock_cible": {
+      "item": {
+        "item:farine_de_froment": 4,
+        "item:farine_de_seigle": 3,
+        "item:farine_d_orge": 3,
+        "item:levain_de_chef": 4,
+        "item:miel_de_bruyere": 6,
+        "item:motte_de_beurre": 6,
+        "item:oeufs_de_ferme": 8,
+        "item:epices_douces": 4,
+        "item:Sel": 6
+      },
+      "sous_categorie": {
+        "grain": 12,
+        "fruit_sec": 6,
+        "aromate": 6,
+        "boulangerie": 6
+      }
+    }
+  },
+  {
+    "_id": "link:boulangerie01_to_auxerre",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:auxerre",
+        "pos": [
+          48,
+          29
+        ]
+      },
+      {
+        "lieu": "lieu:le_four_banal_de_saint_germain",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "boulangerie",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "lieu:le_fournil_de_l_yonne",
+    "type": "lieu",
+    "label": "Le Fournil de l'Yonne",
+    "image": "boulangerie_europe03.png",
+    "categorie": "boulangerie",
+    "lieu_parent": "lieu:auxerre",
+    "pnj": [
+      {
+        "character": "pnj:marchand_boulangerie",
+        "nom": "Perrette Bienfarine"
+      }
+    ],
+    "stock_matieres": {
+      "item:grain_de_froment": 24,
+      "item:grain_de_seigle": 18,
+      "item:grain_d_orge": 15,
+      "item:levain_de_chef": 8,
+      "item:Sel": 8,
+      "item:miel_de_bruyere": 6,
+      "item:motte_de_beurre": 6,
+      "item:oeufs_de_ferme": 6,
+      "item:cerneaux_de_noix": 6,
+      "item:raisins_secs": 6,
+      "item:epices_douces": 4,
+      "item:herbes_de_fournil": 6,
+      "item:Pomme_de_verger": 12,
+      "item:Poire_de_verger": 12
+    },
+    "stock_vente": [],
+    "stock_cible": {
+      "item": {
+        "item:farine_de_froment": 4,
+        "item:farine_de_seigle": 3,
+        "item:farine_d_orge": 3,
+        "item:levain_de_chef": 4,
+        "item:miel_de_bruyere": 6,
+        "item:motte_de_beurre": 6,
+        "item:oeufs_de_ferme": 8,
+        "item:epices_douces": 4,
+        "item:Sel": 6
+      },
+      "sous_categorie": {
+        "grain": 12,
+        "fruit_sec": 6,
+        "aromate": 6,
+        "boulangerie": 6
+      }
+    }
+  },
+  {
+    "_id": "link:boulangerie02_to_auxerre",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:auxerre",
+        "pos": [
+          29,
+          29
+        ]
+      },
+      {
+        "lieu": "lieu:le_fournil_de_l_yonne",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "boulangerie",
+      "status": "ouvert"
+    }
+  }
+]
