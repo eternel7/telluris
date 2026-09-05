@@ -1,0 +1,164 @@
+[
+  {
+    "_id": "item:acier",
+    "_rev": "2-6557450137ef8165700cb72b8da92e2b",
+    "type": "item",
+    "nom": "Lingot d'acier",
+    "sous_categorie": "acier",
+    "icon": "⚙️",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:bronze",
+    "_rev": "2-083310da64b363783a6b04c72dd81412",
+    "type": "item",
+    "nom": "Lingot de bronze",
+    "sous_categorie": "bronze",
+    "icon": "🟫",
+    "rarete": "commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 3,
+    "valeur": [
+      {
+        "cu": 35
+      }
+    ]
+  },
+  {
+    "_id": "item:fer",
+    "_rev": "2-6ccfd32c527e11e1aed15d59fd58d6b8",
+    "type": "item",
+    "nom": "Lingot de fer",
+    "sous_categorie": "fer",
+    "icon": "🔩",
+    "rarete": "commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 3,
+    "valeur": [
+      {
+        "cu": 50
+      }
+    ]
+  },
+  {
+    "_id": "item:adamantite",
+    "_rev": "4-3452d2b234a489ffbbd1d2bebf6a5a4a",
+    "type": "item",
+    "nom": "Lingot d'adamantite",
+    "sous_categorie": "metaux_precieux",
+    "icon": "⚫",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "or": 20
+      }
+    ]
+  },
+  {
+    "_id": "item:argent",
+    "_rev": "3-4511b29944a15fed8e618ed0f45bac3f",
+    "type": "item",
+    "nom": "Lingot d'argent",
+    "description": "Métal blanc, tendre et cher, que les armuriers réservent aux incrustations, aux runes et aux lames dites bénies.",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "sous_categorie": "metaux_precieux",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 20
+      }
+    ]
+  },
+  {
+    "_id": "item:mithril",
+    "_rev": "3-531ce507123c4f8237d50af894d0ea1a",
+    "type": "item",
+    "nom": "Lingot de mithril",
+    "sous_categorie": "metaux_precieux",
+    "icon": "✨",
+    "rarete": "rare",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 1,
+    "valeur": [
+      {
+        "or": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:orichalque",
+    "_rev": "4-398ee3fadaee19ba4774648a96482863",
+    "type": "item",
+    "nom": "Lingot d'orichalque",
+    "sous_categorie": "metaux_precieux",
+    "icon": "🌟",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "or": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:plomb",
+    "_rev": "3-5fdd18f4df740194e21877acba2495fd",
+    "type": "item",
+    "nom": "Lingot de plomb",
+    "description": "Métal mou et lourd, sans valeur au tranchant : on l'emploie à lester ce qui doit tomber vite et frapper fort.",
+    "icon": "🔗",
+    "rarete": "commun",
+    "categorie": "metal",
+    "sous_categorie": "plomb",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 4,
+    "valeur": [
+      {
+        "cu": 20
+      }
+    ]
+  }
+]
