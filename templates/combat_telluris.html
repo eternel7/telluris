@@ -1993,13 +1993,28 @@ function canConsume(data) {
 }
 
 // ── Sorts (1 action + PM) ────────────────────────────────────────────
-// Cibles valides d'un sort offensif : portée du sort, et au-delà du contact (portée > 1)
+// Portée EFFECTIVE d'une capacité + son caractère « à distance » — miroir mot pour mot de
+// combat._portee_competence. Une COMPÉTENCE `jet:"cc"` à dés est un coup porté AVEC l'arme :
+// elle en emprunte les dés (cf. compLabel, qui les préfixe d'un `+`) et donc son ALLONGE —
+// une hallebarde frappe à 2 cases, la compétence aussi, et EN MÊLÉE (`ranged` se mesure à
+// l'allonge, pas à `portee > 1`, sinon la case se griserait dès qu'un ennemi est au contact).
+// ⚠️ Le discriminant est `competence_id` et non `jet` : capaCibles reçoit indifféremment un
+// sort ou une compétence, et le payload de sort ne publie même pas `jet` — s'appuyer sur un
+// champ absent ne marcherait que par accident. Un sort `cc` n'emprunte pas les dés de l'arme,
+// donc pas son allonge non plus.
+function capaPortee(c) {
+	const allonge = (c.competence_id && c.jet === 'cc' && (c.effets || {}).degats)
+		? Math.max(1, attackProfile('cac').portee || 1) : 1;
+	const portee = Math.max(allonge, Math.max(1, c.portee || 1));
+	return { portee, ranged: portee > allonge };
+}
+// Cibles valides d'un sort/compétence offensif : portée effective, et au-delà de l'allonge
 // mêmes règles que le tir — non engagé + ligne de vue (miroir serveur).
 function sortTargets(s) {
 	const j = me();
-	const portee = Math.max(1, s.portee || 1);
+	const { portee, ranged } = capaPortee(s);
 	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
-	if (portee > 1) {
+	if (ranged) {
 		if (isEngaged()) return [];
 		list = list.filter(m => lineOfSight(j.pos.x, j.pos.y, m.pos.x, m.pos.y));
 	}
@@ -2013,10 +2028,10 @@ function sortTargets(s) {
 //     c'est même là que ça sert. La ligne de vue reste exigée au-delà du contact.
 function allyTargets(s) {
 	const j = me();
-	const portee = Math.max(1, s.portee || 1);
+	const { portee, ranged } = capaPortee(s);
 	let list = (state.joueurs || []).filter(p =>
 		p.pos && p.id !== j.id && (p.currentPV || 0) > 0 && chebyJM(j, p) <= portee);
-	if (portee > 1) list = list.filter(p => lineOfSight(j.pos.x, j.pos.y, p.pos.x, p.pos.y));
+	if (ranged) list = list.filter(p => lineOfSight(j.pos.x, j.pos.y, p.pos.x, p.pos.y));
 	return list;
 }
 // Cibles d'une capacité, quel que soit son camp — SOURCE UNIQUE des trois consommateurs
@@ -2496,6 +2511,10 @@ function compLabel(c) {
 	if (c.effets.pv) parts.push(`+${c.effets.pv} PV`);
 	if (c.effets.pm) parts.push(`+${c.effets.pm} PM`);
 	if (c.effets.furtivite) parts.push('🥷 furtivité');
+	// Portée EFFECTIVE et non déclarée : une frappe `cc` emprunte l'allonge de l'arme en
+	// main, donc la même compétence ne porte pas à la même distance d'une épée à une hast.
+	// C'est le seul endroit où le joueur peut le lire.
+	if (c.cible !== 'soi') { const p = capaPortee(c).portee; if (p > 1) parts.push(`portée ${p}`); }
 	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${c.cout_pm} PM` : ''}`
 		+ (parts.length ? ` (${parts.join(', ')})` : '');
 }

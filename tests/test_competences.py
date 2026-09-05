@@ -467,6 +467,98 @@ def test_competence_ranged_exige_une_ligne_de_vue_libre():
     assert "error" in res and "corps à corps" in res["error"]
 
 
+# ── Allonge de l'arme : une frappe `cc` emprunte les dés ET la portée ────────────
+#
+# Même porte que _degats_competence : si le coup est porté AVEC l'arme, il porte aussi
+# AUSSI LOIN qu'elle. Le vrai piège est le drapeau `ranged` — déduit de `portee > 1`, il
+# aurait rendu une hallebarde interdite en mêlée et soumise à la ligne de vue.
+
+_PROFIL_HAST = [{"mode": "cac", "portee": 2, "ranged": False,
+                 "toucher": "cc", "degats": "degats_cc"}]
+_PROFIL_EPEE = [{"mode": "cac", "portee": 1, "ranged": False,
+                 "toucher": "cc", "degats": "degats_cc"}]
+
+
+def _combat_arme(profils=None, monstres=None, **joueur_extra):
+    """Combat dont le joueur (3, 5) porte une arme de mêlée donnée."""
+    extra = {"attaque_profils": profils if profils is not None else _PROFIL_HAST,
+             "degats_cc": "1D4"}
+    extra.update(joueur_extra)
+    return _combat(joueur_extra=extra, monstres=monstres)
+
+
+def _portee(profils, **overrides):
+    joueur = {"attaque_profils": profils} if profils is not None else {}
+    return combat_mod._portee_competence(joueur, normaliser_competence(_comp(**overrides)))
+
+
+def test_portee_competence_frappe_cc_prend_l_allonge_de_l_arme():
+    # Hallebarde (cac portée 2) : la frappe porte à 2 cases, EN MÊLÉE (ranged faux).
+    assert _portee(_PROFIL_HAST) == (2, False)
+    # Épée (portée 1) : rien ne change, comportement d'avant.
+    assert _portee(_PROFIL_EPEE) == (1, False)
+
+
+def test_portee_competence_ne_rabaisse_jamais_une_portee_ecrite():
+    # `max` et non un remplacement : l'auteur garde la main…
+    assert _portee(_PROFIL_EPEE, portee=3) == (3, True)
+    # …et frapper AU-DELÀ de l'allonge, c'est frapper à distance (LdV + non engagé).
+    assert _portee(_PROFIL_HAST, portee=3) == (3, True)
+
+
+def test_portee_competence_hors_frappe_cc_inchangee():
+    # cd / magique : allonge 1, donc la formule se réduit exactement à `portee > 1`.
+    assert _portee(_PROFIL_HAST, jet="cd", portee=6) == (6, True)
+    assert _portee(_PROFIL_HAST, jet="magique", portee=4) == (4, True)
+    # Prise sans dés (entrave, cri) : ce n'est pas un coup porté avec l'arme.
+    assert _portee(_PROFIL_HAST, effets={"buffs": {"V": -2}, "duree": 2}) == (1, False)
+    # ⚠️ normaliser_competence met jet:"cc" PAR DÉFAUT, y compris sur un soin : sans la
+    # porte des dégâts, on soignerait au bout d'une hallebarde.
+    assert _portee(_PROFIL_HAST, cible="allie", effets={"pv": 10}) == (1, False)
+
+
+def test_portee_competence_sans_attaque_profils():
+    # Combat déjà en base : repli mains nues, comportement d'avant. Aucune migration.
+    assert _portee(None) == (1, False)
+
+
+def test_frappe_cc_atteint_une_cible_a_l_allonge_de_l_arme(monkeypatch):
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)
+    combat = _combat_arme(monstres=[_monstre("monstre_0", 3, 3)])   # 2 cases
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(_comp()))
+    assert "error" not in res, res
+    assert res["hit"] is True
+    # La même compétence, épée en main, ne porte plus si loin.
+    combat = _combat_arme(_PROFIL_EPEE, monstres=[_monstre("monstre_0", 3, 3)])
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(_comp()))
+    assert "error" in res and "hors de portée" in res["error"]
+
+
+def test_frappe_cc_a_l_allonge_reste_jouable_engage_et_sans_ligne_de_vue(monkeypatch):
+    # LE piège : `ranged` déduit de `portee > 1` aurait interdit la hallebarde dès qu'un
+    # ennemi est au contact, et lui aurait exigé une ligne de vue.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 1)
+    combat = _combat_arme(monstres=[_monstre("monstre_0", 3, 3),    # 2 cases
+                                    _monstre("monstre_1", 3, 4)])   # au contact
+    combat["grid"]["cells"][4][3] = 0        # mur entre le joueur (3, 5) et la cible (3, 3)
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(_comp()))
+    assert "error" not in res, res
+
+
+def test_frappe_cc_a_l_allonge_brise_la_furtivite(monkeypatch):
+    # Une hast frappe AU CONTACT, à deux cases : elle révèle à tous, comme le fait déjà
+    # l'attaque d'hast ordinaire — c'est le drapeau `ranged`, pas la distance, qui décide.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 100)
+    combat = _combat_arme(monstres=[_monstre_actif("monstre_0", 3, 3)],
+                          furtif=True, furtivite_bonus=1)
+    resolve_action(combat, "competence", cible_id="monstre_0",
+                   competence=normaliser_competence(_comp()))
+    assert combat["joueurs"][0]["furtif"] is False
+
+
 # ── Nouvelles clés d'effets : esquive / furtivite ────────────────────────────────
 
 def test_normalisation_esquive_et_furtivite():

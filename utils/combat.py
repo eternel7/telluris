@@ -1147,6 +1147,22 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 	return [best[m] for m in ("cac", "jet", "tir") if m in best]
 
 
+def _profil_attaque(joueur: dict, mode: str | None = None) -> dict:
+	"""Profil d'attaque du snapshot pour un MODE — sélecteur unique, pendant serveur du
+	`attackProfile(mode)` du client. Deux replis, dans cet ordre : le mode demandé, puis la
+	mêlée, puis les mains nues — `_weapon_attacks` posant toujours un `cac`, le dernier ne
+	sert qu'aux snapshots d'avant `attaque_profils` (combat déjà en base : aucune migration).
+	"""
+	attaques = joueur.get("attaque_profils") or []
+	profil = next((a for a in attaques if a.get("mode") == mode), None) if mode else None
+	if profil is None:
+		profil = next((a for a in attaques if a.get("mode") == "cac"), None)
+	if profil is None:
+		profil = {"mode": "cac", "portee": joueur.get("portee", 1), "ranged": False,
+				  "toucher": "cc", "degats": "degats_cc"}
+	return profil
+
+
 def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# Buffs de consommables inclus : un combat démarré pendant un buff en profite
 	# intégralement (pv_max, cc, dégâts, initiative, actions, déplacement — et donc
@@ -1580,6 +1596,39 @@ def _degats_competence(joueur: dict, competence: dict, effets: dict) -> str:
 	if not base or (competence or {}).get("jet", "cc") != "cc":
 		return base
 	return concat_degats(joueur.get("degats_cc", ""), base)
+
+
+def _portee_competence(joueur: dict, competence: dict) -> tuple:
+	"""Portée EFFECTIVE d'une compétence et son caractère « à distance » — SOURCE UNIQUE.
+
+	Même porte que `_degats_competence`, juste au-dessus, et pour la même raison : une frappe
+	de CORPS À CORPS (`jet: "cc"` avec des dés) est un coup PORTÉ AVEC l'arme. Elle en emprunte
+	les dés — et donc aussi l'ALLONGE : une arme d'hast frappe à 2 cases par `attaquer`, la
+	compétence portée par cette même hallebarde doit frapper à 2 cases elle aussi.
+
+	⚠️ `max` et NON un remplacement : une portée écrite par l'auteur n'est jamais rabaissée par
+	l'arme en main.
+	⚠️ Tout ce qui n'est pas une frappe `cc` à dés garde une allonge de 1 : un pur debuff de
+	contact (entrave, cri), un soin `cible: "allie"` — `normaliser_competence` met `jet: "cc"`
+	PAR DÉFAUT, on ne soigne pas au bout d'une hallebarde —, une compétence `cd` ou `magique`.
+	⚠️ **Le second membre est le vrai piège.** La branche `competence` déduisait « à distance »
+	de `portee > 1`, là où la branche `attaquer` lit le drapeau `ranged` du profil : hériter des
+	2 cases d'une hast aurait rendu la compétence INTERDITE en mêlée et soumise à la ligne de
+	vue, l'inverse même de ce qu'est une hast. `ranged` se mesure donc à l'allonge — on est « à
+	distance » quand on frappe AU-DELÀ de ce que l'arme atteint. À allonge 1 la formule se réduit
+	exactement à `portee > 1` : comportement d'avant à la lettre pour tout le reste.
+	⚠️ Snapshot sans `attaque_profils` (combat déjà en base) ⇒ `_profil_attaque` retombe sur les
+	mains nues, donc allonge 1 : aucune migration.
+	"""
+	comp = competence or {}
+	portee = max(1, int(comp.get("portee", 1) or 1))
+	effets = comp.get("effets") or {}
+	if comp.get("jet", "cc") == "cc" and effets.get("degats"):
+		allonge = max(1, int(_profil_attaque(joueur, "cac").get("portee", 1) or 1))
+	else:
+		allonge = 1
+	portee = max(portee, allonge)
+	return portee, portee > allonge
 
 
 def _magic_hit_threshold(toucher_magique: int, cible_pm_def: int) -> int:
@@ -2227,14 +2276,9 @@ def resolve_action(
 		if not alive:
 			return {"error": "Aucune cible disponible."}
 
-		# Profil d'attaque selon le mode demandé (arme), repli sur la mêlée (cac).
-		attaques = joueur.get("attaque_profils") or []
-		profil = next((a for a in attaques if a["mode"] == mode), None) if mode else None
-		if profil is None:
-			profil = next((a for a in attaques if a["mode"] == "cac"), None)
-		if profil is None:
-			profil = {"mode": "cac", "portee": joueur.get("portee", 1), "ranged": False,
-					  "toucher": "cc", "degats": "degats_cc"}
+		# Profil d'attaque selon le mode demandé (arme), repli sur la mêlée (cac) —
+		# sélecteur partagé avec _portee_competence, qui y lit l'allonge de l'arme.
+		profil = _profil_attaque(joueur, mode)
 		atk_portee = max(1, int(profil.get("portee", 1)))
 		is_ranged = bool(profil.get("ranged"))
 		skill = joueur.get("cd" if profil.get("toucher") == "cd" else "cc", 0)
@@ -2673,7 +2717,7 @@ def resolve_action(
 			# Miroir exact de la branche alliée du sort (même chokepoint).
 			allie = _get_joueur(combat_doc, cible_id) if cible_id else None
 			res_allie = _lancer_sur_allie(combat_doc, joueur, allie, competence, effets,
-										  competence.get("portee", 1), grid)
+										  _portee_competence(joueur, competence)[0], grid)
 			if "error" in res_allie:
 				return res_allie
 			joueur["currentPM"] -= cout_pm
@@ -2686,10 +2730,13 @@ def resolve_action(
 			monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
 			if not monstre or not monstre["vivant"]:
 				return {"error": "Cible invalide."}
-			comp_portee = max(1, int(competence.get("portee", 1) or 1))
-			# Portée > 1 = règles à distance (jet/tir/sort) : interdit si engagé au corps à
-			# corps, et exige une ligne de vue.
-			if comp_portee > 1:
+			# Portée EFFECTIVE : une frappe `cc` à dés emprunte l'ALLONGE de l'arme en main,
+			# comme elle en emprunte les dés (chokepoint _portee_competence).
+			comp_portee, comp_ranged = _portee_competence(joueur, competence)
+			# Règles à distance (jet/tir/sort) : interdit si engagé au corps à corps, et exige
+			# une ligne de vue. ⚠️ Pilotées par le drapeau `ranged` — miroir de la branche
+			# `attaquer` — et non par `portee > 1` : une hallebarde frappe à 2 cases EN MÊLÉE.
+			if comp_ranged:
 				if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
 					return {"error": "Un ennemi vous menace au corps à corps : impossible."}
 				if not _line_of_sight(grid["cells"], joueur["pos"]["x"], joueur["pos"]["y"],
@@ -2792,7 +2839,7 @@ def resolve_action(
 
 			# Frapper au contact révèle le joueur (touché ou raté) ; à distance, seule la
 			# cible tente de le repérer — et une cible abattue ne repère plus rien.
-			_furtivite_apres_offensive(combat_doc, joueur, monstre, comp_portee > 1)
+			_furtivite_apres_offensive(combat_doc, joueur, monstre, comp_ranged)
 		else:
 			# Compétence sur soi : toujours utilisable ; débit PM puis part instantanée clampée.
 			joueur["currentPM"] -= cout_pm

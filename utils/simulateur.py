@@ -561,12 +561,15 @@ def options_offensives_statiques(snapshot: dict, arsenal: dict) -> list:
 					"portee": max(1, sort["portee"]), "ranged": max(1, sort["portee"]) > 1,
 					"notation": notation, "cout_pm": sort["cout_pm"]})
 	for comp in arsenal.get("competences") or []:
-		# jet "cc" → la frappe est portée AVEC l'arme (source unique _degats_competence).
+		# jet "cc" → la frappe est portée AVEC l'arme : elle en emprunte les dés
+		# (_degats_competence) ET l'allonge (_portee_competence). Deux sources uniques,
+		# partagées avec le moteur — une copie locale ferait diverger le banc d'essai.
 		notation = combat._degats_competence(snapshot, comp, comp["effets"])
 		if not notation:
 			continue
+		portee, ranged = combat._portee_competence(snapshot, comp)
 		out.append({"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
-					"portee": comp["portee"], "ranged": comp["portee"] > 1,
+					"portee": portee, "ranged": ranged,
 					"notation": notation, "cout_pm": comp["cout_pm"]})
 	return out
 
@@ -621,8 +624,10 @@ def _options_jouables(actor: dict, arsenal: dict, distance: int):
 			   "ranged": portee > 1,
 			   "effets_cible": "ennemi", "source": sort, "compteur": "sorts"}
 	for comp in arsenal.get("competences") or []:
-		portee = comp["portee"]
-		if distance > portee or (portee > 1 and distance <= 1):
+		# Allonge de l'arme pour une frappe `cc` à dés, et drapeau `ranged` mesuré à cette
+		# allonge : une hast reste jouable au contact (cf. combat._portee_competence).
+		portee, ranged = combat._portee_competence(actor, comp)
+		if distance > portee or (ranged and distance <= 1):
 			continue
 		if comp["cout_pm"] > actor.get("currentPM", 0):
 			continue
@@ -631,7 +636,7 @@ def _options_jouables(actor: dict, arsenal: dict, distance: int):
 			continue
 		yield {"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
 			   "notation": notation, "cout_pm": comp["cout_pm"], "effets": comp["effets"],
-			   "ranged": portee > 1,
+			   "ranged": ranged,
 			   "effets_cible": "ennemi", "source": comp, "compteur": "competences"}
 
 
@@ -916,7 +921,10 @@ def _recap_arsenal(bel: dict) -> dict:
 					 for p in snap.get("attaque_profils") or []],
 		"sorts": [{"label": s["nom"], "cout_pm": s["cout_pm"], "portee": max(1, s["portee"]),
 				   "degats": s["effets"].get("degats", "")} for s in arsenal["sorts"]],
-		"competences": [{"label": c["nom"], "cout_pm": c["cout_pm"], "portee": c["portee"],
+		# ⚠️ Portée EFFECTIVE et non déclarée : une frappe `cc` emprunte l'allonge de l'arme,
+		# et le récap doit montrer ce que le duel joue vraiment (cf. _options_jouables).
+		"competences": [{"label": c["nom"], "cout_pm": c["cout_pm"],
+						 "portee": combat._portee_competence(snap, c)[0],
 						 "degats": c["effets"].get("degats", "")} for c in arsenal["competences"]],
 		"soutiens": [{"label": s["label"], "cout_pm": s["cout_pm"], "stock": s.get("stock")}
 					 for s in arsenal["soutiens"]],
