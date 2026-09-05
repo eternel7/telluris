@@ -91,7 +91,8 @@ def _recrue_view(character: dict, av: dict, lieu_doc: dict | None = None) -> dic
 		"voc": av.get("voc", ""),
 		"voc_niveau": (av.get("vocations_niveaux") or {}).get(av.get("voc", ""), 0),
 		"sex": av.get("sex", ""),
-		"rang": av.get("rang", "F"),
+		# ⚠️ Pas de `rang` : il n'appartient qu'au principal (cf. recrutement.RANGS). La carte
+		# de personnage n'affiche donc la mention « Rang » que pour lui.
 		"niveau": compute_character_level(av.get("xp_total", 0)),
 		"specialite": av.get("specialite", ""),
 		"image": av.get("image", ""),
@@ -527,7 +528,7 @@ async def groupe_compagnon(
 		"race": av.get("race", ""),
 		"race_nom": race.get("nom", av.get("race", "")),
 		"voc": av.get("voc", ""),
-		"rang": av.get("rang", "F"),
+		# ⚠️ Pas de `rang` : il n'appartient qu'au principal (cf. recrutement.RANGS).
 		"specialite": av.get("specialite", ""),
 		"image": av.get("image", ""),
 		# Cadrage du portrait : le client mesure l'image, mais il ne peut pas DEVINER le

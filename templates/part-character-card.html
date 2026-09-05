@@ -75,7 +75,13 @@
 		{% if identite %}
 		<div class="char-identity" data-role="identity">
 			<div class="char-name" data-role="nom">{{ nom }}</div>
-			<div class="char-class" data-role="classe">{{ voc_icon }} {{ voc_label }} Niv.<span class="voc-niveau niveau-nb" data-role="voc-niveau">{{ voc_niveau }}</span> - <span data-role="race">{{ race }}</span> Niv.<span class="race-niveau niveau-nb" data-role="race-niveau">{{ niveau }}</span> · <span data-role="rang"{% if rang_title %} title="{{ rang_title }}"{% endif %}>Rang <span data-role="rang-val">{{ rang }}</span></span></div>
+			{# ⚠️ Le RANG n'appartient qu'au personnage principal : seul lui en a un (`rangs_guilde`,
+			   gagné aux épreuves du comptoir). Compagnons, recrues, montures et personnes escortées
+			   n'en portent pas — leur payload n'a pas de clé `rang` et la mention reste `hidden`,
+			   séparateur « · » COMPRIS (il vit dans le span, sinon il pendrait tout seul).
+			   ⚠️ L'élément est émis dans TOUS les cas : la carte de la fiche change de porteur
+			   (mode compagnon), `_setCardIdentite` doit avoir quelque chose à rallumer au retour. #}
+			<div class="char-class" data-role="classe">{{ voc_icon }} {{ voc_label }} Niv.<span class="voc-niveau niveau-nb" data-role="voc-niveau">{{ voc_niveau }}</span> - <span data-role="race">{{ race }}</span> Niv.<span class="race-niveau niveau-nb" data-role="race-niveau">{{ niveau }}</span><span data-role="rang"{% if not rang %} hidden{% endif %}{% if rang_title %} title="{{ rang_title }}"{% endif %}> · Rang <span data-role="rang-val">{{ rang }}</span></span></div>
 			<div class="char-vitals">
 				<span class="pv-val" data-role="pv-val">PV <span data-role="pv">{{ pv }}</span>/<span data-role="pv-max">{{ pv_max or "—" }}</span></span>
 				<span class="pm-val" data-role="pm-val">PM <span data-role="pm">{{ pm }}</span>/<span data-role="pm-max">{{ pm_max or "—" }}</span></span>

@@ -893,6 +893,9 @@
 		.sh-skill-toggle:hover .sh-skill-name { text-decoration: underline; }
 		.sh-skill-full-desc { font-size: 0.85rem; color: var(--muted); margin-top: 6px;
 			padding-top: 6px; border-top: 1px dashed rgba(74,74,90,0.4); white-space: pre-line; }
+		/* Portée, en tête de la fiche dépliée. ⚠️ Un <div> À PART dans .sh-skill-full-desc, qui
+		   est en `pre-line` : concaténée au texte, elle collerait à la première ligne de prose. */
+		.sh-sort-portee { color: var(--accent-color); margin-bottom: 4px; }
 		/* Les 2 modes optionnels (🪃 Jet, 🏹 Tir) tiennent côte à côte dès que la place le
 		   permet — le conteneur wrap, chaque case garde une largeur mini plutôt que de
 		   forcer toute la largeur du panneau comme une ligne de sac/sort ordinaire. */
@@ -2749,8 +2752,9 @@
 	}
 
 	// Rang de guilde affiché — même logique de propriété que les vitaux (miroir de
-	// updateVitals) : seul le JOUEUR peut le voir changer en jeu (promotion au comptoir de
-	// guilde), mais générique par cohérence si un jour un compagnon en gagne un.
+	// updateVitals). ⚠️ Seul le JOUEUR a un rang : un compagnon n'en gagne jamais, la mention
+	// est masquée sur sa carte. Le paramètre `porteurId` reste par symétrie avec updateVitals,
+	// mais aucun appelant ne vise autre chose que le principal.
 	function updateRang(rang, rangDetail, porteurId) {
 		if (!rang) return;
 		const cible = porteurId || PRINCIPAL_ID;
@@ -2767,7 +2771,10 @@
 			const valEl = _q(card, 'rang-val');
 			if (valEl) valEl.textContent = rang;
 			const rangEl = _q(card, 'rang');
-			if (rangEl) { if (rangDetail) rangEl.title = rangDetail; else rangEl.removeAttribute('title'); }
+			if (rangEl) {
+				rangEl.hidden = false;   // premier rang décroché : la mention apparaît.
+				if (rangDetail) rangEl.title = rangDetail; else rangEl.removeAttribute('title');
+			}
 		});
 	}
 
@@ -3328,11 +3335,18 @@ function _setCardIdentite(card, p) {
 	set('voc-niveau', p.voc_niveau !== undefined ? p.voc_niveau : 0);
 	set('race', p.race || '');
 	set('race-niveau', p.niveau !== undefined ? p.niveau : 0);
-	set('rang-val', p.rang || 'aucun');
-	// Détail par ville en infobulle — seul le joueur le porte (`rang_detail`) ; un
-	// compagnon/recrue n'a qu'un rang scalaire, sans ville : rien à survoler, on efface.
+	// ⚠️ Le rang n'appartient QU'AU PRINCIPAL : un compagnon, une recrue, une monture ou une
+	// personne escortée n'en a pas, et leur payload ne porte donc aucune clé `rang`. La mention
+	// (séparateur « · » compris) se masque plutôt que d'afficher un « Rang aucun » qui laisserait
+	// croire à un rang perdu — et se rallume au retour sur le joueur, la carte de la fiche étant
+	// la MÊME des deux côtés du mode compagnon.
 	const rangEl = _q(card, 'rang');
-	if (rangEl) { if (p.rang_detail) rangEl.title = p.rang_detail; else rangEl.removeAttribute('title'); }
+	if (rangEl) {
+		rangEl.hidden = !p.rang;
+		if (p.rang) set('rang-val', p.rang);
+		// Détail par ville en infobulle — seul le joueur le porte (`rang_detail`).
+		if (p.rang_detail) rangEl.title = p.rang_detail; else rangEl.removeAttribute('title');
+	}
 	// La ligne « ⚔ Guerrier Niv.<span> - <race> Niv.<span> · Rang <span> » : seul son premier
 	// nœud TEXTE porte l'icône et le libellé de vocation (le reste est déjà en data-role).
 	const classeEl = _q(card, 'classe');
@@ -4922,6 +4936,21 @@ function _sortEffetsLabel(e, prefixeDegats) {
 }
 function _sortDomId(sortId) { return sortId.replace(/[^a-zA-Z0-9_-]/g, '_'); }
 
+// Portée d'un sort, pour la fiche dépliée des DEUX listes (connus + à apprendre).
+// ⚠️ Rien pour `cible:"soi"` : se viser soi-même n'a pas de distance — même règle que
+// `compLabel` (combat_telluris.html), un seul critère dans tout le jeu.
+// ⚠️ `Math.max(1, …)` comme le moteur (`sort_portee`, utils/combat.py) : le champ `portee` est
+// ABSENT sur les sorts `cible:"soi"` et vaut alors 0 — un « portée 0 » affiché serait faux.
+// ⚠️ Pour un SORT, portée déclarée == portée EFFECTIVE : contrairement à une compétence
+// `jet:"cc"` à dés, un sort n'emprunte JAMAIS l'allonge de l'arme en main
+// (`combat._portee_competence` ne vise que les compétences). Ne pas « harmoniser » vers
+// `capaPortee`, qui n'existe qu'en combat et ajouterait une allonge qui ne s'applique pas ici.
+function _sortPorteeTexte(s) {
+	if (!s || s.cible === 'soi') return '';
+	const p = Math.max(1, s.portee || 1);
+	return p > 1 ? `📏 Portée : ${p} cases` : '📏 Portée : au contact (1 case)';
+}
+
 function _renderSorts(list) {
 	if (Array.isArray(list)) _sorts = list;
 	const box = document.getElementById('sh-sorts-connus');
@@ -4948,8 +4977,11 @@ function _renderSorts(list) {
 			? `<label class="sh-sort-uselbl" title="Engager les composants disponibles (renforce le sort ; les consommés sont dépensés)"><input type="checkbox" id="sortchk-${_sortDomId(s.sort_id)}" checked ${hasCompo ? '' : 'disabled'}>compo</label>
 			   <button type="button" class="sh-drop-btn" onclick="lancerSort('${s.sort_id}', this)">Lancer</button>`
 			: `<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>`);
-		// Sort déjà connu → sa description complète est toujours consultable (s'il y en a une).
-		const peutVoir = !!s.description;
+		// Sort déjà connu → sa fiche est toujours consultable (aucun grimoire à porter). Une
+		// portée suffit à la rendre dépliable : sans ce `||`, un sort écrit sans prose n'aurait
+		// aucun endroit où annoncer sa distance.
+		const portee = _sortPorteeTexte(s);
+		const peutVoir = !!s.description || !!portee;
 		const ouvert = peutVoir && _sortsDescOuvertes.has(s.sort_id);
 		return `<div class="sh-skill${ouvert ? ' expanded' : ''}">
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
@@ -4957,7 +4989,7 @@ function _renderSorts(list) {
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span></div>
 				<div class="sh-skill-desc">${_sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
 				${compos ? `<div class="sh-sort-compos">${compos}</div>` : ''}
-				${ouvert ? `<div class="sh-skill-full-desc">${s.description}</div>` : ''}
+				${ouvert ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${s.description || ''}</div>` : ''}
 			</div>
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;
@@ -4977,16 +5009,19 @@ function _renderSortsApprenables(list) {
 		const grim = s.grimoire_ok
 			? '<span class="sh-sort-grim" title="Grimoire porté">📖✔</span>'
 			: '<span class="sh-sort-grim" title="Il vous faut le grimoire qui enseigne ce sort (sac ou équipé)">📖✖</span>';
-		// Description consultable seulement si le grimoire enseignant est porté — sans
-		// lui, rien à débloquer avant d'avoir les moyens d'apprendre le sort.
-		const peutVoir = !!s.description && s.grimoire_ok;
+		// Fiche consultable seulement si le grimoire enseignant est porté — sans lui, rien à
+		// débloquer avant d'avoir les moyens d'apprendre le sort. ⚠️ `grimoire_ok` EN TÊTE de la
+		// conjonction : la portée n'est pas une échappatoire au verrou, elle ne fait qu'ajouter
+		// une raison de déplier une fois le grimoire en main (cas d'un sort écrit sans prose).
+		const portee = _sortPorteeTexte(s);
+		const peutVoir = s.grimoire_ok && (!!s.description || !!portee);
 		const ouvert = peutVoir && _sortsDescOuvertes.has(s.id);
 		return `<div class="sh-skill${ouvert ? ' expanded' : ''}">
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span> ${grim}</div>
 				<div class="sh-skill-desc">Niv. ${s.niveau} · ${_sortEffetsLabel(s.effets)}</div>
-				${ouvert ? `<div class="sh-skill-full-desc">${s.description}</div>` : ''}
+				${ouvert ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${s.description || ''}</div>` : ''}
 			</div>
 			<div class="sh-inv-actions">
 				<button type="button" class="sh-drop-btn" onclick="apprendreSort('${s.id}', this)" ${ok ? '' : 'disabled'}>Apprendre (${s.cout_points} pts)</button>
@@ -6578,7 +6613,7 @@ function renderFicheCompagnons(list) {
 			<strong>${r.actif ? '⚔' : '·'}</strong>
 			<div class="sh-rel-info">
 				<div class="sh-rel-name">${escapeHtml(r.prenom || '?')} ${escapeHtml(r.nom || '')}${r.actif ? ' <span style="opacity:.6;font-size:.75em">(dans le groupe)</span>' : ''}</div>
-				<div class="sh-rel-class">${escapeHtml(r.voc || '')} · ${escapeHtml(r.race || '')} · rang ${escapeHtml(r.rang || 'F')}${contrat}${vit}</div>
+				<div class="sh-rel-class">${escapeHtml(r.voc || '')} · ${escapeHtml(r.race || '')}${contrat}${vit}</div>
 			</div>
 			<div>
 				<div class="sh-rel-score ${cls}">${sc}<span style="opacity:.5;font-size:.7em">/100</span></div>
@@ -8028,8 +8063,10 @@ function _applySheetIdentite(p) {
 	const pvPct = v.pv_max ? Math.min(100, Math.round(v.currentPV / v.pv_max * 100)) : 0;
 	const pmPct = v.pm_max ? Math.min(100, Math.round(v.currentPM / v.pm_max * 100)) : 0;
 	if (els.gauche) {
+		// ⚠️ Mention de rang réservée au principal (cf. _setCardIdentite) : un compagnon n'en a pas.
 		const classe = `${_vocLabel(p.voc)} Niv.<span class="voc-niveau niveau-nb">${p.voc_niveau}</span>`
-			+ ` - ${p.race} Niv.<span class="race-niveau niveau-nb">${p.niveau}</span> · Rang ${p.rang}`;
+			+ ` - ${p.race} Niv.<span class="race-niveau niveau-nb">${p.niveau}</span>`
+			+ (p.rang ? ` · Rang ${escapeHtml(p.rang)}` : '');
 		// Mêmes ids que le gabarit Jinja : _refreshDerivedStats continue d'y écrire les max.
 		const vitals = `<span class="pv-val">PV ${v.currentPV}/<span id="stat-left-drv-pv_max">${v.pv_max}</span></span>`
 			+ `<span class="pm-val">PM ${v.currentPM}/<span id="stat-left-drv-pm_max">${v.pm_max}</span></span>`;

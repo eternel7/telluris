@@ -52,7 +52,13 @@ SLOTS_PERSONNAGE = [
 	"mains", "anneau_1", "anneau_2", "cou", "ceinture",
 ]
 
-# Rang affiché, dérivé du niveau (F = débutant, comme les quêtes générées).
+# Échelle des rangs de la GUILDE — F (Cuivre) à S+ (Adamantite), cf. la page d'accueil.
+# ⚠️ Elle n'appartient QU'AU PERSONNAGE PRINCIPAL (`character["rangs_guilde"]`, gagné par
+# les épreuves du comptoir, cf. utils/chasse.py). Une recrue, un compagnon, une monture ou
+# une personne escortée n'ont PAS de rang et n'en gagnent jamais : le rang se mérite auprès
+# d'une guilde, il ne se dérive pas d'un niveau. (Elle a longtemps été indexée par le niveau
+# de la recrue — « 1 niveau = 1 rang » —, ce que la progression décrite par le site dément :
+# le rang F couvre à lui seul les niveaux 3 à 10.)
 RANGS = ["F", "E", "D", "C", "B", "A", "S", "S+"]
 
 # Clauses de conduite types (données affichées, sans détection de violation en v1).
@@ -599,7 +605,7 @@ def generer_aventurier(guild_doc: dict, parent_doc: dict | None, niveau_max: int
 		"effets_actifs": [],
 		"or": 0, "argent": 0, "cuivre": 0,
 		"combats_recompenses": [],
-		"rang": RANGS[min(niveau, len(RANGS) - 1)],
+		# ⚠️ AUCUN `rang` : il n'appartient qu'au principal (cf. RANGS).
 		"specialite": vocation.get("blurb", ""),
 		"exigences": _tirer_exigences(niveau),
 		"genere_at": now,
@@ -1189,7 +1195,7 @@ def memo_compagnon(character: dict, av: dict) -> None:
 	connus[av["_id"]] = {
 		"prenom": av.get("prenom", ""), "nom": av.get("nom", ""),
 		"voc": av.get("voc", ""), "race": av.get("race", ""),
-		"image": av.get("image", ""), "rang": av.get("rang", "F"),
+		"image": av.get("image", ""),
 	}
 	if len(connus) > 30:
 		# Écarte les plus anciens non actifs (ordre d'insertion des dicts Python).
@@ -1237,7 +1243,6 @@ def affinites_detail_payload(character: dict, get_doc_fn=None) -> list:
 			"voc": (av or memo).get("voc", ""),
 			"race": (av or memo).get("race", ""),
 			"image": (av or memo).get("image", ""),
-			"rang": (av or memo).get("rang", "F"),
 			"affinite": affinite_de(character, av_id),
 			"actif": av_id in actifs,
 		}

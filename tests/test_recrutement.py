@@ -119,7 +119,7 @@ def test_generation_champs_miroirs(monde):
 				  "vocations_niveaux", "xp_total", "attribute_points", "inventaire",
 				  "slots", "equipment_bonus", "sorts_connus", "competences_connues",
 				  "competences_bonus", "effets_actifs", "combats_recompenses",
-				  "rang", "specialite", "exigences", "genere_at", "expire_at"):
+				  "specialite", "exigences", "genere_at", "expire_at"):
 		assert champ in av, champ
 
 
@@ -172,23 +172,24 @@ def test_generation_au_plafond_de_la_CAPITALE(monde):
 			assert compute_character_level(av["xp_total"]) == niveau
 			for k, v in av["caracteristiques_current"].items():
 				assert race["stats"][k] <= v <= race["stats_max"][k], k
-			# `rang = RANGS[min(niveau, len-1)]` : au plafond on doit encore lire un vrai cran.
-			assert av["rang"] in recrutement.RANGS
+			# ⚠️ Une recrue n'a PAS de rang : il n'appartient qu'au principal, gagné aux
+			# épreuves du comptoir. Il était jadis indexé par le niveau (« 1 niveau = 1
+			# rang »), ce que la progression du monde dément — F couvre les niveaux 3 à 10.
+			assert "rang" not in av
 			vus.add(niveau)
 	finally:
 		random.setstate(etat)
 	assert plafond in vus, "le tirage n'atteint jamais son propre plafond"
 
 
-def test_les_plafonds_de_lOFFRE_sont_ordonnes_et_dans_lechelle():
+def test_les_plafonds_de_lOFFRE_sont_ordonnes():
 	"""Invariante de réglage : une capitale offre au moins autant qu'une ville, qui offre
-	au moins autant que le défaut — et aucun plafond ne sort de l'échelle des rangs, que
-	`generer_aventurier` indexe pour poser le `rang` de la recrue."""
+	au moins autant que le défaut. ⚠️ Plus aucun lien avec l'échelle des rangs — le niveau
+	d'une recrue n'indexe plus rien, elle n'a pas de rang."""
 	table = character_stats.RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE
 	capitale, ville, defaut = table["capitale"], table["ville"], table["defaut"]
 	assert capitale["niveau_max"] >= ville["niveau_max"] >= defaut["niveau_max"] >= 0
 	assert capitale["nb"] >= ville["nb"] >= defaut["nb"] >= 1
-	assert capitale["niveau_max"] < len(recrutement.RANGS)
 
 
 def test_generation_portrait_coherent(monde):
