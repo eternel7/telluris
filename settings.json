@@ -2,18 +2,15 @@
   "env": {
     "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
   },
-
-  "model": "sonnet",
-
-  "enabledPlugins": {
-    "chrome-devtools-mcp@claude-plugins-official": true
+  "model": "opus",
+  "skillOverrides": {
+    "chrome-devtools-mcp:a11y-debugging": "off",
+    "chrome-devtools-mcp:chrome-devtools": "off",
+    "chrome-devtools-mcp:chrome-devtools-cli": "off",
+    "chrome-devtools-mcp:debug-optimize-lcp": "off",
+    "chrome-devtools-mcp:memory-leak-debugging": "off",
+    "chrome-devtools-mcp:troubleshooting": "off"
   },
-
-  "autoUpdatesChannel": "latest",
-  "autoMemoryEnabled": true,
-  "theme": "dark",
-  "agentPushNotifEnabled": true,
-
   "hooks": {
     "PostToolUse": [
       {
@@ -21,28 +18,34 @@
         "hooks": [
           {
             "type": "command",
-            "shell": "bash",
-            "command": "file=$(jq -r '.tool_input.file_path'); case \"$file\" in *.py) ruff check --fix \"$file\" ;; esac"
+            "command": "file=$(jq -r '.tool_input.file_path'); case \"$file\" in *.py) ruff check --fix \"$file\" ;; esac",
+            "shell": "bash"
           },
           {
             "type": "command",
-            "shell": "bash",
-            "command": "file=$(jq -r '.tool_input.file_path'); git diff --stat -- \"$file\""
+            "command": "file=$(jq -r '.tool_input.file_path'); git diff --stat -- \"$file\"",
+            "shell": "bash"
           }
         ]
       }
     ],
-
     "Stop": [
       {
         "hooks": [
           {
             "type": "command",
-            "shell": "bash",
-            "command": "python -m pytest -q"
+            "command": "python -m pytest -q",
+            "shell": "bash"
           }
         ]
       }
     ]
-  }
+  },
+  "enabledPlugins": {
+    "chrome-devtools-mcp@claude-plugins-official": true
+  },
+  "autoUpdatesChannel": "latest",
+  "autoMemoryEnabled": true,
+  "theme": "dark",
+  "agentPushNotifEnabled": true
 }
