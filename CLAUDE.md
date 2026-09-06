@@ -124,7 +124,7 @@ tests/                   # tests purs, un fichier par système
 
 ## Conventions transverses
 
-Douze règles qui valent **partout** ; les sections suivantes ne répètent que ce qui leur est propre.
+Règles qui valent **partout** ; les sections suivantes ne répètent que ce qui leur est propre.
 
 **1. Chokepoint `_acteur(current_user, body)`** (`routers/user.py`) → `(porteur, principal)`. Sans `compagnon_id` les deux sont le même dict (un seul `save_doc`) ; avec, le porteur est le doc `aventurier:*` ou `monture:*`. ⚠️ Ces docs **n'ont pas de `user_id`** : leur seule preuve d'appartenance est le statut + le lien vers CE personnage (`embauche`/`embauche_par`, `acquise`/`acquise_par`) via `groupe_effectif`/`montures_effectives` → **403** sinon. Côté client, **`_actionBody(extra)`** injecte le `compagnon_id`. Sauvegarde multi-docs **`_save_acteur`** : porteur **autoritatif d'abord** (409), le reste best-effort. ⚠️ **Toute action doit porter le `compagnon_id` de l'ACTEUR COURANT** — `_acteur` retombe **silencieusement sur le principal** quand le corps n'en porte pas, ce qui écrit sur le mauvais doc *et* renvoie l'état du mauvais doc, que le client affiche comme celui du compagnon. Les deux états finissent durablement mélangés. C'est la classe de bug la plus coûteuse du projet.
 
@@ -148,7 +148,17 @@ Douze règles qui valent **partout** ; les sections suivantes ne répètent que 
 
 **10. Resync de payload.** Tout endpoint qui bouge un état doit **renvoyer le bloc correspondant recalculé** (`slots`, `relations_lieux`, `caracts_detail`, `inventaire_payload`, `links`…). Le client ne reconstruit jamais un état lui-même ; sans le bloc, l'onglet reste figé sur l'état du dernier chargement de `/play` — symptôme classique et difficile à relier à sa cause.
 
-**11. Import de contenu.** Les docs de contenu vivent dans `jsons/*_a_importer.json`, chargés par la carte d'import de `/admin`. ⚠️ **`admin_import_bulk` fait un PUT COMPLET, jamais un merge** : éditer un champ oblige à reproduire tout le doc — d'où les générateurs `dev/gen_*.py`, qui relisent les docs depuis le **dump** (source unique) et n'y injectent que le champ ajouté, ce qui rend la régénération **idempotente** (une retouche faite à la main en base survit, réimporter ne peut rien annuler en silence). Le `_rev` d'un doc importé est sans effet : il est toujours réattaché depuis la base.
+**11. Import de contenu.** Les docs de contenu vivent dans `jsons/*_a_importer.json`, chargés par la carte d'import de `/admin`. ⚠️ **`admin_import_bulk` fait un PUT COMPLET, jamais un merge** : éditer un champ oblige à reproduire tout le doc — d'où les générateurs `dev/gen_*.py`, qui relisent les docs depuis le **dump** (source unique) et n'y injectent que le champ ajouté, ce qui rend la régénération **idempotente** (une retouche faite à la main en base survit, réimporter ne peut rien annuler en silence). Le `_rev` d'un doc importé est sans effet : il est toujours réattaché depuis la base. ⚠️ Avant de livrer un générateur neuf, vérifier l'absence de collision d'`_id` et rejouer le générateur contre un export récent (`telluris-dump-*.json` ou `/admin/exports/by-type`) plutôt que de le supposer correct.
+
+**12. Écriture de fichiers — jamais de heredoc shell.** Toujours passer par les outils Write/Edit pour écrire ou patcher un fichier, jamais par un heredoc shell (`cat <<EOF`) : l'échappement casse sur l'Unicode, les tabulations et les apostrophes, et bute sur les limites de spawn. ⚠️ **Fins de ligne MIXTES selon le fichier** (aucune convention uniforme dans ce dépôt, pas de `.gitattributes`) : ne jamais normaliser CRLF→LF (ni l'inverse) au passage d'une édition — préserver celles du fichier touché, quelles qu'elles soient.
+
+**13. Discipline de périmètre.** Implémenter exactement ce qui est demandé : pas de repli, de nouvel opérateur de condition, ni de lecture défensive depuis un autre type de doc (ex. un repli non demandé vers `pnj:*`) sans que ce soit explicitement demandé. Un mécanisme supplémentaire jugé nécessaire se propose et s'attend une réponse, il ne s'ajoute pas en silence.
+
+**14. La suite de tests clôt la tâche.** Après toute modification touchant le moteur, le simulateur ou un payload client, relancer `pytest` (et les harnais Node concernés si du JS a bougé, cf. § Running tests) et annoncer le nombre de tests passés avant de déclarer la tâche terminée ; si le comportement change, les tests eux-mêmes sont mis à jour dans la même passe. ⚠️ Deux pièges déjà rencontrés dans ce projet : un tirage `random` non contrôlé dans un test (le hasard doit passer par un `rand_fn`/`des_fn` injecté, cf. §Dégâts) et un dict de compagnon de fixture auquel il manque `caracteristiques_current`.
+
+**15. Vérifier le rendu après une modif template/CSS/JS**, pas seulement la relire. Trois pièges déjà pris dans ce projet, à ne pas rejouer : un calque `pointer-events:none` qui avale les clics d'un enfant qui ne le rouvre pas pour lui-même (cf. § Sur un ALLIÉ) ; un `const` capturé par `getElementById` avant que son markup n'existe dans le DOM (cf. § mode « test de déplacement ») ; un sondage qui redessine un champ de saisie en cours de frappe (cf. § Tavernes, SONDAGE).
+
+**16. Documentation compacte.** CLAUDE.md et la doc du projet restent en listes courtes, pas en prose : ne pas y restituer ce que le code dit déjà lui-même, ni ce qu'un test verrouille déjà.
 
 ## Core Design Patterns
 
