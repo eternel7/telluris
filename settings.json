@@ -1,29 +1,48 @@
 {
-	"env": {
-		"CLAUDE_CODE_USE_PYTHON_TOOL": "1",
-		"CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
-	},
-	"model": "sonnet",
-	"enableWorkflows": true,
-	"enabledPlugins": {
-		"chrome-devtools-mcp@claude-plugins-official": true
-	},
-	"autoUpdatesChannel": "latest",
-	"autoMemoryEnabled": true,
-	"theme": "dark",
-	"agentPushNotifEnabled": true,
-	"hooks": {
-		"PostToolUse": [
-			{
-				"matcher": "Edit|Write",
-				"hooks": [
-					{"type": "command", "command": "if echo \"$CLAUDE_FILE_PATHS\" | grep -q '\\.py$'; then ruff check --fix $CLAUDE_FILE_PATHS; fi"},
-					{"type": "command", "command": "git diff --stat -- $CLAUDE_FILE_PATHS | grep -q . && echo 'edited: '$CLAUDE_FILE_PATHS"}
-				]
-			}
-		],
-		"Stop": [
-			{"hooks": [{"type": "command", "command": "python -m pytest -q --timeout=300 2>&1 | tail -5"}]}
-		]
-	}
+  "env": {
+    "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
+  },
+
+  "model": "sonnet",
+
+  "enabledPlugins": {
+    "chrome-devtools-mcp@claude-plugins-official": true
+  },
+
+  "autoUpdatesChannel": "latest",
+  "autoMemoryEnabled": true,
+  "theme": "dark",
+  "agentPushNotifEnabled": true,
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "file=$(jq -r '.tool_input.file_path'); case \"$file\" in *.py) ruff check --fix \"$file\" ;; esac"
+          },
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "file=$(jq -r '.tool_input.file_path'); git diff --stat -- \"$file\""
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "python -m pytest -q --timeout=300"
+          }
+        ]
+      }
+    ]
+  }
 }
