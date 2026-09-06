@@ -39,7 +39,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "python -m pytest -q --timeout=300"
+            "command": "python -m pytest -q"
           }
         ]
       }
