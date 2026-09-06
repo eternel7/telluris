@@ -158,6 +158,39 @@ MULT_RARETE: dict[str, float] = {
 APPRO_DEBIT: dict[str, int] = {"fer": 5, "acier": 3, "bronze": 5, "mithril": 1, "herbe": 0, "seve": 0}
 APPRO_DEBIT_DEFAUT: int = 5
 
+# ── Magasins de niveau supérieur (grandes manufactures) ─────────────────────────
+# Une catégorie de lieu peut EN INCLURE d'autres : ses recettes, ce qu'elle achète au joueur
+# et ses feuilles d'approvisionnement sont l'UNION des siennes et de celles des catégories
+# incluses. Une `grande_apothicairerie` sait donc tout faire de l'apothicairerie ET du
+# jardinier, plus ses propres recettes — dont les intrants croisent plusieurs des métiers
+# réunis, ce qu'aucune boutique de base ne peut avoir en stock.
+#
+# ⚠️ Résolu À LA LECTURE des index de `utils/marche.py` (`categories_incluses`) : aucune
+# recette n'est dupliquée en base, et la table reste réglable à chaud depuis /admin — le
+# rechargement des variables de monde vide déjà `reset_prix_cache()`.
+LIEU_CATEGORIES_FUSION: dict[str, list[str]] = {
+	"grande_apothicairerie":             ["apothicairerie", "jardinier"],
+	"institut_medico_alchimique":        ["apothicairerie", "laboratoire_d_alchimie"],
+	"grand_arsenal":                     ["armurerie", "tannerie", "bourrellerie", "corderie",
+										  "fletcher", "atelier_de_l_empenneur"],
+	"grande_manufacture_du_cuir":        ["tannerie", "maroquinerie", "cordonnerie", "bourrellerie"],
+	"grande_manufacture_textile":        ["tissage", "plumasserie", "brosserie"],
+	"grandes_halles_alimentaires":       ["boucherie", "salaison", "fumoir", "cuisine"],
+	"grande_orfevrerie":                 ["bijouterie", "tabletterie"],
+	"manufacture_des_instruments":       ["lutherie", "boyauderie", "plumasserie"],
+	"grande_maison_des_arts":            ["atelier_d_artisan", "bijouterie", "tabletterie"],
+	"manufacture_des_savons_et_parfums": ["savonnerie", "apothicairerie", "atelier_de_cirier"],
+	"grand_scriptorium":                 ["scriptorium", "atelier_de_cirier"],
+	"grand_laboratoire_alchimique":      ["laboratoire_d_alchimie", "apothicairerie", "bijouterie"],
+	"institut_de_thanaturgie":           ["necromancie", "laboratoire_d_alchimie"],
+	"cabinet_des_specimens":             ["taxidermie", "plumasserie", "tabletterie"],
+	"grande_corderie":                   ["corderie", "boyauderie", "tissage"],
+	"grand_atelier_d_empennage":         ["atelier_de_l_empenneur", "plumasserie", "fletcher"],
+	"grande_boulangerie":                ["boulangerie", "cuisine"],
+	"maison_des_conserves":              ["boucherie", "salaison", "fumoir", "boulangerie"],
+}
+
+
 # ── Marchandage ─────────────────────────────────────────────────────────────────
 # Le prix d'une transaction est interpolé entre le min et le max de l'objet
 # (`valeur` à deux bornes, sinon min dérivé et max = min × PRIX_MAX_FACTEUR). Le
@@ -165,7 +198,13 @@ APPRO_DEBIT_DEFAUT: int = 5
 # de CHA_MARCHAND_PAR_CATEGORIE[lieu.categorie], sinon du global CHA_MARCHAND (un
 # champ `cha` posé sur le doc lieu le supplante).
 CHA_MARCHAND: int = 50
-CHA_MARCHAND_PAR_CATEGORIE: dict[str, int] = { "bijouterie": 70 }
+# Une grande maison marchande mieux qu'un atelier de quartier : elle réunit plusieurs métiers
+# sous un toit et n'a pas besoin de la vente. Dérivé de la table de fusion pour qu'ouvrir une
+# catégorie supérieure n'oblige jamais à penser à deux endroits.
+CHA_MARCHAND_PAR_CATEGORIE: dict[str, int] = {
+	"bijouterie": 70,
+	**{cat: 65 for cat in LIEU_CATEGORIES_FUSION},
+}
 PRIX_MAX_FACTEUR: float = 3.0
 # Marge appliquée à chaque étape de transformation (coût de revient propagé) :
 # prix_produit ≈ coût_ingrédients × (quantite_matiere / quantite_produite) × MARGE_TRANSFO.
@@ -747,6 +786,7 @@ def current_world_variables() -> dict:
 		"APPRO_DEBIT_DEFAUT": APPRO_DEBIT_DEFAUT,
 		"CHA_MARCHAND": CHA_MARCHAND,
 		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
+		"LIEU_CATEGORIES_FUSION": {k: list(v) for k, v in LIEU_CATEGORIES_FUSION.items()},
 		"PRIX_MAX_FACTEUR": PRIX_MAX_FACTEUR,
 		"MARGE_TRANSFO": MARGE_TRANSFO,
 		"RACHAT_FACTEUR": RACHAT_FACTEUR,
@@ -955,6 +995,16 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("CHA_MARCHAND_PAR_CATEGORIE"), dict):
 		CHA_MARCHAND_PAR_CATEGORIE.clear()
 		CHA_MARCHAND_PAR_CATEGORIE.update({k: int(x) for k, x in v["CHA_MARCHAND_PAR_CATEGORIE"].items()})
+	# Dict MUTÉ EN PLACE (modèle de DEPECAGE_TAGS) : `utils/marche.categories_incluses` le lit
+	# par attribut de module à chaque résolution. Les valeurs illisibles sont écartées plutôt que
+	# de faire tomber le chargement — une table vide désactive proprement la fusion.
+	if isinstance(v.get("LIEU_CATEGORIES_FUSION"), dict):
+		fusions = {}
+		for cat, incluses in v["LIEU_CATEGORIES_FUSION"].items():
+			if isinstance(incluses, (list, tuple)):
+				fusions[str(cat)] = [str(c) for c in incluses if c]
+		LIEU_CATEGORIES_FUSION.clear()
+		LIEU_CATEGORIES_FUSION.update(fusions)
 	if isinstance(v.get("DEPECAGE_TAGS"), dict):
 		DEPECAGE_TAGS.clear()
 		DEPECAGE_TAGS.update({k: list(x) for k, x in v["DEPECAGE_TAGS"].items()})

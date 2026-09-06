@@ -102,6 +102,11 @@ _cout_memo: dict[str, int] = {}
 _marche_map: dict | None = None   # {"besoins": {cat: set}, "feuilles": set} dérivé des recettes
 _recettes_all: list | None = None          # toutes les recettes (UNE lecture par process)
 _recettes_par_lieu: dict | None = None     # lieu_categorie → [recettes]
+# Fusion des catégories (magasins de niveau supérieur) : résolution et liste de recettes
+# fusionnée, mémoïsées par catégorie. ⚠️ Vidées par reset_prix_cache() comme les autres —
+# c'est ce qui rend `LIEU_CATEGORIES_FUSION` réglable à chaud depuis /admin.
+_categories_incluses_memo: dict[str, tuple] = {}
+_recettes_fusion_memo: dict[str, list] = {}
 
 
 def reset_prix_cache() -> None:
@@ -113,6 +118,8 @@ def reset_prix_cache() -> None:
 	_recettes_par_lieu = None
 	_image_route_memo = {}
 	_cout_memo.clear()
+	_categories_incluses_memo.clear()
+	_recettes_fusion_memo.clear()
 
 
 def _all_recettes() -> list:
@@ -176,13 +183,46 @@ def _get_marche_map() -> dict:
 	return _marche_map
 
 
+def categories_incluses(categorie: str) -> tuple:
+	"""La catégorie elle-même PUIS celles qu'elle inclut (`LIEU_CATEGORIES_FUSION`) — le
+	magasin de niveau supérieur, qui sait tout faire de ses métiers réunis.
+
+	Résolution TRANSITIVE (une grande maison peut en inclure une autre), dédoublonnée, à
+	l'ORDRE STABLE et la catégorie propre en tête : plusieurs appelants départagent les
+	ex æquo par « le premier gagne », et c'est le métier du lieu qui doit gagner.
+
+	⚠️ Parcours itératif avec `vus` : la table est éditable à chaud depuis /admin, une
+	inclusion circulaire ne doit pas faire boucler le premier tick venu.
+
+	⚠️ La fusion se résout ICI, À LA LECTURE — `_get_marche_map` et `_recettes_par_lieu`
+	restent indexés sur la valeur LITTÉRALE de `recette.lieu_categorie`. Aucune recette
+	n'est dupliquée en base et changer la table ne demande rien d'autre qu'un
+	`reset_prix_cache()`."""
+	if not categorie:
+		return ()
+	if categorie not in _categories_incluses_memo:
+		table = character_stats.LIEU_CATEGORIES_FUSION
+		ordre, vus, a_visiter = [], {categorie}, [categorie]
+		while a_visiter:
+			cat = a_visiter.pop(0)
+			ordre.append(cat)
+			for incluse in table.get(cat, ()):
+				if incluse and incluse not in vus:
+					vus.add(incluse)
+					a_visiter.append(incluse)
+		_categories_incluses_memo[categorie] = tuple(ordre)
+	return _categories_incluses_memo[categorie]
+
+
 def besoins_categorie(categorie: str) -> list[str]:
 	"""Clés matières consommées par les recettes de cette catégorie de lieu (sous-catégories
 	et/ou ids d'items référencés directement — ce que le marchand achète au joueur). Liste
-	triée, vide si aucune recette."""
+	triée, vide si aucune recette. Union sur `categories_incluses` : un grand magasin achète
+	tout ce qu'achètent les métiers qu'il réunit."""
 	if not categorie:
 		return []
-	return sorted(_get_marche_map()["besoins"].get(categorie, set()))
+	besoins = _get_marche_map()["besoins"]
+	return sorted(set().union(*(besoins.get(c, set()) for c in categories_incluses(categorie))))
 
 
 def appro_leaves_categorie(categorie: str) -> list[str]:
@@ -191,14 +231,17 @@ def appro_leaves_categorie(categorie: str) -> list[str]:
 	if not categorie:
 		return []
 	mm = _get_marche_map()
-	return sorted(mm["besoins"].get(categorie, set()) & mm["feuilles"])
+	besoins = set().union(*(mm["besoins"].get(c, set()) for c in categories_incluses(categorie)))
+	return sorted(besoins & mm["feuilles"])
 
 
 def produits_categorie(categorie: str) -> set:
-	"""Item_ids des biens produits par les recettes de cette catégorie de lieu."""
+	"""Item_ids des biens produits par les recettes de cette catégorie de lieu (union des
+	métiers réunis, cf. `categories_incluses`)."""
 	if not categorie:
 		return set()
-	return _get_marche_map()["produits"].get(categorie, set())
+	produits = _get_marche_map()["produits"]
+	return set().union(*(produits.get(c, set()) for c in categories_incluses(categorie)))
 
 
 def lieu_produit(lieu_doc: dict, item_doc: dict) -> bool:
@@ -837,7 +880,12 @@ def lieu_recettes(lieu_categorie: str) -> list:
 	`_recipe_map`/`_marche_map` sont DÉJÀ des caches process, donc `lieu_buys`/
 	`besoins_categorie` étaient déjà figés jusqu'à `reset_prix_cache()` ; on ne fait
 	qu'aligner `lieu_recettes` sur eux. Effet de bord positif : renvoie `[]` et non `None`
-	quand la lecture échoue (`_executer_production_batch` plantait dessus)."""
+	quand la lecture échoue (`_executer_production_batch` plantait dessus).
+
+	Un magasin de niveau supérieur cuit AUSSI les recettes des métiers qu'il réunit
+	(`categories_incluses`) : concaténation dans l'ordre — les siennes d'abord — dédoublonnée
+	par `_id`, deux métiers réunis pouvant partager une recette. Le résultat est mémoïsé : ce
+	chemin est celui des quatre sites de tick."""
 	global _recettes_par_lieu
 	if not lieu_categorie:
 		return []
@@ -848,7 +896,21 @@ def lieu_recettes(lieu_categorie: str) -> list:
 			if cat:
 				index.setdefault(cat, []).append(r)
 		_recettes_par_lieu = index
-	return _recettes_par_lieu.get(lieu_categorie, [])
+	incluses = categories_incluses(lieu_categorie)
+	if len(incluses) == 1:
+		return _recettes_par_lieu.get(lieu_categorie, [])
+	if lieu_categorie not in _recettes_fusion_memo:
+		fusion, vus = [], set()
+		for cat in incluses:
+			for r in _recettes_par_lieu.get(cat, []):
+				rid = r.get("_id")
+				if rid is not None and rid in vus:
+					continue
+				if rid is not None:
+					vus.add(rid)
+				fusion.append(r)
+		_recettes_fusion_memo[lieu_categorie] = fusion
+	return _recettes_fusion_memo[lieu_categorie]
 
 
 def _stock_vente_add(stock_vente: list, item_id: str, qty: int) -> None:

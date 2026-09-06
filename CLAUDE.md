@@ -105,7 +105,8 @@ templates/
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
   export_bestiaire.py    # export d'équilibrage (writer OOXML → utils/xlsx.py)
-  gen_marchands.py       # génère les 28 tenanciers génériques `pnj:marchand_*`
+  gen_marchands.py       # génère les tenanciers génériques `pnj:marchand_*` (une catégorie à recettes = un tenancier)
+  gen_magasins_superieurs.py # les 18 grandes manufactures de Lutèce (enseignes, portes, tenanciers, items exclusifs)
   gen_acces_donjon.py    # génère les imports de la chaîne d'accès au donjon-mine
   gen_relation_guilde.py # pose `relation_lieu` : les 4 lieux du Bastion partagent UNE cote
   gen_escorte_marchands.py # pose les nœuds d'escorte sur les 29 `pnj:marchand_*`
@@ -173,9 +174,17 @@ Pattern `type:identifier` — `user:email@example.com`, `lieu:lutecia`, `rules:r
 ### Character document vs. Pydantic model
 `models/character_document.py` = spec de référence. **Vérité = le code de création dans `routers/user.py`.** Les noms de champs diffèrent : `voc`, `sex`, `caracteristiques_standard`/`current`, `cite`.
 
+### Magasins de niveau supérieur (fusion de catégories)
+Une catégorie de lieu peut **en inclure d'autres** — `LIEU_CATEGORIES_FUSION` (variable de monde, `models/character_stats.py`) : `grande_apothicairerie` = apothicairerie + jardinier, plus ses recettes propres. Les 18 grandes maisons sont à Lutèce (`dev/gen_magasins_superieurs.py`).
+
+- **Résolu À LA LECTURE** par `marche.categories_incluses` (transitif, dédoublonné, catégorie propre EN TÊTE, garde-fou de cycle). `_get_marche_map` / `_recettes_par_lieu` restent indexés sur la valeur **littérale** de `recette.lieu_categorie` : **aucune recette n'est dupliquée en base**, et régler la table à chaud ne demande qu'un `reset_prix_cache()`.
+- Les quatre accesseurs (`besoins_categorie`, `appro_leaves_categorie`, `produits_categorie`, `lieu_recettes`) unionnent ; **aucun site d'appel n'a changé** — `lieu_buys`, `cle_matiere_lieu`, le tick, transport, scriptorium et le bouton 🏷️ suivent gratuitement.
+- ⚠️ `lieu_est_scriptorium` teste `categorie == "scriptorium"` **OU** le tag : le grand scriptorium porte `tags: ["scriptorium"]`. Même échappatoire pour `auberge`/`etable` si on les fusionne un jour.
+- ⚠️ Une recette exclusive doit être **CROISÉE** — aucun métier réuni ne doit pouvoir fournir tous ses intrants seul, sinon la grande maison n'apporte rien. Vérifié à la génération (`_metier_unique`), qui refuse d'écrire sinon.
+
 ### Cache de documents à portée REQUÊTE (`db/config.py`)
 `get_doc` était un aller-retour HTTP par appel, sans cache — une seule vente en faisait 200 à 350 (relectures répétées du même doc `item:*`). D'où **`RequestDocCacheMiddleware`**, monté dans `main.py` après le `SessionMiddleware`, qui mémorise par requête les docs de **CONTENU** (`_CACHEABLE_PREFIXES`) et exclut tout ce qui porte un état de partie (`character:`, `aventurier:`, `lieu:`, `combat:`, `quete:`…), lu/muté/sauvé dans la même requête. Hit/miss, whitelist, copie de surface, invalidation et kill-switch `TELLURIS_DOC_CACHE=0` sont couverts par `tests/test_doc_cache.py`.
 
 ⚠️ **Middleware ASGI PUR, jamais `@app.middleware("http")`** : `BaseHTTPMiddleware` exécute l'aval dans une tâche anyio distincte, ce qui casserait la propagation du `ContextVar`. ⚠️ Le `ContextVar` est posé **par le middleware et nulle part ailleurs** — `get_doc` ne fait que **muter** l'objet stocké : un endpoint `def` tourne dans le threadpool avec une **copie** du contexte, la copie partage l'objet (donc les mutations portent) mais un `set()` fait depuis le thread serait perdu.
 
-**Caches process voisins, à ne pas confondre** : `utils/marche.py` mémorise les **recettes** (`_all_recettes` → `_recipe_map` / `_marche_map` / `lieu_recettes`, une lecture par process) et la **route d'image d'un lieu** (`_lieu_image_route`, mémo par nom de fichier — aucun endpoint d'upload n'existe, le disque ne bouge pas à chaud). Vidés par **`reset_prix_cache()`**, appelé au chargement des variables de monde **et** en fin d'`admin_import_bulk` / `PUT /admin/doc` quand un doc `type ∈ {recette, item}` est écrit — sans quoi importer une recette n'avait aucun effet visible.
+**Caches process voisins, à ne pas confondre** : `utils/marche.py` mémorise les **recettes** (`_all_recettes` → `_recipe_map` / `_marche_map` / `lieu_recettes`, une lecture par process), la **fusion des catégories** (`_categories_incluses_memo` / `_recettes_fusion_memo`) et la **route d'image d'un lieu** (`_lieu_image_route`, mémo par nom de fichier — aucun endpoint d'upload n'existe, le disque ne bouge pas à chaud). Vidés par **`reset_prix_cache()`**, appelé au chargement des variables de monde **et** en fin d'`admin_import_bulk` / `PUT /admin/doc` quand un doc `type ∈ {recette, item}` est écrit — sans quoi importer une recette n'avait aucun effet visible.

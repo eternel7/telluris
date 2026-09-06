@@ -1,0 +1,5 @@
+Images de lieu à dessiner pour l'import magasins_superieurs_a_importer.json
+Dossier cible : templates/resources/towns/
+==============================================================================
+
+Aucune : toutes les images référencées existent déjà.

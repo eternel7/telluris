@@ -125,7 +125,9 @@ All share `_id: rules:<name>`, `type: "rules"`, and wrap their real payload in o
 - `rules:races` — `value[]` of `{id, label, icon, stats, stats_max, max_bonus, trait}`.
 - `rules:races_proximity` / `rules:vocations_proximity` — `value{<id>: [<related ids>]}`.
 - `rules:vocations` — `value[]` of `{id, label, icon, img, magie, blurb, equipement_de_base[]}`.
-- `rules:world_variables` — `value{<VAR_NAME>: <value>}`, ~116 keys; see CLAUDE.md "Variables de
+- `rules:world_variables` — `value{<VAR_NAME>: <value>}`, ~117 keys (incl. `LIEU_CATEGORIES_FUSION`,
+  the superior-shop table: a `lieu.categorie` that *includes* others, resolved at read time by
+  `utils/marche.categories_incluses` — no recipe is ever duplicated in the DB); see CLAUDE.md "Variables de
   monde réglables" (now in `.claude/skills/telluris-admin-tools/`) for the full catalogue.
 - ⚠️ **Stale doc reference, not a live field**: CLAUDE.md's "Character document vs. Pydantic
   model" note names `caracteristiques_standard` as a real (if divergent) field. It appears in

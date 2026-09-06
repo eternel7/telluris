@@ -151,6 +151,56 @@
 	#legend-card.collapsed .legend { display: none; }
 	#legend-card.collapsed .card-title-row { margin-bottom: 0; }
 
+	/* --- MINI-OUTILS FLOTTANTS --- */
+	/* Replier le panneau agrandit la carte mais retire le sélecteur de mode ET le pinceau : on ne
+	   pouvait plus peindre sans le redéployer. Cet overlay les rend, réduits aux deux modes qui
+	   peignent une cellule (Terrain / Navigation) — Zones, Rencontres, Ressources et Lieux ont des
+	   listes et des formulaires entiers, ils n'ont rien à faire dans une vignette.
+	   ⚠️ Il ne DOUBLE aucun état : ses boutons portent les mêmes classes `.val-btn` / `.dir-btn`
+	   que ceux du panneau et appellent les mêmes fonctions ; `syncMiniOutils` recopie l'état.
+	   ⚠️ Il reste affiché PENDANT le test de déplacement, qui masque tout le panneau de gauche :
+	   c'est là qu'on voit qu'une case est mal peinte, et c'est donc là qu'on veut la corriger. */
+	#mini-outils {
+		position: fixed;
+		z-index: 100;
+		top: 96px; right: 18px;
+		width: 186px;
+		box-sizing: border-box;
+		background: var(--panel);
+		border: 1px solid var(--accent);
+		border-radius: 6px;
+		padding: 8px;
+		box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+	}
+	/* Même piège que #dim-card : le `display` d'auteur l'emporterait sur le [hidden] du navigateur. */
+	#mini-outils[hidden] { display: none; }
+	.mini-head {
+		display: flex; align-items: center; gap: 6px;
+		cursor: move; user-select: none;
+		font-family: 'Cinzel', serif; font-size: 0.62rem;
+		letter-spacing: 0.1em; text-transform: uppercase;
+		color: var(--accent);
+		margin-bottom: 8px;
+	}
+	.mini-modes { display: flex; gap: 6px; margin-bottom: 8px; }
+	.mini-mode-btn {
+		flex: 1; min-width: 0; padding: 5px 3px;
+		border: 1px solid var(--border); border-radius: 4px;
+		background: #0d0f14; color: var(--muted);
+		font-size: 0.64rem; cursor: pointer;
+		transition: all 0.15s;
+	}
+	.mini-mode-btn:hover { border-color: var(--accent); color: var(--accent); }
+	.mini-mode-btn.active {
+		border-color: var(--accent); color: var(--accent);
+		background: rgba(200,168,75,0.18);
+	}
+	#mini-terrain[hidden], #mini-nav[hidden] { display: none; }
+	#mini-outils .value-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 0; }
+	#mini-outils .val-btn { font-size: 0.78rem; }
+	#mini-outils .dir-grid { grid-template-columns: repeat(3, 34px); gap: 4px; margin-bottom: 0; }
+	#mini-outils .dir-btn { font-size: 0.9rem; }
+
 	.card {
 		background: var(--panel);
 		border: 1px solid var(--border);
@@ -641,7 +691,9 @@ body.mode-deplacement #left-panel,
 body.mode-deplacement #bm-card,
 body.mode-deplacement #legend-card { display: none; }
 body.mode-deplacement .main { grid-template-columns: 1fr; }
-body.mode-deplacement #grid-canvas { cursor: default; }
+/* ⚠️ Le curseur reste le `crosshair` de l'éditeur : depuis que les mini-outils flottants
+   restent offerts pendant le test, la carte se PEINT toujours en Terrain et en Navigation.
+   Un curseur de simple flèche annoncerait le contraire. */
 
 {{ movepanel.move_panel_css('.dep-section', '.dep-controls', flottant=true) }}
 /* ⚠️ z-index 100 (posé par la macro) : l'overlay reste SOUS la fiche de lieu (200) et sous
@@ -976,6 +1028,41 @@ body.mode-deplacement #grid-canvas { cursor: default; }
 	</div>
 </div>
 
+<!-- Mini-outils : le sélecteur de mode et le pinceau quand le panneau de gauche est replié.
+     Même contrainte de placement que #dep-section ci-dessus — ses éléments sont capturés en
+     `const` à l'évaluation du script, donc il doit exister AVANT. Position `fixed` : sa place
+     dans le DOM n'a aucun effet visuel. -->
+<div id="mini-outils" hidden>
+	<div class="mini-head" id="mini-head" title="Glisser pour déplacer">⠿ Outils</div>
+	<div class="mini-modes">
+		<button class="mini-mode-btn" data-mode="terrain">Terrain</button>
+		<button class="mini-mode-btn" data-mode="nav">Navigation</button>
+	</div>
+	<div id="mini-terrain" hidden>
+		<div class="value-grid" id="mini-val-grid">
+			<button class="val-btn" data-val="0">0</button>
+			<button class="val-btn" data-val="1">1</button>
+			<button class="val-btn" data-val="2">2</button>
+			<button class="val-btn" data-val="3">3</button>
+			<button class="val-btn" data-val="5">5</button>
+			<button class="val-btn" data-val="9">∞</button>
+		</div>
+	</div>
+	<div id="mini-nav" hidden>
+		<div class="dir-grid" id="mini-dir-grid">
+			<button class="dir-btn" data-bit="7">↖</button>
+			<button class="dir-btn" data-bit="0">↑</button>
+			<button class="dir-btn" data-bit="1">↗</button>
+			<button class="dir-btn" data-bit="6">←</button>
+			<button class="dir-btn center"></button>
+			<button class="dir-btn" data-bit="2">→</button>
+			<button class="dir-btn" data-bit="5">↙</button>
+			<button class="dir-btn" data-bit="4">↓</button>
+			<button class="dir-btn" data-bit="3">↘</button>
+		</div>
+	</div>
+</div>
+
 <!-- ⚠️ nav.js D'ABORD : `pasAutoriseLocal` y prend `navAllows`, dont la vérification est
      BIDIRECTIONNELLE (source ET cible). Cette page recopiait jusqu'ici la table `VALID_MOVES`
      sous le nom `NAV_DIRS` pour le seul redimensionnement ; les règles de MARCHE, elles, ne
@@ -1114,7 +1201,68 @@ const leftPanelEl		= document.getElementById('left-panel');
 const leftPanelToggleBtn	= document.getElementById('left-panel-toggle-btn');
 leftPanelToggleBtn.dataset.titreFermer = 'Réduire le panneau';
 leftPanelToggleBtn.dataset.titreOuvrir = 'Déployer le panneau';
-leftPanelToggleBtn.addEventListener('click', () => togglePanel(leftPanelEl, leftPanelToggleBtn, '◀', '▶'));
+leftPanelToggleBtn.addEventListener('click', () => {
+	togglePanel(leftPanelEl, leftPanelToggleBtn, '◀', '▶');
+	syncMiniOutils();
+});
+
+// ── MINI-OUTILS FLOTTANTS ──────────────────────────────────────────────────
+// Panneau replié = plus de sélecteur de mode ni de pinceau. Cet overlay les rend pour les deux
+// modes qui peignent une cellule. ⚠️ Il n'a AUCUN état à lui : `editMode`, `selectedVal` et
+// `navMask` restent les seules variables, ses boutons appellent les mêmes fonctions que ceux du
+// panneau, et `syncMiniOutils` ne fait que recopier l'état dans les classes `.active`.
+const miniOutilsEl	= document.getElementById('mini-outils');
+const miniHeadEl	= document.getElementById('mini-head');
+const miniTerrainEl	= document.getElementById('mini-terrain');
+const miniNavEl		= document.getElementById('mini-nav');
+const miniValGrid	= document.getElementById('mini-val-grid');
+const miniDirGrid	= document.getElementById('mini-dir-grid');
+
+// Les DEUX situations où le panneau de gauche n'est plus là : replié à la main, ou masqué par le
+// mode test. Le sélecteur de mode est toujours offert (sinon, entré en Zones puis replié, on ne
+// pourrait plus revenir au pinceau) ; seul le sélecteur de valeurs suit le mode courant.
+function syncMiniOutils() {
+	const visible = leftPanelEl.classList.contains('collapsed') || modeDeplacement;
+	miniOutilsEl.hidden = !visible;
+	if (!visible) return;
+	miniTerrainEl.hidden = editMode !== 'terrain';
+	miniNavEl.hidden     = editMode !== 'nav';
+	miniOutilsEl.querySelectorAll('.mini-mode-btn')
+		.forEach(b => b.classList.toggle('active', b.dataset.mode === editMode));
+	marquerValActive(selectedVal);
+	updateDirButtons(navMask);
+}
+
+miniOutilsEl.querySelectorAll('.mini-mode-btn').forEach(btn => {
+	// ⚠️ Contrairement à `#mode-select`, ce geste-ci NE FERME PAS le test de déplacement : c'est
+	// même sa raison d'être — corriger une case en marchant dessus, sans perdre le jeton ni
+	// avoir à relancer un placement.
+	btn.addEventListener('click', () => setMode(btn.dataset.mode));
+});
+
+// Déplacement à la souris. La position par défaut est en `top/right` (coin haut-droit de la
+// carte) ; au premier glisser on bascule en `top/left`, `right` remis à `auto` — sans quoi les
+// deux contraintes horizontales se battraient et le panneau s'étirerait au lieu de bouger.
+let miniDrag = null;   // { dx, dy } écart pointeur → coin haut-gauche
+miniHeadEl.addEventListener('pointerdown', e => {
+	const r = miniOutilsEl.getBoundingClientRect();
+	miniDrag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+	miniOutilsEl.style.right = 'auto';
+	miniOutilsEl.style.left = r.left + 'px';
+	miniOutilsEl.style.top = r.top + 'px';
+	miniHeadEl.setPointerCapture(e.pointerId);
+	e.preventDefault();
+});
+miniHeadEl.addEventListener('pointermove', e => {
+	if (!miniDrag) return;
+	// Borné à la fenêtre : lâché hors écran, la poignée deviendrait inatteignable.
+	const maxX = window.innerWidth  - miniOutilsEl.offsetWidth;
+	const maxY = window.innerHeight - miniOutilsEl.offsetHeight;
+	miniOutilsEl.style.left = Math.max(0, Math.min(maxX, e.clientX - miniDrag.dx)) + 'px';
+	miniOutilsEl.style.top  = Math.max(0, Math.min(maxY, e.clientY - miniDrag.dy)) + 'px';
+});
+miniHeadEl.addEventListener('pointerup',     () => { miniDrag = null; });
+miniHeadEl.addEventListener('pointercancel', () => { miniDrag = null; });
 
 const legendCardEl		= document.getElementById('legend-card');
 const legendToggleBtn	= document.getElementById('legend-toggle-btn');
@@ -1692,8 +1840,13 @@ function cellAt(e) {
 	return {cx, cy};
 }
 
+// Ce qu'on a le droit de peindre PENDANT le test de déplacement : les deux seuls modes que les
+// mini-outils flottants savent piloter. Les quatre autres ont des panneaux entiers — listes,
+// formulaires, overlay JSON — que le mode test masque : leur clic canvas n'aurait plus d'interface.
+function editionPendantTest() { return editMode === 'terrain' || editMode === 'nav'; }
+
 function paint(e) {
-	if (modeDeplacement) return;   // ceinture : le mode test ne peint jamais
+	if (modeDeplacement && !editionPendantTest()) return;
 	const c = cellAt(e);
 	if (!c) return;
 	const {cx, cy} = c;
@@ -1758,16 +1911,25 @@ function paint(e) {
 	}
 }
 
-// ⚠️ Le drapeau `modeDeplacement` sort en tête des CINQ écouteurs, pas seulement de `paint` :
-// un clic écrirait du terrain sous le jeton (avec l'auto-sauvegarde derrière), et `mousemove`
-// réécrit `setStatus` à chaque pixel — il écraserait les messages du mode test.
-canvas.addEventListener('mousedown', e => {
-	if (modeDeplacement || !grid.length) return;
-	isPainting = true;
+// ⚠️ La carte vient peut-être de changer SOUS le jeton : les flèches du test se recalculent
+// (`depPasAutorise` relit `grid`/`nav` à chaque appel), sinon elles resteraient sur les règles
+// d'avant la retouche — or c'est exactement ce qu'on est venu vérifier en peignant.
+function paintEtTest(e) {
 	paint(e);
+	if (modeDeplacement) depMajFleches();
+}
+
+// ⚠️ Le drapeau `modeDeplacement` sort en tête des écouteurs, pas seulement de `paint` — mais il
+// n'interdit plus que ce qu'il doit : les modes SANS interface pendant le test (`editionPendantTest`)
+// et le `setStatus` de survol, qui réécrit à chaque pixel et effacerait les messages du mode test.
+// Terrain et Navigation, eux, peignent en marchant.
+canvas.addEventListener('mousedown', e => {
+	if (!grid.length) return;
+	if (modeDeplacement && !editionPendantTest()) return;
+	isPainting = true;
+	paintEtTest(e);
 });
 canvas.addEventListener('mousemove', e => {
-	if (modeDeplacement) return;
 	const c = cellAt(e);
 	const prev = hoverCell;
 	hoverCell = c;
@@ -1776,6 +1938,10 @@ canvas.addEventListener('mousemove', e => {
 		renderGrid();
 	}
 	if (!isPainting) {
+		// Le survol RENSEIGNE, il n'agit pas — et pendant le test de déplacement, la barre de
+		// statut appartient au jeton : on garde le surlignage de case (rendu plus haut) et on se
+		// tait.
+		if (modeDeplacement) return;
 		// ⚠️ `grid[c.cy]` peut ne pas exister : `cellAt` borne sur `cols`/`rows`, c'est-à-dire sur
 		// `dimensions` — or sur un doc où `dimensions` dépasse `cells`, survoler la carte levait.
 		// Même classe de défaut que celle déjà colmatée dans renderGrid/paint/_caseAccessible.
@@ -1790,30 +1956,41 @@ canvas.addEventListener('mousemove', e => {
 		return;
 	}
 	if (editMode === 'lieux') return; // click-only, pas de sélection au drag
-	paint(e);
+	paintEtTest(e);
 });
 canvas.addEventListener('mouseup',		() => { isPainting = false; });
 canvas.addEventListener('mouseleave', () => { isPainting = false; hoverCell = null; if (grid.length) renderGrid(); });
 
 // Touch support
-canvas.addEventListener('touchstart', e => { if (modeDeplacement) return; e.preventDefault(); isPainting = true; paint(e.touches[0]); }, {passive:false});
-canvas.addEventListener('touchmove',	e => { if (modeDeplacement) return; e.preventDefault(); if (editMode === 'lieux') return; paint(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchstart', e => { if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); isPainting = true; paintEtTest(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchmove',	e => { if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); if (editMode === 'lieux') return; paintEtTest(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchend',	 () => { isPainting = false; });
 
 // ── VALUE SELECTION ────────────────────────────────────────────────────────
-valGrid.addEventListener('click', e => {
+// ⚠️ Le pinceau a DEUX jeux de boutons (le panneau et les mini-outils flottants) : marquer
+// l'actif se fait donc par la VALEUR sur tous les `.val-btn`, jamais sur le seul bouton cliqué —
+// son jumeau resterait sinon allumé sur l'ancienne valeur. Une valeur libre (« autre… »)
+// n'appartient à aucun bouton : tous s'éteignent, comme avant.
+function marquerValActive(v) {
+	document.querySelectorAll('.val-btn')
+		.forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === v));
+}
+
+function onValGridClick(e) {
 	const btn = e.target.closest('.val-btn');
 	if (!btn) return;
-	selectVal(parseInt(btn.dataset.val));
-	document.querySelectorAll('.val-btn').forEach(b => b.classList.remove('active'));
-	btn.classList.add('active');
-});
+	const v = parseInt(btn.dataset.val);
+	selectVal(v);
+	marquerValActive(v);
+}
+valGrid.addEventListener('click', onValGridClick);
+miniValGrid.addEventListener('click', onValGridClick);
 
 customBtn.addEventListener('click', () => {
 	const v = parseInt(customInput.value);
 	if (isNaN(v)) return;
 	selectVal(v);
-	document.querySelectorAll('.val-btn').forEach(b => b.classList.remove('active'));
+	marquerValActive(v);
 });
 
 function selectVal(v) {
@@ -1841,6 +2018,7 @@ function setMode(mode) {
 	if (mode === 'lieux') { lieuxSelectedCell = null; lieuxJsonOuvert = null; lieuxJsonDest = null; renderLieuJsonOverlay(); fetchLieuxConnections(); renderLieuxConnList(); }
 	if (mode !== 'nav') navSelectedCell = null;
 	updateLegend();   // la légende explique le mode COURANT : terrain ailleurs, couleurs des points en Lieux
+	syncMiniOutils(); // l'overlay suit le mode courant (pinceau affiché ou non)
 	if (grid.length) renderGrid();
 }
 modeSelect.addEventListener('change', (e) => {
@@ -3044,22 +3222,26 @@ zoneFormeEl.addEventListener('change', () => updateSelectedZone('forme', zoneFor
 zoneSelect.addEventListener('change', () => updateSelectedZone('zone', zoneSelect.value));
 
 // ── DIR BUTTONS ────────────────────────────────────────────────────────────
+// ⚠️ `document` et non `dirGrid` : la rose des vents existe en double depuis les mini-outils
+// flottants, et les deux affichent le MÊME `navMask`.
 function updateDirButtons(mask) {
 	navMask = mask;
-	dirGrid.querySelectorAll('.dir-btn[data-bit]').forEach(btn => {
+	document.querySelectorAll('.dir-btn[data-bit]').forEach(btn => {
 		const bit = parseInt(btn.dataset.bit);
 		btn.classList.toggle('active', !!(mask & (1 << bit)));
 	});
 }
 
-dirGrid.addEventListener('click', e => {
+function onDirGridClick(e) {
     const btn = e.target.closest('.dir-btn[data-bit]');
     if (!btn) return;
     const bit = parseInt(btn.dataset.bit);
     navMask ^= (1 << bit); // toggle indépendamment de la cellule sélectionnée
     updateDirButtons(navMask);
     navInfo.textContent = `Masque : ${navMask} (${navMask.toString(2).padStart(8,'0')})`;
-});
+}
+dirGrid.addEventListener('click', onDirGridClick);
+miniDirGrid.addEventListener('click', onDirGridClick);
 
 navClearBtn.addEventListener('click', () => {
     navMask = 0;
@@ -3645,7 +3827,9 @@ async function ouvrirModeDeplacement() {
 	document.body.classList.add('mode-deplacement');
 	depSection.hidden = false;
 	depCombatEl.checked = depReglesCombat;
-	canvas.style.cursor = 'default';
+	// Le panneau de gauche disparaît : les mini-outils prennent le relais, on continue de peindre
+	// le terrain et les murs de nav sans quitter le jeton.
+	syncMiniOutils();
 	// La largeur du conteneur change (le panneau de gauche disparaît) : la grille se redessine.
 	renderGrid();
 	depPos = null;
@@ -3663,6 +3847,7 @@ function fermerModeDeplacement() {
 	depArriveeAttendue = null;
 	depPortesEl.innerHTML = '';
 	canvas.style.cursor = '';
+	syncMiniOutils();                // le panneau de gauche revient : l'overlay ne reste que s'il est replié
 	if (grid.length) renderGrid();   // la carte reprend le rendu de son mode d'édition
 }
 

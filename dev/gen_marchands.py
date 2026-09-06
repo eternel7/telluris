@@ -69,7 +69,42 @@ METIERS = {
 	"tannerie":             ("Maître Rufin", "le tanneur", "L'odeur du tan prend à la gorge."),
 	"taxidermie":           ("Maître Sylvain", "le taxidermiste", "Des regards de verre vous suivent depuis les étagères."),
 	"tissage":              ("Dame Guillemette", "la tisserande", "Le métier à tisser bat une mesure obstinée."),
+
+	# Les GRANDES MAISONS (cf. `character_stats.LIEU_CATEGORIES_FUSION`, posées à Lutèce par
+	# dev/gen_magasins_superieurs.py). Elles apparaîtront d'elles-mêmes dans
+	# `categories_marchandes()` dès que leurs recettes exclusives seront en base : sans
+	# entrée ici, leur tenancier hériterait du repli anonyme « Le tenancier ».
+	"grande_apothicairerie":             ("Dame Ysabeau de Lutèce", "le maître apothicaire", "Le jardin d'en bas monte jusqu'aux bocaux du haut sans passer par la rue."),
+	"institut_medico_alchimique":        ("Docte Ancelin", "le médecin alchimiste", "Des lits d'observation voisinent avec les alambics, ce qui rassure peu."),
+	"grand_arsenal":                     ("Maître Gerbaud", "le maître d'arsenal", "Enclumes, tréteaux de sellier et bancs de corderie sous une seule charpente."),
+	"grande_manufacture_du_cuir":        ("Dame Aliénor la Corroyeuse", "le maître mégissier", "La peau entre crue d'un bout et ressort bottée de l'autre."),
+	"grande_manufacture_textile":        ("Dame Sibylle", "le maître drapier", "Cent métiers battent ensemble ; on se parle à l'oreille."),
+	"grandes_halles_alimentaires":       ("Maître Eudes", "le maître des halles", "Le billot, le saloir et le fourneau se passent la marchandise sans qu'elle refroidisse."),
+	"grande_orfevrerie":                 ("Maître Ambroise", "le maître orfèvre", "L'or et l'os attendent leur tour sous la même loupe."),
+	"manufacture_des_instruments":       ("Maître Jocelin", "le maître facteur d'instruments", "Des tables d'harmonie sèchent au-dessus des bacs à boyau."),
+	"grande_maison_des_arts":            ("Dame Mahaut de Lutèce", "le maître des arts", "On y taille, on y sertit et on y polit dans la même salle."),
+	"manufacture_des_savons_et_parfums": ("Dame Constance", "le maître parfumeur", "L'odeur change trois fois entre la porte et le comptoir."),
+	"grand_scriptorium":                 ("Frère Odilon", "le maître copiste", "Les cierges de l'atelier voisin brûlent au-dessus de chaque pupitre."),
+	"grand_laboratoire_alchimique":      ("Maître Vulcain", "le grand alchimiste", "Les creusets sont montés sur pied d'orfèvre ; on ne sait plus si l'on fond ou si l'on sertit."),
+	"institut_de_thanaturgie":           ("Docte Sereine", "le thanaturge", "On y parle des morts comme d'un procédé, ce qui met mal à l'aise."),
+	"cabinet_des_specimens":             ("Maître Théobald", "le conservateur", "Chaque vitrine vous regarde passer, et aucune ne cligne."),
+	"grande_corderie":                   ("Maître Herbert", "le maître cordier", "La longère file sur quarante toises, boyau et chanvre commis ensemble."),
+	"grand_atelier_d_empennage":         ("Le vieux Garin", "le maître empenneur", "Des plumes triées par teinte, par poids, et par ce que l'on veut abattre."),
+	"grande_boulangerie":                ("Maître Robert", "le maître boulanger", "Deux fours, un fourneau, et de quoi nourrir un quartier avant matines."),
+	"maison_des_conserves":              ("Dame Berthe", "le maître conservateur", "Rien ne s'y perd : ce qui ne se vend pas frais y entre en pot."),
 }
+
+
+def portrait_de(categorie: str) -> str:
+	"""Portrait générique d'un tenancier, choisi dans PORTRAITS de façon STABLE.
+
+	⚠️ La rotation d'origine indexait sur le rang de la catégorie dans la liste TRIÉE
+	(`PORTRAITS[i % len(PORTRAITS)]`) : ouvrir un métier de plus décalait le rang de presque
+	tous les autres, et régénérer le fichier réattribuait le portrait des tenanciers déjà en
+	base — une dérive muette, d'autant plus que l'entrée `pnj[]` du lieu surcharge souvent le
+	portrait et masque le symptôme. On indexe donc sur le NOM de la catégorie : ajouter un
+	métier ne touche plus à ceux qui existent."""
+	return PORTRAITS[sum(ord(c) for c in categorie) % len(PORTRAITS)]
 
 # Nœuds du service `transport` — mêmes ids pour tous les marchands (le router ne fait que
 # les router, ils sont déclarés dans `services.transport.noeuds`).
@@ -331,7 +366,7 @@ def categories_marchandes() -> list:
 
 def main() -> None:
 	docs = []
-	for i, cat in enumerate(categories_marchandes()):
+	for cat in categories_marchandes():
 		nom, metier, ambiance = METIERS.get(
 			cat, (f"Le tenancier", "le marchand", "La boutique sent le travail bien fait.")
 		)
@@ -346,7 +381,7 @@ def main() -> None:
 			"nom": nom,
 			"race": "humain",
 			"vocation": "marchand",
-			"portrait": PORTRAITS[i % len(PORTRAITS)],
+			"portrait": portrait_de(cat),
 			"services": {
 				"transport": {"noeuds": dict(NOEUDS_TRANSPORT)},
 				"escorte": {"noeuds": dict(NOEUDS_ESCORTE)},

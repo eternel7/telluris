@@ -234,6 +234,19 @@ CATALOGUE = [
 			"qui manque : relancer sur un dump plus récent est idempotent.",
 	},
 	{
+		"id": "gen_magasins_superieurs",
+		"label": "🏛️ Générer les grandes manufactures de Lutèce",
+		"argv": _py("gen_magasins_superieurs.py"),
+		"ecrit": "Écrit jsons/magasins_superieurs_a_importer.json (+ la liste des images manquantes).",
+		"description": "Les 18 magasins de niveau supérieur : enseignes, portes, tenanciers et "
+			"items exclusifs. La FUSION des métiers n'est pas écrite ici — elle vit dans la "
+			"variable de monde LIEU_CATEGORIES_FUSION et se résout à la lecture. ⚠️ Le script "
+			"rebranche db.config sur le dump avant d'importer utils.marche : il REFUSE d'écrire "
+			"une recette dont un métier réuni ferait tout à lui seul, ou dont un intrant est "
+			"hors de portée de la maison. Le rapport dit, recette par recette, ce qui arrive au "
+			"rayon sans le joueur.",
+	},
+	{
 		"id": "gen_matieres_generiques_bois",
 		"label": "🪵 Générer les matières génériques de bois",
 		"argv": _py("gen_matieres_generiques_bois.py"),
@@ -283,6 +296,23 @@ CATALOGUE = [
 		"danger": True,
 		"description": "One-shot destiné à solder l'arriéré. Seules les quêtes source=genere "
 			"sont supprimées ; une quête AUTHORÉE n'est jamais touchée.",
+	},
+	{
+		"id": "audit_economy",
+		"label": "⚖️ Audit économique — recettes, rayons, marges",
+		# `--dernier` et pas un chemin figé : l'argv d'une entrée est écrit ICI, en dur, et
+		# `Popen` ne branche aucun stdin — le bouton ne peut donc pas poser la question que le
+		# script pose en CLI (sans dump il sortirait en code 2). Le rapport nomme en tête le
+		# dump retenu : le choix est automatique, il n'est pas caché.
+		"argv": _py("audit_economy.py", "--dernier"),
+		"ecrit": "Lecture seule. Lit le dump le plus récent de jsons/, jamais la base.",
+		"description": "Trois indicateurs d'équilibrage : part des items qu'aucune recette "
+			"atteignable ne produit, part des recettes dont le produit n'entre jamais en rayon "
+			"(et les matières qui les bloquent), marge médiane d'un objet fabriqué. Rebranche "
+			"`db.config` sur le dump avant d'importer `utils.marche` : les prix et coûts de "
+			"revient sortent du moteur du jeu, pas d'une réimplémentation. ⚠️ Hypothèses de "
+			"référence documentées en tête de dev/audit_economy.py (A à F) — notamment « en "
+			"rayon » = sans le joueur ravitailleur.",
 	},
 	{
 		"id": "pytest",
