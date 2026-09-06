@@ -36,6 +36,10 @@ sub-category/name keys, is used to look one up).
 `_id: recette:<uuid>`.
 - **Required**: `lieu_categorie`, `objet_final` (sous-catégorie key, not an `item:` id — resolved via
   `matiere_item_id`), `quantite_produite`, `type`.
+- **Optional**: `lieu_portee -> lieu` — geographic scope: the recipe is only cooked by shops whose
+  `lieu_parent` ancestor chain reaches that lieu (`utils/marche.portees_lieu`). Absent ⇒ worldwide,
+  the pre-existing behaviour. Note the cities now carry `lieu_parent: "lieu:france"` so that a
+  country-wide scope resolves at all.
 - **Optional, two mutually-exclusive input shapes**: list form `matieres_premieres[].{item ->
   item (32%) | sous_categorie (58%), quantite}` (82% of recettes), or legacy single-entry form
   `matiere_premiere_sous_categorie` + `quantite_matiere` (18%) — both read by `utils/marche.py`.

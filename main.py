@@ -50,7 +50,7 @@ from utils import lint_dialogues
 from utils import dev_tools
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
-from utils.marche import tick_atelier, reset_prix_cache, besoins_categorie, appro_leaves_categorie, relations_lieux_payload
+from utils.marche import tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu, relations_lieux_payload
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
@@ -68,7 +68,10 @@ logger.propagate = False
 
 # Types de docs dont l'écriture périme les caches process de `utils/marche.py`
 # (coût de revient, besoins/feuilles dérivés des recettes, recettes par catégorie).
-_TYPES_PRIX = {"recette", "item"}
+# ⚠️ `lieu` en fait partie depuis la PORTÉE GÉOGRAPHIQUE des recettes : la chaîne d'ancêtres
+# `lieu_parent` est mémoïsée (`marche.portees_lieu`), donc rebrancher une cité depuis /admin
+# doit périmer le mémo — sans quoi le changement reste sans effet jusqu'au redémarrage.
+_TYPES_PRIX = {"recette", "item", "lieu"}
 
 
 @app.on_event("startup")
@@ -591,7 +594,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# matière/produits en stock OU un approvisionnement configuré pour la catégorie (sinon le lieu
 	# ne pourrait jamais s'amorcer) ; on ne persiste que si quelque chose a changé.
 	if grid_doc and (grid_doc.get("stock_matieres") or grid_doc.get("stock_vente")
-			or appro_leaves_categorie(grid_doc.get("categorie"))):
+			or appro_leaves_lieu(grid_doc)):
 		# Recettes passées explicitement, comme sell_item / convertir_apres_achat. Un
 		# scriptorium y ajoute son petit lot de recettes VIRTUELLES (sort/recette/carte),
 		# scopées à SON lieu_parent — cf. utils/scriptorium.recettes_effectives.
@@ -825,7 +828,7 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# Texte d'ambiance libre porté par le doc `lieu:*` (champ `texte`) : affiché en tête
 			# de la sidebar, au-dessus des Actions et des Lieux. Champ absent = rien de rendu.
 			"lieu_texte": grid_doc.get("texte"),
-			"achat_sous_categories": besoins_categorie(grid_doc.get("categorie")),
+			"achat_sous_categories": besoins_lieu(grid_doc),
 			"est_guilde": est_guilde,
 			"est_recrutement": est_recrutement,
 			"lieu_de_guilde": lieu_de_guilde,

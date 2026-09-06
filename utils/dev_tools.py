@@ -234,6 +234,18 @@ CATALOGUE = [
 			"qui manque : relancer sur un dump plus récent est idempotent.",
 	},
 	{
+		"id": "gen_specialites_france",
+		"label": "🥐 Générer les spécialités de terroir (recettes portées)",
+		"argv": _py("gen_specialites_france.py"),
+		"ecrit": "Écrit jsons/specialites_france_a_importer.json.",
+		"description": "Dix spécialités françaises de fournil et de cuisine, portées par un "
+			"lieu (`recette.lieu_portee`) : elles ne se cuisent que sous ce lieu, la remontée "
+			"se faisant par `lieu_parent`. ⚠️ Rattache aussi les trois cités à `lieu:france` — "
+			"sans quoi la chaîne s'arrête à la ville et aucune portée « pays » n'aboutit. Le "
+			"script REFUSE d'écrire une recette portée par un lieu sans atelier du métier "
+			"(morte-née), et dit recette par recette ce qui arrive au rayon sans le joueur.",
+	},
+	{
 		"id": "gen_magasins_superieurs",
 		"label": "🏛️ Générer les grandes manufactures de Lutèce",
 		"argv": _py("gen_magasins_superieurs.py"),
@@ -244,7 +256,9 @@ CATALOGUE = [
 			"rebranche db.config sur le dump avant d'importer utils.marche : il REFUSE d'écrire "
 			"une recette dont un métier réuni ferait tout à lui seul, ou dont un intrant est "
 			"hors de portée de la maison. Le rapport dit, recette par recette, ce qui arrive au "
-			"rayon sans le joueur.",
+			"rayon sans le joueur. RELANÇABLE : ce qui est déjà en base est sauté, jamais réémis "
+			"(un PUT complet écraserait une retouche faite à la main) ; sans rien à créer, aucun "
+			"fichier n'est écrit.",
 	},
 	{
 		"id": "gen_matieres_generiques_bois",

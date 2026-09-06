@@ -326,11 +326,15 @@ def auditer(docs: list, meta: dict) -> None:
 
 	# Hypothèse A, 2e source : ce que le fournisseur livre de lui-même, toutes catégories
 	# d'atelier existantes confondues.
-	def auto_appro_de(categorie: str) -> set:
-		return {c for c in marche.appro_leaves_categorie(categorie)
+	# ⚠️ Balayé par LIEU et non par catégorie : une feuille propre à une spécialité de terroir
+	# (`lieu_portee`) n'apparaît que dans `appro_leaves_lieu` d'un atelier dans la portée. Vue
+	# par catégorie seule, elle serait tenue pour non livrée et sa recette rapportée en
+	# « chaîne rompue » alors qu'elle cuit très bien là où elle doit cuire.
+	def auto_appro_de(lieu_doc: dict) -> set:
+		return {c for c in marche.appro_leaves_lieu(lieu_doc)
 				if marche._appro_debit_pour(c) > 0}
 
-	auto_appro = set().union(*(auto_appro_de(c) for c in categories_lieu)) if categories_lieu else set()
+	auto_appro = set().union(set(), *(auto_appro_de(L) for L in lieux))
 
 	toutes_cles = {cle for r in recettes for cle, _q in marche.recette_matieres(r)}
 	sans_production = {c for c in toutes_cles if apportee_par_le_joueur(c) or c in auto_appro}
@@ -348,29 +352,56 @@ def auditer(docs: list, meta: dict) -> None:
 	jamais_visee = len(sans_recette_atteignable) - len(chaine_rompue)
 
 	# ── 2. Recettes dont le produit n'entre jamais en rayon ──────────────────────
-	# Point fixe par catégorie de lieu, amorcé par le SEUL approvisionnement automatique.
-	cuites_par_categorie: dict[str, set] = {}
-	acquis_par_categorie: dict[str, set] = {}
-	for cat in sorted({r.get("lieu_categorie") for r in recettes if r.get("lieu_categorie")}):
-		rec_cat = marche.lieu_recettes(cat)
-		amorce = auto_appro_de(cat) if cat in categories_lieu else set()
-		cuites_par_categorie[cat], acquis_par_categorie[cat] = point_fixe(marche, rec_cat, amorce)
+	# Point fixe par ATELIER, amorcé par le SEUL approvisionnement automatique.
+	#
+	# ⚠️ Par atelier et non par catégorie, depuis la PORTÉE GÉOGRAPHIQUE (`lieu_portee`) :
+	# une spécialité de terroir sort de l'index par catégorie (`marche.lieu_recettes`) et
+	# n'est servie que par `marche.recettes_lieu`, qui a besoin du doc lieu. Auditée par
+	# catégorie, elle serait rapportée « bloquée » alors qu'elle cuit très bien là où elle
+	# doit cuire. On choisit un atelier REPRÉSENTATIF par (catégorie, portée) — le premier
+	# par `_id`, pour que deux exécutions rendent le même rapport.
+	def _atelier_de(r: dict):
+		"""Le lieu par lequel cette recette peut être cuite, ou None si aucun ne le peut."""
+		cat = r.get("lieu_categorie")
+		portee = r.get("lieu_portee")
+		candidats = [L for L in sorted(lieux, key=lambda d: d.get("_id") or "")
+					 if cat in marche.categories_incluses(L.get("categorie") or "")
+					 and (not portee or portee in marche.portees_lieu(L))]
+		return candidats[0] if candidats else None
+
+	point_fixe_atelier: dict[str, tuple] = {}   # lieu_id → (cuites, acquis)
+	atelier_par_recette: dict[str, str] = {}
+	for r in recettes:
+		atelier = _atelier_de(r)
+		if atelier is None:
+			continue
+		lieu_id = atelier["_id"]
+		atelier_par_recette[r.get("_id")] = lieu_id
+		if lieu_id not in point_fixe_atelier:
+			amorce = {c for c in marche.appro_leaves_lieu(atelier)
+					  if marche._appro_debit_pour(c) > 0}
+			point_fixe_atelier[lieu_id] = point_fixe(
+				marche, marche.recettes_lieu(atelier), amorce)
 
 	blocages: dict[str, list] = {}
 	cles_bloquantes: dict[str, int] = {}   # clé matière → nb de recettes qu'elle bloque
 	for r in recettes:
 		cat = r.get("lieu_categorie")
 		produit = marche.objet_final_item_id(r.get("objet_final", ""))
+		lieu_id = atelier_par_recette.get(r.get("_id"))
+		cuites, acquis = point_fixe_atelier.get(lieu_id, (set(), set()))
 		if not marche.recette_matieres(r):
 			blocages.setdefault("sans intrant (le moteur ne la prépare jamais)", []).append(r)
-		elif not cat or cat not in categories_lieu:
-			blocages.setdefault(f"aucun lieu de catégorie « {cat} »", []).append(r)
+		elif lieu_id is None:
+			motif = (f"aucun lieu de catégorie « {cat} »" if not r.get("lieu_portee")
+					 else f"aucun atelier « {cat} » sous la portée {r['lieu_portee']}")
+			blocages.setdefault(motif, []).append(r)
 		elif produit not in items_par_id:
 			blocages.setdefault("produit sans doc item (ligne invisible en rayon)", []).append(r)
-		elif r.get("_id") not in cuites_par_categorie.get(cat, set()):
+		elif r.get("_id") not in cuites:
 			blocages.setdefault(MOTIF_INTRANTS, []).append(r)
 			for cle, _q in marche.recette_matieres(r):
-				if cle not in acquis_par_categorie.get(cat, set()):
+				if cle not in acquis:
 					cles_bloquantes[cle] = cles_bloquantes.get(cle, 0) + 1
 	bloquees = [r for lot in blocages.values() for r in lot]
 	# Relâchement de l'hypothèse D : le joueur revend ce qu'il a acheté ailleurs. Ne restent
@@ -379,7 +410,7 @@ def auditer(docs: list, meta: dict) -> None:
 	bloquees_structurelles = [
 		r for r in bloquees
 		if not marche.recette_matieres(r)
-		or (r.get("lieu_categorie") not in categories_lieu)
+		or (atelier_par_recette.get(r.get("_id")) is None)
 		or (marche.objet_final_item_id(r.get("objet_final", "")) not in items_par_id)
 		or (r.get("_id") not in cuites_global)
 	]

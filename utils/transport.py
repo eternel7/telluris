@@ -57,7 +57,7 @@ LIEU_PARENT_AUTO = "auto"
 def est_magasin(lieu_doc: dict) -> bool:
 	"""Le lieu est-il marchand ? Un lieu l'est de fait dès que sa catégorie a des recettes,
 	donc des matières à racheter au joueur — c'est déjà le prédicat du bouton 🏷️ Achat-Vente."""
-	return bool(marche.besoins_categorie((lieu_doc or {}).get("categorie")))
+	return bool(marche.besoins_lieu(lieu_doc))
 
 
 def entree_marchand(lieu_doc: dict) -> dict | None:
@@ -234,7 +234,7 @@ def items_fournis(giver_doc: dict) -> list:
 		iid = ligne.get("item_id")
 		if iid and iid not in out:
 			out.append(iid)
-	for iid in sorted(marche.produits_categorie((giver_doc or {}).get("categorie"))):
+	for iid in sorted(marche.produits_lieu(giver_doc)):
 		if iid not in out:
 			out.append(iid)
 	return out

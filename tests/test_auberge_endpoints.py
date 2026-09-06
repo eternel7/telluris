@@ -610,7 +610,7 @@ def test_la_nuit_relance_les_etals_du_LIEU_PARENT(monde, monkeypatch):
 	appels = []
 	monkeypatch.setattr(ra, "tick_atelier", lambda doc, rec: appels.append(doc["_id"]) or True)
 	monkeypatch.setattr(ra.scriptorium, "recettes_effectives", lambda lieu, fd, gd, sd: [])
-	monkeypatch.setattr(ra, "appro_leaves_categorie", lambda cat: [])
+	monkeypatch.setattr(ra, "appro_leaves_lieu", lambda lieu_doc: [])
 
 	data = _appel(monde, _perso(), ra.passer_la_nuit, None)
 	assert appels == ["lieu:forge"] * int(character_stats.AUBERGE_NUIT_PASSES_ATELIER)

@@ -21,7 +21,7 @@ from db.config import get_doc, save_doc, delete_doc, find_docs
 from models import character_stats
 from utils.auth import get_current_user
 from utils.characters import get_selected_character, cuivre_to_purse, money_to_cuivre
-from utils.marche import debit_character, tick_atelier, appro_leaves_categorie
+from utils.marche import debit_character, tick_atelier, appro_leaves_lieu
 from utils import auberge
 from utils import recrutement
 from utils import montures
@@ -434,9 +434,8 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	magasins = 0
 	voisins = (find_docs({"type": "lieu", "lieu_parent": parent_id}) or []) if parent_id else []
 	for boutique in voisins:
-		categorie = boutique.get("categorie")
 		if not (boutique.get("stock_matieres") or boutique.get("stock_vente")
-				or appro_leaves_categorie(categorie)):
+				or appro_leaves_lieu(boutique)):
 			continue
 		# `lieu_recettes` est mémoïsé par process : les dizaines d'appels touchent le mémo.
 		# Un scriptorium y ajoute son petit lot de recettes virtuelles (sort/recette/carte),

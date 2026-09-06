@@ -98,16 +98,23 @@ def sorts_documentables(lieu_parent_id: str, find_docs_fn, get_doc_fn) -> list[s
 
 
 def recettes_documentables(lieu_parent_id: str, find_docs_fn) -> list[str]:
-	"""Recettes RÉELLEMENT appliquées par un magasin du lieu_parent : catégories distinctes
-	des lieux enfants → `marche.lieu_recettes(categorie)` pour chacune, ids dédoublonnés."""
+	"""Recettes RÉELLEMENT appliquées par un magasin du lieu_parent : `marche.recettes_lieu`
+	de chaque lieu enfant, ids dédoublonnés.
+
+	⚠️ Par LIEU et non par catégorie : une spécialité de terroir n'est documentable que là où
+	elle se cuit, et `recettes_lieu` a besoin du doc (son `_id` et son `lieu_parent`) pour
+	résoudre la portée — d'où les deux champs ajoutés à la projection."""
 	if not lieu_parent_id or not find_docs_fn:
 		return []
 	enfants = find_docs_fn({"type": "lieu", "lieu_parent": lieu_parent_id},
-						   fields=["_id", "categorie"]) or []
-	categories = {e.get("categorie") for e in enfants if e.get("categorie")}
+						   fields=["_id", "categorie", "lieu_parent"]) or []
 	recettes: set = set()
-	for categorie in categories:
-		for r in marche.lieu_recettes(categorie):
+	vus: set = set()
+	for enfant in enfants:
+		if not enfant.get("categorie") or enfant.get("_id") in vus:
+			continue
+		vus.add(enfant.get("_id"))
+		for r in marche.recettes_lieu(enfant):
 			rid = r.get("_id")
 			if rid:
 				recettes.add(rid)
@@ -303,9 +310,13 @@ def recettes_virtuelles(lieu_doc: dict, find_docs_fn, get_doc_fn, save_doc_fn) -
 def recettes_effectives(lieu_doc: dict, find_docs_fn, get_doc_fn, save_doc_fn) -> list[dict]:
 	"""Recettes à passer à `marche.tick_atelier` pour CE lieu — chokepoint des 4 sites
 	d'appel du tick (visite, achat, vente/rachat, nuit). Pour un lieu NON scriptorium,
-	identique à `marche.lieu_recettes(categorie)` (comportement inchangé, zéro coût de plus :
-	aucun appel à `find_docs_fn`/`save_doc_fn`)."""
-	base = marche.lieu_recettes((lieu_doc or {}).get("categorie"))
+	identique à `marche.recettes_lieu(lieu_doc)` (comportement inchangé, zéro coût de plus :
+	aucun appel à `find_docs_fn`/`save_doc_fn`).
+
+	⚠️ C'est ici que la PORTÉE GÉOGRAPHIQUE entre dans le tick : `recettes_lieu` connaît le
+	doc, donc les spécialités de terroir suivent les quatre sites d'appel sans qu'aucun
+	appelant change."""
+	base = marche.recettes_lieu(lieu_doc)
 	if not lieu_est_scriptorium(lieu_doc):
 		return base
 	return base + recettes_virtuelles(lieu_doc, find_docs_fn, get_doc_fn, save_doc_fn)

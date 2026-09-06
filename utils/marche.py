@@ -107,19 +107,31 @@ _recettes_par_lieu: dict | None = None     # lieu_categorie → [recettes]
 # c'est ce qui rend `LIEU_CATEGORIES_FUSION` réglable à chaud depuis /admin.
 _categories_incluses_memo: dict[str, tuple] = {}
 _recettes_fusion_memo: dict[str, list] = {}
+# Portée géographique des recettes (spécialités de terroir) : index PARALLÈLES aux précédents,
+# peuplés par les seules recettes portant `lieu_portee`, et chaîne d'ancêtres d'un lieu.
+# ⚠️ Le mémo d'ancêtres n'est pas un confort : `lieu:` n'est PAS dans `_CACHEABLE_PREFIXES`
+# (db/config.py), donc chaque remontée serait un aller-retour HTTP — et la nuit d'auberge
+# tique toutes les boutiques de la cité, plusieurs fois chacune.
+_marche_map_portee: dict | None = None     # {lieu_portee: {"besoins"/"produits": {cat: set}}}
+_recettes_par_portee: dict | None = None   # {lieu_portee: {lieu_categorie: [recettes]}}
+_portees_memo: dict[str, tuple] = {}       # lieu_id → (lui-même, parent, grand-parent…)
 
 
 def reset_prix_cache() -> None:
 	"""Vide les caches de coût de revient (à appeler quand recettes/items/MARGE changent)."""
 	global _recipe_map, _marche_map, _recettes_all, _recettes_par_lieu, _image_route_memo
+	global _marche_map_portee, _recettes_par_portee
 	_recipe_map = None
 	_marche_map = None
 	_recettes_all = None
 	_recettes_par_lieu = None
+	_marche_map_portee = None
+	_recettes_par_portee = None
 	_image_route_memo = {}
 	_cout_memo.clear()
 	_categories_incluses_memo.clear()
 	_recettes_fusion_memo.clear()
+	_portees_memo.clear()
 
 
 def _all_recettes() -> list:
@@ -157,30 +169,52 @@ def _get_marche_map() -> dict:
 	"""Construit (une fois) depuis toutes les recettes :
 	{"besoins": {lieu_categorie: set(clés matières consommées — sous_cat ou item id)},
 	 "produits": {lieu_categorie: set(item_id produits)},
-	 "feuilles": set(clés matières sans recette productrice, hors carcasse)}."""
-	global _marche_map
+	 "feuilles": set(clés matières sans recette productrice, hors carcasse)}.
+
+	⚠️ Une recette PORTÉE (`lieu_portee` : spécialité de terroir) n'alimente PAS `besoins` ni
+	`produits` — elle va dans l'index parallèle `_marche_map_portee`, sinon toute boulangerie
+	du monde se mettrait à acheter du vin pour un coq au vin qu'elle ne peut pas cuire.
+	`feuilles`, en revanche, RESTE GLOBAL et se calcule sur les entrées et sorties de TOUTES
+	les recettes : c'est ce qui fait qu'une matière que seule une recette portée consomme est
+	bien reconnue comme feuille (personne ne la produit), et qu'un plat de terroir n'en est
+	pas une (une recette le produit, fût-elle portée)."""
+	global _marche_map, _marche_map_portee
 	if _marche_map is None:
 		besoins: dict[str, set] = {}
 		produits: dict[str, set] = {}
+		portee: dict[str, dict] = {}
 		outputs: set = set()
 		inputs_all: set = set()
 		for r in _all_recettes():
 			cat = r.get("lieu_categorie")
+			scope = r.get("lieu_portee")
+			cible = (portee.setdefault(scope, {"besoins": {}, "produits": {}})
+					 if scope else {"besoins": besoins, "produits": produits})
 			outputs.add(r.get("objet_final"))
 			if cat:
-				produits.setdefault(cat, set()).add(objet_final_item_id(r.get("objet_final", "")))
+				cible["produits"].setdefault(cat, set()).add(
+					objet_final_item_id(r.get("objet_final", "")))
 			for (cle, _qm) in recette_matieres(r):
 				if not cle:
 					continue
 				inputs_all.add(cle)
 				if cat:
-					besoins.setdefault(cat, set()).add(cle)
+					cible["besoins"].setdefault(cat, set()).add(cle)
 		# Une clé item-ref est « produite » si une recette a cet item pour objet_final.
 		outputs_ids = {objet_final_item_id(o) for o in outputs if o}
 		feuilles = {k for k in inputs_all
 					if k not in outputs and k not in outputs_ids} - {"carcasse"}
 		_marche_map = {"besoins": besoins, "produits": produits, "feuilles": feuilles}
+		_marche_map_portee = portee
 	return _marche_map
+
+
+def _get_marche_map_portee() -> dict:
+	"""Index parallèle des recettes PORTÉES : {lieu_portee: {"besoins"/"produits": {cat: set}}}.
+	Bâti dans la même passe que `_get_marche_map` (une seule lecture des recettes)."""
+	if _marche_map_portee is None:
+		_get_marche_map()
+	return _marche_map_portee or {}
 
 
 def categories_incluses(categorie: str) -> tuple:
@@ -244,21 +278,134 @@ def produits_categorie(categorie: str) -> set:
 	return set().union(*(produits.get(c, set()) for c in categories_incluses(categorie)))
 
 
+# ── Portée géographique des recettes (spécialités de terroir) ────────────────────
+# Une recette peut porter `lieu_portee` : elle n'est alors cuisinable que par les boutiques
+# dont la chaîne d'ancêtres `lieu_parent` remonte jusqu'à ce lieu. Champ ABSENT ⇒ portée
+# mondiale, comportement d'avant, aucune migration.
+#
+# ⚠️ La portée dit OÙ L'ON FABRIQUE, jamais COMBIEN ÇA VAUT : `_get_recipe_map` et
+# `_cout_memo` (indexé par item_id NU) restent délibérément globaux. Les scoper rendrait le
+# prix d'un objet dépendant du premier lieu qui l'a demandé dans la vie du process, et un
+# objet sans recette locale retomberait sur son prix poids/rareté au lieu du coût propagé —
+# soit « acheter là où c'est produit, revendre là où ça ne l'est pas », exactement la machine
+# à or que `tests/test_appro_comptoir.py::test_aucun_arbitrage_…` verrouille.
+
+def portees_lieu(lieu_doc: dict, get_doc_fn=None) -> tuple:
+	"""Le lieu lui-même PUIS ses ancêtres `lieu_parent`, du plus proche au plus lointain —
+	les portées sous lesquelles ce lieu se trouve (boutique → cité → pays).
+
+	⚠️ Mémoïsé par `_id` et vidé par `reset_prix_cache()` : `lieu:` n'est pas mis en cache
+	par requête (`db/config.py`), donc chaque remontée est un aller-retour HTTP réel, et la
+	nuit d'auberge tique toutes les boutiques de la cité plusieurs fois chacune.
+
+	⚠️ Garde `vus` contre un cycle de parenté (l'éditeur de carte peut en poser un), et
+	FAIL-SOFT complet : un doc sans `_id` — les fixtures de tests en sont — rend une chaîne
+	vide, donc aucune recette portée, donc le comportement d'avant."""
+	lieu_id = (lieu_doc or {}).get("_id")
+	if not lieu_id:
+		return ()
+	if lieu_id not in _portees_memo:
+		get_doc_fn = get_doc_fn or get_doc
+		ordre, vus = [], set()
+		courant = lieu_doc
+		while courant:
+			cid = courant.get("_id")
+			if not cid or cid in vus:
+				break
+			vus.add(cid)
+			ordre.append(cid)
+			parent_id = courant.get("lieu_parent")
+			courant = get_doc_fn(parent_id) if parent_id and parent_id not in vus else None
+		_portees_memo[lieu_id] = tuple(ordre)
+	return _portees_memo[lieu_id]
+
+
+def _recettes_portees() -> dict:
+	"""Index des recettes PORTÉES : {lieu_portee: {lieu_categorie: [recettes]}}. Bâti dans la
+	même passe que l'index par catégorie de `lieu_recettes` (une seule lecture des recettes)."""
+	if _recettes_par_portee is None:
+		lieu_recettes("__amorce__")   # bâtit les deux index d'un coup
+	return _recettes_par_portee or {}
+
+
+def _cumul_portee(lieu_doc: dict, cle: str, categorie: str | None = None) -> set:
+	"""Union, sur toutes les portées du lieu, de `besoins`/`produits` des recettes portées —
+	pour la catégorie du lieu ET les métiers qu'elle réunit (la portée compose avec la fusion :
+	le Grand Fournil de Lutèce cuit bien une recette `boulangerie` portée par Lutèce)."""
+	scopes = portees_lieu(lieu_doc)
+	if not scopes:
+		return set()
+	categorie = categorie if categorie is not None else (lieu_doc or {}).get("categorie")
+	if not categorie:
+		return set()
+	table = _get_marche_map_portee()
+	cats = categories_incluses(categorie)
+	return set().union(set(), *(table.get(s, {}).get(cle, {}).get(c, set())
+								for s in scopes for c in cats))
+
+
+def besoins_lieu(lieu_doc: dict) -> list[str]:
+	"""`besoins_categorie` du lieu, PLUS les intrants des recettes portées sous lesquelles il
+	se trouve. C'est ce que CE marchand-ci achète au joueur."""
+	lieu_doc = lieu_doc or {}
+	base = set(besoins_categorie(lieu_doc.get("categorie")))
+	return sorted(base | _cumul_portee(lieu_doc, "besoins"))
+
+
+def produits_lieu(lieu_doc: dict) -> set:
+	"""`produits_categorie` du lieu, PLUS les biens de ses recettes portées."""
+	lieu_doc = lieu_doc or {}
+	return produits_categorie(lieu_doc.get("categorie")) | _cumul_portee(lieu_doc, "produits")
+
+
+def appro_leaves_lieu(lieu_doc: dict) -> list[str]:
+	"""Feuilles à auto-approvisionner pour CE lieu — portée comprise. C'est par là qu'une
+	matière propre à une spécialité de terroir (le vin d'un coq au vin) est livrée à la
+	boutique dans la portée, et à elle seule."""
+	lieu_doc = lieu_doc or {}
+	besoins = set(besoins_categorie(lieu_doc.get("categorie"))) | _cumul_portee(lieu_doc, "besoins")
+	return sorted(besoins & _get_marche_map()["feuilles"])
+
+
+def recettes_lieu(lieu_doc: dict) -> list:
+	"""Recettes que CE lieu peut cuire : celles de sa catégorie (fusion comprise) PUIS celles
+	qui lui sont portées, dans l'ordre des portées (la plus proche d'abord)."""
+	lieu_doc = lieu_doc or {}
+	categorie = lieu_doc.get("categorie")
+	base = lieu_recettes(categorie)
+	scopes = portees_lieu(lieu_doc)
+	if not scopes or not categorie:
+		return base
+	table = _recettes_portees()
+	cats = categories_incluses(categorie)
+	sup, vus = [], {r.get("_id") for r in base}
+	for scope in scopes:
+		for cat in cats:
+			for r in table.get(scope, {}).get(cat, []):
+				rid = r.get("_id")
+				if rid is not None and rid in vus:
+					continue
+				if rid is not None:
+					vus.add(rid)
+				sup.append(r)
+	return base + sup if sup else base
+
+
 def lieu_produit(lieu_doc: dict, item_doc: dict) -> bool:
 	"""True si l'item est un bien que ce lieu **produit** (donc rachetable au joueur)."""
 	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
 	if not item_id:
 		return False
-	return item_id in produits_categorie((lieu_doc or {}).get("categorie"))
+	return item_id in produits_lieu(lieu_doc)
 
 
 def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
 	"""True si le marchand du lieu achète cet item : son id OU sa sous-catégorie ∈ besoins
 	(intrants des recettes, item-refs compris) **OU** c'est un bien que le lieu produit
-	(rachat à moindre coût)."""
+	(rachat à moindre coût). Portée géographique comprise (`besoins_lieu`)."""
 	if lieu_produit(lieu_doc, item_doc):
 		return True
-	besoins = besoins_categorie((lieu_doc or {}).get("categorie"))
+	besoins = besoins_lieu(lieu_doc)
 	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
 	if item_id and item_id in besoins:
 		return True
@@ -266,14 +413,19 @@ def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
 	return bool(sc) and sc in besoins
 
 
-def cle_matiere_lieu(categorie: str, item_doc: dict) -> str:
+def cle_matiere_lieu(categorie: str, item_doc: dict, lieu_doc: dict | None = None) -> str:
 	"""Clé sous laquelle cet item entre dans le `stock_matieres` du lieu : son **id** si une
 	recette de la catégorie le référence directement (le plus précis gagne, comme
 	`stock_cible_pour`), sinon sa sous-catégorie. Limitation assumée : si un même lieu a une
 	recette item-ref ET une recette générique sur la même sous-catégorie, l'item référencé
-	alimente le bucket spécifique (pas le générique)."""
+	alimente le bucket spécifique (pas le générique).
+
+	`lieu_doc` OPTIONNEL : fourni, les recettes portées du lieu comptent aussi — sans quoi un
+	intrant nommé par une seule spécialité de terroir entrerait sous sa sous-catégorie
+	générique et la recette ne le retrouverait jamais. Absent ⇒ comportement d'avant."""
 	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
-	if item_id and item_id in besoins_categorie(categorie):
+	besoins = besoins_lieu(lieu_doc) if lieu_doc else besoins_categorie(categorie)
+	if item_id and item_id in besoins:
 		return item_id
 	return item_sous_categorie(item_doc)
 
@@ -302,7 +454,7 @@ def params_vente_lieu(lieu_doc: dict, item_doc: dict, item_id: str, ref=None) ->
 	if en_rayon > 0 or lieu_produit(lieu_doc, item_doc):
 		pmin_r = max(1, int(round(pmin * float(character_stats.RACHAT_FACTEUR))))
 		return pmin_r, pmin, en_rayon
-	cle = cle_matiere_lieu((lieu_doc or {}).get("categorie"), item_doc)
+	cle = cle_matiere_lieu((lieu_doc or {}).get("categorie"), item_doc, lieu_doc)
 	stock = int(((lieu_doc or {}).get("stock_matieres", {}) or {}).get(cle, 0))
 	return pmin, pmax, stock
 
@@ -886,16 +1038,26 @@ def lieu_recettes(lieu_categorie: str) -> list:
 	(`categories_incluses`) : concaténation dans l'ordre — les siennes d'abord — dédoublonnée
 	par `_id`, deux métiers réunis pouvant partager une recette. Le résultat est mémoïsé : ce
 	chemin est celui des quatre sites de tick."""
-	global _recettes_par_lieu
+	global _recettes_par_lieu, _recettes_par_portee
 	if not lieu_categorie:
 		return []
 	if _recettes_par_lieu is None:
 		index: dict[str, list] = {}
+		portees: dict[str, dict] = {}
 		for r in _all_recettes():
 			cat = r.get("lieu_categorie")
-			if cat:
+			if not cat:
+				continue
+			# ⚠️ Une recette PORTÉE sort de l'index par catégorie : sinon elle serait cuite
+			# par toutes les boutiques du métier, ce que la portée sert précisément à éviter.
+			# Elle n'est servie que par `recettes_lieu`, qui connaît le lieu.
+			scope = r.get("lieu_portee")
+			if scope:
+				portees.setdefault(scope, {}).setdefault(cat, []).append(r)
+			else:
 				index.setdefault(cat, []).append(r)
 		_recettes_par_lieu = index
+		_recettes_par_portee = portees
 	incluses = categories_incluses(lieu_categorie)
 	if len(incluses) == 1:
 		return _recettes_par_lieu.get(lieu_categorie, [])
@@ -923,7 +1085,8 @@ def _stock_vente_add(stock_vente: list, item_id: str, qty: int) -> None:
 
 
 def _matieres_entrantes(item_doc: dict, qmap: dict | None = None,
-						categorie: str | None = None) -> list[tuple[str, int]]:
+						categorie: str | None = None,
+						lieu_doc: dict | None = None) -> list[tuple[str, int]]:
 	"""Matières apportées au lieu par l'objet acheté. Une carcasse est décomposée par
 	espèce (quantités issues de `qmap`, table des recettes de boucherie) ; tout autre
 	objet apporte 1 unité sous sa clé matière pour ce lieu (`cle_matiere_lieu` : id
@@ -941,7 +1104,7 @@ def _matieres_entrantes(item_doc: dict, qmap: dict | None = None,
 		sub = item_id[len("item:"):] if item_id.startswith("item:") else ""
 		espece = get_doc("espece:" + sub) if sub else None
 		return depecage_carcasse(espece, qmap, (item_doc or {}).get("poids")) if espece else []
-	cle = cle_matiere_lieu(categorie, item_doc)
+	cle = cle_matiere_lieu(categorie, item_doc, lieu_doc)
 	if cle:
 		return [(cle, 1)]
 	return []
@@ -965,7 +1128,7 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	stock_vente = lieu_doc.setdefault("stock_vente", [])
 	categorie = lieu_doc.get("categorie")
-	recettes = recettes if recettes is not None else lieu_recettes(categorie)
+	recettes = recettes if recettes is not None else recettes_lieu(lieu_doc)
 	consommables = {sc for r in recettes for (sc, _q) in recette_matieres(r)}
 
 	# Rayon-comme-matière : (clé-matière, cible de vente) d'une ligne de rayon, mémoïsé par
@@ -976,7 +1139,7 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 		if item_id not in _res_cache:
 			item = resolve_fn(item_id) if item_id else None
 			_res_cache[item_id] = (
-				(cle_matiere_lieu(categorie, item), stock_cible_pour(lieu_doc, item))
+				(cle_matiere_lieu(categorie, item, lieu_doc), stock_cible_pour(lieu_doc, item))
 				if item else (None, 0)
 			)
 		return _res_cache[item_id]
@@ -1142,7 +1305,7 @@ def approvisionner(lieu_doc: dict) -> bool:
 	matière reste consommable en production, elle n'est simplement pas vendue. Une clé à débit
 	nul (`APPRO_DEBIT["herbe"] = 0`, récolte joueur) n'y monte pas non plus, faute de livraison.
 	"""
-	feuilles = appro_leaves_categorie((lieu_doc or {}).get("categorie"))
+	feuilles = appro_leaves_lieu(lieu_doc)
 	if not feuilles:
 		return False
 	stock = lieu_doc.setdefault("stock_matieres", {})
@@ -1199,7 +1362,7 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:
 		r.get("objet_final"): int(r.get("quantite_produite", 1) or 1)
 		for r in recettes if r.get("matiere_premiere_sous_categorie") == "carcasse"
 	}
-	for cle, qty in _matieres_entrantes(item_doc, qmap, lieu_doc.get("categorie")):
+	for cle, qty in _matieres_entrantes(item_doc, qmap, lieu_doc.get("categorie"), lieu_doc):
 		stock_mat[cle] = int(stock_mat.get(cle, 0)) + qty
 
 	return tick_atelier(lieu_doc, recettes)

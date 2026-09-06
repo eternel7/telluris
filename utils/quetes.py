@@ -804,11 +804,20 @@ def lieux_solidaires(giver_doc: dict, find_docs_fn=None) -> list:
 	parent = (giver_doc or {}).get("lieu_parent")
 	if not sous_cat or not parent:
 		return [giver_doc]
+	# ⚠️ Une CITÉ n'est la maison de personne. Ce qui l'écartait jusqu'ici, c'était son absence
+	# de `lieu_parent` (garde ci-dessus) ; depuis que les cités pendent au pays (portée
+	# géographique des recettes, `marche.portees_lieu`), deux villes de même `sous_categorie`
+	# — Auxerre et Reims portent toutes deux `"ville"` — deviendraient sœurs, et un
+	# renoncement à Auxerre sanctionnerait la réputation à Reims. On le dit donc explicitement
+	# au lieu de compter sur une forme de données qui a changé.
+	if (giver_doc or {}).get("categorie") == "ville":
+		return [giver_doc]
 	freres = (find_docs_fn or find_docs)({"type": "lieu", "lieu_parent": parent}) or []
 	lieux = [giver_doc]
 	vus = {(giver_doc or {}).get("_id")}
 	for d in freres:
-		if d.get("_id") not in vus and sous_categorie_lieu(d) == sous_cat:
+		if (d.get("_id") not in vus and sous_categorie_lieu(d) == sous_cat
+				and d.get("categorie") != "ville"):
 			lieux.append(d)
 			vus.add(d.get("_id"))
 	return lieux

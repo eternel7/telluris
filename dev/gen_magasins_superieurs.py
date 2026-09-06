@@ -15,6 +15,15 @@ Sorties :
     jsons/magasins_superieurs_a_importer.json        (à coller dans la carte d'import de /admin)
     jsons/magasins_superieurs_images_manquantes.txt  (les images à dessiner)
 
+⚠️ RELANÇABLE : un doc déjà présent dans le dump est SAUTÉ, jamais réémis (CLAUDE.md §11 —
+régénérer contre un export récent doit être idempotent). Sauter plutôt que réémettre n'est pas
+une commodité : `admin_import_bulk` fait un PUT COMPLET, donc réémettre écraserait en silence
+toute retouche faite à la main en base — un seuil déplacé dans l'éditeur de carte, par exemple.
+Le rapport relit d'ailleurs la case RÉELLE d'une porte déjà posée, au lieu d'en proposer une
+autre. Sans rien à créer, aucun fichier n'est écrit : un fichier d'import vide se confondrait
+avec un lot en attente. Seul `lieu:lutecia` échappe à la règle — c'est une INJECTION (un champ
+ajouté à un doc relu du dump), donc le critère y est l'état du champ, pas la présence du doc.
+
 ⚠️ Les recettes exclusives sont CROISÉES : leurs intrants ne peuvent PAS être réunis par un
 seul des métiers fusionnés. C'est ce qui justifie la grande maison — l'atelier de quartier
 n'aura jamais la clé manquante en stock, quoi qu'il produise. Le garde-fou `_metier_unique`
@@ -593,15 +602,28 @@ def main() -> int:
 			erreurs.append("%s : au catalogue mais absente de LIEU_CATEGORIES_FUSION" % grande)
 
 	# --- Les items et leurs recettes -------------------------------------------------
+	# ⚠️ CRÉATION, donc RELANÇABLE : un doc déjà en base est SAUTÉ, pas signalé en erreur.
+	# Le script ne réécrit que ce qui manque, comme dev/gen_magasins_auxerre.py — sans quoi
+	# une seule passe d'import le rendait définitivement inutilisable. Sauter plutôt que
+	# réémettre protège au passage une retouche faite à la main en base : `admin_import_bulk`
+	# fait un PUT COMPLET, réémettre l'écraserait en silence (CLAUDE.md §11).
 	sortie, rapport_recettes = [], []
-	slugs_crees = set()
+	slugs_crees, sautes = set(), []
+
+	def creer(doc: dict) -> bool:
+		"""Ajoute le doc à la sortie s'il n'est pas déjà en base. True s'il a été retenu."""
+		if doc["_id"] in index:
+			sautes.append(doc["_id"])
+			return False
+		sortie.append(doc)
+		return True
+
 	for grande in grandes:
 		atteignables = _atteignables(marche, grande)
 		for (slug, nom, icon, rarete, categorie, sous_cat, poids, slots, extras, desc,
 			 matieres, quantite) in CREATIONS.get(grande, []):
 			item_id = "item:" + slug
-			if item_id in index:
-				erreurs.append("%s : collision d'_id avec un doc du dump" % item_id)
+			# Contrôle d'intégrité du CATALOGUE (et non de la base) : celui-là reste fatal.
 			if slug in slugs_crees:
 				erreurs.append("%s : créé deux fois par ce script" % item_id)
 			slugs_crees.add(slug)
@@ -613,12 +635,10 @@ def main() -> int:
 				"poids": poids,
 			}
 			item.update(extras)          # bonus_pa, bonus, effets, restriction, portee…
-			sortie.append(item)
+			creer(item)
 
 			recette_id = "recette:%s_%s" % (grande, slug.lower())
-			if recette_id in index:
-				erreurs.append("%s : collision d'_id avec un doc du dump" % recette_id)
-			sortie.append({
+			creer({
 				"_id": recette_id, "type": "recette",
 				"lieu_categorie": grande,
 				"objet_final": slug,
@@ -653,39 +673,46 @@ def main() -> int:
 	# Doc RELU du dump, un seul champ ajouté (idiome des générateurs) : `lieu:lutecia` porte
 	# `categorie: ""`, ce qui la ferait manquer le regroupement par ville de l'onglet 🤝
 	# (`marche.relations_lieux_payload` : est_ville = categorie == "ville").
+	#
+	# ⚠️ INJECTION IDEMPOTENTE, pas une création : ce doc-ci EXISTE toujours, on ne peut donc
+	# pas le sauter sur sa seule présence. Le critère est l'état du CHAMP — déjà posé, il n'y
+	# a rien à faire ; sinon on réémet le doc relu du dump avec ce seul champ ajouté.
 	cite = index.get(CITE)
+	cite_a_jour = False
 	if not cite:
 		erreurs.append("%s introuvable dans %s" % (CITE, os.path.basename(source)))
+	elif cite.get("categorie") == "ville":
+		cite_a_jour = True
 	else:
-		cite = dict(cite)
-		cite["categorie"] = "ville"
-		sortie.append(cite)
+		sortie.append(dict(cite, categorie="ville"))
 
 	# --- Enseignes, portes et tenanciers ---------------------------------------------
 	occupees = {tuple(n["pos"]) for d in docs
 				if isinstance(d, dict) and d.get("type") == "connection"
 				for n in d.get("nodes", [])
 				if n.get("lieu") == CITE and isinstance(n.get("pos"), list)}
-	portes = choisir_portes(cite or {}, occupees, len(grandes)) if cite else []
-	if len(portes) < len(grandes):
-		erreurs.append("seulement %d case(s) de seuil libre(s) pour %d enseignes"
-					   % (len(portes), len(grandes)))
+	# ⚠️ On ne demande de seuils QUE pour les portes qui manquent : les cases des portes déjà
+	# posées sont dans `occupees`, donc jamais reprises, et une enseigne déjà ouverte ne se
+	# voit pas réattribuer un seuil différent du sien.
+	a_ouvrir = [g for g in grandes
+				if g in ENSEIGNES and ("link:%s_to_lutecia" % ENSEIGNES[g][0]) not in index]
+	portes = choisir_portes(cite or {}, occupees, len(a_ouvrir)) if cite else []
+	if len(portes) < len(a_ouvrir):
+		erreurs.append("seulement %d case(s) de seuil libre(s) pour %d enseignes à ouvrir"
+					   % (len(portes), len(a_ouvrir)))
 
 	images_presentes = set(os.listdir(DOSSIER_IMAGES)) if os.path.isdir(DOSSIER_IMAGES) else set()
 	manquantes_img, rapport_lieux = [], []
 
 	from dev.gen_marchands import METIERS, NOEUDS_ESCORTE, NOEUDS_TRANSPORT, dialogue, portrait_de
 
-	for i, grande in enumerate(grandes):
-		if grande not in ENSEIGNES or i >= len(portes):
+	for grande in grandes:
+		if grande not in ENSEIGNES:
 			continue
 		slug, label, image = ENSEIGNES[grande]
 		lieu_id = "lieu:" + slug
 		lien_id = "link:%s_to_lutecia" % slug
-		for doc_id in (lieu_id, lien_id):
-			if doc_id in index:
-				erreurs.append("%s : collision d'_id avec un doc du dump" % doc_id)
-		if image not in images_presentes:
+		if image not in images_presentes and lieu_id not in index:
 			manquantes_img.append((image, grande, label))
 
 		lieu = {
@@ -703,21 +730,34 @@ def main() -> int:
 		# OU le tag. Le tag est l'échappatoire prévue par ce module : aucun code à toucher.
 		if "scriptorium" in marche.categories_incluses(grande)[1:]:
 			lieu["tags"] = ["scriptorium"]
-		sortie.append(lieu)
+		creer(lieu)
 
-		x, y = portes[i]
-		sortie.append({
-			"_id": lien_id, "type": "connection",
-			"nodes": [{"lieu": CITE, "pos": [x, y]}, {"lieu": lieu_id, "pos": [0, 0]}],
-			"metadata": {"type": grande, "status": "ouvert"},
-		})
+		if lien_id in index:
+			# Porte déjà posée : on relit SA case en base plutôt que d'en proposer une autre.
+			# Le rapport dit donc où l'enseigne est vraiment, y compris si elle a été déplacée
+			# à la main dans l'éditeur de carte depuis l'import.
+			sautes.append(lien_id)
+			x, y = next((tuple(n["pos"]) for n in index[lien_id].get("nodes", [])
+						 if n.get("lieu") == CITE and isinstance(n.get("pos"), list)), (-1, -1))
+		else:
+			rang = a_ouvrir.index(grande)
+			# Plus de case libre : l'erreur est déjà signalée plus haut et le script refusera
+			# d'écrire — on n'émet pas de porte sans seuil plutôt que de sortir de la liste.
+			if rang >= len(portes):
+				continue
+			x, y = portes[rang]
+			creer({
+				"_id": lien_id, "type": "connection",
+				"nodes": [{"lieu": CITE, "pos": [x, y]}, {"lieu": lieu_id, "pos": [0, 0]}],
+				"metadata": {"type": grande, "status": "ouvert"},
+			})
 
 		# Tenancier générique : `utils/transport.entree_marchand` dérive `pnj:marchand_<cat>`
 		# de la catégorie du lieu. Doc rigoureusement identique à celui que produira
 		# `dev/gen_marchands.py` une fois les recettes en base (mêmes METIERS, même portrait
 		# indexé sur le nom de catégorie) — les deux générateurs restent interchangeables.
 		nom, metier, ambiance = METIERS[grande]
-		sortie.append({
+		creer({
 			"_id": "pnj:marchand_" + grande, "type": "pnj",
 			"nom": nom, "race": "humain", "vocation": "marchand",
 			"portrait": portrait_de(grande),
@@ -727,7 +767,8 @@ def main() -> int:
 			},
 			"dialogue": dialogue(metier, ambiance),
 		})
-		rapport_lieux.append((grande, label, x, y, image, image in images_presentes))
+		rapport_lieux.append((grande, label, x, y, image, image in images_presentes,
+							  lieu_id not in index))
 
 	# --- Refus ------------------------------------------------------------------------
 	if erreurs:
@@ -737,6 +778,17 @@ def main() -> int:
 		return 1
 
 	# --- Écriture ---------------------------------------------------------------------
+	# ⚠️ Rien à créer ⇒ on n'écrit RIEN, pas un tableau vide : un fichier d'import vide n'a
+	# aucun usage et, laissé sur le disque, se confond avec un lot en attente d'import.
+	if not sortie:
+		print("Dump lu            : %s" % os.path.basename(source))
+		print("Grandes maisons    : %d" % len(grandes))
+		print("Déjà en base       : %d doc(s) — RIEN À CRÉER, aucun fichier écrit.%s"
+			  % (len(sautes), " `%s` a déjà sa catégorie." % CITE if cite_a_jour else ""))
+		print("Pour rejouer une enseigne, supprimer ses docs (`lieu:*`, `link:*`) depuis")
+		print("/admin/table avant de relancer.")
+		return 0
+
 	with open(SORTIE, "w", encoding="utf-8") as f:
 		json.dump(sortie, f, ensure_ascii=False, indent=2)
 		f.write("\n")
@@ -753,17 +805,23 @@ def main() -> int:
 			f.write("\nEn attendant, le lieu est jouable : seule l'illustration est absente.\n")
 
 	# --- Récapitulatif ------------------------------------------------------------------
+	par_type: dict[str, int] = {}
+	for d in sortie:
+		par_type[d.get("type", "?")] = par_type.get(d.get("type", "?"), 0) + 1
+	detail = ", ".join("%d %s" % (n, t) for t, n in sorted(par_type.items())) or "rien"
+
 	print("Dump lu            : %s" % os.path.basename(source))
 	print("Grandes maisons    : %d" % len(grandes))
-	print("Docs écrits        : %d (%d items, %d recettes, %d lieux, %d portes, %d tenanciers, 1 cité)"
-		  % (len(sortie), len(slugs_crees), len(slugs_crees), len(rapport_lieux),
-			 len(rapport_lieux), len(rapport_lieux)))
+	print("Docs à créer       : %d (%s)" % (len(sortie), detail))
+	print("Déjà en base       : %d doc(s) sauté(s)%s"
+		  % (len(sautes), " ; `%s` a déjà sa catégorie" % CITE if cite_a_jour else ""))
 	print("Images manquantes  : %d" % len(manquantes_img))
 	print()
 	print("ENSEIGNES ET SEUILS (à revoir dans le mode « Lieux » de l'éditeur de carte)")
-	for grande, label, x, y, image, ok in rapport_lieux:
-		print("   %-34s %-32s [%2d,%2d]  %s%s"
-			  % (grande, label, x, y, image, "" if ok else "   ← IMAGE MANQUANTE"))
+	for grande, label, x, y, image, ok, neuve in rapport_lieux:
+		print("   %-34s %-32s [%2d,%2d]  %-34s %s"
+			  % (grande, label, x, y, image,
+				 ("← IMAGE MANQUANTE" if not ok else "") if neuve else "(déjà en base)"))
 	print()
 	print("RECETTES EXCLUSIVES — intrants que la maison ne produit pas seule")
 	print("   (une maison dont les métiers de base dépendent déjà du joueur reste dans ce cas ;")

@@ -127,6 +127,24 @@ def test_giver_sans_lieu_parent():
 	assert quetes.lieux_solidaires(orphelin, make_find_docs()) == [orphelin]
 
 
+def test_une_CITE_nest_solidaire_daucune_autre():
+	"""⚠️ Depuis que les cités pendent au pays (portée géographique des recettes,
+	`marche.portees_lieu`), deux villes de même `sous_categorie` sont sœurs au sens du
+	sélecteur — et ce qui les écartait jusque-là était leur absence de `lieu_parent`.
+	Sans garde explicite, un renoncement à Auxerre sanctionnerait la réputation à Reims."""
+	auxerre = {"_id": "lieu:auxerre", "type": "lieu", "categorie": "ville",
+			   "sous_categorie": "ville", "lieu_parent": "lieu:france"}
+	rhemi = {"_id": "lieu:rhemi", "type": "lieu", "categorie": "ville",
+			 "sous_categorie": "ville", "lieu_parent": "lieu:france"}
+	find_docs_fn = make_find_docs([auxerre, rhemi])
+	assert quetes.lieux_solidaires(auxerre, find_docs_fn) == [auxerre]
+	# Et une cité ne se fait pas non plus ramasser par la maison d'un lieu qui la partagerait.
+	voisin = {"_id": "lieu:halle", "type": "lieu", "categorie": "boucherie",
+			  "sous_categorie": "ville", "lieu_parent": "lieu:france"}
+	assert ids(quetes.lieux_solidaires(voisin, make_find_docs([voisin, auxerre, rhemi]))) == [
+		"lieu:halle"]
+
+
 # ── sanctionner_renoncement ──────────────────────────────────────────────────────
 
 def test_sanction_frappe_toute_la_maison(perso, db, monkeypatch):
