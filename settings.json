@@ -1,8 +1,21 @@
 {
+  "model": "opus",
+  "theme": "dark",
+  "autoUpdatesChannel": "latest",
+  "autoMemoryEnabled": true,
+  "agentPushNotifEnabled": true,
   "env": {
     "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
   },
-  "model": "opus",
+  "permissions": {
+    "defaultMode": "plan"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true
+  },
   "skillOverrides": {
     "chrome-devtools-mcp:a11y-debugging": "off",
     "chrome-devtools-mcp:chrome-devtools": "off",
@@ -18,13 +31,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "file=$(jq -r '.tool_input.file_path'); case \"$file\" in *.py) ruff check --fix \"$file\" ;; esac",
-            "shell": "bash"
+            "shell": "powershell",
+            "command": "$f = ([Console]::In.ReadToEnd() | ConvertFrom-Json).tool_input.file_path; if ($f -like '*.py' -and (Get-Command ruff -ErrorAction SilentlyContinue)) { ruff check --fix -- $f }",
+            "statusMessage": "ruff"
           },
           {
             "type": "command",
-            "command": "file=$(jq -r '.tool_input.file_path'); git diff --stat -- \"$file\"",
-            "shell": "bash"
+            "shell": "powershell",
+            "command": "$f = ([Console]::In.ReadToEnd() | ConvertFrom-Json).tool_input.file_path; if ($f) { git diff --stat -- $f }",
+            "statusMessage": "git diff"
           }
         ]
       }
@@ -34,18 +49,12 @@
         "hooks": [
           {
             "type": "command",
+            "shell": "powershell",
             "command": "python -m pytest -q",
-            "shell": "bash"
+            "statusMessage": "pytest"
           }
         ]
       }
     ]
-  },
-  "enabledPlugins": {
-    "chrome-devtools-mcp@claude-plugins-official": true
-  },
-  "autoUpdatesChannel": "latest",
-  "autoMemoryEnabled": true,
-  "theme": "dark",
-  "agentPushNotifEnabled": true
+  }
 }

@@ -1,10 +1,60 @@
 {
-  "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true
+  "model": "opus",
+  "theme": "dark",
+  "autoUpdatesChannel": "latest",
+  "autoMemoryEnabled": true,
+  "agentPushNotifEnabled": true,
+  "env": {
+    "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
   },
   "permissions": {
     "defaultMode": "plan"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true
+  },
+  "skillOverrides": {
+    "chrome-devtools-mcp:a11y-debugging": "off",
+    "chrome-devtools-mcp:chrome-devtools": "off",
+    "chrome-devtools-mcp:chrome-devtools-cli": "off",
+    "chrome-devtools-mcp:debug-optimize-lcp": "off",
+    "chrome-devtools-mcp:memory-leak-debugging": "off",
+    "chrome-devtools-mcp:troubleshooting": "off"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "$f = ([Console]::In.ReadToEnd() | ConvertFrom-Json).tool_input.file_path; if ($f -like '*.py' -and (Get-Command ruff -ErrorAction SilentlyContinue)) { ruff check --fix -- $f }",
+            "statusMessage": "ruff"
+          },
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "$f = ([Console]::In.ReadToEnd() | ConvertFrom-Json).tool_input.file_path; if ($f) { git diff --stat -- $f }",
+            "statusMessage": "git diff"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "python -m pytest -q",
+            "statusMessage": "pytest"
+          }
+        ]
+      }
+    ]
   }
 }
