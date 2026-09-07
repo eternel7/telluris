@@ -627,6 +627,27 @@
 		max-height: 200px; overflow: auto; white-space: pre; margin-bottom: 12px;
 	}
 	.la-actions { display: flex; gap: 8px; }
+	/* Listes à cocher du formulaire de lieu : capacités et écurie. */
+	.nl-caps {
+		border: 1px solid var(--border); border-radius: 4px;
+		max-height: 190px; overflow-y: auto;
+	}
+	.nl-cap {
+		display: flex; align-items: flex-start; gap: 6px;
+		padding: 4px 6px; font-size: 0.68rem;
+		border-bottom: 1px solid rgba(255,255,255,0.05);
+	}
+	.nl-cap:last-child { border-bottom: none; }
+	.nl-cap input { margin-top: 2px; cursor: pointer; }
+	.nl-cap input:disabled { cursor: default; }
+	.nl-cap .t { flex: 1; min-width: 0; }
+	.nl-cap .t b { color: var(--text); font-weight: normal; }
+	.nl-cap .n { display: block; color: #888; font-size: 0.62rem; line-height: 1.35; }
+	/* Capacité acquise par la catégorie : la case est cochée mais inopérante. */
+	.nl-cap.par-categorie { opacity: 0.75; }
+	.nl-cap.par-categorie .t b::after {
+		content: " (par la catégorie)"; color: var(--accent2); font-size: 0.62rem;
+	}
 
 	/* ── Création d'un LOT de lieux ──
 	   Même overlay que #lieu-add-overlay (mêmes .la-*), mais large et à deux colonnes :
@@ -753,7 +774,10 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
    elle ne redéfinit que le fond. Sur une flèche, ce halo n'a aucun sens — on l'éteint ici. */
 .dep-controls .btn:hover { box-shadow: none; }
 .dep-section[hidden] { display: none; }
-.dep-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+/* Poignée de glisser : `cursor:move` et `user-select:none` comme `.mini-head` — sans le
+   second, tirer le pavé surlignerait son titre au lieu de le déplacer. */
+.dep-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;
+	cursor: move; user-select: none; }
 .dep-title { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--accent); letter-spacing: 0.08em; }
 .dep-close { background: none; border: none; color: var(--muted); font-size: 1rem; cursor: pointer; line-height: 1; padding: 0 2px; }
 .dep-close:hover { color: var(--danger); }
@@ -1062,8 +1086,11 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
      (Et pas de balise de script écrite en toutes lettres dans ce commentaire : `check_js.js`
      la prendrait pour une vraie ouverture de bloc et contrôlerait du texte français.) -->
 <div class="dep-section" id="dep-section" hidden>
-	<div class="dep-head">
-		<span class="dep-title">🚶 Test de déplacement</span>
+	<!-- La barre de titre est la POIGNÉE (cf. `rendreDeplacable`) : le pavé recouvre la
+	     carte, et c'est justement sous lui qu'on veut parfois marcher. Même grip ⠿ et
+	     même infobulle que les mini-outils. Le ✕ n'amorce aucun glisser. -->
+	<div class="dep-head" id="dep-head" title="Glisser pour déplacer">
+		<span class="dep-title">⠿ 🚶 Test de déplacement</span>
 		<button class="dep-close" id="dep-close-btn" title="Quitter le mode test">✕</button>
 	</div>
 	<div class="dep-regle" id="dep-regle"></div>
@@ -1290,29 +1317,51 @@ miniOutilsEl.querySelectorAll('.mini-mode-btn').forEach(btn => {
 	btn.addEventListener('click', () => setMode(btn.dataset.mode));
 });
 
-// Déplacement à la souris. La position par défaut est en `top/right` (coin haut-droit de la
-// carte) ; au premier glisser on bascule en `top/left`, `right` remis à `auto` — sans quoi les
-// deux contraintes horizontales se battraient et le panneau s'étirerait au lieu de bouger.
-let miniDrag = null;   // { dx, dy } écart pointeur → coin haut-gauche
-miniHeadEl.addEventListener('pointerdown', e => {
-	const r = miniOutilsEl.getBoundingClientRect();
-	miniDrag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
-	miniOutilsEl.style.right = 'auto';
-	miniOutilsEl.style.left = r.left + 'px';
-	miniOutilsEl.style.top = r.top + 'px';
-	miniHeadEl.setPointerCapture(e.pointerId);
-	e.preventDefault();
-});
-miniHeadEl.addEventListener('pointermove', e => {
-	if (!miniDrag) return;
-	// Borné à la fenêtre : lâché hors écran, la poignée deviendrait inatteignable.
-	const maxX = window.innerWidth  - miniOutilsEl.offsetWidth;
-	const maxY = window.innerHeight - miniOutilsEl.offsetHeight;
-	miniOutilsEl.style.left = Math.max(0, Math.min(maxX, e.clientX - miniDrag.dx)) + 'px';
-	miniOutilsEl.style.top  = Math.max(0, Math.min(maxY, e.clientY - miniDrag.dy)) + 'px';
-});
-miniHeadEl.addEventListener('pointerup',     () => { miniDrag = null; });
-miniHeadEl.addEventListener('pointercancel', () => { miniDrag = null; });
+// ── Panneaux flottants déplaçables ─────────────────────────────────────────
+// Brique partagée par les mini-outils et le pavé du test de déplacement : les deux
+// flottent au-dessus de la carte et finissent par recouvrir la case qu'on veut voir.
+//
+// ⚠️ La position de départ vient du CSS et n'est PAS ancrée au même coin selon le
+// panneau (`top/right` pour les mini-outils, `bottom/right` pour le pavé de test). Au
+// premier glisser on repasse donc tout en `top/left` et on remet les autres ancres à
+// `auto` : deux contraintes opposées sur le même axe se battraient et le panneau
+// s'étirerait au lieu de se déplacer.
+// ⚠️ `transform` est remis à `none` : la règle mobile de part-move-panel centre le pavé
+// par `translateX(-50%)`, qui le décalerait d'une demi-largeur sous le pointeur.
+// ⚠️ Un `pointerdown` sur un BOUTON de la poignée (le ✕ du pavé de test) n'amorce aucun
+// glisser — la capture de pointeur détournerait le clic censé fermer le mode.
+function rendreDeplacable(el, poignee) {
+	if (!el || !poignee) return;
+	let drag = null;   // { dx, dy } écart pointeur → coin haut-gauche
+	poignee.addEventListener('pointerdown', e => {
+		if (e.target && e.target.closest && e.target.closest('button')) return;
+		const r = el.getBoundingClientRect();
+		drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+		el.style.right = 'auto';
+		el.style.bottom = 'auto';
+		el.style.transform = 'none';
+		el.style.left = r.left + 'px';
+		el.style.top = r.top + 'px';
+		poignee.setPointerCapture(e.pointerId);
+		e.preventDefault();
+	});
+	poignee.addEventListener('pointermove', e => {
+		if (!drag) return;
+		// Borné à la fenêtre : lâché hors écran, la poignée deviendrait inatteignable.
+		const maxX = window.innerWidth  - el.offsetWidth;
+		const maxY = window.innerHeight - el.offsetHeight;
+		el.style.left = Math.max(0, Math.min(maxX, e.clientX - drag.dx)) + 'px';
+		el.style.top  = Math.max(0, Math.min(maxY, e.clientY - drag.dy)) + 'px';
+	});
+	poignee.addEventListener('pointerup',     () => { drag = null; });
+	poignee.addEventListener('pointercancel', () => { drag = null; });
+}
+
+rendreDeplacable(miniOutilsEl, miniHeadEl);
+// ⚠️ Le pavé du test est câblé ICI et non près de son code : son markup vit avant le
+// script, mais `depSection` est capturé bien plus bas. `getElementById` sur place évite
+// de dépendre de cet ordre.
+rendreDeplacable(document.getElementById('dep-section'), document.getElementById('dep-head'));
 
 const legendCardEl		= document.getElementById('legend-card');
 const legendToggleBtn	= document.getElementById('legend-toggle-btn');
@@ -2196,6 +2245,7 @@ function renderLieuxConnList() {
 			<div style="color:#888;">${_escHtml(type)} ${pos}</div>
 			<div style="display:flex;gap:6px;margin-top:4px;">
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuFiche('${destId}')">📄 Fiche</button>
+				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuForm('edition','${destId}')">✏️ Éditer</button>
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="toggleSousLieuJson('${conn._id}','${destId}')">${ouvert ? '✕ Fermer' : '🧾 JSON'}</button>
 			</div>
 		</div>`;
@@ -2991,38 +3041,217 @@ function _nlCategorie() {
 	return sel ? sel.value : '';
 }
 
-async function openLieuAdd() {
-	if (!currentLocId || !lieuxSelectedCell) return;
+// ══ CAPACITÉS DE LIEU ══════════════════════════════════════════════════════
+// « Le type d'un lieu » n'est pas un champ : c'est un jeu de capacités que cinq
+// prédicats du serveur résolvent à la lecture, toutes de la forme
+// « categorie == X OU tag Y ». Le catalogue arrive par `creation_options.capacites`
+// (utils/capacites.py) — ces fonctions-ci ne font que l'INTERPRÉTER, elles ne
+// redéfinissent aucune règle.
+//
+// ⚠️ Une capacité accordée par la CATÉGORIE ne se retire pas : aucun anti-tag
+// n'existe. La case est alors cochée ET désactivée, plutôt que d'offrir un geste
+// sans effet.
+//
+// Ces trois-là sont déclarées en `function` pour dev/test_lieu_form_client.js.
+
+function _capaciteAccordee(cap, categorie, sousCategorie) {
+	if (!cap) return false;
+	return ((cap.categories || []).indexOf(String(categorie || '')) !== -1)
+		|| ((cap.sous_categories || []).indexOf(String(sousCategorie || '')) !== -1);
+}
+
+function _capacitesDe(lieuDoc, catalogue) {
+	const doc = lieuDoc || {};
+	const tags = doc.tags || [];
+	const out = {};
+	(catalogue || []).forEach(cap => {
+		out[cap.id] = _capaciteAccordee(cap, doc.categorie, doc.sous_categorie)
+			|| tags.indexOf(cap.tag) !== -1;
+	});
+	return out;
+}
+
+// Les `tags` du doc après application des cases cochées.
+// ⚠️ Ne touche QUE les tags de capacité : tout autre tag survit, dans son ordre
+// (pondération de carte de combat, marquage d'auteur…).
+// ⚠️ Un tag redondant avec la catégorie n'est pas posé — le doc de référence
+// (`lieu:auberge_de_la_tour_de_l_horloge`) n'en porte aucun.
+function _tagsApres(tags, voulues, catalogue, categorie, sousCategorie) {
+	const capTags = (catalogue || []).map(c => c.tag);
+	const sortie = (tags || []).filter(t => capTags.indexOf(t) === -1);
+	(catalogue || []).forEach(cap => {
+		if (!(voulues || {})[cap.id]) return;
+		if (_capaciteAccordee(cap, categorie, sousCategorie)) return;
+		sortie.push(cap.tag);
+	});
+	return sortie;
+}
+
+// ══ FUSION D'UN DOC LIEU ═══════════════════════════════════════════════════
+// ⚠️ LA fonction critique de l'édition. `PUT /admin/doc` écrit le document ENTIER :
+// une édition naïve effacerait tout ce que le formulaire ne connaît pas — stocks,
+// `acces`, `relation_lieu`, et surtout la `progeniture` d'un PNJ, qui porte une
+// chaîne d'escorte (10 en base). On part donc du doc EXISTANT et on n'y écrit que
+// les six champs que le formulaire possède.
+//
+// ⚠️ `pnj` est une LISTE : trois lieux en base en portent plusieurs (jusqu'à 4).
+// On fusionne dans l'entrée [0] et on CONSERVE les suivantes. Dans l'entrée [0],
+// seules `character`, `nom`, `portrait` et `montures` sont écrites ; `progeniture`,
+// `description`, `conditions`, `probabilite` et `image` traversent intactes.
+//
+// ⚠️ `_id` n'est JAMAIS touché, quel que soit le label.
+function _fusionLieu(existant, champs, catalogue) {
+	const doc = JSON.parse(JSON.stringify(existant || {}));
+	doc.type = 'lieu';
+	doc.label = champs.label;
+	doc.image = champs.image;
+	doc.categorie = champs.categorie;
+
+	const tags = _tagsApres(doc.tags, champs.capacites, catalogue,
+		champs.categorie, doc.sous_categorie);
+	if (tags.length) doc.tags = tags; else delete doc.tags;
+
+	if (champs.pnj) {
+		const liste = Array.isArray(doc.pnj) ? doc.pnj.slice() : [];
+		const entree = Object.assign({}, liste[0] || {});
+		entree.character = champs.pnj.character;
+		if (champs.pnj.nom) entree.nom = champs.pnj.nom; else delete entree.nom;
+		if (champs.pnj.portrait) entree.portrait = champs.pnj.portrait; else delete entree.portrait;
+		// L'écurie n'existe QUE si la capacité est active : décocher « Étable » doit
+		// vraiment vider le rayon, pas laisser une liste orpheline que rien ne lit.
+		if (champs.montures && champs.montures.length) entree.montures = champs.montures.slice();
+		else delete entree.montures;
+		liste[0] = entree;
+		doc.pnj = liste;
+	} else {
+		delete doc.pnj;
+	}
+
+	if (champs.nuit_messages && champs.nuit_messages.length) {
+		doc.nuit_messages = champs.nuit_messages.slice();
+	} else {
+		delete doc.nuit_messages;
+	}
+	return doc;
+}
+
+// Le formulaire sert DEUX modes. `nlMode` pilote le titre, le bouton, le gel de l'`_id`,
+// l'affichage de la connexion et le contrôle de collision.
+// ⚠️ `nlDocExistant` est le doc RELU EN BASE : c'est lui, et jamais un doc reconstruit,
+// que `_fusionLieu` prend pour base — c'est ce qui fait survivre stocks, `acces` et
+// `progeniture` à une édition.
+let nlMode = 'creation';
+let nlDocExistant = null;
+let nlCapacites = {};      // {id: bool} — l'état des cases, seule source du rendu
+let nlMontures = [];       // ids d'espèces cochées pour l'écurie
+
+// Conservée : le bouton du panneau et le lot l'appellent toujours.
+async function openLieuAdd() { return openLieuForm('creation'); }
+
+async function openLieuForm(mode, destId) {
+	if (!currentLocId) return;
+	if (mode === 'creation' && !lieuxSelectedCell) return;
+	nlMode = (mode === 'edition') ? 'edition' : 'creation';
+	nlDocExistant = null;
 	_nlCabler();
 	const overlay = _nlEl('lieu-add-overlay');
-	_nlEl('nl-error').textContent = 'Chargement des options…';
+	_nlEl('nl-error').textContent = 'Chargement…';
 	overlay.classList.remove('la-hidden');
 	try {
 		const res = await fetch('/api/lieux/creation_options');
 		if (!res.ok) throw new Error('options indisponibles');
 		creationOptions = await res.json();
+		if (nlMode === 'edition') {
+			const r2 = await fetch(`/api/lieu/${encodeURIComponent(destId)}`);
+			if (!r2.ok) throw new Error('lieu introuvable');
+			nlDocExistant = await r2.json();
+			if (!nlDocExistant || !nlDocExistant._id) throw new Error('lieu introuvable');
+		}
 	} catch (err) {
 		_nlEl('nl-error').textContent = `✗ ${err.message}`;
 		return;
 	}
 	_nlEl('nl-error').textContent = '';
-	// Champs remis à neuf à chaque ouverture (l'overlay est réutilisé).
-	_nlEl('nl-label').value = '';
+
+	// Le select de catégories est reconstruit à chaque ouverture (la base a pu bouger).
+	// ⚠️ En édition, la catégorie du doc peut ne PLUS être dans la liste (aucun autre lieu
+	// ne la porte) : on l'ajoute pour ne pas la perdre silencieusement au premier
+	// enregistrement.
+	const cats = (creationOptions.categories || []).slice();
+	const catDoc = nlDocExistant ? (nlDocExistant.categorie || '') : '';
+	if (catDoc && cats.indexOf(catDoc) === -1) cats.push(catDoc);
+	const catSel = _nlEl('nl-categorie');
+	catSel.innerHTML = `<option value="" disabled${catDoc ? '' : ' selected'}>-- Choisir une catégorie --</option>`
+		+ cats.sort().map(c => `<option value="${_escHtml(c)}">${_escHtml(c)}</option>`).join('')
+		+ `<option value="__libre__">« autre… »</option>`;
+
+	// Champs remis à neuf (l'overlay est réutilisé), puis peuplés depuis le doc en édition.
 	_nlEl('nl-categorie-libre').value = '';
 	_nlEl('nl-categorie-libre').style.display = 'none';
-	_nlEl('nl-pnj-on').checked = true;
-	_nlEl('nl-pnj-bloc').style.display = '';
-	_nlEl('nl-pnj-nom').value = '';
 	_nlEl('nl-image-all').checked = false;
 	_nlEl('nl-pnj-portrait-all').checked = false;
-	nlNomTouche = false;
-	const catSel = _nlEl('nl-categorie');
-	catSel.innerHTML = `<option value="" disabled selected>-- Choisir une catégorie --</option>`
-		+ (creationOptions.categories || []).map(c => `<option value="${_escHtml(c)}">${_escHtml(c)}</option>`).join('')
-		+ `<option value="__libre__">« autre… »</option>`;
+	_nlEl('nl-montures-warn').textContent = '';
+
+	if (nlMode === 'edition') {
+		catSel.value = catDoc;
+		_nlEl('nl-label').value = nlDocExistant.label || '';
+		nlCapacites = _capacitesDe(nlDocExistant, creationOptions.capacites);
+		const entree = (nlDocExistant.pnj || [])[0] || null;
+		_nlEl('nl-pnj-on').checked = !!entree;
+		_nlEl('nl-pnj-bloc').style.display = entree ? '' : 'none';
+		_nlEl('nl-pnj-nom').value = (entree && entree.nom) || '';
+		nlMontures = ((entree && entree.montures) || []).slice();
+		// ⚠️ Les deux filtres par catégorie sont HEURISTIQUES (la convention de nommage
+		// des images n'est pas fiable) : le fichier réel du doc peut ne pas y figurer.
+		// On ouvre alors la liste complète — sans quoi le `select` retomberait à vide et
+		// l'enregistrement refuserait « Image requise » sur un lieu qui en a une.
+		if (nlDocExistant.image
+				&& !_imagesPourCategorie(catDoc).includes(nlDocExistant.image)) {
+			_nlEl('nl-image-all').checked = true;
+		}
+		if (entree && entree.portrait
+				&& !_portraitsPourCategorie(catDoc).includes(entree.portrait)) {
+			_nlEl('nl-pnj-portrait-all').checked = true;
+		}
+		_nlEl('nl-nuit-messages').value = (nlDocExistant.nuit_messages || []).join('\n');
+		nlNomTouche = true;   // un nom relu de la base n'est pas à écraser par le portrait
+	} else {
+		_nlEl('nl-label').value = '';
+		_nlEl('nl-pnj-nom').value = '';
+		_nlEl('nl-nuit-messages').value = '';
+		// Aucune catégorie n'est encore choisie : rien n'est décidé, le bloc reste offert
+		// comme avant. C'est le premier choix de catégorie qui tranche, via
+		// `_nlTenancierDefaut` — et c'est lui qui empêche d'écrire un tenancier fantôme.
+		_nlEl('nl-pnj-on').checked = true;
+		_nlEl('nl-pnj-bloc').style.display = '';
+		nlCapacites = {};
+		nlMontures = [];
+		nlNomTouche = false;
+	}
+
+	_nlMajChrome();
 	_nlRepeuplerImages();
+	if (nlMode === 'edition' && nlDocExistant.image) _nlEl('nl-image').value = nlDocExistant.image;
+	_nlMajVignetteImage();
 	_nlRepeuplerPnj();
+	_nlRenderCapacites();
+	if (nlMode === 'edition') {
+		const entree = (nlDocExistant.pnj || [])[0] || null;
+		if (entree && entree.character) _nlEl('nl-pnj-character').value = entree.character;
+		if (entree && entree.portrait) _nlEl('nl-pnj-portrait').value = entree.portrait;
+		_nlMajPortrait();
+	}
 	_nlRefreshApercu();
+}
+
+// Titre, bouton, gel de l'`_id`, connexion : tout ce qui distingue les deux modes.
+function _nlMajChrome() {
+	const edition = nlMode === 'edition';
+	_nlEl('nl-titre').textContent = edition ? '✏️ Éditer un lieu' : '➕ Nouveau lieu';
+	_nlEl('nl-create-btn').textContent = edition ? '💾 Enregistrer' : '➕ Créer';
+	_nlEl('nl-create-btn').disabled = false;
+	_nlEl('nl-id-fige').style.display = edition ? '' : 'none';
+	_nlEl('nl-link-field').style.display = edition ? 'none' : '';
 }
 
 function closeLieuAdd() {
@@ -3047,6 +3276,23 @@ function _nlMajVignetteImage() {
 	if (!f) { img.style.display = 'none'; img.removeAttribute('src'); return; }
 	img.src = `{{ url_for('towns', path='') }}${f}`;
 	img.style.display = 'block';
+}
+
+// ⚠️ LE correctif qui débloque l'auberge. Le bloc PNJ n'est coché d'office QUE si le
+// tenancier générique existe vraiment en base. `auberge` est la seule catégorie
+// interactive du jeu sans `pnj:marchand_*` (aucun code d'auberge ne lit `lieu.pnj[]`) :
+// laisser la case cochée écrivait une référence morte à chaque création, en silence.
+// Vaut aussi pour les 15 autres catégories sans tenancier générique (temple, grotte…).
+// ⚠️ En ÉDITION, on ne touche à rien : la case reflète le doc relu, pas une déduction.
+function _nlTenancierDefaut() {
+	if (nlMode === 'edition') return;
+	const cat = _nlCategorie();
+	const pnjs = (creationOptions && creationOptions.pnj) || [];
+	const existe = !!cat && pnjs.some(p => p._id === `pnj:marchand_${cat}`);
+	// Une écurie a besoin d'un tenancier pour la porter : la capacité gagne.
+	const on = existe || !!nlCapacites.montures;
+	_nlEl('nl-pnj-on').checked = on;
+	_nlEl('nl-pnj-bloc').style.display = on ? '' : 'none';
 }
 
 function _nlRepeuplerPnj() {
@@ -3090,43 +3336,169 @@ function _nlMajPortrait() {
 	if (!nlNomTouche) _nlEl('nl-pnj-nom').value = _nomDepuisPortrait(f, _nlCategorie());
 }
 
-// Les deux docs à écrire, tels qu'ils partiront en base (aussi l'aperçu).
-function _docsNouveauLieu() {
+// ── Capacités : rendu et réaction ──────────────────────────────────────────
+// ⚠️ Redessiné à chaque changement de catégorie ou de case, mais il n'y a ici AUCUN
+// champ de saisie libre : aucun focus à voler (contrairement à la composition du lot).
+function _nlRenderCapacites() {
+	const catalogue = (creationOptions && creationOptions.capacites) || [];
 	const cat = _nlCategorie();
-	const label = (_nlEl('nl-label').value || '').trim();
-	const slug = _slugLieu(label);
-	const lieu = {
-		_id: `lieu:${slug}`,
-		type: 'lieu',
-		label: label,
+	const sousCat = nlDocExistant ? (nlDocExistant.sous_categorie || '') : '';
+	_nlEl('nl-capacites').innerHTML = catalogue.map(cap => {
+		const parCat = _capaciteAccordee(cap, cat, sousCat);
+		const coche = parCat || !!nlCapacites[cap.id];
+		return `<label class="nl-cap${parCat ? ' par-categorie' : ''}">
+			<input type="checkbox" data-cap="${_escHtml(cap.id)}" ${coche ? 'checked' : ''} ${parCat ? 'disabled' : ''}
+				onchange="_nlCapacite(this)">
+			<span class="t"><b>${_escHtml(cap.label)}</b>
+				<span class="n">${_escHtml(cap.note)}</span></span>
+		</label>`;
+	}).join('') || `<div style="padding:8px;font-size:.66rem;color:#666;">Aucune capacité au catalogue.</div>`;
+
+	// Les blocs de champs propres suivent l'état RÉEL (catégorie comprise).
+	const actives = _nlCapacitesActives();
+	_nlEl('nl-taverne-bloc').style.display = actives.taverne ? '' : 'none';
+	_nlEl('nl-montures-bloc').style.display = actives.montures ? '' : 'none';
+	if (actives.montures) _nlRenderMontures();
+}
+
+// L'état complet : ce que la catégorie accorde, plus ce qui est coché à la main.
+function _nlCapacitesActives() {
+	const catalogue = (creationOptions && creationOptions.capacites) || [];
+	const cat = _nlCategorie();
+	const sousCat = nlDocExistant ? (nlDocExistant.sous_categorie || '') : '';
+	const out = {};
+	catalogue.forEach(cap => {
+		out[cap.id] = _capaciteAccordee(cap, cat, sousCat) || !!nlCapacites[cap.id];
+	});
+	return out;
+}
+
+// ⚠️ L'id de capacité voyage par un `data-cap` lu en JS, jamais dans un
+// `onchange="…('${id}')"` (CLAUDE.md §9).
+function _nlCapacite(el) {
+	const id = el && el.dataset ? el.dataset.cap : '';
+	if (!id) return;
+	nlCapacites[id] = !!el.checked;
+	// ⚠️ Une écurie vit sur le TENANCIER (`pnj[0].montures`) : cocher « Étable » sans PNJ
+	// produirait un lieu qui ouvre le bouton Montures sur un rayon vide.
+	if (id === 'montures' && el.checked && !_nlEl('nl-pnj-on').checked) {
+		_nlEl('nl-pnj-on').checked = true;
+		_nlEl('nl-pnj-bloc').style.display = '';
+		_nlEl('nl-montures-warn').textContent =
+			"⚠ Un PNJ a été ajouté : c'est le tenancier qui tient l'écurie, pas le bâtiment.";
+	}
+	_nlRenderCapacites();   // les blocs de champs propres suivent la bascule
+	_nlRefreshApercu();
+}
+
+// ── L'écurie ───────────────────────────────────────────────────────────────
+// Aucun endpoint : `especesDefs` est déjà chargé au démarrage de l'éditeur
+// (`GET /api/especes`) avec les `tags`. Le tag `monture` retient 19 espèces sur 139 —
+// exactement celles qui portent `proprietes.charge_mult` / `prix_cuivre`.
+function _especesMontures() {
+	return Object.keys(especesDefs)
+		.filter(id => ((especesDefs[id].tags) || []).indexOf('monture') !== -1)
+		.sort((a, b) => (especesDefs[a].nom || a).localeCompare(especesDefs[b].nom || b));
+}
+
+function _nlRenderMontures() {
+	const liste = _especesMontures();
+	if (!liste.length) {
+		_nlEl('nl-montures-liste').innerHTML =
+			`<div style="padding:8px;font-size:.66rem;color:#666;">Aucune espèce taguée « monture ».</div>`;
+		return;
+	}
+	_nlEl('nl-montures-liste').innerHTML = liste.map(id => {
+		const e = especesDefs[id];
+		return `<label class="nl-cap">
+			<input type="checkbox" data-espece="${_escHtml(id)}" ${nlMontures.indexOf(id) !== -1 ? 'checked' : ''}
+				onchange="_nlMonture(this)">
+			<span class="t"><b>${_escHtml(e.nom || id)}</b>
+				<span class="n">${_escHtml(id)}</span></span>
+		</label>`;
+	}).join('');
+}
+
+function _nlMonture(el) {
+	const id = el && el.dataset ? el.dataset.espece : '';
+	if (!id) return;
+	const i = nlMontures.indexOf(id);
+	if (el.checked && i === -1) nlMontures.push(id);
+	else if (!el.checked && i !== -1) nlMontures.splice(i, 1);
+	_nlRefreshApercu();
+}
+
+// Le récit de la nuit : une ligne par message, les vides écartées.
+function _nlNuitMessages() {
+	return (_nlEl('nl-nuit-messages').value || '')
+		.split('\n').map(l => l.trim()).filter(Boolean);
+}
+
+// Les champs que le formulaire POSSÈDE — la seule chose que `_fusionLieu` a le droit
+// d'écrire dans un doc existant.
+function _nlChamps() {
+	const actives = _nlCapacitesActives();
+	const champs = {
+		label: (_nlEl('nl-label').value || '').trim(),
 		image: _nlEl('nl-image').value,
-		categorie: cat,
+		categorie: _nlCategorie(),
+		capacites: nlCapacites,
+		nuit_messages: actives.taverne ? _nlNuitMessages() : [],
+		montures: actives.montures ? nlMontures : [],
+		pnj: null,
 	};
 	if (_nlEl('nl-pnj-on').checked) {
-		// Les champs vides ne sont pas écrits : `nom`/`portrait` absents font
-		// retomber pnj_payload sur ceux du doc PNJ, ce qui est le comportement voulu.
-		const entree = { character: _nlEl('nl-pnj-character').value };
-		const nom = (_nlEl('nl-pnj-nom').value || '').trim();
-		const portrait = _nlEl('nl-pnj-portrait').value;
-		if (nom) entree.nom = nom;
-		if (portrait) entree.portrait = portrait;
-		lieu.pnj = [entree];
+		champs.pnj = {
+			character: _nlEl('nl-pnj-character').value,
+			nom: (_nlEl('nl-pnj-nom').value || '').trim(),
+			portrait: _nlEl('nl-pnj-portrait').value,
+		};
 	}
+	return champs;
+}
+
+// Les deux docs à écrire, tels qu'ils partiront en base (aussi l'aperçu).
+// ⚠️ Le doc du lieu passe par `_fusionLieu` sur une base VIDE : création et édition
+// produisent ainsi rigoureusement la même forme, depuis une seule fonction. Un champ
+// ajouté au formulaire ne peut plus n'atterrir que dans l'un des deux chemins.
+function _docsNouveauLieu() {
+	const champs = _nlChamps();
+	const catalogue = (creationOptions && creationOptions.capacites) || [];
+	const lieu = _fusionLieu({}, champs, catalogue);
+	lieu._id = `lieu:${_slugLieu(champs.label)}`;
 	lieu.lieu_parent = currentLocId;
 	const cell = lieuxSelectedCell || { cx: 0, cy: 0 };
 	const link = {
-		_id: _prochainLinkId(cat, currentLocId),
+		_id: _prochainLinkId(champs.categorie, currentLocId),
 		type: 'connection',
 		nodes: [
 			{ lieu: currentLocId, pos: [cell.cx, cell.cy] },
 			{ lieu: lieu._id, pos: [0, 0] },
 		],
-		metadata: { type: cat, status: 'ouvert' },
+		metadata: { type: champs.categorie, status: 'ouvert' },
 	};
 	return { lieu, link };
 }
 
+// Le doc à écrire en ÉDITION : le doc RELU EN BASE, fusionné avec les seuls champs du
+// formulaire. ⚠️ `_id` et `_rev` viennent de `nlDocExistant` et ne sont jamais recalculés.
+function _docLieuEdite() {
+	const catalogue = (creationOptions && creationOptions.capacites) || [];
+	return _fusionLieu(nlDocExistant || {}, _nlChamps(), catalogue);
+}
+
+// ⚠️ NE redessine PAS les capacités ni l'écurie : cocher une monture appelle ceci, et
+// reconstruire la liste de 19 espèces remettrait son défilement à zéro sous le doigt.
+// Le rendu des cases est appelé explicitement là où il change vraiment — ouverture du
+// formulaire, changement de catégorie, bascule d'une capacité.
 function _nlRefreshApercu() {
+	if (nlMode === 'edition') {
+		const doc = _docLieuEdite();
+		_nlEl('nl-id').textContent = doc._id || 'lieu:';
+		_nlEl('nl-id-warn').textContent = '';
+		_nlEl('nl-preview').textContent = JSON.stringify(doc, null, 2);
+		return;
+	}
 	const { lieu, link } = _docsNouveauLieu();
 	_nlEl('nl-id').textContent = lieu._id;
 	_nlEl('nl-link-id').textContent = link._id || 'link:… (catégorie requise)';
@@ -3135,14 +3507,73 @@ function _nlRefreshApercu() {
 	_nlEl('nl-preview').textContent = JSON.stringify([lieu, link], null, 2);
 }
 
+// Le bouton du formulaire, quel que soit le mode.
+function submitLieuForm() {
+	return nlMode === 'edition' ? enregistrerLieuEdite() : creerSousLieu();
+}
+
+// Contrôles communs aux deux modes. Rend un message, ou '' si tout va bien.
+function _nlValider(doc) {
+	if (!doc.categorie) return 'Catégorie requise.';
+	if (!doc.label) return 'Label requis.';
+	if (!doc.image) return 'Image requise.';
+	if (doc.pnj && !doc.pnj[0].character) {
+		return 'PNJ (character) requis, ou décochez « avec un PNJ ».';
+	}
+	// Une étable sans écurie ouvre le bouton Montures sur un rayon vide.
+	if (_nlCapacitesActives().montures && !(doc.pnj && (doc.pnj[0].montures || []).length)) {
+		return 'Écurie vide : cochez au moins une monture, ou retirez la capacité « Étable ».';
+	}
+	return '';
+}
+
+async function enregistrerLieuEdite() {
+	const err = _nlEl('nl-error');
+	if (!nlDocExistant || !nlDocExistant._id) { err.textContent = 'Aucun lieu chargé.'; return; }
+	const doc = _docLieuEdite();
+	const souci = _nlValider(doc);
+	if (souci) { err.textContent = souci; return; }
+
+	// ⚠️ Retirer un PNJ qui portait une `progeniture` (une chaîne d'escorte) ou une écurie
+	// est une PERTE DE CONTENU, pas un réglage : elle se confirme.
+	const avant = (nlDocExistant.pnj || [])[0] || null;
+	const perdus = [];
+	if (avant && !doc.pnj) {
+		if (avant.progeniture) perdus.push('la progéniture (chaîne d’escorte)');
+		if ((avant.montures || []).length) perdus.push("l'écurie");
+	}
+	if (perdus.length && !confirm(
+			`Retirer le PNJ supprimera ${perdus.join(' et ')} de ${nlDocExistant._id}.\n\nContinuer ?`)) {
+		return;
+	}
+
+	const btn = _nlEl('nl-create-btn');
+	btn.disabled = true;
+	err.textContent = 'Enregistrement…';
+	try {
+		await _putDoc(doc);
+	} catch (e) {
+		err.textContent = `✗ ${e.message}`;
+		btn.disabled = false;
+		return;
+	}
+	btn.disabled = false;
+	closeLieuAdd();
+	// Le cache de l'éditeur JSON porte l'ancien doc : le laisser servirait un `_rev` périmé.
+	delete lieuxDocCache[doc._id];
+	creationOptions = null;
+	await fetchLieuxConnections();
+	renderLieuxConnList();
+	if (grid.length) renderGrid();
+	setStatus(`Lieu <span>${doc._id}</span> mis à jour.`);
+}
+
 async function creerSousLieu() {
 	const err = _nlEl('nl-error');
 	if (!currentLocId || !lieuxSelectedCell) { err.textContent = 'Aucune case sélectionnée.'; return; }
 	const { lieu, link } = _docsNouveauLieu();
-	if (!lieu.categorie) { err.textContent = 'Catégorie requise.'; return; }
-	if (!lieu.label) { err.textContent = 'Label requis.'; return; }
-	if (!lieu.image) { err.textContent = 'Image requise.'; return; }
-	if (lieu.pnj && !lieu.pnj[0].character) { err.textContent = 'PNJ (character) requis, ou décochez « avec un PNJ ».'; return; }
+	const souci = _nlValider(lieu);
+	if (souci) { err.textContent = souci; return; }
 	if (((creationOptions && creationOptions.lieu_ids) || []).includes(lieu._id)) {
 		err.textContent = `${lieu._id} existe déjà — changez le label.`;
 		return;
@@ -3257,7 +3688,13 @@ function _lotLignes(expansion, file, labels, edits, images, portraits) {
 
 // Les deux docs de chaque ligne, lieu PUIS son link (une connexion orpheline casse
 // l'enrichissement `details` de get_lieu_connections). Miroir de `_docsNouveauLieu`.
-function _lotDocs(lignes, parentId, slugFn, linkFn) {
+//
+// ⚠️ `tenanciers` = les `pnj:marchand_*` RÉELLEMENT en base. Sans ce contrôle, un lot
+// d'auberges écrivait N références vers `pnj:marchand_auberge`, QUI N'EXISTE PAS — c'est
+// la seule catégorie interactive du jeu sans tenancier générique, et aucun code d'auberge
+// ne lit `lieu.pnj[]`. Un lieu sans champ `pnj` est la forme correcte, et c'est exactement
+// celle de l'auberge d'Auxerre.
+function _lotDocs(lignes, parentId, slugFn, linkFn, tenanciers) {
 	const docs = [];
 	const linksPris = [];
 	(lignes || []).forEach(l => {
@@ -3268,14 +3705,17 @@ function _lotDocs(lignes, parentId, slugFn, linkFn) {
 			image: l.image,
 			categorie: l.categorie,
 			lieu_parent: parentId,
-			pnj: [{ character: 'pnj:marchand_' + l.categorie }],
 			stock_matieres: {},
 			stock_vente: [],
 		};
-		// Champs vides jamais écrits : `nom`/`portrait` absents font retomber
-		// `pnj_payload` sur ceux du doc PNJ générique, ce qui est le comportement voulu.
-		if (l.portrait) lieu.pnj[0].portrait = l.portrait;
-		if (l.nom) lieu.pnj[0].nom = l.nom;
+		const tenancier = 'pnj:marchand_' + l.categorie;
+		if (!tenanciers || tenanciers.indexOf(tenancier) !== -1) {
+			lieu.pnj = [{ character: tenancier }];
+			// Champs vides jamais écrits : `nom`/`portrait` absents font retomber
+			// `pnj_payload` sur ceux du doc PNJ générique, ce qui est le comportement voulu.
+			if (l.portrait) lieu.pnj[0].portrait = l.portrait;
+			if (l.nom) lieu.pnj[0].nom = l.nom;
+		}
 		const linkId = linkFn(l.categorie, parentId, linksPris);
 		linksPris.push(linkId);
 		docs.push(lieu);
@@ -3315,6 +3755,12 @@ function _lotCollisions(lignes, lieuIds, slugFn) {
 // ── Le reste : lecture du DOM et du serveur ──────────────────────────────────
 
 // Catégories offertes, et ce que la cité courante possède déjà de chacune.
+// Les `pnj:marchand_*` réellement en base — `_lotDocs` n'écrit un `pnj` que pour ceux-là.
+function _lotTenanciers() {
+	return ((creationOptions && creationOptions.pnj) || [])
+		.map(p => p._id).filter(id => String(id || '').indexOf('pnj:marchand_') === 0);
+}
+
 function _lotCategories() {
 	const cats = (creationOptions && creationOptions.categories) || [];
 	const lieux = (creationOptions && creationOptions.lieux) || [];
@@ -3614,7 +4060,7 @@ function _lotRenderPied() {
 
 	_lotEl('lot-preview').textContent = n
 		? JSON.stringify(_lotDocs(lotLignes.filter(l => l.case_ok && l.label),
-			currentLocId, _slugLieu, _prochainLinkId), null, 1)
+			currentLocId, _slugLieu, _prochainLinkId, _lotTenanciers()), null, 1)
 		: '';
 }
 
@@ -3627,7 +4073,7 @@ async function creerLot() {
 	if (col.doublons.length || col.existants.length || col.sansLabel.length) return;
 	if (!lotLignes.length || lotLignes.some(l => !l.case_ok || !l.image)) return;
 
-	const docs = _lotDocs(lotLignes, currentLocId, _slugLieu, _prochainLinkId);
+	const docs = _lotDocs(lotLignes, currentLocId, _slugLieu, _prochainLinkId, _lotTenanciers());
 	lotEnVol = true;
 	_lotEl('lot-create-btn').disabled = true;
 	_lotEl('lot-error').textContent = '';
@@ -3716,13 +4162,18 @@ let _nlCable = false;
 function _nlCabler() {
 	if (_nlCable) return;
 	_nlCable = true;
+	// ⚠️ `_nlTenancierDefaut` passe APRÈS `_nlRepeuplerPnj` : il décide de COCHER ou non
+	// le bloc selon l'existence du tenancier générique de la catégorie choisie.
 	_nlEl('nl-categorie').addEventListener('change', () => {
 		_nlEl('nl-categorie-libre').style.display = _nlEl('nl-categorie').value === '__libre__' ? '' : 'none';
-		_nlRepeuplerImages(); _nlRepeuplerPnj(); _nlRefreshApercu();
+		_nlRepeuplerImages(); _nlRepeuplerPnj(); _nlTenancierDefaut();
+		_nlRenderCapacites(); _nlRefreshApercu();
 	});
 	_nlEl('nl-categorie-libre').addEventListener('input', () => {
-		_nlRepeuplerImages(); _nlRepeuplerPnj(); _nlRefreshApercu();
+		_nlRepeuplerImages(); _nlRepeuplerPnj(); _nlTenancierDefaut();
+		_nlRenderCapacites(); _nlRefreshApercu();
 	});
+	_nlEl('nl-nuit-messages').addEventListener('input', _nlRefreshApercu);
 	_nlEl('nl-image-all').addEventListener('change', () => { _nlRepeuplerImages(); _nlRefreshApercu(); });
 	_nlEl('nl-image').addEventListener('change', () => { _nlMajVignetteImage(); _nlRefreshApercu(); });
 	_nlEl('nl-label').addEventListener('input', _nlRefreshApercu);
@@ -4583,7 +5034,7 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 <div id="lieu-add-overlay" class="la-hidden" onclick="if(event.target===this)closeLieuAdd()">
 	<div class="la-panel">
 		<div class="la-topbar">
-			<h2>➕ Nouveau lieu</h2>
+			<h2 id="nl-titre">➕ Nouveau lieu</h2>
 			<button class="btn btn-inline" style="font-size:.62rem;" onclick="closeLieuAdd()">✕ Fermer</button>
 		</div>
 
@@ -4591,6 +5042,29 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 			<label for="nl-categorie">Catégorie</label>
 			<select id="nl-categorie" style="margin-bottom:6px;"></select>
 			<input type="text" id="nl-categorie-libre" placeholder="catégorie libre…" style="display:none;">
+		</div>
+
+		<!-- Ce que le lieu SAURA FAIRE. Une capacité vient de la catégorie OU d'un tag ;
+		     accordée par la catégorie, la case est cochée et GRISÉE — il n'existe aucun
+		     anti-tag, décocher n'aurait donc aucun effet. -->
+		<div class="la-field">
+			<label>Ce que ce lieu saura faire</label>
+			<div id="nl-capacites" class="nl-caps"></div>
+		</div>
+
+		<!-- Champs propres à une TAVERNE. -->
+		<div class="la-field" id="nl-taverne-bloc" style="display:none;">
+			<label for="nl-nuit-messages">Récit de la nuit <span style="color:#888;font-weight:normal;">(optionnel, une ligne par message)</span></label>
+			<textarea id="nl-nuit-messages" rows="4" placeholder="La salle se vide peu à peu…"></textarea>
+			<div style="font-size:.64rem;color:#888;">Vide ⇒ les 36 lignes par défaut du jeu.</div>
+		</div>
+
+		<!-- Champs propres à une ÉTABLE. ⚠️ L'écurie vit sur le TENANCIER, pas sur le
+		     bâtiment : cette liste part dans `pnj[0].montures`. -->
+		<div class="la-field" id="nl-montures-bloc" style="display:none;">
+			<label>Écurie <span style="color:#888;font-weight:normal;">(ce que le tenancier vend)</span></label>
+			<div id="nl-montures-liste" class="nl-caps"></div>
+			<div id="nl-montures-warn" class="la-warn"></div>
 		</div>
 
 		<div class="la-field">
@@ -4605,6 +5079,12 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 			<input type="text" id="nl-label" placeholder="Le Chaudron des Brumes">
 			<div class="la-readonly" id="nl-id" style="margin-top:6px;">lieu:</div>
 			<div class="la-warn" id="nl-id-warn"></div>
+			<!-- ⚠️ En édition, l'`_id` est GELÉ : CouchDB ne renomme pas, et la connexion
+			     pointe l'ancien. Le label reste libre — la divergence est déjà normale en
+			     base (`lieu:le_four_banal_de_saint_germain` s'affiche « …de l'horloge »). -->
+			<div id="nl-id-fige" style="font-size:.64rem;color:#888;margin-top:4px;display:none;">
+				L'identifiant ne change jamais : renommer le label ne renomme pas le document.
+			</div>
 		</div>
 
 		<div class="la-field">
@@ -4622,7 +5102,9 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 			</div>
 		</div>
 
-		<div class="la-field">
+		<!-- Pas de connexion en ÉDITION : le lieu a déjà sa porte, et l'édition n'écrit
+		     qu'un seul doc. -->
+		<div class="la-field" id="nl-link-field">
 			<label>Connexion</label>
 			<div class="la-readonly" id="nl-link-id">link:</div>
 		</div>
@@ -4632,7 +5114,7 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 
 		<div class="la-warn" id="nl-error" style="margin-bottom:8px;"></div>
 		<div class="la-actions">
-			<button class="btn" id="nl-create-btn" onclick="creerSousLieu()">➕ Créer</button>
+			<button class="btn" id="nl-create-btn" onclick="submitLieuForm()">➕ Créer</button>
 			<button class="btn danger" onclick="closeLieuAdd()">Annuler</button>
 		</div>
 	</div>

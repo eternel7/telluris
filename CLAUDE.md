@@ -23,9 +23,10 @@ node dev/test_slots_client.js      # exécution des fonctions pures de la barre 
 node dev/test_resize_client.js     # exécution du redimensionnement de grille (éditeur de carte)
 node dev/test_deplacement_client.js # exécution des règles de MARCHE partagées (scripts/deplacement.js)
 node dev/test_lot_lieux_client.js  # exécution du LOT de lieux (éditeur de carte, mode Lieux)
+node dev/test_lieu_form_client.js  # exécution du FORMULAIRE de lieu (capacités, fusion à l'édition)
 ```
 
-Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les cinq harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
+Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les six harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
 
 - `check_js.js` neutralise les expressions Jinja avant de passer le code au parseur de Node — ⚠️ en `(0)` et non `0`, sinon `{{ liste | tojson }}.forEach(...)` deviendrait `0.forEach(...)`, faux positif garanti. ⚠️ Il contrôle **aussi `templates/scripts/*.js`** : les `<script src=…>` sont sautés (ils n'ont pas de corps dans la page), si bien que `nav.js`, `battle_map.js` et `deplacement.js` n'étaient couverts par **rien**. Un `.js` n'ayant pas de balise, le fichier entier est traité comme un unique bloc.
 - `test_slots_client.js` extrait les fonctions **pures** du template (par nom, accolades équilibrées) et les exécute dans un contexte `vm` : il ferme la classe de bug « à qui appartient ce que j'affiche et ce que j'écris ? », qu'aucun test pytest ne peut atteindre. **Hors de portée sans jsdom** : rendu DOM, clic long, ordre inversé en mobile — à vérifier en jeu.
@@ -85,6 +86,7 @@ utils/
   marche.py              # prix, stocks, tick atelier, relations de lieu
   focalisation.py        # 🧭 lieu (BFS) / 🎯 quête (biais probabiliste)
   enseignes.py           # noms d'enseigne (pur) : tournures par métier × toponymes de cité
+  capacites.py           # capacités d'un lieu (pur) : catalogue taverne/étable/scriptorium/recrutement/guilde
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil
   pnj.py                 # PNJ de lieu (pur) : tirage de présence, arbre de dialogue, services
   acces.py               # barrière d'accès à un lieu gardée par un PNJ (pur) : conditions, laissez-passer, cycle
@@ -127,6 +129,7 @@ dev/
   test_slots_client.js   # tests d'EXÉCUTION du JS de la barre de slots (node, sans dépendance)
   test_deplacement_client.js # tests d'EXÉCUTION des règles de marche (scripts/deplacement.js)
   test_lot_lieux_client.js # tests d'EXÉCUTION du lot de lieux (éditeur de carte)
+  test_lieu_form_client.js # tests d'EXÉCUTION du formulaire de lieu (capacités, fusion)
 tests/                   # tests purs, un fichier par système
 ```
 
@@ -179,6 +182,24 @@ Pattern `type:identifier` — `user:email@example.com`, `lieu:lutecia`, `rules:r
 ### Character document vs. Pydantic model
 `models/character_document.py` = spec de référence. **Vérité = le code de création dans `routers/user.py`.** Les noms de champs diffèrent : `voc`, `sex`, `caracteristiques_standard`/`current`, `cite`.
 
+### Capacités d'un lieu — « le type » n'est pas un champ
+Ce qu'un lieu SAIT FAIRE est résolu **à la lecture** par cinq prédicats du même idiome (`categorie == X` **OU** tag `Y` — le OU évite toute migration et ouvre la capacité à n'importe quel lieu par la donnée seule) : `auberge.lieu_est_taverne` · `montures.lieu_vend_montures` · `scriptorium.lieu_est_scriptorium` · `recrutement.lieu_recrute` · `recrutement.lieu_de_guilde`. `utils/capacites.py` en sert le **catalogue** (id, label, tag, catégories qui l'accordent) à l'éditeur, via `creation_options.capacites`.
+
+- ⚠️ **`capacites.py` RECOPIE les cinq prédicats, il n'en est pas la source** — les importer tirerait `marche`, `expedition` et `quetes` derrière eux pour un simple GET d'admin. La recopie est verrouillée par `tests/test_capacites.py`, qui compare `capacites_de` aux **vrais** prédicats sur une matrice : elle ne peut pas dériver en silence. (C'est ce test qui a attrapé l'oubli des 4 catégories de `lieu_de_guilde`.)
+- ⚠️ **Une capacité accordée par la CATÉGORIE ne se retire pas** : il n'existe aucun anti-tag. Le formulaire coche ET grise la case, plutôt que d'offrir un geste sans effet. Symétriquement, un tag redondant avec la catégorie n'est **pas** posé — l'auberge de référence n'en porte aucun.
+- **Une auberge est le doc le plus dépouillé du jeu** : `categorie: "auberge"` (ou le tag) suffit. Tables et messages naissent en jeu, prix/plafonds/durées sont des variables de monde. Seul champ propre, optionnel : `nuit_messages`. ⚠️ **Aucun tenancier** — aucun code d'auberge ne lit `lieu.pnj[]`, et `pnj:marchand_auberge` n'existe pas.
+- ⚠️ **L'écurie d'une étable vit sur le TENANCIER** (`pnj[0].montures`), pas sur le bâtiment : `lieu_vend_montures` seul ouvre le bouton sur un rayon vide. Le picker filtre les espèces sur le tag `monture` (19 sur 139, exactement celles qui portent `proprietes.charge_mult`/`prix_cuivre`).
+- ⚠️ **Le bloc PNJ n'est coché d'office que si `pnj:marchand_<categorie>` existe** (`_nlTenancierDefaut`). Avant, le chemin par défaut écrivait une **référence morte** pour `auberge` et les 15 autres catégories sans tenancier générique.
+
+### Édition d'un sous-lieu — FUSION, jamais remplacement
+Le bouton `✏️ Éditer` d'une ligne de connexion rouvre le **même** formulaire, pré-rempli depuis `GET /api/lieu/{id}`. ⚠️ `PUT /admin/doc` écrit le doc **ENTIER** : `_fusionLieu(existant, champs)` part donc du doc **relu en base** et n'y écrit que les six champs que le formulaire possède (`label`, `image`, `categorie`, `tags`, `pnj`, `nuit_messages`).
+
+- ⚠️ **`pnj` est une LISTE** (trois lieux en base en portent plusieurs, jusqu'à 4) : on fusionne dans l'entrée **[0]** et on conserve les suivantes. Dans [0], seules `character`/`nom`/`portrait`/`montures` sont écrites — **`progeniture` (10 en base, les chaînes d'escorte), `description`, `conditions`, `probabilite`, `image` survivent**. Retirer un PNJ porteur de `progeniture` ou d'écurie demande une **confirmation** : c'est une perte de contenu.
+- ⚠️ **L'`_id` est GELÉ** : CouchDB ne renomme pas et la connexion pointe l'ancien. Le label reste libre — la divergence est déjà normale en base.
+- ⚠️ Les filtres image/portrait par catégorie sont **heuristiques** : si le fichier réel du doc n'y figure pas, « toutes les images » est coché d'office, sinon le `select` retomberait à vide et l'enregistrement refuserait « Image requise » sur un lieu qui en a une.
+- `metadata.type` de la connexion **n'est pas retouché** après un changement de catégorie (champ purement descriptif, lu par aucun code) : l'édition n'écrit qu'un seul doc.
+- `_docsNouveauLieu` passe par `_fusionLieu({}, …)` : création et édition produisent la **même forme** depuis une seule fonction.
+
 ### Peupler une ville — le LOT de lieux (`/admin/editor`, mode Lieux)
 Poser N boutiques d'un coup, sans écrire un `dev/gen_magasins_<ville>.py` de plus : **Maj+clic** empile des cases dans une file (une par boutique, l'ordre compte), `➕ Ajouter un lot` ouvre un tableau — composition à gauche (métier coché + quantité, avec ce que la cité possède déjà), lignes à droite (enseigne 🎲, image, portrait, tout modifiable). Écriture en **une** requête `POST /admin/import-bulk`.
 
@@ -188,6 +209,7 @@ Poser N boutiques d'un coup, sans écrire un `dev/gen_magasins_<ville>.py` de pl
 - ⚠️ Les retouches manuelles sont indexées sur **`<categorie>#<rang>`**, jamais sur l'index de ligne : un nom réécrit survit à un changement de composition.
 - Enseignes : `utils/enseignes.py` (pur, `rand_fn` injecté) croise des tournures de métier avec les toponymes de la cité ; ouvrir une ville neuve ne demande **rien** (repli sur `TOPONYMES_DEFAUT`), l'enrichir se fait dans ce seul fichier. Servi par `POST /api/lieux/enseignes`.
 - `GET /api/lieux/creation_options` porte désormais aussi `lieux` (`_id`, `categorie`, `image`, `lieu_parent`, `label`, projetés) : compter par catégorie, écarter une façade déjà posée dans la ville, exclure une enseigne existante.
+- ⚠️ **`_lotDocs` n'écrit un `pnj` que si le tenancier générique existe** (5ᵉ paramètre `tenanciers`) : un lot d'auberges posait sinon N références vers `pnj:marchand_auberge`, **qui n'existe pas**. Un lot ne pose ni capacité ni champ propre — la catégorie suffit, le reste est au formulaire mono-lieu.
 
 ### Magasins de niveau supérieur (fusion de catégories)
 Une catégorie de lieu peut **en inclure d'autres** — `LIEU_CATEGORIES_FUSION` (variable de monde, `models/character_stats.py`) : `grande_apothicairerie` = apothicairerie + jardinier, plus ses recettes propres. Les 18 grandes maisons sont à Lutèce (`dev/gen_magasins_superieurs.py`).

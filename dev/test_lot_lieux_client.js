@@ -213,6 +213,29 @@ t('un portrait vide n’est PAS écrit (repli voulu sur le doc PNJ générique)'
 	assert.strictEqual(avec.pnj[0].portrait, 'marchand_nain_m_armurerie.png');
 });
 
+t('LE PIÈGE : aucun `pnj` écrit pour une catégorie SANS tenancier générique', () => {
+	// `auberge` est la seule catégorie interactive du jeu sans `pnj:marchand_*`, et aucun
+	// code d'auberge ne lit `lieu.pnj[]`. Écrire l'entrée quand même poserait N références
+	// mortes en base, en silence. Le doc correct est celui de l'auberge d'Auxerre : sans `pnj`.
+	const tenanciers = ['pnj:marchand_armurerie', 'pnj:marchand_etable'];
+	const docs = _lotDocs(lignes(
+		['auberge', 'L’Auberge du Pont', 1, 1],
+		['armurerie', 'L’Enclume', 2, 2]), 'lieu:lutecia', _slugLieu, _prochainLinkId, tenanciers);
+	const lieux = docs.filter(d => d.type === 'lieu');
+	assert.ok(!('pnj' in lieux[0]), 'un pnj:marchand_auberge fantôme a été écrit');
+	assert.deepStrictEqual(lieux[1].pnj, [{ character: 'pnj:marchand_armurerie' }]);
+	// La porte, elle, est posée dans les deux cas.
+	assert.strictEqual(docs.filter(d => d.type === 'connection').length, 2);
+});
+
+t('sans liste de tenanciers, le comportement d’avant est conservé', () => {
+	// Le paramètre est facultatif : un appelant qui ne le passe pas écrit le `pnj` comme
+	// avant. C'est ce qui rend le correctif sans risque pour les sites d'appel existants.
+	const [lieu] = _lotDocs(lignes(['auberge', 'L’Auberge', 1, 1]), 'lieu:lutecia',
+		_slugLieu, _prochainLinkId);
+	assert.deepStrictEqual(lieu.pnj, [{ character: 'pnj:marchand_auberge' }]);
+});
+
 t('la connexion pointe la case du lieu courant et [0,0] côté boutique', () => {
 	const [, link] = _lotDocs(lignes(['armurerie', 'L’Enclume', 12, 7]), 'lieu:lutecia',
 		_slugLieu, _prochainLinkId);

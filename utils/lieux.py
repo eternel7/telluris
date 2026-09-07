@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
-from utils import acces, enseignes
+from utils import acces, capacites, enseignes
 
 # Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
 TOWNS_IMAGES_PATH = "templates/resources/towns"
@@ -342,6 +342,9 @@ async def get_creation_options(
 
 	return {
 		"categories": sorted(categories),
+		# Ce que chaque case à cocher « capacité » du formulaire doit savoir : le tag
+		# qu'elle pose, et les catégories qui l'accordent d'office (case grisée).
+		"capacites": capacites.CAPACITES,
 		"images": _lister_images(TOWNS_IMAGES_PATH),
 		"portraits": _lister_images(PNJ_IMAGES_PATH),
 		"pnj": sorted(
