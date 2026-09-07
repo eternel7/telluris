@@ -628,6 +628,56 @@
 	}
 	.la-actions { display: flex; gap: 8px; }
 
+	/* ── Création d'un LOT de lieux ──
+	   Même overlay que #lieu-add-overlay (mêmes .la-*), mais large et à deux colonnes :
+	   la composition à gauche, le tableau des lignes à droite. Le z-index est le même —
+	   les deux ne peuvent pas être ouverts ensemble (openLot ferme l'autre). */
+	#lot-overlay {
+		position: fixed; inset: 0; z-index: 300;
+		display: flex; align-items: flex-start; justify-content: center;
+		background: rgba(0,0,0,0.72); padding: 24px 12px; overflow-y: auto;
+	}
+	#lot-overlay.la-hidden { display: none; }
+	#lot-overlay .la-panel { width: min(1180px, 100%); }
+	.lot-cols { display: flex; gap: 14px; align-items: flex-start; }
+	.lot-col-gauche { flex: 0 0 300px; min-width: 0; }
+	.lot-col-droite { flex: 1 1 auto; min-width: 0; }
+	/* Les deux colonnes défilent séparément : la composition compte ~50 lignes, le
+	   tableau autant, et une seule barre de défilement les désynchroniserait. */
+	.lot-scroll { max-height: 46vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px; }
+	.lot-compo-ligne {
+		display: flex; align-items: center; gap: 6px;
+		padding: 3px 6px; font-size: 0.66rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+	}
+	.lot-compo-ligne:last-child { border-bottom: none; }
+	.lot-compo-ligne .cat { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--text); }
+	.lot-compo-ligne .deja { color: var(--muted); font-size: 0.62rem; white-space: nowrap; }
+	.lot-compo-ligne input[type=number] { width: 46px; padding: 2px 4px; font-size: 0.66rem; }
+	.lot-compo-ligne.sans-tenancier .cat { color: var(--danger); }
+	/* Le tableau des lignes déborde en largeur bien avant la page : il défile CHEZ LUI,
+	   le panneau ne doit jamais partir en défilement horizontal. */
+	.lot-table-wrap { overflow-x: auto; }
+	.lot-table { width: 100%; border-collapse: collapse; font-size: 0.66rem; }
+	.lot-table th {
+		text-align: left; color: var(--accent); font-weight: normal;
+		padding: 4px 5px; border-bottom: 1px solid var(--border); white-space: nowrap;
+		position: sticky; top: 0; background: var(--panel); z-index: 1;
+	}
+	.lot-table td { padding: 3px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+	.lot-table select, .lot-table input[type=text] { width: 100%; padding: 2px 4px; font-size: 0.66rem; }
+	.lot-table tr.sans-case td { opacity: 0.55; }
+	.lot-table tr.sans-case .case { color: var(--danger); }
+	.lot-table tr.collision .enseigne input { border-color: var(--danger); }
+	.lot-table .case { font-family: 'Share Tech Mono', monospace; color: var(--accent2); white-space: nowrap; }
+	.lot-mini { background: none; border: none; cursor: pointer; padding: 0 3px; font-size: 0.8rem; line-height: 1; }
+	.lot-mini:hover { filter: brightness(1.4); }
+	.lot-compteur { font-size: 0.68rem; color: var(--muted); margin: 6px 0; }
+	.lot-compteur b.ko { color: var(--danger); }
+	.lot-compteur b.ok { color: var(--accent2); }
+	/* Barre de progression de l'import en masse (NDJSON). */
+	.lot-progress { height: 6px; background: #0d0f14; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; margin: 6px 0; }
+	.lot-progress > div { height: 100%; width: 0; background: var(--accent2); transition: width .15s linear; }
+
 	/* Éditeurs JSON d'une connexion (panneau Lieux) — overlay fixe à droite, calqué sur
 	   `#editor-card` d'admin_table.html : même géométrie, même ombre, même ✕. La carte et
 	   le panneau restent utilisables dessous (ce n'est PAS un modal à backdrop, contrairement
@@ -1311,6 +1361,9 @@ let lieuxRepos = null;
 let lieuxDocCache = {};      // lieu_id -> doc lieu (alimente l'éditeur JSON)
 let creationOptions = null;  // payload de /api/lieux/creation_options
 let nlNomTouche = false;     // le nom du PNJ a-t-il été saisi à la main ?
+// File des cases où poser un LOT de lieux : [{cx, cy}], dans l'ordre de shift+clic.
+// ⚠️ Une case par boutique, et l'ordre COMPTE — la ligne i du tableau prend la case i.
+let lieuxFileCases = [];
 
 const ZONE_COLORS = [
 	'rgba(255,80,80,0.35)',  'rgba(80,160,255,0.35)', 'rgba(80,255,120,0.35)',
@@ -1451,6 +1504,10 @@ lieuSelect.addEventListener('change', async (e) => {
 			lieuxJsonOuvert = null;
 			lieuxJsonDest = null;
 			lieuxRepos = null;
+			// La file du lot est faite de cases D'UNE grille : elle ne veut plus rien dire
+			// sur la suivante. Le lot ouvert se ferme avec elle, sans rien écrire.
+			lieuxFileCases = [];
+			closeLot();
 			// Changer de lieu abandonne un aperçu non enregistré : ses cotes ne veulent plus rien dire
 			// ici, et le laisser posé verrouillerait l'auto-sauvegarde du lieu SUIVANT.
 			redimEnAttente = null;
@@ -1816,6 +1873,28 @@ function renderGrid() {
 			ctx.restore();
 		});
 	}
+
+	// File du LOT — un carré numéroté par case empilée au shift+clic. Dessiné APRÈS les
+	// disques de connexion : une case peut porter les deux (rien n'interdit d'ouvrir une
+	// seconde boutique sur un seuil déjà servi), et c'est le numéro qu'on doit lire.
+	if (showLieux && lieuxFileCases.length > 0) {
+		lieuxFileCases.forEach((c, i) => {
+			const x = c.cx * cw, y = c.cy * ch;
+			const t = Math.max(4, Math.min(cw, ch) * 0.22);
+			ctx.save();
+			ctx.strokeStyle = 'rgba(120,255,180,0.95)';
+			ctx.lineWidth = 3;
+			ctx.strokeRect(x + 1.5, y + 1.5, cw - 3, ch - 3);
+			ctx.fillStyle = 'rgba(20,60,40,0.85)';
+			ctx.fillRect(x + 1.5, y + 1.5, t * 2.2, t * 1.8);
+			ctx.fillStyle = 'rgba(120,255,180,0.98)';
+			ctx.font = `bold ${t}px "Share Tech Mono", monospace`;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(String(i + 1), x + 1.5 + t * 1.1, y + 1.5 + t * 0.9);
+			ctx.restore();
+		});
+	}
 }
 
 function getHoverGlow() {
@@ -1902,6 +1981,14 @@ function paint(e) {
 				return;
 			}
 			_poserPorte(cx, cy);
+			return;
+		}
+		// Shift+clic : empile la case dans la file du LOT. Geste ajouté EN TÊTE et à
+		// lui seul — le clic simple ci-dessous reste rigoureusement celui d'avant.
+		// ⚠️ Le tactile passe un objet `Touch`, qui n'a pas de `shiftKey` : il retombe
+		// donc sur le clic simple, comportement inchangé.
+		if (e && e.shiftKey) {
+			_lotFileAjouter(cx, cy);
 			return;
 		}
 		// Lecture seule : sélectionne la case (filtre la liste), ne mute jamais grid.
@@ -2745,11 +2832,65 @@ function clearLieuxCell() {
 function renderLieuAddSection() {
 	if (!lieuAddSectionEl) return;
 	if (!currentLocId) { lieuAddSectionEl.innerHTML = ''; return; }
-	if (!lieuxSelectedCell) {
-		lieuAddSectionEl.innerHTML = `<div style="font-size:.66rem;color:#666;">Cliquez une case de la grille pour pouvoir y ajouter un lieu.</div>`;
-		return;
-	}
-	lieuAddSectionEl.innerHTML = `<button class="btn" style="font-size:.68rem;" onclick="openLieuAdd()">➕ Ajouter un lieu en [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]</button>`;
+	const solo = lieuxSelectedCell
+		? `<button class="btn" style="font-size:.68rem;" onclick="openLieuAdd()">➕ Ajouter un lieu en [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]</button>`
+		: `<div style="font-size:.66rem;color:#666;">Cliquez une case de la grille pour pouvoir y ajouter un lieu.</div>`;
+
+	// La file du LOT. ⚠️ Les ⌫ portent l'INDEX de la case, jamais son libellé : rien de
+	// ce qui vient de l'admin ne transite par un `onclick="…('…')"` (CLAUDE.md §9).
+	const pastilles = lieuxFileCases.map((c, i) =>
+		`<span style="display:inline-flex;align-items:center;gap:3px;background:#1c2c24;border:1px solid rgba(120,255,180,.5);border-radius:4px;padding:1px 4px;margin:0 3px 3px 0;">
+			<b style="color:rgba(120,255,180,.98);">${i + 1}</b>
+			<span style="color:#aaa;">${c.cx},${c.cy}</span>
+			<span onclick="_lotFileRetirer(${i})" title="Retirer de la file" style="cursor:pointer;color:var(--danger);">⌫</span>
+		</span>`).join('');
+
+	lieuAddSectionEl.innerHTML = solo + `
+		<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+			<div style="font-size:.66rem;color:#888;margin-bottom:5px;">
+				<b>Lot</b> — <b>Maj+clic</b> sur la grille empile une case : une par boutique, dans l'ordre.
+			</div>
+			${lieuxFileCases.length
+				? `<div style="margin-bottom:6px;">${pastilles}</div>`
+				: `<div style="font-size:.66rem;color:#666;margin-bottom:6px;">File vide.</div>`}
+			<button class="btn" style="font-size:.68rem;margin-bottom:4px;" ${lieuxFileCases.length ? '' : 'disabled'}
+				onclick="openLot()">➕ Ajouter un lot (${lieuxFileCases.length} case${lieuxFileCases.length > 1 ? 's' : ''})</button>
+			${lieuxFileCases.length
+				? `<button class="btn danger" style="font-size:.68rem;" onclick="_lotFileVider()">↺ Vider la file</button>`
+				: ''}
+		</div>`;
+}
+
+// ── LIEUX : la file de cases du lot ────────────────────────────────────────
+// Une case peut être empilée deux fois (deux boutiques sur un même seuil est un cas
+// déjà présent en base — les deux temples de Malakor) : on ne dédoublonne donc PAS.
+function _lotFileAjouter(cx, cy) {
+	lieuxFileCases.push({ cx, cy });
+	renderGrid();
+	renderLieuAddSection();
+	setStatus(`Case <span>[${cx}, ${cy}]</span> empilée : ${lieuxFileCases.length} dans la file du lot.`);
+}
+
+function _lotFileRetirer(i) {
+	if (i < 0 || i >= lieuxFileCases.length) return;
+	lieuxFileCases.splice(i, 1);
+	renderGrid();
+	renderLieuAddSection();
+	if (_lotOuvert()) _lotRefresh();
+}
+
+function _lotFileVider() {
+	lieuxFileCases = [];
+	renderGrid();
+	renderLieuAddSection();
+	if (_lotOuvert()) _lotRefresh();
+}
+
+// ⚠️ Le markup de l'overlay vit APRÈS cette balise script : ces fonctions sont
+// appelables avant qu'il n'existe (le chargement d'un lieu appelle `closeLot`).
+function _lotOuvert() {
+	const o = document.getElementById('lot-overlay');
+	return !!o && !o.classList.contains('la-hidden');
 }
 
 // Marques diacritiques combinantes (échappées : ce fichier voyage en UTF-8 mais
@@ -2819,13 +2960,23 @@ function _nomDepuisPortrait(fichier, cat) {
 // link:<categorie><NN>_to_<parent> — convention de la base (link:apothicairerie01_to_auxerre).
 // Le lien à créer ayant par construction le lieu courant pour node, une collision
 // serait forcément déjà visible dans lieuxConnections : le contrôle client suffit.
-function _prochainLinkId(cat, parentId) {
+//
+// ⚠️ `dejaPris` est INDISPENSABLE au lot : le compteur se dérive de `lieuxConnections`,
+// qui ne bouge pas tant que rien n'est écrit. Sans lui, N appels d'affilée rendraient N
+// fois le MÊME `link:armurerie01_to_lutecia`, et l'import en masse — un PUT complet —
+// n'en laisserait qu'un seul en base, les autres boutiques restant sans porte.
+// Le formulaire mono-lieu passe un Set vide : comportement identique à avant.
+function _prochainLinkId(cat, parentId, dejaPris) {
 	const parent = String(parentId || '').replace(/^lieu:/, '');
 	if (!cat || !parent) return '';
 	const re = new RegExp('^link:' + _escRe(cat) + '(\\d+)_to_' + _escRe(parent) + '$');
 	let max = 0;
 	lieuxConnections.forEach(c => {
 		const m = re.exec(c._id || '');
+		if (m) max = Math.max(max, parseInt(m[1], 10) || 0);
+	});
+	(dejaPris || []).forEach(id => {
+		const m = re.exec(id || '');
 		if (m) max = Math.max(max, parseInt(m[1], 10) || 0);
 	});
 	const n = max + 1;
@@ -3030,6 +3181,533 @@ async function _putDoc(doc) {
 	return res.json();
 }
 
+// ══ LOT DE LIEUX ═══════════════════════════════════════════════════════════
+// Poser N boutiques d'un coup : la file de cases donne les seuils, la composition
+// dit quels métiers et combien, le tableau propose enseigne/image/portrait et se
+// laisse retoucher ligne à ligne. L'écriture part en UNE requête
+// (`POST /admin/import-bulk`), qui gère l'upsert et vide le cache des prix.
+//
+// ⚠️ Rien n'est écrit avant le bouton « Créer le lot » : ✕, Échap et le clic sur le
+// backdrop ferment sans rien engager (CLAUDE.md §8).
+
+let lotCompo = {};    // categorie -> quantité voulue (absente ou 0 = non cochée)
+let lotEdits = {};    // "<cat>#<rang>" -> {label, image, portrait} saisis à la main
+let lotLabels = {};   // "<cat>#<rang>" -> enseigne PROPOSÉE par le serveur
+let lotLabelsDemandes = {};  // clés déjà réclamées au serveur (anti-boucle, cf. _lotRefresh)
+let lotLignes = [];   // dernier calcul de `_lotLignes`, ce que « Créer » écrira
+let lotGen = 0;       // génération : une réponse d'enseignes en vol ne repeint pas la suivante
+let lotEnVol = false; // une écriture est en cours (bouton verrouillé)
+
+function _lotEl(id) { return document.getElementById(id); }
+
+function _lotCle(categorie, rang) { return categorie + '#' + rang; }
+
+// ── Fonctions PURES (déclarées en `function` : dev/test_lot_lieux_client.js les
+//    extrait par nom et les exécute dans un `vm`) ───────────────────────────────
+
+// Composition {categorie: n} -> une entrée par boutique à créer, ordre stable.
+function _lotExpansion(compo) {
+	const sortie = [];
+	Object.keys(compo || {}).sort().forEach(cat => {
+		const n = parseInt(compo[cat], 10) || 0;
+		for (let rang = 1; rang <= n; rang++) sortie.push({ categorie: cat, rang: rang });
+	});
+	return sortie;
+}
+
+// Premier élément de `liste` hors de `prises` ; tout pris ⇒ on tourne sur le rang
+// plutôt que de rendre rien (une ligne sans image serait refusée à l'écriture).
+function _lotRotation(liste, prises, rang) {
+	const l = liste || [];
+	if (!l.length) return '';
+	for (let i = 0; i < l.length; i++) {
+		if (prises.indexOf(l[i]) === -1) return l[i];
+	}
+	return l[(rang - 1) % l.length];
+}
+
+// Expansion + file de cases -> les lignes du tableau.
+// ⚠️ La case de la ligne i est la i-ᵉ de la file, dans l'ordre des Maj+clic. Une ligne
+// en surnombre sort avec `case_ok: false` : elle est montrée barrée et bloque l'écriture,
+// plutôt que d'être silencieusement rognée — l'admin doit voir ce qui manque.
+// ⚠️ `edits` gagne toujours sur la proposition : c'est ce qui fait qu'un nom réécrit à la
+// main survit à un changement de composition (la clé est `<categorie>#<rang>`, pas l'index).
+function _lotLignes(expansion, file, labels, edits, images, portraits) {
+	const imgPrises = [], porPrises = [];
+	return (expansion || []).map((e, i) => {
+		const cle = e.categorie + '#' + e.rang;
+		const ed = (edits || {})[cle] || {};
+		const dispoImg = (images || {})[e.categorie] || [];
+		const dispoPor = (portraits || {})[e.categorie] || [];
+		const image = ed.image || _lotRotation(dispoImg, imgPrises, e.rang);
+		const portrait = ed.portrait !== undefined ? ed.portrait
+			: _lotRotation(dispoPor, porPrises, e.rang);
+		if (image) imgPrises.push(image);
+		if (portrait) porPrises.push(portrait);
+		const c = (file || [])[i] || null;
+		return {
+			categorie: e.categorie, rang: e.rang, cle: cle,
+			label: ed.label !== undefined ? ed.label : ((labels || {})[cle] || ''),
+			image: image, portrait: portrait,
+			cx: c ? c.cx : null, cy: c ? c.cy : null, case_ok: !!c,
+			images: dispoImg, portraits: dispoPor,
+		};
+	});
+}
+
+// Les deux docs de chaque ligne, lieu PUIS son link (une connexion orpheline casse
+// l'enrichissement `details` de get_lieu_connections). Miroir de `_docsNouveauLieu`.
+function _lotDocs(lignes, parentId, slugFn, linkFn) {
+	const docs = [];
+	const linksPris = [];
+	(lignes || []).forEach(l => {
+		const lieu = {
+			_id: 'lieu:' + slugFn(l.label),
+			type: 'lieu',
+			label: l.label,
+			image: l.image,
+			categorie: l.categorie,
+			lieu_parent: parentId,
+			pnj: [{ character: 'pnj:marchand_' + l.categorie }],
+			stock_matieres: {},
+			stock_vente: [],
+		};
+		// Champs vides jamais écrits : `nom`/`portrait` absents font retomber
+		// `pnj_payload` sur ceux du doc PNJ générique, ce qui est le comportement voulu.
+		if (l.portrait) lieu.pnj[0].portrait = l.portrait;
+		if (l.nom) lieu.pnj[0].nom = l.nom;
+		const linkId = linkFn(l.categorie, parentId, linksPris);
+		linksPris.push(linkId);
+		docs.push(lieu);
+		docs.push({
+			_id: linkId, type: 'connection',
+			nodes: [
+				{ lieu: parentId, pos: [l.cx, l.cy] },
+				{ lieu: lieu._id, pos: [0, 0] },
+			],
+			metadata: { type: l.categorie, status: 'ouvert' },
+		});
+	});
+	return docs;
+}
+
+// Les `_id` de lieu qui poseraient problème : en double DANS le lot, ou déjà en base.
+// ⚠️ `import-bulk` fait un PUT COMPLET : réécrire un `_id` existant effacerait en
+// silence une retouche faite à la main (CLAUDE.md §11). D'où le refus AVANT l'envoi.
+function _lotCollisions(lignes, lieuIds, slugFn) {
+	const vus = {}, doublons = {}, existants = {}, sansLabel = [];
+	const enBase = {};
+	(lieuIds || []).forEach(id => { enBase[id] = true; });
+	(lignes || []).forEach(l => {
+		if (!l.label) { sansLabel.push(l.cle); return; }
+		const id = 'lieu:' + slugFn(l.label);
+		if (vus[id]) doublons[id] = true;
+		vus[id] = true;
+		if (enBase[id]) existants[id] = true;
+	});
+	return {
+		doublons: Object.keys(doublons),
+		existants: Object.keys(existants),
+		sansLabel: sansLabel,
+	};
+}
+
+// ── Le reste : lecture du DOM et du serveur ──────────────────────────────────
+
+// Catégories offertes, et ce que la cité courante possède déjà de chacune.
+function _lotCategories() {
+	const cats = (creationOptions && creationOptions.categories) || [];
+	const lieux = (creationOptions && creationOptions.lieux) || [];
+	const pnjs = (creationOptions && creationOptions.pnj) || [];
+	const deja = {};
+	lieux.forEach(l => {
+		if (l.lieu_parent !== currentLocId || !l.categorie) return;
+		deja[l.categorie] = (deja[l.categorie] || 0) + 1;
+	});
+	const tenanciers = {};
+	pnjs.forEach(p => { tenanciers[p._id] = true; });
+	return cats.map(c => ({
+		categorie: c,
+		deja: deja[c] || 0,
+		tenancier: !!tenanciers['pnj:marchand_' + c],
+	}));
+}
+
+// Façades déjà portées par un lieu de CETTE cité : deux boutiques voisines qui
+// partagent une image se lisent comme une erreur de saisie.
+function _lotImagesDeLaCite() {
+	return ((creationOptions && creationOptions.lieux) || [])
+		.filter(l => l.lieu_parent === currentLocId && l.image)
+		.map(l => l.image);
+}
+
+// Les enseignes à ne jamais reproposer : celles de la base ET celles du tableau.
+function _lotExclus() {
+	const base = ((creationOptions && creationOptions.lieux) || [])
+		.map(l => l.label).filter(Boolean);
+	const table = Object.keys(lotLabels).map(k => lotLabels[k]).filter(Boolean);
+	const mains = Object.keys(lotEdits).map(k => lotEdits[k].label).filter(Boolean);
+	return base.concat(table, mains);
+}
+
+// Catalogues d'images/portraits par catégorie, calculés une fois par rendu.
+function _lotCatalogues(expansion) {
+	const images = {}, portraits = {};
+	const dejaEnVille = _lotImagesDeLaCite();
+	expansion.forEach(e => {
+		if (!images[e.categorie]) {
+			// Les façades de la cité sortent du catalogue, sauf à le vider entièrement :
+			// mieux vaut une image en double qu'une ligne sans image (refusée à l'écriture).
+			const toutes = _imagesPourCategorie(e.categorie);
+			const libres = toutes.filter(f => dejaEnVille.indexOf(f) === -1);
+			images[e.categorie] = libres.length ? libres : toutes;
+			portraits[e.categorie] = _portraitsPourCategorie(e.categorie);
+		}
+	});
+	return { images: images, portraits: portraits };
+}
+
+async function openLot() {
+	if (!currentLocId || !lieuxFileCases.length) return;
+	closeLieuAdd();
+	_lotCabler();
+	const overlay = _lotEl('lot-overlay');
+	_lotEl('lot-error').textContent = 'Chargement des options…';
+	overlay.classList.remove('la-hidden');
+	try {
+		const res = await fetch('/api/lieux/creation_options');
+		if (!res.ok) throw new Error('options indisponibles');
+		creationOptions = await res.json();
+	} catch (err) {
+		_lotEl('lot-error').textContent = `✗ ${err.message}`;
+		return;
+	}
+	_lotEl('lot-error').textContent = '';
+	lotCompo = {};
+	lotEdits = {};
+	lotLabels = {};
+	lotLabelsDemandes = {};
+	lotLignes = [];
+	lotEnVol = false;
+	_lotEl('lot-filtre').value = '';
+	_lotEl('lot-progress').hidden = true;
+	_lotEl('lot-progress-bar').style.width = '0';
+	_lotRenderCompo();
+	_lotRefresh();
+}
+
+// ⚠️ Refuse de fermer PENDANT l'écriture : masquer l'overlay ne l'interromprait pas,
+// et l'admin croirait avoir annulé un lot qui part quand même en base.
+function closeLot() {
+	if (lotEnVol) return;
+	const overlay = _lotEl('lot-overlay');
+	if (overlay) overlay.classList.add('la-hidden');
+}
+
+// La liste des catégories. ⚠️ Rendue à l'ouverture et au FILTRE seulement : la
+// redessiner à chaque changement de quantité arracherait le focus du champ en cours
+// de frappe (piège CLAUDE.md §15, déjà pris sur le sondage des tavernes).
+function _lotRenderCompo() {
+	const filtre = (_lotEl('lot-filtre').value || '').toLowerCase().trim();
+	const lignes = _lotCategories()
+		.filter(c => !filtre || c.categorie.toLowerCase().indexOf(filtre) !== -1)
+		.map(c => {
+			const n = parseInt(lotCompo[c.categorie], 10) || 0;
+			// ⚠️ La catégorie voyage par un `data-cat` lu en JS, JAMAIS dans un
+			// `onchange="…('${cat}')"` : une apostrophe la casserait (CLAUDE.md §9),
+			// et des catégories à espaces existent déjà en base (« Porte de rempart »).
+			return `<div class="lot-compo-ligne${c.tenancier ? '' : ' sans-tenancier'}" data-cat="${_escHtml(c.categorie)}">
+				<input type="checkbox" ${n > 0 ? 'checked' : ''}
+					onchange="_lotCocher(this, this.checked)">
+				<span class="cat" title="${c.tenancier ? '' : 'Aucun pnj:marchand_' + _escHtml(c.categorie) + ' en base'}">${_escHtml(c.categorie)}${c.tenancier ? '' : ' ⚠'}</span>
+				<span class="deja">déjà ${c.deja}</span>
+				<input type="number" min="0" max="99" value="${n}"
+					onchange="_lotQuantite(this, this.value)">
+			</div>`;
+		}).join('');
+	_lotEl('lot-compo').innerHTML = lignes
+		|| `<div style="padding:8px;font-size:.66rem;color:#666;">Aucune catégorie.</div>`;
+}
+
+// La catégorie se lit sur la ligne, pas dans l'attribut d'événement (cf. ci-dessus).
+function _lotCatDe(el) {
+	const ligne = el && el.closest ? el.closest('.lot-compo-ligne') : null;
+	return ligne ? ligne.dataset.cat : '';
+}
+
+function _lotCocher(el, coche) {
+	const categorie = _lotCatDe(el);
+	if (!categorie) return;
+	lotCompo[categorie] = coche ? Math.max(1, parseInt(lotCompo[categorie], 10) || 0) : 0;
+	_lotRenderCompo();
+	_lotRefresh();
+}
+
+function _lotQuantite(el, valeur) {
+	const categorie = _lotCatDe(el);
+	if (!categorie) return;
+	lotCompo[categorie] = Math.max(0, Math.min(99, parseInt(valeur, 10) || 0));
+	_lotRenderCompo();
+	_lotRefresh();
+}
+
+function _lotRetirerTout() {
+	lotCompo = {};
+	lotEdits = {};
+	_lotRenderCompo();
+	_lotRefresh();
+}
+
+// Recalcule les lignes et repeint tableau, compteur et aperçu. Les enseignes
+// manquantes sont demandées au serveur, qui répond de façon asynchrone : le rendu
+// se fait d'abord avec ce qu'on a, puis une seconde fois à la réponse.
+function _lotRefresh() {
+	const expansion = _lotExpansion(lotCompo);
+	const cat = _lotCatalogues(expansion);
+	lotLignes = _lotLignes(expansion, lieuxFileCases, lotLabels, lotEdits, cat.images, cat.portraits);
+	_lotRenderTable();
+	_lotRenderPied();
+	// ⚠️ On ne redemande JAMAIS une enseigne déjà réclamée : `_lotChargerLabels` se
+	// termine par `_lotRefresh`, donc une réponse incomplète (ou un serveur muet)
+	// relancerait la requête en boucle. La ligne reste alors vide et visiblement
+	// fautive — ce que l'admin peut corriger, contrairement à une boucle.
+	const manquants = lotLignes.filter(l => !l.label && !lotLabelsDemandes[l.cle]);
+	if (manquants.length) _lotChargerLabels(manquants);
+}
+
+async function _lotChargerLabels(manquants) {
+	const gen = ++lotGen;
+	manquants.forEach(l => { lotLabelsDemandes[l.cle] = true; });
+	const parCat = {};
+	manquants.forEach(l => { parCat[l.categorie] = (parCat[l.categorie] || 0) + 1; });
+	const demandes = Object.keys(parCat).map(c => ({ categorie: c, n: parCat[c] }));
+	let labels;
+	try {
+		const res = await fetch('/api/lieux/enseignes', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				lieu_parent: currentLocId, demandes: demandes, exclus: _lotExclus(),
+			}),
+		});
+		if (!res.ok) throw new Error('enseignes indisponibles');
+		labels = (await res.json()).labels || {};
+	} catch (err) {
+		_lotEl('lot-error').textContent = `✗ ${err.message}`;
+		return;
+	}
+	// ⚠️ Une réponse arrivée après un changement de composition ne repeint rien :
+	// ses noms ne correspondent plus aux lignes affichées.
+	if (gen !== lotGen) return;
+	const curseur = {};
+	manquants.forEach(l => {
+		const i = curseur[l.categorie] || 0;
+		const propose = (labels[l.categorie] || [])[i];
+		if (propose) lotLabels[l.cle] = propose;
+		curseur[l.categorie] = i + 1;
+	});
+	_lotRefresh();
+}
+
+// 🎲 sur une ligne : un nom neuf pour elle seule, jamais un de ceux déjà posés.
+async function _lotRelancer(i) {
+	const ligne = lotLignes[i];
+	if (!ligne) return;
+	try {
+		const res = await fetch('/api/lieux/enseignes', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				lieu_parent: currentLocId,
+				demandes: [{ categorie: ligne.categorie, n: 1 }],
+				exclus: _lotExclus(),
+			}),
+		});
+		if (!res.ok) throw new Error('enseignes indisponibles');
+		const propose = (((await res.json()).labels || {})[ligne.categorie] || [])[0];
+		if (!propose) return;
+		lotLabels[ligne.cle] = propose;
+		// Le 🎲 reprend la main sur un nom SAISI — mais lui seul : l'image et le portrait
+		// choisis à la main sur cette ligne n'ont aucune raison de sauter avec.
+		if (lotEdits[ligne.cle]) delete lotEdits[ligne.cle].label;
+		_lotRefresh();
+	} catch (err) {
+		_lotEl('lot-error').textContent = `✗ ${err.message}`;
+	}
+}
+
+function _lotEdit(i, champ, valeur) {
+	const ligne = lotLignes[i];
+	if (!ligne) return;
+	lotEdits[ligne.cle] = lotEdits[ligne.cle] || {};
+	lotEdits[ligne.cle][champ] = valeur;
+	ligne[champ] = valeur;
+	// ⚠️ On NE redessine PAS le tableau : l'admin est peut-être en train de taper dans
+	// le champ. Seuls le pied de panneau et les classes de collision se remettent à jour.
+	_lotRenderPied();
+	_lotMajCollisions();
+}
+
+// Le tableau des lignes. ⚠️ Aucun `onclick="…('${label}')"` : les boutons portent
+// l'INDEX de ligne, la valeur se lit dans l'`<input>` (CLAUDE.md §9).
+function _lotRenderTable() {
+	if (!lotLignes.length) {
+		_lotEl('lot-table').innerHTML =
+			`<tr><td style="padding:10px;color:#666;">Cochez une catégorie à gauche.</td></tr>`;
+		return;
+	}
+	const opts = (liste, choisie) => (liste || []).map(f =>
+		`<option value="${_escHtml(f)}"${f === choisie ? ' selected' : ''}>${_escHtml(f)}</option>`).join('');
+	_lotEl('lot-table').innerHTML =
+		`<thead><tr><th>Métier</th><th>Case</th><th>Enseigne</th><th>Image</th><th>Portrait</th><th></th></tr></thead><tbody>`
+		+ lotLignes.map((l, i) => `<tr data-i="${i}"${l.case_ok ? '' : ' class="sans-case"'}>
+			<td>${_escHtml(l.categorie)}</td>
+			<td class="case">${l.case_ok ? `${l.cx},${l.cy}` : 'aucune'}</td>
+			<td class="enseigne"><input type="text" value="${_escHtml(l.label)}"
+				oninput="_lotEdit(${i}, 'label', this.value)" placeholder="enseigne…"></td>
+			<td><select onchange="_lotEdit(${i}, 'image', this.value)">${opts(l.images, l.image)}</select></td>
+			<td><select onchange="_lotEdit(${i}, 'portrait', this.value)"><option value="">— aucun —</option>${opts(l.portraits, l.portrait)}</select></td>
+			<td style="white-space:nowrap;">
+				<button class="lot-mini" title="Retirer un autre nom" onclick="_lotRelancer(${i})">🎲</button>
+			</td>
+		</tr>`).join('') + `</tbody>`;
+	_lotMajCollisions();
+}
+
+// Marque les lignes fautives sans redessiner le tableau (une saisie est peut-être
+// en cours dans l'un de ses champs).
+function _lotMajCollisions() {
+	const col = _lotCollisions(lotLignes, (creationOptions && creationOptions.lieu_ids) || [], _slugLieu);
+	const mauvais = {};
+	col.doublons.concat(col.existants).forEach(id => { mauvais[id] = true; });
+	Array.prototype.forEach.call(_lotEl('lot-table').querySelectorAll('tr[data-i]'), tr => {
+		const l = lotLignes[parseInt(tr.dataset.i, 10)];
+		const id = l && l.label ? 'lieu:' + _slugLieu(l.label) : '';
+		tr.classList.toggle('collision', !!(id && mauvais[id]));
+	});
+	return col;
+}
+
+// Compteur, aperçu JSON, message d'erreur et état du bouton d'écriture.
+function _lotRenderPied() {
+	const n = lotLignes.length;
+	const cases = lieuxFileCases.length;
+	const sansCase = lotLignes.filter(l => !l.case_ok).length;
+	const classe = (n && !sansCase) ? 'ok' : 'ko';
+	_lotEl('lot-compteur').innerHTML =
+		`<b class="${classe}">${n}</b> boutique${n > 1 ? 's' : ''} pour <b>${cases}</b> case${cases > 1 ? 's' : ''} dans la file`
+		+ (sansCase ? ` — <b class="ko">${sansCase} sans case</b> (Maj+clic pour en empiler)` : '');
+
+	const col = _lotCollisions(lotLignes, (creationOptions && creationOptions.lieu_ids) || [], _slugLieu);
+	const soucis = [];
+	if (sansCase) soucis.push(`${sansCase} ligne(s) sans case`);
+	if (col.sansLabel.length) soucis.push(`${col.sansLabel.length} ligne(s) sans enseigne`);
+	if (col.doublons.length) soucis.push(`enseignes en double : ${col.doublons.join(', ')}`);
+	if (col.existants.length) soucis.push(`déjà en base : ${col.existants.join(', ')}`);
+	const lignesSansImage = lotLignes.filter(l => !l.image).length;
+	if (lignesSansImage) soucis.push(`${lignesSansImage} ligne(s) sans image`);
+	_lotEl('lot-error').textContent = soucis.length ? '✗ ' + soucis.join(' · ') : '';
+
+	const pret = n > 0 && !soucis.length && !lotEnVol;
+	_lotEl('lot-create-btn').disabled = !pret;
+	_lotEl('lot-create-btn').textContent = `➕ Créer le lot (${n * 2} docs)`;
+
+	_lotEl('lot-preview').textContent = n
+		? JSON.stringify(_lotDocs(lotLignes.filter(l => l.case_ok && l.label),
+			currentLocId, _slugLieu, _prochainLinkId), null, 1)
+		: '';
+}
+
+// ── L'écriture ───────────────────────────────────────────────────────────────
+// `POST /admin/import-bulk` : un seul aller-retour, upsert par doc, progression en
+// NDJSON, et `reset_prix_cache()` déclenché côté serveur (`type: "lieu"`).
+async function creerLot() {
+	if (lotEnVol) return;
+	const col = _lotCollisions(lotLignes, (creationOptions && creationOptions.lieu_ids) || [], _slugLieu);
+	if (col.doublons.length || col.existants.length || col.sansLabel.length) return;
+	if (!lotLignes.length || lotLignes.some(l => !l.case_ok || !l.image)) return;
+
+	const docs = _lotDocs(lotLignes, currentLocId, _slugLieu, _prochainLinkId);
+	lotEnVol = true;
+	_lotEl('lot-create-btn').disabled = true;
+	_lotEl('lot-error').textContent = '';
+	const barre = _lotEl('lot-progress-bar');
+	_lotEl('lot-progress').hidden = false;
+	barre.style.width = '0';
+
+	let bilan = null;
+	try {
+		const res = await fetch('/admin/import-bulk', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(docs),
+		});
+		if (!res.ok) {
+			const e = await res.json().catch(() => ({}));
+			throw new Error(e.detail || res.status);
+		}
+		// Lecture du flux NDJSON, ligne à ligne (même boucle qu'admin_telluris.html).
+		const reader = res.body.getReader();
+		const decoder = new TextDecoder();
+		let reste = '';
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			reste += decoder.decode(value, { stream: true });
+			const lignes = reste.split('\n');
+			reste = lignes.pop();
+			lignes.forEach(ligne => {
+				if (!ligne.trim()) return;
+				let ev;
+				try { ev = JSON.parse(ligne); } catch (e) { return; }
+				if (ev.event === 'progress') {
+					barre.style.width = Math.round(100 * ev.processed / ev.total) + '%';
+				} else if (ev.event === 'done') {
+					bilan = ev;
+				}
+			});
+		}
+	} catch (err) {
+		lotEnVol = false;
+		_lotEl('lot-error').textContent = `✗ ${err.message}`;
+		_lotRenderPied();
+		return;
+	}
+	lotEnVol = false;
+
+	if (bilan && bilan.failed) {
+		// Échec PARTIEL : le lot n'est pas rejoué (les docs écrits le sont pour de bon),
+		// on rend la main avec le détail plutôt que de fermer sur un succès trompeur.
+		_lotEl('lot-error').textContent =
+			`✗ ${bilan.failed} doc(s) en échec sur ${bilan.total} — ${(bilan.errors || []).join(' · ')}`;
+		await fetchLieuxConnections();
+		renderLieuxConnList();
+		if (grid.length) renderGrid();
+		return;
+	}
+
+	const n = lotLignes.length;
+	closeLot();
+	lieuxFileCases = [];
+	lotCompo = {}; lotEdits = {}; lotLabels = {}; lotLabelsDemandes = {}; lotLignes = [];
+	// `creationOptions` porte les `lieu_ids` : périmé, il laisserait rouvrir un lot
+	// qui recréerait ce qu'on vient d'écrire.
+	creationOptions = null;
+	await fetchLieuxConnections();
+	renderLieuxConnList();
+	renderLieuAddSection();
+	if (grid.length) renderGrid();
+	setStatus(`Lot créé : <span>${n}</span> lieu(x) et leurs portes dans <span>${currentLocId}</span>.`);
+}
+
+// ⚠ Posé À LA PREMIÈRE OUVERTURE : le markup de l'overlay vit après la balise script.
+let _lotCable = false;
+function _lotCabler() {
+	if (_lotCable) return;
+	_lotCable = true;
+	_lotEl('lot-filtre').addEventListener('input', _lotRenderCompo);
+}
+
 // Câblage du formulaire : la catégorie repeuple images/PNJ/portraits, tout le
 // reste ne fait que recalculer l'aperçu et les identifiants.
 // ⚠ Posé À LA PREMIÈRE OUVERTURE, pas au chargement du script : le markup de
@@ -3191,7 +3869,10 @@ function closeLieuFiche() {
 
 document.addEventListener('keydown', (e) => {
 	if (e.key !== 'Escape') return;
-	// L'overlay de création est au-dessus de la fiche : il se ferme en premier.
+	// Les overlays de création sont au-dessus de la fiche : ils se ferment en premier.
+	// ⚠️ Échap ANNULE le lot sans rien écrire (CLAUDE.md §8) — sauf pendant l'écriture,
+	// où fermer masquerait une opération en cours sans l'interrompre.
+	if (_lotOuvert() && !lotEnVol) { closeLot(); return; }
 	const add = document.getElementById('lieu-add-overlay');
 	if (add && !add.classList.contains('la-hidden')) { closeLieuAdd(); return; }
 	const ov = document.getElementById('lieu-fiche-overlay');
@@ -3953,6 +4634,48 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 		<div class="la-actions">
 			<button class="btn" id="nl-create-btn" onclick="creerSousLieu()">➕ Créer</button>
 			<button class="btn danger" onclick="closeLieuAdd()">Annuler</button>
+		</div>
+	</div>
+</div>
+
+<!-- Création d'un LOT de lieux. ⚠️ Clic sur le backdrop = ANNULER sans rien écrire
+     (CLAUDE.md §8) : une décision irréversible ne part jamais d'un geste de sortie. -->
+<div id="lot-overlay" class="la-hidden" onclick="if(event.target===this)closeLot()">
+	<div class="la-panel">
+		<div class="la-topbar">
+			<h2>➕ Lot de lieux</h2>
+			<button class="btn btn-inline" style="font-size:.62rem;" onclick="closeLot()">✕ Fermer</button>
+		</div>
+
+		<div class="lot-cols">
+			<div class="lot-col-gauche">
+				<label>Composition</label>
+				<div style="font-size:.64rem;color:#888;margin:4px 0 6px;">
+					Cochez les métiers voulus et leur quantité. « déjà » = ce que cette cité possède.
+				</div>
+				<input type="text" id="lot-filtre" placeholder="filtrer les catégories…" style="margin-bottom:6px;">
+				<div class="lot-scroll" id="lot-compo"></div>
+				<div class="lot-compteur" id="lot-compteur"></div>
+			</div>
+
+			<div class="lot-col-droite">
+				<label>Lignes à créer</label>
+				<div style="font-size:.64rem;color:#888;margin:4px 0 6px;">
+					Une ligne par boutique. La case vient de la file, dans l'ordre des Maj+clic ;
+					l'enseigne, l'image et le portrait sont des propositions — tout est modifiable.
+				</div>
+				<div class="lot-scroll lot-table-wrap"><table class="lot-table" id="lot-table"></table></div>
+				<label style="margin-top:10px;">Aperçu</label>
+				<div class="la-preview" id="lot-preview" style="max-height:150px;"></div>
+			</div>
+		</div>
+
+		<div class="lot-progress" id="lot-progress" hidden><div id="lot-progress-bar"></div></div>
+		<div class="la-warn" id="lot-error" style="margin-bottom:8px;"></div>
+		<div class="la-actions">
+			<button class="btn" id="lot-create-btn" onclick="creerLot()">➕ Créer le lot</button>
+			<button class="btn btn-inline" style="font-size:.62rem;" onclick="_lotRetirerTout()">↺ Tout décocher</button>
+			<button class="btn danger" onclick="closeLot()">Annuler</button>
 		</div>
 	</div>
 </div>

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
-from utils import acces
+from utils import acces, enseignes
 
 # Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
 TOWNS_IMAGES_PATH = "templates/resources/towns"
@@ -322,13 +322,18 @@ async def get_creation_options(
 	rapatrierait les `cells` de chaque carte.
 	`lieu_ids` sert au contrôle de collision d'_id côté client — `GET /lieu/{id}`
 	ne peut pas le faire, son 404 étant ravalé en 500 par son propre try/except.
+
+	`lieux` (mêmes docs, projetés) sert au LOT : compter ce qu'une cité possède déjà par
+	catégorie, écarter les façades et les enseignes déjà prises. Les autres clés ne
+	bougent pas — le formulaire mono-lieu ne les connaît même pas.
 	"""
 	if (not current_user or
 		"admin" not in current_user or
 		current_user["admin"] != 1 ):
 		raise HTTPException(status_code=403, detail="Admin only")
 
-	lieux = find_docs({"type": "lieu"}, fields=["_id", "categorie"]) or []
+	lieux = find_docs({"type": "lieu"},
+		fields=["_id", "categorie", "image", "lieu_parent", "label"]) or []
 	recettes = find_docs({"type": "recette"}, fields=["lieu_categorie"]) or []
 	pnjs = find_docs({"type": "pnj"}, fields=["_id", "nom"]) or []
 
@@ -344,7 +349,51 @@ async def get_creation_options(
 			key=lambda p: p["_id"] or ""
 		),
 		"lieu_ids": sorted(d["_id"] for d in lieux if d.get("_id")),
+		"lieux": sorted(
+			({"_id": d.get("_id"), "categorie": d.get("categorie") or "",
+			  "image": d.get("image") or "", "lieu_parent": d.get("lieu_parent") or "",
+			  "label": d.get("label") or ""} for d in lieux if d.get("_id")),
+			key=lambda d: d["_id"]
+		),
 	}
+
+
+@lieu_router.post("/lieux/enseignes")
+async def proposer_enseignes(
+	current_user: Annotated[User, Depends(get_current_user)],
+	payload: dict = Body(...)):
+	"""Noms d'enseigne pour le tableau du LOT — `{categorie: [labels]}`.
+
+	Corps : `{lieu_parent, demandes: [{categorie, n}], exclus: [labels]}`. Appelé une
+	fois à la construction du tableau, puis une fois par 🎲 (n=1).
+
+	⚠️ `exclus` est cumulatif D'UNE DEMANDE À L'AUTRE dans le même appel : deux
+	catégories dont le catalogue se recoupe (les tournures génériques d'une catégorie
+	hors table) ne doivent pas se voir attribuer le même nom, l'`_id` du lieu se
+	déduisant du label. Le client y ajoute les labels déjà en base.
+	⚠️ Aucune écriture : cet endpoint PROPOSE, il ne réserve rien.
+	"""
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1 ):
+		raise HTTPException(status_code=403, detail="Admin only")
+
+	lieu_parent = str(payload.get("lieu_parent") or "")
+	demandes = payload.get("demandes")
+	if not isinstance(demandes, list):
+		raise HTTPException(status_code=422, detail="`demandes` doit être une liste.")
+
+	exclus = set(payload.get("exclus") or [])
+	labels = {}
+	for demande in demandes:
+		if not isinstance(demande, dict):
+			continue
+		categorie = str(demande.get("categorie") or "")
+		tires = enseignes.tirer_labels(
+			categorie, demande.get("n"), lieu_parent, exclus)
+		exclus.update(tires)
+		labels.setdefault(categorie, []).extend(tires)
+	return {"labels": labels}
 
 def dimensions_coherentes(dimensions, cells) -> dict:
 	"""Valide une `dimensions` soumise AVEC ses `cells`, et la renvoie normalisée.

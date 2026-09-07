@@ -22,13 +22,15 @@ node dev/check_js.js               # syntaxe du JS inline des templates/*.html E
 node dev/test_slots_client.js      # exécution des fonctions pures de la barre de slots
 node dev/test_resize_client.js     # exécution du redimensionnement de grille (éditeur de carte)
 node dev/test_deplacement_client.js # exécution des règles de MARCHE partagées (scripts/deplacement.js)
+node dev/test_lot_lieux_client.js  # exécution du LOT de lieux (éditeur de carte, mode Lieux)
 ```
 
-Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les quatre harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
+Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les cinq harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
 
 - `check_js.js` neutralise les expressions Jinja avant de passer le code au parseur de Node — ⚠️ en `(0)` et non `0`, sinon `{{ liste | tojson }}.forEach(...)` deviendrait `0.forEach(...)`, faux positif garanti. ⚠️ Il contrôle **aussi `templates/scripts/*.js`** : les `<script src=…>` sont sautés (ils n'ont pas de corps dans la page), si bien que `nav.js`, `battle_map.js` et `deplacement.js` n'étaient couverts par **rien**. Un `.js` n'ayant pas de balise, le fichier entier est traité comme un unique bloc.
 - `test_slots_client.js` extrait les fonctions **pures** du template (par nom, accolades équilibrées) et les exécute dans un contexte `vm` : il ferme la classe de bug « à qui appartient ce que j'affiche et ce que j'écris ? », qu'aucun test pytest ne peut atteindre. **Hors de portée sans jsdom** : rendu DOM, clic long, ordre inversé en mobile — à vérifier en jeu.
 - `test_deplacement_client.js` est le seul des quatre à **charger directement un `.js`** (`scripts/nav.js` puis `scripts/deplacement.js`) : il n'y a rien à extraire d'un template. Il est aussi le **seul test des règles de marche du jeu**, et ce n'est pas une commodité — ⚠️ **il n'existe AUCUNE règle de marche côté serveur** : la branche x/y de `move_character` ne valide que les bornes, ni terrain ni `nav`. `deplacement.js` ne double donc pas le serveur, **il EST la règle**.
+- `test_lot_lieux_client.js` (même méthode, même `runInThisContext`) verrouille le **lot de lieux**. ⚠️ Son objet est une classe de bug SILENCIEUSE : `import-bulk` fait un PUT complet, donc deux `link:*` de même `_id` dans un lot ne laissent qu'une porte en base et les autres boutiques deviennent **inatteignables sans la moindre erreur**. D'où le paramètre `dejaPris` de `_prochainLinkId` — le compteur se dérive de `lieuxConnections`, qui ne bouge pas tant que rien n'est écrit.
 - `test_resize_client.js` suit la même méthode pour le redimensionnement de carte (`admin_map_editor.html`) — ⚠️ mais avec **`vm.runInThisContext`** et non `vm.createContext` : un contexte séparé est un autre *realm*, donc ses tableaux ont un autre prototype `Array` et `deepStrictEqual` les refuse tous. Ces fonctions-ci n'ayant besoin d'aucune globale, les évaluer dans le realm du test suffit — et permet au passage de semer sur `globalThis` les quelques globales dont `_reappliquerPortes` dépend, seul moyen d'éprouver son idempotence.
 
 **Environnement local de l'agent** : Node dans `C:\Program Files\nodejs\`, Python dans `C:\Python314\`. ⚠️ Les deux peuvent être **hors du `PATH`** — appeler Node par son chemin complet (`"/c/Program Files/nodejs/node.exe"` depuis Bash) et pytest par `python -m pytest` (l'exe vit dans `~/AppData/Roaming/Python/Python314/Scripts`, hors `PATH`). Dépendances nécessaires **rien que pour collecter** les tests purs (ils importent `utils/*` → `routers/*`) : `pytest` + la ligne du `docker-compose.yml` **sans `uvicorn` ni `Pillow`** (`fastapi Jinja2 couchdb2 bcrypt pyjwt[crypto] authlib httpx itsdangerous`). CouchDB est injoignable en local : `db/config.py` tolère l'absence de connexion à l'import (`server`/`db` = `None`, les helpers renvoient `None`) pour que les tests purs se collectent. Docker et l'app tournent côté utilisateur.
@@ -82,6 +84,7 @@ utils/
   expedition.py          # capacités MISES EN COMMUN par le groupe (pur) : membres, outil partagé, négociateur
   marche.py              # prix, stocks, tick atelier, relations de lieu
   focalisation.py        # 🧭 lieu (BFS) / 🎯 quête (biais probabiliste)
+  enseignes.py           # noms d'enseigne (pur) : tournures par métier × toponymes de cité
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil
   pnj.py                 # PNJ de lieu (pur) : tirage de présence, arbre de dialogue, services
   acces.py               # barrière d'accès à un lieu gardée par un PNJ (pur) : conditions, laissez-passer, cycle
@@ -123,6 +126,7 @@ dev/
   check_js.js            # contrôle SYNTAXIQUE du JS des templates ET de templates/scripts/ (node)
   test_slots_client.js   # tests d'EXÉCUTION du JS de la barre de slots (node, sans dépendance)
   test_deplacement_client.js # tests d'EXÉCUTION des règles de marche (scripts/deplacement.js)
+  test_lot_lieux_client.js # tests d'EXÉCUTION du lot de lieux (éditeur de carte)
 tests/                   # tests purs, un fichier par système
 ```
 
@@ -174,6 +178,16 @@ Pattern `type:identifier` — `user:email@example.com`, `lieu:lutecia`, `rules:r
 
 ### Character document vs. Pydantic model
 `models/character_document.py` = spec de référence. **Vérité = le code de création dans `routers/user.py`.** Les noms de champs diffèrent : `voc`, `sex`, `caracteristiques_standard`/`current`, `cite`.
+
+### Peupler une ville — le LOT de lieux (`/admin/editor`, mode Lieux)
+Poser N boutiques d'un coup, sans écrire un `dev/gen_magasins_<ville>.py` de plus : **Maj+clic** empile des cases dans une file (une par boutique, l'ordre compte), `➕ Ajouter un lot` ouvre un tableau — composition à gauche (métier coché + quantité, avec ce que la cité possède déjà), lignes à droite (enseigne 🎲, image, portrait, tout modifiable). Écriture en **une** requête `POST /admin/import-bulk`.
+
+- Les docs écrits sont **exactement** ceux de `dev/gen_magasins_auxerre.py` : `lieu:<slug(label)>` + son `connection`, `stock_matieres:{}` / `stock_vente:[]` (le `tick_atelier` garnit à la première visite), `pnj:[{character: "pnj:marchand_<cat>"}]`. Les générateurs restent la voie du contenu AUTHORÉ (items et recettes exclusifs) ; le lot est celle du contenu de remplissage.
+- ⚠️ **`_prochainLinkId` prend un `dejaPris`** : son compteur se dérive de `lieuxConnections`, qui ne bouge pas tant que rien n'est écrit. Sans lui, N boutiques d'un même métier porteraient le même `link:*` et `import-bulk` — PUT complet — n'en laisserait qu'une : les autres seraient **sans porte, invisibles en jeu, sans erreur**. Verrouillé par `dev/test_lot_lieux_client.js`.
+- ⚠️ Un `_id` déjà en base fait **refuser le lot avant l'envoi** (même raison : le PUT complet écraserait une retouche faite à la main, CLAUDE.md §11). Après écriture, `creationOptions` est mis à `null` — périmé, il laisserait rouvrir un lot qui recrée ce qu'on vient de poser.
+- ⚠️ Les retouches manuelles sont indexées sur **`<categorie>#<rang>`**, jamais sur l'index de ligne : un nom réécrit survit à un changement de composition.
+- Enseignes : `utils/enseignes.py` (pur, `rand_fn` injecté) croise des tournures de métier avec les toponymes de la cité ; ouvrir une ville neuve ne demande **rien** (repli sur `TOPONYMES_DEFAUT`), l'enrichir se fait dans ce seul fichier. Servi par `POST /api/lieux/enseignes`.
+- `GET /api/lieux/creation_options` porte désormais aussi `lieux` (`_id`, `categorie`, `image`, `lieu_parent`, `label`, projetés) : compter par catégorie, écarter une façade déjà posée dans la ville, exclure une enseigne existante.
 
 ### Magasins de niveau supérieur (fusion de catégories)
 Une catégorie de lieu peut **en inclure d'autres** — `LIEU_CATEGORIES_FUSION` (variable de monde, `models/character_stats.py`) : `grande_apothicairerie` = apothicairerie + jardinier, plus ses recettes propres. Les 18 grandes maisons sont à Lutèce (`dev/gen_magasins_superieurs.py`).
