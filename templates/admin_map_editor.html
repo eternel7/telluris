@@ -750,6 +750,53 @@
 		font-size: 0.62rem; color: var(--accent2); line-height: 1.4;
 		border: 1px dashed var(--accent2); border-radius: 4px; padding: 4px 6px; margin-bottom: 4px;
 	}
+
+	/* ── Formulaire d'une CONNEXION (panneau Lieux) ──
+	   Même géométrie que #lj-overlay : panneau fixe à droite et NON un modal à backdrop.
+	   Ce n'est pas cosmétique — la carte doit rester cliquable dessous, c'est la condition
+	   de la visée 🎯. Les deux panneaux se partagent la place : ouvrir l'un ferme l'autre. */
+	#conn-overlay {
+		position: fixed; top: 70px; right: 14px; bottom: 14px;
+		width: min(460px, 94vw); z-index: 60;
+		display: flex; flex-direction: column; overflow: auto;
+		box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+	}
+	#conn-overlay.cx-hidden { display: none; }
+	/* Visée armée : le panneau recouvre près de la moitié de la carte en largeur, or c'est
+	   la carte qu'on doit pouvoir cliquer. Il s'efface donc et LAISSE PASSER les clics — le
+	   canvas est dessous, `pointer-events:none` les lui rend. ⚠️ Aucun enfant ne rouvre les
+	   siens (CLAUDE.md §15) : c'est voulu ici, mais ça rend le ✕ de la visée inerte le temps
+	   du geste — d'où le rappel d'Échap dans la barre de statut. */
+	#conn-overlay.cx-viser { opacity: 0.3; pointer-events: none; }
+	/* Le formulaire est plus long que le panneau : son en-tête reste visible en défilant —
+	   le ✕ est la seule sortie à la souris, il ne doit pas partir en haut de l'écran.
+	   ⚠️ `top` négatif + `padding-top` : le scrollport commence au bord du padding de .card,
+	   un `top:0` laisserait une bande de 16 px par laquelle le contenu défilerait à nu. */
+	#conn-overlay .lj-title {
+		position: sticky; top: -16px; z-index: 2;
+		background: var(--panel); margin-top: -16px; padding: 16px 0 6px;
+	}
+	.cx-noeud {
+		border: 1px solid var(--border); border-radius: 4px;
+		padding: 8px; margin-bottom: 10px;
+	}
+	.cx-noeud > h3 {
+		font-size: 0.66rem; color: var(--accent); font-weight: normal;
+		text-transform: uppercase; letter-spacing: 0.08em;
+		margin-bottom: 6px; overflow-wrap: anywhere;
+	}
+	.cx-pos { display: flex; gap: 6px; align-items: flex-end; }
+	.cx-pos > div { flex: 0 0 70px; min-width: 0; }
+	.cx-pos input[type=number] { width: 100%; margin-bottom: 0; }
+	.cx-hint {
+		font-size: 0.62rem; color: var(--muted); line-height: 1.4;
+		margin-top: 4px; min-height: 1em; overflow-wrap: anywhere;
+	}
+	.cx-hint.ko { color: var(--danger); }
+	.cx-hint.ok { color: var(--accent2); }
+	/* Visée armée : même signal que .lj-repos-on, dont elle emprunte le sens. */
+	#cx-visee-btn.cx-visee { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
+	#conn-overlay input[readonly] { opacity: 0.65; cursor: default; }
 /* ── Mode « test de déplacement » ─────────────────────────────────────────────────────
    On MARCHE dans le lieu qu'on vient d'éditer, avec les règles réelles du jeu. Le pavé et
    son cadre flottant viennent de part-move-panel.html — mêmes flèches que play_town et le
@@ -983,7 +1030,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			</div>
 			<!-- Panneau Lieux -->
 			<div id="panel-lieux" style="display:none;">
-				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, 🧾 JSON édite ses documents, ➕ crée un sous-lieu sur cette case.</div>
+				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, ✏️ Lieu et 🔗 Connexion ouvrent leurs formulaires, 🧾 JSON édite les documents bruts. ➕ crée un sous-lieu sur cette case, 🔗 relie deux lieux existants.</div>
 				<div id="lieu-add-section" style="margin-bottom:8px;"></div>
 				<div id="lieux-conn-list" style="max-height:320px;overflow-y:auto;font-size:.68rem;"></div>
 			</div>
@@ -1557,6 +1604,9 @@ lieuSelect.addEventListener('change', async (e) => {
 			// sur la suivante. Le lot ouvert se ferme avec elle, sans rien écrire.
 			lieuxFileCases = [];
 			closeLot();
+			// Le formulaire de connexion parle des documents du lieu PRÉCÉDENT : le laisser
+			// ouvert ferait enregistrer une porte sur une carte qui n'est plus à l'écran.
+			closeConnForm();
 			// Changer de lieu abandonne un aperçu non enregistré : ses cotes ne veulent plus rien dire
 			// ici, et le laisser posé verrouillerait l'auto-sauvegarde du lieu SUIVANT.
 			redimEnAttente = null;
@@ -1697,7 +1747,10 @@ function renderGrid() {
 	const showLieux   = (editMode === 'lieux');
 	// Repositionnement armé : le mode Lieux ne peint pas le terrain, l'admin ne verrait donc
 	// pas où il a le droit de poser sa porte. On le rallume le temps de viser.
-	const showRepos   = (showLieux && !!lieuxRepos);
+	// ⚠️ Les DEUX visées passent par ce même drapeau (🎯 de l'éditeur JSON et 🎯 du
+	// formulaire de connexion) : voile rouge, cadre de survol et refus du clic sont ainsi
+	// littéralement le même code pour les deux outils.
+	const showRepos   = (showLieux && (!!lieuxRepos || cxVisee));
 
 	// Draw cell fills
 	if (showTerrain || showRepos) for (let y = 0; y < rows; y++) {
@@ -2021,6 +2074,19 @@ function paint(e) {
 		updateLegend();
 		scheduleGridSend();
 	} else if (editMode === 'lieux') {
+		// Visée du FORMULAIRE de connexion : le clic lui appartient. Même refus et même
+		// prédicat que le repositionnement — c'est le voile rouge qu'on vient de peindre.
+		// Différence unique : on écrit dans le formulaire, rien ne part en base.
+		if (cxVisee) {
+			if (!_caseAccessible(cx, cy)) {
+				// On refuse et on RESTE armé, l'admin vise à côté.
+				_cxMsg(`✗ Case [${cx}, ${cy}] inaccessible (terrain ${(grid[cy] || [])[cx]}) — porte non posée.`, true);
+				setStatus(`<span style="color:var(--danger)">Case [${cx}, ${cy}] inaccessible : la porte n'y serait jamais atteignable.</span>`);
+				return;
+			}
+			_cxPoserVisee(cx, cy);
+			return;
+		}
 		// Outil de repositionnement armé : le clic lui appartient, il ne touche plus au filtre.
 		if (lieuxRepos) {
 			if (!_caseAccessible(cx, cy)) {
@@ -2083,7 +2149,7 @@ canvas.addEventListener('mousemove', e => {
 		// Même classe de défaut que celle déjà colmatée dans renderGrid/paint/_caseAccessible.
 		const _v = c ? (grid[c.cy] || [])[c.cx] : undefined;
 		const _txt = _v === undefined ? '(hors cells)' : _v;
-		if (c && lieuxRepos) {
+		if (c && (lieuxRepos || cxVisee)) {
 			const ok = _caseAccessible(c.cx, c.cy);
 			setStatus(`Cellule [${c.cx}, ${c.cy}] = ${_txt} — `
 				+ (ok ? '<span>porte posable ici</span>'
@@ -2150,6 +2216,9 @@ function setMode(mode) {
 	// donc au-dessus d'un mode où le panneau Lieux n'est même plus affiché. Le repositionnement
 	// part avec lui — armé, le clic du mode d'arrivée lui reviendrait.
 	lieuxRepos = null; canvas.style.cursor = '';
+	// Le formulaire de connexion part avec, et dans les deux sens : sa visée attend un clic
+	// sur une carte dont le mode ne peint plus le terrain.
+	closeConnForm();
 	if (mode !== 'lieux') { lieuxJsonOuvert = null; lieuxJsonDest = null; renderLieuJsonOverlay(); }
 	if (mode === 'lieux') { lieuxSelectedCell = null; lieuxJsonOuvert = null; lieuxJsonDest = null; renderLieuJsonOverlay(); fetchLieuxConnections(); renderLieuxConnList(); }
 	if (mode !== 'nav') navSelectedCell = null;
@@ -2231,8 +2300,12 @@ function renderLieuxConnList() {
 		const dest = _connDest(conn);
 		const label = (dest && dest.details && dest.details.label) || (dest && dest.lieu) || '?';
 		const type = (conn.metadata && conn.metadata.type) || '';
+		const statut = (conn.metadata && conn.metadata.status) || '';
 		const node = (conn.nodes || []).find(x => x.lieu === currentLocId);
-		const pos = node && node.pos ? `[${node.pos[0]},${node.pos[1]}]` : '';
+		const pos = node && node.pos ? `[${node.pos[0]},${node.pos[1]}]` : '—';
+		// La position de l'AUTRE nœud : elle ne se lisait nulle part, alors que c'est elle
+		// qui dit où le joueur atterrit (branche « lien » de move_character).
+		const posLa = dest && dest.pos ? `[${dest.pos[0]},${dest.pos[1]}]` : '—';
 		const destId = dest ? dest.lieu : '';
 		const ouvert = lieuxJsonOuvert === conn._id;
 		// Même pastille que sur la carte : la ligne et son point se reconnaissent l'un l'autre.
@@ -2242,10 +2315,12 @@ function renderLieuxConnList() {
 			+ `background:${LIEUX_PNJ_COULEURS[etat]};border:1px solid rgba(255,255,255,0.5);"></span>`;
 		return `<div style="border:1px solid var(--border);border-radius:4px;padding:6px;margin-bottom:6px;">
 			<div>${pastille}<b>➔ ${_escHtml(label)}</b></div>
-			<div style="color:#888;">${_escHtml(type)} ${pos}</div>
-			<div style="display:flex;gap:6px;margin-top:4px;">
+			<div style="color:#888;">🔗 ${_escHtml(conn._id)}</div>
+			<div style="color:#888;">${_escHtml(type)}${statut ? ' · ' + _escHtml(statut) : ''} — ici ${pos} → là-bas ${posLa}</div>
+			<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuFiche('${destId}')">📄 Fiche</button>
-				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuForm('edition','${destId}')">✏️ Éditer</button>
+				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuForm('edition','${destId}')">✏️ Lieu</button>
+				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openConnForm('edition','${conn._id}')">🔗 Connexion</button>
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="toggleSousLieuJson('${conn._id}','${destId}')">${ouvert ? '✕ Fermer' : '🧾 JSON'}</button>
 			</div>
 		</div>`;
@@ -2301,6 +2376,7 @@ function renderLieuJsonOverlay() {
 
 async function toggleSousLieuJson(connId, destId) {
 	if (lieuxJsonOuvert === connId) { closeLieuJson(); return; }
+	closeConnForm();   // les deux panneaux occupent la même place à droite
 	await _chargerDocLieu(destId);
 	lieuxJsonOuvert = connId;
 	lieuxJsonDest = destId;
@@ -2317,6 +2393,478 @@ function closeLieuJson() {
 	renderLieuJsonOverlay();
 	renderLieuxConnList();
 	if (grid.length) renderGrid();
+}
+
+// ══ CONNEXIONS ENTRE LIEUX ═════════════════════════════════════════════════
+// Voir, éditer et AJOUTER un lien entre deux lieux existants, sans passer par le JSON.
+// Une connexion est un doc `link:*` à DEUX nœuds : celui qui porte le lieu COURANT dit la
+// case que le joueur doit occuper pour voir la porte (`get_lieu_links` est scopé à sa case),
+// l'autre dit où il atterrit (branche « lien » de `move_character`).
+//
+// Le `label` d'un nœud est le texte du bouton qui mène À CE NŒUD, lu depuis l'autre côté :
+// `buildLocationslist` (play_town) affiche le `details.label` du nœud qui n'est PAS le lieu
+// courant, et `get_lieu_links` replie ce label sur celui du lieu quand il est absent.
+//
+// ⚠️ Ce formulaire n'écrit QU'UN document, le `link:*` — aucun `lieu:*`. Créer une boutique
+// ET sa porte d'un coup reste le travail d'`openLieuAdd` (mono-lieu) et du LOT.
+// ⚠️ Rien n'est écrit avant « Créer »/« Enregistrer » : ✕ et Échap ferment sans rien
+// engager (CLAUDE.md §8). Sa visée 🎯 écrit dans le FORMULAIRE, là où celle de l'éditeur
+// JSON enregistre aussitôt — deux outils, deux contrats.
+
+let cxMode = 'creation';   // 'creation' | 'edition'
+let cxDoc = null;          // doc de la connexion éditée, NU (sans les `details` injectés)
+let cxIciIdx = 0;          // index, DANS `nodes`, du nœud qui porte le lieu courant
+let cxVisee = false;       // la visée sur la carte est-elle armée ?
+let cxIdsConnus = [];      // tous les `_id` de connexions en base (anti-écrasement)
+let cxIdsCharges = false;  // ces `_id` ont-ils pu être lus ? (sinon le garde-fou ne joue pas)
+let cxIdTouche = false;    // l'`_id` a-t-il été saisi à la main ? (sinon il se dérive)
+let cxTypeTouche = false;  // idem pour le type
+
+// ── Fonctions PURES ────────────────────────────────────────────────────────
+// Aucune ne lit de globale : dev/test_connexions_client.js les extrait PAR NOM et les
+// exécute hors du navigateur. Déclarées en `function` — l'extracteur cherche « function <nom>( ».
+
+// « lieu:auxerre » → « auxerre ». Seul le préfixe est retiré.
+function _cxSlug(lieuId) {
+	return String(lieuId == null ? '' : lieuId).replace(/^lieu:/, '');
+}
+
+// `_id` proposé pour une connexion neuve — convention de la base : `link:<là-bas>_to_<ici>`.
+// ⚠️ `dejaPris` n'est pas décoratif : `PUT /admin/doc` fait un PUT COMPLET et ne refuse RIEN
+// (il rattache même le `_rev` courant). Réutiliser l'`_id` d'une connexion existante
+// l'écraserait EN SILENCE — la classe de bug de CLAUDE.md §11.
+function _cxIdPropose(destId, iciId, dejaPris) {
+	const la = _cxSlug(destId), ici = _cxSlug(iciId);
+	if (!la || !ici) return '';
+	const base = `link:${la}_to_${ici}`;
+	const pris = new Set(dejaPris || []);
+	if (!pris.has(base)) return base;
+	for (let n = 2; n < 100; n++) {
+		const id = `${base}_${n < 10 ? '0' + n : n}`;
+		if (!pris.has(id)) return id;
+	}
+	return base;
+}
+
+// Une position est-elle posable sur CETTE grille ? Rend '' (bonne), 'invalide' (pas un
+// couple d'entiers positifs), 'hors' (hors de la grille) ou 'terrain' (case < 1, jamais
+// atteignable — même seuil que `_caseAccessible`, donc que le voile rouge de la carte).
+// ⚠️ `cells` vide ⇒ le lieu n'a PAS de carte : aucune règle ne s'y applique. Les boutiques
+// portent [0, 0] par convention et c'est légitime, ce n'est pas une case.
+function _cxPosPosable(cells, pos) {
+	if (!Array.isArray(pos) || pos.length !== 2) return 'invalide';
+	const x = pos[0], y = pos[1];
+	if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0) return 'invalide';
+	if (!Array.isArray(cells) || !cells.length) return '';
+	const ligne = cells[y];
+	if (!Array.isArray(ligne) || x >= ligne.length) return 'hors';
+	return Number(ligne[x]) >= 1 ? '' : 'terrain';
+}
+
+// Le doc à écrire : l'EXISTANT (relu), fusionné avec les seuls champs du formulaire — même
+// parti pris que `_fusionLieu`. `PUT /admin/doc` écrit le doc ENTIER, donc tout ce que le
+// formulaire ne possède pas doit survivre : les clés inconnues du doc ET celles de CHAQUE
+// nœud. ⚠️ `champs.noeuds` vient dans l'ORDRE DU DOC : c'est l'appelant qui sait lequel des
+// deux porte le lieu courant, permuter déplacerait la porte à l'insu de l'admin.
+function _fusionConnexion(existant, champs) {
+	const doc = JSON.parse(JSON.stringify(existant || {}));
+	doc.type = 'connection';
+	const anciens = Array.isArray(doc.nodes) ? doc.nodes : [];
+	doc.nodes = (champs.noeuds || []).map((n, i) => {
+		const noeud = Object.assign({}, anciens[i] || {});
+		noeud.lieu = n.lieu;
+		noeud.pos = [n.pos[0], n.pos[1]];
+		// Un label vide n'est pas ÉCRIT : `get_lieu_links` retombe alors sur celui du lieu.
+		// L'y laisser en chaîne vide afficherait un bouton sans texte en jeu.
+		if (n.label) noeud.label = n.label; else delete noeud.label;
+		return noeud;
+	});
+	const meta = Object.assign({}, doc.metadata || {});
+	meta.type = champs.type;
+	meta.status = champs.status;
+	doc.metadata = meta;
+	return doc;
+}
+
+// Ce qui interdit d'écrire — rend un motif, ou '' si le doc est bon.
+// ⚠️ `idsConnus` ne sert qu'en CRÉATION : en édition l'`_id` est gelé, se le voir refuser
+// parce qu'il existe déjà serait absurde.
+function _cxValider(doc, iciId, idsConnus, creation) {
+	const id = (doc && doc._id) ? String(doc._id) : '';
+	if (!/^link:\S+$/.test(id)) return "L'identifiant doit commencer par « link: » et ne contenir aucun espace.";
+	const noeuds = (doc && doc.nodes) || [];
+	if (noeuds.length !== 2) return 'Une connexion relie exactement deux lieux.';
+	if (!noeuds[0].lieu || !noeuds[1].lieu) return 'Les deux lieux sont requis.';
+	if (noeuds[0].lieu === noeuds[1].lieu) return 'Un lieu ne se relie pas à lui-même.';
+	if (!noeuds.some(n => n.lieu === iciId)) return 'Un des deux nœuds doit être le lieu courant.';
+	for (const n of noeuds) {
+		if (_cxPosPosable(null, n.pos) === 'invalide') return `Position invalide pour ${n.lieu}.`;
+	}
+	if (!(doc.metadata && doc.metadata.type)) return 'Le type de la connexion est requis.';
+	if (!(doc.metadata && doc.metadata.status)) return "L'état de la connexion est requis.";
+	if (creation && (idsConnus || []).includes(id))
+		return `${id} existe déjà — l'enregistrement écraserait cette connexion.`;
+	return '';
+}
+
+// ── Le reste : lecture du DOM et du serveur ────────────────────────────────
+function _cxEl(id) { return document.getElementById(id); }
+
+// ⚠️ Le markup de l'overlay vit APRÈS la balise script : `_cxOuvert` peut être appelée
+// avant qu'il n'existe (le chargement d'un lieu appelle `closeConnForm`). Même précaution
+// que `_lotOuvert`.
+function _cxOuvert() {
+	const ov = document.getElementById('conn-overlay');
+	return !!ov && !ov.classList.contains('cx-hidden');
+}
+
+function _cxMsg(texte, erreur) {
+	const el = _cxEl('cx-msg');
+	if (el) { el.textContent = texte; el.style.color = erreur ? 'var(--danger)' : 'var(--accent2)'; }
+}
+
+// Tous les `_id` de connexions EN BASE — le seul garde-fou sûr contre l'écrasement :
+// `lieuxConnections` ne voit que celles du lieu courant, alors qu'un `_id` saisi à la main
+// peut viser n'importe quel document. Même endpoint que l'écran /admin/table ; les docs
+// `connection` sont minuscules (deux nœuds et deux champs de métadonnées).
+// ⚠️ En cas d'échec on ne se tait PAS : le formulaire dit que le garde-fou ne joue plus.
+async function _cxChargerIds() {
+	try {
+		const res = await fetch('/admin/table/data?type=connection');
+		if (!res.ok) throw new Error('connexions indisponibles');
+		const data = await res.json();
+		cxIdsConnus = ((data && data.docs) || []).map(d => d._id).filter(Boolean);
+		cxIdsCharges = true;
+	} catch (err) {
+		cxIdsConnus = [];
+		cxIdsCharges = false;
+	}
+}
+
+async function openConnForm(mode, connId) {
+	if (!currentLocId) return;
+	// ⚠️ Même refus que `armerRepositionnement`, pour la même raison : ce formulaire écrit
+	// une porte EN BASE alors que la grille en aperçu, elle, n'est pas enregistrée —
+	// `_reappliquerPortes` reprendrait ensuite la position posée à la main pour une origine
+	// et la remettrait à l'échelle.
+	if (redimEnAttente) {
+		setStatus('<span style="color:var(--danger)">Redimensionnement en attente : enregistrez-le (💾) '
+			+ 'ou annulez-le avant de toucher aux connexions.</span>');
+		return;
+	}
+	cxMode = (mode === 'edition') ? 'edition' : 'creation';
+	cxDoc = null;
+	cxIciIdx = 0;
+	cxIdTouche = false;
+	cxTypeTouche = false;
+	cxVisee = false;
+	closeLieuJson();   // les deux panneaux occupent la même place à droite
+	_cxCabler();
+	_cxEl('conn-overlay').classList.remove('cx-hidden');
+	_cxMajChrome();   // ⚠️ AVANT le premier retour possible : un panneau titré « Créer »
+	_cxMsg('Chargement…', false);   //   sur un échec d'édition mentirait sur ce qu'il ferait.
+
+	if (cxMode === 'edition') {
+		// ⚠️ La connexion est reprise dans `lieuxConnections`, re-fetché après chaque
+		// écriture : garder l'objet d'un rendu précédent rendrait un `_rev` périmé.
+		const conn = lieuxConnections.find(c => c._id === connId);
+		if (!conn) {
+			_cxMsg('✗ Connexion introuvable — rechargez le lieu.', true);
+			_cxEl('cx-submit-btn').disabled = true;   // les champs sont ceux d'une autre ouverture
+			return;
+		}
+		cxDoc = _connNu(conn);   // ⚠️ sans les `details` injectés par get_lieu_connections
+		const idx = (cxDoc.nodes || []).findIndex(n => n.lieu === currentLocId);
+		cxIciIdx = idx >= 0 ? idx : 0;
+		cxIdTouche = true;
+		cxTypeTouche = true;
+	}
+
+	// Le sélecteur de lieux est reconstruit à chaque ouverture : la base a pu bouger (un lot
+	// vient peut-être d'être écrit, et `creationOptions` est alors mis à null par `creerLot`).
+	try {
+		const res = await fetch('/api/lieux/creation_options');
+		if (res.ok) creationOptions = await res.json();
+	} catch (err) { /* le sélecteur se repliera sur la destination courante seule */ }
+	await _cxChargerIds();
+
+	const noeuds = (cxDoc && cxDoc.nodes) || [];
+	const destId = (noeuds[1 - cxIciIdx] || {}).lieu || '';
+	const posIci = (noeuds[cxIciIdx] || {}).pos
+		|| (lieuxSelectedCell ? [lieuxSelectedCell.cx, lieuxSelectedCell.cy] : [0, 0]);
+	const posLa = (noeuds[1 - cxIciIdx] || {}).pos || [0, 0];
+
+	_cxEl('cx-ici-lieu').textContent = currentLocId;
+	_cxEl('cx-ici-x').value = posIci[0];
+	_cxEl('cx-ici-y').value = posIci[1];
+	_cxEl('cx-ici-label').value = (noeuds[cxIciIdx] || {}).label || '';
+	_cxEl('cx-la-x').value = posLa[0];
+	_cxEl('cx-la-y').value = posLa[1];
+	_cxEl('cx-la-label').value = (noeuds[1 - cxIciIdx] || {}).label || '';
+	_cxEl('cx-dest-filtre').value = '';
+	_cxEl('cx-type').value = (cxDoc && cxDoc.metadata && cxDoc.metadata.type) || '';
+	_cxEl('cx-status').value = (cxDoc && cxDoc.metadata && cxDoc.metadata.status) || 'ouvert';
+	_cxEl('cx-id').value = cxDoc ? (cxDoc._id || '') : '';
+
+	_cxRepeuplerListes();
+	_cxRepeuplerLieux(destId);
+	if (destId) await _cxChargerDest(destId);
+	_cxMajHints();
+	_cxMsg(cxIdsCharges ? '' : "⚠ Liste des connexions indisponible : le contrôle d'écrasement d'identifiant ne joue pas.", !cxIdsCharges);
+}
+
+// Titre, bouton, gel de l'`_id` : tout ce qui distingue les deux modes.
+// ⚠️ En édition l'`_id` est GELÉ, comme celui d'un lieu : CouchDB ne renomme pas un
+// document, et le renommer à la main créerait un doublon en laissant l'ancien en place.
+function _cxMajChrome() {
+	const edition = cxMode === 'edition';
+	_cxEl('cx-titre').textContent = edition ? 'Éditer la connexion' : 'Nouvelle connexion';
+	_cxEl('cx-submit-btn').textContent = edition ? '💾 Enregistrer' : '➕ Créer';
+	_cxEl('cx-submit-btn').disabled = false;
+	_cxEl('cx-id').readOnly = edition;
+	_cxEl('cx-id-hint').textContent = edition
+		? "L'identifiant ne change jamais : CouchDB ne renomme pas un document."
+		: 'Proposé depuis la destination — modifiable.';
+}
+
+function closeConnForm() {
+	desarmerViseeConn();
+	const ov = document.getElementById('conn-overlay');
+	if (ov) ov.classList.add('cx-hidden');
+}
+
+// Le `select` des destinations. ⚠️ La destination COURANTE y reste toujours, même écartée
+// par le filtre ou absente de la base : un `select` qui retombe à vide ferait enregistrer
+// une connexion amputée d'un nœud, sans un mot (même piège que le sélecteur d'images du
+// formulaire de lieu).
+function _cxRepeuplerLieux(prefere) {
+	const sel = _cxEl('cx-dest');
+	const voulu = prefere !== undefined ? prefere : (sel.value || '');
+	const filtre = (_cxEl('cx-dest-filtre').value || '').trim().toLowerCase();
+	const tous = ((creationOptions && creationOptions.lieux) || [])
+		.filter(l => l._id && l._id !== currentLocId);
+	let liste = filtre
+		? tous.filter(l => (`${l._id} ${l.label || ''} ${l.categorie || ''}`).toLowerCase().includes(filtre))
+		: tous.slice();
+	if (voulu && !liste.some(l => l._id === voulu)) {
+		liste = [tous.find(l => l._id === voulu) || { _id: voulu, label: '', categorie: '' }].concat(liste);
+	}
+	sel.innerHTML = `<option value="" disabled${voulu ? '' : ' selected'}>-- Choisir un lieu --</option>`
+		+ liste.map(l => `<option value="${_escHtml(l._id)}">${_escHtml(_cxLibelle(l))}</option>`).join('');
+	if (voulu) sel.value = voulu;
+}
+
+function _cxLibelle(l) {
+	const nom = l.label || _cxSlug(l._id);
+	return l.categorie ? `${nom} — ${l.categorie}` : nom;
+}
+
+// Les deux `datalist` : ce que la base porte déjà, plutôt qu'une liste fermée inventée ici.
+// `metadata.type`/`status` ne sont lus par AUCUN code du jeu (champs descriptifs) — on
+// propose, on n'impose pas.
+function _cxRepeuplerListes() {
+	const types = new Set(), etats = new Set(['ouvert']);
+	lieuxConnections.forEach(c => {
+		const m = c.metadata || {};
+		if (m.type) types.add(m.type);
+		if (m.status) etats.add(m.status);
+	});
+	((creationOptions && creationOptions.categories) || []).forEach(c => types.add(c));
+	_cxEl('cx-type-liste').innerHTML = [...types].sort()
+		.map(t => `<option value="${_escHtml(t)}"></option>`).join('');
+	_cxEl('cx-status-liste').innerHTML = [...etats].sort()
+		.map(t => `<option value="${_escHtml(t)}"></option>`).join('');
+}
+
+// Le doc du lieu de destination : c'est lui qui porte les `cells` sur lesquelles la case
+// d'arrivée est éprouvée. Mémoïsé dans `lieuxDocCache`, partagé avec l'éditeur JSON.
+async function _cxChargerDest(destId) {
+	if (!destId || lieuxDocCache[destId] !== undefined) return;
+	await _chargerDocLieu(destId);
+}
+
+function _cxPos(cote) {
+	const x = parseInt(_cxEl(`cx-${cote}-x`).value, 10);
+	const y = parseInt(_cxEl(`cx-${cote}-y`).value, 10);
+	// -1 (et non 0) quand le champ est vide : `_cxPosPosable` doit rendre 'invalide', pas
+	// accepter silencieusement l'origine.
+	return [Number.isNaN(x) ? -1 : x, Number.isNaN(y) ? -1 : y];
+}
+
+// Ce que les deux positions valent VRAIMENT, relu à chaque frappe. La case d'ici est
+// éprouvée sur la grille EN COURS D'ÉDITION (`grid`) et non sur le doc relu — c'est celle
+// que l'admin a sous les yeux ; celle de là-bas sur les `cells` du doc de destination.
+function _cxMajHints() {
+	const destId = _cxEl('cx-dest').value || '';
+	const dest = destId ? lieuxDocCache[destId] : undefined;
+	// ⚠️ « pas de carte » et « doc non relu » ne sont PAS la même chose : le second ne dit
+	// rien de la case d'arrivée, et l'annoncer comme un lieu sans grille serait un mensonge.
+	const relu = !!(dest && dest._id);
+	const cells = (relu && dest.cells && dest.cells.length) ? dest.cells : null;
+
+	const info = _cxEl('cx-dest-info');
+	if (!destId) info.textContent = 'Aucune destination choisie.';
+	else if (!relu) info.textContent = `${destId} — document introuvable ou non relu.`;
+	else info.textContent = `${destId}${cells ? ` — carte ${_cxTaille(cells)}` : ' — sans carte'}`;
+
+	_cxHint('cx-ici-hint', _cxPosPosable(grid, _cxPos('ici')), _cxPos('ici'), grid.length ? `${cols}×${rows}` : '');
+	if (destId && !relu) {
+		const el = _cxEl('cx-la-hint');
+		el.className = 'cx-hint';
+		el.textContent = "Carte de destination inconnue : la case d'arrivée n'est pas vérifiée.";
+	} else {
+		_cxHint('cx-la-hint', _cxPosPosable(cells, _cxPos('la')), _cxPos('la'), cells ? _cxTaille(cells) : '');
+	}
+	_cxMajApercu();
+}
+
+function _cxTaille(cells) {
+	return `${(cells[0] || []).length}×${cells.length}`;
+}
+
+function _cxHint(elId, motif, pos, taille) {
+	const el = _cxEl(elId);
+	if (!el) return;
+	const ou = `[${pos[0]}, ${pos[1]}]`;
+	let txt = '', klass = '';
+	if (motif === 'invalide') { txt = 'Position invalide : deux entiers positifs attendus.'; klass = 'ko'; }
+	else if (!taille) { txt = "Ce lieu n'a pas de carte — sa position n'est lue par personne (convention : [0, 0])."; }
+	else if (motif === 'hors') { txt = `${ou} est hors de la grille (${taille}).`; klass = 'ko'; }
+	else if (motif === 'terrain') { txt = `${ou} : terrain infranchissable — la porte n'y serait jamais atteignable.`; klass = 'ko'; }
+	else { txt = `${ou} sur ${taille} — case praticable.`; klass = 'ok'; }
+	el.className = 'cx-hint' + (klass ? ' ' + klass : '');
+	el.textContent = txt;
+}
+
+function _cxChamps() {
+	const iciCote = { lieu: currentLocId, pos: _cxPos('ici'), label: (_cxEl('cx-ici-label').value || '').trim() };
+	const laCote = { lieu: _cxEl('cx-dest').value || '', pos: _cxPos('la'), label: (_cxEl('cx-la-label').value || '').trim() };
+	return {
+		noeuds: cxIciIdx === 1 ? [laCote, iciCote] : [iciCote, laCote],
+		type: (_cxEl('cx-type').value || '').trim(),
+		status: (_cxEl('cx-status').value || '').trim(),
+	};
+}
+
+function _cxDocForme() {
+	const doc = _fusionConnexion(cxMode === 'edition' ? (cxDoc || {}) : {}, _cxChamps());
+	if (cxMode !== 'edition') doc._id = (_cxEl('cx-id').value || '').trim();
+	return doc;
+}
+
+function _cxMajApercu() {
+	const el = _cxEl('cx-preview');
+	if (el) el.textContent = JSON.stringify(_cxDocForme(), null, 2);
+}
+
+// ── La visée sur la carte ──────────────────────────────────────────────────
+// ⚠️ Elle écrit dans le FORMULAIRE, pas en base : le 🎯 de l'éditeur JSON, lui, enregistre
+// aussitôt. Ici l'écriture attend le bouton, comme tout le reste du formulaire.
+function basculerViseeConn() {
+	if (cxVisee) { desarmerViseeConn(); return; }
+	if (!grid.length) { _cxMsg("✗ Ce lieu n'a pas de grille : aucune case à viser.", true); return; }
+	if (editMode !== 'lieux') { _cxMsg('✗ Repassez en mode Lieux pour viser une case.', true); return; }
+	cxVisee = true;
+	canvas.style.cursor = 'crosshair';
+	_cxMajVisee();
+	renderGrid();
+	setStatus("Visée : cliquez la case de la porte — <span>Échap</span> pour renoncer. "
+		+ "Rien n'est enregistré avant le bouton.");
+}
+
+function desarmerViseeConn() {
+	if (!cxVisee) return;
+	cxVisee = false;
+	canvas.style.cursor = '';
+	_cxMajVisee();
+	if (grid.length) renderGrid();
+}
+
+function _cxMajVisee() {
+	const btn = _cxEl('cx-visee-btn');
+	if (!btn) return;
+	btn.classList.toggle('cx-visee', cxVisee);
+	btn.textContent = cxVisee ? '✕ Annuler la visée' : '🎯 Viser sur la carte';
+	// Le panneau s'efface et laisse passer les clics le temps du geste : sans quoi la moitié
+	// droite de la carte — celle qu'il recouvre — serait invisée.
+	const ov = _cxEl('conn-overlay');
+	if (ov) ov.classList.toggle('cx-viser', cxVisee);
+}
+
+function _cxPoserVisee(cx, cy) {
+	_cxEl('cx-ici-x').value = cx;
+	_cxEl('cx-ici-y').value = cy;
+	desarmerViseeConn();
+	_cxMajHints();
+	_cxMsg(`Case [${cx}, ${cy}] retenue — reste à enregistrer.`, false);
+}
+
+// ── L'écriture ─────────────────────────────────────────────────────────────
+async function submitConnForm() {
+	const creation = cxMode !== 'edition';
+	const doc = _cxDocForme();
+	const souci = _cxValider(doc, currentLocId, cxIdsConnus, creation);
+	if (souci) { _cxMsg(`✗ ${souci}`, true); return; }
+	// ⚠️ Ce refus et le voile rouge de la carte sont le MÊME prédicat : ce que la visée
+	// refuse au clic, la saisie à la main ne doit pas le faire passer.
+	const ici = doc.nodes[cxIciIdx];
+	const la = doc.nodes[1 - cxIciIdx];
+	if (_cxPosPosable(grid, ici.pos)) {
+		_cxMsg(`✗ [${ici.pos[0]}, ${ici.pos[1]}] n'est pas une case praticable de ce lieu.`, true);
+		return;
+	}
+	const destDoc = lieuxDocCache[la.lieu] || null;
+	if (destDoc && destDoc.cells && destDoc.cells.length && _cxPosPosable(destDoc.cells, la.pos)) {
+		_cxMsg(`✗ [${la.pos[0]}, ${la.pos[1]}] n'est pas une case praticable sur la carte de destination.`, true);
+		return;
+	}
+	const btn = _cxEl('cx-submit-btn');
+	btn.disabled = true;
+	_cxMsg('Enregistrement…', false);
+	try {
+		await _putDoc(doc);
+	} catch (e) {
+		_cxMsg(`✗ ${e.message}`, true);
+		btn.disabled = false;
+		return;
+	}
+	btn.disabled = false;
+	closeConnForm();
+	// La porte est peut-être ailleurs qu'avant : la liste latérale est filtrée par la case
+	// sélectionnée, la connexion en disparaîtrait à la seconde où on la déplace (même
+	// précaution que `_poserPorte`).
+	lieuxSelectedCell = { cx: ici.pos[0], cy: ici.pos[1] };
+	await fetchLieuxConnections();
+	renderLieuxConnList();
+	if (grid.length) renderGrid();
+	setStatus(`Connexion <span>${doc._id}</span> ${creation ? 'créée' : 'enregistrée'}.`);
+}
+
+// Câblage posé À LA PREMIÈRE OUVERTURE et non au chargement du script : le markup du
+// panneau vit après la balise, comme celui du formulaire de lieu.
+let _cxCable = false;
+function _cxCabler() {
+	if (_cxCable) return;
+	_cxCable = true;
+	_cxEl('cx-dest-filtre').addEventListener('input', () => _cxRepeuplerLieux());
+	_cxEl('cx-dest').addEventListener('change', async () => {
+		const destId = _cxEl('cx-dest').value;
+		// L'`_id` et le type se DÉRIVENT de la destination tant que l'admin ne les a pas
+		// touchés — comme le nom du PNJ se dérive du portrait dans le formulaire de lieu.
+		if (!cxIdTouche) _cxEl('cx-id').value = _cxIdPropose(destId, currentLocId, cxIdsConnus);
+		if (!cxTypeTouche) {
+			const l = ((creationOptions && creationOptions.lieux) || []).find(x => x._id === destId);
+			if (l && l.categorie) _cxEl('cx-type').value = l.categorie;
+		}
+		await _cxChargerDest(destId);
+		_cxMajHints();
+	});
+	_cxEl('cx-id').addEventListener('input', () => { cxIdTouche = true; _cxMajApercu(); });
+	_cxEl('cx-type').addEventListener('input', () => { cxTypeTouche = true; _cxMajApercu(); });
+	['cx-ici-x', 'cx-ici-y', 'cx-la-x', 'cx-la-y'].forEach(id =>
+		_cxEl(id).addEventListener('input', _cxMajHints));
+	['cx-ici-label', 'cx-la-label', 'cx-status'].forEach(id =>
+		_cxEl(id).addEventListener('input', _cxMajApercu));
 }
 
 // ── REDIMENSIONNEMENT : fonctions PURES ────────────────────────────────────
@@ -2886,6 +3434,12 @@ function renderLieuAddSection() {
 		? `<button class="btn" style="font-size:.68rem;" onclick="openLieuAdd()">➕ Ajouter un lieu en [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]</button>`
 		: `<div style="font-size:.66rem;color:#666;">Cliquez une case de la grille pour pouvoir y ajouter un lieu.</div>`;
 
+	// Relier DEUX LIEUX EXISTANTS : n'écrit qu'un doc `link:*`, jamais de `lieu:*` — c'est
+	// tout ce qui le sépare d'`openLieuAdd`. Offert sans case sélectionnée : le formulaire
+	// a ses champs x/y et sa visée 🎯, la case n'est qu'un pré-remplissage.
+	const relier = `<button class="btn" style="font-size:.68rem;margin-top:6px;" onclick="openConnForm('creation')">🔗 Relier à un lieu existant${
+		lieuxSelectedCell ? ` depuis [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]` : ''}</button>`;
+
 	// La file du LOT. ⚠️ Les ⌫ portent l'INDEX de la case, jamais son libellé : rien de
 	// ce qui vient de l'admin ne transite par un `onclick="…('…')"` (CLAUDE.md §9).
 	const pastilles = lieuxFileCases.map((c, i) =>
@@ -2895,7 +3449,7 @@ function renderLieuAddSection() {
 			<span onclick="_lotFileRetirer(${i})" title="Retirer de la file" style="cursor:pointer;color:var(--danger);">⌫</span>
 		</span>`).join('');
 
-	lieuAddSectionEl.innerHTML = solo + `
+	lieuAddSectionEl.innerHTML = solo + relier + `
 		<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
 			<div style="font-size:.66rem;color:#888;margin-bottom:5px;">
 				<b>Lot</b> — <b>Maj+clic</b> sur la grille empile une case : une par boutique, dans l'ordre.
@@ -4328,9 +4882,11 @@ document.addEventListener('keydown', (e) => {
 	if (add && !add.classList.contains('la-hidden')) { closeLieuAdd(); return; }
 	const ov = document.getElementById('lieu-fiche-overlay');
 	if (ov && !ov.classList.contains('lieu-fiche-hidden')) { closeLieuFiche(); return; }
-	// L'éditeur JSON vient en dernier : les deux précédents sont des modals qui le recouvrent.
-	// Armé, Échap annule d'abord la visée et laisse l'overlay ouvert — sinon on perdrait
-	// l'éditeur pour avoir voulu renoncer à un clic.
+	// Les deux panneaux de droite viennent ensuite : les précédents sont des modals qui les
+	// recouvrent. Armée, Échap annule d'abord la VISÉE et laisse le panneau ouvert — sinon
+	// on perdrait sa saisie pour avoir voulu renoncer à un clic.
+	if (cxVisee) { desarmerViseeConn(); return; }
+	if (_cxOuvert()) { closeConnForm(); return; }
 	if (lieuxRepos) { desarmerRepositionnement(); return; }
 	if (lieuxJsonOuvert) { closeLieuJson(); return; }
 	// Le mode test vient en dernier : son overlay est en z-index 100, sous les deux modals et
@@ -5014,6 +5570,74 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 		deux boutons.
 	</div>
 	<div id="lj-body"></div>
+</div>
+
+<!-- Formulaire d'une CONNEXION du mode Lieux : voir, éditer, ajouter un lien entre deux
+     lieux EXISTANTS. Panneau fixe à droite comme #lj-overlay et non un modal — la carte
+     doit rester cliquable pour la visée 🎯.
+     ⚠️ Rien n'est écrit avant le bouton : ✕ et Échap ferment sans rien engager (CLAUDE.md §8).
+     ⚠️ Aucun `const` n'est capturé sur ce markup au chargement du script (il vit APRÈS la
+     balise) : tout passe par `_cxEl`, appelé depuis des fonctions. -->
+<div id="conn-overlay" class="card cx-hidden">
+	<div class="lj-title">
+		<div class="card-title">🔗 <span id="cx-titre">Nouvelle connexion</span></div>
+		<button type="button" class="lj-close" onclick="closeConnForm()" title="Fermer (sans enregistrer)">✕</button>
+	</div>
+	<div class="lj-desc">
+		Deux nœuds : la case à occuper <b>ici</b> pour voir la porte, et la case d'arrivée
+		<b>là-bas</b>. Le <b>label</b> d'un nœud est le texte du bouton qui y mène, lu depuis
+		l'autre côté — vide, c'est le label du lieu qui s'affiche en jeu.
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Ici — <span id="cx-ici-lieu"></span></h3>
+		<div class="cx-pos">
+			<div><label for="cx-ici-x">x</label><input type="number" id="cx-ici-x" min="0" step="1"></div>
+			<div><label for="cx-ici-y">y</label><input type="number" id="cx-ici-y" min="0" step="1"></div>
+			<button class="btn btn-inline" id="cx-visee-btn" style="font-size:.62rem;"
+				onclick="basculerViseeConn()">🎯 Viser sur la carte</button>
+		</div>
+		<div class="cx-hint" id="cx-ici-hint"></div>
+		<label for="cx-ici-label" style="margin-top:8px;">Label du bouton qui mène ICI
+			<span style="color:#888;font-weight:normal;">(optionnel, vu depuis là-bas)</span></label>
+		<input type="text" id="cx-ici-label" placeholder="redescendre au comptoir">
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Là-bas</h3>
+		<input type="text" id="cx-dest-filtre" placeholder="filtrer les lieux…">
+		<select id="cx-dest" style="margin-bottom:0;"></select>
+		<div class="cx-hint" id="cx-dest-info"></div>
+		<div class="cx-pos" style="margin-top:6px;">
+			<div><label for="cx-la-x">x</label><input type="number" id="cx-la-x" min="0" step="1"></div>
+			<div><label for="cx-la-y">y</label><input type="number" id="cx-la-y" min="0" step="1"></div>
+		</div>
+		<div class="cx-hint" id="cx-la-hint"></div>
+		<label for="cx-la-label" style="margin-top:8px;">Label du bouton qui mène LÀ-BAS
+			<span style="color:#888;font-weight:normal;">(optionnel, vu d'ici)</span></label>
+		<input type="text" id="cx-la-label" placeholder="au-delà des remparts">
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Document</h3>
+		<label for="cx-type">Type <span style="color:#888;font-weight:normal;">(descriptif)</span></label>
+		<input type="text" id="cx-type" list="cx-type-liste" placeholder="chemin">
+		<datalist id="cx-type-liste"></datalist>
+		<label for="cx-status" style="margin-top:8px;">État</label>
+		<input type="text" id="cx-status" list="cx-status-liste" placeholder="ouvert">
+		<datalist id="cx-status-liste"></datalist>
+		<label for="cx-id" style="margin-top:8px;">Identifiant</label>
+		<input type="text" id="cx-id" placeholder="link:…" style="margin-bottom:0;">
+		<div class="cx-hint" id="cx-id-hint"></div>
+	</div>
+
+	<label>Aperçu</label>
+	<div class="la-preview" id="cx-preview"></div>
+	<div class="lj-msg" id="cx-msg"></div>
+	<div class="la-actions">
+		<button class="btn" id="cx-submit-btn" onclick="submitConnForm()">➕ Créer</button>
+		<button class="btn danger" onclick="closeConnForm()">Annuler</button>
+	</div>
 </div>
 
 <!-- Overlay fiche du lieu (réplique play_town, lecture seule) -->

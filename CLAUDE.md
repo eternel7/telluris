@@ -24,14 +24,16 @@ node dev/test_resize_client.js     # exécution du redimensionnement de grille (
 node dev/test_deplacement_client.js # exécution des règles de MARCHE partagées (scripts/deplacement.js)
 node dev/test_lot_lieux_client.js  # exécution du LOT de lieux (éditeur de carte, mode Lieux)
 node dev/test_lieu_form_client.js  # exécution du FORMULAIRE de lieu (capacités, fusion à l'édition)
+node dev/test_connexions_client.js # exécution du FORMULAIRE de connexion (id, fusion, case posable)
 ```
 
-Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les six harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
+Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les sept harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
 
 - `check_js.js` neutralise les expressions Jinja avant de passer le code au parseur de Node — ⚠️ en `(0)` et non `0`, sinon `{{ liste | tojson }}.forEach(...)` deviendrait `0.forEach(...)`, faux positif garanti. ⚠️ Il contrôle **aussi `templates/scripts/*.js`** : les `<script src=…>` sont sautés (ils n'ont pas de corps dans la page), si bien que `nav.js`, `battle_map.js` et `deplacement.js` n'étaient couverts par **rien**. Un `.js` n'ayant pas de balise, le fichier entier est traité comme un unique bloc.
 - `test_slots_client.js` extrait les fonctions **pures** du template (par nom, accolades équilibrées) et les exécute dans un contexte `vm` : il ferme la classe de bug « à qui appartient ce que j'affiche et ce que j'écris ? », qu'aucun test pytest ne peut atteindre. **Hors de portée sans jsdom** : rendu DOM, clic long, ordre inversé en mobile — à vérifier en jeu.
 - `test_deplacement_client.js` est le seul des quatre à **charger directement un `.js`** (`scripts/nav.js` puis `scripts/deplacement.js`) : il n'y a rien à extraire d'un template. Il est aussi le **seul test des règles de marche du jeu**, et ce n'est pas une commodité — ⚠️ **il n'existe AUCUNE règle de marche côté serveur** : la branche x/y de `move_character` ne valide que les bornes, ni terrain ni `nav`. `deplacement.js` ne double donc pas le serveur, **il EST la règle**.
 - `test_lot_lieux_client.js` (même méthode, même `runInThisContext`) verrouille le **lot de lieux**. ⚠️ Son objet est une classe de bug SILENCIEUSE : `import-bulk` fait un PUT complet, donc deux `link:*` de même `_id` dans un lot ne laissent qu'une porte en base et les autres boutiques deviennent **inatteignables sans la moindre erreur**. D'où le paramètre `dejaPris` de `_prochainLinkId` — le compteur se dérive de `lieuxConnections`, qui ne bouge pas tant que rien n'est écrit.
+- `test_connexions_client.js` (même méthode) verrouille le **formulaire de connexion**. ⚠️ Deux classes de bug SILENCIEUSES : `PUT /admin/doc` fait un PUT complet et ne refuse **rien** (un `link:*` déjà pris est écrasé, la porte d'un autre lieu disparaît sans erreur — d'où `_cxIdPropose` et la liste complète des `_id`), et le doc écrit est le doc **entier** (ce que le formulaire ne possède pas doit survivre à `_fusionConnexion` : clés inconnues du doc **et de chaque nœud**).
 - `test_resize_client.js` suit la même méthode pour le redimensionnement de carte (`admin_map_editor.html`) — ⚠️ mais avec **`vm.runInThisContext`** et non `vm.createContext` : un contexte séparé est un autre *realm*, donc ses tableaux ont un autre prototype `Array` et `deepStrictEqual` les refuse tous. Ces fonctions-ci n'ayant besoin d'aucune globale, les évaluer dans le realm du test suffit — et permet au passage de semer sur `globalThis` les quelques globales dont `_reappliquerPortes` dépend, seul moyen d'éprouver son idempotence.
 
 **Environnement local de l'agent** : Node dans `C:\Program Files\nodejs\`, Python dans `C:\Python314\`. ⚠️ Les deux peuvent être **hors du `PATH`** — appeler Node par son chemin complet (`"/c/Program Files/nodejs/node.exe"` depuis Bash) et pytest par `python -m pytest` (l'exe vit dans `~/AppData/Roaming/Python/Python314/Scripts`, hors `PATH`). Dépendances nécessaires **rien que pour collecter** les tests purs (ils importent `utils/*` → `routers/*`) : `pytest` + la ligne du `docker-compose.yml` **sans `uvicorn` ni `Pillow`** (`fastapi Jinja2 couchdb2 bcrypt pyjwt[crypto] authlib httpx itsdangerous`). CouchDB est injoignable en local : `db/config.py` tolère l'absence de connexion à l'import (`server`/`db` = `None`, les helpers renvoient `None`) pour que les tests purs se collectent. Docker et l'app tournent côté utilisateur.
@@ -130,6 +132,7 @@ dev/
   test_deplacement_client.js # tests d'EXÉCUTION des règles de marche (scripts/deplacement.js)
   test_lot_lieux_client.js # tests d'EXÉCUTION du lot de lieux (éditeur de carte)
   test_lieu_form_client.js # tests d'EXÉCUTION du formulaire de lieu (capacités, fusion)
+  test_connexions_client.js # tests d'EXÉCUTION du formulaire de connexion (éditeur de carte)
 tests/                   # tests purs, un fichier par système
 ```
 
@@ -199,6 +202,15 @@ Le bouton `✏️ Éditer` d'une ligne de connexion rouvre le **même** formulai
 - ⚠️ Les filtres image/portrait par catégorie sont **heuristiques** : si le fichier réel du doc n'y figure pas, « toutes les images » est coché d'office, sinon le `select` retomberait à vide et l'enregistrement refuserait « Image requise » sur un lieu qui en a une.
 - `metadata.type` de la connexion **n'est pas retouché** après un changement de catégorie (champ purement descriptif, lu par aucun code) : l'édition n'écrit qu'un seul doc.
 - `_docsNouveauLieu` passe par `_fusionLieu({}, …)` : création et édition produisent la **même forme** depuis une seule fonction.
+
+### Relier deux lieux — le formulaire de CONNEXION (`/admin/editor`, mode Lieux)
+`🔗 Connexion` (sur une ligne) et `🔗 Relier à un lieu existant` ouvrent **`#conn-overlay`** : voir, éditer et ajouter un lien sans passer par le JSON. Panneau fixe à droite, **même place que `#lj-overlay`** (ouvrir l'un ferme l'autre). N'écrit **qu'un doc `link:*`** — créer la boutique ET sa porte reste le travail du formulaire de lieu et du LOT.
+
+- ⚠️ **`PUT /admin/doc` ne refuse RIEN** (PUT complet, `_rev` rattaché en base) : réutiliser un `link:*` existant l'écrase en silence. D'où `_cxIdPropose` (convention `link:<là-bas>_to_<ici>`) et la liste **complète** des `_id`, lue par ouverture sur `GET /admin/table/data?type=connection` — `lieuxConnections` ne voit que le lieu courant. Lecture échouée ⇒ le formulaire **le dit**.
+- ⚠️ `_fusionConnexion` = `_fusionLieu` pour les connexions : survivent `_rev`, les clés inconnues du doc **et de chaque nœud** ; `champs.noeuds` est dans l'**ordre du doc** (`cxIciIdx`), permuter déplacerait la porte ; un label vidé est **supprimé** (sinon `get_lieu_links` ne peut plus replier sur le label du lieu).
+- ⚠️ Une seule règle de case, `_cxPosPosable` : « s'il y a une grille, la case doit être praticable » (`>= 1`, celui de `_caseAccessible` donc du voile rouge) ; `cells` absent ⇒ aucune règle. La visée 🎯 et la saisie à la main partagent ce prédicat.
+- ⚠️ La visée 🎯 écrit **dans le formulaire**, pas en base (celle de l'éditeur JSON enregistre aussitôt), et **efface le panneau en `pointer-events:none`** le temps du geste : il recouvre la moitié droite de la carte. Refusée hors mode Lieux ; le formulaire entier est refusé tant qu'un **redimensionnement est en aperçu**.
+- ⚠️ `_id` **gelé en édition** ; la destination reste modifiable et l'`_id` ne la suit pas.
 
 ### Peupler une ville — le LOT de lieux (`/admin/editor`, mode Lieux)
 Poser N boutiques d'un coup, sans écrire un `dev/gen_magasins_<ville>.py` de plus : **Maj+clic** empile des cases dans une file (une par boutique, l'ordre compte), `➕ Ajouter un lot` ouvre un tableau — composition à gauche (métier coché + quantité, avec ce que la cité possède déjà), lignes à droite (enseigne 🎲, image, portrait, tout modifiable). Écriture en **une** requête `POST /admin/import-bulk`.
