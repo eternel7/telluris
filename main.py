@@ -1092,6 +1092,82 @@ def admin_lint_dialogues(
 	return lint_dialogues.analyser(payload)
 
 
+# ── Éditeur de dialogues & d'offres de quête ─────────────────────────────────
+# Écran « Dialogues & quêtes » : éditer un arbre de dialogue `pnj:*` et les specs
+# `services.transport.offre` / `services.escorte.offre` (= les quêtes AUTHORÉES du jeu,
+# qui ne sont pas des docs `quete:*`). ⚠️ La page n'ÉCRIT RIEN en base : elle produit le
+# document complet à coller dans la carte d'import de `/admin`. Elle lit les docs par
+# `GET /admin/table/data?type=pnj` et se fait contrôler par `POST /admin/lint-dialogues`.
+
+def _vocabulaire_dialogues() -> dict:
+	"""Le vocabulaire que le moteur consomme RÉELLEMENT, servi au template.
+
+	⚠️ Servi, jamais recopié en JS. C'est exactement le risque documenté pour
+	`utils/capacites.py` : une liste recopiée dans le front diverge du moteur en SILENCE
+	(un flag ajouté à `FLAGS_CONNUS` manquerait à l'éditeur, qui laisserait alors saisir
+	une condition que le linter refuse — ou pire, l'inverse).
+
+	⚠️ Ces constantes sont des `set` et un dict à clés TUPLE : ni l'un ni l'autre n'est
+	sérialisable par `| tojson`. D'où les listes triées et l'aplatissement de
+	`ACTIONS_A_CONDITIONNER` en `[{service, op, flag}]`."""
+	return {
+		"placeholders": sorted(lint_dialogues.PLACEHOLDERS_CONNUS),
+		"flags": sorted(lint_dialogues.FLAGS_CONNUS),
+		"conditions_structurees": sorted(lint_dialogues.CONDITIONS_STRUCTUREES),
+		"conditions_quete": sorted(lint_dialogues.CONDITIONS_QUETE),
+		"quete_cles": sorted(lint_dialogues.QUETE_REUSSIE_CLES),
+		"relation_cles": sorted(lint_dialogues.RELATION_CLES),
+		"fin": lint_dialogues.FIN,
+		# Nœuds de résultat par service : tout ce que `routers/pnj.py` va chercher par sa
+		# clé. Le transport n'est pas dans `NOEUDS_REQUIS` (ses deux rôles ne sont pas
+		# exigés du même PNJ), on le reconstitue depuis ses trois ensembles.
+		# ⚠️ `livre_retour` et `deja` sont lus par le router mais absents des listes du
+		# linter — le premier n'y figure nulle part, le second est volontairement optionnel
+		# (un gardien peut ne pas reconnaître les habitués). Sans cette mention l'éditeur
+		# ne les proposerait pas, et ils resteraient introuvables autrement qu'en lisant
+		# le router.
+		"noeuds_service": dict(
+			{s: sorted(v) for s, v in lint_dialogues.NOEUDS_REQUIS.items()},
+			transport=sorted(lint_dialogues.TRANSPORT_DONNEUR
+							 | lint_dialogues.TRANSPORT_DESTINATAIRE
+							 | lint_dialogues.TRANSPORT_RETOUR
+							 | {"livre_retour"}),
+			escorte=sorted(set(lint_dialogues.NOEUDS_REQUIS["escorte"])
+						   | lint_dialogues.ESCORTE_MEFIANCE),
+			acces=sorted(set(lint_dialogues.NOEUDS_REQUIS["acces"]) | {"deja"}),
+		),
+		"actions": [
+			{"service": service, "op": op, "flag": flag}
+			for (service, op), flag in sorted(lint_dialogues.ACTIONS_A_CONDITIONNER.items())
+		],
+		# Les flags que `routers/pnj.py:_contexte` ne pose QUE si le service est déclaré :
+		# sans lui le choix ne s'affiche jamais, et le linter ne peut pas le voir (il ne
+		# teste que l'appartenance à `FLAGS_CONNUS`). L'éditeur, lui, connaît les services
+		# du document — il peut donc avertir.
+		"flags_par_service": {
+			"transport": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("transport_")),
+			"escorte": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("escorte_")),
+			"rang": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("rang_")),
+			"commission": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("commission_")),
+			"acces": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("acces_")),
+		},
+		"acces_conditions": sorted(acces.CONDITIONS_CONNUES),
+		"acces_sous_filtres": {c: sorted(s) for c, s in acces.SOUS_FILTRES_CONNUS.items()},
+	}
+
+
+@app.get("/admin/dialogues", response_class=HTMLResponse)
+def admin_dialogues(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_dialogues.html",
+		context={"title": "Dialogues & quêtes", "vocabulaire": _vocabulaire_dialogues()},
+	)
+
+
 # ── Outils de dev/ ───────────────────────────────────────────────────────────
 # Écran « Outils de développement » : lancer un script de `dev/` et suivre sa sortie en
 # direct. ⚠️ Le client n'envoie qu'un `id` du catalogue (`utils/dev_tools`) — jamais un

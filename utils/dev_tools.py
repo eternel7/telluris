@@ -378,6 +378,16 @@ CATALOGUE = [
 			"partagé par play_town, le combat et le mode test de l'éditeur. C'est son SEUL test : "
 			"la règle de marche (terrain, `nav`, bornes) n'existe NULLE PART côté serveur.",
 	},
+	{
+		"id": "test_dialogues_client",
+		"label": "🧪 Tests d'exécution de l'éditeur de dialogues (node)",
+		"argv": _node("test_dialogues_client.js"),
+		"ecrit": "Lecture seule.",
+		"description": "⚠️ Exige `node` (cf. ci-dessus). Exécute les fonctions PURES de "
+			"/admin/dialogues : fusion préservant les clés inconnues (doc, nœud, choix), "
+			"atteignabilité des nœuds (nœuds de service compris), offres de transport et "
+			"d'escorte, placement du graphe.",
+	},
 ]
 
 _PAR_ID = OrderedDict((o["id"], o) for o in CATALOGUE)
