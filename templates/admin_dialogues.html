@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<style>
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--danger: #c84b4b;
+			--success: #4bc87a;
+			--text: #fff;
+			--muted: #9aa3b2;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+		header a:hover { color: var(--accent); }
+		.main { width: 100%; max-width: none; padding: 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-title {
+			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		code { color: var(--accent2); }
+
+		.btn, .dl-btn {
+			display: inline-flex; align-items: center; gap: 8px;
+			padding: 10px 18px; border-radius: 6px;
+			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
+			text-decoration: none; cursor: pointer; transition: all 0.2s;
+			border: 1px solid var(--accent); background: rgba(200,168,75,0.1); color: var(--accent);
+		}
+		.btn:hover, .dl-btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+		.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+		.btn.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
+		.btn.secondary:hover { background: rgba(75,143,200,0.22); box-shadow: 0 0 12px rgba(75,143,200,0.25); }
+		.btn.danger { border-color: var(--danger); background: rgba(200,75,75,0.1); color: var(--danger); }
+		.btn.danger:hover { background: rgba(200,75,75,0.22); box-shadow: 0 0 12px rgba(200,75,75,0.25); }
+		.btn.mini { padding: 4px 9px; font-size: 0.72rem; }
+
+		.status { font-size: 0.78rem; margin-top: 12px; min-height: 1.2em; color: var(--muted); }
+		.status.ok { color: var(--success); }
+		.status.err { color: var(--danger); }
+
+		input[type=text], input[type=number], select, textarea {
+			padding: 8px 11px; border: 1px solid var(--border); border-radius: 6px;
+			background: var(--bg); color: var(--text);
+			font-family: inherit; font-size: 0.8rem; letter-spacing: 0.03em;
+		}
+		input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+		input[readonly] { background: #0a0c11; color: var(--muted); cursor: default; }
+		textarea { width: 100%; resize: vertical; line-height: 1.5; }
+		label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em; }
+
+		.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+		.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+		.field { display: flex; flex-direction: column; gap: 5px; }
+		.field > input, .field > select, .field > textarea { width: 100%; }
+		.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+		.hint { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+		.hint.warn { color: var(--accent); }
+
+		/* Dialogue : liste des nœuds à gauche, graphe à droite. Le graphe cède la place à
+		   l'overlay d'édition (cf. `_dlgOverlay`) — les deux occupent la moitié droite. */
+		.dlg-split { display: grid; grid-template-columns: 300px 1fr; gap: 14px; align-items: start; }
+		.dlg-split.compact { grid-template-columns: 1fr; }
+		.dlg-split.compact .graph-wrap { display: none; }
+
+		.noeud-list { max-height: 62vh; overflow: auto; border: 1px solid var(--border); border-radius: 6px; }
+		.noeud-item {
+			padding: 7px 10px; border-bottom: 1px solid #1b212c; cursor: pointer;
+			font-size: 0.78rem; display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+		}
+		.noeud-item:hover { background: rgba(75,143,200,0.08); }
+		.noeud-item.selected { background: rgba(200,168,75,0.16); }
+		.noeud-id { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
+		.badge {
+			font-size: 0.62rem; padding: 1px 6px; border-radius: 10px;
+			border: 1px solid var(--border); color: var(--muted); white-space: nowrap;
+		}
+		.badge.mort { border-color: var(--danger); color: var(--danger); }
+		.badge.service { border-color: var(--accent); color: var(--accent); }
+		.badge.depart { border-color: var(--success); color: var(--success); }
+
+		.graph-wrap { border: 1px solid var(--border); border-radius: 6px; background: #0a0c11; overflow: auto; max-height: 62vh; }
+		.graph-wrap svg { display: block; }
+		.gnode rect { fill: #141720; stroke: var(--border); stroke-width: 1.5; }
+		.gnode.entree rect { stroke: var(--accent); }
+		.gnode.mort rect { stroke: var(--danger); stroke-dasharray: 4 3; }
+		.gnode.selected rect { fill: rgba(200,168,75,0.18); stroke: var(--accent); stroke-width: 2.5; }
+		.gnode text { fill: var(--text); font-size: 11px; font-family: 'Share Tech Mono', monospace; }
+		.gnode { cursor: pointer; }
+		.glink { fill: none; stroke: #3a4256; stroke-width: 1.4; }
+		.glink.conditionne { stroke-dasharray: 5 4; stroke: #55617d; }
+		.glink.mort { stroke: var(--danger); stroke-dasharray: 3 3; }
+		.graph-legend { font-size: 0.7rem; color: var(--muted); padding: 8px 10px; display: flex; gap: 14px; flex-wrap: wrap; }
+
+		/* Choix d'un nœud : une ligne repliable par choix. */
+		.choix-item { border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 9px; background: #0f131b; }
+		.choix-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+		.choix-head .grip { color: var(--muted); font-size: 0.85rem; }
+		.choix-num { font-size: 0.7rem; color: var(--muted); }
+
+		/* Services : un bloc par service, replié tant qu'il n'est pas déclaré. */
+		.svc { border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; background: #0f131b; }
+		.svc-head { display: flex; align-items: center; gap: 9px; padding: 9px 12px; cursor: pointer; }
+		.svc-head .svc-nom { font-size: 0.8rem; color: var(--accent); letter-spacing: 0.08em; }
+		.svc-head input { accent-color: var(--accent); }
+		.svc-body { padding: 0 12px 12px; border-top: 1px solid var(--border); }
+		.svc-body.hidden { display: none; }
+
+		/* Lignes de tableau générique (cargaison, protégés, items de récompense). */
+		.ligne { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px; flex-wrap: wrap; }
+		.ligne .field { flex: 1 1 140px; }
+
+		/* Rapport du linter — repris de la carte d'import de /admin. */
+		.lint-report { display: none; margin-top: 12px; max-height: 300px; overflow-y: auto; }
+		.lint-report.active { display: block; }
+		.lint-line {
+			font-size: 0.75rem; line-height: 1.5; padding: 5px 8px;
+			border-left: 3px solid var(--border); margin-bottom: 4px;
+			background: #0d0f14; border-radius: 0 4px 4px 0;
+		}
+		.lint-line.erreur { border-left-color: var(--danger); }
+		.lint-line.avertissement { border-left-color: var(--accent); }
+		.lint-where { color: var(--accent2); }
+		.lint-node { color: var(--muted); }
+
+		/* Overlay d'édition d'un nœud : même géométrie que #editor-card d'admin_table. */
+		#noeud-overlay {
+			position: fixed; top: 70px; right: 14px; bottom: 14px;
+			width: min(520px, 96vw); margin: 0; z-index: 60;
+			flex-direction: column; overflow: auto;
+			box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+		}
+		.editor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+		.editor-close {
+			background: none; border: none; color: var(--muted);
+			font-size: 1rem; line-height: 1; cursor: pointer; padding: 2px 6px;
+		}
+		.editor-close:hover { color: var(--danger); }
+		.portrait-apercu { max-height: 84px; border-radius: 6px; border: 1px solid var(--border); }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>🗣 Dialogues &amp; quêtes — administration</h1>
+		<a href="/admin">← Retour à l'administration</a>
+	</header>
+	<div class="main">
+
+		<!-- Choix du PNJ -->
+		<div class="card">
+			<div class="card-title">Document PNJ</div>
+			<div class="card-desc">
+				Les arbres de dialogue et les <strong>quêtes authorées</strong> du jeu vivent tous
+				dans les docs <code>pnj:*</code> — une quête écrite est une spec
+				<code>services.transport.offre</code> ou <code>services.escorte.offre</code>, pas un
+				doc <code>quete:*</code>. ⚠️ Cet écran <strong>n'écrit rien en base</strong> : il
+				produit le document complet, à coller dans la carte d'import de <code>/admin</code>.
+			</div>
+			<div class="row">
+				<select id="pnj-select" style="flex: 1 1 340px"><option value="">— charger la liste —</option></select>
+				<button class="btn" type="button" id="reload-btn">↻ Charger la liste</button>
+			</div>
+			<div class="status" id="load-status">Chargement…</div>
+		</div>
+
+		<!-- Identité -->
+		<div class="card" id="ident-card" style="display:none">
+			<div class="card-title">Identité</div>
+			<div class="card-desc">
+				⚠️ L'<code>_id</code> est <strong>gelé</strong> : CouchDB ne renomme pas, et tout ce
+				qui pointe ce PNJ (entrées <code>pnj</code> des lieux) garderait l'ancien.
+			</div>
+			<div class="grid">
+				<div class="field"><label for="f-id">_id</label><input type="text" id="f-id" readonly></div>
+				<div class="field"><label for="f-nom">nom</label><input type="text" id="f-nom"></div>
+				<div class="field"><label for="f-race">race</label><input type="text" id="f-race"></div>
+				<div class="field"><label for="f-vocation">vocation</label><input type="text" id="f-vocation"></div>
+				<div class="field"><label for="f-portrait">portrait</label><input type="text" id="f-portrait"></div>
+				<div class="field"><label>aperçu</label><img id="f-portrait-img" class="portrait-apercu" alt="" style="display:none"></div>
+			</div>
+			<div class="field" style="margin-top:12px">
+				<label for="f-description">description (facultative — 11 docs en portent une)</label>
+				<textarea id="f-description" rows="2"></textarea>
+			</div>
+		</div>
+
+		<!-- Dialogue -->
+		<div class="card" id="dlg-card" style="display:none">
+			<div class="card-title">Dialogue</div>
+			<div class="card-desc">
+				⚠️ <code>noeud_depart</code> et <code>noeud_attente</code> vivent <strong>dans</strong>
+				<code>dialogue</code>, à côté de <code>noeuds</code>. Un nœud marqué
+				<span class="badge mort">mort</span> n'est atteint par aucun <code>next</code> ni
+				aucun service : son texte ne sera jamais lu.
+			</div>
+			<div class="grid" style="margin-bottom:14px">
+				<div class="field"><label for="f-depart">noeud_depart</label><select id="f-depart"></select></div>
+				<div class="field"><label for="f-attente">noeud_attente (facultatif)</label><select id="f-attente"></select></div>
+			</div>
+			<div class="row" style="margin-bottom:10px">
+				<button class="btn mini" type="button" id="add-noeud">➕ Nouveau nœud</button>
+				<span class="hint" id="dlg-compte"></span>
+			</div>
+			<div class="dlg-split" id="dlg-split">
+				<div class="noeud-list" id="noeud-list"></div>
+				<div class="graph-wrap">
+					<div class="graph-legend">
+						<span>▭ nœud</span>
+						<span style="color:var(--accent)">▭ entrée (départ / service)</span>
+						<span style="color:var(--danger)">▭ inatteignable</span>
+						<span>— next</span>
+						<span>┄ conditionné</span>
+						<span style="color:var(--danger)">┄ next mort</span>
+					</div>
+					<div id="graph"></div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Services & offres -->
+		<div class="card" id="svc-card" style="display:none">
+			<div class="card-title">Services &amp; offres de quête</div>
+			<div class="card-desc">
+				Cocher un service déclare son bloc <code>services.&lt;nom&gt;</code>. ⚠️ Les flags de
+				condition (<code>acces_ouvrable</code>, <code>commission_offerte</code>…) ne sont posés
+				par le moteur <strong>que si le service est déclaré ici</strong> — un choix conditionné
+				par un flag orphelin ne s'affiche jamais, et le linter ne peut pas le voir.
+			</div>
+			<div id="svc-list"></div>
+		</div>
+
+		<!-- JSON -->
+		<div class="card" id="json-card" style="display:none">
+			<div class="card-title">Document à importer</div>
+			<div class="card-desc">
+				Le document <strong>complet</strong>, reconstruit par fusion sur celui relu en base :
+				tout ce que ce formulaire ne modélise pas (sous-clés de services, clés inconnues d'un
+				nœud ou d'un choix) est <strong>conservé</strong>. ⚠️ Nécessaire, car
+				<code>/admin/import-bulk</code> fait un <strong>PUT complet, jamais un merge</strong> :
+				une clé absente d'ici disparaîtrait de la base en silence.
+			</div>
+			<textarea id="json-out" rows="14" readonly spellcheck="false"></textarea>
+			<div class="btn-row">
+				<button class="btn" type="button" id="copy-btn">📋 Copier le JSON</button>
+				<button class="btn secondary" type="button" id="lint-btn">🔍 Vérifier les dialogues</button>
+				<a class="btn secondary" href="/admin#import-json">→ Aller à l'import</a>
+			</div>
+			<div class="status" id="json-status"></div>
+			<div class="lint-report" id="lint-report"></div>
+		</div>
+	</div>
+
+	<!-- Édition d'un nœud : overlay fixe à droite (cf. #noeud-overlay) -->
+	<div class="card" id="noeud-overlay" style="display:none">
+		<div class="editor-head">
+			<div class="card-title" style="margin-bottom:0">Nœud — <span id="ov-id"></span></div>
+			<button type="button" class="editor-close" id="ov-close" title="Fermer">✕</button>
+		</div>
+		<div class="field" style="margin-top:10px">
+			<label for="ov-nid">identifiant du nœud</label>
+			<input type="text" id="ov-nid">
+		</div>
+		<div class="field" style="margin-top:10px">
+			<label for="ov-texte">texte</label>
+			<textarea id="ov-texte" rows="4"></textarea>
+			<span class="hint">Placeholders connus : <span id="ov-placeholders"></span></span>
+			<span class="hint">⚠️ Ne pas écrire d'espaces insécables autour des « » : le moteur les pose au rendu.</span>
+		</div>
+		<div class="field" style="margin-top:10px">
+			<label for="ov-texte-gratuit">texte_gratuit (variante si le soin est offert)</label>
+			<textarea id="ov-texte-gratuit" rows="2"></textarea>
+		</div>
+		<div class="grid" style="margin-top:10px">
+			<div class="field">
+				<label for="ov-delai">delai_min (secondes, &gt; 0)</label>
+				<input type="number" id="ov-delai" min="0" step="1">
+			</div>
+			<div class="field">
+				<label for="ov-reinit">relation_reinit (nœuds, séparés par des virgules)</label>
+				<input type="text" id="ov-reinit">
+			</div>
+		</div>
+		<div class="grid" style="margin-top:10px">
+			<div class="field"><label for="ov-rel-delta">relation.delta (0 = pas de bloc)</label><input type="number" id="ov-rel-delta" step="1"></div>
+			<div class="field"><label for="ov-rel-lieu">relation.lieu (défaut : le lieu où l'on parle)</label><input type="text" id="ov-rel-lieu"></div>
+			<div class="field"><label for="ov-rel-unique">relation.unique (clé d'unicité)</label><input type="text" id="ov-rel-unique"></div>
+		</div>
+
+		<div class="card-title" style="margin:16px 0 8px">Choix</div>
+		<div id="ov-choix"></div>
+		<div class="btn-row">
+			<button class="btn mini" type="button" id="ov-add-choix">➕ Ajouter un choix</button>
+			<button class="btn mini danger" type="button" id="ov-del-noeud">🗑 Supprimer ce nœud</button>
+		</div>
+		<div class="status" id="ov-status"></div>
+	</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// Éditeur de dialogues PNJ & d'offres de quête — /admin/dialogues
+//
+// ⚠️ Cet écran n'écrit RIEN en base. Il lit (`GET /admin/table/data?type=pnj`), se fait
+// contrôler (`POST /admin/lint-dialogues`, lecture seule) et produit le doc à importer.
+//
+// Le vocabulaire vient du SERVEUR (`_vocabulaire_dialogues`), jamais d'une recopie ici :
+// une liste recopiée diverge du moteur en silence (cf. utils/capacites.py dans CLAUDE.md).
+// ═══════════════════════════════════════════════════════════════════════════
+
+const VOCAB = {{ vocabulaire | tojson | safe }};
+
+const $ = id => document.getElementById(id);
+function setStatus(el, msg, kind) { el.textContent = msg; el.className = 'status' + (kind ? ' ' + kind : ''); }
+function escapeHtml(s) {
+	return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+		'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+	}[c]));
+}
+
+// ── État ────────────────────────────────────────────────────────────────────
+let docsPnj = [];          // tous les docs `pnj:*` relus en base
+let docExistant = null;    // le doc RELU, base de toute fusion — jamais un doc reconstruit
+let noeuds = {};           // {id: nœud} en cours d'édition
+let ordreNoeuds = [];      // l'ordre d'affichage (les objets JS gardent l'ordre d'insertion)
+let services = {};         // {nom: conf} en cours d'édition
+let identite = {};         // {nom, race, vocation, portrait, description}
+let departId = '';
+let attenteId = '';
+let selection = null;      // id du nœud ouvert dans l'overlay
+
+const SERVICES_CONNUS = ['soin', 'don', 'transport', 'escorte', 'rang', 'commission', 'acces'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FONCTIONS PURES — testées par dev/test_dialogues_client.js
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Points d'entrée de l'arbre. ⚠️ Miroir de `lint_dialogues._entrees` : le nœud de départ,
+// le nœud d'attente, ET tous les nœuds de service — le router y saute directement après
+// une action, aucun `next` n'y mène. Les omettre ferait passer chaque nœud de service pour
+// un « texte mort », c'est-à-dire un faux positif sur du contenu parfaitement correct.
+function _dlgEntrees(doc) {
+	const dialogue = (doc && doc.dialogue) || {};
+	const noeudsDoc = dialogue.noeuds || {};
+	const out = new Set();
+	if (dialogue.noeud_depart) out.add(dialogue.noeud_depart);
+	if (dialogue.noeud_attente) out.add(dialogue.noeud_attente);
+	const svc = (doc && doc.services) || {};
+	for (const nom of Object.keys(svc)) {
+		const conf = svc[nom] || {};
+		const decl = conf.noeuds || {};
+		for (const cle of Object.keys(decl)) {
+			if (decl[cle]) out.add(decl[cle]);
+		}
+	}
+	// Une entrée qui ne désigne aucun nœud existant n'est pas une entrée (le linter la
+	// signale par ailleurs) : la garder ferait planter la traversée.
+	return new Set([...out].filter(nid => Object.prototype.hasOwnProperty.call(noeudsDoc, nid)));
+}
+
+// Fermeture transitive des `next` depuis les entrées. ⚠️ Miroir de
+// `lint_dialogues._atteignables`. Les cycles (`retour → accueil`) sont très fréquents en
+// base : le `vus` est ce qui empêche la boucle infinie.
+function _dlgAtteignables(noeudsDoc, entrees) {
+	const vus = new Set();
+	const pile = [...entrees];
+	while (pile.length) {
+		const nid = pile.pop();
+		if (vus.has(nid)) continue;
+		vus.add(nid);
+		const noeud = noeudsDoc[nid] || {};
+		for (const choix of noeud.choix || []) {
+			const cible = choix.next;
+			if (cible && Object.prototype.hasOwnProperty.call(noeudsDoc, cible)) pile.push(cible);
+		}
+	}
+	return vus;
+}
+
+// `next` qui ne mènent nulle part : ni la sentinelle `fin`, ni un nœud existant. Le moteur
+// referme alors le dialogue sans un mot — indiscernable d'une fin voulue.
+function _dlgNextMorts(noeudsDoc) {
+	const morts = [];
+	for (const nid of Object.keys(noeudsDoc)) {
+		for (const choix of (noeudsDoc[nid] || {}).choix || []) {
+			const cible = choix.next;
+			if (!cible || cible === VOCAB.fin) continue;
+			if (!Object.prototype.hasOwnProperty.call(noeudsDoc, cible)) {
+				morts.push({ noeud: nid, choix: choix.id || '', cible: cible });
+			}
+		}
+	}
+	return morts;
+}
+
+// Fusion d'un CHOIX. ⚠️ `Object.assign` sur l'ancien : les clés que ce formulaire ne
+// modélise pas doivent survivre (même idiome que `_fusionConnexion` sur ses nœuds).
+// Un champ vidé est SUPPRIMÉ, jamais écrit à vide : `next: ""` ou `condition: {}` sont des
+// formes que le moteur et le linter traitent différemment de l'absence.
+function _dlgFusionChoix(ancien, champs) {
+	const choix = Object.assign({}, ancien || {});
+	choix.id = champs.id;
+	choix.label = champs.label;
+	// ⚠️ Une `action` rend le `next` INOPÉRANT (routers/pnj.py : le nœud suivant vient de
+	// `services.<x>.noeuds.<résultat>`). L'écrire quand même laisserait croire à une suite
+	// qui n'aura pas lieu.
+	if (champs.action && champs.action.service) {
+		choix.action = champs.action.op
+			? { service: champs.action.service, op: champs.action.op }
+			: { service: champs.action.service };
+		delete choix.next;
+	} else {
+		delete choix.action;
+		if (champs.next) choix.next = champs.next; else delete choix.next;
+	}
+	if (champs.condition && Object.keys(champs.condition).length) choix.condition = champs.condition;
+	else delete choix.condition;
+	if (champs.deplacer) choix.deplacer = champs.deplacer; else delete choix.deplacer;
+	return choix;
+}
+
+// Fusion d'un NŒUD. Mêmes règles : on part de l'ancien, on ne pose que ce qu'on possède.
+// `delai_min <= 0` et un `relation.delta` nul ne sont PAS écrits — le linter les refuse
+// (« il doit être un entier de secondes > 0, sinon il ne verrouille rien »).
+function _dlgFusionNoeud(ancien, champs) {
+	const noeud = Object.assign({}, ancien || {});
+	noeud.texte = champs.texte || '';
+	if (champs.texte_gratuit) noeud.texte_gratuit = champs.texte_gratuit; else delete noeud.texte_gratuit;
+
+	const delai = parseInt(champs.delai_min, 10);
+	if (Number.isFinite(delai) && delai > 0) noeud.delai_min = delai; else delete noeud.delai_min;
+
+	const delta = parseInt((champs.relation || {}).delta, 10);
+	if (Number.isFinite(delta) && delta !== 0) {
+		const rel = Object.assign({}, ancien && ancien.relation ? ancien.relation : {});
+		rel.delta = delta;
+		if (champs.relation.lieu) rel.lieu = champs.relation.lieu; else delete rel.lieu;
+		if (champs.relation.unique) rel.unique = champs.relation.unique; else delete rel.unique;
+		noeud.relation = rel;
+	} else {
+		delete noeud.relation;
+	}
+
+	const reinit = (champs.relation_reinit || []).filter(x => x);
+	if (reinit.length === 1) noeud.relation_reinit = reinit[0];
+	else if (reinit.length > 1) noeud.relation_reinit = reinit;
+	else delete noeud.relation_reinit;
+
+	const anciensChoix = (ancien && ancien.choix) || [];
+	noeud.choix = (champs.choix || []).map((c, i) => _dlgFusionChoix(anciensChoix[i], c));
+	return noeud;
+}
+
+// Fusion du DOCUMENT. ⚠️ LA fonction critique de cet écran : le JSON produit part vers
+// `/admin/import-bulk`, qui fait un PUT COMPLET. Toute clé absente d'ici DISPARAÎT de la
+// base sans erreur — d'où la copie profonde du doc relu, et le fait qu'on n'écrase que ce
+// que le formulaire possède réellement. Même idiome que `_fusionLieu`/`_fusionConnexion`.
+function _dlgFusionDoc(existant, champs) {
+	const doc = JSON.parse(JSON.stringify(existant || {}));
+	doc.type = 'pnj';
+	doc.nom = champs.nom;
+	doc.race = champs.race;
+	doc.vocation = champs.vocation;
+	doc.portrait = champs.portrait;
+	if (champs.description) doc.description = champs.description; else delete doc.description;
+
+	// `dialogue` : on conserve ses éventuelles clés inconnues, on réécrit les trois qu'on a.
+	const dialogue = Object.assign({}, doc.dialogue || {});
+	dialogue.noeud_depart = champs.noeud_depart;
+	if (champs.noeud_attente) dialogue.noeud_attente = champs.noeud_attente;
+	else delete dialogue.noeud_attente;
+	dialogue.noeuds = champs.noeuds;
+	doc.dialogue = dialogue;
+
+	// `services` : chaque service coché est fusionné sur l'ancien — `escorte.recherche`,
+	// `soin.gratuit_si`, `recompenses.items`, `recompenses.rang_guilde` et tout ce que ce
+	// formulaire ne montre pas doivent survivre. Un service décoché est retiré.
+	const anciensSvc = doc.services || {};
+	const svc = {};
+	for (const nom of Object.keys(champs.services || {})) {
+		const conf = Object.assign({}, anciensSvc[nom] || {});
+		const apport = champs.services[nom] || {};
+		for (const cle of Object.keys(apport)) {
+			if (apport[cle] === undefined) delete conf[cle];
+			else conf[cle] = apport[cle];
+		}
+		svc[nom] = conf;
+	}
+	if (Object.keys(svc).length) doc.services = svc; else delete doc.services;
+	return doc;
+}
+
+// Construit `services.transport.offre`. ⚠️ Rend `null` — donc n'écrit RIEN — si
+// `destination` ou `cargaison` manque : `transport.offre_spec` rendrait `None`, et l'offre
+// serait silencieusement inerte. Mieux vaut ne pas l'écrire que d'écrire une offre morte.
+function _dlgOffreTransport(ancienne, champs) {
+	const cargaison = (champs.cargaison || [])
+		.filter(l => l && l.item)
+		.map((l, i) => {
+			const ligne = Object.assign({}, (ancienne && ancienne.cargaison && ancienne.cargaison[i]) || {});
+			ligne.item = l.item;
+			ligne.quantite = Math.max(1, parseInt(l.quantite, 10) || 1);
+			const poids = parseFloat(l.poids);
+			if (Number.isFinite(poids)) ligne.poids = poids; else delete ligne.poids;
+			return ligne;
+		});
+	if (!champs.destination || !cargaison.length) return null;
+
+	const offre = Object.assign({}, ancienne || {});
+	offre.id = champs.id;
+	offre.destination = champs.destination;
+	offre.cargaison = cargaison;
+	_dlgPoserTexte(offre, champs);
+	_dlgPoserNombre(offre, 'duree', champs.duree, v => v > 0);
+	_dlgPoserBooleen(offre, 'unique', champs.unique);
+	_dlgPoserBooleen(offre, 'retour', champs.retour);
+	_dlgPoserRecompenses(offre, ancienne, champs.recompenses);
+	return offre;
+}
+
+// Construit `services.escorte.offre`. Miroir strict du transport — `escorte.offre_spec`
+// exige `destination` ET `proteges`.
+// ⚠️ TROIS formes de rendez-vous, et elles ne veulent pas dire la même chose :
+// `rencontre` absente → la personne attend chez le donneur ; `{lieu}` → à l'entrée du
+// lieu ; `{lieu, zones}` → une case tirée dans le placement. Écrire un `rencontre` vide
+// changerait le sens de la mission.
+function _dlgOffreEscorte(ancienne, champs) {
+	const proteges = (champs.proteges || [])
+		.filter(p => p && p.prenom)
+		.map((p, i) => {
+			const ref = Object.assign({}, (ancienne && ancienne.proteges && ancienne.proteges[i]) || {});
+			ref.prenom = p.prenom;
+			if (p.nom) ref.nom = p.nom; else delete ref.nom;
+			if (p.race) ref.race = p.race; else delete ref.race;
+			if (p.sex) ref.sex = p.sex; else delete ref.sex;
+			if (p.image) ref.image = p.image; else delete ref.image;
+			if (p.description) ref.description = p.description; else delete ref.description;
+			return ref;
+		});
+	if (!champs.destination || !proteges.length) return null;
+
+	const offre = Object.assign({}, ancienne || {});
+	offre.id = champs.id;
+	offre.destination = champs.destination;
+	offre.proteges = proteges;
+	_dlgPoserTexte(offre, champs);
+	_dlgPoserBooleen(offre, 'unique', champs.unique);
+
+	if (champs.rencontre_lieu) {
+		const renc = Object.assign({}, (ancienne && ancienne.rencontre) || {});
+		renc.lieu = champs.rencontre_lieu;
+		const zones = (champs.rencontre_zones || []).filter(z => z);
+		if (zones.length) renc.zones = zones; else delete renc.zones;
+		offre.rencontre = renc;
+	} else {
+		delete offre.rencontre;
+	}
+
+	if (champs.rang_min_cite && champs.rang_min_rang) {
+		offre.rang_min = { cite: champs.rang_min_cite, rang: champs.rang_min_rang };
+	} else {
+		delete offre.rang_min;
+	}
+	_dlgPoserRecompenses(offre, ancienne, champs.recompenses);
+	return offre;
+}
+
+// Helpers d'écriture partagés par les deux constructeurs d'offre : un champ vide est
+// SUPPRIMÉ, jamais écrit à vide (le moteur distingue absent et vide).
+function _dlgPoserTexte(offre, champs) {
+	if (champs.titre) offre.titre = champs.titre; else delete offre.titre;
+	if (champs.description) offre.description = champs.description; else delete offre.description;
+	if (champs.rang) offre.rang = champs.rang; else delete offre.rang;
+}
+
+function _dlgPoserNombre(cible, cle, brut, valide) {
+	const v = parseFloat(brut);
+	if (Number.isFinite(v) && (!valide || valide(v))) cible[cle] = v; else delete cible[cle];
+}
+
+function _dlgPoserBooleen(cible, cle, valeur) {
+	if (valeur) cible[cle] = true; else delete cible[cle];
+}
+
+// `recompenses` : on n'écrit que `xp`/`cuivre`. ⚠️ `items` (avec sa sentinelle
+// `lieu_parent: "auto"`) et `rang_guilde` existent en base et ne sont PAS modélisés ici —
+// ils doivent survivre, d'où la fusion sur l'ancien bloc.
+function _dlgPoserRecompenses(offre, ancienne, champs) {
+	const rec = Object.assign({}, (ancienne && ancienne.recompenses) || {});
+	_dlgPoserNombre(rec, 'xp', (champs || {}).xp, v => v > 0);
+	_dlgPoserNombre(rec, 'cuivre', (champs || {}).cuivre, v => v > 0);
+	if (Object.keys(rec).length) offre.recompenses = rec; else delete offre.recompenses;
+}
+
+// Validation d'un nœud avant de refermer l'overlay. Idiome `_cxValider` : rend un motif,
+// ou '' si tout va bien.
+function _dlgValiderNoeud(noeudsDoc, nid, noeud) {
+	if (!nid) return "L'identifiant du nœud est requis.";
+	if (!/^[^\s]+$/.test(nid)) return "L'identifiant ne doit contenir aucun espace.";
+	if (nid === VOCAB.fin) return '`' + VOCAB.fin + '` est la sentinelle de fin : ce n\'est pas un nœud.';
+	const choix = (noeud && noeud.choix) || [];
+	if (!choix.length) return 'Un nœud sans choix ferme le dialogue : le joueur ne peut ni répondre ni sortir.';
+	const vus = new Set();
+	for (const c of choix) {
+		if (!c.id) return 'Un choix sans identifiant est ignoré au rendu.';
+		// `choix_valide` renvoie le PREMIER trouvé : un doublon est du texte mort.
+		if (vus.has(c.id)) return 'Deux choix portent l\'id « ' + c.id + " » : le second ne sera jamais joué.";
+		vus.add(c.id);
+	}
+	return '';
+}
+
+// Validation du document avant de proposer son JSON.
+function _dlgValiderDoc(doc) {
+	const id = (doc && doc._id) ? String(doc._id) : '';
+	if (!/^pnj:\S+$/.test(id)) return "L'identifiant doit commencer par « pnj: » et ne contenir aucun espace.";
+	const dialogue = doc.dialogue || {};
+	const noeudsDoc = dialogue.noeuds || {};
+	if (!Object.keys(noeudsDoc).length) return 'Aucun nœud : parler à ce PNJ n\'afficherait rien.';
+	if (!dialogue.noeud_depart) return '`noeud_depart` est requis.';
+	if (!Object.prototype.hasOwnProperty.call(noeudsDoc, dialogue.noeud_depart)) {
+		return '`noeud_depart` désigne « ' + dialogue.noeud_depart + ' », qui n\'existe pas.';
+	}
+	if (dialogue.noeud_attente && !Object.prototype.hasOwnProperty.call(noeudsDoc, dialogue.noeud_attente)) {
+		return '`noeud_attente` désigne « ' + dialogue.noeud_attente + ' », qui n\'existe pas.';
+	}
+	return '';
+}
+
+// Placement du graphe : couches par BFS depuis les entrées (rang = distance). Les nœuds
+// inatteignables vont dans une bande à part, sous le reste — c'est précisément ce qu'on
+// vient chercher dans cette vue. Pur et déterministe : aucun DOM, aucun hasard.
+function _dlgLayoutGraphe(noeudsDoc, entrees) {
+	const LARGEUR = 190, HAUTEUR = 34, ECART_X = 230, ECART_Y = 48;
+	const rang = {};
+	let file = [...entrees];
+	for (const nid of file) rang[nid] = 0;
+	while (file.length) {
+		const suivante = [];
+		for (const nid of file) {
+			for (const choix of (noeudsDoc[nid] || {}).choix || []) {
+				const cible = choix.next;
+				if (!cible || !Object.prototype.hasOwnProperty.call(noeudsDoc, cible)) continue;
+				if (rang[cible] === undefined) { rang[cible] = rang[nid] + 1; suivante.push(cible); }
+			}
+		}
+		file = suivante;
+	}
+	// Les inatteignables n'ont pas de rang : on les range après le plus profond.
+	const rangs = Object.keys(rang).map(k => rang[k]);
+	const rangOrphelin = (rangs.length ? Math.max.apply(null, rangs) : 0) + 1;
+	const orphelins = Object.keys(noeudsDoc).filter(nid => rang[nid] === undefined);
+	for (const nid of orphelins) rang[nid] = rangOrphelin;
+
+	const parRang = {};
+	// L'ordre d'insertion des nœuds fixe l'ordre vertical : deux rendus successifs du même
+	// document produisent exactement le même dessin.
+	for (const nid of Object.keys(noeudsDoc)) {
+		const r = rang[nid];
+		(parRang[r] = parRang[r] || []).push(nid);
+	}
+	const placés = [];
+	for (const r of Object.keys(parRang)) {
+		parRang[r].forEach((nid, i) => {
+			placés.push({
+				id: nid, rang: Number(r), x: Number(r) * ECART_X, y: i * ECART_Y,
+				largeur: LARGEUR, hauteur: HAUTEUR, orphelin: orphelins.indexOf(nid) >= 0
+			});
+		});
+	}
+	const index = {};
+	for (const n of placés) index[n.id] = n;
+	const liens = [];
+	for (const nid of Object.keys(noeudsDoc)) {
+		for (const choix of (noeudsDoc[nid] || {}).choix || []) {
+			const cible = choix.next;
+			if (!cible || cible === VOCAB.fin) continue;
+			liens.push({
+				de: nid, vers: cible,
+				conditionne: !!(choix.condition && Object.keys(choix.condition).length),
+				mort: !Object.prototype.hasOwnProperty.call(noeudsDoc, cible)
+			});
+		}
+	}
+	return { noeuds: placés, liens: liens, index: index };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Chargement
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function chargerListe() {
+	setStatus($('load-status'), 'Chargement des documents PNJ…');
+	$('reload-btn').disabled = true;
+	try {
+		const res = await fetch('/admin/table/data?type=pnj');
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) { setStatus($('load-status'), 'Erreur : ' + (data.detail || res.status), 'err'); return; }
+		docsPnj = (data.docs || []).slice().sort((a, b) => String(a._id).localeCompare(String(b._id)));
+		const sel = $('pnj-select');
+		sel.innerHTML = '<option value="">— choisir un PNJ —</option>'
+			+ docsPnj.map(d => `<option value="${escapeHtml(d._id)}">${escapeHtml(d._id)} — ${escapeHtml(d.nom || '')}</option>`).join('');
+		setStatus($('load-status'), '✓ ' + docsPnj.length + ' document(s) PNJ chargé(s).', 'ok');
+	} catch (e) {
+		setStatus($('load-status'), 'Erreur réseau : ' + e.message, 'err');
+	} finally {
+		$('reload-btn').disabled = false;
+	}
+}
+
+function ouvrirPnj(pnjId) {
+	const trouve = docsPnj.filter(d => d._id === pnjId)[0];
+	if (!trouve) { ['ident-card', 'dlg-card', 'svc-card', 'json-card'].forEach(i => $(i).style.display = 'none'); return; }
+	docExistant = trouve;
+	const dialogue = trouve.dialogue || {};
+	noeuds = JSON.parse(JSON.stringify(dialogue.noeuds || {}));
+	ordreNoeuds = Object.keys(noeuds);
+	services = JSON.parse(JSON.stringify(trouve.services || {}));
+	departId = dialogue.noeud_depart || '';
+	attenteId = dialogue.noeud_attente || '';
+	identite = {
+		nom: trouve.nom || '', race: trouve.race || '', vocation: trouve.vocation || '',
+		portrait: trouve.portrait || '', description: trouve.description || ''
+	};
+	selection = null;
+	fermerOverlay();
+
+	$('f-id').value = trouve._id;
+	$('f-nom').value = identite.nom;
+	$('f-race').value = identite.race;
+	$('f-vocation').value = identite.vocation;
+	$('f-portrait').value = identite.portrait;
+	$('f-description').value = identite.description;
+	majPortrait();
+	['ident-card', 'dlg-card', 'svc-card', 'json-card'].forEach(i => $(i).style.display = '');
+	rendreServices();
+	rendreTout();
+}
+
+function majPortrait() {
+	const img = $('f-portrait-img');
+	const nom = $('f-portrait').value.trim();
+	if (nom) { img.src = '/pnj/' + nom; img.style.display = ''; } else { img.style.display = 'none'; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Rendu
+// ═══════════════════════════════════════════════════════════════════════════
+
+function docCourant() {
+	return _dlgFusionDoc(docExistant, {
+		nom: $('f-nom').value.trim(),
+		race: $('f-race').value.trim(),
+		vocation: $('f-vocation').value.trim(),
+		portrait: $('f-portrait').value.trim(),
+		description: $('f-description').value.trim(),
+		noeud_depart: departId,
+		noeud_attente: attenteId,
+		noeuds: noeudsOrdonnes(),
+		services: services
+	});
+}
+
+// L'ordre des clés d'un objet JS est celui d'insertion : reconstruire dans `ordreNoeuds`
+// garde le document stable d'un rendu à l'autre (et diffable contre celui d'origine).
+function noeudsOrdonnes() {
+	const out = {};
+	for (const nid of ordreNoeuds) {
+		if (Object.prototype.hasOwnProperty.call(noeuds, nid)) out[nid] = noeuds[nid];
+	}
+	return out;
+}
+
+function rendreTout() {
+	rendreSelects();
+	rendreListeNoeuds();
+	rendreGraphe();
+	rendreJson();
+}
+
+function rendreSelects() {
+	const ids = ordreNoeuds.filter(n => Object.prototype.hasOwnProperty.call(noeuds, n));
+	const opts = ids.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+	const dep = $('f-depart');
+	dep.innerHTML = opts;
+	dep.value = departId;
+	const att = $('f-attente');
+	att.innerHTML = '<option value="">— aucun —</option>' + opts;
+	att.value = attenteId;
+	$('dlg-compte').textContent = ids.length + ' nœud(s), '
+		+ ids.reduce((n, id) => n + ((noeuds[id].choix || []).length), 0) + ' choix.';
+}
+
+function rendreListeNoeuds() {
+	const doc = docCourant();
+	const entrees = _dlgEntrees(doc);
+	const vivants = _dlgAtteignables(noeuds, entrees);
+	const svcNoeuds = new Set();
+	for (const nom of Object.keys(services)) {
+		const decl = (services[nom] || {}).noeuds || {};
+		for (const cle of Object.keys(decl)) if (decl[cle]) svcNoeuds.add(decl[cle]);
+	}
+	const lignes = ordreNoeuds.filter(n => Object.prototype.hasOwnProperty.call(noeuds, n)).map(nid => {
+		const badges = [];
+		if (nid === departId) badges.push('<span class="badge depart">départ</span>');
+		if (nid === attenteId) badges.push('<span class="badge depart">attente</span>');
+		if (svcNoeuds.has(nid)) badges.push('<span class="badge service">service</span>');
+		if (!vivants.has(nid)) badges.push('<span class="badge mort">mort</span>');
+		const nb = (noeuds[nid].choix || []).length;
+		return `<div class="noeud-item${nid === selection ? ' selected' : ''}" data-nid="${escapeHtml(nid)}">`
+			+ `<span class="noeud-id">${escapeHtml(nid)}</span>`
+			+ `<span class="badge">${nb} choix</span>${badges.join('')}</div>`;
+	});
+	const liste = $('noeud-list');
+	liste.innerHTML = lignes.join('');
+	liste.querySelectorAll('.noeud-item').forEach(el => {
+		el.addEventListener('click', () => ouvrirNoeud(el.getAttribute('data-nid')));
+	});
+}
+
+function rendreGraphe() {
+	const doc = docCourant();
+	const entrees = _dlgEntrees(doc);
+	const dispo = noeudsOrdonnes();
+	const layout = _dlgLayoutGraphe(dispo, entrees);
+	if (!layout.noeuds.length) { $('graph').innerHTML = ''; return; }
+
+	const maxX = Math.max.apply(null, layout.noeuds.map(n => n.x + n.largeur)) + 30;
+	const maxY = Math.max.apply(null, layout.noeuds.map(n => n.y + n.hauteur)) + 30;
+
+	const liens = layout.liens.map(l => {
+		const a = layout.index[l.de], b = layout.index[l.vers];
+		if (!a || !b) return '';
+		const x1 = a.x + a.largeur, y1 = a.y + a.hauteur / 2;
+		const x2 = b.x, y2 = b.y + b.hauteur / 2;
+		const dx = Math.max(24, (x2 - x1) / 2);
+		const cls = 'glink' + (l.mort ? ' mort' : (l.conditionne ? ' conditionne' : ''));
+		return `<path class="${cls}" d="M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}"/>`;
+	}).join('');
+
+	const boites = layout.noeuds.map(n => {
+		const cls = 'gnode' + (n.orphelin ? ' mort' : (entrees.has(n.id) ? ' entree' : ''))
+			+ (n.id === selection ? ' selected' : '');
+		const court = n.id.length > 24 ? n.id.slice(0, 23) + '…' : n.id;
+		return `<g class="${cls}" data-nid="${escapeHtml(n.id)}" transform="translate(${n.x},${n.y})">`
+			+ `<rect width="${n.largeur}" height="${n.hauteur}" rx="5"/>`
+			+ `<text x="10" y="21">${escapeHtml(court)}</text></g>`;
+	}).join('');
+
+	$('graph').innerHTML = `<svg width="${maxX}" height="${maxY}" viewBox="0 0 ${maxX} ${maxY}">`
+		+ liens + boites + '</svg>';
+	$('graph').querySelectorAll('.gnode').forEach(el => {
+		el.addEventListener('click', () => ouvrirNoeud(el.getAttribute('data-nid')));
+	});
+}
+
+function rendreJson() {
+	const doc = docCourant();
+	$('json-out').value = JSON.stringify(doc, null, 2);
+	const motif = _dlgValiderDoc(doc);
+	if (motif) setStatus($('json-status'), '⚠ ' + motif, 'err');
+	else setStatus($('json-status'), '');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Overlay d'édition d'un nœud
+// ═══════════════════════════════════════════════════════════════════════════
+
+function ouvrirNoeud(nid) {
+	if (!Object.prototype.hasOwnProperty.call(noeuds, nid)) return;
+	selection = nid;
+	const n = noeuds[nid];
+	$('ov-id').textContent = nid;
+	$('ov-nid').value = nid;
+	$('ov-texte').value = n.texte || '';
+	$('ov-texte-gratuit').value = n.texte_gratuit || '';
+	$('ov-delai').value = n.delai_min || '';
+	const reinit = n.relation_reinit;
+	$('ov-reinit').value = Array.isArray(reinit) ? reinit.join(', ') : (reinit || '');
+	const rel = n.relation || {};
+	$('ov-rel-delta').value = rel.delta || '';
+	$('ov-rel-lieu').value = rel.lieu || '';
+	$('ov-rel-unique').value = rel.unique || '';
+	$('ov-placeholders').textContent = VOCAB.placeholders.map(p => '{' + p + '}').join(' ');
+	rendreChoix(n.choix || []);
+	setStatus($('ov-status'), '');
+	$('noeud-overlay').style.display = 'flex';
+	// Le graphe et l'overlay se disputent la moitié droite : on cède la place, comme
+	// `#lj-overlay` et `#conn-overlay` le font dans l'éditeur de carte.
+	$('dlg-split').classList.add('compact');
+	rendreListeNoeuds();
+}
+
+function fermerOverlay() {
+	selection = null;
+	$('noeud-overlay').style.display = 'none';
+	$('dlg-split').classList.remove('compact');
+}
+
+// Une ligne par choix. Les `<select>` (next, service/op, flags) rendent la plupart des
+// fautes que le linter attrape IMPOSSIBLES à saisir, plutôt que de les signaler après coup.
+function rendreChoix(choix) {
+	const idsNoeuds = ordreNoeuds.filter(n => Object.prototype.hasOwnProperty.call(noeuds, n));
+	const html = choix.map((c, i) => {
+		const optsNext = ['<option value="">— aucun (ferme le dialogue) —</option>',
+			`<option value="${escapeHtml(VOCAB.fin)}"${c.next === VOCAB.fin ? ' selected' : ''}>${escapeHtml(VOCAB.fin)} (sentinelle)</option>`]
+			.concat(idsNoeuds.map(n => `<option value="${escapeHtml(n)}"${c.next === n ? ' selected' : ''}>${escapeHtml(n)}</option>`))
+			.join('');
+		const action = c.action || {};
+		const optsAction = ['<option value="">— aucune —</option>'].concat(
+			VOCAB.actions.map(a => {
+				const v = a.service + '/' + a.op;
+				const sel = (action.service === a.service && action.op === a.op) ? ' selected' : '';
+				return `<option value="${escapeHtml(v)}"${sel}>${escapeHtml(v)}</option>`;
+			}),
+			// `soin` et `don` n'ont PAS d'`op` (routers/pnj.py les branche sur le seul service).
+			['soin', 'don'].map(s => {
+				const sel = (action.service === s && !action.op) ? ' selected' : '';
+				return `<option value="${escapeHtml(s)}"${sel}>${escapeHtml(s)} (sans op)</option>`;
+			}),
+			['transport/accepter', 'escorte/accepter', 'rang/accepter', 'commission/accepter'].map(v => {
+				const bouts = v.split('/');
+				const sel = (action.service === bouts[0] && action.op === bouts[1]) ? ' selected' : '';
+				return `<option value="${escapeHtml(v)}"${sel}>${escapeHtml(v)}</option>`;
+			})
+		).join('');
+		const cond = c.condition || {};
+		const condCle = Object.keys(cond)[0] || '';
+		const condVal = condCle ? cond[condCle] : true;
+		const optsFlag = ['<option value="">— aucune —</option>'].concat(
+			VOCAB.flags.map(f => `<option value="${escapeHtml(f)}"${condCle === f ? ' selected' : ''}>${escapeHtml(f)}</option>`)
+		).join('');
+		const structuree = VOCAB.conditions_structurees.indexOf(condCle) >= 0;
+		return `<div class="choix-item" data-i="${i}">`
+			+ `<div class="choix-head"><span class="choix-num">#${i + 1}</span>`
+			+ `<button class="btn mini" type="button" data-monter="${i}" title="Monter">▲</button>`
+			+ `<button class="btn mini" type="button" data-descendre="${i}" title="Descendre">▼</button>`
+			+ `<button class="btn mini danger" type="button" data-suppr="${i}" title="Supprimer">✕</button></div>`
+			+ `<div class="grid">`
+			+ `<div class="field"><label>id</label><input type="text" data-c="id" value="${escapeHtml(c.id || '')}"></div>`
+			+ `<div class="field"><label>next</label><select data-c="next">${optsNext}</select></div>`
+			+ `</div>`
+			+ `<div class="field" style="margin-top:8px"><label>label</label><input type="text" data-c="label" value="${escapeHtml(c.label || '')}"></div>`
+			+ `<div class="grid" style="margin-top:8px">`
+			+ `<div class="field"><label>action (service/op — ignore le next)</label><select data-c="action">${optsAction}</select></div>`
+			+ `<div class="field"><label>deplacer (lieu:…)</label><input type="text" data-c="deplacer" value="${escapeHtml(c.deplacer || '')}"></div>`
+			+ `</div>`
+			+ `<div class="grid" style="margin-top:8px">`
+			+ `<div class="field"><label>condition (flag)</label><select data-c="condflag"${structuree ? ' disabled' : ''}>${optsFlag}</select></div>`
+			+ `<div class="field"><label>attendu</label><select data-c="condval"${structuree ? ' disabled' : ''}>`
+			+ `<option value="true"${condVal !== false ? ' selected' : ''}>true</option>`
+			+ `<option value="false"${condVal === false ? ' selected' : ''}>false</option></select></div>`
+			+ `</div>`
+			+ (structuree
+				? `<div class="hint warn" style="margin-top:6px">Condition structurée <code>${escapeHtml(condCle)}</code> : `
+					+ `conservée telle quelle, éditable seulement dans le JSON (${escapeHtml(JSON.stringify(cond[condCle]))}).</div>`
+				: '')
+			+ `</div>`;
+	});
+	$('ov-choix').innerHTML = html.join('');
+	brancherChoix();
+}
+
+function brancherChoix() {
+	const zone = $('ov-choix');
+	zone.querySelectorAll('input, select').forEach(el => {
+		el.addEventListener('input', appliquerNoeud);
+		el.addEventListener('change', appliquerNoeud);
+	});
+	zone.querySelectorAll('[data-suppr]').forEach(b => b.addEventListener('click', () => {
+		const n = noeuds[selection];
+		n.choix.splice(parseInt(b.getAttribute('data-suppr'), 10), 1);
+		rendreChoix(n.choix); rendreTout();
+	}));
+	zone.querySelectorAll('[data-monter]').forEach(b => b.addEventListener('click', () => {
+		const i = parseInt(b.getAttribute('data-monter'), 10);
+		if (i <= 0) return;
+		const c = noeuds[selection].choix;
+		c.splice(i - 1, 0, c.splice(i, 1)[0]);
+		rendreChoix(c); rendreTout();
+	}));
+	zone.querySelectorAll('[data-descendre]').forEach(b => b.addEventListener('click', () => {
+		const i = parseInt(b.getAttribute('data-descendre'), 10);
+		const c = noeuds[selection].choix;
+		if (i >= c.length - 1) return;
+		c.splice(i + 1, 0, c.splice(i, 1)[0]);
+		rendreChoix(c); rendreTout();
+	}));
+}
+
+// Relit l'overlay et refond le nœud. ⚠️ Passe TOUJOURS par `_dlgFusionNoeud` : c'est ce qui
+// fait survivre les clés que ce formulaire ne connaît pas.
+function appliquerNoeud() {
+	if (!selection) return;
+	const ancien = noeuds[selection];
+	const champsChoix = [];
+	$('ov-choix').querySelectorAll('.choix-item').forEach(item => {
+		const lire = n => { const el = item.querySelector('[data-c="' + n + '"]'); return el ? el.value : ''; };
+		const i = parseInt(item.getAttribute('data-i'), 10);
+		const ancienChoix = (ancien.choix || [])[i] || {};
+		const actionBrute = lire('action');
+		let action = null;
+		if (actionBrute) {
+			const bouts = actionBrute.split('/');
+			action = { service: bouts[0], op: bouts[1] || '' };
+		}
+		// Une condition structurée n'est pas éditable ici : on la reconduit telle quelle.
+		let condition = {};
+		const cleAncienne = Object.keys(ancienChoix.condition || {})[0] || '';
+		if (VOCAB.conditions_structurees.indexOf(cleAncienne) >= 0) {
+			condition = ancienChoix.condition;
+		} else if (lire('condflag')) {
+			condition[lire('condflag')] = lire('condval') === 'true';
+		}
+		champsChoix.push({
+			id: lire('id').trim(), label: lire('label'), next: lire('next'),
+			action: action, condition: condition, deplacer: lire('deplacer').trim()
+		});
+	});
+
+	const nouveau = _dlgFusionNoeud(ancien, {
+		texte: $('ov-texte').value,
+		texte_gratuit: $('ov-texte-gratuit').value.trim(),
+		delai_min: $('ov-delai').value,
+		relation: {
+			delta: $('ov-rel-delta').value,
+			lieu: $('ov-rel-lieu').value.trim(),
+			unique: $('ov-rel-unique').value.trim()
+		},
+		relation_reinit: $('ov-reinit').value.split(',').map(s => s.trim()),
+		choix: champsChoix
+	});
+	noeuds[selection] = nouveau;
+
+	const motif = _dlgValiderNoeud(noeuds, selection, nouveau);
+	setStatus($('ov-status'), motif ? '⚠ ' + motif : '✓ nœud valide.', motif ? 'err' : 'ok');
+	rendreTout();
+}
+
+// Renommer un nœud : il faut suivre TOUTES ses références, sinon le renommage laisse
+// derrière lui des `next` morts et des nœuds de service pointant dans le vide.
+function renommerNoeud(ancienId, nouveauId) {
+	if (!nouveauId || nouveauId === ancienId) return;
+	if (Object.prototype.hasOwnProperty.call(noeuds, nouveauId)) {
+		setStatus($('ov-status'), '⚠ « ' + nouveauId + ' » existe déjà.', 'err');
+		return;
+	}
+	noeuds[nouveauId] = noeuds[ancienId];
+	delete noeuds[ancienId];
+	ordreNoeuds = ordreNoeuds.map(n => (n === ancienId ? nouveauId : n));
+	for (const nid of Object.keys(noeuds)) {
+		for (const c of noeuds[nid].choix || []) if (c.next === ancienId) c.next = nouveauId;
+	}
+	for (const nom of Object.keys(services)) {
+		const decl = (services[nom] || {}).noeuds || {};
+		for (const cle of Object.keys(decl)) if (decl[cle] === ancienId) decl[cle] = nouveauId;
+	}
+	if (departId === ancienId) departId = nouveauId;
+	if (attenteId === ancienId) attenteId = nouveauId;
+	selection = nouveauId;
+	$('ov-id').textContent = nouveauId;
+	rendreServices();
+	rendreTout();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Services & offres
+// ═══════════════════════════════════════════════════════════════════════════
+
+function rendreServices() {
+	const idsNoeuds = ordreNoeuds.filter(n => Object.prototype.hasOwnProperty.call(noeuds, n));
+	const html = SERVICES_CONNUS.map(nom => {
+		const actif = Object.prototype.hasOwnProperty.call(services, nom);
+		const conf = services[nom] || {};
+		const cles = VOCAB.noeuds_service[nom] || [];
+		const decl = conf.noeuds || {};
+		const lignesNoeuds = cles.map(cle => {
+			const opts = ['<option value="">— non déclaré —</option>'].concat(
+				idsNoeuds.map(n => `<option value="${escapeHtml(n)}"${decl[cle] === n ? ' selected' : ''}>${escapeHtml(n)}</option>`)
+			).join('');
+			return `<div class="field"><label>noeuds.${escapeHtml(cle)}</label>`
+				+ `<select data-svc="${escapeHtml(nom)}" data-noeud="${escapeHtml(cle)}">${opts}</select></div>`;
+		}).join('');
+		return `<div class="svc">`
+			+ `<div class="svc-head"><input type="checkbox" data-svc-actif="${escapeHtml(nom)}"${actif ? ' checked' : ''}>`
+			+ `<span class="svc-nom">${escapeHtml(nom)}</span>`
+			+ `<span class="hint">${actif ? '' : 'non déclaré'}</span></div>`
+			+ `<div class="svc-body${actif ? '' : ' hidden'}">`
+			+ `<div class="grid" style="margin-top:10px">${lignesNoeuds}</div>`
+			+ champsPropres(nom, conf)
+			+ `</div></div>`;
+	});
+	$('svc-list').innerHTML = html.join('');
+	brancherServices();
+}
+
+// Les champs propres à un service. On ne modélise que ce qui se saisit sans ambiguïté ;
+// tout le reste (gratuit_si, recherche, progeniture…) survit par fusion et reste visible
+// dans le JSON.
+function champsPropres(nom, conf) {
+	if (nom === 'acces') {
+		return `<div class="grid" style="margin-top:10px"><div class="field"><label>lieu gardé (lieu:…)</label>`
+			+ `<input type="text" data-svc-champ="acces.lieu" value="${escapeHtml(conf.lieu || '')}"></div></div>`;
+	}
+	if (nom === 'commission') {
+		return `<div class="grid" style="margin-top:10px"><div class="field"><label>donjon (donjon:…)</label>`
+			+ `<input type="text" data-svc-champ="commission.donjon" value="${escapeHtml(conf.donjon || '')}"></div></div>`;
+	}
+	if (nom === 'transport') return blocOffreTransport(conf.offre || null);
+	if (nom === 'escorte') return blocOffreEscorte(conf.offre || null);
+	return '';
+}
+
+function blocOffreTransport(offre) {
+	const o = offre || {};
+	const rec = o.recompenses || {};
+	const lignes = (o.cargaison || []).concat([{}]).map((l, i) => `<div class="ligne" data-carg="${i}">`
+		+ `<div class="field"><label>item</label><input type="text" data-carg-champ="item" value="${escapeHtml(l.item || '')}"></div>`
+		+ `<div class="field"><label>quantité</label><input type="number" min="1" data-carg-champ="quantite" value="${escapeHtml(l.quantite == null ? '' : l.quantite)}"></div>`
+		+ `<div class="field"><label>poids (facultatif)</label><input type="number" step="0.01" data-carg-champ="poids" value="${escapeHtml(l.poids == null ? '' : l.poids)}"></div>`
+		+ `</div>`).join('');
+	return `<div class="card-title" style="margin:16px 0 6px">Offre de transport (quête écrite)</div>`
+		+ `<div class="hint" style="margin-bottom:10px">Sans <code>destination</code> ni <code>cargaison</code>, `
+		+ `l'offre n'est <strong>pas écrite</strong> : <code>transport.offre_spec</code> la rendrait inerte.</div>`
+		+ `<div class="grid">`
+		+ champ('transport.offre.id', 'id (quete:… — stable, sert de verrou à `unique`)', o.id)
+		+ champ('transport.offre.destination', 'destination (lieu:…)', o.destination)
+		+ champ('transport.offre.titre', 'titre', o.titre)
+		+ champ('transport.offre.rang', 'rang', o.rang)
+		+ champNb('transport.offre.duree', 'duree (secondes)', o.duree)
+		+ champNb('transport.offre.recompenses.xp', 'récompense xp', rec.xp)
+		+ champNb('transport.offre.recompenses.cuivre', 'récompense cuivre', rec.cuivre)
+		+ `</div>`
+		+ `<div class="field" style="margin-top:10px"><label>description</label>`
+		+ `<textarea rows="2" data-svc-champ="transport.offre.description">${escapeHtml(o.description || '')}</textarea></div>`
+		+ `<div class="row" style="margin-top:10px">`
+		+ coche('transport.offre.unique', 'unique', o.unique)
+		+ coche('transport.offre.retour', 'retour (le donneur solde au retour)', o.retour)
+		+ `</div>`
+		+ `<div class="card-title" style="margin:14px 0 6px">Cargaison</div>${lignes}`;
+}
+
+function blocOffreEscorte(offre) {
+	const o = offre || {};
+	const rec = o.recompenses || {};
+	const renc = o.rencontre || {};
+	const lignes = (o.proteges || []).concat([{}]).map((p, i) => `<div class="ligne" data-prot="${i}">`
+		+ `<div class="field"><label>prénom</label><input type="text" data-prot-champ="prenom" value="${escapeHtml(p.prenom || '')}"></div>`
+		+ `<div class="field"><label>nom</label><input type="text" data-prot-champ="nom" value="${escapeHtml(p.nom || '')}"></div>`
+		+ `<div class="field"><label>race</label><input type="text" data-prot-champ="race" value="${escapeHtml(p.race || '')}"></div>`
+		+ `<div class="field"><label>sexe</label><input type="text" data-prot-champ="sex" value="${escapeHtml(p.sex || '')}"></div>`
+		+ `<div class="field"><label>image</label><input type="text" data-prot-champ="image" value="${escapeHtml(p.image || '')}"></div>`
+		+ `</div>`).join('');
+	return `<div class="card-title" style="margin:16px 0 6px">Offre d'escorte (quête écrite)</div>`
+		+ `<div class="hint" style="margin-bottom:10px">Sans <code>destination</code> ni <code>proteges</code>, l'offre n'est `
+		+ `<strong>pas écrite</strong>. ⚠️ Trois rendez-vous distincts : <em>lieu vide</em> = chez le donneur ; `
+		+ `<em>lieu seul</em> = à l'entrée ; <em>lieu + zones</em> = une case tirée dans le placement.</div>`
+		+ `<div class="grid">`
+		+ champ('escorte.offre.id', 'id (quete:…)', o.id)
+		+ champ('escorte.offre.destination', 'destination — où déposer (lieu:…)', o.destination)
+		+ champ('escorte.offre.titre', 'titre', o.titre)
+		+ champ('escorte.offre.rencontre.lieu', 'rencontre.lieu (lieu:…)', renc.lieu)
+		+ champ('escorte.offre.rencontre.zones', 'rencontre.zones (zone:…, virgules)', (renc.zones || []).join(', '))
+		+ champ('escorte.offre.rang_min.cite', 'rang_min.cite (lieu:…)', (o.rang_min || {}).cite)
+		+ champ('escorte.offre.rang_min.rang', 'rang_min.rang', (o.rang_min || {}).rang)
+		+ champNb('escorte.offre.recompenses.xp', 'récompense xp', rec.xp)
+		+ champNb('escorte.offre.recompenses.cuivre', 'récompense cuivre', rec.cuivre)
+		+ `</div>`
+		+ `<div class="field" style="margin-top:10px"><label>description</label>`
+		+ `<textarea rows="2" data-svc-champ="escorte.offre.description">${escapeHtml(o.description || '')}</textarea></div>`
+		+ `<div class="row" style="margin-top:10px">${coche('escorte.offre.unique', 'unique', o.unique)}</div>`
+		+ `<div class="card-title" style="margin:14px 0 6px">Personnes à protéger</div>${lignes}`;
+}
+
+function champ(chemin, label, valeur) {
+	return `<div class="field"><label>${escapeHtml(label)}</label>`
+		+ `<input type="text" data-svc-champ="${escapeHtml(chemin)}" value="${escapeHtml(valeur || '')}"></div>`;
+}
+function champNb(chemin, label, valeur) {
+	return `<div class="field"><label>${escapeHtml(label)}</label>`
+		+ `<input type="number" step="1" data-svc-champ="${escapeHtml(chemin)}" value="${escapeHtml(valeur == null ? '' : valeur)}"></div>`;
+}
+function coche(chemin, label, valeur) {
+	return `<label style="display:inline-flex;align-items:center;gap:6px">`
+		+ `<input type="checkbox" data-svc-coche="${escapeHtml(chemin)}"${valeur ? ' checked' : ''}> ${escapeHtml(label)}</label>`;
+}
+
+function brancherServices() {
+	const zone = $('svc-list');
+	zone.querySelectorAll('[data-svc-actif]').forEach(el => el.addEventListener('change', () => {
+		const nom = el.getAttribute('data-svc-actif');
+		if (el.checked) services[nom] = services[nom] || {};
+		else delete services[nom];
+		rendreServices(); rendreTout();
+	}));
+	zone.querySelectorAll('[data-noeud]').forEach(el => el.addEventListener('change', () => {
+		const nom = el.getAttribute('data-svc'), cle = el.getAttribute('data-noeud');
+		const conf = services[nom] = services[nom] || {};
+		const decl = conf.noeuds = conf.noeuds || {};
+		if (el.value) decl[cle] = el.value; else delete decl[cle];
+		if (!Object.keys(decl).length) delete conf.noeuds;
+		rendreTout();
+	}));
+	zone.querySelectorAll('[data-svc-champ], [data-svc-coche], [data-carg-champ], [data-prot-champ]')
+		.forEach(el => {
+			el.addEventListener('input', appliquerServices);
+			el.addEventListener('change', appliquerServices);
+		});
+}
+
+// Relit les champs de services et refond chaque bloc par fusion. Les offres passent par
+// `_dlgOffreTransport` / `_dlgOffreEscorte`, qui refusent d'écrire une offre inerte.
+function appliquerServices() {
+	const zone = $('svc-list');
+	const lire = chemin => {
+		const el = zone.querySelector('[data-svc-champ="' + chemin + '"]');
+		return el ? el.value.trim() : '';
+	};
+	const coché = chemin => {
+		const el = zone.querySelector('[data-svc-coche="' + chemin + '"]');
+		return !!(el && el.checked);
+	};
+
+	if (services.acces) services.acces.lieu = lire('acces.lieu') || undefined;
+	if (services.acces && !services.acces.lieu) delete services.acces.lieu;
+	if (services.commission) services.commission.donjon = lire('commission.donjon') || undefined;
+	if (services.commission && !services.commission.donjon) delete services.commission.donjon;
+
+	if (services.transport) {
+		const cargaison = [];
+		zone.querySelectorAll('[data-carg]').forEach(l => {
+			const v = n => { const el = l.querySelector('[data-carg-champ="' + n + '"]'); return el ? el.value.trim() : ''; };
+			cargaison.push({ item: v('item'), quantite: v('quantite'), poids: v('poids') });
+		});
+		const offre = _dlgOffreTransport(services.transport.offre, {
+			id: lire('transport.offre.id'), destination: lire('transport.offre.destination'),
+			titre: lire('transport.offre.titre'), description: lire('transport.offre.description'),
+			rang: lire('transport.offre.rang'), duree: lire('transport.offre.duree'),
+			unique: coché('transport.offre.unique'), retour: coché('transport.offre.retour'),
+			cargaison: cargaison,
+			recompenses: { xp: lire('transport.offre.recompenses.xp'), cuivre: lire('transport.offre.recompenses.cuivre') }
+		});
+		if (offre) services.transport.offre = offre; else delete services.transport.offre;
+	}
+
+	if (services.escorte) {
+		const proteges = [];
+		zone.querySelectorAll('[data-prot]').forEach(l => {
+			const v = n => { const el = l.querySelector('[data-prot-champ="' + n + '"]'); return el ? el.value.trim() : ''; };
+			proteges.push({
+				prenom: v('prenom'), nom: v('nom'), race: v('race'), sex: v('sex'), image: v('image')
+			});
+		});
+		const offre = _dlgOffreEscorte(services.escorte.offre, {
+			id: lire('escorte.offre.id'), destination: lire('escorte.offre.destination'),
+			titre: lire('escorte.offre.titre'), description: lire('escorte.offre.description'),
+			unique: coché('escorte.offre.unique'),
+			rencontre_lieu: lire('escorte.offre.rencontre.lieu'),
+			rencontre_zones: lire('escorte.offre.rencontre.zones').split(',').map(s => s.trim()),
+			rang_min_cite: lire('escorte.offre.rang_min.cite'),
+			rang_min_rang: lire('escorte.offre.rang_min.rang'),
+			proteges: proteges,
+			recompenses: { xp: lire('escorte.offre.recompenses.xp'), cuivre: lire('escorte.offre.recompenses.cuivre') }
+		});
+		if (offre) services.escorte.offre = offre; else delete services.escorte.offre;
+	}
+	rendreTout();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Rapport du linter — repris de la carte d'import de /admin (même moteur serveur).
+// ═══════════════════════════════════════════════════════════════════════════
+
+function lintRender(bilan) {
+	const lignes = (bilan.trouvailles || []).map(t => {
+		const noeud = t.noeud ? ` <span class="lint-node">[${escapeHtml(t.noeud)}]</span>` : '';
+		return `<div class="lint-line ${t.niveau}">`
+			+ `<span class="lint-where">${escapeHtml(t.doc_id)}</span>${noeud} — `
+			+ `${escapeHtml(t.message)}</div>`;
+	});
+	$('lint-report').innerHTML = lignes.join('');
+	$('lint-report').classList.toggle('active', lignes.length > 0);
+}
+
+function lintResume(bilan) {
+	if (!bilan.analyses) return ['Aucun dialogue à vérifier ici.', 'ok'];
+	if (bilan.erreurs) {
+		return ['✗ ' + bilan.erreurs + ' erreur(s), ' + bilan.avertissements + ' avertissement(s).', 'err'];
+	}
+	if (bilan.avertissements) return ['⚠ aucune erreur, ' + bilan.avertissements + ' avertissement(s).', 'ok'];
+	return ['✓ aucune anomalie.', 'ok'];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Câblage
+// ═══════════════════════════════════════════════════════════════════════════
+
+$('reload-btn').addEventListener('click', chargerListe);
+$('pnj-select').addEventListener('change', e => ouvrirPnj(e.target.value));
+['f-nom', 'f-race', 'f-vocation', 'f-description'].forEach(id =>
+	$(id).addEventListener('input', rendreJson));
+$('f-portrait').addEventListener('input', () => { majPortrait(); rendreJson(); });
+$('f-depart').addEventListener('change', e => { departId = e.target.value; rendreTout(); });
+$('f-attente').addEventListener('change', e => { attenteId = e.target.value; rendreTout(); });
+
+$('add-noeud').addEventListener('click', () => {
+	let base = 'noeud', i = 1;
+	while (Object.prototype.hasOwnProperty.call(noeuds, base + i)) i++;
+	const nid = base + i;
+	// Un nœud naît avec un choix : sans lui il serait immédiatement en faute (« le joueur
+	// ne peut ni répondre ni sortir »).
+	noeuds[nid] = { texte: '', choix: [{ id: 'fin', label: 'S\'en aller.', next: VOCAB.fin }] };
+	ordreNoeuds.push(nid);
+	rendreTout();
+	ouvrirNoeud(nid);
+});
+
+$('ov-close').addEventListener('click', fermerOverlay);
+$('ov-nid').addEventListener('change', e => renommerNoeud(selection, e.target.value.trim()));
+['ov-texte', 'ov-texte-gratuit', 'ov-delai', 'ov-reinit', 'ov-rel-delta', 'ov-rel-lieu', 'ov-rel-unique']
+	.forEach(id => $(id).addEventListener('input', appliquerNoeud));
+$('ov-add-choix').addEventListener('click', () => {
+	const n = noeuds[selection];
+	n.choix = n.choix || [];
+	n.choix.push({ id: 'choix' + (n.choix.length + 1), label: '', next: VOCAB.fin });
+	rendreChoix(n.choix); rendreTout();
+});
+$('ov-del-noeud').addEventListener('click', () => {
+	if (!selection) return;
+	if (!confirm('Supprimer le nœud « ' + selection + ' » ? Les `next` qui y mènent deviendront morts.')) return;
+	delete noeuds[selection];
+	ordreNoeuds = ordreNoeuds.filter(n => n !== selection);
+	fermerOverlay();
+	rendreTout();
+});
+
+$('copy-btn').addEventListener('click', async () => {
+	try {
+		await navigator.clipboard.writeText($('json-out').value);
+		setStatus($('json-status'), '✓ JSON copié — à coller dans la carte d\'import de /admin.', 'ok');
+	} catch (e) {
+		// Presse-papiers refusé (contexte non sécurisé) : la sélection reste possible.
+		$('json-out').select();
+		setStatus($('json-status'), 'Copie refusée par le navigateur — le texte est sélectionné, faites Ctrl+C.', 'err');
+	}
+});
+
+$('lint-btn').addEventListener('click', async () => {
+	const btn = $('lint-btn');
+	btn.disabled = true;
+	setStatus($('json-status'), 'Vérification…');
+	try {
+		const res = await fetch('/admin/lint-dialogues', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: $('json-out').value
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) { setStatus($('json-status'), 'Échec : ' + (data.detail || res.status), 'err'); return; }
+		lintRender(data);
+		const resume = lintResume(data);
+		setStatus($('json-status'), resume[0], resume[1]);
+	} catch (e) {
+		setStatus($('json-status'), 'Erreur réseau : ' + e.message, 'err');
+	} finally {
+		btn.disabled = false;
+	}
+});
+
+chargerListe();
+</script>
+</body>
+</html>

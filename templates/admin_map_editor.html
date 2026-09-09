@@ -797,6 +797,25 @@
 	/* Visée armée : même signal que .lj-repos-on, dont elle emprunte le sens. */
 	#cx-visee-btn.cx-visee { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
 	#conn-overlay input[readonly] { opacity: 0.65; cursor: default; }
+
+	/* PORTE DE REMPART : même géométrie et mêmes règles que #conn-overlay — panneau fixe à
+	   droite, carte cliquable dessous (condition des DEUX visées), et les trois panneaux se
+	   partagent la place : ouvrir l'un ferme les autres. */
+	#porte-overlay {
+		position: fixed; top: 70px; right: 14px; bottom: 14px;
+		width: min(460px, 94vw); z-index: 60;
+		display: flex; flex-direction: column; overflow: auto;
+		box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+	}
+	#porte-overlay.pt-hidden { display: none; }
+	#porte-overlay.cx-viser { opacity: 0.3; pointer-events: none; }
+	#porte-overlay .lj-title {
+		position: sticky; top: -16px; z-index: 2;
+		background: var(--panel); margin-top: -16px; padding: 16px 0 6px;
+	}
+	#pt-visee-ext.cx-visee, #pt-visee-int.cx-visee {
+		border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18);
+	}
 /* ── Mode « test de déplacement » ─────────────────────────────────────────────────────
    On MARCHE dans le lieu qu'on vient d'éditer, avec les règles réelles du jeu. Le pavé et
    son cadre flottant viennent de part-move-panel.html — mêmes flèches que play_town et le
@@ -1030,7 +1049,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			</div>
 			<!-- Panneau Lieux -->
 			<div id="panel-lieux" style="display:none;">
-				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, ✏️ Lieu et 🔗 Connexion ouvrent leurs formulaires, 🧾 JSON édite les documents bruts. ➕ crée un sous-lieu sur cette case, 🔗 relie deux lieux existants.</div>
+				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, ✏️ Lieu et 🔗 Connexion ouvrent leurs formulaires, 🧾 JSON édite les documents bruts. ➕ crée un sous-lieu sur cette case, 🏰 pose une porte de rempart (paire extérieur/intérieur).</div>
 				<div id="lieu-add-section" style="margin-bottom:8px;"></div>
 				<div id="lieux-conn-list" style="max-height:320px;overflow-y:auto;font-size:.68rem;"></div>
 			</div>
@@ -1604,9 +1623,11 @@ lieuSelect.addEventListener('change', async (e) => {
 			// sur la suivante. Le lot ouvert se ferme avec elle, sans rien écrire.
 			lieuxFileCases = [];
 			closeLot();
-			// Le formulaire de connexion parle des documents du lieu PRÉCÉDENT : le laisser
-			// ouvert ferait enregistrer une porte sur une carte qui n'est plus à l'écran.
+			// Les formulaires de connexion et de porte parlent des documents du lieu
+			// PRÉCÉDENT : les laisser ouverts ferait enregistrer une porte sur une carte qui
+			// n'est plus à l'écran.
 			closeConnForm();
+			closePorteForm();
 			// Changer de lieu abandonne un aperçu non enregistré : ses cotes ne veulent plus rien dire
 			// ici, et le laisser posé verrouillerait l'auto-sauvegarde du lieu SUIVANT.
 			redimEnAttente = null;
@@ -1747,10 +1768,10 @@ function renderGrid() {
 	const showLieux   = (editMode === 'lieux');
 	// Repositionnement armé : le mode Lieux ne peint pas le terrain, l'admin ne verrait donc
 	// pas où il a le droit de poser sa porte. On le rallume le temps de viser.
-	// ⚠️ Les DEUX visées passent par ce même drapeau (🎯 de l'éditeur JSON et 🎯 du
-	// formulaire de connexion) : voile rouge, cadre de survol et refus du clic sont ainsi
-	// littéralement le même code pour les deux outils.
-	const showRepos   = (showLieux && (!!lieuxRepos || cxVisee));
+	// ⚠️ TOUTES les visées passent par ce même drapeau (🎯 de l'éditeur JSON, 🎯 du
+	// formulaire de connexion et les DEUX 🎯 du formulaire de porte) : voile rouge, cadre de
+	// survol et refus du clic sont ainsi littéralement le même code pour tous les outils.
+	const showRepos   = (showLieux && (!!lieuxRepos || cxVisee || !!ptVisee));
 
 	// Draw cell fills
 	if (showTerrain || showRepos) for (let y = 0; y < rows; y++) {
@@ -2087,6 +2108,17 @@ function paint(e) {
 			_cxPoserVisee(cx, cy);
 			return;
 		}
+		// Visée du formulaire de PORTE : même refus, même prédicat. `ptVisee` dit laquelle
+		// des deux cases (extérieure / intérieure) reçoit le clic.
+		if (ptVisee) {
+			if (!_caseAccessible(cx, cy)) {
+				_ptMsg(`✗ Case [${cx}, ${cy}] inaccessible (terrain ${(grid[cy] || [])[cx]}) — porte non posée.`, true);
+				setStatus(`<span style="color:var(--danger)">Case [${cx}, ${cy}] inaccessible : la porte n'y serait jamais atteignable.</span>`);
+				return;
+			}
+			_ptPoserVisee(cx, cy);
+			return;
+		}
 		// Outil de repositionnement armé : le clic lui appartient, il ne touche plus au filtre.
 		if (lieuxRepos) {
 			if (!_caseAccessible(cx, cy)) {
@@ -2149,7 +2181,7 @@ canvas.addEventListener('mousemove', e => {
 		// Même classe de défaut que celle déjà colmatée dans renderGrid/paint/_caseAccessible.
 		const _v = c ? (grid[c.cy] || [])[c.cx] : undefined;
 		const _txt = _v === undefined ? '(hors cells)' : _v;
-		if (c && (lieuxRepos || cxVisee)) {
+		if (c && (lieuxRepos || cxVisee || ptVisee)) {
 			const ok = _caseAccessible(c.cx, c.cy);
 			setStatus(`Cellule [${c.cx}, ${c.cy}] = ${_txt} — `
 				+ (ok ? '<span>porte posable ici</span>'
@@ -2310,6 +2342,12 @@ function renderLieuxConnList() {
 		const ouvert = lieuxJsonOuvert === conn._id;
 		// Même pastille que sur la carte : la ligne et son point se reconnaissent l'un l'autre.
 		const etat = etatPnjDeLieu(dest && dest.details);
+		// Une porte de rempart se rouvre par SA PAIRE, jamais connexion par connexion : ses
+		// trois liens ne veulent rien dire séparément.
+		const estPorte = !!(dest && dest.details && dest.details.categorie === PORTE_CATEGORIE);
+		const btnPorte = estPorte
+			? `<button class="btn btn-inline" style="font-size:.62rem;" onclick="openPorteForm('${destId}')">🏰 Porte</button>`
+			: '';
 		const pastille = `<span title="${_escHtml((LIEUX_PNJ_ETATS.find(e => e.cle === etat) || {}).label || '')}"`
 			+ ` style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;`
 			+ `background:${LIEUX_PNJ_COULEURS[etat]};border:1px solid rgba(255,255,255,0.5);"></span>`;
@@ -2321,6 +2359,7 @@ function renderLieuxConnList() {
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuFiche('${destId}')">📄 Fiche</button>
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuForm('edition','${destId}')">✏️ Lieu</button>
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="openConnForm('edition','${conn._id}')">🔗 Connexion</button>
+				${btnPorte}
 				<button class="btn btn-inline" style="font-size:.62rem;" onclick="toggleSousLieuJson('${conn._id}','${destId}')">${ouvert ? '✕ Fermer' : '🧾 JSON'}</button>
 			</div>
 		</div>`;
@@ -2376,7 +2415,8 @@ function renderLieuJsonOverlay() {
 
 async function toggleSousLieuJson(connId, destId) {
 	if (lieuxJsonOuvert === connId) { closeLieuJson(); return; }
-	closeConnForm();   // les deux panneaux occupent la même place à droite
+	closeConnForm();   // les trois panneaux occupent la même place à droite
+	closePorteForm();
 	await _chargerDocLieu(destId);
 	lieuxJsonOuvert = connId;
 	lieuxJsonDest = destId;
@@ -2417,6 +2457,10 @@ let cxIciIdx = 0;          // index, DANS `nodes`, du nœud qui porte le lieu co
 let cxVisee = false;       // la visée sur la carte est-elle armée ?
 let cxIdsConnus = [];      // tous les `_id` de connexions en base (anti-écrasement)
 let cxIdsCharges = false;  // ces `_id` ont-ils pu être lus ? (sinon le garde-fou ne joue pas)
+// Les docs COMPLETS de ces mêmes connexions. ⚠️ Indispensable aux portes : leur connexion
+// de PASSAGE (extérieur ↔ intérieur) n'a aucun nœud sur la cité, elle est donc absente de
+// `lieuxConnections` — sans la liste complète, une paire ne peut pas être rouverte.
+let cxDocsConnus = [];
 let cxIdTouche = false;    // l'`_id` a-t-il été saisi à la main ? (sinon il se dérive)
 let cxTypeTouche = false;  // idem pour le type
 
@@ -2507,6 +2551,221 @@ function _cxValider(doc, iciId, idsConnus, creation) {
 	return '';
 }
 
+// ══ PORTES DE REMPART : fonctions PURES ════════════════════════════════════
+// Une porte n'est PAS une connexion, c'est une construction à CINQ documents — et c'est
+// exactement ce que le formulaire générique ne savait pas produire :
+//
+//   lieu:<cite>_porte_<slug>_exterieur ─┐ « carte → extérieur » (label « au-delà des remparts »)
+//                                       ├── deux cases de la carte de la cité, de part
+//   lieu:<cite>_porte_<slug>_interieur ─┘ « carte → intérieur » (sans label)  et d'autre du mur
+//                                         + « passage » ext[0,0] ↔ int[0,0]
+//
+// ⚠️ Une porte n'a NI `dimensions` NI `cells` : c'est une salle de passage, pas une grille.
+// D'où [0, 0] sur ses deux nœuds — `_cxPosPosable(null, …)` ne lui applique aucune règle.
+//
+// Déclarées en `function` : dev/test_portes_client.js les extrait par NOM et les exécute
+// dans un `vm` (même méthode que dev/test_connexions_client.js).
+
+const PORTE_CATEGORIE = 'Porte de rempart';
+// ⚠️ `metadata.type` vaut « poste de garde » et NON la catégorie. `_docsNouveauLieu` écrit
+// `metadata.type = champs.categorie` ; recopier ce réflexe produirait « Porte de rempart »,
+// à contre-courant des 10 connexions de portes déjà en base.
+const PORTE_META_TYPE = 'poste de garde';
+// Le label du nœud CARTE du lien extérieur, et de lui seul. `get_lieu_links` fait
+// `node.label || doc.label` : c'est donc le texte du bouton de sortie quand on se tient
+// dans la porte extérieure. Le lien intérieur n'en porte pas — son bouton dit « Auxerre ».
+const PORTE_LABEL_EXT = 'au-delà des remparts';
+
+// Les cinq `_id` d'une porte neuve. ⚠️ Convention NEUVE : celle de la base est incohérente
+// (`link:auxerre_porte_douve_interieur_exterieur01` d'un côté,
+// `link:auxerre_poste_de_garde_tour_pont_interieur_vers_exterieur` de l'autre). On ne
+// rétro-nomme rien — CouchDB ne renomme pas —, les portes existantes gardent leurs ids.
+function _ptIds(citeId, nom, slugFn) {
+	const cite = _cxSlug(citeId);
+	// « Porte sud » et « sud » donnent le même id : le mot est déjà dans le motif, l'y
+	// laisser produirait `auxerre_porte_porte_sud_exterieur`. La base dit `_porte_douve_`,
+	// `_porte_pont_` — le nom y est le qualificatif, jamais le mot « porte ».
+	const slug = (slugFn || _slugLieu)(nom).replace(/^porte_/, '');
+	if (!cite || !slug) return { ext: '', int: '', linkExt: '', linkInt: '', linkPassage: '' };
+	const base = `${cite}_porte_${slug}`;
+	return {
+		ext: `lieu:${base}_exterieur`,
+		int: `lieu:${base}_interieur`,
+		linkExt: `link:${base}_carte_exterieur`,
+		linkInt: `link:${base}_carte_interieur`,
+		linkPassage: `link:${base}_passage`,
+	};
+}
+
+// De quel côté du rempart est ce lieu ? Lu sur l'`_id` puis sur le label — les 10 portes en
+// base portent le mot dans les deux. '' quand on ne peut pas trancher : l'appelant REFUSE
+// alors d'ouvrir le formulaire, plutôt que de risquer d'intervertir les deux côtés.
+function _ptCote(lieuId, label) {
+	const blob = `${lieuId || ''} ${label || ''}`.toLowerCase();
+	const ext = blob.indexOf('exterieur') >= 0 || blob.indexOf('extérieur') >= 0;
+	const int = blob.indexOf('interieur') >= 0 || blob.indexOf('intérieur') >= 0;
+	if (ext === int) return '';       // ni l'un ni l'autre, ou les deux à la fois
+	return ext ? 'exterieur' : 'interieur';
+}
+
+// ⚠️ `_fusionConnexion` fusionne les nœuds PAR POSITION : il faut donc les lui passer dans
+// l'ORDRE DU DOC existant. Une connexion dont le doc porte la porte en premier verrait
+// sinon ses deux nœuds permutés — la porte changerait de côté du rempart, en silence.
+function _ptOrdonner(ancien, noeuds) {
+	const anciens = (ancien && ancien.nodes) || [];
+	if (anciens.length !== 2 || noeuds.length !== 2) return noeuds;
+	const premier = anciens[0].lieu;
+	if (noeuds[1].lieu === premier && noeuds[0].lieu !== premier) return [noeuds[1], noeuds[0]];
+	return noeuds;
+}
+
+// Les CINQ documents d'une porte, dans l'ordre [ext, int, linkExt, linkInt, linkPassage].
+// ⚠️ LA fonction critique : le lot part vers `POST /admin/import-bulk`, qui fait un PUT
+// COMPLET (CLAUDE.md §11). Tout ce que ce formulaire ne possède pas doit donc survivre —
+// d'où la fusion sur les docs RELUS (`existants`), via `_fusionLieu` et `_fusionConnexion`.
+// En création, `existants` est vide et les `_id` viennent de `_ptIds` ; en édition les
+// `_id` des docs relus l'emportent : ils sont GELÉS.
+function _ptDocs(existants, champs) {
+	const ex = existants || {};
+	const ids = _ptIds(champs.citeId, champs.nom);
+	const idExt = (ex.ext && ex.ext._id) || ids.ext;
+	const idInt = (ex.int && ex.int._id) || ids.int;
+
+	// Catalogue de capacités VIDE : une porte n'en accorde aucune, et `_tagsApres` laisse
+	// alors passer d'éventuels tags posés à la main plutôt que de les effacer.
+	const lieuExt = _fusionLieu(ex.ext || {}, {
+		label: champs.labelExt, image: champs.imageExt,
+		categorie: PORTE_CATEGORIE, capacites: {},
+	}, []);
+	lieuExt._id = idExt;
+	lieuExt.lieu_parent = champs.citeId;
+
+	const lieuInt = _fusionLieu(ex.int || {}, {
+		label: champs.labelInt, image: champs.imageInt,
+		categorie: PORTE_CATEGORIE, capacites: {},
+	}, []);
+	lieuInt._id = idInt;
+	lieuInt.lieu_parent = champs.citeId;
+
+	const type = champs.type || PORTE_META_TYPE;
+	const status = champs.status || 'ouvert';
+
+	const linkExt = _fusionConnexion(ex.linkExt || {}, {
+		noeuds: _ptOrdonner(ex.linkExt, [
+			{ lieu: champs.citeId, pos: champs.posExt, label: champs.labelPorteExt },
+			{ lieu: idExt, pos: [0, 0], label: '' },
+		]),
+		type: type, status: status,
+	});
+	linkExt._id = (ex.linkExt && ex.linkExt._id) || ids.linkExt;
+
+	const linkInt = _fusionConnexion(ex.linkInt || {}, {
+		noeuds: _ptOrdonner(ex.linkInt, [
+			{ lieu: champs.citeId, pos: champs.posInt, label: champs.labelPorteInt },
+			{ lieu: idInt, pos: [0, 0], label: '' },
+		]),
+		type: type, status: status,
+	});
+	linkInt._id = (ex.linkInt && ex.linkInt._id) || ids.linkInt;
+
+	const linkPassage = _fusionConnexion(ex.linkPassage || {}, {
+		noeuds: _ptOrdonner(ex.linkPassage, [
+			{ lieu: idExt, pos: [0, 0], label: '' },
+			{ lieu: idInt, pos: [0, 0], label: '' },
+		]),
+		type: type, status: status,
+	});
+	linkPassage._id = (ex.linkPassage && ex.linkPassage._id) || ids.linkPassage;
+
+	return [lieuExt, lieuInt, linkExt, linkInt, linkPassage];
+}
+
+// La case CARTE d'une connexion de porte : celle du nœud posé sur la cité.
+function _ptPosCarte(link, citeId) {
+	const n = ((link && link.nodes) || []).find(x => x.lieu === citeId);
+	return n ? n.pos : null;
+}
+
+// Ce qui interdit d'écrire — rend un motif, ou '' si les cinq documents sont bons.
+// ⚠️ `_cxValider` n'est PAS réutilisable ici : il exige qu'un des deux nœuds soit le lieu
+// courant, ce qui est FAUX de la connexion de passage (ext ↔ int, aucun nœud sur la cité).
+function _ptValider(docs, citeId, cells, idsConnus, creation) {
+	if (!Array.isArray(docs) || docs.length !== 5) return 'Une porte compte exactement cinq documents.';
+	const ext = docs[0], int = docs[1], linkExt = docs[2], linkInt = docs[3];
+	if (!citeId) return 'Aucune cité : ouvrez une carte avant de poser une porte.';
+	if (!ext.label || !int.label) return 'Le nom de la porte est requis.';
+	if (!/^lieu:\S+$/.test(ext._id || '') || !/^lieu:\S+$/.test(int._id || ''))
+		return "Le nom de la porte ne donne aucun identifiant utilisable.";
+	if (!ext.image) return "L'image extérieure est requise.";
+	if (!int.image) return "L'image intérieure est requise.";
+
+	const posExt = _ptPosCarte(linkExt, citeId);
+	const posInt = _ptPosCarte(linkInt, citeId);
+	if (!posExt || !posInt) return 'Chaque porte doit être posée sur une case de la carte.';
+	// ⚠️ Même prédicat que le voile rouge de la carte : ce que la visée refuse au clic, la
+	// saisie à la main ne doit pas le faire passer. Appliqué aux DEUX cases.
+	const motifs = { invalide: 'invalide', hors: 'hors de la carte', terrain: 'infranchissable' };
+	for (const [cote, pos] of [['extérieure', posExt], ['intérieure', posInt]]) {
+		const souci = _cxPosPosable(cells, pos);
+		if (souci) return `Case ${cote} [${pos[0]}, ${pos[1]}] ${motifs[souci]} — la porte n'y serait jamais atteignable.`;
+	}
+	// Les deux cases confondues, le rempart ne séparerait plus rien : on entrerait et on
+	// sortirait de la cité depuis la même case.
+	if (posExt[0] === posInt[0] && posExt[1] === posInt[1])
+		return 'Les deux cases sont identiques : le rempart ne séparerait plus rien.';
+
+	if (creation) {
+		const pris = new Set(idsConnus || []);
+		for (const d of docs) {
+			if (pris.has(d._id)) return `${d._id} existe déjà — l'enregistrement l'écraserait.`;
+		}
+	}
+	return '';
+}
+
+// Retrouve la paire complète à partir d'UN de ses deux lieux. C'est ce qui rend la
+// réédition possible : la connexion de PASSAGE n'a aucun nœud sur la cité, elle est donc
+// absente de `lieuxConnections` (qui ne voit que les connexions du lieu courant) — il faut
+// la chercher dans la liste COMPLÈTE des connexions.
+// Rend null si la paire est incomplète : mieux vaut refuser d'ouvrir que d'écrire à moitié.
+function _ptPaireDe(connexions, lieuId, citeId) {
+	const toutes = connexions || [];
+	const impliquant = id => toutes.filter(c => ((c.nodes || []).some(n => n.lieu === id)));
+	const liens = impliquant(lieuId);
+	const passage = liens.find(c => !(c.nodes || []).some(n => n.lieu === citeId));
+	if (!passage) return null;
+	const jumeau = ((passage.nodes || []).find(n => n.lieu !== lieuId) || {}).lieu;
+	if (!jumeau || jumeau === lieuId) return null;
+
+	const carteDe = id => impliquant(id).find(c => (c.nodes || []).some(n => n.lieu === citeId));
+	const carteA = carteDe(lieuId), carteB = carteDe(jumeau);
+	if (!carteA || !carteB) return null;
+
+	const coteA = _ptCote(lieuId);
+	const coteB = _ptCote(jumeau);
+	// Fail-closed : sans savoir qui est dehors, rouvrir le formulaire risquerait
+	// d'intervertir les deux côtés à l'enregistrement.
+	if (coteA === '' || coteB === '' || coteA === coteB) return null;
+
+	const dehors = coteA === 'exterieur';
+	return {
+		extId: dehors ? lieuId : jumeau,
+		intId: dehors ? jumeau : lieuId,
+		linkExt: dehors ? carteA : carteB,
+		linkInt: dehors ? carteB : carteA,
+		linkPassage: passage,
+	};
+}
+
+// Les images d'une famille (douves / pont) et d'un côté encore libres. `prises` = les
+// images déjà portées par un lieu : proposer une image déjà employée ferait deux portes
+// jumelles à l'écran, sans que rien ne le signale.
+function _ptImagesLibres(images, famille, cote, prises) {
+	const prefixe = `porte_de_ville_${famille}_${cote}`;
+	const deja = new Set(prises || []);
+	return (images || []).filter(f => String(f).indexOf(prefixe) === 0 && !deja.has(f));
+}
+
 // ── Le reste : lecture du DOM et du serveur ────────────────────────────────
 function _cxEl(id) { return document.getElementById(id); }
 
@@ -2533,9 +2792,11 @@ async function _cxChargerIds() {
 		const res = await fetch('/admin/table/data?type=connection');
 		if (!res.ok) throw new Error('connexions indisponibles');
 		const data = await res.json();
-		cxIdsConnus = ((data && data.docs) || []).map(d => d._id).filter(Boolean);
+		cxDocsConnus = (data && data.docs) || [];
+		cxIdsConnus = cxDocsConnus.map(d => d._id).filter(Boolean);
 		cxIdsCharges = true;
 	} catch (err) {
+		cxDocsConnus = [];
 		cxIdsConnus = [];
 		cxIdsCharges = false;
 	}
@@ -2558,7 +2819,8 @@ async function openConnForm(mode, connId) {
 	cxIdTouche = false;
 	cxTypeTouche = false;
 	cxVisee = false;
-	closeLieuJson();   // les deux panneaux occupent la même place à droite
+	closeLieuJson();   // les trois panneaux occupent la même place à droite
+	closePorteForm();
 	_cxCabler();
 	_cxEl('conn-overlay').classList.remove('cx-hidden');
 	_cxMajChrome();   // ⚠️ AVANT le premier retour possible : un panneau titré « Créer »
@@ -2865,6 +3127,398 @@ function _cxCabler() {
 		_cxEl(id).addEventListener('input', _cxMajHints));
 	['cx-ici-label', 'cx-la-label', 'cx-status'].forEach(id =>
 		_cxEl(id).addEventListener('input', _cxMajApercu));
+}
+
+// ══ PORTES DE REMPART : le panneau ═════════════════════════════════════════
+// Pose ou corrige une paire complète (2 lieux + 3 connexions) en UNE requête
+// `POST /admin/import-bulk`, comme le LOT. ⚠️ Rien n'est écrit avant le bouton : ✕, Échap
+// et Annuler ferment sans rien engager (CLAUDE.md §8).
+
+let ptMode = 'creation';   // 'creation' | 'edition'
+let ptExistants = {};      // les docs RELUS d'une paire rouverte — base de toute fusion
+let ptVisee = '';          // '' | 'ext' | 'int' : quelle case on vise sur la carte
+let ptNomTouche = false;   // le nom a-t-il été saisi ? (sinon les labels se dérivent)
+let ptEnVol = false;
+
+function _ptEl(id) { return document.getElementById(id); }
+
+// ⚠️ Le markup vit APRÈS la balise script : appelable avant qu'il n'existe (le chargement
+// d'un lieu ferme les panneaux). Même précaution que `_cxOuvert` et `_lotOuvert`.
+function _ptOuvert() {
+	const ov = document.getElementById('porte-overlay');
+	return !!ov && !ov.classList.contains('pt-hidden');
+}
+
+function _ptMsg(texte, erreur) {
+	const el = _ptEl('pt-msg');
+	if (el) { el.textContent = texte; el.style.color = erreur ? 'var(--danger)' : 'var(--accent2)'; }
+}
+
+// Les images déjà portées par un lieu : les reproposer ferait deux portes jumelles.
+// En édition, celle de la porte courante reste offerte — sinon le `select` retomberait à
+// vide et l'enregistrement refuserait « image requise » sur une porte qui en a une (même
+// piège que le sélecteur d'images du formulaire de lieu).
+function _ptImagesPrises(sauf) {
+	const garder = new Set((sauf || []).filter(Boolean));
+	return ((creationOptions && creationOptions.lieux) || [])
+		.map(l => l.image).filter(img => img && !garder.has(img));
+}
+
+// ⚠️ `voulues` ({ext, int}) est passée EXPLICITEMENT, jamais relue depuis le `select` :
+// affecter `.value` sur un `<select>` encore vide ne prend pas, et l'image de la porte
+// éditée disparaîtrait — l'enregistrement refuserait alors « image requise » sur une porte
+// qui en a une. Même piège que le sélecteur d'images du formulaire de lieu.
+// L'image COURANTE reste offerte même si un autre lieu la porte : sinon rouvrir une porte
+// pour bouger sa case suffirait à lui faire perdre son image.
+function _ptRepeuplerImages(voulues) {
+	const famille = _ptEl('pt-famille').value;
+	const toutes = (creationOptions && creationOptions.images) || [];
+	const v = voulues || {};
+	for (const cote of ['exterieur', 'interieur']) {
+		const estExt = cote === 'exterieur';
+		const sel = _ptEl(estExt ? 'pt-image-ext' : 'pt-image-int');
+		const courante = (estExt ? v.ext : v.int) !== undefined
+			? (estExt ? v.ext : v.int) : sel.value;
+		const prises = _ptImagesPrises([courante]);
+		let liste = _ptImagesLibres(toutes, famille, cote, prises);
+		if (courante && liste.indexOf(courante) === -1) liste = [courante].concat(liste);
+		sel.innerHTML = `<option value="">— choisir —</option>`
+			+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(f)}</option>`).join('');
+		sel.value = courante || '';
+	}
+	_ptMajApercu();
+}
+
+// Les libellés des deux lieux se dérivent du nom tant qu'on n'y a pas touché — même
+// idiome que l'`_id` dérivé de la destination dans le formulaire de connexion.
+function _ptLabelsDerives() {
+	if (ptNomTouche) return;
+	const nom = _ptEl('pt-nom').value.trim();
+	const cite = ((creationOptions && creationOptions.lieux) || [])
+		.find(l => l._id === currentLocId);
+	const ville = (cite && cite.label) || _cxSlug(currentLocId);
+	if (!nom) return;
+	_ptEl('pt-label-ext').value = `${nom} — ${ville} — extérieur`;
+	_ptEl('pt-label-int').value = `${nom} — ${ville} — intérieur`;
+}
+
+function _ptChamps() {
+	const n = id => {
+		const v = parseInt(_ptEl(id).value, 10);
+		return Number.isFinite(v) ? v : NaN;
+	};
+	return {
+		citeId: currentLocId,
+		nom: _ptEl('pt-nom').value.trim(),
+		labelExt: _ptEl('pt-label-ext').value.trim(),
+		labelInt: _ptEl('pt-label-int').value.trim(),
+		imageExt: _ptEl('pt-image-ext').value,
+		imageInt: _ptEl('pt-image-int').value,
+		posExt: [n('pt-ext-x'), n('pt-ext-y')],
+		posInt: [n('pt-int-x'), n('pt-int-y')],
+		labelPorteExt: _ptEl('pt-label-carte-ext').value.trim(),
+		labelPorteInt: _ptEl('pt-label-carte-int').value.trim(),
+		type: _ptEl('pt-type').value.trim(),
+		status: _ptEl('pt-status').value.trim(),
+	};
+}
+
+function _ptDocsForme() { return _ptDocs(ptExistants, _ptChamps()); }
+
+function _ptMajApercu() {
+	const docs = _ptDocsForme();
+	const el = _ptEl('pt-preview');
+	if (el) el.textContent = JSON.stringify(docs, null, 1);
+	const ids = _ptEl('pt-ids');
+	if (ids) {
+		ids.innerHTML = docs.map(d => {
+			const pris = ptMode === 'creation' && cxIdsConnus.indexOf(d._id) >= 0;
+			const lieuPris = ptMode === 'creation'
+				&& ((creationOptions && creationOptions.lieu_ids) || []).indexOf(d._id) >= 0;
+			const ko = pris || lieuPris;
+			return `<div class="cx-hint${ko ? ' ko' : ''}">${ko ? '✗ ' : '· '}${_escHtml(d._id || '—')}</div>`;
+		}).join('');
+	}
+	_ptMajHints();
+}
+
+// Les deux indices de case, au même prédicat que le voile rouge de la carte.
+function _ptMajHints() {
+	const champs = _ptChamps();
+	for (const [cle, pos] of [['pt-ext-hint', champs.posExt], ['pt-int-hint', champs.posInt]]) {
+		const el = _ptEl(cle);
+		if (!el) continue;
+		const souci = _cxPosPosable(grid, pos);
+		const mots = { invalide: 'position invalide', hors: 'hors de la carte', terrain: 'case infranchissable' };
+		el.textContent = souci ? `✗ ${mots[souci]}` : `✓ [${pos[0]}, ${pos[1]}] praticable`;
+		el.className = 'cx-hint ' + (souci ? 'ko' : 'ok');
+	}
+}
+
+// ── Ouverture ──────────────────────────────────────────────────────────────
+async function openPorteForm(lieuId) {
+	if (!currentLocId) return;
+	// ⚠️ Même refus que `openConnForm`, pour la même raison : ce formulaire écrit des portes
+	// EN BASE alors que la grille en aperçu, elle, n'est pas enregistrée.
+	if (redimEnAttente) {
+		setStatus('<span style="color:var(--danger)">Redimensionnement en attente : enregistrez-le (💾) '
+			+ 'ou annulez-le avant de poser une porte.</span>');
+		return;
+	}
+	closeConnForm();     // les trois panneaux occupent la même place à droite
+	closeLieuJson();
+	ptMode = lieuId ? 'edition' : 'creation';
+	ptExistants = {};
+	ptVisee = '';
+	ptNomTouche = false;
+	_ptCabler();
+	_ptEl('porte-overlay').classList.remove('pt-hidden');
+	_ptMajChrome();
+	_ptMsg('Chargement…', false);
+
+	if (!creationOptions) {
+		try {
+			const res = await fetch('/api/lieux/creation_options');
+			if (res.ok) creationOptions = await res.json();
+		} catch (e) { /* le formulaire le dira plus bas */ }
+	}
+	await _cxChargerIds();
+
+	// Valeurs par défaut d'une porte NEUVE : la case sélectionnée pré-remplit l'extérieur.
+	const cell = lieuxSelectedCell || { cx: 0, cy: 0 };
+	_ptEl('pt-nom').value = '';
+	_ptEl('pt-label-ext').value = '';
+	_ptEl('pt-label-int').value = '';
+	_ptEl('pt-famille').value = 'douves';
+	_ptEl('pt-ext-x').value = cell.cx;
+	_ptEl('pt-ext-y').value = cell.cy;
+	_ptEl('pt-int-x').value = cell.cx;
+	_ptEl('pt-int-y').value = cell.cy;
+	_ptEl('pt-label-carte-ext').value = PORTE_LABEL_EXT;
+	_ptEl('pt-label-carte-int').value = '';
+	_ptEl('pt-type').value = PORTE_META_TYPE;
+	_ptEl('pt-status').value = 'ouvert';
+	_ptEl('pt-image-ext').value = '';
+	_ptEl('pt-image-int').value = '';
+
+	if (ptMode === 'edition') {
+		const paire = _ptPaireDe(cxDocsConnus, lieuId, currentLocId);
+		if (!paire) {
+			_ptMsg('✗ Paire introuvable ou incomplète — corrigez-la par 🧾 JSON.', true);
+			_ptEl('pt-submit-btn').disabled = true;
+			return;
+		}
+		const [extDoc, intDoc] = await Promise.all([
+			_ptLireLieu(paire.extId), _ptLireLieu(paire.intId)]);
+		if (!extDoc || !intDoc) {
+			_ptMsg('✗ Un des deux lieux de la porte est introuvable.', true);
+			_ptEl('pt-submit-btn').disabled = true;
+			return;
+		}
+		ptExistants = {
+			ext: extDoc, int: intDoc,
+			linkExt: paire.linkExt, linkInt: paire.linkInt, linkPassage: paire.linkPassage,
+		};
+		ptNomTouche = true;   // les libellés viennent des docs, pas d'une dérivation
+		const carte = (l) => (l.nodes || []).find(n => n.lieu === currentLocId) || {};
+		_ptEl('pt-label-ext').value = extDoc.label || '';
+		_ptEl('pt-label-int').value = intDoc.label || '';
+		const posExt = _ptPosCarte(paire.linkExt, currentLocId) || [0, 0];
+		const posInt = _ptPosCarte(paire.linkInt, currentLocId) || [0, 0];
+		_ptEl('pt-ext-x').value = posExt[0]; _ptEl('pt-ext-y').value = posExt[1];
+		_ptEl('pt-int-x').value = posInt[0]; _ptEl('pt-int-y').value = posInt[1];
+		_ptEl('pt-label-carte-ext').value = carte(paire.linkExt).label || '';
+		_ptEl('pt-label-carte-int').value = carte(paire.linkInt).label || '';
+		const meta = paire.linkExt.metadata || {};
+		_ptEl('pt-type').value = meta.type || PORTE_META_TYPE;
+		_ptEl('pt-status').value = meta.status || 'ouvert';
+		// La famille se devine de l'image, pour que le `select` propose les bonnes sœurs.
+		_ptEl('pt-famille').value = String(extDoc.image || '').indexOf('_pont_') >= 0 ? 'pont' : 'douves';
+	}
+
+	_ptRepeuplerImages(ptMode === 'edition'
+		? { ext: ptExistants.ext.image || '', int: ptExistants.int.image || '' }
+		: { ext: '', int: '' });
+	_ptMajChrome();
+	_ptMajApercu();
+	_ptMsg(cxIdsCharges ? '' : '⚠ Les connexions n\'ont pas pu être lues : le garde-fou anti-écrasement ne joue pas.', !cxIdsCharges);
+}
+
+// Le doc d'un lieu, mémoïsé comme partout ailleurs dans l'éditeur.
+async function _ptLireLieu(id) {
+	if (lieuxDocCache[id]) return lieuxDocCache[id];
+	try {
+		const res = await fetch(`/api/lieu/${encodeURIComponent(id)}`);
+		if (!res.ok) return null;
+		const doc = await res.json();
+		lieuxDocCache[id] = doc;
+		return doc;
+	} catch (e) { return null; }
+}
+
+function _ptMajChrome() {
+	const edition = ptMode === 'edition';
+	_ptEl('pt-titre').textContent = edition ? 'Éditer la porte de rempart' : 'Nouvelle porte de rempart';
+	_ptEl('pt-submit-btn').textContent = edition ? '💾 Enregistrer' : '➕ Créer la porte';
+	_ptEl('pt-submit-btn').disabled = false;
+	// En édition les `_id` sont gelés : le nom ne les recalcule plus, il ne sert qu'aux
+	// libellés. Le dire, sinon on croirait renommer la porte en base.
+	_ptEl('pt-nom-bloc').style.display = edition ? 'none' : '';
+	_ptEl('pt-ids-hint').textContent = edition
+		? 'Identifiants gelés : CouchDB ne renomme pas un document.'
+		: 'Dérivés du nom — vérifiez qu\'aucun n\'est déjà pris.';
+}
+
+function closePorteForm() {
+	desarmerViseePorte();
+	const ov = document.getElementById('porte-overlay');
+	if (ov) ov.classList.add('pt-hidden');
+}
+
+// ── Les DEUX visées ────────────────────────────────────────────────────────
+// ⚠️ Une seule armée à la fois : `ptVisee` dit laquelle. Sans cet état, le clic ne saurait
+// pas dans quel couple de champs écrire.
+function basculerViseePorte(cote) {
+	if (ptVisee === cote) { desarmerViseePorte(); return; }
+    if (!grid.length) { _ptMsg("✗ Ce lieu n'a pas de grille : aucune case à viser.", true); return; }
+	if (editMode !== 'lieux') { _ptMsg('✗ Repassez en mode Lieux pour viser une case.', true); return; }
+	ptVisee = cote;
+	canvas.style.cursor = 'crosshair';
+	_ptMajVisee();
+	renderGrid();
+	setStatus(`Visée de la case ${cote === 'ext' ? 'EXTÉRIEURE' : 'INTÉRIEURE'} : cliquez la case — `
+		+ "<span>Échap</span> pour renoncer. Rien n'est enregistré avant le bouton.");
+}
+
+function desarmerViseePorte() {
+	if (!ptVisee) return;
+	ptVisee = '';
+	canvas.style.cursor = '';
+	_ptMajVisee();
+	if (grid.length) renderGrid();
+}
+
+function _ptMajVisee() {
+	for (const cote of ['ext', 'int']) {
+		const btn = _ptEl(`pt-visee-${cote}`);
+		if (!btn) continue;
+		const arme = ptVisee === cote;
+		btn.classList.toggle('cx-visee', arme);
+		btn.textContent = arme ? '✕ Annuler' : '🎯 Viser';
+	}
+	// Le panneau s'efface et laisse passer les clics le temps du geste : il recouvre la
+	// moitié droite de la carte, qui serait sinon invisée.
+	const ov = _ptEl('porte-overlay');
+	if (ov) ov.classList.toggle('cx-viser', !!ptVisee);
+}
+
+function _ptPoserVisee(cx, cy) {
+	const prefixe = ptVisee === 'ext' ? 'pt-ext' : 'pt-int';
+	const cote = ptVisee === 'ext' ? 'extérieure' : 'intérieure';
+	_ptEl(`${prefixe}-x`).value = cx;
+	_ptEl(`${prefixe}-y`).value = cy;
+	desarmerViseePorte();
+	_ptMajApercu();
+	_ptMsg(`Case ${cote} [${cx}, ${cy}] retenue — reste à enregistrer.`, false);
+}
+
+// ── L'écriture ─────────────────────────────────────────────────────────────
+// `POST /admin/import-bulk` : cinq documents, un seul aller-retour, upsert par doc.
+async function submitPorteForm() {
+	if (ptEnVol) return;
+	const creation = ptMode !== 'edition';
+	const docs = _ptDocsForme();
+	const souci = _ptValider(docs, currentLocId, grid, cxIdsConnus, creation);
+	if (souci) { _ptMsg(`✗ ${souci}`, true); return; }
+	// ⚠️ En création, les deux `lieu:*` doivent AUSSI être libres : `_ptValider` ne connaît
+	// que les `_id` de connexions. `import-bulk` écraserait un lieu existant en silence.
+	if (creation) {
+		const lieuxPris = (creationOptions && creationOptions.lieu_ids) || [];
+		for (const d of docs.slice(0, 2)) {
+			if (lieuxPris.indexOf(d._id) >= 0) {
+				_ptMsg(`✗ ${d._id} existe déjà — l'enregistrement l'écraserait.`, true);
+				return;
+			}
+		}
+	}
+
+	ptEnVol = true;
+	const btn = _ptEl('pt-submit-btn');
+	btn.disabled = true;
+	_ptMsg('Enregistrement des cinq documents…', false);
+	let bilan = null;
+	try {
+		const res = await fetch('/admin/import-bulk', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(docs),
+		});
+		if (!res.ok) {
+			const e = await res.json().catch(() => ({}));
+			throw new Error(e.detail || res.status);
+		}
+		// Flux NDJSON, ligne à ligne (même boucle que le LOT).
+		const reader = res.body.getReader();
+		const decoder = new TextDecoder();
+		let reste = '';
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			reste += decoder.decode(value, { stream: true });
+			const lignes = reste.split('\n');
+			reste = lignes.pop();
+			lignes.forEach(l => {
+				if (!l.trim()) return;
+				let ev; try { ev = JSON.parse(l); } catch (e) { return; }
+				if (ev.event === 'done') bilan = ev;
+			});
+		}
+	} catch (err) {
+		ptEnVol = false;
+		btn.disabled = false;
+		_ptMsg(`✗ ${err.message}`, true);
+		return;
+	}
+	ptEnVol = false;
+	btn.disabled = false;
+
+	if (bilan && bilan.failed) {
+		// Échec PARTIEL : les docs écrits le sont pour de bon, on ne rejoue pas — on rend
+		// la main avec le détail plutôt que de fermer sur un succès trompeur.
+		_ptMsg(`✗ ${bilan.failed} doc(s) en échec sur ${bilan.total} — ${(bilan.errors || []).join(' · ')}`, true);
+		await fetchLieuxConnections();
+		renderLieuxConnList();
+		if (grid.length) renderGrid();
+		return;
+	}
+
+	closePorteForm();
+	creationOptions = null;   // périmé : deux lieux de plus, deux images de moins
+	// La porte est peut-être ailleurs qu'avant : la liste latérale est filtrée par la case
+	// sélectionnée, elle en disparaîtrait à la seconde où on la déplace.
+	const posExt = _ptPosCarte(docs[2], currentLocId);
+	if (posExt) lieuxSelectedCell = { cx: posExt[0], cy: posExt[1] };
+	await fetchLieuxConnections();
+	renderLieuxConnList();
+	if (grid.length) renderGrid();
+	setStatus(`Porte <span>${docs[0].label || docs[0]._id}</span> ${creation ? 'créée' : 'enregistrée'} — 5 documents.`);
+}
+
+let _ptCable = false;
+function _ptCabler() {
+	if (_ptCable) return;
+	_ptCable = true;
+	_ptEl('pt-nom').addEventListener('input', () => { _ptLabelsDerives(); _ptMajApercu(); });
+	['pt-label-ext', 'pt-label-int'].forEach(id =>
+		_ptEl(id).addEventListener('input', () => { ptNomTouche = true; _ptMajApercu(); }));
+	_ptEl('pt-famille').addEventListener('change', _ptRepeuplerImages);
+	['pt-image-ext', 'pt-image-int', 'pt-label-carte-ext', 'pt-label-carte-int',
+		'pt-type', 'pt-status'].forEach(id =>
+		_ptEl(id).addEventListener('input', _ptMajApercu));
+	['pt-image-ext', 'pt-image-int'].forEach(id =>
+		_ptEl(id).addEventListener('change', _ptMajApercu));
+	['pt-ext-x', 'pt-ext-y', 'pt-int-x', 'pt-int-y'].forEach(id =>
+		_ptEl(id).addEventListener('input', _ptMajApercu));
 }
 
 // ── REDIMENSIONNEMENT : fonctions PURES ────────────────────────────────────
@@ -3434,10 +4088,10 @@ function renderLieuAddSection() {
 		? `<button class="btn" style="font-size:.68rem;" onclick="openLieuAdd()">➕ Ajouter un lieu en [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]</button>`
 		: `<div style="font-size:.66rem;color:#666;">Cliquez une case de la grille pour pouvoir y ajouter un lieu.</div>`;
 
-	// Relier DEUX LIEUX EXISTANTS : n'écrit qu'un doc `link:*`, jamais de `lieu:*` — c'est
-	// tout ce qui le sépare d'`openLieuAdd`. Offert sans case sélectionnée : le formulaire
-	// a ses champs x/y et sa visée 🎯, la case n'est qu'un pré-remplissage.
-	const relier = `<button class="btn" style="font-size:.68rem;margin-top:6px;" onclick="openConnForm('creation')">🔗 Relier à un lieu existant${
+	// PORTE DE REMPART : deux lieux et trois connexions d'un coup — c'est ce qu'aucun
+	// formulaire mono-doc ne pouvait produire. Offert sans case sélectionnée : le panneau a
+	// ses deux couples x/y et ses deux visées 🎯, la case n'est qu'un pré-remplissage.
+	const relier = `<button class="btn" style="font-size:.68rem;margin-top:6px;" onclick="openPorteForm()">🏰 Ajouter une porte de rempart${
 		lieuxSelectedCell ? ` depuis [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]` : ''}</button>`;
 
 	// La file du LOT. ⚠️ Les ⌫ portent l'INDEX de la case, jamais son libellé : rien de
@@ -4886,7 +5540,11 @@ document.addEventListener('keydown', (e) => {
 	// recouvrent. Armée, Échap annule d'abord la VISÉE et laisse le panneau ouvert — sinon
 	// on perdrait sa saisie pour avoir voulu renoncer à un clic.
 	if (cxVisee) { desarmerViseeConn(); return; }
+	if (ptVisee) { desarmerViseePorte(); return; }
 	if (_cxOuvert()) { closeConnForm(); return; }
+	// ⚠️ Comme le lot : Échap n'annule pas pendant l'écriture, fermer masquerait une
+	// opération en cours sans l'interrompre.
+	if (_ptOuvert() && !ptEnVol) { closePorteForm(); return; }
 	if (lieuxRepos) { desarmerRepositionnement(); return; }
 	if (lieuxJsonOuvert) { closeLieuJson(); return; }
 	// Le mode test vient en dernier : son overlay est en z-index 100, sous les deux modals et
@@ -5637,6 +6295,94 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 	<div class="la-actions">
 		<button class="btn" id="cx-submit-btn" onclick="submitConnForm()">➕ Créer</button>
 		<button class="btn danger" onclick="closeConnForm()">Annuler</button>
+	</div>
+</div>
+
+<!-- PORTE DE REMPART : une PAIRE de lieux et TROIS connexions, écrites en une requête. -->
+<div id="porte-overlay" class="card pt-hidden">
+	<div class="lj-title">
+		<div class="card-title">🏰 <span id="pt-titre">Nouvelle porte de rempart</span></div>
+		<button type="button" class="lj-close" onclick="closePorteForm()" title="Fermer (sans enregistrer)">✕</button>
+	</div>
+	<div class="lj-desc">
+		Une porte est une <b>paire</b> : un lieu <b>extérieur</b> et un lieu <b>intérieur</b>,
+		chacun relié à une case de la carte, plus le <b>passage</b> qui les joint. Les deux
+		cases doivent enjamber le rempart — l'éditeur vérifie qu'elles sont praticables et
+		distinctes, mais <b>pas</b> qu'elles sont du bon côté du mur : cela reste votre œil.
+	</div>
+
+	<div class="cx-noeud" id="pt-nom-bloc">
+		<h3>Nom</h3>
+		<input type="text" id="pt-nom" placeholder="sud, douve, de l'Évêché…">
+		<div class="cx-hint">Sert aux identifiants et aux libellés. Le mot « porte » est déjà dans le motif.</div>
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Libellés des deux lieux</h3>
+		<label for="pt-label-ext">Extérieur</label>
+		<input type="text" id="pt-label-ext" placeholder="Porte sud — Auxerre — extérieur">
+		<label for="pt-label-int" style="margin-top:6px;">Intérieur</label>
+		<input type="text" id="pt-label-int" placeholder="Porte sud — Auxerre — intérieur">
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Images</h3>
+		<label for="pt-famille">Famille</label>
+		<select id="pt-famille" style="margin-bottom:6px;">
+			<option value="douves">douves</option>
+			<option value="pont">pont</option>
+		</select>
+		<label for="pt-image-ext">Extérieure</label>
+		<select id="pt-image-ext" style="margin-bottom:6px;"></select>
+		<label for="pt-image-int">Intérieure</label>
+		<select id="pt-image-int" style="margin-bottom:0;"></select>
+		<div class="cx-hint">Les images déjà portées par un lieu ne sont pas proposées.</div>
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Case EXTÉRIEURE — hors les murs</h3>
+		<div class="cx-pos">
+			<div><label for="pt-ext-x">x</label><input type="number" id="pt-ext-x" min="0" step="1"></div>
+			<div><label for="pt-ext-y">y</label><input type="number" id="pt-ext-y" min="0" step="1"></div>
+			<button class="btn btn-inline" id="pt-visee-ext" style="font-size:.62rem;"
+				onclick="basculerViseePorte('ext')">🎯 Viser</button>
+		</div>
+		<div class="cx-hint" id="pt-ext-hint"></div>
+		<label for="pt-label-carte-ext" style="margin-top:8px;">Label du bouton de sortie
+			<span style="color:#888;font-weight:normal;">(vu depuis la porte)</span></label>
+		<input type="text" id="pt-label-carte-ext" placeholder="au-delà des remparts">
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Case INTÉRIEURE — dans l'enceinte</h3>
+		<div class="cx-pos">
+			<div><label for="pt-int-x">x</label><input type="number" id="pt-int-x" min="0" step="1"></div>
+			<div><label for="pt-int-y">y</label><input type="number" id="pt-int-y" min="0" step="1"></div>
+			<button class="btn btn-inline" id="pt-visee-int" style="font-size:.62rem;"
+				onclick="basculerViseePorte('int')">🎯 Viser</button>
+		</div>
+		<div class="cx-hint" id="pt-int-hint"></div>
+		<label for="pt-label-carte-int" style="margin-top:8px;">Label du bouton d'entrée
+			<span style="color:#888;font-weight:normal;">(vide = le label de la cité)</span></label>
+		<input type="text" id="pt-label-carte-int" placeholder="">
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Les cinq documents</h3>
+		<label for="pt-type">Type <span style="color:#888;font-weight:normal;">(descriptif)</span></label>
+		<input type="text" id="pt-type" placeholder="poste de garde">
+		<label for="pt-status" style="margin-top:6px;">État</label>
+		<input type="text" id="pt-status" placeholder="ouvert" style="margin-bottom:6px;">
+		<div id="pt-ids"></div>
+		<div class="cx-hint" id="pt-ids-hint"></div>
+	</div>
+
+	<label>Aperçu</label>
+	<div class="la-preview" id="pt-preview"></div>
+	<div class="lj-msg" id="pt-msg"></div>
+	<div class="la-actions">
+		<button class="btn" id="pt-submit-btn" onclick="submitPorteForm()">➕ Créer la porte</button>
+		<button class="btn danger" onclick="closePorteForm()">Annuler</button>
 	</div>
 </div>
 
