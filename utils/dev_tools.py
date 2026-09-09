@@ -379,6 +379,16 @@ CATALOGUE = [
 			"la règle de marche (terrain, `nav`, bornes) n'existe NULLE PART côté serveur.",
 	},
 	{
+		"id": "test_portes_client",
+		"label": "🧪 Tests d'exécution des portes de rempart (node)",
+		"argv": _node("test_portes_client.js"),
+		"ecrit": "Lecture seule.",
+		"description": "⚠️ Exige `node` (cf. ci-dessus). Exécute les fonctions PURES du flux "
+			"« porte de rempart » de /admin/editor : les cinq documents d'une paire, la fusion "
+			"préservant les clés inconnues, l'ordre des nœuds (permuter changerait la porte de "
+			"côté), et la reconstitution d'une paire depuis l'un ou l'autre de ses deux lieux.",
+	},
+	{
 		"id": "test_dialogues_client",
 		"label": "🧪 Tests d'exécution de l'éditeur de dialogues (node)",
 		"argv": _node("test_dialogues_client.js"),
