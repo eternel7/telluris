@@ -115,12 +115,14 @@ _recettes_fusion_memo: dict[str, list] = {}
 _marche_map_portee: dict | None = None     # {lieu_portee: {"besoins"/"produits": {cat: set}}}
 _recettes_par_portee: dict | None = None   # {lieu_portee: {lieu_categorie: [recettes]}}
 _portees_memo: dict[str, tuple] = {}       # lieu_id → (lui-même, parent, grand-parent…)
+_cles_consommees_memo: set | None = None   # toutes les clés matières consommées, portées comprises
 
 
 def reset_prix_cache() -> None:
 	"""Vide les caches de coût de revient (à appeler quand recettes/items/MARGE changent)."""
 	global _recipe_map, _marche_map, _recettes_all, _recettes_par_lieu, _image_route_memo
-	global _marche_map_portee, _recettes_par_portee
+	global _marche_map_portee, _recettes_par_portee, _cles_consommees_memo
+	_cles_consommees_memo = None
 	_recipe_map = None
 	_marche_map = None
 	_recettes_all = None
@@ -276,6 +278,24 @@ def produits_categorie(categorie: str) -> set:
 		return set()
 	produits = _get_marche_map()["produits"]
 	return set().union(*(produits.get(c, set()) for c in categories_incluses(categorie)))
+
+
+def cles_consommees() -> set:
+	"""Toutes les clés matières qu'une recette consomme, quelque part dans le monde — recettes
+	PORTÉES comprises (une spécialité de terroir est un débouché comme un autre).
+
+	C'est le seul index INVERSE du marché : tous les autres vont de la catégorie vers les clés,
+	celui-ci répond à « quelqu'un, quelque part, sait-il quoi faire de ça ? » sans balayer les
+	catégories ni toucher la base. Sert de filtre bon marché au pool de flux d'une cité, qui ne
+	doit se remplir que de matières dont un atelier a l'usage. Mémo process, vidé par
+	`reset_prix_cache()` comme ses voisins."""
+	global _cles_consommees_memo
+	if _cles_consommees_memo is None:
+		cles = set().union(set(), *_get_marche_map()["besoins"].values())
+		for table in _get_marche_map_portee().values():
+			cles |= set().union(set(), *(table.get("besoins") or {}).values())
+		_cles_consommees_memo = cles
+	return _cles_consommees_memo
 
 
 # ── Portée géographique des recettes (spécialités de terroir) ────────────────────
@@ -1328,20 +1348,170 @@ def approvisionner(lieu_doc: dict) -> bool:
 	return changed
 
 
-def tick_atelier(lieu_doc: dict, recettes: list | None = None) -> bool:
-	"""Tick marché à appeler à chaque vente/visite : approvisionne le lieu selon sa catégorie,
-	tente une passe de production puis un écoulement PNJ des produits finis. Renvoie True si le
-	doc a changé (→ l'appelant save)."""
+# ── Flux de marchandises entre boutiques d'une même cité ─────────────────────────
+# Ce que les PNJ consomment chez un marchand ne s'évapore plus tout à fait : une part
+# (`VENTE_PNJ_REDISTRIB`) est versée au POOL DE FLUX de la cité — un `flux_marchand:
+# {item_id: qty}` sur le doc `lieu:*` de la ville — où les ateliers dont une recette réclame
+# cette matière viennent puiser à leur propre tick. Ce que le boulanger vend aux habitants
+# nourrit l'aubergiste ; le cuir écoulé chez le tanneur revient chez le bourrelier.
+#
+# ⚠️ **Un seul doc partagé, AUCUN scan de voisins**, et ce n'est pas un confort : `lieu:` n'est
+# pas dans `_CACHEABLE_PREFIXES` (db/config.py), donc chercher les boutiques sœurs à chaque
+# écoulement coûterait un `find_docs` par tick — et la nuit d'auberge tique toutes les
+# boutiques de la cité, plusieurs fois chacune. L'appelant ouvre le contexte UNE fois
+# (`flux_cite`), le passe à autant de `tick_atelier` qu'il veut, puis le referme
+# (`persister_flux`) : une lecture, au plus une écriture.
+#
+# ⚠️ Champ absent ⇒ comportement d'avant, aucune migration (CLAUDE.md §4) — et `flux=None`
+# rend les deux greffes de `tick_atelier` strictement inertes.
+
+def flux_cite(cite_doc: dict | None) -> dict | None:
+	"""Ouvre le contexte de flux d'une CITÉ : `{"doc", "pool": {item_id: qty}, "change"}`.
+	Renvoie **None** si le doc n'est pas une cité — le tick se comporte alors exactement comme
+	avant. Fail-soft sur une quantité illisible en base (ignorée, pas d'exception).
+
+	⚠️ **Garde `categorie == "ville"`** : les cités portent `lieu_parent: "lieu:france"` depuis
+	les spécialités de terroir. Sans elle, une cité qui tique elle-même verserait son flux sur
+	le doc du PAYS, et les villes se fourniraient entre elles d'un bout à l'autre du royaume.
+	Même garde, pour la même raison, que celle de `quetes.lieux_solidaires`."""
+	if not cite_doc or (cite_doc or {}).get("categorie") != "ville":
+		return None
+	brut = cite_doc.get("flux_marchand")
+	pool = {}
+	for cle, q in (brut.items() if isinstance(brut, dict) else ()):
+		try:
+			q = int(q)
+		except (TypeError, ValueError):
+			continue
+		if q > 0:
+			pool[cle] = q
+	return {"doc": cite_doc, "pool": pool, "change": False}
+
+
+def persister_flux(flux: dict | None, save_doc_fn) -> bool:
+	"""Referme un contexte de flux : réécrit `flux_marchand` sur le doc de la cité et le sauve
+	— UNE fois, et **seulement si le pool a bougé** (sans quoi chaque visite d'une boutique
+	paierait une écriture pour rien). Un pool vidé retire le champ plutôt que d'y laisser un
+	dict vide. Renvoie True si le doc a été sauvé."""
+	if not flux or not flux.get("change"):
+		return False
+	doc = flux.get("doc")
+	if doc is None:
+		return False
+	pool = {cle: q for cle, q in (flux.get("pool") or {}).items() if q > 0}
+	if pool:
+		doc["flux_marchand"] = pool
+	else:
+		doc.pop("flux_marchand", None)
+	return save_doc_fn(doc) is not None
+
+
+def _crediter_flux(flux: dict | None, ecoules: list) -> bool:
+	"""Verse au pool de la cité la part `VENTE_PNJ_REDISTRIB` de ce que les PNJ viennent de
+	consommer, et **seulement ce dont un atelier a l'usage** (`cles_consommees` : « ça existe
+	et c'est nécessaire »). Mute le contexte ; True si le pool a bougé.
+
+	⚠️ Plafonné par clé à `STOCK_CIBLE_DEFAUT` : une matière que personne ne vient chercher ne
+	doit pas gonfler indéfiniment le doc de la ville — c'est le défaut de `stock_matieres`,
+	seul réservoir non borné du système, qu'on ne reproduit pas ici."""
+	if not flux or not ecoules:
+		return False
+	part = _clamp(float(character_stats.VENTE_PNJ_REDISTRIB), 0.0, 1.0)
+	if part <= 0:
+		return False
+	consommees = cles_consommees()
+	plafond = max(1, int(character_stats.STOCK_CIBLE_DEFAUT))
+	pool = flux["pool"]
+	change = False
+	for ligne in ecoules:
+		item_id = (ligne or {}).get("item_id")
+		qty = int((ligne or {}).get("qty", 0))
+		if not item_id or qty <= 0:
+			continue
+		item = resolve_item_ref(item_id)
+		if not item:
+			continue
+		if item_id not in consommees and item_sous_categorie(item) not in consommees:
+			continue
+		verse = int(round(qty * part))
+		if verse <= 0:
+			continue
+		avant = int(pool.get(item_id, 0))
+		apres = min(plafond, avant + verse)
+		if apres != avant:
+			pool[item_id] = apres
+			change = True
+	if change:
+		flux["change"] = True
+	return change
+
+
+def puiser_flux(lieu_doc: dict, flux: dict | None) -> bool:
+	"""Ce lieu retire du pool de sa cité les matières que SES recettes réclament (`besoins_lieu`,
+	portée géographique comprise) et les verse en **RÉSERVE** (`stock_matieres`), sous la clé de
+	`cle_matiere_lieu` — exactement le chemin d'une vente au marchand. Mute `lieu_doc` et le
+	contexte ; True si quelque chose a été pris.
+
+	⚠️ **On saute ce que le lieu PRODUIT** : sans cette garde, un atelier dont un produit est
+	aussi l'intrant d'une de ses propres recettes (corde → arc) reprendrait sans fin ce qu'il
+	vient de vendre aux PNJ, et l'écoulement deviendrait un tour de manège."""
+	if not flux or not lieu_doc:
+		return False
+	pool = flux["pool"]
+	if not pool:
+		return False
+	besoins = set(besoins_lieu(lieu_doc))
+	if not besoins:
+		return False
+	categorie = lieu_doc.get("categorie")
+	stock = lieu_doc.setdefault("stock_matieres", {})
+	pris = False
+	for item_id in list(pool):
+		qty = int(pool.get(item_id, 0))
+		if qty <= 0:
+			continue
+		item = resolve_item_ref(item_id)
+		if not item:
+			continue
+		if item_id not in besoins and item_sous_categorie(item) not in besoins:
+			continue
+		if lieu_produit(lieu_doc, item):
+			continue
+		cle = cle_matiere_lieu(categorie, item, lieu_doc)
+		if not cle:
+			continue
+		stock[cle] = int(stock.get(cle, 0)) + qty
+		del pool[item_id]
+		pris = True
+	if pris:
+		flux["change"] = True
+	return pris
+
+
+def tick_atelier(lieu_doc: dict, recettes: list | None = None, flux: dict | None = None) -> bool:
+	"""Tick marché à appeler à chaque vente/visite : puise au flux de la cité, approvisionne le
+	lieu selon sa catégorie, tente une passe de production puis un écoulement PNJ des produits
+	finis — dont une part repart au flux. Renvoie True si le **doc lieu** a changé (→ l'appelant
+	save) ; le doc de la cité, lui, se referme par `persister_flux`.
+
+	⚠️ **L'ordre n'est pas cosmétique** : on puise AVANT d'écouler, sinon une boutique
+	reprendrait dans le même tick ce qu'elle vient de vendre aux habitants. Puiser en premier
+	laisse aussi la matière reçue passer à la production du tick même.
+	⚠️ `flux=None` (lieu sans cité, fixture de test) ⇒ les deux greffes sont inertes et le tick
+	est **strictement** celui d'avant."""
+	puise = puiser_flux(lieu_doc, flux)
 	approvisionne = approvisionner(lieu_doc)
 	produits = tenter_production(lieu_doc, recettes)
 	ecoules = ecouler_produits_pnj(lieu_doc)
-	return bool(approvisionne or produits or ecoules)
+	_crediter_flux(flux, ecoules)
+	return bool(puise or approvisionne or produits or ecoules)
 
 
-def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:
+def convertir_apres_achat(lieu_doc: dict, item_doc: dict, flux: dict | None = None) -> bool:
 	"""Absorbe l'objet acheté en matières (`stock_matieres`) puis lance un `tick_atelier`
 	(production + écoulement PNJ, probabilistes). Mute `lieu_doc` en place (l'appelant
-	persiste). Renvoie True si quelque chose a changé."""
+	persiste). `flux` : contexte de flux de la cité, simplement relayé au tick. Renvoie True si
+	quelque chose a changé."""
 	# Import PARESSEUX : évite le cycle marche ⇄ scriptorium (utils/scriptorium.py importe
 	# `utils.marche` au niveau module). Ce site (« vente »/rachat) est le 4ᵉ des sites qui
 	# résolvent explicitement leurs recettes — un scriptorium y ajoute son petit lot de
@@ -1354,7 +1524,7 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:
 		item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
 		if item_id:
 			_stock_vente_add(lieu_doc.setdefault("stock_vente", []), item_id, 1)
-		return tick_atelier(lieu_doc, recettes)
+		return tick_atelier(lieu_doc, recettes, flux)
 
 	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	# Table de quantités du dépeçage : recettes `carcasse → <matiere>` du lieu (boucherie).
@@ -1365,7 +1535,7 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict) -> bool:
 	for cle, qty in _matieres_entrantes(item_doc, qmap, lieu_doc.get("categorie"), lieu_doc):
 		stock_mat[cle] = int(stock_mat.get(cle, 0)) + qty
 
-	return tick_atelier(lieu_doc, recettes)
+	return tick_atelier(lieu_doc, recettes, flux)
 
 
 def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> list[dict]:

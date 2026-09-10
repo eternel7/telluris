@@ -50,7 +50,8 @@ from utils import lint_dialogues
 from utils import dev_tools
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
-from utils.marche import tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu, relations_lieux_payload
+from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu,
+						  relations_lieux_payload, flux_cite, persister_flux)
 from utils.lieux import get_lieu_links, get_lieu_directions, get_lieux_ids, cites_de_depart, lieu_router
 from models import character_stats
 from models.character_stats import compute_derived_stats, BaseStats, compute_stat_cap, compute_character_level, xp_seuil_niveau, load_world_variables
@@ -598,8 +599,13 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		# Recettes passées explicitement, comme sell_item / convertir_apres_achat. Un
 		# scriptorium y ajoute son petit lot de recettes VIRTUELLES (sort/recette/carte),
 		# scopées à SON lieu_parent — cf. utils/scriptorium.recettes_effectives.
-		if tick_atelier(grid_doc, scriptorium_util.recettes_effectives(grid_doc, find_docs, get_doc, save_doc)):
+		# Flux de la cité : la boutique y puise ce dont ses recettes ont besoin et y reverse
+		# une part de ce que les PNJ lui prennent. `flux_cite` rend None hors d'une ville.
+		cite_id = grid_doc.get("lieu_parent")
+		flux = flux_cite(get_doc(cite_id) if cite_id else None)
+		if tick_atelier(grid_doc, scriptorium_util.recettes_effectives(grid_doc, find_docs, get_doc, save_doc), flux):
 			save_doc(grid_doc)
+		persister_flux(flux, save_doc)
 	# Courses de transport échues : l'expiration est PARESSEUSE (aucun tick de fond dans le
 	# jeu) — on la solde à chaque point de passage. La sanction de réputation part avec.
 	transports_echoues = transport_util.traiter_expirations(
