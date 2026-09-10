@@ -608,7 +608,8 @@ def test_la_nuit_relance_les_etals_du_LIEU_PARENT(monde, monkeypatch):
 	monde["docs"]["lieu:forge"] = boutique
 
 	appels = []
-	monkeypatch.setattr(ra, "tick_atelier", lambda doc, rec: appels.append(doc["_id"]) or True)
+	# 3ᵉ argument : le contexte de flux de la cité, ouvert UNE fois hors de la boucle.
+	monkeypatch.setattr(ra, "tick_atelier", lambda doc, rec, flux=None: appels.append(doc["_id"]) or True)
 	monkeypatch.setattr(ra.scriptorium, "recettes_effectives", lambda lieu, fd, gd, sd: [])
 	monkeypatch.setattr(ra, "appro_leaves_lieu", lambda lieu_doc: [])
 

@@ -21,7 +21,7 @@ from db.config import get_doc, save_doc, delete_doc, find_docs
 from models import character_stats
 from utils.auth import get_current_user
 from utils.characters import get_selected_character, cuivre_to_purse, money_to_cuivre
-from utils.marche import debit_character, tick_atelier, appro_leaves_lieu
+from utils.marche import debit_character, tick_atelier, appro_leaves_lieu, flux_cite, persister_flux
 from utils import auberge
 from utils import recrutement
 from utils import montures
@@ -433,6 +433,11 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	passes = int(character_stats.AUBERGE_NUIT_PASSES_ATELIER)
 	magasins = 0
 	voisins = (find_docs({"type": "lieu", "lieu_parent": parent_id}) or []) if parent_id else []
+	# Flux de la cité ouvert UNE fois pour toutes les boutiques : ce que les PNJ prennent chez
+	# l'une revient en matière chez celles dont une recette en a l'usage. Le doc de la ville est
+	# lu une fois et sauvé au plus une fois — un `find_docs` de voisins par écoulement aurait
+	# coûté ~60 × N requêtes sur cet endpoint, déjà le plus lourd du jeu.
+	flux = flux_cite(get_doc(parent_id) if parent_id else None)
 	for boutique in voisins:
 		if not (boutique.get("stock_matieres") or boutique.get("stock_vente")
 				or appro_leaves_lieu(boutique)):
@@ -443,9 +448,10 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		recettes = scriptorium.recettes_effectives(boutique, find_docs, get_doc, save_doc)
 		change = False
 		for _ in range(passes):
-			change = tick_atelier(boutique, recettes) or change
+			change = tick_atelier(boutique, recettes, flux) or change
 		if change and save_doc(boutique) is not None:
 			magasins += 1
+	persister_flux(flux, save_doc)
 
 	# 4. Les recrues. ⚠️ On PÉRIME au lieu de supprimer : c'est ce qui fait traverser
 	#    `retirer_du_tableau`, le chokepoint qui sait qu'un ANCIEN COMPAGNON repasse `parti`

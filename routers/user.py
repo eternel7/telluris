@@ -21,7 +21,7 @@ from utils.characters import (
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
 	convertir_apres_achat, resolve_stock_vente, tick_atelier, lieu_buys, params_vente_lieu,
-	fiche_item_fields,
+	fiche_item_fields, flux_cite, persister_flux,
 	get_relation, relation_value, marchandage_bloque, appliquer_marchandage,
 	compter_transaction,
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
@@ -1859,13 +1859,18 @@ async def sell_item(
 	purse = credit_character(principal, prix)   # l'argent va au principal, l'objet quitte le porteur
 	porteur["inventaire"] = inventaire
 
-	# Le lieu absorbe l'objet acheté → matières → stock vendable (mute lieu_doc).
-	convertir_apres_achat(lieu_doc, item)
+	# Le lieu absorbe l'objet acheté → matières → stock vendable (mute lieu_doc). Le flux de la
+	# cité voyage avec le tick : ce que les PNJ prennent au rayon repart chez les ateliers qui
+	# en ont l'usage (None hors d'une ville → comportement d'avant).
+	cite_id = lieu_doc.get("lieu_parent")
+	flux = flux_cite(get_doc(cite_id) if cite_id else None)
+	convertir_apres_achat(lieu_doc, item, flux)
 
 	# Porteur d'abord (autoritatif : l'objet est retiré pour de bon → pas de double vente),
 	# puis le principal (monnaie, best-effort si compagnon). Même séquence bi-doc que drop.
 	_save_acteur(porteur, principal)
 	save_doc(lieu_doc)  # best-effort : le stock du lieu est une commodité monde
+	persister_flux(flux, save_doc)  # une écriture du doc cité, et seulement si le pool a bougé
 
 	porteurs = recrutement.porteurs_effectifs(principal, get_doc)
 	payload = _inventory_payload(principal)
@@ -1927,8 +1932,11 @@ async def buy_item(
 	# Tick marché à l'achat aussi (approvisionnement + production + écoulement PNJ), comme à la
 	# vente et à l'entrée du lieu — l'achat vient de retirer du stock à reconstituer. Un
 	# scriptorium y ajoute son petit lot de recettes virtuelles (sort/recette/carte).
-	tick_atelier(lieu_doc, scriptorium.recettes_effectives(lieu_doc, find_docs, get_doc, save_doc))
+	cite_id = lieu_doc.get("lieu_parent")
+	flux = flux_cite(get_doc(cite_id) if cite_id else None)
+	tick_atelier(lieu_doc, scriptorium.recettes_effectives(lieu_doc, find_docs, get_doc, save_doc), flux)
 	save_doc(lieu_doc)  # best-effort : décrément du stock monde
+	persister_flux(flux, save_doc)
 
 	payload = _inventory_payload(character)
 	_appliquer_fidelite(character, relation, payload)

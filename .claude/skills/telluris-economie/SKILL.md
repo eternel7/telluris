@@ -28,6 +28,8 @@ Entrée d'inventaire = **string legacy** `"item:xxx"` (poids = min) **ou objet**
 
 ⚠️ « Achetable » tient à **DEUX destinations dans `approvisionner`** (`stock_matieres` pour l'atelier, `stock_vente` pour le comptoir) — rien ne fait jamais passer une matière de l'un à l'autre, et la vitrine est regarnie **jusqu'au `stock_cible` et jamais au-dessus**, ce qui rend le comptoir neutre pour l'atelier. Épinglé par `tests/test_appro_comptoir.py`.
 
+⚠️ **Le seul transfert entre deux `lieu:*`, hors quête de transport** : le **flux de cité**. Une part `VENTE_PNJ_REDISTRIB` (0.5) de ce que les PNJ consomment est versée au pool `flux_marchand` du doc de la **ville**, d'où les ateliers dont une recette réclame cette matière la tirent en **réserve** à leur propre tick (`flux_cite` → `tick_atelier(…, flux)` → `persister_flux`). ⚠️ On puise **avant** d'écouler, on saute ce que le lieu produit, et `flux_cite` refuse tout doc non-`ville`. Épinglé par `tests/test_flux_pnj.py` — cf. CLAUDE.md § Flux de marchandises.
+
 ⚠️ **Deux exceptions, assumées** : `APPRO_DEBIT` à 0 ⇒ aucune livraison (`herbe`, récolte joueur seule) ; `matiere_item_id` rendant un id inexistant ⇒ fail-soft, consommable en production mais jamais vendu (`branche`, `rondin`…). ⚠️ Créer le doc item manquant suffirait à les mettre en vente **sans qu'on l'ait décidé**.
 
 ⚠️ Une clé matière **sous-catégorie** est résolue en `item:<sous_categorie>` par `matiere_item_id` : ce doc doit exister, sinon la matière est valorisée à vide. Quand l'item générique porte un autre id, utiliser la forme **`{"item": "item:XXX", "quantite": n}`**.
