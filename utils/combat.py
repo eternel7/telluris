@@ -550,6 +550,27 @@ def _occupied_at(combat_doc: dict, x: int, y: int) -> bool:
 	return (x, y) in _occupied_set(combat_doc)
 
 
+def _allie_echangeable(combat_doc: dict, x: int, y: int) -> dict | None:
+	"""L'acteur NON JOUABLE (monture, personne escortée) vivant sur (x,y), ou None.
+
+	⚠️ `jouable is False` STRICTEMENT : un joueur ordinaire n'a pas la clé, et un
+	`.get("jouable")` falsy rendrait tout le groupe échangeable. Un compagnon jouable
+	garde sa case — il a son propre tour pour s'en aller — et un monstre encore plus."""
+	for j in combat_doc["joueurs"]:
+		if (j.get("jouable") is False and j.get("currentPV", 1) > 0
+				and j["pos"]["x"] == x and j["pos"]["y"] == y):
+			return j
+	return None
+
+
+def _echange_possible(cells: list, a: dict, b: dict) -> bool:
+	"""Deux acteurs peuvent-ils PERMUTER leurs cases ? Chacun doit pouvoir TENIR sur celle
+	de l'autre — `_walkable` avec le vol de CELUI QUI ARRIVE, dans les deux sens. Un joueur
+	volant posé sur une falaise n'échange donc pas avec une monture qui l'y suivrait mal."""
+	return (_walkable(cells, b["pos"]["x"], b["pos"]["y"], _can_fly(a))
+			and _walkable(cells, a["pos"]["x"], a["pos"]["y"], _can_fly(b)))
+
+
 def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
 	"""AP consommés pour `cells_moved` cases : ceil(cells * actions_max / deplacement)."""
 	dep = max(1, actor.get("deplacement", 1))
@@ -2229,8 +2250,19 @@ def resolve_action(
 			return {"error": "Terrain infranchissable."}
 		if not nav_allows(grid.get("nav", {}), joueur["pos"]["x"], joueur["pos"]["y"], dx, dy):
 			return {"error": "Direction bloquée."}
+		# Case occupée par un acteur NON JOUABLE (monture, personne escortée) : il n'a ni tour
+		# ni budget de déplacement, il enfermerait donc le joueur pour tout le combat. On
+		# ÉCHANGE les deux places, au prix d'un pas ordinaire. La règle : chacun doit pouvoir
+		# tenir sur la case de l'autre (la jambe ALLER est la garde de terrain ci-dessus).
+		# ⚠️ Aucun second contrôle `nav` pour la direction retour : `get_final_mask` est
+		# bidirectionnel (il vérifie la source ET la cible), l'appel ci-dessus la couvre déjà.
+		echange = None
 		if _occupied_at(combat_doc, nx, ny):
-			return {"error": "Case occupée."}
+			echange = _allie_echangeable(combat_doc, nx, ny)
+			if echange is None:
+				return {"error": "Case occupée."}
+			if not _echange_possible(cells, joueur, echange):
+				return {"error": f"{echange['nom']} ne peut pas tenir sur votre case."}
 		if joueur["cells_moved"] >= joueur.get("deplacement", 1):
 			return {"error": "Budget de déplacement épuisé."}
 		projected = (joueur["attaques"] + joueur.get("penalites", 0)
@@ -2238,15 +2270,25 @@ def resolve_action(
 		if projected > joueur["actions_max"]:
 			return {"error": "Plus d'actions pour se déplacer."}
 
+		# ⚠️ Dicts NEUFS des deux côtés : le journal copie l'état par acteur, une référence
+		# partagée ferait dériver une ligne déjà écrite.
+		ancienne = {"x": joueur["pos"]["x"], "y": joueur["pos"]["y"]}
 		joueur["pos"] = {"x": nx, "y": ny}
+		if echange is not None:
+			echange["pos"] = ancienne
 		joueur["cells_moved"] += 1
 		_refresh_actions(joueur)
 		combat_doc["log"].append(_avec_etat({
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "move",
-			"texte": f"{joueur['nom']} se déplace en [{nx},{ny}].",
-		}, joueur))
+			"texte": (f"{joueur['nom']} échange sa place avec {echange['nom']}."
+					  if echange is not None
+					  else f"{joueur['nom']} se déplace en [{nx},{ny}]."),
+		# ⚠️ L'échangé est passé LUI AUSSI : il vient de bouger. Absent de `etat`, son jeton
+		# suivrait l'état final tout de suite pendant que celui du joueur attend la révélation
+		# du journal — les deux corps ne glisseraient pas ensemble. (`None` est ignoré.)
+		}, joueur, echange))
 		result = {"moved": True, "pos": joueur["pos"]}
 
 	elif action_type == "tourner":

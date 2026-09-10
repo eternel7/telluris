@@ -36,6 +36,18 @@ function caseFranchissable(cells, x, y, volant) {
 	return !!volant || row[x] !== TERRAIN_FALAISE;
 }
 
+// Deux acteurs peuvent-ils PERMUTER leurs cases ? Chacun doit pouvoir TENIR sur celle de
+// l'autre — règle du COMBAT (`caseFranchissable`), donc symétrique par construction : un
+// joueur volant posé sur une falaise n'échange pas avec une monture qui l'y suivrait mal.
+// `a` / `b` : { x, y, volant }. Miroir de `combat._echange_possible` (utils/combat.py).
+//
+// ⚠️ Rien à vérifier du côté `nav` : `getFinalMask` est bidirectionnel, le contrôle du pas
+// aller couvre déjà la direction retour.
+function echangePossible(cells, a, b) {
+	return caseFranchissable(cells, b.x, b.y, a.volant)
+		&& caseFranchissable(cells, a.x, a.y, b.volant);
+}
+
 // Le pas (dx,dy) depuis (x,y) est-il permis EN EXPLORATION ?
 //
 // ⚠️ Rend un MOTIF, pas un booléen. Toute la valeur du mode test est de répondre à
