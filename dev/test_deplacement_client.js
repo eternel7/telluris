@@ -74,6 +74,37 @@ t('les deux règles DIVERGENT bien sur le terrain difficile — c’est tout l�
 	assert.strictEqual(caseFranchissable(CELLS, 1, 1), true);
 });
 
+console.log('\n── echangePossible : chacun doit tenir sur la case de l’autre ──────────────');
+
+// Miroir de `combat._echange_possible`. Ferme la classe de bug « la monture se retrouve
+// sur une case où elle ne peut pas être » : une monture n'a NI tour NI budget, elle ne
+// pourrait jamais en repartir.
+t('deux cases de sol ordinaire : l’échange passe', () => {
+	assert.strictEqual(echangePossible(CELLS,
+		{ x: 0, y: 0 }, { x: 1, y: 0 }), true);
+});
+
+t('une falaise sous l’un des deux refuse l’échange, DANS LES DEUX SENS', () => {
+	const sol = { x: 0, y: 0 };
+	const falaise = { x: 2, y: 1, volant: true };   // seul un volant peut y être
+	assert.strictEqual(echangePossible(CELLS, sol, falaise), false);
+	assert.strictEqual(echangePossible(CELLS, falaise, sol), false, 'symétrique');
+});
+
+t('deux volants échangent par-dessus la falaise', () => {
+	assert.strictEqual(echangePossible(CELLS,
+		{ x: 2, y: 1, volant: true }, { x: 0, y: 0, volant: true }), true);
+});
+
+t('le terrain difficile ne gêne pas (règle de COMBAT, pas d’exploration)', () => {
+	assert.strictEqual(echangePossible(CELLS, { x: 1, y: 1 }, { x: 0, y: 1 }), true);
+});
+
+t('un mur reste infranchissable, même en vol', () => {
+	assert.strictEqual(echangePossible(CELLS,
+		{ x: 3, y: 1, volant: true }, { x: 4, y: 1, volant: true }), false);
+});
+
 console.log('\n── pasAutoriseLocal : le MOTIF, pas un booléen ─────────────────────────────');
 
 t('un pas ordinaire est autorisé', () => {

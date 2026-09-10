@@ -2092,6 +2092,18 @@ function cellOccupied(x, y) {
 	if (state.joueurs.some(p => (p.currentPV || 0) > 0 && p.pos && p.pos.x === x && p.pos.y === y)) return true;
 	return state.monstres.some(m => m.vivant && m.pos && m.pos.x === x && m.pos.y === y);
 }
+// L'occupant de (nx,ny) est-il un allié NON JOUABLE (monture, personne escortée) avec qui
+// `j` peut ÉCHANGER sa place ? Miroir serveur de `_allie_echangeable` + `_echange_possible`.
+// ⚠️ `jouable === false` STRICTEMENT : un joueur ordinaire n'a pas la clé, et un test falsy
+// rendrait tout le groupe échangeable. Un compagnon jouable garde sa case (il a son tour).
+function occupantEchangeable(j, nx, ny) {
+	const a = state.joueurs.find(p => p.jouable === false && (p.currentPV || 0) > 0
+		&& p.pos && p.pos.x === nx && p.pos.y === ny);
+	if (!a) return false;
+	return echangePossible((GRID || {}).cells,
+		{ x: j.pos.x, y: j.pos.y, volant: !!j.volant },
+		{ x: nx, y: ny, volant: !!a.volant });
+}
 function moveApUsedFor(j, cells) {
 	const dep = Math.max(1, j.deplacement || 1);
 	return Math.ceil(cells * j.actions_max / dep);
@@ -2110,7 +2122,11 @@ function dirAvailable(data, sdx, sdy) {
 	const j = activePlayer(data);
 	const [wx, wy] = screenToWorld(sdx, sdy);
 	const nx = j.pos.x + wx, ny = j.pos.y + wy;
-	return cellWalkable(nx, ny) && !cellOccupied(nx, ny)
+	// Case occupée : la flèche reste ouverte si l'occupant est un allié non jouable
+	// échangeable — la jambe ALLER est déjà couverte par `cellWalkable`, `occupantEchangeable`
+	// n'ajoute que la jambe RETOUR (l'allié doit tenir sur la case du joueur).
+	return cellWalkable(nx, ny)
+		&& (!cellOccupied(nx, ny) || occupantEchangeable(j, nx, ny))
 		&& navAllows(GRID.nav, j.pos.x, j.pos.y, wx, wy);
 }
 
