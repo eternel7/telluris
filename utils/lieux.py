@@ -437,7 +437,6 @@ async def update_cells(
 	
 	if cells_info :
 		cells = cells_info["cells"]
-		nav = cells_info["nav"]
 		lieu_id = cells_info["_id"]
 		# Redimensionnement de la grille (éditeur de carte). ⚠️ Contrôlé AVANT la moindre lecture :
 		# une taille incohérente doit être refusée sans avoir touché à la base. Clé ABSENTE ⇒ champ
@@ -447,7 +446,10 @@ async def update_cells(
 		lieu_doc = get_doc(lieu_id)
 		if lieu_doc:
 			lieu_doc["cells"] = cells
-			lieu_doc["nav"] = nav
+			# `nav` ABSENT ⇒ jamais écrit : le ✔ Appliquer de la carte 🔍 n'envoie que `cells`.
+			# Le pinceau, lui, l'envoie toujours — son chemin est inchangé.
+			if "nav" in cells_info:
+				lieu_doc["nav"] = cells_info["nav"]
 			if dimensions:
 				lieu_doc["dimensions"] = dimensions
 			# Métadonnées battle map (optionnelles) : tags + catégorie pour la sélection pondérée.
@@ -483,7 +485,8 @@ async def get_grille_proposee(
 	"""Propose une grille de terrain lue sur l'IMAGE du lieu (admin, éditeur de carte).
 
 	⚠️ **N'ÉCRIT RIEN.** L'endpoint calcule et rend ; c'est au client d'en faire un aperçu.
-	Le seul chemin vers la base reste `update_cells` (le pinceau) et la carte d'import.
+	Le seul chemin vers la base reste `update_cells` (le pinceau, ou ✔ Appliquer de l'éditeur
+	qui n'envoie que `cells`) et la carte d'import.
 
 	⚠️ Import de Pillow PARESSEUX, dans le corps : `tests/` importe `utils/*` → `routers/*`,
 	et Pillow n'est pas dans les dépendances de collecte locale (CLAUDE.md § Running tests).

@@ -745,6 +745,8 @@
 	   navigateur (même piège que .aub-ecrivain-ligne dans play_town). */
 	#dim-card[hidden], #dim-attente[hidden] { display: none; }
 	#grille-card[hidden], #grille-attente[hidden] { display: none; }
+	/* Une ligne de la matrice par ligne du bloc-notes : défilement horizontal plutôt que retour. */
+	.grille-json { min-height: 180px; margin-bottom: 6px; white-space: pre; overflow: auto; cursor: text; }
 	/* Outil de repositionnement : le bouton armé et sa consigne. */
 	.lj-repos-on { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
 	.lj-repos-hint {
@@ -1098,9 +1100,13 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			<div id="grille-attente" hidden>
 				<div class="dim-warn" id="grille-warn">⚠️ Aperçu seul : <b>rien n'est enregistré</b>.
 					Le pinceau continue d'écrire la grille réelle, pas celle-ci. Pour l'adopter,
-					copier le JSON et passer par la carte d'import de /admin.</div>
+					<b>✔ Appliquer</b> — qui n'écrit que le champ <code>cells</code>.</div>
 				<div class="nav-info" id="grille-comptes" style="margin-bottom:8px;"></div>
-				<button class="btn" id="grille-copier-btn" style="margin-bottom:6px;">📋 Copier le JSON</button>
+				<!-- Bloc-notes en LECTURE SEULE : se sélectionne et se copie à la main, y compris
+				     en HTTP sur une IP locale, où `navigator.clipboard` n'existe pas. -->
+				<textarea class="lj-area grille-json" id="grille-json" readonly wrap="off"
+					spellcheck="false" aria-label="JSON de la grille proposée"></textarea>
+				<button class="btn" id="grille-appliquer-btn" style="margin-bottom:6px;">✔ Appliquer</button>
 				<button class="btn danger" id="grille-fermer-btn">✕ Fermer l'aperçu</button>
 			</div>
 			<div class="dim-msg" id="grille-msg"></div>
@@ -3979,14 +3985,35 @@ function annulerRedimensionnement() {
 // JS : une règle de terrain écrite deux fois finit par diverger, et c'est le genre d'écart que
 // personne ne voit avant d'y buter en jeu.
 //
-// ⚠️ **CETTE CARTE N'ÉCRIT RIEN.** Elle remplit `grilleProposee`, que ni `sendGrid` ni
+// ⚠️ **L'APERÇU N'ÉCRIT RIEN.** Il remplit `grilleProposee`, que ni `sendGrid` ni
 // `scheduleGridSend` ne lisent. Adopter la proposition demande un geste manuel explicite :
-// copier le JSON et passer par la carte d'import de /admin.
+// ✔ Appliquer (champ `cells` seul), ou copier le JSON du bloc-notes vers la carte d'import.
 const grilleCard	  = document.getElementById('grille-card');
 const grilleAttenteEl = document.getElementById('grille-attente');
 const grilleComptesEl = document.getElementById('grille-comptes');
 const grilleMsgEl	  = document.getElementById('grille-msg');
+const grilleJsonEl	  = document.getElementById('grille-json');
 const grilleProposerBtn = document.getElementById('grille-proposer-btn');
+
+// JSON valide, mais UNE ligne de la matrice par ligne : `JSON.stringify(…, null, 2)` poserait
+// une case par ligne, soit des milliers de lignes illisibles pour une grille de 40×30.
+function _grilleJson(cells) {
+	const lignes = cells.map(r => '    ' + JSON.stringify(r));
+	return '{\n  "dimensions": ' + JSON.stringify({ x: cols, y: rows })
+		+ ',\n  "cells": [\n' + lignes.join(',\n') + '\n  ]\n}';
+}
+
+// Combien de cases changeraient si l'admin adoptait la proposition — la seule chose qu'il ne
+// peut pas estimer à l'œil. Partagé par le bandeau de comptes et la confirmation de ✔ Appliquer.
+function _grilleDifferences() {
+	let n = 0;
+	for (let y = 0; y < rows; y++) {
+		for (let x = 0; x < cols; x++) {
+			if (((grilleProposee || [])[y] || [])[x] !== (grid[y] || [])[x]) n++;
+		}
+	}
+	return n;
+}
 
 function _grilleMsg(texte, erreur) {
 	if (!grilleMsgEl) return;
@@ -4039,20 +4066,16 @@ async function proposerGrilleDepuisImage() {
 		}
 		// Combien de cases changeraient si l'admin adoptait la proposition — la seule chose qu'il
 		// ne peut pas estimer à l'œil, et celle qui lui dit si le geste vaut la peine.
-		let differentes = 0;
-		for (let y = 0; y < rows; y++) {
-			for (let x = 0; x < cols; x++) {
-				if ((grilleProposee[y] || [])[x] !== (grid[y] || [])[x]) differentes++;
-			}
-		}
-		parts.push(`— ${differentes} case(s) sur ${total} différeraient de la grille en base`);
+		parts.push(`— ${_grilleDifferences()} case(s) sur ${total} différeraient de la grille en base`);
 		if (grilleComptesEl) grilleComptesEl.textContent = parts.join(' · ');
+		if (grilleJsonEl) { grilleJsonEl.value = _grilleJson(grilleProposee); grilleJsonEl.scrollTop = 0; }
 		_grilleMaj();
 		renderGrid();
 		_grilleMsg('✓ Aperçu affiché (liseré cyan) — c\'est la PROPOSITION que montre la carte, '
 			+ 'pas la grille en base.', false);
 	} catch (err) {
 		grilleProposee = null;
+		if (grilleJsonEl) grilleJsonEl.value = '';
 		_grilleMaj();
 		renderGrid();
 		_grilleMsg(`✗ ${err.message}`, true);
@@ -4061,30 +4084,63 @@ async function proposerGrilleDepuisImage() {
 
 function fermerGrilleProposee() {
 	grilleProposee = null;
+	if (grilleJsonEl) grilleJsonEl.value = '';
 	_grilleMaj();
 	renderGrid();
 	_grilleMsg('', false);
 }
 
-async function copierGrilleProposee() {
-	if (!grilleProposee) return;
-	const charge = JSON.stringify({ dimensions: { x: cols, y: rows }, cells: grilleProposee });
+// ✔ Appliquer — écrit la proposition dans `cells`, et RIEN d'autre : ni `nav`, ni `dimensions`,
+// ni les métadonnées battle map (clés absentes ⇒ jamais écrites par `update_cells`). Le bouton
+// vit dans #grille-attente : il n'existe à l'écran que tant qu'un aperçu est affiché.
+// ⚠️ `dimensions` n'est pas envoyé : la proposition est lue à `cols`×`rows`, la taille annoncée
+// par le doc, et un redimensionnement en aperçu efface la proposition (`_grilleMaj` y bloque 🔍).
+async function appliquerGrilleProposee() {
+	if (!grilleProposee || !currentLocId || redimEnAttente) return;
+	const differentes = _grilleDifferences();
+	if (!confirm(`Remplacer la grille en base par la proposition ?\n\n`
+		+ `${differentes} case(s) sur ${cols * rows} changeront. Seul le champ cells est écrit.`)) return;
+	const lieuId = currentLocId;
+	const cellules = grilleProposee.map(l => l.slice());
+	const ancienne = grid;
+	// ⚠️ `grid` est remplacé AVANT l'envoi : un auto-envoi du pinceau encore en attente (800 ms)
+	// qui partirait pendant la requête enverrait sinon l'ANCIENNE grille et écraserait celle-ci.
+	grid = cellules;
+	if (grilleAppliquerBtn) grilleAppliquerBtn.disabled = true;
+	_grilleMsg('Enregistrement…', false);
 	try {
-		await navigator.clipboard.writeText(charge);
-		_grilleMsg('✓ JSON copié dans le presse-papier.', false);
+		const res = await fetch('/api/update_cells', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ _id: lieuId, cells: cellules }),
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			throw new Error(`Grille non enregistrée (${err.detail || res.status})`);
+		}
+		const lieuData = await res.json();
+		// ⚠️ Lieu changé pendant la requête : le rechargement a déjà posé SA grille et SON `_rev`.
+		if (currentLocId !== lieuId) return;
+		currentRev = lieuData._rev;
+		fermerGrilleProposee();
+		updateLegend();
+		_grilleMsg(`✓ Grille appliquée — ${differentes} case(s) modifiée(s).`, false);
+		setStatus(`Lieu <span>${_escHtml(lieuId)}</span> : grille appliquée depuis l'image - ${currentRev}.`);
 	} catch (err) {
-		// `navigator.clipboard` exige un contexte sécurisé : en HTTP sur une IP locale, il n'existe
-		// pas. Un échec muet laisserait croire à une copie réussie.
-		_grilleMsg('✗ Copie refusée par le navigateur (contexte non sécurisé). '
-			+ 'Le JSON reste disponible via dev/gen_grille_image.py.', true);
+		if (currentLocId !== lieuId) return;
+		grid = ancienne;
+		renderGrid();
+		_grilleMsg(`✗ ${err.message}`, true);
+	} finally {
+		if (grilleAppliquerBtn) grilleAppliquerBtn.disabled = false;
 	}
 }
 
 if (grilleProposerBtn) grilleProposerBtn.addEventListener('click', proposerGrilleDepuisImage);
 const grilleFermerBtn = document.getElementById('grille-fermer-btn');
 if (grilleFermerBtn) grilleFermerBtn.addEventListener('click', fermerGrilleProposee);
-const grilleCopierBtn = document.getElementById('grille-copier-btn');
-if (grilleCopierBtn) grilleCopierBtn.addEventListener('click', copierGrilleProposee);
+const grilleAppliquerBtn = document.getElementById('grille-appliquer-btn');
+if (grilleAppliquerBtn) grilleAppliquerBtn.addEventListener('click', appliquerGrilleProposee);
 // ── LIEUX : repositionnement d'une porte ───────────────────────────────────
 // Déplacer une connexion, c'est réécrire la `pos` du nœud QUI PORTE LE LIEU COURANT — la case
 // que le joueur doit occuper pour voir le lien (get_lieu_links est scopé à sa case). La saisir
