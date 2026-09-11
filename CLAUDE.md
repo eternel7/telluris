@@ -93,6 +93,7 @@ utils/
   focalisation.py        # 🧭 lieu (BFS) / 🎯 quête (biais probabiliste)
   enseignes.py           # noms d'enseigne (pur) : tournures par métier × toponymes de cité
   capacites.py           # capacités d'un lieu (pur) : catalogue taverne/étable/scriptorium/recrutement/guilde
+  grille_image.py        # grille de terrain depuis l'image d'une carte (pur) : indices auto-calibrés → 0/1/5
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil
   pnj.py                 # PNJ de lieu (pur) : tirage de présence, arbre de dialogue, services
   acces.py               # barrière d'accès à un lieu gardée par un PNJ (pur) : conditions, laissez-passer, cycle
@@ -131,6 +132,7 @@ dev/
   gen_lutecia.py         # donne ses zones d'influence à la capitale (urbain, Seine, faubourgs, campagne)
   lint_dialogues.py      # CLI de contrôle des dialogues PNJ (→ utils/lint_dialogues.py)
   purge_quetes_acceptees.py # purge ONE-SHOT des docs `quete:*` générés acceptés (poids mort)
+  gen_grille_image.py    # propose les `cells` d'un lieu depuis son image (Pillow) + aperçu PNG + concordance
   check_js.js            # contrôle SYNTAXIQUE du JS des templates ET de templates/scripts/ (node)
   test_slots_client.js   # tests d'EXÉCUTION du JS de la barre de slots (node, sans dépendance)
   test_deplacement_client.js # tests d'EXÉCUTION des règles de marche (scripts/deplacement.js)
