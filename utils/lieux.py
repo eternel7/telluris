@@ -463,3 +463,109 @@ async def update_cells(
 				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — rechargez et réessayez.")
 			return lieu_doc
 	raise HTTPException(status_code=404, detail="Incorrect location grid info")
+
+
+# Cascade des dossiers d'images d'un lieu. ⚠️ MÊME ORDRE que le client
+# (`admin_map_editor.html`, chargement du lieu) et que `dev/gen_grille_image.py` : un doc ne
+# porte qu'un NOM de fichier, jamais son dossier. Diverger d'ici ferait proposer une grille
+# calculée sur une image que l'éditeur n'affiche pas.
+GRILLE_DOSSIERS_IMAGE = ("templates/resources/towns", "templates/resources/battle_maps",
+	"templates/resources/maps")
+
+
+@lieu_router.get("/lieu/{lieu_id}/grille_proposee")
+async def get_grille_proposee(
+	response: Response,
+	current_user: Annotated[User, Depends(get_current_user)],
+	lieu_id: str,
+	cols: int = 0,
+	rows: int = 0):
+	"""Propose une grille de terrain lue sur l'IMAGE du lieu (admin, éditeur de carte).
+
+	⚠️ **N'ÉCRIT RIEN.** L'endpoint calcule et rend ; c'est au client d'en faire un aperçu.
+	Le seul chemin vers la base reste `update_cells` (le pinceau) et la carte d'import.
+
+	⚠️ Import de Pillow PARESSEUX, dans le corps : `tests/` importe `utils/*` → `routers/*`,
+	et Pillow n'est pas dans les dépendances de collecte locale (CLAUDE.md § Running tests).
+	Un import en tête de module ferait échouer la COLLECTE de toute la suite de tests purs —
+	même raison, même remède que `routers/animations._dimensions`.
+
+	La classification vit dans `utils/grille_image.py`, sans dépendance et testée ; ici on ne
+	fait que lire des pixels. `cols`/`rows` par défaut : les `dimensions` du doc.
+	"""
+	if (not current_user or
+		"admin" not in current_user or
+		current_user["admin"] != 1):
+		raise HTTPException(status_code=400, detail="Invalid session credentials")
+
+	lieu_doc = get_doc(lieu_id)
+	if not lieu_doc:
+		raise HTTPException(status_code=404, detail=f"Lieu inconnu : {lieu_id}")
+	nom_image = lieu_doc.get("image")
+	if not nom_image:
+		raise HTTPException(status_code=404,
+			detail="Ce lieu ne porte pas d'image : il n'y a rien à analyser.")
+
+	dimensions = lieu_doc.get("dimensions") or {}
+	try:
+		cols = int(cols) or int(dimensions.get("x") or 0)
+		rows = int(rows) or int(dimensions.get("y") or 0)
+	except (TypeError, ValueError):
+		raise HTTPException(status_code=422, detail="`cols` et `rows` doivent être des entiers.")
+	if cols < 1 or rows < 1:
+		raise HTTPException(status_code=422,
+			detail="Taille de grille inconnue : ce lieu n'a pas de `dimensions`.")
+
+	chemin = None
+	for dossier in GRILLE_DOSSIERS_IMAGE:
+		candidat = os.path.join(dossier, nom_image)
+		if os.path.exists(candidat):
+			chemin = candidat
+			break
+	if not chemin:
+		raise HTTPException(status_code=404, detail=f"Image introuvable sur le disque : {nom_image}")
+
+	from PIL import Image, ImageFilter
+	from utils import grille_image
+	try:
+		with Image.open(chemin) as img:
+			img.load()
+			# ⚠️ `Image.BOX` et pas `BILINEAR` : BOX est une moyenne d'AIRE, donc chaque pixel du
+			# résultat EST la couleur moyenne exacte de sa case. Un rééchantillonnage interpolant
+			# mélangerait les cases voisines et étalerait la rivière sur ses berges.
+			# ⚠️ Les contours se mesurent à PLEINE RÉSOLUTION puis se réduisent : réduire d'abord
+			# effacerait justement ce qu'on cherche à compter.
+			couleurs = _pixels_a_plat(img.convert("RGB").resize((cols, rows), Image.BOX))
+			contours = _pixels_a_plat(img.convert("L").filter(ImageFilter.FIND_EDGES)
+				.resize((cols, rows), Image.BOX))
+	except HTTPException:
+		raise
+	except Exception:
+		raise HTTPException(status_code=422, detail=f"Image illisible : {nom_image}")
+
+	cells = grille_image.lisser_majorite(
+		grille_image.grille_depuis_echantillons(couleurs, contours, cols, rows))
+
+	peinte = lieu_doc.get("cells")
+	rapport = None
+	if peinte and len(peinte) == rows and all(len(ligne) == cols for ligne in peinte):
+		rapport = grille_image.concordance(cells, peinte)
+		rapport.pop("ecarts", None)   # la liste complète ne sert qu'au CLI ; inutile de la servir
+	return {
+		"cells": cells,
+		"dimensions": {"x": cols, "y": rows},
+		"image": nom_image,
+		"comptes": grille_image.comptes(cells),
+		"concordance": rapport,
+	}
+
+
+def _pixels_a_plat(img) -> list:
+	"""Les pixels d'une image, à plat, ligne par ligne.
+
+	⚠️ `getdata()` est déprécié depuis Pillow 12 mais `get_flattened_data()` n'existe pas
+	avant : le conteneur installe la dernière version au démarrage (`docker-compose.yml`) et
+	rien ne l'épingle, donc les deux âges de Pillow doivent passer."""
+	if hasattr(img, "get_flattened_data"):
+		return list(img.get_flattened_data())
+	return list(img.getdata())

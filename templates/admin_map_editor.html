@@ -744,6 +744,7 @@
 	/* ⚠️ Le `display:flex`/`block` d'auteur l'emporterait sur le [hidden] de la feuille du
 	   navigateur (même piège que .aub-ecrivain-ligne dans play_town). */
 	#dim-card[hidden], #dim-attente[hidden] { display: none; }
+	#grille-card[hidden], #grille-attente[hidden] { display: none; }
 	/* Outil de repositionnement : le bouton armé et sa consigne. */
 	.lj-repos-on { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
 	.lj-repos-hint {
@@ -1083,6 +1084,27 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			</div>
 			<div class="dim-msg" id="dim-msg"></div>
 		</div>
+		<!-- Proposition de grille lue sur l'IMAGE du lieu. Hors des sous-panneaux de
+		     #mode-select, comme 📐 : ce que dit l'image ne dépend d'aucun mode d'édition.
+		     ⚠️ APERÇU SEUL — la proposition ne touche JAMAIS `grid` et rien ne part en base. -->
+		<div class="card" id="grille-card" hidden>
+			<div class="card-title">🔍 Grille depuis l'image</div>
+			<div class="nav-info" style="margin-bottom:8px;">
+				Lit l'image du lieu et propose un terrain : <b>0</b> bâti, <b>1</b> libre,
+				<b>5</b> eau. Une <b>proposition</b>, pas une vérité — une case de 16 px contient
+				souvent un toit ET une ruelle.
+			</div>
+			<button class="btn" id="grille-proposer-btn">🔍 Proposer depuis l'image</button>
+			<div id="grille-attente" hidden>
+				<div class="dim-warn" id="grille-warn">⚠️ Aperçu seul : <b>rien n'est enregistré</b>.
+					Le pinceau continue d'écrire la grille réelle, pas celle-ci. Pour l'adopter,
+					copier le JSON et passer par la carte d'import de /admin.</div>
+				<div class="nav-info" id="grille-comptes" style="margin-bottom:8px;"></div>
+				<button class="btn" id="grille-copier-btn" style="margin-bottom:6px;">📋 Copier le JSON</button>
+				<button class="btn danger" id="grille-fermer-btn">✕ Fermer l'aperçu</button>
+			</div>
+			<div class="dim-msg" id="grille-msg"></div>
+		</div>
 
 		</div>
 	</div>
@@ -1228,6 +1250,12 @@ let nav = {};		 // { "x,y": bitmask }
 let editMode = 'terrain'; // 'terrain' | 'nav'
 let navMask = 0;	  // bitmask actuellement sélectionné dans le panneau nav
 let navSelectedCell = null; // {cx,cy} cellule nav sélectionnée
+// Grille proposée par lecture de l'image (carte 🔍). ⚠️ VARIABLE SÉPARÉE, et ce n'est PAS
+// cosmétique : verser la proposition dans `grid` la ferait partir en base au premier coup de
+// pinceau suivant — `paint()` appelle `scheduleGridSend()`, qui envoie la matrice ENTIÈRE. On
+// écraserait 4 128 cases en croyant en corriger une. Ici, la panne est impossible, pas
+// seulement improbable : aucun écrivain ne lit cette variable.
+let grilleProposee = null;   // [y][x] | null
 
 // Color map for values
 const VALUE_COLORS = {
@@ -1586,6 +1614,9 @@ lieuSelect.addEventListener('change', async (e) => {
 		// lieu PRÉCÉDENT, et la branche « image introuvable » de mapImg.onerror ne la rouvrira
 		// jamais — sans grille chargée, il n'y a rien à redimensionner. `_dimMaj()` la rouvre.
 		if (dimCard) dimCard.hidden = true;
+		// Même bascule pour la carte 🔍, et même raison : sans image chargée il n'y a rien à lire,
+		// et la branche `mapImg.onerror` ne la rouvrira jamais. `_grilleMaj()` la rouvre.
+		if (grilleCard) grilleCard.hidden = true;
 		imgLoaded = false;
 		mapImg.removeAttribute('src');
 		const urlTowns = `{{ url_for('towns', path='') }}${lieuData.image}`;
@@ -1632,6 +1663,10 @@ lieuSelect.addEventListener('change', async (e) => {
 			// ici, et le laisser posé verrouillerait l'auto-sauvegarde du lieu SUIVANT.
 			redimEnAttente = null;
 			_dimMsg('', false);
+			// Même raison pour la proposition de grille : elle a été lue sur l'image PRÉCÉDENTE.
+			// La laisser affichée ferait juger la carte d'à côté sur le calque de celle d'avant.
+			grilleProposee = null;
+			_grilleMsg('', false);
 			canvas.style.cursor = '';
 			renderLieuJsonOverlay();   // changer de lieu ferme l'éditeur : ses docs ne sont plus les bons
 			lieuxDocCache = {};
@@ -1644,6 +1679,7 @@ lieuSelect.addEventListener('change', async (e) => {
 				setStatus(`Lieu <span>${lieuData.label}</span> (${cols}×${rows}) chargé - ${currentRev}.`);
 				updateLegend();
 				_dimMaj();
+				_grilleMaj();
 				// ⚠️ `chargerLieu` remet à zéro grid/nav/cols/rows/lieuxConnections sans rien savoir
 				// du mode test : sans ce rappel, le jeton resterait à des coordonnées périmées sur
 				// une carte d'une autre taille. Il se pose à l'arrivée de la porte, sinon re-tire.
@@ -1774,8 +1810,14 @@ function renderGrid() {
 	const showRepos   = (showLieux && (!!lieuxRepos || cxVisee || !!ptVisee));
 
 	// Draw cell fills
+	// ⚠️ Pendant un aperçu, on peint la PROPOSITION À LA PLACE du terrain réel, jamais par-dessus.
+	// Par-dessus ne marchait pas : la valeur 1 est TRANSPARENTE dans cette palette (`valColor`
+	// rend null), donc une case réellement 0 que la proposition dit « libre » restait noire —
+	// l'aperçu montrait un mélange des deux grilles en se donnant pour la proposition.
+	// ⚠️ Lecture seule : `grilleProposee` n'est écrite nulle part, `sendGrid` n'envoie que `grid`.
+	const sourcePeinture = (grilleProposee && showTerrain) ? grilleProposee : grid;
 	if (showTerrain || showRepos) for (let y = 0; y < rows; y++) {
-		const ligneY = grid[y] || [];
+		const ligneY = sourcePeinture[y] || [];
 		for (let x = 0; x < cols; x++) {
 			const v = ligneY[x];
 			if (v === undefined) continue;   // `dimensions` plus grand que `cells` : rien à peindre
@@ -1796,6 +1838,20 @@ function renderGrid() {
 				if (!_caseAccessible(x, y)) ctx.fillRect(x * cw, y * ch, cw, ch);
 			}
 		}
+	}
+
+	// Liseré du canvas pendant un aperçu : le seul repère qui dise, sans rien masquer, que ce
+	// qu'on regarde n'est PAS la grille en base.
+	// ⚠️ Un liseré par case différente avait été essayé et retiré après l'avoir vu rendu : sur
+	// Auxerre, 991 cases sur 4 128 diffèrent, soit un quart de la carte entourée de cyan. Le
+	// compte de ces cases est une information, leur dessin était du bruit — il est donc donné
+	// en texte, sous le bouton.
+	if (grilleProposee && showTerrain) {
+		ctx.save();
+		ctx.strokeStyle = 'rgba(90,220,235,0.9)';
+		ctx.lineWidth = 4;
+		ctx.strokeRect(2, 2, W - 4, H - 4);
+		ctx.restore();
 	}
 
 	// Draw grid lines
@@ -3812,6 +3868,11 @@ function appliquerRedimensionnement() {
 	renderZoneProfilWeights();
 	renderLieuxConnList();
 	_dimMaj();
+	// ⚠️ Un aperçu de grille survivrait à un redimensionnement sans y survivre VRAIMENT : il a
+	// été lu à l'ancienne taille, ses lignes n'ont plus la bonne longueur et le calque se
+	// décalerait d'une case sur deux. On le referme plutôt que de le laisser mentir.
+	grilleProposee = null;
+	_grilleMaj();
 	let avert = deformees.length
 		? ` ⚠️ ${deformees.length} zone(s) tournée(s) déformée(s) par l'échelle inégale : à revoir à la main.`
 		: '';
@@ -3891,6 +3952,7 @@ async function enregistrerRedimensionnement() {
 		renderLieuxConnList();
 		renderZoneList();
 		_dimMaj();
+		_grilleMaj();   // le 💾 lève `redimEnAttente` : le bouton 🔍 redevient cliquable
 		_dimMsg(`✓ Enregistré — ${rapport.join(', ')}.`, portesKo.length > 0);
 		setStatus(`Lieu <span>${_escHtml(currentLocId)}</span> redimensionné en ${cols}×${rows} - ${currentRev}.`);
 	} catch (err) {
@@ -3909,6 +3971,120 @@ function annulerRedimensionnement() {
 	_dimMsg('Rechargement…', false);
 	lieuSelect.dispatchEvent(new Event('change'));
 }
+
+
+// ── GRILLE DEPUIS L'IMAGE : proposition en aperçu ──────────────────────────
+// Le serveur lit les pixels (`GET /api/lieu/{id}/grille_proposee`) et rend une matrice ; la
+// classification vit dans `utils/grille_image.py`, module PUR et testé. Rien n'est recopié en
+// JS : une règle de terrain écrite deux fois finit par diverger, et c'est le genre d'écart que
+// personne ne voit avant d'y buter en jeu.
+//
+// ⚠️ **CETTE CARTE N'ÉCRIT RIEN.** Elle remplit `grilleProposee`, que ni `sendGrid` ni
+// `scheduleGridSend` ne lisent. Adopter la proposition demande un geste manuel explicite :
+// copier le JSON et passer par la carte d'import de /admin.
+const grilleCard	  = document.getElementById('grille-card');
+const grilleAttenteEl = document.getElementById('grille-attente');
+const grilleComptesEl = document.getElementById('grille-comptes');
+const grilleMsgEl	  = document.getElementById('grille-msg');
+const grilleProposerBtn = document.getElementById('grille-proposer-btn');
+
+function _grilleMsg(texte, erreur) {
+	if (!grilleMsgEl) return;
+	grilleMsgEl.textContent = texte || '';
+	grilleMsgEl.style.color = erreur ? 'var(--danger)' : 'var(--accent)';
+}
+
+// État de la carte 🔍, sur le modèle de `_dimMaj` : une seule fonction pour la visibilité, le
+// bouton et le bandeau d'aperçu.
+function _grilleMaj() {
+	if (!grilleCard) return;
+	// Sans lieu chargé il n'y a rien à analyser ; sans image, il n'y a rien à LIRE — le bouton
+	// est alors désactivé plutôt que masqué, pour que l'admin sache que la carte existe et
+	// pourquoi elle ne marche pas ici.
+	grilleCard.hidden = !currentLocId;
+	if (grilleAttenteEl) grilleAttenteEl.hidden = !grilleProposee;
+	if (!grilleProposerBtn) return;
+	// ⚠️ Refusé tant qu'un redimensionnement est en APERÇU : `cols`/`rows` ne décrivent alors
+	// plus le doc en base, et le serveur relirait le lieu tel qu'il y est encore. Même garde,
+	// même raison que le formulaire de connexion.
+	const bloque = !imgLoaded || !!redimEnAttente;
+	grilleProposerBtn.disabled = bloque;
+	grilleProposerBtn.style.opacity = bloque ? 0.45 : '';
+	grilleProposerBtn.title = !imgLoaded
+		? "Ce lieu n'a pas d'image affichable : il n'y a rien à lire."
+		: (redimEnAttente ? 'Enregistrer ou annuler le redimensionnement d\'abord.' : '');
+}
+
+async function proposerGrilleDepuisImage() {
+	if (!currentLocId || !imgLoaded || redimEnAttente) return;
+	_grilleMsg('Lecture de l\'image…', false);
+	try {
+		const res = await fetch(
+			`/api/lieu/${encodeURIComponent(currentLocId)}/grille_proposee?cols=${cols}&rows=${rows}`);
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+		grilleProposee = data.cells;
+		const total = cols * rows;
+		const etiquettes = { 0: 'bâti', 1: 'libre', 5: 'eau' };
+		const parts = Object.keys(data.comptes || {}).sort((a, b) => a - b).map(v =>
+			`${v} ${etiquettes[v] || '?'} ${data.comptes[v]} (${Math.round(data.comptes[v] * 100 / total)} %)`);
+		// La concordance n'est servie que si le lieu porte DÉJÀ une grille de la même taille :
+		// c'est une note contre le travail de l'auteur, pas une mesure absolue.
+		if (data.concordance) {
+			const pv = data.concordance.par_valeur || {};
+			const rappels = Object.keys(pv).sort((a, b) => a - b).map(v =>
+				`${v}: ${Math.round(pv[v].rappel * 100)} %`);
+			parts.push(`— accord avec la grille en base ${Math.round(data.concordance.global * 100)} % `
+				+ `(rappel par valeur ${rappels.join(', ')})`);
+		}
+		// Combien de cases changeraient si l'admin adoptait la proposition — la seule chose qu'il
+		// ne peut pas estimer à l'œil, et celle qui lui dit si le geste vaut la peine.
+		let differentes = 0;
+		for (let y = 0; y < rows; y++) {
+			for (let x = 0; x < cols; x++) {
+				if ((grilleProposee[y] || [])[x] !== (grid[y] || [])[x]) differentes++;
+			}
+		}
+		parts.push(`— ${differentes} case(s) sur ${total} différeraient de la grille en base`);
+		if (grilleComptesEl) grilleComptesEl.textContent = parts.join(' · ');
+		_grilleMaj();
+		renderGrid();
+		_grilleMsg('✓ Aperçu affiché (liseré cyan) — c\'est la PROPOSITION que montre la carte, '
+			+ 'pas la grille en base.', false);
+	} catch (err) {
+		grilleProposee = null;
+		_grilleMaj();
+		renderGrid();
+		_grilleMsg(`✗ ${err.message}`, true);
+	}
+}
+
+function fermerGrilleProposee() {
+	grilleProposee = null;
+	_grilleMaj();
+	renderGrid();
+	_grilleMsg('', false);
+}
+
+async function copierGrilleProposee() {
+	if (!grilleProposee) return;
+	const charge = JSON.stringify({ dimensions: { x: cols, y: rows }, cells: grilleProposee });
+	try {
+		await navigator.clipboard.writeText(charge);
+		_grilleMsg('✓ JSON copié dans le presse-papier.', false);
+	} catch (err) {
+		// `navigator.clipboard` exige un contexte sécurisé : en HTTP sur une IP locale, il n'existe
+		// pas. Un échec muet laisserait croire à une copie réussie.
+		_grilleMsg('✗ Copie refusée par le navigateur (contexte non sécurisé). '
+			+ 'Le JSON reste disponible via dev/gen_grille_image.py.', true);
+	}
+}
+
+if (grilleProposerBtn) grilleProposerBtn.addEventListener('click', proposerGrilleDepuisImage);
+const grilleFermerBtn = document.getElementById('grille-fermer-btn');
+if (grilleFermerBtn) grilleFermerBtn.addEventListener('click', fermerGrilleProposee);
+const grilleCopierBtn = document.getElementById('grille-copier-btn');
+if (grilleCopierBtn) grilleCopierBtn.addEventListener('click', copierGrilleProposee);
 // ── LIEUX : repositionnement d'une porte ───────────────────────────────────
 // Déplacer une connexion, c'est réécrire la `pos` du nœud QUI PORTE LE LIEU COURANT — la case
 // que le joueur doit occuper pour voir le lien (get_lieu_links est scopé à sa case). La saisir
