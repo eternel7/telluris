@@ -387,6 +387,16 @@ def offre_spec(pnj_doc: dict) -> dict | None:
 	return spec
 
 
+def donneur_present(pnj_docs: list) -> dict | None:
+	"""Le premier des PNJ présents qui porte une course ÉCRITE, ou None (personne ici ne
+	tient de course écrite — la branche « magasin » de `poser_transport_offert` prend alors
+	le relais, comme elle le faisait déjà pour un PNJ sans offre).
+
+	⚠️ Existe pour le CUMUL des présences : plusieurs PNJ peuvent tenir le lieu ensemble, et
+	prendre bêtement le premier ferait taire en silence l'offre écrite de son voisin."""
+	return next((doc for doc in pnj_docs if offre_spec(doc)), None)
+
+
 def deja_reussie(character: dict, quete_id: str) -> bool:
 	"""Cette quête a-t-elle déjà été MENÉE À BIEN par le personnage ? (Un échec ne compte
 	pas : le donneur repropose sa course — on ne condamne pas un joueur pour un retard.)

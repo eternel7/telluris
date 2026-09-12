@@ -697,6 +697,25 @@ def test_progeniture_lue_sur_l_entree_du_lieu_en_priorite():
 	assert escorte_util.progeniture_de(None, None) is None
 
 
+def test_donneur_present_suit_les_trois_branches_dans_l_ordre():
+	"""Les présences sont cumulables : ce qu'un seul PNJ arbitrait entre ses propres services
+	se tranche maintenant entre plusieurs. L'ordre de `poser_escorte_offerte` fait foi —
+	écrite, puis progéniture, puis registre — sinon un lieu qui tient un registre rendrait
+	muette la mission écrite de son voisin."""
+	muet = ({}, {"_id": "pnj:muet"})
+	registre = ({}, {"_id": "pnj:comptoir",
+					 "services": {"escorte": {"recherche": {"cite": "lieu:auxerre"}}}})
+	famille = ({"progeniture": {"nom": "Girard", "enfants": [{"prenom": "Aline"}]}},
+			   {"_id": "pnj:marchand_athanor"})
+	ecrite = ({}, {"_id": "pnj:gautier", "services": {"escorte": {"offre": {
+		"id": "q1", "destination": "lieu:auxerre", "proteges": [{"prenom": "Ysoré"}]}}}})
+	assert escorte_util.donneur_present([muet, registre, famille, ecrite]) == ecrite
+	assert escorte_util.donneur_present([muet, registre, famille]) == famille
+	assert escorte_util.donneur_present([muet, registre]) == registre
+	assert escorte_util.donneur_present([muet]) == (None, None)
+	assert escorte_util.donneur_present([]) == (None, None)
+
+
 def test_progeniture_sans_enfant_nomme_n_ouvre_rien():
 	# Une famille vide, ou dont aucun enfant n'a de prénom, ne doit pas produire d'offre.
 	assert escorte_util.progeniture_de({"progeniture": {"nom": "X", "enfants": []}}, None) is None
