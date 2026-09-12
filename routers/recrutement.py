@@ -127,6 +127,9 @@ def _protege_view(p: dict) -> dict:
 	`est_protege` permet au client de la ranger sous son propre sous-titre 🛡️ et de ne lui
 	offrir AUCUNE action — on ne congédie pas quelqu'un qu'on a promis de ramener.
 
+	`image_base` : /pnj d'abord, /characters en dernier ressort (`escorte.image_protege`) — le
+	portrait d'une personne nommée dans le service d'un PNJ reste rangé avec les PNJ.
+
 	⚠️ Carte NON éditable et NON cliquable : une escortée est hors de `groupe_effectif`,
 	donc `_acteur` refuserait (403) d'enregistrer son cadrage de portrait, et elle n'a pas de
 	fiche (ni équipement, ni sorts, ni XP). Elle n'apparaît pas non plus dans la section 🎒 :
@@ -138,8 +141,11 @@ def _protege_view(p: dict) -> dict:
 		"race": p.get("race", ""),
 		"sex": p.get("sex", ""),
 		"image": p.get("image", ""),
+		"image_base": escorte.image_protege(p.get("image", ""))[0],
 		"description": p.get("description", ""),
 		"est_protege": True,
+		# Elle frappe l'ennemi au contact en combat (`combat._run_defenseur_turn`) : la carte le dit.
+		"se_defend": bool(p.get("se_defend")),
 		**escorte.vitaux_de(p),
 	}
 

@@ -53,10 +53,12 @@ SORTIE = "jsons/progeniture_a_importer.json"
 # Les familles. Le `nom` reprend celui du tenancier tel que son lieu le nomme, et la `race`
 # celle que trahit son portrait — un enfant ressemble à ses parents.
 #
-# ⚠️ Les portraits d'enfants sont pris dans `templates/resources/characters` : il n'existe pas
-# de planche « civil », on emprunte donc aux vocations qui en ont l'allure (druide, ménestrel,
-# forestier, lettré). Le fichier DOIT exister et son couple race/sexe correspondre, sinon le
-# jeton de combat et la carte du protégé s'afficheraient vides.
+# ⚠️ Les portraits d'enfants sont pris dans `templates/resources/characters`, DERNIER RESSORT
+# de `escorte.image_protege` (qui cherche d'abord dans `pnj/`) : il n'existe pas de planche
+# « civil », on emprunte donc aux vocations qui en ont l'allure (druide, ménestrel, forestier,
+# lettré). Un fichier de même nom posé dans `pnj/` prendrait la main. Le fichier DOIT exister
+# et son couple race/sexe correspondre, sinon le jeton de combat et la carte du protégé
+# s'afficheraient vides.
 FAMILLES = {
 	"lieu:l_athanor_de_saint_germain": {          # Clément Varnepierre, alchimiste
 		"nom": "Varnepierre",

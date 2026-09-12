@@ -304,6 +304,82 @@ def test_conditions_invalides_tous_les_sous_filtres_connus_passent():
 
 
 # ---------------------------------------------------------------------------
+# quete_reussie — une quête MENÉE À BIEN (archives), jamais une quête en cours
+# ---------------------------------------------------------------------------
+
+def _reussite(qid="quete:convoi", echec=False):
+	return {"id": qid, "titre": "Convoi", "echec": echec}
+
+
+def _ok(character, clause):
+	return acces.clauses_remplies(character, [clause], get_doc)
+
+
+def test_quete_reussie_dans_les_deux_sens():
+	vierge = _character()
+	fait = _character(quetes_terminees=[_reussite()])
+	positif = {"quete_reussie": {"id": "quete:convoi"}}
+	negatif = {"quete_reussie": {"id": "quete:convoi", "attendu": False}}
+
+	assert _ok(vierge, positif) is False and _ok(fait, positif) is True
+	assert _ok(vierge, negatif) is True and _ok(fait, negatif) is False
+
+
+def test_quete_reussie_un_echec_ne_compte_pas():
+	"""Même règle que la condition de dialogue homonyme (`quetes.quete_reussie`) : une escorte
+	perdue n'a pas été menée à bien."""
+	rate = _character(quetes_terminees=[_reussite(echec=True)])
+	assert _ok(rate, {"quete_reussie": {"id": "quete:convoi"}}) is False
+	assert _ok(rate, {"quete_reussie": {"id": "quete:convoi", "attendu": False}}) is True
+
+
+def test_quete_reussie_ne_regarde_pas_les_quetes_en_cours():
+	en_cours = _character(quetes_actives=[{"id": "quete:convoi", "objectif": {"type": "escorte"}}])
+	assert _ok(en_cours, {"quete_reussie": {"id": "quete:convoi"}}) is False
+
+
+@pytest.mark.parametrize("id_", [None, "", 12])
+def test_quete_reussie_id_illisible_refuse_dans_les_deux_sens(id_):
+	"""⚠️ Y compris sous la négation : un id illisible ne doit pas se lire « jamais réussie »,
+	sinon un PNJ masqué « après la quête » réapparaîtrait pour toujours sur une faute de frappe."""
+	fait = _character(quetes_terminees=[_reussite()])
+	for attendu in (True, False):
+		filtre = {"attendu": attendu} if id_ is None else {"id": id_, "attendu": attendu}
+		assert _ok(fait, {"quete_reussie": filtre}) is False
+		assert _ok(_character(), {"quete_reussie": filtre}) is False
+
+
+def test_quete_reussie_attendu_non_booleen_refuse():
+	fait = _character(quetes_terminees=[_reussite()])
+	assert _ok(fait, {"quete_reussie": {"id": "quete:convoi", "attendu": "oui"}}) is False
+
+
+def test_quete_reussie_dans_un_ou():
+	fait = _character(quetes_terminees=[_reussite()])
+	clause = {"ou": [{"quete_reussie": {"id": "quete:autre"}},
+					 {"quete_reussie": {"id": "quete:convoi"}}]}
+	assert _ok(fait, clause) is True
+
+
+def test_quete_reussie_est_declaree_au_vocabulaire():
+	assert "quete_reussie" in acces.CONDITIONS_CONNUES
+	assert acces.SOUS_FILTRES_CONNUS["quete_reussie"] == {"id", "attendu"}
+	assert acces.conditions_invalides(
+		_lieu_garde([{"quete_reussie": {"id": "q", "attendu": False}}])) == []
+	assert acces.conditions_invalides(
+		_lieu_garde([{"quete_reussie": {"ids": "q"}}])) == ["quete_reussie.ids"]
+
+
+def test_quete_reussie_controlee_dans_la_presence_d_un_pnj():
+	"""C'est ce qui masque un PNJ APRÈS une quête : une sous-clé fautive le laisserait visible."""
+	lieu = {"_id": "lieu:cathedrale", "type": "lieu", "pnj": [
+		{"character": "pnj:a", "conditions": [{"quete_reussie": {"id": "q", "attendu": False}}]},
+		{"character": "pnj:b", "conditions": [{"quete_reussie": {"id": "q", "attendus": False}}]},
+	]}
+	assert acces.conditions_pnj_invalides(lieu) == ["pnj[1].conditions.quete_reussie.attendus"]
+
+
+# ---------------------------------------------------------------------------
 # Laissez-passer
 # ---------------------------------------------------------------------------
 

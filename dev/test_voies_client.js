@@ -369,5 +369,71 @@ t('un mur nav entre dans la coupe : fermer la brèche par nav sépare les deux s
 	assert.strictEqual(voiesCoupeMin(a.graphe, a.regions, idx(TROU, 0, 1), idx(TROU, 4, 1)).statut, 'separees');
 });
 
+console.log('\n── Chemins multiples A → B ────────────────────────────────────────────────');
+
+// Rempart vertical (x = 3) percé en haut ET en bas : deux passages bien distincts.
+const DEUX_TROUS = [
+	[1, 1, 1, 1, 1, 1, 1],
+	[1, 1, 1, 0, 1, 1, 1],
+	[1, 1, 1, 0, 1, 1, 1],
+	[1, 1, 1, 0, 1, 1, 1],
+	[1, 1, 1, 1, 1, 1, 1],
+];
+// Brèche de DEUX cases contiguës : un seul passage, large.
+const BRECHE2 = [
+	[1, 1, 1, 0, 1, 1, 1],
+	[1, 1, 1, 1, 1, 1, 1],
+	[1, 1, 1, 1, 1, 1, 1],
+	[1, 1, 1, 0, 1, 1, 1],
+];
+
+function cheminValide(graphe, c, a, b) {
+	assert.strictEqual(c[0], a, 'part de A');
+	assert.strictEqual(c[c.length - 1], b, 'finit en B');
+	for (let k = 1; k < c.length; k++) {
+		assert.ok(graphe.voisins[c[k - 1]].includes(c[k]), `pas ${k} hors graphe`);
+	}
+}
+
+t('deux trous : deux chemins, un par trou — et pas de troisième', () => {
+	const { graphe } = analyse(DEUX_TROUS);
+	const a = idx(DEUX_TROUS, 0, 2), b = idx(DEUX_TROUS, 6, 2);
+	const haut = idx(DEUX_TROUS, 3, 0), bas = idx(DEUX_TROUS, 3, 4);
+	const cs = voiesChemins(graphe, a, b, 3);
+	assert.strictEqual(cs.length, 2);
+	cs.forEach(c => cheminValide(graphe, c, a, b));
+	assert.deepStrictEqual(cs[0], voiesChemin(graphe, a, b), 'le premier est le plus court');
+	assert.deepStrictEqual(cs.map(c => [c.includes(haut), c.includes(bas)]).sort(),
+		[[false, true], [true, false]], 'chaque trou exactement une fois');
+	assert.deepStrictEqual(voiesChemins(graphe, a, b, 3), cs, 'déterministe');
+});
+
+t('une brèche de 2 cases : écartés d’une case ⇒ 1 chemin ; strictement disjoints ⇒ 2', () => {
+	const { graphe } = analyse(BRECHE2);
+	const a = idx(BRECHE2, 0, 1), b = idx(BRECHE2, 6, 1);
+	assert.strictEqual(voiesChemins(graphe, a, b, 8).length, 1, 'écart par défaut = 1');
+	assert.strictEqual(voiesChemins(graphe, a, b, 8, 1).length, 1);
+	assert.strictEqual(voiesChemins(graphe, a, b, 8, 0).length, 2);
+});
+
+t('le nombre demandé est respecté, borné à [1, VOIES_CHEMINS_MAX]', () => {
+	const { graphe } = analyse(DEUX_TROUS);
+	const a = idx(DEUX_TROUS, 0, 2), b = idx(DEUX_TROUS, 6, 2);
+	assert.deepStrictEqual(voiesChemins(graphe, a, b, 1), [voiesChemin(graphe, a, b)]);
+	assert.strictEqual(voiesChemins(graphe, a, b, 0).length, 1, 'plancher à 1');
+	assert.strictEqual(voiesChemins(graphe, a, b, 'n’importe quoi').length, 2, 'repli sur le défaut');
+	assert.strictEqual(voiesChemins(analyse(BRECHE2).graphe, idx(BRECHE2, 0, 1), idx(BRECHE2, 6, 1), 99, 0).length, 2);
+});
+
+t('cas limites : A = B, A et B voisins (sans boucler), hors voie, mur plein', () => {
+	const { graphe } = analyse(TROU);
+	assert.deepStrictEqual(voiesChemins(graphe, idx(TROU, 0, 1), idx(TROU, 0, 1), 3), [[idx(TROU, 0, 1)]]);
+	assert.deepStrictEqual(voiesChemins(graphe, idx(TROU, 0, 0), idx(TROU, 1, 0), 8),
+		[[idx(TROU, 0, 0), idx(TROU, 1, 0)]], 'le chemin tient dans les abords : arrêt');
+	assert.deepStrictEqual(voiesChemins(graphe, idx(TROU, 2, 0), idx(TROU, 4, 1), 3), []);
+	const mur = analyse(MUR).graphe;
+	assert.deepStrictEqual(voiesChemins(mur, idx(MUR, 0, 1), idx(MUR, 4, 1), 3), []);
+});
+
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);
 process.exit(echecs ? 1 : 0);

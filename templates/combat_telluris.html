@@ -828,7 +828,7 @@
 						   de joueurs[0]) ; ids DOM uniques par acteur pour les anneaux/portraits. #}
 						{% set jp = combat.joueurs | selectattr('id', 'equalto', actor_id) | first %}
 						{% set j_ko = ' dead' if (jp and jp.currentPV <= 0) else '' %}
-						<div class="init-badge joueur{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}">
+						{# Personne escortée qui SE DÉFEND (`se_defend`) : dans l'ordre, mais aux couleurs dorées d'une escortée — jamais prise pour un combattant jouable. #}<div class="init-badge {{ 'protege' if (jp and jp.est_protege) else 'joueur' }}{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}"{% if jp and jp.est_protege %} title="{{ jp.nom }} — sous votre protection : se défend au contact, sans se déplacer."{% endif %}>
 							{% if portraits_joueurs.get(actor_id, {}).get('image') %}<div class="ib-img" id="badge-portrait-{{ actor_id }}"></div>{% else %}<div class="ib-letter">{{ jp.nom[0] | upper if jp and jp.nom else '?' }}</div>{% endif %}
 							<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
 								<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
@@ -866,7 +866,10 @@
 				   ⚠️ `selectattr('jouable', 'defined')` est indispensable : un joueur ordinaire ne
 				   PORTE PAS ce champ, un `rejectattr` seul les ramasserait tous et dupliquerait
 				   leurs badges. #}
-				{% set hors_tour = combat.joueurs | selectattr('jouable', 'defined') | rejectattr('jouable') | list %}
+				{#- ⚠️ SAUF la personne escortée qui SE DÉFEND (`se_defend`) : elle a un tour, joué par le
+				   serveur, donc elle figure DANS `ordre_initiative` — la garder ici dupliquerait son
+				   badge et son id DOM. #}
+				{% set hors_tour = combat.joueurs | selectattr('jouable', 'defined') | rejectattr('jouable') | rejectattr('se_defend') | list %}
 				{% if hors_tour %}<span class="init-sep" aria-hidden="true"></span>{% endif %}
 				{% for jp in hors_tour %}
 					{# Ni `active` (ces acteurs n'ont pas de tour), ni œil barré (marqueur d'ENNEMI

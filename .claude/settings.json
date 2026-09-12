@@ -38,7 +38,7 @@
           {
             "type": "command",
             "shell": "powershell",
-            "command": "$f = ([Console]::In.ReadToEnd() | ConvertFrom-Json).tool_input.file_path; if ($f) { git diff --stat -- $f }",
+            "command": "$f = ([Console]::In.ReadToEnd() | ConvertFrom-Json).tool_input.file_path; if ($f) { git diff --stat -- $f 2>$null }; exit 0",
             "statusMessage": "git diff"
           }
         ]

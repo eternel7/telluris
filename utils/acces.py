@@ -28,6 +28,9 @@
 #     (character["rangs_guilde"][cite], absent ⇒ le premier de l'échelle) atteint au moins
 #     `rang` sur l'échelle recrutement.RANGS. Une porte de prestige : le maître de guilde
 #     ne reçoit pas les novices.
+#   - quete_reussie: {id, attendu?} — la quête nommée a été MENÉE À BIEN (archive sans échec,
+#     même prédicat que la condition de dialogue homonyme). L'état d'APRÈS, que `quete_active`
+#     ne voit plus : c'est ce qui retire un PNJ d'un lieu une fois sa mission accomplie.
 #   - ou: [clause, clause, …] — la SEULE clause composite : vraie dès qu'UNE des sous-clauses
 #     l'est. `conditions` restant un ET, c'est ce qui rend enfin exprimable un « A OU B ».
 #     ⚠️ Elle est née d'un besoin qu'aucune négation ne couvrait : deux docs de lieu qui se
@@ -65,7 +68,8 @@ def now_epoch() -> int:
 
 # Clés de condition reconnues par `conditions_remplies`. Toute autre clé fait échouer
 # `conditions_invalides` (signalée par le linter) ET `conditions_remplies` (fail-closed).
-CONDITIONS_CONNUES = {"quete_active", "item", "rang_min", "combat_gagne", "lieu_visite", "ou"}
+CONDITIONS_CONNUES = {"quete_active", "quete_reussie", "item", "rang_min", "combat_gagne",
+					  "lieu_visite", "ou"}
 
 # Sous-filtres reconnus par condition. ⚠️ Les valider AUSSI : une clé de premier niveau
 # inconnue refuse (fail-closed, donc visible en jeu), mais un SOUS-filtre inconnu était
@@ -77,6 +81,9 @@ SOUS_FILTRES_CONNUS = {
 	# le temps qu'on aille dans celle qui est habitée). Même mot, même sémantique que la
 	# condition de dialogue `quete_reussie.attendu` : un seul vocabulaire de négation.
 	"quete_active": {"lieu", "types", "giver_categorie", "cible", "objectif_atteint", "attendu"},
+	# Une quête MENÉE À BIEN, nommée par son id — l'état d'APRÈS, que `quete_active` ne voit
+	# plus (la quête a quitté `quetes_actives`). Même `attendu` que partout ailleurs.
+	"quete_reussie": {"id", "attendu"},
 	"item": {"item", "lieu_parent"},
 	"rang_min": {"cite", "rang"},
 	"combat_gagne": {"lieu", "attendu"},
@@ -320,6 +327,29 @@ def _condition_rang_min(character: dict, filtre: dict) -> bool:
 	return rang_min_satisfait(character, filtre)
 
 
+def _condition_quete_reussie(character: dict, filtre: dict) -> bool:
+	"""Cette quête a-t-elle été MENÉE À BIEN ? `attendu: false` pour l'inverse — c'est ainsi
+	qu'un PNJ quitte un lieu une fois sa mission accomplie (les paladins du parvis d'Auxerre,
+	partis à Notre-Dame avec le convoi de Lutecia).
+
+	Complément de `quete_active`, qui ne voit plus une quête sortie de `quetes_actives`.
+	Délègue au prédicat PARTAGÉ avec la condition de dialogue homonyme (`quetes.quete_reussie` :
+	archive sans échec), par import PARESSEUX — même idiome que `objectif_atteint`, pour la même
+	raison : `utils.quetes` tire bois/expedition/recrutement/marche.
+
+	⚠️ `id` obligatoire (chaîne non vide) et `attendu` booléen, fail-closed sinon — SOUS LA
+	NÉGATION AUSSI : un id illisible lu comme "jamais réussie" rouvrirait pour toujours ce qu'il
+	devait refermer."""
+	qid = (filtre or {}).get("id")
+	if not qid or not isinstance(qid, str):
+		return False
+	attendu = (filtre or {}).get("attendu", True)
+	if not isinstance(attendu, bool):
+		return False
+	from utils.quetes import quete_reussie
+	return bool(quete_reussie(character, qid)) is attendu
+
+
 def _clause_remplie(character: dict, condition, get_doc_fn) -> bool:
 	"""UNE clause du ET. ⚠️ RÉCURSIVE par `ou` — et fail-closed à chaque étage : une
 	clause qui n'est pas un dict d'EXACTEMENT une clé refuse, une clé inconnue refuse, et
@@ -330,6 +360,8 @@ def _clause_remplie(character: dict, condition, get_doc_fn) -> bool:
 	(cle, filtre), = condition.items()
 	if cle == "quete_active":
 		return _condition_quete_active(character, filtre or {}, get_doc_fn)
+	if cle == "quete_reussie":
+		return _condition_quete_reussie(character, filtre or {})
 	if cle == "item":
 		return _condition_item(character, filtre or {})
 	if cle == "rang_min":

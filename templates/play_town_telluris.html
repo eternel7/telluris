@@ -8006,7 +8006,9 @@ function _rendreCartesMontures(container, liste, actions, pied) {
 // Pied d'une carte de personne escortée : ce que le joueur doit surveiller, ce sont ses PV —
 // la carte les affiche déjà. On y met donc l'enjeu, pas une statistique de plus.
 function _piedProtege(p) {
-	return `<span>🛡️ Sous votre protection</span>`;
+	// `se_defend` (`_protege_view`) : elle frappe l'ennemi au contact sans jamais se déplacer —
+	// le joueur doit le savoir avant d'engager, sinon il la couvrirait comme une civile.
+	return `<span>🛡️ Sous votre protection${p && p.se_defend ? ' · ⚔️ Se défend au contact' : ''}</span>`;
 }
 
 // Sacs côte à côte. Le compagnon affiché à droite est le dernier choisi (mémorisé), à

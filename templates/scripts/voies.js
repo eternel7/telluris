@@ -21,6 +21,12 @@ const VOIES_SOURCES_MAX = 400;
 const VOIES_DIRS = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
 // Directions nav près des murs : nombre minimal de voisines à 0 (réglable dans la carte).
 const VOIES_SEUIL_MURS = 2;
+// Chemins A → B multiples (`voiesChemins`) : combien par défaut, plafond du champ de la carte, et
+// rayon (Chebyshev) autour de A et B jamais retiré du graphe. ⚠️ VOIES_ABORDS doit DÉPASSER
+// l'écart (1) : sinon le premier chemin murerait la sortie de A et plus rien ne partirait en éventail.
+const VOIES_CHEMINS_DEFAUT = 3;
+const VOIES_CHEMINS_MAX = 8;
+const VOIES_ABORDS = 2;
 
 // Prédicat de CASE de la règle — celui de deplacement.js, jamais recopié.
 // ⚠️ `caseFranchissable(null, …)` rend true : sans grille, TOUT deviendrait praticable.
@@ -242,6 +248,54 @@ function voiesDirectionsNav(cells, nav, dims, regle, seuilMurs) {
 // Plus court chemin A → B (BFS, voisins dans l'ordre de VOIES_DIRS : déterministe).
 // `[a, …, b]`, ou null si B est injoignable ou si A/B n'est pas un nœud.
 function voiesChemin(graphe, a, b) {
+	return _voiesBfs(graphe, a, b, null);
+}
+
+// Jusqu'à `max` chemins A → B, chacun forcé par un PASSAGE DIFFÉRENT : un rempart percé en trois
+// endroits montre ses trois trous, et non le seul que le BFS rencontre en premier.
+// Après chaque chemin, ses cases DILATÉES de `ecart` (défaut 1) sont retirées du graphe, sauf aux
+// abords de A et B (Chebyshev ≤ VOIES_ABORDS) : le suivant doit franchir ailleurs, et une brèche
+// large ne compte qu'une ou deux fois au lieu d'absorber tous les chemins, un par case.
+// ⚠️ Arrêt dès qu'un chemin n'ajoute AUCUNE case interdite (il tient dans les abords, A et B
+// voisins) : le suivant serait le même, à l'infini. Plus court d'abord ; `[]` si A/B hors voie ou
+// injoignables.
+function voiesChemins(graphe, a, b, max, ecart) {
+	const { W, H, N, noeud } = graphe;
+	if (!(a >= 0 && a < N && b >= 0 && b < N) || !noeud[a] || !noeud[b]) return [];
+	if (a === b) return [[a]];
+	const voulu = Number.isFinite(Number(max)) ? Math.floor(Number(max)) : VOIES_CHEMINS_DEFAUT;
+	const n = Math.min(VOIES_CHEMINS_MAX, Math.max(1, voulu));
+	const e = Number.isFinite(ecart) ? Math.max(0, Math.floor(ecart)) : 1;
+	const ax = a % W, ay = Math.floor(a / W), bx = b % W, by = Math.floor(b / W);
+	const abord = (x, y) => Math.max(Math.abs(x - ax), Math.abs(y - ay)) <= VOIES_ABORDS
+		|| Math.max(Math.abs(x - bx), Math.abs(y - by)) <= VOIES_ABORDS;
+	const interdit = new Uint8Array(N);
+	const chemins = [];
+	while (chemins.length < n) {
+		const chemin = _voiesBfs(graphe, a, b, interdit);
+		if (!chemin) break;
+		chemins.push(chemin);
+		let ajoutes = 0;
+		for (const i of chemin) {
+			const x = i % W, y = Math.floor(i / W);
+			for (let dy = -e; dy <= e; dy++) {
+				for (let dx = -e; dx <= e; dx++) {
+					const nx = x + dx, ny = y + dy;
+					if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+					const j = ny * W + nx;
+					if (interdit[j] || abord(nx, ny)) continue;
+					interdit[j] = 1;
+					ajoutes++;
+				}
+			}
+		}
+		if (!ajoutes) break;
+	}
+	return chemins;
+}
+
+// BFS commun aux deux fonctions ci-dessus : saute en plus les cases `interdit[v]` (null = aucune).
+function _voiesBfs(graphe, a, b, interdit) {
 	const { N, noeud, voisins } = graphe;
 	if (!(a >= 0 && a < N && b >= 0 && b < N) || !noeud[a] || !noeud[b]) return null;
 	if (a === b) return [a];
@@ -253,7 +307,7 @@ function voiesChemin(graphe, a, b) {
 	while (tete < queue) {
 		const u = file[tete++];
 		for (const v of voisins[u]) {
-			if (parent[v] !== -1) continue;
+			if (parent[v] !== -1 || (interdit && interdit[v])) continue;
 			parent[v] = u;
 			if (v === b) {
 				const chemin = [b];

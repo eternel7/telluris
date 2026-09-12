@@ -407,6 +407,39 @@ t('l_inventaire d_un protégé, non modélisé, survit', () => {
 	assert.deepStrictEqual(out.proteges[0].inventaire, [{ item: 'item:herbes', poids: 0.1 }]);
 });
 
+t('se_defend et l_équipement d_un protégé sont écrits, puis retirés', () => {
+	const base = { id: 'q', destination: 'lieu:b' };
+	const avec = _dlgOffreEscorte(null, Object.assign({}, base, {
+		proteges: [{ prenom: 'Éléonore', se_defend: true,
+			equipement: 'torse=item:Armure_plates_surcoat, main_droite = item:Epee_longue_ordre, ,mauvais' }],
+	}));
+	assert.strictEqual(avec.proteges[0].se_defend, true);
+	assert.deepStrictEqual(avec.proteges[0].equipement,
+		{ torse: 'item:Armure_plates_surcoat', main_droite: 'item:Epee_longue_ordre' });
+	const sans = _dlgOffreEscorte(avec, Object.assign({}, base, {
+		proteges: [{ prenom: 'Éléonore', se_defend: false, equipement: '' }],
+	}));
+	assert.ok(!('se_defend' in sans.proteges[0]));
+	assert.ok(!('equipement' in sans.proteges[0]));
+});
+
+t('une référence {item, poids} de l_équipement survit si l_objet ne change pas', () => {
+	const ancienne = { id: 'q', destination: 'lieu:b', proteges: [{ prenom: 'Martin',
+		equipement: { torse: { item: 'item:Armure_plates_surcoat', poids: 12 }, tete: 'item:Heaume_de_plates' } }] };
+	const out = _dlgOffreEscorte(ancienne, { id: 'q', destination: 'lieu:b', proteges: [{ prenom: 'Martin',
+		equipement: 'torse=item:Armure_plates_surcoat, tete=item:Heaume_cuir' }] });
+	assert.deepStrictEqual(out.proteges[0].equipement,
+		{ torse: { item: 'item:Armure_plates_surcoat', poids: 12 }, tete: 'item:Heaume_cuir' });
+});
+
+t('un appelant qui ne modélise ni se_defend ni l_équipement ne les efface pas', () => {
+	const ancienne = { id: 'q', destination: 'lieu:b', proteges: [{ prenom: 'Martin', se_defend: true,
+		equipement: { torse: 'item:Armure_plates_surcoat' } }] };
+	const out = _dlgOffreEscorte(ancienne, { id: 'q', destination: 'lieu:b', proteges: [{ prenom: 'Martin' }] });
+	assert.strictEqual(out.proteges[0].se_defend, true);
+	assert.deepStrictEqual(out.proteges[0].equipement, { torse: 'item:Armure_plates_surcoat' });
+});
+
 // ── _dlgValiderNoeud ─────────────────────────────────────────────────────────
 t('un nœud sans choix est refusé', () => {
 	assert.match(_dlgValiderNoeud({}, 'a', { texte: 'x', choix: [] }), /sans choix/);

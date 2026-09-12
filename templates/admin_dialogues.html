@@ -556,6 +556,28 @@ function _dlgOffreEscorte(ancienne, champs) {
 			if (p.sex) ref.sex = p.sex; else delete ref.sex;
 			if (p.image) ref.image = p.image; else delete ref.image;
 			if (p.description) ref.description = p.description; else delete ref.description;
+			// `se_defend` / `equipement` : écrits seulement quand l'appelant les MODÉLISE (le
+			// formulaire passe toujours les deux) — un appelant qui les ignore ne les efface pas.
+			if (p.se_defend !== undefined) {
+				if (p.se_defend) ref.se_defend = true; else delete ref.se_defend;
+			}
+			// Équipement saisi « slot=item:…, slot=item:… ». ⚠️ Une référence `{item, poids}` déjà
+			// posée pour le MÊME objet au même emplacement est gardée telle quelle : import-bulk
+			// fait un PUT complet, un poids d'instance ne doit pas disparaître d'une édition à blanc.
+			if (p.equipement !== undefined) {
+				const avant = ref.equipement || {};
+				const equip = {};
+				String(p.equipement || '').split(',').forEach(morceau => {
+					const i = morceau.indexOf('=');
+					if (i < 0) return;
+					const slot = morceau.slice(0, i).trim(), item = morceau.slice(i + 1).trim();
+					if (!slot || !item) return;
+					const ancien = avant[slot];
+					const ancienId = ancien && typeof ancien === 'object' ? ancien.item : ancien;
+					equip[slot] = ancienId === item ? ancien : item;
+				});
+				if (Object.keys(equip).length) ref.equipement = equip; else delete ref.equipement;
+			}
 			return ref;
 		});
 	if (!champs.destination || !proteges.length) return null;
@@ -1171,6 +1193,13 @@ function blocOffreEscorte(offre) {
 		+ `<div class="field"><label>race</label><input type="text" data-prot-champ="race" value="${escapeHtml(p.race || '')}"></div>`
 		+ `<div class="field"><label>sexe</label><input type="text" data-prot-champ="sex" value="${escapeHtml(p.sex || '')}"></div>`
 		+ `<div class="field"><label>image</label><input type="text" data-prot-champ="image" value="${escapeHtml(p.image || '')}"></div>`
+		// Équipement PORTÉ (armure, arme) : « slot=item:…, slot=item:… ». Une référence `{item, poids}`
+		// est affichée par son seul id — `_dlgOffreEscorte` la garde telle quelle si l'objet ne change pas.
+		+ `<div class="field"><label>équipement (slot=item:…, virgules)</label><input type="text" data-prot-champ="equipement" value="${escapeHtml(Object.entries(p.equipement || {}).map(([s, r]) => s + '=' + (r && typeof r === 'object' ? r.item : r)).join(', '))}"></div>`
+		// ⚠️ `data-prot-champ` (et non un attribut de case à cocher à part) : c'est lui qu'écoute
+		// `brancherServices`. La valeur se lit en `.checked`, jamais en `.value` (« on » toujours).
+		+ `<label style="display:inline-flex;align-items:center;gap:6px" title="Frappe l'ennemi au contact en combat, sans se déplacer.">`
+		+ `<input type="checkbox" data-prot-champ="se_defend"${p.se_defend ? ' checked' : ''}> se défend</label>`
 		+ `</div>`).join('');
 	return `<div class="card-title" style="margin:16px 0 6px">Offre d'escorte (quête écrite)</div>`
 		+ `<div class="hint" style="margin-bottom:10px">Sans <code>destination</code> ni <code>proteges</code>, l'offre n'est `
@@ -1268,8 +1297,10 @@ function appliquerServices() {
 		const proteges = [];
 		zone.querySelectorAll('[data-prot]').forEach(l => {
 			const v = n => { const el = l.querySelector('[data-prot-champ="' + n + '"]'); return el ? el.value.trim() : ''; };
+			const c = n => { const el = l.querySelector('[data-prot-champ="' + n + '"]'); return !!(el && el.checked); };
 			proteges.push({
-				prenom: v('prenom'), nom: v('nom'), race: v('race'), sex: v('sex'), image: v('image')
+				prenom: v('prenom'), nom: v('nom'), race: v('race'), sex: v('sex'), image: v('image'),
+				equipement: v('equipement'), se_defend: c('se_defend')
 			});
 		});
 		const offre = _dlgOffreEscorte(services.escorte.offre, {

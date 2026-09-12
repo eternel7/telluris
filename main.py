@@ -931,7 +931,14 @@ async def get_combat_page(
 		# `portrait_translate` absents) — le cadrage par défaut zoomerait sur un fragment.
 		# C'est le SERVEUR qui le dit : le client ne doit pas le déduire du dossier d'image.
 		entier = est_monture or bool(j.get("est_protege"))
-		dossier = MONSTERS_IMAGES_PATH if est_monture else CHARACTERS_IMAGES_PATH
+		if est_monture:
+			base, dossier = "/monsters", MONSTERS_IMAGES_PATH
+		elif j.get("est_protege"):
+			# Personne escortée : /pnj d'abord, /characters en dernier ressort — même
+			# résolution que sa carte de groupe (`_protege_view`).
+			base, dossier = escorte_util.image_protege(img)
+		else:
+			base, dossier = "/characters", CHARACTERS_IMAGES_PATH
 		try:
 			with Image.open(dossier + "/" + img) as p:
 				largeur, hauteur = p.size
@@ -939,7 +946,7 @@ async def get_combat_page(
 			largeur, hauteur = 100, 100
 		portraits_joueurs[j["id"]] = {
 			"image": img,
-			"base": "/monsters" if est_monture else "/characters",
+			"base": base,
 			"entier": entier,
 			"largeur": largeur,
 			"hauteur": hauteur,

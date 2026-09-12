@@ -1505,8 +1505,12 @@ def create_combat_doc(
 	joueurs += montures_snaps
 
 	# Personnes ESCORTÉES : même traitement qu'une monture — elles suivent le groupe, sont
-	# sur la carte donc CIBLABLES, mais ne jouent pas. C'est tout l'enjeu de la quête : elles
-	# n'ont aucun moyen de se défendre, et le joueur doit s'interposer.
+	# sur la carte donc CIBLABLES, mais ne jouent pas. C'est tout l'enjeu de la quête : le
+	# joueur doit s'interposer.
+	# Exception : une personne qui SAIT SE DÉFENDRE (`se_defend`, posé par la spec de l'offre)
+	# reçoit un tour, joué par le SERVEUR (`_run_defenseur_turn`) — jamais un pas, un coup sur
+	# l'ennemi au contact. Elle reste `jouable: False` : défaite, échange de places et
+	# finalisation (mort ⇒ échec de l'escorte) ne changent pas.
 	# ⚠️ Pas de `charge_max` recalculé, contrairement aux montures : un protégé ne porte pas
 	# pour le groupe (il est absent de `porteurs_effectifs`), la dérivée standard suffit.
 	proteges_snaps = []
@@ -1516,13 +1520,18 @@ def create_combat_doc(
 		snap["est_protege"] = True
 		snap["deplacement"] = 0
 		snap["deplacement_base"] = 0
+		if p.get("se_defend"):
+			snap["se_defend"] = True
 		proteges_snaps.append(snap)
 	joueurs += proteges_snaps
 
-	# ⚠️ `ordre_initiative` n'accueille QUE les jouables : une monture qui y figurerait
-	# obtiendrait un tour que personne ne peut jouer (_resolve_until_player rendrait la
-	# main au client sur un acteur qui n'a pas d'actions) — le combat s'arrêterait là.
-	all_actors = [(j["id"], j["initiative"]) for j in joueurs if j.get("jouable", True)]
+	# ⚠️ `ordre_initiative` n'accueille QUE les acteurs qui ont un tour : une monture qui y
+	# figurerait obtiendrait un tour que personne ne peut jouer (_resolve_until_player rendrait
+	# la main au client sur un acteur qui n'a pas d'actions) — le combat s'arrêterait là.
+	# La personne escortée qui se défend y entre, elle : son tour est joué par
+	# `_resolve_until_player`, qui ne rend jamais la main sur elle.
+	all_actors = [(j["id"], j["initiative"]) for j in joueurs
+				  if j.get("jouable", True) or j.get("se_defend")]
 	all_actors += [(m["id"], m["initiative"]) for m in monstres]
 	all_actors.sort(key=lambda x: x[1], reverse=True)
 	ordre = [a[0] for a in all_actors]
@@ -2151,11 +2160,123 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	combat_doc["acteur_courant_index"] = idx
 
 
+def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: dict) -> tuple:
+	"""Résout UN coup d'un acteur du camp du joueur sur un monstre, selon un profil d'attaque :
+	jet, localisation, dégâts, ligne de journal (kill/hit/miss) et effet d'arme. Renvoie
+	`(result, jet)`.
+
+	Partagé par l'action `attaquer` du joueur et le tour de la personne escortée qui se défend
+	(`_run_defenseur_turn`) : même jet, même formule, même journal — aucun coup gratuit.
+	⚠️ Le DÉCOMPTE reste à l'appelant (furtivité, `attaques`, fumble, victoire) : la personne
+	escortée n'est jamais furtive, et l'ordre des lignes de journal du joueur ne doit pas bouger.
+	Ni portée ni ligne de vue ne sont contrôlées ici."""
+	skill = attaquant.get("cd" if profil.get("toucher") == "cd" else "cc", 0)
+	notation = attaquant.get(profil.get("degats", "degats_cc")) or attaquant.get("degats_cc", "1D4")
+	seuil = _hit_threshold(skill, _defense_physique(monstre))
+	jet = _resoudre_jet(attaquant, monstre, seuil)
+	roll = jet["roll"]
+	if not jet["touche"]:
+		combat_doc["log"].append(_avec_vfx({
+			"tour": combat_doc["tour"],
+			"acteur": attaquant["nom"],
+			"kind": "fumble" if jet["fumble"] else "miss",
+			"texte": (
+				f"{attaquant['nom']} rate LAMENTABLEMENT son attaque sur {monstre['nom']} ! "
+				f"(jet {roll} / seuil {seuil})"
+				if jet["fumble"] else
+				f"{attaquant['nom']} rate son attaque sur {monstre['nom']} ! (jet {roll} / seuil {seuil})"
+			),
+		}, "fumble" if jet["fumble"] else "miss", monstre.get("id", ""),
+			acteur_id=attaquant.get("id", "")))
+		return {"hit": False, "fumble": jet["fumble"], "roll": roll, "seuil": seuil}, jet
+
+	zone = tirer_localisation()
+	ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
+	dmg = calculer_degats(attaquant, monstre, notation, jet["mult_degats"],
+						  profil.get("toucher", "cc"), zone=zone)
+	monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
+	# L'animation suit le MODE de l'arme (cac/jet/tir), avec celle de l'arme elle-même en
+	# priorité : le profil la porte depuis le snapshot, aucun doc n'est relu ici.
+	anim_arme = profil.get("animation")
+	if monstre["currentPV"] <= 0:
+		monstre["vivant"] = False
+		texte = (f"{attaquant['nom']} porte un COUP CRITIQUE et élimine {monstre['nom']} !"
+				 if jet["critique"] else
+				 f"{attaquant['nom']} élimine {monstre['nom']} !")
+		kind = "kill"
+	else:
+		texte = (
+			f"{attaquant['nom']} porte un COUP CRITIQUE à {monstre['nom']}{ou} : {dmg} dégâts ! "
+			f"(jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
+			if jet["critique"] else
+			f"{attaquant['nom']} touche {monstre['nom']}{ou} pour {dmg} dégâts ! "
+			f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
+		)
+		kind = "crit" if jet["critique"] else "hit"
+	combat_doc["log"].append(_avec_etat(_avec_vfx({
+		"tour": combat_doc["tour"],
+		"acteur": attaquant["nom"],
+		"kind": kind,
+		"texte": texte,
+	}, profil.get("mode", "cac"), monstre.get("id", ""), anim_arme, attaquant.get("id", "")),
+		monstre))
+	# Après la mise à jour de `vivant` : le chokepoint refuse une cible morte.
+	effet_arme = _appliquer_effet_arme(combat_doc, attaquant, monstre, profil)
+	result = {"hit": True, "dmg": dmg, "critique": jet["critique"],
+			  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
+	if effet_arme:
+		result["effet_arme"] = {"nom": effet_arme.get("nom"),
+								"restants": effet_arme.get("restants")}
+	return result, jet
+
+
+def _run_defenseur_turn(combat_doc: dict, joueur: dict) -> None:
+	"""Tour d'une personne escortée qui SAIT SE DÉFENDRE (`se_defend`) — joué par le serveur,
+	comme celui d'un monstre, et ne rend donc jamais la main au client.
+
+	Elle ne fait JAMAIS un pas : la couvrir reste l'affaire du joueur. Elle frappe, à l'allonge
+	de son arme de mêlée, l'ennemi au contact le plus entamé (le premier en cas d'égalité),
+	tant qu'il lui reste des actions. Personne à portée ⇒ elle passe, sans ligne de journal
+	(sinon une ligne par tour pour ne rien dire).
+
+	Budget, jet, fumble et victoire sont ceux du joueur (`_frapper_monstre`) : aucun coup
+	gratuit. ⚠️ Elle reste `jouable: False` — sa survie n'empêche pas la défaite
+	(`_combattants_vivants`) : elle ne bouge pas, un groupe à terre ne gagnerait jamais."""
+	_reset_turn_budget(joueur, combat_doc)
+	profil = _profil_attaque(joueur, "cac")
+	portee = max(1, int(profil.get("portee", 1)))
+	safety = 0
+	while (combat_doc["status"] == "active" and joueur.get("currentPV", 0) > 0
+		   and joueur["actions_restantes"] > 0 and safety < 100):
+		safety += 1
+		cibles = [m for m in combat_doc["monstres"]
+				  if m["vivant"] and _cheby(joueur, m) <= portee]
+		if not cibles:
+			break
+		monstre = min(cibles, key=lambda m: m["currentPV"])
+		_, jet = _frapper_monstre(combat_doc, joueur, monstre, profil)
+		joueur["attaques"] = joueur.get("attaques", 0) + 1
+		_refresh_actions(joueur)
+		# Après le décompte de l'attaque : un fumble coûte une action de PLUS.
+		if jet["fumble"]:
+			_appliquer_fumble(combat_doc, joueur)
+		_check_victory(combat_doc)
+
+	idx = combat_doc["acteur_courant_index"] + 1
+	if idx >= len(combat_doc["ordre_initiative"]):
+		idx = 0
+		combat_doc["tour"] += 1
+	combat_doc["acteur_courant_index"] = idx
+
+
 def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool = False) -> None:
 	"""Run monster turns until it's a player's turn.
 
 	start_at_current=True  : process the actor at acteur_courant_index first (combat init).
 	start_at_current=False : advance past the current actor first (after player action).
+
+	Les personnes escortées qui se défendent (`joueur_*` à `jouable: False`) sont jouées ICI,
+	comme des monstres : la main ne s'arrête jamais sur elles.
 	"""
 	ordre = combat_doc["ordre_initiative"]
 	max_iter = len(ordre) * 20
@@ -2175,6 +2296,10 @@ def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool =
 		if actor_id.startswith("joueur_"):
 			joueur = _get_joueur(combat_doc, actor_id)
 			if joueur and joueur.get("currentPV", 0) > 0:
+				# ⚠️ `is False` STRICTEMENT : un joueur ordinaire ne porte pas la clé.
+				if joueur.get("jouable") is False:
+					_run_defenseur_turn(combat_doc, joueur)
+					continue
 				_reset_turn_budget(joueur, combat_doc)
 				break
 			# Joueur KO (à terre) : son tour est sauté, comme un monstre mort.
@@ -2223,6 +2348,10 @@ def resolve_action(
 	joueur = _get_joueur(combat_doc, actor_id)
 	if not joueur:
 		return {"error": "Joueur introuvable."}
+	if joueur.get("jouable") is False:
+		# Garde défensive : une personne escortée qui se défend joue un tour SERVEUR
+		# (`_run_defenseur_turn`) — la main ne s'arrête jamais sur elle, un doc en vol non plus.
+		return {"error": "Ce n'est pas le tour du joueur."}
 	if joueur.get("currentPV", 0) <= 0:
 		# Garde défensive : un joueur à terre ne devrait jamais avoir la main
 		# (_resolve_until_player le saute), mais un doc en vol ne doit pas agir.
@@ -2323,8 +2452,6 @@ def resolve_action(
 		profil = _profil_attaque(joueur, mode)
 		atk_portee = max(1, int(profil.get("portee", 1)))
 		is_ranged = bool(profil.get("ranged"))
-		skill = joueur.get("cd" if profil.get("toucher") == "cd" else "cc", 0)
-		notation = joueur.get(profil.get("degats", "degats_cc")) or joueur.get("degats_cc", "1D4")
 
 		if cible_id:
 			monstre = _get_monstre(combat_doc, cible_id)
@@ -2346,66 +2473,7 @@ def resolve_action(
 		if _cheby(joueur, monstre) > atk_portee:
 			return {"error": "Cible hors de portée."}
 
-		seuil = _hit_threshold(skill, _defense_physique(monstre))
-		jet = _resoudre_jet(joueur, monstre, seuil)
-		roll = jet["roll"]
-		if jet["touche"]:
-			zone = tirer_localisation()
-			ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
-			dmg = calculer_degats(joueur, monstre, notation, jet["mult_degats"],
-								  profil.get("toucher", "cc"), zone=zone)
-			monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
-			# L'animation suit le MODE de l'arme (cac/jet/tir), avec celle de l'arme elle-même
-			# en priorité : le profil la porte depuis le snapshot, aucun doc n'est relu ici.
-			anim_arme = profil.get("animation")
-			if monstre["currentPV"] <= 0:
-				monstre["vivant"] = False
-				combat_doc["log"].append(_avec_etat(_avec_vfx({
-					"tour": combat_doc["tour"],
-					"acteur": joueur["nom"],
-					"kind": "kill",
-					"texte": (
-						f"{joueur['nom']} porte un COUP CRITIQUE et élimine {monstre['nom']} !"
-						if jet["critique"] else
-						f"{joueur['nom']} élimine {monstre['nom']} !"
-					),
-				}, profil.get("mode", "cac"), monstre.get("id", ""), anim_arme, joueur.get("id", "")),
-					monstre))
-			else:
-				combat_doc["log"].append(_avec_etat(_avec_vfx({
-					"tour": combat_doc["tour"],
-					"acteur": joueur["nom"],
-					"kind": "crit" if jet["critique"] else "hit",
-					"texte": (
-						f"{joueur['nom']} porte un COUP CRITIQUE à {monstre['nom']}{ou} : {dmg} dégâts ! "
-						f"(jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
-						if jet["critique"] else
-						f"{joueur['nom']} touche {monstre['nom']}{ou} pour {dmg} dégâts ! "
-						f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
-					),
-				}, profil.get("mode", "cac"), monstre.get("id", ""), anim_arme, joueur.get("id", "")),
-					monstre))
-			# Après la mise à jour de `vivant` : le chokepoint refuse une cible morte.
-			effet_arme = _appliquer_effet_arme(combat_doc, joueur, monstre, profil)
-			result = {"hit": True, "dmg": dmg, "critique": jet["critique"],
-					  "cible": monstre["nom"], "cible_pv": monstre["currentPV"]}
-			if effet_arme:
-				result["effet_arme"] = {"nom": effet_arme.get("nom"),
-										"restants": effet_arme.get("restants")}
-		else:
-			combat_doc["log"].append(_avec_vfx({
-				"tour": combat_doc["tour"],
-				"acteur": joueur["nom"],
-				"kind": "fumble" if jet["fumble"] else "miss",
-				"texte": (
-					f"{joueur['nom']} rate LAMENTABLEMENT son attaque sur {monstre['nom']} ! "
-					f"(jet {roll} / seuil {seuil})"
-					if jet["fumble"] else
-					f"{joueur['nom']} rate son attaque sur {monstre['nom']} ! (jet {roll} / seuil {seuil})"
-				),
-			}, "fumble" if jet["fumble"] else "miss", monstre.get("id", ""),
-				acteur_id=joueur.get("id", "")))
-			result = {"hit": False, "fumble": jet["fumble"], "roll": roll, "seuil": seuil}
+		result, jet = _frapper_monstre(combat_doc, joueur, monstre, profil)
 
 		_furtivite_apres_offensive(combat_doc, joueur, monstre, is_ranged)
 		joueur["attaques"] += 1

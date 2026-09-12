@@ -7,6 +7,8 @@
 # La partie COMBAT (snapshot non jouable, hors initiative, défaite) est en fin de fichier
 # et réutilise les fabriques de test_combat_groupe, comme test_combat_montures.
 
+import os
+
 import pytest
 
 from models import character_stats
@@ -1176,3 +1178,217 @@ def test_la_fiche_nomme_le_rendez_vous_par_son_label(db, monkeypatch):
 
 	assert "Auxerre" in txt
 	assert "lieu:" not in txt
+
+
+# ── Portrait : /pnj d'abord, /characters en dernier ressort ──────────────────────
+
+def _existe(image, *dossiers):
+	presents = {os.path.join(d, image) for d in dossiers}
+	return lambda chemin: chemin in presents
+
+
+def test_portrait_protege_pris_dans_pnj_meme_present_dans_characters():
+	"""Une personne nommée dans le service d'un PNJ a son portrait rangé avec les PNJ :
+	/pnj gagne, même si un fichier de même nom traîne dans characters/."""
+	img = "bucheron_Armand_Renaud_humain_m.jpg"
+	existe = _existe(img, escorte_util.PNJ_IMAGES_PATH, escorte_util.CHARACTERS_IMAGES_PATH)
+
+	assert escorte_util.image_protege(img, existe) == ("/pnj", escorte_util.PNJ_IMAGES_PATH)
+
+
+def test_portrait_protege_characters_en_dernier_ressort():
+	"""Les enfants de la progéniture empruntent à characters/ faute de portrait civil."""
+	img = "druide_f_humain03.jpg"
+	existe = _existe(img, escorte_util.CHARACTERS_IMAGES_PATH)
+
+	assert escorte_util.image_protege(img, existe) == ("/characters", escorte_util.CHARACTERS_IMAGES_PATH)
+
+
+@pytest.mark.parametrize("img", ["", "introuvable.jpg"])
+def test_portrait_protege_introuvable_retombe_sur_characters(img):
+	"""Nom vide ou fichier absent partout : le repli d'avant, jamais une route vide."""
+	assert escorte_util.image_protege(img, lambda chemin: False) == (
+		"/characters", escorte_util.CHARACTERS_IMAGES_PATH)
+
+
+# ── Protégés qui SE DÉFENDENT + équipement porté ─────────────────────────────────
+
+PLATES = {"_id": "item:Armure_plates_surcoat", "type": "item",
+		  "nom": "Armure de plates + surcoat blanc", "categorie": "armure",
+		  "slots": ["torse"], "bonus_pa": 25, "poids": 12}
+EPEE = {"_id": "item:Epee_longue_ordre", "type": "item", "nom": "Épée longue d'ordre",
+		"categorie": "arme", "slots": ["main_droite"], "tags": ["cac", "tranchant"],
+		"portee": 1, "poids": 1.5, "bonus_degats": 2}
+
+PALADIN = {"prenom": "Éléonore", "nom": "de Rochefort", "race": "humain", "sex": "F",
+		   "se_defend": True,
+		   "equipement": {"torse": "item:Armure_plates_surcoat",
+						  "main_droite": {"item": "item:Epee_longue_ordre", "poids": 1.6}}}
+
+
+def test_protege_porte_l_equipement_de_la_spec(db, monkeypatch):
+	"""L'équipement est PORTÉ, pas rangé dans le sac : poids résolu depuis le doc item (ou
+	gardé s'il est donné), PA comptés — c'est ce qui fait tenir un paladin sous les coups."""
+	db["docs"].update({d["_id"]: dict(d) for d in (PLATES, EPEE)})
+	monkeypatch.setattr(characters_util, "get_doc", db["get"])
+
+	doc = escorte_util.creer_protege(PALADIN, character(), "quete:convoi", db["get"])
+
+	assert doc["se_defend"] is True
+	assert doc["slots"] == {"torse": {"item": "item:Armure_plates_surcoat", "poids": 12},
+							"main_droite": {"item": "item:Epee_longue_ordre", "poids": 1.6}}
+	assert doc["inventaire"] == []
+	assert doc["equipment_bonus"]["pa"] == 25
+
+
+def test_protege_sans_se_defend_ni_equipement_comportement_d_avant(db):
+	doc = escorte_util.creer_protege(SPEC["proteges"][0], character(), "quete:escorte_aline",
+									 db["get"])
+
+	assert "se_defend" not in doc
+	assert doc["slots"] == {}
+
+
+def defenseur_snap(jid="joueur_1", x=1, y=1, pv=80, **champs):
+	return protege_snap(jid, "protege:eleonore", x=x, y=y, pv=pv, nom="Éléonore",
+						se_defend=True, cc=60, degats_cc="1D6", **champs)
+
+
+@pytest.fixture
+def des_fixes(monkeypatch):
+	"""Hasard CONTRÔLÉ : chaque d100 vaut 10 (ni critique ni fumble, touche à ces seuils) et
+	chaque dé plus petit rend sa face maximale."""
+	monkeypatch.setattr(combat_util.random, "randint", lambda a, b: min(max(10, a), b))
+
+
+def test_defenseur_entre_dans_l_initiative_mais_reste_non_jouable(dbc):
+	doc = combat_util.create_combat_doc(combat_character(), [monstre_snap()], [], "",
+										proteges=[protege_doc(se_defend=True)])
+	prot = doc["joueurs"][1]
+
+	assert prot["se_defend"] is True
+	assert prot["jouable"] is False and prot["est_protege"] is True
+	assert set(doc["ordre_initiative"]) == {"joueur_0", "joueur_1", "monstre_0"}
+
+
+def test_defenseur_frappe_au_contact_sans_bouger_puis_rend_la_main(dbc, des_fixes):
+	j0 = joueur_snap("joueur_0", "character:u_1", x=0, y=0)
+	defe = defenseur_snap(x=5, y=5)
+	m = monstre_snap(x=6, y=5, currentPV=100, pv_max=100)
+	doc = combat_doc([j0, defe], [m], acteur_courant_index=1)
+
+	combat_util._resolve_until_player(doc, combat_util._open_grid(), start_at_current=True)
+
+	assert m["currentPV"] < 100
+	assert defe["pos"] == {"x": 5, "y": 5}
+	assert any(e.get("acteur") == "Éléonore" and e.get("kind") == "hit" for e in doc["log"])
+	# Le monstre a joué son tour, puis la main revient au joueur — jamais à la défenseuse.
+	assert doc["ordre_initiative"][doc["acteur_courant_index"]] == "joueur_0"
+
+
+def test_defenseur_ne_frappe_pas_hors_de_portee(dbc, des_fixes):
+	defe = defenseur_snap(x=5, y=5)
+	m = monstre_snap(x=7, y=5)
+	doc = combat_doc([joueur_snap("joueur_0", "character:u_1"), defe], [m],
+					 acteur_courant_index=1)
+
+	combat_util._run_defenseur_turn(doc, defe)
+
+	assert m["currentPV"] == 10
+	assert defe["attaques"] == 0 and defe["pos"] == {"x": 5, "y": 5}
+	assert doc["log"] == []
+	assert doc["acteur_courant_index"] == 2
+
+
+def test_defenseur_frappe_d_abord_l_ennemi_le_plus_entame(dbc, des_fixes):
+	defe = defenseur_snap(x=5, y=5, actions_max=1)
+	intact = monstre_snap("monstre_0", x=6, y=5, currentPV=100, pv_max=100)
+	blesse = monstre_snap("monstre_1", x=4, y=5, currentPV=50, pv_max=100)
+	doc = combat_doc([joueur_snap("joueur_0", "character:u_1"), defe], [intact, blesse],
+					 acteur_courant_index=1)
+
+	combat_util._run_defenseur_turn(doc, defe)
+
+	assert intact["currentPV"] == 100
+	assert blesse["currentPV"] < 50
+
+
+def test_defenseur_qui_abat_le_dernier_ennemi_donne_la_victoire(dbc, des_fixes):
+	defe = defenseur_snap(x=5, y=5)
+	m = monstre_snap(x=6, y=5, currentPV=1, xp_reward=10)
+	doc = combat_doc([joueur_snap("joueur_0", "character:u_1"), defe], [m],
+					 acteur_courant_index=1)
+
+	combat_util._run_defenseur_turn(doc, defe)
+
+	assert m["vivant"] is False
+	assert doc["status"] == "victoire" and doc["xp_gagnee"] == 10
+	assert defe["attaques"] == 1   # combat terminé : pas de second coup dans le vide
+
+
+def test_defenseuse_debout_n_empeche_pas_la_defaite(dbc, des_fixes):
+	"""Elle ne bouge pas : si elle comptait comme survivante, un groupe à terre ne perdrait
+	jamais et le combat resterait bloqué. Même régression critique que pour une escortée."""
+	j0 = joueur_snap("joueur_0", "character:u_1", x=0, y=0, pv=1)
+	defe = defenseur_snap(x=1, y=1)
+	m = monstre_snap(x=0, y=1, cc=100, degats_cc="100D6")
+	doc = combat_doc([j0, defe], [m])
+
+	combat_util._do_attack_on(doc, m, j0)
+
+	assert doc["status"] == "defaite"
+
+
+def test_la_main_ne_s_arrete_jamais_sur_une_defenseuse(dbc):
+	"""Garde défensive : un doc en vol dont l'index pointe sur elle ne la laisse pas agir."""
+	defe = defenseur_snap(x=5, y=5)
+	doc = combat_doc([joueur_snap("joueur_0", "character:u_1"), defe], [monstre_snap()],
+					 acteur_courant_index=1)
+
+	assert "error" in combat_util.resolve_action(doc, "passer")
+
+
+# ── Linter : une acceptation qui DÉPLACE n'exige pas de nœud `accepte` ──────────────
+
+from utils import lint_dialogues  # noqa: E402
+
+
+def _donneur_escorte(*acceptations):
+	"""Doc PNJ minimal qui confie une escorte ; chaque `acceptation` = champs ajoutés au choix."""
+	choix = [dict({"id": f"accepter_{i}", "label": "« En route. »",
+				   "action": {"service": "escorte", "op": "accepter"}}, **champs)
+			 for i, champs in enumerate(acceptations)]
+	return {"_id": "pnj:eleonore", "type": "pnj", "nom": "Éléonore",
+			"services": {"escorte": {"offre": dict(SPEC)}},
+			"dialogue": {"noeud_depart": "accueil", "noeuds": {
+				"accueil": {"texte": "…",
+							"choix": choix + [{"id": "fin", "label": "Partir.", "next": "fin"}]},
+			}}}
+
+
+def _avertit_accepte(doc):
+	return any("ne déclare pas `accepte`" in t["message"]
+			   for t in lint_dialogues.analyser_doc(doc) if t["niveau"] == "avertissement")
+
+
+def test_lint_acceptation_qui_deplace_n_exige_pas_accepte():
+	"""Le client suit `deplacer` et recharge la page : un nœud `accepte` ne serait jamais lu."""
+	assert not _avertit_accepte(_donneur_escorte({"deplacer": "lieu:auxerre"}))
+
+
+def test_lint_acceptation_sur_place_exige_toujours_accepte():
+	assert _avertit_accepte(_donneur_escorte({}))
+
+
+def test_lint_une_seule_acceptation_sur_place_suffit_a_avertir():
+	"""Celle-là fermerait le dialogue sans un mot : l'avertissement redevient juste."""
+	assert _avertit_accepte(_donneur_escorte({"deplacer": "lieu:auxerre"}, {}))
+
+
+def test_lint_deplacer_illisible_ne_dispense_pas_d_accepte():
+	"""Un `deplacer` sans préfixe `lieu:` ne déplace personne : on resterait sur place."""
+	assert _avertit_accepte(_donneur_escorte({"deplacer": "auxerre"}))
+
+
+def test_lint_sans_acceptation_l_avertissement_demeure():
+	assert _avertit_accepte(_donneur_escorte())

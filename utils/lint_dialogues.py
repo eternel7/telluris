@@ -445,6 +445,22 @@ def analyser_doc(doc: dict) -> list:
 			# Le tenancier générique est le seul à qui la confiance puisse manquer.
 			if doc_id.startswith("pnj:marchand_"):
 				attendus |= ESCORTE_MEFIANCE
+			# Une acceptation qui DÉPLACE ne revient jamais au dialogue : le client suit
+			# `deplacer` (`moveTo`, page rechargée) sans rendre le nœud suivant. Exiger
+			# `accepte` y ferait écrire un texte que personne ne lira — et nuisible quand le
+			# PNJ est masqué dès l'acceptation (convoi de Lutecia) : si le lien venait à
+			# manquer, ce nœud s'afficherait et le clic suivant échouerait en 404.
+			# ⚠️ TOUTES les acceptations doivent déplacer : une seule qui reste sur place
+			# fermerait le dialogue sans un mot, et l'avertissement redevient juste.
+			acceptations = [
+				c for n in noeuds.values() if isinstance(n, dict)
+				for c in (n.get("choix") or [])
+				if isinstance(c, dict) and isinstance(c.get("action"), dict)
+				and c["action"].get("service") == "escorte" and c["action"].get("op") == "accepter"
+			]
+			if acceptations and all(isinstance(c.get("deplacer"), str)
+									and c["deplacer"].startswith("lieu:") for c in acceptations):
+				attendus.discard("accepte")
 		else:
 			attendus = NOEUDS_REQUIS.get(service, set())
 		for cle in attendus - set(declares):

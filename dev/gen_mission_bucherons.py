@@ -139,9 +139,9 @@ def choix_loups(label_charger, label_apres):
 # ---------------------------------------------------------------------------
 # Les quatre personnes à ramener — specs de `services.escorte.offre.proteges`
 # ---------------------------------------------------------------------------
-# ⚠️ Le portrait d'un `protege:*` est servi par le mount /characters (`_protege_view`
-# n'expose aucun `image_base`), là où le `portrait` d'un doc `pnj:*` vient de /pnj : les
-# mêmes fichiers sont donc copiés dans les deux dossiers, sous le MÊME nom.
+# ⚠️ Le portrait d'un `protege:*` est cherché dans /pnj D'ABORD, /characters en dernier
+# ressort (`escorte.image_protege`) : les fichiers vivent dans `templates/resources/pnj`,
+# comme le `portrait` des docs `pnj:*`. Ne RIEN copier dans `characters/`.
 # ⚠️ Aucune clé `caracteristiques` : `creer_protege` retombe sur les stats de BASE de la race
 # (`rules:races`), c'est-à-dire aucun point dépensé — ce sont des civils, pas des aventuriers.
 

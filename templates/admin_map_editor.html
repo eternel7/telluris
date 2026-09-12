@@ -1112,7 +1112,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 						<span><span class="voies-pastille" style="width:34px;background:linear-gradient(90deg,rgba(255,220,0,0.2),rgba(255,110,0,0.6),rgba(255,0,0,0.9));"></span>passage faible → fort</span>
 						<span><span class="voies-pastille" style="height:3px;background:rgba(60,230,110,1);"></span>direction autorisée</span>
 						<span><span class="voies-pastille" style="height:4px;width:6px;background:rgba(240,60,60,1);"></span>fermée par nav</span>
-						<span><span class="voies-pastille" style="height:4px;background:rgba(40,230,255,0.95);"></span>chemin A → B</span>
+						<span><span class="voies-pastille" style="height:4px;width:34px;background:linear-gradient(90deg,rgba(40,230,255,0.95),rgba(255,255,255,0.95),rgba(150,120,255,0.95),rgba(255,140,190,0.95));"></span>chemins A → B (1 = le plus court, les suivants en tirets)</span>
 						<span><span class="voies-pastille" style="border:2px solid rgba(255,225,40,1);"></span>case de la coupe minimale</span>
 					</div>
 					<label class="dep-bascule">
@@ -1125,6 +1125,11 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 						Placez <b>A</b> et <b>B</b> en terrain ouvert, de part et d'autre du rempart ou du fleuve
 						à fermer : le chemin montre par où l'on passe, la coupe les cases à boucher.
 					</div>
+					<label class="dep-bascule">
+						Chemins A → B :
+						<input type="number" id="voies-nb-chemins" min="1" max="8" step="1" value="3"
+							style="width:3.6em;padding:2px 4px;margin:0;"> — chacun par un passage différent
+					</label>
 					<button class="btn" id="voies-ab-btn" style="margin-bottom:6px;">🎯 Choisir A puis B</button>
 					<button class="btn" id="voies-ab-effacer-btn" style="margin-bottom:6px;">✕ Effacer A/B</button>
 					<div class="nav-info" id="voies-ab" style="margin-bottom:8px;"></div>
@@ -4090,6 +4095,7 @@ const voiesDirectionsEl	= document.getElementById('voies-directions');
 const voiesSeuilEl		= document.getElementById('voies-seuil-murs');
 const voiesAbBtn		= document.getElementById('voies-ab-btn');
 const voiesAbEl			= document.getElementById('voies-ab');
+const voiesNbCheminsEl	= document.getElementById('voies-nb-chemins');
 
 // JSON valide, mais UNE ligne de la matrice par ligne : `JSON.stringify(…, null, 2)` poserait
 // une case par ligne, soit des milliers de lignes illisibles pour une grille de 40×30.
@@ -4261,6 +4267,12 @@ if (grilleAppliquerBtn) grilleAppliquerBtn.addEventListener('click', appliquerGr
 // La région principale (rang 0) garde un vert discret : c'est la norme, pas l'alerte. Les autres
 // cyclent sur des teintes vives, pour qu'une enclave saute aux yeux.
 const VOIES_REGION_PRINCIPALE = 'rgba(70,200,110,0.25)';
+// Chemins A → B, dans l'ordre (cyclique) : le n° 1 garde le cyan d'avant. Palette choisie HORS de
+// celles déjà peintes — magenta des goulots, jaune de la coupe, vert des régions et directions,
+// rampe jaune → rouge du passage — pour qu'un chemin ne se confonde avec aucune autre couche.
+const VOIES_CHEMINS_COULEURS = [
+	'rgba(40,230,255,0.95)', 'rgba(255,255,255,0.95)', 'rgba(150,120,255,0.95)', 'rgba(255,140,190,0.95)',
+];
 const VOIES_REGIONS = [
 	'rgba(240,90,200,0.5)', 'rgba(80,170,255,0.5)', 'rgba(255,170,40,0.5)',
 	'rgba(170,110,255,0.5)', 'rgba(40,220,220,0.5)', 'rgba(255,80,80,0.5)',
@@ -4317,7 +4329,7 @@ function tracerVoies() {
 			// La carte de passage est la seule coûteuse : calculée au premier passage sur sa vue.
 			passage: vue === 'passage' ? voiesPassage(graphe) : null,
 			directions: voiesDirectionsNav(source, nav, dims, regle, seuilMurs),
-			a, b, chemin: null, coupe: null,
+			a, b, chemins: [], coupe: null,
 		};
 		_voiesCalculerAB();
 		voiesPerime = false;
@@ -4409,18 +4421,44 @@ function _voiesDessiner(cw, ch) {
 		});
 		ctx.restore();
 	}
-	if (voies.chemin && voies.chemin.length > 1) {
+	// Chemins A → B : dessinés en ordre INVERSE pour que le n° 1 (le plus court) reste au-dessus ;
+	// le n° 1 en trait plein, les suivants en tirets — lisibles même là où deux couleurs se croisent.
+	const chemins = (voies.chemins || []).filter(c => c && c.length > 1);
+	for (let k = chemins.length - 1; k >= 0; k--) {
 		ctx.save();
-		ctx.strokeStyle = 'rgba(40,230,255,0.95)';
-		ctx.lineWidth = Math.max(2, cote * 0.2);
+		ctx.strokeStyle = VOIES_CHEMINS_COULEURS[k % VOIES_CHEMINS_COULEURS.length];
+		ctx.lineWidth = Math.max(2, cote * (k ? 0.16 : 0.2));
 		ctx.lineJoin = 'round';
-		ctx.lineCap = 'round';
+		ctx.lineCap = k ? 'butt' : 'round';
+		ctx.setLineDash(k ? [Math.max(4, cote * 0.7), Math.max(3, cote * 0.45)] : []);
 		ctx.shadowColor = 'rgba(0,0,0,0.6)';
 		ctx.shadowBlur = 3;
 		ctx.beginPath();
-		voies.chemin.forEach((i, k) => k ? ctx.lineTo(centreX(i), centreY(i)) : ctx.moveTo(centreX(i), centreY(i)));
+		chemins[k].forEach((i, n) => n ? ctx.lineTo(centreX(i), centreY(i)) : ctx.moveTo(centreX(i), centreY(i)));
 		ctx.stroke();
 		ctx.restore();
+	}
+	// Numéros (dès 2 chemins), sur la case MÉDIANE de chacun : à relier au texte « 11 · 14 · 19 pas ».
+	if (chemins.length > 1) {
+		chemins.forEach((chemin, k) => {
+			const i = chemin[Math.floor(chemin.length / 2)];
+			const x = centreX(i), y = centreY(i), r = Math.max(5, cote * 0.4);
+			ctx.save();
+			ctx.shadowBlur = 0;
+			ctx.beginPath();
+			ctx.arc(x, y, r, 0, Math.PI * 2);
+			ctx.fillStyle = VOIES_CHEMINS_COULEURS[k % VOIES_CHEMINS_COULEURS.length];
+			ctx.fill();
+			ctx.lineWidth = 1.5;
+			ctx.strokeStyle = '#111';
+			ctx.stroke();
+			ctx.fillStyle = '#111';
+			ctx.font = `bold ${Math.max(7, Math.round(r * 1.2))}px "Share Tech Mono", monospace`;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(String(k + 1), x, y);
+			ctx.restore();
+		});
 	}
 	// Directions nav près des murs : trait VERT = on passe, tiret ROUGE près du bord = fermé par nav
 	// seule. Aucun trait = terrain refusé.
@@ -4480,15 +4518,23 @@ function _voiesSeuilMurs() {
 	return Number.isFinite(n) ? Math.min(8, Math.max(1, n)) : VOIES_SEUIL_MURS;
 }
 
-// Chemin et coupe A/B sur le graphe COURANT du tracé (appelé par `tracerVoies` et `_voiesViser`).
+// Nombre de chemins A → B voulu (champ de la carte), borné comme `voiesChemins` le fera.
+function _voiesNbChemins() {
+	const n = parseInt(voiesNbCheminsEl && voiesNbCheminsEl.value, 10);
+	return Number.isFinite(n) ? Math.min(VOIES_CHEMINS_MAX, Math.max(1, n)) : VOIES_CHEMINS_DEFAUT;
+}
+
+// Chemins et coupe A/B sur le graphe COURANT du tracé (appelé par `tracerVoies`, `_voiesViser` et le
+// champ du nombre de chemins). `cheminsDemandes` est retenu pour que le texte dise « 2 sur 4 ».
 function _voiesCalculerAB() {
 	if (!voies) return;
-	voies.chemin = null;
+	voies.chemins = [];
 	voies.coupe = null;
 	if (!voies.a || !voies.b) return;
 	const W = voies.graphe.W;
 	const ia = voies.a.y * W + voies.a.x, ib = voies.b.y * W + voies.b.x;
-	voies.chemin = voiesChemin(voies.graphe, ia, ib);
+	voies.cheminsDemandes = _voiesNbChemins();
+	voies.chemins = voiesChemins(voies.graphe, ia, ib, voies.cheminsDemandes, 1);
 	voies.coupe = voiesCoupeMin(voies.graphe, voies.regions, ia, ib);
 }
 
@@ -4502,7 +4548,16 @@ function _voiesTexteAB() {
 	if (!voies.b || !voies.coupe) return parts[0];
 	const c = voies.coupe;
 	if (c.statut !== 'hors voie' && c.statut !== 'identiques') {
-		parts.push(voies.chemin ? `chemin : ${voies.chemin.length - 1} pas` : 'aucun chemin');
+		const cs = voies.chemins || [];
+		const pas = cs.map(ch => ch.length - 1);
+		let texte = !cs.length ? 'aucun chemin'
+			: cs.length === 1 ? `chemin : ${pas[0]} pas`
+			: `${cs.length} chemins : ${pas.join(' · ')} pas`;
+		// Moins que demandé : il n'existe pas d'autre passage (écarté d'une case du précédent).
+		if (cs.length && cs.length < (voies.cheminsDemandes || 1)) {
+			texte += ` (${cs.length} sur ${voies.cheminsDemandes} demandés : aucun autre passage)`;
+		}
+		parts.push(texte);
 	}
 	const statuts = {
 		'hors voie': "A ou B n'est pas praticable sous cette règle",
@@ -4572,7 +4627,8 @@ function _voiesViser(e) {
 function effacerVoiesAB() {
 	if (!voies) return;
 	voies.a = voies.b = null;
-	voies.chemin = voies.coupe = null;
+	voies.chemins = [];
+	voies.coupe = null;
 	if (voiesVisee) { voiesVisee = null; canvas.style.cursor = ''; }
 	_grilleMaj();
 	renderGrid();
@@ -4595,6 +4651,16 @@ const voiesAbEffacerBtn = document.getElementById('voies-ab-effacer-btn');
 if (voiesAbEffacerBtn) voiesAbEffacerBtn.addEventListener('click', effacerVoiesAB);
 if (voiesDirectionsEl) voiesDirectionsEl.addEventListener('change', majDirectionsVoies);
 if (voiesSeuilEl) voiesSeuilEl.addEventListener('input', majDirectionsVoies);
+// Nombre de chemins A → B : seul A/B est recalculé, jamais le tracé — sauf s'il est périmé (même
+// règle que `majDirectionsVoies` : rien ne se dessine sur un graphe qui ne correspond plus à la grille).
+function majCheminsVoies() {
+	if (!voies) return;
+	if (voiesPerime) { tracerVoies(); return; }
+	_voiesCalculerAB();
+	_grilleMaj();
+	renderGrid();
+}
+if (voiesNbCheminsEl) voiesNbCheminsEl.addEventListener('input', majCheminsVoies);
 // ── LIEUX : repositionnement d'une porte ───────────────────────────────────
 // Déplacer une connexion, c'est réécrire la `pos` du nœud QUI PORTE LE LIEU COURANT — la case
 // que le joueur doit occuper pour voir le lien (get_lieu_links est scopé à sa case). La saisir

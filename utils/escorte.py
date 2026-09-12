@@ -20,6 +20,11 @@
 # `expedition.membres`. On ne lui transfère rien, il ne vend rien, il ne manie pas de hache.
 # Son index vit dans `character["proteges"]`, SÉPARÉ de `groupe` et de `montures`.
 #
+# ⚠️ SAUF `se_defend` : une personne qui SAIT SE DÉFENDRE (les paladins d'un convoi) garde
+# `jouable: False` mais entre dans `ordre_initiative` pour un tour joué par le SERVEUR
+# (`combat._run_defenseur_turn`) — jamais un pas, un coup sur l'ennemi au contact. Son
+# `equipement` (spec) est posé dans `slots` : armure et arme jouent comme sur un personnage.
+#
 # TROIS FORMES DE RENDEZ-VOUS, une seule résolution (`position_de_rencontre`) :
 #   · `rencontre` absent      → chez le donneur : elle rejoint le groupe À L'ACCEPTATION ;
 #   · `{lieu}` seul           → à l'ENTRÉE de ce lieu ;
@@ -35,6 +40,7 @@
 # l'appelant persiste. Pattern de utils/transport.py et utils/montures.py. World-vars lues
 # via le module (jamais from-import) : elles sont réglables à chaud depuis /admin.
 
+import os
 import random
 import unicodedata
 import uuid
@@ -65,8 +71,10 @@ def offre_spec(pnj_doc: dict) -> dict | None:
 	"""L'escorte ÉCRITE que ce PNJ confie, ou None. Miroir strict de
 	`transport.offre_spec` — donc N'IMPORTE QUEL PNJ peut confier une escorte, il n'a pas
 	à tenir boutique. `services.escorte.offre` = {id, destination, rencontre?{lieu, zones?},
-	proteges:[{prenom, nom, race, sex, image?, inventaire?}], unique?, proba?, titre?,
-	description?, recompenses?{xp, cuivre}}."""
+	proteges:[{prenom, nom, race, sex, image?, inventaire?, equipement?{slot: item},
+	se_defend?}], unique?, proba?, titre?, description?, recompenses?{xp, cuivre}}.
+	`equipement` est PORTÉ (slots), `inventaire` est dans le sac ; `se_defend` donne à la
+	personne un tour de combat où elle frappe au contact sans bouger (cf. `creer_protege`)."""
 	service = (((pnj_doc or {}).get("services") or {}).get("escorte") or {})
 	spec = service.get("offre")
 	if not spec or not spec.get("destination") or not spec.get("proteges"):
@@ -749,29 +757,49 @@ def _stats_de_race(race_id: str, get_doc_fn) -> dict:
 	return stats or dict(STATS_DEFAUT)
 
 
+def _ref_item(ligne, get_doc_fn) -> dict | None:
+	"""Référence d'objet `{item, poids}` tirée d'une ligne de spec (id nu OU objet). Poids
+	absent ⇒ le minimum du doc item ; doc introuvable ⇒ référence sans poids. None si la ligne
+	ne nomme aucun objet. Partagé par `inventaire` (le sac) et `equipement` (les slots)."""
+	ref = dict(ligne) if isinstance(ligne, dict) else {"item": ligne}
+	iid = ref.get("item")
+	if not iid:
+		return None
+	if ref.get("poids") is None:
+		doc = get_doc_fn(iid)
+		if doc:
+			ref["poids"] = poids_bounds(doc)[0]
+		else:
+			ref.pop("poids", None)
+	return ref
+
+
 def creer_protege(spec_p: dict, character: dict, quete_id: str, get_doc_fn,
 				  giver_id: str | None = None) -> dict:
 	"""Doc `protege:*` neuf — MIROIR du character, calqué sur `montures.creer_monture`.
 
 	Le doc porte le SOUS-ENSEMBLE des champs qui rend opérants `compute_derived_stats`,
-	`build_joueur_snapshot` et `_apply_world_turn_regen`. `slots` reste vide (une civile
-	n'équipe rien, mais le champ doit exister — `carried_weight` le somme) ; `inventaire`
-	reçoit ce que la spec lui fait porter (les herbes d'Aline arrivent AVEC elle et ne sont
-	pas transférables : un protégé n'est pas un porteur)."""
+	`build_joueur_snapshot` et `_apply_world_turn_regen`. `inventaire` reçoit ce que la spec
+	lui fait porter (les herbes d'Aline arrivent AVEC elle et ne sont pas transférables : un
+	protégé n'est pas un porteur). `slots` reçoit son `equipement` — vide pour une civile, mais
+	le champ doit exister (`carried_weight` le somme).
+
+	`se_defend` : la personne SAIT SE DÉFENDRE — en combat elle a un tour, joué par le serveur,
+	où elle frappe l'ennemi au contact sans jamais se déplacer (`combat._run_defenseur_turn`).
+	Posé seulement quand la spec le demande : clé absente ⇒ comportement d'avant."""
 	caract = dict(spec_p.get("caracteristiques") or _stats_de_race(spec_p.get("race", ""), get_doc_fn))
-	inventaire = []
-	for ligne in spec_p.get("inventaire") or []:
-		ref = dict(ligne) if isinstance(ligne, dict) else {"item": ligne}
-		iid = ref.get("item")
-		if not iid:
-			continue
-		if ref.get("poids") is None:
-			doc = get_doc_fn(iid)
-			if doc:
-				ref["poids"] = poids_bounds(doc)[0]
-			else:
-				ref.pop("poids", None)
-		inventaire.append(ref)
+	inventaire = [ref for ref in (_ref_item(ligne, get_doc_fn) for ligne in spec_p.get("inventaire") or [])
+				  if ref]
+	# Équipement PORTÉ (plates, épée…) : dans `slots`, il est lu comme celui d'un personnage —
+	# PA par zone (`sync_equipment_bonus`) et profil d'attaque (`combat._weapon_attacks`).
+	# ⚠️ Aucun contrôle de `restriction` ni d'emplacement : c'est du contenu ÉCRIT, pas un choix
+	# du joueur, et l'auteur répond de sa cohérence.
+	equipement = spec_p.get("equipement")
+	slots = {}
+	for slot, ligne in (equipement.items() if isinstance(equipement, dict) else ()):
+		ref = _ref_item(ligne, get_doc_fn)
+		if slot and ref:
+			slots[str(slot)] = ref
 	protege = {
 		"_id": f"protege:{uuid.uuid4().hex[:16]}",
 		"type": "protege",
@@ -790,13 +818,16 @@ def creer_protege(spec_p: dict, character: dict, quete_id: str, get_doc_fn,
 		"currentPV": 0,   # posés au max dérivé ci-dessous
 		"currentPM": 0,
 		"inventaire": inventaire,
-		"slots": {},
+		"slots": slots,
 		"equipment_bonus": {},
 		"competences_bonus": {},
 		"effets_actifs": [],
 		"combats_recompenses": [],   # requis par la finalisation de combat
-		"jouable": False,            # ← lu par le combat : ni tour, ni déplacement
+		"jouable": False,            # ← lu par le combat : ni tour à soi, ni déplacement
 	}
+	if spec_p.get("se_defend"):
+		# Lu par `combat.create_combat_doc` : un tour SERVEUR dans l'initiative, jamais un pas.
+		protege["se_defend"] = True
 	derived = _derives_de(protege)
 	protege["currentPV"] = derived.pv_max
 	protege["currentPM"] = derived.pm_max
@@ -807,6 +838,26 @@ def nom_complet(protege: dict) -> str:
 	return " ".join(
 		x for x in ((protege or {}).get("prenom"), (protege or {}).get("nom")) if x
 	).strip() or "l'inconnu"
+
+
+# Portrait d'un protégé : un nom de fichier NU (spec comme doc), dont le dossier se résout À
+# LA LECTURE. `pnj/` d'abord — une personne nommée dans le service d'un PNJ a son portrait
+# rangé avec les PNJ, et il y RESTE : on ne le copie jamais dans `characters/`. Ce dernier
+# n'est que le dernier ressort (les enfants de `gen_progeniture` y empruntent, faute de
+# portrait civil). ⚠️ Chemins relatifs à la racine du projet, comme les `app.mount` de main.py.
+PNJ_IMAGES_PATH = "templates/resources/pnj"
+CHARACTERS_IMAGES_PATH = "templates/resources/characters"
+_DOSSIERS_PORTRAIT = (("/pnj", PNJ_IMAGES_PATH), ("/characters", CHARACTERS_IMAGES_PATH))
+
+
+def image_protege(image: str, existe_fn=os.path.isfile) -> tuple[str, str]:
+	"""(route, dossier) du portrait d'un protégé : premier dossier où le fichier existe
+	(pnj → characters). Nom vide ou introuvable ⇒ `/characters`, le repli d'avant."""
+	if image:
+		for route, dossier in _DOSSIERS_PORTRAIT:
+			if existe_fn(os.path.join(dossier, image)):
+				return route, dossier
+	return _DOSSIERS_PORTRAIT[-1]
 
 
 def attacher(character: dict, protege: dict) -> None:
