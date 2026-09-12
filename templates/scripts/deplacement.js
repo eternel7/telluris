@@ -72,6 +72,29 @@ function pasAutoriseLocal(cells, nav, dims, x, y, dx, dy) {
 	return { ok: true, raison: '' };
 }
 
+// Le pas (dx,dy) est-il permis sous la RÈGLE nommée ? `'exploration'` (=== 1, les flèches de
+// play_town) ou `'combat'` (>= 1 && != 3, combat et guidage 🧭). Toute autre valeur ⇒ exploration.
+// SOURCE UNIQUE du mode test de l'éditeur ET du tracé des voies (scripts/voies.js) : ce que le
+// jeton refuse et ce que les régions coloriées disent ne peuvent pas diverger.
+//
+// Régime COMBAT : même géométrie, seul le prédicat de CASE change. Une case type 1 dont toutes
+// les sorties sont en terrain 2 est joignable en combat et INJOIGNABLE à pied — `_reachable_region`
+// inonde avec `_walkable` (>= 1, le terrain difficile servant de tissu conjonctif) là où
+// l'exploration exige `=== 1`.
+function pasAutoriseRegle(regle, cells, nav, dims, x, y, dx, dy) {
+	if (regle !== 'combat') return pasAutoriseLocal(cells, nav, dims, x, y, dx, dy);
+	const nx = x + dx, ny = y + dy;
+	if (!dims || nx < 0 || nx >= dims.x || ny < 0 || ny >= dims.y) {
+		return { ok: false, raison: 'hors carte' };
+	}
+	if (!caseFranchissable(cells, nx, ny)) {
+		const v = ((cells || [])[ny] || [])[nx];
+		return { ok: false, raison: v === undefined ? 'case absente de cells' : 'terrain ' + v };
+	}
+	if (!navAllows(nav, x, y, dx, dy)) return { ok: false, raison: 'mur nav' };
+	return { ok: true, raison: '' };
+}
+
 // Grisage des flèches d'un pavé — LE SEUL JOINT partagé par les trois pages.
 //
 // ⚠️ Prend des PRÉDICATS, pas des données : play_town lit un masque et une matrice d'accès

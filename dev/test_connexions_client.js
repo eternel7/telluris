@@ -47,7 +47,7 @@ function extraire(nom) {
 	throw new Error('accolades déséquilibrées dans ' + nom);
 }
 
-for (const f of ['_cxSlug', '_cxIdPropose', '_cxPosPosable', '_fusionConnexion', '_cxValider']) {
+for (const f of ['_cxSlug', '_cxIdPropose', '_cxPosPosable', '_fusionConnexion', '_cxValider', '_lieuxHorsTerrain']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -262,6 +262,64 @@ t('le type et l_état sont requis', () => {
 	assert.match(_cxValider(sansType, 'lieu:auxerre', [], true), /type/i);
 	const sansEtat = bon(); sansEtat.metadata.status = '';
 	assert.match(_cxValider(sansEtat, 'lieu:auxerre', [], true), /état/i);
+});
+
+// ── _lieuxHorsTerrain ────────────────────────────────────────────────────────
+// Alerte du mode Lieux : le prédicat est `!== 1`, PAS celui de `_cxPosPosable` (`>= 1`) — une
+// porte sur terrain difficile se pose, mais sort des flèches de déplacement de play_town.
+function lien(id, posIci, destId, label) {
+	const dest = { lieu: destId, pos: [0, 0] };
+	if (label) dest.details = { label };
+	return { _id: id, nodes: [{ lieu: 'lieu:auxerre', pos: posIci }, dest] };
+}
+
+t('une case 1 n_est pas signalée ; 0, 2 et 9 le sont, avec leur valeur', () => {
+	const r = _lieuxHorsTerrain([
+		lien('link:libre', [1, 0], 'lieu:libre'),
+		lien('link:zero', [0, 0], 'lieu:zero'),
+		lien('link:deux', [1, 1], 'lieu:deux'),
+		lien('link:neuf', [3, 2], 'lieu:neuf'),
+	], 'lieu:auxerre', GRILLE);
+	assert.deepStrictEqual(r.map(c => [c.cx, c.cy, c.v]), [[0, 0, 0], [1, 1, 2], [3, 2, 9]]);
+});
+
+t('une position hors grille est signalée avec v: null', () => {
+	const r = _lieuxHorsTerrain([lien('link:loin', [7, 1], 'lieu:loin'), lien('link:neg', [1, -1], 'lieu:neg')],
+		'lieu:auxerre', GRILLE);
+	assert.deepStrictEqual(r.map(c => [c.cx, c.cy, c.v]), [[1, -1, null], [7, 1, null]]);
+});
+
+t('un nœud sans pos, ou une connexion sans nœud sur le lieu courant, est ignoré', () => {
+	const sansPos = { _id: 'link:sans_pos', nodes: [{ lieu: 'lieu:auxerre' }, { lieu: 'lieu:x', pos: [0, 0] }] };
+	const ailleurs = { _id: 'link:ailleurs', nodes: [{ lieu: 'lieu:reims', pos: [0, 0] }, { lieu: 'lieu:x', pos: [0, 0] }] };
+	assert.deepStrictEqual(_lieuxHorsTerrain([sansPos, ailleurs, null], 'lieu:auxerre', GRILLE), []);
+});
+
+t('deux connexions sur la même case sont regroupées, label replié sur l_id du lieu', () => {
+	const r = _lieuxHorsTerrain([
+		lien('link:a', [0, 1], 'lieu:forge', 'La Forge'),
+		lien('link:b', [0, 1], 'lieu:tannerie'),
+	], 'lieu:auxerre', GRILLE);
+	assert.strictEqual(r.length, 1);
+	assert.deepStrictEqual(r[0].lieux, [
+		{ connId: 'link:a', destId: 'lieu:forge', label: 'La Forge' },
+		{ connId: 'link:b', destId: 'lieu:tannerie', label: 'lieu:tannerie' },
+	]);
+});
+
+t('sans grille, aucune règle : rien n_est signalé', () => {
+	const conns = [lien('link:zero', [0, 0], 'lieu:zero')];
+	assert.deepStrictEqual(_lieuxHorsTerrain(conns, 'lieu:auxerre', []), []);
+	assert.deepStrictEqual(_lieuxHorsTerrain(conns, 'lieu:auxerre', null), []);
+});
+
+t('les cases sont triées par ligne puis par colonne', () => {
+	const r = _lieuxHorsTerrain([
+		lien('link:c', [3, 2], 'lieu:c'),
+		lien('link:b', [0, 2], 'lieu:b'),
+		lien('link:a', [0, 0], 'lieu:a'),
+	], 'lieu:auxerre', GRILLE);
+	assert.deepStrictEqual(r.map(c => [c.cx, c.cy]), [[0, 0], [0, 2], [3, 2]]);
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);

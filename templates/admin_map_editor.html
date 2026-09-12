@@ -744,7 +744,11 @@
 	/* ⚠️ Le `display:flex`/`block` d'auteur l'emporterait sur le [hidden] de la feuille du
 	   navigateur (même piège que .aub-ecrivain-ligne dans play_town). */
 	#dim-card[hidden], #dim-attente[hidden] { display: none; }
-	#grille-card[hidden], #grille-attente[hidden] { display: none; }
+	#grille-card[hidden], #grille-attente[hidden], #voies-attente[hidden] { display: none; }
+	/* Tracé des voies : séparation des deux outils, légende en ligne. */
+	.voies-section { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px; }
+	.voies-legende { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 6px 0; }
+	.voies-pastille { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
 	/* Une ligne de la matrice par ligne du bloc-notes : défilement horizontal plutôt que retour. */
 	.grille-json { min-height: 180px; margin-bottom: 6px; white-space: pre; overflow: auto; cursor: text; }
 	/* Outil de repositionnement : le bouton armé et sa consigne. */
@@ -1053,6 +1057,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			<!-- Panneau Lieux -->
 			<div id="panel-lieux" style="display:none;">
 				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, ✏️ Lieu et 🔗 Connexion ouvrent leurs formulaires, 🧾 JSON édite les documents bruts. ➕ crée un sous-lieu sur cette case, 🏰 pose une porte de rempart (paire extérieur/intérieur).</div>
+				<div id="lieux-terrain-alerte" hidden style="border:1px solid rgba(230,140,40,0.75);background:rgba(230,140,40,0.12);color:#f0c080;border-radius:4px;padding:6px;margin-bottom:8px;font-size:.68rem;"></div>
 				<div id="lieu-add-section" style="margin-bottom:8px;"></div>
 				<div id="lieux-conn-list" style="max-height:320px;overflow-y:auto;font-size:.68rem;"></div>
 			</div>
@@ -1090,13 +1095,13 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 		     #mode-select, comme 📐 : ce que dit l'image ne dépend d'aucun mode d'édition.
 		     ⚠️ APERÇU SEUL — la proposition ne touche JAMAIS `grid` et rien ne part en base. -->
 		<div class="card" id="grille-card" hidden>
-			<div class="card-title">🔍 Grille depuis l'image</div>
+			<div class="card-title">🔍 Analyse d'image</div>
 			<div class="nav-info" style="margin-bottom:8px;">
-				Lit l'image du lieu et propose un terrain : <b>0</b> bâti, <b>1</b> libre,
-				<b>5</b> eau. Une <b>proposition</b>, pas une vérité — une case de 16 px contient
-				souvent un toit ET une ruelle.
+				<b>Proposer une grille</b> lit l'image du lieu et propose un terrain : <b>0</b> bâti,
+				<b>1</b> libre, <b>5</b> eau. Une <b>proposition</b>, pas une vérité — une case de 16 px
+				contient souvent un toit ET une ruelle.
 			</div>
-			<button class="btn" id="grille-proposer-btn">🔍 Proposer depuis l'image</button>
+			<button class="btn" id="grille-proposer-btn">🔍 Proposer une grille</button>
 			<div id="grille-attente" hidden>
 				<div class="dim-warn" id="grille-warn">⚠️ Aperçu seul : <b>rien n'est enregistré</b>.
 					Le pinceau continue d'écrire la grille réelle, pas celle-ci. Pour l'adopter,
@@ -1110,6 +1115,37 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				<button class="btn danger" id="grille-fermer-btn">✕ Fermer l'aperçu</button>
 			</div>
 			<div class="dim-msg" id="grille-msg"></div>
+			<!-- Tracé des voies : où l'on circule VRAIMENT. ⚠️ LECTURE SEULE — ni base ni `grid`.
+			     Source = la proposition ci-dessus si elle est affichée, sinon la grille en base. -->
+			<div class="voies-section">
+				<div class="nav-info" style="margin-bottom:8px;">
+					<b>Tracer les voies</b> montre où l'on circule vraiment : régions, goulots (trou de
+					rempart, gué, pont) ou carte de passage — sur la <b>proposition</b> si elle est
+					affichée, sinon sur la grille en base. Rien n'est enregistré.
+				</div>
+				<button class="btn" id="voies-tracer-btn">🛤️ Tracer les voies</button>
+				<div id="voies-attente" hidden>
+					<label class="dep-bascule">
+						<input type="checkbox" id="voies-regle-combat"> Règle combat / guidage 🧭 (≥ 1, ≠ 3 : eau et terrain difficile franchissables)
+					</label>
+					<label class="dep-bascule">
+						<input type="radio" name="voies-vue" value="regions" checked> Régions + goulots
+					</label>
+					<label class="dep-bascule" style="margin-top:2px;">
+						<input type="radio" name="voies-vue" value="passage"> Carte de passage (pas non pondérés)
+					</label>
+					<div class="nav-info voies-legende">
+						<span><span class="voies-pastille" style="background:rgba(70,200,110,0.6);"></span>région principale</span>
+						<span><span class="voies-pastille" style="background:linear-gradient(90deg,rgba(240,90,200,0.85),rgba(80,170,255,0.85),rgba(255,170,40,0.85));"></span>autre région (enclave)</span>
+						<span><span class="voies-pastille" style="border:2px solid rgba(255,40,220,1);border-radius:50%;"></span>goulot</span>
+						<span><span class="voies-pastille" style="width:34px;background:linear-gradient(90deg,rgba(255,220,0,0.2),rgba(255,110,0,0.6),rgba(255,0,0,0.9));"></span>passage faible → fort</span>
+					</div>
+					<div class="nav-info" id="voies-comptes" style="margin-bottom:8px;"></div>
+					<button class="btn" id="voies-recalculer-btn" style="margin-bottom:6px;">↻ Recalculer</button>
+					<button class="btn danger" id="voies-fermer-btn">✕ Fermer les voies</button>
+				</div>
+				<div class="dim-msg" id="voies-msg"></div>
+			</div>
 		</div>
 
 		</div>
@@ -1240,6 +1276,8 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
      sont écrites qu'une fois — dans deplacement.js, partagé avec play_town et le combat. -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
+<!-- voies.js APRÈS deplacement.js : le tracé des voies ne recopie aucune règle, il prend `pasAutoriseRegle`. -->
+<script src="{{ url_for('scripts', path='voies.js') }}"></script>
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────────
 let grid = [];					// 2D array [y][x]
@@ -1262,6 +1300,10 @@ let navSelectedCell = null; // {cx,cy} cellule nav sélectionnée
 // écraserait 4 128 cases en croyant en corriger une. Ici, la panne est impossible, pas
 // seulement improbable : aucun écrivain ne lit cette variable.
 let grilleProposee = null;   // [y][x] | null
+// Tracé des voies (carte 🔍) : {regle, vue, source, signature, graphe, regions, goulots, passage, ms} | null.
+// ⚠️ LECTURE SEULE, comme `grilleProposee` : rien ne l'écrit en base ni dans `grid`.
+let voies = null;
+let voiesPerime = false;     // dernier état de péremption AFFICHÉ — le DOM ne bouge qu'au changement
 
 // Color map for values
 const VALUE_COLORS = {
@@ -1356,6 +1398,7 @@ const saveRessourcesBtn	= document.getElementById('save-ressources-btn');
 const panelLieux		= document.getElementById('panel-lieux');
 const lieuxConnListEl	= document.getElementById('lieux-conn-list');
 const lieuAddSectionEl	= document.getElementById('lieu-add-section');
+const lieuxTerrainAlerteEl	= document.getElementById('lieux-terrain-alerte');
 const dimCard		= document.getElementById('dim-card');
 const dimActuelEl	= document.getElementById('dim-actuel');
 const dimXEl		= document.getElementById('dim-x');
@@ -1673,6 +1716,10 @@ lieuSelect.addEventListener('change', async (e) => {
 			// La laisser affichée ferait juger la carte d'à côté sur le calque de celle d'avant.
 			grilleProposee = null;
 			_grilleMsg('', false);
+			// Le tracé des voies décrivait la grille PRÉCÉDENTE : on le ferme plutôt que de le déclarer périmé.
+			voies = null;
+			voiesPerime = false;
+			_voiesMsg('', false);
 			canvas.style.cursor = '';
 			renderLieuJsonOverlay();   // changer de lieu ferme l'éditeur : ses docs ne sont plus les bons
 			lieuxDocCache = {};
@@ -1876,6 +1923,10 @@ function renderGrid() {
 		ctx.stroke();
 	}
 
+	// Voies tracées (carte 🔍 Analyse d'image) : dans TOUS les modes tant qu'un tracé est actif,
+	// sous les bordures nav, les zones et les points de lieux, qui restent lisibles par-dessus.
+	if (voies) _voiesDessiner(cw, ch);
+
 	// Aperçu de visée pendant un repositionnement : cadre VERT si la case est acceptée, ROUGE
 	// sinon. Branche à part et non détournement du survol de peinture ci-dessous, qui affiche
 	// la couleur et la valeur de `selectedVal` — sans rapport ici.
@@ -2032,6 +2083,8 @@ function renderGrid() {
 			const etat = etatPnjDeLieu(dest && dest.details);
 			if (cell.etat === null || LIEUX_PNJ_RANG[etat] < LIEUX_PNJ_RANG[cell.etat]) cell.etat = etat;
 		});
+		// Même prédicat que le bandeau du panneau : ce qui est listé est ce qui est cerclé.
+		const horsTerrain = new Set(_lieuxHorsTerrain(lieuxConnections, currentLocId, grid).map(c => `${c.cx},${c.cy}`));
 		Object.values(byCell).forEach(cell => {
 			const cx = cell.x * cw + cw / 2;
 			const cy = cell.y * ch + ch / 2;
@@ -2048,6 +2101,17 @@ function renderGrid() {
 			ctx.lineWidth = sel ? 4 : 2;
 			ctx.fill();
 			ctx.stroke();
+			// Terrain ≠ 1 : anneau rouge en pointillés AUTOUR du disque — ni sa couleur d'état ni
+			// le contour de sélection ne sont touchés.
+			if (horsTerrain.has(`${cell.x},${cell.y}`)) {
+				ctx.beginPath();
+				ctx.arc(cx, cy, r + Math.max(3, r * 0.35), 0, Math.PI * 2);
+				ctx.setLineDash([4, 3]);
+				ctx.strokeStyle = 'rgba(240,70,70,1)';
+				ctx.lineWidth = 2.5;
+				ctx.stroke();
+				ctx.setLineDash([]);
+			}
 			if (cell.conns.length > 1) {
 				ctx.fillStyle = '#fff';
 				ctx.font = `bold ${Math.max(9, r)}px "Share Tech Mono", monospace`;
@@ -2374,6 +2438,7 @@ function _connNu(conn) {
 }
 
 function renderLieuxConnList() {
+	renderLieuxTerrainAlerte();
 	renderLieuAddSection();
 	if (!lieuxConnListEl) return;
 	let list = lieuxConnections;
@@ -3994,6 +4059,11 @@ const grilleComptesEl = document.getElementById('grille-comptes');
 const grilleMsgEl	  = document.getElementById('grille-msg');
 const grilleJsonEl	  = document.getElementById('grille-json');
 const grilleProposerBtn = document.getElementById('grille-proposer-btn');
+const voiesTracerBtn	= document.getElementById('voies-tracer-btn');
+const voiesAttenteEl	= document.getElementById('voies-attente');
+const voiesComptesEl	= document.getElementById('voies-comptes');
+const voiesMsgEl		= document.getElementById('voies-msg');
+const voiesCombatEl		= document.getElementById('voies-regle-combat');
 
 // JSON valide, mais UNE ligne de la matrice par ligne : `JSON.stringify(…, null, 2)` poserait
 // une case par ligne, soit des milliers de lignes illisibles pour une grille de 40×30.
@@ -4030,6 +4100,16 @@ function _grilleMaj() {
 	// pourquoi elle ne marche pas ici.
 	grilleCard.hidden = !currentLocId;
 	if (grilleAttenteEl) grilleAttenteEl.hidden = !grilleProposee;
+	// Tracer les voies ne lit pas l'image mais la GRILLE : sans `cells`, rien à tracer. Pas de
+	// garde de redimensionnement — c'est un calcul local, et l'aperçu de taille est ce qu'on voit.
+	if (voiesAttenteEl) voiesAttenteEl.hidden = !voies;
+	if (voiesComptesEl) voiesComptesEl.textContent = _voiesComptes();
+	if (voiesTracerBtn) {
+		const sansGrille = !grid.length;
+		voiesTracerBtn.disabled = sansGrille;
+		voiesTracerBtn.style.opacity = sansGrille ? 0.45 : '';
+		voiesTracerBtn.title = sansGrille ? "Ce lieu n'a pas de grille (cells) : il n'y a pas de voie à tracer." : '';
+	}
 	if (!grilleProposerBtn) return;
 	// ⚠️ Refusé tant qu'un redimensionnement est en APERÇU : `cols`/`rows` ne décrivent alors
 	// plus le doc en base, et le serveur relirait le lieu tel qu'il y est encore. Même garde,
@@ -4141,6 +4221,148 @@ const grilleFermerBtn = document.getElementById('grille-fermer-btn');
 if (grilleFermerBtn) grilleFermerBtn.addEventListener('click', fermerGrilleProposee);
 const grilleAppliquerBtn = document.getElementById('grille-appliquer-btn');
 if (grilleAppliquerBtn) grilleAppliquerBtn.addEventListener('click', appliquerGrilleProposee);
+
+// ── ANALYSE D'IMAGE : tracer les voies ─────────────────────────────────────
+// Où circule-t-on VRAIMENT ? Régions connexes + goulots, ou carte de passage — calculées par
+// `templates/scripts/voies.js` (pur, testé) sur la règle de marche de deplacement.js.
+// ⚠️ LECTURE SEULE : rien ne part en base, `grid` n'est jamais touché.
+// ⚠️ SOURCE = la proposition d'image si elle est affichée, sinon la grille en base : c'est
+// l'intérêt de réunir les deux outils — juger la proposition AVANT de l'appliquer.
+
+// La région principale (rang 0) garde un vert discret : c'est la norme, pas l'alerte. Les autres
+// cyclent sur des teintes vives, pour qu'une enclave saute aux yeux.
+const VOIES_REGION_PRINCIPALE = 'rgba(70,200,110,0.25)';
+const VOIES_REGIONS = [
+	'rgba(240,90,200,0.5)', 'rgba(80,170,255,0.5)', 'rgba(255,170,40,0.5)',
+	'rgba(170,110,255,0.5)', 'rgba(40,220,220,0.5)', 'rgba(255,80,80,0.5)',
+];
+
+function _voiesSource() { return grilleProposee || grid; }
+function _voiesDims() { return { x: cols, y: rows }; }
+function _voiesVue() {
+	const r = document.querySelector('input[name="voies-vue"]:checked');
+	return r ? r.value : 'regions';
+}
+
+function _voiesMsg(texte, erreur) {
+	if (!voiesMsgEl) return;
+	voiesMsgEl.textContent = texte || '';
+	voiesMsgEl.style.color = erreur ? 'var(--danger)' : 'var(--accent)';
+}
+
+function _voiesComptes() {
+	if (!voies) return '';
+	const t = voies.regions.tailles;
+	const total = t.reduce((a, b) => a + b, 0);
+	return [
+		voies.source === 'proposition' ? "Source : proposition d'image" : 'Source : grille en base',
+		voies.regle === 'combat' ? 'règle combat / guidage 🧭' : 'règle exploration',
+		`${total} case(s) praticable(s)`,
+		`${t.length} région(s)` + (t.length > 1 ? ` (plus grandes : ${t.slice(0, 3).join(', ')})` : ''),
+		`${total - (t[0] || 0)} case(s) hors de la région principale`,
+		`${voies.goulots.length} goulot(s)`,
+	].join(' · ');
+}
+
+function tracerVoies() {
+	if (!currentLocId || !grid.length) return;
+	try {
+		const t0 = performance.now();
+		const source = _voiesSource();
+		const dims = _voiesDims();
+		const regle = voiesCombatEl && voiesCombatEl.checked ? 'combat' : 'exploration';
+		const graphe = voiesGraphe(source, nav, dims, regle);
+		const regions = voiesRegions(graphe);
+		const vue = _voiesVue();
+		voies = {
+			regle, vue,
+			source: grilleProposee ? 'proposition' : 'base',
+			signature: voiesSignature(source, nav, dims),
+			graphe, regions,
+			goulots: voiesGoulots(graphe, regions),
+			// La carte de passage est la seule coûteuse : calculée au premier passage sur sa vue.
+			passage: vue === 'passage' ? voiesPassage(graphe) : null,
+		};
+		voiesPerime = false;
+		_voiesMsg(`✓ Voies tracées en ${Math.round(performance.now() - t0)} ms. Rien n'est enregistré.`, false);
+	} catch (err) {
+		voies = null;
+		_voiesMsg(`✗ ${err.message}`, true);
+	}
+	_grilleMaj();
+	renderGrid();
+}
+
+function fermerVoies() {
+	voies = null;
+	voiesPerime = false;
+	_voiesMsg('', false);
+	_grilleMaj();
+	renderGrid();
+}
+
+// Changer de VUE ne recalcule rien d'autre que la carte de passage manquante. Un tracé périmé,
+// lui, est refait en entier : c'est une nouvelle demande de l'admin.
+function changerVueVoies() {
+	if (!voies || voiesPerime) { tracerVoies(); return; }
+	voies.vue = _voiesVue();
+	if (voies.vue === 'passage' && !voies.passage) voies.passage = voiesPassage(voies.graphe);
+	renderGrid();
+}
+
+// Appelé par `renderGrid`. ⚠️ Un tracé dont l'empreinte ne correspond plus à ce qui est affiché
+// (pinceau, nav, aperçu fermé ou appliqué, redimensionnement) n'est PAS dessiné : il mentirait.
+function _voiesDessiner(cw, ch) {
+	const perime = voiesSignature(_voiesSource(), nav, _voiesDims()) !== voies.signature;
+	if (perime !== voiesPerime) {
+		voiesPerime = perime;
+		_voiesMsg(perime ? '⚠️ Grille modifiée depuis le tracé — ↻ Recalculer.' : '', perime);
+	}
+	if (perime) return;
+	const { W, N } = voies.graphe;
+	ctx.save();
+	if (voies.vue === 'passage' && voies.passage) {
+		// Rampe transparent → jaune → rouge sur sqrt(v) : sans racine, le pic d'un gué écraserait
+		// tout le reste dans le transparent.
+		for (let i = 0; i < N; i++) {
+			const v = voies.passage[i];
+			if (!(v > 0)) continue;
+			const s = Math.sqrt(v);
+			ctx.fillStyle = `rgba(255,${Math.round(220 * (1 - s))},0,${(0.12 + 0.63 * s).toFixed(3)})`;
+			ctx.fillRect((i % W) * cw, Math.floor(i / W) * ch, cw, ch);
+		}
+	} else {
+		const region = voies.regions.region;
+		for (let i = 0; i < N; i++) {
+			const r = region[i];
+			if (r < 0) continue;
+			ctx.fillStyle = r === 0 ? VOIES_REGION_PRINCIPALE : VOIES_REGIONS[(r - 1) % VOIES_REGIONS.length];
+			ctx.fillRect((i % W) * cw, Math.floor(i / W) * ch, cw, ch);
+		}
+		// Goulots : anneau magenta, rayon croissant (log) avec l'importance, borné à la case.
+		const plus = voies.goulots.reduce((m, g) => Math.max(m, g.importance), 1);
+		const demi = Math.min(cw, ch) / 2;
+		ctx.strokeStyle = 'rgba(255,40,220,1)';
+		ctx.shadowColor = 'rgba(255,40,220,0.9)';
+		ctx.shadowBlur = 6;
+		ctx.lineWidth = Math.max(1.5, demi * 0.25);
+		voies.goulots.forEach(g => {
+			const rayon = Math.max(3, demi * (0.45 + 0.55 * Math.log(1 + g.importance) / Math.log(1 + plus)));
+			ctx.beginPath();
+			ctx.arc((g.i % W) * cw + cw / 2, Math.floor(g.i / W) * ch + ch / 2, rayon, 0, Math.PI * 2);
+			ctx.stroke();
+		});
+	}
+	ctx.restore();
+}
+
+if (voiesTracerBtn) voiesTracerBtn.addEventListener('click', tracerVoies);
+const voiesRecalculerBtn = document.getElementById('voies-recalculer-btn');
+if (voiesRecalculerBtn) voiesRecalculerBtn.addEventListener('click', tracerVoies);
+const voiesFermerBtn = document.getElementById('voies-fermer-btn');
+if (voiesFermerBtn) voiesFermerBtn.addEventListener('click', fermerVoies);
+if (voiesCombatEl) voiesCombatEl.addEventListener('change', () => { if (voies) tracerVoies(); });
+document.querySelectorAll('input[name="voies-vue"]').forEach(r => r.addEventListener('change', changerVueVoies));
 // ── LIEUX : repositionnement d'une porte ───────────────────────────────────
 // Déplacer une connexion, c'est réécrire la `pos` du nœud QUI PORTE LE LIEU COURANT — la case
 // que le joueur doit occuper pour voir le lien (get_lieu_links est scopé à sa case). La saisir
@@ -4160,6 +4382,62 @@ function _caseAccessible(cx, cy) {
 	// exister. `Number(undefined)` vaut NaN, et NaN >= 1 est faux — la case est refusée, ce qui
 	// est le bon défaut pour une case qui n'existe pas.
 	return Number((grid[cy] || [])[cx]) >= 1;
+}
+
+// Connexions du lieu courant dont la case n'est pas un terrain LIBRE (`!== 1`), groupées par case.
+// ⚠️ Écart VOULU avec `_caseAccessible` (`>= 1`) : poser une porte sur 2/3/5 reste permis, mais les
+// flèches de play_town se grisent dès que `loc_access !== 1` — la porte n'est alors atteignable que
+// par le guidage 🧭 (sur 0/9, par rien). C'est un AVERTISSEMENT, jamais un refus.
+// Grille vide ⇒ aucune règle (même contrat que `_cxPosPosable`). Hors grille ⇒ signalée, `v: null`.
+// PURE : dev/test_connexions_client.js l'extrait par nom — aucune globale lue.
+function _lieuxHorsTerrain(conns, iciId, grille) {
+	if (!grille || !grille.length) return [];
+	const parCase = {};
+	(conns || []).forEach(conn => {
+		const nodes = (conn && conn.nodes) || [];
+		const ici = nodes.find(n => n && n.lieu === iciId);
+		if (!ici || !Array.isArray(ici.pos)) return;
+		const cx = ici.pos[0], cy = ici.pos[1];
+		const brut = Number((grille[cy] || [])[cx]);
+		if (brut === 1) return;
+		const dest = nodes.find(n => n && n.lieu !== iciId) || null;
+		const cle = `${cx},${cy}`;
+		const c = (parCase[cle] = parCase[cle] || { cx, cy, v: Number.isFinite(brut) ? brut : null, lieux: [] });
+		c.lieux.push({
+			connId: conn._id,
+			destId: dest ? dest.lieu : '',
+			label: (dest && dest.details && dest.details.label) || (dest && dest.lieu) || '?',
+		});
+	});
+	return Object.values(parCase).sort((a, b) => a.cy - b.cy || a.cx - b.cx);
+}
+
+// Bandeau du panneau Lieux. Appelé par `renderLieuxConnList`, donc à l'entrée dans le mode, au
+// retour de `fetchLieuxConnections` et après chaque enregistrement ou déplacement de porte.
+function renderLieuxTerrainAlerte() {
+	if (!lieuxTerrainAlerteEl) return;
+	const cases = _lieuxHorsTerrain(lieuxConnections, currentLocId, grid);
+	if (!cases.length) { lieuxTerrainAlerteEl.innerHTML = ''; lieuxTerrainAlerteEl.hidden = true; return; }
+	const total = cases.reduce((s, c) => s + c.lieux.length, 0);
+	const lignes = cases.map(c => {
+		const terrain = c.v === null ? 'hors grille' : `terrain ${c.v} — ${LEGEND_LABELS[c.v] ?? 'Valeur ' + c.v}`;
+		const noms = c.lieux.map(l => _escHtml(l.label)).join(', ');
+		// `Number(...)` : seuls des nombres partent dans le `onclick`, jamais une chaîne du doc.
+		return `<div style="cursor:pointer;margin-top:3px;" title="Sélectionner la case"`
+			+ ` onclick="selectionnerLieuxCase(${Number(c.cx)},${Number(c.cy)})">`
+			+ `<b>[${Number(c.cx)},${Number(c.cy)}]</b> · ${_escHtml(terrain)} : ${noms}</div>`;
+	}).join('');
+	lieuxTerrainAlerteEl.innerHTML = `<div style="font-weight:bold;">⚠️ ${total} lieu(x) sur une case de terrain ≠ 1</div>`
+		+ `<div style="color:#b98;margin-top:2px;">Hors des flèches de déplacement : 🧭 seulement (2/3/5), inatteignable (0/9).</div>`
+		+ lignes;
+	lieuxTerrainAlerteEl.hidden = false;
+}
+
+// Même geste qu'un clic sur le point : sélectionne la case, filtre la liste.
+function selectionnerLieuxCase(cx, cy) {
+	lieuxSelectedCell = { cx, cy };
+	renderLieuxConnList();
+	if (grid.length) renderGrid();
 }
 
 function armerRepositionnement(connId, destId) {
@@ -5869,6 +6147,7 @@ function updateLegendLieux() {
 	};
 	LIEUX_PNJ_ETATS.forEach(e => ligne(e.couleur, e.label));
 	ligne('rgba(120,120,130,0.35)', 'Case sélectionnée (contour doré)', '2px solid rgba(220,180,75,0.98)');
+	ligne('transparent', 'Case de terrain ≠ 1 : hors des flèches de déplacement (anneau rouge)', '2px dashed rgba(240,70,70,1)');
 	const note = document.createElement('div');
 	note.className = 'legend-item';
 	note.style.color = '#888';
@@ -6206,22 +6485,12 @@ const DEP_DIRS = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
 // Le prédicat COURANT — source unique du grisage, du pas et du texte d'aide.
 function depPasAutorise(dx, dy) {
 	if (!depPos) return { ok: false, raison: 'aucun jeton' };
-	if (!depReglesCombat) {
-		return pasAutoriseLocal(grid, nav, { x: cols, y: rows }, depPos.x, depPos.y, dx, dy);
-	}
-	// Régime COMBAT : même géométrie, seul le prédicat de CASE change. C'est cet écart-là que
-	// le mode doit rendre visible — une case type 1 dont toutes les sorties sont en terrain 2
-	// est joignable en combat et INJOIGNABLE à pied. Le jeton peut donc naître ENFERMÉ, huit
-	// flèches grises, sans que ce soit un bug : `_reachable_region` inonde avec `_walkable`
-	// (>= 1, le terrain difficile servant de tissu conjonctif) là où l'exploration exige `=== 1`.
-	const nx = depPos.x + dx, ny = depPos.y + dy;
-	if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return { ok: false, raison: 'hors carte' };
-	if (!caseFranchissable(grid, nx, ny)) {
-		const v = (grid[ny] || [])[nx];
-		return { ok: false, raison: v === undefined ? 'case absente de cells' : 'terrain ' + v };
-	}
-	if (!navAllows(nav, depPos.x, depPos.y, dx, dy)) return { ok: false, raison: 'mur nav' };
-	return { ok: true, raison: '' };
+	// Les deux régimes vivent dans deplacement.js (`pasAutoriseRegle`), PARTAGÉS avec le tracé
+	// des voies : ce que le jeton refuse et ce que les régions coloriées disent ne divergent pas.
+	// En combat, le jeton peut naître ENFERMÉ (huit flèches grises) sans que ce soit un bug : une
+	// case type 1 cernée de terrain 2 est joignable en combat, pas à pied — cf. le commentaire là-bas.
+	return pasAutoriseRegle(depReglesCombat ? 'combat' : 'exploration',
+		grid, nav, { x: cols, y: rows }, depPos.x, depPos.y, dx, dy);
 }
 
 function depMajFleches() {

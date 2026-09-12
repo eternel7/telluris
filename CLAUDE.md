@@ -27,13 +27,15 @@ node dev/test_lieu_form_client.js  # exécution du FORMULAIRE de lieu (capacité
 node dev/test_connexions_client.js # exécution du FORMULAIRE de connexion (id, fusion, case posable)
 node dev/test_dialogues_client.js  # exécution de l'ÉDITEUR de dialogues/offres (fusion, atteignabilité, graphe)
 node dev/test_portes_client.js     # exécution des PORTES DE REMPART (paire de lieux + 3 connexions)
+node dev/test_voies_client.js      # exécution du TRACÉ DES VOIES (régions, goulots, carte de passage)
 ```
 
-Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les neuf harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
+Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les dix harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
 
 - `check_js.js` neutralise les expressions Jinja avant de passer le code au parseur de Node — ⚠️ en `(0)` et non `0`, sinon `{{ liste | tojson }}.forEach(...)` deviendrait `0.forEach(...)`, faux positif garanti. ⚠️ Il contrôle **aussi `templates/scripts/*.js`** : les `<script src=…>` sont sautés (ils n'ont pas de corps dans la page), si bien que `nav.js`, `battle_map.js` et `deplacement.js` n'étaient couverts par **rien**. Un `.js` n'ayant pas de balise, le fichier entier est traité comme un unique bloc.
 - `test_slots_client.js` extrait les fonctions **pures** du template (par nom, accolades équilibrées) et les exécute dans un contexte `vm` : il ferme la classe de bug « à qui appartient ce que j'affiche et ce que j'écris ? », qu'aucun test pytest ne peut atteindre. **Hors de portée sans jsdom** : rendu DOM, clic long, ordre inversé en mobile — à vérifier en jeu.
 - `test_deplacement_client.js` est le seul des quatre à **charger directement un `.js`** (`scripts/nav.js` puis `scripts/deplacement.js`) : il n'y a rien à extraire d'un template. Il est aussi le **seul test des règles de marche du jeu**, et ce n'est pas une commodité — ⚠️ **il n'existe AUCUNE règle de marche côté serveur** : la branche x/y de `move_character` ne valide que les bornes, ni terrain ni `nav`. `deplacement.js` ne double donc pas le serveur, **il EST la règle**.
+- `test_voies_client.js` charge de même `nav.js`, `deplacement.js` puis **`voies.js`** : le tracé des voies ne recopie aucune règle (`pasAutoriseRegle`). Il verrouille le trou d'une case = goulot, le trou **en coin** (diagonales), l'eau qui sépare à pied et relie en combat, la brèche de 2 cases **sans** goulot, et Tarjan **itératif** (file de 20 000 cases).
 - `test_lot_lieux_client.js` (même méthode, même `runInThisContext`) verrouille le **lot de lieux**. ⚠️ Son objet est une classe de bug SILENCIEUSE : `import-bulk` fait un PUT complet, donc deux `link:*` de même `_id` dans un lot ne laissent qu'une porte en base et les autres boutiques deviennent **inatteignables sans la moindre erreur**. D'où le paramètre `dejaPris` de `_prochainLinkId` — le compteur se dérive de `lieuxConnections`, qui ne bouge pas tant que rien n'est écrit.
 - `test_connexions_client.js` (même méthode) verrouille le **formulaire de connexion**. ⚠️ Deux classes de bug SILENCIEUSES : `PUT /admin/doc` fait un PUT complet et ne refuse **rien** (un `link:*` déjà pris est écrasé, la porte d'un autre lieu disparaît sans erreur — d'où `_cxIdPropose` et la liste complète des `_id`), et le doc écrit est le doc **entier** (ce que le formulaire ne possède pas doit survivre à `_fusionConnexion` : clés inconnues du doc **et de chaque nœud**).
 - `test_dialogues_client.js` (même méthode) verrouille l'**éditeur de dialogues** (`/admin/dialogues`). ⚠️ Il sème `globalThis.VOCAB` avant d'évaluer les fonctions — elles lisent le vocabulaire servi par le serveur. Deux objets : la **fusion** (le JSON produit part vers `import-bulk`, PUT complet — une clé inconnue du doc, d'un nœud ou d'un choix qui ne survit pas est une perte SILENCIEUSE, `services.escorte.recherche` et `recompenses.items`/`rang_guilde` en tête) et l'**atteignabilité**, dont les entrées incluent les nœuds de **service** : les omettre ferait passer une centaine de nœuds corrects pour du « texte mort ».
@@ -114,6 +116,7 @@ templates/
                          #   (part-character-card, part-slot-bar-css, part-move-panel)
   scripts/               # JS partagé, servi par le mount /scripts
                          #   battle_map.js · nav.js (bitmask nav) · deplacement.js (règles de marche)
+                         #   voies.js (tracé des voies de l'éditeur : régions, goulots, passage)
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
   export_bestiaire.py    # export d'équilibrage (writer OOXML → utils/xlsx.py)
@@ -141,6 +144,7 @@ dev/
   test_connexions_client.js # tests d'EXÉCUTION du formulaire de connexion (éditeur de carte)
   test_dialogues_client.js # tests d'EXÉCUTION de l'éditeur de dialogues/offres (/admin/dialogues)
   test_portes_client.js  # tests d'EXÉCUTION des portes de rempart (éditeur de carte)
+  test_voies_client.js   # tests d'EXÉCUTION du tracé des voies (scripts/voies.js)
 tests/                   # tests purs, un fichier par système
 ```
 
@@ -217,6 +221,7 @@ Le bouton `✏️ Éditer` d'une ligne de connexion rouvre le **même** formulai
 - ⚠️ **`PUT /admin/doc` ne refuse RIEN** (PUT complet, `_rev` rattaché en base) : réutiliser un `link:*` existant l'écrase en silence. D'où `_cxIdPropose` (convention `link:<là-bas>_to_<ici>`) et la liste **complète** des `_id`, lue par ouverture sur `GET /admin/table/data?type=connection` — `lieuxConnections` ne voit que le lieu courant. Lecture échouée ⇒ le formulaire **le dit**.
 - ⚠️ `_fusionConnexion` = `_fusionLieu` pour les connexions : survivent `_rev`, les clés inconnues du doc **et de chaque nœud** ; `champs.noeuds` est dans l'**ordre du doc** (`cxIciIdx`), permuter déplacerait la porte ; un label vidé est **supprimé** (sinon `get_lieu_links` ne peut plus replier sur le label du lieu).
 - ⚠️ Une seule règle de case, `_cxPosPosable` : « s'il y a une grille, la case doit être praticable » (`>= 1`, celui de `_caseAccessible` donc du voile rouge) ; `cells` absent ⇒ aucune règle. La visée 🎯 et la saisie à la main partagent ce prédicat.
+- ⚠️ **Alerte terrain ≠ 1** (`_lieuxHorsTerrain`, bandeau `#lieux-terrain-alerte` + anneau rouge pointillé sur le point) : un prédicat **différent**, `!== 1` et non `>= 1`. Une porte sur 2/3/5 reste **posable**, mais les flèches de play_town se grisent dès que `loc_access !== 1` (🧭 seul ; 0/9 : inatteignable). C'est un avertissement, pas un refus. Hors grille ⇒ signalée ; `cells` absent ⇒ rien.
 - ⚠️ La visée 🎯 écrit **dans le formulaire**, pas en base (celle de l'éditeur JSON enregistre aussitôt), et **efface le panneau en `pointer-events:none`** le temps du geste : il recouvre la moitié droite de la carte. Refusée hors mode Lieux ; le formulaire entier est refusé tant qu'un **redimensionnement est en aperçu**.
 - ⚠️ `_id` **gelé en édition** ; la destination reste modifiable et l'`_id` ne la suit pas.
 - ⚠️ **La CRÉATION générique n'existe plus** : le bouton « Relier à un lieu existant » a cédé la place à « 🏰 Ajouter une porte de rempart » (section suivante). `openConnForm` garde son mode `'creation'`, dont l'édition se sert pour pré-remplir. Voir et éditer une connexion quelconque reste offert par « 🔗 Connexion ».
@@ -242,6 +247,16 @@ Poser N boutiques d'un coup, sans écrire un `dev/gen_magasins_<ville>.py` de pl
 - Enseignes : `utils/enseignes.py` (pur, `rand_fn` injecté) croise des tournures de métier avec les toponymes de la cité ; ouvrir une ville neuve ne demande **rien** (repli sur `TOPONYMES_DEFAUT`), l'enrichir se fait dans ce seul fichier. Servi par `POST /api/lieux/enseignes`.
 - `GET /api/lieux/creation_options` porte désormais aussi `lieux` (`_id`, `categorie`, `image`, `lieu_parent`, `label`, projetés) : compter par catégorie, écarter une façade déjà posée dans la ville, exclure une enseigne existante.
 - ⚠️ **`_lotDocs` n'écrit un `pnj` que si le tenancier générique existe** (5ᵉ paramètre `tenanciers`) : un lot d'auberges posait sinon N références vers `pnj:marchand_auberge`, **qui n'existe pas**. Un lot ne pose ni capacité ni champ propre — la catégorie suffit, le reste est au formulaire mono-lieu.
+
+### Analyse d'image — tracer les voies (`/admin/editor`)
+La carte « 🔍 Analyse d'image » réunit **Proposer une grille** (lecture de l'image, `utils/grille_image.py`) et **Tracer les voies** : où l'on circule vraiment, pour juger une carte (trou de rempart, gué, enclave). Calcul `templates/scripts/voies.js`, rendu `_voiesDessiner` dans `renderGrid`.
+
+- ⚠️ **LECTURE SEULE** : ni base ni `grid`. **Source = la proposition si elle est affichée**, sinon la grille en base — on juge une proposition AVANT ✔ Appliquer.
+- ⚠️ **`pasAutoriseRegle(regle, …)`** (deplacement.js) est le prédicat de pas UNIQUE des voies **et** du mode test (`depPasAutorise` n'est plus qu'un appel) : bascule exploration `=== 1` / combat-guidage `>= 1 && != 3`, `nav` compris.
+- Deux vues : **régions** (rang 0 = principale, vert discret ; les enclaves en teintes vives) + **goulots** (points d'articulation, cerclés magenta), ou **carte de passage** (Brandes, sources au pas fixe `VOIES_SOURCES_MAX`, rampe sur `sqrt`).
+- ⚠️ Goulot = importance (plus petit côté isolé) `>= VOIES_GOULOT_MIN` (3), sinon chaque impasse en serait un. Une brèche de **2 cases** n'a pas de goulot : c'est la carte de passage qui la montre.
+- ⚠️ **Péremption** : `voiesSignature` (cases + `nav` + dimensions) comparée à chaque rendu ; un tracé périmé **n'est pas dessiné** (message « ↻ Recalculer »). Changer de lieu le ferme.
+- ⚠️ Pas **non pondérés** : le surcoût ×2/×5 du terrain difficile en combat n'entre pas dans la carte de passage.
 
 ### Écrire un dialogue et une quête — `/admin/dialogues` (`admin_dialogues.html`)
 Éditer un doc `pnj:*` par formulaire : identité, nœuds/choix (overlay à droite), services, et les **quêtes AUTHORÉES** du jeu — qui ne sont pas des docs `quete:*` mais les specs `services.transport.offre` / `services.escorte.offre`. Une **vue graphe SVG en lecture seule** (couches par BFS, `_dlgLayoutGraphe`) montre nœuds inatteignables et `next` morts.

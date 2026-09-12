@@ -169,6 +169,42 @@ t('l’ordre des contrôles : le TERRAIN prime sur nav (le motif le plus parlant
 	assert.strictEqual(pasAutoriseLocal(CELLS, nav, DIMS, 0, 0, 1, 1).raison, 'terrain 2');
 });
 
+console.log('\n── pasAutoriseRegle : UNE règle de pas par régime (mode test + voies) ───────');
+
+t('exploration : rend exactement pasAutoriseLocal, dans les huit directions', () => {
+	const nav = { '0,2': 4, '1,0': 16 };
+	// ⚠️ Liste locale : `HUIT` est un `const` déclaré plus bas, encore en zone morte ici.
+	const dirs = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+	for (const [x, y] of [[0, 0], [0, 2], [4, 3], [1, 0]]) {
+		for (const [dx, dy] of dirs) {
+			assert.deepStrictEqual(pasAutoriseRegle('exploration', CELLS, nav, DIMS, x, y, dx, dy),
+				pasAutoriseLocal(CELLS, nav, DIMS, x, y, dx, dy), `(${x},${y}) +(${dx},${dy})`);
+		}
+	}
+});
+
+t('une règle inconnue retombe sur l’exploration', () => {
+	assert.deepStrictEqual(pasAutoriseRegle('vol', CELLS, {}, DIMS, 0, 1, 1, 0),
+		{ ok: false, raison: 'terrain 2' });
+});
+
+t('combat : terrain difficile et eau passent, falaise et mur refusés, motif nommé', () => {
+	assert.deepStrictEqual(pasAutoriseRegle('combat', CELLS, {}, DIMS, 0, 1, 1, 0), { ok: true, raison: '' });
+	assert.deepStrictEqual(pasAutoriseRegle('combat', [[1, 5]], {}, { x: 2, y: 1 }, 0, 0, 1, 0),
+		{ ok: true, raison: '' });
+	assert.deepStrictEqual(pasAutoriseRegle('combat', CELLS, {}, DIMS, 1, 0, 1, 1), { ok: false, raison: 'terrain 3' });
+	assert.deepStrictEqual(pasAutoriseRegle('combat', CELLS, {}, DIMS, 2, 0, 1, 1), { ok: false, raison: 'terrain 0' });
+});
+
+t('combat : hors carte, ligne absente et mur nav', () => {
+	assert.deepStrictEqual(pasAutoriseRegle('combat', CELLS, {}, DIMS, 0, 0, -1, 0), { ok: false, raison: 'hors carte' });
+	const courtes = [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]];
+	assert.deepStrictEqual(pasAutoriseRegle('combat', courtes, {}, DIMS, 2, 1, 0, 1),
+		{ ok: false, raison: 'case absente de cells' });
+	assert.deepStrictEqual(pasAutoriseRegle('combat', CELLS, { '1,0': 64 }, DIMS, 0, 0, 1, 0),
+		{ ok: false, raison: 'mur nav' });
+});
+
 console.log('\n── majFleches / verrouillerFleches : le PARCOURS du DOM ────────────────────');
 
 // Faux boutons : juste ce que les deux fonctions touchent (dataset, disabled, classList).
