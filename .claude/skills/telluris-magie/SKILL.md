@@ -1,6 +1,6 @@
 ---
 name: telluris-magie
-description: Spells, vocation skills and focus: PM-costed spells with components/schools, vocation active/passive skills (mirrors spells), and the guidance/quest-bias focalisation mechanic (utils/sorts.py, competences.py, focalisation.py). Load when working on spells, vocation skills, or the focalisation system.
+description: Spells, vocation skills and focus — PM-costed spells with components/schools, vocation active/passive skills (mirrors spells), and the guidance/quest-bias focalisation mechanic (utils/sorts.py, competences.py, focalisation.py). Load when working on spells, vocation skills, or the focalisation system.
 ---
 
 ### Sorts — PM, composants, écoles

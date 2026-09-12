@@ -1,6 +1,6 @@
 ---
 name: telluris-admin-tools
-description: Admin tooling and tunable world variables: the dev/ script launcher screen and the full rules:world_variables catalogue (utils/dev_tools.py, main.py /admin/dev-tools routes, world variable loading). Load when adding a dev/ script to the admin launcher, or looking up/adding a world-tunable variable.
+description: Admin tooling, content generators and tunable world variables — the dev/ script launcher screen, the catalogue of dev/gen_*.py content generators (dump-driven, idempotent imports), and the full rules:world_variables catalogue (utils/dev_tools.py, main.py /admin/dev-tools routes, world variable loading). Load when adding a dev/ script to the launcher, writing or re-running a content generator, or looking up/adding a world-tunable variable.
 ---
 
 ### Outils de `dev/` lançables depuis `/admin`
@@ -16,6 +16,26 @@ description: Admin tooling and tunable world variables: the dev/ script launcher
 **Un seul run à la fois** (`_VERROU`, 409 sinon) : deux générateurs écrivent volontiers le même `jsons/*_a_importer.json`, et le journal est un tampon unique. Le tampon vit **dans le serveur** (liste bornée à `MAX_LIGNES`, `base` = nombre de lignes tombées) et le client rappelle l'**offset absolu** qu'on lui a donné → une requête perdue ne troue pas le journal, un **rechargement de page reprend le fil** d'un run en cours, et un débordement est **annoncé** plutôt que masqué. C'est ce que la scrutation par offset apporte sur un flux ouvert. ⚠️ Le notepad s'écrit en **`textContent`**, jamais `innerHTML` : ce qui défile est la sortie brute d'un script. ⚠️ « Suivre la fin » ne recolle au bas que si on y **était déjà** — sinon lire en remontant serait impossible.
 
 ⚠️ **Deux entrées ne peuvent pas tourner dans le conteneur tel qu'il est** — elles restent au catalogue pour que la raison soit **lisible**, plutôt que d'être absentes sans explication : `node` n'est pas dans l'image (`check_js` / `test_slots_client` → **127**, `[introuvable]`). L'y ajouter suffit, sans une ligne de code — c'est ce qui a été fait pour **`pytest`, désormais dans le `pip install` du `docker-compose.yml`** (avec `Pillow`) : cette entrée-là tourne. ⚠️ L'entrée `pytest` porte `-p no:cacheprovider` (sans quoi elle écrirait `.pytest_cache`, et sa fiche « Lecture seule » mentirait) et `--color=no` (un `PY_COLORS` traînant cracherait des séquences ANSI dans un notepad qui écrit en `textContent`).
+
+
+### Générateurs de contenu — `dev/gen_*.py`
+Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le champ ajouté, écrire `jsons/*_a_importer.json` → régénération **idempotente** (CLAUDE.md §11). Avant de livrer : absence de collision d'`_id`, rejeu contre un export récent. Catalogue (non exhaustif — `ls dev/gen_*.py`) :
+- `gen_marchands.py` — tenanciers génériques `pnj:marchand_*` (une catégorie à recettes = un tenancier).
+- `gen_magasins_auxerre.py` — boutiques d'Auxerre (même forme que le lot de lieux de l'éditeur).
+- `gen_magasins_superieurs.py` — les 18 grandes manufactures de Lutèce (enseignes, portes, tenanciers, items exclusifs).
+- `gen_specialites_france.py` — 10 spécialités de terroir (`lieu_portee`) + cités rattachées à `lieu:france`.
+- `gen_lutecia.py` — zones d'influence de la capitale (urbain, Seine, faubourgs, campagne).
+- `gen_coherence_france.py` — ressources + espèces manquantes de `lieu:france` (+ `restriction_tags` magique).
+- `gen_grades_france.py` — profils de niveau 5-6 du lieu descendus vers `zone:tres_dangereuse`.
+- `gen_acces_donjon.py` — chaîne d'accès au donjon-mine.
+- `gen_relation_guilde.py` — `relation_lieu` : les 4 lieux du Bastion partagent une cote.
+- `gen_escorte_marchands.py` / `gen_progeniture.py` / `gen_escorte_guilde.py` — escortes : nœuds des 29 `pnj:marchand_*`, familles des boutiques, registre des disparitions au comptoir.
+- `gen_convoi_lutecia.py` — le voyage à Lutèce.
+- `gen_epaulieres.py` — 21 pièces d'épaules + recettes.
+- `gen_loot_immateriel.py` — sous-catégorie + recettes pour 32 butins immatériels.
+- `gen_boulangeries.py`, `gen_jardinerie.py`, `gen_recettes_empenneur_archerie.py` — boutiques et recettes de métier.
+
+Autres scripts : `gen_grille_image.py` (propose les `cells` d'un lieu depuis son image, Pillow), `lint_dialogues.py` (CLI du linter), `export_bestiaire.py` (export d'équilibrage), `purge_quetes_acceptees.py` (purge ONE-SHOT des `quete:*` acceptés).
 
 
 ### Variables de monde réglables

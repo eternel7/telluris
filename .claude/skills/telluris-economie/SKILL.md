@@ -1,6 +1,6 @@
 ---
 name: telluris-economie
-description: Items, weight, currency and the market: inventory item references & weight, carry capacity/overload, currency tiers, weapon/raw-material content rules, and haggling/relation-driven pricing (utils/characters.py, utils/marche.py, routers/user.py market endpoints). Load when working on inventory weight, the shop/market, pricing, or crafting materials.
+description: Items, weight, currency and the market — inventory item references & weight, carry capacity/overload, currency tiers, weapon/raw-material content rules, haggling/relation-driven pricing, higher-tier shops merging categories (LIEU_CATEGORIES_FUSION), geographic recipe scope (lieu_portee) and the city goods flow between workshops (flux_marchand) (utils/characters.py, utils/marche.py, routers/user.py market endpoints). Load when working on inventory weight, the shop/market, pricing, recipes, the workshop tick, or crafting materials.
 ---
 
 ### Références d'items & poids
@@ -28,7 +28,7 @@ Entrée d'inventaire = **string legacy** `"item:xxx"` (poids = min) **ou objet**
 
 ⚠️ « Achetable » tient à **DEUX destinations dans `approvisionner`** (`stock_matieres` pour l'atelier, `stock_vente` pour le comptoir) — rien ne fait jamais passer une matière de l'un à l'autre, et la vitrine est regarnie **jusqu'au `stock_cible` et jamais au-dessus**, ce qui rend le comptoir neutre pour l'atelier. Épinglé par `tests/test_appro_comptoir.py`.
 
-⚠️ **Le seul transfert entre deux `lieu:*`, hors quête de transport** : le **flux de cité**. Une part `VENTE_PNJ_REDISTRIB` (0.5) de ce que les PNJ consomment est versée au pool `flux_marchand` du doc de la **ville**, d'où les ateliers dont une recette réclame cette matière la tirent en **réserve** à leur propre tick (`flux_cite` → `tick_atelier(…, flux)` → `persister_flux`). ⚠️ On puise **avant** d'écouler, on saute ce que le lieu produit, et `flux_cite` refuse tout doc non-`ville`. Épinglé par `tests/test_flux_pnj.py` — cf. CLAUDE.md § Flux de marchandises.
+⚠️ **Le seul transfert entre deux `lieu:*`, hors quête de transport** : le **flux de cité** (§ Flux de marchandises, plus bas).
 
 ⚠️ **Deux exceptions, assumées** : `APPRO_DEBIT` à 0 ⇒ aucune livraison (`herbe`, récolte joueur seule) ; `matiere_item_id` rendant un id inexistant ⇒ fail-soft, consommable en production mais jamais vendu (`branche`, `rondin`…). ⚠️ Créer le doc item manquant suffirait à les mettre en vente **sans qu'on l'ait décidé**.
 
@@ -39,4 +39,30 @@ Contenu : `jsons/armes_hast_a_importer.json` (armes d'hast, matières `item:hamp
 
 ### Marchandage & relations
 `prix_courant` = prix négocié ou prix de base pondéré par la relation (0-100, neutre 50) ; **prix appliqué** = `prix_marche` (re-clampé par le facteur de stock). La négociation est persistée comme **FRACTION de la fourchette**, pas comme montant fixe. Relation = doc `type:"relation"` (char × lieu), avec crit ok/fail sur `POST /api/marchander` et blocage temporaire en cas d'échec critique. Formules, fidélité (`marche.compter_transaction`, +1 relation tous les N échanges sous un seuil) et persistance sont couverts par `tests/test_marche_recettes.py` et `tests/test_quetes_relation.py`.
+
+
+### Magasins de niveau supérieur — fusion de catégories
+Une catégorie de lieu peut **en inclure d'autres** : `LIEU_CATEGORIES_FUSION` (variable de monde, `models/character_stats.py`), ex. `grande_apothicairerie` = apothicairerie + jardinier + ses recettes propres. 18 grandes maisons à Lutèce (`dev/gen_magasins_superieurs.py`). Verrouillé par `tests/test_magasins_superieurs.py`.
+
+- Résolu **à la lecture** (`marche.categories_incluses`, transitif, catégorie propre en tête, anti-cycle) ; les index restent sur la valeur **littérale** de `recette.lieu_categorie` ⇒ **aucune recette dupliquée en base**, régler la table à chaud = `reset_prix_cache()`. Les quatre accesseurs (`besoins_categorie`, `appro_leaves_categorie`, `produits_categorie`, `lieu_recettes`) unionnent : **aucun site d'appel n'a changé**.
+- ⚠️ Une capacité se perd à la fusion si son prédicat ne teste que la catégorie : le grand scriptorium porte `tags: ["scriptorium"]` (même échappatoire pour `auberge`/`etable` si on les fusionne un jour).
+- ⚠️ Une recette exclusive doit être **CROISÉE** — aucun métier réuni ne fournit seul tous ses intrants —, sinon la grande maison n'apporte rien. Contrôlé à la génération (`_metier_unique`), qui refuse d'écrire.
+
+
+### Portée géographique des recettes — spécialités de terroir
+`recette.lieu_portee` (id de lieu) : cuisinable seulement par les boutiques dont la chaîne `lieu_parent` remonte jusqu'à lui ; **absent ⇒ portée mondiale**. Contenu `dev/gen_specialites_france.py`. Verrouillé par `tests/test_recettes_portee.py`.
+
+- `marche.portees_lieu(lieu_doc)` = le lieu puis ses ancêtres, **mémoïsé** : `lieu:` est hors du cache de requête et la nuit d'auberge tique toutes les boutiques de la cité.
+- Une recette portée sort des index par catégorie ; seules les variantes **`recettes_lieu` / `besoins_lieu` / `produits_lieu` / `appro_leaves_lieu`** (qui prennent le doc) la servent. `scriptorium.recettes_effectives` reste le chokepoint des 4 sites de tick.
+- ⚠️ **`feuilles` reste GLOBAL** : une matière que seule une recette portée consomme n'est livrée qu'aux boutiques dans la portée — c'est ce qui rend le mécanisme visible en jeu.
+- ⚠️ **Le prix reste MONDIAL** (`_get_recipe_map` / `_cout_memo` non scopés) : scoper ferait dépendre le prix du premier lieu demandeur du process et rouvrirait l'arbitrage « acheter où c'est produit, revendre ailleurs ». **La portée dit où l'on fabrique, jamais combien ça vaut.**
+- ⚠️ Les cités portent `lieu_parent: "lieu:france"` : toute remontée d'ancêtres qui cherche « la ville » doit s'arrêter aux `categorie == "ville"` (`quetes.lieux_solidaires`, `marche.flux_cite`) — sinon Auxerre et Reims deviennent sœurs, ou le flux se pose sur le pays.
+
+
+### Flux de marchandises entre boutiques d'une cité
+Le **seul transfert entre deux `lieu:*` hors quête de transport**. La part `VENTE_PNJ_REDISTRIB` de ce que les PNJ consomment (`ecouler_produits_pnj`) va au pool `flux_marchand: {item_id: qty}` du doc de la **ville**, où les ateliers dont une recette en a l'usage puisent **en réserve** (`stock_matieres`, clé `cle_matiere_lieu`). Champ absent ⇒ comportement d'avant. Verrouillé par `tests/test_flux_pnj.py`.
+
+- ⚠️ **`flux=None` ⇒ tick strictement d'avant.** L'appelant ouvre (`flux_cite`), passe le contexte à N `tick_atelier`, referme (`persister_flux` : une écriture, seulement si le pool a bougé). La nuit d'auberge l'ouvre **hors de la boucle** (sinon ~60 × N `find_docs`).
+- ⚠️ **Puiser AVANT d'écouler** (sinon une boutique reprend ce qu'elle vient de vendre) et sauter ce que le lieu **produit** (sinon corde → arc tournerait en manège).
+- `cles_consommees()` = **seul index inverse** du marché ; pool plafonné par clé à `STOCK_CIBLE_DEFAUT` (pas de second réservoir non borné).
 

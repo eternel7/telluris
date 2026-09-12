@@ -1,6 +1,6 @@
 ---
 name: telluris-combat
-description: Combat math: stat scale/caps, damage & hit-location, attack modes, the combat action-slot bar, crit windows, timed effects (buffs/debuffs), combat VFX/animations, deferred log reveal, and the duel simulator (utils/combat.py, slots_actions.py, animations.py, consommables.py, simulateur.py, combat_telluris.html, /admin/simulateur). Load when working on combat mechanics, damage formulas, the action bar, buffs, or the duel simulator.
+description: Combat math — stat scale/caps, damage & hit-location, attack modes, the combat action-slot bar, crit windows, timed effects (buffs/debuffs), combat VFX/animations, deferred log reveal, and the duel simulator (utils/combat.py, slots_actions.py, animations.py, consommables.py, simulateur.py, combat_telluris.html, /admin/simulateur). Load when working on combat mechanics, damage formulas, the action bar, buffs, or the duel simulator.
 ---
 
 ### Échelle des caractéristiques (×10, sauf V)

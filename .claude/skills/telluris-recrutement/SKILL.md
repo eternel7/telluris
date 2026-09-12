@@ -1,6 +1,6 @@
 ---
 name: telluris-recrutement
-description: Recruitment, group combat and companions: expedition's pooled group capabilities, hiring recruits and group combat, permanent company membership, single-mission contracts, and mounts (utils/recrutement.py, expedition.py, montures.py, routers/recrutement.py, routers/montures.py). Load when working on the group/companion system, recruitment, or mounts.
+description: Recruitment, group combat and companions — expedition's pooled group capabilities, hiring recruits and group combat, permanent company membership, single-mission contracts, and mounts (utils/recrutement.py, expedition.py, montures.py, routers/recrutement.py, routers/montures.py). Load when working on the group/companion system, recruitment, or mounts.
 ---
 
 ### Capacités mises en commun par l'expédition (`utils/expedition.py`)

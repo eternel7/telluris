@@ -1,6 +1,6 @@
 ---
 name: telluris-social-ui
-description: Character-sheet social tabs and shared UI: the journal (carnet + bestiary), the relations tab, the shared scrollable-list UI pattern, the character-card/portrait component, taverns (chat tables, notice board, the night-rest flow), and the scriptorium (personal book-writing + generated content books) (utils/journal.py, utils/marche.py relations, part-character-card.html, utils/auberge.py, routers/auberge.py, utils/scriptorium.py, routers/scriptorium.py, play_town_telluris.html). Load when working on the journal, relations tab, character cards/portraits, scrollable lists, tavern chat/notice-board/night flow, or the scriptorium/book-writing system.
+description: Character-sheet social tabs and shared UI — the journal (carnet + bestiary), the relations tab, the shared scrollable-list UI pattern, the character-card/portrait component, taverns (chat tables, notice board, the night-rest flow), the scriptorium (personal book-writing + generated content books), and stacked toasts (showToast) (utils/journal.py, utils/marche.py relations, part-character-card.html, utils/auberge.py, routers/auberge.py, utils/scriptorium.py, routers/scriptorium.py, play_town_telluris.html). Load when working on the journal, relations tab, character cards/portraits, scrollable lists, tavern chat/notice-board/night flow, or the scriptorium/book-writing system.
 ---
 
 ### Onglet 📖 Journal — carnet + bestiaire
@@ -114,4 +114,12 @@ Trois pools de sujets **documentables**, tous scopés au `lieu_parent` : `sorts_
 World-vars (`models/character_stats.py`, même module que `FACTEUR_DEGATS_ARMURE`) : `SCRIPTORIUM_LIVRE_LONGUEUR_MAX` (800), `SCRIPTORIUM_LIVRE_PAPIER` (3), `SCRIPTORIUM_LIVRE_ENCRE` (2).
 
 **UI** (`play_town_telluris.html`) : bouton `🖋️ Écrire` conditionné par `est_scriptorium` (contexte `/play` ; le 403 de `_acces_scriptorium` reste la garde autoritative) → `#scriptorium-panel`, `openScriptorium`/`renderScriptorium`/`closeScriptorium`. Couvert par `tests/test_scriptorium.py`.
+
+
+### Toasts empilés — `showToast`
+Défini dans `play_town_telluris.html` seul (`combat_telluris.html` a le sien). `#toast` / `#toast-major` sont des **conteneurs** : un appel = une `.toast-item` à durée de vie propre, pile plafonnée à `TOAST_MAX` (4). Avant, l'élément était unique et réécrit : deux messages coup sur coup n'en montraient qu'un, en silence.
+
+- `showToast(msg)` inchangé sur la centaine de sites d'appel ; `{major:true}` = bulle haute, grande, 7 s, réservée aux **moments de jeu** (dépose d'escorte), jamais aux accusés de réception.
+- ⚠️ **Double `requestAnimationFrame`** avant `.show` : une transition n'interpole rien sur un élément né dans la frame (même piège que les jetons de combat). Garde `prefers-reduced-motion` **locale** (ce template n'inclut pas `part-accessibility-css.html`).
+- Écrit en `textContent` : jamais d'`escapeHtml` (CLAUDE.md §9). `_fideliteSuffixe` / `_xpCompagnieSuffixe` restent — une vente et son bonus de fidélité sont **un** événement, pas deux.
 

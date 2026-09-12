@@ -17,40 +17,19 @@ FastAPI sur `http://localhost:8000`, CouchDB sur `http://localhost:5984`. Le com
 ## Running tests
 
 ```bash
-python -m pytest tests/          # logique Python pure, aucune dépendance base
-node dev/check_js.js               # syntaxe du JS inline des templates/*.html ET de templates/scripts/*.js
-node dev/test_slots_client.js      # exécution des fonctions pures de la barre de slots
-node dev/test_resize_client.js     # exécution du redimensionnement de grille (éditeur de carte)
-node dev/test_deplacement_client.js # exécution des règles de MARCHE partagées (scripts/deplacement.js)
-node dev/test_lot_lieux_client.js  # exécution du LOT de lieux (éditeur de carte, mode Lieux)
-node dev/test_lieu_form_client.js  # exécution du FORMULAIRE de lieu (capacités, fusion à l'édition)
-node dev/test_connexions_client.js # exécution du FORMULAIRE de connexion (id, fusion, case posable)
-node dev/test_dialogues_client.js  # exécution de l'ÉDITEUR de dialogues/offres (fusion, atteignabilité, graphe)
-node dev/test_portes_client.js     # exécution des PORTES DE REMPART (paire de lieux + 3 connexions)
-node dev/test_voies_client.js      # exécution du TRACÉ DES VOIES (régions, goulots, carte de passage)
+python -m pytest tests/            # logique Python pure, aucune dépendance base
+node dev/check_js.js               # syntaxe du JS inline des templates ET de templates/scripts/*.js
+node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Les tests pytest ne couvrent que la logique pure (stats, combat, marché/recettes, consommables, sorts, quêtes…). Les dix harnais Node sont **sans aucune dépendance** (ni `package.json`, ni second écosystème à entretenir) et sortent en **code 1** en cas d'échec.
+Harnais : `slots` · `resize` · `deplacement` · `voies` · `lot_lieux` · `lieu_form` · `connexions` · `dialogues` · `portes`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
-- `check_js.js` neutralise les expressions Jinja avant de passer le code au parseur de Node — ⚠️ en `(0)` et non `0`, sinon `{{ liste | tojson }}.forEach(...)` deviendrait `0.forEach(...)`, faux positif garanti. ⚠️ Il contrôle **aussi `templates/scripts/*.js`** : les `<script src=…>` sont sautés (ils n'ont pas de corps dans la page), si bien que `nav.js`, `battle_map.js` et `deplacement.js` n'étaient couverts par **rien**. Un `.js` n'ayant pas de balise, le fichier entier est traité comme un unique bloc.
-- `test_slots_client.js` extrait les fonctions **pures** du template (par nom, accolades équilibrées) et les exécute dans un contexte `vm` : il ferme la classe de bug « à qui appartient ce que j'affiche et ce que j'écris ? », qu'aucun test pytest ne peut atteindre. **Hors de portée sans jsdom** : rendu DOM, clic long, ordre inversé en mobile — à vérifier en jeu.
-- `test_deplacement_client.js` est le seul des quatre à **charger directement un `.js`** (`scripts/nav.js` puis `scripts/deplacement.js`) : il n'y a rien à extraire d'un template. Il est aussi le **seul test des règles de marche du jeu**, et ce n'est pas une commodité — ⚠️ **il n'existe AUCUNE règle de marche côté serveur** : la branche x/y de `move_character` ne valide que les bornes, ni terrain ni `nav`. `deplacement.js` ne double donc pas le serveur, **il EST la règle**.
-- `test_voies_client.js` charge de même `nav.js`, `deplacement.js` puis **`voies.js`** : le tracé des voies ne recopie aucune règle (`pasAutoriseRegle`). Il verrouille le trou d'une case = goulot, le trou **en coin** (diagonales), l'eau qui sépare à pied et relie en combat, la brèche de 2 cases **sans** goulot, et Tarjan **itératif** (file de 20 000 cases).
-- `test_lot_lieux_client.js` (même méthode, même `runInThisContext`) verrouille le **lot de lieux**. ⚠️ Son objet est une classe de bug SILENCIEUSE : `import-bulk` fait un PUT complet, donc deux `link:*` de même `_id` dans un lot ne laissent qu'une porte en base et les autres boutiques deviennent **inatteignables sans la moindre erreur**. D'où le paramètre `dejaPris` de `_prochainLinkId` — le compteur se dérive de `lieuxConnections`, qui ne bouge pas tant que rien n'est écrit.
-- `test_connexions_client.js` (même méthode) verrouille le **formulaire de connexion**. ⚠️ Deux classes de bug SILENCIEUSES : `PUT /admin/doc` fait un PUT complet et ne refuse **rien** (un `link:*` déjà pris est écrasé, la porte d'un autre lieu disparaît sans erreur — d'où `_cxIdPropose` et la liste complète des `_id`), et le doc écrit est le doc **entier** (ce que le formulaire ne possède pas doit survivre à `_fusionConnexion` : clés inconnues du doc **et de chaque nœud**).
-- `test_dialogues_client.js` (même méthode) verrouille l'**éditeur de dialogues** (`/admin/dialogues`). ⚠️ Il sème `globalThis.VOCAB` avant d'évaluer les fonctions — elles lisent le vocabulaire servi par le serveur. Deux objets : la **fusion** (le JSON produit part vers `import-bulk`, PUT complet — une clé inconnue du doc, d'un nœud ou d'un choix qui ne survit pas est une perte SILENCIEUSE, `services.escorte.recherche` et `recompenses.items`/`rang_guilde` en tête) et l'**atteignabilité**, dont les entrées incluent les nœuds de **service** : les omettre ferait passer une centaine de nœuds corrects pour du « texte mort ».
-- `test_portes_client.js` (même méthode) verrouille les **portes de rempart**. ⚠️ Il extrait aussi les constantes `PORTE_*` du template plutôt que de les recopier. Trois classes de bug SILENCIEUSES : une clé inconnue perdue à la fusion (le lot part en `import-bulk`, PUT complet) ; **l'ORDRE des nœuds** — `_fusionConnexion` fusionne par position, donc passer la cité et la porte dans l'ordre inverse du doc les PERMUTE et la porte change de côté du rempart ; un des cinq `_id` déjà pris, qui écrase un doc existant.
-- `test_resize_client.js` suit la même méthode pour le redimensionnement de carte (`admin_map_editor.html`) — ⚠️ mais avec **`vm.runInThisContext`** et non `vm.createContext` : un contexte séparé est un autre *realm*, donc ses tableaux ont un autre prototype `Array` et `deepStrictEqual` les refuse tous. Ces fonctions-ci n'ayant besoin d'aucune globale, les évaluer dans le realm du test suffit — et permet au passage de semer sur `globalThis` les quelques globales dont `_reappliquerPortes` dépend, seul moyen d'éprouver son idempotence.
-
-**Environnement local de l'agent** : Node dans `C:\Program Files\nodejs\`, Python dans `C:\Python314\`. ⚠️ Les deux peuvent être **hors du `PATH`** — appeler Node par son chemin complet (`"/c/Program Files/nodejs/node.exe"` depuis Bash) et pytest par `python -m pytest` (l'exe vit dans `~/AppData/Roaming/Python/Python314/Scripts`, hors `PATH`). Dépendances nécessaires **rien que pour collecter** les tests purs (ils importent `utils/*` → `routers/*`) : `pytest` + la ligne du `docker-compose.yml` **sans `uvicorn` ni `Pillow`** (`fastapi Jinja2 couchdb2 bcrypt pyjwt[crypto] authlib httpx itsdangerous`). CouchDB est injoignable en local : `db/config.py` tolère l'absence de connexion à l'import (`server`/`db` = `None`, les helpers renvoient `None`) pour que les tests purs se collectent. Docker et l'app tournent côté utilisateur.
+- ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
+- **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
 
 ## Inspecting live DB values
 
-La CouchDB live tourne sur un hôte distant, généralement NON joignable en local. Pour connaître les valeurs réelles des documents (races, espèces, profils, lieux, items…), lire le dump JSON committé à la racine : **`telluris-dump-*.json`** (produit par `GET /admin/exports/couchdb` / `db.config.dump_all_docs()`). Objet `{"db","exported_at","doc_count","docs":[...]}` ; `docs` exclut les `user:*`. Repérer un doc par grep sur `"_id": "rules:races"`.
-
-- **Export ciblé d'un type** : `GET /admin/exports/by-type?type=<type>` (`find_docs({"type": t})`, `user:*` exclus) → `<type>-AAAAMMJJ-HHMMSS.json` ; la page `/admin/exports` liste les types présents en base.
-- **Édition en tableau** : `/admin/table` (`admin_table.html`, carte « Mise à jour en tableau » dans `/admin`) liste les docs d'un type en tableau (colonnes choisies/ordonnées par drag, triables, filtrables, redimensionnables) ; cliquer une ligne ouvre le JSON dans un overlay fixe à droite. **Save** = `PUT /admin/doc` / **Cancel** ferme / **Delete** = `DELETE /admin/doc?id=…` après `confirm()`, la ligne étant retirée localement sans rechargement du type. ⚠️ Le `_rev` est **relu en base**, jamais celui du client ; `db.delete_doc` renvoyant `None` succès comme échec, le serveur vérifie par relecture → 409. Données : `GET /admin/table/data?type=<t>`. Préférences d'affichage (colonnes/ordre/tri/filtres/largeurs) mémorisées **par type** dans `localStorage` (`telluris.admin_table.v1.<type>`).
-- **Export du tableau** : deux boutons au-dessus exportent les lignes **actuellement affichées** (filtres+tri, `computeVisibleRows`) — **⬇ Export JSON** (docs complets) et **⬇ Export Excel** (`POST /admin/table/export.xlsx` → writer OOXML partagé `utils/xlsx.py`, une colonne par clé de 1er niveau, valeurs imbriquées en JSON). Nom commun `exportFilename(ext)` = `<type>_filtre_<col>_<val>…_AAAAMMJJ-HHMMSS.(json|xlsx)`, horodatage **UTC** aligné sur les exports serveur (`datetime.utcnow()`).
+La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs : lire le dump committé **`telluris-dump-*.json`** (`{"db","exported_at","doc_count","docs":[...]}`, sans `user:*`) — grep sur `"_id": "rules:races"`. Exports ciblés, `/admin/table`, sémantique d'écriture, caches : compétence **telluris-db**.
 
 ## Gameplay Systems
 
@@ -106,9 +85,9 @@ utils/
   lint_dialogues.py      # contrôle des arbres de dialogue (pur) — partagé CLI dev + bouton /admin
   dev_tools.py           # catalogue + lanceur des scripts de dev/ (liste blanche) — écran /admin/dev-tools
 db/
-  config.py              # CouchDB connection, get_doc / save_doc / find_docs helpers
+  config.py              # CouchDB connection, get_doc / save_doc / find_docs helpers, cache de requête
 models/
-  character_stats.py     # BaseStats, DerivedStats, EquipmentBonus, compute_derived_stats()
+  character_stats.py     # BaseStats, DerivedStats, EquipmentBonus, compute_derived_stats(), variables de monde
   character_document.py  # Pydantic spec d'un doc personnage (référence seule — cf. note ci-dessous)
 templates/
   *.html                 # Jinja2 pages (play_town, combat, fiche perso, admin, éditeurs)
@@ -119,72 +98,67 @@ templates/
                          #   voies.js (tracé des voies de l'éditeur : régions, goulots, passage)
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
-  export_bestiaire.py    # export d'équilibrage (writer OOXML → utils/xlsx.py)
-  gen_marchands.py       # génère les tenanciers génériques `pnj:marchand_*` (une catégorie à recettes = un tenancier)
-  gen_magasins_superieurs.py # les 18 grandes manufactures de Lutèce (enseignes, portes, tenanciers, items exclusifs)
-  gen_specialites_france.py # 10 spécialités de terroir (recettes `lieu_portee`) + cités rattachées à `lieu:france`
-  gen_acces_donjon.py    # génère les imports de la chaîne d'accès au donjon-mine
-  gen_relation_guilde.py # pose `relation_lieu` : les 4 lieux du Bastion partagent UNE cote
-  gen_escorte_marchands.py # pose les nœuds d'escorte sur les 29 `pnj:marchand_*`
-  gen_progeniture.py     # donne une FAMILLE à une dizaine de boutiques (entrée `pnj` du lieu)
-  gen_escorte_guilde.py  # ouvre le registre des disparitions au comptoir (Borin)
-  gen_epaulieres.py      # 21 pièces d'épaules + recettes — l'emplacement `epaules` n'avait rien à porter
-  gen_loot_immateriel.py # sous-catégorie + recettes pour 32 butins immatériels (esprits, morts-vivants)
-  gen_coherence_france.py# ressources + espèces manquantes de `lieu:france` (+ `restriction_tags` magique)
-  gen_grades_france.py   # descend les profils de niveau 5-6 du lieu vers `zone:tres_dangereuse`
-  gen_lutecia.py         # donne ses zones d'influence à la capitale (urbain, Seine, faubourgs, campagne)
-  lint_dialogues.py      # CLI de contrôle des dialogues PNJ (→ utils/lint_dialogues.py)
-  purge_quetes_acceptees.py # purge ONE-SHOT des docs `quete:*` générés acceptés (poids mort)
-  gen_grille_image.py    # propose les `cells` d'un lieu depuis son image (Pillow) + aperçu PNG + concordance
-  check_js.js            # contrôle SYNTAXIQUE du JS des templates ET de templates/scripts/ (node)
-  test_slots_client.js   # tests d'EXÉCUTION du JS de la barre de slots (node, sans dépendance)
-  test_deplacement_client.js # tests d'EXÉCUTION des règles de marche (scripts/deplacement.js)
-  test_lot_lieux_client.js # tests d'EXÉCUTION du lot de lieux (éditeur de carte)
-  test_lieu_form_client.js # tests d'EXÉCUTION du formulaire de lieu (capacités, fusion)
-  test_connexions_client.js # tests d'EXÉCUTION du formulaire de connexion (éditeur de carte)
-  test_dialogues_client.js # tests d'EXÉCUTION de l'éditeur de dialogues/offres (/admin/dialogues)
-  test_portes_client.js  # tests d'EXÉCUTION des portes de rempart (éditeur de carte)
-  test_voies_client.js   # tests d'EXÉCUTION du tracé des voies (scripts/voies.js)
+  gen_*.py               # générateurs de contenu → jsons/*_a_importer.json (catalogue : telluris-admin-tools)
+  lint_dialogues.py · export_bestiaire.py · purge_quetes_acceptees.py · gen_grille_image.py
+  check_js.js · test_*_client.js   # contrôle syntaxique + harnais d'exécution du JS client
 tests/                   # tests purs, un fichier par système
 ```
 
+## Compétences — où vit le détail
+
+Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-*` ; un renvoi « CLAUDE.md § <titre> » dans le code désigne la section homonyme de la compétence.
+
+| Sujet | Compétence |
+|---|---|
+| caractéristiques, combat, dégâts, barre de slots, effets à durée, animations, simulateur | `telluris-combat` |
+| bitmask `nav`, règles de marche, animation de carte/jetons, pavé partagé, mode test de déplacement | `telluris-map-movement` |
+| `/admin/editor` : mode Lieux, formulaires de lieu/connexion, portes de rempart, lot de lieux, voies, redimensionnement | `telluris-editeur-carte` |
+| items, poids, marché, recettes, grandes maisons, portée des recettes, flux de cité | `telluris-economie` |
+| quêtes (guilde, transport, chasse, escorte), PNJ et dialogues, `/admin/dialogues`, accès, donjons, intro | `telluris-quetes-pnj` |
+| recrutement, groupe, compagnie, contrat de mission, montures | `telluris-recrutement` |
+| sorts, compétences de vocation, focalisation | `telluris-magie` |
+| journal, relations, cartes/portraits, listes scrollables, tavernes, scriptorium, toasts | `telluris-social-ui` |
+| dump, exports, `/admin/table`, écritures PUT complet, cache de requête, caches process | `telluris-db` |
+| lanceur `dev/`, générateurs de contenu, variables de monde | `telluris-admin-tools` |
+| harnais Node, `check_js`, collecte pytest | `telluris-tests` |
+
 ## Conventions transverses
 
-Règles qui valent **partout** ; les sections suivantes ne répètent que ce qui leur est propre.
+Règles qui valent **partout** ; les compétences ne répètent que ce qui leur est propre.
 
-**1. Chokepoint `_acteur(current_user, body)`** (`routers/user.py`) → `(porteur, principal)`. Sans `compagnon_id` les deux sont le même dict (un seul `save_doc`) ; avec, le porteur est le doc `aventurier:*` ou `monture:*`. ⚠️ Ces docs **n'ont pas de `user_id`** : leur seule preuve d'appartenance est le statut + le lien vers CE personnage (`embauche`/`embauche_par`, `acquise`/`acquise_par`) via `groupe_effectif`/`montures_effectives` → **403** sinon. Côté client, **`_actionBody(extra)`** injecte le `compagnon_id`. Sauvegarde multi-docs **`_save_acteur`** : porteur **autoritatif d'abord** (409), le reste best-effort. ⚠️ **Toute action doit porter le `compagnon_id` de l'ACTEUR COURANT** — `_acteur` retombe **silencieusement sur le principal** quand le corps n'en porte pas, ce qui écrit sur le mauvais doc *et* renvoie l'état du mauvais doc, que le client affiche comme celui du compagnon. Les deux états finissent durablement mélangés. C'est la classe de bug la plus coûteuse du projet.
+**1. Chokepoint `_acteur(current_user, body)`** (`routers/user.py`) → `(porteur, principal)`. Sans `compagnon_id` les deux sont le même dict ; avec, le porteur est le doc `aventurier:*` ou `monture:*`. ⚠️ Ces docs **n'ont pas de `user_id`** : leur appartenance se prouve par le statut + le lien vers CE personnage (`groupe_effectif`/`montures_effectives`) → **403** sinon. Client : **`_actionBody(extra)`** injecte le `compagnon_id`. Sauvegarde **`_save_acteur`** : porteur **autoritatif d'abord** (409), le reste best-effort. ⚠️ **Toute action doit porter le `compagnon_id` de l'ACTEUR COURANT** — sans lui, `_acteur` retombe **en silence** sur le principal : il écrit le mauvais doc *et* renvoie son état, que le client affiche comme celui du compagnon. C'est la classe de bug la plus coûteuse du projet.
 
-**2. Modules purs `utils/*`** : DB injectée (`get_doc_fn`/`save_doc_fn`/`find_docs`), **mutent sans sauver** (l'appelant persiste), testés sans dépendance base. Un helper partagé par plusieurs routers vit dans `utils/`, **jamais dans un router** — `routers/recrutement` importe `routers/user`, donc l'inverse créerait un cycle.
+**2. Modules purs `utils/*`** : DB injectée (`get_doc_fn`/`save_doc_fn`/`find_docs`), **mutent sans sauver** (l'appelant persiste), testés sans base. Un helper partagé par plusieurs routers vit dans `utils/`, **jamais dans un router** — `routers/recrutement` importe `routers/user`, l'inverse créerait un cycle.
 
 **3. Anti-exploit des buffs** : `charge_max_of`, les plafonds et coûts d'XP (`compute_stat_cap`, `compute_xp_cost`) et `restriction_satisfaite` lisent `caracteristiques_current` **BRUT**. Un buff n'ouvre jamais un plafond, n'abaisse jamais un tarif, ne débloque jamais une arme.
 
-**4. Aucune migration de base.** Champ absent ⇒ comportement d'avant ; quand une forme neuve est nécessaire, elle est reconstruite **À LA LECTURE** (`slots_effectifs`, `_slots_derives`, replis `.get(..., 0)` sur les snapshots de combat). Un doc déjà en base doit toujours continuer de tourner.
+**4. Aucune migration de base.** Champ absent ⇒ comportement d'avant ; une forme neuve est reconstruite **À LA LECTURE** (`slots_effectifs`, `_slots_derives`, replis `.get(..., 0)` sur les snapshots). Un doc déjà en base doit toujours continuer de tourner.
 
-**5. Péremption et vérification PARESSEUSES** — **aucun tick de fond n'existe dans le jeu**. Tout ce qui expire est contrôlé au passage : tableaux de quêtes et de recrues (`purger_*`), délais de course (`traiter_expirations`, appelé à `/play`, dans les **deux** branches de `move_character` et à l'entrée du dialogue PNJ), départs volontaires de compagnons, laissez-passer.
+**5. Péremption et vérification PARESSEUSES** — **aucun tick de fond n'existe**. Tout ce qui expire est contrôlé au passage : tableaux de quêtes et de recrues (`purger_*`), délais de course (`traiter_expirations` : `/play`, les **deux** branches de `move_character`, entrée du dialogue PNJ), départs volontaires de compagnons, laissez-passer.
 
-**6. Champs transitoires du personnage** : `pnj_present`, `transport_offert`, `rang_offert`, `ressource_recoltable`, `objets_au_sol`. Même sémantique — tirés à l'**ENTRÉE** dans le lieu et persistés, donc un refresh ne re-tire pas ; ressortir/rentrer re-tire ; vidés dès un déplacement réel.
+**6. Champs transitoires du personnage** : `pnj_present`, `transport_offert`, `rang_offert`, `ressource_recoltable`, `objets_au_sol`. Tirés à l'**ENTRÉE** dans le lieu et persistés (un refresh ne re-tire pas ; ressortir/rentrer re-tire), vidés dès un déplacement réel.
 
-**7. Porteurs vs membres — deux listes à ne pas confondre.** `recrutement.porteurs_effectifs(character, get_doc)` = SOURCE UNIQUE de « qui **porte** pour moi » (`groupe_effectif` + `montures_effectives`, compagnons d'abord). `expedition.membres(character, get_doc)` = qui **agit** (principal EN TÊTE puis compagnons) — ⚠️ **JAMAIS de monture** : une bête porte le butin, elle ne négocie pas et ne manie pas une hache. L'ordre compte : plusieurs appelants départagent les ex æquo par « le premier gagne », et c'est le joueur qui doit gagner.
+**7. Porteurs vs membres.** `recrutement.porteurs_effectifs(character, get_doc)` = SOURCE UNIQUE de qui **porte** (compagnons + montures). `expedition.membres(character, get_doc)` = qui **agit** (principal EN TÊTE puis compagnons) — ⚠️ **JAMAIS de monture**. L'ordre compte : les ex æquo se départagent par « le premier gagne », et c'est le joueur qui doit gagner.
 
-**8. Overlays de décision bloquante** (`#clauses-overlay`, `#engagement-overlay`, `#max-bonus-overlay`, `#cible-allie-overlay`) : ⚠️ **✕ / Échap / clic sur le backdrop = ANNULER sans rien engager** — une décision irréversible ne doit jamais partir d'un geste de sortie. Quand un appel attend la réponse, l'annulation doit **résoudre la promesse à `null`**, sinon le lancement reste suspendu et son bouton désactivé pour toujours.
+**8. Overlays de décision bloquante** (`#clauses-overlay`, `#engagement-overlay`, `#max-bonus-overlay`, `#cible-allie-overlay`…) : ⚠️ **✕ / Échap / clic sur le backdrop = ANNULER sans rien engager**. Quand un appel attend la réponse, l'annulation **résout la promesse à `null`**, sinon le lancement reste suspendu et son bouton désactivé pour toujours.
 
-**9. XSS — on BORNE au serveur, on ÉCHAPPE au rendu.** Les helpers de nettoyage serveur (`recrutement.nettoyer_nom_compagnie`…) valident et bornent mais **n'échappent pas le HTML** (double échappement sinon) ; le client a son `escapeHtml`, obligatoire dès qu'une chaîne saisie par le joueur part dans un template literal `innerHTML`. ⚠️ **Jamais dans un `onclick="…('${x}')"`** (`'` → `&#39;` casserait la chaîne JS) : lire la valeur depuis l'`<input>` en JS. ⚠️ **Jamais pour `showToast`**, qui écrit en `textContent`.
+**9. XSS — on BORNE au serveur, on ÉCHAPPE au rendu.** Les nettoyages serveur (`recrutement.nettoyer_nom_compagnie`…) valident et bornent sans échapper (double échappement sinon) ; `escapeHtml` est obligatoire dès qu'une chaîne saisie part dans un template literal `innerHTML`. ⚠️ **Jamais dans un `onclick="…('${x}')"`** (`'` → `&#39;` casse la chaîne JS) : lire la valeur depuis l'`<input>` en JS. ⚠️ **Jamais pour `showToast`**, qui écrit en `textContent`.
 
-**9 bis. Les toasts s'EMPILENT** (`play_town_telluris.html`, seul fichier à définir `showToast` — `combat_telluris.html` a le sien). `#toast` et `#toast-major` sont des **conteneurs**, pas des bulles : chaque appel crée sa `.toast-item`, avec sa propre durée de vie, et la pile est plafonnée à `TOAST_MAX` (4). Avant, l'élément était unique et `textContent` était réécrit à chaque appel → **deux messages coup sur coup n'en laissaient voir qu'un**, en silence. Signature **rétro-compatible** : `showToast(msg)` inchangé sur la centaine de sites d'appel, `{major:true}` en 2ᵉ argument pour la bulle haute, grande et longue (7 s), réservée aux **moments de jeu** (dépose d'escorte) et non aux accusés de réception. ⚠️ **Double `requestAnimationFrame`** avant la classe `.show` — une transition n'a rien à interpoler sur un élément qui vient de naître (même piège que les jetons de combat). ⚠️ Garde `prefers-reduced-motion` **locale** : ce template n'inclut pas `part-accessibility-css.html`. ⚠️ `_fideliteSuffixe` / `_xpCompagnieSuffixe` **restent** — suffixer n'est plus une contrainte technique mais le bon rendu (une vente et son bonus de fidélité sont *un* événement, pas deux).
+**9 bis. Les toasts s'EMPILENT** : un appel à `showToast(msg)` = une bulle, pile plafonnée ; `{major:true}` est réservé aux moments de jeu. Détail : `telluris-social-ui`.
 
-**10. Resync de payload.** Tout endpoint qui bouge un état doit **renvoyer le bloc correspondant recalculé** (`slots`, `relations_lieux`, `caracts_detail`, `inventaire_payload`, `links`…). Le client ne reconstruit jamais un état lui-même ; sans le bloc, l'onglet reste figé sur l'état du dernier chargement de `/play` — symptôme classique et difficile à relier à sa cause.
+**10. Resync de payload.** Tout endpoint qui bouge un état **renvoie le bloc recalculé** (`slots`, `relations_lieux`, `caracts_detail`, `inventaire_payload`, `links`…). Le client ne reconstruit jamais un état ; sans le bloc, l'onglet reste figé sur le dernier chargement de `/play` — symptôme difficile à relier à sa cause.
 
-**11. Import de contenu.** Les docs de contenu vivent dans `jsons/*_a_importer.json`, chargés par la carte d'import de `/admin`. ⚠️ **`admin_import_bulk` fait un PUT COMPLET, jamais un merge** : éditer un champ oblige à reproduire tout le doc — d'où les générateurs `dev/gen_*.py`, qui relisent les docs depuis le **dump** (source unique) et n'y injectent que le champ ajouté, ce qui rend la régénération **idempotente** (une retouche faite à la main en base survit, réimporter ne peut rien annuler en silence). Le `_rev` d'un doc importé est sans effet : il est toujours réattaché depuis la base. ⚠️ Avant de livrer un générateur neuf, vérifier l'absence de collision d'`_id` et rejouer le générateur contre un export récent (`telluris-dump-*.json` ou `/admin/exports/by-type`) plutôt que de le supposer correct.
+**11. Import et écriture de contenu.** Docs de contenu dans `jsons/*_a_importer.json`, chargés par la carte d'import de `/admin`. ⚠️ **`admin_import_bulk` et `PUT /admin/doc` font un PUT COMPLET, jamais un merge, et ne refusent rien** (`_rev` réattaché depuis la base) : un `_id` réutilisé écrase en silence, une clé absente disparaît. D'où les générateurs `dev/gen_*.py`, qui relisent le **dump** et n'injectent que le champ ajouté (régénération **idempotente**), et les formulaires d'admin qui fusionnent le doc **relu**. ⚠️ Avant de livrer un générateur : aucune collision d'`_id`, rejeu contre un export récent.
 
-**12. Écriture de fichiers — jamais de heredoc shell.** Toujours passer par les outils Write/Edit pour écrire ou patcher un fichier, jamais par un heredoc shell (`cat <<EOF`) : l'échappement casse sur l'Unicode, les tabulations et les apostrophes, et bute sur les limites de spawn. ⚠️ **Fins de ligne MIXTES selon le fichier** (aucune convention uniforme dans ce dépôt, pas de `.gitattributes`) : ne jamais normaliser CRLF→LF (ni l'inverse) au passage d'une édition — préserver celles du fichier touché, quelles qu'elles soient.
+**12. Écriture de fichiers — jamais de heredoc shell.** Toujours Write/Edit : l'échappement casse sur l'Unicode, les tabulations et les apostrophes. ⚠️ **Fins de ligne MIXTES selon le fichier** (pas de `.gitattributes`) : ne jamais normaliser CRLF↔LF au passage d'une édition.
 
-**13. Discipline de périmètre.** Implémenter exactement ce qui est demandé : pas de repli, de nouvel opérateur de condition, ni de lecture défensive depuis un autre type de doc (ex. un repli non demandé vers `pnj:*`) sans que ce soit explicitement demandé. Un mécanisme supplémentaire jugé nécessaire se propose et s'attend une réponse, il ne s'ajoute pas en silence.
+**13. Discipline de périmètre.** Implémenter exactement ce qui est demandé : pas de repli, de nouvel opérateur de condition, ni de lecture défensive depuis un autre type de doc sans demande explicite. Un mécanisme jugé nécessaire se propose et attend une réponse.
 
-**14. La suite de tests clôt la tâche.** Après toute modification touchant le moteur, le simulateur ou un payload client, relancer `pytest` (et les harnais Node concernés si du JS a bougé, cf. § Running tests) et annoncer le nombre de tests passés avant de déclarer la tâche terminée ; si le comportement change, les tests eux-mêmes sont mis à jour dans la même passe. ⚠️ Deux pièges déjà rencontrés dans ce projet : un tirage `random` non contrôlé dans un test (le hasard doit passer par un `rand_fn`/`des_fn` injecté, cf. §Dégâts) et un dict de compagnon de fixture auquel il manque `caracteristiques_current`.
+**14. La suite de tests clôt la tâche.** Après toute modification du moteur, du simulateur ou d'un payload client, relancer `pytest` (et les harnais Node concernés si du JS a bougé) et annoncer le nombre de tests passés ; si le comportement change, les tests sont mis à jour dans la même passe. ⚠️ Pièges déjà pris : un `random` non contrôlé dans un test (le hasard passe par un `rand_fn`/`des_fn` injecté) et un compagnon de fixture sans `caracteristiques_current`.
 
-**15. Vérifier le rendu après une modif template/CSS/JS**, pas seulement la relire. Trois pièges déjà pris dans ce projet, à ne pas rejouer : un calque `pointer-events:none` qui avale les clics d'un enfant qui ne le rouvre pas pour lui-même (cf. § Sur un ALLIÉ) ; un `const` capturé par `getElementById` avant que son markup n'existe dans le DOM (cf. § mode « test de déplacement ») ; un sondage qui redessine un champ de saisie en cours de frappe (cf. § Tavernes, SONDAGE).
+**15. Vérifier le rendu après une modif template/CSS/JS**, pas seulement la relire. Pièges déjà pris : un calque `pointer-events:none` qui avale les clics d'un enfant (`telluris-combat` § Sur un ALLIÉ) ; un `const` capturé par `getElementById` avant que son markup existe (`telluris-map-movement` § mode test de déplacement) ; un sondage qui redessine un champ en cours de frappe (`telluris-social-ui` § Tavernes).
 
-**16. Documentation compacte.** CLAUDE.md et la doc du projet restent en listes courtes, pas en prose : ne pas y restituer ce que le code dit déjà lui-même, ni ce qu'un test verrouille déjà.
+**16. Documentation compacte.** Listes courtes, pas de prose ; ne pas restituer ce que le code dit déjà ni ce qu'un test verrouille (une ligne « verrouillé par … » suffit). Le détail d'un système va dans sa compétence, pas ici.
 
 ## Core Design Patterns
 
@@ -198,107 +172,7 @@ Pattern `type:identifier` — `user:email@example.com`, `lieu:lutecia`, `rules:r
 `models/character_document.py` = spec de référence. **Vérité = le code de création dans `routers/user.py`.** Les noms de champs diffèrent : `voc`, `sex`, `caracteristiques_standard`/`current`, `cite`.
 
 ### Capacités d'un lieu — « le type » n'est pas un champ
-Ce qu'un lieu SAIT FAIRE est résolu **à la lecture** par cinq prédicats du même idiome (`categorie == X` **OU** tag `Y` — le OU évite toute migration et ouvre la capacité à n'importe quel lieu par la donnée seule) : `auberge.lieu_est_taverne` · `montures.lieu_vend_montures` · `scriptorium.lieu_est_scriptorium` · `recrutement.lieu_recrute` · `recrutement.lieu_de_guilde`. `utils/capacites.py` en sert le **catalogue** (id, label, tag, catégories qui l'accordent) à l'éditeur, via `creation_options.capacites`.
+Résolues **à la lecture** par cinq prédicats `categorie == X` **OU** tag `Y` (le OU évite toute migration) : `auberge.lieu_est_taverne` · `montures.lieu_vend_montures` · `scriptorium.lieu_est_scriptorium` · `recrutement.lieu_recrute` · `recrutement.lieu_de_guilde`. ⚠️ `utils/capacites.py` les **RECOPIE** pour l'éditeur (les importer tirerait `marche`/`expedition`/`quetes`) ; la recopie est verrouillée par `tests/test_capacites.py` — modifier un prédicat, c'est modifier les deux.
 
-- ⚠️ **`capacites.py` RECOPIE les cinq prédicats, il n'en est pas la source** — les importer tirerait `marche`, `expedition` et `quetes` derrière eux pour un simple GET d'admin. La recopie est verrouillée par `tests/test_capacites.py`, qui compare `capacites_de` aux **vrais** prédicats sur une matrice : elle ne peut pas dériver en silence. (C'est ce test qui a attrapé l'oubli des 4 catégories de `lieu_de_guilde`.)
-- ⚠️ **Une capacité accordée par la CATÉGORIE ne se retire pas** : il n'existe aucun anti-tag. Le formulaire coche ET grise la case, plutôt que d'offrir un geste sans effet. Symétriquement, un tag redondant avec la catégorie n'est **pas** posé — l'auberge de référence n'en porte aucun.
-- **Une auberge est le doc le plus dépouillé du jeu** : `categorie: "auberge"` (ou le tag) suffit. Tables et messages naissent en jeu, prix/plafonds/durées sont des variables de monde. Seul champ propre, optionnel : `nuit_messages`. ⚠️ **Aucun tenancier** — aucun code d'auberge ne lit `lieu.pnj[]`, et `pnj:marchand_auberge` n'existe pas.
-- ⚠️ **L'écurie d'une étable vit sur le TENANCIER** (`pnj[0].montures`), pas sur le bâtiment : `lieu_vend_montures` seul ouvre le bouton sur un rayon vide. Le picker filtre les espèces sur le tag `monture` (19 sur 139, exactement celles qui portent `proprietes.charge_mult`/`prix_cuivre`).
-- ⚠️ **Le bloc PNJ n'est coché d'office que si `pnj:marchand_<categorie>` existe** (`_nlTenancierDefaut`). Avant, le chemin par défaut écrivait une **référence morte** pour `auberge` et les 15 autres catégories sans tenancier générique.
-
-### Édition d'un sous-lieu — FUSION, jamais remplacement
-Le bouton `✏️ Éditer` d'une ligne de connexion rouvre le **même** formulaire, pré-rempli depuis `GET /api/lieu/{id}`. ⚠️ `PUT /admin/doc` écrit le doc **ENTIER** : `_fusionLieu(existant, champs)` part donc du doc **relu en base** et n'y écrit que les six champs que le formulaire possède (`label`, `image`, `categorie`, `tags`, `pnj`, `nuit_messages`).
-
-- ⚠️ **`pnj` est une LISTE** (trois lieux en base en portent plusieurs, jusqu'à 4) : on fusionne dans l'entrée **[0]** et on conserve les suivantes. Dans [0], seules `character`/`nom`/`portrait`/`montures` sont écrites — **`progeniture` (10 en base, les chaînes d'escorte), `description`, `conditions`, `probabilite`, `image` survivent**. Retirer un PNJ porteur de `progeniture` ou d'écurie demande une **confirmation** : c'est une perte de contenu.
-- ⚠️ **L'`_id` est GELÉ** : CouchDB ne renomme pas et la connexion pointe l'ancien. Le label reste libre — la divergence est déjà normale en base.
-- ⚠️ Les filtres image/portrait par catégorie sont **heuristiques** : si le fichier réel du doc n'y figure pas, « toutes les images » est coché d'office, sinon le `select` retomberait à vide et l'enregistrement refuserait « Image requise » sur un lieu qui en a une.
-- `metadata.type` de la connexion **n'est pas retouché** après un changement de catégorie (champ purement descriptif, lu par aucun code) : l'édition n'écrit qu'un seul doc.
-- `_docsNouveauLieu` passe par `_fusionLieu({}, …)` : création et édition produisent la **même forme** depuis une seule fonction.
-
-### Relier deux lieux — le formulaire de CONNEXION (`/admin/editor`, mode Lieux)
-`🔗 Connexion` (sur une ligne) et `🔗 Relier à un lieu existant` ouvrent **`#conn-overlay`** : voir, éditer et ajouter un lien sans passer par le JSON. Panneau fixe à droite, **même place que `#lj-overlay`** (ouvrir l'un ferme l'autre). N'écrit **qu'un doc `link:*`** — créer la boutique ET sa porte reste le travail du formulaire de lieu et du LOT.
-
-- ⚠️ **`PUT /admin/doc` ne refuse RIEN** (PUT complet, `_rev` rattaché en base) : réutiliser un `link:*` existant l'écrase en silence. D'où `_cxIdPropose` (convention `link:<là-bas>_to_<ici>`) et la liste **complète** des `_id`, lue par ouverture sur `GET /admin/table/data?type=connection` — `lieuxConnections` ne voit que le lieu courant. Lecture échouée ⇒ le formulaire **le dit**.
-- ⚠️ `_fusionConnexion` = `_fusionLieu` pour les connexions : survivent `_rev`, les clés inconnues du doc **et de chaque nœud** ; `champs.noeuds` est dans l'**ordre du doc** (`cxIciIdx`), permuter déplacerait la porte ; un label vidé est **supprimé** (sinon `get_lieu_links` ne peut plus replier sur le label du lieu).
-- ⚠️ Une seule règle de case, `_cxPosPosable` : « s'il y a une grille, la case doit être praticable » (`>= 1`, celui de `_caseAccessible` donc du voile rouge) ; `cells` absent ⇒ aucune règle. La visée 🎯 et la saisie à la main partagent ce prédicat.
-- ⚠️ **Alerte terrain ≠ 1** (`_lieuxHorsTerrain`, bandeau `#lieux-terrain-alerte` + anneau rouge pointillé sur le point) : un prédicat **différent**, `!== 1` et non `>= 1`. Une porte sur 2/3/5 reste **posable**, mais les flèches de play_town se grisent dès que `loc_access !== 1` (🧭 seul ; 0/9 : inatteignable). C'est un avertissement, pas un refus. Hors grille ⇒ signalée ; `cells` absent ⇒ rien.
-- ⚠️ La visée 🎯 écrit **dans le formulaire**, pas en base (celle de l'éditeur JSON enregistre aussitôt), et **efface le panneau en `pointer-events:none`** le temps du geste : il recouvre la moitié droite de la carte. Refusée hors mode Lieux ; le formulaire entier est refusé tant qu'un **redimensionnement est en aperçu**.
-- ⚠️ `_id` **gelé en édition** ; la destination reste modifiable et l'`_id` ne la suit pas.
-- ⚠️ **La CRÉATION générique n'existe plus** : le bouton « Relier à un lieu existant » a cédé la place à « 🏰 Ajouter une porte de rempart » (section suivante). `openConnForm` garde son mode `'creation'`, dont l'édition se sert pour pré-remplir. Voir et éditer une connexion quelconque reste offert par « 🔗 Connexion ».
-
-### Porte de rempart — une PAIRE, cinq documents (`/admin/editor`, mode Lieux)
-`categorie: "Porte de rempart"` (10 lieux en base, 5 paires, toutes à Auxerre). Une porte n'est pas une connexion : c'est un lieu **extérieur** et un lieu **intérieur**, chacun relié à une case de la carte de la cité, plus le **passage** qui les joint — **2 `lieu:*` + 3 `connection`**, écrits en une requête `POST /admin/import-bulk`. « 🏰 Ajouter une porte de rempart » crée, « 🏰 Porte » (sur une ligne de porte) rouvre la paire.
-
-- ⚠️ **Une porte n'a NI `dimensions` NI `cells`** — salle de passage, pas grille : ses deux nœuds sont en `[0, 0]`, et `_cxPosPosable(null, …)` ne lui applique aucune règle. Les deux cases **carte**, elles, passent le prédicat du voile rouge, et doivent **différer** (mêmes cases ⇒ le rempart ne sépare plus rien). L'éditeur ne peut pas vérifier qu'elles sont du bon **côté** du mur : c'est l'œil de l'auteur.
-- ⚠️ **`metadata.type` vaut « poste de garde », pas la catégorie** — contrairement à `_docsNouveauLieu`, qui écrit `metadata.type = categorie`. Les 10 connexions en base le confirment.
-- ⚠️ Le label **« au-delà des remparts »** est porté par le nœud **carte** du lien extérieur, et lui seul : `get_lieu_links` fait `node.label || doc.label`, c'est donc le bouton de sortie vu depuis la porte. Le lien intérieur n'en porte aucun — son bouton dit le label de la cité.
-- ⚠️ **`_ptOrdonner`** passe les nœuds à `_fusionConnexion` dans l'**ordre du doc** : cette fusion se fait PAR POSITION, permuter changerait la porte de côté en silence. Verrouillé par `dev/test_portes_client.js`.
-- ⚠️ `_ptPaireDe` lit **`cxDocsConnus`** (docs complets de `/admin/table/data?type=connection`) et non `lieuxConnections` : le passage n'a aucun nœud sur la cité, il est invisible depuis le lieu courant. Côté indécidable (ni `exterieur` ni `interieur` dans l'id/label) ⇒ **refus d'ouvrir**, plutôt que risquer d'intervertir les deux côtés.
-- ⚠️ Le `select` d'image reçoit sa valeur en **paramètre** (`_ptRepeuplerImages(voulues)`), jamais relue du DOM : affecter `.value` sur un `<select>` encore vide ne prend pas, et l'enregistrement refusait « image requise » sur une porte qui en avait une. L'image courante reste offerte même si un autre lieu la porte.
-- Convention d'`_id` **neuve** (celle de la base est incohérente, et rien n'est rétro-nommé) : `lieu:<cite>_porte_<slug>_exterieur|_interieur`, `link:<cite>_porte_<slug>_carte_exterieur|_carte_interieur|_passage`. Le mot « porte » est retiré du slug — « Porte sud » et « sud » donnent le même id.
-
-### Peupler une ville — le LOT de lieux (`/admin/editor`, mode Lieux)
-Poser N boutiques d'un coup, sans écrire un `dev/gen_magasins_<ville>.py` de plus : **Maj+clic** empile des cases dans une file (une par boutique, l'ordre compte), `➕ Ajouter un lot` ouvre un tableau — composition à gauche (métier coché + quantité, avec ce que la cité possède déjà), lignes à droite (enseigne 🎲, image, portrait, tout modifiable). Écriture en **une** requête `POST /admin/import-bulk`.
-
-- Les docs écrits sont **exactement** ceux de `dev/gen_magasins_auxerre.py` : `lieu:<slug(label)>` + son `connection`, `stock_matieres:{}` / `stock_vente:[]` (le `tick_atelier` garnit à la première visite), `pnj:[{character: "pnj:marchand_<cat>"}]`. Les générateurs restent la voie du contenu AUTHORÉ (items et recettes exclusifs) ; le lot est celle du contenu de remplissage.
-- ⚠️ **`_prochainLinkId` prend un `dejaPris`** : son compteur se dérive de `lieuxConnections`, qui ne bouge pas tant que rien n'est écrit. Sans lui, N boutiques d'un même métier porteraient le même `link:*` et `import-bulk` — PUT complet — n'en laisserait qu'une : les autres seraient **sans porte, invisibles en jeu, sans erreur**. Verrouillé par `dev/test_lot_lieux_client.js`.
-- ⚠️ Un `_id` déjà en base fait **refuser le lot avant l'envoi** (même raison : le PUT complet écraserait une retouche faite à la main, CLAUDE.md §11). Après écriture, `creationOptions` est mis à `null` — périmé, il laisserait rouvrir un lot qui recrée ce qu'on vient de poser.
-- ⚠️ Les retouches manuelles sont indexées sur **`<categorie>#<rang>`**, jamais sur l'index de ligne : un nom réécrit survit à un changement de composition.
-- Enseignes : `utils/enseignes.py` (pur, `rand_fn` injecté) croise des tournures de métier avec les toponymes de la cité ; ouvrir une ville neuve ne demande **rien** (repli sur `TOPONYMES_DEFAUT`), l'enrichir se fait dans ce seul fichier. Servi par `POST /api/lieux/enseignes`.
-- `GET /api/lieux/creation_options` porte désormais aussi `lieux` (`_id`, `categorie`, `image`, `lieu_parent`, `label`, projetés) : compter par catégorie, écarter une façade déjà posée dans la ville, exclure une enseigne existante.
-- ⚠️ **`_lotDocs` n'écrit un `pnj` que si le tenancier générique existe** (5ᵉ paramètre `tenanciers`) : un lot d'auberges posait sinon N références vers `pnj:marchand_auberge`, **qui n'existe pas**. Un lot ne pose ni capacité ni champ propre — la catégorie suffit, le reste est au formulaire mono-lieu.
-
-### Analyse d'image — tracer les voies (`/admin/editor`)
-La carte « 🔍 Analyse d'image » réunit **Proposer une grille** (lecture de l'image, `utils/grille_image.py`) et **Tracer les voies** : où l'on circule vraiment, pour juger une carte (trou de rempart, gué, enclave). Calcul `templates/scripts/voies.js`, rendu `_voiesDessiner` dans `renderGrid`.
-
-- ⚠️ **LECTURE SEULE** : ni base ni `grid`. **Source = la proposition si elle est affichée**, sinon la grille en base — on juge une proposition AVANT ✔ Appliquer.
-- ⚠️ **`pasAutoriseRegle(regle, …)`** (deplacement.js) est le prédicat de pas UNIQUE des voies **et** du mode test (`depPasAutorise` n'est plus qu'un appel) : bascule exploration `=== 1` / combat-guidage `>= 1 && != 3`, `nav` compris.
-- Deux vues : **régions** (rang 0 = principale, vert discret ; les enclaves en teintes vives) + **goulots** (points d'articulation, cerclés magenta), ou **carte de passage** (Brandes, sources au pas fixe `VOIES_SOURCES_MAX`, rampe sur `sqrt`).
-- ⚠️ Goulot = importance (plus petit côté isolé) `>= VOIES_GOULOT_MIN` (3), sinon chaque impasse en serait un. Une brèche de **2 cases** n'a pas de goulot : c'est la carte de passage qui la montre.
-- ⚠️ **Péremption** : `voiesSignature` (cases + `nav` + dimensions) comparée à chaque rendu ; un tracé périmé **n'est pas dessiné** (message « ↻ Recalculer »). Changer de lieu le ferme.
-- ⚠️ Pas **non pondérés** : le surcoût ×2/×5 du terrain difficile en combat n'entre pas dans la carte de passage.
-- **Directions nav près des murs** (`voiesDirectionsNav`) : cases jouxtant ≥ x cases à 0 **et** `getFinalMask ≠ 255` — **deux côtés** d'un mur nav, l'entrée pouvant être sur la voisine. Trait vert = autorisé, tiret rouge = fermé **par nav seule** (le terrain prime dans `pasAutoriseRegle`).
-- **En mode test de déplacement** (panneau de gauche et carte 🔍 masqués), `#dep-open-btn` de la barre de statut devient « 🛤️ Tracer les voies » / « ↻ Recalculer les voies » (`_depOpenBtnMaj`, `depOpenBtnClic`) ; ⚠️ le tracé y suit la règle **du jeton** (`depReglesCombat` recopié dans `#voies-regle-combat`), et ses comptes partent dans la barre de statut.
-- **A/B** : jusqu'à X chemins (`voiesChemins`, champ `#voies-nb-chemins` 1-8, 3 par défaut) : le plus court puis des **variantes par PÉNALITÉ** (Dijkstra : chaque chemin renchérit ses cases et leurs voisines), retenues si ≥ `VOIES_CHEMINS_NOUVEAUTE` de leurs cases hors abords de A/B sont neuves ; ⚠️ jamais de RETRAIT de cases — un seul passage obligé hors des abords (porte, rue) tuait toute variante (74 % de paires à 1 chemin sur Auxerre) + **coupe minimale en cases** (`voiesCoupeMin`, flot max sur graphe dédoublé) — la brèche de 2-3 cases qu'aucun goulot ne montre. ⚠️ Visée interceptée en **tête** de `mousedown`/`touchstart` (ne peint rien), refusée si le tracé est périmé ou qu'une visée Lieux est armée ; A/B survivent à ↻ Recalculer.
-- ⚠️ Coupe ≤ voisinage de A (≤ 8 augmentations) ; parmi les coupes minimales sort **la plus proche de A**, et `collee` signale une coupe faite **uniquement de voisines du point** (elle l'entoure au lieu de fermer le rempart) — ⚠️ inclusion, pas égalité : un coin de carte garde une partie des voisines du côté du point.
-
-### Écrire un dialogue et une quête — `/admin/dialogues` (`admin_dialogues.html`)
-Éditer un doc `pnj:*` par formulaire : identité, nœuds/choix (overlay à droite), services, et les **quêtes AUTHORÉES** du jeu — qui ne sont pas des docs `quete:*` mais les specs `services.transport.offre` / `services.escorte.offre`. Une **vue graphe SVG en lecture seule** (couches par BFS, `_dlgLayoutGraphe`) montre nœuds inatteignables et `next` morts.
-
-- ⚠️ **N'ÉCRIT RIEN en base** : la page produit le doc complet à coller dans la carte d'import. Elle lit par `GET /admin/table/data?type=pnj` et se fait contrôler par `POST /admin/lint-dialogues` (lecture seule, qui accepte un doc **seul**). C'est le linter qui reste la source des 30+ contrôles — le client ne les réimplémente pas, il rend seulement la plupart **impossibles à saisir** (`<select>` partout où le vocabulaire est fini).
-- ⚠️ **`_dlgFusionDoc` part du doc RELU** et ne réécrit que ce que le formulaire possède : `import-bulk` faisant un PUT complet (§11), toute clé absente disparaîtrait en silence — au niveau du doc, du **nœud** ET du **choix**. Vérifié : les 59 docs du dump ressortent **identiques** d'un aller-retour à blanc.
-- ⚠️ Le vocabulaire (`FLAGS_CONNUS`, `PLACEHOLDERS_CONNUS`, nœuds de service…) est **servi par `main._vocabulaire_dialogues`**, jamais recopié en JS — même risque de dérive silencieuse que `utils/capacites.py`. Il y expose `livre_retour` et `deja`, lus par `routers/pnj.py` mais absents des listes du linter.
-- ⚠️ Une `action` sur un choix rend son `next` **inopérant** (le suivant vient de `services.<x>.noeuds`) : la fusion le supprime plutôt que de laisser croire à une suite. Une offre sans `destination`+`cargaison` (ou `proteges`) **n'est pas écrite** — `offre_spec` la rendrait inerte.
-- ⚠️ Overlay et graphe se disputent la moitié droite : ouvrir l'un replie l'autre (`.dlg-split.compact`), comme `#lj-overlay`/`#conn-overlay` dans l'éditeur de carte.
-
-### Magasins de niveau supérieur (fusion de catégories)
-Une catégorie de lieu peut **en inclure d'autres** — `LIEU_CATEGORIES_FUSION` (variable de monde, `models/character_stats.py`) : `grande_apothicairerie` = apothicairerie + jardinier, plus ses recettes propres. Les 18 grandes maisons sont à Lutèce (`dev/gen_magasins_superieurs.py`).
-
-- **Résolu À LA LECTURE** par `marche.categories_incluses` (transitif, dédoublonné, catégorie propre EN TÊTE, garde-fou de cycle). `_get_marche_map` / `_recettes_par_lieu` restent indexés sur la valeur **littérale** de `recette.lieu_categorie` : **aucune recette n'est dupliquée en base**, et régler la table à chaud ne demande qu'un `reset_prix_cache()`.
-- Les quatre accesseurs (`besoins_categorie`, `appro_leaves_categorie`, `produits_categorie`, `lieu_recettes`) unionnent ; **aucun site d'appel n'a changé** — `lieu_buys`, `cle_matiere_lieu`, le tick, transport, scriptorium et le bouton 🏷️ suivent gratuitement.
-- ⚠️ `lieu_est_scriptorium` teste `categorie == "scriptorium"` **OU** le tag : le grand scriptorium porte `tags: ["scriptorium"]`. Même échappatoire pour `auberge`/`etable` si on les fusionne un jour.
-- ⚠️ Une recette exclusive doit être **CROISÉE** — aucun métier réuni ne doit pouvoir fournir tous ses intrants seul, sinon la grande maison n'apporte rien. Vérifié à la génération (`_metier_unique`), qui refuse d'écrire sinon.
-
-### Portée géographique des recettes (spécialités de terroir)
-Une `recette:*` peut porter **`lieu_portee`** (un id de lieu) : elle n'est alors cuisinable que par les boutiques dont la chaîne d'ancêtres `lieu_parent` remonte jusqu'à lui. **Champ absent ⇒ portée mondiale**, comportement d'avant. Contenu : `dev/gen_specialites_france.py`.
-
-- `marche.portees_lieu(lieu_doc)` = le lieu PUIS ses ancêtres (mémoïsé, anti-cycle, fail-soft sur un doc sans `_id`). ⚠️ Le mémo est indispensable : `lieu:` n'est **pas** dans `_CACHEABLE_PREFIXES`, chaque remontée serait un aller-retour HTTP, et la nuit d'auberge tique toutes les boutiques de la cité.
-- Une recette portée **sort** de `lieu_recettes(categorie)` et de `besoins/produits_categorie` (index parallèles) ; elle n'est servie que par les variantes **`recettes_lieu` / `besoins_lieu` / `produits_lieu` / `appro_leaves_lieu`**, qui prennent le doc. `lieu_buys`, `params_vente_lieu`, `approvisionner` et le tick y basculent sans qu'aucun appelant change — `scriptorium.recettes_effectives` reste le chokepoint des 4 sites de tick.
-- ⚠️ **`feuilles` reste GLOBAL** : une matière que seule une recette portée consomme est bien une feuille (personne ne la produit) et n'est livrée qu'aux boutiques dans la portée — c'est ce qui rend le mécanisme visible en jeu.
-- ⚠️ **Le prix reste MONDIAL** : `_get_recipe_map` / `_cout_memo` (clé = item_id nu) ne sont PAS scopés. Les scoper ferait dépendre le prix d'un objet du premier lieu qui l'a demandé dans le process, et rouvrirait l'arbitrage « acheter là où c'est produit, revendre là où ça ne l'est pas ». **La portée dit où l'on fabrique, jamais combien ça vaut.**
-- ⚠️ Les cités portent désormais `lieu_parent: "lieu:france"`. Conséquence traitée : `quetes.lieux_solidaires` écarte explicitement les `categorie == "ville"` — sans quoi Auxerre et Reims, de même `sous_categorie`, seraient devenues sœurs et un renoncement à l'une sanctionnerait l'autre. La garde était jusque-là l'absence de parent sur les cités.
-
-### Flux de marchandises entre boutiques d'une cité (tick atelier)
-Ce que les PNJ consomment (`ecouler_produits_pnj`) ne s'évapore plus tout à fait : la part `VENTE_PNJ_REDISTRIB` (0.5) est versée au **pool de flux de la cité** — `flux_marchand: {item_id: qty}` sur le doc `lieu:*` de la ville — où les ateliers dont une recette réclame cette matière viennent puiser à leur propre tick, en **réserve** (`stock_matieres`, clé de `cle_matiere_lieu`). Champ absent ⇒ comportement d'avant.
-
-- ⚠️ **`flux=None` ⇒ tick STRICTEMENT d'avant.** L'appelant ouvre le contexte (`flux_cite`), le passe à autant de `tick_atelier` qu'il veut, le referme (`persister_flux` : **une** écriture, et seulement si le pool a bougé). La nuit d'auberge l'ouvre **hors de la boucle** — un `find_docs` de voisins par écoulement aurait coûté ~60 × N requêtes.
-- ⚠️ **On puise AVANT d'écouler** : l'ordre inverse ferait reprendre à une boutique, dans le même tick, ce qu'elle vient de vendre aux habitants. Et on saute ce que le lieu **produit** (`lieu_produit`), sans quoi corde → arc tournerait en manège.
-- ⚠️ **Garde `categorie == "ville"`** dans `flux_cite` : les cités portent `lieu_parent: "lieu:france"`, le flux se poserait sinon sur le PAYS et les villes se fourniraient d'un bout à l'autre du royaume. Même garde, même raison que `quetes.lieux_solidaires`.
-- `cles_consommees()` est le **seul index inverse** du marché (tous les autres vont de la catégorie vers les clés) : il filtre le crédit à ce dont un atelier a l'usage. Pool plafonné par clé à `STOCK_CIBLE_DEFAUT` — `stock_matieres` est déjà le seul réservoir non borné, on n'en fait pas un second. Verrouillé par `tests/test_flux_pnj.py`.
-
-### Cache de documents à portée REQUÊTE (`db/config.py`)
-`get_doc` était un aller-retour HTTP par appel, sans cache — une seule vente en faisait 200 à 350 (relectures répétées du même doc `item:*`). D'où **`RequestDocCacheMiddleware`**, monté dans `main.py` après le `SessionMiddleware`, qui mémorise par requête les docs de **CONTENU** (`_CACHEABLE_PREFIXES`) et exclut tout ce qui porte un état de partie (`character:`, `aventurier:`, `lieu:`, `combat:`, `quete:`…), lu/muté/sauvé dans la même requête. Hit/miss, whitelist, copie de surface, invalidation et kill-switch `TELLURIS_DOC_CACHE=0` sont couverts par `tests/test_doc_cache.py`.
-
-⚠️ **Middleware ASGI PUR, jamais `@app.middleware("http")`** : `BaseHTTPMiddleware` exécute l'aval dans une tâche anyio distincte, ce qui casserait la propagation du `ContextVar`. ⚠️ Le `ContextVar` est posé **par le middleware et nulle part ailleurs** — `get_doc` ne fait que **muter** l'objet stocké : un endpoint `def` tourne dans le threadpool avec une **copie** du contexte, la copie partage l'objet (donc les mutations portent) mais un `set()` fait depuis le thread serait perdu.
-
-**Caches process voisins, à ne pas confondre** : `utils/marche.py` mémorise les **recettes** (`_all_recettes` → `_recipe_map` / `_marche_map` / `lieu_recettes`, une lecture par process), la **fusion des catégories** (`_categories_incluses_memo` / `_recettes_fusion_memo`), la **portée géographique** (`_portees_memo`, `_marche_map_portee`, `_recettes_par_portee`) et la **route d'image d'un lieu** (`_lieu_image_route`, mémo par nom de fichier — aucun endpoint d'upload n'existe, le disque ne bouge pas à chaud). Vidés par **`reset_prix_cache()`**, appelé au chargement des variables de monde **et** en fin d'`admin_import_bulk` / `PUT /admin/doc` quand un doc `type ∈ {recette, item, lieu}` est écrit (`lieu` : la chaîne d'ancêtres est mémoïsée, rebrancher une cité doit prendre effet) — sans quoi importer une recette n'avait aucun effet visible.
+### Cache de documents
+`get_doc` est mémorisé **par requête** pour les seuls préfixes de contenu (`_CACHEABLE_PREFIXES`) ; tout doc d'état de partie en est exclu. Un nouveau préfixe se classe explicitement. Recettes, fusion de catégories et portée sont mémoïsées par process et vidées par `marche.reset_prix_cache()`. Détail : `telluris-db`.
