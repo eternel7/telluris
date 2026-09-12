@@ -19,6 +19,17 @@ const VOIES_GOULOT_MIN = 3;
 // Brandes exact coûte N × (N + arêtes), ~150 M d'opérations sur Auxerre (86×48).
 const VOIES_SOURCES_MAX = 400;
 const VOIES_DIRS = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+// Directions nav près des murs : nombre minimal de voisines à 0 (réglable dans la carte).
+const VOIES_SEUIL_MURS = 2;
+
+// Prédicat de CASE de la règle — celui de deplacement.js, jamais recopié.
+// ⚠️ `caseFranchissable(null, …)` rend true : sans grille, TOUT deviendrait praticable.
+function _voiesTient(cells, regle) {
+	const grille = Array.isArray(cells) ? cells : [];
+	return regle === 'combat'
+		? (x, y) => caseFranchissable(grille, x, y)
+		: (x, y) => caseType1(grille, x, y);
+}
 
 // Graphe de marche : un nœud par case qui TIENT sous la règle, une arête par pas accepté.
 // Non orienté par construction — `getFinalMask` est bidirectionnel et le prédicat de case est
@@ -26,11 +37,8 @@ const VOIES_DIRS = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1]
 function voiesGraphe(cells, nav, dims, regle) {
 	const W = (dims && dims.x) || 0, H = (dims && dims.y) || 0;
 	const N = W * H;
-	// ⚠️ `caseFranchissable(null, …)` rend true : sans grille, TOUT deviendrait praticable.
 	const grille = Array.isArray(cells) ? cells : [];
-	const tient = regle === 'combat'
-		? (x, y) => caseFranchissable(grille, x, y)
-		: (x, y) => caseType1(grille, x, y);
+	const tient = _voiesTient(grille, regle);
 	const noeud = new Uint8Array(N);
 	const voisins = new Array(N);
 	for (let y = 0; y < H; y++) {
@@ -195,4 +203,142 @@ function voiesSignature(cells, nav, dims) {
 		mixe(Number(nav[cle]) || 0);
 	}
 	return `${W}x${H}:${(h >>> 0).toString(16)}`;
+}
+
+// Directions près des murs : cases qui TIENNENT sous la règle, jouxtent au moins `seuilMurs`
+// cases à 0 (hors carte non compté) et dont `nav` restreint une direction — DES DEUX CÔTÉS
+// (`getFinalMask` ≠ 255 : l'entrée peut être posée sur la voisine). C'est là qu'une brèche large ou
+// un mur nav posé d'un seul côté laisse passer sans jamais faire de goulot.
+// `autorisees` = pas acceptés par la règle ; `fermeesNav` = pas refusés PAR NAV SEULE — le terrain
+// prime sur nav dans `pasAutoriseRegle`, un « mur nav » y a donc toujours un terrain praticable.
+function voiesDirectionsNav(cells, nav, dims, regle, seuilMurs) {
+	const W = (dims && dims.x) || 0, H = (dims && dims.y) || 0;
+	const grille = Array.isArray(cells) ? cells : [];
+	const seuil = Math.max(1, seuilMurs == null ? VOIES_SEUIL_MURS : seuilMurs);
+	const tient = _voiesTient(grille, regle);
+	const res = [];
+	for (let y = 0; y < H; y++) {
+		for (let x = 0; x < W; x++) {
+			if (!tient(x, y) || getFinalMask(nav, x, y) === 255) continue;
+			let murs = 0;
+			for (const [dx, dy] of VOIES_DIRS) {
+				const nx = x + dx, ny = y + dy;
+				if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+				if ((grille[ny] || [])[nx] === 0) murs++;
+			}
+			if (murs < seuil) continue;
+			const autorisees = [], fermeesNav = [];
+			for (const [dx, dy] of VOIES_DIRS) {
+				const r = pasAutoriseRegle(regle, grille, nav, dims, x, y, dx, dy);
+				if (r.ok) autorisees.push([dx, dy]);
+				else if (r.raison === 'mur nav') fermeesNav.push([dx, dy]);
+			}
+			res.push({ i: y * W + x, murs, autorisees, fermeesNav });
+		}
+	}
+	return res;
+}
+
+// Plus court chemin A → B (BFS, voisins dans l'ordre de VOIES_DIRS : déterministe).
+// `[a, …, b]`, ou null si B est injoignable ou si A/B n'est pas un nœud.
+function voiesChemin(graphe, a, b) {
+	const { N, noeud, voisins } = graphe;
+	if (!(a >= 0 && a < N && b >= 0 && b < N) || !noeud[a] || !noeud[b]) return null;
+	if (a === b) return [a];
+	const parent = new Int32Array(N).fill(-1);
+	const file = new Int32Array(N);
+	let tete = 0, queue = 0;
+	file[queue++] = a;
+	parent[a] = a;
+	while (tete < queue) {
+		const u = file[tete++];
+		for (const v of voisins[u]) {
+			if (parent[v] !== -1) continue;
+			parent[v] = u;
+			if (v === b) {
+				const chemin = [b];
+				for (let w = b; w !== a; ) { w = parent[w]; chemin.push(w); }
+				return chemin.reverse();
+			}
+			file[queue++] = v;
+		}
+	}
+	return null;
+}
+
+// Coupe minimale en CASES entre A et B : le plus petit ensemble de cases à boucher pour les
+// séparer — la brèche de 2-3 cases qu'aucun goulot ne montre. Flot maximal sur le graphe
+// DÉDOUBLÉ (entrée 2v → sortie 2v+1, capacité 1, ∞ pour A et B ; arcs sortie → entrée ∞).
+// ⚠️ La coupe ne dépasse jamais le voisinage de A (≤ 8) : au plus 8 augmentations.
+// ⚠️ Parmi plusieurs coupes minimales, c'est la plus proche de A qui sort. Si elle vaut TOUT le
+// voisinage de A (ou de B), `collee` le dit : c'est l'entourage du point qui est coupé, pas le
+// rempart — il faut placer A et B en terrain ouvert.
+// Statuts : 'hors voie' · 'identiques' · 'separees' (rien à couper) · 'adjacentes' · 'coupe'.
+function voiesCoupeMin(graphe, regions, a, b) {
+	const { N, noeud, voisins } = graphe;
+	const res = (statut, cases, collee) => ({ statut, cases: cases || [], collee: collee || null });
+	if (!(a >= 0 && a < N && b >= 0 && b < N) || !noeud[a] || !noeud[b]) return res('hors voie');
+	if (a === b) return res('identiques');
+	if (regions.region[a] !== regions.region[b]) return res('separees');
+	if (voisins[a].includes(b)) return res('adjacentes');
+
+	let arcs = N;
+	for (let v = 0; v < N; v++) arcs += voisins[v].length;
+	const tete = new Int32Array(2 * N).fill(-1);
+	const suiv = new Int32Array(2 * arcs), vers = new Int32Array(2 * arcs), cap = new Int32Array(2 * arcs);
+	let m = 0;
+	// Arêtes allouées PAR PAIRES : l'inverse de `e` est `e ^ 1`.
+	const ajoute = (u, v, c) => {
+		vers[m] = v; cap[m] = c; suiv[m] = tete[u]; tete[u] = m++;
+		vers[m] = u; cap[m] = 0; suiv[m] = tete[v]; tete[v] = m++;
+	};
+	const INFINI = 1 << 20;
+	for (let v = 0; v < N; v++) {
+		if (!noeud[v]) continue;
+		ajoute(2 * v, 2 * v + 1, (v === a || v === b) ? INFINI : 1);
+		for (const w of voisins[v]) ajoute(2 * v + 1, 2 * w, INFINI);
+	}
+
+	const source = 2 * a + 1, puits = 2 * b;
+	const precedent = new Int32Array(2 * N);   // arête d'arrivée ; -1 non atteint, -2 source
+	const file = new Int32Array(2 * N);
+	const atteint = () => {
+		precedent.fill(-1);
+		let t = 0, q = 0;
+		file[q++] = source;
+		precedent[source] = -2;
+		while (t < q) {
+			const u = file[t++];
+			for (let e = tete[u]; e !== -1; e = suiv[e]) {
+				const v = vers[e];
+				if (cap[e] > 0 && precedent[v] === -1) {
+					precedent[v] = e;
+					if (v === puits) return true;
+					file[q++] = v;
+				}
+			}
+		}
+		return false;
+	};
+	let flot = 0;
+	while (atteint()) {
+		for (let v = puits; v !== source; ) {
+			const e = precedent[v];
+			cap[e] -= 1;
+			cap[e ^ 1] += 1;
+			v = vers[e ^ 1];
+		}
+		if (++flot > 8) throw new Error('coupe minimale > 8 : graphe incohérent');
+	}
+	// Dernier BFS (échoué) = ensemble atteignable depuis A dans le résiduel.
+	const cases = [];
+	for (let v = 0; v < N; v++) {
+		if (!noeud[v] || v === a || v === b) continue;
+		if (precedent[2 * v] !== -1 && precedent[2 * v + 1] === -1) cases.push(v);
+	}
+	// « Collée » = la coupe n'est faite QUE de voisines du point. ⚠️ Pas « égale à tout son
+	// voisinage » : dans un coin, une partie des voisines forme une poche du côté du point, et la
+	// coupe les contourne — vu sur Auxerre, 5 voisines sur 8, qui ne disaient rien du rempart.
+	const colle = p => cases.every(v => voisins[p].includes(v));
+	return res('coupe', cases, colle(a) ? 'A' : (colle(b) ? 'B' : null));
 }

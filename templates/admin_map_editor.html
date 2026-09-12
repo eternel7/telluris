@@ -1062,35 +1062,6 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				<div id="lieux-conn-list" style="max-height:320px;overflow-y:auto;font-size:.68rem;"></div>
 			</div>
 		</div>
-		<!-- Redimensionnement de la grille. Hors des sous-panneaux de #mode-select : la taille
-		     d'une carte ne dépend d'aucun mode d'édition. Deux temps — ↔ n'écrit RIEN, 💾 est le
-		     seul écrivain. -->
-		<div class="card" id="dim-card" hidden>
-			<div class="card-title">📐 Dimensions</div>
-			<div class="nav-info" style="margin-bottom:8px;">Actuel : <span id="dim-actuel">—</span></div>
-			<div style="display:flex;gap:6px;margin-bottom:8px;">
-				<div style="flex:1;min-width:0;">
-					<label for="dim-x">Largeur (x)</label>
-					<input type="number" id="dim-x" min="1" max="512" step="1">
-				</div>
-				<div style="flex:1;min-width:0;">
-					<label for="dim-y">Hauteur (y)</label>
-					<input type="number" id="dim-y" min="1" max="512" step="1">
-				</div>
-			</div>
-			<div class="nav-info" style="margin-bottom:8px;">
-				Rééchantillonnage au plus proche voisin. <b>Zones et portes suivent.</b>
-				Ne suivent PAS : la position des personnages présents, <code>intro.position_depart</code>,
-				les positions figées dans les quêtes en cours, et un combat ouvert sur cette carte.
-			</div>
-			<button class="btn" id="dim-appliquer-btn">↔ Appliquer (aperçu)</button>
-			<div id="dim-attente" hidden>
-				<div class="dim-warn" id="dim-warn"></div>
-				<button class="btn" id="dim-save-btn" style="margin-bottom:6px;">💾 Enregistrer la nouvelle taille</button>
-				<button class="btn danger" id="dim-annuler-btn">↺ Annuler</button>
-			</div>
-			<div class="dim-msg" id="dim-msg"></div>
-		</div>
 		<!-- Proposition de grille lue sur l'IMAGE du lieu. Hors des sous-panneaux de
 		     #mode-select, comme 📐 : ce que dit l'image ne dépend d'aucun mode d'édition.
 		     ⚠️ APERÇU SEUL — la proposition ne touche JAMAIS `grid` et rien ne part en base. -->
@@ -1139,7 +1110,24 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 						<span><span class="voies-pastille" style="background:linear-gradient(90deg,rgba(240,90,200,0.85),rgba(80,170,255,0.85),rgba(255,170,40,0.85));"></span>autre région (enclave)</span>
 						<span><span class="voies-pastille" style="border:2px solid rgba(255,40,220,1);border-radius:50%;"></span>goulot</span>
 						<span><span class="voies-pastille" style="width:34px;background:linear-gradient(90deg,rgba(255,220,0,0.2),rgba(255,110,0,0.6),rgba(255,0,0,0.9));"></span>passage faible → fort</span>
+						<span><span class="voies-pastille" style="height:3px;background:rgba(60,230,110,1);"></span>direction autorisée</span>
+						<span><span class="voies-pastille" style="height:4px;width:6px;background:rgba(240,60,60,1);"></span>fermée par nav</span>
+						<span><span class="voies-pastille" style="height:4px;background:rgba(40,230,255,0.95);"></span>chemin A → B</span>
+						<span><span class="voies-pastille" style="border:2px solid rgba(255,225,40,1);"></span>case de la coupe minimale</span>
 					</div>
+					<label class="dep-bascule">
+						<input type="checkbox" id="voies-directions" checked> Directions nav près des murs, jouxtant ≥
+						<input type="number" id="voies-seuil-murs" min="1" max="8" step="1" value="2"
+							style="width:3.6em;padding:2px 4px;margin:0;"> case(s) à 0
+					</label>
+					<!-- A/B : chemin le plus court + coupe minimale (cases à boucher pour séparer A de B). -->
+					<div class="nav-info" style="margin:8px 0 4px;">
+						Placez <b>A</b> et <b>B</b> en terrain ouvert, de part et d'autre du rempart ou du fleuve
+						à fermer : le chemin montre par où l'on passe, la coupe les cases à boucher.
+					</div>
+					<button class="btn" id="voies-ab-btn" style="margin-bottom:6px;">🎯 Choisir A puis B</button>
+					<button class="btn" id="voies-ab-effacer-btn" style="margin-bottom:6px;">✕ Effacer A/B</button>
+					<div class="nav-info" id="voies-ab" style="margin-bottom:8px;"></div>
 					<div class="nav-info" id="voies-comptes" style="margin-bottom:8px;"></div>
 					<button class="btn" id="voies-recalculer-btn" style="margin-bottom:6px;">↻ Recalculer</button>
 					<button class="btn danger" id="voies-fermer-btn">✕ Fermer les voies</button>
@@ -1147,7 +1135,35 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				<div class="dim-msg" id="voies-msg"></div>
 			</div>
 		</div>
-
+		<!-- Redimensionnement de la grille. Hors des sous-panneaux de #mode-select : la taille
+		     d'une carte ne dépend d'aucun mode d'édition. Deux temps — ↔ n'écrit RIEN, 💾 est le
+		     seul écrivain. -->
+		<div class="card" id="dim-card" hidden>
+			<div class="card-title">📐 Dimensions</div>
+			<div class="nav-info" style="margin-bottom:8px;">Actuel : <span id="dim-actuel">—</span></div>
+			<div style="display:flex;gap:6px;margin-bottom:8px;">
+				<div style="flex:1;min-width:0;">
+					<label for="dim-x">Largeur (x)</label>
+					<input type="number" id="dim-x" min="1" max="512" step="1">
+				</div>
+				<div style="flex:1;min-width:0;">
+					<label for="dim-y">Hauteur (y)</label>
+					<input type="number" id="dim-y" min="1" max="512" step="1">
+				</div>
+			</div>
+			<div class="nav-info" style="margin-bottom:8px;">
+				Rééchantillonnage au plus proche voisin. <b>Zones et portes suivent.</b>
+				Ne suivent PAS : la position des personnages présents, <code>intro.position_depart</code>,
+				les positions figées dans les quêtes en cours, et un combat ouvert sur cette carte.
+			</div>
+			<button class="btn" id="dim-appliquer-btn">↔ Appliquer (aperçu)</button>
+			<div id="dim-attente" hidden>
+				<div class="dim-warn" id="dim-warn"></div>
+				<button class="btn" id="dim-save-btn" style="margin-bottom:6px;">💾 Enregistrer la nouvelle taille</button>
+				<button class="btn danger" id="dim-annuler-btn">↺ Annuler</button>
+			</div>
+			<div class="dim-msg" id="dim-msg"></div>
+		</div>
 		</div>
 	</div>
 
@@ -1304,6 +1320,9 @@ let grilleProposee = null;   // [y][x] | null
 // ⚠️ LECTURE SEULE, comme `grilleProposee` : rien ne l'écrit en base ni dans `grid`.
 let voies = null;
 let voiesPerime = false;     // dernier état de péremption AFFICHÉ — le DOM ne bouge qu'au changement
+// Visée A/B du tracé : null | 'A' | 'B'. ⚠️ Interceptée en TÊTE de mousedown/touchstart : armée,
+// un clic sur la carte ne peint pas, ne sélectionne rien, ne pose rien.
+let voiesVisee = null;
 
 // Color map for values
 const VALUE_COLORS = {
@@ -1719,6 +1738,7 @@ lieuSelect.addEventListener('change', async (e) => {
 			// Le tracé des voies décrivait la grille PRÉCÉDENTE : on le ferme plutôt que de le déclarer périmé.
 			voies = null;
 			voiesPerime = false;
+			voiesVisee = null;
 			_voiesMsg('', false);
 			canvas.style.cursor = '';
 			renderLieuJsonOverlay();   // changer de lieu ferme l'éditeur : ses docs ne sont plus les bons
@@ -2285,6 +2305,8 @@ function paintEtTest(e) {
 // Terrain et Navigation, eux, peignent en marchant.
 canvas.addEventListener('mousedown', e => {
 	if (!grid.length) return;
+	// Visée A/B du tracé des voies : AVANT tout le reste, le clic ne doit rien peindre ni poser.
+	if (voiesVisee) { e.preventDefault(); _voiesViser(e); return; }
 	if (modeDeplacement && !editionPendantTest()) return;
 	isPainting = true;
 	paintEtTest(e);
@@ -2322,7 +2344,7 @@ canvas.addEventListener('mouseup',		() => { isPainting = false; });
 canvas.addEventListener('mouseleave', () => { isPainting = false; hoverCell = null; if (grid.length) renderGrid(); });
 
 // Touch support
-canvas.addEventListener('touchstart', e => { if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); isPainting = true; paintEtTest(e.touches[0]); }, {passive:false});
+canvas.addEventListener('touchstart', e => { if (voiesVisee) { e.preventDefault(); _voiesViser(e.touches[0]); return; } if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); isPainting = true; paintEtTest(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchmove',	e => { if (modeDeplacement && !editionPendantTest()) return; e.preventDefault(); if (editMode === 'lieux') return; paintEtTest(e.touches[0]); }, {passive:false});
 canvas.addEventListener('touchend',	 () => { isPainting = false; });
 
@@ -2373,7 +2395,7 @@ function setMode(mode) {
 	// ⚠️ L'overlay JSON est fermé DANS LES DEUX SENS : il est en `position:fixed`, il flotterait
 	// donc au-dessus d'un mode où le panneau Lieux n'est même plus affiché. Le repositionnement
 	// part avec lui — armé, le clic du mode d'arrivée lui reviendrait.
-	lieuxRepos = null; canvas.style.cursor = '';
+	lieuxRepos = null; voiesVisee = null; canvas.style.cursor = '';
 	// Le formulaire de connexion part avec, et dans les deux sens : sa visée attend un clic
 	// sur une carte dont le mode ne peint plus le terrain.
 	closeConnForm();
@@ -2884,13 +2906,18 @@ function _ptPaireDe(connexions, lieuId, citeId) {
 	};
 }
 
-// Les images d'une famille (douves / pont) et d'un côté encore libres. `prises` = les
-// images déjà portées par un lieu : proposer une image déjà employée ferait deux portes
-// jumelles à l'écran, sans que rien ne le signale.
-function _ptImagesLibres(images, famille, cote, prises) {
-	const prefixe = `porte_de_ville_${famille}_${cote}`;
+// Les images `porte_de_ville*` d'un côté encore libres. `prises` = les images déjà portées par
+// un lieu : proposer une image déjà employée ferait deux portes jumelles à l'écran, sans que
+// rien ne le signale.
+// ⚠️ AUCUN filtre de famille : les noms réels n'en suivent aucune (douves, pont, route, lutece…
+// ou rien du tout — `porte_de_ville_exterieur01`). Seul le CÔTÉ est lu, par sous-chaîne :
+// `interieur` couvre aussi la graphie `interieure` présente sur disque.
+function _ptImagesLibres(images, cote, prises) {
 	const deja = new Set(prises || []);
-	return (images || []).filter(f => String(f).indexOf(prefixe) === 0 && !deja.has(f));
+	return (images || []).filter(f => {
+		const nom = String(f).toLowerCase();
+		return nom.indexOf('porte_de_ville') === 0 && nom.indexOf(cote) > 0 && !deja.has(f);
+	});
 }
 
 // ── Le reste : lecture du DOM et du serveur ────────────────────────────────
@@ -3298,7 +3325,6 @@ function _ptImagesPrises(sauf) {
 // L'image COURANTE reste offerte même si un autre lieu la porte : sinon rouvrir une porte
 // pour bouger sa case suffirait à lui faire perdre son image.
 function _ptRepeuplerImages(voulues) {
-	const famille = _ptEl('pt-famille').value;
 	const toutes = (creationOptions && creationOptions.images) || [];
 	const v = voulues || {};
 	for (const cote of ['exterieur', 'interieur']) {
@@ -3307,7 +3333,7 @@ function _ptRepeuplerImages(voulues) {
 		const courante = (estExt ? v.ext : v.int) !== undefined
 			? (estExt ? v.ext : v.int) : sel.value;
 		const prises = _ptImagesPrises([courante]);
-		let liste = _ptImagesLibres(toutes, famille, cote, prises);
+		let liste = _ptImagesLibres(toutes, cote, prises);
 		if (courante && liste.indexOf(courante) === -1) liste = [courante].concat(liste);
 		sel.innerHTML = `<option value="">— choisir —</option>`
 			+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(f)}</option>`).join('');
@@ -3416,7 +3442,6 @@ async function openPorteForm(lieuId) {
 	_ptEl('pt-nom').value = '';
 	_ptEl('pt-label-ext').value = '';
 	_ptEl('pt-label-int').value = '';
-	_ptEl('pt-famille').value = 'douves';
 	_ptEl('pt-ext-x').value = cell.cx;
 	_ptEl('pt-ext-y').value = cell.cy;
 	_ptEl('pt-int-x').value = cell.cx;
@@ -3459,8 +3484,6 @@ async function openPorteForm(lieuId) {
 		const meta = paire.linkExt.metadata || {};
 		_ptEl('pt-type').value = meta.type || PORTE_META_TYPE;
 		_ptEl('pt-status').value = meta.status || 'ouvert';
-		// La famille se devine de l'image, pour que le `select` propose les bonnes sœurs.
-		_ptEl('pt-famille').value = String(extDoc.image || '').indexOf('_pont_') >= 0 ? 'pont' : 'douves';
 	}
 
 	_ptRepeuplerImages(ptMode === 'edition'
@@ -3638,7 +3661,6 @@ function _ptCabler() {
 	_ptEl('pt-nom').addEventListener('input', () => { _ptLabelsDerives(); _ptMajApercu(); });
 	['pt-label-ext', 'pt-label-int'].forEach(id =>
 		_ptEl(id).addEventListener('input', () => { ptNomTouche = true; _ptMajApercu(); }));
-	_ptEl('pt-famille').addEventListener('change', _ptRepeuplerImages);
 	['pt-image-ext', 'pt-image-int', 'pt-label-carte-ext', 'pt-label-carte-int',
 		'pt-type', 'pt-status'].forEach(id =>
 		_ptEl(id).addEventListener('input', _ptMajApercu));
@@ -4064,6 +4086,10 @@ const voiesAttenteEl	= document.getElementById('voies-attente');
 const voiesComptesEl	= document.getElementById('voies-comptes');
 const voiesMsgEl		= document.getElementById('voies-msg');
 const voiesCombatEl		= document.getElementById('voies-regle-combat');
+const voiesDirectionsEl	= document.getElementById('voies-directions');
+const voiesSeuilEl		= document.getElementById('voies-seuil-murs');
+const voiesAbBtn		= document.getElementById('voies-ab-btn');
+const voiesAbEl			= document.getElementById('voies-ab');
 
 // JSON valide, mais UNE ligne de la matrice par ligne : `JSON.stringify(…, null, 2)` poserait
 // une case par ligne, soit des milliers de lignes illisibles pour une grille de 40×30.
@@ -4104,6 +4130,9 @@ function _grilleMaj() {
 	// garde de redimensionnement — c'est un calcul local, et l'aperçu de taille est ce qu'on voit.
 	if (voiesAttenteEl) voiesAttenteEl.hidden = !voies;
 	if (voiesComptesEl) voiesComptesEl.textContent = _voiesComptes();
+	if (voiesAbEl) voiesAbEl.textContent = _voiesTexteAB();
+	if (voiesAbBtn) voiesAbBtn.textContent = voiesVisee ? '✕ Annuler la visée' : '🎯 Choisir A puis B';
+	_depOpenBtnMaj();   // en mode test, le bouton de la barre de statut dit « Tracer » ou « Recalculer »
 	if (voiesTracerBtn) {
 		const sansGrille = !grid.length;
 		voiesTracerBtn.disabled = sansGrille;
@@ -4274,15 +4303,23 @@ function tracerVoies() {
 		const graphe = voiesGraphe(source, nav, dims, regle);
 		const regions = voiesRegions(graphe);
 		const vue = _voiesVue();
+		const seuilMurs = _voiesSeuilMurs();
+		// A/B SURVIVENT à un nouveau tracé (autre règle, grille retouchée) tant qu'ils tombent dans
+		// la grille : c'est tout l'intérêt de « boucher, recalculer, revoir la coupe ».
+		const garde = p => (p && p.x < dims.x && p.y < dims.y) ? p : null;
+		const a = garde(voies && voies.a), b = a ? garde(voies && voies.b) : null;
 		voies = {
-			regle, vue,
+			regle, vue, seuilMurs,
 			source: grilleProposee ? 'proposition' : 'base',
 			signature: voiesSignature(source, nav, dims),
 			graphe, regions,
 			goulots: voiesGoulots(graphe, regions),
 			// La carte de passage est la seule coûteuse : calculée au premier passage sur sa vue.
 			passage: vue === 'passage' ? voiesPassage(graphe) : null,
+			directions: voiesDirectionsNav(source, nav, dims, regle, seuilMurs),
+			a, b, chemin: null, coupe: null,
 		};
+		_voiesCalculerAB();
 		voiesPerime = false;
 		_voiesMsg(`✓ Voies tracées en ${Math.round(performance.now() - t0)} ms. Rien n'est enregistré.`, false);
 	} catch (err) {
@@ -4296,6 +4333,7 @@ function tracerVoies() {
 function fermerVoies() {
 	voies = null;
 	voiesPerime = false;
+	if (voiesVisee) { voiesVisee = null; canvas.style.cursor = ''; }
 	_voiesMsg('', false);
 	_grilleMaj();
 	renderGrid();
@@ -4354,6 +4392,79 @@ function _voiesDessiner(cw, ch) {
 		});
 	}
 	ctx.restore();
+
+	// Par-dessus les deux vues : coupe, chemin, directions nav, puis les pastilles A/B.
+	const cote = Math.min(cw, ch);
+	const centreX = i => (i % W) * cw + cw / 2;
+	const centreY = i => Math.floor(i / W) * ch + ch / 2;
+	if (voies.coupe && voies.coupe.statut === 'coupe') {
+		ctx.save();
+		ctx.strokeStyle = 'rgba(255,225,40,1)';
+		ctx.shadowColor = 'rgba(255,225,40,0.95)';
+		ctx.shadowBlur = 8;
+		const lw = Math.max(2, cote * 0.18);
+		ctx.lineWidth = lw;
+		voies.coupe.cases.forEach(i => {
+			ctx.strokeRect((i % W) * cw + lw / 2, Math.floor(i / W) * ch + lw / 2, cw - lw, ch - lw);
+		});
+		ctx.restore();
+	}
+	if (voies.chemin && voies.chemin.length > 1) {
+		ctx.save();
+		ctx.strokeStyle = 'rgba(40,230,255,0.95)';
+		ctx.lineWidth = Math.max(2, cote * 0.2);
+		ctx.lineJoin = 'round';
+		ctx.lineCap = 'round';
+		ctx.shadowColor = 'rgba(0,0,0,0.6)';
+		ctx.shadowBlur = 3;
+		ctx.beginPath();
+		voies.chemin.forEach((i, k) => k ? ctx.lineTo(centreX(i), centreY(i)) : ctx.moveTo(centreX(i), centreY(i)));
+		ctx.stroke();
+		ctx.restore();
+	}
+	// Directions nav près des murs : trait VERT = on passe, tiret ROUGE près du bord = fermé par nav
+	// seule. Aucun trait = terrain refusé.
+	if (voies.directions && (!voiesDirectionsEl || voiesDirectionsEl.checked)) {
+		ctx.save();
+		ctx.shadowBlur = 0;
+		ctx.lineCap = 'round';
+		voies.directions.forEach(d => {
+			const x = centreX(d.i), y = centreY(d.i);
+			ctx.strokeStyle = 'rgba(60,230,110,1)';
+			ctx.lineWidth = Math.max(1, cote * 0.08);
+			ctx.beginPath();
+			d.autorisees.forEach(([dx, dy]) => { ctx.moveTo(x, y); ctx.lineTo(x + dx * cw * 0.45, y + dy * ch * 0.45); });
+			ctx.stroke();
+			ctx.strokeStyle = 'rgba(240,60,60,1)';
+			ctx.lineWidth = Math.max(1.5, cote * 0.12);
+			ctx.beginPath();
+			d.fermeesNav.forEach(([dx, dy]) => {
+				ctx.moveTo(x + dx * cw * 0.28, y + dy * ch * 0.28);
+				ctx.lineTo(x + dx * cw * 0.48, y + dy * ch * 0.48);
+			});
+			ctx.stroke();
+		});
+		ctx.restore();
+	}
+	[['A', voies.a], ['B', voies.b]].forEach(([nom, p]) => {
+		if (!p) return;
+		const x = p.x * cw + cw / 2, y = p.y * ch + ch / 2, r = Math.max(6, cote * 0.55);
+		ctx.save();
+		ctx.shadowBlur = 0;
+		ctx.beginPath();
+		ctx.arc(x, y, r, 0, Math.PI * 2);
+		ctx.fillStyle = '#fff';
+		ctx.fill();
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = 'rgba(40,230,255,1)';
+		ctx.stroke();
+		ctx.fillStyle = '#111';
+		ctx.font = `bold ${Math.max(8, Math.round(r * 1.1))}px "Share Tech Mono", monospace`;
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillText(nom, x, y);
+		ctx.restore();
+	});
 }
 
 if (voiesTracerBtn) voiesTracerBtn.addEventListener('click', tracerVoies);
@@ -4363,6 +4474,127 @@ const voiesFermerBtn = document.getElementById('voies-fermer-btn');
 if (voiesFermerBtn) voiesFermerBtn.addEventListener('click', fermerVoies);
 if (voiesCombatEl) voiesCombatEl.addEventListener('change', () => { if (voies) tracerVoies(); });
 document.querySelectorAll('input[name="voies-vue"]').forEach(r => r.addEventListener('change', changerVueVoies));
+
+function _voiesSeuilMurs() {
+	const n = parseInt(voiesSeuilEl && voiesSeuilEl.value, 10);
+	return Number.isFinite(n) ? Math.min(8, Math.max(1, n)) : VOIES_SEUIL_MURS;
+}
+
+// Chemin et coupe A/B sur le graphe COURANT du tracé (appelé par `tracerVoies` et `_voiesViser`).
+function _voiesCalculerAB() {
+	if (!voies) return;
+	voies.chemin = null;
+	voies.coupe = null;
+	if (!voies.a || !voies.b) return;
+	const W = voies.graphe.W;
+	const ia = voies.a.y * W + voies.a.x, ib = voies.b.y * W + voies.b.x;
+	voies.chemin = voiesChemin(voies.graphe, ia, ib);
+	voies.coupe = voiesCoupeMin(voies.graphe, voies.regions, ia, ib);
+}
+
+function _voiesTexteAB() {
+	if (!voies) return '';
+	if (voiesVisee) return voiesVisee === 'A' ? '🎯 Cliquez la case A (départ).' : '🎯 Cliquez la case B (arrivée).';
+	if (!voies.a) return '';
+	const W = voies.graphe.W;
+	const pos = i => `[${i % W},${Math.floor(i / W)}]`;
+	const parts = [`A [${voies.a.x},${voies.a.y}]` + (voies.b ? ` → B [${voies.b.x},${voies.b.y}]` : '')];
+	if (!voies.b || !voies.coupe) return parts[0];
+	const c = voies.coupe;
+	if (c.statut !== 'hors voie' && c.statut !== 'identiques') {
+		parts.push(voies.chemin ? `chemin : ${voies.chemin.length - 1} pas` : 'aucun chemin');
+	}
+	const statuts = {
+		'hors voie': "A ou B n'est pas praticable sous cette règle",
+		identiques: 'A et B sont la même case',
+		separees: 'déjà séparées (régions différentes) : rien à couper',
+		adjacentes: 'A et B sont voisines : aucune case ne les sépare',
+	};
+	if (c.statut === 'coupe') {
+		parts.push(`coupe minimale : ${c.cases.length} case(s) — ${c.cases.map(pos).join(' ')}`);
+		if (c.collee) parts.push(`⚠️ la coupe colle à ${c.collee} : elle l'entoure au lieu de fermer le passage — placez ${c.collee} en terrain ouvert, loin du bord`);
+	} else {
+		parts.push(statuts[c.statut] || c.statut);
+	}
+	return parts.join(' · ');
+}
+
+function armerVoiesAB() {
+	if (!voies) return;
+	if (voiesVisee) {   // second clic sur le bouton = annuler la visée
+		voiesVisee = null;
+		canvas.style.cursor = '';
+		_grilleMaj();
+		return;
+	}
+	if (voiesPerime) { _voiesMsg('⚠️ Grille modifiée depuis le tracé — ↻ Recalculer avant de viser.', true); return; }
+	// ⚠️ Deux visées armées se disputeraient le même clic : celle du tracé l'intercepte en tête.
+	if (lieuxRepos || cxVisee || ptVisee) {
+		_voiesMsg("✗ Une visée du mode Lieux est armée : terminez-la ou annulez-la d'abord.", true);
+		return;
+	}
+	voiesVisee = 'A';
+	canvas.style.cursor = 'crosshair';
+	_voiesMsg('', false);
+	_grilleMaj();
+}
+
+function _voiesViser(e) {
+	const c = cellAt(e);
+	if (!c || !voies) return;
+	if (voiesPerime) {
+		voiesVisee = null;
+		canvas.style.cursor = '';
+		_grilleMaj();
+		_voiesMsg('⚠️ Grille modifiée depuis le tracé — ↻ Recalculer avant de viser.', true);
+		return;
+	}
+	if (!voies.graphe.noeud[c.cy * voies.graphe.W + c.cx]) {
+		// Refusée mais la visée RESTE armée : on vise une autre case, on ne recommence pas tout.
+		_voiesMsg(`✗ [${c.cx},${c.cy}] n'est pas praticable sous la règle ${voies.regle} : choisissez une autre case.`, true);
+		return;
+	}
+	if (voiesVisee === 'A') {
+		voies.a = { x: c.cx, y: c.cy };
+		voies.b = null;
+		voiesVisee = 'B';
+	} else {
+		voies.b = { x: c.cx, y: c.cy };
+		voiesVisee = null;
+		canvas.style.cursor = '';
+	}
+	_voiesCalculerAB();
+	_voiesMsg('', false);
+	_grilleMaj();
+	renderGrid();
+}
+
+function effacerVoiesAB() {
+	if (!voies) return;
+	voies.a = voies.b = null;
+	voies.chemin = voies.coupe = null;
+	if (voiesVisee) { voiesVisee = null; canvas.style.cursor = ''; }
+	_grilleMaj();
+	renderGrid();
+}
+
+// Seuil de murs ou case « Directions » : seules les directions bougent, le reste du tracé non.
+function majDirectionsVoies() {
+	if (!voies) return;
+	if (voiesPerime) { tracerVoies(); return; }
+	const seuil = _voiesSeuilMurs();
+	if (seuil !== voies.seuilMurs) {
+		voies.seuilMurs = seuil;
+		voies.directions = voiesDirectionsNav(_voiesSource(), nav, _voiesDims(), voies.regle, seuil);
+	}
+	renderGrid();
+}
+
+if (voiesAbBtn) voiesAbBtn.addEventListener('click', armerVoiesAB);
+const voiesAbEffacerBtn = document.getElementById('voies-ab-effacer-btn');
+if (voiesAbEffacerBtn) voiesAbEffacerBtn.addEventListener('click', effacerVoiesAB);
+if (voiesDirectionsEl) voiesDirectionsEl.addEventListener('change', majDirectionsVoies);
+if (voiesSeuilEl) voiesSeuilEl.addEventListener('input', majDirectionsVoies);
 // ── LIEUX : repositionnement d'une porte ───────────────────────────────────
 // Déplacer une connexion, c'est réécrire la `pos` du nœud QUI PORTE LE LIEU COURANT — la case
 // que le joueur doit occuper pour voir le lien (get_lieu_links est scopé à sa case). La saisir
@@ -6672,6 +6904,7 @@ async function ouvrirModeDeplacement() {
 	}
 	modeDeplacement = true;
 	document.body.classList.add('mode-deplacement');
+	_depOpenBtnMaj();
 	depSection.hidden = false;
 	depCombatEl.checked = depReglesCombat;
 	// Le panneau de gauche disparaît : les mini-outils prennent le relais, on continue de peindre
@@ -6688,6 +6921,7 @@ function fermerModeDeplacement() {
 	if (!modeDeplacement) return;
 	modeDeplacement = false;
 	document.body.classList.remove('mode-deplacement');
+	_depOpenBtnMaj();
 	depSection.hidden = true;
 	depRetirerToken();
 	depPos = null;
@@ -6698,7 +6932,33 @@ function fermerModeDeplacement() {
 	if (grid.length) renderGrid();   // la carte reprend le rendu de son mode d'édition
 }
 
-depOpenBtn.addEventListener('click', ouvrirModeDeplacement);
+// ⚠️ En mode test, le panneau de gauche est masqué — et avec lui la carte 🔍 « Analyse d'image ».
+// Le bouton de la barre de statut, qui ne servirait plus qu'à rouvrir un test déjà ouvert, devient
+// « Tracer les voies » / « Recalculer » : sans lui, le tracé serait injoignable pendant le test.
+function _depOpenBtnMaj() {
+	if (!depOpenBtn) return;
+	if (!modeDeplacement) {
+		depOpenBtn.textContent = '🚶 Tester le déplacement';
+		depOpenBtn.title = 'Marcher dans ce lieu avec les règles réelles du jeu';
+		return;
+	}
+	depOpenBtn.textContent = voies ? '↻ Recalculer les voies' : '🛤️ Tracer les voies';
+	depOpenBtn.title = "Tracer les voies selon la règle du jeton (exploration ou combat) — rien n'est enregistré";
+}
+
+function depOpenBtnClic() {
+	if (!modeDeplacement) { ouvrirModeDeplacement(); return; }
+	// La case de règle du tracé vit dans la carte 🔍, masquée pendant le test : on trace selon la
+	// règle QU'APPLIQUE LE JETON, sinon les régions coloriées contrediraient les flèches.
+	if (voiesCombatEl) voiesCombatEl.checked = depReglesCombat;
+	tracerVoies();
+	// Le message du tracé part dans la carte masquée : la barre de statut en rend compte.
+	setStatus(voies
+		? `🛤️ ${_escHtml(_voiesComptes())}`
+		: `<span style="color:var(--danger)">${_escHtml(voiesMsgEl ? voiesMsgEl.textContent : 'Tracé impossible.')}</span>`);
+}
+
+depOpenBtn.addEventListener('click', depOpenBtnClic);
 document.getElementById('dep-close-btn').addEventListener('click', fermerModeDeplacement);
 document.getElementById('dep-replacer-btn').addEventListener('click', depReplacer);
 depCombatEl.addEventListener('change', () => {
@@ -6828,16 +7088,11 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 
 	<div class="cx-noeud">
 		<h3>Images</h3>
-		<label for="pt-famille">Famille</label>
-		<select id="pt-famille" style="margin-bottom:6px;">
-			<option value="douves">douves</option>
-			<option value="pont">pont</option>
-		</select>
 		<label for="pt-image-ext">Extérieure</label>
 		<select id="pt-image-ext" style="margin-bottom:6px;"></select>
 		<label for="pt-image-int">Intérieure</label>
 		<select id="pt-image-int" style="margin-bottom:0;"></select>
-		<div class="cx-hint">Les images déjà portées par un lieu ne sont pas proposées.</div>
+		<div class="cx-hint">Toutes les images <code>porte_de_ville*</code> du bon côté (extérieur / intérieur), sans filtre de famille. Celles déjà portées par un lieu ne sont pas proposées.</div>
 	</div>
 
 	<div class="cx-noeud">

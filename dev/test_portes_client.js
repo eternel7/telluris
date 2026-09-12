@@ -434,18 +434,30 @@ t('un côté indécidable refuse la paire plutôt que de deviner', () => {
 });
 
 // ── _ptImagesLibres ──────────────────────────────────────────────────────────
-t('les images sont filtrées par famille et par côté, les prises écartées', () => {
-	const images = [
-		'porte_de_ville_douves_exterieur01.png', 'porte_de_ville_douves_exterieur02.png',
-		'porte_de_ville_douves_interieur01.png', 'porte_de_ville_pont_exterieur01.png',
-		'auxerre.png',
-	];
-	assert.deepStrictEqual(_ptImagesLibres(images, 'douves', 'exterieur', []),
-		['porte_de_ville_douves_exterieur01.png', 'porte_de_ville_douves_exterieur02.png']);
+// Noms RÉELS du disque : familles variées, noms sans famille, graphie « interieure », .jpg.
+const IMAGES_PORTES = [
+	'porte_de_ville_douves_exterieur01.png', 'porte_de_ville_pont_exterieur02.png',
+	'porte_de_ville_route_interieur01.png', 'porte_de_ville_lutece_exterieur.jpg',
+	'porte_de_ville_exterieur01.jpg', 'porte_de_ville_interieure02.jpg',
+	'porte_de_ville_douves_interieur03.png', 'auxerre.png', 'grande_porte_exterieur.png',
+];
+
+t('toutes les images porte_de_ville* du bon côté, SANS filtre de famille', () => {
+	assert.deepStrictEqual(_ptImagesLibres(IMAGES_PORTES, 'exterieur', []), [
+		'porte_de_ville_douves_exterieur01.png', 'porte_de_ville_pont_exterieur02.png',
+		'porte_de_ville_lutece_exterieur.jpg', 'porte_de_ville_exterieur01.jpg',
+	]);
+	assert.deepStrictEqual(_ptImagesLibres(IMAGES_PORTES, 'interieur', []), [
+		'porte_de_ville_route_interieur01.png', 'porte_de_ville_interieure02.jpg',
+		'porte_de_ville_douves_interieur03.png',
+	], 'la graphie « interieure » est reconnue');
+});
+
+t('les images déjà prises sont écartées ; hors porte_de_ville*, rien n’est proposé', () => {
 	assert.deepStrictEqual(
-		_ptImagesLibres(images, 'douves', 'exterieur', ['porte_de_ville_douves_exterieur01.png']),
-		['porte_de_ville_douves_exterieur02.png']);
-	assert.deepStrictEqual(_ptImagesLibres(images, 'pont', 'interieur', []), []);
+		_ptImagesLibres(IMAGES_PORTES, 'exterieur', ['porte_de_ville_douves_exterieur01.png', 'porte_de_ville_exterieur01.jpg']),
+		['porte_de_ville_pont_exterieur02.png', 'porte_de_ville_lutece_exterieur.jpg']);
+	assert.ok(!_ptImagesLibres(IMAGES_PORTES, 'exterieur', []).includes('grande_porte_exterieur.png'));
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);

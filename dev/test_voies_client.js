@@ -234,5 +234,140 @@ t('une case, une entrée nav ou les dimensions changent la signature', () => {
 	assert.notStrictEqual(voiesSignature(TROU, {}, { x: 5, y: 2 }), base);
 });
 
+console.log('\n── Directions nav près des murs ───────────────────────────────────────────');
+
+// Rempart vertical percé en (2,1) ; nav ferme la DROITE depuis la brèche.
+const REMPART = [
+	[1, 1, 0, 1, 1],
+	[1, 1, 1, 1, 1],
+	[1, 1, 0, 1, 1],
+];
+
+t('la brèche ET sa voisine de l’autre côté du mur nav sont listées (bidirectionnel)', () => {
+	const r = voiesDirectionsNav(REMPART, { '2,1': 4 }, dims(REMPART), 'exploration', 2);
+	assert.deepStrictEqual(r, [
+		{ i: idx(REMPART, 2, 1), murs: 2,
+			autorisees: [[-1, -1], [1, -1], [-1, 0], [-1, 1], [1, 1]], fermeesNav: [[1, 0]] },
+		// (3,1) ne porte AUCUNE entrée nav : c'est la brèche qui lui interdit d'entrer par la gauche.
+		{ i: idx(REMPART, 3, 1), murs: 2,
+			autorisees: [[0, -1], [1, -1], [1, 0], [0, 1], [1, 1]], fermeesNav: [[-1, 0]] },
+	]);
+});
+
+t('sans restriction nav, rien n’est listé — même contre un mur', () => {
+	assert.deepStrictEqual(voiesDirectionsNav(REMPART, {}, dims(REMPART), 'exploration', 1), []);
+});
+
+t('un seuil au-dessus du nombre de murs exclut la case', () => {
+	assert.deepStrictEqual(voiesDirectionsNav(REMPART, { '2,1': 4 }, dims(REMPART), 'exploration', 3), []);
+});
+
+t('la règle compte : en combat, le terrain difficile devient une direction autorisée', () => {
+	const DIFFICILE = [
+		[0, 0, 1],
+		[2, 1, 1],
+		[0, 0, 1],
+	];
+	const cle = idx(DIFFICILE, 1, 1);
+	const expl = voiesDirectionsNav(DIFFICILE, { '1,1': 1 }, dims(DIFFICILE), 'exploration', 2).find(d => d.i === cle);
+	const comb = voiesDirectionsNav(DIFFICILE, { '1,1': 1 }, dims(DIFFICILE), 'combat', 2).find(d => d.i === cle);
+	assert.strictEqual(expl.murs, 4);
+	assert.ok(!expl.autorisees.some(([dx, dy]) => dx === -1 && dy === 0), 'terrain 2 refusé à pied');
+	assert.ok(comb.autorisees.some(([dx, dy]) => dx === -1 && dy === 0), 'terrain 2 franchi en combat');
+});
+
+console.log('\n── Chemin A → B ───────────────────────────────────────────────────────────');
+
+t('le chemin franchit le rempart par le trou', () => {
+	const { graphe } = analyse(TROU);
+	const a = idx(TROU, 0, 1), b = idx(TROU, 4, 1);
+	const c = voiesChemin(graphe, a, b);
+	assert.strictEqual(c.length, 5);
+	assert.strictEqual(c[0], a);
+	assert.strictEqual(c[c.length - 1], b);
+	assert.ok(c.includes(idx(TROU, 2, 1)));
+	assert.deepStrictEqual(voiesChemin(graphe, a, b), c, 'déterministe');
+});
+
+t('pas de chemin à travers un mur plein, ni depuis une case à 0 ; A = B rend [A]', () => {
+	const mur = analyse(MUR).graphe;
+	assert.strictEqual(voiesChemin(mur, idx(MUR, 0, 1), idx(MUR, 4, 1)), null);
+	assert.strictEqual(voiesChemin(mur, idx(MUR, 2, 1), idx(MUR, 4, 1)), null);
+	assert.deepStrictEqual(voiesChemin(mur, idx(MUR, 0, 1), idx(MUR, 0, 1)), [idx(MUR, 0, 1)]);
+});
+
+console.log('\n── Coupe minimale A ↔ B ───────────────────────────────────────────────────');
+
+t('une brèche de 2 cases : la coupe est exactement ces 2 cases', () => {
+	const BRECHE = [
+		[1, 1, 0, 1, 1],
+		[1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1],
+		[1, 1, 0, 1, 1],
+	];
+	const { graphe, regions } = analyse(BRECHE);
+	const r = voiesCoupeMin(graphe, regions, idx(BRECHE, 0, 1), idx(BRECHE, 4, 1));
+	assert.deepStrictEqual(r, { statut: 'coupe', cases: [idx(BRECHE, 2, 1), idx(BRECHE, 2, 2)], collee: null });
+});
+
+t('un trou d’une case : la coupe est le trou', () => {
+	const { graphe, regions } = analyse(TROU);
+	assert.deepStrictEqual(voiesCoupeMin(graphe, regions, idx(TROU, 0, 1), idx(TROU, 4, 1)),
+		{ statut: 'coupe', cases: [idx(TROU, 2, 1)], collee: null });
+});
+
+t('statuts : séparées, adjacentes, hors voie, identiques', () => {
+	const mur = analyse(MUR);
+	assert.strictEqual(voiesCoupeMin(mur.graphe, mur.regions, idx(MUR, 0, 1), idx(MUR, 4, 1)).statut, 'separees');
+	const trou = analyse(TROU);
+	assert.strictEqual(voiesCoupeMin(trou.graphe, trou.regions, idx(TROU, 0, 0), idx(TROU, 1, 0)).statut, 'adjacentes');
+	assert.strictEqual(voiesCoupeMin(trou.graphe, trou.regions, idx(TROU, 2, 0), idx(TROU, 4, 1)).statut, 'hors voie');
+	assert.strictEqual(voiesCoupeMin(trou.graphe, trou.regions, idx(TROU, 0, 1), idx(TROU, 0, 1)).statut, 'identiques');
+});
+
+t('A dans un coin face à une brèche plus large que son voisinage : collee = A', () => {
+	const LARGE = [
+		[1, 1, 0, 1, 1],
+		[1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1],
+		[1, 1, 0, 1, 1],
+	];
+	const { graphe, regions } = analyse(LARGE);
+	const r = voiesCoupeMin(graphe, regions, idx(LARGE, 0, 0), idx(LARGE, 4, 3));
+	assert.deepStrictEqual(r, { statut: 'coupe', cases: [idx(LARGE, 1, 0), idx(LARGE, 0, 1), idx(LARGE, 1, 1)], collee: 'A' });
+	assert.deepStrictEqual(voiesCoupeMin(graphe, regions, idx(LARGE, 0, 0), idx(LARGE, 4, 3)), r, 'déterministe');
+});
+
+t('collee = coupe faite de voisines de A, même quand un coin en garde une partie de son côté', () => {
+	// Brèche de 6 cases en x=4 ; A en (1,1) a 8 voisines, mais le coin (0,0),(1,0),(0,1) ne mène
+	// nulle part : la coupe minimale en prend 5 autour de A. Une égalité stricte avec le voisinage
+	// (8) la laissait passer pour une vraie brèche — c'est le cas relevé sur Auxerre.
+	const COIN = [
+		[1, 1, 1, 1, 0, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 0, 1, 1],
+	];
+	const { graphe, regions } = analyse(COIN);
+	const r = voiesCoupeMin(graphe, regions, idx(COIN, 1, 1), idx(COIN, 6, 4));
+	assert.deepStrictEqual(r, {
+		statut: 'coupe',
+		cases: [idx(COIN, 2, 0), idx(COIN, 2, 1), idx(COIN, 0, 2), idx(COIN, 1, 2), idx(COIN, 2, 2)],
+		collee: 'A',
+	});
+});
+
+t('un mur nav entre dans la coupe : fermer la brèche par nav sépare les deux salles', () => {
+	// Nav interdit toute sortie de la brèche vers la droite (↗ → ↘) : plus rien à couper.
+	const a = analyse(TROU, 'exploration', { '2,1': 2 | 4 | 8 });
+	assert.strictEqual(voiesCoupeMin(a.graphe, a.regions, idx(TROU, 0, 1), idx(TROU, 4, 1)).statut, 'separees');
+});
+
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);
 process.exit(echecs ? 1 : 0);
