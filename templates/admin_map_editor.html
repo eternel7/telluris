@@ -1224,7 +1224,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 
 <!-- ── Mode « test de déplacement » ────────────────────────────────────────────────────
      Panneau flottant en bas à droite : le pavé (part-move-panel.html, partagé avec play_town
-     et le combat), la règle appliquée, le motif de chaque flèche refusée, et les portes de la
+     et le combat), la règle appliquée, la case courante et son terrain, et les portes de la
      case courante. Aucun réseau, aucun document muté — sauf le tirage du placement, qui reste
      du PYTHON (`GET /api/lieu/{id}/placement_test`).
 
@@ -6778,7 +6778,6 @@ const DEP_FLECHES = {
 	'-1,-1': '↖', '0,-1': '↑', '1,-1': '↗', '-1,0': '←',
 	'1,0': '→', '-1,1': '↙', '0,1': '↓', '1,1': '↘',
 };
-const DEP_DIRS = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
 
 // Le prédicat COURANT — source unique du grisage, du pas et du texte d'aide.
 function depPasAutorise(dx, dy) {
@@ -6808,18 +6807,13 @@ function depMajFleches() {
 	// Pas d'`exergue` : il n'y a pas de guidage 🧭 ici, et cette page ne définit même pas
 	// `.btn-highlight`.
 	majFleches(depControls, { autorise: (dx, dy) => depPasAutorise(dx, dy) });
-	// Le motif de chaque direction refusée : c'est CE que le mode est venu répondre.
-	const motifs = [];
-	for (const [dx, dy] of DEP_DIRS) {
-		const r = depPasAutorise(dx, dy);
-		if (!r.ok) motifs.push(DEP_FLECHES[dx + ',' + dy] + ' ' + r.raison);
-	}
+	// ⚠️ Pas de récapitulatif des huit directions ici : le grisage du pavé dit déjà lesquelles
+	// sont ouvertes, et la bannière de règle au-dessus dit SOUS QUEL RÉGIME — le doublon en
+	// toutes lettres n'apprenait rien de plus. La case et son terrain restent, eux : ils ne
+	// sont lisibles nulle part ailleurs.
 	const v = (grid[depPos.y] || [])[depPos.x];
 	depInfoEl.innerHTML = 'Case <b>[' + depPos.x + ', ' + depPos.y + ']</b> — terrain <b>'
 		+ (v === undefined ? '?' : v) + '</b>'
-		+ (motifs.length
-			? '<br>Fermé : ' + motifs.map(m => '<span>' + m + '</span>').join(' · ')
-			: '<br>Toutes les directions sont ouvertes.')
 		+ '<br>⚠️ La <b>surcharge</b> (garde 409 du serveur) n\'est pas simulée : ce mode n\'a pas de personnage.';
 }
 
@@ -6934,7 +6928,7 @@ async function depReplacer() {
 }
 
 // Placement refusé : on ne laisse ni jeton fantôme (il serait resté du lieu précédent) ni
-// flèches actives. La bannière de règle et le motif restent, eux : ils expliquent.
+// flèches actives. La bannière de règle reste, elle, et l'aide renvoie vers ↻ Replacer.
 function depEchec() {
 	depPos = null;
 	depRetirerToken();
