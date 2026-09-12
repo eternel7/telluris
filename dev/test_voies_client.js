@@ -435,5 +435,31 @@ t('cas limites : A = B, A et B voisins (sans boucler), hors voie, mur plein', ()
 	assert.deepStrictEqual(voiesChemins(mur, idx(MUR, 0, 1), idx(MUR, 4, 1), 3), []);
 });
 
+t('un passage OBLIGÉ hors des abords n’empêche plus les variantes (méthode par pénalité)', () => {
+	// Rempart x = 4 percé d'UNE porte (4,3), loin de A ; au-delà, un pilier (x = 6, y 2-4) se
+	// contourne par le haut OU par le bas. Retirer les cases du premier chemin murait la porte :
+	// un seul chemin — c'est le défaut vu sur Auxerre (74 % des paires).
+	const PORTE_PILIER = [
+		[1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1],
+		[1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1],
+		[1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+	];
+	const { graphe } = analyse(PORTE_PILIER);
+	const a = idx(PORTE_PILIER, 0, 3), b = idx(PORTE_PILIER, 10, 3);
+	const porte = idx(PORTE_PILIER, 4, 3);
+	const avant = voiesChemin(graphe, a, b);
+	const cs = voiesChemins(graphe, a, b, 3);
+	assert.strictEqual(cs.length, 2, 'par le haut et par le bas du pilier');
+	cs.forEach(c => { cheminValide(graphe, c, a, b); assert.ok(c.includes(porte), 'la porte reste empruntable'); });
+	const cote = c => c.some(i => i % 11 === 6 && Math.floor(i / 11) < 2) ? 'haut' : 'bas';
+	assert.deepStrictEqual(cs.map(cote).sort(), ['bas', 'haut']);
+	assert.ok(cs.every(c => c.length >= cs[0].length), 'le premier est le plus court');
+	assert.deepStrictEqual(voiesChemin(graphe, a, b), avant, 'le graphe n’est pas modifié');
+});
+
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);
 process.exit(echecs ? 1 : 0);

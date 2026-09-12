@@ -4553,9 +4553,9 @@ function _voiesTexteAB() {
 		let texte = !cs.length ? 'aucun chemin'
 			: cs.length === 1 ? `chemin : ${pas[0]} pas`
 			: `${cs.length} chemins : ${pas.join(' · ')} pas`;
-		// Moins que demandé : il n'existe pas d'autre passage (écarté d'une case du précédent).
+		// Moins que demandé : aucune autre variante assez différente (cf. VOIES_CHEMINS_NOUVEAUTE).
 		if (cs.length && cs.length < (voies.cheminsDemandes || 1)) {
-			texte += ` (${cs.length} sur ${voies.cheminsDemandes} demandés : aucun autre passage)`;
+			texte += ` (${cs.length} sur ${voies.cheminsDemandes} demandés : aucune autre variante assez différente)`;
 		}
 		parts.push(texte);
 	}

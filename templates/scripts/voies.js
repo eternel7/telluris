@@ -21,12 +21,22 @@ const VOIES_SOURCES_MAX = 400;
 const VOIES_DIRS = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
 // Directions nav près des murs : nombre minimal de voisines à 0 (réglable dans la carte).
 const VOIES_SEUIL_MURS = 2;
-// Chemins A → B multiples (`voiesChemins`) : combien par défaut, plafond du champ de la carte, et
-// rayon (Chebyshev) autour de A et B jamais retiré du graphe. ⚠️ VOIES_ABORDS doit DÉPASSER
-// l'écart (1) : sinon le premier chemin murerait la sortie de A et plus rien ne partirait en éventail.
+// Chemins A → B multiples (`voiesChemins`) : combien par défaut, et plafond du champ de la carte.
 const VOIES_CHEMINS_DEFAUT = 3;
 const VOIES_CHEMINS_MAX = 8;
+// Rayon (Chebyshev) autour de A et B jamais renchéri ni compté dans la nouveauté d'une variante :
+// tous les chemins en partent, ils y seraient forcément « identiques ».
 const VOIES_ABORDS = 2;
+// Surcoût d'une case (et de ses voisines) par chemin qui l'a empruntée : un pas ordinaire vaut 1, un
+// pas déjà pris en vaut 1 + 4. Plus fort, les variantes s'écartent davantage et s'allongent d'autant.
+const VOIES_CHEMINS_PENALITE = 4;
+// Part minimale de cases NEUVES (hors empreinte des chemins retenus, hors abords) pour qu'une variante
+// soit retenue. Plus bas, on voit des doublons décalés d'une case ; plus haut, des variantes réelles
+// qui partagent un long passage obligé sont refusées.
+const VOIES_CHEMINS_NOUVEAUTE = 0.3;
+// Dijkstra tentés par chemin demandé : un essai refusé renchérit quand même sa route, le suivant
+// part plus loin. Borne le coût (8 × 6 = 48 Dijkstra au pire, quelques ms sur Auxerre).
+const VOIES_CHEMINS_ESSAIS = 6;
 
 // Prédicat de CASE de la règle — celui de deplacement.js, jamais recopié.
 // ⚠️ `caseFranchissable(null, …)` rend true : sans grille, TOUT deviendrait praticable.
@@ -248,54 +258,6 @@ function voiesDirectionsNav(cells, nav, dims, regle, seuilMurs) {
 // Plus court chemin A → B (BFS, voisins dans l'ordre de VOIES_DIRS : déterministe).
 // `[a, …, b]`, ou null si B est injoignable ou si A/B n'est pas un nœud.
 function voiesChemin(graphe, a, b) {
-	return _voiesBfs(graphe, a, b, null);
-}
-
-// Jusqu'à `max` chemins A → B, chacun forcé par un PASSAGE DIFFÉRENT : un rempart percé en trois
-// endroits montre ses trois trous, et non le seul que le BFS rencontre en premier.
-// Après chaque chemin, ses cases DILATÉES de `ecart` (défaut 1) sont retirées du graphe, sauf aux
-// abords de A et B (Chebyshev ≤ VOIES_ABORDS) : le suivant doit franchir ailleurs, et une brèche
-// large ne compte qu'une ou deux fois au lieu d'absorber tous les chemins, un par case.
-// ⚠️ Arrêt dès qu'un chemin n'ajoute AUCUNE case interdite (il tient dans les abords, A et B
-// voisins) : le suivant serait le même, à l'infini. Plus court d'abord ; `[]` si A/B hors voie ou
-// injoignables.
-function voiesChemins(graphe, a, b, max, ecart) {
-	const { W, H, N, noeud } = graphe;
-	if (!(a >= 0 && a < N && b >= 0 && b < N) || !noeud[a] || !noeud[b]) return [];
-	if (a === b) return [[a]];
-	const voulu = Number.isFinite(Number(max)) ? Math.floor(Number(max)) : VOIES_CHEMINS_DEFAUT;
-	const n = Math.min(VOIES_CHEMINS_MAX, Math.max(1, voulu));
-	const e = Number.isFinite(ecart) ? Math.max(0, Math.floor(ecart)) : 1;
-	const ax = a % W, ay = Math.floor(a / W), bx = b % W, by = Math.floor(b / W);
-	const abord = (x, y) => Math.max(Math.abs(x - ax), Math.abs(y - ay)) <= VOIES_ABORDS
-		|| Math.max(Math.abs(x - bx), Math.abs(y - by)) <= VOIES_ABORDS;
-	const interdit = new Uint8Array(N);
-	const chemins = [];
-	while (chemins.length < n) {
-		const chemin = _voiesBfs(graphe, a, b, interdit);
-		if (!chemin) break;
-		chemins.push(chemin);
-		let ajoutes = 0;
-		for (const i of chemin) {
-			const x = i % W, y = Math.floor(i / W);
-			for (let dy = -e; dy <= e; dy++) {
-				for (let dx = -e; dx <= e; dx++) {
-					const nx = x + dx, ny = y + dy;
-					if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
-					const j = ny * W + nx;
-					if (interdit[j] || abord(nx, ny)) continue;
-					interdit[j] = 1;
-					ajoutes++;
-				}
-			}
-		}
-		if (!ajoutes) break;
-	}
-	return chemins;
-}
-
-// BFS commun aux deux fonctions ci-dessus : saute en plus les cases `interdit[v]` (null = aucune).
-function _voiesBfs(graphe, a, b, interdit) {
 	const { N, noeud, voisins } = graphe;
 	if (!(a >= 0 && a < N && b >= 0 && b < N) || !noeud[a] || !noeud[b]) return null;
 	if (a === b) return [a];
@@ -307,7 +269,7 @@ function _voiesBfs(graphe, a, b, interdit) {
 	while (tete < queue) {
 		const u = file[tete++];
 		for (const v of voisins[u]) {
-			if (parent[v] !== -1 || (interdit && interdit[v])) continue;
+			if (parent[v] !== -1) continue;
 			parent[v] = u;
 			if (v === b) {
 				const chemin = [b];
@@ -320,6 +282,125 @@ function _voiesBfs(graphe, a, b, interdit) {
 	return null;
 }
 
+// Jusqu'à `max` chemins A → B : le plus court, puis des VARIANTES qui s'en écartent de plus en plus —
+// un rempart percé en trois endroits montre ses trois trous, une ville ses rues parallèles.
+// Méthode par PÉNALITÉ, pas par retrait : chaque chemin tracé (retenu ou non) renchérit de
+// VOIES_CHEMINS_PENALITE ses cases et leurs voisines à `ecart` (défaut 1), puis on relance un Dijkstra.
+// ⚠️ RETIRER ces cases (méthode d'avant) tuait toute variante dès que les routes partageaient UN
+// passage obligé hors des abords — une porte, une rue de 3 cases, un pont : 74 % des paires n'avaient
+// qu'un chemin sur Auxerre. Renchéri, le passage obligé reste empruntable et le reste de la route diverge.
+// Une variante n'est RETENUE que si au moins VOIES_CHEMINS_NOUVEAUTE de ses cases hors abords de A/B
+// (Chebyshev ≤ VOIES_ABORDS) sortent de l'EMPREINTE (cases dilatées de `ecart`) des chemins déjà
+// retenus : une brèche large ne compte qu'une fois, un détour d'une case n'est pas une variante.
+// Au plus `max × VOIES_CHEMINS_ESSAIS` Dijkstra. Le premier est `voiesChemin` ; `[]` si A/B hors voie
+// ou injoignables. Déterministe, et le graphe n'est jamais modifié.
+function voiesChemins(graphe, a, b, max, ecart) {
+	const { W, H, N } = graphe;
+	const premier = voiesChemin(graphe, a, b);
+	if (!premier) return [];
+	const voulu = Number.isFinite(Number(max)) ? Math.floor(Number(max)) : VOIES_CHEMINS_DEFAUT;
+	const n = Math.min(VOIES_CHEMINS_MAX, Math.max(1, voulu));
+	const e = Number.isFinite(ecart) ? Math.max(0, Math.floor(ecart)) : 1;
+	const ax = a % W, ay = Math.floor(a / W), bx = b % W, by = Math.floor(b / W);
+	const abord = i => {
+		const x = i % W, y = Math.floor(i / W);
+		return Math.max(Math.abs(x - ax), Math.abs(y - ay)) <= VOIES_ABORDS
+			|| Math.max(Math.abs(x - bx), Math.abs(y - by)) <= VOIES_ABORDS;
+	};
+	const hors = chemin => chemin.filter(i => !abord(i));
+	// Chaque case de la bande de largeur `ecart` autour du chemin, hors abords, une seule fois.
+	const bande = (chemin, fn) => {
+		const vues = new Set();
+		for (const i of chemin) {
+			const x = i % W, y = Math.floor(i / W);
+			for (let dy = -e; dy <= e; dy++) {
+				for (let dx = -e; dx <= e; dx++) {
+					const nx = x + dx, ny = y + dy;
+					if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+					const j = ny * W + nx;
+					if (!vues.has(j) && !abord(j)) { vues.add(j); fn(j); }
+				}
+			}
+		}
+	};
+	const chemins = [premier];
+	// Un chemin qui tient tout entier dans les abords (A = B, A et B voisins) n'a pas de variante.
+	if (n === 1 || !hors(premier).length) return chemins;
+	const empreinte = new Uint8Array(N);
+	const penalite = new Float64Array(N);
+	bande(premier, j => { empreinte[j] = 1; penalite[j] += VOIES_CHEMINS_PENALITE; });
+	for (let essai = 0; chemins.length < n && essai < n * VOIES_CHEMINS_ESSAIS; essai++) {
+		const chemin = _voiesDijkstra(graphe, a, b, penalite);
+		if (!chemin) break;
+		const cases = hors(chemin);
+		const neuves = cases.filter(i => !empreinte[i]).length;
+		const retenu = cases.length > 0 && neuves / cases.length >= VOIES_CHEMINS_NOUVEAUTE;
+		if (retenu) chemins.push(chemin);
+		// Renchéri même REFUSÉ : sinon le Dijkstra suivant rendrait exactement le même chemin.
+		bande(chemin, j => {
+			penalite[j] += VOIES_CHEMINS_PENALITE;
+			if (retenu) empreinte[j] = 1;
+		});
+	}
+	return chemins;
+}
+
+// Plus court chemin PONDÉRÉ A → B : entrer dans une case coûte `1 + penalite[case]`. Tas binaire
+// départagé par l'index de case, relâchement strict : déterministe. Null si B est injoignable.
+function _voiesDijkstra(graphe, a, b, penalite) {
+	const { N, voisins } = graphe;
+	const dist = new Float64Array(N).fill(Infinity);
+	const parent = new Int32Array(N).fill(-1);
+	const fermee = new Uint8Array(N);
+	const tasD = [], tasI = [];
+	const avant = (i, j) => tasD[i] < tasD[j] || (tasD[i] === tasD[j] && tasI[i] < tasI[j]);
+	const echange = (i, j) => {
+		const d = tasD[i]; tasD[i] = tasD[j]; tasD[j] = d;
+		const v = tasI[i]; tasI[i] = tasI[j]; tasI[j] = v;
+	};
+	const pousser = (d, v) => {
+		tasD.push(d); tasI.push(v);
+		for (let k = tasD.length - 1; k > 0; ) {
+			const p = (k - 1) >> 1;
+			if (!avant(k, p)) break;
+			echange(k, p); k = p;
+		}
+	};
+	const tirer = () => {
+		const v = tasI[0];
+		const dd = tasD.pop(), vv = tasI.pop();
+		if (tasD.length) {
+			tasD[0] = dd; tasI[0] = vv;
+			for (let k = 0; ; ) {
+				const g = 2 * k + 1, d = g + 1;
+				let m = k;
+				if (g < tasD.length && avant(g, m)) m = g;
+				if (d < tasD.length && avant(d, m)) m = d;
+				if (m === k) break;
+				echange(k, m); k = m;
+			}
+		}
+		return v;
+	};
+	dist[a] = 0;
+	parent[a] = a;
+	pousser(0, a);
+	while (tasD.length) {
+		const u = tirer();
+		if (fermee[u]) continue;
+		fermee[u] = 1;
+		if (u === b) break;
+		for (const v of voisins[u]) {
+			if (fermee[v]) continue;
+			const nd = dist[u] + 1 + penalite[v];
+			if (nd < dist[v]) { dist[v] = nd; parent[v] = u; pousser(nd, v); }
+		}
+	}
+	if (parent[b] === -1) return null;
+	const chemin = [b];
+	for (let w = b; w !== a; ) { w = parent[w]; chemin.push(w); }
+	return chemin.reverse();
+}
 // Coupe minimale en CASES entre A et B : le plus petit ensemble de cases à boucher pour les
 // séparer — la brèche de 2-3 cases qu'aucun goulot ne montre. Flot maximal sur le graphe
 // DÉDOUBLÉ (entrée 2v → sortie 2v+1, capacité 1, ∞ pour A et B ; arcs sortie → entrée ∞).
