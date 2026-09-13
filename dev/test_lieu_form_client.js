@@ -48,7 +48,8 @@ function extraire(nom) {
 	throw new Error('accolades déséquilibrées dans ' + nom);
 }
 
-for (const f of ['_capaciteAccordee', '_capacitesDe', '_tagsApres', '_fusionLieu']) {
+for (const f of ['_capaciteAccordee', '_capacitesDe', '_tagsApres', '_fusionLieu',
+				 '_escRe', '_portraitsPourCategorie', '_nomDepuisPortrait']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -329,6 +330,55 @@ t('passer la catégorie à `auberge` retire le tag devenu redondant, sans rien c
 	}), CATALOGUE);
 	assert.ok(!('tags' in doc));
 	assert.strictEqual(_capacitesDe(doc, CATALOGUE).taverne, true, 'la capacité reste acquise');
+});
+
+console.log('\n── Portraits : le filtre par catégorie ──');
+
+// Noms réels de templates/resources/pnj/ : les deux conventions, avec et sans numéro
+// de variante. `creationOptions` est la globale que sert /api/lieux/creation_options.
+const PORTRAITS = [
+	'marchand_elfe_f_boulangerie.jpg',
+	'marchand_elfe_f_boulangerie01.jpg',
+	'marchand_nain_f_boulangerie01.jpg',
+	'marchand_ogre_m_boulangerie.jpg',
+	'marchand_elfe_f_bijouterie01.png',
+	'marchand_clement_varnepierre_laboratoire_d_alchimie.png',
+	'marchand_elfe_f_laboratoire_d_alchimie.png',
+	'Gaspard_Briselame.jpg',
+];
+globalThis.creationOptions = { portraits: PORTRAITS };
+
+t('le numéro de variante ne fait pas écarter un portrait', () => {
+	assert.deepStrictEqual(_portraitsPourCategorie('boulangerie'), [
+		'marchand_elfe_f_boulangerie.jpg',
+		'marchand_elfe_f_boulangerie01.jpg',
+		'marchand_nain_f_boulangerie01.jpg',
+		'marchand_ogre_m_boulangerie.jpg',
+	]);
+});
+
+t('une catégorie à rallonge reste filtrée exactement', () => {
+	assert.deepStrictEqual(_portraitsPourCategorie('laboratoire_d_alchimie'), [
+		'marchand_clement_varnepierre_laboratoire_d_alchimie.png',
+		'marchand_elfe_f_laboratoire_d_alchimie.png',
+	]);
+});
+
+t('un filtre sans résultat rend la liste complète, jamais vide', () => {
+	assert.deepStrictEqual(_portraitsPourCategorie('etable'), PORTRAITS);
+	assert.deepStrictEqual(_portraitsPourCategorie(''), PORTRAITS);
+});
+
+t('le numéro de variante tombe avec le suffixe de catégorie', () => {
+	assert.strictEqual(_nomDepuisPortrait('marchand_elfe_f_boulangerie01.jpg', 'boulangerie'), '');
+	assert.strictEqual(_nomDepuisPortrait('marchand_elfe_f_boulangerie.jpg', 'boulangerie'), '');
+});
+
+t('le tenancier nommé garde son nom', () => {
+	assert.strictEqual(
+		_nomDepuisPortrait('marchand_clement_varnepierre_laboratoire_d_alchimie.png',
+						   'laboratoire_d_alchimie'),
+		'Clement Varnepierre');
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);
