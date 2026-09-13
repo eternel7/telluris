@@ -287,6 +287,15 @@ CATALOGUE = [
 			"chez l'un, on sait le faire chez l'autre.",
 	},
 	{
+		"id": "gen_encre_scriptorium",
+		"label": "🖋️ Donner au scriptorium une encre au pigment",
+		"argv": _py("gen_encre_scriptorium.py"),
+		"ecrit": "Écrit jsons/encre_scriptorium_a_importer.json.",
+		"description": "Sans encre au-dessus de sa cible, le scriptorium ne fabrique aucun "
+			"livre (sort, recette, carte). Sa seule encre venait du sang, qu'aucun appro ne "
+			"livre : recette pigment ×1 → encre ×2. ⚠️ L'encre passe de 12-36 cu à 30-90 cu.",
+	},
+	{
 		"id": "gen_terrain_tags",
 		"label": "🌲 Générer les terrain_tags des zones d'influence",
 		"argv": _py("gen_terrain_tags.py"),

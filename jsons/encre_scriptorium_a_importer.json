@@ -1,0 +1,15 @@
+[
+	{
+		"_id": "recette:scriptorium_encre_pigment",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "encre",
+		"quantite_produite": 2,
+		"matieres_premieres": [
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			}
+		]
+	}
+]

@@ -34,6 +34,7 @@ Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le
 - `gen_epaulieres.py` — 21 pièces d'épaules + recettes.
 - `gen_loot_immateriel.py` — sous-catégorie + recettes pour 32 butins immatériels.
 - `gen_boulangeries.py`, `gen_jardinerie.py`, `gen_recettes_empenneur_archerie.py` — boutiques et recettes de métier.
+- `gen_encre_scriptorium.py` — recette pigment ×1 → encre ×2 : sans elle aucun livre de contenu ne sort (cf. `telluris-social-ui` § Scriptorium). ⚠️ Encre 12-36 → 30-90 cu.
 
 Autres scripts : `gen_grille_image.py` (propose les `cells` d'un lieu depuis son image, Pillow), `lint_dialogues.py` (CLI du linter), `export_bestiaire.py` (export d'équilibrage), `purge_quetes_acceptees.py` (purge ONE-SHOT des `quete:*` acceptés).
 
