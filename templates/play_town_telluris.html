@@ -1433,7 +1433,7 @@
 				{% if lieu_texte %}
 				<div class="loc-texte">{{ lieu_texte }}</div>
 				{% endif %}
-				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or pnj_present %}
+				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or pnjs_presents %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
 					{% if achat_sous_categories %}
@@ -1458,14 +1458,18 @@
 					{% if est_scriptorium %}
 					<li><button class="sub-loc-btn" onclick="openScriptorium()">🖋️ Écrire</button></li>
 					{% endif %}
-					{% if pnj_present %}
-					{# Pastille « ! »/« ? » du PNJ : rendue en Jinja au chargement, réécrite en JS
-					   par `_majPnjMarque` après chaque choix de dialogue (accepter une course doit
-					   faire disparaître le « ! » sans recharger la page). Le <span> est TOUJOURS
-					   émis, vide quand il n'y a rien : sans l'élément, le JS n'aurait rien à
-					   allumer (même patron que `.sh-bonus-btn`). #}
-					<li><button class="sub-loc-btn" id="pnj-talk-btn" onclick="openPnjDialogue()"><span id="pnj-talk-marque">{% if pnj_marque %}<span class="loc-marque {% if pnj_marque == '!' %}neuf{% else %}rendu{% endif %}">{{ pnj_marque }}</span>{% endif %}</span>🗣 Parler à {{pnj_present.nom}}</button></li>
-					{% endif %}
+					{# Les présences sont CUMULABLES : une ligne par PNJ présent, dans l'ordre du
+					   lieu. Pastille « ! »/« ? » de CHACUN : rendue en Jinja au chargement,
+					   réécrite en JS par `_majPnjMarque` après chaque choix de dialogue (accepter
+					   une course doit faire disparaître le « ! » sans recharger la page). Le
+					   <span> est TOUJOURS émis, vide quand il n'y a rien : sans l'élément, le JS
+					   n'aurait rien à allumer (même patron que `.sh-bonus-btn`).
+					   ⚠️ L'id du PNJ passe par `data-pnj` et le bouton se transmet par `this` —
+					   jamais dans un `onclick="…('{{ … }}')"` : Jinja échapperait une apostrophe
+					   en `&#39;` et casserait la chaîne JS (Conventions §9). #}
+					{% for p in pnjs_presents %}
+					<li><button class="sub-loc-btn pnj-talk-btn" data-pnj="{{ p.character }}" onclick="openPnjDialogue(this)"><span class="pnj-talk-marque">{% if p.marque %}<span class="loc-marque {% if p.marque == '!' %}neuf{% else %}rendu{% endif %}">{{ p.marque }}</span>{% endif %}</span>🗣 Parler à {{ p.nom }}</button></li>
+					{% endfor %}
 				</ul>
 				{% endif %}
 				<section id="recolte-action"></section>
@@ -2540,21 +2544,20 @@
 	<div id="pnj-panel" class="panel-hidden panel-frame board-panel" aria-label="Dialogue avec un personnage">
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Dialogue">
-			<h2>🗣 {{ pnj_present.nom if pnj_present else '' }}</h2>
+			{# Identité rendue en JS (`_renderPnjIdentite`) et non en Jinja : plusieurs PNJ
+			   peuvent tenir le lieu, le panneau est celui de l'interlocuteur qu'on vient
+			   d'ouvrir — c'est le payload de `/api/pnj/dialogue` qui le nomme. #}
+			<h2>🗣 <span id="pnj-nom"></span></h2>
 			</header>
 			<button class="sheet-tab-btn close-sheet-btn" onclick="closePnjPanel()" role="button">✕ Fermer</button>
 		</div>
 		<div class="pnj-corps">
-			{% if pnj_present and pnj_present.portrait %}
-			<img class="pnj-portrait" src="{{ url_for('pnj', path=pnj_present.portrait) }}" alt="{{pnj_present.nom}}">
-			{% endif %}
+			<img class="pnj-portrait" id="pnj-portrait" src="" alt="" style="display:none">
 			<div class="pnj-dialogue">
 				{# Description facultative : les tenanciers génériques n'en ont pas (le doc est
 				   partagé par tout le métier et ne peut décrire personne en particulier) ; une
 				   boutique qui veut la sienne la pose sur son entrée `pnj`. #}
-				{% if pnj_present and pnj_present.description %}
-				<div class="pnj-ambiance">{{pnj_present.description}}</div>
-				{% endif %}
+				<div class="pnj-ambiance" id="pnj-ambiance" style="display:none"></div>
 				<div id="pnj-noeud-texte"></div>
 				<ul id="pnj-choix" class="sub-locations-list" style="list-style:none;padding:0;margin:0"></ul>
 			</div>
@@ -2660,9 +2663,13 @@
 		if (m !== '!' && m !== '?') return '';
 		return `<span class="loc-marque ${m === '!' ? 'neuf' : 'rendu'}">${m}</span>`;
 	}
-	// Badge du bouton 🗣, réécrit sans toucher au reste du libellé.
+	// Badge du bouton 🗣 de l'interlocuteur COURANT, réécrit sans toucher au reste du libellé.
+	// ⚠️ Les présences sont cumulables : il y a un bouton par PNJ présent, et c'est celui de
+	// `_pnjCourant` qu'un choix de dialogue vient de changer — pas le premier venu.
 	function _majPnjMarque(m) {
-		const el = document.getElementById('pnj-talk-marque');
+		const btn = Array.from(document.querySelectorAll('.pnj-talk-btn'))
+			.find(b => b.dataset.pnj === _pnjCourant);
+		const el = btn ? btn.querySelector('.pnj-talk-marque') : null;
 		if (el) el.innerHTML = _marquePastille(m);
 	}
 	let ACCESS = {{ access | tojson | safe }};
@@ -8391,6 +8398,30 @@ async function closeCompagnonSheet() {
 // Panneau plein écran (pattern quêtes/marché). Navigation stateless : chaque choix
 // renvoie le nœud suivant déjà filtré/substitué côté serveur ; `noeud: null` = fin.
 let _pnjNoeudCourant = null;
+// À QUI l'on parle : les présences étant CUMULABLES, plusieurs boutons 🗣 coexistent et chaque
+// requête nomme son interlocuteur (sans quoi le serveur retomberait sur le premier présent).
+let _pnjCourant = null;
+// Racine du mount des portraits (`/pnj`). L'identité du panneau est rendue en JS, pas en
+// Jinja : elle dépend du PNJ qu'on vient d'ouvrir.
+const PNJ_PORTRAIT_BASE = "{{ url_for('pnj', path='') }}";
+
+// Identité du panneau : nom, portrait, description d'ambiance. Tout en `textContent` sauf la
+// source d'image — aucun échappement à faire (Conventions §9).
+function _renderPnjIdentite(p) {
+	_pnjCourant = p ? p.character : null;
+	document.getElementById('pnj-nom').textContent = (p && p.nom) || '';
+	const img = document.getElementById('pnj-portrait');
+	if (p && p.portrait) {
+		img.src = PNJ_PORTRAIT_BASE + p.portrait;
+		img.alt = p.nom || '';
+		img.style.display = '';
+	} else {
+		img.style.display = 'none';
+	}
+	const amb = document.getElementById('pnj-ambiance');
+	amb.textContent = (p && p.description) || '';
+	amb.style.display = (p && p.description) ? '' : 'none';
+}
 
 // Récompense de réputation posée sur un nœud de dialogue (`relation` côté donnée). Le signe
 // est explicite : le même mécanisme sert à punir. ⚠️ `showToast` écrit en textContent — aucun
@@ -8414,9 +8445,13 @@ function renderPnjNoeud(noeud) {
 	).join('') || '<li><button class="sub-loc-btn" onclick="closePnjPanel()">✕ Prendre congé</button></li>';
 }
 
-async function openPnjDialogue() {
+// `btn` = le bouton 🗣 cliqué ; son `data-pnj` dit à qui l'on parle. Sans bouton, le serveur
+// retombe sur le premier PNJ présent.
+async function openPnjDialogue(btn) {
+	const pnjId = (btn && btn.dataset) ? btn.dataset.pnj : null;
 	try {
-		const res = await fetch('api/pnj/dialogue');
+		const res = await fetch('api/pnj/dialogue'
+			+ (pnjId ? '?pnj_id=' + encodeURIComponent(pnjId) : ''));
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
 		// Une course a pu périmer à l'ouverture du dialogue (expiration paresseuse) : le serveur
@@ -8424,6 +8459,9 @@ async function openPnjDialogue() {
 		// porter une récompense de réputation (versée une seule fois, cf. `relation_gain`).
 		if (Array.isArray(data.relations_lieux)) renderFicheRelations(data.relations_lieux);
 		if (data.relation_gain) showToast(_relationGainTexte(data.relation_gain));
+		// ⚠️ L'identité AVANT le badge : c'est elle qui arrête `_pnjCourant`, donc le bouton 🗣
+		// dont la pastille doit être réécrite.
+		_renderPnjIdentite(data.pnj);
 		// Badge du 🗣 et marques de lieux : une course a pu périmer à l'ouverture, l'offre
 		// d'hier n'est peut-être plus là. Le panneau masque la sidebar, mais elle réapparaît
 		// à la fermeture — elle doit être juste avant, pas après.
@@ -8447,7 +8485,7 @@ async function choisirPnj(choixId) {
 	try {
 		const res = await fetch('api/pnj/dialogue/choix', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ noeud: _pnjNoeudCourant, choix_id: choixId })
+			body: JSON.stringify({ noeud: _pnjNoeudCourant, choix_id: choixId, pnj_id: _pnjCourant })
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }

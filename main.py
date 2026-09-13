@@ -610,7 +610,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# jeu) — on la solde à chaque point de passage. La sanction de réputation part avec.
 	transports_echoues = transport_util.traiter_expirations(
 		character, quetes.now_epoch(), get_doc, save_doc)
-	# PNJ de lieu : tirage de présence à l'ENTRÉE (persisté → un refresh ne re-tire pas).
+	# PNJ de lieu : tirage de présence à l'ENTRÉE (persisté → un refresh ne re-tire pas), une
+	# probabilité par entrée et les présences CUMULABLES — plusieurs PNJ peuvent tenir le lieu.
 	# Un magasin n'a pas de champ `pnj` : son tenancier est dérivé de sa catégorie.
 	# Écriture dans le GET assumée (précédent : tick_atelier) ; un conflit de save serait
 	# rejoué au prochain rendu, on ne lève pas de 409 ici.
@@ -622,27 +623,33 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	change |= pnj_util.poser_pnj_present(character, grid_doc,
 								  marchand_fn=transport_util.entree_marchand,
 								  condition_fn=conditions_pnj)
-	# Le PNJ arrêté pour cette entrée est résolu AVANT l'offre de course : c'est lui qui peut
-	# porter une course écrite (`services.transport.offre`), auquel cas le lieu n'a pas à être
-	# un magasin (le réceptionniste de la guilde confie sa mission d'initiation).
-	pnj_entree = pnj_util.entree_pnj_active(character, grid_doc,
+	# Les PNJ arrêtés pour cette entrée sont résolus AVANT l'offre de course : c'est parmi eux
+	# qu'on cherche celui qui porte une course écrite (`services.transport.offre`), auquel cas
+	# le lieu n'a pas à être un magasin (le réceptionniste de la guilde confie sa mission
+	# d'initiation). ⚠️ Le donneur se CHERCHE (`donneur_present`) au lieu d'être le premier
+	# venu : depuis le cumul des présences, un PNJ muet placé en tête de liste ferait taire
+	# en silence l'offre de son voisin.
+	pnj_entrees = pnj_util.entrees_pnj_actives(character, grid_doc,
 								  transport_util.entree_marchand, conditions_pnj)
-	pnj_doc = get_doc(pnj_entree["character"]) if pnj_entree else None
+	pnj_paires = [(e, get_doc(e["character"])) for e in pnj_entrees]
+	pnj_paires = [(e, d) for e, d in pnj_paires if d]
 	# Offre de course : tirée à l'entrée, persistée (même sémantique que pnj_present).
 	change |= transport_util.poser_transport_offert(character, grid_doc, find_docs, get_doc,
-													pnj_doc=pnj_doc)
-	# Offre d'ESCORTE : même sémantique, même PNJ déjà résolu. L'ENTRÉE du lieu part avec —
+													pnj_doc=transport_util.donneur_present(
+														[d for _, d in pnj_paires]))
+	# Offre d'ESCORTE : même sémantique, même recherche de donneur. L'ENTRÉE du lieu part avec —
 	# c'est elle qui porte la `progeniture` d'un tenancier (le doc `pnj:marchand_*` est
 	# générique, deux boutiques d'un même métier le partagent).
+	entree_esc, pnj_doc_esc = escorte_util.donneur_present(pnj_paires)
 	change |= escorte_util.poser_escorte_offerte(character, grid_doc, find_docs, get_doc,
-												 pnj_doc=pnj_doc, entree=pnj_entree)
+												 pnj_doc=pnj_doc_esc, entree=entree_esc)
 	# Compagnons : départs volontaires paresseux (affinité tombée sous le seuil pendant
 	# l'absence) — les docs `aventurier:*` sont annexes, persistés séparément ; le retrait
 	# du groupe part avec le save du personnage ci-dessous. Toast au rendu.
 	# Offre d'épreuve de RANG : au comptoir de guilde avec PNJ présent, tirée à l'entrée (même
 	# sémantique que l'offre de course). Hors comptoir, purge un éventuel reliquat d'offre.
 	change |= chasse_util.poser_rang_offert(character, grid_doc, get_doc, find_docs,
-		pnj_present=bool(pnj_entree and pnj_doc))
+		pnj_present=bool(pnj_paires))
 	compagnons_partis = recrutement_util.departs_volontaires(character, get_doc)
 	for _av in compagnons_partis:
 		save_doc(_av)
@@ -654,13 +661,16 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# avec lui. La garde `butin_collectes` rend ce rattrapage inoffensif s'il a déjà eu lieu.
 	for c in combats_termines:
 		delete_doc(c)
-	pnj_present = pnj_util.pnj_payload(pnj_entree, pnj_doc) if (pnj_entree and pnj_doc) else None
-	# Indicateurs « ! » / « ? ». Le badge du 🗣 est la plus forte marque des choix visibles du
+	# Une ligne d'action par PNJ présent, dans l'ordre du lieu, chacune avec SA marque.
+	# Indicateurs « ! » / « ? ». Le badge d'un 🗣 est la plus forte marque des choix visibles du
 	# nœud d'ouverture — donc EXACT par construction, contrairement à un « ! » posé sur une
 	# porte voisine (dont l'offre n'est tirée qu'à l'entrée : cf. utils/indicateurs). ⚠️ Chemin
 	# LECTURE SEULE : il n'arme aucun `delai_min` et ne verse aucune récompense de relation.
-	pnj_marque = (pnj_router_marque_pnj(character, pnj_doc, grid_doc, pnj_entree)
-				  if (pnj_entree and pnj_doc) else None)
+	pnjs_presents = [
+		dict(pnj_util.pnj_payload(e, d),
+			 marque=pnj_router_marque_pnj(character, d, grid_doc, e))
+		for e, d in pnj_paires
+	]
 	lieux_marques = indicateurs_util.marques_lieux(character)
 	position = character.get("position", {"x" : 1 ,"y" : 1})
 	links = get_lieu_links(current_user)
@@ -669,9 +679,13 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	image = grid_doc.get("image")
 	# PNJ présent : l'entrée du lieu peut fournir une variante d'image AVEC le PNJ visible
 	# (repli silencieux sur l'image de base — ex. version « _vide » — si absente du disque).
-	if pnj_present and pnj_present.get("image_lieu") and os.path.exists(
-			os.path.join(TOWNS_IMAGES_PATH, pnj_present["image_lieu"])):
-		image = pnj_present["image_lieu"]
+	# ⚠️ Une seule image de fond pour le lieu : le PREMIER présent qui en propose une la donne
+	# (deux variantes ne se superposent pas, il n'y a qu'un décor).
+	for _p in pnjs_presents:
+		if _p.get("image_lieu") and os.path.exists(
+				os.path.join(TOWNS_IMAGES_PATH, _p["image_lieu"])):
+			image = _p["image_lieu"]
+			break
 	if os.path.exists(os.path.join(TOWNS_IMAGES_PATH, image)):
 		image_path = os.path.join(TOWNS_IMAGES_PATH, image)
 		image_route = "towns"
@@ -856,11 +870,12 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"compagnons_partis": [
 				f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in compagnons_partis
 			],
-			"pnj_present": pnj_present,
-			# Marques « ! »/« ? » : badge du bouton 🗣 et map {lieu_id: "?"} des lieux où une
-			# quête active attend une remise. La map porte TOUS les lieux concernés (courant
-			# compris) — c'est le client qui l'intersecte avec les portes qu'il affiche.
-			"pnj_marque": pnj_marque,
+			# Les PNJ présents, cumulés : une ligne d'action par PNJ, dans l'ordre du lieu.
+			# Chacun porte sa marque « ! »/« ? » (badge de SON bouton 🗣).
+			"pnjs_presents": pnjs_presents,
+			# Map {lieu_id: "?"} des lieux où une quête active attend une remise. Elle porte
+			# TOUS les lieux concernés (courant compris) — c'est le client qui l'intersecte
+			# avec les portes qu'il affiche.
 			"lieux_marques": lieux_marques,
 			# Courses échues pendant l'absence du joueur : toast d'échec au rendu.
 			"transports_echoues": [

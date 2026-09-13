@@ -588,6 +588,24 @@ def _offre_du_registre(character: dict, lieu_doc: dict, recherche: dict, find_do
 		recompenses_defaut=recherche.get("recompenses"))
 
 
+def donneur_present(paires: list) -> tuple:
+	"""`(entrée, doc)` du PNJ présent qui peut confier une escorte, ou `(None, None)`.
+	`paires` = les `(entrée du lieu, doc PNJ)` présents, dans l'ordre du lieu.
+
+	⚠️ Existe pour le CUMUL des présences (miroir de `transport.donneur_present`), avec les
+	TROIS branches de `poser_escorte_offerte` comme ordre de priorité — écrite, puis
+	progéniture, puis registre : ce qu'un seul PNJ arbitrait entre ses propres services se
+	tranche maintenant entre plusieurs, et le choisir au hasard de l'ordre de la liste
+	rendrait muette la mission écrite d'un lieu qui tient aussi un registre."""
+	for porte in (lambda e, d: offre_spec(d),
+				  lambda e, d: progeniture_de(e, d),
+				  lambda e, d: recherche_spec(d)):
+		for entree, pnj_doc in paires:
+			if porte(entree, pnj_doc):
+				return entree, pnj_doc
+	return None, None
+
+
 def poser_escorte_offerte(character: dict, lieu_doc: dict, find_docs_fn, get_doc_fn,
 						  rand_fn=random.random, pnj_doc: dict | None = None,
 						  entree: dict | None = None, choix_fn=random.choice,

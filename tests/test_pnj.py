@@ -90,35 +90,59 @@ def _ctx(relations=None, intro_raison=None, prenom="Aldo"):
 
 def test_tirage_present_si_jet_sous_proba():
     lieu = _lieu([_entree(proba=0.7)])
-    assert pnj.tirer_pnj_present(lieu, rand_fn=lambda: 0.69) == "pnj:reverend"
-    assert pnj.tirer_pnj_present(lieu, rand_fn=lambda: 0.7) is None
+    assert pnj.tirer_pnjs_presents(lieu, rand_fn=lambda: 0.69) == ["pnj:reverend"]
+    assert pnj.tirer_pnjs_presents(lieu, rand_fn=lambda: 0.7) == []
 
 
-def test_tirage_ordre_premiere_entree_gagne():
+def test_tirage_presences_CUMULABLES():
+    """Chaque entrée tire SA probabilité : deux PNJ qui passent sont là ensemble, dans
+    l'ordre du lieu — la première n'écarte plus la seconde."""
     lieu = _lieu([_entree("pnj:a", proba=1.0), _entree("pnj:b", proba=1.0)])
-    assert pnj.tirer_pnj_present(lieu, rand_fn=lambda: 0.0) == "pnj:a"
+    assert pnj.tirer_pnjs_presents(lieu, rand_fn=lambda: 0.0) == ["pnj:a", "pnj:b"]
+
+
+def test_tirage_la_probabilite_de_chacun_est_prise_en_compte():
+    """Le jet de l'un ne dit rien de l'autre : seul celui dont la probabilité couvre le jet
+    est présent."""
+    lieu = _lieu([_entree("pnj:a", proba=0.2), _entree("pnj:b", proba=0.9)])
+    assert pnj.tirer_pnjs_presents(lieu, rand_fn=lambda: 0.5) == ["pnj:b"]
+    assert pnj.tirer_pnjs_presents(lieu, rand_fn=lambda: 0.95) == []
+
+
+def test_tirage_deux_entrees_du_meme_pnj_ne_font_qu_un():
+    """Cas RÉEL du Garde-manger des 3 fées : quatre entrées (nom, portrait) du même doc
+    `pnj:marchand_cuisine`. C'est l'id qui adresse le dialogue — la première entrée tient le
+    comptoir, comme sous l'ancienne règle « la première qui passe gagne »."""
+    character = _character()
+    lieu = _lieu([_entree("pnj:a", proba=1.0), _entree("pnj:a", proba=1.0)])
+    lieu["pnj"][0]["nom"] = "Les 3 fées"
+    lieu["pnj"][1]["nom"] = "Ysabeau Clairval"
+    assert pnj.tirer_pnjs_presents(lieu, rand_fn=lambda: 0.0) == ["pnj:a"]
+    pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.0)
+    assert [e["nom"] for e in pnj.entrees_pnj_actives(character, lieu)] == ["Les 3 fées"]
 
 
 def test_tirage_lieu_sans_pnj():
-    assert pnj.tirer_pnj_present(_lieu()) is None
-    assert pnj.tirer_pnj_present({"_id": "lieu:x"}) is None
+    assert pnj.tirer_pnjs_presents(_lieu()) == []
+    assert pnj.tirer_pnjs_presents({"_id": "lieu:x"}) == []
 
 
 def test_poser_pnj_present_pose_et_persiste():
     character = _character()
     lieu = _lieu([_entree(proba=1.0)])
     assert pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.0) is True
-    assert character["pnj_present"] == {"lieu": "lieu:temple_test", "character": "pnj:reverend"}
+    assert character["pnj_present"] == {"lieu": "lieu:temple_test",
+                                        "characters": ["pnj:reverend"]}
     # Même lieu → no-op (refresh stable), même si le jet aurait donné autre chose.
     assert pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.99) is False
-    assert character["pnj_present"]["character"] == "pnj:reverend"
+    assert character["pnj_present"]["characters"] == ["pnj:reverend"]
 
 
 def test_poser_pnj_present_absent_reste_stable():
     character = _character()
     lieu = _lieu([_entree(proba=0.5)])
     assert pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.9) is True
-    assert character["pnj_present"] == {"lieu": "lieu:temple_test", "character": None}
+    assert character["pnj_present"] == {"lieu": "lieu:temple_test", "characters": []}
     assert pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.0) is False
 
 
@@ -127,7 +151,7 @@ def test_poser_pnj_present_changement_de_lieu_retire():
     pnj.poser_pnj_present(character, _lieu([_entree(proba=1.0)]), rand_fn=lambda: 0.0)
     autre = _lieu(_id="lieu:autre")
     assert pnj.poser_pnj_present(character, autre, rand_fn=lambda: 0.0) is True
-    assert character["pnj_present"] == {"lieu": "lieu:autre", "character": None}
+    assert character["pnj_present"] == {"lieu": "lieu:autre", "characters": []}
 
 
 def test_entree_pnj_active():
@@ -139,11 +163,41 @@ def test_entree_pnj_active():
     # Tirage périmé (autre lieu) → None.
     assert pnj.entree_pnj_active(character, _lieu(_id="lieu:autre")) is None
     # PNJ absent au tirage → None.
-    character["pnj_present"]["character"] = None
+    character["pnj_present"]["characters"] = []
     assert pnj.entree_pnj_active(character, lieu) is None
     # Entrée retirée de la donnée depuis le tirage → None.
-    character["pnj_present"]["character"] = "pnj:disparu"
+    character["pnj_present"]["characters"] = ["pnj:disparu"]
     assert pnj.entree_pnj_active(character, lieu) is None
+
+
+def test_entrees_pnj_actives_rend_TOUS_les_presents_dans_l_ordre_du_lieu():
+    character = _character()
+    lieu = _lieu([_entree("pnj:a", proba=1.0), _entree("pnj:b", proba=1.0)])
+    pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.0)
+    assert [e["character"] for e in pnj.entrees_pnj_actives(character, lieu)] \
+        == ["pnj:a", "pnj:b"]
+
+
+def test_entree_pnj_active_designe_son_interlocuteur():
+    """Plusieurs PNJ présents : c'est l'id qui dit à qui l'on parle ; sans id, le premier."""
+    character = _character()
+    lieu = _lieu([_entree("pnj:a", proba=1.0), _entree("pnj:b", proba=1.0)])
+    pnj.poser_pnj_present(character, lieu, rand_fn=lambda: 0.0)
+    assert pnj.entree_pnj_active(character, lieu)["character"] == "pnj:a"
+    assert pnj.entree_pnj_active(character, lieu, pnj_id="pnj:b")["character"] == "pnj:b"
+    # Un PNJ qui n'est pas là ne se laisse pas adresser (requête forgée, ou parti depuis).
+    assert pnj.entree_pnj_active(character, lieu, pnj_id="pnj:absent") is None
+
+
+def test_pnj_present_forme_d_avant_le_cumul_toujours_lue():
+    """Aucune migration (Conventions §4) : un personnage sauvegardé avant le cumul porte
+    `character: id` et non `characters: [...]` — il garde son PNJ jusqu'à son prochain pas."""
+    character = _character()
+    lieu = _lieu([_entree(proba=1.0)])
+    character["pnj_present"] = {"lieu": "lieu:temple_test", "character": "pnj:reverend"}
+    assert pnj.entree_pnj_active(character, lieu)["character"] == "pnj:reverend"
+    character["pnj_present"] = {"lieu": "lieu:temple_test", "character": None}
+    assert pnj.entrees_pnj_actives(character, lieu) == []
 
 
 def test_pnj_payload_priorite_entree_puis_doc():
@@ -600,23 +654,23 @@ def _faux(_conditions):
 
 def test_entree_conditionnee_presente_si_la_condition_tient():
     lieu = _lieu_conditionne()
-    assert pnj.tirer_pnj_present(lieu, lambda: 0.0, None, _vrai) == "pnj:armand"
+    assert pnj.tirer_pnjs_presents(lieu, lambda: 0.0, None, _vrai) == ["pnj:armand"]
 
 
 def test_entree_conditionnee_absente_sinon():
     lieu = _lieu_conditionne()
-    assert pnj.tirer_pnj_present(lieu, lambda: 0.0, None, _faux) is None
+    assert pnj.tirer_pnjs_presents(lieu, lambda: 0.0, None, _faux) == []
 
 
 def test_entree_conditionnee_FAIL_CLOSED_sans_evaluateur():
     """Un appelant qui oublie `condition_fn` doit voir le PNJ DISPARAÎTRE, pas apparaître
     dans tous les états du monde : la faute silencieusement permissive est la pire des deux."""
-    assert pnj.tirer_pnj_present(_lieu_conditionne(), lambda: 0.0) is None
+    assert pnj.tirer_pnjs_presents(_lieu_conditionne(), lambda: 0.0) == []
 
 
 def test_entree_SANS_conditions_inchangee_sans_evaluateur():
     """Aucune migration : la donnée existante ne porte pas le champ."""
-    assert pnj.tirer_pnj_present(_lieu([_entree(proba=1.0)]), lambda: 0.0) == "pnj:reverend"
+    assert pnj.tirer_pnjs_presents(_lieu([_entree(proba=1.0)]), lambda: 0.0) == ["pnj:reverend"]
 
 
 def test_entree_conditionnee_ecartee_A_LA_LECTURE_du_tirage_persiste():
@@ -630,11 +684,11 @@ def test_entree_conditionnee_ecartee_A_LA_LECTURE_du_tirage_persiste():
     assert pnj.entree_pnj_active(character, lieu, None, _faux) is None
 
 
-def test_une_entree_conditionnee_laisse_la_place_a_la_suivante():
+def test_une_entree_conditionnee_ne_retire_qu_elle_meme():
     lieu = _lieu([_entree("pnj:armand", proba=1.0, conditions=CONDS),
                   _entree("pnj:autre", proba=1.0)])
-    assert pnj.tirer_pnj_present(lieu, lambda: 0.0, None, _faux) == "pnj:autre"
-    assert pnj.tirer_pnj_present(lieu, lambda: 0.0, None, _vrai) == "pnj:armand"
+    assert pnj.tirer_pnjs_presents(lieu, lambda: 0.0, None, _faux) == ["pnj:autre"]
+    assert pnj.tirer_pnjs_presents(lieu, lambda: 0.0, None, _vrai) == ["pnj:armand", "pnj:autre"]
 
 
 def test_nom_pnj_du_lieu_ne_nomme_pas_un_pnj_conditionne():

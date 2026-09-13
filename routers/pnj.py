@@ -43,10 +43,14 @@ from routers.user import _derived_from_character, _vitals_payload, _inventory_pa
 pnj_router = APIRouter()
 
 
-def _pnj_du_lieu(character: dict) -> tuple[dict, dict, dict]:
-	"""(entrée pnj du lieu, doc PNJ, doc lieu) du PNJ présent au lieu courant ; 404 sinon.
-	`entree_marchand` fournit le tenancier implicite des magasins (aucun doc `lieu:*`
-	marchand ne porte de champ `pnj`)."""
+def _pnj_du_lieu(character: dict, pnj_id: str | None = None) -> tuple[dict, dict, dict]:
+	"""(entrée pnj du lieu, doc PNJ, doc lieu) du PNJ auquel on parle au lieu courant ;
+	404 sinon. `entree_marchand` fournit le tenancier implicite des magasins (aucun doc
+	`lieu:*` marchand ne porte de champ `pnj`).
+
+	Les présences étant CUMULABLES, le client dit à QUI il parle (`pnj_id`) : c'est le seul
+	moyen de désigner un interlocuteur parmi plusieurs. Sans lui, on retombe sur le premier
+	présent — un client d'avant le cumul continue donc de parler au tenancier."""
 	lieu_doc = get_doc(character.get("lieu", ""))
 	# ⚠️ Le filtre `conditions` de l'entrée est repassé ICI aussi : `pnj_present` est un champ
 	# transitoire PERSISTÉ, et sans lui le PNJ tiré quand sa condition tenait resterait
@@ -54,7 +58,7 @@ def _pnj_du_lieu(character: dict) -> tuple[dict, dict, dict]:
 	# mais la requête, elle, passe encore.
 	entree = pnj.entree_pnj_active(
 		character, lieu_doc or {}, transport.entree_marchand,
-		lambda conds: acces.clauses_remplies(character, conds, get_doc))
+		lambda conds: acces.clauses_remplies(character, conds, get_doc), pnj_id)
 	pnj_doc = get_doc(entree["character"]) if entree else None
 	if not entree or not pnj_doc:
 		raise HTTPException(status_code=404, detail="Personne à qui parler ici.")
@@ -515,15 +519,17 @@ def _resoudre_escorte(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 
 
 @pnj_router.get("/pnj/dialogue")
-async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)]):
-	"""État initial du panneau de dialogue : PNJ présent + nœud de départ (choix filtrés)."""
+async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)],
+					   pnj_id: str | None = None):
+	"""État initial du panneau de dialogue : PNJ présent + nœud de départ (choix filtrés).
+	`pnj_id` (query) = celui des PNJ présents à qui l'on parle ; le premier à défaut."""
 	if not current_user:
 		raise HTTPException(status_code=400, detail="Invalid session credentials")
 	character = get_selected_character(current_user)
 	if not character:
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
 
-	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character)
+	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character, pnj_id)
 	# Une course dont le délai vient d'expirer ne doit pas être livrable : on solde les
 	# échéances (et leur sanction de réputation) avant de composer le dialogue.
 	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
@@ -559,7 +565,9 @@ async def pnj_dialogue(current_user: Annotated[dict, Depends(get_current_user)])
 async def pnj_dialogue_choix(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...)):
-	"""Résout un choix de dialogue (stateless, revalidé serveur). Body {"noeud", "choix_id"}.
+	"""Résout un choix de dialogue (stateless, revalidé serveur).
+	Body {"noeud", "choix_id", "pnj_id"?} — `pnj_id` désigne l'interlocuteur (les présences
+	sont cumulables) ; à défaut, le premier PNJ présent.
 	Un choix à action `{"service":"soin"}` débite et soigne ; `{"service":"don"}` remet un
 	objet (contrôle de charge + débit, séquence modèle buy_item) ; un choix simple renvoie
 	le nœud suivant, `noeud: null` = fin (le client ferme)."""
@@ -569,7 +577,7 @@ async def pnj_dialogue_choix(
 	if not character:
 		raise HTTPException(status_code=406, detail="Aucun personnage sélectionné")
 
-	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character)
+	entree, pnj_doc, lieu_doc = _pnj_du_lieu(character, body.get("pnj_id"))
 	echues = transport.traiter_expirations(character, quetes.now_epoch(), get_doc, save_doc)
 	if echues:
 		save_doc(character)

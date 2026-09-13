@@ -171,10 +171,23 @@ def test_une_boutique_peut_nommer_son_tenancier_sans_dupliquer_le_dialogue():
 def test_le_champ_pnj_explicite_prime_sur_le_tenancier_implicite():
 	# Un temple garde son PNJ authoré ; une boutique sans champ `pnj` reçoit son tenancier.
 	temple = dict(TEMPLE, pnj=[{"character": "pnj:malakor", "probabilite": 1.0}])
-	assert pnj.tirer_pnj_present(temple, lambda: 0.0, transport.entree_marchand) == "pnj:malakor"
-	assert pnj.tirer_pnj_present(SALAISON, lambda: 0.0, transport.entree_marchand) == "pnj:marchand_salaison"
+	assert pnj.tirer_pnjs_presents(temple, lambda: 0.0, transport.entree_marchand) == ["pnj:malakor"]
+	assert pnj.tirer_pnjs_presents(SALAISON, lambda: 0.0, transport.entree_marchand) \
+		== ["pnj:marchand_salaison"]
 	# Sans marchand_fn (appelants historiques), rien ne change pour les lieux sans `pnj`.
-	assert pnj.tirer_pnj_present(SALAISON, lambda: 0.0) is None
+	assert pnj.tirer_pnjs_presents(SALAISON, lambda: 0.0) == []
+
+
+def test_donneur_present_cherche_la_course_ECRITE_parmi_les_presents():
+	"""Les présences sont cumulables : un PNJ muet en tête de liste ne doit pas faire taire
+	la course écrite de son voisin."""
+	muet = {"_id": "pnj:muet"}
+	ecrit = {"_id": "pnj:facteur", "services": {"transport": {"offre": {
+		"id": "q1", "destination": "lieu:salaison", "cargaison": [{"item": "item:sel"}]}}}}
+	assert transport.donneur_present([muet, ecrit]) is ecrit
+	# Personne ne porte de course écrite → None : la branche « magasin » reprend la main.
+	assert transport.donneur_present([muet]) is None
+	assert transport.donneur_present([]) is None
 
 
 # ── Géographie ───────────────────────────────────────────────────────────────────

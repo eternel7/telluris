@@ -2,8 +2,12 @@
 # PNJ de lieu avec dialogues à choix + services. Un doc `lieu:*` porte un champ `pnj`
 # (liste d'entrées {character:"pnj:xxx", portrait, image?, probabilite, description}) ;
 # le tirage de présence se fait à l'ENTRÉE dans le lieu et est persisté en champ
-# transitoire character["pnj_present"] = {"lieu": id, "character": id|None} — un refresh
-# ne re-tire jamais (character:None = « tirage fait, PNJ absent »).
+# transitoire character["pnj_present"] = {"lieu": id, "characters": [id, …]} — un refresh
+# ne re-tire jamais (liste vide = « tirage fait, personne »).
+# Les présences sont CUMULABLES : chaque entrée `pnj` tire SA probabilité, indépendamment
+# des autres, et tous ceux qui passent sont là ensemble (une ligne d'action chacun, dans
+# l'ordre de la liste du lieu). ⚠️ Forme d'AVANT le cumul, `{"lieu": id, "character": id|None}`,
+# relue telle quelle (Conventions §4 : aucune migration) — cf. `_ids_presents`.
 #
 # Le doc PNJ (`type:"pnj"`) porte :
 # - `dialogue` : {"noeud_depart": id, "noeud_attente"?: id,
@@ -90,21 +94,28 @@ def _entree_visible(entree, condition_fn) -> bool:
 	return bool(condition_fn and condition_fn(conditions))
 
 
-def tirer_pnj_present(lieu_doc: dict, rand_fn=random.random, marchand_fn=None,
-					 condition_fn=None) -> str | None:
-	"""Tire le PNJ présent parmi les entrées `pnj` du lieu : la première entrée dont
-	`rand_fn() < probabilite` gagne (ordre de la liste = priorité). None si aucun."""
+def tirer_pnjs_presents(lieu_doc: dict, rand_fn=random.random, marchand_fn=None,
+						condition_fn=None) -> list:
+	"""Tire les PNJ présents parmi les entrées `pnj` du lieu. Les présences sont
+	CUMULABLES : chaque entrée est tirée POUR ELLE-MÊME (`rand_fn() < probabilite`) et
+	toutes celles qui passent sont retenues — la probabilité de rencontre de chacune reste
+	donc pleinement prise en compte, aucune n'est court-circuitée par une voisine. L'ordre
+	de la liste du lieu est conservé : c'est l'ordre des lignes d'action.
+
+	⚠️ Un même `character` n'est retenu qu'une fois : c'est son id qui adresse le dialogue,
+	deux entrées jumelles donneraient deux boutons pour un seul interlocuteur."""
+	presents = []
 	for entree in entrees_pnj(lieu_doc, marchand_fn, condition_fn):
 		pnj_id = entree.get("character")
-		if not pnj_id:
+		if not pnj_id or pnj_id in presents:
 			continue
 		try:
 			proba = float(entree.get("probabilite", 1.0))
 		except (TypeError, ValueError):
 			proba = 1.0
 		if rand_fn() < proba:
-			return pnj_id
-	return None
+			presents.append(pnj_id)
+	return presents
 
 
 def poser_pnj_present(character: dict, lieu_doc: dict, rand_fn=random.random,
@@ -120,29 +131,62 @@ def poser_pnj_present(character: dict, lieu_doc: dict, rand_fn=random.random,
 		return False
 	character["pnj_present"] = {
 		"lieu": lieu_id,
-		"character": tirer_pnj_present(lieu_doc, rand_fn, marchand_fn, condition_fn),
+		"characters": tirer_pnjs_presents(lieu_doc, rand_fn, marchand_fn, condition_fn),
 	}
 	return True
 
 
-def entree_pnj_active(character: dict, lieu_doc: dict, marchand_fn=None,
-					  condition_fn=None) -> dict | None:
-	"""L'entrée `pnj` du lieu correspondant au tirage persisté, ou None (tirage périmé,
-	PNJ absent, lieu sans pnj, entrée retirée de la donnée depuis le tirage).
-	
+def _ids_presents(character: dict) -> list:
+	"""Les ids tirés à l'entrée. ⚠️ Aucune migration (Conventions §4) : un personnage
+	sauvegardé AVANT le cumul porte `character: id|None` et non `characters: [...]` — il
+	continue de tourner, avec son unique PNJ, jusqu'à son prochain déplacement."""
+	present = (character or {}).get("pnj_present") or {}
+	ids = present.get("characters")
+	if isinstance(ids, list):
+		return [pnj_id for pnj_id in ids if pnj_id]
+	pnj_id = present.get("character")
+	return [pnj_id] if pnj_id else []
+
+
+def entrees_pnj_actives(character: dict, lieu_doc: dict, marchand_fn=None,
+						condition_fn=None) -> list:
+	"""Les entrées `pnj` du lieu correspondant au tirage persisté, dans l'ordre du lieu.
+	Liste vide si le tirage est périmé, si personne n'est là, ou si le lieu n'a pas de pnj ;
+	une entrée retirée de la donnée depuis le tirage disparaît d'elle-même.
+
 	⚠️ Le filtre `conditions` joue ICI AUSSI, et pas seulement au tirage : `pnj_present` est
 	un champ TRANSITOIRE persisté, et `poser_pnj_present` est un no-op tant qu'on reste dans
 	le lieu. Un PNJ tiré alors que sa condition tenait continuerait donc de parler après
 	qu'elle a cessé de tenir. La condition est autoritative à la LECTURE."""
 	present = (character or {}).get("pnj_present") or {}
 	lieu_id = (lieu_doc or {}).get("_id")
-	pnj_id = present.get("character")
-	if not lieu_id or present.get("lieu") != lieu_id or not pnj_id:
-		return None
-	for entree in entrees_pnj(lieu_doc, marchand_fn, condition_fn):
-		if entree.get("character") == pnj_id:
-			return entree
-	return None
+	if not lieu_id or present.get("lieu") != lieu_id:
+		return []
+	presents = set(_ids_presents(character))
+	if not presents:
+		return []
+	# ⚠️ UNE entrée par PNJ, la première : un lieu peut lister plusieurs variantes d'identité
+	# (nom, portrait) du MÊME doc — quatre tenancières au Garde-manger des 3 fées. Sous
+	# l'ancienne règle « la première entrée qui passe gagne », les suivantes étaient
+	# inatteignables ; les rendre toutes ferait quatre boutons pour un seul interlocuteur.
+	vues, retenues = set(), []
+	for e in entrees_pnj(lieu_doc, marchand_fn, condition_fn):
+		pnj_id = e.get("character")
+		if pnj_id in presents and pnj_id not in vues:
+			vues.add(pnj_id)
+			retenues.append(e)
+	return retenues
+
+
+def entree_pnj_active(character: dict, lieu_doc: dict, marchand_fn=None,
+					  condition_fn=None, pnj_id: str | None = None) -> dict | None:
+	"""L'entrée d'UN des PNJ présents, ou None. Avec `pnj_id`, celle de CE PNJ (le dialogue
+	adresse explicitement son interlocuteur — plusieurs peuvent être là) ; sans lui, la
+	première présente, dans l'ordre du lieu."""
+	actives = entrees_pnj_actives(character, lieu_doc, marchand_fn, condition_fn)
+	if pnj_id:
+		return next((e for e in actives if e.get("character") == pnj_id), None)
+	return actives[0] if actives else None
 
 
 def nom_effectif(entree: dict, pnj_doc: dict) -> str:
