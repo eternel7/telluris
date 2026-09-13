@@ -5001,11 +5001,15 @@ function _imagesPourCategorie(cat) {
 }
 
 // Le suffixe des portraits, lui, est fiable : marchand_<prenom>_<nom>_<categorie>.png
+// ⚠️ La catégorie peut porter un NUMÉRO DE VARIANTE avant l'extension
+// (marchand_elfe_f_boulangerie01.jpg) : sans le `\d*`, ces fichiers étaient écartés
+// et la boulangerie n'avait plus qu'à cocher « tous les portraits ».
 function _portraitsPourCategorie(cat) {
 	const tous = (creationOptions && creationOptions.portraits) || [];
 	const c = String(cat || '').toLowerCase();
 	if (!c) return tous;
-	const filtres = tous.filter(f => f.toLowerCase().includes('_' + c + '.'));
+	const re = new RegExp('_' + _escRe(c) + '\\d*\\.[^.]+$');
+	const filtres = tous.filter(f => re.test(f.toLowerCase()));
 	return filtres.length ? filtres : tous;
 }
 
@@ -5014,10 +5018,12 @@ function _portraitsPourCategorie(cat) {
 // (ci-dessus) et le GÉNÉRIQUE marchand_<race>_<sexe>_<categorie>.png. Le second ne
 // porte pas de nom : on rend '' pour laisser nom_effectif retomber sur le doc PNJ,
 // plutôt que d'écrire « Elfe F » dans le lieu.
+// Le numéro de variante fait partie du suffixe de catégorie et tombe avec lui : sinon
+// marchand_elfe_f_boulangerie01.jpg nommerait le tenancier « Elfe F Boulangerie01 ».
 function _nomDepuisPortrait(fichier, cat) {
 	let base = String(fichier || '').replace(/\.[^.]+$/, '').replace(/^marchand_/, '');
 	const c = String(cat || '').toLowerCase();
-	if (c && base.toLowerCase().endsWith('_' + c)) base = base.slice(0, -(c.length + 1));
+	if (c) base = base.replace(new RegExp('_' + _escRe(c) + '\\d*$', 'i'), '');
 	const mots = base.split(/[_\s]+/).filter(Boolean);
 	if (mots.length === 2 && /^[mf]$/i.test(mots[1])) return '';
 	return mots.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(' ');
