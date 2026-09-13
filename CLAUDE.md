@@ -22,7 +22,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `slots` · `resize` · `deplacement` · `voies` · `lot_lieux` · `lieu_form` · `connexions` · `dialogues` · `portes`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `slots` · `resize` · `deplacement` · `voies` · `lot_lieux` · `lieu_form` · `connexions` · `dialogues` · `portes` · `gestion_lieux`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -83,7 +83,8 @@ utils/
   potentiel.py           # potentiels combat/survie/support (pur) : `REGLES_POTENTIEL` = le point d'édition
   xlsx.py                # writer xlsx OOXML pur stdlib (zipfile) — partagé bestiaire + export tableau admin
   lint_dialogues.py      # contrôle des arbres de dialogue (pur) — partagé CLI dev + bouton /admin
-  dev_tools.py           # catalogue + lanceur des scripts de dev/ (liste blanche) — écran /admin/dev-tools
+  dev_tools.py           # catalogue + lanceur des scripts de dev/ (liste blanche) — /admin/dev-tools,
+                         #   et outils PARAMÉTRÉS (ville, lieux, spec JSON) de /admin/lieux
 db/
   config.py              # CouchDB connection, get_doc / save_doc / find_docs helpers, cache de requête
 models/
@@ -92,7 +93,8 @@ models/
 templates/
   *.html                 # Jinja2 pages (play_town, combat, fiche perso, admin, éditeurs)
   part-*.html            # fragments partagés : {% include %} de markup OU macros paramétrées
-                         #   (part-character-card, part-slot-bar-css, part-move-panel)
+                         #   (part-character-card, part-slot-bar-css, part-move-panel,
+                         #    part-lieux-{js,css,markup} : mode Lieux partagé /admin/editor ↔ /admin/lieux)
   scripts/               # JS partagé, servi par le mount /scripts
                          #   battle_map.js · nav.js (bitmask nav) · deplacement.js (règles de marche)
                          #   voies.js (tracé des voies de l'éditeur : régions, goulots, passage)
@@ -112,7 +114,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 |---|---|
 | caractéristiques, combat, dégâts, barre de slots, effets à durée, animations, simulateur | `telluris-combat` |
 | bitmask `nav`, règles de marche, animation de carte/jetons, pavé partagé, mode test de déplacement | `telluris-map-movement` |
-| `/admin/editor` : mode Lieux, formulaires de lieu/connexion, portes de rempart, lot de lieux, voies, redimensionnement | `telluris-editeur-carte` |
+| `/admin/editor` : mode Lieux, formulaires de lieu/connexion, portes de rempart, lot de lieux, voies, redimensionnement ; `/admin/lieux` et le contrat `LIEUX_HOTE` des parts partagées | `telluris-editeur-carte` |
 | items, poids, marché, recettes, grandes maisons, portée des recettes, flux de cité | `telluris-economie` |
 | quêtes (guilde, transport, chasse, escorte), PNJ et dialogues, `/admin/dialogues`, accès, donjons, intro | `telluris-quetes-pnj` |
 | recrutement, groupe, compagnie, contrat de mission, montures | `telluris-recrutement` |

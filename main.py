@@ -342,21 +342,25 @@ def admin_table_export_xlsx(
 		headers={"Content-Disposition": f'attachment; filename="{name}"'},
 	)
 
-@app.get("/admin/exports/couchdb")
-def admin_export_couchdb(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
-	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
-		raise HTTPException(status_code=403, detail="Admin only")
-	import json, datetime
-	# Exclut les documents utilisateurs (données sensibles : hash de mot de passe, etc.).
+def _dump_payload(now) -> dict:
+	"""Le dump complet — SOURCE UNIQUE du format `{"db","exported_at","doc_count","docs"}`,
+	que l'export télécharge ET que les outils de /admin/lieux relisent (`_preparer_outil`).
+	Exclut les documents utilisateurs (données sensibles : hash de mot de passe, etc.)."""
 	docs = [d for d in dump_all_docs() if not str(d.get("_id", "")).startswith("user:")]
-	now = datetime.datetime.utcnow()
-	payload = {
+	return {
 		"db": "telluris",
 		"exported_at": now.isoformat() + "Z",
 		"doc_count": len(docs),
 		"docs": docs,
 	}
-	data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+
+@app.get("/admin/exports/couchdb")
+def admin_export_couchdb(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	import datetime
+	now = datetime.datetime.utcnow()
+	data = json.dumps(_dump_payload(now), ensure_ascii=False, indent=2).encode("utf-8")
 	filename = f"telluris-dump-{now:%Y%m%d-%H%M%S}.json"
 	return Response(
 		content=data,
@@ -1215,19 +1219,98 @@ def admin_dev_tools(request: Request, current_user: Annotated[User, Depends(get_
 	)
 
 
+def _villes() -> list:
+	"""Les cités gérables sur /admin/lieux (`dev_tools.est_ville`), triées par label.
+	Projetées : les `cells` de chaque carte n'ont rien à faire ici."""
+	docs = find_docs({"type": "lieu"}, fields=["_id", "label", "categorie", "sous_categorie"]) or []
+	return sorted(
+		({"_id": d["_id"], "label": d.get("label") or d["_id"]}
+		 for d in docs if d.get("_id") and dev_tools.est_ville(d)),
+		key=lambda v: v["label"].lower(),
+	)
+
+
+def _preparer_outil(outil: dict, valeurs: dict) -> dict:
+	"""Écrit ce qu'un outil paramétré relit : le dump régénéré et la spec JSON.
+	⚠️ Noms choisis ICI, jamais par le client ; chemins rendus RELATIFS à la racine du dépôt."""
+	import datetime
+	now = datetime.datetime.utcnow()
+	horodatage = f"{now:%Y%m%d-%H%M%S}"
+	fichiers = {}
+	if outil.get("dump_frais"):
+		rel = f"jsons/telluris-dump-{horodatage}.json"
+		with open(os.path.join(dev_tools.RACINE, rel), "w", encoding="utf-8") as f:
+			json.dump(_dump_payload(now), f, ensure_ascii=False, indent=2)
+		fichiers["dump"] = rel
+	spec = dev_tools.spec_a_ecrire(outil, valeurs)
+	if spec is not None:
+		os.makedirs(os.path.join(dev_tools.RACINE, "jsons", "outils"), exist_ok=True)
+		rel = f"jsons/outils/{outil['id']}-{horodatage}.json"
+		with open(os.path.join(dev_tools.RACINE, rel), "w", encoding="utf-8") as f:
+			json.dump(spec, f, ensure_ascii=False, indent=2)
+		fichiers["spec"] = rel
+	return fichiers
+
+
 @app.post("/admin/dev-tools/lancer")
 def admin_dev_tools_lancer(
 	current_user: Annotated[User, Depends(get_current_user)],
 	payload: dict = Body(...),
 ):
 	"""Démarre un outil du catalogue. 409 si un autre tourne encore (un seul run à la fois :
-	deux générateurs écrivent volontiers le même fichier)."""
+	deux générateurs écrivent volontiers le même fichier). Un outil paramétré reçoit `params`,
+	validé par `dev_tools.valider_params` (422 sinon)."""
 	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
 		raise HTTPException(status_code=403, detail="Admin only")
-	run, erreur = dev_tools.lancer(str(payload.get("outil", "")))
+	outil_id = str(payload.get("outil", ""))
+	outil = next((o for o in dev_tools.CATALOGUE if o["id"] == outil_id), None)
+	run, erreur = dev_tools.lancer(
+		outil_id, payload.get("params"),
+		preparer=_preparer_outil,
+		# Les villes ne sont relues que si l'outil en attend une : la liste coûte une requête.
+		villes_connues=[v["_id"] for v in _villes()]
+			if outil and any(p["type"] == "ville" for p in outil.get("params") or []) else (),
+	)
 	if erreur:
 		raise HTTPException(status_code=erreur[0], detail=erreur[1])
 	return {"run_id": run["run_id"], "label": run["label"], "fini": run["fini"]}
+
+
+@app.get("/admin/dev-tools/sortie")
+def admin_dev_tools_sortie(
+	current_user: Annotated[User, Depends(get_current_user)],
+	outil: str = Query(""),
+):
+	"""Le fichier produit par le DERNIER run réussi d'un outil — ce que 📥 Importer envoie à
+	`/admin/import-bulk`. Chemin tiré du catalogue, jamais du client ; refusé s'il date d'avant
+	le run (cf. `dev_tools.sortie_fraiche`)."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	chemin, erreur = dev_tools.sortie_fraiche(outil)
+	if erreur:
+		raise HTTPException(status_code=erreur[0], detail=erreur[1])
+	with open(os.path.join(dev_tools.RACINE, chemin), encoding="utf-8") as f:
+		data = json.load(f)
+	docs = data["docs"] if isinstance(data, dict) and isinstance(data.get("docs"), list) else data
+	if not isinstance(docs, list):
+		raise HTTPException(status_code=422, detail=f"{chemin} n'est pas une liste de documents.")
+	return {"chemin": chemin, "docs": docs,
+			"ids": [d.get("_id") for d in docs if isinstance(d, dict)]}
+
+
+@app.get("/admin/lieux", response_class=HTMLResponse)
+def admin_lieux(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Gestion des lieux d'une ville : tableau des connexions de la cité (1re colonne partagée
+	avec le mode Lieux de l'éditeur) et outils de dev/ appliqués à la ville ou aux lignes affichées."""
+	redirect = _require_admin_page(request, current_user)
+	if redirect:
+		return redirect
+	return templates.TemplateResponse(
+		request=request,
+		name="admin_lieux.html",
+		context={"title": "Gestion des lieux", "villes": _villes(),
+				 "outils": dev_tools.catalogue_payload("lieux")},
+	)
 
 
 @app.get("/admin/dev-tools/log")

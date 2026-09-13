@@ -8,6 +8,20 @@ description: Map editor authoring at /admin/editor (admin_map_editor.html) — t
 **Patron commun** — `PUT /admin/doc` et `POST /admin/import-bulk` font un PUT **COMPLET** et ne refusent rien (`_rev` rattaché en base, CLAUDE.md §11). Tout formulaire part donc du doc **RELU**, n'écrit que les champs qu'il possède (`_fusionLieu`, `_fusionConnexion`) et refuse un `_id` déjà pris **avant** l'envoi. Fusions, conventions d'`_id`, ordre des nœuds et seuils de case sont verrouillés par `dev/test_{lieu_form,connexions,portes,lot_lieux,voies,resize}_client.js` : ce qui suit garde le pourquoi et ce qu'aucun harnais n'atteint (DOM, visée, séquencement réseau). ✕ / Échap annulent sans rien écrire (CLAUDE.md §8).
 
 
+### Parts partagées et contrat `LIEUX_HOTE`
+Ligne de liste, fiche 📄, éditeurs 🧾 JSON, formulaires ✏️ lieu et 🔗 connexion vivent dans **`part-lieux-{js,css,markup}.html`**, inclus (`include`, pas `import` : `url_for`) par `/admin/editor` et `/admin/lieux`. Porte de rempart, lot, repositionnement, voies restent dans l'éditeur.
+- ⚠️ La part ne lit **aucune** globale de page : tout passe par `const LIEUX_HOTE` que chaque page déclare (clés `LIEUX_HOTE_REQUIS`, doc en tête de la part). `visee`/`repositionnement` à `null` masquent 🎯 ; `caseCourante()` null interdit la création. Verrouillé par `test_gestion_lieux_client.js` (clés des deux pages, liste de globales interdites).
+- Scripts : la part JS est incluse **avant** le script de page (qui déclare `LIEUX_HOTE`), le markup **après**. `lieuxLigneHtml(conn, ici, {link, porte, ouvert})` = la ligne unique des deux pages.
+- Harnais : lire les templates par `dev/_template_js.js` (includes développés).
+
+
+### Gestion des lieux — `/admin/lieux`
+Tableau des connexions d'une ville (`GET /api/lieu/{ville}/connections`), logique de `/admin/table` recopiée (colonnes, tri, filtres, largeurs ; `localStorage` `telluris.admin_lieux.v1`). 1re colonne fixe = `lieuxLigneHtml` sans `link:` ni 🏰. Villes = `dev_tools.est_ville`.
+- **🛠 Outils** (à droite au-dessus du tableau) = catalogue `portee: "lieux"` de `utils/dev_tools.py` (cf. `telluris-admin-tools`). `lieux` = les lignes **affichées** (filtres compris) dont la 1re entrée `pnj` est un `pnj:marchand_*` explicite (`lieuxMarchandsVisibles`).
+- **📍 Compléter les positions** (spec de magasins) : `voiesRegions(voiesGraphe(cells, nav, dims, 'exploration'))` → région **0** seule ; `_proposerCases` préfère ≤ `PROPOSITION_RAYON` d'une porte de boutique, puis le plus loin des portes du même métier et des cases déjà proposées. `gen_magasins.py` refuse ensuite toute case ≠ 1.
+- **📥 Importer** : `GET /admin/dev-tools/sortie` puis `POST /admin/import-bulk` (NDJSON), `confirm` listant les `_id` ; bouton masqué après import.
+
+
 ### Mode « Lieux »
 Points cliquables aux positions des connexions du lieu courant. `GET /api/lieu/{id}/connections` = range sur la vue `reseau/liens_cases`, chaque nœud enrichi de `details` (doc lieu sans `cells`/`_rev`/`_id`). ⚠️ **Ne peint jamais la grille** ; le clic sélectionne la case (`lieuxSelectedCell`) et filtre la liste latérale. Fiche `#lieu-fiche-overlay` = réplique de play_town (image `towns→battle_maps→maps`, sous-lieux `.lf-subbtn`, destinations sans `cells` en image fit).
 

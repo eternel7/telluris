@@ -1,0 +1,108 @@
+[
+  {
+    "_id": "lieu:au_lion_d_or",
+    "_rev": "3-2668ba37defbb01b5e3a79ccc688a1c2",
+    "type": "lieu",
+    "label": "Au Lion d'Or",
+    "image": "auberge_europe04.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia"
+  },
+  {
+    "_id": "lieu:auberge_de_la_cite",
+    "_rev": "1-80e5dd6b27298e83fe375e1163c2b07a",
+    "type": "lieu",
+    "label": "Auberge de la Cité",
+    "image": "auberge_europe01.png",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_de_la_greve",
+    "_rev": "1-39ae293708ae67009e9bc3c6cc771521",
+    "type": "lieu",
+    "label": "Auberge de la Grève",
+    "image": "auberge_europe02.png",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_de_la_seine",
+    "_rev": "1-4d7308d85b79a6c72ed4700d33899e71",
+    "type": "lieu",
+    "label": "Auberge de la Seine",
+    "image": "auberge_europe02.png",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_des_ecoles",
+    "_rev": "1-eae681e3e9b832c79dd198f0c54fdac0",
+    "type": "lieu",
+    "label": "Auberge des Écoles",
+    "image": "auberge_europe04.png",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_des_halles",
+    "_rev": "1-7557ba83fb3d3c7a408dd75118d83380",
+    "type": "lieu",
+    "label": "Auberge des Halles",
+    "image": "auberge_europe05.png",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_du_palais",
+    "_rev": "1-3a623b4bb5d76cf7ee9c969c6b35dc8b",
+    "type": "lieu",
+    "label": "Auberge du Palais",
+    "image": "auberge_europe03.png",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_du_parvis",
+    "_rev": "1-bce45c18dca846b395dc195ac1b095d7",
+    "type": "lieu",
+    "label": "Auberge du Parvis",
+    "image": "auberge_europe02.png",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:auberge_du_petit_pont",
+    "_rev": "1-989b647acea53af8f0924e12c10d654d",
+    "type": "lieu",
+    "label": "Auberge du Petit-Pont",
+    "image": "auberge_europe05.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia",
+    "stock_matieres": {},
+    "stock_vente": []
+  },
+  {
+    "_id": "lieu:le_coq_de_lutece",
+    "_rev": "2-d1b04baa8afaddbd1fc9143fb35dc8a1",
+    "type": "lieu",
+    "label": "Le Coq de Lutèce",
+    "image": "auberge_europe06.jpg",
+    "categorie": "auberge",
+    "lieu_parent": "lieu:lutecia"
+  }
+]

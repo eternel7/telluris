@@ -29,6 +29,7 @@ Annoncer le nombre de tests passés avant de clore (CLAUDE.md §14).
 Aucune dépendance (ni `package.json`, ni second écosystème), code 1 en échec, helper `t(nom, fn)`.
 
 - **Extraction** : les fonctions **pures** sont extraites du template **par nom** (accolades équilibrées, `extraire(nom)`), les constantes aussi (`extraireConst`, ex. `PORTE_*`) plutôt que recopiées — une recopie dérive en silence.
+- ⚠️ **Lire le template par `dev/_template_js.js`** (`lireAvecIncludes`, `scriptsInline`), jamais `fs.readFileSync` brut : le mode Lieux vit dans `part-lieux-*.html`, un template lu sans ses `{% include %}` développés rend « fonction introuvable ».
 - **Chargement direct** quand la logique vit dans `templates/scripts/` : `nav.js` → `deplacement.js` (→ `voies.js`).
 - ⚠️ **`vm.runInThisContext`, pas `vm.createContext`** : un contexte séparé est un autre *realm*, ses tableaux ont un autre prototype `Array` et `assert.deepStrictEqual` les refuse tous. Le realm du test permet aussi de **semer des globales** sur `globalThis` : `VOCAB` (dialogues — vocabulaire servi par le serveur), les globales de `_reappliquerPortes` (resize, pour éprouver l'idempotence).
 - Une fonction testable prend ses données **en paramètres** au lieu de lire l'état de page (`dejaPris` de `_prochainLinkId`, `tenanciers` de `_lotDocs`).
@@ -46,4 +47,5 @@ Aucune dépendance (ni `package.json`, ni second écosystème), code 1 en échec
 | `test_connexions_client` | formulaire de connexion | `link:*` écrasé ; clés du doc/nœud perdues ; case posable |
 | `test_portes_client` | portes de rempart | ordre des nœuds (porte qui change de côté) ; 5 `_id` ; clés perdues |
 | `test_lot_lieux_client` | lot de lieux | N boutiques ⇒ un seul `link:*` ⇒ boutiques sans porte |
+| `test_gestion_lieux_client` | `/admin/lieux` + contrat `LIEUX_HOTE` | globale d'éditeur lue par la part (ReferenceError au clic sur l'autre page) ; clé de contrat absente ; lignes affichées envoyées aux outils ; 📍 hors région principale |
 | `test_dialogues_client` | `/admin/dialogues` | fusion doc/nœud/choix ; atteignabilité **avec** les nœuds de service |

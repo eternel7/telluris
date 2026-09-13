@@ -90,6 +90,7 @@ Usage :
     python dev/audit_economy.py jsons/telluris-dump-20260906-081358.json
     python dev/audit_economy.py --dump <chemin>
     python dev/audit_economy.py --dernier              # le dump le plus récent
+    python dev/audit_economy.py <dump> --ville lieu:lutecia   # périmètre d'une ville (+ §4 par atelier)
 
 Le dump est OBLIGATOIRE et n'est jamais deviné TOUT SEUL : sans argument, le script liste
 les dumps trouvés et demande lequel prendre — choisir en silence rendrait le rapport non
@@ -303,7 +304,7 @@ def _quantile(valeurs: list, q: float) -> float:
 	return v[min(len(v) - 1, int(q * len(v)))] if v else 0.0
 
 
-def auditer(docs: list, meta: dict) -> None:
+def auditer(docs: list, meta: dict, ville: str | None = None) -> None:
 	character_stats, characters, marche = brancher_moteur(docs)
 
 	par_type: dict[str, list] = {}
@@ -314,8 +315,34 @@ def auditer(docs: list, meta: dict) -> None:
 	recettes = sorted(par_type.get("recette", []), key=lambda d: d.get("_id", ""))
 	lieux = par_type.get("lieu", [])
 
+	# Calculés sur TOUS les objets, quel que soit le périmètre : un produit a un doc ou n'en a
+	# pas, et le joueur apporte ce qu'il a trouvé n'importe où.
 	items_par_id = {d["_id"]: d for d in items if d.get("_id")}
 	sous_cats = {sc for d in items if (sc := characters.item_sous_categorie(d))}
+
+	def _atelier_de(r: dict):
+		"""Le lieu par lequel cette recette peut être cuite, ou None si aucun ne le peut.
+		⚠️ Lit `lieux` À L'APPEL : restreint à la ville quand `--ville` est donné."""
+		cat = r.get("lieu_categorie")
+		portee = r.get("lieu_portee")
+		candidats = [L for L in sorted(lieux, key=lambda d: d.get("_id") or "")
+					 if cat in marche.categories_incluses(L.get("categorie") or "")
+					 and (not portee or portee in marche.portees_lieu(L))]
+		return candidats[0] if candidats else None
+
+	# ── Périmètre d'une VILLE (`--ville`, outil de /admin/lieux) ────────────────────────
+	# ⚠️ Le moteur reste branché sur TOUT le dump (portées, fusions de catégories) : seul le
+	# PÉRIMÈTRE se resserre — les lieux enfants de la ville, les recettes que l'un d'eux peut
+	# cuire, les objets qu'elles visent. Une chaîne qui ne tient que par l'atelier d'une AUTRE
+	# ville est donc « rompue » ici : c'est ce qu'on vient mesurer. Sans `--ville`, rien de ce
+	# bloc ne s'exécute et le rapport est inchangé.
+	hors_ville = []
+	if ville:
+		lieux = [L for L in lieux if L.get("lieu_parent") == ville]
+		hors_ville = [r for r in recettes if _atelier_de(r) is None]
+		recettes = [r for r in recettes if _atelier_de(r) is not None]
+		vises = {marche.objet_final_item_id(r.get("objet_final", "")) for r in recettes}
+		items = [d for d in items if d["_id"] in vises]
 	categories_lieu = {l.get("categorie") for l in lieux if l.get("categorie")}
 
 	def apportee_par_le_joueur(cle: str) -> bool:
@@ -359,16 +386,7 @@ def auditer(docs: list, meta: dict) -> None:
 	# n'est servie que par `marche.recettes_lieu`, qui a besoin du doc lieu. Auditée par
 	# catégorie, elle serait rapportée « bloquée » alors qu'elle cuit très bien là où elle
 	# doit cuire. On choisit un atelier REPRÉSENTATIF par (catégorie, portée) — le premier
-	# par `_id`, pour que deux exécutions rendent le même rapport.
-	def _atelier_de(r: dict):
-		"""Le lieu par lequel cette recette peut être cuite, ou None si aucun ne le peut."""
-		cat = r.get("lieu_categorie")
-		portee = r.get("lieu_portee")
-		candidats = [L for L in sorted(lieux, key=lambda d: d.get("_id") or "")
-					 if cat in marche.categories_incluses(L.get("categorie") or "")
-					 and (not portee or portee in marche.portees_lieu(L))]
-		return candidats[0] if candidats else None
-
+	# par `_id`, pour que deux exécutions rendent le même rapport (`_atelier_de`, plus haut).
 	point_fixe_atelier: dict[str, tuple] = {}   # lieu_id → (cuites, acquis)
 	atelier_par_recette: dict[str, str] = {}
 	for r in recettes:
@@ -448,6 +466,8 @@ def auditer(docs: list, meta: dict) -> None:
 	print(f"exporté le    : {meta.get('exported_at', '?')}   ({meta.get('doc_count', len(docs))} docs)")
 	print(f"items {len(items):>4}   recettes {len(recettes):>4}   lieux {len(lieux):>3}"
 		  f"   catégories d'atelier {len(categories_lieu):>3}")
+	if ville:
+		print(f"ville         : {ville}   — {len(hors_ville)} recette(s) sans atelier ici, hors périmètre")
 	print(f"tunables      : MARGE_TRANSFO={character_stats.MARGE_TRANSFO} "
 		  f"PRIX_MAX_FACTEUR={character_stats.PRIX_MAX_FACTEUR} "
 		  f"PRIX_DERIVE_BASE={character_stats.PRIX_DERIVE_BASE} "
@@ -508,6 +528,36 @@ def auditer(docs: list, meta: dict) -> None:
 			print(f"       {produit:<44} vendu {prix:>7} cu / revient {cout:>9.1f} cu"
 				  f"   {_m * 100:+7.1f} %")
 	print()
+	if ville:
+		# ── 4. Par atelier de la ville ───────────────────────────────────────────────────
+		# Même point fixe que §2, mais pour CHAQUE lieu (§2 n'en garde qu'un représentatif par
+		# recette) : la ligne qu'on lit avant d'ouvrir une boutique de plus dans la ville.
+		ateliers = []
+		for L in sorted(lieux, key=lambda d: d.get("_id") or ""):
+			siennes = marche.recettes_lieu(L)
+			if not siennes:
+				continue
+			amorce = {c for c in marche.appro_leaves_lieu(L) if marche._appro_debit_pour(c) > 0}
+			cuites_l, acquis_l = point_fixe(marche, siennes, amorce)
+			en_rayon = [r for r in siennes if r.get("_id") in cuites_l
+						and marche.objet_final_item_id(r.get("objet_final", "")) in items_par_id]
+			manque: dict[str, int] = {}
+			for r in siennes:
+				if r.get("_id") in cuites_l:
+					continue
+				for cle, _q in marche.recette_matieres(r):
+					if cle not in acquis_l:
+						manque[cle] = manque.get(cle, 0) + 1
+			ateliers.append((L, len(siennes), len(en_rayon), manque))
+		print("─" * larg)
+		print(f"4. ATELIERS DE LA VILLE                       ({len(ateliers)} lieu(x) à recettes)")
+		print("─" * larg)
+		for L, n, rayon, manque in ateliers:
+			top = sorted(manque.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
+			print(f"   {L['_id']:<40} {str(L.get('categorie') or ''):<34} en rayon {rayon:>3} / {n:<3}"
+				  + (f"  manque : {', '.join(c for c, _n in top)}" if top else ""))
+		print()
+
 	print("─" * larg)
 	print("Hypothèses de référence : cf. docstring en tête de ce fichier (A à F).")
 	print("─" * larg)
@@ -515,6 +565,14 @@ def auditer(docs: list, meta: dict) -> None:
 
 def main(argv: list) -> int:
 	args = [a for a in argv[1:] if a != "--dump"]
+	ville = None
+	if "--ville" in args:
+		i = args.index("--ville")
+		if i + 1 >= len(args):
+			print("`--ville` : identifiant attendu (lieu:…).", file=sys.stderr)
+			return 2
+		ville = args[i + 1]
+		del args[i:i + 2]
 	if "--dernier" in args:
 		candidats = dumps_disponibles()
 		if not candidats:
@@ -535,7 +593,10 @@ def main(argv: list) -> int:
 		print(f"Dump illisible : {e}", file=sys.stderr)
 		return 2
 	meta["_chemin"] = chemin
-	auditer(docs, meta)
+	if ville and not any(isinstance(d, dict) and d.get("_id") == ville for d in docs):
+		print(f"`--ville` : {ville} absent du dump.", file=sys.stderr)
+		return 2
+	auditer(docs, meta, ville)
 	return 0
 
 

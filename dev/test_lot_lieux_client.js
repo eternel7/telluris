@@ -29,7 +29,8 @@ const assert = require('assert');
 const vm = require('vm');
 
 const TEMPLATE = path.join(__dirname, '..', 'templates', 'admin_map_editor.html');
-const src = fs.readFileSync(TEMPLATE, 'utf8');
+// Includes développés : le formulaire de lieu vit dans part-lieux-js.html (cf. dev/_template_js.js).
+const src = require('./_template_js').lireAvecIncludes(TEMPLATE);
 
 const js = [...src.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)]
 	.map(m => m[1]).join('\n');
@@ -56,6 +57,9 @@ for (const f of ['_lotExpansion', '_lotRotation', '_lotLignes', '_lotDocs', '_lo
 }
 vm.runInThisContext(src.match(/const _DIACRITIQUES = [^;]+;/)[0]);
 globalThis.lieuxConnections = [];
+// `_prochainLinkId` lit les connexions par le contrat de la page hôte (part-lieux-js.html) :
+// on le branche sur la globale que les tests réaffectent.
+globalThis.LIEUX_HOTE = { connexions: () => globalThis.lieuxConnections };
 
 let passes = 0, echecs = 0;
 function t(nom, fn) {

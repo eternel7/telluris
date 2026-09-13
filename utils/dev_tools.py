@@ -15,7 +15,9 @@ Aucun `shell=True` non plus : `Popen` reçoit une LISTE, donc rien n'est interpr
 (409) tant que le premier n'est pas terminé.
 """
 
+import json
 import os
+import re
 import subprocess
 import sys
 import threading
@@ -48,6 +50,83 @@ def _node(script: str, *args: str) -> list:
 def _module(mod: str, *args: str) -> list:
 	"""argv d'un module Python lancé par `-m` (pytest) — même `-u` que `_py`, même raison."""
 	return [sys.executable, "-u", "-m", mod, *args]
+
+
+# ── Outils PARAMÉTRÉS (/admin/lieux) ─────────────────────────────────────────
+# Une entrée à `params` reçoit des valeurs du client — et c'est précisément ce que la liste
+# blanche interdisait jusqu'ici. Elle le reste : le client n'envoie JAMAIS un chemin ni un
+# morceau d'argv. Chaque valeur est typée et VALIDÉE ici (`valider_params`), l'argv est bâti
+# par `argv_fn` depuis ces valeurs, et les fichiers qu'un outil lit (dump, spec) sont écrits
+# par le SERVEUR sous un nom qu'il choisit (`preparer`, injecté par main.py).
+#
+#   ville  → un `lieu:*` qui passe `ID_LIEU` ET figure parmi les villes connues
+#   lieux  → liste non vide de `lieu:*` (≤ LIEUX_MAX), dédoublonnée, ordre gardé
+#   json   → un OBJET JSON (≤ JSON_OCTETS_MAX), écrit dans un fichier par le serveur
+#
+# ⚠️ `dump_frais` : un générateur relit un DUMP pour n'injecter que son champ (CLAUDE.md §11) —
+# relu sur un dump périmé, son import (PUT complet) écraserait les retouches faites depuis.
+ID_LIEU = re.compile(r"^lieu:[a-z0-9_]{1,120}$")
+LIEUX_MAX = 500
+JSON_OCTETS_MAX = 256_000
+_TYPES_PARAM = ("ville", "lieux", "json")
+
+
+def est_ville(doc: dict) -> bool:
+	"""Une cité gérable sur /admin/lieux. ⚠️ Lutèce n'a PAS de `categorie` (vide) : seule sa
+	`sous_categorie` « capitale » la désigne — un filtre sur `categorie` seule l'oublierait."""
+	return (doc.get("categorie") == "ville"
+			or doc.get("sous_categorie") in ("ville", "capitale"))
+
+
+def valider_params(outil: dict, brut, villes_connues=()) -> tuple:
+	"""Valeurs typées d'un outil paramétré. Rend `(valeurs, None)` ou `(None, message)`."""
+	attendus = {p["nom"]: p["type"] for p in outil.get("params") or []}
+	if not attendus:
+		return ({}, None) if not brut else (None, "Cet outil ne prend aucun paramètre.")
+	if not isinstance(brut, dict):
+		return None, "Paramètres : un objet est attendu."
+	inconnus = sorted(set(brut) - set(attendus))
+	if inconnus:
+		return None, f"Paramètre(s) inconnu(s) : {', '.join(inconnus)}."
+	villes = set(villes_connues or ())
+	valeurs = {}
+	for nom, typ in attendus.items():
+		v = brut.get(nom)
+		if typ == "ville":
+			if not isinstance(v, str) or not ID_LIEU.match(v):
+				return None, f"`{nom}` : identifiant de lieu invalide."
+			if v not in villes:
+				return None, f"`{nom}` : {v} n'est pas une ville connue."
+		elif typ == "lieux":
+			if not isinstance(v, list) or not v:
+				return None, f"`{nom}` : une liste non vide d'identifiants est attendue."
+			if len(v) > LIEUX_MAX:
+				return None, f"`{nom}` : {len(v)} lieux, au plus {LIEUX_MAX}."
+			if not all(isinstance(x, str) and ID_LIEU.match(x) for x in v):
+				return None, f"`{nom}` : identifiant de lieu invalide dans la liste."
+			v = list(dict.fromkeys(v))
+		elif typ == "json":
+			if not isinstance(v, dict):
+				return None, f"`{nom}` : un objet JSON est attendu."
+			if len(json.dumps(v, ensure_ascii=False).encode("utf-8")) > JSON_OCTETS_MAX:
+				return None, f"`{nom}` : plus de {JSON_OCTETS_MAX // 1000} Ko."
+		else:
+			return None, f"Type de paramètre inconnu : {typ}."
+		valeurs[nom] = v
+	return valeurs, None
+
+
+def spec_a_ecrire(outil: dict, valeurs: dict):
+	"""Contenu du fichier de spec d'un outil à paramètre `json`, ou None.
+	⚠️ La cité de la spec est la VILLE VALIDÉE, jamais celle que le JSON prétend : la spec
+	collée à la main ne peut pas viser une autre ville que celle affichée."""
+	nom = next((p["nom"] for p in outil.get("params") or [] if p["type"] == "json"), None)
+	if not nom:
+		return None
+	spec = dict(valeurs[nom])
+	if "ville" in valeurs:
+		spec["cite"] = valeurs["ville"]
+	return spec
 
 
 # ── Catalogue ────────────────────────────────────────────────────────────────
@@ -337,6 +416,50 @@ CATALOGUE = [
 			"référence documentées en tête de dev/audit_economy.py (A à F) — notamment « en "
 			"rayon » = sans le joueur ravitailleur.",
 	},
+	# ── /admin/lieux : outils PARAMÉTRÉS par la ville et les lignes affichées ──────────
+	# Absents de /admin/dev-tools (qui ne sait pas saisir de paramètre, cf. `catalogue_payload`).
+	# Tous `dump_frais` : le dump relu est écrit par le serveur à l'instant du lancement.
+	{
+		"id": "lieux_magasins_json",
+		"portee": "lieux",
+		"label": "🏪 Magasins depuis un JSON",
+		"params": [{"nom": "ville", "type": "ville"}, {"nom": "spec", "type": "json"}],
+		"argv_fn": lambda v, f: _py("gen_magasins.py", "--dump", f["dump"], "--spec", f["spec"]),
+		"dump_frais": True,
+		"sortie": "jsons/magasins_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/magasins_a_importer.json. Rien en base avant 📥 Importer.",
+		"description": "Un lieu + sa connexion par entrée de la spec, même forme que le lot de lieux "
+			"de l'éditeur. `cite` est forcée à la ville affichée. Refuse TOUT le lot sur un `_id` "
+			"déjà pris, une case absente, hors grille, de terrain ≠ 1 ou déjà porteuse du même "
+			"métier. « 📍 Compléter les positions » propose des cases de la région principale.",
+	},
+	{
+		"id": "lieux_progeniture",
+		"portee": "lieux",
+		"label": "👪 Progéniture des marchands affichés",
+		"params": [{"nom": "lieux", "type": "lieux"}],
+		"argv_fn": lambda v, f: _py("gen_progeniture.py", "--dump", f["dump"],
+									"--lieux", ",".join(v["lieux"])),
+		"dump_frais": True,
+		"sortie": "jsons/progeniture_lieux_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/progeniture_lieux_a_importer.json. Rien en base avant 📥 Importer.",
+		"description": "Pose un bloc `progeniture` sur la 1re entrée `pnj` des boutiques affichées "
+			"dont le tenancier est un `pnj:marchand_*` explicite. Prénoms et noms du répertoire du "
+			"recrutement, portraits empruntés à `characters/`, tirage déterministe par lieu. Une "
+			"famille déjà écrite n'est JAMAIS réécrite (le prénom fait l'id de la quête).",
+	},
+	{
+		"id": "lieux_audit_economy",
+		"portee": "lieux",
+		"label": "⚖️ Audit économique de la ville",
+		"params": [{"nom": "ville", "type": "ville"}],
+		"argv_fn": lambda v, f: _py("audit_economy.py", f["dump"], "--ville", v["ville"]),
+		"dump_frais": True,
+		"ecrit": "Régénère un dump (jsons/telluris-dump-*.json) et l'audite. Rien d'autre.",
+		"description": "Les trois indicateurs de l'audit économique, restreints aux ateliers de la "
+			"ville, aux recettes que l'un d'eux peut cuire et aux objets qu'elles visent — plus "
+			"une ligne par atelier (recettes, en rayon sans le joueur, matières manquantes).",
+	},
 	{
 		"id": "pytest",
 		"label": "🧪 Suite de tests pure (pytest)",
@@ -412,10 +535,21 @@ CATALOGUE = [
 _PAR_ID = OrderedDict((o["id"], o) for o in CATALOGUE)
 
 
-def catalogue_payload() -> list:
-	"""Le catalogue tel que l'écran l'affiche — SANS l'argv : le client n'a aucune raison de
-	connaître la ligne de commande, et la publier inviterait à la renvoyer."""
-	return [{k: v for k, v in outil.items() if k != "argv"} for outil in CATALOGUE]
+# Jamais publié : le client n'a aucune raison de connaître la ligne de commande, et la publier
+# inviterait à la renvoyer. (`argv_fn` est une fonction : pas du JSON, de toute façon.)
+_PRIVES = ("argv", "argv_fn")
+
+
+def catalogue_payload(portee: str | None = None) -> list:
+	"""Le catalogue tel qu'un écran l'affiche, sans `_PRIVES`.
+
+	`portee=None` → /admin/dev-tools : les seules entrées SANS `params` (l'écran ne sait pas en
+	saisir, les lancer sans valeur les ferait refuser). `portee="lieux"` → /admin/lieux."""
+	if portee is None:
+		choisis = [o for o in CATALOGUE if not o.get("params")]
+	else:
+		choisis = [o for o in CATALOGUE if o.get("portee") == portee]
+	return [{k: v for k, v in o.items() if k not in _PRIVES} for o in choisis]
 
 
 # ── Exécution ────────────────────────────────────────────────────────────────
@@ -466,26 +600,50 @@ def _lire_sortie(run: dict) -> None:
 		run["fini"] = True
 
 
-def lancer(outil_id: str):
-	"""Démarre un outil. Renvoie `(run, erreur)` — `erreur` = `(code HTTP, message)`."""
+def lancer(outil_id: str, params=None, preparer=None, villes_connues=()):
+	"""Démarre un outil. Renvoie `(run, erreur)` — `erreur` = `(code HTTP, message)`.
+
+	Outil PARAMÉTRÉ : `params` est validé AVANT le verrou (un refus ne bloque personne), puis
+	`preparer(outil, valeurs)` — injecté par main.py, seul à toucher la base et le disque —
+	écrit le dump et la spec, et rend leurs chemins RELATIFS à la racine, que `argv_fn` place.
+	⚠️ La préparation a lieu SOUS le verrou et APRÈS le contrôle « déjà en cours » : on n'écrit
+	pas un dump de plusieurs Mo pour se voir refuser le lancement."""
 	global _RUN
 	outil = _PAR_ID.get(outil_id)
 	if not outil:
 		return None, (404, f"Outil inconnu : {outil_id}")
+	valeurs, refus = valider_params(outil, params, villes_connues)
+	if refus:
+		return None, (422, refus)
+	if outil.get("argv_fn") and preparer is None:
+		return None, (500, "Cet outil exige une préparation (dump, spec) que l'appelant ne fournit pas.")
 	with _VERROU:
 		if _RUN is not None and not _RUN["fini"]:
 			return None, (409, f"« {_RUN['label']} » est encore en cours.")
+		fichiers = {}
+		if outil.get("argv_fn"):
+			try:
+				fichiers = preparer(outil, valeurs) or {}
+			except Exception as err:
+				return None, (500, f"Préparation impossible : {err}")
+			argv = outil["argv_fn"](valeurs, fichiers)
+		else:
+			argv = outil["argv"]
+		# ⚠️ Créé APRÈS la préparation : `debut` sert à dater le fichier produit (`sortie_fraiche`),
+		# le dump qu'on vient d'écrire ne doit pas passer pour la sortie du run.
 		run = _nouvelle_execution(outil, f"{outil_id}-{int(time.time() * 1000)}")
 		# ⚠️ Environnement : dans une image slim la locale est POSIX, donc le stdout d'un fils
 		# redirigé vers un tube s'encode en ASCII — le premier `print` accentué (tous les
 		# scripts du projet parlent français) lèverait un UnicodeEncodeError et l'outil
 		# semblerait planter tout seul. PYTHONIOENCODING ferme ce cas.
 		env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
-		_emettre(run, "$ " + " ".join(outil["argv"]))
+		for cle, chemin in fichiers.items():
+			_emettre(run, f"# {cle} écrit par le serveur : {chemin}")
+		_emettre(run, "$ " + " ".join(argv))
 		_emettre(run, "")
 		try:
 			run["proc"] = subprocess.Popen(
-				outil["argv"],                 # LISTE : aucun shell, rien n'est interprété
+				argv,                          # LISTE : aucun shell, rien n'est interprété
 				cwd=RACINE,
 				stdout=subprocess.PIPE,
 				stderr=subprocess.STDOUT,      # un seul flux : l'ordre des lignes est celui du script
@@ -496,7 +654,7 @@ def lancer(outil_id: str):
 				env=env,
 			)
 		except FileNotFoundError:
-			_emettre(run, f"[introuvable] {outil['argv'][0]} — cet exécutable n'existe pas "
+			_emettre(run, f"[introuvable] {argv[0]} — cet exécutable n'existe pas "
 				"dans le conteneur.")
 			run["fini"], run["code"] = True, 127
 			_RUN = run
@@ -534,6 +692,32 @@ def journal(offset: int = 0) -> dict:
 		"fini": run["fini"],
 		"code": run["code"],
 	}
+
+
+def sortie_fraiche(outil_id: str, mtime_fn=os.path.getmtime):
+	"""Chemin RELATIF du fichier produit par le DERNIER run de cet outil — seulement s'il a fini
+	en code 0 et que le fichier est plus récent que son départ. `(chemin, None)` ou
+	`(None, (code HTTP, message))`.
+
+	⚠️ Sans ce contrôle, 📥 Importer enverrait le fichier d'un run PRÉCÉDENT : un générateur qui
+	refuse le lot ou n'a rien à écrire laisse l'ancien fichier en place — et l'import est un PUT
+	complet (CLAUDE.md §11)."""
+	outil = _PAR_ID.get(outil_id)
+	if not outil or not outil.get("sortie"):
+		return None, (404, "Cet outil ne produit aucun fichier à importer.")
+	run = _RUN
+	if run is None or run.get("outil") != outil_id or not run.get("fini"):
+		return None, (409, "Aucun run terminé de cet outil.")
+	if run.get("code") != 0:
+		return None, (409, f"Le dernier run a échoué (code {run.get('code')}) : rien à importer.")
+	chemin = outil["sortie"]
+	try:
+		mtime = mtime_fn(os.path.join(RACINE, chemin))
+	except OSError:
+		return None, (404, f"{chemin} n'a pas été écrit.")
+	if mtime < run["debut"]:
+		return None, (409, f"{chemin} date d'avant ce run : le générateur n'a rien écrit.")
+	return chemin, None
 
 
 def arreter() -> bool:

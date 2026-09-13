@@ -1,0 +1,329 @@
+{#
+  Mode « Lieux » — le CSS PARTAGÉ (fiche, formulaire de lieu, éditeurs JSON, formulaire de
+  connexion). Inclus DANS le <style> de la page hôte : pas de balise ici.
+  ⚠️ S'appuie sur les variables et les styles de base de l'éditeur (--gold, --bronze, --parch*,
+  .card, .card-title, .btn, .btn-inline, label, select, input) : une page hôte les redéfinit.
+#}
+	/* ── Fiche du lieu (overlay, thème parchemin, réplique play_town) ── */
+	#lieu-fiche-overlay {
+		position: fixed; inset: 0; z-index: 200;
+		display: flex; align-items: center; justify-content: center;
+		background: rgba(0,0,0,0.65); padding: 20px;
+	}
+	#lieu-fiche-overlay.lieu-fiche-hidden { display: none; }
+	#lieu-fiche-overlay .board-panel {
+		background: var(--parch); color: var(--ink);
+		border: 4px double var(--bronze); border-radius: 8px;
+		box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+		width: min(1000px, 100%); max-height: 92vh; overflow-y: auto;
+		padding: 14px; font-family: Georgia, serif;
+	}
+	#lieu-fiche-overlay .sell-topbar {
+		display: flex; align-items: center; gap: 10px;
+		border-bottom: 2px solid var(--bronze); padding-bottom: 8px; margin-bottom: 12px;
+	}
+	#lieu-fiche-overlay .sell-topbar h2 {
+		font-family: 'Cinzel', Georgia, serif; color: var(--gold); font-size: 1.4rem; flex: 1;
+	}
+	#lieu-fiche-overlay .close-sheet-btn {
+		margin-left: auto; background: var(--parch2); color: var(--danger);
+		border: 1px solid var(--bronze); border-radius: 5px; padding: 6px 12px;
+		cursor: pointer; font-family: Georgia, serif; font-size: .85rem;
+	}
+	#lieu-fiche-overlay .close-sheet-btn:hover { background: #fff; }
+	#lieu-fiche-overlay .lf-body {
+		display: grid; grid-template-columns: 1fr 260px; gap: 14px; align-items: start;
+	}
+	@media (max-width: 720px) { #lieu-fiche-overlay .lf-body { grid-template-columns: 1fr; } }
+	#lieu-fiche-overlay .lf-map-scroll {
+		max-height: 60vh; overflow: auto; border: 2px solid var(--bronze); border-radius: 6px; background: #0002;
+	}
+	#lieu-fiche-overlay .lf-img { display: block; max-width: none; }
+	#lieu-fiche-overlay .lf-img-fit { display: block; width: 100%; height: auto; }
+	#lieu-fiche-overlay .lf-noimg, #lieu-fiche-overlay .lf-empty {
+		color: #6b5a3a; font-style: italic; padding: 12px;
+	}
+	#lieu-fiche-overlay .lf-sublocs {
+		border: 2px solid var(--bronze); border-radius: 6px; background: var(--parch2); padding: 8px;
+	}
+	#lieu-fiche-overlay .lf-sublocs h3 {
+		font-family: 'Cinzel', Georgia, serif; color: var(--gold); font-size: 1rem; margin-bottom: 8px;
+	}
+	/* Deuxième section (PNJ) : on la décolle de la liste des lieux au-dessus. */
+	#lieu-fiche-overlay .lf-sublocs h3.lf-h3-suite {
+		margin-top: 14px; border-top: 1px solid var(--bronze); padding-top: 10px;
+	}
+	#lieu-fiche-overlay .lf-sublist { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+	#lieu-fiche-overlay .lf-subitem { list-style: none; }
+	#lieu-fiche-overlay .lf-subbtn {
+		display: block; width: 100%; text-align: left; cursor: pointer;
+		background: var(--parch3); color: var(--ink); border: 1px solid var(--bronze);
+		border-radius: 5px; padding: 6px 10px; font-family: Georgia, serif; font-size: .9rem;
+		transition: background .12s, border-color .12s;
+	}
+	#lieu-fiche-overlay .lf-subbtn:hover {
+		background: var(--gold2); border-color: var(--gold); color: var(--ink);
+	}
+	/* PNJ du lieu : un bouton par PNJ (vignette + nom) quand il a un portrait,
+	   une simple ligne grisée sinon — le clic remplace l'image du lieu par le portrait. */
+	#lieu-fiche-overlay .lf-pnjbtn {
+		display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+	}
+	#lieu-fiche-overlay .lf-pnjbtn.lf-pnjbtn-on { cursor: pointer; }
+	#lieu-fiche-overlay .lf-pnjbtn-off {
+		cursor: default; opacity: .65;
+	}
+	#lieu-fiche-overlay .lf-pnjbtn-off:hover {
+		background: var(--parch3); border-color: var(--bronze); color: var(--ink);
+	}
+	#lieu-fiche-overlay .lf-pnj-thumb {
+		width: 34px; height: 34px; object-fit: cover; flex: 0 0 auto;
+		border: 1px solid var(--bronze); border-radius: 4px; background: #0002;
+	}
+	#lieu-fiche-overlay .lf-pnj-nom { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+	#lieu-fiche-overlay .lf-pnj-sansportrait {
+		display: block; font-size: .75rem; color: #6b5a3a; font-style: italic;
+	}
+	#lieu-fiche-overlay .lf-backbtn {
+		display: inline-block; margin-bottom: 8px; cursor: pointer;
+		background: var(--parch3); color: var(--ink); border: 1px solid var(--bronze);
+		border-radius: 5px; padding: 6px 12px; font-family: Georgia, serif; font-size: .9rem;
+	}
+	#lieu-fiche-overlay .lf-backbtn:hover { background: var(--gold2); border-color: var(--gold); }
+	#lieu-fiche-overlay .lf-portrait-nom {
+		font-family: 'Cinzel', Georgia, serif; color: var(--gold); margin-bottom: 6px;
+	}
+
+	/* ── Création d'un sous-lieu (overlay, thème admin sombre) ──
+	   z-index au-dessus de la fiche : Échap doit fermer celui-ci en premier. */
+	#lieu-add-overlay {
+		position: fixed; inset: 0; z-index: 300;
+		display: flex; align-items: flex-start; justify-content: center;
+		background: rgba(0,0,0,0.72); padding: 24px 12px; overflow-y: auto;
+	}
+	#lieu-add-overlay.la-hidden { display: none; }
+	.la-panel {
+		background: var(--panel); border: 1px solid var(--accent); border-radius: 6px;
+		box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+		width: min(580px, 100%); padding: 18px; margin: auto 0;
+	}
+	.la-topbar {
+		display: flex; align-items: center; gap: 10px;
+		border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 14px;
+	}
+	.la-topbar h2 {
+		flex: 1; font-family: 'Cinzel', serif; font-size: 0.9rem;
+		letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase;
+	}
+	.la-field { margin-bottom: 12px; }
+	.la-field > label { margin-bottom: 4px; }
+	.la-row { display: flex; gap: 8px; align-items: flex-end; }
+	.la-row > * { min-width: 0; }
+	.la-check {
+		display: flex; align-items: center; gap: 6px;
+		font-size: 0.68rem; color: var(--muted); cursor: pointer; margin: 4px 0;
+	}
+	.la-check input { cursor: pointer; }
+	.la-readonly {
+		font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+		color: var(--accent2); background: #0d0f14;
+		border: 1px dashed var(--border); border-radius: 4px;
+		padding: 6px 8px; word-break: break-all;
+	}
+	.la-thumb {
+		display: block; max-width: 100%; max-height: 120px; margin-top: 6px;
+		border: 1px solid var(--border); border-radius: 4px; background: #0d0f14;
+	}
+	.la-warn { color: var(--danger); font-size: 0.66rem; margin-top: 4px; min-height: 1em; }
+	.la-preview {
+		background: #0d0f14; border: 1px solid var(--border); border-radius: 4px;
+		padding: 8px; font-size: 0.66rem; color: var(--muted);
+		max-height: 200px; overflow: auto; white-space: pre; margin-bottom: 12px;
+	}
+	.la-actions { display: flex; gap: 8px; }
+	/* Listes à cocher du formulaire de lieu : capacités et écurie. */
+	.nl-caps {
+		border: 1px solid var(--border); border-radius: 4px;
+		max-height: 190px; overflow-y: auto;
+	}
+	.nl-cap {
+		display: flex; align-items: flex-start; gap: 6px;
+		padding: 4px 6px; font-size: 0.68rem;
+		border-bottom: 1px solid rgba(255,255,255,0.05);
+	}
+	.nl-cap:last-child { border-bottom: none; }
+	.nl-cap input { margin-top: 2px; cursor: pointer; }
+	.nl-cap input:disabled { cursor: default; }
+	.nl-cap .t { flex: 1; min-width: 0; }
+	.nl-cap .t b { color: var(--text); font-weight: normal; }
+	.nl-cap .n { display: block; color: #888; font-size: 0.62rem; line-height: 1.35; }
+	/* Capacité acquise par la catégorie : la case est cochée mais inopérante. */
+	.nl-cap.par-categorie { opacity: 0.75; }
+	.nl-cap.par-categorie .t b::after {
+		content: " (par la catégorie)"; color: var(--accent2); font-size: 0.62rem;
+	}
+	/* ── PNJ du lieu : une carte repliable par entrée `pnj`, dans l'ordre de la liste ── */
+	#lieu-add-overlay .la-panel { width: min(760px, 100%); }
+	.nlp-note { font-size: 0.64rem; color: #888; line-height: 1.4; }
+	.nlp-note i { font-style: normal; color: var(--accent2); }
+	#nl-pnj-liste { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; }
+	.nlp-vide {
+		padding: 8px; font-size: 0.66rem; color: #777;
+		border: 1px dashed var(--border); border-radius: 4px;
+	}
+	.nlp-carte { border: 1px solid var(--border); border-radius: 4px; background: #0d0f14; }
+	.nlp-carte.ouverte { border-color: var(--accent); }
+	.nlp-carte.inerte { border-style: dashed; }
+	.nlp-entete { display: flex; align-items: center; gap: 6px; padding: 4px 6px; }
+	.nlp-ordre { display: flex; flex-direction: column; }
+	.nlp-ordre button, .nlp-x {
+		background: none; border: none; color: var(--muted); cursor: pointer;
+		font-size: 0.62rem; line-height: 1; padding: 1px 3px;
+	}
+	.nlp-ordre button:disabled { opacity: 0.25; cursor: default; }
+	.nlp-ordre button:hover:not(:disabled), .nlp-x:hover { color: var(--accent); }
+	.nlp-rang {
+		font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+		color: var(--accent2); min-width: 1.2em; text-align: center;
+	}
+	.nlp-vignette {
+		width: 34px; height: 34px; object-fit: cover; flex: 0 0 auto;
+		border: 1px solid var(--border); border-radius: 3px;
+	}
+	span.nlp-vignette { display: flex; align-items: center; justify-content: center; color: #555; font-size: 0.7rem; }
+	.nlp-titre {
+		flex: 1; min-width: 0; text-align: left; cursor: pointer;
+		background: none; border: none; color: var(--text); padding: 2px 0; font: inherit;
+	}
+	.nlp-titre b { display: block; font-weight: normal; font-size: 0.72rem; overflow-wrap: anywhere; }
+	.nlp-titre .nlp-id {
+		display: block; font-family: 'Share Tech Mono', monospace;
+		font-size: 0.6rem; color: #777; overflow-wrap: anywhere;
+	}
+	.nlp-badges { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; }
+	.nlp-badge {
+		font-size: 0.6rem; padding: 1px 5px; border-radius: 8px; white-space: nowrap;
+		border: 1px solid var(--border); color: var(--muted);
+	}
+	.nlp-badge.nlp-si { color: var(--accent2); border-color: var(--accent2); }
+	.nlp-badge.nlp-alerte { color: var(--danger); border-color: var(--danger); }
+	.nlp-corps { padding: 4px 10px 10px; border-top: 1px solid var(--border); }
+	.nlp-corps > label { margin-top: 8px; }
+	.nlp-proba { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; }
+	.nlp-proba input[type=range] { flex: 1; min-width: 0; }
+	.nlp-proba input[type=number] { width: 80px; margin-bottom: 0; }
+	.nlp-cond-tete { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-top: 8px; }
+	.nlp-mini { font-size: 0.6rem; }
+	.nlp-clauses { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; align-items: stretch; }
+	.nlp-clauses > .nlp-mini { align-self: flex-start; }
+	.nlp-clauses .nlp-clauses { margin-left: 10px; padding-left: 8px; border-left: 2px solid var(--border); }
+	.nlp-clause { border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 4px 6px; }
+	.nlp-clause-json { border-style: dashed; }
+	.nlp-clause-tete { display: flex; align-items: center; gap: 6px; font-size: 0.64rem; color: var(--muted); }
+	.nlp-clause-tete select { width: auto; margin-bottom: 0; }
+	.nlp-clause-tete .nlp-aide { flex: 1; min-width: 0; color: #777; }
+	.nlp-liant { font-family: 'Share Tech Mono', monospace; color: var(--accent2); min-width: 2em; }
+	.nlp-sousfiltres {
+		display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+		gap: 4px 8px; margin-top: 4px;
+	}
+	.nlp-sf { display: flex; flex-direction: column; font-size: 0.6rem; color: #888; margin: 0; }
+	.nlp-sf input, .nlp-sf select { margin-bottom: 0; }
+	.nlp-json { width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 0.66rem; margin-top: 4px; }
+	.nlp-autres { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+	.nlp-lien {
+		background: none; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;
+		color: var(--text); font-size: 0.64rem; padding: 2px 6px;
+	}
+	.nlp-lien:hover { border-color: var(--accent); color: var(--accent); }
+	.nlp-lien span { color: #888; }
+	.nlp-pied { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+	/* Éditeurs JSON d'une connexion (panneau Lieux) — overlay fixe à droite, calqué sur
+	   `#editor-card` d'admin_table.html : même géométrie, même ombre, même ✕. La carte et
+	   le panneau restent utilisables dessous (ce n'est PAS un modal à backdrop, contrairement
+	   à #lieu-fiche-overlay) — on édite un doc en gardant la grille sous les yeux. */
+	#lj-overlay {
+		position: fixed; top: 70px; right: 14px; bottom: 14px;
+		width: min(460px, 94vw); z-index: 60;
+		display: flex; flex-direction: column; overflow: auto;
+		box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+	}
+	#lj-overlay.lj-hidden { display: none; }
+	.lj-title { display: flex; align-items: flex-start; gap: 10px; }
+	.lj-title .card-title { flex: 1; margin-bottom: 0; overflow-wrap: anywhere; }
+	.lj-close {
+		background: none; border: none; color: var(--muted);
+		font-size: 1rem; line-height: 1; cursor: pointer; padding: 2px 6px;
+	}
+	.lj-close:hover { color: var(--danger); }
+	.lj-desc { font-size: 0.66rem; color: #9aa3b2; line-height: 1.5; margin: 8px 0 4px; }
+	/* Les deux éditeurs se partagent la hauteur restante de l'overlay. */
+	#lj-body { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+	.lj-head {
+		display: flex; align-items: center; gap: 6px;
+		font-size: 0.64rem; color: var(--accent); margin: 6px 0 4px;
+	}
+	.lj-head span { flex: 1; overflow-wrap: anywhere; }
+	.lj-area {
+		width: 100%; flex: 1 1 auto; min-height: 130px; resize: vertical;
+		background: #0d0f14; border: 1px solid var(--border); border-radius: 4px;
+		color: var(--text); font-family: 'Share Tech Mono', monospace;
+		font-size: 0.64rem; padding: 6px; outline: none;
+	}
+	.lj-area:focus { border-color: var(--accent); }
+	.lj-msg { font-size: 0.62rem; min-height: 1em; margin-top: 3px; }
+
+	/* Outil de repositionnement : le bouton armé et sa consigne. */
+	.lj-repos-on { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
+	.lj-repos-hint {
+		font-size: 0.62rem; color: var(--accent2); line-height: 1.4;
+		border: 1px dashed var(--accent2); border-radius: 4px; padding: 4px 6px; margin-bottom: 4px;
+	}
+
+	/* ── Formulaire d'une CONNEXION (panneau Lieux) ──
+	   Même géométrie que #lj-overlay : panneau fixe à droite et NON un modal à backdrop.
+	   Ce n'est pas cosmétique — la carte doit rester cliquable dessous, c'est la condition
+	   de la visée 🎯. Les deux panneaux se partagent la place : ouvrir l'un ferme l'autre. */
+	#conn-overlay {
+		position: fixed; top: 70px; right: 14px; bottom: 14px;
+		width: min(460px, 94vw); z-index: 60;
+		display: flex; flex-direction: column; overflow: auto;
+		box-shadow: -6px 0 28px rgba(0,0,0,0.55);
+	}
+	#conn-overlay.cx-hidden { display: none; }
+	/* Visée armée : le panneau recouvre près de la moitié de la carte en largeur, or c'est
+	   la carte qu'on doit pouvoir cliquer. Il s'efface donc et LAISSE PASSER les clics — le
+	   canvas est dessous, `pointer-events:none` les lui rend. ⚠️ Aucun enfant ne rouvre les
+	   siens (CLAUDE.md §15) : c'est voulu ici, mais ça rend le ✕ de la visée inerte le temps
+	   du geste — d'où le rappel d'Échap dans la barre de statut. */
+	#conn-overlay.cx-viser { opacity: 0.3; pointer-events: none; }
+	/* Le formulaire est plus long que le panneau : son en-tête reste visible en défilant —
+	   le ✕ est la seule sortie à la souris, il ne doit pas partir en haut de l'écran.
+	   ⚠️ `top` négatif + `padding-top` : le scrollport commence au bord du padding de .card,
+	   un `top:0` laisserait une bande de 16 px par laquelle le contenu défilerait à nu. */
+	#conn-overlay .lj-title {
+		position: sticky; top: -16px; z-index: 2;
+		background: var(--panel); margin-top: -16px; padding: 16px 0 6px;
+	}
+	.cx-noeud {
+		border: 1px solid var(--border); border-radius: 4px;
+		padding: 8px; margin-bottom: 10px;
+	}
+	.cx-noeud > h3 {
+		font-size: 0.66rem; color: var(--accent); font-weight: normal;
+		text-transform: uppercase; letter-spacing: 0.08em;
+		margin-bottom: 6px; overflow-wrap: anywhere;
+	}
+	.cx-pos { display: flex; gap: 6px; align-items: flex-end; }
+	.cx-pos > div { flex: 0 0 70px; min-width: 0; }
+	.cx-pos input[type=number] { width: 100%; margin-bottom: 0; }
+	.cx-hint {
+		font-size: 0.62rem; color: var(--muted); line-height: 1.4;
+		margin-top: 4px; min-height: 1em; overflow-wrap: anywhere;
+	}
+	.cx-hint.ko { color: var(--danger); }
+	.cx-hint.ok { color: var(--accent2); }
+	/* Visée armée : même signal que .lj-repos-on, dont elle emprunte le sens. */
+	#cx-visee-btn.cx-visee { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
+	#conn-overlay input[readonly] { opacity: 0.65; cursor: default; }

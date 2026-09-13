@@ -1,0 +1,132 @@
+[
+  {
+    "_id": "link:bastion_bureau_maitre_to_bastion_comptoir",
+    "_rev": "9-08ba552e750db7fac80d9060908a0b2f",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "redescendre au comptoir"
+      },
+      {
+        "lieu": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "monter l'escalier du fond"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:bastion_comptoir_to_bastion_interieur",
+    "_rev": "6-aa7fdd815e1d646a7068a2938f53f210",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_bastion_de_l_yonne_interieur",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "retourner dans la salle commune"
+      },
+      {
+        "lieu": "lieu:le_bastion_de_l_yonne_comptoir",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "s'approcher du comptoir"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:guilde01_to_auxerre",
+    "_rev": "2-5a0dc449e23a6cc272fc6cabc9920d82",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:auxerre",
+        "pos": [
+          26,
+          22
+        ]
+      },
+      {
+        "lieu": "lieu:le_bastion_de_l_yonne",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:guilde01_to_guilde_ext",
+    "_rev": "2-0cd19f82ee4bebde81b84296d7c1b59e",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:le_bastion_de_l_yonne_interieur",
+        "pos": [
+          0,
+          0
+        ]
+      },
+      {
+        "lieu": "lieu:le_bastion_de_l_yonne",
+        "pos": [
+          0,
+          0
+        ],
+        "label": "sortir dans la rue"
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier",
+      "status": "ouvert"
+    }
+  },
+  {
+    "_id": "link:guilde_aventurier_exterieur01_to_lutecia",
+    "_rev": "1-55eb7d42bdee2868105755c8ae1e1afb",
+    "type": "connection",
+    "nodes": [
+      {
+        "lieu": "lieu:lutecia",
+        "pos": [
+          34,
+          20
+        ]
+      },
+      {
+        "lieu": "lieu:le_grand_relais_des_frontieres_exterieur",
+        "pos": [
+          0,
+          0
+        ]
+      }
+    ],
+    "metadata": {
+      "type": "guilde_aventurier_exterieur",
+      "status": "ouvert"
+    }
+  }
+]

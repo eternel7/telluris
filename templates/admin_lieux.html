@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+	<style>
+		/* Palette de l'éditeur de carte : les overlays PARTAGÉS (part-lieux-css.html) s'appuient
+		   sur --parch*, --gold*, --bronze et --ink. */
+		:root {
+			--bg: #0d0f14;
+			--panel: #141720;
+			--border: #2a3040;
+			--accent: #c8a84b;
+			--accent2: #4b8fc8;
+			--danger: #c84b4b;
+			--success: #4bc87a;
+			--text: #fff;
+			--muted: #9aa3b2;
+			--ink: #0e0b08;
+			--parch: #f5edd8;
+			--parch2: #eddfc0;
+			--parch3: #ffffff;
+			--gold: #8a651a;
+			--gold2: #f0c04a;
+			--gold3: #e8a020;
+			--bronze: #704d29;
+		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		/* ⚠️ Un `display` d'auteur l'emporterait sur le [hidden] du navigateur (boutons, cartes). */
+		[hidden] { display: none !important; }
+		body {
+			background: var(--bg); color: var(--text);
+			font-family: 'Share Tech Mono', monospace;
+			min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+		}
+		header {
+			width: 100%; padding: 18px 32px; border-bottom: 1px solid var(--border);
+			background: linear-gradient(90deg, #0d0f14 0%, #141a24 100%);
+			display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		}
+		header h1 { font-size: 1.3rem; letter-spacing: 0.12em; color: var(--accent); }
+		header a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+		header a:hover { color: var(--accent); }
+		.main { width: 100%; max-width: none; padding: 24px; }
+		.card {
+			background: var(--panel); border: 1px solid var(--border);
+			border-radius: 8px; padding: 20px; margin-bottom: 16px;
+		}
+		.card-title {
+			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
+			text-transform: uppercase; margin-bottom: 6px;
+		}
+		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+		code { color: var(--accent2); }
+
+		/* Champs de formulaire — les overlays partagés les attendent tels que l'éditeur les pose. */
+		label { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; letter-spacing: 0.05em; }
+		select {
+			width: 100%; background: #0d0f14; border: 1px solid var(--border); border-radius: 4px;
+			color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.85rem;
+			padding: 8px; outline: none; cursor: pointer; margin-bottom: 14px;
+		}
+		select:focus { border-color: var(--accent); }
+		input[type="number"], input[type="text"] {
+			width: 100%; background: #0d0f14; border: 1px solid var(--border); border-radius: 4px;
+			color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.85rem;
+			padding: 7px 9px; outline: none;
+		}
+		input[type="number"]:focus, input[type="text"]:focus { border-color: var(--accent); }
+
+		.btn {
+			display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+			padding: 9px 16px; border-radius: 6px;
+			font-family: inherit; font-size: 0.82rem; letter-spacing: 0.05em;
+			text-decoration: none; cursor: pointer; transition: all 0.2s;
+			border: 1px solid var(--accent); background: rgba(200,168,75,0.1); color: var(--accent);
+		}
+		.btn:hover:not(:disabled) { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
+		.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+		.btn.secondary { border-color: var(--accent2); background: rgba(75,143,200,0.1); color: var(--accent2); }
+		.btn.secondary:hover:not(:disabled) { background: rgba(75,143,200,0.22); }
+		.btn.danger { border-color: var(--danger); background: rgba(200,75,75,0.1); color: var(--danger); }
+		.btn.danger:hover:not(:disabled) { background: rgba(200,75,75,0.22); }
+		.btn-inline { padding: 2px 8px; height: 27px; border-radius: 4px; }
+		.la-actions .btn { flex: 1; }
+		.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+
+		.status { font-size: 0.78rem; margin-top: 10px; min-height: 1.2em; color: var(--muted); }
+		.status span { color: var(--accent2); }
+		.status.ok { color: var(--success); }
+		.status.err { color: var(--danger); }
+		.status.run { color: var(--accent); }
+
+		{% include "part-lieux-css.html" %}
+
+		/* ── Ville ── */
+		.ville-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+		.ville-row select { flex: 1 1 320px; width: auto; margin-bottom: 0; min-width: 220px; }
+
+		/* ── Colonnes (glisser-déposer pour réordonner), comme /admin/table ── */
+		.cols { display: flex; flex-wrap: wrap; gap: 8px; }
+		.cols-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 10px; }
+		.col-item {
+			display: inline-flex; align-items: center; gap: 6px;
+			padding: 3px 9px; border: 1px solid var(--border); border-radius: 6px;
+			background: #0f131b; transition: border-color 0.15s, opacity 0.15s;
+		}
+		.col-item.dragging { opacity: 0.4; }
+		.col-item.dragover { border-color: var(--accent); box-shadow: 0 0 8px rgba(200,168,75,0.3); }
+		.col-item label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; margin: 0; cursor: pointer; }
+		.col-item input { accent-color: var(--accent); }
+		.drag-handle { cursor: grab; color: var(--muted); font-size: 0.9rem; }
+
+		/* ── Barre au-dessus du tableau : compteur à gauche, outils à DROITE ── */
+		.table-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+		.table-top .count { flex: 1; font-size: 0.72rem; color: var(--muted); }
+		.table-top select { width: auto; min-width: 260px; margin-bottom: 0; }
+
+		/* ── Tableau ── */
+		.table-wrap { overflow: auto; max-height: 68vh; border: 1px solid var(--border); border-radius: 6px; }
+		table { border-collapse: collapse; table-layout: fixed; width: max-content; min-width: 100%; font-size: 0.78rem; }
+		thead th {
+			position: sticky; top: 0; background: #11151e; z-index: 2;
+			text-align: left; color: var(--accent); font-weight: normal;
+			padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
+		}
+		.th-label { cursor: pointer; user-select: none; }
+		.th-label:hover { color: var(--text); }
+		.col-resizer { position: absolute; top: 0; right: 0; width: 7px; height: 100%; cursor: col-resize; }
+		.col-resizer:hover { background: var(--accent); opacity: 0.5; }
+		thead tr.filters th { top: 33px; background: #0f131b; padding: 4px 6px; }
+		.filter-input {
+			width: 100%; min-width: 90px; padding: 4px 6px; border: 1px solid var(--border);
+			border-radius: 4px; background: var(--bg); color: var(--text);
+			font-family: inherit; font-size: 0.72rem;
+		}
+		.filter-input:focus { outline: none; border-color: var(--accent); }
+		tbody td {
+			padding: 6px 10px; border-bottom: 1px solid #1b212c; vertical-align: top;
+			max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+		}
+		tbody tr:hover td { background: rgba(75,143,200,0.06); }
+		tbody tr.selected td { background: rgba(200,168,75,0.12); }
+		.muted-cell { color: var(--muted); font-style: italic; }
+		/* La 1re colonne : la ligne PARTAGÉE avec le mode Lieux de l'éditeur. Fixe à gauche au
+		   défilement horizontal, hors du choix des colonnes, ni triable ni filtrable. */
+		.ligne-col {
+			position: sticky; left: 0; z-index: 1; width: 340px; min-width: 340px;
+			background: var(--panel); white-space: normal !important; max-width: none !important;
+			font-size: 0.68rem; border-right: 1px solid var(--border);
+		}
+		thead th.ligne-col { z-index: 3; background: #11151e; }
+		thead tr.filters th.ligne-col { background: #0f131b; }
+		.ligne-col .lieux-ligne { margin-bottom: 0 !important; }
+
+		/* ── Panneau d'outil ── */
+		.outil-card { border: 1px solid var(--accent); border-radius: 6px; padding: 14px; margin-bottom: 12px; background: #10131b; }
+		.outil-head { display: flex; align-items: center; gap: 10px; }
+		.outil-head b { flex: 1; color: var(--accent); font-weight: normal; letter-spacing: 0.05em; }
+		.outil-close { background: none; border: none; color: var(--muted); font-size: 1rem; cursor: pointer; padding: 2px 6px; }
+		.outil-close:hover { color: var(--danger); }
+		.outil-info { margin-top: 8px; font-size: 0.76rem; line-height: 1.55; color: var(--muted); }
+		.outil-ecrit {
+			display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 4px;
+			border: 1px solid var(--border); background: #0f131b; color: var(--accent2); font-size: 0.74rem;
+		}
+		.outil-ecrit.danger { border-color: var(--danger); color: var(--danger); }
+		.param { margin-top: 12px; font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
+		.param b { color: var(--text); font-weight: normal; }
+		#p-json {
+			width: 100%; min-height: 180px; resize: vertical; margin-top: 6px;
+			background: #0d0f14; border: 1px solid var(--border); border-radius: 6px;
+			color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.74rem;
+			line-height: 1.45; padding: 10px; outline: none;
+		}
+		#p-json:focus { border-color: var(--accent); }
+		#outil-log {
+			height: 34vh; min-height: 180px; overflow: auto; margin-top: 10px;
+			background: #07090d; border: 1px solid var(--border); border-radius: 6px;
+			padding: 10px; font-family: 'Share Tech Mono', monospace;
+			font-size: 0.72rem; line-height: 1.45; color: #cfe3d0;
+			white-space: pre-wrap; word-break: break-word;
+		}
+		#outil-log:empty::before { content: 'Aucune sortie — ▶ Lancer.'; color: var(--muted); }
+		.progress { margin-top: 8px; height: 8px; overflow: hidden; background: #0d0f14; border: 1px solid var(--border); border-radius: 6px; }
+		.progress > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width .15s ease; }
+	</style>
+</head>
+<body>
+	<header>
+		<h1>🏘️ Gestion des lieux — administration</h1>
+		<a href="/admin">← Retour à l'administration</a>
+	</header>
+	<div class="main">
+		<div class="card">
+			<div class="card-title">Ville</div>
+			<div class="card-desc">
+				Les lieux reliés à la carte de la ville — une ligne par <strong>connexion</strong>, comme la
+				liste du mode Lieux de <code>/admin/editor</code>. La première colonne en reprend la ligne :
+				📄 Fiche, ✏️ Lieu, 🔗 Connexion, 🧾 JSON. Les <strong>🛠 Outils</strong> s'appliquent à la
+				ville choisie ou aux lignes <strong>affichées</strong> (filtres compris), sur un dump
+				régénéré au lancement.
+			</div>
+			<div class="ville-row">
+				<select id="ville-select">
+					<option value="" disabled selected>-- Choisir une ville --</option>
+					{% for v in villes %}<option value="{{ v._id }}">{{ v.label }} — {{ v._id }}</option>{% endfor %}
+				</select>
+				<button class="btn" type="button" id="recharger-btn">↻ Recharger</button>
+			</div>
+			<div class="status" id="page-status">Choisissez une ville.</div>
+		</div>
+
+		<div class="card" id="cols-card" hidden>
+			<div class="card-title">Colonnes</div>
+			<div class="cols-hint">Cochez pour afficher · glissez ⠿ pour réordonner · tirez la poignée droite d'un en-tête pour redimensionner. La colonne « Lieu » est fixe.</div>
+			<div class="cols" id="cols-box"></div>
+		</div>
+
+		<div class="card" id="table-card" hidden>
+			<div class="table-top">
+				<div class="count" id="row-count"></div>
+				<select id="outil-select" title="Outils de dev/ appliqués à la ville ou aux lignes affichées">
+					<option value="">🛠 Outils…</option>
+					{% for o in outils %}<option value="{{ o.id }}">{{ o.label }}</option>{% endfor %}
+				</select>
+			</div>
+
+			<div class="outil-card" id="outil-card" hidden>
+				<div class="outil-head">
+					<b id="outil-titre"></b>
+					<button type="button" class="outil-close" id="outil-fermer" title="Fermer le panneau (un run en cours continue)">✕</button>
+				</div>
+				<div class="outil-info" id="outil-desc"></div>
+				<span class="outil-ecrit" id="outil-ecrit"></span>
+
+				<div class="param" id="p-ville-bloc" hidden>Ville : <b id="p-ville"></b></div>
+				<div class="param" id="p-lieux-bloc" hidden>
+					Boutiques affichées avec un tenancier <code>pnj:marchand_*</code> explicite :
+					<b id="p-lieux-n">0</b> <span id="p-lieux-apercu"></span>
+				</div>
+				<div class="param" id="p-json-bloc" hidden>
+					Spec JSON — <code>cite</code> est forcée à la ville affichée ; une entrée sans
+					<code>pos</code> se complète par 📍.
+					<input type="file" id="p-json-file" accept=".json,application/json" hidden>
+					<textarea id="p-json" spellcheck="false" placeholder='{ "magasins": [ { "categorie": "auberge", "label": "…", "image": "auberge_europe01.png" } ] }'></textarea>
+					<div class="btn-row" style="margin-top:6px;">
+						<button class="btn secondary" type="button" id="p-json-file-btn">📁 Charger un fichier</button>
+						<button class="btn secondary" type="button" id="p-json-pos-btn">📍 Compléter les positions</button>
+					</div>
+					<div class="status" id="p-json-status"></div>
+				</div>
+
+				<div class="btn-row">
+					<button class="btn" type="button" id="outil-lancer">▶ Lancer</button>
+					<button class="btn danger" type="button" id="outil-arreter" disabled>✕ Arrêter</button>
+					<button class="btn secondary" type="button" id="outil-importer" hidden>📥 Importer</button>
+				</div>
+				<div class="status" id="outil-status"></div>
+				<div class="progress" id="import-progress" hidden><div id="import-bar"></div></div>
+				<pre id="outil-log"></pre>
+			</div>
+
+			<div class="table-wrap">
+				<table id="data-table">
+					<thead id="data-head"></thead>
+					<tbody id="data-body"></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+<!-- La règle de marche (deplacement.js) et le tracé des voies servent à proposer des cases
+     ACCESSIBLES : la région principale de la ville, jamais une règle recopiée ici. -->
+<script src="{{ url_for('scripts', path='nav.js') }}"></script>
+<script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
+<script src="{{ url_for('scripts', path='voies.js') }}"></script>
+<!-- Mode Lieux PARTAGÉ avec /admin/editor. ⚠️ AVANT le script de la page, qui déclare `LIEUX_HOTE`. -->
+{% include "part-lieux-js.html" %}
+<script>
+// ── Données du serveur ─────────────────────────────────────────────────────
+// Catalogue SANS argv (cf. utils/dev_tools.catalogue_payload).
+const OUTILS = {{ outils | tojson }};
+const PAR_ID = Object.fromEntries(OUTILS.map(o => [o.id, o]));
+const $ = id => document.getElementById(id);
+
+const LS_KEY = 'telluris.admin_lieux.v1';
+const DEFAULT_W = 150;
+// Colonnes tirées de la CONNEXION ; les autres sont les clés du doc lieu de destination.
+const COLS_LIEN = ['lieu', 'connexion', 'lien_type', 'lien_status', 'pos_ici', 'pos_la'];
+const COLS_DEFAUT = ['lieu', 'categorie', 'image', 'pnj', 'lien_type', 'pos_ici'];
+// Distance (Chebyshev) à une porte de boutique existante pour qu'une case soit « sur une rue
+// commerçante ». Au-delà, 📍 ne la propose qu'en dernier recours.
+const PROPOSITION_RAYON = 2;
+
+let villeId = '';
+let villeDoc = null;      // doc de la ville : cells, nav, dimensions
+let connexions = [];     // GET /api/lieu/{ville}/connections — nœuds enrichis `details`
+let columns = [], visible = [], sortCol = null, sortDir = 1, filters = {}, widths = {}, dragCol = null;
+
+// ── Contrat du mode Lieux partagé (clés : LIEUX_HOTE_REQUIS) ────────────────
+// Pas de carte ici : ni visée 🎯, ni repositionnement, ni création de lieu (aucune case choisie).
+const LIEUX_HOTE = {
+	lieuCourant: () => villeId,
+	caseCourante: () => null,
+	connexions: () => connexions,
+	grille: () => {
+		const cells = (villeDoc && Array.isArray(villeDoc.cells)) ? villeDoc.cells : [];
+		return { cells, cols: (cells[0] || []).length, rows: cells.length };
+	},
+	blocage: () => '',
+	apresEcriture: async () => { await chargerConnexions(); },
+	rendreListe: () => renderBody(),
+	statut: html => setStatusHtml(html),
+	fermerAutres: () => {},
+	visee: null,
+	repositionnement: null,
+};
+
+// ── Fonctions PURES (dev/test_gestion_lieux_client.js les extrait par nom) ──
+
+// Valeur d'une colonne pour une connexion vue depuis `ici` — SOURCE UNIQUE du rendu, du filtre
+// et du tri. Les colonnes de COLS_LIEN viennent de la connexion, les autres du lieu de destination.
+function valeurLigne(conn, col, ici) {
+	const nodes = (conn && conn.nodes) || [];
+	const noeudIci = nodes.find(n => n.lieu === ici) || null;
+	const dest = nodes.find(n => n.lieu !== ici) || nodes[0] || null;
+	const meta = (conn && conn.metadata) || {};
+	switch (col) {
+		case 'lieu': return dest ? dest.lieu : undefined;
+		case 'connexion': return conn ? conn._id : undefined;
+		case 'lien_type': return meta.type;
+		case 'lien_status': return meta.status;
+		case 'pos_ici': return noeudIci && noeudIci.pos ? noeudIci.pos : undefined;
+		case 'pos_la': return dest && dest.pos ? dest.pos : undefined;
+		default: return ((dest && dest.details) || {})[col];
+	}
+}
+
+// Toutes les colonnes : celles de la connexion en tête, puis l'union triée des clés des lieux.
+function colonnesDe(conns, ici) {
+	const cles = new Set();
+	(conns || []).forEach(c => {
+		const nodes = (c && c.nodes) || [];
+		const dest = nodes.find(n => n.lieu !== ici) || nodes[0];
+		Object.keys((dest && dest.details) || {}).forEach(k => cles.add(k));
+	});
+	COLS_LIEN.forEach(k => cles.delete(k));
+	return [...COLS_LIEN, ...[...cles].sort()];
+}
+
+// Les lieux des lignes données dont la 1re entrée `pnj` est un tenancier générique EXPLICITE —
+// ce que l'outil de progéniture sait servir (un tenancier implicite n'a pas d'entrée où poser
+// la famille). Dédoublonnés, ordre des lignes gardé.
+function lieuxMarchandsVisibles(conns, ici) {
+	const ids = [];
+	(conns || []).forEach(c => {
+		const nodes = (c && c.nodes) || [];
+		const dest = nodes.find(n => n.lieu !== ici);
+		const pnj = dest && dest.details && Array.isArray(dest.details.pnj) ? dest.details.pnj : [];
+		const e0 = pnj[0];
+		if (e0 && /^pnj:marchand_/.test(String(e0.character || '')) && !ids.includes(dest.lieu)) ids.push(dest.lieu);
+	});
+	return ids;
+}
+
+// Les portes posées sur la carte de `ici` : [{pos, categorie}].
+function portesDeVille(conns, ici) {
+	const portes = [];
+	(conns || []).forEach(c => {
+		const nodes = (c && c.nodes) || [];
+		const n = nodes.find(x => x.lieu === ici);
+		const dest = nodes.find(x => x.lieu !== ici);
+		if (n && Array.isArray(n.pos)) {
+			portes.push({ pos: [n.pos[0], n.pos[1]], categorie: (dest && dest.details && dest.details.categorie) || '' });
+		}
+	});
+	return portes;
+}
+
+function _posValide(pos) {
+	return Array.isArray(pos) && pos.length === 2 && pos.every(v => Number.isInteger(v) && v >= 0);
+}
+
+// Cases proposées pour `n` nouvelles portes. `region` = rangs de `voiesRegions` (index y*W+x) :
+// seules les cases de la région PRINCIPALE (rang 0) sont candidates — atteignables à pied
+// depuis l'essentiel de la carte, sous la règle de marche de deplacement.js.
+// Parmi elles, on préfère celles à ≤ `rayon` d'une porte de boutique (`ancres`) : une rue
+// commerçante plutôt qu'un champ hors les murs. Puis tirage « le plus loin » : la case la plus
+// éloignée des `repoussoirs` (portes du même métier, cases déjà proposées) ; à égalité, la plus
+// proche d'une boutique, puis l'ordre de lecture. Jamais sur un repoussoir. DÉTERMINISTE.
+function _proposerCases(region, W, ancres, repoussoirs, n, rayon) {
+	const cheb = (ax, ay, bx, by) => Math.max(Math.abs(ax - bx), Math.abs(ay - by));
+	const dMin = (x, y, pts) => pts.reduce((m, p) => Math.min(m, cheb(x, y, p[0], p[1])), Infinity);
+	const lesAncres = ancres || [];
+	const libres = [];
+	for (let i = 0; i < region.length; i++) if (region[i] === 0) libres.push([i % W, Math.floor(i / W)]);
+	const proches = lesAncres.length ? libres.filter(([x, y]) => dMin(x, y, lesAncres) <= rayon) : [];
+	const candidats = proches.length ? proches : libres;
+	const repousse = (repoussoirs || []).map(p => [p[0], p[1]]);
+	const choisis = [];
+	for (let k = 0; k < n; k++) {
+		let meilleur = null, score = null;
+		for (const [x, y] of candidats) {
+			const dr = dMin(x, y, repousse);
+			if (dr === 0) continue;
+			const da = lesAncres.length ? dMin(x, y, lesAncres) : 0;
+			if (meilleur === null || dr > score[0] || (dr === score[0] && da < score[1])) {
+				meilleur = [x, y];
+				score = [dr, da];
+			}
+		}
+		if (!meilleur) break;
+		choisis.push(meilleur);
+		repousse.push(meilleur);
+	}
+	return choisis;
+}
+
+// ── Valeurs : affichage / filtre / tri (comme /admin/table) ────────────────
+function fullText(v) {
+	if (v === undefined || v === null) return '';
+	return (typeof v === 'object') ? JSON.stringify(v) : String(v);
+}
+function cellText(v) { const s = fullText(v); return s.length > 80 ? s.slice(0, 77) + '…' : s; }
+function filterText(v) { return fullText(v).toLowerCase(); }
+function cmp(a, b) {
+	if (typeof a === 'number' && typeof b === 'number') return a - b;
+	return fullText(a).localeCompare(fullText(b), undefined, { numeric: true, sensitivity: 'base' });
+}
+function esc(s) {
+	return String(s == null ? '' : s)
+		.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ── Statuts ────────────────────────────────────────────────────────────────
+function setStatusOn(el, msg, kind) { el.textContent = msg; el.className = 'status' + (kind ? ' ' + kind : ''); }
+function setStatus(msg, kind) { setStatusOn($('page-status'), msg, kind); }
+// Les formulaires partagés écrivent un statut avec un `<span>` autour de l'`_id` (cf. l'éditeur).
+function setStatusHtml(html) { $('page-status').innerHTML = html; $('page-status').className = 'status ok'; }
+function detailErreur(data, code) {
+	const d = data && data.detail;
+	return typeof d === 'string' ? d : (d ? JSON.stringify(d) : String(code));
+}
+
+// ── Chargement ─────────────────────────────────────────────────────────────
+async function chargerVille() {
+	const id = $('ville-select').value;
+	if (!id) return;
+	// Les panneaux ouverts parlent des documents de la ville PRÉCÉDENTE.
+	closeLieuJson();
+	closeConnForm();
+	closeLieuFiche();
+	lieuxDocCache = {};
+	creationOptions = null;
+	villeId = id;
+	setStatus('Chargement…');
+	try {
+		const [rDoc, rConn] = await Promise.all([
+			fetch(`/api/lieu/${encodeURIComponent(id)}`),
+			fetch(`/api/lieu/${encodeURIComponent(id)}/connections`),
+		]);
+		if (!rDoc.ok || !rConn.ok) throw new Error(`HTTP ${rDoc.ok ? rConn.status : rDoc.status}`);
+		villeDoc = await rDoc.json();
+		connexions = (await rConn.json()) || [];
+	} catch (e) {
+		villeDoc = null;
+		connexions = [];
+		setStatus('Erreur de chargement : ' + e.message, 'err');
+	}
+	columns = colonnesDe(connexions, villeId);
+	visible = columns.filter(c => COLS_DEFAUT.includes(c));
+	restoreState();
+	$('cols-card').hidden = !connexions.length;
+	$('table-card').hidden = false;
+	renderCols(); renderHead(); renderBody();
+	persistState();
+	if (connexions.length || !villeDoc) {
+		const label = (villeDoc && villeDoc.label) || villeId;
+		if (villeDoc) setStatus(`${connexions.length} connexion(s) sur la carte de « ${label} ».`, 'ok');
+	} else {
+		setStatus('Aucune connexion sur cette carte.', 'err');
+	}
+}
+
+// Après une écriture : on relit les connexions SANS perdre colonnes, tri, filtres ni largeurs.
+async function chargerConnexions() {
+	if (!villeId) return;
+	try {
+		const r = await fetch(`/api/lieu/${encodeURIComponent(villeId)}/connections`);
+		if (!r.ok) throw new Error('HTTP ' + r.status);
+		connexions = (await r.json()) || [];
+	} catch (e) {
+		setStatus('Relecture des connexions impossible : ' + e.message, 'err');
+		return;
+	}
+	const toutes = colonnesDe(connexions, villeId);
+	const suite = columns.filter(c => toutes.includes(c));
+	toutes.forEach(c => { if (!suite.includes(c)) suite.push(c); });
+	columns = suite;
+	visible = columns.filter(c => visible.includes(c));
+	renderCols(); renderHead(); renderBody();
+	renderLieuJsonOverlay();   // le `_rev` a changé : l'overlay 🧾 se repeint depuis la relecture
+	persistState();
+}
+
+// ── Persistance (localStorage) ─────────────────────────────────────────────
+function lireEtat() {
+	try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return null; }
+}
+function persistState() {
+	try {
+		localStorage.setItem(LS_KEY, JSON.stringify({ ville: villeId, columns, visible, sortCol, sortDir, filters, widths }));
+	} catch (e) { /* navigation privée : on ignore */ }
+}
+// Réconcilie l'état mémorisé avec les colonnes réellement présentes pour CETTE ville.
+function restoreState() {
+	const s = lireEtat();
+	filters = {}; sortCol = null; sortDir = 1; widths = {};
+	if (!s) return;
+	const connues = new Set(columns);
+	const ordre = (s.columns || []).filter(c => connues.has(c));
+	columns.forEach(c => { if (!ordre.includes(c)) ordre.push(c); });
+	columns = ordre;
+	if (Array.isArray(s.visible)) {
+		const v = columns.filter(c => s.visible.includes(c));
+		if (v.length) visible = v;
+	}
+	sortCol = (s.sortCol && connues.has(s.sortCol)) ? s.sortCol : null;
+	sortDir = s.sortDir === -1 ? -1 : 1;
+	for (const k in (s.filters || {})) if (connues.has(k)) filters[k] = s.filters[k];
+	for (const k in (s.widths || {})) if (connues.has(k)) widths[k] = Number(s.widths[k]) || DEFAULT_W;
+}
+
+// ── Rendu : sélecteur de colonnes ──────────────────────────────────────────
+function renderCols() {
+	$('cols-box').innerHTML = columns.map(c => `<div class="col-item" draggable="true" data-col="${esc(c)}">
+			<span class="drag-handle" title="Glisser pour réordonner">⠿</span>
+			<label><input type="checkbox" data-col="${esc(c)}" ${visible.includes(c) ? 'checked' : ''}>${esc(c)}</label>
+		</div>`).join('');
+	$('cols-box').querySelectorAll('input[data-col]').forEach(cb => {
+		cb.addEventListener('change', () => {
+			const col = cb.dataset.col;
+			if (cb.checked) { if (!visible.includes(col)) visible.push(col); }
+			else visible = visible.filter(c => c !== col);
+			visible = columns.filter(c => visible.includes(c));
+			renderHead(); renderBody(); persistState();
+		});
+	});
+	$('cols-box').querySelectorAll('.col-item').forEach(it => {
+		it.addEventListener('dragstart', e => { dragCol = it.dataset.col; it.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+		it.addEventListener('dragend', () => {
+			it.classList.remove('dragging');
+			$('cols-box').querySelectorAll('.col-item').forEach(x => x.classList.remove('dragover'));
+		});
+		it.addEventListener('dragover', e => {
+			e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+			if (it.dataset.col !== dragCol) it.classList.add('dragover');
+		});
+		it.addEventListener('dragleave', () => it.classList.remove('dragover'));
+		it.addEventListener('drop', e => {
+			e.preventDefault(); it.classList.remove('dragover');
+			const rect = it.getBoundingClientRect();
+			if (dragCol && dragCol !== it.dataset.col) {
+				columns = columns.filter(c => c !== dragCol);
+				let idx = columns.indexOf(it.dataset.col);
+				if (idx < 0) idx = columns.length - 1;
+				columns.splice(e.clientX > rect.left + rect.width / 2 ? idx + 1 : idx, 0, dragCol);
+				visible = columns.filter(c => visible.includes(c));
+				renderCols(); renderHead(); renderBody(); persistState();
+			}
+			dragCol = null;
+		});
+	});
+}
+
+// ── Rendu : en-tête (tri, redimensionnement, filtres) ──────────────────────
+function renderHead() {
+	const ths = visible.map(c => {
+		const ind = sortCol === c ? (sortDir === 1 ? ' ▲' : ' ▼') : '';
+		return `<th data-col="${esc(c)}" style="width:${widths[c] || DEFAULT_W}px;position:sticky;">`
+			+ `<span class="th-label">${esc(c)}${ind}</span><div class="col-resizer" data-col="${esc(c)}"></div></th>`;
+	}).join('');
+	const filtres = visible.map(c =>
+		`<th><input class="filter-input" data-col="${esc(c)}" value="${esc(filters[c] || '')}" placeholder="filtrer…"></th>`).join('');
+	$('data-head').innerHTML = `<tr><th class="ligne-col">Lieu</th>${ths}</tr>`
+		+ `<tr class="filters"><th class="ligne-col"></th>${filtres}</tr>`;
+
+	$('data-head').querySelectorAll('.th-label').forEach(lbl => {
+		lbl.addEventListener('click', () => {
+			const col = lbl.closest('th').dataset.col;
+			if (sortCol === col) sortDir = -sortDir; else { sortCol = col; sortDir = 1; }
+			renderHead(); renderBody(); persistState();
+		});
+	});
+	$('data-head').querySelectorAll('.col-resizer').forEach(rz => {
+		rz.addEventListener('mousedown', e => {
+			e.preventDefault(); e.stopPropagation();
+			const col = rz.dataset.col, th = rz.closest('th');
+			const startX = e.clientX, startW = th.offsetWidth;
+			const onMove = ev => { const w = Math.max(40, startW + (ev.clientX - startX)); widths[col] = w; th.style.width = w + 'px'; };
+			const onUp = () => {
+				document.removeEventListener('mousemove', onMove);
+				document.removeEventListener('mouseup', onUp);
+				document.body.style.userSelect = '';
+				persistState();
+			};
+			document.body.style.userSelect = 'none';
+			document.addEventListener('mousemove', onMove);
+			document.addEventListener('mouseup', onUp);
+		});
+	});
+	// ⚠️ La frappe ne redessine QUE le corps : redessiner l'en-tête volerait le focus du filtre.
+	$('data-head').querySelectorAll('.filter-input').forEach(inp => {
+		inp.addEventListener('input', () => { filters[inp.dataset.col] = inp.value; renderBody(); persistState(); });
+	});
+}
+
+// Lignes affichées (filtres puis tri) — SOURCE UNIQUE du corps et des « lignes affichées »
+// qu'un outil reçoit.
+function lignesVisibles() {
+	let rows = connexions.slice();
+	for (const c of visible) {
+		const f = (filters[c] || '').trim().toLowerCase();
+		if (f) rows = rows.filter(r => filterText(valeurLigne(r, c, villeId)).includes(f));
+	}
+	if (sortCol) rows.sort((a, b) => sortDir * cmp(valeurLigne(a, sortCol, villeId), valeurLigne(b, sortCol, villeId)));
+	return rows;
+}
+
+function renderBody() {
+	const rows = lignesVisibles();
+	$('data-body').innerHTML = rows.map(conn => {
+		const ouvert = lieuxJsonOuvert === conn._id;
+		const tds = visible.map(c => {
+			const v = valeurLigne(conn, c, villeId);
+			const vide = v === undefined || v === null || v === '';
+			return `<td${vide ? ' class="muted-cell"' : ''} title="${esc(fullText(v))}">${esc(cellText(v))}</td>`;
+		}).join('');
+		const ligne = lieuxLigneHtml(conn, villeId, { link: false, porte: false, ouvert });
+		return `<tr${ouvert ? ' class="selected"' : ''}><td class="ligne-col">${ligne}</td>${tds}</tr>`;
+	}).join('');
+	$('row-count').textContent = rows.length + ' / ' + connexions.length + ' ligne(s)';
+	majParamsOutil();
+}
+
+// ── Outils ─────────────────────────────────────────────────────────────────
+let offset = 0;          // index ABSOLU de la prochaine ligne de journal attendue
+let timer = null;
+let runOutil = '';       // l'outil du run suivi (le sélecteur a pu changer depuis)
+const PERIODE = 700;
+
+function outilCourant() { return PAR_ID[$('outil-select').value] || null; }
+function setOutilStatus(msg, kind) { setStatusOn($('outil-status'), msg, kind); }
+function setJsonStatus(msg, kind) { setStatusOn($('p-json-status'), msg, kind); }
+
+function ouvrirOutil() {
+	const o = outilCourant();
+	$('outil-card').hidden = !o;
+	if (!o) return;
+	$('outil-titre').textContent = o.label;
+	$('outil-desc').textContent = o.description || '';
+	$('outil-ecrit').textContent = o.ecrit || '';
+	$('outil-ecrit').className = 'outil-ecrit' + (o.danger ? ' danger' : '');
+	const types = (o.params || []).map(p => p.type);
+	$('p-ville-bloc').hidden = !types.includes('ville');
+	$('p-lieux-bloc').hidden = !types.includes('lieux');
+	$('p-json-bloc').hidden = !types.includes('json');
+	if (runOutil !== o.id) { $('outil-importer').hidden = true; setOutilStatus(''); }
+	majParamsOutil();
+}
+
+function majParamsOutil() {
+	if ($('outil-card').hidden) return;
+	$('p-ville').textContent = villeId || '— aucune ville choisie —';
+	const ids = lieuxMarchandsVisibles(lignesVisibles(), villeId);
+	$('p-lieux-n').textContent = ids.length;
+	$('p-lieux-apercu').textContent = ids.length
+		? '(' + ids.slice(0, 5).join(', ') + (ids.length > 5 ? `, … +${ids.length - 5}` : '') + ')' : '';
+}
+
+// Les valeurs envoyées au serveur, qui les REVALIDE (utils/dev_tools.valider_params).
+function paramsOutil(o) {
+	const params = {};
+	for (const p of o.params || []) {
+		if (p.type === 'ville') {
+			if (!villeId) return [null, 'Choisissez une ville.'];
+			params[p.nom] = villeId;
+		} else if (p.type === 'lieux') {
+			const ids = lieuxMarchandsVisibles(lignesVisibles(), villeId);
+			if (!ids.length) return [null, "Aucune boutique affichée n'a de tenancier pnj:marchand_* explicite."];
+			params[p.nom] = ids;
+		} else if (p.type === 'json') {
+			let v;
+			try { v = JSON.parse($('p-json').value); } catch (e) { return [null, 'JSON invalide : ' + e.message]; }
+			if (!v || typeof v !== 'object' || Array.isArray(v)) return [null, 'La spec doit être un objet JSON.'];
+			params[p.nom] = v;
+		}
+	}
+	return [params, ''];
+}
+
+function majBoutonsOutil(enCours) {
+	$('outil-lancer').disabled = enCours;
+	$('outil-arreter').disabled = !enCours;
+	$('outil-select').disabled = enCours;
+}
+
+async function lancerOutil() {
+	const o = outilCourant();
+	if (!o) return;
+	const [params, souci] = paramsOutil(o);
+	if (souci) { setOutilStatus(souci, 'err'); return; }
+	if (o.danger && !confirm('« ' + o.label + " »\n\n" + (o.ecrit || '') + "\n\nLancer quand même ?")) return;
+	majBoutonsOutil(true);
+	$('outil-importer').hidden = true;
+	setOutilStatus(o.dump_frais ? 'Régénération du dump, puis lancement…' : 'Lancement…', 'run');
+	try {
+		const res = await fetch('/admin/dev-tools/lancer', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ outil: o.id, params }),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) {
+			setOutilStatus('Échec : ' + detailErreur(data, res.status), 'err');
+			majBoutonsOutil(false);
+			return;
+		}
+		offset = 0;
+		runOutil = o.id;
+		$('outil-log').textContent = '';
+		setOutilStatus('En cours — ' + data.label, 'run');
+		demarrerScrutation();
+	} catch (e) {
+		setOutilStatus('Erreur réseau : ' + e.message, 'err');
+		majBoutonsOutil(false);
+	}
+}
+
+async function arreterOutil() {
+	$('outil-arreter').disabled = true;
+	setOutilStatus('Arrêt demandé…', 'run');
+	try { await fetch('/admin/dev-tools/arreter', { method: 'POST' }); }
+	catch (e) { setOutilStatus('Erreur réseau : ' + e.message, 'err'); }
+}
+
+// ⚠️ `textContent`, jamais `innerHTML` : c'est la sortie BRUTE d'un script.
+function ecrireJournal(lignes) {
+	if (!lignes.length) return;
+	const log = $('outil-log');
+	const colle = (log.scrollHeight - log.scrollTop - log.clientHeight) < 40;
+	log.textContent += lignes.join('\n') + '\n';
+	if (colle) log.scrollTop = log.scrollHeight;
+}
+
+function conclureRun(data) {
+	arreterScrutation();
+	majBoutonsOutil(false);
+	const ok = data.code === 0;
+	setOutilStatus(ok ? '✓ Terminé (code 0).' : '✗ Terminé avec le code ' + data.code + '.', ok ? 'ok' : 'err');
+	const o = PAR_ID[data.outil];
+	if (ok && o && o.sortie) {
+		$('outil-importer').textContent = '📥 Importer ' + o.sortie;
+		$('outil-importer').hidden = false;
+	}
+}
+
+async function tirerJournal() {
+	try {
+		const res = await fetch('/admin/dev-tools/log?offset=' + offset);
+		if (!res.ok) { arreterScrutation(); setOutilStatus('Erreur de lecture du journal : ' + res.status, 'err'); return; }
+		const data = await res.json();
+		if (!data.actif) { arreterScrutation(); return; }
+		if (data.perdu) ecrireJournal(['[… ' + data.perdu + ' ligne(s) perdue(s) : tampon plein …]']);
+		ecrireJournal(data.lignes || []);
+		offset = data.offset;
+		if (data.fini) conclureRun(data);
+	} catch (e) {
+		arreterScrutation();
+		setOutilStatus('Erreur réseau : ' + e.message, 'err');
+		majBoutonsOutil(false);
+	}
+}
+function demarrerScrutation() { if (timer) return; timer = setInterval(tirerJournal, PERIODE); tirerJournal(); }
+function arreterScrutation() { if (timer) { clearInterval(timer); timer = null; } }
+
+// 📥 : le fichier du DERNIER run réussi (le serveur refuse un fichier plus ancien que le run),
+// envoyé à /admin/import-bulk. ⚠️ PUT COMPLET : un `_id` existant est remplacé (CLAUDE.md §11).
+async function importerSortie() {
+	const o = PAR_ID[runOutil];
+	if (!o) return;
+	const btn = $('outil-importer');
+	btn.disabled = true;
+	try {
+		const r = await fetch('/admin/dev-tools/sortie?outil=' + encodeURIComponent(o.id));
+		const data = await r.json().catch(() => ({}));
+		if (!r.ok) { setOutilStatus('Import impossible : ' + detailErreur(data, r.status), 'err'); return; }
+		const ids = (data.ids || []).filter(Boolean);
+		const apercu = ids.slice(0, 15).join('\n') + (ids.length > 15 ? '\n… et ' + (ids.length - 15) + ' autre(s)' : '');
+		if (!confirm(`Importer ${data.docs.length} document(s) de ${data.chemin} ?\n\n`
+				+ `⚠️ PUT complet : un document existant de même _id est remplacé.\n\n${apercu}`)) return;
+		setOutilStatus('Import…', 'run');
+		$('import-progress').hidden = false;
+		$('import-bar').style.width = '0%';
+		const res = await fetch('/admin/import-bulk', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(data.docs),
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			setOutilStatus('Échec : ' + detailErreur(err, res.status), 'err');
+			return;
+		}
+		const reader = res.body.getReader();
+		const decoder = new TextDecoder();
+		let buf = '', fin = null;
+		while (true) {
+			const morceau = await reader.read();
+			if (morceau.done) break;
+			buf += decoder.decode(morceau.value, { stream: true });
+			let nl;
+			while ((nl = buf.indexOf('\n')) >= 0) {
+				const ligne = buf.slice(0, nl).trim();
+				buf = buf.slice(nl + 1);
+				if (!ligne) continue;
+				let ev;
+				try { ev = JSON.parse(ligne); } catch (e) { continue; }
+				if (ev.event === 'progress') {
+					$('import-bar').style.width = Math.round(100 * ev.processed / ev.total) + '%';
+					setOutilStatus(`Import… ${ev.processed}/${ev.total}`, 'run');
+				} else if (ev.event === 'done') {
+					fin = ev;
+				}
+			}
+		}
+		if (!fin) { setOutilStatus('Import interrompu : réponse incomplète.', 'err'); return; }
+		setOutilStatus(`✓ ${fin.imported}/${fin.total} document(s) importé(s).` + (fin.failed ? ` ${fin.failed} échec(s).` : ''),
+			fin.failed ? 'err' : 'ok');
+		// Déjà importé : le bouton ne doit pas pouvoir renvoyer le même lot.
+		btn.hidden = true;
+		creationOptions = null;
+		await chargerConnexions();
+	} catch (e) {
+		setOutilStatus('Erreur réseau : ' + e.message, 'err');
+	} finally {
+		btn.disabled = false;
+		$('import-progress').hidden = true;
+	}
+}
+
+// 📍 Compléter les positions : une case ACCESSIBLE pour chaque magasin de la spec qui n'en a pas.
+// Accessible = région principale de la ville sous la règle d'exploration (voies.js prend la
+// règle de marche dans deplacement.js) — le serveur refusera de toute façon une case ≠ 1.
+function completerPositions() {
+	let spec;
+	try { spec = JSON.parse($('p-json').value || '{}'); } catch (e) { setJsonStatus('JSON invalide : ' + e.message, 'err'); return; }
+	if (!spec || typeof spec !== 'object' || !Array.isArray(spec.magasins)) {
+		setJsonStatus('La spec doit porter une liste `magasins`.', 'err');
+		return;
+	}
+	const cells = villeDoc && Array.isArray(villeDoc.cells) ? villeDoc.cells : null;
+	if (!cells || !cells.length) { setJsonStatus("Cette ville n'a pas de grille chargée.", 'err'); return; }
+	const dims = (villeDoc.dimensions && villeDoc.dimensions.x)
+		? villeDoc.dimensions : { x: (cells[0] || []).length, y: cells.length };
+	const { region } = voiesRegions(voiesGraphe(cells, villeDoc.nav || {}, dims, 'exploration'));
+	const portes = portesDeVille(connexions, villeId);
+	const ancres = portes.filter(p => p.categorie && p.categorie !== PORTE_CATEGORIE && p.categorie !== 'pays').map(p => p.pos);
+	const poses = [];
+	const lignes = [];
+	spec.magasins.forEach(m => {
+		if (!m || typeof m !== 'object') return;
+		if (_posValide(m.pos)) { poses.push(m.pos); return; }
+		const repoussoirs = portes.filter(p => p.categorie === m.categorie).map(p => p.pos).concat(poses);
+		const [pos] = _proposerCases(region, dims.x, ancres, repoussoirs, 1, PROPOSITION_RAYON);
+		if (pos) {
+			m.pos = pos;
+			poses.push(pos);
+			lignes.push(`${m.label || m.categorie || '?'} → [${pos[0]}, ${pos[1]}]`);
+		}
+	});
+	spec.cite = villeId;
+	$('p-json').value = JSON.stringify(spec, null, 2);
+	setJsonStatus(lignes.length
+		? `📍 ${lignes.length} position(s) proposée(s) — ${lignes.join(' · ')}. Relisez avant ▶.`
+		: 'Aucune position manquante.', 'ok');
+}
+
+// ── Échap : ANNULE sans rien écrire (CLAUDE.md §8), du plus haut au plus bas ─
+document.addEventListener('keydown', e => {
+	if (e.key !== 'Escape') return;
+	const add = $('lieu-add-overlay');
+	if (add && !add.classList.contains('la-hidden')) { closeLieuAdd(); return; }
+	const fiche = $('lieu-fiche-overlay');
+	if (fiche && !fiche.classList.contains('lieu-fiche-hidden')) { closeLieuFiche(); return; }
+	if (_cxOuvert()) { closeConnForm(); return; }
+	if (lieuxJsonOuvert) closeLieuJson();
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────
+$('ville-select').addEventListener('change', chargerVille);
+$('recharger-btn').addEventListener('click', chargerVille);
+$('outil-select').addEventListener('change', ouvrirOutil);
+$('outil-fermer').addEventListener('click', () => { $('outil-select').value = ''; ouvrirOutil(); });
+$('outil-lancer').addEventListener('click', lancerOutil);
+$('outil-arreter').addEventListener('click', arreterOutil);
+$('outil-importer').addEventListener('click', importerSortie);
+$('p-json-pos-btn').addEventListener('click', completerPositions);
+$('p-json-file-btn').addEventListener('click', () => $('p-json-file').click());
+$('p-json-file').addEventListener('change', () => {
+	const f = $('p-json-file').files && $('p-json-file').files[0];
+	if (!f) return;
+	const lecteur = new FileReader();
+	lecteur.onload = () => { $('p-json').value = lecteur.result; setJsonStatus(f.name + ' chargé.', 'ok'); };
+	lecteur.onerror = () => setJsonStatus('Lecture du fichier impossible.', 'err');
+	lecteur.readAsText(f);
+	$('p-json-file').value = '';
+});
+
+(function init() {
+	const s = lireEtat();
+	const sel = $('ville-select');
+	if (s && s.ville && sel.querySelector(`option[value="${CSS.escape(s.ville)}"]`)) {
+		sel.value = s.ville;
+		chargerVille();
+	}
+	// Un run d'un outil de cette page est peut-être encore en cours (le tampon vit dans le
+	// serveur) : on rouvre son panneau et on reprend le fil.
+	fetch('/admin/dev-tools/log?offset=0').then(r => r.ok ? r.json() : null).then(data => {
+		if (!data || !data.actif || !PAR_ID[data.outil]) return;
+		$('outil-select').value = data.outil;
+		runOutil = data.outil;
+		ouvrirOutil();
+		ecrireJournal(data.lignes || []);
+		offset = data.offset;
+		if (data.fini) conclureRun(data);
+		else { majBoutonsOutil(true); setOutilStatus('En cours — ' + (data.label || ''), 'run'); demarrerScrutation(); }
+	}).catch(() => {});
+})();
+</script>
+{% include "part-lieux-markup.html" %}
+</body>
+</html>

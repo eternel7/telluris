@@ -8,6 +8,12 @@ description: Admin tooling, content generators and tunable world variables — t
 
 ⚠️ **LISTE BLANCHE, jamais un chemin venu du client** : le client n'envoie qu'un `id` du catalogue, l'`argv` est écrit en dur dans le module, et `Popen` reçoit une **LISTE** (aucun `shell=True`). Un endpoint qui accepterait un nom de fichier — même « juste sous `dev/` » — serait une exécution de code arbitraire derrière un cookie admin. Chaque entrée déclare ce qu'elle **écrit** (lecture seule / fichier / base) ; `danger:true` (la purge `--appliquer`) exige un `confirm()`.
 
+**Outils PARAMÉTRÉS** (`portee: "lieux"`, lancés depuis `/admin/lieux`, absents de `/admin/dev-tools` qui ne sait pas saisir de valeur) — la liste blanche tient toujours : le client envoie `outil` + `params` **typés**, jamais un chemin ni un bout d'argv.
+- `params: [{nom, type}]`, `type ∈ ville | lieux | json`, revalidés par **`valider_params`** (regex `ID_LIEU`, ville ∈ `_villes()` = `est_ville`, ≤ `LIEUX_MAX`, objet ≤ `JSON_OCTETS_MAX` ; clé inconnue ⇒ 422). ⚠️ `est_ville` lit aussi `sous_categorie` : Lutèce a une `categorie` VIDE.
+- `argv_fn(valeurs, fichiers)` bâtit l'argv ; `fichiers` vient de **`preparer`** injecté par `main._preparer_outil`, seul à écrire : `jsons/telluris-dump-<UTC>.json` si `dump_frais` (même format que l'export, `_dump_payload`) et `jsons/outils/<id>-<UTC>.json` pour la spec (`spec_a_ecrire` **force `cite` à la ville validée**). ⚠️ Préparation **sous le verrou, après le 409** : pas de dump écrit pour un lancement refusé.
+- `sortie` + **`sortie_fraiche`** : 📥 Importer (`GET /admin/dev-tools/sortie`) ne rend le fichier que si le DERNIER run est cet outil, fini en code 0, et que le fichier est **plus récent que son départ** — un générateur qui refuse ou n'a rien à écrire laisse l'ancien fichier, que l'import (PUT complet) réécrirait. Verrouillé par `tests/test_dev_tools.py`.
+- Les trois outils : `lieux_magasins_json` (`gen_magasins.py`), `lieux_progeniture` (`gen_progeniture.py --lieux`), `lieux_audit_economy` (`audit_economy.py --ville`).
+
 ⚠️ **Trois pièges du lancement d'un fils, tous silencieux :**
 - **`-u` sur l'argv Python** — le stdout d'un fils redirigé vers un tube est **bloc-bufférisé** : sans lui, un tail reste muet pendant toute l'exécution puis crache tout d'un coup.
 - **`PYTHONIOENCODING=utf-8` dans l'environnement** — dans l'image `python:3.11-slim` la locale est POSIX, donc le stdout du fils s'encode en **ASCII** : le premier `print` accentué (tous les scripts du projet parlent français) lèverait un `UnicodeEncodeError` et l'outil semblerait planter tout seul.
@@ -22,6 +28,9 @@ description: Admin tooling, content generators and tunable world variables — t
 Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le champ ajouté, écrire `jsons/*_a_importer.json` → régénération **idempotente** (CLAUDE.md §11). Avant de livrer : absence de collision d'`_id`, rejeu contre un export récent. Catalogue (non exhaustif — `ls dev/gen_*.py`) :
 - `gen_marchands.py` — tenanciers génériques `pnj:marchand_*` (une catégorie à recettes = un tenancier).
 - `gen_magasins_auxerre.py` — boutiques d'Auxerre (même forme que le lot de lieux de l'éditeur).
+- `gen_magasins.py --dump --spec` — la version GÉNÉRIQUE : ville, métiers, enseignes et cases dans une spec JSON ; refuse TOUT le lot sur un `_id` pris ou une case ≠ 1 (`tests/test_gen_magasins.py`).
+- `gen_progeniture.py --dump --lieux a,b` — familles TIRÉES (déterministe par lieu, `recrutement.PRENOMS/NOMS`) pour les boutiques choisies ; une famille existante n'est jamais réécrite. Sans `--lieux` : les familles écrites d'Auxerre.
+- `audit_economy.py <dump> --ville lieu:X` — périmètre d'une ville + §4 par atelier ; sans `--ville`, rapport inchangé.
 - `gen_magasins_superieurs.py` — les 18 grandes manufactures de Lutèce (enseignes, portes, tenanciers, items exclusifs).
 - `gen_specialites_france.py` — 10 spécialités de terroir (`lieu_portee`) + cités rattachées à `lieu:france`.
 - `gen_lutecia.py` — zones d'influence de la capitale (urbain, Seine, faubourgs, campagne).

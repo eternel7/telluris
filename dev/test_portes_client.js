@@ -36,7 +36,8 @@ const assert = require('assert');
 const vm = require('vm');
 
 const TEMPLATE = path.join(__dirname, '..', 'templates', 'admin_map_editor.html');
-const src = fs.readFileSync(TEMPLATE, 'utf8');
+// Includes développés : connexion et lieu vivent dans part-lieux-js.html (cf. dev/_template_js.js).
+const src = require('./_template_js').lireAvecIncludes(TEMPLATE);
 
 const js = [...src.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)]
 	.map(m => m[1]).join('\n');

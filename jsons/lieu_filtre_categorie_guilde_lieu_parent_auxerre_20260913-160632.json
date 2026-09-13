@@ -1,0 +1,74 @@
+[
+  {
+    "_id": "lieu:bureau_du_maitre_de_guilde_d_auxerre",
+    "_rev": "12-ecebe1c80e4b4978c37c1aa066eaa89c",
+    "type": "lieu",
+    "label": "Bureau de Gautier de Valcroix, Maitre de la Guilde d'Aventuriers d'Auxerre",
+    "image": "guilde_bureau_maitre_de_guilde_europe01.png",
+    "categorie": "bureau_maitre_guilde",
+    "pnj": [
+      {
+        "character": "pnj:gautier_de_valcroix",
+        "nom": "Gautier de Valcroix",
+        "portrait": "humain_m_guerrier01.jpg"
+      }
+    ],
+    "lieu_parent": "lieu:auxerre",
+    "acces": {
+      "gardien": "pnj:borin_barbe_de_jais",
+      "refus": "Borin Barbe-de-Jais barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.",
+      "cycle": 1,
+      "conditions": [
+        {
+          "rang_min": {
+            "cite": "lieu:auxerre",
+            "rang": "D"
+          }
+        }
+      ]
+    },
+    "relation_lieu": "lieu:le_bastion_de_l_yonne_comptoir"
+  },
+  {
+    "_id": "lieu:le_bastion_de_l_yonne_interieur",
+    "_rev": "8-4025e11b3e27d566db7763cfe9f979a9",
+    "type": "lieu",
+    "label": "Le Bastion de l'Yonne - reception",
+    "image": "guilde_aventuriers_interieur_europe01.png",
+    "categorie": "guilde_aventurier",
+    "sous_categorie": "guilde_aventurier",
+    "lieu_parent": "lieu:auxerre",
+    "tags": [
+      "recrutement"
+    ],
+    "relation_lieu": "lieu:le_bastion_de_l_yonne_comptoir"
+  },
+  {
+    "_id": "lieu:le_bastion_de_l_yonne_comptoir",
+    "_rev": "5-5f57a9c42779ac012b19430d891ef5f1",
+    "type": "lieu",
+    "label": "Le comptoir du Bastion",
+    "image": "guilde_aventuriers_interieur_receptioniste_europe01.jpg",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "guilde_aventurier_comptoir",
+    "sous_categorie": "guilde_aventurier",
+    "pnj": [
+      {
+        "character": "pnj:borin_barbe_de_jais",
+        "portrait": "nain_m_receptioniste01.png",
+        "probabilite": 1,
+        "description": "Derrière le vaste comptoir de chêne se tient Borin Barbe-de-Jais. Sa barbe noire est tressée en nattes serrées où brillent de petits anneaux d'acier gravés du symbole de la Guilde. Depuis plus de cinquante ans, il accueille ceux qui franchissent les portes du Bastion — et l'on dit qu'il connaît le nom de chaque aventurier ayant un jour porté l'insigne."
+      }
+    ]
+  },
+  {
+    "_id": "lieu:le_bastion_de_l_yonne",
+    "_rev": "8-b31a3c32c866d6859c9fb5871ef470bc",
+    "type": "lieu",
+    "label": "Le Bastion de l'Yonne",
+    "image": "guilde_aventuriers_exterieur_europe01.png",
+    "lieu_parent": "lieu:auxerre",
+    "categorie": "guilde_aventurier_exterieur",
+    "relation_lieu": "lieu:le_bastion_de_l_yonne_comptoir"
+  }
+]

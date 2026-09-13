@@ -1,0 +1,8 @@
+{
+	"cite": "lieu:lutecia",
+	"magasins": [
+		{ "categorie": "auberge", "label": "La Pomme de Pin", "image": "auberge_europe02.png" },
+		{ "categorie": "auberge", "label": "Le Mouton Blanc", "image": "auberge_europe03.png" },
+		{ "categorie": "auberge", "label": "L'Écu d'Argent", "image": "auberge_europe05.jpg" }
+	]
+}

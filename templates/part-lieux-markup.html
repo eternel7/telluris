@@ -1,0 +1,200 @@
+{#
+  Mode « Lieux » — le MARKUP PARTAGÉ des overlays : 🧾 JSON, 🔗 connexion, 📄 fiche, ✏️ lieu.
+  Inclus APRÈS le script de la page : aucune fonction n'en capture un élément au chargement.
+#}
+<!-- Éditeurs JSON d'une connexion du mode Lieux (overlay fixe à droite, cf. admin_table).
+     Rendu par renderLieuJsonOverlay() : `#lj-body` est réécrit à chaque ouverture ET après
+     chaque enregistrement (le `_rev` a changé) — rien n'est semé ici. -->
+<div id="lj-overlay" class="card lj-hidden">
+	<div class="lj-title">
+		<div class="card-title">🧾 JSON — <span id="lj-dest"></span></div>
+		<button type="button" class="lj-close" onclick="closeLieuJson()" title="Fermer (sans enregistrer)">✕</button>
+	</div>
+	<div class="lj-desc">
+		Éditez puis <b>💾</b> (enregistre en base) ; <b>🗑</b> supprime définitivement, après
+		confirmation. Supprimer la <b>connexion</b> n'efface pas le <b>lieu</b> : deux documents,
+		deux boutons.
+	</div>
+	<div id="lj-body"></div>
+</div>
+
+<!-- Formulaire d'une CONNEXION du mode Lieux : voir, éditer, ajouter un lien entre deux
+     lieux EXISTANTS. Panneau fixe à droite comme #lj-overlay et non un modal — la carte
+     doit rester cliquable pour la visée 🎯.
+     ⚠️ Rien n'est écrit avant le bouton : ✕ et Échap ferment sans rien engager (CLAUDE.md §8).
+     ⚠️ Aucun `const` n'est capturé sur ce markup au chargement du script (il vit APRÈS la
+     balise) : tout passe par `_cxEl`, appelé depuis des fonctions. -->
+<div id="conn-overlay" class="card cx-hidden">
+	<div class="lj-title">
+		<div class="card-title">🔗 <span id="cx-titre">Nouvelle connexion</span></div>
+		<button type="button" class="lj-close" onclick="closeConnForm()" title="Fermer (sans enregistrer)">✕</button>
+	</div>
+	<div class="lj-desc">
+		Deux nœuds : la case à occuper <b>ici</b> pour voir la porte, et la case d'arrivée
+		<b>là-bas</b>. Le <b>label</b> d'un nœud est le texte du bouton qui y mène, lu depuis
+		l'autre côté — vide, c'est le label du lieu qui s'affiche en jeu.
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Ici — <span id="cx-ici-lieu"></span></h3>
+		<div class="cx-pos">
+			<div><label for="cx-ici-x">x</label><input type="number" id="cx-ici-x" min="0" step="1"></div>
+			<div><label for="cx-ici-y">y</label><input type="number" id="cx-ici-y" min="0" step="1"></div>
+			<button class="btn btn-inline" id="cx-visee-btn" style="font-size:.62rem;"
+				onclick="basculerViseeConn()">🎯 Viser sur la carte</button>
+		</div>
+		<div class="cx-hint" id="cx-ici-hint"></div>
+		<label for="cx-ici-label" style="margin-top:8px;">Label du bouton qui mène ICI
+			<span style="color:#888;font-weight:normal;">(optionnel, vu depuis là-bas)</span></label>
+		<input type="text" id="cx-ici-label" placeholder="redescendre au comptoir">
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Là-bas</h3>
+		<input type="text" id="cx-dest-filtre" placeholder="filtrer les lieux…">
+		<select id="cx-dest" style="margin-bottom:0;"></select>
+		<div class="cx-hint" id="cx-dest-info"></div>
+		<div class="cx-pos" style="margin-top:6px;">
+			<div><label for="cx-la-x">x</label><input type="number" id="cx-la-x" min="0" step="1"></div>
+			<div><label for="cx-la-y">y</label><input type="number" id="cx-la-y" min="0" step="1"></div>
+		</div>
+		<div class="cx-hint" id="cx-la-hint"></div>
+		<label for="cx-la-label" style="margin-top:8px;">Label du bouton qui mène LÀ-BAS
+			<span style="color:#888;font-weight:normal;">(optionnel, vu d'ici)</span></label>
+		<input type="text" id="cx-la-label" placeholder="au-delà des remparts">
+	</div>
+
+	<div class="cx-noeud">
+		<h3>Document</h3>
+		<label for="cx-type">Type <span style="color:#888;font-weight:normal;">(descriptif)</span></label>
+		<input type="text" id="cx-type" list="cx-type-liste" placeholder="chemin">
+		<datalist id="cx-type-liste"></datalist>
+		<label for="cx-status" style="margin-top:8px;">État</label>
+		<input type="text" id="cx-status" list="cx-status-liste" placeholder="ouvert">
+		<datalist id="cx-status-liste"></datalist>
+		<label for="cx-id" style="margin-top:8px;">Identifiant</label>
+		<input type="text" id="cx-id" placeholder="link:…" style="margin-bottom:0;">
+		<div class="cx-hint" id="cx-id-hint"></div>
+	</div>
+
+	<label>Aperçu</label>
+	<div class="la-preview" id="cx-preview"></div>
+	<div class="lj-msg" id="cx-msg"></div>
+	<div class="la-actions">
+		<button class="btn" id="cx-submit-btn" onclick="submitConnForm()">➕ Créer</button>
+		<button class="btn danger" onclick="closeConnForm()">Annuler</button>
+	</div>
+</div>
+
+<!-- Overlay fiche du lieu (réplique play_town, lecture seule) -->
+<div id="lieu-fiche-overlay" class="lieu-fiche-hidden" onclick="if(event.target===this)closeLieuFiche()">
+	<div class="board-panel">
+		<div class="sell-topbar">
+			<h2 id="lf-title"></h2>
+			<button class="close-sheet-btn" onclick="closeLieuFiche()">✕ Fermer</button>
+		</div>
+		<div class="lf-body">
+			<div id="lf-map"></div>
+			<div id="lf-sublist" class="lf-sublocs"></div>
+		</div>
+	</div>
+</div>
+
+<!-- Création d'un sous-lieu sur la case sélectionnée (mode Lieux) -->
+<div id="lieu-add-overlay" class="la-hidden" onclick="if(event.target===this)closeLieuAdd()">
+	<div class="la-panel">
+		<div class="la-topbar">
+			<h2 id="nl-titre">➕ Nouveau lieu</h2>
+			<button class="btn btn-inline" style="font-size:.62rem;" onclick="closeLieuAdd()">✕ Fermer</button>
+		</div>
+
+		<div class="la-field">
+			<label for="nl-categorie">Catégorie</label>
+			<select id="nl-categorie" style="margin-bottom:6px;"></select>
+			<input type="text" id="nl-categorie-libre" placeholder="catégorie libre…" style="display:none;">
+		</div>
+
+		<!-- Ce que le lieu SAURA FAIRE. Une capacité vient de la catégorie OU d'un tag ;
+		     accordée par la catégorie, la case est cochée et GRISÉE — il n'existe aucun
+		     anti-tag, décocher n'aurait donc aucun effet. -->
+		<div class="la-field">
+			<label>Ce que ce lieu saura faire</label>
+			<div id="nl-capacites" class="nl-caps"></div>
+		</div>
+
+		<!-- Champs propres à une TAVERNE. -->
+		<div class="la-field" id="nl-taverne-bloc" style="display:none;">
+			<label for="nl-nuit-messages">Récit de la nuit <span style="color:#888;font-weight:normal;">(optionnel, une ligne par message)</span></label>
+			<textarea id="nl-nuit-messages" rows="4" placeholder="La salle se vide peu à peu…"></textarea>
+			<div style="font-size:.64rem;color:#888;">Vide ⇒ les 36 lignes par défaut du jeu.</div>
+		</div>
+
+		<!-- Champs propres à une ÉTABLE. ⚠️ L'écurie vit sur un PNJ, pas sur le bâtiment :
+		     cette liste part dans les `montures` de l'entrée qui la TIENT. -->
+		<div class="la-field" id="nl-montures-bloc" style="display:none;">
+			<label>Écurie <span style="color:#888;font-weight:normal;">(ce que le tenancier vend)</span></label>
+			<div id="nl-montures-liste" class="nl-caps"></div>
+			<label for="nl-ecurie-ligne" style="margin-top:8px;">Tenue par</label>
+			<select id="nl-ecurie-ligne" style="margin-bottom:0;"></select>
+			<div id="nl-montures-warn" class="la-warn"></div>
+		</div>
+
+		<div class="la-field">
+			<label for="nl-image">Image du lieu</label>
+			<select id="nl-image" style="margin-bottom:0;"></select>
+			<label class="la-check"><input type="checkbox" id="nl-image-all"> toutes les images</label>
+			<img id="nl-image-thumb" class="la-thumb" alt="" style="display:none;">
+		</div>
+
+		<div class="la-field">
+			<label for="nl-label">Label</label>
+			<input type="text" id="nl-label" placeholder="Le Chaudron des Brumes">
+			<div class="la-readonly" id="nl-id" style="margin-top:6px;">lieu:</div>
+			<div class="la-warn" id="nl-id-warn"></div>
+			<!-- ⚠️ En édition, l'`_id` est GELÉ : CouchDB ne renomme pas, et la connexion
+			     pointe l'ancien. Le label reste libre — la divergence est déjà normale en
+			     base (`lieu:le_four_banal_de_saint_germain` s'affiche « …de l'horloge »). -->
+			<div id="nl-id-fige" style="font-size:.64rem;color:#888;margin-top:4px;display:none;">
+				L'identifiant ne change jamais : renommer le label ne renomme pas le document.
+			</div>
+		</div>
+
+		<!-- PNJ du lieu : une carte par entrée `pnj`, dans l'ordre de la liste du lieu.
+		     ⚠️ Chaque carte garde l'indice de son entrée d'ORIGINE (`src`) : ce que le formulaire
+		     ne possède pas (progéniture, description, image…) suit son entrée, même déplacée.
+		     Écouteurs délégués, posés sur la section par `_nlCabler`. -->
+		<div class="la-field" id="nl-pnj-section">
+			<label>PNJ du lieu</label>
+			<div class="nlp-note">
+				Chaque PNJ est tiré pour lui-même à l'entrée : plusieurs peuvent être là ensemble.
+				Le premier PNJ <i>sans condition</i> est le nom annoncé à distance (livraisons, courses).
+			</div>
+			<div id="nl-pnj-liste"></div>
+			<div class="nlp-pied">
+				<button type="button" class="btn btn-inline" style="font-size:.62rem;" data-act="ajouter-pnj">+ Ajouter un PNJ</button>
+				<span class="nlp-note" id="nl-pnj-resume"></span>
+			</div>
+			<!-- Suggestions du constructeur de conditions, remplies à l'ouverture. -->
+			<datalist id="nl-dl-lieux"></datalist>
+			<datalist id="nl-dl-cites"></datalist>
+			<datalist id="nl-dl-cats"></datalist>
+			<datalist id="nl-dl-items"></datalist>
+		</div>
+
+		<!-- Pas de connexion en ÉDITION : le lieu a déjà sa porte, et l'édition n'écrit
+		     qu'un seul doc. -->
+		<div class="la-field" id="nl-link-field">
+			<label>Connexion</label>
+			<div class="la-readonly" id="nl-link-id">link:</div>
+		</div>
+
+		<label>Aperçu</label>
+		<div class="la-preview" id="nl-preview"></div>
+
+		<div class="la-warn" id="nl-error" style="margin-bottom:8px;"></div>
+		<div class="la-actions">
+			<button class="btn" id="nl-create-btn" onclick="submitLieuForm()">➕ Créer</button>
+			<button class="btn danger" onclick="closeLieuAdd()">Annuler</button>
+		</div>
+	</div>
+</div>

@@ -23,7 +23,8 @@ const assert = require('assert');
 const vm = require('vm');
 
 const TEMPLATE = path.join(__dirname, '..', 'templates', 'admin_map_editor.html');
-const src = fs.readFileSync(TEMPLATE, 'utf8');
+// Includes développés : le mode Lieux vit dans des parts (cf. dev/_template_js.js).
+const src = require('./_template_js').lireAvecIncludes(TEMPLATE);
 
 // Le template porte plusieurs blocs <script> : on les concatène, l'extraction se faisant ensuite
 // par nom de fonction.
