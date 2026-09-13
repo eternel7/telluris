@@ -24,7 +24,7 @@
       "rang": {
         "apport": {
           "id": "quete:rang_c_grand_relais",
-          "titre": "Rang C : une dépouille de l'Est",
+          "titre": "Rang C : une dépouille de monstre",
           "rang_vise": "C",
           "items": [
             "item:vouivre",
@@ -257,7 +257,7 @@
           ]
         },
         "apport_propose": {
-          "texte": "Éléonore pose sa plume, ce qu'elle ne fait presque jamais. « Le rang {rang_vise}, {prenom}, ne se gagne plus dans nos bois. À ce rang-là, la Guilde vous envoie là où les autres ne reviennent pas. » Elle déroule une carte de France et pose le doigt à l'Est, au-delà des zones que la Guilde marque en rouge. « Là-bas vivent des vouivres — et parfois pire : la Tarasque. Rapportez-moi la dépouille de l'une ou de l'autre, ou ce que vous aurez pu en débiter : une tête, une patte, la queue. {xp} points d'expérience, {prime} pièces de cuivre, et votre nom sur la liste que je lis chaque soir au maître de la Guilde. »",
+          "texte": "Éléonore pose sa plume, ce qu'elle ne fait presque jamais. « Le rang {rang_vise}, {prenom}, ne se gagne plus dans nos bois. À ce rang-là, la Guilde vous envoie là où les autres ne reviennent pas. » Elle déroule une carte de France, fait courir son doigt le long des montagnes du sud, puis s'arrête sur les taches rouges semées à travers le pays. « Les vouivres nichent dans ces montagnes et rôdent dans les zones que la Guilde marque en rouge. La Tarasque, elle, ne quitte jamais ces zones rouges. Rapportez-moi la dépouille d'une vouivre, ou celle de la Tarasque — entière, ou ce que vous aurez pu en débiter : la tête, le corps, une patte, la queue. {xp} points d'expérience, {prime} pièces de cuivre, et votre nom sur la liste que je lis chaque soir au maître de la Guilde. »",
           "choix": [
             {
               "id": "apport_infos",
@@ -277,7 +277,7 @@
           ]
         },
         "apport_infos": {
-          "texte": "« À l'Est, passé les zones dangereuses. Les éclaireurs qui en reviennent parlent de collines brûlées et d'eaux dormantes. » Elle tapote la carte, puis vous regarde droit dans les yeux. « Deux conseils. Une Tarasque entière pèse plus d'une tonne : débitez-la sur place et chargez une monture, personne ne vous demande de la porter sur votre dos. Et ne m'apportez pas une carcasse de wyverne en me jurant que c'est une vouivre. Je le verrai tout de suite — et je m'en souviendrai longtemps. »",
+          "texte": "« Pour une vouivre, les montagnes du sud : c'est au sud-ouest qu'on la croise le plus, mais les zones rouges en abritent aussi. Pour la Tarasque, les zones rouges seulement — on la signale surtout à l'est et au sud-est. » Elle tapote la carte, puis vous regarde droit dans les yeux. « Deux conseils. Une Tarasque entière pèse plus d'une tonne : débitez-la sur place et chargez une monture, personne ne vous demande de la porter sur votre dos. Et ne m'apportez pas une carcasse de wyverne en me jurant que c'est une vouivre. Je le verrai tout de suite — et je m'en souviendrai longtemps. »",
           "choix": [
             {
               "id": "ok",
