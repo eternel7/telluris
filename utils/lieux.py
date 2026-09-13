@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
-from utils import acces, capacites, enseignes
+from utils import acces, capacites, enseignes, pnj as pnj_util
 
 # Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
 TOWNS_IMAGES_PATH = "templates/resources/towns"
@@ -324,8 +324,12 @@ async def get_creation_options(
 	ne peut pas le faire, son 404 étant ravalé en 500 par son propre try/except.
 
 	`lieux` (mêmes docs, projetés) sert au LOT : compter ce qu'une cité possède déjà par
-	catégorie, écarter les façades et les enseignes déjà prises. Les autres clés ne
-	bougent pas — le formulaire mono-lieu ne les connaît même pas.
+	catégorie, écarter les façades et les enseignes déjà prises. Chaque lieu y porte aussi
+	le RÉSUMÉ de ses PNJ (`pnj_util.resume_presences`) : la vue inverse du formulaire de
+	lieu (« ce PNJ apparaît aussi dans… »), puisqu'un doc `pnj:*` ignore où il apparaît.
+
+	`conditions` = le vocabulaire des clauses (`acces.vocabulaire_conditions`), d'où le
+	formulaire construit les conditions de présence d'un PNJ — servi, jamais recopié en JS.
 	"""
 	if (not current_user or
 		"admin" not in current_user or
@@ -333,7 +337,7 @@ async def get_creation_options(
 		raise HTTPException(status_code=403, detail="Admin only")
 
 	lieux = find_docs({"type": "lieu"},
-		fields=["_id", "categorie", "image", "lieu_parent", "label"]) or []
+		fields=["_id", "categorie", "image", "lieu_parent", "label", "pnj"]) or []
 	recettes = find_docs({"type": "recette"}, fields=["lieu_categorie"]) or []
 	pnjs = find_docs({"type": "pnj"}, fields=["_id", "nom"]) or []
 
@@ -355,9 +359,11 @@ async def get_creation_options(
 		"lieux": sorted(
 			({"_id": d.get("_id"), "categorie": d.get("categorie") or "",
 			  "image": d.get("image") or "", "lieu_parent": d.get("lieu_parent") or "",
-			  "label": d.get("label") or ""} for d in lieux if d.get("_id")),
+			  "label": d.get("label") or "",
+			  "pnj": pnj_util.resume_presences(d)} for d in lieux if d.get("_id")),
 			key=lambda d: d["_id"]
 		),
+		"conditions": acces.vocabulaire_conditions(),
 	}
 
 

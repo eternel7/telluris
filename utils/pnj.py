@@ -212,6 +212,32 @@ def nom_pnj_du_lieu(lieu_doc: dict, get_doc_fn, marchand_fn=None) -> str | None:
 	return None
 
 
+def resume_presences(lieu_doc: dict) -> list:
+	"""Résumé des entrées `pnj` d'un lieu pour l'ÉDITEUR de carte — la vue inverse « ce PNJ
+	apparaît aussi dans… » : `[{character, nom?, probabilite, conditionne}]`, dans l'ordre
+	du lieu.
+
+	⚠️ Ne publie QUE ces clés : `progeniture`, `description`, `montures` n'ont rien à faire
+	dans les options chargées à chaque ouverture de formulaire.
+	`probabilite` est lue comme au tirage (`tirer_pnjs_presents`) : absente ou illisible ⇒ 1.0.
+	Les `conditions` ne sont pas évaluées (aucun personnage) : on dit seulement qu'il y en a.
+	Le tenancier IMPLICITE d'une boutique sans champ `pnj` n'y figure pas."""
+	resume = []
+	for entree in (lieu_doc or {}).get("pnj") or []:
+		if not isinstance(entree, dict) or not entree.get("character"):
+			continue
+		try:
+			proba = float(entree.get("probabilite", 1.0))
+		except (TypeError, ValueError):
+			proba = 1.0
+		item = {"character": entree["character"], "probabilite": proba,
+				"conditionne": bool(entree.get("conditions"))}
+		if entree.get("nom"):
+			item["nom"] = entree["nom"]
+		resume.append(item)
+	return resume
+
+
 def pnj_payload(entree: dict, pnj_doc: dict) -> dict:
 	"""Payload de rendu du PNJ présent (template /play + panneau de dialogue).
 	Nom/portrait/description : l'entrée du lieu prime (identité propre à la boutique), repli

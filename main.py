@@ -1179,8 +1179,9 @@ def _vocabulaire_dialogues() -> dict:
 			"commission": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("commission_")),
 			"acces": sorted(f for f in lint_dialogues.FLAGS_CONNUS if f.startswith("acces_")),
 		},
-		"acces_conditions": sorted(acces.CONDITIONS_CONNUES),
-		"acces_sous_filtres": {c: sorted(s) for c, s in acces.SOUS_FILTRES_CONNUS.items()},
+		# Même source que les conditions de présence du formulaire de lieu (`creation_options`).
+		"acces_conditions": acces.vocabulaire_conditions()["cles"],
+		"acces_sous_filtres": acces.vocabulaire_conditions()["sous_filtres"],
 	}
 
 

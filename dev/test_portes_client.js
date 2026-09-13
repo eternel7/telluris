@@ -66,6 +66,8 @@ for (const c of ['_DIACRITIQUES', 'PORTE_CATEGORIE', 'PORTE_META_TYPE', 'PORTE_L
 }
 for (const f of ['_cxSlug', '_cxPosPosable', '_fusionConnexion',
 	'_slugLieu', '_capaciteAccordee', '_tagsApres', '_fusionLieu',
+	// `_fusionLieu` délègue ses entrées `pnj` (une porte n'en a pas, mais l'appel a lieu).
+	'_probaLue', '_fusionPnjEntrees',
 	'_ptIds', '_ptCote', '_ptOrdonner', '_ptDocs', '_ptPosCarte', '_ptValider',
 	'_ptPaireDe', '_ptImagesLibres']) {
 	vm.runInThisContext(extraire(f));

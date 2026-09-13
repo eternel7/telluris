@@ -94,6 +94,20 @@ SOUS_FILTRES_CONNUS = {
 }
 
 
+def vocabulaire_conditions() -> dict:
+	"""Le vocabulaire des clauses tel que le moteur le consomme, sous forme SÉRIALISABLE
+	(`set` → listes triées), pour les éditeurs : `/admin/dialogues` et les conditions de
+	présence d'un PNJ du formulaire de lieu de `/admin/editor`. Servi, JAMAIS recopié en JS.
+
+	`rangs` garde l'ORDRE de l'échelle `recrutement.RANGS` : c'est une échelle, pas un
+	ensemble — la trier alphabétiquement mettrait « A » sous « F »."""
+	return {
+		"cles": sorted(CONDITIONS_CONNUES),
+		"sous_filtres": {c: sorted(s) for c, s in SOUS_FILTRES_CONNUS.items()},
+		"rangs": list(RANGS),
+	}
+
+
 def gate_de(lieu_doc: dict) -> dict | None:
 	"""Le bloc `acces` du lieu, ou None s'il est absent/vide."""
 	acces = (lieu_doc or {}).get("acces")

@@ -709,3 +709,37 @@ def test_linter_signale_une_condition_pnj_fautive():
 
 def test_linter_accepte_une_condition_pnj_correcte():
     assert lint_dialogues.analyser([_lieu_conditionne()])["erreurs"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Résumé des présences — la vue inverse de l'éditeur de carte
+# ---------------------------------------------------------------------------
+
+def test_resume_presences_ordre_du_lieu_et_seules_cles_publiees():
+    """Le résumé part dans `creation_options`, chargé à chaque ouverture du formulaire :
+    ni progéniture, ni description, ni écurie."""
+    lieu = _lieu([
+        {"character": "pnj:a", "nom": "A", "probabilite": 0.3, "conditions": CONDS,
+         "progeniture": {"enfants": []}, "description": "d", "montures": ["espece:ane"]},
+        {"character": "pnj:b"},
+    ])
+    assert pnj.resume_presences(lieu) == [
+        {"character": "pnj:a", "nom": "A", "probabilite": 0.3, "conditionne": True},
+        {"character": "pnj:b", "probabilite": 1.0, "conditionne": False},
+    ]
+
+
+def test_resume_presences_lit_la_probabilite_comme_le_tirage():
+    """Illisible ⇒ 1.0, exactement comme `tirer_pnjs_presents` : l'éditeur ne doit pas
+    annoncer une chance que le jeu n'applique pas."""
+    lieu = _lieu([{"character": "pnj:a", "probabilite": "n'importe"},
+                  {"character": "pnj:b", "probabilite": None}])
+    assert [r["probabilite"] for r in pnj.resume_presences(lieu)] == [1.0, 1.0]
+    assert pnj.tirer_pnjs_presents(lieu, lambda: 0.99) == ["pnj:a", "pnj:b"]
+
+
+def test_resume_presences_ignore_les_entrees_inexploitables():
+    lieu = _lieu([None, "pnj:x", {"nom": "sans character"}, {"character": "pnj:ok"}])
+    assert [r["character"] for r in pnj.resume_presences(lieu)] == ["pnj:ok"]
+    assert pnj.resume_presences({}) == []
+    assert pnj.resume_presences(None) == []

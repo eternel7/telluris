@@ -49,7 +49,11 @@ function extraire(nom) {
 }
 
 for (const f of ['_capaciteAccordee', '_capacitesDe', '_tagsApres', '_fusionLieu',
-				 '_escRe', '_portraitsPourCategorie', '_nomDepuisPortrait']) {
+				 '_escRe', '_portraitsPourCategorie', '_nomDepuisPortrait',
+				 '_probaLue', '_nlLigneDepuisEntree', '_fusionPnjEntrees', '_pnjDoublons',
+				 '_probaPersonne', '_lieuxDuPnj',
+				 '_genreSousFiltre', '_brutDepuisValeur', '_valeurDepuisBrut',
+				 '_clauseRepresentable', '_clausesFautives']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -164,10 +168,19 @@ t('le récit de la nuit n’est écrit que s’il y a quelque chose à dire', ()
 	assert.deepStrictEqual(doc.nuit_messages, ['une', 'deux']);
 });
 
+// Une ligne de la section « PNJ du lieu », telle que `_nlChamps` la passe. `src` = indice de
+// l'entrée d'ORIGINE dans le doc relu (`null` pour une ligne neuve) : c'est lui, et jamais
+// le `character`, qui dit quelle entrée la ligne prolonge.
+function ligne(over) {
+	return Object.assign({
+		src: null, character: '', nom: '', portrait: '', probabilite: 1, conditions: [], ecurie: false,
+	}, over || {});
+}
+
 t('l’écurie part sur le TENANCIER, pas sur le bâtiment', () => {
 	const doc = _fusionLieu({}, champs({
 		categorie: 'etable',
-		pnj: { character: 'pnj:marchand_etable', nom: 'Garin', portrait: 'g.png' },
+		pnj: [ligne({ character: 'pnj:marchand_etable', nom: 'Garin', portrait: 'g.png', ecurie: true })],
 		montures: ['espece:ane', 'espece:cheval'],
 	}), CATALOGUE);
 	assert.deepStrictEqual(doc.pnj, [{
@@ -204,7 +217,7 @@ t('LE PIÈGE : la progéniture d’un PNJ survit à une édition', () => {
 	// Elle porte une chaîne d'escorte. La perdre casse la quête, sans erreur ni symptôme.
 	const doc = _fusionLieu(boutique(), champs({
 		label: 'La Forge Noire', image: 'armurerie_europe01.png', categorie: 'armurerie',
-		pnj: { character: 'pnj:marchand_armurerie', nom: 'George Dubois', portrait: 'g.png' },
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_armurerie', nom: 'George Dubois', portrait: 'g.png' })],
 	}), CATALOGUE);
 	assert.deepStrictEqual(doc.pnj[0].progeniture,
 		{ nom: 'Dubois', race: 'humain', enfants: [{ prenom: 'Colin' }] });
@@ -214,7 +227,7 @@ t('stocks, accès, relation, texte et sous-catégorie survivent', () => {
 	const avant = boutique();
 	const doc = _fusionLieu(avant, champs({
 		label: 'La Forge Noire', image: 'armurerie_europe01.png', categorie: 'armurerie',
-		pnj: { character: 'pnj:marchand_armurerie', nom: 'X', portrait: 'g.png' },
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_armurerie', nom: 'X', portrait: 'g.png' })],
 	}), CATALOGUE);
 	for (const cle of ['stock_matieres', 'stock_vente', 'stock_cible', 'acces',
 					   'relation_lieu', 'texte', 'sous_categorie', 'lieu_parent']) {
@@ -227,7 +240,7 @@ t('un champ INCONNU du formulaire survit', () => {
 	// `nuit_messages` d'un autre auteur, un champ à venir).
 	const avant = Object.assign(boutique(), { recrutement_restrictions: { nb: 1 }, futur: 42 });
 	const doc = _fusionLieu(avant, champs({ categorie: 'armurerie',
-		pnj: { character: 'pnj:marchand_armurerie', nom: 'X', portrait: 'g.png' } }), CATALOGUE);
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_armurerie', nom: 'X', portrait: 'g.png' })] }), CATALOGUE);
 	assert.deepStrictEqual(doc.recrutement_restrictions, { nb: 1 });
 	assert.strictEqual(doc.futur, 42);
 });
@@ -236,7 +249,7 @@ t('l’_id ne change JAMAIS, quel que soit le label', () => {
 	// CouchDB ne renomme pas, et la connexion pointe l'ancien id.
 	const doc = _fusionLieu(boutique(), champs({
 		label: 'Un Nom Totalement Different', categorie: 'armurerie',
-		pnj: { character: 'pnj:marchand_armurerie', nom: 'X', portrait: 'g.png' },
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_armurerie', nom: 'X', portrait: 'g.png' })],
 	}), CATALOGUE);
 	assert.strictEqual(doc._id, 'lieu:l_enclume_du_rempart');
 	assert.strictEqual(doc.label, 'Un Nom Totalement Different');
@@ -250,9 +263,9 @@ t('la fusion ne mute pas le doc d’origine', () => {
 	assert.deepStrictEqual(avant, copie);
 });
 
-t('LE PIÈGE : les entrées pnj[1..] survivent', () => {
-	// Trois lieux en base portent plusieurs PNJ (jusqu'à 4). Le formulaire n'édite que
-	// la première entrée ; écraser la liste perdrait les autres sans le dire.
+t('LE PIÈGE : une ligne par entrée — éditer la 1re ne touche pas la 2de', () => {
+	// Quatre lieux en base portent plusieurs PNJ (jusqu'à 4). Écraser la liste, ou fusionner
+	// une ligne dans la mauvaise entrée, romprait le lien PNJ ↔ lieu sans le dire.
 	const avant = {
 		_id: 'lieu:la_cathedrale', type: 'lieu', label: 'La Cathédrale',
 		image: 'x.png', categorie: 'cathedral',
@@ -261,30 +274,34 @@ t('LE PIÈGE : les entrées pnj[1..] survivent', () => {
 			{ character: 'pnj:frere_martin', nom: 'Martin', description: 'd2', probabilite: 0.5 },
 		],
 	};
+	const lignes = avant.pnj.map((e, i) => _nlLigneDepuisEntree(e, i));
+	lignes[0].nom = 'Dame Éléonore';
+	lignes[0].portrait = 'e.png';
 	const doc = _fusionLieu(avant, champs({
-		label: 'La Cathédrale', image: 'x.png', categorie: 'cathedral',
-		pnj: { character: 'pnj:dame_eleonore', nom: 'Dame Éléonore', portrait: 'e.png' },
+		label: 'La Cathédrale', image: 'x.png', categorie: 'cathedral', pnj: lignes,
 	}), CATALOGUE);
 	assert.strictEqual(doc.pnj.length, 2);
-	assert.deepStrictEqual(doc.pnj[1], avant.pnj[1], 'la seconde entrée a été perdue');
+	assert.deepStrictEqual(doc.pnj[1], avant.pnj[1], 'la seconde entrée a été altérée');
 	assert.strictEqual(doc.pnj[0].nom, 'Dame Éléonore');
 	assert.strictEqual(doc.pnj[0].description, 'd1', 'les clés hors formulaire survivent');
 	assert.strictEqual(doc.pnj[0].probabilite, 0.5);
 });
 
-t('décocher « avec un PNJ » retire bien le champ', () => {
-	// Le geste est destructeur — c'est l'interface qui le fait confirmer, pas cette
+t('retirer toutes les lignes retire bien le champ', () => {
+	// Le geste est destructeur — c'est l'interface qui fait confirmer les pertes, pas cette
 	// fonction : ici il doit s'appliquer sans détour.
-	const doc = _fusionLieu(boutique(), champs({ categorie: 'armurerie', pnj: null }), CATALOGUE);
-	assert.ok(!('pnj' in doc));
-	assert.deepStrictEqual(doc.stock_vente, [{ item_id: 'item:Dague', qty: 3 }]);
+	for (const pnj of [[], null]) {
+		const doc = _fusionLieu(boutique(), champs({ categorie: 'armurerie', pnj: pnj }), CATALOGUE);
+		assert.ok(!('pnj' in doc));
+		assert.deepStrictEqual(doc.stock_vente, [{ item_id: 'item:Dague', qty: 3 }]);
+	}
 });
 
 t('un nom ou un portrait vidé disparaît de l’entrée', () => {
 	// Absents, `nom`/`portrait` font retomber `pnj_payload` sur le doc PNJ générique :
 	// c'est un repli voulu, pas une valeur manquante.
 	const doc = _fusionLieu(boutique(), champs({ categorie: 'armurerie',
-		pnj: { character: 'pnj:marchand_armurerie', nom: '', portrait: '' } }), CATALOGUE);
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_armurerie', nom: '', portrait: '' })] }), CATALOGUE);
 	assert.ok(!('nom' in doc.pnj[0]) && !('portrait' in doc.pnj[0]));
 	assert.strictEqual(doc.pnj[0].character, 'pnj:marchand_armurerie');
 	assert.ok(doc.pnj[0].progeniture, 'la progéniture survit quand même');
@@ -297,9 +314,254 @@ t('décocher « Étable » vide vraiment l’écurie', () => {
 	};
 	const doc = _fusionLieu(avant, champs({
 		label: 'E', image: 'e.png', categorie: 'boulangerie', montures: [],
-		pnj: { character: 'pnj:marchand_boulangerie', nom: '', portrait: '' },
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_boulangerie', nom: '', portrait: '' })],
 	}), CATALOGUE);
 	assert.ok(!('montures' in doc.pnj[0]), 'une écurie orpheline que rien ne lit');
+});
+
+console.log('\n── PNJ du lieu : plusieurs entrées, sans rompre le lien PNJ ↔ lieu ──');
+
+// Les CINQ `conditions` réelles du dump du 13/09 (trois formes distinctes, les deux paladins
+// d'un même lieu portant la même).
+const CONDITIONS_REELLES = {
+	'grotte_dans_foret_humide[0]': [
+		{ quete_active: { types: ['escorte'], cible: 'lieu:bureau_du_maitre_de_guilde_d_auxerre',
+						  giver_categorie: 'bureau_maitre_guilde' } },
+	],
+	'la_cathedrale_saint_etienne_d_auxerre[0,1]': [
+		{ quete_active: { types: ['escorte'], cible: 'lieu:notre_dame', giver_categorie: 'cathedral',
+						  attendu: false } },
+		{ quete_reussie: { id: 'quete:escorte_convoi_de_lutecia', attendu: false } },
+	],
+	'notre_dame[0,1]': [
+		{ quete_reussie: { id: 'quete:escorte_convoi_de_lutecia' } },
+	],
+};
+
+// Le vocabulaire tel que `acces.vocabulaire_conditions` le sert. ⚠️ Recopié ici comme
+// CATALOGUE, pour affirmer un comportement sur CE vocabulaire : c'est `tests/test_acces.py`
+// qui verrouille l'accord entre ce payload et le moteur.
+const VOCAB = {
+	cles: ['combat_gagne', 'item', 'lieu_visite', 'ou', 'quete_active', 'quete_reussie', 'rang_min'],
+	sous_filtres: {
+		quete_active: ['attendu', 'cible', 'giver_categorie', 'lieu', 'objectif_atteint', 'types'],
+		quete_reussie: ['attendu', 'id'], item: ['item', 'lieu_parent'], rang_min: ['cite', 'rang'],
+		combat_gagne: ['attendu', 'lieu'], lieu_visite: ['attendu', 'lieu'], ou: [],
+	},
+	rangs: ['F', 'E', 'D', 'C', 'B', 'A', 'S', 'S+'],
+};
+
+// Réplique du Garde-manger des 3 fées : QUATRE entrées pour le même `pnj:marchand_cuisine`.
+function gardeManger() {
+	return {
+		_id: 'lieu:le_garde_manger_des_3_fees', type: 'lieu', label: 'Le Garde-manger des 3 fées',
+		image: 'cuisine_europe01.jpg', categorie: 'cuisine',
+		pnj: [
+			{ character: 'pnj:marchand_cuisine', nom: 'Les 3 fées', portrait: 'marchand_3_fées_cuisine.png' },
+			{ character: 'pnj:marchand_cuisine', nom: 'Ysabeau Clairval', portrait: 'marchand_ysabeau_clairval_cuisine.png' },
+			{ character: 'pnj:marchand_cuisine', nom: 'Floraine Ventdoux', portrait: 'marchand_floraine_ventdoux_cuisine.png' },
+			{ character: 'pnj:marchand_cuisine', nom: 'Sibylle Ormerande', portrait: 'marchand_sibylle_ormerande_cuisine.png' },
+		],
+	};
+}
+
+// Réplique de la cathédrale d'Auxerre : `image`, `description`, un `probabilite: 1` EXPLICITE
+// et des conditions — tout ce qu'une édition doit laisser passer.
+function cathedrale() {
+	const conds = () => JSON.parse(JSON.stringify(CONDITIONS_REELLES['la_cathedrale_saint_etienne_d_auxerre[0,1]']));
+	return {
+		_id: 'lieu:la_cathedrale_saint_etienne_d_auxerre', type: 'lieu', label: 'Cathédrale Saint-Étienne',
+		image: 'cathedrale.png', categorie: 'cathedral',
+		pnj: [
+			{ character: 'pnj:frere_martin_de_clairvaux', nom: 'Frère Martin de Clairvaux', probabilite: 0.3,
+			  image: 'pnj_paladin_frere_martin.jpg', portrait: 'paladin_Frere_Martin_de_Clairvaux_hobbit_m.jpg',
+			  description: 'Un paladin hobbit.', conditions: conds() },
+			{ character: 'pnj:dame_eleonore_de_rochefort', nom: 'Dame Éléonore de Rochefort',
+			  portrait: 'paladin_Dame_Eleonore_de_Rochefort_elfe_f.jpg', probabilite: 1,
+			  image: 'pnj_paladin_dame_eleonore.jpg', description: 'Une paladine.', conditions: conds() },
+		],
+	};
+}
+
+const lignesDe = doc => (doc.pnj || []).map((e, i) => _nlLigneDepuisEntree(e, i));
+
+t('ouvrir puis enregistrer sans rien toucher rend des entrées IDENTIQUES', () => {
+	for (const avant of [gardeManger(), boutique(), cathedrale()]) {
+		const doc = _fusionLieu(avant, champs({
+			label: avant.label, image: avant.image, categorie: avant.categorie, pnj: lignesDe(avant),
+		}), CATALOGUE);
+		assert.deepStrictEqual(doc.pnj, avant.pnj, avant._id);
+		assert.strictEqual(JSON.stringify(doc.pnj), JSON.stringify(avant.pnj), avant._id + ' : ordre des clés');
+	}
+});
+
+t('réordonner : la progéniture et la description SUIVENT leur entrée', () => {
+	const avant = boutique();
+	avant.pnj.push({ character: 'pnj:apprenti', nom: 'Colin', description: 'le fils' });
+	const doc = _fusionLieu(avant, champs({ categorie: 'armurerie', pnj: lignesDe(avant).reverse() }), CATALOGUE);
+	assert.deepStrictEqual(doc.pnj, [avant.pnj[1], avant.pnj[0]]);
+});
+
+t('doublons : éditer la 3e tenancière ne touche QUE la 3e entrée', () => {
+	const avant = gardeManger();
+	const lignes = lignesDe(avant);
+	lignes[2].nom = 'Floraine la Douce';
+	const doc = _fusionLieu(avant, champs({ categorie: 'cuisine', pnj: lignes }), CATALOGUE);
+	assert.strictEqual(doc.pnj[2].nom, 'Floraine la Douce');
+	assert.strictEqual(doc.pnj[2].portrait, avant.pnj[2].portrait);
+	for (const i of [0, 1, 3]) assert.deepStrictEqual(doc.pnj[i], avant.pnj[i], 'entrée ' + i);
+});
+
+t('retirer la 2e de 4 : les autres restent identiques', () => {
+	const avant = gardeManger();
+	const lignes = lignesDe(avant).filter(l => l.src !== 1);
+	const doc = _fusionLieu(avant, champs({ categorie: 'cuisine', pnj: lignes }), CATALOGUE);
+	assert.deepStrictEqual(doc.pnj, [avant.pnj[0], avant.pnj[2], avant.pnj[3]]);
+});
+
+t('probabilité : 1 n’est pas écrite sur une ligne neuve, un 1 EXPLICITE reste', () => {
+	const neuve = _fusionPnjEntrees([], [ligne({ character: 'pnj:a', probabilite: 1 })], []);
+	assert.ok(!('probabilite' in neuve[0]));
+	const reglee = _fusionPnjEntrees([], [ligne({ character: 'pnj:a', probabilite: 0.25 })], []);
+	assert.strictEqual(reglee[0].probabilite, 0.25);
+	const avant = [{ character: 'pnj:a', probabilite: 1 }];
+	assert.strictEqual(_fusionPnjEntrees(avant, lignesDe({ pnj: avant }), [])[0].probabilite, 1);
+});
+
+t('probabilité illisible : lue comme le moteur (1), gardée telle quelle tant qu’on n’y touche pas', () => {
+	assert.strictEqual(_probaLue('n’importe'), 1);
+	assert.strictEqual(_probaLue(undefined), 1);
+	assert.strictEqual(_probaLue(null), 1);
+	assert.strictEqual(_probaLue('0.4'), 0.4);
+	const avant = [{ character: 'pnj:a', probabilite: 'n’importe' }];
+	assert.strictEqual(_fusionPnjEntrees(avant, lignesDe({ pnj: avant }), [])[0].probabilite, 'n’importe');
+	const reglee = lignesDe({ pnj: avant });
+	reglee[0].probabilite = 0.5;
+	assert.strictEqual(_fusionPnjEntrees(avant, reglee, [])[0].probabilite, 0.5);
+});
+
+t('conditions : vidées ⇒ clé retirée ; nulles et intactes ⇒ laissées telles quelles', () => {
+	const avant = [{ character: 'pnj:a', conditions: [{ quete_reussie: { id: 'q' } }] }];
+	const videes = lignesDe({ pnj: avant });
+	videes[0].conditions = [];
+	assert.ok(!('conditions' in _fusionPnjEntrees(avant, videes, [])[0]));
+	const nulles = [{ character: 'pnj:a', conditions: null }];
+	assert.deepStrictEqual(_fusionPnjEntrees(nulles, lignesDe({ pnj: nulles }), []), nulles);
+});
+
+t('des conditions qui ne sont pas une liste ouvrent la ligne en JSON, en ERREUR', () => {
+	const l = _nlLigneDepuisEntree({ character: 'pnj:a', conditions: { quete_reussie: { id: 'q' } } }, 0);
+	assert.ok(l.jsonErreur, 'l’enregistrement doit rester bloqué');
+	assert.deepStrictEqual(JSON.parse(l.json), { quete_reussie: { id: 'q' } });
+});
+
+t('l’écurie passe sur la ligne qui la TIENT et quitte l’ancienne', () => {
+	const avant = [
+		{ character: 'pnj:marchand_etable', montures: ['espece:ane'] },
+		{ character: 'pnj:palefrenier' },
+	];
+	const lignes = lignesDe({ pnj: avant });
+	lignes[1].ecurie = true;
+	const apres = _fusionPnjEntrees(avant, lignes, ['espece:ane', 'espece:cheval']);
+	assert.ok(!('montures' in apres[0]));
+	assert.deepStrictEqual(apres[1].montures, ['espece:ane', 'espece:cheval']);
+});
+
+t('doublons : masquée derrière une entrée SANS condition, pas derrière une conditionnée', () => {
+	assert.deepStrictEqual(_pnjDoublons(lignesDe(gardeManger())), {
+		1: { premier: 0, masquee: true }, 2: { premier: 0, masquee: true }, 3: { premier: 0, masquee: true },
+	});
+	assert.deepStrictEqual(_pnjDoublons([
+		ligne({ character: 'pnj:a', conditions: [{ quete_reussie: { id: 'q' } }] }),
+		ligne({ character: 'pnj:a' }),
+		ligne({ character: 'pnj:b' }),
+	]), { 1: { premier: 0, masquee: false } });
+});
+
+t('chance que le lieu soit vide : le tirage du moteur, conditions à part', () => {
+	const r = _probaPersonne([
+		ligne({ character: 'pnj:a', probabilite: 0.5 }),
+		ligne({ character: 'pnj:b', probabilite: 0.5 }),
+		ligne({ character: 'pnj:c', probabilite: 1, conditions: [{ quete_reussie: { id: 'q' } }] }),
+	]);
+	assert.deepStrictEqual(r, { personne: 0.25, esperance: 1, horsCalcul: 1 });
+	// Un PNJ listé deux fois est là dès que L'UN de ses tirages passe (le moteur retente).
+	assert.deepStrictEqual(_probaPersonne([
+		ligne({ character: 'pnj:a', probabilite: 0.5 }), ligne({ character: 'pnj:a', probabilite: 0.5 }),
+	]), { personne: 0.25, esperance: 0.75, horsCalcul: 0 });
+});
+
+t('vue inverse : les AUTRES lieux du PNJ, le lieu courant exclu', () => {
+	const lieux = [
+		{ _id: 'lieu:temple_de_malakor', label: 'Temple',
+		  pnj: [{ character: 'pnj:reverend_malakor', probabilite: 0.7, conditionne: false }] },
+		{ _id: 'lieu:temple_de_malakor02', label: 'Temple 2',
+		  pnj: [{ character: 'pnj:reverend_malakor', probabilite: 0.3, conditionne: false }] },
+		{ _id: 'lieu:ailleurs', label: 'Ailleurs', pnj: [{ character: 'pnj:autre', probabilite: 1, conditionne: true }] },
+		{ _id: 'lieu:vide', label: 'Vide' },
+	];
+	assert.deepStrictEqual(_lieuxDuPnj(lieux, 'pnj:reverend_malakor', 'lieu:temple_de_malakor'), [
+		{ _id: 'lieu:temple_de_malakor02', label: 'Temple 2', probabilite: 0.3, conditionne: false },
+	]);
+	assert.deepStrictEqual(_lieuxDuPnj(lieux, 'pnj:personne', 'lieu:x'), []);
+	assert.deepStrictEqual(_lieuxDuPnj(lieux, '', 'lieu:x'), []);
+});
+
+console.log('\n── Conditions de présence : le constructeur ne perd rien ──');
+
+t('toutes les conditions réelles s’affichent en constructeur', () => {
+	for (const [ou, conds] of Object.entries(CONDITIONS_REELLES)) {
+		for (const c of conds) assert.ok(_clauseRepresentable(c, VOCAB), ou + ' : ' + JSON.stringify(c));
+	}
+});
+
+t('aller-retour par les widgets : chaque sous-filtre réel revient À L’IDENTIQUE', () => {
+	for (const conds of Object.values(CONDITIONS_REELLES)) {
+		for (const c of conds) {
+			const cle = Object.keys(c)[0];
+			const relue = {};
+			for (const [sous, v] of Object.entries(c[cle])) {
+				const g = _genreSousFiltre(sous);
+				const retour = _valeurDepuisBrut(_brutDepuisValeur(v, g), g);
+				if (retour !== undefined) relue[sous] = retour;
+			}
+			assert.deepStrictEqual(relue, c[cle], JSON.stringify(c));
+		}
+		assert.deepStrictEqual(_clausesFautives(conds), []);
+	}
+});
+
+t('un champ vidé est SUPPRIMÉ, jamais écrit à vide', () => {
+	assert.strictEqual(_valeurDepuisBrut('', 'texte'), undefined);
+	assert.strictEqual(_valeurDepuisBrut('  ', 'texte'), undefined);
+	assert.strictEqual(_valeurDepuisBrut(' , ', 'liste'), undefined);
+	assert.strictEqual(_valeurDepuisBrut('', 'bool'), undefined);
+	assert.deepStrictEqual(_valeurDepuisBrut('escorte, chasse', 'liste'), ['escorte', 'chasse']);
+	assert.strictEqual(_valeurDepuisBrut('false', 'bool'), false);
+});
+
+t('une clause hors constructeur reste une carte JSON, intacte', () => {
+	for (const c of [
+		{ quete_reussie: { ids: 'q' } },                  // sous-filtre inconnu
+		{ quete_activ: {} },                              // clé inconnue
+		{ quete_active: { types: [] } },                  // liste vide : ≠ absence de filtre
+		{ quete_active: { attendu: 'non' } },             // booléen illisible
+		{ quete_reussie: { id: ' q ' } },                 // l'espace ne survivrait pas au widget
+		{ item: { item: 'x' }, rang_min: { rang: 'D' } }, // deux clés dans une clause
+		{ ou: [{ quete_reussie: { idd: 'q' } }] },        // fautive enfouie dans un ou
+	]) {
+		assert.strictEqual(_clauseRepresentable(c, VOCAB), false, JSON.stringify(c));
+	}
+	assert.strictEqual(_clauseRepresentable({ ou: [{ lieu_visite: { lieu: 'lieu:x', attendu: false } }] }, VOCAB), true);
+});
+
+t('ce que le moteur rendrait faux POUR TOUJOURS bloque l’enregistrement', () => {
+	assert.strictEqual(_clausesFautives([{ ou: [] }]).length, 1);
+	assert.strictEqual(_clausesFautives([{ combat_gagne: {} }]).length, 1);
+	assert.strictEqual(_clausesFautives([{ item: { item: 'x' }, rang_min: { rang: 'D' } }]).length, 1);
+	assert.strictEqual(_clausesFautives([{ ou: [{ lieu_visite: {} }] }]).length, 1, 'enfouie dans un ou');
+	// « une quête quelconque en cours » : le seul filtre vide qui ait un sens.
+	assert.deepStrictEqual(_clausesFautives([{ quete_active: {} }]), []);
 });
 
 console.log('\n── Fusion : les tags, en édition ──');

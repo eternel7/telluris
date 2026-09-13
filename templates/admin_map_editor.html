@@ -648,6 +648,82 @@
 	.nl-cap.par-categorie .t b::after {
 		content: " (par la catégorie)"; color: var(--accent2); font-size: 0.62rem;
 	}
+	/* ── PNJ du lieu : une carte repliable par entrée `pnj`, dans l'ordre de la liste ── */
+	#lieu-add-overlay .la-panel { width: min(760px, 100%); }
+	.nlp-note { font-size: 0.64rem; color: #888; line-height: 1.4; }
+	.nlp-note i { font-style: normal; color: var(--accent2); }
+	#nl-pnj-liste { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; }
+	.nlp-vide {
+		padding: 8px; font-size: 0.66rem; color: #777;
+		border: 1px dashed var(--border); border-radius: 4px;
+	}
+	.nlp-carte { border: 1px solid var(--border); border-radius: 4px; background: #0d0f14; }
+	.nlp-carte.ouverte { border-color: var(--accent); }
+	.nlp-carte.inerte { border-style: dashed; }
+	.nlp-entete { display: flex; align-items: center; gap: 6px; padding: 4px 6px; }
+	.nlp-ordre { display: flex; flex-direction: column; }
+	.nlp-ordre button, .nlp-x {
+		background: none; border: none; color: var(--muted); cursor: pointer;
+		font-size: 0.62rem; line-height: 1; padding: 1px 3px;
+	}
+	.nlp-ordre button:disabled { opacity: 0.25; cursor: default; }
+	.nlp-ordre button:hover:not(:disabled), .nlp-x:hover { color: var(--accent); }
+	.nlp-rang {
+		font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+		color: var(--accent2); min-width: 1.2em; text-align: center;
+	}
+	.nlp-vignette {
+		width: 34px; height: 34px; object-fit: cover; flex: 0 0 auto;
+		border: 1px solid var(--border); border-radius: 3px;
+	}
+	span.nlp-vignette { display: flex; align-items: center; justify-content: center; color: #555; font-size: 0.7rem; }
+	.nlp-titre {
+		flex: 1; min-width: 0; text-align: left; cursor: pointer;
+		background: none; border: none; color: var(--text); padding: 2px 0; font: inherit;
+	}
+	.nlp-titre b { display: block; font-weight: normal; font-size: 0.72rem; overflow-wrap: anywhere; }
+	.nlp-titre .nlp-id {
+		display: block; font-family: 'Share Tech Mono', monospace;
+		font-size: 0.6rem; color: #777; overflow-wrap: anywhere;
+	}
+	.nlp-badges { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; }
+	.nlp-badge {
+		font-size: 0.6rem; padding: 1px 5px; border-radius: 8px; white-space: nowrap;
+		border: 1px solid var(--border); color: var(--muted);
+	}
+	.nlp-badge.nlp-si { color: var(--accent2); border-color: var(--accent2); }
+	.nlp-badge.nlp-alerte { color: var(--danger); border-color: var(--danger); }
+	.nlp-corps { padding: 4px 10px 10px; border-top: 1px solid var(--border); }
+	.nlp-corps > label { margin-top: 8px; }
+	.nlp-proba { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; }
+	.nlp-proba input[type=range] { flex: 1; min-width: 0; }
+	.nlp-proba input[type=number] { width: 80px; margin-bottom: 0; }
+	.nlp-cond-tete { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-top: 8px; }
+	.nlp-mini { font-size: 0.6rem; }
+	.nlp-clauses { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; align-items: stretch; }
+	.nlp-clauses > .nlp-mini { align-self: flex-start; }
+	.nlp-clauses .nlp-clauses { margin-left: 10px; padding-left: 8px; border-left: 2px solid var(--border); }
+	.nlp-clause { border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 4px 6px; }
+	.nlp-clause-json { border-style: dashed; }
+	.nlp-clause-tete { display: flex; align-items: center; gap: 6px; font-size: 0.64rem; color: var(--muted); }
+	.nlp-clause-tete select { width: auto; margin-bottom: 0; }
+	.nlp-clause-tete .nlp-aide { flex: 1; min-width: 0; color: #777; }
+	.nlp-liant { font-family: 'Share Tech Mono', monospace; color: var(--accent2); min-width: 2em; }
+	.nlp-sousfiltres {
+		display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+		gap: 4px 8px; margin-top: 4px;
+	}
+	.nlp-sf { display: flex; flex-direction: column; font-size: 0.6rem; color: #888; margin: 0; }
+	.nlp-sf input, .nlp-sf select { margin-bottom: 0; }
+	.nlp-json { width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 0.66rem; margin-top: 4px; }
+	.nlp-autres { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+	.nlp-lien {
+		background: none; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;
+		color: var(--text); font-size: 0.64rem; padding: 2px 6px;
+	}
+	.nlp-lien:hover { border-color: var(--accent); color: var(--accent); }
+	.nlp-lien span { color: #888; }
+	.nlp-pied { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
 	/* ── Création d'un LOT de lieux ──
 	   Même overlay que #lieu-add-overlay (mêmes .la-*), mais large et à deux colonnes :
@@ -1576,7 +1652,8 @@ let lieuxJsonDest = null;    // lieu de destination de cette connexion (le doc �
 let lieuxRepos = null;
 let lieuxDocCache = {};      // lieu_id -> doc lieu (alimente l'éditeur JSON)
 let creationOptions = null;  // payload de /api/lieux/creation_options
-let nlNomTouche = false;     // le nom du PNJ a-t-il été saisi à la main ?
+let nlPnjLignes = [];        // formulaire de lieu : une ligne par entrée `pnj` (cf. _fusionPnjEntrees)
+let nlInstantane = '';       // le doc produit à l'ouverture du formulaire — « modifié ? »
 // File des cases où poser un LOT de lieux : [{cx, cy}], dans l'ordre de shift+clic.
 // ⚠️ Une case par boutique, et l'ordre COMPTE — la ligne i du tableau prend la case i.
 let lieuxFileCases = [];
@@ -5111,10 +5188,9 @@ function _tagsApres(tags, voulues, catalogue, categorie, sousCategorie) {
 // chaîne d'escorte (10 en base). On part donc du doc EXISTANT et on n'y écrit que
 // les six champs que le formulaire possède.
 //
-// ⚠️ `pnj` est une LISTE : trois lieux en base en portent plusieurs (jusqu'à 4).
-// On fusionne dans l'entrée [0] et on CONSERVE les suivantes. Dans l'entrée [0],
-// seules `character`, `nom`, `portrait` et `montures` sont écrites ; `progeniture`,
-// `description`, `conditions`, `probabilite` et `image` traversent intactes.
+// ⚠️ `pnj` est une LISTE, et chaque entrée tire SA présence (utils/pnj.py). Le formulaire
+// en édite TOUTES les entrées, une ligne chacune : `_fusionPnjEntrees` fait survivre dans
+// chacune ce qu'il ne possède pas (`progeniture`, `description`, `image`…), même déplacée.
 //
 // ⚠️ `_id` n'est JAMAIS touché, quel que soit le label.
 function _fusionLieu(existant, champs, catalogue) {
@@ -5128,21 +5204,10 @@ function _fusionLieu(existant, champs, catalogue) {
 		champs.categorie, doc.sous_categorie);
 	if (tags.length) doc.tags = tags; else delete doc.tags;
 
-	if (champs.pnj) {
-		const liste = Array.isArray(doc.pnj) ? doc.pnj.slice() : [];
-		const entree = Object.assign({}, liste[0] || {});
-		entree.character = champs.pnj.character;
-		if (champs.pnj.nom) entree.nom = champs.pnj.nom; else delete entree.nom;
-		if (champs.pnj.portrait) entree.portrait = champs.pnj.portrait; else delete entree.portrait;
-		// L'écurie n'existe QUE si la capacité est active : décocher « Étable » doit
-		// vraiment vider le rayon, pas laisser une liste orpheline que rien ne lit.
-		if (champs.montures && champs.montures.length) entree.montures = champs.montures.slice();
-		else delete entree.montures;
-		liste[0] = entree;
-		doc.pnj = liste;
-	} else {
-		delete doc.pnj;
-	}
+	// L'écurie n'existe QUE si la capacité est active (`champs.montures` vide sinon) :
+	// décocher « Étable » vide vraiment le rayon, sans liste orpheline que rien ne lit.
+	const entrees = _fusionPnjEntrees(doc.pnj, champs.pnj || [], champs.montures);
+	if (entrees.length) doc.pnj = entrees; else delete doc.pnj;
 
 	if (champs.nuit_messages && champs.nuit_messages.length) {
 		doc.nuit_messages = champs.nuit_messages.slice();
@@ -5150,6 +5215,231 @@ function _fusionLieu(existant, champs, catalogue) {
 		delete doc.nuit_messages;
 	}
 	return doc;
+}
+
+// ══ PNJ DU LIEU — fonctions pures ══════════════════════════════════════════
+// Un lieu porte `pnj: [{character, nom?, portrait?, probabilite?, conditions?, …}]` et le
+// moteur tire CHAQUE entrée pour elle-même (utils/pnj.tirer_pnjs_presents). Le lien entre
+// un PNJ et ses lieux n'existe QUE là : un doc `pnj:*` ignore où il apparaît. Perdre une
+// entrée, ou une clé cachée d'une entrée, rompt ce lien sans la moindre erreur.
+//
+// Déclarées en `function` pour dev/test_lieu_form_client.js.
+
+// `probabilite` lue EXACTEMENT comme au tirage : absente ou illisible ⇒ 1.
+function _probaLue(v) {
+	if (v === undefined || v === null) return 1;
+	if (typeof v === 'boolean') return v ? 1 : 0;
+	if (typeof v === 'string' && !v.trim()) return 1;
+	const p = Number(v);
+	return isFinite(p) ? p : 1;
+}
+
+// La ligne de formulaire qui prolonge l'entrée d'indice `src` du doc relu.
+// ⚠️ Des `conditions` qui ne sont pas une liste cachent le PNJ pour toujours (le moteur
+// n'y trouve aucune clause valide) : la ligne s'ouvre en JSON, en erreur, et l'enregistrement
+// reste bloqué tant qu'on ne les a pas réécrites.
+function _nlLigneDepuisEntree(entree, src) {
+	const e = (entree && typeof entree === 'object') ? entree : {};
+	const l = {
+		src: src, character: e.character || '', nom: e.nom || '', portrait: e.portrait || '',
+		probabilite: _probaLue(e.probabilite),
+		conditions: Array.isArray(e.conditions) ? JSON.parse(JSON.stringify(e.conditions)) : [],
+		json: null, jsonErreur: '', clauseErreurs: {},
+		nomTouche: true,   // un nom relu de la base n'est pas à écraser par le portrait
+		ouvert: false, ecurie: false, tousPortraits: false, auto: false,
+	};
+	if (e.conditions != null && !Array.isArray(e.conditions)) {
+		l.json = JSON.stringify(e.conditions, null, 2);
+		l.jsonErreur = 'les conditions doivent être une LISTE de clauses';
+	}
+	return l;
+}
+
+// Les entrées `pnj` à écrire, dans l'ORDRE DES LIGNES.
+// ⚠️ Chaque ligne prolonge l'entrée d'origine d'indice `src` (null = ligne neuve), JAMAIS
+// celle qui porte son `character` : un même PNJ peut figurer plusieurs fois dans un lieu
+// (quatre tenancières au Garde-manger des 3 fées). L'entrée part d'un CLONE de l'origine :
+// toute clé que le formulaire ne possède pas (`progeniture`, `description`, `image`, une
+// clé à venir) suit SON entrée, y compris quand on la déplace.
+// Une valeur inchangée n'est pas réécrite : un `probabilite: 1` explicite reste, une
+// probabilité illisible reste telle quelle tant qu'on ne la règle pas.
+// `montures` = l'écurie, écrite sur la SEULE ligne qui la tient (`ecurie`, sinon la
+// première) et retirée des autres : `montures.especes_offertes` fait l'union de toutes
+// les entrées, le jeu vend donc la même chose. Liste vide ⇒ plus d'écurie.
+function _fusionPnjEntrees(existantes, lignes, montures) {
+	const avant = Array.isArray(existantes) ? existantes : [];
+	const liste = Array.isArray(lignes) ? lignes : [];
+	const ecurie = (montures && montures.length) ? montures.slice() : null;
+	let tenue = liste.findIndex(l => l && l.ecurie);
+	if (tenue === -1) tenue = 0;
+	return liste.map((l, i) => {
+		const orig = (l.src !== null && l.src !== undefined
+			&& avant[l.src] && typeof avant[l.src] === 'object') ? avant[l.src] : null;
+		const e = orig ? JSON.parse(JSON.stringify(orig)) : {};
+		e.character = l.character;
+		if (l.nom) e.nom = l.nom; else delete e.nom;
+		if (l.portrait) e.portrait = l.portrait; else delete e.portrait;
+
+		const p = Number(l.probabilite);
+		if (isFinite(p)) {
+			if (orig && 'probabilite' in orig) {
+				if (_probaLue(orig.probabilite) !== p) e.probabilite = p;
+			} else if (p !== 1) {
+				e.probabilite = p;
+			}
+		}
+
+		const conds = Array.isArray(l.conditions) ? l.conditions : [];
+		const origConds = (orig && orig.conditions != null) ? orig.conditions : [];
+		if (JSON.stringify(conds) !== JSON.stringify(origConds)) {
+			if (conds.length) e.conditions = JSON.parse(JSON.stringify(conds));
+			else delete e.conditions;
+		}
+
+		if (ecurie && i === tenue) e.montures = ecurie.slice();
+		else delete e.montures;
+		return e;
+	});
+}
+
+// Les lignes dont le PNJ figure DÉJÀ plus haut : `{indice: {premier, masquee}}`.
+// Le moteur ne montre qu'UNE entrée par PNJ, la première VISIBLE (`entrees_pnj_actives`) :
+// une ligne est `masquee` dès qu'une ligne plus haut porte le même PNJ SANS condition — son
+// nom, son portrait, sa description ne se verront jamais. Sa probabilité compte encore : le
+// tirage retente un PNJ qui a raté le sien.
+function _pnjDoublons(lignes) {
+	const out = {};
+	(lignes || []).forEach((l, i) => {
+		if (!l || !l.character) return;
+		for (let k = 0; k < i; k++) {
+			const avant = lignes[k];
+			if (!avant || avant.character !== l.character) continue;
+			if (!(i in out)) out[i] = { premier: k, masquee: false };
+			if (!(avant.conditions || []).length) out[i].masquee = true;
+		}
+	});
+	return out;
+}
+
+// Ce que la liste promet quand AUCUNE condition ne tient (les lignes conditionnées sont
+// comptées à part) : `personne` = chance que le lieu soit vide, `esperance` = nombre moyen
+// de PNJ distincts présents. Même tirage que le moteur : chaque entrée est indépendante, et
+// un PNJ listé deux fois est là dès que l'un de ses tirages passe.
+function _probaPersonne(lignes) {
+	const absent = {};
+	let horsCalcul = 0;
+	(lignes || []).forEach(l => {
+		if (!l || !l.character) return;
+		if ((l.conditions || []).length) { horsCalcul++; return; }
+		const p = Math.min(1, Math.max(0, _probaLue(l.probabilite)));
+		absent[l.character] = (l.character in absent ? absent[l.character] : 1) * (1 - p);
+	});
+	let personne = 1, esperance = 0;
+	Object.keys(absent).forEach(c => { personne *= absent[c]; esperance += 1 - absent[c]; });
+	return { personne, esperance, horsCalcul };
+}
+
+// Les AUTRES lieux où ce PNJ peut se montrer, depuis le résumé `creation_options.lieux`
+// (`utils/pnj.resume_presences`) — le lieu courant exclu : pour lui, le formulaire fait foi.
+// ⚠️ Un tenancier générique (`pnj:marchand_*`) est AUSSI implicite dans toute boutique de sa
+// catégorie sans champ `pnj` : cette liste n'en dit rien.
+function _lieuxDuPnj(lieux, pnjId, lieuCourantId) {
+	const out = [];
+	if (!pnjId) return out;
+	(lieux || []).forEach(l => {
+		if (!l || l._id === lieuCourantId) return;
+		const entrees = (l.pnj || []).filter(e => e && e.character === pnjId);
+		if (!entrees.length) return;
+		out.push({
+			_id: l._id, label: l.label || l._id,
+			probabilite: entrees[0].probabilite,
+			conditionne: entrees.some(e => e.conditionne),
+		});
+	});
+	return out;
+}
+
+// ── Conditions de présence : du doc au constructeur, et retour ──
+// Le vocabulaire (clés, sous-filtres, rangs) vient de `creation_options.conditions`
+// (acces.vocabulaire_conditions) : rien n'en est recopié ici. Ce qui suit ne décide que du
+// WIDGET d'un sous-filtre, d'après son nom — un nom inconnu reçoit un champ texte.
+
+function _genreSousFiltre(sous) {
+	if (sous === 'attendu' || sous === 'objectif_atteint') return 'bool';
+	if (sous === 'types') return 'liste';
+	return 'texte';
+}
+
+// Valeur du doc → texte du widget.
+function _brutDepuisValeur(valeur, genre) {
+	if (valeur === undefined || valeur === null) return '';
+	if (genre === 'bool') return valeur === true ? 'true' : (valeur === false ? 'false' : '');
+	if (genre === 'liste') return Array.isArray(valeur) ? valeur.join(', ') : '';
+	return String(valeur);
+}
+
+// Texte du widget → valeur du doc. `undefined` = SUPPRIMER la clé : un filtre vide n'est
+// jamais écrit (`types: []` refuse tout, ce n'est pas l'absence de filtre).
+function _valeurDepuisBrut(brut, genre) {
+	const s = String(brut == null ? '' : brut).trim();
+	if (genre === 'bool') return s === 'true' ? true : (s === 'false' ? false : undefined);
+	if (genre === 'liste') {
+		const l = s.split(',').map(x => x.trim()).filter(Boolean);
+		return l.length ? l : undefined;
+	}
+	return s ? s : undefined;
+}
+
+// La clause s'affiche-t-elle en constructeur SANS rien perdre ? Une seule clé, connue ; un
+// filtre objet dont chaque sous-filtre est connu et fait l'aller-retour à l'identique par son
+// widget ; pour `ou`, des sous-clauses elles-mêmes représentables. Sinon elle reste une carte
+// JSON, rendue telle quelle — jamais « corrigée » en silence.
+// Un `ou` VIDE s'affiche (c'est l'état d'un `ou` qu'on vient de choisir) : c'est
+// `_clausesFautives` qui refuse de l'écrire.
+function _clauseRepresentable(clause, vocab) {
+	if (!clause || typeof clause !== 'object' || Array.isArray(clause)) return false;
+	const cles = Object.keys(clause);
+	if (cles.length !== 1) return false;
+	const cle = cles[0];
+	if (((vocab && vocab.cles) || []).indexOf(cle) === -1) return false;
+	const filtre = clause[cle];
+	if (cle === 'ou') {
+		return Array.isArray(filtre) && filtre.every(c => _clauseRepresentable(c, vocab));
+	}
+	if (!filtre || typeof filtre !== 'object' || Array.isArray(filtre)) return false;
+	const connus = ((vocab.sous_filtres || {})[cle]) || [];
+	return Object.keys(filtre).every(sous => {
+		if (connus.indexOf(sous) === -1) return false;
+		const genre = _genreSousFiltre(sous);
+		const v = filtre[sous];
+		if (genre === 'bool' && typeof v !== 'boolean') return false;
+		if (genre === 'liste' && !(Array.isArray(v) && v.every(x => typeof x === 'string'))) return false;
+		if (genre === 'texte' && typeof v !== 'string') return false;
+		return JSON.stringify(_valeurDepuisBrut(_brutDepuisValeur(v, genre), genre)) === JSON.stringify(v);
+	});
+}
+
+// Ce qui empêche d'écrire une liste de clauses, en clair — vide si rien. On n'y refuse que ce
+// que le moteur (`acces._clause_remplie`) rendrait FAUX POUR TOUJOURS, donc un PNJ qui ne se
+// montre jamais : une clause à plusieurs clés, un `ou` sans sous-clause, un filtre vide (privé
+// de sa cible). Seul `quete_active: {}` a un sens : « une quête quelconque en cours ».
+function _clausesFautives(conditions, prefixe) {
+	const out = [];
+	(conditions || []).forEach((c, i) => {
+		const ici = (prefixe ? prefixe + ' › ' : '') + 'clause ' + (i + 1);
+		if (!c || typeof c !== 'object' || Array.isArray(c)) { out.push(`${ici} : ce n'est pas un objet`); return; }
+		const cles = Object.keys(c);
+		if (cles.length !== 1) { out.push(`${ici} : une clause porte exactement une clé (${cles.length})`); return; }
+		const cle = cles[0], f = c[cle];
+		if (cle === 'ou') {
+			if (!Array.isArray(f) || !f.length) out.push(`${ici} : « ou » sans sous-clause, toujours faux`);
+			else _clausesFautives(f, ici + ' (ou)').forEach(m => out.push(m));
+		} else if (cle !== 'quete_active' && f && typeof f === 'object' && !Array.isArray(f)
+				&& !Object.keys(f).length) {
+			out.push(`${ici} : « ${cle} » sans aucun filtre rempli`);
+		}
+	});
+	return out;
 }
 
 // Le formulaire sert DEUX modes. `nlMode` pilote le titre, le bouton, le gel de l'`_id`,
@@ -5206,59 +5496,54 @@ async function openLieuForm(mode, destId) {
 	_nlEl('nl-categorie-libre').value = '';
 	_nlEl('nl-categorie-libre').style.display = 'none';
 	_nlEl('nl-image-all').checked = false;
-	_nlEl('nl-pnj-portrait-all').checked = false;
 	_nlEl('nl-montures-warn').textContent = '';
 
 	if (nlMode === 'edition') {
 		catSel.value = catDoc;
 		_nlEl('nl-label').value = nlDocExistant.label || '';
 		nlCapacites = _capacitesDe(nlDocExistant, creationOptions.capacites);
-		const entree = (nlDocExistant.pnj || [])[0] || null;
-		_nlEl('nl-pnj-on').checked = !!entree;
-		_nlEl('nl-pnj-bloc').style.display = entree ? '' : 'none';
-		_nlEl('nl-pnj-nom').value = (entree && entree.nom) || '';
-		nlMontures = ((entree && entree.montures) || []).slice();
-		// ⚠️ Les deux filtres par catégorie sont HEURISTIQUES (la convention de nommage
-		// des images n'est pas fiable) : le fichier réel du doc peut ne pas y figurer.
-		// On ouvre alors la liste complète — sans quoi le `select` retomberait à vide et
-		// l'enregistrement refuserait « Image requise » sur un lieu qui en a une.
+		// Une ligne par entrée `pnj`, chacune liée à SON entrée d'origine (`src`).
+		const entrees = Array.isArray(nlDocExistant.pnj) ? nlDocExistant.pnj : [];
+		nlPnjLignes = entrees.map((e, i) => _nlLigneDepuisEntree(e, i));
+		// L'écurie = l'union de toutes les entrées (ce que `montures.especes_offertes` vend),
+		// tenue par la première ligne qui en portait une.
+		nlMontures = [];
+		entrees.forEach(e => ((e && e.montures) || []).forEach(m => {
+			if (nlMontures.indexOf(m) === -1) nlMontures.push(m);
+		}));
+		const tenue = entrees.findIndex(e => e && (e.montures || []).length);
+		if (nlPnjLignes.length) nlPnjLignes[tenue === -1 ? 0 : tenue].ecurie = true;
+		if (nlPnjLignes.length === 1) nlPnjLignes[0].ouvert = true;
+		// ⚠️ Le filtre d'images par catégorie est HEURISTIQUE (la convention de nommage
+		// n'est pas fiable) : le fichier réel du doc peut ne pas y figurer. On ouvre alors
+		// la liste complète — sans quoi le `select` retomberait à vide et l'enregistrement
+		// refuserait « Image requise » sur un lieu qui en a une.
 		if (nlDocExistant.image
 				&& !_imagesPourCategorie(catDoc).includes(nlDocExistant.image)) {
 			_nlEl('nl-image-all').checked = true;
 		}
-		if (entree && entree.portrait
-				&& !_portraitsPourCategorie(catDoc).includes(entree.portrait)) {
-			_nlEl('nl-pnj-portrait-all').checked = true;
-		}
 		_nlEl('nl-nuit-messages').value = (nlDocExistant.nuit_messages || []).join('\n');
-		nlNomTouche = true;   // un nom relu de la base n'est pas à écraser par le portrait
 	} else {
 		_nlEl('nl-label').value = '';
-		_nlEl('nl-pnj-nom').value = '';
 		_nlEl('nl-nuit-messages').value = '';
-		// Aucune catégorie n'est encore choisie : rien n'est décidé, le bloc reste offert
-		// comme avant. C'est le premier choix de catégorie qui tranche, via
-		// `_nlTenancierDefaut` — et c'est lui qui empêche d'écrire un tenancier fantôme.
-		_nlEl('nl-pnj-on').checked = true;
-		_nlEl('nl-pnj-bloc').style.display = '';
+		// Aucune catégorie n'est encore choisie : aucun PNJ. C'est le premier choix de
+		// catégorie qui propose le tenancier, via `_nlTenancierDefaut` — et lui seul, pour
+		// ne jamais écrire de tenancier fantôme.
+		nlPnjLignes = [];
 		nlCapacites = {};
 		nlMontures = [];
-		nlNomTouche = false;
 	}
 
 	_nlMajChrome();
 	_nlRepeuplerImages();
 	if (nlMode === 'edition' && nlDocExistant.image) _nlEl('nl-image').value = nlDocExistant.image;
 	_nlMajVignetteImage();
-	_nlRepeuplerPnj();
+	_nlRemplirDatalists();
 	_nlRenderCapacites();
-	if (nlMode === 'edition') {
-		const entree = (nlDocExistant.pnj || [])[0] || null;
-		if (entree && entree.character) _nlEl('nl-pnj-character').value = entree.character;
-		if (entree && entree.portrait) _nlEl('nl-pnj-portrait').value = entree.portrait;
-		_nlMajPortrait();
-	}
+	_nlRenderPnj();
 	_nlRefreshApercu();
+	nlInstantane = _nlDocCourantJson();
+	overlay.scrollTop = 0;
 }
 
 // Titre, bouton, gel de l'`_id`, connexion : tout ce qui distingue les deux modes.
@@ -5295,62 +5580,598 @@ function _nlMajVignetteImage() {
 	img.style.display = 'block';
 }
 
-// ⚠️ LE correctif qui débloque l'auberge. Le bloc PNJ n'est coché d'office QUE si le
+// ══ PNJ DU LIEU — rendu et gestes ══════════════════════════════════════════
+// Une carte repliable par ligne de `nlPnjLignes`, dans l'ordre de la liste du lieu.
+// ⚠️ Les gestes STRUCTURELS (ordre, ajout, retrait, choix d'un PNJ, d'une clé de clause…)
+// redessinent la liste ; la FRAPPE jamais : redessiner sous le doigt volerait le focus, et
+// redessiner au `change` qui suit un blur avalerait le clic qui l'a provoqué (CLAUDE.md §15).
+// Une saisie ne met à jour que la donnée, l'en-tête de sa carte et le résumé.
+// ⚠️ Les identifiants voyagent par des `data-*` lus en JS, jamais dans un
+// `onclick="…('${x}')"` (CLAUDE.md §9). `_escAttr` échappe aussi les guillemets, ce que
+// `_escHtml` ne fait pas : tout texte saisi qui part dans un attribut passe par lui.
+
+const NL_PNJ_URL = `{{ url_for('pnj', path='') }}`;
+// Ce que dit chaque clé, pour qui lit le constructeur. Une clé servie sans aide reste
+// utilisable : seule l'aide manque.
+const NL_AIDE_CONDITIONS = {
+	quete_active: 'une quête en cours correspond',
+	quete_reussie: 'une quête nommée a été menée à bien',
+	item: 'le joueur porte cet objet',
+	rang_min: 'rang de guilde minimal dans une cité',
+	combat_gagne: 'combat remporté dans cette salle',
+	lieu_visite: 'lieu déjà visité',
+	ou: 'au moins une des clauses tient',
+};
+// Suggestions par sous-filtre — des `datalist`, jamais une contrainte (`cible` peut aussi
+// désigner une espèce).
+const NL_DATALIST_SOUS = {
+	lieu: 'nl-dl-lieux', cible: 'nl-dl-lieux', lieu_parent: 'nl-dl-lieux',
+	item: 'nl-dl-items', cite: 'nl-dl-cites', giver_categorie: 'nl-dl-cats',
+};
+
+function _escAttr(s) {
+	return _escHtml(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function _nlPct(p) {
+	const n = Number(p);
+	return isFinite(n) ? `${Math.round(n * 1000) / 10} %` : '? %';
+}
+
+function _nlVocab() {
+	return (creationOptions && creationOptions.conditions) || { cles: [], sous_filtres: {}, rangs: [] };
+}
+
+// Ce que le formulaire écrirait maintenant — comparé à `nlInstantane` pour savoir s'il a changé.
+function _nlDocCourantJson() {
+	return JSON.stringify(nlMode === 'edition' ? _docLieuEdite() : _docsNouveauLieu());
+}
+
+// Le tenancier générique de la catégorie, s'il existe VRAIMENT en base ('' sinon).
+function _nlTenancierDeduit() {
+	const cat = _nlCategorie();
+	const id = cat ? `pnj:marchand_${cat}` : '';
+	return (id && ((creationOptions && creationOptions.pnj) || []).some(p => p._id === id)) ? id : '';
+}
+
+function _nlNouvelleLigne(character) {
+	const l = _nlLigneDepuisEntree({ character: character || '' }, null);
+	l.nomTouche = false;   // une ligne neuve déduit son nom du portrait
+	l.ouvert = true;
+	return l;
+}
+
+// ⚠️ LE correctif qui débloque l'auberge. Un PNJ n'est proposé d'office QUE si le
 // tenancier générique existe vraiment en base. `auberge` est la seule catégorie
 // interactive du jeu sans `pnj:marchand_*` (aucun code d'auberge ne lit `lieu.pnj[]`) :
-// laisser la case cochée écrivait une référence morte à chaque création, en silence.
+// le proposer écrivait une référence morte à chaque création, en silence.
 // Vaut aussi pour les 15 autres catégories sans tenancier générique (temple, grotte…).
-// ⚠️ En ÉDITION, on ne touche à rien : la case reflète le doc relu, pas une déduction.
+// ⚠️ En ÉDITION, on ne touche à rien : les lignes reflètent le doc relu, pas une déduction.
+// Seule une ligne `auto` (proposée, jamais touchée) suit la catégorie ; dès que l'auteur a
+// pris la main sur une ligne, on ne la lui retire plus.
 function _nlTenancierDefaut() {
 	if (nlMode === 'edition') return;
-	const cat = _nlCategorie();
-	const pnjs = (creationOptions && creationOptions.pnj) || [];
-	const existe = !!cat && pnjs.some(p => p._id === `pnj:marchand_${cat}`);
+	if (nlPnjLignes.some(l => !l.auto)) return;
+	const t = _nlTenancierDeduit();
 	// Une écurie a besoin d'un tenancier pour la porter : la capacité gagne.
-	const on = existe || !!nlCapacites.montures;
-	_nlEl('nl-pnj-on').checked = on;
-	_nlEl('nl-pnj-bloc').style.display = on ? '' : 'none';
+	if (t || nlCapacites.montures) {
+		const l = _nlNouvelleLigne(t);
+		l.auto = true;
+		l.ecurie = true;
+		nlPnjLignes = [l];
+	} else {
+		nlPnjLignes = [];
+	}
 }
 
-function _nlRepeuplerPnj() {
-	const cat = _nlCategorie();
-	const attendu = cat ? `pnj:marchand_${cat}` : '';
+// Une écurie active est toujours TENUE par une ligne (la première, à défaut).
+function _nlAssurerEcurie() {
+	if (nlPnjLignes.length && !nlPnjLignes.some(l => l.ecurie)) nlPnjLignes[0].ecurie = true;
+}
+
+function _nlRemplirDatalists() {
+	const opts = ids => ids.map(v => `<option value="${_escAttr(v)}"></option>`).join('');
+	const lieux = (creationOptions && creationOptions.lieux) || [];
+	_nlEl('nl-dl-lieux').innerHTML = opts((creationOptions && creationOptions.lieu_ids) || []);
+	_nlEl('nl-dl-cites').innerHTML = opts(lieux.filter(l => !l.lieu_parent).map(l => l._id));
+	_nlEl('nl-dl-cats').innerHTML = opts((creationOptions && creationOptions.categories) || []);
+	_nlEl('nl-dl-items').innerHTML = opts(Object.keys(itemsDefs).sort());
+}
+
+function _nlNomAffiche(l) {
+	const doc = ((creationOptions && creationOptions.pnj) || []).find(p => p._id === l.character);
+	return l.nom || (doc && doc.nom) || l.character || '(PNJ à choisir)';
+}
+
+// L'entrée du doc RELU que cette ligne prolonge, ou null (ligne neuve, création).
+function _nlEntreeOrigine(l) {
+	const avant = (nlDocExistant && Array.isArray(nlDocExistant.pnj)) ? nlDocExistant.pnj : [];
+	const e = (l.src !== null && l.src !== undefined) ? avant[l.src] : null;
+	return (e && typeof e === 'object') ? e : null;
+}
+
+function _nlRenderPnj() {
+	_nlAssurerEcurie();
+	const doublons = _pnjDoublons(nlPnjLignes);
+	_nlEl('nl-pnj-liste').innerHTML = nlPnjLignes.map((l, r) => _nlCarteHtml(l, r, doublons)).join('')
+		|| `<div class="nlp-vide">Aucun PNJ déclaré dans ce lieu.</div>`;
+	_nlMajResume();
+	_nlMajEcurieSelect();
+}
+
+function _nlBadgesHtml(l, r, doublons) {
+	const orig = _nlEntreeOrigine(l);
+	const b = [`<span class="nlp-badge" title="Chance de présence à l'entrée">${_nlPct(l.probabilite)}</span>`];
+	if (l.json !== null || (l.conditions || []).length) {
+		const detail = l.json !== null ? l.json : JSON.stringify(l.conditions);
+		b.push(`<span class="nlp-badge nlp-si" title="${_escAttr(detail)}">si…</span>`);
+	}
+	if (orig && orig.progeniture) b.push(`<span class="nlp-badge" title="Porte une progéniture (chaîne d’escorte)">👶</span>`);
+	if (l.ecurie && _nlCapacitesActives().montures) b.push(`<span class="nlp-badge" title="Tient l’écurie">🐴</span>`);
+	const d = doublons[r];
+	if (d) {
+		b.push(`<span class="nlp-badge nlp-alerte" title="Même PNJ que la ligne n°${d.premier + 1}">`
+			+ `⚠ ${d.masquee ? 'inerte' : 'doublon'}</span>`);
+	}
+	return b.join('');
+}
+
+function _nlCarteHtml(l, r, doublons) {
+	const d = doublons[r];
+	const dernier = nlPnjLignes.length - 1;
+	const vignette = l.portrait
+		? `<img class="nlp-vignette" src="${NL_PNJ_URL}${encodeURIComponent(l.portrait)}" alt="">`
+		: `<span class="nlp-vignette">?</span>`;
+	const entete = `<div class="nlp-entete">
+			<span class="nlp-ordre">
+				<button type="button" data-act="haut" data-ligne="${r}" title="Monter"${r === 0 ? ' disabled' : ''}>▲</button>
+				<button type="button" data-act="bas" data-ligne="${r}" title="Descendre"${r === dernier ? ' disabled' : ''}>▼</button>
+			</span>
+			<span class="nlp-rang">${r + 1}</span>
+			${vignette}
+			<button type="button" class="nlp-titre" data-act="basculer" data-ligne="${r}" title="${l.ouvert ? 'Replier' : 'Déplier'}">
+				<b data-nom-ligne="${r}">${_escHtml(_nlNomAffiche(l))}</b>
+				<span class="nlp-id">${_escHtml(l.character || '—')}</span>
+			</button>
+			<span class="nlp-badges" data-badges-ligne="${r}">${_nlBadgesHtml(l, r, doublons)}</span>
+			<button type="button" class="nlp-x" data-act="retirer" data-ligne="${r}" title="Retirer ce PNJ du lieu">✕</button>
+		</div>`;
+	const classes = 'nlp-carte' + (l.ouvert ? ' ouverte' : '') + (d && d.masquee ? ' inerte' : '');
+	return `<div class="${classes}">${entete}${l.ouvert ? _nlCorpsHtml(l, r, d) : ''}</div>`;
+}
+
+function _nlCorpsHtml(l, r, d) {
 	const pnjs = (creationOptions && creationOptions.pnj) || [];
-	const connu = pnjs.some(p => p._id === attendu);
-	const sel = _nlEl('nl-pnj-character');
-	// Le doc marchand peut ne pas exister encore : on l'offre quand même, avec
-	// un avertissement — pnj_payload le résoudrait à vide.
-	// Sans catégorie il n'y a rien à déduire : un placeholder, plutôt que de
-	// laisser le navigateur présélectionner silencieusement le premier PNJ venu.
-	sel.innerHTML = (attendu ? '' : `<option value="" disabled selected>-- Choisir d'abord une catégorie --</option>`)
-		+ (attendu && !connu ? `<option value="${_escHtml(attendu)}">${_escHtml(attendu)} (doc absent)</option>` : '')
-		+ pnjs.map(p => `<option value="${_escHtml(p._id)}">${_escHtml(p._id)} — ${_escHtml(p.nom)}</option>`).join('');
-	if (attendu) sel.value = attendu;
-	_nlEl('nl-pnj-warn').textContent = (attendu && !connu)
-		? `⚠ Aucun document ${attendu} en base.` : '';
-	_nlRepeuplerPortraits();
+	const deduit = _nlTenancierDeduit();
+	const docPnj = pnjs.find(p => p._id === l.character);
+	const tries = deduit
+		? pnjs.filter(p => p._id === deduit).concat(pnjs.filter(p => p._id !== deduit)) : pnjs;
+	const optsPnj = `<option value="" disabled${l.character ? '' : ' selected'}>-- Choisir un PNJ --</option>`
+		+ (l.character && !docPnj
+			? `<option value="${_escAttr(l.character)}" selected>${_escHtml(l.character)} (doc absent)</option>` : '')
+		+ tries.map(p => `<option value="${_escAttr(p._id)}"${p._id === l.character ? ' selected' : ''}>`
+			+ `${p._id === deduit ? '★ ' : ''}${_escHtml(p._id)} — ${_escHtml(p.nom)}</option>`).join('');
+
+	// Le portrait COURANT est toujours offert, même hors du filtre par catégorie (heuristique) :
+	// sinon le `select` retomberait à vide et l'enregistrement effacerait le portrait.
+	let portraits = l.tousPortraits
+		? ((creationOptions && creationOptions.portraits) || []) : _portraitsPourCategorie(_nlCategorie());
+	if (l.portrait && portraits.indexOf(l.portrait) === -1) portraits = [l.portrait].concat(portraits);
+	const optsPortrait = `<option value=""${l.portrait ? '' : ' selected'}>— aucun : celui du doc PNJ —</option>`
+		+ portraits.map(f => `<option value="${_escAttr(f)}"${f === l.portrait ? ' selected' : ''}>${_escHtml(f)}</option>`).join('');
+
+	const p = Number(l.probabilite);
+	const pct = isFinite(p) ? Math.round(p * 10000) / 100 : '';
+	const doublon = !d ? '' : `<div class="la-warn">⚠ Même PNJ que la ligne n°${d.premier + 1} : ` + (d.masquee
+		? `le jeu ne montre que la première entrée visible — ce nom, ce portrait et cette description ne se verront jamais. Sa chance de présence ajoute seulement un second tirage.`
+		: `cette entrée ne se montre que lorsque les conditions des lignes plus haut les écartent.`) + `</div>`;
+
+	return `<div class="nlp-corps">
+		<label>PNJ <span class="nlp-note">(★ = tenancier générique de la catégorie)</span></label>
+		<select data-champ="character" data-ligne="${r}" style="margin-bottom:0;">${optsPnj}</select>
+		${l.character && !docPnj ? `<div class="la-warn">⚠ Aucun document ${_escHtml(l.character)} en base.</div>` : ''}
+		${doublon}
+		<label>Portrait</label>
+		<select data-champ="portrait" data-ligne="${r}" style="margin-bottom:0;">${optsPortrait}</select>
+		<label class="la-check"><input type="checkbox" data-champ="tous-portraits" data-ligne="${r}"${l.tousPortraits ? ' checked' : ''}> tous les portraits</label>
+		${l.portrait ? `<img class="la-thumb" src="${NL_PNJ_URL}${encodeURIComponent(l.portrait)}" alt="">` : ''}
+		<label>Nom <span class="nlp-note">(vide = celui du doc PNJ)</span></label>
+		<input type="text" data-champ="nom" data-ligne="${r}" value="${_escAttr(l.nom)}" placeholder="${_escAttr((docPnj && docPnj.nom) || '')}" style="margin-bottom:0;">
+		<label>Chance de présence</label>
+		<div class="nlp-proba">
+			<input type="range" min="0" max="100" step="1" data-champ="proba-range" data-ligne="${r}" value="${pct}">
+			<input type="number" min="0" max="100" step="any" data-champ="proba" data-ligne="${r}" value="${pct}"> %
+		</div>
+		<div class="nlp-note">Tirée à chaque entrée dans le lieu, indépendamment des autres PNJ.</div>
+		${_nlConditionsHtml(l, r)}
+		${_nlAutresLieuxHtml(l, r)}
+		${_nlClesConserveesHtml(l)}
+	</div>`;
 }
 
-function _nlRepeuplerPortraits() {
-	const sel = _nlEl('nl-pnj-portrait');
-	const cat = _nlCategorie();
-	const tous = _nlEl('nl-pnj-portrait-all').checked;
-	const liste = tous ? ((creationOptions && creationOptions.portraits) || []) : _portraitsPourCategorie(cat);
-	const avant = sel.value;
-	sel.innerHTML = `<option value="" disabled selected>-- Choisir un portrait --</option>`
-		+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(f)}</option>`).join('');
-	if (avant && liste.includes(avant)) sel.value = avant;
-	_nlMajPortrait();
+function _nlConditionsHtml(l, r) {
+	const json = l.json !== null;
+	const tete = `<div class="nlp-cond-tete">
+			<label style="margin:0;">Conditions de présence <span class="nlp-note">(toutes doivent tenir ; aucune = toujours)</span></label>
+			<button type="button" class="btn btn-inline nlp-mini" data-act="json" data-ligne="${r}">${json ? '🧩 Constructeur' : '{ } JSON'}</button>
+		</div>`;
+	if (json) {
+		return tete + `<textarea class="nlp-json" rows="6" data-champ="json" data-ligne="${r}">${_escHtml(l.json)}</textarea>`
+			+ `<div class="la-warn" data-err-json="${r}">${_escHtml(l.jsonErreur)}</div>`;
+	}
+	return tete + _nlClausesHtml(l, r, l.conditions, '', 'ET');
 }
 
-function _nlMajPortrait() {
-	const img = _nlEl('nl-pnj-thumb');
-	const f = _nlEl('nl-pnj-portrait').value;
-	if (!f) { img.style.display = 'none'; img.removeAttribute('src'); return; }
-	img.src = `{{ url_for('pnj', path='') }}${f}`;
-	img.style.display = 'block';
-	// Le nom se déduit du portrait tant que l'utilisateur n'y a pas touché.
-	if (!nlNomTouche) _nlEl('nl-pnj-nom').value = _nomDepuisPortrait(f, _nlCategorie());
+// Une liste de clauses (la racine, ou le `ou` d'une clause). `cheminListe` : "" pour la
+// racine, "0/ou" pour le `ou` de la 1re clause, etc.
+function _nlClausesHtml(l, r, clauses, cheminListe, liant) {
+	const vocab = _nlVocab();
+	const items = (clauses || []).map((c, i) => {
+		const chemin = cheminListe ? `${cheminListe}/${i}` : String(i);
+		const mot = i ? liant : (cheminListe ? '' : 'SI');
+		return _nlClauseHtml(l, r, c, chemin, mot, vocab);
+	}).join('');
+	return `<div class="nlp-clauses">${items}`
+		+ `<button type="button" class="btn btn-inline nlp-mini" data-act="ajouter-clause" data-ligne="${r}" data-chemin="${cheminListe}">`
+		+ `+ clause${cheminListe ? ' (ou)' : ''}</button></div>`;
+}
+
+function _nlClauseHtml(l, r, c, chemin, liant, vocab) {
+	const retirer = `<button type="button" class="nlp-x" data-act="retirer-clause" data-ligne="${r}" data-chemin="${chemin}" title="Retirer cette clause">✕</button>`;
+	if (!_clauseRepresentable(c, vocab)) {
+		return `<div class="nlp-clause nlp-clause-json">
+			<div class="nlp-clause-tete"><span class="nlp-liant">${liant}</span>
+				<span class="nlp-aide">hors constructeur — conservée telle quelle, modifiable en JSON</span>${retirer}</div>
+			<textarea class="nlp-json" rows="3" data-json-clause="1" data-ligne="${r}" data-chemin="${chemin}">${_escHtml(JSON.stringify(c, null, 2))}</textarea>
+			<div class="la-warn" data-err-clause="${r}|${chemin}">${_escHtml((l.clauseErreurs || {})[chemin] || '')}</div>
+		</div>`;
+	}
+	const cle = Object.keys(c)[0];
+	const options = vocab.cles.map(k => `<option value="${_escAttr(k)}"${k === cle ? ' selected' : ''}>${_escHtml(k)}</option>`).join('');
+	let corps;
+	if (cle === 'ou') {
+		corps = _nlClausesHtml(l, r, c.ou, `${chemin}/ou`, 'OU');
+	} else {
+		const filtre = c[cle];
+		const connus = (vocab.sous_filtres || {})[cle] || [];
+		// Les sous-filtres présents dans l'ORDRE DU DOC, puis les autres : rien n'est réordonné.
+		const ordre = Object.keys(filtre).concat(connus.filter(s => !(s in filtre)));
+		corps = `<div class="nlp-sousfiltres">${ordre.map(s => _nlSousFiltreHtml(filtre[s], s, r, chemin, vocab)).join('')}</div>`;
+	}
+	return `<div class="nlp-clause">
+		<div class="nlp-clause-tete"><span class="nlp-liant">${liant}</span>
+			<select data-cle-clause="1" data-ligne="${r}" data-chemin="${chemin}">${options}</select>
+			<span class="nlp-aide">${_escHtml(NL_AIDE_CONDITIONS[cle] || '')}</span>${retirer}</div>
+		${corps}
+	</div>`;
+}
+
+function _nlSousFiltreHtml(valeur, sous, r, chemin, vocab) {
+	const genre = _genreSousFiltre(sous);
+	const brut = _brutDepuisValeur(valeur, genre);
+	const attrs = `data-sous="${_escAttr(sous)}" data-ligne="${r}" data-chemin="${chemin}"`;
+	let champ;
+	if (genre === 'bool') {
+		champ = `<select ${attrs}><option value="">—</option>`
+			+ `<option value="true"${brut === 'true' ? ' selected' : ''}>vrai</option>`
+			+ `<option value="false"${brut === 'false' ? ' selected' : ''}>faux</option></select>`;
+	} else if (sous === 'rang') {
+		const rangs = (vocab.rangs || []).slice();
+		if (brut && rangs.indexOf(brut) === -1) rangs.push(brut);
+		champ = `<select ${attrs}><option value="">—</option>`
+			+ rangs.map(x => `<option value="${_escAttr(x)}"${x === brut ? ' selected' : ''}>${_escHtml(x)}</option>`).join('')
+			+ `</select>`;
+	} else {
+		const dl = NL_DATALIST_SOUS[sous];
+		champ = `<input type="text" ${attrs} value="${_escAttr(brut)}"${dl ? ` list="${dl}"` : ''}`
+			+ `${genre === 'liste' ? ' placeholder="séparés par des virgules"' : ''}>`;
+	}
+	const note = sous === 'attendu' ? ' <i>faux = la négation</i>' : '';
+	return `<label class="nlp-sf"><span>${_escHtml(sous)}${note}</span>${champ}</label>`;
+}
+
+// La vue inverse : où d'autre ce PNJ peut se montrer. Lecture seule — chaque lieu s'ouvre
+// dans ce même formulaire, un seul doc écrit à la fois.
+function _nlAutresLieuxHtml(l, r) {
+	if (!l.character) return '';
+	const courant = nlDocExistant ? nlDocExistant._id : null;
+	const autres = _lieuxDuPnj((creationOptions && creationOptions.lieux) || [], l.character, courant);
+	const generique = l.character.indexOf('pnj:marchand_') === 0;
+	let html = `<label>Aussi présent dans</label>`;
+	if (autres.length) {
+		html += `<div class="nlp-autres">` + autres.map(a =>
+			`<button type="button" class="nlp-lien" data-act="ouvrir-lieu" data-ligne="${r}" data-lieu="${_escAttr(a._id)}" title="Ouvrir ${_escAttr(a._id)}">`
+			+ `${_escHtml(a.label)} <span>${_nlPct(a.probabilite)}${a.conditionne ? ' · si…' : ''}</span> ↗</button>`).join('')
+			+ `</div>`;
+	} else if (!generique) {
+		html += `<div class="la-warn">⚠ Nulle part ailleurs : retiré d'ici, ce PNJ ne serait plus joignable (dialogue et services).</div>`;
+	} else {
+		html += `<div class="nlp-note">Aucun autre lieu ne le déclare.</div>`;
+	}
+	if (generique) {
+		html += `<div class="nlp-note">Tenancier générique : il tient aussi, implicitement, les boutiques de sa catégorie sans champ <code>pnj</code>.</div>`;
+	}
+	return html;
+}
+
+// Ce que le formulaire ne possède pas dans l'entrée d'origine — et qui la suivra, intact.
+function _nlClesConserveesHtml(l) {
+	const orig = _nlEntreeOrigine(l);
+	if (!orig) return '';
+	const possedees = ['character', 'nom', 'portrait', 'probabilite', 'conditions', 'montures'];
+	const autres = Object.keys(orig).filter(k => possedees.indexOf(k) === -1);
+	return autres.length
+		? `<div class="nlp-note" style="margin-top:8px;">Conservé tel quel : <i>${autres.map(_escHtml).join(', ')}</i></div>` : '';
+}
+
+function _nlMajResume() {
+	const el = _nlEl('nl-pnj-resume');
+	if (!nlPnjLignes.length) { el.textContent = ''; return; }
+	const r = _probaPersonne(nlPnjLignes);
+	let txt = (r.horsCalcul ? 'Si aucune condition ne tient : ' : '')
+		+ `personne n'est là ${_nlPct(r.personne)} du temps · ${Math.round(r.esperance * 100) / 100} PNJ en moyenne`;
+	if (r.horsCalcul) txt += ` · ${r.horsCalcul} entrée(s) conditionnée(s) hors calcul`;
+	el.textContent = txt;
+}
+
+function _nlMajEcurieSelect() {
+	const sel = _nlEl('nl-ecurie-ligne');
+	if (!sel) return;
+	sel.innerHTML = nlPnjLignes.length
+		? nlPnjLignes.map((l, r) => `<option value="${r}"${l.ecurie ? ' selected' : ''}>${r + 1} — ${_escHtml(_nlNomAffiche(l))}</option>`).join('')
+		: `<option value="">(aucun PNJ : ajoutez-en un)</option>`;
+}
+
+function _nlMajEntete(r) {
+	const l = nlPnjLignes[r];
+	const nom = document.querySelector(`#nl-pnj-liste [data-nom-ligne="${r}"]`);
+	if (nom) nom.textContent = _nlNomAffiche(l);
+	const badges = document.querySelector(`#nl-pnj-liste [data-badges-ligne="${r}"]`);
+	if (badges) badges.innerHTML = _nlBadgesHtml(l, r, _pnjDoublons(nlPnjLignes));
+}
+
+// La liste de clauses désignée par `cheminListe` ("" = la racine, "0/ou" = le `ou` de la 1re).
+function _nlListeClauses(l, cheminListe) {
+	let liste = l.conditions;
+	const segs = cheminListe ? String(cheminListe).split('/') : [];
+	for (let k = 0; k < segs.length; k += 2) liste = liste[parseInt(segs[k], 10)].ou;
+	return liste;
+}
+
+// Une clause : la liste qui la porte et son indice.
+function _nlClauseA(l, chemin) {
+	const segs = String(chemin).split('/');
+	return {
+		liste: _nlListeClauses(l, segs.slice(0, -1).join('/')),
+		index: parseInt(segs[segs.length - 1], 10),
+	};
+}
+
+function _nlPnjClic(ev) {
+	const b = ev.target.closest('[data-act]');
+	if (!b || b.disabled) return;
+	const act = b.dataset.act;
+	if (act === 'ajouter-pnj') {
+		const deduit = _nlTenancierDeduit();
+		const pris = nlPnjLignes.some(l => l.character === deduit);
+		nlPnjLignes.forEach(l => { l.ouvert = false; l.auto = false; });
+		nlPnjLignes.push(_nlNouvelleLigne(deduit && !pris ? deduit : ''));
+		_nlRenderPnj();
+		_nlRefreshApercu();
+		return;
+	}
+	const r = parseInt(b.dataset.ligne, 10);
+	const l = nlPnjLignes[r];
+	if (!l) return;
+	switch (act) {
+	case 'haut':
+	case 'bas': {
+		const j = act === 'haut' ? r - 1 : r + 1;
+		if (j < 0 || j >= nlPnjLignes.length) return;
+		[nlPnjLignes[r], nlPnjLignes[j]] = [nlPnjLignes[j], nlPnjLignes[r]];
+		break;
+	}
+	case 'retirer':
+		nlPnjLignes.splice(r, 1);
+		break;
+	case 'basculer':
+		l.ouvert = !l.ouvert;
+		break;
+	case 'ajouter-clause': {
+		const vocab = _nlVocab();
+		const cle = vocab.cles.indexOf('quete_active') !== -1 ? 'quete_active' : (vocab.cles[0] || 'quete_active');
+		_nlListeClauses(l, b.dataset.chemin).push({ [cle]: cle === 'ou' ? [] : {} });
+		l.auto = false;
+		break;
+	}
+	case 'retirer-clause': {
+		const { liste, index } = _nlClauseA(l, b.dataset.chemin);
+		liste.splice(index, 1);
+		l.clauseErreurs = {};   // les indices ont glissé
+		break;
+	}
+	case 'json':
+		if (l.json === null) {
+			l.json = JSON.stringify(l.conditions, null, 2);
+			l.jsonErreur = '';
+		} else if (l.jsonErreur) {
+			const err = document.querySelector(`#nl-pnj-liste [data-err-json="${r}"]`);
+			if (err) err.textContent = `${l.jsonErreur} — corrigez le JSON avant de revenir au constructeur.`;
+			return;
+		} else {
+			l.json = null;
+			l.clauseErreurs = {};
+		}
+		break;
+	case 'ouvrir-lieu':
+		_nlOuvrirAutreLieu(b.dataset.lieu);
+		return;
+	default:
+		return;
+	}
+	_nlRenderPnj();
+	_nlRefreshApercu();
+}
+
+function _nlPnjSaisie(ev) {
+	const el = ev.target;
+	if (!el || !el.dataset || el.dataset.ligne === undefined) return;
+	// ⚠️ Un <select> ou une case se traite au `change` ; tout le reste à la FRAPPE, et jamais
+	// au `change` qui suit le blur (cf. en-tête de section).
+	const discret = el.tagName === 'SELECT' || el.type === 'checkbox';
+	if ((ev.type === 'change') !== discret) return;
+	const r = parseInt(el.dataset.ligne, 10);
+	const l = nlPnjLignes[r];
+	if (!l) return;
+	const d = el.dataset;
+	l.auto = false;
+	let redessiner = discret;
+	if (d.champ === 'character') {
+		l.character = el.value;
+	} else if (d.champ === 'portrait') {
+		l.portrait = el.value;
+		// Le nom se déduit du portrait tant que l'auteur n'y a pas touché.
+		if (!l.nomTouche) l.nom = _nomDepuisPortrait(l.portrait, _nlCategorie());
+	} else if (d.champ === 'tous-portraits') {
+		l.tousPortraits = el.checked;
+	} else if (d.champ === 'nom') {
+		l.nom = el.value;
+		l.nomTouche = true;
+	} else if (d.champ === 'proba' || d.champ === 'proba-range') {
+		const pct = parseFloat(el.value);
+		l.probabilite = isFinite(pct) ? Math.round(pct * 100) / 10000 : NaN;
+		const jumeau = d.champ === 'proba' ? 'proba-range' : 'proba';
+		const autre = document.querySelector(`#nl-pnj-liste [data-ligne="${r}"][data-champ="${jumeau}"]`);
+		if (autre) autre.value = el.value;
+	} else if (d.champ === 'json') {
+		l.json = el.value;
+		try {
+			const v = JSON.parse(el.value);
+			if (!Array.isArray(v)) throw new Error('les conditions doivent être une LISTE de clauses');
+			l.conditions = v;
+			l.jsonErreur = '';
+		} catch (e) {
+			l.jsonErreur = e.message;
+		}
+		const err = document.querySelector(`#nl-pnj-liste [data-err-json="${r}"]`);
+		if (err) err.textContent = l.jsonErreur;
+	} else if (d.cleClause) {
+		const { liste, index } = _nlClauseA(l, d.chemin);
+		liste[index] = el.value === 'ou' ? { ou: [] } : { [el.value]: {} };
+		l.clauseErreurs = {};
+	} else if (d.sous) {
+		const { liste, index } = _nlClauseA(l, d.chemin);
+		const clause = liste[index];
+		const cle = Object.keys(clause)[0];
+		const v = _valeurDepuisBrut(el.value, _genreSousFiltre(d.sous));
+		if (v === undefined) delete clause[cle][d.sous]; else clause[cle][d.sous] = v;
+		redessiner = false;   // un <select> de sous-filtre ne change pas la forme de la carte
+	} else if (d.jsonClause) {
+		const { liste, index } = _nlClauseA(l, d.chemin);
+		try {
+			const v = JSON.parse(el.value);
+			if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error('une clause est un objet');
+			liste[index] = v;
+			delete l.clauseErreurs[d.chemin];
+		} catch (e) {
+			l.clauseErreurs[d.chemin] = e.message;
+		}
+		const err = document.querySelector(`#nl-pnj-liste [data-err-clause="${r}|${d.chemin}"]`);
+		if (err) err.textContent = l.clauseErreurs[d.chemin] || '';
+	} else {
+		return;
+	}
+	if (redessiner) {
+		_nlRenderPnj();
+	} else {
+		_nlMajEntete(r);
+		_nlMajResume();
+		_nlMajEcurieSelect();
+	}
+	_nlRefreshApercu();
+}
+
+function _nlEcurieChoisie() {
+	const r = parseInt(_nlEl('nl-ecurie-ligne').value, 10);
+	if (!nlPnjLignes[r]) return;
+	nlPnjLignes.forEach((l, i) => { l.ecurie = i === r; });
+	_nlRenderPnj();
+	_nlRefreshApercu();
+}
+
+// ↗ depuis la vue inverse : ouvrir l'autre lieu DANS ce formulaire. Un seul doc en cours
+// d'édition à la fois — des modifications non enregistrées se confirment avant d'être perdues.
+async function _nlOuvrirAutreLieu(id) {
+	if (!id) return;
+	if (_nlDocCourantJson() !== nlInstantane
+			&& !confirm(`Les modifications de ce formulaire ne sont pas enregistrées.\n\nLes abandonner pour ouvrir ${id} ?`)) {
+		return;
+	}
+	await openLieuForm('edition', id);
+}
+
+// Ce qui empêche d'enregistrer les PNJ, en clair — '' si rien.
+function _nlErreursPnj() {
+	for (let r = 0; r < nlPnjLignes.length; r++) {
+		const l = nlPnjLignes[r];
+		const n = `PNJ n°${r + 1}`;
+		if (!l.character) return `${n} : choisissez un PNJ (character), ou retirez la ligne.`;
+		if (!(l.probabilite >= 0 && l.probabilite <= 1)) return `${n} : chance de présence entre 0 et 100 %.`;
+		if (l.json !== null && l.jsonErreur) return `${n} : JSON des conditions illisible — ${l.jsonErreur}.`;
+		if (Object.keys(l.clauseErreurs || {}).length) return `${n} : une clause JSON est illisible.`;
+		const fautes = _clausesFautives(l.conditions);
+		if (fautes.length) return `${n} : ${fautes[0]}.`;
+	}
+	return '';
+}
+
+// Ce qu'un enregistrement fera perdre, en clair — vide si rien. Mesuré contre le doc RELU :
+// une entrée d'origine qu'aucune ligne ne prolonge part avec tout ce qu'elle portait, et un
+// PNJ qui ne figure plus ici ni ailleurs n'est plus joignable nulle part.
+function _nlPertes(docApres) {
+	if (!nlDocExistant) return [];
+	const avant = Array.isArray(nlDocExistant.pnj) ? nlDocExistant.pnj : [];
+	const gardees = nlPnjLignes.map(l => l.src);
+	const restants = nlPnjLignes.map(l => l.character);
+	const lieux = (creationOptions && creationOptions.lieux) || null;
+	const pertes = [], orphelins = [];
+	avant.forEach((e, i) => {
+		if (!e || typeof e !== 'object') return;
+		const qui = e.nom || e.character || `entrée n°${i + 1}`;
+		if (gardees.indexOf(i) === -1 && e.progeniture) pertes.push(`• ${qui} : sa progéniture (chaîne d’escorte)`);
+		const c = e.character;
+		// Un tenancier générique reste implicite dans les boutiques de sa catégorie.
+		if (!lieux || !c || restants.indexOf(c) !== -1 || orphelins.indexOf(c) !== -1
+				|| c.indexOf('pnj:marchand_') === 0) return;
+		if (_lieuxDuPnj(lieux, c, nlDocExistant._id).length) return;
+		orphelins.push(c);
+		pertes.push(`• ${qui} (${c}) : plus aucun lieu où le rencontrer — dialogue et services injoignables`);
+	});
+	const avaitEcurie = avant.some(e => e && (e.montures || []).length);
+	const aEcurie = ((docApres && docApres.pnj) || []).some(e => (e.montures || []).length);
+	if (avaitEcurie && !aEcurie) pertes.push('• l’écurie : plus aucune monture en vente');
+	return pertes;
+}
+
+// Le linter serveur sur le doc qui va partir : seules les fautes des `pnj[i].conditions`
+// bloquent ici — fail-closed, elles cacheraient le PNJ pour toujours. `ok:false` = contrôle
+// INJOIGNABLE : le dire, ne jamais laisser croire qu'il a eu lieu.
+async function _nlControlerConditions(doc) {
+	try {
+		const res = await fetch('/admin/lint-dialogues', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(doc),
+		});
+		if (!res.ok) throw new Error(String(res.status));
+		const rapport = await res.json();
+		const fautes = (rapport.trouvailles || [])
+			.filter(t => t.niveau === 'erreur' && /^pnj\[\d+\]/.test(t.message || ''))
+			.map(t => t.message);
+		return { ok: true, fautes: fautes };
+	} catch (e) {
+		return { ok: false, fautes: [] };
+	}
 }
 
 // ── Capacités : rendu et réaction ──────────────────────────────────────────
@@ -5396,15 +6217,17 @@ function _nlCapacite(el) {
 	const id = el && el.dataset ? el.dataset.cap : '';
 	if (!id) return;
 	nlCapacites[id] = !!el.checked;
-	// ⚠️ Une écurie vit sur le TENANCIER (`pnj[0].montures`) : cocher « Étable » sans PNJ
+	// ⚠️ Une écurie vit sur un PNJ (les `montures` d'une entrée) : cocher « Étable » sans PNJ
 	// produirait un lieu qui ouvre le bouton Montures sur un rayon vide.
-	if (id === 'montures' && el.checked && !_nlEl('nl-pnj-on').checked) {
-		_nlEl('nl-pnj-on').checked = true;
-		_nlEl('nl-pnj-bloc').style.display = '';
+	if (id === 'montures' && el.checked && !nlPnjLignes.length) {
+		const l = _nlNouvelleLigne(_nlTenancierDeduit());
+		l.ecurie = true;
+		nlPnjLignes.push(l);
 		_nlEl('nl-montures-warn').textContent =
-			"⚠ Un PNJ a été ajouté : c'est le tenancier qui tient l'écurie, pas le bâtiment.";
+			"⚠ Un PNJ a été ajouté : c'est un tenancier qui tient l'écurie, pas le bâtiment.";
 	}
 	_nlRenderCapacites();   // les blocs de champs propres suivent la bascule
+	_nlRenderPnj();         // le badge 🐴 suit la capacité
 	_nlRefreshApercu();
 }
 
@@ -5462,15 +6285,12 @@ function _nlChamps() {
 		capacites: nlCapacites,
 		nuit_messages: actives.taverne ? _nlNuitMessages() : [],
 		montures: actives.montures ? nlMontures : [],
-		pnj: null,
+		// Une ligne par entrée `pnj` : `src` dit laquelle elle prolonge (cf. _fusionPnjEntrees).
+		pnj: nlPnjLignes.map(l => ({
+			src: l.src, character: l.character, nom: (l.nom || '').trim(), portrait: l.portrait,
+			probabilite: l.probabilite, conditions: l.conditions, ecurie: l.ecurie,
+		})),
 	};
-	if (_nlEl('nl-pnj-on').checked) {
-		champs.pnj = {
-			character: _nlEl('nl-pnj-character').value,
-			nom: (_nlEl('nl-pnj-nom').value || '').trim(),
-			portrait: _nlEl('nl-pnj-portrait').value,
-		};
-	}
 	return champs;
 }
 
@@ -5534,14 +6354,44 @@ function _nlValider(doc) {
 	if (!doc.categorie) return 'Catégorie requise.';
 	if (!doc.label) return 'Label requis.';
 	if (!doc.image) return 'Image requise.';
-	if (doc.pnj && !doc.pnj[0].character) {
-		return 'PNJ (character) requis, ou décochez « avec un PNJ ».';
-	}
+	const pnj = _nlErreursPnj();
+	if (pnj) return pnj;
 	// Une étable sans écurie ouvre le bouton Montures sur un rayon vide.
-	if (_nlCapacitesActives().montures && !(doc.pnj && (doc.pnj[0].montures || []).length)) {
-		return 'Écurie vide : cochez au moins une monture, ou retirez la capacité « Étable ».';
+	if (_nlCapacitesActives().montures && !(doc.pnj || []).some(e => (e.montures || []).length)) {
+		return nlPnjLignes.length
+			? 'Écurie vide : cochez au moins une monture, ou retirez la capacité « Étable ».'
+			: 'Écurie sans tenancier : ajoutez un PNJ, ou retirez la capacité « Étable ».';
 	}
 	return '';
+}
+
+// Ce qui précède TOUTE écriture du lieu, dans les deux modes : le linter, puis les pertes.
+// Rend le résultat du contrôle si l'on peut écrire, null sinon (le message est affiché et le
+// bouton rendu). Le bouton reste verrouillé pendant l'appel : pas de double envoi.
+async function _nlAvantEcriture(doc, btn, err) {
+	btn.disabled = true;
+	err.textContent = 'Contrôle des conditions…';
+	const controle = await _nlControlerConditions(doc);
+	if (controle.fautes.length) {
+		err.textContent = `✗ ${controle.fautes.join(' · ')}`;
+		btn.disabled = false;
+		return null;
+	}
+	// ⚠️ Retirer une entrée qui portait une `progeniture` (une chaîne d'escorte), vider une
+	// écurie ou rendre un PNJ injoignable est une PERTE DE CONTENU, pas un réglage : un seul
+	// `confirm` la récapitule.
+	const pertes = _nlPertes(doc);
+	if (pertes.length && !confirm(`Enregistrer ${doc._id} fera perdre :\n\n${pertes.join('\n')}\n\nContinuer ?`)) {
+		err.textContent = '';
+		btn.disabled = false;
+		return null;
+	}
+	return controle;
+}
+
+// Linter injoignable : l'écriture passe, mais la barre de statut le dit.
+function _nlMentionControle(controle) {
+	return (controle && controle.ok) ? '' : ' ⚠ Conditions des PNJ NON contrôlées (linter injoignable).';
 }
 
 async function enregistrerLieuEdite() {
@@ -5551,21 +6401,9 @@ async function enregistrerLieuEdite() {
 	const souci = _nlValider(doc);
 	if (souci) { err.textContent = souci; return; }
 
-	// ⚠️ Retirer un PNJ qui portait une `progeniture` (une chaîne d'escorte) ou une écurie
-	// est une PERTE DE CONTENU, pas un réglage : elle se confirme.
-	const avant = (nlDocExistant.pnj || [])[0] || null;
-	const perdus = [];
-	if (avant && !doc.pnj) {
-		if (avant.progeniture) perdus.push('la progéniture (chaîne d’escorte)');
-		if ((avant.montures || []).length) perdus.push("l'écurie");
-	}
-	if (perdus.length && !confirm(
-			`Retirer le PNJ supprimera ${perdus.join(' et ')} de ${nlDocExistant._id}.\n\nContinuer ?`)) {
-		return;
-	}
-
 	const btn = _nlEl('nl-create-btn');
-	btn.disabled = true;
+	const controle = await _nlAvantEcriture(doc, btn, err);
+	if (!controle) return;
 	err.textContent = 'Enregistrement…';
 	try {
 		await _putDoc(doc);
@@ -5582,7 +6420,7 @@ async function enregistrerLieuEdite() {
 	await fetchLieuxConnections();
 	renderLieuxConnList();
 	if (grid.length) renderGrid();
-	setStatus(`Lieu <span>${doc._id}</span> mis à jour.`);
+	setStatus(`Lieu <span>${doc._id}</span> mis à jour.` + _nlMentionControle(controle));
 }
 
 async function creerSousLieu() {
@@ -5596,7 +6434,8 @@ async function creerSousLieu() {
 		return;
 	}
 	const btn = _nlEl('nl-create-btn');
-	btn.disabled = true;
+	const controle = await _nlAvantEcriture(lieu, btn, err);
+	if (!controle) return;
 	err.textContent = 'Création…';
 	try {
 		// Le lieu D'ABORD : une connexion orpheline ferait échouer l'enrichissement
@@ -5610,10 +6449,12 @@ async function creerSousLieu() {
 	}
 	btn.disabled = false;
 	closeLieuAdd();
+	// Le résumé des présences (vue inverse) a changé : le laisser servirait des lieux périmés.
+	creationOptions = null;
 	await fetchLieuxConnections();
 	renderLieuxConnList();
 	if (grid.length) renderGrid();
-	setStatus(`Lieu <span>${lieu._id}</span> créé et connecté (${link._id}).`);
+	setStatus(`Lieu <span>${lieu._id}</span> créé et connecté (${link._id}).` + _nlMentionControle(controle));
 }
 
 async function _putDoc(doc) {
@@ -6179,29 +7020,29 @@ let _nlCable = false;
 function _nlCabler() {
 	if (_nlCable) return;
 	_nlCable = true;
-	// ⚠️ `_nlTenancierDefaut` passe APRÈS `_nlRepeuplerPnj` : il décide de COCHER ou non
-	// le bloc selon l'existence du tenancier générique de la catégorie choisie.
+	// ⚠️ `_nlTenancierDefaut` passe AVANT le rendu : il décide de PROPOSER ou non une ligne
+	// selon l'existence du tenancier générique de la catégorie choisie. La catégorie refiltre
+	// aussi les portraits de chaque carte, d'où le rendu des PNJ.
 	_nlEl('nl-categorie').addEventListener('change', () => {
 		_nlEl('nl-categorie-libre').style.display = _nlEl('nl-categorie').value === '__libre__' ? '' : 'none';
-		_nlRepeuplerImages(); _nlRepeuplerPnj(); _nlTenancierDefaut();
-		_nlRenderCapacites(); _nlRefreshApercu();
+		_nlRepeuplerImages(); _nlTenancierDefaut();
+		_nlRenderCapacites(); _nlRenderPnj(); _nlRefreshApercu();
 	});
 	_nlEl('nl-categorie-libre').addEventListener('input', () => {
-		_nlRepeuplerImages(); _nlRepeuplerPnj(); _nlTenancierDefaut();
-		_nlRenderCapacites(); _nlRefreshApercu();
+		_nlRepeuplerImages(); _nlTenancierDefaut();
+		_nlRenderCapacites(); _nlRenderPnj(); _nlRefreshApercu();
 	});
 	_nlEl('nl-nuit-messages').addEventListener('input', _nlRefreshApercu);
 	_nlEl('nl-image-all').addEventListener('change', () => { _nlRepeuplerImages(); _nlRefreshApercu(); });
 	_nlEl('nl-image').addEventListener('change', () => { _nlMajVignetteImage(); _nlRefreshApercu(); });
 	_nlEl('nl-label').addEventListener('input', _nlRefreshApercu);
-	_nlEl('nl-pnj-on').addEventListener('change', () => {
-		_nlEl('nl-pnj-bloc').style.display = _nlEl('nl-pnj-on').checked ? '' : 'none';
-		_nlRefreshApercu();
-	});
-	_nlEl('nl-pnj-character').addEventListener('change', _nlRefreshApercu);
-	_nlEl('nl-pnj-portrait-all').addEventListener('change', () => { _nlRepeuplerPortraits(); _nlRefreshApercu(); });
-	_nlEl('nl-pnj-portrait').addEventListener('change', () => { _nlMajPortrait(); _nlRefreshApercu(); });
-	_nlEl('nl-pnj-nom').addEventListener('input', () => { nlNomTouche = true; _nlRefreshApercu(); });
+	// Section PNJ : des écouteurs DÉLÉGUÉS, posés sur la section — les cartes sont redessinées,
+	// leurs éléments ne vivent pas assez longtemps pour porter les leurs.
+	const section = _nlEl('nl-pnj-section');
+	section.addEventListener('click', _nlPnjClic);
+	section.addEventListener('input', _nlPnjSaisie);
+	section.addEventListener('change', _nlPnjSaisie);
+	_nlEl('nl-ecurie-ligne').addEventListener('change', _nlEcurieChoisie);
 }
 
 // Résout l'URL image d'un lieu (cascade towns → battle_maps → maps).
@@ -7245,11 +8086,13 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 			<div style="font-size:.64rem;color:#888;">Vide ⇒ les 36 lignes par défaut du jeu.</div>
 		</div>
 
-		<!-- Champs propres à une ÉTABLE. ⚠️ L'écurie vit sur le TENANCIER, pas sur le
-		     bâtiment : cette liste part dans `pnj[0].montures`. -->
+		<!-- Champs propres à une ÉTABLE. ⚠️ L'écurie vit sur un PNJ, pas sur le bâtiment :
+		     cette liste part dans les `montures` de l'entrée qui la TIENT. -->
 		<div class="la-field" id="nl-montures-bloc" style="display:none;">
 			<label>Écurie <span style="color:#888;font-weight:normal;">(ce que le tenancier vend)</span></label>
 			<div id="nl-montures-liste" class="nl-caps"></div>
+			<label for="nl-ecurie-ligne" style="margin-top:8px;">Tenue par</label>
+			<select id="nl-ecurie-ligne" style="margin-bottom:0;"></select>
 			<div id="nl-montures-warn" class="la-warn"></div>
 		</div>
 
@@ -7273,19 +8116,26 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 			</div>
 		</div>
 
-		<div class="la-field">
-			<label class="la-check"><input type="checkbox" id="nl-pnj-on" checked> avec un PNJ</label>
-			<div id="nl-pnj-bloc">
-				<label for="nl-pnj-character">PNJ (character — déduit de la catégorie)</label>
-				<select id="nl-pnj-character" style="margin-bottom:0;"></select>
-				<div class="la-warn" id="nl-pnj-warn"></div>
-				<label for="nl-pnj-portrait" style="margin-top:8px;">Portrait</label>
-				<select id="nl-pnj-portrait" style="margin-bottom:0;"></select>
-				<label class="la-check"><input type="checkbox" id="nl-pnj-portrait-all"> tous les portraits</label>
-				<img id="nl-pnj-thumb" class="la-thumb" alt="" style="display:none;">
-				<label for="nl-pnj-nom" style="margin-top:8px;">Nom du PNJ</label>
-				<input type="text" id="nl-pnj-nom" placeholder="Thalindra Serevent">
+		<!-- PNJ du lieu : une carte par entrée `pnj`, dans l'ordre de la liste du lieu.
+		     ⚠️ Chaque carte garde l'indice de son entrée d'ORIGINE (`src`) : ce que le formulaire
+		     ne possède pas (progéniture, description, image…) suit son entrée, même déplacée.
+		     Écouteurs délégués, posés sur la section par `_nlCabler`. -->
+		<div class="la-field" id="nl-pnj-section">
+			<label>PNJ du lieu</label>
+			<div class="nlp-note">
+				Chaque PNJ est tiré pour lui-même à l'entrée : plusieurs peuvent être là ensemble.
+				Le premier PNJ <i>sans condition</i> est le nom annoncé à distance (livraisons, courses).
 			</div>
+			<div id="nl-pnj-liste"></div>
+			<div class="nlp-pied">
+				<button type="button" class="btn btn-inline" style="font-size:.62rem;" data-act="ajouter-pnj">+ Ajouter un PNJ</button>
+				<span class="nlp-note" id="nl-pnj-resume"></span>
+			</div>
+			<!-- Suggestions du constructeur de conditions, remplies à l'ouverture. -->
+			<datalist id="nl-dl-lieux"></datalist>
+			<datalist id="nl-dl-cites"></datalist>
+			<datalist id="nl-dl-cats"></datalist>
+			<datalist id="nl-dl-items"></datalist>
 		</div>
 
 		<!-- Pas de connexion en ÉDITION : le lieu a déjà sa porte, et l'édition n'écrit

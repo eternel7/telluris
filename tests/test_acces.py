@@ -379,6 +379,17 @@ def test_quete_reussie_controlee_dans_la_presence_d_un_pnj():
 	assert acces.conditions_pnj_invalides(lieu) == ["pnj[1].conditions.quete_reussie.attendus"]
 
 
+def test_vocabulaire_conditions_est_celui_du_moteur():
+	"""Servi aux éditeurs (formulaire de lieu, /admin/dialogues) : il ne doit ni diverger du
+	moteur, ni perdre l'ORDRE de l'échelle des rangs, ni rester un `set` non sérialisable."""
+	import json
+	vocab = acces.vocabulaire_conditions()
+	assert vocab["cles"] == sorted(acces.CONDITIONS_CONNUES)
+	assert {c: set(s) for c, s in vocab["sous_filtres"].items()} == acces.SOUS_FILTRES_CONNUS
+	assert vocab["rangs"] == list(acces.RANGS)
+	assert json.loads(json.dumps(vocab)) == vocab
+
+
 # ---------------------------------------------------------------------------
 # Laissez-passer
 # ---------------------------------------------------------------------------
