@@ -37,6 +37,17 @@
 			font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent);
 			text-transform: uppercase; margin-bottom: 6px;
 		}
+		/* Card repliable : l'en-tête (PREMIER .card-title) bascule l'état, mémorisé en
+		   localStorage. Fermée, seul l'en-tête reste — les sous-titres des cards
+		   « Concepts » disparaissent avec le reste. */
+		.card > .card-title:first-child { cursor: pointer; user-select: none; outline: none; }
+		.card > .card-title:first-child::after { content: '▾'; float: right; color: var(--muted); }
+		.card > .card-title:first-child:hover::after,
+		.card > .card-title:first-child:focus-visible::after { color: var(--accent); }
+		.card > .card-title:first-child:focus-visible { text-decoration: underline; }
+		.card.closed > .card-title:first-child { margin-bottom: 0; }
+		.card.closed > .card-title:first-child::after { content: '▸'; }
+		.card.closed > :not(:first-child) { display: none; }
 		.card-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
 		.section-label {
 			font-size: 0.7rem; letter-spacing: 0.18em; color: var(--muted);
@@ -388,6 +399,45 @@
 	</div>
 
 <script>
+// ── Cards repliables (état par navigateur) ─────────────────────────
+// Clé d'une card = texte de son en-tête : pas d'attribut à poser, une card ajoutée est
+// repliable d'office. Absente de l'objet = ouverte (le défaut).
+const CARDS_LS_KEY = 'telluris.admin_cards.v1';
+
+function _cardsLoad() {
+	try { return JSON.parse(localStorage.getItem(CARDS_LS_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+function _cardsSave(etat) {
+	try { localStorage.setItem(CARDS_LS_KEY, JSON.stringify(etat)); } catch (e) { /* mode privé */ }
+}
+
+(function initCards() {
+	const etat = _cardsLoad();
+	document.querySelectorAll('.main > .card').forEach(card => {
+		const head = card.firstElementChild;
+		if (!head || !head.classList.contains('card-title')) return;
+		const cle = head.textContent.trim();
+		const appliquer = ferme => {
+			card.classList.toggle('closed', ferme);
+			head.setAttribute('aria-expanded', ferme ? 'false' : 'true');
+		};
+		const basculer = () => {
+			const ferme = !card.classList.contains('closed');
+			appliquer(ferme);
+			const courant = _cardsLoad();
+			if (ferme) courant[cle] = true; else delete courant[cle];
+			_cardsSave(courant);
+		};
+		head.setAttribute('role', 'button');
+		head.setAttribute('tabindex', '0');
+		appliquer(!!etat[cle]);
+		head.addEventListener('click', basculer);
+		head.addEventListener('keydown', e => {
+			if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); }
+		});
+	});
+})();
+
 const editor   = document.getElementById('wv-editor');
 const codeEl   = document.getElementById('wv-code');
 const statusEl = document.getElementById('wv-status');
