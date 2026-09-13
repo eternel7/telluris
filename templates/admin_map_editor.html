@@ -6770,7 +6770,7 @@ function renderLieuProfilWeights() {
 // refuse — exactement le défaut qu'il est censé détecter.
 //
 // ⚠️ La SURCHARGE (garde 409 du serveur) n'a aucun sens sans personnage : le mode ne la simule
-// pas, et le DIT dans son aide plutôt que de laisser croire qu'il simule tout.
+// pas
 
 const depSection   = document.getElementById('dep-section');
 const depControls  = document.getElementById('dep-controls');
@@ -6819,8 +6819,7 @@ function depMajFleches() {
 	// sont lisibles nulle part ailleurs.
 	const v = (grid[depPos.y] || [])[depPos.x];
 	depInfoEl.innerHTML = 'Case <b>[' + depPos.x + ', ' + depPos.y + ']</b> — terrain <b>'
-		+ (v === undefined ? '?' : v) + '</b>'
-		+ '<br>⚠️ La <b>surcharge</b> (garde 409 du serveur) n\'est pas simulée : ce mode n\'a pas de personnage.';
+		+ (v === undefined ? '?' : v) + '</b>';
 }
 
 // Le jeton, en POURCENTAGES du conteneur (cf. le commentaire CSS de `.dep-token`).
