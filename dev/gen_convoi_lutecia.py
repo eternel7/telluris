@@ -2,10 +2,10 @@
 # Mission scénarisée « Le convoi de Lutecia » → jsons/convoi_lutecia_a_importer.json
 #
 # Suite des bûcherons d'Auxerre : Dame Éléonore de Rochefort conduit la dernière livraison de
-# cristaux de mana jusqu'aux cryptes de Notre-Dame, à Lutecia. Aélis de Montfaucon voyage avec
-# le convoi. C'est une quête d'ESCORTE ÉCRITE (`services.escorte.offre`) à TROIS protégés, dont
-# deux paladins qui SAVENT SE DÉFENDRE (`se_defend` + `equipement` : plates complètes et épée
-# longue d'ordre) — ils frappent l'ennemi au contact sans jamais se déplacer.
+# cristaux de mana jusqu'à Notre-Dame, à Lutecia. Aélis de Montfaucon voyage avec le convoi.
+# C'est une quête d'ESCORTE ÉCRITE (`services.escorte.offre`) à TROIS protégés, dont deux paladins
+# qui SAVENT SE DÉFENDRE (`se_defend` + `equipement` : plates complètes et épée longue d'ordre) —
+# ils frappent l'ennemi au contact sans jamais se déplacer.
 #
 # ⚠️ Idempotent PARCE QU'IL RELIT LE DUMP (source unique, CLAUDE.md §11) : `admin_import_bulk`
 # fait un PUT COMPLET. Les docs déjà en base (les deux paladins, la cathédrale, Notre-Dame) sont
@@ -22,6 +22,13 @@
 #     docs à Lutecia : leur accueil d'Auxerre décrit le parvis, un doc ne s'ouvre pas sur deux
 #     décors.
 #
+# Notre-Dame (13/09) : son portail FONCTIONNE — les cristaux du convoi y sont taillés en gemmes de
+# mana qui l'alimentent (plus de « sceau » ni de porte fermée) — et sa nef est gardée par un
+# templier : les paladins attendent donc sur le PARVIS. La garde elle-même (templier, nef, porte)
+# vit dans `dev/gen_garde_notre_dame.py`, qui réemploie ce module et écrit l'import complet.
+# ⚠️ Ne plus réimporter `convoi_lutecia_a_importer.json` : son `lieu:notre_dame` pointe encore le
+# templier sur le doc de George Dourdan.
+#
 # ⚠️ AUCUN nœud `services.escorte.noeuds.accepte` — et le linter ne le réclame pas : une
 # acceptation qui porte `deplacer` en est dispensée (`utils/lint_dialogues`, branche escorte).
 # La présence d'un PNJ est revérifiée à CHAQUE requête de dialogue (`routers/pnj._pnj_du_lieu`) et
@@ -35,7 +42,7 @@ import json
 import os
 import sys
 
-DUMP = "jsons/telluris-dump-20260912-063741.json"
+DUMP = "jsons/telluris-dump-20260913-090240.json"
 SORTIE = "jsons/convoi_lutecia_a_importer.json"
 
 QUETE = "quete:escorte_convoi_de_lutecia"
@@ -97,7 +104,8 @@ PROTEGES = [
 		"prenom": "Aélis", "nom": "de Montfaucon", "race": "humain", "sex": "F",
 		"image": PORTRAIT_AELIS,
 		"description": "Architecte et chercheuse en cristaux de mana. Elle suit le convoi jusqu'à "
-					   "Notre-Dame pour étudier le sceau des cryptes. Elle ne sait pas se battre.",
+					   "Notre-Dame pour étudier le portail des Frères Aborigènes. Elle ne sait pas "
+					   "se battre.",
 	},
 	{
 		"prenom": "Éléonore", "nom": "de Rochefort", "race": "elfe", "sex": "F",
@@ -120,13 +128,15 @@ PROTEGES = [
 # ⚠️ UNE seule constante pour les deux donneurs : celui des deux paladins que le tirage de
 # présence retient pose l'offre, et le même id garantit qu'on ne mène le convoi qu'une fois.
 # Aucun `rencontre` : les trois rejoignent le groupe À L'ACCEPTATION, sur le parvis.
+# ⚠️ La destination est le PARVIS (`lieu:notre_dame`), jamais la nef gardée : le convoi se solde
+# en franchissant la porte, et une nef réservée au rang A de Lutecia rendrait la dépose impossible.
 OFFRE = {
 	"id": QUETE,
 	"titre": "Le convoi de Lutecia",
 	"description": "Dame Éléonore de Rochefort conduit la dernière livraison de cristaux de mana "
-				   "d'Auxerre jusqu'aux cryptes de Notre-Dame, à Lutecia. Aélis de Montfaucon "
-				   "voyage avec le convoi. Les deux paladins savent se défendre ; l'architecte, "
-				   "non. Amenez-les tous les trois vivants sous la nef de Notre-Dame.",
+				   "d'Auxerre jusqu'à Notre-Dame, à Lutecia, où ils alimenteront le portail. Aélis "
+				   "de Montfaucon voyage avec le convoi. Les deux paladins savent se défendre ; "
+				   "l'architecte, non. Amenez-les tous les trois vivants sur le parvis de Notre-Dame.",
 	"destination": NOTRE_DAME,
 	"proteges": PROTEGES,
 	"unique": True,
@@ -190,14 +200,15 @@ def eleonore(base):
 			"texte": "Elle referme le registre sur son pouce. « Aujourd'hui. » Pas de date annoncée "
 					 "la veille : c'est ainsi qu'elle l'avait dit. « Sept caisses, mademoiselle de "
 					 "Montfaucon, Frère Martin, moi — et vous, {prenom}, si vous tenez parole. Nous "
-					 "ne livrons pas à un entrepôt de la capitale : nous descendons aux cryptes de "
-					 "Notre-Dame. » Elle voit la question venir et la devance. « Oui, Notre-Dame a un "
-					 "portail. C'est pour cela que l'ordre l'a scellé, et c'est pour cela que le sceau "
-					 "réclame des cristaux purs : ceux-ci iront nourrir ce qui tient la porte fermée. "
-					 "La demoiselle veut voir comment il a été bâti ; elle dit que personne ne l'a "
-					 "jamais mesuré. » Un temps. « {xp} points d'expérience et {prime} pièces de "
-					 "cuivre à l'arrivée. Frère Martin et moi tiendrons nos lames si l'on vient nous "
-					 "chercher. La demoiselle, non. Ne la laissez jamais seule. »",
+					 "ne livrons pas à un entrepôt de la capitale : nous livrons Notre-Dame. » Elle "
+					 "voit la question venir et la devance. « Oui, Notre-Dame a un portail, et il "
+					 "tourne jour et nuit. C'est le plus ancien qui fonctionne encore, et il se nourrit "
+					 "de pierres de mana : ces cristaux-ci y seront taillés en gemmes, et chaque gemme "
+					 "ouvrira un chemin. La demoiselle veut voir comment il a été bâti — l'Institut des "
+					 "Architectes n'est à Lutecia que pour cela. » Un temps. « {xp} points "
+					 "d'expérience et {prime} pièces de cuivre à l'arrivée. Frère Martin et moi "
+					 "tiendrons nos lames si l'on vient nous chercher. La demoiselle, non. Ne la "
+					 "laissez jamais seule. »",
 			"choix": [
 				_accepter("« Alors partons. » — Quitter le parvis avec le convoi."),
 				{"id": "retour", "label": "« Pas encore. »", "next": "accueil"},
@@ -228,14 +239,15 @@ def martin(base):
 		"convoi_propose": {
 			"texte": "Il se relève, frotte la craie de ses genoux et referme son carnet de sceaux. "
 					 "« Aujourd'hui. Sept caisses, sept sceaux, trois personnes, et une paire de bras "
-					 "de plus : la vôtre. » Il compte sur ses doigts. « Destination : les cryptes de "
-					 "Notre-Dame. Ne faites pas cette tête, {prenom} — le portail est fermé depuis "
-					 "longtemps, et c'est justement pour qu'il le reste qu'on lui porte ces cristaux. » "
+					 "de plus : la vôtre. » Il compte sur ses doigts. « Destination : Notre-Dame. Ne "
+					 "faites pas cette tête, {prenom} — le portail ne mord personne, il mange des "
+					 "pierres. Une gemme de mana par passage, et ces caisses-là en feront beaucoup. » "
 					 "Il tapote la garde de son épée. « Dame Éléonore et moi, nous nous défendrons si "
 					 "l'on vient nous chercher au contact. Nous ne courrons après personne : sur une "
 					 "route, celui qui court après une bête laisse les caisses derrière lui. La "
 					 "demoiselle, elle, ne sait tenir qu'un carnet. {xp} points d'expérience et "
-					 "{prime} pièces de cuivre au bout, si vous nous amenez tous les trois sous la nef. »",
+					 "{prime} pièces de cuivre au bout, si vous nous amenez tous les trois jusqu'au "
+					 "parvis. »",
 			"choix": [
 				_accepter("« En route, frère. » — Quitter le parvis avec le convoi."),
 				{"id": "retour", "label": "« Laissez-moi un instant. »", "next": "accueil"},
@@ -258,6 +270,9 @@ def martin(base):
 # ---------------------------------------------------------------------------
 # Les deux paladins à Lutecia (docs neufs)
 # ---------------------------------------------------------------------------
+# Ils se tiennent sur le PARVIS, au pied de la nef que garde le templier : ni eux ni le joueur n'y
+# entrent sans y être autorisés. Leurs textes parlent de la garde SANS la conditionner — les flags
+# `acces_*` ne sont calculés que pour le PNJ qui porte `services.acces`.
 
 def eleonore_lutecia():
 	return {
@@ -267,43 +282,67 @@ def eleonore_lutecia():
 		"race": "elfe",
 		"vocation": "paladin",
 		"portrait": PORTRAIT_ELEONORE,
-		"description": "Paladine, commandante des convois de cristaux d'Auxerre. En garde à "
-					   "Notre-Dame de Lutecia depuis l'arrivée du dernier convoi, jusqu'à nouvel ordre.",
+		"description": "Paladine, commandante des convois de cristaux d'Auxerre. Depuis l'arrivée du "
+					   "dernier convoi, elle attend ses ordres sur le parvis de Notre-Dame, à Lutecia.",
 		"dialogue": {
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "Sous la nef, la lumière tombe en colonnes grises sur les dalles. Dame "
-							 "Éléonore se tient près de l'escalier des cryptes, le registre ouvert, et "
-							 "fait descendre une dernière caisse sous le regard d'un templier. Elle vous "
-							 "reconnaît avant que vous ayez fait trois pas. « {prenom}. Les sept sont en "
-							 "bas, scellées, comptées deux fois — Frère Martin y a veillé. » Elle "
-							 "referme le registre. « L'ordre nous garde ici jusqu'à nouvel ordre. »",
+					"texte": "Au pied des marches de la nef, Dame Éléonore regarde deux templiers faire "
+							 "entrer une dernière caisse par les grandes portes. Tout au fond, la lueur du "
+							 "portail tourne sans fin, et son bourdonnement fait trembler l'encre de son "
+							 "registre ouvert. Elle vous reconnaît avant que vous ayez fait trois pas. "
+							 "« {prenom}. Les sept sont entrées, comptées deux fois — Frère Martin y a "
+							 "veillé. » Elle referme le registre. « L'ordre nous garde ici jusqu'à nouvel "
+							 "ordre. »",
 					"choix": [
-						{"id": "sceau", "label": "« Pourquoi porter à un portail ce qui appelle ? »",
-						 "next": "sceau"},
+						{"id": "portail", "label": "« Pourquoi porter à un portail ce qui appelle ? »",
+						 "next": "portail"},
+						{"id": "garde", "label": "« Le templier des marches ne laisse passer personne. »",
+						 "next": "garde"},
 						{"id": "aelis", "label": "« Et mademoiselle de Montfaucon ? »", "next": "aelis"},
-						fin("« Je vous laisse à la garde du sceau. »"),
+						fin("« Je vous laisse à votre garde. »"),
 					],
 				},
-				"sceau": {
-					"texte": "« Parce qu'un sceau s'use. » Elle désigne l'escalier. « Les cristaux ne "
-							 "l'ouvrent pas : ils le nourrissent. Sous la prière, ils se taisent, et ce "
-							 "qui se tait sous cette nef tient la porte fermée. » Un temps. « À Auxerre, "
-							 "on les cache. Ici, on les emploie. C'est toute la différence entre un "
-							 "coffre et un rempart. »",
+				"portail": {
+					"texte": "« Parce qu'ici, ce qui appelle est enfin employé. » Elle désigne la lueur, "
+							 "au fond de la nef. « Une caisse de cristaux qui dort dans un entrepôt attire "
+							 "les bêtes à trois lieues. La même caisse, taillée en gemmes violettes par les "
+							 "ateliers du quartier, fait tourner cette arche : une gemme de deux cent "
+							 "cinquante grammes, et le passage s'ouvre vers n'importe quel point du monde "
+							 "connu. » Un temps. « À Auxerre, on cache le mana. Lutecia n'en a presque pas, "
+							 "alors elle l'achète, et elle en fait des chemins. C'est toute la différence "
+							 "entre un coffre et une route. »",
 					"choix": [
+						{"id": "garde", "label": "« Et qui garde ces chemins ? »", "next": "garde"},
 						{"id": "aelis", "label": "« Et la demoiselle, dans tout cela ? »", "next": "aelis"},
 						{"id": "retour", "label": "Revenir.", "next": "accueil"},
 					],
 				},
-				"aelis": {
-					"texte": "« Le chapitre lui a accordé les cryptes. » L'ombre d'un sourire. « Elle "
-							 "a mesuré le premier pilier du sceau avant même d'avoir retiré son manteau. "
-							 "Elle dit que les bâtisseurs de Notre-Dame savaient ce qu'ils faisaient, et "
-							 "qu'ils ne l'ont écrit nulle part. Je crois qu'elle compte réparer cet oubli. »",
+				"garde": {
+					"texte": "« Bouzereau ? » L'ombre d'un sourire. « Il ne laisse entrer que les porteurs "
+							 "d'une carte de la guilde de Lutecia, et seulement au rang A. Moi-même, je n'ai "
+							 "passé ces portes que derrière mes caisses, un ordre écrit du chapitre à la main, "
+							 "et il l'a lu deux fois. » Elle suit du regard un voyageur qui ressort de la nef "
+							 "en titubant, les cheveux encore dressés par l'orage du passage. « Un chemin qui "
+							 "mène partout mène aussi à ce qu'on ne voudrait pas voir revenir. Je ne lui en "
+							 "veux pas d'être prudent : je fais le même métier, sur les routes. »",
 					"choix": [
-						{"id": "sceau", "label": "« Et ce sceau, justement ? »", "next": "sceau"},
+						{"id": "portail", "label": "« Ce portail vaut tant de précautions ? »",
+						 "next": "portail"},
+						{"id": "retour", "label": "Revenir.", "next": "accueil"},
+					],
+				},
+				"aelis": {
+					"texte": "« L'Institut des Architectes l'a réclamée dès le premier soir. » L'ombre d'un "
+							 "sourire. « Elle a mesuré l'autel d'ancrage avant même d'avoir retiré son "
+							 "manteau. Les Architectes ne sont à Lutecia que pour ce portail : un Frère "
+							 "Aborigène l'a bâti, la grande vague ne l'a pas dérangé, et personne depuis n'a "
+							 "su en faire un pareil. Elle dit que ses bâtisseurs savaient ce qu'ils "
+							 "faisaient, et qu'ils ne l'ont écrit nulle part. Je crois qu'elle compte réparer "
+							 "cet oubli. »",
+					"choix": [
+						{"id": "portail", "label": "« Et ce portail, justement ? »", "next": "portail"},
 						{"id": "retour", "label": "Revenir.", "next": "accueil"},
 					],
 				},
@@ -320,20 +359,23 @@ def martin_lutecia():
 		"race": "hobbit",
 		"vocation": "paladin",
 		"portrait": PORTRAIT_MARTIN,
-		"description": "Paladin hobbit, second de Dame Éléonore. Il tient à Notre-Dame le registre "
-					   "des caisses du dernier convoi d'Auxerre, jusqu'à nouvel ordre.",
+		"description": "Paladin hobbit, second de Dame Éléonore. Il tient sur le parvis de Notre-Dame "
+					   "le registre des caisses du dernier convoi d'Auxerre, jusqu'à nouvel ordre.",
 		"dialogue": {
 			"noeud_depart": "accueil",
 			"noeuds": {
 				"accueil": {
-					"texte": "Assis sur la dernière marche de l'escalier des cryptes, Frère Martin "
-							 "compare une empreinte de cire à celle qu'il a relevée à Auxerre, puis la "
-							 "range dans son carnet avec un soin de relique. « Sept. » Il lève le nez. "
-							 "« Sept parties, sept arrivées, sept intactes, et pas un essieu de cassé "
-							 "entre l'Yonne et la Seine. J'ai failli ne pas le croire. Asseyez-vous, "
-							 "{prenom} — pas sur la craie. »",
+					"texte": "Assis sur la dernière marche du parvis, dos aux grandes portes de la nef, "
+							 "Frère Martin compare une empreinte de cire à celle qu'il a relevée à Auxerre, "
+							 "puis la range dans son carnet avec un soin de relique. Chaque fois que le "
+							 "bourdonnement du portail enfle derrière lui, son fusain tremble et il "
+							 "grommelle. « Sept. » Il lève le nez. « Sept parties, sept arrivées, sept "
+							 "intactes, et pas un essieu de cassé entre l'Yonne et la Seine. J'ai failli ne "
+							 "pas le croire. Asseyez-vous, {prenom} — pas sur la craie. »",
 					"choix": [
 						{"id": "route", "label": "« Que retenez-vous de la route ? »", "next": "route"},
+						{"id": "bruit", "label": "« Ce grondement ne vous gêne pas ? »", "next": "bruit"},
+						{"id": "garde", "label": "« Qui garde ces portes ? »", "next": "garde"},
 						{"id": "ordre", "label": "« Combien de temps restez-vous ici ? »", "next": "ordre"},
 						fin("« Bonne garde, frère. »"),
 					],
@@ -348,11 +390,39 @@ def martin_lutecia():
 						{"id": "retour", "label": "Revenir.", "next": "accueil"},
 					],
 				},
+				"bruit": {
+					"texte": "« Il me gêne depuis notre arrivée, et il gênera encore mes petits-enfants. » "
+							 "Il pointe son fusain par-dessus son épaule. « C'est le portail qui tourne. Un "
+							 "bourdonnement pour dire qu'il tient, un claquement pour dire que quelqu'un "
+							 "arrive, et une odeur d'orage pour dire d'où — les habitués reconnaissent la mer "
+							 "ou la neige rien qu'au nez. » Il souffle sur son carnet. « Nos cristaux passent "
+							 "chez les tailleurs du quartier et en ressortent en gemmes violettes de deux cent "
+							 "cinquante grammes. Une gemme, un voyage. J'ai fait le calcul pour les sept "
+							 "caisses. Je ne vous dirai pas le résultat : vous ne dormiriez plus. »",
+					"choix": [
+						{"id": "garde", "label": "« Et qui décide qui voyage ? »", "next": "garde"},
+						{"id": "retour", "label": "Revenir.", "next": "accueil"},
+					],
+				},
+				"garde": {
+					"texte": "« Bouzereau. » Il baisse la voix, par prudence plus que par crainte. « Un "
+							 "ogre qui sait lire, ce qui est rare, et qui lit tout, ce qui est pire. Carte "
+							 "de la guilde de Lutecia, rang A, et rien d'autre — pas de recommandation, pas "
+							 "de sceau d'Auxerre, pas même le mien. » Il tapote son carnet. « J'ai essayé, "
+							 "avec mon sceau d'ordre. Il l'a regardé longtemps, puis il m'a demandé où je "
+							 "comptais aller. J'ai dit : nulle part. Il a dit : alors vous n'avez pas besoin "
+							 "d'entrer. » Il range son fusain. « Je n'ai rien trouvé à répondre. C'est la "
+							 "première fois depuis Clairvaux. »",
+					"choix": [
+						{"id": "bruit", "label": "« Et ce grondement, d'où vient-il ? »", "next": "bruit"},
+						{"id": "retour", "label": "Revenir.", "next": "accueil"},
+					],
+				},
 				"ordre": {
-					"texte": "« Jusqu'à nouvel ordre, nous restons sous cette nef. » Il hausse les "
-							 "épaules. « Dame Éléonore tient le registre du sceau, je tiens celui des "
-							 "caisses, et le chapitre tient les deux. Quand Auxerre aura une autre "
-							 "livraison, on nous le fera savoir — tard, comme d'habitude. »",
+					"texte": "« Jusqu'à nouvel ordre, nous restons sur ce parvis. » Il hausse les épaules. "
+							 "« Dame Éléonore tient le registre du convoi, je tiens celui des caisses, et le "
+							 "chapitre tient les deux. Quand Auxerre aura une autre livraison, on nous le "
+							 "fera savoir — tard, comme d'habitude. »",
 					"choix": [
 						{"id": "route", "label": "« Parlez-moi encore de la route. »", "next": "route"},
 						{"id": "retour", "label": "Revenir.", "next": "accueil"},
@@ -384,9 +454,9 @@ def cathedrale(base):
 
 
 def notre_dame(base):
-	"""Les deux paladins APRÈS la réussite, placés AVANT le templier — sans quoi ils ne seraient
-	jamais tirés (le templier n'a pas de `probabilite`, donc 1). ⚠️ Prix assumé : après le convoi,
-	le templier n'est plus là que dans ~56 % des visites."""
+	"""Les deux paladins APRÈS la réussite, placés avant le templier. Présences cumulables : chaque
+	entrée tire sa propre probabilité, et le templier (sans `probabilite`, donc 1) garde toujours
+	les marches. Toute autre entrée est conservée telle quelle à la suite."""
 	doc = nu(base[NOTRE_DAME])
 	autres = [e for e in doc.get("pnj") or []
 			  if not (isinstance(e, dict) and e.get("character") in (ELEONORE_LUTECIA, MARTIN_LUTECIA))]
@@ -397,7 +467,7 @@ def notre_dame(base):
 			"portrait": PORTRAIT_ELEONORE,
 			"probabilite": 0.25,
 			"conditions": copy.deepcopy(CONVOI_ARRIVE),
-			"description": "Une paladine en haubert clair, près de l'escalier des cryptes.",
+			"description": "Une paladine en haubert clair, au pied des marches de la nef.",
 		},
 		{
 			"character": MARTIN_LUTECIA,
@@ -405,7 +475,8 @@ def notre_dame(base):
 			"portrait": PORTRAIT_MARTIN,
 			"probabilite": 0.25,
 			"conditions": copy.deepcopy(CONVOI_ARRIVE),
-			"description": "Un paladin hobbit assis sur les marches, un carnet de sceaux sur les genoux.",
+			"description": "Un paladin hobbit assis sur la dernière marche du parvis, un carnet de "
+						   "sceaux sur les genoux.",
 		},
 	] + autres
 	return doc
