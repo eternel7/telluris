@@ -858,7 +858,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 .dep-info b { color: var(--accent2); }
 .dep-regle { font-size: 0.62rem; color: var(--accent2); border: 1px dashed var(--accent2);
 	border-radius: 4px; padding: 4px 6px; margin-bottom: 8px; line-height: 1.4; }
-.dep-portes { font-size: 0.64rem; margin-top: 8px; }
+.dep-portes { font-size: 0.64rem; margin-top: 8px; margin-bottom: 8px; }
 .dep-porte { display: block; width: 100%; text-align: left; margin-top: 4px; padding: 5px 6px;
 	border: 1px solid var(--accent); border-radius: 4px; background: rgba(200,168,75,0.08);
 	color: var(--accent); font-size: 0.64rem; cursor: pointer; }
@@ -1110,7 +1110,6 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 						<span><span class="voies-pastille" style="background:linear-gradient(90deg,rgba(240,90,200,0.85),rgba(80,170,255,0.85),rgba(255,170,40,0.85));"></span>autre région (enclave)</span>
 						<span><span class="voies-pastille" style="border:2px solid rgba(255,40,220,1);border-radius:50%;"></span>goulot</span>
 						<span><span class="voies-pastille" style="width:34px;background:linear-gradient(90deg,rgba(255,220,0,0.2),rgba(255,110,0,0.6),rgba(255,0,0,0.9));"></span>passage faible → fort</span>
-						<span><span class="voies-pastille" style="height:3px;background:rgba(60,230,110,1);"></span>direction autorisée</span>
 						<span><span class="voies-pastille" style="height:4px;width:6px;background:rgba(240,60,60,1);"></span>fermée par nav</span>
 						<span><span class="voies-pastille" style="height:4px;width:34px;background:linear-gradient(90deg,rgba(40,230,255,0.95),rgba(255,255,255,0.95),rgba(150,120,255,0.95),rgba(255,140,190,0.95));"></span>chemins A → B (1 = le plus court, les suivants en tirets)</span>
 						<span><span class="voies-pastille" style="border:2px solid rgba(255,225,40,1);"></span>case de la coupe minimale</span>
@@ -1245,12 +1244,13 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 		<button class="dep-close" id="dep-close-btn" title="Quitter le mode test">✕</button>
 	</div>
 	<div class="dep-regle" id="dep-regle"></div>
-	{{ movepanel.move_panel('dep-controls', fn='depPas', classes='dep-controls') }}
 	<label class="dep-bascule">
 		<input type="checkbox" id="dep-regle-combat"> Règles de COMBAT (terrain difficile franchissable)
 	</label>
-	<div class="dep-info" id="dep-info"></div>
 	<div class="dep-portes" id="dep-portes"></div>
+	{{ movepanel.move_panel('dep-controls', fn='depPas', classes='dep-controls') }}
+
+	<div class="dep-info" id="dep-info"></div>
 	<div class="dep-row">
 		<button class="btn" id="dep-replacer-btn" title="Re-tirer un placement de départ">↻ Replacer</button>
 	</div>
@@ -4268,7 +4268,7 @@ if (grilleAppliquerBtn) grilleAppliquerBtn.addEventListener('click', appliquerGr
 // cyclent sur des teintes vives, pour qu'une enclave saute aux yeux.
 const VOIES_REGION_PRINCIPALE = 'rgba(70,200,110,0.25)';
 // Chemins A → B, dans l'ordre (cyclique) : le n° 1 garde le cyan d'avant. Palette choisie HORS de
-// celles déjà peintes — magenta des goulots, jaune de la coupe, vert des régions et directions,
+// celles déjà peintes — magenta des goulots, jaune de la coupe, vert des régions,
 // rampe jaune → rouge du passage — pour qu'un chemin ne se confonde avec aucune autre couche.
 const VOIES_CHEMINS_COULEURS = [
 	'rgba(40,230,255,0.95)', 'rgba(255,255,255,0.95)', 'rgba(150,120,255,0.95)', 'rgba(255,140,190,0.95)',
@@ -4460,19 +4460,14 @@ function _voiesDessiner(cw, ch) {
 			ctx.restore();
 		});
 	}
-	// Directions nav près des murs : trait VERT = on passe, tiret ROUGE près du bord = fermé par nav
-	// seule. Aucun trait = terrain refusé.
+	// Directions nav près des murs : tiret ROUGE près du bord = fermé par nav seule. Les directions
+	// autorisées (`d.autorisees`) ne sont pas dessinées.
 	if (voies.directions && (!voiesDirectionsEl || voiesDirectionsEl.checked)) {
 		ctx.save();
 		ctx.shadowBlur = 0;
 		ctx.lineCap = 'round';
 		voies.directions.forEach(d => {
 			const x = centreX(d.i), y = centreY(d.i);
-			ctx.strokeStyle = 'rgba(60,230,110,1)';
-			ctx.lineWidth = Math.max(1, cote * 0.08);
-			ctx.beginPath();
-			d.autorisees.forEach(([dx, dy]) => { ctx.moveTo(x, y); ctx.lineTo(x + dx * cw * 0.45, y + dy * ch * 0.45); });
-			ctx.stroke();
 			ctx.strokeStyle = 'rgba(240,60,60,1)';
 			ctx.lineWidth = Math.max(1.5, cote * 0.12);
 			ctx.beginPath();
@@ -6770,7 +6765,7 @@ function renderLieuProfilWeights() {
 // refuse — exactement le défaut qu'il est censé détecter.
 //
 // ⚠️ La SURCHARGE (garde 409 du serveur) n'a aucun sens sans personnage : le mode ne la simule
-// pas
+// pas.
 
 const depSection   = document.getElementById('dep-section');
 const depControls  = document.getElementById('dep-controls');
