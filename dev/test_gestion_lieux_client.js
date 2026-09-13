@@ -57,7 +57,7 @@ vm.runInThisContext(extraireDeclaration(/const PORTE_CATEGORIE = [^;]+;/, 'PORTE
 vm.runInThisContext(extraireDeclaration(/const GUILDE_EXTERIEUR_CATEGORIE = [^;]+;/, 'GUILDE_EXTERIEUR_CATEGORIE'));
 vm.runInThisContext(extraireDeclaration(/const COLS_LIEN = [^;]+;/, 'COLS_LIEN'));
 vm.runInThisContext(extraireDeclaration(/const LIEUX_HOTE_REQUIS = \[[\s\S]*?\];/, 'LIEUX_HOTE_REQUIS'));
-for (const f of ['_escHtml', '_connDest', 'etatPnjDeLieu', 'lieuxLigneHtml',
+for (const f of ['_escHtml', '_connDest', 'etatPnjDeLieu', 'lieuxLigneHtml', '_ljConnexion',
 				 'valeurLigne', 'colonnesDe', 'lieuxMarchandsVisibles', 'portesDeVille',
 				 '_posValide', '_proposerCases']) {
 	vm.runInThisContext(extraire(f));
@@ -189,6 +189,17 @@ t('le label est échappé ; 🏰 Porte seulement si demandé ; ✕ Fermer quand 
 	assert.ok(!html.includes('🏰 Porte') && html.includes('✕ Fermer'));
 	assert.ok(lieuxLigneHtml(PORTE, VILLE, { porte: true }).includes('🏰 Porte'));
 	assert.ok(!lieuxLigneHtml(AUBERGE, VILLE, { porte: true }).includes('🏰 Porte'));
+});
+
+t('🧾 JSON : connexion résolue dans la liste du lieu, ou dans la liste COMPLÈTE hors liste', () => {
+	const maillon = { _id: 'link:reception_to_facade', nodes: [{ lieu: 'lieu:r' }, { lieu: 'lieu:f' }] };
+	assert.strictEqual(_ljConnexion(AUBERGE._id, false, [AUBERGE], []), AUBERGE);
+	// Un maillon de guilde n'a aucun nœud sur la carte : la liste du lieu ne le voit pas.
+	assert.strictEqual(_ljConnexion(maillon._id, false, [AUBERGE], [maillon]), null);
+	assert.strictEqual(_ljConnexion(maillon._id, true, [AUBERGE], [maillon]), maillon);
+	// Hors liste, la liste du lieu n'est PAS consultée : sa copie enrichie n'est pas celle qu'on édite.
+	assert.strictEqual(_ljConnexion(AUBERGE._id, true, [AUBERGE], []), null);
+	assert.strictEqual(_ljConnexion(null, true, [AUBERGE], [maillon]), null);
 });
 
 t('🏛️ Guilde seulement si demandé, et seulement sur une façade de guilde', () => {

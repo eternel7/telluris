@@ -80,6 +80,8 @@ Source unique des formulaires (admin) : catégories (`lieu.categorie` ∪ `recet
 - ⚠️ Le bureau n'a **pas** de `sous_categorie` (utils/recrutement.py § Maison de guilde) ; aucun tag `recrutement` (la catégorie l'accorde).
 - **`relation_lieu` → comptoir** : créer le comptoir **réécrit** façade et réception (relues **fraîches**, `_gdLireFrais`, clone + ce seul champ) ; le bureau le reçoit et répare un maillon qui ne l'aurait pas. Valeur déjà posée, même divergente : **jamais écrasée**, signalée.
 - `acces` du bureau : `gardien` = 1re entrée `pnj` du comptoir relu (omis sinon : informatif), `rang_min {cite: lieu_parent, rang}` pris dans `creation_options.conditions.rangs`. ⚠️ Sans dialogue qui pose un laissez-passer, seul le rang ouvre.
+- **🧾 JSON par maillon** : `#lj-overlay` s'ouvre **par-dessus** le panneau (z-index 60 > 59), qui reste dessous. `toggleSousLieuJson(…, {horsListe:true})` ne ferme pas les autres panneaux et résout la connexion dans `cxDocsConnus` (`_ljConnexion`), **relu après 💾/🗑** (sinon `_rev` périmé ⇒ 409). Façade = sa connexion à la carte ; maillon = celle au précédent ; doublon = chaque candidat. 🎯 masqué sur une connexion sans nœud sur la carte. Échap ferme le JSON avant le panneau.
+- ⚠️ Un 💾 JSON pendant que le panneau est ouvert ⇒ `gdPerime` : la création **relit** la maison au lieu d'écrire (sinon `gdRelus` périmé réécrirait la façade sans la retouche).
 
 
 ### Lot de lieux — peupler une ville

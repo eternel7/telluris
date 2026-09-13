@@ -574,6 +574,8 @@
 	}
 	#porte-overlay.pt-hidden, #guilde-overlay.gd-hidden { display: none; }
 	#porte-overlay.cx-viser { opacity: 0.3; pointer-events: none; }
+	/* Sous #lj-overlay (60) : le 🧾 JSON d'un maillon s'ouvre PAR-DESSUS le panneau, qui reste dessous. */
+	#guilde-overlay { z-index: 59; }
 	#porte-overlay .lj-title, #guilde-overlay .lj-title {
 		position: sticky; top: -16px; z-index: 2;
 		background: var(--panel); margin-top: -16px; padding: 16px 0 6px;
@@ -1344,8 +1346,14 @@ const LIEUX_HOTE = {
 		await fetchLieuxConnections();
 		renderLieuxConnList();
 		if (grid.length) renderGrid();
+		// Un 🧾 JSON ouvert par-dessus le panneau de guilde vient d'écrire : sa maison est à relire.
+		if (_gdOuvert()) _gdMarquerPerime();
 	},
-	rendreListe: () => { renderLieuxConnList(); if (grid.length) renderGrid(); },
+	rendreListe: () => {
+		renderLieuxConnList();
+		if (grid.length) renderGrid();
+		if (_gdOuvert()) _gdRenderChaine();   // ses boutons 🧾 suivent l'overlay, comme ceux de la liste
+	},
 	statut: html => setStatus(html),
 	fermerAutres: () => { closePorteForm(); closeGuildeForm(); },
 	visee: {
@@ -2935,7 +2943,8 @@ function _gdChaine(connexions, lieux, facadeId) {
 	const cats = {};
 	(lieux || []).forEach(l => { if (l && l._id) cats[l._id] = l.categorie || ''; });
 	const etapes = _gdEtapes();
-	const out = { facade: { lieu: facadeId, link: null }, etape: '', precedent: '', erreur: '' };
+	const out = { facade: { lieu: facadeId, link: null }, etape: '', precedent: '', erreur: '',
+		etapeErreur: '', candidats: [] };
 	etapes.forEach(e => { out[e.cle] = null; });
 	if (!facadeId || cats[facadeId] !== GUILDE_EXTERIEUR_CATEGORIE) {
 		out.erreur = `${facadeId || '?'} n'est pas une façade de guilde (${GUILDE_EXTERIEUR_CATEGORIE}).`;
@@ -2953,7 +2962,10 @@ function _gdChaine(connexions, lieux, facadeId) {
 		out.precedent = precedent;
 		if (candidats.length > 1) {
 			out.erreur = `${candidats.length} liens « ${e.titre} » partent de ${precedent} (`
-				+ candidats.map(x => `${x.link._id} → ${x.lieu}`).join(', ') + ') — corrigez par 🧾 JSON.';
+				+ candidats.map(x => `${x.link._id} → ${x.lieu}`).join(', ') + ') — corrigez-les par leur 🧾 JSON.';
+			// Les candidats restent listés, chacun avec son 🧾 : c'est par là qu'on répare.
+			out.etapeErreur = e.cle;
+			out.candidats = candidats;
 			return out;
 		}
 		if (!candidats.length) { out.etape = e.cle; return out; }
@@ -3079,6 +3091,7 @@ let gdFacadeId = '';   // la façade dont on bâtit la maison ('' = panneau ferm
 let gdChaine = null;   // `_gdChaine` à l'ouverture
 let gdRelus = {};      // {facade, reception, comptoir} relus FRAIS — base de toute réécriture
 let gdEnVol = false;
+let gdPerime = false;  // un 🧾 JSON a écrit depuis l'ouverture : relire la maison avant de créer
 
 function _gdEl(id) { return document.getElementById(id); }
 
@@ -3115,17 +3128,54 @@ async function _gdLireFrais(id) {
 	} catch (e) { return null; }
 }
 
+// Le 🧾 d'un maillon ouvre #lj-overlay PAR-DESSUS le panneau (`horsListe`) : le lieu et SA
+// connexion au maillon précédent — pour la façade, celle qui la pose sur la carte.
+// ⚠️ Des `_id` CouchDB dans l'onclick, jamais une saisie (CLAUDE.md §9), comme `lieuxLigneHtml`.
+function _gdBoutonJson(link, lieuId) {
+	if (!link || !link._id || !lieuId) return '';
+	const ouvert = lieuxJsonOuvert === link._id;
+	return `<button class="btn btn-inline" style="font-size:.6rem;" onclick="toggleSousLieuJson('${link._id}','${lieuId}',{horsListe:true})">${ouvert ? '✕ Fermer' : '🧾 JSON'}</button>`;
+}
+
+// La connexion de la façade à la carte — dans `cxDocsConnus`, où `_ljConnexion` la résoudra.
+function _gdLienFacade() {
+	return cxDocsConnus.find(c => {
+		const nodes = c.nodes || [];
+		return nodes.some(n => n.lieu === gdFacadeId) && nodes.some(n => n.lieu === currentLocId);
+	}) || null;
+}
+
 function _gdRenderChaine() {
 	const el = _gdEl('gd-chaine');
+	if (!el) return;
 	const ch = gdChaine || {};
-	const lignes = [`<div class="cx-hint ok">✓ Façade — ${_escHtml(_gdLabelLieu(gdFacadeId))}</div>`];
+	const ligne = (classe, texte, bouton) =>
+		`<div class="cx-hint${classe}" style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">`
+		+ `<span style="flex:1;">${texte}</span>${bouton || ''}</div>`;
+	const lignes = [ligne(' ok', `✓ Façade — ${_escHtml(_gdLabelLieu(gdFacadeId))}`,
+		gdChaine ? _gdBoutonJson(_gdLienFacade(), gdFacadeId) : '')];
 	_gdEtapes().forEach(e => {
 		const m = ch[e.cle];
-		if (m) lignes.push(`<div class="cx-hint ok">✓ ${e.titre} — ${_escHtml(_gdLabelLieu(m.lieu))}</div>`);
-		else if (ch.etape === e.cle && !ch.erreur) lignes.push(`<div class="cx-hint"><b>➕ ${e.titre}</b> — à créer maintenant</div>`);
-		else lignes.push(`<div class="cx-hint" style="color:#666;">· ${e.titre} — ensuite</div>`);
+		if (m) {
+			lignes.push(ligne(' ok', `✓ ${e.titre} — ${_escHtml(_gdLabelLieu(m.lieu))}`, _gdBoutonJson(m.link, m.lieu)));
+		} else if (ch.erreur && ch.etapeErreur === e.cle) {
+			(ch.candidats || []).forEach(x => lignes.push(ligne(' ko',
+				`✗ ${e.titre} en double — ${_escHtml(_gdLabelLieu(x.lieu))}`, _gdBoutonJson(x.link, x.lieu))));
+		} else if (ch.etape === e.cle && !ch.erreur) {
+			lignes.push(ligne('', `<b>➕ ${e.titre}</b> — à créer maintenant`));
+		} else {
+			lignes.push(ligne('', `<span style="color:#666;">· ${e.titre} — ensuite</span>`));
+		}
 	});
 	el.innerHTML = lignes.join('');
+}
+
+// ⚠️ On ne relit PAS sous les doigts de l'auteur (sa saisie serait perdue, et le 🧾 ouvert
+// par-dessus refermé) : c'est la création qui relira la maison, avant d'écrire quoi que ce soit.
+// Sans cela, `gdRelus` périmé ferait réécrire la façade ou la réception SANS la retouche JSON.
+function _gdMarquerPerime() {
+	gdPerime = true;
+	_gdMsg("⚠ Un document a été enregistré depuis l'ouverture : la maison sera relue avant toute création.", false);
 }
 
 // ⚠️ Les valeurs voulues sont passées EXPLICITEMENT, jamais relues du `<select>` : affecter
@@ -3211,6 +3261,7 @@ async function openGuildeForm(facadeId) {
 	gdFacadeId = facadeId;
 	gdChaine = null;
 	gdRelus = {};
+	gdPerime = false;
 	_gdCabler();
 	_gdEl('guilde-overlay').classList.remove('gd-hidden');
 	_gdEl('gd-titre').textContent = facadeId;
@@ -3300,6 +3351,14 @@ function closeGuildeForm() {
 // ── L'écriture ─────────────────────────────────────────────────────────────
 async function submitGuildeForm() {
 	if (gdEnVol) return;
+	if (gdPerime) {
+		// Chaîne, catégories et docs relus peuvent avoir changé : on relit tout, on n'écrit rien.
+		await openGuildeForm(gdFacadeId);
+		if (_gdOuvert() && gdChaine && !gdChaine.erreur && gdChaine.etape) {
+			_gdMsg('↻ Maison relue après une écriture JSON : vérifiez les champs, puis recréez.', false);
+		}
+		return;
+	}
 	const etape = _gdEtapeCourante();
 	const docs = _gdDocsForme();
 	const souci = _gdValider(docs, gdChaine, {
@@ -5142,9 +5201,10 @@ document.addEventListener('keydown', (e) => {
 	// ⚠️ Comme le lot : Échap n'annule pas pendant l'écriture, fermer masquerait une
 	// opération en cours sans l'interrompre.
 	if (_ptOuvert() && !ptEnVol) { closePorteForm(); return; }
-	if (_gdOuvert() && !gdEnVol) { closeGuildeForm(); return; }
 	if (lieuxRepos) { desarmerRepositionnement(); return; }
 	if (lieuxJsonOuvert) { closeLieuJson(); return; }
+	// APRÈS le 🧾 JSON : celui d'un maillon s'ouvre par-dessus le panneau de guilde.
+	if (_gdOuvert() && !gdEnVol) { closeGuildeForm(); return; }
 	// Le mode test vient en dernier : son overlay est en z-index 100, sous les deux modals et
 	// sous l'éditeur JSON — c'est donc lui qu'on ferme quand il ne reste plus que lui.
 	if (modeDeplacement) fermerModeDeplacement();
@@ -5920,6 +5980,7 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 		<b>réception</b> (tableau de recrues), puis <b>comptoir</b> (rang de guilde), enfin
 		<b>bureau du maître</b> (fermé sous un rang minimal). Chaque étape écrit le lieu et sa connexion
 		au précédent ; toute la maison partage la <b>cote</b> du comptoir (<code>relation_lieu</code>).
+		<b>🧾 JSON</b> ouvre par-dessus le document d'un lieu et celui de sa connexion au précédent.
 	</div>
 
 	<div class="cx-noeud">

@@ -185,6 +185,9 @@ t('deux réceptions sur une même façade : ERREUR, jamais un choix', () => {
 	const ch = _gdChaine(conns, ls, FACADE);
 	assert.match(ch.erreur, /link:doublon/);
 	assert.strictEqual(ch.etape, '');
+	// Les candidats restent exposés : le panneau offre un 🧾 JSON sur chacun pour réparer.
+	assert.strictEqual(ch.etapeErreur, 'reception');
+	assert.deepStrictEqual(ch.candidats.map(x => x.lieu).sort(), [RECEPTION, 'lieu:autre_reception'].sort());
 	assert.match(_gdValider([{}, {}], ch, ctx()), /link:doublon/);
 });
 

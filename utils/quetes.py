@@ -303,7 +303,7 @@ def generer_quete(guild_doc: dict, parent_doc: dict, type_obj: str, cible, nivea
 		xp_unit = _xp_unitaire(esp, niveau) if esp else max(1, int(niveau) * 4)
 		nom = (esp.get("nom") if esp else None) or _nom_espece(cible)
 		titre = random.choice(_TITRES_KILL).format(nom=nom)
-		desc_tpl = "La guilde demande d'abattre {q} {nom} qui rôdent dans les environs d'Auxerre."
+		desc_tpl = "La guilde demande d'abattre {q} {nom} qui rôdent dans les environs."
 	else:  # collect
 		item = get_doc_fn(cible)
 		xp_unit = _xp_unitaire_item(item, niveau, get_doc_fn)

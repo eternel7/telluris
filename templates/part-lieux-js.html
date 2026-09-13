@@ -47,6 +47,7 @@ const LIEUX_HOTE_REQUIS = ['lieuCourant', 'caseCourante', 'connexions', 'grille'
 
 let lieuxJsonOuvert = null;  // _id de la connexion dont les JSON sont ouverts dans l'overlay
 let lieuxJsonDest = null;    // lieu de destination de cette connexion (le doc édité à côté)
+let lieuxJsonHorsListe = false; // ouverte depuis un panneau de page : résolue dans la liste COMPLÈTE
 
 let lieuxDocCache = {};      // lieu_id -> doc lieu (alimente l'éditeur JSON)
 let creationOptions = null;  // payload de /api/lieux/creation_options
@@ -135,7 +136,10 @@ function _sousLieuJsonHtml(conn, destId) {
 	// L'état armé est porté par le BOUTON lui-même : le corps de l'overlay étant réécrit à
 	// chaque rendu, il n'y a rien à basculer, seulement à composer depuis l'état de l'hôte.
 	// Sans carte (`repositionnement` null), l'outil n'est pas proposé du tout.
-	const repo = LIEUX_HOTE.repositionnement;
+	// 🎯 déplace le nœud posé sur la carte courante : une connexion qui n'en a pas (maillon d'une
+	// maison de guilde) n'a rien à repositionner.
+	const surCarte = (conn.nodes || []).some(n => n.lieu === LIEUX_HOTE.lieuCourant());
+	const repo = surCarte ? LIEUX_HOTE.repositionnement : null;
 	const repos = !!(repo && repo.actif(conn._id));
 	return `<div class="lj-head">
 			<span>📄 ${_escHtml(destId)}</span>
@@ -165,20 +169,33 @@ function _sousLieuJsonHtml(conn, destId) {
 function renderLieuJsonOverlay() {
 	const ov = document.getElementById('lj-overlay');
 	if (!ov) return;
-	const conn = lieuxJsonOuvert ? LIEUX_HOTE.connexions().find(c => c._id === lieuxJsonOuvert) : null;
+	const conn = _ljConnexion(lieuxJsonOuvert, lieuxJsonHorsListe, LIEUX_HOTE.connexions(), cxDocsConnus);
 	if (!conn) { ov.classList.add('lj-hidden'); return; }
 	document.getElementById('lj-dest').textContent = lieuxJsonDest || '';
 	document.getElementById('lj-body').innerHTML = _sousLieuJsonHtml(conn, lieuxJsonDest);
 	ov.classList.remove('lj-hidden');
 }
 
-async function toggleSousLieuJson(connId, destId) {
+// La connexion dont les JSON sont ouverts. PURE (test_gestion_lieux_client.js).
+// `horsListe` : dans la liste COMPLÈTE `toutes` — un maillon de maison de guilde n'a aucun nœud
+// sur la carte, la liste du lieu ne le voit pas. Sinon dans la liste du lieu SEULE : une connexion
+// qui en sort après un 💾 referme l'overlay plutôt que d'en afficher une copie périmée.
+function _ljConnexion(connId, horsListe, liste, toutes) {
+	if (!connId) return null;
+	return ((horsListe ? toutes : liste) || []).find(c => c._id === connId) || null;
+}
+
+// `opts.horsListe` : ouvert DEPUIS un panneau de la page (maison de guilde), qui reste DESSOUS —
+// les autres panneaux ne sont donc pas fermés, et la connexion se résout dans `cxDocsConnus`.
+async function toggleSousLieuJson(connId, destId, opts) {
+	const horsListe = !!(opts && opts.horsListe);
 	if (lieuxJsonOuvert === connId) { closeLieuJson(); return; }
 	closeConnForm();   // les panneaux de droite occupent la même place
-	LIEUX_HOTE.fermerAutres();
+	if (!horsListe) LIEUX_HOTE.fermerAutres();
 	await _chargerDocLieu(destId);
 	lieuxJsonOuvert = connId;
 	lieuxJsonDest = destId;
+	lieuxJsonHorsListe = horsListe;
 	LIEUX_HOTE.rendreListe();   // le bouton de la ligne passe à « ✕ Fermer »
 	renderLieuJsonOverlay();
 }
@@ -719,6 +736,9 @@ async function sauverDocJson(kind, destId, docPret) {
 			return;
 		}
 		if (kind === 'lieu') await _chargerDocLieu(destId);
+		// Hors liste, la connexion affichée vient de `cxDocsConnus` : sans relecture, son `_rev`
+		// périmé ferait échouer (409) le 💾 suivant.
+		if (lieuxJsonHorsListe) await _cxChargerIds();
 		await LIEUX_HOTE.apresEcriture();
 		renderLieuJsonOverlay();   // repeint les deux zones : le `_rev` vient de changer
 		_ljMsg(kind, '✓ Enregistré.', false);   // ⚠️ APRÈS le rendu, qui vient d'écraser la zone de message
@@ -749,6 +769,7 @@ async function supprimerDocJson(kind, destId) {
 			_ljMsg(kind, `✗ ${err.detail || res.status}`, true);
 			return;
 		}
+		if (lieuxJsonHorsListe) await _cxChargerIds();
 		lieuxJsonOuvert = null;
 		lieuxJsonDest = null;
 		// Le document visé n'existe plus : plus rien à repositionner.
