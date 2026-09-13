@@ -35,7 +35,7 @@ from utils.zones import (
 	load_zone_defs_for_lieu, compute_zone_intensity, resolve_profil_weights,
 	profils_compatibles,
 )
-from utils.characters import lieu_label
+from utils.characters import lieu_label, item_ref_id
 from utils.recrutement import RANGS
 from utils import quetes
 
@@ -665,3 +665,80 @@ def solder_rang(character: dict, quete_id: str) -> dict | None:
 		"termine_at": quetes.now_epoch(),
 	})
 	return {"promu": nouveau, "recompenses": recap}
+
+
+# ── Épreuve d'APPORT : un rang contre un objet remis ─────────────────────────────
+# Épreuve de rang ÉCRITE, sans chasse générée : le PNJ exige qu'on lui REMETTE l'un des objets
+# de sa liste (une carcasse, ou n'importe quelle portion débitée) pour inscrire au rang visé.
+# `services.rang.apport` = {rang_vise, items:[item:…], id?, titre?, recompenses?{xp, cuivre}}.
+# Rien n'est accepté ni suivi : l'épreuve est ouverte tant que le rang courant est le cran du
+# dessous, et le rang atteint la referme — unique sans champ neuf sur le personnage (§4).
+# ⚠️ Elle franchit le PLAFOND du comptoir (`rang_max_de`) : ce plafond borne ce que le bestiaire
+# LOCAL justifie en chasses générées, alors qu'un apport écrit dit ce qu'il faut aller chercher
+# ailleurs.
+
+def apport_spec(pnj_doc: dict) -> dict | None:
+	"""L'épreuve d'apport de ce PNJ, ou None. Fail-closed : `rang_vise` hors échelle (ou au pied
+	de l'échelle, qu'aucune épreuve ne vise) ou liste d'objets vide ⇒ None."""
+	spec = (((pnj_doc or {}).get("services") or {}).get("rang") or {}).get("apport")
+	if not isinstance(spec, dict) or spec.get("rang_vise") not in RANGS[1:]:
+		return None
+	if not [i for i in (spec.get("items") or []) if isinstance(i, str) and i]:
+		return None
+	return spec
+
+
+def apport_offert(character: dict, cite: str, spec: dict | None) -> bool:
+	"""L'apport est-il ouvert ? Seulement au cran JUSTE en dessous du rang visé, dans CETTE cité :
+	plus bas il reste des épreuves de chasse, au rang visé c'est déjà fait."""
+	if not spec or not cite or spec.get("rang_vise") not in RANGS:
+		return False
+	return _index_rang(rang_de(character, cite)) == RANGS.index(spec["rang_vise"]) - 1
+
+
+def sac_avec_apport(sacs: list, spec: dict) -> int | None:
+	"""Index du premier sac qui contient l'un des objets de l'apport, ou None.
+	`sacs` = le principal EN TÊTE puis ses MONTURES : une portion de Tarasque pèse de 70 à 520 kg,
+	elle voyage sur une monture — n'accepter que le sac du joueur rendrait l'épreuve impossible.
+	⚠️ Jamais un compagnon : le solde recharge le groupe de son côté (XP partagée, fin de contrat),
+	on tiendrait deux dicts du même doc `aventurier:*`."""
+	voulus = set(spec.get("items") or [])
+	for i, sac in enumerate(sacs or []):
+		if any(item_ref_id(ref) in voulus for ref in (sac or {}).get("inventaire") or []):
+			return i
+	return None
+
+
+def retirer_objet_apport(sac: dict, spec: dict) -> str | None:
+	"""Retire UN objet de l'apport de ce sac (le premier trouvé) et renvoie son id ; None si rien.
+	Mute sans save."""
+	voulus = set(spec.get("items") or [])
+	inv = (sac or {}).get("inventaire") or []
+	for i, ref in enumerate(inv):
+		if item_ref_id(ref) in voulus:
+			sac["inventaire"] = inv[:i] + inv[i + 1:]
+			return item_ref_id(ref)
+	return None
+
+
+def apport_quete_id(spec: dict, cite: str) -> str:
+	"""Id STABLE sous lequel l'apport est archivé — celui qu'une condition `quete_reussie` nomme."""
+	return spec.get("id") or f"quete:apport_{str(cite).split(':', 1)[-1]}_{spec.get('rang_vise')}"
+
+
+def solder_apport(character: dict, cite: str, spec: dict) -> dict | None:
+	"""Solde l'apport — l'objet est déjà RETIRÉ par l'appelant, qui seul sait de quel sac : inscrit
+	au rang visé, applique XP/prime, archive. Mute sans save. `{promu, recompenses}`, ou None si
+	l'apport n'est pas ouvert."""
+	if not apport_offert(character, cite, spec):
+		return None
+	promu = spec["rang_vise"]
+	crediter_rang(character, {"cite": cite, "rang": promu})
+	recap = quetes.appliquer_recompenses(character, {"recompenses": spec.get("recompenses") or {}})
+	character.setdefault("quetes_terminees", []).append({
+		"id": apport_quete_id(spec, cite),
+		"titre": spec.get("titre") or f"Épreuve de rang {promu}",
+		"rang": promu,
+		"termine_at": quetes.now_epoch(),
+	})
+	return {"promu": promu, "recompenses": recap}

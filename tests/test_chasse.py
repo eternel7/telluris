@@ -471,6 +471,76 @@ def test_solder_rang_refuse_si_incomplet():
 	assert character["quetes_actives"]  # toujours active
 
 
+# ── Épreuve d'APPORT : un rang contre un objet remis ─────────────────────────────
+
+APPORT = {"rang_vise": "C", "items": ["item:vouivre", "item:tarasque_patte"],
+		  "recompenses": {"xp": 100, "cuivre": 50}}
+
+
+def _pnj_apport(apport):
+	return {"_id": "pnj:eleonore", "services": {"rang": {"apport": apport}}}
+
+
+def _perso_rang(rang, inventaire=None):
+	return {"rangs_guilde": {"lieu:lutecia": rang} if rang else {},
+			"inventaire": list(inventaire or []), "quetes_actives": [], "quetes_terminees": [],
+			"xp_total": 0, "vocations_niveaux": {"guerrier": 0}, "voc": "guerrier",
+			"or": 0, "argent": 0, "cuivre": 0, "attribute_points": 0}
+
+
+def test_apport_spec_fail_closed():
+	assert chasse.apport_spec(_pnj_apport(APPORT)) is APPORT
+	assert chasse.apport_spec(_pnj_apport({**APPORT, "rang_vise": "Z"})) is None
+	assert chasse.apport_spec(_pnj_apport({**APPORT, "rang_vise": RANGS[0]})) is None
+	assert chasse.apport_spec(_pnj_apport({**APPORT, "items": []})) is None
+	assert chasse.apport_spec({"services": {"rang": {}}}) is None
+
+
+def test_apport_offert_seulement_au_cran_du_dessous_et_dans_la_cite():
+	assert chasse.apport_offert(_perso_rang("D"), "lieu:lutecia", APPORT) is True
+	assert chasse.apport_offert(_perso_rang("E"), "lieu:lutecia", APPORT) is False   # chasses d'abord
+	assert chasse.apport_offert(_perso_rang("C"), "lieu:lutecia", APPORT) is False   # déjà fait
+	assert chasse.apport_offert(_perso_rang(None), "lieu:lutecia", APPORT) is False  # repli F
+	assert chasse.apport_offert(_perso_rang("D"), "lieu:auxerre", APPORT) is False   # autre cité
+	assert chasse.apport_offert(_perso_rang("D"), "lieu:lutecia", None) is False
+
+
+def test_sac_avec_apport_principal_puis_monture():
+	perso = _perso_rang("D", ["item:pain"])
+	monture = {"inventaire": [{"item": "item:tarasque_patte", "poids": 90}]}
+	assert chasse.sac_avec_apport([perso, monture], APPORT) == 1
+	perso["inventaire"].append({"item": "item:vouivre", "poids": 13})
+	assert chasse.sac_avec_apport([perso, monture], APPORT) == 0   # le principal d'abord
+	assert chasse.sac_avec_apport([_perso_rang("D")], APPORT) is None
+
+
+def test_retirer_objet_apport_un_seul_exemplaire():
+	sac = {"inventaire": ["item:pain", {"item": "item:vouivre", "poids": 13},
+						  {"item": "item:vouivre", "poids": 12}]}
+	assert chasse.retirer_objet_apport(sac, APPORT) == "item:vouivre"
+	assert sac["inventaire"] == ["item:pain", {"item": "item:vouivre", "poids": 12}]
+	assert chasse.retirer_objet_apport({"inventaire": ["item:pain"]}, APPORT) is None
+
+
+def test_solder_apport_inscrit_recompense_archive_et_se_referme():
+	perso = _perso_rang("D")
+	res = chasse.solder_apport(perso, "lieu:lutecia", APPORT)
+	assert res["promu"] == "C"
+	assert perso["rangs_guilde"]["lieu:lutecia"] == "C"
+	assert res["recompenses"]["xp"]["xp_gain"] == 100
+	assert perso["quetes_terminees"][-1]["id"] == "quete:apport_lutecia_C"
+	assert quetes.quete_reussie(perso, "quete:apport_lutecia_C")
+	# Le rang atteint REFERME l'épreuve : pas de second solde.
+	assert chasse.solder_apport(perso, "lieu:lutecia", APPORT) is None
+
+
+def test_solder_apport_refuse_hors_du_cran_et_garde_l_id_ecrit():
+	assert chasse.solder_apport(_perso_rang("E"), "lieu:lutecia", APPORT) is None
+	perso = _perso_rang("D")
+	chasse.solder_apport(perso, "lieu:lutecia", {**APPORT, "id": "quete:rang_c_grand_relais"})
+	assert perso["quetes_terminees"][-1]["id"] == "quete:rang_c_grand_relais"
+
+
 # ── build_monster_snapshot (refactor) + progression ──────────────────────────────
 
 def test_build_monster_snapshot_applique_le_profil():

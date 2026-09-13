@@ -508,12 +508,14 @@ def test_appliquer_soin_fraction_et_clamp():
 
 def test_don_effectif_payant_par_defaut():
     don = pnj.don_effectif(_pnj_doc(), _ctx({"lieu:auxerre": 50, "lieu:guilde": 69}))
-    assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 5, "gratuit": False}
+    assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 5, "gratuit": False,
+                   "lieu_parent": None, "rang_guilde": None, "unique": False}
 
 
 def test_don_effectif_gratuit_si_une_relation_suffit():
     don = pnj.don_effectif(_pnj_doc(), _ctx({"lieu:auxerre": 20, "lieu:guilde": 70}))
-    assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 0, "gratuit": True}
+    assert don == {"item": "item:Eau_benite", "quantite": 1, "cout_cuivre": 0, "gratuit": True,
+                   "lieu_parent": None, "rang_guilde": None, "unique": False}
 
 
 def test_don_effectif_sans_service_ou_sans_item():
@@ -544,6 +546,34 @@ def test_appliquer_don_ajoute_references_inventaire():
     assert pnj.appliquer_don(character, "item:Bougie", 0.1, 0) == 1
     assert len(character["inventaire"]) == 3
     assert character["inventaire"][-1] == {"item": "item:Bougie", "poids": 0.1}
+
+
+def test_don_inscription_rend_ses_trois_cles_brutes():
+    doc = _pnj_doc()
+    doc["services"]["don"].update({"lieu_parent": "auto", "rang_guilde": "F", "unique": True})
+    don = pnj.don_effectif(doc, _ctx())
+    assert (don["lieu_parent"], don["rang_guilde"], don["unique"]) == ("auto", "F", True)
+
+
+def test_appliquer_don_pose_le_lieu_parent_resolu():
+    character = {}
+    pnj.appliquer_don(character, "item:carte_aventurier", 0.05, 1, "lieu:lutecia")
+    assert character["inventaire"] == [
+        {"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": "lieu:lutecia"}]
+
+
+def test_don_deja_recu_compare_l_item_ET_la_cite():
+    """Une carte d'Auxerre ne vaut pas celle de Lutèce : le don de Lutèce reste ouvert."""
+    from utils.characters import item_ref_id, item_ref_lieu
+    character = {"inventaire": ["item:pain",
+                                {"item": "item:carte_aventurier", "lieu_parent": "lieu:auxerre"}]}
+    assert pnj.don_deja_recu(character, "item:carte_aventurier", "lieu:lutecia",
+                             item_ref_id, item_ref_lieu) is False
+    character["inventaire"].append({"item": "item:carte_aventurier", "lieu_parent": "lieu:lutecia"})
+    assert pnj.don_deja_recu(character, "item:carte_aventurier", "lieu:lutecia",
+                             item_ref_id, item_ref_lieu) is True
+    # Sans `lieu_parent`, une référence héritée (chaîne) compte.
+    assert pnj.don_deja_recu(character, "item:pain", None, item_ref_id, item_ref_lieu) is True
 
 
 # ---------------------------------------------------------------------------
@@ -709,6 +739,51 @@ def test_linter_signale_une_condition_pnj_fautive():
 
 def test_linter_accepte_une_condition_pnj_correcte():
     assert lint_dialogues.analyser([_lieu_conditionne()])["erreurs"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Épreuve d'APPORT (`services.rang.apport`) — contrôle du linter
+# ---------------------------------------------------------------------------
+
+def _doc_apport(apport=None, avec_noeud=True, condition=True):
+    ok = [{"id": "ok", "label": "Ok", "next": "fin"}]
+    remettre = {"id": "remettre", "label": "Voici.", "action": {"service": "rang", "op": "apporter"}}
+    if condition:
+        remettre["condition"] = {"rang_apport_possible": True}
+    noeuds = {
+        "accueil": {"texte": "Bonjour.", "choix": [remettre]},
+        "accepte": {"texte": "Bien.", "choix": ok},
+        "rapporte": {"texte": "Rang {rang}.", "choix": ok},
+    }
+    declares = {"accepte": "accepte", "rapporte": "rapporte"}
+    if avec_noeud:
+        noeuds["apporte"] = {"texte": "{objet} : rang {rang}.", "choix": ok}
+        declares["apporte"] = "apporte"
+    return {"_id": "pnj:eleonore", "type": "pnj",
+            "dialogue": {"noeud_depart": "accueil", "noeuds": noeuds},
+            "services": {"rang": {
+                "apport": apport if apport is not None else {"rang_vise": "C", "items": ["item:vouivre"]},
+                "noeuds": declares}}}
+
+
+def test_lint_apport_valide_est_silencieux():
+    assert lint_dialogues.analyser_doc(_doc_apport()) == []
+
+
+def test_lint_apport_sans_noeud_apporte_avertit():
+    assert any("`apporte`" in m for m in _messages(_doc_apport(avec_noeud=False), "avertissement"))
+
+
+def test_lint_apport_non_conditionne():
+    assert any("rang_apport_possible" in m for m in _messages(_doc_apport(condition=False), "erreur"))
+
+
+def test_lint_apport_spec_illisible():
+    assert any("rang_vise" in m
+               for m in _messages(_doc_apport({"rang_vise": "F", "items": ["item:x"]}), "erreur"))
+    assert any("items" in m for m in _messages(_doc_apport({"rang_vise": "C", "items": []}), "erreur"))
+    assert any("items" in m
+               for m in _messages(_doc_apport({"rang_vise": "C", "items": ["vouivre"]}), "erreur"))
 
 
 # ---------------------------------------------------------------------------

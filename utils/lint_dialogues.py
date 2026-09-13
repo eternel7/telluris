@@ -30,6 +30,8 @@ PLACEHOLDERS_CONNUS = {
 	"colis", "poids", "delai", "xp", "prime",
 	# Quêtes de chasse / rang de guilde.
 	"espece", "lieu", "rang", "rang_vise",
+	# Épreuve d'apport : le nom de l'objet remis.
+	"objet",
 	# Escortes : la PERSONNE à protéger + l'enseigne où on la retrouve. ({destination},
 	# {direction}, {repere}, {xp}, {prime} sont partagés avec le transport.)
 	# ⚠️ `rang_requis` (le rang EXIGÉ par une offre) est distinct de `rang` (le rang COURANT,
@@ -64,6 +66,10 @@ FLAGS_CONNUS = {
 	"transport_offert", "transport_a_livrer", "transport_a_rapporter",
 	"transport_en_cours", "transport_accompli", "transport_mefiance",
 	"rang_offert", "rang_a_rapporter", "rang_max",
+	# Épreuve d'APPORT : ouverte au cran du dessous / l'un des objets est porté.
+	"rang_apport_offert", "rang_apport_possible",
+	# Don UNIQUE (carte de guilde) : l'exemplaire est déjà dans le sac.
+	"don_recu",
 	# Escortes. ⚠️ Pas de flag « à déposer » : la dépose est AUTOMATIQUE (elle se solde en
 	# franchissant la porte du lieu de destination), le dialogue n'a qu'un geste — accepter.
 	"escorte_offerte", "escorte_en_cours", "escorte_accomplie",
@@ -114,6 +120,7 @@ NOEUDS_REQUIS = {
 TRANSPORT_DONNEUR = {"accepte", "trop_charge"}
 TRANSPORT_DESTINATAIRE = {"livre", "incomplet"}
 TRANSPORT_RETOUR = {"rapporte"}   # course `retour` : le donneur solde au retour
+RANG_APPORT = {"apporte"}         # épreuve d'apport : le PNJ reçoit l'objet
 
 # Même raisonnement pour l'escorte : `mefiance` n'a de sens que là où la CONFIANCE est la
 # porte, c'est-à-dire chez un tenancier qui déclare une progéniture. L'exiger de tous ferait
@@ -129,6 +136,7 @@ ACTIONS_A_CONDITIONNER = {
 	("transport", "livrer"):    "transport_a_livrer",
 	("transport", "rapporter"): "transport_a_rapporter",
 	("rang", "rapporter"):      "rang_a_rapporter",
+	("rang", "apporter"):       "rang_apport_possible",
 	("commission", "rapporter"): "commission_a_rapporter",
 	("acces", "passer"):        "acces_ouvrable",
 }
@@ -461,6 +469,20 @@ def analyser_doc(doc: dict) -> list:
 			if acceptations and all(isinstance(c.get("deplacer"), str)
 									and c["deplacer"].startswith("lieu:") for c in acceptations):
 				attendus.discard("accepte")
+		elif service == "rang":
+			attendus = set(NOEUDS_REQUIS["rang"])
+			apport = (conf or {}).get("apport")
+			if apport is not None:
+				attendus |= RANG_APPORT
+				# `chasse.apport_spec` IGNORE une spec illisible : le PNJ ne proposerait jamais
+				# l'épreuve, et rien ne dirait pourquoi.
+				items = apport.get("items") if isinstance(apport, dict) else None
+				if not isinstance(apport, dict) or apport.get("rang_vise") not in acces.RANGS[1:]:
+					erreur("`services.rang.apport.rang_vise` doit être un rang de guilde au-dessus du "
+						   f"premier ({', '.join(acces.RANGS[1:])}) — l'épreuve serait ignorée.")
+				elif not items or any(not (isinstance(i, str) and i.startswith("item:")) for i in items):
+					erreur("`services.rang.apport.items` doit lister des ids `item:…` (au moins un) — "
+						   "l'épreuve serait ignorée ou ne reconnaîtrait jamais l'objet.")
 		else:
 			attendus = NOEUDS_REQUIS.get(service, set())
 		for cle in attendus - set(declares):

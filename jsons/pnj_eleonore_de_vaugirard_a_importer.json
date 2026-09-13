@@ -1,0 +1,354 @@
+[
+  {
+    "_id": "pnj:eleonore_de_vaugirard",
+    "type": "pnj",
+    "nom": "Éléonore de Vaugirard",
+    "race": "humain",
+    "vocation": "receptionniste",
+    "portrait": "humain_f_receptioniste01.jpg",
+    "description": "Réceptionniste principale et secrétaire de la Guilde, au Grand Relais des Frontières. Un calme presque imperturbable, une tenue sobre aux couleurs de la Guilde et, au cou, le petit médaillon de sa charge : elle n'oublie ni un nom, ni une dette, ni un mensonge.",
+    "services": {
+      "don": {
+        "item": "item:carte_aventurier",
+        "quantite": 1,
+        "cout_cuivre": 0,
+        "lieu_parent": "auto",
+        "rang_guilde": "F",
+        "unique": true,
+        "noeuds": {
+          "fait": "inscription_faite",
+          "sans_fonds": "inscription_sans_fonds",
+          "trop_charge": "inscription_trop_charge"
+        }
+      },
+      "rang": {
+        "apport": {
+          "id": "quete:rang_c_grand_relais",
+          "titre": "Rang C : une dépouille de l'Est",
+          "rang_vise": "C",
+          "items": [
+            "item:vouivre",
+            "item:tarasque",
+            "item:tarasque_tete",
+            "item:tarasque_corps",
+            "item:tarasque_patte",
+            "item:tarasque_queue"
+          ],
+          "recompenses": {
+            "xp": 150,
+            "cuivre": 1200
+          }
+        },
+        "noeuds": {
+          "propose": "rang_propose",
+          "accepte": "rang_accepte",
+          "rapporte": "rang_rapporte",
+          "apporte": "apport_recu"
+        }
+      },
+      "acces": {
+        "lieu": "lieu:le_grand_relais_des_frontieres_bureau_du_maitre",
+        "noeuds": {
+          "ouvre": "acces_ouvre",
+          "refus": "acces_refus",
+          "deja": "acces_deja"
+        }
+      }
+    },
+    "dialogue": {
+      "noeud_depart": "accueil",
+      "noeuds": {
+        "accueil": {
+          "texte": "Derrière le long comptoir de chêne ciré, une jeune femme en veste bleu nuit bordée d'or lève les yeux d'un registre épais. Un petit médaillon brille à son cou. « Bienvenue au Grand Relais des Frontières, {prenom}. Éléonore de Vaugirard, secrétaire de la Guilde. » Sa voix est posée, comme si rien au monde ne pouvait la presser. « Que puis-je pour vous ? »",
+          "choix": [
+            {
+              "id": "inscription",
+              "label": "Je voudrais ma carte d'aventurier.",
+              "next": "inscription_propose",
+              "condition": {
+                "don_recu": false
+              }
+            },
+            {
+              "id": "rang_proposer",
+              "label": "Une épreuve pour monter en rang ?",
+              "next": "rang_propose",
+              "condition": {
+                "rang_offert": true
+              }
+            },
+            {
+              "id": "rang_rapporter",
+              "label": "C'est fait. Le {espece} de {lieu} ne fera plus de victimes.",
+              "action": {
+                "service": "rang",
+                "op": "rapporter"
+              },
+              "condition": {
+                "rang_a_rapporter": true
+              }
+            },
+            {
+              "id": "apport_question",
+              "label": "Que faut-il pour atteindre le rang {rang_vise} ?",
+              "next": "apport_propose",
+              "condition": {
+                "rang_apport_offert": true,
+                "rang_apport_possible": false
+              }
+            },
+            {
+              "id": "apport_remettre",
+              "label": "J'ai rapporté ce que vous demandiez.",
+              "action": {
+                "service": "rang",
+                "op": "apporter"
+              },
+              "condition": {
+                "rang_apport_possible": true
+              }
+            },
+            {
+              "id": "rang_sommet",
+              "label": "Reste-t-il une épreuve à ma mesure ?",
+              "next": "rang_sommet",
+              "condition": {
+                "rang_max": true,
+                "rang_apport_offert": false
+              }
+            },
+            {
+              "id": "acces_passer",
+              "label": "Je voudrais voir le maître de la Guilde.",
+              "condition": {
+                "acces_ouvrable": true
+              },
+              "action": {
+                "service": "acces",
+                "op": "passer"
+              }
+            },
+            {
+              "id": "acces_deja",
+              "label": "Je remonte voir le maître.",
+              "condition": {
+                "acces_ouvert": true
+              },
+              "next": "acces_deja"
+            },
+            {
+              "id": "acces_pourquoi",
+              "label": "Qui dirige la Guilde, ici ?",
+              "condition": {
+                "acces_refuse": true
+              },
+              "next": "acces_refus"
+            },
+            {
+              "id": "memoire",
+              "label": "On dit que vous n'oubliez rien.",
+              "next": "memoire"
+            },
+            {
+              "id": "rien",
+              "label": "Je ne faisais que passer.",
+              "next": "fin"
+            }
+          ]
+        },
+        "inscription_propose": {
+          "texte": "Éléonore trempe sa plume sans vous quitter des yeux. « Certaines guildes font porter des caisses à leurs recrues, pour voir si elles arrivent entières. Le Grand Relais n'a pas ce luxe : les routes de l'Est nous prennent assez de monde sans que j'en envoie d'autres sur les chemins pour un exercice. » Elle ouvre le registre à une page vierge. « Votre nom, votre lignée, ce que vous savez faire — et la vérité, de préférence. Je finis toujours par la connaître. Vous serez inscrit au premier échelon, celui d'où tout le monde est parti. »",
+          "choix": [
+            {
+              "id": "inscrire",
+              "label": "Inscrivez-moi.",
+              "action": {
+                "service": "don"
+              }
+            },
+            {
+              "id": "attendre",
+              "label": "Pas encore.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "inscription_faite": {
+          "texte": "Quelques lignes d'une écriture nette, un coup de buvard, puis elle fait glisser vers vous une plaque de cuir frappée du blason de la Guilde. « Votre carte. Elle vous ouvre le tableau des contrats et la salle des recrues — ici, au Grand Relais, pas ailleurs. Perdez-la, et revenez me voir : je saurai que c'est bien vous. » Un sourire bref. « Bienvenue parmi nous, {prenom}. »",
+          "choix": [
+            {
+              "id": "merci",
+              "label": "Merci, Éléonore.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "inscription_trop_charge": {
+          "texte": "« Vous ne pouvez même plus glisser une carte dans votre sac ? » Elle hausse à peine un sourcil. « Allégez-vous, {prenom}. Le registre vous attendra. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviens plus léger.",
+              "next": "fin"
+            }
+          ]
+        },
+        "inscription_sans_fonds": {
+          "texte": "« L'inscription ne coûte rien, {prenom}. Si le registre vous réclame une pièce, c'est qu'on a changé les règles sans me prévenir — et cela n'arrive jamais. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Je reviendrai.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_propose": {
+          "texte": "Éléonore déplie une note d'éclaireur couverte de croquis. « Vous voulez monter en rang ? La Guilde ne récompense pas l'envie, elle récompense les faits. Nos éclaireurs signalent un {espece} hors du commun du côté de {lieu} : une bête énorme, couverte du sang de ses victimes. Abattez-la, puis revenez me le dire. Le rang {rang_vise} et {xp} points d'expérience vous attendent. » Elle marque un temps. « Inutile d'enjoliver le récit : je saurai si vous mentez. »",
+          "choix": [
+            {
+              "id": "rang_accepter",
+              "label": "Je m'en charge.",
+              "action": {
+                "service": "rang",
+                "op": "accepter"
+              }
+            },
+            {
+              "id": "rang_reflechir",
+              "label": "Laissez-moi y réfléchir.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "rang_accepte": {
+          "texte": "« C'est inscrit. » Une ligne, une date, sans une rature. « {lieu}. Et revenez vivant, {prenom} : j'ai déjà trop de noms à rayer ce mois-ci. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y vais.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_rapporte": {
+          "texte": "Elle vous écoute jusqu'au bout sans vous interrompre, pose deux questions précises — le terrain, l'heure —, puis hoche lentement la tête. « Vous dites vrai. » Elle grave une marque nette sur votre carte. « Rang {rang}. La Guilde attendra davantage de vous, maintenant. Et moi aussi. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Éléonore.",
+              "next": "fin"
+            }
+          ]
+        },
+        "rang_sommet": {
+          "texte": "« Une épreuve à votre mesure ? » Éléonore referme le registre. « Rang {rang}. Ce que le Grand Relais pouvait vous demander, vous l'avez fait. Au-delà, il vous faudra la guilde d'une autre cité — et je leur écrirai que vous êtes quelqu'un de fiable. » Un léger sourire. « Je l'écris rarement. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Ce fut un honneur.",
+              "next": "fin"
+            }
+          ]
+        },
+        "apport_propose": {
+          "texte": "Éléonore pose sa plume, ce qu'elle ne fait presque jamais. « Le rang {rang_vise}, {prenom}, ne se gagne plus dans nos bois. À ce rang-là, la Guilde vous envoie là où les autres ne reviennent pas. » Elle déroule une carte de France et pose le doigt à l'Est, au-delà des zones que la Guilde marque en rouge. « Là-bas vivent des vouivres — et parfois pire : la Tarasque. Rapportez-moi la dépouille de l'une ou de l'autre, ou ce que vous aurez pu en débiter : une tête, une patte, la queue. {xp} points d'expérience, {prime} pièces de cuivre, et votre nom sur la liste que je lis chaque soir au maître de la Guilde. »",
+          "choix": [
+            {
+              "id": "apport_infos",
+              "label": "Où chercher, exactement ?",
+              "next": "apport_infos"
+            },
+            {
+              "id": "partir",
+              "label": "J'y vais.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Plus tard.",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apport_infos": {
+          "texte": "« À l'Est, passé les zones dangereuses. Les éclaireurs qui en reviennent parlent de collines brûlées et d'eaux dormantes. » Elle tapote la carte, puis vous regarde droit dans les yeux. « Deux conseils. Une Tarasque entière pèse plus d'une tonne : débitez-la sur place et chargez une monture, personne ne vous demande de la porter sur votre dos. Et ne m'apportez pas une carcasse de wyverne en me jurant que c'est une vouivre. Je le verrai tout de suite — et je m'en souviendrai longtemps. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Compris.",
+              "next": "fin"
+            },
+            {
+              "id": "retour",
+              "label": "Une autre question…",
+              "next": "accueil"
+            }
+          ]
+        },
+        "apport_recu": {
+          "texte": "Éléonore contourne le comptoir pour examiner longuement ce que vous avez rapporté — {objet} —, sans un mot. Puis elle revient à son registre. « Authentique. » La plume court. « Rang {rang}, {prenom}. Il y a trois ans, une compagnie entière est partie chercher ce que vous venez de poser devant moi. Deux en sont revenus. » Elle compte {prime} pièces de cuivre sur le chêne. « Le maître de la Guilde l'apprendra ce soir. De ma bouche. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Merci, Éléonore.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_ouvre": {
+          "texte": "Éléonore retrouve votre ligne dans le registre sans même la chercher, puis désigne l'escalier du fond. « Rang {rang}. Le maître vous recevra. C'est en haut : {portail}. Frappez une fois, et soyez bref — il écoute tout, mais il n'aime pas qu'on le lui fasse payer en temps. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:le_grand_relais_des_frontieres_bureau_du_maitre"
+            }
+          ]
+        },
+        "acces_refus": {
+          "texte": "« Le maître de la Guilde ? » Elle ne lève même pas les yeux. « Son bureau n'est pas ouvert aux recrues : il faut le rang D. Vous en êtes à {rang}. » Puis, plus doucement : « Je suis l'une des rares à pouvoir lui annoncer une mauvaise nouvelle sans trembler, {prenom}. Faites en sorte que la vôtre, le jour où vous monterez, soit une bonne. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "J'y travaille.",
+              "next": "fin"
+            }
+          ]
+        },
+        "acces_deja": {
+          "texte": "« Vous connaissez le chemin. » Un geste de la plume vers l'escalier du fond, sans quitter sa page. « Montez, {prenom}. »",
+          "choix": [
+            {
+              "id": "ok",
+              "label": "Monter l'escalier.",
+              "next": "fin",
+              "deplacer": "lieu:le_grand_relais_des_frontieres_bureau_du_maitre"
+            }
+          ]
+        },
+        "memoire": {
+          "texte": "« Je n'oublie rien : c'est mon métier. » Elle énumère, sans consulter le moindre papier. « Qui est inscrit, et pour quoi il est doué. Qui doit combien, et à qui. Quels contrats vous avez tenus, et lesquels vous avez rendus. Quels groupes sont dehors et depuis quand, quelles primes attendent encore qu'on les réclame, ce qui s'est passé dans chaque donjon qu'on nous a signalé. » Elle vous regarde enfin. « Et je reconnais sans peine quelqu'un qui arrange ce qu'il a vu en chemin. Cela vous évitera d'essayer. »",
+          "choix": [
+            {
+              "id": "retour",
+              "label": "Retenez donc mon nom.",
+              "next": "accueil"
+            },
+            {
+              "id": "fin",
+              "label": "Au revoir.",
+              "next": "fin"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

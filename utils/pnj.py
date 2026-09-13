@@ -409,6 +409,7 @@ FLAGS_OFFRE = frozenset({
 FLAGS_RAPPORT = frozenset({
 	"transport_a_livrer", "transport_a_rapporter",
 	"rang_a_rapporter", "commission_a_rapporter", "acces_accompli",
+	"rang_apport_possible",
 })
 
 
@@ -774,7 +775,13 @@ def don_effectif(pnj_doc: dict, contexte: dict) -> dict | None:
 	atteint le seuil (défaut world-var PNJ_REPUTATION_SEUIL). None si le PNJ n'offre pas
 	ce service. Miroir de `soin_effectif`. Schéma data attendu :
 	`services.don = {item, quantite, cout_cuivre, gratuit_si:{lieux, seuil},
-	noeuds:{fait, sans_fonds, trop_charge}}`."""
+	lieu_parent?, rang_guilde?, unique?, noeuds:{fait, sans_fonds, trop_charge}}`.
+
+	Trois clés font d'un don une INSCRIPTION (la carte de guilde remise sans épreuve) :
+	`lieu_parent` (`"auto"` = la cité du lieu, résolue par le router comme les récompenses de
+	transport), `rang_guilde` (même forme que `recompenses.rang_guilde`) et `unique` (refusé
+	tant que le personnage porte déjà cet exemplaire, cf. `don_deja_recu`). Rendues BRUTES :
+	ce module ne lit aucun doc lieu."""
 	service = (((pnj_doc or {}).get("services") or {}).get("don"))
 	if not service or not service.get("item"):
 		return None
@@ -788,15 +795,37 @@ def don_effectif(pnj_doc: dict, contexte: dict) -> dict | None:
 		"quantite": max(1, int(service.get("quantite", 1))),
 		"cout_cuivre": cout,
 		"gratuit": gratuit,
+		"lieu_parent": service.get("lieu_parent"),
+		"rang_guilde": service.get("rang_guilde"),
+		"unique": bool(service.get("unique")),
 	}
 
 
-def appliquer_don(character: dict, item_id: str, poids_unitaire: float, quantite: int) -> int:
+def appliquer_don(character: dict, item_id: str, poids_unitaire: float, quantite: int,
+				  lieu_parent: str | None = None) -> int:
 	"""Ajoute `quantite` instances de `item_id` à l'inventaire, chacune en référence
 	`{item, poids}` (mute `inventaire`, NE SAUVEGARDE PAS). Renvoie la quantité ajoutée.
-	Le contrôle de charge et le débit se font côté router avant l'appel."""
+	Le contrôle de charge et le débit se font côté router avant l'appel.
+	`lieu_parent` (déjà RÉSOLU) est posé sur chaque référence : c'est l'instance qui dit de
+	quelle guilde vient une carte (`characters.item_ref_lieu`)."""
 	inv = character.setdefault("inventaire", [])
 	n = max(1, int(quantite))
 	for _ in range(n):
-		inv.append({"item": item_id, "poids": float(poids_unitaire)})
+		ref = {"item": item_id, "poids": float(poids_unitaire)}
+		if lieu_parent:
+			ref["lieu_parent"] = lieu_parent
+		inv.append(ref)
 	return n
+
+
+def don_deja_recu(character: dict, item_id: str, lieu_parent: str | None,
+				  ref_id_fn, ref_lieu_fn) -> bool:
+	"""Garde d'un don `unique` : le personnage porte-t-il DÉJÀ cet exemplaire (même item, même
+	`lieu_parent`) dans SON sac ?
+	⚠️ Un état porté, pas un registre : perdue, la carte se redemande. C'est le sac du PRINCIPAL
+	que lit le tableau de recrues (`recrutement.acces_autorise`) — une carte confiée à une
+	monture n'y ouvre rien. Aucun champ neuf sur le personnage (CLAUDE.md §4).
+	`ref_id_fn`/`ref_lieu_fn` = `characters.item_ref_id`/`item_ref_lieu`, injectés : ce module
+	n'importe que `random` et `character_stats`."""
+	return any(ref_id_fn(ref) == item_id and ref_lieu_fn(ref) == lieu_parent
+			   for ref in (character or {}).get("inventaire") or [])

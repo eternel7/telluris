@@ -14,7 +14,7 @@ from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, sync_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
-	poids_bounds, carried_weight, charge_max_of, item_ref_id, resolve_item_ref,
+	poids_bounds, carried_weight, charge_max_of, item_ref_id, item_ref_lieu, resolve_item_ref,
 	lieu_label,
 )
 from utils.marche import (
@@ -63,6 +63,17 @@ def _pnj_du_lieu(character: dict, pnj_id: str | None = None) -> tuple[dict, dict
 	if not entree or not pnj_doc:
 		raise HTTPException(status_code=404, detail="Personne à qui parler ici.")
 	return entree, pnj_doc, lieu_doc
+
+
+def _lieu_parent_don(don: dict, lieu_doc: dict | None) -> str | None:
+	"""`lieu_parent` RÉSOLU de l'exemplaire qu'un don remet, None s'il n'en déclare pas.
+	`"auto"` = la cité du lieu, par le MÊME résolveur que les récompenses de transport
+	(`transport.items_recompense`) : la carte de Borin et celle d'un don ne divergent pas."""
+	if not (don or {}).get("lieu_parent"):
+		return None
+	refs = transport.items_recompense(
+		[{"item": don.get("item"), "lieu_parent": don["lieu_parent"]}], lieu_doc)
+	return refs[0].get("lieu_parent") if refs else None
 
 
 def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
@@ -202,6 +213,30 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 			placeholders["rang"] = rang_courant
 			if offre_rang or a_rapporter:
 				placeholders.update(_placeholders_rang(offre_rang or a_rapporter, rang_courant))
+		# Épreuve d'APPORT (`services.rang.apport`) : un rang obtenu en REMETTANT un objet, sans
+		# chasse. Deux flags, parce qu'il y a deux gestes : le PNJ dit ce qu'il veut
+		# (`rang_apport_offert`), puis le reçoit (`rang_apport_possible` = l'un des objets est porté
+		# par le joueur ou une de ses montures). Les montures ne sont lues qu'au cran concerné.
+		spec_apport = chasse.apport_spec(pnj_doc)
+		if spec_apport:
+			cite_apport = lieu_doc.get("lieu_parent")
+			ouvert = chasse.apport_offert(character, cite_apport, spec_apport)
+			flags["rang_apport_offert"] = ouvert
+			flags["rang_apport_possible"] = ouvert and chasse.sac_avec_apport(
+				[character] + montures.montures_effectives(character, get_doc), spec_apport) is not None
+			rec_apport = spec_apport.get("recompenses") or {}
+			# `setdefault` : une épreuve de CHASSE offerte ou en cours garde ses propres valeurs.
+			placeholders.setdefault("rang", chasse.rang_de(character, cite_apport))
+			placeholders.setdefault("rang_vise", spec_apport["rang_vise"])
+			placeholders.setdefault("xp", rec_apport.get("xp", 0))
+			placeholders.setdefault("prime", rec_apport.get("cuivre", 0))
+		# Don UNIQUE (la carte de guilde remise à l'inscription) : le choix se masque tant que
+		# l'exemplaire est dans le sac, et revient s'il est perdu.
+		don_conf = (pnj_doc.get("services") or {}).get("don") or {}
+		flags["don_recu"] = bool(
+			don_conf.get("unique") and don_conf.get("item")
+			and pnj.don_deja_recu(character, don_conf["item"], _lieu_parent_don(don_conf, lieu_doc),
+								  item_ref_id, item_ref_lieu))
 		# Commissions d'éradication (maître de guilde) : `services.commission.donjon` est le
 		# SEUL lien PNJ → donjon. L'offre est REBÂTIE à chaque affichage (pas de champ
 		# transitoire `*_offert`, cf. `donjon.offre_commission_pour`) → les placeholders
@@ -623,6 +658,11 @@ async def pnj_dialogue_choix(
 		don = pnj.don_effectif(pnj_doc, contexte)
 		if not don:
 			raise HTTPException(status_code=422, detail="Ce personnage n'a rien à donner.")
+		lieu_parent_don = _lieu_parent_don(don, lieu_doc)
+		# ⚠️ Garde AUTORITATIVE du don `unique` : le flag `don_recu` ne fait que masquer le choix.
+		if don["unique"] and pnj.don_deja_recu(character, don["item"], lieu_parent_don,
+											   item_ref_id, item_ref_lieu):
+			raise HTTPException(status_code=422, detail="Vous avez déjà reçu cet objet.")
 		item_doc = get_doc(don["item"])
 		if not item_doc:
 			raise HTTPException(status_code=422, detail="Objet du don introuvable.")
@@ -636,7 +676,11 @@ async def pnj_dialogue_choix(
 			# Bourse vide : rien débité (fonds non mutés), rien donné.
 			suivant = noeuds_don.get("sans_fonds")
 		else:
-			pnj.appliquer_don(character, don["item"], poids_unitaire, don["quantite"])
+			pnj.appliquer_don(character, don["item"], poids_unitaire, don["quantite"], lieu_parent_don)
+			# Inscription portée par le don (`rang_guilde`), résolue comme une récompense de
+			# transport : la cité est celle du lieu. `crediter_rang` ne rétrograde jamais.
+			spec_rang = transport.rang_guilde_recompense(don["rang_guilde"], lieu_doc).get("rang_guilde")
+			promu = chasse.crediter_rang(character, spec_rang) if spec_rang else None
 			if save_doc(character) is None:
 				raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
 			suivant = noeuds_don.get("fait")
@@ -649,6 +693,15 @@ async def pnj_dialogue_choix(
 				"cout": don["cout_cuivre"],
 			}
 			reponse["inventaire_payload"] = _inventory_payload(character)
+			if promu:
+				# Même forme que le solde d'une épreuve de rang : le client resynchronise l'affichage.
+				rangs_guilde = character.get("rangs_guilde") or {}
+				reponse["rang"] = {
+					"promu": promu,
+					"xp_compagnie": None,
+					"meilleur": chasse.meilleur_rang(rangs_guilde),
+					"detail": chasse.rangs_guilde_title(rangs_guilde, get_doc),
+				}
 		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
 	elif action.get("service") == "transport":
 		suivant, dits = _resoudre_transport(character, pnj_doc, lieu_doc, action.get("op"), reponse)
@@ -956,6 +1009,53 @@ def _resoudre_rang(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 		if relation_gain is not None:
 			reponse["relations_lieux"] = relations_lieux_payload(character)
 		return noeuds.get("rapporte"), dits
+
+	if op == "apporter":
+		spec = chasse.apport_spec(pnj_doc)
+		if not spec or not chasse.apport_offert(character, cite, spec):
+			raise HTTPException(status_code=422, detail="Aucune épreuve d'apport à solder ici.")
+		# Principal EN TÊTE puis ses montures : à égalité, c'est le sac du joueur qui se vide (§7).
+		sacs = [character] + montures.montures_effectives(character, get_doc)
+		i = chasse.sac_avec_apport(sacs, spec)
+		if i is None:
+			raise HTTPException(status_code=422, detail="Vous n'avez rien de ce qui est demandé.")
+		objet_id = chasse.retirer_objet_apport(sacs[i], spec)
+		resultat = chasse.solder_apport(character, cite, spec)
+		libres = _cloturer_contrats(character, lieu_doc)
+		if save_doc(character) is None:
+			raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+		# ⚠️ Le sac d'une MONTURE après le save autoritatif, best-effort : le rang atteint referme
+		# l'apport (`apport_offert`), un échec ici laisse au pire l'objet dans la sacoche — jamais un
+		# second rang.
+		if i > 0:
+			save_doc(sacs[i])
+		_sauver_compagnie(resultat["recompenses"])
+		_sauver_contrats(libres, reponse)
+		relation_gain = quetes.recompenser_donneur(character, lieu_doc, get_doc, save_doc)
+		rec = spec.get("recompenses") or {}
+		dits = {
+			"rang": resultat["promu"],
+			"rang_vise": resultat["promu"],
+			"objet": (get_doc(objet_id) or {}).get("nom") or objet_id,
+			"xp": rec.get("xp", 0),
+			"prime": rec.get("cuivre", 0),
+		}
+		rangs_guilde = character.get("rangs_guilde") or {}
+		reponse["rang"] = {
+			"promu": resultat["promu"],
+			"xp": resultat["recompenses"]["xp"].get("xp_gain", 0),
+			"niveau_up": resultat["recompenses"]["xp"].get("niveau_up", False),
+			"xp_compagnie": _xp_compagnie(resultat["recompenses"]),
+			"meilleur": chasse.meilleur_rang(rangs_guilde),
+			"detail": chasse.rangs_guilde_title(rangs_guilde, get_doc),
+		}
+		reponse["purse"] = cuivre_to_purse(money_to_cuivre(character))
+		reponse["vitals"] = _vitals_payload(character)
+		reponse["inventaire_payload"] = _inventory_payload(character)
+		reponse["fiche_actives"], reponse["fiche_terminees"] = quetes.fiche_details(character)
+		if relation_gain is not None:
+			reponse["relations_lieux"] = relations_lieux_payload(character)
+		return noeuds.get("apporte"), dits
 
 	raise HTTPException(status_code=422, detail="Action de rang inconnue.")
 
