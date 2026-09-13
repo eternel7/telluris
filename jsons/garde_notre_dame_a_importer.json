@@ -21,7 +21,7 @@
       "noeud_depart": "accueil",
       "noeuds": {
         "accueil": {
-          "texte": "Au sommet des marches, devant les grandes portes de la nef, {pnj} barre le passage de toute sa carrure d'ogre, une hallebarde plantée à côté de lui comme une borne. Derrière lui, tout au fond, la lueur du portail tourne sans fin, et un bourdonnement grave fait vibrer les dalles jusque sous vos pieds. « Halte. Le parvis est à tout le monde. La nef, non. »",
+          "texte": "Au sommet des marches, devant les grandes portes de la nef, {pnj} barre le passage de toute sa carrure d'ogre, une épée parcourue d'éclairs plantée à côté de lui comme une borne. Derrière lui, tout au fond, la lueur du portail tourne sans fin, et un bourdonnement grave fait vibrer les dalles jusque sous vos pieds. « Halte. Le parvis est à tout le monde. La nef, non. »",
           "choix": [
             {
               "id": "passer",
