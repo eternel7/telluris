@@ -5,7 +5,7 @@ description: Map editor authoring at /admin/editor (admin_map_editor.html) — t
 
 Écrire la carte du monde depuis `/admin/editor`. Marcher dedans (règles de pas, pavé partagé, mode test de déplacement) : **telluris-map-movement**.
 
-**Patron commun** — `PUT /admin/doc` et `POST /admin/import-bulk` font un PUT **COMPLET** et ne refusent rien (`_rev` rattaché en base, CLAUDE.md §11). Tout formulaire part donc du doc **RELU**, n'écrit que les champs qu'il possède (`_fusionLieu`, `_fusionConnexion`) et refuse un `_id` déjà pris **avant** l'envoi. Fusions, conventions d'`_id`, ordre des nœuds et seuils de case sont verrouillés par `dev/test_{lieu_form,connexions,portes,lot_lieux,voies,resize}_client.js` : ce qui suit garde le pourquoi et ce qu'aucun harnais n'atteint (DOM, visée, séquencement réseau). ✕ / Échap annulent sans rien écrire (CLAUDE.md §8).
+**Patron commun** — `PUT /admin/doc` et `POST /admin/import-bulk` font un PUT **COMPLET** et ne refusent rien (`_rev` rattaché en base, CLAUDE.md §11). Tout formulaire part donc du doc **RELU**, n'écrit que les champs qu'il possède (`_fusionLieu`, `_fusionConnexion`) et refuse un `_id` déjà pris **avant** l'envoi. Fusions, conventions d'`_id`, ordre des nœuds et seuils de case sont verrouillés par `dev/test_{lieu_form,connexions,portes,guilde,lot_lieux,voies,resize}_client.js` : ce qui suit garde le pourquoi et ce qu'aucun harnais n'atteint (DOM, visée, séquencement réseau). ✕ / Échap annulent sans rien écrire (CLAUDE.md §8).
 
 
 ### Parts partagées et contrat `LIEUX_HOTE`
@@ -70,6 +70,16 @@ Source unique des formulaires (admin) : catégories (`lieu.categorie` ∪ `recet
 - ⚠️ `_ptOrdonner` remet les nœuds dans l'ordre du **doc** avant `_fusionConnexion` : fusion par position, permuter changerait la porte de côté en silence.
 - `_ptPaireDe` lit **`cxDocsConnus`**, pas `lieuxConnections` : le passage n'a aucun nœud sur la cité. Côté indécidable ⇒ **refus d'ouvrir** plutôt qu'intervertir.
 - ⚠️ `_ptRepeuplerImages(voulues)` reçoit la valeur en **paramètre**, jamais relue du DOM : affecter `.value` sur un `<select>` encore vide ne prend pas (« image requise » sur une porte qui en avait une). L'image courante reste offerte même si un autre lieu la porte.
+
+
+### Maison de guilde — une étape par geste
+`categorie: "guilde_aventurier_exterieur"` ⇒ « 🏛️ Guilde » sur la ligne (`opts.guilde`, éditeur seul). Chaîne façade → réception → comptoir → bureau du maître, calquée sur le Bastion d'Auxerre ; chaque geste écrit **l'étape suivante seule** (lieu + connexion au maillon précédent, nœuds `[0,0]`) en un `import-bulk`, puis rouvre le panneau sur la suivante. Forme exacte des docs : **`dev/test_guilde_client.js`**.
+
+- `_gdChaine` suit les voisins **par catégorie** dans `cxDocsConnus` (aucun maillon n'a de nœud sur la cité). Deux candidats pour un maillon ⇒ **refus** ; connexions illisibles ⇒ refus d'ouvrir (la chaîne ne se devine pas, on rebâtirait une réception).
+- `_id` = `lieu:<façade sans _exterieur><suffixe>` : redonne `_interieur`/`_comptoir` du Bastion ; `_bureau_du_maitre` est neuf.
+- ⚠️ Le bureau n'a **pas** de `sous_categorie` (utils/recrutement.py § Maison de guilde) ; aucun tag `recrutement` (la catégorie l'accorde).
+- **`relation_lieu` → comptoir** : créer le comptoir **réécrit** façade et réception (relues **fraîches**, `_gdLireFrais`, clone + ce seul champ) ; le bureau le reçoit et répare un maillon qui ne l'aurait pas. Valeur déjà posée, même divergente : **jamais écrasée**, signalée.
+- `acces` du bureau : `gardien` = 1re entrée `pnj` du comptoir relu (omis sinon : informatif), `rang_min {cite: lieu_parent, rang}` pris dans `creation_options.conditions.rangs`. ⚠️ Sans dialogue qui pose un laissez-passer, seul le rang ouvre.
 
 
 ### Lot de lieux — peupler une ville

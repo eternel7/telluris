@@ -640,7 +640,7 @@ function renderBody() {
 			const vide = v === undefined || v === null || v === '';
 			return `<td${vide ? ' class="muted-cell"' : ''} title="${esc(fullText(v))}">${esc(cellText(v))}</td>`;
 		}).join('');
-		const ligne = lieuxLigneHtml(conn, villeId, { link: false, porte: false, ouvert });
+		const ligne = lieuxLigneHtml(conn, villeId, { link: false, porte: false, guilde: false, ouvert });
 		return `<tr${ouvert ? ' class="selected"' : ''}><td class="ligne-col">${ligne}</td>${tds}</tr>`;
 	}).join('');
 	$('row-count').textContent = rows.length + ' / ' + connexions.length + ' ligne(s)';

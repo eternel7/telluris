@@ -22,7 +22,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `slots` · `resize` · `deplacement` · `voies` · `lot_lieux` · `lieu_form` · `connexions` · `dialogues` · `portes` · `gestion_lieux`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `slots` · `resize` · `deplacement` · `voies` · `lot_lieux` · `lieu_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -114,7 +114,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 |---|---|
 | caractéristiques, combat, dégâts, barre de slots, effets à durée, animations, simulateur | `telluris-combat` |
 | bitmask `nav`, règles de marche, animation de carte/jetons, pavé partagé, mode test de déplacement | `telluris-map-movement` |
-| `/admin/editor` : mode Lieux, formulaires de lieu/connexion, portes de rempart, lot de lieux, voies, redimensionnement ; `/admin/lieux` et le contrat `LIEUX_HOTE` des parts partagées | `telluris-editeur-carte` |
+| `/admin/editor` : mode Lieux, formulaires de lieu/connexion, portes de rempart, maison de guilde, lot de lieux, voies, redimensionnement ; `/admin/lieux` et le contrat `LIEUX_HOTE` des parts partagées | `telluris-editeur-carte` |
 | items, poids, marché, recettes, grandes maisons, portée des recettes, flux de cité | `telluris-economie` |
 | quêtes (guilde, transport, chasse, escorte), PNJ et dialogues, `/admin/dialogues`, accès, donjons, intro | `telluris-quetes-pnj` |
 | recrutement, groupe, compagnie, contrat de mission, montures | `telluris-recrutement` |

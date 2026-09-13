@@ -565,15 +565,16 @@
 	/* PORTE DE REMPART : même géométrie et mêmes règles que #conn-overlay — panneau fixe à
 	   droite, carte cliquable dessous (condition des DEUX visées), et les trois panneaux se
 	   partagent la place : ouvrir l'un ferme les autres. */
-	#porte-overlay {
+	/* MAISON DE GUILDE : même panneau, sans visée (tous ses nœuds sont en [0,0]). */
+	#porte-overlay, #guilde-overlay {
 		position: fixed; top: 70px; right: 14px; bottom: 14px;
 		width: min(460px, 94vw); z-index: 60;
 		display: flex; flex-direction: column; overflow: auto;
 		box-shadow: -6px 0 28px rgba(0,0,0,0.55);
 	}
-	#porte-overlay.pt-hidden { display: none; }
+	#porte-overlay.pt-hidden, #guilde-overlay.gd-hidden { display: none; }
 	#porte-overlay.cx-viser { opacity: 0.3; pointer-events: none; }
-	#porte-overlay .lj-title {
+	#porte-overlay .lj-title, #guilde-overlay .lj-title {
 		position: sticky; top: -16px; z-index: 2;
 		background: var(--panel); margin-top: -16px; padding: 16px 0 6px;
 	}
@@ -813,7 +814,7 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 			</div>
 			<!-- Panneau Lieux -->
 			<div id="panel-lieux" style="display:none;">
-				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, ✏️ Lieu et 🔗 Connexion ouvrent leurs formulaires, 🧾 JSON édite les documents bruts. ➕ crée un sous-lieu sur cette case, 🏰 pose une porte de rempart (paire extérieur/intérieur).</div>
+				<div style="font-size:.68rem;color:#888;margin-bottom:6px;">Points sur la carte = connexions du lieu. Cliquez une case pour la sélectionner : 📄 Fiche ouvre le lieu de destination, ✏️ Lieu et 🔗 Connexion ouvrent leurs formulaires, 🧾 JSON édite les documents bruts. ➕ crée un sous-lieu sur cette case, 🏰 pose une porte de rempart (paire extérieur/intérieur). 🏛️ Guilde, sur une façade de guilde, ajoute sa réception, son comptoir puis le bureau du maître.</div>
 				<div id="lieux-terrain-alerte" hidden style="border:1px solid rgba(230,140,40,0.75);background:rgba(230,140,40,0.12);color:#f0c080;border-radius:4px;padding:6px;margin-bottom:8px;font-size:.68rem;"></div>
 				<div id="lieu-add-section" style="margin-bottom:8px;"></div>
 				<div id="lieux-conn-list" style="max-height:320px;overflow-y:auto;font-size:.68rem;"></div>
@@ -1346,7 +1347,7 @@ const LIEUX_HOTE = {
 	},
 	rendreListe: () => { renderLieuxConnList(); if (grid.length) renderGrid(); },
 	statut: html => setStatus(html),
-	fermerAutres: () => closePorteForm(),
+	fermerAutres: () => { closePorteForm(); closeGuildeForm(); },
 	visee: {
 		refus: () => {
 			if (!grid.length) return "Ce lieu n'a pas de grille : aucune case à viser.";
@@ -1520,6 +1521,7 @@ lieuSelect.addEventListener('change', async (e) => {
 			// n'est plus à l'écran.
 			closeConnForm();
 			closePorteForm();
+			closeGuildeForm();
 			// Changer de lieu abandonne un aperçu non enregistré : ses cotes ne veulent plus rien dire
 			// ici, et le laisser posé verrouillerait l'auto-sauvegarde du lieu SUIVANT.
 			redimEnAttente = null;
@@ -2254,7 +2256,7 @@ function renderLieuxConnList() {
 		: `<div style="margin-bottom:6px;color:#888;">${list.length} connexion(s) — cliquez un point pour filtrer.</div>`;
 	// La ligne elle-même est PARTAGÉE avec /admin/lieux (part-lieux-js.html).
 	const rows = list.map(conn => lieuxLigneHtml(conn, currentLocId, {
-		link: true, porte: true, ouvert: lieuxJsonOuvert === conn._id,
+		link: true, porte: true, guilde: true, ouvert: lieuxJsonOuvert === conn._id,
 	})).join('') || `<div style="color:#888;">Aucune connexion ici.</div>`;
 	lieuxConnListEl.innerHTML = header + rows;
 }
@@ -2617,8 +2619,9 @@ async function openPorteForm(lieuId) {
 			+ 'ou annulez-le avant de poser une porte.</span>');
 		return;
 	}
-	closeConnForm();     // les trois panneaux occupent la même place à droite
+	closeConnForm();     // les panneaux de droite occupent la même place
 	closeLieuJson();
+	closeGuildeForm();
 	ptMode = lieuId ? 'edition' : 'creation';
 	ptExistants = {};
 	ptVisee = '';
@@ -2867,6 +2870,517 @@ function _ptCabler() {
 		_ptEl(id).addEventListener('change', _ptMajApercu));
 	['pt-ext-x', 'pt-ext-y', 'pt-int-x', 'pt-int-y'].forEach(id =>
 		_ptEl(id).addEventListener('input', _ptMajApercu));
+}
+
+// ══ MAISON DE GUILDE : fonctions PURES ═════════════════════════════════════
+// Une guilde d'aventuriers n'est pas UN lieu mais une CHAÎNE, calquée sur le Bastion d'Auxerre :
+//
+//   cité ──(case de la carte)── façade ── réception ── comptoir ── bureau du maître
+//
+// La façade (`guilde_aventurier_exterieur`) se pose comme toute boutique (➕) ; « 🏛️ Guilde »
+// ajoute derrière elle l'étape SUIVANTE seule : un lieu et sa connexion au maillon précédent,
+// nœuds en [0, 0] (aucun de ces lieux n'a de grille).
+// ⚠️ Aucun maillon n'a de nœud sur la cité : la chaîne se lit dans `cxDocsConnus` (liste
+// COMPLÈTE des connexions), jamais dans `lieuxConnections`.
+//
+// Déclarées en `function` : dev/test_guilde_client.js les extrait par NOM.
+
+// Les trois étapes, dans l'ordre de la chaîne. Les labels de nœud sont ceux du Bastion : le label
+// d'un nœud est le texte du bouton qui mène À ce nœud, lu depuis l'autre bout (`get_lieu_links`).
+// ⚠️ Le bureau n'a PAS de `sous_categorie`, comme en base — cf. utils/recrutement.py § Maison de
+// guilde, qui interdit d'harmoniser la donnée.
+// ⚠️ Pas de tag `recrutement` sur la réception : sa catégorie l'accorde déjà.
+function _gdEtapes() {
+	return [
+		{ cle: 'reception', titre: 'Réception', libelle: 'réception',
+			categorie: 'guilde_aventurier', sousCategorie: 'guilde_aventurier', suffixe: '_interieur',
+			labelVersPrecedent: 'sortir dans la rue', labelVersNouveau: '',
+			pnj: false, acces: false },
+		{ cle: 'comptoir', titre: 'Comptoir', libelle: 'comptoir',
+			categorie: 'guilde_aventurier_comptoir', sousCategorie: 'guilde_aventurier', suffixe: '_comptoir',
+			labelVersPrecedent: 'retourner dans la salle commune', labelVersNouveau: "s'approcher du comptoir",
+			pnj: true, acces: false },
+		{ cle: 'bureau', titre: 'Bureau du maître', libelle: 'bureau du maître',
+			categorie: 'bureau_maitre_guilde', sousCategorie: '', suffixe: '_bureau_du_maitre',
+			labelVersPrecedent: 'redescendre au comptoir', labelVersNouveau: "monter l'escalier du fond",
+			pnj: true, acces: true },
+	];
+}
+
+// Racine des `_id` de la maison : la façade sans préfixe ni suffixe `_exterieur`. Sur le Bastion
+// (`lieu:le_bastion_de_l_yonne`), elle redonne exactement `_interieur` et `_comptoir` en base.
+function _gdBase(facadeId) {
+	return String(facadeId == null ? '' : facadeId).replace(/^lieu:/, '').replace(/_exterieur$/, '');
+}
+
+// Libellé proposé pour un sous-lieu : celui de la façade, sans son éventuel « — extérieur ».
+function _gdLabelDefaut(facadeLabel, cle) {
+	const etape = _gdEtapes().find(e => e.cle === cle);
+	const nom = String(facadeLabel || '').replace(/\s*[-–—]\s*ext[ée]rieur\s*$/i, '').trim();
+	return (etape && nom) ? `${nom} - ${etape.libelle}` : '';
+}
+
+function _gdRefusDefaut(nomGardien) {
+	const qui = String(nomGardien || '').trim() || 'Le réceptionniste';
+	return `${qui} barre l'escalier du fond d'un bras tranquille : le bureau du maître de la Guilde n'est pas ouvert aux recrues.`;
+}
+
+// Où en est la maison ? `{facade, reception, comptoir, bureau, etape, precedent, erreur}` — chaque
+// maillon vaut `{lieu, link}` ou null, `etape` est la clé du PREMIER maillon manquant ('' : maison
+// complète), `precedent` le lieu auquel il se raccrochera.
+// Un maillon = un voisin du précédent dont la CATÉGORIE est celle attendue.
+// ⚠️ Fail-closed : deux candidats pour un même maillon rendent `erreur` — deviner lequel est « le
+// bon » ferait bâtir la suite sur l'autre moitié d'une maison dédoublée.
+function _gdChaine(connexions, lieux, facadeId) {
+	const cats = {};
+	(lieux || []).forEach(l => { if (l && l._id) cats[l._id] = l.categorie || ''; });
+	const etapes = _gdEtapes();
+	const out = { facade: { lieu: facadeId, link: null }, etape: '', precedent: '', erreur: '' };
+	etapes.forEach(e => { out[e.cle] = null; });
+	if (!facadeId || cats[facadeId] !== GUILDE_EXTERIEUR_CATEGORIE) {
+		out.erreur = `${facadeId || '?'} n'est pas une façade de guilde (${GUILDE_EXTERIEUR_CATEGORIE}).`;
+		return out;
+	}
+	let precedent = facadeId;
+	for (const e of etapes) {
+		const candidats = [];
+		(connexions || []).forEach(c => {
+			const nodes = c.nodes || [];
+			if (nodes.length !== 2 || !nodes.some(n => n.lieu === precedent)) return;
+			const autre = nodes.find(n => n.lieu !== precedent);
+			if (autre && cats[autre.lieu] === e.categorie) candidats.push({ lieu: autre.lieu, link: c });
+		});
+		out.precedent = precedent;
+		if (candidats.length > 1) {
+			out.erreur = `${candidats.length} liens « ${e.titre} » partent de ${precedent} (`
+				+ candidats.map(x => `${x.link._id} → ${x.lieu}`).join(', ') + ') — corrigez par 🧾 JSON.';
+			return out;
+		}
+		if (!candidats.length) { out.etape = e.cle; return out; }
+		out[e.cle] = candidats[0];
+		precedent = candidats[0].lieu;
+	}
+	return out;
+}
+
+// Les images `guilde*` à proposer : celles de l'étape d'abord, sans celles qu'un lieu porte déjà
+// (deux guildes jumelles à l'écran, sans que rien ne le signale). Aucune ne correspond ⇒ toutes
+// les `guilde*` libres. L'image COURANTE reste offerte même prise (même piège que la porte).
+function _gdImages(images, cle, prises, courante) {
+	const deja = new Set((prises || []).filter(f => f && f !== courante));
+	const libres = (images || []).filter(f => String(f).toLowerCase().indexOf('guilde') === 0 && !deja.has(f));
+	const vise = f => {
+		const nom = String(f).toLowerCase();
+		if (cle === 'reception') return nom.indexOf('interieur') >= 0 && nom.indexOf('receptioniste') < 0;
+		if (cle === 'comptoir') return nom.indexOf('receptioniste') >= 0;
+		if (cle === 'bureau') return nom.indexOf('bureau') >= 0;
+		return false;
+	};
+	let liste = libres.filter(vise);
+	if (!liste.length) liste = libres;
+	if (courante && liste.indexOf(courante) === -1) liste = [courante].concat(liste);
+	return liste;
+}
+
+// Les documents de l'étape, dans l'ordre d'écriture : [nouveau lieu, connexion, ...lieux réécrits].
+// `relus` = {facade, reception, comptoir} relus FRAIS en base.
+// ⚠️ `relation_lieu` → comptoir : la maison partage UNE cote (`marche.lieu_de_relation`). Créer le
+// comptoir RÉÉCRIT donc la façade et la réception ; le bureau le reçoit à sa création et répare
+// au passage un maillon qui ne l'aurait pas. `import-bulk` fait un PUT COMPLET (CLAUDE.md §11) :
+// un réécrit est un CLONE du doc relu, ce seul champ ajouté. Une valeur déjà présente — même
+// divergente — n'est JAMAIS écrasée : c'est une décision d'auteur, le panneau la signale.
+// ⚠️ `acces.gardien` = 1re entrée `pnj` du comptoir relu, omis sans elle : il est informatif
+// (utils/acces.py), seules les `conditions` décident.
+function _gdDocs(chaine, champs, relus) {
+	const etape = _gdEtapes().find(e => e.cle === (chaine && chaine.etape));
+	if (!etape) return [];
+	const c = champs || {};
+	const r = relus || {};
+	const base = _gdBase(chaine.facade && chaine.facade.lieu);
+	const id = base ? `lieu:${base}${etape.suffixe}` : '';
+	const parent = (r.facade && r.facade.lieu_parent) || c.citeId || '';
+
+	const p = c.pnj || {};
+	const lignes = (etape.pnj && p.character)
+		? [{ src: null, character: p.character, nom: p.nom || '', portrait: p.portrait || '', probabilite: 1, conditions: [] }]
+		: [];
+	const lieu = _fusionLieu({}, {
+		label: c.label, image: c.image, categorie: etape.categorie, capacites: {}, pnj: lignes,
+	}, []);
+	lieu._id = id;
+	lieu.lieu_parent = parent;
+	if (etape.sousCategorie) lieu.sous_categorie = etape.sousCategorie;
+	const comptoirId = etape.cle === 'comptoir' ? id : ((chaine.comptoir && chaine.comptoir.lieu) || '');
+	if (comptoirId && comptoirId !== id) lieu.relation_lieu = comptoirId;
+	if (etape.acces) {
+		const gardien = ((r.comptoir && r.comptoir.pnj) || []).map(e => e && e.character).find(Boolean);
+		const acces = {};
+		if (gardien) acces.gardien = gardien;
+		if (c.refus) acces.refus = c.refus;
+		acces.cycle = 1;
+		acces.conditions = [{ rang_min: { cite: parent, rang: c.rang } }];
+		lieu.acces = acces;
+	}
+
+	const link = _fusionConnexion({}, {
+		noeuds: [
+			{ lieu: chaine.precedent, pos: [0, 0], label: c.labelVersPrecedent },
+			{ lieu: id, pos: [0, 0], label: c.labelVersNouveau },
+		],
+		type: 'guilde_aventurier', status: 'ouvert',
+	});
+	link._id = _cxIdPropose(id, chaine.precedent, c.connIdsPris);
+
+	const docs = [lieu, link];
+	if (comptoirId) {
+		for (const cle of ['facade', 'reception']) {
+			const doc = r[cle];
+			if (!doc || !doc._id || doc._id === comptoirId || doc.relation_lieu) continue;
+			const copie = JSON.parse(JSON.stringify(doc));
+			copie.relation_lieu = comptoirId;
+			docs.push(copie);
+		}
+	}
+	return docs;
+}
+
+// Ce qui interdit d'écrire — un motif, ou ''. `ctx` = {lieuIds, connIds, pnjIds, rangs}.
+function _gdValider(docs, chaine, ctx) {
+	const x = ctx || {};
+	if (!chaine) return 'Maison de guilde illisible.';
+	if (chaine.erreur) return chaine.erreur;
+	if (!chaine.etape) return 'La maison est complète : rien à ajouter.';
+	if (!Array.isArray(docs) || docs.length < 2) return 'Documents incomplets.';
+	const lieu = docs[0], link = docs[1];
+	if (!/^lieu:\S+$/.test(lieu._id || '')) return "La façade ne donne aucun identifiant utilisable.";
+	if (!lieu.label) return 'Le libellé est requis.';
+	if (!lieu.image) return "L'image est requise.";
+	if (!lieu.lieu_parent) return "La façade n'a pas de lieu_parent : aucune cité à qui rattacher la maison.";
+	if ((x.lieuIds || []).indexOf(lieu._id) >= 0) return `${lieu._id} existe déjà — l'enregistrement l'écraserait.`;
+	if (!/^link:\S+$/.test(link._id || '')) return 'Identifiant de connexion invalide.';
+	if ((x.connIds || []).indexOf(link._id) >= 0) return `${link._id} existe déjà — l'enregistrement l'écraserait.`;
+	for (const e of lieu.pnj || []) {
+		if ((x.pnjIds || []).indexOf(e.character) === -1) return `${e.character} : aucun document PNJ de ce nom.`;
+	}
+	if (lieu.acces) {
+		const filtre = ((lieu.acces.conditions || [])[0] || {}).rang_min || {};
+		if ((x.rangs || []).indexOf(filtre.rang) === -1) return `Rang « ${filtre.rang || ''} » hors de l'échelle des rangs de guilde.`;
+	}
+	return '';
+}
+
+
+// ══ MAISON DE GUILDE : le panneau ══════════════════════════════════════════
+// Une étape par geste, en UNE requête `POST /admin/import-bulk` ; le panneau se rouvre ensuite sur
+// l'étape suivante. ⚠️ Rien n'est écrit avant le bouton : ✕, Échap et Fermer n'engagent rien
+// (CLAUDE.md §8).
+
+let gdFacadeId = '';   // la façade dont on bâtit la maison ('' = panneau fermé)
+let gdChaine = null;   // `_gdChaine` à l'ouverture
+let gdRelus = {};      // {facade, reception, comptoir} relus FRAIS — base de toute réécriture
+let gdEnVol = false;
+
+function _gdEl(id) { return document.getElementById(id); }
+
+// ⚠️ Le markup vit APRÈS la balise script (même précaution que `_ptOuvert`).
+function _gdOuvert() {
+	const ov = document.getElementById('guilde-overlay');
+	return !!ov && !ov.classList.contains('gd-hidden');
+}
+
+function _gdMsg(texte, erreur) {
+	const el = _gdEl('gd-msg');
+	if (el) { el.textContent = texte; el.style.color = erreur ? 'var(--danger)' : 'var(--accent2)'; }
+}
+
+function _gdEtapeCourante() {
+	return _gdEtapes().find(e => e.cle === (gdChaine && gdChaine.etape)) || null;
+}
+
+function _gdLabelLieu(id) {
+	const l = ((creationOptions && creationOptions.lieux) || []).find(x => x._id === id);
+	return (l && l.label) || id || '';
+}
+
+// Relu EN BASE, jamais depuis `lieuxDocCache` : ces docs peuvent repartir en PUT complet, une
+// copie ancienne effacerait ce qui a été retouché depuis.
+async function _gdLireFrais(id) {
+	try {
+		const res = await fetch(`/api/lieu/${encodeURIComponent(id)}`);
+		if (!res.ok) return null;
+		const doc = await res.json();
+		if (!doc || doc._id !== id) return null;
+		lieuxDocCache[id] = doc;
+		return doc;
+	} catch (e) { return null; }
+}
+
+function _gdRenderChaine() {
+	const el = _gdEl('gd-chaine');
+	const ch = gdChaine || {};
+	const lignes = [`<div class="cx-hint ok">✓ Façade — ${_escHtml(_gdLabelLieu(gdFacadeId))}</div>`];
+	_gdEtapes().forEach(e => {
+		const m = ch[e.cle];
+		if (m) lignes.push(`<div class="cx-hint ok">✓ ${e.titre} — ${_escHtml(_gdLabelLieu(m.lieu))}</div>`);
+		else if (ch.etape === e.cle && !ch.erreur) lignes.push(`<div class="cx-hint"><b>➕ ${e.titre}</b> — à créer maintenant</div>`);
+		else lignes.push(`<div class="cx-hint" style="color:#666;">· ${e.titre} — ensuite</div>`);
+	});
+	el.innerHTML = lignes.join('');
+}
+
+// ⚠️ Les valeurs voulues sont passées EXPLICITEMENT, jamais relues du `<select>` : affecter
+// `.value` sur un `<select>` encore vide ne prend pas (piège de `_ptRepeuplerImages`).
+function _gdRepeuplerSelects(voulues) {
+	const v = voulues || {};
+	const co = creationOptions || {};
+	const option = (val, txt) => `<option value="${_escHtml(val)}">${_escHtml(txt)}</option>`;
+
+	const prises = (co.lieux || []).map(l => l.image).filter(Boolean);
+	const images = _gdImages(co.images || [], gdChaine.etape, prises, v.image);
+	_gdEl('gd-image').innerHTML = option('', '— choisir —') + images.map(f => option(f, f)).join('');
+	_gdEl('gd-image').value = v.image !== undefined ? v.image : (images[0] || '');
+
+	_gdEl('gd-pnj-character').innerHTML = option('', '— aucun —') + (co.pnj || []).map(pj =>
+		option(pj._id, pj.nom && pj.nom !== pj._id ? `${pj.nom} — ${pj._id}` : pj._id)).join('');
+	_gdEl('gd-pnj-character').value = v.character || '';
+
+	_gdEl('gd-pnj-portrait').innerHTML = option('', '— celui du doc PNJ —')
+		+ (co.portraits || []).map(f => option(f, f)).join('');
+	_gdEl('gd-pnj-portrait').value = v.portrait || '';
+
+	const rangs = (co.conditions && co.conditions.rangs) || [];
+	_gdEl('gd-rang').innerHTML = rangs.map(rg => option(rg, rg)).join('');
+	_gdEl('gd-rang').value = rangs.indexOf(v.rang) >= 0 ? v.rang : (rangs[0] || '');
+}
+
+function _gdChamps() {
+	return {
+		citeId: currentLocId,
+		label: _gdEl('gd-label').value.trim(),
+		image: _gdEl('gd-image').value,
+		labelVersPrecedent: _gdEl('gd-label-precedent').value.trim(),
+		labelVersNouveau: _gdEl('gd-label-nouveau').value.trim(),
+		pnj: {
+			character: _gdEl('gd-pnj-character').value,
+			nom: _gdEl('gd-pnj-nom').value.trim(),
+			portrait: _gdEl('gd-pnj-portrait').value,
+		},
+		rang: _gdEl('gd-rang').value,
+		refus: _gdEl('gd-refus').value.trim(),
+		connIdsPris: cxIdsConnus,
+	};
+}
+
+function _gdDocsForme() { return _gdDocs(gdChaine, _gdChamps(), gdRelus); }
+
+// ⚠️ N'écrit QUE l'aperçu, les `_id` et la ligne `relation_lieu` : jamais un champ de saisie
+// (la frappe perdrait son focus, CLAUDE.md §15).
+function _gdMajApercu() {
+	const etape = _gdEtapeCourante();
+	if (!etape) return;
+	const docs = _gdDocsForme();
+	_gdEl('gd-preview').textContent = JSON.stringify(docs, null, 1);
+	const lieuIds = (creationOptions && creationOptions.lieu_ids) || [];
+	_gdEl('gd-ids').innerHTML = docs.map((d, i) => {
+		const ko = (i === 0 && lieuIds.indexOf(d._id) >= 0) || (i === 1 && cxIdsConnus.indexOf(d._id) >= 0);
+		const quoi = i === 0 ? 'nouveau lieu' : (i === 1 ? 'connexion' : 'réécrit : + relation_lieu');
+		return `<div class="cx-hint${ko ? ' ko' : ''}">${ko ? '✗ ' : '· '}${_escHtml(d._id || '—')} <span style="color:#888;">(${quoi})</span></div>`;
+	}).join('');
+
+	const comptoirId = etape.cle === 'comptoir' ? docs[0]._id : ((gdChaine.comptoir && gdChaine.comptoir.lieu) || '');
+	const rel = _gdEl('gd-relations');
+	if (!comptoirId) {
+		rel.innerHTML = 'relation_lieu : posé sur toute la maison à la création du comptoir.';
+		return;
+	}
+	const poses = docs.filter(d => d.relation_lieu === comptoirId).map(d => d._id);
+	const divergents = ['facade', 'reception'].map(cle => gdRelus[cle])
+		.filter(d => d && d.relation_lieu && d.relation_lieu !== comptoirId);
+	rel.innerHTML = `relation_lieu → ${_escHtml(comptoirId)} : `
+		+ (poses.length ? `posé sur ${poses.map(_escHtml).join(', ')}.` : 'déjà en place.')
+		+ divergents.map(d => `<div class="cx-hint ko">⚠ ${_escHtml(d._id)} délègue déjà sa cote à `
+			+ `${_escHtml(d.relation_lieu)} : laissé tel quel.</div>`).join('');
+}
+
+// ── Ouverture ──────────────────────────────────────────────────────────────
+async function openGuildeForm(facadeId) {
+	if (!currentLocId || !facadeId) return;
+	closeConnForm();     // les panneaux de droite occupent la même place
+	closeLieuJson();
+	closePorteForm();
+	gdFacadeId = facadeId;
+	gdChaine = null;
+	gdRelus = {};
+	_gdCabler();
+	_gdEl('guilde-overlay').classList.remove('gd-hidden');
+	_gdEl('gd-titre').textContent = facadeId;
+	_gdEl('gd-chaine').innerHTML = '';
+	_gdEl('gd-form').style.display = 'none';
+	_gdEl('gd-submit-btn').disabled = true;
+	_gdEl('gd-submit-btn').textContent = '➕ Créer';
+	_gdMsg('Chargement…', false);
+	// Fermé ou rouvert sur une autre façade pendant une lecture : cette ouverture-ci est caduque.
+	const caduque = () => gdFacadeId !== facadeId || !_gdOuvert();
+
+	if (!creationOptions) {
+		try {
+			const res = await fetch('/api/lieux/creation_options');
+			if (res.ok) creationOptions = await res.json();
+		} catch (e) { /* dit juste en dessous */ }
+	}
+	if (caduque()) return;
+	if (!creationOptions) { _gdMsg('✗ /api/lieux/creation_options illisible : catégories des lieux inconnues.', true); return; }
+	await _cxChargerIds();
+	if (caduque()) return;
+	// ⚠️ Pas un simple avertissement comme pour la porte : sans les connexions, la chaîne ne se lit
+	// pas — on bâtirait une deuxième réception sur une maison déjà complète.
+	if (!cxIdsCharges) { _gdMsg("✗ Les connexions n'ont pas pu être lues : la maison ne peut pas être reconstituée.", true); return; }
+
+	_gdEl('gd-titre').textContent = _gdLabelLieu(facadeId);
+	gdChaine = _gdChaine(cxDocsConnus, creationOptions.lieux, facadeId);
+	_gdRenderChaine();
+	if (gdChaine.erreur) { _gdMsg(`✗ ${gdChaine.erreur}`, true); return; }
+	if (!gdChaine.etape) { _gdMsg('✓ Maison complète : réception, comptoir et bureau du maître existent.', false); return; }
+
+	const aRelire = { facade: facadeId,
+		reception: gdChaine.reception && gdChaine.reception.lieu,
+		comptoir: gdChaine.comptoir && gdChaine.comptoir.lieu };
+	const relus = {};
+	for (const cle of Object.keys(aRelire)) {
+		if (!aRelire[cle]) continue;
+		relus[cle] = await _gdLireFrais(aRelire[cle]);
+		if (caduque()) return;
+		if (!relus[cle]) { _gdMsg(`✗ ${aRelire[cle]} n'a pas pu être relu.`, true); return; }
+	}
+	gdRelus = relus;
+
+	const etape = _gdEtapeCourante();
+	const precedent = _gdLabelLieu(gdChaine.precedent);
+	_gdEl('gd-etape-titre').textContent = etape.titre;
+	_gdEl('gd-label').value = _gdLabelDefaut(relus.facade.label, etape.cle);
+	_gdEl('gd-label-nouveau-txt').textContent = `Bouton vers « ${etape.titre} » (vu depuis ${precedent})`;
+	_gdEl('gd-label-nouveau').value = etape.labelVersNouveau;
+	_gdEl('gd-label-precedent-txt').textContent = `Bouton de retour vers ${precedent}`;
+	_gdEl('gd-label-precedent').value = etape.labelVersPrecedent;
+
+	_gdEl('gd-pnj-bloc').style.display = etape.pnj ? '' : 'none';
+	_gdEl('gd-pnj-nom').value = '';
+	_gdEl('gd-pnj-hint').textContent = etape.cle === 'comptoir'
+		? 'Facultatif. Le 1er PNJ du comptoir sera nommé gardien du bureau.'
+		: 'Facultatif. Le maître de guilde, qui reçoit dans son bureau.';
+
+	_gdEl('gd-acces-bloc').style.display = etape.acces ? '' : 'none';
+	if (etape.acces) {
+		const entrees = (relus.comptoir && relus.comptoir.pnj) || [];
+		const entree = entrees.find(e => e && e.character) || {};
+		const docPnj = ((creationOptions.pnj) || []).find(pj => pj._id === entree.character) || {};
+		const nom = entree.nom || (docPnj.nom && docPnj.nom !== docPnj._id ? docPnj.nom : '');
+		_gdEl('gd-gardien').textContent = entree.character
+			? `Gardien : ${nom || entree.character} (${entree.character}), 1er PNJ du comptoir.`
+			: "Le comptoir n'a aucun PNJ : la barrière n'aura pas de gardien nommé (champ informatif).";
+		_gdEl('gd-refus').value = _gdRefusDefaut(nom);
+	} else {
+		_gdEl('gd-refus').value = '';
+	}
+
+	_gdRepeuplerSelects({ rang: 'D' });
+	_gdEl('gd-form').style.display = '';
+	_gdEl('gd-submit-btn').disabled = false;
+	_gdEl('gd-submit-btn').textContent = `➕ Créer : ${etape.libelle}`;
+	_gdMajApercu();
+	_gdMsg('', false);
+}
+
+function closeGuildeForm() {
+	gdFacadeId = '';
+	const ov = document.getElementById('guilde-overlay');
+	if (ov) ov.classList.add('gd-hidden');
+}
+
+// ── L'écriture ─────────────────────────────────────────────────────────────
+async function submitGuildeForm() {
+	if (gdEnVol) return;
+	const etape = _gdEtapeCourante();
+	const docs = _gdDocsForme();
+	const souci = _gdValider(docs, gdChaine, {
+		lieuIds: (creationOptions && creationOptions.lieu_ids) || [],
+		connIds: cxIdsConnus,
+		pnjIds: ((creationOptions && creationOptions.pnj) || []).map(pj => pj._id),
+		rangs: (creationOptions && creationOptions.conditions && creationOptions.conditions.rangs) || [],
+	});
+	if (souci) { _gdMsg(`✗ ${souci}`, true); return; }
+
+	gdEnVol = true;
+	const btn = _gdEl('gd-submit-btn');
+	btn.disabled = true;
+	_gdMsg(`Enregistrement de ${docs.length} documents…`, false);
+	let bilan = null;
+	try {
+		const res = await fetch('/admin/import-bulk', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(docs),
+		});
+		if (!res.ok) {
+			const e = await res.json().catch(() => ({}));
+			throw new Error(e.detail || res.status);
+		}
+		// Flux NDJSON, ligne à ligne (même boucle que la porte et le LOT).
+		const reader = res.body.getReader();
+		const decoder = new TextDecoder();
+		let reste = '';
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			reste += decoder.decode(value, { stream: true });
+			const lignes = reste.split('\n');
+			reste = lignes.pop();
+			lignes.forEach(l => {
+				if (!l.trim()) return;
+				let ev; try { ev = JSON.parse(l); } catch (e) { return; }
+				if (ev.event === 'done') bilan = ev;
+			});
+		}
+	} catch (err) {
+		gdEnVol = false;
+		btn.disabled = false;
+		_gdMsg(`✗ ${err.message}`, true);
+		return;
+	}
+	gdEnVol = false;
+	btn.disabled = false;
+	docs.forEach(d => { delete lieuxDocCache[d._id]; });
+
+	if (bilan && bilan.failed) {
+		// Échec PARTIEL : ce qui est écrit l'est pour de bon — on rend la main avec le détail.
+		_gdMsg(`✗ ${bilan.failed} doc(s) en échec sur ${bilan.total} — ${(bilan.errors || []).join(' · ')}`, true);
+		await fetchLieuxConnections();
+		renderLieuxConnList();
+		if (grid.length) renderGrid();
+		return;
+	}
+
+	creationOptions = null;   // périmé : un lieu de plus, une image de moins
+	const facadeId = gdFacadeId;
+	await fetchLieuxConnections();
+	renderLieuxConnList();
+	if (grid.length) renderGrid();
+	setStatus(`Guilde : ${etape.libelle} <span>${_escHtml(docs[0].label)}</span> créé — ${docs.length} documents.`);
+	// Rouvert sur la même façade : le panneau présente l'étape SUIVANTE.
+	await openGuildeForm(facadeId);
+	if (_gdOuvert() && gdChaine && !gdChaine.erreur) {
+		_gdMsg(`✓ ${etape.titre} créé.${gdChaine.etape ? ' Étape suivante ci-dessous.' : ' Maison complète.'}`, false);
+	}
+}
+
+let _gdCable = false;
+function _gdCabler() {
+	if (_gdCable) return;
+	_gdCable = true;
+	['gd-label', 'gd-label-precedent', 'gd-label-nouveau', 'gd-pnj-nom', 'gd-refus'].forEach(id =>
+		_gdEl(id).addEventListener('input', _gdMajApercu));
+	['gd-image', 'gd-pnj-character', 'gd-pnj-portrait', 'gd-rang'].forEach(id =>
+		_gdEl(id).addEventListener('change', _gdMajApercu));
 }
 
 // ── REDIMENSIONNEMENT : fonctions PURES ────────────────────────────────────
@@ -4628,6 +5142,7 @@ document.addEventListener('keydown', (e) => {
 	// ⚠️ Comme le lot : Échap n'annule pas pendant l'écriture, fermer masquerait une
 	// opération en cours sans l'interrompre.
 	if (_ptOuvert() && !ptEnVol) { closePorteForm(); return; }
+	if (_gdOuvert() && !gdEnVol) { closeGuildeForm(); return; }
 	if (lieuxRepos) { desarmerRepositionnement(); return; }
 	if (lieuxJsonOuvert) { closeLieuJson(); return; }
 	// Le mode test vient en dernier : son overlay est en z-index 100, sous les deux modals et
@@ -5391,6 +5906,81 @@ window.addEventListener('resize', () => { if (grid.length) renderGrid(); });
 	<div class="la-actions">
 		<button class="btn" id="pt-submit-btn" onclick="submitPorteForm()">➕ Créer la porte</button>
 		<button class="btn danger" onclick="closePorteForm()">Annuler</button>
+	</div>
+</div>
+
+<!-- MAISON DE GUILDE : un sous-lieu à la fois derrière la façade (réception → comptoir → bureau). -->
+<div id="guilde-overlay" class="card gd-hidden">
+	<div class="lj-title">
+		<div class="card-title">🏛️ <span id="gd-titre"></span></div>
+		<button type="button" class="lj-close" onclick="closeGuildeForm()" title="Fermer (sans enregistrer)">✕</button>
+	</div>
+	<div class="lj-desc">
+		Une maison de guilde se bâtit <b>derrière sa façade</b>, une étape à la fois :
+		<b>réception</b> (tableau de recrues), puis <b>comptoir</b> (rang de guilde), enfin
+		<b>bureau du maître</b> (fermé sous un rang minimal). Chaque étape écrit le lieu et sa connexion
+		au précédent ; toute la maison partage la <b>cote</b> du comptoir (<code>relation_lieu</code>).
+	</div>
+
+	<div class="cx-noeud">
+		<h3>La maison</h3>
+		<div id="gd-chaine"></div>
+	</div>
+
+	<div id="gd-form" style="display:none;">
+		<div class="cx-noeud">
+			<h3><span id="gd-etape-titre"></span></h3>
+			<label for="gd-label">Libellé</label>
+			<input type="text" id="gd-label">
+			<label for="gd-image" style="margin-top:6px;">Image</label>
+			<select id="gd-image" style="margin-bottom:0;"></select>
+			<div class="cx-hint">Images <code>guilde*</code> de l'étape d'abord ; celles déjà portées par un lieu ne sont pas proposées.</div>
+		</div>
+
+		<div class="cx-noeud">
+			<h3>Les deux boutons</h3>
+			<label for="gd-label-nouveau" id="gd-label-nouveau-txt">Bouton vers le nouveau lieu</label>
+			<input type="text" id="gd-label-nouveau">
+			<label for="gd-label-precedent" id="gd-label-precedent-txt" style="margin-top:6px;">Bouton de retour</label>
+			<input type="text" id="gd-label-precedent" style="margin-bottom:0;">
+			<div class="cx-hint">Vide = le libellé du lieu visé.</div>
+		</div>
+
+		<div class="cx-noeud" id="gd-pnj-bloc">
+			<h3>PNJ</h3>
+			<label for="gd-pnj-character">Personnage</label>
+			<select id="gd-pnj-character"></select>
+			<label for="gd-pnj-nom" style="margin-top:6px;">Nom affiché <span style="color:#888;font-weight:normal;">(vide = celui du doc PNJ)</span></label>
+			<input type="text" id="gd-pnj-nom">
+			<label for="gd-pnj-portrait" style="margin-top:6px;">Portrait</label>
+			<select id="gd-pnj-portrait" style="margin-bottom:0;"></select>
+			<div class="cx-hint" id="gd-pnj-hint"></div>
+		</div>
+
+		<div class="cx-noeud" id="gd-acces-bloc">
+			<h3>Accès gardé</h3>
+			<div class="cx-hint" id="gd-gardien"></div>
+			<label for="gd-rang" style="margin-top:6px;">Rang de guilde minimal dans la cité</label>
+			<select id="gd-rang"></select>
+			<label for="gd-refus" style="margin-top:6px;">Texte du refus</label>
+			<textarea id="gd-refus" rows="3" style="width:100%;box-sizing:border-box;"></textarea>
+			<div class="cx-hint">Sans laissez-passer, seul le rang ouvre la porte : le gardien est informatif.</div>
+		</div>
+
+		<div class="cx-noeud">
+			<h3>Documents</h3>
+			<div id="gd-ids"></div>
+			<div class="cx-hint" id="gd-relations"></div>
+		</div>
+
+		<label>Aperçu</label>
+		<div class="la-preview" id="gd-preview"></div>
+	</div>
+
+	<div class="lj-msg" id="gd-msg"></div>
+	<div class="la-actions">
+		<button class="btn" id="gd-submit-btn" onclick="submitGuildeForm()" disabled>➕ Créer</button>
+		<button class="btn danger" onclick="closeGuildeForm()">Fermer</button>
 	</div>
 </div>
 

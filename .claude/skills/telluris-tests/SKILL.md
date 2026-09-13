@@ -46,6 +46,7 @@ Aucune dépendance (ni `package.json`, ni second écosystème), code 1 en échec
 | `test_lieu_form_client` | formulaire de lieu | capacités ; fusion (`progeniture`, `pnj[1..]`, clés inconnues) |
 | `test_connexions_client` | formulaire de connexion | `link:*` écrasé ; clés du doc/nœud perdues ; case posable |
 | `test_portes_client` | portes de rempart | ordre des nœuds (porte qui change de côté) ; 5 `_id` ; clés perdues |
+| `test_guilde_client` | maison de guilde | étape sautée ou maison dédoublée ; `relation_lieu` écrasé ou clés perdues des docs réécrits ; bureau avec `sous_categorie` |
 | `test_lot_lieux_client` | lot de lieux | N boutiques ⇒ un seul `link:*` ⇒ boutiques sans porte |
 | `test_gestion_lieux_client` | `/admin/lieux` + contrat `LIEUX_HOTE` | globale d'éditeur lue par la part (ReferenceError au clic sur l'autre page) ; clé de contrat absente ; lignes affichées envoyées aux outils ; 📍 hors région principale |
 | `test_dialogues_client` | `/admin/dialogues` | fusion doc/nœud/choix ; atteignabilité **avec** les nœuds de service |

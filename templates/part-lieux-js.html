@@ -10,7 +10,7 @@
   Rien ici ne lit une globale propre à une page — carte, grille éditée, case sélectionnée,
   redimensionnement : tout passe par ces crochets. Détail : compétence telluris-editeur-carte.
 
-  Harnais : dev/test_{lieu_form,connexions,portes,lot_lieux}_client.js extraient ces fonctions
+  Harnais : dev/test_{lieu_form,connexions,portes,guilde,lot_lieux}_client.js extraient ces fonctions
   PAR NOM depuis admin_map_editor.html, includes développés par dev/_template_js.js.
 #}
 <script>
@@ -63,6 +63,7 @@ function _connDest(conn, ici) {
 // Une ligne de la liste des connexions d'un lieu — SOURCE UNIQUE du panneau Lieux de l'éditeur
 // et de la première colonne de /admin/lieux. PURE (test_gestion_lieux_client.js).
 // `opts.link` : ligne « 🔗 link:… » · `opts.porte` : bouton 🏰 (seul l'éditeur rouvre une paire)
+// · `opts.guilde` : bouton 🏛️ sur une façade de guilde (seul l'éditeur bâtit la maison)
 // · `opts.ouvert` : le bouton 🧾 devient « ✕ Fermer ».
 // ⚠️ Les `_id` partent dans des `onclick="…('${id}')"` : des identifiants CouchDB (`lieu:<slug>`,
 // `link:…`), jamais une saisie libre. Le label, lui, passe par `_escHtml`.
@@ -86,6 +87,11 @@ function lieuxLigneHtml(conn, ici, opts) {
 	const btnPorte = estPorte
 		? `<button class="btn btn-inline" style="font-size:.62rem;" onclick="openPorteForm('${destId}')">🏰 Porte</button>`
 		: '';
+	// Une façade de guilde ouvre l'assistant qui ajoute, derrière elle, l'étape suivante de la maison.
+	const estGuilde = !!(o.guilde && dest && dest.details && dest.details.categorie === GUILDE_EXTERIEUR_CATEGORIE);
+	const btnGuilde = estGuilde
+		? `<button class="btn btn-inline" style="font-size:.62rem;" onclick="openGuildeForm('${destId}')">🏛️ Guilde</button>`
+		: '';
 	const pastille = `<span title="${_escHtml((LIEUX_PNJ_ETATS.find(e => e.cle === etat) || {}).label || '')}"`
 		+ ` style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;`
 		+ `background:${LIEUX_PNJ_COULEURS[etat]};border:1px solid rgba(255,255,255,0.5);"></span>`;
@@ -98,6 +104,7 @@ function lieuxLigneHtml(conn, ici, opts) {
 			<button class="btn btn-inline" style="font-size:.62rem;" onclick="openLieuForm('edition','${destId}')">✏️ Lieu</button>
 			<button class="btn btn-inline" style="font-size:.62rem;" onclick="openConnForm('edition','${conn._id}')">🔗 Connexion</button>
 			${btnPorte}
+			${btnGuilde}
 			<button class="btn btn-inline" style="font-size:.62rem;" onclick="toggleSousLieuJson('${conn._id}','${destId}')">${o.ouvert ? '✕ Fermer' : '🧾 JSON'}</button>
 		</div>
 	</div>`;
@@ -303,6 +310,7 @@ function _cxValider(doc, iciId, idsConnus, creation) {
 }
 
 const PORTE_CATEGORIE = 'Porte de rempart';
+const GUILDE_EXTERIEUR_CATEGORIE = 'guilde_aventurier_exterieur';
 
 // ── Le reste : lecture du DOM et du serveur ────────────────────────────────
 function _cxEl(id) { return document.getElementById(id); }

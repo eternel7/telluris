@@ -54,6 +54,7 @@ vm.runInThisContext(extraireDeclaration(/const LIEUX_PNJ_ETATS = \[[\s\S]*?\];/,
 vm.runInThisContext(extraireDeclaration(/const LIEUX_PNJ_COULEURS = [^\n]+/, 'LIEUX_PNJ_COULEURS'));
 vm.runInThisContext(extraireDeclaration(/const LIEUX_PNJ_RANG = [^\n]+/, 'LIEUX_PNJ_RANG'));
 vm.runInThisContext(extraireDeclaration(/const PORTE_CATEGORIE = [^;]+;/, 'PORTE_CATEGORIE'));
+vm.runInThisContext(extraireDeclaration(/const GUILDE_EXTERIEUR_CATEGORIE = [^;]+;/, 'GUILDE_EXTERIEUR_CATEGORIE'));
 vm.runInThisContext(extraireDeclaration(/const COLS_LIEN = [^;]+;/, 'COLS_LIEN'));
 vm.runInThisContext(extraireDeclaration(/const LIEUX_HOTE_REQUIS = \[[\s\S]*?\];/, 'LIEUX_HOTE_REQUIS'));
 for (const f of ['_escHtml', '_connDest', 'etatPnjDeLieu', 'lieuxLigneHtml',
@@ -84,6 +85,8 @@ const TEMPLE = conn('link:temple_to_lutecia', [30, 9], 'lieu:notre_dame',
 	{ label: 'Notre-Dame', categorie: 'temple_portail', pnj: [{ character: 'pnj:dame_eleonore' }, { character: 'pnj:marchand_x' }] });
 const PORTE = conn('link:porte_nord', [49, 6], 'lieu:porte_nord_interieur',
 	{ label: "Porte <nord> l'intérieur", categorie: 'Porte de rempart' });
+const GUILDE = conn('link:guilde_aventurier_exterieur01_to_lutecia', [34, 20], 'lieu:le_grand_relais_des_frontieres_exterieur',
+	{ label: 'Le Grand Relais des Frontières', categorie: 'guilde_aventurier_exterieur' });
 
 console.log('\n── Valeurs de colonne ──');
 
@@ -188,6 +191,13 @@ t('le label est échappé ; 🏰 Porte seulement si demandé ; ✕ Fermer quand 
 	assert.ok(!lieuxLigneHtml(AUBERGE, VILLE, { porte: true }).includes('🏰 Porte'));
 });
 
+t('🏛️ Guilde seulement si demandé, et seulement sur une façade de guilde', () => {
+	assert.ok(lieuxLigneHtml(GUILDE, VILLE, { guilde: true }).includes('🏛️ Guilde'));
+	assert.ok(!lieuxLigneHtml(GUILDE, VILLE, { guilde: false }).includes('🏛️ Guilde'));
+	assert.ok(!lieuxLigneHtml(AUBERGE, VILLE, { guilde: true }).includes('🏛️ Guilde'));
+	assert.ok(!lieuxLigneHtml(PORTE, VILLE, { guilde: true, porte: true }).includes('🏛️ Guilde'));
+});
+
 console.log('\n── Contrat LIEUX_HOTE ──');
 
 function blocHote(fichier) {
@@ -222,7 +232,7 @@ t('la part JS ne lit aucune globale propre à une page (hors commentaires)', () 
 		// jamais la fin d'une ligne coupée sur `\n` seul, et aucun commentaire ne serait retiré.
 		.split(/\r?\n/).map(l => l.replace(/(^|[^:'"`])\/\/.*$/, '$1')).join('\n');
 	const interdites = ['currentLocId', 'lieuxSelectedCell', 'lieuxConnections', 'redimEnAttente',
-		'renderGrid', 'fetchLieuxConnections', 'renderLieuxConnList', 'setStatus', 'closePorteForm',
+		'renderGrid', 'fetchLieuxConnections', 'renderLieuxConnList', 'setStatus', 'closePorteForm', 'closeGuildeForm',
 		'lieuxRepos', 'editMode', 'canvas', 'lieuxFileCases'];
 	const trouvees = interdites.filter(nom => new RegExp('\\b' + nom + '\\b').test(code));
 	assert.deepStrictEqual(trouvees, []);
