@@ -38,7 +38,7 @@ Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le
 - `gen_grades_france.py` — profils de niveau 5-6 du lieu descendus vers `zone:tres_dangereuse`.
 - `gen_acces_donjon.py` — chaîne d'accès au donjon-mine.
 - `gen_relation_guilde.py` — `relation_lieu` : les 4 lieux du Bastion partagent une cote.
-- `gen_repurgateur_noire.py` — le répurgateur passe de la magie Sainte à la `Démonologie`, `familles_exclues: ["invocation"]` ; re-tague ses 3 sorts et ajoute un sort d'invocation par école noire. ⚠️ Recopie `rules:vocations` ENTIER (PUT complet).
+- `gen_repurgateur_noire.py` — le répurgateur passe de la magie Sainte à la `Démonologie`, `familles_exclues: ["invocation"]` ; ajoute un sort d'invocation par école noire. ⚠️ Recopie `rules:vocations` ENTIER (PUT complet). ⚠️ Ses 3 sorts Saints restent **intacts** et sortent donc de son répertoire : perte assumée, le script les liste avant l'import.
 - `gen_escorte_marchands.py` / `gen_progeniture.py` / `gen_escorte_guilde.py` — escortes : nœuds des 29 `pnj:marchand_*`, familles des boutiques, registre des disparitions au comptoir.
 - `gen_convoi_lutecia.py` — le voyage à Lutèce.
 - `gen_epaulieres.py` — 21 pièces d'épaules + recettes.

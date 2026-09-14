@@ -218,12 +218,13 @@ CATALOGUE = [
 		"id": "gen_repurgateur_noire",
 		"label": "🔱 Basculer le répurgateur en magie noire (+ invocations)",
 		"argv": _py("gen_repurgateur_noire.py"),
-		"ecrit": "Écrit jsons/repurgateur_magie_noire_a_importer.json (6 docs).",
+		"ecrit": "Écrit jsons/repurgateur_magie_noire_a_importer.json (3 docs).",
 		"description": "Le répurgateur quitte la magie Sainte pour la Démonologie du démoniste, "
 			"dont il est exclu des INVOCATIONS (`familles_exclues` de rules:vocations). Recopie "
-			"le doc de vocations ENTIER (PUT complet), re-tague ses 3 sorts en magie noire sans "
-			"toucher à leur équilibre, et ajoute un sort d'invocation par école noire — sans quoi "
-			"l'exclusion ne mordrait sur rien. Relit le dump figé : régénération idempotente.",
+			"le doc de vocations ENTIER (PUT complet) et ajoute un sort d'invocation par école "
+			"noire — sans quoi l'exclusion ne mordrait sur rien. ⚠️ Ses 3 sorts Saints ne sont PAS "
+			"repris : ils restent tels quels et sortent de son répertoire (le script les liste "
+			"avant l'import). Relit le dump figé : régénération idempotente.",
 	},
 	{
 		"id": "gen_depecage_tags",

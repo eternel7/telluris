@@ -9,20 +9,22 @@
 #      change : `magie` Sainte → Démonologie, `familles_exclues: ["invocation"]`, blurb.
 #      ⚠️ Le doc entier est réécrit parce qu'`admin_import_bulk` fait un PUT COMPLET : une
 #      `value` partielle EFFACERAIT les 19 autres vocations, en silence.
-#   2. Les 3 sorts de répurgateur déjà en base, relus du dump, re-tagués `Démonologie` et
-#      re-formulés en magie noire (l'eau bénite et le sel laissent la place au sel noir et
-#      au soufre). `_id`, `effets`, `cout_pm`, `cible`, `jet` et `portee` sont INCHANGÉS :
-#      un personnage qui connaît déjà l'un de ces sorts le garde, au même prix et au même
-#      effet — seule sa couleur change.
-#   3. Deux sorts d'INVOCATION NEUFS, un par école noire (`sort:pacte_du_servant` en
+#   2. Deux sorts d'INVOCATION NEUFS, un par école noire (`sort:pacte_du_servant` en
 #      Démonologie, `sort:levee_des_ossements` en Nécromancie). Ce sont eux que la nouvelle
 #      exclusion retire au répurgateur : sans contenu d'invocation en Démonologie, la règle
 #      ne mordrait sur rien.
 #
-# POURQUOI UN GÉNÉRATEUR plutôt qu'un JSON tapé à la main : les docs 1 et 2 sont RELUS du
-# dump et ne reçoivent que les champs ajoutés, donc régénérer est idempotent et ne peut pas
-# perdre un champ que quelqu'un aurait posé entre-temps (cf. CLAUDE.md § Import et écriture
-# de contenu). Le script sort en erreur si l'un des docs attendus manque du dump, et si un
+# CE QU'IL NE TOUCHE PAS, DÉLIBÉRÉMENT. Les 3 sorts `vocation: "repurgateur"` déjà en base
+# (`fer_et_priere`, `feu_purificateur`, `sceau_de_protection`) restent en magie SAINTE, sans
+# la moindre modification. Ils sortent donc du répertoire du répurgateur, qui ne pratique
+# plus cette école : PLUS PERSONNE ne peut les apprendre avec cette vocation. C'est assumé —
+# les répurgateurs existants les perdent purement et simplement, sans reprise ni
+# compensation. Le script les LISTE à chaque exécution pour que la perte reste visible.
+#
+# POURQUOI UN GÉNÉRATEUR plutôt qu'un JSON tapé à la main : `rules:vocations` est RELU du
+# dump et ne reçoit que les champs ajoutés, donc régénérer est idempotent et ne peut pas
+# perdre une vocation que quelqu'un aurait ajoutée entre-temps (cf. CLAUDE.md § Import et
+# écriture de contenu). Le script sort en erreur si un doc attendu manque du dump, et si un
 # `_id` neuf existe déjà en base.
 #
 # ⚠️ LE DUMP EST UN INSTANTANÉ, figé explicitement ci-dessous. Une vocation ajoutée dans
@@ -32,7 +34,7 @@
 #
 # Usage : python dev/gen_repurgateur_noire.py
 # Sortie (à coller dans /admin -> Import en masse) :
-#   jsons/repurgateur_magie_noire_a_importer.json   (6 docs)
+#   jsons/repurgateur_magie_noire_a_importer.json   (3 docs)
 
 import json
 import os
@@ -59,41 +61,7 @@ BLURB_REPURGATEUR = (
 	"mais il n'appelle jamais ce qu'il passe sa vie à abattre."
 )
 
-# ── 2. Re-formulation des 3 sorts de répurgateur ────────────────────────────────────
-# Seules ces clés sont réécrites ; tout le reste du doc est celui du dump. `effets`,
-# `cout_pm`, `cible`, `jet` et `portee` n'y figurent VOLONTAIREMENT pas : la bascule
-# d'école ne doit rien changer à l'équilibre d'un sort déjà en jeu.
-SORTS_REPURGATEUR = {
-	"sort:fer_et_priere": {
-		"magie": ECOLE_NOIRE,
-		"nom": "Fer et malédiction",
-		"description": "La main gantée s'abat en même temps que la formule. Contre l'impur, "
-					   "le répurgateur emprunte à l'impur — et le contact vaut mieux que la distance.",
-		"composants": [
-			{"item": "item:Sel_noir", "consomme": True, "bonus": {"degats": "1D6"}},
-			{"item": "item:Soufre", "consomme": False, "bonus": {"degats": "1"}},
-		],
-	},
-	"sort:feu_purificateur": {
-		"magie": ECOLE_NOIRE,
-		"description": "Un feu noir qui purge les créatures maudites. Il ne descend d'aucun ciel.",
-		"composants": [
-			{"item": "item:Soufre", "consomme": True, "bonus": {"degats": "1D6"}},
-			{"item": "item:Sel_noir", "consomme": True, "bonus": {"degats": "1D4"}},
-		],
-	},
-	"sort:sceau_de_protection": {
-		"magie": ECOLE_NOIRE,
-		"description": "Un sceau tracé au sel noir : ce qui rôde le reconnaît comme un des siens "
-					   "et passe son chemin.",
-		"composants": [
-			{"item": "item:Sel_noir", "consomme": True, "bonus": {"duree": 2}},
-			{"item": "item:Bougie", "consomme": False, "bonus": {"buffs": {"Vol": 5}}},
-		],
-	},
-}
-
-# ── 3. Sorts d'INVOCATION neufs ─────────────────────────────────────────────────────
+# ── 2. Sorts d'INVOCATION neufs ─────────────────────────────────────────────────────
 # NIVEAU 1, et non 0 : une invocation ajoute un combattant entier à la grille, ce qu'aucun
 # sort de départ ne doit faire (le niveau 0 alimente le choix de sort à la création).
 # AUCUN `composants` : les bonus de composant s'additionnent aux `effets`, qu'une invocation
@@ -191,21 +159,25 @@ def vocations_doc() -> dict:
 	return doc
 
 
-def sorts_retagues() -> list:
-	"""Les 3 sorts de répurgateur du dump, re-tagués et re-formulés en magie noire."""
-	docs = []
-	for sort_id, champs in SORTS_REPURGATEUR.items():
-		doc = extraire(sort_id)
-		if doc.get("vocation") != REPURGATEUR:
-			sys.exit(f"ERREUR : {sort_id} n'est pas un sort de répurgateur "
-					 f"(vocation={doc.get('vocation')!r})")
-		avant = doc.get("magie", "")
-		doc.update(champs)
-		etat = "déjà en magie noire (réimport sans effet sur l'école)" if avant == ECOLE_NOIRE \
-			else f"{avant or '(vide)'} -> {ECOLE_NOIRE}"
-		print(f"   {sort_id} : {etat}")
-		docs.append(doc)
-	return docs
+def signaler_sorts_perdus() -> None:
+	"""Liste, SANS RIEN ÉCRIRE, les sorts que la bascule met hors d'atteinte du répurgateur.
+
+	Ils restent en magie Sainte, tels quels : le répurgateur ne pratiquant plus cette école,
+	ils quittent simplement son répertoire. Aucun doc n'est produit pour eux — c'est ce qui
+	rend la perte définitive, et c'est voulu. Ce rapport existe pour qu'elle soit VUE avant
+	l'import, jamais découverte après.
+	"""
+	perdus = [d for d in base().values()
+			  if d.get("type") == "sort" and d.get("vocation") == REPURGATEUR
+			  and str(d.get("magie") or "") != ECOLE_NOIRE]
+	if not perdus:
+		print("   (aucun sort de répurgateur hors Démonologie — rien à perdre)")
+		return
+	print(f"   ⚠️ {len(perdus)} sort(s) de répurgateur laissés EN L'ÉTAT, donc perdus :")
+	for doc in sorted(perdus, key=lambda d: d["_id"]):
+		print(f"      {doc['_id']} — {doc.get('nom', '?')} ({doc.get('magie') or 'sans école'})")
+	print("      Plus aucun répurgateur ne peut les apprendre ; ceux qui les connaissent"
+		  " déjà les gardent dans `sorts_connus` (aucune reprise n'est faite).")
 
 
 def sorts_neufs() -> list:
@@ -226,15 +198,16 @@ def sorts_neufs() -> list:
 
 def main() -> None:
 	print(f"source : {SRC_DUMP}")
-	docs = [vocations_doc()] + sorts_retagues() + sorts_neufs()
+	docs = [vocations_doc()] + sorts_neufs()
+	signaler_sorts_perdus()
 
 	chemin = os.path.join(RACINE, SORTIE)
 	with open(chemin, "w", encoding="utf-8") as f:
 		json.dump(docs, f, ensure_ascii=False, indent=2)
 		f.write("\n")
 	print(f"écrit {SORTIE}\n   {len(docs)} doc(s)")
-	print("   ⚠️ Après l'import : un répurgateur ne voit plus les sorts Saints dans son "
-		  "onglet ⚡, mais les sorts de Démonologie — hors invocations.")
+	print("   ⚠️ Après l'import : la liste « à apprendre » d'un répurgateur ne propose plus "
+		  "de sorts Saints, mais ceux de Démonologie — hors invocations.")
 
 
 if __name__ == "__main__":
