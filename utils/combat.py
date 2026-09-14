@@ -27,6 +27,7 @@ from utils import recrutement
 from utils import montures as montures_util
 from utils import escorte as escorte_util
 from utils import animations as animations_util
+from utils import jetons
 from utils import journal
 
 BATTLE_MAPS = [
@@ -224,7 +225,9 @@ def _avec_vfx(entree: dict, canal: str, cible_id: str, source_anim=None, acteur_
 # Champs d'un snapshot que le CLIENT PEINT, et qui doivent donc attendre la ligne de
 # journal qui les explique : vitalité, mort, position. Tout le reste (compteurs d'action,
 # effets, détection, charge) suit l'état autoritatif immédiatement.
-CHAMPS_ETAT = ("currentPV", "currentPM", "vivant", "morte", "pos", "facing")
+# `cap` : l'orientation d'un grand jeton (utils/jetons.py) — un pivot doit se révéler avec
+# le glissement qu'il accompagne, pas avant.
+CHAMPS_ETAT = ("currentPV", "currentPM", "vivant", "morte", "pos", "facing", "cap")
 
 
 # Profondeur des DEUX gardes d'idempotence indexées par id de combat : `combats_recompenses`
@@ -357,8 +360,7 @@ def _lancer_sur_allie(combat_doc: dict, lanceur: dict, cible: dict, source: dict
 	portee = max(1, int(portee or 1))
 	if _cheby(lanceur, cible) > portee:
 		return {"error": "Allié hors de portée."}
-	if portee > 1 and not _line_of_sight(grid["cells"], lanceur["pos"]["x"], lanceur["pos"]["y"],
-										  cible["pos"]["x"], cible["pos"]["y"]):
+	if portee > 1 and not _vue_acteurs(grid["cells"], lanceur, cible):
 		return {"error": "Ligne de vue obstruée."}
 	return _appliquer_soutien(combat_doc, lanceur, cible, source, effets)
 
@@ -466,17 +468,20 @@ def cibles_de_zone(combat_doc: dict, joueur: dict, monstre: dict, zone: dict,
 	"""
 	if not zone:
 		return [monstre]
+	jx, jy = joueur["pos"]["x"], joueur["pos"]["y"]
+	# Grand jeton : la forme se pose sur la case de son emprise la plus proche du lanceur, et
+	# une victime est prise dès qu'UNE de ses cases est dans la forme (utils/jetons.py).
 	cases = set(cases_effet(
 		zone,
-		(joueur["pos"]["x"], joueur["pos"]["y"]),
-		(monstre["pos"]["x"], monstre["pos"]["y"]),
+		(jx, jy),
+		jetons.case_proche(monstre, jx, jy),
 		joueur.get("facing", 0),
 		praticable=lambda x, y: _passable(grid["cells"], x, y),
 		vue=lambda x0, y0, x1, y1: _line_of_sight(grid["cells"], x0, y0, x1, y1),
 	))
 	autres = [m for m in combat_doc["monstres"]
 			  if m["vivant"] and m is not monstre and m.get("pos")
-			  and (m["pos"]["x"], m["pos"]["y"]) in cases]
+			  and any(c in cases for c in jetons.cases_emprise(m))]
 	return [monstre] + autres
 
 
@@ -503,17 +508,18 @@ def beneficiaires_de_zone(combat_doc: dict, lanceur: dict, principal: dict, zone
 	"""
 	if not zone:
 		return [principal]
+	lx, ly = lanceur["pos"]["x"], lanceur["pos"]["y"]
 	cases = set(cases_effet(
 		zone,
-		(lanceur["pos"]["x"], lanceur["pos"]["y"]),
-		(principal["pos"]["x"], principal["pos"]["y"]),
+		(lx, ly),
+		jetons.case_proche(principal, lx, ly),
 		lanceur.get("facing", 0),
 		praticable=lambda x, y: _passable(grid["cells"], x, y),
 		vue=lambda x0, y0, x1, y1: _line_of_sight(grid["cells"], x0, y0, x1, y1),
 	))
 	autres = [p for p in combat_doc.get("joueurs", [])
 			  if p is not principal and p.get("pos") and p.get("currentPV", 0) > 0
-			  and (p["pos"]["x"], p["pos"]["y"]) in cases]
+			  and any(c in cases for c in jetons.cases_emprise(p))]
 	return [principal] + autres
 
 
@@ -744,7 +750,10 @@ def _walkable(cells: list, x: int, y: int, flying: bool = False) -> bool:
 
 
 def _cheby(a: dict, b: dict) -> int:
-	return max(abs(a["pos"]["x"] - b["pos"]["x"]), abs(a["pos"]["y"] - b["pos"]["y"]))
+	"""Distance de Chebyshev entre deux ACTEURS — entre leurs EMPRISES (utils/jetons.py).
+	Chokepoint unique de toutes les portées et adjacences du moteur : deux 1x1 donnent
+	exactement l'écart case à case d'avant, un grand jeton se touche par n'importe quel bord."""
+	return jetons.distance(a, b)
 
 
 def _line_of_sight(cells: list, x0: int, y0: int, x1: int, y1: int) -> bool:
@@ -774,20 +783,42 @@ def _line_of_sight(cells: list, x0: int, y0: int, x1: int, y1: int) -> bool:
 			y += sy
 
 
-def _occupied_set(combat_doc: dict, exclude: dict | None = None) -> set:
-	"""Ensemble des (x,y) occupés par des acteurs vivants (hors `exclude`)."""
+def _vue_acteurs(cells: list, a: dict, b: dict) -> bool:
+	"""Ligne de vue entre deux ACTEURS : vraie si AU MOINS UNE paire (case de a, case de b)
+	se voit. Deux 1x1 ⇒ exactement `_line_of_sight` d'une case à l'autre ; un grand jeton
+	dépasse d'un mur tant qu'une de ses cases reste à découvert."""
+	cases_a = jetons.cases_emprise(a)
+	cases_b = jetons.cases_emprise(b)
+	return any(_line_of_sight(cells, x0, y0, x1, y1)
+			   for (x0, y0) in cases_a for (x1, y1) in cases_b)
+
+
+def _traversable_par(occupant: dict, traversant: dict | None) -> bool:
+	"""`traversant` peut-il passer sur les cases d'`occupant` ? Seul un joueur JOUABLE, et
+	seulement sur un grand allié NON JOUABLE (monture, personne escortée, invocation de plus
+	d'une case) : l'échange de places qui débloque un 1x1 est géométriquement impossible avec
+	un 2x2, qui enfermerait sinon le groupe. Les monstres, eux, n'y passent jamais."""
+	return (traversant is not None and traversant.get("jouable", True) is not False
+			and occupant.get("jouable") is False and jetons.est_grand(occupant))
+
+
+def _occupied_set(combat_doc: dict, exclude: dict | None = None,
+				  traversant: dict | None = None) -> set:
+	"""Ensemble des (x,y) occupés par des acteurs vivants (hors `exclude`) — TOUTES les cases
+	de chaque emprise. `traversant` (un joueur qui se déplace) ignore les grands alliés non
+	jouables, qu'il a le droit de traverser (`_traversable_par`)."""
 	occ = set()
 	for j in combat_doc["joueurs"]:
-		if j is not exclude and j.get("currentPV", 1) > 0:
-			occ.add((j["pos"]["x"], j["pos"]["y"]))
+		if j is not exclude and j.get("currentPV", 1) > 0 and not _traversable_par(j, traversant):
+			occ.update(jetons.cases_emprise(j))
 	for m in combat_doc["monstres"]:
 		if m is not exclude and m["vivant"]:
-			occ.add((m["pos"]["x"], m["pos"]["y"]))
+			occ.update(jetons.cases_emprise(m))
 	return occ
 
 
-def _occupied_at(combat_doc: dict, x: int, y: int) -> bool:
-	return (x, y) in _occupied_set(combat_doc)
+def _occupied_at(combat_doc: dict, x: int, y: int, traversant: dict | None = None) -> bool:
+	return (x, y) in _occupied_set(combat_doc, traversant=traversant)
 
 
 def _allie_echangeable(combat_doc: dict, x: int, y: int) -> dict | None:
@@ -795,10 +826,11 @@ def _allie_echangeable(combat_doc: dict, x: int, y: int) -> dict | None:
 
 	⚠️ `jouable is False` STRICTEMENT : un joueur ordinaire n'a pas la clé, et un
 	`.get("jouable")` falsy rendrait tout le groupe échangeable. Un compagnon jouable
-	garde sa case — il a son propre tour pour s'en aller — et un monstre encore plus."""
+	garde sa case — il a son propre tour pour s'en aller — et un monstre encore plus.
+	⚠️ 1x1 SEULEMENT : un grand allié ne s'échange pas, il se traverse (`_traversable_par`)."""
 	for j in combat_doc["joueurs"]:
 		if (j.get("jouable") is False and j.get("currentPV", 1) > 0
-				and j["pos"]["x"] == x and j["pos"]["y"] == y):
+				and not jetons.est_grand(j) and jetons.couvre(j, x, y)):
 			return j
 	return None
 
@@ -1049,7 +1081,8 @@ def _place_actors(combat_doc: dict, grid: dict) -> None:
 	monstres = combat_doc["monstres"]
 	occupied: set = set()
 
-	need = len(joueurs) + len(monstres)  # cases distinctes à loger dans la région
+	# Cases distinctes à loger dans la région — un grand jeton en compte plusieurs.
+	need = sum(l * p for l, p in (jetons.dims_jeton(a) for a in joueurs + monstres))
 
 	# 1-2. Mode + recherche d'une case type 1 pour le central dont la région
 	#      atteignable est assez grande pour le groupe ET les monstres.
@@ -1070,6 +1103,13 @@ def _place_actors(combat_doc: dict, grid: dict) -> None:
 		ok = True
 		for j in joueurs[1:]:
 			free = [c for c in region if c not in occupied]
+			if jetons.est_grand(j):
+				# Grande monture : l'ancre la plus proche du central où toute l'emprise tient.
+				ancres = sorted(free, key=lambda c: (max(abs(c[0] - main_cell[0]),
+														 abs(c[1] - main_cell[1])), c[1], c[0]))
+				if _poser_emprise(j, ancres, region, occupied, main):
+					continue
+				j.pop("jeton", None)   # nulle part où la loger : posée en 1x1 pour ce combat
 			pick = _nearest_of([c for c in free if _is_type1(cells, c[0], c[1])] or free, main_cell)
 			if pick is None:
 				ok = False
@@ -1084,6 +1124,8 @@ def _place_actors(combat_doc: dict, grid: dict) -> None:
 		fallback = _first_passable_cells(cells, dims, len(joueurs))
 		occupied = set()
 		for i, j in enumerate(joueurs):
+			if jetons.est_grand(j):
+				j.pop("jeton", None)   # le repli pose une case par acteur
 			pos = fallback[i] if i < len(fallback) else (0, 0)
 			j["pos"] = {"x": pos[0], "y": pos[1]}
 			occupied.add(pos)
@@ -1093,12 +1135,48 @@ def _place_actors(combat_doc: dict, grid: dict) -> None:
 	base = (main["pos"]["x"], main["pos"]["y"])
 	for m in monstres:
 		pool = [c for c in region if c not in occupied]
+		if jetons.est_grand(m):
+			# Grand jeton : ancres de la région dans un ordre aléatoire, tourné vers le groupe.
+			ancres = sorted(pool)
+			random.shuffle(ancres)
+			if _poser_emprise(m, ancres, region, occupied, main):
+				continue
+			m.pop("jeton", None)   # carte trop petite : posé en 1x1 (fail-soft)
 		if pool:
 			pos = random.choice(pool)
 		else:  # région saturée (carte minuscule) : repli sur la case libre la plus proche.
 			pos = _nearest_passable(cells, dims, base[0], base[1], occupied)
 		m["pos"] = {"x": pos[0], "y": pos[1]}
 		occupied.add(pos)
+
+
+def _caps_face_a(sonde: dict, repere: dict) -> list:
+	"""Les deux caps à essayer pour poser un grand jeton : celui qui fait face à `repere`,
+	puis celui de l'autre axe (toujours vers lui) — un couloir peut refuser le premier."""
+	premier = jetons.cap_vers(sonde, repere)
+	(sx, sy), (rx, ry) = jetons.centre(sonde), jetons.centre(repere)
+	if premier in ("gauche", "droite"):
+		second = "bas" if ry >= sy else "haut"
+	else:
+		second = "droite" if rx >= sx else "gauche"
+	return [premier, second]
+
+
+def _poser_emprise(acteur: dict, ancres, region: set, occupied: set, repere: dict) -> bool:
+	"""Pose `acteur` (grand jeton) sur la première ancre de `ancres` où TOUTE son emprise tient
+	dans `region` sans chevaucher `occupied`, en essayant les deux caps de `_caps_face_a`.
+	Mute `pos`, `cap` et `occupied` ; rend False si rien ne tient (l'appelant décide du repli)."""
+	for (x, y) in ancres:
+		sonde = {"pos": {"x": x, "y": y}, "jeton": acteur.get("jeton")}
+		for cap in _caps_face_a(sonde, repere):
+			sonde["cap"] = cap
+			cases = jetons.cases_emprise(sonde)
+			if all(c in region and c not in occupied for c in cases):
+				acteur["pos"] = {"x": x, "y": y}
+				acteur["cap"] = cap
+				occupied.update(cases)
+				return True
+	return False
 
 
 def select_battle_map(terrain_tags: list, depart_lieu: dict | None) -> dict | None:
@@ -1637,7 +1715,7 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 	)
 	xp_reward = max(1, niveau * 4 + sum_stats // 10)
 
-	return {
+	snap = {
 		"id": f"monstre_{idx}",
 		"nom": espece.get("nom", "Monstre"),
 		"espece_id": espece["_id"],
@@ -1701,6 +1779,12 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		"xp_reward": xp_reward,
 		"niveau": niveau,   # niveau du profil → pondère le tirage du poids de carcasse
 	}
+	# Grand jeton (utils/jetons.py) : clé ABSENTE pour une espèce 1x1 sans forme, dont le
+	# snapshot reste celui d'avant, à la lettre. `cap` est posé au placement.
+	jeton = jetons.jeton_espece(espece)
+	if jeton:
+		snap["jeton"] = jeton
+	return snap
 
 
 # ── Invocations ──────────────────────────────────────────────────────────────
@@ -1793,22 +1877,38 @@ def _prochain_index_joueur(combat_doc: dict) -> int:
 	return suivant
 
 
-def _cases_invocation(combat_doc: dict, grid: dict, origine: dict, nombre: int) -> list:
-	"""Jusqu'à `nombre` cases libres où faire apparaître des créatures autour d'`origine`,
-	les plus proches d'abord.
+def _cases_invocation(combat_doc: dict, grid: dict, origine: dict, nombre: int,
+					  jeton: dict | None = None) -> list:
+	"""Jusqu'à `nombre` places libres où faire apparaître des créatures autour d'`origine`,
+	les plus proches d'abord. Chaque place : `{"pos", "cap", "reduit"}`.
 
 	Bornées à la RÉGION ATTEIGNABLE depuis l'invocateur (`_reachable_region`, mêmes règles
 	de terrain et de `nav` que l'A* de déplacement) : une créature ne doit jamais surgir
 	derrière un mur, d'où elle ne pourrait ni rejoindre l'ennemi ni être rejointe. Renvoie
-	moins de cases que demandé s'il n'y a pas la place — et une liste vide si l'invocateur
+	moins de places que demandé s'il n'y a pas la place — et une liste vide si l'invocateur
 	est totalement encerclé, ce que l'appelant traite comme un échec du sort.
+
+	Grand `jeton` : toute l'emprise doit tenir ; sinon la créature est posée en 1x1
+	(`reduit: True`), comme au placement initial.
 	"""
 	ox, oy = origine["pos"]["x"], origine["pos"]["y"]
 	occupees = _occupied_set(combat_doc)
 	region = _reachable_region(grid["cells"], grid["dims"], grid.get("nav", {}), (ox, oy))
 	libres = [c for c in region if c not in occupees]
 	libres.sort(key=lambda c: (max(abs(c[0] - ox), abs(c[1] - oy)), c[1], c[0]))
-	return libres[:max(0, int(nombre))]
+	places = []
+	for _ in range(max(0, int(nombre))):
+		sonde = {"jeton": jeton}
+		if jetons.est_grand(sonde) and _poser_emprise(sonde, libres, region, occupees, origine):
+			places.append({"pos": sonde["pos"], "cap": sonde["cap"], "reduit": False})
+			continue
+		case = next((c for c in libres if c not in occupees), None)
+		if case is None:
+			break
+		occupees.add(case)
+		places.append({"pos": {"x": case[0], "y": case[1]}, "cap": None,
+					   "reduit": jetons.est_grand(sonde)})
+	return places
 
 
 def invoquer(combat_doc: dict, lanceur: dict, sort: dict, grid: dict) -> list:
@@ -1830,13 +1930,18 @@ def invoquer(combat_doc: dict, lanceur: dict, sort: dict, grid: dict) -> list:
 	if profil is not None and profil.get("type") != "profil":
 		profil = None
 
-	cases = _cases_invocation(combat_doc, grid, lanceur, invocation.get("nombre", 1))
+	places = _cases_invocation(combat_doc, grid, lanceur, invocation.get("nombre", 1),
+							   jetons.jeton_espece(espece))
 	crees = []
-	for x, y in cases:
+	for place in places:
 		snap = build_invocation_snapshot(
 			espece, profil, _prochain_index_joueur(combat_doc),
 			invocation.get("duree", 1), lanceur)
-		snap["pos"] = {"x": x, "y": y}
+		snap["pos"] = place["pos"]
+		if place["cap"]:
+			snap["cap"] = place["cap"]
+		if place["reduit"]:
+			snap.pop("jeton", None)
 		combat_doc["joueurs"].append(snap)
 		crees.append(snap)
 
@@ -1929,6 +2034,11 @@ def create_combat_doc(
 		# d'espèce, sinon la répartition du butin de fin lui refuserait des carcasses
 		# qu'elle peut parfaitement porter (/collect borne sur CETTE valeur).
 		snap["charge_max"] = montures_util.charge_max_porteur(m)
+		# Gabarit relu sur l'ESPÈCE, jamais recopié sur le doc monture : une retouche du
+		# bestiaire vaut tout de suite pour les bêtes déjà achetées (aucune migration).
+		jeton = jetons.jeton_espece(get_doc(m["espece"])) if m.get("espece") else None
+		if jeton:
+			snap["jeton"] = jeton
 		montures_snaps.append(snap)
 	joueurs += montures_snaps
 
@@ -2327,13 +2437,54 @@ def _do_monster_attack(combat_doc: dict, monstre: dict, joueur: dict) -> None:
 	_do_attack_on(combat_doc, monstre, joueur)
 
 
+def _predicats_jeton(grid: dict, acteur: dict) -> tuple:
+	"""(praticable, nav_ok) injectés dans `utils/jetons.py` — mêmes règles que `_find_path`."""
+	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
+	flying = _can_fly(acteur)
+	return ((lambda x, y: 0 <= x < dims["x"] and 0 <= y < dims["y"] and _walkable(cells, x, y, flying)),
+			(lambda x, y, dx, dy: nav_allows(nav, x, y, dx, dy)))
+
+
+def _pas_budget_ok(acteur: dict) -> bool:
+	"""Reste-t-il assez d'AP pour UN pas de plus (coût proportionnel) ?"""
+	projected = (acteur["attaques"] + acteur.get("penalites", 0)
+				 + _move_ap_used_for(acteur, acteur["cells_moved"] + 1))
+	return projected <= acteur["actions_max"]
+
+
+def _grand_pas_vers(combat_doc: dict, acteur: dict, cible: dict, grid: dict, blocked: set) -> bool:
+	"""Un pas d'un GRAND jeton vers `cible` : A* sur les états (ancre, cap) jusqu'à ce que son
+	emprise soit à portée, puis le premier pas — pivot compris (utils/jetons.py)."""
+	portee = max(1, int(acteur.get("portee", 1) or 1))
+	praticable, nav_ok = _predicats_jeton(grid, acteur)
+	chemin = jetons.chemin_jeton(
+		acteur,
+		but=lambda vue: jetons.distance(vue, cible) <= portee,
+		heuristique=lambda vue: max(0, jetons.distance(vue, cible) - portee),
+		bloque=blocked, praticable=praticable, nav_ok=nav_ok,
+	)
+	if not chemin or len(chemin) < 2 or not _pas_budget_ok(acteur):
+		return False
+	x, y, cap = chemin[1]
+	acteur["pos"] = {"x": x, "y": y}
+	acteur["cap"] = cap
+	acteur["cells_moved"] += 1
+	_refresh_actions(acteur)
+	return True
+
+
 def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: dict) -> bool:
 	"""Avance le monstre d'une case vers le joueur via A*. Retourne True si déplacé."""
 	blocked = _occupied_set(combat_doc, exclude=monstre)
+	if jetons.est_grand(monstre):
+		return _grand_pas_vers(combat_doc, monstre, joueur, grid, blocked)
+	mx, my = monstre["pos"]["x"], monstre["pos"]["y"]
+	# Cible à grand jeton : on vise la case de son emprise la plus proche (la sienne pour un 1x1).
+	but = jetons.case_proche(joueur, mx, my)
 	path = _find_path(
 		grid["cells"], grid["dims"],
-		(monstre["pos"]["x"], monstre["pos"]["y"]),
-		(joueur["pos"]["x"], joueur["pos"]["y"]),
+		(mx, my),
+		but,
 		blocked,
 		grid.get("nav", {}),
 		flying=_can_fly(monstre),
@@ -2342,13 +2493,13 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 		return False
 	nxt = path[1]
 	# Ne pas entrer sur la case du joueur (cible) ni une case occupée.
-	if nxt == (joueur["pos"]["x"], joueur["pos"]["y"]) or nxt in blocked:
+	if jetons.couvre(joueur, nxt[0], nxt[1]) or nxt in blocked:
 		return False
 	# Vérifier qu'il reste assez d'AP pour ce pas (coût proportionnel).
-	projected = (monstre["attaques"] + monstre.get("penalites", 0)
-				 + _move_ap_used_for(monstre, monstre["cells_moved"] + 1))
-	if projected > monstre["actions_max"]:
+	if not _pas_budget_ok(monstre):
 		return False
+	if monstre.get("jeton"):   # 1x1 à forme : le dessin s'oriente dans le sens de la marche
+		monstre["cap"] = jetons.cap_vers(monstre, {"pos": {"x": nxt[0], "y": nxt[1]}})
 	monstre["pos"] = {"x": nxt[0], "y": nxt[1]}
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
@@ -2466,6 +2617,19 @@ def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
 	"""Un pas d'errance : case voisine aléatoire praticable (mêmes règles que le
 	déplacement — nav bitmask, terrain, cases occupées). Retourne True si déplacé."""
 	blocked = _occupied_set(combat_doc, exclude=monstre)
+	if jetons.est_grand(monstre):
+		# Grand jeton : les pas qui tiennent (pivot compris), tirés au hasard.
+		praticable, nav_ok = _predicats_jeton(grid, monstre)
+		etats = [e for e in (jetons.pas_jeton(monstre, dx, dy, blocked, praticable, nav_ok)
+							 for dx, dy in MOVE_OFFSETS) if e]
+		if not etats or not _pas_budget_ok(monstre):
+			return False
+		pos, cap = random.choice(etats)
+		monstre["pos"] = pos
+		monstre["cap"] = cap
+		monstre["cells_moved"] += 1
+		_refresh_actions(monstre)
+		return True
 	x, y = monstre["pos"]["x"], monstre["pos"]["y"]
 	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
 	flying = _can_fly(monstre)
@@ -2486,6 +2650,8 @@ def _wander_step(combat_doc: dict, monstre: dict, grid: dict) -> bool:
 	if projected > monstre["actions_max"]:
 		return False
 	nx, ny = random.choice(options)
+	if monstre.get("jeton"):   # 1x1 à forme : le dessin s'oriente dans le sens de la marche
+		monstre["cap"] = jetons.cap_vers(monstre, {"pos": {"x": nx, "y": ny}})
 	monstre["pos"] = {"x": nx, "y": ny}
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
@@ -2896,12 +3062,21 @@ def resolve_action(
 		# tenir sur la case de l'autre (la jambe ALLER est la garde de terrain ci-dessus).
 		# ⚠️ Aucun second contrôle `nav` pour la direction retour : `get_final_mask` est
 		# bidirectionnel (il vérifie la source ET la cible), l'appel ci-dessus la couvre déjà.
+		# ⚠️ Une case couverte par un GRAND allié non jouable n'est pas « occupée » pour le
+		# joueur : il la traverse (`_traversable_par`) — l'échange de places est impossible avec
+		# une emprise de plusieurs cases, qui l'enfermerait pour tout le combat.
 		echange = None
-		if _occupied_at(combat_doc, nx, ny):
+		if _occupied_at(combat_doc, nx, ny, traversant=joueur):
 			echange = _allie_echangeable(combat_doc, nx, ny)
 			if echange is None:
 				return {"error": "Case occupée."}
 			if not _echange_possible(cells, joueur, echange):
+				return {"error": f"{echange['nom']} ne peut pas tenir sur votre case."}
+			# L'échangé atterrit sur l'ancienne case du joueur : si celui-ci traversait un grand
+			# allié, les deux bêtes se superposeraient.
+			ox, oy = joueur["pos"]["x"], joueur["pos"]["y"]
+			if any(p is not joueur and p is not echange and p.get("currentPV", 1) > 0
+				   and jetons.couvre(p, ox, oy) for p in combat_doc["joueurs"]):
 				return {"error": f"{echange['nom']} ne peut pas tenir sur votre case."}
 		if joueur["cells_moved"] >= joueur.get("deplacement", 1):
 			return {"error": "Budget de déplacement épuisé."}
@@ -2978,8 +3153,7 @@ def resolve_action(
 		if is_ranged:
 			if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
 				return {"error": "Un ennemi vous menace au corps à corps : impossible de tirer."}
-			if not _line_of_sight(grid["cells"], joueur["pos"]["x"], joueur["pos"]["y"],
-								   monstre["pos"]["x"], monstre["pos"]["y"]):
+			if not _vue_acteurs(grid["cells"], joueur, monstre):
 				return {"error": "Ligne de vue obstruée."}
 		if _cheby(joueur, monstre) > atk_portee:
 			return {"error": "Cible hors de portée."}
@@ -3201,8 +3375,7 @@ def resolve_action(
 			if sort_portee > 1:
 				if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
 					return {"error": "Un ennemi vous menace au corps à corps : impossible d'incanter."}
-				if not _line_of_sight(grid["cells"], joueur["pos"]["x"], joueur["pos"]["y"],
-									   monstre["pos"]["x"], monstre["pos"]["y"]):
+				if not _vue_acteurs(grid["cells"], joueur, monstre):
 					return {"error": "Ligne de vue obstruée."}
 			if _cheby(joueur, monstre) > sort_portee:
 				return {"error": "Cible hors de portée."}
@@ -3329,8 +3502,7 @@ def resolve_action(
 			if comp_ranged:
 				if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
 					return {"error": "Un ennemi vous menace au corps à corps : impossible."}
-				if not _line_of_sight(grid["cells"], joueur["pos"]["x"], joueur["pos"]["y"],
-									   monstre["pos"]["x"], monstre["pos"]["y"]):
+				if not _vue_acteurs(grid["cells"], joueur, monstre):
 					return {"error": "Ligne de vue obstruée."}
 			if _cheby(joueur, monstre) > comp_portee:
 				return {"error": "Cible hors de portée."}

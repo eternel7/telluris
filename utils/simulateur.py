@@ -53,6 +53,7 @@ import re
 from models import character_stats
 from models.character_stats import BaseStats, compute_character_level
 from utils import combat
+from utils import jetons
 from utils.characters import (SLOT_ZONE, item_ref_id, main_occupee_par_deux_mains,
 							  recompute_equipment_bonus, restriction_satisfaite)
 from utils.competences import (competence_utilisable_combat, condition_remplie,
@@ -666,9 +667,13 @@ def _refiger(*acteurs) -> None:
 
 def _poser_positions(actor: dict, adversaire: dict, distance: int) -> None:
 	"""Positions 1D posées sur les snapshots pour que les helpers de furtivité du moteur
-	(_detection_threshold via _cheby) mesurent la vraie distance du duel."""
+	(_detection_threshold via _cheby) mesurent la vraie distance du duel.
+
+	⚠️ `_cheby` mesure l'écart entre EMPRISES (utils/jetons.py) : l'adversaire est posé à
+	droite du BORD de l'acteur, sans quoi un grand jeton raccourcirait la distance saisie."""
 	actor["pos"] = {"x": 0, "y": 0}
-	adversaire["pos"] = {"x": max(0, int(distance)), "y": 0}
+	_, _, largeur, _ = jetons.emprise(actor)
+	adversaire["pos"] = {"x": largeur - 1 + max(0, int(distance)), "y": 0}
 
 
 def _executer_attaque(actor: dict, cible: dict, option: dict, etat: dict) -> None:

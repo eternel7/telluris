@@ -308,6 +308,25 @@
 			<textarea id="esp-desc" rows="2" placeholder="Description courte..."></textarea>
 			<label>Tags (séparés par des virgules)</label>
 			<input type="text" id="esp-tags" placeholder="hostile, forest, humanoid">
+			<!-- Jeton de combat (utils/jetons.py) : largeur × profondeur (dans le sens de la marche).
+			     ⚠️ Champ relu par buildDocFromForm : sans ces deux sélecteurs, sauver l'espèce
+			     effacerait le `jeton` importé (PUT complet). -->
+			<label>Jeton de combat (largeur × profondeur · forme)</label>
+			<div style="display:flex;gap:6px;">
+				<select id="esp-jeton-taille" style="flex:1;">
+					<option value="">1x1 (défaut)</option>
+					<option value="2x1">2x1</option>
+					<option value="1x2">1x2</option>
+					<option value="2x2">2x2</option>
+					<option value="3x2">3x2</option>
+				</select>
+				<select id="esp-jeton-forme" style="flex:1;">
+					<option value="">rond (défaut)</option>
+					<option value="ellipse">ellipse</option>
+					<option value="rectangle">rectangle</option>
+					<option value="triangle">triangle</option>
+				</select>
+			</div>
 			<div style="display:flex;gap:6px;margin-top:4px;">
 				<button class="btn success" id="btn-new-esp" style="margin:0;flex:1;">+ Nouveau</button>
 				<button class="btn" id="btn-save-esp" style="margin:0;flex:1;">💾 Sauver</button>
@@ -466,6 +485,8 @@ const espImage       = document.getElementById('esp-image');
 const espImgPreview  = document.getElementById('esp-img-preview');
 const espDesc        = document.getElementById('esp-desc');
 const espTags        = document.getElementById('esp-tags');
+const espJetonTaille = document.getElementById('esp-jeton-taille');
+const espJetonForme  = document.getElementById('esp-jeton-forme');
 const espProprietes  = document.getElementById('esp-proprietes');
 const cardProprietes = document.getElementById('card-proprietes');
 
@@ -606,6 +627,12 @@ function populateForm(doc) {
 		updateImagePreview(doc.image);
 		espDesc.value  = doc.description || '';
 		espTags.value  = (doc.tags || []).join(', ');
+		// Une valeur hors liste retombe sur le défaut du sélecteur (1x1 / rond), comme le moteur.
+		const jeton = doc.jeton || {};
+		espJetonTaille.value = jeton.taille && jeton.taille !== '1x1' ? jeton.taille : '';
+		if (espJetonTaille.selectedIndex < 0) espJetonTaille.value = '';
+		espJetonForme.value = jeton.forme || '';
+		if (espJetonForme.selectedIndex < 0) espJetonForme.value = '';
 		espProprietes.value = JSON.stringify(doc.proprietes || {}, null, 2);
 		STATS.forEach(s => {
 			const stat = (doc.base_attributes || {})[s] || {};
@@ -635,6 +662,7 @@ function clearForm() {
 		espNom.value = ''; espId.value = ''; espImage.value = '';
 		espImgPreview.style.display = 'none';
 		espDesc.value = ''; espTags.value = '';
+		espJetonTaille.value = ''; espJetonForme.value = '';
 		espProprietes.value = '{\n  "loot_table": [],\n  "xp_reward": 0\n}';
 		STATS.forEach(s => {
 			const minEl = document.getElementById(`stat-min-${s}`);
@@ -675,6 +703,7 @@ proNom.addEventListener('input', () => {
 });
 
 [espId, espDesc, espTags, espProprietes].forEach(el => el.addEventListener('input', onEspeceChange));
+[espJetonTaille, espJetonForme].forEach(el => el.addEventListener('change', onEspeceChange));
 espImage.addEventListener('change', () => { updateImagePreview(espImage.value); onEspeceChange(); });
 [proId, proNiveau, proSkills, proDesc].forEach(el => el.addEventListener('input', onProfilChange));
 previewProfilSel.addEventListener('change', updatePreview);
@@ -742,6 +771,11 @@ function buildDocFromForm() {
 			tags: espTags.value.split(',').map(t => t.trim()).filter(Boolean),
 			proprietes,
 		};
+		// Jeton de combat : clé ABSENTE en 1x1 rond (le défaut du moteur, rien à écrire).
+		if (espJetonTaille.value || espJetonForme.value) {
+			doc.jeton = { taille: espJetonTaille.value || '1x1' };
+			if (espJetonForme.value) doc.jeton.forme = espJetonForme.value;
+		}
 		if (currentDoc?._rev) doc._rev = currentDoc._rev;
 		return doc;
 	} else {

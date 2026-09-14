@@ -43,6 +43,8 @@ Aucune dépendance (ni `package.json`, ni second écosystème), code 1 en échec
 | `test_deplacement_client` | `scripts/deplacement.js` | les **seules** règles de marche du jeu — aucune n'existe côté serveur |
 | `test_voies_client` | `scripts/voies.js` | régions, goulots (coin, eau, brèche de 2), Tarjan itératif, chemins, coupe |
 | `test_zones_effet_client` | `scripts/zones_effet.js` + `apercuZone` du combat | géométrie d'aperçu qui MENT sur ce qui va brûler (mêmes cas que `tests/test_zones_effet.py`, valeurs comprises) ; survol laissé armé sur un jeton réutilisé |
+| `test_jetons_client` | `scripts/jetons.js` + occupation/traversée du combat | portée ou cases prises qui divergent du serveur (mêmes cas que `tests/test_jetons.py`) ; grand allié non jouable qui bloque au lieu de se traverser |
+| `test_vue_combat_client` | `syncViewSize` (`combat_telluris.html`), contre un modèle de mise en page | `--step`/`--view-width` qui varient d'un tick à l'autre sans action utilisateur (rétroaction barre de défilement ↔ largeur mesurée) ; écriture ou coupure d'animation sur une notification sans effet |
 | `test_resize_client` | redimensionnement (`admin_map_editor.html`) | `nav`/zones/portes rééchantillonnés, recalage idempotent |
 | `test_lieu_form_client` | formulaire de lieu | capacités ; fusion (`progeniture`, `pnj[1..]`, clés inconnues) |
 | `test_connexions_client` | formulaire de connexion | `link:*` écrasé ; clés du doc/nœud perdues ; case posable |

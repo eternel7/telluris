@@ -1,0 +1,3571 @@
+[
+  {
+    "_id": "espece:aigle_geant",
+    "_rev": "4-645da5568f57aa1701d370dab558f097",
+    "type": "espece",
+    "nom": "Aigle Geant",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "aigle_geant_transparent.png",
+    "description": "Rapace d'envergure colossale, capable d'emporter un homme dans ses serres et de planer des heures durant.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "vol",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:araignee_geante",
+    "_rev": "2-b2b4d683f93dc6c694f8ab4c4de685b5",
+    "type": "espece",
+    "nom": "Araignee Geante",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "araignee_geante_transparent.png",
+    "description": "Arachnide monstrueux tissant des toiles capables de piéger un cheval, venin paralysant puissant.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "monstre",
+      "venin",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:archange_de_l_ordre",
+    "_rev": "3-00a98a6ef4e493474e446729432eb694",
+    "type": "espece",
+    "nom": "Archange de l Ordre",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "archange_de_l_ordre_transparent.png",
+    "description": "Haut commandant des armées célestes, garant de l'équilibre cosmique et de la discipline divine.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 60,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 90
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 50,
+        "max": 75
+      },
+      "Cha": {
+        "min": 50,
+        "max": 80
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:avatar",
+    "_rev": "2-c839c4dbb87c8c3a0fde2b7480e80af5",
+    "type": "espece",
+    "nom": "Avatar",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "avatar_transparent.png",
+    "description": "Manifestation incarnée d'une puissance divine sur le plan mortel, son pouvoir dépasse toute mesure conventionnelle.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 70,
+        "max": 105
+      },
+      "R": {
+        "min": 70,
+        "max": 105
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 90,
+        "max": 130
+      },
+      "Int": {
+        "min": 60,
+        "max": 90
+      },
+      "Cha": {
+        "min": 55,
+        "max": 85
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "boss",
+      "legendaire",
+      "divin",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:basilic",
+    "_rev": "1-eab87c9b95738a37d50cb3b2889c1181",
+    "type": "espece",
+    "nom": "Basilic",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "basilic_transparent.png",
+    "description": "Le basilic est un reptile à six pattes, il ressemble à un gros lézard. Il pétrifie ses attaquants et possède une résistance naturelle à la magie.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 60
+      },
+      "R": {
+        "min": 40,
+        "max": 80
+      },
+      "Ag": {
+        "min": 0,
+        "max": 0
+      },
+      "Vol": {
+        "min": 50,
+        "max": 100
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "petrification"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:bete_de_l_apocalypse",
+    "_rev": "2-320bbcd7633cd80d8665fea66261a000",
+    "type": "espece",
+    "nom": "Bete de l Apocalypse",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_de_l_apocalypse_transparent.png",
+    "description": "Entité cataclysmique annonçant la fin des temps, sa puissance dépasse l'entendement des mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 8,
+        "max": 10
+      },
+      "F": {
+        "min": 110,
+        "max": 160
+      },
+      "R": {
+        "min": 105,
+        "max": 155
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 110,
+        "max": 150
+      },
+      "Int": {
+        "min": 50,
+        "max": 80
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 70,
+        "max": 105
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "boss",
+      "cataclysme",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:bete_du_gevaudan",
+    "_rev": "2-d957fa58726b1a1fd901f515e242e5d6",
+    "type": "espece",
+    "nom": "Bête du Gévaudan",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "bete_du_gevaudan_transparent.png",
+    "description": "Canidé monstrueux du folklore français, semblable à un loup démesuré à la fourrure brun roux striée d'une bande noire sur le dos. D'une rapidité et d'une ruse insaisissables, elle échappe à toutes les chasses organisées contre elle.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "rapide",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:bunyip",
+    "_rev": "1-4cb273cb04e3511c57ec15065000f7f7",
+    "type": "espece",
+    "nom": "Bunyip",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "bunyip_transparent.png",
+    "description": "Créature amphibie des marais et billabongs australiens, mi-chien mi-cheval, à la fourrure sombre et aux dents de morse. Son cri perçant peut paralyser ou hypnotiser ses proies avant qu'il ne les entraîne sous l'eau.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "marais"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:centaure",
+    "_rev": "2-7e0b9a6e52c4c35c34fefe546ef521df",
+    "type": "espece",
+    "nom": "Centaure",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "centaure_transparent.png",
+    "description": "Créature mi-homme mi-cheval, guerrier et chasseur d'une endurance et d'une force remarquables.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 60
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "humanoide",
+      "hybride",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:cerbere",
+    "_rev": "1-957b931d340878f161e92078c3b9f6e9",
+    "type": "espece",
+    "nom": "Cerbere",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "cerbere_transparent.png",
+    "description": "Chien tricéphale gardien des enfers, chaque tête mordant avec une rage indépendante.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "infernal",
+      "gardien"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:cerf",
+    "_rev": "1-4a117f47d235837e95046e22cb807ca0",
+    "type": "espece",
+    "nom": "Cerf",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cerf_transparent.png",
+    "description": "Un cerf est un grand mammifère herbivore des forêts et des plaines. Le mâle porte des bois ramifiés qu'il renouvelle chaque année et se nourrit principalement d'herbes, de feuilles, de jeunes pousses et d'écorces.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "proie"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:chauve_souris_geante",
+    "_rev": "3-8d353f75b1f15fcfc39918f44d233cf0",
+    "type": "espece",
+    "nom": "Chauve Souris Geante",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "chauve_souris_geante_transparent.png",
+    "description": "Chiroptère monstrueux assoiffé de sang, ses cris ultrasoniques désorientent ses proies.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 25,
+        "max": 40
+      },
+      "R": {
+        "min": 20,
+        "max": 35
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "monstre",
+      "vol",
+      "nocturne",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:cheval",
+    "_rev": "6-b3cd3470692e1dcd455339c58be27073",
+    "type": "espece",
+    "nom": "Cheval",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cheval_transparent.png",
+    "description": "Monture commune et polyvalente, alliant vitesse et fiabilité sur tous les terrains.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 8
+      },
+      "F": {
+        "min": 20,
+        "max": 40
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 25,
+        "max": 50
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.3,
+      "prix_cuivre": 2500
+    }
+  },
+  {
+    "_id": "espece:cheval_de_trait",
+    "_rev": "5-98cf5000331cc8870c7f5b941bc5664f",
+    "type": "espece",
+    "nom": "Cheval de Trait",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cheval_de_trait_transparent.png",
+    "description": "Cheval massif élevé pour la force de traction, lent mais d'une puissance considérable.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "bete_de_somme",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.5,
+      "prix_cuivre": 3000
+    }
+  },
+  {
+    "_id": "espece:cheval_normand",
+    "_rev": "5-342a1acfbd2d2db612bc4839aea8d7cd",
+    "type": "espece",
+    "nom": "Cheval Normand",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "cheval_normand_transparent.png",
+    "description": "Race de guerre réputée pour sa robustesse, capable de porter un cavalier en armure complète.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.3,
+      "prix_cuivre": 4500
+    }
+  },
+  {
+    "_id": "espece:chimere",
+    "_rev": "2-060114f61019510454a724a373fe8b71",
+    "type": "espece",
+    "nom": "Chimere",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "chimere_transparent.png",
+    "description": "Hybride monstrueux mêlant lion, chèvre et serpent, crachant le feu par sa tête caprine.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "souffle",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:coursier_elfique",
+    "_rev": "5-64984ab225cda083d206c32081c87875",
+    "type": "espece",
+    "nom": "Coursier Elfique",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "coursier_elfique_transparent.png",
+    "description": "Monture d'une grâce surnaturelle, façonnée par les elfes pour épouser silence et célérité.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 45,
+        "max": 75
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 5,
+        "max": 15
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "magique",
+      "elfique",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.2,
+      "prix_cuivre": 9000
+    }
+  },
+  {
+    "_id": "espece:coursier_persan",
+    "_rev": "5-f40b29871f60881a50b2362fb03e0ae8",
+    "type": "espece",
+    "nom": "Coursier Persan",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "coursier_persan_transparent.png",
+    "description": "Cheval racé du désert, taillé pour la vitesse et l'endurance sur de longues distances.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "rapide",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.2,
+      "prix_cuivre": 5000
+    }
+  },
+  {
+    "_id": "espece:crocodile",
+    "_rev": "2-6c12493b48879a2945f7421ee205fa12",
+    "type": "espece",
+    "nom": "Crocodile",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "crocodile_transparent.png",
+    "description": "Reptile aquatique embusqué, mâchoires puissantes et patience redoutable.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "aquatique",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:cyclope",
+    "_rev": "2-8f09b267e777bc6f272d83fb1d0002c6",
+    "type": "espece",
+    "nom": "Cyclope",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "cyclope_transparent.png",
+    "description": "Géant à l'œil unique, doté d'une force colossale et d'une vision perçante malgré son handicap apparent.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 50,
+        "max": 80
+      },
+      "Ag": {
+        "min": 5,
+        "max": 15
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "humanoide",
+      "geant",
+      "monstre"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:demon_majeur_de_la_destruction",
+    "_rev": "3-1cc5fabe5b492c834e75f2a1ff810cb6",
+    "type": "espece",
+    "nom": "Demon Majeur de la Destruction",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "demon_majeur_de_la_destruction_transparent.png",
+    "description": "Seigneur infernal incarnant la dévastation pure, son passage ne laisse derrière lui que ruines et cendres.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 75,
+        "max": 115
+      },
+      "R": {
+        "min": 70,
+        "max": 110
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 60,
+        "max": 90
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "boss",
+      "legendaire",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:dragnard",
+    "_rev": "5-5c44b689356d54da62c71f1ccbc360bd",
+    "type": "espece",
+    "nom": "Dragnard",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "dragnard_transparent.png",
+    "description": "Les dragnards sont des chevaux fantastiques à six pattes qui s’ébattent dans les montagnes et dans les plaines glaciales.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 25,
+        "max": 45
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "monture",
+      "draconique"
+    ],
+    "proprietes": {
+      "charge_mult": 1.3,
+      "prix_cuivre": 12000
+    }
+  },
+  {
+    "_id": "espece:dragon",
+    "_rev": "3-e308d87329f9eba6b9b18b9a4d07a057",
+    "type": "espece",
+    "nom": "Dragon",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_transparent.png",
+    "description": "Reptile ailé légendaire, souffle destructeur et intelligence redoutable, dominant son territoire sans partage.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 65,
+        "max": 100
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 65,
+        "max": 95
+      },
+      "Int": {
+        "min": 45,
+        "max": 70
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 40,
+        "max": 65
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:dragon_empereur",
+    "_rev": "3-f864ff37028fdc5399a3378c6e37a6e8",
+    "type": "espece",
+    "nom": "Dragon Empereur",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_empereur_transparent.png",
+    "description": "Souverain absolu parmi les dragons, dont la simple présence plie les volontés les plus fortes.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 95,
+        "max": 140
+      },
+      "R": {
+        "min": 95,
+        "max": 140
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 95,
+        "max": 135
+      },
+      "Int": {
+        "min": 65,
+        "max": 95
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 60,
+        "max": 95
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:dragon_zombie",
+    "_rev": "3-e7d99498c5af69192086eba118c1a934",
+    "type": "espece",
+    "nom": "Dragon Zombie",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "dragon_zombie_transparent.png",
+    "description": "Carcasse draconique réanimée par nécromancie, son souffle putride remplace les flammes d'antan.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 60,
+        "max": 90
+      },
+      "R": {
+        "min": 60,
+        "max": 95
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 70
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "draconique",
+      "vol",
+      "boss",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:fauves",
+    "_rev": "2-a25672d7855b7f706aa412b8ad1b97c7",
+    "type": "espece",
+    "nom": "Fauves",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "fauves_transparent.png",
+    "description": "Grands félins prédateurs — lions, tigres, panthères — vitesse et puissance combinées.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 30,
+        "max": 55
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:geant_ou_titan",
+    "_rev": "2-f52bb817c51c3d7ef121f5b01a0d69f7",
+    "type": "espece",
+    "nom": "Geant ou Titan",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "geant_ou_titan_transparent.png",
+    "description": "Colosse aux proportions démesurées, capable d'arracher des arbres et de fracasser des murailles.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 10
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 60,
+        "max": 95
+      },
+      "Ag": {
+        "min": 5,
+        "max": 20
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 55
+      }
+    },
+    "tags": [
+      "humanoide",
+      "geant"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:golem_de_fer",
+    "_rev": "2-c9375a1b6e2097a1cc2381196c97c293",
+    "type": "espece",
+    "nom": "Golem de Fer",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "golem_de_fer_transparent.png",
+    "description": "Construct métallique impénétrable, son poids et sa carapace le rendent presque inarrêtable.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 0,
+        "max": 10
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 40
+      }
+    },
+    "tags": [
+      "construct",
+      "lent",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:golem_de_pierre",
+    "_rev": "2-e7ab72b852e9fc7c33fbed518ff781c5",
+    "type": "espece",
+    "nom": "Golem de Pierre",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "golem_de_pierre_transparent.png",
+    "description": "Construct massif sculpté dans la roche, lent mais d'une résistance quasi indestructible.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 70,
+        "max": 110
+      },
+      "Ag": {
+        "min": 0,
+        "max": 10
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 35
+      }
+    },
+    "tags": [
+      "construct",
+      "lent",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:grand_dragon",
+    "_rev": "3-b6d1e8fcf7d763ab5c8aadb244dab9f0",
+    "type": "espece",
+    "nom": "Grand Dragon",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "grand_dragon_transparent.png",
+    "description": "Dragon parvenu à un âge vénérable, dont la puissance et la sagesse rivalisent avec celles des plus grandes créatures du monde.",
+    "base_attributes": {
+      "V": {
+        "min": 17,
+        "max": 19
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 80,
+        "max": 120
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 80,
+        "max": 115
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 50,
+        "max": 80
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "souffle",
+      "legendaire",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:grand_faucon",
+    "_rev": "6-bebf2438e3f9a295dc088eda33a6f8d4",
+    "type": "espece",
+    "nom": "Grand Faucon",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "grand_faucon_transparent.png",
+    "description": "Rapace de grande envergure dressé pour porter un cavalier léger lors de raids aériens rapides.",
+    "base_attributes": {
+      "V": {
+        "min": 14,
+        "max": 16
+      },
+      "F": {
+        "min": 15,
+        "max": 30
+      },
+      "R": {
+        "min": 15,
+        "max": 30
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "vol",
+      "rapide",
+      "predateur"
+    ],
+    "proprietes": {
+      "charge_mult": 1,
+      "prix_cuivre": 8000
+    }
+  },
+  {
+    "_id": "espece:grand_phenix",
+    "_rev": "2-418d583663bd067c8b27778cb8326c05",
+    "type": "espece",
+    "nom": "Grand Phenix",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "grand_phenix_transparent.png",
+    "description": "Variante ascendante du phénix, dont le souffle ardent embrase des champs entiers et la renaissance s'accompagne d'une vague de pure lumière.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 75,
+        "max": 110
+      },
+      "Int": {
+        "min": 40,
+        "max": 65
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "feu",
+      "renaissance",
+      "vol",
+      "magique",
+      "legendaire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:grand_sanglier",
+    "_rev": "6-951421ec3ff91b7486f56ce0d84922d1",
+    "type": "espece",
+    "nom": "Grand Sanglier",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "grand_sanglier_transparent.png",
+    "description": "Sanglier de guerre aux défenses acérées, monture brutale prisée pour les charges de front.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 65
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 25,
+        "max": 40
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "monture",
+      "monture_de_guerre",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.35,
+      "prix_cuivre": 4000
+    }
+  },
+  {
+    "_id": "espece:griffon",
+    "_rev": "3-4876acdd23a18c67a8b40e287aa97acb",
+    "type": "espece",
+    "nom": "Griffon",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "triangle"
+    },
+    "image": "griffon_transparent.png",
+    "description": "Créature mêlant lion et aigle, chasseur aérien féroce gardant son territoire avec ardeur.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 60
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 20,
+        "max": 40
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "vol",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:hippogriffe",
+    "_rev": "2-1c4713095a6b7f97688a36776f72b368",
+    "type": "espece",
+    "nom": "Hippogriffe",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "triangle"
+    },
+    "image": "hippogriffe_transparent.png",
+    "description": "Hybride de griffon et de cheval, monture noble et farouche qui ne se laisse approcher que par les braves.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 10,
+        "max": 25
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "vol"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:homme_arbre",
+    "_rev": "1-7b262a2c57f5d95948d3b98fc2777cf4",
+    "type": "espece",
+    "nom": "Homme Arbre",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "homme_arbre_transparent.png",
+    "description": "Esprit végétal ancestral animé, lent mais d'une force et d'une endurance presque géologiques.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 5
+      },
+      "F": {
+        "min": 40,
+        "max": 70
+      },
+      "R": {
+        "min": 60,
+        "max": 95
+      },
+      "Ag": {
+        "min": 0,
+        "max": 5
+      },
+      "Vol": {
+        "min": 35,
+        "max": 60
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "monstre",
+      "foret",
+      "lent"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:hydre",
+    "_rev": "1-1fa73e92b3fe49f9034a689379c146b0",
+    "type": "espece",
+    "nom": "Hydre",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "hydre_transparent.png",
+    "description": "Reptile à multiples têtes se régénérant lorsqu'elles sont tranchées, terreur des marécages.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 90
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "regeneration",
+      "legendaire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:kraken",
+    "_rev": "1-8dc93a83cef0bacce29663b76a93c891",
+    "type": "espece",
+    "nom": "Kraken",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "kraken_transparent.png",
+    "description": "Titan des mers aux tentacules monstrueux, capable de briser des navires entiers.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 8
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "legendaire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:leviathan",
+    "_rev": "1-88c19a894f3c83cb58e92b2b81742aba",
+    "type": "espece",
+    "nom": "Leviathan",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "leviathan_transparent.png",
+    "description": "Titan des abysses, créature primordiale dont le réveil peut engloutir des flottes entières.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 100,
+        "max": 150
+      },
+      "R": {
+        "min": 95,
+        "max": 145
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 60,
+        "max": 95
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "legendaire",
+      "boss"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:lhamia",
+    "_rev": "1-f90ba86f25f9d7f196180f3bbd6cfd13",
+    "type": "espece",
+    "nom": "Lhamia",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "lhamia_transparent.png",
+    "description": "Créature mort-vivante à apparence séduisante et corps de serpent, attirant ses victimes avant de les dévorer.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 30,
+        "max": 50
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "hybride"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:licorne",
+    "_rev": "5-ad4e0c9f63f06995e51315a0dd64aebd",
+    "type": "espece",
+    "nom": "Licorne",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "licorne_transparent.png",
+    "description": "Créature pure et majestueuse, son contact apaise les blessures et repousse la corruption.",
+    "base_attributes": {
+      "V": {
+        "min": 6,
+        "max": 8
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 30,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "magique",
+      "pure",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.25,
+      "prix_cuivre": 20000
+    }
+  },
+  {
+    "_id": "espece:loup_geant",
+    "_rev": "5-51a3f722129559fc6e5e137efca9170e",
+    "type": "espece",
+    "nom": "Loup Géant",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "loup_geant_transparent.png",
+    "description": "Loup de taille colossale, chasseur en meute redoutable autant que monture pour les guerriers du froid.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "monture",
+      "monstre",
+      "predateur"
+    ],
+    "proprietes": {
+      "charge_mult": 1.25,
+      "prix_cuivre": 6000
+    }
+  },
+  {
+    "_id": "espece:malandhir",
+    "_rev": "4-0c2da37e023f9973774c1705de77e57d",
+    "type": "espece",
+    "nom": "Malandhir",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "malandhir_transparent.png",
+    "description": "Monstre-monture des terres sombres, féroce et difficile à dompter, réservé aux cavaliers expérimentés.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 40,
+        "max": 60
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 25
+      }
+    },
+    "tags": [
+      "monture",
+      "sombre"
+    ],
+    "proprietes": {
+      "charge_mult": 1.3,
+      "prix_cuivre": 10000
+    }
+  },
+  {
+    "_id": "espece:mammouth",
+    "_rev": "2-1a2d93da5e541146b2f4ade085fa251e",
+    "type": "espece",
+    "nom": "Mammouth",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "mammouth_transparent.png",
+    "description": "Pachyderme préhistorique aux défenses imposantes, force colossale et résistance au froid extrême.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 60,
+        "max": 95
+      },
+      "R": {
+        "min": 55,
+        "max": 85
+      },
+      "Ag": {
+        "min": 5,
+        "max": 15
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 15,
+        "max": 30
+      }
+    },
+    "tags": [
+      "animal",
+      "grande_taille",
+      "proie"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:manticore",
+    "_rev": "2-d3962849a23a77c28c6cd4344ee9c102",
+    "type": "espece",
+    "nom": "Manticore",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "manticore_transparent.png",
+    "description": "Bête à corps de lion, ailes et queue de scorpion empoisonnée, redoutable prédateur des contrées sauvages.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 60
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 60
+      },
+      "Int": {
+        "min": 15,
+        "max": 25
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "venin",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:monture_angelique",
+    "_rev": "5-a2c3c8af26c67e0f4bb77cc48b9e215e",
+    "type": "espece",
+    "nom": "Monture Angelique",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "monture_angelique_transparent.png",
+    "description": "Créature céleste portant les messagers divins, sa crinière rayonne d'une lumière apaisante.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 25,
+        "max": 40
+      },
+      "Cha": {
+        "min": 30,
+        "max": 50
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "monture",
+      "vol"
+    ],
+    "proprietes": {
+      "charge_mult": 1.25,
+      "prix_cuivre": 25000
+    }
+  },
+  {
+    "_id": "espece:monture_demoniaque",
+    "_rev": "4-64734464c9c7f4dd35785eff25812f44",
+    "type": "espece",
+    "nom": "Monture Demoniaque",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "monture_demoniaque_transparent.png",
+    "description": "Créature infernale dressée pour porter un cavalier, ses sabots brûlants laissent des traces de cendres.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "monture"
+    ],
+    "proprietes": {
+      "charge_mult": 1.3,
+      "prix_cuivre": 20000
+    }
+  },
+  {
+    "_id": "espece:monture_squelette",
+    "_rev": "4-ea42c426546bbd64974e7dc38526764d",
+    "type": "espece",
+    "nom": "Monture Squelette",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "monture_squelette_transparent.png",
+    "description": "Cheval ou bête réduite à l'état d'ossature, monture obéissante des morts-vivants n'ayant plus à se reposer.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 40
+      },
+      "Ag": {
+        "min": 20,
+        "max": 35
+      },
+      "Vol": {
+        "min": 0,
+        "max": 0
+      },
+      "Int": {
+        "min": 0,
+        "max": 5
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "monture"
+    ],
+    "proprietes": {
+      "charge_mult": 1.3,
+      "prix_cuivre": 7000
+    }
+  },
+  {
+    "_id": "espece:mulet",
+    "_rev": "5-3c9d3243a8bd29c111abdb79938452a8",
+    "type": "espece",
+    "nom": "Mulet",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "mulet_transparent.png",
+    "description": "Animal de bât increvable, têtu mais d'une endurance remarquable sur les terrains difficiles.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 7
+      },
+      "F": {
+        "min": 20,
+        "max": 35
+      },
+      "R": {
+        "min": 25,
+        "max": 45
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 15,
+        "max": 30
+      },
+      "Int": {
+        "min": 5,
+        "max": 10
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "bete_de_somme",
+      "proie"
+    ],
+    "proprietes": {
+      "charge_mult": 1.45,
+      "prix_cuivre": 1200
+    }
+  },
+  {
+    "_id": "espece:ours",
+    "_rev": "2-3b502afd93ec9d8d8c0cfc6c838ae6c7",
+    "type": "espece",
+    "nom": "Ours",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "ours_transparent.png",
+    "description": "Grand prédateur omnivore, puissant et imprévisible, capable de charges dévastatrices.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 35,
+        "max": 60
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "predateur"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:ours_polaire",
+    "_rev": "1-baccb7b77ddba7badeca8bc0ca57b57d",
+    "type": "espece",
+    "nom": "Ours Polaire",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "ellipse"
+    },
+    "image": "ours_polaire_transparent.png",
+    "description": "Géant des glaces, parfaitement adapté au froid mordant, redoutable chasseur solitaire.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 10,
+        "max": 20
+      }
+    },
+    "tags": [
+      "animal",
+      "froid"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:pegase",
+    "_rev": "6-e00ba9200783212ef5b754adf579c5ff",
+    "type": "espece",
+    "nom": "Pégase",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "pegase_transparent.png",
+    "description": "Cheval ailé capable de fendre les cieux, symbole de noblesse et de liberté.",
+    "base_attributes": {
+      "V": {
+        "min": 16,
+        "max": 18
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 45,
+        "max": 75
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 15,
+        "max": 30
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monture",
+      "vol",
+      "magique"
+    ],
+    "proprietes": {
+      "charge_mult": 1.2,
+      "prix_cuivre": 15000
+    }
+  },
+  {
+    "_id": "espece:petit_dragon",
+    "_rev": "2-11911cc178aa1f15e9540496c5607e4a",
+    "type": "espece",
+    "nom": "Petit Dragon",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "triangle"
+    },
+    "image": "petit_dragon_transparent.png",
+    "description": "Jeune dragon encore en pleine croissance, déjà redoutable malgré une taille modeste.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 45,
+        "max": 70
+      },
+      "R": {
+        "min": 45,
+        "max": 70
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:phenix",
+    "_rev": "2-27dc19a60a163b4ddbb389ccc0dbdaf4",
+    "type": "espece",
+    "nom": "Phenix",
+    "jeton": {
+      "taille": "2x1",
+      "forme": "triangle"
+    },
+    "image": "phenix_transparent.png",
+    "description": "Oiseau de feu renaissant de ses cendres, symbole d'immortalité et de renouveau.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 25,
+        "max": 45
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 35,
+        "max": 60
+      },
+      "Vol": {
+        "min": 60,
+        "max": 95
+      },
+      "Int": {
+        "min": 30,
+        "max": 50
+      },
+      "Cha": {
+        "min": 30,
+        "max": 55
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "feu",
+      "renaissance",
+      "vol",
+      "magique"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:poissons_mammiferes_marins",
+    "_rev": "1-e90de961b6e3a91c5a062a2e8ce2798d",
+    "type": "espece",
+    "nom": "Poissons Mammiferes Marins",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "poissons_mammiferes_marins_transparent.png",
+    "description": "Faune aquatique variée, des bancs de poissons aux grands mammifères marins.",
+    "base_attributes": {
+      "V": {
+        "min": 3,
+        "max": 6
+      },
+      "F": {
+        "min": 10,
+        "max": 30
+      },
+      "R": {
+        "min": 10,
+        "max": 30
+      },
+      "Ag": {
+        "min": 20,
+        "max": 40
+      },
+      "Vol": {
+        "min": 15,
+        "max": 25
+      },
+      "Int": {
+        "min": 5,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "animal",
+      "aquatique"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:polar_kraken",
+    "_rev": "2-f80d205d6262a108ab82e5bdb3852426",
+    "type": "espece",
+    "nom": "Polar Kraken",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "polar_kraken_transparent.png",
+    "description": "Variante du Kraken adaptée aux mers glacées, ses tentacules gèlent au contact tout ce qu'elles enserrent.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 8
+      },
+      "F": {
+        "min": 70,
+        "max": 110
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 15,
+        "max": 30
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 45
+      }
+    },
+    "tags": [
+      "monstre",
+      "aquatique",
+      "froid",
+      "legendaire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:prince_demon",
+    "_rev": "2-4a89446894cc10509968e92474a0d557",
+    "type": "espece",
+    "nom": "Prince Demon",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "prince_demon_transparent.png",
+    "description": "Souverain des enfers, son autorité s'étend sur des légions entières et sa seule volonté peut déchaîner des guerres.",
+    "base_attributes": {
+      "V": {
+        "min": 7,
+        "max": 9
+      },
+      "F": {
+        "min": 85,
+        "max": 130
+      },
+      "R": {
+        "min": 85,
+        "max": 130
+      },
+      "Ag": {
+        "min": 40,
+        "max": 65
+      },
+      "Vol": {
+        "min": 85,
+        "max": 125
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 45,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "demon",
+      "infernal",
+      "boss",
+      "legendaire",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:reine_lhamia",
+    "_rev": "2-6b9014a61d05632039cefa88498330a7",
+    "type": "espece",
+    "nom": "Reine Lhamia",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "reine_lhamia_transparent.png",
+    "description": "Lhamia ayant atteint un rang souverain, son venin et son charme sont également mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 40,
+        "max": 65
+      },
+      "R": {
+        "min": 40,
+        "max": 65
+      },
+      "Ag": {
+        "min": 45,
+        "max": 70
+      },
+      "Vol": {
+        "min": 55,
+        "max": 85
+      },
+      "Int": {
+        "min": 35,
+        "max": 55
+      },
+      "Cha": {
+        "min": 50,
+        "max": 75
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "undead",
+      "non_mort",
+      "hybride",
+      "boss",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:seraphin",
+    "_rev": "3-dc2eb2fab59ea3f465c74a38ba056d20",
+    "type": "espece",
+    "nom": "Seraphin",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "seraphin_transparent.png",
+    "description": "Plus haute hiérarchie angélique, entité de lumière pure dont la contemplation seule éblouit les mortels.",
+    "base_attributes": {
+      "V": {
+        "min": 18,
+        "max": 20
+      },
+      "F": {
+        "min": 80,
+        "max": 120
+      },
+      "R": {
+        "min": 85,
+        "max": 125
+      },
+      "Ag": {
+        "min": 50,
+        "max": 75
+      },
+      "Vol": {
+        "min": 105,
+        "max": 145
+      },
+      "Int": {
+        "min": 70,
+        "max": 100
+      },
+      "Cha": {
+        "min": 65,
+        "max": 95
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "ange",
+      "celeste",
+      "vol",
+      "boss",
+      "legendaire",
+      "divin",
+      "humanoide"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:serpent_geant",
+    "_rev": "1-fa4d65f007d74f5e42e324daeaad7535",
+    "type": "espece",
+    "nom": "Serpent Geant",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "serpent_geant_transparent.png",
+    "description": "Reptile titanesque capable d'engloutir une proie entière, se dissimulant dans la végétation dense.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 45,
+        "max": 75
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 50
+      }
+    },
+    "tags": [
+      "monstre",
+      "reptile"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:sphinx",
+    "_rev": "1-887b392460aea9646e7c411644bc7171",
+    "type": "espece",
+    "nom": "Sphinx",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "sphinx_transparent.png",
+    "description": "Créature à corps de lion et tête humaine, gardienne d'énigmes et de savoirs anciens.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 35,
+        "max": 55
+      },
+      "Ag": {
+        "min": 25,
+        "max": 45
+      },
+      "Vol": {
+        "min": 50,
+        "max": 80
+      },
+      "Int": {
+        "min": 55,
+        "max": 85
+      },
+      "Cha": {
+        "min": 35,
+        "max": 60
+      },
+      "Ch": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    "tags": [
+      "monstre",
+      "hybride",
+      "gardien",
+      "magique"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:tarasque",
+    "_rev": "1-64cf20d140417cb4e65b91a76f3fd1f0",
+    "type": "espece",
+    "nom": "Tarasque",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "tarasque_transparent.png",
+    "description": "Bête légendaire de Provence à tête de lion aux oreilles de cheval, corps de bœuf porté par six courtes pattes d'ours, protégé par une carapace de tortue hérissée d'épines, et une queue écailleuse terminée par un dard. Sa carapace la rend presque invulnérable et elle peut cracher le feu.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 65,
+        "max": 100
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 35,
+        "max": 55
+      },
+      "Int": {
+        "min": 10,
+        "max": 20
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 35,
+        "max": 60
+      }
+    },
+    "tags": [
+      "monstre",
+      "legendaire",
+      "souffle",
+      "gardien"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:taureau",
+    "_rev": "1-03d525791bf939465e712e8e69f27fcc",
+    "type": "espece",
+    "nom": "Taureau",
+    "jeton": {
+      "taille": "1x2",
+      "forme": "ellipse"
+    },
+    "image": "taureau_transparent.png",
+    "description": "Bovidé puissant et entêté, charge redoutable et résistance physique solide.",
+    "base_attributes": {
+      "V": {
+        "min": 4,
+        "max": 6
+      },
+      "F": {
+        "min": 35,
+        "max": 55
+      },
+      "R": {
+        "min": 30,
+        "max": 50
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 20,
+        "max": 35
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 5,
+        "max": 15
+      }
+    },
+    "tags": [
+      "animal"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:troll",
+    "_rev": "1-9df7cea7f421df7392f791fcf5805246",
+    "type": "espece",
+    "nom": "Troll",
+    "jeton": {
+      "taille": "2x2",
+      "forme": "rectangle"
+    },
+    "image": "troll_transparent.png",
+    "description": "Créature massive à la régénération stupéfiante, vulnérable au feu mais quasiment increvable autrement.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 55,
+        "max": 85
+      },
+      "R": {
+        "min": 55,
+        "max": 90
+      },
+      "Ag": {
+        "min": 10,
+        "max": 25
+      },
+      "Vol": {
+        "min": 30,
+        "max": 50
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 25,
+        "max": 45
+      }
+    },
+    "tags": [
+      "humanoide",
+      "regeneration"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:vers_des_sables",
+    "_rev": "1-e28c39916b1130668080130b1fb24e76",
+    "type": "espece",
+    "nom": "Vers des Sables",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "ellipse"
+    },
+    "image": "vers_des_sables_transparent.png",
+    "description": "Créature titanesque vivant sous les déserts, surgissant pour engloutir tout ce qui traverse son territoire.",
+    "base_attributes": {
+      "V": {
+        "min": 5,
+        "max": 7
+      },
+      "F": {
+        "min": 75,
+        "max": 115
+      },
+      "R": {
+        "min": 70,
+        "max": 110
+      },
+      "Ag": {
+        "min": 10,
+        "max": 20
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 5,
+        "max": 15
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 45,
+        "max": 75
+      }
+    },
+    "tags": [
+      "monstre",
+      "desert",
+      "legendaire"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:vouivre",
+    "_rev": "2-bb1bb4b9747954dddc9c261225b974c5",
+    "type": "espece",
+    "nom": "Vouivre",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "vouivre_transparent.png",
+    "description": "Dragon ailé sans pattes avant, portant souvent une pierre précieuse au front, gardienne de trésors.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 30,
+        "max": 50
+      },
+      "Vol": {
+        "min": 45,
+        "max": 70
+      },
+      "Int": {
+        "min": 20,
+        "max": 35
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "gardien"
+    ],
+    "proprietes": {}
+  },
+  {
+    "_id": "espece:wyvern",
+    "_rev": "2-b229662ccf7e9907678388b4a55468e8",
+    "type": "espece",
+    "nom": "Wyvern",
+    "jeton": {
+      "taille": "3x2",
+      "forme": "triangle"
+    },
+    "image": "wyvern_transparent.png",
+    "description": "Dragon bipède aux ailes immenses et à la queue venimeuse, prédateur agile des cieux.",
+    "base_attributes": {
+      "V": {
+        "min": 15,
+        "max": 17
+      },
+      "F": {
+        "min": 50,
+        "max": 80
+      },
+      "R": {
+        "min": 45,
+        "max": 75
+      },
+      "Ag": {
+        "min": 35,
+        "max": 55
+      },
+      "Vol": {
+        "min": 40,
+        "max": 65
+      },
+      "Int": {
+        "min": 15,
+        "max": 30
+      },
+      "Cha": {
+        "min": 0,
+        "max": 0
+      },
+      "Ch": {
+        "min": 30,
+        "max": 55
+      }
+    },
+    "tags": [
+      "monstre",
+      "draconique",
+      "vol",
+      "venin"
+    ],
+    "proprietes": {}
+  }
+]

@@ -160,6 +160,16 @@ CATALOGUE = [
 			"de la quête de transport.",
 	},
 	{
+		"id": "gen_jetons_especes",
+		"label": "🐉 Gabarits des jetons de combat (espèces)",
+		"argv": _py("gen_jetons_especes.py"),
+		"ecrit": "Écrit jsons/jetons_especes_a_importer.json.",
+		"description": "Pose `jeton: {taille, forme}` sur les espèces qui occupent plus d'une "
+			"case (dragon 3x2, cheval 1x2…). Table exhaustive : échoue si une espèce du dump n'y "
+			"est pas classée. Relit le dump le plus récent et n'injecte que ce champ : "
+			"régénération idempotente.",
+	},
+	{
 		"id": "gen_escorte_marchands",
 		"label": "🧵 Ouvrir l'escorte de progéniture chez les tenanciers",
 		"argv": _py("gen_escorte_marchands.py"),

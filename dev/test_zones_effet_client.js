@@ -31,6 +31,9 @@ const vm = require('vm');
 const SCRIPT = path.join(__dirname, '..', 'templates', 'scripts', 'zones_effet.js');
 assert.ok(fs.existsSync(SCRIPT), 'fichier introuvable : ' + SCRIPT);
 vm.runInThisContext(fs.readFileSync(SCRIPT, 'utf8'), { filename: SCRIPT });
+// `apercuZone` ancre la forme par `caseProche` (emprise des grands jetons) : chargé comme la page.
+const JETONS = path.join(__dirname, '..', 'templates', 'scripts', 'jetons.js');
+vm.runInThisContext(fs.readFileSync(JETONS, 'utf8'), { filename: JETONS });
 
 let passes = 0, echecs = 0;
 function t(nom, fn) {

@@ -6,6 +6,8 @@ description: Movement on the map — the nav bitmask shared by combat and client
 ### Navigation bitmask
 8 directions via le dict `nav` (bit 1=HAUT, 2=HAUT_DROITE, …, 128=HAUT_GAUCHE), `VALID_MOVES`/`MOVE_OFFSETS` dans `utils/lieux.py`. Partagé par le combat (`_find_path` A*, `_reachable_region` flood fill via `nav_allows`) et par `scripts/deplacement.js` côté client. Bitmask bidirectionnel et cas limites couverts par `dev/test_deplacement_client.js` et `tests/test_combat_terrain.py`.
 
+**Grands jetons en combat** (2x2, 3x2… — `telluris-combat` § Jetons de taille variable) : une case couverte par l'emprise d'un monstre bloque le pas du joueur, celle d'un grand allié non jouable se TRAVERSE (`cellOccupied` ↔ `_occupied_set(traversant=…)`) ; un grand monstre marche par `jetons.pas_jeton` (pivot + `nav` de proche en proche), pas par `_find_path`. Rendu `.gabarit` : la forme tourne AVEC la caméra, le portrait est contre-tourné.
+
 
 ### Animation des déplacements — carte d'exploration & jetons de combat
 **Exploration** (`play_town_telluris.html`) : `move()` écrit `--x`/`--y` sur le `:root` ; `img#bg-image` se décale par **`transform: translate3d(calc(…var(--x)…), calc(…var(--y)…), 0)`** avec `top:0; left:0` → la transition et le `will-change` déclarés sont vivants et le glissement est composité (aucun relayout). ⚠️ Décaler par `top`/`left` alors que la transition porte sur `transform` est une **déclaration morte** : rien n'est interpolé. ⚠️ `--x`/`--y` ne sont **pas** des custom properties enregistrées (`@property`), donc non interpolables — mais on ne les anime pas : c'est la valeur **calculée** de `transform` qui l'est. Durée dans `--map-anim` (260 ms) ; `.token` (jeton du joueur) reste fixe au centre ; `img#bg-image-fit` (lieux sans grille) intact.

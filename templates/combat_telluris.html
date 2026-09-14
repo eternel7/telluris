@@ -244,6 +244,73 @@
 .ally-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
 .ally-token .mt-hp-fill { height: 100%; background: #2e86de; }
 
+/* ── Jetons à GABARIT (utils/jetons.py, scripts/jetons.js) ─────────────────────────────
+   Un acteur porteur d'un `jeton` (dragon 3x2, cheval 1x2, ou 1x1 à forme) occupe un
+   RECTANGLE de cases. Sa boîte couvre toute l'emprise et se pose sur son CENTRE
+   (`_placerGabarit`) : même ancre et même `rotate` de caméra que les autres jetons, mais
+   SANS le `rotate(-a)` final — la forme doit coller aux cases et tourner avec le décor.
+   Seul `.jt-debout` (portrait + PV) est contre-tourné pour rester lisible.
+   ⚠️ `bottom` recentre la boîte sur le pivot : son centre doit tomber à `--floor + 0.5`
+   case, comme celui d'un jeton d'une case, sinon `rotate` tournerait autour d'un autre
+   point que la carte. */
+.monster-token.gabarit, .ally-token.gabarit {
+	display: block;
+	width: calc(var(--step) * var(--jw, 1));
+	height: calc(var(--step) * var(--jh, 1));
+	bottom: calc(var(--step) * (var(--floor) + 0.5 - var(--jh, 1) / 2));
+	transition: transform var(--map-anim, 260ms) ease-out, width var(--map-anim, 260ms) ease-out,
+		height var(--map-anim, 260ms) ease-out, bottom var(--map-anim, 260ms) ease-out;
+}
+/* Un grand allié non jouable passe SOUS les autres alliés : le joueur qui le traverse doit
+   rester visible par-dessus. */
+.ally-token.gabarit { z-index: 1; }
+/* La forme : un calque de bordure (`.jt-forme`) et son fond en retrait (`.jt-fond`),
+   découpés ensemble — un `border` CSS serait rogné par le `clip-path` du triangle. Fond
+   translucide : l'aperçu d'une zone d'effet (z-index 0) doit se voir au travers. */
+.gabarit .jt-forme { position: absolute; inset: 3%; background: #aa3333; }
+.gabarit .jt-fond { position: absolute; inset: 3px; background: rgba(74, 26, 26, 0.62); }
+.gabarit .jt-forme.ellipse, .gabarit .jt-forme.ellipse .jt-fond { border-radius: 50%; }
+.gabarit .jt-forme.rectangle, .gabarit .jt-forme.rectangle .jt-fond { border-radius: 22%; }
+/* Triangle : la pointe suit le `cap` (découpes SVG #clip-jeton-*, unités de la boîte). */
+.gabarit .jt-forme.triangle[data-cap="haut"], .gabarit .jt-forme.triangle[data-cap="haut"] .jt-fond { clip-path: url(#clip-jeton-haut); }
+.gabarit .jt-forme.triangle[data-cap="bas"], .gabarit .jt-forme.triangle[data-cap="bas"] .jt-fond { clip-path: url(#clip-jeton-bas); }
+.gabarit .jt-forme.triangle[data-cap="gauche"], .gabarit .jt-forme.triangle[data-cap="gauche"] .jt-fond { clip-path: url(#clip-jeton-gauche); }
+.gabarit .jt-forme.triangle[data-cap="droite"], .gabarit .jt-forme.triangle[data-cap="droite"] .jt-fond { clip-path: url(#clip-jeton-droite); }
+.gabarit .jt-debout {
+	position: absolute; left: 50%; top: 50%;
+	width: calc(var(--step) * var(--jd, 1)); height: calc(var(--step) * var(--jd, 1));
+	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+	transform: translate(-50%, -50%);
+	transition: transform var(--map-anim, 260ms) ease-out;
+}
+/* ⚠️ Propriétés de fond DÉTAILLÉES avec !important, jamais le raccourci `background` : le
+   portrait arrive en `style` inline (image, et cadrage de fiche via applyPortraitTo) — un
+   raccourci effacerait l'image, un réglage sans !important perdrait contre le cadrage. Une
+   espèce se montre ENTIÈRE dans sa forme. */
+.gabarit .jt-portrait {
+	width: 80%; height: 80%;
+	background-size: contain !important;
+	background-position: center center !important;
+	background-repeat: no-repeat !important;
+	display: flex; align-items: center; justify-content: center;
+	font-size: 13px; font-weight: bold; color: #ffaaaa;
+}
+/* Halo de ciblage : `filter` sur la BOÎTE, jamais sur la forme — une ombre posée sous un
+   `clip-path` serait rognée avec elle. */
+.monster-token.gabarit.adjacent { filter: drop-shadow(0 0 6px #ffd700); }
+.monster-token.gabarit.adjacent .jt-forme { background: #ffd700; }
+.monster-token.gabarit.spellcast { filter: drop-shadow(0 0 6px #b26bff); }
+.monster-token.gabarit.spellcast .jt-forme { background: #b26bff; }
+.ally-token.gabarit .jt-forme { background: #2e86de; }
+.ally-token.gabarit .jt-fond { background: rgba(26, 58, 90, 0.62); }
+.ally-token.gabarit.monture .jt-forme { background: #b98c4a; }
+.ally-token.gabarit.monture .jt-fond { background: rgba(58, 47, 26, 0.62); }
+.ally-token.gabarit.protege .jt-forme { background: #f0c453; }
+.ally-token.gabarit.invocation .jt-forme { background: #a06bd6; }
+.ally-token.gabarit.invocation .jt-fond { background: rgba(43, 28, 58, 0.62); }
+.ally-token.gabarit.spellcast { filter: drop-shadow(0 0 6px #4cd97b); }
+.ally-token.gabarit.spellcast .jt-forme { background: #4cd97b; }
+
 /* Sprite d'animation d'impact : posé comme un jeton (même ancre left/bottom, même
    transform par _placerToken) puis retiré à la fin de la boucle d'images. z-index 3 =
    au-dessus des jetons (monstres 1, alliés 2), sous le jeton du joueur et la vignette.
@@ -263,13 +330,14 @@
    changement d'acteur, lui, est bel et bien animé (cf. angleCamera / _placerToken). */
 #viewport.no-anim #bg-image,
 #viewport.no-anim .monster-token,
-#viewport.no-anim .ally-token { transition: none; }
+#viewport.no-anim .ally-token,
+#viewport.no-anim .jt-debout { transition: none; }
 
 /* ⚠️ Cette page n'inclut PAS part-accessibility-css.html : elle porte sa propre garde.
    Le sprite d'impact n'est même pas créé dans ce mode (cf. jouerVfx) ; la règle reste
    le filet de sécurité si l'un venait à être posé par un autre chemin. */
 @media (prefers-reduced-motion: reduce) {
-	#bg-image, .monster-token, .ally-token, .vfx-sprite { transition: none; animation: none; }
+	#bg-image, .monster-token, .ally-token, .jt-debout, .vfx-sprite { transition: none; animation: none; }
 }
 
 /* ─── Tour Header ──────────────────────────────────────────────── */
@@ -828,6 +896,18 @@
 				<img id="bg-image" src="{{ url_for('battle_maps', path=combat.map_image) }}" alt="Carte de combat">
 			</div>
 			<div id="tokens-layer"></div>
+			{# Découpes des jetons TRIANGLE (.gabarit .jt-forme.triangle) : en unités de la BOÎTE
+			   (objectBoundingBox), donc une seule figure par cap quelle que soit la taille. Pointe
+			   vers le cap, sommets arrondis par des courbes. Taille nulle et non `display:none`,
+			   qui rendrait les découpes inopérantes dans certains navigateurs. #}
+			<svg class="jt-clips" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+				<defs>
+					<clipPath id="clip-jeton-haut" clipPathUnits="objectBoundingBox"><path d="M0.43,0.12 Q0.5,0 0.57,0.12 L0.97,0.84 Q1,1 0.86,1 L0.14,1 Q0,1 0.03,0.84 Z"/></clipPath>
+					<clipPath id="clip-jeton-bas" clipPathUnits="objectBoundingBox"><path d="M0.43,0.88 Q0.5,1 0.57,0.88 L0.97,0.16 Q1,0 0.86,0 L0.14,0 Q0,0 0.03,0.16 Z"/></clipPath>
+					<clipPath id="clip-jeton-droite" clipPathUnits="objectBoundingBox"><path d="M0.88,0.43 Q1,0.5 0.88,0.57 L0.16,0.97 Q0,1 0,0.86 L0,0.14 Q0,0 0.16,0.03 Z"/></clipPath>
+					<clipPath id="clip-jeton-gauche" clipPathUnits="objectBoundingBox"><path d="M0.12,0.43 Q0,0.5 0.12,0.57 L0.84,0.97 Q1,1 1,0.86 L1,0.14 Q1,0 0.84,0.03 Z"/></clipPath>
+				</defs>
+			</svg>
 			<div class="player-token">
 				<!-- Portrait du MEMBRE ACTIF (posé en JS via applyPlayerPortrait, re-appliqué
 				     au changement d'acteur — plus de condition Jinja sur joueurs[0]). -->
@@ -1014,6 +1094,9 @@
 {# Géométrie des zones d'effet — MIROIR de utils/zones_effet.py. Sert à l'APERÇU des cases
    touchées pendant le ciblage violet ; le serveur reste seul juge de qui encaisse. #}
 <script src="{{ url_for('scripts', path='zones_effet.js') }}"></script>
+{# Emprise des jetons de taille variable — MIROIR de utils/jetons.py. Portées, cases prises,
+   ancre de zone et dessin des grands acteurs ; le serveur reste seul juge. #}
+<script src="{{ url_for('scripts', path='jetons.js') }}"></script>
 <script>
 // ─── State ────────────────────────────────────────────────────────
 const SERVER_DATA = {
@@ -1089,29 +1172,75 @@ if (GRID && GRID.dims) {
 const MAX_H = 10;
 document.documentElement.style.setProperty('--max-height', MAX_H);
 
-// Échelle du viewport iso : --step est borné par la SEULE largeur (--view-width = step×17 = w),
+// Échelle du viewport iso : --step est borné par la SEULE largeur (--view-width = step×17 ≤ w),
 // pour que la carte grandisse en hauteur (step×(MAX_H-1+floor)) dans tous les formats sans jamais
 // toucher à sa largeur. Si la carte dépasse la hauteur d'écran, la page défile (body = pan-y).
 // À poser AVANT le premier renderTokens()/updateCamera().
-function syncViewSize() {
-	const root   = document.documentElement;
+//
+// ⚠️ IDEMPOTENTE : deux appels successifs sans action de l'utilisateur rendent la MÊME échelle.
+// La largeur mesurée dépend de ce que la fonction écrit — un --step plus grand allonge la carte,
+// fait apparaître la barre de défilement et rétrécit la colonne — et le ResizeObserver relance le
+// calcul : --step oscillait d'un tick à l'autre (l'ancien `-1` ne faisait que déplacer le seuil).
+// Trois gardes :
+//   • un pas ENTIER : aucune fraction de pixel arrondie différemment d'un rendu à l'autre ;
+//   • la conséquence de sa PROPRE écriture est mesurée aussitôt (lire clientWidth force la mise
+//     en page) ; si elle change le pas, le plus petit des deux est retenu une fois pour toutes ;
+//   • les largeurs ainsi résolues sont MÉMORISÉES avec leur pas (`_vueResolue`) : les re-mesurer
+//     ne recalcule rien, seule une largeur inédite (vrai redimensionnement) relance le calcul.
+// Verrouillé par dev/test_vue_combat_client.js.
+function tailleVue(largeur) {
+	const step = Math.max(8, Math.floor(largeur / 17) - 1);
+	return { step: step, viewWidth: step * 17 };
+}
+let _vueResolue = null;     // { largeurs: [px mesurés], step } — la dernière résolution
+let _stepApplique = null;   // le pas réellement écrit sur :root
+function _largeurVue() {
 	const center = document.querySelector('.combat-center');
-	const w = center ? center.clientWidth : window.innerWidth;
-	if (w <= 0) return;
-	const step = Math.max(8, w / 17)-1;
+	return center ? center.clientWidth : window.innerWidth;
+}
+function _appliquerVue(step) {
+	if (step === _stepApplique) return;
+	// Le pas change TOUTES les positions : à faire sauter d'un bloc (sinon les jetons glisseraient
+	// pendant qu'on étire la fenêtre) — et seulement quand il change, pour qu'une notification sans
+	// effet ne coupe aucune animation en cours.
+	sansAnimationCarte();
+	const root = document.documentElement;
 	root.style.setProperty('--step', step + 'px');
 	root.style.setProperty('--view-width', (step * 17) + 'px');
+	_stepApplique = step;
+}
+function syncViewSize() {
+	const w0 = _largeurVue();
+	if (w0 > 0 && !(_vueResolue && _vueResolue.largeurs.indexOf(w0) >= 0)) {
+		let step = tailleVue(w0).step;
+		_appliquerVue(step);
+		const w1 = _largeurVue();              // la mise en page qui SUIT notre écriture
+		const largeurs = [w0, w1];
+		if (w1 > 0 && tailleVue(w1).step !== step) {
+			step = Math.min(step, tailleVue(w1).step);
+			_appliquerVue(step);
+			// ⚠️ La largeur AU PAS RETENU : c'est exactement elle que re-mesurera l'appel suivant.
+			largeurs.push(_largeurVue());
+		}
+		_vueResolue = { largeurs: largeurs, step: step };
+	}
+	return _stepApplique === null ? null : { step: _stepApplique, viewWidth: _stepApplique * 17 };
+}
+// Notification de taille (colonne ou fenêtre) : les jetons ne sont replacés que si le pas a
+// VRAIMENT changé.
+function _surRedimensionnement() {
+	const avant = _stepApplique;
+	syncViewSize();
+	if (_stepApplique !== avant && window._combatReady) { renderTokens(); updateCamera(); }
 }
 syncViewSize();
 if (window.ResizeObserver) {
-	// Un redimensionnement change --step, donc toutes les positions : à faire sauter
-	// d'un bloc, sinon les jetons glisseraient pendant que l'on étire la fenêtre.
-	const _ro = new ResizeObserver(() => { sansAnimationCarte(); syncViewSize(); if (window._combatReady) { renderTokens(); updateCamera(); } });
+	const _ro = new ResizeObserver(_surRedimensionnement);
 	const center = document.querySelector('.combat-center');
 	if (center) _ro.observe(center);
 }
 // La hauteur de fenêtre (budget hauteur) n'est pas captée par le ResizeObserver sur la colonne.
-window.addEventListener('resize', () => { sansAnimationCarte(); syncViewSize(); if (window._combatReady) { renderTokens(); updateCamera(); } });
+window.addEventListener('resize', _surRedimensionnement);
 
 // Portraits des membres du groupe : la portion d'image cadrée dans play_town (zoom +
 // déplacement) est reproduite dans les jetons via background-size/-position en %
@@ -1408,8 +1537,7 @@ function angleCamera() {
 }
 
 function chebyToPlayer(m) {
-	const j = me();
-	return Math.max(Math.abs(m.pos.x - j.pos.x), Math.abs(m.pos.y - j.pos.y));
+	return distanceActeurs(me(), m);
 }
 
 // ── Glissement des jetons & de la carte ───────────────────────────
@@ -1482,7 +1610,9 @@ function apercuZone(capa, cible) {
 	const soutien = (capa.cible === 'soi' || capa.cible === 'allie') ? ' soutien' : '';
 	const layer = document.getElementById('tokens-layer');
 	const g = GRID || {};
-	casesEffet(zone, [j.pos.x, j.pos.y], [ancre.pos.x, ancre.pos.y], j.facing || 0,
+	// Grand jeton : la forme se pose sur la case de son emprise la plus proche du lanceur
+	// (miroir de `cibles_de_zone` / `beneficiaires_de_zone`).
+	casesEffet(zone, [j.pos.x, j.pos.y], caseProche(ancre, j.pos.x, j.pos.y), j.facing || 0,
 			   g.cells, g.dims).forEach(c => {
 		const el = document.createElement('div');
 		el.className = 'zone-case' + soutien;
@@ -1510,6 +1640,35 @@ function _armerApercuZone(el, capa, cible) {
 // cadrage. Le double rAF laisse le navigateur peindre les nouvelles positions sans
 // transition avant de rétablir la classe (les valeurs ne bougeant plus, rien ne
 // s'anime au retrait).
+// ── Jetons à GABARIT (grands acteurs, formes) ─────────────────────
+// Structure interne d'un jeton porteur d'un `jeton` : la forme (bordure + fond) puis le
+// calque debout qui reçoit portrait et barre de PV. La forme vient du serveur, déjà
+// normalisée ; elle est tout de même reversée à la liste connue avant de devenir une classe.
+function _gabaritJeton(a, contenu) {
+	const forme = JETON_FORMES.indexOf((a.jeton || {}).forme) >= 0 ? a.jeton.forme : 'ellipse';
+	return `<div class="jt-forme ${forme}"><div class="jt-fond"></div></div>`
+		+ `<div class="jt-debout">${contenu}</div>`;
+}
+
+// Placement d'un jeton à gabarit : la boîte couvre l'emprise (--jw × --jh cases) et se pose
+// sur son CENTRE. ⚠️ Pas de `rotate(-a)` final, contrairement à `_placerToken` : l'emprise
+// doit tourner AVEC le décor pour rester sur ses cases. Le calque debout, lui, reçoit le
+// contre-angle — c'est le portrait qu'on garde droit, pas la forme.
+function _placerGabarit(tok, a, j) {
+	const e = empriseActeur(a);
+	const c = centreActeur(a);
+	const ang = angleCamera();
+	tok.style.setProperty('--jw', e[2]);
+	tok.style.setProperty('--jh', e[3]);
+	tok.style.setProperty('--jd', Math.min(e[2], e[3]));
+	tok.style.transform = `translateX(-50%) rotate(${ang}deg)`
+		+ ` translate(calc(var(--step) * ${c[0] - j.pos.x}), calc(var(--step) * ${c[1] - j.pos.y}))`;
+	const debout = tok.querySelector('.jt-debout');
+	if (debout) debout.style.transform = `translate(-50%, -50%) rotate(${-ang}deg)`;
+	const forme = tok.querySelector('.jt-forme');
+	if (forme) forme.dataset.cap = capDe(a);
+}
+
 function sansAnimationCarte() {
 	const vp = document.getElementById('viewport');
 	if (!vp || vp.classList.contains('no-anim')) return;
@@ -1541,19 +1700,24 @@ function renderTokens() {
 		if (!m.pos) return;
 		vus.add(m.id);
 		const adj = targetable.has(m.id) && !versAllies;
+		// Gabarit : clé `jeton` présente (grand acteur ou forme) — sinon le rond d'avant, à la lettre.
+		const gabarit = !!m.jeton;
 		let tok = _tokens.get(m.id);
 		const neuf = !tok;
 		if (neuf) {
 			tok = document.createElement('div');
+			const cls = gabarit ? 'jt-portrait' : 'mt-portrait';
 			const portrait = m.image
-				? `<div class="mt-portrait" style="background-image:url('/monsters/${m.image}')"></div>`
-				: `<div class="mt-portrait">${(m.nom || '?').charAt(0).toUpperCase()}</div>`;
-			tok.innerHTML = portrait + `<div class="mt-hp"><div class="mt-hp-fill"></div></div>`;
+				? `<div class="${cls}" style="background-image:url('/monsters/${m.image}')"></div>`
+				: `<div class="${cls}">${(m.nom || '?').charAt(0).toUpperCase()}</div>`;
+			const contenu = portrait + `<div class="mt-hp"><div class="mt-hp-fill"></div></div>`;
+			tok.innerHTML = gabarit ? _gabaritJeton(m, contenu) : contenu;
 			_tokens.set(m.id, tok);
 		}
-		tok.className = 'monster-token' + (m.vivant ? '' : ' dead')
+		tok.className = 'monster-token' + (gabarit ? ' gabarit' : '') + (m.vivant ? '' : ' dead')
 			+ (adj ? (casting ? ' spellcast' : ' adjacent') : '');
-		_placerToken(tok, m.pos.x - j.pos.x, m.pos.y - j.pos.y);
+		if (gabarit) _placerGabarit(tok, m, j);
+		else _placerToken(tok, m.pos.x - j.pos.x, m.pos.y - j.pos.y);
 		tok.querySelector('.mt-hp-fill').style.width = pct(m.currentPV, m.pv_max) + '%';
 		// Jeton réutilisé ⇒ remettre explicitement à null : un `if (adj)` laisserait
 		// en place le gestionnaire du rendu précédent sur une cible devenue hors portée.
@@ -1576,28 +1740,34 @@ function renderTokens() {
 		if (!p.pos || p.id === j.id) return;
 		vus.add(p.id);
 		const vise = versAllies && targetable.has(p.id);
+		// Gabarit : une monture ou une invocation d'espèce à `jeton` (les personnages restent 1x1).
+		const gabarit = !!p.jeton;
 		let tok = _tokens.get(p.id);
 		const neuf = !tok;
 		if (neuf) {
 			tok = document.createElement('div');
+			// Gabarit : portrait et PV vont dans le calque debout, sous la forme.
+			if (gabarit) tok.innerHTML = _gabaritJeton(p, '');
+			const hote = gabarit ? tok.querySelector('.jt-debout') : tok;
 			const inner = document.createElement('div');
-			inner.className = 'at-portrait';
+			inner.className = gabarit ? 'jt-portrait' : 'at-portrait';
 			const st = portraitStyle(p.id);
 			if (st) applyPortraitTo(inner, st);
 			else inner.textContent = (p.nom || '?').charAt(0).toUpperCase();
-			tok.appendChild(inner);
+			hote.appendChild(inner);
 			const hp = document.createElement('div');
 			hp.className = 'mt-hp';
 			hp.innerHTML = `<div class="mt-hp-fill"></div>`;
-			tok.appendChild(hp);
+			hote.appendChild(hp);
 			_tokens.set(p.id, tok);
 		}
-		tok.className = 'ally-token' + ((p.currentPV || 0) > 0 ? '' : ' ko')
+		tok.className = 'ally-token' + (gabarit ? ' gabarit' : '') + ((p.currentPV || 0) > 0 ? '' : ' ko')
 					  + (p.est_monture ? ' monture' : '')
 					  + (p.est_protege ? ' protege' : '')
 					  + (p.est_invocation ? ' invocation' : '')
 					  + (vise ? ' spellcast' : '');
-		_placerToken(tok, p.pos.x - j.pos.x, p.pos.y - j.pos.y);
+		if (gabarit) _placerGabarit(tok, p, j);
+		else _placerToken(tok, p.pos.x - j.pos.x, p.pos.y - j.pos.y);
 		tok.querySelector('.mt-hp-fill').style.width = pct(p.currentPV, p.pv_max) + '%';
 		tok.onclick = !vise ? null : (pendingSort
 			? () => doAction('sort', p.id, null, null, null, null,
@@ -1854,11 +2024,15 @@ function jouerVfx(v) {
 	const j = me();
 	const dx = parseFloat(anim.decalage_x) || 0;
 	const dy = parseFloat(anim.decalage_y) || 0;
+	// CENTRES d'emprise, pas `pos` : sur un dragon 3x2, `pos` est un coin — le sprite s'y
+	// poserait à côté de la bête (scripts/jetons.js ; un 1x1 rend exactement `pos`).
+	const cSujet = centreActeur(sujet);
+	const cDepart = trajet ? centreActeur(source) : cSujet;
 	const ctx = {
-		ax: (trajet ? source.pos.x : sujet.pos.x) - j.pos.x,
-		ay: (trajet ? source.pos.y : sujet.pos.y) - j.pos.y,
-		bx: sujet.pos.x - j.pos.x,
-		by: sujet.pos.y - j.pos.y,
+		ax: cDepart[0] - j.pos.x,
+		ay: cDepart[1] - j.pos.y,
+		bx: cSujet[0] - j.pos.x,
+		by: cSujet[1] - j.pos.y,
 		oax: trajet ? (parseFloat(anim.depart_decalage_x) || 0) : dx,
 		oay: trajet ? (parseFloat(anim.depart_decalage_y) || 0) : dy,
 		obx: dx, oby: dy,
@@ -1877,8 +2051,9 @@ function jouerVfx(v) {
 	} else if (ctx.auto && v.acteur && v.acteur !== ancre) {
 		const autre = _acteurVfx(v.acteur);
 		if (autre && autre.pos) {
-			ctx.dirx = sujet.pos.x - autre.pos.x;
-			ctx.diry = sujet.pos.y - autre.pos.y;
+			const cAutre = centreActeur(autre);
+			ctx.dirx = cSujet[0] - cAutre[0];
+			ctx.diry = cSujet[1] - cAutre[1];
 		}
 	}
 	_vfxFrame(el, anim, anim.debut);
@@ -1914,7 +2089,8 @@ function jouerVfx(v) {
 // Les champs que le client PEINT sont donc rembobinés à leur valeur d'avant, puis dégelés
 // ligne par ligne par la clé `etat` posée sur l'entrée de journal (jumelle de `vfx`, et
 // pour la même raison : le journal est le seul canal capable de porter la chronologie).
-const CHAMPS_ETAT = ['currentPV', 'currentPM', 'vivant', 'morte', 'pos', 'facing'];
+// `cap` : orientation d'un grand jeton — son pivot se révèle avec le glissement qu'il accompagne.
+const CHAMPS_ETAT = ['currentPV', 'currentPM', 'vivant', 'morte', 'pos', 'facing', 'cap'];
 let etatFinal   = null;   // vérité mise de côté pendant la révélation (filet de réconciliation)
 let finDeCombat = null;   // overlay de fin, en attente de la fin du journal
 
@@ -2084,6 +2260,12 @@ function lineOfSight(x0, y0, x1, y1) {
 		if (e2 < dx)  { err += dx; y += sy; }
 	}
 }
+// Ligne de vue entre deux ACTEURS — miroir de `_vue_acteurs` : vraie si AU MOINS UNE paire
+// (case de a, case de b) se voit. Deux 1x1 ⇒ exactement lineOfSight d'une case à l'autre.
+function vueActeurs(a, b) {
+	const cb = casesActeur(b);
+	return casesActeur(a).some(p => cb.some(q => lineOfSight(p[0], p[1], q[0], q[1])));
+}
 // Cibles atteignables pour un mode : portée, et pour le tir/jet non engagé + ligne de vue.
 function targetableMonsters(mode) {
 	const j = me();
@@ -2092,7 +2274,7 @@ function targetableMonsters(mode) {
 	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
 	if (prof.ranged) {
 		if (isEngaged()) return [];
-		list = list.filter(m => lineOfSight(j.pos.x, j.pos.y, m.pos.x, m.pos.y));
+		list = list.filter(m => vueActeurs(j, m));
 	}
 	return list;
 }
@@ -2107,8 +2289,10 @@ function updateAttackButtons(data) {
 	if (!modes.includes(currentMode)) currentMode = modes[0] || 'cac';
 }
 
+// Distance entre deux acteurs = entre leurs EMPRISES (miroir de `_cheby` → `jetons.distance`) :
+// un grand jeton se touche par n'importe quel bord. Deux 1x1 ⇒ l'écart case à case d'avant.
 function chebyJM(j, m) {
-	return Math.max(Math.abs(m.pos.x - j.pos.x), Math.abs(m.pos.y - j.pos.y));
+	return distanceActeurs(j, m);
 }
 // Miroir client de la validation serveur « ramasser » : tour du joueur, action dispo,
 // aucun ennemi vivant au corps à corps, et au moins une carcasse adjacente non ramassée.
@@ -2149,7 +2333,7 @@ function sortTargets(s) {
 	let list = state.monstres.filter(m => m.vivant && m.pos && chebyJM(j, m) <= portee);
 	if (ranged) {
 		if (isEngaged()) return [];
-		list = list.filter(m => lineOfSight(j.pos.x, j.pos.y, m.pos.x, m.pos.y));
+		list = list.filter(m => vueActeurs(j, m));
 	}
 	return list;
 }
@@ -2164,7 +2348,7 @@ function allyTargets(s) {
 	const { portee, ranged } = capaPortee(s);
 	let list = (state.joueurs || []).filter(p =>
 		p.pos && p.id !== j.id && (p.currentPV || 0) > 0 && chebyJM(j, p) <= portee);
-	if (ranged) list = list.filter(p => lineOfSight(j.pos.x, j.pos.y, p.pos.x, p.pos.y));
+	if (ranged) list = list.filter(p => vueActeurs(j, p));
 	return list;
 }
 // Cibles d'une capacité, quel que soit son camp — SOURCE UNIQUE des trois consommateurs
@@ -2213,18 +2397,25 @@ function cellWalkable(x, y) {
 	return caseFranchissable(g.cells, x, y, !!(me() || {}).volant);
 }
 function cellOccupied(x, y) {
-	// Tous les joueurs VIVANTS bloquent une case (miroir serveur _occupied_set).
-	if (state.joueurs.some(p => (p.currentPV || 0) > 0 && p.pos && p.pos.x === x && p.pos.y === y)) return true;
-	return state.monstres.some(m => m.vivant && m.pos && m.pos.x === x && m.pos.y === y);
+	// Toutes les cases de chaque emprise VIVANTE bloquent (miroir serveur _occupied_set), sauf
+	// celles d'un GRAND allié non jouable : le joueur le traverse (miroir `_traversable_par`),
+	// l'échange de places étant impossible avec une emprise de plusieurs cases.
+	if (state.joueurs.some(p => (p.currentPV || 0) > 0 && p.pos
+		&& !(p.jouable === false && estGrand(p)) && couvreActeur(p, x, y))) return true;
+	return state.monstres.some(m => m.vivant && m.pos && couvreActeur(m, x, y));
 }
 // L'occupant de (nx,ny) est-il un allié NON JOUABLE (monture, personne escortée) avec qui
 // `j` peut ÉCHANGER sa place ? Miroir serveur de `_allie_echangeable` + `_echange_possible`.
 // ⚠️ `jouable === false` STRICTEMENT : un joueur ordinaire n'a pas la clé, et un test falsy
 // rendrait tout le groupe échangeable. Un compagnon jouable garde sa case (il a son tour).
+// ⚠️ 1x1 seulement (un grand allié se traverse), et refusé si la case du joueur est couverte
+// par un autre allié — le joueur traversait une grande monture, les deux se superposeraient.
 function occupantEchangeable(j, nx, ny) {
 	const a = state.joueurs.find(p => p.jouable === false && (p.currentPV || 0) > 0
-		&& p.pos && p.pos.x === nx && p.pos.y === ny);
+		&& p.pos && !estGrand(p) && couvreActeur(p, nx, ny));
 	if (!a) return false;
+	if (state.joueurs.some(p => p.id !== j.id && p.id !== a.id && (p.currentPV || 0) > 0
+		&& p.pos && couvreActeur(p, j.pos.x, j.pos.y))) return false;
 	return echangePossible((GRID || {}).cells,
 		{ x: j.pos.x, y: j.pos.y, volant: !!j.volant },
 		{ x: nx, y: ny, volant: !!a.volant });
