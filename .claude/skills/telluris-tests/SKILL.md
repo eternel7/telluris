@@ -42,6 +42,7 @@ Aucune dépendance (ni `package.json`, ni second écosystème), code 1 en échec
 | `test_slots_client` | barre de slots (`combat_telluris.html`) | à qui appartient ce que j'affiche et ce que j'écris (`acteurCompagnonId`) |
 | `test_deplacement_client` | `scripts/deplacement.js` | les **seules** règles de marche du jeu — aucune n'existe côté serveur |
 | `test_voies_client` | `scripts/voies.js` | régions, goulots (coin, eau, brèche de 2), Tarjan itératif, chemins, coupe |
+| `test_zones_effet_client` | `scripts/zones_effet.js` + `apercuZone` du combat | géométrie d'aperçu qui MENT sur ce qui va brûler (mêmes cas que `tests/test_zones_effet.py`, valeurs comprises) ; survol laissé armé sur un jeton réutilisé |
 | `test_resize_client` | redimensionnement (`admin_map_editor.html`) | `nav`/zones/portes rééchantillonnés, recalage idempotent |
 | `test_lieu_form_client` | formulaire de lieu | capacités ; fusion (`progeniture`, `pnj[1..]`, clés inconnues) |
 | `test_connexions_client` | formulaire de connexion | `link:*` écrasé ; clés du doc/nœud perdues ; case posable |

@@ -80,6 +80,9 @@ Item `categorie:"consommable"` + champ `effets` : `pv`/`pm` instantanés, `buffs
 
 UI : chips ✨ `#joueur-effets` (`renderEffetsActifs`). ⚠️ **Hors périmètre** : le client n'affiche les chips que pour le joueur — un ennemi debuffé ne se voit que dans le log.
 
+#### Sur PLUSIEURS cibles — zones d'effet
+Une capacité portant un bloc `zone` (cercle / carré / rectangle / cône, ancrés sur le lanceur ou sur la cible, orientés par l'axe de visée ou par le `facing`) atteint tout son camp opposé — ou tout son camp — pris dans la forme. Offensif : les branches `sort` et `competence` de `resolve_action` partagent **un seul chokepoint** — `_resoudre_capacite_offensive` → `_resoudre_coup_capacite` —, leurs libellés restant portés par `TEXTES_SORT`/`TEXTES_COMPETENCE` : un jet, une localisation et une part durative PAR victime, mais un seul débit de PM/action et un seul fumble possible (celui de la cible désignée). Bénéfique (`cible` `allie` ou `soi`) : `beneficiaires_de_zone` → `_servir_zone_soutien` → `_appliquer_soutien`, extrait de `_lancer_sur_allie` qui en garde les gardes. Géométrie, contrat de donnée, aperçu client et limites (les deux camps ne se mélangent jamais) : compétence **telluris-magie** § Zones d'effet. Verrouillé par `tests/test_combat_zone.py`.
+
 #### Sur une CIBLE ENNEMIE (debuffs)
 Chokepoint `_appliquer_effet_sur_cible(..., hostile=True)` : posé seulement si le jet touche, jamais sur une cible que le même coup vient d'abattre, ne remonte sur aucun doc. Un sort/une compétence peut n'être QUE du debuff (`degats OU part_durative`). Couvert par `tests/test_combat_debuffs.py`.
 

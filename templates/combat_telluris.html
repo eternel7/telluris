@@ -128,6 +128,32 @@
 	transform: translateX(-50%);
 	transition: transform var(--map-anim, 260ms) ease-out;
 }
+/* Case d'APERÇU d'une zone d'effet : même ancre que les jetons (left/bottom fixes,
+   l'écart porté par `transform` via _placerToken), donc elle tourne avec le décor et
+   glisse avec la caméra. Aucune `transition` : une case d'aperçu apparaît et disparaît,
+   elle ne se déplace jamais — l'interpoler la ferait naître depuis la case du joueur.
+   `pointer-events: none` : le calque est déjà transparent aux clics, mais ces cases se
+   posent PAR-DESSUS les jetons ennemis et leur voleraient le clic de ciblage. */
+.zone-case {
+	position: absolute;
+	left: 50%;
+	bottom: calc(var(--step) * var(--floor));
+	width: var(--step); height: var(--step);
+	box-sizing: border-box;
+	z-index: 0;
+	pointer-events: none;
+	background: rgba(178, 107, 255, 0.28);
+	border: 1px solid rgba(178, 107, 255, 0.85);
+	box-shadow: inset 0 0 8px rgba(178, 107, 255, 0.5);
+}
+/* Zone BÉNÉFIQUE : verte, comme tout le ciblage allié de la page (jetons, badges). Le
+   violet reste l'offensif — deux nappes de la même couleur, et un soin de groupe aurait
+   l'air d'une boule de feu. */
+.zone-case.soutien {
+	background: rgba(76, 217, 123, 0.26);
+	border-color: rgba(76, 217, 123, 0.85);
+	box-shadow: inset 0 0 8px rgba(76, 217, 123, 0.5);
+}
 .monster-token {
 	width: var(--step); height: var(--step);
 	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -985,6 +1011,9 @@
 {# ⚠️ APRÈS nav.js, dont dépend `pasAutoriseLocal`. Le combat n'en consomme que
    `caseFranchissable` et `majFleches` : sa règle de portée et de budget lui reste propre. #}
 <script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
+{# Géométrie des zones d'effet — MIROIR de utils/zones_effet.py. Sert à l'APERÇU des cases
+   touchées pendant le ciblage violet ; le serveur reste seul juge de qui encaisse. #}
+<script src="{{ url_for('scripts', path='zones_effet.js') }}"></script>
 <script>
 // ─── State ────────────────────────────────────────────────────────
 const SERVER_DATA = {
@@ -1325,6 +1354,7 @@ function refreshBadgeTargets() {
 				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
 			: () => doAction('competence', p.id, null, null, null, null,
 				{ competence_id: pendingComp.competence_id }));
+		_armerApercuZone(el, t ? capa : null, p);
 	});
 	state.monstres.forEach(m => {
 		const el = document.getElementById(`badge-${m.id}`);   // badge-<actor_id>, actor_id monstre = m.id
@@ -1339,6 +1369,10 @@ function refreshBadgeTargets() {
 				: () => doAction('competence', m.id, null, null, null, null,
 					{ competence_id: pendingComp.competence_id }))
 			: () => doAction('attaquer', m.id, null, null, null, currentMode));
+		// Le badge cible autant que le jeton (cf. § Attaques par mode) : il doit donc
+		// montrer la même forme au survol, sans quoi l'aperçu dépendrait de l'endroit
+		// d'où l'on vise.
+		_armerApercuZone(el, t && casting ? capa : null, m);
 	});
 }
 
@@ -1409,6 +1443,68 @@ function _placerToken(tok, wx, wy) {
 		+ ` rotate(${-a}deg)`;
 }
 
+// ── Aperçu des cases touchées par une zone d'effet ────────────────
+// Une capacité porteuse d'un bloc `zone` (cf. scripts/zones_effet.js, miroir de
+// utils/zones_effet.py) ne frappe pas que la case visée : le joueur doit voir la forme
+// AVANT de payer son action et ses PM. L'aperçu s'allume au survol d'une cible pendant le
+// ciblage violet et s'éteint dès qu'on la quitte.
+//
+// ⚠️ Les cases vivent dans #tokens-layer et se placent par `_placerToken`, comme les
+// jetons : même ancre, même `rotate` de caméra. Les poser en left/bottom les laisserait
+// sur place pendant un pivot, à côté du décor qu'elles prétendent brûler.
+//
+// ⚠️ Elles ne sont PAS dans `_tokens` (ce registre sert la persistance des jetons d'un
+// rendu à l'autre, tout le contraire de ce qu'on veut ici) : `renderTokens` les efface en
+// tête, faute de quoi un pas ou un pivot laisserait l'ancienne forme peinte de travers.
+//
+// ⚠️ Hors de portée de l'aperçu : le TACTILE. Un doigt n'a pas de survol — il tape, et la
+// capacité part. C'est assumé ; l'étiquette de la case (libelleZone, cf. sortLabel) dit la
+// forme, et le journal nomme chaque victime.
+const _apercuZoneCases = [];
+
+function effacerApercuZone() {
+	while (_apercuZoneCases.length) _apercuZoneCases.pop().remove();
+}
+
+// Peint la forme de `capa` telle qu'elle tomberait sur `cible` (un monstre de `state`).
+// Sans zone, sans cible ou sans position : rien à peindre, et l'aperçu précédent est
+// effacé — un appel de trop ne laisse jamais de traînée.
+function apercuZone(capa, cible) {
+	effacerApercuZone();
+	const j = me();
+	const zone = capa ? normaliserZone(capa.zone) : null;
+	if (!zone || !j || !j.pos) return;
+	// `cible: "soi"` ne DÉSIGNE personne : la forme se pose sur le lanceur, et une forme
+	// orientée n'a que son `facing` à lire — exactement ce que fait le serveur
+	// (`beneficiaires_de_zone` reçoit alors le lanceur comme bénéficiaire principal).
+	const ancre = (capa.cible === 'soi') ? j : cible;
+	if (!ancre || !ancre.pos) return;
+	const soutien = (capa.cible === 'soi' || capa.cible === 'allie') ? ' soutien' : '';
+	const layer = document.getElementById('tokens-layer');
+	const g = GRID || {};
+	casesEffet(zone, [j.pos.x, j.pos.y], [ancre.pos.x, ancre.pos.y], j.facing || 0,
+			   g.cells, g.dims).forEach(c => {
+		const el = document.createElement('div');
+		el.className = 'zone-case' + soutien;
+		_placerToken(el, c[0] - j.pos.x, c[1] - j.pos.y);
+		layer.appendChild(el);   // posé APRÈS son placement, comme les jetons
+		_apercuZoneCases.push(el);
+	});
+}
+
+// Arme (ou désarme) le survol d'aperçu sur un élément de ciblage — jeton ou badge. ⚠️ On
+// réassigne TOUJOURS, `null` compris : ces éléments survivent d'un rendu à l'autre, et un
+// gestionnaire laissé en place peindrait la zone d'une capacité déjà lancée.
+function _armerApercuZone(el, capa, cible) {
+	// ⚠️ `cible` est facultative pour une capacité `soi` — sa forme est entièrement
+	// déterminée par le lanceur, c'est ce qui permet de la montrer au survol de sa CASE,
+	// seul moment où elle peut se voir (un sort sur soi ne passe par aucun ciblage).
+	const actif = !!(el && capa && capa.zone && (cible || capa.cible === 'soi'));
+	if (!el) return;
+	el.onpointerenter = actif ? () => apercuZone(capa, cible) : null;
+	el.onpointerleave = actif ? effacerApercuZone : null;
+}
+
 // Coupe l'animation le temps d'une frame, pour un re-rendu qui n'est PAS un mouvement
 // de jeu : redimensionnement (--step change, donc toutes les positions), premier
 // cadrage. Le double rAF laisse le navigateur peindre les nouvelles positions sans
@@ -1424,6 +1520,9 @@ function sansAnimationCarte() {
 function renderTokens() {
 	const layer = document.getElementById('tokens-layer');
 	const j = me();
+	// L'aperçu de zone est recalculé au survol : tout ce qui est peint ici devient faux
+	// dès que quelqu'un bouge ou que la caméra pivote.
+	effacerApercuZone();
 	// Ciblage de sort/compétence en attente : cibles violettes au lieu de l'attaque.
 	const casting = !!(pendingSort || pendingComp);
 	const capa = casting ? (pendingSort ? pendingSort.sort : pendingComp.comp) : null;
@@ -1465,6 +1564,8 @@ function renderTokens() {
 				: () => doAction('competence', m.id, null, null, null, null,
 					{ competence_id: pendingComp.competence_id }))
 			: () => doAction('attaquer', m.id, null, null, null, currentMode));
+		// Survol = aperçu de la forme qui tomberait sur CE monstre (capacité de zone).
+		_armerApercuZone(tok, adj && casting ? capa : null, m);
 		if (neuf) layer.appendChild(tok);   // posé APRÈS son placement : pas de transition à la naissance
 	});
 	// Alliés : les membres du groupe NON actifs, aux coords relatives au membre actif
@@ -1503,6 +1604,9 @@ function renderTokens() {
 				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
 			: () => doAction('competence', p.id, null, null, null, null,
 				{ competence_id: pendingComp.competence_id }));
+		// Une capacité BÉNÉFIQUE de zone se prévisualise sur ses alliés comme l'offensive
+		// sur ses ennemis — en vert (cf. `.zone-case.soutien`).
+		_armerApercuZone(tok, vise ? capa : null, p);
 		if (neuf) layer.appendChild(tok);
 	});
 	// Jeton devenu sans objet : l'acteur qui prend la main (il a le jeton central fixe),
@@ -2292,6 +2396,7 @@ function doRotate(sens) {
 // ouvert). Appelé par tout clic de bouton : doAction et les triggers. Annule aussi un
 // éventuel ciblage de sort en attente (les badges/tokens redeviennent « attaque »).
 function closeSelectors() {
+	effacerApercuZone();
 	document.getElementById('target-row').style.display = 'none';
 	document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('hidden-selecting'));
 	if (pendingSort || pendingComp) {
@@ -2347,6 +2452,10 @@ function sortLabel(s) {
 	// Invocation : ses `effets` sont vides par construction (elle fait apparaître une
 	// créature, elle ne pose rien sur personne) — sans cette ligne la case n'annoncerait rien.
 	if (s.invocation) parts.push(`🐾 ×${s.invocation.nombre}, ⏳${s.invocation.duree} tours`);
+	// Zone d'effet : sur mobile c'est le SEUL endroit où elle se lit (pas de survol,
+	// donc pas d'aperçu sur la carte).
+	const zone = libelleZone(normaliserZone(s.zone), s.cible);
+	if (zone) parts.push(zone);
 	const compos = (s.composants || []).filter(c => c.disponible).length;
 	return `${s.icon || '🔮'} ${s.nom} — ${s.cout_pm} PM`
 		+ (parts.length ? ` (${parts.join(', ')})` : '')
@@ -2466,6 +2575,17 @@ function attacherDragLong(el, position, selecteurCase, onDrop) {
 	el.addEventListener('pointerup', relacher);
 	el.addEventListener('pointercancel', nettoyer);
 }
+// Capacité `cible: "soi"` PORTEUSE D'UNE ZONE derrière une case de la barre, ou null.
+// Seul cas où une forme est entièrement connue sans ciblage — donc le seul qui puisse
+// s'afficher au survol de la case. Toute autre case rend null : son aperçu dépend d'une
+// cible, et il vit sur les jetons et les badges.
+function _capaSoiDeZone(slot) {
+	if (!slot) return null;
+	const capa = slot.type === 'sort' ? slotSort(slot)
+			   : slot.type === 'competence' ? slotComp(slot) : null;
+	return (capa && capa.cible === 'soi' && capa.zone) ? capa : null;
+}
+
 function renderSlots() {
 	const box = document.getElementById('slot-grid');
 	box.innerHTML = SLOTS.map(slot => {
@@ -2485,6 +2605,11 @@ function renderSlots() {
 		const n = parseInt(b.dataset.slot, 10);
 		b.addEventListener('click', () => onSlotClick(n));
 		attacherDragLong(b, n, '.slot-btn', deplacerSlot);
+		// Une capacité `soi` de zone ne passe par AUCUN ciblage : son bouton est le seul
+		// endroit où sa forme peut se montrer avant d'être payée. Les capacités ciblées,
+		// elles, dépendent d'une cible que la case ne connaît pas encore — leur aperçu
+		// reste sur les jetons et les badges.
+		_armerApercuZone(b, _capaSoiDeZone(SLOTS.find(sl => sl.position === n)), null);
 	});
 }
 
@@ -2563,6 +2688,9 @@ function compLabel(c) {
 	// main, donc la même compétence ne porte pas à la même distance d'une épée à une hast.
 	// C'est le seul endroit où le joueur peut le lire.
 	if (c.cible !== 'soi') { const p = capaPortee(c).portee; if (p > 1) parts.push(`portée ${p}`); }
+	// Zone d'effet : comme pour les sorts, c'est le seul canal sur mobile (pas de survol).
+	const zone = libelleZone(normaliserZone(c.zone), c.cible);
+	if (zone) parts.push(zone);
 	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${c.cout_pm} PM` : ''}`
 		+ (parts.length ? ` (${parts.join(', ')})` : '');
 }

@@ -18,6 +18,7 @@ from utils.consommables import (
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
 )
 from utils.sorts import part_durative, effets_d_arme, concat_degats
+from utils.zones_effet import cases_effet
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 # `utils/zones.py` est une FEUILLE (math/random seulement) : aucun cycle possible.
 from utils.zones import profils_compatibles
@@ -359,7 +360,18 @@ def _lancer_sur_allie(combat_doc: dict, lanceur: dict, cible: dict, source: dict
 	if portee > 1 and not _line_of_sight(grid["cells"], lanceur["pos"]["x"], lanceur["pos"]["y"],
 										  cible["pos"]["x"], cible["pos"]["y"]):
 		return {"error": "Ligne de vue obstruée."}
+	return _appliquer_soutien(combat_doc, lanceur, cible, source, effets)
 
+
+def _appliquer_soutien(combat_doc: dict, lanceur: dict, cible: dict, source: dict,
+					   effets: dict) -> dict:
+	"""Pose un effet BÉNÉFIQUE sur un allié — l'application seule, SANS aucune garde.
+
+	Séparé de `_lancer_sur_allie` (qui garde portée, ligne de vue et « à terre ») parce
+	qu'une ZONE de soutien sert des alliés que ces gardes refuseraient : la forme couvre
+	sa propre distance, et elle a déjà été filtrée par le terrain et la ligne de vue
+	depuis son ancre. L'appelant reste responsable d'écarter un allié à terre.
+	"""
 	avant_pv, avant_pm = cible.get("currentPV", 0), cible.get("currentPM", 0)
 	cible["currentPV"] = min(cible.get("pv_max", avant_pv), avant_pv + int(effets.get("pv", 0) or 0))
 	cible["currentPM"] = min(cible.get("pm_max", avant_pm), avant_pm + int(effets.get("pm", 0) or 0))
@@ -394,6 +406,234 @@ def _lancer_sur_allie(combat_doc: dict, lanceur: dict, cible: dict, source: dict
 		"pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
 		"effet_cible": dict(effet_pose) if effet_pose else None,
 	}
+
+
+# ── Capacités offensives (sorts & compétences) : un coup, une zone ───────────────
+# Les deux branches de `resolve_action` posaient le MÊME mécanisme (seuil, jet, dégâts,
+# localisation, journal, part à durée) dans deux copies qui ne différaient que par la
+# plume. La zone d'effet ayant besoin de le rejouer une fois PAR CIBLE, il devient un
+# chokepoint unique, les libellés restant portés par la branche appelante.
+#
+# Champs disponibles dans chaque gabarit : {acteur} {cible} {nom} {nom_fumble} {ou}
+# {dmg} {pv} {pv_max} {roll} {seuil}. ⚠️ `nom_fumble` existe parce que le repli du nom
+# d'un sort diffère entre ses lignes (« un sort » / « le sort ») ; pour une compétence
+# les deux valent la même chose.
+TEXTES_SORT = {
+	"kill_crit": "{acteur} lance {nom} d'une puissance CRITIQUE et pulvérise {cible} !",
+	"kill": "{acteur} lance {nom} et élimine {cible} !",
+	"crit": "{acteur} lance {nom} d'une puissance CRITIQUE : {cible} encaisse{ou} {dmg} "
+			"dégâts ! (jet {roll} — PV : {pv}/{pv_max})",
+	"hit": "{acteur} lance {nom} : {cible} encaisse{ou} {dmg} dégâts ! "
+		   "(PV : {pv}/{pv_max})",
+	"prend": "{acteur} lance {nom} sur {cible} : le sort prend.",
+	"fumble": "{acteur} bafouille son incantation : {nom_fumble} lui explose au visage ! "
+			  "(jet {roll} / seuil {seuil})",
+	"miss": "{acteur} lance {nom} sur {cible} mais le sort se dissipe ! "
+			"(jet {roll} / seuil {seuil})",
+}
+TEXTES_COMPETENCE = {
+	"kill_crit": "{acteur} utilise {nom} — coup CRITIQUE — et élimine {cible} !",
+	"kill": "{acteur} utilise {nom} et élimine {cible} !",
+	"crit": "{acteur} utilise {nom} — coup CRITIQUE : {cible} encaisse{ou} {dmg} dégâts ! "
+			"(jet {roll} — PV : {pv}/{pv_max})",
+	"hit": "{acteur} utilise {nom} : {cible} encaisse{ou} {dmg} dégâts ! "
+		   "(PV : {pv}/{pv_max})",
+	"prend": "{acteur} utilise {nom} sur {cible} : la prise porte.",
+	"fumble": "{acteur} rate complètement {nom} sur {cible} et se découvre ! "
+			  "(jet {roll} / seuil {seuil})",
+	"miss": "{acteur} utilise {nom} sur {cible} mais manque son coup ! "
+			"(jet {roll} / seuil {seuil})",
+}
+
+
+def cibles_de_zone(combat_doc: dict, joueur: dict, monstre: dict, zone: dict,
+				   grid: dict) -> list:
+	"""Monstres vivants touchés par la ZONE d'une capacité offensive, cible désignée EN TÊTE.
+
+	`zone` est la vue normalisée d'`utils/zones_effet` (None ⇒ la seule cible désignée).
+	La géométrie est filtrée par le terrain et la ligne de vue DEPUIS L'ANCRE : une
+	explosion ne brûle pas l'intérieur d'un mur et ne contourne pas l'angle d'un couloir.
+
+	⚠️ **La cible DÉSIGNÉE est toujours de la liste**, même si la forme ne la couvre pas
+	(zone ancrée sur le lanceur et poussée trop loin par son `decalage`, par exemple).
+	C'est contre elle que la portée, la ligne de vue et l'engagement au corps à corps ont
+	été validés, et c'est elle que le joueur a payé pour frapper : l'écarter rendrait un
+	sort visiblement sans effet sur l'ennemi qu'on vient de désigner.
+
+	⚠️ **Aucun tir ami.** Une zone hostile ne touche QUE des monstres : ni le lanceur, ni
+	ses compagnons, ni ses montures, ni ses invocations. C'est une limite assumée du
+	périmètre (le jeu n'a de tir ami nulle part), pas un oubli.
+	"""
+	if not zone:
+		return [monstre]
+	cases = set(cases_effet(
+		zone,
+		(joueur["pos"]["x"], joueur["pos"]["y"]),
+		(monstre["pos"]["x"], monstre["pos"]["y"]),
+		joueur.get("facing", 0),
+		praticable=lambda x, y: _passable(grid["cells"], x, y),
+		vue=lambda x0, y0, x1, y1: _line_of_sight(grid["cells"], x0, y0, x1, y1),
+	))
+	autres = [m for m in combat_doc["monstres"]
+			  if m["vivant"] and m is not monstre and m.get("pos")
+			  and (m["pos"]["x"], m["pos"]["y"]) in cases]
+	return [monstre] + autres
+
+
+def beneficiaires_de_zone(combat_doc: dict, lanceur: dict, principal: dict, zone: dict,
+						  grid: dict) -> list:
+	"""Alliés DEBOUT servis par la zone d'une capacité bénéfique, `principal` EN TÊTE.
+
+	Jumeau de `cibles_de_zone` pour l'autre camp. `principal` est l'allié DÉSIGNÉ pour une
+	capacité `cible: "allie"`, et le LANCEUR lui-même pour une capacité `cible: "soi"` —
+	qui n'en désigne aucun, et dont la forme se pose donc toujours sur lui.
+
+	⚠️ **Le lanceur profite d'une zone dans laquelle il se tient**, alors qu'il ne peut
+	jamais être *désigné* comme allié (`allyTargets` l'exclut côté client). Les deux ne
+	disent pas la même chose : une vague de soin centrée sur un compagnon blessé qui
+	épargnerait le soigneur debout au milieu serait une surprise, pas une règle.
+
+	⚠️ **Un allié à TERRE est écarté** — même raison que dans `_lancer_sur_allie` : le
+	remettre en jeu changerait la condition de défaite et l'ordre du tour. Relever un
+	compagnon mérite sa propre mécanique.
+
+	⚠️ **Montures, personnes escortées et invocations sont de la partie** : elles sont sur
+	la grille et déjà visables une par une, rien ne justifie qu'une nappe les traverse
+	sans les toucher. Aucun MONSTRE n'en profite, symétrique exact du « pas de tir ami ».
+	"""
+	if not zone:
+		return [principal]
+	cases = set(cases_effet(
+		zone,
+		(lanceur["pos"]["x"], lanceur["pos"]["y"]),
+		(principal["pos"]["x"], principal["pos"]["y"]),
+		lanceur.get("facing", 0),
+		praticable=lambda x, y: _passable(grid["cells"], x, y),
+		vue=lambda x0, y0, x1, y1: _line_of_sight(grid["cells"], x0, y0, x1, y1),
+	))
+	autres = [p for p in combat_doc.get("joueurs", [])
+			  if p is not principal and p.get("pos") and p.get("currentPV", 0) > 0
+			  and (p["pos"]["x"], p["pos"]["y"]) in cases]
+	return [principal] + autres
+
+
+def _servir_zone_soutien(combat_doc: dict, lanceur: dict, principal: dict, source: dict,
+						 effets: dict, zone: dict, grid: dict) -> list:
+	"""Sert les alliés que la zone ajoute au bénéficiaire déjà traité. Rend leurs résultats.
+
+	⚠️ À n'appeler qu'APRÈS que `principal` a reçu son dû (par `_lancer_sur_allie` pour une
+	capacité `allie`, par la branche `soi` pour le lanceur) : il est en tête de la liste et
+	volontairement sauté ici, sinon il encaisserait deux fois le même soin.
+	"""
+	return [_appliquer_soutien(combat_doc, lanceur, p, source, effets)
+			for p in beneficiaires_de_zone(combat_doc, lanceur, principal, zone, grid)[1:]]
+
+
+def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, source: dict,
+							effets: dict, notation: str, mode_jet: str, canal: str,
+							textes: dict, noms: dict) -> tuple:
+	"""UN coup de capacité offensive sur UNE cible : jet, dégâts, journal, part à durée.
+
+	Chokepoint partagé par les branches `sort` et `competence` de `resolve_action`, et
+	rejoué une fois par cible d'une zone d'effet. Ne touche NI les PM, NI le compteur
+	d'actions, NI la furtivité, NI la victoire : tout cela est propre au lancement, pas
+	au coup, et se paie une seule fois même quand la zone frappe cinq ennemis.
+
+	⚠️ `notation` est calculée par l'appelant (une compétence de contact y ajoute les dés
+	de l'arme) : elle ne dépend pas de la cible, la recalculer par victime serait faux
+	pour rien. En revanche la LOCALISATION et le jet de toucher sont retirés pour chacune
+	— une boule de feu peut griller l'un et manquer l'autre.
+
+	Rend `(resultat, jet)`.
+	"""
+	if mode_jet == "magique":
+		seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
+	else:
+		skill = joueur["cd"] if mode_jet == "cd" else joueur["cc"]
+		seuil = _hit_threshold(skill, _defense_physique(monstre))
+	jet = _resoudre_jet(joueur, monstre, seuil)
+	ctx = {"acteur": joueur["nom"], "cible": monstre["nom"], "roll": jet["roll"],
+		   "seuil": seuil, "ou": "", "dmg": 0,
+		   "pv": monstre["currentPV"], "pv_max": monstre["pv_max"], **noms}
+	anim = (source or {}).get("animation")
+
+	if not jet["touche"]:
+		cle = "fumble" if jet["fumble"] else "miss"
+		combat_doc["log"].append(_avec_etat(_avec_vfx({
+			"tour": combat_doc["tour"],
+			"acteur": joueur["nom"],
+			"kind": cle,
+			"texte": textes[cle].format(**ctx),
+		}, cle, monstre.get("id", ""), acteur_id=joueur.get("id", "")), joueur))
+		return {"hit": False, "fumble": jet["fumble"], "roll": jet["roll"], "seuil": seuil,
+				"cible": monstre["nom"], "cible_id": monstre.get("id")}, jet
+
+	if notation:
+		touchee = tirer_localisation()
+		ctx["ou"] = f" {ZONE_LIBELLE[touchee]}" if touchee in ZONE_LIBELLE else ""
+		dmg = calculer_degats(joueur, monstre, notation, jet["mult_degats"], mode_jet,
+							  zone=touchee)
+	else:
+		dmg = 0   # capacité de pur debuff : elle touche sans blesser
+	monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
+	ctx["dmg"] = dmg
+	ctx["pv"] = monstre["currentPV"]
+
+	if dmg and monstre["currentPV"] <= 0:
+		monstre["vivant"] = False
+		cle, kind, geles = ("kill_crit" if jet["critique"] else "kill"), "kill", (joueur, monstre)
+	elif dmg:
+		cle = "crit" if jet["critique"] else "hit"
+		kind, geles = cle, (joueur, monstre)
+	else:
+		# La ligne posée juste après par `_appliquer_effet_sur_cible` dira ce que la
+		# cible encaisse ; celle-ci ne gèle donc PAS la cible (elle ne la change pas).
+		cle, kind, geles = "prend", "hit", (joueur,)
+	combat_doc["log"].append(_avec_etat(_avec_vfx({
+		"tour": combat_doc["tour"],
+		"acteur": joueur["nom"],
+		"kind": kind,
+		"texte": textes[cle].format(**ctx),
+	}, canal, monstre.get("id", ""), anim, joueur.get("id", "")), *geles))
+
+	# Part à DURÉE sur la CIBLE : posée seulement si la capacité a TOUCHÉ, et jamais sur
+	# une cible que le même coup vient d'abattre.
+	effet_cible = _appliquer_effet_sur_cible(combat_doc, monstre, source, effets,
+											 combat_doc["tour"])
+	return {"hit": True, "dmg": dmg, "critique": jet["critique"],
+			"cible": monstre["nom"], "cible_id": monstre.get("id"),
+			"cible_pv": monstre["currentPV"],
+			"effet_cible": dict(effet_cible) if effet_cible else None}, jet
+
+
+def _resoudre_capacite_offensive(combat_doc: dict, joueur: dict, cibles: list,
+								 source: dict, effets: dict, notation: str,
+								 mode_jet: str, canal: str, textes: dict,
+								 noms: dict) -> tuple:
+	"""Le coup ci-dessus, joué sur CHAQUE cible de la zone. Rend `(resultat, jet_principal)`.
+
+	Le résultat est celui de la cible DÉSIGNÉE (premier élément), enrichi de `cibles` —
+	la liste complète — dès qu'il y en a plus d'une. Le client garde donc exactement le
+	payload qu'il lisait avant pour une capacité mono-cible.
+
+	⚠️ **Seul le jet de la cible désignée peut faire échouer critiquement le lanceur.**
+	Chaque victime a bien son propre jet (elles n'ont ni la même défense ni la même
+	chance), mais faire du fumble une loterie à N tirages punirait les zones larges
+	exactement parce qu'elles sont larges — un cône de cinq cases deviendrait le geste le
+	plus dangereux du jeu pour celui qui le lance.
+	"""
+	resultats = []
+	jet_principal = None
+	for cible in cibles:
+		res, jet = _resoudre_coup_capacite(combat_doc, joueur, cible, source, effets,
+										   notation, mode_jet, canal, textes, noms)
+		if jet_principal is None:
+			jet_principal = jet
+		resultats.append(res)
+	principal = dict(resultats[0])
+	if len(resultats) > 1:
+		principal["cibles"] = resultats
+	return principal, jet_principal
 
 
 def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
@@ -2939,6 +3179,13 @@ def resolve_action(
 				return res_allie   # PM NON débités : le sort n'est jamais parti
 			joueur["currentPM"] -= cout_pm
 			result = {"sort": sdoc.get("nom"), **res_allie}
+			# ZONE DE SOUTIEN : les alliés que la forme ajoute au désigné, lui déjà servi.
+			# ⚠️ Les gardes de `_lancer_sur_allie` (portée, ligne de vue, « à terre ») ne
+			# valent que pour le DÉSIGNÉ : c'est contre lui que le sort a été autorisé.
+			autres = _servir_zone_soutien(combat_doc, joueur, allie, sdoc, effets,
+										  sdoc.get("zone"), grid)
+			if autres:
+				result["beneficiaires"] = autres
 		elif sdoc.get("cible") == "ennemi":
 			# Dégâts OU part à durée : un sort offensif peut n'être qu'un debuff
 			# (« −10 Ag pendant 2 tours »), il lui suffit d'avoir quelque chose à faire.
@@ -2967,91 +3214,16 @@ def resolve_action(
 			# pm_def ; un sort de CONTACT marqué `cc`/`cd` (« au toucher ») exige
 			# d'abord de poser la main — jet martial contre la défense physique.
 			mode_jet = sdoc.get("jet") or "magique"
-			if mode_jet == "magique":
-				seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0),
-											 monstre.get("pm_def", 0))
-			else:
-				skill = joueur["cd"] if mode_jet == "cd" else joueur["cc"]
-				seuil = _hit_threshold(skill, _defense_physique(monstre))
-			jet = _resoudre_jet(joueur, monstre, seuil)
-			roll = jet["roll"]
-			if jet["touche"]:
-				# `mode_jet` porte tout : la magie ignore les PA (la pm_def a déjà joué
-				# dans le seuil), un sort à jet MARTIAL les subit — sinon `jet: "cc"`
-				# serait un pur gain, contourner la pm_def sans rien payer en retour.
-				ou = ""
-				if effets.get("degats"):
-					zone = tirer_localisation()
-					ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
-					dmg = calculer_degats(joueur, monstre, effets["degats"],
-										  jet["mult_degats"], mode_jet, zone=zone)
-				else:
-					dmg = 0
-				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
-				anim_sort = sdoc.get("animation")
-				if dmg and monstre["currentPV"] <= 0:
-					monstre["vivant"] = False
-					combat_doc["log"].append(_avec_etat(_avec_vfx({
-						"tour": combat_doc["tour"],
-						"acteur": joueur["nom"],
-						"kind": "kill",
-						"texte": (
-							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} d'une puissance CRITIQUE "
-							f"et pulvérise {monstre['nom']} !"
-							if jet["critique"] else
-							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} et élimine {monstre['nom']} !"
-						),
-					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")), joueur, monstre))
-				elif dmg:
-					combat_doc["log"].append(_avec_etat(_avec_vfx({
-						"tour": combat_doc["tour"],
-						"acteur": joueur["nom"],
-						"kind": "crit" if jet["critique"] else "hit",
-						"texte": (
-							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} d'une puissance CRITIQUE : "
-							f"{monstre['nom']} encaisse{ou} {dmg} dégâts ! "
-							f"(jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
-							if jet["critique"] else
-							f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {monstre['nom']} "
-							f"encaisse{ou} {dmg} dégâts ! (PV : {monstre['currentPV']}/{monstre['pv_max']})"
-						),
-					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")), joueur, monstre))
-				else:
-					# Sort de pur debuff : il touche sans blesser. La ligne posée juste
-					# après par _appliquer_effet_sur_cible dit ce que la cible encaisse.
-					combat_doc["log"].append(_avec_etat(_avec_vfx({
-						"tour": combat_doc["tour"],
-						"acteur": joueur["nom"],
-						"kind": "hit",
-						"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} "
-								 f"sur {monstre['nom']} : le sort prend.",
-					}, "sort", monstre.get("id", ""), anim_sort, joueur.get("id", "")), joueur))
-				# Part à DURÉE sur la CIBLE : posée seulement si le sort a TOUCHÉ, et jamais
-				# sur une cible que le même coup vient d'abattre.
-				effet_cible = _appliquer_effet_sur_cible(
-					combat_doc, monstre, sdoc, effets, combat_doc["tour"])
-				result = {"sort": sdoc.get("nom"), "hit": True, "dmg": dmg,
-						  "critique": jet["critique"],
-						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"],
-						  "effet_cible": dict(effet_cible) if effet_cible else None}
-			else:
-				# Le lanceur en état : les PM sont débités AVANT le jet (raté = dépensés),
-				# la ligne qui annonce l'échec est donc celle qui doit les faire baisser.
-				combat_doc["log"].append(_avec_etat(_avec_vfx({
-					"tour": combat_doc["tour"],
-					"acteur": joueur["nom"],
-					"kind": "fumble" if jet["fumble"] else "miss",
-					"texte": (
-						f"{joueur['nom']} bafouille son incantation : {sdoc.get('nom', 'le sort')} "
-						f"lui explose au visage ! (jet {roll} / seuil {seuil})"
-						if jet["fumble"] else
-						f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} sur {monstre['nom']}"
-						f" mais le sort se dissipe ! (jet {roll} / seuil {seuil})"
-					),
-				}, "fumble" if jet["fumble"] else "miss", monstre.get("id", ""),
-					acteur_id=joueur.get("id", "")), joueur))
-				result = {"sort": sdoc.get("nom"), "hit": False, "fumble": jet["fumble"],
-						  "roll": roll, "seuil": seuil}
+			# ZONE D'EFFET : la cible désignée d'abord, puis tout monstre pris dans la
+			# forme (cf. utils/zones_effet.py). `zone` absente ⇒ liste d'un seul élément,
+			# donc exactement le comportement d'avant.
+			cibles_sort = cibles_de_zone(combat_doc, joueur, monstre, sdoc.get("zone"), grid)
+			nom_sort = sdoc.get("nom", "un sort")
+			result, jet = _resoudre_capacite_offensive(
+				combat_doc, joueur, cibles_sort, sdoc, effets, effets.get("degats", ""),
+				mode_jet, "sort", TEXTES_SORT,
+				{"nom": nom_sort, "nom_fumble": sdoc.get("nom", "le sort")})
+			result["sort"] = sdoc.get("nom")
 
 			# Incanter au contact révèle le lanceur (touché ou raté) ; à distance, seule la
 			# cible tente de le repérer — foudroyée sur place, elle n'en a même pas le temps.
@@ -3085,6 +3257,13 @@ def resolve_action(
 			result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
 					  "furtif": bool(joueur.get("furtif")),
 					  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
+			# ZONE DE SOUTIEN autour de soi (cri de ralliement, nappe de soin) : le
+			# lanceur vient d'être servi ci-dessus, la forme est ancrée sur lui et, faute
+			# de cible désignée, orientée par son `facing`.
+			autres = _servir_zone_soutien(combat_doc, joueur, joueur, sdoc, effets,
+										  sdoc.get("zone"), grid)
+			if autres:
+				result["beneficiaires"] = autres
 
 		# Les composants consommés quittent le sac → la charge portée baisse.
 		poids_consommes = float(sort.get("poids_consommes", 0) or 0)
@@ -3129,6 +3308,10 @@ def resolve_action(
 				return res_allie
 			joueur["currentPM"] -= cout_pm
 			result = {"competence": nom, **res_allie}
+			autres = _servir_zone_soutien(combat_doc, joueur, allie, competence, effets,
+										  competence.get("zone"), grid)
+			if autres:
+				result["beneficiaires"] = autres
 		elif competence.get("cible") == "ennemi":
 			# Dégâts OU part à durée : une compétence offensive peut n'être qu'un debuff
 			# (cri de guerre qui affaiblit, entrave qui ralentit…).
@@ -3161,88 +3344,17 @@ def resolve_action(
 			# Le jet est aussi ce qui décide si les dégâts d'ARME s'ajoutent (cf.
 			# _degats_competence) : une frappe `cc` est portée avec l'arme en main.
 			jet = competence.get("jet", "cc")
-			if jet == "magique":
-				seuil = _magic_hit_threshold(joueur.get("toucher_magique", 0), monstre.get("pm_def", 0))
-			else:
-				skill = joueur["cd"] if jet == "cd" else joueur["cc"]
-				seuil = _hit_threshold(skill, _defense_physique(monstre))
-			resultat_jet = _resoudre_jet(joueur, monstre, seuil)
-			roll = resultat_jet["roll"]
-			if resultat_jet["touche"]:
-				ou = ""
-				if effets.get("degats"):
-					# Notation = dés de la compétence, PLUS les dégâts d'arme si c'est une
-					# frappe de contact. Le reste (critique avant les PA, magie sans PA)
-					# est la formule commune.
-					notation = _degats_competence(joueur, competence, effets)
-					zone = tirer_localisation()
-					ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
-					dmg = calculer_degats(joueur, monstre, notation,
-										  resultat_jet["mult_degats"], jet, zone=zone)
-				else:
-					dmg = 0   # compétence de pur debuff : elle touche sans blesser
-				monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
-				anim_comp = competence.get("animation")
-				if dmg and monstre["currentPV"] <= 0:
-					monstre["vivant"] = False
-					combat_doc["log"].append(_avec_etat(_avec_vfx({
-						"tour": combat_doc["tour"],
-						"acteur": joueur["nom"],
-						"kind": "kill",
-						"texte": (
-							f"{joueur['nom']} utilise {nom} — coup CRITIQUE — et élimine {monstre['nom']} !"
-							if resultat_jet["critique"] else
-							f"{joueur['nom']} utilise {nom} et élimine {monstre['nom']} !"
-						),
-					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")),
-						joueur, monstre))
-				elif dmg:
-					combat_doc["log"].append(_avec_etat(_avec_vfx({
-						"tour": combat_doc["tour"],
-						"acteur": joueur["nom"],
-						"kind": "crit" if resultat_jet["critique"] else "hit",
-						"texte": (
-							f"{joueur['nom']} utilise {nom} — coup CRITIQUE : {monstre['nom']} encaisse{ou} "
-							f"{dmg} dégâts ! (jet {roll} — PV : {monstre['currentPV']}/{monstre['pv_max']})"
-							if resultat_jet["critique"] else
-							f"{joueur['nom']} utilise {nom} : {monstre['nom']} encaisse{ou} {dmg} dégâts ! "
-							f"(PV : {monstre['currentPV']}/{monstre['pv_max']})"
-						),
-					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")),
-						joueur, monstre))
-				else:
-					# Compétence de pur debuff : elle touche sans blesser. La ligne posée
-					# juste après par _appliquer_effet_sur_cible dit ce que la cible encaisse.
-					combat_doc["log"].append(_avec_etat(_avec_vfx({
-						"tour": combat_doc["tour"],
-						"acteur": joueur["nom"],
-						"kind": "hit",
-						"texte": f"{joueur['nom']} utilise {nom} sur {monstre['nom']} : la prise porte.",
-					}, "competence", monstre.get("id", ""), anim_comp, joueur.get("id", "")), joueur))
-				# Part à DURÉE sur la CIBLE : posée seulement si la compétence a TOUCHÉ, et
-				# jamais sur une cible que le même coup vient d'abattre.
-				effet_cible = _appliquer_effet_sur_cible(
-					combat_doc, monstre, competence, effets, combat_doc["tour"])
-				result = {"competence": nom, "hit": True, "dmg": dmg,
-						  "critique": resultat_jet["critique"],
-						  "cible": monstre["nom"], "cible_pv": monstre["currentPV"],
-						  "effet_cible": dict(effet_cible) if effet_cible else None}
-			else:
-				combat_doc["log"].append(_avec_etat(_avec_vfx({
-					"tour": combat_doc["tour"],
-					"acteur": joueur["nom"],
-					"kind": "fumble" if resultat_jet["fumble"] else "miss",
-					"texte": (
-						f"{joueur['nom']} rate complètement {nom} sur {monstre['nom']} "
-						f"et se découvre ! (jet {roll} / seuil {seuil})"
-						if resultat_jet["fumble"] else
-						f"{joueur['nom']} utilise {nom} sur {monstre['nom']}"
-						f" mais manque son coup ! (jet {roll} / seuil {seuil})"
-					),
-				}, "fumble" if resultat_jet["fumble"] else "miss", monstre.get("id", ""),
-					acteur_id=joueur.get("id", "")), joueur))
-				result = {"competence": nom, "hit": False, "fumble": resultat_jet["fumble"],
-						  "roll": roll, "seuil": seuil}
+			# Notation = dés de la compétence, PLUS les dégâts d'arme si c'est une frappe
+			# de contact. Elle ne dépend pas de la cible : calculée UNE fois, même quand la
+			# zone frappe plusieurs ennemis.
+			notation = _degats_competence(joueur, competence, effets) if effets.get("degats") else ""
+			# ZONE D'EFFET : cible désignée d'abord, puis tout monstre pris dans la forme.
+			cibles_comp = cibles_de_zone(combat_doc, joueur, monstre,
+										 competence.get("zone"), grid)
+			result, resultat_jet = _resoudre_capacite_offensive(
+				combat_doc, joueur, cibles_comp, competence, effets, notation,
+				jet, "competence", TEXTES_COMPETENCE, {"nom": nom, "nom_fumble": nom})
+			result["competence"] = nom
 
 			# Frapper au contact révèle le joueur (touché ou raté) ; à distance, seule la
 			# cible tente de le repérer — et une cible abattue ne repère plus rien.
@@ -3275,6 +3387,10 @@ def resolve_action(
 			result = {"competence": nom, "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
 					  "furtif": bool(joueur.get("furtif")),
 					  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
+			autres = _servir_zone_soutien(combat_doc, joueur, joueur, competence, effets,
+										  competence.get("zone"), grid)
+			if autres:
+				result["beneficiaires"] = autres
 
 		result["currentPM"] = joueur["currentPM"]
 		joueur["competences"] = joueur.get("competences", 0) + 1

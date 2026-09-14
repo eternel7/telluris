@@ -22,7 +22,7 @@ node dev/check_js.js               # syntaxe du JS inline des templates ET de te
 node dev/test_<x>_client.js        # EXÉCUTION du JS client, sans dépendance, code 1 en échec
 ```
 
-Harnais : `slots` · `resize` · `deplacement` · `voies` · `lot_lieux` · `lieu_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
+Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `lot_lieux` · `lieu_form` · `connexions` · `dialogues` · `portes` · `guilde` · `gestion_lieux`. Méthode (extraction par nom, `runInThisContext`, globales semées), portée de chacun, collecte pytest en local : compétence **telluris-tests**.
 
 - ⚠️ **Aucune règle de marche côté serveur** (`move_character` ne valide que les bornes) : `scripts/deplacement.js` EST la règle, `test_deplacement_client.js` son seul test.
 - **Environnement local de l'agent** : Node (`C:\Program Files\nodejs\`) et Python (`C:\Python314\`) souvent **hors `PATH`** — `"/c/Program Files/nodejs/node.exe"` depuis Bash, `python -m pytest`. CouchDB injoignable en local ; Docker et l'app tournent côté utilisateur.
@@ -58,6 +58,8 @@ utils/
   sorts.py               # sorts (pur) : normalisation, composants, écoles de magie, apprentissage,
                          #   familles exclues d'une vocation, bloc `invocation`
   competences.py         # compétences de vocation (pur) : passives permanentes, actives, apprentissage
+  zones_effet.py         # zones d'effet des sorts/compétences (pur) : cercle, carré, rectangle, cône ;
+                         #   ancre (lanceur/cible) + orientation ; miroir scripts/zones_effet.js
   consommables.py        # chokepoint des buffs : sources, cumul, effets_actifs
   slots_actions.py       # barre d'action de combat (pur) : entrées, invariante, migration à la lecture
   animations.py          # animations de combat (pur) : découpe d'une feuille, cascade de canaux, charge `vfx`
@@ -99,6 +101,7 @@ templates/
   scripts/               # JS partagé, servi par le mount /scripts
                          #   battle_map.js · nav.js (bitmask nav) · deplacement.js (règles de marche)
                          #   voies.js (tracé des voies de l'éditeur : régions, goulots, passage)
+                         #   zones_effet.js (géométrie des zones d'effet : APERÇU, le serveur tranche)
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
   gen_*.py               # générateurs de contenu → jsons/*_a_importer.json (catalogue : telluris-admin-tools)
@@ -119,7 +122,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 | items, poids, marché, recettes, grandes maisons, portée des recettes, flux de cité | `telluris-economie` |
 | quêtes (guilde, transport, chasse, escorte), PNJ et dialogues, `/admin/dialogues`, accès, donjons, intro | `telluris-quetes-pnj` |
 | recrutement, groupe, compagnie, contrat de mission, montures | `telluris-recrutement` |
-| sorts, compétences de vocation, focalisation | `telluris-magie` |
+| sorts, compétences de vocation, zones d'effet, focalisation | `telluris-magie` |
 | journal, relations, cartes/portraits, listes scrollables, tavernes, scriptorium, toasts | `telluris-social-ui` |
 | dump, exports, `/admin/table`, écritures PUT complet, cache de requête, caches process | `telluris-db` |
 | lanceur `dev/`, générateurs de contenu, variables de monde | `telluris-admin-tools` |
