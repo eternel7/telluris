@@ -1,0 +1,88 @@
+[
+  {
+    "_id": "sort:souffle_de_feu",
+    "type": "sort",
+    "nom": "Souffle de feu",
+    "icon": "🔥",
+    "description": "Une gorgée d'air brûlant crachée devant soi. La nappe s'évase en s'éloignant : ce qui se tient au coude à coude face au mage brûle ensemble.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 1,
+    "cout_pm": 14,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 3,
+    "effets": { "degats": "2D6" },
+    "zone": {
+      "forme": "cone",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "longueur": 3,
+      "decalage": 1,
+      "angle": 90
+    }
+  },
+  {
+    "_id": "sort:boule_de_feu",
+    "type": "sort",
+    "nom": "Boule de feu",
+    "icon": "☄️",
+    "description": "Une bille incandescente qui éclate là où elle touche. Le souffle emporte tout ce qui se serre autour du point d'impact.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 2,
+    "cout_pm": 20,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 8,
+    "effets": { "degats": "3D6" },
+    "zone": {
+      "forme": "cercle",
+      "origine": "cible",
+      "rayon": 2
+    }
+  },
+  {
+    "_id": "competence:balayage",
+    "type": "competence",
+    "nom": "Balayage",
+    "icon": "⚔️",
+    "description": "Un seul mouvement d'épaule, la lame à l'horizontale : le fer passe sur les trois cases qui font face au guerrier.",
+    "vocation": "guerrier",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 6,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": { "degats": "1D6" },
+    "zone": {
+      "forme": "rectangle",
+      "origine": "lanceur",
+      "orientation": "cible",
+      "longueur": 1,
+      "largeur": 3,
+      "decalage": 1
+    }
+  },
+  {
+    "_id": "competence:tourbillon_de_lames",
+    "type": "competence",
+    "nom": "Tourbillon de lames",
+    "icon": "🌀",
+    "description": "Le barbare pivote sur lui-même, arme tendue. Rien de ce qui l'entoure n'est épargné — et rien ne le prévient de ce qui vient de dos.",
+    "vocation": "barbare",
+    "niveau": 2,
+    "mode": "active",
+    "cout_pm": 12,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": { "degats": "1D6" },
+    "zone": {
+      "forme": "carre",
+      "origine": "lanceur",
+      "rayon": 1
+    }
+  }
+]

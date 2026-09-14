@@ -32,6 +32,7 @@ from utils.consommables import _as_int, poser_effet
 from utils.sorts import (
 	CIBLE_DEFAUT, CIBLES, JETS, _bonus_dict, famille_de, familles_exclues, part_durative,
 )
+from utils.zones_effet import normaliser_zone
 
 MODES = ("passive", "active")
 # JETS vient de utils.sorts (source unique partagée avec les sorts) ; seul le DÉFAUT
@@ -69,6 +70,9 @@ def normaliser_competence(doc) -> dict | None:
 		"cible": cible,
 		"jet": jet,
 		"portee": max(1, _as_int(doc.get("portee")) or 1),
+		# Zone d'effet (ou None) — même bloc et même règle que les sorts
+		# (cf. utils/zones_effet.py). Absente ⇒ la seule case de la cible.
+		"zone": normaliser_zone(doc.get("zone")),
 		"effets": _bonus_dict(doc.get("effets")),
 		# Condition d'activation optionnelle : {"battle_map_tags": [...]} — la
 		# compétence n'agit en combat que si la carte porte l'un de ces tags
@@ -326,6 +330,8 @@ def liste_competences_payload(character: dict, get_doc, contexte: str) -> list:
 			"cible": comp["cible"],
 			"jet": comp["jet"],
 			"portee": comp["portee"],
+			# Étiquette de la case + aperçu des cases touchées, comme pour les sorts.
+			"zone": comp["zone"],
 			"effets": comp["effets"],
 		})
 	return out

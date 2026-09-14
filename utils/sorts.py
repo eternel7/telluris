@@ -30,6 +30,7 @@
 from models import character_stats
 from utils.characters import item_ref_id
 from utils.consommables import _as_int, poser_effet
+from utils.zones_effet import normaliser_zone
 
 # Jet de toucher d'un effet offensif, porté par la DONNÉE. SOURCE UNIQUE, partagée avec
 # les compétences (utils/competences.py l'importe) — les deux familles se résolvent par
@@ -215,6 +216,10 @@ def normaliser_sort(sort_doc) -> dict | None:
 		# CONTACT peut demander `cc` (« au toucher » : il faut d'abord poser la main).
 		"jet": jet,
 		"portee": _as_int(doc.get("portee")),
+		# Zone d'effet (ou None) : forme touchée autour de la cible désignée ou du
+		# lanceur — cf. utils/zones_effet.py. Absente ⇒ la seule case de la cible,
+		# comportement d'avant. EXPLICITE dans cette liste blanche, comme `animation`.
+		"zone": normaliser_zone(doc.get("zone")),
 		"effets": effets_de_sort(doc),
 		"composants": composants,
 		# Condition d'activation optionnelle (partagée avec les compétences) :
@@ -710,6 +715,10 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str) -> list:
 			"cout_pm": sort["cout_pm"],
 			"cible": sort["cible"],
 			"portee": sort["portee"],
+			# Le client en tire l'étiquette de la case ET l'APERÇU des cases touchées
+			# pendant le ciblage (scripts/zones_effet.js) : sans ce champ, un sort de
+			# zone se lancerait à l'aveugle.
+			"zone": sort["zone"],
 			"effets": sort["effets"],
 			# Bloc `invocation` (ou None) : le client en tire l'étiquette de la case — sans
 			# lui, un sort d'invocation s'afficherait sans le moindre effet annoncé, ses

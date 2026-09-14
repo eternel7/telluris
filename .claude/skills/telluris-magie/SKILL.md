@@ -1,6 +1,6 @@
 ---
 name: telluris-magie
-description: Spells, vocation skills and focus — PM-costed spells with components/schools, vocation active/passive skills (mirrors spells), and the guidance/quest-bias focalisation mechanic (utils/sorts.py, competences.py, focalisation.py). Load when working on spells, vocation skills, or the focalisation system.
+description: Spells, vocation skills and focus — PM-costed spells with components/schools, vocation active/passive skills (mirrors spells), area-of-effect target zones (circle/square/rectangle/cone anchored on caster or target, with an orientation), and the guidance/quest-bias focalisation mechanic (utils/sorts.py, competences.py, zones_effet.py, focalisation.py). Load when working on spells, vocation skills, area/zone targeting, or the focalisation system.
 ---
 
 ### Sorts — PM, composants, écoles
@@ -27,6 +27,23 @@ Le snapshot est un `build_monster_snapshot` re-keyé en `joueur_*` (`build_invoc
 Doc `competence:*` : même schéma d'`effets` que les sorts, sans composants, `cout_pm ≥ 0`. Logique pure `utils/competences.py`. Choix à la création pour toute vocation hors `SORT_VOCATIONS_DEPART` (un sort **ou** une compétence, jamais les deux). Passive = buffs/régén permanents dénormalisés dans `competences_bonus`. Active = 1 action + PM, jet porté par la donnée (martial avec soustraction de PA, magique sans). **Une frappe de contact (`jet:"cc"`) emprunte les dés ET l'allonge de l'arme équipée** (chokepoints `combat._degats_competence`/`_portee_competence`) — sans quoi une active payante frapperait moins fort et moins loin qu'une attaque gratuite ; `ranged` en dérive (`portee > allonge`), ce qui pilote aussi la rupture de furtivité. Furtivité et détection (jet de détection par monstre à son tour, rupture au corps-à-corps, la cible seule tente un jet à distance) sont couvertes par le même chokepoint `_furtivite_apres_offensive`. Toute cette mécanique est couverte par `tests/test_competences.py`.
 
 Apprentissage : `POST /api/apprendre_competence`, coût `(niveau+1)×COMPETENCE_COUT_COEFF`, pas de grimoire. Contenu : `jsons/competences_niveau0.json`, `new_comp0.json`.
+
+
+### Zones d'effet — une forme, pas une case
+Bloc `zone` d'un doc `sort:*`/`competence:*`, géométrie pure `utils/zones_effet.py`, miroir client `templates/scripts/zones_effet.js`. **Bloc absent ⇒ la seule case de la cible désignée**, à la lettre (aucune migration). Le quadrillage étant fait de CARRÉS, une zone se lit en trois temps : une **ancre** (`origine`: `cible` | `lanceur`), une **orientation** (`orientation`: `cible` = l'axe lanceur→cible ramené au huitième de tour | `facing` = l'orientation du lanceur, ⚠️ les monstres n'en ont pas), une **forme**.
+
+| `forme` | dimensions | figure |
+|---|---|---|
+| `cercle` | `rayon` | disque EUCLIDIEN (rayon 1 = la croix, 5 cases) — boule de feu |
+| `carre` | `rayon` | disque de CHEBYSHEV (rayon 1 = les 8 cases autour, 9) — tourbillon de lames |
+| `rectangle` | `longueur` × `largeur`, `decalage` | bande orientée — les 3 cases devant : `longueur 1, largeur 3, decalage 1` |
+| `cone` | `longueur`, `angle` (défaut 90), `decalage` | secteur angulaire — souffle de feu : 3 + 5 + 7 cases sur 3 crans |
+
+⚠️ **`decalage` compte depuis l'ancre INCLUSE** : 0 = la forme commence sur la case d'ancre. Une forme orientée ancrée sur le LANCEUR s'écrit donc `decalage: 1` (sinon son premier cran est la case du lanceur) ; ancrée sur la CIBLE elle garde 0, faute de quoi la cible désignée serait la seule épargnée. ⚠️ `cercle` et `carre` de rayon 1 sont **deux figures distinctes**, c'est la raison d'être des deux formes. ⚠️ Largeur PAIRE : débordement d'une case à droite (assumé, on ne centre pas sur une case). Bornes de donnée : rayon ≤ 8, longueur/largeur/décalage ≤ 12, angle 1-360.
+
+**Résolution** (`combat.cibles_de_zone` → `_resoudre_capacite_offensive` → `_resoudre_coup_capacite`, chokepoint unique désormais partagé par les branches `sort` et `competence` de `resolve_action`, les libellés restant portés par chacune via `TEXTES_SORT`/`TEXTES_COMPETENCE`) : **un jet de toucher, une localisation et une part durative PAR victime**, mais **un seul débit de PM, une seule action, une seule ligne de furtivité**. ⚠️ **Seul le jet de la cible DÉSIGNÉE peut faire échouer critiquement** — sinon une zone large deviendrait le geste le plus dangereux du jeu pour celui qui le lance. ⚠️ **La cible désignée est TOUJOURS touchée**, même si la forme ne la couvre pas : c'est contre elle que portée, ligne de vue et engagement ont été validés. ⚠️ **Aucun tir ami** (ni lanceur, ni compagnons, ni montures, ni invocations) — limite assumée, le jeu n'en a nulle part. ⚠️ **Zones HOSTILES seulement** : `cible: "allie"`/`"soi"` ignorent le bloc. La forme est filtrée par le terrain (`_passable`) et par la ligne de vue **depuis l'ancre** : une explosion ne contourne pas l'angle d'un couloir. `portee` (qui l'on peut DÉSIGNER) et la zone (ce qui BRÛLE) sont deux choses distinctes.
+
+**Payload & UI** : `zone` normalisée dans `normaliser_sort`/`normaliser_competence` et dans les deux `liste_*_payload` ; le résultat d'action gagne une clé **`cibles`** (liste complète) **seulement à partir de deux victimes** — le client garde son payload d'avant pour une capacité mono-cible. Combat : aperçu des cases au **survol** d'une cible pendant le ciblage violet (`apercuZone`/`_armerApercuZone`, cases `.zone-case` posées par `_placerToken` donc solidaires de la caméra) ; ⚠️ **le tactile n'a pas de survol** — d'où `libelleZone` dans l'étiquette de la case (et dans l'onglet ⚡, qui n'a pas de grille). Verrouillé par `tests/test_zones_effet.py`, `tests/test_combat_zone.py` et `dev/test_zones_effet_client.js` (qui rejoue les MÊMES cas que le pytest, valeurs comprises). Contenu : `jsons/zones_effet_exemples_a_importer.json` (les quatre figures de référence).
 
 
 ### Focalisation — 🧭 lieu / 🎯 quête

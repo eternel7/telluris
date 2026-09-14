@@ -2640,6 +2640,9 @@
    `majFleches`/`verrouillerFleches` (son accès lui est RÉSOLU PAR LE SERVEUR), mais le
    fichier est un tout — c'est la même règle de marche des trois côtés. #}
 <script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
+{# `libelleZone` seulement : l'onglet ⚡ est un CATALOGUE, il annonce la forme d'une zone
+   d'effet sans rien dessiner (il n'y a pas de grille hors combat). #}
+<script src="{{ url_for('scripts', path='zones_effet.js') }}"></script>
 <script>
 	let POSITIONS = { "x" : {{ position["x"] | tojson | safe }}, "y": {{ position["y"] | tojson | safe }} }
 	let LINKS = {{ links | tojson | safe }};
@@ -4986,6 +4989,14 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.duree) parts.push(`${e.duree} tours`);
 	return parts.join(', ');
 }
+// Étiquette de ZONE D'EFFET d'un sort ou d'une compétence, préfixée pour s'accrocher à la
+// ligne d'effets. Vide quand il n'y en a pas : hors combat il n'y a pas de grille, donc
+// rien à dessiner — le catalogue se contente d'annoncer la forme. `libelleZone` vient de
+// scripts/zones_effet.js.
+function _zoneLabel(capa) {
+	const txt = libelleZone(normaliserZone((capa || {}).zone));
+	return txt ? ' · ' + txt : '';
+}
 // Étiquette d'un sort d'INVOCATION. Elle REMPLACE `_sortEffetsLabel` plutôt que de s'y
 // ajouter : une invocation n'a aucun `effets` (elle fait apparaître une créature, elle ne
 // pose rien sur personne), sa ligne de description resterait vide.
@@ -5048,7 +5059,7 @@ function _renderSorts(list) {
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.sort_id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span></div>
-				<div class="sh-skill-desc">${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
+				<div class="sh-skill-desc">${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${_zoneLabel(s)}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
 				${compos ? `<div class="sh-sort-compos">${compos}</div>` : ''}
 				${ouvert ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${s.description || ''}</div>` : ''}
 			</div>
@@ -5344,7 +5355,7 @@ function _renderCompetences(list) {
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${c.nom}${pm}</div>
 				<div class="sh-skill-desc">${c.description || ''}</div>
-				<div class="sh-skill-desc"${armeTitre}>${_sortEffetsLabel(c.effets, arme ? '+' : '')}${portee}</div>
+				<div class="sh-skill-desc"${armeTitre}>${_sortEffetsLabel(c.effets, arme ? '+' : '')}${portee}${_zoneLabel(c)}</div>
 			</div>
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;
