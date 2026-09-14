@@ -7,6 +7,9 @@
 # PAR victime, un seul débit de PM/action, le fumble de la seule cible désignée, et
 # l'absence totale de tir ami.
 #
+# Les zones BÉNÉFIQUES (`cible: "allie"` et `cible: "soi"`) sont le miroir de tout cela,
+# en bas de fichier : pas de jet, pas de localisation, gains clampés aux max de chacun.
+#
 # Mêmes fixtures que tests/test_combat_debuffs.py, aucun accès DB.
 
 import pytest
@@ -85,6 +88,38 @@ def _joueur():
 	j["cc"] = j["cd"] = 200              # on ne teste pas le toucher, on teste la zone
 	j["toucher_magique"] = 200
 	return j
+
+
+def _allie(idx, x, y, nom, pv=40, **overrides):
+	p = build_joueur_snapshot(_character(_id=f"character:test_{idx}", nom=nom), idx)
+	p["pos"] = {"x": x, "y": y}
+	p["vivant"] = True
+	p["currentPV"] = pv
+	p.update(overrides)
+	return p
+
+
+def _avec_allies(doc, allies):
+	doc["joueurs"].extend(allies)
+	doc["ordre_initiative"].extend(p["id"] for p in allies if p.get("jouable") is not False)
+	return doc
+
+
+def _sort_soutien(zone=None, cible="allie", portee=1, cout_pm=0, effets=None):
+	doc = {"_id": "sort:vague", "type": "sort", "vocation": "pretre",
+		   "nom": "Vague de soin", "icon": "✨", "cible": cible, "cout_pm": max(1, cout_pm),
+		   "portee": portee, "effets": effets or {"pv": 10}, "zone": zone}
+	norm = normaliser_sort(doc)
+	norm["cout_pm"] = cout_pm
+	return {"doc": norm, "effets": norm["effets"]}
+
+
+def _comp_soutien(zone=None, cible="allie", portee=1, effets=None):
+	return normaliser_competence({
+		"_id": "competence:cri", "type": "competence", "vocation": "guerrier",
+		"nom": "Cri de ralliement", "mode": "active", "cible": cible, "cout_pm": 0,
+		"portee": portee, "effets": effets or {"pv": 10}, "zone": zone,
+	})
 
 
 @pytest.fixture(autouse=True)
@@ -260,3 +295,180 @@ def test_le_journal_porte_une_ligne_par_victime():
 	# une victime après l'autre à la révélation, au rythme des animations.
 	# (`vfx` n'est posé que si un canal résout une animation — aucune ici.)
 	assert all(e.get("etat") for e in touches)
+
+
+# ── Zones BÉNÉFIQUES — cible "allie" ─────────────────────────────────────────────
+
+def test_zone_alliee_sert_le_designe_et_ceux_que_la_forme_attrape():
+	# Joueur en (3, 5). Désigné en (3, 4) ; un second allié en (2, 4), dans le carré.
+	m0 = _monstre(0, 6, 6)
+	a1, a2 = _allie(1, 3, 4, "Ordan"), _allie(2, 2, 4, "Brann")
+	doc = _avec_allies(_combat(_joueur(), [m0]), [a1, a2])
+	res = resolve_action(doc, "sort", a1["id"], sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}))
+	assert res["cible"] == "Ordan" and res["pv_rendu"] == 10
+	# `beneficiaires` = ceux que la ZONE ajoute, le désigné étant déjà décrit au-dessus.
+	# Le lanceur en est (il se tient dans sa propre nappe) — cf. le test dédié plus bas.
+	assert [b["cible"] for b in res["beneficiaires"]] == ["Frida", "Brann"]
+	assert a1["currentPV"] == 50 and a2["currentPV"] == 50
+
+
+def test_zone_alliee_ne_soigne_jamais_un_monstre():
+	m0 = _monstre(0, 2, 4)          # collé au lanceur, en plein dans la nappe
+	pv_monstre = m0["currentPV"]
+	a1 = _allie(1, 3, 4, "Ordan")
+	doc = _avec_allies(_combat(_joueur(), [m0]), [a1])
+	resolve_action(doc, "sort", a1["id"], sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}))
+	assert m0["currentPV"] == pv_monstre
+
+
+def test_zone_alliee_le_lanceur_profite_de_sa_propre_nappe():
+	# Il ne peut jamais être DÉSIGNÉ (allyTargets l'exclut), mais il se tient dedans.
+	a1 = _allie(1, 3, 4, "Ordan")
+	j = _joueur()
+	j["currentPV"] = 30
+	doc = _avec_allies(_combat(j, [_monstre(0, 6, 6)]), [a1])
+	res = resolve_action(doc, "sort", a1["id"], sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}))
+	assert "Frida" in [b["cible"] for b in res["beneficiaires"]]
+	assert j["currentPV"] == 40
+
+
+def test_zone_alliee_ecarte_un_allie_a_terre():
+	# Même règle que _lancer_sur_allie : relever un compagnon changerait la condition
+	# de défaite, ce n'est pas un effet de bord d'un soin de zone.
+	a1, mort = _allie(1, 3, 4, "Ordan"), _allie(2, 2, 4, "Brann", pv=0)
+	doc = _avec_allies(_combat(_joueur(), [_monstre(0, 6, 6)]), [a1, mort])
+	res = resolve_action(doc, "sort", a1["id"], sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}))
+	assert "Brann" not in [b["cible"] for b in res.get("beneficiaires", [])]
+	assert mort["currentPV"] == 0
+
+
+def test_zone_alliee_sert_les_acteurs_hors_tour():
+	# Monture / personne escortée : sur la grille, déjà visables une par une.
+	monture = _allie(2, 2, 4, "Bourrique", jouable=False)
+	a1 = _allie(1, 3, 4, "Ordan")
+	doc = _avec_allies(_combat(_joueur(), [_monstre(0, 6, 6)]), [a1, monture])
+	res = resolve_action(doc, "sort", a1["id"], sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}))
+	assert "Bourrique" in [b["cible"] for b in res["beneficiaires"]]
+	assert monture["currentPV"] == 50
+
+
+def test_zone_alliee_franchit_la_portee_mais_pas_un_mur():
+	# La forme porte sa propre distance (portée 1, nappe de rayon 2) ; un mur l'arrête.
+	cells = [[1, 1, 1, 1, 0, 1, 1] if y != 2 else [1] * 7 for y in range(7)]
+	a1 = _allie(1, 3, 4, "Ordan")
+	loin, abrite = _allie(2, 3, 6, "Brann"), _allie(3, 5, 4, "Ysée")
+	doc = _avec_allies(_combat(_joueur(), [_monstre(0, 6, 6)], cells=cells),
+					   [a1, loin, abrite])
+	res = resolve_action(doc, "sort", a1["id"], sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 2}))
+	noms = [b["cible"] for b in res["beneficiaires"]]
+	assert "Brann" in noms          # à 2 cases : hors portée 1, dans la nappe
+	assert "Ysée" not in noms       # derrière le mur en x=4
+	assert abrite["currentPV"] == 40
+
+
+def test_zone_alliee_un_seul_debit_de_pm_et_une_seule_action():
+	a1, a2 = _allie(1, 3, 4, "Ordan"), _allie(2, 2, 4, "Brann")
+	j = _joueur()
+	pm_avant, actions_avant = j["currentPM"], j["actions_restantes"]
+	doc = _avec_allies(_combat(j, [_monstre(0, 6, 6)]), [a1, a2])
+	res = resolve_action(doc, "sort", a1["id"], sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}, cout_pm=9))
+	assert len(res["beneficiaires"]) == 2   # le lanceur + Brann, en plus du désigné
+	assert j["currentPM"] == pm_avant - 9
+	assert j["actions_restantes"] == actions_avant - 1
+
+
+def test_zone_alliee_le_designe_reste_seul_juge_du_depart():
+	# Désigné hors de portée ⇒ le sort NE PART PAS : ni PM, ni zone, ni action.
+	a1, a2 = _allie(1, 3, 1, "Ordan"), _allie(2, 2, 4, "Brann")
+	j = _joueur()
+	pm_avant = j["currentPM"]
+	doc = _avec_allies(_combat(j, [_monstre(0, 6, 6)]), [a1, a2])
+	res = resolve_action(doc, "sort", a1["id"], sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 3}))
+	assert "error" in res
+	assert j["currentPM"] == pm_avant
+	assert a2["currentPV"] == 40
+
+
+def test_competence_alliee_a_zone_miroir_exact_du_sort():
+	a1, a2 = _allie(1, 3, 4, "Ordan"), _allie(2, 2, 4, "Brann")
+	doc = _avec_allies(_combat(_joueur(), [_monstre(0, 6, 6)]), [a1, a2])
+	res = resolve_action(doc, "competence", a1["id"], competence=_comp_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}))
+	assert res["competence"] == "Cri de ralliement"
+	assert [b["cible"] for b in res["beneficiaires"]] == ["Frida", "Brann"]
+	assert a1["currentPV"] == 50 and a2["currentPV"] == 50
+
+
+# ── Zones BÉNÉFIQUES — cible "soi" ───────────────────────────────────────────────
+
+def test_zone_soi_le_lanceur_est_servi_puis_la_forme_autour_de_lui():
+	a1, loin = _allie(1, 3, 4, "Ordan"), _allie(2, 0, 0, "Brann")
+	j = _joueur()
+	j["currentPV"] = 30
+	doc = _avec_allies(_combat(j, [_monstre(0, 6, 6)]), [a1, loin])
+	res = resolve_action(doc, "sort", None, sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}, cible="soi"))
+	assert res["pv_rendu"] == 10 and j["currentPV"] == 40
+	assert [b["cible"] for b in res["beneficiaires"]] == ["Ordan"]
+	assert loin["currentPV"] == 40   # hors de la forme, intact
+
+
+def test_zone_soi_n_a_besoin_d_aucune_cible_designee():
+	# Aucun ennemi, aucun allié désigné : une aura part quand même.
+	a1 = _allie(1, 3, 4, "Ordan")
+	doc = _avec_allies(_combat(_joueur(), [_monstre(0, 6, 6)]), [a1])
+	res = resolve_action(doc, "sort", None, sort=_sort_soutien(
+		{"forme": "cercle", "origine": "cible", "rayon": 1}, cible="soi"))
+	# `origine: "cible"` sans cible désignée retombe sur le lanceur — les deux ancres
+	# se valent pour un sort sur soi, et aucune ne peut échouer.
+	assert [b["cible"] for b in res["beneficiaires"]] == ["Ordan"]
+
+
+def test_zone_soi_orientee_suit_le_facing_du_lanceur():
+	# Aucune cible à viser : un rectangle « devant soi » ne peut lire que le facing.
+	devant, derriere = _allie(1, 3, 4, "Ordan"), _allie(2, 3, 6, "Brann")
+	j = _joueur()
+	j["facing"] = 0                  # regarde vers le nord (y décroissant)
+	doc = _avec_allies(_combat(j, [_monstre(0, 6, 6)]), [devant, derriere])
+	res = resolve_action(doc, "sort", None, sort=_sort_soutien(
+		{"forme": "rectangle", "origine": "lanceur", "orientation": "facing",
+		 "longueur": 1, "largeur": 3, "decalage": 1}, cible="soi"))
+	assert [b["cible"] for b in res["beneficiaires"]] == ["Ordan"]
+	assert derriere["currentPV"] == 40
+	assert devant["currentPV"] == 50
+
+
+def test_zone_soi_pose_aussi_la_part_a_duree_sur_les_allies():
+	a1 = _allie(1, 3, 4, "Ordan")
+	j = _joueur()
+	doc = _avec_allies(_combat(j, [_monstre(0, 6, 6)]), [a1])
+	resolve_action(doc, "sort", None, sort=_sort_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}, cible="soi",
+		effets={"buffs": {"F": 10}, "duree": 3}))
+	assert [e["restants"] for e in j["effets_actifs"]] == [3]
+	assert [e["restants"] for e in a1["effets_actifs"]] == [3]
+
+
+def test_competence_soi_a_zone_miroir_exact_du_sort():
+	a1 = _allie(1, 3, 4, "Ordan")
+	doc = _avec_allies(_combat(_joueur(), [_monstre(0, 6, 6)]), [a1])
+	res = resolve_action(doc, "competence", None, competence=_comp_soutien(
+		{"forme": "carre", "origine": "lanceur", "rayon": 1}, cible="soi"))
+	assert res["pv_rendu"] == 10
+	assert [b["cible"] for b in res["beneficiaires"]] == ["Ordan"]
+
+
+def test_sans_zone_une_capacite_de_soutien_ne_sert_que_son_beneficiaire():
+	a1, a2 = _allie(1, 3, 4, "Ordan"), _allie(2, 2, 4, "Brann")
+	doc = _avec_allies(_combat(_joueur(), [_monstre(0, 6, 6)]), [a1, a2])
+	res = resolve_action(doc, "sort", a1["id"], sort=_sort_soutien())
+	assert "beneficiaires" not in res
+	assert a2["currentPV"] == 40

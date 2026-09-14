@@ -4994,7 +4994,7 @@ function _sortEffetsLabel(e, prefixeDegats) {
 // rien à dessiner — le catalogue se contente d'annoncer la forme. `libelleZone` vient de
 // scripts/zones_effet.js.
 function _zoneLabel(capa) {
-	const txt = libelleZone(normaliserZone((capa || {}).zone));
+	const txt = libelleZone(normaliserZone((capa || {}).zone), (capa || {}).cible);
 	return txt ? ' · ' + txt : '';
 }
 // Étiquette d'un sort d'INVOCATION. Elle REMPLACE `_sortEffetsLabel` plutôt que de s'y

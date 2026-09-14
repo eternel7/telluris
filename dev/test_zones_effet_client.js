@@ -235,9 +235,27 @@ console.log('\n── Étiquette d’infobulle ───────────
 t('libelleZone : vide sans zone, et décrit la forme sinon', () => {
 	assert.strictEqual(libelleZone(null), '');
 	assert.ok(libelleZone(normaliserZone({ forme: 'cercle', rayon: 2 })).includes('rayon 2'));
+	assert.ok(libelleZone(normaliserZone({ forme: 'carre', rayon: 2 })).includes('carré rayon 2'));
 	assert.ok(libelleZone(normaliserZone({ forme: 'cone', longueur: 3 })).includes('cône 3'));
 	assert.ok(libelleZone(normaliserZone({ forme: 'rectangle', longueur: 1, largeur: 3 }))
 		.includes('1×3'));
+});
+
+t('libelleZone : une capacité `soi` ne dit JAMAIS « sur la cible »', () => {
+	// Elle n'en désigne aucune, quelle que soit l'`origine` écrite dans la donnée — le
+	// moteur ancre de toute façon la forme sur le lanceur.
+	const z = normaliserZone({ forme: 'cercle', origine: 'cible', rayon: 2 });
+	assert.ok(libelleZone(z, 'ennemi').includes('sur la cible'));
+	assert.ok(libelleZone(z, 'soi').includes('autour de soi'));
+	assert.ok(!libelleZone(z, 'soi').includes('sur la cible'));
+});
+
+t('libelleZone : l’icône suit le camp, comme la couleur de l’aperçu', () => {
+	const z = normaliserZone({ forme: 'carre', rayon: 1 });
+	assert.ok(libelleZone(z, 'ennemi').startsWith('💥'));
+	assert.ok(libelleZone(z, 'allie').startsWith('✨'));
+	assert.ok(libelleZone(z, 'soi').startsWith('✨'));
+	assert.ok(libelleZone(z).startsWith('💥'), 'camp inconnu ⇒ offensif, comme avant');
 });
 
 console.log('\n── Aperçu sur la carte (combat_telluris.html) ──────────────────────────────');
@@ -331,6 +349,35 @@ t('cible ou position manquante : aucun plantage, aucune case', () => {
 	assert.strictEqual(LAYER.enfants.length, 0);
 	apercuZone(null, { pos: { x: 2, y: 1 } });
 	assert.strictEqual(LAYER.enfants.length, 0);
+});
+
+t('capacité BÉNÉFIQUE : les cases portent la variante verte', () => {
+	apercuZone({ cible: 'allie', zone: { forme: 'carre', origine: 'lanceur', rayon: 1 } },
+			   { pos: { x: 2, y: 1 } });
+	assert.ok(LAYER.enfants.every(e => e.className === 'zone-case soutien'));
+	effacerApercuZone();
+});
+
+t('capacité `soi` : la forme se pose sur le LANCEUR, sans cible désignée', () => {
+	PLACEMENTS.length = 0;
+	// Aucune cible passée (une case de la barre n'en connaît pas) : l'ancre est le
+	// lanceur, en (2,2) — mêmes 9 cases, toutes centrées sur lui.
+	apercuZone({ cible: 'soi', zone: { forme: 'carre', origine: 'cible', rayon: 1 } }, null);
+	assert.strictEqual(LAYER.enfants.length, 9);
+	assert.ok(LAYER.enfants.every(e => e.className === 'zone-case soutien'));
+	assert.deepStrictEqual(a(PLACEMENTS), a([[-1, -1], [0, -1], [1, -1],
+											 [-1, 0], [0, 0], [1, 0],
+											 [-1, 1], [0, 1], [1, 1]]));
+	effacerApercuZone();
+});
+
+t('_armerApercuZone : une capacité `soi` s’arme SANS cible (sa case suffit)', () => {
+	const casebtn = elementFactice();
+	_armerApercuZone(casebtn, { cible: 'soi', zone: { forme: 'carre', rayon: 1 } }, null);
+	assert.strictEqual(typeof casebtn.onpointerenter, 'function');
+	// Une capacité CIBLÉE, elle, n'a rien à montrer tant qu'aucune cible n'est connue.
+	_armerApercuZone(casebtn, { cible: 'ennemi', zone: { forme: 'carre', rayon: 1 } }, null);
+	assert.strictEqual(casebtn.onpointerenter, null);
 });
 
 t('_armerApercuZone REMET À NULL : un jeton réutilisé ne garde pas l’ancien survol', () => {

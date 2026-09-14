@@ -12,7 +12,9 @@
     "cible": "ennemi",
     "jet": "magique",
     "portee": 3,
-    "effets": { "degats": "2D6" },
+    "effets": {
+      "degats": "2D6"
+    },
     "zone": {
       "forme": "cone",
       "origine": "lanceur",
@@ -35,7 +37,9 @@
     "cible": "ennemi",
     "jet": "magique",
     "portee": 8,
-    "effets": { "degats": "3D6" },
+    "effets": {
+      "degats": "3D6"
+    },
     "zone": {
       "forme": "cercle",
       "origine": "cible",
@@ -55,7 +59,9 @@
     "cible": "ennemi",
     "jet": "cc",
     "portee": 1,
-    "effets": { "degats": "1D6" },
+    "effets": {
+      "degats": "1D6"
+    },
     "zone": {
       "forme": "rectangle",
       "origine": "lanceur",
@@ -78,11 +84,59 @@
     "cible": "ennemi",
     "jet": "cc",
     "portee": 1,
-    "effets": { "degats": "1D6" },
+    "effets": {
+      "degats": "1D6"
+    },
     "zone": {
       "forme": "carre",
       "origine": "lanceur",
       "rayon": 1
+    }
+  },
+  {
+    "_id": "sort:vague_de_soin",
+    "type": "sort",
+    "nom": "Vague de soin",
+    "icon": "✨",
+    "description": "La lumière prend un blessé pour foyer et déborde sur ceux qui le tiennent debout. Qui soigne seul soigne peu.",
+    "vocation": "pretre",
+    "magie": "Sainte",
+    "niveau": 1,
+    "cout_pm": 16,
+    "cible": "allie",
+    "portee": 1,
+    "effets": {
+      "pv": 12
+    },
+    "zone": {
+      "forme": "cercle",
+      "origine": "cible",
+      "rayon": 1
+    }
+  },
+  {
+    "_id": "competence:cri_de_ralliement",
+    "type": "competence",
+    "nom": "Cri de ralliement",
+    "icon": "📣",
+    "description": "Un ordre lancé à pleine gorge. Ceux qui l'entendent resserrent les rangs et cessent de reculer.",
+    "vocation": "guerrier",
+    "niveau": 1,
+    "mode": "active",
+    "cout_pm": 8,
+    "cible": "soi",
+    "portee": 1,
+    "effets": {
+      "buffs": {
+        "F": 8,
+        "Vol": 8
+      },
+      "duree": 3
+    },
+    "zone": {
+      "forme": "carre",
+      "origine": "lanceur",
+      "rayon": 2
     }
   }
 ]

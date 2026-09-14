@@ -29,6 +29,10 @@
 # la peindrait). Une forme ancrée sur la CIBLE garde `decalage: 0`, faute de quoi la
 # cible désignée serait la seule à ne PAS être touchée.
 #
+# Le bloc vaut pour les TROIS `cible` d'une capacité : `ennemi` (tous les monstres pris
+# dans la forme), `allie` (tous les alliés debout) et `soi` — qui ne désigne personne, et
+# dont la forme est donc toujours ancrée sur le lanceur et orientée par son `facing`.
+#
 # Module PUR : aucune lecture de base, aucune connaissance de la grille de combat. Les
 # prédicats de terrain et de ligne de vue sont INJECTÉS par l'appelant (`cases_effet`) —
 # ils vivent dans `utils/combat.py` (`_passable`, `_line_of_sight`), qui importe ce

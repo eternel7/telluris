@@ -360,7 +360,18 @@ def _lancer_sur_allie(combat_doc: dict, lanceur: dict, cible: dict, source: dict
 	if portee > 1 and not _line_of_sight(grid["cells"], lanceur["pos"]["x"], lanceur["pos"]["y"],
 										  cible["pos"]["x"], cible["pos"]["y"]):
 		return {"error": "Ligne de vue obstruée."}
+	return _appliquer_soutien(combat_doc, lanceur, cible, source, effets)
 
+
+def _appliquer_soutien(combat_doc: dict, lanceur: dict, cible: dict, source: dict,
+					   effets: dict) -> dict:
+	"""Pose un effet BÉNÉFIQUE sur un allié — l'application seule, SANS aucune garde.
+
+	Séparé de `_lancer_sur_allie` (qui garde portée, ligne de vue et « à terre ») parce
+	qu'une ZONE de soutien sert des alliés que ces gardes refuseraient : la forme couvre
+	sa propre distance, et elle a déjà été filtrée par le terrain et la ligne de vue
+	depuis son ancre. L'appelant reste responsable d'écarter un allié à terre.
+	"""
 	avant_pv, avant_pm = cible.get("currentPV", 0), cible.get("currentPM", 0)
 	cible["currentPV"] = min(cible.get("pv_max", avant_pv), avant_pv + int(effets.get("pv", 0) or 0))
 	cible["currentPM"] = min(cible.get("pm_max", avant_pm), avant_pm + int(effets.get("pm", 0) or 0))
@@ -467,6 +478,55 @@ def cibles_de_zone(combat_doc: dict, joueur: dict, monstre: dict, zone: dict,
 			  if m["vivant"] and m is not monstre and m.get("pos")
 			  and (m["pos"]["x"], m["pos"]["y"]) in cases]
 	return [monstre] + autres
+
+
+def beneficiaires_de_zone(combat_doc: dict, lanceur: dict, principal: dict, zone: dict,
+						  grid: dict) -> list:
+	"""Alliés DEBOUT servis par la zone d'une capacité bénéfique, `principal` EN TÊTE.
+
+	Jumeau de `cibles_de_zone` pour l'autre camp. `principal` est l'allié DÉSIGNÉ pour une
+	capacité `cible: "allie"`, et le LANCEUR lui-même pour une capacité `cible: "soi"` —
+	qui n'en désigne aucun, et dont la forme se pose donc toujours sur lui.
+
+	⚠️ **Le lanceur profite d'une zone dans laquelle il se tient**, alors qu'il ne peut
+	jamais être *désigné* comme allié (`allyTargets` l'exclut côté client). Les deux ne
+	disent pas la même chose : une vague de soin centrée sur un compagnon blessé qui
+	épargnerait le soigneur debout au milieu serait une surprise, pas une règle.
+
+	⚠️ **Un allié à TERRE est écarté** — même raison que dans `_lancer_sur_allie` : le
+	remettre en jeu changerait la condition de défaite et l'ordre du tour. Relever un
+	compagnon mérite sa propre mécanique.
+
+	⚠️ **Montures, personnes escortées et invocations sont de la partie** : elles sont sur
+	la grille et déjà visables une par une, rien ne justifie qu'une nappe les traverse
+	sans les toucher. Aucun MONSTRE n'en profite, symétrique exact du « pas de tir ami ».
+	"""
+	if not zone:
+		return [principal]
+	cases = set(cases_effet(
+		zone,
+		(lanceur["pos"]["x"], lanceur["pos"]["y"]),
+		(principal["pos"]["x"], principal["pos"]["y"]),
+		lanceur.get("facing", 0),
+		praticable=lambda x, y: _passable(grid["cells"], x, y),
+		vue=lambda x0, y0, x1, y1: _line_of_sight(grid["cells"], x0, y0, x1, y1),
+	))
+	autres = [p for p in combat_doc.get("joueurs", [])
+			  if p is not principal and p.get("pos") and p.get("currentPV", 0) > 0
+			  and (p["pos"]["x"], p["pos"]["y"]) in cases]
+	return [principal] + autres
+
+
+def _servir_zone_soutien(combat_doc: dict, lanceur: dict, principal: dict, source: dict,
+						 effets: dict, zone: dict, grid: dict) -> list:
+	"""Sert les alliés que la zone ajoute au bénéficiaire déjà traité. Rend leurs résultats.
+
+	⚠️ À n'appeler qu'APRÈS que `principal` a reçu son dû (par `_lancer_sur_allie` pour une
+	capacité `allie`, par la branche `soi` pour le lanceur) : il est en tête de la liste et
+	volontairement sauté ici, sinon il encaisserait deux fois le même soin.
+	"""
+	return [_appliquer_soutien(combat_doc, lanceur, p, source, effets)
+			for p in beneficiaires_de_zone(combat_doc, lanceur, principal, zone, grid)[1:]]
 
 
 def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, source: dict,
@@ -3119,6 +3179,13 @@ def resolve_action(
 				return res_allie   # PM NON débités : le sort n'est jamais parti
 			joueur["currentPM"] -= cout_pm
 			result = {"sort": sdoc.get("nom"), **res_allie}
+			# ZONE DE SOUTIEN : les alliés que la forme ajoute au désigné, lui déjà servi.
+			# ⚠️ Les gardes de `_lancer_sur_allie` (portée, ligne de vue, « à terre ») ne
+			# valent que pour le DÉSIGNÉ : c'est contre lui que le sort a été autorisé.
+			autres = _servir_zone_soutien(combat_doc, joueur, allie, sdoc, effets,
+										  sdoc.get("zone"), grid)
+			if autres:
+				result["beneficiaires"] = autres
 		elif sdoc.get("cible") == "ennemi":
 			# Dégâts OU part à durée : un sort offensif peut n'être qu'un debuff
 			# (« −10 Ag pendant 2 tours »), il lui suffit d'avoir quelque chose à faire.
@@ -3190,6 +3257,13 @@ def resolve_action(
 			result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
 					  "furtif": bool(joueur.get("furtif")),
 					  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
+			# ZONE DE SOUTIEN autour de soi (cri de ralliement, nappe de soin) : le
+			# lanceur vient d'être servi ci-dessus, la forme est ancrée sur lui et, faute
+			# de cible désignée, orientée par son `facing`.
+			autres = _servir_zone_soutien(combat_doc, joueur, joueur, sdoc, effets,
+										  sdoc.get("zone"), grid)
+			if autres:
+				result["beneficiaires"] = autres
 
 		# Les composants consommés quittent le sac → la charge portée baisse.
 		poids_consommes = float(sort.get("poids_consommes", 0) or 0)
@@ -3234,6 +3308,10 @@ def resolve_action(
 				return res_allie
 			joueur["currentPM"] -= cout_pm
 			result = {"competence": nom, **res_allie}
+			autres = _servir_zone_soutien(combat_doc, joueur, allie, competence, effets,
+										  competence.get("zone"), grid)
+			if autres:
+				result["beneficiaires"] = autres
 		elif competence.get("cible") == "ennemi":
 			# Dégâts OU part à durée : une compétence offensive peut n'être qu'un debuff
 			# (cri de guerre qui affaiblit, entrave qui ralentit…).
@@ -3309,6 +3387,10 @@ def resolve_action(
 			result = {"competence": nom, "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
 					  "furtif": bool(joueur.get("furtif")),
 					  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
+			autres = _servir_zone_soutien(combat_doc, joueur, joueur, competence, effets,
+										  competence.get("zone"), grid)
+			if autres:
+				result["beneficiaires"] = autres
 
 		result["currentPM"] = joueur["currentPM"]
 		joueur["competences"] = joueur.get("competences", 0) + 1

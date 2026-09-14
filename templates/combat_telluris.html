@@ -146,6 +146,14 @@
 	border: 1px solid rgba(178, 107, 255, 0.85);
 	box-shadow: inset 0 0 8px rgba(178, 107, 255, 0.5);
 }
+/* Zone BÉNÉFIQUE : verte, comme tout le ciblage allié de la page (jetons, badges). Le
+   violet reste l'offensif — deux nappes de la même couleur, et un soin de groupe aurait
+   l'air d'une boule de feu. */
+.zone-case.soutien {
+	background: rgba(76, 217, 123, 0.26);
+	border-color: rgba(76, 217, 123, 0.85);
+	box-shadow: inset 0 0 8px rgba(76, 217, 123, 0.5);
+}
 .monster-token {
 	width: var(--step); height: var(--step);
 	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -1346,6 +1354,7 @@ function refreshBadgeTargets() {
 				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
 			: () => doAction('competence', p.id, null, null, null, null,
 				{ competence_id: pendingComp.competence_id }));
+		_armerApercuZone(el, t ? capa : null, p);
 	});
 	state.monstres.forEach(m => {
 		const el = document.getElementById(`badge-${m.id}`);   // badge-<actor_id>, actor_id monstre = m.id
@@ -1464,13 +1473,19 @@ function apercuZone(capa, cible) {
 	effacerApercuZone();
 	const j = me();
 	const zone = capa ? normaliserZone(capa.zone) : null;
-	if (!zone || !j || !j.pos || !cible || !cible.pos) return;
+	if (!zone || !j || !j.pos) return;
+	// `cible: "soi"` ne DÉSIGNE personne : la forme se pose sur le lanceur, et une forme
+	// orientée n'a que son `facing` à lire — exactement ce que fait le serveur
+	// (`beneficiaires_de_zone` reçoit alors le lanceur comme bénéficiaire principal).
+	const ancre = (capa.cible === 'soi') ? j : cible;
+	if (!ancre || !ancre.pos) return;
+	const soutien = (capa.cible === 'soi' || capa.cible === 'allie') ? ' soutien' : '';
 	const layer = document.getElementById('tokens-layer');
 	const g = GRID || {};
-	casesEffet(zone, [j.pos.x, j.pos.y], [cible.pos.x, cible.pos.y], j.facing || 0,
+	casesEffet(zone, [j.pos.x, j.pos.y], [ancre.pos.x, ancre.pos.y], j.facing || 0,
 			   g.cells, g.dims).forEach(c => {
 		const el = document.createElement('div');
-		el.className = 'zone-case';
+		el.className = 'zone-case' + soutien;
 		_placerToken(el, c[0] - j.pos.x, c[1] - j.pos.y);
 		layer.appendChild(el);   // posé APRÈS son placement, comme les jetons
 		_apercuZoneCases.push(el);
@@ -1481,7 +1496,10 @@ function apercuZone(capa, cible) {
 // réassigne TOUJOURS, `null` compris : ces éléments survivent d'un rendu à l'autre, et un
 // gestionnaire laissé en place peindrait la zone d'une capacité déjà lancée.
 function _armerApercuZone(el, capa, cible) {
-	const actif = !!(el && capa && capa.zone && cible);
+	// ⚠️ `cible` est facultative pour une capacité `soi` — sa forme est entièrement
+	// déterminée par le lanceur, c'est ce qui permet de la montrer au survol de sa CASE,
+	// seul moment où elle peut se voir (un sort sur soi ne passe par aucun ciblage).
+	const actif = !!(el && capa && capa.zone && (cible || capa.cible === 'soi'));
 	if (!el) return;
 	el.onpointerenter = actif ? () => apercuZone(capa, cible) : null;
 	el.onpointerleave = actif ? effacerApercuZone : null;
@@ -1586,6 +1604,9 @@ function renderTokens() {
 				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
 			: () => doAction('competence', p.id, null, null, null, null,
 				{ competence_id: pendingComp.competence_id }));
+		// Une capacité BÉNÉFIQUE de zone se prévisualise sur ses alliés comme l'offensive
+		// sur ses ennemis — en vert (cf. `.zone-case.soutien`).
+		_armerApercuZone(tok, vise ? capa : null, p);
 		if (neuf) layer.appendChild(tok);
 	});
 	// Jeton devenu sans objet : l'acteur qui prend la main (il a le jeton central fixe),
@@ -2433,7 +2454,7 @@ function sortLabel(s) {
 	if (s.invocation) parts.push(`🐾 ×${s.invocation.nombre}, ⏳${s.invocation.duree} tours`);
 	// Zone d'effet : sur mobile c'est le SEUL endroit où elle se lit (pas de survol,
 	// donc pas d'aperçu sur la carte).
-	const zone = libelleZone(normaliserZone(s.zone));
+	const zone = libelleZone(normaliserZone(s.zone), s.cible);
 	if (zone) parts.push(zone);
 	const compos = (s.composants || []).filter(c => c.disponible).length;
 	return `${s.icon || '🔮'} ${s.nom} — ${s.cout_pm} PM`
@@ -2554,6 +2575,17 @@ function attacherDragLong(el, position, selecteurCase, onDrop) {
 	el.addEventListener('pointerup', relacher);
 	el.addEventListener('pointercancel', nettoyer);
 }
+// Capacité `cible: "soi"` PORTEUSE D'UNE ZONE derrière une case de la barre, ou null.
+// Seul cas où une forme est entièrement connue sans ciblage — donc le seul qui puisse
+// s'afficher au survol de la case. Toute autre case rend null : son aperçu dépend d'une
+// cible, et il vit sur les jetons et les badges.
+function _capaSoiDeZone(slot) {
+	if (!slot) return null;
+	const capa = slot.type === 'sort' ? slotSort(slot)
+			   : slot.type === 'competence' ? slotComp(slot) : null;
+	return (capa && capa.cible === 'soi' && capa.zone) ? capa : null;
+}
+
 function renderSlots() {
 	const box = document.getElementById('slot-grid');
 	box.innerHTML = SLOTS.map(slot => {
@@ -2573,6 +2605,11 @@ function renderSlots() {
 		const n = parseInt(b.dataset.slot, 10);
 		b.addEventListener('click', () => onSlotClick(n));
 		attacherDragLong(b, n, '.slot-btn', deplacerSlot);
+		// Une capacité `soi` de zone ne passe par AUCUN ciblage : son bouton est le seul
+		// endroit où sa forme peut se montrer avant d'être payée. Les capacités ciblées,
+		// elles, dépendent d'une cible que la case ne connaît pas encore — leur aperçu
+		// reste sur les jetons et les badges.
+		_armerApercuZone(b, _capaSoiDeZone(SLOTS.find(sl => sl.position === n)), null);
 	});
 }
 
@@ -2652,7 +2689,7 @@ function compLabel(c) {
 	// C'est le seul endroit où le joueur peut le lire.
 	if (c.cible !== 'soi') { const p = capaPortee(c).portee; if (p > 1) parts.push(`portée ${p}`); }
 	// Zone d'effet : comme pour les sorts, c'est le seul canal sur mobile (pas de survol).
-	const zone = libelleZone(normaliserZone(c.zone));
+	const zone = libelleZone(normaliserZone(c.zone), c.cible);
 	if (zone) parts.push(zone);
 	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${c.cout_pm} PM` : ''}`
 		+ (parts.length ? ` (${parts.join(', ')})` : '');

@@ -203,12 +203,21 @@ function casesEffet(zone, lanceur, cible, facing, cells, dims) {
 // Étiquette courte d'une zone, pour l'infobulle d'une case de la barre d'action et la
 // liste des sorts de la fiche. Rend '' quand il n'y a pas de zone : l'appelant concatène
 // sans condition.
-function libelleZone(zone) {
+//
+// `cibleCapa` (le champ `cible` du sort/de la compétence) n'est pas décoratif :
+//   • une capacité `soi` ne DÉSIGNE personne — dire « sur la cible » y serait faux, quelle
+//     que soit l'`origine` écrite dans la donnée (le moteur l'ancre sur le lanceur) ;
+//   • l'icône suit le camp, comme la couleur de l'aperçu : 💥 offensif, ✨ bénéfique.
+// Absent ⇒ on s'en tient à ce que dit l'`origine`, et à l'icône offensive.
+function libelleZone(zone, cibleCapa) {
 	if (!zone) return '';
-	const ou = zone.origine === 'lanceur' ? 'autour de soi' : 'sur la cible';
-	if (zone.forme === 'cercle') return `💥 cercle rayon ${zone.rayon} ${ou}`;
-	if (zone.forme === 'carre') return `💥 carré rayon ${zone.rayon} ${ou}`;
-	const depart = zone.origine === 'lanceur' ? 'devant soi' : 'depuis la cible';
-	if (zone.forme === 'rectangle') return `💥 ${zone.longueur}×${zone.largeur} cases ${depart}`;
-	return `💥 cône ${zone.longueur} cases (${zone.angle}°) ${depart}`;
+	const surSoi = zone.origine === 'lanceur' || cibleCapa === 'soi';
+	const icone = (cibleCapa === 'soi' || cibleCapa === 'allie') ? '✨' : '💥';
+	if (zone.forme === 'cercle' || zone.forme === 'carre') {
+		const forme = zone.forme === 'cercle' ? 'cercle' : 'carré';
+		return `${icone} ${forme} rayon ${zone.rayon} ${surSoi ? 'autour de soi' : 'sur la cible'}`;
+	}
+	const depart = surSoi ? 'devant soi' : 'depuis la cible';
+	if (zone.forme === 'rectangle') return `${icone} ${zone.longueur}×${zone.largeur} cases ${depart}`;
+	return `${icone} cône ${zone.longueur} cases (${zone.angle}°) ${depart}`;
 }
