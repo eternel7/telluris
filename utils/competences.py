@@ -17,7 +17,10 @@
 #
 # Apprentissage : character["competences_connues"] (liste d'ids). Coût en points de
 # caractéristique = (niveau + 1) × COMPETENCE_COUT_COEFF, dès que vocations_niveaux[vocation]
-# ≥ niveau. Pas de grimoire (l'équivalent viendra avec l'arbre de compétences).
+# ≥ niveau. Pas de grimoire (l'équivalent viendra avec l'arbre de compétences). Une
+# compétence d'une FAMILLE exclue par la vocation (champ `famille` du doc contre
+# `familles_exclues` de rules:vocations) reste inapprenable — même règle et même code que
+# les sorts (utils/sorts.apprentissage_exclu).
 #
 # À la CRÉATION, les vocations HORS SORT_VOCATIONS_DEPART choisissent une compétence de
 # niveau 0 (complément exact du choix de sort — on choisit l'un ou l'autre, jamais les deux).
@@ -26,7 +29,9 @@
 
 from models import character_stats
 from utils.consommables import _as_int, poser_effet
-from utils.sorts import CIBLE_DEFAUT, CIBLES, JETS, _bonus_dict, part_durative
+from utils.sorts import (
+	CIBLE_DEFAUT, CIBLES, JETS, _bonus_dict, famille_de, familles_exclues, part_durative,
+)
 
 MODES = ("passive", "active")
 # JETS vient de utils.sorts (source unique partagée avec les sorts) ; seul le DÉFAUT
@@ -55,6 +60,9 @@ def normaliser_competence(doc) -> dict | None:
 		"icon": doc.get("icon", "⚡"),
 		"description": doc.get("description", ""),
 		"vocation": doc.get("vocation"),
+		# Type de la compétence, pour l'exclusion d'apprentissage par vocation — même
+		# champ et même règle que les sorts (cf. utils/sorts.FAMILLE_*).
+		"famille": famille_de(doc),
 		"niveau": _as_int(doc.get("niveau")),
 		"mode": mode,
 		"cout_pm": _as_int(doc.get("cout_pm")),
@@ -249,19 +257,28 @@ def vocation_choisit_competence(voc) -> bool:
 	return bool(voc) and voc not in character_stats.SORT_VOCATIONS_DEPART
 
 
-def competences_apprenables(character: dict, find_docs) -> list:
+def competences_apprenables(character: dict, find_docs, rules_vocations=None) -> list:
 	"""Compétences achetables par le personnage : celles de sa vocation, de niveau atteint,
-	pas déjà connues. Chaque entrée est enrichie de `cout_points`."""
+	de famille non exclue, pas déjà connues. Chaque entrée est enrichie de `cout_points`.
+
+	`rules_vocations` (doc rules:vocations, ou sa `value`) porte les `familles_exclues` de
+	la vocation. Omis ⇒ aucune exclusion : un appelant qui ne le passe pas obtient
+	exactement la liste d'avant."""
 	character = character or {}
 	voc = character.get("voc")
 	niveau_voc = _as_int((character.get("vocations_niveaux") or {}).get(voc, 0))
 	connues = set(character.get("competences_connues") or [])
+	exclues = familles_exclues(voc, rules_vocations)
 	out = []
 	for doc in find_docs({"type": "competence"}) or []:
 		comp = normaliser_competence(doc)
 		if not comp or comp["id"] in connues or comp["vocation"] != voc:
 			continue
 		if niveau_voc < comp["niveau"]:
+			continue
+		# Famille interdite à cette vocation : la compétence n'apparaît pas dans la liste
+		# (l'endpoint `apprendre_competence` refait le test — la liste n'est pas la garde).
+		if comp["famille"] and comp["famille"] in exclues:
 			continue
 		comp["cout_points"] = cout_apprentissage(comp)
 		out.append(comp)

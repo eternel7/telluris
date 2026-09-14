@@ -945,12 +945,16 @@ async def get_combat_page(
 		# Une monture est illustrée par l'image de son ESPÈCE, servie par /monsters : ni le
 		# dossier ni le mount ne sont ceux d'un portrait de personnage.
 		est_monture = bool(j.get("est_monture"))
+		# Créature INVOQUÉE : illustrée par l'image de son ESPÈCE, exactement comme une
+		# monture — servie par /monsters, jamais par /characters (où son fichier n'existe
+		# pas : le jeton et le badge resteraient vides).
+		est_invocation = bool(j.get("est_invocation"))
 		# ⚠️ Portrait ENTIER (jamais recadré) pour ce qui n'est pas un aventurier : une bête
 		# comme une personne escortée n'a pas de cadrage de fiche (`portrait_zoom` /
 		# `portrait_translate` absents) — le cadrage par défaut zoomerait sur un fragment.
 		# C'est le SERVEUR qui le dit : le client ne doit pas le déduire du dossier d'image.
-		entier = est_monture or bool(j.get("est_protege"))
-		if est_monture:
+		entier = est_monture or est_invocation or bool(j.get("est_protege"))
+		if est_monture or est_invocation:
 			base, dossier = "/monsters", MONSTERS_IMAGES_PATH
 		elif j.get("est_protege"):
 			# Personne escortée : /pnj d'abord, /characters en dernier ressort — même

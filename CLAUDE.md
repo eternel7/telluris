@@ -55,7 +55,8 @@ utils/
   lieux.py               # lieu_router, movement logic, navigation bitmask
   combat.py              # logique de combat pure (snapshots, A*, résolution, loot, finalize)
   zones.py               # géométrie des zones d'influence + tirage d'événements + resolve_profil_weights
-  sorts.py               # sorts (pur) : normalisation, composants, écoles de magie, apprentissage
+  sorts.py               # sorts (pur) : normalisation, composants, écoles de magie, apprentissage,
+                         #   familles exclues d'une vocation, bloc `invocation`
   competences.py         # compétences de vocation (pur) : passives permanentes, actives, apprentissage
   consommables.py        # chokepoint des buffs : sources, cumul, effets_actifs
   slots_actions.py       # barre d'action de combat (pur) : entrées, invariante, migration à la lecture
