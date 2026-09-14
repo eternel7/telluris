@@ -203,6 +203,18 @@
 	background-repeat: no-repeat;
 }
 .ally-token.protege .mt-hp-fill { background: #f0c453; }
+/* Créature INVOQUÉE : anneau VIOLET — la couleur du lancement de sort dans tout ce combat,
+   puisque c'est un sort qui l'a fait venir. Elle a un tour (contrairement à la monture et à
+   l'escortée) mais ne se pilote pas : le violet dit « magie », l'absence de doré dit « pas
+   vous ». Image d'ESPÈCE, donc `contain` comme les deux autres. */
+.ally-token.invocation .at-portrait {
+	background-color: #2b1c3a; border-color: #a06bd6;
+	box-shadow: 0 0 10px rgba(160,107,214,0.8); color: #d9bcf5;
+	background-size: contain;
+	background-position: center center;
+	background-repeat: no-repeat;
+}
+.ally-token.invocation .mt-hp-fill { background: #a06bd6; }
 .ally-token .mt-hp { width: 70%; height: 4px; background: #111; border-radius: 2px; margin-top: 2px; overflow: hidden; }
 .ally-token .mt-hp-fill { height: 100%; background: #2e86de; }
 
@@ -283,8 +295,10 @@
    déclarations pour écraser `.init-badge.joueur` serait fragile. */
 .init-badge.monture { background: #3a2f1a; border-color: #b98c4a; color: #e8c98a; }
 .init-badge.protege { background: #3b3218; border-color: #f0c453; color: #ffe9ac; }
+.init-badge.invocation { background: #2b1c3a; border-color: #a06bd6; color: #d9bcf5; }
 .init-badge.monture.spellcast,
-.init-badge.protege.spellcast  { border-color: #4cd97b; box-shadow: 0 0 9px rgba(76,217,123,0.7); cursor: pointer; }
+.init-badge.protege.spellcast,
+.init-badge.invocation.spellcast { border-color: #4cd97b; box-shadow: 0 0 9px rgba(76,217,123,0.7); cursor: pointer; }
 /* Séparateur : ces badges ne font pas partie de l'ordre du tour, la coupure doit se voir. */
 .init-sep { flex-shrink: 0; width: 1px; height: 26px; background: var(--border-color); margin: 0 4px; opacity: 0.7; }
 .init-badge.active  { border-color: var(--gold2); box-shadow: 0 0 9px rgba(240,192,74,0.7); transform: scale(1.12); }
@@ -307,7 +321,8 @@
    l'image s'afficherait à sa taille NATIVE, rognée dans un cercle de 32 px. Même remède que
    sur les jetons alliés (`.ally-token.monture .at-portrait`). */
 .init-badge.monture .ib-img,
-.init-badge.protege .ib-img { background-size: contain; background-position: center; }
+.init-badge.protege .ib-img,
+.init-badge.invocation .ib-img { background-size: contain; background-position: center; }
 /* Deux demi-arcs en bordure : gauche = PV (rouge), droite = PM (bleu). */
 .vit-ring  { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
 .vit-ring path, .vit-ring circle { fill: none; }
@@ -828,7 +843,9 @@
 						   de joueurs[0]) ; ids DOM uniques par acteur pour les anneaux/portraits. #}
 						{% set jp = combat.joueurs | selectattr('id', 'equalto', actor_id) | first %}
 						{% set j_ko = ' dead' if (jp and jp.currentPV <= 0) else '' %}
-						{# Personne escortée qui SE DÉFEND (`se_defend`) : dans l'ordre, mais aux couleurs dorées d'une escortée — jamais prise pour un combattant jouable. #}<div class="init-badge {{ 'protege' if (jp and jp.est_protege) else 'joueur' }}{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}"{% if jp and jp.est_protege %} title="{{ jp.nom }} — sous votre protection : se défend au contact, sans se déplacer."{% endif %}>
+						{# Personne escortée qui SE DÉFEND (`se_defend`) : dans l'ordre, mais aux couleurs dorées d'une escortée — jamais prise pour un combattant jouable. Créature INVOQUÉE : même situation, aux couleurs violettes du sort qui l'a appelée. #}
+						{% set badge_role = 'invocation' if (jp and jp.est_invocation) else ('protege' if (jp and jp.est_protege) else 'joueur') %}
+						<div class="init-badge {{ badge_role }}{{ j_ko }} {{ active }}" id="badge-{{ actor_id }}"{% if jp and jp.est_protege %} title="{{ jp.nom }} — sous votre protection : se défend au contact, sans se déplacer."{% elif jp and jp.est_invocation %} title="{{ jp.nom }} — créature invoquée : elle joue seule, encore {{ jp.invocation_restants }} tour(s) avant de se dissiper."{% endif %}>
 							{% if portraits_joueurs.get(actor_id, {}).get('image') %}<div class="ib-img" id="badge-portrait-{{ actor_id }}"></div>{% else %}<div class="ib-letter">{{ jp.nom[0] | upper if jp and jp.nom else '?' }}</div>{% endif %}
 							<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">
 								<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>
@@ -866,10 +883,10 @@
 				   ⚠️ `selectattr('jouable', 'defined')` est indispensable : un joueur ordinaire ne
 				   PORTE PAS ce champ, un `rejectattr` seul les ramasserait tous et dupliquerait
 				   leurs badges. #}
-				{#- ⚠️ SAUF la personne escortée qui SE DÉFEND (`se_defend`) : elle a un tour, joué par le
-				   serveur, donc elle figure DANS `ordre_initiative` — la garder ici dupliquerait son
-				   badge et son id DOM. #}
-				{% set hors_tour = combat.joueurs | selectattr('jouable', 'defined') | rejectattr('jouable') | rejectattr('se_defend') | list %}
+				{#- ⚠️ SAUF la personne escortée qui SE DÉFEND (`se_defend`) et les créatures INVOQUÉES
+				   (`est_invocation`) : elles ont un tour, joué par le serveur, donc elles figurent DANS
+				   `ordre_initiative` — les garder ici dupliquerait leur badge et leur id DOM. #}
+				{% set hors_tour = combat.joueurs | selectattr('jouable', 'defined') | rejectattr('jouable') | rejectattr('se_defend') | rejectattr('est_invocation') | list %}
 				{% if hors_tour %}<span class="init-sep" aria-hidden="true"></span>{% endif %}
 				{% for jp in hors_tour %}
 					{# Ni `active` (ces acteurs n'ont pas de tour), ni œil barré (marqueur d'ENNEMI
@@ -1477,6 +1494,7 @@ function renderTokens() {
 		tok.className = 'ally-token' + ((p.currentPV || 0) > 0 ? '' : ' ko')
 					  + (p.est_monture ? ' monture' : '')
 					  + (p.est_protege ? ' protege' : '')
+					  + (p.est_invocation ? ' invocation' : '')
 					  + (vise ? ' spellcast' : '');
 		_placerToken(tok, p.pos.x - j.pos.x, p.pos.y - j.pos.y);
 		tok.querySelector('.mt-hp-fill').style.width = pct(p.currentPV, p.pv_max) + '%';
@@ -2326,6 +2344,9 @@ function sortLabel(s) {
 	if (s.effets.pv) parts.push(`+${s.effets.pv} PV`);
 	if (s.effets.pm) parts.push(`+${s.effets.pm} PM`);
 	if (s.effets.furtivite) parts.push('🥷 furtivité');
+	// Invocation : ses `effets` sont vides par construction (elle fait apparaître une
+	// créature, elle ne pose rien sur personne) — sans cette ligne la case n'annoncerait rien.
+	if (s.invocation) parts.push(`🐾 ×${s.invocation.nombre}, ⏳${s.invocation.duree} tours`);
 	const compos = (s.composants || []).filter(c => c.disponible).length;
 	return `${s.icon || '🔮'} ${s.nom} — ${s.cout_pm} PM`
 		+ (parts.length ? ` (${parts.join(', ')})` : '')

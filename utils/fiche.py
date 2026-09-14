@@ -92,7 +92,7 @@ def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = No
 		),
 		"sorts_magies": sorts_util.apprentissage_magies_payload(character, vocations),
 		"competences": competences_util.liste_competences_payload(character, get_doc_fn, "exploration"),
-		"competences_apprenables": competences_util.competences_apprenables(character, find_docs_fn),
+		"competences_apprenables": competences_util.competences_apprenables(character, find_docs_fn, vocations),
 		# Barre de combat : une seule liste ordonnée remplace les deux listes d'épinglés.
 		# ⚠️ Clé `barre_slots` et non `slots` : ce bloc est fusionné dans le payload d'un
 		# compagnon (`routers/recrutement._recrue_view`), où `slots` désigne déjà son

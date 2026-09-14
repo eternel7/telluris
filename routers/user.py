@@ -1302,6 +1302,8 @@ async def apprendre_sort(
 	niveau = sorts_util.niveau_ecole(character, ecole, vocations)
 	if niveau is None or niveau < sort["niveau"]:
 		raise HTTPException(status_code=422, detail="École de magie non pratiquée ou niveau insuffisant")
+	if sorts_util.apprentissage_exclu(sort, character.get("voc"), vocations):
+		raise HTTPException(status_code=422, detail="Votre vocation ne pratique pas ce type de sort")
 	if sorts_util.grimoire_pour(character, sort["id"], resolve_item_ref) is None:
 		raise HTTPException(status_code=409, detail="Grimoire requis pour apprendre ce sort")
 
@@ -1403,6 +1405,9 @@ async def apprendre_competence(
 	niveaux = character.get("vocations_niveaux", {})
 	if niveaux.get(comp["vocation"], 0) < comp["niveau"]:
 		raise HTTPException(status_code=422, detail="Niveau de vocation insuffisant")
+	vocations = get_doc("rules:vocations")
+	if sorts_util.apprentissage_exclu(comp, character.get("voc"), vocations):
+		raise HTTPException(status_code=422, detail="Votre vocation ne pratique pas ce type de compétence")
 
 	cout = competences_util.cout_apprentissage(comp)
 	attribute_points = character.get("attribute_points", 0)
@@ -1420,7 +1425,7 @@ async def apprendre_competence(
 		"attribute_points": character["attribute_points"],
 		"competences_connues": list(character["competences_connues"]),
 		"competences": competences_util.liste_competences_payload(character, get_doc, "exploration"),
-		"competences_apprenables": competences_util.competences_apprenables(character, find_docs),
+		"competences_apprenables": competences_util.competences_apprenables(character, find_docs, vocations),
 		"vitals": _vitals_payload(character),
 		"caracts_detail": _caracts_payload(character),
 		"appris": {"nom": comp["nom"], "icon": comp["icon"]},

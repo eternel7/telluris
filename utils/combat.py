@@ -1463,6 +1463,194 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 	}
 
 
+# ── Invocations ──────────────────────────────────────────────────────────────
+# Une INVOCATION est une créature ALLIÉE apparue en plein combat par un sort (bloc
+# `invocation` du doc, normalisé par `utils.sorts.invocation_de`). Elle vit dans
+# `combat_doc["joueurs"]`, comme une monture ou une personne escortée : tout ce qui parcourt
+# cette liste — ciblage des monstres, jetons alliés, cases occupées, badges — la voit sans
+# code neuf.
+#
+# Ce qui la distingue des deux autres acteurs `jouable: False` :
+#   · elle a un TOUR, joué par le SERVEUR (`_run_invocation_turn`) : elle se DÉPLACE puis
+#     frappe, là où la personne escortée qui se défend ne fait jamais un pas. Elle figure
+#     donc dans `ordre_initiative` (comme une escortée qui se défend, jamais comme une
+#     monture) — d'où l'exclusion explicite de la liste « hors tour » du bandeau ;
+#   · elle est TEMPORAIRE : `invocation_restants` tours d'action, puis elle se dissipe ;
+#   · elle n'a AUCUN doc en base (pas de `character_id`), ce qui suffit à la faire sauter
+#     par `finalize_combat` (`doc = get_doc(cid) if cid else None`) et par les bénéficiaires
+#     de `/collect` : ni XP, ni butin, ni affinité, ni sauvegarde. Rien d'elle ne survit au
+#     combat, et c'est voulu.
+#
+# ⚠️ Elle reste `jouable: False` : `_combattants_vivants` ne la compte pas, donc un groupe
+# entièrement à terre perd même si son invocation tient encore debout. Sans cela, un joueur
+# KO derrière une créature invoquée bloquerait le combat sans que personne puisse jouer.
+
+
+def build_invocation_snapshot(espece: dict, profil: dict | None, joueur_index: int,
+							  duree: int, invocateur: dict | None = None) -> dict:
+	"""Snapshot d'UNE créature invoquée, côté JOUEUR — `build_monster_snapshot` re-keyé.
+
+	Mêmes stats dérivées qu'un monstre de la même espèce (c'est le même bestiaire), donc le
+	même travail de dérivation, mais un id `joueur_*` : c'est lui que lisent `_get_joueur`,
+	`_resolve_until_player` et la branche `est_joueur` de `_do_attack_on`.
+
+	`profil is None` → point médian de l'espèce au niveau 1 : DÉTERMINISTE (le tirage d'un
+	`profil:*` passe par `roll_monster_stats`, donc par `random`). C'est le défaut des sorts
+	qui ne nomment pas de profil.
+	"""
+	snap = build_monster_snapshot(espece, profil, joueur_index)
+	snap["id"] = f"joueur_{joueur_index}"
+	# Clés qui n'ont de sens que sur un ENNEMI : une invocation ne se loote pas, ne rapporte
+	# aucune XP et n'a personne à détecter. `vivant` en particulier doit disparaître — du
+	# côté joueur, c'est `currentPV > 0` qui fait foi (cf. `_joueurs_vivants`), et un
+	# `vivant: True` figé dans les entrées de journal (`CHAMPS_ETAT`) mentirait au client.
+	for cle in ("vivant", "detecte", "xp_reward"):
+		snap.pop(cle, None)
+	snap["jouable"] = False
+	snap["est_invocation"] = True
+	snap["invocation_restants"] = max(1, int(duree or 1))
+	snap["invocateur_id"] = str((invocateur or {}).get("id") or "")
+	snap["invocateur_nom"] = str((invocateur or {}).get("nom") or "")
+	# Pas de magie : une créature invoquée ne lance rien. Posés explicitement parce que
+	# `_tick_effets_combat` et les anneaux de badge les lisent.
+	snap["currentPM"] = 0
+	snap["pm_max"] = 0
+	# Esquive : un monstre n'en porte pas de clé, mais `_defense_physique` la lit sur la
+	# CIBLE — un debuff d'esquive posé sur l'invocation doit avoir où atterrir.
+	snap["esquive"] = 0
+	# Profil d'attaque explicite (et non le repli « mains nues » de `_profil_attaque`) :
+	# c'est lui qui porte l'animation d'impact de l'espèce, sans quoi les coups de la
+	# créature seraient muets là où ceux du même monstre en face s'animent.
+	snap["attaque_profils"] = [{
+		"mode": "cac", "portee": snap.get("portee", 1), "ranged": False,
+		"toucher": "cc", "degats": "degats_cc",
+		"label": espece.get("nom", "Griffes"),
+		"animation": str(espece.get("animation") or ""),
+	}]
+	return snap
+
+
+def _prochain_index_joueur(combat_doc: dict) -> int:
+	"""Prochain indice de snapshot `joueur_*` JAMAIS attribué dans ce combat, et le réserve.
+
+	⚠️ SURTOUT PAS `len(joueurs)` : une invocation purgée libère son indice, qui serait
+	réattribué à la suivante. Or les entrées de journal déjà écrites portent l'état des
+	acteurs PAR ID (`_avec_etat`, `_avec_vfx`) — une ligne de la créature d'avant irait
+	alors s'appliquer à celle d'après, et le client la verrait mourir en naissant.
+
+	Le compteur vit sur le doc (donc il survit au retrait ET au tour suivant). Absent
+	— combat déjà en base, ou premier appel — il repart du plus grand indice présent + 1,
+	ce qui est exact : aucune invocation n'a pu être purgée avant le premier appel.
+	"""
+	suivant = combat_doc.get("prochain_joueur_index")
+	if not isinstance(suivant, int):
+		suivant = 0
+		for j in combat_doc.get("joueurs") or []:
+			suffixe = str(j.get("id", "")).rsplit("_", 1)[-1]
+			if suffixe.isdigit():
+				suivant = max(suivant, int(suffixe) + 1)
+	combat_doc["prochain_joueur_index"] = suivant + 1
+	return suivant
+
+
+def _cases_invocation(combat_doc: dict, grid: dict, origine: dict, nombre: int) -> list:
+	"""Jusqu'à `nombre` cases libres où faire apparaître des créatures autour d'`origine`,
+	les plus proches d'abord.
+
+	Bornées à la RÉGION ATTEIGNABLE depuis l'invocateur (`_reachable_region`, mêmes règles
+	de terrain et de `nav` que l'A* de déplacement) : une créature ne doit jamais surgir
+	derrière un mur, d'où elle ne pourrait ni rejoindre l'ennemi ni être rejointe. Renvoie
+	moins de cases que demandé s'il n'y a pas la place — et une liste vide si l'invocateur
+	est totalement encerclé, ce que l'appelant traite comme un échec du sort.
+	"""
+	ox, oy = origine["pos"]["x"], origine["pos"]["y"]
+	occupees = _occupied_set(combat_doc)
+	region = _reachable_region(grid["cells"], grid["dims"], grid.get("nav", {}), (ox, oy))
+	libres = [c for c in region if c not in occupees]
+	libres.sort(key=lambda c: (max(abs(c[0] - ox), abs(c[1] - oy)), c[1], c[0]))
+	return libres[:max(0, int(nombre))]
+
+
+def invoquer(combat_doc: dict, lanceur: dict, sort: dict, grid: dict) -> list:
+	"""Fait apparaître les créatures du bloc `invocation` de `sort` (vue normalisée) autour
+	de `lanceur`, et les inscrit dans le combat. Renvoie les snapshots créés (vide = aucune
+	case libre : le sort n'a rien pu appeler).
+
+	⚠️ Elles sont insérées dans `ordre_initiative` JUSTE APRÈS l'acteur courant, et non à
+	leur rang d'initiative : tout ce qui précède l'index courant garderait sinon un rang
+	décalé d'un cran, et `acteur_courant_index` désignerait brusquement quelqu'un d'autre en
+	plein tour. Elles jouent donc dès le tour où on les appelle — ce que dit déjà la fiction
+	(« il surgit ») — puis suivent l'ordre comme tout le monde.
+	"""
+	invocation = sort.get("invocation") or {}
+	espece = get_doc(invocation.get("espece"))
+	if not espece or espece.get("type") != "espece":
+		return []
+	profil = get_doc(invocation["profil"]) if invocation.get("profil") else None
+	if profil is not None and profil.get("type") != "profil":
+		profil = None
+
+	cases = _cases_invocation(combat_doc, grid, lanceur, invocation.get("nombre", 1))
+	crees = []
+	for x, y in cases:
+		snap = build_invocation_snapshot(
+			espece, profil, _prochain_index_joueur(combat_doc),
+			invocation.get("duree", 1), lanceur)
+		snap["pos"] = {"x": x, "y": y}
+		combat_doc["joueurs"].append(snap)
+		crees.append(snap)
+
+	ordre = combat_doc["ordre_initiative"]
+	insert_at = combat_doc["acteur_courant_index"] + 1
+	for i, snap in enumerate(crees):
+		ordre.insert(insert_at + i, snap["id"])
+	return crees
+
+
+def _dissiper_invocation(combat_doc: dict, invoc: dict, texte: str) -> None:
+	"""Marque une invocation comme dissipée (elle quittera le combat à la prochaine purge).
+
+	⚠️ `currentPV = 0` EN PLUS du drapeau : c'est ce que lisent `_joueurs_vivants` (ciblage
+	des monstres) et `_occupied_set` (sa case redevient libre) — le drapeau seul la laisserait
+	encaisser des coups et bloquer un passage jusqu'à la purge."""
+	invoc["dissipe"] = True
+	invoc["currentPV"] = 0
+	combat_doc["log"].append(_avec_etat(_avec_vfx({
+		"tour": combat_doc["tour"],
+		"acteur": "Système",
+		"kind": "sys",
+		"texte": texte,
+	}, "dissipation", invoc.get("id", "")), invoc))
+
+
+def _purger_invocations(combat_doc: dict) -> None:
+	"""Retire du combat les invocations dissipées ou abattues — CHOKEPOINT UNIQUE, appelé en
+	tête de chaque itération de `_resolve_until_player`.
+
+	Les retirer (plutôt que les laisser à 0 PV comme un compagnon à terre) est ce qui fait
+	disparaître leur jeton côté client, qui reconstruit ses tokens depuis `joueurs` et purge
+	ceux qu'il n'y voit plus. Mais cela DÉCALE `ordre_initiative` : l'index courant est donc
+	recalculé sur l'acteur qu'il désignait, par comptage des entrées supprimées avant lui —
+	jamais par recherche de son id, qui peut être justement celui qu'on retire.
+	"""
+	morts = {j["id"] for j in combat_doc["joueurs"]
+			 if j.get("est_invocation") and (j.get("dissipe") or j.get("currentPV", 0) <= 0)}
+	if not morts:
+		return
+	combat_doc["joueurs"] = [j for j in combat_doc["joueurs"] if j["id"] not in morts]
+	ordre = combat_doc["ordre_initiative"]
+	idx = combat_doc["acteur_courant_index"]
+	retires_avant = sum(1 for i, aid in enumerate(ordre) if i < idx and aid in morts)
+	combat_doc["ordre_initiative"] = [aid for aid in ordre if aid not in morts]
+	idx -= retires_avant
+	# L'acteur courant lui-même a pu partir : l'index garde alors sa valeur et désigne
+	# celui qui a pris sa place. Débordement ⇒ tour suivant, comme partout ailleurs.
+	if idx >= len(combat_doc["ordre_initiative"]):
+		idx = 0
+		combat_doc["tour"] += 1
+	combat_doc["acteur_courant_index"] = max(0, idx)
+
+
 def create_combat_doc(
 	character: dict, monstres: list, zone_tags: list, map_image: str,
 	battle_map: dict | None = None,
@@ -1804,7 +1992,14 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 				# ⚠️ Marqué AVANT la ligne, qui porte l'état du défenseur (`morte`).
 				if est_monture or est_protege:
 					defenseur["morte"] = True
-				if est_monture:
+				if defenseur.get("est_invocation"):
+					# Une créature invoquée n'est pas « à terre » : elle cesse d'être là.
+					# ⚠️ Marquée `dissipe` ICI, sinon elle traînerait à 0 PV jusqu'à son
+					# propre tour — que `_resolve_until_player` saute justement parce
+					# qu'elle est à 0 PV. Personne ne la retirerait jamais du combat.
+					defenseur["dissipe"] = True
+					texte_ko = f"{defenseur['nom']} est mis en pièces et se dissipe en fumée."
+				elif est_monture:
 					texte_ko = f"{defenseur['nom']} s'effondre — sa charge se répand au sol !"
 				elif est_protege:
 					# ⚠️ Tournure NEUTRE en genre : le snapshot ne porte pas le sexe, et une
@@ -2269,14 +2464,78 @@ def _run_defenseur_turn(combat_doc: dict, joueur: dict) -> None:
 	combat_doc["acteur_courant_index"] = idx
 
 
+def _run_invocation_turn(combat_doc: dict, invoc: dict, grid: dict) -> None:
+	"""Tour d'une créature INVOQUÉE — joué par le serveur, comme celui d'un monstre : elle
+	fonce sur l'ennemi vivant le plus proche (A*, mêmes règles de terrain et de `nav`) puis
+	frappe tant qu'il lui reste des actions.
+
+	Miroir exact de `_run_monster_turn`, camp inversé et sans furtivité (une créature
+	appelée à grand bruit ne surprend personne, et aucun monstre ne se cache d'elle). Budget,
+	jet, fumble et victoire passent par les chokepoints du joueur (`_frapper_monstre`) :
+	aucun coup gratuit.
+
+	DURÉE : décomptée à la FIN de son tour, de sorte qu'une créature appelée pour `duree`
+	tours agisse exactement `duree` fois — celui de son apparition compris."""
+	_reset_turn_budget(invoc, combat_doc)
+	profil = _profil_attaque(invoc, "cac")
+	portee = max(1, int(profil.get("portee", 1)))
+
+	cibles = [m for m in combat_doc["monstres"] if m["vivant"]]
+	cible = min(cibles, key=lambda m: _cheby(invoc, m)) if cibles else None
+
+	steps = 0
+	safety = 0
+	while (combat_doc["status"] == "active" and cible is not None
+		   and invoc["actions_restantes"] > 0 and _cheby(invoc, cible) > portee
+		   and invoc["cells_moved"] < invoc.get("deplacement", 1) and safety < 100):
+		safety += 1
+		if not _monster_step_toward(combat_doc, invoc, cible, grid):
+			break
+		steps += 1
+	if steps > 0:
+		combat_doc["log"].append(_avec_etat({
+			"tour": combat_doc["tour"],
+			"acteur": invoc["nom"],
+			"kind": "move",
+			"texte": f"{invoc['nom']} bondit vers {cible['nom']} ({steps} case(s)).",
+		}, invoc))
+
+	safety = 0
+	while (combat_doc["status"] == "active" and invoc["actions_restantes"] > 0 and safety < 100):
+		safety += 1
+		if cible is None or not cible["vivant"]:
+			vivants = [m for m in combat_doc["monstres"] if m["vivant"]]
+			cible = min(vivants, key=lambda m: _cheby(invoc, m)) if vivants else None
+		if cible is None or _cheby(invoc, cible) > portee:
+			break
+		_, jet = _frapper_monstre(combat_doc, invoc, cible, profil)
+		invoc["attaques"] = invoc.get("attaques", 0) + 1
+		_refresh_actions(invoc)
+		if jet["fumble"]:
+			_appliquer_fumble(combat_doc, invoc)
+		_check_victory(combat_doc)
+
+	invoc["invocation_restants"] = int(invoc.get("invocation_restants", 1)) - 1
+	if invoc["invocation_restants"] <= 0:
+		_dissiper_invocation(combat_doc, invoc,
+							 f"{invoc['nom']} retourne d'où il vient — l'appel est épuisé.")
+
+	idx = combat_doc["acteur_courant_index"] + 1
+	if idx >= len(combat_doc["ordre_initiative"]):
+		idx = 0
+		combat_doc["tour"] += 1
+	combat_doc["acteur_courant_index"] = idx
+
+
 def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool = False) -> None:
 	"""Run monster turns until it's a player's turn.
 
 	start_at_current=True  : process the actor at acteur_courant_index first (combat init).
 	start_at_current=False : advance past the current actor first (after player action).
 
-	Les personnes escortées qui se défendent (`joueur_*` à `jouable: False`) sont jouées ICI,
-	comme des monstres : la main ne s'arrête jamais sur elles.
+	Les personnes escortées qui se défendent et les créatures INVOQUÉES (`joueur_*` à
+	`jouable: False`) sont jouées ICI, comme des monstres : la main ne s'arrête jamais sur
+	elles. C'est aussi ici que les invocations expirées quittent le combat.
 	"""
 	ordre = combat_doc["ordre_initiative"]
 	max_iter = len(ordre) * 20
@@ -2292,11 +2551,23 @@ def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool =
 	for _ in range(max_iter):
 		if combat_doc["status"] != "active":
 			break
+		# Invocations dissipées ou abattues : elles quittent le combat ICI, seul endroit qui
+		# puisse remettre `acteur_courant_index` d'aplomb après un retrait. ⚠️ `ordre` est
+		# relu juste après — la purge remplace la liste, elle ne la mute pas en place.
+		_purger_invocations(combat_doc)
+		ordre = combat_doc["ordre_initiative"]
+		if not ordre:
+			break
+		if combat_doc["acteur_courant_index"] >= len(ordre):
+			combat_doc["acteur_courant_index"] = 0
 		actor_id = ordre[combat_doc["acteur_courant_index"]]
 		if actor_id.startswith("joueur_"):
 			joueur = _get_joueur(combat_doc, actor_id)
 			if joueur and joueur.get("currentPV", 0) > 0:
 				# ⚠️ `is False` STRICTEMENT : un joueur ordinaire ne porte pas la clé.
+				if joueur.get("est_invocation"):
+					_run_invocation_turn(combat_doc, joueur, grid)
+					continue
 				if joueur.get("jouable") is False:
 					_run_defenseur_turn(combat_doc, joueur)
 					continue
@@ -2625,14 +2896,40 @@ def resolve_action(
 		sdoc = sort["doc"]
 		effets = sort.get("effets") or {}
 		cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
-		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")
+		invocation = sdoc.get("invocation") or None
+		if not (invocation or effets.get("degats") or effets.get("pv") or effets.get("pm")
 				or int(effets.get("furtivite", 0) or 0) > 0 or part_durative(effets)):
 			return {"error": "Ce sort n'a aucun effet utilisable en combat."}
 		if joueur["currentPM"] < cout_pm:
 			return {"error": "PM insuffisants."}
 
 		jet = None   # renseigné seulement par la branche offensive (jet de toucher)
-		if sdoc.get("cible") == "allie":
+		if invocation:
+			# INVOCATION : le sort ne vise personne, il ajoute des combattants. Testée AVANT
+			# `cible`, qui ne décrit pas ce qu'elle fait (une invocation est `soi` par défaut,
+			# mais elle ne se pose rien sur soi).
+			# ⚠️ Aucune case libre autour du lanceur ⇒ le sort NE PART PAS : ni PM, ni action.
+			# Le contraire ferait payer plein tarif une incantation dont il ne sort rien, et
+			# c'est le seul échec ici qui ne doit rien à un jet de dés.
+			# ⚠️ EXCLUSIF des trois autres branches : un sort qui invoque n'applique aucun de
+			# ses `effets`. Ce qu'il produit est la créature, pas un buff — et lui laisser les
+			# deux ferait d'une invocation le meilleur sort de soi du jeu, pour le même coût.
+			crees = invoquer(combat_doc, joueur, sdoc, grid)
+			if not crees:
+				return {"error": "Aucune place autour de vous pour faire apparaître la créature."}
+			joueur["currentPM"] -= cout_pm
+			noms = ", ".join(c["nom"] for c in crees)
+			combat_doc["log"].append(_avec_etat({
+				"tour": combat_doc["tour"],
+				"acteur": joueur["nom"],
+				"kind": "sys",
+				"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {noms} "
+						 f"répond à l'appel ({crees[0]['invocation_restants']} tour(s)).",
+			}, joueur))
+			result = {"sort": sdoc.get("nom"),
+					  "invoques": [{"id": c["id"], "nom": c["nom"],
+									"restants": c["invocation_restants"]} for c in crees]}
+		elif sdoc.get("cible") == "allie":
 			# Sort d'entraide : compagnon OU monture, désigné par son id de snapshot.
 			# Aucun jet, aucun compteur d'attaque — seulement l'action et les PM.
 			allie = _get_joueur(combat_doc, cible_id) if cible_id else None

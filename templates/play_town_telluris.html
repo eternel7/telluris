@@ -4986,6 +4986,15 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.duree) parts.push(`${e.duree} tours`);
 	return parts.join(', ');
 }
+// Étiquette d'un sort d'INVOCATION. Elle REMPLACE `_sortEffetsLabel` plutôt que de s'y
+// ajouter : une invocation n'a aucun `effets` (elle fait apparaître une créature, elle ne
+// pose rien sur personne), sa ligne de description resterait vide.
+function _invocationLabel(s) {
+	const inv = s && s.invocation;
+	if (!inv) return '';
+	return `🐾 invoque ${inv.nombre > 1 ? inv.nombre + ' créatures' : 'une créature'}`
+		+ ` pendant ${inv.duree} tours`;
+}
 function _sortDomId(sortId) { return sortId.replace(/[^a-zA-Z0-9_-]/g, '_'); }
 
 // Portée d'un sort, pour la fiche dépliée des DEUX listes (connus + à apprendre).
@@ -5039,7 +5048,7 @@ function _renderSorts(list) {
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.sort_id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span></div>
-				<div class="sh-skill-desc">${_sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
+				<div class="sh-skill-desc">${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
 				${compos ? `<div class="sh-sort-compos">${compos}</div>` : ''}
 				${ouvert ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${s.description || ''}</div>` : ''}
 			</div>
@@ -5072,7 +5081,7 @@ function _renderSortsApprenables(list) {
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span> ${grim}</div>
-				<div class="sh-skill-desc">Niv. ${s.niveau} · ${_sortEffetsLabel(s.effets)}</div>
+				<div class="sh-skill-desc">Niv. ${s.niveau} · ${_invocationLabel(s) || _sortEffetsLabel(s.effets)}</div>
 				${ouvert ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${s.description || ''}</div>` : ''}
 			</div>
 			<div class="sh-inv-actions">
@@ -7905,6 +7914,10 @@ async function reprendreAventurier(avId) {
 const AFFINITES_INIT = {{ affinites_detail | tojson | safe }};
 renderFicheCompagnons(AFFINITES_INIT);
 {{ compagnons_partis | tojson | safe }}.forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+// Sorts perdus : la vocation ne pratique plus leur école. Même check paresseux, même
+// rendu unique — le doc a déjà été réécrit, ce toast ne reviendra pas.
+// ⚠️ Pas d'escapeHtml : showToast écrit en textContent (CLAUDE.md §9).
+{{ sorts_perdus | tojson | safe }}.forEach(n => showToast(n + ' vous échappe : votre vocation ne pratique plus cette magie.', {major: true}));
 
 // ── Panneau 👥 Groupe ───────────────────────────────────────────────────────────
 // Deux sections en accordéon : les compagnons (→ fiche complète de chacun) et l'inventaire

@@ -8,7 +8,19 @@ Doc `sort:*` : `{nom, vocation, magie, niveau, cout_pm (>0), cible, jet, portee,
 
 **UI** : onglet ⚡ (sorts connus + 📖 Apprentissage + 🏫 Écoles) ; en combat l'accès passe par les slots, ciblage **violet**.
 
-Contenu : `jsons/sort-exemples.json`, `update_sorts.json`, `magie_naturelle_sorts.json`, `sorts_nature_elementaire_a_importer.json`, `sorts_bataille_illusoire_noire_sainte_a_importer.json`.
+Contenu : `jsons/sort-exemples.json`, `update_sorts.json`, `magie_naturelle_sorts.json`, `sorts_nature_elementaire_a_importer.json`, `sorts_bataille_illusoire_noire_sainte_a_importer.json`, `repurgateur_magie_noire_a_importer.json`.
+
+
+### Familles — exclure un TYPE de sort/compétence d'une vocation
+Doc `sort:*`/`competence:*` : `famille` (étiquette libre, ex. `"invocation"`) ; entrée de `rules:vocations` : `familles_exclues: [...]`. L'intersection n'est ni listée (`sorts_apprenables`, `competences_apprenables`) ni achetable (`apprendre_sort`, `apprendre_competence` → 422). Source unique `sorts.apprentissage_exclu`, partagée par les deux familles ; `competences_apprenables(character, find_docs, rules_vocations=None)` — argument omis ⇒ aucune exclusion. Champ absent des deux côtés ⇒ comportement d'avant (aucune migration). Cas d'usage : le **répurgateur** pratique la `Démonologie` du démoniste **sans ses invocations**. Verrouillé par `tests/test_familles_exclues.py`.
+
+**Changer la `magie` d'une vocation fait PERDRE son ancien répertoire.** `sorts_connus` n'est relu contre l'école nulle part ailleurs : sans cela, les sorts déjà achetés se lanceraient indéfiniment. `sorts.purger_sorts_hors_ecole(character, get_doc, rules_vocations)` les retire de `sorts_connus` (et de `sorts_epingles` **si la clé existe**), mute sans sauver, et renvoie de quoi toaster la perte. Appelé PARESSEUSEMENT au rendu de `/play` — principal + `groupe_effectif` —, avec réécriture du doc à ce moment (même place et même motif que `departs_volontaires`). ⚠️ Un sort n'est retiré que si son doc est RÉSOLU et son école identifiable et non pratiquée : un id mort ou une lecture qui échoue le laisse en place. ⚠️ Aucun contrôle de niveau (`niveau_ecole` rend **0**, pas None, pour une école native au niveau 0 — un test de vérité viderait le répertoire d'un personnage neuf). La barre d'action n'a rien à purger : `slots_effectifs` écarte déjà les cases sans sort possédé.
+
+
+### Invocations — une créature alliée de plus sur la grille
+Bloc `invocation` d'un doc `sort:*` : `{espece, profil?, nombre (≤ 4), duree}`. `profil` vide = point médian de l'espèce au niveau 1 (**déterministe** ; un `profil:*` passerait par `random`). COMBAT SEULEMENT (`sort_utilisable_exploration` la refuse : il n'y a pas de grille où la poser), et **exclusive** de `effets` — la créature EST l'effet du sort, ses `composants` seraient inertes.
+
+Le snapshot est un `build_monster_snapshot` re-keyé en `joueur_*` (`build_invocation_snapshot`) : `jouable: False` + `est_invocation`, **sans `character_id`** — ce qui suffit à le faire sauter par `finalize_combat` et par les bénéficiaires de `/collect` (ni XP, ni butin, ni doc). Elle a un TOUR, joué par le serveur (`_run_invocation_turn` : A* vers l'ennemi vivant le plus proche puis frappe), donc elle est dans `ordre_initiative` — **insérée juste après l'acteur courant**, jamais à son rang d'initiative (sinon `acteur_courant_index` désignerait un autre acteur en plein tour). Elle se dissipe à `invocation_restants` = 0 ou à 0 PV ; `_purger_invocations` (en tête de `_resolve_until_player`) la retire des DEUX listes et recale l'index. ⚠️ Son id vient de `_prochain_index_joueur` (compteur sur le doc), **jamais de `len(joueurs)`** : un indice libéré par une purge et réattribué ferait s'appliquer à la nouvelle créature les `etat` de journal de l'ancienne. ⚠️ `jouable: False` ⇒ elle ne compte pas dans `_combattants_vivants` : un groupe à terre perd même si elle tient debout. UI : jeton et badge VIOLETS, exclue de la liste « hors tour » du bandeau. Verrouillé par `tests/test_invocations.py`.
 
 
 ### Compétences de vocation — passives + actives (miroir des sorts)

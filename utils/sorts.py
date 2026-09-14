@@ -11,6 +11,16 @@
 # est achetable en points de caractéristique — coût (n+1) × SORT_COUT_COEFF — dès que
 # vocations_niveaux[vocation] ≥ n ET qu'un grimoire l'enseignant (item sous_categorie
 # "grimoire", champ `sorts` contenant l'id) est porté. Le grimoire n'est PAS consommé.
+# Un sort d'une FAMILLE exclue par la vocation (cf. `familles_exclues`) reste inapprenable
+# quel que soit le reste — c'est ce qui laisse le répurgateur pratiquer la Démonologie
+# sans ses invocations.
+#
+# Invocations : un sort peut porter un bloc `invocation` (cf. `invocation_de`) À LA PLACE de
+# ses `effets`. Il fait apparaître N créatures ALLIÉES sur la grille de combat pour quelques
+# tours ; tout ce qui les anime vit dans utils/combat.py (placement, tour d'IA, dissipation),
+# ce module ne fait que normaliser et borner la donnée. ⚠️ EXCLUSIF : la branche `sort` de
+# `resolve_action` traite l'invocation AVANT la cible et n'applique alors AUCUN `effets` —
+# écrire les deux sur un même doc laisserait les seconds silencieusement inertes.
 #
 # Logique pure (get_doc/find_docs/resolve_ref injectés), ne sauvegarde jamais — les
 # endpoints persistent. Comme pour les consommables : pv/pm/degats = instantanés (seuls
@@ -40,6 +50,25 @@ JET_SORT_DEFAUT = "magique"
 #              porteur comme cible, cf. `sort_utilisable_exploration`.
 CIBLES = ("soi", "ennemi", "allie")
 CIBLE_DEFAUT = "soi"
+
+# ── Familles (types) de sorts et de compétences ──────────────────────────────────
+# `famille` est une ÉTIQUETTE LIBRE portée par la DONNÉE (doc `sort:*` ou `competence:*`)
+# qui classe une capacité par TYPE — et non par école : « invocation » existe en
+# Démonologie comme en Nécromancie. Elle ne sert qu'à une chose : permettre à une vocation
+# d'EXCLURE tout un type de son apprentissage (`familles_exclues` de son entrée dans
+# rules:vocations), sans scinder une école ni énumérer les sorts un par un.
+#
+# ⚠️ Champ absent ⇒ famille vide ⇒ JAMAIS exclue : un doc déjà en base garde exactement le
+# comportement d'avant (aucune migration), et une vocation sans `familles_exclues` non plus.
+# SOURCE UNIQUE, partagée avec les compétences (utils/competences.py l'importe) : les deux
+# familles se filtrent par le même contrat, il ne doit pas exister deux règles qui divergent.
+FAMILLE_INVOCATION = "invocation"
+
+# Bornes du bloc `invocation` (cf. `invocation_de`). Une durée absente vaut
+# INVOCATION_DUREE_DEFAUT tours — jamais « illimitée » : une créature qui ne se dissipe
+# jamais resterait sur la carte tout le combat pour le prix d'une action.
+INVOCATION_DUREE_DEFAUT = 3
+INVOCATION_NOMBRE_MAX = 4
 
 
 def _bonus_dict(raw) -> dict:
@@ -85,6 +114,38 @@ def _bonus_dict(raw) -> dict:
 def effets_de_sort(sort_doc) -> dict:
 	"""Champ `effets` du sort, normalisé (clés toujours présentes)."""
 	return _bonus_dict((sort_doc or {}).get("effets"))
+
+
+def famille_de(doc) -> str:
+	"""Famille (`famille`) d'un doc `sort:*`/`competence:*` OU de sa vue normalisée —
+	chaîne vide si le doc n'en porte pas. Partagée avec les compétences."""
+	return str((doc or {}).get("famille") or "").strip()
+
+
+def invocation_de(doc) -> dict | None:
+	"""Bloc `invocation` d'un sort, normalisé — ou None si le sort n'invoque rien.
+
+	`{espece, profil, nombre, duree}` : `espece` (doc `espece:*`) est le SEUL champ requis ;
+	`profil` vide = point médian de l'espèce au niveau 1 (le tirage `profil:*` est aléatoire,
+	son absence rend l'invocation déterministe). `nombre` et `duree` sont bornés — cf.
+	INVOCATION_NOMBRE_MAX / INVOCATION_DUREE_DEFAUT."""
+	raw = (doc or {}).get("invocation") or {}
+	espece = str(raw.get("espece") or "").strip()
+	if not espece:
+		return None
+	return {
+		"espece": espece,
+		"profil": str(raw.get("profil") or "").strip(),
+		"nombre": max(1, min(INVOCATION_NOMBRE_MAX, _as_int(raw.get("nombre")) or 1)),
+		"duree": max(1, _as_int(raw.get("duree")) or INVOCATION_DUREE_DEFAUT),
+	}
+
+
+def est_invocation(sort: dict) -> bool:
+	"""Le sort (vue normalisée) fait-il apparaître une créature ? SOURCE UNIQUE du test —
+	c'est la présence du bloc `invocation` qui décide, jamais la `famille` (une étiquette
+	libre, qu'un auteur peut oublier ou orthographier autrement)."""
+	return bool((sort or {}).get("invocation"))
 
 
 # Une ARME porte le même bloc `effets` qu'un sort, mais ne sait viser que deux personnes :
@@ -141,6 +202,12 @@ def normaliser_sort(sort_doc) -> dict | None:
 		"description": doc.get("description", ""),
 		"vocation": doc.get("vocation"),
 		"magie": (str(doc.get("magie")).strip() or None) if doc.get("magie") else None,
+		# Type du sort, pour l'exclusion d'apprentissage par vocation (cf. FAMILLE_*).
+		"famille": famille_de(doc),
+		# Créature(s) appelée(s) par le sort, ou None. EXPLICITE dans cette vue, qui est
+		# une liste blanche : sans ce champ la liaison n'atteindrait jamais le moteur de
+		# combat (même piège que `animation`).
+		"invocation": invocation_de(doc),
 		"niveau": _as_int(doc.get("niveau")),
 		"cout_pm": cout_pm,
 		"cible": cible,
@@ -254,7 +321,12 @@ def sort_utilisable_combat(sort: dict) -> bool:
 	"""Éligibilité combat : une part instantanée (dégâts, PV, PM — ou furtivité, état de
 	combat posé instantanément) OU une part à DURÉE. Depuis que le snapshot porte ses
 	effets vivants et les décrémente au tour de son porteur, un buff pur (« Armure de
-	givre ») est lançable en combat exactement comme en exploration."""
+	givre ») est lançable en combat exactement comme en exploration.
+
+	⚠️ Une INVOCATION est lançable sans porter le moindre `effets` : ce qu'elle fait n'est
+	pas un effet posé sur quelqu'un, c'est un combattant de plus sur la grille."""
+	if est_invocation(sort):
+		return True
 	eff = (sort or {}).get("effets") or {}
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
 			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
@@ -267,8 +339,14 @@ def sort_utilisable_exploration(sort: dict) -> bool:
 
 	⚠️ Seul `ennemi` est exclu : il n'y a pas de monstre à viser hors combat. Un sort
 	`allie` est lançable sur un compagnon ou une monture — la cible est désignée par le
-	`cible_id` du corps de requête (cf. `_cible_alliee`, routers/user.py)."""
+	`cible_id` du corps de requête (cf. `_cible_alliee`, routers/user.py).
+
+	⚠️ Une INVOCATION est refusée hors combat, même si elle porte par ailleurs un effet
+	applicable : la créature n'existe que sur la grille de combat (elle y est placée, y
+	joue son tour et s'y dissipe). Rien ne saurait l'accueillir en exploration."""
 	s = sort or {}
+	if est_invocation(s):
+		return False
 	if (s.get("cible") or "soi") == "ennemi":
 		return False
 	eff = s.get("effets") or {}
@@ -332,6 +410,54 @@ def sorts_connus_docs(character: dict, get_doc) -> list:
 	return out
 
 
+def purger_sorts_hors_ecole(character: dict, get_doc, rules_vocations) -> list:
+	"""Retire de `sorts_connus` (et de `sorts_epingles`) les sorts dont l'ÉCOLE n'est plus
+	pratiquée par le personnage. MUTE, NE SAUVEGARDE PAS — l'appelant persiste.
+	Renvoie `[{id, nom, icon, magie}]` de ce qui est parti (liste vide = rien à faire).
+
+	POURQUOI. Changer la `magie` d'une vocation en base ferme sa liste « à apprendre », mais
+	`sorts_connus` n'est jamais relu contre l'école : un répurgateur passé en Démonologie
+	continuerait de lancer indéfiniment les sorts Saints qu'il avait déjà achetés. Ce contrôle
+	est PARESSEUX, comme tout ce qui périme dans le jeu (CLAUDE.md §5) — aucun tick de fond,
+	aucune migration de base : il se fait au passage, et réécrit le doc à ce moment-là.
+
+	⚠️ Un sort n'est retiré QUE si son doc a été résolu ET que son école est identifiable ET
+	qu'elle n'est pas pratiquée. Un id mort, un doc illisible ou une école non résoluble sont
+	LAISSÉS EN PLACE : une lecture qui échoue ne doit jamais détruire ce qu'un joueur a payé.
+	⚠️ Aucun contrôle de NIVEAU : l'école pratiquée à un niveau devenu insuffisant garde ses
+	sorts. Ce qui se perd est un répertoire entier, jamais un sort trop cher pour son
+	propriétaire actuel.
+	⚠️ La barre d'action n'a rien à purger : `slots_actions.slots_effectifs` écarte déjà à la
+	lecture toute case qui pointe un sort absent de `sorts_connus`.
+	"""
+	character = character or {}
+	connus = character.get("sorts_connus") or []
+	if not connus:
+		return []
+
+	partis, gardes = [], []
+	for sort_id in connus:
+		sort = normaliser_sort(get_doc(sort_id))
+		ecole = magie_de_sort(sort, rules_vocations) if sort else None
+		if sort is None or ecole is None or niveau_ecole(character, ecole, rules_vocations) is not None:
+			gardes.append(sort_id)
+			continue
+		partis.append({"id": sort["id"], "nom": sort["nom"], "icon": sort["icon"],
+					   "magie": ecole})
+	if not partis:
+		return []
+
+	character["sorts_connus"] = gardes
+	# ⚠️ Épinglés filtrés SEULEMENT si la clé existe : l'absence est un état à part entière
+	# (auto-épinglage du premier sort connu, cf. `sorts_epingles_effectifs`) — la poser ici
+	# figerait le choix du joueur sur ce qui lui reste, sans qu'il ait rien décidé.
+	if "sorts_epingles" in character:
+		restants = set(gardes)
+		character["sorts_epingles"] = [s for s in (character.get("sorts_epingles") or [])
+									   if s in restants]
+	return partis
+
+
 def sorts_epingles_effectifs(character: dict) -> list:
 	"""Sorts d'accès rapide (barre d'icônes en combat), ids ordonnés.
 
@@ -356,18 +482,48 @@ def sorts_epingles_effectifs(character: dict) -> list:
 # ont leur propre niveau, stocké dans character["magies_apprises"] = {ecole: niveau}, et
 # n'affectent JAMAIS les stats dérivées (anti-exploit).
 
-def _vocation_magie_map(rules_vocations) -> dict:
-	"""Map {id_vocation: ecole} depuis le doc rules:vocations (doc complet OU sa `value`).
-	Tolère None (→ map vide) et les vocations sans magie (→ chaîne vide)."""
+def _vocations_entries(rules_vocations) -> list:
+	"""Entrées de vocation depuis le doc rules:vocations (doc complet OU sa `value` nue).
+	Tolère None → liste vide. Source unique de cette normalisation d'entrée."""
 	entries = rules_vocations
 	if isinstance(rules_vocations, dict):
 		entries = rules_vocations.get("value") or []
+	return entries or []
+
+
+def _vocation_magie_map(rules_vocations) -> dict:
+	"""Map {id_vocation: ecole} depuis le doc rules:vocations (doc complet OU sa `value`).
+	Tolère None (→ map vide) et les vocations sans magie (→ chaîne vide)."""
 	out = {}
-	for v in entries or []:
+	for v in _vocations_entries(rules_vocations):
 		vid = (v or {}).get("id")
 		if vid:
 			out[str(vid)] = (str((v or {}).get("magie") or "")).strip()
 	return out
+
+
+def familles_exclues(voc, rules_vocations) -> set:
+	"""Familles (cf. FAMILLE_*) que la vocation `voc` ne peut PAS apprendre — champ
+	`familles_exclues` de son entrée dans rules:vocations, vide par défaut.
+
+	C'est ce qui permet à une vocation de pratiquer une école SANS en pratiquer tout le
+	répertoire : le répurgateur partage la Démonologie du démoniste, mais pas ses
+	invocations. Lu à chaque appel (aucune dénormalisation sur le personnage) : retirer
+	une exclusion en base rouvre aussitôt l'apprentissage, sans migration."""
+	for v in _vocations_entries(rules_vocations):
+		if str((v or {}).get("id") or "") == str(voc or ""):
+			return {f for f in (str(x).strip() for x in ((v or {}).get("familles_exclues") or [])) if f}
+	return set()
+
+
+def apprentissage_exclu(doc, voc, rules_vocations) -> bool:
+	"""Ce sort / cette compétence est-il d'une famille INTERDITE à cette vocation ?
+
+	SOURCE UNIQUE de la règle, partagée par les sorts et les compétences, par les listes
+	d'apprenables et par les endpoints qui les valident. Accepte indifféremment un doc brut
+	ou sa vue normalisée (les deux portent `famille`). Doc sans famille ⇒ jamais exclu."""
+	famille = famille_de(doc)
+	return bool(famille) and famille in familles_exclues(voc, rules_vocations)
 
 
 def ecole_native(voc, rules_vocations) -> str | None:
@@ -473,13 +629,19 @@ def apprentissage_magies_payload(character: dict, rules_vocations) -> dict:
 
 def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) -> list:
 	"""Sorts achetables par le personnage : école pratiquée (native ou achetée), niveau
-	d'école suffisant, pas déjà connu. Chaque entrée est enrichie de `cout_points`,
-	`grimoire_ok` (grimoire enseignant porté) et `magie` (école résolue)."""
+	d'école suffisant, famille non exclue par la vocation, pas déjà connu. Chaque entrée est
+	enrichie de `cout_points`, `grimoire_ok` (grimoire enseignant porté) et `magie` (école
+	résolue)."""
 	connus = set((character or {}).get("sorts_connus") or [])
+	exclues = familles_exclues((character or {}).get("voc"), rules_vocations)
 	out = []
 	for doc in find_docs({"type": "sort"}) or []:
 		sort = normaliser_sort(doc)
 		if not sort or sort["id"] in connus:
+			continue
+		# Famille interdite à cette vocation : le sort n'apparaît même pas dans la liste
+		# (l'endpoint `apprendre_sort` refait le test — la liste n'est pas la garde).
+		if sort["famille"] and sort["famille"] in exclues:
 			continue
 		ecole = magie_de_sort(sort, rules_vocations)
 		niv = niveau_ecole(character, ecole, rules_vocations)
@@ -549,6 +711,10 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str) -> list:
 			"cible": sort["cible"],
 			"portee": sort["portee"],
 			"effets": sort["effets"],
+			# Bloc `invocation` (ou None) : le client en tire l'étiquette de la case — sans
+			# lui, un sort d'invocation s'afficherait sans le moindre effet annoncé, ses
+			# `effets` étant vides par construction.
+			"invocation": sort["invocation"],
 			"composants": _composants_payload(sort, character, get_doc),
 		})
 	return out
