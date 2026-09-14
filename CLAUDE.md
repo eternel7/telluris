@@ -137,7 +137,7 @@ Règles qui valent **partout** ; les compétences ne répètent que ce qui leur 
 
 **4. Aucune migration de base.** Champ absent ⇒ comportement d'avant ; une forme neuve est reconstruite **À LA LECTURE** (`slots_effectifs`, `_slots_derives`, replis `.get(..., 0)` sur les snapshots). Un doc déjà en base doit toujours continuer de tourner.
 
-**5. Péremption et vérification PARESSEUSES** — **aucun tick de fond n'existe**. Tout ce qui expire est contrôlé au passage : tableaux de quêtes et de recrues (`purger_*`), délais de course (`traiter_expirations` : `/play`, les **deux** branches de `move_character`, entrée du dialogue PNJ), départs volontaires de compagnons, laissez-passer.
+**5. Péremption et vérification PARESSEUSES** — **aucun tick de fond n'existe**. Tout ce qui expire est contrôlé au passage : tableaux de quêtes et de recrues (`purger_*`), délais de course (`traiter_expirations` : `/play`, les **deux** branches de `move_character`, entrée du dialogue PNJ), départs volontaires de compagnons, laissez-passer, sorts d'une école que la vocation ne pratique plus (`purger_sorts_hors_ecole`, `/play`).
 
 **6. Champs transitoires du personnage** : `pnj_present`, `transport_offert`, `rang_offert`, `ressource_recoltable`, `objets_au_sol`. Tirés à l'**ENTRÉE** dans le lieu et persistés (un refresh ne re-tire pas ; ressortir/rentrer re-tire), vidés dès un déplacement réel.
 

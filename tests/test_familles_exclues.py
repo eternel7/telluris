@@ -12,7 +12,7 @@
 
 from utils.sorts import (
     FAMILLE_INVOCATION, apprentissage_exclu, famille_de, familles_exclues,
-    normaliser_sort, sorts_apprenables,
+    normaliser_sort, purger_sorts_hors_ecole, sorts_apprenables,
 )
 from utils.competences import competences_apprenables, normaliser_competence
 
@@ -148,3 +148,88 @@ def test_competences_apprenables_sans_rules_vocations_nexclut_rien():
     perso = _perso("repurgateur")
     ids = sorted(c["id"] for c in competences_apprenables(perso, _find_comps))
     assert ids == ["competence:appel", "competence:sentence"]
+
+
+# ── Purge paresseuse des sorts d'une école qu'on ne pratique plus ────────────────
+# Pendant utile de l'exclusion : changer la `magie` d'une vocation ferme sa liste « à
+# apprendre », mais `sorts_connus` n'est relu contre l'école NULLE PART ailleurs — les sorts
+# déjà achetés se lanceraient indéfiniment. La purge se fait au passage (/play) et réécrit
+# le doc à ce moment-là.
+
+_SORTS_BASE = {
+    "sort:flamme": _sort(_id="sort:flamme", nom="Flamme", magie="Démonologie"),
+    "sort:feu_pur": _sort(_id="sort:feu_pur", nom="Feu purificateur",
+                          vocation="repurgateur", magie="Sainte"),
+    "sort:sceau": _sort(_id="sort:sceau", nom="Sceau", vocation="repurgateur", magie="Sainte"),
+}
+
+
+def _get_doc(doc_id):
+    return _SORTS_BASE.get(doc_id)
+
+
+def test_purge_retire_les_sorts_de_l_ecole_abandonnee():
+    perso = _perso("repurgateur", sorts_connus=["sort:flamme", "sort:feu_pur", "sort:sceau"])
+    partis = purger_sorts_hors_ecole(perso, _get_doc, _RULES_VOCS)
+
+    assert [p["id"] for p in partis] == ["sort:feu_pur", "sort:sceau"]
+    assert partis[0]["magie"] == "Sainte" and partis[0]["nom"] == "Feu purificateur"
+    assert perso["sorts_connus"] == ["sort:flamme"]      # l'école pratiquée reste
+
+
+def test_purge_est_idempotente_et_ne_touche_rien_sans_raison():
+    """Deuxième passage : plus rien à retirer, donc rien à réécrire (`change` reste faux)."""
+    perso = _perso("repurgateur", sorts_connus=["sort:flamme"])
+    assert purger_sorts_hors_ecole(perso, _get_doc, _RULES_VOCS) == []
+    assert perso["sorts_connus"] == ["sort:flamme"]
+    assert purger_sorts_hors_ecole(_perso("demoniste", sorts_connus=[]), _get_doc, _RULES_VOCS) == []
+
+
+def test_purge_ne_detruit_jamais_sur_une_lecture_qui_echoue():
+    """Id mort ou doc illisible : LAISSÉ EN PLACE. Une lecture ratée ne doit pas effacer ce
+    qu'un joueur a payé — c'est le seul endroit du jeu qui retire un sort acquis."""
+    perso = _perso("repurgateur", sorts_connus=["sort:disparu", "sort:feu_pur"])
+    partis = purger_sorts_hors_ecole(perso, lambda i: None if i == "sort:disparu" else _get_doc(i),
+                                     _RULES_VOCS)
+    assert [p["id"] for p in partis] == ["sort:feu_pur"]
+    assert perso["sorts_connus"] == ["sort:disparu"]
+
+
+def test_purge_garde_un_sort_dont_l_ecole_n_est_pas_resoluble():
+    """Sort sans `magie`, d'une vocation non magique : aucune école identifiable. Le retirer
+    reviendrait à punir un contenu mal tagué."""
+    docs = {"sort:orphelin": _sort(_id="sort:orphelin", vocation="guerrier", magie=None)}
+    perso = _perso("repurgateur", sorts_connus=["sort:orphelin"])
+    assert purger_sorts_hors_ecole(perso, docs.get, _RULES_VOCS) == []
+    assert perso["sorts_connus"] == ["sort:orphelin"]
+
+
+def test_purge_ignore_le_niveau_d_ecole():
+    """Le niveau NATIF vaut 0 à la création : `niveau_ecole` rend 0, pas None. Un test de
+    vérité sur cette valeur purgerait tout le répertoire d'un personnage neuf."""
+    perso = _perso("demoniste", sorts_connus=["sort:flamme"])
+    perso["vocations_niveaux"] = {"demoniste": 0}
+    assert purger_sorts_hors_ecole(perso, _get_doc, _RULES_VOCS) == []
+    assert perso["sorts_connus"] == ["sort:flamme"]
+
+
+def test_purge_garde_une_ecole_ACHETEE_par_un_polyvalent():
+    """Un lettré qui a acheté la Sainte la pratique : ses sorts Saints ne bougent pas, quelle
+    que soit l'école native de sa vocation."""
+    perso = _perso("lettre", sorts_connus=["sort:feu_pur"])
+    perso["magies_apprises"] = {"Sainte": 1}
+    assert purger_sorts_hors_ecole(perso, _get_doc, _RULES_VOCS) == []
+
+
+def test_purge_nettoie_les_epingles_sans_creer_la_cle():
+    """Clé présente → filtrée. Clé ABSENTE → laissée absente : l'absence est un état à part
+    entière (auto-épinglage du premier sort connu), la poser figerait un choix non fait."""
+    perso = _perso("repurgateur", sorts_connus=["sort:flamme", "sort:feu_pur"],
+                   sorts_epingles=["sort:feu_pur", "sort:flamme"])
+    purger_sorts_hors_ecole(perso, _get_doc, _RULES_VOCS)
+    assert perso["sorts_epingles"] == ["sort:flamme"]
+
+    sans_cle = _perso("repurgateur", sorts_connus=["sort:flamme", "sort:feu_pur"])
+    assert "sorts_epingles" not in sans_cle
+    purger_sorts_hors_ecole(sans_cle, _get_doc, _RULES_VOCS)
+    assert "sorts_epingles" not in sans_cle

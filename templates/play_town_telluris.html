@@ -7914,6 +7914,10 @@ async function reprendreAventurier(avId) {
 const AFFINITES_INIT = {{ affinites_detail | tojson | safe }};
 renderFicheCompagnons(AFFINITES_INIT);
 {{ compagnons_partis | tojson | safe }}.forEach(n => showToast('👋 ' + n + ' a quitté le groupe.'));
+// Sorts perdus : la vocation ne pratique plus leur école. Même check paresseux, même
+// rendu unique — le doc a déjà été réécrit, ce toast ne reviendra pas.
+// ⚠️ Pas d'escapeHtml : showToast écrit en textContent (CLAUDE.md §9).
+{{ sorts_perdus | tojson | safe }}.forEach(n => showToast(n + ' vous échappe : votre vocation ne pratique plus cette magie.', {major: true}));
 
 // ── Panneau 👥 Groupe ───────────────────────────────────────────────────────────
 // Deux sections en accordéon : les compagnons (→ fiche complète de chacun) et l'inventaire

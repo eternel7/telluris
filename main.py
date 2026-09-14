@@ -658,6 +658,17 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	for _av in compagnons_partis:
 		save_doc(_av)
 	change |= bool(compagnons_partis)
+	# Sorts d'une école que la vocation ne pratique plus (sa `magie` a changé en base) :
+	# retirés PARESSEUSEMENT ici, avec réécriture du doc — `sorts_connus` n'est relu contre
+	# l'école nulle part ailleurs, le répertoire perdu se lancerait donc indéfiniment. Même
+	# place et même motif que les départs volontaires juste au-dessus : les compagnons sont
+	# des docs annexes, persistés séparément ; le principal part avec le `change` ci-dessous.
+	_vocations = get_doc("rules:vocations")
+	sorts_perdus = sorts_util.purger_sorts_hors_ecole(character, get_doc, _vocations)
+	change |= bool(sorts_perdus)
+	for _av in recrutement_util.groupe_effectif(character, get_doc):
+		if sorts_util.purger_sorts_hors_ecole(_av, get_doc, _vocations):
+			save_doc(_av)
 	if change:
 		save_doc(character)
 	# Combats terminés : supprimés SEULEMENT une fois le personnage sauvé — sur conflit, le
@@ -871,6 +882,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			# faudrait ouvrir le panneau pour apprendre qu'il y a quelque chose à y faire.
 			"compagnons_points": recrutement_util.compagnons_a_repartir(character, get_doc),
 			# Compagnons partis d'eux-mêmes pendant l'absence (affinité sous le seuil) : toast.
+			# Sorts perdus avec le changement d'école de la vocation (purge paresseuse
+			# ci-dessus) : annoncés UNE fois, au rendu qui les a retirés — le doc étant déjà
+			# réécrit, le rendu suivant n'aura plus rien à dire.
+			"sorts_perdus": [f"{s.get('icon', '🔮')} {s.get('nom', '')}" for s in sorts_perdus],
 			"compagnons_partis": [
 				f"{av.get('prenom', '')} {av.get('nom', '')}".strip() for av in compagnons_partis
 			],
