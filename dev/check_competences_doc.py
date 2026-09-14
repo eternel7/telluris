@@ -33,6 +33,7 @@ from utils.competences import (  # noqa: E402
 	normaliser_competence,
 )
 from utils.sorts import _bonus_dict  # noqa: E402
+from utils.zones_effet import normaliser_zone  # noqa: E402
 
 DOC_DEFAUT = os.path.join(RACINE, "docs", "competences_vocations_3_6_10.md")
 DOSSIER_JSONS = os.path.join(RACINE, "jsons")
@@ -44,8 +45,13 @@ CHAMPS_ACTIFS_SEULEMENT = ("cout_pm", "cible", "jet", "portee")
 # Clés de PREMIER NIVEAU que `normaliser_competence` sait lire. Même piège que les clés
 # d'effet : un `magie` ou un `composants` recopié depuis un doc de sort ne lève rien et
 # disparaît — la compétence part en base amputée de ce que son auteur croyait y mettre.
-CHAMPS_DOC = ("_id", "_rev", "type", "nom", "icon", "description", "vocation", "niveau",
-			  "mode", "cout_pm", "cible", "jet", "portee", "effets", "condition", "animation")
+CHAMPS_DOC = ("_id", "_rev", "type", "nom", "icon", "description", "vocation", "famille",
+			  "niveau", "mode", "cout_pm", "cible", "jet", "portee", "zone", "effets",
+			  "condition", "animation")
+# Clés du bloc `zone` que `normaliser_zone` sait lire. Même liste blanche, même piège : une
+# `rayon_max` ou une `hauteur` inventée ne lève rien et ne dessine rien.
+CHAMPS_ZONE = ("forme", "origine", "orientation", "rayon", "longueur", "largeur",
+			   "decalage", "angle")
 
 BLOC_JSON = re.compile(r"^```json\n(.*?)\n```", re.MULTILINE | re.DOTALL)
 
@@ -58,6 +64,31 @@ def charger_blocs(chemin):
 		ligne = texte.count("\n", 0, m.start()) + 1
 		blocs.append((ligne, m.group(1)))
 	return blocs
+
+
+def ids_des_imports() -> set:
+	"""`_id` de compétences présents dans les `jsons/*_a_importer.json` committés.
+
+	⚠️ NÉCESSAIRE, et pas par excès de zèle : le dump committé retarde toujours sur le
+	contenu livré. Les compétences arrivées avec les zones d'effet (`competence:balayage`,
+	`competence:tourbillon_de_lames`, `competence:cri_de_ralliement`) vivent dans un import
+	et dans AUCUN dump — un `_id` réutilisé les écraserait en silence, `admin_import_bulk`
+	faisant un PUT complet. On lit donc les deux référentiels.
+	"""
+	out = set()
+	if not os.path.isdir(DOSSIER_JSONS):
+		return out
+	for nom in os.listdir(DOSSIER_JSONS):
+		if not nom.endswith("_a_importer.json"):
+			continue
+		try:
+			contenu = json.load(open(os.path.join(DOSSIER_JSONS, nom), encoding="utf-8"))
+		except (json.JSONDecodeError, OSError):
+			continue   # un import illisible n'est pas le sujet de ce script
+		for doc in (contenu if isinstance(contenu, list) else [contenu]):
+			if isinstance(doc, dict) and str(doc.get("_id", "")).startswith("competence:"):
+				out.add(doc["_id"])
+	return out
 
 
 def vocations_du_dump():
@@ -96,6 +127,9 @@ def main():
 		raise SystemExit(f"ERREUR : aucun bloc ```json``` dans {chemin}")
 
 	dump, vocations_connues, ids_existants = vocations_du_dump()
+	ids_imports = ids_des_imports()
+	if ids_existants is not None:
+		ids_existants = ids_existants | ids_imports
 
 	docs = []
 	for ligne, brut in blocs:
@@ -124,6 +158,41 @@ def main():
 			if cle not in CHAMPS_DOC:
 				erreurs.append(f"{prefixe} : champ `{cle}` INCONNU de normaliser_competence — "
 							   f"il disparaîtrait silencieusement à la lecture")
+
+		# (2) une invocation n'existe QUE pour un sort : `normaliser_competence` ne lit pas
+		# le bloc, et la branche `competence` de resolve_action ne le traite pas. Le poser
+		# ici produirait une compétence en base qui ne fait rien — le plus coûteux des
+		# silences, puisque le thème (« invoquer ») laisse croire au contraire.
+		if "invocation" in doc:
+			erreurs.append(f"{prefixe} : bloc `invocation` sur une COMPÉTENCE — inerte "
+						   f"(réservé aux docs `sort:*`)")
+
+		# (1 bis) la zone est une seconde liste blanche, avec ses propres pièges
+		zone_ecrite = doc.get("zone")
+		if zone_ecrite is not None:
+			for cle in zone_ecrite if isinstance(zone_ecrite, dict) else ():
+				if cle not in CHAMPS_ZONE:
+					erreurs.append(f"{prefixe} : clé de zone `{cle}` INCONNUE du moteur")
+			zone_lue = normaliser_zone(zone_ecrite)
+			if zone_lue is None:
+				erreurs.append(f"{prefixe} : bloc `zone` rejeté par normaliser_zone "
+							   f"(`forme` absente ou non reconnue) — la capacité "
+							   f"retomberait sur la seule case de sa cible")
+			else:
+				# (6) une passive ne vise rien : sa zone ne serait jamais évaluée
+				if est_passive(comp):
+					erreurs.append(f"{prefixe} : PASSIVE portant une `zone` — décoratif, "
+								   f"aucune passive n'est jamais résolue sur la grille")
+				# (8) convention de `decalage`, pour les seules formes orientées
+				if zone_lue["forme"] in ("rectangle", "cone"):
+					if zone_lue["origine"] == "lanceur" and zone_lue["decalage"] < 1:
+						erreurs.append(f"{prefixe} : forme orientée ancrée sur le LANCEUR "
+									   f"avec decalage {zone_lue['decalage']} — son premier "
+									   f"cran serait la case du lanceur (attendu ≥ 1)")
+					if zone_lue["origine"] == "cible" and zone_lue["decalage"] != 0:
+						erreurs.append(f"{prefixe} : forme orientée ancrée sur la CIBLE "
+									   f"avec decalage {zone_lue['decalage']} — la cible "
+									   f"désignée serait la seule épargnée (attendu 0)")
 
 		effets_ecrits = doc.get("effets") or {}
 		effets_lus = _bonus_dict(effets_ecrits)
@@ -200,17 +269,25 @@ def main():
 
 	# ── Rapport ──────────────────────────────────────────────────────────────────
 	print(f"Document  : {os.path.relpath(chemin, RACINE)}")
-	print(f"Référentiel : {dump or 'AUCUN DUMP — contrôles de vocation et de collision sautés'}")
+	print(f"Référentiel : {dump or 'AUCUN DUMP — contrôles de vocation et de collision sautés'}"
+		  f" + {len(ids_imports)} competence:* dans jsons/*_a_importer.json")
 	print(f"Blocs lus : {len(docs)} · vocations couvertes : {len(par_vocation)}")
 	passives = sum(1 for _, d in docs if (d.get("mode") == "passive"))
 	print(f"Répartition : {passives} passives / {len(docs) - passives} actives")
+	zones = [d for _, d in docs if d.get("zone")]
+	formes = {}
+	for d in zones:
+		formes[d["zone"].get("forme")] = formes.get(d["zone"].get("forme"), 0) + 1
+	hostiles = sum(1 for d in zones if d.get("cible") == "ennemi")
+	print(f"Zones : {len(zones)} ({hostiles} hostiles / {len(zones) - hostiles} bénéfiques) · "
+		  + " · ".join(f"{f} ×{n}" for f, n in sorted(formes.items())))
 
 	if erreurs:
 		print(f"\n{len(erreurs)} PROBLÈME(S) :")
 		for e in erreurs:
 			print(f"  - {e}")
 		return 1
-	print("\nOK — les huit invariants tiennent.")
+	print("\nOK — les neuf invariants tiennent.")
 	return 0
 
 
