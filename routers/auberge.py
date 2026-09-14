@@ -444,10 +444,12 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 			continue
 		# `lieu_recettes` est mémoïsé par process : les dizaines d'appels touchent le mémo.
 		# Un scriptorium y ajoute son petit lot de recettes virtuelles (sort/recette/carte),
-		# tiré UNE FOIS pour toute la nuit (pas rejoué à chaque passe).
-		recettes = scriptorium.recettes_effectives(boutique, find_docs, get_doc, save_doc)
+		# ⚠️ RE-TIRÉ à chaque passe : chaque livre ne cuit qu'une fois par passe
+		# (`max_par_passe`), un tirage unique rendrait `passes` copies du même sujet. Coût nul
+		# pour un magasin ordinaire (`recettes_effectives` = `recettes_lieu` mémoïsé).
 		change = False
 		for _ in range(passes):
+			recettes = scriptorium.recettes_effectives(boutique, find_docs, get_doc, save_doc)
 			change = tick_atelier(boutique, recettes, flux) or change
 		if change and save_doc(boutique) is not None:
 			magasins += 1

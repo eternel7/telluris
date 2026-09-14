@@ -138,6 +138,25 @@ def test_batch_matiere_item_ref_non_consommee_mise_en_rayon_sans_double_prefixe(
     assert lieu["stock_vente"] == [{"item_id": "item:Herbes_medicinales", "qty": 3}]
 
 
+def _stock_cinq_elixirs():
+    return {"stock_matieres": {"item:Herbes_medicinales": 10, "item:Herbes_a_bruler": 10, "sang": 5}}
+
+
+def test_batch_sans_max_par_passe_draine_tout_comme_avant():
+    lieu = _stock_cinq_elixirs()
+    produits = _executer_production_batch(lieu, [_recette_elixir()], resolve_fn=lambda i: None)
+    assert produits == [{"item_id": "item:elixir_revigorant", "qty": 5}]
+
+
+def test_batch_max_par_passe_borne_les_cuissons_et_garde_la_matiere():
+    # Un livre du scriptorium : UN exemplaire par passe, le reste de la matière attend.
+    lieu = _stock_cinq_elixirs()
+    recette = dict(_recette_elixir(), max_par_passe=1)
+    produits = _executer_production_batch(lieu, [recette], resolve_fn=lambda i: None)
+    assert produits == [{"item_id": "item:elixir_revigorant", "qty": 1}]
+    assert lieu["stock_matieres"] == {"item:Herbes_medicinales": 8, "item:Herbes_a_bruler": 8, "sang": 4}
+
+
 # ── Pool unifié : le rayon (stock_vente) sert aussi de matière (surplus seulement) ──
 
 def _recettes_arc():

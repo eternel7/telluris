@@ -4626,7 +4626,10 @@ function openMarchandDetail(sens, arrIdx) {
 function _renderMarchandDetail(st) {
 	const it = st.item;
 	let html = `<h3>${it.icon || '📦'} ${it.nom || '—'}</h3>`;
-	if (it.description) html += `<div class="item-detail-desc">${escapeHtml(it.description)}</div>`;
+	// Livre du scriptorium en vitrine : le serveur a retiré description et carte (le contenu
+	// est la marchandise) — ils reviennent dans la fiche du sac une fois l'ouvrage acheté.
+	if (it.contenu_scelle) html += `<div class="item-detail-desc">🔏 Contenu scellé : il se lit une fois l'ouvrage acheté.</div>`;
+	else if (it.description) html += `<div class="item-detail-desc">${escapeHtml(it.description)}</div>`;
 	if (it.compagnon_id) html += `<div class="item-cmp-slotsel"><span>Porteur :</span><strong>${it.porteur_icon || '👤'} ${it.porteur_nom || 'Porteur'}</strong></div>`;
 	if (it.prix) html += `<div class="item-cmp-slotsel"><span>Prix :</span><strong>${it.negocie ? '🤝 ' : ''}${formatPrix(it.prix)}</strong></div>`;
 	if (st.slots.length) {

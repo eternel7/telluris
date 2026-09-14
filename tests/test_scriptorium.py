@@ -259,6 +259,7 @@ def test_recettes_virtuelles_au_plus_un_sujet_par_pool(monkeypatch):
 	for r in out:
 		assert r["lieu_categorie"] == "scriptorium"
 		assert r["quantite_produite"] == 1
+		assert r["max_par_passe"] == 1  # jamais N copies du même sujet dans une passe
 		matieres = {m["item"]: m["quantite"] for m in r["matieres_premieres"]}
 		assert matieres == {"item:Papier": character_stats.SCRIPTORIUM_LIVRE_PAPIER,
 							 "item:Encre": character_stats.SCRIPTORIUM_LIVRE_ENCRE}
@@ -312,3 +313,55 @@ def test_recettes_effectives_scriptorium_sans_rien_a_documenter(monkeypatch):
 	monkeypatch.setattr("utils.focalisation._graphe_cache", {"at": 0.0, "graphe": None})
 	out = scriptorium.recettes_effectives(SCRIPTORIUM, find_docs_fn, docs.get, lambda d: d)
 	assert out == []
+
+
+# ── Vitrine : le contenu d'un livre ne se lit pas avant l'achat ─────────────────
+
+LIVRE_SORT = {"_id": "item:livre_sort_eclair", "type": "item", "nom": "Traité : Éclair",
+			  "categorie": "livre", "sous_categorie": "livre_sort", "slots": [], "poids": 0.4,
+			  "rarete": "commun", "description": "École : elementaire\nCoût : 4 PM"}
+LIVRE_CARTE = {"_id": "item:livre_carte_armurerie", "type": "item", "nom": "Carte : Armurerie",
+			   "categorie": "livre", "sous_categorie": "livre_carte", "slots": [], "poids": 0.3,
+			   "rarete": "commun", "description": "Un bout de carte situant l'Armurerie.",
+			   "carte": {"position": {"x": 3, "y": 4}, "dimensions": {"x": 50, "y": 50},
+						 "image": "auxerre.png", "image_route": "towns", "lieu_nom": "Armurerie"}}
+PARCHEMIN = {"_id": "item:parchemin", "type": "item", "nom": "Parchemin", "categorie": "composant",
+			 "sous_categorie": "papier", "slots": [], "poids": 0.1, "rarete": "commun",
+			 "description": "Une feuille vierge."}
+
+
+def test_contenu_scelle_ne_vise_que_les_livres_de_contenu():
+	assert scriptorium.contenu_scelle(LIVRE_SORT) is True
+	assert scriptorium.contenu_scelle(LIVRE_CARTE) is True
+	assert scriptorium.contenu_scelle({"categorie": "livre", "sous_categorie": "livre_recette"}) is True
+	assert scriptorium.contenu_scelle({"categorie": "livre", "sous_categorie": "livre_ecrit"}) is False
+	assert scriptorium.contenu_scelle(GRIMOIRE) is False
+	assert scriptorium.contenu_scelle(PARCHEMIN) is False
+	assert scriptorium.contenu_scelle(None) is False
+
+
+def test_vitrine_retire_description_et_carte_des_livres_de_contenu(monkeypatch):
+	from utils import marche
+	catalogue = {d["_id"]: d for d in (LIVRE_SORT, LIVRE_CARTE, PARCHEMIN)}
+	monkeypatch.setattr(marche, "_all_recettes", lambda: [])
+	monkeypatch.setattr(marche, "get_doc", lambda i: catalogue.get(i))
+	monkeypatch.setattr(marche, "resolve_item_ref",
+						lambda i: (dict(catalogue[i], item=i) if i in catalogue else None))
+	marche.reset_prix_cache()
+	try:
+		lieu = dict(SCRIPTORIUM, stock_vente=[{"item_id": i, "qty": 1} for i in catalogue])
+		lignes = {l["item_id"]: l for l in marche.resolve_stock_vente(lieu)}
+	finally:
+		marche.reset_prix_cache()
+
+	for livre in (LIVRE_SORT, LIVRE_CARTE):
+		ligne = lignes[livre["_id"]]
+		assert "description" not in ligne
+		assert "carte" not in ligne
+		assert ligne["contenu_scelle"] is True
+		assert ligne["nom"] == livre["nom"]  # le sujet reste lisible : on sait ce qu'on achète
+	# Le doc item n'est pas amputé pour autant : une fois dans le sac, tout se lit.
+	assert "carte" in LIVRE_CARTE and LIVRE_SORT["description"]
+	# Un objet ordinaire garde sa description.
+	assert lignes[PARCHEMIN["_id"]]["description"] == "Une feuille vierge."
+	assert "contenu_scelle" not in lignes[PARCHEMIN["_id"]]

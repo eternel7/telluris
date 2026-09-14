@@ -24,7 +24,7 @@ import time
 from models import character_stats
 from utils import auberge
 from utils import marche
-from utils.characters import lieu_label
+from utils.characters import item_sous_categorie, lieu_label
 
 ITEM_LIVRE_ECRIT_ID = "item:livre_ecrit"
 SOUS_CATEGORIE_LIVRE_ECRIT = "livre_ecrit"
@@ -35,6 +35,11 @@ SOUS_CATEGORIE_LIVRE_ECRIT = "livre_ecrit"
 PREFIXE_LIVRE_SORT = "livre_sort_"
 PREFIXE_LIVRE_RECETTE = "livre_recette_"
 PREFIXE_LIVRE_CARTE = "livre_carte_"
+
+# Livres dont le CONTENU (`description`, `carte`) est la marchandise : scellés en vitrine
+# (`marche.resolve_stock_vente`), lisibles une fois dans un sac. `livre_ecrit` n'en est pas :
+# un manuscrit personnel ne passe pas en rayon.
+SOUS_CATEGORIES_LIVRE_CONTENU = frozenset({"livre_sort", "livre_recette", "livre_carte"})
 
 
 def now_epoch() -> int:
@@ -50,6 +55,12 @@ def lieu_est_scriptorium(lieu_doc: dict) -> bool:
 		return False
 	return (lieu_doc.get("categorie") == "scriptorium"
 			or "scriptorium" in (lieu_doc.get("tags") or []))
+
+
+def contenu_scelle(item: dict) -> bool:
+	"""Vrai pour un traité, un recueil ou une carte du scriptorium : leur contenu ne se montre
+	pas avant l'achat. Passe par `item_sous_categorie`, jamais `doc["sous_categorie"]`."""
+	return bool(item) and item_sous_categorie(item) in SOUS_CATEGORIES_LIVRE_CONTENU
 
 
 # ── Point 1 : l'écrit personnel ─────────────────────────────────────────────────
@@ -249,7 +260,11 @@ def _assurer_item_livre(item_id: str, kind: str, sujet_id: str, get_doc_fn, save
 
 def _recette_virtuelle(item_id: str) -> dict:
 	"""Recette EN MÉMOIRE (jamais persistée) produisant `item_id` — coût en papier/encre
-	délibérément non trivial (cf. `recettes_virtuelles`, § rareté)."""
+	délibérément non trivial (cf. `recettes_virtuelles`, § rareté).
+
+	⚠️ `max_par_passe: 1` : UN exemplaire par passe de production. Sans lui, le drainage de
+	`marche._executer_production_batch` rejouait le même sujet tant qu'il restait de la matière
+	(8 cartes, 9 recueils, 5 traités identiques en un tick au dump du 14/09)."""
 	slug = item_id[len("item:"):] if item_id.startswith("item:") else item_id
 	return {
 		"objet_final": slug,
@@ -259,6 +274,7 @@ def _recette_virtuelle(item_id: str) -> dict:
 			{"item": "item:Encre", "quantite": int(character_stats.SCRIPTORIUM_LIVRE_ENCRE)},
 		],
 		"quantite_produite": 1,
+		"max_par_passe": 1,
 	}
 
 

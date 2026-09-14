@@ -8,7 +8,7 @@ Doc `sort:*` : `{nom, vocation, magie, niveau, cout_pm (>0), cible, jet, portee,
 
 **UI** : onglet ⚡ (sorts connus + 📖 Apprentissage + 🏫 Écoles) ; en combat l'accès passe par les slots, ciblage **violet**.
 
-Contenu : `jsons/sort-exemples.json`, `update_sorts.json`, `magie_naturelle_sorts.json`, `sorts_nature_elementaire_a_importer.json`, `sorts_bataille_illusoire_noire_sainte_a_importer.json`, `repurgateur_magie_noire_a_importer.json`.
+Contenu : `jsons/sort-exemples.json`, `update_sorts.json`, `magie_naturelle_sorts.json`, `sorts_nature_elementaire_a_importer.json`, `sorts_bataille_illusoire_noire_sainte_a_importer.json`, `repurgateur_magie_noire_a_importer.json`, `sorts_invocation_a_importer.json` (échelles d'invocation 1-10 + grimoires manquants, `dev/gen_sorts_invocation.py`).
 
 
 ### Familles — exclure un TYPE de sort/compétence d'une vocation

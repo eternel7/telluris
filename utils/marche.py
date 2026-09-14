@@ -39,6 +39,8 @@ _FICHE_ITEM_KEYS = (
 	# sans elle, la fiche marchand n'affichait AUCUN texte d'objet, même pour un livre qu'on
 	# s'apprête à acheter. `carte` : bout de carte d'un livre_carte (mêmes clés que
 	# `quetes._carte_chasse`), pour le bouton 🗺️ générique de la fiche.
+	# ⚠️ Retirés des lignes d'ACHAT d'un livre de contenu (`resolve_stock_vente`) : c'est ce
+	# qu'on paie, il ne se lit pas en vitrine.
 	"description", "carte",
 )
 
@@ -1201,6 +1203,11 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 			"poids": sum(qm for (_sc, qm) in recette_matieres(r)),  # pour la pondération du tirage
 			"qp": max(1, int(r.get("quantite_produite", 1) or 1)),
 			"item_id": objet_final_item_id(r.get("objet_final", "")),
+			# `max_par_passe` : nombre de fois où la recette peut cuire dans CETTE passe (absent
+			# = sans limite, le drainage d'avant). Posé par les livres du scriptorium : sans lui,
+			# le drainage rejouait le même sujet tant qu'il restait papier et encre.
+			"max": r.get("max_par_passe"),
+			"cuites": 0,
 		}
 		for r in recettes
 		if recette_matieres(r)
@@ -1209,8 +1216,10 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 	fired = 0
 	while fired < _CONVERSION_CAP:
 		# Une recette est applicable seulement si TOUTES ses matières sont disponibles (stock
-		# matières + surplus du rayon).
-		applicable = [p for p in prepared if all(_dispo(sc) >= qm for (sc, qm) in p["inputs"])]
+		# matières + surplus du rayon) et qu'elle n'a pas atteint son `max_par_passe`.
+		applicable = [p for p in prepared
+					  if (p["max"] is None or p["cuites"] < int(p["max"]))
+					  and all(_dispo(sc) >= qm for (sc, qm) in p["inputs"])]
 		if not applicable:
 			break
 		chosen = random.choices(applicable, weights=[max(1, p["poids"]) for p in applicable])[0]
@@ -1218,6 +1227,7 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 			_consommer(sc, qm)
 		_stock_vente_add(stock_vente, chosen["item_id"], chosen["qp"])
 		produits[chosen["item_id"]] = produits.get(chosen["item_id"], 0) + chosen["qp"]
+		chosen["cuites"] += 1
 		fired += 1
 
 	# Produits finis : matières qu'aucune recette du lieu ne consomme (ex. viande/os
@@ -1540,7 +1550,12 @@ def convertir_apres_achat(lieu_doc: dict, item_doc: dict, flux: dict | None = No
 
 def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> list[dict]:
 	"""Stock de vente du lieu résolu en lignes affichables : item résolu + qty + prix
-	courant à l'achat (négocié ou base pondéré relation) + fourchette min–max."""
+	courant à l'achat (négocié ou base pondéré relation) + fourchette min–max.
+
+	⚠️ Un traité, un recueil ou une carte du scriptorium (`scriptorium.contenu_scelle`) perd
+	`description` et `carte` et porte `contenu_scelle: True` : leur contenu EST la marchandise.
+	Import tardif : `scriptorium` importe ce module."""
+	from utils import scriptorium
 	out = []
 	for entry in (lieu_doc or {}).get("stock_vente", []):
 		item_id = entry.get("item_id")
@@ -1554,7 +1569,7 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 		cible = stock_cible_pour(lieu_doc, item)
 		prix_cuivre = prix_marche(relation_doc, item_id, pmin, pmax, "achat", qty, cible)
 		negocie = (relation_doc or {}).get("prix_negocies", {}).get(item_id, {}).get("achat") is not None
-		out.append({
+		ligne = {
 			"item_id": item_id,
 			"nom": item.get("nom"),
 			"icon": item.get("icon"),
@@ -1568,5 +1583,10 @@ def resolve_stock_vente(lieu_doc: dict, relation_doc: dict | None = None) -> lis
 			"prix_max_purse": cuivre_to_purse(pmax),
 			"negocie": negocie,
 			**fiche_item_fields(item),
-		})
+		}
+		if scriptorium.contenu_scelle(item):
+			ligne.pop("description", None)
+			ligne.pop("carte", None)
+			ligne["contenu_scelle"] = True
+		out.append(ligne)
 	return out
