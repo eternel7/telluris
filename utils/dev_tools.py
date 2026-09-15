@@ -515,6 +515,15 @@ CATALOGUE = [
 			"du template de combat dans un contexte vm.",
 	},
 	{
+		"id": "test_saut_client",
+		"label": "🧪 Tests d'exécution du ciblage de saut (node)",
+		"argv": _node("test_saut_client.js"),
+		"ecrit": "Lecture seule.",
+		"description": "⚠️ Exige `node` (cf. ci-dessus). Éprouve le SEUL ciblage de la page "
+			"qui porte sur une CASE et non sur un acteur : cases d'arrivée offertes (miroir "
+			"de `_verifier_saut`, mur franchi compris) et parcours du mode `pendingSaut`.",
+	},
+	{
 		"id": "test_resize_client",
 		"label": "🧪 Tests d'exécution du redimensionnement de grille (node)",
 		"argv": _node("test_resize_client.js"),

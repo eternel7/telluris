@@ -30,7 +30,8 @@
 from models import character_stats
 from utils.consommables import _as_int, poser_effet
 from utils.sorts import (
-	CIBLE_DEFAUT, CIBLES, JETS, _bonus_dict, famille_de, familles_exclues, part_durative,
+	CIBLE_DEFAUT, CIBLES, JETS, MAINTIEN_PM_MAX, _bonus_dict, est_maintenu, famille_de,
+	familles_exclues, part_durative,
 )
 from utils.zones_effet import normaliser_zone
 
@@ -67,6 +68,16 @@ def normaliser_competence(doc) -> dict | None:
 		"niveau": _as_int(doc.get("niveau")),
 		"mode": mode,
 		"cout_pm": _as_int(doc.get("cout_pm")),
+		# ENTRETIEN en PM par round — une garde qu'on tient (cf. utils/sorts, § les trois
+		# notions du temps magique). Même borne, même défaut neutre, et même piège de liste
+		# blanche que `zone` et `animation` juste en dessous.
+		# ⚠️ Pas d'`incantation` ici, et c'est DÉLIBÉRÉ : la canalisation multi-round n'a
+		# qu'un seul chemin de résolution (`_avancer_incantation` → `_lancer_sort`), propre
+		# aux sorts. Normaliser le champ sans le brancher afficherait « ⏱ 4 PA » sur une
+		# compétence qui partirait quand même du premier coup — un champ qui ment est pire
+		# qu'un champ absent. À rebrancher le jour où les compétences auront leur propre
+		# chokepoint de lancement.
+		"maintien": min(MAINTIEN_PM_MAX, _as_int(doc.get("maintien"))),
 		"cible": cible,
 		"jet": jet,
 		"portee": max(1, _as_int(doc.get("portee")) or 1),
@@ -107,22 +118,34 @@ def competence_utilisable_combat(comp: dict) -> bool:
 	"""Éligibilité combat : active ET (part instantanée — dégâts, PV, PM, ou furtivité,
 	état de combat posé instantanément — OU part à DURÉE). Miroir exact de
 	sorts.sort_utilisable_combat : un buff pur est désormais utilisable en combat, le
-	snapshot le portant et le décrémentant au tour de son porteur."""
+	snapshot le portant et le décrémentant au tour de son porteur.
+
+	⚠️ Miroir aussi des trois ajouts de `sort_utilisable_combat` : une compétence
+	MAINTENUE, un saut ou un lien de vie n'ont rien à poser sur la cible et seraient
+	refusés comme « sans effet »."""
 	if not est_active(comp):
 		return False
+	if est_maintenu(comp):
+		return True
 	eff = (comp or {}).get("effets") or {}
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
 			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
-			or part_durative(eff))
+			or bool(eff.get("degats_pm")) or _as_int(eff.get("saut")) > 0
+			or bool(eff.get("lien_vie")) or part_durative(eff))
 
 
 def competence_utilisable_exploration(comp: dict) -> bool:
 	"""Éligibilité exploration : active, NON offensive (`soi` ou `allie`), et au moins un
 	effet applicable hors combat (soin/PM instantanés, ou buffs/régén/esquive à durée).
-	Miroir exact de sorts.sort_utilisable_exploration."""
+	Miroir exact de sorts.sort_utilisable_exploration — refus des mécaniques de ROUND
+	(incantation longue, entretien) et de GRILLE (saut, lien de vie) comprises."""
 	if not est_active(comp) or (comp or {}).get("cible", "soi") == "ennemi":
 		return False
+	if est_maintenu(comp):
+		return False
 	eff = (comp or {}).get("effets") or {}
+	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie"):
+		return False
 	instant = _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0
 	return instant or part_durative(eff)
 
@@ -327,6 +350,9 @@ def liste_competences_payload(character: dict, get_doc, contexte: str) -> list:
 			"niveau": comp["niveau"],
 			"mode": comp["mode"],
 			"cout_pm": comp["cout_pm"],
+			# L'entretien par round, comme pour les sorts : sans lui le client ne peut ni
+			# annoncer la facture ni griser une case impayable.
+			"maintien": comp["maintien"],
 			"cible": comp["cible"],
 			"jet": comp["jet"],
 			"portee": comp["portee"],

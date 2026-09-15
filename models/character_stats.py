@@ -360,6 +360,12 @@ FOCUS_CIBLE_MULT: float = 3.0
 # le niveau de vocation requis. SORT_VOCATIONS_DEPART = vocations « pures magiciennes » qui
 # choisissent UN sort gratuit (parmi les niveau 0 de leur vocation) à la création du perso.
 SORT_COUT_COEFF: int = 2
+# Test de CONCENTRATION : quand un lanceur encaisse un coup pendant une incantation longue
+# ou alors qu'il entretient un sort maintenu, il jette un d100 sous
+# `50 + Vol/CONCENTRATION_VOL_DIV − dégâts subis` (clampé [5, 95], cf.
+# utils/sorts.seuil_concentration). Baisser le diviseur rend les mages plus solides sous le
+# feu ; le monter en fait des artilleurs qu'il faut vraiment protéger.
+CONCENTRATION_VOL_DIV: int = 2
 SORT_VOCATIONS_DEPART: list = [
 	"elementaliste", "mage", "illusionniste", "lettre", "druide",
 	"chaman", "pretre", "necromancien", "demoniste",
@@ -838,6 +844,7 @@ def current_world_variables() -> dict:
 		"FOCUS_EVENEMENT_MULT": FOCUS_EVENEMENT_MULT,
 		"FOCUS_CIBLE_MULT": FOCUS_CIBLE_MULT,
 		"SORT_COUT_COEFF": SORT_COUT_COEFF,
+		"CONCENTRATION_VOL_DIV": CONCENTRATION_VOL_DIV,
 		"SORT_VOCATIONS_DEPART": list(SORT_VOCATIONS_DEPART),
 		"MAGIE_POLYVALENTE_VOCATIONS": list(MAGIE_POLYVALENTE_VOCATIONS),
 		"MAGIE_ECOLE_COUT_COEFF": MAGIE_ECOLE_COUT_COEFF,
@@ -938,6 +945,7 @@ def load_world_variables() -> dict:
 	global QUETE_CHASSE_XP_FACTEUR, QUETE_CHASSE_PROBA_RANG, RANG_GUILDE_MAX_DEFAUT
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
+	global CONCENTRATION_VOL_DIV
 	global RECRUTEMENT_GROUPE_TAILLE_MAX, RECRUTEMENT_BOARD_DUREE_SECONDES, RECRUTEMENT_BOARD_DUREE_JITTER
 	global RECRUTEMENT_PART_BUTIN_MIN, RECRUTEMENT_PART_BUTIN_MAX, RECRUTEMENT_NIVEAU_POINTS_PAR_NIVEAU
 	global RECRUTEMENT_CARTE_REQUISE, RECRUTEMENT_CAUTION_CUIVRE
@@ -1077,6 +1085,8 @@ def load_world_variables() -> dict:
 	FOCUS_CIBLE_MULT     = float(v.get("FOCUS_CIBLE_MULT", FOCUS_CIBLE_MULT))
 
 	SORT_COUT_COEFF = max(0, int(v.get("SORT_COUT_COEFF", SORT_COUT_COEFF)))
+	# Plancher à 1 : c'est un DIVISEUR (seuil_concentration divise la Volonté par lui).
+	CONCENTRATION_VOL_DIV = max(1, int(v.get("CONCENTRATION_VOL_DIV", CONCENTRATION_VOL_DIV)))
 	if isinstance(v.get("SORT_VOCATIONS_DEPART"), list):
 		SORT_VOCATIONS_DEPART[:] = [str(x) for x in v["SORT_VOCATIONS_DEPART"]]
 	MAGIE_ECOLE_COUT_COEFF = max(0, int(v.get("MAGIE_ECOLE_COUT_COEFF", MAGIE_ECOLE_COUT_COEFF)))

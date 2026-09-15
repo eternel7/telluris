@@ -71,6 +71,29 @@ FAMILLE_INVOCATION = "invocation"
 INVOCATION_DUREE_DEFAUT = 3
 INVOCATION_NOMBRE_MAX = 4
 
+# ── Les trois notions du temps magique ───────────────────────────────────────────
+# Un sort porte TROIS contraintes distinctes, volontairement séparées pour qu'elles se
+# combinent librement (un Météore est long à lancer mais ne s'entretient pas ; un Mur de
+# feu part vite et coûte chaque round) :
+#   `incantation` → PA de LANCEMENT : le temps nécessaire pour déclencher le sort ;
+#   `cout_pm`     → PM de LANCEMENT : l'énergie nécessaire pour le créer ;
+#   `maintien`    → PM de MAINTIEN  : l'énergie consommée chaque round pour le garder actif.
+#
+# ⚠️ Défauts NEUTRES (`incantation` 1, `maintien` 0) : un doc `sort:*` déjà en base se
+# comporte exactement comme avant — aucune migration (CLAUDE.md §4).
+# ⚠️ COMBAT SEULEMENT pour les deux champs neufs : il n'y a pas de round en exploration,
+# donc rien à quoi rattacher un PA reporté ou un prélèvement par tour (cf.
+# `sort_utilisable_exploration`). Même arbitrage que l'invocation, et pour la même raison.
+INCANTATION_PA_DEFAUT = 1
+INCANTATION_PA_MAX = 12
+MAINTIEN_PM_MAX = 20
+
+# Bornes des clés d'effet neuves (cf. `_bonus_dict`). Un drain ne rend jamais plus que les
+# dégâts infligés, un saut ne franchit pas la moitié d'une carte.
+DRAIN_PCT_MAX = 100
+LIEN_VIE_PCT_MAX = 100
+SAUT_DISTANCE_MAX = 8
+
 
 def _bonus_dict(raw) -> dict:
 	"""Normalise un bloc d'effets/bonus : degats str, entiers ≥ 0, buffs {caract:int},
@@ -91,7 +114,18 @@ def _bonus_dict(raw) -> dict:
 	- `esquive`  : malus au seuil de toucher PHYSIQUE (cc/cd) des attaques subies —
 	  jamais la magie (elle se résout sur pm_def, pas sur l'Ag).
 	- `furtivite`: > 0 = confère l'état furtif ; la valeur s'ajoute à l'Ag dans la
-	  difficulté du jet de détection des ennemis."""
+	  difficulté du jet de détection des ennemis.
+	- `degats_pm`: notation de dés portée aux PM de la CIBLE (et non à ses PV). Sans
+	  soustraction des PA : une armure n'arrête pas une siphonie.
+	- `cout_pv`  : PV dépensés par le LANCEUR au lancement. ⚠️ Ce ne sont PAS des dégâts
+	  subis — ni test de concentration, ni lien de vie, ni furtivité rompue.
+	- `drain_pv` / `drain_pm` : pourcentage des dégâts RÉELLEMENT infligés reversé au
+	  lanceur, plafonné par `drain_max` (0 = aucun plafond) une fois par lancement.
+	- `saut`     : distance max d'une téléportation (cases). Le sort vise une CASE.
+	- `lien_vie` : {part, reduction} — cf. `_lien_vie_dict`.
+
+	⚠️ Toutes les clés neuves sont ≥ 0 par nature : le clamp d'`_as_int` reste valide, et
+	un doc déjà en base les reçoit à leur valeur neutre (aucune migration, CLAUDE.md §4)."""
 	raw = raw or {}
 	buffs = {}
 	for k, v in (raw.get("buffs") or {}).items():
@@ -109,7 +143,31 @@ def _bonus_dict(raw) -> dict:
 		"duree": _as_int(raw.get("duree")),
 		"esquive": _as_int(raw.get("esquive")),
 		"furtivite": _as_int(raw.get("furtivite")),
+		"degats_pm": str(raw.get("degats_pm") or "").strip(),
+		"cout_pv": _as_int(raw.get("cout_pv")),
+		"drain_pv": min(DRAIN_PCT_MAX, _as_int(raw.get("drain_pv"))),
+		"drain_pm": min(DRAIN_PCT_MAX, _as_int(raw.get("drain_pm"))),
+		"drain_max": _as_int(raw.get("drain_max")),
+		"saut": min(SAUT_DISTANCE_MAX, _as_int(raw.get("saut"))),
+		"lien_vie": _lien_vie_dict(raw.get("lien_vie")),
 	}
+
+
+def _lien_vie_dict(raw) -> dict | None:
+	"""Bloc `lien_vie` d'un effet, normalisé — ou None si l'effet n'en porte pas.
+
+	`{part, reduction}` en POURCENTS : sur les dégâts qu'encaisse le protégé, `reduction`
+	est d'abord absorbée, puis `part` du reste est TRANSFÉRÉE au protecteur. ⚠️ Le lien ne
+	CRÉE aucun dégât — il déplace la perte de PV d'un corps vers l'autre (l'exemple du
+	livre de règles : 20 dégâts avec `part: 50` font 10 et 10).
+
+	⚠️ `part` à 0 rendrait le lien inerte tout en le faisant payer : le bloc est alors
+	considéré comme absent, plutôt que de laisser un sort s'entretenir pour rien."""
+	raw = raw or {}
+	part = min(LIEN_VIE_PCT_MAX, _as_int(raw.get("part")))
+	if part <= 0:
+		return None
+	return {"part": part, "reduction": min(LIEN_VIE_PCT_MAX, _as_int(raw.get("reduction")))}
 
 
 def effets_de_sort(sort_doc) -> dict:
@@ -147,6 +205,50 @@ def est_invocation(sort: dict) -> bool:
 	c'est la présence du bloc `invocation` qui décide, jamais la `famille` (une étiquette
 	libre, qu'un auteur peut oublier ou orthographier autrement)."""
 	return bool((sort or {}).get("invocation"))
+
+
+def est_maintenu(capacite: dict) -> bool:
+	"""La capacité (vue normalisée) demande-t-elle un ENTRETIEN en PM chaque round ?
+	SOURCE UNIQUE du test, partagée par les deux éligibilités, le moteur et le client."""
+	return _as_int((capacite or {}).get("maintien")) > 0
+
+
+def est_incantation_longue(capacite: dict) -> bool:
+	"""L'incantation déborde-t-elle du lancement immédiat (plus d'un PA) ?
+
+	⚠️ À `incantation == 1` tout se passe exactement comme avant : un sort part dans
+	l'appel qui le lance. C'est ce prédicat, et lui seul, qui bascule sur la machinerie
+	de canalisation multi-round."""
+	return _as_int((capacite or {}).get("incantation")) > INCANTATION_PA_DEFAUT
+
+
+def pm_par_pa(capacite: dict) -> int:
+	"""Tranche de PM versée par PA d'incantation — `ceil(cout_pm / incantation)`.
+
+	Le coût en PM est réparti sur les PA, arrondi AU SUPÉRIEUR, et la réserve baisse au
+	fur et à mesure. Les derniers PA peuvent donc coûter ZÉRO si tous les PM nécessaires
+	ont déjà été versés : un Météore de 15 PM en 6 PA verse 3 PM par PA, les 15 PM sont
+	couverts au 5ᵉ, et le 6ᵉ — celui qui déclenche enfin le sort — est gratuit.
+
+	⚠️ Sert aussi de PÉNALITÉ à une réussite non critique du test de concentration : un
+	coup encaissé coûte une tranche, pas le sort entier.
+	⚠️ `incantation` est planché à 1 par `normaliser_sort` — pas de division par zéro."""
+	c = capacite or {}
+	pa = max(INCANTATION_PA_DEFAUT, _as_int(c.get("incantation")))
+	return -(-_as_int(c.get("cout_pm")) // pa)
+
+
+def seuil_concentration(vol: int, degats_subis: int) -> int:
+	"""Seuil d100 d'un test de concentration : `50 + Vol/div − dégâts subis`, clampé [5, 95].
+
+	Même forme que les deux autres seuils du moteur (`_hit_threshold`, `_flee_threshold`) :
+	la Volonté tient l'incantation, le coup encaissé l'écarte. Le clamp garde toujours une
+	marge des deux côtés — aucun mage n'est incassable, aucun coup n'interrompt à coup sûr.
+
+	Logique PURE (aucune lecture de snapshot) : la résolution du jet, elle, reste dans
+	`utils/combat._resoudre_jet`, pour que la Chance pilote les fenêtres de critique."""
+	div = max(1, character_stats.CONCENTRATION_VOL_DIV)
+	return max(5, min(95, 50 + int(vol or 0) // div - max(0, int(degats_subis or 0))))
 
 
 # Une ARME porte le même bloc `effets` qu'un sort, mais ne sait viser que deux personnes :
@@ -211,6 +313,16 @@ def normaliser_sort(sort_doc) -> dict | None:
 		"invocation": invocation_de(doc),
 		"niveau": _as_int(doc.get("niveau")),
 		"cout_pm": cout_pm,
+		# ── Les deux notions de TEMPS, à côté du `cout_pm` d'ÉNERGIE (cf. INCANTATION_*).
+		# EXPLICITES dans cette liste blanche, comme `animation`, `zone` et `invocation`
+		# avant elles : sans ces deux lignes, un sort à incantation longue ou à entretien
+		# se lancerait instantanément et gratuitement, sans le moindre message d'erreur.
+		# `incantation` : PA de lancement, plancher 1 — 0 n'aurait aucun sens et ferait
+		# diviser par zéro le calcul de la tranche de PM par PA.
+		"incantation": max(INCANTATION_PA_DEFAUT,
+						   min(INCANTATION_PA_MAX, _as_int(doc.get("incantation")))),
+		# `maintien` : PM par round pour rester actif, 0 = sort non maintenu.
+		"maintien": min(MAINTIEN_PM_MAX, _as_int(doc.get("maintien"))),
 		"cible": cible,
 		# Jet de toucher (cible ennemie seulement) : `magique` par défaut — un sort de
 		# CONTACT peut demander `cc` (« au toucher » : il faut d'abord poser la main).
@@ -246,7 +358,11 @@ def concat_degats(a: str, b: str) -> str:
 
 def fusionner_effets(base: dict, bonus_list: list) -> dict:
 	"""Effets de base + bonus additifs des composants engagés : entiers additionnés,
-	buffs sommés par caract, notations `degats` concaténées, durée additive."""
+	buffs sommés par caract, notations `degats` concaténées, durée additive.
+
+	⚠️ `lien_vie` est ÉCRASÉ par le dernier bloc non vide, jamais fusionné : un composant
+	renforce un lien existant (ou en pose un), il n'en recompose pas la géométrie — deux
+	`part` additionnés dépasseraient 100 % et transféreraient plus que le coup reçu."""
 	out = {
 		"degats": base.get("degats", ""),
 		"pv": _as_int(base.get("pv")),
@@ -257,11 +373,22 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"duree": _as_int(base.get("duree")),
 		"esquive": _as_int(base.get("esquive")),
 		"furtivite": _as_int(base.get("furtivite")),
+		"degats_pm": base.get("degats_pm", ""),
+		"cout_pv": _as_int(base.get("cout_pv")),
+		"drain_pv": _as_int(base.get("drain_pv")),
+		"drain_pm": _as_int(base.get("drain_pm")),
+		"drain_max": _as_int(base.get("drain_max")),
+		"saut": _as_int(base.get("saut")),
+		"lien_vie": dict(base["lien_vie"]) if base.get("lien_vie") else None,
 	}
 	for bonus in bonus_list or []:
 		bonus = bonus or {}
 		out["degats"] = concat_degats(out["degats"], bonus.get("degats", ""))
-		for key in ("pv", "pm", "regen_pv", "regen_pm", "duree", "esquive", "furtivite"):
+		out["degats_pm"] = concat_degats(out["degats_pm"], bonus.get("degats_pm", ""))
+		if bonus.get("lien_vie"):
+			out["lien_vie"] = dict(bonus["lien_vie"])
+		for key in ("pv", "pm", "regen_pv", "regen_pm", "duree", "esquive", "furtivite",
+					"cout_pv", "drain_pv", "drain_pm", "drain_max", "saut"):
 			out[key] += _as_int(bonus.get(key))
 		for k, delta in (bonus.get("buffs") or {}).items():
 			if str(k) == "V":
@@ -270,6 +397,12 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 				out["buffs"][str(k)] = int(out["buffs"].get(str(k), 0)) + int(delta)
 			except (TypeError, ValueError):
 				continue
+	# ⚠️ Re-clampage APRÈS l'addition : `_bonus_dict` borne chaque bloc pris isolément,
+	# mais deux composants à 60 % de drain feraient 120 % — un sort qui rend plus de PV
+	# qu'il n'inflige de dégâts.
+	out["drain_pv"] = min(DRAIN_PCT_MAX, out["drain_pv"])
+	out["drain_pm"] = min(DRAIN_PCT_MAX, out["drain_pm"])
+	out["saut"] = min(SAUT_DISTANCE_MAX, out["saut"])
 	return out
 
 
@@ -329,13 +462,24 @@ def sort_utilisable_combat(sort: dict) -> bool:
 	givre ») est lançable en combat exactement comme en exploration.
 
 	⚠️ Une INVOCATION est lançable sans porter le moindre `effets` : ce qu'elle fait n'est
-	pas un effet posé sur quelqu'un, c'est un combattant de plus sur la grille."""
-	if est_invocation(sort):
+	pas un effet posé sur quelqu'un, c'est un combattant de plus sur la grille.
+
+	⚠️ Trois autres capacités n'ont, elles non plus, rien à poser sur personne — et
+	seraient refusées ici comme « sans effet » :
+	  - un sort MAINTENU (Bouclier magique : des buffs, mais aucune `duree` — c'est
+	    l'entretien qui le tient, cf. INCANTATION_*) ;
+	  - un SAUT, dont tout l'effet est une case d'arrivée ;
+	  - un LIEN DE VIE, dont l'effet vit sur un AUTRE corps que celui qu'il vise.
+	⚠️ Ce test et celui de `resolve_action` (branche `sort`) sont JUMEAUX : un critère qui
+	diverge entre « lançable » et « applicable » produit un sort accepté puis inerte."""
+	s = sort or {}
+	if est_invocation(s) or est_maintenu(s):
 		return True
-	eff = (sort or {}).get("effets") or {}
+	eff = s.get("effets") or {}
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
 			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
-			or part_durative(eff))
+			or bool(eff.get("degats_pm")) or _as_int(eff.get("saut")) > 0
+			or bool(eff.get("lien_vie")) or part_durative(eff))
 
 
 def sort_utilisable_exploration(sort: dict) -> bool:
@@ -348,13 +492,23 @@ def sort_utilisable_exploration(sort: dict) -> bool:
 
 	⚠️ Une INVOCATION est refusée hors combat, même si elle porte par ailleurs un effet
 	applicable : la créature n'existe que sur la grille de combat (elle y est placée, y
-	joue son tour et s'y dissipe). Rien ne saurait l'accueillir en exploration."""
+	joue son tour et s'y dissipe). Rien ne saurait l'accueillir en exploration.
+
+	⚠️ Quatre mécaniques sont refusées pour la MÊME raison — il n'y a **pas de round** en
+	exploration, et pas de grille :
+	  - une INCANTATION de plus d'un PA : rien à quoi rattacher un PA reporté ;
+	  - un sort MAINTENU : rien à prélever, aucun tour ne passe ;
+	  - un SAUT : aucune case où atterrir ;
+	  - un LIEN DE VIE : aucun coup à rediriger.
+	⚠️ `cout_pv`, lui, reste applicable : ce n'est qu'un coût, pas une règle de tour."""
 	s = sort or {}
-	if est_invocation(s):
+	if est_invocation(s) or est_maintenu(s) or est_incantation_longue(s):
 		return False
 	if (s.get("cible") or "soi") == "ennemi":
 		return False
 	eff = s.get("effets") or {}
+	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie"):
+		return False
 	instant = _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0
 	return instant or part_durative(eff)
 
@@ -713,6 +867,12 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str) -> list:
 			"description": sort["description"],
 			"niveau": sort["niveau"],
 			"cout_pm": sort["cout_pm"],
+			# Les deux autres notions de coût, à côté des PM de lancement : le client en
+			# tire l'étiquette de la case ET le grisage (un sort maintenu n'est lançable
+			# que si l'on peut payer le premier round). Sans elles, un joueur découvrirait
+			# la facture APRÈS avoir cliqué.
+			"incantation": sort["incantation"],
+			"maintien": sort["maintien"],
 			"cible": sort["cible"],
 			"portee": sort["portee"],
 			# Le client en tire l'étiquette de la case ET l'APERÇU des cases touchées

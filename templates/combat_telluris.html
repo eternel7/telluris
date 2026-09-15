@@ -154,6 +154,23 @@
 	border-color: rgba(76, 217, 123, 0.85);
 	box-shadow: inset 0 0 8px rgba(76, 217, 123, 0.5);
 }
+/* Case de DESTINATION d'un saut. Contrairement à l'aperçu de zone, celle-ci se CLIQUE.
+   ⚠️ `pointer-events: auto` rouvert POUR ELLE SEULE : #tokens-layer est en `none` et chaque
+   élément doit le rouvrir pour lui-même — c'est exactement l'oubli qui a longtemps rendu
+   `.ally-token.spellcast` muet (l'onclick était posé mais jamais reçu).
+   ⚠️ `z-index: 2`, AU-DESSUS des jetons : pendant un saut on vise le SOL, et une case
+   d'arrivée masquée par un monstre serait injoignable — or sauter derrière l'ennemi est
+   précisément ce qu'on veut faire. */
+.zone-case.destination {
+	pointer-events: auto; cursor: pointer; z-index: 2;
+	background: rgba(120, 200, 255, 0.22);
+	border: 1px dashed rgba(120, 200, 255, 0.9);
+	box-shadow: inset 0 0 8px rgba(120, 200, 255, 0.45);
+}
+.zone-case.destination:hover {
+	background: rgba(120, 200, 255, 0.5);
+	border-style: solid;
+}
 .monster-token {
 	width: var(--step); height: var(--step);
 	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -799,6 +816,11 @@
 }
 .charge-fill.over-half { background: linear-gradient(90deg, #a86a2e 0%, #e0902f 100%); }
 .charge-fill.over-max  { background: linear-gradient(90deg, #a83232 0%, #e04a4a 100%); }
+/* Incantation : même jauge, mais VIOLETTE — la couleur de la magie dans tout le combat
+   (ciblage de sort, jetons d'invocation, aperçu de zone hostile). */
+.incant-fill { background: linear-gradient(90deg, #6a4d8f 0%, #b26bff 100%);
+	box-shadow: 0 0 5px rgba(178,107,255,0.45); }
+.incantation-wrap .stat-label { color: #cba8ff; }
 /* Le pip marque la moitié de la charge max (seuil du malus de déplacement). */
 .charge-pip {
 	position: absolute; top: -3px; bottom: -3px; left: 50%;
@@ -820,6 +842,11 @@
 	border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; white-space: nowrap;
 }
 .sh-effet-chip .sh-effet-restants { color: #8d8878; margin-left: 4px; }
+/* Sort MAINTENU : liseré violet (la couleur de la magie) — il se distingue d'un effet à
+   durée ordinaire parce qu'il COÛTE chaque round et qu'on peut le relâcher. */
+.sh-effet-chip.maintenu { border-color: rgba(178,107,255,0.45); cursor: pointer; }
+.sh-effet-chip.maintenu:hover { border-color: #b26bff; background: #241b30; }
+.sh-effet-chip.maintenu .sh-effet-restants { color: #b26bff; }
 .end-btn {
 	padding: 12px 28px; background: #cc2233; color: white;
 	border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
@@ -878,6 +905,21 @@
 					<div class="charge-bar">
 						<div class="charge-fill" id="joueur-charge-fill"></div>
 						<div class="charge-pip"></div>
+					</div>
+				</div>
+			</div>
+
+			<!-- INCANTATION en cours (sort à plusieurs PA de lancement). Masquée tant que
+				 le mage ne canalise rien — un bloc vide déplacerait les effets à durée
+				 d'un cran à chaque lancement de sort long. -->
+			<div class="incantation-wrap" id="joueur-incantation" style="display:none;">
+				<div class="char-charge-head">
+					<span class="stat-label" id="joueur-incant-nom">Incantation</span>
+					<span class="stat-value" id="joueur-incant-text"></span>
+				</div>
+				<div class="charge-bar-wrap">
+					<div class="charge-bar">
+						<div class="charge-fill incant-fill" id="joueur-incant-fill"></div>
 					</div>
 				</div>
 			</div>
@@ -1359,6 +1401,7 @@ function updateJoueur(j) {
 	updateChargeBar(j);
 	updatePlayerVitals(j);
 	renderEffetsActifs(j.effets_actifs);
+	renderIncantation(j.incantation);
 }
 
 // Chips d'effets à durée du membre actif. Markup identique à _renderEffetsActifs de
@@ -1372,10 +1415,47 @@ function renderEffetsActifs(list) {
 		if (e.regen_pv) details.push(`+${e.regen_pv} PV/tour`);
 		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
 		if (e.esquive) details.push(`+${e.esquive} esquive`);
-		return `<span class="sh-effet-chip">${e.icon || '✨'} ${e.nom || 'Effet'}`
+		// Un sort MAINTENU n'a pas de compte à rebours : il dure tant que son lanceur paie
+		// l'entretien. Afficher « ⏳3 » mentirait — le chiffre ne bougerait jamais. On
+		// annonce donc la FACTURE par round, seule chose qui décide de sa survie.
+		const suffixe = e.maintenu
+			? `<span class="sh-effet-restants">🔄${e.maintien || 0} PM/round</span>`
+			: `<span class="sh-effet-restants">⏳${e.restants}</span>`;
+		const titre = e.maintenu
+			? ` title="Cliquer pour cesser d'entretenir ce sort (gratuit)"` : '';
+		return `<span class="sh-effet-chip${e.maintenu ? ' maintenu' : ''}"${titre}>`
+			+ `${e.icon || '✨'} ${e.nom || 'Effet'}`
 			+ `${details.length ? ' (' + details.join(', ') + ')' : ''}`
-			+ `<span class="sh-effet-restants">⏳${e.restants}</span></span>`;
+			+ `${suffixe}</span>`;
 	}).join('');
+	// Relâcher un sort maintenu : gratuit, et le seul moyen d'arrêter l'hémorragie de PM
+	// avant qu'elle ne vide la réserve.
+	// ⚠️ L'id du sort est retrouvé par la POSITION dans la liste, jamais interpolé dans le
+	// markup : ce template n'a pas d'`escapeHtml`, et un id dans un `onclick="…('${x}')"`
+	// est précisément ce que CLAUDE.md §9 interdit. ⚠️ `onclick` réassigné à chaque rendu,
+	// `null` compris, comme partout ailleurs dans ce fichier.
+	Array.from(el.children).forEach((chip, i) => {
+		const e = (list || [])[i] || {};
+		chip.onclick = (e.maintenu && e.source_id)
+			? () => doAction('interrompre', e.source_id) : null;
+	});
+}
+
+// Barre de progression de l'incantation en cours (sort à plusieurs PA de lancement).
+// ⚠️ Un tour de canalisation est joué ENTIÈREMENT côté serveur — le client n'a même pas la
+// main — donc cette barre suit la RÉVÉLATION du journal (`incantation` est dans
+// CHAMPS_ETAT), pas la réponse HTTP. Sans cela elle sauterait d'un coup à l'état final.
+function renderIncantation(inc) {
+	const wrap = document.getElementById('joueur-incantation');
+	if (!wrap) return;
+	if (!inc || !inc.pa_total) { wrap.style.display = 'none'; return; }
+	wrap.style.display = '';
+	const investis = inc.pa_investis || 0;
+	const total = inc.pa_total || 1;
+	document.getElementById('joueur-incant-nom').textContent = `${inc.icon || '🔮'} ${inc.nom || 'Incantation'}`;
+	document.getElementById('joueur-incant-text').textContent = `${investis}/${total} PA`;
+	document.getElementById('joueur-incant-fill').style.width =
+		`${Math.max(0, Math.min(100, Math.round(investis * 100 / total)))}%`;
 }
 
 // Panneau droit : portrait du dernier ennemi ciblé/attaquant + ses barres PV/PM.
@@ -1463,9 +1543,13 @@ function refreshBadgeTargets() {
 	const casting = canAct && (pendingSort || pendingComp);
 	const capa = casting ? (pendingSort ? pendingSort.sort : pendingComp.comp) : null;
 	const versAllies = !!capa && capa.cible === 'allie';
+	// ⚠️ `pendingSaut` éteint AUSSI les badges ennemis. Sans ce terme, `casting` est faux
+	// pendant un saut et le bandeau retombe sur les cibles d'attaque : le joueur cliquerait
+	// un badge rouge et ATTAQUERAIT au lieu de sauter. Même raisonnement que le jeu
+	// `targetable` de `renderTokens`, avec lequel ce bandeau doit toujours s'accorder.
 	const targets = casting
 		? capaCibles(capa)
-		: (canAct ? targetableMonsters(currentMode) : []);
+		: ((canAct && !pendingSaut) ? targetableMonsters(currentMode) : []);
 	const targetable = new Set(targets.map(m => m.id));
 	// Badges ALLIÉS : cliquables (vert) seulement pendant une capacité bénéfique.
 	// ⚠️ Cette boucle balaie TOUT `state.joueurs`, montures et personnes escortées comprises :
@@ -1622,6 +1706,61 @@ function apercuZone(capa, cible) {
 	});
 }
 
+// ── Saut : désignation d'une CASE d'arrivée ───────────────────────
+// Un sort de saut (`effets.saut`) ne vise personne : il vise le SOL. C'est le seul ciblage
+// de la page qui porte sur une case et non sur un acteur, d'où ce mode à part.
+//
+// ⚠️ Les cases se construisent en espace MONDE et ne se reconvertissent JAMAIS : on balaie
+// les (wx, wy) autour du sauteur, on filtre, et `_placerToken` s'occupe seul de la rotation
+// de caméra — exactement comme pour l'aperçu de zone. `screenToWorld` n'a RIEN à faire ici :
+// elle n'existe que pour les flèches de déplacement, qui sont en espace écran, et
+// l'appliquer ferait tourner la case deux fois.
+//
+// ⚠️ Les cases sont rangées dans `_apercuZoneCases` : `renderTokens` l'efface en tête à
+// chaque rendu, et les repeint ensuite. Ce n'est pas un contournement — c'est ce qui les
+// fait suivre un pivot de caméra, et c'est moins de code qu'un second registre à vider.
+let pendingSaut = null;
+
+function casesSaut(s) {
+	const j = me();
+	const sauteur = (s.cible === 'allie' && pendingSaut && pendingSaut.sauteur)
+		? pendingSaut.sauteur : j;
+	const portee = (s.effets || {}).saut || 0;
+	const g = GRID || {};
+	const dims = g.dims || {};
+	if (!sauteur || !sauteur.pos || !portee) return [];
+	const out = [];
+	for (let wy = sauteur.pos.y - portee; wy <= sauteur.pos.y + portee; wy++) {
+		for (let wx = sauteur.pos.x - portee; wx <= sauteur.pos.x + portee; wx++) {
+			if (wx < 0 || wy < 0 || wx >= (dims.x || 0) || wy >= (dims.y || 0)) continue;
+			if (wx === sauteur.pos.x && wy === sauteur.pos.y) continue;
+			// ⚠️ Miroirs des gardes SERVEUR (`_verifier_saut`), jamais la seule garde : ni
+			// `nav`, ni chemin, ni ligne de vue — franchir le mur est tout l'intérêt du sort.
+			if (!cellWalkable(wx, wy)) continue;
+			if (cellOccupied(wx, wy)) continue;
+			out.push([wx, wy]);
+		}
+	}
+	return out;
+}
+
+function peindreCasesSaut() {
+	if (!pendingSaut) return;
+	const j = me();
+	const layer = document.getElementById('tokens-layer');
+	if (!j || !j.pos || !layer) return;
+	casesSaut(pendingSaut.sort).forEach(([wx, wy]) => {
+		const el = document.createElement('div');
+		el.className = 'zone-case destination';
+		_placerToken(el, wx - j.pos.x, wy - j.pos.y);
+		el.onclick = () => doAction('sort', pendingSaut.cible_id, wx, wy, null, null,
+								   { sort_id: pendingSaut.sort.sort_id,
+									 composants: pendingSaut.composants });
+		layer.appendChild(el);
+		_apercuZoneCases.push(el);
+	});
+}
+
 // Arme (ou désarme) le survol d'aperçu sur un élément de ciblage — jeton ou badge. ⚠️ On
 // réassigne TOUJOURS, `null` compris : ces éléments survivent d'un rendu à l'autre, et un
 // gestionnaire laissé en place peindrait la zone d'une capacité déjà lancée.
@@ -1688,9 +1827,11 @@ function renderTokens() {
 	// Une capacité bénéfique cible les ALLIÉS : les monstres sortent alors du ciblage,
 	// et ce sont les jetons alliés qui s'allument (en vert).
 	const versAllies = !!capa && capa.cible === 'allie';
+	// ⚠️ Pendant un SAUT on vise le SOL : plus aucun acteur n'est cliquable, sinon le
+	// joueur toucherait un monstre en croyant choisir sa case d'arrivée.
 	const targetable = new Set((casting
 		? capaCibles(capa)
-		: targetableMonsters(currentMode)).map(m => m.id));
+		: (pendingSaut ? [] : targetableMonsters(currentMode))).map(m => m.id));
 	// ⚠️ Plus de `layer.innerHTML = ''` : les jetons SURVIVENT d'un rendu à l'autre
 	// (cf. _tokens), sans quoi rien ne pourrait glisser. Ce qui varie — classes,
 	// position, barre de PV, gestionnaire de clic — est réécrit à chaque passage ;
@@ -1769,7 +1910,15 @@ function renderTokens() {
 		if (gabarit) _placerGabarit(tok, p, j);
 		else _placerToken(tok, p.pos.x - j.pos.x, p.pos.y - j.pos.y);
 		tok.querySelector('.mt-hp-fill').style.width = pct(p.currentPV, p.pv_max) + '%';
-		tok.onclick = !vise ? null : (pendingSort
+		// ⚠️ Un sort de SAUT sur allié ne se lance pas au clic : désigner l'allié n'est que
+		// le PREMIER temps (qui saute), les cases d'arrivée se peignent ensuite autour de
+		// lui. Sans cette branche, le sort partirait sans destination.
+		tok.onclick = !vise ? null : ((pendingSort && pendingSort.saut)
+			? () => { pendingSaut = { sort: pendingSort.sort,
+									  composants: pendingSort.composants,
+									  sauteur: p, cible_id: p.id };
+					  pendingSort = null; renderTokens(); refreshBadgeTargets(); }
+			: pendingSort
 			? () => doAction('sort', p.id, null, null, null, null,
 				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
 			: () => doAction('competence', p.id, null, null, null, null,
@@ -1782,6 +1931,10 @@ function renderTokens() {
 	// Jeton devenu sans objet : l'acteur qui prend la main (il a le jeton central fixe),
 	// une monture perdue, un monstre disparu de l'état.
 	_tokens.forEach((tok, id) => { if (!vus.has(id)) { tok.remove(); _tokens.delete(id); } });
+	// ⚠️ APRÈS l'effacement de tête : les cases d'arrivée d'un saut vivent dans le même
+	// registre que l'aperçu de zone, donc elles viennent d'être balayées. Les repeindre ici
+	// est ce qui les fait suivre un pivot de caméra, comme les jetons.
+	peindreCasesSaut();
 }
 
 // Même recomposition que _placerToken, et pour la même raison : `rotate` AVANT le
@@ -2090,7 +2243,12 @@ function jouerVfx(v) {
 // ligne par ligne par la clé `etat` posée sur l'entrée de journal (jumelle de `vfx`, et
 // pour la même raison : le journal est le seul canal capable de porter la chronologie).
 // `cap` : orientation d'un grand jeton — son pivot se révèle avec le glissement qu'il accompagne.
-const CHAMPS_ETAT = ['currentPV', 'currentPM', 'vivant', 'morte', 'pos', 'facing', 'cap'];
+// ⚠️ `incantation` en fait partie : un tour de canalisation est joué ENTIÈREMENT côté
+// serveur (le client n'a même pas la main), donc toute la progression arrive d'un bloc.
+// Sans elle ici, la barre sauterait directement à l'état final au lieu de suivre la
+// révélation ligne à ligne. `null` y est une valeur légitime (l'incantation qui s'achève).
+const CHAMPS_ETAT = ['currentPV', 'currentPM', 'vivant', 'morte', 'pos', 'facing', 'cap',
+					 'incantation'];
 let etatFinal   = null;   // vérité mise de côté pendant la révélation (filet de réconciliation)
 let finDeCombat = null;   // overlay de fin, en attente de la fin du journal
 
@@ -2356,11 +2514,25 @@ function allyTargets(s) {
 // cible cliquable ne puissent pas diverger.
 function capaCibles(c) { return c.cible === 'allie' ? allyTargets(c) : sortTargets(c); }
 
-// Sort lançable maintenant ? PM suffisants, et pour un sort CIBLÉ au moins une cible.
-// Consommé par slotJouable (état de la case) et par activerSlot (refus au clic).
+// Prix d'une capacité en PV (effets.cout_pv) : la vie du jeteur comme ressource magique.
+// ⚠️ `>` STRICT, miroir exact du serveur : un sort ne laisse jamais son auteur à 0 PV,
+// sinon il ouvrirait une condition de défaite par sa seule facture.
+function coutPvPayable(capa) {
+	const cout = (capa.effets || {}).cout_pv || 0;
+	return !cout || (me() || {}).currentPV > cout;
+}
+
+// Canalisation en cours : plus rien ne se lance. Miroir du refus serveur « Une incantation
+// est déjà en cours. » — en pratique la main ne revient même pas au joueur tant qu'elle
+// dure, mais la case doit être grisée dans le tour où il vient de l'armer.
+function canalise() { return !!(me() || {}).incantation; }
+
+// Sort lançable maintenant ? PM (et PV) suffisants, et pour un sort CIBLÉ au moins une
+// cible. Consommé par slotJouable (état de la case) et par activerSlot (refus au clic).
 function sortCastable(s) {
 	const j = me() || {};
 	return (j.currentPM || 0) >= s.cout_pm
+		&& coutPvPayable(s) && !canalise()
 		&& (s.cible === 'soi' || capaCibles(s).length > 0);
 }
 
@@ -2371,6 +2543,7 @@ function compTargets(c) { return capaCibles(c); }
 function compCastable(c) {
 	const j = me() || {};
 	return (j.currentPM || 0) >= c.cout_pm
+		&& coutPvPayable(c) && !canalise()
 		&& (c.cible === 'soi' || capaCibles(c).length > 0);
 }
 
@@ -2590,9 +2763,14 @@ function closeSelectors() {
 	effacerApercuZone();
 	document.getElementById('target-row').style.display = 'none';
 	document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('hidden-selecting'));
-	if (pendingSort || pendingComp) {
+	// ⚠️ `pendingSaut` doit être vidé ICI aussi : `doAction` appelle `closeSelectors` en
+	// première ligne, donc les cases d'arrivée disparaissent dès l'envoi — et une annulation
+	// (autre case de barre, attaque) ne doit pas laisser un tapis de cases cliquables qui
+	// lanceraient un sort déjà abandonné.
+	if (pendingSort || pendingComp || pendingSaut) {
 		pendingSort = null;
 		pendingComp = null;
+		pendingSaut = null;
 		if (window._combatReady) { renderTokens(); refreshBadgeTargets(); }
 	}
 }
@@ -2656,6 +2834,31 @@ function sortLabel(s) {
 // passage des badges/tokens en mode ciblage violet (plusieurs cibles). Appelé depuis
 // la case du sort (activerSlot), qui décide des composants à engager.
 function startSortCast(s, composants) {
+	// ⚠️ Le SAUT se teste AVANT `cible !== 'soi'` : un sort de téléportation s'écrit
+	// naturellement `cible: 'soi'` et tomberait dans le `else` ci-dessous, qui le lancerait
+	// immédiatement — sans destination, donc refusé par le serveur sans que le joueur ait
+	// jamais pu désigner sa case.
+	if ((s.effets || {}).saut) {
+		if (s.cible === 'allie') {
+			// Deux temps : on désigne d'abord QUI saute (ciblage vert habituel), les cases
+			// d'arrivée ne se peignent qu'ensuite, autour de lui.
+			const allies = capaCibles(s);
+			if (!allies.length) { closeSelectors(); return; }
+			if (allies.length > 1 && !(pendingSaut && pendingSaut.sauteur)) {
+				pendingSort = { sort_id: s.sort_id, composants, sort: s, saut: true };
+				renderTokens(); refreshBadgeTargets();
+				return;
+			}
+			const sauteur = (pendingSaut && pendingSaut.sauteur) || allies[0];
+			pendingSaut = { sort: s, composants, sauteur, cible_id: sauteur.id };
+		} else {
+			pendingSaut = { sort: s, composants, sauteur: me(), cible_id: null };
+		}
+		pendingSort = null;
+		renderTokens();
+		refreshBadgeTargets();
+		return;
+	}
 	if (s.cible !== 'soi') {
 		const cibles = capaCibles(s);
 		if (!cibles.length) { closeSelectors(); return; }
