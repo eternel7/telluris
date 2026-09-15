@@ -41,6 +41,8 @@ from utils import intro
 from utils import transport
 from utils import recrutement
 from utils import acces
+from utils import courriel
+from utils import motdepasse
 from utils import montures
 from utils import escorte
 from utils import indicateurs
@@ -108,7 +110,61 @@ async def login_user(user: LoginRequest, response: Response):
 	response = JSONResponse(content=content)
 	response.set_cookie(key="auth_token", value=token, httponly=True, samesite="lax")
 	return	response
-	
+
+class OubliRequest(BaseModel):
+	email: str
+
+def _base_url_courriel(request: Request) -> str:
+	"""Origine des liens envoyés par courriel. `APP_BASE_URL` D'ABORD : `request.base_url`
+	se construit sur l'en-tête `Host`, que le client choisit — un lien de réinitialisation
+	bâti dessus partirait vers le domaine de l'attaquant, dans la boîte de la victime."""
+	return os.getenv("APP_BASE_URL") or str(request.base_url)
+
+@user_router.post("/mot-de-passe/oubli")
+async def mot_de_passe_oubli(request: Request, demande: OubliRequest):
+	"""Demande de réinitialisation. ⚠️ Réponse IDENTIQUE que l'adresse soit connue ou non
+	(et quel que soit le sort de l'envoi) : distinguer les deux ferait de cet écran un
+	oracle disant quelles adresses ont un compte."""
+	email = (demande.email or "").strip()
+	user_doc = get_doc("user:" + email) if email else None
+	if user_doc:
+		jeton, doc_jeton = motdepasse.nouveau_jeton(user_doc["_id"])
+		if save_doc(doc_jeton) is not None:
+			lien = motdepasse.lien_reinitialisation(_base_url_courriel(request), jeton)
+			sujet, corps = motdepasse.courriel_de_reinitialisation(user_doc.get("username"), lien)
+			# Destinataire = l'adresse PORTÉE PAR LE COMPTE, jamais la chaîne saisie : un
+			# compte social sans courriel (`user:apple_<sub>`) ne doit rien recevoir.
+			courriel.envoyer(user_doc.get("email") or "", sujet, corps)
+	return {"message": motdepasse.MESSAGE_DEMANDE}
+
+class ReinitialisationRequest(BaseModel):
+	jeton: str
+	password: str
+	password_again: str
+
+@user_router.post("/mot-de-passe/reinitialiser")
+async def mot_de_passe_reinitialiser(demande: ReinitialisationRequest):
+	"""Grave le nouveau sceau et CONSOMME le lien. Le jeton est contrôlé avant le mot de
+	passe, mais n'est détruit qu'après l'écriture : une saisie refusée laisse le joueur
+	réessayer avec le même lien."""
+	doc_jeton = motdepasse.jeton_utilisable(demande.jeton, get_doc)
+	if not doc_jeton:
+		raise HTTPException(status_code=400, detail="Lien de réinitialisation invalide ou expiré")
+
+	erreur = motdepasse.verifier_force(demande.password, demande.password_again)
+	if erreur:
+		raise HTTPException(status_code=400, detail=erreur)
+
+	user_doc = get_doc(doc_jeton["user_id"])
+	if not user_doc:
+		raise HTTPException(status_code=400, detail="Lien de réinitialisation invalide ou expiré")
+
+	user_doc["password"] = bcrypt.hashpw(demande.password.encode(), bcrypt.gensalt()).decode()
+	if save_doc(user_doc) is None:
+		raise HTTPException(status_code=500, detail="Échec de l'enregistrement du nouveau sceau")
+	delete_doc(doc_jeton)
+	return {"reinitialise": True}
+
 @user_router.post("/character")
 async def add_character(response: Response, current_user: Annotated[User, Depends(get_current_user)], characterinfo: dict = Body(...),):
 	if not current_user:

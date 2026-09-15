@@ -15,112 +15,10 @@
 		{% include "part-accessibility-css.html" without context %}
 		{% include "part-input-css.html" without context %}
 		
-		/* ── BASE & SCROLL LOCK ─────────────────────────────────── */
-		body {
-			background-color: var(--ink);
-			background: radial-gradient(circle, #1a1612 0%, #0e0b08 100%);
-			overflow: hidden;
-			padding: 20px;
-			box-sizing: border-box;
-		}
-		
-		/* ── CONTAINER ──────────────────────────────────────────── */
-		.auth-main {
-			position: relative;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			min-height: auto;
-			padding: 2rem;
-			z-index: 0;
-		}
-		.auth-container {
-			width: 100%;
-			max-width: 520px;
-			background: var(--parch);
-			border: 2px solid var(--gold);
-			border-radius: 2px;
-			padding: 40px;
-			box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 100px rgba(141, 99, 52, 0.1);
-			text-align: center;
-			position: relative;
-			color: var(--ink);
-			z-index: 1;
-		}
+		{% include "part-auth-css.html" without context %}
 
-		.auth-container::before {
-			content: '';
-			position: absolute;
-			top: 5px; left: 5px; right: 5px; bottom: 5px;
-			border: 1px solid var(--bronze);
-			pointer-events: none;
-			opacity: 0.5;
-		}
-
-		.logo {
-			font-family: 'Cinzel Decorative', serif;
-			font-size: clamp(28px, 8vw, 60px);
-			font-weight: 700;
-			letter-spacing: 0.12em;
-			color: var(--ink);
-			margin-bottom: 5px;
-		}
-
-		.subtitle {
-			font-family: 'Cinzel', serif;
-			color: var(--bronze);
-			font-size: 12px;
-			text-transform: uppercase;
-			margin-bottom: 20px;
-			letter-spacing: 1.5px;
-			font-weight: 700;
-			animation: heroReveal 2s 0.6s ease both;
-			min-height: 1.2em;
-		}
-
-		/* ── ICONE DYNAMIQUE DU MOT DE PASSE ────────────────────── */
-		.pass-visual {
-			position: absolute;
-			right: 5px;
-			bottom: 10px;
-			font-size: 18px;
-			pointer-events: none;
-			transition: all 0.2s ease;
-			opacity: 0;
-		}
-		.pass-visual.visible {			
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			height: 26px;
-			width: 26px;
-			border-radius: 5px;
-			padding: 0px 5px;
-			opacity: 1;
-		}
-
-		/* ── BOUTONS ────────────────── */
-		.btn-auth {
-			width: 100%;
-			margin-top: 15px;
-			padding: 14px 20px;
-			font-family: 'Cinzel', serif;
-			font-size: 14px;
-			font-weight: 700;
-			text-transform: uppercase;
-			letter-spacing: 2px;
-			color: var(--parch);
-			background: var(--ink);
-			border: 1px solid var(--gold);
-			cursor: pointer;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			transition: all 0.3s ease;
-		}
-
-		.btn-auth:hover, .btn-social:hover {
+		/* ── BOUTONS SOCIAUX ────────────── */
+		.btn-social:hover {
 			background: var(--gold);
 			color: var(--ink);
 			box-shadow: 0 4px 15px rgba(201, 146, 42, 0.4);
@@ -165,31 +63,6 @@
 			cursor: pointer;
 			transition: all 0.3s ease;
 		}
-		/* Ornement haut */
-		.ornament {
-			width: 180px;
-			height: 1px;
-			background: linear-gradient(90deg, transparent, var(--gold), transparent);
-			position: relative;
-			margin: 0 auto 20px auto;
-		}
-		.ornament::before {
-			content: '✦';
-			position: absolute;
-			top: 50%; left: 50%;
-			transform: translate(-50%, -50%);
-			color: var(--gold);
-			font-size: 12px;
-			background: var(--parch);
-			padding: 0 6px;
-		}		
-
-		.hero-rule {
-			width: 60px;
-			height: 0.5px;
-			background: var(--gold);
-			margin: 18px auto;
-		}
 		.social-auth {
 			margin: 18px auto;
 		}
@@ -209,28 +82,37 @@
 			color: var(--parch);
 			box-shadow: 0 4px 15px rgba(139, 90, 43, 0.35);
 		}
-		.hidden { display: none; }
+		/* ── SCEAU OUBLIÉ ───────────────────────────────────────── */
+		.forgot-link {
+			margin: 14px 0 0 0;
+			font-size: 13px;
+			font-style: italic;
+			color: var(--bronze);
+		}
+		.forgot-link a {
+			color: var(--bronze);
+			text-decoration: underline;
+			cursor: pointer;
+		}
+		.forgot-link a:hover { color: var(--ink); }
+		.forgot-intro {
+			font-size: 14px;
+			font-style: italic;
+			color: var(--bronze);
+			margin: 0 0 20px 0;
+			text-align: left;
+		}
+		.forgot-message {
+			margin-top: 18px;
+			font-size: 14px;
+			font-style: italic;
+			color: var(--ink);
+			border-top: 1px solid var(--bronze);
+			padding-top: 14px;
+		}
+
 		/* ── RESPONSIVE ───────────────────────────────────────────── */
 		@media (max-width: 768px) {
-			#main-content{
-				margin-top: 40px;
-				justify-content: center;
-				padding-left: 5px;
-				padding-right: 5px;
-			}
-			.auth-main {
-				padding: 0px;
-			}
-			.auth-container {
-				padding: 20px 10px;
-				width: 100%;
-			}
-			.auth-container::before {
-				border: 0px;
-			}
-			label {
-				font-size: 10px;
-			}
 			.btn-social {
 				display: inline-flex;
 			}
@@ -278,7 +160,10 @@
 					<span class="pass-visual"></span>
 				</div>
 				<button type="submit" class="btn-auth">Entrer dans la cité</button>
-				{% if is_google_auth or is_apple_auth or is_facebook_auth %}	
+				<p class="forgot-link">
+					<a onclick="montrerOubli()" id="forgot-toggle" role="button" tabindex="0">Sceau Secret oublié ?</a>
+				</p>
+				{% if is_google_auth or is_apple_auth or is_facebook_auth %}
 				<div class="social-auth">
 					<div>
 						<p class="social-subtitle">Ou invoquer votre identité via</p>
@@ -323,6 +208,19 @@
 				<button type="submit" class="btn-auth">Prêter Serment</button>
 			</form>
 
+			<form id="forgot-form" class="hidden">
+				<p class="forgot-intro">
+					Nommez le sceau de correspondance de votre compte : un messager vous
+					portera un lien pour graver un nouveau Sceau Secret.
+				</p>
+				<div class="form-group">
+					<label for="forgot-email" title="Email/courriel" >Sceau de correspondance</label>
+					<input type="email" id="forgot-email" placeholder="votre@parchemin.com" required>
+				</div>
+				<button type="submit" class="btn-auth">Dépêcher un messager</button>
+				<p id="forgot-message" class="forgot-message hidden"></p>
+			</form>
+
 			<div class="switch-mode">
 				<span id="toggle-text">Nouveau voyageur ?</span>
 				<a onclick="toggleAuth()" id="toggle-link" role="button" tabindex="0">S'inscrire</a>
@@ -363,6 +261,10 @@
 			const toggleText = document.getElementById('toggle-text');
 			const toggleLink = document.getElementById('toggle-link');
 
+			// Le volet « sceau oublié » n'est pas un des deux états de `isSignIn` : il se
+			// referme dès qu'on bascule, sinon deux formulaires resteraient affichés.
+			document.getElementById('forgot-form').classList.add('hidden');
+
 			if (isSignIn) {
 				signinForm.classList.add('hidden');
 				signupForm.classList.remove('hidden');
@@ -375,6 +277,17 @@
 				toggleLink.innerText = "S'inscrire";
 			}
 			isSignIn = !isSignIn;
+		}
+
+		function montrerOubli() {
+			document.getElementById('signin-form').classList.add('hidden');
+			document.getElementById('signup-form').classList.add('hidden');
+			document.getElementById('forgot-form').classList.remove('hidden');
+			document.getElementById('toggle-text').innerText = "Sceau retrouvé ?";
+			document.getElementById('toggle-link').innerText = "Se connecter";
+			// `isSignIn` reste FAUX : le prochain clic sur le lien de bascule ramène donc
+			// bien l'écran de connexion, quel que soit le formulaire d'où l'on vient.
+			isSignIn = false;
 		}
 
 		// Logique de hachage et visualisation
@@ -480,6 +393,36 @@
 				}
 			} catch (err) {
 				console.error("Erreur de connexion", err);
+			}
+		});
+
+		document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			const bouton = e.target.querySelector('button[type="submit"]');
+			const message = document.getElementById('forgot-message');
+			bouton.disabled = true;
+			try {
+				const response = await fetch('api/mot-de-passe/oubli', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email: document.getElementById('forgot-email').value })
+				});
+				const data = await response.json();
+				if (response.ok) {
+					// Réponse volontairement identique, adresse connue ou non : on affiche
+					// le message du serveur et on retire la saisie, pour ne rien laisser
+					// deviner d'un compte existant.
+					message.textContent = data.message;
+					message.classList.remove('hidden');
+					document.getElementById('forgot-email').value = '';
+				} else {
+					alert("Erreur : " + data.detail);
+					bouton.disabled = false;
+				}
+			} catch (err) {
+				console.error("Erreur de connexion", err);
+				bouton.disabled = false;
 			}
 		});
 	</script>

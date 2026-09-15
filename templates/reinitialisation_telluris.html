@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Telluris — {{ title }}</title>
+	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+	<style>
+
+		{% include "part-root-css.html" without context %}
+		{% include "part-footer-css.html" without context %}
+		{% include "part-nav-css.html" without context %}
+		{% include "part-accessibility-css.html" without context %}
+		{% include "part-input-css.html" without context %}
+
+		{% include "part-auth-css.html" without context %}
+
+		/* ── ÉTAT DU LIEN ───────────────────────────────────────── */
+		.reset-intro {
+			font-size: 14px;
+			font-style: italic;
+			color: var(--bronze);
+			margin: 0 0 20px 0;
+			text-align: left;
+		}
+		.reset-message {
+			margin-top: 18px;
+			font-size: 14px;
+			font-style: italic;
+			color: var(--ink);
+			border-top: 1px solid var(--bronze);
+			padding-top: 14px;
+		}
+		.reset-retour {
+			display: block;
+			margin-top: 20px;
+			padding: 11px 20px;
+			font-family: 'Cinzel', serif;
+			font-size: 13px;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			color: var(--ink);
+			background: transparent;
+			border: 1px solid var(--bronze);
+			text-decoration: none;
+			transition: all 0.3s ease;
+		}
+		.reset-retour:hover {
+			background: var(--bronze);
+			color: var(--parch);
+			box-shadow: 0 4px 15px rgba(139, 90, 43, 0.35);
+		}
+	</style>
+</head>
+<body>
+	<a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+	<nav role="navigation" aria-label="Menu principal">
+		<a href="/" class="nav-logo">Telluris</a>
+		<ul class="nav-links">
+			<li><a href="/#monde">Le monde</a></li>
+			<li><a href="/#guildes">Guildes</a></li>
+			<li><a href="/#vocations">Vocations</a></li>
+			<li><a href="/auth">Jouer</a></li>
+		</ul>
+	</nav>
+
+	<main id="main-content">
+		<section class="auth-main" aria-labelledby="reinitialisation">
+		<div class="auth-container">
+			<div class="ornament"></div>
+			<div class="logo">Telluris</div>
+			<div class="subtitle">Nouveau Sceau Secret</div>
+			<div class="hero-rule"></div>
+
+	{% if jeton_valide %}
+			<form id="reset-form">
+				<p class="reset-intro">
+					Gravez le sceau qui gardera désormais votre compte. Il doit compter au
+					moins 8 caractères, dont une majuscule, un chiffre et un symbole.
+				</p>
+				<div class="form-group">
+					<label for="reset-pass" title="Mot de passe" >Sceau Secret*</label>
+					<input type="password" id="reset-pass" class="pass-input" placeholder="Min. 8 caractères, min 1 majuscule, 1 chiffre, 1 symbole" required>
+					<span class="pass-visual"></span>
+				</div>
+				<div class="form-group">
+					<label for="reset-pass2" title="Mot de passe - vérification" >Contre-sceau*</label>
+					<input type="password" id="reset-pass2" class="pass-input" placeholder="Vérification du Sceau Secret" required>
+					<span class="pass-visual"></span>
+				</div>
+				<button type="submit" class="btn-auth">Graver le nouveau sceau</button>
+				<p id="reset-message" class="reset-message hidden"></p>
+			</form>
+	{% else %}
+			<p class="reset-intro">
+				Ce lien de réinitialisation n'est plus valable : il a déjà servi, ou son
+				délai est écoulé. Demandez-en un nouveau depuis l'écran de connexion.
+			</p>
+			<a href="/auth" class="reset-retour">Retour à la connexion</a>
+	{% endif %}
+		</div>
+		</section>
+	</main>
+
+	{% include "part-main-footer.html" without context %}
+
+	<script>
+		// Icône dynamique du mot de passe — même hachage que /auth : deux saisies
+		// identiques donnent le même symbole, ce qui vaut vérification à l'œil.
+		const icons = [ "⚔️︎", "🛡️︎", "🏹︎", "🔮︎", "📜︎", "🏰︎", "🐉︎", "🔱︎", "💎︎", "⚖️︎",
+						"🗝️︎", "⚒️︎", "🕯️︎", "🧪︎", "🏺︎", "👑︎", "🐺︎", "🦅︎", "🌲︎", "⛰️︎",
+						"💀︎", "🕸️︎", "🔥︎", "❄️︎", "🌙︎", "☀️︎", "🧭︎", "⚓︎", "🐎︎", "🐾︎",
+						"👣︎", "👁️︎", "🩸︎", "🌿︎", "🍄︎", "⛓️︎", "⚱️︎", "🧱︎"
+		];
+		const colors = ["#b87333", "#8a8f98", "#ffd700", "#e5e4e2", "#6fdcff", "#ff7f50", "#ffffff", "initial"];
+
+		function getHashCode(str) {
+			let hash = 0;
+			for (let i = 0; i < str.length; i++) {
+				hash = str.charCodeAt(i) + ((hash << 5) - hash);
+			}
+			return Math.abs(hash);
+		}
+
+		function getContrastBg(hexcolor) {
+			if (hexcolor === "initial") return "var(--parch)";
+			hexcolor = hexcolor.replace("#", "");
+			const r = parseInt(hexcolor.substr(0,2),16);
+			const g = parseInt(hexcolor.substr(2,2),16);
+			const b = parseInt(hexcolor.substr(4,2),16);
+			const yiq = ((r*299)+(g*587)+(b*114))/1000;
+			return (yiq >= 142) ? "var(--ink)" : "var(--parch)";
+		}
+
+		document.querySelectorAll('.pass-input').forEach(input => {
+			input.addEventListener('input', function() {
+				const visual = this.nextElementSibling;
+				const val = this.value;
+
+				if (val.length > 0) {
+					const hash = getHashCode(val);
+					const iconIdx = hash % icons.length;
+					const colorIdx = hash % colors.length;
+					const selectedColor = colors[colorIdx];
+					if (selectedColor === "initial") {
+						visual.style.backgroundColor = "var(--parch)";
+						visual.innerText = icons[iconIdx].replace('︎', '');
+						visual.style.color = "";
+					} else {
+						visual.style.backgroundColor = getContrastBg(selectedColor);
+						visual.innerText = icons[iconIdx];
+						visual.style.color = selectedColor;
+					}
+					visual.classList.add('visible');
+				} else {
+					visual.classList.remove('visible');
+				}
+			});
+		});
+
+		const resetForm = document.getElementById('reset-form');
+		if (resetForm) {
+			// Le jeton vient de l'URL et n'est JAMAIS réaffiché : il voyage dans le corps
+			// de la requête, pas dans un champ que le navigateur mémoriserait.
+			const jeton = new URLSearchParams(window.location.search).get('jeton') || '';
+
+			resetForm.addEventListener('submit', async (e) => {
+				e.preventDefault();
+
+				const bouton = resetForm.querySelector('button[type="submit"]');
+				const message = document.getElementById('reset-message');
+				bouton.disabled = true;
+				try {
+					const response = await fetch('/api/mot-de-passe/reinitialiser', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							jeton: jeton,
+							password: document.getElementById('reset-pass').value,
+							password_again: document.getElementById('reset-pass2').value
+						})
+					});
+					const data = await response.json();
+					if (response.ok) {
+						message.textContent = "Sceau gravé. Vous pouvez entrer dans la cité.";
+						message.classList.remove('hidden');
+						window.location.href = "/auth";
+					} else {
+						alert("Erreur : " + data.detail);
+						bouton.disabled = false;
+					}
+				} catch (err) {
+					console.error("Erreur de connexion", err);
+					bouton.disabled = false;
+				}
+			});
+		}
+	</script>
+</body>
+</html>
