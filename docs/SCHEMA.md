@@ -222,9 +222,12 @@ state on the same doc.
 
 ### `reset` (0 in this dump — created on demand, deleted on use)
 `_id: reset:<sha256 of the token>` — the token itself is never stored, so the doc id *is* the
-lookup key (no view, no index). Written by `POST /api/mot-de-passe/oubli`, deleted by
-`POST /api/mot-de-passe/reinitialiser` (single use); stale docs simply expire in place — nothing
-sweeps them (CLAUDE.md § 5).
+lookup key for verification (no view, no index). Written by `POST /api/mot-de-passe/oubli`, deleted
+by `POST /api/mot-de-passe/reinitialiser` (single use). These docs are also the rate-limit record:
+the same endpoint reads the account's existing ones (`{type, user_id}`, served by
+`idx-tables-by-user`) and stays silent when the newest `cree_le` is under
+`motdepasse.DELAI_ENTRE_DEMANDES_SECONDES` — hence no field added to `user:*`. Expired ones are
+swept there too, at the next request (CLAUDE.md § 5 — nothing else sweeps them).
 - **Required**: `user_id -> user`, `cree_le` (epoch), `expire_le` (epoch,
   `motdepasse.DUREE_JETON_MINUTES` after creation), `type`.
 

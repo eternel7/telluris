@@ -89,8 +89,9 @@ utils/
   intro.py               # intro narrative (pur) : démarrage, overlay, raisons, conclusion en zone sûre
   simulateur.py          # duel 1D Monte Carlo (pur) : belligérants, politique de duel, équipement d'essai
   potentiel.py           # potentiels combat/survie/support (pur) : `REGLES_POTENTIEL` = le point d'édition
-  motdepasse.py          # sceau oublié (pur) : jeton `reset:<empreinte>` à usage unique, règle du
-                         #   nouveau sceau, corps du courriel
+  motdepasse.py          # sceau oublié (pur) : jeton `reset:<empreinte>` à usage unique, cadence max
+                         #   par compte (lue sur les jetons en base), règle du sceau — celle de
+                         #   l'inscription AUSSI (`verifier_force`) —, corps du courriel
   courriel.py            # envoi SMTP (stdlib) ; SANS `SMTP_HOST`, le message part dans le JOURNAL
   xlsx.py                # writer xlsx OOXML pur stdlib (zipfile) — partagé bestiaire + export tableau admin
   lint_dialogues.py      # contrôle des arbres de dialogue (pur) — partagé CLI dev + bouton /admin
