@@ -220,6 +220,14 @@ state on the same doc.
   messages carry one via `AUBERGE_MESSAGE_DUREE_SECONDES` at write time (not present in this
   sample, both docs being tableau notices).
 
+### `reset` (0 in this dump — created on demand, deleted on use)
+`_id: reset:<sha256 of the token>` — the token itself is never stored, so the doc id *is* the
+lookup key (no view, no index). Written by `POST /api/mot-de-passe/oubli`, deleted by
+`POST /api/mot-de-passe/reinitialiser` (single use); stale docs simply expire in place — nothing
+sweeps them (CLAUDE.md § 5).
+- **Required**: `user_id -> user`, `cree_le` (epoch), `expire_le` (epoch,
+  `motdepasse.DUREE_JETON_MINUTES` after creation), `type`.
+
 ### `combat` (1 — ephemeral, deleted/rotated; do not treat as content schema)
 `_id: combat:<hex32>`. Full battle snapshot: `joueurs[]`/`monstres[]` (stats + `attaque_profils[]`
 + `equipment_bonus.*`, denormalized at combat start and frozen), `ordre_initiative`,

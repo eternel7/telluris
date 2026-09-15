@@ -14,6 +14,8 @@ docker compose up
 
 FastAPI sur `http://localhost:8000`, CouchDB sur `http://localhost:5984`. Le compose installe les dépendances Python au démarrage du conteneur (pas d'image pré-construite).
 
+`.env` — courriel sortant (réinitialisation du mot de passe) : `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · `SMTP_FROM` · `SMTP_SSL` · `SMTP_STARTTLS`, et `APP_BASE_URL` (origine des liens envoyés — à défaut l'en-tête `Host`, que le client choisit). Sans `SMTP_HOST`, le lien de réinitialisation est écrit dans le journal du serveur au lieu d'être posté.
+
 ## Running tests
 
 ```bash
@@ -34,9 +36,10 @@ La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs 
 ## Gameplay Systems
 
 ```
-main.py                  # FastAPI app, page routes (/play, /combat/{id}, /admin*, /admin/simulateur), static mounts
+main.py                  # FastAPI app, page routes (/play, /combat/{id}, /reinitialisation, /admin*, /admin/simulateur), static mounts
 routers/
-  user.py                # /api/* : auth, character CRUD, movement, equip/unequip, drop/pickup, spend_xp
+  user.py                # /api/* : auth (dont sceau oublié : mot-de-passe/oubli + /reinitialiser),
+                         #   character CRUD, movement, equip/unequip, drop/pickup, spend_xp
   combat.py              # /api/combat/* : start, get, action, collect (loot)
   zones.py               # /api/* : zones d'influence + tables de rencontres/ressources par lieu + GET /api/items
   bestiaire.py           # /admin/* : CRUD espece:* / profil:* (+ éditeur)
@@ -86,6 +89,9 @@ utils/
   intro.py               # intro narrative (pur) : démarrage, overlay, raisons, conclusion en zone sûre
   simulateur.py          # duel 1D Monte Carlo (pur) : belligérants, politique de duel, équipement d'essai
   potentiel.py           # potentiels combat/survie/support (pur) : `REGLES_POTENTIEL` = le point d'édition
+  motdepasse.py          # sceau oublié (pur) : jeton `reset:<empreinte>` à usage unique, règle du
+                         #   nouveau sceau, corps du courriel
+  courriel.py            # envoi SMTP (stdlib) ; SANS `SMTP_HOST`, le message part dans le JOURNAL
   xlsx.py                # writer xlsx OOXML pur stdlib (zipfile) — partagé bestiaire + export tableau admin
   lint_dialogues.py      # contrôle des arbres de dialogue (pur) — partagé CLI dev + bouton /admin
   dev_tools.py           # catalogue + lanceur des scripts de dev/ (liste blanche) — /admin/dev-tools,
@@ -99,7 +105,8 @@ templates/
   *.html                 # Jinja2 pages (play_town, combat, fiche perso, admin, éditeurs)
   part-*.html            # fragments partagés : {% include %} de markup OU macros paramétrées
                          #   (part-character-card, part-slot-bar-css, part-move-panel,
-                         #    part-lieux-{js,css,markup} : mode Lieux partagé /admin/editor ↔ /admin/lieux)
+                         #    part-lieux-{js,css,markup} : mode Lieux partagé /admin/editor ↔ /admin/lieux,
+                         #    part-auth-css : carte de parchemin partagée /auth ↔ /reinitialisation)
   scripts/               # JS partagé, servi par le mount /scripts
                          #   battle_map.js · nav.js (bitmask nav) · deplacement.js (règles de marche)
                          #   voies.js (tracé des voies de l'éditeur : régions, goulots, passage)

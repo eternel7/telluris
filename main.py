@@ -44,6 +44,7 @@ from utils import escorte as escorte_util
 from utils import indicateurs as indicateurs_util
 from utils import fiche as fiche_util
 from utils import acces
+from utils import motdepasse as motdepasse_util
 from utils import journal as journal_util
 from utils import animations as animations_util
 from utils import lint_dialogues
@@ -471,7 +472,23 @@ async def read_page_auth(request: Request):
 			"is_facebook_auth": is_facebook_auth
 		}
 	)
-	
+
+@app.get("/reinitialisation", response_class=HTMLResponse)
+async def read_page_reinitialisation(request: Request):
+	"""Page ouverte depuis le lien du courriel. Le jeton est vérifié DÈS L'AFFICHAGE :
+	un lien périmé montre l'impasse et le renvoi vers une nouvelle demande, au lieu de
+	faire saisir deux fois un mot de passe pour rien."""
+	jeton = request.query_params.get("jeton", "")
+	return templates.TemplateResponse(
+		request=request,
+		name="reinitialisation_telluris.html",
+		context={
+			"title": "Nouveau Sceau Secret",
+			"jeton": jeton,
+			"jeton_valide": motdepasse_util.jeton_utilisable(jeton, get_doc) is not None,
+		}
+	)
+
 @app.get("/embleme", response_class=HTMLResponse)
 async def get_embleme(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if not current_user:

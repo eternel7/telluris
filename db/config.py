@@ -69,8 +69,8 @@ _CACHE_ENABLED = os.getenv("TELLURIS_DOC_CACHE", "1") != "0"
 
 # Docs de CONTENU : écrits uniquement par les écrans d'administration, jamais mutés au
 # cours d'une requête de jeu. Tout ce qui porte un état de partie en est EXCLU
-# (character:, aventurier:, monture:, lieu:, relation:, combat:, user:, quete:) — ces
-# docs-là sont lus, mutés et sauvés dans la même requête. `str.startswith` accepte un
+# (character:, aventurier:, monture:, lieu:, relation:, combat:, user:, quete:, reset:)
+# — ces docs-là sont lus, mutés et sauvés dans la même requête. `str.startswith` accepte un
 # tuple → un seul test ; ajouter un préfixe reste une décision par type.
 _CACHEABLE_PREFIXES = ("item:", "espece:", "profil:", "recette:", "sort:",
 					   "competence:", "rules:", "animation:", "donjon:", "pnj:", "link:",
