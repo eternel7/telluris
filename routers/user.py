@@ -41,6 +41,7 @@ from utils import intro
 from utils import transport
 from utils import recrutement
 from utils import acces
+from utils import cadence
 from utils import courriel
 from utils import motdepasse
 from utils import montures
@@ -76,9 +77,12 @@ async def register_user(user: RegisterRequest, response: Response):
 	if user_doc:
 		raise HTTPException(status_code=400, detail="L'utilisateur existe déjà")
 	
-	if user.password != user.password_again:
-		raise HTTPException(status_code=400, detail="Les mots de passe ne correspondent pas")
-	
+	# Même règle qu'à la réinitialisation (source unique) : le champ annonçait
+	# « 8 caractères, 1 majuscule, 1 chiffre, 1 symbole » sans que rien ne le vérifie.
+	erreur = motdepasse.verifier_force(user.password, user.password_again)
+	if erreur:
+		raise HTTPException(status_code=400, detail=erreur)
+
 	hashed_pw = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt())
 	token = create_access_token({"user_id": user_id})
 
@@ -125,9 +129,27 @@ async def mot_de_passe_oubli(request: Request, demande: OubliRequest):
 	"""Demande de réinitialisation. ⚠️ Réponse IDENTIQUE que l'adresse soit connue ou non
 	(et quel que soit le sort de l'envoi) : distinguer les deux ferait de cet écran un
 	oracle disant quelles adresses ont un compte."""
+	# Plafond par IP AVANT toute lecture : c'est le balayage d'adresses au hasard qu'il
+	# freine, et celui-là ne touche jamais un compte. Un 429 ici ne dit rien d'un compte
+	# (il ne dépend que de l'appelant), donc il peut être franc — contrairement au refus
+	# de cadence plus bas, qui doit se taire.
+	ip = cadence.ip_du_client(request.client.host if request.client else "",
+							  request.headers.get("x-forwarded-for", ""))
+	if cadence.plafond_atteint(ip):
+		raise HTTPException(status_code=429,
+							detail="Trop de demandes depuis cet emplacement. Réessayez plus tard.")
+
 	email = (demande.email or "").strip()
 	user_doc = get_doc("user:" + email) if email else None
 	if user_doc:
+		jetons = motdepasse.jetons_du_compte(user_doc["_id"], find_docs)
+		for perime in motdepasse.jetons_perimes(jetons):
+			delete_doc(perime)
+		# Cadence max : on REND LA MÊME RÉPONSE sans rien envoyer. Le joueur pressé
+		# ne voit pas de différence, la boîte visée ne prend pas l'averse.
+		if motdepasse.demande_trop_recente(jetons):
+			return {"message": motdepasse.MESSAGE_DEMANDE}
+
 		jeton, doc_jeton = motdepasse.nouveau_jeton(user_doc["_id"])
 		if save_doc(doc_jeton) is not None:
 			lien = motdepasse.lien_reinitialisation(_base_url_courriel(request), jeton)

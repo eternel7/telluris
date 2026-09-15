@@ -18,6 +18,7 @@ import pytest
 from fastapi import HTTPException
 
 from routers import user as user_router
+from utils import cadence
 from utils import courriel
 from utils import motdepasse
 
@@ -65,6 +66,32 @@ def test_jeton_inconnu_vide_ou_d_un_autre_type():
 	assert motdepasse.jeton_utilisable(jeton, base.get, now=1000) is None
 
 
+def test_cadence_lue_sur_les_jetons_deja_emis():
+	jetons = [{"type": "reset", "user_id": "user:a@b.c", "cree_le": 1000, "expire_le": 4600}]
+
+	assert motdepasse.demande_trop_recente(jetons, now=1000) is True
+	assert motdepasse.demande_trop_recente(
+		jetons, now=1000 + motdepasse.DELAI_ENTRE_DEMANDES_SECONDES - 1) is True
+	# À la seconde près : le délai écoulé, la demande repasse.
+	assert motdepasse.demande_trop_recente(
+		jetons, now=1000 + motdepasse.DELAI_ENTRE_DEMANDES_SECONDES) is False
+	assert motdepasse.demande_trop_recente([], now=1000) is False
+
+
+def test_jetons_perimes_et_selecteur_du_compte():
+	vieux = {"type": "reset", "user_id": "user:a@b.c", "cree_le": 0, "expire_le": 3600}
+	recent = {"type": "reset", "user_id": "user:a@b.c", "cree_le": 5000, "expire_le": 8600}
+
+	assert motdepasse.jetons_perimes([vieux, recent], now=5000) == [vieux]
+	assert motdepasse.jetons_perimes([vieux, recent], now=0) == []
+
+	# Sélecteur servi par l'index ["type", "user_id"] : rien d'autre n'est demandé.
+	vus = []
+	motdepasse.jetons_du_compte("user:a@b.c", lambda selector: vus.append(selector) or [])
+	assert vus == [{"type": "reset", "user_id": "user:a@b.c"}]
+	assert motdepasse.jetons_du_compte("", lambda selector: 1 / 0) == []
+
+
 def test_regle_du_nouveau_sceau():
 	assert motdepasse.verifier_force("Aventure1!", "Aventure1!") is None
 	assert motdepasse.verifier_force("Aventure1!", "Aventure1") == "Les mots de passe ne correspondent pas"
@@ -107,11 +134,18 @@ def test_destinataire_vide_ne_tente_meme_pas_l_envoi(monkeypatch):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-class _Requete:
-	"""Le strict nécessaire : seul `base_url` est lu par l'endpoint."""
+class _Client:
+	def __init__(self, host):
+		self.host = host
 
-	def __init__(self, base_url="http://host-de-l-attaquant/"):
+
+class _Requete:
+	"""Le strict nécessaire : `base_url`, la socket et l'en-tête de proxy."""
+
+	def __init__(self, base_url="http://host-de-l-attaquant/", host="10.0.0.1", forwarded=""):
 		self.base_url = base_url
+		self.client = _Client(host) if host else None
+		self.headers = {"x-forwarded-for": forwarded} if forwarded else {}
 
 
 class _Demande:
@@ -139,9 +173,16 @@ def base(monkeypatch):
 	monkeypatch.setattr(user_router, "get_doc", lambda doc_id: docs.get(doc_id))
 	monkeypatch.setattr(user_router, "save_doc", lambda doc: docs.__setitem__(doc["_id"], doc) or doc)
 	monkeypatch.setattr(user_router, "delete_doc", lambda doc: docs.pop(doc["_id"], None))
+	monkeypatch.setattr(user_router, "find_docs", lambda selector, *a, **k: [
+		d for d in list(docs.values())
+		if all(d.get(champ) == valeur for champ, valeur in selector.items())
+	])
 	monkeypatch.setattr(courriel, "envoyer",
 						lambda destinataire, sujet, corps: envois.append((destinataire, sujet, corps)) or True)
 	monkeypatch.setenv("APP_BASE_URL", "https://telluris.fr")
+	# Le plafond par IP est un état de PROCESS : sans ce vidage, les tests se
+	# contamineraient entre eux (tous tapent depuis la même adresse stub).
+	cadence.reinitialiser()
 	return docs, envois
 
 
@@ -240,6 +281,97 @@ def test_jeton_inconnu_refuse_sans_toucher_au_compte(base):
 	assert bcrypt.checkpw(b"Ancien1!", docs["user:a@b.c"]["password"].encode())
 
 
+def test_une_seconde_demande_trop_tot_n_envoie_rien(base):
+	docs, envois = base
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("a@b.c")))
+	reponse = asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("a@b.c")))
+
+	# ⚠️ MÊME réponse : le refus de cadence ne doit pas se distinguer d'un envoi, sinon
+	# il redit ce que la réponse unique s'applique à taire.
+	assert reponse["message"] == motdepasse.MESSAGE_DEMANDE
+	assert len(envois) == 1
+	assert len(_jetons(docs)) == 1
+
+
+def test_le_delai_ecoule_la_demande_repasse(base, monkeypatch):
+	docs, envois = base
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("a@b.c")))
+	# On vieillit le jeton émis plutôt que d'attendre : le délai est la seule variable.
+	_jetons(docs)[0]["cree_le"] -= motdepasse.DELAI_ENTRE_DEMANDES_SECONDES
+
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("a@b.c")))
+	assert len(envois) == 2
+	assert len(_jetons(docs)) == 2
+
+
+def test_les_jetons_perimes_sont_balayes_a_la_demande_suivante(base):
+	docs, _envois = base
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("a@b.c")))
+	perime = _jetons(docs)[0]
+	perime["cree_le"] -= 86400
+	perime["expire_le"] -= 86400
+
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("a@b.c")))
+	# Le vieux jeton a disparu (aucun tick de fond ne le ferait), le neuf l'a remplacé.
+	restants = _jetons(docs)
+	assert len(restants) == 1 and restants[0]["_id"] != perime["_id"]
+
+
+def test_la_cadence_ne_vise_que_le_compte_concerne(base):
+	docs, envois = base
+	docs["user:d@e.f"] = {"_id": "user:d@e.f", "type": "user", "email": "d@e.f",
+						  "username": "Autre",
+						  "password": bcrypt.hashpw(b"Ancien1!", bcrypt.gensalt()).decode()}
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("a@b.c")))
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("d@e.f")))
+
+	assert [envoi[0] for envoi in envois] == ["a@b.c", "d@e.f"]
+
+
+def test_plafond_par_ip_coupe_avant_toute_lecture(base, monkeypatch):
+	docs, envois = base
+	monkeypatch.setattr(cadence, "DEMANDES_MAX_PAR_IP", 3)
+	lectures = []
+	monkeypatch.setattr(user_router, "get_doc",
+						lambda doc_id: lectures.append(doc_id) or docs.get(doc_id))
+
+	for _ in range(3):
+		asyncio.run(user_router.mot_de_passe_oubli(_Requete(host="10.0.0.9"),
+												   _Demande("inconnu@nulle.part")))
+	assert len(lectures) == 3
+
+	# Au-delà du quota, un 429 FRANC : il ne dépend que de l'appelant, donc il ne dit
+	# rien d'un compte — et la lecture n'a même pas lieu.
+	with pytest.raises(HTTPException) as erreur:
+		asyncio.run(user_router.mot_de_passe_oubli(_Requete(host="10.0.0.9"), _Demande("a@b.c")))
+	assert erreur.value.status_code == 429
+	assert len(lectures) == 3
+	assert envois == []
+
+	# Le seau est bien PAR adresse : le voisin n'est pas puni.
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(host="10.0.0.10"), _Demande("a@b.c")))
+	assert len(envois) == 1
+
+
+def test_derriere_un_proxy_de_confiance_le_seau_suit_le_vrai_client(base, monkeypatch):
+	_docs, envois = base
+	monkeypatch.setattr(cadence, "DEMANDES_MAX_PAR_IP", 1)
+	monkeypatch.setenv("TRUST_PROXY_HOPS", "1")
+
+	# Même socket (le proxy), deux clients réels : sans la lecture de l'en-tête, le
+	# second mangerait le quota du premier.
+	asyncio.run(user_router.mot_de_passe_oubli(
+		_Requete(host="172.18.0.2", forwarded="203.0.113.7"), _Demande("a@b.c")))
+	asyncio.run(user_router.mot_de_passe_oubli(
+		_Requete(host="172.18.0.2", forwarded="203.0.113.8"), _Demande("a@b.c")))
+	assert len(envois) == 1   # le second est arrêté par la cadence DU COMPTE, pas par l'IP
+
+	with pytest.raises(HTTPException) as erreur:
+		asyncio.run(user_router.mot_de_passe_oubli(
+			_Requete(host="172.18.0.2", forwarded="203.0.113.7"), _Demande("a@b.c")))
+	assert erreur.value.status_code == 429
+
+
 def test_compte_disparu_entre_la_demande_et_la_gravure(base):
 	docs, envois = base
 	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("a@b.c")))
@@ -249,3 +381,48 @@ def test_compte_disparu_entre_la_demande_et_la_gravure(base):
 	with pytest.raises(HTTPException) as erreur:
 		asyncio.run(user_router.mot_de_passe_reinitialiser(_Reinit(jeton, "Nouveau1!", "Nouveau1!")))
 	assert erreur.value.status_code == 400
+
+
+# ── Inscription ───────────────────────────────────────────────────────────────
+# La règle du sceau a UNE source (`verifier_force`) : l'inscription annonçait
+# « 8 caractères, 1 majuscule, 1 chiffre, 1 symbole » dans son champ sans rien vérifier.
+
+class _Inscription:
+	def __init__(self, email, password, password_again, username="Novice"):
+		self.email = email
+		self.username = username
+		self.password = password
+		self.password_again = password_again
+
+
+def test_inscription_refuse_un_sceau_hors_regle(base):
+	docs, _envois = base
+	for faible in ("Court1!", "aventure1!", "Aventuree!", "Aventure11"):
+		with pytest.raises(HTTPException) as erreur:
+			asyncio.run(user_router.register_user(_Inscription("neuf@b.c", faible, faible), None))
+		assert erreur.value.status_code == 400
+		assert "user:neuf@b.c" not in docs
+
+
+def test_inscription_refuse_toujours_deux_saisies_differentes(base):
+	_docs, _envois = base
+	with pytest.raises(HTTPException) as erreur:
+		asyncio.run(user_router.register_user(_Inscription("neuf@b.c", "Aventure1!", "Aventure2!"), None))
+	assert erreur.value.detail == "Les mots de passe ne correspondent pas"
+
+
+def test_inscription_accepte_un_sceau_conforme(base):
+	docs, _envois = base
+	reponse = asyncio.run(user_router.register_user(_Inscription("neuf@b.c", "Aventure1!", "Aventure1!"), None))
+
+	assert reponse.status_code == 200
+	assert bcrypt.checkpw(b"Aventure1!", docs["user:neuf@b.c"]["password"].encode())
+
+
+def test_le_compte_deja_pris_prime_sur_la_regle(base):
+	"""Un sceau faible sur une adresse DÉJÀ inscrite rend toujours « existe déjà » :
+	sinon le message de force deviendrait un moyen de tester des adresses."""
+	_docs, _envois = base
+	with pytest.raises(HTTPException) as erreur:
+		asyncio.run(user_router.register_user(_Inscription("a@b.c", "faible", "faible"), None))
+	assert erreur.value.detail == "L'utilisateur existe déjà"

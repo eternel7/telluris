@@ -28,6 +28,13 @@ DUREE_JETON_MINUTES = 60
 # Longueur du secret tiré (octets avant encodage url-safe).
 OCTETS_JETON = 32
 
+# Cadence maximale des demandes POUR UN MÊME COMPTE. Le joueur qui n'a rien vu passer
+# peut relancer sans attendre longtemps ; la boîte visée ne prend jamais plus de douze
+# messages par heure. ⚠️ Elle se lit sur les jetons DÉJÀ EN BASE (aucun champ ajouté au
+# doc `user:*`, aucune écriture de plus) : un lien consommé efface donc sa propre
+# cadence, et c'est voulu — se réinitialiser puis redemander n'est pas un abus.
+DELAI_ENTRE_DEMANDES_SECONDES = 300
+
 PREFIXE_JETON = "reset:"
 
 # Réponse UNIQUE de la demande d'oubli, adresse connue ou non : révéler qu'un compte
@@ -72,6 +79,31 @@ def jeton_utilisable(jeton: str, get_doc_fn, *, now: int = None) -> dict | None:
 	if maintenant >= int(doc.get("expire_le", 0)):
 		return None
 	return doc
+
+
+def jetons_du_compte(user_id: str, find_docs_fn) -> list[dict]:
+	"""Les jetons vivants ou périmés déjà émis pour ce compte. Sélecteur servi par
+	l'index `idx-tables-by-user` (`["type", "user_id"]`, db/config.py)."""
+	if not user_id:
+		return []
+	return find_docs_fn({"type": "reset", "user_id": user_id}) or []
+
+
+def demande_trop_recente(jetons: list[dict], *, now: int = None) -> bool:
+	"""Un lien a-t-il déjà été émis il y a moins de `DELAI_ENTRE_DEMANDES_SECONDES` ?
+	⚠️ L'appelant REFUSE EN SILENCE (même réponse que d'ordinaire) : un 429 ne
+	tomberait que sur les adresses qui ont un compte, et redirait ce que
+	`MESSAGE_DEMANDE` s'applique à taire."""
+	maintenant = int(now if now is not None else time.time())
+	return any(maintenant - int(j.get("cree_le", 0)) < DELAI_ENTRE_DEMANDES_SECONDES
+			   for j in jetons)
+
+
+def jetons_perimes(jetons: list[dict], *, now: int = None) -> list[dict]:
+	"""Ceux que l'appelant peut supprimer au passage. Aucun tick de fond ne ramasse les
+	jetons expirés (CLAUDE.md § 5) : ils s'effacent ici, à la demande suivante."""
+	maintenant = int(now if now is not None else time.time())
+	return [j for j in jetons if maintenant >= int(j.get("expire_le", 0))]
 
 
 def verifier_force(mot_de_passe: str, verification: str) -> str | None:

@@ -16,6 +16,8 @@ FastAPI sur `http://localhost:8000`, CouchDB sur `http://localhost:5984`. Le com
 
 `.env` — courriel sortant (réinitialisation du mot de passe) : `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · `SMTP_FROM` · `SMTP_SSL` · `SMTP_STARTTLS`, et `APP_BASE_URL` (origine des liens envoyés — à défaut l'en-tête `Host`, que le client choisit). Sans `SMTP_HOST`, le lien de réinitialisation est écrit dans le journal du serveur au lieu d'être posté.
 
+⚠️ **`TRUST_PROXY_HOPS`** (défaut `0`) — nombre de proxies de confiance devant l'app. À `0`, le plafond par IP compte `request.client.host` : **derrière un reverse-proxy, c'est le proxy**, donc tous les joueurs partagent un seul seau. À `N`, le Nième maillon en partant de la FIN de `X-Forwarded-For` (les précédents viennent du client et s'inventent).
+
 ## Running tests
 
 ```bash
@@ -89,9 +91,12 @@ utils/
   intro.py               # intro narrative (pur) : démarrage, overlay, raisons, conclusion en zone sûre
   simulateur.py          # duel 1D Monte Carlo (pur) : belligérants, politique de duel, équipement d'essai
   potentiel.py           # potentiels combat/survie/support (pur) : `REGLES_POTENTIEL` = le point d'édition
-  motdepasse.py          # sceau oublié (pur) : jeton `reset:<empreinte>` à usage unique, règle du
-                         #   nouveau sceau, corps du courriel
+  motdepasse.py          # sceau oublié (pur) : jeton `reset:<empreinte>` à usage unique, cadence max
+                         #   par compte (lue sur les jetons en base), règle du sceau — celle de
+                         #   l'inscription AUSSI (`verifier_force`) —, corps du courriel
   courriel.py            # envoi SMTP (stdlib) ; SANS `SMTP_HOST`, le message part dans le JOURNAL
+  cadence.py             # plafond de requêtes par IP — état de PROCESS (dict), ni partagé entre
+                         #   workers ni conservé au redémarrage ; `TRUST_PROXY_HOPS` pour X-Forwarded-For
   xlsx.py                # writer xlsx OOXML pur stdlib (zipfile) — partagé bestiaire + export tableau admin
   lint_dialogues.py      # contrôle des arbres de dialogue (pur) — partagé CLI dev + bouton /admin
   dev_tools.py           # catalogue + lanceur des scripts de dev/ (liste blanche) — /admin/dev-tools,
