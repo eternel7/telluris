@@ -18,6 +18,7 @@ import pytest
 from fastapi import HTTPException
 
 from routers import user as user_router
+from utils import cadence
 from utils import courriel
 from utils import motdepasse
 
@@ -133,11 +134,18 @@ def test_destinataire_vide_ne_tente_meme_pas_l_envoi(monkeypatch):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
-class _Requete:
-	"""Le strict nécessaire : seul `base_url` est lu par l'endpoint."""
+class _Client:
+	def __init__(self, host):
+		self.host = host
 
-	def __init__(self, base_url="http://host-de-l-attaquant/"):
+
+class _Requete:
+	"""Le strict nécessaire : `base_url`, la socket et l'en-tête de proxy."""
+
+	def __init__(self, base_url="http://host-de-l-attaquant/", host="10.0.0.1", forwarded=""):
 		self.base_url = base_url
+		self.client = _Client(host) if host else None
+		self.headers = {"x-forwarded-for": forwarded} if forwarded else {}
 
 
 class _Demande:
@@ -172,6 +180,9 @@ def base(monkeypatch):
 	monkeypatch.setattr(courriel, "envoyer",
 						lambda destinataire, sujet, corps: envois.append((destinataire, sujet, corps)) or True)
 	monkeypatch.setenv("APP_BASE_URL", "https://telluris.fr")
+	# Le plafond par IP est un état de PROCESS : sans ce vidage, les tests se
+	# contamineraient entre eux (tous tapent depuis la même adresse stub).
+	cadence.reinitialiser()
 	return docs, envois
 
 
@@ -315,6 +326,50 @@ def test_la_cadence_ne_vise_que_le_compte_concerne(base):
 	asyncio.run(user_router.mot_de_passe_oubli(_Requete(), _Demande("d@e.f")))
 
 	assert [envoi[0] for envoi in envois] == ["a@b.c", "d@e.f"]
+
+
+def test_plafond_par_ip_coupe_avant_toute_lecture(base, monkeypatch):
+	docs, envois = base
+	monkeypatch.setattr(cadence, "DEMANDES_MAX_PAR_IP", 3)
+	lectures = []
+	monkeypatch.setattr(user_router, "get_doc",
+						lambda doc_id: lectures.append(doc_id) or docs.get(doc_id))
+
+	for _ in range(3):
+		asyncio.run(user_router.mot_de_passe_oubli(_Requete(host="10.0.0.9"),
+												   _Demande("inconnu@nulle.part")))
+	assert len(lectures) == 3
+
+	# Au-delà du quota, un 429 FRANC : il ne dépend que de l'appelant, donc il ne dit
+	# rien d'un compte — et la lecture n'a même pas lieu.
+	with pytest.raises(HTTPException) as erreur:
+		asyncio.run(user_router.mot_de_passe_oubli(_Requete(host="10.0.0.9"), _Demande("a@b.c")))
+	assert erreur.value.status_code == 429
+	assert len(lectures) == 3
+	assert envois == []
+
+	# Le seau est bien PAR adresse : le voisin n'est pas puni.
+	asyncio.run(user_router.mot_de_passe_oubli(_Requete(host="10.0.0.10"), _Demande("a@b.c")))
+	assert len(envois) == 1
+
+
+def test_derriere_un_proxy_de_confiance_le_seau_suit_le_vrai_client(base, monkeypatch):
+	_docs, envois = base
+	monkeypatch.setattr(cadence, "DEMANDES_MAX_PAR_IP", 1)
+	monkeypatch.setenv("TRUST_PROXY_HOPS", "1")
+
+	# Même socket (le proxy), deux clients réels : sans la lecture de l'en-tête, le
+	# second mangerait le quota du premier.
+	asyncio.run(user_router.mot_de_passe_oubli(
+		_Requete(host="172.18.0.2", forwarded="203.0.113.7"), _Demande("a@b.c")))
+	asyncio.run(user_router.mot_de_passe_oubli(
+		_Requete(host="172.18.0.2", forwarded="203.0.113.8"), _Demande("a@b.c")))
+	assert len(envois) == 1   # le second est arrêté par la cadence DU COMPTE, pas par l'IP
+
+	with pytest.raises(HTTPException) as erreur:
+		asyncio.run(user_router.mot_de_passe_oubli(
+			_Requete(host="172.18.0.2", forwarded="203.0.113.7"), _Demande("a@b.c")))
+	assert erreur.value.status_code == 429
 
 
 def test_compte_disparu_entre_la_demande_et_la_gravure(base):

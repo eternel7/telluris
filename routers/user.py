@@ -41,6 +41,7 @@ from utils import intro
 from utils import transport
 from utils import recrutement
 from utils import acces
+from utils import cadence
 from utils import courriel
 from utils import motdepasse
 from utils import montures
@@ -128,6 +129,16 @@ async def mot_de_passe_oubli(request: Request, demande: OubliRequest):
 	"""Demande de réinitialisation. ⚠️ Réponse IDENTIQUE que l'adresse soit connue ou non
 	(et quel que soit le sort de l'envoi) : distinguer les deux ferait de cet écran un
 	oracle disant quelles adresses ont un compte."""
+	# Plafond par IP AVANT toute lecture : c'est le balayage d'adresses au hasard qu'il
+	# freine, et celui-là ne touche jamais un compte. Un 429 ici ne dit rien d'un compte
+	# (il ne dépend que de l'appelant), donc il peut être franc — contrairement au refus
+	# de cadence plus bas, qui doit se taire.
+	ip = cadence.ip_du_client(request.client.host if request.client else "",
+							  request.headers.get("x-forwarded-for", ""))
+	if cadence.plafond_atteint(ip):
+		raise HTTPException(status_code=429,
+							detail="Trop de demandes depuis cet emplacement. Réessayez plus tard.")
+
 	email = (demande.email or "").strip()
 	user_doc = get_doc("user:" + email) if email else None
 	if user_doc:
