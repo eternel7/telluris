@@ -62,6 +62,7 @@ D. **« Entrer en rayon » (indicateur 2) = APPROVISIONNEMENT AUTONOME.** C'est 
    que si un joueur l'a garnie est vide au premier jour du monde. La ligne « même en
    supposant le joueur ravitailleur » sous l'indicateur relâche cette hypothèse et ne garde
    que les blocages structurels (pas d'atelier, pas de doc, chaîne globalement rompue).
+   ⚠️ Le flux de cité n'entre PAS dans le chiffre de tête : il est rendu à part (hypothèse G).
 
 E. **Marge (indicateur 3).** Pour un objet fabricable :
      · prix payé par le joueur = `prix_base_cuivre(pmin, pmax, RELATION_INITIALE, "achat")`,
@@ -82,6 +83,18 @@ F. **Déterminisme.** Aucun chemin utilisé ici ne tire de hasard (le hasard du 
    dans `marchander`, `tenter_production` et `ecouler_produits_pnj`, jamais appelés) ; les
    parcours de docs sont triés par `_id` ; `random.seed(0)` est posé par ceinture. Deux
    exécutions sur le même dump rendent le même rapport, chiffre pour chiffre.
+
+G. **Flux de cité (sous-lignes du §2).** Seconde voie d'approvisionnement sans le joueur :
+   les PNJ écoulent l'excédent d'un rayon, une part va au `flux_marchand` de la VILLE
+   (parent direct de catégorie `ville`), où les boutiques sœurs puisent (cf.
+   `marche.tick_atelier`). Point fixe PAR CITÉ sur toutes ses boutiques (`point_fixe_cite`).
+   Parmi les recettes « intrants non ravitaillés sans le joueur », on sépare :
+     · **débloquées par le flux** — cuites dans une boutique de la ville grâce au pool ;
+     · **cuites par un autre atelier** — autonomes ailleurs que chez le représentatif du §2 ;
+     · **totalement dépendantes de l'aventurier** — le reste, que seul un joueur ravitaille.
+   ⚠️ C'est une POSSIBILITÉ, pas un débit : le flux exige un rayon au-dessus du stock
+   cible, un tirage `VENTE_PNJ_PROBA`, puis deux arrondis (`VENTE_PNJ_FRACTION`,
+   `VENTE_PNJ_REDISTRIB`) qui peuvent donner 0 sur un petit excédent.
 
 ────────────────────────────────────────────────────────────────────────────────────────
 
@@ -279,6 +292,72 @@ def point_fixe(marche, recettes: list, acquis: set) -> tuple[set, set]:
 	return cuites, acquis
 
 
+# ── Flux de marchandises entre boutiques d'une cité (hypothèse G) ────────────────
+
+def cites_boutiques(marche, lieux: list, lieux_par_id: dict) -> dict[str, list]:
+	"""Boutiques à recettes groupées par CITÉ, selon la règle des sites d'appel du moteur :
+	`flux_cite(get_doc(lieu.lieu_parent))`, qui rend None si ce parent n'est pas une `ville`.
+	Une boutique hors ville ne partage aucun flux et n'apparaît pas ici."""
+	cites: dict[str, list] = {}
+	for L in sorted(lieux, key=lambda d: d.get("_id") or ""):
+		parent = lieux_par_id.get(L.get("lieu_parent") or "")
+		if marche.flux_cite(parent) is None or not marche.recettes_lieu(L):
+			continue
+		cites.setdefault(parent["_id"], []).append(L)
+	return cites
+
+
+def point_fixe_cite(marche, characters, boutiques: list, items_par_id: dict) -> tuple[set, set]:
+	"""Point fixe d'une cité : chaque boutique part de son approvisionnement automatique, cuit,
+	et ses produits alimentent le pool ; les sœurs y puisent, cuisent à leur tour… jusqu'à
+	stabilité. Renvoie (`_id` cuites SANS flux, `_id` cuites AVEC flux), toutes boutiques
+	confondues.
+
+	Mêmes gardes que le moteur, dans l'ordre du moteur :
+	  · entre au pool (`_crediter_flux`) : un produit CUIT dont le doc item existe
+	    (`resolve_item_ref`) et dont une recette du monde a l'usage (`cles_consommees`) ;
+	  · la boutique puise (`puiser_flux`) : l'id ou la sous-catégorie est dans `besoins_lieu`,
+	    elle ne le PRODUIT pas (`lieu_produit`), et la clé d'entrée est `cle_matiere_lieu`.
+	⚠️ Seuls les produits CUITS voyagent : une feuille livrée n'est montée en vitrine que
+	JUSQU'AU stock cible (`approvisionner`), or les PNJ n'écoulent que l'excédent."""
+	consommees = marche.cles_consommees()
+	recettes = {L["_id"]: marche.recettes_lieu(L) for L in boutiques}
+	acquis = {L["_id"]: {c for c in marche.appro_leaves_lieu(L) if marche._appro_debit_pour(c) > 0}
+			  for L in boutiques}
+	sans_flux: set[str] = set()
+	for L in boutiques:
+		sans_flux |= point_fixe(marche, recettes[L["_id"]], acquis[L["_id"]])[0]
+	cuites: dict[str, set] = {}
+	change = True
+	while change:
+		change = False
+		pool: set[str] = set()
+		for L in boutiques:
+			cuites[L["_id"]], _a = point_fixe(marche, recettes[L["_id"]], acquis[L["_id"]])
+			for r in recettes[L["_id"]]:
+				if r.get("_id") not in cuites[L["_id"]]:
+					continue
+				produit = marche.objet_final_item_id(r.get("objet_final", ""))
+				doc = items_par_id.get(produit)
+				if doc and (produit in consommees
+							or characters.item_sous_categorie(doc) in consommees):
+					pool.add(produit)
+		for L in boutiques:
+			besoins = set(marche.besoins_lieu(L))
+			for produit in sorted(pool):
+				doc = items_par_id[produit]
+				if produit not in besoins and characters.item_sous_categorie(doc) not in besoins:
+					continue
+				if marche.lieu_produit(L, doc):
+					continue
+				cle = marche.cle_matiere_lieu(L.get("categorie"), doc, L)
+				if cle and cle not in acquis[L["_id"]]:
+					acquis[L["_id"]].add(cle)
+					change = True
+	avec_flux = set().union(set(), *cuites.values())
+	return sans_flux, avec_flux
+
+
 # ── Rapport ──────────────────────────────────────────────────────────────────────
 
 # Le motif de blocage « le joueur est la chaîne d'appro » : le seul dont on détaille les
@@ -289,6 +368,15 @@ MOTIF_INTRANTS = "intrants non ravitaillés sans le joueur"
 
 def _pct(n: int, total: int) -> str:
 	return f"{(100.0 * n / total):5.1f} %" if total else "    — "
+
+
+def _lister_objets(lot: list, n: int = 10) -> None:
+	"""Objets produits par un lot de recettes, triés, les `n` premiers puis le compte du reste."""
+	objets = sorted({r.get("objet_final", "?") for r in lot})
+	for i in range(0, min(n, len(objets)), 5):
+		print("       " + ", ".join(objets[i:min(i + 5, n)]))
+	if len(objets) > n:
+		print(f"       … et {len(objets) - n} autres")
 
 
 def _mediane(valeurs: list) -> float:
@@ -318,6 +406,8 @@ def auditer(docs: list, meta: dict, ville: str | None = None) -> None:
 	# Calculés sur TOUS les objets, quel que soit le périmètre : un produit a un doc ou n'en a
 	# pas, et le joueur apporte ce qu'il a trouvé n'importe où.
 	items_par_id = {d["_id"]: d for d in items if d.get("_id")}
+	# Les docs de VILLE ne sont pas des enfants d'elles-mêmes : indexés avant la restriction `--ville`.
+	lieux_par_id = {d["_id"]: d for d in lieux if d.get("_id")}
 	sous_cats = {sc for d in items if (sc := characters.item_sous_categorie(d))}
 
 	def _atelier_de(r: dict):
@@ -433,6 +523,27 @@ def auditer(docs: list, meta: dict, ville: str | None = None) -> None:
 		or (r.get("_id") not in cuites_global)
 	]
 
+	# Relâchement de l'hypothèse D par le FLUX DE CITÉ (hypothèse G) : parmi les recettes que
+	# l'approvisionnement automatique laisse en plan, lesquelles cuisent quand même SANS le
+	# joueur parce qu'une boutique sœur de la ville leur livre la matière ?
+	flux_actif = all(float(getattr(character_stats, t)) > 0
+					 for t in ("VENTE_PNJ_PROBA", "VENTE_PNJ_FRACTION", "VENTE_PNJ_REDISTRIB"))
+	cuites_par_flux: set[str] = set()
+	cuites_sans_flux: set[str] = set()
+	if flux_actif:
+		for boutiques in cites_boutiques(marche, lieux, lieux_par_id).values():
+			sans, avec = point_fixe_cite(marche, characters, boutiques, items_par_id)
+			cuites_sans_flux |= sans
+			cuites_par_flux |= avec
+	intrants_bloques = blocages.get(MOTIF_INTRANTS, [])
+	par_flux = [r for r in intrants_bloques
+				if r.get("_id") in cuites_par_flux and r.get("_id") not in cuites_sans_flux]
+	# Cuite en autonomie par un AUTRE atelier que le représentatif du §2 : ni flux ni joueur.
+	autre_atelier = [r for r in intrants_bloques if r.get("_id") in cuites_sans_flux]
+	vus = {r.get("_id") for r in par_flux + autre_atelier}
+	dependantes_joueur = [r for r in intrants_bloques
+						  if r.get("_id") not in vus and r.get("_id") in cuites_global]
+
 	# ── 3. Marge médiane d'un objet fabriqué ─────────────────────────────────────
 	cout_par_produit: dict[str, float] = {}
 	for r in recettes:
@@ -509,6 +620,29 @@ def auditer(docs: list, meta: dict, ville: str | None = None) -> None:
 				  + ", ".join(f"{cle} ({n})" for cle, n in top))
 	print(f"   dont bloquées MÊME en supposant le joueur ravitailleur : "
 		  f"{_pct(len(bloquees_structurelles), len(recettes))} ({len(bloquees_structurelles)})")
+	if not flux_actif:
+		print("   flux de cité : INACTIF (VENTE_PNJ_PROBA, _FRACTION ou _REDISTRIB à 0)")
+	else:
+		if ville and marche.flux_cite(lieux_par_id.get(ville)) is None:
+			print(f"   ⚠ {ville} n'est pas de catégorie « ville » : AUCUN flux n'y circule en jeu")
+		print(f"   dont débloquées par le flux de cité (sans le joueur) : "
+			  f"{_pct(len(par_flux), len(recettes))} ({len(par_flux)})")
+		_lister_objets(par_flux)
+		if autre_atelier:
+			print(f"   dont cuites en autonomie par un autre atelier que le représentatif : "
+				  f"{_pct(len(autre_atelier), len(recettes))} ({len(autre_atelier)})")
+			_lister_objets(autre_atelier)
+		print(f"   dont TOTALEMENT dépendantes de l'aventurier : "
+			  f"{_pct(len(dependantes_joueur), len(recettes))} ({len(dependantes_joueur)})")
+		_lister_objets(dependantes_joueur)
+		manque_joueur: dict[str, int] = {}
+		for r in dependantes_joueur:
+			for cle, _q in marche.recette_matieres(r):
+				if cle not in point_fixe_atelier.get(atelier_par_recette.get(r.get("_id")), ((), ()))[1]:
+					manque_joueur[cle] = manque_joueur.get(cle, 0) + 1
+		if manque_joueur:
+			top = sorted(manque_joueur.items(), key=lambda kv: (-kv[1], kv[0]))[:6]
+			print("       seul l'aventurier apporte : " + ", ".join(f"{c} ({n})" for c, n in top))
 	print()
 
 	print("─" * larg)
@@ -559,7 +693,7 @@ def auditer(docs: list, meta: dict, ville: str | None = None) -> None:
 		print()
 
 	print("─" * larg)
-	print("Hypothèses de référence : cf. docstring en tête de ce fichier (A à F).")
+	print("Hypothèses de référence : cf. docstring en tête de ce fichier (A à G).")
 	print("─" * larg)
 
 

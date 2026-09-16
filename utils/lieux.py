@@ -337,15 +337,21 @@ async def get_creation_options(
 		raise HTTPException(status_code=403, detail="Admin only")
 
 	lieux = find_docs({"type": "lieu"},
-		fields=["_id", "categorie", "image", "lieu_parent", "label", "pnj"]) or []
+		fields=["_id", "categorie", "sous_categorie", "image", "lieu_parent", "label", "pnj"]) or []
 	recettes = find_docs({"type": "recette"}, fields=["lieu_categorie"]) or []
 	pnjs = find_docs({"type": "pnj"}, fields=["_id", "nom"]) or []
 
 	categories = {str(d["categorie"]).strip() for d in lieux if d.get("categorie")}
 	categories |= {str(r["lieu_categorie"]).strip() for r in recettes if r.get("lieu_categorie")}
+	# Sous-catégories : celles portées en base, plus celles qui ACCORDENT une capacité — une
+	# sous-catégorie de guilde doit rester proposée même si plus aucun lieu ne la porte.
+	sous_categories = {str(d["sous_categorie"]).strip() for d in lieux if d.get("sous_categorie")}
+	sous_categories |= {str(s).strip() for cap in capacites.CAPACITES
+						for s in cap.get("sous_categories", []) if s}
 
 	return {
 		"categories": sorted(categories),
+		"sous_categories": sorted(sous_categories),
 		# Ce que chaque case à cocher « capacité » du formulaire doit savoir : le tag
 		# qu'elle pose, et les catégories qui l'accordent d'office (case grisée).
 		"capacites": capacites.CAPACITES,

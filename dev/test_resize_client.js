@@ -53,7 +53,9 @@ for (const f of ['_resizeIndex', '_grilleTaille', '_resizeMatrice', '_resizeNav'
                  // Ces deux-la ne sont PAS pures : elles lisent les globales de l'editeur.
                  // On les amene quand meme, en semant ces globales sur globalThis - c'est le
                  // seul moyen d'eprouver l'IDEMPOTENCE du recalage des portes, le piege du module.
-                 '_caseAccessible', '_reappliquerPortes']) {
+                 '_caseAccessible', '_reappliquerPortes',
+                 // Métadonnées battle map envoyées avec la grille (sendGrid, 💾 des dimensions).
+                 '_bmTagsListe', '_bmBaseDe', '_bmMetadonnees', '_bmCategorieRemplacee']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -347,6 +349,94 @@ t('sans redimensionnement en cours, aucune porte n’est touchée', () => {
 	globalThis.redimEnAttente = null;
 	assert.strictEqual(_reappliquerPortes(), 0);
 	assert.deepStrictEqual(lieuxConnections[0].nodes[0].pos, [10, 8]);
+});
+
+console.log('\n── Métadonnées battle map : seules les modifications partent (_bmMetadonnees) ──');
+
+// ⚠️ Régression du 16/09/2026 : chaque coup de pinceau envoyait `categorie: ""` (case décochée)
+// et `update_cells` l'écrivait. Lutèce perdait `categorie: "ville"`, donc son flux de cité et
+// son regroupement 🤝 ; ses `tags` étaient remplacés par la saisie du champ au passage.
+const LUTECE = { _id: 'lieu:lutecia', categorie: 'ville', tags: ['capitale', 'urbain'] };
+const ARENE = { _id: 'lieu:arene', categorie: 'battle_map', tags: ['foret'] };
+
+t('RÉGRESSION : peindre une VILLE sans toucher à la case n’envoie ni categorie ni tags', () => {
+	const base = _bmBaseDe(LUTECE);
+	// Ce que l'éditeur affiche au chargement : case décochée, tags joints par « , ».
+	const envoi = _bmMetadonnees(base, false, LUTECE.tags.join(', '));
+	assert.deepStrictEqual(envoi, {});
+	assert.ok(!('categorie' in envoi), 'categorie envoyée : update_cells effacerait « ville »');
+});
+
+t('peindre une battle map sans toucher à la case n’envoie rien non plus', () => {
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(ARENE), true, 'foret'), {});
+});
+
+t('cocher la case sur un lieu qui n’était pas une battle map envoie categorie battle_map', () => {
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(LUTECE), true, 'capitale, urbain'),
+		{ categorie: 'battle_map' });
+});
+
+t('décocher la case sur une battle map envoie categorie vide', () => {
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(ARENE), false, 'foret'), { categorie: '' });
+});
+
+t('sur une battle map, modifier les tags envoie les tags, et SEULEMENT eux', () => {
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(ARENE), true, 'foret, riviere'),
+		{ tags: ['foret', 'riviere'] });
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(ARENE), true, ''), { tags: [] },
+		'vider le champ est une modification voulue');
+});
+
+t('HORS battle map, les tags ne partent JAMAIS — ils portent les capacités du lieu', () => {
+	// Un scriptorium tient sa capacité de son tag : un champ vidé ou retouché la lui retirerait
+	// sans passer par le formulaire de lieu, seul à recalculer les tags de capacité.
+	const scriptorium = { _id: 'lieu:s', categorie: 'librairie', tags: ['scriptorium'] };
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(scriptorium), false, ''), {});
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(scriptorium), false, 'autre'), {});
+	// Décocher une battle map envoie la catégorie vide, mais pas une retouche de tags.
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(ARENE), false, 'retouche'), { categorie: '' });
+});
+
+t('cocher la case sur un lieu PEUT envoyer ses tags modifiés (il devient battle map)', () => {
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(LUTECE), true, 'capitale'),
+		{ categorie: 'battle_map', tags: ['capitale'] });
+});
+
+t('espaces et virgules en trop ne comptent pas pour une modification', () => {
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(ARENE), true, ' foret ,, '), {});
+});
+
+t('_bmBaseDe garde catégorie et sous-catégorie pour le libellé en lecture seule', () => {
+	const b = _bmBaseDe({ categorie: 'guilde_aventurier_comptoir', sous_categorie: 'guilde_aventurier' });
+	assert.strictEqual(b.categorie, 'guilde_aventurier_comptoir');
+	assert.strictEqual(b.sous_categorie, 'guilde_aventurier');
+	assert.deepStrictEqual(_bmBaseDe(null), { battle: false, categorie: '', sous_categorie: '', tags: [] });
+});
+
+console.log('\n── Cocher « battle map » sur un lieu qui a déjà une catégorie : confirmation ──');
+
+t('cocher sur une VILLE demande de confirmer le remplacement de « ville »', () => {
+	assert.strictEqual(_bmCategorieRemplacee(_bmBaseDe(LUTECE), true), 'ville');
+});
+
+t('rien à confirmer : case décochée, lieu déjà battle map, ou lieu sans catégorie', () => {
+	assert.strictEqual(_bmCategorieRemplacee(_bmBaseDe(LUTECE), false), '');
+	assert.strictEqual(_bmCategorieRemplacee(_bmBaseDe(ARENE), true), '');
+	assert.strictEqual(_bmCategorieRemplacee(_bmBaseDe({ _id: 'lieu:x', categorie: '' }), true), '');
+	assert.strictEqual(_bmCategorieRemplacee(null, true), '');
+});
+
+t('un lieu sans categorie ni tags en base, case décochée et champ vide : rien ne part', () => {
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe({ _id: 'lieu:x' }), false, ''), {});
+	assert.deepStrictEqual(_bmMetadonnees(_bmBaseDe(null), false, ''), {});
+});
+
+t('les deux points d’envoi passent par _bmMetadonnees, plus aucune categorie en dur', () => {
+	// Garde de source : un troisième appelant qui recopierait l'ancienne ligne rouvrirait le trou.
+	assert.ok(!/categorie:\s*document\.getElementById\('bm-categorie'\)/.test(js),
+		'une requête construit encore categorie depuis la case, sans comparer à la base');
+	assert.strictEqual((js.match(/_bmMetadonnees\(bmBase,/g) || []).length, 2,
+		'sendGrid et enregistrerRedimensionnement doivent tous deux passer par _bmMetadonnees');
 });
 
 console.log(`\n${passes} test(s) OK, ${echecs} échec(s).`);

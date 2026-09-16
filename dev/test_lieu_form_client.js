@@ -236,6 +236,43 @@ t('stocks, accès, relation, texte et sous-catégorie survivent', () => {
 	}
 });
 
+console.log('\n── Fusion : la sous-catégorie ──');
+
+t('le formulaire écrit la sous-catégorie choisie', () => {
+	const doc = _fusionLieu(boutique(), champs({ categorie: 'armurerie', sous_categorie: 'forge',
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_armurerie' })] }), CATALOGUE);
+	assert.strictEqual(doc.sous_categorie, 'forge');
+});
+
+t('une sous-catégorie VIDÉE retire la clé, jamais une chaîne vide', () => {
+	// La maison de guilde teste l'ABSENCE de sous_categorie sur le bureau du maître.
+	const doc = _fusionLieu(boutique(), champs({ categorie: 'armurerie', sous_categorie: '',
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_armurerie' })] }), CATALOGUE);
+	assert.ok(!('sous_categorie' in doc));
+});
+
+t('création sans sous-catégorie : aucune clé écrite', () => {
+	assert.ok(!('sous_categorie' in _fusionLieu({}, champs({ sous_categorie: '' }), CATALOGUE)));
+});
+
+t('champs SANS sous_categorie (porte, lot, guilde) : celle du doc reste intacte', () => {
+	const doc = _fusionLieu(boutique(), champs({ categorie: 'armurerie',
+		pnj: [ligne({ src: 0, character: 'pnj:marchand_armurerie' })] }), CATALOGUE);
+	assert.strictEqual(doc.sous_categorie, 'quelque_chose');
+});
+
+t('les tags de capacité se recalculent sur la sous-catégorie ÉCRITE', () => {
+	// La sous-catégorie `guilde_aventurier` accorde « Maison de guilde » : le tag devient redondant.
+	const avant = { _id: 'lieu:g', type: 'lieu', categorie: 'grotte', tags: ['guilde', 'foret'] };
+	const pose = _fusionLieu(avant, champs({ categorie: 'grotte', sous_categorie: 'guilde_aventurier',
+		capacites: { guilde: true } }), CATALOGUE);
+	assert.deepStrictEqual(pose.tags, ['foret'], 'accordée par la sous-catégorie : pas de tag redondant');
+	// Retirée : la capacité voulue repasse par son tag, sans quoi le lieu la perdrait.
+	const retire = _fusionLieu(pose, champs({ categorie: 'grotte', sous_categorie: '',
+		capacites: { guilde: true } }), CATALOGUE);
+	assert.deepStrictEqual(retire.tags, ['foret', 'guilde']);
+});
+
 t('un champ INCONNU du formulaire survit', () => {
 	// La base a des champs que ce formulaire n'a jamais vus (`recrutement_restrictions`,
 	// `nuit_messages` d'un autre auteur, un champ à venir).

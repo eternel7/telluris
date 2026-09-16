@@ -958,9 +958,14 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 		     cette carte n'en avait pas. -->
 		<div class="card" id="bm-card">
 			<div class="card-title">⚔️ Battle map</div>
+			<!-- Catégorie et sous-catégorie en LECTURE SEULE : elles s'éditent dans le formulaire
+			     de lieu, qui recalcule les tags de capacité (cf. `_bmMetadonnees`). -->
+			<div class="nav-info" id="bm-lieu-cats" style="margin-bottom:6px;">—</div>
+			<button class="btn btn-inline" id="bm-edit-lieu" type="button" style="margin-bottom:8px;"
+				title="Catégorie, sous-catégorie, capacités, PNJ : le formulaire de lieu">✎ Modifier le lieu</button>
 			<input type="text" id="bm-tags" placeholder="tags séparés par des virgules"
 				style="width:100%;box-sizing:border-box;font-size:0.8rem;padding:6px;">
-			<div class="nav-info" style="margin-top:4px;">Tags utilisés pour la sélection pondérée de la carte de combat.</div>
+			<div class="nav-info" id="bm-tags-info" style="margin-top:4px;">Tags utilisés pour la sélection pondérée de la carte de combat.</div>
 			<label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;margin-top:8px;">
 				<input type="checkbox" id="bm-categorie"> Lieu de combat (battle map)
 			</label>
@@ -1072,6 +1077,9 @@ let paintMode = null;		// 'set'
 let imgLoaded = false;
 let hoverCell = null;		// {cx, cy} currently hovered
 let currentRev = null;
+// Métadonnées battle map telles qu'en BASE (chargement, puis chaque réponse d'`update_cells`) :
+// seul un écart à cet état part dans la requête (cf. `_bmMetadonnees`).
+let bmBase = { battle: false, tags: [] };
 let currentLocId = null;
 let debounceTimer = null;
 let nav = {};		 // { "x,y": bitmask }
@@ -1343,6 +1351,8 @@ const LIEUX_HOTE = {
 		// La liste est filtrée par la case sélectionnée : une porte déplacée en disparaîtrait
 		// à la seconde même où on la déplace — d'où `opts.case`, posé AVANT le refetch.
 		if (opts && opts.case) lieuxSelectedCell = opts.case;
+		// ✎ Modifier le lieu : la carte ⚔️ reflète la catégorie et les tags qu'on vient d'écrire.
+		if (opts && opts.lieu && opts.lieu._id === currentLocId) _bmAppliquer(opts.lieu);
 		await fetchLieuxConnections();
 		renderLieuxConnList();
 		if (grid.length) renderGrid();
@@ -1502,9 +1512,7 @@ lieuSelect.addEventListener('change', async (e) => {
 				? lieuData.cells.map(row => [...row])
 				: Array.from({ length: rows }, () => Array(cols).fill(1));
 			nav = lieuData.nav ? { ...lieuData.nav } : {};
-			document.getElementById('bm-categorie').checked = (lieuData.categorie === 'battle_map');
-			updateBattleMapTabs(lieuData.categorie === 'battle_map');
-			document.getElementById('bm-tags').value = (lieuData.tags || []).join(', ');
+			_bmAppliquer(lieuData);
 			zonesPlacements = lieuData.zone_influences ? JSON.parse(JSON.stringify(lieuData.zone_influences)) : [];
 			selectedZoneIdx = -1;
 			renderZoneList();
@@ -1590,16 +1598,75 @@ lieuSelect.addEventListener('change', async (e) => {
 	}
 });
 
+// ── Métadonnées battle map : n'envoyer que ce que l'utilisateur a CHANGÉ ─────────
+// ⚠️ `update_cells` écrit `categorie` et `tags` dès que la clé est présente. Les envoyer à
+// chaque coup de pinceau remettait `categorie: ""` sur tout lieu qui n'était pas une battle
+// map — Lutèce perdait `ville`, donc son flux de cité — et remplaçait ses `tags` par la saisie.
+function _bmTagsListe(saisie) {
+	return String(saisie || '').split(',').map(t => t.trim()).filter(Boolean);
+}
+
+function _bmBaseDe(lieuDoc) {
+	const doc = lieuDoc || {};
+	return {
+		battle: doc.categorie === 'battle_map',
+		categorie: String(doc.categorie || ''),
+		sous_categorie: String(doc.sous_categorie || ''),
+		tags: _bmTagsListe((doc.tags || []).join(',')),
+	};
+}
+
+// `categorie` part seulement si la case a changé l'état du lieu (cochée sur un lieu qui ne
+// l'était pas → 'battle_map' ; décochée sur une battle map → '') ; `tags`, seulement si la
+// liste saisie diffère de celle en base. Rien de changé ⇒ {} ⇒ le serveur ne touche à rien.
+// ⚠️ `tags` ne part QUE sur une battle map (case cochée) : ailleurs le tableau porte aussi les
+// tags de CAPACITÉ (scriptorium, recrutement…), que seul le formulaire de lieu recalcule.
+function _bmMetadonnees(base, coche, saisieTags) {
+	const out = {};
+	if (!!coche !== !!(base && base.battle)) out.categorie = coche ? 'battle_map' : '';
+	if (!coche) return out;
+	const tags = _bmTagsListe(saisieTags);
+	const avant = (base && base.tags) || [];
+	if (tags.length !== avant.length || tags.some((t, i) => t !== avant[i])) out.tags = tags;
+	return out;
+}
+
+// La catégorie qu'une coche de la case REMPLACERAIT, à faire confirmer — '' si rien à perdre
+// (case décochée, lieu déjà battle map, ou lieu sans catégorie).
+function _bmCategorieRemplacee(base, coche) {
+	if (!coche || !base || base.battle) return '';
+	return base.categorie || '';
+}
+
+// Un doc lieu RELU (chargement, formulaire de lieu) : base, case, tags, libellés.
+// ⚠️ Jamais après un envoi de la grille : réécrire `#bm-tags` volerait une saisie en cours.
+function _bmAppliquer(lieuDoc) {
+	bmBase = _bmBaseDe(lieuDoc);
+	document.getElementById('bm-categorie').checked = bmBase.battle;
+	updateBattleMapTabs(bmBase.battle);
+	document.getElementById('bm-tags').value = ((lieuDoc && lieuDoc.tags) || []).join(', ');
+	_bmMajChamps();
+}
+
+// Libellé catégorie/sous-catégorie (en base) et verrou du champ tags (suit la case).
+function _bmMajChamps() {
+	const coche = document.getElementById('bm-categorie').checked;
+	document.getElementById('bm-tags').disabled = !coche;
+	document.getElementById('bm-tags-info').textContent = coche
+		? 'Tags utilisés pour la sélection pondérée de la carte de combat.'
+		: 'Hors battle map, les tags portent les capacités du lieu : ✎ Modifier le lieu.';
+	document.getElementById('bm-lieu-cats').textContent =
+		`Catégorie : ${bmBase.categorie || '—'} · Sous-catégorie : ${bmBase.sous_categorie || '—'}`;
+}
+
 async function sendGrid() {
-	const payload = {
+	const payload = Object.assign({
 		_id: currentLocId,
 		_rev: currentRev,
 		cells: grid,
 		nav: nav,
-		categorie: document.getElementById('bm-categorie').checked ? 'battle_map' : '',
-		tags: document.getElementById('bm-tags').value
-			.split(',').map(t => t.trim()).filter(Boolean)
-	};
+	}, _bmMetadonnees(bmBase, document.getElementById('bm-categorie').checked,
+		document.getElementById('bm-tags').value));
 
 	try {
 		const res = await fetch('/api/update_cells', {
@@ -1611,6 +1678,8 @@ async function sendGrid() {
 		if (res.ok) {
 			const lieuData = await res.json();
 			currentRev = lieuData._rev; // CouchDB renvoie le nouveau _rev
+			bmBase = _bmBaseDe(lieuData);
+			_bmMajChamps();
 			setStatus(`Lieu <span>${lieuData.label}</span> (${cols}×${rows}) chargé - ${currentRev}.`);
 		} else if (res.status === 409) {
 			// Conflit : recharge le doc puis réessaie
@@ -1634,7 +1703,8 @@ function scheduleGridSend() {
 		return;
 	}
 	clearTimeout(debounceTimer);
-	debounceTimer = setTimeout(() => sendGrid(), 800);
+	// Remis à null au départ : `debounceTimer` non nul = un envoi EN ATTENTE (cf. ✎ Modifier le lieu).
+	debounceTimer = setTimeout(() => { debounceTimer = null; sendGrid(); }, 800);
 }
 
 // Battle map : masque les modes Zones/Rencontres (un lieu de combat n'en a pas).
@@ -1652,8 +1722,34 @@ function updateBattleMapTabs(isBattle) {
 
 // Métadonnées battle map : sauvegarder dès que la case ou les tags changent.
 document.getElementById('bm-categorie').addEventListener('change', (e) => {
+	const remplacee = _bmCategorieRemplacee(bmBase, e.target.checked);
+	if (remplacee && !confirm(`Ce lieu est de catégorie « ${remplacee} ».\n\n`
+			+ `En faire une battle map remplace cette catégorie, et les capacités qu'elle accorde. Continuer ?`)) {
+		e.target.checked = false;
+		return;
+	}
+	// Décochée : une saisie de tags non enregistrée ne partira plus, le champ reprend la base.
+	if (!e.target.checked) document.getElementById('bm-tags').value = bmBase.tags.join(', ');
 	updateBattleMapTabs(e.target.checked);
+	_bmMajChamps();
 	if (currentLocId) scheduleGridSend();
+});
+// ✎ Le formulaire de lieu sur le lieu COURANT. Il écrit par PUT COMPLET le doc relu à
+// l'ouverture, `cells` comprises : un envoi de grille encore en attente partirait après cette
+// lecture et serait écrasé à l'enregistrement — on le vide d'abord.
+document.getElementById('bm-edit-lieu').addEventListener('click', async () => {
+	if (!currentLocId) return;
+	if (redimEnAttente) {
+		setStatus(`<span style="color:var(--danger)">Redimensionnement en attente : `
+			+ `enregistrez-le (💾) ou annulez-le avant de modifier le lieu.</span>`);
+		return;
+	}
+	if (debounceTimer) {
+		clearTimeout(debounceTimer);
+		debounceTimer = null;
+		await sendGrid();
+	}
+	openLieuForm('edition', currentLocId);
 });
 document.getElementById('bm-tags').addEventListener('input', () => {
 	if (currentLocId) scheduleGridSend();
@@ -3764,15 +3860,14 @@ async function enregistrerRedimensionnement() {
 		const res = await fetch('/api/update_cells', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
+			body: JSON.stringify(Object.assign({
 				_id: currentLocId,
 				_rev: currentRev,
 				cells: grid,
 				nav: nav,
 				dimensions: { x: cols, y: rows },
-				categorie: document.getElementById('bm-categorie').checked ? 'battle_map' : '',
-				tags: document.getElementById('bm-tags').value.split(',').map(t => t.trim()).filter(Boolean),
-			}),
+			}, _bmMetadonnees(bmBase, document.getElementById('bm-categorie').checked,
+				document.getElementById('bm-tags').value))),
 		});
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));
@@ -3781,6 +3876,8 @@ async function enregistrerRedimensionnement() {
 		}
 		const lieuData = await res.json();
 		currentRev = lieuData._rev;
+		bmBase = _bmBaseDe(lieuData);
+		_bmMajChamps();
 
 		const rapport = [`${cols}×${rows}`];
 		if (zonesPlacements.length) {

@@ -36,7 +36,8 @@ const LIEUX_PNJ_RANG = Object.fromEntries(LIEUX_PNJ_ETATS.map((e, i) => [e.cle, 
 //   connexions()      → les connexions de ce lieu, enrichies `details` (re-fetchées après écriture)
 //   grille()          → {cells, cols, rows} sur laquelle éprouver la case d'ici
 //   blocage()         → message qui interdit d'écrire une connexion, '' sinon
-//   apresEcriture(o)  → async : relire les connexions et repeindre ; `o.case` = case à sélectionner
+//   apresEcriture(o)  → async : relire les connexions et repeindre ; `o.case` = case à sélectionner ;
+//                       `o.lieu` = doc lieu que le formulaire vient d'écrire (édition)
 //   rendreListe()     → repeindre la liste (le bouton 🧾 d'une ligne suit l'overlay)
 //   statut(html)      → barre de statut de la page
 //   fermerAutres()    → fermer les panneaux PROPRES à la page qui partagent la place à droite
@@ -887,6 +888,13 @@ function _nlCategorie() {
 	return sel ? sel.value : '';
 }
 
+// Même geste que la catégorie (liste + « autre… »), mais FACULTATIVE : '' = pas de sous-catégorie.
+function _nlSousCategorie() {
+	const sel = _nlEl('nl-sous-categorie');
+	if (sel && sel.value === '__libre__') return (_nlEl('nl-sous-categorie-libre').value || '').trim();
+	return sel ? sel.value : '';
+}
+
 // ══ CAPACITÉS DE LIEU ══════════════════════════════════════════════════════
 // « Le type d'un lieu » n'est pas un champ : c'est un jeu de capacités que cinq
 // prédicats du serveur résolvent à la lecture, toutes de la forme
@@ -938,7 +946,7 @@ function _tagsApres(tags, voulues, catalogue, categorie, sousCategorie) {
 // une édition naïve effacerait tout ce que le formulaire ne connaît pas — stocks,
 // `acces`, `relation_lieu`, et surtout la `progeniture` d'un PNJ, qui porte une
 // chaîne d'escorte (10 en base). On part donc du doc EXISTANT et on n'y écrit que
-// les six champs que le formulaire possède.
+// les champs que le formulaire possède.
 //
 // ⚠️ `pnj` est une LISTE, et chaque entrée tire SA présence (utils/pnj.py). Le formulaire
 // en édite TOUTES les entrées, une ligne chacune : `_fusionPnjEntrees` fait survivre dans
@@ -951,7 +959,15 @@ function _fusionLieu(existant, champs, catalogue) {
 	doc.label = champs.label;
 	doc.image = champs.image;
 	doc.categorie = champs.categorie;
+	// `sous_categorie` ABSENTE des champs (porte, lot, guilde) ⇒ celle du doc survit, intacte.
+	// Présente : vide RETIRE la clé plutôt que d'écrire "" (la guilde teste son absence).
+	if (champs.sous_categorie !== undefined) {
+		if (champs.sous_categorie) doc.sous_categorie = champs.sous_categorie;
+		else delete doc.sous_categorie;
+	}
 
+	// ⚠️ La sous-catégorie accorde aussi des capacités (maison de guilde) : les tags se
+	// recalculent sur la valeur ÉCRITE, pas sur celle d'avant l'édition.
 	const tags = _tagsApres(doc.tags, champs.capacites, catalogue,
 		champs.categorie, doc.sous_categorie);
 	if (tags.length) doc.tags = tags; else delete doc.tags;
@@ -1245,9 +1261,22 @@ async function openLieuForm(mode, destId) {
 		+ cats.sort().map(c => `<option value="${_escHtml(c)}">${_escHtml(c)}</option>`).join('')
 		+ `<option value="__libre__">« autre… »</option>`;
 
+	// Sous-catégorie : même reconstruction, même garde (la valeur du doc est toujours offerte),
+	// plus un choix VIDE sélectionné par défaut — la plupart des lieux n'en ont pas.
+	const sousCats = (creationOptions.sous_categories || []).slice();
+	const sousCatDoc = nlDocExistant ? (nlDocExistant.sous_categorie || '') : '';
+	if (sousCatDoc && sousCats.indexOf(sousCatDoc) === -1) sousCats.push(sousCatDoc);
+	const sousCatSel = _nlEl('nl-sous-categorie');
+	sousCatSel.innerHTML = `<option value="">— aucune —</option>`
+		+ sousCats.sort().map(c => `<option value="${_escHtml(c)}">${_escHtml(c)}</option>`).join('')
+		+ `<option value="__libre__">« autre… »</option>`;
+	sousCatSel.value = sousCatDoc;
+
 	// Champs remis à neuf (l'overlay est réutilisé), puis peuplés depuis le doc en édition.
 	_nlEl('nl-categorie-libre').value = '';
 	_nlEl('nl-categorie-libre').style.display = 'none';
+	_nlEl('nl-sous-categorie-libre').value = '';
+	_nlEl('nl-sous-categorie-libre').style.display = 'none';
 	_nlEl('nl-image-all').checked = false;
 	_nlEl('nl-montures-warn').textContent = '';
 
@@ -1933,7 +1962,7 @@ async function _nlControlerConditions(doc) {
 function _nlRenderCapacites() {
 	const catalogue = (creationOptions && creationOptions.capacites) || [];
 	const cat = _nlCategorie();
-	const sousCat = nlDocExistant ? (nlDocExistant.sous_categorie || '') : '';
+	const sousCat = _nlSousCategorie();
 	_nlEl('nl-capacites').innerHTML = catalogue.map(cap => {
 		const parCat = _capaciteAccordee(cap, cat, sousCat);
 		const coche = parCat || !!nlCapacites[cap.id];
@@ -1956,7 +1985,7 @@ function _nlRenderCapacites() {
 function _nlCapacitesActives() {
 	const catalogue = (creationOptions && creationOptions.capacites) || [];
 	const cat = _nlCategorie();
-	const sousCat = nlDocExistant ? (nlDocExistant.sous_categorie || '') : '';
+	const sousCat = _nlSousCategorie();
 	const out = {};
 	catalogue.forEach(cap => {
 		out[cap.id] = _capaciteAccordee(cap, cat, sousCat) || !!nlCapacites[cap.id];
@@ -2035,6 +2064,7 @@ function _nlChamps() {
 		label: (_nlEl('nl-label').value || '').trim(),
 		image: _nlEl('nl-image').value,
 		categorie: _nlCategorie(),
+		sous_categorie: _nlSousCategorie(),
 		capacites: nlCapacites,
 		nuit_messages: actives.taverne ? _nlNuitMessages() : [],
 		montures: actives.montures ? nlMontures : [],
@@ -2171,7 +2201,7 @@ async function enregistrerLieuEdite() {
 	// Le cache de l'éditeur JSON porte l'ancien doc : le laisser servirait un `_rev` périmé.
 	delete lieuxDocCache[doc._id];
 	creationOptions = null;
-	await LIEUX_HOTE.apresEcriture();
+	await LIEUX_HOTE.apresEcriture({ lieu: doc });
 	LIEUX_HOTE.statut(`Lieu <span>${doc._id}</span> mis à jour.` + _nlMentionControle(controle));
 }
 
@@ -2239,6 +2269,14 @@ function _nlCabler() {
 	_nlEl('nl-categorie-libre').addEventListener('input', () => {
 		_nlRepeuplerImages(); _nlTenancierDefaut();
 		_nlRenderCapacites(); _nlRenderPnj(); _nlRefreshApercu();
+	});
+	// La sous-catégorie peut accorder une capacité (maison de guilde) : les cases suivent.
+	_nlEl('nl-sous-categorie').addEventListener('change', () => {
+		_nlEl('nl-sous-categorie-libre').style.display = _nlEl('nl-sous-categorie').value === '__libre__' ? '' : 'none';
+		_nlRenderCapacites(); _nlRefreshApercu();
+	});
+	_nlEl('nl-sous-categorie-libre').addEventListener('input', () => {
+		_nlRenderCapacites(); _nlRefreshApercu();
 	});
 	_nlEl('nl-nuit-messages').addEventListener('input', _nlRefreshApercu);
 	_nlEl('nl-image-all').addEventListener('change', () => { _nlRepeuplerImages(); _nlRefreshApercu(); });
