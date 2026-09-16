@@ -1,0 +1,142 @@
+[
+  {
+    "_id": "sort:meteore",
+    "type": "sort",
+    "nom": "Météore",
+    "icon": "☄️",
+    "description": "Le mage lève les bras et ne les baisse plus. Six respirations durant, le ciel s'assombrit au-dessus de sa cible — puis il tombe. Rien ne protège d'un météore ; seul le temps qu'il faut pour l'appeler protège encore le monde des mages.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 2,
+    "cout_pm": 15,
+    "incantation": 6,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 8,
+    "effets": { "degats": "4D6" },
+    "zone": { "forme": "cercle", "origine": "cible", "rayon": 2 },
+    "composants": [
+      { "item": "item:Cristal_canalisation", "consomme": false, "bonus": { "degats": "1D6" } }
+    ]
+  },
+  {
+    "_id": "sort:mur_de_feu",
+    "type": "sort",
+    "nom": "Mur de feu",
+    "icon": "🔥",
+    "description": "Une cloison de flammes se dresse et tient debout tant que le mage la nourrit. Elle ne demande que deux gestes pour naître, et toute son attention pour durer.",
+    "vocation": "elementaliste",
+    "magie": "Élémentaire",
+    "niveau": 1,
+    "cout_pm": 5,
+    "incantation": 2,
+    "maintien": 3,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 5,
+    "effets": { "degats": "2D6", "buffs": { "Ag": -10 }, "duree": 2 },
+    "zone": { "forme": "rectangle", "origine": "cible", "orientation": "cible", "longueur": 1, "largeur": 3, "decalage": 0 },
+    "composants": []
+  },
+  {
+    "_id": "sort:bouclier_magique",
+    "type": "sort",
+    "nom": "Bouclier magique",
+    "icon": "🛡️",
+    "description": "Une coque translucide, tenue à bout de volonté. Elle ne s'use pas : elle s'éteint le jour où le mage n'a plus de quoi la payer.",
+    "vocation": "mage",
+    "magie": "Bataille",
+    "niveau": 0,
+    "cout_pm": 6,
+    "maintien": 2,
+    "cible": "soi",
+    "portee": 0,
+    "effets": { "buffs": { "R": 15 }, "esquive": 5 },
+    "composants": [
+      { "item": "item:Cristal_canalisation", "consomme": false, "bonus": { "buffs": { "R": 5 } } }
+    ]
+  },
+  {
+    "_id": "sort:eclair_siphonnant",
+    "type": "sort",
+    "nom": "Éclair siphonnant",
+    "icon": "⚡",
+    "description": "Un trait bleu qui mord la chair et boit la magie. Contre un homme, c'est une blessure ; contre un sorcier, c'est un désarmement.",
+    "vocation": "mage",
+    "magie": "Bataille",
+    "niveau": 1,
+    "cout_pm": 9,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 6,
+    "effets": { "degats": "2D6", "degats_pm": "1D6" },
+    "composants": [
+      { "item": "item:Cristal_canalisation", "consomme": false, "bonus": { "degats_pm": "1D6" } }
+    ]
+  },
+  {
+    "_id": "sort:baiser_du_vampire",
+    "type": "sort",
+    "nom": "Baiser du vampire",
+    "icon": "🧛",
+    "description": "La plaie s'ouvre chez l'autre et se referme chez soi. Le sort ne rend que ce qu'il a réellement pris : achever un mourant ne nourrit personne.",
+    "vocation": "necromancien",
+    "magie": "Nécromancie",
+    "niveau": 1,
+    "cout_pm": 11,
+    "cible": "ennemi",
+    "jet": "magique",
+    "portee": 4,
+    "effets": { "degats": "3D6", "drain_pv": 50 },
+    "composants": []
+  },
+  {
+    "_id": "sort:pacte_de_sang",
+    "type": "sort",
+    "nom": "Pacte de sang",
+    "icon": "🩸",
+    "description": "Quand la réserve est vide, il reste les veines. Le démoniste paie de sa personne ce que sa magie ne peut plus financer — et frappe plus fort pour l'avoir fait.",
+    "vocation": "demoniste",
+    "magie": "Démonologie",
+    "niveau": 1,
+    "cout_pm": 2,
+    "cible": "soi",
+    "portee": 0,
+    "effets": { "cout_pv": 10, "buffs": { "F": 20, "Vol": 10 }, "duree": 4 },
+    "composants": []
+  },
+  {
+    "_id": "sort:saut",
+    "type": "sort",
+    "nom": "Saut",
+    "icon": "💨",
+    "description": "Quatre cases d'un pas qui n'en est pas un. Le mur, la mêlée, le ravin : rien de tout cela n'est traversé, tout cela est simplement omis.",
+    "vocation": "mage",
+    "magie": "Bataille",
+    "niveau": 1,
+    "cout_pm": 7,
+    "cible": "soi",
+    "portee": 0,
+    "effets": { "saut": 4 },
+    "composants": []
+  },
+  {
+    "_id": "sort:lien_du_paladin",
+    "type": "sort",
+    "nom": "Lien du paladin",
+    "icon": "🔗",
+    "description": "Un fil d'or entre deux poitrines. Ce que l'un reçoit, l'autre en prend la moitié — le lien ne guérit rien, il partage. Tant que le paladin tient, son protégé tombe deux fois plus lentement.",
+    "vocation": "paladin",
+    "magie": "Sainte",
+    "niveau": 1,
+    "cout_pm": 8,
+    "incantation": 2,
+    "maintien": 3,
+    "cible": "allie",
+    "portee": 4,
+    "effets": { "lien_vie": { "part": 50, "reduction": 10 } },
+    "composants": [
+      { "item": "item:Eau_benite", "consomme": true, "bonus": { "lien_vie": { "part": 50, "reduction": 30 } } }
+    ]
+  }
+]

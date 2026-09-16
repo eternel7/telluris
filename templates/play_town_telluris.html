@@ -4989,8 +4989,31 @@ function _sortEffetsLabel(e, prefixeDegats) {
 	if (e.regen_pm) parts.push(`+${e.regen_pm} PM/tour`);
 	if (e.esquive) parts.push(`esquive +${e.esquive}`);
 	if (e.furtivite) parts.push(`🥷 furtivité`);
+	// Les six clés d'effet du « temps magique ». ⚠️ Sans elles, un sort de drain ou de saut
+	// s'afficherait sans le moindre effet annoncé — même défaut que les invocations avant
+	// `_invocationLabel`, et le TACTILE n'a pas de survol pour compenser.
+	if (e.degats_pm) parts.push(`${e.degats_pm} dég. aux PM`);
+	if (e.cout_pv) parts.push(`🩸 −${e.cout_pv} PV`);
+	if (e.drain_pv) parts.push(`🧛 drain ${e.drain_pv} % en PV`);
+	if (e.drain_pm) parts.push(`🧛 drain ${e.drain_pm} % en PM`);
+	if (e.saut) parts.push(`💨 saut ${e.saut} cases`);
+	if (e.lien_vie) {
+		parts.push(`🔗 lien de vie ${e.lien_vie.part} %`
+			+ (e.lien_vie.reduction ? ` (−${e.lien_vie.reduction} % absorbés)` : ''));
+	}
 	if (e.duree) parts.push(`${e.duree} tours`);
 	return parts.join(', ');
+}
+
+// Étiquette des autres notions de coût, à côté des PM de lancement : le temps
+// d'incantation (PA, sorts uniquement) et l'entretien par round. Vide pour une capacité
+// ordinaire — l'écrasante majorité —, donc le catalogue ne s'alourdit que là où il y a
+// quelque chose à dire. ⚠️ Le tactile n'a pas de survol : ce libellé est le SEUL canal.
+function _sortTempsLabel(s) {
+	const parts = [];
+	if ((s.incantation || 1) > 1) parts.push(`⏱ ${s.incantation} PA`);
+	if (s.maintien) parts.push(`🔄 ${s.maintien} PM/round`);
+	return parts.length ? ` · ${parts.join(' · ')}` : '';
 }
 // Étiquette de ZONE D'EFFET d'un sort ou d'une compétence, préfixée pour s'accrocher à la
 // ligne d'effets. Vide quand il n'y en a pas : hors combat il n'y a pas de grille, donc
@@ -5062,7 +5085,7 @@ function _renderSorts(list) {
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.sort_id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span></div>
-				<div class="sh-skill-desc">${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${_zoneLabel(s)}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
+				<div class="sh-skill-desc">${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${_sortTempsLabel(s)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${_zoneLabel(s)}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
 				${compos ? `<div class="sh-sort-compos">${compos}</div>` : ''}
 				${ouvert ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${s.description || ''}</div>` : ''}
 			</div>
@@ -5095,7 +5118,7 @@ function _renderSortsApprenables(list) {
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.id, peutVoir)}>
 				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span> ${grim}</div>
-				<div class="sh-skill-desc">Niv. ${s.niveau} · ${_invocationLabel(s) || _sortEffetsLabel(s.effets)}</div>
+				<div class="sh-skill-desc">Niv. ${s.niveau} · ${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${_sortTempsLabel(s)}</div>
 				${ouvert ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${s.description || ''}</div>` : ''}
 			</div>
 			<div class="sh-inv-actions">
@@ -5358,7 +5381,7 @@ function _renderCompetences(list) {
 			<div class="sh-skill-info">
 				<div class="sh-skill-name">${c.nom}${pm}</div>
 				<div class="sh-skill-desc">${c.description || ''}</div>
-				<div class="sh-skill-desc"${armeTitre}>${_sortEffetsLabel(c.effets, arme ? '+' : '')}${portee}${_zoneLabel(c)}</div>
+				<div class="sh-skill-desc"${armeTitre}>${_sortEffetsLabel(c.effets, arme ? '+' : '')}${_sortTempsLabel(c)}${portee}${_zoneLabel(c)}</div>
 			</div>
 			<div class="sh-inv-actions">${actions}</div>
 		</div>`;

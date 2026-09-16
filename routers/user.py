@@ -1306,6 +1306,14 @@ async def lancer_sort(
 		raise HTTPException(status_code=422, detail="Ce sort ne peut pas être lancé hors combat")
 	if int(character.get("currentPM", 0) or 0) < sort["cout_pm"]:
 		raise HTTPException(status_code=409, detail="PM insuffisants")
+	# DÉPENSE DE PV : « certains effets peuvent remplacer tout ou partie de leur coût en PM
+	# par une dépense directe de PV ». Contrôlée AVANT les composants, comme les PM — mais
+	# sur le coût de BASE : un composant qui alourdirait la facture en sang ne doit pas
+	# pouvoir la faire passer d'un cheveu au-dessus des PV du lanceur après coup.
+	# ⚠️ `>` STRICT : un sort ne laisse jamais son auteur à 0 PV.
+	cout_pv_base = int((sort.get("effets") or {}).get("cout_pv", 0) or 0)
+	if cout_pv_base and int(character.get("currentPV", 0) or 0) <= cout_pv_base:
+		raise HTTPException(status_code=409, detail="Pas assez de PV pour payer ce sort")
 
 	# Composants engagés : indisponibles/inconnus ignorés (mode dégradé, jamais bloquant).
 	etat = {c["item"]: c for c in sorts_util.composants_etat(sort, character)}
@@ -1331,6 +1339,13 @@ async def lancer_sort(
 	eq = sync_equipment_bonus(cible)
 	derived = _derived_from_character(cible, eq)
 	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - sort["cout_pm"])
+	# Le sang du LANCEUR, jamais celui de la cible : c'est lui qui paie son propre sort.
+	# ⚠️ Débité AVANT la part instantanée, qui peut soigner la cible — et donc le lanceur
+	# quand il se vise lui-même. Un sort qui coûte 10 PV et en rend 10 doit être neutre,
+	# pas rentable.
+	if cout_pv_base:
+		character["currentPV"] = max(1, int(character.get("currentPV", 0) or 0)
+									 - int(effets.get("cout_pv", cout_pv_base) or 0))
 	avant_pv = int(cible.get("currentPV", 0) or 0)
 	avant_pm = int(cible.get("currentPM", 0) or 0)
 	cible["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])

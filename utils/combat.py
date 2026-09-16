@@ -17,7 +17,10 @@ from utils.consommables import (
 	regen_bonus,
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
 )
-from utils.sorts import part_durative, effets_d_arme, concat_degats
+from utils.sorts import (
+	part_durative, effets_d_arme, concat_degats, INCANTATION_PA_MAX,
+	est_incantation_longue, est_maintenu, pm_par_pa, seuil_concentration,
+)
 from utils.zones_effet import cases_effet
 from utils.quetes import maj_progress_kills, maj_progress_chasse
 # `utils/zones.py` est une FEUILLE (math/random seulement) : aucun cycle possible.
@@ -184,9 +187,15 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 	ici faute de clé de famille à ce niveau — le snapshot ne sait pas s'il pose un sort, une
 	compétence ou une potion). Vaut aussi pour les debuffs posés sur une cible : relancer le
 	même sort sur le même monstre le rafraîchit au lieu de l'empiler.
+
+	⚠️ Un sort MAINTENU pose son entrée même sans part durative : un Mur de feu ou un Lien
+	de vie n'a aucun buff propre — son effet vit ailleurs (une nappe, un autre corps) — mais
+	il doit se voir dans les chips ✨ avec son entretien, faute de quoi le joueur paierait
+	chaque round pour quelque chose d'invisible.
 	"""
 	eff = effets or {}
-	if not part_durative(eff):
+	maintien = _eff_int((source or {}).get("maintien"))
+	if not part_durative(eff) and not maintien:
 		return None
 	entry = {
 		"source_id": identite_source(source),
@@ -201,6 +210,13 @@ def _empiler_effet_combat(acteur: dict, source: dict, effets: dict, tour: int) -
 		# son propre tour perdrait un point avant d'avoir servi.
 		"pose_tour": int(tour or 0),
 	}
+	if maintien:
+		# ⚠️ `maintenu` fait SAUTER le décrément (cf. _tick_effets_combat) : « tant qu'il
+		# peut payer, le sort reste actif ». `duree` ne veut donc plus rien dire pour lui —
+		# c'est la concentration qui le tient, et le défaut de PM qui le fait tomber.
+		entry["maintenu"] = True
+		entry["maintien"] = maintien
+		entry["restants"] = max(1, entry["restants"])
 	poser_effet(acteur, entry)
 	_refresh_snapshot_stats(acteur)
 	return entry
@@ -581,9 +597,35 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 							  zone=touchee)
 	else:
 		dmg = 0   # capacité de pur debuff : elle touche sans blesser
+	avant_pv = monstre["currentPV"]
 	monstre["currentPV"] = max(0, monstre["currentPV"] - dmg)
 	ctx["dmg"] = dmg
 	ctx["pv"] = monstre["currentPV"]
+
+	# ── DÉGÂTS AUX PM ────────────────────────────────────────────────────────────
+	# « Ils ne réduisent pas directement les PV. » Un sort peut porter les deux à la fois
+	# (Éclair siphonnant : 10 aux PV et 5 aux PM).
+	# ⚠️ AUCUNE soustraction des PA : une armure n'arrête pas une siphonie. C'est pour cela
+	# que le jet passe par `roll_dice` en direct et non par `calculer_degats`.
+	dmg_pm = 0
+	notation_pm = (effets or {}).get("degats_pm") or ""
+	if notation_pm:
+		dmg_pm = roll_dice(notation_pm) * jet["mult_degats"]
+		avant_pm = _eff_int(monstre.get("currentPM"))
+		monstre["currentPM"] = max(0, avant_pm - dmg_pm)
+		dmg_pm = avant_pm - monstre["currentPM"]
+
+	# ── DRAIN ────────────────────────────────────────────────────────────────────
+	# « Le drain ne récupère que sur les dégâts EFFECTIVEMENT infligés, et non sur les
+	# dégâts théoriques du sort. » D'où l'écart réel de PV (`avant_pv − currentPV`) et non
+	# `dmg` : le `max(0, …)` ci-dessus fait qu'un coup mortel de 40 sur une cible à 5 PV ne
+	# nourrit le lanceur que de 5.
+	# ⚠️ Rendu par la fonction, jamais crédité ici : le contrat de ce chokepoint est de ne
+	# toucher ni les PM du lanceur, ni son action, ni sa furtivité, ni la victoire — et le
+	# plafond `drain_max` vaut UNE FOIS PAR LANCEMENT, pas une fois par victime d'une zone.
+	inflige = avant_pv - monstre["currentPV"]
+	drain_pv = (inflige * _eff_int((effets or {}).get("drain_pv"))) // 100
+	drain_pm = (inflige * _eff_int((effets or {}).get("drain_pm"))) // 100
 
 	if dmg and monstre["currentPV"] <= 0:
 		monstre["vivant"] = False
@@ -602,6 +644,18 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 		"texte": textes[cle].format(**ctx),
 	}, canal, monstre.get("id", ""), anim, joueur.get("id", "")), *geles))
 
+	# Ligne PROPRE aux dégâts de PM : `currentPM` est dans `CHAMPS_ETAT`, donc l'anneau de
+	# mana de la cible ne bougera qu'à la révélation de cette ligne-ci. La fondre dans la
+	# ligne de dégâts ferait chuter les deux jauges d'un coup, sans dire pourquoi.
+	if dmg_pm:
+		combat_doc["log"].append(_avec_etat({
+			"tour": combat_doc["tour"],
+			"acteur": joueur["nom"],
+			"kind": "hit",
+			"texte": f"{monstre['nom']} voit sa magie se vider : −{dmg_pm} PM "
+					 f"({monstre['currentPM']}/{monstre.get('pm_max', 0)}).",
+		}, monstre))
+
 	# Part à DURÉE sur la CIBLE : posée seulement si la capacité a TOUCHÉ, et jamais sur
 	# une cible que le même coup vient d'abattre.
 	effet_cible = _appliquer_effet_sur_cible(combat_doc, monstre, source, effets,
@@ -609,6 +663,9 @@ def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, sourc
 	return {"hit": True, "dmg": dmg, "critique": jet["critique"],
 			"cible": monstre["nom"], "cible_id": monstre.get("id"),
 			"cible_pv": monstre["currentPV"],
+			# Remontés au LANCEMENT, qui seul sait plafonner et créditer une fois.
+			"dmg_pm": dmg_pm, "cible_pm": _eff_int(monstre.get("currentPM")),
+			"drain_pv": drain_pv, "drain_pm": drain_pm,
 			"effet_cible": dict(effet_cible) if effet_cible else None}, jet
 
 
@@ -639,6 +696,35 @@ def _resoudre_capacite_offensive(combat_doc: dict, joueur: dict, cibles: list,
 	principal = dict(resultats[0])
 	if len(resultats) > 1:
 		principal["cibles"] = resultats
+	# DRAIN : sommé sur toutes les victimes, plafonné UNE FOIS PAR LANCEMENT, puis crédité
+	# au lanceur. ⚠️ C'est ici et pas dans `_resoudre_coup_capacite` : `drain_max` est le
+	# plafond du SORT, pas celui de chaque victime — sinon une zone de cinq ennemis
+	# rendrait cinq fois le plafond, et le sort le plus large serait aussi le plus
+	# nourrissant.
+	total_pv = sum(_eff_int(r.get("drain_pv")) for r in resultats)
+	total_pm = sum(_eff_int(r.get("drain_pm")) for r in resultats)
+	plafond = _eff_int((effets or {}).get("drain_max"))
+	if plafond:
+		total_pv = min(total_pv, plafond)
+		total_pm = min(total_pm, plafond)
+	if total_pv or total_pm:
+		avant_pv, avant_pm = joueur["currentPV"], _eff_int(joueur.get("currentPM"))
+		# Clampés aux max du lanceur : un drain ne fait pas déborder une jauge.
+		joueur["currentPV"] = min(joueur.get("pv_max", avant_pv), avant_pv + total_pv)
+		joueur["currentPM"] = min(joueur.get("pm_max", avant_pm), avant_pm + total_pm)
+		gains = " / ".join(s for s in (
+			f"+{joueur['currentPV'] - avant_pv} PV" if joueur["currentPV"] != avant_pv else "",
+			f"+{joueur['currentPM'] - avant_pm} PM" if joueur["currentPM"] != avant_pm else "",
+		) if s)
+		if gains:
+			combat_doc["log"].append(_avec_etat({
+				"tour": combat_doc["tour"],
+				"acteur": joueur["nom"],
+				"kind": "sys",
+				"texte": f"{joueur['nom']} draine la vie de ses victimes ({gains}).",
+			}, joueur))
+		principal["drain"] = {"pv": joueur["currentPV"] - avant_pv,
+							  "pm": joueur["currentPM"] - avant_pm}
 	return principal, jet_principal
 
 
@@ -681,10 +767,14 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 				"texte": f"{acteur.get('nom', '?')} régénère ({gains}).",
 			}, acteur))
 
-	# 2. Décrément + purge. Une entrée posée CE tour-ci est épargnée.
+	# 2. Décrément + purge. Une entrée posée CE tour-ci est épargnée — une entrée MAINTENUE
+	# aussi, et pour toujours : sa durée n'est pas un compte à rebours mais la capacité de
+	# son lanceur à payer l'entretien (cf. `_payer_maintiens`, qui la retire quand il ne le
+	# peut plus). La décrémenter ferait tomber le sort au bout de `duree` tours alors même
+	# que le mage paie, ce qui est exactement ce que « sort maintenu » exclut.
 	restants, expires = [], []
 	for eff in actifs:
-		if int(eff.get("pose_tour", -1)) == tour:
+		if eff.get("maintenu") or int(eff.get("pose_tour", -1)) == tour:
 			restants.append(eff)
 			continue
 		eff["restants"] = _eff_int(eff.get("restants")) - 1
@@ -851,15 +941,20 @@ def _move_ap_used_for(actor: dict, cells_moved: int) -> int:
 
 def _refresh_actions(actor: dict) -> None:
 	"""Recalcule actions_restantes = actions_max - attaques - ramassages - consommations
-	- sorts - compétences - éditions de barre - pénalités - AP_déplacement.
+	- sorts - compétences - éditions de barre - canalisation - pénalités - AP_déplacement.
 
 	`penalites` = actions perdues sur échec critique (cf. _appliquer_fumble). Comme
 	actions_restantes est TOUJOURS recalculé ici, une pénalité doit être un compteur :
-	poser actions_restantes = 0 à la main serait écrasé au prochain appel."""
+	poser actions_restantes = 0 à la main serait écrasé au prochain appel.
+
+	`canalisation` = PA versés CE TOUR dans une incantation longue (cf.
+	_avancer_incantation). Même raison d'être un compteur, et même piège : une incantation
+	qui poserait directement actions_restantes = 0 se ferait rendre son budget au premier
+	déplacement du joueur."""
 	used = (actor.get("attaques", 0) + actor.get("ramasses", 0)
 			+ actor.get("consommes", 0) + actor.get("sorts", 0)
 			+ actor.get("competences", 0) + actor.get("editions", 0)
-			+ actor.get("penalites", 0)
+			+ actor.get("canalisation", 0) + actor.get("penalites", 0)
 			+ _move_ap_used_for(actor, actor.get("cells_moved", 0)))
 	actor["actions_restantes"] = max(0, actor["actions_max"] - used)
 
@@ -868,8 +963,13 @@ def _reset_turn_budget(actor: dict, combat_doc: dict | None = None) -> None:
 	"""Réinitialise le budget d'un acteur en début de tour.
 
 	Seul hook « début de tour d'acteur » du moteur : c'est donc ici que les effets à durée
-	régénèrent, se décrémentent et expirent (`combat_doc` fourni). Sans `combat_doc` —
-	appels de test, monstres — le budget seul est réinitialisé.
+	régénèrent, se décrémentent et expirent, que l'entretien des sorts maintenus est prélevé
+	et qu'une incantation longue avance (`combat_doc` fourni). Sans `combat_doc` — appels de
+	test, monstres — le budget seul est réinitialisé.
+
+	⚠️ ORDRE : entretien et incantation viennent APRÈS la remise à `actions_max`, parce que
+	l'incantation DÉPENSE ce budget. Les inverser lui donnerait un tour d'avance, puis un
+	budget plein pour agir malgré la canalisation.
 	"""
 	if combat_doc is not None:
 		_tick_effets_combat(combat_doc, actor)
@@ -886,8 +986,344 @@ def _reset_turn_budget(actor: dict, combat_doc: dict | None = None) -> None:
 	# se paie MAINTENANT : elle devient la pénalité du nouveau tour, puis s'efface.
 	actor["penalites"] = actor.get("dette_actions", 0)
 	actor["dette_actions"] = 0
+	# ⚠️ Remis à zéro ICI comme `editions`, et AVANT `_avancer_incantation` qui le remplit :
+	# les PA versés dans l'incantation sont mémorisés par `pa_investis`, pas par ce compteur,
+	# qui ne mesure que la dépense DU TOUR (cf. _refresh_actions).
+	actor["canalisation"] = 0
 	actor["actions_restantes"] = actor["actions_max"]
 	_refresh_actions(actor)
+	# ⚠️ `combat_doc` peut être le PSEUDO-DOC du simulateur (`{"tour", "log"}` seuls, cf.
+	# utils/simulateur) : les deux helpers ci-dessous ne lisent que `tour`, `log` et
+	# `joueurs` via `.get(...)`, et sortent en tête sur un acteur qui n'entretient ni ne
+	# canalise rien — c'est-à-dire toujours, au banc d'essai.
+	if combat_doc is not None:
+		_payer_maintiens(combat_doc, actor)
+		_avancer_incantation(combat_doc, actor)
+
+
+def _avancer_tour(combat_doc: dict) -> None:
+	"""Passe la main à l'acteur suivant d'`ordre_initiative` ; débordement ⇒ tour suivant.
+
+	SOURCE UNIQUE de l'avancement — sept copies verbatim de ces quatre lignes vivaient dans
+	les fins de tours serveur (monstre, défenseur, invocation) et dans `_resolve_until_player`.
+	Le compteur `tour` n'avance QUE sur le débordement : c'est lui qui définit un « round »,
+	et donc la cadence des effets à durée comme celle de l'entretien des sorts maintenus.
+
+	⚠️ **N'est PAS le chemin de `_purger_invocations`**, qui RÉPARE l'index après un retrait
+	(aucun `+1`, et un clamp à 0 en plus). Y router la purge ferait sauter un acteur à chaque
+	invocation dissipée.
+	"""
+	idx = combat_doc["acteur_courant_index"] + 1
+	if idx >= len(combat_doc["ordre_initiative"]):
+		idx = 0
+		combat_doc["tour"] += 1
+	combat_doc["acteur_courant_index"] = idx
+
+
+# ── Concentration : sorts MAINTENUS et incantations LONGUES ──────────────────────
+# Deux états de snapshot, tous deux propres au COMBAT (jamais reversés sur un doc
+# personnage, cf. `_finalize_membre`) :
+#
+#   acteur["concentrations"] = [{sort_id, nom, icon, maintien, cible_id}]
+#       Ce que le lanceur ENTRETIENT. Prélevé en PM au début de CHACUN de ses tours
+#       (`_payer_maintiens`), sans coûter le moindre PA. Ce qu'il ne peut plus payer tombe.
+#
+#   acteur["incantation"] = {sort_id, …, pa_total, pa_investis, pm_total, pm_verses, …}
+#       Ce qu'il est en train de LANCER. Absorbe ses PA tour après tour
+#       (`_avancer_incantation`) jusqu'à ce que le sort parte.
+#
+# Les deux sont FRAGILES : un coup encaissé déclenche un test de concentration par objet
+# tenu (cf. `_tester_concentration`). C'est ce qui fait du mage un artilleur à protéger.
+# ⚠️ Clés ABSENTES sur un combat déjà en base, et sur tout acteur qui n'a rien lancé : tout
+# ce qui les lit sort en tête sur une liste vide (CLAUDE.md §4).
+
+
+def _concentrations(acteur: dict) -> list:
+	"""Liste (vivante) des sorts entretenus par l'acteur — vide s'il n'entretient rien."""
+	return (acteur or {}).get("concentrations") or []
+
+
+def _rompre_concentration(combat_doc: dict, acteur: dict, entree: dict, texte: str) -> None:
+	"""Un sort maintenu s'arrête : entretien, effet, invocations et lien de vie disparaissent.
+
+	CHOKEPOINT UNIQUE de l'arrêt — appelé par le défaut de paiement (`_payer_maintiens`),
+	par l'échec d'un test de concentration et par la fin de combat. Trois choses à défaire,
+	et les oublier laisserait des états orphelins que plus rien ne nettoierait :
+	  1. l'entrée d'`effets_actifs` de même source (puis recalcul des dérivées) ;
+	  2. les créatures que ce sort tenait sur la grille ;
+	  3. le lien de vie posé sur le protégé — sinon il continuerait d'encaisser pour un
+		 protecteur qui ne paie plus.
+
+	⚠️ Mute sans sauver, comme tout `utils/*`. ⚠️ Tolère un `combat_doc` réduit (le
+	pseudo-doc du simulateur n'a ni `joueurs` ni `monstres`).
+	"""
+	sort_id = str(entree.get("sort_id") or "")
+	acteur["concentrations"] = [c for c in _concentrations(acteur)
+								if str(c.get("sort_id") or "") != sort_id]
+
+	# 1. L'effet qu'il portait — et celui qu'il avait posé AILLEURS.
+	# ⚠️ Balaie TOUS les acteurs, monstres compris : un sort maintenu OFFENSIF (Mur de feu)
+	# pose sa part durative sur ses VICTIMES, pas sur son lanceur. Ne nettoyer que ce
+	# dernier laisserait le débuff en place pour toujours — et `maintenu` l'exempte
+	# justement du décrément, donc plus rien ne l'aurait jamais retiré.
+	porteurs = ([acteur] + list(combat_doc.get("joueurs") or [])
+				+ list(combat_doc.get("monstres") or []))
+	vus = set()
+	for porteur in porteurs:
+		if id(porteur) in vus:
+			continue
+		vus.add(id(porteur))
+		avant = porteur.get("effets_actifs") or []
+		restants = [e for e in avant if str(e.get("source_id") or "") != sort_id]
+		if len(restants) != len(avant):
+			porteur["effets_actifs"] = restants
+			_refresh_snapshot_stats(porteur)
+
+	# 2. Les créatures qu'il tenait. ⚠️ `_dissiper_invocation` et jamais un marquage à la
+	# main : elle pose aussi `currentPV = 0`, que lisent `_joueurs_vivants` et `_occupied_set`.
+	for invoc in list(combat_doc.get("joueurs") or []):
+		if invoc.get("est_invocation") and str(invoc.get("sort_maintenu") or "") == sort_id:
+			_dissiper_invocation(combat_doc, invoc,
+								 f"{invoc['nom']} se dissipe : l'appel n'est plus tenu.")
+
+	# 3. Le lien de vie qu'il tissait.
+	cible_id = str(entree.get("cible_id") or "")
+	for protege in list(combat_doc.get("joueurs") or []):
+		lien = protege.get("lien_vie") or {}
+		if lien and str(lien.get("source_id") or "") == sort_id and (
+				not cible_id or protege.get("id") == cible_id):
+			protege.pop("lien_vie", None)
+
+	combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
+		"tour": int(combat_doc.get("tour", 0) or 0),
+		"acteur": acteur.get("nom", "?"),
+		"kind": "sys",
+		"texte": texte,
+	}, "dissipation", acteur.get("id", "")), acteur))
+
+
+def _payer_maintiens(combat_doc: dict, acteur: dict) -> None:
+	"""Début de tour : l'acteur verse les PM d'entretien de chacun de ses sorts maintenus.
+
+	« À chaque round, le jeteur doit dépenser le coût de maintien en PM. Tant qu'il peut
+	payer ce coût, le sort reste actif. » Le maintien ne consomme AUCUN PA et n'empêche pas
+	de lancer autre chose — c'est pour cela qu'il est prélevé ici et non par un compteur
+	d'action.
+
+	⚠️ Paiement dans l'ORDRE DE POSE, et chacun est tenté : celui qui n'est pas payable
+	tombe, les suivants — moins chers — peuvent encore tenir. Faire tomber toute la file au
+	premier impayé punirait le mage prévoyant qui garde un petit sort en réserve.
+	⚠️ La `duree` compte en tours du PORTEUR partout dans le moteur (cf.
+	`_tick_effets_combat`) : prélever au début du tour du lanceur met l'entretien à la même
+	cadence, et le rend indépendant du nombre de combattants.
+	"""
+	for entree in list(_concentrations(acteur)):
+		du = _eff_int(entree.get("maintien"))
+		if du <= 0:
+			continue
+		if _eff_int(acteur.get("currentPM")) < du:
+			_rompre_concentration(
+				combat_doc, acteur, entree,
+				f"{entree.get('icon', '✨')} {entree.get('nom', 'Le sort')} s'effondre : "
+				f"{acteur.get('nom', '?')} n'a plus les {du} PM du maintien.")
+			continue
+		acteur["currentPM"] = _eff_int(acteur.get("currentPM")) - du
+
+
+def _effets_a_reverser(snap: dict) -> list:
+	"""Effets à durée d'un snapshot qui survivent à la SORTIE du combat.
+
+	SOURCE UNIQUE des trois sites de `finalize_combat` (membre du groupe, monture, personne
+	escortée) : un buff est un buff, qu'il ait été lancé avant le combat ou pendant, et il
+	ne meurt pas avec lui. `pose_tour` n'a de sens qu'en combat et ne suit pas.
+
+	⚠️ Un effet MAINTENU ne suit pas non plus, et c'est l'essentiel : il n'existe que tant
+	que quelqu'un paie son entretien chaque round, et il n'y a pas de round en exploration.
+	Le reverser tel quel poserait sur le personnage un buff que plus rien ne prélève et que
+	plus rien ne fait tomber — permanent et gratuit, donc un exploit.
+	"""
+	return [
+		{k: v for k, v in eff.items() if k not in ("pose_tour", "maintenu", "maintien")}
+		for eff in (snap or {}).get("effets_actifs") or []
+		if _eff_int(eff.get("restants")) > 0 and not eff.get("maintenu")
+	]
+
+
+def _payer_cout_pv(combat_doc: dict, joueur: dict, source: dict, cout_pv: int) -> None:
+	"""Le lanceur paie une partie du prix en SANG (`effets.cout_pv`).
+
+	« Certains effets peuvent remplacer tout ou partie de leur coût en PM par une dépense
+	directe de PV, faisant de la vie du jeteur une ressource magique utilisable. »
+
+	⚠️ Ces PV ne sont PAS des dégâts subis : ils ne déclenchent aucun test de concentration,
+	ne passent par aucun lien de vie et ne rompent pas la furtivité. La dépense est
+	volontaire — c'est le prix demandé, pas un coup reçu.
+	⚠️ L'appelant a déjà garanti `currentPV > cout_pv` : le plancher est ici une ceinture.
+	"""
+	if cout_pv <= 0:
+		return
+	joueur["currentPV"] = max(1, _eff_int(joueur.get("currentPV")) - cout_pv)
+	combat_doc.setdefault("log", []).append(_avec_etat({
+		"tour": int(combat_doc.get("tour", 0) or 0),
+		"acteur": joueur.get("nom", "?"),
+		"kind": "sys",
+		"texte": f"{joueur.get('nom', '?')} paie {(source or {}).get('nom', 'le sort')} "
+				 f"de son sang : −{cout_pv} PV.",
+	}, joueur))
+
+
+def _armer_incantation(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
+					   cible_id: str | None, dx, dy) -> dict:
+	"""Arme une incantation LONGUE, puis y verse déjà les PA du tour en cours.
+
+	Le sort ne part pas : il devient un état du snapshot que `_avancer_incantation` fera
+	progresser à chaque tour du lanceur. La cible visée est mémorisée telle quelle et
+	re-validée à la résolution.
+
+	⚠️ `doc` et `effets` sont STOCKÉS dans le combat, pas relus plus tard : la résolution a
+	lieu depuis `_reset_turn_budget`, qui n'a aucun accès à la base (tout `utils/combat` est
+	du calcul pur). Ce sont des dicts normalisés, donc sérialisables tels quels.
+	"""
+	joueur["incantation"] = {
+		"sort_id": sdoc.get("id", ""),
+		"nom": sdoc.get("nom", "un sort"),
+		"icon": sdoc.get("icon", "🔮"),
+		"doc": dict(sdoc),
+		"effets": dict(effets or {}),
+		"cible_id": cible_id,
+		"dx": dx,
+		"dy": dy,
+		"pa_total": max(1, int(sdoc.get("incantation", 1) or 1)),
+		"pa_investis": 0,
+		"pm_total": max(0, int(sdoc.get("cout_pm", 0) or 0)),
+		"pm_verses": 0,
+	}
+	combat_doc.setdefault("log", []).append(_avec_etat({
+		"tour": int(combat_doc.get("tour", 0) or 0),
+		"acteur": joueur.get("nom", "?"),
+		"kind": "sys",
+		"texte": f"{joueur.get('nom', '?')} entame l'incantation de "
+				 f"{sdoc.get('nom', 'un sort')} ({joueur['incantation']['pa_total']} PA).",
+	}, joueur))
+	_avancer_incantation(combat_doc, joueur)
+	# ⚠️ Relu APRÈS l'avancement : le tour a pu la mener à terme (le sort est parti) ou la
+	# rompre (plus de PM). Renvoyer le bloc capturé avant afficherait une barre de progression
+	# pour une incantation qui n'existe plus.
+	return {"sort": sdoc.get("nom"), "incantation": _incantation_payload(joueur)}
+
+
+def _incantation_payload(joueur: dict) -> dict | None:
+	"""Vue CLIENT de l'incantation en cours — None s'il n'y en a pas.
+
+	⚠️ `doc` et `effets` en sont retirés : le client n'a rien à en faire, et le sort complet
+	pèse plus lourd que tout le reste du payload d'action."""
+	inc = (joueur or {}).get("incantation")
+	if not inc:
+		return None
+	return {k: v for k, v in inc.items() if k not in ("doc", "effets")}
+
+
+def _rompre_incantation(combat_doc: dict, joueur: dict, texte: str) -> None:
+	"""L'incantation en cours s'arrête sans que le sort parte. Les PM déjà versés sont PERDUS.
+
+	« Une interruption peut donc faire perdre les PM déjà dépensés » : c'est tout le risque
+	du mage artilleur, et la raison pour laquelle ses alliés doivent le couvrir. Les
+	composants consommés, eux, sont partis dès le démarrage — eux aussi sont perdus.
+	"""
+	inc = joueur.get("incantation")
+	if not inc:
+		return
+	# ⚠️ Posé à None plutôt que retiré : `incantation` est dans `CHAMPS_ETAT`, et
+	# `_avec_etat` ne photographie que les clés PRÉSENTES. Retirée, la fin de l'incantation
+	# ne serait jamais gelée et la barre de progression du client resterait pleine jusqu'au
+	# prochain rafraîchissement complet.
+	joueur["incantation"] = None
+	perdus = _eff_int(inc.get("pm_verses"))
+	combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
+		"tour": int(combat_doc.get("tour", 0) or 0),
+		"acteur": joueur.get("nom", "?"),
+		"kind": "sys",
+		"texte": texte + (f" ({perdus} PM perdus)" if perdus else ""),
+	}, "dissipation", joueur.get("id", "")), joueur))
+
+
+def _avancer_incantation(combat_doc: dict, joueur: dict) -> None:
+	"""Verse dans l'incantation en cours TOUS les PA dont le lanceur dispose ce tour.
+
+	« Le jeteur dépense ses PA disponibles pour faire progresser l'incantation. Les PA
+	investis sont conservés d'un round à l'autre. Le sort n'est lancé qu'une fois la
+	totalité des PA nécessaires dépensée. »
+
+	Arithmétique des PM, verrouillée par `tests/test_combat_incantation.py` sur l'exemple du
+	livre de règles : la tranche vaut `ceil(cout_pm / incantation)` et la réserve baisse au
+	fur et à mesure, donc **les derniers PA peuvent être gratuits** — un Météore de 15 PM en
+	6 PA verse 3 PM par PA, les 15 PM sont couverts au 5ᵉ, et le 6ᵉ ne coûte rien.
+
+	⚠️ Le sort part ICI, des tours après le clic, par le même chokepoint que le lancement
+	direct (`_lancer_sort`). Sa cible est RE-VALIDÉE à ce moment : morte ou hors de portée,
+	le sort se perd — c'est le prix du temps d'incantation.
+	⚠️ `joueur["canalisation"]` est un COMPTEUR (cf. `_refresh_actions`) : poser
+	`actions_restantes = 0` serait écrasé au premier recalcul.
+	⚠️ Tolère le pseudo-doc du simulateur : sortie en tête sur un acteur sans `incantation`,
+	et `get_combat_grid` n'est appelé qu'au moment de résoudre.
+	"""
+	inc = joueur.get("incantation")
+	if not inc:
+		return
+	pa_total = max(1, _eff_int(inc.get("pa_total")))
+	pm_total = _eff_int(inc.get("pm_total"))
+	tranche = -(-pm_total // pa_total)
+
+	while _eff_int(inc.get("pa_investis")) < pa_total and joueur.get("actions_restantes", 0) > 0:
+		du = min(tranche, pm_total - _eff_int(inc.get("pm_verses")))
+		if du > 0 and _eff_int(joueur.get("currentPM")) < du:
+			_rompre_incantation(
+				combat_doc, joueur,
+				f"{joueur.get('nom', '?')} n'a plus les {du} PM qu'exige la suite de "
+				f"l'incantation : le sort se défait.")
+			return
+		if du > 0:
+			joueur["currentPM"] = _eff_int(joueur.get("currentPM")) - du
+			inc["pm_verses"] = _eff_int(inc.get("pm_verses")) + du
+		inc["pa_investis"] = _eff_int(inc.get("pa_investis")) + 1
+		joueur["canalisation"] = _eff_int(joueur.get("canalisation")) + 1
+		_refresh_actions(joueur)
+
+	if _eff_int(inc.get("pa_investis")) < pa_total:
+		# Encore du chemin : une ligne par tour, pour que le joueur voie où il en est.
+		combat_doc.setdefault("log", []).append(_avec_etat({
+			"tour": int(combat_doc.get("tour", 0) or 0),
+			"acteur": joueur.get("nom", "?"),
+			"kind": "sys",
+			"texte": f"{joueur.get('nom', '?')} poursuit son incantation de "
+					 f"{inc.get('nom', 'un sort')} ({inc['pa_investis']}/{pa_total} PA).",
+		}, joueur))
+		return
+
+	# L'incantation aboutit : le sort part MAINTENANT.
+	# ⚠️ None et non un retrait — même raison que dans `_rompre_incantation` : la clé doit
+	# rester présente pour que `_avec_etat` gèle sa disparition.
+	joueur["incantation"] = None
+	sdoc = dict(inc.get("doc") or {})
+	# ⚠️ Les PM ont été versés par tranches : les redébiter ferait payer le sort deux fois.
+	sdoc["cout_pm"] = 0
+	grid = get_combat_grid(combat_doc)
+	result, jet = _lancer_sort(combat_doc, joueur, sdoc, inc.get("effets") or {},
+							   inc.get("cible_id"), inc.get("dx"), inc.get("dy"), grid)
+	if "error" in result:
+		# Cible morte, hors de portée, plus de place pour l'invocation… Le sort est perdu,
+		# et les PM avec lui : rien à rembourser, ils ont été dépensés round après round.
+		combat_doc.setdefault("log", []).append(_avec_etat({
+			"tour": int(combat_doc.get("tour", 0) or 0),
+			"acteur": joueur.get("nom", "?"),
+			"kind": "sys",
+			"texte": f"{joueur.get('nom', '?')} achève son incantation dans le vide : "
+					 f"{result['error']}",
+		}, joueur))
+		return
+	if jet and jet["fumble"]:
+		_appliquer_fumble(combat_doc, joueur)
+	_check_victory(combat_doc)
 
 
 def _find_path(cells: list, dims: dict, start: tuple, goal: tuple, blocked: set,
@@ -1744,6 +2180,16 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		"animation": str(espece.get("animation") or ""),
 		"currentPV": max(1, derived.pv_max),
 		"pv_max": max(1, derived.pv_max),
+		# RÉSERVE DE MANA d'un monstre. Il ne lance rien — c'est une réserve à VIDER, pas à
+		# dépenser : sans elle, un sort à `degats_pm` serait inerte sur la seule cible qu'il
+		# puisse viser, et toute la mécanique anti-lanceur n'existerait que sur le papier.
+		# ⚠️ Même formule que les joueurs (`compute_derived_stats` : Vol×2 + Int×2), donc
+		# une bête sans volonté ni intelligence n'a rien à siphonner — ce qui est juste.
+		# ⚠️ Un combat déjà en base n'a pas ces clés : tout ce qui les lit passe par
+		# `.get(..., 0)` (CLAUDE.md §4). `_refresh_snapshot_stats` les recompose et les
+		# re-clampe ensuite comme celles d'un joueur, sans une ligne de plus.
+		"currentPM": max(0, derived.pm_max),
+		"pm_max": max(0, derived.pm_max),
 		"actions_restantes": _compute_actions_max(base_stats.ag, base_stats.v),
 		"actions_max": _compute_actions_max(base_stats.ag, base_stats.v),
 		"cc": derived.cc,
@@ -1937,6 +2383,10 @@ def invoquer(combat_doc: dict, lanceur: dict, sort: dict, grid: dict) -> list:
 		snap = build_invocation_snapshot(
 			espece, profil, _prochain_index_joueur(combat_doc),
 			invocation.get("duree", 1), lanceur)
+		# Sort d'origine : c'est par lui que `_enregistrer_concentration` reconnaît les
+		# créatures que CE lancement vient d'appeler. Sans lui, un second sort d'invocation
+		# maintenu adopterait les créatures du premier.
+		snap["sort_id"] = sort.get("id", "")
 		snap["pos"] = place["pos"]
 		if place["cap"]:
 			snap["cap"] = place["cap"]
@@ -2287,6 +2737,305 @@ def _check_victory(combat_doc: dict) -> None:
 		})
 
 
+def _poser_lien_vie(combat_doc: dict, lanceur: dict, protege: dict, sdoc: dict,
+					effets: dict) -> None:
+	"""Tisse un lien de vie entre le lanceur (PROTECTEUR) et l'allié désigné (PROTÉGÉ).
+
+	Le bloc vit sur le PROTÉGÉ — c'est lui qui encaisse, donc lui que `_rediriger_lien_vie`
+	interroge à chaque coup. Le lanceur, lui, porte la concentration qui le finance
+	(cf. `_enregistrer_concentration`), et c'est par `source_id` que les deux se retrouvent
+	quand le sort tombe.
+
+	⚠️ Un lanceur ne se lie pas à lui-même : il encaisserait ce qu'il encaisse déjà, pour
+	un entretien en PM. Le bloc est alors simplement ignoré.
+	"""
+	lien = (effets or {}).get("lien_vie")
+	if not lien or not protege or protege is lanceur:
+		return
+	protege["lien_vie"] = {
+		"protecteur_id": lanceur.get("id", ""),
+		"protecteur_nom": lanceur.get("nom", "?"),
+		"source_id": sdoc.get("id", ""),
+		"part": int(lien.get("part", 0) or 0),
+		"reduction": int(lien.get("reduction", 0) or 0),
+	}
+	combat_doc.setdefault("log", []).append(_avec_etat({
+		"tour": int(combat_doc.get("tour", 0) or 0),
+		"acteur": lanceur.get("nom", "?"),
+		"kind": "sys",
+		"texte": f"{lanceur.get('nom', '?')} tisse un lien de vie avec "
+				 f"{protege.get('nom', '?')} : {lien.get('part', 0)} % des coups reçus "
+				 f"lui reviendront.",
+	}, lanceur))
+
+
+def _verifier_saut(combat_doc: dict, sauteur: dict, effets: dict, dx, dy,
+				   grid: dict) -> dict:
+	"""Une destination de saut est-elle recevable ? `{}` si oui (ou si ce n'est pas un saut).
+
+	SÉPARÉE de `_sauter` parce qu'elle est appelée DEUX fois : une première en tête de
+	`_lancer_sort`, AVANT le moindre débit de PM, et une seconde par `_sauter` lui-même.
+	Sans la première, une case invalide coûtait le sort sans rien téléporter — alors que la
+	règle du moteur est constante : un sort qui ne part pas ne se paie pas (cf.
+	`_lancer_sur_allie`, « PM NON débités : le sort n'est jamais parti »).
+
+	Ce qui n'est PAS vérifié fait tout l'intérêt du sort : ni `nav`, ni chemin praticable,
+	ni ligne de vue. On franchit le mur, on ne le contourne pas.
+	"""
+	portee = max(0, int((effets or {}).get("saut", 0) or 0))
+	if portee <= 0:
+		return {}
+	if not sauteur:
+		return {"error": "Personne à téléporter."}
+	if dx is None or dy is None:
+		return {"error": "Aucune case de destination désignée."}
+	nx, ny = int(dx), int(dy)
+	dims, cells = grid["dims"], grid["cells"]
+	if nx < 0 or nx >= dims["x"] or ny < 0 or ny >= dims["y"]:
+		return {"error": "Hors de la zone."}
+	# Portée mesurée d'EMPRISE à case, comme toutes les portées du moteur (`_cheby`) : une
+	# grande créature saute depuis son bord le plus proche.
+	if jetons.distance(sauteur, {"pos": {"x": nx, "y": ny}}) > portee:
+		return {"error": "Destination hors de portée du saut."}
+
+	# Emprise d'ARRIVÉE : une seule case pour un jeton ordinaire, le rectangle complet pour
+	# une grande créature (cap courant — un saut ne fait pas pivoter la bête). Toutes doivent
+	# être praticables ET libres. ⚠️ `exclude=sauteur` : il quitte ses propres cases, elles
+	# ne doivent pas se bloquer elles-mêmes sur un saut court qui les recouvre.
+	occupees = _occupied_set(combat_doc, exclude=sauteur)
+	largeur, profondeur = jetons.dims_jeton(sauteur)
+	w, h = jetons.dims_orientees(largeur, profondeur, jetons.cap_de(sauteur))
+	for cx, cy in jetons.cases_rect(nx, ny, w, h):
+		if cx < 0 or cx >= dims["x"] or cy < 0 or cy >= dims["y"]:
+			return {"error": "Hors de la zone."}
+		if not _walkable(cells, cx, cy, _can_fly(sauteur)):
+			return {"error": "Terrain infranchissable à l'arrivée."}
+		if (cx, cy) in occupees:
+			return {"error": "Case occupée."}
+	return {}
+
+
+def _sauter(combat_doc: dict, lanceur: dict, sauteur: dict, effets: dict,
+			dx, dy, grid: dict) -> dict:
+	"""Téléporte `sauteur` sur la case (dx, dy) — coordonnées ABSOLUES. `{}` si pas un saut.
+
+	« Le déplacement est instantané : les cases situées entre le départ et l'arrivée ne sont
+	pas parcourues. » D'où ce qui n'est PAS vérifié, et qui fait tout l'intérêt du sort :
+	ni `nav`, ni chemin praticable, ni ligne de vue. On franchit le mur, on ne le contourne
+	pas. Restent la portée (Chebyshev depuis le sauteur), le terrain d'ARRIVÉE et la place.
+
+	⚠️ `dx`/`dy` sont ici des coordonnées ABSOLUES, alors que la branche `deplacer` de
+	`resolve_action` les clampe à [-1, 1] comme des deltas. Deux sémantiques sur un même
+	champ, donc : c'est pourquoi seul `_sauter` les lit tels quels, et jamais l'inverse.
+	⚠️ Journal : UNE seule entrée `move`, avec tout l'écart de `pos`. Le jeton glisse alors
+	d'un trait sans parcourir les cases — la téléportation s'anime toute seule, sans une
+	ligne de client (cf. `telluris-combat` § Révélation différée).
+	⚠️ Un GRAND jeton doit tenir tout entier à l'arrivée, `cap` courant compris.
+	"""
+	if not (effets or {}).get("saut"):
+		return {}
+	erreur = _verifier_saut(combat_doc, sauteur, effets, dx, dy, grid)
+	if erreur:
+		return erreur
+
+	nx, ny = int(dx), int(dy)
+	ancienne = {"x": sauteur["pos"]["x"], "y": sauteur["pos"]["y"]}
+	sauteur["pos"] = {"x": nx, "y": ny}
+	combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
+		"tour": int(combat_doc.get("tour", 0) or 0),
+		"acteur": lanceur.get("nom", "?"),
+		"kind": "move",
+		"texte": f"{sauteur.get('nom', '?')} disparaît et reparaît en [{nx},{ny}].",
+	}, "sort", sauteur.get("id", "")), sauteur))
+	return {"saut": {"acteur_id": sauteur.get("id"), "de": ancienne,
+					 "vers": {"x": nx, "y": ny}}}
+
+
+def _rediriger_lien_vie(combat_doc: dict, defenseur: dict, dmg: int) -> tuple:
+	"""Répartit un coup entre le protégé et son protecteur. N'APPLIQUE rien.
+
+	Rend `(dégâts pour le défenseur, dégâts pour le protecteur, protecteur ou None)` ;
+	l'appelant écrit les deux PV, de façon que la ligne de coup affiche déjà le bon total.
+
+	« Le transfert ne crée pas de nouveaux dégâts : il déplace la perte de PV d'une cible
+	vers une autre. » `reduction` est absorbée d'abord, `part` du reste part au protecteur —
+	l'exemple du livre de règles (20 dégâts, part 50 %) donne bien 10 et 10.
+
+	⚠️ Lien SANS protecteur valide (mort, à terre, ou disparu du combat) ⇒ comportement
+	d'avant, à la lettre : le protégé encaisse tout. Un lien qui absorberait encore alors
+	que son porteur est au sol protégerait gratuitement.
+	⚠️ **Ce chokepoint n'est atteint que depuis `_do_attack_on`**, seul endroit où un acteur
+	du camp du joueur perd des PV sous un coup. `_resoudre_coup_capacite` et
+	`_frapper_monstre` ne frappent QUE des monstres, par construction — le jour où un
+	monstre lancera un sort offensif par le premier, le lien de vie cessera de fonctionner
+	en silence. Même angle mort au banc d'essai : `utils/simulateur` applique ses dégâts en
+	parallèle, un duel 1 contre 1 n'ayant personne à protéger.
+	"""
+	lien = (defenseur or {}).get("lien_vie") or {}
+	if not lien or dmg <= 0:
+		return dmg, 0, None
+	protecteur = next(
+		(p for p in combat_doc.get("joueurs") or []
+		 if p.get("id") == lien.get("protecteur_id") and p.get("currentPV", 0) > 0),
+		None)
+	if protecteur is None or protecteur is defenseur:
+		return dmg, 0, None
+	reduction = max(0, min(100, int(lien.get("reduction", 0) or 0)))
+	part = max(0, min(100, int(lien.get("part", 0) or 0)))
+	reduit = dmg - (dmg * reduction) // 100
+	transfere = (reduit * part) // 100
+	return reduit - transfere, transfere, (protecteur if transfere > 0 else None)
+
+
+def _tester_concentration(combat_doc: dict, acteur: dict, attaquant: dict,
+						  degats_subis: int) -> None:
+	"""Un coup encaissé menace ce que l'acteur TIENT : son incantation et ses sorts maintenus.
+
+	« Lorsqu'un lanceur subit une attaque pendant une incantation, il effectue un test de
+	concentration. » Quatre issues, par objet tenu :
+	  • réussite critique → rien ne bouge ;
+	  • réussite         → ça tient, au prix d'une TRANCHE de PM (cf. sorts.pm_par_pa) ;
+	  • échec            → l'incantation est perdue, ou le sort maintenu tombe ;
+	  • échec critique   → idem, PLUS une action perdue (`_appliquer_fumble`).
+
+	⚠️ **Un jet PAR objet tenu** — c'est le choix de conception retenu, à l'inverse de la
+	règle des zones d'effet (un seul fumble possible, quel que soit le nombre de cibles).
+	Ici la multiplication du risque est la contrepartie assumée d'entretenir plusieurs
+	sorts à la fois : un mage qui en tient trois est trois fois plus exposé.
+	⚠️ `_resoudre_jet` et non un `random` local : c'est lui qui fait que la CHANCE pilote
+	les fenêtres de critique, celle du lanceur comme celle de qui le frappe.
+	⚠️ Des PV dépensés volontairement (`effets.cout_pv`) n'atteignent JAMAIS ce test : ce
+	sont un prix payé, pas un coup reçu.
+	"""
+	if not acteur.get("incantation") and not _concentrations(acteur):
+		return
+	seuil = seuil_concentration(acteur.get("vol", acteur.get("caracts_base", {}).get("Vol", 0)),
+								degats_subis)
+
+	def _issue():
+		jet = _resoudre_jet(acteur, attaquant, seuil)
+		if jet["critique"]:
+			return "critique", jet
+		if jet["fumble"]:
+			return "fumble", jet
+		return ("reussite" if jet["touche"] else "echec"), jet
+
+	# 1. L'incantation en cours.
+	inc = acteur.get("incantation")
+	if inc:
+		issue, _ = _issue()
+		if issue == "reussite":
+			penalite = min(_eff_int(acteur.get("currentPM")), pm_par_pa(inc.get("doc") or {}))
+			acteur["currentPM"] = _eff_int(acteur.get("currentPM")) - penalite
+			combat_doc.setdefault("log", []).append(_avec_etat({
+				"tour": int(combat_doc.get("tour", 0) or 0),
+				"acteur": acteur.get("nom", "?"),
+				"kind": "sys",
+				"texte": f"{acteur.get('nom', '?')} vacille mais tient son incantation "
+						 f"(−{penalite} PM).",
+			}, acteur))
+		elif issue in ("echec", "fumble"):
+			_rompre_incantation(combat_doc, acteur,
+								f"{acteur.get('nom', '?')} perd le fil de son incantation !")
+			if issue == "fumble":
+				_appliquer_fumble(combat_doc, acteur)
+
+	# 2. Chacun des sorts maintenus.
+	for entree in list(_concentrations(acteur)):
+		issue, _ = _issue()
+		if issue == "critique":
+			continue
+		if issue == "reussite":
+			penalite = min(_eff_int(acteur.get("currentPM")), _eff_int(entree.get("maintien")))
+			acteur["currentPM"] = _eff_int(acteur.get("currentPM")) - penalite
+			continue
+		_rompre_concentration(
+			combat_doc, acteur, entree,
+			f"{entree.get('icon', '✨')} {entree.get('nom', 'Le sort')} se rompt sous le coup "
+			f"({acteur.get('nom', '?')}).")
+		if issue == "fumble":
+			_appliquer_fumble(combat_doc, acteur)
+
+
+def _traiter_ko(combat_doc: dict, defenseur: dict, attaquant: dict) -> None:
+	"""Un corps vient de tomber à 0 PV : marqueurs, ligne de journal, défaite ou victoire.
+
+	Extrait de `_do_attack_on`, qui ne pouvait abattre qu'UN acteur par coup. Le LIEN DE
+	VIE en fait tomber potentiellement DEUX — le protégé et son protecteur — et les deux
+	doivent suivre exactement la même cascade.
+
+	⚠️ `est_joueur` est RECALCULÉ ici depuis la victime, jamais hérité du défenseur : un
+	protecteur du camp du joueur passerait sinon par la branche « proie », qui le
+	déclarerait mort-depçable et lui retirerait son XP.
+	⚠️ Les marqueurs (`morte`, `dissipe`) sont posés AVANT la ligne, qui photographie
+	l'état de la victime (`_avec_etat`) : après, `morte: False` serait figé dans le journal
+	et la cargaison d'une monture ne se déverserait jamais à l'écran.
+	"""
+	est_joueur = str(defenseur.get("id", "")).startswith("joueur_")
+	if est_joueur:
+		# KO d'un membre du groupe : le combat continue tant qu'il reste un
+		# joueur debout — la défaite n'arrive que TOUS à terre.
+		est_monture = defenseur.get("est_monture")
+		est_protege = defenseur.get("est_protege")
+		# La cargaison vit sur le DOC de la monture, pas sur son snapshot : on se
+		# contente de la marquer ici, `finalize_combat` déversera son sac AU SOL (là
+		# où le doc est chargé, et sauvé) — la ligne ci-dessous le dit déjà, il aura
+		# fallu le mécanisme du sol pour qu'elle cesse de mentir. Une personne ESCORTÉE
+		# porte le même marqueur `morte` — c'est `_finalize_protege` qui en tirera la
+		# mort et l'échec de la quête, au même endroit et pour la même raison.
+		# ⚠️ Marqué AVANT la ligne, qui porte l'état du défenseur (`morte`).
+		if est_monture or est_protege:
+			defenseur["morte"] = True
+		if defenseur.get("est_invocation"):
+			# Une créature invoquée n'est pas « à terre » : elle cesse d'être là.
+			# ⚠️ Marquée `dissipe` ICI, sinon elle traînerait à 0 PV jusqu'à son
+			# propre tour — que `_resolve_until_player` saute justement parce
+			# qu'elle est à 0 PV. Personne ne la retirerait jamais du combat.
+			defenseur["dissipe"] = True
+			texte_ko = f"{defenseur['nom']} est mis en pièces et se dissipe en fumée."
+		elif est_monture:
+			texte_ko = f"{defenseur['nom']} s'effondre — sa charge se répand au sol !"
+		elif est_protege:
+			# ⚠️ Tournure NEUTRE en genre : le snapshot ne porte pas le sexe, et une
+			# escorte peut viser n'importe qui — un accord fautif se verrait à chaque
+			# partie. (Même précaution que la règle « aucun pronom genré » des dialogues.)
+			texte_ko = f"{defenseur['nom']} s'effondre… La promesse n'aura pas tenu."
+		else:
+			texte_ko = f"{defenseur['nom']} est à terre !"
+		combat_doc["log"].append(_avec_etat({
+			"tour": combat_doc["tour"],
+			"acteur": "Système",
+			"kind": "sys",
+			"texte": texte_ko,
+		}, defenseur))
+		# ⚠️ `_combattants_vivants` et non la liste brute : une monture debout ne
+		# doit pas empêcher la défaite d'être déclarée (plus personne ne joue).
+		# ⚠️ Garde `status` : depuis le lien de vie, un même coup peut faire tomber DEUX
+		# corps, donc appeler cette cascade deux fois. Sans elle, la seconde réécrirait
+		# « Tout le groupe est à terre… Défaite. » une deuxième fois dans le journal.
+		if not _combattants_vivants(combat_doc) and combat_doc["status"] == "active":
+			combat_doc["status"] = "defaite"
+			combat_doc["log"].append({
+				"tour": combat_doc["tour"],
+				"acteur": "Système",
+				"kind": "sys",
+				"texte": "Tout le groupe est à terre… Défaite.",
+			})
+	else:
+		# Proie tuée par un monstre : le joueur n'en tire pas l'XP (kill qu'il
+		# n'a pas fait) mais la carcasse reste dépeçable (butin conservé).
+		defenseur["vivant"] = False
+		defenseur["tue_par_monstre"] = True
+		defenseur["xp_reward"] = 0
+		combat_doc["log"].append(_avec_etat({
+			"tour": combat_doc["tour"],
+			"acteur": attaquant["nom"],
+			"kind": "kill",
+			"texte": f"{attaquant['nom']} abat {defenseur['nom']} !",
+		}, defenseur))
+		_check_victory(combat_doc)
+
+
 def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 	"""Attaque physique d'un monstre sur un défenseur — le joueur (cas normal) OU un
 	autre monstre (chasse prédateur/proie pendant la furtivité du joueur). L'`esquive`
@@ -2308,7 +3057,14 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 		ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
 		dmg = calculer_degats(attaquant, defenseur, attaquant["degats_cc"],
 							  jet["mult_degats"], "cc", zone=zone)
-		defenseur["currentPV"] = max(0, defenseur["currentPV"] - dmg)
+		# LIEN DE VIE : une partie du coup peut être absorbée puis reportée sur un
+		# protecteur. ⚠️ Les DEUX déductions de PV avant le moindre `_traiter_ko` : la
+		# première cascade interroge `_combattants_vivants`, qui répondrait sur un état
+		# incomplet si le protecteur n'avait pas encore encaissé sa part.
+		dmg_def, dmg_prot, protecteur = _rediriger_lien_vie(combat_doc, defenseur, dmg)
+		defenseur["currentPV"] = max(0, defenseur["currentPV"] - dmg_def)
+		if protecteur is not None:
+			protecteur["currentPV"] = max(0, protecteur["currentPV"] - dmg_prot)
 		# Un tour de monstre est entièrement résolu côté serveur : sans cette charge sur
 		# l'entrée de journal, un coup encaissé par le joueur ne pourrait jamais s'animer.
 		# ⚠️ L'ATTAQUANT est en état lui aussi, alors que ses PV ne bougent pas : c'est sa
@@ -2327,66 +3083,33 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 			),
 		}, "monstre", defenseur.get("id", ""), attaquant.get("animation"), attaquant.get("id", "")),
 			attaquant, defenseur))
+		if protecteur is not None:
+			# ⚠️ Ligne SÉPARÉE, et non un troisième acteur gelé sur la ligne ci-dessus :
+			# `_gelerActeurs` (client) ne rembobine que les acteurs qu'une entrée NOMME, et
+			# `_avec_vfx` ne porte qu'UNE cible. Sans sa propre ligne, la barre du protecteur
+			# chuterait dès l'arrivée de la réponse, avant que le coup ne s'anime — le défaut
+			# même que toute la révélation différée existe pour empêcher.
+			combat_doc["log"].append(_avec_etat(_avec_vfx({
+				"tour": combat_doc["tour"],
+				"acteur": protecteur["nom"],
+				"kind": "hit",
+				"texte": f"Le lien de vie détourne {dmg_prot} dégâts vers "
+						 f"{protecteur['nom']} ! "
+						 f"(PV : {protecteur['currentPV']}/{protecteur['pv_max']})",
+			}, "monstre", protecteur.get("id", "")), protecteur))
+		# CONCENTRATION : chaque corps qui a réellement perdu des PV risque ce qu'il tenait.
+		# ⚠️ Avant les cascades de KO : un mort n'a plus rien à concentrer, et la ligne se
+		# lirait absurdement après son « est à terre ».
+		if dmg_def > 0:
+			_tester_concentration(combat_doc, defenseur, attaquant, dmg_def)
+		if protecteur is not None and dmg_prot > 0:
+			_tester_concentration(combat_doc, protecteur, attaquant, dmg_prot)
 		if defenseur["currentPV"] <= 0:
-			if est_joueur:
-				# KO d'un membre du groupe : le combat continue tant qu'il reste un
-				# joueur debout — la défaite n'arrive que TOUS à terre.
-				est_monture = defenseur.get("est_monture")
-				est_protege = defenseur.get("est_protege")
-				# La cargaison vit sur le DOC de la monture, pas sur son snapshot : on se
-				# contente de la marquer ici, `finalize_combat` déversera son sac AU SOL (là
-				# où le doc est chargé, et sauvé) — la ligne ci-dessous le dit déjà, il aura
-				# fallu le mécanisme du sol pour qu'elle cesse de mentir. Une personne ESCORTÉE
-				# porte le même marqueur `morte` — c'est `_finalize_protege` qui en tirera la
-				# mort et l'échec de la quête, au même endroit et pour la même raison.
-				# ⚠️ Marqué AVANT la ligne, qui porte l'état du défenseur (`morte`).
-				if est_monture or est_protege:
-					defenseur["morte"] = True
-				if defenseur.get("est_invocation"):
-					# Une créature invoquée n'est pas « à terre » : elle cesse d'être là.
-					# ⚠️ Marquée `dissipe` ICI, sinon elle traînerait à 0 PV jusqu'à son
-					# propre tour — que `_resolve_until_player` saute justement parce
-					# qu'elle est à 0 PV. Personne ne la retirerait jamais du combat.
-					defenseur["dissipe"] = True
-					texte_ko = f"{defenseur['nom']} est mis en pièces et se dissipe en fumée."
-				elif est_monture:
-					texte_ko = f"{defenseur['nom']} s'effondre — sa charge se répand au sol !"
-				elif est_protege:
-					# ⚠️ Tournure NEUTRE en genre : le snapshot ne porte pas le sexe, et une
-					# escorte peut viser n'importe qui — un accord fautif se verrait à chaque
-					# partie. (Même précaution que la règle « aucun pronom genré » des dialogues.)
-					texte_ko = f"{defenseur['nom']} s'effondre… La promesse n'aura pas tenu."
-				else:
-					texte_ko = f"{defenseur['nom']} est à terre !"
-				combat_doc["log"].append(_avec_etat({
-					"tour": combat_doc["tour"],
-					"acteur": "Système",
-					"kind": "sys",
-					"texte": texte_ko,
-				}, defenseur))
-				# ⚠️ `_combattants_vivants` et non la liste brute : une monture debout ne
-				# doit pas empêcher la défaite d'être déclarée (plus personne ne joue).
-				if not _combattants_vivants(combat_doc):
-					combat_doc["status"] = "defaite"
-					combat_doc["log"].append({
-						"tour": combat_doc["tour"],
-						"acteur": "Système",
-						"kind": "sys",
-						"texte": "Tout le groupe est à terre… Défaite.",
-					})
-			else:
-				# Proie tuée par un monstre : le joueur n'en tire pas l'XP (kill qu'il
-				# n'a pas fait) mais la carcasse reste dépeçable (butin conservé).
-				defenseur["vivant"] = False
-				defenseur["tue_par_monstre"] = True
-				defenseur["xp_reward"] = 0
-				combat_doc["log"].append(_avec_etat({
-					"tour": combat_doc["tour"],
-					"acteur": attaquant["nom"],
-					"kind": "kill",
-					"texte": f"{attaquant['nom']} abat {defenseur['nom']} !",
-				}, defenseur))
-				_check_victory(combat_doc)
+			_traiter_ko(combat_doc, defenseur, attaquant)
+		if protecteur is not None and protecteur["currentPV"] <= 0:
+			# Le protecteur peut tomber sous le coup qu'il absorbe — même cascade, et le
+			# même `attaquant` en est la cause, même s'il ne l'a jamais visé.
+			_traiter_ko(combat_doc, protecteur, attaquant)
 	else:
 		# Rien n'a changé chez le défenseur, mais l'attaquant vient peut-être d'arriver
 		# (chasse d'une proie, sans ligne de déplacement) : sa position doit se poser ici.
@@ -2715,11 +3438,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 		cible_furtive = min(furtifs, key=lambda j: _cheby(monstre, j)) if furtifs else None
 		if cible_furtive is None or not _tenter_detection(combat_doc, monstre, cible_furtive):
 			_chasse_ou_erre(combat_doc, monstre, grid)
-			idx = combat_doc["acteur_courant_index"] + 1
-			if idx >= len(combat_doc["ordre_initiative"]):
-				idx = 0
-				combat_doc["tour"] += 1
-			combat_doc["acteur_courant_index"] = idx
+			_avancer_tour(combat_doc)
 			return
 		joueur = cible_furtive
 
@@ -2754,11 +3473,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			break
 		_do_monster_attack(combat_doc, monstre, joueur)   # décompte l'action lui-même
 
-	idx = combat_doc["acteur_courant_index"] + 1
-	if idx >= len(combat_doc["ordre_initiative"]):
-		idx = 0
-		combat_doc["tour"] += 1
-	combat_doc["acteur_courant_index"] = idx
+	_avancer_tour(combat_doc)
 
 
 def _frapper_monstre(combat_doc: dict, attaquant: dict, monstre: dict, profil: dict) -> tuple:
@@ -2863,11 +3578,7 @@ def _run_defenseur_turn(combat_doc: dict, joueur: dict) -> None:
 			_appliquer_fumble(combat_doc, joueur)
 		_check_victory(combat_doc)
 
-	idx = combat_doc["acteur_courant_index"] + 1
-	if idx >= len(combat_doc["ordre_initiative"]):
-		idx = 0
-		combat_doc["tour"] += 1
-	combat_doc["acteur_courant_index"] = idx
+	_avancer_tour(combat_doc)
 
 
 def _run_invocation_turn(combat_doc: dict, invoc: dict, grid: dict) -> None:
@@ -2921,16 +3632,17 @@ def _run_invocation_turn(combat_doc: dict, invoc: dict, grid: dict) -> None:
 			_appliquer_fumble(combat_doc, invoc)
 		_check_victory(combat_doc)
 
-	invoc["invocation_restants"] = int(invoc.get("invocation_restants", 1)) - 1
-	if invoc["invocation_restants"] <= 0:
-		_dissiper_invocation(combat_doc, invoc,
-							 f"{invoc['nom']} retourne d'où il vient — l'appel est épuisé.")
+	# ⚠️ Une créature TENUE par un sort maintenu ne compte plus ses tours : c'est l'entretien
+	# en PM qui la garde là (cf. `_payer_maintiens`), et c'est le défaut de paiement qui la
+	# renvoie. Continuer le compte à rebours la ferait disparaître alors que son invocateur
+	# paie toujours — deux horloges pour une seule créature, dont la plus courte gagnerait.
+	if not invoc.get("sort_maintenu"):
+		invoc["invocation_restants"] = int(invoc.get("invocation_restants", 1)) - 1
+		if invoc["invocation_restants"] <= 0:
+			_dissiper_invocation(combat_doc, invoc,
+								 f"{invoc['nom']} retourne d'où il vient — l'appel est épuisé.")
 
-	idx = combat_doc["acteur_courant_index"] + 1
-	if idx >= len(combat_doc["ordre_initiative"]):
-		idx = 0
-		combat_doc["tour"] += 1
-	combat_doc["acteur_courant_index"] = idx
+	_avancer_tour(combat_doc)
 
 
 def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool = False) -> None:
@@ -2944,15 +3656,18 @@ def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool =
 	elles. C'est aussi ici que les invocations expirées quittent le combat.
 	"""
 	ordre = combat_doc["ordre_initiative"]
-	max_iter = len(ordre) * 20
+	# Garde-fou de boucle. Une itération est consommée par : un tour de monstre, de défenseur
+	# ou d'invocation, un joueur à terre ou un monstre mort qu'on saute — et désormais un
+	# tour de CANALISATION, sauté parce que l'incantation a mangé tout le budget. Ce dernier
+	# poste dépend du CONTENU (un sort peut demander jusqu'à INCANTATION_PA_MAX PA, soit
+	# autant de tours sautés pour un lanceur), d'où la marge explicite : sans elle, un groupe
+	# de mages sur un sort très long épuiserait le compteur et sortirait, en silence, sur un
+	# combat figé.
+	max_iter = len(ordre) * (20 + INCANTATION_PA_MAX)
 
 	if not start_at_current:
 		# Move past current actor before entering the loop
-		idx = combat_doc["acteur_courant_index"] + 1
-		if idx >= len(ordre):
-			idx = 0
-			combat_doc["tour"] += 1
-		combat_doc["acteur_courant_index"] = idx
+		_avancer_tour(combat_doc)
 
 	for _ in range(max_iter):
 		if combat_doc["status"] != "active":
@@ -2977,23 +3692,30 @@ def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool =
 				if joueur.get("jouable") is False:
 					_run_defenseur_turn(combat_doc, joueur)
 					continue
+				# ⚠️ C'est `_reset_turn_budget` qui prélève l'entretien des sorts maintenus
+				# ET fait avancer une incantation longue : le budget qu'il rend peut donc
+				# être déjà entièrement mangé quand il revient.
 				_reset_turn_budget(joueur, combat_doc)
+				if joueur["actions_restantes"] <= 0:
+					# CANALISATION : la main ne va PAS au client. Il n'aurait aucune action
+					# à jouer et `resolve_action` lui refuserait tout, `passer` compris —
+					# le joueur resterait devant une interface morte.
+					# ⚠️ On teste le BUDGET, jamais un drapeau « canalise » : un lanceur dont
+					# l'entretien vient d'échouer (plus de PM, incantation rompue) a retrouvé
+					# son budget et doit rejouer normalement. Un drapeau le sauterait à vie.
+					# ⚠️ `_avancer_tour` AVANT `continue` : sans lui on tourne sur le même
+					# index, `max_iter` s'épuise en silence et le combat ressort avec la main
+					# plantée sur le lanceur — tous les boutons éteints, partie bloquée.
+					_avancer_tour(combat_doc)
+					continue
 				break
 			# Joueur KO (à terre) : son tour est sauté, comme un monstre mort.
-			idx = combat_doc["acteur_courant_index"] + 1
-			if idx >= len(ordre):
-				idx = 0
-				combat_doc["tour"] += 1
-			combat_doc["acteur_courant_index"] = idx
+			_avancer_tour(combat_doc)
 			continue
 		monstre = _get_monstre(combat_doc, actor_id)
 		if not monstre or not monstre["vivant"]:
 			# Dead monster — skip
-			idx = combat_doc["acteur_courant_index"] + 1
-			if idx >= len(ordre):
-				idx = 0
-				combat_doc["tour"] += 1
-			combat_doc["acteur_courant_index"] = idx
+			_avancer_tour(combat_doc)
 			continue
 		_run_monster_turn(combat_doc, monstre, grid)
 
@@ -3009,6 +3731,229 @@ def resolve_first_turns(combat_doc: dict) -> None:
 
 
 # ── API publique ────────────────────────────────────────────────────────────
+
+def _lancer_sort(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
+				 cible_id: str | None, dx, dy, grid: dict) -> tuple:
+	"""Résout un sort qui PART : les quatre familles de lancement, et rien d'autre.
+
+	CHOKEPOINT PARTAGÉ par les deux chemins qui font partir un sort — le lancement direct
+	(branche `sort` de `resolve_action`) et la fin d'une INCANTATION LONGUE, qui se résout
+	des tours plus tard depuis `_avancer_incantation`. Les deux doivent aboutir au même
+	état : deux copies divergeraient au premier effet ajouté.
+
+	⚠️ Ne touche NI le compteur d'actions, NI la charge (composants), NI le fumble, NI la
+	victoire : tout cela appartient au LANCEMENT et se paie une seule fois, alors qu'une
+	incantation longue traverse plusieurs tours. L'appelant s'en charge.
+	⚠️ Les PM de lancement sont débités ICI pour un sort instantané ; une incantation
+	longue les a déjà versés par tranches (`pm_verses`) et passe `cout_pm` à 0.
+
+	Rend `(resultat, jet)` — `jet` renseigné par la seule branche offensive.
+	"""
+	cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
+	invocation = sdoc.get("invocation") or None
+	jet = None   # renseigné seulement par la branche offensive (jet de toucher)
+	# ⚠️ Le SAUT se valide AVANT le moindre débit : sa destination est désignée par le
+	# joueur, donc refusable, et la règle du moteur est constante — un sort qui ne part pas
+	# ne se paie pas. La branche qui l'exécute revalidera, c'est le même chokepoint.
+	if effets.get("saut"):
+		sauteur = (_get_joueur(combat_doc, cible_id) if sdoc.get("cible") == "allie"
+				   else joueur)
+		if sauteur is not None:
+			erreur = _verifier_saut(combat_doc, sauteur, effets, dx, dy, grid)
+			if erreur:
+				return erreur, None
+	if invocation:
+		# INVOCATION : le sort ne vise personne, il ajoute des combattants. Testée AVANT
+		# `cible`, qui ne décrit pas ce qu'elle fait (une invocation est `soi` par défaut,
+		# mais elle ne se pose rien sur soi).
+		# ⚠️ Aucune case libre autour du lanceur ⇒ le sort NE PART PAS : ni PM, ni action.
+		# Le contraire ferait payer plein tarif une incantation dont il ne sort rien, et
+		# c'est le seul échec ici qui ne doit rien à un jet de dés.
+		# ⚠️ EXCLUSIF des trois autres branches : un sort qui invoque n'applique aucun de
+		# ses `effets`. Ce qu'il produit est la créature, pas un buff — et lui laisser les
+		# deux ferait d'une invocation le meilleur sort de soi du jeu, pour le même coût.
+		crees = invoquer(combat_doc, joueur, sdoc, grid)
+		if not crees:
+			return {"error": "Aucune place autour de vous pour faire apparaître la créature."}, None
+		joueur["currentPM"] -= cout_pm
+		noms = ", ".join(c["nom"] for c in crees)
+		combat_doc["log"].append(_avec_etat({
+			"tour": combat_doc["tour"],
+			"acteur": joueur["nom"],
+			"kind": "sys",
+			"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {noms} "
+					 f"répond à l'appel ({crees[0]['invocation_restants']} tour(s)).",
+		}, joueur))
+		result = {"sort": sdoc.get("nom"),
+				  "invoques": [{"id": c["id"], "nom": c["nom"],
+								"restants": c["invocation_restants"]} for c in crees]}
+	elif sdoc.get("cible") == "allie":
+		# Sort d'entraide : compagnon OU monture, désigné par son id de snapshot.
+		# Aucun jet, aucun compteur d'attaque — seulement l'action et les PM.
+		allie = _get_joueur(combat_doc, cible_id) if cible_id else None
+		res_allie = _lancer_sur_allie(combat_doc, joueur, allie, sdoc, effets,
+									  sdoc.get("portee", 1), grid)
+		if "error" in res_allie:
+			return res_allie, None   # PM NON débités : le sort n'est jamais parti
+		joueur["currentPM"] -= cout_pm
+		result = {"sort": sdoc.get("nom"), **res_allie}
+		# ZONE DE SOUTIEN : les alliés que la forme ajoute au désigné, lui déjà servi.
+		# ⚠️ Les gardes de `_lancer_sur_allie` (portée, ligne de vue, « à terre ») ne
+		# valent que pour le DÉSIGNÉ : c'est contre lui que le sort a été autorisé.
+		autres = _servir_zone_soutien(combat_doc, joueur, allie, sdoc, effets,
+									  sdoc.get("zone"), grid)
+		if autres:
+			result["beneficiaires"] = autres
+		# LIEN DE VIE : le sort ne pose rien sur le désigné, il TISSE entre lui et le
+		# lanceur. Posé après le soutien, pour que la zone serve d'abord normalement.
+		_poser_lien_vie(combat_doc, joueur, allie, sdoc, effets)
+		# SAUT sur un allié : la case d'arrivée est celle que le joueur a désignée.
+		saut = _sauter(combat_doc, joueur, allie, effets, dx, dy, grid)
+		if "error" in saut:
+			return saut, None
+		result.update(saut)
+	elif sdoc.get("cible") == "ennemi":
+		# Dégâts OU part à durée : un sort offensif peut n'être qu'un debuff
+		# (« −10 Ag pendant 2 tours »), il lui suffit d'avoir quelque chose à faire.
+		# ⚠️ TROISIÈME garde jumelle, avec `sorts.sort_utilisable_combat` et le test de
+		# `resolve_action` : une siphonie pure (`degats_pm` seul, sans le moindre dégât de
+		# PV) doit passer les trois. Elle est le cœur de la famille anti-lanceur.
+		if not (effets.get("degats") or effets.get("degats_pm") or part_durative(effets)):
+			return {"error": "Ce sort n'a aucun effet sur une cible."}, None
+		monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
+		if not monstre or not monstre["vivant"]:
+			return {"error": "Cible invalide."}, None
+		sort_portee = max(1, int(sdoc.get("portee", 1) or 1))
+		# Règles à distance identiques au jet/tir : un sort de portée > 1 est
+		# interdit si engagé au corps à corps et exige une ligne de vue ; un sort
+		# de contact (portée 1) reste lançable en mêlée.
+		if sort_portee > 1:
+			if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
+				return {"error": "Un ennemi vous menace au corps à corps : impossible d'incanter."}, None
+			if not _vue_acteurs(grid["cells"], joueur, monstre):
+				return {"error": "Ligne de vue obstruée."}, None
+		if _cheby(joueur, monstre) > sort_portee:
+			return {"error": "Cible hors de portée."}, None
+
+		# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés).
+		joueur["currentPM"] -= cout_pm
+		# Jet porté par la DONNÉE, exactement comme pour les compétences :
+		# `magique` (défaut des sorts) se résout sous toucher_magique contre la
+		# pm_def ; un sort de CONTACT marqué `cc`/`cd` (« au toucher ») exige
+		# d'abord de poser la main — jet martial contre la défense physique.
+		mode_jet = sdoc.get("jet") or "magique"
+		# ZONE D'EFFET : la cible désignée d'abord, puis tout monstre pris dans la
+		# forme (cf. utils/zones_effet.py). `zone` absente ⇒ liste d'un seul élément,
+		# donc exactement le comportement d'avant.
+		cibles_sort = cibles_de_zone(combat_doc, joueur, monstre, sdoc.get("zone"), grid)
+		nom_sort = sdoc.get("nom", "un sort")
+		result, jet = _resoudre_capacite_offensive(
+			combat_doc, joueur, cibles_sort, sdoc, effets, effets.get("degats", ""),
+			mode_jet, "sort", TEXTES_SORT,
+			{"nom": nom_sort, "nom_fumble": sdoc.get("nom", "le sort")})
+		result["sort"] = sdoc.get("nom")
+
+		# Incanter au contact révèle le lanceur (touché ou raté) ; à distance, seule la
+		# cible tente de le repérer — foudroyée sur place, elle n'en a même pas le temps.
+		_furtivite_apres_offensive(combat_doc, joueur, monstre, sort_portee > 1)
+	else:
+		# Sort sur soi : toujours lançable ; débit PM puis part instantanée clampée.
+		joueur["currentPM"] -= cout_pm
+		avant_pv, avant_pm = joueur["currentPV"], joueur["currentPM"]
+		joueur["currentPV"] = min(joueur["pv_max"], avant_pv + int(effets.get("pv", 0) or 0))
+		joueur["currentPM"] = min(joueur["pm_max"], avant_pm + int(effets.get("pm", 0) or 0))
+		pv_rendu = joueur["currentPV"] - avant_pv
+		pm_rendu = joueur["currentPM"] - avant_pm
+		# Part à DURÉE : empilée sur les effets vivants du snapshot (buffs de caract,
+		# régén, esquive), qui recalcule aussitôt les dérivées du lanceur.
+		effet_pose = _empiler_effet_combat(joueur, sdoc, effets, combat_doc["tour"])
+		gains = " / ".join(s for s in (
+			f"+{pv_rendu} PV" if pv_rendu else "",
+			f"+{pm_rendu} PM" if pm_rendu else "",
+			f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
+		) if s) or "aucun effet"
+		combat_doc["log"].append(_avec_etat({
+			"tour": combat_doc["tour"],
+			"acteur": joueur["nom"],
+			"kind": "sys",
+			"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} ({gains}).",
+		}, joueur))
+		# Sort de dissimulation (effets.furtivite > 0) : pose l'état furtif et
+		# remet la détection de tous les monstres à zéro.
+		if int(effets.get("furtivite", 0) or 0) > 0:
+			_activer_furtivite(combat_doc, joueur, int(effets["furtivite"]))
+		result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
+				  "furtif": bool(joueur.get("furtif")),
+				  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
+		# ZONE DE SOUTIEN autour de soi (cri de ralliement, nappe de soin) : le
+		# lanceur vient d'être servi ci-dessus, la forme est ancrée sur lui et, faute
+		# de cible désignée, orientée par son `facing`.
+		autres = _servir_zone_soutien(combat_doc, joueur, joueur, sdoc, effets,
+									  sdoc.get("zone"), grid)
+		if autres:
+			result["beneficiaires"] = autres
+		# SAUT sur soi : le cas courant de la téléportation tactique.
+		saut = _sauter(combat_doc, joueur, joueur, effets, dx, dy, grid)
+		if "error" in saut:
+			return saut, None
+		result.update(saut)
+
+	# ⚠️ ICI et pas plus haut : on n'entretient que ce qui est réellement parti. Toutes les
+	# sorties en erreur ci-dessus ont déjà rendu la main, donc aucune concentration
+	# fantôme ne survit à un sort refusé.
+	entree = _enregistrer_concentration(combat_doc, joueur, sdoc, cible_id)
+	if entree:
+		result["concentrations"] = [dict(c) for c in _concentrations(joueur)]
+	return result, jet
+
+
+def _enregistrer_concentration(combat_doc: dict, joueur: dict, sdoc: dict,
+							   cible_id: str | None) -> dict | None:
+	"""Inscrit un sort MAINTENU dans les concentrations du lanceur — None s'il n'en est pas un.
+
+	L'entrée est ce que `_payer_maintiens` prélèvera à chaque tour, et ce que
+	`_rompre_concentration` défera. Elle rattache aussi les objets que le sort TIENT :
+	  • les créatures qu'il vient d'appeler (marquées `sort_maintenu`), pour qu'elles se
+		dissipent avec lui plutôt qu'à l'épuisement de leur propre compteur ;
+	  • le lien de vie qu'il pose sur le protégé.
+	"""
+	if not est_maintenu(sdoc):
+		return None
+	sort_id = sdoc.get("id", "")
+	entree = {
+		"sort_id": sort_id,
+		"nom": sdoc.get("nom", "un sort"),
+		"icon": sdoc.get("icon", "🔮"),
+		"maintien": max(0, int(sdoc.get("maintien", 0) or 0)),
+		"cible_id": cible_id or "",
+	}
+	concentrations = [c for c in _concentrations(joueur)
+					  if str(c.get("sort_id") or "") != sort_id]
+	concentrations.append(entree)
+	joueur["concentrations"] = concentrations
+
+	# Chip de suivi sur le LANCEUR. ⚠️ Indispensable pour un sort maintenu OFFENSIF (Mur de
+	# feu) ou un LIEN DE VIE : leur part durative vit sur la victime ou sur le protégé, donc
+	# le lanceur n'a rien dans ses propres `effets_actifs` — il paierait chaque round pour
+	# quelque chose d'invisible, sans même pouvoir le relâcher (la chip EST le bouton).
+	if not any(str(e.get("source_id") or "") == sort_id
+			   for e in joueur.get("effets_actifs") or []):
+		poser_effet(joueur, {
+			"source_id": sort_id, "nom": entree["nom"], "icon": entree["icon"],
+			"buffs": {}, "regen_pv": 0, "regen_pm": 0, "esquive": 0,
+			"restants": 1, "pose_tour": int(combat_doc.get("tour", 0) or 0),
+			"maintenu": True, "maintien": entree["maintien"],
+		})
+
+	# Les créatures que CE sort vient d'appeler cessent de compter leurs tours : c'est
+	# l'entretien qui les tient désormais (cf. `_run_invocation_turn`).
+	for invoc in combat_doc.get("joueurs") or []:
+		if (invoc.get("est_invocation") and not invoc.get("sort_maintenu")
+				and invoc.get("invocateur_id") == joueur.get("id")
+				and invoc.get("sort_id") == sort_id):
+			invoc["sort_maintenu"] = sort_id
+	return entree
+
 
 def resolve_action(
 	combat_doc: dict, action_type: str, cible_id: str | None = None,
@@ -3178,6 +4123,27 @@ def resolve_action(
 		joueur["actions_restantes"] = 0
 		result = {"passed": True}
 
+	elif action_type == "interrompre":
+		# Cesser d'entretenir un sort MAINTENU dont on ne veut plus payer le prix. GRATUIT —
+		# relâcher un effort n'est pas un geste, et faire payer la sortie enfermerait un mage
+		# dans son propre sort jusqu'à ce que ses PM s'épuisent.
+		# ⚠️ Ne vise QUE les sorts maintenus, et c'est délibéré : une INCANTATION ne
+		# s'abandonne pas. Elle absorbe tout le budget du tour (`_avancer_incantation`), donc
+		# la main ne revient jamais au joueur tant qu'elle dure — commencer un Météore, c'est
+		# s'y engager. Seuls un coup encaissé (test de concentration) ou le manque de PM
+		# peuvent encore l'arrêter, et c'est précisément ce qui fait du mage un artilleur que
+		# ses alliés doivent protéger.
+		entree = next((c for c in _concentrations(joueur)
+					   if str(c.get("sort_id") or "") == str(cible_id or "")), None)
+		if not entree:
+			return {"error": "Vous n'entretenez pas ce sort."}
+		_rompre_concentration(
+			combat_doc, joueur, entree,
+			f"{joueur['nom']} cesse d'entretenir {entree.get('nom', 'son sort')}.")
+		result = {"interrompu": True,
+				  "concentrations": [dict(c) for c in _concentrations(joueur)],
+				  "currentPM": joueur["currentPM"]}
+
 	elif action_type == "fuir":
 		init_max = max(
 			(m["initiative"] for m in combat_doc["monstres"] if m["vivant"]),
@@ -3311,132 +4277,36 @@ def resolve_action(
 		effets = sort.get("effets") or {}
 		cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
 		invocation = sdoc.get("invocation") or None
-		if not (invocation or effets.get("degats") or effets.get("pv") or effets.get("pm")
-				or int(effets.get("furtivite", 0) or 0) > 0 or part_durative(effets)):
+		# ⚠️ JUMEAU de `sorts.sort_utilisable_combat` : les deux doivent accepter les mêmes
+		# sorts, sinon un sort passe le filtre du router puis se fait refuser ici.
+		if not (invocation or est_maintenu(sdoc) or effets.get("degats") or effets.get("pv")
+				or effets.get("pm") or int(effets.get("furtivite", 0) or 0) > 0
+				or effets.get("degats_pm") or int(effets.get("saut", 0) or 0) > 0
+				or effets.get("lien_vie") or part_durative(effets)):
 			return {"error": "Ce sort n'a aucun effet utilisable en combat."}
-		if joueur["currentPM"] < cout_pm:
-			return {"error": "PM insuffisants."}
+		cout_pv = max(0, int(effets.get("cout_pv", 0) or 0))
+		# ⚠️ `>` STRICT : à 0 PV le lanceur est « à terre ». Un sort capable d'assommer son
+		# auteur par sa seule facture ouvrirait une condition de défaite absurde.
+		if cout_pv and joueur["currentPV"] <= cout_pv:
+			return {"error": "Pas assez de PV pour payer ce sort."}
 
-		jet = None   # renseigné seulement par la branche offensive (jet de toucher)
-		if invocation:
-			# INVOCATION : le sort ne vise personne, il ajoute des combattants. Testée AVANT
-			# `cible`, qui ne décrit pas ce qu'elle fait (une invocation est `soi` par défaut,
-			# mais elle ne se pose rien sur soi).
-			# ⚠️ Aucune case libre autour du lanceur ⇒ le sort NE PART PAS : ni PM, ni action.
-			# Le contraire ferait payer plein tarif une incantation dont il ne sort rien, et
-			# c'est le seul échec ici qui ne doit rien à un jet de dés.
-			# ⚠️ EXCLUSIF des trois autres branches : un sort qui invoque n'applique aucun de
-			# ses `effets`. Ce qu'il produit est la créature, pas un buff — et lui laisser les
-			# deux ferait d'une invocation le meilleur sort de soi du jeu, pour le même coût.
-			crees = invoquer(combat_doc, joueur, sdoc, grid)
-			if not crees:
-				return {"error": "Aucune place autour de vous pour faire apparaître la créature."}
-			joueur["currentPM"] -= cout_pm
-			noms = ", ".join(c["nom"] for c in crees)
-			combat_doc["log"].append(_avec_etat({
-				"tour": combat_doc["tour"],
-				"acteur": joueur["nom"],
-				"kind": "sys",
-				"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {noms} "
-						 f"répond à l'appel ({crees[0]['invocation_restants']} tour(s)).",
-			}, joueur))
-			result = {"sort": sdoc.get("nom"),
-					  "invoques": [{"id": c["id"], "nom": c["nom"],
-									"restants": c["invocation_restants"]} for c in crees]}
-		elif sdoc.get("cible") == "allie":
-			# Sort d'entraide : compagnon OU monture, désigné par son id de snapshot.
-			# Aucun jet, aucun compteur d'attaque — seulement l'action et les PM.
-			allie = _get_joueur(combat_doc, cible_id) if cible_id else None
-			res_allie = _lancer_sur_allie(combat_doc, joueur, allie, sdoc, effets,
-										  sdoc.get("portee", 1), grid)
-			if "error" in res_allie:
-				return res_allie   # PM NON débités : le sort n'est jamais parti
-			joueur["currentPM"] -= cout_pm
-			result = {"sort": sdoc.get("nom"), **res_allie}
-			# ZONE DE SOUTIEN : les alliés que la forme ajoute au désigné, lui déjà servi.
-			# ⚠️ Les gardes de `_lancer_sur_allie` (portée, ligne de vue, « à terre ») ne
-			# valent que pour le DÉSIGNÉ : c'est contre lui que le sort a été autorisé.
-			autres = _servir_zone_soutien(combat_doc, joueur, allie, sdoc, effets,
-										  sdoc.get("zone"), grid)
-			if autres:
-				result["beneficiaires"] = autres
-		elif sdoc.get("cible") == "ennemi":
-			# Dégâts OU part à durée : un sort offensif peut n'être qu'un debuff
-			# (« −10 Ag pendant 2 tours »), il lui suffit d'avoir quelque chose à faire.
-			if not effets.get("degats") and not part_durative(effets):
-				return {"error": "Ce sort n'a aucun effet sur une cible."}
-			monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
-			if not monstre or not monstre["vivant"]:
-				return {"error": "Cible invalide."}
-			sort_portee = max(1, int(sdoc.get("portee", 1) or 1))
-			# Règles à distance identiques au jet/tir : un sort de portée > 1 est
-			# interdit si engagé au corps à corps et exige une ligne de vue ; un sort
-			# de contact (portée 1) reste lançable en mêlée.
-			if sort_portee > 1:
-				if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
-					return {"error": "Un ennemi vous menace au corps à corps : impossible d'incanter."}
-				if not _vue_acteurs(grid["cells"], joueur, monstre):
-					return {"error": "Ligne de vue obstruée."}
-			if _cheby(joueur, monstre) > sort_portee:
-				return {"error": "Cible hors de portée."}
-
-			# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés).
-			joueur["currentPM"] -= cout_pm
-			# Jet porté par la DONNÉE, exactement comme pour les compétences :
-			# `magique` (défaut des sorts) se résout sous toucher_magique contre la
-			# pm_def ; un sort de CONTACT marqué `cc`/`cd` (« au toucher ») exige
-			# d'abord de poser la main — jet martial contre la défense physique.
-			mode_jet = sdoc.get("jet") or "magique"
-			# ZONE D'EFFET : la cible désignée d'abord, puis tout monstre pris dans la
-			# forme (cf. utils/zones_effet.py). `zone` absente ⇒ liste d'un seul élément,
-			# donc exactement le comportement d'avant.
-			cibles_sort = cibles_de_zone(combat_doc, joueur, monstre, sdoc.get("zone"), grid)
-			nom_sort = sdoc.get("nom", "un sort")
-			result, jet = _resoudre_capacite_offensive(
-				combat_doc, joueur, cibles_sort, sdoc, effets, effets.get("degats", ""),
-				mode_jet, "sort", TEXTES_SORT,
-				{"nom": nom_sort, "nom_fumble": sdoc.get("nom", "le sort")})
-			result["sort"] = sdoc.get("nom")
-
-			# Incanter au contact révèle le lanceur (touché ou raté) ; à distance, seule la
-			# cible tente de le repérer — foudroyée sur place, elle n'en a même pas le temps.
-			_furtivite_apres_offensive(combat_doc, joueur, monstre, sort_portee > 1)
+		if est_incantation_longue(sdoc):
+			# INCANTATION LONGUE : le sort ne part pas maintenant. Il s'arme, puis absorbe
+			# les PA du lanceur tour après tour (`_avancer_incantation`), et se résout de
+			# lui-même quand la totalité des PA a été versée.
+			# ⚠️ Testée AVANT le débit des PM : ils partent par TRANCHES, une par PA.
+			if joueur.get("incantation"):
+				return {"error": "Une incantation est déjà en cours."}
+			result = _armer_incantation(combat_doc, joueur, sdoc, effets, cible_id, dx, dy)
+			jet = None
+			_payer_cout_pv(combat_doc, joueur, sdoc, cout_pv)
 		else:
-			# Sort sur soi : toujours lançable ; débit PM puis part instantanée clampée.
-			joueur["currentPM"] -= cout_pm
-			avant_pv, avant_pm = joueur["currentPV"], joueur["currentPM"]
-			joueur["currentPV"] = min(joueur["pv_max"], avant_pv + int(effets.get("pv", 0) or 0))
-			joueur["currentPM"] = min(joueur["pm_max"], avant_pm + int(effets.get("pm", 0) or 0))
-			pv_rendu = joueur["currentPV"] - avant_pv
-			pm_rendu = joueur["currentPM"] - avant_pm
-			# Part à DURÉE : empilée sur les effets vivants du snapshot (buffs de caract,
-			# régén, esquive), qui recalcule aussitôt les dérivées du lanceur.
-			effet_pose = _empiler_effet_combat(joueur, sdoc, effets, combat_doc["tour"])
-			gains = " / ".join(s for s in (
-				f"+{pv_rendu} PV" if pv_rendu else "",
-				f"+{pm_rendu} PM" if pm_rendu else "",
-				f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
-			) if s) or "aucun effet"
-			combat_doc["log"].append(_avec_etat({
-				"tour": combat_doc["tour"],
-				"acteur": joueur["nom"],
-				"kind": "sys",
-				"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} ({gains}).",
-			}, joueur))
-			# Sort de dissimulation (effets.furtivite > 0) : pose l'état furtif et
-			# remet la détection de tous les monstres à zéro.
-			if int(effets.get("furtivite", 0) or 0) > 0:
-				_activer_furtivite(combat_doc, joueur, int(effets["furtivite"]))
-			result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
-					  "furtif": bool(joueur.get("furtif")),
-					  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
-			# ZONE DE SOUTIEN autour de soi (cri de ralliement, nappe de soin) : le
-			# lanceur vient d'être servi ci-dessus, la forme est ancrée sur lui et, faute
-			# de cible désignée, orientée par son `facing`.
-			autres = _servir_zone_soutien(combat_doc, joueur, joueur, sdoc, effets,
-										  sdoc.get("zone"), grid)
-			if autres:
-				result["beneficiaires"] = autres
+			if joueur["currentPM"] < cout_pm:
+				return {"error": "PM insuffisants."}
+			result, jet = _lancer_sort(combat_doc, joueur, sdoc, effets, cible_id, dx, dy, grid)
+			if "error" in result:
+				return result   # rien n'a été payé : le sort n'est jamais parti
+			_payer_cout_pv(combat_doc, joueur, sdoc, cout_pv)
 
 		# Les composants consommés quittent le sac → la charge portée baisse.
 		poids_consommes = float(sort.get("poids_consommes", 0) or 0)
@@ -3445,7 +4315,11 @@ def resolve_action(
 			_recompute_player_deplacement(joueur)
 			result["charge"] = joueur["charge"]
 		result["currentPM"] = joueur["currentPM"]
-		joueur["sorts"] = joueur.get("sorts", 0) + 1
+		# ⚠️ Une incantation LONGUE ne passe pas par ce compteur : ses PA sont déjà décomptés
+		# un par un par `canalisation` (cf. `_avancer_incantation`). L'ajouter ferait payer
+		# une action de plus le tour où le mage se contente de commencer à incanter.
+		if not est_incantation_longue(sdoc):
+			joueur["sorts"] = joueur.get("sorts", 0) + 1
 		_refresh_actions(joueur)
 		# Après le décompte du sort : une incantation ratée sur un échec critique coûte
 		# une action de PLUS (les PM, eux, sont déjà partis avant le jet).
@@ -3464,8 +4338,13 @@ def resolve_action(
 			return {"error": "Compétence invalide."}
 		effets = competence.get("effets") or {}
 		cout_pm = max(0, int(competence.get("cout_pm", 0) or 0))
-		if not (effets.get("degats") or effets.get("pv") or effets.get("pm")
-				or int(effets.get("furtivite", 0) or 0) > 0 or part_durative(effets)):
+		# ⚠️ Garde JUMELLE de `competences.competence_utilisable_combat` : les deux doivent
+		# accepter les mêmes capacités, sinon une compétence passe le filtre du router puis
+		# se fait refuser ici. Même liste que la branche `sort`.
+		if not (est_maintenu(competence) or effets.get("degats") or effets.get("pv")
+				or effets.get("pm") or int(effets.get("furtivite", 0) or 0) > 0
+				or effets.get("degats_pm") or int(effets.get("saut", 0) or 0) > 0
+				or effets.get("lien_vie") or part_durative(effets)):
 			return {"error": "Cette compétence n'a aucun effet utilisable en combat."}
 		if joueur["currentPM"] < cout_pm:
 			return {"error": "PM insuffisants."}
@@ -3564,6 +4443,13 @@ def resolve_action(
 			if autres:
 				result["beneficiaires"] = autres
 
+		# ENTRETIEN : une compétence peut elle aussi demander des PM chaque round (une garde
+		# qu'on tient). ⚠️ Sans cet appel, `_empiler_effet_combat` poserait bien une entrée
+		# `maintenu: True` — donc EXEMPTÉE du décrément — que rien ne facturerait ni ne
+		# retirerait jamais : un buff permanent et gratuit, c'est-à-dire un exploit.
+		entree_conc = _enregistrer_concentration(combat_doc, joueur, competence, cible_id)
+		if entree_conc:
+			result["concentrations"] = [dict(c) for c in _concentrations(joueur)]
 		result["currentPM"] = joueur["currentPM"]
 		joueur["competences"] = joueur.get("competences", 0) + 1
 		_refresh_actions(joueur)
@@ -3773,11 +4659,7 @@ def _finalize_membre(combat_doc: dict, joueur: dict, doc: dict, status: str) -> 
 	# (_apply_world_turn_regen) les reprend. Un buff est un buff — qu'il ait été lancé
 	# avant le combat ou pendant, il ne meurt pas avec lui. `pose_tour` n'a de sens qu'en
 	# combat et ne suit pas.
-	restants = [
-		{k: v for k, v in eff.items() if k != "pose_tour"}
-		for eff in joueur.get("effets_actifs") or []
-		if _eff_int(eff.get("restants")) > 0
-	]
+	restants = _effets_a_reverser(joueur)
 	# Écrasement (pas d'extend) : ces entrées SONT celles du personnage, copiées à l'entrée
 	# en combat puis décrémentées — les rajouter les dupliquerait.
 	if restants or joueur.get("effets_actifs") is not None:
@@ -3845,11 +4727,7 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 		# Effets à durée encore vivants (un buff lancé sur la bête par un allié) :
 		# reversés comme pour un membre du groupe. Un doc `monture:*` étant un miroir
 		# du character, le tick d'exploration les reprend sans code supplémentaire.
-		restants = [
-			{k: v for k, v in eff.items() if k != "pose_tour"}
-			for eff in snap.get("effets_actifs") or []
-			if _eff_int(eff.get("restants")) > 0
-		]
+		restants = _effets_a_reverser(snap)
 		if restants or snap.get("effets_actifs") is not None:
 			doc["effets_actifs"] = restants
 
@@ -3895,11 +4773,7 @@ def _finalize_protege(combat_doc: dict, snap: dict, doc: dict, status: str,
 		doc["currentPM"] = max(0, snap.get("currentPM", doc.get("currentPM", 0)))
 		# Effets à durée encore vivants (un soin lancé sur elle par un allié) : reversés,
 		# comme pour un membre du groupe — son doc est un miroir du character.
-		restants = [
-			{k: v for k, v in eff.items() if k != "pose_tour"}
-			for eff in snap.get("effets_actifs") or []
-			if _eff_int(eff.get("restants")) > 0
-		]
+		restants = _effets_a_reverser(snap)
 		if restants or snap.get("effets_actifs") is not None:
 			doc["effets_actifs"] = restants
 
