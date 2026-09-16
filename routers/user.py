@@ -276,7 +276,8 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 		inventaire_de_base = inventaire_valide
 
 		# Sort de départ : les vocations « pures magiciennes » (SORT_VOCATIONS_DEPART)
-		# choisissent UN sort niveau 0 de leur vocation à la création (validé serveur).
+		# choisissent UN sort niveau 0 de l'école native de leur vocation à la
+		# création (validé serveur, cf. sorts.sort_de_depart_valide).
 		# Dégradé gracieux : si aucun sort niveau 0 n'existe encore en base pour la
 		# vocation (contenu non importé), on laisse créer sans sort.
 		sorts_init: list = []
@@ -284,14 +285,13 @@ async def add_character(response: Response, current_user: Annotated[User, Depend
 			sort_initial = characterinfo.get("sort_initial")
 			if sort_initial:
 				sort_doc = sorts_util.normaliser_sort(get_doc(sort_initial))
-				if (not sort_doc or sort_doc["vocation"] != characterinfo["voc"]
-						or sort_doc["niveau"] != 0):
+				if not sorts_util.sort_de_depart_valide(sort_doc, characterinfo["voc"], vocations):
 					raise HTTPException(status_code=422, detail="Sort de départ invalide pour cette vocation.")
 				sorts_init = [sort_doc["id"]]
 			else:
 				candidats = [s for d in find_docs({"type": "sort"})
 							 if (s := sorts_util.normaliser_sort(d))
-							 and s["vocation"] == characterinfo["voc"] and s["niveau"] == 0]
+							 and sorts_util.sort_de_depart_valide(s, characterinfo["voc"], vocations)]
 				if candidats:
 					raise HTTPException(status_code=422, detail="Choisissez un sort de départ pour cette vocation.")
 

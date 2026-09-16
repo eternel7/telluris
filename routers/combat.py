@@ -9,7 +9,7 @@ from utils.characters import get_selected_character, carried_weight, charge_max_
 from utils.consommables import liste_consommables_combat
 from utils.sorts import (
     normaliser_sort, sort_utilisable_combat, composants_etat, effets_effectifs,
-    liste_sorts_payload,
+    liste_sorts_payload, doc_effectif,
 )
 from utils.competences import (
     normaliser_competence, competence_utilisable_combat, liste_competences_payload,
@@ -494,9 +494,12 @@ async def combat_action(
                 sort_consomme_items = True
             engages.append(cid)
         character["inventaire"] = inventaire
+        effets = effets_effectifs(sort_norm, engages)
         sort_arg = {
-            "doc": sort_norm,
-            "effets": effets_effectifs(sort_norm, engages),
+            # Doc RENFORCÉ par les composants (durée/nombre d'invocation, entretien) : le
+            # moteur lit ces champs sur le doc, jamais dans `effets`.
+            "doc": doc_effectif(sort_norm, effets),
+            "effets": effets,
             "composants_engages": engages,
             "poids_consommes": round(poids_consommes, 2),
         }

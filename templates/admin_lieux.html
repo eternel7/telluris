@@ -278,6 +278,7 @@
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 <script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
 <script src="{{ url_for('scripts', path='voies.js') }}"></script>
+<script src="{{ url_for('scripts', path='import_sortie.js') }}"></script>
 <!-- Mode Lieux PARTAGÉ avec /admin/editor. ⚠️ AVANT le script de la page, qui déclare `LIEUX_HOTE`. -->
 {% include "part-lieux-js.html" %}
 <script>
@@ -788,59 +789,18 @@ async function tirerJournal() {
 function demarrerScrutation() { if (timer) return; timer = setInterval(tirerJournal, PERIODE); tirerJournal(); }
 function arreterScrutation() { if (timer) { clearInterval(timer); timer = null; } }
 
-// 📥 : le fichier du DERNIER run réussi (le serveur refuse un fichier plus ancien que le run),
-// envoyé à /admin/import-bulk. ⚠️ PUT COMPLET : un `_id` existant est remplacé (CLAUDE.md §11).
+// 📥 : le fichier du DERNIER run réussi, via `scripts/import_sortie.js` (partagé avec
+// /admin/dev-tools). ⚠️ PUT COMPLET : un `_id` existant est remplacé (CLAUDE.md §11).
 async function importerSortie() {
 	const o = PAR_ID[runOutil];
 	if (!o) return;
 	const btn = $('outil-importer');
 	btn.disabled = true;
 	try {
-		const r = await fetch('/admin/dev-tools/sortie?outil=' + encodeURIComponent(o.id));
-		const data = await r.json().catch(() => ({}));
-		if (!r.ok) { setOutilStatus('Import impossible : ' + detailErreur(data, r.status), 'err'); return; }
-		const ids = (data.ids || []).filter(Boolean);
-		const apercu = ids.slice(0, 15).join('\n') + (ids.length > 15 ? '\n… et ' + (ids.length - 15) + ' autre(s)' : '');
-		if (!confirm(`Importer ${data.docs.length} document(s) de ${data.chemin} ?\n\n`
-				+ `⚠️ PUT complet : un document existant de même _id est remplacé.\n\n${apercu}`)) return;
-		setOutilStatus('Import…', 'run');
-		$('import-progress').hidden = false;
-		$('import-bar').style.width = '0%';
-		const res = await fetch('/admin/import-bulk', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(data.docs),
+		const fin = await importerSortieOutil(o.id, {
+			setStatus: setOutilStatus, progress: $('import-progress'), bar: $('import-bar'),
 		});
-		if (!res.ok) {
-			const err = await res.json().catch(() => ({}));
-			setOutilStatus('Échec : ' + detailErreur(err, res.status), 'err');
-			return;
-		}
-		const reader = res.body.getReader();
-		const decoder = new TextDecoder();
-		let buf = '', fin = null;
-		while (true) {
-			const morceau = await reader.read();
-			if (morceau.done) break;
-			buf += decoder.decode(morceau.value, { stream: true });
-			let nl;
-			while ((nl = buf.indexOf('\n')) >= 0) {
-				const ligne = buf.slice(0, nl).trim();
-				buf = buf.slice(nl + 1);
-				if (!ligne) continue;
-				let ev;
-				try { ev = JSON.parse(ligne); } catch (e) { continue; }
-				if (ev.event === 'progress') {
-					$('import-bar').style.width = Math.round(100 * ev.processed / ev.total) + '%';
-					setOutilStatus(`Import… ${ev.processed}/${ev.total}`, 'run');
-				} else if (ev.event === 'done') {
-					fin = ev;
-				}
-			}
-		}
-		if (!fin) { setOutilStatus('Import interrompu : réponse incomplète.', 'err'); return; }
-		setOutilStatus(`✓ ${fin.imported}/${fin.total} document(s) importé(s).` + (fin.failed ? ` ${fin.failed} échec(s).` : ''),
-			fin.failed ? 'err' : 'ok');
+		if (!fin) return;
 		// Déjà importé : le bouton ne doit pas pouvoir renvoyer le même lot.
 		btn.hidden = true;
 		creationOptions = null;
@@ -849,7 +809,6 @@ async function importerSortie() {
 		setOutilStatus('Erreur réseau : ' + e.message, 'err');
 	} finally {
 		btn.disabled = false;
-		$('import-progress').hidden = true;
 	}
 }
 

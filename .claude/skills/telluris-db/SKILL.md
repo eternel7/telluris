@@ -7,7 +7,7 @@ Couche CouchDB (`db/config.py`) et outils d'admin qui lisent ou écrivent des do
 
 
 ### Lire les valeurs réelles
-CouchDB live distante, injoignable en local : lire **`telluris-dump-*.json`** à la racine (produit par `GET /admin/exports/couchdb` / `db.config.dump_all_docs()`), `docs` sans `user:*`. ⚠️ Plusieurs dumps coexistent : prendre le plus récent, et recompter dessus avant d'annoncer un trou de données.
+CouchDB live distante, injoignable en local : lire **`telluris-dump-*.json`** à la racine (produit par `GET /admin/exports/couchdb` / `db.config.dump_all_docs()`). ⚠️ L'export téléchargé **inclut les `user:*`** (restauration à l'identique, `_dump_payload(avec_users=True)`) — les retirer avant de committer ; le dump écrit par les outils de `/admin/lieux` les exclut. ⚠️ Plusieurs dumps coexistent : prendre le plus récent, et recompter dessus avant d'annoncer un trou de données.
 
 - **Export d'un type** : `GET /admin/exports/by-type?type=<t>` (`find_docs({"type": t})`, sans `user:*`) → `<type>-AAAAMMJJ-HHMMSS.json` ; `/admin/exports` liste les types présents.
 

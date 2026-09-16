@@ -129,11 +129,29 @@
 		.dl-btn:hover { background: rgba(200,168,75,0.22); box-shadow: 0 0 12px rgba(200,168,75,0.25); }
 
 		code { color: var(--accent2); }
+
+		/* Alerte « sorts sans grimoire » : lecture seule, masquée quand tout est couvert. */
+		.alerte {
+			background: rgba(200,168,75,0.08); border: 1px solid var(--accent); border-radius: 8px;
+			padding: 14px 18px; margin-bottom: 16px; font-size: 0.8rem; line-height: 1.5; color: var(--text);
+		}
+		.alerte[hidden] { display: none; }
+		.alerte summary { cursor: pointer; color: var(--accent); }
+		.alerte ul { margin: 8px 0 10px 18px; color: var(--muted); max-height: 200px; overflow-y: auto; }
+		.alerte a { color: var(--accent2); }
 	</style>
 </head>
 <body>
 	<header><h1>⚙ Administration — Telluris</h1></header>
 	<div class="main">
+
+		<div class="alerte" id="grimoires-alerte" hidden>
+			<details>
+				<summary id="grimoires-titre"></summary>
+				<ul id="grimoires-liste"></ul>
+			</details>
+			<a href="/admin/dev-tools?outil=gen_grimoires">→ Générer leurs grimoires (📖 outils de développement)</a>
+		</div>
 
 		<div class="section-label">Editeurs</div>
 		<div class="card">
@@ -763,6 +781,7 @@ importSave.addEventListener('click', async () => {
 		let msg = '✓ ' + done.imported + '/' + done.total + ' document(s) importé(s).';
 		if (done.failed) msg += ' ' + done.failed + ' échec(s).';
 		setStatusOn(importStatus, msg, done.failed ? 'err' : 'ok');
+		if (lotContientSort(res.value)) chargerGrimoiresManquants();
 	} catch (e) {
 		setStatusOn(importStatus, 'Erreur réseau : ' + e.message, 'err');
 		progressHide();
@@ -772,8 +791,40 @@ importSave.addEventListener('click', async () => {
 	}
 });
 
+// ── Alerte : sorts sans grimoire UNIQUE ────────────────────────────
+// Lecture seule : elle prévient, l'outil 📖 de /admin/dev-tools génère. Relue au chargement
+// et après un import qui contenait un `sort:*` (ou un grimoire, qui peut en couvrir un).
+function lotContientSort(valeur) {
+	const docs = Array.isArray(valeur) ? valeur : (valeur && Array.isArray(valeur.docs) ? valeur.docs : []);
+	return docs.some(d => d && (d.type === 'sort' || String(d._id || '').startsWith('sort:')
+		|| d.sous_categorie === 'grimoire'));
+}
+
+async function chargerGrimoiresManquants() {
+	const bloc = document.getElementById('grimoires-alerte');
+	try {
+		const r = await fetch('/admin/grimoires/manquants');
+		if (!r.ok) return;   // base injoignable : pas d'alerte plutôt qu'une fausse
+		const data = await r.json();
+		if (!data.nb) { bloc.hidden = true; return; }
+		// ⚠️ `textContent` : nom et école viennent de docs saisis.
+		document.getElementById('grimoires-titre').textContent =
+			'⚠️ ' + data.nb + ' sort(s) sans grimoire — ils ne peuvent pas être appris';
+		const liste = document.getElementById('grimoires-liste');
+		liste.textContent = '';
+		(data.sorts || []).forEach(s => {
+			const li = document.createElement('li');
+			li.textContent = (s.nom || s._id) + ' — ' + (s.magie || '?') + ', niveau ' + (s.niveau ?? 0)
+				+ ' (' + s._id + ')';
+			liste.appendChild(li);
+		});
+		bloc.hidden = false;
+	} catch (e) { /* hors ligne : rien à signaler */ }
+}
+
 loadVariables();
 loadCodeDefaults();
+chargerGrimoiresManquants();
 </script>
 </body>
 </html>

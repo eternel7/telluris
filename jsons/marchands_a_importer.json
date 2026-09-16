@@ -5,7 +5,7 @@
     "nom": "Dame Ysoline",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier01.jpg",
+    "portrait": "elfe_m_lettre01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -319,7 +319,7 @@
     "nom": "Maître Gorm",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_f_duelliste01.jpg",
+    "portrait": "elfe_m_lettre02.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -633,7 +633,7 @@
     "nom": "Maître Aldric",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_lettre01.jpg",
+    "portrait": "humain_f_duelliste01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -947,7 +947,7 @@
     "nom": "Dame Bertrade",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier02.jpg",
+    "portrait": "humain_m_guerrier01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -1261,7 +1261,7 @@
     "nom": "Le vieux Renaud",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "elfe_m_lettre01.jpg",
+    "portrait": "humain_f_duelliste01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -1575,7 +1575,7 @@
     "nom": "Maître Orfeo",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier03.jpg",
+    "portrait": "humain_m_guerrier02.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -1889,7 +1889,7 @@
     "nom": "Maître Barnabé",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "elfe_m_lettre02.jpg",
+    "portrait": "humain_m_guerrier03.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -2203,7 +2203,7 @@
     "nom": "Maître Guerric",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier01.jpg",
+    "portrait": "elfe_m_lettre01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -2831,7 +2831,7 @@
     "nom": "Le vieux Colin",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_lettre01.jpg",
+    "portrait": "humain_f_duelliste01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -3145,7 +3145,7 @@
     "nom": "Maître Erwan",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier02.jpg",
+    "portrait": "humain_m_guerrier03.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -3459,7 +3459,7 @@
     "nom": "Maître Simon",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "elfe_m_lettre01.jpg",
+    "portrait": "humain_m_guerrier01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -3773,7 +3773,7 @@
     "nom": "Dame Perrine",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier03.jpg",
+    "portrait": "humain_m_guerrier02.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -4087,7 +4087,7 @@
     "nom": "Le vieux Thibaut",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "elfe_m_lettre02.jpg",
+    "portrait": "humain_m_guerrier03.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -4715,7 +4715,7 @@
     "nom": "Dame Aveline",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_f_duelliste01.jpg",
+    "portrait": "humain_m_guerrier01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -5029,7 +5029,7 @@
     "nom": "Maître Corvin",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_lettre01.jpg",
+    "portrait": "humain_f_duelliste01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -5343,7 +5343,7 @@
     "nom": "Maître Anselme",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier02.jpg",
+    "portrait": "humain_m_guerrier03.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -5657,7 +5657,7 @@
     "nom": "Dame Ermeline",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "elfe_m_lettre01.jpg",
+    "portrait": "humain_m_lettre01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -5971,7 +5971,7 @@
     "nom": "L'ombre de Vaudrec",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier03.jpg",
+    "portrait": "humain_f_duelliste01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -6285,7 +6285,7 @@
     "nom": "Dame Alaïs",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "elfe_m_lettre02.jpg",
+    "portrait": "elfe_m_lettre01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -6599,7 +6599,7 @@
     "nom": "Maître Gontran",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier01.jpg",
+    "portrait": "elfe_m_lettre01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -6913,7 +6913,7 @@
     "nom": "Dame Osanne",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_f_duelliste01.jpg",
+    "portrait": "elfe_m_lettre01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -7227,7 +7227,7 @@
     "nom": "Frère Anselin",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_lettre01.jpg",
+    "portrait": "elfe_m_lettre02.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -7541,7 +7541,7 @@
     "nom": "Maître Ivon",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier02.jpg",
+    "portrait": "elfe_m_lettre01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -7855,7 +7855,7 @@
     "nom": "Maître Rufin",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "elfe_m_lettre01.jpg",
+    "portrait": "humain_m_guerrier01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -8169,7 +8169,7 @@
     "nom": "Maître Sylvain",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "humain_m_guerrier03.jpg",
+    "portrait": "elfe_m_lettre01.jpg",
     "services": {
       "transport": {
         "noeuds": {
@@ -8483,7 +8483,7 @@
     "nom": "Dame Guillemette",
     "race": "humain",
     "vocation": "marchand",
-    "portrait": "elfe_m_lettre02.jpg",
+    "portrait": "humain_m_guerrier02.jpg",
     "services": {
       "transport": {
         "noeuds": {

@@ -1,0 +1,2914 @@
+[
+  {
+    "_id": "item:grimoire_ailes_de_charogne",
+    "type": "item",
+    "nom": "Grimoire : Ailes de charogne",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Ailes de charogne », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "legendaire",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ailes_de_charogne"
+    ],
+    "valeur": [
+      {
+        "ag": 100
+      },
+      {
+        "ag": 300
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_amitie_des_betes",
+    "type": "item",
+    "nom": "Grimoire : Amitié des bêtes",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Amitié des bêtes », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:amitie_des_betes"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_anatheme",
+    "type": "item",
+    "nom": "Grimoire : Anathème",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Anathème », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:anatheme"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_anneaux_du_serpent_geant",
+    "type": "item",
+    "nom": "Grimoire : Anneaux du serpent géant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Anneaux du serpent géant », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:anneaux_du_serpent_geant"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_antidote_sylvestre",
+    "type": "item",
+    "nom": "Grimoire : Antidote sylvestre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Antidote sylvestre », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:antidote_sylvestre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_armure_de_givre",
+    "type": "item",
+    "nom": "Grimoire : Armure de givre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Armure de givre », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:armure_de_givre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_aura_de_devotion",
+    "type": "item",
+    "nom": "Grimoire : Aura de force",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Aura de force », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:aura_de_devotion"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_baiser_du_vampire",
+    "type": "item",
+    "nom": "Grimoire : Baiser du vampire",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Baiser du vampire », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:baiser_du_vampire"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_bandelettes_du_tombeau",
+    "type": "item",
+    "nom": "Grimoire : Bandelettes du tombeau",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bandelettes du tombeau », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:bandelettes_du_tombeau"
+    ],
+    "valeur": [
+      {
+        "ag": 30
+      },
+      {
+        "ag": 90
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_baume_de_seve",
+    "type": "item",
+    "nom": "Grimoire : Baume de sève",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Baume de sève », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:baume_de_seve"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_benediction_martiale",
+    "type": "item",
+    "nom": "Grimoire : Bénédiction martiale",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bénédiction martiale », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:benediction_martiale"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_benir",
+    "type": "item",
+    "nom": "Grimoire : Bénir",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bénir », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:benir"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_bouclier_arcanique",
+    "type": "item",
+    "nom": "Grimoire : Bouclier arcanique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bouclier arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:bouclier_arcanique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_bouclier_magique",
+    "type": "item",
+    "nom": "Grimoire : Bouclier magique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bouclier magique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:bouclier_magique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_boule_de_feu",
+    "type": "item",
+    "nom": "Grimoire : Boule de feu",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Boule de feu », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:boule_de_feu"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_chant_de_la_lhamia",
+    "type": "item",
+    "nom": "Grimoire : Chant de la lhamia",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Chant de la lhamia », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:chant_de_la_lhamia"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_charge_du_sanglier",
+    "type": "item",
+    "nom": "Grimoire : Charge du sanglier",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Charge du sanglier », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:charge_du_sanglier"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_contrat_mineur",
+    "type": "item",
+    "nom": "Grimoire : Contrat mineur",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Contrat mineur », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:contrat_mineur"
+    ],
+    "valeur": [
+      {
+        "ag": 30
+      },
+      {
+        "ag": 90
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_couronne_de_l_enfer",
+    "type": "item",
+    "nom": "Grimoire : Couronne de l'Enfer",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Couronne de l'Enfer », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "legendaire",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:couronne_de_l_enfer"
+    ],
+    "valeur": [
+      {
+        "ag": 100
+      },
+      {
+        "ag": 300
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_couvee_infernale",
+    "type": "item",
+    "nom": "Grimoire : Couvée infernale",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Couvée infernale », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:couvee_infernale"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_descente_du_seraphin",
+    "type": "item",
+    "nom": "Grimoire : Descente du séraphin",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Descente du séraphin », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "legendaire",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:descente_du_seraphin"
+    ],
+    "valeur": [
+      {
+        "ag": 100
+      },
+      {
+        "ag": 300
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_ecailles_du_servant",
+    "type": "item",
+    "nom": "Grimoire : Écailles du servant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Écailles du servant », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ecailles_du_servant"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eclair_siphonnant",
+    "type": "item",
+    "nom": "Grimoire : Éclair siphonnant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éclair siphonnant », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eclair_siphonnant"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eclat_de_givre",
+    "type": "item",
+    "nom": "Grimoire : Éclat de givre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éclat de givre », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eclat_de_givre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eclat_eblouissant",
+    "type": "item",
+    "nom": "Grimoire : Éclat éblouissant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éclat éblouissant », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eclat_eblouissant"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eclat_rocheux",
+    "type": "item",
+    "nom": "Grimoire : Éclat rocheux",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éclat rocheux », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eclat_rocheux"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_ecuries_de_l_abime",
+    "type": "item",
+    "nom": "Grimoire : Écuries de l'Abîme",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Écuries de l'Abîme », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ecuries_de_l_abime"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_envol_du_griffon",
+    "type": "item",
+    "nom": "Grimoire : Envol du griffon",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Envol du griffon », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:envol_du_griffon"
+    ],
+    "valeur": [
+      {
+        "ag": 90
+      },
+      {
+        "ag": 270
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_etreinte_sepulcrale",
+    "type": "item",
+    "nom": "Grimoire : Étreinte sépulcrale",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Étreinte sépulcrale », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:etreinte_sepulcrale"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eveil_de_l_homme_arbre",
+    "type": "item",
+    "nom": "Grimoire : Éveil de l'homme-arbre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éveil de l'homme-arbre », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eveil_de_l_homme_arbre"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_faim_de_la_goule",
+    "type": "item",
+    "nom": "Grimoire : Faim de la goule",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Faim de la goule », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:faim_de_la_goule"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_fer_et_priere",
+    "type": "item",
+    "nom": "Grimoire : Fer et prière",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Fer et prière », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:fer_et_priere"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_feu_purificateur",
+    "type": "item",
+    "nom": "Grimoire : Feu purificateur",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Feu purificateur », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:feu_purificateur"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_flamme_infernale",
+    "type": "item",
+    "nom": "Grimoire : Flamme infernale",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Flamme infernale », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:flamme_infernale"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_flammerole",
+    "type": "item",
+    "nom": "Grimoire : Flammerole",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Flammerole », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:flammerole"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_flegme_demoniaque",
+    "type": "item",
+    "nom": "Grimoire : Flegme démoniaque",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Flegme démoniaque », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:flegme_demoniaque"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_force_partagee",
+    "type": "item",
+    "nom": "Grimoire : Force partagée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Force partagée », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:force_partagee"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_formule_de_clairvoyance",
+    "type": "item",
+    "nom": "Grimoire : Formule de clairvoyance",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Formule de clairvoyance », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:formule_de_clairvoyance"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_fracas_tellurique",
+    "type": "item",
+    "nom": "Grimoire : Fracas tellurique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Fracas tellurique », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:fracas_tellurique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_garde_parfaite",
+    "type": "item",
+    "nom": "Grimoire : Garde parfaite",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Garde parfaite », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:garde_parfaite"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_gardien_des_portes",
+    "type": "item",
+    "nom": "Grimoire : Gardien des portes",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Gardien des portes », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:gardien_des_portes"
+    ],
+    "valeur": [
+      {
+        "ag": 70
+      },
+      {
+        "ag": 210
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_gardien_du_temple",
+    "type": "item",
+    "nom": "Grimoire : Gardien du temple",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Gardien du temple », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:gardien_du_temple"
+    ],
+    "valeur": [
+      {
+        "ag": 30
+      },
+      {
+        "ag": 90
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_grace_divine",
+    "type": "item",
+    "nom": "Grimoire : Grâce divine",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Grâce divine », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:grace_divine"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_guerison_des_animaux",
+    "type": "item",
+    "nom": "Grimoire : Guérison des animaux",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Guérison des animaux », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:guerison_des_animaux"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_horde_des_fosses",
+    "type": "item",
+    "nom": "Grimoire : Horde des fosses",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Horde des fosses », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:horde_des_fosses"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_hurlement_du_loup",
+    "type": "item",
+    "nom": "Grimoire : Hurlement du loup",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Hurlement du loup », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:hurlement_du_loup"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_incarnation_divine",
+    "type": "item",
+    "nom": "Grimoire : Incarnation divine",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Incarnation divine », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:incarnation_divine"
+    ],
+    "valeur": [
+      {
+        "ag": 90
+      },
+      {
+        "ag": 270
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_jet_d_eau",
+    "type": "item",
+    "nom": "Grimoire : Jet d'eau",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Jet d'eau », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:jet_d_eau"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_jugement_sacre",
+    "type": "item",
+    "nom": "Grimoire : Fouet arcanique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Fouet arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:jugement_sacre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lame_de_vent",
+    "type": "item",
+    "nom": "Grimoire : Lame de vent",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lame de vent », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lame_de_vent"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_legion_de_l_abime",
+    "type": "item",
+    "nom": "Grimoire : Légion de l'Abîme",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Légion de l'Abîme », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:legion_de_l_abime"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_leurre_spectral",
+    "type": "item",
+    "nom": "Grimoire : Leurre spectral",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Leurre spectral », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:leurre_spectral"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_levee_des_ossements",
+    "type": "item",
+    "nom": "Grimoire : Levée des ossements",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Levée des ossements », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:levee_des_ossements"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_licorne_immaculee",
+    "type": "item",
+    "nom": "Grimoire : Licorne immaculée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Licorne immaculée », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:licorne_immaculee"
+    ],
+    "valeur": [
+      {
+        "ag": 40
+      },
+      {
+        "ag": 120
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lien_du_paladin",
+    "type": "item",
+    "nom": "Grimoire : Lien du paladin",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lien du paladin », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lien_du_paladin"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lumiere_purificatrice",
+    "type": "item",
+    "nom": "Grimoire : Lumière purificatrice",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lumière purificatrice », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lumiere_purificatrice"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_main_de_l_ordre",
+    "type": "item",
+    "nom": "Grimoire : Main de l'Ordre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Main de l'Ordre », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:main_de_l_ordre"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_main_de_venin",
+    "type": "item",
+    "nom": "Grimoire : Main de venin",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Main de venin », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:main_de_venin"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_maladresse",
+    "type": "item",
+    "nom": "Grimoire : Maladresse",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Maladresse », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:maladresse"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_malediction_mineure",
+    "type": "item",
+    "nom": "Grimoire : Malédiction mineure",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Malédiction mineure », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:malediction_mineure"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_marche_des_mammouths",
+    "type": "item",
+    "nom": "Grimoire : Marche des mammouths",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Marche des mammouths », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:marche_des_mammouths"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_meditation_profonde",
+    "type": "item",
+    "nom": "Grimoire : Méditation profonde",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Méditation profonde », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:meditation_profonde"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_messager_aile",
+    "type": "item",
+    "nom": "Grimoire : Messager ailé",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Messager ailé », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:messager_aile"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_meteore",
+    "type": "item",
+    "nom": "Grimoire : Météore",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Météore », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:meteore"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_meute_grise",
+    "type": "item",
+    "nom": "Grimoire : Meute grise",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Meute grise », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:meute_grise"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_morsure_de_ronces",
+    "type": "item",
+    "nom": "Grimoire : Morsure de ronces",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Morsure de ronces », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:morsure_de_ronces"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_morsure_totemique",
+    "type": "item",
+    "nom": "Grimoire : Morsure totémique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Morsure totémique », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:morsure_totemique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_mortis",
+    "type": "item",
+    "nom": "Grimoire : Mortis",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Mortis », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:mortis"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_mot_de_pouvoir",
+    "type": "item",
+    "nom": "Grimoire : Mot de pouvoir",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Mot de pouvoir », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:mot_de_pouvoir"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_mur_de_feu",
+    "type": "item",
+    "nom": "Grimoire : Mur de feu",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Mur de feu », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:mur_de_feu"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_murmure_de_la_succube",
+    "type": "item",
+    "nom": "Grimoire : Murmure de la succube",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Murmure de la succube », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:murmure_de_la_succube"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_oeil_de_la_chouette",
+    "type": "item",
+    "nom": "Grimoire : Œil de la chouette",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Œil de la chouette », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:oeil_de_la_chouette"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_ordre_sanglant",
+    "type": "item",
+    "nom": "Grimoire : Ordre sanglant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Ordre sanglant », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:ordre_sanglant"
+    ],
+    "valeur": [
+      {
+        "ag": 90
+      },
+      {
+        "ag": 270
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_pacte_de_sang",
+    "type": "item",
+    "nom": "Grimoire : Pacte de sang",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Pacte de sang », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:pacte_de_sang"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_pacte_du_servant",
+    "type": "item",
+    "nom": "Grimoire : Pacte du servant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Pacte du servant », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:pacte_du_servant"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_projectile_arcanique",
+    "type": "item",
+    "nom": "Grimoire : Projectile arcanique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Projectile arcanique », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:projectile_arcanique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_regain_sylvestre",
+    "type": "item",
+    "nom": "Grimoire : Regain sylvestre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Regain sylvestre », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:regain_sylvestre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_regard_glacial",
+    "type": "item",
+    "nom": "Grimoire : Regard glacial",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Regard glacial », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:regard_glacial"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_reveil_de_l_ours",
+    "type": "item",
+    "nom": "Grimoire : Réveil de l'ours",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Réveil de l'ours », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:reveil_de_l_ours"
+    ],
+    "valeur": [
+      {
+        "ag": 30
+      },
+      {
+        "ag": 90
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_revigore",
+    "type": "item",
+    "nom": "Grimoire : Revigore",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Revigore », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:revigore"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_rupture_du_sceau",
+    "type": "item",
+    "nom": "Grimoire : Rupture du sceau",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Rupture du sceau », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:rupture_du_sceau"
+    ],
+    "valeur": [
+      {
+        "ag": 90
+      },
+      {
+        "ag": 270
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_saut",
+    "type": "item",
+    "nom": "Grimoire : Saut",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Saut », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:saut"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_sceau_de_protection",
+    "type": "item",
+    "nom": "Grimoire : Sceau de protection",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sceau de protection », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:sceau_de_protection"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_seigneurie_du_sang",
+    "type": "item",
+    "nom": "Grimoire : Seigneurie du sang",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Seigneurie du sang », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:seigneurie_du_sang"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_sentence_de_justice",
+    "type": "item",
+    "nom": "Grimoire : Sentence de justice",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sentence de justice », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:sentence_de_justice"
+    ],
+    "valeur": [
+      {
+        "ag": 70
+      },
+      {
+        "ag": 210
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_sentinelle_du_parvis",
+    "type": "item",
+    "nom": "Grimoire : Sentinelle du parvis",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sentinelle du parvis », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:sentinelle_du_parvis"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_serment_du_demon_guerrier",
+    "type": "item",
+    "nom": "Grimoire : Serment du démon guerrier",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Serment du démon guerrier », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:serment_du_demon_guerrier"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_serres_de_l_aigle_geant",
+    "type": "item",
+    "nom": "Grimoire : Serres de l'aigle géant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Serres de l'aigle géant », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:serres_de_l_aigle_geant"
+    ],
+    "valeur": [
+      {
+        "ag": 70
+      },
+      {
+        "ag": 210
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_seve_vivifiante",
+    "type": "item",
+    "nom": "Grimoire : Sève vivifiante",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sève vivifiante », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:seve_vivifiante"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_silhouettes_trompeuses",
+    "type": "item",
+    "nom": "Grimoire : Silhouettes trompeuses",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Silhouettes trompeuses », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:silhouettes_trompeuses"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_soif_du_nosferatu",
+    "type": "item",
+    "nom": "Grimoire : Soif du nosferatu",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Soif du nosferatu », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:soif_du_nosferatu"
+    ],
+    "valeur": [
+      {
+        "ag": 70
+      },
+      {
+        "ag": 210
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_soin_du_compagnon",
+    "type": "item",
+    "nom": "Grimoire : Soin du compagnon",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Soin du compagnon », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:soin_du_compagnon"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_soin_mineur",
+    "type": "item",
+    "nom": "Grimoire : Soin mineur",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Soin mineur », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:soin_mineur"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_soin_regenerant",
+    "type": "item",
+    "nom": "Grimoire : Soin régénérant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Soin régénérant », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:soin_regenerant"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_sommeil_pesant",
+    "type": "item",
+    "nom": "Grimoire : Sommeil pesant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Sommeil pesant », de l'école Bataille. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:sommeil_pesant"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_souffle_ancestral",
+    "type": "item",
+    "nom": "Grimoire : Souffle ancestral",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Souffle ancestral », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:souffle_ancestral"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_souffle_de_feu",
+    "type": "item",
+    "nom": "Grimoire : Souffle de feu",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Souffle de feu », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:souffle_de_feu"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_souffle_de_soufre",
+    "type": "item",
+    "nom": "Grimoire : Souffle de soufre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Souffle de soufre », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:souffle_de_soufre"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_source_vive",
+    "type": "item",
+    "nom": "Grimoire : Source vive",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Source vive », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:source_vive"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_temoin_celeste",
+    "type": "item",
+    "nom": "Grimoire : Témoin céleste",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Témoin céleste », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:temoin_celeste"
+    ],
+    "valeur": [
+      {
+        "ag": 50
+      },
+      {
+        "ag": 150
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_tetes_de_l_hydre",
+    "type": "item",
+    "nom": "Grimoire : Têtes de l'hydre",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Têtes de l'hydre », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "legendaire",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:tetes_de_l_hydre"
+    ],
+    "valeur": [
+      {
+        "ag": 100
+      },
+      {
+        "ag": 300
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_toucher_devitalisant",
+    "type": "item",
+    "nom": "Grimoire : Toucher dévitalisant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Toucher dévitalisant », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:toucher_devitalisant"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_trait_de_flamme",
+    "type": "item",
+    "nom": "Grimoire : Trait de flamme",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Trait de flamme », de l'école Élémentaire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:trait_de_flamme"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_trait_mortifere",
+    "type": "item",
+    "nom": "Grimoire : Trait mortifère",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Trait mortifère », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:trait_mortifere"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_transe_du_totem",
+    "type": "item",
+    "nom": "Grimoire : Transe du totem",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Transe du totem », de l'école Nature. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:transe_du_totem"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_trouble_magique",
+    "type": "item",
+    "nom": "Grimoire : Trouble magique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Trouble magique », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:trouble_magique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_vague_de_soin",
+    "type": "item",
+    "nom": "Grimoire : Vague de soin",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Vague de soin », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:vague_de_soin"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_verdict_de_lumiere",
+    "type": "item",
+    "nom": "Grimoire : Verdict de lumière",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Verdict de lumière », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:verdict_de_lumiere"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_verite_gravee",
+    "type": "item",
+    "nom": "Grimoire : Vérité gravée",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Vérité gravée », de l'école Sainte. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:verite_gravee"
+    ],
+    "valeur": [
+      {
+        "ag": 20
+      },
+      {
+        "ag": 60
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_vigueur_demoniaque",
+    "type": "item",
+    "nom": "Grimoire : Vigueur démoniaque",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Vigueur démoniaque », de l'école Démonologie. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:vigueur_demoniaque"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_visage_de_l_horreur",
+    "type": "item",
+    "nom": "Grimoire : Visage de l'horreur",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Visage de l'horreur », de l'école Nécromancie. Il n'est pas consumé par l'étude.",
+    "rarete": "rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:visage_de_l_horreur"
+    ],
+    "valeur": [
+      {
+        "ag": 60
+      },
+      {
+        "ag": 180
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_zone_de_silence",
+    "type": "item",
+    "nom": "Grimoire : Zone de silence",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Zone de silence », de l'école Illusoire. Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:zone_de_silence"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  }
+]

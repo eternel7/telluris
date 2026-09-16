@@ -5001,6 +5001,10 @@ function _sortEffetsLabel(e, prefixeDegats) {
 		parts.push(`🔗 lien de vie ${e.lien_vie.part} %`
 			+ (e.lien_vie.reduction ? ` (−${e.lien_vie.reduction} % absorbés)` : ''));
 	}
+	// Renforts de composant d'une invocation ou d'un sort maintenu (cf. sorts.doc_effectif).
+	if (e.invocation_nombre) parts.push(`🐾 +${e.invocation_nombre} créature${e.invocation_nombre > 1 ? 's' : ''}`);
+	if (e.invocation_duree) parts.push(`🐾 +${e.invocation_duree} tour${e.invocation_duree > 1 ? 's' : ''} d'invocation`);
+	if (e.maintien_reduction) parts.push(`🔄 −${e.maintien_reduction} PM/round d'entretien`);
 	if (e.duree) parts.push(`${e.duree} tours`);
 	return parts.join(', ');
 }

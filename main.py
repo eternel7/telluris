@@ -49,6 +49,7 @@ from utils import journal as journal_util
 from utils import animations as animations_util
 from utils import lint_dialogues
 from utils import dev_tools
+from utils import grimoires as grimoires_util
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
 from utils.marche import (tick_atelier, reset_prix_cache, besoins_lieu, appro_leaves_lieu,
@@ -343,11 +344,13 @@ def admin_table_export_xlsx(
 		headers={"Content-Disposition": f'attachment; filename="{name}"'},
 	)
 
-def _dump_payload(now) -> dict:
+def _dump_payload(now, avec_users: bool = False) -> dict:
 	"""Le dump complet — SOURCE UNIQUE du format `{"db","exported_at","doc_count","docs"}`,
 	que l'export télécharge ET que les outils de /admin/lieux relisent (`_preparer_outil`).
-	Exclut les documents utilisateurs (données sensibles : hash de mot de passe, etc.)."""
-	docs = [d for d in dump_all_docs() if not str(d.get("_id", "")).startswith("user:")]
+	`avec_users` : l'export téléchargé garde les `user:*` (restauration à l'identique) ;
+	le dump écrit dans le dépôt par les outils les exclut (hash de mot de passe, etc.)."""
+	docs = [d for d in dump_all_docs()
+			if avec_users or not str(d.get("_id", "")).startswith("user:")]
 	return {
 		"db": "telluris",
 		"exported_at": now.isoformat() + "Z",
@@ -361,7 +364,7 @@ def admin_export_couchdb(request: Request, current_user: Annotated[User, Depends
 		raise HTTPException(status_code=403, detail="Admin only")
 	import datetime
 	now = datetime.datetime.utcnow()
-	data = json.dumps(_dump_payload(now), ensure_ascii=False, indent=2).encode("utf-8")
+	data = json.dumps(_dump_payload(now, avec_users=True), ensure_ascii=False, indent=2).encode("utf-8")
 	filename = f"telluris-dump-{now:%Y%m%d-%H%M%S}.json"
 	return Response(
 		content=data,
@@ -383,7 +386,7 @@ def admin_export_by_type(
 	t = (doc_type or "").strip()
 	if not t:
 		raise HTTPException(status_code=400, detail="Paramètre 'type' requis")
-	# Exclut les user:* (cohérent avec le dump complet : données sensibles).
+	# Exclut les user:* (données sensibles ; seul le dump complet les garde, pour restaurer).
 	docs = [d for d in (find_docs({"type": t}) or [])
 			if not str(d.get("_id", "")).startswith("user:")]
 	now = datetime.datetime.utcnow()
@@ -542,7 +545,7 @@ async def get_embleme(request: Request, current_user: Annotated[User, Depends(ge
 			# Choix du sort de départ à la création : vocations « pures magiciennes »
 			# + sorts niveau 0 par vocation (id, nom, icon, description).
 			"sort_vocations_depart": list(character_stats.SORT_VOCATIONS_DEPART),
-			"sorts_depart": sorts_util.sorts_depart_par_vocation(find_docs),
+			"sorts_depart": sorts_util.sorts_depart_par_vocation(find_docs, vocations),
 			# Compétences niveau 0 par vocation : les vocations HORS sort_vocations_depart
 			# choisissent une compétence à la place du sort (complément exact, dérivé client).
 			"competences_depart": competences_util.competences_depart_par_vocation(find_docs),
@@ -1255,6 +1258,21 @@ def admin_dev_tools(request: Request, current_user: Annotated[User, Depends(get_
 		name="admin_dev_tools.html",
 		context={"title": "Outils de développement", "outils": dev_tools.catalogue_payload()},
 	)
+
+
+@app.get("/admin/grimoires/manquants")
+def admin_grimoires_manquants(current_user: Annotated[User, Depends(get_current_user)]):
+	"""Sorts sans grimoire UNIQUE — l'alerte de /admin. Lecture seule : c'est l'outil
+	`gen_grimoires` de /admin/dev-tools qui génère. Règle : `grimoires.sorts_sans_grimoire_unique`."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	sorts = find_docs({"type": "sort"}, fields=["_id", "nom", "niveau", "magie"])
+	grims = find_docs({"type": "item", "sous_categorie": "grimoire"}, fields=["_id", "sous_categorie", "sorts"])
+	if sorts is None or grims is None:
+		raise HTTPException(status_code=503, detail="Base injoignable")
+	manquants = grimoires_util.sorts_sans_grimoire_unique(sorts, grims)
+	return {"nb": len(manquants),
+			"sorts": [{k: s.get(k) for k in ("_id", "nom", "niveau", "magie")} for s in manquants]}
 
 
 def _villes() -> list:

@@ -150,6 +150,11 @@ def _bonus_dict(raw) -> dict:
 		"drain_max": _as_int(raw.get("drain_max")),
 		"saut": min(SAUT_DISTANCE_MAX, _as_int(raw.get("saut"))),
 		"lien_vie": _lien_vie_dict(raw.get("lien_vie")),
+		# Renforts d'un sort qui ne pose pas d'`effets` : ils ne valent QUE comme bonus de
+		# composant, appliqués au doc par `doc_effectif` (cf. INVOCATION_* / MAINTIEN_*).
+		"invocation_duree": _as_int(raw.get("invocation_duree")),
+		"invocation_nombre": min(INVOCATION_NOMBRE_MAX, _as_int(raw.get("invocation_nombre"))),
+		"maintien_reduction": min(MAINTIEN_PM_MAX, _as_int(raw.get("maintien_reduction"))),
 	}
 
 
@@ -275,9 +280,12 @@ def effets_d_arme(item_doc) -> tuple[dict, str]:
 
 def normaliser_sort(sort_doc) -> dict | None:
 	"""Vue normalisée d'un doc `sort:*`, ou None si le doc n'est pas un sort valide
-	(type ≠ "sort", vocation absente, coût PM ≤ 0)."""
+	(type ≠ "sort", coût PM ≤ 0).
+
+	⚠️ Un sort n'appartient à AUCUNE vocation : il appartient à son école (`magie`). Le
+	champ `vocation` des docs anciens n'est plus lu que par le repli de `magie_de_sort`."""
 	doc = sort_doc or {}
-	if doc.get("type") != "sort" or not doc.get("vocation"):
+	if doc.get("type") != "sort":
 		return None
 	cout_pm = _as_int(doc.get("cout_pm"))
 	if cout_pm <= 0:
@@ -303,6 +311,7 @@ def normaliser_sort(sort_doc) -> dict | None:
 		"nom": doc.get("nom", "Sort"),
 		"icon": doc.get("icon", "🔮"),
 		"description": doc.get("description", ""),
+		# Rétro-compat SEULE : repli d'école d'un doc sans `magie` (cf. `magie_de_sort`).
 		"vocation": doc.get("vocation"),
 		"magie": (str(doc.get("magie")).strip() or None) if doc.get("magie") else None,
 		# Type du sort, pour l'exclusion d'apprentissage par vocation (cf. FAMILLE_*).
@@ -380,6 +389,9 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		"drain_max": _as_int(base.get("drain_max")),
 		"saut": _as_int(base.get("saut")),
 		"lien_vie": dict(base["lien_vie"]) if base.get("lien_vie") else None,
+		"invocation_duree": _as_int(base.get("invocation_duree")),
+		"invocation_nombre": _as_int(base.get("invocation_nombre")),
+		"maintien_reduction": _as_int(base.get("maintien_reduction")),
 	}
 	for bonus in bonus_list or []:
 		bonus = bonus or {}
@@ -388,7 +400,8 @@ def fusionner_effets(base: dict, bonus_list: list) -> dict:
 		if bonus.get("lien_vie"):
 			out["lien_vie"] = dict(bonus["lien_vie"])
 		for key in ("pv", "pm", "regen_pv", "regen_pm", "duree", "esquive", "furtivite",
-					"cout_pv", "drain_pv", "drain_pm", "drain_max", "saut"):
+					"cout_pv", "drain_pv", "drain_pm", "drain_max", "saut",
+					"invocation_duree", "invocation_nombre", "maintien_reduction"):
 			out[key] += _as_int(bonus.get(key))
 		for k, delta in (bonus.get("buffs") or {}).items():
 			if str(k) == "V":
@@ -439,6 +452,32 @@ def effets_effectifs(sort: dict, composants_engages: list) -> dict:
 	bonus = [c["bonus"] for c in (sort or {}).get("composants") or []
 			 if c.get("item") in engages]
 	return fusionner_effets((sort or {}).get("effets") or {}, bonus)
+
+
+def doc_effectif(sort: dict, effets: dict) -> dict:
+	"""Copie de la vue normalisée `sort` où les renforts de composant qui portent sur le
+	SORT et non sur ses effets sont appliqués : durée et nombre d'une invocation, entretien.
+
+	C'est ce qui rend les composants d'une invocation opérants : sa branche du moteur
+	n'applique aucun `effets`, elle lit le bloc `invocation` et le `maintien` du doc.
+	⚠️ Re-clampé APRÈS l'addition (`nombre` ≤ INVOCATION_NOMBRE_MAX), comme drain et saut.
+	⚠️ L'entretien ne descend JAMAIS sous 1 PM : à 0, `est_maintenu` basculerait et le sort
+	changerait de nature (un sort tenu sans `duree` n'aurait plus rien pour durer).
+	Sans renfort, rend une copie identique — le doc d'origine n'est jamais muté."""
+	doc = dict(sort or {})
+	eff = effets or {}
+	inv = doc.get("invocation")
+	if inv:
+		doc["invocation"] = {
+			**inv,
+			"duree": _as_int(inv.get("duree")) + _as_int(eff.get("invocation_duree")),
+			"nombre": min(INVOCATION_NOMBRE_MAX,
+						  _as_int(inv.get("nombre")) + _as_int(eff.get("invocation_nombre"))),
+		}
+	reduction = _as_int(eff.get("maintien_reduction"))
+	if reduction and est_maintenu(doc):
+		doc["maintien"] = max(1, _as_int(doc.get("maintien")) - reduction)
+	return doc
 
 
 def part_durative(effets: dict) -> bool:
@@ -814,20 +853,32 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) 
 	return out
 
 
-def sorts_depart_par_vocation(find_docs) -> dict:
-	"""Sorts niveau 0 groupés par vocation — choix du sort de départ à la création
-	de personnage : {vocation: [{id, nom, icon, description}]}."""
+def sort_de_depart_valide(sort: dict | None, voc, rules_vocations) -> bool:
+	"""Ce sort (vue normalisée) peut-il être le sort de départ de la vocation `voc` ?
+
+	SOURCE UNIQUE de la règle, partagée par la liste de la création et par sa validation
+	serveur : niveau 0, de l'ÉCOLE NATIVE de la vocation, d'une famille qu'elle peut
+	apprendre (un répurgateur ne démarre pas sur une invocation qu'il ne pourrait acheter).
+	Deux vocations de même école (druide/chaman) partagent donc la même liste."""
+	if not sort or sort["niveau"] != 0:
+		return False
+	native = ecole_native(voc, rules_vocations)
+	return (native is not None and magie_de_sort(sort, rules_vocations) == native
+			and not apprentissage_exclu(sort, voc, rules_vocations))
+
+
+def sorts_depart_par_vocation(find_docs, rules_vocations) -> dict:
+	"""Sorts de départ groupés par vocation — choix à la création de personnage :
+	{vocation: [{id, nom, icon, description}]}, cf. `sort_de_depart_valide`."""
+	sorts = [s for doc in find_docs({"type": "sort"}) or [] if (s := normaliser_sort(doc))]
 	out: dict = {}
-	for doc in find_docs({"type": "sort"}) or []:
-		s = normaliser_sort(doc)
-		if not s or s["niveau"] != 0:
-			continue
-		out.setdefault(s["vocation"], []).append({
-			"id": s["id"], "nom": s["nom"], "icon": s["icon"],
-			"description": s["description"],
-		})
-	for lst in out.values():
-		lst.sort(key=lambda x: x["nom"])
+	for entree in _vocations_entries(rules_vocations):
+		voc = entree.get("id")
+		lst = [{"id": s["id"], "nom": s["nom"], "icon": s["icon"],
+				"description": s["description"]}
+			   for s in sorts if sort_de_depart_valide(s, voc, rules_vocations)]
+		if lst:
+			out[voc] = sorted(lst, key=lambda x: x["nom"])
 	return out
 
 

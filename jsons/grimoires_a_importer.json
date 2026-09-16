@@ -1,0 +1,410 @@
+[
+  {
+    "_id": "item:grimoire_bouclier_magique",
+    "type": "item",
+    "nom": "Grimoire : Bouclier magique",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Bouclier magique » (mage). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:bouclier_magique"
+    ],
+    "valeur": [
+      {
+        "ag": 5
+      },
+      {
+        "ag": 15
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_bouclier_magique",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_bouclier_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_eclair_siphonnant",
+    "type": "item",
+    "nom": "Grimoire : Éclair siphonnant",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Éclair siphonnant » (mage). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:eclair_siphonnant"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_eclair_siphonnant",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_eclair_siphonnant",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_saut",
+    "type": "item",
+    "nom": "Grimoire : Saut",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Saut » (mage). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:saut"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_saut",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_saut",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_pacte_de_sang",
+    "type": "item",
+    "nom": "Grimoire : Pacte de sang",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Pacte de sang » (demoniste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:pacte_de_sang"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_pacte_de_sang",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_pacte_de_sang",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_baiser_du_vampire",
+    "type": "item",
+    "nom": "Grimoire : Baiser du vampire",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Baiser du vampire » (necromancien). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:baiser_du_vampire"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_baiser_du_vampire",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_baiser_du_vampire",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_lien_du_paladin",
+    "type": "item",
+    "nom": "Grimoire : Lien du paladin",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Lien du paladin » (paladin). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:lien_du_paladin"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_lien_du_paladin",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_lien_du_paladin",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_mur_de_feu",
+    "type": "item",
+    "nom": "Grimoire : Mur de feu",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Mur de feu » (elementaliste). Il n'est pas consumé par l'étude.",
+    "rarete": "peu_commun",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:mur_de_feu"
+    ],
+    "valeur": [
+      {
+        "ag": 10
+      },
+      {
+        "ag": 30
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_mur_de_feu",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_mur_de_feu",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:grimoire_meteore",
+    "type": "item",
+    "nom": "Grimoire : Météore",
+    "icon": "📖",
+    "description": "Un grimoire relié qui enseigne le sort « Météore » (elementaliste). Il n'est pas consumé par l'étude.",
+    "rarete": "tres_rare",
+    "categorie": "livre",
+    "sous_categorie": "grimoire",
+    "slots": [],
+    "tags": [
+      "grimoire"
+    ],
+    "poids": 1,
+    "sorts": [
+      "sort:meteore"
+    ],
+    "valeur": [
+      {
+        "ag": 80
+      },
+      {
+        "ag": 240
+      }
+    ]
+  },
+  {
+    "_id": "recette:grimoire_meteore",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "grimoire_meteore",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Encre",
+        "quantite": 2
+      },
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "item": "item:Plume_d_oie",
+        "quantite": 1
+      },
+      {
+        "item": "item:Papier",
+        "quantite": 3
+      }
+    ]
+  }
+]

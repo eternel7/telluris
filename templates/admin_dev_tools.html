@@ -78,6 +78,8 @@
 		.status.ok { color: var(--success); }
 		.status.err { color: var(--danger); }
 		.status.run { color: var(--accent); }
+		.progress { margin-top: 8px; height: 8px; overflow: hidden; background: #0d0f14; border: 1px solid var(--border); border-radius: 6px; }
+		.progress > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width .15s ease; }
 
 		/* Le « notepad » : sortie brute, police fixe, fond noir, défilement propre.
 		   `white-space: pre-wrap` — une ligne longue s'enroule au lieu d'imposer un
@@ -116,9 +118,11 @@
 				</select>
 				<button class="btn" type="button" id="run-btn">▶ Lancer</button>
 				<button class="btn danger" type="button" id="stop-btn" disabled>✕ Arrêter</button>
+				<button class="btn secondary" type="button" id="outil-importer" hidden>📥 Importer</button>
 			</div>
 			<div class="outil-info" id="outil-info"></div>
 			<div class="status" id="run-status"></div>
+			<div class="progress" id="import-progress" hidden><div id="import-bar"></div></div>
 		</div>
 
 		<div class="card">
@@ -131,6 +135,7 @@
 		</div>
 	</div>
 
+<script src="{{ url_for('scripts', path='import_sortie.js') }}"></script>
 <script>
 // Catalogue injecté par le serveur — SANS argv (le client n'a aucune raison de connaître la
 // ligne de commande, et la publier inviterait à la renvoyer).
@@ -141,6 +146,7 @@ const $ = id => document.getElementById(id);
 let offset = 0;        // index ABSOLU de la prochaine ligne attendue
 let timer = null;      // scrutation en cours
 const PERIODE = 700;   // ms
+let runOutil = '';     // l'outil du run suivi (le sélecteur a pu changer depuis)
 
 function setStatus(msg, kind) {
 	$('run-status').textContent = msg;
@@ -188,14 +194,44 @@ async function tirerJournal() {
 		$('log-title').textContent = 'Journal — ' + (data.label || data.outil || '');
 		if (data.fini) {
 			arreterScrutation();
-			const ok = data.code === 0;
-			setStatus(ok ? '✓ Terminé (code 0).' : '✗ Terminé avec le code ' + data.code + '.', ok ? 'ok' : 'err');
+			conclureRun(data);
 			majBoutons(false);
 		}
 	} catch (e) {
 		arreterScrutation();
 		setStatus('Erreur réseau : ' + e.message, 'err');
 		majBoutons(false);
+	}
+}
+
+// Fin de run : statut, et 📥 si l'outil produit un fichier à importer et a fini en code 0.
+// Le serveur revérifie (fichier plus récent que le run) : le bouton n'est qu'une offre.
+function conclureRun(data) {
+	runOutil = data.outil || '';
+	const ok = data.code === 0;
+	setStatus(ok ? '✓ Terminé (code 0).' : '✗ Terminé avec le code ' + data.code + '.', ok ? 'ok' : 'err');
+	const o = PAR_ID[runOutil];
+	if (ok && o && o.sortie) {
+		$('outil-importer').textContent = '📥 Importer ' + o.sortie;
+		$('outil-importer').hidden = false;
+	}
+}
+
+async function importerSortie() {
+	const o = PAR_ID[runOutil];
+	if (!o) return;
+	const btn = $('outil-importer');
+	btn.disabled = true;
+	try {
+		const fin = await importerSortieOutil(o.id, {
+			setStatus, progress: $('import-progress'), bar: $('import-bar'),
+		});
+		// Déjà importé : le bouton ne doit pas pouvoir renvoyer le même lot.
+		if (fin) btn.hidden = true;
+	} catch (e) {
+		setStatus('Erreur réseau : ' + e.message, 'err');
+	} finally {
+		btn.disabled = false;
 	}
 }
 
@@ -224,6 +260,7 @@ async function lancer() {
 	if (o.danger && !confirm('« ' + o.label + " »\n\n" + (o.ecrit || '')
 			+ "\n\nLancer quand même ?")) return;
 	majBoutons(true);
+	$('outil-importer').hidden = true;
 	setStatus('Lancement…', 'run');
 	try {
 		const res = await fetch('/admin/dev-tools/lancer', {
@@ -263,6 +300,13 @@ $('outil-select').addEventListener('change', majInfo);
 $('run-btn').addEventListener('click', lancer);
 $('stop-btn').addEventListener('click', arreter);
 $('clear-btn').addEventListener('click', () => { $('log').textContent = ''; });
+$('outil-importer').addEventListener('click', importerSortie);
+// `?outil=<id>` (lien de l'alerte de /admin) : pré-sélection, seulement si l'id est au catalogue.
+(() => {
+	let voulu = null;
+	try { voulu = new URLSearchParams(location.search).get('outil'); } catch (e) { /* URL illisible */ }
+	if (voulu && PAR_ID[voulu]) $('outil-select').value = voulu;
+})();
 majInfo();
 
 // Le tampon vit dans le SERVEUR, pas dans la page : un rechargement (ou un second onglet)
@@ -278,8 +322,7 @@ majInfo();
 		offset = data.offset;
 		$('log-title').textContent = 'Journal — ' + (data.label || data.outil || '');
 		if (data.fini) {
-			const ok = data.code === 0;
-			setStatus(ok ? '✓ Terminé (code 0).' : '✗ Terminé avec le code ' + data.code + '.', ok ? 'ok' : 'err');
+			conclureRun(data);
 		} else {
 			const sel = $('outil-select');
 			if (data.outil && PAR_ID[data.outil]) { sel.value = data.outil; majInfo(); }

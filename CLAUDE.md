@@ -33,7 +33,7 @@ Harnais : `slots` · `resize` · `deplacement` · `voies` · `zones_effet` · `l
 
 ## Inspecting live DB values
 
-La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs : lire le dump committé **`telluris-dump-*.json`** (`{"db","exported_at","doc_count","docs":[...]}`, sans `user:*`) — grep sur `"_id": "rules:races"`. Exports ciblés, `/admin/table`, sémantique d'écriture, caches : compétence **telluris-db**.
+La CouchDB live est distante, NON joignable en local. Valeurs réelles des docs : lire le dump committé **`telluris-dump-*.json`** (`{"db","exported_at","doc_count","docs":[...]}`, sans `user:*`) — grep sur `"_id": "rules:races"`. ⚠️ Le dump **téléchargé** depuis `/admin/exports` **inclut les `user:*`** (restauration à l'identique : empreintes de mot de passe, jetons `reset:*`) → les retirer avant de committer ; celui qu'écrivent les outils de `/admin/lieux` les exclut. Exports ciblés, `/admin/table`, sémantique d'écriture, caches : compétence **telluris-db**.
 
 ## Gameplay Systems
 
@@ -64,6 +64,8 @@ utils/
                          #   familles exclues d'une vocation, bloc `invocation`, les TROIS notions
                          #   du temps magique (incantation PA / cout_pm / maintien), seuil de
                          #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie
+  grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;
+                         #   règle de couverture partagée par dev/gen_grimoires.py et l'alerte de /admin
   competences.py         # compétences de vocation (pur) : passives permanentes, actives, apprentissage
   zones_effet.py         # zones d'effet des sorts/compétences (pur) : cercle, carré, rectangle, cône ;
                          #   ancre (lanceur/cible) + orientation ; miroir scripts/zones_effet.js

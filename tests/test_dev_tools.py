@@ -45,6 +45,9 @@ def test_forme_des_entrees():
 		if o.get("params"):
 			assert callable(o.get("argv_fn")) and o.get("dump_frais"), o["id"]
 			assert all(p["type"] in dt._TYPES_PARAM for p in o["params"]), o["id"]
+		elif o.get("argv_fn"):
+			# Sans paramètre mais avec un dump régénéré au lancement (gen_grimoires).
+			assert callable(o["argv_fn"]) and o.get("dump_frais"), o["id"]
 		else:
 			assert isinstance(o.get("argv"), list), o["id"]
 
@@ -152,6 +155,24 @@ def test_lancer_prepare_puis_lance_l_argv_construit(monkeypatch):
 	assert isinstance(vu["argv"], list) and not vu["shell"]
 	assert vu["argv"][-3:] == ["jsons/d.json", "--ville", "lieu:lutecia"]
 	assert "# dump écrit par le serveur : jsons/d.json" in run["lignes"]
+
+
+def test_outil_sans_parametre_a_dump_frais(monkeypatch):
+	"""gen_grimoires : listé sur /admin/dev-tools (aucun paramètre à saisir) mais relancé sur un
+	dump que le serveur écrit — le dump committé réémettrait un grimoire retouché depuis."""
+	assert "gen_grimoires" in {o["id"] for o in dt.catalogue_payload()}
+	monkeypatch.setattr(dt, "_RUN", None)
+	vu = {}
+
+	def faux_popen(argv, **kw):
+		vu["argv"] = argv
+		raise FileNotFoundError
+
+	monkeypatch.setattr(dt.subprocess, "Popen", faux_popen)
+	run, erreur = dt.lancer("gen_grimoires", None, preparer=lambda o, v: {"dump": "jsons/d.json"})
+	assert erreur is None and vu["argv"][-3:] == [os.path.join("dev", "gen_grimoires.py"), "--dump", "jsons/d.json"]
+	monkeypatch.setattr(dt, "_RUN", None)
+	assert dt.lancer("gen_grimoires", {"x": 1}, preparer=lambda o, v: {})[1][0] == 422
 
 
 # ── 📥 Importer : jamais le fichier d'un autre run ───────────────────────────

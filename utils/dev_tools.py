@@ -397,6 +397,23 @@ CATALOGUE = [
 			"livre : recette pigment ×1 → encre ×2. ⚠️ L'encre passe de 12-36 cu à 30-90 cu.",
 	},
 	{
+		"id": "gen_grimoires",
+		"label": "📖 Générer les grimoires des sorts qui n'en ont pas",
+		# Sans paramètre, mais `dump_frais` : l'import est un PUT complet, relire le dump committé
+		# réémettrait un grimoire retouché depuis — et l'écraserait.
+		"argv_fn": lambda v, f: _py("gen_grimoires.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/grimoires_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/grimoires_a_importer.json. Rien en base avant 📥 Importer.",
+		"description": "Un grimoire UNIQUE (`sorts: [le sort]`) et sa recette de scriptorium pour "
+			"chaque sort qui n'en a pas — un sort que seul un grimoire multiple cite reçoit quand "
+			"même le sien. Prix et rareté par niveau (5-15 ag au niveau 0, 10n-30n ag au niveau n), "
+			"matières reprises de la recette de grimoire la plus répandue. ⚠️ Chaque recette neuve "
+			"entre au tirage de TOUS les scriptoriums. Signale aussi les grimoires qu'aucune recette "
+			"ne produit. Refuse tout le lot sur un `_id` déjà pris par autre chose ; sans rien à "
+			"créer, n'écrit aucun fichier.",
+	},
+	{
 		"id": "gen_terrain_tags",
 		"label": "🌲 Générer les terrain_tags des zones d'influence",
 		"argv": _py("gen_terrain_tags.py"),

@@ -91,7 +91,9 @@
 			<div class="card-desc">
 				Export JSON des documents de la base <code>telluris</code> (design docs inclus),
 				avec leurs <code>_id</code>/<code>_rev</code>. Les documents <code>user:*</code>
-				sont <strong>exclus</strong>. Ré-importable via l'API CouchDB <code>_bulk_docs</code>.
+				sont <strong>inclus</strong> (restauration à l'identique) : le fichier contient les
+				empreintes de mot de passe — <strong>ne pas le committer tel quel</strong>.
+				Ré-importable via l'API CouchDB <code>_bulk_docs</code>.
 			</div>
 			<a class="dl-btn" href="{{ url_for('admin_export_couchdb') }}">⬇ Télécharger le dump (.json)</a>
 		</div>

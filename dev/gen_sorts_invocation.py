@@ -43,8 +43,10 @@
 #
 # PRIX DES GRIMOIRES. Les 61 grimoires en base enseignent tous un sort de niveau 0 et
 # valent 5-15 argent, peu communs. Un grimoire de niveau n vaut 10n-30n argent, et sa
-# rareté monte par paliers (`rarete_grimoire`). La recette reprend les matières des
-# recettes de grimoire déjà en base (relues du dump, jamais retapées).
+# rareté monte par paliers (`grimoires.rarete_grimoire`). La recette reprend les matières des
+# recettes de grimoire déjà en base (relues du dump, jamais retapées). Cette passe est celle
+# de dev/gen_grimoires.py (`utils/grimoires.py`) : un sort que seul un grimoire MULTIPLE cite
+# reçoit quand même son grimoire unique.
 #
 # IDEMPOTENT : un sort déjà en base avec la même espèce invoquée, un grimoire qui enseigne
 # déjà le sort, une recette qui produit déjà ce grimoire ne sont pas réémis. Un `_id` pris
@@ -58,7 +60,6 @@
 import json
 import os
 import sys
-from collections import Counter
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RACINE)
@@ -68,6 +69,7 @@ SORTIE = os.path.join(DOSSIER_JSONS, "sorts_invocation_a_importer.json")
 # `utils/zones.py` est une feuille de l'arbre d'imports (math/random seuls) : la règle de
 # compatibilité profil/espèce est lue à sa source, jamais recopiée.
 from utils.zones import profil_compatible  # noqa: E402
+from utils import grimoires  # noqa: E402
 
 FAMILLE_INVOCATION = "invocation"
 # Miroir de `utils/sorts.INVOCATION_NOMBRE_MAX` : au-delà, `invocation_de` rabote en silence.
@@ -180,26 +182,6 @@ SORTS = [
 ]
 
 
-def rarete_grimoire(niveau: int) -> str:
-	"""Paliers de rareté d'un grimoire selon le niveau du sort qu'il enseigne. Le niveau 0
-	garde celle des 61 grimoires en base."""
-	if niveau <= 3:
-		return "peu_commun"
-	if niveau <= 6:
-		return "rare"
-	if niveau <= 9:
-		return "tres_rare"
-	return "legendaire"
-
-
-def valeur_grimoire(niveau: int) -> list:
-	"""Fourchette de prix (min, max) : 5-15 argent au niveau 0 (valeur des grimoires en
-	base), 10n-30n argent au niveau n."""
-	if niveau <= 0:
-		return [{"ag": 5}, {"ag": 15}]
-	return [{"ag": 10 * niveau}, {"ag": 30 * niveau}]
-
-
 def charger_dump(chemin=None) -> dict:
 	if chemin:
 		return json.load(open(chemin, encoding="utf-8"))
@@ -235,53 +217,6 @@ def sort_doc(spec) -> dict:
 		# de `resolve_action`), des bonus de composant y seraient inertes.
 		"effets": {},
 		"invocation": invocation,
-	}
-
-
-def matieres_grimoire(base: dict) -> list:
-	"""Matières de la recette de grimoire la plus répandue en base — relues, jamais retapées."""
-	signatures = Counter(
-		json.dumps(d.get("matieres_premieres"), sort_keys=True, ensure_ascii=False)
-		for d in base.values()
-		if d.get("type") == "recette" and str(d.get("objet_final") or "").startswith("grimoire_")
-		and d.get("matieres_premieres")
-	)
-	if not signatures:
-		raise SystemExit("ERREUR : aucune recette de grimoire dans le dump — pas de modèle à reprendre.")
-	return json.loads(signatures.most_common(1)[0][0])
-
-
-def grimoire_doc(sort: dict) -> dict:
-	slug = sort["_id"][len("sort:"):]
-	niveau = int(sort.get("niveau") or 0)
-	nom = sort.get("nom") or slug
-	return {
-		"_id": "item:grimoire_" + slug,
-		"type": "item",
-		"nom": "Grimoire : " + nom,
-		"icon": "📖",
-		"description": "Un grimoire relié qui enseigne le sort « %s » (%s). Il n'est pas consumé par l'étude."
-					   % (nom, sort.get("vocation") or ""),
-		"rarete": rarete_grimoire(niveau),
-		"categorie": "livre",
-		"sous_categorie": "grimoire",
-		"slots": [],
-		"tags": ["grimoire"],
-		"poids": 1,
-		"sorts": [sort["_id"]],
-		"valeur": valeur_grimoire(niveau),
-	}
-
-
-def recette_doc(sort: dict, matieres: list) -> dict:
-	slug = sort["_id"][len("sort:"):]
-	return {
-		"_id": "recette:grimoire_" + slug,
-		"type": "recette",
-		"lieu_categorie": "scriptorium",
-		"objet_final": "grimoire_" + slug,
-		"quantite_produite": 1,
-		"matieres_premieres": [dict(m) for m in matieres],
 	}
 
 
@@ -367,39 +302,15 @@ def main() -> None:
 			print("   (en base : %s — %s niveau %s)%s" % (d["_id"], d.get("magie"), d.get("niveau"), note))
 
 	# ── 2. Grimoires + recettes manquants ──────────────────────────────────────────
+	# Règle et docs partagés avec dev/gen_grimoires.py (`utils/grimoires.py`) : un sort n'est
+	# couvert que par un grimoire UNIQUE.
 	print("\n== Grimoires et recettes manquants")
-	matieres = matieres_grimoire(base)
-	couverts = {
-		s for d in base.values()
-		if d.get("type") == "item" and d.get("sous_categorie") == "grimoire"
-		for s in (d.get("sorts") or [])
-	}
-	tous = [d for d in base.values() if d.get("type") == "sort"] + neufs
-	nb_grimoires = 0
-	for sort in sorted(tous, key=lambda d: (str(d.get("magie") or ""), int(d.get("niveau") or 0), d["_id"])):
-		if sort["_id"] in couverts:
-			continue
-		grimoire = grimoire_doc(sort)
-		recette = recette_doc(sort, matieres)
-		if grimoire["_id"] in base:
-			# Il existe, mais n'enseigne PAS ce sort (sinon il serait dans `couverts`).
-			erreurs.append("%s existe déjà et n'enseigne pas %s" % (grimoire["_id"], sort["_id"]))
-			continue
-		sortie.append(grimoire)
-		nb_grimoires += 1
-		etat_recette = "neuve"
-		existante = base.get(recette["_id"])
-		if existante is not None:
-			if existante.get("objet_final") == recette["objet_final"]:
-				etat_recette = "déjà en base"
-			else:
-				erreurs.append("%s existe déjà et ne produit pas %s" % (recette["_id"], grimoire["_id"]))
-				continue
-		else:
-			sortie.append(recette)
-		print("   %-44s niv %2d  %-10s %s-%s ag  recette %s" % (
-			grimoire["_id"], int(sort.get("niveau") or 0), grimoire["rarete"],
-			grimoire["valeur"][0]["ag"], grimoire["valeur"][1]["ag"], etat_recette))
+	grim_docs, lignes, grim_erreurs = grimoires.grimoires_manquants(base, neufs)
+	sortie.extend(grim_docs)
+	erreurs.extend(grim_erreurs)
+	nb_grimoires = sum(1 for d in grim_docs if d["type"] == "item")
+	for ligne in lignes:
+		print("   " + ligne)
 
 	if erreurs:
 		print("\n⚠️ %d erreur(s) — RIEN n'est écrit :" % len(erreurs))

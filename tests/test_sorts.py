@@ -53,7 +53,8 @@ def _sort(**overrides):
 def test_normaliser_rejette_docs_invalides():
     assert normaliser_sort(None) is None
     assert normaliser_sort({"type": "item"}) is None
-    assert normaliser_sort(_sort(vocation=None)) is None
+    # Un sort appartient à son ÉCOLE, pas à une vocation : `vocation` n'est plus requis.
+    assert normaliser_sort(_sort(vocation=None)) is not None
     assert normaliser_sort(_sort(cout_pm=0)) is None      # un sort coûte TOUJOURS des PM
     assert normaliser_sort(_sort(cout_pm=-3)) is None
 
