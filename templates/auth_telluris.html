@@ -160,9 +160,11 @@
 					<span class="pass-visual"></span>
 				</div>
 				<button type="submit" class="btn-auth">Entrer dans la cité</button>
+				{% if is_reset_mail %}
 				<p class="forgot-link">
 					<a onclick="montrerOubli()" id="forgot-toggle" role="button" tabindex="0">Sceau Secret oublié ?</a>
 				</p>
+				{% endif %}
 				{% if is_google_auth or is_apple_auth or is_facebook_auth %}
 				<div class="social-auth">
 					<div>
@@ -208,6 +210,7 @@
 				<button type="submit" class="btn-auth">Prêter Serment</button>
 			</form>
 
+			{% if is_reset_mail %}
 			<form id="forgot-form" class="hidden">
 				<p class="forgot-intro">
 					Nommez le sceau de correspondance de votre compte : un messager vous
@@ -220,6 +223,7 @@
 				<button type="submit" class="btn-auth">Dépêcher un messager</button>
 				<p id="forgot-message" class="forgot-message hidden"></p>
 			</form>
+			{% endif %}
 
 			<div class="switch-mode">
 				<span id="toggle-text">Nouveau voyageur ?</span>
@@ -263,7 +267,10 @@
 
 			// Le volet « sceau oublié » n'est pas un des deux états de `isSignIn` : il se
 			// referme dès qu'on bascule, sinon deux formulaires resteraient affichés.
-			document.getElementById('forgot-form').classList.add('hidden');
+			// ⚠️ Absent du DOM quand SMTP n'est pas configuré : sans ce test, la bascule
+			// Connexion ↔ Inscription lèverait et ne ferait plus rien du tout.
+			const forgotForm = document.getElementById('forgot-form');
+			if (forgotForm) forgotForm.classList.add('hidden');
 
 			if (isSignIn) {
 				signinForm.classList.add('hidden');
@@ -396,7 +403,10 @@
 			}
 		});
 
-		document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+		// Idem : pas de volet « sceau oublié » sans relais SMTP, donc pas d'écouteur —
+		// et surtout pas d'exception qui emporterait la fin du script.
+		const forgotFormNode = document.getElementById('forgot-form');
+		if (forgotFormNode) forgotFormNode.addEventListener('submit', async (e) => {
 			e.preventDefault();
 
 			const bouton = e.target.querySelector('button[type="submit"]');
