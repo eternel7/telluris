@@ -5,195 +5,212 @@ code de jeu n'a été modifié. Chaque bloc `json` est un doc CouchDB **complet*
 dans `/admin/doc` ou à rassembler dans un `jsons/*_a_importer.json` une fois la liste arbitrée.
 
 Vérificateur : `python dev/check_competences_doc.py` — relit ce fichier, normalise chaque bloc
-par le moteur réel (`utils/competences.normaliser_competence`, `utils/zones_effet.normaliser_zone`)
-et contrôle les invariants listés plus bas. Il échoue en code 1.
+par le moteur réel et contrôle les invariants listés plus bas. Il échoue en code 1.
 
-> **Révision 2** — mise à jour pour les **zones d'effet** (PR #11) et la famille **invocation**
-> (PR #10). 24 entrées gagnent un bloc `zone` ; le répurgateur change d'école. Le détail de ce
-> qui a bougé est en fin de document, § « Ce que la révision 2 a changé ».
+> **Révision 3** — mise à jour pour les **trois notions du temps magique** et les **sept clés
+> d'effets** arrivées avec elles (drain, dégâts aux PM, coût en PV, saut, lien de vie). 13
+> entrées changent ; trois titres que les révisions précédentes avaient dû réinterpréter
+> deviennent enfin littéraux. Détail en fin de document, § « Ce que la révision 3 a changé ».
 
 ---
 
 ## Pourquoi
 
-La base ne contient qu'une poignée de compétences, de niveau 0 ou 1.
-`competences_apprenables` filtre sur `vocations_niveaux[voc] ≥ niveau` : passé le niveau 1 de
-vocation, l'onglet ⚡ n'a plus rien à vendre, pour aucune des 20 vocations. Ce document propose
-**120 compétences** — 20 vocations × 3 paliers (3 / 6 / 10) × (1 passive + 1 active).
+Passé le niveau 1 de vocation, l'onglet ⚡ n'a plus rien à vendre, pour aucune des 20
+vocations (`competences_apprenables` filtre sur `vocations_niveaux[voc] ≥ niveau`). Ce document
+propose **120 compétences** — 20 vocations × 3 paliers (3 / 6 / 10) × (1 passive + 1 active).
 
-Inspiration : `vocations et titres.txt` (titres de niveaux 3 et 5 de la table de jeu d'origine).
-Le palier **10** n'y existe pas : il est neuf, et traité en **capstone de signature**.
+Inspiration : `vocations et titres.txt` (titres de niveaux 3 et 5 de la table d'origine). Le
+palier **10** n'y existe pas : il est neuf, et traité en **capstone de signature**.
 
 ---
 
-## Le cadre — ce que le moteur sait lire, et rien d'autre
+## Ce qu'une COMPÉTENCE sait faire — et ce qu'un sort seul sait faire
 
-`_bonus_dict` (`utils/sorts.py`) et `normaliser_competence` (`utils/competences.py`) sont des
-**listes blanches fermées**. Une clé inventée ne lève rien et **disparaît**. Vocabulaire
-disponible, et lui seul :
+`_bonus_dict` porte aujourd'hui **19 clés**, partagées par les sorts, les compétences, les armes
+et les composants. **Mais toutes ne sont pas honorées par la branche `competence` du moteur.**
+Le tableau ci-dessous a été établi en exécutant `resolve_action` sur chaque clé, posée
+successivement sur un sort et sur une compétence — pas en lisant le code.
 
-| dans `effets` | au premier niveau du doc |
-|---|---|
-| `degats` `"2D8+4"` · `pv` · `pm` · `regen_pv` · `regen_pm` | `mode` (passive/active) · `cout_pm` · `famille` |
-| `buffs` `{V,F,R,Ag,Vol,Int,Cha,Ch: ±int}` · `duree` | `cible` (soi/ennemi/allie) · `jet` (cc/cd/magique) |
-| `esquive` · `furtivite` | `portee` · **`zone`** · `condition.battle_map_tags` · `animation` |
+| clé | compétence | ce que fait le moteur |
+|---|---|---|
+| `degats` · `pv` · `pm` · `regen_pv` · `regen_pm` · `buffs` · `duree` · `esquive` · `furtivite` | ✅ | inchangé depuis la révision 1 |
+| **`maintien`** (champ du doc, ≤ 20) | ✅ | PM par round, facturés par `_enregistrer_concentration` |
+| **`drain_pv`** · **`drain_pm`** · **`drain_max`** | ✅ | chokepoint offensif partagé avec les sorts |
+| **`degats_pm`** | ⚠️ **jamais seul** | inerte seul (cf. ci-dessous) ; fonctionne accompagné |
+| `cout_pv` | ❌ | jamais prélevé sur une compétence |
+| `saut` | ❌ | inerte : l'action réussit, rien ne se téléporte |
+| `lien_vie` | ❌ | inerte : l'action réussit, aucun lien n'est posé |
+| `incantation` (champ du doc) | ❌ | non lu — **délibéré**, cf. ci-dessous |
+| `invocation` (bloc du doc) | ❌ | réservé aux docs `sort:*` |
+| `invocation_duree` · `invocation_nombre` · `maintien_reduction` | ❌ | bonus de **composant** ; une compétence n'en a pas |
 
-### Les zones d'effet — la nouveauté qui change le plus le contenu
+Aucune entrée de ce document n'emploie une clé marquée ❌. Les trois dernières lignes ne sont
+pas des oublis du moteur mais des choix : `incantation` n'est pas normalisée sur une compétence
+parce que la canalisation multi-round n'a qu'un chemin de résolution, propre aux sorts —
+afficher « ⏱ 4 PA » sur une capacité qui partirait quand même du premier coup serait un champ
+qui ment. Les trois bonus de composant n'ont pas de sens là où il n'y a pas de composant.
 
-Bloc `zone`, géométrie pure dans `utils/zones_effet.py`, miroir client
-`templates/scripts/zones_effet.js`. **Bloc absent ⇒ la seule case de la cible désignée**, à la
-lettre. Il vaut pour les **trois** `cible` : `ennemi`, `allie` et `soi`.
+### ⚠️ `degats_pm` seul : deux gardes jumelles divergent
+
+`competence_utilisable_combat` accepte une compétence qui ne porte que `degats_pm` — le router
+la liste et l'accepte — mais la sous-branche `ennemi` de `resolve_action` la refuse ensuite :
+
+```
+utils/combat.py:3821   sort        if not (degats or degats_pm or part_durative)   →  accepte
+utils/combat.py:4370   competence  if not degats and not part_durative             →  REFUSE
+```
+
+C'est exactement la divergence que la compétence `telluris-magie` signale (« une capacité
+acceptée par le router puis refusée par le moteur »), sur la quatrième garde. **Ce document ne
+la contourne pas en silence** : ses trois entrées à `degats_pm` portent toutes, en plus, des
+`degats` — ce qui est de toute façon leur intention (frapper *et* vider la réserve). Elles
+fonctionneront donc telles quelles, que la divergence soit corrigée ou non.
+
+Signalé sans être corrigé : c'est du code de jeu, hors du périmètre de ce document.
+
+### Le maintien — une posture, pas une durée
+
+Un `maintien` de N PM/round transforme une capacité à durée en **posture tenue** : elle dure
+tant que le lanceur paie, sans aucun PA, et s'arrête sur une relâche volontaire (action
+`interrompre`, gratuite), un manque de PM, ou un test de concentration raté quand il encaisse
+un coup. Son entrée d'`effets_actifs` porte `maintenu: True` et **ne se décrémente pas** — sa
+durée n'est pas un compte à rebours mais la capacité de payer.
+
+Trois conséquences pour l'écriture, toutes vérifiées en exécutant le moteur :
+
+1. **`duree` devient inutile** et les entrées maintenues de ce document l'omettent. La poser
+   n'est pas une erreur (le moteur la range dans `restants` puis ne la décrémente jamais), mais
+   elle annonce une échéance qui n'existe pas.
+2. ⚠️ **Une compétence maintenue est COMBAT SEULEMENT** : `competence_utilisable_exploration`
+   refuse `est_maintenu`. Convertir un buff en posture lui **retire son usage hors combat** —
+   d'où le choix de ne convertir que ce qui est une posture de mêlée, jamais un baume de route.
+3. **Encaisser un coup, c'est risquer de la perdre** (un jet par objet tenu). Une posture n'est
+   donc pas un buff gratuit à laisser tourner : c'est le contrepoids de sa durée illimitée.
+
+Le coût se répartit en conséquence : un `cout_pm` de lancement **abaissé**, plus l'entretien.
+
+---
+
+## Les zones d'effet
+
+Bloc `zone`, géométrie pure `utils/zones_effet.py`. **Bloc absent ⇒ la seule case de la cible
+désignée.** Il vaut pour les trois `cible` : `ennemi`, `allie`, `soi`.
 
 | `forme` | dimensions | figure |
 |---|---|---|
 | `cercle` | `rayon` | disque EUCLIDIEN — rayon 1 = la croix (5 cases), rayon 2 = 13 cases |
 | `carre` | `rayon` | disque de CHEBYSHEV — rayon 1 = les 8 cases autour + l'ancre (9) |
-| `rectangle` | `longueur` × `largeur`, `decalage` | bande orientée — les 3 cases devant : `longueur 1, largeur 3, decalage 1` |
+| `rectangle` | `longueur` × `largeur`, `decalage` | bande orientée — 3 cases devant : `1 × 3, decalage 1` |
 | `cone` | `longueur`, `angle` (défaut 90), `decalage` | secteur — 3 + 5 + 7 cases sur 3 crans |
 
-`origine` : `cible` (la case visée) ou `lanceur` (la sienne). `orientation` (rectangle et cône
-seuls) : `cible` (l'axe lanceur → cible, ramené au huitième de tour) ou `facing`.
-
-**Cinq règles de zone qui ont dicté l'écriture de chaque bloc :**
-
-1. ⚠️ **`decalage` compte depuis l'ancre INCLUSE.** Une forme orientée ancrée sur le **lanceur**
-   s'écrit `decalage: 1` — sinon son premier cran est la case du lanceur lui-même. Ancrée sur la
-   **cible**, elle garde `0`, faute de quoi la cible désignée serait la seule épargnée. Toutes
-   les formes orientées de ce document sont ancrées sur le lanceur et portent `decalage: 1`.
+1. ⚠️ **`decalage` compte depuis l'ancre INCLUSE.** Forme orientée ancrée sur le **lanceur** ⇒
+   `decalage: 1` ; ancrée sur la **cible** ⇒ `0`, sinon la cible désignée serait la seule
+   épargnée.
 2. ⚠️ **`cercle` et `carre` de rayon 1 sont deux figures distinctes** (la croix contre les huit
-   cases autour), pas deux écritures de la même. Un tourbillon est un `carre`, une explosion un
-   `cercle`.
-3. ⚠️ **Les deux camps ne se mélangent jamais** : aucune zone hostile ne touche un allié, aucune
-   zone bénéfique ne touche un monstre. Il n'y a pas de tir ami à doser.
+   cases autour).
+3. ⚠️ **Les deux camps ne se mélangent jamais** : pas de tir ami, pas de soin aux monstres.
 4. ⚠️ **La cible désignée est toujours touchée**, même hors de la forme — et **seul son jet peut
-   échouer critiquement**. Une zone large n'est donc jamais plus dangereuse pour son lanceur.
-5. ⚠️ **`portee` (qui l'on peut DÉSIGNER) et la zone (ce qui est ATTEINT) sont indépendantes.**
-   Une forme ancrée sur le lanceur porte sa propre distance ; `portee` n'y change rien. La forme
-   est filtrée par le terrain et par la ligne de vue **depuis l'ancre** — une nappe ne soigne ni
-   ne brûle à travers un mur.
+   échouer critiquement**.
+5. ⚠️ **`portee` et la zone sont indépendantes.** La forme est filtrée par le terrain et par la
+   ligne de vue **depuis l'ancre**.
 
-Et deux effets de bord utiles, exploités ici : **le lanceur profite d'une zone bénéfique où il se
-tient** (alors qu'il ne peut jamais être *désigné*), et une zone `allie` **sert aussi les
-montures, les personnes escortées et les invocations**. En revanche un allié **à terre est
-écarté**.
+Effets de bord exploités : **le lanceur profite d'une zone bénéfique où il se tient**, et une
+zone `allie` **sert aussi montures, escortés et invocations**. Un allié **à terre est écarté**.
 
-### ⚠️ Les invocations ne sont PAS disponibles pour une compétence
+---
 
-Le bloc `invocation` (`{espece, profil?, nombre ≤ 4, duree}`) est lu par `normaliser_sort`
-**et par lui seul**. `normaliser_competence` ne le lit pas, et la branche `competence` de
-`resolve_action` (`utils/combat.py`) n'en a aucune trace — là où la branche `sort` la traite
-avant même la cible. **Un bloc `invocation` posé sur un doc `competence:*` serait silencieusement
-inerte** : la compétence partirait en base et ne ferait rien.
-
-Aucune entrée de ce document n'invoque donc quoi que ce soit. Trois capstones sont pourtant des
-invocations par leur thème — `competence:gardien_des_esprits` (« +1 esprit invocable par jour »),
-`competence:invocation_majeure`, `competence:couronne_de_liche` — et sont rendus ici en
-**possession du lanceur** (un très gros buff de soi), seule forme que le moteur sache porter pour
-une compétence. Deux voies existent pour les rendre littéralement, toutes deux **hors du
-périmètre de ce document** : les écrire en `sort:*` (aucun code à toucher — c'est ce qu'ont fait
-`sort:pacte_du_servant` et `sort:levee_des_ossements`), ou étendre `invocation` aux compétences
-(du code moteur). À arbitrer.
-
-### La famille `invocation` et le répurgateur
-
-`famille` est une étiquette libre portée par la donnée, lue par `normaliser_competence` comme par
-`normaliser_sort`. Elle sert à une seule chose : permettre à une vocation d'exclure tout un
-**type** de capacité de son apprentissage (`familles_exclues` de `rules:vocations`). Le
-répurgateur est passé en **Démonologie** et exclut `["invocation"]` — il pratique l'école du
-démoniste sans ses invocations.
-
-Conséquence pour ce document : **aucune entrée ne porte `famille`**. En poser une vaudrait
-s'exposer à ce qu'une vocation la rende inapprenable sans que rien ne le signale au moment de
-l'écriture. Le champ ne se justifiera que le jour où une compétence appartiendra vraiment à un
-type qu'une vocation doit pouvoir refuser.
-
-### Les cinq pièges de fond
+## Les cinq pièges de fond
 
 1. **Une passive `condition`nnée est EXCLUE du repli permanent** (`bonus_passifs`) : seule sa
-   `furtivite` est lue, au snapshot de combat. ⇒ **une passive à `condition` ne porte QUE
-   `furtivite`**. Une seule entrée en use (`competence:eclaireur`).
+   `furtivite` est lue. ⇒ **une passive à `condition` ne porte QUE `furtivite`**. Une seule
+   entrée en use (`competence:eclaireur`).
 2. **`furtivite` est ignorée hors combat**, et se prend en **MAX**, jamais en somme.
-3. **`Cha` n'a aucune dérivée de combat** : un buff de Cha est social et marchand. Réservé aux
-   vocations dont c'est l'identité — ménestrel, duelliste, druide, prêtre, paladin.
-4. **`V` est à SON échelle 1-10**, pas ×10 : `+1` est un gain notable, `−3` entrave lourdement
-   (plancher `deplacement = max(1, V)`).
+3. **`Cha` n'a aucune dérivée de combat** : gain social et marchand. Réservé aux vocations dont
+   c'est l'identité — ménestrel, duelliste, druide, prêtre, paladin.
+4. **`V` est à SON échelle 1-10**, pas ×10 : `+1` est notable, `−3` entrave lourdement.
 5. **Deux actives ne cumulent pas sur la même caract** (meilleur bonus + pire malus retenus).
    Passives et équipement, eux, s'additionnent.
 
-### Ce que les titres du `.txt` ne permettaient pas de rendre
+### Ce que les titres du `.txt` ne permettent toujours pas de rendre
 
-Aucune de ces mécaniques n'existe : réussite critique sur 9+, annulation d'un échec critique,
-attaque supplémentaire par round (`+1 A`), immunité psychologique, plafond de caract dépassé
-(`+1 au-dessus du maximum`), résistance typée (feu / poison / maladie), doublement d'un bonus de
-compétence hors combat. Les titres qui en dépendaient sont **réinterprétés** : la note *Source*
-de chaque entrée dit ce qui a été retenu à la place.
+Réussite critique sur 9+, annulation d'un échec critique, attaque supplémentaire par round
+(`+1 A`), immunité psychologique, plafond de caract dépassé, résistance typée (feu / poison /
+maladie), doublement d'un bonus hors combat. Les titres qui en dépendaient restent
+**réinterprétés** : la note *Source* de chaque entrée dit ce qui a été retenu.
 
-### Deux leviers supportés et sous-employés par le contenu actuel
+### La famille `invocation` et le répurgateur
 
-- **le debuff pur sur `cible:"ennemi"`** — `{buffs:{F:-15}, duree:3}` sans dégâts, accepté par
-  `resolve_action` (« la prise porte ») ; onze entrées en vivent ;
-- **`regen_pm`**, et `esquive` sur une active.
+`famille` est une étiquette libre lue par `normaliser_competence`, qui permet à une vocation
+d'exclure tout un **type** (`familles_exclues` de `rules:vocations`). Le répurgateur est en
+**Démonologie** et exclut `["invocation"]`. **Aucune entrée de ce document ne porte `famille`** :
+en poser une exposerait à ce qu'une vocation la rende inapprenable sans que rien ne le signale
+à l'écriture.
 
 ### Ce qu'une frappe `cc` vaut réellement
 
-Une active `jet:"cc"` **à dés** emprunte les dés ET l'allonge de l'arme équipée
-(`_degats_competence`, `_portee_competence`) — `cd` et `magique` en sont exclus. Le bloc `degats`
-d'une frappe de contact se lit donc **au-dessus** du `degats_cc` du porteur.
+Une active `jet:"cc"` **à dés** emprunte les dés ET l'allonge de l'arme équipée — `cd` et
+`magique` en sont exclus. Le bloc `degats` d'une frappe de contact se lit donc **au-dessus** du
+`degats_cc` du porteur.
 
 ---
 
 ## Grille de calibrage
 
 Référence en base : passive niveau 0 ≈ **+4** en une caract ; active niveau 0 ≈ **10 PM pour
-1D8+2**. Les sorts plafonnent à `buffs ±20`, `pv 16`, `regen 4`, `duree 5`, `12 PM`.
-Coût d'achat = `(niveau+1) × COMPETENCE_COUT_COEFF` → **8 / 14 / 22** points de caractéristique.
+1D8+2**. Coût d'achat = `(niveau+1) × COMPETENCE_COUT_COEFF` → **8 / 14 / 22** points.
 
 | | **Niveau 3** | **Niveau 6** | **Niveau 10 — capstone** |
 |---|---|---|---|
-| **Passive** | +8 pts de caract (1-2 caracts) | +14 pts, ou +8 pts `+ esquive 5` | +22 pts, **ou** un effet de signature seul |
+| **Passive** | +8 pts de caract | +14 pts, ou +8 `+ esquive 5` | +22 pts, **ou** un effet de signature |
 | variantes | `esquive 4-6`, `regen_pv 1` | `esquive 10`, `regen_pv 2` | `esquive 20` · `regen_pv 4-5` · `regen_pm 4-5` · `furtivite 18-20` |
-| **Active — PM** | **15** | **25** | **40** |
-| offensive mono-cible | `2D8+4` (≈ 13) | `3D8+8` (≈ 21) | `5D10+18…20` (≈ 45-48) |
+| **Active — PM de lancement** | **15** | **25** | **40** |
+| offensive mono-cible | `2D8+4` | `3D8+8` | `5D10+18…20` |
 | offensive + entrave | `1D6` + buffs `−8` / `duree 3` | `2D8+4` + buffs `−15` / `duree 3` | `3D10` + buffs `−20` / `duree 4` |
-| soutien `soi` / `allie` | `pv 18`, ou buffs `+12` / `duree 4` | `pv 30`, ou buffs `+18` / `duree 5` | `pv 45` + `regen_pv 5` + buffs `+20` / `duree 5` |
+| soutien `soi` / `allie` | `pv 18`, ou buffs `+12` / `duree 4` | `pv 30`, ou buffs `+18` / `duree 5` | `pv 45` + `regen_pv 5` + buffs `+20` |
+| **posture maintenue** | `8 PM + 3/round` | `12 PM + 4/round` | `18 PM + 6/round` |
+| **drain** (% des dégâts réels) | — | `drain_pv 35-50` | `drain_pv 40` + `drain_max 25` |
+| **`degats_pm`** (toujours accompagné) | `1D6` | `2D6` | `2D8` |
 
 ### La décote de zone
 
-Une zone multiplie l'effet par le nombre de cibles prises **pour le même coût, la même action et
-un seul débit de PM**. Elle se paie donc sur la puissance unitaire :
+Une zone multiplie l'effet par le nombre de cibles **pour un seul débit de PM et une seule
+action**. Elle se paie donc sur la puissance unitaire :
 
-| portée de la forme | décote appliquée | formes concernées |
+| portée de la forme | décote | formes |
 |---|---|---|
 | petite (≈ 3-5 cases) | **−25 %** | `rectangle 1×3`, `cone` longueur 2, `cercle` rayon 1 |
 | moyenne (≈ 9-13 cases) | **−40 %** | `carre` rayon 1, `cercle` rayon 2, `cone` longueur 3 |
 | large (≥ 20 cases) | **−50 %** | `carre` rayon 2, `cone` longueur 4 |
 
-Appliquée aux dégâts pour les zones hostiles, aux `pv`/`buffs` pour les zones bénéfiques. Un
-capstone offensif mono-cible reste donc **le plus gros coup unitaire du jeu** : la zone ne le
-périme pas, elle propose l'autre moitié du choix.
+Un capstone offensif mono-cible reste **le plus gros coup unitaire du document**.
 
-⚠️ Un gros buff de `R` ou de `Vol` **re-clampe PV/PM à son expiration** (plancher `pv_max ≥ 1`) :
-voulu, déjà éprouvé par les sorts, et visible sur les capstones de chaman et de démoniste.
+⚠️ Un gros buff de `R` ou de `Vol` **re-clampe PV/PM à son expiration** (plancher `pv_max ≥ 1`).
 
 ---
 
 ## Invariants contrôlés par `dev/check_competences_doc.py`
 
-1. Chaque bloc passe `normaliser_competence` **sans perte de clé** — ni dans `effets`, ni au
-   premier niveau du doc, ni dans `buffs`, ni dans `zone`. Une clé inventée (`crit_bonus`, un
-   `magie` recopié d'un sort, un buff sur une caract qui n'existe pas, une `forme` mal
-   orthographiée) ne lève rien et **disparaît en silence**.
-2. **Aucun bloc `invocation`** : il serait inerte sur une compétence (cf. ci-dessus).
-3. Aucun `_id` en double, aucune collision avec les `competence:*` déjà en base.
-4. Exactement **6 entrées par vocation** : une passive et une active par niveau 3, 6, 10.
-5. `vocation` ∈ les 20 ids de `rules:vocations` ; `niveau` ∈ {3, 6, 10}.
-6. Toute passive portant `condition` n'a **que** `furtivite` dans ses effets ; **aucune passive
-   ne porte de `zone`** (une passive ne vise rien — le bloc serait décoratif).
-7. Toute active `cible:"ennemi"` porte `degats` **ou** une part durative ; toute active passe
+1. Chaque bloc passe `normaliser_competence` **sans perte de clé** — ni au premier niveau du
+   doc, ni dans `effets`, ni dans `buffs`, ni dans `zone`. Une clé inventée disparaît en
+   silence ; c'est le piège central du contenu.
+2. **Aucune clé inerte sur une compétence** : ni `invocation`, ni `incantation`, ni `cout_pv`,
+   ni `saut`, ni `lien_vie`, ni les trois bonus de composant.
+3. **`degats_pm` jamais seul** — toujours accompagné de `degats` ou d'une part durative, sans
+   quoi la sous-branche `ennemi` refuse la compétence (gardes jumelles divergentes).
+4. `maintien` ≤ `MAINTIEN_PM_MAX` (20), **actives seulement**, et une entrée maintenue
+   n'annonce pas de `duree`.
+5. Aucun `_id` en double, aucune collision avec les `competence:*` déjà en base **ou dans un
+   `jsons/*_a_importer.json`**.
+6. Exactement **6 entrées par vocation** : une passive et une active par niveau 3, 6, 10 ;
+   `vocation` ∈ `rules:vocations` ; `niveau` ∈ {3, 6, 10}.
+7. Toute passive à `condition` n'a **que** `furtivite` ; **aucune passive ne porte de `zone`**
+   ni de `maintien`.
+8. Toute active `cible:"ennemi"` porte `degats` **ou** une part durative ; toute active passe
    `competence_utilisable_combat` **ou** `competence_utilisable_exploration`.
-8. Convention de `decalage` : une forme orientée ancrée sur le `lanceur` porte `decalage ≥ 1`,
-   ancrée sur la `cible` porte `decalage == 0`.
-9. Aucune passive ne porte `cout_pm`, `cible`, `jet` ou `portee`.
+9. Convention de `decalage` : forme orientée ancrée sur le `lanceur` ⇒ `≥ 1`, sur la `cible`
+   ⇒ `0`.
+10. Aucune passive ne porte `cout_pm`, `cible`, `jet` ou `portee`.
 
 ## Guerrier ⚔️
 
@@ -232,14 +249,14 @@ Seigneur de guerre, Mastodonte.*
 ```
 *Source : « Protecteur » (niv. 5) — « +5 PV au-dessus du maximum » : `pv_max = R·3 + F`, donc +14 R vaut +42 PV. Le plafond de caract n'est pas touché (un buff s'ajoute après `compute_stat_cap`).*
 
-**Garde de fer** 🛡️ · active · 25 PM · `soi` / portée 1 · zone : les 8 cases autour
+**Garde de fer** 🛡️ · active · 12 PM + 4/round (posture) · `soi` / portée 1 · zone : les 8 cases autour · ⚔️ combat seulement
 ```json
 {"_id": "competence:garde_de_fer", "type": "competence", "nom": "Garde de fer", "icon": "🛡️",
  "description": "Il ferme la garde et cesse d'avancer. Pendant quelques instants, il n'y a plus d'ouverture.",
- "vocation": "guerrier", "niveau": 6, "mode": "active", "cout_pm": 25,
+ "vocation": "guerrier", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4,
  "cible": "soi", "portee": 1,
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
- "effets": {"buffs": {"R": 11}, "esquive": 5, "duree": 5}}
+ "effets": {"buffs": {"R": 11}, "esquive": 5}}
 ```
 *Source : « Stratège » (niv. 3), tenue de ligne.*
 
@@ -304,13 +321,13 @@ sang, Vétéran, Danseur de guerre.*
 ```
 *Source : « Vétéran » (niv. 5) — « pas de malus de situation » n'a pas de support ; rendu en socle martial.*
 
-**Annonce de sang** 🔥 · active · 25 PM · `soi` / portée 1
+**Annonce de sang** 🔥 · active · 12 PM + 4/round (posture) · `soi` / portée 1 · ⚔️ combat seulement
 ```json
 {"_id": "competence:annonce_de_sang", "type": "competence", "nom": "Annonce de sang", "icon": "🔥",
  "description": "La fureur guerrière montée d'un cran. Ceux qui l'ont vue une fois changent de chemin la fois suivante.",
- "vocation": "barbare", "niveau": 6, "mode": "active", "cout_pm": 25,
+ "vocation": "barbare", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"F": 20, "Ag": 6}, "regen_pv": 3, "duree": 5}}
+ "effets": {"buffs": {"F": 20, "Ag": 6}, "regen_pv": 3}}
 ```
 *Source : « Annonce de sang » (niv. 5).*
 
@@ -445,14 +462,14 @@ Titres : Gentilhomme, Mousquetaire, Garde, Seigneur, Maître d'armes, Exécuteur
 ```
 *Source : « Garde » (niv. 3), « +2 en résistance au moral et à la panique » → Volonté.*
 
-**Parade de maître** ⚔️ · active · 25 PM · `soi` / portée 1 · zone : les 8 cases autour
+**Parade de maître** ⚔️ · active · 12 PM + 4/round (posture) · `soi` / portée 1 · zone : les 8 cases autour · ⚔️ combat seulement
 ```json
 {"_id": "competence:parade_de_maitre", "type": "competence", "nom": "Parade de maître", "icon": "⚔️",
  "description": "Il cesse d'attaquer et se contente de répondre. Plus rien ne passe.",
- "vocation": "duelliste", "niveau": 6, "mode": "active", "cout_pm": 25,
+ "vocation": "duelliste", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4,
  "cible": "soi", "portee": 1,
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
- "effets": {"buffs": {"Ag": 6}, "esquive": 10, "duree": 5}}
+ "effets": {"buffs": {"Ag": 6}, "esquive": 10}}
 ```
 
 ### Niveau 10 — capstone
@@ -632,13 +649,13 @@ Sensei, Ascète.*
 ```
 *Source : « Sage » (niv. 3), « +2 en résistance à la folie » → Volonté (et, par elle, `pm_max` et `pm_def`).*
 
-**Garde du pèlerin** 🥢 · active · 15 PM · `soi` / portée 1
+**Garde du pèlerin** 🥢 · active · 8 PM + 3/round (posture) · `soi` / portée 1 · ⚔️ combat seulement
 ```json
 {"_id": "competence:garde_du_pelerin", "type": "competence", "nom": "Garde du pèlerin", "icon": "🥢",
  "description": "Le bâton tenu en travers, comme un bouclier de bois. Même les traits finissent par s'y perdre.",
- "vocation": "moine", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "moine", "niveau": 3, "mode": "active", "cout_pm": 8, "maintien": 3,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"R": 12}, "esquive": 6, "duree": 4}}
+ "effets": {"buffs": {"R": 12}, "esquive": 6}}
 ```
 *Source : « Pèlerin » (niv. 3), parade des projectiles.*
 
@@ -775,13 +792,13 @@ Justice, Bras divin, Gardien.*
 ```
 *Source : « Brise-sort » (niv. 3), « dissipation naturelle 10+ » → `pm_def = Vol//2 + Int//4`, la seule défense magique du moteur.*
 
-**Arme de justice** ⚔️ · active · 15 PM · `soi` / portée 1
+**Arme de justice** ⚔️ · active · 8 PM + 3/round (posture) · `soi` / portée 1 · ⚔️ combat seulement
 ```json
 {"_id": "competence:arme_de_justice", "type": "competence", "nom": "Arme de justice", "icon": "⚔️",
  "description": "Il n'enchante pas sa lame : il lui rappelle pourquoi elle a été forgée.",
- "vocation": "templier", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "templier", "niveau": 3, "mode": "active", "cout_pm": 8, "maintien": 3,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"F": 12}, "duree": 4}}
+ "effets": {"buffs": {"F": 12}}}
 ```
 *Source : « Juge » (niv. 3), sort Arme de vie.*
 
@@ -817,14 +834,14 @@ Justice, Bras divin, Gardien.*
 ```
 *Source : « Gardien » (niv. 5), « sauvegarde naturelle 10+ » — pas de jet de sauvegarde ici ; rendu par la plus haute R permanente du jeu (+48 PV, +0 à +1 PA).*
 
-**Verdict** ⚖️ · active · 40 PM · `ennemi` / `cc` / portée 1 · zone : les 3 cases devant
+**Verdict** ⚖️ · active · 40 PM · `ennemi` / `cc` / portée 1 · zone : les 3 cases devant · 2D8 aux PM
 ```json
 {"_id": "competence:verdict", "type": "competence", "nom": "Verdict", "icon": "⚖️",
  "description": "Il ne juge pas : il énonce. Le coup vient après, pour la forme.",
  "vocation": "templier", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "zone": {"forme": "rectangle", "origine": "lanceur", "orientation": "cible", "longueur": 1, "largeur": 3, "decalage": 1},
- "effets": {"degats": "3D10+12", "buffs": {"R": -15}, "duree": 3}}
+ "effets": {"degats": "3D10+12", "buffs": {"R": -15}, "duree": 3, "degats_pm": "2D8"}}
 ```
 *Source : « Vengeur » (niv. 3), haine testée à la volonté.*
 
@@ -846,13 +863,13 @@ Inquisiteur, Tueur de démon, Rejeton ou Saint.*
 ```
 *Source : « Exalté » (niv. 3), « ajouter son bonus de Vol aux résistances ».*
 
-**Marque du traqueur** 🎯 · active · 15 PM · `ennemi` / `cc` / portée 1
+**Marque du traqueur** 🎯 · active · 15 PM · `ennemi` / `cc` / portée 1 · 1D6 aux PM
 ```json
 {"_id": "competence:marque_du_traqueur", "type": "competence", "nom": "Marque du traqueur", "icon": "🎯",
  "description": "Il pose sur la bête un signe qu'elle ne comprend pas, et qui l'empêche désormais de bien fuir.",
  "vocation": "repurgateur", "niveau": 3, "mode": "active", "cout_pm": 15,
  "cible": "ennemi", "jet": "cc", "portee": 1,
- "effets": {"degats": "1D6", "buffs": {"Ag": -10, "Vol": -6}, "duree": 3}}
+ "effets": {"degats": "1D6", "buffs": {"Ag": -10, "Vol": -6}, "duree": 3, "degats_pm": "1D6"}}
 ```
 *Source : « Traqueur » (niv. 3) — la détection des créatures n'est pas une compétence jouable ; rendue en marque qui entrave.*
 
@@ -867,13 +884,13 @@ Inquisiteur, Tueur de démon, Rejeton ou Saint.*
 ```
 *Source : « Chasseur de Sorcier » (niv. 3) — les sorts de dissipation ne s'octroient pas par une compétence ; rendu par la `pm_def`.*
 
-**Fer de l'Inquisiteur** 🔱 · active · 25 PM · `ennemi` / `cc` / portée 1
+**Fer de l'Inquisiteur** 🔱 · active · 25 PM · `ennemi` / `cc` / portée 1 · 2D6 aux PM
 ```json
 {"_id": "competence:fer_de_l_inquisiteur", "type": "competence", "nom": "Fer de l'Inquisiteur", "icon": "🔱",
  "description": "Le zèle poussé au-delà de ce qu'une conscience ordinaire supporte, et une lame au bout.",
  "vocation": "repurgateur", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "ennemi", "jet": "cc", "portee": 1,
- "effets": {"degats": "3D8+8"}}
+ "effets": {"degats": "3D8+8", "degats_pm": "2D6"}}
 ```
 *Source : « Inquisiteur » (niv. 5).*
 
@@ -1269,13 +1286,13 @@ Conjurateur, Archimage, Nexus, Invocateur.*
 ```
 *Source : « Conjurateur » (niv. 3) — relancer un sort à usage limité n'est pas exprimable ; rendu par la réserve (`pm_max = 2·Vol + 2·Int` ⇒ +16 PM).*
 
-**Égide arcanique** 🛡️ · active · 15 PM · `soi` / portée 1
+**Égide arcanique** 🛡️ · active · 8 PM + 3/round (posture) · `soi` / portée 1 · ⚔️ combat seulement
 ```json
 {"_id": "competence:egide_arcanique", "type": "competence", "nom": "Égide arcanique", "icon": "🛡️",
  "description": "Une pellicule d'arcanes épouse sa peau et amortit ce qui arrive. Elle tient le temps qu'il faut.",
- "vocation": "mage", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "mage", "niveau": 3, "mode": "active", "cout_pm": 8, "maintien": 3,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"R": 12, "Vol": 6}, "esquive": 5, "duree": 4}}
+ "effets": {"buffs": {"R": 12, "Vol": 6}, "esquive": 5}}
 ```
 *Prolonge `competence:bouclier_arcanique` (niv. 0), qui en est la version passive.*
 
@@ -1337,13 +1354,13 @@ Conjurateur, Archimage, Nexus, Invocateur.*
 ```
 *Prolonge `competence:voile_d_illusion` (niv. 0), en y ajoutant l'esquive.*
 
-**Double illusoire** 👥 · active · 15 PM · `soi` / portée 1
+**Double illusoire** 👥 · active · 8 PM + 3/round (posture) · `soi` / portée 1 · ⚔️ combat seulement
 ```json
 {"_id": "competence:double_illusoire", "type": "competence", "nom": "Double illusoire", "icon": "👥",
  "description": "Il y en a deux, puis trois. Un seul saigne, mais il faut d'abord trouver lequel.",
- "vocation": "illusionniste", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "illusionniste", "niveau": 3, "mode": "active", "cout_pm": 8, "maintien": 3,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"Ag": 8}, "esquive": 14, "duree": 4}}
+ "effets": {"buffs": {"Ag": 8}, "esquive": 14}}
 ```
 
 ### Niveau 6
@@ -1423,15 +1440,15 @@ voie ultime, la Liche.*
  "effets": {"buffs": {"Vol": 10, "Int": 4}}}
 ```
 
-**Drain vital** 🩸 · active · 25 PM · `ennemi` / `magique` / portée 6
+**Drain vital** 🩸 · active · 25 PM · `ennemi` / `magique` / portée 6 · drain 50 % des dégâts
 ```json
 {"_id": "competence:drain_vital", "type": "competence", "nom": "Drain vital", "icon": "🩸",
  "description": "Il prend ce qui tient la cible debout. Ce qu'il en fait ensuite ne regarde personne.",
  "vocation": "necromancien", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "ennemi", "jet": "magique", "portee": 6,
- "effets": {"degats": "3D8+8", "buffs": {"F": -12, "R": -8}, "duree": 3}}
+ "effets": {"degats": "3D8+8", "buffs": {"F": -12, "R": -8}, "duree": 3, "drain_pv": 50}}
 ```
-*⚠️ Le drain **au sens strict** n'est pas exprimable : sur `cible:"ennemi"`, `resolve_action` n'applique `pv` qu'à un allié ou à soi, jamais en retour d'une attaque. Le vol de vie est donc rendu par « dégâts + affaiblissement durable », et non par un gain de PV du lanceur.*
+*✅ **Enfin littéral.** La révision 2 notait ici que « le drain au sens strict n'est pas exprimable » et se rabattait sur « dégâts + affaiblissement durable ». `drain_pv` existe désormais : le nécromancien récupère **50 % des dégâts RÉELLEMENT infligés** (`avant_pv − currentPV`, donc un coup mortel ne rend que ce qui restait), clampé à son propre `pv_max`. Vérifié en exécutant le moteur sur une compétence, pas seulement sur un sort.*
 
 ### Niveau 10 — capstone
 
@@ -1443,14 +1460,14 @@ voie ultime, la Liche.*
  "effets": {"buffs": {"Vol": 16, "Int": 6}}}
 ```
 
-**Étreinte du tombeau** ⚱️ · active · 40 PM · `ennemi` / `magique` / portée 8 · zone : disque de rayon 2
+**Étreinte du tombeau** ⚱️ · active · 40 PM · `ennemi` / `magique` / portée 8 · zone : disque de rayon 2 · drain 40 %, plafond 25
 ```json
 {"_id": "competence:etreinte_du_tombeau", "type": "competence", "nom": "Étreinte du tombeau", "icon": "⚱️",
  "description": "Le sol se souvient de tous ceux qu'il a reçus, et tend les mains vers celui qui marche dessus.",
  "vocation": "necromancien", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "ennemi", "jet": "magique", "portee": 8,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
- "effets": {"degats": "3D10+11", "buffs": {"R": -12, "V": -2}, "duree": 4}}
+ "effets": {"degats": "3D10+11", "buffs": {"R": -12, "V": -2}, "duree": 4, "drain_pv": 40, "drain_max": 25}}
 ```
 
 ---
@@ -1491,14 +1508,14 @@ Invocateur, Archimage.*
  "effets": {"buffs": {"R": 10, "Int": 4}}}
 ```
 
-**Griffe du familier** 👹 · active · 25 PM · `ennemi` / `magique` / portée 6 · zone : cône de 2 crans
+**Griffe du familier** 👹 · active · 25 PM · `ennemi` / `magique` / portée 6 · zone : cône de 2 crans · drain 35 %
 ```json
 {"_id": "competence:griffe_du_familier", "type": "competence", "nom": "Griffe du familier", "icon": "👹",
  "description": "Il ouvre à peine. Ce qui passe la main de l'autre côté fait le travail et repart.",
  "vocation": "demoniste", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "ennemi", "jet": "magique", "portee": 6,
  "zone": {"forme": "cone", "origine": "lanceur", "orientation": "cible", "longueur": 2, "decalage": 1, "angle": 90},
- "effets": {"degats": "2D10+6"}}
+ "effets": {"degats": "2D10+6", "drain_pv": 35}}
 ```
 
 ### Niveau 10 — capstone
@@ -1663,6 +1680,39 @@ qui les distingue. Elles conservent en échange les plus gros coups unitaires du
 
 ---
 
+## Ce que la révision 3 a changé
+
+Écrite après les trois notions du temps magique (PR #15) et les sept clés d'effets arrivées
+avec elles. Les 120 `_id`, les noms et les paliers n'ont toujours pas bougé.
+
+**Trois titres deviennent enfin littéraux** — c'est l'apport principal :
+
+| entrée | révision 2 (réinterprétation) | révision 3 (littéral) |
+|---|---|---|
+| `drain_vital` (nécromancien 6) | « le drain au sens strict n'est pas exprimable » → dégâts + affaiblissement | **`drain_pv: 50`** — 50 % des dégâts réellement infligés |
+| `fer_de_l_inquisiteur` (répurgateur 6) | frappe générique | **`degats_pm: "2D6"`** — le chasseur de sorciers vide la réserve |
+| `verdict` (templier 10) | frappe + affaiblissement | **`degats_pm: "2D8"`** — la lignée du Brise-sort |
+
+**Sept postures maintenues.** Sept actives de soi passent de « buff à durée » à **posture
+tenue** (`maintien`) : `cout_pm` de lancement abaissé, entretien par round, `duree` retirée.
+Guerrier (Garde de fer), barbare (Annonce de sang), duelliste (Parade de maître), moine (Garde
+du pèlerin), templier (Arme de justice), mage (Égide arcanique), illusionniste (Double
+illusoire). ⚠️ **Contrepartie assumée et signalée sur chaque en-tête : elles deviennent COMBAT
+SEULEMENT** — `competence_utilisable_exploration` refuse `est_maintenu`. C'est pourquoi seules
+des postures de mêlée ont été converties, jamais un baume de route.
+
+**Trois drains** (`drain_vital`, `etreinte_du_tombeau`, `griffe_du_familier`) et **trois
+`degats_pm`**, soit 13 entrées touchées au total.
+
+**Ce que la révision 3 a refusé d'écrire**, après l'avoir vérifié en exécutant le moteur :
+`cout_pv`, `saut` et `lien_vie` sont **inertes sur une compétence** (seule la branche `sort` les
+résout), et `saut`/`lien_vie` sont même acceptés par `competence_utilisable_combat` — une
+compétence qui en porte s'utiliserait sans la moindre erreur et ne ferait rien. Le vérificateur
+les refuse désormais (invariant n°2). `incantation` reste hors de portée, délibérément côté
+moteur ; `invocation` reste réservé aux `sort:*`.
+
+---
+
 ## Ce que la révision 2 a changé
 
 Écrite après les PR #10 (familles, magie noire du répurgateur, invocations) et #11 (zones
@@ -1679,7 +1729,7 @@ d'effet). Les 120 `_id`, les noms et les paliers n'ont pas bougé — seuls les 
 | répurgateur | école Sainte | école **Démonologie**, `familles_exclues: ["invocation"]` |
 
 **Ce qui n'a pas changé et méritait d'être revérifié** : les 60 passives (une passive ne vise
-rien, une `zone` y serait décorative — l'invariant n°6 du vérificateur l'interdit désormais), la
+rien, une `zone` y serait décorative — l'invariant n°7 du vérificateur l'interdit désormais), la
 grille de calibrage des paliers, et les quatre vocations laissées sans zone.
 
 ---
