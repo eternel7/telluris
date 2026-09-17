@@ -24,7 +24,10 @@ from email.message import EmailMessage
 _logger = logging.getLogger("telluris.courriel")
 
 
-def smtp_configure() -> bool:
+def smtp_est_configure() -> bool:
+	"""Un relais est-il en place ? C'est aussi ce qui décide si `/auth` propose le
+	volet « Sceau Secret oublié ? » : sans relais, la porte resterait ouverte sur un
+	parcours dont le lien ne part jamais ailleurs que dans le journal."""
 	return bool(os.getenv("SMTP_HOST"))
 
 
@@ -38,7 +41,7 @@ def envoyer(destinataire: str, sujet: str, corps: str) -> bool:
 	if not destinataire:
 		return False
 
-	if not smtp_configure():
+	if not smtp_est_configure():
 		_logger.warning(
 			"SMTP non configuré — courriel NON envoyé à %s.\nSujet : %s\n%s",
 			destinataire, sujet, corps,

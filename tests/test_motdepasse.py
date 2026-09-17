@@ -127,6 +127,19 @@ def test_sans_smtp_rien_ne_part_et_l_appelant_le_sait(monkeypatch, caplog):
 	assert "https://telluris.fr/x" in caplog.text
 
 
+def test_le_relais_declare_sa_presence(monkeypatch):
+	"""⚠️ Ce prédicat ne sert pas qu'à l'envoi : `/auth` s'en sert pour proposer — ou
+	NON — le volet « Sceau Secret oublié ? » (`is_reset_mail`, main.read_page_auth).
+	Un lien qui promettrait un messager inexistant vaut moins que pas de lien."""
+	monkeypatch.delenv("SMTP_HOST", raising=False)
+	assert courriel.smtp_est_configure() is False
+	monkeypatch.setenv("SMTP_HOST", "smtp.exemple.fr")
+	assert courriel.smtp_est_configure() is True
+	# Une variable posée mais vide n'est pas un relais.
+	monkeypatch.setenv("SMTP_HOST", "")
+	assert courriel.smtp_est_configure() is False
+
+
 def test_destinataire_vide_ne_tente_meme_pas_l_envoi(monkeypatch):
 	monkeypatch.setenv("SMTP_HOST", "smtp.exemple.fr")
 	assert courriel.envoyer("", "Sujet", "Corps") is False

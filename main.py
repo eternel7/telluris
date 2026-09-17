@@ -44,6 +44,7 @@ from utils import escorte as escorte_util
 from utils import indicateurs as indicateurs_util
 from utils import fiche as fiche_util
 from utils import acces
+from utils import courriel
 from utils import motdepasse as motdepasse_util
 from utils import journal as journal_util
 from utils import animations as animations_util
@@ -464,15 +465,20 @@ async def read_page_auth(request: Request):
 	is_google_auth = bool(os.getenv("GOOGLE_CLIENT_ID"))
 	is_apple_auth = bool(os.getenv("APPLE_CLIENT_ID"))
 	is_facebook_auth = bool(os.getenv("FACEBOOK_CLIENT_ID"))
+	# Même logique que les trois boutons sociaux : une porte ne s'ouvre que si ce qui
+	# est derrière existe. Sans relais SMTP, le volet « Sceau Secret oublié ? »
+	# promettrait un messager qui ne part jamais.
+	is_reset_mail = courriel.smtp_est_configure()
 	return templates.TemplateResponse(
-		request=request, 
-		name="auth_telluris.html", 
+		request=request,
+		name="auth_telluris.html",
 		context={
 			"title": "Authentification",
 			"is_new": is_new,
 			"is_google_auth": is_google_auth,
 			"is_apple_auth": is_apple_auth,
-			"is_facebook_auth": is_facebook_auth
+			"is_facebook_auth": is_facebook_auth,
+			"is_reset_mail": is_reset_mail
 		}
 	)
 

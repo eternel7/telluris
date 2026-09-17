@@ -99,6 +99,7 @@ utils/
                          #   par compte (lue sur les jetons en base), règle du sceau — celle de
                          #   l'inscription AUSSI (`verifier_force`) —, corps du courriel
   courriel.py            # envoi SMTP (stdlib) ; SANS `SMTP_HOST`, le message part dans le JOURNAL
+                         #   et `/auth` NE PROPOSE PAS le volet « Sceau Secret oublié ? »
   cadence.py             # plafond de requêtes par IP — état de PROCESS (dict), ni partagé entre
                          #   workers ni conservé au redémarrage ; `TRUST_PROXY_HOPS` pour X-Forwarded-For
   xlsx.py                # writer xlsx OOXML pur stdlib (zipfile) — partagé bestiaire + export tableau admin
