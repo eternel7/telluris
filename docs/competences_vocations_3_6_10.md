@@ -51,23 +51,20 @@ parce que la canalisation multi-round n'a qu'un chemin de résolution, propre au
 afficher « ⏱ 4 PA » sur une capacité qui partirait quand même du premier coup serait un champ
 qui ment. Les trois bonus de composant n'ont pas de sens là où il n'y a pas de composant.
 
-### ⚠️ `degats_pm` seul : deux gardes jumelles divergent
+### ✅ `degats_pm` seul : la divergence de gardes jumelles est corrigée
 
-`competence_utilisable_combat` accepte une compétence qui ne porte que `degats_pm` — le router
-la liste et l'accepte — mais la sous-branche `ennemi` de `resolve_action` la refuse ensuite :
+La révision 3 signalait ici que `competence_utilisable_combat` acceptait une compétence ne
+portant que `degats_pm` — le router la listait — tandis que la sous-branche `ennemi` de
+`resolve_action` la refusait ensuite, sa recopie ayant omis la clé.
 
-```
-utils/combat.py:3821   sort        if not (degats or degats_pm or part_durative)   →  accepte
-utils/combat.py:4370   competence  if not degats and not part_durative             →  REFUSE
-```
+**Corrigé depuis** : les six sites qui décidaient de l'éligibilité d'une capacité appellent
+désormais deux fonctions partagées de `utils/sorts.py` — `capacite_utilisable_combat` et
+`effets_agissent_sur_cible` — au lieu de recopier la même expression. Une siphonie pure de
+compétence part et vide la réserve de sa cible. Verrouillé par `tests/test_gardes_jumelles.py`,
+qui compare le prédicat et le moteur sur la même batterie d'effets, pour les deux familles.
 
-C'est exactement la divergence que la compétence `telluris-magie` signale (« une capacité
-acceptée par le router puis refusée par le moteur »), sur la quatrième garde. **Ce document ne
-la contourne pas en silence** : ses trois entrées à `degats_pm` portent toutes, en plus, des
-`degats` — ce qui est de toute façon leur intention (frapper *et* vider la réserve). Elles
-fonctionneront donc telles quelles, que la divergence soit corrigée ou non.
-
-Signalé sans être corrigé : c'est du code de jeu, hors du périmètre de ce document.
+Les trois entrées à `degats_pm` de ce document portent de toute façon des `degats` en plus —
+frapper *et* vider la réserve était leur intention. Elles n'ont pas eu à changer.
 
 ### Le maintien — une posture, pas une durée
 
@@ -196,8 +193,9 @@ Un capstone offensif mono-cible reste **le plus gros coup unitaire du document**
    silence ; c'est le piège central du contenu.
 2. **Aucune clé inerte sur une compétence** : ni `invocation`, ni `incantation`, ni `cout_pv`,
    ni `saut`, ni `lien_vie`, ni les trois bonus de composant.
-3. **`degats_pm` jamais seul** — toujours accompagné de `degats` ou d'une part durative, sans
-   quoi la sous-branche `ennemi` refuse la compétence (gardes jumelles divergentes).
+3. **Accord du router et du moteur** : une active `ennemi` lançable en combat doit aussi avoir
+   de quoi faire à une cible. Remplace l'ancienne règle « `degats_pm` jamais seul », devenue
+   sans objet depuis que les deux gardes appellent la même fonction.
 4. `maintien` ≤ `MAINTIEN_PM_MAX` (20), **actives seulement**, et une entrée maintenue
    n'annonce pas de `duree`.
 5. Aucun `_id` en double, aucune collision avec les `competence:*` déjà en base **ou dans un

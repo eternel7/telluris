@@ -63,7 +63,9 @@ utils/
   sorts.py               # sorts (pur) : normalisation, composants, écoles de magie, apprentissage,
                          #   familles exclues d'une vocation, bloc `invocation`, les TROIS notions
                          #   du temps magique (incantation PA / cout_pm / maintien), seuil de
-                         #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie
+                         #   concentration, clés d'effet drain / degats_pm / cout_pv / saut / lien_vie,
+                         #   et les prédicats d'éligibilité PARTAGÉS avec les compétences
+                         #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;
                          #   règle de couverture partagée par dev/gen_grimoires.py et l'alerte de /admin
   competences.py         # compétences de vocation (pur) : passives permanentes, actives, apprentissage

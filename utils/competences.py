@@ -30,7 +30,8 @@
 from models import character_stats
 from utils.consommables import _as_int, poser_effet
 from utils.sorts import (
-	CIBLE_DEFAUT, CIBLES, JETS, MAINTIEN_PM_MAX, _bonus_dict, est_maintenu, famille_de,
+	CIBLE_DEFAUT, CIBLES, JETS, MAINTIEN_PM_MAX, _bonus_dict,
+	capacite_utilisable_combat, capacite_utilisable_exploration, famille_de,
 	familles_exclues, part_durative,
 )
 from utils.zones_effet import normaliser_zone
@@ -122,32 +123,23 @@ def competence_utilisable_combat(comp: dict) -> bool:
 
 	⚠️ Miroir aussi des trois ajouts de `sort_utilisable_combat` : une compétence
 	MAINTENUE, un saut ou un lien de vie n'ont rien à poser sur la cible et seraient
-	refusés comme « sans effet »."""
-	if not est_active(comp):
-		return False
-	if est_maintenu(comp):
-		return True
-	eff = (comp or {}).get("effets") or {}
-	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
-			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
-			or bool(eff.get("degats_pm")) or _as_int(eff.get("saut")) > 0
-			or bool(eff.get("lien_vie")) or part_durative(eff))
+	refusés comme « sans effet ».
+
+	⚠️ « Miroir » n'est plus une promesse tenue à la main : la règle vit dans
+	`sorts.capacite_utilisable_combat`, partagée avec les sorts et avec les deux gardes du
+	moteur. Il ne reste ici que ce qui est PROPRE aux compétences — une passive ne se lance
+	pas."""
+	return est_active(comp) and capacite_utilisable_combat(comp)
 
 
 def competence_utilisable_exploration(comp: dict) -> bool:
 	"""Éligibilité exploration : active, NON offensive (`soi` ou `allie`), et au moins un
 	effet applicable hors combat (soin/PM instantanés, ou buffs/régén/esquive à durée).
-	Miroir exact de sorts.sort_utilisable_exploration — refus des mécaniques de ROUND
-	(incantation longue, entretien) et de GRILLE (saut, lien de vie) comprises."""
-	if not est_active(comp) or (comp or {}).get("cible", "soi") == "ennemi":
-		return False
-	if est_maintenu(comp):
-		return False
-	eff = (comp or {}).get("effets") or {}
-	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie"):
-		return False
-	instant = _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0
-	return instant or part_durative(eff)
+	Refus des mécaniques de ROUND (incantation longue, entretien) et de GRILLE (saut, lien
+	de vie) compris — la règle vit dans `sorts.capacite_utilisable_exploration`, partagée
+	avec les sorts. Il ne reste ici que ce qui est PROPRE aux compétences : une passive ne
+	se lance pas."""
+	return est_active(comp) and capacite_utilisable_exploration(comp)
 
 
 def empiler_effet_competence(character: dict, comp: dict) -> dict | None:

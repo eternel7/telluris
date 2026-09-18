@@ -19,6 +19,7 @@ from utils.consommables import (
 )
 from utils.sorts import (
 	part_durative, effets_d_arme, concat_degats, INCANTATION_PA_MAX,
+	capacite_utilisable_combat, effets_agissent_sur_cible,
 	est_incantation_longue, est_maintenu, pm_par_pa, seuil_concentration,
 )
 from utils.zones_effet import cases_effet
@@ -3813,12 +3814,13 @@ def _lancer_sort(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			return saut, None
 		result.update(saut)
 	elif sdoc.get("cible") == "ennemi":
-		# Dégâts OU part à durée : un sort offensif peut n'être qu'un debuff
+		# Dégâts, dégâts de PM OU part à durée : un sort offensif peut n'être qu'un debuff
 		# (« −10 Ag pendant 2 tours »), il lui suffit d'avoir quelque chose à faire.
-		# ⚠️ TROISIÈME garde jumelle, avec `sorts.sort_utilisable_combat` et le test de
-		# `resolve_action` : une siphonie pure (`degats_pm` seul, sans le moindre dégât de
-		# PV) doit passer les trois. Elle est le cœur de la famille anti-lanceur.
-		if not (effets.get("degats") or effets.get("degats_pm") or part_durative(effets)):
+		# ⚠️ Garde partagée avec la sous-branche `ennemi` des compétences
+		# (`sorts.effets_agissent_sur_cible`) : une siphonie pure (`degats_pm` seul, sans
+		# le moindre dégât de PV) doit passer des deux côtés. Elle est le cœur de la
+		# famille anti-lanceur.
+		if not effets_agissent_sur_cible(effets):
 			return {"error": "Ce sort n'a aucun effet sur une cible."}, None
 		monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
 		if not monstre or not monstre["vivant"]:
@@ -4276,13 +4278,11 @@ def resolve_action(
 		sdoc = sort["doc"]
 		effets = sort.get("effets") or {}
 		cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
-		invocation = sdoc.get("invocation") or None
-		# ⚠️ JUMEAU de `sorts.sort_utilisable_combat` : les deux doivent accepter les mêmes
-		# sorts, sinon un sort passe le filtre du router puis se fait refuser ici.
-		if not (invocation or est_maintenu(sdoc) or effets.get("degats") or effets.get("pv")
-				or effets.get("pm") or int(effets.get("furtivite", 0) or 0) > 0
-				or effets.get("degats_pm") or int(effets.get("saut", 0) or 0) > 0
-				or effets.get("lien_vie") or part_durative(effets)):
+		# ⚠️ MÊME FONCTION que `sorts.sort_utilisable_combat`, celle qui a filtré ce sort
+		# côté router : les deux ne peuvent plus diverger. `effets` est passé à part —
+		# ce sont les effets FUSIONNÉS avec le bonus des composants engagés, et c'est sur
+		# eux qu'il faut juger, pas sur ceux du doc nu.
+		if not capacite_utilisable_combat(sdoc, effets):
 			return {"error": "Ce sort n'a aucun effet utilisable en combat."}
 		cout_pv = max(0, int(effets.get("cout_pv", 0) or 0))
 		# ⚠️ `>` STRICT : à 0 PV le lanceur est « à terre ». Un sort capable d'assommer son
@@ -4338,13 +4338,11 @@ def resolve_action(
 			return {"error": "Compétence invalide."}
 		effets = competence.get("effets") or {}
 		cout_pm = max(0, int(competence.get("cout_pm", 0) or 0))
-		# ⚠️ Garde JUMELLE de `competences.competence_utilisable_combat` : les deux doivent
-		# accepter les mêmes capacités, sinon une compétence passe le filtre du router puis
-		# se fait refuser ici. Même liste que la branche `sort`.
-		if not (est_maintenu(competence) or effets.get("degats") or effets.get("pv")
-				or effets.get("pm") or int(effets.get("furtivite", 0) or 0) > 0
-				or effets.get("degats_pm") or int(effets.get("saut", 0) or 0) > 0
-				or effets.get("lien_vie") or part_durative(effets)):
+		# ⚠️ MÊME FONCTION que `competences.competence_utilisable_combat` et que la branche
+		# `sort` ci-dessus : une seule règle pour les quatre sites, plus aucune recopie à
+		# tenir en accord. Une compétence n'a pas de composants — ses `effets` sont ceux du
+		# doc, et le second argument ne fait que l'expliciter.
+		if not capacite_utilisable_combat(competence, effets):
 			return {"error": "Cette compétence n'a aucun effet utilisable en combat."}
 		if joueur["currentPM"] < cout_pm:
 			return {"error": "PM insuffisants."}
@@ -4365,9 +4363,11 @@ def resolve_action(
 			if autres:
 				result["beneficiaires"] = autres
 		elif competence.get("cible") == "ennemi":
-			# Dégâts OU part à durée : une compétence offensive peut n'être qu'un debuff
-			# (cri de guerre qui affaiblit, entrave qui ralentit…).
-			if not effets.get("degats") and not part_durative(effets):
+			# Dégâts, dégâts de PM OU part à durée : une compétence offensive peut n'être
+			# qu'un debuff (cri de guerre qui affaiblit, entrave qui ralentit…) ou une
+			# siphonie pure. ⚠️ MÊME FONCTION que la sous-branche `ennemi` des sorts :
+			# c'est ici que la recopie avait divergé, en omettant `degats_pm`.
+			if not effets_agissent_sur_cible(effets):
 				return {"error": "Cette compétence n'a aucun effet sur une cible."}
 			monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
 			if not monstre or not monstre["vivant"]:
