@@ -1721,6 +1721,7 @@ function apercuZone(capa, cible) {
 // fait suivre un pivot de caméra, et c'est moins de code qu'un second registre à vider.
 let pendingSaut = null;
 
+// `s` est une CAPACITÉ — sort ou compétence : seuls `cible` et `effets.saut` sont lus.
 function casesSaut(s) {
 	const j = me();
 	const sauteur = (s.cible === 'allie' && pendingSaut && pendingSaut.sauteur)
@@ -1749,13 +1750,14 @@ function peindreCasesSaut() {
 	const j = me();
 	const layer = document.getElementById('tokens-layer');
 	if (!j || !j.pos || !layer) return;
-	casesSaut(pendingSaut.sort).forEach(([wx, wy]) => {
+	// ⚠️ `kind` et `payload` sont portés par `pendingSaut` : un saut de COMPÉTENCE se
+	// cible exactement comme un saut de sort, seule l'action postée diffère.
+	casesSaut(pendingSaut.capacite).forEach(([wx, wy]) => {
 		const el = document.createElement('div');
 		el.className = 'zone-case destination';
 		_placerToken(el, wx - j.pos.x, wy - j.pos.y);
-		el.onclick = () => doAction('sort', pendingSaut.cible_id, wx, wy, null, null,
-								   { sort_id: pendingSaut.sort.sort_id,
-									 composants: pendingSaut.composants });
+		el.onclick = () => doAction(pendingSaut.kind, pendingSaut.cible_id, wx, wy,
+									null, null, pendingSaut.payload);
 		layer.appendChild(el);
 		_apercuZoneCases.push(el);
 	});
@@ -1914,13 +1916,19 @@ function renderTokens() {
 		// le PREMIER temps (qui saute), les cases d'arrivée se peignent ensuite autour de
 		// lui. Sans cette branche, le sort partirait sans destination.
 		tok.onclick = !vise ? null : ((pendingSort && pendingSort.saut)
-			? () => { pendingSaut = { sort: pendingSort.sort,
-									  composants: pendingSort.composants,
+			? () => { pendingSaut = { kind: 'sort', capacite: pendingSort.sort,
+									  payload: { sort_id: pendingSort.sort_id,
+												 composants: pendingSort.composants },
 									  sauteur: p, cible_id: p.id };
 					  pendingSort = null; renderTokens(); refreshBadgeTargets(); }
 			: pendingSort
 			? () => doAction('sort', p.id, null, null, null, null,
 				{ sort_id: pendingSort.sort_id, composants: pendingSort.composants })
+			: (pendingComp && pendingComp.saut)
+			? () => { pendingSaut = { kind: 'competence', capacite: pendingComp.comp,
+									  payload: { competence_id: pendingComp.competence_id },
+									  sauteur: p, cible_id: p.id };
+					  pendingComp = null; renderTokens(); refreshBadgeTargets(); }
 			: () => doAction('competence', p.id, null, null, null, null,
 				{ competence_id: pendingComp.competence_id }));
 		// Une capacité BÉNÉFIQUE de zone se prévisualise sur ses alliés comme l'offensive
@@ -2850,9 +2858,11 @@ function startSortCast(s, composants) {
 				return;
 			}
 			const sauteur = (pendingSaut && pendingSaut.sauteur) || allies[0];
-			pendingSaut = { sort: s, composants, sauteur, cible_id: sauteur.id };
+			pendingSaut = { kind: 'sort', capacite: s, sauteur, cible_id: sauteur.id,
+							payload: { sort_id: s.sort_id, composants } };
 		} else {
-			pendingSaut = { sort: s, composants, sauteur: me(), cible_id: null };
+			pendingSaut = { kind: 'sort', capacite: s, sauteur: me(), cible_id: null,
+							payload: { sort_id: s.sort_id, composants } };
 		}
 		pendingSort = null;
 		renderTokens();
@@ -3091,6 +3101,31 @@ function compLabel(c) {
 // Utilise la compétence `c` : direct (soi / 1 cible) ou ciblage violet (plusieurs cibles).
 // Appelé depuis la case de la compétence (activerSlot).
 function startCompUse(c) {
+	// ⚠️ Le SAUT se teste AVANT `cible !== 'soi'`, pour la même raison que dans
+	// `startSortCast` : une compétence de téléportation s'écrit naturellement
+	// `cible: 'soi'` et tomberait dans le `else`, qui la lancerait SANS destination —
+	// refusée par le serveur sans que le joueur ait pu désigner sa case.
+	if ((c.effets || {}).saut) {
+		if (c.cible === 'allie') {
+			const allies = capaCibles(c);
+			if (!allies.length) { closeSelectors(); return; }
+			if (allies.length > 1 && !(pendingSaut && pendingSaut.sauteur)) {
+				pendingComp = { competence_id: c.competence_id, comp: c, saut: true };
+				renderTokens(); refreshBadgeTargets();
+				return;
+			}
+			const sauteur = (pendingSaut && pendingSaut.sauteur) || allies[0];
+			pendingSaut = { kind: 'competence', capacite: c, sauteur, cible_id: sauteur.id,
+							payload: { competence_id: c.competence_id } };
+		} else {
+			pendingSaut = { kind: 'competence', capacite: c, sauteur: me(), cible_id: null,
+							payload: { competence_id: c.competence_id } };
+		}
+		pendingComp = null;
+		renderTokens();
+		refreshBadgeTargets();
+		return;
+	}
 	if (c.cible !== 'soi') {
 		const cibles = capaCibles(c);
 		if (!cibles.length) { closeSelectors(); return; }

@@ -30,9 +30,9 @@
 from models import character_stats
 from utils.consommables import _as_int, poser_effet
 from utils.sorts import (
-	CIBLE_DEFAUT, CIBLES, JETS, MAINTIEN_PM_MAX, _bonus_dict,
-	capacite_utilisable_combat, capacite_utilisable_exploration, famille_de,
-	familles_exclues, part_durative,
+	CIBLE_DEFAUT, CIBLES, INCANTATION_PA_DEFAUT, INCANTATION_PA_MAX, JETS,
+	MAINTIEN_PM_MAX, _bonus_dict, capacite_utilisable_combat,
+	capacite_utilisable_exploration, famille_de, familles_exclues, part_durative,
 )
 from utils.zones_effet import normaliser_zone
 
@@ -72,13 +72,16 @@ def normaliser_competence(doc) -> dict | None:
 		# ENTRETIEN en PM par round — une garde qu'on tient (cf. utils/sorts, § les trois
 		# notions du temps magique). Même borne, même défaut neutre, et même piège de liste
 		# blanche que `zone` et `animation` juste en dessous.
-		# ⚠️ Pas d'`incantation` ici, et c'est DÉLIBÉRÉ : la canalisation multi-round n'a
-		# qu'un seul chemin de résolution (`_avancer_incantation` → `_lancer_sort`), propre
-		# aux sorts. Normaliser le champ sans le brancher afficherait « ⏱ 4 PA » sur une
-		# compétence qui partirait quand même du premier coup — un champ qui ment est pire
-		# qu'un champ absent. À rebrancher le jour où les compétences auront leur propre
-		# chokepoint de lancement.
 		"maintien": min(MAINTIEN_PM_MAX, _as_int(doc.get("maintien"))),
+		# PA de LANCEMENT — une compétence peut elle aussi demander plusieurs tours à
+		# s'armer (une visée longue, une posture qu'on prend). Longtemps absent ici
+		# DÉLIBÉRÉMENT : la canalisation n'avait qu'un chemin de résolution, propre aux
+		# sorts, et normaliser le champ sans le brancher aurait affiché « ⏱ 4 PA » sur une
+		# compétence qui serait partie du premier coup. Le chokepoint de lancement est
+		# désormais PARTAGÉ (`combat._lancer_capacite`), et le champ est branché des deux
+		# côtés. Défaut neutre : 1 PA ⇒ aucune migration.
+		"incantation": max(1, min(INCANTATION_PA_MAX,
+								  _as_int(doc.get("incantation")) or INCANTATION_PA_DEFAUT)),
 		"cible": cible,
 		"jet": jet,
 		"portee": max(1, _as_int(doc.get("portee")) or 1),
@@ -342,9 +345,11 @@ def liste_competences_payload(character: dict, get_doc, contexte: str) -> list:
 			"niveau": comp["niveau"],
 			"mode": comp["mode"],
 			"cout_pm": comp["cout_pm"],
-			# L'entretien par round, comme pour les sorts : sans lui le client ne peut ni
-			# annoncer la facture ni griser une case impayable.
+			# L'entretien par round ET les PA de lancement, comme pour les sorts : sans eux
+			# le client ne peut ni annoncer la facture, ni griser une case impayable, ni
+			# prévenir qu'une compétence va absorber plusieurs tours.
 			"maintien": comp["maintien"],
+			"incantation": comp["incantation"],
 			"cible": comp["cible"],
 			"jet": comp["jet"],
 			"portee": comp["portee"],
