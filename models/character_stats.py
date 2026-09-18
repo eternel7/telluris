@@ -774,6 +774,15 @@ VENTE_PNJ_FRACTION: float = 0.05
 # matière viennent puiser à leur propre tick. Ce que le boulanger vend aux habitants nourrit
 # l'aubergiste. 0 = comportement d'avant (tout s'évapore), 1 = circuit fermé.
 VENTE_PNJ_REDISTRIB: float = 0.5
+# Déversement DÉTERMINISTE du surplus au pool de la cité : ce qui dépasse le stock cible d'un
+# rayon, et que le lieu ne consomme pas lui-même, part à la ville à chaque tick — sans tirage
+# ni arrondi. C'est ce qui fait circuler les sous-produits du dépeçage (os, cuir, tendons) du
+# boucher vers le tabletier. 0 = comportement d'avant (seuls les achats PNJ alimentent le pool).
+FLUX_SURPLUS_PART: float = 1.0
+# Part d'une ligne du pool qu'UN atelier emporte à son tick. À 1 le premier arrivé rafle tout
+# et ses sœurs trouvent zéro ; en dessous, le lot se partage sur plusieurs passages. Plancher
+# d'une unité : une ligne de 1 reste prenable.
+FLUX_PART_MAX: float = 0.5
 
 
 def current_world_variables() -> dict:
@@ -809,6 +818,8 @@ def current_world_variables() -> dict:
 		"VENTE_PNJ_PROBA": VENTE_PNJ_PROBA,
 		"VENTE_PNJ_FRACTION": VENTE_PNJ_FRACTION,
 		"VENTE_PNJ_REDISTRIB": VENTE_PNJ_REDISTRIB,
+		"FLUX_SURPLUS_PART": FLUX_SURPLUS_PART,
+		"FLUX_PART_MAX": FLUX_PART_MAX,
 		"CRIT_REUSSITE_MAX": CRIT_REUSSITE_MAX,
 		"CRIT_ECHEC_MIN": CRIT_ECHEC_MIN,
 		"CRIT_CHANCE_DIVISEUR": CRIT_CHANCE_DIVISEUR,
@@ -931,6 +942,7 @@ def load_world_variables() -> dict:
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
 	global STOCK_CIBLE_DEFAUT, PRIX_AMPLITUDE_STOCK, VENTE_PNJ_PROBA, VENTE_PNJ_FRACTION, VENTE_PNJ_REDISTRIB
+	global FLUX_SURPLUS_PART, FLUX_PART_MAX
 	global CRIT_REUSSITE_MAX, CRIT_ECHEC_MIN, CRIT_CHANCE_DIVISEUR, COMBAT_SLOTS_MAX
 	global RELATION_INITIALE, RELATION_SEUIL_COEFF, MARCHANDAGE_BLOCAGE_SECONDES
 	global MARCHANDAGE_COMPAGNON_AFFINITE_MIN
@@ -1029,6 +1041,8 @@ def load_world_variables() -> dict:
 	VENTE_PNJ_PROBA      = float(v.get("VENTE_PNJ_PROBA", VENTE_PNJ_PROBA))
 	VENTE_PNJ_FRACTION   = float(v.get("VENTE_PNJ_FRACTION", VENTE_PNJ_FRACTION))
 	VENTE_PNJ_REDISTRIB  = float(v.get("VENTE_PNJ_REDISTRIB", VENTE_PNJ_REDISTRIB))
+	FLUX_SURPLUS_PART    = float(v.get("FLUX_SURPLUS_PART", FLUX_SURPLUS_PART))
+	FLUX_PART_MAX        = float(v.get("FLUX_PART_MAX", FLUX_PART_MAX))
 
 	CRIT_REUSSITE_MAX            = int(v.get("CRIT_REUSSITE_MAX", CRIT_REUSSITE_MAX))
 	CRIT_ECHEC_MIN               = int(v.get("CRIT_ECHEC_MIN", CRIT_ECHEC_MIN))

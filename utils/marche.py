@@ -1359,11 +1359,23 @@ def approvisionner(lieu_doc: dict) -> bool:
 
 
 # ── Flux de marchandises entre boutiques d'une même cité ─────────────────────────
-# Ce que les PNJ consomment chez un marchand ne s'évapore plus tout à fait : une part
-# (`VENTE_PNJ_REDISTRIB`) est versée au POOL DE FLUX de la cité — un `flux_marchand:
-# {item_id: qty}` sur le doc `lieu:*` de la ville — où les ateliers dont une recette réclame
-# cette matière viennent puiser à leur propre tick. Ce que le boulanger vend aux habitants
-# nourrit l'aubergiste ; le cuir écoulé chez le tanneur revient chez le bourrelier.
+# Le POOL DE FLUX de la cité — un `flux_marchand: {item_id: qty}` sur le doc `lieu:*` de la
+# ville — où les ateliers dont une recette réclame cette matière viennent puiser à leur propre
+# tick. Ce que le boulanger vend aux habitants nourrit l'aubergiste ; le cuir écoulé chez le
+# tanneur revient chez le bourrelier.
+#
+# DEUX ALIMENTATIONS, et il faut les deux :
+#   · `_crediter_flux` — une part (`VENTE_PNJ_REDISTRIB`) de ce que les PNJ viennent d'acheter.
+#     Aléatoire et menue, c'est la respiration du marché.
+#   · `_deverser_surplus_flux` — tout ce qui dépasse le `stock_cible` du rayon, DÉTERMINISTE.
+#     C'est ce qui fait réellement circuler une filière : sans lui, il fallait 55 exemplaires
+#     en rayon avant qu'une seule unité franchisse les deux arrondis du crédit PNJ, et les
+#     sous-produits du dépeçage (os, cuir, tendons) n'atteignaient jamais leur artisan.
+#
+# ⚠️ **Une seule matière ne se donne jamais toute seule** : `carcasse` reste hors du circuit
+# (aucun doc `item:carcasse`, clé jamais écrite en stock — cf. `_matieres_entrantes`, qui
+# décompose la bête À LA VENTE). C'est le seul point d'entrée de l'aventurier, et le seul
+# verrou de toute l'économie : carcasse accordée, les 614 recettes du monde cuisent.
 #
 # ⚠️ **Un seul doc partagé, AUCUN scan de voisins**, et ce n'est pas un confort : `lieu:` n'est
 # pas dans `_CACHEABLE_PREFIXES` (db/config.py), donc chercher les boutiques sœurs à chaque
@@ -1456,6 +1468,73 @@ def _crediter_flux(flux: dict | None, ecoules: list) -> bool:
 	return change
 
 
+def _deverser_surplus_flux(lieu_doc: dict, flux: dict | None) -> bool:
+	"""Verse au pool de la cité le surplus de rayon de ce lieu — **ce qui dépasse le
+	`stock_cible`**, sans tirage ni arrondi, à la part `FLUX_SURPLUS_PART`. Mute `lieu_doc` et
+	le contexte ; True si le pool a bougé.
+
+	C'est la marche qui manquait au flux : jusqu'ici le pool n'était alimenté que par
+	`_crediter_flux`, c'est-à-dire par ce que les PNJ venaient d'acheter — quatre portes
+	multiplicatives (`ATELIER_TRANSFO_PROBA`, `VENTE_PNJ_PROBA`, puis deux arrondis) avant
+	qu'une unité circule. Avec les réglages de la base, il fallait **55 exemplaires en rayon**
+	(cible 25) pour qu'une seule unité atteigne la ville, et rien en dessous : les
+	sous-produits du dépeçage n'arrivaient jamais chez le tabletier. Le boucher déverse
+	maintenant ce qui dépasse sa cible, et les ateliers qui en ont l'usage viennent y puiser.
+
+	Trois gardes, dans l'ordre :
+	- **`cles_consommees`**, comme `_crediter_flux` : seule circule une matière dont un atelier
+	  a l'usage quelque part. Un produit fini que personne ne cuisine reste en vitrine et finit
+	  chez les PNJ.
+	- ⚠️ **On saute ce que le lieu CONSOMME lui-même** (`besoins_lieu`) — miroir exact de la
+	  garde `lieu_produit` de `puiser_flux`. Le surplus de rayon EST la matière du prochain
+	  batch (`_executer_production_batch`, pool unifié) : sans cette garde, un atelier
+	  expédierait à la ville l'intermédiaire qu'il vient de cuire pour sa propre recette de
+	  niveau supérieur, et ne pourrait pas le reprendre (`lieu_produit` le lui interdit).
+	- **Plafond par clé à `STOCK_CIBLE_DEFAUT`**, comme le crédit PNJ : ce qui ne rentre pas
+	  reste en rayon, où les PNJ le reprendront. Auto-régulé, aucun réservoir non borné.
+
+	⚠️ Le rayon ne descend jamais sous sa cible : le joueur trouve toujours de quoi acheter."""
+	if not flux or not lieu_doc:
+		return False
+	part = _clamp(float(character_stats.FLUX_SURPLUS_PART), 0.0, 1.0)
+	if part <= 0:
+		return False
+	rayon = (lieu_doc or {}).get("stock_vente") or []
+	if not rayon:
+		return False
+	consommees = cles_consommees()
+	besoins = set(besoins_lieu(lieu_doc))
+	plafond = max(1, int(character_stats.STOCK_CIBLE_DEFAUT))
+	pool = flux["pool"]
+	change = False
+	for entry in rayon:
+		item_id = entry.get("item_id")
+		qty = int(entry.get("qty", 0))
+		if not item_id or qty <= 0:
+			continue
+		item = resolve_item_ref(item_id)
+		if not item:
+			continue
+		sous_cat = item_sous_categorie(item)
+		if item_id not in consommees and sous_cat not in consommees:
+			continue
+		if item_id in besoins or sous_cat in besoins:
+			continue
+		excedent = qty - stock_cible_pour(lieu_doc, item)
+		if excedent <= 0:
+			continue
+		avant = int(pool.get(item_id, 0))
+		verse = min(int(excedent * part), plafond - avant)
+		if verse <= 0:
+			continue
+		entry["qty"] = qty - verse
+		pool[item_id] = avant + verse
+		change = True
+	if change:
+		flux["change"] = True
+	return change
+
+
 def puiser_flux(lieu_doc: dict, flux: dict | None) -> bool:
 	"""Ce lieu retire du pool de sa cité les matières que SES recettes réclament (`besoins_lieu`,
 	portée géographique comprise) et les verse en **RÉSERVE** (`stock_matieres`), sous la clé de
@@ -1464,7 +1543,12 @@ def puiser_flux(lieu_doc: dict, flux: dict | None) -> bool:
 
 	⚠️ **On saute ce que le lieu PRODUIT** : sans cette garde, un atelier dont un produit est
 	aussi l'intrant d'une de ses propres recettes (corde → arc) reprendrait sans fin ce qu'il
-	vient de vendre aux PNJ, et l'écoulement deviendrait un tour de manège."""
+	vient de vendre aux PNJ, et l'écoulement deviendrait un tour de manège.
+
+	⚠️ **Une PART de la ligne, pas la ligne entière** (`FLUX_PART_MAX`, plancher d'une unité) :
+	le pool est un bien commun et trois ateliers peuvent réclamer le même cuir. À 1 le premier
+	qui tique rafle tout et ses sœurs trouvent zéro — c'est le comportement d'avant, et il
+	rendait le flux illisible dès qu'une cité avait deux preneurs pour la même matière."""
 	if not flux or not lieu_doc:
 		return False
 	pool = flux["pool"]
@@ -1472,6 +1556,9 @@ def puiser_flux(lieu_doc: dict, flux: dict | None) -> bool:
 		return False
 	besoins = set(besoins_lieu(lieu_doc))
 	if not besoins:
+		return False
+	part = _clamp(float(character_stats.FLUX_PART_MAX), 0.0, 1.0)
+	if part <= 0:
 		return False
 	categorie = lieu_doc.get("categorie")
 	stock = lieu_doc.setdefault("stock_matieres", {})
@@ -1490,8 +1577,14 @@ def puiser_flux(lieu_doc: dict, flux: dict | None) -> bool:
 		cle = cle_matiere_lieu(categorie, item, lieu_doc)
 		if not cle:
 			continue
-		stock[cle] = int(stock.get(cle, 0)) + qty
-		del pool[item_id]
+		prend = min(qty, max(1, int(qty * part)))
+		if prend <= 0:
+			continue
+		stock[cle] = int(stock.get(cle, 0)) + prend
+		if prend >= qty:
+			del pool[item_id]
+		else:
+			pool[item_id] = qty - prend
 		pris = True
 	if pris:
 		flux["change"] = True
@@ -1507,14 +1600,19 @@ def tick_atelier(lieu_doc: dict, recettes: list | None = None, flux: dict | None
 	⚠️ **L'ordre n'est pas cosmétique** : on puise AVANT d'écouler, sinon une boutique
 	reprendrait dans le même tick ce qu'elle vient de vendre aux habitants. Puiser en premier
 	laisse aussi la matière reçue passer à la production du tick même.
-	⚠️ `flux=None` (lieu sans cité, fixture de test) ⇒ les deux greffes sont inertes et le tick
+	⚠️ Le **déversement du surplus vient en DERNIER**, après l'écoulement PNJ : les habitants
+	servis les premiers gardent leur part (sans quoi le rayon serait toujours à la cible quand
+	`ecouler_produits_pnj` passe, et la vente PNJ mourrait en silence) ; la ville récupère ce
+	qu'ils n'ont pas pris.
+	⚠️ `flux=None` (lieu sans cité, fixture de test) ⇒ les trois greffes sont inertes et le tick
 	est **strictement** celui d'avant."""
 	puise = puiser_flux(lieu_doc, flux)
 	approvisionne = approvisionner(lieu_doc)
 	produits = tenter_production(lieu_doc, recettes)
 	ecoules = ecouler_produits_pnj(lieu_doc)
 	_crediter_flux(flux, ecoules)
-	return bool(puise or approvisionne or produits or ecoules)
+	deverse = _deverser_surplus_flux(lieu_doc, flux)
+	return bool(puise or approvisionne or produits or ecoules or deverse)
 
 
 def convertir_apres_achat(lieu_doc: dict, item_doc: dict, flux: dict | None = None) -> bool:

@@ -68,6 +68,8 @@ def _marche_en_memoire(monkeypatch):
 	monkeypatch.setattr(character_stats, "VENTE_PNJ_PROBA", 1.0)        # demande toujours là
 	monkeypatch.setattr(character_stats, "VENTE_PNJ_FRACTION", 1.0)     # tout le surplus part
 	monkeypatch.setattr(character_stats, "VENTE_PNJ_REDISTRIB", 0.5)
+	monkeypatch.setattr(character_stats, "FLUX_SURPLUS_PART", 1.0)   # tout le surplus déverse
+	monkeypatch.setattr(character_stats, "FLUX_PART_MAX", 1.0)       # le preneur prend le lot
 	marche.reset_prix_cache()
 	yield
 	marche.reset_prix_cache()
@@ -166,6 +168,80 @@ def test_une_part_nulle_ne_redistribue_rien(monkeypatch):
 	assert flux["pool"] == {}
 
 
+# ── 2 bis. Déversement DÉTERMINISTE du surplus ───────────────────────────────────
+# La marche qui manquait : le crédit PNJ passe par quatre portes multiplicatives et deux
+# arrondis (`round(0.5) == 0` en Python), si bien qu'avec les réglages de la base il fallait
+# 55 exemplaires en rayon pour qu'UNE unité atteigne la ville. Le surplus part maintenant
+# sans tirage — c'est ce qui fait circuler les sous-produits du dépeçage.
+
+def test_le_surplus_du_rayon_part_a_la_ville_sans_tirage(monkeypatch):
+	# La boulangerie ne CONSOMME pas la farine qu'elle a en rayon ? si — on prend donc le
+	# moulin, qui produit la farine et ne la consomme pas : c'est lui le boucher de l'histoire.
+	monkeypatch.setattr(character_stats, "VENTE_PNJ_PROBA", 0.0)   # aucun PNJ ce tick
+	moulin = _moulin(stock_cible={"item": {"item:farine": 2}},
+					 stock_vente=[{"item_id": "item:farine", "qty": 9}])
+	flux = marche.flux_cite(_cite())
+
+	marche.tick_atelier(moulin, RECETTES, flux)
+
+	# 9 − 2 = 7 déversés, alors que le crédit PNJ n'aurait RIEN versé sur un tel excédent.
+	assert flux["pool"] == {"item:farine": 7}
+	assert moulin["stock_vente"] == [{"item_id": "item:farine", "qty": 2}]
+	assert flux["change"] is True
+
+
+def test_le_rayon_ne_descend_jamais_sous_sa_cible():
+	# Le joueur doit toujours trouver de quoi acheter : la ville ne prend que l'excédent.
+	moulin = _moulin(stock_cible={"item": {"item:farine": 5}},
+					 stock_vente=[{"item_id": "item:farine", "qty": 5}])
+	flux = marche.flux_cite(_cite())
+	assert marche._deverser_surplus_flux(moulin, flux) is False
+	assert moulin["stock_vente"] == [{"item_id": "item:farine", "qty": 5}]
+	assert flux["pool"] == {}
+
+
+def test_on_ne_deverse_PAS_ce_que_le_lieu_consomme_lui_meme():
+	# Miroir exact de la garde `lieu_produit` de `puiser_flux`. Le surplus de rayon EST la
+	# matière du prochain batch (pool unifié) : l'expédier alors que `lieu_produit` interdit
+	# de le reprendre priverait l'atelier de son propre intermédiaire.
+	boulangerie = _boulangerie(stock_cible={"item": {"item:farine": 2}},
+							   stock_vente=[{"item_id": "item:farine", "qty": 20}])
+	flux = marche.flux_cite(_cite())
+	assert "farine" in marche.besoins_lieu(boulangerie)
+	assert marche._deverser_surplus_flux(boulangerie, flux) is False
+	assert flux["pool"] == {}
+
+
+def test_un_produit_fini_dont_personne_n_a_l_usage_ne_deverse_pas():
+	# Même filtre que le crédit PNJ (`cles_consommees`) : le pain reste en vitrine.
+	moulin = _moulin(stock_cible={"item": {"item:pain": 1}},
+					 stock_vente=[{"item_id": "item:pain", "qty": 30}])
+	flux = marche.flux_cite(_cite())
+	assert marche._deverser_surplus_flux(moulin, flux) is False
+	assert flux["pool"] == {}
+
+
+def test_le_deversement_est_plafonne_et_le_reste_demeure_en_rayon():
+	# Le pool ne devient pas un second réservoir non borné : ce qui ne rentre pas reste en
+	# vente, où les PNJ le reprendront. Auto-régulé.
+	moulin = _moulin(stock_cible={"item": {"item:farine": 1}},
+					 stock_vente=[{"item_id": "item:farine", "qty": 100}])
+	flux = marche.flux_cite(_cite())
+	assert marche._deverser_surplus_flux(moulin, flux) is True
+	assert flux["pool"]["item:farine"] == character_stats.STOCK_CIBLE_DEFAUT
+	assert moulin["stock_vente"][0]["qty"] == 100 - character_stats.STOCK_CIBLE_DEFAUT
+
+
+def test_une_part_de_surplus_nulle_rend_le_tick_d_avant(monkeypatch):
+	monkeypatch.setattr(character_stats, "FLUX_SURPLUS_PART", 0.0)
+	moulin = _moulin(stock_cible={"item": {"item:farine": 2}},
+					 stock_vente=[{"item_id": "item:farine", "qty": 40}])
+	flux = marche.flux_cite(_cite())
+	assert marche._deverser_surplus_flux(moulin, flux) is False
+	assert flux["pool"] == {}
+	assert marche._deverser_surplus_flux(moulin, None) is False
+
+
 # ── 3. Tirage : la boutique qui en a l'usage sert en RÉSERVE ──────────────────────
 
 def test_la_boutique_qui_en_a_besoin_puise_en_reserve_sous_la_cle_de_cle_matiere_lieu():
@@ -225,6 +301,33 @@ def test_un_lieu_qui_PRODUIT_l_item_ne_le_repuise_pas():
 		marche.reset_prix_cache()
 
 
+def test_le_preneur_n_emporte_qu_une_PART_du_lot(monkeypatch):
+	# Le pool est un bien commun : trois ateliers peuvent réclamer le même cuir. Le premier
+	# qui tique ne doit pas repartir avec tout — sinon les sœurs trouvent zéro et le flux
+	# devient illisible dès qu'une cité a deux preneurs pour la même matière.
+	monkeypatch.setattr(character_stats, "FLUX_PART_MAX", 0.5)
+	boulangerie = _boulangerie()
+	flux = marche.flux_cite(_cite())
+	flux["pool"] = {"item:farine": 10}
+
+	assert marche.puiser_flux(boulangerie, flux) is True
+	assert boulangerie["stock_matieres"] == {"farine": 5}
+	assert flux["pool"] == {"item:farine": 5}
+
+	# Plancher d'une unité : une ligne de 1 reste prenable, le pool ne se fige jamais.
+	flux["pool"] = {"item:farine": 1}
+	assert marche.puiser_flux(_boulangerie(), flux) is True
+	assert flux["pool"] == {}
+
+
+def test_une_part_de_tirage_nulle_laisse_le_pool_intact(monkeypatch):
+	monkeypatch.setattr(character_stats, "FLUX_PART_MAX", 0.0)
+	flux = marche.flux_cite(_cite())
+	flux["pool"] = {"item:farine": 10}
+	assert marche.puiser_flux(_boulangerie(), flux) is False
+	assert flux["pool"] == {"item:farine": 10}
+
+
 # ── 4. L'ordre dans le tick ──────────────────────────────────────────────────────
 
 def test_on_puise_AVANT_d_ecouler_donc_pas_de_tour_de_manege():
@@ -244,6 +347,36 @@ def test_on_puise_AVANT_d_ecouler_donc_pas_de_tour_de_manege():
 	# Au tick SUIVANT, en revanche, le moulin sert bien son propre besoin.
 	marche.tick_atelier(moulin, RECETTES, flux)
 	assert moulin["stock_matieres"]["ble"] == 4
+
+
+def test_on_deverse_APRES_les_PNJ_qui_gardent_donc_leur_part():
+	# L'ordre inverse tuerait la vente PNJ en silence : le rayon serait déjà rabattu à la
+	# cible quand `ecouler_produits_pnj` passerait, et il ne trouverait plus jamais d'excédent.
+	moulin = _moulin(stock_cible={"item": {"item:farine": 2}},
+					 stock_vente=[{"item_id": "item:farine", "qty": 10}])
+	flux = marche.flux_cite(_cite())
+
+	marche.tick_atelier(moulin, RECETTES, flux)
+
+	# Les habitants prennent les 8 d'excédent (fixture : proba 1, fraction 1) et en reversent
+	# la moitié ; le déversement qui suit ne trouve plus rien. Le pool tient des PNJ SEULS.
+	assert flux["pool"] == {"item:farine": 4}
+	assert moulin["stock_vente"] == [{"item_id": "item:farine", "qty": 2}]
+
+
+def test_la_filiere_circule_du_producteur_a_l_artisan():
+	# Ce que la modification vient acheter, bout à bout : le moulin déverse sa farine, la
+	# boulangerie la retrouve en RÉSERVE — sans PNJ, sans tirage, en deux ticks.
+	moulin = _moulin(stock_cible={"item": {"item:farine": 2}},
+					 stock_vente=[{"item_id": "item:farine", "qty": 12}])
+	boulangerie = _boulangerie()
+	flux = marche.flux_cite(_cite())
+
+	marche.tick_atelier(moulin, RECETTES, flux)
+	marche.tick_atelier(boulangerie, RECETTES, flux)
+
+	assert boulangerie["stock_matieres"]["farine"] > 0
+	assert moulin["stock_vente"] == [{"item_id": "item:farine", "qty": 2}]
 
 
 def test_rien_n_est_cree_la_redistribution_est_une_PORTION():

@@ -60,9 +60,16 @@ Une catégorie de lieu peut **en inclure d'autres** : `LIEU_CATEGORIES_FUSION` (
 
 
 ### Flux de marchandises entre boutiques d'une cité
-Le **seul transfert entre deux `lieu:*` hors quête de transport**. La part `VENTE_PNJ_REDISTRIB` de ce que les PNJ consomment (`ecouler_produits_pnj`) va au pool `flux_marchand: {item_id: qty}` du doc de la **ville**, où les ateliers dont une recette en a l'usage puisent **en réserve** (`stock_matieres`, clé `cle_matiere_lieu`). Champ absent ⇒ comportement d'avant. Verrouillé par `tests/test_flux_pnj.py`.
+Le **seul transfert entre deux `lieu:*` hors quête de transport**. Pool `flux_marchand: {item_id: qty}` sur le doc de la **ville**, où les ateliers dont une recette en a l'usage puisent **en réserve** (`stock_matieres`, clé `cle_matiere_lieu`). Champ absent ⇒ comportement d'avant. Verrouillé par `tests/test_flux_pnj.py`.
+
+**DEUX alimentations, et il faut les deux :**
+- `_crediter_flux` — part `VENTE_PNJ_REDISTRIB` de ce que les PNJ viennent d'acheter (`ecouler_produits_pnj`). Aléatoire et menue.
+- `_deverser_surplus_flux` — tout ce qui dépasse le `stock_cible` du rayon, **déterministe**, part `FLUX_SURPLUS_PART`. ⚠️ Sans lui le crédit PNJ passait par quatre portes multiplicatives et deux arrondis (`round(0.5) == 0`) : **55 exemplaires en rayon** (cible 25) pour qu'UNE unité atteigne la ville, rien en dessous. Mesuré sur le dump du 16/09, 60 sangliers vendus au boucher de Lutèce : pool 1 tendon → 25, et l'armurier passe de 3 à 62 ligatures.
 
 - ⚠️ **`flux=None` ⇒ tick strictement d'avant.** L'appelant ouvre (`flux_cite`), passe le contexte à N `tick_atelier`, referme (`persister_flux` : une écriture, seulement si le pool a bougé). La nuit d'auberge l'ouvre **hors de la boucle** (sinon ~60 × N `find_docs`).
-- ⚠️ **Puiser AVANT d'écouler** (sinon une boutique reprend ce qu'elle vient de vendre) et sauter ce que le lieu **produit** (sinon corde → arc tournerait en manège).
-- `cles_consommees()` = **seul index inverse** du marché ; pool plafonné par clé à `STOCK_CIBLE_DEFAUT` (pas de second réservoir non borné).
+- ⚠️ **Ordre du tick** : puiser AVANT d'écouler (sinon une boutique reprend ce qu'elle vient de vendre), **déverser en DERNIER** (sinon le rayon est déjà à la cible quand `ecouler_produits_pnj` passe et la vente PNJ meurt en silence).
+- ⚠️ **Deux gardes symétriques** : on ne **puise** pas ce que le lieu produit (`lieu_produit` — sinon corde → arc tournerait en manège), on ne **déverse** pas ce que le lieu consomme (`besoins_lieu` — le surplus de rayon EST la matière du prochain batch, cf. pool unifié, et `lieu_produit` interdirait de le reprendre).
+- `cles_consommees()` = **seul index inverse** du marché ; pool plafonné par clé à `STOCK_CIBLE_DEFAUT` (pas de second réservoir non borné) — ce qui ne rentre pas reste en rayon, où les PNJ le reprendront.
+- ⚠️ `puiser_flux` prend une **PART** de la ligne (`FLUX_PART_MAX`, plancher d'une unité), pas le lot entier : le pool est un bien commun et trois ateliers peuvent réclamer le même cuir.
+- ⚠️ **`carcasse` ne circule jamais** : aucun doc `item:carcasse`, et la clé n'est écrite nulle part — `_matieres_entrantes` décompose la bête **À LA VENTE** (les 16 recettes `carcasse → X` de la boucherie ne cuisent jamais, elles servent de **table de quantités** à `convertir_apres_achat`). C'est le seul point d'entrée de l'aventurier, et le seul verrou de l'économie : carcasse accordée, les 614 recettes du monde cuisent.
 
