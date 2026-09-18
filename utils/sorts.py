@@ -494,62 +494,106 @@ def part_durative(effets: dict) -> bool:
 		or _as_int(eff.get("esquive")))
 
 
-def sort_utilisable_combat(sort: dict) -> bool:
-	"""Éligibilité combat : une part instantanée (dégâts, PV, PM — ou furtivité, état de
-	combat posé instantanément) OU une part à DURÉE. Depuis que le snapshot porte ses
-	effets vivants et les décrémente au tour de son porteur, un buff pur (« Armure de
-	givre ») est lançable en combat exactement comme en exploration.
+# ── Éligibilité d'une CAPACITÉ — source unique des sorts ET des compétences ──────
+# Un sort et une compétence se lancent par le même contrat : mêmes `effets`, mêmes
+# `cible`/`jet`, mêmes mécaniques de round. Les trois prédicats ci-dessous sont donc
+# écrits UNE fois et servent les deux familles, côté module pur comme côté moteur.
+#
+# ⚠️ POURQUOI ce regroupement. Les mêmes expressions booléennes ont longtemps été
+# recopiées à SIX endroits — `sort_utilisable_combat`, `competence_utilisable_combat`, les
+# deux gardes de `resolve_action`, et les deux sous-branches `ennemi`. Une recopie a fini
+# par diverger : celle des compétences omettait `degats_pm`, si bien qu'une siphonie de
+# compétence était listée et épinglée par le router, puis refusée par le moteur au moment
+# de frapper. Le seul remède durable n'est pas de corriger la ligne, c'est de supprimer
+# les copies.
 
-	⚠️ Une INVOCATION est lançable sans porter le moindre `effets` : ce qu'elle fait n'est
-	pas un effet posé sur quelqu'un, c'est un combattant de plus sur la grille.
 
-	⚠️ Trois autres capacités n'ont, elles non plus, rien à poser sur personne — et
-	seraient refusées ici comme « sans effet » :
-	  - un sort MAINTENU (Bouclier magique : des buffs, mais aucune `duree` — c'est
-	    l'entretien qui le tient, cf. INCANTATION_*) ;
-	  - un SAUT, dont tout l'effet est une case d'arrivée ;
-	  - un LIEN DE VIE, dont l'effet vit sur un AUTRE corps que celui qu'il vise.
-	⚠️ Ce test et celui de `resolve_action` (branche `sort`) sont JUMEAUX : un critère qui
-	diverge entre « lançable » et « applicable » produit un sort accepté puis inerte."""
-	s = sort or {}
-	if est_invocation(s) or est_maintenu(s):
-		return True
-	eff = s.get("effets") or {}
+def effets_utilisables_combat(effets: dict) -> bool:
+	"""Les `effets` portent-ils de quoi agir en COMBAT ?
+
+	Part instantanée (dégâts de PV ou de PM, soin, PM rendus, furtivité — un état posé
+	instantanément, saut, lien de vie) OU part à DURÉE. Ne dit rien des mécaniques portées
+	par le DOC (invocation, entretien) : c'est `capacite_utilisable_combat` qui les ajoute.
+	"""
+	eff = effets or {}
 	return (bool(eff.get("degats")) or _as_int(eff.get("pv")) > 0
 			or _as_int(eff.get("pm")) > 0 or _as_int(eff.get("furtivite")) > 0
 			or bool(eff.get("degats_pm")) or _as_int(eff.get("saut")) > 0
 			or bool(eff.get("lien_vie")) or part_durative(eff))
 
 
-def sort_utilisable_exploration(sort: dict) -> bool:
-	"""Éligibilité exploration : NON offensif (`soi` ou `allie`) ET au moins un effet
-	applicable hors combat (soin/PM instantanés, ou buffs/régén/esquive à durée).
+def capacite_utilisable_combat(capacite: dict, effets: dict | None = None) -> bool:
+	"""Une capacité (sort OU compétence, vue normalisée) est-elle lançable en combat ?
 
-	⚠️ Seul `ennemi` est exclu : il n'y a pas de monstre à viser hors combat. Un sort
-	`allie` est lançable sur un compagnon ou une monture — la cible est désignée par le
-	`cible_id` du corps de requête (cf. `_cible_alliee`, routers/user.py).
+	⚠️ `effets` est passé À PART parce que les deux appelants n'ont pas le même bloc sous
+	la main : le moteur résout un sort sur ses effets FUSIONNÉS avec le bonus des
+	composants engagés, pas sur `capacite["effets"]`. Omis, on retombe sur celui du doc —
+	ce qui convient aux compétences, qui n'ont pas de composants.
 
-	⚠️ Une INVOCATION est refusée hors combat, même si elle porte par ailleurs un effet
-	applicable : la créature n'existe que sur la grille de combat (elle y est placée, y
-	joue son tour et s'y dissipe). Rien ne saurait l'accueillir en exploration.
+	Deux familles de capacités n'ont RIEN à poser sur personne et seraient refusées comme
+	« sans effet » si l'on ne testait que les `effets` :
+	  - une INVOCATION, dont le produit est un combattant de plus sur la grille (sorts
+	    seuls : `normaliser_competence` ne lit pas le bloc) ;
+	  - une capacité MAINTENUE (Bouclier magique, Garde de fer : des buffs, mais aucune
+	    `duree` — c'est l'entretien qui la tient).
+	"""
+	cap = capacite or {}
+	if est_invocation(cap) or est_maintenu(cap):
+		return True
+	return effets_utilisables_combat(cap.get("effets") if effets is None else effets)
 
-	⚠️ Quatre mécaniques sont refusées pour la MÊME raison — il n'y a **pas de round** en
-	exploration, et pas de grille :
-	  - une INCANTATION de plus d'un PA : rien à quoi rattacher un PA reporté ;
-	  - un sort MAINTENU : rien à prélever, aucun tour ne passe ;
-	  - un SAUT : aucune case où atterrir ;
-	  - un LIEN DE VIE : aucun coup à rediriger.
-	⚠️ `cout_pv`, lui, reste applicable : ce n'est qu'un coût, pas une règle de tour."""
-	s = sort or {}
-	if est_invocation(s) or est_maintenu(s) or est_incantation_longue(s):
+
+def effets_agissent_sur_cible(effets: dict) -> bool:
+	"""Les `effets` ont-ils quelque chose à faire à un ENNEMI désigné ?
+
+	Dégâts de PV, dégâts de PM, ou part à durée — une capacité offensive peut n'être qu'un
+	debuff (« −10 Ag pendant 2 tours »), il lui suffit d'avoir quelque chose à faire.
+
+	⚠️ `degats_pm` en fait partie : une siphonie PURE, sans le moindre dégât de PV, est le
+	cœur de la famille anti-lanceur. C'est précisément la clé que la recopie des
+	compétences avait oubliée."""
+	eff = effets or {}
+	return bool(eff.get("degats")) or bool(eff.get("degats_pm")) or part_durative(eff)
+
+
+def capacite_utilisable_exploration(capacite: dict) -> bool:
+	"""Une capacité (sort OU compétence) est-elle lançable HORS combat ?
+
+	NON offensive (`soi` ou `allie` — il n'y a pas de monstre à viser) ET au moins un effet
+	applicable hors combat : soin ou PM instantanés, ou part à durée.
+
+	⚠️ Cinq mécaniques sont refusées, toutes pour la même raison — il n'y a **ni round ni
+	grille** en exploration : l'INVOCATION (rien pour accueillir la créature), l'INCANTATION
+	de plus d'un PA (rien à quoi rattacher un PA reporté), l'ENTRETIEN (rien à prélever,
+	aucun tour ne passe), le SAUT (aucune case où atterrir) et le LIEN DE VIE (aucun coup à
+	rediriger). ⚠️ `cout_pv`, lui, reste applicable : ce n'est qu'un coût, pas une règle de
+	tour."""
+	cap = capacite or {}
+	if est_invocation(cap) or est_maintenu(cap) or est_incantation_longue(cap):
 		return False
-	if (s.get("cible") or "soi") == "ennemi":
+	if (cap.get("cible") or CIBLE_DEFAUT) == "ennemi":
 		return False
-	eff = s.get("effets") or {}
+	eff = cap.get("effets") or {}
 	if _as_int(eff.get("saut")) > 0 or eff.get("lien_vie"):
 		return False
-	instant = _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0
-	return instant or part_durative(eff)
+	return _as_int(eff.get("pv")) > 0 or _as_int(eff.get("pm")) > 0 or part_durative(eff)
+
+
+def sort_utilisable_combat(sort: dict) -> bool:
+	"""Éligibilité combat d'un SORT — cf. `capacite_utilisable_combat`, dont ce n'est plus
+	qu'un alias nommé. ⚠️ Ce test et celui de `resolve_action` (branche `sort`) sont
+	JUMEAUX : ils appellent désormais la même fonction, ils ne peuvent plus diverger."""
+	return capacite_utilisable_combat(sort)
+
+
+def sort_utilisable_exploration(sort: dict) -> bool:
+	"""Éligibilité exploration d'un SORT — cf. `capacite_utilisable_exploration`, dont ce
+	n'est plus qu'un alias nommé.
+
+	⚠️ Seul `ennemi` est exclu côté cible : un sort `allie` est lançable sur un compagnon
+	ou une monture, désigné par le `cible_id` du corps de requête (cf. `_cible_alliee`,
+	routers/user.py)."""
+	return capacite_utilisable_exploration(sort)
 
 
 def empiler_effet_sort(character: dict, sort: dict, effets: dict) -> dict | None:

@@ -32,7 +32,9 @@ from utils.competences import (  # noqa: E402
 	est_passive,
 	normaliser_competence,
 )
-from utils.sorts import MAINTIEN_PM_MAX, _bonus_dict  # noqa: E402
+from utils.sorts import (  # noqa: E402
+	MAINTIEN_PM_MAX, _bonus_dict, capacite_utilisable_combat, effets_agissent_sur_cible,
+)
 from utils.zones_effet import normaliser_zone  # noqa: E402
 
 DOC_DEFAUT = os.path.join(RACINE, "docs", "competences_vocations_3_6_10.md")
@@ -76,13 +78,6 @@ CHAMPS_ZONE = ("forme", "origine", "orientation", "rayon", "longueur", "largeur"
 			   "decalage", "angle")
 
 BLOC_JSON = re.compile(r"^```json\n(.*?)\n```", re.MULTILINE | re.DOTALL)
-
-
-def _as_int_local(v) -> int:
-	try:
-		return int(v or 0)
-	except (TypeError, ValueError):
-		return 0
 
 
 def charger_blocs(chemin):
@@ -199,20 +194,18 @@ def main():
 			if (doc.get("effets") or {}).get(cle):
 				erreurs.append(f"{prefixe} : effet `{cle}` sur une COMPÉTENCE — {pourquoi}")
 
-		# (3) `degats_pm` SEUL : accepté par `competence_utilisable_combat`, puis refusé par
-		# la sous-branche `ennemi` de `resolve_action` (gardes jumelles divergentes —
-		# combat.py:3821 accepte côté sort, combat.py:4370 refuse côté compétence). Une
-		# compétence écrite ainsi serait listée, épinglable, et échouerait à l'usage.
-		eff_doc = doc.get("effets") or {}
-		if eff_doc.get("degats_pm") and not eff_doc.get("degats"):
-			eff_norm = _bonus_dict(eff_doc)
-			durative = _as_int_local(eff_norm.get("duree")) > 0 and (
-				eff_norm.get("buffs") or eff_norm.get("regen_pv")
-				or eff_norm.get("regen_pm") or eff_norm.get("esquive"))
-			if not durative:
-				erreurs.append(f"{prefixe} : `degats_pm` SEUL — accepté par le router puis "
-							   f"REFUSÉ par resolve_action ; accompagnez-le de `degats` ou "
-							   f"d'une part durative")
+		# (3) L'ACCORD entre le prédicat du router et le moteur. Ce contrôle remplace
+		# l'ancienne règle « `degats_pm` jamais seul », devenue sans objet : les deux
+		# gardes divergeaient (celle des compétences omettait la clé), elles appellent
+		# désormais la même fonction. Plutôt que de retirer le contrôle, on le remonte
+		# d'un cran — on ne teste plus UNE clé, on teste que les deux prédicats du moteur
+		# s'accordent sur cette entrée, quelle que soit la clé en cause.
+		eff_norm = _bonus_dict(doc.get("effets") or {})
+		if est_active(comp) and comp["cible"] == "ennemi":
+			if capacite_utilisable_combat(comp) and not effets_agissent_sur_cible(eff_norm):
+				erreurs.append(f"{prefixe} : active `ennemi` lançable en combat mais SANS "
+							   f"effet sur une cible — le router la listerait, le moteur "
+							   f"la refuserait au moment de frapper")
 
 		# (4) maintien : borne du moteur, actives seulement, et pas de `duree` trompeuse
 		if "maintien" in doc:
