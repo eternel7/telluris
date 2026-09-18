@@ -11,7 +11,7 @@ passer ce genre de clé sans le moindre symptôme — jusqu'à l'import, où la 
 base et ne fait rien. Le seul contrôle qui vaille est donc de faire normaliser chaque bloc par
 le moteur RÉEL, puis de comparer ce qui entre et ce qui sort.
 
-Les huit invariants contrôlés sont énoncés dans le document lui-même (§ « Invariants contrôlés
+Les dix invariants contrôlés sont énoncés dans le document lui-même (§ « Invariants contrôlés
 par dev/check_competences_doc.py ») — ce fichier en est l'exécution, pas la source.
 
 Ce script ne lit ni n'écrit la base : il ne fait que relire un fichier markdown committé.
@@ -32,7 +32,7 @@ from utils.competences import (  # noqa: E402
 	est_passive,
 	normaliser_competence,
 )
-from utils.sorts import _bonus_dict  # noqa: E402
+from utils.sorts import MAINTIEN_PM_MAX, _bonus_dict  # noqa: E402
 from utils.zones_effet import normaliser_zone  # noqa: E402
 
 DOC_DEFAUT = os.path.join(RACINE, "docs", "competences_vocations_3_6_10.md")
@@ -46,14 +46,43 @@ CHAMPS_ACTIFS_SEULEMENT = ("cout_pm", "cible", "jet", "portee")
 # d'effet : un `magie` ou un `composants` recopié depuis un doc de sort ne lève rien et
 # disparaît — la compétence part en base amputée de ce que son auteur croyait y mettre.
 CHAMPS_DOC = ("_id", "_rev", "type", "nom", "icon", "description", "vocation", "famille",
-			  "niveau", "mode", "cout_pm", "cible", "jet", "portee", "zone", "effets",
-			  "condition", "animation")
+			  "niveau", "mode", "cout_pm", "maintien", "cible", "jet", "portee", "zone",
+			  "effets", "condition", "animation")
+# Clés que le moteur lit sur un SORT mais jamais sur une compétence. `_bonus_dict` les
+# normalise (elles ne « disparaissent » donc pas : le contrôle n°1 ne les verrait pas), et
+# `competence_utilisable_combat` en accepte même deux — mais AUCUNE branche de
+# `resolve_action` ne les résout côté compétence. Une compétence qui en porte une part en
+# base, s'utilise sans erreur, et ne fait rien. Vérifié en exécutant le moteur.
+EFFETS_INERTES_SUR_COMPETENCE = {
+	"cout_pv":    "jamais prélevé (seule la branche `sort` appelle `_payer_cout_pv`)",
+	"saut":       "inerte (seul `_lancer_sort` appelle `_sauter`)",
+	"lien_vie":   "inerte (seul `_lancer_sort` appelle `_poser_lien_vie`)",
+	# Bonus de COMPOSANT, appliqués au doc par `sorts.doc_effectif` : une compétence n'a
+	# pas de composants, ces trois clés ne seront jamais lues.
+	"invocation_duree":  "bonus de composant — une compétence n'a pas de composants",
+	"invocation_nombre": "bonus de composant — une compétence n'a pas de composants",
+	"maintien_reduction": "bonus de composant — une compétence n'a pas de composants",
+}
+# Champs de premier niveau réservés aux sorts.
+CHAMPS_INERTES_SUR_COMPETENCE = {
+	"invocation":  "réservé aux docs `sort:*` (normaliser_competence ne le lit pas)",
+	"incantation": "non normalisée sur une compétence, DÉLIBÉRÉMENT (la canalisation "
+				   "multi-round n'a qu'un chemin, propre aux sorts)",
+}
+MAINTIEN_MAX = MAINTIEN_PM_MAX   # borne du moteur, jamais recopiée à la main
 # Clés du bloc `zone` que `normaliser_zone` sait lire. Même liste blanche, même piège : une
 # `rayon_max` ou une `hauteur` inventée ne lève rien et ne dessine rien.
 CHAMPS_ZONE = ("forme", "origine", "orientation", "rayon", "longueur", "largeur",
 			   "decalage", "angle")
 
 BLOC_JSON = re.compile(r"^```json\n(.*?)\n```", re.MULTILINE | re.DOTALL)
+
+
+def _as_int_local(v) -> int:
+	try:
+		return int(v or 0)
+	except (TypeError, ValueError):
+		return 0
 
 
 def charger_blocs(chemin):
@@ -159,13 +188,45 @@ def main():
 				erreurs.append(f"{prefixe} : champ `{cle}` INCONNU de normaliser_competence — "
 							   f"il disparaîtrait silencieusement à la lecture")
 
-		# (2) une invocation n'existe QUE pour un sort : `normaliser_competence` ne lit pas
-		# le bloc, et la branche `competence` de resolve_action ne le traite pas. Le poser
-		# ici produirait une compétence en base qui ne fait rien — le plus coûteux des
-		# silences, puisque le thème (« invoquer ») laisse croire au contraire.
-		if "invocation" in doc:
-			erreurs.append(f"{prefixe} : bloc `invocation` sur une COMPÉTENCE — inerte "
-						   f"(réservé aux docs `sort:*`)")
+		# (2) Clés INERTES sur une compétence. Elles ne disparaissent pas à la
+		# normalisation — c'est bien pire : la compétence part en base, s'utilise sans la
+		# moindre erreur, et ne fait rien. Deux d'entre elles (`saut`, `lien_vie`) sont même
+		# ACCEPTÉES par `competence_utilisable_combat`.
+		for cle, pourquoi in CHAMPS_INERTES_SUR_COMPETENCE.items():
+			if cle in doc:
+				erreurs.append(f"{prefixe} : champ `{cle}` sur une COMPÉTENCE — {pourquoi}")
+		for cle, pourquoi in EFFETS_INERTES_SUR_COMPETENCE.items():
+			if (doc.get("effets") or {}).get(cle):
+				erreurs.append(f"{prefixe} : effet `{cle}` sur une COMPÉTENCE — {pourquoi}")
+
+		# (3) `degats_pm` SEUL : accepté par `competence_utilisable_combat`, puis refusé par
+		# la sous-branche `ennemi` de `resolve_action` (gardes jumelles divergentes —
+		# combat.py:3821 accepte côté sort, combat.py:4370 refuse côté compétence). Une
+		# compétence écrite ainsi serait listée, épinglable, et échouerait à l'usage.
+		eff_doc = doc.get("effets") or {}
+		if eff_doc.get("degats_pm") and not eff_doc.get("degats"):
+			eff_norm = _bonus_dict(eff_doc)
+			durative = _as_int_local(eff_norm.get("duree")) > 0 and (
+				eff_norm.get("buffs") or eff_norm.get("regen_pv")
+				or eff_norm.get("regen_pm") or eff_norm.get("esquive"))
+			if not durative:
+				erreurs.append(f"{prefixe} : `degats_pm` SEUL — accepté par le router puis "
+							   f"REFUSÉ par resolve_action ; accompagnez-le de `degats` ou "
+							   f"d'une part durative")
+
+		# (4) maintien : borne du moteur, actives seulement, et pas de `duree` trompeuse
+		if "maintien" in doc:
+			maintien = doc.get("maintien") or 0
+			if not isinstance(maintien, int) or maintien < 0 or maintien > MAINTIEN_MAX:
+				erreurs.append(f"{prefixe} : `maintien` {maintien!r} hors de [0, "
+							   f"{MAINTIEN_MAX}] (MAINTIEN_PM_MAX)")
+			if maintien and est_passive(comp):
+				erreurs.append(f"{prefixe} : PASSIVE portant `maintien` — une passive n'est "
+							   f"jamais lancée, rien ne prélèverait l'entretien")
+			if maintien and (doc.get("effets") or {}).get("duree"):
+				erreurs.append(f"{prefixe} : entrée MAINTENUE portant `duree` — l'entrée "
+							   f"d'effets_actifs ne se décrémente pas, la durée annoncée "
+							   f"est une échéance qui n'existe pas")
 
 		# (1 bis) la zone est une seconde liste blanche, avec ses propres pièges
 		zone_ecrite = doc.get("zone")
@@ -183,7 +244,7 @@ def main():
 				if est_passive(comp):
 					erreurs.append(f"{prefixe} : PASSIVE portant une `zone` — décoratif, "
 								   f"aucune passive n'est jamais résolue sur la grille")
-				# (8) convention de `decalage`, pour les seules formes orientées
+				# (9) convention de `decalage`, pour les seules formes orientées
 				if zone_lue["forme"] in ("rectangle", "cone"):
 					if zone_lue["origine"] == "lanceur" and zone_lue["decalage"] < 1:
 						erreurs.append(f"{prefixe} : forme orientée ancrée sur le LANCEUR "
@@ -287,7 +348,7 @@ def main():
 		for e in erreurs:
 			print(f"  - {e}")
 		return 1
-	print("\nOK — les neuf invariants tiennent.")
+	print("\nOK — les dix invariants tiennent.")
 	return 0
 
 
