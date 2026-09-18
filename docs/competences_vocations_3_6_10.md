@@ -7,10 +7,10 @@ dans `/admin/doc` ou à rassembler dans un `jsons/*_a_importer.json` une fois la
 Vérificateur : `python dev/check_competences_doc.py` — relit ce fichier, normalise chaque bloc
 par le moteur réel et contrôle les invariants listés plus bas. Il échoue en code 1.
 
-> **Révision 3** — mise à jour pour les **trois notions du temps magique** et les **sept clés
-> d'effets** arrivées avec elles (drain, dégâts aux PM, coût en PV, saut, lien de vie). 13
-> entrées changent ; trois titres que les révisions précédentes avaient dû réinterpréter
-> deviennent enfin littéraux. Détail en fin de document, § « Ce que la révision 3 a changé ».
+> **Révision 4** — après la mise à plat des gardes d'éligibilité (PR #18), sorts et compétences
+> ne diffèrent plus que par **quatre champs de doc et trois clés d'effet**. L'écart a été
+> re-mesuré en exécutant le moteur, pas relu. Une entrée devient une **siphonie pure**, ce que
+> le moteur refusait encore. Détail en fin de document, § « Ce que la révision 4 a changé ».
 
 ---
 
@@ -25,46 +25,59 @@ palier **10** n'y existe pas : il est neuf, et traité en **capstone de signatur
 
 ---
 
-## Ce qu'une COMPÉTENCE sait faire — et ce qu'un sort seul sait faire
+## Ce qu'une COMPÉTENCE sait faire — l'écart avec un sort, mesuré
 
-`_bonus_dict` porte aujourd'hui **19 clés**, partagées par les sorts, les compétences, les armes
-et les composants. **Mais toutes ne sont pas honorées par la branche `competence` du moteur.**
-Le tableau ci-dessous a été établi en exécutant `resolve_action` sur chaque clé, posée
-successivement sur un sort et sur une compétence — pas en lisant le code.
+Depuis la mise à plat des gardes, **une compétence et un sort sont presque le même objet**. Le
+tableau ci-dessous n'est pas une lecture du code : chaque ligne a été obtenue en posant le même
+effet sur un sort et sur une compétence, en appelant `resolve_action`, et en regardant si
+l'état du combat bouge.
 
-| clé | compétence | ce que fait le moteur |
-|---|---|---|
-| `degats` · `pv` · `pm` · `regen_pv` · `regen_pm` · `buffs` · `duree` · `esquive` · `furtivite` | ✅ | inchangé depuis la révision 1 |
-| **`maintien`** (champ du doc, ≤ 20) | ✅ | PM par round, facturés par `_enregistrer_concentration` |
-| **`drain_pv`** · **`drain_pm`** · **`drain_max`** | ✅ | chokepoint offensif partagé avec les sorts |
-| **`degats_pm`** | ⚠️ **jamais seul** | inerte seul (cf. ci-dessous) ; fonctionne accompagné |
-| `cout_pv` | ❌ | jamais prélevé sur une compétence |
-| `saut` | ❌ | inerte : l'action réussit, rien ne se téléporte |
-| `lien_vie` | ❌ | inerte : l'action réussit, aucun lien n'est posé |
-| `incantation` (champ du doc) | ❌ | non lu — **délibéré**, cf. ci-dessous |
-| `invocation` (bloc du doc) | ❌ | réservé aux docs `sort:*` |
-| `invocation_duree` · `invocation_nombre` · `maintien_reduction` | ❌ | bonus de **composant** ; une compétence n'en a pas |
+### Ce que les deux partagent (tout le reste)
 
-Aucune entrée de ce document n'emploie une clé marquée ❌. Les trois dernières lignes ne sont
-pas des oublis du moteur mais des choix : `incantation` n'est pas normalisée sur une compétence
-parce que la canalisation multi-round n'a qu'un chemin de résolution, propre aux sorts —
-afficher « ⏱ 4 PA » sur une capacité qui partirait quand même du premier coup serait un champ
-qui ment. Les trois bonus de composant n'ont pas de sens là où il n'y a pas de composant.
+`cible` · `jet` · `portee` · `zone` · `cout_pm` · `maintien` · `famille` · `condition` ·
+`animation` · `niveau`, et **seize des dix-neuf clés d'`effets`** : `degats`, `pv`, `pm`,
+`regen_pv`, `regen_pm`, `buffs`, `duree`, `esquive`, `furtivite`, `degats_pm`, `drain_pv`,
+`drain_pm`, `drain_max` (+ les trois bonus de composant, sans objet ici).
 
-### ✅ `degats_pm` seul : la divergence de gardes jumelles est corrigée
+Vérifié en exécutant le moteur : une **siphonie pure** (`degats_pm` seul) part des deux côtés ;
+un **drain** rend au lanceur le même pourcentage des dégâts réels ; une **zone** frappe le même
+nombre de cibles ; une **posture maintenue** est facturée par le même `_enregistrer_concentration`.
 
-La révision 3 signalait ici que `competence_utilisable_combat` acceptait une compétence ne
-portant que `degats_pm` — le router la listait — tandis que la sous-branche `ennemi` de
-`resolve_action` la refusait ensuite, sa recopie ayant omis la clé.
+### Ce qui reste propre aux sorts — quatre champs, trois clés
 
-**Corrigé depuis** : les six sites qui décidaient de l'éligibilité d'une capacité appellent
-désormais deux fonctions partagées de `utils/sorts.py` — `capacite_utilisable_combat` et
-`effets_agissent_sur_cible` — au lieu de recopier la même expression. Une siphonie pure de
-compétence part et vide la réserve de sa cible. Verrouillé par `tests/test_gardes_jumelles.py`,
-qui compare le prédicat et le moteur sur la même batterie d'effets, pour les deux familles.
+| réservé au `sort:*` | pourquoi |
+|---|---|
+| `magie` · `composants` | un sort appartient à une **école** et se renforce par des composants ; une compétence n'a ni l'une ni les autres — la vocation lui tient lieu d'école |
+| `incantation` | la canalisation multi-round n'a qu'un chemin de résolution, propre aux sorts. **Délibéré** : afficher « ⏱ 4 PA » sur une capacité qui partirait du premier coup serait un champ qui ment |
+| `invocation` | `normaliser_competence` ne lit pas le bloc |
+| `effets.saut` | seul `_lancer_sort` appelle `_sauter` |
+| `effets.cout_pv` | seule la branche `sort` appelle `_payer_cout_pv` |
+| `effets.lien_vie` | seul `_lancer_sort` appelle `_poser_lien_vie` |
 
-Les trois entrées à `degats_pm` de ce document portent de toute façon des `degats` en plus —
-frapper *et* vider la réserve était leur intention. Elles n'ont pas eu à changer.
+Et **un seul champ propre aux compétences** : `mode` (`passive` / `active`). Un sort est
+toujours actif ; une passive n'existe que côté compétences, et c'est la seule asymétrie qui
+aille dans ce sens.
+
+⚠️ **Les trois clés d'effet réservées sont le vrai piège**, et il est pire qu'une absence :
+`_bonus_dict` les normalise pour les deux familles, et `capacite_utilisable_combat` en accepte
+même deux (`saut`, `lien_vie`). Une compétence qui en porte une **part en base, s'utilise sans
+la moindre erreur, et ne fait rien**. Aucune entrée de ce document n'en emploie ; l'invariant
+n°2 du vérificateur les refuse.
+
+### Ce que la mise à plat a débloqué pour le contenu
+
+La révision 3 s'interdisait `degats_pm` seul : deux gardes divergeaient, la copie des
+compétences ayant omis la clé, si bien qu'une siphonie de compétence était listée puis refusée
+au moment de frapper. Les six sites appellent désormais les fonctions partagées
+`capacite_utilisable_combat` et `effets_agissent_sur_cible` (`utils/sorts.py`), verrouillées par
+`tests/test_gardes_jumelles.py`.
+
+**La contrainte tombe donc**, et `competence:marque_du_traqueur` en profite : elle portait un
+`1D6` de dégâts purement décoratif, là uniquement pour franchir la garde. C'est maintenant une
+**siphonie pure** — la marque coupe la bête de sa source, elle ne l'entaille pas.
+
+Les deux autres entrées à `degats_pm` gardent leurs dégâts : chez elles, frapper *et* vider la
+réserve était l'intention, pas un contournement.
 
 ### Le maintien — une posture, pas une durée
 
@@ -861,15 +874,17 @@ Inquisiteur, Tueur de démon, Rejeton ou Saint.*
 ```
 *Source : « Exalté » (niv. 3), « ajouter son bonus de Vol aux résistances ».*
 
-**Marque du traqueur** 🎯 · active · 15 PM · `ennemi` / `cc` / portée 1 · 1D6 aux PM
+**Marque du traqueur** 🎯 · active · 15 PM · `ennemi` / `cc` / portée 1 · **siphonie pure** 2D6 aux PM
 ```json
 {"_id": "competence:marque_du_traqueur", "type": "competence", "nom": "Marque du traqueur", "icon": "🎯",
- "description": "Il pose sur la bête un signe qu'elle ne comprend pas, et qui l'empêche désormais de bien fuir.",
+ "description": "Il pose sur la bête un signe qu'elle ne comprend pas. Elle ne saigne pas — elle se sent seulement coupée de ce qui la nourrissait.",
  "vocation": "repurgateur", "niveau": 3, "mode": "active", "cout_pm": 15,
  "cible": "ennemi", "jet": "cc", "portee": 1,
- "effets": {"degats": "1D6", "buffs": {"Ag": -10, "Vol": -6}, "duree": 3, "degats_pm": "1D6"}}
+ "effets": {"degats_pm": "2D6", "buffs": {"Ag": -10, "Vol": -6}, "duree": 3}}
 ```
-*Source : « Traqueur » (niv. 3) — la détection des créatures n'est pas une compétence jouable ; rendue en marque qui entrave.*
+*Source : « Traqueur » (niv. 3) — la détection des créatures n'est pas une compétence jouable ; rendue en marque qui coupe et entrave.*
+*✅ **Siphonie pure**, désormais autorisable. La révision 3 devait lui coller un `degats: "1D6"` décoratif pour franchir une garde qui refusait `degats_pm` seul. Les dés de PM passent de 1D6 à 2D6 : ils ne sont plus l'appoint d'un coup, ils SONT le coup. Vérifié en exécutant le moteur sur ce bloc même : `dmg = 0`, les PV de la cible ne bougent pas, et — `jet: "cc"` ou non — elle n'emprunte **aucun dé d'arme** (`_degats_competence` laisse sans dés une compétence qui n'en a pas).*
+*⚠️ Deux effets qui se renforcent, et ce n'est pas un hasard : les dégâts de PM ne subissent pas la soustraction des PA (une armure n'arrête pas une siphonie), et le `Vol: -6` abaisse le `pm_max` de la cible (`2·Vol + 2·Int`) — ce qui reclampe ses PM vers le bas en plus de ce que la siphonie lui a pris.*
 
 ### Niveau 6
 
@@ -1675,6 +1690,30 @@ Enchanteur.*
 **duelliste** (hors sa parade) sont les vocations du coup unique et placé, le **forestier** celle
 du tir précis, le **voleur** celle de l'esquive et du vol — leur donner une nappe effacerait ce
 qui les distingue. Elles conservent en échange les plus gros coups unitaires du document.
+
+---
+
+## Ce que la révision 4 a changé
+
+Écrite après la mise à plat des gardes d'éligibilité (PR #18). **Une seule entrée change** —
+la doctrine, elle, change beaucoup.
+
+| | révision 3 | révision 4 |
+|---|---|---|
+| écart sort ↔ compétence | une liste de dix lignes, dont deux « ⚠️ » | **4 champs de doc + 3 clés d'effet**, et un seul champ propre aux compétences (`mode`) |
+| `degats_pm` | interdit seul (contournement d'un bug) | **autorisé seul** — `marque_du_traqueur` devient une siphonie pure |
+| méthode | lecture du code, corrigée par sondage | **mesure d'abord** : chaque ligne du tableau vient d'un `resolve_action` réellement exécuté |
+
+**Ce que la mesure a corrigé dans mes propres notes.** Quatre fois sur cette passe, la première
+mesure était fausse à cause de la sonde, pas du moteur : des dés non fixés faisaient rater un
+coup (donc « pas de drain »), un lanceur à PV pleins n'avait rien à drainer, un ennemi au
+contact interdisait une zone de portée > 1, et une fixture épinglant `pv_max` faisait croire
+qu'une siphonie blessait. Aucune de ces quatre lignes n'aurait été détectable à la relecture.
+
+**Ce que la révision 4 continue de refuser d'écrire** : `saut`, `cout_pv` et `lien_vie`. Ces
+trois clés sont normalisées pour les compétences et deux d'entre elles passent même la garde du
+router — une compétence qui en porte part en base, s'utilise sans erreur, et ne fait rien.
+`incantation` et `invocation` restent hors de portée, la première délibérément.
 
 ---
 
