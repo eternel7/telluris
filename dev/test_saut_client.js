@@ -119,7 +119,8 @@ vm.runInThisContext([
 function armer(portee, extra) {
 	const s = Object.assign({ sort_id: 'sort:saut', cible: 'soi', effets: { saut: portee } },
 							extra || {});
-	__setPendingSaut({ sort: s, composants: [], sauteur: MOI, cible_id: null });
+	__setPendingSaut({ kind: 'sort', capacite: s, sauteur: MOI, cible_id: null,
+					   payload: { sort_id: s.sort_id, composants: [] } });
 	return s;
 }
 
@@ -182,7 +183,8 @@ t('un saut sur ALLIÉ se mesure depuis l’allié, pas depuis le lanceur', () =>
 	OCCUPEES = new Set();
 	const brann = { id: 'joueur_1', pos: { x: 6, y: 3 } };
 	const s = { sort_id: 'sort:saut', cible: 'allie', effets: { saut: 1 } };
-	__setPendingSaut({ sort: s, composants: [], sauteur: brann, cible_id: 'joueur_1' });
+	__setPendingSaut({ kind: 'sort', capacite: s, sauteur: brann, cible_id: 'joueur_1',
+					   payload: { sort_id: s.sort_id, composants: [] } });
 	const c = ens(casesSaut(s));
 	assert.ok(c.has('6,2'), 'voisine de BRANN');
 	assert.ok(!c.has('1,3'), 'et non voisine du lanceur');
@@ -235,8 +237,9 @@ t('un saut sur allié envoie SON id en cible', () => {
 	effacerApercuZone();
 	ENVOIS.length = 0;
 	const brann = { id: 'joueur_1', pos: { x: 3, y: 3 } };
-	__setPendingSaut({ sort: { sort_id: 'sort:saut', cible: 'allie', effets: { saut: 1 } },
-					   composants: [], sauteur: brann, cible_id: 'joueur_1' });
+	__setPendingSaut({ kind: 'sort', cible_id: 'joueur_1', sauteur: brann,
+					   capacite: { sort_id: 'sort:saut', cible: 'allie', effets: { saut: 1 } },
+					   payload: { sort_id: 'sort:saut', composants: [] } });
 	peindreCasesSaut();
 	LAYER.enfants[0].onclick();
 	assert.strictEqual(ENVOIS[0][1], 'joueur_1');
@@ -255,6 +258,23 @@ t('les cases vivent dans le registre d’aperçu, donc s’effacent avec lui', (
 	assert.strictEqual(LAYER.enfants.length, 0,
 					   'renderTokens efface ce registre en tête : une case oubliée resterait '
 					   + 'cliquable et lancerait un sort déjà abandonné');
+});
+
+t('un saut de COMPÉTENCE poste une action `competence`, pas `sort`', () => {
+	// ⚠️ Le mode de ciblage est le MÊME pour les deux familles depuis que `pendingSaut`
+	// porte son `kind` et sa charge utile : seule l'action postée diffère. Sans cela, une
+	// compétence de saut partait en `doAction('sort', …)` avec un `sort_id` inexistant.
+	LAYER.enfants.length = 0;
+	ENVOIS.length = 0;
+	OCCUPEES = new Set();
+	__setPendingSaut({ kind: 'competence', cible_id: null, sauteur: MOI,
+					   capacite: { competence_id: 'competence:bond', cible: 'soi',
+								   effets: { saut: 1 } },
+					   payload: { competence_id: 'competence:bond' } });
+	peindreCasesSaut();
+	LAYER.enfants[0].onclick();
+	assert.strictEqual(ENVOIS[0][0], 'competence', 'action postée');
+	assert.strictEqual(ENVOIS[0][6].competence_id, 'competence:bond');
 });
 
 t('sans pendingSaut, peindreCasesSaut ne peint rien', () => {

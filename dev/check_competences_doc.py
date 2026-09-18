@@ -48,28 +48,25 @@ CHAMPS_ACTIFS_SEULEMENT = ("cout_pm", "cible", "jet", "portee")
 # d'effet : un `magie` ou un `composants` recopié depuis un doc de sort ne lève rien et
 # disparaît — la compétence part en base amputée de ce que son auteur croyait y mettre.
 CHAMPS_DOC = ("_id", "_rev", "type", "nom", "icon", "description", "vocation", "famille",
-			  "niveau", "mode", "cout_pm", "maintien", "cible", "jet", "portee", "zone",
-			  "effets", "condition", "animation")
+			  "niveau", "mode", "cout_pm", "maintien", "incantation", "cible", "jet",
+			  "portee", "zone", "effets", "condition", "animation")
 # Clés que le moteur lit sur un SORT mais jamais sur une compétence. `_bonus_dict` les
 # normalise (elles ne « disparaissent » donc pas : le contrôle n°1 ne les verrait pas), et
 # `competence_utilisable_combat` en accepte même deux — mais AUCUNE branche de
 # `resolve_action` ne les résout côté compétence. Une compétence qui en porte une part en
 # base, s'utilise sans erreur, et ne fait rien. Vérifié en exécutant le moteur.
+# ⚠️ `cout_pv`, `saut` et `lien_vie` ONT ÉTÉ OUVERTS aux compétences (chokepoint de
+# lancement partagé `combat._lancer_capacite`), ainsi qu'`incantation` : ils ne figurent
+# donc plus ici. Ne restent inertes que les bonus de COMPOSANT — une compétence n'en a pas,
+# et `sorts.doc_effectif` ne les lira jamais sur elle.
 EFFETS_INERTES_SUR_COMPETENCE = {
-	"cout_pv":    "jamais prélevé (seule la branche `sort` appelle `_payer_cout_pv`)",
-	"saut":       "inerte (seul `_lancer_sort` appelle `_sauter`)",
-	"lien_vie":   "inerte (seul `_lancer_sort` appelle `_poser_lien_vie`)",
-	# Bonus de COMPOSANT, appliqués au doc par `sorts.doc_effectif` : une compétence n'a
-	# pas de composants, ces trois clés ne seront jamais lues.
 	"invocation_duree":  "bonus de composant — une compétence n'a pas de composants",
 	"invocation_nombre": "bonus de composant — une compétence n'a pas de composants",
 	"maintien_reduction": "bonus de composant — une compétence n'a pas de composants",
 }
-# Champs de premier niveau réservés aux sorts.
+# Champs de premier niveau encore réservés aux sorts.
 CHAMPS_INERTES_SUR_COMPETENCE = {
 	"invocation":  "réservé aux docs `sort:*` (normaliser_competence ne le lit pas)",
-	"incantation": "non normalisée sur une compétence, DÉLIBÉRÉMENT (la canalisation "
-				   "multi-round n'a qu'un chemin, propre aux sorts)",
 }
 MAINTIEN_MAX = MAINTIEN_PM_MAX   # borne du moteur, jamais recopiée à la main
 # Clés du bloc `zone` que `normaliser_zone` sait lire. Même liste blanche, même piège : une

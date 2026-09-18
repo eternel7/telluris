@@ -68,7 +68,9 @@ utils/
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;
                          #   règle de couverture partagée par dev/gen_grimoires.py et l'alerte de /admin
-  competences.py         # compétences de vocation (pur) : passives permanentes, actives, apprentissage
+  competences.py         # compétences de vocation (pur) : passives permanentes, actives, apprentissage ;
+                         #   MÊME contrat que les sorts (incantation/maintien, saut, cout_pv,
+                         #   lien_vie, zones, drain) — cf. combat._lancer_capacite
   zones_effet.py         # zones d'effet des sorts/compétences (pur) : cercle, carré, rectangle, cône ;
                          #   ancre (lanceur/cible) + orientation ; miroir scripts/zones_effet.js
   jetons.py              # jetons de taille variable (pur) : emprise LxP selon le cap, distance entre

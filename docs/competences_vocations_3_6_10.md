@@ -43,26 +43,35 @@ Vérifié en exécutant le moteur : une **siphonie pure** (`degats_pm` seul) par
 un **drain** rend au lanceur le même pourcentage des dégâts réels ; une **zone** frappe le même
 nombre de cibles ; une **posture maintenue** est facturée par le même `_enregistrer_concentration`.
 
-### Ce qui reste propre aux sorts — quatre champs, trois clés
+### Ce qui reste propre aux sorts — deux champs, et c'est tout
 
 | réservé au `sort:*` | pourquoi |
 |---|---|
 | `magie` · `composants` | un sort appartient à une **école** et se renforce par des composants ; une compétence n'a ni l'une ni les autres — la vocation lui tient lieu d'école |
-| `incantation` | la canalisation multi-round n'a qu'un chemin de résolution, propre aux sorts. **Délibéré** : afficher « ⏱ 4 PA » sur une capacité qui partirait du premier coup serait un champ qui ment |
 | `invocation` | `normaliser_competence` ne lit pas le bloc |
-| `effets.saut` | seul `_lancer_sort` appelle `_sauter` |
-| `effets.cout_pv` | seule la branche `sort` appelle `_payer_cout_pv` |
-| `effets.lien_vie` | seul `_lancer_sort` appelle `_poser_lien_vie` |
 
 Et **un seul champ propre aux compétences** : `mode` (`passive` / `active`). Un sort est
 toujours actif ; une passive n'existe que côté compétences, et c'est la seule asymétrie qui
 aille dans ce sens.
 
-⚠️ **Les trois clés d'effet réservées sont le vrai piège**, et il est pire qu'une absence :
-`_bonus_dict` les normalise pour les deux familles, et `capacite_utilisable_combat` en accepte
-même deux (`saut`, `lien_vie`). Une compétence qui en porte une **part en base, s'utilise sans
-la moindre erreur, et ne fait rien**. Aucune entrée de ce document n'en emploie ; l'invariant
-n°2 du vérificateur les refuse.
+✅ **`saut`, `cout_pv`, `lien_vie` et `incantation` sont désormais OUVERTS.** Les trois
+premiers étaient le pire des silences — `_bonus_dict` les normalisait déjà pour les deux
+familles et deux d'entre eux passaient même la garde du router, si bien qu'une compétence qui
+en portait partait en base, s'utilisait sans erreur, et ne faisait rien. La cause n'était pas
+un choix de conception : leur résolution vivait dans `_lancer_sort`, un chemin que les
+compétences n'empruntaient pas. Le chokepoint de lancement est désormais **partagé**
+(`combat._lancer_capacite`), et les quatre mécaniques valent des deux côtés :
+
+| mécanique | ce qu'une compétence peut faire |
+|---|---|
+| `effets.saut` | téléporter son porteur (ou un allié désigné) sur une CASE, mur compris. Validé **avant tout débit** ; le client offre le même ciblage de sol que pour un sort |
+| `effets.cout_pv` | se payer en PV. Garde `>` STRICTE : elle ne peut pas assommer son auteur. Ce ne sont **pas** des dégâts subis (ni test de concentration, ni furtivité rompue) |
+| `effets.lien_vie` | tisser un lien sur un allié : le bloc vit sur le PROTÉGÉ, la concentration sur le porteur |
+| `incantation` | s'armer sur plusieurs tours, PM versés par tranches. Le bloc mémorise son `kind` — la résolution a lieu des tours plus tard, sans moyen de redeviner le type |
+
+⚠️ **COMBAT SEULEMENT** : `capacite_utilisable_exploration` refuse une incantation longue, un
+entretien, un saut et un lien de vie — il n'y a ni round ni grille hors combat. `cout_pv`, lui,
+reste applicable : ce n'est qu'un coût.
 
 ### Ce que la mise à plat a débloqué pour le contenu
 
@@ -204,8 +213,9 @@ Un capstone offensif mono-cible reste **le plus gros coup unitaire du document**
 1. Chaque bloc passe `normaliser_competence` **sans perte de clé** — ni au premier niveau du
    doc, ni dans `effets`, ni dans `buffs`, ni dans `zone`. Une clé inventée disparaît en
    silence ; c'est le piège central du contenu.
-2. **Aucune clé inerte sur une compétence** : ni `invocation`, ni `incantation`, ni `cout_pv`,
-   ni `saut`, ni `lien_vie`, ni les trois bonus de composant.
+2. **Aucune clé inerte sur une compétence** : ni `invocation`, ni les trois bonus de
+   composant. (`saut`, `cout_pv`, `lien_vie` et `incantation` en sont sortis : ils sont
+   désormais résolus des deux côtés.)
 3. **Accord du router et du moteur** : une active `ennemi` lançable en combat doit aussi avoir
    de quoi faire à une cible. Remplace l'ancienne règle « `degats_pm` jamais seul », devenue
    sans objet depuis que les deux gardes appellent la même fonction.
@@ -1710,10 +1720,12 @@ coup (donc « pas de drain »), un lanceur à PV pleins n'avait rien à drainer,
 contact interdisait une zone de portée > 1, et une fixture épinglant `pv_max` faisait croire
 qu'une siphonie blessait. Aucune de ces quatre lignes n'aurait été détectable à la relecture.
 
-**Ce que la révision 4 continue de refuser d'écrire** : `saut`, `cout_pv` et `lien_vie`. Ces
-trois clés sont normalisées pour les compétences et deux d'entre elles passent même la garde du
-router — une compétence qui en porte part en base, s'utilise sans erreur, et ne fait rien.
-`incantation` et `invocation` restent hors de portée, la première délibérément.
+**Ce que la révision 4 refusait encore d'écrire** : `saut`, `cout_pv` et `lien_vie` — trois
+clés normalisées pour les compétences, dont deux passaient même la garde du router, si bien
+qu'une compétence qui en portait partait en base, s'utilisait sans erreur, et ne faisait rien.
+✅ **Ouvertes depuis**, avec `incantation`, par le chokepoint de lancement partagé
+`combat._lancer_capacite` (cf. § « Ce qui reste propre aux sorts » en tête de document). Seule
+`invocation` demeure réservée aux `sort:*`.
 
 ---
 

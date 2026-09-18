@@ -464,6 +464,63 @@ TEXTES_COMPETENCE = {
 			"(jet {roll} / seuil {seuil})",
 }
 
+# ── Profil d'une CAPACITÉ — la seule chose qui distingue un sort d'une compétence ──
+# Sorts et compétences suivent le MÊME chemin de lancement (`_lancer_capacite`) : mêmes
+# `effets`, mêmes cibles, mêmes mécaniques de round et de grille. Ce qui les sépare tient
+# en cinq lignes, rassemblées ici plutôt que dispersées dans deux branches jumelles.
+#
+# ⚠️ Deux différences ne sont PAS cosmétiques :
+#   - `notation` : une frappe de compétence en `cc` emprunte les dés de l'arme équipée
+#     (`_degats_competence`) ; un sort n'emprunte rien ;
+#   - `portee` : une compétence emprunte aussi l'ALLONGE de l'arme et en dérive son
+#     drapeau `ranged` (une hallebarde frappe à 2 cases EN mêlée), là où un sort tient
+#     simplement `portee > 1` pour « à distance ».
+# Les trois autres (clé de résultat, textes de journal, verbe) sont de l'habillage.
+PROFIL_SORT = {
+	"cle": "sort",
+	"textes": TEXTES_SORT,
+	"verbe": "lance",
+	"nom_defaut": "un sort",
+	"icon_defaut": "🔮",
+	"sans_effet": "Ce sort n'a aucun effet sur une cible.",
+	"engage": "Un ennemi vous menace au corps à corps : impossible d'incanter.",
+}
+PROFIL_COMPETENCE = {
+	"cle": "competence",
+	"textes": TEXTES_COMPETENCE,
+	"verbe": "utilise",
+	"nom_defaut": "une compétence",
+	"icon_defaut": "⚡",
+	"sans_effet": "Cette compétence n'a aucun effet sur une cible.",
+	"engage": "Un ennemi vous menace au corps à corps : impossible.",
+}
+PROFILS = {"sort": PROFIL_SORT, "competence": PROFIL_COMPETENCE}
+
+
+def _profil_de(kind) -> dict:
+	"""Profil d'une capacité par son type. Défaut `sort` — c'est le chemin historique, et
+	un `kind` absent vient forcément d'un doc de combat écrit avant le partage."""
+	return PROFILS.get(str(kind or "sort"), PROFIL_SORT)
+
+
+def _notation_capacite(joueur: dict, doc: dict, effets: dict, profil: dict) -> str:
+	"""Notation de dégâts d'une capacité qui part. Une COMPÉTENCE de contact ajoute les dés
+	de l'arme en main (chokepoint `_degats_competence`) ; un sort garde les siens."""
+	if not effets.get("degats"):
+		return ""
+	if profil["cle"] == "competence":
+		return _degats_competence(joueur, doc, effets)
+	return effets.get("degats", "")
+
+
+def _portee_capacite(joueur: dict, doc: dict, profil: dict) -> tuple:
+	"""`(portée effective, à distance ?)`. Une COMPÉTENCE emprunte l'allonge de son arme et
+	en dérive `ranged` ; un sort est « à distance » dès que sa portée dépasse 1."""
+	if profil["cle"] == "competence":
+		return _portee_competence(joueur, doc)
+	portee = max(1, int((doc or {}).get("portee", 1) or 1))
+	return portee, portee > 1
+
 
 def cibles_de_zone(combat_doc: dict, joueur: dict, monstre: dict, zone: dict,
 				   grid: dict) -> list:
@@ -1174,7 +1231,7 @@ def _payer_cout_pv(combat_doc: dict, joueur: dict, source: dict, cout_pv: int) -
 
 
 def _armer_incantation(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
-					   cible_id: str | None, dx, dy) -> dict:
+					   cible_id: str | None, dx, dy, kind: str = "sort") -> dict:
 	"""Arme une incantation LONGUE, puis y verse déjà les PA du tour en cours.
 
 	Le sort ne part pas : il devient un état du snapshot que `_avancer_incantation` fera
@@ -1185,10 +1242,15 @@ def _armer_incantation(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 	lieu depuis `_reset_turn_budget`, qui n'a aucun accès à la base (tout `utils/combat` est
 	du calcul pur). Ce sont des dicts normalisés, donc sérialisables tels quels.
 	"""
+	profil = _profil_de(kind)
 	joueur["incantation"] = {
 		"sort_id": sdoc.get("id", ""),
-		"nom": sdoc.get("nom", "un sort"),
-		"icon": sdoc.get("icon", "🔮"),
+		# ⚠️ Le TYPE est mémorisé avec le reste : la résolution a lieu des tours plus tard,
+		# depuis `_reset_turn_budget`, qui n'a aucun moyen de redeviner si ce qui s'arme est
+		# un sort ou une compétence. Absent (bloc armé avant le partage) ⇒ `sort`.
+		"kind": profil["cle"],
+		"nom": sdoc.get("nom", profil["nom_defaut"]),
+		"icon": sdoc.get("icon", profil["icon_defaut"]),
 		"doc": dict(sdoc),
 		"effets": dict(effets or {}),
 		"cible_id": cible_id,
@@ -1204,13 +1266,14 @@ def _armer_incantation(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		"acteur": joueur.get("nom", "?"),
 		"kind": "sys",
 		"texte": f"{joueur.get('nom', '?')} entame l'incantation de "
-				 f"{sdoc.get('nom', 'un sort')} ({joueur['incantation']['pa_total']} PA).",
+				 f"{sdoc.get('nom', profil['nom_defaut'])} "
+				 f"({joueur['incantation']['pa_total']} PA).",
 	}, joueur))
 	_avancer_incantation(combat_doc, joueur)
 	# ⚠️ Relu APRÈS l'avancement : le tour a pu la mener à terme (le sort est parti) ou la
 	# rompre (plus de PM). Renvoyer le bloc capturé avant afficherait une barre de progression
 	# pour une incantation qui n'existe plus.
-	return {"sort": sdoc.get("nom"), "incantation": _incantation_payload(joueur)}
+	return {profil["cle"]: sdoc.get("nom"), "incantation": _incantation_payload(joueur)}
 
 
 def _incantation_payload(joueur: dict) -> dict | None:
@@ -1261,7 +1324,7 @@ def _avancer_incantation(combat_doc: dict, joueur: dict) -> None:
 	6 PA verse 3 PM par PA, les 15 PM sont couverts au 5ᵉ, et le 6ᵉ ne coûte rien.
 
 	⚠️ Le sort part ICI, des tours après le clic, par le même chokepoint que le lancement
-	direct (`_lancer_sort`). Sa cible est RE-VALIDÉE à ce moment : morte ou hors de portée,
+	direct (`_lancer_capacite`). Sa cible est RE-VALIDÉE à ce moment : morte ou hors de portée,
 	le sort se perd — c'est le prix du temps d'incantation.
 	⚠️ `joueur["canalisation"]` est un COMPTEUR (cf. `_refresh_actions`) : poser
 	`actions_restantes = 0` serait écrasé au premier recalcul.
@@ -1309,8 +1372,9 @@ def _avancer_incantation(combat_doc: dict, joueur: dict) -> None:
 	# ⚠️ Les PM ont été versés par tranches : les redébiter ferait payer le sort deux fois.
 	sdoc["cout_pm"] = 0
 	grid = get_combat_grid(combat_doc)
-	result, jet = _lancer_sort(combat_doc, joueur, sdoc, inc.get("effets") or {},
-							   inc.get("cible_id"), inc.get("dx"), inc.get("dy"), grid)
+	result, jet = _lancer_capacite(combat_doc, joueur, sdoc, inc.get("effets") or {},
+								   inc.get("cible_id"), inc.get("dx"), inc.get("dy"), grid,
+								   inc.get("kind", "sort"))
 	if "error" in result:
 		# Cible morte, hors de portée, plus de place pour l'invocation… Le sort est perdu,
 		# et les PM avec lui : rien à rembourser, ils ont été dépensés round après round.
@@ -2775,7 +2839,7 @@ def _verifier_saut(combat_doc: dict, sauteur: dict, effets: dict, dx, dy,
 	"""Une destination de saut est-elle recevable ? `{}` si oui (ou si ce n'est pas un saut).
 
 	SÉPARÉE de `_sauter` parce qu'elle est appelée DEUX fois : une première en tête de
-	`_lancer_sort`, AVANT le moindre débit de PM, et une seconde par `_sauter` lui-même.
+	`_lancer_capacite`, AVANT le moindre débit de PM, et une seconde par `_sauter` lui-même.
 	Sans la première, une case invalide coûtait le sort sans rien téléporter — alors que la
 	règle du moteur est constante : un sort qui ne part pas ne se paie pas (cf.
 	`_lancer_sur_allie`, « PM NON débités : le sort n'est jamais parti »).
@@ -3733,14 +3797,20 @@ def resolve_first_turns(combat_doc: dict) -> None:
 
 # ── API publique ────────────────────────────────────────────────────────────
 
-def _lancer_sort(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
-				 cible_id: str | None, dx, dy, grid: dict) -> tuple:
-	"""Résout un sort qui PART : les quatre familles de lancement, et rien d'autre.
+def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
+					 cible_id: str | None, dx, dy, grid: dict, kind: str = "sort") -> tuple:
+	"""Résout une CAPACITÉ qui PART — sort ou compétence : les quatre familles de
+	lancement, et rien d'autre.
 
-	CHOKEPOINT PARTAGÉ par les deux chemins qui font partir un sort — le lancement direct
-	(branche `sort` de `resolve_action`) et la fin d'une INCANTATION LONGUE, qui se résout
-	des tours plus tard depuis `_avancer_incantation`. Les deux doivent aboutir au même
-	état : deux copies divergeraient au premier effet ajouté.
+	CHOKEPOINT PARTAGÉ par les QUATRE chemins qui font partir une capacité : le lancement
+	direct d'un sort, celui d'une compétence, et la fin d'une INCANTATION LONGUE de l'un ou
+	de l'autre, qui se résout des tours plus tard depuis `_avancer_incantation`. Tous
+	doivent aboutir au même état : des copies divergeraient au premier effet ajouté — c'est
+	exactement ce qui était arrivé aux gardes d'éligibilité.
+
+	`kind` ne sert qu'à choisir le PROFIL (cf. `PROFIL_SORT` / `PROFIL_COMPETENCE`) : les
+	dés et l'allonge empruntés à l'arme, les textes de journal et la clé de résultat. Toute
+	la mécanique — saut, lien de vie, zones, furtivité, entretien — est commune.
 
 	⚠️ Ne touche NI le compteur d'actions, NI la charge (composants), NI le fumble, NI la
 	victoire : tout cela appartient au LANCEMENT et se paie une seule fois, alors qu'une
@@ -3750,7 +3820,12 @@ def _lancer_sort(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 
 	Rend `(resultat, jet)` — `jet` renseigné par la seule branche offensive.
 	"""
+	profil = _profil_de(kind)
+	cle = profil["cle"]
+	nom_capacite = sdoc.get("nom", profil["nom_defaut"])
 	cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
+	# Une compétence ne porte jamais de bloc `invocation` (`normaliser_competence` ne le
+	# lit pas) : le `.get` suffit, aucune garde par type n'est nécessaire.
 	invocation = sdoc.get("invocation") or None
 	jet = None   # renseigné seulement par la branche offensive (jet de toucher)
 	# ⚠️ Le SAUT se valide AVANT le moindre débit : sa destination est désignée par le
@@ -3782,10 +3857,10 @@ def _lancer_sort(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "sys",
-			"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} : {noms} "
+			"texte": f"{joueur['nom']} {profil['verbe']} {nom_capacite} : {noms} "
 					 f"répond à l'appel ({crees[0]['invocation_restants']} tour(s)).",
 		}, joueur))
-		result = {"sort": sdoc.get("nom"),
+		result = {cle: nom_capacite,
 				  "invoques": [{"id": c["id"], "nom": c["nom"],
 								"restants": c["invocation_restants"]} for c in crees]}
 	elif sdoc.get("cible") == "allie":
@@ -3793,11 +3868,11 @@ def _lancer_sort(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# Aucun jet, aucun compteur d'attaque — seulement l'action et les PM.
 		allie = _get_joueur(combat_doc, cible_id) if cible_id else None
 		res_allie = _lancer_sur_allie(combat_doc, joueur, allie, sdoc, effets,
-									  sdoc.get("portee", 1), grid)
+									  _portee_capacite(joueur, sdoc, profil)[0], grid)
 		if "error" in res_allie:
-			return res_allie, None   # PM NON débités : le sort n'est jamais parti
+			return res_allie, None   # PM NON débités : la capacité n'est jamais partie
 		joueur["currentPM"] -= cout_pm
-		result = {"sort": sdoc.get("nom"), **res_allie}
+		result = {cle: nom_capacite, **res_allie}
 		# ZONE DE SOUTIEN : les alliés que la forme ajoute au désigné, lui déjà servi.
 		# ⚠️ Les gardes de `_lancer_sur_allie` (portée, ligne de vue, « à terre ») ne
 		# valent que pour le DÉSIGNÉ : c'est contre lui que le sort a été autorisé.
@@ -3821,45 +3896,47 @@ def _lancer_sort(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		# le moindre dégât de PV) doit passer des deux côtés. Elle est le cœur de la
 		# famille anti-lanceur.
 		if not effets_agissent_sur_cible(effets):
-			return {"error": "Ce sort n'a aucun effet sur une cible."}, None
+			return {"error": profil["sans_effet"]}, None
 		monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
 		if not monstre or not monstre["vivant"]:
 			return {"error": "Cible invalide."}, None
-		sort_portee = max(1, int(sdoc.get("portee", 1) or 1))
-		# Règles à distance identiques au jet/tir : un sort de portée > 1 est
-		# interdit si engagé au corps à corps et exige une ligne de vue ; un sort
-		# de contact (portée 1) reste lançable en mêlée.
-		if sort_portee > 1:
+		# Portée EFFECTIVE : une compétence de contact emprunte l'ALLONGE de l'arme en
+		# main, comme elle en emprunte les dés (chokepoint `_portee_capacite`).
+		sort_portee, est_a_distance = _portee_capacite(joueur, sdoc, profil)
+		# Règles à distance identiques au jet/tir : interdit si engagé au corps à corps,
+		# et exige une ligne de vue. ⚠️ Piloté par le drapeau `ranged` et non par
+		# `portee > 1` : une hallebarde frappe à 2 cases EN MÊLÉE.
+		if est_a_distance:
 			if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
-				return {"error": "Un ennemi vous menace au corps à corps : impossible d'incanter."}, None
+				return {"error": profil["engage"]}, None
 			if not _vue_acteurs(grid["cells"], joueur, monstre):
 				return {"error": "Ligne de vue obstruée."}, None
 		if _cheby(joueur, monstre) > sort_portee:
 			return {"error": "Cible hors de portée."}, None
 
-		# Le sort part : PM débités AVANT le jet (raté = PM quand même dépensés).
+		# La capacité part : PM débités AVANT le jet (raté = PM quand même dépensés).
 		joueur["currentPM"] -= cout_pm
 		# Jet porté par la DONNÉE, exactement comme pour les compétences :
 		# `magique` (défaut des sorts) se résout sous toucher_magique contre la
 		# pm_def ; un sort de CONTACT marqué `cc`/`cd` (« au toucher ») exige
 		# d'abord de poser la main — jet martial contre la défense physique.
-		mode_jet = sdoc.get("jet") or "magique"
+		mode_jet = sdoc.get("jet") or ("cc" if cle == "competence" else "magique")
 		# ZONE D'EFFET : la cible désignée d'abord, puis tout monstre pris dans la
 		# forme (cf. utils/zones_effet.py). `zone` absente ⇒ liste d'un seul élément,
 		# donc exactement le comportement d'avant.
 		cibles_sort = cibles_de_zone(combat_doc, joueur, monstre, sdoc.get("zone"), grid)
-		nom_sort = sdoc.get("nom", "un sort")
 		result, jet = _resoudre_capacite_offensive(
-			combat_doc, joueur, cibles_sort, sdoc, effets, effets.get("degats", ""),
-			mode_jet, "sort", TEXTES_SORT,
-			{"nom": nom_sort, "nom_fumble": sdoc.get("nom", "le sort")})
-		result["sort"] = sdoc.get("nom")
+			combat_doc, joueur, cibles_sort, sdoc, effets,
+			_notation_capacite(joueur, sdoc, effets, profil),
+			mode_jet, cle, profil["textes"],
+			{"nom": nom_capacite, "nom_fumble": nom_capacite})
+		result[cle] = nom_capacite
 
 		# Incanter au contact révèle le lanceur (touché ou raté) ; à distance, seule la
 		# cible tente de le repérer — foudroyée sur place, elle n'en a même pas le temps.
-		_furtivite_apres_offensive(combat_doc, joueur, monstre, sort_portee > 1)
+		_furtivite_apres_offensive(combat_doc, joueur, monstre, est_a_distance)
 	else:
-		# Sort sur soi : toujours lançable ; débit PM puis part instantanée clampée.
+		# Capacité sur soi : toujours lançable ; débit PM puis part instantanée clampée.
 		joueur["currentPM"] -= cout_pm
 		avant_pv, avant_pm = joueur["currentPV"], joueur["currentPM"]
 		joueur["currentPV"] = min(joueur["pv_max"], avant_pv + int(effets.get("pv", 0) or 0))
@@ -3878,13 +3955,13 @@ def _lancer_sort(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 			"tour": combat_doc["tour"],
 			"acteur": joueur["nom"],
 			"kind": "sys",
-			"texte": f"{joueur['nom']} lance {sdoc.get('nom', 'un sort')} ({gains}).",
+			"texte": f"{joueur['nom']} {profil['verbe']} {nom_capacite} ({gains}).",
 		}, joueur))
 		# Sort de dissimulation (effets.furtivite > 0) : pose l'état furtif et
 		# remet la détection de tous les monstres à zéro.
 		if int(effets.get("furtivite", 0) or 0) > 0:
 			_activer_furtivite(combat_doc, joueur, int(effets["furtivite"]))
-		result = {"sort": sdoc.get("nom"), "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
+		result = {cle: nom_capacite, "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
 				  "furtif": bool(joueur.get("furtif")),
 				  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
 		# ZONE DE SOUTIEN autour de soi (cri de ralliement, nappe de soin) : le
@@ -4303,7 +4380,8 @@ def resolve_action(
 		else:
 			if joueur["currentPM"] < cout_pm:
 				return {"error": "PM insuffisants."}
-			result, jet = _lancer_sort(combat_doc, joueur, sdoc, effets, cible_id, dx, dy, grid)
+			result, jet = _lancer_capacite(combat_doc, joueur, sdoc, effets,
+										   cible_id, dx, dy, grid, "sort")
 			if "error" in result:
 				return result   # rien n'a été payé : le sort n'est jamais parti
 			_payer_cout_pv(combat_doc, joueur, sdoc, cout_pv)
@@ -4330,128 +4408,54 @@ def resolve_action(
 	elif action_type == "competence":
 		# Utiliser une compétence ACTIVE connue, coûte 1 action + cout_pm PM (souvent 0 :
 		# une compétence martiale ne consomme pas de magie). Le router injecte la compétence
-		# normalisée. Comme pour les sorts et les consommables, part INSTANTANÉE
-		# (degats/pv/pm) ET part à DURÉE s'appliquent. Les compétences PASSIVES n'arrivent
-		# jamais ici — leur bonus est déjà intégré au snapshot (competences_bonus →
-		# caracts_avec_buffs, replié dans `caracts_base`).
+		# normalisée. Les compétences PASSIVES n'arrivent jamais ici — leur bonus est déjà
+		# intégré au snapshot (competences_bonus → caracts_avec_buffs).
+		#
+		# ⚠️ MIROIR EXACT de la branche `sort` ci-dessus, et ce n'est plus une promesse
+		# tenue à la main : les deux appellent `_lancer_capacite`, qui porte toute la
+		# mécanique (saut, lien de vie, zones, furtivité, entretien). Ne restent ici que
+		# le compteur d'actions, le fumble et la victoire — ce qui appartient au LANCEMENT
+		# et se paie une seule fois, alors qu'une incantation longue traverse des tours.
 		if not competence:
 			return {"error": "Compétence invalide."}
 		effets = competence.get("effets") or {}
 		cout_pm = max(0, int(competence.get("cout_pm", 0) or 0))
-		# ⚠️ MÊME FONCTION que `competences.competence_utilisable_combat` et que la branche
-		# `sort` ci-dessus : une seule règle pour les quatre sites, plus aucune recopie à
-		# tenir en accord. Une compétence n'a pas de composants — ses `effets` sont ceux du
-		# doc, et le second argument ne fait que l'expliciter.
+		# ⚠️ MÊME FONCTION que `competences.competence_utilisable_combat`, celle qui a
+		# filtré cette compétence côté router : les deux ne peuvent plus diverger.
 		if not capacite_utilisable_combat(competence, effets):
 			return {"error": "Cette compétence n'a aucun effet utilisable en combat."}
-		if joueur["currentPM"] < cout_pm:
-			return {"error": "PM insuffisants."}
+		cout_pv = max(0, int(effets.get("cout_pv", 0) or 0))
+		# ⚠️ `>` STRICT : à 0 PV le porteur est « à terre ». Une capacité capable d'assommer
+		# son auteur par sa seule facture ouvrirait une condition de défaite absurde.
+		if cout_pv and joueur["currentPV"] <= cout_pv:
+			return {"error": "Pas assez de PV pour payer cette compétence."}
 
-		nom = competence.get("nom", "une compétence")
-		resultat_jet = None   # renseigné seulement par la branche offensive (jet de toucher)
-		if competence.get("cible") == "allie":
-			# Miroir exact de la branche alliée du sort (même chokepoint).
-			allie = _get_joueur(combat_doc, cible_id) if cible_id else None
-			res_allie = _lancer_sur_allie(combat_doc, joueur, allie, competence, effets,
-										  _portee_competence(joueur, competence)[0], grid)
-			if "error" in res_allie:
-				return res_allie
-			joueur["currentPM"] -= cout_pm
-			result = {"competence": nom, **res_allie}
-			autres = _servir_zone_soutien(combat_doc, joueur, allie, competence, effets,
-										  competence.get("zone"), grid)
-			if autres:
-				result["beneficiaires"] = autres
-		elif competence.get("cible") == "ennemi":
-			# Dégâts, dégâts de PM OU part à durée : une compétence offensive peut n'être
-			# qu'un debuff (cri de guerre qui affaiblit, entrave qui ralentit…) ou une
-			# siphonie pure. ⚠️ MÊME FONCTION que la sous-branche `ennemi` des sorts :
-			# c'est ici que la recopie avait divergé, en omettant `degats_pm`.
-			if not effets_agissent_sur_cible(effets):
-				return {"error": "Cette compétence n'a aucun effet sur une cible."}
-			monstre = _get_monstre(combat_doc, cible_id) if cible_id else None
-			if not monstre or not monstre["vivant"]:
-				return {"error": "Cible invalide."}
-			# Portée EFFECTIVE : une frappe `cc` à dés emprunte l'ALLONGE de l'arme en main,
-			# comme elle en emprunte les dés (chokepoint _portee_competence).
-			comp_portee, comp_ranged = _portee_competence(joueur, competence)
-			# Règles à distance (jet/tir/sort) : interdit si engagé au corps à corps, et exige
-			# une ligne de vue. ⚠️ Pilotées par le drapeau `ranged` — miroir de la branche
-			# `attaquer` — et non par `portee > 1` : une hallebarde frappe à 2 cases EN MÊLÉE.
-			if comp_ranged:
-				if any(m["vivant"] and _cheby(joueur, m) <= 1 for m in combat_doc["monstres"]):
-					return {"error": "Un ennemi vous menace au corps à corps : impossible."}
-				if not _vue_acteurs(grid["cells"], joueur, monstre):
-					return {"error": "Ligne de vue obstruée."}
-			if _cheby(joueur, monstre) > comp_portee:
-				return {"error": "Cible hors de portée."}
-
-			# La compétence part : PM débités AVANT le jet (raté = PM quand même dépensés).
-			joueur["currentPM"] -= cout_pm
-			# Le jet est porté par la DONNÉE : une frappe martiale se résout sous cc/cd contre
-			# l'Ag de la cible (PA soustraits comme une attaque d'arme) ; une compétence
-			# magique se résout sous toucher_magique contre la pm_def (sans soustraction de PA,
-			# l'armure physique n'arrête pas la magie).
-			# Le jet est aussi ce qui décide si les dégâts d'ARME s'ajoutent (cf.
-			# _degats_competence) : une frappe `cc` est portée avec l'arme en main.
-			jet = competence.get("jet", "cc")
-			# Notation = dés de la compétence, PLUS les dégâts d'arme si c'est une frappe
-			# de contact. Elle ne dépend pas de la cible : calculée UNE fois, même quand la
-			# zone frappe plusieurs ennemis.
-			notation = _degats_competence(joueur, competence, effets) if effets.get("degats") else ""
-			# ZONE D'EFFET : cible désignée d'abord, puis tout monstre pris dans la forme.
-			cibles_comp = cibles_de_zone(combat_doc, joueur, monstre,
-										 competence.get("zone"), grid)
-			result, resultat_jet = _resoudre_capacite_offensive(
-				combat_doc, joueur, cibles_comp, competence, effets, notation,
-				jet, "competence", TEXTES_COMPETENCE, {"nom": nom, "nom_fumble": nom})
-			result["competence"] = nom
-
-			# Frapper au contact révèle le joueur (touché ou raté) ; à distance, seule la
-			# cible tente de le repérer — et une cible abattue ne repère plus rien.
-			_furtivite_apres_offensive(combat_doc, joueur, monstre, comp_ranged)
+		if est_incantation_longue(competence):
+			# INCANTATION LONGUE : la compétence ne part pas maintenant. Elle s'arme, puis
+			# absorbe les PA du porteur tour après tour, et se résout d'elle-même quand la
+			# totalité des PA a été versée — par le même chemin que les sorts.
+			# ⚠️ Testée AVANT le débit des PM : ils partent par TRANCHES, une par PA.
+			if joueur.get("incantation"):
+				return {"error": "Une incantation est déjà en cours."}
+			result = _armer_incantation(combat_doc, joueur, competence, effets,
+										cible_id, dx, dy, "competence")
+			resultat_jet = None
+			_payer_cout_pv(combat_doc, joueur, competence, cout_pv)
 		else:
-			# Compétence sur soi : toujours utilisable ; débit PM puis part instantanée clampée.
-			joueur["currentPM"] -= cout_pm
-			avant_pv, avant_pm = joueur["currentPV"], joueur["currentPM"]
-			joueur["currentPV"] = min(joueur["pv_max"], avant_pv + int(effets.get("pv", 0) or 0))
-			joueur["currentPM"] = min(joueur["pm_max"], avant_pm + int(effets.get("pm", 0) or 0))
-			pv_rendu = joueur["currentPV"] - avant_pv
-			pm_rendu = joueur["currentPM"] - avant_pm
-			# Part à DURÉE : même traitement que pour un sort (cf. branche "sort").
-			effet_pose = _empiler_effet_combat(joueur, competence, effets, combat_doc["tour"])
-			gains = " / ".join(s for s in (
-				f"+{pv_rendu} PV" if pv_rendu else "",
-				f"+{pm_rendu} PM" if pm_rendu else "",
-				f"effet {effet_pose['restants']} tour(s)" if effet_pose else "",
-			) if s) or "aucun effet"
-			combat_doc["log"].append(_avec_etat({
-				"tour": combat_doc["tour"],
-				"acteur": joueur["nom"],
-				"kind": "sys",
-				"texte": f"{joueur['nom']} utilise {nom} ({gains}).",
-			}, joueur))
-			# Compétence de dissimulation (ex. Furtivité de l'assassin) : pose l'état
-			# furtif et remet la détection de tous les monstres à zéro.
-			if int(effets.get("furtivite", 0) or 0) > 0:
-				_activer_furtivite(combat_doc, joueur, int(effets["furtivite"]))
-			result = {"competence": nom, "pv_rendu": pv_rendu, "pm_rendu": pm_rendu,
-					  "furtif": bool(joueur.get("furtif")),
-					  "effets_actifs": [dict(e) for e in joueur.get("effets_actifs") or []]}
-			autres = _servir_zone_soutien(combat_doc, joueur, joueur, competence, effets,
-										  competence.get("zone"), grid)
-			if autres:
-				result["beneficiaires"] = autres
+			if joueur["currentPM"] < cout_pm:
+				return {"error": "PM insuffisants."}
+			result, resultat_jet = _lancer_capacite(combat_doc, joueur, competence, effets,
+													cible_id, dx, dy, grid, "competence")
+			if "error" in result:
+				return result   # rien n'a été payé : la compétence n'est jamais partie
+			_payer_cout_pv(combat_doc, joueur, competence, cout_pv)
 
-		# ENTRETIEN : une compétence peut elle aussi demander des PM chaque round (une garde
-		# qu'on tient). ⚠️ Sans cet appel, `_empiler_effet_combat` poserait bien une entrée
-		# `maintenu: True` — donc EXEMPTÉE du décrément — que rien ne facturerait ni ne
-		# retirerait jamais : un buff permanent et gratuit, c'est-à-dire un exploit.
-		entree_conc = _enregistrer_concentration(combat_doc, joueur, competence, cible_id)
-		if entree_conc:
-			result["concentrations"] = [dict(c) for c in _concentrations(joueur)]
 		result["currentPM"] = joueur["currentPM"]
-		joueur["competences"] = joueur.get("competences", 0) + 1
+		# ⚠️ Une incantation LONGUE ne passe pas par ce compteur : ses PA sont déjà décomptés
+		# un par un par `canalisation` (cf. `_avancer_incantation`). L'ajouter ferait payer
+		# une action de plus le tour où le porteur se contente de commencer.
+		if not est_incantation_longue(competence):
+			joueur["competences"] = joueur.get("competences", 0) + 1
 		_refresh_actions(joueur)
 		# Après le décompte de la compétence : un échec critique coûte une action de PLUS.
 		if resultat_jet and resultat_jet["fumble"]:

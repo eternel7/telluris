@@ -213,12 +213,18 @@ def test_les_competences_portent_l_entretien():
 	assert _comp(maintien=999)["maintien"] == MAINTIEN_PM_MAX
 
 
-def test_les_competences_ne_portent_PAS_l_incantation():
-	"""⚠️ DÉLIBÉRÉ : la canalisation multi-round n'a qu'un chemin de résolution
-	(`_avancer_incantation` → `_lancer_sort`), propre aux sorts. Normaliser le champ sans
-	le brancher afficherait « ⏱ 4 PA » sur une compétence qui partirait quand même du
-	premier coup — un champ qui ment est pire qu'un champ absent."""
-	assert "incantation" not in _comp(incantation=4)
+def test_les_competences_portent_desormais_l_incantation():
+	"""Le champ était absent DÉLIBÉRÉMENT tant que la canalisation n'avait qu'un chemin de
+	résolution, propre aux sorts : l'afficher sans le brancher aurait annoncé « ⏱ 4 PA » sur
+	une compétence qui serait partie du premier coup. Le chokepoint de lancement est
+	désormais partagé (`combat._lancer_capacite`), et le champ est branché des deux côtés.
+
+	Défaut NEUTRE à 1 PA : un doc `competence:*` déjà en base se comporte exactement comme
+	avant (CLAUDE.md §4). Comportement en combat : cf.
+	`tests/test_competences_saut_coutpv_incantation_lienvie.py`."""
+	assert _comp(incantation=4)["incantation"] == 4
+	assert _comp()["incantation"] == 1
+	assert _comp(incantation=999)["incantation"] == INCANTATION_PA_MAX
 
 
 def test_les_deux_portes_des_competences_suivent_celles_des_sorts():
