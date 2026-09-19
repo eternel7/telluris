@@ -447,13 +447,14 @@ CATALOGUE = [
 		# dump retenu : le choix est automatique, il n'est pas caché.
 		"argv": _py("audit_economy.py", "--dernier"),
 		"ecrit": "Lecture seule. Lit le dump le plus récent de jsons/, jamais la base.",
-		"description": "Trois indicateurs d'équilibrage : part des items qu'aucune recette "
+		"description": "Indicateurs d'équilibrage : part des items qu'aucune recette "
 			"atteignable ne produit, part des recettes dont le produit n'entre jamais en rayon "
-			"(et les matières qui les bloquent), marge médiane d'un objet fabriqué. Rebranche "
-			"`db.config` sur le dump avant d'importer `utils.marche` : les prix et coûts de "
-			"revient sortent du moteur du jeu, pas d'une réimplémentation. ⚠️ Hypothèses de "
-			"référence documentées en tête de dev/audit_economy.py (A à F) — notamment « en "
-			"rayon » = sans le joueur ravitailleur.",
+			"(flux de cité compris), marge médiane d'un objet fabriqué, et les matières RACINES "
+			"que seul l'aventurier apporte (ce que chacune débloque, ce qu'on perd sans elle). "
+			"Rebranche `db.config` sur le dump avant d'importer `utils.marche` : les prix et "
+			"coûts de revient sortent du moteur du jeu, pas d'une réimplémentation. ⚠️ "
+			"Hypothèses de référence documentées en tête de dev/audit_economy.py (A à I) — "
+			"notamment « en rayon » = sans le joueur ravitailleur.",
 	},
 	# ── /admin/lieux : outils PARAMÉTRÉS par la ville et les lignes affichées ──────────
 	# Absents de /admin/dev-tools (qui ne sait pas saisir de paramètre, cf. `catalogue_payload`).

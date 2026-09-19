@@ -235,6 +235,7 @@
 
 	{% include "part-main-footer.html" without context %}
 
+	<script src="{{ url_for('scripts', path='sceau_visuel.js') }}"></script>
 	<script>
 		const tellurisSousTitres = [
 			"Là où s'arrêtent les cartes", "Ubi Chartae Finiunt",
@@ -249,13 +250,6 @@
 			"Le monde dans les ténèbres", "Orbis in Tenebris"
 		];
 
-		const icons = [ "⚔️\uFE0E", "🛡️\uFE0E", "🏹\uFE0E", "🔮\uFE0E", "📜\uFE0E", "🏰\uFE0E", "🐉\uFE0E", "🔱\uFE0E", "💎\uFE0E", "⚖️\uFE0E",
-						"🗝️\uFE0E", "⚒️\uFE0E", "🕯️\uFE0E", "🧪\uFE0E", "🏺\uFE0E", "👑\uFE0E", "🐺\uFE0E", "🦅\uFE0E", "🌲\uFE0E", "⛰️\uFE0E",
-						"💀\uFE0E", "🕸️\uFE0E", "🔥\uFE0E", "❄️\uFE0E", "🌙\uFE0E", "☀️\uFE0E", "🧭\uFE0E", "⚓\uFE0E", "🐎\uFE0E", "🐾\uFE0E",
-						"👣\uFE0E", "👁️\uFE0E", "🩸\uFE0E", "🌿\uFE0E", "🍄\uFE0E", "⛓️\uFE0E", "⚱️\uFE0E", "🧱\uFE0E"
-		];	 
-		const colors = ["#b87333", "#8a8f98", "#ffd700", "#e5e4e2", "#6fdcff", "#ff7f50", "#ffffff", "initial"];
-		
 		document.getElementById('auth-subtitle').innerText = tellurisSousTitres[Math.floor(Math.random() * tellurisSousTitres.length)];
 
 		let isSignIn = !{{ is_new | tojson | safe }};
@@ -297,50 +291,8 @@
 			isSignIn = false;
 		}
 
-		// Logique de hachage et visualisation
-		function getHashCode(str) {
-			let hash = 0;
-			for (let i = 0; i < str.length; i++) {
-				hash = str.charCodeAt(i) + ((hash << 5) - hash);
-			}
-			return Math.abs(hash);
-		}
-		
-		function getContrastBg(hexcolor) {
-			if (hexcolor === "initial") return "var(--parch)";
-			hexcolor = hexcolor.replace("#", "");
-			const r = parseInt(hexcolor.substr(0,2),16);
-			const g = parseInt(hexcolor.substr(2,2),16);
-			const b = parseInt(hexcolor.substr(4,2),16);
-			const yiq = ((r*299)+(g*587)+(b*114))/1000;
-			return (yiq >= 142) ? "var(--ink)" : "var(--parch)";
-		}
-		
-		document.querySelectorAll('.pass-input').forEach(input => {
-			input.addEventListener('input', function() {
-				const visual = this.nextElementSibling;
-				const val = this.value;
-				
-				if (val.length > 0) {
-					const hash = getHashCode(val);
-					const iconIdx = hash % icons.length;
-					const colorIdx = hash % colors.length;
-					const selectedColor = colors[colorIdx];
-					if (selectedColor === "initial") {
-						visual.style.backgroundColor = "var(--parch)";
-						visual.innerText = icons[iconIdx].replace('\uFE0E', '');
-						visual.style.color = "";
-					} else {
-						visual.style.backgroundColor = getContrastBg(selectedColor);
-						visual.innerText = icons[iconIdx];
-						visual.style.color = selectedColor;
-					}
-					visual.classList.add('visible');
-				} else {
-					visual.classList.remove('visible');
-				}
-			});
-		});
+		// Ic\u00F4ne dynamique du mot de passe \u2014 scripts/sceau_visuel.js (partag\u00E9 avec /reinitialisation).
+		brancherSceauxVisuels();
 		const error_pwd_confirm =["Mauvaise confirmation du Sceau de Secret","Mauvais contre-sceau."];
 		var error_pwd_confirm_nb = 0;
 		document.getElementById('signup-form').addEventListener('submit', async (e) => {

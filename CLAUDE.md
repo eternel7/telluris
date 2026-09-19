@@ -126,6 +126,7 @@ templates/
                          #   voies.js (tracé des voies de l'éditeur : régions, goulots, passage)
                          #   zones_effet.js (géométrie des zones d'effet : APERÇU, le serveur tranche)
                          #   jetons.js (emprise des grands jetons : portée, cases prises, dessin)
+                         #   sceau_visuel.js (icône du mot de passe : /auth ↔ /reinitialisation)
   resources/             # assets statiques (characters, towns, maps, monsters, icons, pnj, sounds)
 dev/
   gen_*.py               # générateurs de contenu → jsons/*_a_importer.json (catalogue : telluris-admin-tools)

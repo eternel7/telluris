@@ -32,7 +32,7 @@ Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le
 - `gen_magasins_auxerre.py` — boutiques d'Auxerre (même forme que le lot de lieux de l'éditeur).
 - `gen_magasins.py --dump --spec` — la version GÉNÉRIQUE : ville, métiers, enseignes et cases dans une spec JSON ; refuse TOUT le lot sur un `_id` pris ou une case ≠ 1 (`tests/test_gen_magasins.py`).
 - `gen_progeniture.py --dump --lieux a,b` — familles TIRÉES (déterministe par lieu, `recrutement.PRENOMS/NOMS`) pour les boutiques choisies ; une famille existante n'est jamais réécrite. Sans `--lieux` : les familles écrites d'Auxerre.
-- `audit_economy.py <dump> --ville lieu:X` — périmètre d'une ville + §4 par atelier ; sans `--ville`, rapport inchangé.
+- `audit_economy.py <dump> --ville lieu:X` — périmètre d'une ville + §4 par atelier ; sans `--ville`, rapport inchangé. §5 = matières **racines** que seul l'aventurier apporte (« seule » / « doit », filière animale retirée EN BLOC) ; hypothèses A à I en tête du fichier.
 - `gen_magasins_superieurs.py` — les 18 grandes manufactures de Lutèce (enseignes, portes, tenanciers, items exclusifs).
 - `gen_specialites_france.py` — 10 spécialités de terroir (`lieu_portee`) + cités rattachées à `lieu:france`.
 - `gen_lutecia.py` — zones d'influence de la capitale (urbain, Seine, faubourgs, campagne).
