@@ -742,8 +742,10 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		# Récupérer les dimensions (largeur, hauteur)
 		largeur, hauteur = img.size
 		if dimensions:
-			dim_x = round(largeur/dimensions["x"])
-			dim_y = round(hauteur/dimensions["y"])
+			# Pas d'arrondi : une case peut faire 15,64 px (1408/90). Arrondie à 16, l'erreur
+			# se cumule par colonne et décale le jeton de ~x×0,36 px (≈2 cases en x=81).
+			dim_x = largeur/dimensions["x"]
+			dim_y = hauteur/dimensions["y"]
 		else:
 			dim_x = largeur
 			dim_y = hauteur
