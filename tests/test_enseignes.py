@@ -76,27 +76,32 @@ def test_exclus_vide_ou_absent_ne_gene_pas():
 # ── Le catalogue épuisé ─────────────────────────────────────────────────────────
 
 def test_catalogue_epuise_suffixe_sans_jamais_rendre_moins_que_demande():
-	"""`grande_boulangerie` n'a que 2 tournures × 10 toponymes génériques = 20 noms.
-	On en demande 60 : la fonction doit tenir sa promesse, jamais rendre 20."""
-	labels = enseignes.tirer_labels("grande_boulangerie", 60, "lieu:xxx", rand_fn=inerte)
-	assert len(labels) == 60
-	assert len(set(labels)) == 60
+	"""`grande_boulangerie` n'a que tournures × toponymes génériques noms nus.
+	On en demande trois fois plus : la fonction doit tenir sa promesse, jamais rendre moins."""
+	nus = len(enseignes.TOURNURES["grande_boulangerie"]) * len(enseignes.toponymes_de("lieu:xxx"))
+	labels = enseignes.tirer_labels("grande_boulangerie", nus * 3, "lieu:xxx", rand_fn=inerte)
+	assert len(labels) == nus * 3
+	assert len(set(labels)) == nus * 3
 
 
 def test_les_suffixes_partent_en_romain_puis_en_chiffres():
-	labels = enseignes.tirer_labels("grande_boulangerie", 21, "lieu:xxx", rand_fn=inerte)
-	assert labels[20].endswith(" II")
-	# 20 noms nus + 9 romains × 20 + le début des décimaux → le 201ᵉ est suffixé « 11 ».
-	longs = enseignes.tirer_labels("grande_boulangerie", 210, "lieu:xxx", rand_fn=inerte)
-	assert len(set(longs)) == 210
-	assert longs[200].endswith(" 11")
+	# Taille du catalogue relue, pas figée : tournures et toponymes s'enrichissent.
+	nus = len(enseignes.TOURNURES["grande_boulangerie"]) * len(enseignes.toponymes_de("lieu:xxx"))
+	labels = enseignes.tirer_labels("grande_boulangerie", nus + 1, "lieu:xxx", rand_fn=inerte)
+	assert labels[nus].endswith(" II")
+	# `nus` noms nus + 9 romains × `nus` + le début des décimaux → le suivant est suffixé « 11 ».
+	seuil = nus * (1 + len(enseignes._ROMAINS))
+	longs = enseignes.tirer_labels("grande_boulangerie", seuil + 10, "lieu:xxx", rand_fn=inerte)
+	assert len(set(longs)) == seuil + 10
+	assert longs[seuil].endswith(" 11")
 
 
 def test_le_suffixage_respecte_aussi_exclus():
 	deja = {"Le Grand Fournil du Marché II"}
+	nus = len(enseignes.TOURNURES["grande_boulangerie"]) * len(enseignes.toponymes_de("lieu:xxx"))
 	labels = enseignes.tirer_labels(
-		"grande_boulangerie", 40, "lieu:xxx", exclus=deja, rand_fn=inerte)
-	assert len(set(labels)) == 40
+		"grande_boulangerie", nus * 2, "lieu:xxx", exclus=deja, rand_fn=inerte)
+	assert len(set(labels)) == nus * 2
 	assert not (set(labels) & deja)
 
 
