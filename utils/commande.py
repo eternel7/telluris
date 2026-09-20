@@ -137,8 +137,9 @@ def matiere_acceptee(lieu_doc: dict, item_doc: dict) -> bool:
 	"""Cette matière entre-t-elle dans le tour de main de la maison ? Même critère que ce
 	qu'elle achète au joueur (`besoins_lieu` : id d'item ou sous-catégorie). Un cirier refuse
 	donc le métal, un armurier refuse la cire — §10 du cahier des charges."""
-	if not item_doc:
+	if not item_doc or "fabrication" not in item_doc:
 		return False
+	
 	item_id = item_doc.get("item") or item_doc.get("_id")
 	return any(correspond(item_id, item_doc, cle) for cle in marche.besoins_lieu(lieu_doc))
 
