@@ -588,7 +588,7 @@ SCRIPTORIUM_LIVRE_ENCRE: int = 2
 # pour tester sans attendre). PEREMPTION : au-delà, la commande non retirée est perdue —
 # l'artisan a écoulé la pièce. Contrôlé PARESSEUSEMENT (le statut est dérivé de l'horloge,
 # aucun tick de fond), comme tout ce qui expire dans le jeu.
-COMMANDE_DELAI_SECONDES: int = 1800
+COMMANDE_DELAI_SECONDES: int = 600
 COMMANDE_PEREMPTION_SECONDES: int = 259200   # trois jours
 # Matières distinctes qu'une variante peut combiner. Borne la combinatoire : chaque
 # combinaison inédite crée un doc item ET un doc recette permanents.
