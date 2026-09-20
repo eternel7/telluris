@@ -354,7 +354,7 @@ async def get_creation_options(
 		"sous_categories": sorted(sous_categories),
 		# Ce que chaque case à cocher « capacité » du formulaire doit savoir : le tag
 		# qu'elle pose, et les catégories qui l'accordent d'office (case grisée).
-		"capacites": capacites.CAPACITES,
+		"capacites": capacites.catalogue(),
 		"images": _lister_images(TOWNS_IMAGES_PATH),
 		"portraits": _lister_images(PNJ_IMAGES_PATH),
 		"pnj": sorted(

@@ -1966,6 +1966,23 @@
 				title="Trier l'achat par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
 		</div>
 		<div class="sh-inv-scroll sh-scroll" id="buy-scroll"><ul id="buy-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+		{# ── Commande ──────────────────────────────────────────────────────────────
+		   Servie par `est_commande`, DÉRIVÉ côté serveur de « ce lieu a-t-il des recettes ? ».
+		   Un comptoir de revente n'a donc pas cette section du tout — il n'a rien à fabriquer.
+		   ⚠️ `est_sur_mesure` est un flag SÉPARÉ : il n'ouvre que le bouton « Sur mesure ».
+		   Chez un artisan ordinaire ce bouton ne doit pas exister, sans quoi l'interface
+		   laisserait croire qu'on peut y faire inventer une pièce. #}
+		{% if est_commande %}
+		<div style="display:flex;align-items:center;justify-content:space-between;margin:1rem 0 0">
+			<h2 style="margin:0">🛠️ Commande</h2>
+			<button type="button" id="cmd-sort-btn" class="sh-drop-btn" onclick="cycleCmdSort()"
+				title="Trier le catalogue par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+		</div>
+		<p class="cmd-aide">Ce que l'artisan sait faire, même sans exemplaire en vitrine. Prix façon comprise, sans rien apporter — ce que vous fournissez le fait baisser.</p>
+		<div class="sh-inv-scroll sh-scroll" id="cmd-scroll"><ul id="cmd-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+		<h2 style="margin:1rem 0 0">📋 Vos commandes</h2>
+		<div class="sh-inv-scroll sh-scroll" id="cmd-encours-scroll"><ul id="cmd-encours-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+		{% endif %}
 	</div><!-- /#sell-panel -->
 	<div id="quetes-panel" class="panel-hidden panel-frame board-panel" aria-label="Tableau des quêtes de la guilde">
 		<div class="sell-topbar">
@@ -2546,6 +2563,38 @@
 		#max-bonus-overlay.clauses-hidden { display: none; }
 		#max-bonus-overlay .item-detail-card { max-width: 460px; }
 		.max-bonus-cap { color: #b9a3ee; font-size: 1.1rem; margin: .2rem 0 .8rem; }
+		/* ── Commande auprès d'un artisan ──
+		   La troisième liste du panneau marchand réutilise .sh-inv-item / .sell-prix : c'est
+		   le même objet marchand, seule l'action change. */
+		.cmd-aide { color: var(--muted); font-size: .85rem; font-style: italic; margin: .2rem 0 .4rem; }
+		.cmd-etat { font-size: .82em; white-space: nowrap; opacity: .85; }
+		.cmd-etat.pret { color: var(--gold2, var(--gold, #d8b46a)); opacity: 1; }
+		.cmd-etat.perdu { color: #c98b8b; }
+		/* ── Sur mesure ──
+		   Encore le même calque que les clauses : décision bloquante, et refermer sans
+		   valider ne doit RIEN engager (ni matière prélevée, ni bourse débitée). */
+		#sur-mesure-overlay {
+			position: fixed; inset: 0; z-index: 9400;
+			background: rgba(10, 8, 5, .78);
+			display: flex; align-items: center; justify-content: center; padding: 1rem;
+		}
+		#sur-mesure-overlay.clauses-hidden { display: none; }
+		#sur-mesure-overlay .item-detail-card { max-width: 520px; }
+		.sm-matiere {
+			display: flex; align-items: center; gap: .6rem; width: 100%;
+			padding: .45rem .6rem; margin-bottom: .35rem; cursor: pointer;
+			background: rgba(255,255,255,.04); color: inherit; text-align: left;
+			border: 1px solid rgba(216,180,106,.35); border-radius: 6px;
+		}
+		.sm-matiere:hover { background: rgba(216,180,106,.14); }
+		.sm-matiere.choisie { border-color: var(--gold2, var(--gold, #d8b46a)); background: rgba(216,180,106,.18); }
+		.sm-matiere-nom { flex: 1; }
+		.sm-apporte { font-size: .82em; opacity: .85; white-space: nowrap; }
+		.sm-liste { max-height: 40vh; overflow-y: auto; margin: .2rem 0 .8rem; }
+		.sm-devis { border-top: 1px solid rgba(74,74,90,.4); padding-top: .5rem; margin-top: .4rem; }
+		.sm-devis-ligne { display: flex; justify-content: space-between; font-size: .88em; padding: 2px 0; }
+		.sm-devis-total { font-weight: bold; color: var(--gold2, var(--gold, #d8b46a)); }
+		.sm-manque { color: #c98b8b; font-size: .85rem; font-style: italic; }
 	</style>
 	<div id="pnj-panel" class="panel-hidden panel-frame board-panel" aria-label="Dialogue avec un personnage">
 		<div class="sell-topbar">
@@ -2641,6 +2690,16 @@
 			<div id="max-bonus-body"></div>
 		</div>
 	</div><!-- /#max-bonus-overlay -->
+	{# Sur mesure : ✕ / Échap / clic hors carte = ANNULER sans rien engager. L'appel est en
+	   attente d'une promesse (le bouton « Commander » de la liste est désactivé le temps du
+	   choix) : l'annulation doit la RÉSOUDRE À NULL, sinon le bouton reste mort pour toujours. #}
+	<div id="sur-mesure-overlay" class="clauses-hidden" aria-label="Commander sur mesure"
+		 onclick="if(event.target===this)closeSurMesure()">
+		<div class="item-detail-card">
+			<button class="item-detail-close" onclick="closeSurMesure()" title="Annuler">✕</button>
+			<div id="sur-mesure-body"></div>
+		</div>
+	</div><!-- /#sur-mesure-overlay -->
 <script src="{{ url_for('scripts', path='nav.js') }}"></script>
 {# ⚠️ APRÈS nav.js : `pasAutoriseLocal` y prend `navAllows`. Cette page-ci n'appelle que
    `majFleches`/`verrouillerFleches` (son accès lui est RÉSOLU PAR LE SERVEUR), mais le
@@ -3490,6 +3549,10 @@ document.addEventListener('keydown', e => {
 	if (contratOv && !contratOv.classList.contains('clauses-hidden')) { _contratLaisser(); return; }
 	const cibleAllie = document.getElementById('cible-allie-overlay');
 	if (cibleAllie && !cibleAllie.classList.contains('clauses-hidden')) { closeCibleAllie(); return; }
+	// ⚠️ Le sur-mesure attend une promesse, comme le choix de cible : Échap doit la RÉSOUDRE
+	// (à null), sinon la commande reste suspendue et son bouton désactivé pour toujours.
+	const surMesure = document.getElementById('sur-mesure-overlay');
+	if (surMesure && !surMesure.classList.contains('clauses-hidden')) { closeSurMesure(); return; }
 	// Dépassement du max racial : rien n'est en attente, Échap se contente de refermer —
 	// le bonus n'est engagé que par le bouton « Dépasser » de la carte.
 	const maxBonus = document.getElementById('max-bonus-overlay');
@@ -5677,7 +5740,7 @@ function updatePurse(purse) {
 
 // État relation/blocage du marchand courant. `blocDeadline` = horloge client absolue
 // (on convertit `bloque_jusqu`−`now` serveur en délai relatif pour éviter les décalages).
-let MARCHAND = { relation: 50, blocDeadline: 0 };
+let MARCHAND = { relation: 50, blocDeadline: 0, cmdMatieres: [], cmdMatieresMax: 1 };
 
 function isMarchBlocked()  { return MARCHAND.blocDeadline > Date.now(); }
 function blocRemainingMin(){ return Math.max(1, Math.ceil((MARCHAND.blocDeadline - Date.now()) / 60000)); }
@@ -6217,12 +6280,12 @@ async function marchanderItem(index, itemId, sens, compagnonId, btn) {
 // (le bouton, lui, disparaît avec `game-container`).
 let _sellLoading = false;
 function _sellChargement() {
-	['sell-list', 'buy-list'].forEach(id => {
+	['sell-list', 'buy-list', 'cmd-list', 'cmd-encours-list'].forEach(id => {
 		const el = document.getElementById(id);
 		if (el) el.innerHTML = '<li class="sell-empty">Chargement…</li>';
 	});
 	// Pas encore de liste à faire défiler : l'ombre de bas de cadre n'aurait rien à annoncer.
-	['sell-scroll', 'buy-scroll'].forEach(id => {
+	['sell-scroll', 'buy-scroll', 'cmd-scroll', 'cmd-encours-scroll'].forEach(id => {
 		const el = document.getElementById(id);
 		if (el) el.classList.remove('scrollable');
 	});
@@ -6247,6 +6310,10 @@ async function openSellPanel() {
 		updatePurse(data.purse);
 		renderSellList(data);
 		renderBuyList(data);
+		// Second appel, non bloquant : le comptoir de commande est une section à part
+		// (elle n'existe que si `est_commande`) et ne doit pas retarder l'affichage du
+		// rayon. `chargerCommandes` avale ses propres erreurs.
+		chargerCommandes();
 	} catch(err) {
 		console.error('Erreur quotes', err);
 		showToast('Le marchand ne répond pas.');
@@ -6258,6 +6325,7 @@ function closeSellPanel() {
 	// ⚠️ AVANT de retirer `panel-hidden` : le rendu différé écrit dans le sac / le sol /
 	// la silhouette, qui redeviennent visibles juste après (cf. _renderInventaireDiffere).
 	_viderRenduInventaireDiffere();
+	_arreterCmdTimer();   // plus rien à décompter une fois le comptoir refermé
 	document.getElementById('game-container').classList.remove('panel-hidden');
 	document.getElementById('sell-panel').classList.add('panel-hidden');
 	window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -6300,6 +6368,295 @@ async function buyItem(itemId, btn) {
 		renderBuyList(data);
 		if (data.achete) showToast('Acheté : ' + data.achete.nom + ' (' + formatPrix(data.achete.prix) + ')' + _fideliteSuffixe(data));
 	} catch(err) { console.error('Erreur achat', err); if (btn) btn.disabled = false; }
+}
+
+// ── Commande auprès d'un artisan ──────────────────────────────────────────────
+// Troisième section du panneau marchand, servie par `est_commande` (DÉRIVÉ côté serveur :
+// « ce lieu a-t-il des recettes ? »). `est_sur_mesure` est un flag SÉPARÉ, qui n'ouvre que
+// le bouton « ✨ Sur mesure » — chez un artisan ordinaire il n'existe pas du tout.
+//
+// ⚠️ Le client ne reconstruit JAMAIS un état (Convention §10) : chaque endpoint mutant
+// renvoie `commandes`, `catalogue`, `matieres`, `inventaire_payload`, `achetables`,
+// `vendables` et `purse`, et `_appliquerCommande` les repose tels quels. Le rayon peut
+// avoir bougé (matières achetées pour la commande), d'où les deux listes du marchand.
+const CMD_ACTIVE = {{ 'true' if est_commande else 'false' }};
+const CMD_SUR_MESURE = {{ 'true' if est_sur_mesure else 'false' }};
+let _cmdSort = _loadSort('telluris.play.cmd_sort');
+let _cmdTimer = null;
+function cycleCmdSort() {
+	_cmdSort = _cycleSort(_cmdSort);
+	_saveSort('telluris.play.cmd_sort', _cmdSort);
+	renderCmdCatalogue({ catalogue: MARCHAND.catalogue });
+}
+
+const CMD_LIBELLES = {
+	en_attente_materiaux: 'matières manquantes',
+	en_fabrication: 'en fabrication',
+	terminee: 'prête à retirer',
+	expiree: 'perdue',
+	livree: 'livrée',
+	annulee: 'annulée',
+	impossible: 'impossible',
+};
+
+function renderCmdCatalogue(data) {
+	const list = document.getElementById('cmd-list');
+	if (!list) return;
+	const scrollEl = document.getElementById('cmd-scroll');
+	const cat = MARCHAND.catalogue = data.catalogue || [];
+	_updateSortBtn('cmd-sort-btn', _cmdSort);
+	if (!cat.length) {
+		list.innerHTML = '<li class="sell-empty">Cet artisan ne prend pas de commande.</li>';
+		if (scrollEl) scrollEl.classList.remove('scrollable');
+		return;
+	}
+	list.innerHTML = _sortedOrder(cat, _cmdSort).map(idx => {
+		const v = cat[idx];
+		// ⚠️ L'item_id voyage en data-* lu en JS, JAMAIS dans un onclick="…('${x}')" :
+		// une apostrophe échappée en &#39; y casserait la chaîne JS (Convention §9).
+		// Deux conditions, et elles ne disent pas la même chose : `CMD_SUR_MESURE` = cette
+		// MAISON sait inventer ; `v.sur_mesure` = cet OBJET se façonne (une matière remise au
+		// catalogue par le tag `commandable` reste une matière). Le serveur tranche les deux,
+		// le client n'en redérive aucune.
+		const sm = (CMD_SUR_MESURE && v.sur_mesure)
+			? `<button class="sh-drop-btn" data-item="${escapeHtml(v.item_id)}" onclick="commanderSurMesure(this)" title="Choisir des matières">✨ Sur mesure</button>`
+			: '';
+		return `<li class="sh-inv-item">
+		<span class="sh-inv-open">${v.icon || '🛠️'}</span>
+		<span class="sh-inv-name">${escapeHtml(v.nom || '—')}</span>
+		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
+		<span class="sell-prix">${formatPrix(v.prix)}</span>
+		<span class="sh-inv-actions">
+			<button class="sh-drop-btn" data-item="${escapeHtml(v.item_id)}" onclick="commanderItem(this)" title="Commander">Commander</button>
+			${sm}
+		</span>
+	</li>`;
+	}).join('');
+	if (scrollEl) scrollEl.classList.toggle('scrollable', cat.length > INV_VISIBLE);
+}
+
+function renderCmdEnCours(data) {
+	const list = document.getElementById('cmd-encours-list');
+	if (!list) return;
+	const scrollEl = document.getElementById('cmd-encours-scroll');
+	const cmds = MARCHAND.commandes = data.commandes || [];
+	if (!cmds.length) {
+		list.innerHTML = '<li class="sell-empty">Aucune commande en cours.</li>';
+		if (scrollEl) scrollEl.classList.remove('scrollable');
+		_arreterCmdTimer();
+		return;
+	}
+	const now = typeof data.now === 'number' ? data.now : Math.floor(Date.now() / 1000);
+	list.innerHTML = cmds.map(c => {
+		const pret = c.statut === 'terminee';
+		const perdu = c.statut === 'expiree' || c.statut === 'impossible';
+		// Deadline LOCALE : l'horloge du navigateur peut dériver de celle du serveur —
+		// même précaution que les chronos de quête et le blocage de marchandage.
+		const deadline = (c.statut === 'en_fabrication')
+			? ` data-deadline="${_deadlineLocale(now + c.pret_dans, now)}"` : '';
+		const etat = (c.statut === 'en_fabrication')
+			? '⏳ ' + _fmtRestant(c.pret_dans * 1000)
+			: (CMD_LIBELLES[c.statut] || c.statut);
+		const manque = (c.manquantes || []).length
+			? `<span class="sm-manque"> — il manque ${c.manquantes.map(m => escapeHtml(m.cle) + ' ×' + m.quantite).join(', ')}</span>` : '';
+		// Une commande en attente n'a RIEN prélevé ni débité : l'annuler ne coûte rien, et
+		// « Relancer » la reprend une fois les matières réunies (§7 cas C).
+		const attente = c.statut === 'en_attente_materiaux';
+		const relancer = attente
+			? `<button class="sh-drop-btn" data-cmd="${escapeHtml(c.id)}" onclick="relancerCommande(this)" title="Reprendre la commande">Relancer</button>` : '';
+		const actions = pret
+			? `<button class="sh-drop-btn" data-cmd="${escapeHtml(c.id)}" onclick="retirerCommande(this)" title="Retirer">Retirer</button>`
+			: relancer + `<button class="sh-drop-btn" data-cmd="${escapeHtml(c.id)}" onclick="annulerCommande(this)" title="${(perdu || attente) ? 'Écarter' : 'Annuler (matières et prix perdus)'}">${(perdu || attente) ? 'Écarter' : 'Annuler'}</button>`;
+		return `<li class="sh-inv-item">
+		<span class="sh-inv-open">${c.icon || '🛠️'}</span>
+		<span class="sh-inv-name">${escapeHtml(c.nom || '—')}${c.sur_mesure ? ' ✨' : ''}${manque}</span>
+		<span class="cmd-etat${pret ? ' pret' : ''}${perdu ? ' perdu' : ''}"${deadline}>${etat}</span>
+		<span class="sh-inv-actions">${actions}</span>
+	</li>`;
+	}).join('');
+	if (scrollEl) scrollEl.classList.toggle('scrollable', cmds.length > INV_VISIBLE);
+	_demarrerCmdTimer();
+}
+
+// Un seul intervalle, arrêté dès qu'il n'y a plus rien à décompter. Quand une commande
+// arrive à échéance on refait UN fetch : le statut est dérivé côté serveur, c'est lui qui
+// décide, pas le compte à rebours affiché.
+function _tickCmdTimers() {
+	const spans = document.querySelectorAll('#cmd-encours-list .cmd-etat[data-deadline]');
+	if (!spans.length) { _arreterCmdTimer(); return; }
+	let echu = false;
+	spans.forEach(sp => {
+		const reste = Number(sp.dataset.deadline) - Date.now();
+		if (reste <= 0) { echu = true; return; }
+		sp.textContent = '⏳ ' + _fmtRestant(reste);
+	});
+	if (echu) { _arreterCmdTimer(); chargerCommandes(); }
+}
+function _demarrerCmdTimer() {
+	if (!_cmdTimer && document.querySelector('#cmd-encours-list .cmd-etat[data-deadline]')) {
+		_cmdTimer = setInterval(_tickCmdTimers, 1000);
+	}
+}
+function _arreterCmdTimer() {
+	if (_cmdTimer) { clearInterval(_cmdTimer); _cmdTimer = null; }
+}
+
+// Chokepoint de resynchronisation : tout ce qu'un endpoint de commande renvoie est reposé
+// ici, y compris les deux listes du marchand (le rayon a pu bouger).
+function _appliquerCommande(data) {
+	if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+	if (data.purse) updatePurse(data.purse);
+	if (data.vendables) renderSellList(data);
+	if (data.achetables) renderBuyList(data);
+	renderCmdCatalogue(data);
+	renderCmdEnCours(data);
+	if (data.message) showToast(data.message);
+}
+
+async function chargerCommandes() {
+	if (!CMD_ACTIVE) return;
+	try {
+		const res = await fetch('api/commande');
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		MARCHAND.cmdMatieres = data.matieres || [];
+		MARCHAND.cmdMatieresMax = data.matieres_max || 1;
+		renderCmdCatalogue(data);
+		renderCmdEnCours(data);
+	} catch (err) { console.error('Erreur commande', err); }
+}
+
+async function _posterCommande(url, body, btn) {
+	if (btn) btn.disabled = true;  // anti double-clic pendant le fetch
+	try {
+		const res = await fetch(url, {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(body)
+		});
+		const data = await res.json();
+		// Réactivé sur erreur SEULEMENT : le succès reconstruit la liste, donc le bouton.
+		if (!res.ok) { showToast('Erreur : ' + data.detail); if (btn) btn.disabled = false; return null; }
+		_appliquerCommande(data);
+		return data;
+	} catch (err) { console.error('Erreur commande', err); if (btn) btn.disabled = false; return null; }
+}
+
+function commanderItem(btn) {
+	return _posterCommande('api/commande/passer', { item_id: btn.dataset.item }, btn);
+}
+function retirerCommande(btn) {
+	return _posterCommande('api/commande/retirer', { commande_id: btn.dataset.cmd }, btn);
+}
+function annulerCommande(btn) {
+	return _posterCommande('api/commande/annuler', { commande_id: btn.dataset.cmd }, btn);
+}
+function relancerCommande(btn) {
+	return _posterCommande('api/commande/relancer', { commande_id: btn.dataset.cmd }, btn);
+}
+
+// ── L'overlay « sur mesure » ──────────────────────────────────────────────────
+// Décision BLOQUANTE : ✕ / Échap / clic sur le backdrop = annuler sans rien engager, et la
+// promesse est RÉSOLUE À NULL — sinon la commande resterait suspendue et son bouton
+// désactivé pour toujours (Convention §8).
+let _smResolve = null;
+let _smEtat = { itemId: null, choisies: [] };
+
+function closeSurMesure() {
+	document.getElementById('sur-mesure-overlay').classList.add('clauses-hidden');
+	if (_smResolve) { const r = _smResolve; _smResolve = null; r(null); }
+}
+
+function _smValider() {
+	document.getElementById('sur-mesure-overlay').classList.add('clauses-hidden');
+	if (_smResolve) { const r = _smResolve; _smResolve = null; r(_smEtat.choisies.slice()); }
+}
+
+function _smToggle(btn) {
+	const id = btn.dataset.item;
+	const i = _smEtat.choisies.indexOf(id);
+	if (i >= 0) _smEtat.choisies.splice(i, 1);
+	else if (_smEtat.choisies.length >= MARCHAND.cmdMatieresMax) {
+		showToast('Pas plus de ' + MARCHAND.cmdMatieresMax + ' matières dans une même pièce.');
+		return;
+	} else _smEtat.choisies.push(id);
+	_smRender();
+	_smRafraichirDevis();
+}
+
+function _smRender() {
+	const mats = MARCHAND.cmdMatieres || [];
+	const cat = (MARCHAND.catalogue || []).find(c => c.item_id === _smEtat.itemId);
+	document.getElementById('sur-mesure-body').innerHTML =
+		`<h3 style="margin:.1rem 0 .2rem">✨ ${escapeHtml((cat && cat.nom) || 'Sur mesure')}</h3>
+		<p class="cmd-aide">Jusqu'à ${MARCHAND.cmdMatieresMax} matières. Ce que vous avez dans vos sacs est pris d'abord ; le reste est acheté à l'artisan.</p>
+		<div class="sm-liste">${
+			mats.length ? mats.map(m => `<button type="button" class="sm-matiere${_smEtat.choisies.includes(m.item_id) ? ' choisie' : ''}"
+				data-item="${escapeHtml(m.item_id)}" onclick="_smToggle(this)">
+				<span>${m.icon || '🧱'}</span>
+				<span class="sm-matiere-nom">${escapeHtml(m.nom)}</span>
+				<span class="sm-apporte">${escapeHtml(m.apporte || '—')}</span>
+			</button>`).join('')
+			: '<p class="sm-manque">Cette maison n\'a aucune matière en rayon pour le moment.</p>'
+		}</div>
+		<div class="sm-devis" id="sm-devis">${_smDevisVide()}</div>
+		<div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.6rem">
+			<button class="sh-drop-btn" onclick="closeSurMesure()">Annuler</button>
+			<button class="sh-drop-btn" id="sm-valider" onclick="_smValider()" ${_smEtat.choisies.length ? '' : 'disabled'}>Commander</button>
+		</div>`;
+}
+
+function _smDevisVide() {
+	return '<p class="cmd-aide">Choisissez une matière pour voir le devis.</p>';
+}
+
+// Le devis se rafraîchit à chaque matière ajoutée. ⚠️ `/api/commande/devis` n'ÉCRIT RIEN et
+// ne crée aucun doc : c'est ce qui permet d'explorer les combinaisons sans laisser derrière
+// soi une traînée de définitions que personne n'a commandées.
+async function _smRafraichirDevis() {
+	const box = document.getElementById('sm-devis');
+	if (!box) return;
+	if (!_smEtat.choisies.length) { box.innerHTML = _smDevisVide(); return; }
+	box.innerHTML = '<p class="cmd-aide">Calcul du devis…</p>';
+	try {
+		const res = await fetch('api/commande/devis', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({ item_id: _smEtat.itemId, matieres: _smEtat.choisies })
+		});
+		const data = await res.json();
+		if (!res.ok) { box.innerHTML = `<p class="sm-manque">${escapeHtml(data.detail || 'Devis impossible.')}</p>`; return; }
+		const d = data.devis || {};
+		const ligne = (l, v) => `<div class="sm-devis-ligne"><span>${l}</span><span>${v} cu</span></div>`;
+		const manque = (data.manquantes || []).length
+			? `<p class="sm-manque">Il manque ${data.manquantes.map(m => escapeHtml(m.cle) + ' ×' + m.quantite).join(', ')} — la commande sera mise en attente.</p>` : '';
+		// Les ingrédients que l'artisan met de lui-même ne coûtent rien de plus (ils sont
+		// déjà dans le prix de la pièce) : on les nomme quand même, sinon le devis a l'air
+		// d'oublier la moitié de la recette.
+		const fourni = (data.atelier || []).length
+			? `<p class="cmd-aide">Fourni par l'artisan : ${data.atelier.map(a => escapeHtml(a.nom) + ' ×' + a.quantite).join(', ')}.</p>` : '';
+		box.innerHTML =
+			`<div class="sm-devis-ligne sm-devis-total"><span>${escapeHtml(data.nom || '')}</span><span>${formatPrix(data.total)}</span></div>`
+			+ ligne('Pièce', d.prix_base)
+			+ (d.credit_matieres ? ligne('Matières apportées', '− ' + d.credit_matieres) : '')
+			+ (d.cout_matieres ? ligne('Matières achetées', d.cout_matieres) : '')
+			+ ligne('Façon', d.cout_fabrication)
+			+ (d.supplement_complexite ? ligne('Complexité', d.supplement_complexite) : '')
+			+ fourni + manque;
+	} catch (err) {
+		console.error('Erreur devis', err);
+		box.innerHTML = '<p class="sm-manque">L\'artisan ne répond pas.</p>';
+	}
+}
+
+async function commanderSurMesure(btn) {
+	if (btn) btn.disabled = true;
+	_smEtat = { itemId: btn.dataset.item, choisies: [] };
+	_smRender();
+	document.getElementById('sur-mesure-overlay').classList.remove('clauses-hidden');
+	const choisies = await new Promise(resolve => { _smResolve = resolve; });
+	// Annulation : rien n'a été engagé, mais le bouton DOIT redevenir cliquable.
+	if (!choisies || !choisies.length) { if (btn) btn.disabled = false; return; }
+	await _posterCommande('api/commande/passer',
+		{ item_id: _smEtat.itemId, matieres: choisies.map(id => ({ item: id, quantite: 1 })) }, btn);
 }
 
 // ── Tableau des quêtes (guilde) ───────────────────────────────────────

@@ -1,6 +1,6 @@
 ---
 name: telluris-economie
-description: Items, weight, currency and the market — inventory item references & weight, carry capacity/overload, currency tiers, weapon/raw-material content rules, haggling/relation-driven pricing, higher-tier shops merging categories (LIEU_CATEGORIES_FUSION), geographic recipe scope (lieu_portee) and the city goods flow between workshops (flux_marchand) (utils/characters.py, utils/marche.py, routers/user.py market endpoints). Load when working on inventory weight, the shop/market, pricing, recipes, the workshop tick, or crafting materials.
+description: Items, weight, currency and the market — inventory item references & weight, carry capacity/overload, currency tiers, weapon/raw-material content rules, haggling/relation-driven pricing, higher-tier shops merging categories (LIEU_CATEGORIES_FUSION), geographic recipe scope (lieu_portee), the city goods flow between workshops (flux_marchand), and ordering from a craftsman — made-to-order catalogue pieces and generated custom variants with their `sur_commande` recipes (utils/characters.py, utils/marche.py, utils/commande.py, utils/fabrication.py, routers/user.py market endpoints, routers/commande.py). Load when working on inventory weight, the shop/market, pricing, recipes, the workshop tick, crafting materials, or placing/customising an order at a shop.
 ---
 
 ### Références d'items & poids
@@ -76,4 +76,50 @@ Le **seul transfert entre deux `lieu:*` hors quête de transport**. Pool `flux_m
 - `cles_consommees()` = **seul index inverse** du marché ; pool plafonné par clé à `STOCK_CIBLE_DEFAUT` (pas de second réservoir non borné) — ce qui ne rentre pas reste en rayon, où les PNJ le reprendront.
 - ⚠️ `puiser_flux` prend une **PART** de la ligne (`FLUX_PART_MAX`, plancher d'une unité), pas le lot entier : le pool est un bien commun et trois ateliers peuvent réclamer le même cuir.
 - ⚠️ **`carcasse` ne circule jamais** : aucun doc `item:carcasse`, et la clé n'est écrite nulle part — `_matieres_entrantes` décompose la bête **À LA VENTE** (les 16 recettes `carcasse → X` de la boucherie ne cuisent jamais, elles servent de **table de quantités** à `convertir_apres_achat`). C'est le seul point d'entrée de l'aventurier, et le seul verrou de l'économie : carcasse accordée, les 614 recettes du monde cuisent.
+
+
+### Commande auprès d'un artisan
+`utils/commande.py` (cycle, sourçage, devis) + `utils/fabrication.py` (variantes) + `routers/commande.py` + 3ᵉ section de `#sell-panel`. Verrouillé par `tests/test_commande.py`, `tests/test_fabrication.py`, `tests/test_sur_commande_index.py`.
+
+**DEUX capacités, indépendantes** — les confondre laisserait n'importe quelle échoppe créer des docs permanents :
+
+| | qui | dérivé de |
+|---|---|---|
+| **prendre une commande** (refaire son catalogue, vitrine vide) | tout atelier | son **catalogue épuré** n'est pas vide — ni catégorie ni tag, donc **hors de `capacites.CAPACITES`** |
+| **fabriquer sur mesure** (variante inédite) | grande maison | `categorie ∈ LIEU_CATEGORIES_FUSION` **OU** tag `sur_mesure` — 6ᵉ entrée du catalogue, `categories` relue par `capacites.categories_de` |
+
+⇒ la trichotomie petit magasin / artisan / grand magasin **sans authorer un doc**. Flags de `/play` : `est_commande` (la section) et `est_sur_mesure` (le seul bouton « ✨ Sur mesure »).
+
+**⚠️ Le catalogue écarte les MATIÈRES et DEMI-PRODUITS** — `marche.item_commandable`, `categorie ∈ `**`CATEGORIES_INTERMEDIAIRES`**` = {composant, metal}` (variable de monde). L'Arsenal de Lutèce proposait « Hampe », « Cuir », « Acier plissé », « Manche », « Ligatures », « Cordes d'arc » à côté de ses 133 armes : 144 → 138 lignes, 2757 → 2268 sur le monde, 121 → **106 boutiques** prenant commande (11 boucheries + 4 tanneries ne produisent QUE des matières et perdent leur section — d'où `lieu_prend_commandes` = « catalogue épuré non vide » et non « a des recettes »).
+
+- **Dérogation** = tag `commandable` sur le doc item. Aucun posé à la livraison. ⚠️ Il rouvre la **commande**, **jamais le sur-mesure** : `marche.est_intermediaire` (pur, doc en main, sans dérogation) reste le prédicat du façonnage. Confondre les deux prédicats laisserait façonner un lingot.
+- ⚠️ **Le mémo `_commandable_memo` est vidé par `reset_prix_cache()`** — sans quoi poser le tag depuis `/admin` resterait sans effet jusqu'au redémarrage. `item` est dans `main._TYPES_PRIX`, donc l'écriture déclenche déjà le vidage : la dérogation prend effet à chaud.
+- ⚠️ **Classement par CATÉGORIE, pas par « consommé par une recette »**, mesuré et écarté : `item_sous_categorie` retombe sur `categorie`, donc une recette consommant la clé `arme` faisait passer Arc long, Plumbata, armure de cuir et harnais pour des intermédiaires. Au dump du 20/09 les 438 items `composant`/`metal` sont **tous** non équipables (`slots` vide) — la catégorie classe juste.
+
+**⚠️ Le piège central — `sur_commande`.** Une recette de variante est un doc `recette:*` ordinaire à un drapeau près. Filtrée aux **consommateurs**, jamais à `_all_recettes` :
+- `_get_recipe_map` la **garde** (le prix de la variante doit dériver de ses intrants) ;
+- `_get_marche_map` et `lieu_recettes` la **sautent**.
+
+Sans cette coupure, rien ne lève : toutes les boutiques de la catégorie se mettent à fabriquer et exposer la pièce unique d'un joueur, chacun de ses intrants devient une feuille auto-approvisionnée donc vendue au comptoir, et le recalcul global `feuilles = inputs − outputs` peut créer une **fausse feuille**. Corollaire assumé : la variante sort de `produits_lieu`, d'où le repli de `lieu_produit` sur `fabrication.base_item` — sinon une pièce commandée ne se revendrait nulle part.
+
+**Le prix — ne JAMAIS refacturer les ingrédients.** `prix_base` = `prix_marche(…, "achat", stock=0, …)` (l'objet n'est pas en vitrine : c'est la situation même), et il contient **déjà** le coût propagé des ingrédients (× `MARGE_TRANSFO`). D'où deux traitements :
+- ingrédient de la RECETTE apporté par le joueur → **remise** (`credit_matieres`, plafonnée à `prix_base` — sans ce plafond : acheter du fer au comptoir, le rapporter, repartir avec l'épée pour 1 cu) ;
+- matière SUR MESURE → **supplément** (`cout_matieres`), elle n'est dans le prix d'aucun objet de base.
+
+`total = prix_base − remise + matières sur mesure + façon + complexité`. La façon (`COMMANDE_FACON_PART`) se paie même quand le client apporte tout ; la complexité ne court qu'à partir de la 2ᵉ matière. ⚠️ `COMMANDE_MARGE` est **distincte de `MARGE_TRANSFO`** : à ×5 par étape, la variante d'un objet déjà transformé coûterait ×25. La variante porte une **`valeur` explicite figée** à la création, ce qui coupe la propagation (`cout_production_cuivre` traite `valeur` comme autoritative).
+
+**Sourçage (§7), DEUX passes à `retenus` partagés** (sans partage, le même lingot serait crédité *et* fourni gratuitement) :
+- ingrédients de recette → sac du groupe, puis **`stock_matieres` de l'artisan** puis son rayon, sans rien facturer. ⚠️ C'est la seule lecture de la réserve : l'artisan ne la VEND pas (ce serait l'interdit du § Armement), il la CONSOMME comme le ferait son tick. Sans elle, **65 %** du catalogue du monde naîtrait `en_attente_materiaux` — les intermédiaires (cuir, tendons, os…) vivent en réserve, pas en vitrine ; avec elle, 46 % restent en attente, ce qui est la rareté réelle du contenu (`carcasse`, `Plume_d_oie`, `cuir`).
+- matières sur mesure → sac, puis **`stock_vente` seulement**, au prix du marché.
+- introuvable ⇒ `en_attente_materiaux`, rien n'est prélevé ni débité ; `POST /commande/relancer` re-résout **tout depuis zéro** (prix et stocks ont bougé) et remplace l'entrée.
+
+⚠️ **Appariement d'une clé de recette = `commande.correspond`**, source unique : id, **ou** sous-catégorie, **ou** `marche.matiere_item_id(cle) == item_id`. Le troisième n'est pas du zèle — `item:argent` porte `sous_categorie: "metaux_precieux"` alors que les 17 recettes d'armurerie le désignent par la clé `argent`.
+
+**Cycle de vie** : `en_attente_materiaux` → `payee` → (`en_fabrication` → `terminee` → `expiree`) → `livree` / `annulee` / `impossible`. ⚠️ Les trois du milieu sont **DÉRIVÉS de l'horloge** (`statut(cmd, now)` lit `pret_at`) : aucun tick de fond, aucun des 5 sites de `traiter_expirations` touché. La liste vit **sur le doc personnage** — prélèvement et inscription dans la MÊME mutation, donc le même `save_doc` : double consommation et double fabrication impossibles sans transaction inter-documents. ⚠️ `purger_commandes` s'appelle **AVANT** le save, sinon la liste nettoyée ne vit qu'en mémoire ; une commande `expiree` n'est pas balayée (le joueur doit voir ce qu'il a perdu).
+
+**Variantes** : `signature()` normalise les matières (agrégées par id, triées) puis `sha1` — ⚠️ pas `hash()`, salé par processus. Même combinaison ⇒ même `item:<base>_<sig8>` ⇒ **une définition, N exemplaires**. `assurer_variante` ne retouche JAMAIS un doc existant et lève sur un `_id` occupé par autre chose (un PUT complet l'écraserait). L'exemplaire reste une **référence d'inventaire** enrichie (`fabrique_par`, `commande_at`), jamais un doc.
+
+**Ce qu'une matière apporte vit dans la DONNÉE** : bloc `fabrication: {nom, modificateurs}` sur son doc item (`dev/gen_fabrication_matieres.py`, 12 matières). Bloc absent ⇒ la matière est utilisable mais n'apporte rien (les 1 324 items en base). ⚠️ `CLES_MODIFIABLES` est une **liste blanche** — un doc de contenu ne doit pas pouvoir injecter `slots`, `sorts` ni `type`. Composition : additif sur les `bonus_*` (× quantité), fusion clé à clé sur `bonus`/`effets`, **max** sur `restriction`, `{facteur}` multiplicatif sur `poids`/`valeur`, palier le plus haut sur `rarete` (échelle relue dans `MULT_RARETE`). ⚠️ Les facteurs ne sont PAS multipliés par la quantité : « une épée en acier » ne doit pas peser dix fois plus parce qu'on a fourni dix lingots.
+
+⚠️ **Le générateur ne touche AUCUNE recette** : ajouter un intrant ouvrirait un point de vente pour lui et risquerait la fausse feuille (cf. § Armement).
 

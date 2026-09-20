@@ -12,16 +12,18 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import capacites  # noqa: E402
-from utils import auberge, montures, scriptorium, recrutement  # noqa: E402
+from utils import auberge, montures, scriptorium, recrutement, commande  # noqa: E402
+from models import character_stats  # noqa: E402
 
 
-# Les cinq prédicats RÉELS du jeu, dans l'ordre du catalogue.
+# Les prédicats RÉELS du jeu, dans l'ordre du catalogue.
 PREDICATS = {
 	"taverne": auberge.lieu_est_taverne,
 	"montures": montures.lieu_vend_montures,
 	"scriptorium": scriptorium.lieu_est_scriptorium,
 	"recrutement": recrutement.lieu_recrute,
 	"guilde": recrutement.lieu_de_guilde,
+	"sur_mesure": commande.lieu_fabrique_sur_mesure,
 }
 
 
@@ -37,6 +39,8 @@ def _matrice() -> list:
 		{"categorie": "guilde_aventurier"},
 		{"sous_categorie": "guilde_aventurier"},
 		{"categorie": "grand_scriptorium", "tags": ["scriptorium"]},   # cas réel de Lutèce
+		{"categorie": "grand_arsenal"},                        # grande maison : sur mesure d'office
+		{"categorie": "armurerie"},                            # artisan : commande oui, sur mesure non
 	]
 	for cap in capacites.CAPACITES:
 		docs.append({"tags": [cap["tag"]]})
@@ -53,9 +57,18 @@ def test_la_table_ne_derive_pas_des_vrais_predicats():
 		assert capacites.capacites_de(doc) == attendu, f"divergence sur {doc!r}"
 
 
-def test_le_catalogue_couvre_exactement_les_cinq_predicats():
+def test_le_catalogue_couvre_exactement_les_predicats():
 	assert {c["id"] for c in capacites.CAPACITES} == set(PREDICATS)
 	assert len(capacites.CAPACITES) == len(PREDICATS)
+
+
+def test_prendre_une_commande_nest_pas_une_capacite_de_la_table():
+	"""⚠️ Invariante de conception. « Prendre une commande » est DÉRIVÉ des recettes du lieu :
+	ce n'est ni une catégorie ni un tag, donc ça ne peut pas entrer dans cette table, dont
+	`tags_apres` ne sait poser que des tags. Le jour où quelqu'un y ajoute une case
+	`commande`, décocher ne retirerait rien et cocher ne donnerait rien."""
+	assert "commande" not in {c["id"] for c in capacites.CAPACITES}
+	assert "commande" not in capacites.TAGS_CAPACITE
 
 
 def test_chaque_entree_du_catalogue_est_complete():
@@ -86,6 +99,34 @@ def test_accordee_par_categorie():
 				"guilde_aventurier_exterieur", "bureau_maitre_guilde"):
 		assert capacites.accordee_par_categorie(guilde, cat) is True
 	assert capacites.accordee_par_categorie(guilde, "boulangerie") is False
+
+
+def test_categories_dune_capacite_relues_dans_la_variable_de_monde():
+	"""⚠️ Le sur-mesure n'a pas de liste de catégories en dur : elle EST
+	`LIEU_CATEGORIES_FUSION`. Ouvrir une grande maison de plus doit suffire, sans toucher au
+	catalogue — et le test doit le constater, pas le retaper (CLAUDE.md §14)."""
+	sur_mesure = capacites.PAR_ID["sur_mesure"]
+	assert capacites.categories_de(sur_mesure) == sorted(character_stats.LIEU_CATEGORIES_FUSION)
+	for cat in character_stats.LIEU_CATEGORIES_FUSION:
+		assert capacites.accordee_par_categorie(sur_mesure, cat) is True
+	assert capacites.accordee_par_categorie(sur_mesure, "armurerie") is False
+
+
+def test_categories_relues_a_chaque_appel_pas_figees_a_limport(monkeypatch):
+	# Les variables de monde se rechargent à chaud : une table figée ferait diverger
+	# l'éditeur du jeu sans un mot.
+	monkeypatch.setitem(character_stats.LIEU_CATEGORIES_FUSION, "grande_forge_de_test", ["armurerie"])
+	assert capacites.accordee_par_categorie(capacites.PAR_ID["sur_mesure"],
+											"grande_forge_de_test") is True
+
+
+def test_catalogue_serialise_les_categories_resolues():
+	"""Le client (`part-lieux-js.html`) ne lit que `categories` : `categories_var` ne doit
+	jamais lui arriver non résolu, sinon toutes les cases des grandes maisons se décochent."""
+	sur_mesure = next(c for c in capacites.catalogue() if c["id"] == "sur_mesure")
+	assert sur_mesure["categories"] == sorted(character_stats.LIEU_CATEGORIES_FUSION)
+	# …sans muter le catalogue source.
+	assert capacites.PAR_ID["sur_mesure"]["categories"] == []
 
 
 def test_accordee_par_categorie_supporte_les_valeurs_absentes():

@@ -50,6 +50,7 @@ routers/
   montures.py            # /api/montures/* : étable, acheter, relacher
   auberge.py             # /api/auberge/* : salle commune (tables, tableau d'information), nuit
   scriptorium.py         # /api/scriptorium(/ecrire) : écrit personnel (papier+encre+plume → livre)
+  commande.py            # /api/commande(/devis,/passer,/relancer,/retirer,/annuler) : commande chez un artisan
   animations.py          # /admin/animations/* : scan des feuilles de sprites, liaison au contenu
   pnj.py                 # /api/pnj/dialogue (+ /choix) : dialogues PNJ + services ; /api/intro/raison
 utils/
@@ -92,6 +93,18 @@ utils/
   escorte.py             # escortes (pur) : personne à retrouver, à protéger, à déposer vivante
   expedition.py          # capacités MISES EN COMMUN par le groupe (pur) : membres, outil partagé, négociateur
   marche.py              # prix, stocks, tick atelier, relations de lieu
+  commande.py            # commande auprès d'un artisan (pur) : DEUX capacités — prendre une
+                         #   commande (DÉRIVÉ : son catalogue épuré n'est pas vide) vs
+                         #   fabriquer SUR MESURE (`LIEU_CATEGORIES_FUSION` OU tag
+                         #   `sur_mesure`) ; sourçage des matières (sac / réserve d'atelier /
+                         #   rayon), devis, cycle de vie à statut DÉRIVÉ de l'horloge.
+                         #   ⚠️ Le catalogue écarte les matières (`marche.item_commandable`,
+                         #   tag `commandable` pour déroger) ; le SUR-MESURE leur reste fermé
+                         #   même dérogées (`marche.est_intermediaire`)
+  fabrication.py         # variantes sur mesure (pur) : modificateurs de matière pilotés par
+                         #   la DONNÉE (bloc `fabrication` d'un doc item), identité
+                         #   indépendante de l'ordre des matières, item + recette déterministes
+                         #   et idempotents ; la recette porte `sur_commande` (hors tick)
   focalisation.py        # 🧭 lieu (BFS) / 🎯 quête (biais probabiliste)
   enseignes.py           # noms d'enseigne (pur) : tournures par métier × toponymes de cité
   capacites.py           # capacités d'un lieu (pur) : catalogue taverne/étable/scriptorium/recrutement/guilde
@@ -147,7 +160,7 @@ Chaque mécanique est documentée dans une compétence `.claude/skills/telluris-
 | caractéristiques, combat, dégâts, barre de slots, effets à durée, animations, simulateur | `telluris-combat` |
 | bitmask `nav`, règles de marche, animation de carte/jetons, pavé partagé, mode test de déplacement | `telluris-map-movement` |
 | `/admin/editor` : mode Lieux, formulaires de lieu/connexion, portes de rempart, maison de guilde, lot de lieux, voies, redimensionnement ; `/admin/lieux` et le contrat `LIEUX_HOTE` des parts partagées | `telluris-editeur-carte` |
-| items, poids, marché, recettes, grandes maisons, portée des recettes, flux de cité | `telluris-economie` |
+| items, poids, marché, recettes, grandes maisons, portée des recettes, flux de cité, commande chez un artisan et variantes sur mesure | `telluris-economie` |
 | quêtes (guilde, transport, chasse, escorte), PNJ et dialogues, `/admin/dialogues`, accès, donjons, intro | `telluris-quetes-pnj` |
 | recrutement, groupe, compagnie, contrat de mission, montures | `telluris-recrutement` |
 | sorts, compétences de vocation, zones d'effet, focalisation | `telluris-magie` |
@@ -208,7 +221,9 @@ Pattern `type:identifier` — `user:email@example.com`, `lieu:lutecia`, `rules:r
 `models/character_document.py` = spec de référence. **Vérité = le code de création dans `routers/user.py`.** Les noms de champs diffèrent : `voc`, `sex`, `caracteristiques_standard`/`current`, `cite`.
 
 ### Capacités d'un lieu — « le type » n'est pas un champ
-Résolues **à la lecture** par cinq prédicats `categorie == X` **OU** tag `Y` (le OU évite toute migration) : `auberge.lieu_est_taverne` · `montures.lieu_vend_montures` · `scriptorium.lieu_est_scriptorium` · `recrutement.lieu_recrute` · `recrutement.lieu_de_guilde`. ⚠️ `utils/capacites.py` les **RECOPIE** pour l'éditeur (les importer tirerait `marche`/`expedition`/`quetes`) ; la recopie est verrouillée par `tests/test_capacites.py` — modifier un prédicat, c'est modifier les deux.
+Résolues **à la lecture** par six prédicats `categorie == X` **OU** tag `Y` (le OU évite toute migration) : `auberge.lieu_est_taverne` · `montures.lieu_vend_montures` · `scriptorium.lieu_est_scriptorium` · `recrutement.lieu_recrute` · `recrutement.lieu_de_guilde` · `commande.lieu_fabrique_sur_mesure`. ⚠️ `utils/capacites.py` les **RECOPIE** pour l'éditeur (les importer tirerait `marche`/`expedition`/`quetes`) ; la recopie est verrouillée par `tests/test_capacites.py` — modifier un prédicat, c'est modifier les deux. ⚠️ Les catégories accordantes du sur-mesure sont **relues** dans `LIEU_CATEGORIES_FUSION` (`capacites.categories_de`, sérialisées résolues par `capacites.catalogue()`), jamais recopiées.
+
+⚠️ **Toute capacité n'est pas de cette forme.** `commande.lieu_prend_commandes` (« cet atelier refait-il ce qu'il sait faire ? ») est **entièrement DÉRIVÉ** — son catalogue épuré des matières n'est pas vide : ni catégorie, ni tag, donc **hors de la table** — `tags_apres` ne sait poser que des tags, une case à cocher n'y donnerait rien (verrouillé par `test_prendre_une_commande_nest_pas_une_capacite_de_la_table`).
 
 ### Cache de documents
 `get_doc` est mémorisé **par requête** pour les seuls préfixes de contenu (`_CACHEABLE_PREFIXES`) ; tout doc d'état de partie en est exclu. Un nouveau préfixe se classe explicitement. Recettes, fusion de catégories et portée sont mémoïsées par process et vidées par `marche.reset_prix_cache()`. Détail : `telluris-db`.

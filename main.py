@@ -20,6 +20,7 @@ from routers.recrutement import recrutement_router
 from routers.montures import montures_router
 from routers.auberge import auberge_router
 from routers.scriptorium import scriptorium_router
+from routers.commande import commande_router
 from routers.animations import animations_router
 from utils.combat import (
 	get_combat_grid, finalize_combat, verser_butin_au_sol, etat_charge_snapshot,
@@ -43,6 +44,7 @@ from utils import recrutement as recrutement_util
 from utils import montures as montures_util
 from utils import auberge as auberge_util
 from utils import scriptorium as scriptorium_util
+from utils import commande as commande_util
 from utils import escorte as escorte_util
 from utils import indicateurs as indicateurs_util
 from utils import fiche as fiche_util
@@ -143,6 +145,7 @@ app.include_router(recrutement_router, prefix="/api")
 app.include_router(montures_router, prefix="/api")
 app.include_router(auberge_router, prefix="/api")
 app.include_router(scriptorium_router, prefix="/api")
+app.include_router(commande_router, prefix="/api")
 # Sans préfixe : ce router porte des chemins des DEUX familles (`/api/admin/...` en
 # lecture, `/admin/...` en écriture, comme les endpoints d'admin de main.py).
 app.include_router(animations_router)
@@ -825,6 +828,14 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# d'accès (comme l'auberge/l'étable) — c'est l'écriture elle-même qui demande papier,
 	# encre et plume, pas la porte.
 	est_scriptorium = scriptorium_util.lieu_est_scriptorium(grid_doc)
+
+	# Commande : DEUX flags, et ils ne disent pas la même chose.
+	# `est_commande` (dérivé : le lieu a-t-il des recettes ?) ouvre la section « Commande » du
+	# panneau marchand — tout atelier refait ce qu'il sait faire. `est_sur_mesure` n'ouvre que
+	# le bouton « Sur mesure » : chez un artisan ordinaire il ne doit pas exister du tout,
+	# sans quoi l'interface laisserait croire qu'on peut y faire inventer quelque chose.
+	est_commande = commande_util.lieu_prend_commandes(grid_doc, get_doc)
+	est_sur_mesure = commande_util.lieu_fabrique_sur_mesure(grid_doc)
 	# « Passer la nuit » est une action de la SIDEBAR, pas du panneau : elle doit donc être
 	# servie ici. Le log part avec — le client l'égrène PENDANT que le POST est en vol, et
 	# il ne l'aurait pas en main s'il fallait d'abord ouvrir la salle commune. Même raison
@@ -901,6 +912,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"est_etable": est_etable,
 			"est_auberge": est_auberge,
 			"est_scriptorium": est_scriptorium,
+			"est_commande": est_commande,
+			"est_sur_mesure": est_sur_mesure,
 			"auberge_nuit": auberge_nuit,
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.

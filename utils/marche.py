@@ -11,6 +11,7 @@ from collections import Counter
 
 from db.config import get_doc, find_docs, save_doc
 from models import character_stats
+from utils import fabrication
 from utils.characters import (
 	resolve_item_ref,
 	money_to_cuivre, cuivre_to_purse,
@@ -118,6 +119,8 @@ _marche_map_portee: dict | None = None     # {lieu_portee: {"besoins"/"produits"
 _recettes_par_portee: dict | None = None   # {lieu_portee: {lieu_categorie: [recettes]}}
 _portees_memo: dict[str, tuple] = {}       # lieu_id → (lui-même, parent, grand-parent…)
 _cles_consommees_memo: set | None = None   # toutes les clés matières consommées, portées comprises
+# Matière/demi-produit vs pièce finie, dérogation comprise (cf. `item_commandable`).
+_commandable_memo: dict[str, bool] = {}    # item_id → peut figurer au catalogue de commande
 
 
 def reset_prix_cache() -> None:
@@ -136,6 +139,10 @@ def reset_prix_cache() -> None:
 	_categories_incluses_memo.clear()
 	_recettes_fusion_memo.clear()
 	_portees_memo.clear()
+	# ⚠️ Sans cette ligne, poser le tag `commandable` sur un item depuis /admin resterait
+	# sans effet jusqu'au redémarrage du process — le symptôme le plus coûteux à diagnostiquer
+	# de toute la chaîne (même piège que l'import de recette avant l'ajout de `_recettes_all`).
+	_commandable_memo.clear()
 
 
 def _all_recettes() -> list:
@@ -149,8 +156,72 @@ def _all_recettes() -> list:
 	return _recettes_all
 
 
+# ── Matière / demi-produit vs pièce finie ───────────────────────────────────────
+# Ces deux prédicats vivent ICI et non dans `utils/commande.py` pour une raison précise :
+# le mémo doit être vidé par `reset_prix_cache()`, et `marche` ne peut pas importer
+# `commande` (qui l'importe déjà). C'est aussi ce module qui porte le vocabulaire « matière
+# vs produit » (`besoins` / `produits` / `feuilles`).
+
+TAG_COMMANDABLE = "commandable"
+
+
+def est_intermediaire(item_doc) -> bool:
+	"""Cet objet est-il une MATIÈRE ou un DEMI-PRODUIT ? Pur, doc en main, **sans dérogation**.
+
+	C'est le prédicat du SUR-MESURE : on ne façonne pas une hampe ou un lingot à la demande,
+	même si une dérogation l'a remis au catalogue de commande. Le fait brut, pas la politique.
+
+	⚠️ Ne pas confondre avec `item_commandable`, qui porte la dérogation. Les fusionner
+	rouvrirait le sur-mesure sur les pièces dérogées."""
+	return (item_doc or {}).get("categorie") in character_stats.CATEGORIES_INTERMEDIAIRES
+
+
+def item_commandable(item_id: str, item_doc: dict | None = None) -> bool:
+	"""Cet objet peut-il figurer au CATALOGUE de commande d'un artisan ?
+
+	Faux pour une matière ou un demi-produit — l'Arsenal de Lutèce proposait « Hampe »,
+	« Cuir » et « Acier plissé » à côté de ses armes —, **sauf dérogation** par le tag
+	`commandable` posé sur le doc item.
+
+	Mémoïsé : `lieu_prend_commandes` interroge chaque produit du lieu à chaque rendu de
+	`/play` (jusqu'à 144 au grand arsenal). Le mémo est vidé par `reset_prix_cache()`, que
+	l'écriture d'un doc `item` déclenche déjà (`main._TYPES_PRIX`) — poser le tag depuis
+	`/admin/table` prend donc effet sans redémarrage.
+
+	⚠️ Un item introuvable rend **False** : `_catalogue_vue` le sauterait de toute façon
+	(`resolve_item_ref` ne le résout pas), et le compter rendrait `lieu_prend_commandes` vrai
+	pour une boutique dont le catalogue s'affiche ensuite vide."""
+	if not item_id:
+		return False
+	if item_id not in _commandable_memo:
+		doc = item_doc if (item_doc is not None and (item_doc.get("_id") == item_id
+													 or item_doc.get("item") == item_id)) \
+			else get_doc(item_id)
+		_commandable_memo[item_id] = bool(doc) and (
+			not est_intermediaire(doc) or TAG_COMMANDABLE in (doc.get("tags") or []))
+	return _commandable_memo[item_id]
+
+
+def est_sur_commande(recette: dict) -> bool:
+	"""Recette générée par une commande sur mesure (`utils/fabrication.py`) plutôt qu'authorée.
+
+	⚠️ Elle est une recette NORMALE pour le PRIX (`_get_recipe_map` la garde : le coût de la
+	variante doit pouvoir dériver de ses intrants) et une non-recette pour la PRODUCTION
+	(`_get_marche_map`, `lieu_recettes` la sautent). Sans cette coupure, chaque variante
+	commandée par un joueur entrerait dans `besoins`/`produits`/`feuilles` de sa catégorie :
+	toutes les forges du monde se mettraient à la fabriquer d'elles-mêmes au tick, et chacun
+	de ses intrants deviendrait une feuille auto-approvisionnée, donc achetable au comptoir
+	(cf. `appro_leaves_categorie`). Le recalcul global de `feuilles = inputs − outputs`
+	risquerait en prime de transformer une matière en FAUSSE FEUILLE, ce qui gèle en silence
+	toutes les recettes qui la citent."""
+	return bool((recette or {}).get(fabrication.CLE_SUR_COMMANDE))
+
+
 def _get_recipe_map() -> dict:
-	"""Construit (une fois) la table objet_final_item_id → liste de recettes le produisant."""
+	"""Construit (une fois) la table objet_final_item_id → liste de recettes le produisant.
+
+	⚠️ Les recettes `sur_commande` y sont INCLUSES à dessein — c'est le seul des trois index
+	qui les garde (cf. `est_sur_commande`)."""
 	global _recipe_map
 	if _recipe_map is None:
 		m: dict[str, list] = {}
@@ -190,6 +261,12 @@ def _get_marche_map() -> dict:
 		outputs: set = set()
 		inputs_all: set = set()
 		for r in _all_recettes():
+			# ⚠️ Une recette de commande sur mesure n'entre dans AUCUN des quatre ensembles :
+			# ni `besoins` (le lieu n'achète pas les intrants d'une pièce unique), ni
+			# `produits` (il ne la fabrique pas de lui-même), ni `feuilles` (le calcul global
+			# inputs−outputs en serait faussé). Cf. `est_sur_commande`.
+			if est_sur_commande(r):
+				continue
 			cat = r.get("lieu_categorie")
 			scope = r.get("lieu_portee")
 			cible = (portee.setdefault(scope, {"besoins": {}, "produits": {}})
@@ -414,11 +491,21 @@ def recettes_lieu(lieu_doc: dict) -> list:
 
 
 def lieu_produit(lieu_doc: dict, item_doc: dict) -> bool:
-	"""True si l'item est un bien que ce lieu **produit** (donc rachetable au joueur)."""
+	"""True si l'item est un bien que ce lieu **produit** (donc rachetable au joueur).
+
+	⚠️ Une VARIANTE fabriquée sur mesure (`fabrication.base_item`, cf. `utils/fabrication.py`)
+	compte comme son objet de BASE. Sa propre recette est `sur_commande`, donc absente de
+	`produits_lieu` À DESSEIN — sans ce repli, une pièce commandée chez l'armurier ne pourrait
+	être revendue à personne, pas même à l'atelier qui l'a forgée, alors que le modèle dont
+	elle dérive s'y rachète. Champ absent ⇒ comportement d'avant à la lettre."""
 	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
 	if not item_id:
 		return False
-	return item_id in produits_lieu(lieu_doc)
+	produits = produits_lieu(lieu_doc)
+	if item_id in produits:
+		return True
+	base = ((item_doc or {}).get("fabrication") or {}).get("base_item")
+	return bool(base) and base in produits
 
 
 def lieu_buys(lieu_doc: dict, item_doc: dict) -> bool:
@@ -1069,6 +1156,12 @@ def lieu_recettes(lieu_categorie: str) -> list:
 		for r in _all_recettes():
 			cat = r.get("lieu_categorie")
 			if not cat:
+				continue
+			# ⚠️ Une recette de commande sur mesure n'est JAMAIS cuite par le tick : elle
+			# décrit une pièce unique déjà commandée, pas le catalogue d'un atelier. Sans
+			# cette ligne, la variante d'un joueur apparaîtrait d'elle-même en rayon dans
+			# toutes les boutiques de la catégorie. Cf. `est_sur_commande`.
+			if est_sur_commande(r):
 				continue
 			# ⚠️ Une recette PORTÉE sort de l'index par catégorie : sinon elle serait cuite
 			# par toutes les boutiques du métier, ce que la portée sert précisément à éviter.

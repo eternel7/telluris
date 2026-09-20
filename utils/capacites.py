@@ -11,6 +11,12 @@ citent mutuellement dans leurs docstrings :
     scriptorium.lieu_est_scriptorium  categorie "scriptorium"  OU tag "scriptorium"
     recrutement.lieu_recrute          categorie "guilde_aventurier" OU tag "recrutement"
     recrutement.lieu_de_guilde        sous_categorie "guilde_aventurier" OU tag "guilde"
+    commande.lieu_fabrique_sur_mesure categories de LIEU_CATEGORIES_FUSION OU tag "sur_mesure"
+
+⚠️ « Prendre une commande » (`commande.lieu_prend_commandes`) n'est PAS dans cette table et ne
+peut pas y entrer : ce n'est ni une catégorie ni un tag, c'est une CONSÉQUENCE — tout atelier
+qui a des recettes sait refaire ce qu'il fabrique. Seule la fabrication SUR MESURE (inventer une
+variante, donc créer des docs en base) s'accorde, et la `note` de la case le dit au lecteur.
 
 Ce module existe pour que l'ÉDITEUR DE CARTE puisse les montrer et les poser : sans lui,
 créer une auberge demandait de savoir par cœur que la catégorie `auberge` ouvre la salle
@@ -26,6 +32,8 @@ cas : la table ne peut pas dériver en silence.
 anti-tag. C'est ce que `accordee_par_categorie` sert à dire au client, qui grise la case.
 """
 
+from models import character_stats
+
 # ── Le catalogue ────────────────────────────────────────────────────────────────
 # Sérialisé tel quel dans `GET /api/lieux/creation_options` : le client doit pouvoir
 # pré-cocher, griser et expliquer chaque case sans réimplémenter la règle.
@@ -34,6 +42,9 @@ anti-tag. C'est ce que `accordee_par_categorie` sert à dire au client, qui gris
 # `categories`      : les `categorie` qui l'accordent d'office.
 # `sous_categories` : idem pour `sous_categorie` (la guilde est la seule dans ce cas).
 # `note`            : ce que la capacité change EN JEU, affiché sous la case.
+# `categories_var`  : nom d'une variable de monde qui FOURNIT `categories` (au lieu de la
+#                     lister en dur). Résolu par `categories_de`, sérialisé résolu par
+#                     `catalogue()` — le client continue de ne lire que `categories`.
 CAPACITES = [
 	{
 		"id": "taverne", "label": "Taverne", "tag": "taverne",
@@ -65,6 +76,16 @@ CAPACITES = [
 		"sous_categories": ["guilde_aventurier"],
 		"note": "Un contrat de mission s'y signe, s'y rompt sans frais et s'y achève.",
 	},
+	{
+		# ⚠️ Les catégories accordantes sont les 18 grandes maisons de LIEU_CATEGORIES_FUSION,
+		# RELUES et non recopiées : ouvrir une grande maison de plus ne doit pas obliger à
+		# penser à deux endroits (même dérivation que `CHA_MARCHAND_PAR_CATEGORIE`).
+		"id": "sur_mesure", "label": "Fabrication sur mesure", "tag": "sur_mesure",
+		"categories": [], "categories_var": "LIEU_CATEGORIES_FUSION", "sous_categories": [],
+		"note": "Assemble une VARIANTE inédite à partir de matières (crée un objet et sa "
+				"recette en base). Prendre une commande de son catalogue ne demande rien : "
+				"tout atelier qui a des recettes le fait déjà.",
+	},
 ]
 
 PAR_ID = {c["id"]: c for c in CAPACITES}
@@ -74,6 +95,28 @@ PAR_ID = {c["id"]: c for c in CAPACITES}
 TAGS_CAPACITE = {c["tag"] for c in CAPACITES}
 
 
+def categories_de(cap: dict) -> list:
+	"""Catégories qui accordent cette capacité, `categories_var` résolue.
+
+	⚠️ Lue à CHAQUE appel, jamais figée à l'import : les variables de monde se rechargent à
+	chaud depuis `/admin`, et une table figée ferait diverger l'éditeur du jeu sans un mot."""
+	if not cap:
+		return []
+	nom_var = cap.get("categories_var")
+	if nom_var:
+		table = getattr(character_stats, nom_var, None) or {}
+		return sorted(table)
+	return list(cap.get("categories") or [])
+
+
+def catalogue() -> list:
+	"""Le catalogue sérialisable : comme `CAPACITES`, mais `categories` RÉSOLUE.
+
+	C'est ce que sert `/api/lieux/creation_options` — le client (`part-lieux-js.html`) ne lit
+	que `categories` et n'a pas à connaître `categories_var`."""
+	return [dict(cap, categories=categories_de(cap)) for cap in CAPACITES]
+
+
 def accordee_par_categorie(cap: dict, categorie, sous_categorie="") -> bool:
 	"""Cette capacité est-elle acquise par la seule CATÉGORIE (ou sous-catégorie) ?
 
@@ -81,7 +124,7 @@ def accordee_par_categorie(cap: dict, categorie, sous_categorie="") -> bool:
 	donc décocher ne pourrait rien retirer. Mieux vaut une case grisée qu'un geste sans effet."""
 	if not cap:
 		return False
-	return (str(categorie or "") in (cap.get("categories") or [])
+	return (str(categorie or "") in categories_de(cap)
 			or str(sous_categorie or "") in (cap.get("sous_categories") or []))
 
 

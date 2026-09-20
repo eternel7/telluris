@@ -248,6 +248,19 @@ CATALOGUE = [
 			"portions de carcasse (leur dépeçage est baké).",
 	},
 	{
+		"id": "gen_fabrication_matieres",
+		"label": "⚒️ Ce qu'une matière apporte sur mesure (bloc `fabrication`)",
+		"argv": _py("gen_fabrication_matieres.py"),
+		"ecrit": "Écrit jsons/fabrication_matieres_a_importer.json (docs item enrichis).",
+		"description": "Pose le bloc `fabrication` (fragment de nom + modificateurs) sur une "
+			"douzaine de matières premières : c'est ce qu'elles confèrent à une pièce commandée "
+			"SUR MESURE chez un grand magasin. Sans ce bloc, une matière reste utilisable mais "
+			"n'apporte rien — comportement d'avant, aucune migration. ⚠️ Ne touche AUCUNE "
+			"recette : ajouter un intrant ouvrirait un point de vente pour lui et risquerait la "
+			"fausse feuille. Relit le dump, réémet le doc complet avec le seul champ ajouté : "
+			"régénération idempotente.",
+	},
+	{
 		"id": "gen_carcasses_parties",
 		"label": "🔪 Débiter les grosses carcasses en portions",
 		"argv": _py("gen_carcasses_parties.py"),

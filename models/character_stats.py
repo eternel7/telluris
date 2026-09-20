@@ -145,6 +145,17 @@ PRIX_DERIVE_BASE: float = 2.0
 MULT_RARETE: dict[str, float] = {
 	"commun": 1, "peu_commun": 10, "rare": 30, "tres_rare": 100, "legendaire": 500, "mythique": 1000, "divin" : 10000
 }
+# Catégories d'objets qui sont des MATIÈRES ou des DEMI-PRODUITS, pas des pièces finies :
+# elles n'entrent pas au catalogue de commande d'un artisan (`marche.item_commandable`) et ne
+# sont jamais personnalisables sur mesure (`marche.est_intermediaire`).
+#
+# ⚠️ Classement par CATÉGORIE et non par « cet objet est-il consommé par une recette ? ».
+# Ce second critère a été mesuré et écarté : `item_sous_categorie` retombe sur `categorie`
+# quand `sous_categorie` est vide, donc une recette consommant la clé `arme` fait passer TOUTES
+# les armes pour des intermédiaires (l'Arc long, la Plumbata, l'armure de cuir et le harnais
+# quittaient le catalogue). La catégorie, elle, classe juste : au dump du 20/09, les 438 items
+# `composant`/`metal` sont sans exception non équipables (`slots` vide).
+CATEGORIES_INTERMEDIAIRES: set = {"composant", "metal"}
 # ── Approvisionnement des ateliers (au tick) ─────────────────────────────────────
 # Ce qu'un marchand achète au joueur ET les matières « feuilles » à auto-approvisionner ne
 # sont PLUS des world-vars : ils sont DÉRIVÉS des recettes (`recette:*`, champ `lieu_categorie`
@@ -568,6 +579,29 @@ SCRIPTORIUM_LIVRE_LONGUEUR_MAX: int = 800
 SCRIPTORIUM_LIVRE_PAPIER: int = 3
 SCRIPTORIUM_LIVRE_ENCRE: int = 2
 
+# ── Commandes auprès d'un artisan (cf. utils/commande.py, utils/fabrication.py) ───
+# Un atelier fabrique sur commande ce que ses recettes savent produire ; un grand magasin
+# (categorie de LIEU_CATEGORIES_FUSION, ou tag `sur_mesure`) sait en plus assembler une
+# VARIANTE inédite à partir de matières fournies ou achetées sur place.
+#
+# DELAI : secondes entre la commande payée et le retrait. 0 = fabrication immédiate (utile
+# pour tester sans attendre). PEREMPTION : au-delà, la commande non retirée est perdue —
+# l'artisan a écoulé la pièce. Contrôlé PARESSEUSEMENT (le statut est dérivé de l'horloge,
+# aucun tick de fond), comme tout ce qui expire dans le jeu.
+COMMANDE_DELAI_SECONDES: int = 1800
+COMMANDE_PEREMPTION_SECONDES: int = 259200   # trois jours
+# Matières distinctes qu'une variante peut combiner. Borne la combinatoire : chaque
+# combinaison inédite crée un doc item ET un doc recette permanents.
+COMMANDE_MATIERES_MAX: int = 3
+# Marge du sur-mesure, appliquée UNE fois à (coût du base + coût des matières) pour figer la
+# `valeur` de la variante. ⚠️ Délibérément distincte de MARGE_TRANSFO (×5 par étape) : l'objet
+# de base est DÉJÀ le produit d'une transformation, réutiliser la même marge le facturerait ×25.
+COMMANDE_MARGE: float = 1.6
+# Part du prix du base facturée en façon, même quand le client fournit tout : l'artisan vend
+# son temps. Le supplément de complexité en est un multiple, par matière au-delà de la première.
+COMMANDE_FACON_PART: float = 0.25
+COMMANDE_COMPLEXITE_PART: float = 0.15
+
 # ── Accès (barrières PNJ gardiennes) ──────────────────────────────────────────────
 # Un lieu peut porter un bloc `acces` (gardien, conditions, cycle) qui en interdit
 # l'entrée tant que les conditions ne sont pas remplies — cf. utils/acces.py.
@@ -838,6 +872,7 @@ def current_world_variables() -> dict:
 		"SUB_CAP_REDUCTION": dict(_SUB_CAP_REDUCTION),
 		"PRIX_DERIVE_BASE": PRIX_DERIVE_BASE,
 		"MULT_RARETE": dict(MULT_RARETE),
+		"CATEGORIES_INTERMEDIAIRES": sorted(CATEGORIES_INTERMEDIAIRES),
 		"APPRO_DEBIT": dict(APPRO_DEBIT),
 		"APPRO_DEBIT_DEFAUT": APPRO_DEBIT_DEFAUT,
 		"CHA_MARCHAND": CHA_MARCHAND,
@@ -949,6 +984,12 @@ def current_world_variables() -> dict:
 		"SCRIPTORIUM_LIVRE_LONGUEUR_MAX": SCRIPTORIUM_LIVRE_LONGUEUR_MAX,
 		"SCRIPTORIUM_LIVRE_PAPIER": SCRIPTORIUM_LIVRE_PAPIER,
 		"SCRIPTORIUM_LIVRE_ENCRE": SCRIPTORIUM_LIVRE_ENCRE,
+		"COMMANDE_DELAI_SECONDES": COMMANDE_DELAI_SECONDES,
+		"COMMANDE_PEREMPTION_SECONDES": COMMANDE_PEREMPTION_SECONDES,
+		"COMMANDE_MATIERES_MAX": COMMANDE_MATIERES_MAX,
+		"COMMANDE_MARGE": COMMANDE_MARGE,
+		"COMMANDE_FACON_PART": COMMANDE_FACON_PART,
+		"COMMANDE_COMPLEXITE_PART": COMMANDE_COMPLEXITE_PART,
 		"ACCES_GARDIEN_ACTIF": ACCES_GARDIEN_ACTIF,
 		"INDICATEURS_ACTIFS": INDICATEURS_ACTIFS,
 		"BOIS_A_COUPER": list(BOIS_A_COUPER),
@@ -1025,6 +1066,8 @@ def load_world_variables() -> dict:
 	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
 	global SCRIPTORIUM_LIVRE_LONGUEUR_MAX, SCRIPTORIUM_LIVRE_PAPIER, SCRIPTORIUM_LIVRE_ENCRE
+	global COMMANDE_DELAI_SECONDES, COMMANDE_PEREMPTION_SECONDES, COMMANDE_MATIERES_MAX
+	global COMMANDE_MARGE, COMMANDE_FACON_PART, COMMANDE_COMPLEXITE_PART
 	global ACCES_GARDIEN_ACTIF, INDICATEURS_ACTIFS
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
 	global CARCASSE_TRANCHANT_TAG, CARCASSE_DECOUPE_POIDS_MIN
@@ -1056,6 +1099,11 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("MULT_RARETE"), dict):
 		MULT_RARETE.clear()
 		MULT_RARETE.update({k: float(x) for k, x in v["MULT_RARETE"].items()})
+	# Muté EN PLACE (comme les dicts voisins) : `marche` lit la variable via le module, mais
+	# un `set` réassigné serait invisible à tout `from ... import` existant.
+	if isinstance(v.get("CATEGORIES_INTERMEDIAIRES"), list):
+		CATEGORIES_INTERMEDIAIRES.clear()
+		CATEGORIES_INTERMEDIAIRES.update(str(c) for c in v["CATEGORIES_INTERMEDIAIRES"])
 	if isinstance(v.get("APPRO_DEBIT"), dict):
 		APPRO_DEBIT.clear()
 		APPRO_DEBIT.update({k: int(x) for k, x in v["APPRO_DEBIT"].items()})
@@ -1250,6 +1298,14 @@ def load_world_variables() -> dict:
 	SCRIPTORIUM_LIVRE_LONGUEUR_MAX = max(1, int(v.get("SCRIPTORIUM_LIVRE_LONGUEUR_MAX", SCRIPTORIUM_LIVRE_LONGUEUR_MAX)))
 	SCRIPTORIUM_LIVRE_PAPIER = max(1, int(v.get("SCRIPTORIUM_LIVRE_PAPIER", SCRIPTORIUM_LIVRE_PAPIER)))
 	SCRIPTORIUM_LIVRE_ENCRE = max(1, int(v.get("SCRIPTORIUM_LIVRE_ENCRE", SCRIPTORIUM_LIVRE_ENCRE)))
+	# Délai à 0 = fabrication immédiate (assumé, c'est le réglage de test) ; la péremption a un
+	# plancher d'une seconde, sinon toute commande naîtrait déjà périmée.
+	COMMANDE_DELAI_SECONDES = max(0, int(v.get("COMMANDE_DELAI_SECONDES", COMMANDE_DELAI_SECONDES)))
+	COMMANDE_PEREMPTION_SECONDES = max(1, int(v.get("COMMANDE_PEREMPTION_SECONDES", COMMANDE_PEREMPTION_SECONDES)))
+	COMMANDE_MATIERES_MAX = max(1, int(v.get("COMMANDE_MATIERES_MAX", COMMANDE_MATIERES_MAX)))
+	COMMANDE_MARGE = max(1.0, float(v.get("COMMANDE_MARGE", COMMANDE_MARGE)))
+	COMMANDE_FACON_PART = max(0.0, float(v.get("COMMANDE_FACON_PART", COMMANDE_FACON_PART)))
+	COMMANDE_COMPLEXITE_PART = max(0.0, float(v.get("COMMANDE_COMPLEXITE_PART", COMMANDE_COMPLEXITE_PART)))
 	ACCES_GARDIEN_ACTIF = bool(v.get("ACCES_GARDIEN_ACTIF", ACCES_GARDIEN_ACTIF))
 	INDICATEURS_ACTIFS = bool(v.get("INDICATEURS_ACTIFS", INDICATEURS_ACTIFS))
 
