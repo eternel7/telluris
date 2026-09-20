@@ -251,7 +251,7 @@
    l'escortée) mais ne se pilote pas : le violet dit « magie », l'absence de doré dit « pas
    vous ». Image d'ESPÈCE, donc `contain` comme les deux autres. */
 .ally-token.invocation .at-portrait {
-	background-color: #2b1c3a; border-color: #a06bd6;
+	background-color: #efefef; border-color: #a06bd6;
 	box-shadow: 0 0 10px rgba(160,107,214,0.8); color: #d9bcf5;
 	background-size: contain;
 	background-position: center center;
@@ -305,8 +305,8 @@
    raccourci effacerait l'image, un réglage sans !important perdrait contre le cadrage. Une
    espèce se montre ENTIÈRE dans sa forme. */
 .gabarit .jt-portrait {
-	width: 80%; height: 80%;
-	background-size: contain !important;
+	width: 100%; height: 100%;
+	background-size: cover !important;
 	background-position: center center !important;
 	background-repeat: no-repeat !important;
 	display: flex; align-items: center; justify-content: center;
@@ -816,6 +816,10 @@
 }
 .charge-fill.over-half { background: linear-gradient(90deg, #a86a2e 0%, #e0902f 100%); }
 .charge-fill.over-max  { background: linear-gradient(90deg, #a83232 0%, #e04a4a 100%); }
+/* Palier de CANALISATION : du texte violet à côté des kilos, jamais une teinte de plus sur
+   le remplissage — il dit déjà le PHYSIQUE (pip à 50 %, rouge en surcharge) et les paliers
+   magiques tombent ailleurs (25/50/75/100). Même parti pris qu'en ville. */
+.charge-label .mana, #joueur-charge-text .mana { color: #b26bff; }
 /* Incantation : même jauge, mais VIOLETTE — la couleur de la magie dans tout le combat
    (ciblage de sort, jetons d'invocation, aperçu de zone hostile). */
 .incant-fill { background: linear-gradient(90deg, #6a4d8f 0%, #b26bff 100%);
@@ -1490,7 +1494,15 @@ function updateChargeBar(j) {
 	fill.style.width = (chargeMax > 0 ? Math.min(100, charge / chargeMax * 100) : 0) + '%';
 	fill.classList.toggle('over-half', charge > half && charge <= chargeMax + 1e-6);
 	fill.classList.toggle('over-max',  charge > chargeMax + 1e-6);
-	txt.textContent = `${(+charge).toFixed(1)} / ${chargeMax} kg`;
+	// Palier de CANALISATION en texte violet — le remplissage et le pip continuent de dire
+	// le PHYSIQUE (demi-charge, surcharge) ; deux échelles sur une barre seraient illisibles.
+	const bloc = CHARGE_MAGIE;
+	if (bloc && bloc.palier_label && bloc.penalite > 0) {
+		txt.innerHTML = `${(+charge).toFixed(1)} / ${chargeMax} kg`
+			+ ` · <span class="mana">🔮 ${bloc.palier_label}</span>`;
+	} else {
+		txt.textContent = `${(+charge).toFixed(1)} / ${chargeMax} kg`;
+	}
 }
 
 // Anneaux PV/PM + classe KO d'un badge du camp du joueur. Partagé par la passe
@@ -2537,9 +2549,33 @@ function canalise() { return !!(me() || {}).incantation; }
 
 // Sort lançable maintenant ? PM (et PV) suffisants, et pour un sort CIBLÉ au moins une
 // cible. Consommé par slotJouable (état de la case) et par activerSlot (refus au clic).
+// ── CHARGE → CANALISATION ───────────────────────────────────────────────
+// Coût PM d'une capacité sous la charge de l'ACTEUR COURANT — MIROIR de
+// `charge_magie.cout_pm_effectif` (même famille que zones_effet.js ou jetons.js : le
+// serveur tranche, le client annonce). La courbe f(ratio) ne vit QUE côté serveur et
+// arrive déjà résolue dans `charge_magie.penalite` du payload d'acteur.
+// ⚠️ Le grisage DOIT lire la même valeur que la garde serveur : sinon une case paraît
+// jouable et le moteur la refuse — ou pire, elle part à un prix qui n'est pas l'affiché.
+// ⚠️ Arrondi `floor(x + 0.5)`, comme le serveur, et jamais `Math.round`.
+let CHARGE_MAGIE = {{ charge_magie | tojson | safe }};
+function coutPmCharge(capa) {
+	const base = +(capa && capa.cout_pm) || 0;
+	const bloc = CHARGE_MAGIE;
+	if (!base || !bloc || !(bloc.penalite > 0)) return base;
+	const sens = (capa.sensibilite_charge === null || capa.sensibilite_charge === undefined)
+		? (bloc.sensibilite_defaut || 0) : +capa.sensibilite_charge;
+	const pen = bloc.penalite * sens * (bloc.modificateur === undefined ? 1 : bloc.modificateur);
+	return pen > 0 ? Math.max(base, Math.floor(base * (1 + pen) + 0.5)) : base;
+}
+// « 8 PM » à vide, « 8 → 11 PM » sous la charge.
+function pmTexte(capa) {
+	const base = +(capa && capa.cout_pm) || 0, eff = coutPmCharge(capa);
+	return eff > base ? `${base} → ${eff} PM` : `${base} PM`;
+}
+
 function sortCastable(s) {
 	const j = me() || {};
-	return (j.currentPM || 0) >= s.cout_pm
+	return (j.currentPM || 0) >= coutPmCharge(s)
 		&& coutPvPayable(s) && !canalise()
 		&& (s.cible === 'soi' || capaCibles(s).length > 0);
 }
@@ -2550,7 +2586,7 @@ function sortCastable(s) {
 function compTargets(c) { return capaCibles(c); }
 function compCastable(c) {
 	const j = me() || {};
-	return (j.currentPM || 0) >= c.cout_pm
+	return (j.currentPM || 0) >= coutPmCharge(c)
 		&& coutPvPayable(c) && !canalise()
 		&& (c.cible === 'soi' || capaCibles(c).length > 0);
 }
@@ -2713,6 +2749,9 @@ async function syncActorResources() {
 		CONSOS = data.consommables || [];
 		SORTS = data.sorts || [];
 		COMPS = data.competences || [];
+		// La charge appartient à l'ACTEUR aussi : chaque membre porte SON sac, donc son
+		// propre palier de canalisation et ses propres coûts PM.
+		if (data.charge_magie) CHARGE_MAGIE = data.charge_magie;
 		// La barre appartient à l'ACTEUR : chaque membre du groupe a SA disposition.
 		SLOTS = data.slots || SLOTS;
 		renderSlots();
@@ -2834,7 +2873,7 @@ function sortLabel(s) {
 	const zone = libelleZone(normaliserZone(s.zone), s.cible);
 	if (zone) parts.push(zone);
 	const compos = (s.composants || []).filter(c => c.disponible).length;
-	return `${s.icon || '🔮'} ${s.nom} — ${s.cout_pm} PM`
+	return `${s.icon || '🔮'} ${s.nom} — ${pmTexte(s)}`
 		+ (parts.length ? ` (${parts.join(', ')})` : '')
 		+ (compos ? ` [${compos} compo]` : '');
 }
@@ -3095,7 +3134,7 @@ function compLabel(c) {
 	// Zone d'effet : comme pour les sorts, c'est le seul canal sur mobile (pas de survol).
 	const zone = libelleZone(normaliserZone(c.zone), c.cible);
 	if (zone) parts.push(zone);
-	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${c.cout_pm} PM` : ''}`
+	return `${c.icon || '⚡'} ${c.nom}${c.cout_pm ? ` — ${pmTexte(c)}` : ''}`
 		+ (parts.length ? ` (${parts.join(', ')})` : '');
 }
 // Utilise la compétence `c` : direct (soi / 1 cible) ou ciblage violet (plusieurs cibles).
@@ -3295,7 +3334,10 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 			// (un slot de consommable épuisé se grise, et son index change).
 			if (data.consommables) CONSOS = data.consommables;
 			if (data.sorts) SORTS = data.sorts;
-			if (data.consommables || data.sorts) renderSlots();
+			// Ramasser une carcasse ou boire une potion déplace la charge : le palier et
+			// les coûts PM des cases doivent suivre dans le même rendu.
+			if (data.charge_magie) CHARGE_MAGIE = data.charge_magie;
+			if (data.consommables || data.sorts || data.charge_magie) renderSlots();
 			updateUI(data.combat);
 			return data;
 		} else if (res.status === 409) {

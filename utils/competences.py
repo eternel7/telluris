@@ -31,7 +31,7 @@ from models import character_stats
 from utils.consommables import _as_int, poser_effet
 from utils.sorts import (
 	CIBLE_DEFAUT, CIBLES, INCANTATION_PA_DEFAUT, INCANTATION_PA_MAX, JETS,
-	MAINTIEN_PM_MAX, _bonus_dict, capacite_utilisable_combat,
+	MAINTIEN_PM_MAX, _bonus_dict, _sensibilite_charge, capacite_utilisable_combat,
 	capacite_utilisable_exploration, famille_de, familles_exclues, part_durative,
 )
 from utils.zones_effet import normaliser_zone
@@ -82,6 +82,10 @@ def normaliser_competence(doc) -> dict | None:
 		# côtés. Défaut neutre : 1 PA ⇒ aucune migration.
 		"incantation": max(1, min(INCANTATION_PA_MAX,
 								  _as_int(doc.get("incantation")) or INCANTATION_PA_DEFAUT)),
+		# Sensibilité à la CHARGE PORTÉE — même champ et même lecture que les sorts
+		# (`sorts._sensibilite_charge`, source unique) : le contrat est partagé, la
+		# sensibilité ne doit pas en avoir deux interprétations.
+		"sensibilite_charge": _sensibilite_charge(doc),
 		"cible": cible,
 		"jet": jet,
 		"portee": max(1, _as_int(doc.get("portee")) or 1),
@@ -327,11 +331,25 @@ def competences_depart_par_vocation(find_docs) -> dict:
 
 # ── Payload UI ───────────────────────────────────────────────────────────────────
 
-def liste_competences_payload(character: dict, get_doc, contexte: str) -> list:
+def liste_competences_payload(character: dict, get_doc, contexte: str,
+							  etat_charge: tuple | None = None) -> list:
 	"""Compétences connues pour l'UI (rendu initial ET resync après action). Contexte
 	"combat" : seules les actives à part instantanée (sélecteur ⚡). Contexte "exploration" :
 	TOUTES les compétences connues (l'onglet ⚡ est un catalogue), drapeau `utilisable` pour
 	les seules actives lançables hors combat — une passive n'est jamais « utilisable »."""
+	# Une SEULE mesure de la charge pour toute la liste : `penalite_porteur` résoudrait
+	# l'inventaire à chaque compétence, soit autant de lectures base que d'entrées.
+	# ⚠️ `etat_charge` : en COMBAT, la charge vraie est celle du SNAPSHOT (le butin
+	# ramassé n'est pas encore dans l'inventaire du doc) — l'appelant la passe, sinon
+	# l'étiquette d'une case resterait au tarif d'avant le ramassage.
+	# ⚠️ Import PARESSEUX : `charge_magie` tire `consommables`, dont ce module dépend déjà —
+	# le charger au niveau module ferait dépendre l'import des compétences de l'ordre.
+	from utils import charge_magie
+	_ratio, _canal = etat_charge or charge_magie.etat_porteur(character, get_doc)
+
+	def _pen(capa):
+		return charge_magie.penalite_finale(_ratio, capa, _canal)
+
 	out = []
 	for comp in competences_connues_docs(character, get_doc):
 		if contexte == "combat" and not competence_utilisable_combat(comp):
@@ -356,5 +374,11 @@ def liste_competences_payload(character: dict, get_doc, contexte: str) -> list:
 			# Étiquette de la case + aperçu des cases touchées, comme pour les sorts.
 			"zone": comp["zone"],
 			"effets": comp["effets"],
+			# CHARGE PORTÉE : le coût et l'entretien RÉELLEMENT facturés ici et maintenant,
+			# à côté de leur base. Le client affiche « 12 → 14 PM » et grise sur l'effectif :
+			# sans ces clés il proposerait un sort au tarif à vide que le serveur refuserait.
+			"sensibilite_charge": comp["sensibilite_charge"],
+			"cout_pm_effectif": charge_magie.cout_pm_effectif(comp["cout_pm"], _pen(comp)),
+			"maintien_effectif": charge_magie.maintien_effectif(comp["maintien"], _pen(comp)),
 		})
 	return out

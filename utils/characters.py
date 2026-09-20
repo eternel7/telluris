@@ -295,9 +295,10 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 				"buffs": buffs,
 			})
 
-		# Régén et esquive conférées par l'objet PORTÉ (focus magique, talisman…) : tant
-		# qu'il est équipé, elles jouent en permanence — à chaque tour de monde comme de
-		# combat pour la régén, à chaque attaque physique subie pour l'esquive.
+		# Régén, esquive et aide à la canalisation conférées par l'objet PORTÉ (focus
+		# magique, talisman, robe de mage…) : tant qu'il est équipé, elles jouent en
+		# permanence — à chaque tour de monde comme de combat pour la régén, à chaque
+		# attaque physique subie pour l'esquive, à chaque sort lancé pour la canalisation.
 		# ⚠️ Elles se déclarent dans `effets`, JAMAIS dans `bonus` : ce dernier ne porte que
 		# des CARACTÉRISTIQUES, et `caracts_avec_buffs` écarte toute clé absente de
 		# `caracteristiques_current` — un `bonus:{esquive:3}` serait silencieusement inerte.
@@ -311,6 +312,7 @@ def recompute_equipment_bonus(slots: dict) -> EquipmentBonus:
 			bonus.regen_pv += _effet_int(effets_portes.get("regen_pv"))
 			bonus.regen_pm += _effet_int(effets_portes.get("regen_pm"))
 			bonus.esquive  += _effet_int(effets_portes.get("esquive"))
+			bonus.canalisation += _effet_int(effets_portes.get("canalisation"))
 	return bonus
 
 

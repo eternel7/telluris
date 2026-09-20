@@ -33,6 +33,7 @@ from utils import quetes
 from utils import bois
 from utils import carcasse
 from utils import consommables
+from utils import charge_magie
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
@@ -1148,6 +1149,19 @@ def _inventory_payload(character: dict, sol_doc: dict | None = None) -> dict:
 		"objets_au_sol": [d for r in sol.get("objets_au_sol", []) if (d := resolve_item_ref(r))],
 		"charge":        round(carried_weight(character), 2),
 		"charge_max":    montures.charge_max_porteur(character),
+		# CHARGE → CANALISATION recalculée au même endroit que la charge physique : tout ce
+		# qui bouge l'inventaire passe par ce payload (ramasser, déposer, équiper, acheter,
+		# consommer, recevoir un don, écrire un livre). Sans cette ligne, le palier de
+		# canalisation resterait figé sur le dernier chargement de /play — le symptôme le
+		# plus difficile à relier à sa cause (CLAUDE.md §10).
+		# ⚠️ La capacité MAGIQUE reste `charge_max_of`, brute : `charge_max_porteur` ci-dessus
+		# est la capacité PHYSIQUE, démultipliée sur une monture. Une monture porte plus,
+		# elle ne canalise pas mieux — et elle ne lance pas de sorts.
+		"charge_magie":  charge_magie.bloc_charge(
+			charge_magie.charge_magique_portee(character, resolve_item_ref),
+			charge_max_of(character),
+			consommables.canalisation_bonus(character),
+		),
 	}
 
 
@@ -1304,7 +1318,11 @@ async def lancer_sort(
 	sort = sorts_util.normaliser_sort(get_doc(sort_id))
 	if not sort or not sorts_util.sort_utilisable_exploration(sort):
 		raise HTTPException(status_code=422, detail="Ce sort ne peut pas être lancé hors combat")
-	if int(character.get("currentPM", 0) or 0) < sort["cout_pm"]:
+	# PM sous la CHARGE du lanceur (utils/charge_magie) : un porteur bardé canalise moins
+	# bien. Calculé UNE fois et réutilisé au débit — relire séparément exposerait la garde
+	# et la facture à diverger si l'inventaire bougeait entre les deux.
+	cout_pm = charge_magie.cout_pm_porteur(character, sort, resolve_item_ref)
+	if int(character.get("currentPM", 0) or 0) < cout_pm:
 		raise HTTPException(status_code=409, detail="PM insuffisants")
 	# DÉPENSE DE PV : « certains effets peuvent remplacer tout ou partie de leur coût en PM
 	# par une dépense directe de PV ». Contrôlée AVANT les composants, comme les PM — mais
@@ -1338,7 +1356,7 @@ async def lancer_sort(
 	effet = sorts_util.empiler_effet_sort(cible, sort, effets)
 	eq = sync_equipment_bonus(cible)
 	derived = _derived_from_character(cible, eq)
-	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - sort["cout_pm"])
+	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - cout_pm)
 	# Le sang du LANCEUR, jamais celui de la cible : c'est lui qui paie son propre sort.
 	# ⚠️ Débité AVANT la part instantanée, qui peut soigner la cible — et donc le lanceur
 	# quand il se vise lui-même. Un sort qui coûte 10 PV et en rend 10 doit être neutre,
@@ -1442,7 +1460,9 @@ async def utiliser_competence(
 	comp = competences_util.normaliser_competence(get_doc(competence_id))
 	if not comp or not competences_util.competence_utilisable_exploration(comp):
 		raise HTTPException(status_code=422, detail="Cette compétence ne peut pas être utilisée hors combat")
-	if int(character.get("currentPM", 0) or 0) < comp["cout_pm"]:
+	# Même tarif de charge que les sorts : sorts et compétences partagent le contrat.
+	cout_pm = charge_magie.cout_pm_porteur(character, comp, resolve_item_ref)
+	if int(character.get("currentPM", 0) or 0) < cout_pm:
 		raise HTTPException(status_code=409, detail="PM insuffisants")
 
 	# Buff empilé AVANT le calcul des max (même règle que les consommables et les sorts),
@@ -1452,7 +1472,7 @@ async def utiliser_competence(
 	effet = competences_util.empiler_effet_competence(cible, comp)
 	eq = sync_equipment_bonus(cible)
 	derived = _derived_from_character(cible, eq)
-	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - comp["cout_pm"])
+	character["currentPM"] = max(0, int(character.get("currentPM", 0) or 0) - cout_pm)
 	avant_pv = int(cible.get("currentPV", 0) or 0)
 	avant_pm = int(cible.get("currentPM", 0) or 0)
 	cible["currentPV"] = min(derived.pv_max, avant_pv + effets["pv"])

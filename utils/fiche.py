@@ -16,6 +16,7 @@ from models.character_stats import (
 )
 from utils.characters import sync_equipment_bonus, charge_max_of, resolve_item_ref
 from utils import consommables
+from utils import charge_magie
 from utils import sorts as sorts_util
 from utils import competences as competences_util
 from utils import slots_actions
@@ -86,6 +87,15 @@ def bloc_fiche(character: dict, get_doc_fn, find_docs_fn, race: dict | None = No
 		"xp_niv_next": xp_seuil_niveau(niveau + 1),
 		"effets_actifs": consommables.effets_actifs_payload(character),
 		"caracts_detail": consommables.caracts_detail(character),
+		# CHARGE → CANALISATION : ratio, palier nommé et pénalité en cours. Publié ici, donc
+		# servi à l'identique par /play et par la fiche d'un compagnon. ⚠️ Le client ne
+		# recalcule JAMAIS la courbe : il affiche le palier et les coûts effectifs que les
+		# payloads de sorts/compétences portent déjà, sinon deux formules divergeraient.
+		"charge_magie": charge_magie.bloc_charge(
+			charge_magie.charge_magique_portee(character, get_doc_fn),
+			charge_max_of(character),
+			consommables.canalisation_bonus(character),
+		),
 		"sorts": sorts_util.liste_sorts_payload(character, get_doc_fn, "exploration"),
 		"sorts_apprenables": sorts_util.sorts_apprenables(
 			character, find_docs_fn, resolve_item_ref, vocations

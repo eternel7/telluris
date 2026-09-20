@@ -615,13 +615,17 @@ def _options_jouables(actor: dict, arsenal: dict, distance: int):
 		portee = max(1, sort["portee"])
 		if distance > portee or (portee > 1 and distance <= 1):
 			continue
-		if sort["cout_pm"] > actor.get("currentPM", 0):
+		# Coût sous la CHARGE du lanceur, par la fonction du MOTEUR : une copie locale
+		# ferait diverger le banc d'essai du jeu qu'il mesure. Neutre sur une espèce
+		# (aucun `charge_max` au snapshot) ; réel dès qu'un `character` porte un sac.
+		cout_pm = combat._cout_pm_charge(actor, sort)
+		if cout_pm > actor.get("currentPM", 0):
 			continue
 		notation = sort["effets"].get("degats") or ""
 		if not notation:
 			continue   # pur debuff : hors politique (cf. en-tête de module)
 		yield {"kind": "sort", "label": sort["nom"], "jet": sort.get("jet", "magique"),
-			   "notation": notation, "cout_pm": sort["cout_pm"], "effets": sort["effets"],
+			   "notation": notation, "cout_pm": cout_pm, "effets": sort["effets"],
 			   "ranged": portee > 1,
 			   "effets_cible": "ennemi", "source": sort, "compteur": "sorts"}
 	for comp in arsenal.get("competences") or []:
@@ -630,13 +634,14 @@ def _options_jouables(actor: dict, arsenal: dict, distance: int):
 		portee, ranged = combat._portee_competence(actor, comp)
 		if distance > portee or (ranged and distance <= 1):
 			continue
-		if comp["cout_pm"] > actor.get("currentPM", 0):
+		cout_pm = combat._cout_pm_charge(actor, comp)
+		if cout_pm > actor.get("currentPM", 0):
 			continue
 		notation = combat._degats_competence(actor, comp, comp["effets"])
 		if not notation:
 			continue
 		yield {"kind": "competence", "label": comp["nom"], "jet": comp.get("jet", "cc"),
-			   "notation": notation, "cout_pm": comp["cout_pm"], "effets": comp["effets"],
+			   "notation": notation, "cout_pm": cout_pm, "effets": comp["effets"],
 			   "ranged": ranged,
 			   "effets_cible": "ennemi", "source": comp, "compteur": "competences"}
 
@@ -790,10 +795,12 @@ def _portee_visee(actor: dict, arsenal: dict) -> int:
 	options offensives finançables (l'approche s'arrête là — pas de kiting)."""
 	portees = [max(1, int(p.get("portee", 1) or 1)) for p in actor.get("attaque_profils") or []]
 	for sort in arsenal.get("sorts") or []:
-		if sort["cout_pm"] <= actor.get("currentPM", 0) and sort["effets"].get("degats"):
+		if (combat._cout_pm_charge(actor, sort) <= actor.get("currentPM", 0)
+				and sort["effets"].get("degats")):
 			portees.append(max(1, sort["portee"]))
 	for comp in arsenal.get("competences") or []:
-		if comp["cout_pm"] <= actor.get("currentPM", 0) and comp["effets"].get("degats"):
+		if (combat._cout_pm_charge(actor, comp) <= actor.get("currentPM", 0)
+				and comp["effets"].get("degats")):
 			portees.append(comp["portee"])
 	return max(portees) if portees else 1
 
@@ -924,11 +931,14 @@ def _recap_arsenal(bel: dict) -> dict:
 					  "portee": max(1, int(p.get("portee", 1) or 1)),
 					  "degats": snap.get(p.get("degats", "degats_cc"), "")}
 					 for p in snap.get("attaque_profils") or []],
-		"sorts": [{"label": s["nom"], "cout_pm": s["cout_pm"], "portee": max(1, s["portee"]),
+		# ⚠️ Coût EFFECTIF, comme la portée juste en dessous : le récap doit montrer ce que
+		# le duel paie vraiment, charge comprise.
+		"sorts": [{"label": s["nom"], "cout_pm": combat._cout_pm_charge(snap, s),
+				   "portee": max(1, s["portee"]),
 				   "degats": s["effets"].get("degats", "")} for s in arsenal["sorts"]],
 		# ⚠️ Portée EFFECTIVE et non déclarée : une frappe `cc` emprunte l'allonge de l'arme,
 		# et le récap doit montrer ce que le duel joue vraiment (cf. _options_jouables).
-		"competences": [{"label": c["nom"], "cout_pm": c["cout_pm"],
+		"competences": [{"label": c["nom"], "cout_pm": combat._cout_pm_charge(snap, c),
 						 "portee": combat._portee_competence(snap, c)[0],
 						 "degats": c["effets"].get("degats", "")} for c in arsenal["competences"]],
 		"soutiens": [{"label": s["label"], "cout_pm": s["cout_pm"], "stock": s.get("stock")}

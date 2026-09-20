@@ -101,6 +101,9 @@ Une entrée d'`effets_actifs` posée par une capacité à `maintien > 0` porte *
 #### Un coup peut faire tomber DEUX corps — lien de vie
 Depuis le lien de vie, `_do_attack_on` peut abattre le défenseur **et** son protecteur. Le bloc KO est extrait en **`_traiter_ko`**, appelé une fois par corps, avec `est_joueur` RECALCULÉ depuis la victime ; la déclaration de défaite y a gagné une garde `status == "active"`. Un tour de monstre déclenche aussi un **test de concentration** sur chaque corps qui a réellement perdu des PV. ⚠️ `_do_attack_on` reste le SEUL endroit où un acteur du camp du joueur perd des PV sous un coup — `_resoudre_coup_capacite` et `_frapper_monstre` ne frappent que des monstres, et `utils/simulateur` applique les siens en parallèle (ni lien ni concentration au banc d'essai). Verrouillé par `tests/test_combat_lien_vie.py`.
 
+#### La CHARGE portée renchérit la magie
+Le snapshot porte `charge_magique` et `canalisation` à côté de `charge`/`charge_max` : le ratio des PM de lancement et de l'entretien se lit **là**, jamais en base (règle absolue de la résolution d'un coup). `_ajuster_charge_magique` les suit aux trois sites qui bougent `charge` (ramassage, consommation, composants). Chokepoints : `_cout_pm_charge` (gardes + débit) et `_maintien_du` (entretien + pénalité de concentration). Règle, courbe, deux charges séparées et UI : compétence **telluris-magie** § Charge portée → canalisation du mana. Verrouillé par `tests/test_charge_magie.py`, `tests/test_combat_maintien.py` et `dev/test_charge_magie_client.js`.
+
 #### Sur une CIBLE ENNEMIE (debuffs)
 Chokepoint `_appliquer_effet_sur_cible(..., hostile=True)` : posé seulement si le jet touche, jamais sur une cible que le même coup vient d'abattre, ne remonte sur aucun doc. Un sort/une compétence peut n'être QUE du debuff (`degats OU part_durative`). Couvert par `tests/test_combat_debuffs.py`.
 

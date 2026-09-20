@@ -68,7 +68,7 @@ FAMILLE_INVOCATION = "invocation"
 # Bornes du bloc `invocation` (cf. `invocation_de`). Une durée absente vaut
 # INVOCATION_DUREE_DEFAUT tours — jamais « illimitée » : une créature qui ne se dissipe
 # jamais resterait sur la carte tout le combat pour le prix d'une action.
-INVOCATION_DUREE_DEFAUT = 3
+INVOCATION_DUREE_DEFAUT = 5
 INVOCATION_NOMBRE_MAX = 4
 
 # ── Les trois notions du temps magique ───────────────────────────────────────────
@@ -142,6 +142,10 @@ def _bonus_dict(raw) -> dict:
 		"buffs": buffs,
 		"duree": _as_int(raw.get("duree")),
 		"esquive": _as_int(raw.get("esquive")),
+		# Aide à la CANALISATION sous la charge : % retranché à la pénalité de charge
+		# magique (utils/charge_magie). Un sort ou une compétence peut donc alléger le
+		# mana d'un porteur bardé, comme le fait une robe de mage.
+		"canalisation": _as_int(raw.get("canalisation")),
 		"furtivite": _as_int(raw.get("furtivite")),
 		"degats_pm": str(raw.get("degats_pm") or "").strip(),
 		"cout_pv": _as_int(raw.get("cout_pv")),
@@ -173,6 +177,20 @@ def _lien_vie_dict(raw) -> dict | None:
 	if part <= 0:
 		return None
 	return {"part": part, "reduction": min(LIEN_VIE_PCT_MAX, _as_int(raw.get("reduction")))}
+
+
+def _sensibilite_charge(doc) -> float | None:
+	"""Champ `sensibilite_charge` d'un doc sort/compétence, clampé [0, 1] — ou **None** si
+	le champ est absent, pour que `charge_magie.sensibilite_de` applique le défaut du monde.
+
+	⚠️ Partagé avec `competences.normaliser_competence` : sorts et compétences ont le même
+	contrat, la sensibilité ne doit pas en avoir deux lectures."""
+	if not isinstance(doc, dict) or doc.get("sensibilite_charge") is None:
+		return None
+	try:
+		return min(1.0, max(0.0, float(doc.get("sensibilite_charge"))))
+	except (TypeError, ValueError):
+		return None
 
 
 def effets_de_sort(sort_doc) -> dict:
@@ -332,6 +350,11 @@ def normaliser_sort(sort_doc) -> dict | None:
 						   min(INCANTATION_PA_MAX, _as_int(doc.get("incantation")))),
 		# `maintien` : PM par round pour rester actif, 0 = sort non maintenu.
 		"maintien": min(MAINTIEN_PM_MAX, _as_int(doc.get("maintien"))),
+		# Sensibilité à la CHARGE PORTÉE (0 = le poids ne gêne pas, 1 = plein effet) —
+		# EXPLICITE dans cette liste blanche comme ses voisines. `None` (champ absent) est
+		# conservé tel quel : c'est ce que `charge_magie.sensibilite_de` distingue d'un 0
+		# ÉCRIT, qui doit rester un 0 et non retomber sur le défaut du monde.
+		"sensibilite_charge": _sensibilite_charge(doc),
 		"cible": cible,
 		# Jet de toucher (cible ennemie seulement) : `magique` par défaut — un sort de
 		# CONTACT peut demander `cc` (« au toucher » : il faut d'abord poser la main).
@@ -944,12 +967,26 @@ def _composants_payload(sort: dict, character: dict, resolve_ref_doc) -> list:
 	return out
 
 
-def liste_sorts_payload(character: dict, get_doc, contexte: str) -> list:
+def liste_sorts_payload(character: dict, get_doc, contexte: str,
+						etat_charge: tuple | None = None) -> list:
 	"""Sorts connus pour l'UI (rendu initial ET resync après action) : effets de base +
 	composants avec disponibilité — le client affiche les bonus et envoie les ids engagés.
 	Contexte "combat" : seuls les sorts à part instantanée (sélecteur 🔮). Contexte
 	"exploration" : TOUS les sorts connus (onglet ⚡ = catalogue), drapeau `lancable`
 	pour les seuls lançables hors combat."""
+	# Une SEULE mesure de la charge pour toute la liste : `penalite_porteur` résoudrait
+	# l'inventaire à chaque sort, soit autant de lectures base que de sorts connus.
+	# ⚠️ `etat_charge` : en COMBAT, la charge vraie est celle du SNAPSHOT (le butin
+	# ramassé n'est pas encore dans l'inventaire du doc) — l'appelant la passe, sinon
+	# l'étiquette d'une case resterait au tarif d'avant le ramassage.
+	# ⚠️ Import PARESSEUX : `charge_magie` tire `consommables`, dont ce module dépend déjà —
+	# le charger au niveau module ferait dépendre l'import des sorts de l'ordre.
+	from utils import charge_magie
+	_ratio, _canal = etat_charge or charge_magie.etat_porteur(character, get_doc)
+
+	def _pen(capa):
+		return charge_magie.penalite_finale(_ratio, capa, _canal)
+
 	out = []
 	for sort in sorts_connus_docs(character, get_doc):
 		if contexte == "combat" and not sort_utilisable_combat(sort):
@@ -979,6 +1016,12 @@ def liste_sorts_payload(character: dict, get_doc, contexte: str) -> list:
 			# lui, un sort d'invocation s'afficherait sans le moindre effet annoncé, ses
 			# `effets` étant vides par construction.
 			"invocation": sort["invocation"],
+			# CHARGE PORTÉE : le coût et l'entretien RÉELLEMENT facturés ici et maintenant,
+			# à côté de leur base. Le client affiche « 12 → 14 PM » et grise sur l'effectif :
+			# sans ces clés il proposerait un sort au tarif à vide que le serveur refuserait.
+			"sensibilite_charge": sort["sensibilite_charge"],
+			"cout_pm_effectif": charge_magie.cout_pm_effectif(sort["cout_pm"], _pen(sort)),
+			"maintien_effectif": charge_magie.maintien_effectif(sort["maintien"], _pen(sort)),
 			"composants": _composants_payload(sort, character, get_doc),
 		})
 	return out

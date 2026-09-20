@@ -21,7 +21,10 @@ from routers.montures import montures_router
 from routers.auberge import auberge_router
 from routers.scriptorium import scriptorium_router
 from routers.animations import animations_router
-from utils.combat import get_combat_grid, finalize_combat, verser_butin_au_sol
+from utils.combat import (
+	get_combat_grid, finalize_combat, verser_butin_au_sol, etat_charge_snapshot,
+	bloc_charge_snapshot,
+)
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of
@@ -977,6 +980,11 @@ async def get_combat_page(
 	# (hook `lastActorId`), donc le premier rendu doit déjà être le bon — sinon le joueur
 	# voit et peut déclencher les commandes du principal pendant le tour du compagnon.
 	acteur = get_doc(_actor_character_id(combat_doc)) or character
+	# État de CHARGE de l'acteur pris sur son SNAPSHOT et non sur son doc : en combat le
+	# butin ramassé vit sur le snapshot, et c'est lui que le moteur facture.
+	_acteur_snap = next((j for j in combat_doc.get("joueurs") or []
+						 if j.get("character_id") == acteur.get("_id")), None)
+	_etat_charge = etat_charge_snapshot(_acteur_snap) if _acteur_snap else None
 
 	# Portraits de TOUS les membres du groupe (joueur + compagnons `aventurier:*`) :
 	# le client rend les tokens alliés et le panneau du membre actif à partir de là.
@@ -1037,10 +1045,13 @@ async def get_combat_page(
 			"consommables": consommables.liste_consommables_combat(acteur, resolve_item_ref),
 			# Sorts connus utilisables en combat (part instantanée degats/pv/pm), avec
 			# disponibilité des composants — resynchronisés par la réponse de l'action « sort ».
-			"sorts": sorts_util.liste_sorts_payload(acteur, get_doc, "combat"),
+			# Charge → canalisation de l'acteur : même bloc qu'en ville, pour que le client
+			# n'ait qu'un seul format à lire.
+			"charge_magie": bloc_charge_snapshot(_acteur_snap) if _acteur_snap else None,
+			"sorts": sorts_util.liste_sorts_payload(acteur, get_doc, "combat", _etat_charge),
 			# Compétences ACTIVES utilisables en combat (part instantanée degats/pv/pm/
 			# furtivité) — les passives buffent déjà le snapshot, elles n'apparaissent pas ici.
-			"competences": competences_util.liste_competences_payload(acteur, get_doc, "combat"),
+			"competences": competences_util.liste_competences_payload(acteur, get_doc, "combat", _etat_charge),
 			# Barre d'action : grille de slots à positions STABLES, propre à l'acteur —
 			# resynchronisée par GET /api/combat/{id}/acteur au changement de tour.
 			"slots": slots_actions.slots_payload(acteur, get_doc),

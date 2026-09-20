@@ -10,13 +10,14 @@ from models.character_stats import (
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
 	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id,
-	lieu_label, noter_victoire,
+	lieu_label, noter_victoire, resolve_item_ref,
 )
 from utils.consommables import (
-	caracts_avec_buffs, est_consommable, effet_instantane, effets_de, esquive_bonus,
-	regen_bonus,
+	caracts_avec_buffs, canalisation_bonus, est_consommable, effet_instantane, effets_de,
+	esquive_bonus, regen_bonus,
 	cumul_effets, identite_source, poser_effet, _as_int as _eff_int,
 )
+from utils import charge_magie
 from utils.sorts import (
 	part_durative, effets_d_arme, concat_degats, INCANTATION_PA_MAX,
 	capacite_utilisable_combat, effets_agissent_sur_cible,
@@ -67,6 +68,87 @@ def _recompute_player_deplacement(joueur: dict) -> None:
 		joueur.get("deplacement_base", joueur.get("deplacement", 1)),
 		joueur.get("charge", 0), joueur.get("charge_max", 0),
 	)
+
+
+def _ajuster_charge_magique(joueur: dict, delta_poids: float, coef: float = 1.0) -> None:
+	"""Suit la charge MAGIQUE au rythme de la charge physique, en combat.
+
+	Le snapshot fige `charge_magique` à l'entrée (la résolution d'un coup ne lit pas la
+	base) : chaque site qui bouge `charge` doit donc bouger celle-ci du même mouvement,
+	sans quoi ramasser une carcasse alourdirait le sac sans alourdir la magie. `coef` est
+	le `charge_magique` de l'objet quand on l'a sous la main ; à défaut 1.0, c'est-à-dire
+	le poids physique — le repli déjà retenu partout ailleurs.
+
+	⚠️ Repli sur `charge` quand la clé manque : un combat ouvert AVANT cette mécanique n'a
+	pas de `charge_magique` sur ses snapshots, et doit continuer de tourner (CLAUDE.md §4).
+	"""
+	actuelle = joueur.get("charge_magique")
+	if actuelle is None:
+		actuelle = joueur.get("charge", 0)
+	joueur["charge_magique"] = max(0.0, round(float(actuelle) + delta_poids * coef, 2))
+
+
+def etat_charge_snapshot(joueur: dict) -> tuple:
+	"""`(ratio, canalisation)` d'un SNAPSHOT de combat, à passer aux `liste_*_payload`.
+
+	Hors combat ces listes mesurent la charge sur le doc personnage ; en combat c'est faux
+	dès le premier ramassage — le butin vit sur le snapshot (`butin_ramasse`) et n'entre
+	dans l'inventaire du doc qu'à la fin. Sans cette passerelle, l'étiquette d'une case
+	resterait au tarif d'avant le ramassage pendant que le moteur, lui, facture le vrai.
+	"""
+	charge = joueur.get("charge_magique")
+	if charge is None:
+		charge = joueur.get("charge", 0)
+	return (charge_magie.ratio_charge(charge, joueur.get("charge_max", 0)),
+			joueur.get("canalisation", 0))
+
+
+def bloc_charge_snapshot(joueur: dict) -> dict:
+	"""Bloc `charge_magie` d'un SNAPSHOT, pour le payload de combat — même forme que celui
+	que `fiche.bloc_fiche` publie en ville, pour que le client n'ait qu'un seul format."""
+	charge = joueur.get("charge_magique")
+	if charge is None:
+		charge = joueur.get("charge", 0)
+	return charge_magie.bloc_charge(charge, joueur.get("charge_max", 0),
+									joueur.get("canalisation", 0))
+
+
+def _penalite_charge_acteur(joueur: dict, capacite: dict | None) -> float:
+	"""Pénalité de charge appliquée à CETTE capacité pour CET acteur, ici et maintenant.
+
+	Lit le seul snapshot — aucune base, aucun doc personnage : c'est la règle absolue de
+	la résolution d'un coup. Un acteur sans `charge_max` (monstre, invocation, fixture)
+	donne un ratio de 0, donc aucune pénalité : la mécanique est celle des porteurs.
+	"""
+	ratio, canalisation = etat_charge_snapshot(joueur)
+	return charge_magie.penalite_finale(ratio, capacite, canalisation)
+
+
+def _maintien_du(joueur: dict, entree: dict) -> int:
+	"""PM d'entretien réellement dus ce tour-ci pour ce sort maintenu, charge comprise.
+
+	Écrit `maintien_effectif` sur l'entrée de concentration ET sur la chip correspondante
+	(`effets_actifs`, retrouvée par `source_id`) : le client annonce `🔄 N PM/round` depuis
+	la chip, et afficher la base pendant qu'on prélève le tarif chargé serait un mensonge
+	à l'écran. **Source unique** du montant, partagée par le prélèvement de début de tour
+	et par la pénalité d'un test de concentration réussi."""
+	du = charge_magie.maintien_effectif(
+		entree.get("maintien"), _penalite_charge_acteur(joueur, entree))
+	entree["maintien_effectif"] = du
+	sort_id = str(entree.get("sort_id") or "")
+	for chip in joueur.get("effets_actifs") or []:
+		if str(chip.get("source_id") or "") == sort_id:
+			chip["maintien"] = du
+			break
+	return du
+
+
+def _cout_pm_charge(joueur: dict, capacite: dict | None) -> int:
+	"""PM de lancement d'une capacité sous la charge du porteur. **Source unique** : la
+	garde « PM insuffisants » et le débit doivent lire exactement la même valeur, sinon un
+	sort serait proposé puis refusé (ou pire, débité d'un autre montant)."""
+	return charge_magie.cout_pm_effectif(
+		(capacite or {}).get("cout_pm"), _penalite_charge_acteur(joueur, capacite))
 
 
 # ── Effets à durée EN COMBAT ─────────────────────────────────────────────────
@@ -1176,7 +1258,12 @@ def _payer_maintiens(combat_doc: dict, acteur: dict) -> None:
 	cadence, et le rend indépendant du nombre de combattants.
 	"""
 	for entree in list(_concentrations(acteur)):
-		du = _eff_int(entree.get("maintien"))
+		# ⚠️ L'entretien se REFACTURE à chaque tour au tarif de la charge COURANTE — c'est
+		# l'inverse de l'incantation, qui fige le sien. Un mage qui ramasse un butin au
+		# tour 3 doit sentir son mur de feu peser plus lourd au tour 4 ; il peut aussi
+		# lâcher son sac pour le retenir. La base reste intacte sur l'entrée : seule
+		# `maintien_effectif` bouge, sinon la pénalité se composerait avec elle-même.
+		du = _maintien_du(acteur, entree)
 		if du <= 0:
 			continue
 		if _eff_int(acteur.get("currentPM")) < du:
@@ -1258,7 +1345,11 @@ def _armer_incantation(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 		"dy": dy,
 		"pa_total": max(1, int(sdoc.get("incantation", 1) or 1)),
 		"pa_investis": 0,
-		"pm_total": max(0, int(sdoc.get("cout_pm", 0) or 0)),
+		# ⚠️ **Le seul tarif de charge FIGÉ du jeu**, et c'est voulu : une incantation
+		# absorbe tout le budget du lanceur et NE S'ABANDONNE PAS. Facturer au tarif du
+		# moment où l'on s'engage est cohérent avec cet engagement — et recalculer à
+		# chaque tranche ferait varier le prix d'un round à l'autre sous un ramassage.
+		"pm_total": _cout_pm_charge(joueur, sdoc),
 		"pm_verses": 0,
 	}
 	combat_doc.setdefault("log", []).append(_avec_etat({
@@ -2032,6 +2123,12 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# Charge portée à l'entrée en combat → malus de déplacement si > charge_max/2.
 	charge = round(carried_weight(character), 2)
 	deplacement = _charge_penalized_deplacement(derived.deplacement, charge, derived.charge_max)
+	# Charge MAGIQUE (poids × coefficient `charge_magique` des items) et aide à la
+	# canalisation : figées sur le snapshot parce que la résolution d'un coup n'a PAS le
+	# droit de lire la base. Recalculées aux mêmes deux sites que `charge` (ramassage,
+	# consommation), donc jamais périmées — cf. `_recompute_charge_magique`.
+	charge_mag = round(charge_magie.charge_magique_portee(character, resolve_item_ref), 2)
+	canalisation = canalisation_bonus(character)
 
 	# Profils d'attaque selon les armes équipées (mêlée/jet/tir) + portée de mêlée (legacy).
 	attaques = _weapon_attacks(character, base)
@@ -2070,6 +2167,8 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"deplacement_base": derived.deplacement,  # sans malus (pour recalcul au ramassage)
 		"charge": charge,
 		"charge_max": derived.charge_max,
+		"charge_magique": charge_mag,
+		"canalisation": canalisation,
 		"portee": portee_cac,
 		"attaque_profils": attaques,   # profils d'attaque (cac/jet/tir) ; ≠ "attaques" (compteur)
 		"pos": {"x": 0, "y": 0},
@@ -3011,7 +3110,10 @@ def _tester_concentration(combat_doc: dict, acteur: dict, attaquant: dict,
 		if issue == "critique":
 			continue
 		if issue == "reussite":
-			penalite = min(_eff_int(acteur.get("currentPM")), _eff_int(entree.get("maintien")))
+			# Tenir sous le coup coûte une fois l'entretien — au tarif de la CHARGE, comme
+			# le prélèvement de début de tour : les deux sont le même geste (payer pour ne
+			# pas lâcher), et les facturer différemment serait incompréhensible.
+			penalite = min(_eff_int(acteur.get("currentPM")), _maintien_du(acteur, entree))
 			acteur["currentPM"] = _eff_int(acteur.get("currentPM")) - penalite
 			continue
 		_rompre_concentration(
@@ -3823,7 +3925,11 @@ def _lancer_capacite(combat_doc: dict, joueur: dict, sdoc: dict, effets: dict,
 	profil = _profil_de(kind)
 	cle = profil["cle"]
 	nom_capacite = sdoc.get("nom", profil["nom_defaut"])
-	cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
+	# PM sous la CHARGE du lanceur (utils/charge_magie) : un porteur bardé canalise moins
+	# bien. Même fonction que la garde de `resolve_action`, sinon un sort serait proposé
+	# à un prix et débité à un autre. ⚠️ Une incantation longue arrive ici avec `cout_pm`
+	# déjà à 0 (ses PM sont partis par tranches) : la pénalité ne s'applique pas deux fois.
+	cout_pm = _cout_pm_charge(joueur, sdoc)
 	# Une compétence ne porte jamais de bloc `invocation` (`normaliser_competence` ne le
 	# lit pas) : le `.get` suffit, aucune garde par type n'est nécessaire.
 	invocation = sdoc.get("invocation") or None
@@ -4004,6 +4110,10 @@ def _enregistrer_concentration(combat_doc: dict, joueur: dict, sdoc: dict,
 		"nom": sdoc.get("nom", "un sort"),
 		"icon": sdoc.get("icon", "🔮"),
 		"maintien": max(0, int(sdoc.get("maintien", 0) or 0)),
+		# Sensibilité du sort à la CHARGE, recopiée depuis le doc : `_payer_maintiens`
+		# recalcule l'entretien à CHAQUE tour et n'a plus le doc sous la main. Sans elle,
+		# l'entretien retomberait sur la sensibilité par défaut du monde au 2ᵉ round.
+		"sensibilite_charge": sdoc.get("sensibilite_charge"),
 		"cible_id": cible_id or "",
 	}
 	concentrations = [c for c in _concentrations(joueur)
@@ -4278,6 +4388,7 @@ def resolve_action(
 		# Référence {item, poids} : le poids d'instance tiré est conservé dans l'inventaire.
 		joueur.setdefault("butin_ramasse", []).append({"item": item["_id"], "poids": poids})
 		joueur["charge"] = round(joueur.get("charge", 0) + poids, 2)
+		_ajuster_charge_magique(joueur, poids, charge_magie.coefficient_item(item))
 		_recompute_player_deplacement(joueur)  # malus de charge éventuel
 		joueur["ramasses"] = joueur.get("ramasses", 0) + 1
 		_refresh_actions(joueur)
@@ -4304,7 +4415,9 @@ def resolve_action(
 		joueur["currentPV"] = min(joueur["pv_max"], avant_pv + eff["pv"])
 		joueur["currentPM"] = min(joueur["pm_max"], avant_pm + eff["pm"])
 		# L'item quitte le sac → la charge portée baisse (miroir inverse du ramassage).
-		joueur["charge"] = round(max(0.0, joueur.get("charge", 0) - float(item.get("poids", 0) or 0)), 2)
+		_poids_consomme = float(item.get("poids", 0) or 0)
+		joueur["charge"] = round(max(0.0, joueur.get("charge", 0) - _poids_consomme), 2)
+		_ajuster_charge_magique(joueur, -_poids_consomme, charge_magie.coefficient_item(item))
 		_recompute_player_deplacement(joueur)
 		joueur["consommes"] = joueur.get("consommes", 0) + 1
 		_refresh_actions(joueur)
@@ -4354,7 +4467,7 @@ def resolve_action(
 			return {"error": "Sort invalide."}
 		sdoc = sort["doc"]
 		effets = sort.get("effets") or {}
-		cout_pm = max(0, int(sdoc.get("cout_pm", 0) or 0))
+		cout_pm = _cout_pm_charge(joueur, sdoc)
 		# ⚠️ MÊME FONCTION que `sorts.sort_utilisable_combat`, celle qui a filtré ce sort
 		# côté router : les deux ne peuvent plus diverger. `effets` est passé à part —
 		# ce sont les effets FUSIONNÉS avec le bonus des composants engagés, et c'est sur
@@ -4390,6 +4503,9 @@ def resolve_action(
 		poids_consommes = float(sort.get("poids_consommes", 0) or 0)
 		if poids_consommes:
 			joueur["charge"] = round(max(0.0, joueur.get("charge", 0) - poids_consommes), 2)
+			# Coefficient inconnu ici : le router agrège PLUSIEURS composants en un seul
+			# poids. Repli à 1.0, soit le poids physique — le défaut partout ailleurs.
+			_ajuster_charge_magique(joueur, -poids_consommes)
 			_recompute_player_deplacement(joueur)
 			result["charge"] = joueur["charge"]
 		result["currentPM"] = joueur["currentPM"]
@@ -4419,7 +4535,7 @@ def resolve_action(
 		if not competence:
 			return {"error": "Compétence invalide."}
 		effets = competence.get("effets") or {}
-		cout_pm = max(0, int(competence.get("cout_pm", 0) or 0))
+		cout_pm = _cout_pm_charge(joueur, competence)
 		# ⚠️ MÊME FONCTION que `competences.competence_utilisable_combat`, celle qui a
 		# filtré cette compétence côté router : les deux ne peuvent plus diverger.
 		if not capacite_utilisable_combat(competence, effets):

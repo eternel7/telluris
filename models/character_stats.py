@@ -388,6 +388,42 @@ MAGIE_ECOLE_COUT_COEFF: int = 2
 # les deux) — pas de liste à maintenir en double.
 COMPETENCE_COUT_COEFF: int = 2
 
+# ── Charge portée → canalisation du mana ─────────────────────────────────────────
+# Le poids n'est pas qu'une limite d'inventaire : c'est l'effort que le corps subit
+# pendant qu'il manipule le mana. Le ratio `charge_magique / charge_max` (utils/charge_magie)
+# renchérit les PM de LANCEMENT et l'entretien des sorts MAINTENUS — jamais la concentration
+# ni les PA d'incantation, et jamais au point d'interdire la magie.
+#
+# ⚠️ `CHARGE_MAGIE_PEN_MAX = 0` DÉSACTIVE toute la mécanique : c'est l'interrupteur de repli
+# si l'équilibrage déplaît, sans toucher une ligne de code.
+#
+# `FRANCHISE` : sous ce ratio, aucune pénalité — le mage voyage léger sans y penser. Le monter
+# rend la magie confortable plus longtemps. `PEN_MAX` : la pénalité atteinte pile à 100 % de la
+# capacité, approchée en QUADRATIQUE depuis la franchise (progression douce, aucune rupture).
+# `PENTE_SURCHARGE` : ce qui s'ajoute par unité de ratio AU-DELÀ de 100 %, volontairement plus
+# raide — la surcharge doit se payer. `PEN_PLAFOND` borne le tout (3.0 = coût ×4).
+CHARGE_MAGIE_FRANCHISE: float = 0.25
+CHARGE_MAGIE_PEN_MAX: float = 0.60
+CHARGE_MAGIE_PENTE_SURCHARGE: float = 1.5
+CHARGE_MAGIE_PEN_PLAFOND: float = 3.0
+# Sensibilité d'un sort/compétence SANS champ `sensibilite_charge` (0 = insensible au poids,
+# 1 = plein effet). Monter ce défaut durcit d'un coup tout le répertoire non annoté.
+SENSIBILITE_CHARGE_DEFAUT: float = 0.5
+# Borne du coefficient `charge_magique` d'un item (poids RESSENTI par la canalisation, défaut
+# 1.0 = le poids physique) : < 1 pour un sac dimensionnel, > 1 pour un artefact léger mais
+# pesant sur le mana. Le plafond évite qu'une donnée aberrante gèle la magie.
+CHARGE_MAGIQUE_COEF_MAX: float = 10.0
+# Bornes HAUTES des paliers lisibles, partagées par le serveur et l'affichage. Au-delà du
+# dernier, c'est la surcharge. ⚠️ Muté en place au rechargement (lu par attribut de module).
+CHARGE_MAGIE_PALIERS: dict[str, float] = {
+	"legere": 0.25, "moderee": 0.5, "importante": 0.75, "lourde": 1.0,
+}
+# Plafond de la réduction (%) qu'un objet/buff peut apporter à la pénalité de charge (champ
+# `effets.canalisation` : robe de mage, ceinture de force, bottes magiques). ⚠️ < 100 par
+# construction : la charge ne doit JAMAIS pouvoir être entièrement annulée, sinon
+# l'arbitrage « s'équiper ou canaliser » disparaît.
+CANALISATION_REDUCTION_MAX: int = 90
+
 # ── Recrutement d'aventuriers & compagnons ───────────────────────────────────────
 # Un lieu recruteur (tag "recrutement" ou guilde d'aventuriers) affiche un tableau de
 # recrues générées (docs `aventurier:*`, miroir du character). L'offre dépend de la
@@ -860,6 +896,14 @@ def current_world_variables() -> dict:
 		"MAGIE_POLYVALENTE_VOCATIONS": list(MAGIE_POLYVALENTE_VOCATIONS),
 		"MAGIE_ECOLE_COUT_COEFF": MAGIE_ECOLE_COUT_COEFF,
 		"COMPETENCE_COUT_COEFF": COMPETENCE_COUT_COEFF,
+		"CHARGE_MAGIE_FRANCHISE": CHARGE_MAGIE_FRANCHISE,
+		"CHARGE_MAGIE_PEN_MAX": CHARGE_MAGIE_PEN_MAX,
+		"CHARGE_MAGIE_PENTE_SURCHARGE": CHARGE_MAGIE_PENTE_SURCHARGE,
+		"CHARGE_MAGIE_PEN_PLAFOND": CHARGE_MAGIE_PEN_PLAFOND,
+		"SENSIBILITE_CHARGE_DEFAUT": SENSIBILITE_CHARGE_DEFAUT,
+		"CHARGE_MAGIQUE_COEF_MAX": CHARGE_MAGIQUE_COEF_MAX,
+		"CHARGE_MAGIE_PALIERS": dict(CHARGE_MAGIE_PALIERS),
+		"CANALISATION_REDUCTION_MAX": CANALISATION_REDUCTION_MAX,
 		"RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE": {k: dict(v) for k, v in RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE.items()},
 		"RECRUTEMENT_GROUPE_TAILLE_MAX": RECRUTEMENT_GROUPE_TAILLE_MAX,
 		"RECRUTEMENT_BOARD_DUREE_SECONDES": RECRUTEMENT_BOARD_DUREE_SECONDES,
@@ -957,6 +1001,9 @@ def load_world_variables() -> dict:
 	global QUETE_CHASSE_XP_FACTEUR, QUETE_CHASSE_PROBA_RANG, RANG_GUILDE_MAX_DEFAUT
 	global FOCUS_EVENEMENT_MULT, FOCUS_CIBLE_MULT
 	global SORT_COUT_COEFF, MAGIE_ECOLE_COUT_COEFF, COMPETENCE_COUT_COEFF
+	global CHARGE_MAGIE_FRANCHISE, CHARGE_MAGIE_PEN_MAX, CHARGE_MAGIE_PENTE_SURCHARGE
+	global CHARGE_MAGIE_PEN_PLAFOND, SENSIBILITE_CHARGE_DEFAUT, CHARGE_MAGIQUE_COEF_MAX
+	global CANALISATION_REDUCTION_MAX
 	global CONCENTRATION_VOL_DIV
 	global RECRUTEMENT_GROUPE_TAILLE_MAX, RECRUTEMENT_BOARD_DUREE_SECONDES, RECRUTEMENT_BOARD_DUREE_JITTER
 	global RECRUTEMENT_PART_BUTIN_MIN, RECRUTEMENT_PART_BUTIN_MAX, RECRUTEMENT_NIVEAU_POINTS_PAR_NIVEAU
@@ -1107,6 +1154,38 @@ def load_world_variables() -> dict:
 	if isinstance(v.get("MAGIE_POLYVALENTE_VOCATIONS"), list):
 		MAGIE_POLYVALENTE_VOCATIONS[:] = [str(x) for x in v["MAGIE_POLYVALENTE_VOCATIONS"]]
 	COMPETENCE_COUT_COEFF = max(0, int(v.get("COMPETENCE_COUT_COEFF", COMPETENCE_COUT_COEFF)))
+	# Charge → magie. Clamps : la franchise reste STRICTEMENT sous 1 (à 1 la mécanique ne
+	# s'exprimerait qu'en surcharge, et la division `(1 − franchise)` exploserait) ; la
+	# pénalité max et la pente restent ≥ 0 (une charge ne peut pas rendre la magie moins
+	# chère) ; la sensibilité par défaut vit dans [0, 1] comme celle d'un doc.
+	CHARGE_MAGIE_FRANCHISE = min(0.99, max(0.0, float(
+		v.get("CHARGE_MAGIE_FRANCHISE", CHARGE_MAGIE_FRANCHISE))))
+	CHARGE_MAGIE_PEN_MAX = max(0.0, float(v.get("CHARGE_MAGIE_PEN_MAX", CHARGE_MAGIE_PEN_MAX)))
+	CHARGE_MAGIE_PENTE_SURCHARGE = max(0.0, float(
+		v.get("CHARGE_MAGIE_PENTE_SURCHARGE", CHARGE_MAGIE_PENTE_SURCHARGE)))
+	CHARGE_MAGIE_PEN_PLAFOND = max(0.0, float(
+		v.get("CHARGE_MAGIE_PEN_PLAFOND", CHARGE_MAGIE_PEN_PLAFOND)))
+	SENSIBILITE_CHARGE_DEFAUT = min(1.0, max(0.0, float(
+		v.get("SENSIBILITE_CHARGE_DEFAUT", SENSIBILITE_CHARGE_DEFAUT))))
+	# Plancher à 1.0 : un coefficient d'item plafonné sous 1 interdirait tout artefact
+	# « léger mais pesant sur le mana », qui est la moitié de la raison d'être du champ.
+	CHARGE_MAGIQUE_COEF_MAX = max(1.0, float(
+		v.get("CHARGE_MAGIQUE_COEF_MAX", CHARGE_MAGIQUE_COEF_MAX)))
+	# Borné à 99 : à 100 un seul objet annulerait la charge et l'arbitrage disparaîtrait.
+	CANALISATION_REDUCTION_MAX = min(99, max(0, int(
+		v.get("CANALISATION_REDUCTION_MAX", CANALISATION_REDUCTION_MAX))))
+	# Muté EN PLACE (utils/charge_magie lit la table par attribut de module à chaque appel).
+	# Les bornes illisibles sont écartées plutôt que de faire tomber le chargement ; une
+	# table vide ramène tout au palier de surcharge, ce qui reste lisible.
+	if isinstance(v.get("CHARGE_MAGIE_PALIERS"), dict):
+		paliers = {}
+		for nom, borne in v["CHARGE_MAGIE_PALIERS"].items():
+			try:
+				paliers[str(nom)] = float(borne)
+			except (TypeError, ValueError):
+				continue
+		CHARGE_MAGIE_PALIERS.clear()
+		CHARGE_MAGIE_PALIERS.update(paliers)
 
 	if isinstance(v.get("RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE"), dict):
 		RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE.clear()
@@ -1240,6 +1319,12 @@ class EquipmentBonus(BaseModel):
 	# qui la lit au PREMIER NIVEAU de l'agrégat — d'où un champ à part, et non une entrée
 	# de `buffs` (où `esquive` n'est pas une caractéristique et serait ignorée en silence).
 	esquive:	  int = 0
+	# Aide à la CANALISATION sous la charge (même canal `effets`, même raison d'être un champ
+	# à part qu'`esquive`) : pourcentage retranché à la pénalité de charge magique
+	# (utils/charge_magie), plafonné par CANALISATION_REDUCTION_MAX. Une robe de mage ou une
+	# ceinture de force allège le mana, elle n'ouvre PAS la limite de portage — `charge_max_of`
+	# reste brute (anti-exploit, cf. en-tête de utils/consommables).
+	canalisation: int = 0
 
 
 # ── Stats dérivées calculées ──────────────────────────────────────────────────

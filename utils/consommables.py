@@ -39,6 +39,7 @@ def effets_de(item_doc) -> dict:
 		"buffs": buffs,
 		"duree": _as_int(raw.get("duree")),
 		"esquive": _as_int(raw.get("esquive")),
+		"canalisation": _as_int(raw.get("canalisation")),
 	}
 
 
@@ -49,7 +50,7 @@ def est_consommable(item_doc) -> bool:
 		return False
 	eff = effets_de(item_doc)
 	return bool(eff["pv"] or eff["pm"] or eff["regen_pv"] or eff["regen_pm"]
-				or eff["buffs"] or eff["esquive"])
+				or eff["buffs"] or eff["esquive"] or eff["canalisation"])
 
 
 def effet_instantane(item_doc) -> bool:
@@ -148,12 +149,14 @@ def cumul_effets(effets: list) -> dict:
 	buffs = dict(positifs)
 	for code, delta in negatifs.items():
 		buffs[code] = buffs.get(code, 0) + delta
-	regen_pv = regen_pm = esquive = 0
+	regen_pv = regen_pm = esquive = canalisation = 0
 	for eff in effets or []:
 		regen_pv = max(regen_pv, _as_int((eff or {}).get("regen_pv")))
 		regen_pm = max(regen_pm, _as_int((eff or {}).get("regen_pm")))
 		esquive = max(esquive, _as_int((eff or {}).get("esquive")))
-	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive}
+		canalisation = max(canalisation, _as_int((eff or {}).get("canalisation")))
+	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive,
+			"canalisation": canalisation}
 
 
 def _sources_de_buffs_detaillees(character: dict, origines: tuple = ORIGINES_BUFFS) -> list:
@@ -302,6 +305,25 @@ def esquive_bonus(character: dict, origines: tuple = ORIGINES_BUFFS) -> int:
 	return total
 
 
+def canalisation_bonus(character: dict, origines: tuple = ORIGINES_BUFFS) -> int:
+	"""Aide à la CANALISATION sous la charge : pourcentage retranché à la pénalité de charge
+	magique (utils/charge_magie). Robe de mage, ceinture de force, bottes magiques, potion
+	de concentration, passive de vocation — tout passe par ici.
+
+	Même arithmétique qu'`esquive_bonus`, et pour les mêmes raisons : les objets portés et
+	les passives s'ADDITIONNENT (une robe et un anneau se cumulent), tandis qu'entre effets
+	à durée seul le MEILLEUR compte (non-cumul). Le plafonnement final est le travail de
+	`charge_magie.modificateur_de` — ici on ne fait qu'agréger.
+
+	⚠️ Ceci n'augmente JAMAIS la charge portable : `characters.charge_max_of` reste brute.
+	On allège le mana, pas le sac."""
+	temporaires, permanents = _scinder_sources(character, origines)
+	total = cumul_effets(temporaires)["canalisation"]
+	for eff in permanents:
+		total += _as_int(eff.get("canalisation"))
+	return total
+
+
 def empiler_effet(character: dict, item_doc: dict) -> dict | None:
 	"""Empile l'effet à durée (buffs/régén) de l'item sur character["effets_actifs"]
 	(mute en place, NE SAUVEGARDE PAS). Renvoie l'entrée créée, None si l'item n'a pas
@@ -309,7 +331,7 @@ def empiler_effet(character: dict, item_doc: dict) -> dict | None:
 	l'entrée précédente (durée relancée depuis le dernier usage)."""
 	eff = effets_de(item_doc)
 	if eff["duree"] <= 0 or not (eff["buffs"] or eff["regen_pv"] or eff["regen_pm"]
-			or eff["esquive"]):
+			or eff["esquive"] or eff["canalisation"]):
 		return None
 	entry = {
 		"item_id": item_doc.get("item") or item_doc.get("_id"),
@@ -319,6 +341,7 @@ def empiler_effet(character: dict, item_doc: dict) -> dict | None:
 		"regen_pv": eff["regen_pv"],
 		"regen_pm": eff["regen_pm"],
 		"esquive": eff["esquive"],
+		"canalisation": eff["canalisation"],
 		"restants": eff["duree"],
 	}
 	return poser_effet(character, entry)

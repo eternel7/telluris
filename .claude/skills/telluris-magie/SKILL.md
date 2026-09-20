@@ -47,6 +47,28 @@ Trois contraintes DISTINCTES sur un doc `sort:*`, faites pour se combiner librem
 **UI** : barre de progression violette `#joueur-incantation` (`renderIncantation`) — ⚠️ `incantation` est dans `CHAMPS_ETAT` et posé à **`None` plutôt que retiré** à sa fin, sinon `_avec_etat` (qui ne photographie que les clés PRÉSENTES) ne gèlerait jamais sa disparition. Chip `.sh-effet-chip.maintenu` annonçant `🔄 N PM/round` (et non un `⏳` qui ne bougerait jamais), **cliquable** pour relâcher — id retrouvé par la POSITION dans la liste, jamais interpolé dans le markup (CLAUDE.md §9, ce template n'a pas d'`escapeHtml`). Grisage par `coutPvPayable` / `canalise` dans `sortCastable` et `compCastable`.
 
 
+### Charge portée → canalisation du mana
+Le poids renchérit **les PM de LANCEMENT et l'entretien d'un sort MAINTENU** — jamais la concentration, jamais les PA d'incantation, et **jamais au point d'interdire** (le plafond garantit qu'un guerrier bardé lance encore). Logique pure `utils/charge_magie.py`.
+
+```
+ratio = charge magique portée / charge_max        pénalité = f(ratio)
+pénalité finale = pénalité × sensibilite_charge × modificateur de canalisation
+coût effectif = arrondi_plus_proche(base × (1 + pénalité finale))
+```
+
+`f(ratio)` en trois régimes, **sans rupture de valeur** (seule la pente change à 100 %) : 0 sous `CHARGE_MAGIE_FRANCHISE`, **quadratique** jusqu'à `CHARGE_MAGIE_PEN_MAX` à la capacité, puis linéaire plus raide (`CHARGE_MAGIE_PENTE_SURCHARGE`), le tout borné par `CHARGE_MAGIE_PEN_PLAFOND`. Paliers lisibles `CHARGE_MAGIE_PALIERS` (légère / modérée / importante / lourde / surcharge). ⚠️ **`CHARGE_MAGIE_PEN_MAX = 0` désactive toute la mécanique** depuis `/admin`, sans redémarrage.
+
+⚠️ **DEUX CHARGES, et c'est tout le montage.** La charge PHYSIQUE (`characters.charge_max_of`, F×5) reste **BRUTE** : c'est elle que lisent la garde de surcharge, le butin et les montures, et aucun buff ne l'ouvre (CLAUDE.md §3 — sinon : boire, ramasser, laisser expirer). Seule la charge MAGIQUE est modulable, par deux canaux : `charge_magique` sur un **item** (coefficient, défaut 1.0 — sac dimensionnel < 1, artefact pesant sur le mana > 1) et `effets.canalisation` sur un objet/sort/potion (% retranché à la pénalité, plafonné par `CANALISATION_REDUCTION_MAX` < 100). La ceinture de force n'ouvre donc pas l'inventaire : elle allège le mana.
+- `canalisation` suit **à la lettre le patron d'`esquive`** (`cumul_effets` → `consommables.canalisation_bonus`, champ propre sur `EquipmentBonus`, repli dans `recompute_equipment_bonus`) : meilleur seul entre effets à durée, additif pour équipement et passives. Un objet qui GÊNE la canalisation n'y passe pas (la clé reste ≥ 0) — il s'exprime par `charge_magique > 1` sur son propre doc.
+- `sensibilite_charge` (0-1) sur un `sort:*`/`competence:*`, liste blanche partagée (`sorts._sensibilite_charge`). **Champ absent ⇒ `SENSIBILITE_CHARGE_DEFAUT`** ; un **0 ÉCRIT reste un 0** (on teste la présence, jamais la véracité).
+
+**Où c'est branché** — le coût PM n'était un chokepoint nulle part (4 copies de la garde, 3 familles de débit), d'où `combat._cout_pm_charge` / `charge_magie.cout_pm_porteur` : gardes et débits de `resolve_action`, `_lancer_capacite`, exploration (`routers/user`), et le simulateur (sinon le banc d'essai diverge du jeu). Entretien : `_maintien_du`, source unique du prélèvement de début de tour **et** de la pénalité d'un test de concentration réussi — il **refacture à chaque tour** (se délester en plein combat sauve un sort) et réécrit `maintien_effectif` sur l'entrée ET sur la chip, la base restant intacte (sinon la pénalité se composerait avec elle-même).
+- ⚠️ **En combat, le ratio vient du SNAPSHOT** (`charge_magique`/`canalisation`, posés à l'entrée, suivis par `_ajuster_charge_magique` aux 3 sites qui bougent `charge`) : la résolution d'un coup ne lit jamais la base. Les `liste_*_payload` prennent un `etat_charge` optionnel pour la même raison — sur le doc, le butin ramassé n'existe pas encore.
+- ⚠️ **L'incantation longue FIGE son tarif à l'armement** (`_armer_incantation`), seule entorse au « jamais stocké » : elle absorbe tout le budget et **ne s'abandonne pas**, on paie le tarif du moment où l'on s'engage.
+
+**UI** : aucune jauge neuve, **aucun second pip** — la barre de charge encode déjà les seuils PHYSIQUES (pip à 50 %, rouge à 100 %) et les paliers magiques tombent ailleurs. Le palier est du **texte violet** (`🔮 canalisation modérée`) et les coûts s'affichent « 8 → 11 PM ». Le client porte un **miroir** de la seule multiplication finale (`coutPmCharge`, la courbe restant serveur), verrouillé par `dev/test_charge_magie_client.js`. Verrouillé côté serveur par `tests/test_charge_magie.py` et `tests/test_combat_maintien.py`.
+
+
 ### Drain, dégâts aux PM, coût en PV — six clés d'`effets`
 Ajoutées à `_bonus_dict` (source unique du schéma, partagée sorts / compétences / armes / composants — **pas** `consommables.effets_de`) : `degats_pm`, `cout_pv`, `drain_pv`, `drain_pm`, `drain_max`, `saut`, `lien_vie`. Toutes ≥ 0, défauts neutres. `fusionner_effets` additionne les entiers et concatène `degats_pm` ; **`lien_vie` est ÉCRASÉ, jamais fusionné** (deux `part` additionnés dépasseraient 100 %), et drain/saut sont re-clampés APRÈS l'addition.
 

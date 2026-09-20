@@ -30,7 +30,7 @@ from utils import slots_actions
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
-    verser_butin_au_sol,
+    verser_butin_au_sol, etat_charge_snapshot, bloc_charge_snapshot,
 )
 from utils import chasse
 from models import character_stats
@@ -273,14 +273,24 @@ async def combat_acteur(
     if not doc:
         raise HTTPException(status_code=404, detail="Personnage introuvable")
 
+    # Charge de l'acteur prise sur son SNAPSHOT : en combat le butin ramassé vit là,
+    # et c'est lui que le moteur facture. Sans cela, l'étiquette d'une case resterait
+    # au tarif d'avant le ramassage pendant que les PM, eux, partiraient au vrai.
+    _snap = next((j for j in combat_doc.get("joueurs") or []
+                  if j.get("character_id") == acteur_id), None)
+    _etat_charge = etat_charge_snapshot(_snap) if _snap else None
+
     return {
         "character_id": acteur_id,
         "nom": doc.get("nom", ""),
         "prenom": doc.get("prenom", ""),
         "image": doc.get("image", ""),
         "consommables": liste_consommables_combat(doc, resolve_item_ref),
-        "sorts": liste_sorts_payload(doc, get_doc, "combat"),
-        "competences": liste_competences_payload(doc, get_doc, "combat"),
+        # Charge → canalisation, resynchronisée à chaque changement d'acteur : chaque
+        # membre du groupe porte SON sac, donc son propre palier.
+        "charge_magie": bloc_charge_snapshot(_snap) if _snap else None,
+        "sorts": liste_sorts_payload(doc, get_doc, "combat", _etat_charge),
+        "competences": liste_competences_payload(doc, get_doc, "combat", _etat_charge),
         # Barre d'action : les slots appartiennent à l'ACTEUR — chaque membre du groupe
         # a sa propre disposition, rechargée à chaque changement de tour.
         "slots": slots_actions.slots_payload(doc, get_doc),
@@ -556,7 +566,12 @@ async def combat_action(
         else:
             # Action refusée : rien n'a été consommé, relire l'état réel.
             character = get_doc(acteur_id) or character
-        sorts_payload = liste_sorts_payload(character, get_doc, "combat")
+        # Même règle qu'au-dessus : le tarif affiché suit la charge du SNAPSHOT, qui
+        # vient peut-être de changer (composants consommés, butin ramassé).
+        _snap = next((j for j in combat_doc.get("joueurs") or []
+                      if j.get("character_id") == acteur_id), None)
+        sorts_payload = liste_sorts_payload(
+            character, get_doc, "combat", etat_charge_snapshot(_snap) if _snap else None)
 
     # Combat persisté : applique les récompenses au personnage (idempotent).
     if combat_doc["status"] != "active":
@@ -568,4 +583,12 @@ async def combat_action(
         response["consommables"] = consommables_payload
     if sorts_payload is not None:
         response["sorts"] = sorts_payload
+    # Charge → canalisation recalculée à CHAQUE action : ramasser une carcasse ou
+    # consommer une potion déplace la charge du snapshot, donc le palier ET les coûts PM.
+    # Sans ce bloc, l'étiquette d'une case resterait au tarif d'avant le ramassage
+    # jusqu'au prochain changement d'acteur (CLAUDE.md §10).
+    _acteur_snap = next((j for j in combat_doc.get("joueurs") or []
+                         if j.get("character_id") == acteur_id), None)
+    if _acteur_snap is not None:
+        response["charge_magie"] = bloc_charge_snapshot(_acteur_snap)
     return response

@@ -166,7 +166,12 @@ def test_cumul_regen_et_esquive_prennent_le_max():
 
 
 def test_cumul_liste_vide():
-    assert cumul_effets([]) == {"buffs": {}, "regen_pv": 0, "regen_pm": 0, "esquive": 0}
+    # Forme NEUTRE complète : toutes les clés présentes, toutes à zéro. L'égalité stricte
+    # est voulue — une clé qu'on ajoute à l'agrégat sans la neutraliser ici passerait
+    # silencieusement à `None` chez ses lecteurs.
+    assert cumul_effets([]) == {
+        "buffs": {}, "regen_pv": 0, "regen_pm": 0, "esquive": 0, "canalisation": 0,
+    }
 
 
 def test_regen_et_esquive_non_cumulees_sur_le_perso():

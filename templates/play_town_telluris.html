@@ -688,6 +688,12 @@
 		.sh-charge-label { font-size: 12px; color: #c9b27a; margin-top: 3px; min-height: 14px; }
 		.sh-charge-label .warn { color: #e0902f; }
 		.sh-charge-label .err  { color: #e04a4a; font-weight: bold; }
+		/* Palier de CANALISATION : du TEXTE, en violet (la couleur de la magie partout dans
+		   le jeu) — et surtout pas une deuxième teinte de remplissage ni un second pip. La
+		   barre encode déjà les seuils PHYSIQUES (pip à 50 %, rouge à 100 %) ; les paliers
+		   magiques tombent à 25/50/75/100, et les superposer ferait deux échelles illisibles. */
+		.sh-charge-label .mana { color: #b26bff; }
+		.sh-sort-pm-charge { color: #b26bff; font-weight: bold; }
 		.sh-inv-poids { color: #9a8a66; font-size: 12px; margin: 0 4px; white-space: nowrap; }
 		.sh-drop-btn, .sh-pickup-btn {
 			background: transparent; border: 1px solid #6b5836; color: #cda349;
@@ -4063,6 +4069,10 @@ let _inventaire   = {{ character.get("inventaire", []) | tojson | safe }};
 let _slots        = {{ character.get("slots", {}) | tojson | safe }};
 let _objetsAuSol  = {{ character.get("objets_au_sol", []) | tojson | safe }};
 let _chargeMax    = {{ character.get("derived_stats", {}).get("charge_max", 0) }};
+// Bloc CHARGE → CANALISATION du serveur (utils/charge_magie) : ratio, palier nommé et
+// pénalité en cours. ⚠️ Le client ne recalcule JAMAIS la courbe — il affiche ce bloc et
+// les coûts effectifs que portent déjà les payloads de sorts/compétences.
+let _chargeMagie  = {{ charge_magie | tojson | safe }};
 let _effetsActifs = {{ effets_actifs | tojson | safe }};
 // Mode « fiche compagnon » — déclarés ICI (et non près de openCompagnonSheet) car le premier
 // rendu (_refreshSol/_refreshInventaire → _hasOutilCoupe) les lit à l'init, avant ce bloc :
@@ -4131,9 +4141,45 @@ function _refreshChargeGauge() {
 		let txt = `${charge.toFixed(1)} / ${max} kg`;
 		if (charge > max + 1e-6)   txt += ` · <span class="err">surcharge — déplacement bloqué</span>`;
 		else if (charge > half)    txt += ` · <span class="warn">demi-charge</span>`;
+		txt += _chargeManaLabel();
 		label.innerHTML = txt;
 	}
 	updateControls();
+}
+
+// Palier de CANALISATION, en texte et en violet — jamais une teinte de plus sur le
+// remplissage : la barre dit déjà le physique (demi-charge, surcharge), ceci dit le magique.
+// ⚠️ Le palier vient du SERVEUR (`charge_magie`), jamais recalculé ici : deux formules pour
+// une même courbe finiraient par diverger. Bloc absent (fiche d'un doc ancien) ⇒ rien.
+function _chargeManaLabel() {
+	const bloc = _chargeMagie;
+	if (!bloc || !bloc.palier_label) return '';
+	if (!(bloc.penalite > 0)) return ` · <span class="mana">🔮 canalisation libre</span>`;
+	return ` · <span class="mana">🔮 canalisation ${bloc.palier_label}</span>`;
+}
+
+// Coût PM d'une capacité sous la charge courante — MIROIR de `charge_magie.cout_pm_effectif`
+// (même famille que scripts/zones_effet.js ou jetons.js : le serveur tranche, le client
+// annonce). ⚠️ Ce qui est miroité est seulement la MULTIPLICATION finale : la courbe
+// f(ratio), elle, ne vit que côté serveur et arrive déjà résolue dans `penalite`.
+// ⚠️ Même arrondi que le serveur — `floor(x + 0.5)`, pas `Math.round` (qui, lui, arrondit
+// les négatifs vers le haut) ni un arrondi au supérieur.
+function _coutPmCharge(capa) {
+	const base = +(capa && capa.cout_pm) || 0;
+	const bloc = _chargeMagie;
+	if (!base || !bloc || !(bloc.penalite > 0)) return base;
+	const sens = (capa.sensibilite_charge === null || capa.sensibilite_charge === undefined)
+		? (bloc.sensibilite_defaut || 0) : +capa.sensibilite_charge;
+	const pen = bloc.penalite * sens * (bloc.modificateur === undefined ? 1 : bloc.modificateur);
+	return pen > 0 ? Math.max(base, Math.floor(base * (1 + pen) + 0.5)) : base;
+}
+
+// « 8 PM » à vide, « 8 → 11 PM » sous la charge : le joueur voit la facture AVANT de cliquer.
+function _pmLabel(capa) {
+	const base = +(capa && capa.cout_pm) || 0;
+	const eff = _coutPmCharge(capa);
+	if (eff <= base) return `${base} PM`;
+	return `${base} <span class="sh-sort-pm-charge">→ ${eff}</span> PM`;
 }
 
 // Silhouette du paperdoll : dépend de la race ET du sexe du PORTEUR — donc du compagnon dès
@@ -5016,7 +5062,14 @@ function _sortEffetsLabel(e, prefixeDegats) {
 function _sortTempsLabel(s) {
 	const parts = [];
 	if ((s.incantation || 1) > 1) parts.push(`⏱ ${s.incantation} PA`);
-	if (s.maintien) parts.push(`🔄 ${s.maintien} PM/round`);
+	if (s.maintien) {
+		// Même traitement que le coût de lancement : la charge renchérit aussi l'entretien,
+		// et c'est là qu'elle se sent le plus (on le paie à CHAQUE round).
+		const eff = _coutPmCharge({cout_pm: s.maintien, sensibilite_charge: s.sensibilite_charge});
+		parts.push(eff > s.maintien
+			? `🔄 ${s.maintien} <span class="sh-sort-pm-charge">→ ${eff}</span> PM/round`
+			: `🔄 ${s.maintien} PM/round`);
+	}
 	return parts.length ? ` · ${parts.join(' · ')}` : '';
 }
 // Étiquette de ZONE D'EFFET d'un sort ou d'une compétence, préfixée pour s'accrocher à la
@@ -5088,7 +5141,7 @@ function _renderSorts(list) {
 		return `<div class="sh-skill${ouvert ? ' expanded' : ''}">
 			<span class="sh-skill-icon">${s.icon || '🔮'}</span>
 			<div${_sortInfoAttrs(s.sort_id, peutVoir)}>
-				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${s.cout_pm} PM</span></div>
+				<div class="sh-skill-name">${s.nom}<span class="sh-sort-pm">${_pmLabel(s)}</span></div>
 				<div class="sh-skill-desc">${_invocationLabel(s) || _sortEffetsLabel(s.effets)}${_sortTempsLabel(s)}${s.cible === 'ennemi' ? ' · portée ' + s.portee : ''}${_zoneLabel(s)}${s.cible === 'allie' ? ' · 🤝 sur un allié' : ''}</div>
 				${compos ? `<div class="sh-sort-compos">${compos}</div>` : ''}
 				${ouvert ? `<div class="sh-skill-full-desc">${portee ? `<div class="sh-sort-portee">${portee}</div>` : ''}${s.description || ''}</div>` : ''}
@@ -5373,7 +5426,7 @@ function _renderCompetences(list) {
 			: pin + (c.utilisable
 				? `<button type="button" class="sh-drop-btn" onclick="utiliserCompetence('${c.competence_id}', this)">Utiliser</button>`
 				: '<span class="sh-skill-lvl" title="Utilisable en combat seulement">⚔ combat</span>');
-		const pm = c.cout_pm ? `<span class="sh-sort-pm">${c.cout_pm} PM</span>` : '';
+		const pm = c.cout_pm ? `<span class="sh-sort-pm">${_pmLabel(c)}</span>` : '';
 		let portee = '';
 		if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
 		else if (c.mode === 'active' && c.cible === 'allie') portee = ' · 🤝 sur un allié';
@@ -5532,6 +5585,9 @@ function _applyInventoryPayload(data) {
 	_objetsAuSol = data.objets_au_sol;
 	_slots       = data.slots;
 	if (typeof data.charge_max === 'number') _chargeMax = data.charge_max;
+	// Palier de canalisation recalculé par le serveur au même endroit que la charge : sans
+	// cette ligne, il resterait figé sur le dernier chargement de la page.
+	if (data.charge_magie) { _chargeMagie = data.charge_magie; _renderSorts(_sorts); }
 	if (_sellPanelOuvert()) { _invRenderDiffere = true; return; }
 	_renderInventairePayload();
 }
@@ -8352,6 +8408,7 @@ async function openCompagnonSheet(avId) {
 		// vue du joueur ce que son compagnon vient de poser.
 		_sheetSnap = {
 			inventaire: _inventaire, slots: _slots, chargeMax: _chargeMax,
+			chargeMagie: _chargeMagie,
 			effetsActifs: _effetsActifs, charStats: _charStats, statCaps: _statCaps,
 			maxBonus: _MAX_BONUS, maxBonusUsed: _maxBonusUsed,
 			attributePoints: _attributePoints, vocNiveau: _vocNiveau, caractsDetail: _caractsDetail,
@@ -8372,6 +8429,8 @@ async function openCompagnonSheet(avId) {
 		_compagnonActif = p;
 		_inventaire = p.inventaire; _slots = p.slots; _objetsAuSol = p.objets_au_sol;
 		_chargeMax = p.charge_max; _effetsActifs = p.effets_actifs;
+		// La charge d'un compagnon est la SIENNE : `bloc_fiche` la publie pour lui aussi.
+		_chargeMagie = p.charge_magie || null;
 		_charStats = p.caracteristiques_current; _statCaps = p.stat_caps;
 		// Le dépassement racial appartient au COMPAGNON (sa race, son bonus déjà brûlé ou non) :
 		// la montée passe par le chokepoint `_acteur`, elle écrit sur SON doc.
@@ -8422,6 +8481,7 @@ async function closeCompagnonSheet() {
 	if (s) {
 		_inventaire = s.inventaire; _slots = s.slots;   // `_objetsAuSol` : cf. openCompagnonSheet
 		_chargeMax = s.chargeMax; _effetsActifs = s.effetsActifs;
+		_chargeMagie = s.chargeMagie;
 		_charStats = s.charStats; _statCaps = s.statCaps;
 		_MAX_BONUS = s.maxBonus; _maxBonusUsed = s.maxBonusUsed;
 		_attributePoints = s.attributePoints; _vocNiveau = s.vocNiveau;

@@ -82,6 +82,53 @@ def test_l_entretien_est_preleve_au_debut_de_chaque_tour_du_lanceur():
 		assert mage["concentrations"], "le sort tient tant qu'il est payé"
 
 
+def test_l_entretien_est_REFACTURE_au_tarif_de_la_charge_courante():
+	"""Charge portée → canalisation (utils/charge_magie) : l'entretien d'un sort maintenu
+	se refacture à CHAQUE tour au tarif du moment. Un mage qui s'alourdit en plein combat
+	doit sentir son sort peser plus lourd au tour suivant — et peut lâcher son sac pour le
+	retenir. C'est l'inverse de l'incantation, dont le tarif est figé à l'engagement."""
+	mage = joueur(pm=60)
+	mage["charge_max"] = 100          # capacité de portage du snapshot
+	mage["charge"] = mage["charge_magique"] = 0.0
+	doc = combat([mage])
+	resolve_action(doc, "sort", sort=sort(sensibilite_charge=1, **BOUCLIER))
+
+	_tour(doc, mage, 2)
+	a_vide = 60 - 5 - mage["currentPM"]
+	assert a_vide == BOUCLIER["maintien"], "à vide, on paie le tarif de base"
+
+	# Le mage se charge à pleine capacité (l'équivalent d'un butin ramassé).
+	mage["charge"] = mage["charge_magique"] = 100.0
+	avant = mage["currentPM"]
+	_tour(doc, mage, 3)
+	charge = avant - mage["currentPM"]
+	assert charge > a_vide, "la charge renchérit l'entretien"
+
+	# La chip que lit le client annonce bien le tarif prélevé, pas la base.
+	chip = next(e for e in mage["effets_actifs"] if e.get("maintenu"))
+	assert chip["maintien"] == charge
+	# ⚠️ La BASE reste intacte sur l'entrée : sans cela, la pénalité se composerait avec
+	# elle-même d'un tour à l'autre et l'entretien exploserait.
+	assert mage["concentrations"][0]["maintien"] == BOUCLIER["maintien"]
+
+	# Et l'allègement se ressent tout de suite : reposer le sac rend le sort abordable.
+	mage["charge"] = mage["charge_magique"] = 0.0
+	avant = mage["currentPM"]
+	_tour(doc, mage, 4)
+	assert avant - mage["currentPM"] == a_vide
+
+
+def test_un_sort_insensible_ignore_la_charge():
+	mage = joueur(pm=60)
+	mage["charge_max"] = 100
+	mage["charge"] = mage["charge_magique"] = 200.0     # surcharge franche
+	doc = combat([mage])
+	resolve_action(doc, "sort", sort=sort(sensibilite_charge=0, **BOUCLIER))
+	avant = mage["currentPM"]
+	_tour(doc, mage, 2)
+	assert avant - mage["currentPM"] == BOUCLIER["maintien"]
+
+
 def test_l_entretien_ne_coute_aucun_pa():
 	"""« Le maintien ne consomme pas de PA et n'empêche pas le jeteur de lancer d'autres
 	sorts. »"""
