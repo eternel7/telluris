@@ -495,6 +495,30 @@
 		}
 		.board-panel h2 { margin: 0; }
 		.board-panel .sh-inv-item:last-child { border-bottom: none; }
+		/* ── #sell-panel : quatre listes en accordéon, une seule ouverte ───────────
+		   Le panneau TIENT dans la fenêtre. Le cadre commun (`.panel-frame`) monte à
+		   95vh MINIMUM et ne borne rien : quatre listes de 260px empilées débordaient
+		   les 100vh et faisaient défiler la page entière. Ici, en-tête, bourse et
+		   en-têtes de section gardent leur hauteur naturelle ; la section OUVERTE
+		   prend tout le reste, et c'est sa liste qui défile.
+		   ⚠️ `min-height: 0` à CHAQUE étage : sans lui un enfant flex refuse de
+		   descendre sous la hauteur de son contenu, et le débordement revient.
+		   (Le corps des sections repliées reste en `display:none` — brique `.acc-*`.) */
+		#sell-panel {
+			height: calc(100vh - 20px);   /* 20px = le padding du body */
+			min-height: 0;
+			gap: .5rem;
+		}
+		#sell-panel > .sell-topbar, #sell-panel > .sh-finance-row { flex: 0 0 auto; }
+		#sell-panel .acc-section { display: flex; flex-direction: column; flex: 0 0 auto; min-height: 0; }
+		#sell-panel .acc-section.open { flex: 1 1 auto; }
+		#sell-panel .acc-body { padding: .5rem .6rem; min-height: 0; }
+		#sell-panel .acc-section.open .acc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
+		#sell-panel .sell-acc-tools { display: flex; justify-content: flex-end; flex: 0 0 auto; margin-bottom: .35rem; }
+		#sell-panel .cmd-aide { flex: 0 0 auto; }
+		/* La liste n'a plus de hauteur fixe : elle prend ce que la section lui laisse. */
+		#sell-panel .sh-inv-scroll { display: flex; height: auto; flex: 1 1 auto; min-height: 0; }
+		#sell-panel .sh-inv-box { max-height: none; flex: 1 1 auto; min-height: 0; }
 		.sell-prix { font-weight: bold; color: var(--accent-color); white-space: nowrap; }
 		.sell-empty { opacity: .7; padding: 12px 0; }
 		.q-desc { display: block; white-space: normal; color: var(--text-card-color, #aaa); font-size: .85rem; margin: 2px 0; }
@@ -773,7 +797,7 @@
 			align-items: center;
 		}
 		.sh-paperdoll-img {
-			max-height: 62vh;
+			max-height: 60vh;
 			display: block;
 			pointer-events: none;
 			margin-left: 0px;
@@ -905,7 +929,7 @@
 		/* Les 2 modes optionnels (🪃 Jet, 🏹 Tir) tiennent côte à côte dès que la place le
 		   permet — le conteneur wrap, chaque case garde une largeur mini plutôt que de
 		   forcer toute la largeur du panneau comme une ligne de sac/sort ordinaire. */
-		#sh-modes-attaque { display: flex; flex-wrap: wrap; gap: 4px 50px; }
+		#sh-modes-attaque { display: flex; flex-wrap: wrap; gap: 4px 50px; max-height: fit-content;}
 		#sh-modes-attaque .sh-skill { flex: 1 1 220px; border: 1px solid var(--border-color); padding: 10px;}
 		/* Mobile : ne pas tronquer le sac / le sol. Le contenu (icône, nom, poids, rareté)
 		   passe sur autant de lignes que nécessaire ; les boutons restent groupés à droite. */
@@ -1072,6 +1096,43 @@
 		.sh-quest-list-ended > .sh-rel-scroll { max-height : 35vh; }
 		.sh-capa-list > .sh-rel-scroll { max-height: 34vh; }
 		.sh-jnl-list          > .sh-rel-scroll { max-height: 34vh; }
+		/* ── Onglet ⚡ : les six zones en accordéon, une seule ouverte ─────────────
+		   Même disposition que #sell-panel : en-têtes à hauteur naturelle, la section
+		   OUVERTE prend tout le reste, et c'est sa zone qui défile (les 34vh ci-dessus
+		   ne s'y appliquent plus). La barre de combat 🎯 n'est pas une section : elle
+		   reste dépliée en tête.
+		   ⚠️ Le calage sur la fenêtre est porté par `#sheet-panel.sheet-fit`, posé par
+		   `sheetTab` pour CE seul onglet : borner la fiche en permanence ferait CLIPPER
+		   les onglets longs (📊, 🎒) sous l'`overflow:hidden` du cadre commun.
+		   ⚠️ `min-height: 0` à CHAQUE étage, jusqu'au scroller : sans lui un enfant flex
+		   refuse de descendre sous la hauteur de son contenu. */
+		#sheet-panel.sheet-fit { height: calc(100vh - 20px); min-height: 0; }
+		#sheet-panel.sheet-fit .sheet-right-col { min-height: 0; }
+		/* ⚠️ `auto` et non `hidden` : la barre de combat 🎯 est fixe en tête, et sur une
+		   fenêtre basse elle ne laisse plus rien à la zone ouverte. Le plancher ci-dessous
+		   la garde utilisable, et c'est la FICHE qui défile alors — jamais la page. */
+		#sheet-panel.sheet-fit .sheet-body {
+			display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow-y: auto;
+		}
+		#sheet-panel.sheet-fit .sheet-panel.active {
+			display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: .35rem;
+		}
+		/* `float` ne joue plus dans un conteneur flex : le compteur de points se range
+		   à droite de lui-même. */
+		#sheet-panel.sheet-fit #sh-competences > .pts-dispo { align-self: flex-end; flex: 0 0 auto; }
+		#sh-competences > .sh-section,
+		#sh-competences > .sh-barre-grid,
+		#sh-competences > .sh-barre-hint { flex: 0 0 auto; }
+		#sh-competences .acc-section { display: flex; flex-direction: column; flex: 0 0 auto; min-height: 0; }
+		#sh-competences .acc-section.open { flex: 1 1 auto; }
+		/* L'en-tête garde l'identité typographique des `.sh-section` qu'il remplace. */
+		#sh-competences .acc-head { color: var(--accent-color); text-transform: uppercase; font-size: .95rem; }
+		#sh-competences .acc-body { padding: .4rem .5rem; min-height: 0; }
+		#sh-competences .acc-section.open .acc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
+		/* Plancher de la zone ouverte : au-dessous, une liste ne montre plus une ligne
+		   entière et l'accordéon ne sert plus à rien. */
+		#sh-competences .sh-capa-list { display: flex; flex: 1 1 auto; min-height: 7rem; }
+		#sh-competences .sh-capa-list > .sh-rel-scroll { max-height: none; flex: 1 1 auto; min-height: 0; }
 		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
 		.sh-quest-title { flex: 1; min-width: 200px; font-weight: bold; font-size: 1rem; }
@@ -1782,39 +1843,82 @@
 						<div class="sh-section" style="margin-top:14px">🎯 Barre de combat</div>
 						<div class="sh-barre-grid" id="sh-slot-grid"></div>
 						<div class="sh-barre-hint">Clic long sur une case puis glisser pour échanger deux cases. Les actions ⚔ 🫳 🏃 se déplacent mais ne se retirent pas.</div>
+						{# ── Les six zones en ACCORDÉON (brique `.acc-*`, comme #sell-panel) ──
+						   Une seule ouverte à la fois, et elle prend TOUTE la hauteur restante :
+						   l'onglet tient dans la fenêtre au lieu de la faire défiler.
+						   ⚠️ La barre de combat (🎯) reste HORS accordéon, dépliée en tête —
+						   c'est elle que l'on vient composer, et elle ne défile pas. #}
 						{# Modes d'attaque : ⚔ est obligatoire (toujours sur la barre), 🪃 et 🏹
 						   s'ajoutent et se retirent librement. Sans ces sélecteurs, seul le
 						   mode ⚙ de l'écran de combat — qui coûte UNE ACTION — permettrait de
-						   poser sa case de tir : un archer restait sans bouton pour tirer. #}
-						<div class="sh-section" style="margin-top:14px">🏹 Modes d'attaque</div>
-						<div id="sh-modes-attaque"></div>
+						   poser sa case de tir : un archer restait sans bouton pour tirer.
+						   ⚠️ `#sh-modes-attaque` est ENVELOPPÉ, jamais remplacé : le renderer
+						   écrase son intérieur, et l'ombre vit dans le wrapper au-dessus. #}
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-capa-modes" onclick="toggleCapaSection('capa-modes')">
+								<span>🏹 Modes d'attaque</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-capa-modes">
+								<div class="sh-capa-list sh-scroll scrollable">
+									<div id="sh-modes-attaque" class="sh-rel-scroll"></div>
+								</div>
+							</div>
+						</section>
 						{# Compétences : mêmes règles que les sorts, rendues 100 % côté client
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
-						<div class="sh-section" style="margin-top:14px">⚡ Compétences</div>
-						<div class="sh-capa-list sh-scroll scrollable">
-							<div id="sh-competences-connues" class="sh-rel-scroll"></div>
-						</div>
-						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
-						<div class="sh-capa-list sh-scroll scrollable">
-							<div id="sh-competences-apprenables" class="sh-rel-scroll"></div>
-						</div>
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-capa-competences" onclick="toggleCapaSection('capa-competences')">
+								<span>⚡ Compétences</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-capa-competences">
+								<div class="sh-capa-list sh-scroll scrollable">
+									<div id="sh-competences-connues" class="sh-rel-scroll"></div>
+								</div>
+							</div>
+						</section>
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-capa-apprentissage" onclick="toggleCapaSection('capa-apprentissage')">
+								<span>📖 Apprentissage - compétences</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-capa-apprentissage">
+								<div class="sh-capa-list sh-scroll scrollable">
+									<div id="sh-competences-apprenables" class="sh-rel-scroll"></div>
+								</div>
+							</div>
+						</section>
 						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
 						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
-						<div class="sh-section" style="display:flex; align-items:center; justify-content:space-between">
-							<span>🔮 Sorts connus</span>
-						</div>
-						<div class="sh-capa-list sh-scroll scrollable">
-							<div id="sh-sorts-connus" class="sh-rel-scroll"></div>
-						</div>
-						<div class="sh-section" style="margin-top:14px">🏫 Écoles de magie</div>
-						<div class="sh-capa-list sh-scroll scrollable">
-							<div id="sh-sorts-magies" class="sh-rel-scroll"></div>
-						</div>
-						<div class="sh-section" style="margin-top:14px">📖 Apprentissage</div>
-						<div class="sh-capa-list sh-scroll scrollable">
-							<div id="sh-sorts-apprenables" class="sh-rel-scroll"></div>
-						</div>
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-capa-sorts" onclick="toggleCapaSection('capa-sorts')">
+								<span>🔮 Sorts connus</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-capa-sorts">
+								<div class="sh-capa-list sh-scroll scrollable">
+									<div id="sh-sorts-connus" class="sh-rel-scroll"></div>
+								</div>
+							</div>
+						</section>
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-capa-ecoles" onclick="toggleCapaSection('capa-ecoles')">
+								<span>🏫 Écoles de magie</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-capa-ecoles">
+								<div class="sh-capa-list sh-scroll scrollable">
+									<div id="sh-sorts-magies" class="sh-rel-scroll"></div>
+								</div>
+							</div>
+						</section>
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-capa-magie" onclick="toggleCapaSection('capa-magie')">
+								<span>📖 Apprentissage - magie</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-capa-magie">
+								<div class="sh-capa-list sh-scroll scrollable">
+									<div id="sh-sorts-apprenables" class="sh-rel-scroll"></div>
+								</div>
+							</div>
+						</section>
 					</div>
 
 					<!-- ── RELATIONS ── -->
@@ -1954,34 +2058,65 @@
 				<div class="sh-finance">🟤 <span class="amt" id="sell-amt-cuivre">{{ character.get("cuivre",0) }}</span> Cuivre</div>
 			</div>
 		</div>
-		<div style="display:flex;align-items:center;justify-content:space-between;margin:.6rem 0 0">
-			<h2 style="margin:0">🏷️ Vente</h2>
-			<button type="button" id="sell-sort-btn" class="sh-drop-btn" onclick="cycleSellSort()"
-				title="Trier la vente par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
-		</div>
-		<div class="sh-inv-scroll sh-scroll" id="sell-scroll"><ul id="sell-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
-		<div style="display:flex;align-items:center;justify-content:space-between;margin:1rem 0 0">
-			<h2 style="margin:0">💸 Achat</h2>
-			<button type="button" id="buy-sort-btn" class="sh-drop-btn" onclick="cycleBuySort()"
-				title="Trier l'achat par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
-		</div>
-		<div class="sh-inv-scroll sh-scroll" id="buy-scroll"><ul id="buy-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+		{# ── Les quatre listes en ACCORDÉON (brique `.acc-*`, partagée avec 📖 et 👥) ──
+		   Une seule section ouverte à la fois, et elle prend TOUTE la hauteur restante :
+		   c'est ce qui tient le panneau dans la fenêtre. Empilées, quatre listes à hauteur
+		   fixe débordaient les 100vh et faisaient défiler la page entière.
+		   ⚠️ « Trier » descend DANS le corps : un <button> ne s'imbrique pas dans le
+		   <button> d'en-tête. Le compte reste dans l'en-tête — c'est la seule chose qui
+		   dise ce qu'il y a derrière une section repliée. #}
+		<section class="acc-section">
+			<button type="button" class="acc-head" id="acc-head-vente" onclick="toggleSellSection('vente')">
+				<span>🏷️ Vente (<span id="sell-compte">0</span>)</span><span class="acc-chevron">▾</span>
+			</button>
+			<div class="acc-body" id="acc-body-vente">
+				<div class="sell-acc-tools">
+					<button type="button" id="sell-sort-btn" class="sh-drop-btn" onclick="cycleSellSort()"
+						title="Trier la vente par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+				</div>
+				<div class="sh-inv-scroll sh-scroll" id="sell-scroll"><ul id="sell-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+			</div>
+		</section>
+		<section class="acc-section">
+			<button type="button" class="acc-head" id="acc-head-achat" onclick="toggleSellSection('achat')">
+				<span>💸 Achat (<span id="buy-compte">0</span>)</span><span class="acc-chevron">▾</span>
+			</button>
+			<div class="acc-body" id="acc-body-achat">
+				<div class="sell-acc-tools">
+					<button type="button" id="buy-sort-btn" class="sh-drop-btn" onclick="cycleBuySort()"
+						title="Trier l'achat par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+				</div>
+				<div class="sh-inv-scroll sh-scroll" id="buy-scroll"><ul id="buy-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+			</div>
+		</section>
 		{# ── Commande ──────────────────────────────────────────────────────────────
 		   Servie par `est_commande`, DÉRIVÉ côté serveur de « ce lieu a-t-il des recettes ? ».
-		   Un comptoir de revente n'a donc pas cette section du tout — il n'a rien à fabriquer.
+		   Un comptoir de revente n'a donc pas ces sections du tout — il n'a rien à fabriquer.
 		   ⚠️ `est_sur_mesure` est un flag SÉPARÉ : il n'ouvre que le bouton « Sur mesure ».
 		   Chez un artisan ordinaire ce bouton ne doit pas exister, sans quoi l'interface
 		   laisserait croire qu'on peut y faire inventer une pièce. #}
 		{% if est_commande %}
-		<div style="display:flex;align-items:center;justify-content:space-between;margin:1rem 0 0">
-			<h2 style="margin:0">🛠️ Commande</h2>
-			<button type="button" id="cmd-sort-btn" class="sh-drop-btn" onclick="cycleCmdSort()"
-				title="Trier le catalogue par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
-		</div>
-		<p class="cmd-aide">Ce que l'artisan sait faire, même sans exemplaire en vitrine. Prix façon comprise, sans rien apporter — ce que vous fournissez le fait baisser.</p>
-		<div class="sh-inv-scroll sh-scroll" id="cmd-scroll"><ul id="cmd-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
-		<h2 style="margin:1rem 0 0">📋 Vos commandes</h2>
-		<div class="sh-inv-scroll sh-scroll" id="cmd-encours-scroll"><ul id="cmd-encours-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+		<section class="acc-section">
+			<button type="button" class="acc-head" id="acc-head-commande" onclick="toggleSellSection('commande')">
+				<span>🛠️ Commande (<span id="cmd-compte">0</span>)</span><span class="acc-chevron">▾</span>
+			</button>
+			<div class="acc-body" id="acc-body-commande">
+				<div class="sell-acc-tools">
+					<button type="button" id="cmd-sort-btn" class="sh-drop-btn" onclick="cycleCmdSort()"
+						title="Trier le catalogue par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
+				</div>
+				<p class="cmd-aide">Ce que l'artisan sait faire, même sans exemplaire en vitrine. Prix façon comprise, sans rien apporter — ce que vous fournissez le fait baisser.</p>
+				<div class="sh-inv-scroll sh-scroll" id="cmd-scroll"><ul id="cmd-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+			</div>
+		</section>
+		<section class="acc-section">
+			<button type="button" class="acc-head" id="acc-head-mes-commandes" onclick="toggleSellSection('mes-commandes')">
+				<span>📋 Vos commandes (<span id="cmd-encours-compte">0</span>)</span><span class="acc-chevron">▾</span>
+			</button>
+			<div class="acc-body" id="acc-body-mes-commandes">
+				<div class="sh-inv-scroll sh-scroll" id="cmd-encours-scroll"><ul id="cmd-encours-list" class="sub-locations-list sh-inv-box" style="list-style:none;padding:0;margin:0"></ul></div>
+			</div>
+		</section>
 		{% endif %}
 	</div><!-- /#sell-panel -->
 	<div id="quetes-panel" class="panel-hidden panel-frame board-panel" aria-label="Tableau des quêtes de la guilde">
@@ -3536,6 +3671,13 @@ function sheetTab(id, btn) {
 	document.querySelectorAll('.sheet-panel').forEach(p => p.classList.remove('active'));
 	document.getElementById('sh-' + id).classList.add('active');
 	if (btn) btn.classList.add('active');
+	// ⚡ est le SEUL onglet qui se cale sur la fenêtre : ses zones sont en accordéon et
+	// l'ouverte prend la hauteur restante. ⚠️ Borner la fiche pour tous les onglets ferait
+	// CLIPPER les longs (📊, 🎒) sous l'`overflow:hidden` du cadre commun — ils doivent
+	// garder leur hauteur naturelle et laisser la page défiler.
+	const fiche = document.getElementById('sheet-panel');
+	if (fiche) fiche.classList.toggle('sheet-fit', id === 'competences');
+	if (id === 'competences') _capaRestaurerSection();
 }
 document.addEventListener('keydown', e => {
 	if (e.key !== 'Escape') return;
@@ -5055,6 +5197,55 @@ function _renderBarreSlots() {
 	_renderModesAttaque();
 }
 
+// ── Accordéon de l'onglet ⚡ ─────────────────────────────────────────────────────
+// Même disposition que le panneau marchand : brique `.acc-*` partagée, une seule zone
+// ouverte à la fois (mémorisée par personnage), et elle prend la hauteur restante.
+// ⚠️ La barre de combat 🎯 n'en fait PAS partie — elle reste dépliée en tête.
+const CAPA_SECTIONS = ['capa-modes', 'capa-competences', 'capa-apprentissage',
+					   'capa-sorts', 'capa-ecoles', 'capa-magie'];
+const CAPA_SECTION_KEY = 'telluris.play.capa_section.' + REL_CHAR_ID;
+const CAPA_SCROLLS = ['sh-modes-attaque', 'sh-competences-connues', 'sh-competences-apprenables',
+					  'sh-sorts-connus', 'sh-sorts-magies', 'sh-sorts-apprenables'];
+
+// Les scrollers sont adressés par leur id (le renderer écrit dedans), l'ombre vit dans le
+// WRAPPER au-dessus — c'est lui qu'on mesure.
+function _capaOmbres() {
+	CAPA_SCROLLS.forEach(id => {
+		const box = document.getElementById(id);
+		if (box) _majOmbreScroll(box.parentElement);
+	});
+}
+
+function toggleCapaSection(id) {
+	toggleAccordeon(CAPA_SECTIONS, id, CAPA_SECTION_KEY);
+	// La zone qui vient de s'ouvrir n'avait aucune hauteur à mesurer en `display:none`.
+	_capaOmbres();
+}
+
+function _capaRestaurerSection() {
+	_accRestaurer(CAPA_SECTIONS, CAPA_SECTION_KEY, 'capa-competences');
+	_capaOmbres();
+}
+
+// Le contenu de ces zones est réécrit par SIX renderers appelés depuis une vingtaine de
+// sites (apprendre, lancer, resync de charge…) : on observe le résultat plutôt que
+// d'ajouter l'appel dans chacun — un `return` anticipé en aurait oublié la moitié.
+// ⚠️ Aucune boucle possible : l'observateur ne pose qu'une CLASSE sur le wrapper (parent
+// non observé), et cette classe ne fait qu'ouvrir un `::after` (Convention §17).
+(function _capaObserverRendus() {
+	const obs = new MutationObserver(() => _capaOmbres());
+	CAPA_SCROLLS.forEach(id => {
+		const box = document.getElementById(id);
+		if (box) obs.observe(box, { childList: true });
+	});
+})();
+
+// Redimensionner la fenêtre change la hauteur disponible, donc l'ombre.
+window.addEventListener('resize', () => {
+	const fiche = document.getElementById('sheet-panel');
+	if (fiche && fiche.classList.contains('sheet-fit')) _capaOmbres();
+});
+
 // Les deux modes d'attaque OPTIONNELS. ⚔ n'y figure pas : il est obligatoire, donc
 // toujours sur la barre — son sélecteur n'aurait qu'une seule issue. Une case de mode
 // se grise en combat quand l'arme correspondante n'est pas équipée : elle s'assigne
@@ -6164,11 +6355,68 @@ let _buySort  = _loadSort('telluris.play.buy_sort');
 function cycleSellSort() { _sellSort = _cycleSort(_sellSort); _saveSort('telluris.play.sell_sort', _sellSort); renderSellList({ vendables: MARCHAND.vendables }); }
 function cycleBuySort()  { _buySort  = _cycleSort(_buySort);  _saveSort('telluris.play.buy_sort',  _buySort);  renderBuyList({ achetables: MARCHAND.achetables }); }
 
+// ── Accordéon du panneau marchand ────────────────────────────────────────────────
+// Brique `.acc-*` partagée avec l'onglet 📖 et le panneau 👥 (`toggleAccordeon`) : une
+// seule section ouverte à la fois, mémorisée par personnage. Ici elle porte AUSSI la
+// disposition — la section ouverte prend la hauteur restante, c'est ce qui tient le
+// panneau dans la fenêtre.
+const SELL_SECTIONS = ['vente', 'achat', 'commande', 'mes-commandes'];
+const SELL_SECTION_KEY = 'telluris.play.sell_section.' + REL_CHAR_ID;
+
+function toggleSellSection(id) {
+	toggleAccordeon(SELL_SECTIONS, id, SELL_SECTION_KEY);
+	// La liste qui vient de s'ouvrir n'avait aucune hauteur à mesurer tant qu'elle était
+	// en `display:none` : son ombre ne peut être tranchée qu'ici.
+	_sellOmbres();
+}
+
+// ⚠️ La section mémorisée peut ne pas exister dans CE magasin : les deux sections de
+// commande n'apparaissent que si `est_commande`. Sans ce repli, le panneau d'un simple
+// revendeur s'ouvrirait entièrement replié. On ne réécrit PAS la mémoire pour autant — le
+// choix du joueur vaut toujours chez l'artisan d'à côté.
+function _sellRestaurerSection() {
+	const memo = _accLsGet(SELL_SECTION_KEY);
+	if (memo && !document.getElementById('acc-head-' + memo)) _accAppliquer(SELL_SECTIONS, 'vente');
+	else _accRestaurer(SELL_SECTIONS, SELL_SECTION_KEY, 'vente');
+	_sellOmbres();
+}
+
+// TROISIÈME régime de `.scrollable`, partagé par le panneau marchand et l'onglet ⚡ : là où
+// une liste prend la hauteur restante, l'ombre ne se COMPTE pas en lignes (`INV_VISIBLE`) et
+// ne se pose pas EN DUR — la hauteur disponible dépend de la fenêtre et de la section
+// ouverte, aucun compteur ne la prédit. On la pose sur ce qui déborde RÉELLEMENT.
+// ⚠️ Mesure sans effet de bord : l'ombre est un `::after` en absolute, elle ne change
+// aucune dimension — la relire ne peut pas relancer sa propre mesure (Convention §17).
+function _majOmbreScroll(scrollEl) {
+	if (!scrollEl) return;
+	const box = scrollEl.firstElementChild;
+	scrollEl.classList.toggle('scrollable', !!box && box.scrollHeight > box.clientHeight + 1);
+}
+
+function _sellOmbres() {
+	['sell-scroll', 'buy-scroll', 'cmd-scroll', 'cmd-encours-scroll']
+		.forEach(id => _majOmbreScroll(document.getElementById(id)));
+}
+
+// Le compte reste visible quand la section est repliée : sans lui, rien ne dit s'il y a
+// quelque chose derrière l'en-tête.
+function _sellCompte(id, n) {
+	const el = document.getElementById(id);
+	if (el) el.textContent = n;
+}
+
+// Redimensionner la fenêtre change le nombre de lignes visibles, donc l'ombre.
+window.addEventListener('resize', () => {
+	const p = document.getElementById('sell-panel');
+	if (p && !p.classList.contains('panel-hidden')) _sellOmbres();
+});
+
 function renderSellList(data) {
 	const list = document.getElementById('sell-list');
 	const scrollEl = document.getElementById('sell-scroll');
 	const vendables = MARCHAND.vendables = data.vendables || [];
 	_updateSortBtn('sell-sort-btn', _sellSort);
+	_sellCompte('sell-compte', vendables.length);
 	if (!vendables.length) {
 		list.innerHTML = '<li class="sell-empty">Rien à vendre ici.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
@@ -6188,7 +6436,7 @@ function renderSellList(data) {
 		</span>
 	</li>`;
 	}).join('');
-	if (scrollEl) scrollEl.classList.toggle('scrollable', vendables.length > INV_VISIBLE);
+	_majOmbreScroll(scrollEl);
 }
 
 function renderBuyList(data) {
@@ -6197,6 +6445,7 @@ function renderBuyList(data) {
 	const scrollEl = document.getElementById('buy-scroll');
 	const achetables = MARCHAND.achetables = data.achetables || [];
 	_updateSortBtn('buy-sort-btn', _buySort);
+	_sellCompte('buy-compte', achetables.length);
 	if (!achetables.length) {
 		list.innerHTML = '<li class="sell-empty">Rien à acheter ici.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
@@ -6215,7 +6464,7 @@ function renderBuyList(data) {
 		</span>
 	</li>`;
 	}).join('');
-	if (scrollEl) scrollEl.classList.toggle('scrollable', achetables.length > INV_VISIBLE);
+	_majOmbreScroll(scrollEl);
 }
 
 // Prix RÉELLEMENT appliqué après marchandage = celui affiché dans la liste re-rendue
@@ -6289,6 +6538,9 @@ function _sellChargement() {
 		const el = document.getElementById(id);
 		if (el) el.classList.remove('scrollable');
 	});
+	// Les comptes des en-têtes sont ceux du marchand PRÉCÉDENT tant que rien n'a répondu.
+	['sell-compte', 'buy-compte', 'cmd-compte', 'cmd-encours-compte']
+		.forEach(id => _sellCompte(id, '…'));
 	// La cote affichée est celle du marchand PRÉCÉDENT tant que `quotes` n'a pas répondu.
 	const rel = document.getElementById('sell-relation');
 	if (rel) { rel.classList.remove('relation-bad'); rel.textContent = '🤝 Relation : —'; }
@@ -6300,6 +6552,9 @@ async function openSellPanel() {
 	_sellChargement();
 	document.getElementById('game-container').classList.add('panel-hidden');
 	document.getElementById('sell-panel').classList.remove('panel-hidden');
+	// APRÈS l'affichage : une section repliée n'a pas de hauteur à mesurer, et le panneau
+	// caché n'en a aucune non plus.
+	_sellRestaurerSection();
 	window.scrollTo({ top: 0, behavior: 'instant' });
 	try {
 		const res  = await fetch('api/marchand/quotes');
@@ -6405,6 +6660,7 @@ function renderCmdCatalogue(data) {
 	const scrollEl = document.getElementById('cmd-scroll');
 	const cat = MARCHAND.catalogue = data.catalogue || [];
 	_updateSortBtn('cmd-sort-btn', _cmdSort);
+	_sellCompte('cmd-compte', cat.length);
 	if (!cat.length) {
 		list.innerHTML = '<li class="sell-empty">Cet artisan ne prend pas de commande.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
@@ -6432,7 +6688,7 @@ function renderCmdCatalogue(data) {
 		</span>
 	</li>`;
 	}).join('');
-	if (scrollEl) scrollEl.classList.toggle('scrollable', cat.length > INV_VISIBLE);
+	_majOmbreScroll(scrollEl);
 }
 
 function renderCmdEnCours(data) {
@@ -6440,6 +6696,7 @@ function renderCmdEnCours(data) {
 	if (!list) return;
 	const scrollEl = document.getElementById('cmd-encours-scroll');
 	const cmds = MARCHAND.commandes = data.commandes || [];
+	_sellCompte('cmd-encours-compte', cmds.length);
 	if (!cmds.length) {
 		list.innerHTML = '<li class="sell-empty">Aucune commande en cours.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
@@ -6474,7 +6731,7 @@ function renderCmdEnCours(data) {
 		<span class="sh-inv-actions">${actions}</span>
 	</li>`;
 	}).join('');
-	if (scrollEl) scrollEl.classList.toggle('scrollable', cmds.length > INV_VISIBLE);
+	_majOmbreScroll(scrollEl);
 	_demarrerCmdTimer();
 }
 
@@ -6519,7 +6776,8 @@ async function chargerCommandes() {
 		const res = await fetch('api/commande');
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
-		MARCHAND.cmdMatieres = data.matieres || [];
+		// ⚠️ Pas de liste de matières ici : elle dépend de la PIÈCE choisie (tag
+		// `fabrication_<categorie>`), et l'overlay la demande à son ouverture.
 		MARCHAND.cmdMatieresMax = data.matieres_max || 1;
 		renderCmdCatalogue(data);
 		renderCmdEnCours(data);
@@ -6596,7 +6854,7 @@ function _smRender() {
 				<span class="sm-matiere-nom">${escapeHtml(m.nom)}</span>
 				<span class="sm-apporte">${escapeHtml(m.apporte || '—')}</span>
 			</button>`).join('')
-			: '<p class="sm-manque">Cette maison n\'a aucune matière en rayon pour le moment.</p>'
+			: '<p class="sm-manque">Cette maison n\'a aucune matière en rayon pour cette pièce.</p>'
 		}</div>
 		<div class="sm-devis" id="sm-devis">${_smDevisVide()}</div>
 		<div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.6rem">
@@ -6647,9 +6905,22 @@ async function _smRafraichirDevis() {
 	}
 }
 
+// Les matières proposées dépendent de la PIÈCE : la maison accepte ce que son métier
+// travaille, PLUS ce que le tag `fabrication_<categorie de la pièce>` y destine. Le serveur
+// tranche (Convention §10) — le client ne filtre rien lui-même.
+async function _chargerMatieresSurMesure(itemId) {
+	try {
+		const res = await fetch('api/commande/matieres?item_id=' + encodeURIComponent(itemId));
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return []; }
+		return data.matieres || [];
+	} catch (err) { console.error('Erreur matières', err); return []; }
+}
+
 async function commanderSurMesure(btn) {
 	if (btn) btn.disabled = true;
 	_smEtat = { itemId: btn.dataset.item, choisies: [] };
+	MARCHAND.cmdMatieres = await _chargerMatieresSurMesure(_smEtat.itemId);
 	_smRender();
 	document.getElementById('sur-mesure-overlay').classList.remove('clauses-hidden');
 	const choisies = await new Promise(resolve => { _smResolve = resolve; });

@@ -29,15 +29,33 @@ RECETTE = {
 						   {"item": "item:manche_de_test", "quantite": 1}],
 }
 
+# Bloc `fabrication` minimal : ce qui fait qu'une matière apporte quelque chose à la pièce.
+# Sans lui, elle ne serait proposée nulle part — elle ne ferait que renchérir la commande.
+def _fab(nom, **mods):
+	return {"nom": nom, "modificateurs": mods or {"bonus_degats": 1}}
+
+
 _DB = {
 	"item:Epee_longue": {"_id": "item:Epee_longue", "nom": "Épée longue", "icon": "⚔️",
 						 "categorie": "arme", "sous_categorie": "", "poids": 2.0},
+	"item:Bague": {"_id": "item:Bague", "nom": "Bague", "icon": "💍",
+				   "categorie": "armure", "sous_categorie": "bijou", "poids": 0.1},
 	"item:fer": {"_id": "item:fer", "nom": "Lingot de fer", "categorie": "metal",
-				 "sous_categorie": "fer_de_test", "poids": 3.0},
+				 "sous_categorie": "fer_de_test", "poids": 3.0,
+				 "fabrication": _fab("en fer")},
 	"item:manche_de_test": {"_id": "item:manche_de_test", "nom": "Manche",
-							"categorie": "composant", "sous_categorie": "manche", "poids": 0.5},
+							"categorie": "composant", "sous_categorie": "manche", "poids": 0.5,
+							"fabrication": _fab("à manche de bois")},
 	"item:cire": {"_id": "item:cire", "nom": "Cire", "categorie": "composant",
-				  "sous_categorie": "cire", "poids": 0.3},
+				  "sous_categorie": "cire", "poids": 0.3, "fabrication": _fab("ciré")},
+	# Travaillée par AUCUNE recette de l'armurier : elle n'entre dans l'épée que par son tag.
+	"item:gemmes": {"_id": "item:gemmes", "nom": "Gemme", "categorie": "composant",
+					"sous_categorie": "gemme", "poids": 0.1,
+					"tags": ["fabrication_arme", "fabrication_bijou"],
+					"fabrication": _fab("serti d'une gemme", bonus_pm=4)},
+	# Le tag sans le bloc : la matière reste hors du sur-mesure.
+	"item:sable": {"_id": "item:sable", "nom": "Sable", "categorie": "composant",
+				   "sous_categorie": "sable", "poids": 0.2, "tags": ["fabrication_arme"]},
 }
 
 
@@ -209,6 +227,37 @@ def test_matiere_du_metier_acceptee(index_semes):
 def test_matiere_hors_metier_refusee(index_semes):
 	# Un armurier refuse la cire : §10 du cahier des charges.
 	assert commande.matiere_acceptee(ARTISAN, _DB["item:cire"]) is False
+
+
+def test_matiere_sans_bloc_fabrication_refusee(index_semes):
+	# Le métier la travaille (le tag la destine même aux armes), mais elle n'apporte rien :
+	# la proposer ne ferait que renchérir la pièce sans la changer.
+	assert commande.fabrication_valide(_DB["item:sable"]) is False
+	assert commande.matiere_acceptee(ARTISAN, _DB["item:sable"],
+									 _DB["item:Epee_longue"]) is False
+
+
+# ── La seconde porte : le tag `fabrication_<famille de la pièce>` ───────────────
+
+def test_matiere_taguee_pour_la_famille_de_la_piece(index_semes):
+	"""Une maison qui ne travaille pas la gemme peut la sertir sur une épée : c'est la MATIÈRE
+	qui désigne la famille d'objets où elle s'emploie, pas les recettes du lieu."""
+	gemme = _DB["item:gemmes"]
+	assert commande.matiere_acceptee(ARTISAN, gemme, _DB["item:Epee_longue"]) is True
+
+
+def test_le_tag_suit_la_sous_categorie_aussi(index_semes):
+	# `categorie` OU `sous_categorie` : une bague est `armure/bijou`, et `fabrication_bijou`
+	# suffit — sans quoi tous les bijoux hériteraient du tag des armures.
+	assert commande.tags_fabrication(_DB["item:Bague"]) == {"fabrication_armure",
+														   "fabrication_bijou"}
+	assert commande.matiere_acceptee(ARTISAN, _DB["item:gemmes"], _DB["item:Bague"]) is True
+
+
+def test_sans_piece_le_tag_nouvre_rien(index_semes):
+	# ⚠️ Hors du contexte d'une pièce, la seconde porte reste fermée : on ne sait pas quelle
+	# famille s'applique. C'est ce qui oblige les appelants du sur-mesure à passer l'objet.
+	assert commande.matiere_acceptee(ARTISAN, _DB["item:gemmes"]) is False
 
 
 # ── Les trois cas de matières (§7) ──────────────────────────────────────────────

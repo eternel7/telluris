@@ -13,9 +13,11 @@
 # qui gèle en silence toutes les recettes qui la citent — cf. compétence telluris-economie).
 # Ce script ne fait qu'ENRICHIR des docs item existants.
 #
-# ⚠️ Les matières retenues sont toutes CONSOMMÉES par au moins un métier : c'est la condition
-# pour qu'un artisan les accepte (`commande.matiere_acceptee` → `marche.besoins_lieu`). Une
-# matière que personne ne travaille ne serait proposée nulle part.
+# ⚠️ Les matières retenues sont toutes CONSOMMÉES par au moins un métier : c'est la première
+# des deux portes de `commande.matiere_acceptee` (→ `marche.besoins_lieu`). La seconde est le
+# tag `fabrication_<categorie ou sous_categorie de la pièce>` posé sur le doc matière, qui
+# l'ouvre à une famille d'objets sans passer par les recettes du lieu — ce script ne pose pas
+# de tag, il ne fait qu'écrire le bloc `fabrication` que les DEUX portes exigent.
 #
 # IDEMPOTENT : relit le dump, réémet le doc COMPLET tel qu'il est en base avec le seul bloc
 # `fabrication` ajouté (l'import fait un PUT complet, cf. CLAUDE.md §11). Un doc absent de la

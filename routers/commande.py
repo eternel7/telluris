@@ -9,6 +9,8 @@
 #                                          ou un demi-produit ne se façonne jamais sur mesure.
 # Une commande de catalogue passe chez l'armurier du coin ; la même assortie de matières
 # personnalisées ne passe qu'au Grand Arsenal ; et pas sur une hampe, même là-bas.
+# Les deux dernières sont réunies dans `_garde_sur_mesure` — elles ne vont jamais l'une sans
+# l'autre, et la liste des matières comme le devis doivent les voir pareil.
 #
 # Pattern calqué sur routers/scriptorium.py (lui-même sur routers/auberge.py) : accès au lieu
 # par prédicat, contrôle AVANT dépense, retrait en MÉMOIRE puis un save autoritatif.
@@ -136,17 +138,21 @@ def _catalogue_vue(lieu_doc: dict, relation) -> list:
 	return sorted(lignes, key=lambda l: l["nom"] or "")
 
 
-def _matieres_vue(lieu_doc: dict) -> list:
-	"""Ce que la maison accepte en sur-mesure : les items de son rayon qui entrent dans son
-	tour de main. Le client n'a ainsi qu'à choisir dans une liste déjà filtrée, et rien ne
-	dépend de sa bonne volonté — le serveur revérifie tout à `passer`."""
+def _matieres_vue(lieu_doc: dict, base_doc: dict) -> list:
+	"""Ce que la maison accepte pour CETTE pièce : les items de son rayon qui entrent dans son
+	tour de main, plus ceux que leur tag `fabrication_<famille de la pièce>` y destine. Le
+	client n'a ainsi qu'à choisir dans une liste déjà filtrée, et rien ne dépend de sa bonne
+	volonté — le serveur revérifie tout à `passer`.
+
+	⚠️ La liste dépend de l'objet à façonner : elle ne peut pas être servie par le comptoir,
+	qui ne sait pas encore ce que le joueur va commander."""
 	lignes = []
 	for entree in (lieu_doc.get("stock_vente") or []):
 		item_id = entree.get("item_id")
 		if not item_id or int(entree.get("qty", 0) or 0) <= 0:
 			continue
 		item = resolve_item_ref(item_id)
-		if not item or not commande_util.matiere_acceptee(lieu_doc, item):
+		if not item or not commande_util.matiere_acceptee(lieu_doc, item, base_doc):
 			continue
 		apporte = fabrication.proprietes_matiere(item)
 		lignes.append({
@@ -176,13 +182,58 @@ def comptoir_commande(current_user: Annotated[dict, Depends(get_current_user)]):
 		"lieu_label": lieu_label(lieu_doc),
 		"sur_mesure": sur_mesure,
 		"catalogue": _catalogue_vue(lieu_doc, relation),
-		"matieres": _matieres_vue(lieu_doc) if sur_mesure else [],
+		# ⚠️ Pas de `matieres` ici : ce que la maison accepte dépend de la PIÈCE
+		# (`fabrication_<categorie>`), que le comptoir ne connaît pas encore. L'overlay les
+		# demande à l'ouverture (`/api/commande/matieres`).
 		"matieres_max": int(character_stats.COMMANDE_MATIERES_MAX),
 		"commandes": _vue_commandes(character, commande_util.now_epoch()),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"delai": int(character_stats.COMMANDE_DELAI_SECONDES),
 		"now": commande_util.now_epoch(),
 	}
+
+
+def _garde_sur_mesure(lieu_doc: dict, base_doc: dict) -> None:
+	"""Les DEUX gardes du sur-mesure, ensemble parce qu'elles ne vont jamais l'une sans
+	l'autre — et elles ne disent pas la même chose :
+
+	- la MAISON sait-elle inventer ? (`lieu_fabrique_sur_mesure`, SEULE porte vers la création
+	  d'un doc `item:`/`recette:`) ;
+	- cet OBJET se façonne-t-il ? (`est_intermediaire`, garde INDÉPENDANTE portant sur l'objet)
+	  — on ne façonne pas une hampe ou un lingot sur mesure, fût-ce au Grand Arsenal, et elle
+	  tient même quand le tag `commandable` a remis la pièce au catalogue : le tag rouvre la
+	  commande, jamais la personnalisation."""
+	if not commande_util.lieu_fabrique_sur_mesure(lieu_doc):
+		raise HTTPException(
+			status_code=403,
+			detail="Cet artisan ne travaille que sur ses propres modèles.")
+	if marche.est_intermediaire(base_doc):
+		raise HTTPException(
+			status_code=422,
+			detail="On ne façonne pas une matière première sur mesure.")
+
+
+@commande_router.get("/commande/matieres")
+def matieres_sur_mesure(
+	current_user: Annotated[dict, Depends(get_current_user)],
+	item_id: str = "",
+):
+	"""Les matières que cette maison accepte POUR CETTE PIÈCE — la liste du ✨ sur-mesure.
+
+	⚠️ Servie ici et non par le comptoir : une matière entre dans la pièce soit parce que la
+	maison la travaille, soit parce que son tag `fabrication_<famille>` l'y destine — et la
+	famille, c'est celle de l'objet que le joueur vient de choisir. Le comptoir ne la connaît
+	pas encore.
+
+	`def` et non `async def` : lecture PURE, comme le comptoir."""
+	_, lieu_doc = _acces(current_user)
+	if not item_id or item_id not in commande_util.catalogue_commandable(lieu_doc, get_doc):
+		raise HTTPException(status_code=422, detail="Cet artisan ne sait pas fabriquer cet objet.")
+	base_doc = get_doc(item_id)
+	if not base_doc:
+		raise HTTPException(status_code=422, detail="Objet introuvable")
+	_garde_sur_mesure(lieu_doc, base_doc)
+	return {"item_id": item_id, "matieres": _matieres_vue(lieu_doc, base_doc)}
 
 
 # ── Résolution commune devis / passer ───────────────────────────────────────────
@@ -204,18 +255,8 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 		raise HTTPException(status_code=422, detail="Objet introuvable")
 
 	matieres_demandees = fabrication.normaliser_matieres((body or {}).get("matieres"))
-	if matieres_demandees and not commande_util.lieu_fabrique_sur_mesure(lieu_doc):
-		raise HTTPException(
-			status_code=403,
-			detail="Cet artisan ne travaille que sur ses propres modèles.")
-	# ⚠️ Garde INDÉPENDANTE de la précédente, et elle porte sur l'OBJET, pas sur le lieu : on
-	# ne façonne pas une hampe ou un lingot sur mesure, fût-ce au Grand Arsenal. Elle tient
-	# même quand le tag `commandable` a remis la pièce au catalogue — le tag rouvre la
-	# commande, jamais la personnalisation.
-	if matieres_demandees and marche.est_intermediaire(base_doc):
-		raise HTTPException(
-			status_code=422,
-			detail="On ne façonne pas une matière première sur mesure.")
+	if matieres_demandees:
+		_garde_sur_mesure(lieu_doc, base_doc)
 	if len(matieres_demandees) > int(character_stats.COMMANDE_MATIERES_MAX):
 		raise HTTPException(
 			status_code=422,
@@ -227,7 +268,10 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 		doc = get_doc(entree["item"])
 		if not doc:
 			raise HTTPException(status_code=422, detail="Matière introuvable")
-		if not commande_util.matiere_acceptee(lieu_doc, doc):
+		# ⚠️ La pièce est passée : une matière peut être admise par son tag
+		# `fabrication_<famille de la pièce>` sans que la maison la travaille. Sans elle,
+		# le serveur refuserait ce que l'overlay vient de proposer.
+		if not commande_util.matiere_acceptee(lieu_doc, doc, base_doc):
 			raise HTTPException(
 				status_code=422,
 				detail="%s n'entre pas dans le tour de main de cette maison."

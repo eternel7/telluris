@@ -37,12 +37,16 @@ import time
 import uuid
 
 from models import character_stats
-from utils import marche
+from utils import fabrication, marche
 from utils.characters import (
 	item_ref_id, item_sous_categorie, poids_bounds, resolve_item_ref,
 )
 
 TAG_SUR_MESURE = "sur_mesure"
+
+# Préfixe des tags qui ouvrent une matière à une FAMILLE de pièces : `fabrication_arme`,
+# `fabrication_armure`, `fabrication_bijou`… La donnée dit elle-même ce à quoi elle sert.
+TAG_FABRICATION_PREFIXE = "fabrication_"
 
 # États persistés sur la commande. Les états de DÉROULEMENT (`en_fabrication`, `terminee`,
 # `expiree`) ne sont jamais écrits : ils se lisent sur l'horloge.
@@ -133,15 +137,45 @@ def recette_pour(lieu_doc: dict, item_id: str):
 	return None
 
 
-def matiere_acceptee(lieu_doc: dict, item_doc: dict) -> bool:
-	"""Cette matière entre-t-elle dans le tour de main de la maison ? Même critère que ce
-	qu'elle achète au joueur (`besoins_lieu` : id d'item ou sous-catégorie). Un cirier refuse
-	donc le métal, un armurier refuse la cire — §10 du cahier des charges."""
-	if not item_doc or "fabrication" not in item_doc:
+def fabrication_valide(item_doc: dict) -> bool:
+	"""Le bloc `fabrication` de ce doc apporte-t-il quelque chose ? Lu VIA
+	`fabrication.proprietes_matiere`, source unique de ce qu'est un bloc bien formé : un bloc
+	absent, mal formé ou vide ne fait pas une matière de sur-mesure. Une matière sans apport
+	ne ferait que renchérir la pièce sans rien y changer."""
+	props = fabrication.proprietes_matiere(item_doc)
+	return bool(props["nom"] or props["modificateurs"])
+
+
+def tags_fabrication(base_doc: dict) -> set:
+	"""Les tags qui ouvrent une matière à CETTE pièce : `fabrication_<categorie>` et
+	`fabrication_<sous_categorie>` de l'objet à façonner (`arme`, `armure`, `bijou`…)."""
+	if not base_doc:
+		return set()
+	cles = (base_doc.get("categorie"), item_sous_categorie(base_doc))
+	return {TAG_FABRICATION_PREFIXE + str(c) for c in cles if c}
+
+
+def matiere_acceptee(lieu_doc: dict, item_doc: dict, base_doc: dict | None = None) -> bool:
+	"""Cette matière peut-elle entrer dans la pièce ? DEUX portes, et il suffit d'une :
+
+	- le **tour de main de la maison** — même critère que ce qu'elle achète au joueur
+	  (`besoins_lieu` : id d'item ou sous-catégorie). Un cirier refuse donc le métal, un
+	  armurier refuse la cire — §10 du cahier des charges ;
+	- le **tag de la matière** — `fabrication_<categorie>` / `fabrication_<sous_categorie>`
+	  de la PIÈCE à façonner : la matière désigne elle-même la famille d'objets où elle
+	  s'emploie, sans passer par les recettes du lieu (une maison qui ne travaille pas la
+	  gemme peut la sertir sur une épée si la gemme porte `fabrication_arme`).
+
+	⚠️ Sans `base_doc`, cette seconde porte reste FERMÉE : on ne sait pas ce qu'on façonne,
+	donc aucune famille ne s'applique. Les appelants du sur-mesure passent la pièce.
+
+	Dans les deux cas le bloc `fabrication` doit être renseigné (`fabrication_valide`)."""
+	if not fabrication_valide(item_doc):
 		return False
-	
 	item_id = item_doc.get("item") or item_doc.get("_id")
-	return any(correspond(item_id, item_doc, cle) for cle in marche.besoins_lieu(lieu_doc))
+	if any(correspond(item_id, item_doc, cle) for cle in marche.besoins_lieu(lieu_doc)):
+		return True
+	return bool(tags_fabrication(base_doc) & set(item_doc.get("tags") or []))
 
 
 # ── Approvisionnement des matières (§7 : les trois cas) ─────────────────────────
