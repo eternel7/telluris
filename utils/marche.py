@@ -1146,7 +1146,9 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 	vente ET utilisable comme matière pour la recette de niveau supérieur (chaînage intra-tick),
 	sans duplication (consommer = retirer du rayon ; une base au niveau de la cible reste en
 	vente). `resolve_fn` (injectable pour les tests) résout `item_id → doc` pour reconnaître la
-	clé-matière du rayon ; s'il renvoie None (DB absente), le rayon n'est pas traité comme matière."""
+	clé-matière du rayon ; s'il renvoie None (DB absente), le rayon n'est pas traité comme matière.
+
+	**Un LIVRE déjà en rayon se refait moins** : `_poids_tirage`, ci-dessous."""
 	stock_mat = lieu_doc.setdefault("stock_matieres", {})
 	stock_vente = lieu_doc.setdefault("stock_vente", [])
 	categorie = lieu_doc.get("categorie")
@@ -1197,6 +1199,31 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 			e["qty"] = int(e.get("qty", 0)) - take
 			reste -= take
 
+	# ⚠️ **Un LIVRE déjà en rayon se refait moins.** Le poids de tirage d'une recette dont le
+	# produit est un item `categorie == "livre"` (grimoire, traité, recueil, carte — les quatre
+	# sous-catégories du scriptorium) est divisé par 2 × la quantité DÉJÀ exposée : 1 exemplaire
+	# → /2, 2 → /4, 3 → /6. Un titre encore absent passe donc devant ceux qui sont là, sans
+	# qu'aucun ne soit jamais exclu. Sans cela, 112 recettes de grimoire de poids identique
+	# faisaient du rayon une loterie à 1/112 où le titre neuf attendait derrière les rééditions.
+	# Le compte est REFAIT à chaque cuisson : le rayon bouge dans la passe, et le 2e exemplaire
+	# d'un titre qu'on vient de cuire ne doit pas repartir au poids du 1er.
+	# ⚠️ Livres SEULEMENT — un rayon de pain ou de fer doit continuer de se remplir — et
+	# seulement si `resolve_fn` répond : sans DB (fixtures), poids inchangé, comportement d'avant.
+	_livre_cache: dict[str, bool] = {}
+
+	def _est_livre(item_id: str) -> bool:
+		if item_id not in _livre_cache:
+			item = resolve_fn(item_id) if item_id else None
+			_livre_cache[item_id] = bool(item) and (item or {}).get("categorie") == "livre"
+		return _livre_cache[item_id]
+
+	def _poids_tirage(p: dict) -> float:
+		poids = float(max(1, p["poids"]))
+		if not _est_livre(p["item_id"]):
+			return poids
+		deja = sum(int(e.get("qty", 0)) for e in stock_vente if e.get("item_id") == p["item_id"])
+		return poids / (2.0 * deja) if deja > 0 else poids
+
 	prepared = [
 		{
 			"inputs": recette_matieres(r),                        # [(sous_cat, qm), …]
@@ -1222,7 +1249,7 @@ def _executer_production_batch(lieu_doc: dict, recettes: list | None = None,
 					  and all(_dispo(sc) >= qm for (sc, qm) in p["inputs"])]
 		if not applicable:
 			break
-		chosen = random.choices(applicable, weights=[max(1, p["poids"]) for p in applicable])[0]
+		chosen = random.choices(applicable, weights=[_poids_tirage(p) for p in applicable])[0]
 		for (sc, qm) in chosen["inputs"]:
 			_consommer(sc, qm)
 		_stock_vente_add(stock_vente, chosen["item_id"], chosen["qp"])

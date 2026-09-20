@@ -1,0 +1,2354 @@
+[
+	{
+		"_id": "recette:grimoire_ailes_de_charogne",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_ailes_de_charogne",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_amitie_des_betes",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_amitie_des_betes",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_anatheme",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_anatheme",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_anneaux_du_serpent_geant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_anneaux_du_serpent_geant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_antidote_sylvestre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_antidote_sylvestre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_armure_de_givre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_armure_de_givre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_aura_de_devotion",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_aura_de_devotion",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_baiser_du_vampire",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_baiser_du_vampire",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_bandelettes_du_tombeau",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_bandelettes_du_tombeau",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_baume_de_seve",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_baume_de_seve",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_benediction_martiale",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_benediction_martiale",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_benir",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_benir",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_bouclier_arcanique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_bouclier_arcanique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_bouclier_magique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_bouclier_magique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_boule_de_feu",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_boule_de_feu",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_chant_de_la_lhamia",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_chant_de_la_lhamia",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_charge_du_sanglier",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_charge_du_sanglier",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_contrat_mineur",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_contrat_mineur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_couronne_de_l_enfer",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_couronne_de_l_enfer",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_couvee_infernale",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_couvee_infernale",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_descente_du_seraphin",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_descente_du_seraphin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_ecailles_du_servant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_ecailles_du_servant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_eclair_siphonnant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_eclair_siphonnant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_eclat_de_givre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_eclat_de_givre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_eclat_eblouissant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_eclat_eblouissant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_eclat_rocheux",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_eclat_rocheux",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_ecuries_de_l_abime",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_ecuries_de_l_abime",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_envol_du_griffon",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_envol_du_griffon",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_etreinte_sepulcrale",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_etreinte_sepulcrale",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_eveil_de_l_homme_arbre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_eveil_de_l_homme_arbre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_faim_de_la_goule",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_faim_de_la_goule",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_fer_et_priere",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_fer_et_priere",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_feu_purificateur",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_feu_purificateur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_flamme_infernale",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_flamme_infernale",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_flammerole",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_flammerole",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_flegme_demoniaque",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_flegme_demoniaque",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_force_partagee",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_force_partagee",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_formule_de_clairvoyance",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_formule_de_clairvoyance",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_fracas_tellurique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_fracas_tellurique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_garde_parfaite",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_garde_parfaite",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_gardien_des_portes",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_gardien_des_portes",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_gardien_du_temple",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_gardien_du_temple",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_grace_divine",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_grace_divine",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_guerison_des_animaux",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_guerison_des_animaux",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_horde_des_fosses",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_horde_des_fosses",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_hurlement_du_loup",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_hurlement_du_loup",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_incarnation_divine",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_incarnation_divine",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_jet_d_eau",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_jet_d_eau",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_jugement_sacre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_jugement_sacre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_lame_de_vent",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_lame_de_vent",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_legion_de_l_abime",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_legion_de_l_abime",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_leurre_spectral",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_leurre_spectral",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_levee_des_ossements",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_levee_des_ossements",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_licorne_immaculee",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_licorne_immaculee",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_lien_du_paladin",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_lien_du_paladin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_lumiere_purificatrice",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_lumiere_purificatrice",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_main_de_l_ordre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_main_de_l_ordre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_main_de_venin",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_main_de_venin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_maladresse",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_maladresse",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_malediction_mineure",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_malediction_mineure",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_marche_des_mammouths",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_marche_des_mammouths",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_meditation_profonde",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_meditation_profonde",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_messager_aile",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_messager_aile",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_meteore",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_meteore",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_meute_grise",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_meute_grise",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_morsure_de_ronces",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_morsure_de_ronces",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_morsure_totemique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_morsure_totemique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_mortis",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_mortis",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_mot_de_pouvoir",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_mot_de_pouvoir",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_mur_de_feu",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_mur_de_feu",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_murmure_de_la_succube",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_murmure_de_la_succube",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_oeil_de_la_chouette",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_oeil_de_la_chouette",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_ordre_sanglant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_ordre_sanglant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_pacte_de_sang",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_pacte_de_sang",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_pacte_du_servant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_pacte_du_servant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_projectile_arcanique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_projectile_arcanique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_regain_sylvestre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_regain_sylvestre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_regard_glacial",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_regard_glacial",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_reveil_de_l_ours",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_reveil_de_l_ours",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_revigore",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_revigore",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_rupture_du_sceau",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_rupture_du_sceau",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_saut",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_saut",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_sceau_de_protection",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_sceau_de_protection",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_seigneurie_du_sang",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_seigneurie_du_sang",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_sentence_de_justice",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_sentence_de_justice",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_sentinelle_du_parvis",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_sentinelle_du_parvis",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_serment_du_demon_guerrier",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_serment_du_demon_guerrier",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_serres_de_l_aigle_geant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_serres_de_l_aigle_geant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_seve_vivifiante",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_seve_vivifiante",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_silhouettes_trompeuses",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_silhouettes_trompeuses",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_soif_du_nosferatu",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_soif_du_nosferatu",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_soin_du_compagnon",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_soin_du_compagnon",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_soin_mineur",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_soin_mineur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_soin_regenerant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_soin_regenerant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_sommeil_pesant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_sommeil_pesant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_souffle_ancestral",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_souffle_ancestral",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_souffle_de_feu",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_souffle_de_feu",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_souffle_de_soufre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_souffle_de_soufre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_source_vive",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_source_vive",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_temoin_celeste",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_temoin_celeste",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_tetes_de_l_hydre",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_tetes_de_l_hydre",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_toucher_devitalisant",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_toucher_devitalisant",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_trait_de_flamme",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_trait_de_flamme",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_trait_mortifere",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_trait_mortifere",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_transe_du_totem",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_transe_du_totem",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_trouble_magique",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_trouble_magique",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_vague_de_soin",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_vague_de_soin",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_verdict_de_lumiere",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_verdict_de_lumiere",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_verite_gravee",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_verite_gravee",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_vigueur_demoniaque",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_vigueur_demoniaque",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_visage_de_l_horreur",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_visage_de_l_horreur",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	},
+	{
+		"_id": "recette:grimoire_zone_de_silence",
+		"type": "recette",
+		"lieu_categorie": "scriptorium",
+		"objet_final": "grimoire_zone_de_silence",
+		"quantite_produite": 1,
+		"matieres_premieres": [
+			{
+				"item": "item:Encre",
+				"quantite": 2
+			},
+			{
+				"item": "item:pigment",
+				"quantite": 1
+			},
+			{
+				"item": "item:Papier",
+				"quantite": 3
+			}
+		]
+	}
+]

@@ -217,6 +217,101 @@ def test_pool_unifie_sans_surplus_ne_consomme_pas_le_rayon():
     assert lieu["stock_matieres"]["manche"] == 3
 
 
+# ── Tirage pondéré : un LIVRE déjà en rayon se refait moins ─────────────────────
+
+def _recette_livre(slug, papier, encre):
+    return {
+        "type": "recette", "lieu_categorie": "scriptorium", "objet_final": slug,
+        "quantite_produite": 1,
+        "matieres_premieres": [
+            {"item": "item:Papier", "quantite": papier},
+            {"item": "item:Encre", "quantite": encre},
+        ],
+    }
+
+
+def _resolve_livre(item_id):
+    # Stub sans DB : `categorie` est le SEUL champ que lit le poids de tirage. La
+    # sous-catégorie est neutre — aucune recette d'ici ne la consomme, donc le rayon ne
+    # peut pas se retrouver traité comme matière et brouiller la mesure.
+    cat = "livre" if item_id.startswith(("item:grimoire_", "item:livre_")) else "composant"
+    return {"_id": item_id, "item": item_id, "categorie": cat, "sous_categorie": "neutre"}
+
+
+def _poids_observes(monkeypatch, lieu, recettes):
+    """Lance une passe en interceptant le tirage : rend un dict {item_id: poids} PAR cuisson,
+    et fait toujours cuire la première recette applicable (hasard neutralisé, cf. CLAUDE.md §14)."""
+    vus = []
+
+    def _choices(population, weights=None):
+        vus.append({p["item_id"]: w for p, w in zip(population, weights)})
+        return [population[0]]
+
+    monkeypatch.setattr(marche.random, "choices", _choices)
+    _executer_production_batch(lieu, recettes, resolve_fn=_resolve_livre)
+    return vus
+
+
+def test_poids_tirage_livre_en_rayon_divise_par_deux_fois_la_quantite(monkeypatch):
+    # 112 recettes de grimoire de poids identique faisaient du rayon une loterie à 1/112 :
+    # un titre déjà exposé cède le pas à celui qui manque, sans jamais être exclu.
+    a, b = _recette_livre("grimoire_a", 3, 2), _recette_livre("grimoire_b", 3, 2)
+    poids = sum(q for _c, q in recette_matieres(a))   # relu de la recette, jamais retapé
+    lieu = {
+        "categorie": "scriptorium",
+        "stock_matieres": {"item:Papier": 3, "item:Encre": 2},   # de quoi cuire UNE fois
+        "stock_vente": [{"item_id": "item:grimoire_b", "qty": 3}],
+    }
+    (premier,) = _poids_observes(monkeypatch, lieu, [a, b])
+    assert premier["item:grimoire_a"] == poids        # titre absent du rayon : poids plein
+    assert premier["item:grimoire_b"] == poids / 6    # 3 exemplaires → / (2 × 3)
+
+
+def test_poids_tirage_epargne_ce_qui_n_est_pas_un_livre(monkeypatch):
+    # Un rayon de pain ou de fer doit continuer de se remplir : la division ne vaut QUE
+    # pour `categorie == "livre"` (grimoire, traité, recueil, carte).
+    a, b = _recette_livre("grimoire_a", 3, 2), _recette_livre("Miche", 3, 2)
+    poids = sum(q for _c, q in recette_matieres(b))
+    lieu = {
+        "categorie": "scriptorium",
+        "stock_matieres": {"item:Papier": 3, "item:Encre": 2},
+        "stock_vente": [{"item_id": "item:Miche", "qty": 4}],
+    }
+    (premier,) = _poids_observes(monkeypatch, lieu, [a, b])
+    assert premier["item:Miche"] == poids
+
+
+def test_poids_tirage_recompte_apres_chaque_cuisson(monkeypatch):
+    # Le rayon bouge DANS la passe : le 2e exemplaire d'un titre ne repart pas au poids du 1er.
+    a = _recette_livre("grimoire_a", 1, 1)
+    poids = sum(q for _c, q in recette_matieres(a))
+    lieu = {
+        "categorie": "scriptorium",
+        "stock_matieres": {"item:Papier": 2, "item:Encre": 2},   # deux cuissons possibles
+        "stock_vente": [],
+    }
+    premier, second = _poids_observes(monkeypatch, lieu, [a])
+    assert premier["item:grimoire_a"] == poids        # rayon vide : poids plein
+    assert second["item:grimoire_a"] == poids / 2     # un exemplaire vient d'être posé
+
+
+def test_poids_tirage_inchange_sans_resolution(monkeypatch):
+    # `resolve_fn` muet (fixture sans DB) ⇒ poids d'avant, à la lettre.
+    a = _recette_livre("grimoire_a", 1, 1)
+    poids = sum(q for _c, q in recette_matieres(a))
+    lieu = {"stock_matieres": {"item:Papier": 1, "item:Encre": 1},
+            "stock_vente": [{"item_id": "item:grimoire_a", "qty": 5}]}
+    vus = []
+
+    def _choices(population, weights=None):
+        vus.append({p["item_id"]: w for p, w in zip(population, weights)})
+        return [population[0]]
+
+    monkeypatch.setattr(marche.random, "choices", _choices)
+    _executer_production_batch(lieu, [a], resolve_fn=lambda i: None)
+    assert vus[0]["item:grimoire_a"] == poids
+
+
 # ── ecouler_produits_pnj (demande PNJ objet par objet) ───────────────────────────
 
 def test_ecoulement_pnj_objet_par_objet(monkeypatch):

@@ -1,0 +1,577 @@
+Dans Telluris, les objets et les recettes sont actuellement définis par la base de données.
+
+Une recette n'est utilisable que si elle existe en base de données. De même, un item n'existe réellement dans le jeu que s'il possède une définition en base.
+
+Je souhaite introduire un système de **commande auprès des magasins et ateliers**, permettant notamment de fabriquer des objets à la demande, y compris des variantes qui n'existent pas encore en base.
+
+## 1. Principe général
+
+Une commande représente une demande faite par un joueur auprès d'un magasin, d'un artisan ou d'un grand magasin.
+
+Une commande peut concerner :
+
+1. un objet dont la recette existe déjà en base ;
+2. un objet dont la recette existe déjà, mais dont aucun exemplaire n'est actuellement disponible dans le magasin ;
+3. une variante personnalisée d'un objet existant, obtenue en combinant :
+
+   * un objet de base existant en base ;
+   * une ou plusieurs matières premières ;
+   * éventuellement des caractéristiques, effets ou modificateurs apportés par ces matières premières.
+
+Le système doit donc distinguer :
+
+* **la définition de l'objet** ;
+* **la recette permettant de le fabriquer** ;
+* **les exemplaires physiques de l'objet disponibles dans le monde** ;
+* **la commande permettant de demander sa fabrication**.
+
+## 2. Objet de base et objet fabriqué
+
+Un objet commandé doit toujours pouvoir être rattaché à un **objet de base** existant en base.
+
+Exemple :
+
+```text
+Épée longue
+    ↓
+objet de base
+    ↓
+commande avec :
+- acier
+- bois de chêne
+- gemme magique
+    ↓
+Épée longue en acier au pommeau de chêne
+avec effet supplémentaire apporté par la gemme
+```
+
+L'objet résultant doit conserver les caractéristiques intrinsèques de l'objet de base et recevoir les caractéristiques supplémentaires provenant de sa fabrication.
+
+Il ne faut pas créer un système dans lequel chaque variante doit être définie manuellement à l'avance.
+
+## 3. Matières premières
+
+Chaque matière première doit pouvoir définir les propriétés qu'elle apporte lorsqu'elle est utilisée dans une fabrication.
+
+Une matière première peut par exemple apporter :
+
+* un bonus de dégâts ;
+* une résistance ;
+* un poids différent ;
+* une durabilité différente ;
+* un bonus magique ;
+* un effet élémentaire ;
+* une modification de valeur ;
+* une modification d'apparence ;
+* une propriété spéciale ;
+* ou tout autre modificateur prévu par le système.
+
+Ces propriétés doivent être appliquées au résultat de la fabrication selon les règles du jeu.
+
+Le système doit éviter de coder en dur les effets de chaque matière première dans le système de commande.
+
+Les effets doivent idéalement être définis dans les données afin que le système puisse être étendu sans modifier le code.
+
+## 4. Recette générée
+
+Lorsqu'une commande nécessite la création d'une nouvelle variante d'objet, le système doit générer une **recette persistante**.
+
+Cette recette doit permettre de retrouver comment l'objet a été fabriqué.
+
+Exemple :
+
+```text
+Recette :
+Objet de base : épée_longue
+Matières :
+    acier_renforcé
+    bois_de_chêne
+    cristal_de_feu
+
+Résultat :
+    épée_longue_<identifiant_variant>
+```
+
+La recette générée doit être enregistrée dans la base de données.
+
+Elle devient alors une recette normale du jeu et peut être retrouvée ultérieurement.
+
+## 5. Item généré
+
+Le résultat de la commande doit également être enregistré dans la base de données lorsqu'il s'agit d'une nouvelle variante.
+
+L'objectif est qu'après sa création, l'objet ne soit plus seulement une conséquence temporaire de la commande.
+
+Il devient un véritable item de Telluris.
+
+Exemple :
+
+```text
+Objet de base :
+épée_longue
+
+Nouvelle variante :
+épée_longue_acier_cristal_feu
+
+La base contient désormais :
+- la définition de la variante ;
+- sa recette ;
+- son lien vers l'objet de base ;
+- ses modificateurs ;
+- ses caractéristiques finales.
+```
+
+Le système doit utiliser un identifiant déterministe ou une stratégie équivalente permettant d'éviter de créer plusieurs définitions identiques pour exactement la même combinaison de paramètres.
+
+## 6. Commande d'un objet déjà défini
+
+Il doit être possible de commander un objet dont la recette existe déjà en base.
+
+Cette fonctionnalité est importante.
+
+Une commande ne signifie donc pas nécessairement qu'une nouvelle recette doit être créée.
+
+Exemple :
+
+```text
+Recette : arc_long
+Existe déjà en base.
+
+Le magasin ne possède actuellement aucun arc_long.
+
+Le joueur commande un arc_long.
+
+→ Le système utilise la recette existante.
+→ Les matières premières nécessaires sont déterminées.
+→ Elles sont fournies par le joueur ou achetées.
+→ L'artisan fabrique l'objet.
+→ Un exemplaire est créé.
+```
+
+Ainsi, les commandes peuvent également servir à obtenir des **objets simples qui existent déjà dans le jeu mais qui ne sont momentanément pas disponibles en magasin**.
+
+## 7. Fourniture des matières premières
+
+Lorsqu'une commande est passée, les matières premières nécessaires doivent être déterminées.
+
+Le joueur doit pouvoir :
+
+### Cas A — fournir les matières premières
+
+Le joueur possède les matières nécessaires.
+
+Elles sont prélevées de son inventaire lors de la validation de la commande.
+
+### Cas B — faire acheter les matières premières
+
+Le magasin ou l'artisan peut disposer des matières premières nécessaires.
+
+Dans ce cas, leur prix est ajouté au coût de la commande.
+
+### Cas C — matière indisponible
+
+Si une matière n'est ni fournie par le joueur ni disponible à l'achat auprès de l'artisan, la commande ne peut pas être immédiatement fabriquée.
+
+Le système doit alors permettre de représenter la commande comme :
+
+```text
+en_attente_materiaux
+```
+
+plutôt que de simplement échouer.
+
+## 8. États d'une commande
+
+Prévoir un véritable cycle de vie des commandes.
+
+Par exemple :
+
+```text
+cree
+↓
+verification
+↓
+materiaux_a_fournir
+↓
+materiaux_disponibles
+↓
+payee
+↓
+en_fabrication
+↓
+terminee
+↓
+livree
+```
+
+Avec éventuellement des états d'erreur ou d'annulation :
+
+```text
+annulee
+impossible
+expiree
+```
+
+Le système doit empêcher qu'une commande soit fabriquée deux fois ou que les matières premières soient consommées plusieurs fois.
+
+## 9. Prix
+
+Le prix final d'une commande doit pouvoir être calculé à partir de plusieurs éléments :
+
+```text
+prix final =
+    prix de base
+  + coût des matières premières achetées
+  + coût de fabrication
+  + éventuel supplément lié à la complexité
+  + éventuels coûts spécifiques
+```
+
+Les matières fournies directement par le joueur ne doivent pas être facturées une seconde fois.
+
+Le système doit conserver le détail du calcul afin qu'il soit possible de comprendre ultérieurement pourquoi une commande a coûté telle somme.
+
+## 10. Différence entre magasin et grand magasin
+
+Le système doit permettre différents types de vendeurs. Tous les magasins ne doivent pas nécessairement pouvoir fabriquer des variantes.
+
+Un petit magasin peut uniquement vendre des objets déjà fabriqués.
+
+Un artisan peut fabriquer certains types d'objets sur commande.
+
+Un grand magasin peut accepter des commandes plus complexes et utiliser des matières premières fournies par le client.
+
+Cette différence doit être configurable dans les données plutôt que codée de manière rigide.
+
+Par exemple :
+
+```text
+vendeur :
+    type : grand_magasin
+
+capacites :
+    accepte_commandes : true
+    fabrication_sur_mesure : true
+    accepte_materiaux_client : true
+    achete_materiaux : true
+```
+
+
+Ajouter une capacité du magasin, de l'artisan ou de l'atelier.
+
+Exemple :
+
+custom_crafting = true
+
+Mais cette capacité doit idéalement être plus précise.
+
+Exemple :
+
+forge
+    catégories : weapon, armor
+    matériaux : metal, crystal
+
+ou :
+
+atelier_de_cirier
+    catégories : candle
+    matériaux : wax, herb, crystal
+
+La commande doit être refusée si le magasin ne possède pas les capacités nécessaires.
+
+## 11. Historique de fabrication
+
+Conserver l'origine de la variante.
+
+Prévoir si possible :
+
+```text
+created_from_base_item
+created_by_recipe
+materials_used
+created_at
+creator / artisan
+shop
+```
+
+Cela permettra plus tard de développer :
+
+```text
+traçabilité ;
+réputation des artisans ;
+objets légendaires ;
+signatures d'artisans ;
+historique des objets ;
+commerce de créations uniques.
+```
+
+Ne pas rendre ces fonctionnalités obligatoires si elles n'existent pas encore, mais prévoir une structure extensible.
+
+## 12. Architecture des données
+
+Conserver une séparation claire entre les concepts.
+
+Prévoir au minimum les concepts suivants :
+
+```text
+item_definition
+recipe
+material
+item_instance
+order
+vendor
+```
+
+### item_definition
+
+Décrit ce qu'est l'objet.
+
+Il peut s'agir d'un objet de base ou d'une variante générée.
+
+### recipe
+
+Décrit comment produire un item_definition.
+
+### material
+
+Décrit une matière première et les propriétés qu'elle peut apporter à une fabrication.
+
+### item_instance
+
+Représente l'exemplaire physique possédé par un personnage, stocké dans un magasin, placé dans le monde, etc.
+
+### order
+
+Représente la demande d'un joueur auprès d'un vendeur.
+
+### vendor
+
+Décrit les capacités de fabrication et de commande du vendeur.
+
+## 13. Héritage des caractéristiques
+
+Une variante doit conserver une référence explicite vers son objet de base.
+
+Par exemple :
+
+```json
+{
+    "type": "item_definition",
+    "base_item": "item:epee_longue",
+    "modifiers": [
+        "acier_renforce",
+        "cristal_feu"
+    ]
+}
+```
+
+Les caractéristiques finales doivent être calculées de manière déterministe à partir de :
+
+```text
+objet de base
++
+matières
++
+modificateurs
++
+règles de fabrication
+```
+
+Éviter de dupliquer inutilement les données de l'objet de base.
+
+L'objet dérivé doit pouvoir être recalculé ou vérifié à partir de ses données sources.
+
+## 14. Identité des variantes
+
+Une combinaison identique doit produire la même définition logique.
+
+Par exemple :
+
+```text
+Épée longue
++ acier renforcé
++ cristal de feu
+```
+
+doit correspondre à la même variante que :
+
+```text
+Épée longue
++ cristal de feu
++ acier renforcé
+```
+
+si l'ordre des matières n'a aucune importance dans les règles de fabrication.
+
+Il faut donc normaliser les composants avant de générer l'identifiant de la variante.
+
+En revanche, si l'ordre des composants a une influence sur la fabrication, cette particularité doit être explicitement prise en compte.
+
+## 14. Exemple complet
+
+Le joueur commande :
+
+```text
+1 épée longue en acier renforcé avec cristal de feu
+```
+
+Le système recherche :
+
+```text
+item:epee_longue
+```
+
+La recette de base existe.
+
+La commande indique les matières personnalisées.
+
+Le système vérifie :
+
+```text
+objet de base valide ?
+recette disponible ?
+vendeur capable de fabriquer l'objet ?
+matières disponibles ?
+joueur possède-t-il les matières ?
+prix calculable ?
+```
+
+Si la variante n'existe pas encore :
+
+```text
+Créer item_definition de la variante
+Créer recipe correspondante
+Enregistrer ces deux éléments en base
+```
+
+Puis :
+
+```text
+Créer order
+Réserver ou consommer les matières
+Calculer le prix
+Passer la commande en fabrication
+Créer l'item_instance lorsque la fabrication est terminée
+```
+
+Si la variante existe déjà :
+
+```text
+Réutiliser item_definition existant
+Réutiliser recipe existante
+Créer uniquement la commande et l'item_instance
+```
+
+## 14. Point important : ne pas confondre définition et exemplaire
+
+Le système doit impérativement distinguer :
+
+```text
+ItemDefinition
+    = "ce qu'est une épée longue en acier renforcé"
+
+ItemInstance
+    = "l'exemplaire précis de cette épée que possède le joueur"
+```
+
+Une nouvelle commande d'une même variante ne doit donc pas créer une nouvelle définition.
+
+Elle doit créer un nouvel exemplaire.
+
+Exemple :
+
+```text
+Base :
+Épée longue
+
+Variante :
+Épée longue + acier renforcé + cristal de feu
+
+Base de données :
+    1 item_definition
+    1 recipe
+
+Commandes :
+    commande #001 → exemplaire #A
+    commande #002 → exemplaire #B
+    commande #003 → exemplaire #C
+```
+
+## 17. Compatibilité avec le système actuel
+
+Le nouveau système doit s'intégrer au système existant de recettes et d'items sans casser son fonctionnement actuel.
+
+Les recettes existantes doivent continuer à fonctionner exactement comme avant.
+
+Les items existants doivent continuer à fonctionner exactement comme avant.
+
+Le système de commande doit être une couche supplémentaire permettant :
+
+```text
+objet existant
+        ↓
+recette existante
+        ↓
+commande
+        ↓
+nouvel exemplaire
+```
+
+ou :
+
+```text
+objet existant
+        ↓
+personnalisation par matières
+        ↓
+nouvelle variante
+        ↓
+nouvelle recette persistée
+        ↓
+commande
+        ↓
+nouvel exemplaire
+```
+
+## 18. Contraintes d'implémentation
+
+Avant de modifier le code :
+
+1. analyser le modèle actuel des items ;
+2. analyser le modèle actuel des recettes ;
+3. identifier comment les matières premières sont actuellement représentées ;
+4. identifier comment les magasins et inventaires fonctionnent ;
+5. identifier comment les objets sont créés ;
+6. identifier comment la base de données est structurée ;
+7. réutiliser autant que possible les mécanismes existants.
+
+Ne pas créer un deuxième système parallèle de recettes ou d'items si le système actuel peut être étendu proprement.
+
+Privilégier une architecture pilotée par les données.
+
+Les identifiants générés doivent être stables.
+
+Les opérations de création doivent être idempotentes lorsque cela est pertinent.
+
+Les transactions ou mécanismes équivalents doivent empêcher les duplications, la double consommation des matières et la double création d'un résultat lorsqu'une même commande est traitée plusieurs fois.
+
+## 19. Résultat attendu
+
+Implémenter un système dans lequel :
+
+* les objets existants continuent de fonctionner comme aujourd'hui ;
+* les recettes existantes peuvent être utilisées directement pour des commandes ;
+* un joueur peut commander un objet même si le magasin n'en possède aucun exemplaire ;
+* un joueur peut fournir lui-même les matières premières ;
+* le magasin peut éventuellement acheter les matières pour lui ;
+* les matières peuvent modifier les caractéristiques du résultat ;
+* une variante inexistante peut être générée automatiquement ;
+* cette variante devient un véritable `item_definition` en base ;
+* sa recette devient également persistante en base ;
+* plusieurs exemplaires de la même variante peuvent ensuite être fabriqués sans recréer sa définition ;
+* le système conserve la traçabilité de la fabrication ;
+* les commandes disposent d'un cycle de vie clair ;
+* aucune duplication inutile de définition d'objets ou de recettes n'est créée.
+
+Commencer par analyser le code existant et proposer une architecture d'intégration avant d'implémenter les modifications.
+Ne pas modifier le code tant que les structures existantes et leurs relations n'ont pas été identifiées.

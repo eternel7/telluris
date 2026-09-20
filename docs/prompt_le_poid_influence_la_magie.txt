@@ -1,0 +1,521 @@
+Tu dois concevoir et implémenter dans Telluris RPG stratégique 2D un système reliant le **poids réellement porté par un personnage** à sa capacité à pratiquer la magie.
+
+## Contexte du jeu
+
+Telluris est un RPG stratégique 2D médiéval-fantastique dans lequel la magie possède un **coût physique**. Les personnages peuvent transporter des équipements, armes, armures, consommables, ressources et objets divers.
+
+Le système recherché doit faire du poids transporté une contrainte ayant un impact sur la pratique de la magie, sans simplement interdire celle-ci lorsque le personnage est trop chargé.
+
+L'objectif est de créer une mécanique cohérente, lisible et exploitable tactiquement.
+
+---
+
+# 1. Principe fondamental
+
+Plus un personnage porte de poids, plus il lui est difficile de canaliser correctement le mana.
+
+La logique à implémenter est :
+
+**poids porté → contrainte physique → difficulté de canalisation → qualité/coût de la magie**
+
+Le poids ne doit donc pas être considéré uniquement comme une mécanique d'inventaire.
+
+Il représente également la charge physique que le personnage impose à son propre corps pendant la manipulation du mana.
+
+Un personnage très léger et mobile doit pouvoir pratiquer la magie avec davantage de facilité.
+
+Un personnage lourdement équipé doit pouvoir continuer à utiliser la magie, mais avec des contraintes croissantes.
+
+---
+
+# 2. Ne pas utiliser uniquement un seuil binaire
+
+Éviter une mécanique du type :
+
+* sous 20 kg : magie normale ;
+* au-dessus de 20 kg : magie impossible.
+
+Le système doit être **progressif**.
+
+Définir une charge relative par rapport à la capacité de portage du personnage :
+
+`ratio_charge = poids_porté / capacité_portage`
+
+Exemples :
+
+* 0,00 = aucun poids porté ;
+* 0,25 = 25 % de la capacité ;
+* 0,50 = 50 % ;
+* 0,75 = 75 % ;
+* 1,00 = capacité maximale ;
+* > 1,00 = surcharge.
+
+Le système doit fonctionner indépendamment des valeurs absolues afin de rester compatible avec des personnages ayant des caractéristiques physiques différentes.
+
+---
+
+# 3. États de charge
+
+Créer plusieurs paliers lisibles.
+
+Proposition :
+
+### Charge légère
+
+`0 à 25 %`
+
+Aucune pénalité magique notable.
+
+Le personnage est dans une situation confortable pour canaliser le mana.
+
+### Charge modérée
+
+`25 à 50 %`
+
+Légère augmentation de la difficulté ou du coût de canalisation.
+
+### Charge importante
+
+`50 à 75 %`
+
+La pratique magique devient sensiblement plus exigeante.
+
+### Charge lourde
+
+`75 à 100 %`
+
+La magie devient difficile à maintenir correctement.
+
+Augmenter les contraintes sur :
+
+* le coût en PM ;
+* la concentration ;
+* les sorts maintenus ;
+* les actions nécessitant une grande précision.
+
+### Surcharge
+
+`>100 %`
+
+Le personnage est physiquement surchargé.
+
+La magie reste possible, mais devient fortement pénalisée.
+
+La surcharge doit également produire les conséquences physiques déjà prévues par le système de déplacement/endurance.
+
+---
+
+# 4. Ne pas pénaliser toutes les magies de la même manière
+
+Le système doit distinguer la nature de la pratique magique.
+
+Une magie instantanée et simple ne doit pas être affectée comme une magie nécessitant une concentration prolongée.
+
+Créer idéalement un coefficient de sensibilité à la charge pour chaque sort ou compétence.
+
+Exemple conceptuel :
+
+`sensibilité_charge`
+
+avec une valeur comprise entre 0 et 1.
+
+* `0` : aucune influence du poids ;
+* `0,25` : faible influence ;
+* `0,50` : influence moyenne ;
+* `0,75` : forte influence ;
+* `1` : très forte influence.
+
+Cela permettra par exemple de définir :
+
+* une petite étincelle magique comme peu sensible ;
+* un sort de téléportation comme fortement sensible ;
+* un sort maintenu comme très sensible ;
+* une invocation complexe comme extrêmement sensible.
+
+Ne pas coder ces valeurs en dur dans le moteur si le projet dispose déjà d'une base de données des sorts/compétences.
+
+---
+
+# 5. Quels paramètres peuvent être affectés ?
+
+Le système doit privilégier des pénalités qui ont un intérêt stratégique.
+
+Les effets possibles sont :
+
+### Coût en PM
+
+Plus le personnage est chargé, plus certains sorts consomment de PM.
+
+Formule possible :
+
+`coût_effectif = coût_base × (1 + pénalité_charge × sensibilité_charge)`
+
+La formule exacte doit être adaptée au système existant.
+
+---
+
+### Concentration
+
+Augmenter le risque d'échec ou la difficulté lorsqu'un sort nécessite de maintenir une concentration.
+
+La surcharge physique peut perturber la canalisation.
+
+---
+
+### Temps de lancement
+
+Certains sorts peuvent demander davantage de temps lorsque le personnage est lourdement équipé.
+
+À utiliser avec modération afin de ne pas rendre toutes les actions magiques inutilement lentes.
+
+---
+
+### Sorts maintenus
+
+Les sorts maintenus doivent être particulièrement sensibles à la charge.
+
+La raison narrative est simple :
+
+un personnage doit constamment canaliser du mana tout en supportant physiquement son équipement.
+
+Plus la charge augmente, plus le maintien devient difficile.
+
+---
+
+### Précision / contrôle
+
+Certains sorts peuvent subir une diminution de précision, de portée ou de contrôle lorsque la charge est importante.
+
+Cette mécanique doit cependant être réservée aux sorts dont la précision constitue réellement une composante de gameplay.
+
+---
+
+# 6. Faire intervenir l'endurance physique
+
+La mécanique doit être reliée au système physique existant plutôt que de créer une ressource totalement indépendante.
+
+Le principe recherché est :
+
+**charge → effort physique → fatigue → difficulté magique**
+
+Un personnage qui vient de parcourir une longue distance avec une armure lourde et un sac rempli de ressources doit être moins efficace pour lancer une magie complexe qu'un personnage reposé et légèrement équipé.
+
+Éviter toutefois une double pénalisation excessive.
+
+Si le jeu possède déjà :
+
+* fatigue ;
+* endurance ;
+* PM ;
+* capacité de portage ;
+
+réutiliser ces systèmes plutôt que créer une nouvelle jauge uniquement pour cette mécanique.
+
+---
+
+# 7. Interaction avec l'équipement
+
+Le système doit rendre intéressant le choix de l'équipement.
+
+Exemples :
+
+Un mage équipé de :
+
+* vêtements légers ;
+* bâton ;
+* quelques composants ;
+
+doit être naturellement favorisé pour la pratique magique.
+
+Un combattant équipé de :
+
+* armure lourde ;
+* bouclier ;
+* arme lourde ;
+* nombreuses ressources ;
+
+doit pouvoir pratiquer une magie plus limitée ou plus coûteuse.
+
+Mais un guerrier lourd ne doit pas être automatiquement incapable d'utiliser la magie.
+
+Le système doit permettre des archétypes hybrides.
+
+---
+
+# 8. Créer une distinction entre poids physique et poids magique
+
+Prévoir dans les données la possibilité de distinguer :
+
+`poids_physique`
+
+et éventuellement :
+
+`charge_magique`
+
+ou un coefficient équivalent.
+
+Certains objets peuvent être lourds physiquement mais faciles à transporter magiquement.
+
+À l'inverse, certains artefacts peuvent être légers mais exercer une forte contrainte sur la canalisation du mana.
+
+Ne pas obligatoirement implémenter une deuxième mécanique complète si elle n'est pas nécessaire.
+
+Prévoir cependant une architecture permettant cette extension.
+
+---
+
+# 9. Objets magiques et équipement spécialisé
+
+Certains équipements doivent pouvoir modifier l'effet du poids sur la magie.
+
+Exemples :
+
+* robe de mage : réduit l'impact de la charge ;
+* ceinture de force : augmente la capacité de portage ;
+* artefact de lévitation : réduit la charge effective ;
+* armure runique : augmente légèrement le poids mais diminue son impact magique ;
+* sac dimensionnel : réduit fortement le poids physique ressenti ;
+* bottes magiques : réduisent les effets de surcharge.
+
+Introduire si possible un coefficient :
+
+`modificateur_canalisation_charge`
+
+permettant aux objets, compétences ou buffs de modifier l'effet final.
+
+---
+
+# 10. Conséquence tactique
+
+Le système doit créer des choix.
+
+Le joueur doit constamment arbitrer entre :
+
+**plus d'équipement**
+
+et
+
+**meilleure capacité magique**.
+
+Exemple :
+
+Un aventurier part explorer un donjon.
+
+Il peut prendre :
+
+* davantage de potions ;
+* davantage de nourriture ;
+* davantage de matériel ;
+* une armure plus lourde ;
+* davantage de munitions ;
+
+mais cette décision augmente progressivement sa charge et réduit son confort de canalisation magique.
+
+Il doit donc choisir entre :
+
+> être mieux préparé matériellement
+
+ou
+
+> conserver une meilleure efficacité magique.
+
+Cela doit constituer une décision stratégique avant même le début du combat.
+
+---
+
+# 11. Interface utilisateur
+
+Afficher clairement le rapport entre poids, capacité et magie.
+
+L'interface d'inventaire doit afficher au minimum :
+
+`Poids : 37 / 50 kg`
+
+et éventuellement :
+
+`Charge : 74 %`
+
+La couleur ou l'indicateur visuel peut changer selon le palier de charge.
+
+Dans la fiche du personnage ou du sort, afficher si nécessaire :
+
+`Influence de la charge : modérée`
+
+ou :
+
+`Coût en PM : 12 → 14 sous charge actuelle`
+
+L'objectif est que le joueur puisse comprendre la conséquence de son équipement sans devoir connaître la formule interne.
+
+---
+
+# 12. Préserver la lisibilité
+
+Ne pas transformer la mécanique en simulation physique complexe.
+
+Le joueur doit comprendre intuitivement :
+
+> plus je porte lourd, plus la magie devient difficile.
+
+Les calculs internes peuvent être plus précis, mais l'interface doit rester simple.
+
+Éviter notamment :
+
+* trop de jauges ;
+* trop de coefficients visibles ;
+* des malus impossibles à anticiper ;
+* des effets aléatoires arbitraires.
+
+---
+
+# 13. Configuration par données
+
+Si le projet possède déjà un système de données pour :
+
+* objets ;
+* sorts ;
+* compétences ;
+* personnages ;
+* effets ;
+* caractéristiques ;
+
+intégrer la mécanique dans ce système plutôt que de créer des exceptions spécifiques.
+
+Prévoir des paramètres configurables, par exemple :
+
+```text
+capacite_portage
+poids
+sensibilite_charge_magique
+modificateur_canalisation
+```
+
+Les seuils et coefficients globaux doivent également être configurables.
+
+Ne pas disperser les valeurs d'équilibrage dans le code.
+
+---
+
+# 14. Formule de référence
+
+Implémenter une première version simple et facilement équilibrable.
+
+Conceptuellement :
+
+```text
+ratio = poids_porté / capacité_portage
+```
+
+Puis déterminer une pénalité progressive :
+
+```text
+penalite_charge = f(ratio)
+```
+
+Cette pénalité est ensuite modulée par la sensibilité du sort :
+
+```text
+penalite_finale =
+    penalite_charge
+    × sensibilite_charge_magique
+    × modificateurs_equipement
+    × modificateurs_effets
+```
+
+Puis appliquer le résultat au paramètre concerné :
+
+```text
+coût_PM_final =
+    coût_PM_base × (1 + penalite_finale)
+```
+
+La fonction exacte `f(ratio)` doit être choisie pour éviter les ruptures brutales.
+
+Privilégier une progression douce jusqu'à la capacité maximale puis une augmentation plus forte en surcharge.
+
+---
+
+# 15. Cas particuliers
+
+Prévoir les cas suivants :
+
+* personnage sans capacité de portage valide ;
+* poids nul ;
+* capacité de portage augmentée temporairement ;
+* capacité réduite par un état ;
+* objet retiré pendant le combat ;
+* objet ajouté pendant le combat ;
+* changement d'équipement ;
+* effet de lévitation ;
+* sac dimensionnel ;
+* transformation modifiant la taille ou la force ;
+* personnage immobilisé ;
+* sort lancé alors que le personnage est en surcharge.
+
+La valeur effective doit toujours être recalculée à partir de l'état actuel du personnage.
+
+Éviter de stocker une pénalité magique définitive qui deviendrait obsolète après modification de l'inventaire.
+
+---
+
+# 16. Tests
+
+Ajouter des tests couvrant au minimum :
+
+1. personnage à 0 % de charge ;
+2. personnage à 25 % ;
+3. personnage à 50 % ;
+4. personnage à 75 % ;
+5. personnage à 100 % ;
+6. personnage en surcharge ;
+7. sort insensible à la charge ;
+8. sort très sensible à la charge ;
+9. objet réduisant l'effet de la charge ;
+10. augmentation temporaire de capacité de portage ;
+11. modification de l'inventaire pendant le jeu ;
+12. combinaison de charge + fatigue ;
+13. sort maintenu sous forte charge ;
+14. personnage hybride lourd pratiquant la magie.
+
+Les tests doivent vérifier à la fois les valeurs calculées et l'absence d'effets secondaires sur les autres systèmes.
+
+---
+
+# 17. Architecture attendue
+
+Avant de modifier le code, inspecter l'architecture existante de Telluris.
+
+Identifier :
+
+* où est calculé le poids porté ;
+* où est calculée la capacité de portage ;
+* comment les sorts sont définis ;
+* comment les coûts en PM sont calculés ;
+* comment les buffs/debuffs sont appliqués ;
+* comment les effets maintenus fonctionnent ;
+* comment l'inventaire signale les changements ;
+* où sont stockées les données des objets et compétences.
+
+Réutiliser les mécanismes existants autant que possible.
+
+Ne pas créer un système parallèle si une abstraction existante peut accueillir cette fonctionnalité.
+
+---
+
+# 18. Résultat recherché
+
+La mécanique finale doit donner à Telluris une relation cohérente entre :
+
+**équipement → poids → effort physique → canalisation magique → choix tactique.**
+
+Le joueur doit progressivement comprendre qu'un aventurier ne transporte pas gratuitement son équipement.
+
+Chaque objet emporté représente potentiellement :
+
+* une ressource supplémentaire ;
+* une capacité de survie supplémentaire ;
+* mais aussi une contrainte physique et magique.
+
+Le système doit donc transformer le poids porté en véritable **choix stratégique**, et non en simple limite d'inventaire.
+
+Implémente d'abord une version propre, paramétrable et intégrée aux systèmes existants. Ne refactorise pas inutilement le reste du projet. Documente les nouveaux paramètres et indique précisément les fichiers et systèmes modifiés.

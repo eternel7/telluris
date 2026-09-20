@@ -414,6 +414,25 @@ CATALOGUE = [
 			"créer, n'écrit aucun fichier.",
 	},
 	{
+		"id": "gen_grimoires_sans_plume",
+		"label": "🪶 Retirer la plume d'oie des recettes de grimoire",
+		# Même raison que gen_grimoires : l'import est un PUT complet et ces recettes sont
+		# réémises ENTIÈRES — relire le dump committé écraserait tout ajustement fait depuis.
+		"argv_fn": lambda v, f: _py("gen_grimoires_sans_plume.py", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/grimoires_sans_plume_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/grimoires_sans_plume_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "`item:Plume_d_oie` n'est pas une feuille d'appro (une recette de "
+			"scriptorium la produit) et sa matière `plumes` non plus : elle n'arrive que par le "
+			"flux de la cité, où l'armurerie et la plumasserie puisent avant. Sans plume au "
+			"rayon AU-DESSUS de la cible, aucune recette de grimoire n'est applicable — cinq "
+			"grimoires produits dans le monde en six jours au dump du 20/09, pendant que "
+			"l'encre et le papier s'entassaient. Les grimoires s'alignent sur les livres de "
+			"contenu : papier + encre + pigment. ⚠️ Le scriptorium cesse d'acheter la plume "
+			"comme matière (il la rachète toujours : il la produit).",
+	},
+	{
 		"id": "gen_terrain_tags",
 		"label": "🌲 Générer les terrain_tags des zones d'influence",
 		"argv": _py("gen_terrain_tags.py"),
