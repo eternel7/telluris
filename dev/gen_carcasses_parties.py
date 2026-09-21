@@ -1,52 +1,69 @@
 #!/usr/bin/env python
 # dev/gen_carcasses_parties.py
-# Débite les GROSSES carcasses en portions anatomiques : tête, corps, pattes, queue, ailes.
+# Débite les GROSSES carcasses en portions anatomiques : tête, corps, pattes, queue, ailes —
+# puis les portions encore trop lourdes en MORCEAUX.
 #
 # CE QU'IL CORRIGE. `charge_max = F×5`, soit 250 à 500 kg pour un personnage abouti. Vingt
 # carcasses du bestiaire dépassent 100 kg, jusqu'aux 12 tonnes du mammouth : le ramassage en
 # combat les REFUSE (« Trop lourd : vous ne pouvez pas porter cette carcasse »), et le plus
-# gros gibier du jeu ne rapportait donc RIEN. La découpe rend ce butin divisible — on emporte
-# la tête et les pattes, on abandonne le corps.
+# gros gibier du jeu ne rapportait donc RIEN. La découpe rend ce butin divisible.
 #
-# CE QU'IL ÉCRIT. Deux familles de docs dans UN fichier d'import :
+# CE QU'IL ÉCRIT. Trois familles de docs dans UN fichier d'import :
 #   1. les carcasses sources, enrichies du champ **`decoupe`** = [{item, quantite, fraction}]
-#      — c'est LUI, et lui seul, qui rend une carcasse découpable en jeu
+#      — c'est LUI, et lui seul, qui rend un item découpable en jeu
 #      (`utils/carcasse.item_est_decoupable`) ;
-#   2. un doc `item:<espece>_<partie>` par portion, portant sa propre table **`depecage`**.
+#   2. un doc `item:<espece>_<partie>` par portion, portant sa propre table **`depecage`** ;
+#   3. pour toute portion dont le poids max dépasse le seuil, un doc
+#      `item:<espece>_<partie>_morceau`, et sur la portion un `decoupe` vers n morceaux
+#      identiques, n choisi pour que CHAQUE morceau pèse moins que le seuil même à poids max.
+#
+# ⚠️ UNE DÉCOUPE N'EST JAMAIS ANATOMIQUE DEUX FOIS. Une portion et un morceau sont eux aussi
+# `sous_categorie: carcasse` (c'est ce qui les fait racheter par la boucherie) : sans garde,
+# une relance sur un dump qui contient déjà les portions les re-débitait en « tête d'un
+# corps » (`item:aigle_geant_corps_tete`). Tout doc qui porte `portion_de` est donc EXCLU des
+# sources ; une portion trop lourde se débite en morceaux, et un morceau ne porte aucun
+# `decoupe` (terminal — pas de récursion, cf. le garde-fou de `carcasse.item_est_decoupable`).
 #
 # ⚠️ LE DÉPEÇAGE D'UNE PORTION EST BAKÉ, PAS DÉRIVÉ À CHAUD. `depecage_carcasse` sait déjà
-# lire un champ `depecage` posé sur le doc (il servait aux espèces à dépeçage manuel) : on
-# s'en sert pour chaque portion, en y écrivant l'intersection « ce que CETTE espèce rend »
-# ∩ « ce que CETTE partie contient ». Deux bénéfices : aucun paramètre neuf dans le moteur,
-# et un contenu éditable pièce par pièce dans /admin/table. Le prix : **changer
-# `DEPECAGE_TAGS` ne se propage pas tout seul aux portions** — il faut relancer ce script.
-# C'est le même marché que tous les `dev/gen_*.py`, qui figent des valeurs relues du dump.
+# lire un champ `depecage` posé sur le doc : on s'en sert pour chaque portion, en y écrivant
+# l'intersection « ce que CETTE espèce rend » ∩ « ce que CETTE partie contient ». Un morceau
+# reprend la table de sa portion telle quelle — le moteur la remet à l'échelle du poids
+# d'instance (`× poids / DEPECAGE_POIDS_REF`). Le prix : **changer `DEPECAGE_TAGS` ne se
+# propage pas tout seul** — il faut relancer ce script.
 #
 # ⚠️ LA TABLE LUE EST LE DÉFAUT DE CODE (`models/character_stats.DEPECAGE_TAGS`), pas celle
 # du dump : c'est là que l'auteur édite, et `dev/gen_depecage_tags.py` la pousse vers
-# `rules:world_variables`. Lancer les deux dans la foulée garde les trois d'accord (code,
-# base, portions).
+# `rules:world_variables`. Lancer les deux dans la foulée garde les trois d'accord.
 #
 # ⚠️ CONSERVATION DE LA MASSE. Les `fraction` d'un profil somment à 1.0 — vérifié ici, et le
 # script SORT EN ERREUR sinon. Une partie qui ne rendrait AUCUNE matière est retirée et sa
-# fraction redistribuée sur le corps, plutôt que laissée comme un poids mort invendable.
+# fraction redistribuée. Le `decoupe` d'une portion vers ses morceaux vaut `fraction: 1.0`.
 #
-# ⚠️ LIMITE ASSUMÉE : une portion reste proportionnelle à sa source. Le corps d'un mammouth
-# (0.52 × 5 000 à 12 000 kg) reste intransportable — on prend sa tête et ses pattes, le reste
-# pourrit sur place. C'est le comportement voulu ; pour le changer il faudrait une seconde
-# découpe (portion → quartiers), qui n'existe pas.
+# ⚠️ RELANÇABLE À VOLONTÉ, SUR UN DUMP FRAIS. `admin_import_bulk` fait un PUT COMPLET : relire
+# un dump périmé écraserait les retouches faites depuis. Sans `--dump`, le script écrit donc
+# lui-même un dump frais (`utils/dump.ecrire_dump_frais` — le code des outils de /admin/dev-tools
+# et de /admin/exports), ce qui exige CouchDB : à lancer dans le conteneur.
 #
-# ⚠️ POURQUOI UN SCRIPT ET PAS UN JSON ÉCRIT À LA MAIN : `admin_import_bulk` fait un PUT
-# COMPLET, jamais un merge — éditer un champ oblige à reproduire tout le doc. On RELIT donc
-# les carcasses depuis le dump et on n'y injecte que `decoupe` : régénérer est idempotent.
+# ⚠️ LE FICHIER NE PORTE QUE LE DIFF. Seuls les docs NOUVEAUX ou MODIFIÉS par rapport au dump
+# partent à l'import ; un doc déjà à jour est écarté, et sans rien à changer aucun fichier n'est
+# écrit. Un doc déjà en base est repris DU DUMP, seuls les champs générés y sont écrasés : une
+# clé ajoutée à la main survit à l'import (PUT complet). Relancer juste après un import rend donc
+# un lot vide — c'est le signe que la base est à jour.
+#
+# ⚠️ ORPHELINS. Un doc du dump rattaché (`portion_de`) à une source traitée mais que ce run ne
+# produit pas — typiquement les `item:*_corps_tete` d'une ancienne génération — est LISTÉ,
+# jamais écrit ni supprimé : à effacer à la main dans /admin/table.
 #
 # Usage :
-#   python dev/gen_carcasses_parties.py                # toutes les carcasses > seuil
-#   python dev/gen_carcasses_parties.py cerf mammouth  # seulement ces espèces (slug)
-# Sortie (à coller dans /admin -> Import en masse) :
+#   python dev/gen_carcasses_parties.py                          # dump frais, toutes les carcasses
+#   python dev/gen_carcasses_parties.py --dump jsons/telluris-dump-….json
+#   python dev/gen_carcasses_parties.py cerf mammouth            # seulement ces espèces (slug)
+# Sortie (📥 Importer depuis /admin/dev-tools, ou /admin -> Import en masse) :
 #   jsons/carcasses_parties_a_importer.json
 
+import argparse
 import json
+import math
 import os
 import sys
 
@@ -55,13 +72,11 @@ sys.path.insert(0, RACINE)
 
 from models import character_stats                      # noqa: E402
 from utils.marche import depecage_carcasse              # noqa: E402
-
-# SOURCE UNIQUE : le dump complet de la base. ⚠️ Figé explicitement (et non « le glob le plus
-# récent ») pour que régénérer donne toujours le même résultat ; à mettre à jour à la main
-# après un nouveau dump.
-SRC_DUMP = "jsons/telluris-dump-20260831-122931.json"
+from utils import dump as dump_util                     # noqa: E402
 
 SORTIE = "jsons/carcasses_parties_a_importer.json"
+
+SUFFIXE_MORCEAU = "_morceau"
 
 # ── Anatomie : ce que CHAQUE partie peut contenir ────────────────────────────────
 # Filtre appliqué aux matières que l'espèce rend déjà. Une matière absente de TOUTES les
@@ -109,16 +124,11 @@ PROFIL_PAR_ESPECE: dict[str, str] = {
 	"homme_arbre":     "humanoide",
 }
 
-# Seuil : au-delà, la carcasse mérite d'être débitée. Lu dans les variables de monde pour
-# qu'il n'y ait qu'UNE valeur à changer (le client s'en sert pour son libellé).
-SEUIL = float(character_stats.CARCASSE_DECOUPE_POIDS_MIN)
 
-
-def charger(chemin: str) -> list:
-	"""Docs d'un export admin ou d'un dump : tableau nu, ou {"docs": [...]}."""
-	with open(os.path.join(RACINE, chemin), encoding="utf-8") as f:
-		data = json.load(f)
-	return data["docs"] if isinstance(data, dict) and "docs" in data else data
+def seuil() -> float:
+	"""Seuil de découpe, relu à chaque appel (variable de monde réglable) : au-delà, un item
+	mérite d'être débité, et un morceau pèse toujours MOINS."""
+	return float(character_stats.CARCASSE_DECOUPE_POIDS_MIN)
 
 
 def poids_bornes(poids) -> tuple[float, float]:
@@ -166,7 +176,27 @@ def controler_profils() -> None:
 			sys.exit(f"ERREUR : profil {nom} : matieres perdues a la decoupe : {perdues}")
 
 
-def portions_de(espece: dict, carcasse: dict) -> list[dict]:
+def est_source(doc: dict) -> bool:
+	"""Une carcasse à débiter : `carcasse`, plus lourde que le seuil, et **pas un doc généré**.
+	⚠️ `portion_de` exclut portions ET morceaux : c'est la garde qui empêche la « tête d'un
+	corps » sur une relance."""
+	return (isinstance(doc, dict) and doc.get("type") == "item"
+			and doc.get("sous_categorie") == "carcasse"
+			and not doc.get("portion_de")
+			and poids_bornes(doc.get("poids"))[1] > seuil())
+
+
+def nb_morceaux(pmax: float) -> int:
+	"""Le plus petit n tel que chaque morceau pèse STRICTEMENT moins que le seuil, poids max et
+	arrondi au centième compris (99.996 s'arrondirait à 100.0)."""
+	s = seuil()
+	n = max(1, int(math.floor(pmax / s)) + 1)
+	while round(pmax / n, 2) >= s:
+		n += 1
+	return n
+
+
+def portions_de(espece: dict) -> list[dict]:
 	"""[{partie, quantite, fraction, depecage}] pour une espèce — parties vides retirées et
 	fractions RENORMALISÉES, pour que la masse reste conservée."""
 	# Quantités de base : au poids de référence, le facteur d'échelle vaut exactement 1.
@@ -193,47 +223,79 @@ def portions_de(espece: dict, carcasse: dict) -> list[dict]:
 	return retenues
 
 
-def main() -> None:
-	controler_profils()
-	filtres = set(sys.argv[1:])
-	docs = charger(SRC_DUMP)
-	par_id = {d["_id"]: d for d in docs if isinstance(d, dict) and d.get("_id")}
+def _poids(pi: float, pa: float):
+	return [pi, pa] if pa > pi else pi
 
-	carcasses = [
-		d for d in docs
-		if isinstance(d, dict) and d.get("type") == "item"
-		and d.get("sous_categorie") == "carcasse"
-		and poids_bornes(d.get("poids"))[1] > SEUIL
-	]
+
+def morceau_doc(portion: dict, n: int) -> dict:
+	"""Le doc morceau d'une portion trop lourde. Même dépeçage, poids / n, AUCUN `decoupe`."""
+	pmin, pmax = poids_bornes(portion.get("poids"))
+	pi = max(0.01, round(pmin / n, 2))
+	pa = max(pi, round(pmax / n, 2))
+	libelle = PARTIES[portion["partie"]]["libelle"].lower()
+	nom_esp = portion["_nom_espece"]
+	liaison = de_ou_d(nom_esp)
+	return {
+		"_id": portion["_id"] + SUFFIXE_MORCEAU,
+		"type": "item",
+		"nom": f"Morceau de {libelle} {liaison}{nom_esp}",
+		"icon": "🥩",
+		"categorie": portion["categorie"],
+		"sous_categorie": portion["sous_categorie"],
+		"rarete": portion["rarete"],
+		"slots": [],
+		"poids": _poids(pi, pa),
+		"description": f"Morceau de {libelle} {liaison}{nom_esp}, taillé pour être emporté.",
+		"tags": sorted(set(portion["tags"]) | {"morceau"}),
+		"source_espece": portion["source_espece"],
+		"portion_de": portion["_id"],
+		"partie": portion["partie"],
+		"depecage": [list(e) for e in portion["depecage"]],
+	}
+
+
+def generer(docs: list, filtres=()) -> tuple[list, list, list, list, list]:
+	"""Cœur PUR du générateur : `(sortie, resume, ignorees, orphelins, inchanges)`.
+
+	`sortie` = les SEULS docs à mettre en base : nouveaux, ou modifiés par rapport au dump
+	(`a_ecrire_depuis`) ;
+	`resume` = [(carcasse_id, profil, nb_parties, nb_pieces, nb_morceaux_docs)] — la découpe
+	complète, qu'elle soit déjà en base ou non ;
+	`orphelins` = ids du dump rattachés à une source traitée que ce run ne produit pas ;
+	`inchanges` = ids générés déjà identiques en base, donc absents de `sortie`."""
+	par_id = {d["_id"]: d for d in docs if isinstance(d, dict) and d.get("_id")}
+	carcasses = [d for d in docs if est_source(d)]
+	filtres = set(filtres or ())
 	if filtres:
 		carcasses = [c for c in carcasses if c["_id"][len("item:"):] in filtres]
-		if not carcasses:
-			sys.exit(f"ERREUR : aucune carcasse > {SEUIL} kg pour {sorted(filtres)}")
 
+	s = seuil()
 	sortie, resume, ignorees = [], [], []
+	sources_traitees: set[str] = set()
 	for carc in sorted(carcasses, key=lambda c: c["_id"]):
 		slug = carc["_id"][len("item:"):]
 		espece = par_id.get(carc.get("source_espece") or ("espece:" + slug))
 		if not espece:
 			ignorees.append(f"{carc['_id']} : espece introuvable")
 			continue
-		portions = portions_de(espece, carc)
+		portions = portions_de(espece)
 		if not portions:
 			# Esprit, construct : `depecage_carcasse` ne rend rien, il n'y a rien à débiter.
 			ignorees.append(f"{carc['_id']} : ne se depece pas")
 			continue
+		sources_traitees.add(carc["_id"])
 
 		nom_esp = espece.get("nom") or slug
 		liaison = de_ou_d(nom_esp)
 		pmin, pmax = poids_bornes(carc.get("poids"))
-		entrees = []
+		entrees, nb_morceaux_docs = [], 0
 		for p in portions:
 			pid = f"item:{slug}_{p['partie']}"
 			part = PARTIES[p["partie"]]
 			unite = p["fraction"] / p["quantite"]
 			pi = max(0.01, round(pmin * unite, 2))
 			pa = max(pi, round(pmax * unite, 2))
-			sortie.append({
+			portion = {
 				"_id": pid,
 				"type": "item",
 				"nom": f"{part['libelle']} {liaison}{nom_esp}",
@@ -241,14 +303,13 @@ def main() -> None:
 				"categorie": "composant",
 				# ⚠️ `carcasse` et pas une sous-catégorie neuve : c'est elle qui fait acheter
 				# la portion par la boucherie (`besoins_categorie`) ET qui aiguille
-				# `_matieres_entrantes` vers le dépeçage. Une clé neuve demanderait une
-				# recette et un intrant de plus par métier.
+				# `_matieres_entrantes` vers le dépeçage.
 				"sous_categorie": "carcasse",
 				"rarete": carc.get("rarete", "commun"),
 				"slots": [],
-				"poids": [pi, pa] if pa > pi else pi,
+				"poids": _poids(pi, pa),
 				# Accord en genre porté par la table (`genre`) : « Corps … débité »,
-				# « Patte … débitée ». Un libellé faux se voit à chaque ligne d'inventaire.
+				# « Patte … débitée ».
 				"description": f"{part['libelle']} {liaison}{nom_esp}, "
 							   f"débité{'e' if part['genre'] == 'f' else ''} sur place.",
 				# Les tags de l'ESPÈCE suivent la portion (une aile de dragon reste
@@ -258,7 +319,20 @@ def main() -> None:
 				"portion_de": carc["_id"],
 				"partie": p["partie"],
 				"depecage": p["depecage"],
-			})
+			}
+			morceau = None
+			if pa > s:
+				# Portion encore intransportable : n morceaux identiques, chacun < seuil.
+				n = nb_morceaux(pa)
+				portion["_nom_espece"] = nom_esp
+				morceau = morceau_doc(portion, n)
+				del portion["_nom_espece"]
+				portion["decoupe"] = [{"item": morceau["_id"], "quantite": n, "fraction": 1.0}]
+				portion["decoupe_poids_min"] = s
+			sortie.append(portion)
+			if morceau:
+				sortie.append(morceau)
+				nb_morceaux_docs += 1
 			entrees.append({"item": pid, "quantite": p["quantite"],
 							"fraction": p["fraction"]})
 
@@ -266,23 +340,103 @@ def main() -> None:
 		doc["decoupe"] = entrees
 		# Seuil BAKÉ sur le doc : le serveur refuse en dessous, le client grise en lisant le
 		# même champ, et l'auteur peut le relever espèce par espèce sans toucher au monde.
-		doc["decoupe_poids_min"] = SEUIL
+		doc["decoupe_poids_min"] = s
 		sortie.append(doc)
 		resume.append((carc["_id"], profil_de(espece), len(entrees),
-					   sum(e["quantite"] for e in entrees)))
+					   sum(e["quantite"] for e in entrees), nb_morceaux_docs))
 
-	chemin = os.path.join(RACINE, SORTIE)
-	with open(chemin, "w", encoding="utf-8") as f:
-		json.dump(sortie, f, ensure_ascii=False, indent=2)
-		f.write("\n")
+	produits = {d["_id"] for d in sortie}
+	portions_produites = {d["_id"] for d in sortie if d.get("portion_de") in sources_traitees}
+	rattaches = sources_traitees | portions_produites
+	orphelins = sorted(d["_id"] for d in par_id.values()
+					   if d.get("portion_de") in rattaches and d["_id"] not in produits)
 
-	print(f"ecrit {SORTIE}")
-	print(f"   {len(sortie)} doc(s) : {len(resume)} carcasse(s) + "
-		  f"{len(sortie) - len(resume)} portion(s)")
-	for (cid, profil, nb_parties, nb_pieces) in resume:
-		print(f"   {cid:30} {profil:16} {nb_parties} partie(s), {nb_pieces} piece(s)")
+	# Seul ce qui CHANGE la base part à l'import : un doc absent du dump, ou dont un champ
+	# généré diffère. Un doc déjà à jour est écarté (`inchanges`).
+	a_ecrire, inchanges = [], []
+	for genere in sortie:
+		existant = par_id.get(genere["_id"])
+		doc = a_ecrire_depuis(genere, existant)
+		if doc is None:
+			inchanges.append(genere["_id"])
+		else:
+			a_ecrire.append(doc)
+	return a_ecrire, resume, ignorees, orphelins, inchanges
+
+
+def _sans_rev(doc: dict) -> dict:
+	return {k: v for k, v in doc.items() if k != "_rev"}
+
+
+def a_ecrire_depuis(genere: dict, existant: dict | None):
+	"""Le doc à importer pour `genere`, ou None s'il n'y a rien à changer en base.
+
+	⚠️ Un doc DÉJÀ en base part du doc du dump, où l'on n'écrase que les champs générés :
+	l'import est un PUT COMPLET (CLAUDE.md §11), et reconstruire le doc à neuf ferait disparaître
+	toute clé ajoutée depuis à la main dans /admin/table. `_rev` est ignoré dans la comparaison
+	(l'import le réattache depuis la base)."""
+	if not existant:
+		return genere
+	fusion = dict(existant)
+	fusion.update(genere)
+	return None if _sans_rev(fusion) == _sans_rev(existant) else fusion
+
+
+def main() -> None:
+	parser = argparse.ArgumentParser(description="Débite les grosses carcasses en portions, "
+									 "puis en morceaux de moins de "
+									 f"{seuil():g} kg.")
+	parser.add_argument("--dump", help="dump à relire (défaut : un dump FRAIS écrit maintenant "
+						"depuis CouchDB, dans jsons/)")
+	parser.add_argument("especes", nargs="*", help="slugs de carcasse à traiter (défaut : toutes)")
+	args = parser.parse_args()
+
+	controler_profils()
+	if args.dump:
+		source = args.dump
+	else:
+		try:
+			source = dump_util.ecrire_dump_frais(RACINE)
+		except Exception as err:
+			sys.exit(f"ERREUR : dump frais impossible ({err}). Lancer dans le conteneur, ou "
+					 "passer --dump jsons/telluris-dump-….json")
+		print(f"dump frais ecrit : {source}")
+	chemin_source = source if os.path.isabs(source) else os.path.join(RACINE, source)
+	docs = dump_util.charger_docs(chemin_source)
+	print(f"source : {source} ({len(docs)} docs)")
+
+	sortie, resume, ignorees, orphelins, inchanges = generer(docs, args.especes)
+	if args.especes and not resume:
+		sys.exit(f"ERREUR : aucune carcasse > {seuil():g} kg pour {sorted(args.especes)}")
+
+	par_id = {d.get("_id"): d for d in docs if isinstance(d, dict)}
+	nouveaux = [d["_id"] for d in sortie if d["_id"] not in par_id]
+	modifies = [d["_id"] for d in sortie if d["_id"] in par_id]
+	print(f"{len(sortie)} doc(s) a mettre en base : {len(nouveaux)} nouveau(x), "
+		  f"{len(modifies)} modifie(s) ; {len(inchanges)} deja a jour, ecarte(s)")
+	for oid in modifies:
+		print(f"   modifie : {oid}")
+	if sortie:
+		with open(os.path.join(RACINE, SORTIE), "w", encoding="utf-8") as f:
+			json.dump(sortie, f, ensure_ascii=False, indent=2)
+			f.write("\n")
+		print(f"ecrit {SORTIE}")
+	else:
+		# Aucun fichier : 📥 Importer (`sortie_fraiche`) refuse alors un fichier plus vieux que le
+		# run, au lieu de réimporter un ancien lot.
+		print(f"rien a mettre en base : {SORTIE} n'est PAS reecrit")
+
+	print("\ndecoupe complete (en base ou a importer) :")
+	for (cid, profil, nb_parties, nb_pieces, nb_m) in resume:
+		print(f"   {cid:30} {profil:16} {nb_parties} partie(s), {nb_pieces} piece(s), "
+			  f"{nb_m} portion(s) en morceaux")
 	for ligne in ignorees:
 		print(f"   ignoree : {ligne}")
+	if orphelins:
+		print(f"\n⚠️ {len(orphelins)} doc(s) du dump rattaché(s) à ces carcasses mais plus produit(s) "
+			  "— à supprimer à la main dans /admin/table :")
+		for oid in orphelins:
+			print(f"   {oid}")
 
 
 if __name__ == "__main__":

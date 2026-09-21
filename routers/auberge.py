@@ -26,6 +26,7 @@ from utils import auberge
 from utils import recrutement
 from utils import montures
 from utils import scriptorium
+from utils import commande as commande_util
 # ⚠️ Sens d'import : `routers/auberge` → `routers/user`, jamais l'inverse (précédent :
 # `routers/recrutement`). `routers/user` importe `utils/auberge`, pas ce module.
 from routers.user import _inventory_payload
@@ -468,6 +469,10 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 			save_doc(av)
 		recrues += len(recrutement.remplir_tableau_recrues(voisin, character))
 
+	# 4 bis. Les commandes EN FABRICATION sont prêtes au réveil. Elles vivent sur le doc
+	#    personnage : persistées par le même `save_doc` que la bourse et les PV.
+	commandes = commande_util.achever_pendant_la_nuit(character)
+
 	# 5. Fin de soirée : ses messages de table s'effacent, ses tables se ferment POUR LUI.
 	tables, messages = _salle(lieu_doc.get("_id", ""))
 	modifiees, a_supprimer = auberge.fermer_soiree(character, tables, messages)
@@ -497,6 +502,7 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		"cout": cout,
 		"magasins": magasins,
 		"recrues": recrues,
+		"commandes": commandes,
 		"compagnons": len(compagnons),
 		"montures": len(betes),
 	})

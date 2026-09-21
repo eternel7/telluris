@@ -25,7 +25,7 @@ l'appelant persiste. Tunables lus VIA le module `character_stats` (réglables à
 
 ⚠️ **Le statut d'une commande est DÉRIVÉ de l'horloge, jamais avancé par un tick** : aucun tick
 de fond n'existe dans ce jeu (CLAUDE.md §5). `statut()` lit `pret_at` ; seuls les gestes du
-joueur (passer, retirer, annuler) écrivent.
+joueur (passer, retirer, annuler, passer la nuit à l'auberge) écrivent.
 
 ⚠️ **La commande vit sur le doc PERSONNAGE.** Prélever les matières et inscrire la commande se
 font dans la même mutation, donc dans le même `save_doc` : la double consommation et la double
@@ -596,6 +596,25 @@ def purger_commandes(character: dict, now: int | None = None) -> int:
 	if retirees:
 		character["commandes"] = restantes
 	return retirees
+
+
+def achever_pendant_la_nuit(character: dict, now: int | None = None) -> int:
+	"""Une nuit à l'auberge : toute commande EN FABRICATION est prête au réveil — rend le
+	nombre de commandes achevées. Mute sans sauver ; l'appelant (`/auberge/nuit`) persiste.
+
+	⚠️ On AVANCE `pret_at` à l'instant de la nuit, on n'écrit pas `terminee` : le statut reste
+	dérivé de l'horloge. La péremption court donc depuis le réveil — une nuit ne doit pas faire
+	expirer ce qu'elle vient d'achever.
+
+	⚠️ Seules les commandes `en_fabrication` bougent : une commande en attente de matériaux n'a
+	rien sur l'établi, une commande déjà terminée garde son échéance."""
+	instant = now_epoch() if now is None else int(now)
+	achevees = 0
+	for c in (character or {}).get("commandes") or []:
+		if statut(c, instant) == ETAT_EN_FABRICATION:
+			c["pret_at"] = instant
+			achevees += 1
+	return achevees
 
 
 # ── Vue client ──────────────────────────────────────────────────────────────────

@@ -30,6 +30,7 @@ from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, R
 from utils.auth import get_current_user
 from utils.characters import get_user_characters, get_selected_character, sync_equipment_bonus, resolve_item_ref, charge_max_of
 from utils import quetes
+from utils import dump as dump_util
 from utils import bois
 from utils import consommables
 from utils import sorts as sorts_util
@@ -352,32 +353,35 @@ def admin_table_export_xlsx(
 	)
 
 def _dump_payload(now, avec_users: bool = False) -> dict:
-	"""Le dump complet — SOURCE UNIQUE du format `{"db","exported_at","doc_count","docs"}`,
-	que l'export télécharge ET que les outils de /admin/lieux relisent (`_preparer_outil`).
+	"""Le dump complet — format et filtrage délégués à `utils.dump.payload` (SOURCE UNIQUE,
+	partagée avec les outils de dev/ et les générateurs lancés à la main).
 	`avec_users` : l'export téléchargé garde les `user:*` (restauration à l'identique) ;
-	le dump écrit dans le dépôt par les outils les exclut (hash de mot de passe, etc.)."""
-	docs = [d for d in dump_all_docs()
-			if avec_users or not str(d.get("_id", "")).startswith("user:")]
-	return {
-		"db": "telluris",
-		"exported_at": now.isoformat() + "Z",
-		"doc_count": len(docs),
-		"docs": docs,
-	}
+	le dump committable les exclut (hash de mot de passe, etc.)."""
+	return dump_util.payload(dump_all_docs(), now, avec_users=avec_users)
+
+
+def _telecharger_dump(avec_users: bool) -> Response:
+	now = dump_util.maintenant()
+	data = json.dumps(_dump_payload(now, avec_users=avec_users), ensure_ascii=False, indent=2).encode("utf-8")
+	return Response(
+		content=data,
+		media_type="application/json",
+		headers={"Content-Disposition": f'attachment; filename="{dump_util.nom_fichier(now)}"'},
+	)
 
 @app.get("/admin/exports/couchdb")
 def admin_export_couchdb(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
 	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
 		raise HTTPException(status_code=403, detail="Admin only")
-	import datetime
-	now = datetime.datetime.utcnow()
-	data = json.dumps(_dump_payload(now, avec_users=True), ensure_ascii=False, indent=2).encode("utf-8")
-	filename = f"telluris-dump-{now:%Y%m%d-%H%M%S}.json"
-	return Response(
-		content=data,
-		media_type="application/json",
-		headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-	)
+	return _telecharger_dump(avec_users=True)
+
+@app.get("/admin/exports/couchdb-sans-users")
+def admin_export_couchdb_sans_users(request: Request, current_user: Annotated[User, Depends(get_current_user)]):
+	"""Le MÊME dump que celui qu'écrivent les outils de dev/ (`utils.dump`) : sans `user:*`,
+	donc committable tel quel dans `jsons/`."""
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+	return _telecharger_dump(avec_users=False)
 
 @app.get("/admin/exports/by-type")
 def admin_export_by_type(
@@ -1321,15 +1325,11 @@ def _villes() -> list:
 def _preparer_outil(outil: dict, valeurs: dict) -> dict:
 	"""Écrit ce qu'un outil paramétré relit : le dump régénéré et la spec JSON.
 	⚠️ Noms choisis ICI, jamais par le client ; chemins rendus RELATIFS à la racine du dépôt."""
-	import datetime
-	now = datetime.datetime.utcnow()
+	now = dump_util.maintenant()
 	horodatage = f"{now:%Y%m%d-%H%M%S}"
 	fichiers = {}
 	if outil.get("dump_frais"):
-		rel = f"jsons/telluris-dump-{horodatage}.json"
-		with open(os.path.join(dev_tools.RACINE, rel), "w", encoding="utf-8") as f:
-			json.dump(_dump_payload(now), f, ensure_ascii=False, indent=2)
-		fichiers["dump"] = rel
+		fichiers["dump"] = dump_util.ecrire_dump_frais(dev_tools.RACINE, dump_all_docs, now)
 	spec = dev_tools.spec_a_ecrire(outil, valeurs)
 	if spec is not None:
 		os.makedirs(os.path.join(dev_tools.RACINE, "jsons", "outils"), exist_ok=True)

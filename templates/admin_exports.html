@@ -97,6 +97,17 @@
 			</div>
 			<a class="dl-btn" href="{{ url_for('admin_export_couchdb') }}">⬇ Télécharger le dump (.json)</a>
 		</div>
+		<div class="card">
+			<div class="card-title">Dump committable (sans user:*)</div>
+			<div class="card-desc">
+				Le <strong>même</strong> dump que celui qu'écrivent les outils de
+				<code>/admin/dev-tools</code> et les générateurs <code>dev/gen_*.py</code>
+				(code commun : <code>utils/dump.py</code>) : format identique, mais <strong>sans</strong>
+				les documents <code>user:*</code>. Sans empreinte de mot de passe, il se dépose tel
+				quel dans <code>jsons/</code> et se committe.
+			</div>
+			<a class="dl-btn" href="{{ url_for('admin_export_couchdb_sans_users') }}">⬇ Télécharger le dump committable (.json)</a>
+		</div>
 	</div>
 	<script>
 		const _byTypeUrl = "{{ url_for('admin_export_by_type') }}";

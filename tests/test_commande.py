@@ -774,6 +774,43 @@ def test_purge_ne_touche_pas_le_doc_si_rien_a_faire():
 	assert "commandes" not in perso        # aucune clé créée pour rien
 
 
+# ── Nuit à l'auberge ────────────────────────────────────────────────────────────
+
+def test_la_nuit_acheve_les_commandes_en_fabrication(monkeypatch):
+	monkeypatch.setattr(character_stats, "COMMANDE_DELAI_SECONDES", 600)
+	perso = {"commandes": [_payee(now=1000), _payee(now=1000)]}
+	assert commande.achever_pendant_la_nuit(perso, 1100) == 2
+	for c in perso["commandes"]:
+		assert commande.statut(c, 1100) == commande.ETAT_TERMINEE
+		assert commande.retirable(c, "lieu:forge_du_coin", 1100)
+
+
+def test_la_nuit_ne_fait_pas_expirer_ce_quelle_acheve(monkeypatch):
+	# La péremption court depuis le réveil, pas depuis l'échéance d'origine.
+	monkeypatch.setattr(character_stats, "COMMANDE_DELAI_SECONDES", 600)
+	monkeypatch.setattr(character_stats, "COMMANDE_PEREMPTION_SECONDES", 100)
+	perso = {"commandes": [_payee(now=1000)]}
+	commande.achever_pendant_la_nuit(perso, 1100)
+	assert commande.statut(perso["commandes"][0], 1199) == commande.ETAT_TERMINEE
+
+
+def test_la_nuit_ne_touche_ni_attente_ni_terminee_ni_figee(monkeypatch):
+	monkeypatch.setattr(character_stats, "COMMANDE_DELAI_SECONDES", 0)
+	terminee = _payee(now=1000)
+	attente = dict(_payee(now=1000), statut=commande.ETAT_ATTENTE_MATERIAUX)
+	livree = dict(_payee(now=1000), statut=commande.ETAT_LIVREE)
+	avant = [dict(c) for c in (terminee, attente, livree)]
+	perso = {"commandes": [terminee, attente, livree]}
+	assert commande.achever_pendant_la_nuit(perso, 1050) == 0
+	assert perso["commandes"] == avant
+
+
+def test_la_nuit_sans_commande_ne_cree_rien():
+	perso = {}
+	assert commande.achever_pendant_la_nuit(perso, 1000) == 0
+	assert "commandes" not in perso
+
+
 def test_trouver_par_id():
 	c = _payee()
 	perso = {"commandes": [c]}

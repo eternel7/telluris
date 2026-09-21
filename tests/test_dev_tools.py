@@ -175,6 +175,24 @@ def test_outil_sans_parametre_a_dump_frais(monkeypatch):
 	assert dt.lancer("gen_grimoires", {"x": 1}, preparer=lambda o, v: {})[1][0] == 422
 
 
+def test_carcasses_relancees_sur_dump_frais(monkeypatch):
+	"""gen_carcasses_parties : plus de dump figé — relu sur celui que le serveur vient d'écrire,
+	et sa sortie est offerte à 📥 Importer."""
+	o = next(x for x in dt.catalogue_payload() if x["id"] == "gen_carcasses_parties")
+	assert o["dump_frais"] and o["sortie"] == "jsons/carcasses_parties_a_importer.json"
+	monkeypatch.setattr(dt, "_RUN", None)
+	vu = {}
+
+	def faux_popen(argv, **kw):
+		vu["argv"] = argv
+		raise FileNotFoundError
+
+	monkeypatch.setattr(dt.subprocess, "Popen", faux_popen)
+	run, erreur = dt.lancer("gen_carcasses_parties", None, preparer=lambda o, v: {"dump": "jsons/d.json"})
+	assert erreur is None
+	assert vu["argv"][-3:] == [os.path.join("dev", "gen_carcasses_parties.py"), "--dump", "jsons/d.json"]
+
+
 # ── 📥 Importer : jamais le fichier d'un autre run ───────────────────────────
 
 def test_sortie_fraiche(monkeypatch):

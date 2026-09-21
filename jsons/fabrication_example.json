@@ -1,0 +1,105 @@
+{
+	"_source": "utils/fabrication.py — deux formes du champ `fabrication` d'un doc item:*, selon qu'il est une MATIÈRE (ce qu'elle apporte) ou une VARIANTE générée (sa traçabilité).",
+
+	"matiere": {
+		"_doc": "Lu par `proprietes_matiere`. Toute clé de `modificateurs` hors liste blanche (CLES_MODIFIABLES) est ignorée en silence. Bloc absent/malformé = la matière n'apporte rien (et `apporte()` la refuse au sur-mesure).",
+		"fabrication": {
+			"nom": "en acier trempé",
+			"modificateurs": {
+				"bonus_degats": 2,
+				"bonus_degats_dice": 1,
+				"bonus_cc": 1,
+				"bonus_cd": 1,
+				"bonus_pa": 2,
+				"bonus_pm": 3,
+				"bonus_pv": 5,
+				"bonus_initiative": 1,
+				"bonus_malus_depl": -1,
+				"portee": 1,
+
+				"bonus": {
+					"F": 1,
+					"V": 1,
+					"R": 1,
+					"Ag": 1,
+					"Vol": 1,
+					"Int": 1,
+					"Cha": 1,
+					"Ch": 1
+				},
+				"effets": {
+					"pv": 10,
+					"pm": 5,
+					"regen_pv": 2,
+					"regen_pm": 1,
+					"duree": 3,
+					"buffs": {
+						"F": 1,
+						"V": 1,
+						"R": 1,
+						"Ag": 1,
+						"Vol": 1,
+						"Int": 1,
+						"Cha": 1,
+						"Ch": 1
+					}
+				},
+
+				"restriction": {
+					"F": 12,
+					"Ag": 10,
+					"Vol": 8,
+					"Int": 8,
+					"Cha": 6
+				},
+
+				"poids": { "facteur": 1.05 },
+				"valeur": { "facteur": 1.3 },
+
+				"rarete": "peu_commun"
+			}
+		}
+	},
+
+	"variante": {
+		"_doc": "Écrit par `variante_doc` sur l'item généré `item:<slug_base>_<signature8>`. Jamais saisi à la main : il permet de recalculer/vérifier la variante depuis ses sources. `assurer_variante` compare `base_item` pour détecter une collision d'_id.",
+		"fabrication": {
+			"base_item": "item:Epee_longue",
+			"matieres": [
+				{ "item": "item:acier", "quantite": 2 },
+				{ "item": "item:crocs", "quantite": 1 }
+			],
+			"recette": "recette:commande_Epee_longue_1a2b3c4d",
+			"cree_at": 1789931930,
+			"lieu": "lieu:la_forge_de_lutecia"
+		}
+	},
+
+	"_regles": {
+		"nom": "Fragment ajouté au nom du base (« Épée longue en acier à garde de crocs »), dans l'ordre des matières triées par _id. Vide = rien d'affiché.",
+		"ADDITIF": {
+			"cles": ["bonus_degats", "bonus_degats_dice", "bonus_cc", "bonus_cd", "bonus_pa", "bonus_pm", "bonus_pv", "bonus_initiative", "bonus_malus_depl", "portee"],
+			"regle": "Ajouté à la valeur du base, × quantité de la matière. Résultat arrondi à l'entier. `bonus_degats_dice` borné à [0, 20] (DICE_MAX)."
+		},
+		"FUSION": {
+			"cles": ["bonus", "effets"],
+			"regle": "Dicts additionnés clé à clé (× quantité), en descendant dans les sous-dicts (`effets.buffs`). Zéros retirés. Conflit dict/nombre : le base l'emporte, l'apport est ignoré.",
+			"cles_de_caracteristique": ["F", "V", "R", "Ag", "Vol", "Int", "Cha", "Ch"],
+			"cles_effets_vues_dans_le_dump": ["pv", "pm", "regen_pv", "regen_pm", "duree", "buffs"]
+		},
+		"MAX": {
+			"cles": ["restriction"],
+			"regle": "Par caractéristique, on garde le seuil le plus exigeant entre base et matières. Quantité sans effet."
+		},
+		"FACTEUR": {
+			"cles": ["poids", "valeur"],
+			"forme": { "facteur": 1.0 },
+			"regle": "Multiplicatif, borné à [0.1, 10.0]. Appliqué UNE fois par matière (la quantité ne le répète pas). `poids` [min,max] : appliqué aux deux bornes. `valeur` : appliqué à la fourchette recalculée par `valeur_variante`. Forme invalide = 1.0."
+		},
+		"rarete": {
+			"valeurs": ["commun", "peu_commun", "rare", "tres_rare", "legendaire", "mythique", "divin"],
+			"regle": "La plus haute (selon MULT_RARETE) entre le base et les matières l'emporte ; jamais abaissée."
+		},
+		"ignores": "Toute autre clé dans `modificateurs` (slots, sorts, carte, type, _id, tags…) est ignorée."
+	}
+}

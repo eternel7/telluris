@@ -263,12 +263,23 @@ CATALOGUE = [
 	{
 		"id": "gen_carcasses_parties",
 		"label": "🔪 Débiter les grosses carcasses en portions",
-		"argv": _py("gen_carcasses_parties.py"),
-		"ecrit": "Écrit jsons/carcasses_parties_a_importer.json.",
-		"description": "Les 20 carcasses de plus de 100 kg sont intransportables (charge = F×5) "
+		# `dump_frais` : l'import est un PUT complet, et une relance sur un dump périmé (ou figé)
+		# réémettrait des carcasses retouchées depuis.
+		"argv_fn": lambda v, f: _py("gen_carcasses_parties.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/carcasses_parties_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/carcasses_parties_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "Les carcasses de plus de 100 kg sont intransportables (charge = F×5) "
 			"et ne rapportaient donc RIEN. Crée une portion par partie du corps (tête, corps, "
 			"pattes, queue, ailes) avec sa propre table de dépeçage, et pose `decoupe` sur la "
-			"carcasse source — le champ qui la rend découpable en jeu, à l'arme tranchante.",
+			"carcasse source — le champ qui la rend découpable en jeu, à l'arme tranchante. Une "
+			"portion encore trop lourde se débite en MORCEAUX identiques de moins de 100 kg "
+			"(`item:<portion>_morceau`), jamais en une nouvelle anatomie : un doc généré "
+			"(`portion_de`) n'est jamais relu comme carcasse source. Le fichier ne porte que le DIFF "
+			"avec la base (docs nouveaux ou modifiés, repris du dump pour garder les retouches "
+			"manuelles) ; base à jour ⇒ aucun fichier écrit. Relançable à volonté ; liste les docs "
+			"d'une ancienne génération à supprimer à la main.",
 	},
 	{
 		"id": "gen_armes_tranchantes",
