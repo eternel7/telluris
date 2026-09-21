@@ -103,9 +103,18 @@ def _save_porteurs(principal: dict, porteurs_mutes: list) -> None:
 
 # ── Vue commune ─────────────────────────────────────────────────────────────────
 
-def _vue_commandes(character: dict, now: int) -> list:
-	"""Les commandes du joueur, la plus proche d'être prête en tête."""
-	vues = [commande_util.vue(c, get_doc, now) for c in (character.get("commandes") or [])]
+def _vue_commandes(character: dict, now: int, lieu_id: str) -> list:
+	"""Les commandes du joueur CHEZ CET ARTISAN, la plus proche d'être prête en tête.
+
+	⚠️ Filtrées par lieu, et pas seulement pour la clarté : tout se joue SUR PLACE — on
+	retire chez celui qui a fabriqué (`retirable`) et on relance là où l'on a commandé
+	(« Cette commande a été passée ailleurs »). Une ligne venue d'un autre atelier n'offrirait
+	donc ici que des boutons qui refusent.
+
+	⚠️ Rien n'est perdu : une commande laissée ailleurs vit toujours sur le personnage et
+	réapparaît dès qu'il repasse la porte de son artisan."""
+	vues = [commande_util.vue(c, get_doc, now)
+			for c in (character.get("commandes") or []) if c.get("lieu") == lieu_id]
 	return sorted(vues, key=lambda v: (v["statut"] != commande_util.ETAT_TERMINEE, v["pret_dans"]))
 
 
@@ -138,32 +147,37 @@ def _catalogue_vue(lieu_doc: dict, relation) -> list:
 	return sorted(lignes, key=lambda l: l["nom"] or "")
 
 
-def _matieres_vue(lieu_doc: dict, base_doc: dict) -> list:
-	"""Ce que la maison accepte pour CETTE pièce : les items de son rayon qui entrent dans son
-	tour de main, plus ceux que leur tag `fabrication_<famille de la pièce>` y destine. Le
-	client n'a ainsi qu'à choisir dans une liste déjà filtrée, et rien ne dépend de sa bonne
-	volonté — le serveur revérifie tout à `passer`.
+def _matieres_vue(lieu_doc: dict, base_doc: dict, porteurs: list) -> list:
+	"""Ce qui peut entrer dans CETTE pièce ici, résolu pour le client : le rayon de la maison,
+	les sacs de l'expédition et le catalogue du monde (`commande.matieres_disponibles`, qui
+	tient la règle). Le client n'a ainsi qu'à choisir dans une liste déjà filtrée, et rien ne
+	dépend de sa bonne volonté — le serveur revérifie tout à `passer`.
 
 	⚠️ La liste dépend de l'objet à façonner : elle ne peut pas être servie par le comptoir,
-	qui ne sait pas encore ce que le joueur va commander."""
+	qui ne sait pas encore ce que le joueur va commander.
+
+	⚠️ `porteurs` est celui de `_resoudre` (principal + `porteurs_effectifs`) : les deux
+	doivent voir le même sac, sinon l'overlay proposerait une matière que le devis ne
+	trouverait pas.
+
+	⚠️ Tri par DISPONIBILITÉ puis par nom — sac, rayon, puis ce qui reste à trouver : depuis
+	que le catalogue alimente la liste, un tri alphabétique seul reléguerait sous une matière
+	introuvable celle que le joueur a déjà sur lui. Trié ICI, jamais par le client (§10)."""
 	lignes = []
-	for entree in (lieu_doc.get("stock_vente") or []):
-		item_id = entree.get("item_id")
-		if not item_id or int(entree.get("qty", 0) or 0) <= 0:
-			continue
-		item = resolve_item_ref(item_id)
-		if not item or not commande_util.matiere_acceptee(lieu_doc, item, base_doc):
-			continue
+	for entree in commande_util.matieres_disponibles(lieu_doc, base_doc, porteurs, get_doc):
+		item = resolve_item_ref(entree["item_id"])
 		apporte = fabrication.proprietes_matiere(item)
 		lignes.append({
-			"item_id": item_id,
-			"nom": item.get("nom") or item_id,
+			"item_id": entree["item_id"],
+			"nom": item.get("nom") or entree["item_id"],
 			"icon": item.get("icon") or "🧱",
-			"qty": int(entree.get("qty", 0) or 0),
+			"qty": entree["qty"],
+			"qty_sac": entree["qty_sac"],
 			"apporte": apporte["nom"],
 			"modificateurs": apporte["modificateurs"],
 		})
-	return sorted(lignes, key=lambda l: l["nom"] or "")
+	return sorted(lignes, key=lambda l: (0 if l["qty_sac"] else (1 if l["qty"] else 2),
+										 l["nom"] or ""))
 
 
 # ── GET : l'état du comptoir de commande ────────────────────────────────────────
@@ -186,7 +200,8 @@ def comptoir_commande(current_user: Annotated[dict, Depends(get_current_user)]):
 		# (`fabrication_<categorie>`), que le comptoir ne connaît pas encore. L'overlay les
 		# demande à l'ouverture (`/api/commande/matieres`).
 		"matieres_max": int(character_stats.COMMANDE_MATIERES_MAX),
-		"commandes": _vue_commandes(character, commande_util.now_epoch()),
+		"commandes": _vue_commandes(character, commande_util.now_epoch(),
+									lieu_doc.get("_id", "")),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 		"delai": int(character_stats.COMMANDE_DELAI_SECONDES),
 		"now": commande_util.now_epoch(),
@@ -218,7 +233,8 @@ def matieres_sur_mesure(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	item_id: str = "",
 ):
-	"""Les matières que cette maison accepte POUR CETTE PIÈCE — la liste du ✨ sur-mesure.
+	"""Les matières admises POUR CETTE PIÈCE — la liste du ✨ sur-mesure : le rayon de la
+	maison et les sacs de l'expédition.
 
 	⚠️ Servie ici et non par le comptoir : une matière entre dans la pièce soit parce que la
 	maison la travaille, soit parce que son tag `fabrication_<famille>` l'y destine — et la
@@ -226,14 +242,15 @@ def matieres_sur_mesure(
 	pas encore.
 
 	`def` et non `async def` : lecture PURE, comme le comptoir."""
-	_, lieu_doc = _acces(current_user)
+	character, lieu_doc = _acces(current_user)
 	if not item_id or item_id not in commande_util.catalogue_commandable(lieu_doc, get_doc):
 		raise HTTPException(status_code=422, detail="Cet artisan ne sait pas fabriquer cet objet.")
 	base_doc = get_doc(item_id)
 	if not base_doc:
 		raise HTTPException(status_code=422, detail="Objet introuvable")
 	_garde_sur_mesure(lieu_doc, base_doc)
-	return {"item_id": item_id, "matieres": _matieres_vue(lieu_doc, base_doc)}
+	porteurs = [character] + recrutement.porteurs_effectifs(character, get_doc)
+	return {"item_id": item_id, "matieres": _matieres_vue(lieu_doc, base_doc, porteurs)}
 
 
 # ── Résolution commune devis / passer ───────────────────────────────────────────
@@ -383,9 +400,15 @@ async def passer_commande(
 	commande_util.purger_commandes(character, now)
 
 	# Cas C : on enregistre l'intention, on ne touche ni au sac ni à la bourse.
+	# ⚠️ L'intention, c'est la pièce ET ses matières. Sans `base_item`/`matieres`, une commande
+	# sur mesure mise en attente ressortait NUE de « Relancer » (qui re-résout depuis
+	# `base_item or item` et `matieres`) : le joueur retrouvait la pièce de catalogue, sans un
+	# mot. `item` reste l'id du base — la variante n'est créée qu'au paiement, c'est voulu.
 	if source["manquantes"]:
 		enr = commande_util.nouvelle_commande(
 			lieu_doc, resolu["item_id"], resolu["detail"], now=now,
+			base_item=resolu["base_doc"]["_id"] if resolu["matieres_docs"] else "",
+			matieres=resolu["matieres"],
 			manquantes=source["manquantes"])
 		character.setdefault("commandes", []).append(enr)
 		if save_doc(character) is None:
@@ -611,12 +634,16 @@ def _payload_commande(character: dict, lieu_doc: dict, relation, now: int,
 
 	Le rayon du lieu peut avoir bougé (matières achetées pour la commande) : `achetables` et
 	`vendables` repartent donc avec, sans quoi le panneau du marchand resterait figé sur son
-	dernier chargement — un symptôme difficile à relier à sa cause."""
+	dernier chargement — un symptôme difficile à relier à sa cause.
+
+	⚠️ **Pas de `matieres` ici**, pour la même raison qu'au comptoir : la liste dépend de la
+	PIÈCE (`fabrication_<famille>`), qu'une annulation ou un retrait ne connaissent pas.
+	L'overlay la demande à son ouverture (`/api/commande/matieres`). La servir depuis ce
+	payload-ci faisait lever `_matieres_vue` — donc **500 après l'écriture** : l'action
+	passait en base, le client n'en voyait qu'une erreur et ne se redessinait jamais."""
 	payload = {
-		"commandes": _vue_commandes(character, now),
+		"commandes": _vue_commandes(character, now, lieu_doc.get("_id", "")),
 		"catalogue": _catalogue_vue(lieu_doc, relation),
-		"matieres": (_matieres_vue(lieu_doc)
-					 if commande_util.lieu_fabrique_sur_mesure(lieu_doc) else []),
 		"inventaire_payload": _inventory_payload(character),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"vendables": _marchand_vendables(character, lieu_doc, relation,

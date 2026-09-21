@@ -138,12 +138,11 @@ def recette_pour(lieu_doc: dict, item_id: str):
 
 
 def fabrication_valide(item_doc: dict) -> bool:
-	"""Le bloc `fabrication` de ce doc apporte-t-il quelque chose ? Lu VIA
-	`fabrication.proprietes_matiere`, source unique de ce qu'est un bloc bien formé : un bloc
-	absent, mal formé ou vide ne fait pas une matière de sur-mesure. Une matière sans apport
-	ne ferait que renchérir la pièce sans rien y changer."""
-	props = fabrication.proprietes_matiere(item_doc)
-	return bool(props["nom"] or props["modificateurs"])
+	"""Le bloc `fabrication` de ce doc apporte-t-il quelque chose ? Délégué à
+	`fabrication.apporte`, source unique de ce qu'est un bloc bien formé : un bloc absent, mal
+	formé ou vide ne fait pas une matière de sur-mesure. Une matière sans apport ne ferait que
+	renchérir la pièce sans rien y changer."""
+	return fabrication.apporte(item_doc)
 
 
 def tags_fabrication(base_doc: dict) -> set:
@@ -176,6 +175,66 @@ def matiere_acceptee(lieu_doc: dict, item_doc: dict, base_doc: dict | None = Non
 	if any(correspond(item_id, item_doc, cle) for cle in marche.besoins_lieu(lieu_doc)):
 		return True
 	return bool(tags_fabrication(base_doc) & set(item_doc.get("tags") or []))
+
+
+def matieres_disponibles(lieu_doc: dict, base_doc: dict, porteurs, get_doc_fn) -> list:
+	"""Ce qu'on peut mettre dans CETTE pièce ICI : `[{"item_id", "qty", "qty_sac"}, …]` trié
+	par id. TROIS provenances, une seule règle d'admission (`matiere_acceptee`) :
+
+	- le **rayon** de l'artisan (`stock_vente`), que le joueur paiera au comptoir ;
+	- les **sacs de l'expédition**, que `sourcer` prélève EN PREMIER, donc sans rien facturer ;
+	- le **catalogue du monde** (`marche.matieres_fabrication`), pour tout ce que la maison
+	  accepterait sans l'avoir : `qty == qty_sac == 0` dit « ni ici ni sur vous ».
+
+	Les deux dernières ne sont pas du confort. Sans les sacs, le tag `fabrication_<famille>` ne
+	servirait qu'à filtrer la vitrine : une gemme achetée au joaillier d'en face ne pourrait
+	jamais être sertie, puisque l'armurier n'en vend pas. Sans le catalogue, le joueur ne
+	saurait même pas que la pièce peut la recevoir — il ne peut pas deviner ce qu'aucune des
+	deux listes ne montre. Choisie sans être là, la matière part en `manquantes` : la commande
+	naît `en_attente_materiaux`, rien n'est prélevé ni débité, et « Relancer » la reprend au
+	retour du joueur (§7 cas C).
+
+	⚠️ Les sacs sont balayés exactement comme `emplacements_fournis` les balaie (les
+	références de `inventaire`, porteurs compris) : proposer ce que la dépense ne saurait pas
+	prendre afficherait une matière aussitôt portée `manquantes`.
+
+	⚠️ Une matière vue plusieurs fois ne fait qu'UNE ligne — c'est le même objet, et le sac
+	passe d'abord. Le rayon reste compté à part pour que le client sache s'il la fournit.
+
+	`get_doc_fn` n'est appelé qu'une fois par id : `matiere_acceptee` relit les besoins du
+	lieu, et un sac de trente objets ne doit pas le faire trente fois."""
+	lignes: dict[str, dict] = {}
+	admises: dict[str, bool] = {}
+
+	def _admise(item_id: str) -> bool:
+		if item_id not in admises:
+			doc = get_doc_fn(item_id)
+			admises[item_id] = bool(doc) and matiere_acceptee(lieu_doc, doc, base_doc)
+		return admises[item_id]
+
+	def _ligne(item_id: str) -> dict:
+		return lignes.setdefault(item_id, {"item_id": item_id, "qty": 0, "qty_sac": 0})
+
+	for entree in (lieu_doc or {}).get("stock_vente", []) or []:
+		item_id = entree.get("item_id")
+		qty = int(entree.get("qty", 0) or 0)
+		if item_id and qty > 0 and _admise(item_id):
+			_ligne(item_id)["qty"] += qty
+
+	for porteur in (porteurs or []):
+		for ref in (porteur or {}).get("inventaire", []) or []:
+			item_id = item_ref_id(ref)
+			if item_id and _admise(item_id):
+				_ligne(item_id)["qty_sac"] += 1
+
+	# Le catalogue en dernier : il n'apporte aucune quantité, seulement l'existence de la
+	# ligne. Les deux passes précédentes ont déjà posé leurs compteurs, `_ligne` ne les
+	# écrase pas.
+	for item_id in marche.matieres_fabrication():
+		if _admise(item_id):
+			_ligne(item_id)
+
+	return [lignes[cle] for cle in sorted(lignes)]
 
 
 # ── Approvisionnement des matières (§7 : les trois cas) ─────────────────────────

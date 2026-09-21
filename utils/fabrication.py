@@ -45,7 +45,9 @@ SIGNATURE_LONGUEUR = 8
 # Trois façons de composer, choisies par le champ et non par la matière :
 #   ADDITIF      : les `bonus_*` scalaires s'ajoutent au base puis entre matières.
 #   FUSION       : `bonus` (par caractéristique) et `effets` (par clé d'effet) s'ajoutent
-#                  clé à clé — deux matières qui donnent +1 F donnent +2 F.
+#                  clé à clé — deux matières qui donnent +1 F donnent +2 F — et de sous-dict
+#                  en sous-dict : `effets.buffs` d'un consommable se fusionne comme le reste,
+#                  il ne se perd pas parce qu'il n'est pas un nombre.
 #   MAX          : `restriction` prend le plus exigeant — alourdir une arme ne peut pas la
 #                  rendre plus facile à porter.
 #   FACTEUR      : `poids` et `valeur` sont multiplicatifs ({"facteur": 1.1}), parce qu'ils
@@ -91,6 +93,19 @@ def proprietes_matiere(item_doc) -> dict:
 	}
 
 
+def apporte(item_doc) -> bool:
+	"""Cette matière apporte-t-elle quelque chose à une pièce ? Un nom de variante, des
+	modificateurs, ou les deux.
+
+	SOURCE UNIQUE de la question, parce que deux modules la posent : `commande.matiere_acceptee`
+	pour admettre une matière (une matière sans apport ne ferait que renchérir la pièce sans
+	rien y changer) et `marche.matieres_fabrication` pour dresser l'univers des matières
+	possibles. Elle vit ICI parce que c'est ce module qui définit ce qu'est un bloc bien
+	formé — et `marche` ne peut pas importer `commande` (cycle)."""
+	props = proprietes_matiere(item_doc)
+	return bool(props["nom"] or props["modificateurs"])
+
+
 def _rang_rarete(rarete) -> float:
 	"""Position d'une rareté dans l'échelle des prix. Sert à prendre « la plus haute » sans
 	recopier l'ordre : `MULT_RARETE` EST l'échelle (cf. CLAUDE.md §14, aucune valeur en dur)."""
@@ -112,6 +127,52 @@ def _nombre(val) -> float:
 	return float(val) if isinstance(val, (int, float)) and not isinstance(val, bool) else 0.0
 
 
+def _copie(val) -> dict:
+	"""Copie PROFONDE d'un bloc fusionnable. ⚠️ Une copie de surface partagerait les sous-dicts
+	avec le doc de base — or celui-ci sort du cache de requête (`get_doc` mémorise les `item:`),
+	et l'abîmer ici l'abîmerait pour tout le reste de la requête."""
+	return {k: (_copie(v) if isinstance(v, dict) else v) for k, v in (val or {}).items()}
+
+
+def _fusionner(cible: dict, apport: dict, qte: int) -> dict:
+	"""Ajoute `apport` à `cible` clé à clé, en DESCENDANT dans les sous-dicts (`effets.buffs`).
+	Mute et rend `cible`.
+
+	⚠️ Quand les deux côtés ne sont pas de même nature (un sous-dict d'un côté, un nombre de
+	l'autre), le base l'emporte et l'apport est ignoré : une matière mal rédigée n'apporte
+	rien, elle ne casse rien — et surtout elle n'efface pas ce que la pièce portait déjà."""
+	for cle, delta in (apport or {}).items():
+		courant = cible.get(cle)
+		if isinstance(delta, dict):
+			if isinstance(courant, dict) or courant is None:
+				cible[cle] = _fusionner(courant if isinstance(courant, dict) else {}, delta, qte)
+		elif not isinstance(courant, dict):
+			cible[cle] = _nombre(courant) + _nombre(delta) * qte
+	return cible
+
+
+def _nettoyer(val: dict) -> dict:
+	"""Bloc fusionné prêt à écrire : nombres arrondis, zéros retirés (une matière qui annule un
+	bonus ne doit pas laisser `{"Int": 0}`), sous-dicts NETTOYÉS À LEUR TOUR.
+
+	⚠️ Ce qu'on ne sait pas additionner, on le CONSERVE. C'est ici que `effets.buffs` se
+	perdait : `_nombre({"Int": 5})` vaut 0, le sous-dict passait donc pour un zéro et sautait
+	avec — une bougie arcanique sur mesure perdait son +5 Int, et 53 items du dump portent ce
+	bloc."""
+	sortie = {}
+	for cle, v in (val or {}).items():
+		if isinstance(v, dict):
+			sous = _nettoyer(v)
+			if sous:
+				sortie[cle] = sous
+		elif isinstance(v, (int, float)) and not isinstance(v, bool):
+			if int(round(v)) != 0:
+				sortie[cle] = int(round(v))
+		elif v not in (None, ""):
+			sortie[cle] = v
+	return sortie
+
+
 def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 	"""Champs de l'objet fini = champs du base + apport de chaque matière, selon la règle de
 	composition du champ (cf. en-tête). Déterministe : mêmes entrées ⇒ mêmes sorties, quel que
@@ -125,9 +186,9 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 	sortie = {}
 
 	additifs = {k: _nombre((base_doc or {}).get(k)) for k in CLES_ADDITIVES if (base_doc or {}).get(k) is not None}
-	fusions = {k: dict((base_doc or {}).get(k) or {}) for k in CLES_FUSIONNEES
+	fusions = {k: _copie((base_doc or {}).get(k)) for k in CLES_FUSIONNEES
 			   if isinstance((base_doc or {}).get(k), dict)}
-	maxima = {k: dict((base_doc or {}).get(k) or {}) for k in CLES_MAX
+	maxima = {k: _copie((base_doc or {}).get(k)) for k in CLES_MAX
 			  if isinstance((base_doc or {}).get(k), dict)}
 	facteurs = {k: 1.0 for k in CLES_FACTEUR}
 	rarete = (base_doc or {}).get("rarete")
@@ -139,9 +200,7 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 			if cle in CLES_ADDITIVES:
 				additifs[cle] = additifs.get(cle, 0.0) + _nombre(val) * qte
 			elif cle in CLES_FUSIONNEES and isinstance(val, dict):
-				cible = fusions.setdefault(cle, {})
-				for sous_cle, delta in val.items():
-					cible[sous_cle] = _nombre(cible.get(sous_cle)) + _nombre(delta) * qte
+				_fusionner(fusions.setdefault(cle, {}), val, qte)
 			elif cle in CLES_MAX and isinstance(val, dict):
 				cible = maxima.setdefault(cle, {})
 				for sous_cle, seuil in val.items():
@@ -156,12 +215,8 @@ def appliquer_modificateurs(base_doc: dict, matieres_docs: list) -> dict:
 		if cle == "bonus_degats_dice":
 			arrondi = max(0, min(DICE_MAX, arrondi))
 		sortie[cle] = arrondi
-	for cle, val in fusions.items():
-		nettoye = {k: int(round(v)) for k, v in val.items() if int(round(_nombre(v))) != 0}
-		if nettoye:
-			sortie[cle] = nettoye
-	for cle, val in maxima.items():
-		nettoye = {k: int(round(v)) for k, v in val.items() if int(round(_nombre(v))) != 0}
+	for cle, val in list(fusions.items()) + list(maxima.items()):
+		nettoye = _nettoyer(val)
 		if nettoye:
 			sortie[cle] = nettoye
 	if rarete:

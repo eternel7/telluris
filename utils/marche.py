@@ -121,12 +121,15 @@ _portees_memo: dict[str, tuple] = {}       # lieu_id → (lui-même, parent, gra
 _cles_consommees_memo: set | None = None   # toutes les clés matières consommées, portées comprises
 # Matière/demi-produit vs pièce finie, dérogation comprise (cf. `item_commandable`).
 _commandable_memo: dict[str, bool] = {}    # item_id → peut figurer au catalogue de commande
+# Univers des matières de sur-mesure (cf. `matieres_fabrication`).
+_matieres_fab_memo: list | None = None     # ids des items porteurs d'un bloc `fabrication`
 
 
 def reset_prix_cache() -> None:
 	"""Vide les caches de coût de revient (à appeler quand recettes/items/MARGE changent)."""
 	global _recipe_map, _marche_map, _recettes_all, _recettes_par_lieu, _image_route_memo
 	global _marche_map_portee, _recettes_par_portee, _cles_consommees_memo
+	global _matieres_fab_memo
 	_cles_consommees_memo = None
 	_recipe_map = None
 	_marche_map = None
@@ -143,6 +146,9 @@ def reset_prix_cache() -> None:
 	# sans effet jusqu'au redémarrage du process — le symptôme le plus coûteux à diagnostiquer
 	# de toute la chaîne (même piège que l'import de recette avant l'ajout de `_recettes_all`).
 	_commandable_memo.clear()
+	# ⚠️ Même raison : sans elle, écrire un bloc `fabrication` depuis /admin/table n'ouvrirait
+	# la matière au sur-mesure qu'au prochain redémarrage.
+	_matieres_fab_memo = None
 
 
 def _all_recettes() -> list:
@@ -200,6 +206,29 @@ def item_commandable(item_id: str, item_doc: dict | None = None) -> bool:
 		_commandable_memo[item_id] = bool(doc) and (
 			not est_intermediaire(doc) or TAG_COMMANDABLE in (doc.get("tags") or []))
 	return _commandable_memo[item_id]
+
+
+def matieres_fabrication() -> list:
+	"""Tous les items du monde qui apportent quelque chose à une pièce sur mesure, triés.
+
+	C'est l'UNIVERS des matières possibles, pas une liste par lieu : qui a le droit d'entrer
+	dans quelle pièce reste la décision de `commande.matiere_acceptee` (métier de la maison OU
+	tag `fabrication_<famille>`). Ici on ne retient que le fait brut — le doc porte un bloc
+	`fabrication` qui apporte un nom ou des modificateurs (`fabrication.apporte`).
+
+	C'est ce qui permet de proposer une matière que NI le rayon NI les sacs n'ont : le joueur
+	la commande quand même, la commande naît `en_attente_materiaux`, et « Relancer » la reprend
+	quand il revient avec (§7 cas C).
+
+	⚠️ UNE lecture par process, projetée sur deux champs (même idiome que l'index des grimoires
+	de `/admin`) : l'univers se compte en dizaines d'items sur plus de mille. Vidé par
+	`reset_prix_cache()`, que l'écriture d'un doc `item` déclenche déjà (`main._TYPES_PRIX`)."""
+	global _matieres_fab_memo
+	if _matieres_fab_memo is None:
+		docs = find_docs({"type": "item"}, fields=["_id", "fabrication"]) or []
+		_matieres_fab_memo = sorted(d["_id"] for d in docs
+									if d.get("_id") and fabrication.apporte(d))
+	return _matieres_fab_memo
 
 
 def est_sur_commande(recette: dict) -> bool:

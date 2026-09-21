@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest  # noqa: E402
 
-from utils import commande, marche  # noqa: E402
+from utils import commande, fabrication, marche  # noqa: E402
 from models import character_stats  # noqa: E402
 
 
@@ -72,10 +72,18 @@ ECHOPPE = {"_id": "lieu:comptoir", "categorie": "categorie_sans_recette"}
 
 @pytest.fixture
 def index_semes(monkeypatch):
-	"""Une seule recette dans le monde. `reset_prix_cache()` des deux côtés : ces index sont
-	des caches de PROCESS, les laisser semés ferait mentir les tests suivants."""
+	"""Une seule recette dans le monde, et l'univers des matières de sur-mesure.
+	`reset_prix_cache()` des deux côtés : ces index sont des caches de PROCESS, les laisser
+	semés ferait mentir les tests suivants.
+
+	⚠️ `_matieres_fab_memo` est SEMÉ et non laissé vide : sinon `matieres_fabrication`
+	interrogerait la base (injoignable ici), la troisième provenance serait muette partout —
+	et les tests qui la vérifient passeraient à vide. Dérivé de `_DB` par le prédicat du
+	module, jamais listé en dur : enrichir `_DB` enrichit l'univers."""
 	marche.reset_prix_cache()
 	monkeypatch.setattr(marche, "_recettes_all", [RECETTE])
+	monkeypatch.setattr(marche, "_matieres_fab_memo",
+						sorted(i for i, d in _DB.items() if fabrication.apporte(d)))
 	yield
 	marche.reset_prix_cache()
 
@@ -258,6 +266,147 @@ def test_sans_piece_le_tag_nouvre_rien(index_semes):
 	# ⚠️ Hors du contexte d'une pièce, la seconde porte reste fermée : on ne sait pas quelle
 	# famille s'applique. C'est ce qui oblige les appelants du sur-mesure à passer l'objet.
 	assert commande.matiere_acceptee(ARTISAN, _DB["item:gemmes"]) is False
+
+
+# ── Ce qu'on peut mettre dans la pièce : rayon, sacs ET catalogue du monde ──────
+
+def _dispo(lieu, porteurs, piece=None):
+	return commande.matieres_disponibles(lieu, piece or _DB["item:Epee_longue"],
+										 porteurs, _get_doc)
+
+
+def _ids(res):
+	return [l["item_id"] for l in res]
+
+
+def _ligne(res, item_id):
+	return next((l for l in res if l["item_id"] == item_id), None)
+
+
+def test_le_rayon_alimente_la_liste(index_semes):
+	lieu = dict(ARTISAN, stock_vente=[{"item_id": "item:fer", "qty": 5}])
+	assert _ligne(_dispo(lieu, []), "item:fer") == {"item_id": "item:fer", "qty": 5,
+													"qty_sac": 0}
+
+
+def test_le_sac_alimente_la_liste(index_semes):
+	"""L'armurier ne VEND pas de gemmes, mais la gemme porte `fabrication_arme` — portée par
+	le joueur, elle doit pouvoir être sertie, et le devis ne la lui facturera pas."""
+	joueur = {"_id": "character:j", "inventaire": ["item:gemmes"]}
+	assert _ligne(_dispo(ARTISAN, [joueur]), "item:gemmes") == {"item_id": "item:gemmes",
+															   "qty": 0, "qty_sac": 1}
+
+
+def test_le_catalogue_du_monde_alimente_la_liste(index_semes):
+	"""La troisième provenance : ni en rayon, ni dans les sacs. Sans elle, le joueur ne peut
+	pas deviner qu'une gemme se sertit sur une épée — aucune des deux listes ne la montre, et
+	il n'irait donc jamais en chercher une. `qty == qty_sac == 0` dit « à apporter »."""
+	assert _ligne(_dispo(ARTISAN, []), "item:gemmes") == {"item_id": "item:gemmes",
+														  "qty": 0, "qty_sac": 0}
+
+
+def test_une_matiere_du_metier_absente_des_deux_est_proposee(index_semes):
+	# Symétrie : le tour de main de la maison vaut aussi sans stock. L'armurier propose « en
+	# fer » même sans fer au comptoir — le joueur saura quoi rapporter.
+	assert _ligne(_dispo(ARTISAN, []), "item:fer") == {"item_id": "item:fer",
+													   "qty": 0, "qty_sac": 0}
+
+
+def test_le_catalogue_nouvre_rien_sans_apport(index_semes):
+	"""⚠️ La règle qui tient les trois provenances : sans bloc `fabrication`, rien. Le sable
+	porte pourtant `fabrication_arme` — il ne ferait que renchérir la pièce."""
+	assert "fabrication_arme" in _DB["item:sable"]["tags"]
+	assert "item:sable" not in marche.matieres_fabrication()
+	assert "item:sable" not in _ids(_dispo(ARTISAN, []))
+
+
+def test_le_catalogue_respecte_le_tour_de_main(index_semes):
+	# La cire apporte quelque chose, mais un armurier ne la travaille pas et elle ne porte
+	# aucun tag d'arme : l'élargissement n'ouvre pas la porte à tout le monde (§10).
+	assert "item:cire" in marche.matieres_fabrication()
+	assert "item:cire" not in _ids(_dispo(ARTISAN, []))
+
+
+def test_une_matiere_vue_plusieurs_fois_ne_fait_quune_ligne(index_semes):
+	lieu = dict(ARTISAN, stock_vente=[{"item_id": "item:fer", "qty": 5}])
+	joueur = {"_id": "character:j", "inventaire": ["item:fer", "item:fer"]}
+	res = _dispo(lieu, [joueur])
+	assert _ids(res).count("item:fer") == 1
+	# ⚠️ Le catalogue passe en dernier et n'écrase aucun compteur.
+	assert _ligne(res, "item:fer") == {"item_id": "item:fer", "qty": 5, "qty_sac": 2}
+
+
+def test_le_sac_dun_compagnon_compte_aussi(index_semes):
+	# Même balayage qu'`emplacements_fournis` : ce que la mule porte, la commande le prendra.
+	joueur = {"_id": "character:j", "inventaire": []}
+	mule = {"_id": "monture:mule", "inventaire": ["item:gemmes"]}
+	assert _ligne(_dispo(ARTISAN, [joueur, mule]), "item:gemmes")["qty_sac"] == 1
+
+
+def test_le_sac_ne_deroge_a_aucune_admission(index_semes):
+	"""⚠️ Porter la matière ne la rend pas acceptable : la cire reste hors du tour de main de
+	l'armurier, et le sable n'apporte rien (pas de bloc `fabrication`)."""
+	joueur = {"_id": "character:j", "inventaire": ["item:cire", "item:sable"]}
+	ids = _ids(_dispo(ARTISAN, [joueur]))
+	assert "item:cire" not in ids and "item:sable" not in ids
+
+
+def test_la_famille_de_la_piece_vaut_pour_toutes_les_provenances(index_semes):
+	# La gemme porte `fabrication_arme` et `fabrication_bijou`, pas `fabrication_manche` :
+	# c'est la PIÈCE qui décide, d'où que vienne la matière.
+	joueur = {"_id": "character:j", "inventaire": ["item:gemmes"]}
+	assert "item:gemmes" in _ids(_dispo(ARTISAN, [joueur], _DB["item:Bague"]))
+	assert "item:gemmes" not in _ids(_dispo(ARTISAN, [joueur], _DB["item:manche_de_test"]))
+
+
+def test_matiere_introuvable_ignoree(index_semes):
+	joueur = {"_id": "character:j", "inventaire": ["item:disparu"]}
+	assert "item:disparu" not in _ids(_dispo(ARTISAN, [joueur]))
+
+
+def test_la_liste_et_le_devis_voient_le_meme_sac(index_semes):
+	"""L'invariante du couple repérage/dépense, portée à l'overlay : ce qui est annoncé dans
+	le sac (`qty_sac`) doit pouvoir être prélevé, sinon la commande partirait en `manquantes`
+	sous le nez du joueur."""
+	joueur = {"_id": "character:j", "inventaire": ["item:gemmes"]}
+	ligne = _ligne(_dispo(ARTISAN, [joueur]), "item:gemmes")
+	assert ligne["qty_sac"] == 1
+	res = commande.sourcer([(ligne["item_id"], 1)], [joueur], ARTISAN, _get_doc, _prix_fn)
+	assert res["manquantes"] == [] and res["cout_matieres"] == 0
+
+
+def test_une_matiere_du_catalogue_seul_part_en_manquante(index_semes):
+	"""Le pendant : proposée sans être là, elle n'est PAS une promesse. Le devis la porte en
+	`manquantes`, la commande naîtra `en_attente_materiaux` (§7 cas C) — rien n'est prélevé,
+	rien n'est débité, et « Relancer » la reprendra."""
+	joueur = {"_id": "character:j", "inventaire": []}
+	ligne = _ligne(_dispo(ARTISAN, [joueur]), "item:gemmes")
+	assert (ligne["qty"], ligne["qty_sac"]) == (0, 0)
+	res = commande.sourcer([(ligne["item_id"], 1)], [joueur], ARTISAN, _get_doc, _prix_fn)
+	assert res["manquantes"] == [{"cle": "item:gemmes", "quantite": 1}]
+
+
+# ── L'univers des matières (index de process) ───────────────────────────────────
+
+def test_lunivers_est_lu_une_fois_et_vide_par_reset(monkeypatch):
+	"""⚠️ Même piège que `_commandable_memo` : sans le vidage, écrire un bloc `fabrication`
+	depuis /admin/table n'ouvrirait la matière au sur-mesure qu'au prochain redémarrage."""
+	lectures = []
+
+	def _find(selector, fields=None, limit=10_000):
+		lectures.append(selector)
+		return [{"_id": "item:fer", "fabrication": {"nom": "en fer"}},
+				{"_id": "item:sable", "tags": ["fabrication_arme"]}]
+
+	marche.reset_prix_cache()
+	monkeypatch.setattr(marche, "find_docs", _find)
+	assert marche.matieres_fabrication() == ["item:fer"]
+	assert marche.matieres_fabrication() == ["item:fer"]
+	assert len(lectures) == 1                     # UNE lecture par process…
+	marche.reset_prix_cache()
+	assert marche.matieres_fabrication() == ["item:fer"]
+	assert len(lectures) == 2                     # …et relue après un import
+	marche.reset_prix_cache()
 
 
 # ── Les trois cas de matières (§7) ──────────────────────────────────────────────

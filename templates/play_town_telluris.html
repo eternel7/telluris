@@ -2705,6 +2705,9 @@
 		.cmd-etat { font-size: .82em; white-space: nowrap; opacity: .85; }
 		.cmd-etat.pret { color: var(--gold2, var(--gold, #d8b46a)); opacity: 1; }
 		.cmd-etat.perdu { color: #c98b8b; }
+		/* Ligne dont l'action est partie au serveur : grisée et inerte le temps du trajet —
+		   le payload de réponse la remplace. Provisoire, jamais un état de jeu. */
+		.sh-inv-item.cmd-pending { opacity: .55; font-style: italic; pointer-events: none; }
 		/* ── Sur mesure ──
 		   Encore le même calque que les clauses : décision bloquante, et refermer sans
 		   valider ne doit RIEN engager (ni matière prélevée, ni bourse débitée). */
@@ -2725,6 +2728,8 @@
 		.sm-matiere.choisie { border-color: var(--gold2, var(--gold, #d8b46a)); background: rgba(216,180,106,.18); }
 		.sm-matiere-nom { flex: 1; }
 		.sm-apporte { font-size: .82em; opacity: .85; white-space: nowrap; }
+		/* Provenance : 🎒 = déjà dans les sacs de l'expédition, donc fournie sans frais. */
+		.sm-source { font-size: .9em; }
 		.sm-liste { max-height: 40vh; overflow-y: auto; margin: .2rem 0 .8rem; }
 		.sm-devis { border-top: 1px solid rgba(74,74,90,.4); padding-top: .5rem; margin-top: .4rem; }
 		.sm-devis-ligne { display: flex; justify-content: space-between; font-size: .88em; padding: 2px 0; }
@@ -6698,7 +6703,9 @@ function renderCmdEnCours(data) {
 	const cmds = MARCHAND.commandes = data.commandes || [];
 	_sellCompte('cmd-encours-compte', cmds.length);
 	if (!cmds.length) {
-		list.innerHTML = '<li class="sell-empty">Aucune commande en cours.</li>';
+		// « chez cet artisan » et non « en cours » : le serveur ne sert que les commandes de
+		// CE lieu (`_vue_commandes`), celles laissées ailleurs attendent leur atelier.
+		list.innerHTML = '<li class="sell-empty">Aucune commande chez cet artisan.</li>';
 		if (scrollEl) scrollEl.classList.remove('scrollable');
 		_arreterCmdTimer();
 		return;
@@ -6799,17 +6806,67 @@ async function _posterCommande(url, body, btn) {
 	} catch (err) { console.error('Erreur commande', err); if (btn) btn.disabled = false; return null; }
 }
 
+// ── Retour visuel IMMÉDIAT ────────────────────────────────────────────────────
+// L'aller-retour serveur dure ce qu'il dure, et une liste qui ne bouge pas au clic se lit
+// comme « il ne s'est rien passé » : le joueur reclique, et commande deux fois. On marque
+// donc la ligne AVANT le fetch.
+//
+// ⚠️ Cet état est PROVISOIRE et ne prétend rien : il dit « en cours », jamais « fait ». Le
+// payload de réponse reconstruit les deux listes et fait seul foi (Convention §10) — il
+// efface donc naturellement ce qu'on a posé ici. En cas d'échec, on RECHARGE plutôt que de
+// défaire à la main : après une mutation ratée, l'état vrai est celui du serveur.
+
+function _cmdLigneOccupee(btn, etat) {
+	const li = btn && btn.closest('li');
+	if (!li) return;
+	li.classList.add('cmd-pending');
+	li.querySelectorAll('button').forEach(b => { b.disabled = true; });
+	const sp = li.querySelector('.cmd-etat');
+	// ⚠️ L'échéance part avec : sans cela `_tickCmdTimers` réécrirait le compte à rebours
+	// par-dessus le libellé à la seconde suivante.
+	if (sp) { sp.removeAttribute('data-deadline'); sp.textContent = etat; }
+}
+
+// Ligne provisoire dans « Vos commandes » : le joueur voit sa commande partir sans attendre.
+// Elle ne porte aucun bouton — il n'y a rien à faire sur une commande pas encore enregistrée.
+function _cmdLigneProvisoire(itemId) {
+	const list = document.getElementById('cmd-encours-list');
+	if (!list) return;
+	const v = (MARCHAND.catalogue || []).find(c => c.item_id === itemId) || {};
+	const vide = list.querySelector('.sell-empty');
+	if (vide) vide.remove();
+	const li = document.createElement('li');
+	li.className = 'sh-inv-item cmd-pending';
+	li.innerHTML = '<span class="sh-inv-open">' + (v.icon || '🛠️') + '</span>'
+		+ '<span class="sh-inv-name"></span>'
+		+ '<span class="cmd-etat">⏳ envoi…</span><span class="sh-inv-actions"></span>';
+	// textContent : le nom vient du catalogue, mais rien ne part en innerHTML (Convention §9).
+	li.querySelector('.sh-inv-name').textContent = v.nom || '—';
+	list.appendChild(li);
+	_sellCompte('cmd-encours-compte', list.querySelectorAll('.sh-inv-item').length);
+}
+
+async function _cmdAction(url, body, btn) {
+	const data = await _posterCommande(url, body, btn);
+	if (!data) chargerCommandes();   // échec : on réaligne sur le serveur
+	return data;
+}
+
 function commanderItem(btn) {
-	return _posterCommande('api/commande/passer', { item_id: btn.dataset.item }, btn);
+	_cmdLigneProvisoire(btn.dataset.item);
+	return _cmdAction('api/commande/passer', { item_id: btn.dataset.item }, btn);
 }
 function retirerCommande(btn) {
-	return _posterCommande('api/commande/retirer', { commande_id: btn.dataset.cmd }, btn);
+	_cmdLigneOccupee(btn, '📦 retrait…');
+	return _cmdAction('api/commande/retirer', { commande_id: btn.dataset.cmd }, btn);
 }
 function annulerCommande(btn) {
-	return _posterCommande('api/commande/annuler', { commande_id: btn.dataset.cmd }, btn);
+	_cmdLigneOccupee(btn, '✖ annulation…');
+	return _cmdAction('api/commande/annuler', { commande_id: btn.dataset.cmd }, btn);
 }
 function relancerCommande(btn) {
-	return _posterCommande('api/commande/relancer', { commande_id: btn.dataset.cmd }, btn);
+	_cmdLigneOccupee(btn, '↻ relance…');
+	return _cmdAction('api/commande/relancer', { commande_id: btn.dataset.cmd }, btn);
 }
 
 // ── L'overlay « sur mesure » ──────────────────────────────────────────────────
@@ -6841,20 +6898,31 @@ function _smToggle(btn) {
 	_smRafraichirDevis();
 }
 
+// D'où sort cette matière ? Les trois provenances du serveur, lues sur les deux compteurs :
+// le sac (gratuit), le rayon (acheté au comptoir), ou nulle part — la maison l'accepte mais
+// il faut l'apporter, et la commande attendra jusque-là (§7 cas C). Rien n'est redérivé ici :
+// `qty`/`qty_sac` VIENNENT du serveur, on ne fait que les afficher.
+function _smProvenance(m) {
+	if (m.qty_sac) return '<span class="sm-source" title="Dans vos sacs — fournie sans frais">🎒</span>';
+	if (m.qty) return '';
+	return '<span class="sm-source" title="Ni en rayon ni dans vos sacs — la commande attendra que vous l\'apportiez">🔎</span>';
+}
+
 function _smRender() {
 	const mats = MARCHAND.cmdMatieres || [];
 	const cat = (MARCHAND.catalogue || []).find(c => c.item_id === _smEtat.itemId);
 	document.getElementById('sur-mesure-body').innerHTML =
 		`<h3 style="margin:.1rem 0 .2rem">✨ ${escapeHtml((cat && cat.nom) || 'Sur mesure')}</h3>
-		<p class="cmd-aide">Jusqu'à ${MARCHAND.cmdMatieresMax} matières. Ce que vous avez dans vos sacs est pris d'abord ; le reste est acheté à l'artisan.</p>
+		<p class="cmd-aide">Jusqu'à ${MARCHAND.cmdMatieresMax} matières. Ce que vous avez dans vos sacs (🎒) est pris d'abord ; ce qui est en rayon est acheté à l'artisan ; ce qui reste à trouver (🔎) met la commande en attente.</p>
 		<div class="sm-liste">${
 			mats.length ? mats.map(m => `<button type="button" class="sm-matiere${_smEtat.choisies.includes(m.item_id) ? ' choisie' : ''}"
 				data-item="${escapeHtml(m.item_id)}" onclick="_smToggle(this)">
 				<span>${m.icon || '🧱'}</span>
 				<span class="sm-matiere-nom">${escapeHtml(m.nom)}</span>
+				${_smProvenance(m)}
 				<span class="sm-apporte">${escapeHtml(m.apporte || '—')}</span>
 			</button>`).join('')
-			: '<p class="sm-manque">Cette maison n\'a aucune matière en rayon pour cette pièce.</p>'
+			: '<p class="sm-manque">Cette pièce n\'accepte aucune matière.</p>'
 		}</div>
 		<div class="sm-devis" id="sm-devis">${_smDevisVide()}</div>
 		<div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.6rem">
@@ -6906,8 +6974,9 @@ async function _smRafraichirDevis() {
 }
 
 // Les matières proposées dépendent de la PIÈCE : la maison accepte ce que son métier
-// travaille, PLUS ce que le tag `fabrication_<categorie de la pièce>` y destine. Le serveur
-// tranche (Convention §10) — le client ne filtre rien lui-même.
+// travaille, PLUS ce que le tag `fabrication_<categorie de la pièce>` y destine — et elles
+// viennent de DEUX endroits, son rayon (payant) et les sacs de l'expédition (🎒, gratuit).
+// Le serveur tranche (Convention §10) — le client ne filtre rien lui-même.
 async function _chargerMatieresSurMesure(itemId) {
 	try {
 		const res = await fetch('api/commande/matieres?item_id=' + encodeURIComponent(itemId));
@@ -6926,7 +6995,10 @@ async function commanderSurMesure(btn) {
 	const choisies = await new Promise(resolve => { _smResolve = resolve; });
 	// Annulation : rien n'a été engagé, mais le bouton DOIT redevenir cliquable.
 	if (!choisies || !choisies.length) { if (btn) btn.disabled = false; return; }
-	await _posterCommande('api/commande/passer',
+	// Même retour immédiat que la commande de catalogue : l'overlay se ferme, et la ligne
+	// provisoire dit tout de suite où la commande est partie.
+	_cmdLigneProvisoire(_smEtat.itemId);
+	await _cmdAction('api/commande/passer',
 		{ item_id: _smEtat.itemId, matieres: choisies.map(id => ({ item: id, quantite: 1 })) }, btn);
 }
 

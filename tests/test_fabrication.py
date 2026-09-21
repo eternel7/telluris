@@ -9,6 +9,7 @@ Ce que ce fichier verrouille, et pourquoi :
 - `assurer_variante` est idempotent et refuse d'écraser un `_id` occupé par autre chose.
 """
 
+import json
 import sys
 import os
 
@@ -58,6 +59,30 @@ CRISTAL = {
 BOIS = {
 	"_id": "item:Branche_de_Chene", "type": "item", "nom": "Branche de Chêne",
 	"categorie": "composant", "sous_categorie": "branche", "poids": [1, 3],
+}
+
+# Un CONSOMMABLE : ses effets portent un SOUS-BLOC (`buffs`), et pas seulement des nombres.
+BOUGIE = {
+	"_id": "item:Bougie_arcanique", "type": "item", "nom": "Bougie arcanique",
+	"icon": "🕯️", "categorie": "consommable", "sous_categorie": "bougie", "poids": 0.15,
+	"rarete": "peu_commun",
+	"effets": {"duree": 8, "regen_pm": 3, "buffs": {"Int": 5}},
+}
+
+RITUEL = {
+	"_id": "item:composant_rituel", "type": "item", "nom": "Composant rituel",
+	"categorie": "composant", "poids": 0.1,
+	"tags": ["fabrication_consommable"],
+	"fabrication": {"nom": "de rituel",
+					"modificateurs": {"bonus_pm": 1, "valeur": {"facteur": 1.1}}},
+}
+
+# La même, mais qui touche au SOUS-BLOC : elle doit s'y ajouter, pas le remplacer.
+RITUEL_BUFF = {
+	"_id": "item:composant_majeur", "type": "item", "nom": "Composant majeur",
+	"categorie": "composant", "poids": 0.1,
+	"fabrication": {"nom": "majeur",
+					"modificateurs": {"effets": {"buffs": {"Int": 2, "Vol": 1}}}},
 }
 
 
@@ -127,6 +152,54 @@ def test_fusion_des_bonus_de_caracteristique_et_des_effets():
 	mods = fabrication.appliquer_modificateurs(EPEE, [(CRISTAL, 1), (CRISTAL, 1)])
 	assert mods["bonus"] == {"Int": 4}
 	assert mods["effets"] == {"degats_feu": 8}
+
+
+# ── Les sous-blocs d'un consommable (`effets.buffs`) ────────────────────────────
+
+def test_un_sous_bloc_du_base_survit_a_la_variante():
+	"""⚠️ Constaté en jeu : « Bougie arcanique de rituel » avait perdu le +5 Int de sa base.
+	Le nettoyage jugeait chaque valeur au nombre qu'elle vaut, et `{"Int": 5}` ne valant aucun
+	nombre, le sous-bloc partait avec les zéros. 53 items du dump portent `effets.buffs`."""
+	mods = fabrication.appliquer_modificateurs(BOUGIE, [(RITUEL, 1)])
+	assert mods["effets"] == {"duree": 8, "regen_pm": 3, "buffs": {"Int": 5}}
+	assert mods["bonus_pm"] == 1
+
+
+def test_le_doc_de_base_nest_jamais_mute():
+	"""⚠️ Il sort du cache de requête (`get_doc` mémorise les `item:`) : une copie de surface
+	laisserait la fusion écrire dans le sous-bloc du base, pour toute la requête."""
+	avant = json.loads(json.dumps(BOUGIE))
+	fabrication.appliquer_modificateurs(BOUGIE, [(RITUEL_BUFF, 3)])
+	assert BOUGIE == avant
+
+
+def test_un_sous_bloc_se_fusionne_clé_a_clé():
+	# Même règle qu'un cran plus haut : on ADDITIONNE, quantité comprise.
+	mods = fabrication.appliquer_modificateurs(BOUGIE, [(RITUEL_BUFF, 3)])
+	assert mods["effets"]["buffs"] == {"Int": 5 + 2 * 3, "Vol": 1 * 3}
+
+
+def test_un_sous_bloc_neuf_sapporte_aussi():
+	nu = {"_id": "item:Bougie_nue", "nom": "Bougie", "categorie": "consommable",
+		  "effets": {"duree": 4}}
+	mods = fabrication.appliquer_modificateurs(nu, [(RITUEL_BUFF, 1)])
+	assert mods["effets"] == {"duree": 4, "buffs": {"Int": 2, "Vol": 1}}
+
+
+def test_une_matiere_mal_redigee_neffface_pas_le_sous_bloc():
+	"""Un nombre là où la pièce porte un sous-bloc : le base l'emporte. Une matière mal
+	rédigée n'apporte rien, elle ne casse rien — surtout pas ce qui était déjà là."""
+	casse = {"_id": "item:x", "fabrication": {"modificateurs": {"effets": {"buffs": 7}}}}
+	mods = fabrication.appliquer_modificateurs(BOUGIE, [(casse, 1)])
+	assert mods["effets"]["buffs"] == {"Int": 5}
+
+
+def test_un_sous_bloc_vide_ne_sinvente_pas():
+	# Le nettoyage reste vrai un cran plus bas : un buff qui retombe à zéro ne s'écrit pas.
+	annule = {"_id": "item:x", "fabrication": {"modificateurs": {"effets": {"buffs": {"Int": -5}}}}}
+	mods = fabrication.appliquer_modificateurs(BOUGIE, [(annule, 1)])
+	assert "buffs" not in mods["effets"]
+	assert mods["effets"] == {"duree": 8, "regen_pm": 3}
 
 
 def test_restriction_prend_le_plus_exigeant():
