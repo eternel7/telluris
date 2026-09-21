@@ -2064,6 +2064,10 @@ def _weapon_attacks(character: dict, base: BaseStats) -> list:
 		item = get_doc(item_id)
 		if not item or item.get("categorie") != "arme":
 			continue
+		# Nom propre de l'exemplaire (`characters.renommer_ref`) → libellé du profil. COPIE :
+		# le doc sort du cache de requête. Le non-cumul reste ancré sur l'`_id`, jamais le nom.
+		if isinstance(ref, dict) and ref.get("nom_perso"):
+			item = dict(item, nom=ref["nom_perso"])
 		tags = set(item.get("tags", []))
 		base_portee = int(item.get("portee", 1) or 1)
 		if "tir" in tags:

@@ -669,6 +669,7 @@ DEPECAGE_TAGS: dict[str, list] = {
 	"_charnu_base": [
 	  "viande",
 	  "viande",
+	  "coeur",
 	  "os",
 	  "sang",
 	  "graisse",
@@ -680,6 +681,7 @@ DEPECAGE_TAGS: dict[str, list] = {
 	"animal": [
 	  "cuir_brut",
 	  "crocs",
+	  "coeur",
 	  "poils",
 	  "tendons",
 	  "boyaux",
@@ -689,17 +691,20 @@ DEPECAGE_TAGS: dict[str, list] = {
 	"monstre": [
 	  "cuir_brut",
 	  "crocs",
+	  "coeur",
 	  "boyaux",
 	  "foie",
 	  "crane"
 	],
 	"humanoide": [
 	  "cuir_brut",
+	  "coeur",
 	  "foie",
 	  "crane"
 	],
 	"monture": [
 	  "cuir_brut",
+	  "coeur",
 	  "crins",
 	  "tendons",
 	  "boyaux",
@@ -708,6 +713,7 @@ DEPECAGE_TAGS: dict[str, list] = {
 	],
 	"bete_de_somme": [
 	  "cuir_brut",
+	  "coeur",
 	  "crins",
 	  "tendons",
 	  "boyaux",

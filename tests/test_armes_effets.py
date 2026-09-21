@@ -131,6 +131,17 @@ def test_arme_ordinaire_ne_porte_aucun_effet():
 	assert "effets" not in profil and "effets_cible" not in profil
 
 
+def test_le_nom_propre_de_l_exemplaire_nomme_le_profil():
+	# `nom_perso` (utils/characters.renommer_ref) vit sur la RÉFÉRENCE du slot : il nomme
+	# le profil — donc la source de l'effet posé sur la cible —, jamais l'identité de non-cumul.
+	ref = {"item": "item:Bolas", "poids": 0.8, "nom_perso": "Entrave-Loup"}
+	joueur = build_joueur_snapshot(_character(ref))
+	profil = next(p for p in joueur["attaque_profils"] if p["mode"] == "jet")
+	assert profil["label"] == "Entrave-Loup"
+	assert profil["effets_source_id"] == "item:Bolas"
+	assert BOLAS["nom"] == "Bolas"                                   # doc partagé intact
+
+
 def test_effets_sans_duree_ne_sont_pas_portes(monkeypatch):
 	# part_durative exige une duree > 0 : sans elle, il n'y a rien à empiler et la clé
 	# ne doit pas exister (sinon _appliquer_effet_arme testerait à chaque coup).

@@ -2603,6 +2603,11 @@
 		/* Texte libre d'un objet (manuscrit, traité, recueil…) — préserve les sauts de ligne,
 		   comme .sh-journal-txt : écraser le \n annulerait le soin pris au serveur. */
 		.item-detail-desc { white-space: pre-wrap; margin: .5rem 0; opacity: .85; font-size: .92rem; }
+		/* Nom propre d'un exemplaire : l'objet d'origine en sous-titre, et la saisie en ligne. */
+		.item-detail-origine { margin: -.3rem 2rem .5rem 0; opacity: .7; font-size: .85rem; font-style: italic; }
+		.item-rename-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: .3rem 0 .6rem; }
+		.item-rename-row input { flex: 1 1 10rem; min-width: 0; }
+		.item-rename-row button { margin: 0; }
 		/* ── Conditions d'engagement d'une recrue (exigences à accepter) ──
 		   Réutilise .item-detail-card / .item-detail-close ; seul le calque est neuf
 		   (au-dessus des autres : décision bloquante). Le CONTENU emprunte au panneau
@@ -4464,7 +4469,7 @@ function _refreshInventaire() {
 			const selHtml = compat.length > 1
 				? `<select class="sh-equip-sel">${compat.map(s => `<option value="${s}">${SLOT_LABELS[s]}</option>`).join('')}</select>`
 				: `<span class="sh-equip-sel" data-slot="${compat[0]}" style="display:none"></span>`;
-			equipHtml = `<div class="sh-equip-row">${selHtml}<button class="sh-equip-btn" onclick="equipFromSac('${item._id}',this)">Équiper</button></div>`;
+			equipHtml = `<div class="sh-equip-row">${selHtml}<button class="sh-equip-btn" onclick="equipFromSac('${item._id}',this,${idx})">Équiper</button></div>`;
 		}
 		const rarHtml = item.rarete ? `<span class="sh-rarity ${item.rarete}">${item.rarete}</span>` : '';
 		const poidsHtml = item.poids ? `<span class="sh-inv-poids">${(+item.poids).toFixed(1)} kg</span>` : '';
@@ -4743,9 +4748,72 @@ function _carteBtn(item) {
 	if (!item || !item.carte) return '';
 	return `<button class="sh-equip-btn" data-carte='${_escAttr(JSON.stringify(item.carte))}' onclick="showQuestMap(this)">🗺️ Voir sur la carte</button>`;
 }
+// Titre de fiche : nom (propre à l'exemplaire s'il en porte un), puis l'objet d'origine en
+// sous-titre (`nom_origine`, posé par `resolve_item_ref`). ⚠️ Le nom propre ne peut contenir
+// aucun caractère HTML (`characters.nettoyer_nom_objet`) : c'est ce qui l'autorise ici, et
+// dans les dizaines d'autres interpolations du nom d'un objet, sans échappement.
+function _titreObjet(item) {
+	let html = `<h3>${item.icon || '📦'} ${item.nom || '—'}</h3>`;
+	if (item.nom_origine) html += `<div class="item-detail-origine">${item.nom_origine}</div>`;
+	if (_itemDetailState && _itemDetailState.renommer) {
+		html += `<div class="item-rename-row">
+			<input id="item-rename-input" type="text" maxlength="40" placeholder="Nom de l'objet"
+				onkeydown="if(event.key==='Enter'){_validerRenommage(false);}else if(event.key==='Escape'){event.stopPropagation();_annulerRenommage();}">
+			<button class="sh-equip-btn" onclick="_validerRenommage(false)">Valider</button>
+			${item.nom_origine ? `<button class="sh-drop-btn" onclick="_validerRenommage(true)" title="Retirer le nom propre">Nom d’origine</button>` : ''}
+			<button class="sh-drop-btn" onclick="_annulerRenommage()">Annuler</button>
+		</div>`;
+	}
+	return html;
+}
+// Bouton de la fiche : seuls les objets ÉQUIPABLES du porteur courant se renomment (sac ou
+// emplacement porté) — le serveur applique le même critère (`slots` non vide).
+function _renommerBtn(item) {
+	if (!item || !(item.slots || []).length || (_itemDetailState && _itemDetailState.renommer)) return '';
+	return `<button class="sh-equip-btn" onclick="_ouvrirRenommage()" title="Donner un nom à cet exemplaire">✏️ Renommer</button>`;
+}
+function _ouvrirRenommage() {
+	const st = _itemDetailState;
+	if (!st) return;
+	st.renommer = true;
+	_renderItemDetail();
+	const input = document.getElementById('item-rename-input');
+	if (!input) return;
+	const item = st.mode === 'equip' ? st.equipItem : st.candItem;
+	// Pré-rempli par `.value`, jamais dans le HTML : c'est une saisie du joueur.
+	input.value = (item && item.nom_origine) ? (item.nom || '') : '';
+	input.focus();
+}
+function _annulerRenommage() {
+	if (!_itemDetailState) return;
+	_itemDetailState.renommer = false;
+	_renderItemDetail();
+}
+async function _validerRenommage(retirer) {
+	const st = _itemDetailState;
+	if (!st || (st.mode !== 'equip' && st.mode !== 'sac')) return;
+	const input = document.getElementById('item-rename-input');
+	const nom = retirer ? '' : ((input && input.value) || '').trim();
+	const cible = st.mode === 'equip'
+		? { slot: st.slot, item_id: st.equipItem._id }
+		: { index: st.candIdx, item_id: st.candItem._id };
+	try {
+		const res = await fetch('api/renommer_objet', {
+			method: 'POST', headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(_actionBody({ ...cible, nom }))
+		});
+		const data = await res.json();
+		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }
+		_applyInventoryPayload(data);
+		// Le renommage ne déplace rien : l'index du sac et la clé du slot restent valides.
+		if (st.mode === 'equip') openItemDetail('equip', st.slot);
+		else openItemDetail('sac', st.candIdx);
+		showToast(nom ? `✏️ Objet renommé : ${nom}` : '✏️ L’objet reprend son nom d’origine');
+	} catch (err) { console.error('Erreur renommage', err); }
+}
 function _renderMono(st) {
 	const item = st.item;
-	let html = `<h3>${item.icon || '📦'} ${item.nom || '—'}</h3>`;
+	let html = _titreObjet(item);
 	// Texte libre (manuscrit personnel, ou détail d'un sort/recette produit par le
 	// scriptorium) — bâti hors innerHTML par escapeHtml, car un manuscrit peut porter le
 	// texte du JOUEUR (Convention §9).
@@ -4774,7 +4842,7 @@ function _renderMono(st) {
 function _renderSacCompare(st) {
 	const cand = st.candItem;
 	const equipped = _slots[st.slot] || null;
-	let html = `<h3>${cand.icon || '📦'} ${cand.nom || '—'}</h3>`;
+	let html = _titreObjet(cand);
 	if (st.slots.length > 1) {
 		const opts = st.slots.map(s => `<option value="${s}"${s === st.slot ? ' selected' : ''}>${SLOT_LABELS[s]}${_slots[s] ? ' — ' + (_slots[s].nom || '') : ' — (vide)'}</option>`).join('');
 		html += `<div class="item-cmp-slotsel"><span>Emplacement :</span><select onchange="_setDetailSlot(this.value)">${opts}</select></div>`;
@@ -4782,7 +4850,8 @@ function _renderSacCompare(st) {
 	html += _renderCmpTable(equipped, cand, 'Équipé', 'Sélectionné');
 	const chk = _restrictionOk(cand.restriction);
 	const acts = [];
-	acts.push(`<button class="sh-equip-btn" ${chk.ok ? '' : 'disabled'} ${_restrictionTitle(chk)} onclick="_cardEquip('${cand._id}','${st.slot}')">Équiper${equipped ? ' (remplacer)' : ''}</button>`);
+	acts.push(`<button class="sh-equip-btn" ${chk.ok ? '' : 'disabled'} ${_restrictionTitle(chk)} onclick="_cardEquip('${cand._id}','${st.slot}',${st.candIdx})">Équiper${equipped ? ' (remplacer)' : ''}</button>`);
+	acts.push(_renommerBtn(cand));
 	acts.push(`<button class="sh-drop-btn" onclick="_cardDrop(${st.candIdx},'${cand._id}')">Poser</button>`);
 	html += `<div class="item-detail-actions">${acts.join('')}</div>`;
 	return html;
@@ -4791,7 +4860,7 @@ function _renderEquipCompare(st) {
 	const equipped = st.equipItem;
 	const alt = (st.altPos >= 0 && st.alts[st.altPos]) ? st.alts[st.altPos] : null;
 	const cand = alt ? alt.item : null;
-	let html = `<h3>${equipped.icon || '📦'} ${equipped.nom || '—'}</h3>`;
+	let html = _titreObjet(equipped);
 	if (st.alts.length) {
 		const opts = st.alts.map((a, i) => `<option value="${i}"${i === st.altPos ? ' selected' : ''}>${a.item.nom || '—'}</option>`).join('');
 		html += `<div class="item-cmp-slotsel"><span>Remplacer par :</span><select onchange="_setDetailAlt(this.value)">${opts}</select></div>`;
@@ -4800,8 +4869,9 @@ function _renderEquipCompare(st) {
 	const acts = [];
 	if (cand) {
 		const chk = _restrictionOk(cand.restriction);
-		acts.push(`<button class="sh-equip-btn" ${chk.ok ? '' : 'disabled'} ${_restrictionTitle(chk)} onclick="_cardEquip('${cand._id}','${st.slot}')">Équiper →</button>`);
+		acts.push(`<button class="sh-equip-btn" ${chk.ok ? '' : 'disabled'} ${_restrictionTitle(chk)} onclick="_cardEquip('${cand._id}','${st.slot}',${alt.idx})">Équiper →</button>`);
 	}
+	acts.push(_renommerBtn(equipped));
 	acts.push(`<button class="sh-drop-btn" onclick="_cardUnequip('${st.slot}')">Déséquiper</button>`);
 	html += `<div class="item-detail-actions">${acts.join('')}</div>`;
 	return html;
@@ -4859,7 +4929,7 @@ function _setDetailAlt(i) {
 }
 // Actions depuis la fiche : ferme la fiche puis délègue aux fonctions existantes
 // (elles rafraîchissent sac/paperdoll/stats). Les index deviennent obsolètes après coup.
-function _cardEquip(itemId, slot)       { closeItemDetail(); equip(itemId, slot); }
+function _cardEquip(itemId, slot, idx)  { closeItemDetail(); equip(itemId, slot, idx); }
 function _cardUnequip(slot)             { closeItemDetail(); unequip(slot); }
 function _cardDrop(idx, itemId)         { closeItemDetail(); dropItem(idx, itemId); }
 function _cardPickup(idx, itemId)       { closeItemDetail(); pickupItem(idx, itemId); }
@@ -5851,20 +5921,24 @@ function _applyInventoryPayload(data) {
 	_renderInventairePayload();
 }
 
-function equipFromSac(itemId, btn) {
+function equipFromSac(itemId, btn, idx) {
 	const row    = btn.closest('.sh-equip-row');
 	const sel    = row.querySelector('select.sh-equip-sel');
 	const hidden = row.querySelector('span.sh-equip-sel');
 	const slot   = sel ? sel.value : (hidden ? hidden.dataset.slot : null);
-	if (slot) equip(itemId, slot);
+	if (slot) equip(itemId, slot, idx);
 }
 
-async function equip(itemId, slot) {
+// `idx` = l'EXEMPLAIRE du sac : deux objets identiques ne se valent plus dès que l'un porte un
+// nom propre. Sans lui, le serveur prend le premier exemplaire de l'item (comportement d'avant).
+async function equip(itemId, slot, idx) {
 	try {
+		const payload = {item_id: itemId, slot};
+		if (Number.isInteger(idx)) payload.index = idx;
 		const res  = await fetch('api/equip', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify(_actionBody({item_id: itemId, slot}))
+			body: JSON.stringify(_actionBody(payload))
 		});
 		const data = await res.json();
 		if (!res.ok) { alert('Erreur : ' + data.detail); return; }

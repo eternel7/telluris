@@ -17,6 +17,7 @@ from utils.characters import (
 	main_occupee_par_deux_mains, liberer_pour_deux_mains,
 	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds, lieu_label,
 	money_to_cuivre, cuivre_to_purse, credit_character,
+	nettoyer_nom_objet, renommer_ref,
 )
 from utils.marche import (
 	debit_character, merchant_cha, prix_range_cuivre, marchander,
@@ -1031,8 +1032,15 @@ async def equip_item(
 	character, _principal = _acteur(current_user, body)
 
 	inventaire = character.get("inventaire", [])
-	# Référence correspondant à l'item (chaîne legacy ou objet {item, poids}).
-	ref = next((r for r in inventaire if item_ref_id(r) == item_id), None)
+	# Référence correspondant à l'item (chaîne legacy ou objet {item, poids}). L'`index` vise
+	# L'EXEMPLAIRE : deux épées identiques ne se valent plus dès que l'une porte un nom (ou un
+	# poids) à elle. Absent ou désaligné ⇒ premier exemplaire de l'item, comme avant.
+	idx = body.get("index")
+	if (isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < len(inventaire)
+			and item_ref_id(inventaire[idx]) == item_id):
+		ref = inventaire[idx]
+	else:
+		ref = next((r for r in inventaire if item_ref_id(r) == item_id), None)
 	if ref is None:
 		raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
 
@@ -1248,6 +1256,58 @@ async def pickup_item(
 	payload = _inventory_payload(character, principal)
 	payload["auto_dropped"] = auto_dropped
 	return payload
+
+
+@user_router.post("/renommer_objet")
+async def renommer_objet(
+	current_user: Annotated[User, Depends(get_current_user)],
+	body: dict = Body(...),
+):
+	"""Donne un nom propre à UN exemplaire équipable — au sac (`index`) ou porté (`slot`).
+	Le nom vit sur la référence (`nom_perso`), jamais sur le doc item : cf.
+	`characters.renommer_ref`. `nom` vide ⇒ l'objet reprend son nom d'origine.
+
+	Porteur via `_acteur` : un compagnon renomme SON équipement (CLAUDE.md §1). Le sol n'est
+	pas proposé — un objet posé n'appartient à personne."""
+	character, principal = _acteur(current_user, body)
+	item_id = body.get("item_id")
+
+	slot = body.get("slot")
+	if slot is not None:
+		if slot not in _VALID_SLOTS:
+			raise HTTPException(status_code=422, detail="Slot invalide")
+		slots = character.get("slots") or {}
+		ref = slots.get(slot)
+		if not ref or (item_id is not None and item_ref_id(ref) != item_id):
+			raise HTTPException(status_code=422, detail="Aucun objet à cet emplacement")
+		conteneur, cle = slots, slot
+	else:
+		inventaire = character.get("inventaire") or []
+		idx = body.get("index")
+		if not (isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < len(inventaire)
+				and (item_id is None or item_ref_id(inventaire[idx]) == item_id)):
+			raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")
+		ref = inventaire[idx]
+		conteneur, cle = inventaire, idx
+
+	item = get_doc(item_ref_id(ref))
+	if not item:
+		raise HTTPException(status_code=404, detail="Objet introuvable")
+	# Même critère que /equip : un objet équipable déclare ses emplacements.
+	if not item.get("slots"):
+		raise HTTPException(status_code=422, detail="Cet objet ne s'équipe pas : il ne se renomme pas")
+
+	brut = body.get("nom") or ""
+	nom = nettoyer_nom_objet(brut)
+	if str(brut).strip() and not nom:
+		raise HTTPException(status_code=422, detail="Ce nom ne contient aucun caractère autorisé")
+
+	conteneur[cle] = renommer_ref(ref, nom, item_ref_weight(ref))
+	# Seul le PORTEUR change (pas le sol du principal) : pas de `_save_acteur`, dont la
+	# seconde écriture réécrirait pour rien le doc du principal en mode compagnon.
+	if save_doc(character) is None:
+		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	return _inventory_payload(character, principal)
 
 
 @user_router.post("/consommer")

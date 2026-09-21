@@ -81,3 +81,48 @@ def test_resolve_item_ref_sans_lieu_garde_le_nom_nu():
 	assert characters.resolve_item_ref({"item": "item:epee", "poids": 3.5})["nom"] == "Épée"
 	assert characters.resolve_item_ref("item:epee")["nom"] == "Épée"
 	assert "lieu_parent" not in characters.resolve_item_ref("item:epee")
+
+
+# ── Nom propre d'un exemplaire (`nom_perso`) ────────────────────────────────────
+
+def test_nettoyer_nom_objet_garde_les_lettres_accentuees():
+	assert characters.nettoyer_nom_objet("  Lame   d’Ébène-Noire, v.2 ") == "Lame d’Ébène-Noire, v.2"
+
+
+def test_nettoyer_nom_objet_ne_laisse_passer_aucun_caractere_html():
+	"""La défense XSS : le nom d'un objet est interpolé sans échappement partout côté client."""
+	nom = characters.nettoyer_nom_objet('<img src=x onerror="alert(1)">&`;')
+	assert not set(nom) & set("<>\"&`;=()'/")
+	# L'apostrophe droite fermerait une chaîne JS d'un `onclick` : convertie, pas retirée.
+	assert characters.nettoyer_nom_objet("L'Aube") == "L’Aube"
+
+
+def test_nettoyer_nom_objet_borne_et_vide():
+	assert len(characters.nettoyer_nom_objet("a" * 100)) == characters.NOM_PERSO_MAX
+	assert characters.nettoyer_nom_objet("<>;") == ""
+	assert characters.nettoyer_nom_objet(None) == ""
+
+
+def test_renommer_ref_convertit_une_chaine_en_figeant_le_poids():
+	ref = characters.renommer_ref("item:epee", "Crocdeloup", 3.0)
+	assert ref == {"item": "item:epee", "poids": 3.0, "nom_perso": "Crocdeloup"}
+
+
+def test_renommer_ref_garde_les_donnees_d_instance_et_nom_vide_retire():
+	ref = {"item": "item:carte_aventurier", "lieu_parent": "lieu:auxerre", "poids": 0.05}
+	assert characters.renommer_ref(ref, "Sésame", None) is ref          # mutée sur place
+	assert ref["lieu_parent"] == "lieu:auxerre" and ref["nom_perso"] == "Sésame"
+	characters.renommer_ref(ref, "", None)
+	assert "nom_perso" not in ref and ref["lieu_parent"] == "lieu:auxerre"
+
+
+def test_resolve_item_ref_nom_perso_et_nom_origine():
+	doc = characters.resolve_item_ref({"item": "item:epee", "poids": 3.5, "nom_perso": "Crocdeloup"})
+	assert doc["nom"] == "Crocdeloup" and doc["nom_origine"] == "Épée"
+	assert "nom_origine" not in characters.resolve_item_ref({"item": "item:epee", "poids": 3.5})
+	# Le nom d'origine est le libellé CALCULÉ, suffixe de lieu compris.
+	carte = characters.resolve_item_ref({"item": "item:carte_aventurier",
+										 "lieu_parent": "lieu:auxerre", "nom_perso": "Sésame"})
+	assert carte["nom"] == "Sésame" and carte["nom_origine"] == "Carte d'aventurier (Auxerre)"
+	# Le doc du cache n'est jamais modifié.
+	assert ITEMS["item:epee"]["nom"] == "Épée"

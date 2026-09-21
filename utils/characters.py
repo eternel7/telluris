@@ -91,6 +91,43 @@ def item_ref_lieu(ref) -> str | None:
 	return None
 
 
+# ── Nom propre d'un exemplaire (« Crocdeloup ») ─────────────────────────────────
+# Le nom choisi par le joueur vit sur la RÉFÉRENCE (`nom_perso`), jamais sur le doc item
+# partagé par tout le monde : équiper, poser, transférer déplacent la ref telle quelle, le nom
+# suit ; vendre la dissout dans le rayon (stocké par id), le nom disparaît — voulu.
+#
+# ⚠️ JEU DE CARACTÈRES RESTREINT, et c'est la défense XSS : les noms d'objets sont interpolés
+# sans échappement dans des dizaines d'`innerHTML` et d'`onclick` du client, écrits du temps où
+# aucun nom n'était saisi par un joueur. Lettres, chiffres, espace, `’ - . ,` ne peuvent rien
+# y casser ; `'` droit est converti en `’` (il fermerait une chaîne JS d'un `onclick`).
+NOM_PERSO_MAX = 40   # même borne que `recrutement.nettoyer_nom_compagnie`
+_NOM_PERSO_PONCTUATION = frozenset("’-.,")
+
+
+def nettoyer_nom_objet(brut) -> str:
+	"""Nom d'exemplaire assaini : caractères hors liste retirés, blancs écrasés, borné à
+	`NOM_PERSO_MAX`. "" si rien d'affichable ne reste (l'endpoint en fait un 422)."""
+	texte = "" if brut is None else str(brut).replace("'", "’")
+	garde = "".join(c if (c.isalnum() or c in _NOM_PERSO_PONCTUATION) else " "
+					for c in texte if c.isalnum() or c in _NOM_PERSO_PONCTUATION or c.isspace())
+	return " ".join(garde.split())[:NOM_PERSO_MAX].strip()
+
+
+def renommer_ref(ref, nom: str, poids=None) -> dict:
+	"""La référence renommée (mutée si dict, convertie si chaîne legacy). `nom` DÉJÀ nettoyé ;
+	vide ⇒ `nom_perso` retiré, l'objet reprend son nom d'origine.
+
+	`poids` sert à la conversion d'une chaîne : il FIGE le poids effectif de l'exemplaire
+	(`item_ref_weight`), sans quoi la charge portée bougerait au renommage. Pur, sans DB."""
+	if not isinstance(ref, dict):
+		ref = {"item": ref} if poids is None else {"item": ref, "poids": poids}
+	if nom:
+		ref["nom_perso"] = nom
+	else:
+		ref.pop("nom_perso", None)
+	return ref
+
+
 def item_label(nom: str, lieu_doc: dict | None) -> str:
 	"""« Carte d'aventurier (Auxerre) » — le nom du doc, suffixé du lieu de l'instance."""
 	label = (lieu_doc or {}).get("label") or (lieu_doc or {}).get("nom")
@@ -192,6 +229,11 @@ def resolve_item_ref(ref):
 	if (lieu_id := item_ref_lieu(ref)):
 		doc["lieu_parent"] = lieu_id
 		doc["nom"] = item_label(doc.get("nom") or item_id, get_doc(lieu_id))
+	# Nom choisi par le joueur : EN DERNIER, il l'emporte sur tout libellé calculé. Le nom
+	# qu'il remplace part en `nom_origine`, que seule la fiche objet affiche en sous-titre.
+	if isinstance(ref, dict) and ref.get("nom_perso"):
+		doc["nom_origine"] = doc.get("nom") or item_id
+		doc["nom"] = ref["nom_perso"]
 	return doc
 
 
