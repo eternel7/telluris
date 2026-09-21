@@ -1,7 +1,7 @@
 {
   "db": "telluris",
-  "exported_at": "2026-09-21T19:12:03.551058Z",
-  "doc_count": 3550,
+  "exported_at": "2026-09-21T19:56:37.757604Z",
+  "doc_count": 3595,
   "docs": [
     {
       "_id": "_design/characters",
@@ -34263,7 +34263,7 @@
     },
     {
       "_id": "item:aigle_geant",
-      "_rev": "7-9bcc137c8222599c105f6ff2fd62924a",
+      "_rev": "8-abb5dd5f12033e337c86e41dede47fc8",
       "type": "item",
       "nom": "Carcasse d'Aigle Geant",
       "sous_categorie": "carcasse",
@@ -34309,7 +34309,7 @@
     },
     {
       "_id": "item:aigle_geant_aile",
-      "_rev": "2-ebddfa8a9fa0e49399285212073be61f",
+      "_rev": "3-aa0ca9c841ee0d02101e65d91aed9181",
       "type": "item",
       "nom": "Aile d'Aigle Geant",
       "icon": "🪶",
@@ -34352,7 +34352,7 @@
     },
     {
       "_id": "item:aigle_geant_corps",
-      "_rev": "2-41aaab2d932661c3b86ed7f050ecc47c",
+      "_rev": "3-83693934b2552305dde7588c7efe8ea2",
       "type": "item",
       "nom": "Corps d'Aigle Geant",
       "icon": "🥩",
@@ -34419,7 +34419,7 @@
     },
     {
       "_id": "item:aigle_geant_corps_morceau",
-      "_rev": "1-3a27ae855e230a8a1a5ed5bffed46afe",
+      "_rev": "2-6f2abfa597c1e4b0fc9418ce547dca09",
       "type": "item",
       "nom": "Morceau de corps d'Aigle Geant",
       "icon": "🥩",
@@ -34479,7 +34479,7 @@
     },
     {
       "_id": "item:aigle_geant_patte",
-      "_rev": "2-580d26deb1ce9f94e994e5e14eea94c2",
+      "_rev": "3-bcc4c7956323ebf00bd387c3a57fb34e",
       "type": "item",
       "nom": "Patte d'Aigle Geant",
       "icon": "🦴",
@@ -34526,7 +34526,7 @@
     },
     {
       "_id": "item:aigle_geant_queue",
-      "_rev": "2-6aa9574316fa9b184ee596478fd53d31",
+      "_rev": "3-cfae60a2d097780c3448a2c2dda1cc81",
       "type": "item",
       "nom": "Queue d'Aigle Geant",
       "icon": "🦴",
@@ -34565,7 +34565,7 @@
     },
     {
       "_id": "item:aigle_geant_tete",
-      "_rev": "2-01af88853013cb5a12d2c58e70bd7740",
+      "_rev": "3-85be8d9cb871d16da74e2fca93bffd76",
       "type": "item",
       "nom": "Tête d'Aigle Geant",
       "icon": "💀",
@@ -34656,7 +34656,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance",
-      "_rev": "8-e20111676e4ecd058a8ea4264cdb8dbc",
+      "_rev": "9-0ff4d35ee7b27328dafc4fcb97d682dd",
       "type": "item",
       "nom": "Carcasse d'Ange de la Connaissance",
       "sous_categorie": "carcasse",
@@ -34702,7 +34702,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance_aile",
-      "_rev": "2-fccd38b1cb40470e96be3ea922ac78dc",
+      "_rev": "3-ceb6416660c1be767dc5bc2e78b36754",
       "type": "item",
       "nom": "Aile d'Ange de la Connaissance",
       "icon": "🪶",
@@ -34747,7 +34747,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance_bras",
-      "_rev": "2-b082f9fbb355eeeb7186ffd13cff2ac9",
+      "_rev": "3-8a1dca331febe5987100edd74d0c3856",
       "type": "item",
       "nom": "Bras d'Ange de la Connaissance",
       "icon": "🦴",
@@ -34796,7 +34796,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance_corps",
-      "_rev": "2-c99304c642c115133ff0ca5d35f928a2",
+      "_rev": "3-64a11741442e35e75f786fbfe870d399",
       "type": "item",
       "nom": "Corps d'Ange de la Connaissance",
       "icon": "🥩",
@@ -34861,7 +34861,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance_jambe",
-      "_rev": "2-706e3e01165e82ec8cc3367a35a78dbb",
+      "_rev": "3-23d665306ef25993a7b43d4bb4e66382",
       "type": "item",
       "nom": "Jambe d'Ange de la Connaissance",
       "icon": "🦴",
@@ -34910,7 +34910,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance_tete",
-      "_rev": "2-f2a66eb16f218d987698b43b987dd3d9",
+      "_rev": "3-d3253598ac2a0682d781e93dd15f88e7",
       "type": "item",
       "nom": "Tête d'Ange de la Connaissance",
       "icon": "💀",
@@ -34955,7 +34955,7 @@
     },
     {
       "_id": "item:ange_de_la_justice",
-      "_rev": "7-df368a946991e8ece2c7d38c004c3d01",
+      "_rev": "8-ec0146a32aee4aaefd190947df09b7a3",
       "type": "item",
       "nom": "Carcasse d'Ange de la Justice",
       "sous_categorie": "carcasse",
@@ -35001,7 +35001,7 @@
     },
     {
       "_id": "item:ange_de_la_justice_aile",
-      "_rev": "2-e092b0572820ee11614a72545b90952d",
+      "_rev": "3-689d0cc5f6471ee0f24890795e4e35e1",
       "type": "item",
       "nom": "Aile d'Ange de la Justice",
       "icon": "🪶",
@@ -35045,7 +35045,7 @@
     },
     {
       "_id": "item:ange_de_la_justice_bras",
-      "_rev": "2-13da8e8674bf98db4c83c306553d08ee",
+      "_rev": "3-cb12c3736e9642d1151476703c6d6b0f",
       "type": "item",
       "nom": "Bras d'Ange de la Justice",
       "icon": "🦴",
@@ -35093,7 +35093,7 @@
     },
     {
       "_id": "item:ange_de_la_justice_corps",
-      "_rev": "2-1083193fb509084c7b00bd5ceee06494",
+      "_rev": "3-4a27821c0f17f21fd528e0c464363c87",
       "type": "item",
       "nom": "Corps d'Ange de la Justice",
       "icon": "🥩",
@@ -35157,7 +35157,7 @@
     },
     {
       "_id": "item:ange_de_la_justice_jambe",
-      "_rev": "2-2fda2e987b531ae53ba34bed59a76f52",
+      "_rev": "3-4ed3160993eab131a090379f2592245f",
       "type": "item",
       "nom": "Jambe d'Ange de la Justice",
       "icon": "🦴",
@@ -35205,7 +35205,7 @@
     },
     {
       "_id": "item:ange_de_la_justice_tete",
-      "_rev": "2-986213015371602ebaa7b5fd8cb82591",
+      "_rev": "3-edbf4d1eee63b2a7f4d24ae34ed6bf0a",
       "type": "item",
       "nom": "Tête d'Ange de la Justice",
       "icon": "💀",
@@ -35283,7 +35283,7 @@
     },
     {
       "_id": "item:araignee_geante",
-      "_rev": "7-5d62d70f9473f1d7b70eeda89ee2cc1d",
+      "_rev": "8-778cd4b0d42374b2838f4649737df55f",
       "type": "item",
       "nom": "Carcasse d'Araignee Geante",
       "sous_categorie": "carcasse",
@@ -35319,7 +35319,7 @@
     },
     {
       "_id": "item:araignee_geante_corps",
-      "_rev": "2-b5841b826f67546bc5c9df0a1501de5f",
+      "_rev": "3-4cdccc62867e081bbf25d05a0a78b318",
       "type": "item",
       "nom": "Corps d'Araignee Geante",
       "icon": "🥩",
@@ -35374,7 +35374,7 @@
     },
     {
       "_id": "item:araignee_geante_patte",
-      "_rev": "2-797549720be44c97ff88d2cd768f841a",
+      "_rev": "3-1867607018f431866c2b24690ad9bc54",
       "type": "item",
       "nom": "Patte d'Araignee Geante",
       "icon": "🦴",
@@ -35417,7 +35417,7 @@
     },
     {
       "_id": "item:araignee_geante_tete",
-      "_rev": "2-17aa0f8106e99851976ec520c59a5880",
+      "_rev": "3-6c6c713092690b621fb695c2d4fb5ae1",
       "type": "item",
       "nom": "Tête d'Araignee Geante",
       "icon": "💀",
@@ -35460,7 +35460,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre",
-      "_rev": "8-a0bfe52fdcea64c12140cf499fb4264a",
+      "_rev": "9-5b7f86e5103ce7f8beccb09857903692",
       "type": "item",
       "nom": "Carcasse d'Archange de l Ordre",
       "sous_categorie": "carcasse",
@@ -35506,7 +35506,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre_aile",
-      "_rev": "2-34d46fff332561ef2967dafd80cce44a",
+      "_rev": "3-5737be7276ddb122cb55e47eca006f6e",
       "type": "item",
       "nom": "Aile d'Archange de l Ordre",
       "icon": "🪶",
@@ -35552,7 +35552,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre_bras",
-      "_rev": "2-782742eb6d028aaf32a35fff8e033004",
+      "_rev": "3-6f213b99f9368b215013fc7e5159106e",
       "type": "item",
       "nom": "Bras d'Archange de l Ordre",
       "icon": "🦴",
@@ -35602,7 +35602,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre_corps",
-      "_rev": "2-1862d1be06eceaeaf57b618c906784bd",
+      "_rev": "3-e9d240ea77022f6e718c139bf0f10c8f",
       "type": "item",
       "nom": "Corps d'Archange de l Ordre",
       "icon": "🥩",
@@ -35668,7 +35668,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre_jambe",
-      "_rev": "2-46ae705e532d0266c57cb96309695c3e",
+      "_rev": "3-a72236c285c45bfe711c43ec76e7dba3",
       "type": "item",
       "nom": "Jambe d'Archange de l Ordre",
       "icon": "🦴",
@@ -35718,7 +35718,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre_tete",
-      "_rev": "2-97a8f69f570c9bf954d603a4fb77ce45",
+      "_rev": "3-86b48901cbae0f2ef3f99c2bc8f7a338",
       "type": "item",
       "nom": "Tête d'Archange de l Ordre",
       "icon": "💀",
@@ -35764,7 +35764,7 @@
     },
     {
       "_id": "item:archange_du_savoir",
-      "_rev": "7-2d3ad852dddd848c522816613c34ef39",
+      "_rev": "8-6749208b0de5f3d70cb39937e70778f9",
       "type": "item",
       "nom": "Carcasse d'Archange du Savoir",
       "sous_categorie": "carcasse",
@@ -35810,7 +35810,7 @@
     },
     {
       "_id": "item:archange_du_savoir_aile",
-      "_rev": "2-19d2fa7c93ed1fed6cc64cce9f88893e",
+      "_rev": "3-7e183b190e35d184a5fb1dab05390e3f",
       "type": "item",
       "nom": "Aile d'Archange du Savoir",
       "icon": "🪶",
@@ -35857,7 +35857,7 @@
     },
     {
       "_id": "item:archange_du_savoir_bras",
-      "_rev": "2-691a718a4deb060c0a7b125fb174626a",
+      "_rev": "3-cea17354374c9786fb52793f34ce5400",
       "type": "item",
       "nom": "Bras d'Archange du Savoir",
       "icon": "🦴",
@@ -35908,7 +35908,7 @@
     },
     {
       "_id": "item:archange_du_savoir_corps",
-      "_rev": "2-a77bf94571de82cd3d1784233c4213de",
+      "_rev": "3-4733e3d8fef6daf0b11dce85b77d4781",
       "type": "item",
       "nom": "Corps d'Archange du Savoir",
       "icon": "🥩",
@@ -35975,7 +35975,7 @@
     },
     {
       "_id": "item:archange_du_savoir_jambe",
-      "_rev": "2-852f2c41a1c993ad009354ecad5a5f2b",
+      "_rev": "3-973dff1c743e0a3b09ecb4e55e4751e7",
       "type": "item",
       "nom": "Jambe d'Archange du Savoir",
       "icon": "🦴",
@@ -36026,7 +36026,7 @@
     },
     {
       "_id": "item:archange_du_savoir_tete",
-      "_rev": "2-c619e193dbe2b8651f2eaa3322b52931",
+      "_rev": "3-07068fb51fe0f1da31b60b3ffc902a68",
       "type": "item",
       "nom": "Tête d'Archange du Savoir",
       "icon": "💀",
@@ -36128,7 +36128,7 @@
     },
     {
       "_id": "item:avatar",
-      "_rev": "7-ff713dab6b55d4ec733e8a357e44732e",
+      "_rev": "8-02f6f1d206eb5dbbce57dc804323e95a",
       "type": "item",
       "nom": "Carcasse d'Avatar",
       "sous_categorie": "carcasse",
@@ -36169,7 +36169,7 @@
     },
     {
       "_id": "item:avatar_bras",
-      "_rev": "2-87de32f8d9ceef828285b5dbc48af16d",
+      "_rev": "3-b5e0fc23e4ac52bd4631bf03c149890d",
       "type": "item",
       "nom": "Bras d'Avatar",
       "icon": "🦴",
@@ -36219,7 +36219,7 @@
     },
     {
       "_id": "item:avatar_corps",
-      "_rev": "2-7e2d29b9994832ee9ebb0581927423cc",
+      "_rev": "3-9cdb9e45e736f45b18d98d1bc4d0e01b",
       "type": "item",
       "nom": "Corps d'Avatar",
       "icon": "🥩",
@@ -36285,7 +36285,7 @@
     },
     {
       "_id": "item:avatar_jambe",
-      "_rev": "2-935640350fe266da21dfb5a5e4be2f96",
+      "_rev": "3-f4532797ce9278427fc09e166d2bb5a8",
       "type": "item",
       "nom": "Jambe d'Avatar",
       "icon": "🦴",
@@ -36335,7 +36335,7 @@
     },
     {
       "_id": "item:avatar_tete",
-      "_rev": "2-6e222ef3b6dfeeacd4d1371d2af839ae",
+      "_rev": "3-862b716566bb6ad8ca82f80ee31d99d8",
       "type": "item",
       "nom": "Tête d'Avatar",
       "icon": "💀",
@@ -36416,7 +36416,7 @@
     },
     {
       "_id": "item:basilic",
-      "_rev": "7-9accff88ca8e8c9b3f75f7994b994433",
+      "_rev": "8-810318ffd6597118173ceb81511d1995",
       "type": "item",
       "nom": "Carcasse de Basilic",
       "sous_categorie": "carcasse",
@@ -36457,7 +36457,7 @@
     },
     {
       "_id": "item:basilic_corps",
-      "_rev": "2-a9a637e4398cdea5ebde26e753694cda",
+      "_rev": "3-55775ae40656b379c916201a4373c0a0",
       "type": "item",
       "nom": "Corps de Basilic",
       "icon": "🥩",
@@ -36519,7 +36519,7 @@
     },
     {
       "_id": "item:basilic_corps_morceau",
-      "_rev": "1-d9c33e8e7c730468ee8c2f82c4c8d70d",
+      "_rev": "2-2e90aa52d5ed57c221c6178c172ac562",
       "type": "item",
       "nom": "Morceau de corps de Basilic",
       "icon": "🥩",
@@ -36574,7 +36574,7 @@
     },
     {
       "_id": "item:basilic_patte",
-      "_rev": "2-0e441c0306e7bd4fdcd1f501af685d1d",
+      "_rev": "3-96b46a55ca40fdb9f1a7ecfe5363315d",
       "type": "item",
       "nom": "Patte de Basilic",
       "icon": "🦴",
@@ -36616,7 +36616,7 @@
     },
     {
       "_id": "item:basilic_queue",
-      "_rev": "2-0e8243c0bd79401227887bef4ca948d4",
+      "_rev": "3-b2c38ab5c3d418bc86f38beebda9be2e",
       "type": "item",
       "nom": "Queue de Basilic",
       "icon": "🦴",
@@ -36654,7 +36654,7 @@
     },
     {
       "_id": "item:basilic_tete",
-      "_rev": "2-c9ddc78635b2807a23ee633973ec5ccd",
+      "_rev": "3-c61411298bea3e73beb0417734055956",
       "type": "item",
       "nom": "Tête de Basilic",
       "icon": "💀",
@@ -36708,7 +36708,7 @@
     },
     {
       "_id": "item:basilic_tete_morceau",
-      "_rev": "1-ffe728f7a8131cc472f8227dc0537c32",
+      "_rev": "2-d6b0358208f99a5ff3c0383388409d0b",
       "type": "item",
       "nom": "Morceau de tête de Basilic",
       "icon": "🥩",
@@ -36769,7 +36769,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse",
-      "_rev": "7-4c43e0c68422167174ce89901074ebe0",
+      "_rev": "8-61184adc476f88ae76f4072025ab56b7",
       "type": "item",
       "nom": "Carcasse de Bete de l Apocalypse",
       "sous_categorie": "carcasse",
@@ -36810,7 +36810,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_corps",
-      "_rev": "1-c32dbaa5440429ddb6c7c8fb935db18e",
+      "_rev": "2-ff671012edf8e9c8c7d507c211f15d22",
       "type": "item",
       "nom": "Corps de Bete de l Apocalypse",
       "icon": "🥩",
@@ -36879,7 +36879,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_corps_morceau",
-      "_rev": "1-1c6df96f33f1869d7f82f69153baf103",
+      "_rev": "2-c144ae1fc07dee051b5ee65ac02ecc6e",
       "type": "item",
       "nom": "Morceau de corps de Bete de l Apocalypse",
       "icon": "🥩",
@@ -36941,7 +36941,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_patte",
-      "_rev": "1-08134bdf6cf0376b60423477b3008a24",
+      "_rev": "2-7cc18731e03ca477e5e1a34074eb272d",
       "type": "item",
       "nom": "Patte de Bete de l Apocalypse",
       "icon": "🦴",
@@ -36994,7 +36994,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_patte_morceau",
-      "_rev": "1-05fcf477c9b71dc4082b5c2eab910c59",
+      "_rev": "2-da74eae7e2250ebe2f684707a6d10736",
       "type": "item",
       "nom": "Morceau de patte de Bete de l Apocalypse",
       "icon": "🥩",
@@ -37040,7 +37040,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_queue",
-      "_rev": "1-0a9cd756d6adc3bcbb287dc59338720e",
+      "_rev": "2-eb333fc7acc821e9d352d686fff56ff9",
       "type": "item",
       "nom": "Queue de Bete de l Apocalypse",
       "icon": "🦴",
@@ -37089,7 +37089,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_queue_morceau",
-      "_rev": "1-61715bc53a04f03beb520d99a930d3c7",
+      "_rev": "2-aad4babb571aa2a81f34cd3ba5b092a1",
       "type": "item",
       "nom": "Morceau de queue de Bete de l Apocalypse",
       "icon": "🥩",
@@ -37131,7 +37131,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_tete",
-      "_rev": "1-973ea5cdafb36632fa296016ec0a2d74",
+      "_rev": "2-1ec40d88cec6bee0650d2d9bc68e6be7",
       "type": "item",
       "nom": "Tête de Bete de l Apocalypse",
       "icon": "💀",
@@ -37188,7 +37188,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_tete_morceau",
-      "_rev": "1-7e0ef4634af42470b2e5b5522f0a6c4d",
+      "_rev": "2-b595c1fc6c399cb4af9c38c44a1a0df0",
       "type": "item",
       "nom": "Morceau de tête de Bete de l Apocalypse",
       "icon": "🥩",
@@ -37428,7 +37428,7 @@
     },
     {
       "_id": "item:bunyip",
-      "_rev": "6-e001824bec869a3a9cba51c539317b38",
+      "_rev": "7-0f3684ec66d2f0df3f0d6c33d950cfaa",
       "type": "item",
       "nom": "Carcasse de Bunyip",
       "sous_categorie": "carcasse",
@@ -37469,7 +37469,7 @@
     },
     {
       "_id": "item:bunyip_corps",
-      "_rev": "1-aaf98483fdf2a9aced950d12abd4e163",
+      "_rev": "2-e030f96cdaaec078ced56ba74bc3deec",
       "type": "item",
       "nom": "Corps de Bunyip",
       "icon": "🥩",
@@ -37532,7 +37532,7 @@
     },
     {
       "_id": "item:bunyip_corps_morceau",
-      "_rev": "1-58377e2a97e01c7624b655680ef1483e",
+      "_rev": "2-e8fc65155478fb3b6c9c49f29eadee52",
       "type": "item",
       "nom": "Morceau de corps de Bunyip",
       "icon": "🥩",
@@ -37588,7 +37588,7 @@
     },
     {
       "_id": "item:bunyip_patte",
-      "_rev": "1-9115d04b358078a392dcc00e811596bf",
+      "_rev": "2-db20f1336aac945bdd708d8f0505a30e",
       "type": "item",
       "nom": "Patte de Bunyip",
       "icon": "🦴",
@@ -37631,7 +37631,7 @@
     },
     {
       "_id": "item:bunyip_queue",
-      "_rev": "1-27d5ac98ccd5441043b7d59ab8fc3540",
+      "_rev": "2-f4982b51418f3d43af7c63b34d54e8a6",
       "type": "item",
       "nom": "Queue de Bunyip",
       "icon": "🦴",
@@ -37670,7 +37670,7 @@
     },
     {
       "_id": "item:bunyip_tete",
-      "_rev": "1-043957a7174abc9c5f1e1eb2d0d5fd41",
+      "_rev": "2-d611624d20519a3b3f15aa9481eace5c",
       "type": "item",
       "nom": "Tête de Bunyip",
       "icon": "💀",
@@ -37787,7 +37787,7 @@
     },
     {
       "_id": "item:cerbere",
-      "_rev": "6-a9e11ee95fc71547cf29faa47b2c68eb",
+      "_rev": "7-f560cd4db6ce6a096aaf5f48a6b606bd",
       "type": "item",
       "nom": "Carcasse de Cerbere",
       "sous_categorie": "carcasse",
@@ -37828,7 +37828,7 @@
     },
     {
       "_id": "item:cerbere_corps",
-      "_rev": "1-09c4086d9b0a5936d0d6ceaa582d6124",
+      "_rev": "2-757bb6492a45765cfe33680ff9911dc6",
       "type": "item",
       "nom": "Corps de Cerbere",
       "icon": "🥩",
@@ -37895,7 +37895,7 @@
     },
     {
       "_id": "item:cerbere_corps_morceau",
-      "_rev": "1-894023c25a3837155a57ab78f639489f",
+      "_rev": "2-20b2df47bcb988f0d91623b56e05be41",
       "type": "item",
       "nom": "Morceau de corps de Cerbere",
       "icon": "🥩",
@@ -37955,7 +37955,7 @@
     },
     {
       "_id": "item:cerbere_patte",
-      "_rev": "1-7c1ee072d22237243986a95776348acf",
+      "_rev": "2-637bc42cd10607badf87c9ff7a6e0146",
       "type": "item",
       "nom": "Patte de Cerbere",
       "icon": "🦴",
@@ -38002,7 +38002,7 @@
     },
     {
       "_id": "item:cerbere_queue",
-      "_rev": "1-416cc924623fa6fc075aa53276f2ab98",
+      "_rev": "2-27f08e0444430c9ceffbba561f0dfd37",
       "type": "item",
       "nom": "Queue de Cerbere",
       "icon": "🦴",
@@ -38041,7 +38041,7 @@
     },
     {
       "_id": "item:cerbere_tete",
-      "_rev": "1-e242a2f60793b07d8bf81c6954e65557",
+      "_rev": "2-d4ec9f03be8904eeb4cf14bde86c0a52",
       "type": "item",
       "nom": "Tête de Cerbere",
       "icon": "💀",
@@ -38084,7 +38084,7 @@
     },
     {
       "_id": "item:cerf",
-      "_rev": "4-6c7af92a679e147388de300b42059233",
+      "_rev": "5-4f3138df67fb6089f8f4fc3b5de04b6b",
       "type": "item",
       "nom": "Carcasse de Cerf",
       "sous_categorie": "carcasse",
@@ -38125,7 +38125,7 @@
     },
     {
       "_id": "item:cerf_corps",
-      "_rev": "2-81407143cdc9bdd83ba239566d7cf493",
+      "_rev": "3-f7b1b1a9a3bd2c763a3bde0d31c9e1a3",
       "type": "item",
       "nom": "Corps de Cerf",
       "icon": "🥩",
@@ -38191,7 +38191,7 @@
     },
     {
       "_id": "item:cerf_corps_morceau",
-      "_rev": "1-64c940e0994c62e11090e950569961cf",
+      "_rev": "2-4a05ff446668ca74bed8dd1719c3585a",
       "type": "item",
       "nom": "Morceau de corps de Cerf",
       "icon": "🥩",
@@ -38250,7 +38250,7 @@
     },
     {
       "_id": "item:cerf_patte",
-      "_rev": "2-e7d0b47a2939e42fc5b59a50efbea72b",
+      "_rev": "3-5bdf6fc119de91a77b90e839133023c2",
       "type": "item",
       "nom": "Patte de Cerf",
       "icon": "🦴",
@@ -38296,7 +38296,7 @@
     },
     {
       "_id": "item:cerf_queue",
-      "_rev": "2-60109c32b1760dac3146f461d42ea6ba",
+      "_rev": "3-977282ee98d32dbc310e1e46205a7ca7",
       "type": "item",
       "nom": "Queue de Cerf",
       "icon": "🦴",
@@ -38338,7 +38338,7 @@
     },
     {
       "_id": "item:cerf_tete",
-      "_rev": "2-2d38e7c0e06a5eb72c7f6402cc6eceb2",
+      "_rev": "3-38a10165f2a59f6addde3300f1c34e05",
       "type": "item",
       "nom": "Tête de Cerf",
       "icon": "💀",
@@ -38435,7 +38435,7 @@
     },
     {
       "_id": "item:cheval",
-      "_rev": "6-7def2269e8233647de387dbb4366e9d2",
+      "_rev": "7-04219d04762ce0a1299f4e1115c90a8b",
       "type": "item",
       "nom": "Carcasse de Cheval",
       "sous_categorie": "carcasse",
@@ -38476,7 +38476,7 @@
     },
     {
       "_id": "item:cheval_corps",
-      "_rev": "1-77328dd22cae23a75bb9dd3cb341dd68",
+      "_rev": "2-d6004c6571703b9c0cb19ecedb198903",
       "type": "item",
       "nom": "Corps de Cheval",
       "icon": "🥩",
@@ -38542,7 +38542,7 @@
     },
     {
       "_id": "item:cheval_corps_morceau",
-      "_rev": "1-9cd834561eb802ee11c002b918e56291",
+      "_rev": "2-bbdde1138a32050957aee921bb77c447",
       "type": "item",
       "nom": "Morceau de corps de Cheval",
       "icon": "🥩",
@@ -38601,7 +38601,7 @@
     },
     {
       "_id": "item:cheval_de_trait",
-      "_rev": "6-f998faaad658dc1e7166c45a98c78a31",
+      "_rev": "7-3500b7e08d8d69a1e1c7316580db4449",
       "type": "item",
       "nom": "Carcasse de Cheval de Trait",
       "sous_categorie": "carcasse",
@@ -38642,7 +38642,7 @@
     },
     {
       "_id": "item:cheval_de_trait_corps",
-      "_rev": "1-d767c6f590ed1fd67d144b7ee355e986",
+      "_rev": "2-adb02d9e58cdaecf267f3fe93851d0f2",
       "type": "item",
       "nom": "Corps de Cheval de Trait",
       "icon": "🥩",
@@ -38709,7 +38709,7 @@
     },
     {
       "_id": "item:cheval_de_trait_corps_morceau",
-      "_rev": "1-c2a8790997c3fc4406c9e07f8e619fe1",
+      "_rev": "2-9f4aa94f6ba6b323713a97b29f8e1ada",
       "type": "item",
       "nom": "Morceau de corps de Cheval de Trait",
       "icon": "🥩",
@@ -38769,7 +38769,7 @@
     },
     {
       "_id": "item:cheval_de_trait_patte",
-      "_rev": "1-a0d81a5a4b2fd5569f73f4fa38ba0a24",
+      "_rev": "2-6bd09ce678709c204cd0ffa53340893b",
       "type": "item",
       "nom": "Patte de Cheval de Trait",
       "icon": "🦴",
@@ -38812,7 +38812,7 @@
     },
     {
       "_id": "item:cheval_de_trait_queue",
-      "_rev": "1-30155f02d42e6347b022a9023048545f",
+      "_rev": "2-d0dfd353c69e1f685b301bffa497a086",
       "type": "item",
       "nom": "Queue de Cheval de Trait",
       "icon": "🦴",
@@ -38855,7 +38855,7 @@
     },
     {
       "_id": "item:cheval_de_trait_tete",
-      "_rev": "1-ababd9fcd5e9fe33cec53f6c422184e0",
+      "_rev": "2-95fab1e3d2343cb2b6833eff9b62c33e",
       "type": "item",
       "nom": "Tête de Cheval de Trait",
       "icon": "💀",
@@ -38902,7 +38902,7 @@
     },
     {
       "_id": "item:cheval_de_trait_tete_morceau",
-      "_rev": "1-60195cc7938d7967be4bcfccd8ae5e2e",
+      "_rev": "2-ef2dc9d8c1b869a7e410b562cdf6e8ed",
       "type": "item",
       "nom": "Morceau de tête de Cheval de Trait",
       "icon": "🥩",
@@ -38942,7 +38942,7 @@
     },
     {
       "_id": "item:cheval_normand",
-      "_rev": "6-e01051e24c53c2ca209be83c2e5a6be9",
+      "_rev": "7-596aa56a58948eac32e21c25ddc5d9d0",
       "type": "item",
       "nom": "Carcasse de Cheval Normand",
       "sous_categorie": "carcasse",
@@ -38983,7 +38983,7 @@
     },
     {
       "_id": "item:cheval_normand_corps",
-      "_rev": "1-39ea7dfa7de452235c4aa3e90353c68f",
+      "_rev": "2-0c47b5ca6fa3fa0aeeee35722dbf0547",
       "type": "item",
       "nom": "Corps de Cheval Normand",
       "icon": "🥩",
@@ -39050,7 +39050,7 @@
     },
     {
       "_id": "item:cheval_normand_corps_morceau",
-      "_rev": "1-881513e6864f81b56e25f1347eb77c37",
+      "_rev": "2-36cbc230efee8c9fceafe8e563f7fcdb",
       "type": "item",
       "nom": "Morceau de corps de Cheval Normand",
       "icon": "🥩",
@@ -39110,7 +39110,7 @@
     },
     {
       "_id": "item:cheval_normand_patte",
-      "_rev": "1-8054b70373aea886dc3d53ebd9bc0988",
+      "_rev": "2-31a5c46ab9deb03df4ba2d8bd5317a3f",
       "type": "item",
       "nom": "Patte de Cheval Normand",
       "icon": "🦴",
@@ -39153,7 +39153,7 @@
     },
     {
       "_id": "item:cheval_normand_queue",
-      "_rev": "1-4394d66d414ce4f5a49d301870704c20",
+      "_rev": "2-08109536f54c5d5114ee2932351c5698",
       "type": "item",
       "nom": "Queue de Cheval Normand",
       "icon": "🦴",
@@ -39196,7 +39196,7 @@
     },
     {
       "_id": "item:cheval_normand_tete",
-      "_rev": "1-36674d9fd940543b4ffb065c69046650",
+      "_rev": "2-f66555f75a57ba42469c9193f01411cf",
       "type": "item",
       "nom": "Tête de Cheval Normand",
       "icon": "💀",
@@ -39243,7 +39243,7 @@
     },
     {
       "_id": "item:cheval_normand_tete_morceau",
-      "_rev": "1-e66e79f5a69920266a3dd09f520aee80",
+      "_rev": "2-44e1cc5e9e2886ac00fcf95e93b88040",
       "type": "item",
       "nom": "Morceau de tête de Cheval Normand",
       "icon": "🥩",
@@ -39283,7 +39283,7 @@
     },
     {
       "_id": "item:cheval_patte",
-      "_rev": "1-1906d4c9c922d3a9af01f4d0b82b500b",
+      "_rev": "2-c6ec8ddc8b1b3ff671427f10b15f3eb8",
       "type": "item",
       "nom": "Patte de Cheval",
       "icon": "🦴",
@@ -39325,7 +39325,7 @@
     },
     {
       "_id": "item:cheval_queue",
-      "_rev": "1-1f1aa7bf69b79e7e19b7723f7e43c19c",
+      "_rev": "2-c35f30dfe599febd4bda8972cf95463b",
       "type": "item",
       "nom": "Queue de Cheval",
       "icon": "🦴",
@@ -39367,7 +39367,7 @@
     },
     {
       "_id": "item:cheval_tete",
-      "_rev": "1-7a2fa68efacde46c5a44a58321d21ad2",
+      "_rev": "2-8d8fbe7e0470c79287c9eabfcc2a9395",
       "type": "item",
       "nom": "Tête de Cheval",
       "icon": "💀",
@@ -39440,7 +39440,7 @@
     },
     {
       "_id": "item:chimere",
-      "_rev": "5-22e50a9d3d73c5f2c4865b64648a0fc0",
+      "_rev": "6-905622ee875a0b14a4dc6981c3ac4af3",
       "type": "item",
       "nom": "Carcasse de Chimere",
       "sous_categorie": "carcasse",
@@ -39454,11 +39454,438 @@
       ],
       "description": "Dépouille de Chimere récupérée à l'issue du combat.",
       "source_espece": "espece:chimere",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:chimere_tete",
+          "quantite": 1,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:chimere_corps",
+          "quantite": 1,
+          "fraction": 0.52
+        },
+        {
+          "item": "item:chimere_patte",
+          "quantite": 4,
+          "fraction": 0.28
+        },
+        {
+          "item": "item:chimere_queue",
+          "quantite": 1,
+          "fraction": 0.08
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:chimere_corps",
+      "_rev": "1-7fdbda222ecfa6b64497c749948600df",
+      "type": "item",
+      "nom": "Corps de Chimere",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        416,
+        936
+      ],
+      "description": "Corps de Chimere, débité sur place.",
+      "tags": [
+        "hybride",
+        "monstre",
+        "partie_corps",
+        "predateur",
+        "souffle"
+      ],
+      "source_espece": "espece:chimere",
+      "portion_de": "item:chimere",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:chimere_corps_morceau",
+          "quantite": 10,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:chimere_corps_morceau",
+      "_rev": "1-2fc7509dd8825fc6192db35f8c950232",
+      "type": "item",
+      "nom": "Morceau de corps de Chimere",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        41.6,
+        93.6
+      ],
+      "description": "Morceau de corps de Chimere, taillé pour être emporté.",
+      "tags": [
+        "hybride",
+        "monstre",
+        "morceau",
+        "partie_corps",
+        "predateur",
+        "souffle"
+      ],
+      "source_espece": "espece:chimere",
+      "portion_de": "item:chimere_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:chimere_patte",
+      "_rev": "1-40b24f0a282dc577f76ad0477c459ec8",
+      "type": "item",
+      "nom": "Patte de Chimere",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        56,
+        126
+      ],
+      "description": "Patte de Chimere, débitée sur place.",
+      "tags": [
+        "hybride",
+        "monstre",
+        "partie_patte",
+        "predateur",
+        "souffle"
+      ],
+      "source_espece": "espece:chimere",
+      "portion_de": "item:chimere",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:chimere_patte_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:chimere_patte_morceau",
+      "_rev": "1-83dc4c7fe7c401bb7154688497728c82",
+      "type": "item",
+      "nom": "Morceau de patte de Chimere",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        28,
+        63
+      ],
+      "description": "Morceau de patte de Chimere, taillé pour être emporté.",
+      "tags": [
+        "hybride",
+        "monstre",
+        "morceau",
+        "partie_patte",
+        "predateur",
+        "souffle"
+      ],
+      "source_espece": "espece:chimere",
+      "portion_de": "item:chimere_patte",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:chimere_queue",
+      "_rev": "1-5943a8babe234da9c4682e28cbf5f7a5",
+      "type": "item",
+      "nom": "Queue de Chimere",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        64,
+        144
+      ],
+      "description": "Queue de Chimere, débitée sur place.",
+      "tags": [
+        "hybride",
+        "monstre",
+        "partie_queue",
+        "predateur",
+        "souffle"
+      ],
+      "source_espece": "espece:chimere",
+      "portion_de": "item:chimere",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:chimere_queue_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:chimere_queue_morceau",
+      "_rev": "1-3b7e79fbd5ae992f38c5902a4bcdb319",
+      "type": "item",
+      "nom": "Morceau de queue de Chimere",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        32,
+        72
+      ],
+      "description": "Morceau de queue de Chimere, taillé pour être emporté.",
+      "tags": [
+        "hybride",
+        "monstre",
+        "morceau",
+        "partie_queue",
+        "predateur",
+        "souffle"
+      ],
+      "source_espece": "espece:chimere",
+      "portion_de": "item:chimere_queue",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:chimere_tete",
+      "_rev": "1-c8362754861ab52b8955be631e1a69b0",
+      "type": "item",
+      "nom": "Tête de Chimere",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        96,
+        216
+      ],
+      "description": "Tête de Chimere, débitée sur place.",
+      "tags": [
+        "hybride",
+        "monstre",
+        "partie_tete",
+        "predateur",
+        "souffle"
+      ],
+      "source_espece": "espece:chimere",
+      "portion_de": "item:chimere",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:chimere_tete_morceau",
+          "quantite": 3,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:chimere_tete_morceau",
+      "_rev": "1-0b2a50074d64cecfe7a5afa664eb7c29",
+      "type": "item",
+      "nom": "Morceau de tête de Chimere",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        32,
+        72
+      ],
+      "description": "Morceau de tête de Chimere, taillé pour être emporté.",
+      "tags": [
+        "hybride",
+        "monstre",
+        "morceau",
+        "partie_tete",
+        "predateur",
+        "souffle"
+      ],
+      "source_espece": "espece:chimere",
+      "portion_de": "item:chimere_tete",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:cockatrice",
-      "_rev": "4-e30ca1e3705ac67e7519a48ee9e8bda8",
+      "_rev": "7-5c4cef1f029ff2e04db19d715928f848",
       "type": "item",
       "nom": "Carcasse de Cockatrice",
       "sous_categorie": "carcasse",
@@ -39466,10 +39893,509 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 5.5,
+      "poids": [
+        400,
+        1400
+      ],
       "description": "Dépouille de Cockatrice récupérée à l'issue du combat.",
       "source_espece": "espece:cockatrice",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:cockatrice_tete",
+          "quantite": 1,
+          "fraction": 0.1
+        },
+        {
+          "item": "item:cockatrice_corps",
+          "quantite": 1,
+          "fraction": 0.45
+        },
+        {
+          "item": "item:cockatrice_aile",
+          "quantite": 2,
+          "fraction": 0.2
+        },
+        {
+          "item": "item:cockatrice_patte",
+          "quantite": 2,
+          "fraction": 0.14
+        },
+        {
+          "item": "item:cockatrice_queue",
+          "quantite": 1,
+          "fraction": 0.11
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_aile",
+      "_rev": "1-a3729d116afb7b642ba104187e9fa2ba",
+      "type": "item",
+      "nom": "Aile de Cockatrice",
+      "icon": "🪶",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        40,
+        140
+      ],
+      "description": "Aile de Cockatrice, débitée sur place.",
+      "tags": [
+        "monstre",
+        "partie_aile",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "aile",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "plumes",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:cockatrice_aile_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_aile_morceau",
+      "_rev": "1-759b5dd14ea60afee3ab4ac12834ba1b",
+      "type": "item",
+      "nom": "Morceau de aile de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        20,
+        70
+      ],
+      "description": "Morceau de aile de Cockatrice, taillé pour être emporté.",
+      "tags": [
+        "monstre",
+        "morceau",
+        "partie_aile",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice_aile",
+      "partie": "aile",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "plumes",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:cockatrice_corps",
+      "_rev": "1-1275baf73bc17d042ec6ad0ff26cc38c",
+      "type": "item",
+      "nom": "Corps de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        180,
+        630
+      ],
+      "description": "Corps de Cockatrice, débité sur place.",
+      "tags": [
+        "monstre",
+        "partie_corps",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "plumes",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:cockatrice_corps_morceau",
+          "quantite": 7,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_corps_morceau",
+      "_rev": "1-d41c30d44650f374d5e20875098d6c65",
+      "type": "item",
+      "nom": "Morceau de corps de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        25.71,
+        90
+      ],
+      "description": "Morceau de corps de Cockatrice, taillé pour être emporté.",
+      "tags": [
+        "monstre",
+        "morceau",
+        "partie_corps",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "plumes",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:cockatrice_patte",
+      "_rev": "1-c846ee3b09fa0751e6f7aa57e2604a8d",
+      "type": "item",
+      "nom": "Patte de Cockatrice",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        28,
+        98
+      ],
+      "description": "Patte de Cockatrice, débitée sur place.",
+      "tags": [
+        "monstre",
+        "partie_patte",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:cockatrice_queue",
+      "_rev": "1-7a6fb5756379ba4ee7da67aed0c495e4",
+      "type": "item",
+      "nom": "Queue de Cockatrice",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        44,
+        154
+      ],
+      "description": "Queue de Cockatrice, débitée sur place.",
+      "tags": [
+        "monstre",
+        "partie_queue",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:cockatrice_queue_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_queue_morceau",
+      "_rev": "1-0a30bfec5743fd8dd59a3d00a8daec6e",
+      "type": "item",
+      "nom": "Morceau de queue de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        22,
+        77
+      ],
+      "description": "Morceau de queue de Cockatrice, taillé pour être emporté.",
+      "tags": [
+        "monstre",
+        "morceau",
+        "partie_queue",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice_queue",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:cockatrice_tete",
+      "_rev": "1-2e148f2f3abaeea4fff7cb086683dfd3",
+      "type": "item",
+      "nom": "Tête de Cockatrice",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        40,
+        140
+      ],
+      "description": "Tête de Cockatrice, débitée sur place.",
+      "tags": [
+        "monstre",
+        "partie_tete",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:cockatrice_tete_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_tete_morceau",
+      "_rev": "1-32771ea09bd0f36d65bc019f6e31ad9e",
+      "type": "item",
+      "nom": "Morceau de tête de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        20,
+        70
+      ],
+      "description": "Morceau de tête de Cockatrice, taillé pour être emporté.",
+      "tags": [
+        "monstre",
+        "morceau",
+        "partie_tete",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice_tete",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:coeur",
@@ -39614,7 +40540,7 @@
     },
     {
       "_id": "item:coursier_elfique",
-      "_rev": "7-836ce379c29c394f7c373497fd53ca53",
+      "_rev": "8-29bc1582565948185654000ad5ed4c38",
       "type": "item",
       "nom": "Carcasse de Coursier Elfique",
       "sous_categorie": "carcasse",
@@ -39655,7 +40581,7 @@
     },
     {
       "_id": "item:coursier_elfique_corps",
-      "_rev": "1-7ceaa58a21a3e0a10a8ffc0a26db48fc",
+      "_rev": "2-d2b8cd5c1cc3355a13e92477c80bd3bf",
       "type": "item",
       "nom": "Corps de Coursier Elfique",
       "icon": "🥩",
@@ -39723,7 +40649,7 @@
     },
     {
       "_id": "item:coursier_elfique_corps_morceau",
-      "_rev": "1-59a3c06a26bc22e1d6fbdc16c4c05b62",
+      "_rev": "2-7683b72fa7d91a49c038be845c5064cb",
       "type": "item",
       "nom": "Morceau de corps de Coursier Elfique",
       "icon": "🥩",
@@ -39784,7 +40710,7 @@
     },
     {
       "_id": "item:coursier_elfique_patte",
-      "_rev": "1-f5af641618cdd1a730d210ef26d23e76",
+      "_rev": "2-4b3f43825a0f659737493f5202757a3d",
       "type": "item",
       "nom": "Patte de Coursier Elfique",
       "icon": "🦴",
@@ -39828,7 +40754,7 @@
     },
     {
       "_id": "item:coursier_elfique_queue",
-      "_rev": "1-1e51ecd9560e282dc58bce78d2316c2a",
+      "_rev": "2-80edcf49873d1ac1ad2cc4f8edb2b260",
       "type": "item",
       "nom": "Queue de Coursier Elfique",
       "icon": "🦴",
@@ -39872,7 +40798,7 @@
     },
     {
       "_id": "item:coursier_elfique_tete",
-      "_rev": "1-df2f26abba212933b6017391704e4c67",
+      "_rev": "2-67d5f22b954aaa19c93a2658cc2e2bfe",
       "type": "item",
       "nom": "Tête de Coursier Elfique",
       "icon": "💀",
@@ -39916,7 +40842,7 @@
     },
     {
       "_id": "item:coursier_persan",
-      "_rev": "6-94613c7a2a06ae1c5085ec0b55078828",
+      "_rev": "7-420859293752a4677274957b7c95eaeb",
       "type": "item",
       "nom": "Carcasse de Coursier Persan",
       "sous_categorie": "carcasse",
@@ -39957,7 +40883,7 @@
     },
     {
       "_id": "item:coursier_persan_corps",
-      "_rev": "1-58252d40df7fc3760da5ac63f75eba23",
+      "_rev": "2-43a49b51ea10ecdb809beae0abaff053",
       "type": "item",
       "nom": "Corps de Coursier Persan",
       "icon": "🥩",
@@ -40024,7 +40950,7 @@
     },
     {
       "_id": "item:coursier_persan_corps_morceau",
-      "_rev": "1-fdfb16fca5f8f86acd3b355b97c4a14d",
+      "_rev": "2-7c3b27d6462cc914ec06f070d4118365",
       "type": "item",
       "nom": "Morceau de corps de Coursier Persan",
       "icon": "🥩",
@@ -40084,7 +41010,7 @@
     },
     {
       "_id": "item:coursier_persan_patte",
-      "_rev": "1-01ab39b99ff942d664e895690fff8d7f",
+      "_rev": "2-447aa615f987ab7ed171bb40333ac2a7",
       "type": "item",
       "nom": "Patte de Coursier Persan",
       "icon": "🦴",
@@ -40127,7 +41053,7 @@
     },
     {
       "_id": "item:coursier_persan_queue",
-      "_rev": "1-5e3a9bd6e6ed869e641b132a1c816062",
+      "_rev": "2-93e37d6c83db8b62ddda8ee5da1de654",
       "type": "item",
       "nom": "Queue de Coursier Persan",
       "icon": "🦴",
@@ -40170,7 +41096,7 @@
     },
     {
       "_id": "item:coursier_persan_tete",
-      "_rev": "1-22eb590a55a5a77f582d9cba380f4996",
+      "_rev": "2-87d1dbe093fc54dcf4da01adcf8b45de",
       "type": "item",
       "nom": "Tête de Coursier Persan",
       "icon": "💀",
@@ -40320,7 +41246,7 @@
     },
     {
       "_id": "item:cyclope",
-      "_rev": "6-69c9f8c95dcfdedb8ea841ce408a6668",
+      "_rev": "7-8574f09b93fb978d268c5abc397f5f95",
       "type": "item",
       "nom": "Carcasse de Cyclope",
       "sous_categorie": "carcasse",
@@ -40361,7 +41287,7 @@
     },
     {
       "_id": "item:cyclope_bras",
-      "_rev": "1-49965ccb3fc2063ca466206380acbcc4",
+      "_rev": "2-2d4ea8a43d552545f49d3b07de12a1d2",
       "type": "item",
       "nom": "Bras de Cyclope",
       "icon": "🦴",
@@ -40412,7 +41338,7 @@
     },
     {
       "_id": "item:cyclope_bras_morceau",
-      "_rev": "1-2e7328423f053cfb3d2ae035d65b3470",
+      "_rev": "2-595e60828c885172928df42501d0fa5b",
       "type": "item",
       "nom": "Morceau de bras de Cyclope",
       "icon": "🥩",
@@ -40456,7 +41382,7 @@
     },
     {
       "_id": "item:cyclope_corps",
-      "_rev": "1-b75454b02ce38992dff5c6c84a435f37",
+      "_rev": "2-c4ed617bb4305f2ef0c067a0a382e417",
       "type": "item",
       "nom": "Corps de Cyclope",
       "icon": "🥩",
@@ -40519,7 +41445,7 @@
     },
     {
       "_id": "item:cyclope_corps_morceau",
-      "_rev": "1-a1de07121c54df088e5112873e22e9e8",
+      "_rev": "2-e8de55fca513fbd231086be4b02a27ae",
       "type": "item",
       "nom": "Morceau de corps de Cyclope",
       "icon": "🥩",
@@ -40575,7 +41501,7 @@
     },
     {
       "_id": "item:cyclope_jambe",
-      "_rev": "1-33885f8f82945154cb3afb4f21b5e3a6",
+      "_rev": "2-09df235cf2861f7c635ab0d0ac8c0e9b",
       "type": "item",
       "nom": "Jambe de Cyclope",
       "icon": "🦴",
@@ -40626,7 +41552,7 @@
     },
     {
       "_id": "item:cyclope_jambe_morceau",
-      "_rev": "1-8af923843ef1f942f632f85fa69c386a",
+      "_rev": "2-b28a0aec7486515815c7e47812fa1280",
       "type": "item",
       "nom": "Morceau de jambe de Cyclope",
       "icon": "🥩",
@@ -40670,7 +41596,7 @@
     },
     {
       "_id": "item:cyclope_tete",
-      "_rev": "1-d2042a3fc42a7db3c06571dc78937005",
+      "_rev": "2-0cc24340a8562d4c4671626515998af6",
       "type": "item",
       "nom": "Tête de Cyclope",
       "icon": "💀",
@@ -40721,7 +41647,7 @@
     },
     {
       "_id": "item:cyclope_tete_morceau",
-      "_rev": "1-de2bd70e802a44f667748ffc1ba203dc",
+      "_rev": "2-8728d590fe93f08a493ba0fb9626ed31",
       "type": "item",
       "nom": "Morceau de tête de Cyclope",
       "icon": "🥩",
@@ -40835,7 +41761,7 @@
     },
     {
       "_id": "item:demon_guerrier",
-      "_rev": "4-e49a00954ce10989becb5974bd02a7d6",
+      "_rev": "6-e52d6d0173cd29d2330331ba8ddcdafe",
       "type": "item",
       "nom": "Carcasse de Demon Guerrier",
       "sous_categorie": "carcasse",
@@ -40843,14 +41769,244 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 13.0,
+      "poids": [
+        75,
+        200
+      ],
       "description": "Dépouille de Demon Guerrier récupérée à l'issue du combat.",
       "source_espece": "espece:demon_guerrier",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_guerrier_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_guerrier_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_guerrier_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_guerrier_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_guerrier_bras",
+      "_rev": "1-0d159de87ddaa5c66d991ec8ee939731",
+      "type": "item",
+      "nom": "Bras de Demon Guerrier",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        4.5,
+        12
+      ],
+      "description": "Bras de Demon Guerrier, débité sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_corps",
+      "_rev": "1-429f307261d3831fb81778179f59007c",
+      "type": "item",
+      "nom": "Corps de Demon Guerrier",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        37.5,
+        100
+      ],
+      "description": "Corps de Demon Guerrier, débité sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_jambe",
+      "_rev": "1-ea8aca8bccd6acd68d6c5035e79395c0",
+      "type": "item",
+      "nom": "Jambe de Demon Guerrier",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        11.25,
+        30
+      ],
+      "description": "Jambe de Demon Guerrier, débitée sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_tete",
+      "_rev": "1-7a04bf3479d5d69664b050530a6e62b3",
+      "type": "item",
+      "nom": "Tête de Demon Guerrier",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        6,
+        16
+      ],
+      "description": "Tête de Demon Guerrier, débitée sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_majeur_de_la_destinee",
-      "_rev": "4-95816aac8a8fde2d4a4622c735c04fc0",
+      "_rev": "7-3828cf07553fc2918e718b23f29c02ad",
       "type": "item",
       "nom": "Carcasse de Demon Majeur de la Destinee",
       "sous_categorie": "carcasse",
@@ -40858,14 +42014,256 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 11.5,
+      "poids": [
+        75,
+        200
+      ],
       "description": "Dépouille de Demon Majeur de la Destinee récupérée à l'issue du combat.",
       "source_espece": "espece:demon_majeur_de_la_destinee",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destinee_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_bras",
+      "_rev": "1-09cdf6e573d557ed172892fc78c360bd",
+      "type": "item",
+      "nom": "Bras de Demon Majeur de la Destinee",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        4.5,
+        12
+      ],
+      "description": "Bras de Demon Majeur de la Destinee, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_corps",
+      "_rev": "1-c83dc364732ced5594b7dfb21b018f6f",
+      "type": "item",
+      "nom": "Corps de Demon Majeur de la Destinee",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        37.5,
+        100
+      ],
+      "description": "Corps de Demon Majeur de la Destinee, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_jambe",
+      "_rev": "1-7a6f9a9a8359cbe9ffb75d25c0a8d038",
+      "type": "item",
+      "nom": "Jambe de Demon Majeur de la Destinee",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        11.25,
+        30
+      ],
+      "description": "Jambe de Demon Majeur de la Destinee, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_tete",
+      "_rev": "1-b498259faeb85d638e0aaaa1b620d89c",
+      "type": "item",
+      "nom": "Tête de Demon Majeur de la Destinee",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        6,
+        16
+      ],
+      "description": "Tête de Demon Majeur de la Destinee, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_majeur_de_la_destruction",
-      "_rev": "4-55d0a1b9abb0e7d1b3e050a784c5f56b",
+      "_rev": "6-aeca35fe2c165e2556eeb9efd39e222a",
       "type": "item",
       "nom": "Carcasse de Demon Majeur de la Destruction",
       "sous_categorie": "carcasse",
@@ -40873,14 +42271,326 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 19.0,
+      "poids": [
+        100,
+        500
+      ],
       "description": "Dépouille de Demon Majeur de la Destruction récupérée à l'issue du combat.",
       "source_espece": "espece:demon_majeur_de_la_destruction",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destruction_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_bras",
+      "_rev": "1-1f93307956938586a50bc7a715dcdfaf",
+      "type": "item",
+      "nom": "Bras de Demon Majeur de la Destruction",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        6,
+        30
+      ],
+      "description": "Bras de Demon Majeur de la Destruction, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_corps",
+      "_rev": "1-05b32a8fa52310489f9e934ced8e195a",
+      "type": "item",
+      "nom": "Corps de Demon Majeur de la Destruction",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        50,
+        250
+      ],
+      "description": "Corps de Demon Majeur de la Destruction, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destruction_corps_morceau",
+          "quantite": 3,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_corps_morceau",
+      "_rev": "1-7d6db21749ce8dfaaeeeb27642ea8e79",
+      "type": "item",
+      "nom": "Morceau de corps de Demon Majeur de la Destruction",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        16.67,
+        83.33
+      ],
+      "description": "Morceau de corps de Demon Majeur de la Destruction, taillé pour être emporté.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "morceau",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_jambe",
+      "_rev": "1-b8234e614b27298d29eb9054b1e332f3",
+      "type": "item",
+      "nom": "Jambe de Demon Majeur de la Destruction",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        15,
+        75
+      ],
+      "description": "Jambe de Demon Majeur de la Destruction, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_tete",
+      "_rev": "1-409563ab8ecc67a0394ac5ac8e84faea",
+      "type": "item",
+      "nom": "Tête de Demon Majeur de la Destruction",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        8,
+        40
+      ],
+      "description": "Tête de Demon Majeur de la Destruction, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_mineur",
-      "_rev": "4-e7eb956f6ff2144fca18af71c84af672",
+      "_rev": "5-ce9fc5ed54bbc7019594e3999d779b06",
       "type": "item",
       "nom": "Carcasse de Demon Mineur",
       "sous_categorie": "carcasse",
@@ -40888,14 +42598,17 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 8.0,
+      "poids": [
+        45,
+        90
+      ],
       "description": "Dépouille de Demon Mineur récupérée à l'issue du combat.",
       "source_espece": "espece:demon_mineur",
       "loot_defaut": true
     },
     {
       "_id": "item:demon_servant",
-      "_rev": "4-7c76b7cdf3b57cd283600fe5447b209f",
+      "_rev": "5-baaa642ab1d4ac397669a838b341f192",
       "type": "item",
       "nom": "Carcasse de Demon Servant",
       "sous_categorie": "carcasse",
@@ -40903,7 +42616,10 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 4.5,
+      "poids": [
+        25,
+        55
+      ],
       "description": "Dépouille de Demon Servant récupérée à l'issue du combat.",
       "source_espece": "espece:demon_servant",
       "loot_defaut": true
@@ -40929,7 +42645,7 @@
     },
     {
       "_id": "item:doppleganger",
-      "_rev": "4-b4eb49ac73b47df4dd36afbcd5d51075",
+      "_rev": "6-6ba663e9a33ce64ca18179754c1f3827",
       "type": "item",
       "nom": "Carcasse de Doppleganger",
       "sous_categorie": "carcasse",
@@ -40937,14 +42653,220 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 4.5,
+      "poids": [
+        45,
+        150
+      ],
       "description": "Dépouille de Doppleganger récupérée à l'issue du combat.",
       "source_espece": "espece:doppleganger",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:doppleganger_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:doppleganger_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:doppleganger_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:doppleganger_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:doppleganger_bras",
+      "_rev": "1-0fe03addd74f1961aea49aa10c37a984",
+      "type": "item",
+      "nom": "Bras de Doppleganger",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        2.7,
+        9
+      ],
+      "description": "Bras de Doppleganger, débité sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_bras"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_corps",
+      "_rev": "1-d214865e245e1d597095c547ffc0e764",
+      "type": "item",
+      "nom": "Corps de Doppleganger",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        22.5,
+        75
+      ],
+      "description": "Corps de Doppleganger, débité sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_corps"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_jambe",
+      "_rev": "1-ac790b05f35cf0dc019ac64a919d4f51",
+      "type": "item",
+      "nom": "Jambe de Doppleganger",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        6.75,
+        22.5
+      ],
+      "description": "Jambe de Doppleganger, débitée sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_tete",
+      "_rev": "1-53e01b53e480d9497eb6ca7187211b21",
+      "type": "item",
+      "nom": "Tête de Doppleganger",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        3.6,
+        12
+      ],
+      "description": "Tête de Doppleganger, débitée sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_tete"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:dragnard",
-      "_rev": "4-efea6dce27c3f10366c71c15892ef03f",
+      "_rev": "6-9e92295c1cdac319fea7479cfdf5672c",
       "type": "item",
       "nom": "Carcasse de Dragnard",
       "sous_categorie": "carcasse",
@@ -40952,14 +42874,354 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 10.5,
+      "poids": [
+        500,
+        900
+      ],
       "description": "Dépouille de Dragnard récupérée à l'issue du combat.",
       "source_espece": "espece:dragnard",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:dragnard_tete",
+          "quantite": 1,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:dragnard_corps",
+          "quantite": 1,
+          "fraction": 0.52
+        },
+        {
+          "item": "item:dragnard_patte",
+          "quantite": 4,
+          "fraction": 0.28
+        },
+        {
+          "item": "item:dragnard_queue",
+          "quantite": 1,
+          "fraction": 0.08
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_corps",
+      "_rev": "1-92f0d4ad39ed1722fd7958351b0b6182",
+      "type": "item",
+      "nom": "Corps de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        260,
+        468
+      ],
+      "description": "Corps de Dragnard, débité sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_corps"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:dragnard_corps_morceau",
+          "quantite": 5,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_corps_morceau",
+      "_rev": "1-556709206ff538fdedd44efb066cefa1",
+      "type": "item",
+      "nom": "Morceau de corps de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        52,
+        93.6
+      ],
+      "description": "Morceau de corps de Dragnard, taillé pour être emporté.",
+      "tags": [
+        "draconique",
+        "monture",
+        "morceau",
+        "partie_corps"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_patte",
+      "_rev": "1-94a33da4326edccddbb3a1411552eb70",
+      "type": "item",
+      "nom": "Patte de Dragnard",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        35,
+        63
+      ],
+      "description": "Patte de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_patte"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_queue",
+      "_rev": "1-9a5322eede4d6cf5cd497c36fe41355d",
+      "type": "item",
+      "nom": "Queue de Dragnard",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        40,
+        72
+      ],
+      "description": "Queue de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_queue"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "queue",
+      "depecage": [
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_tete",
+      "_rev": "1-224c296b898d2aafeb6cb538e060193d",
+      "type": "item",
+      "nom": "Tête de Dragnard",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        60,
+        108
+      ],
+      "description": "Tête de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_tete"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:dragnard_tete_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_tete_morceau",
+      "_rev": "1-960ae73487d1f5a5e053ac646eadae63",
+      "type": "item",
+      "nom": "Morceau de tête de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        30,
+        54
+      ],
+      "description": "Morceau de tête de Dragnard, taillé pour être emporté.",
+      "tags": [
+        "draconique",
+        "monture",
+        "morceau",
+        "partie_tete"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard_tete",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:dragon",
-      "_rev": "7-564f9f4230003fdc2fc6dead0d1c61b9",
+      "_rev": "8-e4f34f74d89bbe9343626160218ad391",
       "type": "item",
       "nom": "Carcasse de Dragon",
       "sous_categorie": "carcasse",
@@ -41005,7 +43267,7 @@
     },
     {
       "_id": "item:dragon_aile",
-      "_rev": "2-98511186d40f0e35218a04add5129371",
+      "_rev": "3-29be1610a47faea77044f75929985296",
       "type": "item",
       "nom": "Aile de Dragon",
       "icon": "🪶",
@@ -41047,7 +43309,7 @@
     },
     {
       "_id": "item:dragon_corps",
-      "_rev": "2-df2b6c513b95398fff5aa1cf44f16f0d",
+      "_rev": "3-6573ce884916bd08273700a666c0960b",
       "type": "item",
       "nom": "Corps de Dragon",
       "icon": "🥩",
@@ -41117,7 +43379,7 @@
     },
     {
       "_id": "item:dragon_corps_morceau",
-      "_rev": "1-1a6dae23efa01bd98fd4479add8eeddd",
+      "_rev": "2-e4fbb0f32452e20f8e8efa1d846d5356",
       "type": "item",
       "nom": "Morceau de corps de Dragon",
       "icon": "🥩",
@@ -41180,7 +43442,7 @@
     },
     {
       "_id": "item:dragon_empereur",
-      "_rev": "7-8dca0abc9f218fa1bf36caac264096f8",
+      "_rev": "8-a7f455a7945768b9155c9ffefeed8aac",
       "type": "item",
       "nom": "Carcasse de Dragon Empereur",
       "sous_categorie": "carcasse",
@@ -41226,7 +43488,7 @@
     },
     {
       "_id": "item:dragon_empereur_aile",
-      "_rev": "2-a2f9c86aeaa380585d9056835abf4989",
+      "_rev": "3-6371307d849377aaef1f5ae2f4d797e0",
       "type": "item",
       "nom": "Aile de Dragon Empereur",
       "icon": "🪶",
@@ -41277,7 +43539,7 @@
     },
     {
       "_id": "item:dragon_empereur_aile_morceau",
-      "_rev": "1-e5a73d43386fdffae2b1f8f5cfc3bf13",
+      "_rev": "2-ecc34cbe4307f08865b40c0fb618dc9f",
       "type": "item",
       "nom": "Morceau de aile de Dragon Empereur",
       "icon": "🥩",
@@ -41321,7 +43583,7 @@
     },
     {
       "_id": "item:dragon_empereur_corps",
-      "_rev": "2-d4793f5abfeb95a748e0b34bc9ab9ed1",
+      "_rev": "3-94962eb206d3b4820711ef8d86d4acfb",
       "type": "item",
       "nom": "Corps de Dragon Empereur",
       "icon": "🥩",
@@ -41392,7 +43654,7 @@
     },
     {
       "_id": "item:dragon_empereur_corps_morceau",
-      "_rev": "1-7a0201f1d7255ba9ebaacbdcce315bbd",
+      "_rev": "2-91a56f76c08c983836a6c6737807548b",
       "type": "item",
       "nom": "Morceau de corps de Dragon Empereur",
       "icon": "🥩",
@@ -41456,7 +43718,7 @@
     },
     {
       "_id": "item:dragon_empereur_patte",
-      "_rev": "2-09210398cfc752a50b56a971dd94f6ed",
+      "_rev": "3-c41492f7f836a9d3e49a1f4b9f312dd1",
       "type": "item",
       "nom": "Patte de Dragon Empereur",
       "icon": "🦴",
@@ -41515,7 +43777,7 @@
     },
     {
       "_id": "item:dragon_empereur_patte_morceau",
-      "_rev": "1-fafc34576fa0aa3da1bfb5ad60e4280b",
+      "_rev": "2-0272c70713167637d2bb42addd701f5d",
       "type": "item",
       "nom": "Morceau de patte de Dragon Empereur",
       "icon": "🥩",
@@ -41567,7 +43829,7 @@
     },
     {
       "_id": "item:dragon_empereur_queue",
-      "_rev": "2-1d7ef9f921dc11a634d4b591aac0a6f9",
+      "_rev": "3-02df8a7fc1778852b90c5c0cb966e8cd",
       "type": "item",
       "nom": "Queue de Dragon Empereur",
       "icon": "🦴",
@@ -41618,7 +43880,7 @@
     },
     {
       "_id": "item:dragon_empereur_queue_morceau",
-      "_rev": "1-183855ccca2beef13625f96e35172770",
+      "_rev": "2-4e80e92977d38f771e9bc0c0330f6d09",
       "type": "item",
       "nom": "Morceau de queue de Dragon Empereur",
       "icon": "🥩",
@@ -41662,7 +43924,7 @@
     },
     {
       "_id": "item:dragon_empereur_tete",
-      "_rev": "2-e74aed380f100519210a37d74f043712",
+      "_rev": "3-b8c0fc58799ad050497d0898c0afe20f",
       "type": "item",
       "nom": "Tête de Dragon Empereur",
       "icon": "💀",
@@ -41721,7 +43983,7 @@
     },
     {
       "_id": "item:dragon_empereur_tete_morceau",
-      "_rev": "1-517611110f33aeac03ffa2770ce54384",
+      "_rev": "2-b86446bf00e82d18e06be4b19a69cd1d",
       "type": "item",
       "nom": "Morceau de tête de Dragon Empereur",
       "icon": "🥩",
@@ -41773,7 +44035,7 @@
     },
     {
       "_id": "item:dragon_patte",
-      "_rev": "2-472a9f4bde0f9e0e3ff6301d04332b6a",
+      "_rev": "3-15a8d4f9e46672d189e3b65ec8c96c5e",
       "type": "item",
       "nom": "Patte de Dragon",
       "icon": "🦴",
@@ -41823,7 +44085,7 @@
     },
     {
       "_id": "item:dragon_queue",
-      "_rev": "2-719ac436e168607b254ba4cd342a896d",
+      "_rev": "3-84ffbc9c87aed43a3773757509e1d274",
       "type": "item",
       "nom": "Queue de Dragon",
       "icon": "🦴",
@@ -41865,7 +44127,7 @@
     },
     {
       "_id": "item:dragon_tete",
-      "_rev": "2-8f7aa4b6a2d4f8b015d2deed0021798e",
+      "_rev": "3-138fd9aa392f9f3802416b8a32b93988",
       "type": "item",
       "nom": "Tête de Dragon",
       "icon": "💀",
@@ -41915,7 +44177,7 @@
     },
     {
       "_id": "item:dragon_zombie",
-      "_rev": "6-2f65907a66c0f1f9394d21cc6284e80c",
+      "_rev": "7-6ad93971e6e5b8bf4d18256086373a16",
       "type": "item",
       "nom": "Ossements de Dragon Zombie",
       "sous_categorie": "ossements",
@@ -41923,7 +44185,10 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 15.0,
+      "poids": [
+        500,
+        1900
+      ],
       "description": "Ossements et reliquats récupérés sur Dragon Zombie après sa destruction.",
       "source_espece": "espece:dragon_zombie",
       "loot_defaut": true
@@ -42075,7 +44340,7 @@
     },
     {
       "_id": "item:familier",
-      "_rev": "4-53ef5e116ef24754d71177ad11f2d2e4",
+      "_rev": "5-1dd2320718504e23b18c838d8e1e8ff0",
       "type": "item",
       "nom": "Carcasse de Familier",
       "sous_categorie": "carcasse",
@@ -42083,7 +44348,10 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 1.0,
+      "poids": [
+        15,
+        50
+      ],
       "description": "Dépouille de Familier récupérée à l'issue du combat.",
       "source_espece": "espece:familier",
       "loot_defaut": true
@@ -42171,7 +44439,7 @@
     },
     {
       "_id": "item:fauves",
-      "_rev": "4-c4f613f57e3e1eed6f307fbbe371f9fc",
+      "_rev": "6-d7b2924781e13a18d9b382f70c22b00d",
       "type": "item",
       "nom": "Carcasse de Fauves",
       "sous_categorie": "carcasse",
@@ -42179,10 +44447,291 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 8.0,
+      "poids": [
+        120,
+        300
+      ],
       "description": "Dépouille de Fauves récupérée à l'issue du combat.",
       "source_espece": "espece:fauves",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:fauves_tete",
+          "quantite": 1,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:fauves_corps",
+          "quantite": 1,
+          "fraction": 0.52
+        },
+        {
+          "item": "item:fauves_patte",
+          "quantite": 4,
+          "fraction": 0.28
+        },
+        {
+          "item": "item:fauves_queue",
+          "quantite": 1,
+          "fraction": 0.08
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:fauves_corps",
+      "_rev": "1-5a3ed820bb3b535164dcac34b008dc85",
+      "type": "item",
+      "nom": "Corps de Fauves",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        62.4,
+        156
+      ],
+      "description": "Corps de Fauves, débité sur place.",
+      "tags": [
+        "animal",
+        "partie_corps",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:fauves_corps_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:fauves_corps_morceau",
+      "_rev": "1-205c5d4902d2e0f0b04a3d6fcca58dc4",
+      "type": "item",
+      "nom": "Morceau de corps de Fauves",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        31.2,
+        78
+      ],
+      "description": "Morceau de corps de Fauves, taillé pour être emporté.",
+      "tags": [
+        "animal",
+        "morceau",
+        "partie_corps",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_patte",
+      "_rev": "1-f55d6c854a1754fdcc4f0789563073ae",
+      "type": "item",
+      "nom": "Patte de Fauves",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        8.4,
+        21
+      ],
+      "description": "Patte de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_patte",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_queue",
+      "_rev": "1-0d49f0f22f45f33720a5ed7a42268a53",
+      "type": "item",
+      "nom": "Queue de Fauves",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        9.6,
+        24
+      ],
+      "description": "Queue de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_queue",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_tete",
+      "_rev": "1-77e28b47be95cd9c2b1e9f857ee8242c",
+      "type": "item",
+      "nom": "Tête de Fauves",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        14.4,
+        36
+      ],
+      "description": "Tête de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_tete",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:fee",
@@ -42765,7 +45314,7 @@
     },
     {
       "_id": "item:grand_dragon",
-      "_rev": "7-d6e1c916bb0abfcc28e3a9745e0f3a0b",
+      "_rev": "8-99aa4c9f4edc17b9fd67bbc6e3b06c77",
       "type": "item",
       "nom": "Carcasse de Grand Dragon",
       "sous_categorie": "carcasse",
@@ -42811,7 +45360,7 @@
     },
     {
       "_id": "item:grand_dragon_aile",
-      "_rev": "2-a8dc5fa4ca6fad06bc6acc553b43b05f",
+      "_rev": "3-9f4cdc348e63596191d56415b3639684",
       "type": "item",
       "nom": "Aile de Grand Dragon",
       "icon": "🪶",
@@ -42861,7 +45410,7 @@
     },
     {
       "_id": "item:grand_dragon_aile_morceau",
-      "_rev": "1-79638935607cf58f1726fd7d2e412ed5",
+      "_rev": "2-80c78f2de0707080044aabbee78fa767",
       "type": "item",
       "nom": "Morceau de aile de Grand Dragon",
       "icon": "🥩",
@@ -42904,7 +45453,7 @@
     },
     {
       "_id": "item:grand_dragon_corps",
-      "_rev": "2-cdafbd5e79bbd7cb72a458276914df2c",
+      "_rev": "3-76d7074f716fb9af5d1a679c232d5733",
       "type": "item",
       "nom": "Corps de Grand Dragon",
       "icon": "🥩",
@@ -42974,7 +45523,7 @@
     },
     {
       "_id": "item:grand_dragon_corps_morceau",
-      "_rev": "1-b9ba6315446940642fb57dfe374bbb4b",
+      "_rev": "2-03b46ac345902face562f0a7a8e5cf9a",
       "type": "item",
       "nom": "Morceau de corps de Grand Dragon",
       "icon": "🥩",
@@ -43037,7 +45586,7 @@
     },
     {
       "_id": "item:grand_dragon_patte",
-      "_rev": "2-95cc93ad5a8cd55fc890efc057bb847f",
+      "_rev": "3-b4cfddc588c21edaee423b20c41a1740",
       "type": "item",
       "nom": "Patte de Grand Dragon",
       "icon": "🦴",
@@ -43087,7 +45636,7 @@
     },
     {
       "_id": "item:grand_dragon_queue",
-      "_rev": "2-31c256d2fa5b2e498cf7f6023e811c1c",
+      "_rev": "3-be1cb7a58629216f2138a294310dde0f",
       "type": "item",
       "nom": "Queue de Grand Dragon",
       "icon": "🦴",
@@ -43137,7 +45686,7 @@
     },
     {
       "_id": "item:grand_dragon_queue_morceau",
-      "_rev": "1-6f93ac5c92bbf531e0dddfe5238ce3c5",
+      "_rev": "2-033005f4f25ef916d9b0be5de4b2adf7",
       "type": "item",
       "nom": "Morceau de queue de Grand Dragon",
       "icon": "🥩",
@@ -43180,7 +45729,7 @@
     },
     {
       "_id": "item:grand_dragon_tete",
-      "_rev": "2-2b253c9747647b96d04a12f461d0f5f7",
+      "_rev": "3-ac4648f44cc16c892124ee48692858bc",
       "type": "item",
       "nom": "Tête de Grand Dragon",
       "icon": "💀",
@@ -43238,7 +45787,7 @@
     },
     {
       "_id": "item:grand_dragon_tete_morceau",
-      "_rev": "1-a89cacaab27b72b670a4941f20e5209c",
+      "_rev": "2-4bee234bfe4f34e748d362bb8ea8d882",
       "type": "item",
       "nom": "Morceau de tête de Grand Dragon",
       "icon": "🥩",
@@ -43319,7 +45868,7 @@
     },
     {
       "_id": "item:grand_sanglier",
-      "_rev": "7-5f277202da5dd1f79008ffe04aae7187",
+      "_rev": "8-8122146ff720fd5e8f1511812c029d70",
       "type": "item",
       "nom": "Carcasse de Grand Sanglier",
       "sous_categorie": "carcasse",
@@ -43360,7 +45909,7 @@
     },
     {
       "_id": "item:grand_sanglier_corps",
-      "_rev": "2-8f5d5efa03842b4d582ec4d2d26a3d0a",
+      "_rev": "3-b70e496970919ef8c3508b74f9c45dc3",
       "type": "item",
       "nom": "Corps de Grand Sanglier",
       "icon": "🥩",
@@ -43427,7 +45976,7 @@
     },
     {
       "_id": "item:grand_sanglier_corps_morceau",
-      "_rev": "1-32c734c42981959d7f3395e878f8e143",
+      "_rev": "2-cb957d8f95888a0530dccba51b53f46a",
       "type": "item",
       "nom": "Morceau de corps de Grand Sanglier",
       "icon": "🥩",
@@ -43487,7 +46036,7 @@
     },
     {
       "_id": "item:grand_sanglier_patte",
-      "_rev": "2-3273369557d4330537a1af8a0bcc6f47",
+      "_rev": "3-9ab5475c7f5359f6f6daf8332aa606aa",
       "type": "item",
       "nom": "Patte de Grand Sanglier",
       "icon": "🦴",
@@ -43530,7 +46079,7 @@
     },
     {
       "_id": "item:grand_sanglier_queue",
-      "_rev": "2-749fbf726eb3b24c1ebd50aee56d2791",
+      "_rev": "3-93da604abbfc5a3642ce9c764ee3f53d",
       "type": "item",
       "nom": "Queue de Grand Sanglier",
       "icon": "🦴",
@@ -43573,7 +46122,7 @@
     },
     {
       "_id": "item:grand_sanglier_tete",
-      "_rev": "2-d7a87d34bc00045efd126afdf863665d",
+      "_rev": "3-ff2c719ba270874f9d4751ceb09f0083",
       "type": "item",
       "nom": "Tête de Grand Sanglier",
       "icon": "💀",
@@ -46746,7 +49295,7 @@
     },
     {
       "_id": "item:homme_arbre",
-      "_rev": "7-fda88e8f138712f0187cb53d7da0eed6",
+      "_rev": "8-06940167849598a6ef8c856ef72c5a27",
       "type": "item",
       "nom": "Carcasse d'Homme Arbre",
       "sous_categorie": "carcasse",
@@ -46787,7 +49336,7 @@
     },
     {
       "_id": "item:homme_arbre_bras",
-      "_rev": "2-d353cee5a6b4dc5e832d563d6584638d",
+      "_rev": "3-6c3e980fd9f235d1498692791d97c7fb",
       "type": "item",
       "nom": "Bras d'Homme Arbre",
       "icon": "🦴",
@@ -46838,7 +49387,7 @@
     },
     {
       "_id": "item:homme_arbre_bras_morceau",
-      "_rev": "1-17cb1c1a7fd3608b52430a0e94eb5a24",
+      "_rev": "2-4c1bc5709d66ec59f8bd428107f291d4",
       "type": "item",
       "nom": "Morceau de bras d'Homme Arbre",
       "icon": "🥩",
@@ -46882,7 +49431,7 @@
     },
     {
       "_id": "item:homme_arbre_corps",
-      "_rev": "2-41753a16a84358ea410cae7888800963",
+      "_rev": "3-dc33293ed6edb45a9c496b87b17a0407",
       "type": "item",
       "nom": "Corps d'Homme Arbre",
       "icon": "🥩",
@@ -46949,7 +49498,7 @@
     },
     {
       "_id": "item:homme_arbre_corps_morceau",
-      "_rev": "1-9482a47f9d27a022c140ba2e9c553bc6",
+      "_rev": "2-44e3135679fc3ecaaa3939116acb16b3",
       "type": "item",
       "nom": "Morceau de corps d'Homme Arbre",
       "icon": "🥩",
@@ -47009,7 +49558,7 @@
     },
     {
       "_id": "item:homme_arbre_jambe",
-      "_rev": "2-490424c07b4461f0efb03a01b4da822c",
+      "_rev": "3-b0d050c31426ccd2f4b913032a93673b",
       "type": "item",
       "nom": "Jambe d'Homme Arbre",
       "icon": "🦴",
@@ -47064,7 +49613,7 @@
     },
     {
       "_id": "item:homme_arbre_jambe_morceau",
-      "_rev": "1-533c9d05f3a8cfc880448bbede2c3ab4",
+      "_rev": "2-f9ce70017733ddad1d7f9325507cb0f0",
       "type": "item",
       "nom": "Morceau de jambe d'Homme Arbre",
       "icon": "🥩",
@@ -47112,7 +49661,7 @@
     },
     {
       "_id": "item:homme_arbre_tete",
-      "_rev": "2-88d2c8248ffbcea92ea494e3ea830ede",
+      "_rev": "3-272f862559e89d46e977a5b45497baa0",
       "type": "item",
       "nom": "Tête d'Homme Arbre",
       "icon": "💀",
@@ -47163,7 +49712,7 @@
     },
     {
       "_id": "item:homme_arbre_tete_morceau",
-      "_rev": "1-6f930d53351f2566595a620007953459",
+      "_rev": "2-d848bf7a1de6218f063915006c6fe720",
       "type": "item",
       "nom": "Morceau de tête d'Homme Arbre",
       "icon": "🥩",
@@ -47238,7 +49787,7 @@
     },
     {
       "_id": "item:hydre",
-      "_rev": "7-931938b6b6583e1e71dde97191ea0d28",
+      "_rev": "8-a0d1a4439d0b53b65cef04d4a74ac8fc",
       "type": "item",
       "nom": "Carcasse d'Hydre",
       "sous_categorie": "carcasse",
@@ -47279,7 +49828,7 @@
     },
     {
       "_id": "item:hydre_corps",
-      "_rev": "2-3e33ee31daf3eaf43a58bdccb135df37",
+      "_rev": "3-e0ddca3f670d0144e1dcf90b61ae5edd",
       "type": "item",
       "nom": "Corps d'Hydre",
       "icon": "🥩",
@@ -47346,7 +49895,7 @@
     },
     {
       "_id": "item:hydre_corps_morceau",
-      "_rev": "1-a6606438e098763f17b9008d8270301c",
+      "_rev": "2-f752b44311fb94a60740dc646973e960",
       "type": "item",
       "nom": "Morceau de corps d'Hydre",
       "icon": "🥩",
@@ -47406,7 +49955,7 @@
     },
     {
       "_id": "item:hydre_patte",
-      "_rev": "2-2fa6454a0eb4fb31a6e061abb3ff08a8",
+      "_rev": "3-2dd88bc784ce690ec58693481191ef32",
       "type": "item",
       "nom": "Patte d'Hydre",
       "icon": "🦴",
@@ -47449,7 +49998,7 @@
     },
     {
       "_id": "item:hydre_queue",
-      "_rev": "2-da04607124fae0830f1d09310a99bbc6",
+      "_rev": "3-de88395ad54d8c2b210d796578b177b0",
       "type": "item",
       "nom": "Queue d'Hydre",
       "icon": "🦴",
@@ -47488,7 +50037,7 @@
     },
     {
       "_id": "item:hydre_tete",
-      "_rev": "2-afc39a9d99eefabc950ccf14a386b6a2",
+      "_rev": "3-0c137e29b394ceebb3a02005baf90368",
       "type": "item",
       "nom": "Tête d'Hydre",
       "icon": "💀",
@@ -54456,7 +57005,7 @@
     },
     {
       "_id": "item:loup_garou",
-      "_rev": "6-a6276c82dbf52ad56b0c651f5e6d5822",
+      "_rev": "7-f66d310d4404f59c5ec56f1946a211e0",
       "type": "item",
       "nom": "Carcasse de Loup Garou",
       "sous_categorie": "carcasse",
@@ -54497,7 +57046,7 @@
     },
     {
       "_id": "item:loup_garou_corps",
-      "_rev": "1-91f36e1b8553ac3e1940871e57af0abd",
+      "_rev": "2-365245a89d4bb924593026c40b6fedd9",
       "type": "item",
       "nom": "Corps de Loup Garou",
       "icon": "🥩",
@@ -54552,7 +57101,7 @@
     },
     {
       "_id": "item:loup_garou_patte",
-      "_rev": "1-59380f28b4e0c9336437d6aa94900731",
+      "_rev": "2-8cb8011227be24b900553290b732b83d",
       "type": "item",
       "nom": "Patte de Loup Garou",
       "icon": "🦴",
@@ -54595,7 +57144,7 @@
     },
     {
       "_id": "item:loup_garou_queue",
-      "_rev": "1-85ec9510472d247cfca4ccfe86df6674",
+      "_rev": "2-76ed9017482ed0616907fcd3d0b73a80",
       "type": "item",
       "nom": "Queue de Loup Garou",
       "icon": "🦴",
@@ -54634,7 +57183,7 @@
     },
     {
       "_id": "item:loup_garou_tete",
-      "_rev": "1-250042f21d16e3dd79c3c6f2f419264c",
+      "_rev": "2-3108dea578b74350f1008668c220c9e5",
       "type": "item",
       "nom": "Tête de Loup Garou",
       "icon": "💀",
@@ -54677,7 +57226,7 @@
     },
     {
       "_id": "item:loup_geant",
-      "_rev": "6-b5dbd11922435247b189f224dd7862e5",
+      "_rev": "7-bf362e55b1a33d48c41f7ca261a28260",
       "type": "item",
       "nom": "Carcasse de Loup Géant",
       "sous_categorie": "carcasse",
@@ -54718,7 +57267,7 @@
     },
     {
       "_id": "item:loup_geant_corps",
-      "_rev": "1-b8488754aa5dee2941b9d27c243f32c2",
+      "_rev": "2-5f28d3e5a0ffa52ed328c8e38564f564",
       "type": "item",
       "nom": "Corps de Loup Géant",
       "icon": "🥩",
@@ -54777,7 +57326,7 @@
     },
     {
       "_id": "item:loup_geant_patte",
-      "_rev": "1-cd533c51aea44c2be3668a054425fa40",
+      "_rev": "2-ff583283bf5292ce366d0b01a848f33c",
       "type": "item",
       "nom": "Patte de Loup Géant",
       "icon": "🦴",
@@ -54820,7 +57369,7 @@
     },
     {
       "_id": "item:loup_geant_queue",
-      "_rev": "1-0a8b8865a90fa0544fa70752e898192f",
+      "_rev": "2-49053aedbab2ff70024ebab1d050ae4a",
       "type": "item",
       "nom": "Queue de Loup Géant",
       "icon": "🦴",
@@ -54863,7 +57412,7 @@
     },
     {
       "_id": "item:loup_geant_tete",
-      "_rev": "1-23beb81560a2f3a98cb39afcae378751",
+      "_rev": "2-50bda0640fc87b19da43c7476f373262",
       "type": "item",
       "nom": "Tête de Loup Géant",
       "icon": "💀",
@@ -54921,7 +57470,7 @@
     },
     {
       "_id": "item:mammouth",
-      "_rev": "7-e88724bd33951553838ae85a5a56af55",
+      "_rev": "8-39ae213bec2627eafef1d07a22d4e1e7",
       "type": "item",
       "nom": "Carcasse de Mammouth",
       "sous_categorie": "carcasse",
@@ -54962,7 +57511,7 @@
     },
     {
       "_id": "item:mammouth_corps",
-      "_rev": "2-b7b3a7f09d36238dd6692c4cb2590824",
+      "_rev": "3-0a6a3484763704fb69e8bfcb3b0b5d97",
       "type": "item",
       "nom": "Corps de Mammouth",
       "icon": "🥩",
@@ -55029,7 +57578,7 @@
     },
     {
       "_id": "item:mammouth_corps_morceau",
-      "_rev": "1-84a7549d674d62332eb009997a5ba293",
+      "_rev": "2-3be1538a04d090b0e4c103fa0af5f8ce",
       "type": "item",
       "nom": "Morceau de corps de Mammouth",
       "icon": "🥩",
@@ -55089,7 +57638,7 @@
     },
     {
       "_id": "item:mammouth_patte",
-      "_rev": "2-3042dae2732f78b6b4aaf8e364c6beca",
+      "_rev": "3-348136fce64a321a78810d00a3467900",
       "type": "item",
       "nom": "Patte de Mammouth",
       "icon": "🦴",
@@ -55144,7 +57693,7 @@
     },
     {
       "_id": "item:mammouth_patte_morceau",
-      "_rev": "1-f2b23b637d9d38f6b4fbe8e4c55c32c4",
+      "_rev": "2-e2824edd576b9933ca3179b972075855",
       "type": "item",
       "nom": "Morceau de patte de Mammouth",
       "icon": "🥩",
@@ -55192,7 +57741,7 @@
     },
     {
       "_id": "item:mammouth_queue",
-      "_rev": "2-7245b1dc884e91adf066a11117367ec8",
+      "_rev": "3-0cf1b063e464011d21b0f239b491d858",
       "type": "item",
       "nom": "Queue de Mammouth",
       "icon": "🦴",
@@ -55243,7 +57792,7 @@
     },
     {
       "_id": "item:mammouth_queue_morceau",
-      "_rev": "1-09fb1f745d2a53408821f792c37468e9",
+      "_rev": "2-9f4e30b0761029a3536fa4d6e84785c5",
       "type": "item",
       "nom": "Morceau de queue de Mammouth",
       "icon": "🥩",
@@ -55287,7 +57836,7 @@
     },
     {
       "_id": "item:mammouth_tete",
-      "_rev": "2-3a4876cfdb681d1871ed5b79a00b9142",
+      "_rev": "3-517d01160571d4d7d6ade6bb22be676d",
       "type": "item",
       "nom": "Tête de Mammouth",
       "icon": "💀",
@@ -55338,7 +57887,7 @@
     },
     {
       "_id": "item:mammouth_tete_morceau",
-      "_rev": "1-9485fe3f11e63502e319dbed1a068436",
+      "_rev": "2-10e12117135d0f0723b6e52c4adf4dca",
       "type": "item",
       "nom": "Morceau de tête de Mammouth",
       "icon": "🥩",
@@ -55536,7 +58085,7 @@
     },
     {
       "_id": "item:monture_angelique",
-      "_rev": "4-a0f9259f60b73b66595cf47d768597b5",
+      "_rev": "5-d48a0e0b337a1bf42b7d4295b84d19a3",
       "type": "item",
       "nom": "Carcasse de Monture Angelique",
       "sous_categorie": "carcasse",
@@ -55544,14 +58093,17 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 9.0,
+      "poids": [
+        200,
+        800
+      ],
       "description": "Dépouille de Monture Angelique récupérée à l'issue du combat.",
       "source_espece": "espece:monture_angelique",
       "loot_defaut": true
     },
     {
       "_id": "item:monture_demoniaque",
-      "_rev": "4-aefe12a5035f72fb3d28bbd4a9c9da3a",
+      "_rev": "5-586a896b9c3e0ed51fa973c69a19d83b",
       "type": "item",
       "nom": "Carcasse de Monture Demoniaque",
       "sous_categorie": "carcasse",
@@ -55559,14 +58111,17 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 10.5,
+      "poids": [
+        400,
+        1500
+      ],
       "description": "Dépouille de Monture Demoniaque récupérée à l'issue du combat.",
       "source_espece": "espece:monture_demoniaque",
       "loot_defaut": true
     },
     {
       "_id": "item:monture_squelette",
-      "_rev": "6-74aa1c65bdb104cd62a9212363a09098",
+      "_rev": "7-f4c940ee9f6b4300f81b150808bbd724",
       "type": "item",
       "nom": "Ossements de Monture Squelette",
       "sous_categorie": "ossements",
@@ -55574,7 +58129,10 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 5.5,
+      "poids": [
+        100,
+        400
+      ],
       "description": "Ossements et reliquats récupérés sur Monture Squelette après sa destruction.",
       "source_espece": "espece:monture_squelette",
       "loot_defaut": true
@@ -56198,7 +58756,7 @@
     },
     {
       "_id": "item:petit_dragon",
-      "_rev": "7-f1f2127c536e6a32829ee57a8202f47d",
+      "_rev": "8-e298df618b37ae3feba75d7f8c01aa26",
       "type": "item",
       "nom": "Carcasse de Petit Dragon",
       "sous_categorie": "carcasse",
@@ -56244,7 +58802,7 @@
     },
     {
       "_id": "item:petit_dragon_aile",
-      "_rev": "2-3220a8a1601d1fc133308aeb3615c915",
+      "_rev": "3-bcc16fdd3189df3a1ab6bbe5fcb75958",
       "type": "item",
       "nom": "Aile de Petit Dragon",
       "icon": "🪶",
@@ -56283,7 +58841,7 @@
     },
     {
       "_id": "item:petit_dragon_corps",
-      "_rev": "2-da468eb7169ce0ba17aab5dc036be46f",
+      "_rev": "3-b2e89ec918efd29584155dee810f608e",
       "type": "item",
       "nom": "Corps de Petit Dragon",
       "icon": "🥩",
@@ -56342,7 +58900,7 @@
     },
     {
       "_id": "item:petit_dragon_patte",
-      "_rev": "2-acf8b719f59e52cc8f6c048d3c39848e",
+      "_rev": "3-7be5f765721f6a6b362ddd9c36a336af",
       "type": "item",
       "nom": "Patte de Petit Dragon",
       "icon": "🦴",
@@ -56389,7 +58947,7 @@
     },
     {
       "_id": "item:petit_dragon_queue",
-      "_rev": "2-bdafb1be1d6a5a214d50d2f65a9264f0",
+      "_rev": "3-54a5ea798e1ca5cd2f08b3794e767a1f",
       "type": "item",
       "nom": "Queue de Petit Dragon",
       "icon": "🦴",
@@ -56428,7 +58986,7 @@
     },
     {
       "_id": "item:petit_dragon_tete",
-      "_rev": "2-199c33300e989fb0309047773a71ae8d",
+      "_rev": "3-187af0d44bd5d6c201c3a02fad37e3e2",
       "type": "item",
       "nom": "Tête de Petit Dragon",
       "icon": "💀",
@@ -56658,7 +59216,7 @@
     },
     {
       "_id": "item:polar_kraken",
-      "_rev": "4-751a4789104cfe5ef2741889aff8d76d",
+      "_rev": "5-87f9b9a61b12fc463330d011673c673e",
       "type": "item",
       "nom": "Carcasse de Polar Kraken",
       "sous_categorie": "carcasse",
@@ -56666,7 +59224,10 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 18.0,
+      "poids": [
+        1000,
+        8000
+      ],
       "description": "Dépouille de Polar Kraken récupérée à l'issue du combat.",
       "source_espece": "espece:polar_kraken",
       "loot_defaut": true
@@ -57015,7 +59576,7 @@
     },
     {
       "_id": "item:sanglier",
-      "_rev": "7-b6537cf0db19c494d3814bca24a54a6c",
+      "_rev": "8-1a84625d0c543d725c001b4b21f38d92",
       "type": "item",
       "nom": "Carcasse de Sanglier",
       "sous_categorie": "carcasse",
@@ -57056,7 +59617,7 @@
     },
     {
       "_id": "item:sanglier_corps",
-      "_rev": "2-481be8420ebfae59bd8f82ce6de75298",
+      "_rev": "3-b18a96975c3efd84d2d865c741370a3f",
       "type": "item",
       "nom": "Corps de Sanglier",
       "icon": "🥩",
@@ -57113,7 +59674,7 @@
     },
     {
       "_id": "item:sanglier_patte",
-      "_rev": "2-350bfb912d4b8e0431e130ed22bdaa1f",
+      "_rev": "3-4317b4e4a7971359b3c5fc19ad5ddb5c",
       "type": "item",
       "nom": "Patte de Sanglier",
       "icon": "🦴",
@@ -57158,7 +59719,7 @@
     },
     {
       "_id": "item:sanglier_queue",
-      "_rev": "2-4554464735526c2f628da691bb2d244b",
+      "_rev": "3-8ca8b9221ea38871c92c1fab5feea84e",
       "type": "item",
       "nom": "Queue de Sanglier",
       "icon": "🦴",
@@ -57199,7 +59760,7 @@
     },
     {
       "_id": "item:sanglier_tete",
-      "_rev": "2-55ba152cd68a1a317183a3cd5d4a0411",
+      "_rev": "3-1116e02be33df634c6bbd13c19a0063c",
       "type": "item",
       "nom": "Tête de Sanglier",
       "icon": "💀",
@@ -57515,7 +60076,7 @@
     },
     {
       "_id": "item:tarasque",
-      "_rev": "7-e01f3c1c8e0b5439daff64c8f5557260",
+      "_rev": "8-6d1ec48dd3b7cdac54390386238b7958",
       "type": "item",
       "nom": "Carcasse de Tarasque",
       "sous_categorie": "carcasse",
@@ -57556,7 +60117,7 @@
     },
     {
       "_id": "item:tarasque_corps",
-      "_rev": "2-0446ac2fbb914c72637149ffce85d908",
+      "_rev": "3-655cd7f390b9eaef484cb6eb28b34fa3",
       "type": "item",
       "nom": "Corps de Tarasque",
       "icon": "🥩",
@@ -57624,7 +60185,7 @@
     },
     {
       "_id": "item:tarasque_corps_morceau",
-      "_rev": "1-35ce0a11c036ba941aac40e8011d283f",
+      "_rev": "2-c26194515f8ff7c423953e9fe2dd6d7e",
       "type": "item",
       "nom": "Morceau de corps de Tarasque",
       "icon": "🥩",
@@ -57685,7 +60246,7 @@
     },
     {
       "_id": "item:tarasque_patte",
-      "_rev": "2-a09b0e3a4a0a081a40f9c60956462f48",
+      "_rev": "3-3b722c6f0949503056aab4ea9c5cc2ef",
       "type": "item",
       "nom": "Patte de Tarasque",
       "icon": "🦴",
@@ -57737,7 +60298,7 @@
     },
     {
       "_id": "item:tarasque_patte_morceau",
-      "_rev": "1-642ba8975d4b48fc944194da63dbfe3b",
+      "_rev": "2-36f3b55eba9df853e929ec464f2c380f",
       "type": "item",
       "nom": "Morceau de patte de Tarasque",
       "icon": "🥩",
@@ -57782,7 +60343,7 @@
     },
     {
       "_id": "item:tarasque_queue",
-      "_rev": "2-da6f2b229dbf62387600b1a5c499a0a1",
+      "_rev": "3-b93b605bb489d37fa0284e0e40f82d63",
       "type": "item",
       "nom": "Queue de Tarasque",
       "icon": "🦴",
@@ -57830,7 +60391,7 @@
     },
     {
       "_id": "item:tarasque_queue_morceau",
-      "_rev": "1-5f407605f17bc3727502e3793b4470c2",
+      "_rev": "2-67720f798932e18e88a77ea02635116a",
       "type": "item",
       "nom": "Morceau de queue de Tarasque",
       "icon": "🥩",
@@ -57871,7 +60432,7 @@
     },
     {
       "_id": "item:tarasque_tete",
-      "_rev": "2-1adff7e9461fc0e3af55c2e67cbcaa69",
+      "_rev": "3-c4fa5362b95e85b9cec06a228713161d",
       "type": "item",
       "nom": "Tête de Tarasque",
       "icon": "💀",
@@ -57927,7 +60488,7 @@
     },
     {
       "_id": "item:tarasque_tete_morceau",
-      "_rev": "1-ebbcba44fadbeb8cca7c4359ca2f4dab",
+      "_rev": "2-983fe43b4d6450ea208f3aa325a64615",
       "type": "item",
       "nom": "Morceau de tête de Tarasque",
       "icon": "🥩",
@@ -57976,7 +60537,7 @@
     },
     {
       "_id": "item:taureau",
-      "_rev": "7-8e81d70afbf2c858165fd6f8c3f2d3de",
+      "_rev": "8-a636841e2c0912b1ac2abb2cae5dd439",
       "type": "item",
       "nom": "Carcasse de Taureau",
       "sous_categorie": "carcasse",
@@ -58017,7 +60578,7 @@
     },
     {
       "_id": "item:taureau_corps",
-      "_rev": "2-37dcaab40af782141878477b7df6768b",
+      "_rev": "3-691a5702c496bff4f55ddb1b2ca0861b",
       "type": "item",
       "nom": "Corps de Taureau",
       "icon": "🥩",
@@ -58082,7 +60643,7 @@
     },
     {
       "_id": "item:taureau_corps_morceau",
-      "_rev": "1-c6c826341071871a356c7e9eb83a3ee8",
+      "_rev": "2-c635d903764287cc422a8fca84df15a5",
       "type": "item",
       "nom": "Morceau de corps de Taureau",
       "icon": "🥩",
@@ -58140,7 +60701,7 @@
     },
     {
       "_id": "item:taureau_patte",
-      "_rev": "2-293963b890a9c1c42db982480584385a",
+      "_rev": "3-1f02c05bbea63d00c79238c2cba00ef6",
       "type": "item",
       "nom": "Patte de Taureau",
       "icon": "🦴",
@@ -58193,7 +60754,7 @@
     },
     {
       "_id": "item:taureau_patte_morceau",
-      "_rev": "1-d62707b9dc4905f9230c0c1688c08dca",
+      "_rev": "2-51012ab11ccbab7dfa3929a315253d09",
       "type": "item",
       "nom": "Morceau de patte de Taureau",
       "icon": "🥩",
@@ -58239,7 +60800,7 @@
     },
     {
       "_id": "item:taureau_queue",
-      "_rev": "2-11a960b7076602338f090533335f1f2d",
+      "_rev": "3-8a05a8e446e24d3821bc33da2d7393a8",
       "type": "item",
       "nom": "Queue de Taureau",
       "icon": "🦴",
@@ -58288,7 +60849,7 @@
     },
     {
       "_id": "item:taureau_queue_morceau",
-      "_rev": "1-b3fe5cccd88ad55ea1af8bcc6c3065d8",
+      "_rev": "2-d5da3dafdc6e42a9338b33c79625295a",
       "type": "item",
       "nom": "Morceau de queue de Taureau",
       "icon": "🥩",
@@ -58330,7 +60891,7 @@
     },
     {
       "_id": "item:taureau_tete",
-      "_rev": "2-34ee51fc9dc14cd399afc6cea4e72482",
+      "_rev": "3-8d54776e5b82bb54fc2cb3ca73691d52",
       "type": "item",
       "nom": "Tête de Taureau",
       "icon": "💀",
@@ -58379,7 +60940,7 @@
     },
     {
       "_id": "item:taureau_tete_morceau",
-      "_rev": "1-79940e84542ed9142a76718718f6f010",
+      "_rev": "2-ef3e579e48103b6fa125a153fd2c1757",
       "type": "item",
       "nom": "Morceau de tête de Taureau",
       "icon": "🥩",

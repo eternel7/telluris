@@ -1,0 +1,425 @@
+[
+  {
+    "_id": "item:crocs",
+    "_rev": "3-25a629bfeae46fd5beb7d2fc01d3b8bb",
+    "type": "item",
+    "nom": "Crocs",
+    "sous_categorie": "crocs",
+    "icon": "🦷",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "à garde de crocs",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "valeur": {
+          "facteur": 1.2
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:cuir",
+    "_rev": "3-cbd0d024a3ec36e8f51bdc0265bf7c7c",
+    "type": "item",
+    "nom": "Cuir",
+    "sous_categorie": "cuir",
+    "icon": "🟫",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.5,
+    "fabrication": {
+      "nom": "à garniture de cuir",
+      "modificateurs": {
+        "bonus_pa": 1,
+        "poids": {
+          "facteur": 0.95
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:metaux_precieux",
+    "_rev": "2-74f6211f2b8b210bc4c5d99ba06b56ae",
+    "type": "item",
+    "nom": "Grenaille précieuse",
+    "description": "Petites larmes d'argent et d'or coulées au creuset. Le bijoutier ne travaille pas au lingot : il pèse sa grenaille au grain près.",
+    "icon": "🔸",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "sous_categorie": "metaux_precieux",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 0.1,
+    "valeur": [
+      {
+        "cu": 30
+      }
+    ],
+    "fabrication": {
+      "nom": "à incrustations précieuses",
+      "modificateurs": {
+        "bonus": {
+          "Cha": 2
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:tendons",
+    "_rev": "3-27f138291d8e8ade3dcf2f5138c4f290",
+    "type": "item",
+    "nom": "Tendons",
+    "sous_categorie": "tendons",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "à ligature de tendons",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "poids": {
+          "facteur": 0.95
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:os",
+    "_rev": "3-21943ddf2af8fcf77f29eddc66a299ff",
+    "type": "item",
+    "nom": "Os",
+    "sous_categorie": "os",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.4,
+    "fabrication": {
+      "nom": "à poignée d'os",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "poids": {
+          "facteur": 0.9
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:argent",
+    "_rev": "4-d9c5d4289a62516af0110d99e9654b97",
+    "type": "item",
+    "nom": "Lingot d'argent",
+    "description": "Métal blanc, tendre et cher, que les armuriers réservent aux incrustations, aux runes et aux lames dites bénies.",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "sous_categorie": "metaux_precieux",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 20
+      }
+    ],
+    "fabrication": {
+      "nom": "aux ferrures d'argent",
+      "modificateurs": {
+        "bonus_pm": 3,
+        "bonus": {
+          "Int": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:composant_rituel",
+    "_rev": "12-5532b8d6ad24f1018af952a4988c3cc4",
+    "type": "item",
+    "nom": "Composant rituel",
+    "sous_categorie": "",
+    "icon": "📿",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "de rituel",
+      "modificateurs": {
+        "bonus_pm": 1,
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
+  },
+  {
+    "_id": "item:acier",
+    "_rev": "3-609097a1d33f9e79b46f0bfbf9c50558",
+    "type": "item",
+    "nom": "Lingot d'acier",
+    "sous_categorie": "acier",
+    "icon": "⚙️",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 2
+      }
+    ],
+    "fabrication": {
+      "nom": "en acier",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_pa": 2,
+        "poids": {
+          "facteur": 1.05
+        },
+        "valeur": {
+          "facteur": 1.3
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:bronze",
+    "_rev": "3-ae2bfc65999d4795ee03b95332862b8c",
+    "type": "item",
+    "nom": "Lingot de bronze",
+    "sous_categorie": "bronze",
+    "icon": "🟫",
+    "rarete": "commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 3,
+    "valeur": [
+      {
+        "cu": 35
+      }
+    ],
+    "fabrication": {
+      "nom": "en bronze",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "poids": {
+          "facteur": 1.1
+        },
+        "valeur": {
+          "facteur": 0.9
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:fer",
+    "_rev": "3-5bcf642306bcd80092867907311b48f6",
+    "type": "item",
+    "nom": "Lingot de fer",
+    "sous_categorie": "fer",
+    "icon": "🔩",
+    "rarete": "commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 3,
+    "valeur": [
+      {
+        "cu": 50
+      }
+    ],
+    "fabrication": {
+      "nom": "en fer",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "poids": {
+          "facteur": 1.05
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:perles",
+    "_rev": "2-926d7c4f2a2f7c5ba560342c99f77d61",
+    "type": "item",
+    "nom": "Perle",
+    "description": "Perle d'eau douce, ronde et laiteuse. Il en faut un plein cordon pour un sautoir, et une huître sur mille pour une perle.",
+    "icon": "⚪",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "perles",
+    "slots": [],
+    "tags": [],
+    "poids": 0.02,
+    "valeur": [
+      {
+        "cu": 60
+      }
+    ],
+    "fabrication": {
+      "nom": "perlé",
+      "modificateurs": {
+        "bonus": {
+          "Cha": 1
+        },
+        "valeur": {
+          "facteur": 1.6
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:plomb",
+    "_rev": "4-fb1275956ef1373c377c2c70391a890c",
+    "type": "item",
+    "nom": "Lingot de plomb",
+    "description": "Métal mou et lourd, sans valeur au tranchant : on l'emploie à lester ce qui doit tomber vite et frapper fort.",
+    "icon": "🔗",
+    "rarete": "commun",
+    "categorie": "metal",
+    "sous_categorie": "plomb",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 4,
+    "valeur": [
+      {
+        "cu": 20
+      }
+    ],
+    "fabrication": {
+      "nom": "plombé",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "poids": {
+          "facteur": 1.4
+        },
+        "valeur": {
+          "facteur": 0.8
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Pate_a_polir",
+    "_rev": "4-21d5c0183e8479fd1ee392084df5fc2d",
+    "type": "item",
+    "nom": "Pâte à polir",
+    "icon": "✨",
+    "description": "Mélange abrasif doux, à base de sel et de cendres, pour nettoyer et faire briller.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "poids": 0.15,
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "fabrication": {
+      "nom": "polie",
+      "modificateurs": {
+        "bonus_cc": 1,
+        "bonus": {
+          "Cha": 1
+        },
+        "valeur": {
+          "facteur": 1
+        },
+        "rarete": "commun"
+      }
+    }
+  },
+  {
+    "_id": "item:gemmes",
+    "_rev": "2-8a5d132901814f7f6b690b21207d1212",
+    "type": "item",
+    "nom": "Gemme brute",
+    "description": "Pierre de couleur tirée du gravier d'une rivière ou du fond d'une mine, encore mate. Il faudra la tailler avant qu'elle ne prenne feu.",
+    "icon": "💎",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "gemmes",
+    "slots": [],
+    "tags": [],
+    "poids": 0.05,
+    "valeur": [
+      {
+        "cu": 80
+      }
+    ],
+    "fabrication": {
+      "nom": "serti d'une gemme",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Vol": 1
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:debris_anime",
+    "_rev": "5-148fa00a5b15bf268cffbca9160b4bbf",
+    "type": "item",
+    "nom": "Débris animés",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.8,
+    "description": "Fragments inertes d'un corps que rien de vivant n'habitait.",
+    "fabrication": {
+      "nom": "vivante",
+      "modificateurs": {
+        "bonus_cc": 4,
+        "bonus_cd": 4,
+        "bonus": {
+          "Ag": 2
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "rare"
+      }
+    }
+  }
+]

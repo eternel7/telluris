@@ -1,7 +1,7 @@
 {
   "db": "telluris",
-  "exported_at": "2026-09-21T19:29:10.690689Z",
-  "doc_count": 3567,
+  "exported_at": "2026-09-21T20:30:45.870517Z",
+  "doc_count": 3595,
   "docs": [
     {
       "_id": "_design/characters",
@@ -4794,7 +4794,7 @@
     },
     {
       "_id": "aventurier:le_bastion_de_l_yonne_interieur_4a059fd8c889",
-      "_rev": "2035-b2fb9a1785d8779a3c1d497d91e69e3d",
+      "_rev": "2049-7a24c586b82cd0c779e1d5f6b93472f1",
       "type": "aventurier",
       "statut": "embauche",
       "giver": "lieu:le_bastion_de_l_yonne_interieur",
@@ -13662,7 +13662,7 @@
     },
     {
       "_id": "character:user:eternel7@gmail.com_b5cb3b70-6c86-43fb-b18a-87e106cbad5b",
-      "_rev": "3204-ff7add88b11e74afca891e8d2a442463",
+      "_rev": "3221-48bc07fb08f6129764adfcbb79e5e3ad",
       "user_id": "user:eternel7@gmail.com",
       "type": "character",
       "sex": "F",
@@ -13672,10 +13672,10 @@
       "prenom": "Julia",
       "nom": "Einstein",
       "cite": "lieu:auxerre",
-      "lieu": "lieu:lutecia",
+      "lieu": "lieu:la_maison_des_parfums",
       "position": {
-        "x": 40,
-        "y": 22
+        "x": 0,
+        "y": 0
       },
       "caracteristiques_current": {
         "V": 5,
@@ -14383,8 +14383,10 @@
         "raison": "famine"
       },
       "pnj_present": {
-        "lieu": "lieu:lutecia",
-        "characters": []
+        "lieu": "lieu:la_maison_des_parfums",
+        "characters": [
+          "pnj:marchand_manufacture_des_savons_et_parfums"
+        ]
       },
       "portrait_translate": {
         "x": -49.36,
@@ -14467,7 +14469,10 @@
       ],
       "objets_au_sol": [],
       "ressource_recoltable": null,
-      "transport_offert": null,
+      "transport_offert": {
+        "lieu": "lieu:la_maison_des_parfums",
+        "quete": null
+      },
       "groupe": [
         "aventurier:le_bastion_de_l_yonne_interieur_4a059fd8c889"
       ],
@@ -27525,7 +27530,7 @@
     },
     {
       "_id": "item:Eau_benite",
-      "_rev": "4-0720a0dd4bec0f735b5a5e580476b366",
+      "_rev": "5-95fa98f130d1731cbbbf41787b8ff41a",
       "type": "item",
       "nom": "Eau bénite",
       "sous_categorie": "eau",
@@ -27533,7 +27538,23 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.3
+      "poids": 0.3,
+      "fabrication": {
+        "nom": "Béni",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Vol": 1
+          },
+          "effets": {
+            "pv": 5
+          },
+          "valeur": {
+            "facteur": 1.4
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:Eau_de_prunelle",
@@ -27682,7 +27703,7 @@
     },
     {
       "_id": "item:Empennage_de_maitre",
-      "_rev": "1-44cfa81ca52db6204ffc5d1ed3d98095",
+      "_rev": "2-7f95a81375caab56ca79fb6f5171b122",
       "type": "item",
       "nom": "Empennage de maître",
       "description": "Plumes triées à la parure, refendues et collées trois par trois. La flèche part droite même quand la main tremble.",
@@ -27692,7 +27713,21 @@
       "sous_categorie": "",
       "slots": [],
       "tags": [],
-      "poids": 0.1
+      "poids": 0.1,
+      "fabrication": {
+        "nom": "de la Maîtrise",
+        "modificateurs": {
+          "bonus_degats": 1,
+          "bonus_cc": 2,
+          "bonus_initiative": 1,
+          "poids": {
+            "facteur": 0.95
+          },
+          "valeur": {
+            "facteur": 1.3
+          }
+        }
+      }
     },
     {
       "_id": "item:Emplatre_d_ail",
@@ -27737,7 +27772,7 @@
     },
     {
       "_id": "item:Encre_magique",
-      "_rev": "4-418c90f452244ad67cacace598da0e23",
+      "_rev": "5-4f92f7653a869376d05ab271f907d68d",
       "type": "item",
       "nom": "Encre magique",
       "sous_categorie": "encre",
@@ -27745,7 +27780,25 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.1
+      "poids": 0.1,
+      "fabrication": {
+        "nom": "aux Inscriptions magiques",
+        "modificateurs": {
+          "bonus_pm": 2,
+          "bonus": {
+            "Int": 1,
+            "Vol": 1
+          },
+          "effets": {
+            "pm": 5,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:Encre_noire",
@@ -28224,7 +28277,7 @@
     },
     {
       "_id": "item:Fetiche_envoutement",
-      "_rev": "1-feed48c106079185296d565d3af7cb1d",
+      "_rev": "2-4c1091fd2f2bd84b92d560cba967ff7a",
       "type": "item",
       "nom": "Fétiche d'envoûtement",
       "icon": "🪬",
@@ -28234,7 +28287,26 @@
       "sous_categorie": "",
       "slots": [],
       "tags": [],
-      "poids": 0.25
+      "poids": 0.25,
+      "fabrication": {
+        "nom": "Envoûté",
+        "modificateurs": {
+          "bonus_pm": 2,
+          "bonus": {
+            "Vol": 2
+          },
+          "effets": {
+            "buffs": {
+              "Vol": 1
+            },
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:Feuilles_d_absinthe",
@@ -28308,7 +28380,7 @@
     },
     {
       "_id": "item:Fiole_de_sang_fige",
-      "_rev": "1-51b937c892921123e36f199e223331c0",
+      "_rev": "2-5e2ccebd36faca8af7da0cee2aa98f47",
       "type": "item",
       "nom": "Fiole de sang figé",
       "description": "Du sang de démon repris au catalyseur et tenu en suspension. Les praticiens de l'Institut refusent d'expliquer à quoi cela sert.",
@@ -28318,11 +28390,24 @@
       "sous_categorie": "",
       "slots": [],
       "tags": [],
-      "poids": 0.1
+      "poids": 0.1,
+      "fabrication": {
+        "nom": "du Sang Figé",
+        "modificateurs": {
+          "bonus_degats": 1,
+          "bonus_pv": 3,
+          "effets": {
+            "pv": 5
+          },
+          "valeur": {
+            "facteur": 1.2
+          }
+        }
+      }
     },
     {
       "_id": "item:Fiole_sang_bete",
-      "_rev": "3-91992dc219915bac1bc19afd00327f6a",
+      "_rev": "4-42a7b9f8a5e44785f7292f67779d5503",
       "type": "item",
       "nom": "Fiole de sang de bête",
       "sous_categorie": "",
@@ -28330,7 +28415,26 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.1
+      "poids": 0.1,
+      "fabrication": {
+        "nom": "Bestial",
+        "modificateurs": {
+          "bonus_degats": 1,
+          "bonus": {
+            "F": 1,
+            "V": 1
+          },
+          "effets": {
+            "buffs": {
+              "F": 1
+            },
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.2
+          }
+        }
+      }
     },
     {
       "_id": "item:Fleau_arme",
@@ -28469,7 +28573,7 @@
     },
     {
       "_id": "item:Fragments_ame",
-      "_rev": "3-f40392100184820bbf56be9fe478a014",
+      "_rev": "4-7839ce23ee8e5d168ff578a8e7190507",
       "type": "item",
       "nom": "Fragments d'âme",
       "sous_categorie": "",
@@ -28477,7 +28581,25 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.0
+      "poids": 0.0,
+      "fabrication": {
+        "nom": "Hanté",
+        "modificateurs": {
+          "bonus_pm": 3,
+          "bonus": {
+            "Int": 1,
+            "Vol": 2
+          },
+          "effets": {
+            "pm": 5,
+            "regen_pm": 1
+          },
+          "valeur": {
+            "facteur": 2
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:Francisque",
@@ -28770,7 +28892,7 @@
     },
     {
       "_id": "item:Graine_sacree",
-      "_rev": "3-cc850e094a61d5db0dd61002a532ff76",
+      "_rev": "4-a36b81b6155d56396478e4d6337734af",
       "type": "item",
       "nom": "Graine sacrée",
       "sous_categorie": "",
@@ -28778,7 +28900,25 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.01
+      "poids": 0.01,
+      "fabrication": {
+        "nom": "Sacrée",
+        "modificateurs": {
+          "bonus_pv": 3,
+          "bonus": {
+            "Vol": 1
+          },
+          "effets": {
+            "pv": 5,
+            "regen_pv": 1,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:Grimoire_base",
@@ -31594,7 +31734,7 @@
     },
     {
       "_id": "item:Poison_de_base",
-      "_rev": "3-abc7b1c10f44cacd15f76013cdcc6fd2",
+      "_rev": "4-aca940c3af4d13574e4ace314c462a8d",
       "type": "item",
       "nom": "Poison de base",
       "sous_categorie": "",
@@ -31602,7 +31742,20 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.1
+      "poids": 0.1,
+      "fabrication": {
+        "nom": "Empoisonné",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "effets": {
+            "pv": -5,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.3
+          }
+        }
+      }
     },
     {
       "_id": "item:Pommade_corporelle",
@@ -31678,7 +31831,7 @@
     },
     {
       "_id": "item:Poudre_amethyste",
-      "_rev": "3-1a0283242533635800198bb4a4ee51f5",
+      "_rev": "4-52c7c3e985fc374aa02c7fb7a3be777f",
       "type": "item",
       "nom": "Poudre d'améthyste",
       "sous_categorie": "",
@@ -31686,11 +31839,27 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.05
+      "poids": 0.05,
+      "fabrication": {
+        "nom": "d’Améthyste",
+        "modificateurs": {
+          "bonus_pm": 2,
+          "bonus": {
+            "Vol": 1
+          },
+          "effets": {
+            "pm": 5
+          },
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:Poudre_de_miroir",
-      "_rev": "3-aac0f0dc1477ff9dc04aef916c20c15c",
+      "_rev": "4-93460be450d974fa81367020ea42e7bc",
       "type": "item",
       "nom": "Poudre de miroir",
       "sous_categorie": "",
@@ -31698,11 +31867,24 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.05
+      "poids": 0.05,
+      "fabrication": {
+        "nom": "du Reflet",
+        "modificateurs": {
+          "bonus_cd": 2,
+          "bonus": {
+            "Ag": 1,
+            "Cha": 1
+          },
+          "valeur": {
+            "facteur": 1.4
+          }
+        }
+      }
     },
     {
       "_id": "item:Poudre_os",
-      "_rev": "4-f956fd29d134ff92c0cbd16ab642d2a0",
+      "_rev": "5-3f6f2ece897db0715319e7029d3b74c2",
       "type": "item",
       "nom": "Poudre d'os",
       "sous_categorie": "poudre_d_os",
@@ -31710,11 +31892,26 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.1
+      "poids": 0.1,
+      "fabrication": {
+        "nom": "des Ossements",
+        "modificateurs": {
+          "bonus_pv": 2,
+          "bonus": {
+            "R": 1
+          },
+          "poids": {
+            "facteur": 0.95
+          },
+          "valeur": {
+            "facteur": 1.1
+          }
+        }
+      }
     },
     {
       "_id": "item:Poupee_de_cire",
-      "_rev": "1-60adfc8546d227386e8838f6bba86a78",
+      "_rev": "2-ab71556ea19f7316f238870fc8c090b5",
       "type": "item",
       "nom": "Poupée de cire",
       "icon": "🪆",
@@ -31724,7 +31921,23 @@
       "sous_categorie": "",
       "slots": [],
       "tags": [],
-      "poids": 0.2
+      "poids": 0.2,
+      "fabrication": {
+        "nom": "de l’Imitation",
+        "modificateurs": {
+          "bonus_pm": 1,
+          "bonus": {
+            "Vol": 1,
+            "Int": 1
+          },
+          "effets": {
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.3
+          }
+        }
+      }
     },
     {
       "_id": "item:Pourpoint_colore",
@@ -31900,7 +32113,7 @@
     },
     {
       "_id": "item:Reactif_brut",
-      "_rev": "1-002d3bd940e28fe6ef5077aeaa80d7e2",
+      "_rev": "2-a1517f6b61cfb45aca854d36eb293daa",
       "type": "item",
       "nom": "Réactif brut",
       "icon": "⚗️",
@@ -31910,7 +32123,19 @@
       "sous_categorie": "reactif_brut",
       "slots": [],
       "tags": [],
-      "poids": 0.3
+      "poids": 0.3,
+      "fabrication": {
+        "nom": "Alchimique",
+        "modificateurs": {
+          "bonus_pm": 1,
+          "effets": {
+            "pm": 3
+          },
+          "valeur": {
+            "facteur": 1.1
+          }
+        }
+      }
     },
     {
       "_id": "item:Rebec",
@@ -32598,7 +32823,7 @@
     },
     {
       "_id": "item:Sang_demon_seche",
-      "_rev": "3-19606f9dc744ee107a0baee7efe6a8d0",
+      "_rev": "4-83ca605d4a582f26db8f35dafd27779a",
       "type": "item",
       "nom": "Sang de démon séché",
       "sous_categorie": "",
@@ -32606,7 +32831,24 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.05
+      "poids": 0.05,
+      "fabrication": {
+        "nom": "Démoniaque",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus": {
+            "F": 1,
+            "Vol": 1
+          },
+          "effets": {
+            "pv": 5
+          },
+          "valeur": {
+            "facteur": 1.7
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:Sangle_rembourree",
@@ -32941,7 +33183,7 @@
     },
     {
       "_id": "item:Sel_des_sepultures",
-      "_rev": "1-59af44addb0e74fbd5a2fc321628033c",
+      "_rev": "2-184591b98ee7c165199163a447987724",
       "type": "item",
       "nom": "Sel des sépultures",
       "description": "Sel noir recuit au soufre du laboratoire sur une poudre d'ossements. On en trace des cercles dont on ne ressort pas toujours.",
@@ -32951,7 +33193,24 @@
       "sous_categorie": "",
       "slots": [],
       "tags": [],
-      "poids": 0.2
+      "poids": 0.2,
+      "fabrication": {
+        "nom": "des Sépultures",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Vol": 1
+          },
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.4
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:Sel_gemme",
@@ -32969,7 +33228,7 @@
     },
     {
       "_id": "item:Sel_noir",
-      "_rev": "3-87577645471f8b607ea73a109b28bdbb",
+      "_rev": "4-09b66c1bab30151a82fa2dc243892a31",
       "type": "item",
       "nom": "Sel noir",
       "sous_categorie": "",
@@ -32977,7 +33236,23 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.1
+      "poids": 0.1,
+      "fabrication": {
+        "nom": "Ténébreux",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Vol": 1
+          },
+          "effets": {
+            "pm": -3
+          },
+          "valeur": {
+            "facteur": 1.3
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:Serum_de_l_institut",
@@ -34227,7 +34502,7 @@
     },
     {
       "_id": "item:acier_plisse",
-      "_rev": "1-eb748cba1d81e1bac6fd5ab968e176dd",
+      "_rev": "2-a098edc1178ce25716694ed3276bb8d1",
       "type": "item",
       "nom": "Acier plissé",
       "description": "Barre d'acier repliée et soudée sur elle-même des dizaines de fois : le forgeron y chasse les scories et marie la souplesse du cœur au tranchant de la peau.",
@@ -34239,7 +34514,22 @@
       "tags": [
         "metal"
       ],
-      "poids": 2
+      "poids": 2,
+      "fabrication": {
+        "nom": "Damasquiné",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus_cc": 1,
+          "bonus_pa": 1,
+          "poids": {
+            "facteur": 1.05
+          },
+          "valeur": {
+            "facteur": 1.6
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:adamantite",
@@ -34702,7 +34992,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance_aile",
-      "_rev": "3-ceb6416660c1be767dc5bc2e78b36754",
+      "_rev": "4-2f8b5c9452dc6a5c8b1243e83a87ee4a",
       "type": "item",
       "nom": "Aile d'Ange de la Connaissance",
       "icon": "🪶",
@@ -34743,7 +35033,24 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Connaissance",
+        "modificateurs": {
+          "bonus_pm": 2,
+          "bonus": {
+            "Int": 2
+          },
+          "effets": {
+            "pm": 5,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:ange_de_la_connaissance_bras",
@@ -34910,7 +35217,7 @@
     },
     {
       "_id": "item:ange_de_la_connaissance_tete",
-      "_rev": "3-d3253598ac2a0682d781e93dd15f88e7",
+      "_rev": "4-56e82e65cae32df1b87f80024eacc8a8",
       "type": "item",
       "nom": "Tête d'Ange de la Connaissance",
       "icon": "💀",
@@ -34951,7 +35258,25 @@
           "yeux",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Clairvoyance",
+        "modificateurs": {
+          "bonus_pm": 3,
+          "bonus": {
+            "Int": 2,
+            "Vol": 1
+          },
+          "effets": {
+            "regen_pm": 1,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.2
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:ange_de_la_justice",
@@ -35001,7 +35326,7 @@
     },
     {
       "_id": "item:ange_de_la_justice_aile",
-      "_rev": "3-689d0cc5f6471ee0f24890795e4e35e1",
+      "_rev": "4-ecaed3e5f6609c961710d841f32de580",
       "type": "item",
       "nom": "Aile d'Ange de la Justice",
       "icon": "🪶",
@@ -35041,11 +35366,30 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Justice",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Vol": 2
+          },
+          "effets": {
+            "buffs": {
+              "Vol": 1
+            },
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:ange_de_la_justice_bras",
-      "_rev": "3-cb12c3736e9642d1151476703c6d6b0f",
+      "_rev": "4-598279262e4673ba14c0e03832459cca",
       "type": "item",
       "nom": "Bras d'Ange de la Justice",
       "icon": "🦴",
@@ -35089,7 +35433,22 @@
           "viande",
           2
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Jugement",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus_pa": 2,
+          "bonus": {
+            "F": 2,
+            "Vol": 1
+          },
+          "valeur": {
+            "facteur": 2
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:ange_de_la_justice_corps",
@@ -35205,7 +35564,7 @@
     },
     {
       "_id": "item:ange_de_la_justice_tete",
-      "_rev": "3-edbf4d1eee63b2a7f4d24ae34ed6bf0a",
+      "_rev": "4-ae3349cbe0f1230ac3ac6424f0829b4c",
       "type": "item",
       "nom": "Tête d'Ange de la Justice",
       "icon": "💀",
@@ -35241,7 +35600,26 @@
           "os",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Vérité",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Vol": 2
+          },
+          "effets": {
+            "buffs": {
+              "Vol": 1
+            },
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.2
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:anneau",
@@ -35417,7 +35795,7 @@
     },
     {
       "_id": "item:araignee_geante_tete",
-      "_rev": "3-6c6c713092690b621fb695c2d4fb5ae1",
+      "_rev": "4-368a7ab4b2ee35060d6ac676a1b64a66",
       "type": "item",
       "nom": "Tête d'Araignee Geante",
       "icon": "💀",
@@ -35456,7 +35834,24 @@
           "os",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "Arachnéen",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Ag": 1
+          },
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.4
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:archange_de_l_ordre",
@@ -35506,7 +35901,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre_aile",
-      "_rev": "3-5737be7276ddb122cb55e47eca006f6e",
+      "_rev": "4-8ff215057dc4c92caa625e01fe56dbd9",
       "type": "item",
       "nom": "Aile d'Archange de l Ordre",
       "icon": "🪶",
@@ -35548,11 +35943,30 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de l’Ordre",
+        "modificateurs": {
+          "bonus_pm": 3,
+          "bonus": {
+            "Vol": 2
+          },
+          "effets": {
+            "buffs": {
+              "Vol": 1
+            },
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.5
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:archange_de_l_ordre_bras",
-      "_rev": "3-6f213b99f9368b215013fc7e5159106e",
+      "_rev": "4-34ba8702828636402b8c7ab9178c7009",
       "type": "item",
       "nom": "Bras d'Archange de l Ordre",
       "icon": "🦴",
@@ -35598,7 +36012,22 @@
           "viande",
           2
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de l’Autorité",
+        "modificateurs": {
+          "bonus_degats": 4,
+          "bonus_pa": 2,
+          "bonus": {
+            "F": 2,
+            "R": 1
+          },
+          "valeur": {
+            "facteur": 2.5
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:archange_de_l_ordre_corps",
@@ -35718,7 +36147,7 @@
     },
     {
       "_id": "item:archange_de_l_ordre_tete",
-      "_rev": "3-86b48901cbae0f2ef3f99c2bc8f7a338",
+      "_rev": "4-be91ed05b7eeeab9f56fe76a3519fe65",
       "type": "item",
       "nom": "Tête d'Archange de l Ordre",
       "icon": "💀",
@@ -35760,7 +36189,26 @@
           "yeux",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Commandement",
+        "modificateurs": {
+          "bonus": {
+            "Vol": 2,
+            "R": 1
+          },
+          "effets": {
+            "buffs": {
+              "Vol": 1
+            },
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.5
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:archange_du_savoir",
@@ -35810,7 +36258,7 @@
     },
     {
       "_id": "item:archange_du_savoir_aile",
-      "_rev": "3-7e183b190e35d184a5fb1dab05390e3f",
+      "_rev": "4-bfacbe5c9c27e3ee74b7eabb54921c89",
       "type": "item",
       "nom": "Aile d'Archange du Savoir",
       "icon": "🪶",
@@ -35853,7 +36301,25 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Savoir",
+        "modificateurs": {
+          "bonus_pm": 4,
+          "bonus": {
+            "Int": 2,
+            "Vol": 1
+          },
+          "effets": {
+            "regen_pm": 1,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.8
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:archange_du_savoir_bras",
@@ -36026,7 +36492,7 @@
     },
     {
       "_id": "item:archange_du_savoir_tete",
-      "_rev": "3-07068fb51fe0f1da31b60b3ffc902a68",
+      "_rev": "4-d45c0336496556c751b0c0e239382426",
       "type": "item",
       "nom": "Tête d'Archange du Savoir",
       "icon": "💀",
@@ -36069,7 +36535,24 @@
           "yeux",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Sagesse",
+        "modificateurs": {
+          "bonus_pm": 4,
+          "bonus": {
+            "Int": 3
+          },
+          "effets": {
+            "pm": 10,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 3
+          },
+          "rarete": "legendaire"
+        }
+      }
     },
     {
       "_id": "item:argent",
@@ -36169,7 +36652,7 @@
     },
     {
       "_id": "item:avatar_bras",
-      "_rev": "3-b5e0fc23e4ac52bd4631bf03c149890d",
+      "_rev": "4-557c69d2539931422cdef9026ea949ad",
       "type": "item",
       "nom": "Bras d'Avatar",
       "icon": "🦴",
@@ -36215,7 +36698,24 @@
           "viande",
           2
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de l’Avatar",
+        "modificateurs": {
+          "bonus_degats": 4,
+          "bonus_pa": 2,
+          "bonus": {
+            "F": 3
+          },
+          "poids": {
+            "facteur": 1.15
+          },
+          "valeur": {
+            "facteur": 2.5
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:avatar_corps",
@@ -36335,7 +36835,7 @@
     },
     {
       "_id": "item:avatar_tete",
-      "_rev": "3-862b716566bb6ad8ca82f80ee31d99d8",
+      "_rev": "4-e533ce94cd61b8824de211a8aac4103f",
       "type": "item",
       "nom": "Tête d'Avatar",
       "icon": "💀",
@@ -36377,7 +36877,25 @@
           "yeux",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Transcendance",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus": {
+            "F": 1,
+            "Vol": 2
+          },
+          "effets": {
+            "pv": 10,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.5
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:bague",
@@ -36616,7 +37134,7 @@
     },
     {
       "_id": "item:basilic_queue",
-      "_rev": "3-b2c38ab5c3d418bc86f38beebda9be2e",
+      "_rev": "4-485d82fce2a12e030da9555d6d3d0fa7",
       "type": "item",
       "nom": "Queue de Basilic",
       "icon": "🦴",
@@ -36650,11 +37168,26 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Basilic",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus_cd": 1,
+          "effets": {
+            "pv": -5,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.8
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:basilic_tete",
-      "_rev": "3-c61411298bea3e73beb0417734055956",
+      "_rev": "4-9e33bb557b8634dd45e8588efcbcdbd1",
       "type": "item",
       "nom": "Tête de Basilic",
       "icon": "💀",
@@ -36704,11 +37237,28 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "du Regard Mortel",
+        "modificateurs": {
+          "bonus_degats": 4,
+          "bonus": {
+            "Vol": 2
+          },
+          "effets": {
+            "pv": -5,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.2
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:basilic_tete_morceau",
-      "_rev": "2-d6b0358208f99a5ff3c0383388409d0b",
+      "_rev": "3-237a7bad746efa2f99548306d6123f9b",
       "type": "item",
       "nom": "Morceau de tête de Basilic",
       "icon": "🥩",
@@ -36751,7 +37301,24 @@
           "yeux",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Regard Venimeux",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Vol": 1
+          },
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:baudruche",
@@ -36941,7 +37508,7 @@
     },
     {
       "_id": "item:bete_de_l_apocalypse_patte",
-      "_rev": "2-7cc18731e03ca477e5e1a34074eb272d",
+      "_rev": "3-d83bbea6426177edc0d61cd55344e550",
       "type": "item",
       "nom": "Patte de Bete de l Apocalypse",
       "icon": "🦴",
@@ -36990,11 +37557,29 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "de la Destruction",
+        "modificateurs": {
+          "bonus_degats": 4,
+          "bonus_pa": 1,
+          "bonus": {
+            "F": 2,
+            "Ag": 1
+          },
+          "poids": {
+            "facteur": 1.1
+          },
+          "valeur": {
+            "facteur": 2.4
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:bete_de_l_apocalypse_patte_morceau",
-      "_rev": "2-da74eae7e2250ebe2f684707a6d10736",
+      "_rev": "3-af29164997f6bf4ba3bcc693f08d7949",
       "type": "item",
       "nom": "Morceau de patte de Bete de l Apocalypse",
       "icon": "🥩",
@@ -37036,11 +37621,24 @@
           "viande",
           2
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Ravage",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "F": 1
+          },
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:bete_de_l_apocalypse_queue",
-      "_rev": "2-eb333fc7acc821e9d352d686fff56ff9",
+      "_rev": "3-5a4babbaac326ece516f242b1aa0f9d8",
       "type": "item",
       "nom": "Queue de Bete de l Apocalypse",
       "icon": "🦴",
@@ -37085,11 +37683,28 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "de l’Apocalypse",
+        "modificateurs": {
+          "bonus_degats": 4,
+          "bonus_pa": 2,
+          "bonus": {
+            "F": 2
+          },
+          "poids": {
+            "facteur": 1.1
+          },
+          "valeur": {
+            "facteur": 2.5
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:bete_de_l_apocalypse_queue_morceau",
-      "_rev": "2-aad4babb571aa2a81f34cd3ba5b092a1",
+      "_rev": "3-b918214b7b1981c7700d5635f35298cb",
       "type": "item",
       "nom": "Morceau de queue de Bete de l Apocalypse",
       "icon": "🥩",
@@ -37127,11 +37742,24 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Fléau",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "F": 1
+          },
+          "valeur": {
+            "facteur": 1.6
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:bete_de_l_apocalypse_tete",
-      "_rev": "2-1ec40d88cec6bee0650d2d9bc68e6be7",
+      "_rev": "3-5f959eef1e119cbf0fbf3bed52225b62",
       "type": "item",
       "nom": "Tête de Bete de l Apocalypse",
       "icon": "💀",
@@ -37184,11 +37812,30 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "de la Fin des Temps",
+        "modificateurs": {
+          "bonus_degats": 5,
+          "bonus_pa": 2,
+          "bonus": {
+            "F": 2,
+            "Vol": 2
+          },
+          "effets": {
+            "pv": 10,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 3
+          },
+          "rarete": "legendaire"
+        }
+      }
     },
     {
       "_id": "item:bete_de_l_apocalypse_tete_morceau",
-      "_rev": "2-b595c1fc6c399cb4af9c38c44a1a0df0",
+      "_rev": "3-886f823c764681606a8ddeb3eb5f1f6b",
       "type": "item",
       "nom": "Morceau de tête de Bete de l Apocalypse",
       "icon": "🥩",
@@ -37234,7 +37881,21 @@
           "yeux",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Désastre",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus": {
+            "F": 1,
+            "Vol": 1
+          },
+          "valeur": {
+            "facteur": 1.8
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:bete_du_gevaudan",
@@ -37588,7 +38249,7 @@
     },
     {
       "_id": "item:bunyip_patte",
-      "_rev": "2-db20f1336aac945bdd708d8f0505a30e",
+      "_rev": "3-47082545310a981124639f7ae8715050",
       "type": "item",
       "nom": "Patte de Bunyip",
       "icon": "🦴",
@@ -37627,11 +38288,29 @@
           "viande",
           2
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "des Profondeurs",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus_pm": 1,
+          "bonus": {
+            "R": 1,
+            "Ag": 1
+          },
+          "poids": {
+            "facteur": 1.05
+          },
+          "valeur": {
+            "facteur": 1.7
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:bunyip_queue",
-      "_rev": "2-f4982b51418f3d43af7c63b34d54e8a6",
+      "_rev": "3-9307ea7066677b8ebc87c4d360affc3b",
       "type": "item",
       "nom": "Queue de Bunyip",
       "icon": "🦴",
@@ -37666,11 +38345,30 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "des Eaux Sombres",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "R": 2
+          },
+          "effets": {
+            "buffs": {
+              "R": 1
+            },
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.8
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:bunyip_tete",
-      "_rev": "2-d611624d20519a3b3f15aa9481eace5c",
+      "_rev": "3-5f8eaa36267f386a8e9f4f7479269599",
       "type": "item",
       "nom": "Tête de Bunyip",
       "icon": "💀",
@@ -37709,7 +38407,24 @@
           "os",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "des Marais",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus_pv": 5,
+          "bonus": {
+            "R": 2
+          },
+          "effets": {
+            "pv": 5
+          },
+          "valeur": {
+            "facteur": 2
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:carte_aventurier",
@@ -38041,7 +38756,7 @@
     },
     {
       "_id": "item:cerbere_tete",
-      "_rev": "2-d4ec9f03be8904eeb4cf14bde86c0a52",
+      "_rev": "3-d20b494cb15b3e932ebb505ec1a7b385",
       "type": "item",
       "nom": "Tête de Cerbere",
       "icon": "💀",
@@ -38080,7 +38795,25 @@
           "os",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Gardien Infernal",
+        "modificateurs": {
+          "bonus_degats": 4,
+          "bonus": {
+            "F": 2,
+            "Vol": 1
+          },
+          "effets": {
+            "pv": -5,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.5
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:cerf",
@@ -39602,7 +40335,7 @@
     },
     {
       "_id": "item:chimere_patte",
-      "_rev": "1-40b24f0a282dc577f76ad0477c459ec8",
+      "_rev": "2-f396a845fdc4da4bdee376b819d49503",
       "type": "item",
       "nom": "Patte de Chimere",
       "icon": "🦴",
@@ -39650,11 +40383,26 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "de la Fureur",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus_pa": 1,
+          "bonus": {
+            "F": 1,
+            "Ag": 1
+          },
+          "valeur": {
+            "facteur": 1.8
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:chimere_patte_morceau",
-      "_rev": "1-83dc4c7fe7c401bb7154688497728c82",
+      "_rev": "2-46ef8911212d80a81e4661e63a8e87da",
       "type": "item",
       "nom": "Morceau de patte de Chimere",
       "icon": "🥩",
@@ -39695,11 +40443,24 @@
           "viande",
           2
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Férocité",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Ag": 1
+          },
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:chimere_queue",
-      "_rev": "1-5943a8babe234da9c4682e28cbf5f7a5",
+      "_rev": "2-805007662c0f99694c5147760dc7d3d6",
       "type": "item",
       "nom": "Queue de Chimere",
       "icon": "🦴",
@@ -39743,11 +40504,29 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "de la Chimère",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus_cd": 2,
+          "bonus": {
+            "Ag": 1
+          },
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 2
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:chimere_queue_morceau",
-      "_rev": "1-3b7e79fbd5ae992f38c5902a4bcdb319",
+      "_rev": "2-57649bea33fb6dc7afa346e0ff598305",
       "type": "item",
       "nom": "Morceau de queue de Chimere",
       "icon": "🥩",
@@ -39784,11 +40563,22 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Discorde",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus_cd": 1,
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:chimere_tete",
-      "_rev": "1-c8362754861ab52b8955be631e1a69b0",
+      "_rev": "2-b9c052a36aeadd227077abad71721a5b",
       "type": "item",
       "nom": "Tête de Chimere",
       "icon": "💀",
@@ -39836,11 +40626,30 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "des Trois Visages",
+        "modificateurs": {
+          "bonus_degats": 4,
+          "bonus": {
+            "F": 1,
+            "Ag": 1,
+            "Vol": 1
+          },
+          "effets": {
+            "pv": -5,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.4
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:chimere_tete_morceau",
-      "_rev": "1-0b2a50074d64cecfe7a5afa664eb7c29",
+      "_rev": "2-00c172ff8c5e0bedc8e9eb52236c787b",
       "type": "item",
       "nom": "Morceau de tête de Chimere",
       "icon": "🥩",
@@ -39881,7 +40690,24 @@
           "os",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Monstruosité",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Vol": 1
+          },
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.6
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:cockatrice",
@@ -39931,7 +40757,7 @@
     },
     {
       "_id": "item:cockatrice_aile",
-      "_rev": "1-a3729d116afb7b642ba104187e9fa2ba",
+      "_rev": "2-fdcc36c6f0abdf8fc5dde69c5bd615fa",
       "type": "item",
       "nom": "Aile de Cockatrice",
       "icon": "🪶",
@@ -39979,11 +40805,25 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "Paralysant",
+        "modificateurs": {
+          "bonus_pm": 2,
+          "bonus_cd": 1,
+          "bonus": {
+            "Ag": 1
+          },
+          "valeur": {
+            "facteur": 1.8
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:cockatrice_aile_morceau",
-      "_rev": "1-759b5dd14ea60afee3ab4ac12834ba1b",
+      "_rev": "2-ed7326bcf5c8f5d8f199496eabcdcede",
       "type": "item",
       "nom": "Morceau de aile de Cockatrice",
       "icon": "🥩",
@@ -40024,7 +40864,20 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Regard de Pierre",
+        "modificateurs": {
+          "bonus_pm": 1,
+          "bonus": {
+            "Ag": 1
+          },
+          "valeur": {
+            "facteur": 1.4
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:cockatrice_corps",
@@ -40157,7 +41010,7 @@
     },
     {
       "_id": "item:cockatrice_patte",
-      "_rev": "1-c846ee3b09fa0751e6f7aa57e2604a8d",
+      "_rev": "2-c6e270035b9e30cea303b752bd34ed52",
       "type": "item",
       "nom": "Patte de Cockatrice",
       "icon": "🦴",
@@ -40201,11 +41054,28 @@
           "viande",
           2
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Griffe Mortelle",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Ag": 1
+          },
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.6
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:cockatrice_queue",
-      "_rev": "1-7a6fb5756379ba4ee7da67aed0c495e4",
+      "_rev": "2-2af8d6e059fe152009cce15807e3b02e",
       "type": "item",
       "nom": "Queue de Cockatrice",
       "icon": "🦴",
@@ -40249,11 +41119,26 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "Venimeuse",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus_cd": 1,
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.7
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:cockatrice_queue_morceau",
-      "_rev": "1-0a30bfec5743fd8dd59a3d00a8daec6e",
+      "_rev": "2-f7a3674e8175807e57878bf1c596d8db",
       "type": "item",
       "nom": "Morceau de queue de Cockatrice",
       "icon": "🥩",
@@ -40290,11 +41175,25 @@
           "tendons",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "du Venin Noir",
+        "modificateurs": {
+          "bonus_degats": 1,
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.4
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:cockatrice_tete",
-      "_rev": "1-2e148f2f3abaeea4fff7cb086683dfd3",
+      "_rev": "2-7f942525ceeb19867704817ac9a663b6",
       "type": "item",
       "nom": "Tête de Cockatrice",
       "icon": "💀",
@@ -40346,11 +41245,29 @@
           "fraction": 1
         }
       ],
-      "decoupe_poids_min": 100
+      "decoupe_poids_min": 100,
+      "fabrication": {
+        "nom": "Pétrifiant",
+        "modificateurs": {
+          "bonus_degats": 3,
+          "bonus": {
+            "Ag": 1,
+            "Vol": 1
+          },
+          "effets": {
+            "pv": -5,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:cockatrice_tete_morceau",
-      "_rev": "1-32771ea09bd0f36d65bc019f6e31ad9e",
+      "_rev": "2-241959905dc86c88b52eb54d551b1634",
       "type": "item",
       "nom": "Morceau de tête de Cockatrice",
       "icon": "🥩",
@@ -40395,11 +41312,28 @@
           "yeux",
           1
         ]
-      ]
+      ],
+      "fabrication": {
+        "nom": "de la Pétrification",
+        "modificateurs": {
+          "bonus_degats": 2,
+          "bonus": {
+            "Vol": 1
+          },
+          "effets": {
+            "pv": -3,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.5
+          },
+          "rarete": "rare"
+        }
+      }
     },
     {
       "_id": "item:coeur",
-      "_rev": "2-045ddd5b664fc8991628e67ecc8eba40",
+      "_rev": "3-d95255fbba685dc1c73d94047fe07953",
       "type": "item",
       "nom": "Cœur",
       "sous_categorie": "coeur",
@@ -40407,7 +41341,24 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.3
+      "poids": 0.3,
+      "fabrication": {
+        "nom": "du Courage",
+        "modificateurs": {
+          "bonus_pv": 3,
+          "bonus": {
+            "V": 1
+          },
+          "effets": {
+            "pv": 5,
+            "regen_pv": 1,
+            "duree": 2
+          },
+          "valeur": {
+            "facteur": 1.5
+          }
+        }
+      }
     },
     {
       "_id": "item:coeur_confit",
@@ -41216,7 +42167,7 @@
     },
     {
       "_id": "item:cuir_brut",
-      "_rev": "5-bde66869d13e918863ba6a80360256d3",
+      "_rev": "6-a2524851b6e4b899781f724d55a430c7",
       "type": "item",
       "nom": "Cuir brut",
       "sous_categorie": "cuir_brut",
@@ -41224,7 +42175,22 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.6
+      "poids": 0.6,
+      "fabrication": {
+        "nom": "de la Peau",
+        "modificateurs": {
+          "bonus_pv": 1,
+          "bonus": {
+            "R": 1
+          },
+          "poids": {
+            "facteur": 0.95
+          },
+          "valeur": {
+            "facteur": 1.05
+          }
+        }
+      }
     },
     {
       "_id": "item:cupidon",
@@ -41761,7 +42727,7 @@
     },
     {
       "_id": "item:demon_guerrier",
-      "_rev": "5-1311fbaec662ba47e61060f978830e92",
+      "_rev": "6-e52d6d0173cd29d2330331ba8ddcdafe",
       "type": "item",
       "nom": "Carcasse de Demon Guerrier",
       "sous_categorie": "carcasse",
@@ -41775,11 +42741,238 @@
       ],
       "description": "Dépouille de Demon Guerrier récupérée à l'issue du combat.",
       "source_espece": "espece:demon_guerrier",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_guerrier_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_guerrier_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_guerrier_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_guerrier_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_guerrier_bras",
+      "_rev": "1-0d159de87ddaa5c66d991ec8ee939731",
+      "type": "item",
+      "nom": "Bras de Demon Guerrier",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        4.5,
+        12
+      ],
+      "description": "Bras de Demon Guerrier, débité sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_corps",
+      "_rev": "1-429f307261d3831fb81778179f59007c",
+      "type": "item",
+      "nom": "Corps de Demon Guerrier",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        37.5,
+        100
+      ],
+      "description": "Corps de Demon Guerrier, débité sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_jambe",
+      "_rev": "1-ea8aca8bccd6acd68d6c5035e79395c0",
+      "type": "item",
+      "nom": "Jambe de Demon Guerrier",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        11.25,
+        30
+      ],
+      "description": "Jambe de Demon Guerrier, débitée sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_tete",
+      "_rev": "1-7a04bf3479d5d69664b050530a6e62b3",
+      "type": "item",
+      "nom": "Tête de Demon Guerrier",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        6,
+        16
+      ],
+      "description": "Tête de Demon Guerrier, débitée sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_majeur_de_la_destinee",
-      "_rev": "6-794d79186cb543ebc6ea87b5e25e2a3c",
+      "_rev": "7-3828cf07553fc2918e718b23f29c02ad",
       "type": "item",
       "nom": "Carcasse de Demon Majeur de la Destinee",
       "sous_categorie": "carcasse",
@@ -41793,11 +42986,250 @@
       ],
       "description": "Dépouille de Demon Majeur de la Destinee récupérée à l'issue du combat.",
       "source_espece": "espece:demon_majeur_de_la_destinee",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destinee_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_bras",
+      "_rev": "1-09cdf6e573d557ed172892fc78c360bd",
+      "type": "item",
+      "nom": "Bras de Demon Majeur de la Destinee",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        4.5,
+        12
+      ],
+      "description": "Bras de Demon Majeur de la Destinee, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_corps",
+      "_rev": "1-c83dc364732ced5594b7dfb21b018f6f",
+      "type": "item",
+      "nom": "Corps de Demon Majeur de la Destinee",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        37.5,
+        100
+      ],
+      "description": "Corps de Demon Majeur de la Destinee, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_jambe",
+      "_rev": "1-7a6f9a9a8359cbe9ffb75d25c0a8d038",
+      "type": "item",
+      "nom": "Jambe de Demon Majeur de la Destinee",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        11.25,
+        30
+      ],
+      "description": "Jambe de Demon Majeur de la Destinee, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_tete",
+      "_rev": "1-b498259faeb85d638e0aaaa1b620d89c",
+      "type": "item",
+      "nom": "Tête de Demon Majeur de la Destinee",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        6,
+        16
+      ],
+      "description": "Tête de Demon Majeur de la Destinee, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_majeur_de_la_destruction",
-      "_rev": "5-8bf6ef1ee4471c593976e6c2f9dd1839",
+      "_rev": "6-aeca35fe2c165e2556eeb9efd39e222a",
       "type": "item",
       "nom": "Carcasse de Demon Majeur de la Destruction",
       "sous_categorie": "carcasse",
@@ -41811,7 +43243,316 @@
       ],
       "description": "Dépouille de Demon Majeur de la Destruction récupérée à l'issue du combat.",
       "source_espece": "espece:demon_majeur_de_la_destruction",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destruction_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_bras",
+      "_rev": "1-1f93307956938586a50bc7a715dcdfaf",
+      "type": "item",
+      "nom": "Bras de Demon Majeur de la Destruction",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        6,
+        30
+      ],
+      "description": "Bras de Demon Majeur de la Destruction, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_corps",
+      "_rev": "1-05b32a8fa52310489f9e934ced8e195a",
+      "type": "item",
+      "nom": "Corps de Demon Majeur de la Destruction",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        50,
+        250
+      ],
+      "description": "Corps de Demon Majeur de la Destruction, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destruction_corps_morceau",
+          "quantite": 3,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_corps_morceau",
+      "_rev": "1-7d6db21749ce8dfaaeeeb27642ea8e79",
+      "type": "item",
+      "nom": "Morceau de corps de Demon Majeur de la Destruction",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        16.67,
+        83.33
+      ],
+      "description": "Morceau de corps de Demon Majeur de la Destruction, taillé pour être emporté.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "morceau",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_jambe",
+      "_rev": "1-b8234e614b27298d29eb9054b1e332f3",
+      "type": "item",
+      "nom": "Jambe de Demon Majeur de la Destruction",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        15,
+        75
+      ],
+      "description": "Jambe de Demon Majeur de la Destruction, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_tete",
+      "_rev": "1-409563ab8ecc67a0394ac5ac8e84faea",
+      "type": "item",
+      "nom": "Tête de Demon Majeur de la Destruction",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        8,
+        40
+      ],
+      "description": "Tête de Demon Majeur de la Destruction, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_mineur",
@@ -41870,7 +43611,7 @@
     },
     {
       "_id": "item:doppleganger",
-      "_rev": "5-02a8da53e8d91120de334e74b2ad47e1",
+      "_rev": "6-6ba663e9a33ce64ca18179754c1f3827",
       "type": "item",
       "nom": "Carcasse de Doppleganger",
       "sous_categorie": "carcasse",
@@ -41884,11 +43625,214 @@
       ],
       "description": "Dépouille de Doppleganger récupérée à l'issue du combat.",
       "source_espece": "espece:doppleganger",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:doppleganger_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:doppleganger_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:doppleganger_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:doppleganger_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:doppleganger_bras",
+      "_rev": "1-0fe03addd74f1961aea49aa10c37a984",
+      "type": "item",
+      "nom": "Bras de Doppleganger",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        2.7,
+        9
+      ],
+      "description": "Bras de Doppleganger, débité sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_bras"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_corps",
+      "_rev": "1-d214865e245e1d597095c547ffc0e764",
+      "type": "item",
+      "nom": "Corps de Doppleganger",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        22.5,
+        75
+      ],
+      "description": "Corps de Doppleganger, débité sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_corps"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_jambe",
+      "_rev": "1-ac790b05f35cf0dc019ac64a919d4f51",
+      "type": "item",
+      "nom": "Jambe de Doppleganger",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        6.75,
+        22.5
+      ],
+      "description": "Jambe de Doppleganger, débitée sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_tete",
+      "_rev": "1-53e01b53e480d9497eb6ca7187211b21",
+      "type": "item",
+      "nom": "Tête de Doppleganger",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        3.6,
+        12
+      ],
+      "description": "Tête de Doppleganger, débitée sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_tete"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:dragnard",
-      "_rev": "5-29e9e5610c940d4f2de7a4023ad85b20",
+      "_rev": "6-9e92295c1cdac319fea7479cfdf5672c",
       "type": "item",
       "nom": "Carcasse de Dragnard",
       "sous_categorie": "carcasse",
@@ -41902,7 +43846,344 @@
       ],
       "description": "Dépouille de Dragnard récupérée à l'issue du combat.",
       "source_espece": "espece:dragnard",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:dragnard_tete",
+          "quantite": 1,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:dragnard_corps",
+          "quantite": 1,
+          "fraction": 0.52
+        },
+        {
+          "item": "item:dragnard_patte",
+          "quantite": 4,
+          "fraction": 0.28
+        },
+        {
+          "item": "item:dragnard_queue",
+          "quantite": 1,
+          "fraction": 0.08
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_corps",
+      "_rev": "1-92f0d4ad39ed1722fd7958351b0b6182",
+      "type": "item",
+      "nom": "Corps de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        260,
+        468
+      ],
+      "description": "Corps de Dragnard, débité sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_corps"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:dragnard_corps_morceau",
+          "quantite": 5,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_corps_morceau",
+      "_rev": "1-556709206ff538fdedd44efb066cefa1",
+      "type": "item",
+      "nom": "Morceau de corps de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        52,
+        93.6
+      ],
+      "description": "Morceau de corps de Dragnard, taillé pour être emporté.",
+      "tags": [
+        "draconique",
+        "monture",
+        "morceau",
+        "partie_corps"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_patte",
+      "_rev": "1-94a33da4326edccddbb3a1411552eb70",
+      "type": "item",
+      "nom": "Patte de Dragnard",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        35,
+        63
+      ],
+      "description": "Patte de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_patte"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_queue",
+      "_rev": "1-9a5322eede4d6cf5cd497c36fe41355d",
+      "type": "item",
+      "nom": "Queue de Dragnard",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        40,
+        72
+      ],
+      "description": "Queue de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_queue"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "queue",
+      "depecage": [
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_tete",
+      "_rev": "1-224c296b898d2aafeb6cb538e060193d",
+      "type": "item",
+      "nom": "Tête de Dragnard",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        60,
+        108
+      ],
+      "description": "Tête de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_tete"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:dragnard_tete_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_tete_morceau",
+      "_rev": "1-960ae73487d1f5a5e053ac646eadae63",
+      "type": "item",
+      "nom": "Morceau de tête de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        30,
+        54
+      ],
+      "description": "Morceau de tête de Dragnard, taillé pour être emporté.",
+      "tags": [
+        "draconique",
+        "monture",
+        "morceau",
+        "partie_tete"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard_tete",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:dragon",
@@ -43025,7 +45306,7 @@
     },
     {
       "_id": "item:familier",
-      "_rev": "4-53ef5e116ef24754d71177ad11f2d2e4",
+      "_rev": "5-1dd2320718504e23b18c838d8e1e8ff0",
       "type": "item",
       "nom": "Carcasse de Familier",
       "sous_categorie": "carcasse",
@@ -43033,7 +45314,10 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 1.0,
+      "poids": [
+        15,
+        50
+      ],
       "description": "Dépouille de Familier récupérée à l'issue du combat.",
       "source_espece": "espece:familier",
       "loot_defaut": true
@@ -43121,7 +45405,7 @@
     },
     {
       "_id": "item:fauves",
-      "_rev": "4-c4f613f57e3e1eed6f307fbbe371f9fc",
+      "_rev": "6-d7b2924781e13a18d9b382f70c22b00d",
       "type": "item",
       "nom": "Carcasse de Fauves",
       "sous_categorie": "carcasse",
@@ -43129,10 +45413,291 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 8.0,
+      "poids": [
+        120,
+        300
+      ],
       "description": "Dépouille de Fauves récupérée à l'issue du combat.",
       "source_espece": "espece:fauves",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:fauves_tete",
+          "quantite": 1,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:fauves_corps",
+          "quantite": 1,
+          "fraction": 0.52
+        },
+        {
+          "item": "item:fauves_patte",
+          "quantite": 4,
+          "fraction": 0.28
+        },
+        {
+          "item": "item:fauves_queue",
+          "quantite": 1,
+          "fraction": 0.08
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:fauves_corps",
+      "_rev": "1-5a3ed820bb3b535164dcac34b008dc85",
+      "type": "item",
+      "nom": "Corps de Fauves",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        62.4,
+        156
+      ],
+      "description": "Corps de Fauves, débité sur place.",
+      "tags": [
+        "animal",
+        "partie_corps",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:fauves_corps_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:fauves_corps_morceau",
+      "_rev": "1-205c5d4902d2e0f0b04a3d6fcca58dc4",
+      "type": "item",
+      "nom": "Morceau de corps de Fauves",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        31.2,
+        78
+      ],
+      "description": "Morceau de corps de Fauves, taillé pour être emporté.",
+      "tags": [
+        "animal",
+        "morceau",
+        "partie_corps",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_patte",
+      "_rev": "1-f55d6c854a1754fdcc4f0789563073ae",
+      "type": "item",
+      "nom": "Patte de Fauves",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        8.4,
+        21
+      ],
+      "description": "Patte de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_patte",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_queue",
+      "_rev": "1-0d49f0f22f45f33720a5ed7a42268a53",
+      "type": "item",
+      "nom": "Queue de Fauves",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        9.6,
+        24
+      ],
+      "description": "Queue de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_queue",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_tete",
+      "_rev": "1-77e28b47be95cd9c2b1e9f857ee8242c",
+      "type": "item",
+      "nom": "Tête de Fauves",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        14.4,
+        36
+      ],
+      "description": "Tête de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_tete",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:fee",
@@ -56486,7 +59051,7 @@
     },
     {
       "_id": "item:monture_angelique",
-      "_rev": "4-a0f9259f60b73b66595cf47d768597b5",
+      "_rev": "5-d48a0e0b337a1bf42b7d4295b84d19a3",
       "type": "item",
       "nom": "Carcasse de Monture Angelique",
       "sous_categorie": "carcasse",
@@ -56494,14 +59059,17 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 9.0,
+      "poids": [
+        200,
+        800
+      ],
       "description": "Dépouille de Monture Angelique récupérée à l'issue du combat.",
       "source_espece": "espece:monture_angelique",
       "loot_defaut": true
     },
     {
       "_id": "item:monture_demoniaque",
-      "_rev": "4-aefe12a5035f72fb3d28bbd4a9c9da3a",
+      "_rev": "5-586a896b9c3e0ed51fa973c69a19d83b",
       "type": "item",
       "nom": "Carcasse de Monture Demoniaque",
       "sous_categorie": "carcasse",
@@ -56509,14 +59077,17 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 10.5,
+      "poids": [
+        400,
+        1500
+      ],
       "description": "Dépouille de Monture Demoniaque récupérée à l'issue du combat.",
       "source_espece": "espece:monture_demoniaque",
       "loot_defaut": true
     },
     {
       "_id": "item:monture_squelette",
-      "_rev": "6-74aa1c65bdb104cd62a9212363a09098",
+      "_rev": "7-f4c940ee9f6b4300f81b150808bbd724",
       "type": "item",
       "nom": "Ossements de Monture Squelette",
       "sous_categorie": "ossements",
@@ -56524,7 +59095,10 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 5.5,
+      "poids": [
+        100,
+        400
+      ],
       "description": "Ossements et reliquats récupérés sur Monture Squelette après sa destruction.",
       "source_espece": "espece:monture_squelette",
       "loot_defaut": true
@@ -57608,7 +60182,7 @@
     },
     {
       "_id": "item:polar_kraken",
-      "_rev": "4-751a4789104cfe5ef2741889aff8d76d",
+      "_rev": "5-87f9b9a61b12fc463330d011673c673e",
       "type": "item",
       "nom": "Carcasse de Polar Kraken",
       "sous_categorie": "carcasse",
@@ -57616,7 +60190,10 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 18.0,
+      "poids": [
+        1000,
+        8000
+      ],
       "description": "Dépouille de Polar Kraken récupérée à l'issue du combat.",
       "source_espece": "espece:polar_kraken",
       "loot_defaut": true
@@ -57671,7 +60248,7 @@
     },
     {
       "_id": "item:poudre_alchimique",
-      "_rev": "2-232579b9b49553b7329edbb40a992107",
+      "_rev": "3-24c44b5b1c33be9e25f358a6a38facfc",
       "type": "item",
       "nom": "Poudre alchimique",
       "sous_categorie": "",
@@ -57679,7 +60256,20 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.1
+      "poids": 0.1,
+      "fabrication": {
+        "nom": "de l’Alchimie",
+        "modificateurs": {
+          "bonus_pm": 2,
+          "effets": {
+            "pm": 5
+          },
+          "valeur": {
+            "facteur": 1.4
+          },
+          "rarete": "peu_commun"
+        }
+      }
     },
     {
       "_id": "item:prince_demon",
@@ -57807,7 +60397,7 @@
     },
     {
       "_id": "item:relique",
-      "_rev": "2-25e398f8009849ffc8ef1b34fac4da3b",
+      "_rev": "3-0d09f06cbd5041704df95686a1c6d1c2",
       "type": "item",
       "nom": "Relique",
       "sous_categorie": "",
@@ -57815,7 +60405,26 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.5
+      "poids": 0.5,
+      "fabrication": {
+        "nom": "Relique",
+        "modificateurs": {
+          "bonus_pm": 2,
+          "bonus_pv": 3,
+          "bonus": {
+            "Vol": 2
+          },
+          "effets": {
+            "pv": 5,
+            "pm": 5,
+            "duree": 3
+          },
+          "valeur": {
+            "facteur": 2.5
+          },
+          "rarete": "tres_rare"
+        }
+      }
     },
     {
       "_id": "item:rembourrage",
@@ -57953,7 +60562,7 @@
     },
     {
       "_id": "item:sang",
-      "_rev": "2-3c614e66960c9e6314bb1a0e656aa2e7",
+      "_rev": "3-8ff2b4656727fcf3dd99ff9c86a459b4",
       "type": "item",
       "nom": "Sang",
       "sous_categorie": "sang",
@@ -57961,7 +60570,22 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 0.3
+      "poids": 0.3,
+      "fabrication": {
+        "nom": "Sanglante",
+        "modificateurs": {
+          "bonus_pv": 2,
+          "bonus": {
+            "V": 1
+          },
+          "effets": {
+            "pv": 5
+          },
+          "valeur": {
+            "facteur": 1.2
+          }
+        }
+      }
     },
     {
       "_id": "item:sanglier",
@@ -77304,7 +79928,7 @@
     },
     {
       "_id": "lieu:l_arsenal_de_lutecia",
-      "_rev": "52-e63cea628953af75ba597e4528bdd1e1",
+      "_rev": "53-4f0df000fb18cd098970be12ca5b0d2d",
       "type": "lieu",
       "label": "L'Arsenal de Lutèce",
       "image": "grand_arsenal_europe01.jpg",
@@ -77318,19 +79942,22 @@
       ],
       "lieu_parent": "lieu:lutecia",
       "stock_matieres": {
-        "argent": 312,
-        "branche": 287,
-        "bronze": 293,
-        "gros_rondin": 338,
-        "petit_rondin": 302,
-        "plomb": 372,
-        "poix": 320,
-        "rondin": 354,
-        "debris_anime": 150,
-        "cuir_brut": 64,
-        "acier": 27,
-        "fer": 44,
-        "peaux": 45
+        "argent": 317,
+        "branche": 292,
+        "bronze": 298,
+        "gros_rondin": 343,
+        "petit_rondin": 307,
+        "plomb": 377,
+        "poix": 325,
+        "rondin": 359,
+        "debris_anime": 155,
+        "cuir_brut": 76,
+        "acier": 30,
+        "fer": 49,
+        "peaux": 50,
+        "tendons": 6,
+        "boyaux": 6,
+        "crocs": 8
       },
       "stock_vente": [
         {
@@ -81437,7 +84064,7 @@
     },
     {
       "_id": "lieu:la_maison_des_parfums",
-      "_rev": "63-9985a52c6579eb0c2a4eb579fed61e4f",
+      "_rev": "64-d38cbf90917f15cb83f505170e3f1cc6",
       "type": "lieu",
       "label": "La Maison des Parfums",
       "image": "manufacture_des_savons_et_parfums_europe01.jpg",
@@ -81451,21 +84078,21 @@
       ],
       "lieu_parent": "lieu:lutecia",
       "stock_matieres": {
-        "branche": 355,
-        "item:Miel": 445,
-        "item:Reactif_brut": 438,
-        "item:Sel": 425,
-        "item:poix": 423,
-        "petit_rondin": 428,
-        "poix": 332,
-        "item:Cendres": 321,
-        "item:Huile_vegetale": 336,
-        "sel_gemme": 321,
+        "branche": 360,
+        "item:Miel": 450,
+        "item:Reactif_brut": 443,
+        "item:Sel": 430,
+        "item:poix": 428,
+        "petit_rondin": 433,
+        "poix": 337,
+        "item:Cendres": 326,
+        "item:Huile_vegetale": 341,
+        "sel_gemme": 326,
         "item:Ail_des_moines": 2,
-        "cendre": 315,
-        "item:Chiffon": 299,
-        "item:Cire_d_abeille": 244,
-        "item:Herbes_aromatiques": 266,
+        "cendre": 320,
+        "item:Chiffon": 304,
+        "item:Cire_d_abeille": 249,
+        "item:Herbes_aromatiques": 271,
         "item:Poudre_de_miroir": 5,
         "sang": 44,
         "foie": 23,
@@ -81553,7 +84180,7 @@
         },
         {
           "item_id": "item:Savon_d_huile",
-          "qty": 111
+          "qty": 107
         },
         {
           "item_id": "item:Cire_pour_bois",
@@ -89270,7 +91897,7 @@
     },
     {
       "_id": "lieu:lutecia",
-      "_rev": "1948-c7f95897839ded8bdc3daacf253b885e",
+      "_rev": "1950-06d71e169259653e76f4a0c14b207f0d",
       "type": "lieu",
       "label": "La capitale Lutecia",
       "image": "paris_capital.png",
@@ -94410,7 +97037,7 @@
       "tags": [],
       "lieu_parent": "lieu:france",
       "flux_marchand": {
-        "item:Savon_d_huile": 8,
+        "item:Savon_d_huile": 10,
         "item:Lessive_de_cendres": 24,
         "item:saumure": 17,
         "item:Papier": 1,
@@ -94435,11 +97062,11 @@
         "item:Cire_a_cacheter": 14,
         "item:viande": 7,
         "item:os": 25,
-        "item:tendons": 13,
-        "item:boyaux": 13,
+        "item:tendons": 7,
+        "item:boyaux": 7,
         "item:crane": 25,
-        "item:cuir_brut": 25,
-        "item:crocs": 16
+        "item:cuir_brut": 13,
+        "item:crocs": 8
       }
     },
     {

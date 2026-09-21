@@ -250,15 +250,22 @@ CATALOGUE = [
 	{
 		"id": "gen_fabrication_matieres",
 		"label": "⚒️ Ce qu'une matière apporte sur mesure (bloc `fabrication`)",
-		"argv": _py("gen_fabrication_matieres.py"),
-		"ecrit": "Écrit jsons/fabrication_matieres_a_importer.json (docs item enrichis).",
-		"description": "Pose le bloc `fabrication` (fragment de nom + modificateurs) sur une "
-			"douzaine de matières premières : c'est ce qu'elles confèrent à une pièce commandée "
+		# `dump_frais` : l'import est un PUT complet, et une relance sur un dump périmé (ou figé)
+		# réémettrait des matières retouchées depuis.
+		"argv_fn": lambda v, f: _py("gen_fabrication_matieres.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/fabrication_matieres_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/fabrication_matieres_a_importer.json. "
+			"Rien en base avant 📥 Importer.",
+		"description": "Pose le bloc `fabrication` (fragment de nom + modificateurs) sur les "
+			"matières premières de sa table : c'est ce qu'elles confèrent à une pièce commandée "
 			"SUR MESURE chez un grand magasin. Sans ce bloc, une matière reste utilisable mais "
 			"n'apporte rien — comportement d'avant, aucune migration. ⚠️ Ne touche AUCUNE "
 			"recette : ajouter un intrant ouvrirait un point de vente pour lui et risquerait la "
-			"fausse feuille. Relit le dump, réémet le doc complet avec le seul champ ajouté : "
-			"régénération idempotente.",
+			"fausse feuille. Le fichier ne porte que le DIFF avec la base (docs dont le bloc "
+			"change, repris du dump pour garder les retouches manuelles) ; base à jour ⇒ aucun "
+			"fichier écrit. Relançable à volonté ; liste les matières que personne ne travaille "
+			"et les blocs posés hors de la table.",
 	},
 	{
 		"id": "gen_carcasses_parties",

@@ -193,6 +193,24 @@ def test_carcasses_relancees_sur_dump_frais(monkeypatch):
 	assert vu["argv"][-3:] == [os.path.join("dev", "gen_carcasses_parties.py"), "--dump", "jsons/d.json"]
 
 
+def test_fabrication_matieres_relancees_sur_dump_frais(monkeypatch):
+	"""gen_fabrication_matieres : même contrat que les carcasses — dump écrit par le serveur,
+	sortie offerte à 📥 Importer."""
+	o = next(x for x in dt.catalogue_payload() if x["id"] == "gen_fabrication_matieres")
+	assert o["dump_frais"] and o["sortie"] == "jsons/fabrication_matieres_a_importer.json"
+	monkeypatch.setattr(dt, "_RUN", None)
+	vu = {}
+
+	def faux_popen(argv, **kw):
+		vu["argv"] = argv
+		raise FileNotFoundError
+
+	monkeypatch.setattr(dt.subprocess, "Popen", faux_popen)
+	run, erreur = dt.lancer("gen_fabrication_matieres", None, preparer=lambda o, v: {"dump": "jsons/d.json"})
+	assert erreur is None
+	assert vu["argv"][-3:] == [os.path.join("dev", "gen_fabrication_matieres.py"), "--dump", "jsons/d.json"]
+
+
 # ── 📥 Importer : jamais le fichier d'un autre run ───────────────────────────
 
 def test_sortie_fraiche(monkeypatch):

@@ -216,9 +216,12 @@ def test_le_memo_est_vide_par_reset_prix_cache(index_avec_demi_produit):
 	assert marche.item_commandable(deroge["_id"], deroge) is True
 
 
-def test_item_introuvable_nentre_pas_au_catalogue(index_avec_demi_produit):
+def test_item_introuvable_nentre_pas_au_catalogue(index_avec_demi_produit, monkeypatch):
 	# Il serait de toute façon sauté au rendu (`resolve_item_ref` ne le résout pas) : le
 	# compter rendrait `lieu_prend_commandes` vrai pour un catalogue qui s'affiche vide.
+	# ⚠️ Un doc `None` fait retomber `item_commandable` sur la VRAIE base : sans ce patch, le
+	# test passe hors ligne et échoue dès que CouchDB répond (`item:Epee_longue` y existe).
+	monkeypatch.setattr(marche, "get_doc", lambda i: None)
 	assert commande.catalogue_commandable(ARTISAN, lambda i: None) == []
 
 

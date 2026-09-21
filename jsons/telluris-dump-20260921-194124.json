@@ -1,7 +1,7 @@
 {
   "db": "telluris",
-  "exported_at": "2026-09-21T19:18:43.284553Z",
-  "doc_count": 3558,
+  "exported_at": "2026-09-21T19:41:24.256218Z",
+  "doc_count": 3595,
   "docs": [
     {
       "_id": "_design/characters",
@@ -39885,7 +39885,7 @@
     },
     {
       "_id": "item:cockatrice",
-      "_rev": "6-d282f46609953a5e0d0f1f3af85c2a86",
+      "_rev": "7-5c4cef1f029ff2e04db19d715928f848",
       "type": "item",
       "nom": "Carcasse de Cockatrice",
       "sous_categorie": "carcasse",
@@ -39899,7 +39899,503 @@
       ],
       "description": "Dépouille de Cockatrice récupérée à l'issue du combat.",
       "source_espece": "espece:cockatrice",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:cockatrice_tete",
+          "quantite": 1,
+          "fraction": 0.1
+        },
+        {
+          "item": "item:cockatrice_corps",
+          "quantite": 1,
+          "fraction": 0.45
+        },
+        {
+          "item": "item:cockatrice_aile",
+          "quantite": 2,
+          "fraction": 0.2
+        },
+        {
+          "item": "item:cockatrice_patte",
+          "quantite": 2,
+          "fraction": 0.14
+        },
+        {
+          "item": "item:cockatrice_queue",
+          "quantite": 1,
+          "fraction": 0.11
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_aile",
+      "_rev": "1-a3729d116afb7b642ba104187e9fa2ba",
+      "type": "item",
+      "nom": "Aile de Cockatrice",
+      "icon": "🪶",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        40,
+        140
+      ],
+      "description": "Aile de Cockatrice, débitée sur place.",
+      "tags": [
+        "monstre",
+        "partie_aile",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "aile",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "plumes",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:cockatrice_aile_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_aile_morceau",
+      "_rev": "1-759b5dd14ea60afee3ab4ac12834ba1b",
+      "type": "item",
+      "nom": "Morceau de aile de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        20,
+        70
+      ],
+      "description": "Morceau de aile de Cockatrice, taillé pour être emporté.",
+      "tags": [
+        "monstre",
+        "morceau",
+        "partie_aile",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice_aile",
+      "partie": "aile",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "plumes",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:cockatrice_corps",
+      "_rev": "1-1275baf73bc17d042ec6ad0ff26cc38c",
+      "type": "item",
+      "nom": "Corps de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        180,
+        630
+      ],
+      "description": "Corps de Cockatrice, débité sur place.",
+      "tags": [
+        "monstre",
+        "partie_corps",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "plumes",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:cockatrice_corps_morceau",
+          "quantite": 7,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_corps_morceau",
+      "_rev": "1-d41c30d44650f374d5e20875098d6c65",
+      "type": "item",
+      "nom": "Morceau de corps de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        25.71,
+        90
+      ],
+      "description": "Morceau de corps de Cockatrice, taillé pour être emporté.",
+      "tags": [
+        "monstre",
+        "morceau",
+        "partie_corps",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "plumes",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:cockatrice_patte",
+      "_rev": "1-c846ee3b09fa0751e6f7aa57e2604a8d",
+      "type": "item",
+      "nom": "Patte de Cockatrice",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        28,
+        98
+      ],
+      "description": "Patte de Cockatrice, débitée sur place.",
+      "tags": [
+        "monstre",
+        "partie_patte",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:cockatrice_queue",
+      "_rev": "1-7a6fb5756379ba4ee7da67aed0c495e4",
+      "type": "item",
+      "nom": "Queue de Cockatrice",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        44,
+        154
+      ],
+      "description": "Queue de Cockatrice, débitée sur place.",
+      "tags": [
+        "monstre",
+        "partie_queue",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:cockatrice_queue_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_queue_morceau",
+      "_rev": "1-0a30bfec5743fd8dd59a3d00a8daec6e",
+      "type": "item",
+      "nom": "Morceau de queue de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        22,
+        77
+      ],
+      "description": "Morceau de queue de Cockatrice, taillé pour être emporté.",
+      "tags": [
+        "monstre",
+        "morceau",
+        "partie_queue",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice_queue",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:cockatrice_tete",
+      "_rev": "1-2e148f2f3abaeea4fff7cb086683dfd3",
+      "type": "item",
+      "nom": "Tête de Cockatrice",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        40,
+        140
+      ],
+      "description": "Tête de Cockatrice, débitée sur place.",
+      "tags": [
+        "monstre",
+        "partie_tete",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:cockatrice_tete_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:cockatrice_tete_morceau",
+      "_rev": "1-32771ea09bd0f36d65bc019f6e31ad9e",
+      "type": "item",
+      "nom": "Morceau de tête de Cockatrice",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        20,
+        70
+      ],
+      "description": "Morceau de tête de Cockatrice, taillé pour être emporté.",
+      "tags": [
+        "monstre",
+        "morceau",
+        "partie_tete",
+        "petrification",
+        "predateur",
+        "vol"
+      ],
+      "source_espece": "espece:cockatrice",
+      "portion_de": "item:cockatrice_tete",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:coeur",
@@ -41265,7 +41761,7 @@
     },
     {
       "_id": "item:demon_guerrier",
-      "_rev": "4-e49a00954ce10989becb5974bd02a7d6",
+      "_rev": "6-e52d6d0173cd29d2330331ba8ddcdafe",
       "type": "item",
       "nom": "Carcasse de Demon Guerrier",
       "sous_categorie": "carcasse",
@@ -41273,14 +41769,244 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 13.0,
+      "poids": [
+        75,
+        200
+      ],
       "description": "Dépouille de Demon Guerrier récupérée à l'issue du combat.",
       "source_espece": "espece:demon_guerrier",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_guerrier_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_guerrier_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_guerrier_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_guerrier_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_guerrier_bras",
+      "_rev": "1-0d159de87ddaa5c66d991ec8ee939731",
+      "type": "item",
+      "nom": "Bras de Demon Guerrier",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        4.5,
+        12
+      ],
+      "description": "Bras de Demon Guerrier, débité sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_corps",
+      "_rev": "1-429f307261d3831fb81778179f59007c",
+      "type": "item",
+      "nom": "Corps de Demon Guerrier",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        37.5,
+        100
+      ],
+      "description": "Corps de Demon Guerrier, débité sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_jambe",
+      "_rev": "1-ea8aca8bccd6acd68d6c5035e79395c0",
+      "type": "item",
+      "nom": "Jambe de Demon Guerrier",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        11.25,
+        30
+      ],
+      "description": "Jambe de Demon Guerrier, débitée sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_guerrier_tete",
+      "_rev": "1-7a04bf3479d5d69664b050530a6e62b3",
+      "type": "item",
+      "nom": "Tête de Demon Guerrier",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        6,
+        16
+      ],
+      "description": "Tête de Demon Guerrier, débitée sur place.",
+      "tags": [
+        "demon",
+        "guerrier",
+        "humanoide",
+        "infernal",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_guerrier",
+      "portion_de": "item:demon_guerrier",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_majeur_de_la_destinee",
-      "_rev": "4-95816aac8a8fde2d4a4622c735c04fc0",
+      "_rev": "7-3828cf07553fc2918e718b23f29c02ad",
       "type": "item",
       "nom": "Carcasse de Demon Majeur de la Destinee",
       "sous_categorie": "carcasse",
@@ -41288,14 +42014,256 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 11.5,
+      "poids": [
+        75,
+        200
+      ],
       "description": "Dépouille de Demon Majeur de la Destinee récupérée à l'issue du combat.",
       "source_espece": "espece:demon_majeur_de_la_destinee",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destinee_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_majeur_de_la_destinee_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_bras",
+      "_rev": "1-09cdf6e573d557ed172892fc78c360bd",
+      "type": "item",
+      "nom": "Bras de Demon Majeur de la Destinee",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        4.5,
+        12
+      ],
+      "description": "Bras de Demon Majeur de la Destinee, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_corps",
+      "_rev": "1-c83dc364732ced5594b7dfb21b018f6f",
+      "type": "item",
+      "nom": "Corps de Demon Majeur de la Destinee",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        37.5,
+        100
+      ],
+      "description": "Corps de Demon Majeur de la Destinee, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_jambe",
+      "_rev": "1-7a6f9a9a8359cbe9ffb75d25c0a8d038",
+      "type": "item",
+      "nom": "Jambe de Demon Majeur de la Destinee",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        11.25,
+        30
+      ],
+      "description": "Jambe de Demon Majeur de la Destinee, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destinee_tete",
+      "_rev": "1-b498259faeb85d638e0aaaa1b620d89c",
+      "type": "item",
+      "nom": "Tête de Demon Majeur de la Destinee",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        6,
+        16
+      ],
+      "description": "Tête de Demon Majeur de la Destinee, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "magique",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destinee",
+      "portion_de": "item:demon_majeur_de_la_destinee",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_majeur_de_la_destruction",
-      "_rev": "4-55d0a1b9abb0e7d1b3e050a784c5f56b",
+      "_rev": "6-aeca35fe2c165e2556eeb9efd39e222a",
       "type": "item",
       "nom": "Carcasse de Demon Majeur de la Destruction",
       "sous_categorie": "carcasse",
@@ -41303,14 +42271,326 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 19.0,
+      "poids": [
+        100,
+        500
+      ],
       "description": "Dépouille de Demon Majeur de la Destruction récupérée à l'issue du combat.",
       "source_espece": "espece:demon_majeur_de_la_destruction",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destruction_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:demon_majeur_de_la_destruction_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_bras",
+      "_rev": "1-1f93307956938586a50bc7a715dcdfaf",
+      "type": "item",
+      "nom": "Bras de Demon Majeur de la Destruction",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        6,
+        30
+      ],
+      "description": "Bras de Demon Majeur de la Destruction, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_bras"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_corps",
+      "_rev": "1-05b32a8fa52310489f9e934ced8e195a",
+      "type": "item",
+      "nom": "Corps de Demon Majeur de la Destruction",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        50,
+        250
+      ],
+      "description": "Corps de Demon Majeur de la Destruction, débité sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:demon_majeur_de_la_destruction_corps_morceau",
+          "quantite": 3,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_corps_morceau",
+      "_rev": "1-7d6db21749ce8dfaaeeeb27642ea8e79",
+      "type": "item",
+      "nom": "Morceau de corps de Demon Majeur de la Destruction",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        16.67,
+        83.33
+      ],
+      "description": "Morceau de corps de Demon Majeur de la Destruction, taillé pour être emporté.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "morceau",
+        "partie_corps"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "item:Sang_demon_seche",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_jambe",
+      "_rev": "1-b8234e614b27298d29eb9054b1e332f3",
+      "type": "item",
+      "nom": "Jambe de Demon Majeur de la Destruction",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        15,
+        75
+      ],
+      "description": "Jambe de Demon Majeur de la Destruction, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:demon_majeur_de_la_destruction_tete",
+      "_rev": "1-409563ab8ecc67a0394ac5ac8e84faea",
+      "type": "item",
+      "nom": "Tête de Demon Majeur de la Destruction",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "rare",
+      "slots": [],
+      "poids": [
+        8,
+        40
+      ],
+      "description": "Tête de Demon Majeur de la Destruction, débitée sur place.",
+      "tags": [
+        "boss",
+        "demon",
+        "humanoide",
+        "infernal",
+        "legendaire",
+        "partie_tete"
+      ],
+      "source_espece": "espece:demon_majeur_de_la_destruction",
+      "portion_de": "item:demon_majeur_de_la_destruction",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "yeux",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:demon_mineur",
-      "_rev": "4-e7eb956f6ff2144fca18af71c84af672",
+      "_rev": "5-ce9fc5ed54bbc7019594e3999d779b06",
       "type": "item",
       "nom": "Carcasse de Demon Mineur",
       "sous_categorie": "carcasse",
@@ -41318,14 +42598,17 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 8.0,
+      "poids": [
+        45,
+        90
+      ],
       "description": "Dépouille de Demon Mineur récupérée à l'issue du combat.",
       "source_espece": "espece:demon_mineur",
       "loot_defaut": true
     },
     {
       "_id": "item:demon_servant",
-      "_rev": "4-7c76b7cdf3b57cd283600fe5447b209f",
+      "_rev": "5-baaa642ab1d4ac397669a838b341f192",
       "type": "item",
       "nom": "Carcasse de Demon Servant",
       "sous_categorie": "carcasse",
@@ -41333,7 +42616,10 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 4.5,
+      "poids": [
+        25,
+        55
+      ],
       "description": "Dépouille de Demon Servant récupérée à l'issue du combat.",
       "source_espece": "espece:demon_servant",
       "loot_defaut": true
@@ -41359,7 +42645,7 @@
     },
     {
       "_id": "item:doppleganger",
-      "_rev": "4-b4eb49ac73b47df4dd36afbcd5d51075",
+      "_rev": "6-6ba663e9a33ce64ca18179754c1f3827",
       "type": "item",
       "nom": "Carcasse de Doppleganger",
       "sous_categorie": "carcasse",
@@ -41367,14 +42653,220 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 4.5,
+      "poids": [
+        45,
+        150
+      ],
       "description": "Dépouille de Doppleganger récupérée à l'issue du combat.",
       "source_espece": "espece:doppleganger",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:doppleganger_tete",
+          "quantite": 1,
+          "fraction": 0.08
+        },
+        {
+          "item": "item:doppleganger_corps",
+          "quantite": 1,
+          "fraction": 0.5
+        },
+        {
+          "item": "item:doppleganger_bras",
+          "quantite": 2,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:doppleganger_jambe",
+          "quantite": 2,
+          "fraction": 0.3
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:doppleganger_bras",
+      "_rev": "1-0fe03addd74f1961aea49aa10c37a984",
+      "type": "item",
+      "nom": "Bras de Doppleganger",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        2.7,
+        9
+      ],
+      "description": "Bras de Doppleganger, débité sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_bras"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "bras",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_corps",
+      "_rev": "1-d214865e245e1d597095c547ffc0e764",
+      "type": "item",
+      "nom": "Corps de Doppleganger",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        22.5,
+        75
+      ],
+      "description": "Corps de Doppleganger, débité sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_corps"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_jambe",
+      "_rev": "1-ac790b05f35cf0dc019ac64a919d4f51",
+      "type": "item",
+      "nom": "Jambe de Doppleganger",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        6.75,
+        22.5
+      ],
+      "description": "Jambe de Doppleganger, débitée sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_jambe"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "jambe",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:doppleganger_tete",
+      "_rev": "1-53e01b53e480d9497eb6ca7187211b21",
+      "type": "item",
+      "nom": "Tête de Doppleganger",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        3.6,
+        12
+      ],
+      "description": "Tête de Doppleganger, débitée sur place.",
+      "tags": [
+        "furtif",
+        "humanoide",
+        "metamorphe",
+        "partie_tete"
+      ],
+      "source_espece": "espece:doppleganger",
+      "portion_de": "item:doppleganger",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:dragnard",
-      "_rev": "4-efea6dce27c3f10366c71c15892ef03f",
+      "_rev": "6-9e92295c1cdac319fea7479cfdf5672c",
       "type": "item",
       "nom": "Carcasse de Dragnard",
       "sous_categorie": "carcasse",
@@ -41382,10 +42874,350 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 10.5,
+      "poids": [
+        500,
+        900
+      ],
       "description": "Dépouille de Dragnard récupérée à l'issue du combat.",
       "source_espece": "espece:dragnard",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:dragnard_tete",
+          "quantite": 1,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:dragnard_corps",
+          "quantite": 1,
+          "fraction": 0.52
+        },
+        {
+          "item": "item:dragnard_patte",
+          "quantite": 4,
+          "fraction": 0.28
+        },
+        {
+          "item": "item:dragnard_queue",
+          "quantite": 1,
+          "fraction": 0.08
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_corps",
+      "_rev": "1-92f0d4ad39ed1722fd7958351b0b6182",
+      "type": "item",
+      "nom": "Corps de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        260,
+        468
+      ],
+      "description": "Corps de Dragnard, débité sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_corps"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:dragnard_corps_morceau",
+          "quantite": 5,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_corps_morceau",
+      "_rev": "1-556709206ff538fdedd44efb066cefa1",
+      "type": "item",
+      "nom": "Morceau de corps de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        52,
+        93.6
+      ],
+      "description": "Morceau de corps de Dragnard, taillé pour être emporté.",
+      "tags": [
+        "draconique",
+        "monture",
+        "morceau",
+        "partie_corps"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "coeur",
+          1
+        ],
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_patte",
+      "_rev": "1-94a33da4326edccddbb3a1411552eb70",
+      "type": "item",
+      "nom": "Patte de Dragnard",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        35,
+        63
+      ],
+      "description": "Patte de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_patte"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "griffes",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_queue",
+      "_rev": "1-9a5322eede4d6cf5cd497c36fe41355d",
+      "type": "item",
+      "nom": "Queue de Dragnard",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        40,
+        72
+      ],
+      "description": "Queue de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_queue"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "queue",
+      "depecage": [
+        [
+          "crins",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:dragnard_tete",
+      "_rev": "1-224c296b898d2aafeb6cb538e060193d",
+      "type": "item",
+      "nom": "Tête de Dragnard",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        60,
+        108
+      ],
+      "description": "Tête de Dragnard, débitée sur place.",
+      "tags": [
+        "draconique",
+        "monture",
+        "partie_tete"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:dragnard_tete_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:dragnard_tete_morceau",
+      "_rev": "1-960ae73487d1f5a5e053ac646eadae63",
+      "type": "item",
+      "nom": "Morceau de tête de Dragnard",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "peu_commun",
+      "slots": [],
+      "poids": [
+        30,
+        54
+      ],
+      "description": "Morceau de tête de Dragnard, taillé pour être emporté.",
+      "tags": [
+        "draconique",
+        "monture",
+        "morceau",
+        "partie_tete"
+      ],
+      "source_espece": "espece:dragnard",
+      "portion_de": "item:dragnard_tete",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:dragon",
@@ -42345,7 +44177,7 @@
     },
     {
       "_id": "item:dragon_zombie",
-      "_rev": "6-2f65907a66c0f1f9394d21cc6284e80c",
+      "_rev": "7-6ad93971e6e5b8bf4d18256086373a16",
       "type": "item",
       "nom": "Ossements de Dragon Zombie",
       "sous_categorie": "ossements",
@@ -42353,7 +44185,10 @@
       "rarete": "rare",
       "categorie": "composant",
       "slots": [],
-      "poids": 15.0,
+      "poids": [
+        500,
+        1900
+      ],
       "description": "Ossements et reliquats récupérés sur Dragon Zombie après sa destruction.",
       "source_espece": "espece:dragon_zombie",
       "loot_defaut": true
@@ -42505,7 +44340,7 @@
     },
     {
       "_id": "item:familier",
-      "_rev": "4-53ef5e116ef24754d71177ad11f2d2e4",
+      "_rev": "5-1dd2320718504e23b18c838d8e1e8ff0",
       "type": "item",
       "nom": "Carcasse de Familier",
       "sous_categorie": "carcasse",
@@ -42513,7 +44348,10 @@
       "rarete": "peu_commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 1.0,
+      "poids": [
+        15,
+        50
+      ],
       "description": "Dépouille de Familier récupérée à l'issue du combat.",
       "source_espece": "espece:familier",
       "loot_defaut": true
@@ -42601,7 +44439,7 @@
     },
     {
       "_id": "item:fauves",
-      "_rev": "4-c4f613f57e3e1eed6f307fbbe371f9fc",
+      "_rev": "6-d7b2924781e13a18d9b382f70c22b00d",
       "type": "item",
       "nom": "Carcasse de Fauves",
       "sous_categorie": "carcasse",
@@ -42609,10 +44447,291 @@
       "rarete": "commun",
       "categorie": "composant",
       "slots": [],
-      "poids": 8.0,
+      "poids": [
+        120,
+        300
+      ],
       "description": "Dépouille de Fauves récupérée à l'issue du combat.",
       "source_espece": "espece:fauves",
-      "loot_defaut": true
+      "loot_defaut": true,
+      "decoupe": [
+        {
+          "item": "item:fauves_tete",
+          "quantite": 1,
+          "fraction": 0.12
+        },
+        {
+          "item": "item:fauves_corps",
+          "quantite": 1,
+          "fraction": 0.52
+        },
+        {
+          "item": "item:fauves_patte",
+          "quantite": 4,
+          "fraction": 0.28
+        },
+        {
+          "item": "item:fauves_queue",
+          "quantite": 1,
+          "fraction": 0.08
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:fauves_corps",
+      "_rev": "1-5a3ed820bb3b535164dcac34b008dc85",
+      "type": "item",
+      "nom": "Corps de Fauves",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        62.4,
+        156
+      ],
+      "description": "Corps de Fauves, débité sur place.",
+      "tags": [
+        "animal",
+        "partie_corps",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ],
+      "decoupe": [
+        {
+          "item": "item:fauves_corps_morceau",
+          "quantite": 2,
+          "fraction": 1
+        }
+      ],
+      "decoupe_poids_min": 100
+    },
+    {
+      "_id": "item:fauves_corps_morceau",
+      "_rev": "1-205c5d4902d2e0f0b04a3d6fcca58dc4",
+      "type": "item",
+      "nom": "Morceau de corps de Fauves",
+      "icon": "🥩",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        31.2,
+        78
+      ],
+      "description": "Morceau de corps de Fauves, taillé pour être emporté.",
+      "tags": [
+        "animal",
+        "morceau",
+        "partie_corps",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves_corps",
+      "partie": "corps",
+      "depecage": [
+        [
+          "boyaux",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "foie",
+          1
+        ],
+        [
+          "graisse",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "sang",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_patte",
+      "_rev": "1-f55d6c854a1754fdcc4f0789563073ae",
+      "type": "item",
+      "nom": "Patte de Fauves",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        8.4,
+        21
+      ],
+      "description": "Patte de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_patte",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "patte",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ],
+        [
+          "viande",
+          2
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_queue",
+      "_rev": "1-0d49f0f22f45f33720a5ed7a42268a53",
+      "type": "item",
+      "nom": "Queue de Fauves",
+      "icon": "🦴",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        9.6,
+        24
+      ],
+      "description": "Queue de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_queue",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "queue",
+      "depecage": [
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ],
+        [
+          "poils",
+          1
+        ],
+        [
+          "tendons",
+          1
+        ]
+      ]
+    },
+    {
+      "_id": "item:fauves_tete",
+      "_rev": "1-77e28b47be95cd9c2b1e9f857ee8242c",
+      "type": "item",
+      "nom": "Tête de Fauves",
+      "icon": "💀",
+      "categorie": "composant",
+      "sous_categorie": "carcasse",
+      "rarete": "commun",
+      "slots": [],
+      "poids": [
+        14.4,
+        36
+      ],
+      "description": "Tête de Fauves, débitée sur place.",
+      "tags": [
+        "animal",
+        "partie_tete",
+        "predateur"
+      ],
+      "source_espece": "espece:fauves",
+      "portion_de": "item:fauves",
+      "partie": "tete",
+      "depecage": [
+        [
+          "crane",
+          1
+        ],
+        [
+          "crocs",
+          1
+        ],
+        [
+          "cuir_brut",
+          1
+        ],
+        [
+          "os",
+          1
+        ]
+      ]
     },
     {
       "_id": "item:fee",
