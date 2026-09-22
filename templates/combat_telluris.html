@@ -1296,8 +1296,18 @@ window.addEventListener('resize', _surRedimensionnement);
 // (relatifs au conteneur → indépendant de la taille du jeton). Fenêtre de cadrage de
 // référence = 100×100 (play_town). Un doc `aventurier:*` n'a pas de cadrage → défauts.
 const PORTRAITS_JOUEURS = {{ portraits_joueurs | tojson | safe }};
+// ⚠️ Créature INVOQUÉE en cours de combat : absente de PORTRAITS_JOUEURS (calculé au
+// rendu de la page), son jeton resterait vide jusqu'au rafraîchissement. Son snapshot
+// porte l'image de son ESPÈCE : même entrée que le serveur lui aurait donnée (portrait
+// ENTIER servi par /monsters — dimensions inutiles, jamais lues sans cadrage).
+function _portraitInvocation(jid) {
+	const snap = ((state && state.joueurs) || []).find(x => x.id === jid);
+	if (!snap || !snap.est_invocation || !snap.image) return null;
+	return (PORTRAITS_JOUEURS[jid] = { image: snap.image, base: '/monsters', entier: true,
+									   largeur: 100, hauteur: 100, nom: snap.nom || '' });
+}
 function portraitStyle(jid) {
-	const p = PORTRAITS_JOUEURS[jid];
+	const p = PORTRAITS_JOUEURS[jid] || _portraitInvocation(jid);
 	if (!p || !p.image || !p.largeur || !p.hauteur) return null;
 	// Portrait ENTIER (monture, personne escortée) : aucun cadrage à reproduire — on ne
 	// pose ni `size` ni `pos`, et c'est la feuille de style qui fait tenir l'image
