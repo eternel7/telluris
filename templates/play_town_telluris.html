@@ -7,6 +7,8 @@
 {# Pavé de déplacement : markup ET CSS partagés avec la page de combat et le mode « test de
    déplacement » de l'éditeur de carte. #}
 {% import "part-move-panel.html" as movepanel %}
+{# Plein écran : choix gardé d'une page à l'autre + manifeste (cf. part-plein-ecran.html). #}
+{% import "part-plein-ecran.html" as pleinecran %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -14,6 +16,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Telluris — {{ title }}</title>
 	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{{ pleinecran.tete() }}
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
@@ -456,7 +459,7 @@
 		#game-container {
 			display: grid;
 			grid-template-columns: 1.8fr 1.2fr;
-			grid-template-rows: auto 1fr auto auto;
+			grid-template-rows: auto 0.93fr auto auto;
 			grid-template-areas: 
 				"header header"
 				"map sidebar"
@@ -1307,10 +1310,13 @@
 			   fasse varier (le pas sautait donc d'une case à l'autre).
 			   ⚠️ `--x`/`--y` ne sont pas des custom properties enregistrées (@property),
 			   donc non interpolables — mais on ne les anime pas : c'est la valeur
-			   CALCULÉE de `transform` qui est interpolée à chaque `setProperty` de move(). */
+			   CALCULÉE de `transform` qui est interpolée à chaque `setProperty` de move().
+			   `- 0.5` : c'est le CENTRE de la case du personnage qui va au centre de la vue,
+			   pas son coin haut-gauche (même règle que showQuestMap) — à garder en phase
+			   avec `.token`. */
 			transform: translate3d(
-				calc((var(--dist-view)/2 - var(--x)) * var(--cell-w)),
-				calc((var(--dist-view)/2 - var(--y)) * var(--cell-h)),
+				calc((var(--dist-view)/2 - 0.5 - var(--x)) * var(--cell-w)),
+				calc((var(--dist-view)/2 - 0.5 - var(--y)) * var(--cell-h)),
 				0);
 			width: calc(var(--cols) * var(--cell-w));
 			height: calc(var(--rows) * var(--cell-h));
@@ -1330,10 +1336,13 @@
 		}
 		.token {
 			position: absolute;
-			top: calc(var(--cell-h) * (var(--dist-view)/2));
-			left: calc(var(--cell-w) * (var(--dist-view)/2));
-			width: var(--cell-w);
-			height: var(--cell-h);
+			/* 3/4 de case, centré dans la vue : le centre de la case du personnage est à
+			   `dist-view/2` (cf. le `- 0.5` du transform de #bg-image), on retire la moitié
+			   du jeton, soit 0.375 case. */
+			top: calc(var(--cell-h) * (var(--dist-view)/2 - 0.375));
+			left: calc(var(--cell-w) * (var(--dist-view)/2 - 0.375));
+			width: calc(var(--cell-w) * 0.75);
+			height: calc(var(--cell-h) * 0.75);
 			display: flex; align-items: center; justify-content: center;
 			z-index: 10; pointer-events: none;
 			border-width: 3px;
@@ -9504,5 +9513,6 @@ async function choisirPnj(choixId) {
 	} catch(err) { console.error('Erreur choix de dialogue', err); }
 }
 </script>
+{{ pleinecran.pastille(compact=true) }}
 </body>
 </html>

@@ -159,6 +159,41 @@ def read_root(request: Request):
 		name="home_telluris.html", 
 		context={"title": "Ubi Chartae Finiunt"}
 	)
+
+# Application installable (PWA) : ouverte depuis l'icône, elle tourne sans barre de navigateur
+# sur TOUTES les pages — le plein écran de l'API, lui, meurt à chaque navigation
+# (cf. part-plein-ecran.html). Desktop : `fullscreen` retombe en fenêtre sans barre.
+@app.get("/manifest.webmanifest")
+def manifest():
+	return JSONResponse(
+		media_type="application/manifest+json",
+		content={
+			"name": "Telluris",
+			"short_name": "Telluris",
+			"lang": "fr",
+			"start_url": "/embleme",
+			"scope": "/",
+			"display": "fullscreen",
+			"background_color": "#0e0b08",
+			"theme_color": "#0e0b08",
+			"icons": [
+				# Logo de l'application : telluris_logo.png SEUL. Une seconde icône plus grande
+				# (ex. telluris_logo_no_dragon, 1024) serait préférée par le navigateur.
+				# ⚠️ Pas de SVG (favicon, telluris_logo) : `width="100%"` sans hauteur, aucune
+				# taille propre → Chrome ne sait pas le décoder comme icône d'application.
+				{"src": "/icons/telluris_logo.png", "sizes": "614x614", "type": "image/png", "purpose": "any"},
+			],
+			# Fenêtre d'installation enrichie : au moins une capture `wide` (bureau) et une
+			# sans form_factor (mobile). `sizes` = dimensions RÉELLES du fichier.
+			# Illustrations du jeu en attendant de vraies captures d'écran.
+			"screenshots": [
+				{"src": "/towns/auberge_europe03.png", "sizes": "1408x768", "type": "image/png",
+					"form_factor": "wide", "label": "Telluris — une auberge"},
+				{"src": "/towns/portail_de_temple_notre_dame.png", "sizes": "896x1193", "type": "image/png",
+					"label": "Telluris — un portail de temple"},
+			],
+		},
+	)
 	
 @app.get("/admin/bestiaire", response_class=HTMLResponse)
 def bestiaire_editor(request: Request, current_user: Annotated[User, Depends(get_current_user)]):

@@ -1,0 +1,130 @@
+{#
+	Plein écran partagé par les pages de jeu (/embleme, /play, /combat).
+	- Le plein écran de l'API appartient à la PAGE : toute navigation en sort, et une page ne
+	  peut le relancer sans un geste du joueur. ⚠️ Le rejouer au premier clic de la page
+	  suivante a été essayé puis RETIRÉ (trop déroutant) : la pastille vaut pour la page.
+	- Plein écran qui survit à la navigation = l'application installée : `tete()` pose son
+	  manifeste (/manifest.webmanifest, main.py), elle s'ouvre sans barre de navigateur.
+	- z-index 90 : sous tous les overlays (combat 100/120, play 9000+, wizard 2000).
+#}
+{% macro tete() %}
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0e0b08">
+{% endmacro %}
+
+{% macro pastille(compact=false) %}
+<style>
+	.fs-fab {
+		position: fixed;
+		left: 20px;
+		bottom: 20px;
+		z-index: 90;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 16px;
+		background: var(--ink, #0e0b08);
+		border: 1px solid var(--gold, #8a651a);
+		border-radius: 2px;
+		color: var(--gold2, #f0c04a);
+		font-family: 'Cinzel', serif;
+		font-size: 12px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		cursor: pointer;
+		box-shadow: 0 4px 18px rgba(0,0,0,0.6);
+		transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+	}
+	.fs-fab[hidden] { display: none; }
+	.fs-fab:hover, .fs-fab:focus-visible {
+		color: var(--gold3, #e8a020);
+		border-color: var(--gold2, #f0c04a);
+		box-shadow: 0 4px 22px rgba(240,192,74,0.25);
+		opacity: 1;
+	}
+	/* Pages de jeu : discrète, pour ne pas masquer l'interface du coin. */
+	.fs-fab.fs-fab-compact {
+		left: 10px;
+		bottom: 10px;
+		padding: 6px 9px;
+		font-size: 14px;
+		opacity: 0.55;
+	}
+	.fs-fab.fs-fab-compact .fs-fab-txt { display: none; }
+	/* Téléphone : le libellé mangerait la largeur, l'icône suffit. */
+	@media (max-width: 600px) {
+		.fs-fab { padding: 10px 12px; }
+		.fs-fab .fs-fab-txt { display: none; }
+	}
+</style>
+<button type="button" class="fs-fab{% if compact %} fs-fab-compact{% endif %}" id="fs-fab" title="Plein écran" aria-pressed="false" hidden>
+	<span aria-hidden="true" id="fs-fab-ico">⛶</span><span class="fs-fab-txt" id="fs-fab-txt">Plein écran</span>
+</button>
+<script>
+	(function () {
+		const btn = document.getElementById('fs-fab');
+		if (!btn || !document.fullscreenEnabled) return;
+		// Application installée en plein écran : la fenêtre l'est déjà.
+		if (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) return;
+		btn.hidden = false;
+		const ico = document.getElementById('fs-fab-ico');
+		const txt = document.getElementById('fs-fab-txt');
+		// Suit aussi la sortie par Échap : l'état vient du document, pas du clic.
+		function majFs() {
+			const actif = !!document.fullscreenElement;
+			ico.textContent = actif ? '✕' : '⛶';
+			txt.textContent = actif ? 'Quitter' : 'Plein écran';
+			btn.title = actif ? 'Quitter le plein écran' : 'Plein écran';
+			btn.setAttribute('aria-pressed', actif ? 'true' : 'false');
+		}
+		btn.addEventListener('click', function () {
+			const p = document.fullscreenElement
+				? document.exitFullscreen()
+				: document.documentElement.requestFullscreen();
+			if (p && p.catch) p.catch(function () {});
+		});
+		document.addEventListener('fullscreenchange', majFs);
+		// Retour arrière servi depuis le cache : la page revit sans recharger.
+		window.addEventListener('pageshow', majFs);
+		majFs();
+	})();
+</script>
+{% endmacro %}
+
+{#
+	Bouton « Installer Telluris » : ouvre la fenêtre d'installation du navigateur.
+	- ⚠️ Emprunte le style `.fs-fab` : à poser APRÈS `pastille()` sur la même page.
+	- N'apparaît que sur `beforeinstallprompt`, donc Chrome / Edge, jeu installable et pas
+	  encore installé. Firefox et Safari ne l'émettent pas : le bouton y reste caché.
+#}
+{% macro installer() %}
+<style>
+	.fs-fab.fs-fab-install { bottom: 70px; }
+</style>
+<button type="button" class="fs-fab fs-fab-install" id="fs-install" title="Installer Telluris : le jeu s'ouvre sans barre de navigateur" hidden>
+	<span aria-hidden="true">⤓</span><span class="fs-fab-txt">Installer Telluris</span>
+</button>
+<script>
+	(function () {
+		const btn = document.getElementById('fs-install');
+		if (!btn) return;
+		let invite = null;
+		window.addEventListener('beforeinstallprompt', function (ev) {
+			ev.preventDefault();	// notre bouton remplace le bandeau du navigateur
+			invite = ev;
+			btn.hidden = false;
+		});
+		btn.addEventListener('click', function () {
+			if (!invite) return;
+			const ev = invite;
+			invite = null;	// un événement ne sert qu'une fois ; refusé, le navigateur en réémet un
+			btn.hidden = true;
+			ev.prompt();
+		});
+		window.addEventListener('appinstalled', function () {
+			invite = null;
+			btn.hidden = true;
+		});
+	})();
+</script>
+{% endmacro %}

@@ -3,6 +3,8 @@
    déplacement » de l'éditeur de carte. Ici, `rotation=true` : les deux coins bas sont les
    boutons de pivot de la caméra, il n'y a donc que 6 flèches. #}
 {% import "part-move-panel.html" as movepanel %}
+{# Plein écran : choix gardé d'une page à l'autre + manifeste (cf. part-plein-ecran.html). #}
+{% import "part-plein-ecran.html" as pleinecran %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -10,6 +12,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Combat - {{ title }}</title>
 <link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+{{ pleinecran.tete() }}
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 	:root {
@@ -3572,5 +3575,6 @@ if (state.chasse_narration) {
 	document.getElementById('chasse-overlay').classList.add('visible');
 }
 </script>
+{{ pleinecran.pastille(compact=true) }}
 </body>
 </html>

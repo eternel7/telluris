@@ -1,3 +1,5 @@
+{# Pastille plein écran + manifeste : partagés avec /play et /combat. #}
+{% import "part-plein-ecran.html" as pleinecran %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,6 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Telluris — {{ title }}</title>
 	<link rel="icon" type="image/png" href="{{ url_for('icons', path='favicon.svg') }}" sizes="any">
+	{{ pleinecran.tete() }}
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 	<style>
@@ -1093,6 +1096,8 @@
 		</div>
 		</section>
 	</main>
+	{{ pleinecran.pastille() }}
+	{{ pleinecran.installer() }}
 	{% if user_doc and user_doc.get("admin") == 1 %}
 	<a class="admin-fab" href="/admin" title="Administration">
 		<span aria-hidden="true">⚙</span><span class="admin-fab-txt">Administration</span>
