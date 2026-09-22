@@ -1279,14 +1279,17 @@
 			cursor: pointer;
 			text-transform: uppercase;
 		}
-		/* Zoom : une case mesure `--cell-w × --cell-h`, choisie pour que les `--dist-view`
-		   cases visibles remplissent la zone en largeur OU en hauteur, au ratio natif
-		   `dim_x/dim_y`. La portée de vue ne change pas : seul l'agrandissement varie.
+		/* Zoom : une case est un CARRÉ de `--cell`, choisi pour que les `--dist-view` cases
+		   visibles remplissent la zone en largeur OU en hauteur (fenêtre carrée). La portée
+		   de vue ne change pas : seul l'agrandissement varie. L'image est mise à l'échelle
+		   de la GRILLE (`--cols × --rows` cases), étirée si ses cases natives
+		   (`dim_x × dim_y`) ne sont pas carrées.
+		   `--cell-w`/`--cell-h` restent deux noms (transform, jeton, pavé) mais valent `--cell`.
 		   ⚠️ Les unités `cq*` résolvent contre `.map-area.map-grille` (container-type). */
 		.viewport {
-			--cell-w: min(100cqw / var(--dist-view),
-			              100cqh / var(--dist-view) * var(--dim_x) / var(--dim_y));
-			--cell-h: calc(var(--cell-w) * var(--dim_y) / var(--dim_x));
+			--cell: calc(min(100cqw, 100cqh) / var(--dist-view));
+			--cell-w: var(--cell);
+			--cell-h: var(--cell);
 			position: relative;
 			width: calc(var(--cell-w) * var(--dist-view));
 			height: calc(var(--cell-h) * var(--dist-view));
@@ -1506,12 +1509,12 @@
 				height: stretch;
 				max-height: 465px;
 			}		
-			/* Zone zoomée : pleine largeur, hauteur au ratio d'une case (fenêtre carrée en
-			   cases) — sans quoi la containment de taille la ramènerait à 0. */
+			/* Zone zoomée : pleine largeur, carrée comme la fenêtre de cases — sans quoi la
+			   containment de taille la ramènerait à 0. */
 			.map-area.map-grille {
 				height: auto;
 				max-height: none;
-				aspect-ratio: var(--dim_x) / var(--dim_y);
+				aspect-ratio: 1;
 				/* ⚠️ Sans lui, le minimum automatique d'un élément à `aspect-ratio` élargit la
 				   colonne au-delà de l'écran (la page déborde de ~24 px). */
 				min-width: 0;
