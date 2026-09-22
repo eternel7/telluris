@@ -61,14 +61,12 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			padding: 10px;
 		}
 
 		/* 2. DESCRIPTION DU LIEU */
 		.location-desc {
 			grid-area: header;
 			background: rgba(0, 0, 0, 0.4);
-			padding: 10px;
 			border: 2px solid var(--border-color);
 			text-align: center;
 			display: flex;
@@ -76,6 +74,7 @@
 			justify-content: center;
 		}
 		.location-desc h2 {
+			padding: 5px;
 			color: var(--accent-color);
 			font-size: 1.1rem;
 			line-height: 1;
@@ -1443,9 +1442,6 @@
 			/* Zone zoomée : sa hauteur ne vient plus de son contenu (containment de taille). */
 			.map-area.map-grille {
 				height: 300px;
-			}
-			.location-desc {
-				padding: 5px;
 			}
 			.location-desc h2 {
 				font-size: 0.9rem;
