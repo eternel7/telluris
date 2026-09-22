@@ -1533,11 +1533,16 @@ function _majBadgeVitaux(el, p) {
 // markup que la branche `invocation` du template (ids DOM compris : les anneaux, le
 // portrait et le ciblage allié les retrouvent par id). Nom posé en `textContent`/`title`,
 // jamais en innerHTML.
+// Infobulle d'une invocation : même texte que le template, recalculé à chaque mise à
+// jour du bandeau — `invocation_restants` décroît à chaque tour.
+function _titreInvocation(p) {
+	return `${p.nom || ''} — créature invoquée : elle joue seule, encore ${p.invocation_restants || 1} tour(s) avant de se dissiper.`;
+}
 function _creerBadgeInvocation(p) {
 	const el = document.createElement('div');
 	el.className = 'init-badge invocation';
 	el.id = `badge-${p.id}`;
-	el.title = `${p.nom || ''} — créature invoquée : elle joue seule, encore ${p.invocation_restants || 1} tour(s) avant de se dissiper.`;
+	el.title = _titreInvocation(p);
 	const st = portraitStyle(p.id);
 	const img = document.createElement('div');
 	if (st) {
@@ -1587,7 +1592,9 @@ function updateInitiativeStrip(data) {
 		el.classList.toggle('active', i === data.acteur_courant_index);
 		if (id.startsWith('joueur_')) {
 			// Anneaux PV/PM + classe KO de chaque membre du groupe (ids DOM par acteur).
-			_majBadgeVitaux(el, data.joueurs.find(x => x.id === id));
+			const p = data.joueurs.find(x => x.id === id);
+			_majBadgeVitaux(el, p);
+			if (p && p.est_invocation) el.title = _titreInvocation(p);
 		}
 		if (id.startsWith('monstre_')) {
 			const m = data.monstres.find(x => x.id === id);
