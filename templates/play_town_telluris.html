@@ -191,7 +191,6 @@
 			display: flex;
 			align-items: center;
 			gap: 10px;
-			margin-bottom: 10px;
 		}
 		.char-portrait {
 			flex-shrink: 0;
@@ -914,7 +913,7 @@
 		}
 		/* Groupe des boutons d'action d'une ligne (sac/sol) → reste solidaire à droite. */
 		.sh-inv-actions { display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; }
-		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); }
+		.sh-skill { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(74,74,90,0.3); max-height: fit-content;}
 		.sh-skill-icon { font-size: 1.3rem; flex-shrink: 0; }
 		.sh-skill-info { flex: 1; }
 		.sh-skill-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; }
@@ -1125,6 +1124,28 @@
 		#sh-competences > .sh-section,
 		#sh-competences > .sh-barre-grid,
 		#sh-competences > .sh-barre-hint { flex: 0 0 auto; }
+		/* ⓘ de la barre de combat : caché hors mobile, où la consigne reste affichée. */
+		.sh-barre-titre { display: flex; align-items: center; gap: .5rem; }
+		.sh-barre-aide {
+			display: none; margin-left: auto;
+			width: 1.6rem; height: 1.6rem; align-items: center; justify-content: center;
+			background: transparent; color: var(--accent-color);
+			border: 1px solid var(--border-color); border-radius: 50%;
+			font-size: .9rem; line-height: 1; cursor: pointer;
+		}
+		/* Mobile : la consigne quitte le flux (place rendue aux accordéons) et devient une
+		   bulle sous le ⓘ ; `top` est posé par toggleBarreAide (offsetParent = le panneau). */
+		@media (max-width: 768px) {
+			#sh-competences { position: relative; }
+			.sh-barre-aide { display: inline-flex; }
+			#sh-competences > .sh-barre-hint {
+				display: none; position: absolute; left: .5rem; right: .5rem; z-index: 30;
+				padding: .5rem .7rem; font-size: .8rem; color: var(--text-color);
+				background: var(--surface, #181818); border: 1px solid var(--accent-color);
+				border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.6);
+			}
+			#sh-competences > .sh-barre-hint.ouverte { display: block; }
+		}
 		#sh-competences .acc-section { display: flex; flex-direction: column; flex: 0 0 auto; min-height: 0; }
 		#sh-competences .acc-section.open { flex: 1 1 auto; }
 		/* L'en-tête garde l'identité typographique des `.sh-section` qu'il remplace. */
@@ -1797,7 +1818,7 @@
 							{% endfor %}
 						</div>
 
-						<div class="sh-section" style="margin-top:14px">🛡 Caractéristiques dérivées</div>
+						<div class="sh-section">🛡 Caractéristiques dérivées</div>
 						{% for lbl, key, unit in [
 							("PV max","pv_max",""),("PM max","pm_max",""),
 							("Initiative","initiative",""),("Déplacement","deplacement"," cases"),
@@ -1893,9 +1914,13 @@
 						{# Barre de combat : la disposition se compose ICI, au calme (le mode ⚙
 						   de l'écran de combat n'en est qu'un raccourci). Rendue 100 % client
 						   par _renderBarreSlots depuis le payload `slots`. #}
-						<div class="sh-section" style="margin-top:14px">🎯 Barre de combat</div>
+						{# Mobile : la consigne passe dans une bulle ouverte par ⓘ (place gagnée
+						   pour les accordéons) ; le bouton n'existe visuellement qu'en mobile. #}
+						<div class="sh-section sh-barre-titre">🎯 Barre de combat<button type="button" class="sh-barre-aide" id="sh-barre-aide"
+								aria-label="Aide : composer la barre de combat" aria-expanded="false" aria-controls="sh-barre-hint"
+								onclick="toggleBarreAide(event)">ⓘ</button></div>
 						<div class="sh-barre-grid" id="sh-slot-grid"></div>
-						<div class="sh-barre-hint">Clic long sur une case puis glisser pour échanger deux cases. Les actions ⚔ 🫳 🏃 se déplacent mais ne se retirent pas.</div>
+						<div class="sh-barre-hint" id="sh-barre-hint">Clic long sur une case puis glisser pour échanger deux cases. Les actions ⚔ 🫳 🏃 se déplacent mais ne se retirent pas.</div>
 						{# ── Les six zones en ACCORDÉON (brique `.acc-*`, comme #sell-panel) ──
 						   Une seule ouverte à la fois, et elle prend TOUTE la hauteur restante :
 						   l'onglet tient dans la fenêtre au lieu de la faire défiler.
@@ -5170,6 +5195,29 @@ function _sortInfoAttrs(sortId, peutVoir) {
 		? ` class="sh-skill-info sh-skill-toggle" onclick="_toggleSortDesc('${sortId}')"`
 		: ' class="sh-skill-info"';
 }
+
+// ── Barre de combat : bulle d'aide ⓘ (mobile seulement, cf. CSS `.sh-barre-aide`) ──
+// Fermée par un 2e clic sur ⓘ, un clic ailleurs ou Échap.
+function _fermerBarreAide() {
+	const hint = document.getElementById('sh-barre-hint');
+	if (!hint || !hint.classList.contains('ouverte')) return;
+	hint.classList.remove('ouverte');
+	document.getElementById('sh-barre-aide').setAttribute('aria-expanded', 'false');
+}
+function toggleBarreAide(ev) {
+	ev.stopPropagation();
+	const btn = document.getElementById('sh-barre-aide');
+	const hint = document.getElementById('sh-barre-hint');
+	if (hint.classList.contains('ouverte')) { _fermerBarreAide(); return; }
+	hint.style.top = (btn.offsetTop + btn.offsetHeight + 6) + 'px';
+	hint.classList.add('ouverte');
+	btn.setAttribute('aria-expanded', 'true');
+}
+document.addEventListener('click', ev => {
+	const hint = document.getElementById('sh-barre-hint');
+	if (hint && !hint.contains(ev.target)) _fermerBarreAide();
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') _fermerBarreAide(); });
 
 // ── Barre de combat : grille de slots (utils/slots_actions.py) ────────────────────
 // Une entrée par case ; `_barreSlots` remplace les deux anciennes listes d'épinglés, qui
