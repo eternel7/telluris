@@ -1528,12 +1528,62 @@ function _majBadgeVitaux(el, p) {
 	setArc(document.getElementById(`ib-pm-${p.id}`), p.pm_max > 0 ? p.currentPM / p.pm_max : 0);
 }
 
+// Badge d'une créature INVOQUÉE en cours de combat : le bandeau est rendu par Jinja à
+// l'ouverture de la page, elle n'y figurait donc pas avant un rafraîchissement. Même
+// markup que la branche `invocation` du template (ids DOM compris : les anneaux, le
+// portrait et le ciblage allié les retrouvent par id). Nom posé en `textContent`/`title`,
+// jamais en innerHTML.
+function _creerBadgeInvocation(p) {
+	const el = document.createElement('div');
+	el.className = 'init-badge invocation';
+	el.id = `badge-${p.id}`;
+	el.title = `${p.nom || ''} — créature invoquée : elle joue seule, encore ${p.invocation_restants || 1} tour(s) avant de se dissiper.`;
+	const st = portraitStyle(p.id);
+	const img = document.createElement('div');
+	if (st) {
+		img.className = 'ib-img';
+		img.id = `badge-portrait-${p.id}`;
+		applyPortraitTo(img, st);
+	} else {
+		img.className = 'ib-letter';
+		img.textContent = (p.nom || '?').charAt(0).toUpperCase();
+	}
+	el.appendChild(img);
+	el.insertAdjacentHTML('beforeend',
+		`<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">`
+		+ `<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>`
+		+ `<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>`
+		+ `<path class="vit-pv" id="ib-pv-${p.id}" d="M21 38 A17 17 0 0 1 21 4"></path>`
+		+ `<path class="vit-pm" id="ib-pm-${p.id}" d="M21 38 A17 17 0 0 0 21 4"></path>`
+		+ `</svg>`);
+	return el;
+}
+
 function updateInitiativeStrip(data) {
 	// L'œil barré a un sens dès qu'UN membre vivant du groupe est furtif.
 	const furtif = (data.joueurs || []).some(j => (j.currentPV || 0) > 0 && j.furtif);
+	// Invocations : le serveur RETIRE d'`ordre_initiative` celles qui se dissipent ou
+	// tombent (`_purger_invocations`), et y INSÈRE les nouvelles juste après l'acteur
+	// courant. Le bandeau suit : badge orphelin retiré, badge manquant créé à SA place
+	// dans l'ordre — juste après le badge de l'acteur qui la précède.
+	const strip = document.getElementById('initiative-strip');
+	const dansOrdre = new Set(data.ordre_initiative);
+	if (strip) strip.querySelectorAll('.init-badge.invocation').forEach(el => {
+		if (!dansOrdre.has(el.id.slice('badge-'.length))) el.remove();
+	});
+	let precedent = null;
 	data.ordre_initiative.forEach((id, i) => {
-		const el = document.getElementById(`badge-${id}`);
+		let el = document.getElementById(`badge-${id}`);
+		if (!el && strip) {
+			const p = (data.joueurs || []).find(x => x.id === id);
+			if (p && p.est_invocation) {
+				el = _creerBadgeInvocation(p);
+				if (precedent) precedent.after(el);
+				else strip.prepend(el);
+			}
+		}
 		if (!el) return;
+		precedent = el;
 		el.classList.toggle('active', i === data.acteur_courant_index);
 		if (id.startsWith('joueur_')) {
 			// Anneaux PV/PM + classe KO de chaque membre du groupe (ids DOM par acteur).
