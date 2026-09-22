@@ -22,6 +22,11 @@
 			--y: {{ position["y"] | tojson | safe }};
 			--dim_x: {{ dim_x | tojson | safe }};
 			--dim_y: {{ dim_y | tojson | safe }};
+			{% if dimensions %}
+			/* Taille de la grille en cases : l'image zoomée mesure `--cols × --cell-w`. */
+			--cols: {{ dimensions["x"] | tojson | safe }};
+			--rows: {{ dimensions["y"] | tojson | safe }};
+			{% endif %}
 			--portraitW: 100;
 			--portraitH: 100;
 			--dist-view: 10;
@@ -84,7 +89,14 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			min-height: 0; 
+			min-height: 0;
+		}
+		/* Lieu à grille : la fenêtre d'exploration se ZOOME sur la place disponible. La
+		   containment de taille coupe tout retour du contenu sur la taille de la zone (rendu
+		   stable, Convention 17) ; en contrepartie la zone doit tenir sa hauteur de sa ligne
+		   de grille (bureau, paysage) ou d'un `aspect-ratio` (portrait). */
+		.map-area.map-grille {
+			container-type: size;
 		}
 		.grid-placeholder {
 			color: #444;
@@ -98,18 +110,6 @@
 			flex-direction: column;
 			gap: 10px;
 			overflow: hidden;
-		}
-
-		/* 1. PANNEAU DE DÉPLACEMENT */
-		.navigation-panel {
-			border: 2px solid var(--border-color);
-			padding: 8px;
-			background: rgba(0, 0, 0, 0.3);
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			flex-shrink: 0;
 		}
 
 		/* 3. ACCÈS AUX SOUS-LIEUX */
@@ -1279,10 +1279,20 @@
 			cursor: pointer;
 			text-transform: uppercase;
 		}
+		/* Zoom : une case est un CARRÉ de `--cell`, choisi pour que les `--dist-view` cases
+		   visibles remplissent la zone en largeur OU en hauteur (fenêtre carrée). La portée
+		   de vue ne change pas : seul l'agrandissement varie. L'image est mise à l'échelle
+		   de la GRILLE (`--cols × --rows` cases), étirée si ses cases natives
+		   (`dim_x × dim_y`) ne sont pas carrées.
+		   `--cell-w`/`--cell-h` restent deux noms (transform, jeton, pavé) mais valent `--cell`.
+		   ⚠️ Les unités `cq*` résolvent contre `.map-area.map-grille` (container-type). */
 		.viewport {
+			--cell: calc(min(100cqw, 100cqh) / var(--dist-view));
+			--cell-w: var(--cell);
+			--cell-h: var(--cell);
 			position: relative;
-			width: calc(var(--dim_x) * var(--dist-view)* 1px); 
-			height: calc(var(--dim_y) * var(--dist-view)* 1px); 
+			width: calc(var(--cell-w) * var(--dist-view));
+			height: calc(var(--cell-h) * var(--dist-view));
 			touch-action: none;
 			overflow: hidden;
 		}
@@ -1300,9 +1310,11 @@
 			   donc non interpolables — mais on ne les anime pas : c'est la valeur
 			   CALCULÉE de `transform` qui est interpolée à chaque `setProperty` de move(). */
 			transform: translate3d(
-				calc((var(--dist-view)/2 - var(--x)) * var(--dim_x) * 1px),
-				calc((var(--dist-view)/2 - var(--y)) * var(--dim_y) * 1px),
+				calc((var(--dist-view)/2 - var(--x)) * var(--cell-w)),
+				calc((var(--dist-view)/2 - var(--y)) * var(--cell-h)),
 				0);
+			width: calc(var(--cols) * var(--cell-w));
+			height: calc(var(--rows) * var(--cell-h));
 			max-width: none;
 			transition: transform var(--map-anim, 600ms) ease-out;
 			will-change: transform;
@@ -1319,10 +1331,10 @@
 		}
 		.token {
 			position: absolute;
-			top: calc(var(--dim_y) * (var(--dist-view)/2) * 1px);
-			left: calc(var(--dim_x) * (var(--dist-view)/2) * 1px);
-			width: calc(var(--dim_x) * 1px);
-			height: calc(var(--dim_y) * 1px);
+			top: calc(var(--cell-h) * (var(--dist-view)/2));
+			left: calc(var(--cell-w) * (var(--dist-view)/2));
+			width: var(--cell-w);
+			height: var(--cell-h);
 			display: flex; align-items: center; justify-content: center;
 			z-index: 10; pointer-events: none;
 			border-width: 3px;
@@ -1340,7 +1352,38 @@
 		   combat et le mode test de l'éditeur. ⚠️ Les règles sont désormais SCOPÉES en
 		   `.controls .btn` : `.btn` était global ici, mais il n'est porté que par les neuf
 		   flèches (vérifié) — et un `.btn` nu existe dans l'éditeur, où il vaut `width:100%`. */
-{{ movepanel.move_panel_css('.navigation-panel', '.controls') }}
+{{ movepanel.move_panel_css('.viewport', '.controls') }}
+		/* Ici le pavé est posé SUR la carte : chaque flèche à sa position (coins, milieux des
+		   bords), le centre laissé libre pour le jeton. « Attendre un tour » n'y est pas : il vit
+		   dans la liste Actions (#btn-attendre).
+		   ⚠️ Placement EXPLICITE par `data-sdx/sdy` : le centre n'est qu'un `.move-spacer`
+		   masqué, l'auto-placement décalerait sinon ↙ ↓ ↘ d'une cellule.
+		   ⚠️ Le calque est `pointer-events:none` pour laisser passer le survol de la carte ;
+		   seuls les boutons le rétablissent. */
+		.viewport .controls-carte {
+			position: absolute; inset: 0; z-index: 20;
+			--fleche: clamp(34px, calc(var(--cell-w) * 0.9), 50px);
+			grid-template-columns: repeat(3, 1fr);
+			grid-template-rows: repeat(3, 1fr);
+			gap: 0; padding: 6px; margin: 0;
+			pointer-events: none;
+		}
+		.viewport .controls-carte .move-spacer { display: none; }
+		.viewport .controls-carte .btn {
+			width: var(--fleche); height: var(--fleche);
+			pointer-events: auto;
+			background: rgba(0, 0, 0, 0.45);
+			border-color: rgba(255, 255, 255, 0.25);
+		}
+		.viewport .controls-carte .btn:hover:not(:disabled) { background: rgba(0, 0, 0, 0.65); }
+		.viewport .controls-carte .btn:active:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
+		.viewport .controls-carte .btn:disabled { background: rgba(0, 0, 0, 0.12); border-color: transparent; }
+		.viewport .controls-carte [data-sdx="-1"] { grid-column: 1; justify-self: start; }
+		.viewport .controls-carte [data-sdx="0"]  { grid-column: 2; justify-self: center; }
+		.viewport .controls-carte [data-sdx="1"]  { grid-column: 3; justify-self: end; }
+		.viewport .controls-carte [data-sdy="-1"] { grid-row: 1; align-self: start; }
+		.viewport .controls-carte [data-sdy="0"]  { grid-row: 2; align-self: center; }
+		.viewport .controls-carte [data-sdy="1"]  { grid-row: 3; align-self: end; }
 		#personnage {
 			display: none;
 		}
@@ -1396,6 +1439,10 @@
 			.map-area {
 				height: stretch;
 				max-height: 300px;
+			}
+			/* Zone zoomée : sa hauteur ne vient plus de son contenu (containment de taille). */
+			.map-area.map-grille {
+				height: 300px;
 			}
 			.location-desc {
 				padding: 5px;
@@ -1454,9 +1501,6 @@
 			.sidebar {
 				overflow: visible;
 			}
-			.navigation-panel {
-				order: 2;
-			}
 			.sub-locations-panel {
 				order: 1;
 				overflow: visible;
@@ -1465,11 +1509,15 @@
 				height: stretch;
 				max-height: 465px;
 			}		
-			.controls {
-				background: rgba(34, 34, 34, 0.8);
-				padding: 5px;
-				margin: 0 auto;
-				border-radius: 0 0 15px 15px;
+			/* Zone zoomée : pleine largeur, carrée comme la fenêtre de cases — sans quoi la
+			   containment de taille la ramènerait à 0. */
+			.map-area.map-grille {
+				height: auto;
+				max-height: none;
+				aspect-ratio: 1;
+				/* ⚠️ Sans lui, le minimum automatique d'un élément à `aspect-ratio` élargit la
+				   colonne au-delà de l'écran (la page déborde de ~24 px). */
+				min-width: 0;
 			}
 			.sh-quest-status {
 				width: 30vw;
@@ -1483,12 +1531,17 @@
 		<header class="location-desc" aria-label="Fiche personnage">
 			<h2>{{title}}</h2>
 		</header>
-		<main class="map-area">
+		<main class="map-area{% if dimensions %} map-grille{% endif %}">
 			{% if dimensions %}
 			<div class="grid-placeholder">
 				<div class="viewport" id="swipe-zone">
 					<img id="bg-image" src="{{ url_for(image_route, path=image) }}">
 					<div class="token"></div>
+					<!-- Pavé de déplacement : markup et CSS viennent de part-move-panel.html, partagés
+					     avec la page de combat et le mode test de l'éditeur. Ici il est posé SUR la
+					     carte (`.controls-carte`), sans case centrale : « Attendre un tour » est dans
+					     la liste Actions. -->
+					{{ movepanel.move_panel('controls', fn='move', classes='controls controls-carte') }}
 				</div>
 			</div>
 			{% else %}
@@ -1500,9 +1553,14 @@
 				{% if lieu_texte %}
 				<div class="loc-texte">{{ lieu_texte }}</div>
 				{% endif %}
-				{% if achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or pnjs_presents %}
+				{% if dimensions or achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or pnjs_presents %}
 				<h3 id="sub-actions-title" >Actions</h3>
 				<ul class="sub-locations-list">
+					{% if dimensions %}
+					{# Ex-case centrale du pavé. Comme avant, `verrouillerFleches` ne le touche pas
+					   (pas de `data-sdx`) : un double clic est absorbé par la garde `isMoving`. #}
+					<li><button class="sub-loc-btn" id="btn-attendre" onclick="waitTurn()">⌛ Attendre un tour</button></li>
+					{% endif %}
 					{% if achat_sous_categories %}
 					<li><button class="sub-loc-btn" onclick="openSellPanel()">🏷️ Achat-Vente</button></li>
 					{% endif %}
@@ -1545,15 +1603,6 @@
 				<ul id="sub-locations-list-id" class="sub-locations-list">
 				</ul>
 			</section>
-			{% if dimensions %}
-			<!-- Pavé de déplacement : markup et CSS viennent de part-move-panel.html, partagés avec
-			     la page de combat et le mode test de l'éditeur de carte. ⚠️ Le `{% raw %}{% if dimensions %}{% endraw %}`
-			     reste À L'EXTÉRIEUR : un lieu sans grille afficherait sinon un pavé mort. -->
-			<section class="navigation-panel">
-				{{ movepanel.move_panel('controls', fn='move',
-					centre={'classes': 'btn move_btn', 'onclick': 'waitTurn()', 'title': 'Attendre un tour'}) }}
-			</section>
-			{% endif %}
 		</aside>
 		{% set d       = character.get("derived_stats", {}) %}
 		{% set _pv     = character.get("currentPV", character["caracteristiques_current"].get("PV", 0)) %}
