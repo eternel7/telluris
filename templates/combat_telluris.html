@@ -1296,8 +1296,18 @@ window.addEventListener('resize', _surRedimensionnement);
 // (relatifs au conteneur → indépendant de la taille du jeton). Fenêtre de cadrage de
 // référence = 100×100 (play_town). Un doc `aventurier:*` n'a pas de cadrage → défauts.
 const PORTRAITS_JOUEURS = {{ portraits_joueurs | tojson | safe }};
+// ⚠️ Créature INVOQUÉE en cours de combat : absente de PORTRAITS_JOUEURS (calculé au
+// rendu de la page), son jeton resterait vide jusqu'au rafraîchissement. Son snapshot
+// porte l'image de son ESPÈCE : même entrée que le serveur lui aurait donnée (portrait
+// ENTIER servi par /monsters — dimensions inutiles, jamais lues sans cadrage).
+function _portraitInvocation(jid) {
+	const snap = ((state && state.joueurs) || []).find(x => x.id === jid);
+	if (!snap || !snap.est_invocation || !snap.image) return null;
+	return (PORTRAITS_JOUEURS[jid] = { image: snap.image, base: '/monsters', entier: true,
+									   largeur: 100, hauteur: 100, nom: snap.nom || '' });
+}
 function portraitStyle(jid) {
-	const p = PORTRAITS_JOUEURS[jid];
+	const p = PORTRAITS_JOUEURS[jid] || _portraitInvocation(jid);
 	if (!p || !p.image || !p.largeur || !p.hauteur) return null;
 	// Portrait ENTIER (monture, personne escortée) : aucun cadrage à reproduire — on ne
 	// pose ni `size` ni `pos`, et c'est la feuille de style qui fait tenir l'image
@@ -1518,16 +1528,73 @@ function _majBadgeVitaux(el, p) {
 	setArc(document.getElementById(`ib-pm-${p.id}`), p.pm_max > 0 ? p.currentPM / p.pm_max : 0);
 }
 
+// Badge d'une créature INVOQUÉE en cours de combat : le bandeau est rendu par Jinja à
+// l'ouverture de la page, elle n'y figurait donc pas avant un rafraîchissement. Même
+// markup que la branche `invocation` du template (ids DOM compris : les anneaux, le
+// portrait et le ciblage allié les retrouvent par id). Nom posé en `textContent`/`title`,
+// jamais en innerHTML.
+// Infobulle d'une invocation : même texte que le template, recalculé à chaque mise à
+// jour du bandeau — `invocation_restants` décroît à chaque tour.
+function _titreInvocation(p) {
+	return `${p.nom || ''} — créature invoquée : elle joue seule, encore ${p.invocation_restants || 1} tour(s) avant de se dissiper.`;
+}
+function _creerBadgeInvocation(p) {
+	const el = document.createElement('div');
+	el.className = 'init-badge invocation';
+	el.id = `badge-${p.id}`;
+	el.title = _titreInvocation(p);
+	const st = portraitStyle(p.id);
+	const img = document.createElement('div');
+	if (st) {
+		img.className = 'ib-img';
+		img.id = `badge-portrait-${p.id}`;
+		applyPortraitTo(img, st);
+	} else {
+		img.className = 'ib-letter';
+		img.textContent = (p.nom || '?').charAt(0).toUpperCase();
+	}
+	el.appendChild(img);
+	el.insertAdjacentHTML('beforeend',
+		`<svg class="vit-ring" viewBox="0 0 42 42" aria-hidden="true">`
+		+ `<path class="vit-track" d="M21 38 A17 17 0 0 1 21 4"></path>`
+		+ `<path class="vit-track" d="M21 38 A17 17 0 0 0 21 4"></path>`
+		+ `<path class="vit-pv" id="ib-pv-${p.id}" d="M21 38 A17 17 0 0 1 21 4"></path>`
+		+ `<path class="vit-pm" id="ib-pm-${p.id}" d="M21 38 A17 17 0 0 0 21 4"></path>`
+		+ `</svg>`);
+	return el;
+}
+
 function updateInitiativeStrip(data) {
 	// L'œil barré a un sens dès qu'UN membre vivant du groupe est furtif.
 	const furtif = (data.joueurs || []).some(j => (j.currentPV || 0) > 0 && j.furtif);
+	// Invocations : le serveur RETIRE d'`ordre_initiative` celles qui se dissipent ou
+	// tombent (`_purger_invocations`), et y INSÈRE les nouvelles juste après l'acteur
+	// courant. Le bandeau suit : badge orphelin retiré, badge manquant créé à SA place
+	// dans l'ordre — juste après le badge de l'acteur qui la précède.
+	const strip = document.getElementById('initiative-strip');
+	const dansOrdre = new Set(data.ordre_initiative);
+	if (strip) strip.querySelectorAll('.init-badge.invocation').forEach(el => {
+		if (!dansOrdre.has(el.id.slice('badge-'.length))) el.remove();
+	});
+	let precedent = null;
 	data.ordre_initiative.forEach((id, i) => {
-		const el = document.getElementById(`badge-${id}`);
+		let el = document.getElementById(`badge-${id}`);
+		if (!el && strip) {
+			const p = (data.joueurs || []).find(x => x.id === id);
+			if (p && p.est_invocation) {
+				el = _creerBadgeInvocation(p);
+				if (precedent) precedent.after(el);
+				else strip.prepend(el);
+			}
+		}
 		if (!el) return;
+		precedent = el;
 		el.classList.toggle('active', i === data.acteur_courant_index);
 		if (id.startsWith('joueur_')) {
 			// Anneaux PV/PM + classe KO de chaque membre du groupe (ids DOM par acteur).
-			_majBadgeVitaux(el, data.joueurs.find(x => x.id === id));
+			const p = data.joueurs.find(x => x.id === id);
+			_majBadgeVitaux(el, p);
+			if (p && p.est_invocation) el.title = _titreInvocation(p);
 		}
 		if (id.startsWith('monstre_')) {
 			const m = data.monstres.find(x => x.id === id);
