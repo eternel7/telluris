@@ -122,6 +122,30 @@ def est_active(comp: dict) -> bool:
 	return (comp or {}).get("mode") == "active"
 
 
+def est_aura(comp: dict) -> bool:
+	"""Une AURA = une passive qui porte une `zone`. Ancrée TOUJOURS sur son porteur
+	(`origine`/`cible` ignorés), elle ne vaut que pour ceux qu'elle couvre : positionnelle en
+	combat (`combat._recalculer_auras`), tout le groupe en exploration (`auras_recues`).
+	Elle sort donc du repli inconditionnel de `bonus_passifs`."""
+	return est_passive(comp) and bool((comp or {}).get("zone"))
+
+
+def entree_aura(comp: dict) -> dict:
+	"""Forme DÉNORMALISÉE d'une aura (clé `auras` de `competences_bonus`) : de quoi l'appliquer
+	sans relire la base — le moteur de combat n'y a pas accès."""
+	eff = (comp or {}).get("effets") or {}
+	return {
+		"id": comp.get("id", ""),
+		"nom": comp.get("nom", "Aura"),
+		"icon": comp.get("icon", "✨"),
+		"zone": dict(comp.get("zone") or {}),
+		"buffs": {str(k): int(v) for k, v in (eff.get("buffs") or {}).items()},
+		"regen_pv": _as_int(eff.get("regen_pv")),
+		"regen_pm": _as_int(eff.get("regen_pm")),
+		"esquive": _as_int(eff.get("esquive")),
+	}
+
+
 def competence_utilisable_combat(comp: dict) -> bool:
 	"""Éligibilité combat : active ET (part instantanée — dégâts, PV, PM, ou furtivité,
 	état de combat posé instantanément — OU part à DURÉE). Miroir exact de
@@ -189,12 +213,19 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 	(leur effet passe par effets_actifs à l'usage). Les passives portant une `condition` sont
 	EXCLUES de ce repli inconditionnel : elles ne valent que là où la condition s'évalue, au
 	snapshot de combat (cf. furtivite_passive). `buffs_sources` = [{nom, icon, buffs}], le
-	détail nommé du même agrégat (tooltip de la fiche), miroir d'EquipmentBonus."""
+	détail nommé du même agrégat (tooltip de la fiche), miroir d'EquipmentBonus.
+
+	Les AURAS (passive + `zone`) sont exclues de la somme de la même façon et listées à
+	part dans `auras` (cf. `est_aura`) : elles ne valent que pour ceux qu'elles couvrent."""
 	buffs: dict = {}
 	sources: list = []
+	auras: list = []
 	regen_pv = regen_pm = esquive = 0
 	for comp in competences_connues_docs(character, get_doc):
 		if not est_passive(comp) or comp.get("condition"):
+			continue
+		if est_aura(comp):
+			auras.append(entree_aura(comp))
 			continue
 		eff = comp["effets"]
 		propres = {}
@@ -211,7 +242,7 @@ def bonus_passifs(character: dict, get_doc) -> dict:
 		regen_pm += _as_int(eff.get("regen_pm"))
 		esquive += _as_int(eff.get("esquive"))
 	return {"buffs": buffs, "regen_pv": regen_pv, "regen_pm": regen_pm, "esquive": esquive,
-			"buffs_sources": sources}
+			"buffs_sources": sources, "auras": auras}
 
 
 def recompute_competences_bonus(character: dict, get_doc) -> dict:
@@ -228,11 +259,13 @@ def competences_bonus_perime(character: dict) -> bool:
 	qu'à la création et à l'apprentissage : un perso plus ancien porte un agrégat sans
 	`buffs_sources`, et le tooltip de la fiche affiche alors une source anonyme (« ? »).
 	Un perso sans compétence connue n'a rien à recalculer. Le repli d'un perso SANS passive
-	à buffs porte quand même la clé (liste vide) → il n'est pas périmé."""
+	à buffs porte quand même la clé (liste vide) → il n'est pas périmé. Même lecture pour
+	`auras` (clé ajoutée avec les auras) : sans elle, une aura déjà apprise n'agirait pas."""
 	character = character or {}
 	if not character.get("competences_connues"):
 		return False
-	return "buffs_sources" not in (character.get("competences_bonus") or {})
+	bonus = character.get("competences_bonus") or {}
+	return "buffs_sources" not in bonus or "auras" not in bonus
 
 
 def furtivite_passive(character: dict, get_doc, map_tags) -> int:
@@ -246,6 +279,35 @@ def furtivite_passive(character: dict, get_doc, map_tags) -> int:
 			continue
 		best = max(best, _as_int(comp["effets"].get("furtivite")))
 	return best
+
+
+# ── Auras : l'EXPLORATION (tout le groupe) ───────────────────────────────────────
+
+def auras_du_groupe(membres: list) -> list:
+	"""Auras émises par le groupe, dans l'ordre des membres (principal EN TÊTE, cf.
+	`expedition.membres`). Lues sur l'agrégat dénormalisé de chacun : aucune lecture base.
+	Hors combat il n'y a pas de grille — le groupe marche ensemble, l'aura couvre tout le
+	monde, porteur compris."""
+	out = []
+	for m in membres or []:
+		out.extend(dict(a) for a in ((m or {}).get("competences_bonus") or {}).get("auras") or [])
+	return out
+
+
+def appliquer_auras_groupe(membres: list) -> list:
+	"""Pose `auras_recues` (origine « aura » de `consommables`) sur chaque membre du groupe.
+	Mute SANS sauver ; renvoie les membres dont le champ a changé — l'appelant ne réécrit
+	qu'eux. ⚠️ Jamais de monture : `expedition.membres` n'en contient pas (CLAUDE.md §7).
+	Champ absent ⇒ aucune aura reçue : un doc d'avant tourne comme avant."""
+	auras = auras_du_groupe(membres)
+	changes = []
+	for m in membres or []:
+		if m is None:
+			continue
+		if (m.get("auras_recues") or []) != auras:
+			m["auras_recues"] = [dict(a) for a in auras]
+			changes.append(m)
+	return changes
 
 
 def competences_epinglees_effectives(character: dict, get_doc) -> list:

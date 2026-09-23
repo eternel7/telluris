@@ -737,9 +737,21 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	_vocations = get_doc("rules:vocations")
 	sorts_perdus = sorts_util.purger_sorts_hors_ecole(character, get_doc, _vocations)
 	change |= bool(sorts_perdus)
-	for _av in recrutement_util.groupe_effectif(character, get_doc):
+	_compagnons = recrutement_util.groupe_effectif(character, get_doc)
+	_a_sauver = []
+	for _av in _compagnons:
 		if sorts_util.purger_sorts_hors_ecole(_av, get_doc, _vocations):
-			save_doc(_av)
+			_a_sauver.append(_av)
+	# AURAS hors combat : tout le groupe profite de celles de chacun (`auras_recues`),
+	# reposées paresseusement ici — un compagnon parti ou une aura apprise se voit au
+	# prochain rendu. Même motif que la purge ci-dessus : compagnons persistés à part.
+	for _m in competences_util.appliquer_auras_groupe([character, *_compagnons]):
+		if _m is character:
+			change = True
+		elif _m not in _a_sauver:
+			_a_sauver.append(_m)
+	for _av in _a_sauver:
+		save_doc(_av)
 	if change:
 		save_doc(character)
 	# Combats terminés : supprimés SEULEMENT une fois le personnage sauvé — sur conflit, le

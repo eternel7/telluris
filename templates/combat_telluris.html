@@ -854,6 +854,10 @@
 .sh-effet-chip.maintenu { border-color: rgba(178,107,255,0.45); cursor: pointer; }
 .sh-effet-chip.maintenu:hover { border-color: #b26bff; background: #241b30; }
 .sh-effet-chip.maintenu .sh-effet-restants { color: #b26bff; }
+/* AURA reçue d'un allié proche : liseré doré, ni compte à rebours ni clic — elle tient tant
+   que l'on reste dans la zone de son porteur. */
+.sh-effet-chip.aura { border-color: rgba(230,190,90,0.5); }
+.sh-effet-chip.aura .sh-effet-restants { color: #e6be5a; }
 .end-btn {
 	padding: 12px 28px; background: #cc2233; color: white;
 	border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
@@ -1435,12 +1439,18 @@ function renderEffetsActifs(list) {
 		// Un sort MAINTENU n'a pas de compte à rebours : il dure tant que son lanceur paie
 		// l'entretien. Afficher « ⏳3 » mentirait — le chiffre ne bougerait jamais. On
 		// annonce donc la FACTURE par round, seule chose qui décide de sa survie.
+		// Une AURA n'a pas non plus de compte à rebours : elle tient tant que le porteur
+		// reste dans la zone de son émetteur.
 		const suffixe = e.maintenu
 			? `<span class="sh-effet-restants">🔄${e.maintien || 0} PM/round</span>`
-			: `<span class="sh-effet-restants">⏳${e.restants}</span>`;
+			: e.aura
+				? `<span class="sh-effet-restants">aura</span>`
+				: `<span class="sh-effet-restants">⏳${e.restants}</span>`;
 		const titre = e.maintenu
-			? ` title="Cliquer pour cesser d'entretenir ce sort (gratuit)"` : '';
-		return `<span class="sh-effet-chip${e.maintenu ? ' maintenu' : ''}"${titre}>`
+			? ` title="Cliquer pour cesser d'entretenir ce sort (gratuit)"`
+			: e.aura ? ` title="Aura d'un allié proche : active tant que vous restez dans sa zone"` : '';
+		const classe = e.maintenu ? ' maintenu' : e.aura ? ' aura' : '';
+		return `<span class="sh-effet-chip${classe}"${titre}>`
 			+ `${e.icon || '✨'} ${e.nom || 'Effet'}`
 			+ `${details.length ? ' (' + details.join(', ') + ')' : ''}`
 			+ `${suffixe}</span>`;

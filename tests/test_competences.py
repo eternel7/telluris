@@ -173,6 +173,8 @@ def test_recompute_competences_bonus_ecrit_le_champ():
         "buffs": {"F": 4}, "regen_pv": 0, "regen_pm": 0, "esquive": 0,
         # Détail nommé du même agrégat (tooltip « Profil modifié » de la fiche).
         "buffs_sources": [{"nom": "Maîtrise martiale", "icon": "🗡️", "buffs": {"F": 4}}],
+        # Aucune passive à zone : liste d'auras vide (cf. test_competences_aura.py).
+        "auras": [],
     }
 
 

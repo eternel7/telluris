@@ -504,6 +504,9 @@ def construire_belligerant(spec: dict, get_doc_fn, map_tags=(), objets: bool = T
 		# ⚠️ build_joueur_snapshot lit la base via le get_doc GLOBAL (sync_equipment_bonus,
 		# _weapon_attacks) : on ne l'appelle qu'UNE fois, puis deepcopy par passe.
 		base = _normaliser_snapshot(combat.build_joueur_snapshot(character))
+		# AURAS : sans grille ni allié, le porteur est seul dans sa propre zone — même
+		# effet qu'en jeu pour lui. Posées AVANT `_fini`, qui garde le dernier mot.
+		combat.poser_auras_propres(base)
 		base["currentPV"] = base["pv_max"]     # banc d'essai = pleine forme
 		base["currentPM"] = base["pm_max"]
 		base = _fini(base)                     # dérivées forcées par-dessus

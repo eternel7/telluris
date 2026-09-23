@@ -1,0 +1,19 @@
+[
+  {
+    "_id": "competence:pretre_aura_sainte",
+    "type": "competence",
+    "nom": "Aura sainte",
+    "icon": "🕊️",
+    "description": "Une paix lumineuse rayonne du prêtre : quiconque se tient à ses côtés sent ses plaies se refermer. Hors combat, tout le groupe en profite.",
+    "vocation": "pretre",
+    "niveau": 1,
+    "mode": "passive",
+    "effets": {
+      "regen_pv": 1
+    },
+    "zone": {
+      "forme": "carre",
+      "rayon": 1
+    }
+  }
+]
