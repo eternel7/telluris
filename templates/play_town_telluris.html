@@ -1774,7 +1774,10 @@
    Le pip, lui, reste PLANTÉ au max naturel de la race : c'est le repère que le
    remplissage doit visiblement franchir. Il ne descend en-dessous que lorsque le quota
    de maxima rabaisse le plafond (`subcap`) — jamais au-dessus. #}
-{% set echelle       = [maxRace, cap] | max %}
+{# Miroir de _renderStatJauge : la valeur COURANTE (objets, effets) peut dépasser l'échelle
+   (ex. 90/70) — le remplissage plafonne alors à 100 % et l'échelle s'élargit, le pip glisse. #}
+{% set total_cour    = (caracts_detail.get(code) or {}).get("total") or val %}
+{% set echelle       = [maxRace, cap, total_cour, 1] | max %}
 {% set pip_val       = [cap, maxRace] | min %}
 {# `max_bonus` / `max_bonus_used` viennent de bloc_fiche, comme stat_caps : même source que
    celle que lit la fiche d'un compagnon (qui, elle, ne reçoit pas `race`). #}
@@ -1787,7 +1790,7 @@
 								<div class="sh-stat-val sh-mod-val" id="sh-mod-{{ code }}"></div>
 								<div class="sh-stat-bar-wrapper">
 									<div class="sh-stat-bar">
-										<div class="sh-stat-fill" id="sh-stat-bar-{{ code }}" style="width: {{ (val / echelle * 100) | int }}%" data-maxrace="{{ maxRace | int }}"></div>
+										<div class="sh-stat-fill" id="sh-stat-bar-{{ code }}" style="width: {{ (total_cour / echelle * 100) | int }}%" data-maxrace="{{ maxRace | int }}"></div>
 										<div class="sh-stat-pip{% if not is_accessible %} subcap{% endif %}"
 											 style="left: {{ (pip_val / echelle * 100) | int }}%"></div>
 									</div>
@@ -3919,6 +3922,27 @@ function _statEchelle(code) {
 	return Math.max(_RACE_MAX[code] || 1, _statCaps[code] || 0);
 }
 
+// Jauge d'une caract : remplissage = valeur COURANTE (modificateurs compris, repli sur la
+// base), pip = max naturel de la race (ou sous-plafond `subcap`). Quand les objets/effets
+// portent la valeur au-delà de l'échelle (ex. 90/70), le remplissage plafonne à 100 % et
+// c'est l'échelle qui s'élargit : le pip glisse à gauche au lieu que la barre déborde.
+function _renderStatJauge(code) {
+	const fill = document.getElementById('sh-stat-bar-' + code);
+	if (!fill) return;
+	const box  = fill.closest('.sh-stat-bar');
+	const raceMax = _RACE_MAX[code] || parseInt(fill.dataset.maxrace, 10) || 1;
+	const cap  = _statCaps[code] || 0;
+	const d    = _caractsDetail[code];
+	const val  = d ? (d.total || d.base || 0) : (_charStats[code] || 0);
+	const echelle = Math.max(_RACE_MAX[code] ? _statEchelle(code) : raceMax, val, 1);
+	fill.style.width = Math.min(100, val / echelle * 100) + '%';
+	const pip = box && box.querySelector('.sh-stat-pip');
+	if (pip) {
+		pip.style.left = (Math.min(cap || raceMax, raceMax) / echelle * 100) + '%';
+		pip.classList.toggle('subcap', cap < raceMax);
+	}
+}
+
 // Bloc ✦ Expérience (XP totale, niveau de race, jauge, vocation) — mêmes formules que le
 // rendu Jinja initial, mais sur les globales : elles décrivent le personnage AFFICHÉ, qui
 // peut être un compagnon (race, vocation et seuils d'XP différents).
@@ -3955,20 +3979,8 @@ function _refreshStatBoxes() {
 			svEl.childNodes[0].textContent = val;
 			if (sep) sep.textContent = '/' + cap;
 
-			// Jauge et repère de plafond : mêmes formules que le rendu Jinja initial.
-			const box     = svEl.closest('.sh-stat-box');
-			const echelle = _statEchelle(code);
-			const fill = box && box.querySelector('.sh-stat-fill');
-			if (fill) fill.style.width = Math.round(val / echelle * 100) + '%';
-			const pip = box && box.querySelector('.sh-stat-pip');
-			if (pip) {
-				// Le pip reste planté au max NATUREL de la race — c'est le repère que le
-				// remplissage doit visiblement franchir quand le bonus de dépassement a été
-				// engagé. Il ne descend que sous l'effet du quota de maxima (`subcap`).
-				pip.style.left = Math.round(Math.min(cap, _RACE_MAX[code] || cap) / echelle * 100) + '%';
-				pip.classList.toggle('subcap', !isAccessible);
-			}
 		}
+		_renderStatJauge(code);
 		const btn = document.getElementById('sh-btn-' + code);
 		if (btn) {
 			btn.style.display = _attributePoints > 0 ? '' : 'none';
@@ -4050,13 +4062,9 @@ function _renderCaractsMod(detail) {
 			box.title = _caractTooltipLignes(code, nom).join('\n');
 			box.classList.toggle('buffed', !!delta);
 		}
-		const bar = document.getElementById('sh-stat-bar-' + code);
-		if (!bar) continue;
 		// Échelle = plafond du personnage affiché : _RACE_MAX suit le compagnon en mode
-		// compagnon (le data-attribut, lui, est figé sur la race du joueur par Jinja), et
-		// _statEchelle l'élargit si le bonus de dépassement a été engagé sur cette caract.
-		const echelle = _RACE_MAX[code] ? _statEchelle(code) : parseInt(bar.dataset.maxrace, 10);
-		if (echelle) bar.style.width = (d.total / echelle * 100) + '%';
+		// compagnon (le data-attribut, lui, est figé sur la race du joueur par Jinja).
+		_renderStatJauge(code);
 	}
 }
 
@@ -4840,7 +4848,7 @@ function _titreObjet(item) {
 	if (item.nom_origine) html += `<div class="item-detail-origine">${item.nom_origine}</div>`;
 	if (_itemDetailState && _itemDetailState.renommer) {
 		html += `<div class="item-rename-row">
-			<input id="item-rename-input" type="text" maxlength="40" placeholder="Nom de l'objet"
+			<input id="item-rename-input" type="text" maxlength="80" placeholder="Nom de l'objet"
 				onkeydown="if(event.key==='Enter'){_validerRenommage(false);}else if(event.key==='Escape'){event.stopPropagation();_annulerRenommage();}">
 			<button class="sh-equip-btn" onclick="_validerRenommage(false)">Valider</button>
 			${item.nom_origine ? `<button class="sh-drop-btn" onclick="_validerRenommage(true)" title="Retirer le nom propre">Nom d’origine</button>` : ''}
