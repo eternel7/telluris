@@ -53,6 +53,10 @@
 	}
 
 	* { box-sizing: border-box; }
+	/* ⚠️ Place de la barre de défilement RÉSERVÉE : la page qui passe de « tient dans l'écran »
+	   à « défile » (une ligne de plus dans un panneau) faisait apparaître la barre, rétrécissait
+	   la colonne centrale de sa largeur — et `syncViewSize` rééchelonnait toute la carte. */
+	html { scrollbar-gutter: stable; }
 	body {
 		margin: 0;
 		min-height: 100vh;
@@ -471,8 +475,12 @@
 	width: 100%;
 }
 @media (min-width: 768px) {
+	/* ⚠️ Colonnes latérales à largeur FIXE (280 px + 2 × 10 px de marge) et non `auto` : en
+	   `auto`, chaque texte qui change (nom du membre actif, charge, chips d'effets, portrait de
+	   l'ennemi) redimensionnait sa colonne — et avec elle le centre, donc la carte, qui sautait
+	   de quelques pixels à chaque tour. */
 	.combat-layout {
-		grid-template-columns: auto 1fr auto;
+		grid-template-columns: 300px minmax(0, 1fr) 300px;
 		grid-template-areas: "perso center ennemis";
 	}
 	.enemy-panel, .character-card {
@@ -482,6 +490,11 @@
 .character-card { grid-area: perso; display: flex; flex-direction: column; }
 .combat-center  { grid-area: center; }
 .enemy-panel    { grid-area: ennemis; display: flex; flex-direction: column; gap: 12px; margin: 10px; align-items: center;}
+/* ⚠️ Les blocs du panneau prennent TOUTE sa largeur : centrés, ils se taillaient sur leur
+   contenu (image de l'ennemi, longueur des lignes du journal) et changeaient de largeur à
+   chaque ennemi ciblé ou ligne ajoutée. */
+.enemy-panel > .enemy-portrait-wrap,
+.enemy-panel > .combat-log { align-self: stretch; }
 
 /* Look « cuir / parchemin » partagé par les panneaux (tokens de :root). */
 .character-card, .action-bar, .enemy-portrait-wrap, .tour-header {
@@ -517,6 +530,9 @@
 	min-width: 0;
 	border-radius: 8px;
 }
+/* ⚠️ Cadre à proportions FIXES : sa hauteur suivait celle de l'image — différente d'un monstre
+   à l'autre, et NULLE le temps qu'une nouvelle image se charge. `object-fit: cover` recadre. */
+.enemy-portrait { flex: none; aspect-ratio: 3 / 4; }
 .sheet-left-portrait img, .enemy-portrait img {
 	width: 100%; height: 100%;
 	object-fit: cover; object-position: top center;
@@ -530,6 +546,11 @@
 }
 .character-card .char-portrait { flex-shrink: 0; }
 .character-card .char-identity { flex: 1; min-width: 0; }
+/* Une ligne chacun, quel que soit le membre actif : un nom ou une vocation plus longs
+   repliaient sur deux lignes et décalaient tout le bas de la carte au changement de tour. */
+.character-card .char-name, .character-card .char-class {
+	white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 /* Cadre CARRÉ obligatoire : #left-portrait.pt-crop reçoit le cadrage du joueur via
    applyPlayerPortrait (background-size en %, calibré pour une fenêtre carrée 100×100). */
 .character-card .char-header .sheet-left-portrait {
@@ -591,6 +612,10 @@
 .stat-label { color: #aaa; font-size: 11px; }
 .stat-value { font-weight: bold; color: #eee; font-family: monospace; font-size: 11px; }
 .actions-pips { display: flex; gap: 4px; margin-top: 4px; }
+/* Rangée des pips d'actions : même hauteur pour tout membre (zéro pip, beaucoup de pips), sans
+   repli — c'est elle qui pose la jauge de charge juste en dessous. */
+.sheet-left-info > .stat-row:first-child { height: 18px; flex-wrap: nowrap; margin-bottom: 8px; }
+.sheet-left-info > .stat-row:first-child .actions-pips { margin-top: 0; flex-wrap: nowrap; overflow: hidden; }
 .pip       { width: 10px; height: 10px; border-radius: 50%; background: #ffa502; border: 1px solid #cc8400; }
 .pip.empty { background: #333; border-color: #555; }
 
@@ -726,6 +751,8 @@
 	font-family: 'Cinzel', serif; font-weight: 700;
 	color: var(--accent-color); font-size: 14px;
 	margin-top: 8px; text-align: center;
+	/* Une ligne, même vide ou longue : le cadre ne change pas de hauteur d'un ennemi à l'autre. */
+	white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 1.3em;
 }
 
 /* ─── End Overlay ──────────────────────────────────────────────── */
@@ -849,8 +876,19 @@
 .charge-label { font-size: 12px; color: #c9b27a; text-align: center; margin-top: 6px; min-height: 16px; }
 /* Bloc charge sur le panneau joueur (sous les mini-stats dérivées). */
 .char-charge { margin-top: 8px; }
-.char-charge-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-.char-charge-head .stat-value { font-size: 12px; }
+/* ⚠️ HAUTEUR FIXE et centrage vertical, jamais `align-items: baseline` : la ligne changeait de
+   hauteur selon son contenu — texte VIDÉ au changement d'acteur (un item vide prend sa ligne de
+   base à son bord bas), « kg » seul, ou « kg · 🔮 palier » (l'emoji vient d'une police de repli
+   plus haute) — et la jauge en dessous sautait de 1 à 3 px à chaque tour. */
+.char-charge-head {
+	display: flex; justify-content: space-between; align-items: center; gap: 6px;
+	height: 16px; margin-bottom: 4px; overflow: hidden;
+}
+.char-charge-head .stat-label { flex-shrink: 0; line-height: 16px; }
+.char-charge-head .stat-value {
+	font-size: 12px; line-height: 16px; min-width: 0;
+	white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .charge-label .warn { color: #e0902f; }
 .charge-label .err  { color: #e04a4a; }
 /* Effets à durée du membre actif — mêmes chips que la fiche de play_town
@@ -1007,7 +1045,7 @@
 		</div>
 		<!-- Tour header + Initiative strip -->
 		<div class="tour-header">
-			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><span id="furtif-badge" style="display:none" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
+			<span class="tour-label">Tour&nbsp;<span id="tour-num">{{ combat.tour }}</span><span id="furtif-badge" style="visibility:hidden" title="Furtif : les ennemis marqués d'un œil barré ne vous ont pas repéré et ne viennent pas à vous. Frapper au corps à corps vous révèle à tous ; une attaque à distance laisse seulement à la cible une chance de vous repérer.">🥷</span></span>
 			<div id="initiative-strip">
 				{% for actor_id in combat.ordre_initiative %}
 					{% set active = 'active' if loop.index0 == combat.acteur_courant_index else '' %}
@@ -2980,8 +3018,10 @@ function updateUI(data) {
 	renderEnemyPortrait(data);
 	document.getElementById('tour-num').textContent = data.tour;
 	// Badge 🥷 : visible tant que le MEMBRE ACTIF est furtif (posé à l'entrée ou par une capacité).
-	document.getElementById('furtif-badge').style.display =
-		(activePlayer(data) || {}).furtif ? '' : 'none';
+	// ⚠️ `visibility` et non `display` : sa place reste réservée, sinon le bandeau d'initiative
+	// glissait de sa largeur à chaque passage d'un membre furtif à un membre repéré.
+	document.getElementById('furtif-badge').style.visibility =
+		(activePlayer(data) || {}).furtif ? '' : 'hidden';
 	updateInitiativeStrip(data);
 	updateAttackButtons(data);
 	renderTokens();
@@ -3780,7 +3820,7 @@ refreshTargetSelect();
 updateButtons(state);
 updateJoueur(activePlayer(state));
 updateInitiativeStrip(state);   // pose les anneaux de vie des ennemis dans le header dès le chargement
-document.getElementById('furtif-badge').style.display = (activePlayer(state) || {}).furtif ? '' : 'none';
+document.getElementById('furtif-badge').style.visibility = (activePlayer(state) || {}).furtif ? '' : 'hidden';
 renderEnemyPortrait(state);
 document.getElementById('combat-log').scrollTop = 9999;
 window._combatReady = true;
