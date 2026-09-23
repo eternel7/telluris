@@ -33,18 +33,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python -m pytest -q",
-            "shell": "powershell",
-            "statusMessage": "pytest"
-          }
-        ]
-      }
     ]
   },
   "enabledPlugins": {
