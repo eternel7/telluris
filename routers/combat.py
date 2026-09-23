@@ -31,7 +31,11 @@ from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
     verser_butin_au_sol, etat_charge_snapshot, bloc_charge_snapshot,
+    changer_d_etage, annoter_passages,
 )
+from utils import donjon
+from utils.lieux import connexions_du_lieu
+from utils.characters import lieu_label
 from utils import chasse
 from models import character_stats
 
@@ -247,7 +251,7 @@ async def get_combat(
     if combat_doc["user_id"] != current_user["_id"]:
         raise HTTPException(status_code=403, detail="Accès refusé")
 
-    return combat_doc
+    return annoter_passages(combat_doc)
 
 
 @combat_router.get("/combat/{combat_id}/acteur")
@@ -431,6 +435,31 @@ async def collect_loot(
     return {"collected": noms, "au_sol": au_sol, "par_membre": par_membre}
 
 
+def _passer_a_l_etage(combat_doc: dict, passage: dict) -> None:
+    """Charge l'étage au bout de `passage` et y fait passer le combat (mute, sans save).
+    Effectif, grades et passages de l'étage : mêmes règles qu'à l'entrée
+    (`routers.user._ouvrir_donjon_a_etages`)."""
+    donjon_doc = get_doc(combat_doc["etages"].get("donjon"))
+    lieu_doc = get_doc(passage.get("vers_lieu"))
+    if not donjon_doc or not lieu_doc or not lieu_doc.get("cells"):
+        raise HTTPException(status_code=422, detail="Ce passage ne mène nulle part.")
+    principal = combat_doc["character_id"]
+    membres = [j for j in combat_doc["joueurs"]
+               if j.get("jouable", True) and j.get("character_id")]
+    nb_compagnons = sum(1 for j in membres if j["character_id"] != principal)
+    monstres = donjon.monstres_de_salle(
+        donjon_doc, lieu_doc["_id"], find_docs({"type": "profil"}) or [],
+        nb_compagnons, get_doc, instantiate_monsters)
+    passages = donjon.passages_de_l_etage(
+        connexions_du_lieu(lieu_doc["_id"]), lieu_doc["_id"], donjon_doc,
+        lambda lid: lieu_label(get_doc(lid), lid))
+    bonus = donjon.bonus_furtivite_groupe(
+        [get_doc(j["character_id"]) for j in membres],
+        lieu_doc.get("tags") or [], furtivite_passive, get_doc)
+    changer_d_etage(combat_doc, lieu_doc, passage.get("vers_pos") or {},
+                    monstres, passages, bonus)
+
+
 @combat_router.post("/combat/{combat_id}/action")
 async def combat_action(
     combat_id: str,
@@ -529,6 +558,10 @@ async def combat_action(
             raise HTTPException(status_code=422, detail="Compétence inutilisable en combat")
 
     action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg, competence=competence_arg)
+    # Donjon à étages : le passage vers un autre étage est validé par le moteur, l'étage
+    # suivant (carte, monstres, passages) est chargé ICI — le moteur ne lit pas la base.
+    if action_result.get("passage"):
+        _passer_a_l_etage(combat_doc, action_result["passage"])
 
     # Persist the combat state first (source of truth). couchdb2 met à jour le
     # _rev en place ; un échec (conflit 409) renvoie None → on prévient le client
@@ -578,7 +611,7 @@ async def combat_action(
         finalize_combat(combat_doc)
         save_doc(combat_doc)  # persiste le flag recompense_appliquee
 
-    response = {"combat": combat_doc, "action_result": action_result}
+    response = {"combat": annoter_passages(combat_doc), "action_result": action_result}
     if consommables_payload is not None:
         response["consommables"] = consommables_payload
     if sorts_payload is not None:

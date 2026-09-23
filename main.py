@@ -24,7 +24,7 @@ from routers.commande import commande_router
 from routers.animations import animations_router
 from utils.combat import (
 	get_combat_grid, finalize_combat, verser_butin_au_sol, etat_charge_snapshot,
-	bloc_charge_snapshot,
+	bloc_charge_snapshot, annoter_passages,
 )
 from db.config import find_docs, get_doc, save_doc, delete_doc, dump_all_docs, RequestDocCacheMiddleware
 from utils.auth import get_current_user
@@ -1025,6 +1025,7 @@ async def get_combat_page(
 
 	if combat_doc["user_id"] != current_user["_id"]:
 		return RedirectResponse(url="/play", headers=request.headers)
+	annoter_passages(combat_doc)
 
 	character = get_doc(combat_doc["character_id"])
 	if not character:

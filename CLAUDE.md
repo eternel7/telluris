@@ -86,7 +86,8 @@ utils/
   quetes.py              # moteur de génération de quêtes (pur) + état joueur / progression / récompenses
   transport.py           # quêtes de transport (pur) : cargaison, délai, géographie, courses authorées
   chasse.py              # quêtes de chasse (pur) : élite à profil élevé, rang de guilde
-  donjon.py              # donjons (pur) : salles curatées, plafond de grade, commissions d'éradication
+  donjon.py              # donjons (pur) : salles curatées, plafond de grade, commissions d'éradication ;
+                         #   donjon à ÉTAGES (`mode:"etages"`) : étages reliés par des connexions, un seul combat
   recrutement.py         # recrutement (pur) : recrues, tableau, groupe, affinités, parts, compagnie
   montures.py            # montures (pur) : étable, charge multipliée, troupeau
   auberge.py             # tavernes (pur) : tables-chatrooms, tableau d'information, nuit

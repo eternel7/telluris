@@ -43,6 +43,16 @@
 # explorable est tiré par géométrie. D'où : pas de position, pas de zones, et le grade de
 # l'élite = le profil compatible de plus haut niveau de la base (`_profil_max_compatible`).
 #
+# DONJON À ÉTAGES (`"mode": "etages"` sur le doc donjon ; absent ⇒ donjon classique ci-dessus,
+# aucune migration). Même doc, mêmes salles, même cascade de grade — mais on ne descend plus
+# par un gardien qui ouvre un combat : chaque salle est un ÉTAGE, relié aux autres et à la
+# surface par des `connection` ordinaires, dont le `pos` d'arrivée est le point d'apparition
+# FIXE du groupe. Toute la descente est UN SEUL combat, qui change de carte d'étage en étage
+# (cf. `combat.changer_d_etage`) et ne s'achève jamais par la victoire : on en sort par une
+# connexion vers la surface, ou par la défaite. Le groupe entre à chaque étage en furtivité,
+# les monstres y rôdent jusqu'à le repérer. Vaut pour des catacombes qu'on descend comme pour
+# une tour qu'on gravit — « étage », jamais « niveau » (`niveau_*` = le GRADE).
+#
 # La COMMISSION D'ÉRADICATION est une quête `chasse` ORDINAIRE (`objectif.type == "chasse"`),
 # pas un troisième système : elle est donc progressée par `quetes.maj_progress_chasse` (déjà
 # appelée dans `finalize_combat`) et focalisable comme les autres — aucune ligne à ajouter
@@ -101,6 +111,27 @@ def donjon_de_lieu(lieu_id: str, find_docs_fn) -> dict | None:
 		if battle_map_entry(d, lieu_id):
 			return d
 	return None
+
+
+MODE_ETAGES = "etages"
+
+
+def est_a_etages(donjon_doc: dict | None) -> bool:
+	"""Le donjon se parcourt-il étage par étage ? Champ `mode` absent ⇒ donjon classique."""
+	return (donjon_doc or {}).get("mode") == MODE_ETAGES
+
+
+def donjon_a_etages_de(lieu_doc: dict | None, find_docs_fn) -> dict | None:
+	"""Le donjon à étages dont `lieu_doc` est un étage, ou None.
+
+	Filtre de DONNÉE d'abord (`battle_map` + tag `donjon`, le marqueur déjà posé sur toute
+	salle de donjon, cf. `combat.TAG_BATTLE_MAP_EXCLU`) : le `find_docs` de `donjon_de_lieu`
+	n'est payé que pour une salle de donjon, jamais pour une porte de cité."""
+	d = lieu_doc or {}
+	if d.get("categorie") != "battle_map" or "donjon" not in (d.get("tags") or []):
+		return None
+	donjon_doc = donjon_de_lieu(d.get("_id"), find_docs_fn)
+	return donjon_doc if est_a_etages(donjon_doc) else None
 
 
 def _niveau(profil: dict) -> int:
@@ -216,6 +247,60 @@ def especes_de_salle(donjon_doc: dict, lieu_id: str, get_doc_fn) -> list:
 		if doc:
 			docs.append(doc)
 	return docs
+
+
+def monstres_de_salle(donjon_doc: dict, lieu_id: str, profils: list, nb_compagnons: int,
+					  get_doc_fn, instantiate_fn) -> list:
+	"""Les monstres qui peuplent cette salle : espèces de la salle, grades dans sa
+	fourchette, effectif écrit (sinon `3 + compagnons // 2`). Liste vide si la salle n'a
+	aucune espèce. Partagé par le donjon classique et chaque étage d'un donjon à étages.
+
+	`instantiate_fn` = `combat.instantiate_monsters`, injecté (ce module n'importe pas le
+	moteur de combat). `zone_tags` vide : les espèces sont déjà choisies à la main."""
+	pool_especes = especes_de_salle(donjon_doc, lieu_id, get_doc_fn)
+	if not pool_especes:
+		return []
+	dispo = _profils_dans_fourchette(
+		profils, niveau_max_de(donjon_doc, lieu_id), niveau_min_de(donjon_doc, lieu_id))
+	nb = nb_monstres_de(donjon_doc, lieu_id)
+	if nb is None:
+		nb = 3 + int(nb_compagnons or 0) // 2
+	return instantiate_fn(pool_especes, dispo, nb, []) or []
+
+
+def passages_de_l_etage(connexions: list, lieu_id: str, donjon_doc: dict, label_fn) -> list:
+	"""Les points de passage d'un étage, tirés de ses `connection` (docs bruts de la vue
+	reseau/liens_cases) : `[{id, pos, vers_lieu, vers_pos, surface, label}]`.
+
+	`pos` = la case de la connexion SUR cet étage ; `vers_pos` = le point d'apparition fixe
+	de l'autre côté. `surface` = la destination n'est pas un étage de ce donjon — l'emprunter
+	termine l'expédition. `label_fn(lieu_id)` nomme la destination quand le nœud n'a pas de
+	libellé propre."""
+	passages = []
+	for conn in connexions or []:
+		nodes = [n for n in (conn.get("nodes") or []) if isinstance(n, dict)]
+		ici = next((n for n in nodes if n.get("lieu") == lieu_id), None)
+		autre = next((n for n in nodes if n.get("lieu") and n.get("lieu") != lieu_id), None)
+		if not ici or not autre or len(ici.get("pos") or []) < 2 or len(autre.get("pos") or []) < 2:
+			continue
+		passages.append({
+			"id": conn.get("_id"),
+			"pos": {"x": int(ici["pos"][0]), "y": int(ici["pos"][1])},
+			"vers_lieu": autre["lieu"],
+			"vers_pos": {"x": int(autre["pos"][0]), "y": int(autre["pos"][1])},
+			"surface": battle_map_entry(donjon_doc, autre["lieu"]) is None,
+			"label": autre.get("label") or label_fn(autre["lieu"]),
+		})
+	return passages
+
+
+def bonus_furtivite_groupe(docs_membres: list, map_tags, furtivite_fn, get_doc_fn) -> dict:
+	"""`{character_id: bonus}` de furtivité passive de chaque membre qui AGIT (principal et
+	compagnons), évalué contre les tags de l'étage — `furtivite_fn` =
+	`competences.furtivite_passive`, injecté. Les montures et personnes escortées entrent
+	furtives sans bonus."""
+	return {d["_id"]: int(furtivite_fn(d, get_doc_fn, set(map_tags or [])) or 0)
+			for d in docs_membres or [] if d and d.get("_id")}
 
 
 # ── Grade de l'élite ────────────────────────────────────────────────────────────
