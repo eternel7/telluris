@@ -123,10 +123,21 @@ Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée,
 - `niveau_max`/`niveau_min` bornent le grade de l'élite **et** de l'escorte, en cascade salle → donjon → aucune (le plancher cède au plafond en cas de conflit).
 - `nb_monstres` fixe l'effectif **sans** bonus au nombre de compagnons, pour que les répliques narratives qui comptent les ennemis restent exactes.
 - La commission est une quête `chasse` **ordinaire** (`source:"commission"`, hook générique, répétable, sans `unique`) ; son rang dérive de la barrière la plus stricte à franchir pour l'obtenir (`acces.rang_de_quete`, source unique partagée avec les escortes).
-- Combat par `_declencher_combat_donjon` (miroir simplifié de `start_combat`, élite garantie, aucune furtivité d'entrée).
+- Combat par `_declencher_combat_donjon` (miroir simplifié de `start_combat`, élite garantie, aucune furtivité d'entrée). Peuplement partagé avec les étages : `donjon.monstres_de_salle`.
 - Chaîne de contenu (`dev/gen_acces_donjon.py`) : rang D à Auxerre → Borin ouvre le bureau → Gautier mandate la commission → George contrôle le principe → Armand contrôle la destination et ouvre le combat.
 
 Verrouillé par `tests/test_donjon.py`.
+
+#### Donjon à ÉTAGES (`"mode": "etages"` sur le doc donjon)
+Catacombes qu'on descend, tour qu'on gravit : même doc, mêmes salles (`battle_map` + tag `donjon`), même cascade de grade. Champ absent ⇒ donjon classique. « Étage », jamais « niveau » (`niveau_*` = grade) ; aucun identifiant ne nomme un contenu (pas de « catacombes » dans le code).
+
+- **Passages = `connection` ordinaires** (surface ↔ étage 1, étage N ↔ N+1, étage ↔ autre surface). Le `pos` d'arrivée est le **point d'apparition fixe** du groupe. `donjon.passages_de_l_etage` les lit (vue `reseau/liens_cases` via `lieux.connexions_du_lieu`) ; `surface` = destination hors des `battle_maps` du donjon.
+- **Entrée** : `move_character` (branche `link`) ne déplace PAS — `_ouvrir_donjon_a_etages` crée le combat et renvoie `combat_id` (client : `moveTo` redirige). `character["lieu"]` reste la surface d'origine. Un gardien (`acces`) pose un laissez-passer au lieu d'ouvrir le combat.
+- **UN seul combat** pour toute l'expédition (`combat_doc["etages"] = {donjon, etage, passages, archives}`) : tout le groupe entre **furtif** (montures et escortés compris), les monstres naissent à `DISTANCE_MIN_APPARITION` du point et rôdent (`_chasse_ou_erre`) jusqu'à repérer quelqu'un.
+- **Pas de condition de sortie** : `_check_victory` ignoré, `fuir` refusé. Action `emprunter` (gratuite) : un combattant debout SUR la case, tous les autres à ≤ 1 (`passage_franchissable`, exposé en `franchissable` par `annoter_passages`). Vers un étage : `routers/combat._passer_a_l_etage` → `combat.changer_d_etage` (joueurs/PV/PM/effets conservés, monstres archivés et renumérotés, carcasses laissées en bas, client recharge la page). Vers la surface : `victoire` + `sortie` appliquée par `finalize_combat` (XP, kills, bestiaire sur tous les étages). Défaite : retour au lieu d'origine, sans XP.
+- ⚠️ Chaque entrée dans un étage retire ses monstres (y compris en y revenant). Aucune `victoire` de salle n'est notée (`salle_gardee` absent).
+
+Verrouillé par `tests/test_donjon_etages.py`.
 
 
 ### Récolte de ressources et événements de zone

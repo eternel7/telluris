@@ -28,7 +28,9 @@ from utils.marche import (
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 	relations_lieux_payload,
 )
-from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart
+from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart, connexions_du_lieu
+from utils import donjon
+from utils.combat import instantiate_monsters, create_combat_doc, resolve_first_turns, finalize_combat
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
 from utils import quetes
 from utils import bois
@@ -522,6 +524,39 @@ def _recolte_payload(character: dict) -> dict | None:
 	}
 
 
+def _ouvrir_donjon_a_etages(character: dict, donjon_doc: dict, lieu_doc: dict,
+							point_apparition: dict) -> str:
+	"""Ouvre la descente dans un donjon à étages : le combat unique de l'expédition, sur son
+	premier étage (`lieu_doc`), le groupe furtif au point d'apparition de la connexion.
+	Un combat déjà actif est REPRIS, jamais doublé (même garde que les autres entrées)."""
+	for c in (find_docs({"type": "combat", "user_id": character["user_id"]}) or []):
+		if c.get("character_id") == character["_id"] and c.get("status") == "active":
+			return c["_id"]
+	compagnons = recrutement.groupe_effectif(character, get_doc)
+	montures_groupe = montures.montures_effectives(character, get_doc)
+	proteges_groupe = escorte.proteges_effectifs(character, get_doc)
+	monstres = donjon.monstres_de_salle(
+		donjon_doc, lieu_doc["_id"], find_docs({"type": "profil"}) or [],
+		len(compagnons), get_doc, instantiate_monsters)
+	passages = donjon.passages_de_l_etage(
+		connexions_du_lieu(lieu_doc["_id"]), lieu_doc["_id"], donjon_doc,
+		lambda lid: lieu_label(get_doc(lid), lid))
+	tags = list(lieu_doc.get("tags") or [])
+	bonus = donjon.bonus_furtivite_groupe(
+		[character] + list(compagnons), tags, competences_util.furtivite_passive, get_doc)
+	combat_doc = create_combat_doc(
+		character, monstres, tags, lieu_doc.get("image", ""), battle_map=lieu_doc,
+		compagnons=compagnons, montures=montures_groupe, proteges=proteges_groupe,
+		point_apparition=point_apparition,
+		etages={"donjon": donjon_doc["_id"], "etage": lieu_doc["_id"],
+				"passages": passages, "archives": []},
+		furtivite_groupe=bonus)
+	resolve_first_turns(combat_doc)
+	if combat_doc["status"] != "active":
+		finalize_combat(combat_doc)
+	save_doc(combat_doc)
+	return combat_doc["_id"]
+
 @user_router.post("/move_character")
 async def move_character(
 	response: Response, 
@@ -565,6 +600,15 @@ async def move_character(
 						ok, raison = acces.acces_autorise(character_to_update, lieu_doc, get_doc)
 						if not ok:
 							raise HTTPException(status_code=403, detail=raison)
+						# Donjon à étages : la connexion ne DÉPLACE pas le personnage, elle ouvre
+						# la descente — un combat dont il ne sort que par un passage vers la
+						# surface. Son `lieu` reste celui d'où il est descendu.
+						donjon_etages = donjon.donjon_a_etages_de(lieu_doc, find_docs)
+						if donjon_etages:
+							combat_id = _ouvrir_donjon_a_etages(
+								character_to_update, donjon_etages, lieu_doc,
+								{"x": node["pos"][0], "y": node["pos"][1]})
+							return {"moved": 0, "combat_id": combat_id}
 						destination_pos = {"x": node["pos"][0], "y": node["pos"][1] }
 						print("move to ", destination, destination_pos)
 						character_to_update["lieu"] = destination

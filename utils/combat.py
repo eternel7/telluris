@@ -45,6 +45,11 @@ BATTLE_MAPS = [
 # `donjon.donjon_de_lieu`, qui coûterait un find_docs à chaque entrée en combat.
 TAG_BATTLE_MAP_EXCLU = "donjon"
 
+# Donjon à étages : distance de Chebyshev minimale entre le point d'apparition FIXE du groupe
+# et les monstres tirés sur l'étage. Sans elle, un monstre pourrait naître au contact du
+# groupe et l'entrée furtive ne vaudrait rien. Repli sans contrainte sur un étage trop petit.
+DISTANCE_MIN_APPARITION = 5
+
 
 def _compute_actions_max(ag: int, v: int) -> int:
 	"""Nombre d'actions par tour dérivé des stats : max(1, ceil(Ag/40 + V/2))."""
@@ -1738,9 +1743,12 @@ def _first_passable_cells(cells: list, dims: dict, count: int, flying: bool = Fa
 	return out
 
 
-def _place_actors(combat_doc: dict, grid: dict) -> None:
+def _place_actors(combat_doc: dict, grid: dict, point_apparition: dict | None = None) -> None:
 	"""Place le groupe joueur puis disperse les monstres aléatoirement, en garantissant
 	qu'ils peuvent rejoindre le personnage central.
+
+	`point_apparition` ({x, y}, donjon à étages) : le central y est posé tel quel au lieu du
+	tirage centre/bordure, et les monstres naissent à `DISTANCE_MIN_APPARITION` au moins.
 
 	1. Tirage 50/50 du mode du central : ~5 cases du centre, ou ~5 cases des bords.
 	2. Central + groupe potentiel sur des cases type 1 libres ; la distance s'élargit
@@ -1761,14 +1769,22 @@ def _place_actors(combat_doc: dict, grid: dict) -> None:
 
 	# 1-2. Mode + recherche d'une case type 1 pour le central dont la région
 	#      atteignable est assez grande pour le groupe ET les monstres.
-	mode = "centre" if random.random() < 0.5 else "bordure"
 	main = joueurs[0]
 	main_cell, region = None, set()
-	for cand in _player_cell_candidates(cells, dims, occupied, mode):
-		reg = _reachable_region(cells, dims, nav, cand)
-		if len(reg) >= need:
-			main_cell, region = cand, reg
-			break
+	spawn = None
+	if point_apparition is not None:
+		spawn = (int(point_apparition.get("x", -1)), int(point_apparition.get("y", -1)))
+		if _walkable(cells, spawn[0], spawn[1]):
+			main_cell, region = spawn, _reachable_region(cells, dims, nav, spawn)
+		else:
+			spawn = None   # point hors carte ou dans un mur : placement ordinaire
+	if main_cell is None:
+		mode = "centre" if random.random() < 0.5 else "bordure"
+		for cand in _player_cell_candidates(cells, dims, occupied, mode):
+			reg = _reachable_region(cells, dims, nav, cand)
+			if len(reg) >= need:
+				main_cell, region = cand, reg
+				break
 
 	placed_ok = False
 	if main_cell is not None:
@@ -1810,6 +1826,10 @@ def _place_actors(combat_doc: dict, grid: dict) -> None:
 	base = (main["pos"]["x"], main["pos"]["y"])
 	for m in monstres:
 		pool = [c for c in region if c not in occupied]
+		if spawn is not None:
+			loin = [c for c in pool
+					if max(abs(c[0] - spawn[0]), abs(c[1] - spawn[1])) >= DISTANCE_MIN_APPARITION]
+			pool = loin or pool
 		if jetons.est_grand(m):
 			# Grand jeton : ancres de la région dans un ordre aléatoire, tourné vers le groupe.
 			ancres = sorted(pool)
@@ -2710,7 +2730,13 @@ def create_combat_doc(
 	compagnons: list | None = None,
 	montures: list | None = None,
 	proteges: list | None = None,
+	point_apparition: dict | None = None,
+	etages: dict | None = None,
+	furtivite_groupe: dict | None = None,
 ) -> dict:
+	"""`etages` (donjon à étages) : état de la descente, posé tel quel sur le doc — il retire
+	la fin par victoire et la fuite, et ouvre l'action `emprunter`. Le groupe entier y entre
+	furtif (`furtivite_groupe` = {character_id: bonus passif}), au `point_apparition` fixe."""
 	joueur = build_joueur_snapshot(character, joueur_index=0)
 	# Furtivité passive à l'entrée (conditions de terrain déjà évaluées par l'appelant
 	# via competences.furtivite_passive) : posée AVANT resolve_first_turns pour que les
@@ -2775,11 +2801,8 @@ def create_combat_doc(
 	# la main au client sur un acteur qui n'a pas d'actions) — le combat s'arrêterait là.
 	# La personne escortée qui se défend y entre, elle : son tour est joué par
 	# `_resolve_until_player`, qui ne rend jamais la main sur elle.
-	all_actors = [(j["id"], j["initiative"]) for j in joueurs
-				  if j.get("jouable", True) or j.get("se_defend")]
-	all_actors += [(m["id"], m["initiative"]) for m in monstres]
-	all_actors.sort(key=lambda x: x[1], reverse=True)
-	ordre = [a[0] for a in all_actors]
+	ordre = _ordre_par_initiative(
+		[j for j in joueurs if j.get("jouable", True) or j.get("se_defend")] + list(monstres))
 
 	combat_id = f"combat:{uuid.uuid4().hex}"
 	combat_doc = {
@@ -2811,10 +2834,32 @@ def create_combat_doc(
 	else:
 		grid = _open_grid()
 		combat_doc["grid_dims"] = grid["dims"]
-	_place_actors(combat_doc, grid)
+	_place_actors(combat_doc, grid, point_apparition)
+	if etages is not None:
+		combat_doc["etages"] = etages
+		_entrer_en_furtivite(combat_doc, furtivite_groupe)
 	# Auras posées dès le placement : les alliés côte à côte en profitent dès le tour 1.
 	_recalculer_auras(combat_doc, grid)
 	return combat_doc
+
+
+def _ordre_par_initiative(acteurs: list) -> list:
+	"""Ids des acteurs, meilleure initiative en tête (tri stable : à égalité, l'ordre de la
+	liste — donc le camp du joueur, listé d'abord — l'emporte)."""
+	return [a["id"] for a in sorted(acteurs, key=lambda a: a.get("initiative", 0), reverse=True)]
+
+
+def _entrer_en_furtivite(combat_doc: dict, bonus_par_perso: dict | None = None) -> None:
+	"""Donjon à étages : TOUT le groupe entre dans l'étage furtif — montures et personnes
+	escortées comprises (visibles, elles attireraient tous les monstres sur le groupe). Le
+	bonus passif de chaque membre (`competences.furtivite_passive`, calculé par l'appelant)
+	est indexé par `character_id`. Les monstres de l'étage n'ont encore repéré personne."""
+	bonus_par_perso = bonus_par_perso or {}
+	for j in combat_doc["joueurs"]:
+		j["furtif"] = True
+		j["furtivite_bonus"] = int(bonus_par_perso.get(j.get("character_id"), 0) or 0)
+	for m in combat_doc["monstres"]:
+		m["detecte"] = False
 
 
 # ── Helpers internes ────────────────────────────────────────────────────────
@@ -2978,12 +3023,105 @@ def _appliquer_fumble(combat_doc: dict, acteur: dict) -> None:
 	})
 
 
+def passage_franchissable(combat_doc: dict, passage: dict) -> bool:
+	"""Le groupe peut-il emprunter ce passage ? Un combattant debout doit être SUR sa case,
+	et tous les autres combattants debout à une case au plus. Montures, personnes escortées,
+	invocations et membres à terre suivent le groupe sans condition."""
+	pos = passage.get("pos") or {}
+	case = {"pos": {"x": pos.get("x"), "y": pos.get("y")}}
+	if case["pos"]["x"] is None or case["pos"]["y"] is None:
+		return False
+	combattants = _combattants_vivants(combat_doc)
+	if not combattants:
+		return False
+	if not any(jetons.couvre(j, case["pos"]["x"], case["pos"]["y"]) for j in combattants):
+		return False
+	return all(_cheby(j, case) <= 1 for j in combattants)
+
+
+def annoter_passages(combat_doc: dict) -> dict:
+	"""Pose `franchissable` sur chaque passage d'un donjon à étages, pour le client (qui ne
+	recalcule jamais la règle). Recalculé à chaque réponse, jamais lu par le serveur."""
+	for p in (combat_doc.get("etages") or {}).get("passages") or []:
+		p["franchissable"] = passage_franchissable(combat_doc, p)
+	return combat_doc
+
+
+def _monstres_de_l_expedition(combat_doc: dict) -> list:
+	"""Tous les monstres affrontés : ceux des étages quittés (archivés) puis ceux de l'étage
+	courant. C'est la liste des kills, de l'XP et du bestiaire d'un donjon à étages."""
+	archives = list((combat_doc.get("etages") or {}).get("archives") or [])
+	return archives + list(combat_doc.get("monstres") or [])
+
+
+def _sortir_du_donjon(combat_doc: dict, passage: dict) -> None:
+	"""Remontée à la surface : la SEULE victoire d'un donjon à étages. L'XP est celle de
+	toute la descente ; `sortie` est appliquée au personnage par `finalize_combat`, dans la
+	même sauvegarde que l'XP (même garde d'idempotence)."""
+	xp = sum(int(m.get("xp_reward", 0) or 0)
+			 for m in _monstres_de_l_expedition(combat_doc) if not m.get("vivant", True))
+	combat_doc["xp_gagnee"] = xp
+	combat_doc["status"] = "victoire"
+	combat_doc["sortie"] = {"lieu": passage.get("vers_lieu"),
+							"pos": dict(passage.get("vers_pos") or {})}
+	combat_doc["log"].append({
+		"tour": combat_doc["tour"],
+		"acteur": "Système",
+		"kind": "sys",
+		"texte": f"Le groupe remonte à l'air libre. {xp} XP gagnés.",
+	})
+
+
+def changer_d_etage(combat_doc: dict, lieu_doc: dict, point_apparition: dict,
+					monstres: list, passages: list, bonus_par_perso: dict | None = None) -> None:
+	"""Le même combat passe à l'étage `lieu_doc`. Mute sans sauvegarder.
+
+	Conservé : les joueurs (PV, PM, effets, sorts maintenus, butin ramassé), le compteur de
+	tours, le journal. Remplacé : la carte, les monstres (ceux de l'étage quitté sont
+	archivés pour l'XP et les quêtes ; leurs carcasses restent en bas), les passages.
+	Le groupe réapparaît au point fixe, furtif, et un ordre d'initiative neuf commence."""
+	etages = combat_doc["etages"]
+	etages.setdefault("archives", []).extend(combat_doc.get("monstres") or [])
+	# Ids renumérotés à la suite de TOUS les monstres déjà vus : le journal garde les lignes
+	# des étages passés, et deux `monstre_0` y désigneraient deux bêtes différentes.
+	depart = len(etages["archives"])
+	for i, m in enumerate(monstres):
+		m["id"] = f"monstre_{depart + i}"
+	combat_doc["monstres"] = monstres
+	combat_doc["battle_map_id"] = lieu_doc["_id"]
+	combat_doc.pop("grid_dims", None)
+	combat_doc["map_image"] = lieu_doc.get("image", "")
+	combat_doc["zone_tags"] = list(lieu_doc.get("tags") or [])
+	etages["etage"] = lieu_doc["_id"]
+	etages["passages"] = list(passages)
+	grid = {"dims": lieu_doc["dimensions"], "cells": lieu_doc["cells"],
+			"nav": lieu_doc.get("nav", {})}
+	_place_actors(combat_doc, grid, point_apparition)
+	_entrer_en_furtivite(combat_doc, bonus_par_perso)
+	joueurs_en_jeu = set(combat_doc["ordre_initiative"])
+	combat_doc["ordre_initiative"] = _ordre_par_initiative(
+		[j for j in combat_doc["joueurs"] if j["id"] in joueurs_en_jeu] + monstres)
+	combat_doc["acteur_courant_index"] = 0
+	combat_doc["log"].append({
+		"tour": combat_doc["tour"],
+		"acteur": "Système",
+		"kind": "sys",
+		"texte": f"Le groupe atteint {lieu_label(lieu_doc, lieu_doc['_id'])}.",
+	})
+	_recalculer_auras(combat_doc, grid)
+	_resolve_until_player(combat_doc, grid, start_at_current=True)
+
+
 def _flee_threshold(joueur_init: int, monstre_init_max: int) -> int:
 	"""Seuil de fuite sur d100 : 50 + init joueur - meilleure init ennemie, clampé [5, 95]."""
 	return max(5, min(95, 50 + joueur_init - monstre_init_max))
 
 
 def _check_victory(combat_doc: dict) -> None:
+	# Donjon à étages : un étage vidé n'est PAS une fin — on n'en sort que par un passage
+	# vers la surface (`_sortir_du_donjon`) ou par la défaite.
+	if combat_doc.get("etages"):
+		return
 	if all(not m["vivant"] for m in combat_doc["monstres"]):
 		xp = sum(m["xp_reward"] for m in combat_doc["monstres"])
 		combat_doc["xp_gagnee"] = xp
@@ -4447,6 +4585,8 @@ def _resoudre_action_joueur(
 				  "currentPM": joueur["currentPM"]}
 
 	elif action_type == "fuir":
+		if combat_doc.get("etages"):
+			return {"error": "On ne fuit pas un donjon : trouvez un passage vers la surface."}
 		init_max = max(
 			(m["initiative"] for m in combat_doc["monstres"] if m["vivant"]),
 			default=0,
@@ -4471,6 +4611,24 @@ def _resoudre_action_joueur(
 			})
 			joueur["actions_restantes"] = 0
 			result = {"fled": False, "roll": flee_roll, "seuil": seuil}
+
+	elif action_type == "emprunter":
+		# Donjon à étages : franchir une connexion. Aucune action n'est décomptée — la sortie
+		# clôt le combat, et un changement d'étage (orchestré par le router, qui charge
+		# l'étage suivant) repart d'un ordre d'initiative neuf.
+		etages = combat_doc.get("etages")
+		if not etages:
+			return {"error": "Aucun passage à emprunter ici."}
+		passage = next((p for p in etages.get("passages") or [] if p.get("id") == cible_id), None)
+		if passage is None:
+			return {"error": "Passage inconnu."}
+		if not passage_franchissable(combat_doc, passage):
+			return {"error": "Tout le groupe doit se tenir au passage pour l'emprunter."}
+		if passage.get("surface"):
+			_sortir_du_donjon(combat_doc, passage)
+			result = {"sortie": True}
+		else:
+			result = {"passage": dict(passage)}
 
 	elif action_type == "ramasser":
 		# Ramasser la carcasse d'un ennemi mort adjacent, coûte 1 action. Interdit si
@@ -5102,10 +5260,12 @@ def finalize_combat(combat_doc: dict) -> bool:
 
 	# Progression des quêtes de chasse : compte les monstres tués (toute issue), sous le
 	# même garde exactly-once que l'XP → pas de double comptage si /play re-finalise.
-	maj_progress_kills(character, combat_doc.get("monstres", []))
+	# Donjon à étages : les monstres des étages quittés comptent aussi (archivés).
+	tous_monstres = _monstres_de_l_expedition(combat_doc)
+	maj_progress_kills(character, tous_monstres)
 	# Quêtes de « chasse » (élite marquée) : complétées si le monstre porteur du quete_chasse
 	# est tombé. Même fenêtre d'idempotence que les kills ci-dessus.
-	maj_progress_chasse(character, combat_doc.get("monstres", []))
+	maj_progress_chasse(character, tous_monstres)
 	# Bestiaire du carnet (onglet 📖) : TOUTES les espèces de ce combat, tuées OU NON — c'est
 	# un carnet d'observation, une bête qu'on a fuie a bien été rencontrée. D'où un hook à
 	# part de `maj_progress_kills`, qui ne retient que les morts.
@@ -5118,7 +5278,7 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# espèce de ce combat n'a pas encore ce lieu à son actif : un combat répété au même
 	# endroit ne coûte aucune lecture.
 	lieu_id = character.get("lieu", "")
-	monstres = combat_doc.get("monstres", [])
+	monstres = tous_monstres
 	label = ""
 	if journal.lieux_a_nommer(character, monstres, lieu_id):
 		label = lieu_label(get_doc(lieu_id), lieu_id)
@@ -5132,6 +5292,16 @@ def finalize_combat(combat_doc: dict) -> bool:
 	# donc aucun `save_doc` ajouté.
 	if status == "victoire" and combat_doc.get("salle_gardee"):
 		noter_victoire(character, combat_doc["salle_gardee"])
+	# Donjon à étages : remontée par un passage vers la surface — le groupe réapparaît à
+	# l'arrivée de la connexion (une défaite le laisse au lieu d'où il est descendu).
+	# Même save que l'XP, donc même garde exactly-once. Le sol est transitoire (§6).
+	sortie = combat_doc.get("sortie") or {}
+	if status == "victoire" and sortie.get("lieu"):
+		character["lieu"] = sortie["lieu"]
+		character["position"] = {"x": int(sortie.get("pos", {}).get("x", 0)),
+								 "y": int(sortie.get("pos", {}).get("y", 0))}
+		character["objets_au_sol"] = []
+		character["ressource_recoltable"] = None
 	# Focalisation : objectif de la quête focalisée atteint → effacée (même save).
 	effacer_si_objectif_atteint(character)
 

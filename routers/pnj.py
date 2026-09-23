@@ -1164,31 +1164,16 @@ def _declencher_combat_donjon(character: dict, lieu_garde: dict) -> str | None:
 	pool_especes = donjon.especes_de_salle(donjon_doc, lieu_garde["_id"], get_doc)
 	if not pool_especes:
 		return None
-	# ⚠️ La fourchette de grade de la salle vaut pour TOUTE la salle, pas seulement pour
-	# l'élite : sans le PLAFOND, les monstres d'accompagnement seraient tirés parmi tous les
-	# grades de la base (jusqu'au niveau 6) et pèseraient plus lourd que la cible mandatée
-	# elle-même ; sans le PLANCHER, une salle de fin de donjon continuerait d'opposer des
-	# Novices autour d'une élite de niveau 5.
-	profils = donjon._profils_dans_fourchette(
-		find_docs({"type": "profil"}) or [],
-		donjon.niveau_max_de(donjon_doc, lieu_garde["_id"]),
-		donjon.niveau_min_de(donjon_doc, lieu_garde["_id"]),
-	)
 
 	compagnons = recrutement.groupe_effectif(character, get_doc)
 	montures_groupe = montures.montures_effectives(character, get_doc)
 	proteges_groupe = escorte.proteges_effectifs(character, get_doc)
-	# Effectif de la salle : celui que l'auteur impose, sinon la règle d'équilibrage du moteur
-	# (un monstre de plus par tranche de deux compagnons). ⚠️ Un effectif écrit est FIXE —
-	# c'est tout son intérêt : quand trois dialogues répètent « trois, toujours les trois
-	# mêmes », un quatrième loup surgi du calcul dément le texte sous les yeux du joueur.
-	# ⚠️ Ni les montures ni les personnes escortées n'ont jamais compté dans le calcul par
-	# défaut, et c'est voulu : elles ne combattent pas.
-	nb_monstres = donjon.nb_monstres_de(donjon_doc, lieu_garde["_id"])
-	if nb_monstres is None:
-		nb_monstres = 3 + len(compagnons) // 2
-	# zone_tags vide : les espèces sont déjà choisies à la main, pas à filtrer par terrain.
-	monstres = instantiate_monsters(pool_especes, profils, nb_monstres, [])
+	# Espèces, fourchette de grade (vaut pour TOUTE la salle, escorte de l'élite comprise) et
+	# effectif (écrit, sinon un monstre de plus par tranche de deux compagnons — ni montures
+	# ni personnes escortées, qui ne combattent pas) : règle partagée avec les étages.
+	monstres = donjon.monstres_de_salle(
+		donjon_doc, lieu_garde["_id"], find_docs({"type": "profil"}) or [],
+		len(compagnons), get_doc, instantiate_monsters)
 	if not monstres:
 		return None
 
@@ -1257,7 +1242,10 @@ def _resoudre_acces(current_user: dict, character: dict, pnj_doc: dict, lieu_doc
 		ok, _raison = acces.acces_autorise(character, lieu_garde, get_doc)
 		if not ok:
 			return noeuds.get("refus"), dits
-		if lieu_garde.get("categorie") == "battle_map":
+		# Un étage de donjon à étages se franchit par sa connexion (`move_character`) : le
+		# gardien pose le laissez-passer, comme devant un lieu explorable.
+		if (lieu_garde.get("categorie") == "battle_map"
+				and not donjon.donjon_a_etages_de(lieu_garde, find_docs)):
 			# ⚠️ `_declencher_combat_donjon` SAUVEGARDE le doc combat, jamais le character :
 			# rien n'a été muté sur lui (aucun laissez-passer posé), il n'y a donc rien à
 			# persister ici — et surtout rien à écraser sur un `_rev` déjà relu.

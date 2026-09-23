@@ -3298,6 +3298,11 @@
 			});
 			if (response.ok) {
 				const data = await response.json();
+				// Donjon à étages : la connexion ouvre la descente (un combat), sans déplacer.
+				if (data.combat_id) {
+					window.location.href = '/combat/' + data.combat_id;
+					return;
+				}
 				if (data.xp_gain > 0) {
 					sessionStorage.setItem('xp_gain_notif', data.xp_gain);
 				}

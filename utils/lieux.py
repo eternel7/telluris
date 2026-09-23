@@ -164,6 +164,22 @@ async def get_lieu(
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Erreur CouchDB : {str(e)}")
 
+def connexions_du_lieu(lieu_id: str) -> list:
+	"""Toutes les connexions touchant `lieu_id` (docs bruts, dédoublonnés) — requête range sur
+	la vue reseau/liens_cases, indépendante de la case du personnage."""
+	rows = db.view("reseau", "liens_cases", startkey=[lieu_id], endkey=[lieu_id, {}])
+	connections = []
+	seen = set()
+	for row in rows:
+		conn = row.value
+		cid = conn.get("_id")
+		if cid in seen:
+			continue
+		seen.add(cid)
+		connections.append(conn)
+	return connections
+
+
 @lieu_router.get("/lieu/{lieu_id}/connections")
 async def get_lieu_connections(
 	response: Response,
@@ -183,15 +199,8 @@ async def get_lieu_connections(
 
 	decoded_id = unquote(lieu_id)
 	try:
-		rows = db.view("reseau", "liens_cases", startkey=[decoded_id], endkey=[decoded_id, {}])
-		connections = []
-		seen = set()
-		for row in rows:
-			conn = row.value
-			cid = conn.get("_id")
-			if cid in seen:
-				continue
-			seen.add(cid)
+		connections = connexions_du_lieu(decoded_id)
+		for conn in connections:
 			for node in conn["nodes"]:
 				doc = get_doc(node["lieu"])
 				if not doc:
@@ -201,7 +210,6 @@ async def get_lieu_connections(
 				doc.pop("_id", None)
 				node["details"] = doc
 				node["details"]["label"] = node.get("label") or doc.get("label")
-			connections.append(conn)
 		return connections
 
 	except Exception as e:
