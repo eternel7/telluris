@@ -517,6 +517,8 @@
 		#sell-panel .acc-section.open .acc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
 		#sell-panel .sell-acc-tools { display: flex; justify-content: flex-end; flex: 0 0 auto; margin-bottom: .35rem; }
 		#sell-panel .cmd-aide { flex: 0 0 auto; }
+		/* Filtre du catalogue : prend la place à gauche de « Trier », sans la marge basse du filtre des Relations. */
+		#sell-panel .sell-acc-tools .cmd-filtre { flex: 1 1 auto; min-width: 0; width: auto; margin: 0 .5rem 0 0; padding: 4px 8px; }
 		/* La liste n'a plus de hauteur fixe : elle prend ce que la section lui laisse. */
 		#sell-panel .sh-inv-scroll { display: flex; height: auto; flex: 1 1 auto; min-height: 0; }
 		#sell-panel .sh-inv-box { max-height: none; flex: 1 1 auto; min-height: 0; }
@@ -2183,6 +2185,7 @@
 			</button>
 			<div class="acc-body" id="acc-body-commande">
 				<div class="sell-acc-tools">
+					<input id="cmd-filtre" class="sh-rel-filter cmd-filtre" type="search" placeholder="🔍 Filtrer…" autocomplete="off" oninput="renderCmdCatalogue({ catalogue: MARCHAND.catalogue })">
 					<button type="button" id="cmd-sort-btn" class="sh-drop-btn" onclick="cycleCmdSort()"
 						title="Trier le catalogue par nom (clic : A→Z, Z→A, puis annuler)">Trier</button>
 				</div>
@@ -5031,7 +5034,9 @@ function _cardTransferer(source, idx, itemId) { closeItemDetail(); transfererIte
 // Fiche d'un objet du marchand (vente/achat) : même carte, avec comparaison à
 // l'équipement porté si l'objet est équipable, et actions Vendre/Acheter/Marchander.
 function openMarchandDetail(sens, arrIdx) {
-	const list = sens === 'vente' ? (MARCHAND.vendables || []) : (MARCHAND.achetables || []);
+	const list = sens === 'vente' ? (MARCHAND.vendables || [])
+		: sens === 'commande' ? (MARCHAND.catalogue || [])
+		: (MARCHAND.achetables || []);
 	const entry = list[arrIdx];
 	if (!entry) return;
 	const compat = (entry.slots || []).filter(s => s in SLOT_LABELS);
@@ -5055,11 +5060,19 @@ function _renderMarchandDetail(st) {
 			const opts = st.slots.map(s => `<option value="${s}"${s === st.slot ? ' selected' : ''}>${SLOT_LABELS[s]}${_slots[s] ? ' — ' + (_slots[s].nom || '') : ' — (vide)'}</option>`).join('');
 			html += `<div class="item-cmp-slotsel"><span>Comparer à :</span><select onchange="_setDetailSlot(this.value)">${opts}</select></div>`;
 		}
-		html += _renderCmpTable(equipped, it, 'Équipé', st.sens === 'vente' ? 'À vendre' : 'Marchandise');
+		html += _renderCmpTable(equipped, it, 'Équipé', st.sens === 'vente' ? 'À vendre' : st.sens === 'commande' ? 'À commander' : 'Marchandise');
 	} else {
 		html += _renderCmpTable(it, null, 'Objet', '');
 	}
 	const acts = [_carteBtn(it)].filter(Boolean);
+	if (st.sens === 'commande') {
+		// Même règle que la ligne du catalogue (item_id en data-*, Convention §9) ; pas de
+		// 🤝 : le prix d'une commande ne se marchande pas au comptoir.
+		acts.push(`<button class="sh-equip-btn" data-item="${escapeHtml(it.item_id)}" onclick="_cardCommander(this, false)">Commander</button>`);
+		if (CMD_SUR_MESURE && it.sur_mesure) acts.push(`<button class="sh-drop-btn" data-item="${escapeHtml(it.item_id)}" onclick="_cardCommander(this, true)" title="Choisir des matières">✨ Sur mesure</button>`);
+		html += `<div class="item-detail-actions">${acts.join('')}</div>`;
+		return html;
+	}
 	if (st.sens === 'vente') acts.push(`<button class="sh-drop-btn" onclick="_cardSell(${it.index},'${it.item_id}',${_cgArg(it.compagnon_id)})">Vendre</button>`);
 	else                     acts.push(`<button class="sh-equip-btn" onclick="_cardBuy('${it.item_id}')">Acheter</button>`);
 	const mIdx = st.sens === 'vente' ? it.index : 'null';
@@ -5069,6 +5082,16 @@ function _renderMarchandDetail(st) {
 }
 function _cardSell(index, itemId, compagnonId)        { closeItemDetail(); sellItem(index, itemId, compagnonId); }
 function _cardBuy(itemId)                             { closeItemDetail(); buyItem(itemId); }
+// Depuis la fiche, on passe par le bouton de la LIGNE du catalogue quand il est rendu : il
+// porte le retour visuel immédiat (ligne occupée) et se réactive à l'annulation du sur-mesure.
+function _cardCommander(btn, surMesure) {
+	const itemId = btn.dataset.item;
+	closeItemDetail();
+	const ligne = Array.from(document.querySelectorAll('#cmd-list button[data-item]'))
+		.find(b => b.dataset.item === itemId && (b.getAttribute('onclick') || '').includes(surMesure ? 'commanderSurMesure' : 'commanderItem'));
+	const cible = ligne || btn;
+	return surMesure ? commanderSurMesure(cible) : commanderItem(cible);
+}
 function _cardMarch(index, itemId, sens, compagnonId) { closeItemDetail(); marchanderItem(index, itemId, sens, compagnonId); }
 
 // ── Découpe du bois & des grosses carcasses ───────────────────────────
@@ -6864,7 +6887,18 @@ function renderCmdCatalogue(data) {
 		if (scrollEl) scrollEl.classList.remove('scrollable');
 		return;
 	}
-	list.innerHTML = _sortedOrder(cat, _cmdSort).map(idx => {
+	// Filtre sur le nom, insensible à la casse et aux accents. On filtre les INDICES triés :
+	// `idx` reste l'indice dans `MARCHAND.catalogue`, que la fiche relit.
+	const _plier = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+	const fEl = document.getElementById('cmd-filtre');
+	const terme = _plier(fEl ? fEl.value.trim() : '');
+	const ordre = _sortedOrder(cat, _cmdSort).filter(idx => !terme || _plier(cat[idx].nom).includes(terme));
+	if (!ordre.length) {
+		list.innerHTML = '<li class="sell-empty">Aucun objet ne correspond au filtre.</li>';
+		if (scrollEl) scrollEl.classList.remove('scrollable');
+		return;
+	}
+	list.innerHTML = ordre.map(idx => {
 		const v = cat[idx];
 		// ⚠️ L'item_id voyage en data-* lu en JS, JAMAIS dans un onclick="…('${x}')" :
 		// une apostrophe échappée en &#39; y casserait la chaîne JS (Convention §9).
@@ -6876,8 +6910,8 @@ function renderCmdCatalogue(data) {
 			? `<button class="sh-drop-btn" data-item="${escapeHtml(v.item_id)}" onclick="commanderSurMesure(this)" title="Choisir des matières">✨ Sur mesure</button>`
 			: '';
 		return `<li class="sh-inv-item">
-		<span class="sh-inv-open">${v.icon || '🛠️'}</span>
-		<span class="sh-inv-name">${escapeHtml(v.nom || '—')}</span>
+		<span class="sh-inv-open" onclick="openMarchandDetail('commande',${idx})" title="Voir la fiche">${v.icon || '🛠️'}</span>
+		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('commande',${idx})" title="Voir la fiche">${escapeHtml(v.nom || '—')}</span>
 		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
