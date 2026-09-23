@@ -114,6 +114,16 @@ Doc `competence:*` : même schéma d'`effets` que les sorts, sans composants, `c
 
 Apprentissage : `POST /api/apprendre_competence`, coût `(niveau+1)×COMPETENCE_COUT_COEFF`, pas de grimoire. Contenu : `jsons/competences_niveau0.json`, `new_comp0.json`.
 
+**Pourquoi une passive n'a ni condition (hors furtivité), ni zone, ni maintien.** Elle n'est jamais *jouée* : `bonus_passifs` la somme une fois pour toutes dans `competences_bonus`, agrégat global et aveugle à la position. Une passive à `condition` en est exclue et seule `furtivite_passive` la relit (à l'entrée en combat) ; `maintien` est un coût par round pour tenir ce qu'on a LANCÉ (`_lancer_capacite`, que seule une active traverse) — ignoré sur une passive. La `zone`, elle, donne une AURA :
+
+### Auras — passive + `zone`
+`competences.est_aura` = passive portant une `zone`. **Ancrée TOUJOURS sur le porteur** (`origine`/`cible` ignorés). Sort du repli de `bonus_passifs`, listée dans `competences_bonus["auras"]` (`entree_aura` : zone, buffs, régén, esquive — de quoi l'appliquer sans base). Contenu : `jsons/competences_auras_a_importer.json` (Aura sainte du prêtre).
+- **Exploration = tout le groupe** (`expedition.membres`, jamais de monture) : `appliquer_auras_groupe` pose `auras_recues` sur chacun, origine `"aura"` de `consommables` — TEMPORAIRE au sens du non-cumul (`ORIGINES_TEMPORAIRES`). Reposée paresseusement : rendu de `/play`, les deux branches de `move_character` (**avant** la régén, compagnons repassés à `_apply_world_turn_groupe` pour ne pas relire un second dict), `apprendre_competence`. Retirée aux quatre sorties `statut = "parti"` de `utils/recrutement`.
+- **Combat = positionnelle** : le snapshot porte `auras` et **ignore `auras_recues`** (`_ORIGINES_SNAPSHOT`). `_recalculer_auras` (chokepoint, idempotent) pose sur chaque allié couvert une entrée `effets_actifs` `{aura: True, source_id: "aura:<comp>:<porteur>", restants: 0}` via `beneficiaires_de_zone` (terrain, ligne de vue, à terre écartés, jamais un monstre) puis `_refresh_snapshot_stats`. Appelée au placement, en tête de `_reset_turn_budget` (avant la régén), après toute action réussie (`resolve_action` enveloppe `_resoudre_action_joueur`) et dans `_traiter_ko`. ⚠️ Jamais décrémentée (comme `maintenu`), jamais reversée (`_effets_a_reverser`).
+- ⚠️ **Non-cumul** : deux auras, ou une aura et une potion du même effet → la meilleure seule (`cumul_effets`). Deux prêtres = deux chips, une régén.
+- Simulateur : `poser_auras_propres` (le porteur est seul dans sa zone). UI : chip « aura » dorée (combat) / « aura » (fiche), origine « Auras » de l'infobulle, `_zoneLabel` préfixe « aura ». Hors périmètre : auras hostiles, aura + `condition`.
+- Verrouillé par `tests/test_competences_aura.py`.
+
 
 ### Zones d'effet — une forme, pas une case
 Bloc `zone` d'un doc `sort:*`/`competence:*`, géométrie pure `utils/zones_effet.py`, miroir client `templates/scripts/zones_effet.js`. **Bloc absent ⇒ la seule case de la cible désignée**, à la lettre (aucune migration). Le quadrillage étant fait de CARRÉS, une zone se lit en trois temps : une **ancre** (`origine`: `cible` | `lanceur`), une **orientation** (`orientation`: `cible` = l'axe lanceur→cible ramené au huitième de tour | `facing` = l'orientation du lanceur, ⚠️ les monstres n'en ont pas), une **forme**.

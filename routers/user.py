@@ -630,12 +630,14 @@ async def move_character(
 							xp_partage += int(escorte_maj["depose"].get("xp") or 0)
 							niveau_up = niveau_up or bool(escorte_maj["depose"].get("niveau_up"))
 							niveau_new = compute_character_level(character_to_update.get("xp_total", 0))
+						compagnons = _auras_du_groupe(character_to_update)
 						_apply_world_turn_regen(character_to_update)
 						save_doc(character_to_update)
 						# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage (régén +
 						# XP partagée de la compagnie, cf. _apply_world_turn_groupe).
 						xp_compagnie = recrutement.xp_compagnie_payload(
-							_apply_world_turn_groupe(character_to_update, xp_partage), xp_partage)
+							_apply_world_turn_groupe(character_to_update, xp_partage, compagnons),
+							xp_partage)
 						return {"moved": 1, "transports_echoues": _echecs_payload(transports_echoues), "escorte": escorte_maj, "xp_gain": xp_gain, "niveau_up": niveau_up, "niveau": niveau_new, "xp_compagnie": xp_compagnie, "zone_event": _zone_event_payload(zone_event), "vitals": _vitals_payload(character_to_update), "ressource_recoltable": _recolte_payload(character_to_update), "effets_actifs": consommables.effets_actifs_payload(character_to_update), "caracts_detail": _caracts_payload(character_to_update), "focalisation_atteinte": {"lieu": destination, "nom": lieu_label(lieu_doc, destination)} if focus_atteint else None, "intro_terminee": intro_terminee}
 				raise HTTPException(status_code=404, detail="Incorrect movement info")
 		elif ("x" in move and "y" in move
@@ -685,11 +687,12 @@ async def move_character(
 					get_doc, save_doc, find_docs)
 				if escorte_maj["depose"]:
 					xp_partage += int(escorte_maj["depose"].get("xp") or 0)
+				compagnons = _auras_du_groupe(character_to_update)
 				_apply_world_turn_regen(character_to_update)
 				save_doc(character_to_update)
 				# Docs du groupe : ANNEXES, donc persistés APRÈS le personnage. Un pas ne
 				# rapporte pas d'XP — seule une conclusion d'intro peut en partager ici.
-				_apply_world_turn_groupe(character_to_update, xp_partage)
+				_apply_world_turn_groupe(character_to_update, xp_partage, compagnons)
 				links = get_lieu_links(current_user)
 				# Un pas ne recharge pas la page : la sanction de réputation (−1 chez le donneur ET
 				# sa maison) doit repartir avec la réponse, sinon l'onglet 🤝 — rendu 100 % client —
@@ -790,7 +793,19 @@ def _apply_world_turn_regen(character: dict) -> None:
         character["currentPM"] = min(character["currentPM"], derived.pm_max)
 
 
-def _apply_world_turn_groupe(character: dict, xp_partage: int = 0) -> list:
+def _auras_du_groupe(character: dict) -> list:
+    """AURAS hors combat (passives à zone) : tout le groupe profite de celles de chacun.
+    Pose `auras_recues` sur le principal et ses compagnons — AVANT la régén du tour, qui
+    les lit — et rend les compagnons chargés, à repasser à `_apply_world_turn_groupe` : les
+    recharger là-bas donnerait un SECOND dict du même doc (cf. sa docstring), et l'aura
+    posée ici serait perdue. Rien n'est sauvé ici."""
+    compagnons = recrutement.groupe_effectif(character, get_doc)
+    competences_util.appliquer_auras_groupe([character, *compagnons])
+    return compagnons
+
+
+def _apply_world_turn_groupe(character: dict, xp_partage: int = 0,
+                             compagnons: list | None = None) -> list:
     """Le tour monde vaut pour TOUT le groupe : chaque compagnon régénère PV/PM et
     décrémente ses effets actifs exactement comme le joueur — un doc `aventurier:*` est
     un miroir du character, `_apply_world_turn_regen` s'y applique tel quel. Les docs
@@ -807,7 +822,8 @@ def _apply_world_turn_groupe(character: dict, xp_partage: int = 0) -> list:
     perdue en silence. Le retour reste la liste des compagnons ACTIFS : c'est
     `xp_compagnie_payload` qui y isole la compagnie, avec le même prédicat que
     `partager_xp`."""
-    compagnons = recrutement.groupe_effectif(character, get_doc)
+    if compagnons is None:
+        compagnons = recrutement.groupe_effectif(character, get_doc)
     recrutement.partager_xp(character, xp_partage, compagnons=compagnons)
     for porteur in compagnons + montures.montures_effectives(character, get_doc):
         _apply_world_turn_regen(porteur)
@@ -1591,8 +1607,17 @@ async def apprendre_competence(
 	character.setdefault("competences_connues", []).append(comp["id"])
 	# Une passive apprise buffe immédiatement : re-dénormaliser AVANT le save.
 	competences_util.recompute_competences_bonus(character, get_doc)
+	# Une AURA apprise couvre tout le groupe hors combat : `auras_recues` reposé sur chaque
+	# membre. ⚠️ Le porteur (peut-être un compagnon) est réinjecté À SA PLACE — relu par
+	# `groupe_effectif`, ce serait un second dict du même doc, et l'une des deux écritures
+	# serait perdue.
+	membres = [character if m.get("_id") == character.get("_id") else m
+			   for m in expedition.membres(_principal, get_doc)]
+	autres = [m for m in competences_util.appliquer_auras_groupe(membres) if m is not character]
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
+	for m in autres:   # best-effort : le porteur, autoritatif, est déjà sauvé
+		save_doc(m)
 
 	return {
 		"attribute_points": character["attribute_points"],

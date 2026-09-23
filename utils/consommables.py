@@ -64,7 +64,12 @@ def effet_instantane(item_doc) -> bool:
 		eff["buffs"] or eff["regen_pv"] or eff["regen_pm"] or eff["esquive"])
 
 
-ORIGINES_BUFFS: tuple = ("effet", "equipement", "competence")
+ORIGINES_BUFFS: tuple = ("effet", "equipement", "competence", "aura")
+# Origines TEMPORAIRES — non cumulatives entre elles (cf. `_scinder_sources`). Une AURA reçue
+# (`auras_recues`, posée sur tout le groupe par `competences.appliquer_auras_groupe`) en est :
+# deux prêtres ne soignent pas deux fois, et une aura ne s'ajoute pas à une potion du même
+# effet — seule la meilleure compte.
+ORIGINES_TEMPORAIRES: tuple = ("effet", "aura")
 
 
 # ── Non-cumul des effets à durée ─────────────────────────────────────────────────
@@ -166,7 +171,8 @@ def _sources_de_buffs_detaillees(character: dict, origines: tuple = ORIGINES_BUF
 	tour monde ET, depuis les effets en combat, au tour du porteur), "equipement"
 	(`equipment_bonus`, dénormalisé par utils/characters.sync_equipment_bonus) et
 	"competence" (`competences_bonus`, passives permanentes, dénormalisé par
-	utils/competences.recompute_competences_bonus).
+	utils/competences.recompute_competences_bonus) et "aura" (`auras_recues`, auras du
+	groupe hors combat — TEMPORAIRE au sens du non-cumul, cf. ORIGINES_TEMPORAIRES).
 
 	`origines` restreint le repli à un sous-ensemble. Seul le snapshot de combat s'en sert,
 	pour obtenir la base PERMANENTE (équipement + passives) : les effets temporaires y
@@ -180,6 +186,10 @@ def _sources_de_buffs_detaillees(character: dict, origines: tuple = ORIGINES_BUF
 	sources = []
 	if "effet" in origines:
 		sources += [("effet", eff) for eff in (character.get("effets_actifs") or [])]
+	# Auras reçues du GROUPE hors combat. ⚠️ Jamais dans le snapshot de combat, qui ne
+	# demande pas cette origine : là-bas l'aura est positionnelle (`combat._recalculer_auras`).
+	if "aura" in origines:
+		sources += [("aura", a) for a in (character.get("auras_recues") or [])]
 	for origine, cle in (("equipement", "equipment_bonus"), ("competence", "competences_bonus")):
 		if origine not in origines:
 			continue
@@ -201,7 +211,7 @@ def _scinder_sources(character: dict, origines: tuple) -> tuple[list, list]:
 	(un casque +2 R et un anneau +3 R font bien +5 R) et s'ajoutent au meilleur effet."""
 	temporaires, permanents = [], []
 	for origine, eff in _sources_de_buffs_detaillees(character, origines):
-		(temporaires if origine == "effet" else permanents).append(eff)
+		(temporaires if origine in ORIGINES_TEMPORAIRES else permanents).append(eff)
 	return temporaires, permanents
 
 
@@ -267,7 +277,7 @@ def caracts_detail(character: dict) -> dict:
 				# caract, et qu'aucun ex æquo ne l'a déjà été (premier arrivé, premier servi
 				# — même départage que `poser_effet`, qui remplace en place).
 				actif = True
-				if origine == "effet":
+				if origine in ORIGINES_TEMPORAIRES:
 					borne = positifs.get(code) if delta > 0 else negatifs.get(code)
 					actif = delta == borne and (code, delta) not in vus
 					if actif:
@@ -377,8 +387,12 @@ def tick_effets(character: dict) -> list:
 
 
 def effets_actifs_payload(character: dict) -> list:
-	"""Effets actifs pour l'UI (chips ✨ de la fiche) — copies, jamais les entrées vives."""
-	return [dict(eff) for eff in (character or {}).get("effets_actifs") or []]
+	"""Effets actifs pour l'UI (chips ✨ de la fiche) — copies, jamais les entrées vives.
+	Les AURAS reçues du groupe suivent, marquées `aura` (pas de compte à rebours : elles
+	durent tant que le porteur est dans le groupe)."""
+	character = character or {}
+	return ([dict(eff) for eff in character.get("effets_actifs") or []]
+			+ [dict(a, aura=True) for a in character.get("auras_recues") or []])
 
 
 def liste_consommables_combat(character: dict, resolve_ref_fn) -> list:

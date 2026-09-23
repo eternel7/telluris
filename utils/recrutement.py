@@ -756,6 +756,7 @@ def retirer_du_tableau(av: dict) -> None:
 	if av.get("embauche_par"):
 		av["statut"] = "parti"
 		av.pop("expire_at", None)
+		av.pop("auras_recues", None)   # hors du groupe, plus d'aura (competences.appliquer_auras_groupe)
 		save_doc(av)
 	else:
 		delete_doc(av)
@@ -1159,6 +1160,7 @@ def cloturer_contrats_mission(character: dict, lieu_doc: dict, compagnons: list 
 			continue
 		groupe.remove(av["_id"])
 		av["statut"] = "parti"
+		av.pop("auras_recues", None)   # hors du groupe, plus d'aura
 		av["contrat"]["echu_at"] = now_epoch()
 		libres.append(av)
 	character["groupe"] = groupe
@@ -1204,6 +1206,7 @@ def congedier(character: dict, av: dict, lieu_doc: dict | None = None) -> tuple[
 	groupe.remove(av["_id"])
 	character["groupe"] = groupe
 	av["statut"] = "parti"
+	av.pop("auras_recues", None)   # hors du groupe, plus d'aura
 	mission = ((av.get("contrat") or {}).get("mode") == "mission")
 	if av.pop("permanent", None):
 		delta = character_stats.AFFINITE_DELTA_CONGEDIE_PERMANENT
@@ -1298,6 +1301,7 @@ def departs_volontaires(character: dict, get_doc_fn=None) -> list:
 		if affinite_de(character, av["_id"]) < seuil:
 			character["groupe"].remove(av["_id"])
 			av["statut"] = "parti"
+			av.pop("auras_recues", None)   # hors du groupe, plus d'aura
 			partis.append(av)
 	return partis
 

@@ -151,6 +151,11 @@ def _cout_pm_charge(joueur: dict, capacite: dict | None) -> int:
 		(capacite or {}).get("cout_pm"), _penalite_charge_acteur(joueur, capacite))
 
 
+# Origines de buffs lues à l'ENTRÉE en combat : tout sauf « aura » — l'aura de groupe
+# d'exploration (`auras_recues`) y devient positionnelle (cf. `_recalculer_auras`).
+_ORIGINES_SNAPSHOT: tuple = ("effet", "equipement", "competence")
+
+
 # ── Effets à durée EN COMBAT ─────────────────────────────────────────────────
 # Un snapshot de joueur porte une liste `effets_actifs` VIVANTE (même forme d'entrée que
 # character["effets_actifs"] : {nom, icon, buffs, regen_pv, regen_pm, esquive, restants}),
@@ -691,6 +696,80 @@ def _servir_zone_soutien(combat_doc: dict, lanceur: dict, principal: dict, sourc
 			for p in beneficiaires_de_zone(combat_doc, lanceur, principal, zone, grid)[1:]]
 
 
+# ── Auras : passives à zone, POSITIONNELLES en combat ────────────────────────────
+# Une aura (competences.est_aura) est portée par le snapshot de son émetteur (`auras`) et
+# posée, sur chaque allié que sa zone couvre, comme une entrée VIVANTE d'`effets_actifs`
+# marquée `aura: True` : régén, buffs et esquive passent alors par les chokepoints existants
+# (`_tick_effets_combat`, `_refresh_snapshot_stats`, `cumul_effets` — donc NON cumulatives :
+# deux prêtres qui se chevauchent ne soignent qu'une fois). L'entrée ne se décrémente pas et
+# ne survit pas au combat (`_effets_a_reverser`).
+
+def _entree_aura(aura: dict, emetteur: dict) -> dict:
+	"""Entrée d'`effets_actifs` qu'une aura pose sur un allié couvert. `source_id` distingue
+	les porteurs (deux prêtres = deux chips), le non-cumul tenant à `cumul_effets`."""
+	return {
+		"source_id": f"aura:{aura.get('id', '')}:{emetteur.get('id', '')}",
+		"aura": True,
+		"nom": aura.get("nom", "Aura"),
+		"icon": aura.get("icon", "✨"),
+		"buffs": dict(aura.get("buffs") or {}),
+		"regen_pv": _eff_int(aura.get("regen_pv")),
+		"regen_pm": _eff_int(aura.get("regen_pm")),
+		"esquive": _eff_int(aura.get("esquive")),
+		"restants": 0,
+	}
+
+
+def _entrees_aura_attendues(combat_doc: dict, grid: dict) -> dict:
+	"""{id du snapshot: [entrées aura]} selon les positions du moment. Émetteur debout et
+	placé seulement ; bénéficiaires = `beneficiaires_de_zone` ancrée sur l'émetteur (terrain,
+	ligne de vue, alliés à terre écartés, jamais un monstre)."""
+	attendues: dict = {}
+	for emetteur in combat_doc.get("joueurs", []):
+		auras = emetteur.get("auras") or []
+		if not auras or not emetteur.get("pos") or emetteur.get("currentPV", 0) <= 0:
+			continue
+		for aura in auras:
+			for p in beneficiaires_de_zone(combat_doc, emetteur, emetteur, aura.get("zone"), grid):
+				attendues.setdefault(p.get("id"), []).append(_entree_aura(aura, emetteur))
+	return attendues
+
+
+def _poser_entrees_aura(acteur: dict, voulues: list) -> bool:
+	"""Remplace les entrées `aura` d'un acteur ; recalcule ses dérivées SEULEMENT si elles
+	changent. Rend True s'il y a eu changement."""
+	actifs = acteur.get("effets_actifs") or []
+	if [e for e in actifs if e.get("aura")] == voulues:
+		return False
+	acteur["effets_actifs"] = [e for e in actifs if not e.get("aura")] + voulues
+	_refresh_snapshot_stats(acteur)
+	return True
+
+
+def poser_auras_propres(snap: dict) -> None:
+	"""Pose sur un snapshot SES PROPRES auras, sans grille : le porteur est toujours dans sa
+	zone (ancrée sur lui). Sert le simulateur, dont le duel 1D n'a ni grille ni allié — sans
+	quoi le banc d'essai ignorerait une aura que le jeu applique."""
+	_poser_entrees_aura(snap, [_entree_aura(a, snap) for a in (snap.get("auras") or [])])
+
+
+def _recalculer_auras(combat_doc: dict, grid: dict | None = None) -> None:
+	"""Chokepoint unique des auras : remet les entrées `aura` de chaque allié en accord avec
+	les positions et les vivants. Appelé au placement, en tête de tour, en fin d'action et
+	à chaque KO. ⚠️ IDEMPOTENT : aucun allié n'est touché si ses entrées n'ont pas changé
+	(CLAUDE.md §17) — sinon chaque appel relancerait `_refresh_snapshot_stats` pour rien."""
+	joueurs = combat_doc.get("joueurs") or []
+	porteurs = [j for j in joueurs if j.get("auras")]
+	if not porteurs and not any(e.get("aura") for j in joueurs
+								for e in (j.get("effets_actifs") or [])):
+		return
+	if grid is None:
+		grid = get_combat_grid(combat_doc)
+	attendues = _entrees_aura_attendues(combat_doc, grid)
+	for j in joueurs:
+		_poser_entrees_aura(j, attendues.get(j.get("id"), []))
+
+
 def _resoudre_coup_capacite(combat_doc: dict, joueur: dict, monstre: dict, source: dict,
 							effets: dict, notation: str, mode_jet: str, canal: str,
 							textes: dict, noms: dict) -> tuple:
@@ -911,10 +990,11 @@ def _tick_effets_combat(combat_doc: dict, acteur: dict) -> None:
 	# aussi, et pour toujours : sa durée n'est pas un compte à rebours mais la capacité de
 	# son lanceur à payer l'entretien (cf. `_payer_maintiens`, qui la retire quand il ne le
 	# peut plus). La décrémenter ferait tomber le sort au bout de `duree` tours alors même
-	# que le mage paie, ce qui est exactement ce que « sort maintenu » exclut.
+	# que le mage paie, ce qui est exactement ce que « sort maintenu » exclut. Une AURA non
+	# plus : elle dure tant que sa zone couvre le porteur (`_recalculer_auras`).
 	restants, expires = [], []
 	for eff in actifs:
-		if eff.get("maintenu") or int(eff.get("pose_tour", -1)) == tour:
+		if eff.get("maintenu") or eff.get("aura") or int(eff.get("pose_tour", -1)) == tour:
 			restants.append(eff)
 			continue
 		eff["restants"] = _eff_int(eff.get("restants")) - 1
@@ -1112,6 +1192,8 @@ def _reset_turn_budget(actor: dict, combat_doc: dict | None = None) -> None:
 	budget plein pour agir malgré la canalisation.
 	"""
 	if combat_doc is not None:
+		# Auras remises à jour AVANT la régén du tour : elle lit la couverture du moment.
+		_recalculer_auras(combat_doc)
 		_tick_effets_combat(combat_doc, actor)
 	actor["cells_moved"] = 0
 	actor["attaques"] = 0
@@ -1285,12 +1367,13 @@ def _effets_a_reverser(snap: dict) -> list:
 	⚠️ Un effet MAINTENU ne suit pas non plus, et c'est l'essentiel : il n'existe que tant
 	que quelqu'un paie son entretien chaque round, et il n'y a pas de round en exploration.
 	Le reverser tel quel poserait sur le personnage un buff que plus rien ne prélève et que
-	plus rien ne fait tomber — permanent et gratuit, donc un exploit.
+	plus rien ne fait tomber — permanent et gratuit, donc un exploit. Même raison pour une
+	AURA : elle n'existe que tant que son porteur est à côté.
 	"""
 	return [
 		{k: v for k, v in eff.items() if k not in ("pose_tour", "maintenu", "maintien")}
 		for eff in (snap or {}).get("effets_actifs") or []
-		if _eff_int(eff.get("restants")) > 0 and not eff.get("maintenu")
+		if _eff_int(eff.get("restants")) > 0 and not eff.get("maintenu") and not eff.get("aura")
 	]
 
 
@@ -2109,7 +2192,9 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# stocké equipment_bonus, périmé si un item a été modifié en base sans ré-équiper. Posé
 	# AVANT caracts_avec_buffs, qui y lit les buffs de caract portés par les objets.
 	equipment = sync_equipment_bonus(character)
-	stats = caracts_avec_buffs(character)
+	# ⚠️ Sans l'origine « aura » : l'aura de GROUPE d'exploration (`auras_recues`) n'entre pas
+	# en combat, où une aura devient positionnelle (`_recalculer_auras`).
+	stats = caracts_avec_buffs(character, origines=_ORIGINES_SNAPSHOT)
 	# Base PERMANENTE (équipement + passives, SANS les effets temporaires) : c'est depuis
 	# elle que _refresh_snapshot_stats recompose les dérivées à chaque changement d'effet.
 	# `stats` ci-dessus = caracts_base + Σ buffs des effets entrants → le snapshot construit
@@ -2132,7 +2217,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# droit de lire la base. Recalculées aux mêmes deux sites que `charge` (ramassage,
 	# consommation), donc jamais périmées — cf. `_recompute_charge_magique`.
 	charge_mag = round(charge_magie.charge_magique_portee(character, resolve_item_ref), 2)
-	canalisation = canalisation_bonus(character)
+	canalisation = canalisation_bonus(character, origines=_ORIGINES_SNAPSHOT)
 
 	# Profils d'attaque selon les armes équipées (mêlée/jet/tir) + portée de mêlée (legacy).
 	attaques = _weapon_attacks(character, base)
@@ -2189,7 +2274,7 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"dette_actions": 0,
 		# Esquive = malus au seuil de toucher PHYSIQUE des attaques subies (cc/cd,
 		# jamais la magie). Somme des passives (competences_bonus) + effets actifs.
-		"esquive": esquive_bonus(character),
+		"esquive": esquive_bonus(character, origines=_ORIGINES_SNAPSHOT),
 		# Part PERMANENTE seule : _refresh_snapshot_stats y rajoute celle des effets
 		# vivants, qui varie au fil du combat.
 		"esquive_base": esquive_bonus(character, origines=("equipement", "competence")),
@@ -2214,6 +2299,10 @@ def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 		"furtif": False,
 		"furtivite_bonus": 0,
 		"butin_ramasse": [],   # références {item, poids} des carcasses ramassées en combat
+		# AURAS que CE combattant émet (passives à zone, dénormalisées par
+		# competences.recompute_competences_bonus) : appliquées selon les positions par
+		# `_recalculer_auras`. Absent (combat d'avant) ⇒ aucune aura.
+		"auras": [dict(a) for a in ((character.get("competences_bonus") or {}).get("auras") or [])],
 	}
 
 
@@ -2723,6 +2812,8 @@ def create_combat_doc(
 		grid = _open_grid()
 		combat_doc["grid_dims"] = grid["dims"]
 	_place_actors(combat_doc, grid)
+	# Auras posées dès le placement : les alliés côte à côte en profitent dès le tour 1.
+	_recalculer_auras(combat_doc, grid)
 	return combat_doc
 
 
@@ -3179,6 +3270,8 @@ def _traiter_ko(combat_doc: dict, defenseur: dict, attaquant: dict) -> None:
 			"kind": "sys",
 			"texte": texte_ko,
 		}, defenseur))
+		# Un porteur d'aura à terre n'émet plus ; un allié à terre ne reçoit plus.
+		_recalculer_auras(combat_doc)
 		# ⚠️ `_combattants_vivants` et non la liste brute : une monture debout ne
 		# doit pas empêcher la défaite d'être déclarée (plus personne ne joue).
 		# ⚠️ Garde `status` : depuis le lien de vie, un même coup peut faire tomber DEUX
@@ -4149,6 +4242,22 @@ def _enregistrer_concentration(combat_doc: dict, joueur: dict, sdoc: dict,
 
 
 def resolve_action(
+	combat_doc: dict, action_type: str, cible_id: str | None = None,
+	dx: int | None = None, dy: int | None = None, sens: int | None = None,
+	mode: str | None = None, item: dict | None = None, sort: dict | None = None,
+	competence: dict | None = None,
+) -> dict:
+	"""Résout une action du joueur (cf. `_resoudre_action_joueur`), puis remet les AURAS en
+	accord avec les positions : un pas, un saut ou une invocation peut faire entrer ou
+	sortir un allié de la zone d'un porteur. Une action refusée n'a rien bougé."""
+	result = _resoudre_action_joueur(combat_doc, action_type, cible_id, dx, dy, sens, mode,
+									 item, sort, competence)
+	if not (result or {}).get("error"):
+		_recalculer_auras(combat_doc)
+	return result
+
+
+def _resoudre_action_joueur(
 	combat_doc: dict, action_type: str, cible_id: str | None = None,
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
 	mode: str | None = None, item: dict | None = None, sort: dict | None = None,

@@ -3898,7 +3898,7 @@ function _vocLabel(voc) {
 }
 const _CARACT_NOMS = [["V","Vitesse"],["F","Force"],["R","Résistance"],["Ag","Agilité"],
 	["Vol","Volonté"],["Int","Intelligence"],["Cha","Charisme"],["Ch","Chance"]];
-const _ORIGINE_LBL = {equipement: "Équipement", competence: "Compétences", effet: "Effets"};
+const _ORIGINE_LBL = {equipement: "Équipement", competence: "Compétences", effet: "Effets", aura: "Auras"};
 
 function _xpCostNext(statKey) {
 	const cur     = _charStats[statKey] || 0;
@@ -4004,11 +4004,11 @@ function _caractTooltipLignes(code, nom) {
 	const d = _caractsDetail[code] || {base: 0, total: 0, delta: 0, sources: []};
 	const lignes = [`${nom} : ${d.base}`,
 					`Max racial : ${_RACE_MAX[code] || 0} \nCourant : ${d.total || d.base}`];
-	// Sources regroupées par origine, dans l'ordre Équipement/Compétences/Effets.
+	// Sources regroupées par origine, dans l'ordre Équipement/Compétences/Effets/Auras.
 	// `actif === false` = effet à durée DOMINÉ par un autre sur cette caract (non-cumul :
 	// seuls le meilleur bonus et le pire malus s'appliquent) — listé, mais dit ignoré,
 	// sinon le joueur chercherait dans son total un Δ qui n'y est pas.
-	for (const origine of ['equipement', 'competence', 'effet']) {
+	for (const origine of ['equipement', 'competence', 'effet', 'aura']) {
 		for (const s of (d.sources || []).filter(s => s.origine === origine)) {
 			const sd = s.delta > 0 ? '+' + s.delta : '−' + Math.abs(s.delta);
 			const ignore = s.actif === false ? ' (ignoré)' : '';
@@ -5142,7 +5142,10 @@ function _renderEffetsActifs(list) {
 		if (e.regen_pv) details.push(`+${e.regen_pv} PV/tour`);
 		if (e.regen_pm) details.push(`+${e.regen_pm} PM/tour`);
 		if (e.esquive) details.push(`+${e.esquive} esquive`);
-		return `<span class="sh-effet-chip">${e.icon || '✨'} ${e.nom || 'Effet'}${details.length ? ' (' + details.join(', ') + ')' : ''}<span class="sh-effet-restants">⏳${e.restants}</span></span>`;
+		// Une AURA du groupe n'a pas de compte à rebours (elle tient tant que son porteur
+		// est du groupe) : « aura » plutôt qu'un « ⏳ » qui ne bougerait jamais.
+		const suffixe = e.aura ? 'aura' : `⏳${e.restants}`;
+		return `<span class="sh-effet-chip">${e.icon || '✨'} ${e.nom || 'Effet'}${details.length ? ' (' + details.join(', ') + ')' : ''}<span class="sh-effet-restants">${suffixe}</span></span>`;
 	}).join('');
 	['sh-effets-actifs', 'sh-effets-actifs-stats', 'sh-effets-actifs-panel'].forEach(id => {
 		const el = document.getElementById(id);
@@ -5507,8 +5510,10 @@ function _sortTempsLabel(s) {
 // rien à dessiner — le catalogue se contente d'annoncer la forme. `libelleZone` vient de
 // scripts/zones_effet.js.
 function _zoneLabel(capa) {
-	const txt = libelleZone(normaliserZone((capa || {}).zone), (capa || {}).cible);
-	return txt ? ' · ' + txt : '';
+	// Une passive à zone est une AURA, toujours ancrée sur son porteur (`cible` ignorée).
+	const aura = (capa || {}).mode === 'passive';
+	const txt = libelleZone(normaliserZone((capa || {}).zone), aura ? 'soi' : (capa || {}).cible);
+	return txt ? ' · ' + (aura ? 'aura ' : '') + txt : '';
 }
 // Étiquette d'un sort d'INVOCATION. Elle REMPLACE `_sortEffetsLabel` plutôt que de s'y
 // ajouter : une invocation n'a aucun `effets` (elle fait apparaître une créature, elle ne

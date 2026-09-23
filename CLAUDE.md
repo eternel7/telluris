@@ -69,7 +69,8 @@ utils/
                          #   (capacite_utilisable_combat / effets_agissent_sur_cible / _exploration)
   grimoires.py           # grimoires manquants (pur) : grimoire UNIQUE + recette de scriptorium par sort ;
                          #   règle de couverture partagée par dev/gen_grimoires.py et l'alerte de /admin
-  competences.py         # compétences de vocation (pur) : passives permanentes, actives, apprentissage ;
+  competences.py         # compétences de vocation (pur) : passives permanentes, AURAS (passive + zone :
+                         #   tout le groupe hors combat, positionnelle en combat), actives, apprentissage ;
                          #   MÊME contrat que les sorts (incantation/maintien, saut, cout_pv,
                          #   lien_vie, zones, drain) — cf. combat._lancer_capacite
   charge_magie.py        # charge portée → canalisation (pur) : ratio, courbe, paliers,
