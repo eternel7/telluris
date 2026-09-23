@@ -120,6 +120,7 @@ Verrouillé par `tests/test_acces.py` et `tests/test_lieux_acces.py`, y compris 
 Un donjon est un lieu de combat **FERMÉ** : on y descend par une porte gardée, avec un mandat. Doc `donjon:*` : `{nom, portail, niveau_max?, niveau_min?, nb_monstres?, battle_maps:[{lieu, especes, niveau_max?, niveau_min?, nb_monstres?}]}`. Logique pure `utils/donjon.py`.
 
 - Contenu **curaté salle par salle** (pas de zones d'influence) ; `donjon_de_lieu` est le seul lien salle → donjon.
+- **Écriture** : section 🏰 du formulaire de lieu de `/admin/editor` (doc donjon, salle, porte gardée simple, passages d'étage) — telluris-editeur-carte § Section 🏰 Donjon.
 - `niveau_max`/`niveau_min` bornent le grade de l'élite **et** de l'escorte, en cascade salle → donjon → aucune (le plancher cède au plafond en cas de conflit).
 - `nb_monstres` fixe l'effectif **sans** bonus au nombre de compagnons, pour que les répliques narratives qui comptent les ennemis restent exactes.
 - La commission est une quête `chasse` **ordinaire** (`source:"commission"`, hook générique, répétable, sans `unique`) ; son rang dérive de la barrière la plus stricte à franchir pour l'obtenir (`acces.rang_de_quete`, source unique partagée avec les escortes).
@@ -136,6 +137,7 @@ Catacombes qu'on descend, tour qu'on gravit : même doc, mêmes salles (`battle_
 - **UN seul combat** pour toute l'expédition (`combat_doc["etages"] = {donjon, etage, passages, archives}`) : tout le groupe entre **furtif** (montures et escortés compris), les monstres naissent à `DISTANCE_MIN_APPARITION` du point et rôdent (`_chasse_ou_erre`) jusqu'à repérer quelqu'un.
 - **Pas de condition de sortie** : `_check_victory` ignoré, `fuir` refusé. Action `emprunter` (gratuite) : un combattant debout SUR la case, tous les autres à ≤ 1 (`passage_franchissable`, exposé en `franchissable` par `annoter_passages`). Vers un étage : `routers/combat._passer_a_l_etage` → `combat.changer_d_etage` (joueurs/PV/PM/effets conservés, monstres archivés et renumérotés, carcasses laissées en bas, client recharge la page). Vers la surface : `victoire` + `sortie` appliquée par `finalize_combat` (XP, kills, bestiaire sur tous les étages). Défaite : retour au lieu d'origine, sans XP.
 - ⚠️ Chaque entrée dans un étage retire ses monstres (y compris en y revenant). Aucune `victoire` de salle n'est notée (`salle_gardee` absent).
+- UI (`renderPassages`, combat_telluris) : un bouton par passage **empruntable maintenant** seulement (à son tour, `franchissable`), alignés **à droite** (le ⚙ `#btn-slots-edit` est en absolu à gauche). ⚠️ La rangée reste posée sur tout étage à passages, calée par un bouton invisible quand aucun n'est actif — sinon la barre changerait de hauteur à chaque tour de monstres (§17).
 
 Verrouillé par `tests/test_donjon_etages.py`.
 

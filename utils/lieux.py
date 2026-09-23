@@ -61,6 +61,24 @@ def get_lieu_links(current_user: dict = Body(...), filtrer_acces: bool = True):
 
 	return out
 	
+def noeud_destination(conn: dict, lieu_courant: str, position: dict) -> tuple[dict | None, bool]:
+	"""Le nœud où mène `conn` pour qui se tient à `position` dans `lieu_courant`, et si la
+	connexion est INTERNE (ses deux nœuds sur ce même lieu : escalier, trappe, passage entre
+	deux cases de la même carte).
+
+	- Connexion ordinaire : le nœud d'un AUTRE lieu (le premier, comme avant).
+	- Connexion interne : le nœud qui n'est PAS la case où l'on se tient — `get_lieu_links` est
+	  scopé à la case, on se tient donc sur l'une des deux extrémités. Deux extrémités sur la
+	  même case ⇒ (None, True) : il n'y a nulle part où aller."""
+	nodes = [n for n in (conn or {}).get("nodes") or [] if isinstance(n, dict)]
+	autre = next((n for n in nodes if n.get("lieu") != lieu_courant), None)
+	if autre is not None:
+		return autre, False
+	ici = [(position or {}).get("x"), (position or {}).get("y")]
+	autre = next((n for n in nodes if list(n.get("pos") or [])[:2] != ici), None)
+	return autre, True
+
+
 # [bit, dx, dy, opposé]
 # 1: HAUT, 2: HAUT_DROITE, 4: DROITE, 8: BAS_DROITE, 16: BAS, 32: BAS_GAUCHE, 64: GAUCHE, 128: HAUT_GAUCHE
 # ⚠️ Validateur serveur autoritatif. Miroir client : templates/scripts/nav.js — garder synchro.
@@ -284,6 +302,30 @@ def _lister_images(chemin: str) -> list[str]:
 		and f.lower().endswith(IMAGE_EXTENSIONS)
 	)
 
+# Origines SERVABLES d'une image de lieu, dans l'ORDRE où le jeu les résout (`/play` dans
+# main.py, `marche._IMAGE_ROUTES` pour les relations) : un nom présent dans deux dossiers
+# est servi par le PREMIER. ⚠️ Recopie de `marche._IMAGE_ROUTES` (importer `marche` ici
+# tirerait tout le marché dans le combat, qui importe ce module) — verrouillée par
+# `tests/test_lieux.py`.
+ORIGINES_IMAGE_LIEU = (
+	("towns", TOWNS_IMAGES_PATH),
+	("maps", "templates/resources/maps"),
+	("battle_maps", "templates/resources/battle_maps"),
+)
+
+
+def images_de_lieu() -> dict[str, str]:
+	"""`{fichier: route}` de toutes les images qu'un doc lieu peut porter — le formulaire de
+	lieu de l'éditeur les propose TOUTES (une salle de donjon porte une battle map). Même
+	règle que la résolution du jeu : premier dossier qui a le fichier gagne, la route dit
+	d'où la vignette doit être servie. Ordre des clés : par origine, puis par nom."""
+	images: dict[str, str] = {}
+	for route, chemin in ORIGINES_IMAGE_LIEU:
+		for f in _lister_images(chemin):
+			images.setdefault(f, route)
+	return images
+
+
 CITE_DEPART_MARQUEUR = "_start_"
 
 
@@ -363,7 +405,11 @@ async def get_creation_options(
 		# Ce que chaque case à cocher « capacité » du formulaire doit savoir : le tag
 		# qu'elle pose, et les catégories qui l'accordent d'office (case grisée).
 		"capacites": capacites.catalogue(),
+		# `images` = façades de ville (`towns/`) : le lot, les portes de rempart et la maison
+		# de guilde n'habillent QUE des façades. Le formulaire de lieu, lui, lit
+		# `images_lieu` — toute origine servable, avec sa route pour la vignette.
 		"images": _lister_images(TOWNS_IMAGES_PATH),
+		"images_lieu": images_de_lieu(),
 		"portraits": _lister_images(PNJ_IMAGES_PATH),
 		"pnj": sorted(
 			({"_id": p.get("_id"), "nom": p.get("nom") or p.get("_id")} for p in pnjs),
@@ -378,6 +424,19 @@ async def get_creation_options(
 			key=lambda d: d["_id"]
 		),
 		"conditions": acces.vocabulaire_conditions(),
+		# Section 🏰 Donjon du formulaire (salle = battle map) : les espèces qui peuplent une
+		# salle, et les docs `donjon:*` ENTIERS (petits, sans grille) — appartenance d'une
+		# salle, champs du donjon, `_id` déjà pris. ⚠️ Relus avant écriture par le client :
+		# une autre salle a pu modifier le même donjon entre-temps.
+		"especes": sorted(
+			({"_id": e.get("_id"), "nom": e.get("nom") or e.get("_id")}
+			 for e in (find_docs({"type": "espece"}, fields=["_id", "nom"]) or []) if e.get("_id")),
+			key=lambda e: e["_id"]
+		),
+		"donjons": sorted(
+			(d for d in (find_docs({"type": "donjon"}) or []) if d.get("_id")),
+			key=lambda d: d["_id"]
+		),
 	}
 
 

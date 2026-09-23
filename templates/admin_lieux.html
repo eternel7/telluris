@@ -279,6 +279,8 @@
 <script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
 <script src="{{ url_for('scripts', path='voies.js') }}"></script>
 <script src="{{ url_for('scripts', path='import_sortie.js') }}"></script>
+<!-- `rendreDeplacable` : le panneau 🔗 connexion de la part partagée se déplace par son titre. -->
+<script src="{{ url_for('scripts', path='deplacable.js') }}"></script>
 <!-- Mode Lieux PARTAGÉ avec /admin/editor. ⚠️ AVANT le script de la page, qui déclare `LIEUX_HOTE`. -->
 {% include "part-lieux-js.html" %}
 <script>

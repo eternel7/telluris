@@ -60,20 +60,29 @@
 <button type="button" class="fs-fab{% if compact %} fs-fab-compact{% endif %}" id="fs-fab" title="Plein écran" aria-pressed="false" hidden>
 	<span aria-hidden="true" id="fs-fab-ico">⛶</span><span class="fs-fab-txt" id="fs-fab-txt">Plein écran</span>
 </button>
+{{ cablage('fs-fab', 'fs-fab-ico', 'fs-fab-txt') }}
+{% endmacro %}
+
+{#
+	Câblage du plein écran sur un bouton QUELCONQUE (la pastille ci-dessus, l'entrée du menu
+	d'affichage de /play). Le bouton est rendu `hidden` : il ne se montre que si l'API est
+	offerte et que la fenêtre n'est pas déjà l'application installée en plein écran.
+#}
+{% macro cablage(btn_id, ico_id, txt_id, libelle_quitter='Quitter') %}
 <script>
 	(function () {
-		const btn = document.getElementById('fs-fab');
+		const btn = document.getElementById('{{ btn_id }}');
 		if (!btn || !document.fullscreenEnabled) return;
 		// Application installée en plein écran : la fenêtre l'est déjà.
 		if (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) return;
 		btn.hidden = false;
-		const ico = document.getElementById('fs-fab-ico');
-		const txt = document.getElementById('fs-fab-txt');
+		const ico = document.getElementById('{{ ico_id }}');
+		const txt = document.getElementById('{{ txt_id }}');
 		// Suit aussi la sortie par Échap : l'état vient du document, pas du clic.
 		function majFs() {
 			const actif = !!document.fullscreenElement;
 			ico.textContent = actif ? '✕' : '⛶';
-			txt.textContent = actif ? 'Quitter' : 'Plein écran';
+			txt.textContent = actif ? '{{ libelle_quitter }}' : 'Plein écran';
 			btn.title = actif ? 'Quitter le plein écran' : 'Plein écran';
 			btn.setAttribute('aria-pressed', actif ? 'true' : 'false');
 		}

@@ -1415,6 +1415,54 @@
 		.viewport .controls-carte [data-sdy="-1"] { grid-row: 1; align-self: start; }
 		.viewport .controls-carte [data-sdy="0"]  { grid-row: 2; align-self: center; }
 		.viewport .controls-carte [data-sdy="1"]  { grid-row: 3; align-self: end; }
+		/* Pavé FLOTTANT : même cadre que le bloc `flottant` de part-move-panel.html (#dep-section
+		   de l'éditeur). `#controls` y perd `controls-carte` et retombe sur la grille 3×3 de
+		   `move_panel_css('.viewport', '.controls')` ; son `.move-spacer` garde la croix. */
+		.move-flottant {
+			position: fixed; z-index: 100; bottom: 10px; right: 10px;
+			background: var(--panel-bg); border: 1.5px solid var(--border-color);
+			box-shadow: 10px 10px 20px 5px rgba(0, 0, 0, 0.5);
+			border-radius: 10px; padding: 10px;
+		}
+		.move-flottant[hidden] { display: none; }
+		/* ⚠️ Il est le frère SUIVANT de #game-container : quand un panneau (fiche, marché,
+		   quêtes…) remplace la carte, le pavé disparaît avec elle, sans code à chaque ouverture. */
+		#game-container.panel-hidden + .move-flottant { display: none; }
+		@media (max-width: 768px) {
+			.move-flottant { right: auto; left: 50%; transform: translateX(-50%); }
+		}
+		/* Poignée : comme `.dep-head` de l'éditeur. `touch-action:none` en plus — sans lui, au
+		   doigt, le navigateur annule le glisser pour faire défiler la page. */
+		.move-head {
+			display: flex; align-items: center; margin-bottom: 8px;
+			cursor: move; user-select: none; touch-action: none;
+		}
+		.move-titre { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--accent-color); letter-spacing: 0.08em; }
+		/* Ligne « Actions » + menu d'affichage ⚙️. ⚠️ Scopé à #sub-actions-title :
+		   `.sub-locations-panel h3` est générique. */
+		#sub-actions-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+		.affichage-wrap { position: relative; display: inline-flex; }
+		.affichage-btn {
+			background: none; border: 1px solid transparent; border-radius: 6px;
+			padding: 0 4px; font-size: 0.95rem; line-height: 1.4; cursor: pointer; opacity: .75;
+		}
+		.affichage-btn:hover, .affichage-btn[aria-expanded="true"] { opacity: 1; border-color: var(--border-color); }
+		.affichage-menu {
+			position: absolute; top: calc(100% + 4px); right: 0; z-index: 150;
+			display: flex; flex-direction: column; min-width: 190px; padding: 4px;
+			background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px;
+			box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+		}
+		.affichage-menu[hidden] { display: none; }
+		.affichage-item {
+			display: block; width: 100%; text-align: left; white-space: nowrap;
+			padding: 6px 10px 6px 24px; position: relative;
+			background: none; border: none; border-radius: 4px; cursor: pointer;
+			color: var(--text-color); font-size: 0.85rem; font-weight: normal;
+		}
+		.affichage-item[hidden] { display: none; }
+		.affichage-item:hover { background: rgba(255, 255, 255, 0.08); }
+		.affichage-item[aria-checked="true"]::before { content: '✓'; position: absolute; left: 8px; color: var(--accent-color); }
 		#personnage {
 			display: none;
 		}
@@ -1580,8 +1628,25 @@
 				{% if lieu_texte %}
 				<div class="loc-texte">{{ lieu_texte }}</div>
 				{% endif %}
-				{% if dimensions or achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or pnjs_presents %}
-				<h3 id="sub-actions-title" >Actions</h3>
+				{# Ligne « Actions » + menu d'affichage (⚙️, aligné à droite) : mode du pavé de
+				   déplacement et plein écran. ⚠️ Ce menu n'existe que sous la condition de cette
+				   ligne (`a_ligne_actions`) — hors d'elle, la pastille ⛶ flottante reste émise
+				   (bas de page), sans quoi le plein écran disparaîtrait de ces lieux. #}
+				{% set a_ligne_actions = dimensions or achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or pnjs_presents %}
+				{% if a_ligne_actions %}
+				<h3 id="sub-actions-title"><span>Actions</span>
+					<span class="affichage-wrap">
+						<button type="button" id="affichage-btn" class="affichage-btn" title="Affichage"
+							aria-haspopup="menu" aria-expanded="false" aria-controls="affichage-menu" onclick="basculerMenuAffichage()">⚙️</button>
+						<span class="affichage-menu" id="affichage-menu" role="menu" hidden>
+							{% if dimensions %}
+							<button type="button" role="menuitemradio" class="affichage-item" data-pave="carte" aria-checked="true" onclick="choisirModePave('carte')">🗺️ Flèches sur la carte</button>
+							<button type="button" role="menuitemradio" class="affichage-item" data-pave="flottant" aria-checked="false" onclick="choisirModePave('flottant')">🕹️ Flèches flottantes</button>
+							{% endif %}
+							<button type="button" role="menuitem" class="affichage-item" id="affichage-fs" aria-pressed="false" hidden onclick="fermerMenuAffichage()"><span id="affichage-fs-ico" aria-hidden="true">⛶</span> <span id="affichage-fs-txt">Plein écran</span></button>
+						</span>
+					</span>
+				</h3>
 				<ul class="sub-locations-list">
 					{% if dimensions %}
 					{# Ex-case centrale du pavé. Comme avant, `verrouillerFleches` ne le touche pas
@@ -1671,6 +1736,19 @@
 				{% if not compagnons_points %}hidden{% endif %}>★</span></button>
 		</footer>
 	</div><!-- /#game-container -->
+	{% if dimensions %}
+	<!-- Pavé FLOTTANT (menu ⚙️ de la ligne Actions → « Flèches flottantes ») : le MÊME nœud
+	     `#controls` est déplacé ici depuis la carte (`appliquerModePave`) — jamais dupliqué,
+	     `updateControls`/`majFleches` le retrouvent par son id dans les deux modes. La barre
+	     de titre est la POIGNÉE (`rendreDeplacable`, scripts/deplacable.js), comme #dep-head
+	     du mode test de l'éditeur. -->
+	<div class="move-flottant" id="move-flottant" hidden>
+		<div class="move-head" id="move-head" title="Glisser pour déplacer">
+			<span class="move-titre">⠿ 🚶 Déplacement</span>
+		</div>
+		<div id="move-flottant-corps"></div>
+	</div>
+	{% endif %}
 	<div id="sheet-panel" class="panel-hidden panel-frame" aria-label="Fiche personnage">
 		<!-- ══ FICHE PERSONNAGE ══ -->
 		<div class="sheet-layout">
@@ -2934,6 +3012,8 @@
    `majFleches`/`verrouillerFleches` (son accès lui est RÉSOLU PAR LE SERVEUR), mais le
    fichier est un tout — c'est la même règle de marche des trois côtés. #}
 <script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
+{# `rendreDeplacable`/`placerPanneau` : la poignée du pavé flottant (partagé avec l'éditeur). #}
+<script src="{{ url_for('scripts', path='deplacable.js') }}"></script>
 {# `libelleZone` seulement : l'onglet ⚡ est un CATALOGUE, il annonce la forme d'une zone
    d'effet sans rien dessiner (il n'y a pas de grille hors combat). #}
 <script src="{{ url_for('scripts', path='zones_effet.js') }}"></script>
@@ -3236,12 +3316,16 @@
 		sub_locations.innerHTML = LINKS.map(link => {
 			return link.nodes
 				.filter(l => {
-					// Condition 1 : Ne pas correspondre au lieu actuel
-					const isNotCurrentLieu = l.lieu !== "{{lieu}}";
-					
+					// Condition 1 : le nœud où mène le lien — celui d'un AUTRE lieu, ou, pour une
+					// connexion INTERNE à la carte (escalier, trappe), l'extrémité qui n'est pas la
+					// case où l'on se tient (miroir de `lieux.noeud_destination`). Son label est
+					// alors requis par l'éditeur : celui du lieu serait le même des deux côtés.
+					const isNotCurrentLieu = l.lieu !== "{{lieu}}"
+						|| (Array.isArray(l.pos) && (l.pos[0] !== POSITIONS.x || l.pos[1] !== POSITIONS.y));
+
 					// Condition 2 : Le label n'a pas encore été vu
 					const isNewLabel = !seenLabels.has(l.details.label);
-					
+
 					if (isNotCurrentLieu && isNewLabel) {
 						seenLabels.add(l.details.label);
 						return true;
@@ -3252,7 +3336,8 @@
 				// dédoublonne par `l.details.label`, donc deux portes vers le même lieu ne
 				// produisent qu'un bouton et le premier `link._id` gagne — une marque indexée
 				// par lien se rattacherait au mauvais bouton.
-				.map(l => `<li><button class="sub-loc-btn${_guidage && link._id === _guidage.link_id ? ' btn-highlight' : ''}" onclick="moveTo('${link._id}')">${_marquePastille(_lieuxMarques[l.lieu])}➔ ${l.details.label}</button></li>`)
+				// Pas de pastille sur une connexion interne : elle marquerait le lieu où l'on EST.
+				.map(l => `<li><button class="sub-loc-btn${_guidage && link._id === _guidage.link_id ? ' btn-highlight' : ''}" onclick="moveTo('${link._id}')">${l.lieu === "{{lieu}}" ? '' : _marquePastille(_lieuxMarques[l.lieu])}➔ ${l.details.label}</button></li>`)
 				.join('');
 		}).join('') || `<li>Aucun</li>`;
 	}
@@ -3289,6 +3374,82 @@
 		});
 	}
 	updateControls();
+
+	// ── Pavé : sur la carte ou flottant ────────────────────────────────────────
+	// UN SEUL nœud `#controls`, DÉPLACÉ entre la carte (`.viewport`, calque `controls-carte`)
+	// et le panneau `#move-flottant` — jamais cloné : deux jeux de `data-sdx` se
+	// désynchroniseraient, et `updateControls` ne connaît que l'id. Mode et position vivent
+	// dans localStorage (préférence du joueur, pas un état de partie).
+	const PAVE_MODE_CLE = 'telluris.play.pave_mode';
+	const PAVE_POS_CLE  = 'telluris.play.pave_pos';
+	function _paveLire(cle) { try { return localStorage.getItem(cle); } catch (e) { return null; } }
+	function _paveEcrire(cle, v) { try { localStorage.setItem(cle, v); } catch (e) {} }
+	function _paveModeCourant() { return _paveLire(PAVE_MODE_CLE) === 'flottant' ? 'flottant' : 'carte'; }
+	function _paveRestaurerPos(panneau) {
+		let pos = null;
+		try { pos = JSON.parse(_paveLire(PAVE_POS_CLE) || 'null'); } catch (e) { pos = null; }
+		if (pos && Number.isFinite(pos.left) && Number.isFinite(pos.top)) placerPanneau(panneau, pos.left, pos.top);
+	}
+	function appliquerModePave(mode) {
+		const controls = document.getElementById('controls');
+		const panneau = document.getElementById('move-flottant');
+		const corps = document.getElementById('move-flottant-corps');
+		const carte = document.getElementById('swipe-zone');
+		if (!controls || !panneau || !corps || !carte) return;
+		const flottant = mode === 'flottant';
+		if (flottant) {
+			corps.appendChild(controls);
+			controls.classList.remove('controls-carte');
+			panneau.hidden = false;
+			// APRÈS l'affichage : un panneau caché n'a pas de taille, le bornage serait faux.
+			_paveRestaurerPos(panneau);
+		} else {
+			carte.appendChild(controls);
+			controls.classList.add('controls-carte');
+			panneau.hidden = true;
+		}
+		document.querySelectorAll('#affichage-menu [data-pave]').forEach(b => {
+			b.setAttribute('aria-checked', b.dataset.pave === mode ? 'true' : 'false');
+		});
+	}
+	function choisirModePave(mode) {
+		_paveEcrire(PAVE_MODE_CLE, mode);
+		appliquerModePave(mode);
+		fermerMenuAffichage();
+	}
+	appliquerModePave(_paveModeCourant());
+	rendreDeplacable(document.getElementById('move-flottant'), document.getElementById('move-head'),
+		pos => _paveEcrire(PAVE_POS_CLE, JSON.stringify(pos)));
+	// Fenêtre rétrécie : le panneau placé à la main est re-borné, sa poignée reste atteignable.
+	window.addEventListener('resize', () => {
+		const p = document.getElementById('move-flottant');
+		if (p && !p.hidden && p.style.left) placerPanneau(p, parseFloat(p.style.left) || 0, parseFloat(p.style.top) || 0);
+	});
+
+	// ── Menu d'affichage ⚙️ (ligne « Actions ») ─────────────────────────────────
+	// Menu simple, pas un overlay de décision : second clic sur l'icône, clic ailleurs ou
+	// Échap le referment ; choisir une entrée aussi.
+	function basculerMenuAffichage() {
+		const menu = document.getElementById('affichage-menu');
+		if (!menu) return;
+		if (menu.hidden) {
+			menu.hidden = false;
+			document.getElementById('affichage-btn').setAttribute('aria-expanded', 'true');
+		} else fermerMenuAffichage();
+	}
+	function fermerMenuAffichage() {
+		const menu = document.getElementById('affichage-menu');
+		if (!menu || menu.hidden) return;
+		menu.hidden = true;
+		const btn = document.getElementById('affichage-btn');
+		if (btn) btn.setAttribute('aria-expanded', 'false');
+	}
+	document.addEventListener('click', e => {
+		const wrap = document.querySelector('.affichage-wrap');
+		if (wrap && !wrap.contains(e.target)) fermerMenuAffichage();
+	});
+	document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerMenuAffichage(); });
+
 	async function waitTurn(){
 		// Attendre un tour : pas de déplacement, mais on rejoue la résolution serveur
 		// (événements de zone re-testés à la position courante + régén PV hors combat).
@@ -9613,6 +9774,10 @@ async function choisirPnj(choixId) {
 	} catch(err) { console.error('Erreur choix de dialogue', err); }
 }
 </script>
+{% if a_ligne_actions %}
+{{ pleinecran.cablage('affichage-fs', 'affichage-fs-ico', 'affichage-fs-txt', libelle_quitter='Quitter le plein écran') }}
+{% else %}
 {{ pleinecran.pastille(compact=true) }}
+{% endif %}
 </body>
 </html>

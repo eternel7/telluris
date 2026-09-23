@@ -28,7 +28,7 @@ from utils.marche import (
 	prix_courant, prix_marche, stock_cible_pour, _relation_seuil_bonus, now_epoch,
 	relations_lieux_payload,
 )
-from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart, connexions_du_lieu
+from utils.lieux import get_lieu_links, get_lieu_directions, est_cite_de_depart, connexions_du_lieu, noeud_destination
 from utils import donjon
 from utils.combat import instantiate_monsters, create_combat_doc, resolve_first_turns, finalize_combat
 from utils.zones import resolve_zone_event, load_zone_defs_for_lieu, resolve_recolte
@@ -590,20 +590,26 @@ async def move_character(
 			# 1. Trouver le bon lien par son _id
 			link = next((l for l in links if l["_id"] == target_id), None)
 
-			# 2. Trouver le nœud qui n'a PAS le lieu_id
+			# 2. Le nœud où mène le lien : celui d'un autre lieu, ou — connexion INTERNE à la
+			#    carte (escalier, trappe) — l'autre extrémité sur ce même lieu.
 			if link:
-				node = next((n for n in link["nodes"] if n["lieu"] != lieu_courant), None)
+				node, interne = noeud_destination(link, lieu_courant, position)
 				if node:
 					destination = node["lieu"]
 					lieu_doc = get_doc(destination)
 					if lieu_doc:
-						ok, raison = acces.acces_autorise(character_to_update, lieu_doc, get_doc)
-						if not ok:
-							raise HTTPException(status_code=403, detail=raison)
+						# ⚠️ Interne : on ne franchit aucune barrière (on est déjà dans ce lieu — même
+						# règle que get_lieu_links, qui ne filtre jamais le lieu courant) et on
+						# n'ouvre aucune descente de donjon. Tout le reste est un déplacement RÉEL :
+						# sol vidé, événement de zone, escortes, tour de monde.
+						if not interne:
+							ok, raison = acces.acces_autorise(character_to_update, lieu_doc, get_doc)
+							if not ok:
+								raise HTTPException(status_code=403, detail=raison)
 						# Donjon à étages : la connexion ne DÉPLACE pas le personnage, elle ouvre
 						# la descente — un combat dont il ne sort que par un passage vers la
 						# surface. Son `lieu` reste celui d'où il est descendu.
-						donjon_etages = donjon.donjon_a_etages_de(lieu_doc, find_docs)
+						donjon_etages = None if interne else donjon.donjon_a_etages_de(lieu_doc, find_docs)
 						if donjon_etages:
 							combat_id = _ouvrir_donjon_a_etages(
 								character_to_update, donjon_etages, lieu_doc,

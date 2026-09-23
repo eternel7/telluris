@@ -57,7 +57,7 @@ vm.runInThisContext(extraireDeclaration(/const PORTE_CATEGORIE = [^;]+;/, 'PORTE
 vm.runInThisContext(extraireDeclaration(/const GUILDE_EXTERIEUR_CATEGORIE = [^;]+;/, 'GUILDE_EXTERIEUR_CATEGORIE'));
 vm.runInThisContext(extraireDeclaration(/const COLS_LIEN = [^;]+;/, 'COLS_LIEN'));
 vm.runInThisContext(extraireDeclaration(/const LIEUX_HOTE_REQUIS = \[[\s\S]*?\];/, 'LIEUX_HOTE_REQUIS'));
-for (const f of ['_escHtml', '_connDest', 'etatPnjDeLieu', 'lieuxLigneHtml', '_ljConnexion',
+for (const f of ['_escHtml', '_connDest', '_connInterne', 'etatPnjDeLieu', 'lieuxLigneHtml', '_ljConnexion',
 				 'valeurLigne', 'colonnesDe', 'lieuxMarchandsVisibles', 'portesDeVille',
 				 '_posValide', '_proposerCases']) {
 	vm.runInThisContext(extraire(f));

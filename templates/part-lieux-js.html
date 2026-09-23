@@ -10,7 +10,7 @@
   Rien ici ne lit une globale propre à une page — carte, grille éditée, case sélectionnée,
   redimensionnement : tout passe par ces crochets. Détail : compétence telluris-editeur-carte.
 
-  Harnais : dev/test_{lieu_form,connexions,portes,guilde,lot_lieux}_client.js extraient ces fonctions
+  Harnais : dev/test_{lieu_form,donjon_form,connexions,portes,guilde,lot_lieux}_client.js extraient ces fonctions
   PAR NOM depuis admin_map_editor.html, includes développés par dev/_template_js.js.
 #}
 <script>
@@ -62,6 +62,23 @@ function _connDest(conn, ici) {
 	return nodes.find(n => n.lieu !== id) || nodes[0];
 }
 
+// Connexion INTERNE : ses deux nœuds sur le MÊME lieu — un escalier, une trappe, un passage
+// entre deux cases d'une même carte. PURE.
+function _connInterne(conn) {
+	const n = (conn && conn.nodes) || [];
+	return n.length === 2 && !!n[0] && !!n[1] && !!n[0].lieu && n[0].lieu === n[1].lieu;
+}
+
+// Le nœud où mène `conn` pour qui se tient en `pos` ([x, y]) dans `ici` — miroir de
+// `lieux.noeud_destination` (branche « lien » de move_character) : le nœud d'un AUTRE lieu,
+// sinon (connexion interne) l'extrémité qui n'est pas cette case. PURE.
+function _connAutreBout(conn, ici, pos) {
+	const nodes = ((conn && conn.nodes) || []).filter(n => n && typeof n === 'object');
+	const autre = nodes.find(n => n.lieu !== ici);
+	if (autre) return autre;
+	return nodes.find(n => !Array.isArray(n.pos) || !pos || n.pos[0] !== pos[0] || n.pos[1] !== pos[1]) || null;
+}
+
 // Une ligne de la liste des connexions d'un lieu — SOURCE UNIQUE du panneau Lieux de l'éditeur
 // et de la première colonne de /admin/lieux. PURE (test_gestion_lieux_client.js).
 // `opts.link` : ligne « 🔗 link:… » · `opts.porte` : bouton 🏰 (seul l'éditeur rouvre une paire)
@@ -71,6 +88,22 @@ function _connDest(conn, ici) {
 // `link:…`), jamais une saisie libre. Le label, lui, passe par `_escHtml`.
 function lieuxLigneHtml(conn, ici, opts) {
 	const o = opts || {};
+	// Connexion INTERNE : ni fiche ni lieu à éditer (c'est la carte courante) — chaque sens lu
+	// avec le label de l'extrémité où il mène, comme le bouton qu'affiche play_town.
+	if (_connInterne(conn)) {
+		const [a, b] = conn.nodes;
+		const p = n => Array.isArray(n.pos) ? `[${n.pos[0]},${n.pos[1]}]` : '—';
+		const sens = (de, vers) => `${p(de)} ➔ « ${_escHtml(vers.label || 'sans label')} » ${p(vers)}`;
+		return `<div class="lieux-ligne" style="border:1px solid var(--border);border-radius:4px;padding:6px;margin-bottom:6px;">
+		<div><b>🔀 Connexion interne</b></div>
+		${o.link ? `<div style="color:#888;">🔗 ${_escHtml(conn._id)}</div>` : ''}
+		<div style="color:#888;">${sens(a, b)}<br>${sens(b, a)}</div>
+		<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+			<button class="btn btn-inline" style="font-size:.62rem;" onclick="openConnForm('edition','${conn._id}')">🔗 Connexion</button>
+			<button class="btn btn-inline" style="font-size:.62rem;" onclick="toggleSousLieuJson('${conn._id}','${a.lieu}')">${o.ouvert ? '✕ Fermer' : '🧾 JSON'}</button>
+		</div>
+	</div>`;
+	}
 	const dest = _connDest(conn, ici);
 	const label = (dest && dest.details && dest.details.label) || (dest && dest.lieu) || '?';
 	const type = (conn.metadata && conn.metadata.type) || '';
@@ -134,21 +167,30 @@ function _sousLieuJsonHtml(conn, destId) {
 	const doc = lieuxDocCache[destId];
 	const docTxt = doc ? JSON.stringify(doc, null, 2) : 'Document introuvable.';
 	const connTxt = JSON.stringify(_connNu(conn), null, 2);
+	// ⚠️ Connexion INTERNE : son « lieu de destination » est la carte COURANTE. Offrir son JSON
+	// ici, c'est offrir un PUT complet de la carte, grille comprise, par-dessus l'édition en
+	// cours — on ne le propose pas. Pas de 🎯 non plus : deux nœuds sont sur cette carte, le
+	// formulaire 🔗 (deux visées) dit lequel on déplace.
+	const interne = _connInterne(conn);
 	// L'état armé est porté par le BOUTON lui-même : le corps de l'overlay étant réécrit à
 	// chaque rendu, il n'y a rien à basculer, seulement à composer depuis l'état de l'hôte.
 	// Sans carte (`repositionnement` null), l'outil n'est pas proposé du tout.
 	// 🎯 déplace le nœud posé sur la carte courante : une connexion qui n'en a pas (maillon d'une
 	// maison de guilde) n'a rien à repositionner.
 	const surCarte = (conn.nodes || []).some(n => n.lieu === LIEUX_HOTE.lieuCourant());
-	const repo = surCarte ? LIEUX_HOTE.repositionnement : null;
+	const repo = (surCarte && !interne) ? LIEUX_HOTE.repositionnement : null;
 	const repos = !!(repo && repo.actif(conn._id));
-	return `<div class="lj-head">
+	const lieuHtml = interne
+		? `<div class="lj-desc">🔀 Connexion interne à cette carte : pas de lieu à éditer ici.
+			Ses deux cases se déplacent par le formulaire 🔗 Connexion.</div>`
+		: `<div class="lj-head">
 			<span>📄 ${_escHtml(destId)}</span>
 			<button class="btn btn-inline" style="font-size:.6rem;" onclick="sauverDocJson('lieu','${destId}')" ${doc ? '' : 'disabled'}>💾</button>
 			<button class="btn btn-inline danger" style="font-size:.6rem;" onclick="supprimerDocJson('lieu','${destId}')" ${doc ? '' : 'disabled'}>🗑</button>
 		</div>
 		<textarea class="lj-area" id="lj-area-lieu" ${doc ? '' : 'disabled'}>${_escHtml(docTxt)}</textarea>
-		<div class="lj-msg" id="lj-msg-lieu"></div>
+		<div class="lj-msg" id="lj-msg-lieu"></div>`;
+	return `${lieuHtml}
 		<div class="lj-head">
 			<span>🔗 ${_escHtml(conn._id)}</span>
 			${!repo ? '' : repos
@@ -167,9 +209,13 @@ function _sousLieuJsonHtml(conn, destId) {
 // n'est ouvert. ⚠️ La connexion est RE-RÉSOLUE par son `_id` à chaque passe : `fetchLieuxConnections`
 // remplace le tableau après chaque enregistrement, et garder l'objet d'ouverture rendrait un
 // `_rev` périmé — donc un 409 au prochain 💾.
+// Panneau DÉPLAÇABLE par sa barre de titre (scripts/deplacable.js, chargé par les deux pages
+// hôtes), câblé à la première passe : le markup vit après la balise script.
+let _ljCable = false;
 function renderLieuJsonOverlay() {
 	const ov = document.getElementById('lj-overlay');
 	if (!ov) return;
+	if (!_ljCable) { _ljCable = true; rendreDeplacable(ov, document.getElementById('lj-poignee')); }
 	const conn = _ljConnexion(lieuxJsonOuvert, lieuxJsonHorsListe, LIEUX_HOTE.connexions(), cxDocsConnus);
 	if (!conn) { ov.classList.add('lj-hidden'); return; }
 	document.getElementById('lj-dest').textContent = lieuxJsonDest || '';
@@ -231,6 +277,8 @@ let cxMode = 'creation';   // 'creation' | 'edition'
 let cxDoc = null;          // doc de la connexion éditée, NU (sans les `details` injectés)
 let cxIciIdx = 0;          // index, DANS `nodes`, du nœud qui porte le lieu courant
 let cxVisee = false;       // la visée sur la carte est-elle armée ?
+let cxViseeCote = 'ici';   // … et pour quelle case : 'ici', ou 'la' (connexion interne seulement)
+let cxInterne = false;     // connexion INTERNE : ses deux nœuds sur la carte courante
 let cxIdsConnus = [];      // tous les `_id` de connexions en base (anti-écrasement)
 let cxIdsCharges = false;  // ces `_id` ont-ils pu être lus ? (sinon le garde-fou ne joue pas)
 // Les docs COMPLETS de ces mêmes connexions. ⚠️ Indispensable aux portes : leur connexion
@@ -264,6 +312,16 @@ function _cxIdPropose(destId, iciId, dejaPris) {
 		if (!pris.has(id)) return id;
 	}
 	return base;
+}
+
+// `_id` proposé pour une connexion INTERNE : même convention `link:<là-bas>_to_<ici>`, chaque
+// côté suffixé de sa case (le lieu seul ne dit rien, il est des deux côtés). Même garde-fou
+// `dejaPris` que `_cxIdPropose` — un escalier en écraserait un autre en silence.
+function _cxIdInterne(lieuId, posIci, posLa, dejaPris) {
+	const s = _cxSlug(lieuId);
+	const ok = p => Array.isArray(p) && Number.isInteger(p[0]) && Number.isInteger(p[1]) && p[0] >= 0 && p[1] >= 0;
+	if (!s || !ok(posIci) || !ok(posLa)) return '';
+	return _cxIdPropose(`${s}_${posLa[0]}_${posLa[1]}`, `${s}_${posIci[0]}_${posIci[1]}`, dejaPris);
 }
 
 // Une position est-elle posable sur CETTE grille ? Rend '' (bonne), 'invalide' (pas un
@@ -315,7 +373,16 @@ function _cxValider(doc, iciId, idsConnus, creation) {
 	const noeuds = (doc && doc.nodes) || [];
 	if (noeuds.length !== 2) return 'Une connexion relie exactement deux lieux.';
 	if (!noeuds[0].lieu || !noeuds[1].lieu) return 'Les deux lieux sont requis.';
-	if (noeuds[0].lieu === noeuds[1].lieu) return 'Un lieu ne se relie pas à lui-même.';
+	// Connexion INTERNE (deux cases de la même carte) : permise, mais ses deux extrémités
+	// diffèrent, et chacune porte son label — celui du lieu serait le même des deux côtés,
+	// le joueur lirait deux boutons identiques.
+	if (noeuds[0].lieu === noeuds[1].lieu) {
+		const a = noeuds[0].pos || [], b = noeuds[1].pos || [];
+		if (a[0] === b[0] && a[1] === b[1]) return 'Connexion interne : les deux extrémités sont sur la même case.';
+		if (!noeuds[0].label || !noeuds[1].label) {
+			return 'Connexion interne : chaque extrémité porte son label (le texte du bouton qui y mène).';
+		}
+	}
 	if (!noeuds.some(n => n.lieu === iciId)) return 'Un des deux nœuds doit être le lieu courant.';
 	for (const n of noeuds) {
 		if (_cxPosPosable(null, n.pos) === 'invalide') return `Position invalide pour ${n.lieu}.`;
@@ -366,7 +433,10 @@ async function _cxChargerIds() {
 	}
 }
 
-async function openConnForm(mode, connId) {
+// `opts` (création seulement) : `{dest, type}` — destination présélectionnée et type proposé,
+// comme si l'admin les avait choisis au sélecteur (l'`_id` s'en dérive, rien n'est « touché »).
+// Sert au « ➕ Passage » d'un étage de donjon (section 🏰 du formulaire de lieu).
+async function openConnForm(mode, connId, opts) {
 	const ici = LIEUX_HOTE.lieuCourant();
 	if (!ici) return;
 	// ⚠️ Ce formulaire écrit une porte EN BASE : l'hôte peut l'interdire (dans l'éditeur, un
@@ -382,11 +452,13 @@ async function openConnForm(mode, connId) {
 	cxIdTouche = false;
 	cxTypeTouche = false;
 	cxVisee = false;
+	cxViseeCote = 'ici';
+	// Connexion INTERNE (deux cases de cette carte) : demandée à la création, lue sur le doc en
+	// édition (juste après). Posé AVANT `_cxMajChrome`, qui en tire le titre.
+	cxInterne = cxMode !== 'edition' && !!(opts && opts.interne);
 	closeLieuJson();   // les panneaux de droite occupent la même place
 	LIEUX_HOTE.fermerAutres();
 	_cxCabler();
-	// Sans carte sous le panneau, la visée n'a rien à viser : la case se saisit à la main.
-	_cxEl('cx-visee-btn').hidden = !LIEUX_HOTE.visee;
 	_cxEl('conn-overlay').classList.remove('cx-hidden');
 	_cxMajChrome();   // ⚠️ AVANT le premier retour possible : un panneau titré « Créer »
 	_cxMsg('Chargement…', false);   //   sur un échec d'édition mentirait sur ce qu'il ferait.
@@ -405,6 +477,8 @@ async function openConnForm(mode, connId) {
 		cxIciIdx = idx >= 0 ? idx : 0;
 		cxIdTouche = true;
 		cxTypeTouche = true;
+		cxInterne = _connInterne(cxDoc);
+		_cxMajChrome();
 	}
 
 	// Le sélecteur de lieux est reconstruit à chaque ouverture : la base a pu bouger (un lot
@@ -416,11 +490,14 @@ async function openConnForm(mode, connId) {
 	await _cxChargerIds();
 
 	const noeuds = (cxDoc && cxDoc.nodes) || [];
-	const destId = (noeuds[1 - cxIciIdx] || {}).lieu || '';
+	const prerempli = (cxMode !== 'edition' && opts) ? opts : {};
+	const destId = cxInterne ? ici : ((noeuds[1 - cxIciIdx] || {}).lieu || prerempli.dest || '');
 	const caseIci = LIEUX_HOTE.caseCourante();
 	const posIci = (noeuds[cxIciIdx] || {}).pos
 		|| (caseIci ? [caseIci.cx, caseIci.cy] : [0, 0]);
-	const posLa = (noeuds[1 - cxIciIdx] || {}).pos || [0, 0];
+	// Interne, à la création : l'autre case reste à VISER (vide ⇒ « position invalide »), plutôt
+	// qu'un [0, 0] qu'on enregistrerait par mégarde.
+	const posLa = (noeuds[1 - cxIciIdx] || {}).pos || (cxInterne ? ['', ''] : [0, 0]);
 
 	_cxEl('cx-ici-lieu').textContent = ici;
 	_cxEl('cx-ici-x').value = posIci[0];
@@ -430,13 +507,15 @@ async function openConnForm(mode, connId) {
 	_cxEl('cx-la-y').value = posLa[1];
 	_cxEl('cx-la-label').value = (noeuds[1 - cxIciIdx] || {}).label || '';
 	_cxEl('cx-dest-filtre').value = '';
-	_cxEl('cx-type').value = (cxDoc && cxDoc.metadata && cxDoc.metadata.type) || '';
+	_cxEl('cx-type').value = (cxDoc && cxDoc.metadata && cxDoc.metadata.type) || prerempli.type
+		|| (cxInterne ? 'passage' : '');
 	_cxEl('cx-status').value = (cxDoc && cxDoc.metadata && cxDoc.metadata.status) || 'ouvert';
-	_cxEl('cx-id').value = cxDoc ? (cxDoc._id || '') : '';
+	_cxEl('cx-id').value = cxDoc ? (cxDoc._id || '')
+		: (prerempli.dest ? _cxIdPropose(prerempli.dest, ici, cxIdsConnus) : '');
 
 	_cxRepeuplerListes();
 	_cxRepeuplerLieux(destId);
-	if (destId) await _cxChargerDest(destId);
+	if (destId && !cxInterne) await _cxChargerDest(destId);
 	_cxMajHints();
 	_cxMsg(cxIdsCharges ? '' : "⚠ Liste des connexions indisponible : le contrôle d'écrasement d'identifiant ne joue pas.", !cxIdsCharges);
 }
@@ -446,13 +525,23 @@ async function openConnForm(mode, connId) {
 // document, et le renommer à la main créerait un doublon en laissant l'ancien en place.
 function _cxMajChrome() {
 	const edition = cxMode === 'edition';
-	_cxEl('cx-titre').textContent = edition ? 'Éditer la connexion' : 'Nouvelle connexion';
+	_cxEl('cx-titre').textContent = cxInterne
+		? (edition ? 'Éditer la connexion interne' : 'Relier deux cases de cette carte')
+		: (edition ? 'Éditer la connexion' : 'Nouvelle connexion');
 	_cxEl('cx-submit-btn').textContent = edition ? '💾 Enregistrer' : '➕ Créer';
 	_cxEl('cx-submit-btn').disabled = false;
 	_cxEl('cx-id').readOnly = edition;
 	_cxEl('cx-id-hint').textContent = edition
 		? "L'identifiant ne change jamais : CouchDB ne renomme pas un document."
-		: 'Proposé depuis la destination — modifiable.';
+		: cxInterne ? 'Proposé depuis les deux cases — modifiable.' : 'Proposé depuis la destination — modifiable.';
+	// Interne : pas de destination à choisir (c'est cette carte), mais une SECONDE case à viser ;
+	// et les deux labels sont requis (`_cxValider`).
+	_cxEl('cx-dest-bloc').hidden = cxInterne;
+	_cxEl('cx-la-titre').textContent = cxInterne ? 'Autre case — même carte' : 'Là-bas';
+	_cxEl('cx-interne-note').hidden = !cxInterne;
+	// Sans carte sous le panneau, la visée n'a rien à viser : la case se saisit à la main.
+	_cxEl('cx-visee-btn').hidden = !LIEUX_HOTE.visee;
+	_cxEl('cx-visee-la-btn').hidden = !LIEUX_HOTE.visee || !cxInterne;
 }
 
 function closeConnForm() {
@@ -524,6 +613,19 @@ function _cxPos(cote) {
 // éprouvée sur la grille de l'hôte (`LIEUX_HOTE.grille()` — dans l'éditeur, celle EN COURS
 // D'ÉDITION, que l'admin a sous les yeux) ; celle de là-bas sur les `cells` du doc de destination.
 function _cxMajHints() {
+	const g = LIEUX_HOTE.grille() || {};
+	const cellsIci = Array.isArray(g.cells) ? g.cells : [];
+	const tailleIci = cellsIci.length ? `${g.cols}×${g.rows}` : '';
+	_cxHint('cx-ici-hint', _cxPosPosable(cellsIci, _cxPos('ici')), _cxPos('ici'), tailleIci);
+	// Interne : l'autre case est sur CETTE grille — celle en cours d'édition, comme la case d'ici.
+	if (cxInterne) {
+		_cxHint('cx-la-hint', _cxPosPosable(cellsIci, _cxPos('la')), _cxPos('la'), tailleIci);
+		if (cxMode !== 'edition' && !cxIdTouche) {
+			_cxEl('cx-id').value = _cxIdInterne(LIEUX_HOTE.lieuCourant(), _cxPos('ici'), _cxPos('la'), cxIdsConnus);
+		}
+		_cxMajApercu();
+		return;
+	}
 	const destId = _cxEl('cx-dest').value || '';
 	const dest = destId ? lieuxDocCache[destId] : undefined;
 	// ⚠️ « pas de carte » et « doc non relu » ne sont PAS la même chose : le second ne dit
@@ -536,9 +638,6 @@ function _cxMajHints() {
 	else if (!relu) info.textContent = `${destId} — document introuvable ou non relu.`;
 	else info.textContent = `${destId}${cells ? ` — carte ${_cxTaille(cells)}` : ' — sans carte'}`;
 
-	const g = LIEUX_HOTE.grille() || {};
-	const cellsIci = Array.isArray(g.cells) ? g.cells : [];
-	_cxHint('cx-ici-hint', _cxPosPosable(cellsIci, _cxPos('ici')), _cxPos('ici'), cellsIci.length ? `${g.cols}×${g.rows}` : '');
 	if (destId && !relu) {
 		const el = _cxEl('cx-la-hint');
 		el.className = 'cx-hint';
@@ -569,7 +668,8 @@ function _cxHint(elId, motif, pos, taille) {
 
 function _cxChamps() {
 	const iciCote = { lieu: LIEUX_HOTE.lieuCourant(), pos: _cxPos('ici'), label: (_cxEl('cx-ici-label').value || '').trim() };
-	const laCote = { lieu: _cxEl('cx-dest').value || '', pos: _cxPos('la'), label: (_cxEl('cx-la-label').value || '').trim() };
+	const laCote = { lieu: cxInterne ? LIEUX_HOTE.lieuCourant() : (_cxEl('cx-dest').value || ''),
+		pos: _cxPos('la'), label: (_cxEl('cx-la-label').value || '').trim() };
 	return {
 		noeuds: cxIciIdx === 1 ? [laCote, iciCote] : [iciCote, laCote],
 		type: (_cxEl('cx-type').value || '').trim(),
@@ -593,11 +693,15 @@ function _cxMajApercu() {
 // aussitôt. Ici l'écriture attend le bouton, comme tout le reste du formulaire.
 // La carte appartient à l'HÔTE (`LIEUX_HOTE.visee`) : lui seul sait si un clic est possible,
 // et le clic retenu revient ici par `_cxPoserVisee`.
-function basculerViseeConn() {
-	if (cxVisee) { desarmerViseeConn(); return; }
+// `cote` : 'ici' (défaut) ou 'la' — la SECONDE case d'une connexion interne, sur la même carte.
+// Rappuyer sur le bouton de la visée armée l'annule ; sur l'autre, la re-vise pour ce côté-là.
+function basculerViseeConn(cote) {
+	const c = cote === 'la' ? 'la' : 'ici';
+	if (cxVisee && cxViseeCote === c) { desarmerViseeConn(); return; }
 	const visee = LIEUX_HOTE.visee;
 	const refus = visee ? visee.refus() : 'Aucune carte sur cette page : saisissez la case à la main.';
 	if (refus) { _cxMsg(`✗ ${refus}`, true); return; }
+	cxViseeCote = c;
 	cxVisee = true;
 	_cxMajVisee();
 	visee.armer();   // APRÈS `cxVisee = true` : le rendu de la carte en lit l'état
@@ -613,8 +717,12 @@ function desarmerViseeConn() {
 function _cxMajVisee() {
 	const btn = _cxEl('cx-visee-btn');
 	if (!btn) return;
-	btn.classList.toggle('cx-visee', cxVisee);
-	btn.textContent = cxVisee ? '✕ Annuler la visée' : '🎯 Viser sur la carte';
+	[['ici', btn], ['la', _cxEl('cx-visee-la-btn')]].forEach(([cote, b]) => {
+		if (!b) return;
+		const arme = cxVisee && cxViseeCote === cote;
+		b.classList.toggle('cx-visee', arme);
+		b.textContent = arme ? '✕ Annuler la visée' : '🎯 Viser sur la carte';
+	});
 	// Le panneau s'efface et laisse passer les clics le temps du geste : sans quoi la moitié
 	// droite de la carte — celle qu'il recouvre — serait invisée.
 	const ov = _cxEl('conn-overlay');
@@ -622,8 +730,9 @@ function _cxMajVisee() {
 }
 
 function _cxPoserVisee(cx, cy) {
-	_cxEl('cx-ici-x').value = cx;
-	_cxEl('cx-ici-y').value = cy;
+	const cote = cxViseeCote === 'la' ? 'la' : 'ici';
+	_cxEl(`cx-${cote}-x`).value = cx;
+	_cxEl(`cx-${cote}-y`).value = cy;
 	desarmerViseeConn();
 	_cxMajHints();
 	_cxMsg(`Case [${cx}, ${cy}] retenue — reste à enregistrer.`, false);
@@ -643,7 +752,12 @@ async function submitConnForm() {
 		_cxMsg(`✗ [${ici.pos[0]}, ${ici.pos[1]}] n'est pas une case praticable de ce lieu.`, true);
 		return;
 	}
-	const destDoc = lieuxDocCache[la.lieu] || null;
+	// Interne : l'autre case est éprouvée sur la MÊME grille que celle d'ici.
+	if (cxInterne && _cxPosPosable((LIEUX_HOTE.grille() || {}).cells, la.pos)) {
+		_cxMsg(`✗ [${la.pos[0]}, ${la.pos[1]}] n'est pas une case praticable de ce lieu.`, true);
+		return;
+	}
+	const destDoc = cxInterne ? null : (lieuxDocCache[la.lieu] || null);
 	if (destDoc && destDoc.cells && destDoc.cells.length && _cxPosPosable(destDoc.cells, la.pos)) {
 		_cxMsg(`✗ [${la.pos[0]}, ${la.pos[1]}] n'est pas une case praticable sur la carte de destination.`, true);
 		return;
@@ -672,6 +786,9 @@ let _cxCable = false;
 function _cxCabler() {
 	if (_cxCable) return;
 	_cxCable = true;
+	// Panneau DÉPLAÇABLE par sa barre de titre (scripts/deplacable.js, chargé par les deux
+	// pages hôtes). La position reste d'une ouverture à l'autre, le temps de la page.
+	rendreDeplacable(_cxEl('conn-overlay'), _cxEl('cx-poignee'));
 	_cxEl('cx-dest-filtre').addEventListener('input', () => _cxRepeuplerLieux());
 	_cxEl('cx-dest').addEventListener('change', async () => {
 		const destId = _cxEl('cx-dest').value;
@@ -817,8 +934,10 @@ function _nlJetons(s) {
 // cabinet_alchimie_europe01.png, fletcher → archerie_europe01.png) : on retient
 // les fichiers partageant au moins un jeton avec la catégorie, et on retombe sur
 // la liste complète quand le filtre ne rend rien — jamais de liste vide.
-function _imagesPourCategorie(cat) {
-	const toutes = (creationOptions && creationOptions.images) || [];
+// `source` : la liste à filtrer — par défaut les façades (`images`, le lot) ; le formulaire
+// de lieu passe `_nlImagesLieu()`, toutes origines confondues.
+function _imagesPourCategorie(cat, source) {
+	const toutes = source || (creationOptions && creationOptions.images) || [];
 	const jetons = _nlJetons(cat);
 	if (!jetons.length) return toutes;
 	const filtrees = toutes.filter(f => _nlJetons(f).some(t => jetons.includes(t)));
@@ -983,6 +1102,206 @@ function _fusionLieu(existant, champs, catalogue) {
 		delete doc.nuit_messages;
 	}
 	return doc;
+}
+
+// ══ DONJON — fonctions pures ═══════════════════════════════════════════════
+// Une salle de donjon est un lieu `battle_map` à grille ; ce qui en fait une salle vit
+// AILLEURS, dans le doc `donjon:*` qui la revendique (`battle_maps[].lieu`, utils/donjon.py) —
+// le lieu ne sait pas à quel donjon il appartient. Le formulaire écrit donc le lieu (tag
+// `donjon`, bloc `acces`) ET un ou deux docs donjon, tous par PUT COMPLET : même parti pris
+// que `_fusionLieu` — on part du doc relu, on n'écrit que ce qu'on possède, une valeur vide
+// RETIRE sa clé (le moteur lit « absent » comme « hérité »).
+// Déclarées en `function`, sans globale : dev/test_donjon_form_client.js les extrait par nom.
+
+// Le donjon qui revendique cette salle — miroir de `donjon.donjon_de_lieu` : le PREMIER gagne.
+function _donjonDeSalle(donjons, lieuId) {
+	if (!lieuId) return null;
+	return (donjons || []).find(d => d && Array.isArray(d.battle_maps)
+		&& d.battle_maps.some(e => e && typeof e === 'object' && e.lieu === lieuId)) || null;
+}
+
+// `donjon:<slug du nom>` — même slug que les lieux.
+function _idDonjon(nom) {
+	const s = _slugLieu(nom);
+	return s ? `donjon:${s}` : '';
+}
+
+// Bornes de grade et effectif (`niveau_min`, `niveau_max`, `nb_monstres`) : `null` retire la
+// clé (héritée de la cascade salle → donjon → aucune). ⚠️ Une valeur ÉGALE à celle du doc
+// n'est pas réécrite : « ouvrir puis enregistrer » ne doit rien changer, pas même un type.
+function _djPoserBornes(cible, bornes) {
+	['niveau_min', 'niveau_max', 'nb_monstres'].forEach(k => {
+		const v = bornes ? bornes[k] : null;
+		if (v === null || v === undefined) { delete cible[k]; return; }
+		if (k in cible && Number(cible[k]) === v) return;
+		cible[k] = v;
+	});
+}
+
+// Le doc donjon : `champs` = {nom, description, portail, etages, niveau_min, niveau_max,
+// nb_monstres}. `battle_maps` et toute clé inconnue traversent intacts.
+function _fusionDonjon(existant, champs) {
+	const doc = JSON.parse(JSON.stringify(existant || {}));
+	doc.type = 'donjon';
+	doc.nom = champs.nom;
+	if (champs.description) doc.description = champs.description; else delete doc.description;
+	// `portail` est informatif (lore) : aucun code ne le suit, vide ⇒ absent.
+	if (champs.portail) doc.portail = champs.portail; else delete doc.portail;
+	if (champs.etages) doc.mode = 'etages'; else delete doc.mode;
+	_djPoserBornes(doc, champs);
+	if (!Array.isArray(doc.battle_maps)) doc.battle_maps = [];
+	return doc;
+}
+
+// L'entrée de CETTE salle dans le doc donjon : fusionnée si elle existe (ses clés inconnues
+// restent), ajoutée EN FIN sinon. L'ordre de `battle_maps` n'a aucun sens pour le moteur.
+// `salle` = {especes, niveau_min, niveau_max, nb_monstres}.
+function _fusionSalle(donjonDoc, lieuId, salle) {
+	const doc = JSON.parse(JSON.stringify(donjonDoc || {}));
+	const liste = Array.isArray(doc.battle_maps) ? doc.battle_maps : [];
+	let i = liste.findIndex(e => e && typeof e === 'object' && e.lieu === lieuId);
+	if (i === -1) { liste.push({ lieu: lieuId }); i = liste.length - 1; }
+	const e = liste[i];
+	e.especes = (salle.especes || []).slice();
+	_djPoserBornes(e, salle);
+	doc.battle_maps = liste;
+	return doc;
+}
+
+function _retirerSalle(donjonDoc, lieuId) {
+	const doc = JSON.parse(JSON.stringify(donjonDoc || {}));
+	doc.battle_maps = (Array.isArray(doc.battle_maps) ? doc.battle_maps : [])
+		.filter(e => !(e && typeof e === 'object' && e.lieu === lieuId));
+	return doc;
+}
+
+// La clause de la porte gardée SIMPLE — celle de la mine de Saint-Austrelin : une commission
+// de chasse sur CETTE salle, donnée par un bureau de maître de guilde, pas encore accomplie
+// (`objectif_atteint:false` ferme la boucle avant le rapport, cf. acces.py).
+function _accesClauseDonjon(lieuId) {
+	return { quete_active: { lieu: lieuId, types: ['chasse'],
+		giver_categorie: 'bureau_maitre_guilde', objectif_atteint: false } };
+}
+
+// JSON à clés triées : deux clauses égales s'écrivent pareil quel que soit l'ordre des clés.
+function _djCanon(v) {
+	if (Array.isArray(v)) return '[' + v.map(_djCanon).join(',') + ']';
+	if (v && typeof v === 'object') {
+		return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + _djCanon(v[k])).join(',') + '}';
+	}
+	return JSON.stringify(v);
+}
+
+// Le formulaire sait-il écrire ce bloc ? Vrai s'il est absent, ou s'il n'a pour condition que
+// la clause simple de CETTE salle. Faux ⇒ bloc PERSONNALISÉ (`ou`, `rang_min`, autre lieu…) :
+// montré en lecture seule, jamais réécrit.
+function _accesEstSimple(acces, lieuId) {
+	if (acces === undefined || acces === null) return true;
+	if (typeof acces !== 'object' || Array.isArray(acces)) return false;
+	const c = acces.conditions;
+	return Array.isArray(c) && c.length === 1 && _djCanon(c[0]) === _djCanon(_accesClauseDonjon(lieuId));
+}
+
+// Le bloc `acces` simple, fusionné sur l'existant : `cycle` (1 par défaut) et toute clé
+// inconnue survivent. Refus vide ⇒ absent (le jeu a son texte par défaut).
+function _accesSimple(existant, lieuId, gardien, refus) {
+	const a = (existant && typeof existant === 'object') ? JSON.parse(JSON.stringify(existant)) : {};
+	a.gardien = gardien;
+	if (refus) a.refus = refus; else delete a.refus;
+	if (!('cycle' in a)) a.cycle = 1;
+	a.conditions = [_accesClauseDonjon(lieuId)];
+	return a;
+}
+
+// Le tag `donjon` : il EXCLUT la salle des combats aléatoires (combat.TAG_BATTLE_MAP_EXCLU) et
+// il est EXIGÉ d'un étage (`donjon_a_etages_de`). Les autres tags ne bougent pas.
+function _djTags(tags, reservee) {
+	const t = Array.isArray(tags) ? tags.slice() : [];
+	const i = t.indexOf('donjon');
+	if (reservee && i === -1) t.push('donjon');
+	if (!reservee && i !== -1) t.splice(i, 1);
+	return t;
+}
+
+// Le doc LIEU, retouché par la section donjon après `_fusionLieu`. `dj` = {salle, reservee,
+// garde, gardien, refus} ; null ⇒ section inactive, rien ne bouge.
+// ⚠️ Salle décochée : ni tag ni `acces` ne sont touchés — la salle quitte seulement son donjon.
+// ⚠️ Un `acces` personnalisé n'est JAMAIS réécrit ni retiré ici.
+function _djAppliquerAuLieu(doc, dj) {
+	if (!dj || !dj.salle) return doc;
+	const tags = _djTags(doc.tags, dj.reservee);
+	if (tags.length) doc.tags = tags; else delete doc.tags;
+	if (!_accesEstSimple(doc.acces, doc._id)) return doc;
+	if (dj.garde) doc.acces = _accesSimple(doc.acces, doc._id, dj.gardien, dj.refus);
+	else delete doc.acces;
+	return doc;
+}
+
+// Les docs donjon à écrire — `{docs, erreur}`. `etat` = {salle, donjonId, nouveau, nouvelId,
+// donjon: champs de _fusionDonjon, piece: champs de _fusionSalle}.
+// - salle décochée : l'ancien donjon perd la salle ;
+// - changement de donjon : le nouveau la reçoit PUIS l'ancien la perd (une double revendication
+//   passagère est sans effet — le premier gagne —, une salle sans donjon perdrait sa commission) ;
+// - donjon neuf : `_id` refusé s'il est pris ;
+// - un doc identique à sa base n'est pas écrit.
+function _donjonsAEcrire(donjons, lieuId, etat) {
+	const avant = _donjonDeSalle(donjons, lieuId);
+	const inchange = (d, base) => base && JSON.stringify(d) === JSON.stringify(base);
+	if (!etat || !etat.salle) {
+		return { docs: avant ? [_retirerSalle(avant, lieuId)] : [], erreur: '' };
+	}
+	let base;
+	if (etat.nouveau) {
+		if (!etat.nouvelId) return { docs: [], erreur: 'Donjon : un nom est requis.' };
+		if ((donjons || []).some(d => d && d._id === etat.nouvelId)) {
+			return { docs: [], erreur: `${etat.nouvelId} existe déjà — changez le nom, ou choisissez ce donjon dans la liste.` };
+		}
+		base = { _id: etat.nouvelId, type: 'donjon', battle_maps: [] };
+	} else {
+		base = (donjons || []).find(d => d && d._id === etat.donjonId);
+		if (!base) return { docs: [], erreur: `Donjon ${etat.donjonId || '(aucun)'} introuvable — rechargez le formulaire.` };
+	}
+	const cible = _fusionSalle(_fusionDonjon(base, etat.donjon), lieuId, etat.piece);
+	const docs = [];
+	if (!(!etat.nouveau && inchange(cible, base))) docs.push(cible);
+	if (avant && avant._id !== cible._id) docs.push(_retirerSalle(avant, lieuId));
+	return { docs, erreur: '' };
+}
+
+// Les passages d'un étage, vus depuis `lieuId` — miroir de `donjon.passages_de_l_etage` :
+// `surface` = la destination n'est pas une salle de CE donjon.
+function _djPassages(connexions, lieuId, donjonDoc) {
+	const salles = ((donjonDoc && donjonDoc.battle_maps) || []).map(e => e && e.lieu);
+	const out = [];
+	(connexions || []).forEach(c => {
+		const nodes = (c.nodes || []).filter(n => n && typeof n === 'object');
+		const ici = nodes.find(n => n.lieu === lieuId);
+		const autre = nodes.find(n => n.lieu && n.lieu !== lieuId);
+		if (!ici || !autre || (ici.pos || []).length < 2 || (autre.pos || []).length < 2) return;
+		out.push({ id: c._id, pos: ici.pos.slice(0, 2), vers: autre.lieu, versPos: autre.pos.slice(0, 2),
+			surface: salles.indexOf(autre.lieu) === -1 });
+	});
+	return out;
+}
+
+// Le donjon a-t-il une SORTIE ? Une connexion entre l'une de ses salles et un lieu qui n'en est
+// pas une — sans elle, une descente à étages ne se quitte que par la défaite.
+function _djSortieExiste(toutesConnexions, donjonDoc) {
+	const salles = ((donjonDoc && donjonDoc.battle_maps) || []).map(e => e && e.lieu).filter(Boolean);
+	return (toutesConnexions || []).some(c => {
+		const lieux = (c.nodes || []).map(n => n && n.lieu).filter(Boolean);
+		return lieux.length === 2 && lieux.some(l => salles.indexOf(l) !== -1)
+			&& lieux.some(l => salles.indexOf(l) === -1);
+	});
+}
+
+// Destination proposée à « ➕ Passage » : le premier autre étage pas encore relié à celui-ci,
+// sinon le portail, sinon rien.
+function _djPassageSuggere(passages, lieuId, donjonDoc) {
+	const relies = (passages || []).map(p => p.vers);
+	const etage = ((donjonDoc && donjonDoc.battle_maps) || [])
+		.map(e => e && e.lieu).find(l => l && l !== lieuId && relies.indexOf(l) === -1);
+	return etage || (donjonDoc && donjonDoc.portail) || '';
 }
 
 // ══ PNJ DU LIEU — fonctions pures ══════════════════════════════════════════
@@ -1242,6 +1561,10 @@ async function openLieuForm(mode, destId) {
 			if (!r2.ok) throw new Error('lieu introuvable');
 			nlDocExistant = await r2.json();
 			if (!nlDocExistant || !nlDocExistant._id) throw new Error('lieu introuvable');
+			// Une battle map à grille peut être un ÉTAGE : ses passages se lisent dans la liste
+			// COMPLÈTE des connexions (celles de la carte courante ne suffisent pas). Échec ⇒
+			// `cxIdsCharges` faux, et la section le dit plutôt que d'annoncer « aucun passage ».
+			if ((nlDocExistant.cells || []).length) await _cxChargerIds();
 		}
 	} catch (err) {
 		_nlEl('nl-error').textContent = `✗ ${err.message}`;
@@ -1301,7 +1624,7 @@ async function openLieuForm(mode, destId) {
 		// la liste complète — sans quoi le `select` retomberait à vide et l'enregistrement
 		// refuserait « Image requise » sur un lieu qui en a une.
 		if (nlDocExistant.image
-				&& !_imagesPourCategorie(catDoc).includes(nlDocExistant.image)) {
+				&& !_imagesPourCategorie(catDoc, _nlImagesLieu()).includes(nlDocExistant.image)) {
 			_nlEl('nl-image-all').checked = true;
 		}
 		_nlEl('nl-nuit-messages').value = (nlDocExistant.nuit_messages || []).join('\n');
@@ -1323,6 +1646,7 @@ async function openLieuForm(mode, destId) {
 	_nlRemplirDatalists();
 	_nlRenderCapacites();
 	_nlRenderPnj();
+	_djOuvrir();   // AVANT l'instantané : « modifié ? » compare aussi les docs donjon
 	_nlRefreshApercu();
 	nlInstantane = _nlDocCourantJson();
 	overlay.scrollTop = 0;
@@ -1342,14 +1666,37 @@ function closeLieuAdd() {
 	_nlEl('lieu-add-overlay').classList.add('la-hidden');
 }
 
+// Images qu'un lieu peut porter : TOUTES les origines servables (`images_lieu` =
+// {fichier: route}, towns → maps → battle_maps, résolu par le serveur comme le jeu) —
+// une salle de donjon porte une battle map. Repli sur les façades si le serveur est ancien.
+function _nlImagesLieu() {
+	const parOrigine = creationOptions && creationOptions.images_lieu;
+	return parOrigine ? Object.keys(parOrigine) : ((creationOptions && creationOptions.images) || []);
+}
+function _nlOrigineImage(f) {
+	const parOrigine = (creationOptions && creationOptions.images_lieu) || {};
+	return parOrigine[f] || 'towns';
+}
+const _NL_URL_ORIGINE = {
+	towns: `{{ url_for('towns', path='') }}`,
+	maps: `{{ url_for('maps', path='') }}`,
+	battle_maps: `{{ url_for('battle_maps', path='') }}`,
+};
+
 function _nlRepeuplerImages() {
 	const sel = _nlEl('nl-image');
 	const cat = _nlCategorie();
 	const toutes = _nlEl('nl-image-all').checked;
-	const liste = toutes ? ((creationOptions && creationOptions.images) || []) : _imagesPourCategorie(cat);
+	const liste = toutes ? _nlImagesLieu() : _imagesPourCategorie(cat, _nlImagesLieu());
 	const avant = sel.value;
+	// L'origine est affichée hors façades : deux fichiers de dossiers différents se lisent
+	// sinon pareil, et le jeu servira celui du premier dossier.
+	const libelle = f => {
+		const o = _nlOrigineImage(f);
+		return o === 'towns' ? f : `${f} — ${o}`;
+	};
 	sel.innerHTML = `<option value="" disabled selected>-- Choisir une image --</option>`
-		+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(f)}</option>`).join('');
+		+ liste.map(f => `<option value="${_escHtml(f)}">${_escHtml(libelle(f))}</option>`).join('');
 	if (avant && liste.includes(avant)) sel.value = avant;
 	_nlMajVignetteImage();
 }
@@ -1358,7 +1705,7 @@ function _nlMajVignetteImage() {
 	const img = _nlEl('nl-image-thumb');
 	const f = _nlEl('nl-image').value;
 	if (!f) { img.style.display = 'none'; img.removeAttribute('src'); return; }
-	img.src = `{{ url_for('towns', path='') }}${f}`;
+	img.src = (_NL_URL_ORIGINE[_nlOrigineImage(f)] || _NL_URL_ORIGINE.towns) + f;
 	img.style.display = 'block';
 }
 
@@ -1406,7 +1753,7 @@ function _nlVocab() {
 
 // Ce que le formulaire écrirait maintenant — comparé à `nlInstantane` pour savoir s'il a changé.
 function _nlDocCourantJson() {
-	return JSON.stringify(nlMode === 'edition' ? _docLieuEdite() : _docsNouveauLieu());
+	return JSON.stringify(nlMode === 'edition' ? [_docLieuEdite(), _djDocsDonjon()] : _docsNouveauLieu());
 }
 
 // Le tenancier générique de la catégorie, s'il existe VRAIMENT en base ('' sinon).
@@ -1932,7 +2279,7 @@ function _nlPertes(docApres) {
 	const avaitEcurie = avant.some(e => e && (e.montures || []).length);
 	const aEcurie = ((docApres && docApres.pnj) || []).some(e => (e.montures || []).length);
 	if (avaitEcurie && !aEcurie) pertes.push('• l’écurie : plus aucune monture en vente');
-	return pertes;
+	return pertes.concat(_djPertes(docApres));
 }
 
 // Le linter serveur sur le doc qui va partir : seules les fautes des `pnj[i].conditions`
@@ -2050,6 +2397,307 @@ function _nlMonture(el) {
 	_nlRefreshApercu();
 }
 
+// ══ Section 🏰 DONJON — DOM ════════════════════════════════════════════════
+// Les fonctions pures sont plus haut (`_fusionDonjon`, `_donjonsAEcrire`…). Ici : remplir la
+// section à l'ouverture, relire ses champs, et réagir aux <select>/cases. ⚠️ La frappe ne
+// redessine RIEN (focus volé, CLAUDE.md §15) : seuls l'aperçu et les libellés suivent.
+let djEspeces = [];        // espèces cochées pour CETTE salle, dans l'ordre du doc relu
+let djAccesPerso = false;  // l'`acces` relu est personnalisé : lecture seule, jamais réécrit
+const DJ_NOUVEAU = '__nouveau__';
+
+// Une salle = une battle map À GRILLE, en édition : une boutique créée par ➕ n'a pas de carte.
+function _djSectionActive() {
+	return nlMode === 'edition' && !!nlDocExistant
+		&& Array.isArray(nlDocExistant.cells) && nlDocExistant.cells.length > 0
+		&& _nlCategorie() === 'battle_map';
+}
+
+function _djDonjons() { return (creationOptions && creationOptions.donjons) || []; }
+
+// Entier ≥ 1, `null` si vide, NaN si illisible (refusé par `_djErreur`).
+function _djEntier(id) {
+	const v = String(_nlEl(id).value || '').trim();
+	if (!v) return null;
+	const n = Number(v);
+	return (Number.isInteger(n) && n >= 1) ? n : NaN;
+}
+function _djPoserChamp(id, v) { _nlEl(id).value = (v === undefined || v === null) ? '' : v; }
+
+// L'état de la section, tel que les fonctions pures le prennent — null si elle est inactive
+// (le lieu s'enregistre alors exactement comme avant).
+function _djEtat() {
+	if (!_djSectionActive()) return null;
+	const sel = _nlEl('dj-donjon').value;
+	const nouveau = sel === DJ_NOUVEAU;
+	const nom = (_nlEl('dj-nom').value || '').trim();
+	const etages = _nlEl('dj-mode').value === 'etages';
+	return {
+		salle: _nlEl('dj-salle').checked,
+		// Un étage DOIT porter le tag (`donjon_a_etages_de`) : la case est forcée.
+		reservee: etages || _nlEl('dj-reservee').checked,
+		garde: !djAccesPerso && _nlEl('dj-garde').checked,
+		gardien: _nlEl('dj-gardien').value || '',
+		refus: (_nlEl('dj-refus').value || '').trim(),
+		donjonId: nouveau ? '' : sel,
+		nouveau: nouveau,
+		nouvelId: nouveau ? _idDonjon(nom) : '',
+		donjon: {
+			nom: nom, description: (_nlEl('dj-description').value || '').trim(),
+			portail: _nlEl('dj-portail').value || '', etages: etages,
+			niveau_min: _djEntier('dj-niveau-min'), niveau_max: _djEntier('dj-niveau-max'),
+			nb_monstres: _djEntier('dj-nb'),
+		},
+		piece: {
+			especes: djEspeces.slice(),
+			niveau_min: _djEntier('dj-salle-min'), niveau_max: _djEntier('dj-salle-max'),
+			nb_monstres: _djEntier('dj-salle-nb'),
+		},
+	};
+}
+
+// Les docs donjon que l'enregistrement écrirait (aperçu, « modifié ? ») — sur les donjons de
+// l'OUVERTURE ; l'écriture, elle, les relit juste avant (`_djEcrire`).
+function _djDocsDonjon() {
+	const etat = _djEtat();
+	if (!etat || !nlDocExistant) return [];
+	return _donjonsAEcrire(_djDonjons(), nlDocExistant._id, etat).docs;
+}
+
+function _djErreur() {
+	const etat = _djEtat();
+	if (!etat || !etat.salle) return '';
+	if (!etat.donjon.nom) return 'Donjon : un nom est requis.';
+	const bornes = [etat.donjon.niveau_min, etat.donjon.niveau_max, etat.donjon.nb_monstres,
+		etat.piece.niveau_min, etat.piece.niveau_max, etat.piece.nb_monstres];
+	if (bornes.some(v => Number.isNaN(v))) return 'Donjon : grades et nombre de monstres sont des entiers ≥ 1 (ou vides).';
+	if (!etat.piece.especes.length) return 'Donjon : cochez au moins une espèce pour peupler cette salle.';
+	if (etat.garde && !etat.gardien) return 'Porte gardée : choisissez le gardien, ou décochez « Gardée ».';
+	const r = _donjonsAEcrire(_djDonjons(), nlDocExistant._id, etat);
+	return r.erreur;
+}
+
+// Ce que l'enregistrement fera perdre côté donjon (ajouté au `confirm` unique de `_nlPertes`).
+function _djPertes(docApres) {
+	const etat = _djEtat();
+	if (!etat || !nlDocExistant) return [];
+	const pertes = [];
+	const avant = _donjonDeSalle(_djDonjons(), nlDocExistant._id);
+	if (avant && (!etat.salle || (etat.nouveau || etat.donjonId !== avant._id))) {
+		pertes.push(`• cette salle quitte ${avant.nom || avant._id} (${avant._id}) : ses espèces et ses bornes y sont effacées`);
+	}
+	if (nlDocExistant.acces && docApres && !docApres.acces) {
+		pertes.push('• la porte gardée : la salle devient libre d’accès');
+	}
+	return pertes;
+}
+
+// Remplit la section à l'ouverture du formulaire (édition d'une battle map à grille).
+function _djOuvrir() {
+	djEspeces = [];
+	djAccesPerso = false;
+	_nlEl('dj-especes-filtre').value = '';
+	if (nlMode !== 'edition' || !nlDocExistant || !(nlDocExistant.cells || []).length) { _djMaj(); return; }
+	const id = nlDocExistant._id;
+	const avant = _donjonDeSalle(_djDonjons(), id);
+	_nlEl('dj-salle').checked = !!avant;
+	// Salle déjà revendiquée : la case dit ce qui EST (la grotte n'a pas le tag et sert aussi de
+	// décor aléatoire — rien ne change tant qu'on n'y touche pas). Salle neuve : réservée.
+	_nlEl('dj-reservee').checked = avant ? (nlDocExistant.tags || []).indexOf('donjon') !== -1 : true;
+	_djRemplirDonjons(avant ? avant._id : DJ_NOUVEAU);
+	_djChargerDonjon(avant);
+	const entree = avant ? (avant.battle_maps || []).find(e => e && e.lieu === id) : null;
+	djEspeces = entree && Array.isArray(entree.especes) ? entree.especes.slice() : [];
+	_djPoserChamp('dj-salle-min', entree ? entree.niveau_min : null);
+	_djPoserChamp('dj-salle-max', entree ? entree.niveau_max : null);
+	_djPoserChamp('dj-salle-nb', entree ? entree.nb_monstres : null);
+
+	const acces = nlDocExistant.acces;
+	djAccesPerso = !_accesEstSimple(acces, id);
+	_nlEl('dj-garde-simple').style.display = djAccesPerso ? 'none' : '';
+	_nlEl('dj-acces-perso').style.display = djAccesPerso ? '' : 'none';
+	_nlEl('dj-acces-json').textContent = djAccesPerso ? JSON.stringify(acces, null, 2) : '';
+	_nlEl('dj-garde').checked = !djAccesPerso && !!acces;
+	_djRemplirGardiens(acces && acces.gardien);
+	_nlEl('dj-refus').value = (acces && acces.refus) || '';
+	_djRenderEspeces();
+	_djMaj();
+}
+
+// Le <select> des donjons : ceux de la base, puis « nouveau ».
+function _djRemplirDonjons(choisi) {
+	const sel = _nlEl('dj-donjon');
+	sel.innerHTML = _djDonjons().map(d =>
+		`<option value="${_escAttr(d._id)}">${_escHtml((d.nom || d._id) + ' — ' + d._id)}</option>`).join('')
+		+ `<option value="${DJ_NOUVEAU}">➕ Nouveau donjon…</option>`;
+	sel.value = choisi;
+}
+
+// Les champs du DONJON depuis son doc (null = donjon neuf, champs vides).
+function _djChargerDonjon(doc) {
+	const d = doc || {};
+	_nlEl('dj-nom').value = d.nom || '';
+	_nlEl('dj-description').value = d.description || '';
+	_nlEl('dj-mode').value = d.mode === 'etages' ? 'etages' : '';
+	_djPoserChamp('dj-niveau-min', d.niveau_min);
+	_djPoserChamp('dj-niveau-max', d.niveau_max);
+	_djPoserChamp('dj-nb', d.nb_monstres);
+	_djRemplirPortail(d.portail || '');
+}
+
+// ⚠️ La valeur du doc est TOUJOURS offerte, même absente de la base : un <select> qui retombe
+// à vide effacerait le champ au premier enregistrement (même piège que les images).
+function _djRemplirPortail(valeur) {
+	const lieux = ((creationOptions && creationOptions.lieux) || []).slice();
+	if (valeur && !lieux.some(l => l._id === valeur)) lieux.unshift({ _id: valeur, label: '', categorie: '' });
+	_nlEl('dj-portail').innerHTML = `<option value="">— aucun —</option>`
+		+ lieux.map(l => `<option value="${_escAttr(l._id)}">${_escHtml(_cxLibelle(l) + ' (' + l._id + ')')}</option>`).join('');
+	_nlEl('dj-portail').value = valeur;
+}
+
+function _djRemplirGardiens(valeur) {
+	const pnjs = ((creationOptions && creationOptions.pnj) || []).slice();
+	if (valeur && !pnjs.some(p => p._id === valeur)) pnjs.unshift({ _id: valeur, nom: valeur });
+	_nlEl('dj-gardien').innerHTML = `<option value="">— choisir —</option>`
+		+ pnjs.map(p => `<option value="${_escAttr(p._id)}">${_escHtml((p.nom || p._id) + ' — ' + p._id)}</option>`).join('');
+	_nlEl('dj-gardien').value = valeur || '';
+}
+
+// Les espèces, filtrées par la saisie. Une espèce cochée mais absente du catalogue (doc
+// supprimé) reste listée EN TÊTE : elle se décoche, elle ne disparaît pas en silence.
+function _djRenderEspeces() {
+	const toutes = (creationOptions && creationOptions.especes) || [];
+	const f = (_nlEl('dj-especes-filtre').value || '').trim().toLowerCase();
+	const connues = new Set(toutes.map(e => e._id));
+	const orphelines = djEspeces.filter(id => !connues.has(id)).map(id => ({ _id: id, nom: id, orpheline: true }));
+	const liste = orphelines.concat(toutes)
+		.filter(e => !f || (`${e._id} ${e.nom || ''}`).toLowerCase().indexOf(f) !== -1);
+	_nlEl('dj-especes').innerHTML = liste.map(e => `<label class="nl-cap">
+			<input type="checkbox" data-espece="${_escAttr(e._id)}" ${djEspeces.indexOf(e._id) !== -1 ? 'checked' : ''}
+				onchange="_djEspece(this)">
+			<span class="t"><b>${_escHtml(e.nom || e._id)}</b>
+				<span class="n">${_escHtml(e._id)}${e.orpheline ? ' — introuvable en base' : ''}</span></span>
+		</label>`).join('')
+		|| `<div style="padding:8px;font-size:.66rem;color:#666;">Aucune espèce ne correspond.</div>`;
+	_djMajCompteEspeces();
+}
+
+function _djMajCompteEspeces() {
+	const noms = djEspeces.map(id => {
+		const e = ((creationOptions && creationOptions.especes) || []).find(x => x._id === id);
+		return (e && e.nom) || id;
+	});
+	_nlEl('dj-especes-compte').textContent = noms.length
+		? `${noms.length} espèce(s) : ${noms.join(', ')}` : 'Aucune espèce : la salle serait vide.';
+}
+
+// ⚠️ L'id voyage en `data-espece`, jamais dans un `onchange="…('${id}')"` (CLAUDE.md §9).
+function _djEspece(el) {
+	const id = el && el.dataset ? el.dataset.espece : '';
+	if (!id) return;
+	const i = djEspeces.indexOf(id);
+	if (el.checked && i === -1) djEspeces.push(id);
+	else if (!el.checked && i !== -1) djEspeces.splice(i, 1);
+	_djMajCompteEspeces();
+	_nlRefreshApercu();
+}
+
+// Visibilité, libellés dérivés et passages — tout ce qui SUIT l'état sans rien saisir.
+function _djMaj() {
+	const actif = _djSectionActive();
+	_nlEl('nl-donjon-section').style.display = actif ? '' : 'none';
+	if (!actif) return;
+	const salle = _nlEl('dj-salle').checked;
+	_nlEl('dj-corps').style.display = salle ? '' : 'none';
+	const etages = _nlEl('dj-mode').value === 'etages';
+	const reservee = _nlEl('dj-reservee');
+	if (etages) reservee.checked = true;
+	reservee.disabled = etages;
+	const sel = _nlEl('dj-donjon').value;
+	const nouveau = sel === DJ_NOUVEAU;
+	_nlEl('dj-id').textContent = nouveau ? (_idDonjon(_nlEl('dj-nom').value) || 'donjon:') : sel;
+	const doc = nouveau ? null : _djDonjons().find(d => d._id === sel);
+	const autres = doc ? (doc.battle_maps || []).filter(e => e && e.lieu && e.lieu !== nlDocExistant._id).length : 0;
+	_nlEl('dj-partage').textContent = nouveau ? 'Donjon neuf : créé à l’enregistrement.'
+		: autres ? `Partagé avec ${autres} autre(s) salle(s) : les champs du donjon valent pour toutes.`
+		: 'Cette salle est la seule de ce donjon.';
+	_nlEl('dj-garde-corps').style.display = _nlEl('dj-garde').checked ? '' : 'none';
+	_djMajBornes();
+	_nlEl('dj-passages-bloc').style.display = etages ? '' : 'none';
+	if (etages) _djRenderPassages();
+}
+
+// Plancher > plafond n'est pas refusé — le moteur fait céder le plancher (`_profils_dans_fourchette`).
+function _djMajBornes() {
+	const min = _djEntier('dj-salle-min') || _djEntier('dj-niveau-min');
+	const max = _djEntier('dj-salle-max') || _djEntier('dj-niveau-max');
+	_nlEl('dj-bornes-warn').textContent = (min && max && min > max)
+		? `⚠ Grade min ${min} > grade max ${max} : le plancher cèdera au plafond.` : '';
+}
+
+// Le donjon tel que le formulaire le décrit, cette salle comprise — pour classer les passages.
+function _djDonjonCourant() {
+	const docs = _djDocsDonjon();
+	const etat = _djEtat();
+	if (!etat) return null;
+	const cible = docs.find(d => d && (d._id === etat.donjonId || d._id === etat.nouvelId));
+	return cible || _djDonjons().find(d => d._id === etat.donjonId) || null;
+}
+
+// Les passages de CET étage, relus dans la liste COMPLÈTE des connexions (`cxDocsConnus`,
+// chargée à l'ouverture) : le formulaire peut éditer un étage qui n'est pas la carte courante.
+// Les gestes (➕, ✏️) n'existent que sur la carte courante : la visée 🎯 vise SA grille.
+function _djRenderPassages() {
+	const id = nlDocExistant._id;
+	const donjonDoc = _djDonjonCourant() || { battle_maps: [{ lieu: id }] };
+	const passages = _djPassages(cxDocsConnus, id, donjonDoc);
+	const ici = LIEUX_HOTE.lieuCourant() === id && !!LIEUX_HOTE.visee;
+	const lieux = (creationOptions && creationOptions.lieux) || [];
+	const nomDe = lid => { const l = lieux.find(x => x._id === lid); return (l && l.label) || lid; };
+	_nlEl('dj-passages').innerHTML = passages.map(p => `<div class="dj-passage">
+			<span class="dj-badge${p.surface ? ' surface' : ''}">${p.surface ? 'surface' : 'étage'}</span>
+			<span class="v">[${p.pos[0]},${p.pos[1]}] → ${_escHtml(nomDe(p.vers))} [${p.versPos[0]},${p.versPos[1]}]</span>
+			${ici ? `<button type="button" class="btn btn-inline" style="font-size:.6rem;" data-passage="${_escAttr(p.id)}">✏️</button>` : ''}
+		</div>`).join('') || `<div class="nlp-note">Aucun passage.</div>`;
+	const warn = [];
+	if (!cxIdsCharges) warn.push('⚠ Connexions illisibles : passages non vérifiés.');
+	else {
+		if (!passages.length) warn.push('⚠ Aucun passage : cet étage n’est ni atteignable ni quittable.');
+		if (!_djSortieExiste(cxDocsConnus, donjonDoc)) warn.push('⚠ Aucun passage vers la surface dans tout ce donjon : on n’en sortirait que par la défaite.');
+	}
+	_nlEl('dj-passages-warn').textContent = warn.join(' ');
+	_nlEl('dj-passage-btn').style.display = ici ? '' : 'none';
+	_nlEl('dj-passages-note').textContent = ici
+		? 'La case d’ici (🎯) est le point d’apparition du groupe qui ARRIVE par ce passage depuis l’autre côté ; celle de là-bas, où il apparaît en le franchissant.'
+		: 'Ouvrez cet étage dans l’éditeur (sélecteur de lieu, ✎ Modifier le lieu) pour poser ses passages.';
+}
+
+// ➕ Passage / ✏️ : le formulaire de connexion occupe la place — celui-ci se ferme, après
+// confirmation s'il porte des modifications non enregistrées (rien n'est écrit ici).
+async function _djOuvrirPassage(connId) {
+	if (_nlDocCourantJson() !== nlInstantane
+			&& !confirm('Les modifications de ce formulaire ne sont pas enregistrées.\n\nLes abandonner pour ouvrir le passage ?')) {
+		return;
+	}
+	const id = nlDocExistant._id;
+	const donjonDoc = _djDonjonCourant() || { battle_maps: [{ lieu: id }] };
+	const dest = connId ? '' : _djPassageSuggere(_djPassages(cxDocsConnus, id, donjonDoc), id, donjonDoc);
+	closeLieuAdd();
+	if (connId) await openConnForm('edition', connId);
+	else await openConnForm('creation', null, { dest: dest, type: 'passage' });
+}
+
+// Après l'écriture du LIEU : les docs donjon, RELUS juste avant — une autre salle a pu
+// modifier le même donjon depuis l'ouverture, et `PUT /admin/doc` écrase tout.
+async function _djEcrire(etat, lieuId) {
+	const res = await fetch('/admin/table/data?type=donjon');
+	if (!res.ok) throw new Error('donjons illisibles — le lieu est enregistré, le donjon NON');
+	const frais = ((await res.json()) || {}).docs || [];
+	const r = _donjonsAEcrire(frais, lieuId, etat);
+	if (r.erreur) throw new Error(`${r.erreur} — le lieu est enregistré, le donjon NON`);
+	for (const d of r.docs) await _putDoc(d);
+	return r.docs;
+}
+
 // Le récit de la nuit : une ligne par message, les vides écartées.
 function _nlNuitMessages() {
 	return (_nlEl('nl-nuit-messages').value || '')
@@ -2105,7 +2753,8 @@ function _docsNouveauLieu() {
 // formulaire. ⚠️ `_id` et `_rev` viennent de `nlDocExistant` et ne sont jamais recalculés.
 function _docLieuEdite() {
 	const catalogue = (creationOptions && creationOptions.capacites) || [];
-	return _fusionLieu(nlDocExistant || {}, _nlChamps(), catalogue);
+	// La section 🏰 Donjon ne retouche que le tag `donjon` et un `acces` simple (null ⇒ rien).
+	return _djAppliquerAuLieu(_fusionLieu(nlDocExistant || {}, _nlChamps(), catalogue), _djEtat());
 }
 
 // ⚠️ NE redessine PAS les capacités ni l'écurie : cocher une monture appelle ceci, et
@@ -2117,7 +2766,9 @@ function _nlRefreshApercu() {
 		const doc = _docLieuEdite();
 		_nlEl('nl-id').textContent = doc._id || 'lieu:';
 		_nlEl('nl-id-warn').textContent = '';
-		_nlEl('nl-preview').textContent = JSON.stringify(doc, null, 2);
+		// Salle de donjon : les docs `donjon:*` qui partiront aussi (vide = rien à y changer).
+		const donjons = _djDocsDonjon();
+		_nlEl('nl-preview').textContent = JSON.stringify(donjons.length ? [doc].concat(donjons) : doc, null, 2);
 		return;
 	}
 	const { lieu, link } = _docsNouveauLieu();
@@ -2146,7 +2797,7 @@ function _nlValider(doc) {
 			? 'Écurie vide : cochez au moins une monture, ou retirez la capacité « Étable ».'
 			: 'Écurie sans tenancier : ajoutez un PNJ, ou retirez la capacité « Étable ».';
 	}
-	return '';
+	return _djErreur();
 }
 
 // Ce qui précède TOUTE écriture du lieu, dans les deux modes : le linter, puis les pertes.
@@ -2188,6 +2839,9 @@ async function enregistrerLieuEdite() {
 	const btn = _nlEl('nl-create-btn');
 	const controle = await _nlAvantEcriture(doc, btn, err);
 	if (!controle) return;
+	// Relu AVANT les écritures : l'état de la section ne doit pas dépendre de ce qui suit.
+	const etatDonjon = _djEtat();
+	const avantDonjon = etatDonjon ? _donjonDeSalle(_djDonjons(), doc._id) : null;
 	err.textContent = 'Enregistrement…';
 	try {
 		await _putDoc(doc);
@@ -2196,13 +2850,27 @@ async function enregistrerLieuEdite() {
 		btn.disabled = false;
 		return;
 	}
+	// Le LIEU d'abord (comme la porte d'un sous-lieu), puis le ou les docs donjon, relus.
+	let donjonsEcrits = [];
+	if (etatDonjon && (etatDonjon.salle || avantDonjon)) {
+		try {
+			donjonsEcrits = await _djEcrire(etatDonjon, doc._id);
+		} catch (e) {
+			err.textContent = `✗ ${e.message}`;
+			btn.disabled = false;
+			delete lieuxDocCache[doc._id];
+			return;
+		}
+	}
 	btn.disabled = false;
 	closeLieuAdd();
 	// Le cache de l'éditeur JSON porte l'ancien doc : le laisser servirait un `_rev` périmé.
 	delete lieuxDocCache[doc._id];
 	creationOptions = null;
 	await LIEUX_HOTE.apresEcriture({ lieu: doc });
-	LIEUX_HOTE.statut(`Lieu <span>${doc._id}</span> mis à jour.` + _nlMentionControle(controle));
+	const mentionDonjon = donjonsEcrits.length
+		? ` Donjon : ${donjonsEcrits.map(d => `<span>${_escHtml(d._id)}</span>`).join(', ')}.` : '';
+	LIEUX_HOTE.statut(`Lieu <span>${doc._id}</span> mis à jour.` + mentionDonjon + _nlMentionControle(controle));
 }
 
 async function creerSousLieu() {
@@ -2282,6 +2950,33 @@ function _nlCabler() {
 	_nlEl('nl-image-all').addEventListener('change', () => { _nlRepeuplerImages(); _nlRefreshApercu(); });
 	_nlEl('nl-image').addEventListener('change', () => { _nlMajVignetteImage(); _nlRefreshApercu(); });
 	_nlEl('nl-label').addEventListener('input', _nlRefreshApercu);
+	// Section 🏰 Donjon. La catégorie (câblée plus haut) la montre ou la cache : `_djMaj`.
+	['nl-categorie', 'nl-categorie-libre'].forEach(id =>
+		_nlEl(id).addEventListener(id === 'nl-categorie' ? 'change' : 'input', () => { _djMaj(); _nlRefreshApercu(); }));
+	['dj-salle', 'dj-garde', 'dj-mode'].forEach(id =>
+		_nlEl(id).addEventListener('change', () => { _djMaj(); _nlRefreshApercu(); }));
+	['dj-reservee', 'dj-portail', 'dj-gardien'].forEach(id =>
+		_nlEl(id).addEventListener('change', _nlRefreshApercu));
+	_nlEl('dj-donjon').addEventListener('change', () => {
+		const sel = _nlEl('dj-donjon').value;
+		_djChargerDonjon(sel === DJ_NOUVEAU ? null : _djDonjons().find(d => d._id === sel));
+		_djMaj(); _nlRefreshApercu();
+	});
+	// Frappe : libellés et aperçu seulement, jamais un champ redessiné (CLAUDE.md §15).
+	_nlEl('dj-nom').addEventListener('input', () => {
+		const sel = _nlEl('dj-donjon').value;
+		_nlEl('dj-id').textContent = sel === DJ_NOUVEAU ? (_idDonjon(_nlEl('dj-nom').value) || 'donjon:') : sel;
+		_nlRefreshApercu();
+	});
+	['dj-description', 'dj-refus'].forEach(id => _nlEl(id).addEventListener('input', _nlRefreshApercu));
+	['dj-niveau-min', 'dj-niveau-max', 'dj-nb', 'dj-salle-min', 'dj-salle-max', 'dj-salle-nb'].forEach(id =>
+		_nlEl(id).addEventListener('input', () => { _djMajBornes(); _nlRefreshApercu(); }));
+	_nlEl('dj-especes-filtre').addEventListener('input', _djRenderEspeces);
+	_nlEl('dj-passage-btn').addEventListener('click', () => _djOuvrirPassage(null));
+	_nlEl('dj-passages').addEventListener('click', ev => {
+		const b = ev.target && ev.target.closest ? ev.target.closest('button[data-passage]') : null;
+		if (b) _djOuvrirPassage(b.dataset.passage);
+	});
 	// Section PNJ : des écouteurs DÉLÉGUÉS, posés sur la section — les cartes sont redessinées,
 	// leurs éléments ne vivent pas assez longtemps pour porter les leurs.
 	const section = _nlEl('nl-pnj-section');
@@ -2291,13 +2986,15 @@ function _nlCabler() {
 	_nlEl('nl-ecurie-ligne').addEventListener('change', _nlEcurieChoisie);
 }
 
-// Résout l'URL image d'un lieu (cascade towns → battle_maps → maps).
+// Résout l'URL image d'un lieu : cascade towns → maps → battle_maps, l'ordre du JEU
+// (`ORIGINES_IMAGE_LIEU`) — un nom présent dans deux dossiers doit montrer ici l'image
+// que le joueur verra.
 function lieuImageUrl(image, cb) {
 	if (!image) { cb(null); return; }
 	const urls = [
 		`{{ url_for('towns', path='') }}${image}`,
-		`{{ url_for('battle_maps', path='') }}${image}`,
 		`{{ url_for('maps', path='') }}${image}`,
+		`{{ url_for('battle_maps', path='') }}${image}`,
 	];
 	let i = 0;
 	const probe = new Image();

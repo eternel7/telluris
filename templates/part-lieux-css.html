@@ -157,6 +157,15 @@
 	.nl-cap .t { flex: 1; min-width: 0; }
 	.nl-cap .t b { color: var(--text); font-weight: normal; }
 	.nl-cap .n { display: block; color: #888; font-size: 0.62rem; line-height: 1.35; }
+	/* ── Section 🏰 Donjon du formulaire de lieu ── */
+	.dj-bloc { border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; margin-top: 8px; }
+	.dj-titre { font-size: 0.66rem; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+	.dj-bornes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+	.dj-passage { display: flex; align-items: center; gap: 6px; font-size: 0.66rem; padding: 3px 0;
+		border-bottom: 1px solid rgba(255,255,255,0.05); }
+	.dj-passage .v { flex: 1; min-width: 0; }
+	.dj-badge { font-size: 0.6rem; padding: 0 5px; border-radius: 8px; border: 1px solid var(--accent2); color: var(--accent2); }
+	.dj-badge.surface { border-color: var(--accent); color: var(--accent); }
 	/* Capacité acquise par la catégorie : la case est cochée mais inopérante. */
 	.nl-cap.par-categorie { opacity: 0.75; }
 	.nl-cap.par-categorie .t b::after {
@@ -243,13 +252,17 @@
 	   `#editor-card` d'admin_table.html : même géométrie, même ombre, même ✕. La carte et
 	   le panneau restent utilisables dessous (ce n'est PAS un modal à backdrop, contrairement
 	   à #lieu-fiche-overlay) — on édite un doc en gardant la grille sous les yeux. */
+	/* ⚠️ `height` et non `bottom` : déplaçable (cf. #conn-overlay), il se tasserait sinon à la
+	   hauteur de son contenu au premier glisser. */
 	#lj-overlay {
-		position: fixed; top: 70px; right: 14px; bottom: 14px;
+		position: fixed; top: 70px; right: 14px; height: calc(100vh - 84px);
 		width: min(460px, 94vw); z-index: 60;
 		display: flex; flex-direction: column; overflow: auto;
 		box-shadow: -6px 0 28px rgba(0,0,0,0.55);
 	}
 	#lj-overlay.lj-hidden { display: none; }
+	/* Poignée de glisser : pas de surlignage du titre, pas de défilement au doigt. */
+	#lj-overlay > .lj-title { cursor: move; user-select: none; touch-action: none; }
 	.lj-title { display: flex; align-items: flex-start; gap: 10px; }
 	.lj-title .card-title { flex: 1; margin-bottom: 0; overflow-wrap: anywhere; }
 	.lj-close {
@@ -285,8 +298,11 @@
 	   Même géométrie que #lj-overlay : panneau fixe à droite et NON un modal à backdrop.
 	   Ce n'est pas cosmétique — la carte doit rester cliquable dessous, c'est la condition
 	   de la visée 🎯. Les deux panneaux se partagent la place : ouvrir l'un ferme l'autre. */
+	/* ⚠️ `height` et non `bottom` : le panneau se DÉPLACE (poignée = sa barre de titre,
+	   `rendreDeplacable`), qui le repasse en `top/left` et remet `bottom` à auto — ancré en
+	   haut ET en bas, il se serait tassé à la hauteur de son contenu au premier glisser. */
 	#conn-overlay {
-		position: fixed; top: 70px; right: 14px; bottom: 14px;
+		position: fixed; top: 70px; right: 14px; height: calc(100vh - 84px);
 		width: min(460px, 94vw); z-index: 60;
 		display: flex; flex-direction: column; overflow: auto;
 		box-shadow: -6px 0 28px rgba(0,0,0,0.55);
@@ -305,6 +321,9 @@
 	#conn-overlay .lj-title {
 		position: sticky; top: -16px; z-index: 2;
 		background: var(--panel); margin-top: -16px; padding: 16px 0 6px;
+		/* Poignée de glisser : sans `user-select`, tirer surlignerait le titre ; sans
+		   `touch-action`, le doigt ferait défiler au lieu de déplacer. */
+		cursor: move; user-select: none; touch-action: none;
 	}
 	.cx-noeud {
 		border: 1px solid var(--border); border-radius: 4px;
@@ -324,6 +343,10 @@
 	}
 	.cx-hint.ko { color: var(--danger); }
 	.cx-hint.ok { color: var(--accent2); }
+	/* ⚠️ `hidden` doit GAGNER : un `.btn` en `display:inline-flex` (/admin/lieux) l'emporterait
+	   sur la règle de l'agent utilisateur, et une visée sans carte resterait offerte. */
+	#conn-overlay [hidden] { display: none !important; }
 	/* Visée armée : même signal que .lj-repos-on, dont elle emprunte le sens. */
-	#cx-visee-btn.cx-visee { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
+	#cx-visee-btn.cx-visee,
+	#cx-visee-la-btn.cx-visee { border-color: var(--accent2); color: var(--accent2); background: rgba(75,143,200,0.18); }
 	#conn-overlay input[readonly] { opacity: 0.65; cursor: default; }

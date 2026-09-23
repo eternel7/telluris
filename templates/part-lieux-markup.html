@@ -6,8 +6,9 @@
      Rendu par renderLieuJsonOverlay() : `#lj-body` est réécrit à chaque ouverture ET après
      chaque enregistrement (le `_rev` a changé) — rien n'est semé ici. -->
 <div id="lj-overlay" class="card lj-hidden">
-	<div class="lj-title">
-		<div class="card-title">🧾 JSON — <span id="lj-dest"></span></div>
+	<!-- Barre de titre = POIGNÉE (`rendreDeplacable`, câblée par `renderLieuJsonOverlay`). -->
+	<div class="lj-title" id="lj-poignee" title="Glisser pour déplacer">
+		<div class="card-title">⠿ 🧾 JSON — <span id="lj-dest"></span></div>
 		<button type="button" class="lj-close" onclick="closeLieuJson()" title="Fermer (sans enregistrer)">✕</button>
 	</div>
 	<div class="lj-desc">
@@ -25,8 +26,10 @@
      ⚠️ Aucun `const` n'est capturé sur ce markup au chargement du script (il vit APRÈS la
      balise) : tout passe par `_cxEl`, appelé depuis des fonctions. -->
 <div id="conn-overlay" class="card cx-hidden">
-	<div class="lj-title">
-		<div class="card-title">🔗 <span id="cx-titre">Nouvelle connexion</span></div>
+	<!-- La barre de titre est la POIGNÉE (`rendreDeplacable`, câblée par `_cxCabler`) : le
+	     panneau recouvre la moitié droite de la carte. Le ✕ n'amorce aucun glisser. -->
+	<div class="lj-title" id="cx-poignee" title="Glisser pour déplacer">
+		<div class="card-title">⠿ 🔗 <span id="cx-titre">Nouvelle connexion</span></div>
 		<button type="button" class="lj-close" onclick="closeConnForm()" title="Fermer (sans enregistrer)">✕</button>
 	</div>
 	<div class="lj-desc">
@@ -49,14 +52,25 @@
 		<input type="text" id="cx-ici-label" placeholder="redescendre au comptoir">
 	</div>
 
+	<!-- Connexion INTERNE (🔀, deux cases de la carte courante) : pas de destination à choisir,
+	     une seconde visée, et les deux labels requis. Cf. `_cxMajChrome`. -->
+	<div class="cx-hint" id="cx-interne-note" hidden>
+		🔀 Les deux extrémités sont sur cette carte : chacune porte le texte du bouton qui y mène
+		(« monter au rempart », « redescendre ») — sans lui, les deux boutons liraient le nom du lieu.
+	</div>
+
 	<div class="cx-noeud">
-		<h3>Là-bas</h3>
-		<input type="text" id="cx-dest-filtre" placeholder="filtrer les lieux…">
-		<select id="cx-dest" style="margin-bottom:0;"></select>
-		<div class="cx-hint" id="cx-dest-info"></div>
+		<h3 id="cx-la-titre">Là-bas</h3>
+		<div id="cx-dest-bloc">
+			<input type="text" id="cx-dest-filtre" placeholder="filtrer les lieux…">
+			<select id="cx-dest" style="margin-bottom:0;"></select>
+			<div class="cx-hint" id="cx-dest-info"></div>
+		</div>
 		<div class="cx-pos" style="margin-top:6px;">
 			<div><label for="cx-la-x">x</label><input type="number" id="cx-la-x" min="0" step="1"></div>
 			<div><label for="cx-la-y">y</label><input type="number" id="cx-la-y" min="0" step="1"></div>
+			<button class="btn btn-inline" id="cx-visee-la-btn" style="font-size:.62rem;" hidden
+				onclick="basculerViseeConn('la')">🎯 Viser sur la carte</button>
 		</div>
 		<div class="cx-hint" id="cx-la-hint"></div>
 		<label for="cx-la-label" style="margin-top:8px;">Label du bouton qui mène LÀ-BAS
@@ -162,6 +176,86 @@
 			     base (`lieu:le_four_banal_de_saint_germain` s'affiche « …de l'horloge »). -->
 			<div id="nl-id-fige" style="font-size:.64rem;color:#888;margin-top:4px;display:none;">
 				L'identifiant ne change jamais : renommer le label ne renomme pas le document.
+			</div>
+		</div>
+
+		<!-- 🏰 DONJON — en ÉDITION d'une battle map à grille seulement (`_djSectionActive`).
+		     Ce qui fait une salle vit dans le doc `donjon:*` qui la revendique : enregistrer
+		     écrit le lieu PUIS ce doc (et l'ancien, si la salle change de donjon). Rempli par
+		     `_djOuvrir`, jamais redessiné à la frappe (seuls les <select> et cases le font). -->
+		<div class="la-field" id="nl-donjon-section" style="display:none;">
+			<label>🏰 Donjon</label>
+			<label class="la-check"><input type="checkbox" id="dj-salle"> Salle de donjon</label>
+			<div id="dj-corps">
+				<label class="la-check"><input type="checkbox" id="dj-reservee">
+					Réservée au donjon — exclue des combats aléatoires (tag « donjon »)</label>
+
+				<div class="dj-bloc">
+					<div class="dj-titre">Donjon</div>
+					<select id="dj-donjon"></select>
+					<div class="nlp-note" id="dj-partage"></div>
+					<label for="dj-nom">Nom</label>
+					<input type="text" id="dj-nom" placeholder="Le donjon-mine de Saint-Austrelin">
+					<div class="la-readonly" id="dj-id">donjon:</div>
+					<label for="dj-description">Description</label>
+					<textarea id="dj-description" rows="3"></textarea>
+					<label for="dj-portail">Portail <span style="color:#888;font-weight:normal;">(informatif : d'où l'on descend)</span></label>
+					<select id="dj-portail"></select>
+					<label for="dj-mode">Mode</label>
+					<select id="dj-mode">
+						<option value="">Classique — un gardien ouvre le combat de la salle</option>
+						<option value="etages">À étages — une seule descente, d'étage en étage par des passages</option>
+					</select>
+					<div class="dj-bornes">
+						<div><label for="dj-niveau-min">Grade min</label><input type="number" id="dj-niveau-min" min="1" step="1" placeholder="aucun"></div>
+						<div><label for="dj-niveau-max">Grade max</label><input type="number" id="dj-niveau-max" min="1" step="1" placeholder="aucun"></div>
+						<div><label for="dj-nb">Monstres</label><input type="number" id="dj-nb" min="1" step="1" placeholder="auto"></div>
+					</div>
+					<div class="nlp-note">Bornes du donjon ENTIER — une salle les remplace par les siennes. Sans grade max,
+						l'élite reçoit le plus haut profil de la base.</div>
+				</div>
+
+				<div class="dj-bloc">
+					<div class="dj-titre">Cette salle</div>
+					<input type="text" id="dj-especes-filtre" placeholder="filtrer les espèces…">
+					<div id="dj-especes" class="nl-caps"></div>
+					<div class="nlp-note" id="dj-especes-compte"></div>
+					<div class="dj-bornes">
+						<div><label for="dj-salle-min">Grade min</label><input type="number" id="dj-salle-min" min="1" step="1" placeholder="hérité"></div>
+						<div><label for="dj-salle-max">Grade max</label><input type="number" id="dj-salle-max" min="1" step="1" placeholder="hérité"></div>
+						<div><label for="dj-salle-nb">Monstres</label><input type="number" id="dj-salle-nb" min="1" step="1" placeholder="hérité"></div>
+					</div>
+					<div class="la-warn" id="dj-bornes-warn"></div>
+				</div>
+
+				<div class="dj-bloc">
+					<div class="dj-titre">Porte gardée</div>
+					<div id="dj-garde-simple">
+						<label class="la-check"><input type="checkbox" id="dj-garde"> Gardée par un PNJ</label>
+						<div id="dj-garde-corps">
+							<label for="dj-gardien">Gardien</label>
+							<select id="dj-gardien"></select>
+							<label for="dj-refus">Refus <span style="color:#888;font-weight:normal;">(ce que le joueur lit sans commission)</span></label>
+							<textarea id="dj-refus" rows="2"></textarea>
+							<div class="nlp-note">Condition : une commission de <i>chasse</i> active sur <i>cette salle</i>,
+								donnée par un bureau de maître de guilde, pas encore accomplie.</div>
+						</div>
+					</div>
+					<div id="dj-acces-perso" style="display:none;">
+						<div class="nlp-note">Bloc <i>acces</i> personnalisé : le formulaire ne le réécrit pas — éditez-le en 🧾 JSON.</div>
+						<div class="la-readonly" id="dj-acces-json" style="white-space:pre-wrap;"></div>
+					</div>
+					<div class="nlp-note" style="margin-top:4px;">La commission elle-même se règle sur le PNJ qui la donne
+						(<i>/admin/dialogues</i>, service <i>commission</i> → ce donjon).</div>
+				</div>
+
+				<div class="dj-bloc" id="dj-passages-bloc">
+					<div class="dj-titre">Passages de cet étage</div>
+					<div id="dj-passages"></div>
+					<div class="la-warn" id="dj-passages-warn"></div>
+					<button type="button" class="btn btn-inline" id="dj-passage-btn" style="font-size:.62rem;">➕ Passage vers…</button>
+					<div class="nlp-note" id="dj-passages-note"></div>
+				</div>
 			</div>
 		</div>
 

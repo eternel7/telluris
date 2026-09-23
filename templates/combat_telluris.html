@@ -181,7 +181,11 @@
 	border: 1px dashed rgba(240, 190, 80, 0.95);
 	box-shadow: inset 0 0 8px rgba(240, 190, 80, 0.5);
 }
-.passages-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+/* Alignés à DROITE : le ⚙ (#btn-slots-edit) est posé en absolu en bas à gauche de la barre,
+   une rangée partant de la gauche passerait dessous. */
+.passages-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+/* Cale de hauteur d'une rangée sans passage empruntable (cf. renderPassages). */
+.passages-row .passage-cale { visibility: hidden; pointer-events: none; }
 .monster-token {
 	width: var(--step); height: var(--step);
 	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -1517,6 +1521,11 @@ function renderEnemyPortrait(data) {
 	setPortraitBar(document.getElementById('enemy-pm-bar'), m.currentPM || 0, m.pm_max || 0);
 }
 
+// Texte de charge en ATTENTE des données du membre qui joue (cf. `_effacerPalierCharge`).
+// ⚠️ Déclaré ICI, avant tout appel possible d'`updateChargeBar` : un `let` plus bas serait
+// encore en zone morte au premier rendu.
+let _chargeEnAttente = false;
+
 // Jauge de charge du panneau joueur : pip fixe à 50 % (= charge_max/2). Passe en
 // orange au-delà (déplacement divisé par deux) puis rouge à la surcharge.
 function updateChargeBar(j) {
@@ -1532,7 +1541,11 @@ function updateChargeBar(j) {
 	// Palier de CANALISATION en texte violet — le remplissage et le pip continuent de dire
 	// le PHYSIQUE (demi-charge, surcharge) ; deux échelles sur une barre seraient illisibles.
 	const bloc = CHARGE_MAGIE;
-	if (bloc && bloc.palier_label && bloc.penalite > 0) {
+	// Changement d'acteur en cours : le texte ENTIER reste vide jusqu'à ce que les données du
+	// membre suivant arrivent (cf. `_chargeEnAttente`) — rien plutôt que celles du précédent.
+	if (_chargeEnAttente) {
+		txt.textContent = '';
+	} else if (bloc && bloc.palier_label && bloc.penalite > 0) {
 		txt.innerHTML = `${(+charge).toFixed(1)} / ${chargeMax} kg`
 			+ ` · <span class="mana">🔮 ${bloc.palier_label}</span>`;
 	} else {
@@ -1936,24 +1949,38 @@ function peindrePassages(layer, j) {
 	});
 }
 
-// Un bouton par passage. Libellé posé en textContent (nom de lieu = donnée de contenu).
+// Un bouton par passage EMPRUNTABLE maintenant — à son tour, tout le groupe sur la case du
+// passage ou juste à côté (`franchissable`, calculé par le serveur). Les autres ne s'affichent
+// pas : ils se lisent sur la carte (cases de passage). Libellé posé en textContent (nom de
+// lieu = donnée de contenu).
+// ⚠️ RENDU STABLE (CLAUDE.md §17) : le tour des monstres passe sans geste du joueur — la rangée
+// ne doit pas naître ni disparaître à chaque tour, sans quoi la barre d'action changerait de
+// hauteur sous ses yeux. Sur un étage qui a des passages, elle reste donc posée ; vide, elle
+// garde sa hauteur par un bouton INVISIBLE (même classe, donc même hauteur qu'un vrai).
 function renderPassages(data) {
 	const row = document.getElementById('passages-row');
-	const passages = (data.etages || {}).passages || [];
-	row.style.display = passages.length ? '' : 'none';
-	row.replaceChildren();
+	const tous = (data.etages || {}).passages || [];
 	const peutAgir = data.status === 'active' && isPlayerTurn(data) && !revealing && !busy;
-	passages.forEach(p => {
+	const actifs = peutAgir ? tous.filter(p => p.franchissable) : [];
+	row.style.display = tous.length ? '' : 'none';
+	row.replaceChildren();
+	actifs.forEach(p => {
 		const b = document.createElement('button');
 		b.className = 'action-btn';
 		b.textContent = (p.surface ? '🚪 ' : '🪜 ') + (p.label || 'Passage');
-		b.title = p.franchissable
-			? 'Emprunter ce passage avec tout le groupe'
-			: 'Tout le groupe doit se tenir sur la case du passage (ou juste à côté)';
-		b.disabled = !(peutAgir && p.franchissable);
+		b.title = 'Emprunter ce passage avec tout le groupe';
 		b.onclick = () => emprunterPassage(p.id);
 		row.appendChild(b);
 	});
+	if (tous.length && !actifs.length) {
+		const cale = document.createElement('button');
+		cale.className = 'action-btn passage-cale';
+		cale.textContent = '🪜';
+		cale.tabIndex = -1;
+		cale.setAttribute('aria-hidden', 'true');
+		cale.disabled = true;
+		row.appendChild(cale);
+	}
 }
 
 // Changement d'étage : la carte (image, grille) change — on recharge la page plutôt que
@@ -2879,22 +2906,53 @@ let lastActorId = null;
 
 // Recharge les ressources du MEMBRE ACTIF (GET /acteur) : consommables, sorts (+
 // épinglés), compétences (+ épinglées) — le compagnon boit SES potions, lance SES sorts.
+// ⚠️ Tours passés VITE : plusieurs appels sont en vol, et leurs réponses arrivent dans
+// n'importe quel ordre. Seule la DERNIÈRE compte (`_syncActeurSeq`), et seulement si elle
+// décrit bien le membre actif À SON ARRIVÉE (`character_id`) — sinon un tour de retard, et
+// le palier 🔮 d'un membre s'affichait sous le nom du suivant.
+let _syncActeurSeq = 0;
+
+// Vide le texte de charge du panneau du joueur (poids ET palier 🔮) le temps que les données
+// du membre qui joue arrivent. ⚠️ Levé par ceux qui les apportent : la réponse d'action
+// (même membre, `doAction`) ou `syncActorResources` (membre suivant, succès OU échec).
+function _effacerPalierCharge() {
+	_chargeEnAttente = true;
+	updateChargeBar(activePlayer(state) || {});
+}
+function _leverAttenteCharge() {
+	if (!_chargeEnAttente) return;
+	_chargeEnAttente = false;
+	updateChargeBar(activePlayer(state) || {});
+}
 async function syncActorResources() {
+	const seq = ++_syncActeurSeq;
 	try {
 		const res = await fetch(`/api/combat/${SERVER_DATA.combat_id}/acteur`);
-		if (!res.ok) return;
+		// Échec : le poids (tiré de l'état) se réaffiche, sans palier — jamais un texte vide à vie.
+		if (!res.ok) { if (seq === _syncActeurSeq) _leverAttenteCharge(); return; }
 		const data = await res.json();
+		if (seq !== _syncActeurSeq) return;
+		const actif = activePlayer(state) || {};
+		if (data.character_id && actif.character_id && data.character_id !== actif.character_id) return;
 		CONSOS = data.consommables || [];
 		SORTS = data.sorts || [];
 		COMPS = data.competences || [];
 		// La charge appartient à l'ACTEUR aussi : chaque membre porte SON sac, donc son
-		// propre palier de canalisation et ses propres coûts PM.
-		if (data.charge_magie) CHARGE_MAGIE = data.charge_magie;
+		// propre palier de canalisation et ses propres coûts PM. ⚠️ Absente ⇒ AUCUN palier,
+		// jamais celui du membre précédent.
+		CHARGE_MAGIE = data.charge_magie || null;
 		// La barre appartient à l'ACTEUR : chaque membre du groupe a SA disposition.
 		SLOTS = data.slots || SLOTS;
 		renderSlots();
+		// Le panneau du joueur a été peint AVANT cette réponse (updateUI n'attend pas) : son
+		// texte de charge, vidé au changement d'acteur, se redessine avec ce qu'on vient de recevoir.
+		_chargeEnAttente = false;
+		updateChargeBar(actif);
 		if (window._combatReady) { updateButtons(state); refreshTargetSelect(); }
-	} catch (e) { /* réseau : les ressources du membre précédent restent affichées */ }
+	} catch (e) {
+		// Réseau : les ressources du membre précédent restent affichées, mais pas un texte vide.
+		if (seq === _syncActeurSeq) _leverAttenteCharge();
+	}
 }
 
 function updateUI(data) {
@@ -2909,7 +2967,14 @@ function updateUI(data) {
 	if (act.id && act.id !== lastActorId) {
 		lastActorId = act.id;
 		applyPlayerPortrait(act.id);
-		if (data.joueurs.length > 1 && data.status === 'active') syncActorResources();
+		if (data.joueurs.length > 1 && data.status === 'active') {
+			// Le palier connu est celui du membre PRÉCÉDENT : rien plutôt que faux, jusqu'à ce
+			// que `/acteur` apporte le sien (aussi quand le tour finit sans « passer » : budget
+			// épuisé). Le texte de charge ENTIER attend avec lui.
+			CHARGE_MAGIE = null;
+			_effacerPalierCharge();
+			syncActorResources();
+		}
 	}
 	updateJoueur(activePlayer(data));
 	renderEnemyPortrait(data);
@@ -3457,6 +3522,12 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 	closeSelectors();
 	// Le portrait droit suit la cible que le joueur attaque (ou vise d'un sort/compétence).
 	if ((type === 'attaquer' || type === 'sort' || type === 'competence') && cibleId) lastEnemyId = cibleId;
+	// Qui agit : les ressources de la réponse sont les SIENNES (cf. plus bas).
+	const acteurAvant = (activePlayer(state) || {}).id;
+	// Passer, c'est rendre la main : le texte de charge (poids + palier 🔮) est celui d'un
+	// membre qui n'agit plus. On le vide AU CLIC, sans attendre la réponse ; il revient à la
+	// fin de l'action si le même membre garde la main (`finally`), sinon avec `/acteur`.
+	if (type === 'passer') _effacerPalierCharge();
 	busy = true;
 	document.querySelectorAll('#move-controls .btn, .action-btn, .slot-btn')
 		.forEach(el => el.disabled = true);
@@ -3468,14 +3539,21 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 		});
 		if (res.ok) {
 			const data = await res.json();
-			// Potion bue / composant dépensé : la barre doit refléter le sac tout de suite
-			// (un slot de consommable épuisé se grise, et son index change).
-			if (data.consommables) CONSOS = data.consommables;
-			if (data.sorts) SORTS = data.sorts;
-			// Ramasser une carcasse ou boire une potion déplace la charge : le palier et
-			// les coûts PM des cases doivent suivre dans le même rendu.
-			if (data.charge_magie) CHARGE_MAGIE = data.charge_magie;
-			if (data.consommables || data.sorts || data.charge_magie) renderSlots();
+			// ⚠️ Ces blocs décrivent l'acteur qui VIENT D'AGIR (routers/combat : `acteur_id`).
+			// Si l'action a passé la main (« passer », budget épuisé), les poser peindrait le
+			// membre suivant avec le sac et le palier 🔮 du précédent : on les laisse, et le
+			// changement d'acteur détecté par updateUI recharge les siens (`syncActorResources`).
+			const memeActeur = (activePlayer(data.combat) || {}).id === acteurAvant;
+			if (memeActeur) {
+				// Potion bue / composant dépensé : la barre doit refléter le sac tout de suite
+				// (un slot de consommable épuisé se grise, et son index change).
+				if (data.consommables) CONSOS = data.consommables;
+				if (data.sorts) SORTS = data.sorts;
+				// Ramasser une carcasse ou boire une potion déplace la charge : le palier et
+				// les coûts PM des cases doivent suivre dans le même rendu.
+				if (data.charge_magie) CHARGE_MAGIE = data.charge_magie;
+				if (data.consommables || data.sorts || data.charge_magie) renderSlots();
+			}
 			updateUI(data.combat);
 			return data;
 		} else if (res.status === 409) {
@@ -3491,6 +3569,9 @@ async function doAction(type, cibleId, dx = null, dy = null, sens = null, mode =
 	} finally {
 		busy = false;
 		updateButtons(state);
+		// Même membre après l'action (combat solo, dernier debout, requête refusée ou en
+		// échec) : personne d'autre ne lèvera l'attente posée au clic « passer ».
+		if ((activePlayer(state) || {}).id === acteurAvant) _leverAttenteCharge();
 	}
 	return null;
 }

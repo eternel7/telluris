@@ -48,7 +48,8 @@ function extraire(nom) {
 	throw new Error('accolades déséquilibrées dans ' + nom);
 }
 
-for (const f of ['_cxSlug', '_cxIdPropose', '_cxPosPosable', '_fusionConnexion', '_cxValider', '_lieuxHorsTerrain']) {
+for (const f of ['_cxSlug', '_cxIdPropose', '_cxIdInterne', '_cxPosPosable', '_fusionConnexion', '_cxValider', '_lieuxHorsTerrain',
+				 '_connInterne', '_connAutreBout']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -239,18 +240,60 @@ t('un identifiant mal formé est refusé', () => {
 	}
 });
 
-t('une connexion doit relier deux lieux DIFFÉRENTS, dont le lieu courant', () => {
+t('une connexion relie deux nœuds, dont le lieu courant', () => {
 	const seul = bon(); seul.nodes = [seul.nodes[0]];
 	assert.match(_cxValider(seul, 'lieu:auxerre', [], true), /deux lieux/);
-
-	const memeLieu = bon(); memeLieu.nodes[1].lieu = 'lieu:auxerre';
-	assert.match(_cxValider(memeLieu, 'lieu:auxerre', [], true), /lui-même/);
 
 	const vide = bon(); vide.nodes[1].lieu = '';
 	assert.match(_cxValider(vide, 'lieu:auxerre', [], true), /requis/);
 
 	// Aucun des deux nœuds n'est le lieu courant : la porte ne serait visible de nulle part ici.
 	assert.match(_cxValider(bon(), 'lieu:reims', [], true), /lieu courant/);
+});
+
+t('id d’une connexion INTERNE : les deux cases dans l’id, suffixé s’il est pris', () => {
+	assert.strictEqual(_cxIdInterne('lieu:tour', [2, 3], [9, 1], []), 'link:tour_9_1_to_tour_2_3');
+	assert.strictEqual(_cxIdInterne('lieu:tour', [2, 3], [9, 1], ['link:tour_9_1_to_tour_2_3']),
+		'link:tour_9_1_to_tour_2_3_02');
+	// Case pas encore visée (champ vide ⇒ -1) : rien à proposer.
+	assert.strictEqual(_cxIdInterne('lieu:tour', [2, 3], [-1, -1], []), '');
+});
+
+t('connexion INTERNE (deux cases de la même carte) : cases distinctes, deux labels', () => {
+	const interne = (posLa, labelIci, labelLa) => Object.assign(_fusionConnexion({}, {
+		noeuds: [
+			{ lieu: 'lieu:auxerre', pos: [5, 6], label: labelIci },
+			{ lieu: 'lieu:auxerre', pos: posLa, label: labelLa },
+		],
+		type: 'passage', status: 'ouvert',
+	}), { _id: 'link:auxerre_9_2_to_auxerre_5_6' });
+	assert.strictEqual(_cxValider(interne([9, 2], 'redescendre', 'monter au rempart'), 'lieu:auxerre', [], true), '');
+	assert.match(_cxValider(interne([5, 6], 'a', 'b'), 'lieu:auxerre', [], true), /même case/);
+	// Sans label, les deux boutons liraient le nom de la carte : indiscernables en jeu.
+	assert.match(_cxValider(interne([9, 2], 'redescendre', ''), 'lieu:auxerre', [], true), /label/);
+	assert.match(_cxValider(interne([9, 2], '', 'monter'), 'lieu:auxerre', [], true), /label/);
+});
+
+t('l’autre bout d’une connexion : miroir de lieux.noeud_destination (tests/test_lieux.py)', () => {
+	const ordinaire = { nodes: [{ lieu: 'lieu:auxerre', pos: [4, 5] }, { lieu: 'lieu:forge', pos: [0, 0] }] };
+	assert.ok(!_connInterne(ordinaire));
+	assert.strictEqual(_connAutreBout(ordinaire, 'lieu:auxerre', [4, 5]).lieu, 'lieu:forge');
+	const escalier = { nodes: [{ lieu: 'lieu:tour', pos: [2, 3] }, { lieu: 'lieu:tour', pos: [9, 1] }] };
+	assert.ok(_connInterne(escalier));
+	assert.deepStrictEqual(_connAutreBout(escalier, 'lieu:tour', [2, 3]).pos, [9, 1]);
+	assert.deepStrictEqual(_connAutreBout(escalier, 'lieu:tour', [9, 1]).pos, [2, 3]);
+	const plat = { nodes: [{ lieu: 'lieu:tour', pos: [2, 3] }, { lieu: 'lieu:tour', pos: [2, 3] }] };
+	assert.strictEqual(_connAutreBout(plat, 'lieu:tour', [2, 3]), null);
+});
+
+t('alerte terrain : les DEUX bouts d’une connexion interne sont éprouvés', () => {
+	const G = [[1, 2], [3, 1]];
+	const escalier = { _id: 'link:e', nodes: [
+		{ lieu: 'lieu:auxerre', pos: [1, 0], details: { label: 'descendre' } },
+		{ lieu: 'lieu:auxerre', pos: [0, 1], details: { label: 'monter' } }] };
+	const r = _lieuxHorsTerrain([escalier], 'lieu:auxerre', G);
+	assert.deepStrictEqual(r.map(c => [c.cx, c.cy, c.v, c.lieux[0].label]),
+		[[1, 0, 2, 'monter'], [0, 1, 3, 'descendre']]);
 });
 
 t('une position mal formée est refusée avant même la grille', () => {

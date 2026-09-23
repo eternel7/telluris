@@ -1064,6 +1064,8 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 <script src="{{ url_for('scripts', path='deplacement.js') }}"></script>
 <!-- voies.js APRÈS deplacement.js : le tracé des voies ne recopie aucune règle, il prend `pasAutoriseRegle`. -->
 <script src="{{ url_for('scripts', path='voies.js') }}"></script>
+<!-- `rendreDeplacable` (mini-outils, pavé du test) : partagé avec le pavé flottant de play_town. -->
+<script src="{{ url_for('scripts', path='deplacable.js') }}"></script>
 <!-- Mode Lieux PARTAGÉ avec /admin/lieux (ligne de liste, fiche, JSON, formulaires de lieu et de
      connexion). ⚠️ AVANT le script de la page : c'est lui qui déclare `LIEUX_HOTE`. -->
 {% include "part-lieux-js.html" %}
@@ -1243,45 +1245,8 @@ miniOutilsEl.querySelectorAll('.mini-mode-btn').forEach(btn => {
 });
 
 // ── Panneaux flottants déplaçables ─────────────────────────────────────────
-// Brique partagée par les mini-outils et le pavé du test de déplacement : les deux
-// flottent au-dessus de la carte et finissent par recouvrir la case qu'on veut voir.
-//
-// ⚠️ La position de départ vient du CSS et n'est PAS ancrée au même coin selon le
-// panneau (`top/right` pour les mini-outils, `bottom/right` pour le pavé de test). Au
-// premier glisser on repasse donc tout en `top/left` et on remet les autres ancres à
-// `auto` : deux contraintes opposées sur le même axe se battraient et le panneau
-// s'étirerait au lieu de se déplacer.
-// ⚠️ `transform` est remis à `none` : la règle mobile de part-move-panel centre le pavé
-// par `translateX(-50%)`, qui le décalerait d'une demi-largeur sous le pointeur.
-// ⚠️ Un `pointerdown` sur un BOUTON de la poignée (le ✕ du pavé de test) n'amorce aucun
-// glisser — la capture de pointeur détournerait le clic censé fermer le mode.
-function rendreDeplacable(el, poignee) {
-	if (!el || !poignee) return;
-	let drag = null;   // { dx, dy } écart pointeur → coin haut-gauche
-	poignee.addEventListener('pointerdown', e => {
-		if (e.target && e.target.closest && e.target.closest('button')) return;
-		const r = el.getBoundingClientRect();
-		drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
-		el.style.right = 'auto';
-		el.style.bottom = 'auto';
-		el.style.transform = 'none';
-		el.style.left = r.left + 'px';
-		el.style.top = r.top + 'px';
-		poignee.setPointerCapture(e.pointerId);
-		e.preventDefault();
-	});
-	poignee.addEventListener('pointermove', e => {
-		if (!drag) return;
-		// Borné à la fenêtre : lâché hors écran, la poignée deviendrait inatteignable.
-		const maxX = window.innerWidth  - el.offsetWidth;
-		const maxY = window.innerHeight - el.offsetHeight;
-		el.style.left = Math.max(0, Math.min(maxX, e.clientX - drag.dx)) + 'px';
-		el.style.top  = Math.max(0, Math.min(maxY, e.clientY - drag.dy)) + 'px';
-	});
-	poignee.addEventListener('pointerup',     () => { drag = null; });
-	poignee.addEventListener('pointercancel', () => { drag = null; });
-}
-
+// `rendreDeplacable` vit dans scripts/deplacable.js (partagé avec le pavé flottant de
+// play_town) : les mini-outils et le pavé du test recouvrent la case qu'on veut voir.
 rendreDeplacable(miniOutilsEl, miniHeadEl);
 // ⚠️ Le pavé du test est câblé ICI et non près de son code : son markup vit avant le
 // script, mais `depSection` est capturé bien plus bas. `getElementById` sur place évite
@@ -1991,16 +1956,19 @@ function renderGrid() {
 	if (showLieux && lieuxConnections.length > 0) {
 		const byCell = {};
 		lieuxConnections.forEach(conn => {
-			const node = (conn.nodes || []).find(n => n.lieu === currentLocId);
-			if (!node || !node.pos) return;
-			const key = `${node.pos[0]},${node.pos[1]}`;
-			const cell = (byCell[key] = byCell[key] || { x: node.pos[0], y: node.pos[1], conns: [], etat: null });
-			cell.conns.push(conn);
-			// Couleur portée par le lieu de DESTINATION (le point marque la porte qui y mène) :
-			// une case qui en porte plusieurs prend le plus incomplet (cf. LIEUX_PNJ_ETATS).
-			const dest = (conn.nodes || []).find(n => n.lieu !== currentLocId) || null;
-			const etat = etatPnjDeLieu(dest && dest.details);
-			if (cell.etat === null || LIEUX_PNJ_RANG[etat] < LIEUX_PNJ_RANG[cell.etat]) cell.etat = etat;
+			// ⚠️ TOUS les nœuds de ce lieu, pas le premier : une connexion INTERNE (🔀, deux cases
+			// de cette carte) a une porte à CHAQUE bout.
+			(conn.nodes || []).forEach(node => {
+				if (node.lieu !== currentLocId || !node.pos) return;
+				const key = `${node.pos[0]},${node.pos[1]}`;
+				const cell = (byCell[key] = byCell[key] || { x: node.pos[0], y: node.pos[1], conns: [], etat: null });
+				cell.conns.push(conn);
+				// Couleur portée par le lieu de DESTINATION (le point marque la porte qui y mène) :
+				// une case qui en porte plusieurs prend le plus incomplet (cf. LIEUX_PNJ_ETATS).
+				const dest = _connAutreBout(conn, currentLocId, node.pos);
+				const etat = etatPnjDeLieu(dest && dest.details);
+				if (cell.etat === null || LIEUX_PNJ_RANG[etat] < LIEUX_PNJ_RANG[cell.etat]) cell.etat = etat;
+			});
 		});
 		// Même prédicat que le bandeau du panneau : ce qui est listé est ce qui est cerclé.
 		const horsTerrain = new Set(_lieuxHorsTerrain(lieuxConnections, currentLocId, grid).map(c => `${c.cx},${c.cy}`));
@@ -2346,10 +2314,9 @@ function renderLieuxConnList() {
 	if (!lieuxConnListEl) return;
 	let list = lieuxConnections;
 	if (lieuxSelectedCell) {
-		list = lieuxConnections.filter(conn => {
-			const n = (conn.nodes || []).find(x => x.lieu === currentLocId);
-			return n && n.pos && n.pos[0] === lieuxSelectedCell.cx && n.pos[1] === lieuxSelectedCell.cy;
-		});
+		// N'importe lequel des nœuds de ce lieu : une connexion interne se liste à ses DEUX cases.
+		list = lieuxConnections.filter(conn => (conn.nodes || []).some(n =>
+			n.lieu === currentLocId && n.pos && n.pos[0] === lieuxSelectedCell.cx && n.pos[1] === lieuxSelectedCell.cy));
 	}
 	if (!lieuxConnections.length) {
 		lieuxConnListEl.innerHTML = `<div style="color:#888;">Aucune connexion pour ce lieu.</div>`;
@@ -4551,19 +4518,22 @@ function _lieuxHorsTerrain(conns, iciId, grille) {
 	if (!grille || !grille.length) return [];
 	const parCase = {};
 	(conns || []).forEach(conn => {
-		const nodes = (conn && conn.nodes) || [];
-		const ici = nodes.find(n => n && n.lieu === iciId);
-		if (!ici || !Array.isArray(ici.pos)) return;
-		const cx = ici.pos[0], cy = ici.pos[1];
-		const brut = Number((grille[cy] || [])[cx]);
-		if (brut === 1) return;
-		const dest = nodes.find(n => n && n.lieu !== iciId) || null;
-		const cle = `${cx},${cy}`;
-		const c = (parCase[cle] = parCase[cle] || { cx, cy, v: Number.isFinite(brut) ? brut : null, lieux: [] });
-		c.lieux.push({
-			connId: conn._id,
-			destId: dest ? dest.lieu : '',
-			label: (dest && dest.details && dest.details.label) || (dest && dest.lieu) || '?',
+		const nodes = ((conn && conn.nodes) || []).filter(Boolean);
+		// Chaque nœud de CE lieu est une porte à atteindre — deux pour une connexion interne.
+		nodes.filter(n => n.lieu === iciId).forEach(ici => {
+			if (!Array.isArray(ici.pos)) return;
+			const cx = ici.pos[0], cy = ici.pos[1];
+			const brut = Number((grille[cy] || [])[cx]);
+			if (brut === 1) return;
+			// Là où mène cette porte : un autre lieu, sinon l'autre bout (connexion interne).
+			const dest = nodes.find(n => n.lieu !== iciId) || nodes.find(n => n !== ici) || null;
+			const cle = `${cx},${cy}`;
+			const c = (parCase[cle] = parCase[cle] || { cx, cy, v: Number.isFinite(brut) ? brut : null, lieux: [] });
+			c.lieux.push({
+				connId: conn._id,
+				destId: dest ? dest.lieu : '',
+				label: (dest && dest.details && dest.details.label) || (dest && dest.lieu) || '?',
+			});
 		});
 	});
 	return Object.values(parCase).sort((a, b) => a.cy - b.cy || a.cx - b.cx);
@@ -4670,6 +4640,10 @@ function renderLieuAddSection() {
 	// formulaire mono-doc ne pouvait produire. Offert sans case sélectionnée : le panneau a
 	// ses deux couples x/y et ses deux visées 🎯, la case n'est qu'un pré-remplissage.
 	const relier = `<button class="btn" style="font-size:.68rem;margin-top:6px;" onclick="openPorteForm()">🏰 Ajouter une porte de rempart${
+		lieuxSelectedCell ? ` depuis [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]` : ''}</button>`
+		// CONNEXION INTERNE : deux cases de CETTE carte (escalier, trappe). Même formulaire 🔗,
+		// avec deux visées 🎯 ; la case sélectionnée pré-remplit la première.
+		+ `<button class="btn" style="font-size:.68rem;margin-top:6px;" onclick="openConnForm('creation', null, { interne: true })">🔀 Relier deux cases de cette carte${
 		lieuxSelectedCell ? ` depuis [${lieuxSelectedCell.cx},${lieuxSelectedCell.cy}]` : ''}</button>`;
 
 	// La file du LOT. ⚠️ Les ⌫ portent l'INDEX de la case, jamais son libellé : rien de
@@ -5798,14 +5772,20 @@ function depRendrePortes() {
 	if (!portes.length) { depPortesEl.innerHTML = ''; return; }
 	let html = '<div style="color:var(--accent);">🚪 Sur cette case :</div>';
 	portes.forEach(conn => {
-		const dest = _connDest(conn);
-		const nom = (dest.details && dest.details.label) || dest.lieu;
+		// Là où mène la porte depuis CETTE case — miroir de `lieux.noeud_destination` : un autre
+		// lieu, ou l'autre bout d'une connexion interne (🔀).
+		const dest = _connAutreBout(conn, currentLocId, [depPos.x, depPos.y]);
+		if (!dest) return;
+		const interne = dest.lieu === currentLocId;
+		const nom = (dest.details && dest.details.label) || dest.label || dest.lieu;
 		// ⚠️ Le sélecteur de lieux est bâti par `get_lieux_ids`, qui FILTRE SUR `cells` : une
 		// boutique n'y figure pas. Poser une valeur absente la ramène à "" — ce qui VIDE
 		// l'éditeur sans un mot. On vérifie donc l'<option> avant d'offrir le clic.
-		const dispo = !!lieuSelect.querySelector('option[value="' + CSS.escape(dest.lieu) + '"]');
-		html += '<button class="dep-porte" data-dep-dest="' + dest.lieu + '"'
-			+ (dispo ? '' : ' disabled') + '>➔ ' + nom
+		const dispo = interne || !!lieuSelect.querySelector('option[value="' + CSS.escape(dest.lieu) + '"]');
+		// ⚠️ Retrouvée par son `_id` et non par sa destination : deux connexions internes
+		// partagent la même (la carte courante).
+		html += '<button class="dep-porte" data-dep-conn="' + _escAttr(conn._id) + '"'
+			+ (dispo ? '' : ' disabled') + '>' + (interne ? '🔀 ' : '➔ ') + _escHtml(nom)
 			+ (dispo ? '' : ' — sans grille, pas éditable ici') + '</button>';
 	});
 	depPortesEl.innerHTML = html;
@@ -5816,14 +5796,26 @@ function depRendrePortes() {
 // ⚠️ `chargerLieu` remet à zéro `grid`, `nav`, `cols`, `rows` et `lieuxConnections` SANS rien
 // savoir du mode test : c'est à son gestionnaire de `change` de reposer le jeton, faute de quoi
 // il resterait à des coordonnées périmées sur une carte d'une autre taille. D'où ce relais.
+// Connexion INTERNE : rien à recharger, le jeton saute à l'autre case de la même carte.
 depPortesEl.addEventListener('click', (e) => {
-	const btn = e.target.closest('[data-dep-dest]');
-	if (!btn || btn.disabled) return;
-	const destId = btn.dataset.depDest;
-	const conn = depPortesIci().find(c => _connDest(c).lieu === destId);
-	const arrivee = conn ? _connDest(conn).pos : null;
-	depArriveeAttendue = Array.isArray(arrivee) ? { x: arrivee[0], y: arrivee[1] } : null;
-	lieuSelect.value = destId;
+	const btn = e.target.closest('[data-dep-conn]');
+	if (!btn || btn.disabled || !depPos) return;
+	const conn = depPortesIci().find(c => c._id === btn.dataset.depConn);
+	const dest = conn ? _connAutreBout(conn, currentLocId, [depPos.x, depPos.y]) : null;
+	if (!dest) return;
+	const arrivee = Array.isArray(dest.pos) ? { x: dest.pos[0], y: dest.pos[1] } : null;
+	if (dest.lieu === currentLocId) {
+		if (!arrivee) return;
+		depPos = arrivee;
+		depPlacerToken();
+		depMajFleches();
+		depRendrePortes();
+		setStatus('🚶 🔀 <span>[' + depPos.x + ', ' + depPos.y + ']</span> — terrain '
+			+ (grid[depPos.y] || [])[depPos.x] + '.');
+		return;
+	}
+	depArriveeAttendue = arrivee;
+	lieuSelect.value = dest.lieu;
 	lieuSelect.dispatchEvent(new Event('change'));
 });
 

@@ -48,6 +48,7 @@ Aucune dépendance (ni `package.json`, ni second écosystème), code 1 en échec
 | `test_vue_combat_client` | `syncViewSize` (`combat_telluris.html`), contre un modèle de mise en page | `--step`/`--view-width` qui varient d'un tick à l'autre sans action utilisateur (rétroaction barre de défilement ↔ largeur mesurée) ; écriture ou coupure d'animation sur une notification sans effet |
 | `test_resize_client` | redimensionnement (`admin_map_editor.html`) | `nav`/zones/portes rééchantillonnés, recalage idempotent |
 | `test_lieu_form_client` | formulaire de lieu | capacités ; fusion (`progeniture`, `pnj[1..]`, clés inconnues) |
+| `test_donjon_form_client` | section 🏰 du formulaire de lieu | fusion donjon/salle, changement ou retrait de donjon, `_id` neuf, porte gardée simple vs personnalisée, passages ; « ouvrir puis enregistrer » sans effet |
 | `test_connexions_client` | formulaire de connexion | `link:*` écrasé ; clés du doc/nœud perdues ; case posable |
 | `test_portes_client` | portes de rempart | ordre des nœuds (porte qui change de côté) ; 5 `_id` ; clés perdues |
 | `test_guilde_client` | maison de guilde | étape sautée ou maison dédoublée ; `relation_lieu` écrasé ou clés perdues des docs réécrits ; bureau avec `sous_categorie` |
