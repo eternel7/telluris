@@ -200,6 +200,10 @@ def _refresh_snapshot_stats(acteur: dict) -> None:
 	for code, delta in _buffs_des_effets(acteur).items():
 		if code in stats:
 			stats[code] = max(0, int(stats[code] or 0) + delta)
+	# Volant SOUS COUVERT (`_appliquer_couvert`) : V // 3, après les buffs — c'est la vitesse
+	# effective qui est entravée, et l'entrave survit à l'expiration d'un buff.
+	if acteur.get("sous_couvert"):
+		stats["V"] = int(stats.get("V", 0) or 0) // COUVERT_DIVISEUR
 
 	base = BaseStats(
 		v=stats.get("V", 0), f=stats.get("F", 0), r=stats.get("R", 0),
@@ -1032,8 +1036,57 @@ TERRAIN_FALAISE = 3
 
 
 def _can_fly(actor: dict) -> bool:
-	"""L'acteur peut-il franchir les falaises ? Hook `volant` (inerte tant que non peuplé)."""
+	"""L'acteur peut-il franchir les falaises ? `volant`, posé par `_appliquer_couvert`."""
 	return bool(actor.get("volant"))
+
+
+# ── Vol et couvert ───────────────────────────────────────────────────────────
+# Une espèce taguée `vol` (dragon, griffon, pégase…) VOLE : aucun terrain praticable (`>= 1`)
+# ne la bloque, falaise comprise. Mais dans un lieu COUVERT (tag `couvert` : grotte,
+# catacombes…) elle ne peut pas déployer ses ailes : elle marche, et lourdement — V // 3 et
+# actions // 3. Un dragon ne vole pas dans une grotte.
+#   • `vol_espece` est posé sur le snapshot à sa CONSTRUCTION (monstre, invocation) ou à
+#     l'entrée (monture, depuis son espèce) ; clé ABSENTE sinon : un snapshot ordinaire reste
+#     celui d'avant, à la lettre.
+#   • `combat_doc["couvert"]` se décide à l'entrée et à chaque changement d'étage, depuis les
+#     tags du LIEU du combat (battle map ∪ tags de zone). Absent (combat d'avant) ⇒ découvert.
+#   • ⚠️ V // 3 est appliqué dans `_refresh_snapshot_stats`, APRÈS les buffs : c'est lui qui
+#     recompose déplacement et initiative, et un buff de V qui expire ne doit pas effacer
+#     l'entrave. `actions_max`, lui, est FIGÉ au snapshot (cf. `_refresh_snapshot_stats`) :
+#     sa valeur d'origine est gardée dans `actions_max_libre`, pour la rendre à un étage
+#     découvert.
+TAG_ESPECE_VOL = "vol"
+TAG_LIEU_COUVERT = "couvert"
+COUVERT_DIVISEUR = 3
+
+
+def espece_vole(espece: dict | None) -> bool:
+	"""L'espèce vole-t-elle ? Tag `vol` sur le doc `espece:*`."""
+	return TAG_ESPECE_VOL in ((espece or {}).get("tags") or [])
+
+
+def lieu_couvert(*listes_tags) -> bool:
+	"""Le lieu du combat est-il COUVERT ? Vrai si l'une des listes de tags porte `couvert`
+	(battle map, zone d'exploration, étage)."""
+	return any(TAG_LIEU_COUVERT in (tags or []) for tags in listes_tags)
+
+
+def _appliquer_couvert(acteur: dict, couvert: bool) -> None:
+	"""Pose l'état de vol d'un acteur selon le lieu. Sans `vol_espece`, ne touche à RIEN.
+	Réversible : appelé à chaque changement d'étage, il rend ailes et actions à un étage
+	découvert. Mute sans sauvegarder."""
+	if not acteur.get("vol_espece"):
+		return
+	acteur["volant"] = not couvert
+	if couvert:
+		acteur["sous_couvert"] = True
+	else:
+		acteur.pop("sous_couvert", None)
+	libre = int(acteur.setdefault("actions_max_libre", acteur.get("actions_max", 1)) or 1)
+	acteur["actions_max"] = max(1, libre // COUVERT_DIVISEUR) if couvert else libre
+	# Dérivées (V // 3 : déplacement, initiative…) puis budget du tour sur le nouveau max.
+	_refresh_snapshot_stats(acteur)
+	_refresh_actions(acteur)
 
 
 def _open_grid(w: int = DEFAULT_GRID_W, h: int = DEFAULT_GRID_H) -> dict:
@@ -2507,6 +2560,10 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 	jeton = jetons.jeton_espece(espece)
 	if jeton:
 		snap["jeton"] = jeton
+	# Espèce VOLANTE : l'état de vol (ou l'entrave sous couvert) est posé à l'entrée dans le
+	# lieu du combat (`_appliquer_couvert`). Clé absente sinon, même parti pris que `jeton`.
+	if espece_vole(espece):
+		snap["vol_espece"] = True
 	return snap
 
 
@@ -2664,6 +2721,8 @@ def invoquer(combat_doc: dict, lanceur: dict, sort: dict, grid: dict) -> list:
 		# créatures que CE lancement vient d'appeler. Sans lui, un second sort d'invocation
 		# maintenu adopterait les créatures du premier.
 		snap["sort_id"] = sort.get("id", "")
+		# Créature volante appelée sous couvert : entravée comme les autres.
+		_appliquer_couvert(snap, bool(combat_doc.get("couvert")))
 		snap["pos"] = place["pos"]
 		if place["cap"]:
 			snap["cap"] = place["cap"]
@@ -2769,9 +2828,13 @@ def create_combat_doc(
 		snap["charge_max"] = montures_util.charge_max_porteur(m)
 		# Gabarit relu sur l'ESPÈCE, jamais recopié sur le doc monture : une retouche du
 		# bestiaire vaut tout de suite pour les bêtes déjà achetées (aucune migration).
-		jeton = jetons.jeton_espece(get_doc(m["espece"])) if m.get("espece") else None
+		espece_monture = get_doc(m["espece"]) if m.get("espece") else None
+		jeton = jetons.jeton_espece(espece_monture) if espece_monture else None
 		if jeton:
 			snap["jeton"] = jeton
+		# Pégase, grand faucon… : même règle de vol qu'un monstre (relue sur l'espèce).
+		if espece_vole(espece_monture):
+			snap["vol_espece"] = True
 		montures_snaps.append(snap)
 	joueurs += montures_snaps
 
@@ -2796,6 +2859,12 @@ def create_combat_doc(
 		proteges_snaps.append(snap)
 	joueurs += proteges_snaps
 
+	# Vol ou entrave sous COUVERT (tags de la battle map ∪ tags de zone), AVANT l'ordre
+	# d'initiative : V // 3 abaisse aussi l'initiative d'un volant entravé.
+	couvert = lieu_couvert(zone_tags, (battle_map or {}).get("tags"))
+	for acteur in joueurs + list(monstres):
+		_appliquer_couvert(acteur, couvert)
+
 	# ⚠️ `ordre_initiative` n'accueille QUE les acteurs qui ont un tour : une monture qui y
 	# figurerait obtiendrait un tour que personne ne peut jouer (_resolve_until_player rendrait
 	# la main au client sur un acteur qui n'a pas d'actions) — le combat s'arrêterait là.
@@ -2816,6 +2885,8 @@ def create_combat_doc(
 		"acteur_courant_index": 0,
 		"map_image": map_image,
 		"zone_tags": zone_tags,
+		# Lieu couvert : relu par les invocations (`invoquer`) ; recalculé à chaque étage.
+		"couvert": couvert,
 		"joueurs": joueurs,
 		"monstres": monstres,
 		"log": [{"tour": 1, "acteur": "Système", "kind": "sys", "texte": "Le combat commence !"}],
@@ -3092,6 +3163,13 @@ def changer_d_etage(combat_doc: dict, lieu_doc: dict, point_apparition: dict,
 	combat_doc.pop("grid_dims", None)
 	combat_doc["map_image"] = lieu_doc.get("image", "")
 	combat_doc["zone_tags"] = list(lieu_doc.get("tags") or [])
+	# Couvert ou non, étage par étage : un griffon entravé dans les catacombes retrouve ses
+	# ailes en débouchant sur une salle à ciel ouvert (`_appliquer_couvert` est réversible).
+	# AVANT l'ordre d'initiative ci-dessous, qui lit l'initiative recomposée.
+	couvert = lieu_couvert(combat_doc["zone_tags"])
+	combat_doc["couvert"] = couvert
+	for acteur in list(combat_doc["joueurs"]) + monstres:
+		_appliquer_couvert(acteur, couvert)
 	etages["etage"] = lieu_doc["_id"]
 	etages["passages"] = list(passages)
 	grid = {"dims": lieu_doc["dimensions"], "cells": lieu_doc["cells"],

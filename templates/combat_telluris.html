@@ -2815,7 +2815,8 @@ function seeThroughCell(x, y) {
 // une falaise. ⚠️ La RÈGLE elle-même vit dans `scripts/deplacement.js` (`caseFranchissable`),
 // partagée avec le mode test de l'éditeur — elle était écrite deux fois. Ce qui reste ici est
 // ce qui est PROPRE au combat : les bornes lues sur `GRID.dims` et le vol de l'acteur actif.
-// `volant` est un hook inerte tant que non peuplé.
+// `volant` est posé par le serveur (`combat._appliquer_couvert`) sur les espèces taguées `vol`,
+// retiré sous couvert — un joueur n'en a pas, mais le prédicat lit l'acteur, pas son camp.
 function cellWalkable(x, y) {
 	const g = GRID;
 	if (!g || !g.cells) return true;
