@@ -75,10 +75,13 @@
 	position: relative;
 	width: calc(var(--step) * 17);
 	height: calc(var(--step) * (var(--max-height) - 1 + var(--floor)));
-	margin: 0 auto;
+	margin: 10px;
 	flex-shrink: 0;
 	background: #000;
 	overflow: hidden;
+	border: 1.5px solid var(--border-color);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
 }
 /* Vignette : assombrit les bords du sol (remplace le cadrage qu'apportait le flou,
    désormais retiré). Clippée par la forme iso du .viewport (clip-path + overflow). */
@@ -185,11 +188,32 @@
 	border: 1px dashed rgba(240, 190, 80, 0.95);
 	box-shadow: inset 0 0 8px rgba(240, 190, 80, 0.5);
 }
-/* Alignés à DROITE (choix conservé) : la rangée occupe toute la largeur de `.action-bar`,
-   sous celle du ⚙ et de la grille de slots (cf. grid-template-areas de `.action-bar`). */
-.passages-row { grid-area: passagesrow; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0; margin-bottom: 2px; }
-/* Cale de hauteur d'une rangée sans passage empruntable (cf. renderPassages). */
-.passages-row .passage-cale { visibility: hidden; pointer-events: none; }
+/* Dans `.tour-header`, à DROITE du bandeau d'initiative, avant le 🔊. `margin-left: auto`
+   pousse la rangée à droite ET cale le libellé et le bandeau à gauche : un bouton qui
+   apparaît à son tour prend la marge libre sans décaler les badges (§17).
+   ⚠️ À court de place, c'est le PASSAGE qui cède (`flex-shrink: 4`, libellé en ellipse),
+   jamais le bandeau : en `flex-shrink: 0` avec « Remonter à la surface » en toutes lettres,
+   il écrasait `#initiative-strip` à zéro sur mobile. Surtout PAS de `min-width: 0` ici : le
+   plancher automatique (`min-content`) est l'icône seule, sans lui la pastille est rognée. */
+.passages-row { display: flex; flex-wrap: nowrap; flex: 0 4 auto; gap: 6px; margin-left: auto; }
+/* Pastille dorée : la teinte de la case de passage sur la carte (`.zone-case.passage`), à la
+   hauteur du 🔊 voisin. Icône seule sous 768 px — le nom reste en `title`/`aria-label`. */
+.passage-btn {
+	display: inline-flex; align-items: center; gap: 6px; min-width: 32px; max-width: 220px;
+	height: 32px; padding: 0 12px; border-radius: 16px; cursor: pointer;
+	background: rgba(240, 190, 80, 0.14); border: 1.5px solid var(--gold2); color: var(--gold2);
+	font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+	box-shadow: 0 0 8px rgba(240, 190, 80, 0.35);
+	-webkit-tap-highlight-color: transparent;
+}
+.passage-btn:hover { background: rgba(240, 190, 80, 0.26); }
+.passage-btn:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; }
+.passage-btn .passage-ico { flex-shrink: 0; font-size: 14px; line-height: 1; }
+.passage-btn .passage-lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 768px) {
+	.passage-btn { width: 32px; padding: 0; justify-content: center; }
+	.passage-btn .passage-lbl { display: none; }
+}
 .monster-token {
 	width: var(--step); height: var(--step);
 	display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -633,8 +657,8 @@
    CÔTE (⚙ dans sa propre colonne étroite), `align-items: end` calant le bas du ⚙ sur le
    bas de la grille QUEL QUE SOIT son nombre de rangées — sans ce calage, un ⚙ posé en
    absolu ne coïncidait avec la dernière rangée que pour certains comptes de cases, et
-   sinon retombait seul sur sa propre ligne. Les rangées suivantes (édition, ciblage,
-   passages) restent chacune sur toute la largeur. */
+   sinon retombait seul sur sa propre ligne. Les rangées suivantes (édition, ciblage)
+   restent chacune sur toute la largeur ; les passages de donjon vivent dans `.tour-header`. */
 .action-bar {
 	border-radius: 10px;
     margin: 5px;
@@ -644,10 +668,8 @@
 	grid-template-areas:
 		"gear grid"
 		"editrow editrow"
-		"targetrow targetrow"
-		"passagesrow passagesrow";
+		"targetrow targetrow";
 	align-items: end;
-	gap: 2px;
 }
 /* ⚠️ `.move-section` (fixe en bas, séparant le déplacement de l'attaque/fuite) et le pavé
    lui-même viennent de part-move-panel.html — cf. l'appel `move_panel_css` plus bas. */
@@ -678,16 +700,19 @@
 /* Pavé de déplacement — SOURCE UNIQUE (part-move-panel.html), partagée avec play_town et le
    mode test de l'éditeur. Écarts propres au combat : case de 54 px et SVG de 26 px. */
 {{ movepanel.move_panel_css('.move-section', '.controls', cellule=54, svg=26, flottant=true) }}
+/* Poignée du pavé : comme `.move-head` de play_town. `touch-action:none` — sans lui, au
+   doigt, le navigateur annule le glisser pour faire défiler la page (body est en pan-y). */
+.move-section .move-head {
+	text-align: center; line-height: 1; margin: -4px 0 6px;
+	color: var(--accent-color); font-size: 14px; letter-spacing: 0.3em;
+	cursor: move; user-select: none; touch-action: none;
+}
 /* ── Barre d'action : cases à positions STABLES ────────────────────────────────── */
-#btn-slots-edit { grid-area: gear; width: 45px; }
+#btn-slots-edit { grid-area: gear; width: 45px; margin: 5px;}
 {{ slotbar.slot_bar_css('.slot-grid', '.slot-btn', slots_max, '.slot-plus') }}
 /* Écarts propres au combat : la grille a SA PROPRE colonne (cf. .action-bar), plus large
    que dans la fiche — on la vise sous le feu. */
-.slot-grid {
-	grid-area: grid;
-	align-content: flex-start;
-	min-width: 0;
-}
+.slot-grid { grid-area: grid; align-content: flex-start; min-width: 0; margin: 5px; }
 .slot-btn.atk    { border-color: #cc3333; color: #ff8080; }
 .slot-btn.atk:hover:not(:disabled) { background: #3a1a1a; }
 .slot-btn.loot   { border-color: #8a6d2f; color: #cda349; }
@@ -729,7 +754,6 @@
 	width: 100%;
 	scrollbar-width: thin; /* Rend la barre plus fine */
 	scrollbar-color: #4d4d4d transparent;
-	margin-bottom: 200px;
 }
 .log-entry {
 	font-size: 12px; color: #bbb; padding: 2px 0;
@@ -1048,8 +1072,6 @@
 				<select id="target-select"></select>
 				<button class="action-btn attack-btn" id="btn-confirm" onclick="confirmAttack()">✓ Confirmer</button>
 			</div>
-			<!-- Donjon à étages : un bouton par passage de l'étage (rendu par renderPassages). -->
-			<div class="passages-row" id="passages-row" style="display:none"></div>
 		</div>
 		<!-- Tour header + Initiative strip -->
 		<div class="tour-header">
@@ -1124,6 +1146,10 @@
 					</div>
 				{% endfor %}
 			</div>
+			<!-- Donjon à étages : un bouton par passage de l'étage (rendu par renderPassages).
+			     Dans le bandeau et non dans la barre d'action : il y coûtait une rangée entière,
+			     vide la plupart du temps. -->
+			<div class="passages-row" id="passages-row" style="display:none"></div>
 			<!-- Coupe-son : premier réglage audio du jeu. Son état vit dans localStorage
 			     (par navigateur, pas par personnage) et il coupe AUSSI le son en cours. -->
 			<button type="button" id="btn-son" class="son-btn" title="Couper / rétablir les sons de combat">🔊</button>
@@ -1156,7 +1182,10 @@
 				<div class="log-entry {{ entry.kind or '' }}">{{ entry.texte }}</div>
 			{% endfor %}
 		</div>
-		<div class="move-section">
+		<!-- Pavé FLOTTANT (hors flux, `flottant=true` de part-move-panel) : la barre du haut
+		     est la POIGNÉE (`rendreDeplacable`), comme #move-head de play_town. -->
+		<div class="move-section" id="move-section">
+			<div class="move-head" id="move-head" title="Glisser pour déplacer" aria-hidden="true">⠿</div>
 			{{ movepanel.move_panel('move-controls', fn='doMove', rotation=true,
 				centre={'id': 'btn-passer', 'onclick': "doAction('passer', null)", 'title': 'Passer le tour'}) }}
 		</div>
@@ -1210,6 +1239,8 @@
 {# Emprise des jetons de taille variable — MIROIR de utils/jetons.py. Portées, cases prises,
    ancre de zone et dessin des grands acteurs ; le serveur reste seul juge. #}
 <script src="{{ url_for('scripts', path='jetons.js') }}"></script>
+{# `rendreDeplacable`/`placerPanneau` : la poignée du pavé (partagé avec play_town et l'éditeur). #}
+<script src="{{ url_for('scripts', path='deplacable.js') }}"></script>
 <script>
 // ─── State ────────────────────────────────────────────────────────
 const SERVER_DATA = {
@@ -1995,14 +2026,14 @@ function peindrePassages(layer, j) {
 	});
 }
 
-// Un bouton par passage EMPRUNTABLE maintenant — à son tour, tout le groupe sur la case du
-// passage ou juste à côté (`franchissable`, calculé par le serveur). Les autres ne s'affichent
-// pas : ils se lisent sur la carte (cases de passage). Libellé posé en textContent (nom de
-// lieu = donnée de contenu).
-// ⚠️ RENDU STABLE (CLAUDE.md §17) : le tour des monstres passe sans geste du joueur — la rangée
-// ne doit pas naître ni disparaître à chaque tour, sans quoi la barre d'action changerait de
-// hauteur sous ses yeux. Sur un étage qui a des passages, elle reste donc posée ; vide, elle
-// garde sa hauteur par un bouton INVISIBLE (même classe, donc même hauteur qu'un vrai).
+// Un bouton par passage EMPRUNTABLE maintenant — à son tour, le principal sur la case du
+// passage et le groupe en file derrière lui (`franchissable`, calculé par le serveur). Les
+// autres ne s'affichent pas : ils se lisent sur la carte (cases de passage). Libellé posé en
+// textContent (nom de lieu = donnée de contenu).
+// ⚠️ RENDU STABLE (CLAUDE.md §17) : la rangée vit dans `.tour-header`, dont la hauteur est
+// celle des badges d'initiative (plus hauts qu'un bouton) — un bouton qui paraît à son tour
+// n'y change rien, et sa largeur est prise sur la marge libre (`margin-left: auto`). Plus
+// besoin de la cale invisible qu'exigeait l'ancienne rangée de la barre d'action.
 function renderPassages(data) {
 	const row = document.getElementById('passages-row');
 	const tous = (data.etages || {}).passages || [];
@@ -2011,22 +2042,25 @@ function renderPassages(data) {
 	row.style.display = tous.length ? '' : 'none';
 	row.replaceChildren();
 	actifs.forEach(p => {
+		// Icône et libellé séparés : sous 768 px seule l'icône reste (CSS), le nom passe
+		// dans `title`/`aria-label` — il ne doit jamais manger le bandeau d'initiative.
+		const nom = p.label || 'Passage';
 		const b = document.createElement('button');
-		b.className = 'action-btn';
-		b.textContent = (p.surface ? '🚪 ' : '🪜 ') + (p.label || 'Passage');
-		b.title = 'Emprunter ce passage avec tout le groupe';
+		b.type = 'button';
+		b.className = 'passage-btn';
+		b.title = `${nom} — emprunter ce passage avec tout le groupe`;
+		b.setAttribute('aria-label', nom);
+		const ico = document.createElement('span');
+		ico.className = 'passage-ico';
+		ico.setAttribute('aria-hidden', 'true');
+		ico.textContent = p.surface ? '🚪' : '🪜';
+		const lbl = document.createElement('span');
+		lbl.className = 'passage-lbl';
+		lbl.textContent = nom;
+		b.append(ico, lbl);
 		b.onclick = () => emprunterPassage(p.id);
 		row.appendChild(b);
 	});
-	if (tous.length && !actifs.length) {
-		const cale = document.createElement('button');
-		cale.className = 'action-btn passage-cale';
-		cale.textContent = '🪜';
-		cale.tabIndex = -1;
-		cale.setAttribute('aria-hidden', 'true');
-		cale.disabled = true;
-		row.appendChild(cale);
-	}
 }
 
 // Changement d'étage : la carte (image, grille) change — on recharge la page plutôt que
@@ -2288,6 +2322,26 @@ function majBoutonSon() {
 		majBoutonSon();
 	};
 	majBoutonSon();
+})();
+
+// Pavé déplaçable : sa position vit dans localStorage (préférence du joueur, par navigateur,
+// comme le coupe-son) et survit donc au rechargement d'un changement d'étage. Jamais posée
+// → le CSS `flottant` décide (bas de l'écran, centré sous 768 px).
+const PAVE_POS_CLE = 'telluris.combat.pave_pos';
+(function initPaveDeplacable() {
+	const pave = document.getElementById('move-section');
+	if (!pave) return;
+	let pos = null;
+	try { pos = JSON.parse(localStorage.getItem(PAVE_POS_CLE) || 'null'); } catch (e) { pos = null; }
+	if (pos && Number.isFinite(pos.left) && Number.isFinite(pos.top)) placerPanneau(pave, pos.left, pos.top);
+	rendreDeplacable(pave, document.getElementById('move-head'), p => {
+		try { localStorage.setItem(PAVE_POS_CLE, JSON.stringify(p)); } catch (e) { /* mode privé */ }
+	});
+	// Fenêtre rétrécie (rotation d'un mobile) : le pavé placé à la main est re-borné, sa
+	// poignée reste atteignable.
+	window.addEventListener('resize', () => {
+		if (pave.style.left) placerPanneau(pave, parseFloat(pave.style.left) || 0, parseFloat(pave.style.top) || 0);
+	});
 })();
 
 // Acteur d'un id de snapshot (`monstre_N` / `joueur_N`), monstres ET joueurs confondus.
