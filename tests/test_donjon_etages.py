@@ -208,6 +208,55 @@ def test_tout_le_groupe_doit_etre_au_passage(db):
 	assert combat_util.passage_franchissable(regroupe, p) is True
 
 
+def _trio(*positions):
+	return [joueur_snap(f"joueur_{i}", "character:u_1" if i == 0 else f"aventurier:a{i}",
+						x=x, y=y) for i, (x, y) in enumerate(positions)]
+
+
+def test_un_couloir_en_cul_de_sac_se_franchit_en_file(db):
+	"""Cas réel (combat:84de35e8…, 24/09/2026) : sortie au fond d'un couloir d'une case de
+	large, UNE seule voisine praticable — trois combattants ne pouvaient jamais être tous
+	à une case du passage, et le groupe restait enfermé dans le donjon."""
+	p = _passage("connection:surface", 17, 10)
+	en_file = combat_doc(_trio((17, 10), (17, 9), (17, 8)), [], etages=_etages([p]))
+	assert combat_util.passage_franchissable(en_file, p) is True
+
+
+def test_une_file_rompue_ne_franchit_pas(db):
+	p = _passage("connection:surface", 17, 10)
+	trou = combat_doc(_trio((17, 10), (17, 9), (17, 7)), [], etages=_etages([p]))
+	assert combat_util.passage_franchissable(trou, p) is False
+	# Adjacents entre eux mais détachés du passage : la file doit partir de la tête.
+	detaches = combat_doc(_trio((17, 10), (10, 9), (10, 8)), [], etages=_etages([p]))
+	assert combat_util.passage_franchissable(detaches, p) is False
+
+
+def test_un_groupe_de_sept_en_diagonale_franchit(db):
+	"""Chaque membre est adjacent au précédent : la file s'étire sur 7 cases depuis le
+	principal, en diagonale comme en ligne droite."""
+	p = _passage("connection:surface", 5, 5)
+	diagonale = combat_doc(_trio(*[(5 + i, 5 + i) for i in range(7)]), [],
+						   etages=_etages([p]))
+	assert combat_util.passage_franchissable(diagonale, p) is True
+
+
+def test_la_file_part_du_principal(db):
+	"""Un compagnon sur le passage ne suffit pas : c'est le principal qui l'emprunte."""
+	p = _passage("connection:surface", 17, 10)
+	compagnon_dessus = combat_doc(_trio((17, 9), (17, 10), (17, 8)), [], etages=_etages([p]))
+	assert combat_util.passage_franchissable(compagnon_dessus, p) is False
+
+
+def test_principal_a_terre_la_file_part_d_un_combattant_debout(db):
+	"""Le principal à terre suit comme tout membre à terre, sinon le groupe restait
+	enfermé : la file part alors de qui se tient sur le passage."""
+	p = _passage("connection:surface", 17, 10)
+	groupe = _trio((1, 1), (17, 10), (17, 9))
+	groupe[0]["currentPV"] = 0
+	doc = combat_doc(groupe, [], etages=_etages([p]))
+	assert combat_util.passage_franchissable(doc, p) is True
+
+
 def test_une_monture_ou_un_membre_a_terre_suit_sans_condition(db):
 	p = _passage("connection:descente", 5, 5)
 	groupe = _groupe(5, 5, 12, 12)

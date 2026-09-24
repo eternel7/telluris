@@ -3095,19 +3095,36 @@ def _appliquer_fumble(combat_doc: dict, acteur: dict) -> None:
 
 
 def passage_franchissable(combat_doc: dict, passage: dict) -> bool:
-	"""Le groupe peut-il emprunter ce passage ? Un combattant debout doit être SUR sa case,
-	et tous les autres combattants debout à une case au plus. Montures, personnes escortées,
-	invocations et membres à terre suivent le groupe sans condition."""
+	"""Le groupe peut-il emprunter ce passage ? Le personnage PRINCIPAL doit être SUR sa
+	case, et tous les combattants debout former avec lui une FILE continue : chacun adjacent
+	(Chebyshev ≤ 1, entre emprises) à un autre, de proche en proche depuis le principal —
+	un groupe de 7 peut s'étirer sur 7 cases, diagonale comprise. Montures, personnes
+	escortées, invocations et membres à terre suivent sans condition ; le principal à terre
+	aussi, la file part alors de n'importe quel combattant debout sur la case.
+
+	⚠️ Surtout pas « tous à une case du passage » : au fond d'un couloir d'une case de large,
+	le passage n'a qu'UNE voisine praticable, et un groupe de trois y restait enfermé pour
+	toujours (on ne fuit pas un donjon) — cf. `test_un_couloir_en_cul_de_sac_se_franchit_en_file`."""
 	pos = passage.get("pos") or {}
-	case = {"pos": {"x": pos.get("x"), "y": pos.get("y")}}
-	if case["pos"]["x"] is None or case["pos"]["y"] is None:
+	x, y = pos.get("x"), pos.get("y")
+	if x is None or y is None:
 		return False
 	combattants = _combattants_vivants(combat_doc)
-	if not combattants:
+	principal = next((j for j in combattants
+					  if j.get("character_id") == combat_doc.get("character_id")), None)
+	candidats = [principal] if principal else combattants
+	tete = next((j for j in candidats if jetons.couvre(j, x, y)), None)
+	if tete is None:
 		return False
-	if not any(jetons.couvre(j, case["pos"]["x"], case["pos"]["y"]) for j in combattants):
-		return False
-	return all(_cheby(j, case) <= 1 for j in combattants)
+	relies, frontiere = [tete], [tete]
+	restants = [j for j in combattants if j is not tete]
+	while frontiere and restants:
+		courant = frontiere.pop()
+		voisins = [j for j in restants if _cheby(courant, j) <= 1]
+		restants = [j for j in restants if _cheby(courant, j) > 1]
+		relies.extend(voisins)
+		frontiere.extend(voisins)
+	return not restants
 
 
 def annoter_passages(combat_doc: dict) -> dict:
@@ -4701,7 +4718,7 @@ def _resoudre_action_joueur(
 		if passage is None:
 			return {"error": "Passage inconnu."}
 		if not passage_franchissable(combat_doc, passage):
-			return {"error": "Tout le groupe doit se tenir au passage pour l'emprunter."}
+			return {"error": "Tout le groupe doit se tenir au passage, en file derrière celui qui l'occupe."}
 		if passage.get("surface"):
 			_sortir_du_donjon(combat_doc, passage)
 			result = {"sortie": True}

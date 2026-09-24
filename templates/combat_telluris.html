@@ -187,7 +187,7 @@
 }
 /* Alignés à DROITE (choix conservé) : la rangée occupe toute la largeur de `.action-bar`,
    sous celle du ⚙ et de la grille de slots (cf. grid-template-areas de `.action-bar`). */
-.passages-row { grid-area: passagesrow; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+.passages-row { grid-area: passagesrow; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0; margin-bottom: 2px; }
 /* Cale de hauteur d'une rangée sans passage empruntable (cf. renderPassages). */
 .passages-row .passage-cale { visibility: hidden; pointer-events: none; }
 .monster-token {
@@ -638,7 +638,7 @@
 .action-bar {
 	border-radius: 10px;
     margin: 5px;
-	padding: 5px;
+	padding: 0;
 	display: grid;
 	grid-template-columns: 45px 1fr;
 	grid-template-areas:
@@ -647,7 +647,7 @@
 		"targetrow targetrow"
 		"passagesrow passagesrow";
 	align-items: end;
-	gap: 10px;
+	gap: 2px;
 }
 /* ⚠️ `.move-section` (fixe en bas, séparant le déplacement de l'attaque/fuite) et le pavé
    lui-même viennent de part-move-panel.html — cf. l'appel `move_panel_css` plus bas. */
