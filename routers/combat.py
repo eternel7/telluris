@@ -94,6 +94,11 @@ class StartCombatRequest(BaseModel):
     modificateurs: dict = {}
 
 
+class LootAttribution(BaseModel):
+    monstre_id: str
+    beneficiaire_id: str  # character_id d'un membre du combat (character:* ou aventurier:*)
+
+
 class ActionRequest(BaseModel):
     type: str
     cible_id: str | None = None
@@ -109,11 +114,9 @@ class ActionRequest(BaseModel):
     composants: list[str] = []
     # Action « competence » : id de la compétence active (re-vérifiée serveur).
     competence_id: str | None = None
-
-
-class LootAttribution(BaseModel):
-    monstre_id: str
-    beneficiaire_id: str  # character_id d'un membre du combat (character:* ou aventurier:*)
+    # Action « emprunter » (donjon à étages) : répartition du butin de l'étage vidé qu'on
+    # quitte. Absent = pas encore décidé (le moteur renvoie les carcasses sans bouger).
+    attributions: list[LootAttribution] | None = None
 
 
 class CollectLootRequest(BaseModel):
@@ -557,7 +560,10 @@ async def combat_action(
         if competence_arg is None or not competence_utilisable_combat(competence_arg):
             raise HTTPException(status_code=422, detail="Compétence inutilisable en combat")
 
-    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg, competence=competence_arg)
+    attributions = None if body.attributions is None else [
+        {"monstre_id": a.monstre_id, "beneficiaire_id": a.beneficiaire_id}
+        for a in body.attributions]
+    action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg, competence=competence_arg, attributions=attributions)
     # Donjon à étages : le passage vers un autre étage est validé par le moteur, l'étage
     # suivant (carte, monstres, passages) est chargé ICI — le moteur ne lit pas la base.
     if action_result.get("passage"):

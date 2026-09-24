@@ -3142,6 +3142,76 @@ def _monstres_de_l_expedition(combat_doc: dict) -> list:
 	return archives + list(combat_doc.get("monstres") or [])
 
 
+def _etage_nettoye(combat_doc: dict) -> bool:
+	"""Plus aucun ennemi vivant à l'étage courant."""
+	return all(not m.get("vivant", True) for m in combat_doc.get("monstres") or [])
+
+
+def butin_d_etage(combat_doc: dict) -> list:
+	"""Carcasses de l'étage courant à répartir en le quittant : `[{monstre_id, item_id, nom,
+	poids}]`, celles déjà ramassées en combat exclues.
+
+	⚠️ Poids tirés UNE fois et mémorisés sur `etages.butin_etage` (clé = l'étage) : l'overlay
+	peut être fermé puis rouvert, un nouveau tirage à chaque ouverture laisserait le joueur
+	relancer le dé jusqu'à obtenir la carcasse légère."""
+	etages = combat_doc["etages"]
+	memo = etages.get("butin_etage") or {}
+	if memo.get("etage") != etages.get("etage"):
+		dispo = []
+		for m in combat_doc.get("monstres") or []:
+			if m.get("vivant", True) or m.get("loote"):
+				continue
+			payload = _carcasse_payload(m)
+			if payload:
+				dispo.append(payload)
+		memo = {"etage": etages.get("etage"), "dispo": dispo}
+		etages["butin_etage"] = memo
+	loote = {m["id"] for m in combat_doc.get("monstres") or [] if m.get("loote")}
+	return [d for d in memo.get("dispo") or [] if d.get("monstre_id") not in loote]
+
+
+def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -> str | None:
+	"""Met les carcasses attribuées dans le `butin_ramasse` de leur bénéficiaire — celui que
+	`_finalize_membre` verse au sac quelle que soit l'issue. Ce que personne n'emporte reste à
+	l'étage. Refus GLOBAL (rien n'est pris) si un bénéficiaire est hors du groupe ou
+	surchargé : miroir de `/collect`, charge lue sur le SNAPSHOT. Renvoie l'erreur ou None."""
+	par_mid = {d["monstre_id"]: d for d in dispo}
+	# Mêmes bénéficiaires que `/collect` : ni monture morte, ni personne escortée.
+	membres = {j["character_id"]: j for j in combat_doc["joueurs"]
+			   if j.get("character_id") and not j.get("morte") and not j.get("est_protege")}
+	par_benef: dict = {}
+	for a in attributions or []:
+		mid, cid = a.get("monstre_id"), a.get("beneficiaire_id")
+		if mid not in par_mid:
+			continue
+		if cid not in membres:
+			return "Bénéficiaire hors du groupe de combat."
+		par_benef.setdefault(cid, []).append(mid)
+	for cid, mids in par_benef.items():
+		j = membres[cid]
+		if j.get("charge", 0) + sum(par_mid[m]["poids"] for m in mids) > j.get("charge_max", 0) + 1e-6:
+			return f"Charge maximale dépassée pour {j.get('nom', 'ce personnage')}."
+	monstres = {m["id"]: m for m in combat_doc.get("monstres") or []}
+	for cid, mids in par_benef.items():
+		j = membres[cid]
+		for mid in mids:
+			d, monstre = par_mid[mid], monstres.get(mid) or {}
+			item = _ensure_loot_item(monstre.get("espece_id", ""), monstre.get("nom", ""))
+			monstre["loote"] = True
+			j.setdefault("butin_ramasse", []).append({"item": d["item_id"], "poids": d["poids"]})
+			j["charge"] = round(j.get("charge", 0) + d["poids"], 2)
+			_ajuster_charge_magique(j, d["poids"], charge_magie.coefficient_item(item or {}))
+			combat_doc["log"].append({
+				"tour": combat_doc["tour"],
+				"acteur": j.get("nom", ""),
+				"kind": "sys",
+				"texte": f"{j.get('nom', '')} emporte {d.get('nom', 'une carcasse')}.",
+			})
+		_recompute_player_deplacement(j)
+	combat_doc["etages"].pop("butin_etage", None)
+	return None
+
+
 def _sortir_du_donjon(combat_doc: dict, passage: dict) -> None:
 	"""Remontée à la surface : la SEULE victoire d'un donjon à étages. L'XP est celle de
 	toute la descente ; `sortie` est appliquée au personnage par `finalize_combat`, dans la
@@ -4478,13 +4548,14 @@ def resolve_action(
 	combat_doc: dict, action_type: str, cible_id: str | None = None,
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
 	mode: str | None = None, item: dict | None = None, sort: dict | None = None,
-	competence: dict | None = None,
+	competence: dict | None = None, attributions: list | None = None,
 ) -> dict:
 	"""Résout une action du joueur (cf. `_resoudre_action_joueur`), puis remet les AURAS en
 	accord avec les positions : un pas, un saut ou une invocation peut faire entrer ou
-	sortir un allié de la zone d'un porteur. Une action refusée n'a rien bougé."""
+	sortir un allié de la zone d'un porteur. Une action refusée n'a rien bougé.
+	`attributions` : répartition du butin d'étage (`emprunter`, donjon à étages)."""
 	result = _resoudre_action_joueur(combat_doc, action_type, cible_id, dx, dy, sens, mode,
-									 item, sort, competence)
+									 item, sort, competence, attributions)
 	if not (result or {}).get("error"):
 		_recalculer_auras(combat_doc)
 	return result
@@ -4494,7 +4565,7 @@ def _resoudre_action_joueur(
 	combat_doc: dict, action_type: str, cible_id: str | None = None,
 	dx: int | None = None, dy: int | None = None, sens: int | None = None,
 	mode: str | None = None, item: dict | None = None, sort: dict | None = None,
-	competence: dict | None = None,
+	competence: dict | None = None, attributions: list | None = None,
 ) -> dict:
 	ordre = combat_doc["ordre_initiative"]
 	actor_id = ordre[combat_doc["acteur_courant_index"]]
@@ -4719,6 +4790,18 @@ def _resoudre_action_joueur(
 			return {"error": "Passage inconnu."}
 		if not passage_franchissable(combat_doc, passage):
 			return {"error": "Tout le groupe doit se tenir au passage, en file derrière celui qui l'occupe."}
+		# Étage vidé qu'on quitte pour un AUTRE étage : son butin se répartit avant de partir
+		# (la sortie vers la surface a déjà le sien, `butin_disponible` à la victoire).
+		# `attributions` None = pas encore décidé → on renvoie les carcasses sans bouger ;
+		# une liste (même vide) = la répartition choisie, appliquée avant le changement.
+		if not passage.get("surface") and _etage_nettoye(combat_doc):
+			dispo = butin_d_etage(combat_doc)
+			if dispo and attributions is None:
+				return {"butin_etage": dispo, "passage_id": passage.get("id")}
+			if dispo:
+				erreur = _repartir_butin_d_etage(combat_doc, dispo, attributions)
+				if erreur:
+					return {"error": erreur}
 		if passage.get("surface"):
 			_sortir_du_donjon(combat_doc, passage)
 			result = {"sortie": True}
@@ -5200,6 +5283,12 @@ def _finalize_monture(combat_doc: dict, snap: dict, doc: dict, status: str,
 	if combat_id in rewarded:
 		return False
 
+	# Carcasses chargées sur la bête au changement d'étage d'un donjon (`butin_ramasse`) :
+	# dans son sac AVANT l'aiguillage, donc déversées au sol avec le reste si elle est morte.
+	ramasse = [i for i in snap.get("butin_ramasse", []) if i]
+	if ramasse:
+		doc["inventaire"] = list(doc.get("inventaire") or []) + ramasse
+
 	if snap.get("morte") and character_stats.MONTURE_MORT_DEFINITIVE:
 		cargaison = montures_util.tuer(character, doc)
 		if cargaison:
@@ -5336,6 +5425,10 @@ def finalize_combat(combat_doc: dict) -> bool:
 		for m in combat_doc["monstres"]:
 			if m.get("loote"):
 				continue  # déjà ramassée pendant le combat
+			# Un vivant ne laisse pas de carcasse : une sortie de donjon à étages est une
+			# victoire même quand des monstres rôdent encore à l'étage.
+			if m.get("vivant", False):
+				continue
 			payload = _carcasse_payload(m)
 			if payload:
 				dispo.append(payload)

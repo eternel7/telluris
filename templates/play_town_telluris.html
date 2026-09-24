@@ -652,10 +652,6 @@
 				position: absolute; inset: 0;
 				overflow-y: auto; overscroll-behavior: contain;
 			}
-			/* Plancher de liste des accordéons ramené au wrapper (7rem) : à 35vh, les
-			   six en-têtes de ⚡ + la barre de combat débordaient d'un écran de téléphone,
-			   et l'onglet défilait AUTOUR d'une liste qui défile. */
-			.sh-acc-fit .acc-body > .sh-scroll > .sh-rel-scroll { min-height: 0; }
 		}
 		.sh-section {
 			font-size: 0.95rem;
@@ -974,7 +970,10 @@
 		/* Les 2 modes optionnels (🪃 Jet, 🏹 Tir) tiennent côte à côte dès que la place le
 		   permet — le conteneur wrap, chaque case garde une largeur mini plutôt que de
 		   forcer toute la largeur du panneau comme une ligne de sac/sort ordinaire. */
-		#sh-modes-attaque { display: flex; flex-wrap: wrap; gap: 4px 50px; max-height: fit-content;}
+		/* ⚠️ Ni `max-height` ici (un id l'emporterait sur celui de l'accordéon et la liste
+		   ne serait plus bornée, donc plus défilante), ni l'`align-content: stretch` par
+		   défaut (les rangées s'étireraient sur la hauteur du scroller). */
+		#sh-modes-attaque { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px 50px; }
 		#sh-modes-attaque .sh-skill { flex: 1 1 220px; border: 1px solid var(--border-color); padding: 10px;}
 		/* Mobile : ne pas tronquer le sac / le sol. Le contenu (icône, nom, poids, rareté)
 		   passe sur autant de lignes que nécessaire ; les boutons restent groupés à droite. */
@@ -1134,9 +1133,9 @@
 		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
 		/* ── Accordéon d'ONGLET de la fiche (⚡ 🤝 📜 📖) : `.sh-acc-fit` ─────────────
-		   Même disposition que #sell-panel : en-têtes à hauteur naturelle, UNE section
-		   ouverte qui prend tout le reste, et c'est sa liste (`.sh-scroll` > scroller)
-		   qui défile. JS commun : SHEET_ACC / toggleOngletSection / _ongletRestaurer.
+		   En-têtes à hauteur naturelle, UNE section ouverte qui prend la place de son
+		   contenu, au plus tout le reste — sa liste (`.sh-scroll` > scroller) défile
+		   alors. JS commun : SHEET_ACC / toggleOngletSection / _ongletRestaurer.
 		   ⚠️ Hors du flux (`position:absolute`) : leur contenu est extensible (la zone
 		   ouverte prend tout), ils ne doivent PAS dicter la hauteur commune — ils prennent
 		   celle des onglets à hauteur naturelle (📊 🎒), plancher = la fenêtre
@@ -1157,16 +1156,24 @@
 		/* `display:flex` ci-dessus écraserait le `display:none` de l'attribut `hidden`
 		   (👥 Compagnons, masquée tant qu'il n'y a personne). */
 		.sh-acc-fit > .acc-section[hidden] { display: none; }
-		.sh-acc-fit > .acc-section.open { flex: 1 1 auto; }
+		/* L'ouverte prend la place de son CONTENU, pas toute la place : `0 1 auto` ne grandit
+		   pas (deux modes d'attaque n'ont rien à faire d'un cadre vide de la hauteur de
+		   l'onglet) mais RÉTRÉCIT jusqu'à tenir — c'est alors sa liste qui défile. */
+		.sh-acc-fit > .acc-section.open { flex: 0 1 auto; }
 		/* L'en-tête garde l'identité typographique des `.sh-section` qu'il remplace. */
 		.sh-acc-fit .acc-head { color: var(--accent-color); text-transform: uppercase; font-size: .95rem; text-align: left; gap: .5rem; }
 		.sh-acc-fit .acc-body { padding: .4rem .5rem; min-height: 0; }
 		.sh-acc-fit .acc-section.open > .acc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
 		.sh-acc-fit .acc-body > * { flex: 0 0 auto; }
-		/* Plancher de la zone ouverte : au-dessous, une liste ne montre plus une ligne
-		   entière et l'accordéon ne sert plus à rien. */
-		.sh-acc-fit .acc-body > .sh-scroll { display: flex; flex: 1 1 auto; min-height: 7rem; }
-		.sh-acc-fit .acc-body > .sh-scroll > .sh-rel-scroll { max-height: none; flex: 1 1 auto; min-height: 35vh; overflow-y: scroll; }
+		/* Plancher de la zone ouverte, porté par le WRAPPER : au-dessous, une liste ne montre
+		   plus une ligne entière et l'accordéon ne sert plus à rien. Le scroller, lui, n'a
+		   pas de plancher propre — un plancher en `vh` imposait un cadre vide sous une
+		   liste courte. `overflow-y` reste celui de la brique (`auto`) : pas de gouttière
+		   vide quand rien ne déborde. */
+		/* 4.5rem ≈ une ligne `.sh-skill` (58px) : plus haut, une liste d'UNE ligne (les deux
+		   modes côte à côte en desktop) retrouvait un vide sous elle. */
+		.sh-acc-fit .acc-body > .sh-scroll { display: flex; flex: 1 1 auto; min-height: 4.5rem; }
+		.sh-acc-fit .acc-body > .sh-scroll > .sh-rel-scroll { max-height: none; flex: 1 1 auto; min-height: 0; }
 		/* `float` ne joue plus dans un conteneur flex : le compteur de points se range
 		   à droite de lui-même. */
 		#sh-competences > .pts-dispo { align-self: flex-end; }

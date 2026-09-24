@@ -337,6 +337,102 @@ def test_une_defaite_laisse_le_personnage_la_ou_il_est_descendu(db):
 	assert perso["xp_total"] == 0
 
 
+# ── Butin d'un étage vidé ────────────────────────────────────────────────────────
+
+def _carcasse_rat(db, poids=4):
+	item_id = combat_util._loot_item_id("espece:rat")
+	db[item_id] = {"_id": item_id, "type": "item", "nom": "Carcasse de rat", "poids": poids}
+	return item_id
+
+
+def _etage_vide(db, poids=4):
+	"""Groupe au passage de descente, deux rats morts sur l'étage."""
+	item_id = _carcasse_rat(db, poids)
+	p = _passage("connection:descente", 5, 5)
+	morts = [monstre_snap("monstre_0", x=0, y=0, vivant=False),
+			 monstre_snap("monstre_1", x=1, y=0, vivant=False)]
+	return combat_doc(_groupe(5, 5, 5, 6), morts, etages=_etages([p])), p, item_id
+
+
+def test_quitter_un_etage_vide_propose_d_abord_son_butin(db):
+	doc, _, item_id = _etage_vide(db)
+	res = combat_util.resolve_action(doc, "emprunter", "connection:descente")
+	assert res["passage_id"] == "connection:descente"
+	assert [d["monstre_id"] for d in res["butin_etage"]] == ["monstre_0", "monstre_1"]
+	assert all(d["item_id"] == item_id for d in res["butin_etage"])
+	# Rien n'a bougé, et la liste est la MÊME à la réouverture (poids non retirés).
+	assert doc["etages"]["etage"] == "lieu:etage_1" and doc["status"] == "active"
+	assert combat_util.resolve_action(doc, "emprunter", "connection:descente") == res
+
+
+def test_la_repartition_va_au_butin_ramasse_puis_le_groupe_passe(db):
+	doc, p, item_id = _etage_vide(db)
+	res = combat_util.resolve_action(doc, "emprunter", "connection:descente", attributions=[
+		{"monstre_id": "monstre_0", "beneficiaire_id": "aventurier:guilde_ami"}])
+	assert res == {"passage": p}
+	principal, compagnon = doc["joueurs"]
+	assert compagnon["butin_ramasse"] == [{"item": item_id, "poids": 4}]
+	assert compagnon["charge"] == 4 and principal["butin_ramasse"] == []
+	# Ce que personne n'emporte reste à l'étage.
+	assert [m.get("loote", False) for m in doc["monstres"]] == [True, False]
+	assert "butin_etage" not in doc["etages"]
+
+
+def test_une_repartition_vide_laisse_tout_a_l_etage(db):
+	doc, p, _ = _etage_vide(db)
+	res = combat_util.resolve_action(doc, "emprunter", "connection:descente", attributions=[])
+	assert res == {"passage": p}
+	assert not any(m.get("loote") for m in doc["monstres"])
+
+
+def test_une_surcharge_refuse_toute_la_repartition(db):
+	doc, _, _ = _etage_vide(db, poids=100)
+	res = combat_util.resolve_action(doc, "emprunter", "connection:descente", attributions=[
+		{"monstre_id": "monstre_0", "beneficiaire_id": "character:u_1"},
+		{"monstre_id": "monstre_1", "beneficiaire_id": "character:u_1"}])
+	assert "error" in res
+	assert doc["joueurs"][0]["butin_ramasse"] == [] and doc["joueurs"][0]["charge"] == 0
+	assert not any(m.get("loote") for m in doc["monstres"])
+
+
+def test_une_personne_escortee_ne_recoit_pas_de_butin_d_etage(db):
+	doc, _, _ = _etage_vide(db)
+	doc["joueurs"].append(joueur_snap("joueur_2", "protege:enfant", x=6, y=6,
+									  jouable=False, est_protege=True))
+	res = combat_util.resolve_action(doc, "emprunter", "connection:descente", attributions=[
+		{"monstre_id": "monstre_0", "beneficiaire_id": "protege:enfant"}])
+	assert "error" in res
+
+
+def test_un_etage_ou_rodent_des_monstres_ne_propose_rien(db):
+	doc, p, _ = _etage_vide(db)
+	doc["monstres"].append(monstre_snap("monstre_2", x=12, y=12))
+	assert combat_util.resolve_action(doc, "emprunter", "connection:descente") == {"passage": p}
+
+
+def test_la_sortie_ne_propose_pas_la_carcasse_d_un_vivant(db):
+	_carcasse_rat(db)
+	db["character:u_1"] = character()
+	sortie = _passage("connection:sortie", 5, 5, vers="lieu:lutecia", surface=True)
+	doc = combat_doc([joueur_snap("joueur_0", "character:u_1", x=5, y=5)],
+					 [monstre_snap("monstre_0", vivant=False), monstre_snap("monstre_1")],
+					 etages=_etages([sortie]))
+	combat_util.resolve_action(doc, "emprunter", "connection:sortie")
+	combat_util.finalize_combat(doc)
+	assert [d["monstre_id"] for d in doc["butin_disponible"]] == ["monstre_0"]
+
+
+def test_une_monture_garde_le_butin_charge_sur_elle(db):
+	perso = character()
+	bete = {"_id": "monture:ane", "type": "monture", "inventaire": [{"item": "item:sel"}],
+			"currentPV": 30, "combats_recompenses": []}
+	snap = joueur_snap("joueur_1", "monture:ane", est_monture=True,
+					   butin_ramasse=[{"item": "item:carcasse_rat", "poids": 4}])
+	doc = combat_doc([joueur_snap("joueur_0", perso["_id"]), snap], [], status="victoire")
+	combat_util._finalize_monture(doc, snap, bete, "victoire", perso)
+	assert bete["inventaire"] == [{"item": "item:sel"}, {"item": "item:carcasse_rat", "poids": 4}]
+
+
 def test_annoter_passages(db):
 	p1 = _passage("connection:a", 5, 5)
 	p2 = _passage("connection:b", 0, 0)
