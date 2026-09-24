@@ -60,7 +60,9 @@
 		body {
 			background-color: var(--bg-color);
 			color: var(--text-color);
-			min-height: 100vh;
+			/* `svh` : sur mobile, `100vh` vaut la fenêtre SANS barre d'adresse — plus
+			   haute que ce qu'on voit quand la barre est là, et la page défilait pour rien. */
+			min-height: 100svh;
 			display: flex;
 			justify-content: center;
 			align-items: center;
@@ -470,12 +472,17 @@
 			display: none !important; 
 		}
 		/* FICHE PERSONNAGE */
+		/* Plancher = la fenêtre (le calage que seul ⚡ portait), pour TOUS les onglets.
+		   `svh` et non `dvh` : la plus petite fenêtre mobile, stable quand la barre
+		   d'adresse se replie — `dvh` redimensionnerait la fiche au défilement (§17).
+		   20px = le padding du body. */
 		#sheet-panel {
 			display: flex;
 			inset: 0;
 			flex-direction: column;
 			height: auto;
 			bottom: auto;
+			min-height: calc(100svh - 20px);
 		}
 		/* PANNEAU VENTE (marchand) */
 		#purse {
@@ -603,14 +610,52 @@
 			background: linear-gradient(to right, transparent, rgba(0,0,0,0.55));
 			pointer-events: none;
 		}
+		/* ── Taille de la fiche : identique d'un onglet à l'autre ──────────────────
+		   Les onglets s'EMPILENT dans la même cellule de grille : l'inactif est
+		   `visibility:hidden` (hors clic, focus et lecteur d'écran) mais garde sa place,
+		   donc la cellule prend la hauteur du plus haut et changer d'onglet ne fait rien
+		   bouger. Mesuré par le navigateur à la largeur RÉELLE : rien à recalculer au
+		   passage paysage ↔ portrait ni sur mobile (aucun JS, Convention §17).
+		   ⚡ n'entre pas dans le calcul (`position:absolute`, cf. #sh-competences) : il
+		   remplit la place que les autres lui laissent, plancher = la fenêtre. */
 		.sheet-body {
 			padding: 12px;
+			display: grid;
+			grid-template-columns: minmax(0, 1fr);
+			position: relative;
+			flex: 1 1 auto;
 		}
 		.sheet-panel {
-			display: none;
+			grid-area: 1 / 1;
+			visibility: hidden;
 		}
 		.sheet-panel.active {
-			display: block;
+			visibility: visible;
+		}
+		/* Onglets masqués en mode compagnon : ils ne dimensionnent pas sa fiche. */
+		body.sheet-compagnon #sh-quetes,
+		body.sheet-compagnon #sh-relations,
+		body.sheet-compagnon #sh-journal { display: none; }
+		/* Mobile PORTRAIT : la fiche est BORNÉE à la fenêtre — la page ne défile plus,
+		   chaque onglet défile chez lui (📊 🎒 en entier, les accordéons dans leur
+		   liste). Tous les onglets passent hors du flux : la hauteur ne vient plus du
+		   plus haut d'entre eux, mais de la fenêtre.
+		   `svh` : fenêtre AVEC barre d'adresse — la fiche tient quand la barre est là,
+		   et comme la page ne défile pas, la barre ne se replie jamais (§17).
+		   `overscroll-behavior: contain` : arrivé au bout d'un onglet, le geste ne
+		   repart pas vers la page (ni vers le « tirer pour rafraîchir »). */
+		@media (max-width: 768px) and (orientation: portrait) {
+			#sheet-panel { height: 100svh; min-height: 0; }
+			#sheet-panel .sheet-right-col,
+			#sheet-panel .sheet-body { min-height: 0; }
+			#sheet-panel .sheet-panel {
+				position: absolute; inset: 0;
+				overflow-y: auto; overscroll-behavior: contain;
+			}
+			/* Plancher de liste des accordéons ramené au wrapper (7rem) : à 35vh, les
+			   six en-têtes de ⚡ + la barre de combat débordaient d'un écran de téléphone,
+			   et l'onglet défilait AUTOUR d'une liste qui défile. */
+			.sh-acc-fit .acc-body > .sh-scroll > .sh-rel-scroll { min-height: 0; }
 		}
 		.sh-section {
 			font-size: 0.95rem;
@@ -893,8 +938,8 @@
 		   WRAPPER : posée sur l'élément qui défile, elle remonterait avec le contenu
 		   — ne jamais remettre la règle sur le scroller lui-même.
 		   .scrollable = « il reste quelque chose à faire défiler » : bascule comptée
-		   en JS pour les sacs (length > INV_VISIBLE), posée EN DUR dans le markup
-		   pour les listes de la fiche (hauteur en vh, aucun compteur ne s'applique). */
+		   en JS pour les sacs (length > INV_VISIBLE), MESURÉE (_majOmbreScroll) pour
+		   les listes qui prennent la hauteur restante (marchand, accordéons de la fiche). */
 		.sh-scroll { position: relative; }
 		.sh-scroll.scrollable:not(:has(.sh-empty))::after {
 			content: ''; position: absolute; left: 0; right: 0; bottom: 0;
@@ -909,9 +954,6 @@
 			overflow-y: auto;
 			scrollbar-width: thin;
 			scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-		}
-		#sh-rel-lieux {
-			max-height: 54vh;
 		}
 		/* Groupe des boutons d'action d'une ligne (sac/sol) → reste solidaire à droite. */
 		.sh-inv-actions { display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; }
@@ -1091,41 +1133,43 @@
 		.sh-effet-chip { font-size: 0.8rem; padding: 3px 8px; background: var(--btn-bg); border: 1px solid var(--border-color); border-radius: 12px; white-space: nowrap; }
 		.sh-effet-chip .sh-effet-restants { color: var(--muted); margin-left: 4px; }
 		.sh-quest { padding: 10px; background: var(--btn-bg); border: 1px solid var(--border-color); margin-bottom: 8px; }
-		/* Hauteurs par famille de liste : la classe est portée par le WRAPPER, la
-		   contrainte s'applique au scroller. Listes de l'onglet ⚡ (sorts, écoles,
-		   compétences, apprentissages) : le contenu est réécrit en innerHTML dans
-		   le scroller, l'ombre vit dans le wrapper et survit à chaque rendu client. */
-		.sh-quest-list-active > .sh-rel-scroll { min-height: 35vh; max-height : 38vh; }
-		.sh-quest-list-ended > .sh-rel-scroll { max-height : 35vh; }
-		.sh-capa-list > .sh-rel-scroll { max-height: 34vh; }
-		.sh-jnl-list          > .sh-rel-scroll { max-height: 34vh; }
-		/* ── Onglet ⚡ : les six zones en accordéon, une seule ouverte ─────────────
-		   Même disposition que #sell-panel : en-têtes à hauteur naturelle, la section
-		   OUVERTE prend tout le reste, et c'est sa zone qui défile (les 34vh ci-dessus
-		   ne s'y appliquent plus). La barre de combat 🎯 n'est pas une section : elle
-		   reste dépliée en tête.
-		   ⚠️ Le calage sur la fenêtre est porté par `#sheet-panel.sheet-fit`, posé par
-		   `sheetTab` pour CE seul onglet : borner la fiche en permanence ferait CLIPPER
-		   les onglets longs (📊, 🎒) sous l'`overflow:hidden` du cadre commun.
+		/* ── Accordéon d'ONGLET de la fiche (⚡ 🤝 📜 📖) : `.sh-acc-fit` ─────────────
+		   Même disposition que #sell-panel : en-têtes à hauteur naturelle, UNE section
+		   ouverte qui prend tout le reste, et c'est sa liste (`.sh-scroll` > scroller)
+		   qui défile. JS commun : SHEET_ACC / toggleOngletSection / _ongletRestaurer.
+		   ⚠️ Hors du flux (`position:absolute`) : leur contenu est extensible (la zone
+		   ouverte prend tout), ils ne doivent PAS dicter la hauteur commune — ils prennent
+		   celle des onglets à hauteur naturelle (📊 🎒), plancher = la fenêtre
+		   (`#sheet-panel`). Placés par `grid-area` (.sheet-panel), leur bloc conteneur est
+		   la CELLULE, padding de `.sheet-body` déjà déduit : `inset:0` et non `12px`.
+		   Positionné, ⚡ sert aussi d'offsetParent à la bulle ⓘ mobile.
 		   ⚠️ `min-height: 0` à CHAQUE étage, jusqu'au scroller : sans lui un enfant flex
-		   refuse de descendre sous la hauteur de son contenu. */
-		#sheet-panel.sheet-fit { height: calc(100vh - 20px); min-height: 0; }
-		#sheet-panel.sheet-fit .sheet-right-col { min-height: 0; }
-		/* ⚠️ `auto` et non `hidden` : la barre de combat 🎯 est fixe en tête, et sur une
-		   fenêtre basse elle ne laisse plus rien à la zone ouverte. Le plancher ci-dessous
-		   la garde utilisable, et c'est la FICHE qui défile alors — jamais la page. */
-		#sheet-panel.sheet-fit .sheet-body {
-			display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow-y: auto;
+		   refuse de descendre sous la hauteur de son contenu.
+		   ⚠️ `overflow-y: auto` et non `hidden` : sur une fenêtre basse (mobile paysage),
+		   en-têtes + plancher de liste dépassent la cellule — c'est alors l'ONGLET qui
+		   défile, jamais la page. */
+		.sheet-panel.sh-acc-fit {
+			position: absolute; inset: 0;
+			display: flex; flex-direction: column; min-height: 0; gap: .35rem; overflow-y: auto;
 		}
-		#sheet-panel.sheet-fit .sheet-panel.active {
-			display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: .35rem;
-		}
+		.sh-acc-fit > * { flex: 0 0 auto; }
+		.sh-acc-fit > .acc-section { display: flex; flex-direction: column; min-height: 0; }
+		/* `display:flex` ci-dessus écraserait le `display:none` de l'attribut `hidden`
+		   (👥 Compagnons, masquée tant qu'il n'y a personne). */
+		.sh-acc-fit > .acc-section[hidden] { display: none; }
+		.sh-acc-fit > .acc-section.open { flex: 1 1 auto; }
+		/* L'en-tête garde l'identité typographique des `.sh-section` qu'il remplace. */
+		.sh-acc-fit .acc-head { color: var(--accent-color); text-transform: uppercase; font-size: .95rem; text-align: left; gap: .5rem; }
+		.sh-acc-fit .acc-body { padding: .4rem .5rem; min-height: 0; }
+		.sh-acc-fit .acc-section.open > .acc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
+		.sh-acc-fit .acc-body > * { flex: 0 0 auto; }
+		/* Plancher de la zone ouverte : au-dessous, une liste ne montre plus une ligne
+		   entière et l'accordéon ne sert plus à rien. */
+		.sh-acc-fit .acc-body > .sh-scroll { display: flex; flex: 1 1 auto; min-height: 7rem; }
+		.sh-acc-fit .acc-body > .sh-scroll > .sh-rel-scroll { max-height: none; flex: 1 1 auto; min-height: 35vh; overflow-y: scroll; }
 		/* `float` ne joue plus dans un conteneur flex : le compteur de points se range
 		   à droite de lui-même. */
-		#sheet-panel.sheet-fit #sh-competences > .pts-dispo { align-self: flex-end; flex: 0 0 auto; }
-		#sh-competences > .sh-section,
-		#sh-competences > .sh-barre-grid,
-		#sh-competences > .sh-barre-hint { flex: 0 0 auto; }
+		#sh-competences > .pts-dispo { align-self: flex-end; }
 		/* ⓘ de la barre de combat : caché hors mobile, où la consigne reste affichée. */
 		.sh-barre-titre { display: flex; align-items: center; gap: .5rem; }
 		.sh-barre-aide {
@@ -1138,7 +1182,6 @@
 		/* Mobile : la consigne quitte le flux (place rendue aux accordéons) et devient une
 		   bulle sous le ⓘ ; `top` est posé par toggleBarreAide (offsetParent = le panneau). */
 		@media (max-width: 768px) {
-			#sh-competences { position: relative; }
 			.sh-barre-aide { display: inline-flex; }
 			#sh-competences > .sh-barre-hint {
 				display: none; position: absolute; left: .5rem; right: .5rem; z-index: 30;
@@ -1148,16 +1191,6 @@
 			}
 			#sh-competences > .sh-barre-hint.ouverte { display: block; }
 		}
-		#sh-competences .acc-section { display: flex; flex-direction: column; flex: 0 0 auto; min-height: 0; }
-		#sh-competences .acc-section.open { flex: 1 1 auto; }
-		/* L'en-tête garde l'identité typographique des `.sh-section` qu'il remplace. */
-		#sh-competences .acc-head { color: var(--accent-color); text-transform: uppercase; font-size: .95rem; }
-		#sh-competences .acc-body { padding: .4rem .5rem; min-height: 0; }
-		#sh-competences .acc-section.open .acc-body { display: flex; flex-direction: column; flex: 1 1 auto; }
-		/* Plancher de la zone ouverte : au-dessous, une liste ne montre plus une ligne
-		   entière et l'accordéon ne sert plus à rien. */
-		#sh-competences .sh-capa-list { display: flex; flex: 1 1 auto; min-height: 7rem; }
-		#sh-competences .sh-capa-list > .sh-rel-scroll { max-height: none; flex: 1 1 auto; min-height: 35vh; overflow-y: scroll;}
 		.sh-quest-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 		.sh-quest-rang { font-size: 0.8rem; font-weight: bold; padding: 2px 6px; background: #333; border-radius: 3px; color: var(--accent-color); }
 		.sh-quest-title { flex: 1; min-width: 200px; font-weight: bold; font-size: 1rem; }
@@ -1993,7 +2026,7 @@
 					</div>
 
 					<!-- ── COMPETENCES ── -->
-					<div class="sheet-panel" id="sh-competences"><div class="pts-dispo" style="font-size:.85rem; float: right;">Points : <span id="sh-comp-points">{{ character.get("attribute_points", 0) }}</span></div>
+					<div class="sheet-panel sh-acc-fit" id="sh-competences"><div class="pts-dispo" style="font-size:.85rem; float: right;">Points : <span id="sh-comp-points">{{ character.get("attribute_points", 0) }}</span></div>
 						{# Barre de combat : la disposition se compose ICI, au calme (le mode ⚙
 						   de l'écran de combat n'en est qu'un raccourci). Rendue 100 % client
 						   par _renderBarreSlots depuis le payload `slots`. #}
@@ -2016,11 +2049,11 @@
 						   ⚠️ `#sh-modes-attaque` est ENVELOPPÉ, jamais remplacé : le renderer
 						   écrase son intérieur, et l'ombre vit dans le wrapper au-dessus. #}
 						<section class="acc-section">
-							<button type="button" class="acc-head" id="acc-head-capa-modes" onclick="toggleCapaSection('capa-modes')">
+							<button type="button" class="acc-head" id="acc-head-capa-modes" onclick="toggleOngletSection('competences', 'capa-modes')">
 								<span>🏹 Modes d'attaque</span><span class="acc-chevron">▾</span>
 							</button>
 							<div class="acc-body" id="acc-body-capa-modes">
-								<div class="sh-capa-list sh-scroll scrollable">
+								<div class="sh-scroll">
 									<div id="sh-modes-attaque" class="sh-rel-scroll"></div>
 								</div>
 							</div>
@@ -2029,21 +2062,21 @@
 						   depuis _competences / _competencesApprenables — resync après
 						   utiliser/apprendre. #}
 						<section class="acc-section">
-							<button type="button" class="acc-head" id="acc-head-capa-competences" onclick="toggleCapaSection('capa-competences')">
+							<button type="button" class="acc-head" id="acc-head-capa-competences" onclick="toggleOngletSection('competences', 'capa-competences')">
 								<span>⚡ Compétences</span><span class="acc-chevron">▾</span>
 							</button>
 							<div class="acc-body" id="acc-body-capa-competences">
-								<div class="sh-capa-list sh-scroll scrollable">
+								<div class="sh-scroll">
 									<div id="sh-competences-connues" class="sh-rel-scroll"></div>
 								</div>
 							</div>
 						</section>
 						<section class="acc-section">
-							<button type="button" class="acc-head" id="acc-head-capa-apprentissage" onclick="toggleCapaSection('capa-apprentissage')">
+							<button type="button" class="acc-head" id="acc-head-capa-apprentissage" onclick="toggleOngletSection('competences', 'capa-apprentissage')">
 								<span>📖 Apprentissage - compétences</span><span class="acc-chevron">▾</span>
 							</button>
 							<div class="acc-body" id="acc-body-capa-apprentissage">
-								<div class="sh-capa-list sh-scroll scrollable">
+								<div class="sh-scroll">
 									<div id="sh-competences-apprenables" class="sh-rel-scroll"></div>
 								</div>
 							</div>
@@ -2051,31 +2084,31 @@
 						{# Sorts : rendus 100 % côté client depuis les payloads injectés (_sorts /
 						   _sortsApprenables), comme le sac — resync après lancer/apprendre. #}
 						<section class="acc-section">
-							<button type="button" class="acc-head" id="acc-head-capa-sorts" onclick="toggleCapaSection('capa-sorts')">
+							<button type="button" class="acc-head" id="acc-head-capa-sorts" onclick="toggleOngletSection('competences', 'capa-sorts')">
 								<span>🔮 Sorts connus</span><span class="acc-chevron">▾</span>
 							</button>
 							<div class="acc-body" id="acc-body-capa-sorts">
-								<div class="sh-capa-list sh-scroll scrollable">
+								<div class="sh-scroll">
 									<div id="sh-sorts-connus" class="sh-rel-scroll"></div>
 								</div>
 							</div>
 						</section>
 						<section class="acc-section">
-							<button type="button" class="acc-head" id="acc-head-capa-ecoles" onclick="toggleCapaSection('capa-ecoles')">
+							<button type="button" class="acc-head" id="acc-head-capa-ecoles" onclick="toggleOngletSection('competences', 'capa-ecoles')">
 								<span>🏫 Écoles de magie</span><span class="acc-chevron">▾</span>
 							</button>
 							<div class="acc-body" id="acc-body-capa-ecoles">
-								<div class="sh-capa-list sh-scroll scrollable">
+								<div class="sh-scroll">
 									<div id="sh-sorts-magies" class="sh-rel-scroll"></div>
 								</div>
 							</div>
 						</section>
 						<section class="acc-section">
-							<button type="button" class="acc-head" id="acc-head-capa-magie" onclick="toggleCapaSection('capa-magie')">
+							<button type="button" class="acc-head" id="acc-head-capa-magie" onclick="toggleOngletSection('competences', 'capa-magie')">
 								<span>📖 Apprentissage - magie</span><span class="acc-chevron">▾</span>
 							</button>
 							<div class="acc-body" id="acc-body-capa-magie">
-								<div class="sh-capa-list sh-scroll scrollable">
+								<div class="sh-scroll">
 									<div id="sh-sorts-apprenables" class="sh-rel-scroll"></div>
 								</div>
 							</div>
@@ -2083,87 +2116,78 @@
 					</div>
 
 					<!-- ── RELATIONS ── -->
-					<div class="sheet-panel" id="sh-relations">
-						{% set rels_lieux = relations_lieux %}
-						{% set rels = affinites_detail %}
-						{% if not rels_lieux and not rels %}
-							<div class="sh-empty" id="sh-rel-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>
-						{% endif %}
-
+					{# Deux sections en ACCORDÉON d'onglet (`.sh-acc-fit`, comme ⚡) : l'ouverte
+					   prend toute la hauteur, et c'est sa liste qui défile. #}
+					<div class="sheet-panel sh-acc-fit" id="sh-relations">
 						{# Relations de lieu : TOUS les lieux connus (lieux_visites), regroupés par
 						   ville (lieu_parent → lieu categorie:"ville") en accordéon. Échelle 0–100,
 						   neutre 50, 0 = banni. Section rendue entièrement côté client par
 						   renderFicheRelations (RELATIONS_LIEUX_INIT à l'init + resync marchandage). #}
-					   <div class="sh-section">🏪 Lieux connus</div>
-						<input id="sh-rel-filter" class="sh-rel-filter" type="search" placeholder="🔍 Filtrer les lieux…" autocomplete="off">
-						<div id="sh-rel-lieux-scroll" class="sh-scroll scrollable">
-							<div id="sh-rel-lieux" class="sh-rel-scroll"><!-- rendu par renderFicheRelations --></div>
-						</div>
-
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-rel-lieux" onclick="toggleOngletSection('relations', 'rel-lieux')">
+								<span>🏪 Lieux connus</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-rel-lieux">
+								{% if not relations_lieux and not affinites_detail %}
+									<div class="sh-empty" id="sh-rel-empty"><span class="sh-empty-icon">🤝</span>Aucune relation établie.</div>
+								{% endif %}
+								<input id="sh-rel-filter" class="sh-rel-filter" type="search" placeholder="🔍 Filtrer les lieux…" autocomplete="off">
+								<div id="sh-rel-lieux-scroll" class="sh-scroll">
+									<div id="sh-rel-lieux" class="sh-rel-scroll"><!-- rendu par renderFicheRelations --></div>
+								</div>
+							</div>
+						</section>
 						{# Compagnons recrutés (affinités 0–100, neutre 50, alignée sur les lieux) :
 						   rendu 100 % client par renderFicheCompagnons (AFFINITES_INIT à l'init +
-						   resync embauche/congédiement/retour de combat). #}
-						<div class="sh-section" id="sh-rel-comp-titre" style="display:none">👥 Compagnons</div>
-						<div id="sh-rel-compagnons"><!-- rendu par renderFicheCompagnons --></div>
+						   resync embauche/congédiement/retour de combat), qui MASQUE la section
+						   (`hidden`) tant qu'il n'y a personne. #}
+						<section class="acc-section" id="sh-rel-comp-section" hidden>
+							<button type="button" class="acc-head" id="acc-head-rel-compagnons" onclick="toggleOngletSection('relations', 'rel-compagnons')">
+								<span>👥 Compagnons</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-rel-compagnons">
+								<div class="sh-scroll">
+									<div id="sh-rel-compagnons" class="sh-rel-scroll"><!-- rendu par renderFicheCompagnons --></div>
+								</div>
+							</div>
+						</section>
 					</div>
 
 					<!-- ── QUÊTES ── -->
-					<div class="sheet-panel" id="sh-quetes">
-						{% set qa = character.get("quetes_actives_detail",[]) %}
-						{% set qt = character.get("quetes_terminees_detail",[]) %}
-						{% if qa %}
-							<div class="sh-section">📜 Actives</div>
-							<div class="sh-quest-list-active sh-scroll scrollable">
-							<div class="sh-rel-scroll">
-							{# La plus récemment acceptée en premier : quetes_actives est empilée par ordre chronologique. #}
-							{% for q in qa|reverse %}
-							<div class="sh-quest {{ q.get('rang','F') }}">
-								<div class="sh-quest-hdr">
-									<span class="sh-quest-rang">{{ q.get("rang","F") }}</span>
-									<span class="sh-quest-title">{{ q.get("titre","—") }}</span>
-									<span class="sh-quest-status en-cours">En cours</span>
-									{% if q.get("expire_at") %}<span class="sh-quest-timer" data-expire="{{ q.expire_at }}" data-now="{{ q.now }}"></span>{% endif %}
-									<span class="sh-inv-actions">
-										{% if q.get("focalisable") %}<button class="sh-drop-btn{% if focalisation and focalisation.type == 'quete' and focalisation.cible == q.get('id') %} btn-highlight{% endif %}" data-focus-key="quete|{{ q.get('id') }}" onclick="focaliserQuete('{{ q.get('id') }}')" title="Se focaliser sur cette quête (biaise les rencontres/récoltes)">🎯</button>{% endif %}
-										{% if q.get("carte") %}<button class="sh-drop-btn" data-carte='{{ q.carte | tojson }}' onclick="showQuestMap(this)" title="Voir la zone à explorer sur la carte">Carte</button>{% endif %}
-										<button class="sh-drop-btn sh-abandon-btn" onclick="abandonnerQuete('{{ q.get('id') }}',this)" title="Abandonner la quête (perte de la progression)">✕ Abandonner</button>
-									</span>
-								</div>
-								<div class="sh-quest-desc">{{ q.get("description","") }}</div>
-								{% if q.get("progress_txt") %}<div class="sh-quest-progress">🎯 {{ q.progress_txt }}{% if q.get("complete") %} ✓ prêt à rendre{% endif %}</div>{% endif %}
-								{% if q.get("recompenses") %}<div class="sh-quest-reward">{% if q.recompenses.get("or") %}<span>🟡 {{ q.recompenses.or }} or</span>{% endif %}{% if q.recompenses.get("argent") %}<span>⚪ {{ q.recompenses.argent }} ar</span>{% endif %}{% if q.recompenses.get("xp") %}<span>✨ {{ q.recompenses.xp }} XP</span>{% endif %}</div>{% endif %}
+					{# Deux sections en ACCORDÉON d'onglet (`.sh-acc-fit`, comme ⚡). Rendu 100 % CLIENT
+					   par renderFicheQuetes (QUETES_INIT à l'init + resync des endpoints de quêtes) : la
+					   coquille n'émet que les conteneurs — un second gabarit Jinja devait rester
+					   STRICTEMENT identique à celui du JS, et divergeait au premier oubli. #}
+					<div class="sheet-panel sh-acc-fit" id="sh-quetes">
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-quetes-actives" onclick="toggleOngletSection('quetes', 'quetes-actives')">
+								<span>📜 Actives (<span id="sh-quetes-actives-compte">0</span>)</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-quetes-actives">
+								<div class="sh-scroll"><div id="sh-quetes-actives" class="sh-rel-scroll"></div></div>
 							</div>
-							{% endfor %}
+						</section>
+						<section class="acc-section">
+							<button type="button" class="acc-head" id="acc-head-quetes-terminees" onclick="toggleOngletSection('quetes', 'quetes-terminees')">
+								<span>✓ Terminées (<span id="sh-quetes-terminees-compte">0</span>)</span><span class="acc-chevron">▾</span>
+							</button>
+							<div class="acc-body" id="acc-body-quetes-terminees">
+								<div class="sh-scroll"><div id="sh-quetes-terminees" class="sh-rel-scroll"></div></div>
 							</div>
-							</div>
-						{% endif %}
-						{% if qt %}
-							<div class="sh-section" style="opacity:0.6">✓ Terminées ({{ qt|length }})</div>
-							<div class="sh-quest-list-ended sh-scroll scrollable">
-							<div class="sh-rel-scroll">
-							{# La plus récemment terminée en premier : quetes_terminees est empilée par ordre chronologique. #}
-							{% for q in qt|reverse %}
-							<div class="sh-quest {{ q.get('rang','F') }}" style="opacity:0.5">
-								<div class="sh-quest-hdr"><span class="sh-quest-rang">{{ q.get("rang","F") }}</span><span class="sh-quest-title">{{ q.get("titre","—") }}</span><span class="sh-quest-status termine">Terminée</span></div>
-							</div>
-							{% endfor %}
-							</div>
-							</div>
-						{% endif %}
-						{% if not qa and not qt %}<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>{% endif %}
+						</section>
 					</div>
 
 					<!-- ── JOURNAL ── -->
-					{# Deux sections en ACCORDÉON (brique `.acc-*`, partagée avec le panneau 👥) :
+					{# Deux sections en ACCORDÉON d'onglet (`.sh-acc-fit`, comme ⚡) :
 					   ce que le personnage écrit, et ce qu'il a croisé. Rendu 100 % CLIENT par
 					   renderFicheJournal (JOURNAL_INIT à l'init + resync après chaque écriture) —
 					   la coquille ci-dessous n'émet que les conteneurs vides. Rendre les listes
 					   ici EN PLUS les peindrait deux fois, et l'ombre de défilement sauterait au
 					   premier resync (cf. § listes scrollables). #}
-					<div class="sheet-panel" id="sh-journal">
+					<div class="sheet-panel sh-acc-fit" id="sh-journal">
 						<section class="acc-section">
 							<button type="button" class="acc-head" id="acc-head-carnet"
-									onclick="toggleAccordeon(JNL_SECTIONS, 'carnet', JNL_SECTION_KEY)">
+									onclick="toggleOngletSection('journal', 'carnet')">
 								<span>✍️ Carnet</span><span class="acc-chevron">▾</span>
 							</button>
 							<div class="acc-body" id="acc-body-carnet">
@@ -2180,18 +2204,18 @@
 								{# Wrapper qui NE DÉFILE PAS (il porte l'ombre ::after) + UN enfant
 								   qui défile : le renderer écrase l'INTÉRIEUR du scroller, jamais
 								   le wrapper — sinon l'ombre partirait au premier rendu. #}
-								<div class="sh-jnl-list sh-scroll scrollable">
+								<div class="sh-scroll">
 									<div id="jnl-entrees" class="sh-rel-scroll"></div>
 								</div>
 							</div>
 						</section>
 						<section class="acc-section">
 							<button type="button" class="acc-head" id="acc-head-bestiaire"
-									onclick="toggleAccordeon(JNL_SECTIONS, 'bestiaire', JNL_SECTION_KEY)">
+									onclick="toggleOngletSection('journal', 'bestiaire')">
 								<span>🐾 Bestiaire (<span id="jnl-best-compte">0</span>)</span><span class="acc-chevron">▾</span>
 							</button>
 							<div class="acc-body" id="acc-body-bestiaire">
-								<div class="sh-jnl-list sh-scroll scrollable">
+								<div class="sh-scroll">
 									<div id="jnl-bestiaire" class="sh-rel-scroll"></div>
 								</div>
 							</div>
@@ -3931,13 +3955,8 @@ function sheetTab(id, btn) {
 	document.querySelectorAll('.sheet-panel').forEach(p => p.classList.remove('active'));
 	document.getElementById('sh-' + id).classList.add('active');
 	if (btn) btn.classList.add('active');
-	// ⚡ est le SEUL onglet qui se cale sur la fenêtre : ses zones sont en accordéon et
-	// l'ouverte prend la hauteur restante. ⚠️ Borner la fiche pour tous les onglets ferait
-	// CLIPPER les longs (📊, 🎒) sous l'`overflow:hidden` du cadre commun — ils doivent
-	// garder leur hauteur naturelle et laisser la page défiler.
-	const fiche = document.getElementById('sheet-panel');
-	if (fiche) fiche.classList.toggle('sheet-fit', id === 'competences');
-	if (id === 'competences') _capaRestaurerSection();
+	// La taille de la fiche ne dépend pas de l'onglet : tout est en CSS (`.sheet-body`).
+	if (SHEET_ACC[id]) _ongletRestaurer(id);
 }
 document.addEventListener('keydown', e => {
 	if (e.key !== 'Escape') return;
@@ -5573,55 +5592,6 @@ function _renderBarreSlots() {
 	_renderModesAttaque();
 }
 
-// ── Accordéon de l'onglet ⚡ ─────────────────────────────────────────────────────
-// Même disposition que le panneau marchand : brique `.acc-*` partagée, une seule zone
-// ouverte à la fois (mémorisée par personnage), et elle prend la hauteur restante.
-// ⚠️ La barre de combat 🎯 n'en fait PAS partie — elle reste dépliée en tête.
-const CAPA_SECTIONS = ['capa-modes', 'capa-competences', 'capa-apprentissage',
-					   'capa-sorts', 'capa-ecoles', 'capa-magie'];
-const CAPA_SECTION_KEY = 'telluris.play.capa_section.' + REL_CHAR_ID;
-const CAPA_SCROLLS = ['sh-modes-attaque', 'sh-competences-connues', 'sh-competences-apprenables',
-					  'sh-sorts-connus', 'sh-sorts-magies', 'sh-sorts-apprenables'];
-
-// Les scrollers sont adressés par leur id (le renderer écrit dedans), l'ombre vit dans le
-// WRAPPER au-dessus — c'est lui qu'on mesure.
-function _capaOmbres() {
-	CAPA_SCROLLS.forEach(id => {
-		const box = document.getElementById(id);
-		if (box) _majOmbreScroll(box.parentElement);
-	});
-}
-
-function toggleCapaSection(id) {
-	toggleAccordeon(CAPA_SECTIONS, id, CAPA_SECTION_KEY);
-	// La zone qui vient de s'ouvrir n'avait aucune hauteur à mesurer en `display:none`.
-	_capaOmbres();
-}
-
-function _capaRestaurerSection() {
-	_accRestaurer(CAPA_SECTIONS, CAPA_SECTION_KEY, 'capa-competences');
-	_capaOmbres();
-}
-
-// Le contenu de ces zones est réécrit par SIX renderers appelés depuis une vingtaine de
-// sites (apprendre, lancer, resync de charge…) : on observe le résultat plutôt que
-// d'ajouter l'appel dans chacun — un `return` anticipé en aurait oublié la moitié.
-// ⚠️ Aucune boucle possible : l'observateur ne pose qu'une CLASSE sur le wrapper (parent
-// non observé), et cette classe ne fait qu'ouvrir un `::after` (Convention §17).
-(function _capaObserverRendus() {
-	const obs = new MutationObserver(() => _capaOmbres());
-	CAPA_SCROLLS.forEach(id => {
-		const box = document.getElementById(id);
-		if (box) obs.observe(box, { childList: true });
-	});
-})();
-
-// Redimensionner la fenêtre change la hauteur disponible, donc l'ombre.
-window.addEventListener('resize', () => {
-	const fiche = document.getElementById('sheet-panel');
-	if (fiche && fiche.classList.contains('sheet-fit')) _capaOmbres();
-});
-
 // Les deux modes d'attaque OPTIONNELS. ⚔ n'y figure pas : il est obligatoire, donc
 // toujours sur la barre — son sélecteur n'aurait qu'une seule issue. Une case de mode
 // se grise en combat quand l'arme correspondante n'est pas équipée : elle s'assigne
@@ -6442,6 +6412,9 @@ function toggleVilleGroup(id) {
 	box.querySelectorAll('.sh-ville.open').forEach(el => el.classList.remove('open'));
 	if (willOpen) { target.classList.add('open'); _relSaveOpen(id); }
 	else { _relSaveOpen(''); }
+	// Déplier une ville ne change pas les enfants DIRECTS du scroller : l'observateur des
+	// rendus ne le voit pas.
+	_majOmbreScroll(box.parentElement);
 }
 
 // Filtre texte (nom de lieu, insensible à la casse). Les groupes correspondants sont
@@ -6458,6 +6431,7 @@ function applyRelFilter(q) {
 			v.querySelectorAll('.sh-relation').forEach(r => r.classList.remove('hidden'));
 			v.classList.toggle('open', v.getAttribute('data-ville-id') === openId);
 		});
+		_majOmbreScroll(box.parentElement);   // plier/déplier : invisible à l'observateur
 		return;
 	}
 	villes.forEach(v => {
@@ -6475,6 +6449,7 @@ function applyRelFilter(q) {
 		v.classList.toggle('hidden', !show);
 		v.classList.toggle('open', show);
 	});
+	_majOmbreScroll(box.parentElement);
 }
 
 // Init : rendu de la liste des lieux connus + branchement du filtre.
@@ -6514,6 +6489,75 @@ function _accRestaurer(ids, cle, defaut) {
 	_accAppliquer(ids, ouverte === null ? defaut : ouverte);
 }
 
+// ── Accordéons d'ONGLET de la fiche (⚡ 🤝 📜 📖) ─────────────────────────────────
+// Même disposition que le panneau marchand, portée par `.sh-acc-fit` : une seule zone
+// ouverte à la fois (mémorisée par personnage), et elle prend la hauteur restante de
+// l'onglet — c'est sa liste qui défile. ⚠️ La barre de combat 🎯 de ⚡ n'en fait PAS
+// partie : elle reste dépliée en tête.
+// ⚠️ Les clés ⚡ et 📖 sont celles d'avant la mise en commun : le choix mémorisé des
+// joueurs survit.
+const SHEET_ACC = {
+	competences: { cle: 'telluris.play.capa_section.' + REL_CHAR_ID, defaut: 'capa-competences',
+				   ids: ['capa-modes', 'capa-competences', 'capa-apprentissage',
+						 'capa-sorts', 'capa-ecoles', 'capa-magie'] },
+	relations:   { cle: 'telluris.play.rel_section.' + REL_CHAR_ID, defaut: 'rel-lieux',
+				   ids: ['rel-lieux', 'rel-compagnons'] },
+	quetes:      { cle: 'telluris.play.quetes_section.' + REL_CHAR_ID, defaut: 'quetes-actives',
+				   ids: ['quetes-actives', 'quetes-terminees'] },
+	journal:     { cle: 'telluris.play.journal_section.' + REL_CHAR_ID, defaut: 'carnet',
+				   ids: ['carnet', 'bestiaire'] },
+};
+
+// L'ombre vit dans le WRAPPER `.sh-scroll` au-dessus du scroller — c'est lui qu'on mesure.
+function _ongletOmbres(onglet) {
+	document.querySelectorAll('#sh-' + onglet + ' .acc-body .sh-scroll').forEach(_majOmbreScroll);
+}
+
+function toggleOngletSection(onglet, id) {
+	const a = SHEET_ACC[onglet];
+	toggleAccordeon(a.ids, id, a.cle);
+	// La zone qui vient de s'ouvrir n'avait aucune hauteur à mesurer en `display:none`.
+	_ongletOmbres(onglet);
+}
+
+// Une section mémorisée mais MASQUÉE (👥 sans compagnon) laisserait l'onglet tout replié
+// sans que le joueur l'ait choisi : retour au défaut, sans toucher au choix mémorisé.
+function _ongletRestaurer(onglet) {
+	const a = SHEET_ACC[onglet];
+	const memo = _accLsGet(a.cle);
+	const tete = memo ? document.getElementById('acc-head-' + memo) : null;
+	if (memo && (!tete || tete.parentElement.hidden)) _accAppliquer(a.ids, a.defaut);
+	else _accRestaurer(a.ids, a.cle, a.defaut);
+	_ongletOmbres(onglet);
+}
+
+// Le contenu des zones est réécrit par une douzaine de renderers appelés depuis des
+// dizaines de sites (apprendre, lancer, resync de charge, quête rendue…) : on observe le
+// résultat plutôt que d'ajouter l'appel dans chacun — un `return` anticipé en oublierait.
+// ⚠️ Aucune boucle possible : l'observateur ne pose qu'une CLASSE sur le wrapper (parent
+// non observé), et cette classe ne fait qu'ouvrir un `::after` (Convention §17).
+(function _ongletsObserverRendus() {
+	const obs = new MutationObserver(recs => recs.forEach(r => _majOmbreScroll(r.target.parentElement)));
+	Object.keys(SHEET_ACC).forEach(onglet => {
+		document.querySelectorAll('#sh-' + onglet + ' .acc-body .sh-scroll > .sh-rel-scroll')
+			.forEach(box => obs.observe(box, { childList: true }));
+	});
+})();
+
+// Redimensionner la fenêtre change la hauteur disponible, donc l'ombre.
+window.addEventListener('resize', () => {
+	const actif = document.querySelector('#sheet-panel .sheet-panel.active');
+	const onglet = actif ? actif.id.replace(/^sh-/, '') : '';
+	if (SHEET_ACC[onglet]) _ongletOmbres(onglet);
+});
+
+// Compteur d'un en-tête de section : visible même replié — sans lui, rien ne dit s'il y a
+// quelque chose derrière l'en-tête.
+function _ficheCompte(id, n) {
+	const el = document.getElementById(id);
+	if (el) el.textContent = n;
+}
+
 // ── Onglet 📖 Journal ────────────────────────────────────────────────────────────
 // Le CARNET du personnage (ce qu'il écrit) et son BESTIAIRE (ce qu'il a croisé).
 // ⚠️ Ici « journal » = un carnet, PAS un log — le mot désigne partout ailleurs dans le
@@ -6521,8 +6565,6 @@ function _accRestaurer(ids, cle, defaut) {
 // Rendu 100 % client, patron renderFicheRelations : payload JOURNAL_INIT à l'init, puis
 // resync par la réponse de POST /api/journal (Convention §10).
 const JOURNAL_INIT = {{ (journal or {}) | tojson | safe }};
-const JNL_SECTIONS = ['carnet', 'bestiaire'];
-const JNL_SECTION_KEY = 'telluris.play.journal_section.' + REL_CHAR_ID;
 let _jnlEtat = null;
 
 // Fournitures + état du bouton : UNE seule fonction pour les deux, comme `_aubMajEcriture`.
@@ -6661,14 +6703,13 @@ function renderFicheJournal(data) {
 			for (const b of liste) best.appendChild(_jnlBestNode(b));
 		}
 	}
-	const compte = document.getElementById('jnl-best-compte');
-	if (compte) compte.textContent = (data.bestiaire || []).length;
+	_ficheCompte('jnl-best-compte', (data.bestiaire || []).length);
 
 	_jnlMajEcriture();
 	_jnlReste();
 	// ⚠️ Ré-appliquer l'accordéon APRÈS le rendu, comme renderFicheRelations ré-applique son
 	// filtre : le carnet ouvert par défaut, le joueur vient là pour écrire.
-	_accRestaurer(JNL_SECTIONS, JNL_SECTION_KEY, 'carnet');
+	_ongletRestaurer('journal');
 }
 
 async function ecrireJournal() {
@@ -6763,7 +6804,8 @@ function _sellRestaurerSection() {
 	_sellOmbres();
 }
 
-// TROISIÈME régime de `.scrollable`, partagé par le panneau marchand et l'onglet ⚡ : là où
+// TROISIÈME régime de `.scrollable`, partagé par le panneau marchand et les accordéons
+// d'onglet de la fiche (⚡ 🤝 📜 📖) : là où
 // une liste prend la hauteur restante, l'ombre ne se COMPTE pas en lignes (`INV_VISIBLE`) et
 // ne se pose pas EN DUR — la hauteur disponible dépend de la fenêtre et de la section
 // ouverte, aucun compteur ne la prédit. On la pose sur ce qui déborde RÉELLEMENT.
@@ -7391,8 +7433,8 @@ async function commanderSurMesure(btn) {
 }
 
 // ── Tableau des quêtes (guilde) ───────────────────────────────────────
-// Reconstruit l'onglet 📜 de la fiche (rendu serveur au chargement) pour qu'il reflète
-// accept/terminer sans recharger la page. Miroir du gabarit Jinja de #sh-quetes.
+// L'onglet 📜 de la fiche est rendu 100 % client (renderFicheQuetes) : au chargement
+// comme après accept/terminer, sans recharger la page.
 // ── Chronos des quêtes à délai réel (transport) ───────────────────────────────────
 // Le serveur envoie `expire_at` ET son `now` : on en déduit une deadline LOCALE (l'horloge
 // du navigateur peut dériver de celle du serveur — même précaution que le blocage de
@@ -7470,11 +7512,6 @@ function _tickQuestTimers() {
 }
 
 function _startQuestTimers() {
-	// Chronos posés par le rendu Jinja initial : ils portent l'échéance et l'heure SERVEUR
-	// et doivent être convertis en deadline locale, comme ceux du rendu client.
-	document.querySelectorAll('.sh-quest-timer[data-expire]:not([data-deadline])').forEach(sp => {
-		sp.dataset.deadline = _deadlineLocale(Number(sp.dataset.expire), Number(sp.dataset.now));
-	});
 	_tickQuestTimers();
 	if (!_questTimer && document.querySelector('.sh-quest-timer[data-deadline]')) {
 		_questTimer = setInterval(_tickQuestTimers, 1000);
@@ -7554,14 +7591,17 @@ function renderFicheQuetes(data) {
 	}
 	const qa = data.fiche_actives || [];
 	const qt = data.fiche_terminees || [];
-	let html = '';
-	if (qa.length) {
-		html += '<div class="sh-section">📜 Actives</div>';
-		// ⚠️ Double rendu : ce markup doit rester STRICTEMENT identique à celui de
-		// l'onglet 📜 côté Jinja (wrapper .sh-scroll qui porte l'ombre + scroller).
-		html += `<div class="sh-quest-list-active sh-scroll scrollable"><div class="sh-rel-scroll">`;
+	// Seul rendu de l'onglet (la coquille Jinja n'émet que les conteneurs) : on écrit
+	// l'INTÉRIEUR des deux scrollers, jamais les wrappers `.sh-scroll` qui portent l'ombre.
+	const actives = document.getElementById('sh-quetes-actives');
+	const terminees = document.getElementById('sh-quetes-terminees');
+	if (!actives || !terminees) return;
+	_ficheCompte('sh-quetes-actives-compte', qa.length);
+	_ficheCompte('sh-quetes-terminees-compte', qt.length);
+	actives.innerHTML = !qa.length
+		? '<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>'
 		// Plus récemment acceptée en premier ; slice() pour ne pas retourner la liste du payload.
-		html += qa.slice().reverse().map(q => {
+		: qa.slice().reverse().map(q => {
 			const rang = q.rang || 'F';
 			const rew = q.recompenses || {};
 			let reward = '';
@@ -7597,31 +7637,26 @@ function renderFicheQuetes(data) {
 				${reward ? `<div class="sh-quest-reward">${reward}</div>` : ''}
 			</div>`;
 		}).join('');
-		html += `</div></div>`;
-	}
-	if (qt.length) {
-		html += `<div class="sh-section" style="opacity:0.6">✓ Terminées (${qt.length})</div>`;
-		html += `<div class="sh-quest-list-ended sh-scroll scrollable"><div class="sh-rel-scroll">`;
+	terminees.innerHTML = !qt.length
+		? '<div class="sh-empty"><span class="sh-empty-icon">✓</span>Aucune quête terminée.</div>'
 		// Plus récemment terminée en premier ; slice() pour ne pas retourner la liste du payload.
-		html += qt.slice().reverse().map(q => {
+		: qt.slice().reverse().map(q => {
 			const rang = q.rang || 'F';
 			return `<div class="sh-quest ${rang}" style="opacity:0.5">
 				<div class="sh-quest-hdr"><span class="sh-quest-rang">${rang}</span><span class="sh-quest-title">${q.titre || '—'}</span><span class="sh-quest-status termine">Terminée</span></div>
 			</div>`;
 		}).join('');
-		html += `</div></div>`;
-	}
-	if (!qa.length && !qt.length) {
-		html = '<div class="sh-empty"><span class="sh-empty-icon">📜</span>Aucune quête en cours.</div>';
-	}
-	panel.innerHTML = html;
 	_startQuestTimers();
 }
 
-// Init des chronos — DOIT rester après les `let` ci-dessus : appelé plus haut dans le script,
-// il lèverait une ReferenceError (zone morte temporelle) qui interromprait tout le reste des
-// déclarations de haut niveau (dialogue PNJ, panneau de vente…).
-_startQuestTimers();
+// Rendu initial de l'onglet 📜 (qui démarre aussi les chronos) — DOIT rester après les
+// `let` ci-dessus : appelé plus haut dans le script, il lèverait une ReferenceError (zone
+// morte temporelle) qui interromprait tout le reste des déclarations de haut niveau
+// (dialogue PNJ, panneau de vente…). Même source serveur que les resyncs (`fiche_details`).
+renderFicheQuetes({
+	fiche_actives: {{ character.get("quetes_actives_detail", []) | tojson | safe }},
+	fiche_terminees: {{ character.get("quetes_terminees_detail", []) | tojson | safe }},
+});
 // Courses échues pendant l'absence du joueur : le serveur les a déjà soldées au rendu.
 _notifierTransportsEchoues({ transports_echoues: {{ transports_echoues | tojson | safe }} });
 // Course expirée pendant un changement de lieu : le toast a été mis de côté avant le reload.
@@ -7834,14 +7869,16 @@ function escapeHtml(s) {
 // Onglet 🤝 section 👥 : tous les compagnons CONNUS (mémo du perso), actifs d'abord.
 function renderFicheCompagnons(list) {
 	const box = document.getElementById('sh-rel-compagnons');
-	const titre = document.getElementById('sh-rel-comp-titre');
+	const section = document.getElementById('sh-rel-comp-section');
 	if (!box) return;
-	if (!list || !list.length) {
-		box.innerHTML = '';
-		if (titre) titre.style.display = 'none';
-		return;
+	const vide = !list || !list.length;
+	// Section masquée tant qu'il n'y a personne ; la section ouverte se ré-arbitre (elle
+	// pouvait être celle qu'on masque, ou celle qu'on rend).
+	if (section && section.hidden !== vide) {
+		section.hidden = vide;
+		_ongletRestaurer('relations');
 	}
-	if (titre) titre.style.display = '';
+	if (vide) { box.innerHTML = ''; return; }
 	box.innerHTML = list.map(r => {
 		const sc = (r.affinite === null || r.affinite === undefined) ? 50 : r.affinite;
 		const cls = sc > 50 ? 'pos' : sc < 50 ? 'neg' : 'neu';
