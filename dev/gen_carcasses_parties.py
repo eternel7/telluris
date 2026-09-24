@@ -85,8 +85,9 @@ SUFFIXE_MORCEAU = "_morceau"
 # ⚠️ Une matière peut figurer dans plusieurs parties (le cuir vient de partout) — c'est
 # voulu, et sans effet de duplication : chaque portion n'en rend qu'au prorata de SON poids.
 PARTIES: dict[str, dict] = {
+	# Le poison (tag d'espèce `venin`) vient des glandes de la tête et du dard de la queue.
 	"tete":   {"libelle": "Tête",  "icon": "💀", "genre": "f",
-			   "matieres": ["crane", "yeux", "crocs", "cuir_brut", "os"]},
+			   "matieres": ["crane", "yeux", "crocs", "cuir_brut", "os", "item:Poison_de_base"]},
 	"corps":  {"libelle": "Corps", "icon": "🥩", "genre": "m",
 			   "matieres": ["viande", "os", "sang", "graisse", "boyaux", "foie", "coeur",
 							"cuir_brut", "poils", "crins", "plumes", "item:Sang_demon_seche"]},
@@ -99,7 +100,7 @@ PARTIES: dict[str, dict] = {
 	"aile":   {"libelle": "Aile",  "icon": "🪶", "genre": "f",
 			   "matieres": ["plumes", "cuir_brut", "os", "tendons"]},
 	"queue":  {"libelle": "Queue", "icon": "🦴", "genre": "f",
-			   "matieres": ["cuir_brut", "poils", "crins", "os", "tendons"]},
+			   "matieres": ["cuir_brut", "poils", "crins", "os", "tendons", "item:Poison_de_base"]},
 }
 
 # ── Profils anatomiques : (partie, quantité, fraction du poids total) ────────────

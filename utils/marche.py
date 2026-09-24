@@ -366,17 +366,29 @@ def besoins_categorie(categorie: str) -> list[str]:
 	if not categorie:
 		return []
 	besoins = _get_marche_map()["besoins"]
-	return sorted(set().union(*(besoins.get(c, set()) for c in categories_incluses(categorie))))
+	return sorted(set().union(*(besoins.get(c, set()) for c in categories_incluses(categorie)))
+				  | appro_extra_categorie(categorie))
+
+
+def appro_extra_categorie(categorie: str) -> set:
+	"""Matières livrées à cette catégorie PAR DÉCLARATION (`APPRO_EXTRA`), sans recette qui les
+	consomme — les lingots précieux du grand arsenal. Union sur `categories_incluses`, comme
+	le reste. Relu à chaque appel (variable de monde réglable à chaud) : rien à vider."""
+	if not categorie:
+		return set()
+	table = character_stats.APPRO_EXTRA or {}
+	return set().union(set(), *(set(table.get(c) or ()) for c in categories_incluses(categorie)))
 
 
 def appro_leaves_categorie(categorie: str) -> list[str]:
 	"""Matières « feuilles » (sans recette productrice, hors carcasse) consommées par les
-	recettes de cette catégorie → à auto-approvisionner (ex. métaux pour l'armurerie)."""
+	recettes de cette catégorie → à auto-approvisionner (ex. métaux pour l'armurerie), PLUS
+	celles que `APPRO_EXTRA` lui déclare."""
 	if not categorie:
 		return []
 	mm = _get_marche_map()
 	besoins = set().union(*(mm["besoins"].get(c, set()) for c in categories_incluses(categorie)))
-	return sorted(besoins & mm["feuilles"])
+	return sorted((besoins & mm["feuilles"]) | appro_extra_categorie(categorie))
 
 
 def produits_categorie(categorie: str) -> set:
@@ -492,7 +504,8 @@ def appro_leaves_lieu(lieu_doc: dict) -> list[str]:
 	boutique dans la portée, et à elle seule."""
 	lieu_doc = lieu_doc or {}
 	besoins = set(besoins_categorie(lieu_doc.get("categorie"))) | _cumul_portee(lieu_doc, "besoins")
-	return sorted(besoins & _get_marche_map()["feuilles"])
+	return sorted((besoins & _get_marche_map()["feuilles"])
+				  | appro_extra_categorie(lieu_doc.get("categorie")))
 
 
 def recettes_lieu(lieu_doc: dict) -> list:

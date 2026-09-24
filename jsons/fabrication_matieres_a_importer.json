@@ -1,5 +1,36 @@
 [
   {
+    "_id": "item:Cercle_invocation",
+    "type": "item",
+    "nom": "Cercle d'invocation (parchemin)",
+    "sous_categorie": "",
+    "icon": "📜",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "d'invocation",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Int": 1
+        },
+        "effets": {
+          "canalisation": 2
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ]
+  },
+  {
     "_id": "item:Eau_benite",
     "type": "item",
     "nom": "Eau bénite",
@@ -62,6 +93,33 @@
     }
   },
   {
+    "_id": "item:Encens",
+    "type": "item",
+    "nom": "Encens",
+    "sous_categorie": "",
+    "icon": "🕯️",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.05,
+    "fabrication": {
+      "nom": "encensé",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ]
+  },
+  {
     "_id": "item:Encre_magique",
     "type": "item",
     "nom": "Encre magique",
@@ -86,6 +144,33 @@
           "facteur": 1.3
         },
         "rarete": "peu_commun"
+      }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ]
+  },
+  {
+    "_id": "item:Encre_noire",
+    "type": "item",
+    "nom": "Encre noire",
+    "sous_categorie": "encre",
+    "icon": "🖊️",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "aux runes noires",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Int": 1
+        },
+        "valeur": {
+          "facteur": 1.1
+        }
       }
     },
     "tags": [
@@ -252,6 +337,115 @@
     ]
   },
   {
+    "_id": "item:Os_de_totem",
+    "type": "item",
+    "nom": "Os de totem",
+    "sous_categorie": "",
+    "icon": "🦴",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.2,
+    "fabrication": {
+      "nom": "totémique",
+      "modificateurs": {
+        "bonus_pv": 2,
+        "bonus": {
+          "F": 1,
+          "V": 1
+        },
+        "effets": {
+          "esquive": 1
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ]
+  },
+  {
+    "_id": "item:Parchemin_blanc",
+    "type": "item",
+    "nom": "Parchemin vierge",
+    "sous_categorie": "",
+    "icon": "📄",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.02,
+    "fabrication": {
+      "nom": "sur vélin",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_catalyseur"
+    ]
+  },
+  {
+    "_id": "item:Parchemin_vierge",
+    "type": "item",
+    "nom": "Parchemin de sort vierge",
+    "sous_categorie": "",
+    "icon": "📜",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.05,
+    "fabrication": {
+      "nom": "aux marges enluminées",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Int": 1
+        },
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_catalyseur"
+    ]
+  },
+  {
+    "_id": "item:Peintures_de_guerre",
+    "type": "item",
+    "nom": "Peintures de guerre",
+    "sous_categorie": "",
+    "icon": "🎨",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "aux peintures de guerre",
+      "modificateurs": {
+        "bonus_initiative": 1,
+        "bonus": {
+          "F": 1,
+          "Cha": 1
+        },
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ]
+  },
+  {
     "_id": "item:Poison_de_base",
     "type": "item",
     "nom": "Poison de base",
@@ -391,6 +585,30 @@
         }
       }
     }
+  },
+  {
+    "_id": "item:Salpetre",
+    "type": "item",
+    "nom": "Salpêtre",
+    "sous_categorie": "",
+    "icon": "🧂",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "salpêtré",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "bonus_cd": 1,
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme"
+    ]
   },
   {
     "_id": "item:Sang_demon_seche",
@@ -553,6 +771,44 @@
           "facteur": 1.8
         },
         "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:adamantite",
+    "type": "item",
+    "nom": "Lingot d'adamantite",
+    "sous_categorie": "metaux_precieux",
+    "icon": "⚫",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "or": 20
+      }
+    ],
+    "fabrication": {
+      "nom": "en adamantite",
+      "modificateurs": {
+        "bonus_degats": 6,
+        "bonus_pa": 6,
+        "bonus": {
+          "R": 3
+        },
+        "poids": {
+          "facteur": 1.2
+        },
+        "valeur": {
+          "facteur": 3.5
+        },
+        "rarete": "legendaire"
       }
     }
   },
@@ -3276,6 +3532,85 @@
           "facteur": 1.3
         },
         "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:mithril",
+    "type": "item",
+    "nom": "Lingot de mithril",
+    "sous_categorie": "metaux_precieux",
+    "icon": "✨",
+    "rarete": "rare",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal",
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 1,
+    "valeur": [
+      {
+        "or": 1
+      }
+    ],
+    "fabrication": {
+      "nom": "en mithril",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pa": 3,
+        "bonus_cc": 2,
+        "bonus": {
+          "Ag": 2
+        },
+        "poids": {
+          "facteur": 0.6
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:orichalque",
+    "type": "item",
+    "nom": "Lingot d'orichalque",
+    "sous_categorie": "metaux_precieux",
+    "icon": "🌟",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal",
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "or": 2
+      }
+    ],
+    "fabrication": {
+      "nom": "en orichalque",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pm": 4,
+        "bonus": {
+          "Int": 2,
+          "Vol": 2
+        },
+        "effets": {
+          "canalisation": 1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
       }
     }
   },

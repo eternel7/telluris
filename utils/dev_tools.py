@@ -500,10 +500,11 @@ CATALOGUE = [
 		"description": "Indicateurs d'équilibrage : part des items qu'aucune recette "
 			"atteignable ne produit, part des recettes dont le produit n'entre jamais en rayon "
 			"(flux de cité compris), marge médiane d'un objet fabriqué, et les matières RACINES "
-			"que seul l'aventurier apporte (ce que chacune débloque, ce qu'on perd sans elle). "
+			"que seul l'aventurier apporte (ce que chacune débloque, ce qu'on perd sans elle), "
+			"et les matières SANS SOURCE (ni recette, ni appro, ni dépeçage, ni butin, ni récolte). "
 			"Rebranche `db.config` sur le dump avant d'importer `utils.marche` : les prix et "
 			"coûts de revient sortent du moteur du jeu, pas d'une réimplémentation. ⚠️ "
-			"Hypothèses de référence documentées en tête de dev/audit_economy.py (A à I) — "
+			"Hypothèses de référence documentées en tête de dev/audit_economy.py (A à J) — "
 			"notamment « en rayon » = sans le joueur ravitailleur.",
 	},
 	# ── /admin/lieux : outils PARAMÉTRÉS par la ville et les lignes affichées ──────────

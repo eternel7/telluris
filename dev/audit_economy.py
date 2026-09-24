@@ -16,6 +16,8 @@ Indicateurs calculés sur un DUMP (jamais sur la base live) :
   5. **Ce que seul l'aventurier apporte** — les matières RACINES sans lesquelles le monde
      laissé à lui-même ne garnit pas ses rayons, avec pour chacune ce qu'elle débloque seule
      et ce qu'on perd sans elle (hypothèse I).
+  6. **Matières sans source** — les matières qu'aucune voie du jeu ne fait apparaître : ni
+     fabriquées, ni livrées, ni dépecées, ni tombées, ni récoltées (hypothèse J).
 
 ────────────────────────────────────────────────────────────────────────────────────────
 HYPOTHÈSES DE RÉFÉRENCE (ce que « atteignable », « en rayon » et « marge » veulent dire ici)
@@ -126,6 +128,25 @@ I. **Apports de l'aventurier (§5).** Le monde tourne seul (appro + flux, G). Un
    ⚠️ La carcasse et ses morceaux se remplacent mutuellement (chacun a « doit » 0) : la
    filière animale est donc aussi retirée EN BLOC. Ce qui reste bloqué une fois toutes les
    racines apportées manque d'une matière fabriquée AILLEURS (**colportage**).
+
+J. **Matières sans source (§6).** Une MATIÈRE (catégorie de `CATEGORIES_INTERMEDIAIRES`, ou
+   doc qui porte un bloc `fabrication` de matière) doit pouvoir S'OBTENIR. Sources durables :
+     · **recette** — une recette (tables de dépeçage comprises) la produit ;
+     · **appro** — une feuille livrée à un lieu (débit > 0) résout vers elle ;
+     · **dépeçage** — une entrée de `DEPECAGE_TAGS` (celle du dump) ou d'un champ `depecage`
+       (portion, override d'espèce) résout vers elle ;
+     · **butin** — elle est la carcasse d'une espèce (`item:<slug de l'espèce>`) ;
+     · **découpe** — une carcasse la cite dans son `decoupe` ;
+     · **coupe** — elle est le tier inférieur (`bois.cible_coupe`) d'un bois qui a une source ;
+     · **contenu** — un doc de contenu la nomme par son id : récolte d'un lieu, récompense de
+       quête, service de PNJ, équipement de départ…
+   Ne comptent PAS : l'état de partie (inventaires, combats, commandes — ce qu'un joueur
+   possède déjà ne dit pas où il l'a trouvé), les sorts (ils CONSOMMENT leurs composants :
+   c'est un USAGE, rapporté comme tel), et
+   le `stock_vente` d'un lieu, qui s'épuise sans jamais se regarnir : une matière qui n'a que
+   lui est rapportée à part (« rayon seulement »).
+   ⚠️ Une matière sans source reste proposée au sur-mesure (catalogue du monde) : la commande
+   naît `en_attente_materiaux` et ne se relance jamais. C'est le trou que ce § repère.
 
 ────────────────────────────────────────────────────────────────────────────────────────
 
@@ -441,6 +462,135 @@ def monde_autonome(marche, characters, lieux: list, lieux_par_id: dict, items_pa
 		cuites |= avec
 		acquis.update(final)
 	return cuites, acquis
+
+
+# ── Matières sans source (hypothèse J) ───────────────────────────────────────────
+
+# État de partie : ce qu'un joueur possède ne dit pas où il l'a trouvé.
+TYPES_ETAT_DE_PARTIE = frozenset({"character", "aventurier", "monture", "combat", "user", "commande"})
+# Traités à part (`recette`, `item`) ou consommateurs (`sort` : ses composants).
+TYPES_HORS_CONTENU = frozenset({"item", "recette", "sort"})
+
+
+def _cles_depecage(entrees) -> set:
+	"""Clés d'une table de dépeçage : `[[cle, q], …]` ou `[{"sous_categorie": cle}, …]`."""
+	cles = set()
+	for e in entrees or []:
+		if isinstance(e, (list, tuple)) and e:
+			cles.add(str(e[0]))
+		elif isinstance(e, dict) and e.get("sous_categorie"):
+			cles.add(str(e["sous_categorie"]))
+		elif isinstance(e, str):
+			cles.add(e)
+	return cles
+
+
+def _ids_cites(valeur, ids: set, chemin: str, contenu: set, rayon: set) -> None:
+	"""Parcourt un doc de contenu : toute chaîne ÉGALE à un id d'item est une source. Sous un
+	`stock_vente`, elle n'est qu'un rayon qui s'épuise."""
+	if isinstance(valeur, dict):
+		for k, v in valeur.items():
+			_ids_cites(v, ids, chemin + "." + str(k), contenu, rayon)
+	elif isinstance(valeur, list):
+		for v in valeur:
+			_ids_cites(v, ids, chemin, contenu, rayon)
+	elif isinstance(valeur, str) and valeur in ids:
+		(rayon if "stock_vente" in chemin else contenu).add(valeur)
+
+
+def matieres_sans_source(docs: list, *, matiere_item_id, objet_final_item_id, recette_matieres,
+						 sous_categorie, feuilles_livrees, depecage_tags: dict,
+						 est_matiere, cible_coupe=None) -> list[dict]:
+	"""Matières qu'aucune voie du jeu ne fait apparaître (hypothèse J), triées par id :
+	`[{"item", "rayon_seulement", "recettes", "sorts", "sous_cle", "sur_mesure"}, …]`.
+	`sorts` = nombre de sorts qui la citent comme composant (un usage, jamais une source).
+
+	PUR : le moteur est injecté (`matiere_item_id`, `objet_final_item_id`, `recette_matieres`,
+	`sous_categorie`, `cible_coupe(doc) → doc | None` de `utils.bois`), ainsi que
+	`feuilles_livrees` (clés livrées par l'appro, débit > 0) et `est_matiere(doc)`.
+	`recettes` = nombre de recettes qui la consomment ; `sur_mesure` = elle porte un bloc
+	`fabrication` qui apporte quelque chose.
+
+	⚠️ La COUPE du bois (arbre → tronc → rondins → branche) fabrique ses ids par code, sans
+	qu'aucun doc ne les cite : le tier inférieur n'a une source que si le tier coupé en a une.
+	D'où un point fixe en fin de calcul — sans lui, toute l'échelle serait rapportée à tort."""
+	docs = [d for d in docs if isinstance(d, dict) and d.get("_id")]
+	items = {d["_id"]: d for d in docs if d.get("type") == "item"}
+	ids = set(items)
+	sources: set[str] = set()
+
+	recettes = [d for d in docs if d.get("type") == "recette"]
+	for r in recettes:
+		if r.get("objet_final"):
+			sources.add(objet_final_item_id(r["objet_final"]))
+	sources |= {matiere_item_id(c) for c in feuilles_livrees}
+
+	cles_dep = set().union(set(), *(_cles_depecage(v) for v in (depecage_tags or {}).values()))
+	for d in docs:
+		cles_dep |= _cles_depecage(d.get("depecage"))
+		for e in d.get("decoupe") or []:
+			if isinstance(e, dict) and e.get("item"):
+				sources.add(e["item"])
+		if d.get("type") == "espece":
+			sources.add("item:" + d["_id"][len("espece:"):])
+	sources |= {matiere_item_id(c) for c in cles_dep}
+
+	contenu: set[str] = set()
+	rayon: set[str] = set()
+	for d in docs:
+		if d.get("type") in TYPES_ETAT_DE_PARTIE | TYPES_HORS_CONTENU:
+			continue
+		_ids_cites(d, ids, "", contenu, rayon)
+	sources |= contenu
+
+	# Un sort CONSOMME ses composants : ce n'est pas une source, mais c'est un USAGE — sans
+	# lui, `Os_de_totem` (six sorts druidiques) était rapporté « inutilisée ».
+	composants: dict[str, int] = {}
+	for d in docs:
+		if d.get("type") == "sort":
+			cites: set[str] = set()
+			_ids_cites(d, ids, "", cites, cites)
+			for i in cites:
+				composants[i] = composants.get(i, 0) + 1
+
+	if cible_coupe is not None:
+		coupes = {}
+		for item_id, doc in items.items():
+			cible = cible_coupe(doc)
+			if cible and cible.get("_id"):
+				coupes[item_id] = cible["_id"]
+		change = True
+		while change:
+			change = False
+			for amont, aval in coupes.items():
+				if amont in sources and aval not in sources:
+					sources.add(aval)
+					change = True
+
+	out = []
+	for item_id in sorted(ids - sources):
+		doc = items[item_id]
+		if not est_matiere(doc):
+			continue
+		sc = sous_categorie(doc)
+		vraies = [r for r in recettes if not r.get("sur_commande")]
+		# Une recette qu'ELLE bloque : sa clé résout vers cet item. Une clé de sous-catégorie
+		# que résout un AUTRE item (`metaux_precieux` pour le mithril) n'est pas bloquée —
+		# la matière y est seulement acceptée à la revente.
+		n = sum(1 for r in vraies
+				if any(c == item_id or matiere_item_id(c) == item_id for c, _q in recette_matieres(r)))
+		sous_cle = bool(sc) and any(c == sc for r in vraies for c, _q in recette_matieres(r))
+		bloc = doc.get("fabrication")
+		out.append({
+			"item": item_id,
+			"rayon_seulement": item_id in rayon,
+			"recettes": n,
+			"sorts": composants.get(item_id, 0),
+			"sous_cle": sc if (sous_cle and not n) else "",
+			"sur_mesure": isinstance(bloc, dict) and "base_item" not in bloc
+			and bool(bloc.get("nom") or bloc.get("modificateurs")),
+		})
+	return out
 
 
 # ── Rapport ──────────────────────────────────────────────────────────────────────
@@ -935,8 +1085,45 @@ def auditer(docs: list, meta: dict, ville: str | None = None) -> None:
 		print("     " + ", ".join(f"{c} ({len(ids)})" for c, ids in top))
 	print()
 
+	# ── 6. Matières sans source ──────────────────────────────────────────────────────
+	# Calculé sur TOUT le dump, `--ville` ou non : une matière s'obtient n'importe où.
+	import db.config as dbc
+	from utils import bois, fabrication
+	tous_docs = [d for d in docs if isinstance(d, dict)]
+	feuilles = set().union(set(), *(auto_appro_de(L) for L in lieux_par_id.values()))
+	orphelines = matieres_sans_source(
+		tous_docs,
+		matiere_item_id=marche.matiere_item_id,
+		objet_final_item_id=marche.objet_final_item_id,
+		recette_matieres=marche.recette_matieres,
+		sous_categorie=characters.item_sous_categorie,
+		feuilles_livrees=feuilles,
+		depecage_tags=character_stats.DEPECAGE_TAGS,
+		est_matiere=lambda d: (d.get("categorie") in character_stats.CATEGORIES_INTERMEDIAIRES
+							   or fabrication.apporte(d)),
+		cible_coupe=lambda d: bois.cible_coupe(d, dbc.find_docs),
+	)
 	print("─" * larg)
-	print("Hypothèses de référence : cf. docstring en tête de ce fichier (A à I).")
+	print(f"6. MATIÈRES SANS SOURCE                       ({len(orphelines)} matière(s))")
+	print("─" * larg)
+	print("   ni recette, ni appro, ni dépeçage, ni butin, ni récolte/récompense (hypothèse J)")
+	for o in orphelines:
+		usages = []
+		if o["recettes"]:
+			usages.append(f"bloque {o['recettes']} recette(s)")
+		if o["sous_cle"]:
+			usages.append(f"revendable sous la clé « {o['sous_cle']} »")
+		if o["sorts"]:
+			usages.append(f"composant de {o['sorts']} sort(s)")
+		if o["sur_mesure"]:
+			usages.append("⚠ proposée au sur-mesure, commande à jamais en attente")
+		if o["rayon_seulement"]:
+			usages.append("rayon seulement (s'épuise)")
+		print(f"   ⚠ {o['item']:<42} " + (" ; ".join(usages) or "inutilisée"))
+	print()
+
+	print("─" * larg)
+	print("Hypothèses de référence : cf. docstring en tête de ce fichier (A à J).")
 	print("─" * larg)
 
 

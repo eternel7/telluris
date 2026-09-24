@@ -1,10 +1,11 @@
 [
   {
     "_id": "rules:world_variables",
-    "_rev": "66-cb002e9900cdb901ef10db02bcdec3ba",
+    "_rev": "71-bd7afcd7b288b7780b7266e9386b425b",
     "type": "rules",
     "value": {
       "FACTEUR_DEGATS_ARMURE": 20,
+      "MONSTRE_DES_CC_NATURELS": 2,
       "LOCALISATION_TOUCHES": {
         "tete": 7,
         "epaules": 15,
@@ -42,7 +43,10 @@
         "bronze": 5,
         "mithril": 1,
         "herbe": 0,
-        "seve": 0
+        "seve": 0,
+        "item:mithril": 1,
+        "item:orichalque": 1,
+        "item:adamantite": 1
       },
       "APPRO_DEBIT_DEFAUT": 5,
       "CHA_MARCHAND": 50,
@@ -56,6 +60,7 @@
         "_charnu_base": [
           "viande",
           "viande",
+          "coeur",
           "os",
           "sang",
           "graisse",
@@ -67,6 +72,7 @@
         "animal": [
           "cuir_brut",
           "crocs",
+          "coeur",
           "poils",
           "tendons",
           "boyaux",
@@ -76,16 +82,20 @@
         "monstre": [
           "cuir_brut",
           "crocs",
+          "coeur",
+          "boyaux",
           "foie",
           "crane"
         ],
         "humanoide": [
           "cuir_brut",
+          "coeur",
           "foie",
           "crane"
         ],
         "monture": [
           "cuir_brut",
+          "coeur",
           "crins",
           "tendons",
           "boyaux",
@@ -94,6 +104,7 @@
         ],
         "bete_de_somme": [
           "cuir_brut",
+          "coeur",
           "crins",
           "tendons",
           "boyaux",
@@ -143,7 +154,8 @@
           "griffes"
         ],
         "venin": [
-          "crocs"
+          "crocs",
+          "item:Poison_de_base"
         ],
         "foret": [
           "poils",
@@ -196,7 +208,7 @@
       "STOCK_CIBLE_DEFAUT": 25,
       "PRIX_AMPLITUDE_STOCK": 0.3,
       "VENTE_PNJ_PROBA": 0.1,
-      "VENTE_PNJ_FRACTION": 0.5,
+      "VENTE_PNJ_FRACTION": 0.05,
       "CRIT_REUSSITE_MAX": 5,
       "CRIT_ECHEC_MIN": 96,
       "CRIT_CHANCE_DIVISEUR": 10,
@@ -265,7 +277,7 @@
       "RECRUTEMENT_OFFRE_PAR_SOUS_CATEGORIE": {
         "capitale": {
           "nb": 6,
-          "niveau_max": 3
+          "niveau_max": 5
         },
         "ville": {
           "nb": 4,
@@ -284,6 +296,10 @@
       "RECRUTEMENT_NIVEAU_POINTS_PAR_NIVEAU": 6,
       "RECRUTEMENT_CARTE_REQUISE": true,
       "RECRUTEMENT_CAUTION_CUIVRE": 0,
+      "RECRUTEMENT_MISSION_COUT_CUIVRE": 300,
+      "RECRUTEMENT_MISSION_COUT_PAR_NIVEAU": 200,
+      "RECRUTEMENT_MISSION_PART_FACTEUR": 0.5,
+      "RECRUTEMENT_MISSION_PART_MIN": 0,
       "AFFINITE_INITIALE": 50,
       "AFFINITE_DELTA_QUETE": 2,
       "AFFINITE_DELTA_VICTOIRE": 1,
@@ -310,7 +326,11 @@
       "AUBERGE_TABLE_MESSAGES_MAX": 10,
       "AUBERGE_TABLES_MAX": 8,
       "AUBERGE_ANNONCE_LONGUEUR_MAX": 800,
+      "JOURNAL_LONGUEUR_MAX": 800,
+      "JOURNAL_ENTREES_MAX": 50,
+      "JOURNAL_BESTIAIRE_LIEUX_MAX": 5,
       "ACCES_GARDIEN_ACTIF": true,
+      "INDICATEURS_ACTIFS": true,
       "BOIS_A_COUPER": [
         "branche",
         "petit_rondin",
@@ -322,7 +342,14 @@
       "OUTIL_COUPE_BOIS_TAG": "outil_coupe_bois",
       "COUPE_MAX_PIECES": 40,
       "CARCASSE_TRANCHANT_TAG": "tranchant",
-      "CARCASSE_DECOUPE_POIDS_MIN": 100.0
+      "CARCASSE_DECOUPE_POIDS_MIN": 100,
+      "APPRO_EXTRA": {
+        "grand_arsenal": [
+          "item:mithril",
+          "item:orichalque",
+          "item:adamantite"
+        ]
+      }
     }
   }
 ]

@@ -13,7 +13,9 @@
 #   · `DEPECAGE_TAGS` — quelle matière rend quel tag d'espèce ;
 #   · `CARCASSE_TRANCHANT_TAG` / `CARCASSE_DECOUPE_POIDS_MIN` — la découpe des grosses
 #     carcasses en portions localisées ; absentes du doc, elles retomberaient déjà sur le
-#     défaut de code, mais les publier les rend ÉDITABLES depuis /admin comme les autres.
+#     défaut de code, mais les publier les rend ÉDITABLES depuis /admin comme les autres ;
+#   · `APPRO_DEBIT` / `APPRO_EXTRA` — débits d'approvisionnement et matières livrées par
+#     déclaration (cf. `CLES`).
 # Tout le reste du doc est recopié tel quel depuis le dump.
 #
 # ⚠️ LE DUMP EST UN INSTANTANÉ. Un réglage changé dans /admin depuis l'export serait ramené à
@@ -47,13 +49,18 @@ from models import character_stats   # noqa: E402
 # SOURCE UNIQUE : le dump complet de la base. ⚠️ Figé explicitement (et non « le glob le plus
 # récent ») pour que régénérer donne toujours le même résultat ; à mettre à jour à la main
 # après un nouveau dump.
-SRC_DUMP = "jsons/telluris-dump-20260831-122931.json"
+SRC_DUMP = "jsons/telluris-dump-20260924-173132.json"
 
 DOC_ID = "rules:world_variables"
 
 # Les SEULES clés que ce script écrit. Élargir cette liste, c'est élargir ce qu'un import
 # écrase en base : à ne faire qu'en connaissance de cause.
-CLES = ["DEPECAGE_TAGS", "CARCASSE_TRANCHANT_TAG", "CARCASSE_DECOUPE_POIDS_MIN"]
+#
+# ⚠️ `APPRO_DEBIT` / `APPRO_EXTRA` (24/09/2026 : lingots précieux livrés au grand arsenal) passent
+# par ICI et non par un second script : chaque sortie porte le doc `rules:world_variables`
+# ENTIER, et deux fichiers d'import qui le portent s'écraseraient l'un l'autre.
+CLES = ["DEPECAGE_TAGS", "CARCASSE_TRANCHANT_TAG", "CARCASSE_DECOUPE_POIDS_MIN",
+		"APPRO_DEBIT", "APPRO_EXTRA"]
 
 SORTIE = "jsons/depecage_tags_a_importer.json"
 

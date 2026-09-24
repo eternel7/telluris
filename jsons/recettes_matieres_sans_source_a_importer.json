@@ -1,0 +1,215 @@
+[
+  {
+    "_id": "recette:alchimie_poison_de_base",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Poison_de_base",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Capsules_de_pavot",
+        "quantite": 2
+      },
+      {
+        "item": "item:Feuilles_d_absinthe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:alchimie_fiole_sang_bete",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Fiole_sang_bete",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "sang",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "reactif_brut",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:bijouterie_poudre_amethyste",
+    "type": "recette",
+    "lieu_categorie": "bijouterie",
+    "objet_final": "Poudre_amethyste",
+    "quantite_produite": 3,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "gemmes",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:scriptorium_encre_magique",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "Encre_magique",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "encre",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "residu_spectral",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:necromancie_fragments_ame",
+    "type": "recette",
+    "lieu_categorie": "necromancie",
+    "objet_final": "Fragments_ame",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "residu_spectral",
+        "quantite": 3
+      },
+      {
+        "item": "item:composant_rituel",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:alchimie_salpetre",
+    "type": "recette",
+    "lieu_categorie": "laboratoire_d_alchimie",
+    "objet_final": "Salpetre",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "poudre_d_os",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "reactif_brut",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:apothicaire_peintures_de_guerre",
+    "type": "recette",
+    "lieu_categorie": "apothicairerie",
+    "objet_final": "Peintures_de_guerre",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "graisse",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:scriptorium_encre_noire",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "Encre_noire",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:pigment",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "sang",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:cirier_encens",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_cirier",
+    "objet_final": "Encens",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "item": "item:Herbes_a_bruler",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:scriptorium_parchemin_blanc",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "Parchemin_blanc",
+    "quantite_produite": 2,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "cuir",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:scriptorium_parchemin_vierge",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "Parchemin_vierge",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Parchemin_blanc",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "encre",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:scriptorium_cercle_invocation",
+    "type": "recette",
+    "lieu_categorie": "scriptorium",
+    "objet_final": "Cercle_invocation",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Parchemin_vierge",
+        "quantite": 1
+      },
+      {
+        "item": "item:Encre_magique",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:tabletterie_os_de_totem",
+    "type": "recette",
+    "lieu_categorie": "tabletterie",
+    "objet_final": "Os_de_totem",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "os",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "sang",
+        "quantite": 1
+      }
+    ]
+  }
+]

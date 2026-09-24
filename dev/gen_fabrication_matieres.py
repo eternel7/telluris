@@ -196,6 +196,20 @@ MATIERES = {
 													   "valeur": _val(1.1)}, ARME_ARMURE_CONSO),
 	"item:Poupee_de_cire": _matiere("de l’Imitation", 1, {"bonus_pm": 1, "bonus": {"Vol": 1, "Int": 1},
 														  "valeur": _val(1.1)}, ARME_ARMURE),
+	# Lot du 24/09/2026 — matières sans usage ni source jusque-là ; leurs recettes sont dans
+	# jsons/recettes_matieres_sans_source_a_importer.json (une matière sans source serait
+	# proposée au sur-mesure et sa commande resterait en attente pour toujours).
+	"item:Salpetre": _matiere("salpêtré", 1, {"bonus_degats": 1, "bonus_cd": 1, "valeur": _val(1.1)},
+							  [TAG_ARME]),
+	"item:Peintures_de_guerre": _matiere("aux peintures de guerre", 1, {
+		"bonus_initiative": 1, "bonus": {"F": 1, "Cha": 1}, "valeur": _val(1.1)}, ARME_ARMURE),
+	"item:Encre_noire": _matiere("aux runes noires", 1, {"bonus_pm": 2, "bonus": {"Int": 1}, "valeur": _val(1.1)},
+								 [TAG_ARMURE, TAG_CATALYSEUR]),
+	"item:Encens": _matiere("encensé", 1, {"bonus_pm": 2, "bonus": {"Vol": 1}, "valeur": _val(1.1)},
+							[TAG_ARMURE, TAG_CATALYSEUR]),
+	"item:Parchemin_blanc": _matiere("sur vélin", 1, {"bonus_pm": 2, "valeur": _val(1.1)}, [TAG_CATALYSEUR]),
+	"item:Parchemin_vierge": _matiere("aux marges enluminées", 1, {"bonus_pm": 2, "bonus": {"Int": 1},
+																   "valeur": _val(1.1)}, [TAG_CATALYSEUR]),
 
 	# ── Palier 2 : peu communs ─────────────────────────────────────────────────
 	"item:acier": _matiere("en acier", 2, {"bonus_degats": 2, "bonus_pa": 2, "poids": _val(1.05)}),
@@ -221,6 +235,11 @@ MATIERES = {
 											   "effets": _deb("Int", 1, 2)}, [TAG_ARME]),
 	"item:metaux_precieux": _matiere("à incrustations précieuses", 2, {"bonus": {"Cha": 3}}, ARME_ARMURE),
 	"item:debris_anime": _matiere("vivante", 2, {"bonus_cc": 2, "bonus_cd": 1, "bonus": {"Ag": 1}}),
+	"item:Cercle_invocation": _matiere("d'invocation", 2, {"bonus_pm": 2, "bonus": {"Int": 1},
+														   "effets": {"canalisation": 2}}, [TAG_ARMURE, TAG_CATALYSEUR]),
+	# Composant de six sorts druidiques : l'esquive se lit sur une pièce PORTÉE, jamais sur une arme.
+	"item:Os_de_totem": _matiere("totémique", 2, {"bonus_pv": 2, "bonus": {"F": 1, "V": 1},
+												  "effets": {"esquive": 1}}, [TAG_ARMURE, TAG_CATALYSEUR]),
 
 	# ── Palier 3 : rares ───────────────────────────────────────────────────────
 	# L'argent est le métal des canaux : `item:Epee_argent` porte déjà bonus_pm 4 et bonus Int 2.
@@ -246,6 +265,18 @@ MATIERES = {
 	"item:relique": _matiere("Relique", 3, {"bonus_pm": 2, "bonus_pv": 2, "bonus": {"Vol": 2},
 											"effets": {"regen_pm": 1, "pv": 5, "pm": 5, "duree": 3}},
 							 [TAG_ARMURE, TAG_CATALYSEUR, TAG_CONSOMMABLE]),
+
+	# ── Lingots précieux : paliers 4-5 par leur PRIX (1, 2 et 20 or) ─────────────
+	# Aucune recette ne les consomme : c'est `APPRO_EXTRA` qui les fait livrer au grand arsenal
+	# (réserve + comptoir), seule source du jeu — cf. models/character_stats.py.
+	"item:mithril": _matiere("en mithril", 4, {"bonus_degats": 3, "bonus_pa": 3, "bonus_cc": 2,
+											   "bonus": {"Ag": 2}, "poids": _val(0.6)}, ARME_ARMURE),
+	"item:orichalque": _matiere("en orichalque", 4, {"bonus_degats": 3, "bonus_pm": 4,
+													 "bonus": {"Int": 2, "Vol": 2},
+													 "effets": {"canalisation": 1}},
+								ARME_ARMURE + [TAG_CATALYSEUR]),
+	"item:adamantite": _matiere("en adamantite", 5, {"bonus_degats": 6, "bonus_pa": 6, "bonus": {"R": 3},
+													 "poids": _val(1.2)}, ARME_ARMURE),
 
 	# ── Parties de créatures ───────────────────────────────────────────────────
 	# Venin → R, pétrification/paralysie → V (comme les bolas), regard/malédiction → Vol.

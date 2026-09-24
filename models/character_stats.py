@@ -166,8 +166,22 @@ CATEGORIES_INTERMEDIAIRES: set = {"composant", "metal"}
 # (sinon `APPRO_DEBIT_DEFAUT`). En pratique : les métaux pour l'armurerie. Un débit à 0
 # désactive l'appro de la matière (garde `q > 0`) : `herbe` et `seve` restent fournies
 # par la récolte des joueurs, pas par l'atelier.
-APPRO_DEBIT: dict[str, int] = {"fer": 5, "acier": 3, "bronze": 5, "mithril": 1, "herbe": 0, "seve": 0}
+# ⚠️ Une clé item-ref (`item:mithril`) se règle SOUS SON ID : sans entrée dédiée, le débit
+# retombe sur la sous-catégorie du doc (`metaux_precieux` pour les trois lingots), puis sur le
+# défaut — jamais sur la clé courte `mithril`.
+APPRO_DEBIT: dict[str, int] = {"fer": 5, "acier": 3, "bronze": 5, "mithril": 1, "herbe": 0, "seve": 0,
+							   "item:mithril": 1, "item:orichalque": 1, "item:adamantite": 1}
 APPRO_DEBIT_DEFAUT: int = 5
+# Matières LIVRÉES À UNE CATÉGORIE PAR DÉCLARATION, sans qu'aucune de ses recettes les consomme :
+# {categorie_de_lieu: [clé matière, …]}. Le fournisseur les apporte comme une feuille
+# (`approvisionner` : réserve + comptoir, au débit `APPRO_DEBIT`), et le lieu les rachète au
+# joueur (`besoins_categorie`). Fusion comprise : une grande maison reçoit aussi ce qu'on
+# déclare pour les métiers qu'elle réunit.
+# POURQUOI : une matière de SUR-MESURE (les lingots précieux) n'est l'intrant d'aucune recette —
+# sans cette table, il aurait fallu inventer des pièces pour qu'elle soit livrée quelque part.
+APPRO_EXTRA: dict[str, list] = {
+	"grand_arsenal": ["item:mithril", "item:orichalque", "item:adamantite"],
+}
 
 # ── Magasins de niveau supérieur (grandes manufactures) ─────────────────────────
 # Une catégorie de lieu peut EN INCLURE d'autres : ses recettes, ce qu'elle achète au joueur
@@ -657,7 +671,8 @@ CARCASSE_DECOUPE_POIDS_MIN: float = 100.0
 # Les quantités finales sont mises à l'échelle du POIDS de la carcasse (cf.
 # DEPECAGE_POIDS_REF) — il n'y a plus de bucket petite_taille/geant.
 # Une entrée peut être une sous-catégorie (cas courant) OU une clé item-ref `item:*`
-# pour cibler un item précis (ex. `item:Sang_demon_seche` sur `demon`) : elle circule
+# pour cibler un item précis (ex. `item:Sang_demon_seche` sur `demon`, `item:Poison_de_base`
+# sur `venin` — sa seule source avec la recette `alchimie_poison_de_base`) : elle circule
 # telle quelle jusqu'au rayon (matiere_item_id la laisse intacte), sans passer par la
 # résolution sous_cat→item.
 #
@@ -767,7 +782,8 @@ DEPECAGE_TAGS: dict[str, list] = {
 	  "griffes"
 	],
 	"venin": [
-	  "crocs"
+	  "crocs",
+	  "item:Poison_de_base"
 	],
 	"foret": [
 	  "poils",
@@ -885,6 +901,7 @@ def current_world_variables() -> dict:
 		"CATEGORIES_INTERMEDIAIRES": sorted(CATEGORIES_INTERMEDIAIRES),
 		"APPRO_DEBIT": dict(APPRO_DEBIT),
 		"APPRO_DEBIT_DEFAUT": APPRO_DEBIT_DEFAUT,
+		"APPRO_EXTRA": {k: list(v) for k, v in APPRO_EXTRA.items()},
 		"CHA_MARCHAND": CHA_MARCHAND,
 		"CHA_MARCHAND_PAR_CATEGORIE": dict(CHA_MARCHAND_PAR_CATEGORIE),
 		"LIEU_CATEGORIES_FUSION": {k: list(v) for k, v in LIEU_CATEGORIES_FUSION.items()},
@@ -1119,6 +1136,10 @@ def load_world_variables() -> dict:
 		APPRO_DEBIT.clear()
 		APPRO_DEBIT.update({k: int(x) for k, x in v["APPRO_DEBIT"].items()})
 	APPRO_DEBIT_DEFAUT = int(v.get("APPRO_DEBIT_DEFAUT", APPRO_DEBIT_DEFAUT))
+	if isinstance(v.get("APPRO_EXTRA"), dict):
+		APPRO_EXTRA.clear()
+		APPRO_EXTRA.update({str(k): [str(c) for c in (x or []) if c]
+							for k, x in v["APPRO_EXTRA"].items() if isinstance(x, list)})
 
 	CHA_MARCHAND     = int(v.get("CHA_MARCHAND", CHA_MARCHAND))
 	PRIX_MAX_FACTEUR = float(v.get("PRIX_MAX_FACTEUR", PRIX_MAX_FACTEUR))
