@@ -1,0 +1,3620 @@
+[
+  {
+    "_id": "item:acier_plisse",
+    "_rev": "4-3104d0fb93118d6f176d090f0cd83450",
+    "type": "item",
+    "nom": "Acier plissé",
+    "description": "Barre d'acier repliée et soudée sur elle-même des dizaines de fois : le forgeron y chasse les scories et marie la souplesse du cœur au tranchant de la peau.",
+    "icon": "🌊",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "sous_categorie": "acier_plisse",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2,
+    "fabrication": {
+      "nom": "damasquiné",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_cc": 1,
+        "bonus_pa": 1,
+        "poids": {
+          "facteur": 1.05
+        },
+        "valeur": {
+          "facteur": 1.6
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:ange_de_la_connaissance_aile",
+    "_rev": "4-2f8b5c9452dc6a5c8b1243e83a87ee4a",
+    "type": "item",
+    "nom": "Aile d'Ange de la Connaissance",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      6,
+      9.6
+    ],
+    "description": "Aile d'Ange de la Connaissance, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "magique",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_connaissance",
+    "portion_de": "item:ange_de_la_connaissance",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Connaissance",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Int": 2
+        },
+        "effets": {
+          "pm": 5,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:ange_de_la_justice_aile",
+    "_rev": "4-ecaed3e5f6609c961710d841f32de580",
+    "type": "item",
+    "nom": "Aile d'Ange de la Justice",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      6,
+      9.6
+    ],
+    "description": "Aile d'Ange de la Justice, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_justice",
+    "portion_de": "item:ange_de_la_justice",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Justice",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Vol": 2
+        },
+        "effets": {
+          "buffs": {
+            "Vol": 1
+          },
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:archange_de_l_ordre_aile",
+    "_rev": "4-8ff215057dc4c92caa625e01fe56dbd9",
+    "type": "item",
+    "nom": "Aile d'Archange de l Ordre",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6,
+      17.6
+    ],
+    "description": "Aile d'Archange de l Ordre, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:archange_de_l_ordre",
+    "portion_de": "item:archange_de_l_ordre",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de l’Ordre",
+      "modificateurs": {
+        "bonus_pm": 3,
+        "bonus": {
+          "Vol": 2
+        },
+        "effets": {
+          "buffs": {
+            "Vol": 1
+          },
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:archange_du_savoir_aile",
+    "_rev": "6-ba82d2614a1cf6c3289868b6dc33a3e3",
+    "type": "item",
+    "nom": "Aile d'Archange du Savoir",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6,
+      12
+    ],
+    "description": "Aile d'Archange du Savoir, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "magique",
+      "partie_aile",
+      "vol"
+    ],
+    "source_espece": "espece:archange_du_savoir",
+    "portion_de": "item:archange_du_savoir",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Savoir",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Int": 5,
+          "Vol": 5
+        },
+        "effets": {
+          "regen_pm": 5,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.8
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:cockatrice_aile",
+    "_rev": "2-fdcc36c6f0abdf8fc5dde69c5bd615fa",
+    "type": "item",
+    "nom": "Aile de Cockatrice",
+    "icon": "🪶",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      40,
+      140
+    ],
+    "description": "Aile de Cockatrice, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_aile",
+      "petrification",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:cockatrice",
+    "portion_de": "item:cockatrice",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:cockatrice_aile_morceau",
+        "quantite": 2,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "Paralysant",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus_cd": 1,
+        "bonus": {
+          "Ag": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:ange_de_la_justice_bras",
+    "_rev": "4-598279262e4673ba14c0e03832459cca",
+    "type": "item",
+    "nom": "Bras d'Ange de la Justice",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      4.12,
+      6.6
+    ],
+    "description": "Bras d'Ange de la Justice, débité sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "partie_bras",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_justice",
+    "portion_de": "item:ange_de_la_justice",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Jugement",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pa": 2,
+        "bonus": {
+          "F": 2,
+          "Vol": 1
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:archange_de_l_ordre_bras",
+    "_rev": "4-34ba8702828636402b8c7ab9178c7009",
+    "type": "item",
+    "nom": "Bras d'Archange de l Ordre",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      4.12,
+      12.1
+    ],
+    "description": "Bras d'Archange de l Ordre, débité sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "partie_bras",
+      "vol"
+    ],
+    "source_espece": "espece:archange_de_l_ordre",
+    "portion_de": "item:archange_de_l_ordre",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "de l’Autorité",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus_pa": 2,
+        "bonus": {
+          "F": 2,
+          "R": 1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:avatar_bras",
+    "_rev": "4-557c69d2539931422cdef9026ea949ad",
+    "type": "item",
+    "nom": "Bras d'Avatar",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      3.3,
+      7.2
+    ],
+    "description": "Bras d'Avatar, débité sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "divin",
+      "humanoide",
+      "legendaire",
+      "partie_bras"
+    ],
+    "source_espece": "espece:avatar",
+    "portion_de": "item:avatar",
+    "partie": "bras",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "de l’Avatar",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus_pa": 2,
+        "bonus": {
+          "F": 3
+        },
+        "poids": {
+          "facteur": 1.15
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:coeur",
+    "_rev": "4-082905790a95a866e42cb80f99e12aa8",
+    "type": "item",
+    "nom": "Cœur",
+    "sous_categorie": "coeur",
+    "icon": "❤️",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.3,
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ],
+    "fabrication": {
+      "nom": "du Courage",
+      "modificateurs": {
+        "bonus_pv": 3,
+        "bonus": {
+          "V": 1
+        },
+        "effets": {
+          "pv": 5,
+          "regen_pv": 1,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.5
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:composant_rituel",
+    "_rev": "12-5532b8d6ad24f1018af952a4988c3cc4",
+    "type": "item",
+    "nom": "Composant rituel",
+    "sous_categorie": "",
+    "icon": "📿",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "de rituel",
+      "modificateurs": {
+        "bonus_pm": 1,
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
+  },
+  {
+    "_id": "item:crocs",
+    "_rev": "3-25a629bfeae46fd5beb7d2fc01d3b8bb",
+    "type": "item",
+    "nom": "Crocs",
+    "sous_categorie": "crocs",
+    "icon": "🦷",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "à garde de crocs",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "valeur": {
+          "facteur": 1.2
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:cuir",
+    "_rev": "3-cbd0d024a3ec36e8f51bdc0265bf7c7c",
+    "type": "item",
+    "nom": "Cuir",
+    "sous_categorie": "cuir",
+    "icon": "🟫",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.5,
+    "fabrication": {
+      "nom": "à garniture de cuir",
+      "modificateurs": {
+        "bonus_pa": 1,
+        "poids": {
+          "facteur": 0.95
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:cuir_brut",
+    "_rev": "7-7f9fd9b01d3fa821bc0eb18eb9a34d1a",
+    "type": "item",
+    "nom": "Cuir brut",
+    "sous_categorie": "cuir_brut",
+    "icon": "🟫",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.6,
+    "fabrication": {
+      "nom": "de la Peau",
+      "modificateurs": {
+        "bonus_pv": 1,
+        "bonus": {
+          "R": 1
+        },
+        "poids": {
+          "facteur": 0.95
+        },
+        "valeur": {
+          "facteur": 1.05
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ]
+  },
+  {
+    "_id": "item:debris_anime",
+    "_rev": "5-148fa00a5b15bf268cffbca9160b4bbf",
+    "type": "item",
+    "nom": "Débris animés",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.8,
+    "description": "Fragments inertes d'un corps que rien de vivant n'habitait.",
+    "fabrication": {
+      "nom": "vivante",
+      "modificateurs": {
+        "bonus_cc": 4,
+        "bonus_cd": 4,
+        "bonus": {
+          "Ag": 2
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:Eau_benite",
+    "_rev": "7-db4f4296fc6084b7d34473304eda0bc6",
+    "type": "item",
+    "nom": "Eau bénite",
+    "sous_categorie": "eau",
+    "icon": "💧",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.3,
+    "fabrication": {
+      "nom": "béni",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pv": 5
+        },
+        "valeur": {
+          "facteur": 1.4
+        },
+        "rarete": "peu_commun"
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
+  },
+  {
+    "_id": "item:Empennage_de_maitre",
+    "_rev": "3-98fb277645f2920f2b40d865735aadfd",
+    "type": "item",
+    "nom": "Empennage de maître",
+    "description": "Plumes triées à la parure, refendues et collées trois par trois. La flèche part droite même quand la main tremble.",
+    "icon": "🪶",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_arc",
+      "fabrication_arbalete"
+    ],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "de la Maîtrise",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "bonus_cc": 2,
+        "bonus_initiative": 1,
+        "poids": {
+          "facteur": 0.95
+        },
+        "valeur": {
+          "facteur": 1.3
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Encre_magique",
+    "_rev": "6-fa5fbb477fe70d12e76f13086b0e0db8",
+    "type": "item",
+    "nom": "Encre magique",
+    "sous_categorie": "encre",
+    "icon": "🖊️",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "aux Inscriptions magiques",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Int": 1,
+          "Vol": 1
+        },
+        "effets": {
+          "pm": 5,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "rare"
+      }
+    },
+    "tags": [
+      "fabrication_armure"
+    ]
+  },
+  {
+    "_id": "item:Fetiche_envoutement",
+    "_rev": "3-e497b4ed54dd0a0e3d58463f1066ce86",
+    "type": "item",
+    "nom": "Fétiche d'envoûtement",
+    "icon": "🪬",
+    "description": "Poupée de cire nouée de sel noir et de poil, éveillée par une nuit de veille. Elle attend un nom.",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 0.25,
+    "fabrication": {
+      "nom": "Envoûté",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Vol": 2
+        },
+        "effets": {
+          "buffs": {
+            "Vol": 1
+          },
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:Fiole_sang_bete",
+    "_rev": "5-8f383f9e854d8b94369e92fa5a03c733",
+    "type": "item",
+    "nom": "Fiole de sang de bête",
+    "sous_categorie": "",
+    "icon": "🧪",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "Bestial",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "bonus": {
+          "F": 1,
+          "V": 1
+        },
+        "effets": {
+          "buffs": {
+            "F": 1
+          },
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.2
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Fiole_de_sang_fige",
+    "_rev": "3-21b1bbac3d737cbc3d7cd00dde6da722",
+    "type": "item",
+    "nom": "Fiole de sang figé",
+    "description": "Du sang de démon repris au catalyseur et tenu en suspension. Les praticiens de l'Institut refusent d'expliquer à quoi cela sert.",
+    "icon": "🩸",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "du Sang Figé",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "bonus_pv": 3,
+        "effets": {
+          "pv": 5
+        },
+        "valeur": {
+          "facteur": 1.2
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Fragments_ame",
+    "_rev": "6-0c4979b61f54f33cde5d98079f7f441d",
+    "type": "item",
+    "nom": "Fragments d'âme",
+    "sous_categorie": "",
+    "icon": "👻",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0,
+    "fabrication": {
+      "nom": "Hanté",
+      "modificateurs": {
+        "bonus_pm": 3,
+        "bonus": {
+          "Int": 1,
+          "Vol": 2
+        },
+        "effets": {
+          "pm": 5,
+          "regen_pm": 1
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "rare"
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ]
+  },
+  {
+    "_id": "item:gemmes",
+    "_rev": "3-d046f77226a2a1b5f576d3e71a08bb4b",
+    "type": "item",
+    "nom": "Gemme brute",
+    "description": "Pierre de couleur tirée du gravier d'une rivière ou du fond d'une mine, encore mate. Il faudra la tailler avant qu'elle ne prenne feu.",
+    "icon": "💎",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "gemmes",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 0.05,
+    "valeur": [
+      {
+        "cu": 80
+      }
+    ],
+    "fabrication": {
+      "nom": "serti d'une gemme",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Vol": 1
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:Graine_sacree",
+    "_rev": "5-3e58444caa3012924fe7eaf6a19a1a41",
+    "type": "item",
+    "nom": "Graine sacrée",
+    "sous_categorie": "",
+    "icon": "🌱",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.01,
+    "fabrication": {
+      "nom": "Sacrée",
+      "modificateurs": {
+        "bonus_pv": 3,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pv": 5,
+          "regen_pv": 1,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "peu_commun"
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
+  },
+  {
+    "_id": "item:metaux_precieux",
+    "_rev": "3-3e34a3a9cac0632473aa68a2f5e6b472",
+    "type": "item",
+    "nom": "Grenaille précieuse",
+    "description": "Petites larmes d'argent et d'or coulées au creuset. Le bijoutier ne travaille pas au lingot : il pèse sa grenaille au grain près.",
+    "icon": "🔸",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "sous_categorie": "metaux_precieux",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 0.1,
+    "valeur": [
+      {
+        "cu": 30
+      }
+    ],
+    "fabrication": {
+      "nom": "à incrustations précieuses",
+      "modificateurs": {
+        "bonus": {
+          "Cha": 2
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:acier",
+    "_rev": "3-609097a1d33f9e79b46f0bfbf9c50558",
+    "type": "item",
+    "nom": "Lingot d'acier",
+    "sous_categorie": "acier",
+    "icon": "⚙️",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 2
+      }
+    ],
+    "fabrication": {
+      "nom": "en acier",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_pa": 2,
+        "poids": {
+          "facteur": 1.05
+        },
+        "valeur": {
+          "facteur": 1.3
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:argent",
+    "_rev": "4-d9c5d4289a62516af0110d99e9654b97",
+    "type": "item",
+    "nom": "Lingot d'argent",
+    "description": "Métal blanc, tendre et cher, que les armuriers réservent aux incrustations, aux runes et aux lames dites bénies.",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "sous_categorie": "metaux_precieux",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 20
+      }
+    ],
+    "fabrication": {
+      "nom": "aux ferrures d'argent",
+      "modificateurs": {
+        "bonus_pm": 3,
+        "bonus": {
+          "Int": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:bronze",
+    "_rev": "3-ae2bfc65999d4795ee03b95332862b8c",
+    "type": "item",
+    "nom": "Lingot de bronze",
+    "sous_categorie": "bronze",
+    "icon": "🟫",
+    "rarete": "commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 3,
+    "valeur": [
+      {
+        "cu": 35
+      }
+    ],
+    "fabrication": {
+      "nom": "en bronze",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "poids": {
+          "facteur": 1.1
+        },
+        "valeur": {
+          "facteur": 0.9
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:fer",
+    "_rev": "3-5bcf642306bcd80092867907311b48f6",
+    "type": "item",
+    "nom": "Lingot de fer",
+    "sous_categorie": "fer",
+    "icon": "🔩",
+    "rarete": "commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 3,
+    "valeur": [
+      {
+        "cu": 50
+      }
+    ],
+    "fabrication": {
+      "nom": "en fer",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "poids": {
+          "facteur": 1.05
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:plomb",
+    "_rev": "4-fb1275956ef1373c377c2c70391a890c",
+    "type": "item",
+    "nom": "Lingot de plomb",
+    "description": "Métal mou et lourd, sans valeur au tranchant : on l'emploie à lester ce qui doit tomber vite et frapper fort.",
+    "icon": "🔗",
+    "rarete": "commun",
+    "categorie": "metal",
+    "sous_categorie": "plomb",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 4,
+    "valeur": [
+      {
+        "cu": 20
+      }
+    ],
+    "fabrication": {
+      "nom": "plombé",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "poids": {
+          "facteur": 1.4
+        },
+        "valeur": {
+          "facteur": 0.8
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:cockatrice_aile_morceau",
+    "_rev": "2-ed7326bcf5c8f5d8f199496eabcdcede",
+    "type": "item",
+    "nom": "Morceau de aile de Cockatrice",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      20,
+      70
+    ],
+    "description": "Morceau de aile de Cockatrice, taillé pour être emporté.",
+    "tags": [
+      "monstre",
+      "morceau",
+      "partie_aile",
+      "petrification",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:cockatrice",
+    "portion_de": "item:cockatrice_aile",
+    "partie": "aile",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "plumes",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Regard de Pierre",
+      "modificateurs": {
+        "bonus_pm": 1,
+        "bonus": {
+          "Ag": 1
+        },
+        "valeur": {
+          "facteur": 1.4
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:bete_de_l_apocalypse_patte_morceau",
+    "_rev": "3-af29164997f6bf4ba3bcc693f08d7949",
+    "type": "item",
+    "nom": "Morceau de patte de Bete de l Apocalypse",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      17.5,
+      98
+    ],
+    "description": "Morceau de patte de Bete de l Apocalypse, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "cataclysme",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "predateur"
+    ],
+    "source_espece": "espece:bete_de_l_apocalypse",
+    "portion_de": "item:bete_de_l_apocalypse_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Ravage",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "F": 1
+        },
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:chimere_patte_morceau",
+    "_rev": "2-46ef8911212d80a81e4661e63a8e87da",
+    "type": "item",
+    "nom": "Morceau de patte de Chimere",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      28,
+      63
+    ],
+    "description": "Morceau de patte de Chimere, taillé pour être emporté.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "morceau",
+      "partie_patte",
+      "predateur",
+      "souffle"
+    ],
+    "source_espece": "espece:chimere",
+    "portion_de": "item:chimere_patte",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Férocité",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Ag": 1
+        },
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:bete_de_l_apocalypse_queue_morceau",
+    "_rev": "3-b918214b7b1981c7700d5635f35298cb",
+    "type": "item",
+    "nom": "Morceau de queue de Bete de l Apocalypse",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      13.33,
+      74.67
+    ],
+    "description": "Morceau de queue de Bete de l Apocalypse, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "cataclysme",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "predateur"
+    ],
+    "source_espece": "espece:bete_de_l_apocalypse",
+    "portion_de": "item:bete_de_l_apocalypse_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Fléau",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "F": 1
+        },
+        "valeur": {
+          "facteur": 1.6
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:chimere_queue_morceau",
+    "_rev": "2-57649bea33fb6dc7afa346e0ff598305",
+    "type": "item",
+    "nom": "Morceau de queue de Chimere",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      32,
+      72
+    ],
+    "description": "Morceau de queue de Chimere, taillé pour être emporté.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "predateur",
+      "souffle"
+    ],
+    "source_espece": "espece:chimere",
+    "portion_de": "item:chimere_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Discorde",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_cd": 1,
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:cockatrice_queue_morceau",
+    "_rev": "2-f7a3674e8175807e57878bf1c596d8db",
+    "type": "item",
+    "nom": "Morceau de queue de Cockatrice",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      22,
+      77
+    ],
+    "description": "Morceau de queue de Cockatrice, taillé pour être emporté.",
+    "tags": [
+      "monstre",
+      "morceau",
+      "partie_queue",
+      "petrification",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:cockatrice",
+    "portion_de": "item:cockatrice_queue",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Venin Noir",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.4
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:basilic_tete_morceau",
+    "_rev": "5-3154641f92dc5cea3d644d4e7e02d814",
+    "type": "item",
+    "nom": "Morceau de tête de Basilic",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      34.5,
+      73.2
+    ],
+    "description": "Morceau de tête de Basilic, taillé pour être emporté.",
+    "tags": [
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "petrification",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:basilic",
+    "portion_de": "item:basilic_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Regard Venimeux",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:bete_de_l_apocalypse_tete_morceau",
+    "_rev": "4-8c05b37eb673bc340b6d1a7974cf4af1",
+    "type": "item",
+    "nom": "Morceau de tête de Bete de l Apocalypse",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      15,
+      84
+    ],
+    "description": "Morceau de tête de Bete de l Apocalypse, taillé pour être emporté.",
+    "tags": [
+      "boss",
+      "cataclysme",
+      "legendaire",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "predateur",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:bete_de_l_apocalypse",
+    "portion_de": "item:bete_de_l_apocalypse_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Désastre",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus": {
+          "F": 1,
+          "Vol": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:chimere_tete_morceau",
+    "_rev": "3-564b1dce1f87edec345e9b987a3e3082",
+    "type": "item",
+    "nom": "Morceau de tête de Chimere",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      32,
+      72
+    ],
+    "description": "Morceau de tête de Chimere, taillé pour être emporté.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "predateur",
+      "souffle",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:chimere",
+    "portion_de": "item:chimere_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Monstruosité",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.6
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:cockatrice_tete_morceau",
+    "_rev": "3-09d4cb62a5855484f672be77d8c1f0ea",
+    "type": "item",
+    "nom": "Morceau de tête de Cockatrice",
+    "icon": "🥩",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      20,
+      70
+    ],
+    "description": "Morceau de tête de Cockatrice, taillé pour être emporté.",
+    "tags": [
+      "monstre",
+      "morceau",
+      "partie_tete",
+      "petrification",
+      "predateur",
+      "vol",
+      "fabrication_armure"
+    ],
+    "source_espece": "espece:cockatrice",
+    "portion_de": "item:cockatrice_tete",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Pétrification",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:os",
+    "_rev": "3-21943ddf2af8fcf77f29eddc66a299ff",
+    "type": "item",
+    "nom": "Os",
+    "sous_categorie": "os",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.4,
+    "fabrication": {
+      "nom": "à poignée d'os",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "poids": {
+          "facteur": 0.9
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Pate_a_polir",
+    "_rev": "4-21d5c0183e8479fd1ee392084df5fc2d",
+    "type": "item",
+    "nom": "Pâte à polir",
+    "icon": "✨",
+    "description": "Mélange abrasif doux, à base de sel et de cendres, pour nettoyer et faire briller.",
+    "rarete": "commun",
+    "categorie": "consommable",
+    "sous_categorie": "",
+    "slots": [],
+    "poids": 0.15,
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "fabrication": {
+      "nom": "polie",
+      "modificateurs": {
+        "bonus_cc": 1,
+        "bonus": {
+          "Cha": 1
+        },
+        "valeur": {
+          "facteur": 1
+        },
+        "rarete": "commun"
+      }
+    }
+  },
+  {
+    "_id": "item:bete_de_l_apocalypse_patte",
+    "_rev": "3-d83bbea6426177edc0d61cd55344e550",
+    "type": "item",
+    "nom": "Patte de Bete de l Apocalypse",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      35,
+      196
+    ],
+    "description": "Patte de Bete de l Apocalypse, débitée sur place.",
+    "tags": [
+      "boss",
+      "cataclysme",
+      "legendaire",
+      "monstre",
+      "partie_patte",
+      "predateur"
+    ],
+    "source_espece": "espece:bete_de_l_apocalypse",
+    "portion_de": "item:bete_de_l_apocalypse",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:bete_de_l_apocalypse_patte_morceau",
+        "quantite": 2,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "de la Destruction",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus_pa": 1,
+        "bonus": {
+          "F": 2,
+          "Ag": 1
+        },
+        "poids": {
+          "facteur": 1.1
+        },
+        "valeur": {
+          "facteur": 2.4
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:bunyip_patte",
+    "_rev": "3-47082545310a981124639f7ae8715050",
+    "type": "item",
+    "nom": "Patte de Bunyip",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      35,
+      56
+    ],
+    "description": "Patte de Bunyip, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "marais",
+      "monstre",
+      "partie_patte"
+    ],
+    "source_espece": "espece:bunyip",
+    "portion_de": "item:bunyip",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "des Profondeurs",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_pm": 1,
+        "bonus": {
+          "R": 1,
+          "Ag": 1
+        },
+        "poids": {
+          "facteur": 1.05
+        },
+        "valeur": {
+          "facteur": 1.7
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:chimere_patte",
+    "_rev": "2-f396a845fdc4da4bdee376b819d49503",
+    "type": "item",
+    "nom": "Patte de Chimere",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      56,
+      126
+    ],
+    "description": "Patte de Chimere, débitée sur place.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "partie_patte",
+      "predateur",
+      "souffle"
+    ],
+    "source_espece": "espece:chimere",
+    "portion_de": "item:chimere",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:chimere_patte_morceau",
+        "quantite": 2,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "de la Fureur",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pa": 1,
+        "bonus": {
+          "F": 1,
+          "Ag": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:cockatrice_patte",
+    "_rev": "2-c6e270035b9e30cea303b752bd34ed52",
+    "type": "item",
+    "nom": "Patte de Cockatrice",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      28,
+      98
+    ],
+    "description": "Patte de Cockatrice, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_patte",
+      "petrification",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:cockatrice",
+    "portion_de": "item:cockatrice",
+    "partie": "patte",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "griffes",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ],
+      [
+        "viande",
+        2
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Griffe Mortelle",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Ag": 1
+        },
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.6
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:perles",
+    "_rev": "2-926d7c4f2a2f7c5ba560342c99f77d61",
+    "type": "item",
+    "nom": "Perle",
+    "description": "Perle d'eau douce, ronde et laiteuse. Il en faut un plein cordon pour un sautoir, et une huître sur mille pour une perle.",
+    "icon": "⚪",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "perles",
+    "slots": [],
+    "tags": [],
+    "poids": 0.02,
+    "valeur": [
+      {
+        "cu": 60
+      }
+    ],
+    "fabrication": {
+      "nom": "perlé",
+      "modificateurs": {
+        "bonus": {
+          "Cha": 1
+        },
+        "valeur": {
+          "facteur": 1.6
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Poison_de_base",
+    "_rev": "6-f6d931743256de63b7ca7ceeb3302726",
+    "type": "item",
+    "nom": "Poison de base",
+    "sous_categorie": "",
+    "icon": "☠️",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "Empoisonné",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "effets": {
+          "pv": -5,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.3
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ]
+  },
+  {
+    "_id": "item:poudre_alchimique",
+    "_rev": "6-9be8431c1c1695aa2aa6a3ef09b47e81",
+    "type": "item",
+    "nom": "Poudre alchimique",
+    "sous_categorie": "",
+    "icon": "✨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "fabrication": {
+      "nom": "empreint d'alchimie",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "effets": {
+          "pm": 5
+        },
+        "valeur": {
+          "facteur": 1.4
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:Poudre_amethyste",
+    "_rev": "5-ea14d912247afb2254bc6f9e6fafdfc0",
+    "type": "item",
+    "nom": "Poudre d'améthyste",
+    "sous_categorie": "",
+    "icon": "💜",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.05,
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "fabrication": {
+      "nom": "d’Améthyste",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pm": 5
+        },
+        "valeur": {
+          "facteur": 1.5
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:Poudre_os",
+    "_rev": "6-cd09a25275521e9574bb6deb44feecbe",
+    "type": "item",
+    "nom": "Poudre d'os",
+    "sous_categorie": "poudre_d_os",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "des Ossements",
+      "modificateurs": {
+        "bonus_pv": 2,
+        "bonus": {
+          "R": 1
+        },
+        "poids": {
+          "facteur": 0.95
+        },
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
+  },
+  {
+    "_id": "item:Poudre_de_miroir",
+    "_rev": "5-433923c978c47c9448f7bcd5050760b2",
+    "type": "item",
+    "nom": "Poudre de miroir",
+    "sous_categorie": "",
+    "icon": "✨",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.05,
+    "fabrication": {
+      "nom": "du Reflet",
+      "modificateurs": {
+        "bonus_cd": 2,
+        "bonus": {
+          "Ag": 1,
+          "Cha": 1
+        },
+        "valeur": {
+          "facteur": 1.4
+        }
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
+  },
+  {
+    "_id": "item:Poupee_de_cire",
+    "_rev": "3-ae9bfe0a6cd8d3d1476e4626ccd8f636",
+    "type": "item",
+    "nom": "Poupée de cire",
+    "icon": "🪆",
+    "description": "Figurine de cire grossièrement modelée, une mèche de poil prise dans la poitrine. Vendue vierge — ce qu'on en fait ne regarde pas le cirier.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 0.2,
+    "fabrication": {
+      "nom": "de l’Imitation",
+      "modificateurs": {
+        "bonus_pm": 1,
+        "bonus": {
+          "Vol": 1,
+          "Int": 1
+        },
+        "effets": {
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.3
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:basilic_queue",
+    "_rev": "4-485d82fce2a12e030da9555d6d3d0fa7",
+    "type": "item",
+    "nom": "Queue de Basilic",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      46,
+      97.6
+    ],
+    "description": "Queue de Basilic, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_queue",
+      "petrification"
+    ],
+    "source_espece": "espece:basilic",
+    "portion_de": "item:basilic",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Basilic",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_cd": 1,
+        "effets": {
+          "pv": -5,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:bete_de_l_apocalypse_queue",
+    "_rev": "3-5a4babbaac326ece516f242b1aa0f9d8",
+    "type": "item",
+    "nom": "Queue de Bete de l Apocalypse",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      40,
+      224
+    ],
+    "description": "Queue de Bete de l Apocalypse, débitée sur place.",
+    "tags": [
+      "boss",
+      "cataclysme",
+      "legendaire",
+      "monstre",
+      "partie_queue",
+      "predateur"
+    ],
+    "source_espece": "espece:bete_de_l_apocalypse",
+    "portion_de": "item:bete_de_l_apocalypse",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:bete_de_l_apocalypse_queue_morceau",
+        "quantite": 3,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "de l’Apocalypse",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus_pa": 2,
+        "bonus": {
+          "F": 2
+        },
+        "poids": {
+          "facteur": 1.1
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:bunyip_queue",
+    "_rev": "3-9307ea7066677b8ebc87c4d360affc3b",
+    "type": "item",
+    "nom": "Queue de Bunyip",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      40,
+      64
+    ],
+    "description": "Queue de Bunyip, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "marais",
+      "monstre",
+      "partie_queue"
+    ],
+    "source_espece": "espece:bunyip",
+    "portion_de": "item:bunyip",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "des Eaux Sombres",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "R": 2
+        },
+        "effets": {
+          "buffs": {
+            "R": 1
+          },
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:chimere_queue",
+    "_rev": "2-805007662c0f99694c5147760dc7d3d6",
+    "type": "item",
+    "nom": "Queue de Chimere",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      64,
+      144
+    ],
+    "description": "Queue de Chimere, débitée sur place.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "partie_queue",
+      "predateur",
+      "souffle"
+    ],
+    "source_espece": "espece:chimere",
+    "portion_de": "item:chimere",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:chimere_queue_morceau",
+        "quantite": 2,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "de la Chimère",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_cd": 2,
+        "bonus": {
+          "Ag": 1
+        },
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:cockatrice_queue",
+    "_rev": "2-2af8d6e059fe152009cce15807e3b02e",
+    "type": "item",
+    "nom": "Queue de Cockatrice",
+    "icon": "🦴",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      44,
+      154
+    ],
+    "description": "Queue de Cockatrice, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_queue",
+      "petrification",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:cockatrice",
+    "portion_de": "item:cockatrice",
+    "partie": "queue",
+    "depecage": [
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "tendons",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:cockatrice_queue_morceau",
+        "quantite": 2,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "Venimeuse",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_cd": 1,
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.7
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:Reactif_brut",
+    "_rev": "2-a1517f6b61cfb45aca854d36eb293daa",
+    "type": "item",
+    "nom": "Réactif brut",
+    "icon": "⚗️",
+    "description": "Minéraux et sels bruts collectés pour l'alchimiste, matière première de ses réactifs.",
+    "rarete": "commun",
+    "categorie": "composant",
+    "sous_categorie": "reactif_brut",
+    "slots": [],
+    "tags": [],
+    "poids": 0.3,
+    "fabrication": {
+      "nom": "Alchimique",
+      "modificateurs": {
+        "bonus_pm": 1,
+        "effets": {
+          "pm": 3
+        },
+        "valeur": {
+          "facteur": 1.1
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:relique",
+    "_rev": "3-0d09f06cbd5041704df95686a1c6d1c2",
+    "type": "item",
+    "nom": "Relique",
+    "sous_categorie": "",
+    "icon": "⚱️",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.5,
+    "fabrication": {
+      "nom": "Relique",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus_pv": 3,
+        "bonus": {
+          "Vol": 2
+        },
+        "effets": {
+          "pv": 5,
+          "pm": 5,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:sang",
+    "_rev": "3-8ff2b4656727fcf3dd99ff9c86a459b4",
+    "type": "item",
+    "nom": "Sang",
+    "sous_categorie": "sang",
+    "icon": "🩸",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.3,
+    "fabrication": {
+      "nom": "Sanglante",
+      "modificateurs": {
+        "bonus_pv": 2,
+        "bonus": {
+          "V": 1
+        },
+        "effets": {
+          "pv": 5
+        },
+        "valeur": {
+          "facteur": 1.2
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:Sang_demon_seche",
+    "_rev": "4-83ca605d4a582f26db8f35dafd27779a",
+    "type": "item",
+    "nom": "Sang de démon séché",
+    "sous_categorie": "",
+    "icon": "🩸",
+    "rarete": "rare",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.05,
+    "fabrication": {
+      "nom": "Démoniaque",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus": {
+          "F": 1,
+          "Vol": 1
+        },
+        "effets": {
+          "pv": 5
+        },
+        "valeur": {
+          "facteur": 1.7
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:Sel_des_sepultures",
+    "_rev": "2-184591b98ee7c165199163a447987724",
+    "type": "item",
+    "nom": "Sel des sépultures",
+    "description": "Sel noir recuit au soufre du laboratoire sur une poudre d'ossements. On en trace des cercles dont on ne ressort pas toujours.",
+    "icon": "🧂",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "",
+    "slots": [],
+    "tags": [],
+    "poids": 0.2,
+    "fabrication": {
+      "nom": "des Sépultures",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.4
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:Sel_noir",
+    "_rev": "4-09b66c1bab30151a82fa2dc243892a31",
+    "type": "item",
+    "nom": "Sel noir",
+    "sous_categorie": "",
+    "icon": "🖤",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "Ténébreux",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Vol": 1
+        },
+        "effets": {
+          "pm": -3
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:tendons",
+    "_rev": "3-27f138291d8e8ade3dcf2f5138c4f290",
+    "type": "item",
+    "nom": "Tendons",
+    "sous_categorie": "tendons",
+    "icon": "🦴",
+    "rarete": "commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "à ligature de tendons",
+      "modificateurs": {
+        "bonus_degats": 1,
+        "poids": {
+          "facteur": 0.95
+        }
+      }
+    }
+  },
+  {
+    "_id": "item:ange_de_la_connaissance_tete",
+    "_rev": "4-56e82e65cae32df1b87f80024eacc8a8",
+    "type": "item",
+    "nom": "Tête d'Ange de la Connaissance",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      6,
+      9.6
+    ],
+    "description": "Tête d'Ange de la Connaissance, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "magique",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_connaissance",
+    "portion_de": "item:ange_de_la_connaissance",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Clairvoyance",
+      "modificateurs": {
+        "bonus_pm": 3,
+        "bonus": {
+          "Int": 2,
+          "Vol": 1
+        },
+        "effets": {
+          "regen_pm": 1,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.2
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:ange_de_la_justice_tete",
+    "_rev": "4-ae3349cbe0f1230ac3ac6424f0829b4c",
+    "type": "item",
+    "nom": "Tête d'Ange de la Justice",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      6,
+      9.6
+    ],
+    "description": "Tête d'Ange de la Justice, débitée sur place.",
+    "tags": [
+      "ange",
+      "celeste",
+      "humanoide",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:ange_de_la_justice",
+    "portion_de": "item:ange_de_la_justice",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Vérité",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Vol": 2
+        },
+        "effets": {
+          "buffs": {
+            "Vol": 1
+          },
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.2
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:araignee_geante_tete",
+    "_rev": "4-368a7ab4b2ee35060d6ac676a1b64a66",
+    "type": "item",
+    "nom": "Tête d'Araignee Geante",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      11.25,
+      18
+    ],
+    "description": "Tête d'Araignee Geante, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "venin"
+    ],
+    "source_espece": "espece:araignee_geante",
+    "portion_de": "item:araignee_geante",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "Arachnéen",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus": {
+          "Ag": 1
+        },
+        "effets": {
+          "pv": -3,
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.4
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:archange_de_l_ordre_tete",
+    "_rev": "4-be91ed05b7eeeab9f56fe76a3519fe65",
+    "type": "item",
+    "nom": "Tête d'Archange de l Ordre",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6,
+      17.6
+    ],
+    "description": "Tête d'Archange de l Ordre, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:archange_de_l_ordre",
+    "portion_de": "item:archange_de_l_ordre",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Commandement",
+      "modificateurs": {
+        "bonus": {
+          "Vol": 2,
+          "R": 1
+        },
+        "effets": {
+          "buffs": {
+            "Vol": 1
+          },
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:archange_du_savoir_tete",
+    "_rev": "4-d45c0336496556c751b0c0e239382426",
+    "type": "item",
+    "nom": "Tête d'Archange du Savoir",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      6,
+      12
+    ],
+    "description": "Tête d'Archange du Savoir, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "humanoide",
+      "legendaire",
+      "magique",
+      "partie_tete",
+      "vol"
+    ],
+    "source_espece": "espece:archange_du_savoir",
+    "portion_de": "item:archange_du_savoir",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Sagesse",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Int": 3
+        },
+        "effets": {
+          "pm": 10,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 3
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:avatar_tete",
+    "_rev": "4-e533ce94cd61b8824de211a8aac4103f",
+    "type": "item",
+    "nom": "Tête d'Avatar",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      4.4,
+      9.6
+    ],
+    "description": "Tête d'Avatar, débitée sur place.",
+    "tags": [
+      "ange",
+      "boss",
+      "celeste",
+      "divin",
+      "humanoide",
+      "legendaire",
+      "partie_tete"
+    ],
+    "source_espece": "espece:avatar",
+    "portion_de": "item:avatar",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "de la Transcendance",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus": {
+          "F": 1,
+          "Vol": 2
+        },
+        "effets": {
+          "pv": 10,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:basilic_tete",
+    "_rev": "4-9e33bb557b8634dd45e8588efcbcdbd1",
+    "type": "item",
+    "nom": "Tête de Basilic",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      69,
+      146.4
+    ],
+    "description": "Tête de Basilic, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "petrification"
+    ],
+    "source_espece": "espece:basilic",
+    "portion_de": "item:basilic",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:basilic_tete_morceau",
+        "quantite": 2,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "du Regard Mortel",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus": {
+          "Vol": 2
+        },
+        "effets": {
+          "pv": -5,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.2
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:bete_de_l_apocalypse_tete",
+    "_rev": "3-5f959eef1e119cbf0fbf3bed52225b62",
+    "type": "item",
+    "nom": "Tête de Bete de l Apocalypse",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "rare",
+    "slots": [],
+    "poids": [
+      60,
+      336
+    ],
+    "description": "Tête de Bete de l Apocalypse, débitée sur place.",
+    "tags": [
+      "boss",
+      "cataclysme",
+      "legendaire",
+      "monstre",
+      "partie_tete",
+      "predateur"
+    ],
+    "source_espece": "espece:bete_de_l_apocalypse",
+    "portion_de": "item:bete_de_l_apocalypse",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:bete_de_l_apocalypse_tete_morceau",
+        "quantite": 4,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "de la Fin des Temps",
+      "modificateurs": {
+        "bonus_degats": 5,
+        "bonus_pa": 2,
+        "bonus": {
+          "F": 2,
+          "Vol": 2
+        },
+        "effets": {
+          "pv": 10,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 3
+        },
+        "rarete": "legendaire"
+      }
+    }
+  },
+  {
+    "_id": "item:bunyip_tete",
+    "_rev": "3-5f8eaa36267f386a8e9f4f7479269599",
+    "type": "item",
+    "nom": "Tête de Bunyip",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      60,
+      96
+    ],
+    "description": "Tête de Bunyip, débitée sur place.",
+    "tags": [
+      "aquatique",
+      "marais",
+      "monstre",
+      "partie_tete"
+    ],
+    "source_espece": "espece:bunyip",
+    "portion_de": "item:bunyip",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "des Marais",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus_pv": 5,
+        "bonus": {
+          "R": 2
+        },
+        "effets": {
+          "pv": 5
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:cerbere_tete",
+    "_rev": "3-d20b494cb15b3e932ebb505ec1a7b385",
+    "type": "item",
+    "nom": "Tête de Cerbere",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "peu_commun",
+    "slots": [],
+    "poids": [
+      48,
+      96
+    ],
+    "description": "Tête de Cerbere, débitée sur place.",
+    "tags": [
+      "gardien",
+      "infernal",
+      "monstre",
+      "partie_tete"
+    ],
+    "source_espece": "espece:cerbere",
+    "portion_de": "item:cerbere",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "fabrication": {
+      "nom": "du Gardien Infernal",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus": {
+          "F": 2,
+          "Vol": 1
+        },
+        "effets": {
+          "pv": -5,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.5
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:chimere_tete",
+    "_rev": "2-b9c052a36aeadd227077abad71721a5b",
+    "type": "item",
+    "nom": "Tête de Chimere",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      96,
+      216
+    ],
+    "description": "Tête de Chimere, débitée sur place.",
+    "tags": [
+      "hybride",
+      "monstre",
+      "partie_tete",
+      "predateur",
+      "souffle"
+    ],
+    "source_espece": "espece:chimere",
+    "portion_de": "item:chimere",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:chimere_tete_morceau",
+        "quantite": 3,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "des Trois Visages",
+      "modificateurs": {
+        "bonus_degats": 4,
+        "bonus": {
+          "F": 1,
+          "Ag": 1,
+          "Vol": 1
+        },
+        "effets": {
+          "pv": -5,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2.4
+        },
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:cockatrice_tete",
+    "_rev": "2-7f942525ceeb19867704817ac9a663b6",
+    "type": "item",
+    "nom": "Tête de Cockatrice",
+    "icon": "💀",
+    "categorie": "composant",
+    "sous_categorie": "carcasse",
+    "rarete": "commun",
+    "slots": [],
+    "poids": [
+      40,
+      140
+    ],
+    "description": "Tête de Cockatrice, débitée sur place.",
+    "tags": [
+      "monstre",
+      "partie_tete",
+      "petrification",
+      "predateur",
+      "vol"
+    ],
+    "source_espece": "espece:cockatrice",
+    "portion_de": "item:cockatrice",
+    "partie": "tete",
+    "depecage": [
+      [
+        "crane",
+        1
+      ],
+      [
+        "crocs",
+        1
+      ],
+      [
+        "cuir_brut",
+        1
+      ],
+      [
+        "os",
+        1
+      ],
+      [
+        "yeux",
+        1
+      ]
+    ],
+    "decoupe": [
+      {
+        "item": "item:cockatrice_tete_morceau",
+        "quantite": 2,
+        "fraction": 1
+      }
+    ],
+    "decoupe_poids_min": 100,
+    "fabrication": {
+      "nom": "Pétrifiant",
+      "modificateurs": {
+        "bonus_degats": 3,
+        "bonus": {
+          "Ag": 1,
+          "Vol": 1
+        },
+        "effets": {
+          "pv": -5,
+          "duree": 3
+        },
+        "valeur": {
+          "facteur": 2
+        },
+        "rarete": "rare"
+      }
+    }
+  }
+]

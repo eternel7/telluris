@@ -10,9 +10,9 @@
     "slots": [],
     "poids": 0.3,
     "fabrication": {
-      "nom": "Béni",
+      "nom": "béni",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 1,
         "bonus": {
           "Vol": 1
         },
@@ -20,11 +20,15 @@
           "pv": 5
         },
         "valeur": {
-          "facteur": 1.4
-        },
-        "rarete": "peu_commun"
+          "facteur": 1.1
+        }
       }
-    }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
   },
   {
     "_id": "item:Empennage_de_maitre",
@@ -36,20 +40,24 @@
     "categorie": "composant",
     "sous_categorie": "",
     "slots": [],
-    "tags": [],
+    "tags": [
+      "fabrication_arbalete",
+      "fabrication_arc"
+    ],
     "poids": 0.1,
     "fabrication": {
       "nom": "de la Maîtrise",
       "modificateurs": {
-        "bonus_degats": 1,
+        "bonus_degats": 2,
         "bonus_cc": 2,
-        "bonus_initiative": 1,
+        "bonus_initiative": 2,
         "poids": {
           "facteur": 0.95
         },
         "valeur": {
-          "facteur": 1.3
-        }
+          "facteur": 1.8
+        },
+        "rarete": "rare"
       }
     }
   },
@@ -72,15 +80,18 @@
           "Vol": 1
         },
         "effets": {
-          "pm": 5,
-          "duree": 2
+          "canalisation": 1
         },
         "valeur": {
-          "facteur": 1.5
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
-    }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ]
   },
   {
     "_id": "item:Fetiche_envoutement",
@@ -92,23 +103,26 @@
     "categorie": "composant",
     "sous_categorie": "",
     "slots": [],
-    "tags": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
     "poids": 0.25,
     "fabrication": {
       "nom": "Envoûté",
       "modificateurs": {
         "bonus_pm": 2,
         "bonus": {
-          "Vol": 2
+          "Vol": 1
         },
         "effets": {
           "buffs": {
-            "Vol": 1
+            "Vol": -1
           },
-          "duree": 3
+          "duree": 2
         },
         "valeur": {
-          "facteur": 1.5
+          "facteur": 1.3
         },
         "rarete": "peu_commun"
       }
@@ -124,19 +138,23 @@
     "categorie": "composant",
     "sous_categorie": "",
     "slots": [],
-    "tags": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
     "poids": 0.1,
     "fabrication": {
       "nom": "du Sang Figé",
       "modificateurs": {
-        "bonus_degats": 1,
-        "bonus_pv": 3,
-        "effets": {
-          "pv": 5
+        "bonus_degats": 2,
+        "bonus_pv": 6,
+        "bonus": {
+          "R": 2
         },
         "valeur": {
-          "facteur": 1.2
-        }
+          "facteur": 1.8
+        },
+        "rarete": "rare"
       }
     }
   },
@@ -158,17 +176,15 @@
           "F": 1,
           "V": 1
         },
-        "effets": {
-          "buffs": {
-            "F": 1
-          },
-          "duree": 2
-        },
         "valeur": {
-          "facteur": 1.2
+          "facteur": 1.1
         }
       }
-    }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ]
   },
   {
     "_id": "item:Fragments_ame",
@@ -179,7 +195,7 @@
     "rarete": "rare",
     "categorie": "composant",
     "slots": [],
-    "poids": 0.0,
+    "poids": 0,
     "fabrication": {
       "nom": "Hanté",
       "modificateurs": {
@@ -189,15 +205,18 @@
           "Vol": 2
         },
         "effets": {
-          "pm": 5,
           "regen_pm": 1
         },
         "valeur": {
-          "facteur": 2
+          "facteur": 1.8
         },
         "rarete": "rare"
       }
-    }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ]
   },
   {
     "_id": "item:Graine_sacree",
@@ -212,7 +231,7 @@
     "fabrication": {
       "nom": "Sacrée",
       "modificateurs": {
-        "bonus_pv": 3,
+        "bonus_pv": 2,
         "bonus": {
           "Vol": 1
         },
@@ -222,11 +241,15 @@
           "duree": 3
         },
         "valeur": {
-          "facteur": 1.5
+          "facteur": 1.3
         },
         "rarete": "peu_commun"
       }
-    }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
   },
   {
     "_id": "item:Poison_de_base",
@@ -241,16 +264,22 @@
     "fabrication": {
       "nom": "Empoisonné",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 1,
         "effets": {
-          "pv": -5,
+          "buffs": {
+            "R": -1
+          },
           "duree": 2
         },
         "valeur": {
-          "facteur": 1.3
+          "facteur": 1.1
         }
       }
-    }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ]
   },
   {
     "_id": "item:Poudre_amethyste",
@@ -262,18 +291,19 @@
     "categorie": "composant",
     "slots": [],
     "poids": 0.05,
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
     "fabrication": {
       "nom": "d’Améthyste",
       "modificateurs": {
-        "bonus_pm": 2,
+        "bonus_pm": 4,
         "bonus": {
           "Vol": 1
         },
-        "effets": {
-          "pm": 5
-        },
         "valeur": {
-          "facteur": 1.5
+          "facteur": 1.3
         },
         "rarete": "peu_commun"
       }
@@ -292,42 +322,21 @@
     "fabrication": {
       "nom": "du Reflet",
       "modificateurs": {
-        "bonus_cd": 2,
+        "bonus_cd": 1,
         "bonus": {
           "Ag": 1,
           "Cha": 1
         },
         "valeur": {
-          "facteur": 1.4
-        }
-      }
-    }
-  },
-  {
-    "_id": "item:Poudre_os",
-    "type": "item",
-    "nom": "Poudre d'os",
-    "sous_categorie": "poudre_d_os",
-    "icon": "🦴",
-    "rarete": "commun",
-    "categorie": "composant",
-    "slots": [],
-    "poids": 0.1,
-    "fabrication": {
-      "nom": "des Ossements",
-      "modificateurs": {
-        "bonus_pv": 2,
-        "bonus": {
-          "R": 1
-        },
-        "poids": {
-          "facteur": 0.95
-        },
-        "valeur": {
           "facteur": 1.1
         }
       }
-    }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
   },
   {
     "_id": "item:Poupee_de_cire",
@@ -339,7 +348,10 @@
     "categorie": "composant",
     "sous_categorie": "",
     "slots": [],
-    "tags": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
     "poids": 0.2,
     "fabrication": {
       "nom": "de l’Imitation",
@@ -349,11 +361,8 @@
           "Vol": 1,
           "Int": 1
         },
-        "effets": {
-          "duree": 2
-        },
         "valeur": {
-          "facteur": 1.3
+          "facteur": 1.1
         }
       }
     }
@@ -373,7 +382,7 @@
     "fabrication": {
       "nom": "Alchimique",
       "modificateurs": {
-        "bonus_pm": 1,
+        "bonus_pm": 2,
         "effets": {
           "pm": 3
         },
@@ -396,20 +405,26 @@
     "fabrication": {
       "nom": "Démoniaque",
       "modificateurs": {
-        "bonus_degats": 3,
+        "bonus_degats": 4,
         "bonus": {
           "F": 1,
           "Vol": 1
         },
         "effets": {
-          "pv": 5
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
         },
         "valeur": {
-          "facteur": 1.7
+          "facteur": 1.8
         },
         "rarete": "rare"
       }
-    }
+    },
+    "tags": [
+      "fabrication_arme"
+    ]
   },
   {
     "_id": "item:Sel_des_sepultures",
@@ -421,23 +436,27 @@
     "categorie": "composant",
     "sous_categorie": "",
     "slots": [],
-    "tags": [],
+    "tags": [
+      "fabrication_arme"
+    ],
     "poids": 0.2,
     "fabrication": {
       "nom": "des Sépultures",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 3,
         "bonus": {
-          "Vol": 1
+          "Vol": 2
         },
         "effets": {
-          "pv": -3,
+          "buffs": {
+            "R": -1
+          },
           "duree": 2
         },
         "valeur": {
-          "facteur": 1.4
+          "facteur": 1.8
         },
-        "rarete": "peu_commun"
+        "rarete": "rare"
       }
     }
   },
@@ -459,7 +478,46 @@
           "Vol": 1
         },
         "effets": {
-          "pm": -3
+          "buffs": {
+            "Int": -1
+          },
+          "duree": 2
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    },
+    "tags": [
+      "fabrication_arme"
+    ]
+  },
+  {
+    "_id": "item:acier",
+    "type": "item",
+    "nom": "Lingot d'acier",
+    "sous_categorie": "acier",
+    "icon": "⚙️",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "slots": [],
+    "tags": [
+      "metal"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 2
+      }
+    ],
+    "fabrication": {
+      "nom": "en acier",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_pa": 2,
+        "poids": {
+          "facteur": 1.05
         },
         "valeur": {
           "facteur": 1.3
@@ -483,16 +541,16 @@
     ],
     "poids": 2,
     "fabrication": {
-      "nom": "Damasquiné",
+      "nom": "damasquiné",
       "modificateurs": {
-        "bonus_degats": 3,
+        "bonus_degats": 4,
         "bonus_cc": 1,
-        "bonus_pa": 1,
+        "bonus_pa": 2,
         "poids": {
           "facteur": 1.05
         },
         "valeur": {
-          "facteur": 1.6
+          "facteur": 1.8
         },
         "rarete": "rare"
       }
@@ -505,7 +563,7 @@
     "icon": "🪶",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "peu_commun",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       6,
@@ -518,7 +576,9 @@
       "humanoide",
       "magique",
       "partie_aile",
-      "vol"
+      "vol",
+      "fabrication_armure",
+      "fabrication_catalyseur"
     ],
     "source_espece": "espece:ange_de_la_connaissance",
     "portion_de": "item:ange_de_la_connaissance",
@@ -544,16 +604,17 @@
     "fabrication": {
       "nom": "de la Connaissance",
       "modificateurs": {
-        "bonus_pm": 2,
+        "bonus_pm": 4,
         "bonus": {
-          "Int": 2
+          "Int": 3,
+          "Vol": 1
         },
         "effets": {
-          "pm": 5,
-          "duree": 3
+          "regen_pm": 1,
+          "canalisation": 1
         },
         "valeur": {
-          "facteur": 2
+          "facteur": 2.5
         },
         "rarete": "tres_rare"
       }
@@ -566,7 +627,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "peu_commun",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       6,
@@ -579,7 +640,9 @@
       "humanoide",
       "magique",
       "partie_tete",
-      "vol"
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:ange_de_la_connaissance",
     "portion_de": "item:ange_de_la_connaissance",
@@ -605,17 +668,16 @@
     "fabrication": {
       "nom": "de la Clairvoyance",
       "modificateurs": {
-        "bonus_pm": 3,
+        "bonus_pm": 4,
         "bonus": {
-          "Int": 2,
-          "Vol": 1
+          "Int": 3,
+          "Vol": 2
         },
         "effets": {
-          "regen_pm": 1,
-          "duree": 3
+          "canalisation": 3
         },
         "valeur": {
-          "facteur": 2.2
+          "facteur": 2.5
         },
         "rarete": "tres_rare"
       }
@@ -628,7 +690,7 @@
     "icon": "🪶",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "peu_commun",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       6,
@@ -640,7 +702,9 @@
       "celeste",
       "humanoide",
       "partie_aile",
-      "vol"
+      "vol",
+      "fabrication_armure",
+      "fabrication_catalyseur"
     ],
     "source_espece": "espece:ange_de_la_justice",
     "portion_de": "item:ange_de_la_justice",
@@ -666,18 +730,16 @@
     "fabrication": {
       "nom": "de la Justice",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_pa": 3,
+        "bonus_pv": 4,
         "bonus": {
-          "Vol": 2
+          "Vol": 3
         },
         "effets": {
-          "buffs": {
-            "Vol": 1
-          },
-          "duree": 3
+          "esquive": 1
         },
         "valeur": {
-          "facteur": 2
+          "facteur": 2.5
         },
         "rarete": "tres_rare"
       }
@@ -690,7 +752,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "peu_commun",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       4.12,
@@ -702,7 +764,8 @@
       "celeste",
       "humanoide",
       "partie_bras",
-      "vol"
+      "vol",
+      "fabrication_arme"
     ],
     "source_espece": "espece:ange_de_la_justice",
     "portion_de": "item:ange_de_la_justice",
@@ -732,14 +795,14 @@
     "fabrication": {
       "nom": "du Jugement",
       "modificateurs": {
-        "bonus_degats": 3,
-        "bonus_pa": 2,
+        "bonus_degats": 5,
+        "bonus_cc": 1,
         "bonus": {
           "F": 2,
           "Vol": 1
         },
         "valeur": {
-          "facteur": 2
+          "facteur": 2.5
         },
         "rarete": "tres_rare"
       }
@@ -752,7 +815,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "peu_commun",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       6,
@@ -764,7 +827,9 @@
       "celeste",
       "humanoide",
       "partie_tete",
-      "vol"
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:ange_de_la_justice",
     "portion_de": "item:ange_de_la_justice",
@@ -786,18 +851,19 @@
     "fabrication": {
       "nom": "de la Vérité",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 4,
         "bonus": {
-          "Vol": 2
+          "F": 1,
+          "Vol": 3
         },
         "effets": {
           "buffs": {
-            "Vol": 1
+            "Vol": -1
           },
           "duree": 3
         },
         "valeur": {
-          "facteur": 2.2
+          "facteur": 2.5
         },
         "rarete": "tres_rare"
       }
@@ -810,7 +876,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       11.25,
@@ -821,7 +887,9 @@
       "monstre",
       "partie_tete",
       "predateur",
-      "venin"
+      "venin",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:araignee_geante",
     "portion_de": "item:araignee_geante",
@@ -852,11 +920,13 @@
           "Ag": 1
         },
         "effets": {
-          "pv": -3,
+          "buffs": {
+            "V": -1
+          },
           "duree": 2
         },
         "valeur": {
-          "facteur": 1.4
+          "facteur": 1.3
         },
         "rarete": "peu_commun"
       }
@@ -869,7 +939,7 @@
     "icon": "🪶",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       6,
@@ -883,7 +953,9 @@
       "humanoide",
       "legendaire",
       "partie_aile",
-      "vol"
+      "vol",
+      "fabrication_armure",
+      "fabrication_catalyseur"
     ],
     "source_espece": "espece:archange_de_l_ordre",
     "portion_de": "item:archange_de_l_ordre",
@@ -909,15 +981,15 @@
     "fabrication": {
       "nom": "de l’Ordre",
       "modificateurs": {
-        "bonus_pm": 3,
+        "bonus_pm": 4,
+        "bonus_pa": 3,
         "bonus": {
-          "Vol": 2
+          "Vol": 4,
+          "R": 1
         },
         "effets": {
-          "buffs": {
-            "Vol": 1
-          },
-          "duree": 3
+          "esquive": 1,
+          "canalisation": 1
         },
         "valeur": {
           "facteur": 2.5
@@ -933,7 +1005,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       4.12,
@@ -947,7 +1019,8 @@
       "humanoide",
       "legendaire",
       "partie_bras",
-      "vol"
+      "vol",
+      "fabrication_arme"
     ],
     "source_espece": "espece:archange_de_l_ordre",
     "portion_de": "item:archange_de_l_ordre",
@@ -977,10 +1050,10 @@
     "fabrication": {
       "nom": "de l’Autorité",
       "modificateurs": {
-        "bonus_degats": 4,
-        "bonus_pa": 2,
+        "bonus_degats": 6,
+        "bonus_cc": 2,
         "bonus": {
-          "F": 2,
+          "F": 3,
           "R": 1
         },
         "valeur": {
@@ -997,7 +1070,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       6,
@@ -1011,7 +1084,9 @@
       "humanoide",
       "legendaire",
       "partie_tete",
-      "vol"
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:archange_de_l_ordre",
     "portion_de": "item:archange_de_l_ordre",
@@ -1037,15 +1112,16 @@
     "fabrication": {
       "nom": "du Commandement",
       "modificateurs": {
+        "bonus_degats": 4,
         "bonus": {
-          "Vol": 2,
-          "R": 1
+          "Vol": 4,
+          "R": 2
         },
         "effets": {
           "buffs": {
-            "Vol": 1
+            "Vol": -2
           },
-          "duree": 3
+          "duree": 2
         },
         "valeur": {
           "facteur": 2.5
@@ -1061,7 +1137,7 @@
     "icon": "🪶",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       6,
@@ -1076,7 +1152,9 @@
       "legendaire",
       "magique",
       "partie_aile",
-      "vol"
+      "vol",
+      "fabrication_armure",
+      "fabrication_catalyseur"
     ],
     "source_espece": "espece:archange_du_savoir",
     "portion_de": "item:archange_du_savoir",
@@ -1104,15 +1182,15 @@
       "modificateurs": {
         "bonus_pm": 4,
         "bonus": {
-          "Int": 2,
-          "Vol": 1
+          "Int": 4,
+          "Vol": 3
         },
         "effets": {
           "regen_pm": 1,
-          "duree": 3
+          "canalisation": 1
         },
         "valeur": {
-          "facteur": 2.8
+          "facteur": 2.5
         },
         "rarete": "tres_rare"
       }
@@ -1125,7 +1203,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       6,
@@ -1140,7 +1218,9 @@
       "legendaire",
       "magique",
       "partie_tete",
-      "vol"
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:archange_du_savoir",
     "portion_de": "item:archange_du_savoir",
@@ -1166,18 +1246,56 @@
     "fabrication": {
       "nom": "de la Sagesse",
       "modificateurs": {
-        "bonus_pm": 4,
+        "bonus_pm": 6,
         "bonus": {
-          "Int": 3
+          "Int": 5,
+          "Vol": 2
         },
         "effets": {
-          "pm": 10,
-          "duree": 3
+          "canalisation": 3
         },
         "valeur": {
-          "facteur": 3
+          "facteur": 2.5
         },
-        "rarete": "legendaire"
+        "rarete": "tres_rare"
+      }
+    }
+  },
+  {
+    "_id": "item:argent",
+    "type": "item",
+    "nom": "Lingot d'argent",
+    "description": "Métal blanc, tendre et cher, que les armuriers réservent aux incrustations, aux runes et aux lames dites bénies.",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "sous_categorie": "metaux_precieux",
+    "slots": [],
+    "tags": [
+      "metal",
+      "fabrication_catalyseur"
+    ],
+    "poids": 2.5,
+    "valeur": [
+      {
+        "ag": 20
+      }
+    ],
+    "fabrication": {
+      "nom": "aux ferrures d'argent",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Int": 2,
+          "Vol": 1
+        },
+        "effets": {
+          "canalisation": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
       }
     }
   },
@@ -1188,7 +1306,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "legendaire",
     "slots": [],
     "poids": [
       3.3,
@@ -1202,7 +1320,8 @@
       "divin",
       "humanoide",
       "legendaire",
-      "partie_bras"
+      "partie_bras",
+      "fabrication_arme"
     ],
     "source_espece": "espece:avatar",
     "portion_de": "item:avatar",
@@ -1232,18 +1351,18 @@
     "fabrication": {
       "nom": "de l’Avatar",
       "modificateurs": {
-        "bonus_degats": 4,
-        "bonus_pa": 2,
+        "bonus_degats": 8,
+        "bonus_cc": 2,
         "bonus": {
-          "F": 3
+          "F": 4
         },
         "poids": {
           "facteur": 1.15
         },
         "valeur": {
-          "facteur": 2.5
+          "facteur": 3.5
         },
-        "rarete": "tres_rare"
+        "rarete": "legendaire"
       }
     }
   },
@@ -1254,7 +1373,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "legendaire",
     "slots": [],
     "poids": [
       4.4,
@@ -1268,7 +1387,9 @@
       "divin",
       "humanoide",
       "legendaire",
-      "partie_tete"
+      "partie_tete",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:avatar",
     "portion_de": "item:avatar",
@@ -1294,19 +1415,22 @@
     "fabrication": {
       "nom": "de la Transcendance",
       "modificateurs": {
-        "bonus_degats": 3,
+        "bonus_degats": 6,
+        "bonus_pv": 2,
         "bonus": {
-          "F": 1,
-          "Vol": 2
+          "F": 2,
+          "Vol": 4
         },
         "effets": {
-          "pv": 10,
-          "duree": 3
+          "buffs": {
+            "Vol": -2
+          },
+          "duree": 2
         },
         "valeur": {
-          "facteur": 2.5
+          "facteur": 3.5
         },
-        "rarete": "tres_rare"
+        "rarete": "legendaire"
       }
     }
   },
@@ -1317,7 +1441,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       46,
@@ -1327,7 +1451,8 @@
     "tags": [
       "monstre",
       "partie_queue",
-      "petrification"
+      "petrification",
+      "fabrication_arme"
     ],
     "source_espece": "espece:basilic",
     "portion_de": "item:basilic",
@@ -1350,15 +1475,16 @@
       "nom": "du Basilic",
       "modificateurs": {
         "bonus_degats": 3,
-        "bonus_cd": 1,
         "effets": {
-          "pv": -5,
+          "buffs": {
+            "R": -1
+          },
           "duree": 2
         },
         "valeur": {
-          "facteur": 1.8
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -1369,7 +1495,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       69,
@@ -1379,7 +1505,9 @@
     "tags": [
       "monstre",
       "partie_tete",
-      "petrification"
+      "petrification",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:basilic",
     "portion_de": "item:basilic",
@@ -1417,18 +1545,20 @@
     "fabrication": {
       "nom": "du Regard Mortel",
       "modificateurs": {
-        "bonus_degats": 4,
+        "bonus_degats": 2,
         "bonus": {
           "Vol": 2
         },
         "effets": {
-          "pv": -5,
-          "duree": 3
+          "buffs": {
+            "R": -1
+          },
+          "duree": 2
         },
         "valeur": {
-          "facteur": 2.2
+          "facteur": 1.3
         },
-        "rarete": "tres_rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -1450,7 +1580,9 @@
       "monstre",
       "morceau",
       "partie_tete",
-      "petrification"
+      "petrification",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:basilic",
     "portion_de": "item:basilic_tete",
@@ -1480,18 +1612,10 @@
     "fabrication": {
       "nom": "du Regard Venimeux",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 1,
         "bonus": {
           "Vol": 1
-        },
-        "effets": {
-          "pv": -3,
-          "duree": 2
-        },
-        "valeur": {
-          "facteur": 1.5
-        },
-        "rarete": "rare"
+        }
       }
     }
   },
@@ -1502,7 +1626,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "legendaire",
     "slots": [],
     "poids": [
       35,
@@ -1515,7 +1639,8 @@
       "legendaire",
       "monstre",
       "partie_patte",
-      "predateur"
+      "predateur",
+      "fabrication_arme"
     ],
     "source_espece": "espece:bete_de_l_apocalypse",
     "portion_de": "item:bete_de_l_apocalypse",
@@ -1549,19 +1674,19 @@
     "fabrication": {
       "nom": "de la Destruction",
       "modificateurs": {
-        "bonus_degats": 4,
-        "bonus_pa": 1,
+        "bonus_degats": 8,
+        "bonus_cc": 2,
         "bonus": {
-          "F": 2,
-          "Ag": 1
+          "F": 4,
+          "Ag": 2
         },
         "poids": {
           "facteur": 1.1
         },
         "valeur": {
-          "facteur": 2.4
+          "facteur": 3.5
         },
-        "rarete": "tres_rare"
+        "rarete": "legendaire"
       }
     }
   },
@@ -1572,7 +1697,7 @@
     "icon": "🥩",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       17.5,
@@ -1586,7 +1711,8 @@
       "monstre",
       "morceau",
       "partie_patte",
-      "predateur"
+      "predateur",
+      "fabrication_arme"
     ],
     "source_espece": "espece:bete_de_l_apocalypse",
     "portion_de": "item:bete_de_l_apocalypse_patte",
@@ -1612,14 +1738,15 @@
     "fabrication": {
       "nom": "du Ravage",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 5,
         "bonus": {
-          "F": 1
+          "F": 2,
+          "Ag": 2
         },
         "valeur": {
-          "facteur": 1.5
+          "facteur": 2.5
         },
-        "rarete": "rare"
+        "rarete": "tres_rare"
       }
     }
   },
@@ -1630,7 +1757,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "legendaire",
     "slots": [],
     "poids": [
       40,
@@ -1643,7 +1770,8 @@
       "legendaire",
       "monstre",
       "partie_queue",
-      "predateur"
+      "predateur",
+      "fabrication_arme"
     ],
     "source_espece": "espece:bete_de_l_apocalypse",
     "portion_de": "item:bete_de_l_apocalypse",
@@ -1673,18 +1801,24 @@
     "fabrication": {
       "nom": "de l’Apocalypse",
       "modificateurs": {
-        "bonus_degats": 4,
-        "bonus_pa": 2,
+        "bonus_degats": 8,
+        "bonus_cd": 3,
         "bonus": {
-          "F": 2
+          "F": 3
+        },
+        "effets": {
+          "buffs": {
+            "Ag": -2
+          },
+          "duree": 2
         },
         "poids": {
           "facteur": 1.1
         },
         "valeur": {
-          "facteur": 2.5
+          "facteur": 3.5
         },
-        "rarete": "tres_rare"
+        "rarete": "legendaire"
       }
     }
   },
@@ -1695,7 +1829,7 @@
     "icon": "🥩",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       13.33,
@@ -1709,7 +1843,8 @@
       "monstre",
       "morceau",
       "partie_queue",
-      "predateur"
+      "predateur",
+      "fabrication_arme"
     ],
     "source_espece": "espece:bete_de_l_apocalypse",
     "portion_de": "item:bete_de_l_apocalypse_queue",
@@ -1731,14 +1866,15 @@
     "fabrication": {
       "nom": "du Fléau",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 5,
+        "bonus_cd": 2,
         "bonus": {
-          "F": 1
+          "F": 2
         },
         "valeur": {
-          "facteur": 1.6
+          "facteur": 2.5
         },
-        "rarete": "rare"
+        "rarete": "tres_rare"
       }
     }
   },
@@ -1749,7 +1885,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "legendaire",
     "slots": [],
     "poids": [
       60,
@@ -1762,7 +1898,9 @@
       "legendaire",
       "monstre",
       "partie_tete",
-      "predateur"
+      "predateur",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:bete_de_l_apocalypse",
     "portion_de": "item:bete_de_l_apocalypse",
@@ -1800,18 +1938,19 @@
     "fabrication": {
       "nom": "de la Fin des Temps",
       "modificateurs": {
-        "bonus_degats": 5,
-        "bonus_pa": 2,
+        "bonus_degats": 10,
         "bonus": {
-          "F": 2,
+          "F": 4,
           "Vol": 2
         },
         "effets": {
-          "pv": 10,
-          "duree": 3
+          "buffs": {
+            "R": -2
+          },
+          "duree": 2
         },
         "valeur": {
-          "facteur": 3
+          "facteur": 3.5
         },
         "rarete": "legendaire"
       }
@@ -1824,7 +1963,7 @@
     "icon": "🥩",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "rare",
+    "rarete": "tres_rare",
     "slots": [],
     "poids": [
       15,
@@ -1838,7 +1977,9 @@
       "monstre",
       "morceau",
       "partie_tete",
-      "predateur"
+      "predateur",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:bete_de_l_apocalypse",
     "portion_de": "item:bete_de_l_apocalypse_tete",
@@ -1868,13 +2009,13 @@
     "fabrication": {
       "nom": "du Désastre",
       "modificateurs": {
-        "bonus_degats": 3,
+        "bonus_degats": 5,
         "bonus": {
-          "F": 1,
-          "Vol": 1
+          "F": 2,
+          "Vol": 2
         },
         "valeur": {
-          "facteur": 1.8
+          "facteur": 2.5
         },
         "rarete": "tres_rare"
       }
@@ -1887,7 +2028,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "rare",
     "slots": [],
     "poids": [
       35,
@@ -1898,7 +2039,8 @@
       "aquatique",
       "marais",
       "monstre",
-      "partie_patte"
+      "partie_patte",
+      "fabrication_arme"
     ],
     "source_espece": "espece:bunyip",
     "portion_de": "item:bunyip",
@@ -1924,17 +2066,16 @@
     "fabrication": {
       "nom": "des Profondeurs",
       "modificateurs": {
-        "bonus_degats": 2,
-        "bonus_pm": 1,
+        "bonus_degats": 3,
         "bonus": {
           "R": 1,
-          "Ag": 1
+          "Ag": 2
         },
         "poids": {
           "facteur": 1.05
         },
         "valeur": {
-          "facteur": 1.7
+          "facteur": 1.8
         },
         "rarete": "rare"
       }
@@ -1947,7 +2088,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "rare",
     "slots": [],
     "poids": [
       40,
@@ -1958,7 +2099,8 @@
       "aquatique",
       "marais",
       "monstre",
-      "partie_queue"
+      "partie_queue",
+      "fabrication_arme"
     ],
     "source_espece": "espece:bunyip",
     "portion_de": "item:bunyip",
@@ -1980,13 +2122,13 @@
     "fabrication": {
       "nom": "des Eaux Sombres",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 3,
         "bonus": {
           "R": 2
         },
         "effets": {
           "buffs": {
-            "R": 1
+            "Ag": -1
           },
           "duree": 2
         },
@@ -2004,7 +2146,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "rare",
     "slots": [],
     "poids": [
       60,
@@ -2015,7 +2157,9 @@
       "aquatique",
       "marais",
       "monstre",
-      "partie_tete"
+      "partie_tete",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:bunyip",
     "portion_de": "item:bunyip",
@@ -2042,15 +2186,12 @@
       "nom": "des Marais",
       "modificateurs": {
         "bonus_degats": 3,
-        "bonus_pv": 5,
+        "bonus_pv": 6,
         "bonus": {
           "R": 2
         },
-        "effets": {
-          "pv": 5
-        },
         "valeur": {
-          "facteur": 2
+          "facteur": 1.8
         },
         "rarete": "rare"
       }
@@ -2063,7 +2204,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "peu_commun",
+    "rarete": "rare",
     "slots": [],
     "poids": [
       48,
@@ -2074,7 +2215,9 @@
       "gardien",
       "infernal",
       "monstre",
-      "partie_tete"
+      "partie_tete",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:cerbere",
     "portion_de": "item:cerbere",
@@ -2106,13 +2249,15 @@
           "Vol": 1
         },
         "effets": {
-          "pv": -5,
-          "duree": 3
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
         },
         "valeur": {
-          "facteur": 2.5
+          "facteur": 1.8
         },
-        "rarete": "tres_rare"
+        "rarete": "rare"
       }
     }
   },
@@ -2123,7 +2268,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "rare",
     "slots": [],
     "poids": [
       56,
@@ -2135,7 +2280,8 @@
       "monstre",
       "partie_patte",
       "predateur",
-      "souffle"
+      "souffle",
+      "fabrication_arme"
     ],
     "source_espece": "espece:chimere",
     "portion_de": "item:chimere",
@@ -2171,6 +2317,7 @@
       "modificateurs": {
         "bonus_degats": 3,
         "bonus_pa": 1,
+        "bonus_cc": 1,
         "bonus": {
           "F": 1,
           "Ag": 1
@@ -2189,7 +2336,7 @@
     "icon": "🥩",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       28,
@@ -2202,7 +2349,8 @@
       "morceau",
       "partie_patte",
       "predateur",
-      "souffle"
+      "souffle",
+      "fabrication_arme"
     ],
     "source_espece": "espece:chimere",
     "portion_de": "item:chimere_patte",
@@ -2229,13 +2377,14 @@
       "nom": "de la Férocité",
       "modificateurs": {
         "bonus_degats": 2,
+        "bonus_cc": 1,
         "bonus": {
           "Ag": 1
         },
         "valeur": {
-          "facteur": 1.5
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -2246,7 +2395,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "rare",
     "slots": [],
     "poids": [
       64,
@@ -2258,7 +2407,8 @@
       "monstre",
       "partie_queue",
       "predateur",
-      "souffle"
+      "souffle",
+      "fabrication_arme"
     ],
     "source_espece": "espece:chimere",
     "portion_de": "item:chimere",
@@ -2294,11 +2444,13 @@
           "Ag": 1
         },
         "effets": {
-          "pv": -3,
+          "buffs": {
+            "R": -1
+          },
           "duree": 2
         },
         "valeur": {
-          "facteur": 2
+          "facteur": 1.8
         },
         "rarete": "rare"
       }
@@ -2311,7 +2463,7 @@
     "icon": "🥩",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       32,
@@ -2324,7 +2476,8 @@
       "morceau",
       "partie_queue",
       "predateur",
-      "souffle"
+      "souffle",
+      "fabrication_arme"
     ],
     "source_espece": "espece:chimere",
     "portion_de": "item:chimere_queue",
@@ -2347,11 +2500,12 @@
       "nom": "de la Discorde",
       "modificateurs": {
         "bonus_degats": 2,
+        "bonus_cc": 1,
         "bonus_cd": 1,
         "valeur": {
-          "facteur": 1.5
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -2362,7 +2516,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "rare",
     "slots": [],
     "poids": [
       96,
@@ -2374,7 +2528,9 @@
       "monstre",
       "partie_tete",
       "predateur",
-      "souffle"
+      "souffle",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:chimere",
     "portion_de": "item:chimere",
@@ -2415,13 +2571,15 @@
           "Vol": 1
         },
         "effets": {
-          "pv": -5,
-          "duree": 3
+          "buffs": {
+            "Vol": -1
+          },
+          "duree": 2
         },
         "valeur": {
-          "facteur": 2.4
+          "facteur": 1.8
         },
-        "rarete": "tres_rare"
+        "rarete": "rare"
       }
     }
   },
@@ -2432,7 +2590,7 @@
     "icon": "🥩",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       32,
@@ -2445,7 +2603,9 @@
       "morceau",
       "partie_tete",
       "predateur",
-      "souffle"
+      "souffle",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:chimere",
     "portion_de": "item:chimere_tete",
@@ -2476,13 +2636,15 @@
           "Vol": 1
         },
         "effets": {
-          "pv": -3,
+          "buffs": {
+            "Vol": -1
+          },
           "duree": 2
         },
         "valeur": {
-          "facteur": 1.6
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -2493,7 +2655,7 @@
     "icon": "🪶",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       40,
@@ -2505,7 +2667,9 @@
       "partie_aile",
       "petrification",
       "predateur",
-      "vol"
+      "vol",
+      "fabrication_armure",
+      "fabrication_catalyseur"
     ],
     "source_espece": "espece:cockatrice",
     "portion_de": "item:cockatrice",
@@ -2540,14 +2704,17 @@
       "nom": "Paralysant",
       "modificateurs": {
         "bonus_pm": 2,
-        "bonus_cd": 1,
         "bonus": {
-          "Ag": 1
+          "Ag": 1,
+          "Vol": 1
+        },
+        "effets": {
+          "esquive": 1
         },
         "valeur": {
-          "facteur": 1.8
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -2571,7 +2738,9 @@
       "partie_aile",
       "petrification",
       "predateur",
-      "vol"
+      "vol",
+      "fabrication_armure",
+      "fabrication_catalyseur"
     ],
     "source_espece": "espece:cockatrice",
     "portion_de": "item:cockatrice_aile",
@@ -2597,14 +2766,10 @@
     "fabrication": {
       "nom": "du Regard de Pierre",
       "modificateurs": {
-        "bonus_pm": 1,
+        "bonus_pm": 2,
         "bonus": {
           "Ag": 1
-        },
-        "valeur": {
-          "facteur": 1.4
-        },
-        "rarete": "peu_commun"
+        }
       }
     }
   },
@@ -2615,7 +2780,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       28,
@@ -2627,7 +2792,8 @@
       "partie_patte",
       "petrification",
       "predateur",
-      "vol"
+      "vol",
+      "fabrication_arme"
     ],
     "source_espece": "espece:cockatrice",
     "portion_de": "item:cockatrice",
@@ -2662,13 +2828,15 @@
           "Ag": 1
         },
         "effets": {
-          "pv": -3,
+          "buffs": {
+            "V": -1
+          },
           "duree": 2
         },
         "valeur": {
-          "facteur": 1.6
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -2679,7 +2847,7 @@
     "icon": "🦴",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       44,
@@ -2691,7 +2859,8 @@
       "partie_queue",
       "petrification",
       "predateur",
-      "vol"
+      "vol",
+      "fabrication_arme"
     ],
     "source_espece": "espece:cockatrice",
     "portion_de": "item:cockatrice",
@@ -2724,13 +2893,15 @@
         "bonus_degats": 2,
         "bonus_cd": 1,
         "effets": {
-          "pv": -3,
+          "buffs": {
+            "V": -1
+          },
           "duree": 2
         },
         "valeur": {
-          "facteur": 1.7
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -2754,7 +2925,8 @@
       "partie_queue",
       "petrification",
       "predateur",
-      "vol"
+      "vol",
+      "fabrication_arme"
     ],
     "source_espece": "espece:cockatrice",
     "portion_de": "item:cockatrice_queue",
@@ -2778,13 +2950,11 @@
       "modificateurs": {
         "bonus_degats": 1,
         "effets": {
-          "pv": -3,
+          "buffs": {
+            "V": -1
+          },
           "duree": 2
-        },
-        "valeur": {
-          "facteur": 1.4
-        },
-        "rarete": "peu_commun"
+        }
       }
     }
   },
@@ -2795,7 +2965,7 @@
     "icon": "💀",
     "categorie": "composant",
     "sous_categorie": "carcasse",
-    "rarete": "commun",
+    "rarete": "peu_commun",
     "slots": [],
     "poids": [
       40,
@@ -2807,7 +2977,9 @@
       "partie_tete",
       "petrification",
       "predateur",
-      "vol"
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:cockatrice",
     "portion_de": "item:cockatrice",
@@ -2845,19 +3017,21 @@
     "fabrication": {
       "nom": "Pétrifiant",
       "modificateurs": {
-        "bonus_degats": 3,
+        "bonus_degats": 2,
         "bonus": {
           "Ag": 1,
           "Vol": 1
         },
         "effets": {
-          "pv": -5,
-          "duree": 3
+          "buffs": {
+            "V": -1
+          },
+          "duree": 2
         },
         "valeur": {
-          "facteur": 2
+          "facteur": 1.3
         },
-        "rarete": "rare"
+        "rarete": "peu_commun"
       }
     }
   },
@@ -2881,7 +3055,9 @@
       "partie_tete",
       "petrification",
       "predateur",
-      "vol"
+      "vol",
+      "fabrication_arme",
+      "fabrication_armure"
     ],
     "source_espece": "espece:cockatrice",
     "portion_de": "item:cockatrice_tete",
@@ -2911,18 +3087,10 @@
     "fabrication": {
       "nom": "de la Pétrification",
       "modificateurs": {
-        "bonus_degats": 2,
+        "bonus_degats": 1,
         "bonus": {
           "Vol": 1
-        },
-        "effets": {
-          "pv": -3,
-          "duree": 2
-        },
-        "valeur": {
-          "facteur": 1.5
-        },
-        "rarete": "rare"
+        }
       }
     }
   },
@@ -2936,47 +3104,210 @@
     "categorie": "composant",
     "slots": [],
     "poids": 0.3,
+    "tags": [
+      "fabrication_armure",
+      "fabrication_consommable"
+    ],
     "fabrication": {
       "nom": "du Courage",
       "modificateurs": {
-        "bonus_pv": 3,
+        "bonus_pv": 2,
         "bonus": {
           "V": 1
         },
         "effets": {
           "pv": 5,
           "regen_pv": 1,
-          "duree": 2
+          "duree": 3
         },
         "valeur": {
-          "facteur": 1.5
-        }
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
       }
     }
   },
   {
-    "_id": "item:cuir_brut",
+    "_id": "item:composant_rituel",
     "type": "item",
-    "nom": "Cuir brut",
-    "sous_categorie": "cuir_brut",
-    "icon": "🟫",
-    "rarete": "commun",
+    "nom": "Composant rituel",
+    "sous_categorie": "",
+    "icon": "📿",
+    "rarete": "peu_commun",
     "categorie": "composant",
     "slots": [],
-    "poids": 0.6,
+    "poids": 0.1,
     "fabrication": {
-      "nom": "de la Peau",
+      "nom": "de rituel",
       "modificateurs": {
-        "bonus_pv": 1,
+        "bonus_pm": 2,
         "bonus": {
-          "R": 1
+          "Vol": 1
         },
-        "poids": {
-          "facteur": 0.95
+        "effets": {
+          "canalisation": 1
         },
         "valeur": {
-          "facteur": 1.05
-        }
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    },
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_consommable"
+    ]
+  },
+  {
+    "_id": "item:crocs",
+    "type": "item",
+    "nom": "Crocs",
+    "sous_categorie": "crocs",
+    "icon": "🦷",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.1,
+    "fabrication": {
+      "nom": "à garde de crocs",
+      "modificateurs": {
+        "bonus_degats": 2,
+        "bonus_cc": 1,
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:debris_anime",
+    "type": "item",
+    "nom": "Débris animés",
+    "sous_categorie": "debris_anime",
+    "icon": "🪨",
+    "rarete": "peu_commun",
+    "categorie": "composant",
+    "slots": [],
+    "poids": 0.8,
+    "description": "Fragments inertes d'un corps que rien de vivant n'habitait.",
+    "fabrication": {
+      "nom": "vivante",
+      "modificateurs": {
+        "bonus_cc": 2,
+        "bonus_cd": 1,
+        "bonus": {
+          "Ag": 1
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:gemmes",
+    "type": "item",
+    "nom": "Gemme brute",
+    "description": "Pierre de couleur tirée du gravier d'une rivière ou du fond d'une mine, encore mate. Il faudra la tailler avant qu'elle ne prenne feu.",
+    "icon": "💎",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "gemmes",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure",
+      "fabrication_catalyseur"
+    ],
+    "poids": 0.05,
+    "valeur": [
+      {
+        "cu": 80
+      }
+    ],
+    "fabrication": {
+      "nom": "serti d'une gemme",
+      "modificateurs": {
+        "bonus_pm": 4,
+        "bonus": {
+          "Int": 1,
+          "Vol": 2
+        },
+        "effets": {
+          "canalisation": 1
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
+      }
+    }
+  },
+  {
+    "_id": "item:metaux_precieux",
+    "type": "item",
+    "nom": "Grenaille précieuse",
+    "description": "Petites larmes d'argent et d'or coulées au creuset. Le bijoutier ne travaille pas au lingot : il pèse sa grenaille au grain près.",
+    "icon": "🔸",
+    "rarete": "peu_commun",
+    "categorie": "metal",
+    "sous_categorie": "metaux_precieux",
+    "slots": [],
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
+    "poids": 0.1,
+    "valeur": [
+      {
+        "cu": 30
+      }
+    ],
+    "fabrication": {
+      "nom": "à incrustations précieuses",
+      "modificateurs": {
+        "bonus": {
+          "Cha": 3
+        },
+        "valeur": {
+          "facteur": 1.3
+        },
+        "rarete": "peu_commun"
+      }
+    }
+  },
+  {
+    "_id": "item:perles",
+    "type": "item",
+    "nom": "Perle",
+    "description": "Perle d'eau douce, ronde et laiteuse. Il en faut un plein cordon pour un sautoir, et une huître sur mille pour une perle.",
+    "icon": "⚪",
+    "rarete": "rare",
+    "categorie": "composant",
+    "sous_categorie": "perles",
+    "slots": [],
+    "tags": [],
+    "poids": 0.02,
+    "valeur": [
+      {
+        "cu": 60
+      }
+    ],
+    "fabrication": {
+      "nom": "perlé",
+      "modificateurs": {
+        "bonus_pm": 2,
+        "bonus": {
+          "Cha": 3,
+          "Vol": 2
+        },
+        "valeur": {
+          "facteur": 1.8
+        },
+        "rarete": "rare"
       }
     }
   },
@@ -2990,15 +3321,22 @@
     "categorie": "composant",
     "slots": [],
     "poids": 0.1,
+    "tags": [
+      "fabrication_arme",
+      "fabrication_armure"
+    ],
     "fabrication": {
-      "nom": "de l’Alchimie",
+      "nom": "empreint d'alchimie",
       "modificateurs": {
         "bonus_pm": 2,
+        "bonus": {
+          "Int": 1
+        },
         "effets": {
-          "pm": 5
+          "canalisation": 1
         },
         "valeur": {
-          "facteur": 1.4
+          "facteur": 1.3
         },
         "rarete": "peu_commun"
       }
@@ -3018,21 +3356,27 @@
       "nom": "Relique",
       "modificateurs": {
         "bonus_pm": 2,
-        "bonus_pv": 3,
+        "bonus_pv": 2,
         "bonus": {
           "Vol": 2
         },
         "effets": {
+          "regen_pm": 1,
           "pv": 5,
           "pm": 5,
           "duree": 3
         },
         "valeur": {
-          "facteur": 2.5
+          "facteur": 1.8
         },
-        "rarete": "tres_rare"
+        "rarete": "rare"
       }
-    }
+    },
+    "tags": [
+      "fabrication_armure",
+      "fabrication_catalyseur",
+      "fabrication_consommable"
+    ]
   },
   {
     "_id": "item:sang",
@@ -3055,7 +3399,7 @@
           "pv": 5
         },
         "valeur": {
-          "facteur": 1.2
+          "facteur": 1.1
         }
       }
     }

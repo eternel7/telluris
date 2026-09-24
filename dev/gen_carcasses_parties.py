@@ -72,6 +72,7 @@ sys.path.insert(0, RACINE)
 
 from models import character_stats                      # noqa: E402
 from utils.marche import depecage_carcasse              # noqa: E402
+from utils.commande import TAG_FABRICATION_PREFIXE      # noqa: E402
 from utils import dump as dump_util                     # noqa: E402
 
 SORTIE = "jsons/carcasses_parties_a_importer.json"
@@ -374,11 +375,23 @@ def a_ecrire_depuis(genere: dict, existant: dict | None):
 	⚠️ Un doc DÉJÀ en base part du doc du dump, où l'on n'écrase que les champs générés :
 	l'import est un PUT COMPLET (CLAUDE.md §11), et reconstruire le doc à neuf ferait disparaître
 	toute clé ajoutée depuis à la main dans /admin/table. `_rev` est ignoré dans la comparaison
-	(l'import le réattache depuis la base)."""
+	(l'import le réattache depuis la base).
+
+	⚠️ Deux champs générés appartiennent AUSSI à `dev/gen_fabrication_matieres.py`, qui les pose
+	sur les parties après coup : les tags `fabrication_*` (qui ouvrent une partie aux armes et
+	armures) et une `rarete` relevée selon la dangerosité de l'espèce. On les garde, sinon chaque
+	relance de ce script défait l'autre en silence."""
 	if not existant:
 		return genere
 	fusion = dict(existant)
 	fusion.update(genere)
+	if "tags" in genere:
+		fab = [t for t in (existant.get("tags") or []) if str(t).startswith(TAG_FABRICATION_PREFIXE)]
+		if fab:
+			fusion["tags"] = [t for t in genere["tags"] if t not in fab] + sorted(set(fab))
+	if "rarete" in genere and (character_stats.MULT_RARETE.get(existant.get("rarete"), 0)
+							   > character_stats.MULT_RARETE.get(genere["rarete"], 0)):
+		fusion["rarete"] = existant["rarete"]
 	return None if _sans_rev(fusion) == _sans_rev(existant) else fusion
 
 

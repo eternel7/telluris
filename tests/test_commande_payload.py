@@ -161,6 +161,28 @@ def test_une_commande_sur_mesure_en_attente_garde_ses_matieres(atelier, monkeypa
 	assert rep["commandes"][0]["sur_mesure"] is True
 
 
+def test_une_quantite_de_matiere_au_dela_du_plafond_est_refusee(atelier, monkeypatch):
+	"""L'apport additif est multiplié par la quantité : « fer ×20 » donnait +20 dégâts. Le
+	client envoie toujours 1 — c'est la requête FORGÉE que ce plafond ferme, avant tout écrit."""
+	from fastapi import HTTPException
+	from models import character_stats
+	character = _character()
+	trop = int(character_stats.COMMANDE_QUANTITE_MAX) + 1
+	with pytest.raises(HTTPException) as e:
+		_passer(monkeypatch, character, {"item_id": "item:Epee_longue",
+										 "matieres": [{"item": "item:fer", "quantite": trop}]})
+	assert e.value.status_code == 422
+	assert character["commandes"] == []
+
+
+def test_la_quantite_au_plafond_passe(atelier, monkeypatch):
+	from models import character_stats
+	character = _character()
+	_passer(monkeypatch, character, {"item_id": "item:Epee_longue", "matieres": [
+		{"item": "item:fer", "quantite": int(character_stats.COMMANDE_QUANTITE_MAX)}]})
+	assert len(character["commandes"]) == 1
+
+
 def test_une_commande_de_catalogue_en_attente_ne_devient_pas_sur_mesure(atelier, monkeypatch):
 	# `base_item` reste vide sans matière demandée : c'est lui qui allume le ✨.
 	LIEU["stock_vente"] = []

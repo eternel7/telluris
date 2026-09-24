@@ -593,6 +593,10 @@ COMMANDE_PEREMPTION_SECONDES: int = 259200   # trois jours
 # Matières distinctes qu'une variante peut combiner. Borne la combinatoire : chaque
 # combinaison inédite crée un doc item ET un doc recette permanents.
 COMMANDE_MATIERES_MAX: int = 3
+# Exemplaires d'UNE MÊME matière dans une pièce. L'apport additif d'une matière est multiplié
+# par sa quantité (`fabrication.appliquer_modificateurs`) : sans borne, « acier ×20 » donnait
+# +40 dégâts. Le client envoie toujours 1 ; ce plafond ferme la requête forgée.
+COMMANDE_QUANTITE_MAX: int = 1
 # Marge du sur-mesure, appliquée UNE fois à (coût du base + coût des matières) pour figer la
 # `valeur` de la variante. ⚠️ Délibérément distincte de MARGE_TRANSFO (×5 par étape) : l'objet
 # de base est DÉJÀ le produit d'une transformation, réutiliser la même marge le facturerait ×25.
@@ -993,6 +997,7 @@ def current_world_variables() -> dict:
 		"COMMANDE_DELAI_SECONDES": COMMANDE_DELAI_SECONDES,
 		"COMMANDE_PEREMPTION_SECONDES": COMMANDE_PEREMPTION_SECONDES,
 		"COMMANDE_MATIERES_MAX": COMMANDE_MATIERES_MAX,
+		"COMMANDE_QUANTITE_MAX": COMMANDE_QUANTITE_MAX,
 		"COMMANDE_MARGE": COMMANDE_MARGE,
 		"COMMANDE_FACON_PART": COMMANDE_FACON_PART,
 		"COMMANDE_COMPLEXITE_PART": COMMANDE_COMPLEXITE_PART,
@@ -1072,7 +1077,7 @@ def load_world_variables() -> dict:
 	global AUBERGE_TABLES_MAX, AUBERGE_ANNONCE_LONGUEUR_MAX
 	global JOURNAL_LONGUEUR_MAX, JOURNAL_ENTREES_MAX, JOURNAL_BESTIAIRE_LIEUX_MAX
 	global SCRIPTORIUM_LIVRE_LONGUEUR_MAX, SCRIPTORIUM_LIVRE_PAPIER, SCRIPTORIUM_LIVRE_ENCRE
-	global COMMANDE_DELAI_SECONDES, COMMANDE_PEREMPTION_SECONDES, COMMANDE_MATIERES_MAX
+	global COMMANDE_DELAI_SECONDES, COMMANDE_PEREMPTION_SECONDES, COMMANDE_MATIERES_MAX, COMMANDE_QUANTITE_MAX
 	global COMMANDE_MARGE, COMMANDE_FACON_PART, COMMANDE_COMPLEXITE_PART
 	global ACCES_GARDIEN_ACTIF, INDICATEURS_ACTIFS
 	global OUTIL_COUPE_BOIS_TAG, COUPE_MAX_PIECES
@@ -1309,6 +1314,7 @@ def load_world_variables() -> dict:
 	COMMANDE_DELAI_SECONDES = max(0, int(v.get("COMMANDE_DELAI_SECONDES", COMMANDE_DELAI_SECONDES)))
 	COMMANDE_PEREMPTION_SECONDES = max(1, int(v.get("COMMANDE_PEREMPTION_SECONDES", COMMANDE_PEREMPTION_SECONDES)))
 	COMMANDE_MATIERES_MAX = max(1, int(v.get("COMMANDE_MATIERES_MAX", COMMANDE_MATIERES_MAX)))
+	COMMANDE_QUANTITE_MAX = max(1, int(v.get("COMMANDE_QUANTITE_MAX", COMMANDE_QUANTITE_MAX)))
 	COMMANDE_MARGE = max(1.0, float(v.get("COMMANDE_MARGE", COMMANDE_MARGE)))
 	COMMANDE_FACON_PART = max(0.0, float(v.get("COMMANDE_FACON_PART", COMMANDE_FACON_PART)))
 	COMMANDE_COMPLEXITE_PART = max(0.0, float(v.get("COMMANDE_COMPLEXITE_PART", COMMANDE_COMPLEXITE_PART)))

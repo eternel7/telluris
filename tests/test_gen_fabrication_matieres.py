@@ -80,4 +80,96 @@ def test_erreurs_de_forme_hors_liste_blanche():
 
 def test_la_table_reelle_est_bien_formee_et_apporte():
 	assert gen.erreurs_de_forme(gen.MATIERES) == []
-	assert all(fabrication.apporte({"fabrication": b}) for b in gen.MATIERES.values())
+	assert all(fabrication.apporte({"fabrication": gen.bloc_fabrication(b)}) for b in gen.MATIERES.values())
+
+
+# ── Paliers : le gain suit la difficulté d'obtention ─────────────────────────────
+
+def test_la_table_reelle_respecte_le_budget_de_chaque_palier():
+	assert gen.erreurs_de_budget(gen.MATIERES) == []
+
+
+def test_le_score_moyen_croit_strictement_avec_le_palier():
+	moyennes = []
+	for palier in sorted(gen.PALIERS):
+		scores = [gen.score_matiere(e["modificateurs"], e["tags"])
+				  for e in gen.MATIERES.values() if e["palier"] == palier]
+		assert scores, "palier %d vide" % palier
+		moyennes.append(sum(scores) / len(scores))
+	assert moyennes == sorted(set(moyennes))
+
+
+def test_aucun_effet_de_la_table_nest_inerte_ni_retourne():
+	assert gen.effets_mal_diriges(gen.MATIERES) == []
+
+
+def test_un_buff_positif_sur_une_matiere_darme_est_refuse():
+	# Sur une arme, `effets` vise l'ENNEMI : une régén le soignerait.
+	table = {"item:x": {"modificateurs": {"effets": {"regen_pv": 1, "duree": 3}},
+						"tags": [gen.TAG_ARME]}}
+	assert gen.effets_mal_diriges(table) == [
+		"item:x : regen_pv sur une matière d'arme profiterait à l'ENNEMI"]
+
+
+def test_un_venin_en_pv_negatif_est_refuse():
+	# `consommables._as_int` le ramène à 0 : il ne ferait rien, nulle part.
+	table = {"item:x": {"modificateurs": {"effets": {"pv": -5}}, "tags": [gen.TAG_ARME]}}
+	assert any("négatif" in e for e in gen.effets_mal_diriges(table))
+
+
+def test_un_score_hors_budget_est_refuse():
+	table = {"item:x": {"palier": 1, "modificateurs": {"bonus_degats": 5}, "tags": []}}
+	assert gen.erreurs_de_budget(table) == ["item:x : score 5 hors du budget %d-%d du palier 1"
+											% gen.PALIERS[1]["budget"]]
+
+
+def test_le_score_ne_compte_que_ce_qui_agit():
+	eff = {"effets": {"pv": 5}}
+	assert gen.score_matiere(eff, [gen.TAG_ARME]) == 0            # soin instantané sur une arme
+	assert gen.score_matiere(eff, [gen.TAG_CONSOMMABLE]) == 1
+	# Débuff : |Δ| × durée / 2.
+	assert gen.score_matiere({"effets": {"buffs": {"R": -2}, "duree": 3}}) == 3
+
+
+# ── Tags et rareté de l'item ─────────────────────────────────────────────────────
+
+PARTIE = {"_id": "item:chimere_tete", "_rev": "2-z", "type": "item", "rarete": "commun",
+		  "sous_categorie": "carcasse", "tags": ["monstre", "fabrication_armure", "partie_tete"]}
+ENTREE_PARTIE = {"nom": "des Trois Visages", "modificateurs": {"bonus_degats": 4},
+				 "palier": 3, "tags": [gen.TAG_ARME], "rarete_item": "rare"}
+
+
+def test_les_tags_fabrication_sont_remplaces_et_les_autres_gardes():
+	doc = gen.a_ecrire_depuis(ENTREE_PARTIE, PARTIE)
+	assert doc["tags"] == ["monstre", "partie_tete", gen.TAG_ARME]
+	assert doc["rarete"] == "rare"
+	assert doc["fabrication"] == {"nom": "des Trois Visages", "modificateurs": {"bonus_degats": 4}}
+	assert "palier" not in doc["fabrication"] and "_rev" not in doc
+
+
+def test_une_partie_deja_a_jour_ne_repart_pas():
+	a_jour = dict(PARTIE, tags=["monstre", "partie_tete", gen.TAG_ARME], rarete="rare",
+				  fabrication=gen.bloc_fabrication(ENTREE_PARTIE))
+	assert gen.a_ecrire_depuis(ENTREE_PARTIE, a_jour) is None
+
+
+def test_une_entree_sans_tags_ne_touche_pas_aux_tags():
+	doc = gen.a_ecrire_depuis(BLOC_ACIER, dict(PARTIE))
+	assert doc["tags"] == PARTIE["tags"] and doc["rarete"] == "commun"
+
+
+def test_une_partie_seulement_ouverte_par_tag_nest_pas_signalee_jamais_travaillee():
+	sortie, _abs, jamais, _orph, _inch = gen.generer([PARTIE], {"item:chimere_tete": ENTREE_PARTIE})
+	assert jamais == [] and [d["_id"] for d in sortie] == ["item:chimere_tete"]
+
+
+def test_la_relance_des_carcasses_garde_tags_et_rarete_de_fabrication():
+	"""`gen_carcasses_parties` régénère `tags` et `rarete` des parties : sans garde, sa relance
+	défaisait ce générateur en silence."""
+	from dev import gen_carcasses_parties as carc
+	existant = dict(PARTIE, tags=["monstre", "partie_tete", gen.TAG_ARME], rarete="rare")
+	genere = dict(PARTIE, tags=["monstre", "partie_tete"], rarete="commun")
+	assert carc.a_ecrire_depuis(genere, existant) is None
+	# Une rareté plus BASSE en base, elle, est bien remontée à celle de la carcasse.
+	plus_bas = dict(existant, rarete="commun")
+	assert carc.a_ecrire_depuis(dict(genere, rarete="peu_commun"), plus_bas)["rarete"] == "peu_commun"

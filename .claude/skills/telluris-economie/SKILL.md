@@ -126,3 +126,9 @@ Sans cette coupure, rien ne lève : toutes les boutiques de la catégorie se met
 
 ⚠️ **Le générateur ne touche AUCUNE recette** : ajouter un intrant ouvrirait un point de vente pour lui et risquerait la fausse feuille (cf. § Armement).
 
+**Paliers — le gain suit la difficulté d'obtention.** Chaque entrée de `MATIERES` porte un `palier` 1-5 (rareté/prix pour une matière d'échoppe, **dangerosité de l'espèce** = somme des attributs de base pour une partie, morceau = palier − 1), qui fixe le budget de `score_matiere`, le facteur de `valeur` et la `rarete` produite (`PALIERS`) ; plafonds par matière : +10 dég, +6 par carac. Contrôlé AVANT tout dump par `erreurs_de_budget`, rien n'est écrit en cas d'échec.
+- **Tags** : l'entrée porte la liste COMPLÈTE de ses `fabrication_*` (les autres tags du doc restent). Parties : tête → arme + armure, bras/patte/queue → arme, aile → armure + catalyseur. ⚠️ Sans tag, une partie n'entre dans **aucune** pièce : seule la boucherie l'achète (clé `carcasse`). `rarete_item` réaligne la `rarete` du doc partie (donc son prix dérivé).
+- ⚠️ **`effets` selon la famille** (`effets_mal_diriges`) : sur une ARME il vise l'**ennemi** — seulement des débuffs `{"buffs": {X: -n}, "duree": d}`, une régén ou un buff positif soignerait la cible ; sur une pièce PORTÉE seuls `regen_*`/`esquive`/`canalisation` sont lus ; `pv`/`pm` négatifs sont ramenés à 0 partout.
+- ⚠️ **`dev/gen_carcasses_parties.py` conserve** les tags `fabrication_*` et une `rarete` plus haute que celle de la carcasse — sinon sa relance défait ce générateur.
+- ⚠️ **`COMMANDE_QUANTITE_MAX`** (défaut 1) : l'additif est multiplié par la quantité, une requête forgée « acier ×20 » donnait +40 dégâts. Verrouillé par `tests/test_gen_fabrication_matieres.py` et `tests/test_commande*.py`.
+

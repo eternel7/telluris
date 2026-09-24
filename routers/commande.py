@@ -279,6 +279,13 @@ def _resoudre(character: dict, lieu_doc: dict, relation, body: dict) -> dict:
 			status_code=422,
 			detail="Pas plus de %d matières dans une même pièce."
 				   % int(character_stats.COMMANDE_MATIERES_MAX))
+	# ⚠️ L'apport additif d'une matière est multiplié par sa quantité : sans ce plafond, une
+	# requête forgée « acier ×20 » donnait +40 dégâts (le client envoie toujours 1).
+	if any(int(e["quantite"]) > int(character_stats.COMMANDE_QUANTITE_MAX) for e in matieres_demandees):
+		raise HTTPException(
+			status_code=422,
+			detail="Pas plus de %d exemplaire(s) d'une même matière dans une pièce."
+				   % int(character_stats.COMMANDE_QUANTITE_MAX))
 
 	matieres_docs = []
 	for entree in matieres_demandees:
