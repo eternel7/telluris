@@ -308,6 +308,16 @@
 			<textarea id="esp-desc" rows="2" placeholder="Description courte..."></textarea>
 			<label>Tags (séparés par des virgules)</label>
 			<input type="text" id="esp-tags" placeholder="hostile, forest, humanoid">
+			<!-- Équipement + sorts d'un monstre HUMANOÏDE (utils.combat.roll_monster_equipment /
+			     roll_monster_sorts), sans effet sur une espèce sans le tag `humanoide`.
+			     ⚠️ Champs relus par buildDocFromForm : sans eux, sauver l'espèce effacerait
+			     `items`/`magies`/`sorts` importés (PUT complet). -->
+			<label>Équipement assignable (armes + armures, humanoïdes uniquement — un id par ligne)</label>
+			<textarea id="esp-items" rows="3" placeholder="item:Arc_court&#10;item:Cuir_bouilli"></textarea>
+			<label>Magies accessibles ({"ecole": niveau_max})</label>
+			<textarea id="esp-magies" rows="3" style="font-size:0.72rem;">{}</textarea>
+			<label>Sorts nominatifs (remplace le tirage par école si non vide — un id par ligne)</label>
+			<textarea id="esp-sorts" rows="2" placeholder="sort:Jet_de_flammes"></textarea>
 			<!-- Jeton de combat (utils/jetons.py) : largeur × profondeur (dans le sens de la marche).
 			     ⚠️ Champ relu par buildDocFromForm : sans ces deux sélecteurs, sauver l'espèce
 			     effacerait le `jeton` importé (PUT complet). -->
@@ -485,6 +495,9 @@ const espImage       = document.getElementById('esp-image');
 const espImgPreview  = document.getElementById('esp-img-preview');
 const espDesc        = document.getElementById('esp-desc');
 const espTags        = document.getElementById('esp-tags');
+const espItems       = document.getElementById('esp-items');
+const espMagies      = document.getElementById('esp-magies');
+const espSorts       = document.getElementById('esp-sorts');
 const espJetonTaille = document.getElementById('esp-jeton-taille');
 const espJetonForme  = document.getElementById('esp-jeton-forme');
 const espProprietes  = document.getElementById('esp-proprietes');
@@ -627,6 +640,9 @@ function populateForm(doc) {
 		updateImagePreview(doc.image);
 		espDesc.value  = doc.description || '';
 		espTags.value  = (doc.tags || []).join(', ');
+		espItems.value  = (doc.items || []).join('\n');
+		espMagies.value = JSON.stringify(doc.magies || {}, null, 2);
+		espSorts.value  = (doc.sorts || []).join('\n');
 		// Une valeur hors liste retombe sur le défaut du sélecteur (1x1 / rond), comme le moteur.
 		const jeton = doc.jeton || {};
 		espJetonTaille.value = jeton.taille && jeton.taille !== '1x1' ? jeton.taille : '';
@@ -662,6 +678,7 @@ function clearForm() {
 		espNom.value = ''; espId.value = ''; espImage.value = '';
 		espImgPreview.style.display = 'none';
 		espDesc.value = ''; espTags.value = '';
+		espItems.value = ''; espMagies.value = '{}'; espSorts.value = '';
 		espJetonTaille.value = ''; espJetonForme.value = '';
 		espProprietes.value = '{\n  "loot_table": [],\n  "xp_reward": 0\n}';
 		STATS.forEach(s => {
@@ -702,7 +719,7 @@ proNom.addEventListener('input', () => {
 	onProfilChange();
 });
 
-[espId, espDesc, espTags, espProprietes].forEach(el => el.addEventListener('input', onEspeceChange));
+[espId, espDesc, espTags, espItems, espMagies, espSorts, espProprietes].forEach(el => el.addEventListener('input', onEspeceChange));
 [espJetonTaille, espJetonForme].forEach(el => el.addEventListener('change', onEspeceChange));
 espImage.addEventListener('change', () => { updateImagePreview(espImage.value); onEspeceChange(); });
 [proId, proNiveau, proSkills, proDesc].forEach(el => el.addEventListener('input', onProfilChange));
@@ -761,6 +778,8 @@ function buildDocFromForm() {
 		});
 		let proprietes = {};
 		try { proprietes = JSON.parse(espProprietes.value || '{}'); } catch(e) {}
+		let magies = {};
+		try { magies = JSON.parse(espMagies.value || '{}'); } catch(e) {}
 		const doc = {
 			_id: espId.value.trim() || ('espece:' + slugify(espNom.value || 'nouveau')),
 			type: 'espece',
@@ -770,6 +789,12 @@ function buildDocFromForm() {
 			base_attributes,
 			tags: espTags.value.split(',').map(t => t.trim()).filter(Boolean),
 			proprietes,
+			// Équipement + sorts d'un humanoïde (utils.combat.roll_monster_equipment /
+			// roll_monster_sorts) : toujours inclus, même vide — [] / {} est un état valide,
+			// pas gaté comme `jeton` (aucune migration à protéger ici).
+			items: espItems.value.split('\n').map(s => s.trim()).filter(Boolean),
+			magies,
+			sorts: espSorts.value.split('\n').map(s => s.trim()).filter(Boolean),
 		};
 		// Jeton de combat : clé ABSENTE en 1x1 rond (le défaut du moteur, rien à écrire).
 		if (espJetonTaille.value || espJetonForme.value) {
