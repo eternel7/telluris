@@ -37,6 +37,7 @@
 # Logique pure (DB injectée : get_doc_fn / find_docs_fn / rand_fn / now), mute sans save —
 # l'endpoint persiste. Pattern de utils/focalisation.py et utils/pnj.py.
 
+import difflib
 import random
 import uuid
 
@@ -204,6 +205,52 @@ def texte_indice(indice: dict) -> str:
 	if indice.get("ville_nom"):
 		return f"à {indice['ville_nom']}, à {indice.get('distance', 0)} étapes de route"
 	return "loin d'ici"
+
+
+# ---------------------------------------------------------------------------
+# Demander son chemin à un marchand (service PNJ `direction`)
+# ---------------------------------------------------------------------------
+
+# Borne du nom saisi : généreuse — un nom d'enseigne long ne doit jamais être tronqué. Le
+# `maxlength` du champ de saisie (play_town_telluris) la recopie.
+RECHERCHE_LIEU_MAX = 80
+# Nombre de noms proposés quand la saisie n'est qu'approchante.
+SUGGESTIONS_MAX = 3
+
+
+def nettoyer_recherche_lieu(brut) -> str:
+	"""Nom de lieu saisi par le joueur, assaini : caractères de contrôle retirés, blancs
+	écrasés, borné à RECHERCHE_LIEU_MAX. Même traitement que `recrutement.nettoyer_nom_compagnie`
+	— on BORNE au serveur, on n'échappe pas (le texte n'est rendu qu'en `textContent`)."""
+	texte = "" if brut is None else str(brut)
+	texte = "".join(" " if c in "\t\n\r\f\v" else c
+					for c in texte if c.isprintable() or c in "\t\n\r\f\v")
+	return " ".join(texte.split())[:RECHERCHE_LIEU_MAX]
+
+
+def chercher_lieu_nomme(nom: str, giver_doc: dict, find_docs_fn) -> dict:
+	"""Cherche `nom` parmi les lieux du même `lieu_parent` que `giver_doc` — un marchand ne
+	connaît que sa ville, seule échelle où `indice_destination` donne une direction.
+	`giver_doc` lui-même est exclu. Renvoie {"exact": (id, nom)} (casse ignorée),
+	{"suggestions": [nom, …]} (au plus SUGGESTIONS_MAX, les plus ressemblants d'abord),
+	ou {} si rien n'approche."""
+	parent_id = (giver_doc or {}).get("lieu_parent")
+	if not nom or not parent_id:
+		return {}
+	giver_id = (giver_doc or {}).get("_id")
+	candidats = [(d["_id"], lieu_label(d, d["_id"]))
+				 for d in find_docs_fn({"type": "lieu", "lieu_parent": parent_id}) or []
+				 if d.get("_id") and d["_id"] != giver_id]
+	cle = nom.casefold()
+	for lieu_id, label in candidats:
+		if label.casefold() == cle:
+			return {"exact": (lieu_id, label)}
+	# Comparaison sans casse, puis on rend les libellés tels qu'écrits sur l'enseigne.
+	par_cle = {}
+	for _, label in candidats:
+		par_cle.setdefault(label.casefold(), label)
+	proches = difflib.get_close_matches(cle, list(par_cle), n=SUGGESTIONS_MAX)
+	return {"suggestions": [par_cle[p] for p in proches]} if proches else {}
 
 
 # ---------------------------------------------------------------------------

@@ -35,6 +35,11 @@
 #   N'IMPORTE QUEL PNJ peut la confier, magasin ou non (ex. le réceptionniste de la guilde et
 #   sa mission d'initiation). Les conditions `transport_offert` / `transport_a_livrer` /
 #   `transport_en_cours` / `transport_accompli` sont des FLAGS posés par le router.
+# - `services.direction` : {noeuds:{trouve, proche, inconnu}} — le PNJ indique le chemin d'un
+#   lieu de SA ville, dont le joueur SAISIT le nom : un choix `"saisie": true` (+ action
+#   `{"service":"direction"}`) s'affiche en champ texte, la valeur arrive en `saisie` dans le
+#   POST. Placeholders : {lieu} + {direction} (trouve), {recherche} + {suggestions} (proche),
+#   {recherche} (inconnu). Recherche pure : utils/transport.chercher_lieu_nomme.
 # Placeholders substitués serveur dans texte/label : {prenom}, {cout}, plus toute clé de
 # `contexte["placeholders"]` posée par le router — {pnj} (le nom EFFECTIF de celui à qui l'on
 # parle, cf. `nom_effectif`), {destinataire} / {donneur} (les PNJ des deux bouts d'une course),
@@ -549,6 +554,9 @@ def noeud_client(pnj_doc: dict, noeud_id: str, contexte: dict, soin: dict | None
 			"action": bool(choix.get("action")),
 			# Verdict de la condition, jamais la condition elle-même (on n'expose pas l'arbre).
 			"marque": marque_de_condition(choix.get("condition")),
+			# Choix à SAISIE LIBRE : le client affiche un champ texte et envoie sa valeur en
+			# `saisie` avec le `choix_id`.
+			"saisie": bool(choix.get("saisie")),
 		}
 		for choix in _choix_visibles(pnj_doc, noeud_id, contexte)
 	]

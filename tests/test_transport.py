@@ -231,6 +231,78 @@ def test_repere_ignore_les_lieux_non_marchands():
 	) == "Le Fumoir"
 
 
+# ── Demander son chemin (service PNJ `direction`) ────────────────────────────────
+
+def test_recherche_nettoyee_et_bornee():
+	assert transport.nettoyer_recherche_lieu("  Le\tSaloir \n") == "Le Saloir"
+	assert transport.nettoyer_recherche_lieu(None) == ""
+	long = "x" * (transport.RECHERCHE_LIEU_MAX + 10)
+	assert len(transport.nettoyer_recherche_lieu(long)) == transport.RECHERCHE_LIEU_MAX
+
+
+def test_nom_exact_trouve_sans_tenir_compte_de_la_casse():
+	assert transport.chercher_lieu_nomme("le SALOIR", BOUCHERIE, find_docs) == {
+		"exact": ("lieu:salaison", "Le Saloir")}
+
+
+def test_nom_approchant_propose_des_suggestions():
+	res = transport.chercher_lieu_nomme("Le Salloir", BOUCHERIE, find_docs)
+	assert "exact" not in res
+	assert res["suggestions"][0] == "Le Saloir"
+
+
+def test_nom_inconnu_ne_donne_rien():
+	assert transport.chercher_lieu_nomme("Qwxz", BOUCHERIE, find_docs) == {}
+	assert transport.chercher_lieu_nomme("", BOUCHERIE, find_docs) == {}
+
+
+def test_la_boutique_ou_l_on_parle_est_exclue():
+	# On ne demande pas au boucher le chemin de sa propre boutique…
+	assert "exact" not in transport.chercher_lieu_nomme("L'Étal", BOUCHERIE, find_docs)
+	# … mais le saleur, lui, la connaît.
+	assert transport.chercher_lieu_nomme("L'Étal", SALAISON, find_docs) == {
+		"exact": ("lieu:boucherie", "L'Étal")}
+
+
+def test_seuls_les_lieux_de_la_meme_ville_sont_connus():
+	# La ville elle-même n'a pas de parent : le PNJ n'a aucun voisinage où chercher.
+	assert transport.chercher_lieu_nomme("Le Saloir", VILLE, find_docs) == {}
+	ailleurs = {"_id": "lieu:loin", "type": "lieu", "label": "L'Échoppe", "lieu_parent": "lieu:autre"}
+	assert transport.chercher_lieu_nomme("Le Saloir", ailleurs, find_docs) == {}
+
+
+def test_suggestions_plafonnees():
+	n = transport.SUGGESTIONS_MAX + 2
+	forges = [{"_id": f"lieu:forge_{i}", "type": "lieu", "label": f"La Forge {i}",
+			   "lieu_parent": "lieu:ville"} for i in range(n)]
+	res = transport.chercher_lieu_nomme("La Forge", BOUCHERIE, lambda sel: forges)
+	assert len(res["suggestions"]) == transport.SUGGESTIONS_MAX
+
+
+def test_resoudre_direction_reprend_la_phrase_des_courses(monkeypatch):
+	"""Le router rend le nœud de résultat et ses placeholders : nom exact → la MÊME phrase
+	d'orientation que les courses (`texte_indice`) ; approchant → suggestions ; sinon inconnu."""
+	from routers import pnj as rp
+	monkeypatch.setattr(rp, "get_doc", get_doc)
+	monkeypatch.setattr(rp, "find_docs", find_docs)
+	doc = {"_id": "pnj:marchand_boucherie", "services": {"direction": {"noeuds": {
+		"trouve": "n_trouve", "proche": "n_proche", "inconnu": "n_inconnu"}}}}
+
+	suivant, dits = rp._resoudre_direction(doc, BOUCHERIE, "  le saloir ")
+	assert suivant == "n_trouve"
+	indice = transport.indice_destination(BOUCHERIE, "lieu:salaison", find_docs, get_doc)
+	assert dits == {"lieu": "Le Saloir", "direction": transport.texte_indice(indice)}
+	assert "au nord d'ici, tout près de Le Fumoir" == dits["direction"]
+
+	suivant, dits = rp._resoudre_direction(doc, BOUCHERIE, "Le Salloir")
+	assert suivant == "n_proche"
+	assert dits["recherche"] == "Le Salloir"
+	assert dits["suggestions"].startswith("Le Saloir")
+
+	suivant, dits = rp._resoudre_direction(doc, BOUCHERIE, "Qwxz")
+	assert (suivant, dits) == ("n_inconnu", {"recherche": "Qwxz"})
+
+
 # ── Choix de la destination & de la cargaison ────────────────────────────────────
 
 def test_destination_exclut_le_donneur_et_exige_un_racheteur():

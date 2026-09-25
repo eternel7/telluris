@@ -518,6 +518,25 @@ def _placeholders_escorte(q: dict, lieu_doc: dict) -> dict:
 	}
 
 
+def _resoudre_direction(pnj_doc: dict, lieu_doc: dict, saisie) -> tuple[str | None, dict]:
+	"""Service `direction` : le PNJ cherche le lieu SAISI par le joueur parmi ceux de sa ville.
+	Nom exact → `trouve`, avec la phrase d'orientation des courses ({direction} : « au sud-est
+	d'ici, tout près de … ») ; nom approchant → `proche` et ses {suggestions} ; sinon `inconnu`.
+	{recherche} = la saisie assainie, rendue au joueur en `textContent` seulement."""
+	noeuds = ((pnj_doc.get("services") or {}).get("direction") or {}).get("noeuds") or {}
+	nom = transport.nettoyer_recherche_lieu(saisie)
+	trouve = transport.chercher_lieu_nomme(nom, lieu_doc, find_docs)
+	if trouve.get("exact"):
+		lieu_id, label = trouve["exact"]
+		indice = transport.indice_destination(lieu_doc, lieu_id, find_docs, get_doc)
+		return noeuds.get("trouve"), {"lieu": label, "direction": transport.texte_indice(indice)}
+	if trouve.get("suggestions"):
+		noms = trouve["suggestions"]
+		liste = noms[0] if len(noms) == 1 else ", ".join(noms[:-1]) + " ou " + noms[-1]
+		return noeuds.get("proche"), {"recherche": nom, "suggestions": liste}
+	return noeuds.get("inconnu"), {"recherche": nom}
+
+
 def _resoudre_escorte(character: dict, pnj_doc: dict, lieu_doc: dict, op: str,
 					  reponse: dict) -> tuple[str | None, dict]:
 	"""Exécute une action du service `escorte`. Il n'y a QU'UNE opération — `accepter` : la
@@ -601,8 +620,9 @@ async def pnj_dialogue_choix(
 	current_user: Annotated[dict, Depends(get_current_user)],
 	body: dict = Body(...)):
 	"""Résout un choix de dialogue (stateless, revalidé serveur).
-	Body {"noeud", "choix_id", "pnj_id"?} — `pnj_id` désigne l'interlocuteur (les présences
-	sont cumulables) ; à défaut, le premier PNJ présent.
+	Body {"noeud", "choix_id", "pnj_id"?, "saisie"?} — `pnj_id` désigne l'interlocuteur (les
+	présences sont cumulables) ; à défaut, le premier PNJ présent. `saisie` = le texte libre
+	d'un choix `saisie: true` (seul le service `direction` le lit).
 	Un choix à action `{"service":"soin"}` débite et soigne ; `{"service":"don"}` remet un
 	objet (contrôle de charge + débit, séquence modèle buy_item) ; un choix simple renvoie
 	le nœud suivant, `noeud: null` = fin (le client ferme)."""
@@ -734,6 +754,10 @@ async def pnj_dialogue_choix(
 		suivant, dits = _resoudre_acces(current_user, character, pnj_doc, lieu_doc,
 										 action.get("op"), reponse)
 		contexte = _contexte(character, pnj_doc, lieu_doc, entree)
+		contexte["placeholders"].update(dits)
+	elif action.get("service") == "direction":
+		# Simple consultation : aucun état ne bouge, donc aucun flag à refiltrer.
+		suivant, dits = _resoudre_direction(pnj_doc, lieu_doc, body.get("saisie"))
 		contexte["placeholders"].update(dits)
 	else:
 		suivant = choix.get("next")
