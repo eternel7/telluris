@@ -7,10 +7,11 @@ dans `/admin/doc` ou à rassembler dans un `jsons/*_a_importer.json` une fois la
 Vérificateur : `python dev/check_competences_doc.py` — relit ce fichier, normalise chaque bloc
 par le moteur réel et contrôle les invariants listés plus bas. Il échoue en code 1.
 
-> **Révision 4** — après la mise à plat des gardes d'éligibilité (PR #18), sorts et compétences
-> ne diffèrent plus que par **quatre champs de doc et trois clés d'effet**. L'écart a été
-> re-mesuré en exécutant le moteur, pas relu. Une entrée devient une **siphonie pure**, ce que
-> le moteur refusait encore. Détail en fin de document, § « Ce que la révision 4 a changé ».
+> **Révision 5** — les **AURAS** (une passive portant une `zone`), la **charge magique**
+> (`sensibilite_charge`) et l'ouverture de `saut` / `cout_pv` / `lien_vie` / `incantation` aux
+> compétences. **33 entrées changent**, et un invariant de ce document s'inverse : une passive
+> à `zone` n'est plus une erreur, c'est une aura. Détail en fin de document, § « Ce que la
+> révision 5 a changé ».
 
 ---
 
@@ -54,24 +55,67 @@ Et **un seul champ propre aux compétences** : `mode` (`passive` / `active`). Un
 toujours actif ; une passive n'existe que côté compétences, et c'est la seule asymétrie qui
 aille dans ce sens.
 
-✅ **`saut`, `cout_pv`, `lien_vie` et `incantation` sont désormais OUVERTS.** Les trois
-premiers étaient le pire des silences — `_bonus_dict` les normalisait déjà pour les deux
-familles et deux d'entre eux passaient même la garde du router, si bien qu'une compétence qui
-en portait partait en base, s'utilisait sans erreur, et ne faisait rien. La cause n'était pas
-un choix de conception : leur résolution vivait dans `_lancer_sort`, un chemin que les
-compétences n'empruntaient pas. Le chokepoint de lancement est désormais **partagé**
-(`combat._lancer_capacite`), et les quatre mécaniques valent des deux côtés :
+✅ **`saut`, `cout_pv`, `lien_vie` et `incantation` sont ouverts** (chokepoint de lancement
+partagé `combat._lancer_capacite`). Ce document les emploie :
 
-| mécanique | ce qu'une compétence peut faire |
+| mécanique | ce qu'une compétence en fait ici |
 |---|---|
-| `effets.saut` | téléporter son porteur (ou un allié désigné) sur une CASE, mur compris. Validé **avant tout débit** ; le client offre le même ciblage de sol que pour un sort |
-| `effets.cout_pv` | se payer en PV. Garde `>` STRICTE : elle ne peut pas assommer son auteur. Ce ne sont **pas** des dégâts subis (ni test de concentration, ni furtivité rompue) |
-| `effets.lien_vie` | tisser un lien sur un allié : le bloc vit sur le PROTÉGÉ, la concentration sur le porteur |
-| `incantation` | s'armer sur plusieurs tours, PM versés par tranches. Le bloc mémorise son `kind` — la résolution a lieu des tours plus tard, sans moyen de redeviner le type |
+| `effets.saut` | **3 entrées.** Téléporte son porteur sur une CASE, mur compris. Validé **avant tout débit** — une case refusée ne coûte rien. Le client offre le même ciblage de sol que pour un sort |
+| `effets.cout_pv` | **3 entrées.** Le prix du sang. Garde `>` STRICTE : ne peut pas assommer son auteur. Ce ne sont **pas** des dégâts subis (ni test de concentration, ni furtivité rompue). ⚠️ Payé APRÈS la part instantanée : l'Invocation majeure soigne de 25 puis facture 20 |
+| `effets.lien_vie` | **1 entrée** (`serment_du_martyr`). Le bloc vit sur le PROTÉGÉ, la concentration sur le porteur — d'où le `maintien` qui l'accompagne |
+| `incantation` | **4 entrées.** S'arme sur plusieurs tours, PM versés par tranches. Le bloc mémorise son `kind`, la résolution ayant lieu des tours plus tard |
 
 ⚠️ **COMBAT SEULEMENT** : `capacite_utilisable_exploration` refuse une incantation longue, un
 entretien, un saut et un lien de vie — il n'y a ni round ni grille hors combat. `cout_pv`, lui,
 reste applicable : ce n'est qu'un coût.
+
+### Les AURAS — une passive qui déborde sur le groupe
+
+**Une passive portant une `zone` est une aura** (`competences.est_aura`), et c'est le plus
+gros déblocage de contenu depuis les zones elles-mêmes. Elle est **toujours ancrée sur son
+porteur** (`origine` et `cible` sont ignorés), sort du repli permanent de `bonus_passifs` et
+vit dans `competences_bonus["auras"]`.
+
+| où | ce que ça donne |
+|---|---|
+| exploration | **tout le groupe** en profite (`expedition.membres` — jamais une monture), reposé paresseusement au rendu et à chaque déplacement |
+| combat | **positionnel** : seuls les alliés réellement couverts par la forme, terrain et ligne de vue compris ; recalculé après chaque action |
+
+⚠️ **Non-cumul** : deux auras du même effet, ou une aura et une potion, ne s'additionnent pas —
+la meilleure seule. Deux prêtres côte à côte, c'est deux chips et une seule régén.
+⚠️ **Une aura ne porte jamais de `condition`** (hors périmètre du moteur : une passive
+conditionnée sort du repli permanent et rien ne relit sa zone) et doit **donner quelque chose**
+— buffs, régén ou esquive. Les deux gardes sont dans le vérificateur.
+
+**Sept entrées deviennent des auras**, et leurs valeurs baissent en conséquence : ce qui servait
+un seul corps sert désormais toute une ligne.
+
+| vocation | entrée | forme | ce qu'elle rayonne |
+|---|---|---|---|
+| guerrier 6 | **Protecteur** | carré r1 | `R +8` — il tient la ligne, pas seulement lui-même |
+| barbare 6 | **Vétéran** | carré r1 | `F +5 / Vol +5` — le vieux roublard raffermit ceux qui l'entourent |
+| paladin 10 | **Exarque** | disque r2 | `Vol +10 / Cha +4` |
+| templier 10 | **Gardien** | disque r1 | `R +10 / Vol +4` — un gardien garde *quelqu'un* |
+| ménestrel 10 | **Étoile** | carré r2 | `Cha +10 / Vol +5` — une étoile éclaire large |
+| druide 10 | **Fils de la nature** | disque r2 | `R +6`, `regen_pv 2` |
+| chaman 10 | **Gardien des esprits** | disque r2 | `Vol +8 / Int +4` — les esprits débordent sur la troupe |
+
+### La charge magique — `sensibilite_charge`
+
+Le poids porté renchérit les **PM de lancement** et l'entretien. `sensibilite_charge` (0 à 1)
+dit **à quel point une capacité y est sensible** ; champ absent ⇒ défaut du monde, et un `0`
+ÉCRIT reste un 0 (on teste la présence, jamais la véracité).
+
+**Les 18 actives des six vocations martiales** (guerrier, barbare, forestier, duelliste,
+assassin, voleur) portent `sensibilite_charge: 0`. C'est une déclaration de conception : *la
+technique d'un martial ne dépend pas de ce qu'il porte*, là où un sort se paie d'autant plus
+cher qu'on est bardé de fer. Un guerrier en harnois complet garde ses coups intacts.
+
+⚠️ **`effets.canalisation` n'est employée NULLE PART**, et ce n'est pas un oubli : `_bonus_dict`
+la déclare, mais **ni `empiler_effet_sort`, ni `empiler_effet_competence`, ni `bonus_passifs`
+ne la relaient** — elle n'atteint jamais `canalisation_bonus`. C'est une clé d'**objet** et de
+**consommable** (robe de mage, potion de concentration), pas de capacité. Mesuré en exécutant
+le moteur ; l'invariant n°2 du vérificateur la refuse.
 
 ### Ce que la mise à plat a débloqué pour le contenu
 
@@ -213,9 +257,9 @@ Un capstone offensif mono-cible reste **le plus gros coup unitaire du document**
 1. Chaque bloc passe `normaliser_competence` **sans perte de clé** — ni au premier niveau du
    doc, ni dans `effets`, ni dans `buffs`, ni dans `zone`. Une clé inventée disparaît en
    silence ; c'est le piège central du contenu.
-2. **Aucune clé inerte sur une compétence** : ni `invocation`, ni les trois bonus de
-   composant. (`saut`, `cout_pv`, `lien_vie` et `incantation` en sont sortis : ils sont
-   désormais résolus des deux côtés.)
+2. **Aucune clé inerte sur une compétence** : ni `invocation`, ni **`canalisation`**, ni les
+   trois bonus de composant. (`saut`, `cout_pv`, `lien_vie` et `incantation` en sont sortis :
+   ils sont résolus des deux côtés.)
 3. **Accord du router et du moteur** : une active `ennemi` lançable en combat doit aussi avoir
    de quoi faire à une cible. Remplace l'ancienne règle « `degats_pm` jamais seul », devenue
    sans objet depuis que les deux gardes appellent la même fonction.
@@ -225,8 +269,9 @@ Un capstone offensif mono-cible reste **le plus gros coup unitaire du document**
    `jsons/*_a_importer.json`**.
 6. Exactement **6 entrées par vocation** : une passive et une active par niveau 3, 6, 10 ;
    `vocation` ∈ `rules:vocations` ; `niveau` ∈ {3, 6, 10}.
-7. Toute passive à `condition` n'a **que** `furtivite` ; **aucune passive ne porte de `zone`**
-   ni de `maintien`.
+7. Toute passive à `condition` n'a **que** `furtivite`. Une passive à `zone` est une **AURA**
+   (`est_aura`) : elle ne porte alors **jamais de `condition`** et doit donner quelque chose
+   (buffs, régén ou esquive). Aucune passive ne porte de `maintien`.
 8. Toute active `cible:"ennemi"` porte `degats` **ou** une part durative ; toute active passe
    `competence_utilisable_combat` **ou** `competence_utilisable_exploration`.
 9. Convention de `decalage` : forme orientée ancrée sur le `lanceur` ⇒ `≥ 1`, sur la `cible`
@@ -253,7 +298,7 @@ Seigneur de guerre, Mastodonte.*
 ```json
 {"_id": "competence:coup_de_mercenaire", "type": "competence", "nom": "Coup de mercenaire", "icon": "⚔️",
  "description": "Pas une passe d'armes : un coup de métier, donné par quelqu'un qu'on paie pour qu'il porte.",
- "vocation": "guerrier", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "guerrier", "niveau": 3, "mode": "active", "cout_pm": 15, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "effets": {"degats": "2D8+4"}}
 ```
@@ -266,7 +311,8 @@ Seigneur de guerre, Mastodonte.*
 {"_id": "competence:protecteur", "type": "competence", "nom": "Protecteur", "icon": "🩹",
  "description": "Ses cicatrices se comptent par dizaines. Chacune est une leçon que son corps a retenue.",
  "vocation": "guerrier", "niveau": 6, "mode": "passive",
- "effets": {"buffs": {"R": 14}}}
+ "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
+ "effets": {"buffs": {"R": 8}}}
 ```
 *Source : « Protecteur » (niv. 5) — « +5 PV au-dessus du maximum » : `pv_max = R·3 + F`, donc +14 R vaut +42 PV. Le plafond de caract n'est pas touché (un buff s'ajoute après `compute_stat_cap`).*
 
@@ -274,7 +320,7 @@ Seigneur de guerre, Mastodonte.*
 ```json
 {"_id": "competence:garde_de_fer", "type": "competence", "nom": "Garde de fer", "icon": "🛡️",
  "description": "Il ferme la garde et cesse d'avancer. Pendant quelques instants, il n'y a plus d'ouverture.",
- "vocation": "guerrier", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4,
+ "vocation": "guerrier", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4, "sensibilite_charge": 0,
  "cible": "soi", "portee": 1,
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
  "effets": {"buffs": {"R": 11}, "esquive": 5}}
@@ -296,7 +342,7 @@ Seigneur de guerre, Mastodonte.*
 ```json
 {"_id": "competence:brise_ligne", "type": "competence", "nom": "Brise-ligne", "icon": "💥",
  "description": "Un seul coup, porté là où la ligne tient. Après lui, il n'y a plus de ligne.",
- "vocation": "guerrier", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "guerrier", "niveau": 10, "mode": "active", "cout_pm": 40, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "zone": {"forme": "rectangle", "origine": "lanceur", "orientation": "cible", "longueur": 1, "largeur": 3, "decalage": 1},
  "effets": {"degats": "4D10+14"}}
@@ -325,9 +371,9 @@ sang, Vétéran, Danseur de guerre.*
 ```json
 {"_id": "competence:frenesie", "type": "competence", "nom": "Frénésie", "icon": "🩸",
  "description": "Il cesse de se défendre et se met à frapper. Ce n'est pas une décision, c'est une bascule.",
- "vocation": "barbare", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "barbare", "niveau": 3, "mode": "active", "cout_pm": 15, "sensibilite_charge": 0,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"F": 12, "R": 6, "Ag": -6}, "duree": 4}}
+ "effets": {"buffs": {"F": 12, "R": 6, "Ag": -6}, "duree": 4, "cout_pv": 8}}
 ```
 *Source : « Berserker » (niv. 3). La garde ouverte est rendue par le malus d'Ag — la frénésie doit coûter quelque chose.*
 
@@ -338,7 +384,8 @@ sang, Vétéran, Danseur de guerre.*
 {"_id": "competence:veteran", "type": "competence", "nom": "Vétéran", "icon": "🪖",
  "description": "Vieux roublard des batailles. Il n'y a plus de situation qu'il n'ait déjà vue tourner mal.",
  "vocation": "barbare", "niveau": 6, "mode": "passive",
- "effets": {"buffs": {"F": 8, "R": 6}}}
+ "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
+ "effets": {"buffs": {"F": 5, "Vol": 5}}}
 ```
 *Source : « Vétéran » (niv. 5) — « pas de malus de situation » n'a pas de support ; rendu en socle martial.*
 
@@ -346,7 +393,7 @@ sang, Vétéran, Danseur de guerre.*
 ```json
 {"_id": "competence:annonce_de_sang", "type": "competence", "nom": "Annonce de sang", "icon": "🔥",
  "description": "La fureur guerrière montée d'un cran. Ceux qui l'ont vue une fois changent de chemin la fois suivante.",
- "vocation": "barbare", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4,
+ "vocation": "barbare", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4, "sensibilite_charge": 0,
  "cible": "soi", "portee": 1,
  "effets": {"buffs": {"F": 20, "Ag": 6}, "regen_pv": 3}}
 ```
@@ -367,7 +414,7 @@ sang, Vétéran, Danseur de guerre.*
 ```json
 {"_id": "competence:spasme_de_furie", "type": "competence", "nom": "Spasme de furie", "icon": "🪓",
  "description": "Il ne frappe plus une cible : il frappe, et quelque chose se trouve devant.",
- "vocation": "barbare", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "barbare", "niveau": 10, "mode": "active", "cout_pm": 40, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
  "effets": {"degats": "3D10+12"}}
@@ -395,7 +442,7 @@ sang, Vétéran, Danseur de guerre.*
 ```json
 {"_id": "competence:fleche_de_franc_archer", "type": "competence", "nom": "Flèche de franc-archer", "icon": "🏹",
  "description": "Il tire dans la mêlée sans hésiter : il sait exactement où sont les siens.",
- "vocation": "forestier", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "forestier", "niveau": 3, "mode": "active", "cout_pm": 15, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cd", "portee": 10,
  "effets": {"degats": "2D8+4"}}
 ```
@@ -416,7 +463,7 @@ sang, Vétéran, Danseur de guerre.*
 ```json
 {"_id": "competence:tir_d_elite", "type": "competence", "nom": "Tir d'élite", "icon": "🎯",
  "description": "Il retient son souffle une seconde de trop. Le trait part, et arrive entre les deux yeux.",
- "vocation": "forestier", "niveau": 6, "mode": "active", "cout_pm": 25,
+ "vocation": "forestier", "niveau": 6, "mode": "active", "cout_pm": 25, "incantation": 3, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cd", "portee": 12,
  "effets": {"degats": "3D8+8"}}
 ```
@@ -438,7 +485,7 @@ sang, Vétéran, Danseur de guerre.*
 ```json
 {"_id": "competence:trait_du_chasseur_de_monstres", "type": "competence", "nom": "Trait du chasseur de monstres", "icon": "🐉",
  "description": "Une flèche taillée pour ce qui n'a pas de nom, encochée par quelqu'un que cela n'effraie plus.",
- "vocation": "forestier", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "forestier", "niveau": 10, "mode": "active", "cout_pm": 40, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cd", "portee": 14,
  "effets": {"degats": "5D10+18"}}
 ```
@@ -466,7 +513,7 @@ Titres : Gentilhomme, Mousquetaire, Garde, Seigneur, Maître d'armes, Exécuteur
 ```json
 {"_id": "competence:botte_de_mousquetaire", "type": "competence", "nom": "Botte de mousquetaire", "icon": "🤺",
  "description": "Une figure apprise, répétée mille fois, placée une seule — au bon moment.",
- "vocation": "duelliste", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "duelliste", "niveau": 3, "mode": "active", "cout_pm": 15, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "effets": {"degats": "2D8+4"}}
 ```
@@ -487,7 +534,7 @@ Titres : Gentilhomme, Mousquetaire, Garde, Seigneur, Maître d'armes, Exécuteur
 ```json
 {"_id": "competence:parade_de_maitre", "type": "competence", "nom": "Parade de maître", "icon": "⚔️",
  "description": "Il cesse d'attaquer et se contente de répondre. Plus rien ne passe.",
- "vocation": "duelliste", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4,
+ "vocation": "duelliste", "niveau": 6, "mode": "active", "cout_pm": 12, "maintien": 4, "sensibilite_charge": 0,
  "cible": "soi", "portee": 1,
  "zone": {"forme": "carre", "origine": "lanceur", "rayon": 1},
  "effets": {"buffs": {"Ag": 6}, "esquive": 10}}
@@ -508,7 +555,7 @@ Titres : Gentilhomme, Mousquetaire, Garde, Seigneur, Maître d'armes, Exécuteur
 ```json
 {"_id": "competence:coup_de_l_executeur", "type": "competence", "nom": "Coup de l'Exécuteur", "icon": "⚰️",
  "description": "Un chirurgien du combat, qui décide de la blessure avant de la porter.",
- "vocation": "duelliste", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "duelliste", "niveau": 10, "mode": "active", "cout_pm": 40, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "effets": {"degats": "5D10+20"}}
 ```
@@ -536,7 +583,7 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 ```json
 {"_id": "competence:venin_de_contact", "type": "competence", "nom": "Venin de contact", "icon": "🧪",
  "description": "Une goutte sur le fil, et la plaie fait le reste du travail.",
- "vocation": "assassin", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "assassin", "niveau": 3, "mode": "active", "cout_pm": 15, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "effets": {"degats": "1D6", "buffs": {"R": -8, "F": -6}, "duree": 3}}
 ```
@@ -557,7 +604,7 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 ```json
 {"_id": "competence:maitre_lames", "type": "competence", "nom": "Maître lames", "icon": "⚔️",
  "description": "Personne n'inflige autant de dégâts en une seule attaque. C'est tout ce qu'il a jamais cherché à faire.",
- "vocation": "assassin", "niveau": 6, "mode": "active", "cout_pm": 25,
+ "vocation": "assassin", "niveau": 6, "mode": "active", "cout_pm": 25, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "effets": {"degats": "3D8+8"}}
 ```
@@ -578,7 +625,7 @@ Empoisonneur, Maître des ombres, Maître lames, Maître venins.*
 ```json
 {"_id": "competence:execution", "type": "competence", "nom": "Exécution", "icon": "🗡️",
  "description": "Il a choisi l'instant longtemps avant d'entrer dans la pièce.",
- "vocation": "assassin", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "assassin", "niveau": 10, "mode": "active", "cout_pm": 40, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "effets": {"degats": "5D10+20"}}
 ```
@@ -605,7 +652,7 @@ chemins, Grand maître de guilde, Maraudeur.*
 ```json
 {"_id": "competence:coup_de_coupe_jarret", "type": "competence", "nom": "Coup de coupe-jarret", "icon": "🔪",
  "description": "Il ne vise pas le cœur. Il vise le tendon, et attend que l'autre tombe.",
- "vocation": "voleur", "niveau": 3, "mode": "active", "cout_pm": 15,
+ "vocation": "voleur", "niveau": 3, "mode": "active", "cout_pm": 15, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "effets": {"degats": "1D8+2", "buffs": {"V": -2}, "duree": 3}}
 ```
@@ -626,9 +673,9 @@ chemins, Grand maître de guilde, Maraudeur.*
 ```json
 {"_id": "competence:fuite_de_maraudeur", "type": "competence", "nom": "Fuite de maraudeur", "icon": "💨",
  "description": "Il cesse de se battre et se met à ne plus être touchable. C'est un métier différent, qu'il connaît aussi.",
- "vocation": "voleur", "niveau": 6, "mode": "active", "cout_pm": 25,
+ "vocation": "voleur", "niveau": 6, "mode": "active", "cout_pm": 25, "sensibilite_charge": 0,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"Ag": 8}, "esquive": 18, "duree": 4}}
+ "effets": {"buffs": {"Ag": 8}, "esquive": 18, "duree": 4, "saut": 4}}
 ```
 
 ### Niveau 10 — capstone
@@ -646,7 +693,7 @@ chemins, Grand maître de guilde, Maraudeur.*
 ```json
 {"_id": "competence:coup_du_bandit", "type": "competence", "nom": "Coup du bandit de grands chemins", "icon": "🏴",
  "description": "La bourse ou la vie — sauf qu'il a déjà décidé, et qu'il ne repose pas la question.",
- "vocation": "voleur", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "voleur", "niveau": 10, "mode": "active", "cout_pm": 40, "sensibilite_charge": 0,
  "cible": "ennemi", "jet": "cc", "portee": 1,
  "effets": {"degats": "4D10+14", "buffs": {"Ag": -20}, "duree": 3}}
 ```
@@ -766,10 +813,10 @@ Purificateur.*
 ```json
 {"_id": "competence:serment_du_martyr", "type": "competence", "nom": "Serment du martyr", "icon": "🩸",
  "description": "Il prend sur lui ce qu'un autre ne peut plus porter. C'est tout le serment, et il n'en a jamais fait d'autre.",
- "vocation": "paladin", "niveau": 6, "mode": "active", "cout_pm": 25,
+ "vocation": "paladin", "niveau": 6, "mode": "active", "cout_pm": 25, "maintien": 4,
  "cible": "allie", "portee": 2,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 1},
- "effets": {"pv": 22, "buffs": {"R": 9}, "regen_pv": 3, "duree": 5}}
+ "effets": {"pv": 22, "buffs": {"R": 9}, "regen_pv": 3, "lien_vie": {"part": 50, "reduction": 10}}}
 ```
 *Source : « Martyr » (niv. 3). Prolonge `competence:imposition_des_mains` (niv. 1).*
 
@@ -780,7 +827,8 @@ Purificateur.*
 {"_id": "competence:exarque", "type": "competence", "nom": "Exarque", "icon": "👑",
  "description": "Sa ferveur est devenue une architecture. Les attaques contre l'esprit n'y trouvent aucune prise.",
  "vocation": "paladin", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Vol": 16, "Cha": 6}}}
+ "zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2},
+ "effets": {"buffs": {"Vol": 10, "Cha": 4}}}
 ```
 *Source : « Exarque » (niv. 5), « +1 en Vol au-dessus du maximum ».*
 
@@ -851,7 +899,8 @@ Justice, Bras divin, Gardien.*
 {"_id": "competence:gardien", "type": "competence", "nom": "Gardien", "icon": "🗿",
  "description": "Son corps et son esprit sont devenus si massifs qu'il paraît, de loin, insensible aux dommages.",
  "vocation": "templier", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"R": 16, "Vol": 6}}}
+ "zone": {"forme": "cercle", "origine": "lanceur", "rayon": 1},
+ "effets": {"buffs": {"R": 10, "Vol": 4}}}
 ```
 *Source : « Gardien » (niv. 5), « sauvegarde naturelle 10+ » — pas de jet de sauvegarde ici ; rendu par la plus haute R permanente du jeu (+48 PV, +0 à +1 PA).*
 
@@ -996,7 +1045,8 @@ Artiste, Bouffon, Étoile, Prodige, Imitateur.*
 {"_id": "competence:etoile", "type": "competence", "nom": "Étoile", "icon": "💫",
  "description": "Sa beauté, sa voix, sa grâce. On ne discute plus de savoir s'il a du talent : on discute de l'avoir vu.",
  "vocation": "menestrel", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Cha": 16, "Vol": 6}}}
+ "zone": {"forme": "carre", "origine": "lanceur", "rayon": 2},
+ "effets": {"buffs": {"Cha": 10, "Vol": 5}}}
 ```
 *Source : « Étoile » (niv. 5), « +1 en Cha au-dessus du maximum ».*
 
@@ -1004,7 +1054,7 @@ Artiste, Bouffon, Étoile, Prodige, Imitateur.*
 ```json
 {"_id": "competence:chant_du_prodige", "type": "competence", "nom": "Chant du Prodige", "icon": "🎼",
  "description": "La virtuosité poussée jusqu'à la torpeur : ceux qui l'écoutent glissent vers quelque chose qui ressemble à l'inconscience.",
- "vocation": "menestrel", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "menestrel", "niveau": 10, "mode": "active", "cout_pm": 40, "incantation": 3,
  "cible": "ennemi", "jet": "magique", "portee": 6,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
  "effets": {"degats": "1D8", "buffs": {"F": -12, "Ag": -12, "Vol": -9}, "duree": 4}}
@@ -1138,7 +1188,8 @@ Dompteur de monstres, Fils de la nature, Homme-tempête.*
 {"_id": "competence:fils_de_la_nature", "type": "competence", "nom": "Fils de la nature", "icon": "🌳",
  "description": "Un état de symbiose que la nature lui rend bien, et dont il ne parle jamais.",
  "vocation": "druide", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"R": 12, "Vol": 6}, "regen_pv": 4}}
+ "zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2},
+ "effets": {"buffs": {"R": 6}, "regen_pv": 2}}
 ```
 *Source : « Fils de la nature » (niv. 5), « +2 en résistance totale ».*
 
@@ -1197,7 +1248,7 @@ Médium, Onirologue, Homme bête, Gardien des esprits, Ancien.*
  "description": "L'esprit n'est plus un compagnon qu'il invoque : il vit à l'intérieur, et sort quand on l'y oblige.",
  "vocation": "chaman", "niveau": 6, "mode": "active", "cout_pm": 25,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"F": 18, "R": 12, "Ag": 8, "Int": -10}, "regen_pv": 3, "duree": 5}}
+ "effets": {"buffs": {"F": 18, "R": 12, "Ag": 8, "Int": -10}, "regen_pv": 3, "duree": 5, "saut": 3}}
 ```
 *Source : « Homme bête » (niv. 5).*
 
@@ -1208,7 +1259,8 @@ Médium, Onirologue, Homme bête, Gardien des esprits, Ancien.*
 {"_id": "competence:gardien_des_esprits", "type": "competence", "nom": "Gardien des esprits", "icon": "👻",
  "description": "Il en contrôle plus qu'aucun autre chaman n'en a jamais tenu, et la plupart du temps sans y penser.",
  "vocation": "chaman", "niveau": 10, "mode": "passive",
- "effets": {"buffs": {"Vol": 14, "Int": 8}}}
+ "zone": {"forme": "cercle", "origine": "lanceur", "rayon": 2},
+ "effets": {"buffs": {"Vol": 8, "Int": 4}}}
 ```
 *Source : « Gardien des esprits » (niv. 5), « +1 esprit invocable par jour » — le compte d'invocations n'existe pas ; rendu en réserve magique (`pm_max = 2·Vol + 2·Int` ⇒ +44 PM).*
 
@@ -1286,7 +1338,7 @@ Conjurateur, Archimage, Nexus, Invocateur.*
 ```json
 {"_id": "competence:courroux_des_elements", "type": "competence", "nom": "Courroux des éléments", "icon": "🌋",
  "description": "Il n'appelle plus le feu : il le laisse arriver, et s'écarte de son chemin.",
- "vocation": "elementaliste", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "elementaliste", "niveau": 10, "mode": "active", "cout_pm": 40, "incantation": 4,
  "cible": "ennemi", "jet": "magique", "portee": 12,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
  "effets": {"degats": "3D12+12", "buffs": {"R": -15}, "duree": 3}}
@@ -1383,7 +1435,7 @@ Conjurateur, Archimage, Nexus, Invocateur.*
  "description": "Il y en a deux, puis trois. Un seul saigne, mais il faut d'abord trouver lequel.",
  "vocation": "illusionniste", "niveau": 3, "mode": "active", "cout_pm": 8, "maintien": 3,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"Ag": 8}, "esquive": 14}}
+ "effets": {"buffs": {"Ag": 8}, "esquive": 14, "saut": 3}}
 ```
 
 ### Niveau 6
@@ -1487,7 +1539,7 @@ voie ultime, la Liche.*
 ```json
 {"_id": "competence:etreinte_du_tombeau", "type": "competence", "nom": "Étreinte du tombeau", "icon": "⚱️",
  "description": "Le sol se souvient de tous ceux qu'il a reçus, et tend les mains vers celui qui marche dessus.",
- "vocation": "necromancien", "niveau": 10, "mode": "active", "cout_pm": 40,
+ "vocation": "necromancien", "niveau": 10, "mode": "active", "cout_pm": 40, "incantation": 3,
  "cible": "ennemi", "jet": "magique", "portee": 8,
  "zone": {"forme": "cercle", "origine": "cible", "rayon": 2},
  "effets": {"degats": "3D10+11", "buffs": {"R": -12, "V": -2}, "duree": 4, "drain_pv": 40, "drain_max": 25}}
@@ -1517,7 +1569,7 @@ Invocateur, Archimage.*
  "description": "Il avance une part de lui-même contre une avance de puissance. Le taux est mauvais, il le sait.",
  "vocation": "demoniste", "niveau": 3, "mode": "active", "cout_pm": 15,
  "cible": "soi", "portee": 1,
- "effets": {"buffs": {"Int": 14, "Vol": 8, "R": -8}, "duree": 4}}
+ "effets": {"buffs": {"Int": 14, "Vol": 8, "R": -8}, "duree": 4, "cout_pv": 12}}
 ```
 *Le malus de R est délibéré : « chaque pacte consume une part de son âme » (blurb de la vocation). ⚠️ Le malus de R abaisse `pv_max` et re-clampe les PV — le démoniste est réellement plus fragile sous pacte.*
 
@@ -1557,7 +1609,7 @@ Invocateur, Archimage.*
  "description": "Il n'appelle plus une créature : il lui prête sa peau pour la durée du contrat.",
  "vocation": "demoniste", "niveau": 10, "mode": "active", "cout_pm": 40,
  "cible": "soi", "portee": 1,
- "effets": {"pv": 25, "buffs": {"F": 20, "Int": 20, "R": 15}, "regen_pv": 4, "regen_pm": 3, "duree": 5}}
+ "effets": {"pv": 25, "buffs": {"F": 20, "Int": 20, "R": 15}, "regen_pv": 4, "regen_pm": 3, "duree": 5, "cout_pv": 20}}
 ```
 *Source : « Invocateur » (niv. 5), « 2 invocations simultanées » — le compte d'invocations n'existe pas ; rendu par la possession du lanceur, seule forme que le moteur sache porter. Même re-clamp de PV à l'expiration que l'Esprit Antique du chaman.*
 
@@ -1675,7 +1727,11 @@ Enchanteur.*
 | soutien d'allié de zone | — | moine, prêtre |
 | métamorphose / possession de soi | — | chaman, démoniste · lettré (de zone) |
 
-### Où vivent les 21 zones
+### Où vivent les 28 zones — 21 capacités + 7 auras
+
+Les **7 auras** (Protecteur, Vétéran, Exarque, Gardien, Étoile, Fils de la nature, Gardien des esprits) sont des
+PASSIVES : elles ne se lancent pas, elles rayonnent en permanence autour de leur porteur. Le
+tableau ci-dessous ne liste que les 21 zones des capacités ACTIVES.
 
 | vocation | zone(s) | forme |
 |---|---|---|
@@ -1700,6 +1756,36 @@ Enchanteur.*
 **duelliste** (hors sa parade) sont les vocations du coup unique et placé, le **forestier** celle
 du tir précis, le **voleur** celle de l'esquive et du vol — leur donner une nappe effacerait ce
 qui les distingue. Elles conservent en échange les plus gros coups unitaires du document.
+
+---
+
+## Ce que la révision 5 a changé
+
+**33 entrées** changent, et un invariant de ce document s'**inverse**.
+
+| | révision 4 | révision 5 |
+|---|---|---|
+| passive + `zone` | **interdit** (invariant n°7 : « décoratif ») | **c'est une AURA** — 7 entrées en deviennent une |
+| `saut` · `cout_pv` · `lien_vie` · `incantation` | documentés comme inertes | **employés** : 3 + 3 + 1 + 4 entrées |
+| charge magique | sujet absent | **18 actives martiales** à `sensibilite_charge: 0` |
+| `canalisation` | sujet absent | **documentée comme inerte sur une capacité**, et refusée par le vérificateur |
+
+**Ce que les auras changent pour la lecture du document.** Une passive n'était jusqu'ici qu'un
+socle personnel : un chiffre ajouté à son porteur, partout et sans condition. Sept d'entre elles
+deviennent des **objets de position** — elles servent qui se tient près du porteur, en
+exploration comme en combat. Leurs valeurs baissent en conséquence (`Protecteur` passe de
+`R +14` pour soi à `R +8` pour la ligne) : ce n'est pas un affaiblissement, c'est un changement
+de nature.
+
+**Vérifié en exécutant le moteur, sur les blocs du document eux-mêmes** : les 7 auras passent
+`est_aura` et atterrissent dans `competences_bonus["auras"]` avec leur forme ; les 3 sauts
+téléportent ; les 3 coûts en PV débitent le bon montant ; le lien du martyr se pose sur le
+protégé avec la concentration sur le porteur ; les 4 incantations s'arment, versent leurs PM
+par tranches et se résolvent.
+
+⚠️ **Une incohérence attrapée par le vérificateur pendant cette passe** : `serment_du_martyr`
+gagnait un `maintien` tout en gardant sa `duree`. Une entrée maintenue ne se décrémente pas —
+la durée annoncée était une échéance qui n'existe pas. `duree` retirée.
 
 ---
 

@@ -27,6 +27,7 @@ sys.path.insert(0, RACINE)
 
 from utils.competences import (  # noqa: E402
 	competence_utilisable_combat,
+	est_aura,
 	competence_utilisable_exploration,
 	est_active,
 	est_passive,
@@ -48,8 +49,8 @@ CHAMPS_ACTIFS_SEULEMENT = ("cout_pm", "cible", "jet", "portee")
 # d'effet : un `magie` ou un `composants` recopié depuis un doc de sort ne lève rien et
 # disparaît — la compétence part en base amputée de ce que son auteur croyait y mettre.
 CHAMPS_DOC = ("_id", "_rev", "type", "nom", "icon", "description", "vocation", "famille",
-			  "niveau", "mode", "cout_pm", "maintien", "incantation", "cible", "jet",
-			  "portee", "zone", "effets", "condition", "animation")
+			  "niveau", "mode", "cout_pm", "maintien", "incantation", "sensibilite_charge",
+			  "cible", "jet", "portee", "zone", "effets", "condition", "animation")
 # Clés que le moteur lit sur un SORT mais jamais sur une compétence. `_bonus_dict` les
 # normalise (elles ne « disparaissent » donc pas : le contrôle n°1 ne les verrait pas), et
 # `competence_utilisable_combat` en accepte même deux — mais AUCUNE branche de
@@ -60,6 +61,12 @@ CHAMPS_DOC = ("_id", "_rev", "type", "nom", "icon", "description", "vocation", "
 # donc plus ici. Ne restent inertes que les bonus de COMPOSANT — une compétence n'en a pas,
 # et `sorts.doc_effectif` ne les lira jamais sur elle.
 EFFETS_INERTES_SUR_COMPETENCE = {
+	# ⚠️ `canalisation` est déclarée par `_bonus_dict` mais recopiée par AUCUN des deux
+	# `empiler_effet_*` (ni sort, ni compétence) et pas agrégée par `bonus_passifs` :
+	# elle n'atteint jamais `canalisation_bonus`. C'est une clé d'OBJET et de CONSOMMABLE
+	# (`consommables.effets_de` la lit, elle), pas de capacité. Mesuré, pas déduit.
+	"canalisation": "inerte sur une capacité — clé d'objet/consommable (ni empiler_effet_* "
+					"ni bonus_passifs ne la relaient)",
 	"invocation_duree":  "bonus de composant — une compétence n'a pas de composants",
 	"invocation_nombre": "bonus de composant — une compétence n'a pas de composants",
 	"maintien_reduction": "bonus de composant — une compétence n'a pas de composants",
@@ -230,10 +237,24 @@ def main():
 							   f"(`forme` absente ou non reconnue) — la capacité "
 							   f"retomberait sur la seule case de sa cible")
 			else:
-				# (6) une passive ne vise rien : sa zone ne serait jamais évaluée
+				# (6) Une passive + zone n'est plus une erreur : c'est une AURA
+				# (`competences.est_aura`), ancrée sur le porteur, servie au groupe en
+				# exploration et positionnellement en combat. Restent deux gardes.
 				if est_passive(comp):
-					erreurs.append(f"{prefixe} : PASSIVE portant une `zone` — décoratif, "
-								   f"aucune passive n'est jamais résolue sur la grille")
+					if not est_aura(comp):
+						erreurs.append(f"{prefixe} : passive à `zone` que `est_aura` ne "
+									   f"reconnaît pas")
+					# ⚠️ `aura + condition` est HORS PÉRIMÈTRE du moteur : une passive
+					# conditionnée sort déjà du repli permanent, et rien ne relit sa zone.
+					if comp["condition"]:
+						erreurs.append(f"{prefixe} : AURA portant une `condition` — hors "
+									   f"périmètre du moteur, elle ne serait jamais posée")
+					# Une aura qui n'offre rien est une chip vide sur ses alliés.
+					eff_a = comp["effets"]
+					if not (eff_a.get("buffs") or eff_a.get("regen_pv")
+							or eff_a.get("regen_pm") or eff_a.get("esquive")):
+						erreurs.append(f"{prefixe} : AURA sans buff, régén ni esquive — "
+									   f"elle ne donnerait rien à personne")
 				# (9) convention de `decalage`, pour les seules formes orientées
 				if zone_lue["forme"] in ("rectangle", "cone"):
 					if zone_lue["origine"] == "lanceur" and zone_lue["decalage"] < 1:
@@ -325,13 +346,20 @@ def main():
 	print(f"Blocs lus : {len(docs)} · vocations couvertes : {len(par_vocation)}")
 	passives = sum(1 for _, d in docs if (d.get("mode") == "passive"))
 	print(f"Répartition : {passives} passives / {len(docs) - passives} actives")
-	zones = [d for _, d in docs if d.get("zone")]
+	docs_bruts = [d for _, d in docs]
+	zones = [d for d in docs_bruts if d.get("zone")]
 	formes = {}
 	for d in zones:
 		formes[d["zone"].get("forme")] = formes.get(d["zone"].get("forme"), 0) + 1
-	hostiles = sum(1 for d in zones if d.get("cible") == "ennemi")
-	print(f"Zones : {len(zones)} ({hostiles} hostiles / {len(zones) - hostiles} bénéfiques) · "
+	auras = [d for d in zones if d.get("mode") == "passive"]
+	hostiles = sum(1 for d in zones if d.get("cible") == "ennemi" and d.get("mode") != "passive")
+	print(f"Zones : {len(zones)} — {len(zones) - len(auras)} capacités "
+		  f"({hostiles} hostiles / {len(zones) - len(auras) - hostiles} bénéfiques) "
+		  f"+ {len(auras)} aura(s) · "
 		  + " · ".join(f"{f} ×{n}" for f, n in sorted(formes.items())))
+	sensibles = [d for d in docs_bruts if d.get("sensibilite_charge") is not None]
+	if sensibles:
+		print(f"Charge magique : {len(sensibles)} entrée(s) à `sensibilite_charge` explicite")
 
 	if erreurs:
 		print(f"\n{len(erreurs)} PROBLÈME(S) :")
