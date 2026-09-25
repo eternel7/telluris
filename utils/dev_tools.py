@@ -179,6 +179,16 @@ CATALOGUE = [
 			"idempotente. Sans familles écrites, ces nœuds restent inatteignables.",
 	},
 	{
+		"id": "gen_direction_marchands",
+		"label": "🧭 Demander son chemin aux tenanciers",
+		"argv": _py("gen_direction_marchands.py"),
+		"ecrit": "Écrit jsons/direction_marchands_a_importer.json.",
+		"description": "Pose sur les `pnj:marchand_*` le dialogue où le joueur SAISIT le nom "
+			"d'un lieu de la ville : direction et repère si le nom est exact, trois noms proches "
+			"sinon. Relit les docs depuis le dump figé et n'y injecte que ce fragment : "
+			"régénération idempotente.",
+	},
+	{
 		"id": "gen_progeniture",
 		"label": "👪 Donner une famille aux tenanciers d'Auxerre",
 		"argv": _py("gen_progeniture.py"),

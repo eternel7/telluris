@@ -41,6 +41,9 @@ PLACEHOLDERS_CONNUS = {
 	"portail",
 	# Délai de réouverture : minutes restant avant que le dialogue rouvre.
 	"attente",
+	# Service `direction` : le nom SAISI par le joueur et les noms approchants proposés.
+	# ({lieu} et {direction} sont partagés avec les quêtes.)
+	"recherche", "suggestions",
 }
 
 # Clés de `condition` : deux formes structurées, tout le reste est traité comme un FLAG
@@ -108,6 +111,7 @@ NOEUDS_REQUIS = {
 	"escorte": {"accepte"},
 	# `deja` reste optionnel — un gardien peut ne pas reconnaître les habitués.
 	"acces": {"ouvre", "refus"},
+	"direction": {"trouve", "proche", "inconnu"},
 }
 
 # Le transport a DEUX rôles, et presque aucun PNJ ne tient les deux :

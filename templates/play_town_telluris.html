@@ -2675,6 +2675,14 @@
 			border: 2px solid var(--accent, #b98c4a);			
 		}
 		.pnj-dialogue { min-width: 0; }
+		/* Choix à saisie libre (`saisie: true`) : champ + bouton, miroir de `.aub-dire`. */
+		.pnj-saisie { display: flex; gap: .4rem; }
+		.pnj-saisie input {
+			flex: 1 1 auto; min-width: 0; padding: .4rem .55rem; border-radius: 6px;
+			border: 1px solid rgba(220, 200, 160, .35);
+			background: rgba(0, 0, 0, .35); color: inherit; font: inherit;
+		}
+		.pnj-saisie .sub-loc-btn { flex: 0 0 auto; width: auto; }
 		.pnj-ambiance { font-style: italic; opacity: .85; font-size: .9rem; margin-bottom: .6rem; }
 		/* ⚠️ SOURCE UNIQUE de la bulle de réplique : le panneau PNJ l'adresse par son id,
 		   les dialogues rendus en overlay (conditions d'engagement d'une recrue) par la
@@ -9686,9 +9694,23 @@ function renderPnjNoeud(noeud) {
 	// La pastille « ! »/« ? » précède le ✨ existant : les deux sémantiques coexistent —
 	// ✨ dit « ce choix déclenche une action », la pastille dit « il y a là quelque chose
 	// pour toi ». Elle est dérivée de la CONDITION du choix côté serveur, donc exacte.
-	liste.innerHTML = (noeud.choix || []).map(c =>
-		`<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${_marquePastille(c.marque)}${c.action ? '✨ ' : ''}${c.label}</button></li>`
+	// Choix à SAISIE LIBRE : champ texte + bouton ; la valeur part en `saisie` avec le choix.
+	// ⚠️ `maxlength` = transport.RECHERCHE_LIEU_MAX (le serveur borne de toute façon).
+	liste.innerHTML = (noeud.choix || []).map(c => c.saisie
+		? `<li class="pnj-saisie"><input type="text" id="pnj-saisie-${c.id}" maxlength="80"
+				placeholder="Nom du lieu…" onkeydown="if(event.key==='Enter'){choisirPnjSaisie('${c.id}');}">
+			<button class="sub-loc-btn" onclick="choisirPnjSaisie('${c.id}')">${c.label}</button></li>`
+		: `<li><button class="sub-loc-btn" onclick="choisirPnj('${c.id}')">${_marquePastille(c.marque)}${c.action ? '✨ ' : ''}${c.label}</button></li>`
 	).join('') || '<li><button class="sub-loc-btn" onclick="closePnjPanel()">✕ Prendre congé</button></li>';
+	const champ = liste.querySelector('.pnj-saisie input');
+	if (champ) champ.focus();
+}
+
+function choisirPnjSaisie(choixId) {
+	const champ = document.getElementById('pnj-saisie-' + choixId);
+	const valeur = champ ? champ.value.trim() : '';
+	if (!valeur) { if (champ) champ.focus(); return; }
+	choisirPnj(choixId, { saisie: valeur });
 }
 
 // `btn` = le bouton 🗣 cliqué ; son `data-pnj` dit à qui l'on parle. Sans bouton, le serveur
@@ -9726,12 +9748,13 @@ function closePnjPanel() {
 	window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function choisirPnj(choixId) {
+async function choisirPnj(choixId, extra) {
 	if (!_pnjNoeudCourant) return;
 	try {
 		const res = await fetch('api/pnj/dialogue/choix', {
 			method: 'POST', headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({ noeud: _pnjNoeudCourant, choix_id: choixId, pnj_id: _pnjCourant })
+			body: JSON.stringify(Object.assign(
+				{ noeud: _pnjNoeudCourant, choix_id: choixId, pnj_id: _pnjCourant }, extra || {}))
 		});
 		const data = await res.json();
 		if (!res.ok) { showToast('Erreur : ' + data.detail); return; }

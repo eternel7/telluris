@@ -43,6 +43,7 @@ Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le
 - `gen_jetons_especes.py` — `jeton: {taille, forme}` des espèces à gabarit (dragon 3x2, cheval 1x2…) ; table EXHAUSTIVE, échoue sur une espèce du dump non classée ; relit le dump le plus récent (cf. `telluris-combat` § Jetons de taille variable).
 - `gen_repurgateur_noire.py` — le répurgateur passe de la magie Sainte à la `Démonologie`, `familles_exclues: ["invocation"]` ; ajoute un sort d'invocation par école noire. ⚠️ Recopie `rules:vocations` ENTIER (PUT complet). ⚠️ Ses 3 sorts Saints restent **intacts** et sortent donc de son répertoire : perte assumée, le script les liste avant l'import.
 - `gen_escorte_marchands.py` / `gen_progeniture.py` / `gen_escorte_guilde.py` — escortes : nœuds des 29 `pnj:marchand_*`, familles des boutiques, registre des disparitions au comptoir.
+- `gen_direction_marchands.py` — « Vous sauriez m'indiquer un lieu ? » sur les 48 `pnj:marchand_*` (service `direction`, saisie libre), même injection idempotente que l'escorte.
 - `gen_convoi_lutecia.py` — le voyage à Lutèce.
 - `gen_epaulieres.py` — 21 pièces d'épaules + recettes.
 - `gen_loot_immateriel.py` — sous-catégorie + recettes pour 32 butins immatériels.

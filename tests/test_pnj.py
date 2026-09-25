@@ -277,6 +277,16 @@ def test_noeud_client_inconnu():
     assert pnj.noeud_client({}, "accueil", _ctx()) is None
 
 
+def test_noeud_client_signale_le_choix_a_saisie_libre():
+    # Le client doit savoir qu'il affiche un champ texte ; les choix ordinaires restent des boutons.
+    doc = {"dialogue": {"noeud_depart": "d", "noeuds": {"d": {"texte": "Quel lieu ?", "choix": [
+        {"id": "chercher", "label": "Demander", "saisie": True, "action": {"service": "direction"}},
+        {"id": "non", "label": "Rien", "next": "fin"},
+    ]}}}}
+    choix = pnj.noeud_client(doc, "d", _ctx())["choix"]
+    assert [c["saisie"] for c in choix] == [True, False]
+
+
 def test_choix_valide_revalide_serveur():
     doc = _pnj_doc()
     assert pnj.choix_valide(doc, "accueil", "soin", _ctx())["next"] == "soin_propose"
