@@ -33,13 +33,14 @@ fabrication sont impossibles par construction, sans transaction inter-documents 
 cahier des charges).
 """
 
+import random
 import time
 import uuid
 
 from models import character_stats
 from utils import fabrication, marche
 from utils.characters import (
-	item_ref_id, item_sous_categorie, poids_bounds, resolve_item_ref,
+	item_ref_id, item_sous_categorie, poids_bounds, tirer_poids, resolve_item_ref,
 )
 
 TAG_SUR_MESURE = "sur_mesure"
@@ -644,8 +645,18 @@ def vue(commande: dict, get_doc_fn, now: int | None = None) -> dict:
 	}
 
 
-def poids_attendu(item_doc: dict) -> float:
-	"""Poids de l'exemplaire à livrer — le MINIMUM du doc, comme tout objet acheté
-	(`buy_item` pose une référence nue, dont `item_ref_weight` tire le min). Un doc à poids
-	`[min, max]` ne tire donc pas au hasard ici : une pièce commandée est une pièce choisie."""
-	return poids_bounds(item_doc or {})[0]
+def poids_attendu(item_doc: dict, rand_fn=random.random) -> float:
+	"""Poids de l'exemplaire à livrer — TIRÉ dans les bornes du doc (`tirer_poids`, fixe ⇒
+	sans tirage) au moment où la commande est passée (ou relancée), puis stocké sur la commande :
+	`ref_livree` le porte jusqu'au sac."""
+	return tirer_poids(item_doc or {}, rand_fn)
+
+
+def poids_catalogue(item_doc: dict) -> dict:
+	"""Poids d'une ligne de catalogue : `poids` = le min (un NOMBRE, que le client formate),
+	plus `poids_max` seulement pour un doc à fourchette `[min, max]`."""
+	pmin, pmax = poids_bounds(item_doc or {})
+	champs = {"poids": round(pmin, 2)}
+	if pmax > pmin:
+		champs["poids_max"] = round(pmax, 2)
+	return champs

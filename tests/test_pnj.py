@@ -547,13 +547,14 @@ def test_don_effectif_seuil_defaut_world_var():
 
 def test_appliquer_don_ajoute_references_inventaire():
     character = {}
-    assert pnj.appliquer_don(character, "item:Eau_benite", 0.4, 2) == 2
+    # Un exemplaire par poids TIRÉ (par le router, `characters.tirer_poids`) : chacun garde le sien.
+    assert pnj.appliquer_don(character, "item:Eau_benite", [0.4, 0.55]) == 2
     assert character["inventaire"] == [
         {"item": "item:Eau_benite", "poids": 0.4},
-        {"item": "item:Eau_benite", "poids": 0.4},
+        {"item": "item:Eau_benite", "poids": 0.55},
     ]
-    # Ajout cumulatif (au moins 1 même si quantite < 1).
-    assert pnj.appliquer_don(character, "item:Bougie", 0.1, 0) == 1
+    # Ajout cumulatif.
+    assert pnj.appliquer_don(character, "item:Bougie", [0.1]) == 1
     assert len(character["inventaire"]) == 3
     assert character["inventaire"][-1] == {"item": "item:Bougie", "poids": 0.1}
 
@@ -567,7 +568,7 @@ def test_don_inscription_rend_ses_trois_cles_brutes():
 
 def test_appliquer_don_pose_le_lieu_parent_resolu():
     character = {}
-    pnj.appliquer_don(character, "item:carte_aventurier", 0.05, 1, "lieu:lutecia")
+    pnj.appliquer_don(character, "item:carte_aventurier", [0.05], "lieu:lutecia")
     assert character["inventaire"] == [
         {"item": "item:carte_aventurier", "poids": 0.05, "lieu_parent": "lieu:lutecia"}]
 

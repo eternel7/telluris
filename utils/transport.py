@@ -42,7 +42,7 @@ import random
 import uuid
 
 from models import character_stats
-from utils.characters import item_ref_id, poids_bounds, lieu_label
+from utils.characters import item_ref_id, poids_bounds, tirer_poids, lieu_label
 from utils import focalisation, marche, quetes
 
 
@@ -453,9 +453,10 @@ def deja_reussie(character: dict, quete_id: str) -> bool:
 	return quetes.quete_reussie(character, quete_id)
 
 
-def cargaison_authoree(spec: dict, get_doc_fn) -> list:
+def cargaison_authoree(spec: dict, get_doc_fn, rand_fn=random.random) -> list:
 	"""Développe la cargaison écrite en références d'instances `{item, poids}` (une par
-	exemplaire). Poids = celui de la spec s'il est donné, sinon le poids mini de l'item.
+	exemplaire). Poids = celui de la spec s'il est donné, sinon tiré dans les bornes de l'item
+	POUR CHAQUE exemplaire (`tirer_poids`).
 	Les bornes QUETE_TRANSPORT_POIDS_MAX / _NB_MAX ne s'appliquent PAS : une cargaison
 	authorée dit exactement ce qu'elle pèse (le contrôle de charge à l'acceptation, lui,
 	joue toujours → nœud « trop chargé »)."""
@@ -467,9 +468,9 @@ def cargaison_authoree(spec: dict, get_doc_fn) -> list:
 		doc = get_doc_fn(iid)
 		if not doc:
 			continue
-		poids = ligne.get("poids")
-		poids = float(poids) if poids is not None else poids_bounds(doc)[0]
+		ecrit = ligne.get("poids")
 		for _ in range(max(1, int(ligne.get("quantite", 1) or 1))):
+			poids = float(ecrit) if ecrit is not None else tirer_poids(doc, rand_fn)
 			cargaison.append({"item": iid, "poids": poids})
 	return cargaison
 
@@ -511,12 +512,14 @@ def rang_guilde_recompense(spec_rang, giver_doc: dict) -> dict:
 	return {"rang_guilde": {"cite": parent, "rang": spec_rang}}
 
 
-def generer_transport_authore(spec: dict, giver_doc: dict, find_docs_fn, get_doc_fn) -> dict | None:
+def generer_transport_authore(spec: dict, giver_doc: dict, find_docs_fn, get_doc_fn,
+							  rand_fn=random.random) -> dict | None:
 	"""Construit l'offre décrite par la spec du PNJ — même structure que `generer_transport`,
-	mais rien n'est tiré au sort : destination, cargaison, délai et récompenses sont écrits.
+	mais destination, cargaison, délai et récompenses sont écrits ; seul le poids d'un colis
+	sans poids écrit est tiré (`cargaison_authoree`).
 	Titre/description/récompenses absents de la spec sont dérivés comme pour une course
 	générée. None si la cargaison ne se résout pas (items introuvables)."""
-	cargaison = cargaison_authoree(spec, get_doc_fn)
+	cargaison = cargaison_authoree(spec, get_doc_fn, rand_fn)
 	if not cargaison:
 		return None
 	dest_id = spec.get("destination")
@@ -591,7 +594,7 @@ def poser_transport_offert(character: dict, lieu_doc: dict, find_docs_fn, get_do
 		if spec:
 			deja = bool(spec.get("unique")) and deja_reussie(character, spec.get("id"))
 			if not deja and rand_fn() < float(spec.get("proba", 1.0)):
-				quete = generer_transport_authore(spec, lieu_doc, find_docs_fn, get_doc_fn)
+				quete = generer_transport_authore(spec, lieu_doc, find_docs_fn, get_doc_fn, rand_fn)
 		elif (confiance_suffisante(character, lieu_doc, get_doc_fn)
 				and rand_fn() < float(character_stats.QUETE_TRANSPORT_PROBA)):
 			quete = generer_transport(lieu_doc, find_docs_fn, get_doc_fn, rand_fn)

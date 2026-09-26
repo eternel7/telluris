@@ -135,7 +135,7 @@ def _catalogue_vue(lieu_doc: dict, relation) -> list:
 			"item_id": item_id,
 			"nom": item.get("nom") or item_id,
 			"icon": item.get("icon") or "🛠️",
-			"poids": round(float(item.get("poids", 0) or 0), 2),
+			**commande_util.poids_catalogue(item),
 			"prix_cuivre": prix,
 			"prix": cuivre_to_purse(prix),
 			# ⚠️ Drapeau calculé ICI, jamais redérivé côté client (Convention §10) : une pièce

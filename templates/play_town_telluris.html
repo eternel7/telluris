@@ -7130,7 +7130,7 @@ function renderCmdCatalogue(data) {
 		return `<li class="sh-inv-item">
 		<span class="sh-inv-open" onclick="openMarchandDetail('commande',${idx})" title="Voir la fiche">${v.icon || '🛠️'}</span>
 		<span class="sh-inv-name sh-inv-open" onclick="openMarchandDetail('commande',${idx})" title="Voir la fiche">${escapeHtml(v.nom || '—')}</span>
-		<span class="sh-inv-poids">${(+v.poids).toFixed(1)} kg</span>
+		<span class="sh-inv-poids">${v.poids_max != null ? `${(+v.poids).toFixed(1)}–${(+v.poids_max).toFixed(1)}` : (+v.poids).toFixed(1)} kg</span>
 		<span class="sell-prix">${formatPrix(v.prix)}</span>
 		<span class="sh-inv-actions">
 			<button class="sh-drop-btn" data-item="${escapeHtml(v.item_id)}" onclick="commanderItem(this)" title="Commander">Commander</button>

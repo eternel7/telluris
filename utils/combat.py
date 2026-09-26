@@ -9,7 +9,7 @@ from models.character_stats import (
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
-	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id,
+	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, tirer_poids, item_ref_id,
 	lieu_label, noter_victoire, resolve_item_ref, recompute_equipment_bonus, autre_main,
 )
 from utils.consommables import (
@@ -3251,8 +3251,9 @@ def _etage_nettoye(combat_doc: dict) -> bool:
 
 
 def butin_d_etage(combat_doc: dict) -> list:
-	"""Carcasses de l'étage courant à répartir en le quittant : `[{monstre_id, item_id, nom,
-	poids}]`, celles déjà ramassées en combat exclues.
+	"""Butin de l'étage courant à répartir en le quittant : `[{monstre_id, cle, item_id, nom,
+	poids}]` — carcasses (celles déjà ramassées en combat exclues) et objets équipés des
+	humanoïdes, une ligne chacun (cf. `_butin_du_monstre`).
 
 	⚠️ Poids tirés UNE fois et mémorisés sur `etages.butin_etage` (clé = l'étage) : l'overlay
 	peut être fermé puis rouvert, un nouveau tirage à chaque ouverture laisserait le joueur
@@ -3262,15 +3263,15 @@ def butin_d_etage(combat_doc: dict) -> list:
 	if memo.get("etage") != etages.get("etage"):
 		dispo = []
 		for m in combat_doc.get("monstres") or []:
-			if m.get("vivant", True) or m.get("loote"):
+			if m.get("vivant", True):
 				continue
-			payload = _carcasse_payload(m)
-			if payload:
-				dispo.append(payload)
+			dispo.extend(_butin_du_monstre(m))
 		memo = {"etage": etages.get("etage"), "dispo": dispo}
 		etages["butin_etage"] = memo
+	# `loote` (ramassage en combat) ne retire que la CARCASSE ; les objets restent proposés.
 	loote = {m["id"] for m in combat_doc.get("monstres") or [] if m.get("loote")}
-	return [d for d in memo.get("dispo") or [] if d.get("monstre_id") not in loote]
+	return [d for d in memo.get("dispo") or []
+			if d.get("slot") or d.get("monstre_id") not in loote]
 
 
 def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -> str | None:
@@ -3278,29 +3279,34 @@ def _repartir_butin_d_etage(combat_doc: dict, dispo: list, attributions: list) -
 	`_finalize_membre` verse au sac quelle que soit l'issue. Ce que personne n'emporte reste à
 	l'étage. Refus GLOBAL (rien n'est pris) si un bénéficiaire est hors du groupe ou
 	surchargé : miroir de `/collect`, charge lue sur le SNAPSHOT. Renvoie l'erreur ou None."""
-	par_mid = {d["monstre_id"]: d for d in dispo}
+	par_cle = {cle_butin(d): d for d in dispo}
 	# Mêmes bénéficiaires que `/collect` : ni monture morte, ni personne escortée.
 	membres = {j["character_id"]: j for j in combat_doc["joueurs"]
 			   if j.get("character_id") and not j.get("morte") and not j.get("est_protege")}
 	par_benef: dict = {}
 	for a in attributions or []:
-		mid, cid = a.get("monstre_id"), a.get("beneficiaire_id")
-		if mid not in par_mid:
+		cle, cid = a.get("cle") or a.get("monstre_id"), a.get("beneficiaire_id")
+		if cle not in par_cle:
 			continue
 		if cid not in membres:
 			return "Bénéficiaire hors du groupe de combat."
-		par_benef.setdefault(cid, []).append(mid)
-	for cid, mids in par_benef.items():
+		par_benef.setdefault(cid, []).append(cle)
+	for cid, cles in par_benef.items():
 		j = membres[cid]
-		if j.get("charge", 0) + sum(par_mid[m]["poids"] for m in mids) > j.get("charge_max", 0) + 1e-6:
+		if j.get("charge", 0) + sum(par_cle[c]["poids"] for c in cles) > j.get("charge_max", 0) + 1e-6:
 			return f"Charge maximale dépassée pour {j.get('nom', 'ce personnage')}."
 	monstres = {m["id"]: m for m in combat_doc.get("monstres") or []}
-	for cid, mids in par_benef.items():
+	for cid, cles in par_benef.items():
 		j = membres[cid]
-		for mid in mids:
-			d, monstre = par_mid[mid], monstres.get(mid) or {}
-			item = _ensure_loot_item(monstre.get("espece_id", ""), monstre.get("nom", ""))
-			monstre["loote"] = True
+		for cle in cles:
+			d = par_cle[cle]
+			monstre = monstres.get(d.get("monstre_id")) or {}
+			if d.get("slot"):
+				# Objet équipé : pas de `loote`, qui ne marque que la carcasse.
+				item = get_doc(d["item_id"])
+			else:
+				item = _ensure_loot_item(monstre.get("espece_id", ""), monstre.get("nom", ""))
+				monstre["loote"] = True
 			j.setdefault("butin_ramasse", []).append({"item": d["item_id"], "poids": d["poids"]})
 			j["charge"] = round(j.get("charge", 0) + d["poids"], 2)
 			_ajuster_charge_magique(j, d["poids"], charge_magie.coefficient_item(item or {}))
@@ -5322,15 +5328,56 @@ def _carcasse_payload(monstre: dict) -> dict | None:
 		return None
 	return {
 		"monstre_id": monstre["id"],
+		"cle": monstre["id"],
 		"item_id": item["_id"],
 		"nom": item.get("nom", item["_id"]),
 		"poids": _roll_carcasse_weight(item, monstre.get("niveau", 1)),
 	}
 
 
+def cle_butin(d: dict) -> str:
+	"""Clé UNIQUE d'une ligne de butin. Carcasse : le `monstre_id` (forme d'avant — combats et
+	gardes `butin_collectes` déjà en base restent valides) ; objet équipé : `<monstre_id>|<slot>`.
+	Une entrée sans `cle` (combat antérieur) est une carcasse."""
+	return d.get("cle") or d["monstre_id"]
+
+
+def _objets_payload(monstre: dict) -> list[dict]:
+	"""Une ligne de butin par objet ÉQUIPÉ d'un humanoïde (`slots` tiré par
+	`roll_monster_equipment`) : `{monstre_id, cle, slot, item_id, nom, poids}`, poids d'instance
+	tiré dans les bornes du doc (`tirer_poids`). Sans `slots` (bête, humanoïde nu)
+	⇒ []. Un item absent de la base est sauté."""
+	lignes = []
+	for slot, item_id in (monstre.get("slots") or {}).items():
+		item = get_doc(item_id) if item_id else None
+		if not item:
+			continue
+		lignes.append({
+			"monstre_id": monstre["id"],
+			"cle": f"{monstre['id']}|{slot}",
+			"slot": slot,
+			"item_id": item_id,
+			"nom": item.get("nom", item_id),
+			"poids": tirer_poids(item),
+		})
+	return lignes
+
+
+def _butin_du_monstre(monstre: dict) -> list[dict]:
+	"""Butin d'un monstre MORT : sa carcasse (sauf déjà ramassée en combat, `loote` — qui ne
+	concerne QUE la carcasse) puis, pour un humanoïde, chacun de ses objets équipés."""
+	lignes = []
+	if not monstre.get("loote"):
+		payload = _carcasse_payload(monstre)
+		if payload:
+			lignes.append(payload)
+	return lignes + _objets_payload(monstre)
+
+
 def verser_butin_au_sol(character: dict, combat_doc: dict, deja=None) -> list[dict]:
-	"""Verse au SOL du principal les carcasses de `butin_disponible` que personne n'a
-	emportées, et les inscrit dans la MÊME garde que l'encaissement. Mute `character`
+	"""Verse au SOL du principal les éléments de `butin_disponible` (carcasses, objets
+	équipés des humanoïdes) que personne n'a emportés, et les inscrit par CLÉ de ligne
+	(`cle_butin`) dans la MÊME garde que l'encaissement. Mute `character`
 	(`objets_au_sol` + `butin_collectes`) et `combat_doc` (`butin_disponible` vidé) ;
 	ne sauvegarde RIEN — l'appelant persiste. Renvoie `[{nom, poids}]` de ce qui est tombé.
 
@@ -5375,12 +5422,14 @@ def verser_butin_au_sol(character: dict, combat_doc: dict, deja=None) -> list[di
 	au_sol = character.get("objets_au_sol", [])
 	verses = []
 	for d in (combat_doc.get("butin_disponible") or []):
-		mid = d.get("monstre_id")
-		if not mid or mid in traites:
+		if not d.get("monstre_id"):
+			continue
+		cle = cle_butin(d)
+		if cle in traites:
 			continue
 		au_sol.append({"item": d["item_id"], "poids": d["poids"]})
 		verses.append({"nom": d.get("nom", d["item_id"]), "poids": d["poids"]})
-		traites.add(mid)
+		traites.add(cle)
 	character["objets_au_sol"] = au_sol
 
 	# ⚠️ `pop` AVANT l'écriture : réassigner une clé existante ne la déplace pas en fin de
@@ -5610,21 +5659,18 @@ def finalize_combat(combat_doc: dict) -> bool:
 		combat_doc["recompense_appliquee"] = True  # déjà appliqué au principal
 		return False
 
-	# Carcasses laissées au sol (monstres tués non ramassés) : proposées dans l'overlay
-	# de fin UNIQUEMENT en cas de victoire. Le joueur choisit lesquelles emporter via
-	# POST /api/combat/{id}/collect (borné par charge_max) — pas d'ajout automatique.
+	# Butin des monstres tués (carcasse non ramassée + objets équipés d'un humanoïde, une
+	# ligne chacun) : proposé dans l'overlay de fin UNIQUEMENT en cas de victoire. Le joueur
+	# choisit quoi emporter via POST /api/combat/{id}/collect (borné par charge_max) — pas
+	# d'ajout automatique.
 	if status == "victoire":
 		dispo = []
 		for m in combat_doc["monstres"]:
-			if m.get("loote"):
-				continue  # déjà ramassée pendant le combat
-			# Un vivant ne laisse pas de carcasse : une sortie de donjon à étages est une
+			# Un vivant ne laisse rien : une sortie de donjon à étages est une
 			# victoire même quand des monstres rôdent encore à l'étage.
 			if m.get("vivant", False):
 				continue
-			payload = _carcasse_payload(m)
-			if payload:
-				dispo.append(payload)
+			dispo.extend(_butin_du_monstre(m))
 		combat_doc["butin_disponible"] = dispo
 
 	# Montures : une bête tombée quitte le troupeau et déverse sa cargaison au SOL du

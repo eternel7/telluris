@@ -809,21 +809,21 @@ def don_effectif(pnj_doc: dict, contexte: dict) -> dict | None:
 	}
 
 
-def appliquer_don(character: dict, item_id: str, poids_unitaire: float, quantite: int,
+def appliquer_don(character: dict, item_id: str, poids: list,
 				  lieu_parent: str | None = None) -> int:
-	"""Ajoute `quantite` instances de `item_id` à l'inventaire, chacune en référence
-	`{item, poids}` (mute `inventaire`, NE SAUVEGARDE PAS). Renvoie la quantité ajoutée.
+	"""Ajoute une instance de `item_id` par poids de `poids` (tirés par l'appelant,
+	`characters.tirer_poids`), chacune en référence `{item, poids}` (mute `inventaire`, NE
+	SAUVEGARDE PAS). Renvoie la quantité ajoutée.
 	Le contrôle de charge et le débit se font côté router avant l'appel.
 	`lieu_parent` (déjà RÉSOLU) est posé sur chaque référence : c'est l'instance qui dit de
 	quelle guilde vient une carte (`characters.item_ref_lieu`)."""
 	inv = character.setdefault("inventaire", [])
-	n = max(1, int(quantite))
-	for _ in range(n):
-		ref = {"item": item_id, "poids": float(poids_unitaire)}
+	for p in poids:
+		ref = {"item": item_id, "poids": float(p)}
 		if lieu_parent:
 			ref["lieu_parent"] = lieu_parent
 		inv.append(ref)
-	return n
+	return len(poids)
 
 
 def don_deja_recu(character: dict, item_id: str, lieu_parent: str | None,

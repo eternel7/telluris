@@ -1,3 +1,4 @@
+import random
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Response, Request, Body
 from db.config import get_doc, save_doc, find_docs
 from models import character_stats
@@ -72,6 +73,15 @@ def poids_bounds(item: dict) -> tuple[float, float]:
 		return float(p[0] or 0), float(p[1] or 0)
 	val = float(p or 0)
 	return val, val
+
+
+def tirer_poids(item: dict, rand_fn=random.random) -> float:
+	"""Poids d'INSTANCE tiré uniformément dans les bornes du doc (arrondi au centième, même
+	formule que `transport.choisir_cargaison`) ; poids fixe ⇒ ce poids, sans tirage."""
+	pmin, pmax = poids_bounds(item)
+	if pmax <= pmin:
+		return pmin
+	return round(pmin + (pmax - pmin) * rand_fn(), 2)
 
 
 def item_ref_weight(ref) -> float:

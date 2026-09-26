@@ -15,7 +15,7 @@ from utils.characters import (
 	sync_equipment_bonus, carried_weight, charge_max_of,
 	restriction_satisfaite,
 	main_occupee_par_deux_mains, liberer_pour_deux_mains,
-	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds, lieu_label,
+	item_ref_id, item_ref_weight, resolve_item_ref, poids_bounds, tirer_poids, lieu_label,
 	money_to_cuivre, cuivre_to_purse, credit_character,
 	nettoyer_nom_objet, renommer_ref,
 )
@@ -2168,17 +2168,23 @@ async def buy_item(
 	cible = stock_cible_pour(lieu_doc, item)
 	prix = prix_marche(relation, item_id, pmin, pmax, "achat", int(entry.get("qty", 0)), cible)
 
-	if carried_weight(character) + item_ref_weight(item_id) > charge_max_of(character):
+	# Poids d'instance tiré dans les bornes du doc (fixe ⇒ sans tirage), contrôlé puis stocké.
+	poids = tirer_poids(item)
+	if carried_weight(character) + poids > charge_max_of(character):
 		raise HTTPException(status_code=422, detail="Trop chargé pour porter cet objet")
 
 	purse = debit_character(character, prix)
 	if purse is None:
 		raise HTTPException(status_code=422, detail="Fonds insuffisants")
 
-	# Décrément du stock du lieu + ajout à l'inventaire (ref chaîne = poids min de l'item).
+	# Décrément du stock du lieu + ajout à l'inventaire. Réf `{item, poids}` pour un doc à
+	# fourchette (le poids tiré voyage avec l'exemplaire) ; sinon la réf nue d'avant — poids
+	# fixe et objets virtuels du scriptorium gardent exactement leur forme.
 	entry["qty"] = int(entry.get("qty", 0)) - 1
 	lieu_doc["stock_vente"] = [e for e in stock_vente if int(e.get("qty", 0)) > 0]
-	character.setdefault("inventaire", []).append(item_id)
+	pmin, pmax = poids_bounds(item)
+	character.setdefault("inventaire", []).append(
+		{"item": item_id, "poids": poids} if pmax > pmin else item_id)
 
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")

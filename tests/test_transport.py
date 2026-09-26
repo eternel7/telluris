@@ -866,9 +866,20 @@ def test_la_cargaison_ecrite_ignore_les_bornes_de_poids_et_de_nombre(monkeypatch
 	assert transport.poids_cargaison(q["cargaison"]) == 10.0
 
 
-def test_cargaison_authoree_sans_poids_prend_le_poids_mini_de_l_item():
+def test_cargaison_authoree_sans_poids_prend_le_poids_fixe_de_l_item():
 	spec = {"destination": "lieu:fumoir", "cargaison": [{"item": "item:viande", "quantite": 3}]}
 	assert transport.cargaison_authoree(spec, get_doc) == [{"item": "item:viande", "poids": 2}] * 3
+
+
+def test_cargaison_authoree_tire_le_poids_de_chaque_exemplaire():
+	jambon = {"_id": "item:jambon", "type": "item", "poids": [4, 8]}
+	tirages = iter([0.0, 0.5, 0.75])
+	spec = {"destination": "lieu:fumoir", "cargaison": [
+		{"item": "item:jambon", "quantite": 3},
+		{"item": "item:jambon", "quantite": 1, "poids": 5.0}]}   # poids ÉCRIT : jamais tiré
+	cargaison = transport.cargaison_authoree(
+		spec, lambda i: jambon if i == "item:jambon" else None, rand_fn=lambda: next(tirages))
+	assert [c["poids"] for c in cargaison] == [4, 6, 7, 5.0]
 
 
 def test_cargaison_authoree_ignore_un_item_introuvable():

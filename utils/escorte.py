@@ -47,7 +47,7 @@ import uuid
 
 from models import character_stats
 from models.character_stats import BaseStats, compute_derived_stats
-from utils.characters import sync_equipment_bonus, poids_bounds
+from utils.characters import sync_equipment_bonus, tirer_poids
 from utils.consommables import caracts_avec_buffs
 from utils import acces, chasse, marche, quetes
 
@@ -775,9 +775,9 @@ def _stats_de_race(race_id: str, get_doc_fn) -> dict:
 	return stats or dict(STATS_DEFAUT)
 
 
-def _ref_item(ligne, get_doc_fn) -> dict | None:
+def _ref_item(ligne, get_doc_fn, rand_fn=random.random) -> dict | None:
 	"""Référence d'objet `{item, poids}` tirée d'une ligne de spec (id nu OU objet). Poids
-	absent ⇒ le minimum du doc item ; doc introuvable ⇒ référence sans poids. None si la ligne
+	absent ⇒ tiré dans les bornes du doc item (`tirer_poids`) ; doc introuvable ⇒ référence sans poids. None si la ligne
 	ne nomme aucun objet. Partagé par `inventaire` (le sac) et `equipement` (les slots)."""
 	ref = dict(ligne) if isinstance(ligne, dict) else {"item": ligne}
 	iid = ref.get("item")
@@ -786,14 +786,14 @@ def _ref_item(ligne, get_doc_fn) -> dict | None:
 	if ref.get("poids") is None:
 		doc = get_doc_fn(iid)
 		if doc:
-			ref["poids"] = poids_bounds(doc)[0]
+			ref["poids"] = tirer_poids(doc, rand_fn)
 		else:
 			ref.pop("poids", None)
 	return ref
 
 
 def creer_protege(spec_p: dict, character: dict, quete_id: str, get_doc_fn,
-				  giver_id: str | None = None) -> dict:
+				  giver_id: str | None = None, rand_fn=random.random) -> dict:
 	"""Doc `protege:*` neuf — MIROIR du character, calqué sur `montures.creer_monture`.
 
 	Le doc porte le SOUS-ENSEMBLE des champs qui rend opérants `compute_derived_stats`,
@@ -806,7 +806,7 @@ def creer_protege(spec_p: dict, character: dict, quete_id: str, get_doc_fn,
 	où elle frappe l'ennemi au contact sans jamais se déplacer (`combat._run_defenseur_turn`).
 	Posé seulement quand la spec le demande : clé absente ⇒ comportement d'avant."""
 	caract = dict(spec_p.get("caracteristiques") or _stats_de_race(spec_p.get("race", ""), get_doc_fn))
-	inventaire = [ref for ref in (_ref_item(ligne, get_doc_fn) for ligne in spec_p.get("inventaire") or [])
+	inventaire = [ref for ref in (_ref_item(ligne, get_doc_fn, rand_fn) for ligne in spec_p.get("inventaire") or [])
 				  if ref]
 	# Équipement PORTÉ (plates, épée…) : dans `slots`, il est lu comme celui d'un personnage —
 	# PA par zone (`sync_equipment_bonus`) et profil d'attaque (`combat._weapon_attacks`).
@@ -815,7 +815,7 @@ def creer_protege(spec_p: dict, character: dict, quete_id: str, get_doc_fn,
 	equipement = spec_p.get("equipement")
 	slots = {}
 	for slot, ligne in (equipement.items() if isinstance(equipement, dict) else ()):
-		ref = _ref_item(ligne, get_doc_fn)
+		ref = _ref_item(ligne, get_doc_fn, rand_fn)
 		if slot and ref:
 			slots[str(slot)] = ref
 	protege = {
