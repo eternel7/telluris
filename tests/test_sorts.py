@@ -12,7 +12,7 @@ from utils.sorts import (
     normaliser_sort, effets_de_sort, fusionner_effets, composants_etat,
     effets_effectifs, sort_utilisable_combat, sort_utilisable_exploration,
     empiler_effet_sort, cout_apprentissage, grimoire_pour, sorts_apprenables,
-    sorts_epingles_effectifs,
+    sorts_epingles_effectifs, sorts_eligibles_espece,
     ecole_native, magie_de_sort, niveau_ecole, magies_pratiquees,
     ecoles_du_monde, peut_apprendre_magie, ecoles_achetables, cout_ecole,
     ecoles_de_grimoire,
@@ -487,3 +487,32 @@ def test_epingles_champ_present_vide_pas_de_fallback():
     # Le joueur a explicitement tout désépinglé : on respecte son choix.
     char = {"sorts_connus": ["sort:a"], "sorts_epingles": []}
     assert sorts_epingles_effectifs(char) == []
+
+
+# ── Pool de sorts éligibles pour une ESPÈCE (monstres humanoïdes) ────────────────
+
+def test_sorts_eligibles_espece_par_ecole_niveau():
+    docs = [
+        _sort(_id="sort:a", magie="feu", niveau=1),
+        _sort(_id="sort:b", magie="feu", niveau=5),      # niveau au-delà du plafond
+        _sort(_id="sort:c", magie="glace", niveau=1),    # école non listée
+        {"_id": "sort:invalide", "type": "sort", "magie": "feu", "cout_pm": 0},
+    ]
+    find_docs = lambda sel: docs
+    espece = {"_id": "espece:test", "magies": {"feu": 3}}
+    out = sorts_eligibles_espece(espece, get_doc=lambda i: None, find_docs=find_docs)
+    assert [s["id"] for s in out] == ["sort:a"]
+
+
+def test_sorts_eligibles_espece_nominatif_prioritaire():
+    catalogue = {"sort:a": _sort(_id="sort:a", magie="feu", niveau=1),
+                 "sort:z": _sort(_id="sort:z", magie="necromancie", niveau=9)}
+    espece = {"_id": "espece:test", "sorts": ["sort:z"], "magies": {"feu": 3}}
+    out = sorts_eligibles_espece(espece, get_doc=lambda i: catalogue.get(i), find_docs=lambda sel: [])
+    assert [s["id"] for s in out] == ["sort:z"]
+
+
+def test_sorts_eligibles_espece_vide_sans_champ():
+    assert sorts_eligibles_espece({}, get_doc=lambda i: None, find_docs=lambda sel: []) == []
+    espece = {"_id": "espece:test", "magies": {}}
+    assert sorts_eligibles_espece(espece, get_doc=lambda i: None, find_docs=lambda sel: []) == []

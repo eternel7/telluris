@@ -44,6 +44,9 @@ FACTEUR_DEGATS_ARMURE: int = 20
 # comportement d'avant est restauré à la lettre (plancher : zéro dé n'aurait pas de sens).
 TAG_HUMANOIDE: str = "humanoide"
 MONSTRE_DES_CC_NATURELS: int = 2
+# Probabilité, PAR item éligible de `espece["items"]`, qu'un monstre humanoïde
+# l'équipe à sa création (cf. `utils.combat.roll_monster_equipment`).
+MONSTRE_EQUIPEMENT_PROBA: float = 0.65
 
 # ── Facteur SIMULÉ (banc d'essai /admin/simulateur) ──────────────────────
 # Le simulateur doit pouvoir répondre à « et si le facteur valait 10 ? » SANS toucher ni
@@ -886,6 +889,7 @@ def current_world_variables() -> dict:
 	return {
 		"FACTEUR_DEGATS_ARMURE": FACTEUR_DEGATS_ARMURE,
 		"MONSTRE_DES_CC_NATURELS": MONSTRE_DES_CC_NATURELS,
+		"MONSTRE_EQUIPEMENT_PROBA": MONSTRE_EQUIPEMENT_PROBA,
 		"LOCALISATION_TOUCHES": dict(LOCALISATION_TOUCHES),
 		"JET_PORTEE_F_DIV": JET_PORTEE_F_DIV,
 		"DETECTION_DISTANCE_FACTEUR": DETECTION_DISTANCE_FACTEUR,
@@ -1050,7 +1054,7 @@ def load_world_variables() -> dict:
 	côté importateurs ; les scalaires sont réassignés (à lire via le module).
 	Retourne le snapshot effectif.
 	"""
-	global MONSTRE_DES_CC_NATURELS
+	global MONSTRE_DES_CC_NATURELS, MONSTRE_EQUIPEMENT_PROBA
 	global FACTEUR_DEGATS_ARMURE, JET_PORTEE_F_DIV, DETECTION_DISTANCE_FACTEUR, XP_DECOUVERTE_LIEU, TOWN_PROFIL_NIVEAU_MAX, XP_VOC_COEFF, PRIX_DERIVE_BASE
 	global XP_NIVEAU_BASE, XP_NIVEAU_INCREMENT
 	global CHA_MARCHAND, PRIX_MAX_FACTEUR, MARGE_TRANSFO, RACHAT_FACTEUR, DEPECAGE_POIDS_REF, ATELIER_TRANSFO_PROBA, APPRO_DEBIT_DEFAUT
@@ -1109,6 +1113,7 @@ def load_world_variables() -> dict:
 	FACTEUR_DEGATS_ARMURE      = int(v.get("FACTEUR_DEGATS_ARMURE", FACTEUR_DEGATS_ARMURE))
 	# Plancher à 1 : une attaque naturelle sans le moindre dé ne serait plus une attaque.
 	MONSTRE_DES_CC_NATURELS = max(1, int(v.get("MONSTRE_DES_CC_NATURELS", MONSTRE_DES_CC_NATURELS)))
+	MONSTRE_EQUIPEMENT_PROBA = max(0.0, min(1.0, float(v.get("MONSTRE_EQUIPEMENT_PROBA", MONSTRE_EQUIPEMENT_PROBA))))
 	JET_PORTEE_F_DIV           = max(1, int(v.get("JET_PORTEE_F_DIV", JET_PORTEE_F_DIV)))
 	DETECTION_DISTANCE_FACTEUR = max(0, int(v.get("DETECTION_DISTANCE_FACTEUR", DETECTION_DISTANCE_FACTEUR)))
 	XP_DECOUVERTE_LIEU         = int(v.get("XP_DECOUVERTE_LIEU", XP_DECOUVERTE_LIEU))

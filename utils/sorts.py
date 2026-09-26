@@ -920,6 +920,44 @@ def sorts_apprenables(character: dict, find_docs, resolve_ref, rules_vocations) 
 	return out
 
 
+def sorts_eligibles_espece(espece: dict, get_doc, find_docs) -> list:
+	"""Pool de sorts éligibles pour une espèce HUMANOÏDE (cf. `utils.combat.roll_monster_sorts`).
+
+	Liste nominative `espece['sorts']` PRIORITAIRE si non vide (ids résolus via
+	`get_doc`, morts ignorés) ; sinon la carte `espece['magies']` ({ecole: niveau max})
+	filtre tous les `sort:*` du monde (école dans la carte, niveau ≤ son plafond).
+	Pas de `rules_vocations` : un sort porte son école en propre (`magie`, cf.
+	`magie_de_sort`), le repli par vocation ne concerne que les sorts anciens sans ce
+	champ — non pertinent pour un pool d'espèce."""
+	espece = espece or {}
+	nominatifs = [str(s) for s in espece.get("sorts") or [] if s]
+	if nominatifs:
+		out = []
+		for sid in nominatifs:
+			sort = normaliser_sort(get_doc(sid))
+			if sort:
+				out.append(sort)
+		return out
+	magies = espece.get("magies") or {}
+	if not magies:
+		return []
+	out = []
+	for doc in find_docs({"type": "sort"}) or []:
+		sort = normaliser_sort(doc)
+		if not sort:
+			continue
+		ecole = magie_de_sort(sort, None)
+		if not ecole or ecole not in magies:
+			continue
+		try:
+			plafond = int(magies[ecole])
+		except (TypeError, ValueError):
+			continue
+		if sort["niveau"] <= plafond:
+			out.append(sort)
+	return out
+
+
 def sort_de_depart_valide(sort: dict | None, voc, rules_vocations) -> bool:
 	"""Ce sort (vue normalisée) peut-il être le sort de départ de la vocation `voc` ?
 

@@ -10,7 +10,7 @@ from models.character_stats import (
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
 	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id,
-	lieu_label, noter_victoire, resolve_item_ref,
+	lieu_label, noter_victoire, resolve_item_ref, recompute_equipment_bonus, autre_main,
 )
 from utils.consommables import (
 	caracts_avec_buffs, canalisation_bonus, est_consommable, effet_instantane, effets_de,
@@ -22,6 +22,7 @@ from utils.sorts import (
 	part_durative, effets_d_arme, concat_degats, INCANTATION_PA_MAX,
 	capacite_utilisable_combat, effets_agissent_sur_cible,
 	est_incantation_longue, est_maintenu, pm_par_pa, seuil_concentration,
+	sorts_eligibles_espece,
 )
 from utils.zones_effet import cases_effet
 from utils.quetes import maj_progress_kills, maj_progress_chasse
@@ -2254,6 +2255,20 @@ def _profil_attaque(joueur: dict, mode: str | None = None) -> dict:
 	return profil
 
 
+def _profil_arme_monstre(monstre: dict) -> dict:
+	"""Profil d'attaque PRINCIPAL d'un monstre : le meilleur mode À DISTANCE (tir puis
+	jet) s'il en a un, sinon le corps à corps — c'est lui qui pilote à la fois le
+	kiting (`_deplacement_ia`) et le coup porté. Repli mains nues par défaut : monstre
+	sans `attaque_profils` (non-humanoïde, ou combat déjà en base — aucune migration)."""
+	attaques = monstre.get("attaque_profils") or []
+	for mode in ("tir", "jet", "cac"):
+		profil = next((a for a in attaques if a.get("mode") == mode), None)
+		if profil:
+			return profil
+	return {"mode": "cac", "portee": monstre.get("portee", 1), "ranged": False,
+			"toucher": "cc", "degats": "degats_cc"}
+
+
 def build_joueur_snapshot(character: dict, joueur_index: int = 0) -> dict:
 	# Buffs de consommables inclus : un combat démarré pendant un buff en profite
 	# intégralement (pv_max, cc, dégâts, initiative, actions, déplacement — et donc
@@ -2458,6 +2473,57 @@ def des_cc_espece(espece: dict) -> int:
 	return max(1, int(character_stats.MONSTRE_DES_CC_NATURELS or 1))
 
 
+def roll_monster_equipment(espece: dict) -> dict:
+	"""Tire l'équipement d'un monstre HUMANOÏDE parmi `espece['items']` : un jet
+	INDÉPENDANT par item éligible (world-var `MONSTRE_EQUIPEMENT_PROBA`), affecté à un
+	slot libre parmi ceux que l'item couvre (`item['slots']`, même confiance que
+	`_weapon_attacks`/`recompute_equipment_bonus`, qui ne valident pas davantage). Une
+	arme `deux_mains` bloque l'AUTRE main SANS y rien écrire, comme l'équipement joueur
+	(`liberer_pour_deux_mains`). Renvoie `{slot: item_id}` (chaîne, jamais {item, poids}
+	: pas d'exemplaire personnalisé pour un monstre). Vide ⇒ armure naturelle + mains
+	nues, à la lettre — c'est le repli de `build_monster_snapshot`."""
+	items = [str(i) for i in (espece or {}).get("items") or [] if i]
+	if not items:
+		return {}
+	pool = list(items)
+	random.shuffle(pool)
+	proba = character_stats.MONSTRE_EQUIPEMENT_PROBA
+	slots: dict[str, str] = {}
+	occupied: set[str] = set()
+	for item_id in pool:
+		item = get_doc(item_id)
+		if not item or item.get("categorie") not in ("arme", "armure"):
+			continue
+		if random.random() >= proba:
+			continue
+		candidats = [s for s in (item.get("slots") or []) if s not in occupied]
+		if not candidats:
+			continue
+		slot = random.choice(candidats)
+		deux_mains = bool(item.get("deux_mains")) and slot in ("main_droite", "main_gauche")
+		if deux_mains and autre_main(slot) in occupied:
+			continue
+		slots[slot] = item_id
+		occupied.add(slot)
+		if deux_mains:
+			occupied.add(autre_main(slot))
+	return slots
+
+
+def roll_monster_sorts(espece: dict, niveau: int) -> list[str]:
+	"""Sorts ATTRIBUÉS à un monstre humanoïde à sa création : X = niveau du profil,
+	borné au nombre de sorts éligibles (`sorts.sorts_eligibles_espece`), tirés SANS
+	REMISE. Stockés tels quels (`sorts_connus`, même champ/forme que
+	`character['sorts_connus']`), jamais lancés par l'IA cette passe."""
+	pool = sorts_eligibles_espece(espece, get_doc, find_docs)
+	if not pool:
+		return []
+	x = max(0, min(int(niveau or 0), len(pool)))
+	if x == 0:
+		return []
+	return [s["id"] for s in random.sample(pool, x)]
+
+
 def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 	"""Snapshot d'UN monstre (stats dérivées + XP) pour un profil donné. `profil is None`
 	→ repli sur le point médian de l'espèce (niveau 1). Extrait de la boucle
@@ -2473,7 +2539,17 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		profil_id = None
 
 	des_cc = des_cc_espece(espece)
-	derived = compute_derived_stats(base_stats, niveau=niveau, des_cc=des_cc)
+	is_humanoide = character_stats.TAG_HUMANOIDE in (espece.get("tags") or [])
+	slots_monstre: dict = {}
+	equipment = EquipmentBonus()
+	attaque_profils = None
+	if is_humanoide:
+		slots_monstre = roll_monster_equipment(espece)
+		if slots_monstre:
+			equipment = recompute_equipment_bonus(slots_monstre)
+		attaque_profils = _weapon_attacks({"slots": slots_monstre}, base_stats)
+	derived = compute_derived_stats(base_stats, niveau=niveau, equipment=equipment, des_cc=des_cc)
+	portee = max(1, int(_profil_arme_monstre({"attaque_profils": attaque_profils or []}).get("portee", 1)))
 	# XP dérivée de la difficulté : niveau du profil + somme des stats du monstre.
 	sum_stats = (
 		base_stats.v + base_stats.f + base_stats.r + base_stats.ag
@@ -2532,14 +2608,16 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 		# d'espèces ont encore Ch = 0 en base → delta large en faveur du joueur.
 		"ch": base_stats.ch,
 		"pa": derived.pa,
-		# Un monstre n'a pas d'équipement : son armure est NATURELLE, donc uniforme.
-		# `pa_zones` vide ⇒ tout est global, la localisation ne change rien pour lui.
-		"pa_zones": {},
+		# Un monstre SANS équipement n'a que son armure NATURELLE, uniforme : `pa_zones`
+		# vide ⇒ tout est global, la localisation ne change rien pour lui. Un humanoïde
+		# ARMÉ (armure tirée, cf. `roll_monster_equipment`) a un `derived.pa_zones` non
+		# vide, exactement comme un joueur équipé — même formule, aucun cas particulier.
+		"pa_zones": dict(derived.pa_zones),
 		"pm_def": derived.pm_def,
 		"degats_cc": derived.degats_cc,
 		"initiative": derived.initiative,
 		"deplacement": derived.deplacement,
-		"portee": 1,
+		"portee": portee,
 		"pos": {"x": 0, "y": 0},
 		"cells_moved": 0,
 		"attaques": 0,
@@ -2564,6 +2642,27 @@ def build_monster_snapshot(espece: dict, profil: dict | None, idx: int) -> dict:
 	# lieu du combat (`_appliquer_couvert`). Clé absente sinon, même parti pris que `jeton`.
 	if espece_vole(espece):
 		snap["vol_espece"] = True
+	# Équipement et sorts d'un humanoïde : clés ABSENTES sinon (non-humanoïde, ou
+	# humanoïde sans rien tiré) — même parti pris que `jeton`/`vol_espece` ci-dessus,
+	# et même comportement d'avant pour un humanoïde nu (`_profil_arme_monstre` retombe
+	# alors sur son repli mains nues, identique à ce qu'`attaque_profils` porterait).
+	if is_humanoide and slots_monstre:
+		snap["slots"] = slots_monstre
+		snap["equipment_bonus"] = equipment.model_dump()
+		snap["attaque_profils"] = attaque_profils
+		# `cd`/`degats_cd` manquent à TOUT snapshot monstre (`_refresh_snapshot_stats` les
+		# recompose seulement au premier effet posé, cf. `_equiper_snapshot` côté
+		# simulateur) : sans eux ICI, un humanoïde à l'arc toucherait avec un `cd` de 0
+		# et ses dégâts retomberaient sur `degats_cc` (mêlée) tant qu'aucun buff/debuff
+		# n'avait forcé le recalcul. Posés seulement s'il a un profil À DISTANCE qui les
+		# lit — un humanoïde mêlée n'en a pas plus besoin qu'une bête.
+		if attaque_profils and any(p.get("mode") in ("tir", "jet") for p in attaque_profils):
+			snap["cd"] = derived.cd
+			snap["degats_cd"] = derived.degats_cd
+	if is_humanoide:
+		sorts_connus = roll_monster_sorts(espece, niveau)
+		if sorts_connus:
+			snap["sorts_connus"] = sorts_connus
 	return snap
 
 
@@ -2625,12 +2724,16 @@ def build_invocation_snapshot(espece: dict, profil: dict | None, joueur_index: i
 	# Profil d'attaque explicite (et non le repli « mains nues » de `_profil_attaque`) :
 	# c'est lui qui porte l'animation d'impact de l'espèce, sans quoi les coups de la
 	# créature seraient muets là où ceux du même monstre en face s'animent.
-	snap["attaque_profils"] = [{
-		"mode": "cac", "portee": snap.get("portee", 1), "ranged": False,
-		"toucher": "cc", "degats": "degats_cc",
-		"label": espece.get("nom", "Griffes"),
-		"animation": str(espece.get("animation") or ""),
-	}]
+	# ⚠️ Une invocation HUMANOÏDE garde le sien (posé par `build_monster_snapshot` :
+	# arme tirée, portée réelle) au lieu d'être écrasée en mêlée forcée — c'est ce qui
+	# lui permet de kiter comme n'importe quel monstre archer (`_run_invocation_turn`).
+	if character_stats.TAG_HUMANOIDE not in (espece.get("tags") or []):
+		snap["attaque_profils"] = [{
+			"mode": "cac", "portee": snap.get("portee", 1), "ranged": False,
+			"toucher": "cc", "degats": "degats_cc",
+			"label": espece.get("nom", "Griffes"),
+			"animation": str(espece.get("animation") or ""),
+		}]
 	return snap
 
 
@@ -3603,16 +3706,25 @@ def _traiter_ko(combat_doc: dict, defenseur: dict, attaquant: dict) -> None:
 		_check_victory(combat_doc)
 
 
-def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
+def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict,
+				   profil: dict | None = None) -> None:
 	"""Attaque physique d'un monstre sur un défenseur — le joueur (cas normal) OU un
 	autre monstre (chasse prédateur/proie pendant la furtivité du joueur). L'`esquive`
 	du défenseur gonfle sa difficulté défensive (l'Ag), jamais sur la magie.
 
+	`profil` (cf. `_profil_arme_monstre`) : mode/toucher/dégâts de l'ATTAQUE — mêlée
+	mains nues par défaut (repli si absent, combat déjà en base : aucune migration),
+	sinon celui de l'arme tirée d'un humanoïde armé (cac/jet/tir), même idiome que
+	`_frapper_monstre` côté joueur-attaque-monstre.
+
 	Décompte l'action de l'attaquant lui-même : un échec critique en coûte une SECONDE
 	(ou l'endette pour le tour suivant), ce qui exige que le budget soit déjà à jour."""
+	profil = profil or {"mode": "cac", "toucher": "cc", "degats": "degats_cc",
+						 "portee": attaquant.get("portee", 1)}
+	skill = attaquant.get("cd" if profil.get("toucher") == "cd" else "cc", 0)
+	notation = attaquant.get(profil.get("degats", "degats_cc")) or attaquant.get("degats_cc", "1D4")
 	est_joueur = str(defenseur.get("id", "")).startswith("joueur_")
-	seuil = _hit_threshold(attaquant["cc"],
-						   _defense_physique(defenseur))
+	seuil = _hit_threshold(skill, _defense_physique(defenseur))
 	jet = _resoudre_jet(attaquant, defenseur, seuil)
 	roll = jet["roll"]
 	attaquant["attaques"] = attaquant.get("attaques", 0) + 1
@@ -3622,8 +3734,8 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 		# La zone frappée décide des PA opposés (pièce couvrante + protections globales).
 		zone = tirer_localisation()
 		ou = f" {ZONE_LIBELLE[zone]}" if zone in ZONE_LIBELLE else ""
-		dmg = calculer_degats(attaquant, defenseur, attaquant["degats_cc"],
-							  jet["mult_degats"], "cc", zone=zone)
+		dmg = calculer_degats(attaquant, defenseur, notation,
+							  jet["mult_degats"], profil.get("toucher", "cc"), zone=zone)
 		# LIEN DE VIE : une partie du coup peut être absorbée puis reportée sur un
 		# protecteur. ⚠️ Les DEUX déductions de PV avant le moindre `_traiter_ko` : la
 		# première cascade interroge `_combattants_vivants`, qui répondrait sur un état
@@ -3648,7 +3760,11 @@ def _do_attack_on(combat_doc: dict, attaquant: dict, defenseur: dict) -> None:
 				f"{attaquant['nom']} touche {defenseur['nom']}{ou} pour {dmg} dégâts ! "
 				f"(PV : {defenseur['currentPV']}/{defenseur['pv_max']})"
 			),
-		}, "monstre", defenseur.get("id", ""), attaquant.get("animation"), attaquant.get("id", "")),
+		# Canal "monstre" TOUJOURS, quel que soit le mode : c'est le défaut réservé aux
+		# attaques de monstre (distinct des canaux cac/tir/jet du joueur), seule
+		# l'animation SOURCE change — celle de l'arme d'abord, l'espèce à défaut.
+		}, "monstre", defenseur.get("id", ""),
+			profil.get("animation") or attaquant.get("animation"), attaquant.get("id", "")),
 			attaquant, defenseur))
 		if protecteur is not None:
 			# ⚠️ Ligne SÉPARÉE, et non un troisième acteur gelé sur la ligne ci-dessus :
@@ -3723,8 +3839,9 @@ def _cible_joueur(combat_doc: dict, monstre: dict) -> dict | None:
 	return min(visibles, key=lambda j: _cheby(monstre, j))
 
 
-def _do_monster_attack(combat_doc: dict, monstre: dict, joueur: dict) -> None:
-	_do_attack_on(combat_doc, monstre, joueur)
+def _do_monster_attack(combat_doc: dict, monstre: dict, joueur: dict,
+						profil: dict | None = None) -> None:
+	_do_attack_on(combat_doc, monstre, joueur, profil)
 
 
 def _predicats_jeton(grid: dict, acteur: dict) -> tuple:
@@ -3794,6 +3911,95 @@ def _monster_step_toward(combat_doc: dict, monstre: dict, joueur: dict, grid: di
 	monstre["cells_moved"] += 1
 	_refresh_actions(monstre)
 	return True
+
+
+def _monster_step_away(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
+						portee: int) -> bool:
+	"""Un pas de RECUL loin de `cible` (kiting d'un monstre armé à distance trop
+	approché) : pas de nouveau pathfinder, extension minimale des step-functions
+	existantes. Retourne True si déplacé.
+
+	Monstre 1x1 : scan glouton des 8 voisins (mêmes filtres que `_wander_step` —
+	nav bitmask, terrain, cases occupées), choisit celui qui MAXIMISE la distance à
+	`cible` ; aucun candidat ne l'améliore ⇒ pas de pas (même idiome de repli que les
+	autres step-functions). Grand jeton : réutilise `jetons.chemin_jeton` (déjà l'A*
+	générique de `_grand_pas_vers`) avec un but INVERSÉ : s'éloigner jusqu'à `portee`
+	(heuristique admissible, même raisonnement que `_grand_pas_vers`)."""
+	blocked = _occupied_set(combat_doc, exclude=monstre)
+	if jetons.est_grand(monstre):
+		praticable, nav_ok = _predicats_jeton(grid, monstre)
+		chemin = jetons.chemin_jeton(
+			monstre,
+			but=lambda vue: jetons.distance(vue, cible) >= portee,
+			heuristique=lambda vue: max(0, portee - jetons.distance(vue, cible)),
+			bloque=blocked, praticable=praticable, nav_ok=nav_ok,
+		)
+		if not chemin or len(chemin) < 2 or not _pas_budget_ok(monstre):
+			return False
+		x, y, cap = chemin[1]
+		monstre["pos"] = {"x": x, "y": y}
+		monstre["cap"] = cap
+		monstre["cells_moved"] += 1
+		_refresh_actions(monstre)
+		return True
+	x, y = monstre["pos"]["x"], monstre["pos"]["y"]
+	cells, dims, nav = grid["cells"], grid["dims"], grid.get("nav", {})
+	flying = _can_fly(monstre)
+	dist_actuelle = jetons.distance(monstre, cible)
+	best = None
+	best_dist = dist_actuelle
+	for dx, dy in MOVE_OFFSETS:
+		nx, ny = x + dx, y + dy
+		if not (0 <= nx < dims["x"] and 0 <= ny < dims["y"]):
+			continue
+		if (nx, ny) in blocked or not nav_allows(nav, x, y, dx, dy):
+			continue
+		if not _walkable(cells, nx, ny, flying):
+			continue
+		d = jetons.distance({"pos": {"x": nx, "y": ny}}, cible)
+		if d > best_dist:
+			best_dist = d
+			best = (nx, ny)
+	if best is None or not _pas_budget_ok(monstre):
+		return False
+	if monstre.get("jeton"):   # même parti pris que `_monster_step_toward` : le dessin s'oriente
+		monstre["cap"] = jetons.cap_vers(monstre, {"pos": {"x": best[0], "y": best[1]}})
+	monstre["pos"] = {"x": best[0], "y": best[1]}
+	monstre["cells_moved"] += 1
+	_refresh_actions(monstre)
+	return True
+
+
+def _deplacement_ia(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
+					 profil: dict) -> tuple:
+	"""Déplacement d'IA d'un monstre (ou d'une invocation) vers/loin de `cible`, selon
+	son profil d'attaque actif (`_profil_arme_monstre`) : se rapproche si hors de
+	portée, s'écarte si trop près et armé à distance, ne bouge pas s'il est déjà à
+	portée idéale. Renvoie `(steps, verbe)` — `verbe` distingue le texte de log entre
+	un monstre qui avance et un monstre qui recule prudemment."""
+	portee = max(1, int(profil.get("portee", monstre.get("portee", 1))))
+	ranged = bool(profil.get("ranged"))
+	steps = 0
+	safety = 0
+	if ranged and _cheby(monstre, cible) < portee:
+		while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
+			   and _cheby(monstre, cible) < portee
+			   and monstre["cells_moved"] < monstre.get("deplacement", 1)
+			   and safety < 100):
+			safety += 1
+			if not _monster_step_away(combat_doc, monstre, cible, grid, portee):
+				break
+			steps += 1
+		return steps, "recule prudemment devant"
+	while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
+		   and _cheby(monstre, cible) > portee
+		   and monstre["cells_moved"] < monstre.get("deplacement", 1)
+		   and safety < 100):
+		safety += 1
+		if not _monster_step_toward(combat_doc, monstre, cible, grid):
+			break
+		steps += 1
+	return steps, "avance vers"
 
 
 def _detection_threshold(monstre: dict, joueur: dict) -> int:
@@ -3956,18 +4162,13 @@ def _chasse_ou_erre(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	if "predateur" in (monstre.get("tags") or []):
 		proie = _proie_la_plus_proche(combat_doc, monstre)
 	if proie is not None:
-		portee = monstre.get("portee", 1)
-		safety = 0
-		while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
-			   and proie["vivant"] and _cheby(monstre, proie) > portee
-			   and monstre["cells_moved"] < monstre.get("deplacement", 1)
-			   and safety < 100):
-			safety += 1
-			if not _monster_step_toward(combat_doc, monstre, proie, grid):
-				break
+		profil = _profil_arme_monstre(monstre)
+		portee = max(1, int(profil.get("portee", monstre.get("portee", 1))))
+		if proie["vivant"]:
+			_deplacement_ia(combat_doc, monstre, proie, grid, profil)
 		while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
 			   and proie["vivant"] and _cheby(monstre, proie) <= portee):
-			_do_attack_on(combat_doc, monstre, proie)   # décompte l'action lui-même
+			_do_attack_on(combat_doc, monstre, proie, profil)   # décompte l'action lui-même
 		return
 	# Errance : quelques pas au hasard, sans jamais fondre sur le joueur.
 	steps = 0
@@ -3994,7 +4195,8 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 	définitive pour le combat) ; tant qu'il ne l'a pas repéré, il ne vient pas vers lui
 	— un prédateur chasse une proie, les autres errent."""
 	_reset_turn_budget(monstre, combat_doc)
-	portee = monstre.get("portee", 1)
+	profil = _profil_arme_monstre(monstre)
+	portee = max(1, int(profil.get("portee", monstre.get("portee", 1))))
 
 	# Cible résolue en début de tour : le joueur vivant le plus proche. Aucun joueur
 	# visible = tous furtifs non détectés → jet de détection sur le plus proche, puis
@@ -4009,17 +4211,9 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			return
 		joueur = cible_furtive
 
-	# Phase déplacement : avancer vers le joueur tant qu'éloigné et budget dispo.
-	steps = 0
-	safety = 0
-	while (combat_doc["status"] == "active" and monstre["actions_restantes"] > 0
-		   and _cheby(monstre, joueur) > portee
-		   and monstre["cells_moved"] < monstre.get("deplacement", 1)
-		   and safety < 100):
-		safety += 1
-		if not _monster_step_toward(combat_doc, monstre, joueur, grid):
-			break
-		steps += 1
+	# Phase déplacement : se rapprocher du joueur, ou s'en écarter s'il est armé à
+	# distance et déjà trop proche (`_deplacement_ia`, cf. `_profil_arme_monstre`).
+	steps, verbe = _deplacement_ia(combat_doc, monstre, joueur, grid, profil)
 	if steps > 0:
 		# Le jeton ne saute plus à sa case d'arrivée dès la réponse : il y glisse quand
 		# cette ligne est révélée, puis frappe. Le chemin case par case n'est pas rejoué
@@ -4028,7 +4222,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			"tour": combat_doc["tour"],
 			"acteur": monstre["nom"],
 			"kind": "move",
-			"texte": f"{monstre['nom']} avance vers {joueur['nom']} ({steps} case(s)).",
+			"texte": f"{monstre['nom']} {verbe} {joueur['nom']} ({steps} case(s)).",
 		}, monstre))
 
 	# Phase attaque : frapper tant qu'à portée et qu'il reste des actions. Si la cible
@@ -4038,7 +4232,7 @@ def _run_monster_turn(combat_doc: dict, monstre: dict, grid: dict) -> None:
 			joueur = _cible_joueur(combat_doc, monstre)
 		if joueur is None or _cheby(monstre, joueur) > portee:
 			break
-		_do_monster_attack(combat_doc, monstre, joueur)   # décompte l'action lui-même
+		_do_monster_attack(combat_doc, monstre, joueur, profil)   # décompte l'action lui-même
 
 	_avancer_tour(combat_doc)
 
@@ -4161,27 +4355,26 @@ def _run_invocation_turn(combat_doc: dict, invoc: dict, grid: dict) -> None:
 	DURÉE : décomptée à la FIN de son tour, de sorte qu'une créature appelée pour `duree`
 	tours agisse exactement `duree` fois — celui de son apparition compris."""
 	_reset_turn_budget(invoc, combat_doc)
-	profil = _profil_attaque(invoc, "cac")
+	# `_profil_arme_monstre` : une invocation HUMANOÏDE garde son arme (cf.
+	# `build_invocation_snapshot`), les autres retombent sur le `cac` mains nues posé
+	# à sa création — même sélecteur que `_run_monster_turn`, camp inversé.
+	profil = _profil_arme_monstre(invoc)
 	portee = max(1, int(profil.get("portee", 1)))
 
 	cibles = [m for m in combat_doc["monstres"] if m["vivant"]]
 	cible = min(cibles, key=lambda m: _cheby(invoc, m)) if cibles else None
 
-	steps = 0
-	safety = 0
-	while (combat_doc["status"] == "active" and cible is not None
-		   and invoc["actions_restantes"] > 0 and _cheby(invoc, cible) > portee
-		   and invoc["cells_moved"] < invoc.get("deplacement", 1) and safety < 100):
-		safety += 1
-		if not _monster_step_toward(combat_doc, invoc, cible, grid):
-			break
-		steps += 1
+	steps, verbe = (0, "bondit vers")
+	if cible is not None:
+		steps, verbe = _deplacement_ia(combat_doc, invoc, cible, grid, profil)
+		if verbe == "avance vers":
+			verbe = "bondit vers"   # même flair qu'avant pour l'approche
 	if steps > 0:
 		combat_doc["log"].append(_avec_etat({
 			"tour": combat_doc["tour"],
 			"acteur": invoc["nom"],
 			"kind": "move",
-			"texte": f"{invoc['nom']} bondit vers {cible['nom']} ({steps} case(s)).",
+			"texte": f"{invoc['nom']} {verbe} {cible['nom']} ({steps} case(s)).",
 		}, invoc))
 
 	safety = 0
