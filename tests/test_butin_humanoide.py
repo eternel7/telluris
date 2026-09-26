@@ -7,6 +7,7 @@
 # monstre ne pouvait donner qu'une ligne (le butin était indexé par `monstre_id`).
 
 from utils import combat as combat_util
+from utils.characters import tirer_poids
 
 from tests.test_combat_groupe import (
 	character, joueur_snap, monstre_snap, combat_doc, db,
@@ -44,8 +45,9 @@ def test_un_humanoide_donne_sa_carcasse_puis_chacun_de_ses_objets(db):
 		("item:cuirasse", "monstre_0|torse"),
 	]
 	assert len({combat_util.cle_butin(d) for d in lignes}) == len(lignes)
-	# Poids du doc ; [min, max] ⇒ le min (même repli que `item_ref_weight`).
-	assert [d["poids"] for d in lignes[1:]] == [2.5, 8.0]
+	# Poids fixe ⇒ ce poids ; [min, max] ⇒ tiré dans les bornes (`tirer_poids`).
+	assert lignes[1]["poids"] == 2.5
+	assert 8 <= lignes[2]["poids"] <= 12
 	assert all(d["monstre_id"] == "monstre_0" for d in lignes)
 
 
@@ -66,6 +68,19 @@ def test_une_carcasse_ramassee_en_combat_laisse_les_objets(db):
 	_peupler(db)
 	lignes = combat_util._butin_du_monstre(_humanoide(loote=True))
 	assert [d["slot"] for d in lignes] == ["main_droite", "torse"]
+
+
+def test_le_poids_d_un_objet_est_tire_entre_min_et_max():
+	assert tirer_poids(CUIRASSE, rand_fn=lambda: 0.0) == 8
+	assert tirer_poids(CUIRASSE, rand_fn=lambda: 0.5) == 10
+	assert tirer_poids(CUIRASSE, rand_fn=lambda: 0.999) == 12.0   # arrondi au centième
+
+
+def test_un_poids_fixe_n_est_pas_tire():
+	def interdit():
+		raise AssertionError("aucun tirage pour un poids fixe")
+	assert tirer_poids(EPEE, rand_fn=interdit) == 2.5
+	assert tirer_poids({"poids": [3, 3]}, rand_fn=interdit) == 3
 
 
 def test_une_entree_sans_cle_est_une_carcasse():
@@ -123,7 +138,9 @@ def test_un_objet_d_etage_va_a_son_beneficiaire_sans_marquer_la_carcasse(db):
 	assert res == {"passage": p}
 	principal, compagnon = doc["joueurs"]
 	assert compagnon["butin_ramasse"] == [{"item": "item:epee", "poids": 2.5}]
-	assert principal["butin_ramasse"] == [{"item": "item:cuirasse", "poids": 8.0}]
+	[cuirasse] = principal["butin_ramasse"]
+	assert cuirasse["item"] == "item:cuirasse" and 8 <= cuirasse["poids"] <= 12
+	assert principal["charge"] == cuirasse["poids"]
 	assert not doc["monstres"][0].get("loote")
 
 

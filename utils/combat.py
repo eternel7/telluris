@@ -9,7 +9,7 @@ from models.character_stats import (
 )
 from utils.lieux import nav_allows, MOVE_OFFSETS
 from utils.characters import (
-	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, item_ref_id,
+	grant_xp, sync_equipment_bonus, carried_weight, poids_bounds, tirer_poids, item_ref_id,
 	lieu_label, noter_victoire, resolve_item_ref, recompute_equipment_bonus, autre_main,
 )
 from utils.consommables import (
@@ -5344,8 +5344,8 @@ def cle_butin(d: dict) -> str:
 
 def _objets_payload(monstre: dict) -> list[dict]:
 	"""Une ligne de butin par objet ÉQUIPÉ d'un humanoïde (`slots` tiré par
-	`roll_monster_equipment`) : `{monstre_id, cle, slot, item_id, nom, poids}`, poids = celui du
-	doc (min si [min, max], même repli que `item_ref_weight`). Sans `slots` (bête, humanoïde nu)
+	`roll_monster_equipment`) : `{monstre_id, cle, slot, item_id, nom, poids}`, poids d'instance
+	tiré dans les bornes du doc (`tirer_poids`). Sans `slots` (bête, humanoïde nu)
 	⇒ []. Un item absent de la base est sauté."""
 	lignes = []
 	for slot, item_id in (monstre.get("slots") or {}).items():
@@ -5358,7 +5358,7 @@ def _objets_payload(monstre: dict) -> list[dict]:
 			"slot": slot,
 			"item_id": item_id,
 			"nom": item.get("nom", item_id),
-			"poids": poids_bounds(item)[0],
+			"poids": tirer_poids(item),
 		})
 	return lignes
 
