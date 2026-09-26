@@ -14,7 +14,7 @@ from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, sync_equipment_bonus,
 	money_to_cuivre, cuivre_to_purse,
-	poids_bounds, carried_weight, charge_max_of, item_ref_id, item_ref_lieu, resolve_item_ref,
+	tirer_poids, carried_weight, charge_max_of, item_ref_id, item_ref_lieu, resolve_item_ref,
 	lieu_label,
 )
 from utils.marche import (
@@ -137,9 +137,11 @@ def _contexte(character: dict, pnj_doc: dict, lieu_doc: dict | None = None,
 		elif spec:
 			# Une course ÉCRITE se raconte même quand elle n'est plus vivante : le nœud « vétéran »
 			# ne s'affiche QU'APRÈS la réussite (l'offre a disparu, la quête est archivée) et doit
-			# pouvoir nommer qui a reçu la marchandise. Rien n'est tiré au sort dans une course
-			# écrite → la reconstruire donne exactement ce que le PNJ avait proposé.
-			apercu = transport.generer_transport_authore(spec, lieu_doc, find_docs, get_doc)
+			# pouvoir nommer qui a reçu la marchandise. Destination et récompenses sont écrites ;
+			# seul le poids d'un colis sans poids écrit est tiré — `rand_fn` figé au minimum pour
+			# que le texte reste le MÊME d'un affichage à l'autre.
+			apercu = transport.generer_transport_authore(spec, lieu_doc, find_docs, get_doc,
+														 rand_fn=lambda: 0.0)
 			if apercu:
 				placeholders.update(_placeholders_offre(apercu, lieu_doc))
 		# ESCORTES : une personne à retrouver puis à ramener vivante. L'offre est toujours
@@ -687,16 +689,17 @@ async def pnj_dialogue_choix(
 		if not item_doc:
 			raise HTTPException(status_code=422, detail="Objet du don introuvable.")
 		noeuds_don = (pnj_doc.get("services", {}).get("don", {}).get("noeuds", {}))
-		poids_unitaire = poids_bounds(item_doc)[0]
-		poids_total = poids_unitaire * don["quantite"]
-		if carried_weight(character) + poids_total > charge_max_of(character):
+		# Un poids d'instance TIRÉ par exemplaire (`tirer_poids`, fixe ⇒ sans tirage), contrôlé
+		# sur leur total.
+		poids = [tirer_poids(item_doc) for _ in range(max(1, int(don["quantite"])))]
+		if carried_weight(character) + sum(poids) > charge_max_of(character):
 			# Surcharge : rien donné, rien débité, le PNJ le fait remarquer.
 			suivant = noeuds_don.get("trop_charge")
 		elif don["cout_cuivre"] > 0 and debit_character(character, don["cout_cuivre"]) is None:
 			# Bourse vide : rien débité (fonds non mutés), rien donné.
 			suivant = noeuds_don.get("sans_fonds")
 		else:
-			pnj.appliquer_don(character, don["item"], poids_unitaire, don["quantite"], lieu_parent_don)
+			pnj.appliquer_don(character, don["item"], poids, lieu_parent_don)
 			# Inscription portée par le don (`rang_guilde`), résolue comme une récompense de
 			# transport : la cité est celle du lieu. `crediter_rang` ne rétrograde jamais.
 			spec_rang = transport.rang_guilde_recompense(don["rang_guilde"], lieu_doc).get("rang_guilde")

@@ -840,7 +840,18 @@ def test_vue_dune_commande_sur_mesure():
 	assert commande.vue(c, _get_doc, now=1000)["sur_mesure"] is True
 
 
-def test_poids_attendu_prend_le_minimum():
-	assert commande.poids_attendu({"poids": [1.5, 4.0]}) == 1.5
+def test_poids_attendu_est_tire_dans_les_bornes():
+	assert commande.poids_attendu({"poids": [1.5, 4.0]}, rand_fn=lambda: 0.0) == 1.5
+	assert commande.poids_attendu({"poids": [1.5, 4.0]}, rand_fn=lambda: 0.5) == 2.75
+	assert 1.5 <= commande.poids_attendu({"poids": [1.5, 4.0]}) <= 4.0
 	assert commande.poids_attendu({"poids": 2.0}) == 2.0
 	assert commande.poids_attendu(None) == 0
+
+
+def test_poids_catalogue_accepte_une_fourchette():
+	"""Un doc à `[min, max]` faisait planter TOUT le catalogue (`float(list)`) : la ligne
+	porte le min en NOMBRE (le client le formate) et le max à part."""
+	assert commande.poids_catalogue({"poids": [1.5, 4.0]}) == {"poids": 1.5, "poids_max": 4.0}
+	assert commande.poids_catalogue({"poids": 2.0}) == {"poids": 2.0}
+	assert commande.poids_catalogue({"poids": [3, 3]}) == {"poids": 3.0}
+	assert commande.poids_catalogue(None) == {"poids": 0.0}

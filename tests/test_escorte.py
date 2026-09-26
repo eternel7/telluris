@@ -1260,6 +1260,19 @@ def test_protege_porte_l_equipement_de_la_spec(db, monkeypatch):
 	assert doc["equipment_bonus"]["pa"] == 25
 
 
+def test_protege_tire_le_poids_d_un_objet_a_fourchette(db, monkeypatch):
+	"""Poids absent de la spec + doc `[min, max]` ⇒ tiré (`tirer_poids`), une fois par objet ;
+	un poids ÉCRIT dans la spec n'est jamais tiré."""
+	db["docs"].update({d["_id"]: dict(d) for d in (dict(PLATES, poids=[10, 14]), EPEE)})
+	monkeypatch.setattr(characters_util, "get_doc", db["get"])
+
+	doc = escorte_util.creer_protege(PALADIN, character(), "quete:convoi", db["get"],
+									 rand_fn=lambda: 0.25)
+
+	assert doc["slots"] == {"torse": {"item": "item:Armure_plates_surcoat", "poids": 11},
+							"main_droite": {"item": "item:Epee_longue_ordre", "poids": 1.6}}
+
+
 def test_protege_sans_se_defend_ni_equipement_comportement_d_avant(db):
 	doc = escorte_util.creer_protege(SPEC["proteges"][0], character(), "quete:escorte_aline",
 									 db["get"])
