@@ -30,7 +30,7 @@ from utils import slots_actions
 from utils.combat import (
     BATTLE_MAPS, instantiate_monsters, create_combat_doc, build_monster_snapshot,
     resolve_first_turns, resolve_action, finalize_combat, select_battle_map,
-    verser_butin_au_sol, etat_charge_snapshot, bloc_charge_snapshot,
+    verser_butin_au_sol, cle_butin, etat_charge_snapshot, bloc_charge_snapshot,
     changer_d_etage, annoter_passages,
 )
 from utils import donjon
@@ -96,6 +96,9 @@ class StartCombatRequest(BaseModel):
 
 class LootAttribution(BaseModel):
     monstre_id: str
+    # Clé de LIGNE du butin (`utils.combat.cle_butin`) : un humanoïde donne sa carcasse ET ses
+    # objets équipés, plusieurs lignes par monstre. Absente (ancien client) ⇒ `monstre_id`.
+    cle: str | None = None
     beneficiaire_id: str  # character_id d'un membre du combat (character:* ou aventurier:*)
 
 
@@ -311,7 +314,8 @@ async def collect_loot(
     body: CollectLootRequest,
     current_user: Annotated[dict, Depends(get_current_user)],
 ):
-    """Ramasse à la victoire les carcasses, réparties entre les membres du groupe.
+    """Ramasse à la victoire le butin — carcasses et objets équipés des humanoïdes, une
+    ligne chacun (clé `cle`) —, réparti entre les membres du groupe.
 
     Le butin n'est jamais ajouté automatiquement : le client envoie des `attributions`
     `{monstre_id, beneficiaire_id}` (repli legacy `monstre_ids` → tout au principal).
@@ -340,7 +344,7 @@ async def collect_loot(
         raise HTTPException(status_code=404, detail="Personnage introuvable")
     principal_id = character["_id"]
 
-    dispo = {d["monstre_id"]: d for d in combat_doc.get("butin_disponible", [])}
+    dispo = {cle_butin(d): d for d in combat_doc.get("butin_disponible", [])}
     # Bénéficiaires légitimes = les membres qui ont combattu (source de vérité : joueurs[]).
     # Une monture VIVANTE en est un — c'est même le meilleur porteur du groupe ; une
     # monture MORTE non : elle a quitté le troupeau, lui attribuer une carcasse la ferait
@@ -368,11 +372,12 @@ async def collect_loot(
     # Regroupement par bénéficiaire ; carcasses non proposées / déjà encaissées ignorées.
     par_benef: dict[str, list[str]] = {}
     for a in attributions:
-        if a.monstre_id not in dispo or a.monstre_id in deja:
+        cle = a.cle or a.monstre_id
+        if cle not in dispo or cle in deja:
             continue
         if a.beneficiaire_id not in snap_par_cid:
             raise HTTPException(status_code=422, detail="Bénéficiaire hors du groupe de combat.")
-        par_benef.setdefault(a.beneficiaire_id, []).append(a.monstre_id)
+        par_benef.setdefault(a.beneficiaire_id, []).append(cle)
 
     # Docs des bénéficiaires : le principal est déjà chargé (ne pas le re-fetcher → éviter
     # deux versions du même doc / conflit _rev).
@@ -386,9 +391,9 @@ async def collect_loot(
 
     # Contrôle de charge PAR bénéficiaire — refus global (aucune carcasse encaissée) pour
     # que la validation reste atomique. charge_max = celle du snapshot (cohérente avec l'UI).
-    for cid, mids in par_benef.items():
+    for cid, cles in par_benef.items():
         doc = docs[cid]
-        add_w = sum(dispo[mid]["poids"] for mid in mids)
+        add_w = sum(dispo[cle]["poids"] for cle in cles)
         charge_max = snap_par_cid[cid].get("charge_max") or charge_max_of(doc)
         if carried_weight(doc) + add_w > charge_max + 1e-6:
             nom = snap_par_cid[cid].get("nom", "Ce personnage")
@@ -397,14 +402,14 @@ async def collect_loot(
     # Encaissement en mémoire.
     noms = []
     encaisses = set(deja)
-    for cid, mids in par_benef.items():
+    for cid, cles in par_benef.items():
         doc = docs[cid]
         inventaire = doc.get("inventaire", [])
-        for mid in mids:
+        for cle in cles:
             # Référence {item, poids} : on conserve le poids d'instance tiré au butin.
-            inventaire.append({"item": dispo[mid]["item_id"], "poids": dispo[mid]["poids"]})
-            noms.append(dispo[mid]["nom"])
-            encaisses.add(mid)
+            inventaire.append({"item": dispo[cle]["item_id"], "poids": dispo[cle]["poids"]})
+            noms.append(dispo[cle]["nom"])
+            encaisses.add(cle)
         doc["inventaire"] = inventaire
 
     # Ce que PERSONNE n'a emporté tombe au SOL du principal (transitoire, perdu au premier
@@ -428,10 +433,10 @@ async def collect_loot(
 
     # Best-effort : refléter les carcasses encaissées sur le doc combat (cosmétique,
     # le combat est supprimé au retour sur /play). Non bloquant si la sauvegarde échoue.
-    for mid in encaisses:
-        for m in combat_doc["monstres"]:
-            if m["id"] == mid:
-                m["loote"] = True
+    # Seules les clés de CARCASSE (= l'id du monstre) : `loote` ne marque qu'elle.
+    for m in combat_doc["monstres"]:
+        if m["id"] in encaisses:
+            m["loote"] = True
     save_doc(combat_doc)
 
     par_membre = {cid: round(carried_weight(docs[cid]), 2) for cid in par_benef}
@@ -561,7 +566,7 @@ async def combat_action(
             raise HTTPException(status_code=422, detail="Compétence inutilisable en combat")
 
     attributions = None if body.attributions is None else [
-        {"monstre_id": a.monstre_id, "beneficiaire_id": a.beneficiaire_id}
+        {"monstre_id": a.monstre_id, "cle": a.cle, "beneficiaire_id": a.beneficiaire_id}
         for a in body.attributions]
     action_result = resolve_action(combat_doc, body.type, body.cible_id, body.dx, body.dy, body.sens, body.mode, item=item_doc, sort=sort_arg, competence=competence_arg, attributions=attributions)
     # Donjon à étages : le passage vers un autre étage est validé par le moteur, l'étage

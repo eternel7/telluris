@@ -3767,6 +3767,8 @@ function lootMembers() {
 	return (state.joueurs || []).filter(j => j && j.character_id && !j.est_protege && !j.morte);
 }
 
+// Une LIGNE par élément de butin (`cle`) : un humanoïde en donne plusieurs — sa carcasse puis
+// chacun de ses objets équipés, attribuables séparément.
 // Une pastille-portrait cliquable par membre : reproduit le cadrage de play_town via
 // portraitStyle (fond en %, indépendant de la taille). Repli lettre si pas d'image.
 function buildLootList(dispo) {
@@ -3783,7 +3785,7 @@ function buildLootList(dispo) {
 		return `<button type="button" class="loot-benef-btn" data-benef="${j.character_id}" data-jid="${j.id}" title="${j.nom || ''}">${inner}</button>`;
 	};
 	document.getElementById('loot-list').innerHTML = dispo.map(d =>
-		`<div class="loot-item" data-mid="${d.monstre_id}" data-poids="${d.poids}" data-benef="${principalCid}">
+		`<div class="loot-item" data-mid="${d.monstre_id}" data-cle="${d.cle || d.monstre_id}" data-poids="${d.poids}" data-benef="${principalCid}">
 			<span class="loot-nom">${d.nom}</span>
 			<span class="loot-poids">${(+d.poids).toFixed(1)} kg</span>
 			<div class="loot-benefs">
@@ -3890,7 +3892,7 @@ async function leaveCombat() {
 		}
 		const attributions = lootRows()
 			.filter(row => row.dataset.benef)
-			.map(row => ({ monstre_id: row.dataset.mid, beneficiaire_id: row.dataset.benef }));
+			.map(row => ({ monstre_id: row.dataset.mid, cle: row.dataset.cle, beneficiaire_id: row.dataset.benef }));
 		const btn = document.getElementById('end-btn');
 		btn.disabled = true;
 		if (lootEtagePassage !== null) {
