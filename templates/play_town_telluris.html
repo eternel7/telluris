@@ -1719,7 +1719,20 @@
 					<li><button class="sub-loc-btn" onclick="openProprietesOffre()">🏠 Propriétés</button></li>
 					{% endif %}
 					{% if est_propriete %}
-					<li><button class="sub-loc-btn" onclick="openPropriete()">🏠 Gérer le logis</button></li>
+					{# La propriété se présente comme un LIEU : ses PNJ marchands d'abord (une ligne
+					   chacun, comme les PNJ présents), puis le coffre, l'embauche, la caisse. L'id
+					   passe par data-id — jamais dans un onclick (Conventions §9). #}
+					{% for a in proprietes_ateliers %}
+					<li><button class="sub-loc-btn" data-id="{{ a.id }}" onclick="choisirAtelier(this)">🏷️ {{ a.nom }} — {{ a.metier }}{% if a.grande %} ✦{% endif %}</button></li>
+					{% endfor %}
+					<li><button class="sub-loc-btn" onclick="openCoffre()">📦 Coffre</button></li>
+					{% if role_propriete == 'proprietaire' %}
+					<li><button class="sub-loc-btn" onclick="openEmbauche()">🤝 Embaucher</button></li>
+					{% endif %}
+					{% if caisse_accessible %}
+					<li><button class="sub-loc-btn" onclick="releverCaisse()">💰 {% if role_propriete == 'proprietaire' %}Relever la caisse{% else %}Vider la caisse{% endif %}</button></li>
+					{% endif %}
+					<li><button class="sub-loc-btn" onclick="openPropriete()">🏠 {% if role_propriete == 'proprietaire' %}Gérer le logis{% else %}Visiter le logis{% endif %}</button></li>
 					{# Chez soi : même bouton, même flux que la nuit d'auberge — gratuit. #}
 					{% if auberge_nuit %}
 					<li><button class="sub-loc-btn" id="aub-nuit-btn" onclick="passerLaNuit()">🌙 Passer la nuit</button></li>
@@ -2370,6 +2383,47 @@
 		</div>
 		<div id="prop-contenu"></div>
 	</div><!-- /#proprietes-panel -->
+	{# Coffre du lieu : MÊME présentation que l'inventaire du groupe (#grp-inv-wrap) — votre
+	   sac à gauche, à droite le coffre ou l'atelier d'un marchand choisi au sélecteur. #}
+	<div id="prop-coffre-panel" class="panel-hidden panel-frame board-panel" aria-label="Coffre">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Coffre">
+			<h2>📦 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeCoffre()" role="button">✕ Fermer</button>
+		</div>
+		<p id="pcf-etat" class="q-desc"></p>
+		<div class="grp-inv-wrap">
+			<div class="grp-inv-col">
+				<div class="grp-inv-head">
+					<strong>Vous</strong>
+					<span class="sh-inv-poids" id="pcf-charge-principal"></span>
+				</div>
+				<div class="sh-inv-scroll sh-scroll"><div id="pcf-principal" class="sh-inv-box"></div></div>
+			</div>
+			<div class="grp-inv-col">
+				<div class="grp-inv-head">
+					<select id="pcf-select" onchange="onCoffreSelect(this.value)"></select>
+					<span class="sh-inv-poids" id="pcf-charge-droite"></span>
+				</div>
+				<div class="sh-inv-scroll sh-scroll"><div id="pcf-droite" class="sh-inv-box"></div></div>
+			</div>
+		</div>
+	</div><!-- /#prop-coffre-panel -->
+	{# Embauche : comme le tableau de recrues — des cartes de personnage, ici des PNJ
+	   marchands (portrait /pnj), sans vitaux ni clauses. #}
+	<div id="prop-embauche-panel" class="panel-hidden panel-frame board-panel" aria-label="Embauche">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Embauche">
+			<h2>🤝 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeEmbauche()" role="button">✕ Fermer</button>
+		</div>
+		<h2 style="margin:.6rem 0 0">👥 Votre personnel (<span id="pem-plafond"></span>)</h2>
+		<div id="pem-employes" class="cards-list"></div>
+		<h2 style="margin:1rem 0 0">🗒️ Candidats</h2>
+		<div id="pem-candidats" class="cards-list"></div>
+	</div><!-- /#prop-embauche-panel -->
 	<div id="auberge-panel" class="panel-hidden panel-frame board-panel" aria-label="Salle commune">
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Salle commune">
@@ -4043,6 +4097,10 @@ document.addEventListener('keydown', e => {
 	if (etable && !etable.classList.contains('panel-hidden')) { closeEtable(); return; }
 	const propPanel = document.getElementById('proprietes-panel');
 	if (propPanel && !propPanel.classList.contains('panel-hidden')) { closeProprietes(); return; }
+	const coffrePanel = document.getElementById('prop-coffre-panel');
+	if (coffrePanel && !coffrePanel.classList.contains('panel-hidden')) { closeCoffre(); return; }
+	const embauchePanel = document.getElementById('prop-embauche-panel');
+	if (embauchePanel && !embauchePanel.classList.contains('panel-hidden')) { closeEmbauche(); return; }
 	// ⚠️ L'overlay de la nuit AVANT le panneau qui le porte : c'est lui qui est au premier
 	// plan. Il n'est fermable que quand la nuit est passée (son bouton est armé) — sortir
 	// pendant que le serveur écrit laisserait le joueur devant un état à moitié appliqué.
@@ -7111,8 +7169,10 @@ async function buyItem(itemId, btn) {
 // renvoie `commandes`, `catalogue`, `matieres`, `inventaire_payload`, `achetables`,
 // `vendables` et `purse`, et `_appliquerCommande` les repose tels quels. Le rayon peut
 // avoir bougé (matières achetées pour la commande), d'où les deux listes du marchand.
-const CMD_ACTIVE = {{ 'true' if est_commande else 'false' }};
-const CMD_SUR_MESURE = {{ 'true' if est_sur_mesure else 'false' }};
+// `let` et non `const` : dans une PROPRIÉTÉ, c'est le marchand choisi (`choisirAtelier`) qui
+// dit s'il prend des commandes (catalogue) et du sur-mesure (grande maison).
+let CMD_ACTIVE = {{ 'true' if est_commande else 'false' }};
+let CMD_SUR_MESURE = {{ 'true' if est_sur_mesure else 'false' }};
 let _cmdSort = _loadSort('telluris.play.cmd_sort');
 let _cmdTimer = null;
 function cycleCmdSort() {
@@ -8405,14 +8465,6 @@ function renderPropriete(data) {
 		html += `<div class="prop-caps" style="margin-top:.4rem">` + data.hebergeables.map(a =>
 			`<button class="sh-drop-btn" data-av="${escapeHtml(a.id)}" onclick="propCompagnon(this, 'heberger')">Héberger ${escapeHtml(a.nom)}</button>`).join('') + `</div>`;
 	}
-	if (gere && data.embauches.length) {
-		const bourse = _purseEnCuivre(data.purse);
-		html += `<div class="prop-liste" style="margin-top:.4rem">` + data.embauches.map(e =>
-			`<div class="prop-ligne"><div class="prop-txt"><strong>Engager : ${escapeHtml(e.metier_label)}</strong>
-			<span class="q-desc">poste : ${escapeHtml(e.amenagement_nom)} (${e.libres} libre(s))</span>
-			<span class="sell-prix">💰 ${_prixTexte(e.cout)}</span></div>
-			<button class="sh-drop-btn" data-metier="${escapeHtml(e.metier)}" data-am="${escapeHtml(e.amenagement)}" ${e.cout > bourse ? 'disabled' : ''} onclick="propEngager(this)">Engager</button></div>`).join('') + `</div>`;
-	}
 	html += `</section>`;
 
 	html += `<section class="prop-section"><h3>⚒️ Activités</h3><div class="prop-liste">`
@@ -8420,22 +8472,6 @@ function renderPropriete(data) {
 			<span class="q-desc">${escapeHtml(a.nom)} · ${a.exercee ? `<span class="prop-etat-on">exercée par ${escapeHtml(a.employe)}</span>` : '<span class="prop-etat-off">inactive — il faut un(e) ' + escapeHtml(a.metier_label || a.metier) + '</span>'}</span></div></div>`).join('')
 		|| '<div class="sell-empty">Aucun espace d\'activité installé.</div>') + `</div></section>`;
 
-	if (data.coffre_visible) {
-		const peutDeposer = data.role === 'proprietaire' || data.role === 'locataire';
-		html += `<section class="prop-section"><h3>📦 Coffre</h3><div class="prop-liste">`
-			+ (data.coffre.map(o => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(o.nom || '?')}</strong>
-				<span class="q-desc">${o.poids} kg</span></div>
-				<button class="sh-drop-btn" data-idx="${o.idx}" data-item="${escapeHtml(o.item || o._id || '')}" onclick="propRetirer(this)">${data.role === 'visiteur' ? 'Dérober' : 'Prendre'}</button></div>`).join('')
-			|| '<div class="sell-empty">Le coffre est vide.</div>') + `</div>`;
-		if (peutDeposer) {
-			html += `<h3 style="margin-top:.6rem">🎒 Déposer depuis le sac</h3><div class="prop-liste">`
-				+ ((_inventaire || []).map((o, i) => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(o.nom || '?')}</strong>
-					<span class="q-desc">${o.poids} kg</span></div>
-					<button class="sh-drop-btn" data-idx="${i}" data-item="${escapeHtml(o.item || o._id || '')}" onclick="propDeposer(this)">Déposer</button></div>`).join('')
-				|| '<div class="sell-empty">Votre sac est vide.</div>') + `</div>`;
-		}
-		html += `</section>`;
-	}
 	html += _propMesProprietes(data.mes_proprietes);
 	document.getElementById('prop-contenu').innerHTML = html;
 }
@@ -8485,23 +8521,232 @@ async function propInstaller(btn) {
 	if (data) showToast('🛠️ Aménagement installé.');
 }
 
-async function propEngager(btn) {
-	const data = await _propPost('api/proprietes/engager', { metier: btn.dataset.metier, amenagement: btn.dataset.am });
-	if (data && data.engage) showToast(`🤝 ${data.engage} prend son poste.`);
-}
-
 function propRenvoyer(btn) { return _propPost('api/proprietes/renvoyer', { employe_id: btn.dataset.emp }); }
 
 function propCompagnon(btn, geste) { return _propPost(`api/proprietes/${geste}`, { aventurier_id: btn.dataset.av }); }
 
-function propDeposer(btn) {
-	return _propPost('api/proprietes/deposer', { idx: +btn.dataset.idx, item_id: btn.dataset.item || null });
+// ── Marchands employés : on leur parle comme aux marchands d'un lieu ─────────────
+// Le choix pose `atelier_courant` côté serveur (transitoire) : le panneau Achat-Vente et le
+// comptoir de commande s'adressent alors à CE marchand. Commande simple dès qu'il a un
+// catalogue, sur mesure pour une grande maison seulement.
+function _cmdSectionsVisibles(visible) {
+	['acc-head-commande', 'acc-head-mes-commandes'].forEach(id => {
+		const head = document.getElementById(id);
+		const section = head && head.closest('.acc-section');
+		if (section) section.style.display = visible ? '' : 'none';
+	});
 }
 
-async function propRetirer(btn) {
-	const data = await _propPost('api/proprietes/retirer', { idx: +btn.dataset.idx, item_id: btn.dataset.item || null });
+async function choisirAtelier(btn) {
+	const data = await _aubFetch('api/proprietes/atelier/choisir', { employe_id: btn.dataset.id });
+	if (!data) return;
+	CMD_ACTIVE = !!data.commande;
+	CMD_SUR_MESURE = !!data.sur_mesure;
+	_cmdSectionsVisibles(CMD_ACTIVE);
+	openSellPanel();
+}
+
+// ── Coffre : l'inventaire du lieu, présenté comme celui du groupe ────────────────
+// À droite, le COFFRE ou l'atelier d'un marchand (matières confiées, rayon, caisse).
+let _pcfEtat = null;
+let _pcfSel = 'coffre';
+
+function _pcfAfficher() {
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('prop-coffre-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function closeCoffre() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('prop-coffre-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function openCoffre() {
+	const data = await _aubFetch('api/proprietes/coffre');
+	if (!data) return;
+	_pcfAppliquer(data);
+	_pcfAfficher();
+}
+
+function onCoffreSelect(v) { _pcfSel = v; renderCoffre(_pcfEtat); }
+
+function _pcfAppliquer(data) {
+	_pcfEtat = data;
+	if (data.purse) updatePurse(data.purse);
+	if (data.principal) _applyInventoryPayload(data.principal);
+	renderCoffre(data);
+}
+
+// Une ligne d'objet, mêmes classes que les sacs du groupe. `geste` = nom de la fonction
+// appelée au clic ; l'index et l'id passent par data-* (Conventions §9).
+function _pcfLigne(item, idx, fleche, geste, actif, titre, cote) {
+	const btn = `<button class="grp-move-btn" ${actif ? '' : 'disabled'} title="${escapeHtml(titre)}"
+		data-idx="${idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"
+		onclick="${geste}(this)">${fleche}</button>`;
+	const poids = item.poids !== undefined ? `${(+item.poids || 0).toFixed(1)} kg` : `× ${item.qty}`;
+	const row = `<span class="sh-inv-name">${item.icon || '📦'} ${escapeHtml(item.nom || '—')}</span>
+		<span class="sh-inv-poids">${poids}</span>`;
+	return `<div class="sh-inv-item">${cote === 'gauche' ? btn + row : row + btn}</div>`;
+}
+
+function renderCoffre(data) {
+	if (!data) return;
+	const ateliers = data.ateliers || [];
+	const sel = document.getElementById('pcf-select');
+	if (_pcfSel !== 'coffre' && !ateliers.some(a => a.id === _pcfSel)) _pcfSel = 'coffre';
+	if (sel) {
+		sel.innerHTML = `<option value="coffre">📦 Coffre</option>` + ateliers.map(a =>
+			`<option value="${escapeHtml(a.id)}">🏷️ ${escapeHtml(a.nom)} — ${escapeHtml(a.metier_label)}</option>`).join('');
+		sel.value = _pcfSel;
+	}
+	const etat = document.getElementById('pcf-etat');
+	if (etat) etat.textContent = data.gardien ? '🛡️ Un gardien veille sur les lieux.'
+		: (data.role === 'visiteur' ? '⚠️ Personne ne surveille : vous pouvez vous servir…' : '');
+
+	const moi = data.principal || { inventaire: [], charge: 0, charge_max: 0 };
+	_grpCharge('pcf-charge-principal', moi);
+	const inv = moi.inventaire || [];
+
+	if (_pcfSel === 'coffre') {
+		const c = data.coffre || {};
+		_grpCharge('pcf-charge-droite', c);
+		const libre = (+c.charge_max || 0) - (+c.charge || 0);
+		_grpRemplirSac('pcf-principal', inv, inv.length ? inv.map((it, i) =>
+			_pcfLigne(it, i, '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
+				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite')).join('')
+			: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
+		const items = c.inventaire || [];
+		_grpRemplirSac('pcf-droite', items, !c.visible
+			? '<div class="sh-empty"><span class="sh-empty-icon">🔒</span>Fermé à clé.</div>'
+			: items.length ? items.map(it => _pcfLigne(it, it.idx, '←', 'coffrePrendre', true,
+				data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche')).join('')
+			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Coffre vide</div>');
+		return;
+	}
+
+	const a = ateliers.find(x => x.id === _pcfSel) || {};
+	const gere = data.role === 'proprietaire';
+	const cd = document.getElementById('pcf-charge-droite');
+	if (cd) cd.textContent = a.caisse !== null && a.caisse !== undefined ? `💰 ${_prixTexte(a.caisse)}` : '';
+	_grpRemplirSac('pcf-principal', inv, inv.length ? inv.map((it, i) =>
+		_pcfLigne(it, i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite')).join('')
+		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
+	const produits = (a.produits || []).map(p => _pcfLigne(p, 0, '←', 'atelierReprendre', gere, 'Reprendre un exemplaire', 'gauche')).join('');
+	const matieres = (a.matieres || []).map(m => `<div class="sh-inv-item"><span class="sh-inv-name">🧺 ${escapeHtml(m.cle)}</span><span class="sh-inv-poids">× ${m.qty}</span></div>`).join('');
+	_grpRemplirSac('pcf-droite', (a.produits || []).concat(a.matieres || []),
+		`<div class="q-desc">${a.grande ? '✦ Grande maison — prend le sur-mesure' : 'Commandes simples'}</div>`
+		+ `<div class="grp-sous-titre">Au rayon</div>` + (produits || '<div class="sh-empty">Rien en rayon.</div>')
+		+ `<div class="grp-sous-titre">Matières confiées</div>` + (matieres || '<div class="sh-empty">Aucune matière.</div>'));
+}
+
+async function _pcfPost(url, body) {
+	const data = await _aubFetch(url, body);
+	if (data) _pcfAppliquer(data);
+	return data;
+}
+
+function coffreDeposer(btn) {
+	return _pcfPost('api/proprietes/coffre/transferer', { sens: 'vers_coffre', index: +btn.dataset.idx, item_id: btn.dataset.item || null });
+}
+
+async function coffrePrendre(btn) {
+	const data = await _pcfPost('api/proprietes/coffre/transferer', { sens: 'vers_principal', index: +btn.dataset.idx, item_id: btn.dataset.item || null });
 	if (data && data.vol) showToast('🫳 Vous vous êtes servi dans le coffre…');
 }
+
+function atelierDonner(btn) {
+	return _pcfPost('api/proprietes/atelier/donner', { employe_id: _pcfSel, index: +btn.dataset.idx, item_id: btn.dataset.item || null });
+}
+
+function atelierReprendre(btn) {
+	return _pcfPost('api/proprietes/atelier/reprendre', { employe_id: _pcfSel, item_id: btn.dataset.item });
+}
+
+async function releverCaisse() {
+	const data = await _aubFetch('api/proprietes/caisse/relever', {});
+	if (!data) return;
+	if (data.purse) updatePurse(data.purse);
+	showToast(data.vol ? `🫳 Vous avez vidé la caisse : ${_prixTexte(data.releve)}.`
+		: `💰 Caisse relevée : ${_prixTexte(data.releve)}.`);
+	if (!document.getElementById('prop-coffre-panel').classList.contains('panel-hidden')) _pcfAppliquer(data);
+}
+
+// ── Embauche : comme le tableau de recrues, avec des PNJ marchands ───────────────
+function _pemAfficher() {
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('prop-embauche-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// Un marchand embauché ou renvoyé change les lignes d'action de la barre latérale (rendues
+// par /play) : on recharge en refermant, plutôt que de reconstruire cette liste en JS.
+let _pemChange = false;
+
+function closeEmbauche() {
+	if (_pemChange) { window.location.reload(); return; }
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('prop-embauche-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function openEmbauche() {
+	const data = await _aubFetch('api/proprietes/embauche');
+	if (!data) return;
+	updatePurse(data.purse);
+	renderEmbauche(data);
+	_pemAfficher();
+}
+
+// Carte d'un PNJ (candidat ou employé) : la carte de personnage, sans vitaux ni niveaux —
+// un marchand n'a ni PV ni vocation de combat ; sa « classe » est son métier.
+function _carteMarchand(container, p, footer, actions) {
+	const card = renderCharacterCard(container, { id: p.id, prenom: p.prenom, nom: p.nom_famille || p.nom,
+		race: p.race || '', image: p.image, image_base: p.image_base }, { editable: false, footer, actions });
+	if (!card) return;
+	const classe = _q(card, 'classe');
+	if (classe) classe.textContent = `🏷️ ${p.metier_label || ''}${p.categorie_label ? ' · ' + p.categorie_label : ''}${p.grande ? ' ✦' : ''}`;
+	['pv-val', 'pm-val'].forEach(r => { const el = _q(card, r); if (el) el.hidden = true; });
+	['pv-bar', 'pm-bar'].forEach(r => { const el = _q(card, r); if (el && el.parentElement) el.parentElement.hidden = true; });
+}
+
+function renderEmbauche(data) {
+	const plaf = document.getElementById('pem-plafond');
+	if (plaf) plaf.textContent = `${data.personnel}/${data.personnel_max}`;
+	const emp = document.getElementById('pem-employes');
+	clearCharacterCards(emp);
+	(data.employes || []).forEach(e => _carteMarchand(emp, e,
+		`<span>${escapeHtml(e.poste_nom)}</span>`,
+		`<button class="sh-drop-btn" data-emp="${escapeHtml(e.id)}" onclick="pemRenvoyer(this)">Renvoyer</button>`));
+	if (emp && !(data.employes || []).length) emp.innerHTML = '<div class="sell-empty">Personne ne travaille ici.</div>';
+	const cand = document.getElementById('pem-candidats');
+	clearCharacterCards(cand);
+	const bourse = _purseEnCuivre(data.purse);
+	(data.candidats || []).forEach(c => _carteMarchand(cand, c,
+		`<span>${escapeHtml(c.poste_nom)}</span><span class="sell-prix">💰 ${_prixTexte(c.cout)}</span>`,
+		`<button class="sh-drop-btn" data-id="${escapeHtml(c.id)}" ${(data.complet || c.cout > bourse) ? 'disabled' : ''}
+			title="${data.complet ? 'Plus de place pour du personnel' : (c.cout > bourse ? 'Vous n\'avez pas de quoi payer' : 'Embaucher')}"
+			onclick="pemEngager(this)">Embaucher</button>`));
+	if (cand && !(data.candidats || []).length) cand.innerHTML = '<div class="sell-empty">Aucun poste libre : installez un aménagement qui en ouvre un.</div>';
+}
+
+async function pemEngager(btn) {
+	const data = await _aubFetch('api/proprietes/engager', { candidat_id: btn.dataset.id });
+	if (!data) return;
+	updatePurse(data.purse);
+	_pemChange = true;
+	renderEmbauche(data);
+	if (data.engage) showToast(`🤝 ${data.engage} prend son poste.`);
+}
+
+async function pemRenvoyer(btn) {
+	const data = await _aubFetch('api/proprietes/renvoyer', { employe_id: btn.dataset.emp });
+	if (!data) return;
+	_pemChange = true;
+	openEmbauche();
+}
+
 
 // ── Salle commune d'une taverne ──────────────────────────────────────────────────
 // Tables (chatrooms) + tableau d'information + la nuit.

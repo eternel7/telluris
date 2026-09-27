@@ -45,15 +45,25 @@ function extraireConst(nom) {
 	return m[0];
 }
 
-// Globales semées : le DOM se réduit à la cible du rendu, le sac est vide par défaut.
-const cible = { innerHTML: '' };
-globalThis.document = { getElementById: () => cible };
+// Globales semées : le DOM se réduit à des nœuds factices PAR ID (le panneau 🏠 n'écrit que
+// dans `prop-contenu` ; le coffre écrit dans ses deux colonnes, son sélecteur et ses charges).
+function noeud() {
+	return { innerHTML: '', textContent: '', value: '',
+		classList: { toggle() {} }, parentElement: { classList: { toggle() {} } } };
+}
+const noeuds = {};
+const el = id => (noeuds[id] = noeuds[id] || noeud());
+const cible = el('prop-contenu');
+globalThis.document = { getElementById: el };
 globalThis._inventaire = [];
+globalThis._pcfSel = 'coffre';
 
 vm.runInThisContext(extraireConst('_PROP_STATUTS'));
 vm.runInThisContext(extraireConst('_PROP_CATEGORIES'));
+vm.runInThisContext(extraireConst('INV_VISIBLE'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
-	'_propMesProprietes', 'renderProprietesOffre', 'renderPropriete']) {
+	'_propMesProprietes', 'renderProprietesOffre', 'renderPropriete',
+	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_pcfLigne', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -96,7 +106,7 @@ t('les sections exigées sont distinctes', () => {
 	renderPropriete(ici('proprietaire'));
 	const h = cible.innerHTML;
 	for (const titre of ['Type : Maison', 'Capacités', 'Aménagements installés',
-		'Aménagements disponibles', 'Occupants et PNJ', 'Activités', 'Coffre']) {
+		'Aménagements disponibles', 'Occupants et PNJ', 'Activités']) {
 		assert.ok(h.includes(titre), 'section absente : ' + titre);
 	}
 	assert.ok(h.includes('exercée par Jehan Ferrant'));
@@ -115,7 +125,6 @@ t('le visiteur ne voit aucun geste de gestion', () => {
 		'Aménagements disponibles']) {
 		assert.ok(!h.includes(geste), 'geste offert au visiteur : ' + geste);
 	}
-	assert.ok(h.includes('Dérober'), 'le coffre sans gardien doit être dérobable');
 });
 
 t('activité inactive sans PNJ', () => {
@@ -138,6 +147,52 @@ t('offre : types de la zone et chambre à louer', () => {
 	assert.ok(/data-type="maison" disabled/.test(h), 'achat hors budget non grisé');
 	assert.ok(h.includes('Louer') && h.includes('Mes propriétés'));
 	assert.ok(!h.includes(XSS));
+});
+
+// ── Coffre (présenté comme l'inventaire du groupe) ─────────────────────────────────
+function coffre(role, extra) {
+	return Object.assign({
+		role, gardien: false,
+		principal: { charge: 1, charge_max: 50, inventaire: [{ _id: 'item:a', item: 'item:a', nom: 'Pomme', poids: 1 }] },
+		coffre: { visible: true, depot: role === 'proprietaire', charge: 2, charge_max: 20,
+			inventaire: [{ _id: 'item:b', item: 'item:b', nom: XSS, poids: 2, idx: 0 }] },
+		ateliers: [{ id: 'employe:x', nom: 'Jehan', metier_label: 'Alchimiste', grande: true,
+			produits: [{ item_id: 'item:elixir', nom: 'Élixir', qty: 2 }],
+			matieres: [{ cle: 'herbe', qty: 3 }], caisse: 40 }],
+	}, extra || {});
+}
+
+t('coffre : sac à gauche, coffre à droite, noms échappés', () => {
+	globalThis._pcfSel = 'coffre';
+	renderCoffre(coffre('proprietaire'));
+	assert.ok(noeuds['pcf-principal'].innerHTML.includes('coffreDeposer'));
+	const d = noeuds['pcf-droite'].innerHTML;
+	assert.ok(d.includes('coffrePrendre') && d.includes('Prendre'));
+	assert.ok(!d.includes(XSS) && d.includes('&lt;img'));
+	assert.ok(noeuds['pcf-select'].innerHTML.includes('employe:x'));
+});
+
+t('coffre : le visiteur dérobe mais ne dépose pas', () => {
+	globalThis._pcfSel = 'coffre';
+	renderCoffre(coffre('visiteur'));
+	assert.ok(noeuds['pcf-droite'].innerHTML.includes('Dérober'));
+	assert.ok(/coffreDeposer/.test(noeuds['pcf-principal'].innerHTML));
+	assert.ok(/disabled[\s\S]*coffreDeposer/.test(noeuds['pcf-principal'].innerHTML), 'dépôt non grisé');
+});
+
+t('atelier : rayon repris, matières confiées, sur-mesure annoncé', () => {
+	globalThis._pcfSel = 'employe:x';
+	renderCoffre(coffre('proprietaire'));
+	const d = noeuds['pcf-droite'].innerHTML;
+	assert.ok(d.includes('atelierReprendre') && d.includes('Élixir') && d.includes('herbe'));
+	assert.ok(d.includes('Grande maison'));
+	assert.ok(noeuds['pcf-principal'].innerHTML.includes('atelierDonner'));
+});
+
+t('atelier : un visiteur ne confie rien', () => {
+	globalThis._pcfSel = 'employe:x';
+	renderCoffre(coffre('visiteur'));
+	assert.ok(/disabled[\s\S]*atelierDonner/.test(noeuds['pcf-principal'].innerHTML), 'don non grisé');
 });
 
 console.log(`\n${passes} OK, ${echecs} échec(s)`);

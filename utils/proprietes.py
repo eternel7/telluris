@@ -35,7 +35,9 @@ import time
 import uuid
 
 from db.config import get_doc
-from utils.characters import item_ref_weight
+from models import character_stats
+from utils.characters import item_ref_weight, resolve_item_ref
+from utils import marche
 from utils import zones as zones_util
 from utils import recrutement
 
@@ -82,6 +84,7 @@ def catalogue(get_doc_fn=None) -> dict:
 		"types": list(valeur.get("types") or []),
 		"amenagements": list(valeur.get("amenagements") or []),
 		"metiers": list(valeur.get("metiers") or []),
+		"reglages": dict(valeur.get("reglages") or {}),
 	}
 
 
@@ -355,8 +358,12 @@ def quitter(character: dict, prop: dict) -> tuple[bool, str]:
 	return True, ""
 
 
-def peut_ceder(prop: dict) -> tuple[bool, str]:
-	"""Vendre ou abandonner laisse la propriété derrière soi : rien ne doit y disparaître."""
+def peut_ceder(prop: dict, employes: list | None = None) -> tuple[bool, str]:
+	"""Vendre ou abandonner laisse la propriété derrière soi : rien ne doit y disparaître —
+	ni le coffre, ni les compagnons hébergés, ni la caisse des ateliers (le rayon et les
+	matières confiées, eux, partent avec les marchands renvoyés : c'est leur fonds)."""
+	if any(_int(e.get("caisse_cuivre")) for e in employes or []):
+		return False, "Relevez d'abord la caisse de vos marchands."
 	if prop.get("coffre"):
 		return False, "Videz le coffre avant de céder la propriété."
 	if prop.get("heberges"):
@@ -504,25 +511,38 @@ def peut_engager(prop: dict, cat: dict, employes: list, metier_id, am_id) -> tup
 	return True, ""
 
 
-def creer_employe(prop: dict, mdef: dict, am_id, employeur: dict, rand=random) -> dict:
-	"""Doc `employe:*` attaché à CETTE propriété (jamais transféré à une autre)."""
-	sex = rand.choice(["M", "F"])
-	prenoms = recrutement.prenoms_possibles(RACE_PERSONNEL, sex)
-	noms = recrutement.NOMS.get(RACE_PERSONNEL) or recrutement.NOMS["defaut"]
-	metier_id = mdef.get("id", "")
-	return {
+def creer_employe(prop: dict, candidat: dict, employeur: dict) -> dict:
+	"""Doc `employe:*` attaché à CETTE propriété (jamais transféré à une autre), né d'un
+	candidat du tableau d'embauche. Un employé PRODUCTIF (`categorie`) a la forme d'un lieu
+	marchand (`categorie`, `stock_*`, `lieu_parent`) : `utils/marche.py` et `utils/commande.py`
+	le prennent tel quel là où ils attendent une boutique."""
+	metier_id = candidat.get("metier", "")
+	employe = {
 		"_id": f"employe:{metier_id}_{uuid.uuid4().hex[:12]}",
 		"type": TYPE_EMPLOYE,
 		"metier": metier_id,
-		"prenom": rand.choice(prenoms),
-		"nom": rand.choice(noms),
-		"sex": sex,
+		"prenom": candidat.get("prenom", ""),
+		"nom": candidat.get("nom", ""),
+		"sex": candidat.get("sex", ""),
+		"race": candidat.get("race", RACE_PERSONNEL),
+		"portrait": candidat.get("portrait", ""),
 		"propriete": prop.get("_id"),
-		"poste": am_id,
+		"poste": candidat.get("amenagement"),
 		"employe_par": employeur.get("_id"),
 		"statut": EMPLOYE_ACTIF,
 		"embauche_at": now_epoch(),
 	}
+	if candidat.get("categorie"):
+		employe.update({
+			"categorie": candidat["categorie"],
+			"modele": candidat.get("modele", ""),
+			"lieu_parent": prop.get("lieu_parent"),
+			"label": f"{nom_personnage(employe)}",
+			"stock_matieres": {},
+			"stock_vente": [],
+			"caisse_cuivre": 0,
+		})
+	return employe
 
 
 def engager(prop: dict, employe: dict) -> None:
@@ -551,7 +571,7 @@ def gardien_present(prop: dict, cat: dict, employes: list) -> bool:
 
 def activites(prop: dict, cat: dict, employes: list) -> list:
 	"""Activités des aménagements installés : exercée ssi un employé du bon métier y est
-	affecté. Rien n'est produit dans cette passe — l'état est structurel."""
+	affecté. La production elle-même est celle des ATELIERS (`produire`)."""
 	out = []
 	for am_id in prop.get("amenagements") or []:
 		adef = amenagement_def(cat, am_id) or {}
@@ -569,6 +589,223 @@ def activites(prop: dict, cat: dict, employes: list) -> list:
 			"employe": nom_personnage(qui) if qui else "",
 		})
 	return out
+
+
+# ── Ateliers : PNJ marchands employés ────────────────────────────────────────────
+# Un employé dont le poste ouvre des `activite.categories` exerce une catégorie de BOUTIQUE :
+# il produit à partir de ce qu'on lui confie et du flux de SA propriété (jamais celui de la
+# ville), ses ventes remplissent une caisse que relève le propriétaire, et tout visiteur peut
+# lui acheter ou lui commander — simple pour tous, sur mesure pour une grande maison seule
+# (`commande.lieu_fabrique_sur_mesure` appliqué à l'employé, rien à ajouter).
+
+MODELE_PREFIXE = "pnj:marchand_"
+
+
+def reglages(cat: dict) -> dict:
+	"""`rules:proprietes.reglages` : durée du tableau d'embauche, vente automatique."""
+	return cat.get("reglages") or {}
+
+
+def est_atelier(doc: dict) -> bool:
+	doc = doc or {}
+	return (doc.get("type") == TYPE_EMPLOYE and bool(doc.get("categorie"))
+			and doc.get("statut") == EMPLOYE_ACTIF)
+
+
+def grande_maison(employe: dict) -> bool:
+	"""Relu à chaque appel dans la variable de monde (jamais stocké sur l'employé)."""
+	return (employe or {}).get("categorie") in (character_stats.LIEU_CATEGORIES_FUSION or {})
+
+
+def atelier_actif(character: dict, lieu_doc: dict, get_doc_fn=None) -> dict | None:
+	"""L'atelier désigné par le champ TRANSITOIRE `atelier_courant`, s'il travaille dans CETTE
+	propriété. C'est lui que le marché et les commandes traitent comme « le lieu »."""
+	if not est_propriete(lieu_doc):
+		return None
+	eid = (character or {}).get("atelier_courant")
+	if not eid or eid not in (lieu_doc.get("employes") or []):
+		return None
+	e = (get_doc_fn or get_doc)(eid)
+	if e and est_atelier(e) and e.get("propriete") == lieu_doc.get("_id"):
+		return e
+	return None
+
+
+def categories_du_poste(adef: dict, metier_id) -> list:
+	act = (adef or {}).get("activite") or {}
+	return list(act.get("categories") or []) if act.get("metier") == metier_id else []
+
+
+# ── Tableau d'embauche ───────────────────────────────────────────────────────────
+
+def _candidat(am_id, mdef: dict, race: str, portrait: str, rand, categorie=None, modele=None) -> dict:
+	sex = rand.choice(["M", "F"])
+	prenoms = recrutement.prenoms_possibles(race, sex)
+	noms = recrutement.NOMS.get(race) or recrutement.NOMS["defaut"]
+	c = {
+		"id": f"cand_{uuid.uuid4().hex[:10]}",
+		"amenagement": am_id,
+		"metier": mdef.get("id", ""),
+		"prenom": rand.choice(prenoms),
+		"nom": rand.choice(noms),
+		"sex": sex,
+		"race": race,
+		"portrait": portrait,
+		"cout": _int(mdef.get("cout_embauche_cuivre")),
+	}
+	if categorie:
+		c["categorie"] = categorie
+		c["modele"] = modele
+	return c
+
+
+def generer_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None,
+					  portraits=None, rand=random) -> list:
+	"""Un candidat par poste libre — et, pour un poste marchand, un par catégorie ouverte dont
+	le marchand générique `pnj:marchand_<cat>` existe : le candidat en reprend le portrait et
+	la race, mais porte un nom TIRÉ (deux joueurs n'embauchent pas le même Maître Fromond)."""
+	lire = get_doc_fn or get_doc
+	out = []
+	for p in postes_libres(prop, cat, employes):
+		mdef = metier_def(cat, p["metier"])
+		if not mdef:
+			continue
+		adef = amenagement_def(cat, p["amenagement"]) or {}
+		cats = categories_du_poste(adef, p["metier"])
+		if cats:
+			for c in cats:
+				modele = lire(MODELE_PREFIXE + c)
+				if modele:
+					out.append(_candidat(p["amenagement"], mdef, modele.get("race") or RACE_PERSONNEL,
+										 modele.get("portrait", ""), rand, c, modele["_id"]))
+		else:
+			portrait = rand.choice(portraits) if portraits else ""
+			out.append(_candidat(p["amenagement"], mdef, RACE_PERSONNEL, portrait, rand))
+	return out
+
+
+def rafraichir_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None, portraits=None,
+						 now: int | None = None, rand=random, force: bool = False) -> bool:
+	"""Péremption PARESSEUSE du tableau. Tableau valide : on retire seulement les candidats
+	dont le poste a été pourvu entre-temps. True si le doc a changé."""
+	now = now_epoch() if now is None else now
+	if not force and prop.get("candidats") is not None and _int(prop.get("candidats_expire_at")) > now:
+		libres = {(p["amenagement"], p["metier"]) for p in postes_libres(prop, cat, employes)}
+		gardes = [c for c in prop["candidats"] if (c.get("amenagement"), c.get("metier")) in libres]
+		if len(gardes) == len(prop["candidats"]):
+			return False
+		prop["candidats"] = gardes
+		return True
+	prop["candidats"] = generer_candidats(prop, cat, employes, get_doc_fn, portraits, rand)
+	prop["candidats_expire_at"] = now + _int(reglages(cat).get("candidats_duree_s"), 86400)
+	return True
+
+
+def candidat_par_id(prop: dict, cid) -> dict | None:
+	return next((c for c in prop.get("candidats") or [] if c.get("id") == cid), None)
+
+
+def retirer_candidat(prop: dict, cid) -> None:
+	prop["candidats"] = [c for c in prop.get("candidats") or [] if c.get("id") != cid]
+
+
+# ── Matières confiées, produits, caisse ──────────────────────────────────────────
+
+def donner(employe: dict, item_doc: dict) -> tuple[bool, str]:
+	"""Le joueur CONFIE un objet à son marchand. Un bien que l'atelier produit va au rayon
+	(il le revendra) ; une matière de ses recettes entre dans `stock_matieres` sous la clé de
+	`marche.cle_matiere_lieu` — exactement comme une vente à une boutique, sans paiement."""
+	if not est_atelier(employe):
+		return False, "Ce PNJ ne tient pas d'atelier."
+	if not marche.lieu_buys(employe, item_doc):
+		return False, "Il n'a pas l'usage de cet objet."
+	item_id = (item_doc or {}).get("item") or (item_doc or {}).get("_id")
+	if marche.lieu_produit(employe, item_doc):
+		marche._stock_vente_add(employe.setdefault("stock_vente", []), item_id, 1)
+	else:
+		cle = marche.cle_matiere_lieu(employe.get("categorie"), item_doc, employe)
+		stock = employe.setdefault("stock_matieres", {})
+		stock[cle] = _int(stock.get(cle)) + 1
+	return True, ""
+
+
+def reprendre_produit(employe: dict, item_id) -> bool:
+	"""Le propriétaire reprend UN exemplaire du rayon (gratuit : c'est sa production)."""
+	rayon = employe.get("stock_vente") or []
+	entree = next((e for e in rayon if e.get("item_id") == item_id and _int(e.get("qty")) > 0), None)
+	if entree is None:
+		return False
+	entree["qty"] = _int(entree.get("qty")) - 1
+	employe["stock_vente"] = [e for e in rayon if _int(e.get("qty")) > 0]
+	return True
+
+
+def prix_vente_auto(item_id) -> int:
+	"""Prix d'une vente automatique : le prix médian du marché (relation neutre, sans stock)."""
+	doc = resolve_item_ref(item_id) or {}
+	pmin, pmax = marche.prix_range_cuivre(doc, item_id)
+	return marche.prix_base_cuivre(pmin, pmax, 50, "achat")
+
+
+def ecouler_employe(employe: dict, regl: dict, rand=random) -> list:
+	"""Vente automatique du rayon d'un marchand à domicile : chaque produit tire sa demande
+	(`vente_auto.proba`) et en écoule une fraction (`fraction`, au moins 1), en gardant
+	`reserve` exemplaires pour les visiteurs. ⚠️ Pas `ecouler_produits_pnj` : celle-ci
+	n'écoule que l'excédent au-dessus d'une cible de boutique (25) — ici, rien ne partirait."""
+	va = regl.get("vente_auto") or {}
+	proba = float(va.get("proba", 0.5))
+	frac = float(va.get("fraction", 0.34))
+	reserve = _int(va.get("reserve"), 1)
+	ecoules = []
+	for entree in employe.get("stock_vente") or []:
+		qty = _int(entree.get("qty"))
+		if qty <= reserve or rand.random() >= proba:
+			continue
+		vendu = max(1, int(round((qty - reserve) * frac)))
+		entree["qty"] = qty - vendu
+		ecoules.append({"item_id": entree.get("item_id"), "qty": vendu})
+	employe["stock_vente"] = [e for e in employe.get("stock_vente") or [] if _int(e.get("qty")) > 0]
+	return ecoules
+
+
+def flux_propriete(prop: dict) -> dict:
+	"""Le flux PROPRE du bien — même mécanique que celui d'une ville (`flux_marchand`), clos par
+	`marche.persister_flux`. Il prend son sens avec plusieurs marchands : ce que l'un écoule
+	nourrit l'atelier de l'autre."""
+	return marche.ouvrir_flux(prop)
+
+
+def produire(employe: dict, flux: dict | None, passes: int, cat: dict,
+			 prix_fn=prix_vente_auto, rand=random) -> tuple[bool, int]:
+	"""`passes` ticks d'atelier SANS approvisionnement gratuit ; les ventes automatiques vont
+	dans la caisse. Renvoie (changé, gain en cuivre). Mute l'employé et le flux, sans save."""
+	if not est_atelier(employe):
+		return False, 0
+	recettes = marche.recettes_lieu(employe)
+	regl = reglages(cat)
+	change, gain = False, 0
+	for _ in range(max(0, int(passes))):
+		ch, ecoules = marche.tick_detaille(employe, recettes, flux, appro=False,
+										   ecouler=lambda d: ecouler_employe(d, regl, rand))
+		change = change or ch
+		gain += sum(_int(e.get("qty")) * prix_fn(e.get("item_id")) for e in ecoules)
+	if gain:
+		encaisser(employe, gain)
+	return change or bool(gain), gain
+
+
+def encaisser(employe: dict, cuivre: int) -> None:
+	employe["caisse_cuivre"] = _int(employe.get("caisse_cuivre")) + int(cuivre)
+
+
+def relever_caisse(employes: list) -> int:
+	"""Vide la caisse de chaque atelier ; renvoie le total. L'appelant crédite qui relève."""
+	total = 0
+	for e in employes:
+		total += _int(e.get("caisse_cuivre"))
+		if e.get("caisse_cuivre"):
+			e["caisse_cuivre"] = 0
+	return total
 
 
 # ── Compagnons hébergés ──────────────────────────────────────────────────────────

@@ -49,8 +49,9 @@ routers/
   recrutement.py         # /api/recrutement/* + /api/groupe/* : board de recrues, embaucher, congedier, engager
   montures.py            # /api/montures/* : étable, acheter, relacher
   proprietes.py          # /api/proprietes/* : offre, acheter (zone habitable), louer (auberge),
-                         #   ici, occuper/quitter, vendre/abandonner, installer, engager/renvoyer,
-                         #   heberger/reprendre, deposer/retirer (vol sans gardien)
+                         #   ici, occuper/quitter, vendre/abandonner, installer, embauche/engager/renvoyer,
+                         #   heberger/reprendre, coffre (+transferer, vol sans gardien),
+                         #   atelier/donner|reprendre|choisir, caisse/relever
   auberge.py             # /api/auberge/* : salle commune (tables, tableau d'information), nuit
   scriptorium.py         # /api/scriptorium(/ecrire) : écrit personnel (papier+encre+plume → livre)
   commande.py            # /api/commande(/devis,/passer,/relancer,/retirer,/annuler) : commande chez un artisan
@@ -95,7 +96,8 @@ utils/
   montures.py            # montures (pur) : étable, charge multipliée, troupeau
   proprietes.py          # propriétés résidentielles (pur) : type FIGÉ, aménagements contraints
                          #   par type (`rules:proprietes`), capacités dérivées, personnel à poste,
-                         #   gardien/vol, location inviolable, zones habitables peintes
+                         #   gardien/vol, location inviolable, zones habitables peintes ;
+                         #   ATELIERS : PNJ marchands employés (flux du bien, jamais de la ville ; caisse)
   auberge.py             # tavernes (pur) : tables-chatrooms, tableau d'information, nuit
   scriptorium.py         # scriptorium (pur) : écrit personnel transportable + livres de contenu générés au tick d'atelier
   escorte.py             # escortes (pur) : personne à retrouver, à protéger, à déposer vivante

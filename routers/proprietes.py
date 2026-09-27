@@ -18,12 +18,14 @@ from db.config import get_doc, save_doc, delete_doc
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref,
-	item_ref_weight, credit_character,
+	credit_character, tirer_poids, poids_bounds, carried_weight, charge_max_of,
 )
 from utils.marche import debit_character
 from utils import auberge
 from utils import recrutement
 from utils import proprietes
+from utils import escorte
+from utils import commande as commande_util
 # Sens d'import : `routers/proprietes` → `routers/user`, jamais l'inverse (précédent :
 # routers/auberge).
 from routers.user import _inventory_payload
@@ -116,27 +118,6 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 		return {"id": a.get("id"), "nom": a.get("nom", am_id), "categorie": a.get("categorie", ""),
 				"cout": int(a.get("cout_cuivre") or 0), "description": a.get("description", "")}
 
-	coffre_visible = (role in (proprietes.PROPRIETAIRE, proprietes.LOCATAIRE, proprietes.ANCIEN_LOCATAIRE)
-					  or proprietes.peut_retirer(role, prop, gardien)[0])
-	coffre = []
-	if coffre_visible:
-		for i, r in enumerate(prop.get("coffre") or []):
-			d = resolve_item_ref(r)
-			if d:
-				coffre.append(dict(d, idx=i))
-
-	embauches = []
-	if gere and len(employes) < caps["personnel_max"]:
-		for p in proprietes.postes_libres(prop, cat, employes):
-			mdef = proprietes.metier_def(cat, p["metier"])
-			if mdef:
-				embauches.append({
-					"metier": p["metier"], "metier_label": mdef.get("label", p["metier"]),
-					"amenagement": p["amenagement"],
-					"amenagement_nom": (proprietes.amenagement_def(cat, p["amenagement"]) or {}).get("nom", ""),
-					"cout": int(mdef.get("cout_embauche_cuivre") or 0), "libres": p["libres"],
-				})
-
 	revente_ok, revente_raison = proprietes.revente_autorisee(
 		tdef, get_doc(prop.get("lieu_parent")) if prop.get("lieu_parent") else None)
 	payload = {
@@ -160,17 +141,10 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 					 for a in heberges],
 		"hebergeables": [{"id": a["_id"], "nom": proprietes.nom_personnage(a)}
 						 for a in recrutement.groupe_effectif(character, get_doc)] if gere else [],
-		"employes": [{
-			"id": e["_id"], "nom": proprietes.nom_personnage(e), "metier": e.get("metier"),
-			"metier_label": (proprietes.metier_def(cat, e.get("metier")) or {}).get("label", e.get("metier")),
-			"poste_nom": (proprietes.amenagement_def(cat, e.get("poste")) or {}).get("nom", ""),
-		} for e in employes],
-		"embauches": embauches,
+		"employes": [_employe_view(cat, e) for e in employes],
 		"activites": [dict(a, metier_label=(proprietes.metier_def(cat, a["metier"]) or {}).get("label", a["metier"]))
 					  for a in proprietes.activites(prop, cat, employes)],
 		"gardien": gardien,
-		"coffre": coffre,
-		"coffre_visible": coffre_visible,
 		"revente": {"autorisee": gere and revente_ok and prop.get("mode") == proprietes.MODE_ACHAT,
 					"raison": revente_raison, "prix": proprietes.prix_revente(tdef)},
 		"mes_proprietes": _mes_proprietes(character, cat),
@@ -179,6 +153,30 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 	if extra:
 		payload.update(extra)
 	return payload
+
+
+def _employe_view(cat: dict, e: dict) -> dict:
+	"""Vue d'un employé — mêmes clés que la carte de personnage là où elles se recoupent
+	(`prenom`/`nom`/`image`/`image_base`) : il s'affiche comme un PNJ, portrait `/pnj` d'abord."""
+	route, _ = escorte.image_protege(e.get("portrait", ""))
+	return {
+		"id": e["_id"], "nom": proprietes.nom_personnage(e),
+		"prenom": e.get("prenom", ""), "nom_famille": e.get("nom", ""),
+		"image": e.get("portrait", ""), "image_base": route,
+		"metier": e.get("metier"),
+		"metier_label": (proprietes.metier_def(cat, e.get("metier")) or {}).get("label", e.get("metier")),
+		"poste_nom": (proprietes.amenagement_def(cat, e.get("poste")) or {}).get("nom", ""),
+		"categorie": e.get("categorie", ""),
+		"categorie_label": categorie_label(e.get("categorie", "")) if e.get("categorie") else "",
+		"marchand": proprietes.est_atelier(e),
+		"grande": proprietes.grande_maison(e),
+	}
+
+
+def categorie_label(categorie: str) -> str:
+	"""« grand_laboratoire_alchimique » → « Grand laboratoire alchimique » : les catégories de
+	boutique n'ont pas de libellé en base, c'est leur identifiant qui fait foi."""
+	return (categorie or "").replace("_", " ").capitalize()
 
 
 # ── Préludes d'accès ─────────────────────────────────────────────────────────────
@@ -335,7 +333,8 @@ def _ceder(current_user: dict, statut: str) -> dict:
 	un lieu qui n'a plus de porte)."""
 	character, prop, cat, role = _ici(current_user)
 	_exiger(role, proprietes.PROPRIETAIRE)
-	ok, raison = proprietes.peut_ceder(prop)
+	employes = proprietes.employes_effectifs(prop, get_doc)
+	ok, raison = proprietes.peut_ceder(prop, employes)
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	tdef = proprietes.type_def(cat, prop.get("type_propriete")) or {}
@@ -347,7 +346,6 @@ def _ceder(current_user: dict, statut: str) -> dict:
 			raise HTTPException(status_code=409, detail=raison)
 		gain = proprietes.prix_revente(tdef)
 		credit_character(character, gain)
-	employes = proprietes.employes_effectifs(prop, get_doc)
 	proprietes.ceder(character, prop, statut, employes)
 	origine = prop.get("origine") or {}
 	opos = origine.get("pos") or [0, 0]
@@ -389,23 +387,69 @@ async def installer(current_user: Annotated[dict, Depends(get_current_user)], bo
 	return _payload_ici(character, prop, cat, role)
 
 
-@proprietes_router.post("/proprietes/engager")
-async def engager(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+@proprietes_router.get("/proprietes/embauche")
+async def embauche(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""Tableau d'embauche (propriétaire) : un candidat par poste libre, renouvelé
+	paresseusement comme un tableau de recrues."""
 	character, prop, cat, role = _ici(current_user)
 	_exiger(role, proprietes.PROPRIETAIRE)
-	metier_id, am_id = body.get("metier"), body.get("amenagement")
 	employes = proprietes.employes_effectifs(prop, get_doc)
-	ok, raison = proprietes.peut_engager(prop, cat, employes, metier_id, am_id)
+	if proprietes.rafraichir_candidats(prop, cat, employes, get_doc, recrutement.portraits_disponibles()):
+		save_doc(prop)
+	return _payload_embauche(character, prop, cat, employes)
+
+
+def _payload_embauche(character: dict, prop: dict, cat: dict, employes: list, extra=None) -> dict:
+	caps = proprietes.capacites(prop, cat)
+	complet = len(employes) >= caps["personnel_max"]
+
+	def carte(c):
+		route, _ = escorte.image_protege(c.get("portrait", ""))
+		mdef = proprietes.metier_def(cat, c.get("metier")) or {}
+		return {
+			"id": c["id"], "prenom": c.get("prenom", ""), "nom": c.get("nom", ""),
+			"race": c.get("race", ""), "sex": c.get("sex", ""),
+			"image": c.get("portrait", ""), "image_base": route,
+			"metier_label": mdef.get("label", c.get("metier", "")),
+			"poste_nom": (proprietes.amenagement_def(cat, c.get("amenagement")) or {}).get("nom", ""),
+			"categorie_label": categorie_label(c.get("categorie", "")) if c.get("categorie") else "",
+			"grande": c.get("categorie") in (proprietes.character_stats.LIEU_CATEGORIES_FUSION or {}),
+			"cout": int(c.get("cout") or 0),
+		}
+	payload = {
+		"candidats": [carte(c) for c in prop.get("candidats") or []],
+		"employes": [_employe_view(cat, e) for e in employes],
+		"personnel": len(employes), "personnel_max": caps["personnel_max"], "complet": complet,
+		"purse": cuivre_to_purse(money_to_cuivre(character)),
+	}
+	if extra:
+		payload.update(extra)
+	return payload
+
+
+@proprietes_router.post("/proprietes/engager")
+async def engager(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Embauche un candidat du tableau : il devient un `employe:*` de CETTE propriété."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	candidat = proprietes.candidat_par_id(prop, body.get("candidat_id"))
+	if candidat is None:
+		raise HTTPException(status_code=404, detail="Ce candidat n'est plus disponible.")
+	employes = proprietes.employes_effectifs(prop, get_doc)
+	ok, raison = proprietes.peut_engager(prop, cat, employes, candidat.get("metier"), candidat.get("amenagement"))
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
-	mdef = proprietes.metier_def(cat, metier_id)
-	if debit_character(character, int(mdef.get("cout_embauche_cuivre") or 0)) is None:
+	if debit_character(character, int(candidat.get("cout") or 0)) is None:
 		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi engager ce personnel.")
-	employe = proprietes.creer_employe(prop, mdef, am_id, character)
+	employe = proprietes.creer_employe(prop, candidat, character)
 	proprietes.engager(prop, employe)
+	proprietes.retirer_candidat(prop, candidat["id"])
+	employes.append(employe)
+	proprietes.rafraichir_candidats(prop, cat, employes, get_doc)   # poste pourvu : candidats rivaux retirés
 	_sauver(employe, prop, character)
-	return _payload_ici(character, prop, cat, role,
-						{"engage": f"{proprietes.nom_personnage(employe)} ({mdef.get('label', metier_id)})"})
+	mdef = proprietes.metier_def(cat, employe["metier"]) or {}
+	return _payload_embauche(character, prop, cat, employes,
+							 {"engage": f"{proprietes.nom_personnage(employe)} ({mdef.get('label', employe['metier'])})"})
 
 
 @proprietes_router.post("/proprietes/renvoyer")
@@ -416,6 +460,8 @@ async def renvoyer(current_user: Annotated[dict, Depends(get_current_user)], bod
 					if e.get("_id") == body.get("employe_id")), None)
 	if employe is None:
 		raise HTTPException(status_code=404, detail="Cet employé ne travaille pas ici.")
+	if int(employe.get("caisse_cuivre") or 0):
+		raise HTTPException(status_code=409, detail="Relevez d'abord sa caisse.")
 	proprietes.renvoyer(prop, employe)
 	_sauver(prop)
 	save_doc(employe)
@@ -455,41 +501,172 @@ async def reprendre(current_user: Annotated[dict, Depends(get_current_user)], bo
 	return _payload_ici(character, prop, cat, role)
 
 
-@proprietes_router.post("/proprietes/deposer")
-async def deposer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
-	character, prop, cat, role = _ici(current_user)
-	refs = character.get("inventaire") or []
-	pos = proprietes.localiser(refs, body.get("idx"), body.get("item_id"))
-	if pos is None:
-		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
-	ok, raison = proprietes.peut_deposer(role, prop, cat, refs[pos])
-	if not ok:
-		raise HTTPException(status_code=409, detail=raison)
-	proprietes.deposer(character, prop, pos)
-	_sauver(prop, character)
-	return _payload_ici(character, prop, cat, role,
-						{"inventaire_payload": _inventory_payload(character)})
+# ── Coffre et ateliers : l'inventaire du lieu, présenté comme celui du groupe ─────
+
+def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes: list | None = None,
+					extra: dict | None = None) -> dict:
+	"""Deux colonnes, comme `GET /api/groupe` : le sac du personnage (`principal`) et, à
+	droite, le COFFRE puis chaque atelier (matières confiées, rayon, caisse)."""
+	if employes is None:
+		employes = proprietes.employes_effectifs(prop, get_doc)
+	gardien = proprietes.gardien_present(prop, cat, employes)
+	coffre_visible = (role in (proprietes.PROPRIETAIRE, proprietes.LOCATAIRE, proprietes.ANCIEN_LOCATAIRE)
+					  or proprietes.peut_retirer(role, prop, gardien)[0])
+	gere = role == proprietes.PROPRIETAIRE
+	ateliers = []
+	for e in employes:
+		if not proprietes.est_atelier(e):
+			continue
+		ateliers.append(dict(_employe_view(cat, e),
+			matieres=[{"cle": k, "qty": int(q)} for k, q in sorted((e.get("stock_matieres") or {}).items()) if int(q) > 0] if gere else [],
+			produits=[{"item_id": r["item_id"], "nom": (resolve_item_ref(r["item_id"]) or {}).get("nom", r["item_id"]),
+					   "qty": int(r.get("qty") or 0)} for r in e.get("stock_vente") or []] if gere else [],
+			caisse=int(e.get("caisse_cuivre") or 0) if (gere or not gardien) else None))
+	payload = {
+		"role": role,
+		"gardien": gardien,
+		"principal": _inventory_payload(character),
+		"coffre": {
+			"visible": coffre_visible,
+			"depot": role in (proprietes.PROPRIETAIRE, proprietes.LOCATAIRE),
+			"charge": proprietes.poids_coffre(prop),
+			"charge_max": proprietes.capacites(prop, cat)["stockage_kg"],
+			"inventaire": [dict(d, idx=i) for i, r in enumerate(prop.get("coffre") or [])
+						   if (d := resolve_item_ref(r))] if coffre_visible else [],
+		},
+		"ateliers": ateliers,
+		"caisse_totale": sum(int(e.get("caisse_cuivre") or 0) for e in employes),
+		"caisse_accessible": gere or (role == proprietes.VISITEUR and not gardien
+									  and prop.get("mode") == proprietes.MODE_ACHAT),
+		"purse": cuivre_to_purse(money_to_cuivre(character)),
+	}
+	if extra:
+		payload.update(extra)
+	return payload
 
 
-@proprietes_router.post("/proprietes/retirer")
-async def retirer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
-	"""Reprendre un objet du coffre. Un VISITEUR chez un propriétaire sans gardien le peut
-	aussi : c'est le vol (`vol: true` dans la réponse)."""
+@proprietes_router.get("/proprietes/coffre")
+async def coffre(current_user: Annotated[dict, Depends(get_current_user)]):
 	character, prop, cat, role = _ici(current_user)
-	gardien = proprietes.gardien_present(prop, cat, proprietes.employes_effectifs(prop, get_doc))
-	ok, raison = proprietes.peut_retirer(role, prop, gardien)
+	return _payload_coffre(character, prop, cat, role)
+
+
+@proprietes_router.post("/proprietes/coffre/transferer")
+async def coffre_transferer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Sac ↔ coffre. `vers_coffre` : propriétaire ou locataire, borné par le stockage dérivé.
+	`vers_principal` : ses affaires, ou un VISITEUR chez un propriétaire sans gardien — le vol
+	(`vol: true`)."""
+	character, prop, cat, role = _ici(current_user)
+	sens = body.get("sens")
+	if sens == "vers_coffre":
+		refs = character.get("inventaire") or []
+		pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
+		if pos is None:
+			raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
+		ok, raison = proprietes.peut_deposer(role, prop, cat, refs[pos])
+		if not ok:
+			raise HTTPException(status_code=409, detail=raison)
+		proprietes.deposer(character, prop, pos)
+		_sauver(prop, character)
+		return _payload_coffre(character, prop, cat, role)
+	if sens != "vers_principal":
+		raise HTTPException(status_code=422, detail="Sens de transfert inconnu.")
+	employes = proprietes.employes_effectifs(prop, get_doc)
+	ok, raison = proprietes.peut_retirer(role, prop, proprietes.gardien_present(prop, cat, employes))
 	if not ok:
 		raise HTTPException(status_code=403, detail=raison)
 	refs = prop.get("coffre") or []
-	pos = proprietes.localiser(refs, body.get("idx"), body.get("item_id"))
+	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Cet objet n'est plus dans le coffre.")
 	if not recrutement.peut_porter(character, refs[pos]):
 		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage.")
-	poids = item_ref_weight(refs[pos])
 	proprietes.retirer(character, prop, pos)
 	_sauver(prop, character)
-	return _payload_ici(character, prop, cat, role, {
-		"inventaire_payload": _inventory_payload(character),
-		"vol": role == proprietes.VISITEUR, "poids": poids,
-	})
+	return _payload_coffre(character, prop, cat, role, employes, {"vol": role == proprietes.VISITEUR})
+
+
+def _atelier_de(prop: dict, employe_id) -> dict:
+	e = next((x for x in proprietes.employes_effectifs(prop, get_doc)
+			  if x.get("_id") == employe_id and proprietes.est_atelier(x)), None)
+	if e is None:
+		raise HTTPException(status_code=404, detail="Ce marchand ne travaille pas ici.")
+	return e
+
+
+@proprietes_router.post("/proprietes/atelier/donner")
+async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Le propriétaire CONFIE un objet de son sac à un marchand (sans retour : il devient
+	matière d'atelier, ou marchandise du rayon s'il est de ceux qu'il produit)."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	atelier = _atelier_de(prop, body.get("employe_id"))
+	refs = character.get("inventaire") or []
+	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
+	if pos is None:
+		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
+	item = resolve_item_ref(refs[pos])
+	ok, raison = proprietes.donner(atelier, item or {})
+	if not ok:
+		raise HTTPException(status_code=409, detail=raison)
+	refs.pop(pos)
+	character["inventaire"] = refs
+	_sauver(atelier, character)
+	return _payload_coffre(character, prop, cat, role)
+
+
+@proprietes_router.post("/proprietes/atelier/reprendre")
+async def atelier_reprendre(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Le propriétaire reprend un exemplaire du rayon de son marchand (gratuit)."""
+	character, prop, cat, role = _ici(current_user)
+	_exiger(role, proprietes.PROPRIETAIRE)
+	atelier = _atelier_de(prop, body.get("employe_id"))
+	item_id = body.get("item_id")
+	item = resolve_item_ref(item_id) if item_id else None
+	if not item:
+		raise HTTPException(status_code=404, detail="Objet introuvable.")
+	poids = tirer_poids(item)
+	if carried_weight(character) + poids > charge_max_of(character):
+		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage.")
+	if not proprietes.reprendre_produit(atelier, item_id):
+		raise HTTPException(status_code=404, detail="Ce produit n'est plus en rayon.")
+	pmin, pmax = poids_bounds(item)
+	character.setdefault("inventaire", []).append({"item": item_id, "poids": poids} if pmax > pmin else item_id)
+	_sauver(atelier, character)
+	return _payload_coffre(character, prop, cat, role)
+
+
+@proprietes_router.post("/proprietes/atelier/choisir")
+async def atelier_choisir(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
+	"""Tout visiteur s'adresse à un marchand : `atelier_courant` (TRANSITOIRE, vidé au premier
+	déplacement) désigne le « lieu » que le marché et les commandes traiteront."""
+	character, prop, cat, role = _ici(current_user)
+	atelier = _atelier_de(prop, body.get("employe_id"))
+	character["atelier_courant"] = atelier["_id"]
+	_sauver(character)
+	return {
+		**_employe_view(cat, atelier),
+		"commande": commande_util.lieu_prend_commandes(atelier, get_doc),
+		"sur_mesure": commande_util.lieu_fabrique_sur_mesure(atelier),
+	}
+
+
+@proprietes_router.post("/proprietes/caisse/relever")
+async def caisse_relever(current_user: Annotated[dict, Depends(get_current_user)]):
+	"""Le propriétaire relève la caisse de ses marchands. Un VISITEUR la vide aussi quand
+	aucun gardien ne veille : c'est un vol (`vol: true`)."""
+	character, prop, cat, role = _ici(current_user)
+	employes = proprietes.employes_effectifs(prop, get_doc)
+	gardien = proprietes.gardien_present(prop, cat, employes)
+	if role != proprietes.PROPRIETAIRE and not proprietes.peut_retirer(role, prop, gardien)[0]:
+		raise HTTPException(status_code=403, detail="Cette caisse ne vous est pas accessible.")
+	ateliers = [e for e in employes if proprietes.est_atelier(e)]
+	total = proprietes.relever_caisse(ateliers)
+	if not total:
+		raise HTTPException(status_code=409, detail="La caisse est vide.")
+	credit_character(character, total)
+	# Les caisses d'abord : un échec ensuite perd le relevé plutôt que de le DOUBLER (une
+	# caisse restée pleine se relèverait une seconde fois).
+	_sauver(*ateliers, character)
+	return _payload_coffre(character, prop, cat, role, employes,
+						   {"releve": total, "vol": role == proprietes.VISITEUR})

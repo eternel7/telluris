@@ -179,8 +179,11 @@ def test_plafond_de_personnel_du_type():
 
 def test_creer_employe_attache_a_la_propriete():
 	p = maison(amenagements=["labo"])
-	e = proprietes.creer_employe(p, CAT["metiers"][1], "labo", perso())
+	candidat = {"id": "c1", "amenagement": "labo", "metier": "alchimiste", "prenom": "Jehan",
+				"nom": "Ferrant", "portrait": "p.jpg"}
+	e = proprietes.creer_employe(p, candidat, perso())
 	assert e["propriete"] == p["_id"] and e["poste"] == "labo" and e["metier"] == "alchimiste"
+	assert e["prenom"] == "Jehan" and e["portrait"] == "p.jpg"
 	proprietes.engager(p, e)
 	assert proprietes.employes_effectifs(p, {e["_id"]: e}.get) == [e]
 
@@ -423,3 +426,26 @@ def test_livre_images_presentes(livre):
 	racine = os.path.join(os.path.dirname(__file__), "..", "templates", "resources", "towns")
 	for t in cat["types"]:
 		assert os.path.exists(os.path.join(racine, t["image"])), t["image"]
+
+
+def test_livre_postes_marchands_exercables(livre):
+	"""Chaque catégorie qu'un poste marchand ouvre doit avoir, dans le dump le plus récent, son
+	marchand générique (fiche des candidats) ET au moins une recette (sans quoi l'employé ne
+	produirait rien). Les grandes maisons ne s'ouvrent qu'en Demeure ou Domaine."""
+	import glob
+	dump = sorted(glob.glob(os.path.join(os.path.dirname(__file__), "..", "jsons", "telluris-dump-*.json")))[-1]
+	with open(dump, encoding="utf-8") as f:
+		docs = json.load(f)["docs"]
+	ids = {d["_id"] for d in docs}
+	recettes = {d.get("lieu_categorie") for d in docs if d.get("type") == "recette"}
+	fusion = next(d for d in docs if d["_id"] == "rules:world_variables")["value"]["LIEU_CATEGORIES_FUSION"]
+	cat, _ = livre
+	vues = 0
+	for a in cat["amenagements"]:
+		for c in (a.get("activite") or {}).get("categories") or []:
+			vues += 1
+			assert proprietes.MODELE_PREFIXE + c in ids, (a["id"], c)
+			assert c in recettes, (a["id"], c)
+			if c in fusion:
+				assert set(a["types_autorises"]) <= {"demeure", "domaine"}, (a["id"], c)
+	assert vues, "aucun poste marchand dans le catalogue livré"

@@ -916,6 +916,31 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	est_propriete = proprietes_util.est_propriete(grid_doc)
 	dort_chez_soi = est_propriete and proprietes_util.peut_dormir(character, grid_doc)
 	_cat_proprietes = proprietes_util.catalogue(get_doc)
+	# Dans une propriété, chaque visite fait travailler ses marchands employés (une passe,
+	# comme la visite d'une boutique tique son atelier) — sur le flux du BIEN, jamais celui
+	# de la ville. Ils se présentent ensuite comme les PNJ d'un lieu : une ligne d'action chacun.
+	role_propriete = proprietes_util.role_de(character, grid_doc) if est_propriete else None
+	proprietes_ateliers = []
+	caisse_accessible = False
+	if est_propriete:
+		_employes = proprietes_util.employes_effectifs(grid_doc, get_doc)
+		_flux_prop = proprietes_util.flux_propriete(grid_doc)
+		for _e in _employes:
+			if proprietes_util.produire(_e, _flux_prop, 1, _cat_proprietes)[0]:
+				save_doc(_e)
+		persister_flux(_flux_prop, save_doc)
+		proprietes_ateliers = [
+			{"id": _e["_id"], "nom": proprietes_util.nom_personnage(_e),
+			 "metier": (proprietes_util.metier_def(_cat_proprietes, _e.get("metier")) or {}).get("label", ""),
+			 "grande": proprietes_util.grande_maison(_e)}
+			for _e in _employes if proprietes_util.est_atelier(_e)]
+		caisse_accessible = bool(proprietes_ateliers) and (
+			role_propriete == proprietes_util.PROPRIETAIRE
+			or proprietes_util.peut_retirer(role_propriete, grid_doc, proprietes_util.gardien_present(
+				grid_doc, _cat_proprietes, _employes))[0])
+		# La section « Commande » du panneau marchand doit exister : c'est le choix du
+		# marchand qui l'active ou non côté client (catalogue / grande maison).
+		est_commande = est_commande or bool(proprietes_ateliers)
 	proprietes_offre = bool(
 		[t for t in proprietes_util.types_achetables_ici(grid_doc, character.get("position"), get_doc)
 		 if proprietes_util.type_def(_cat_proprietes, t)]
@@ -997,6 +1022,9 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"auberge_nuit": auberge_nuit,
 			"est_propriete": est_propriete,
 			"proprietes_offre": proprietes_offre,
+			"role_propriete": role_propriete,
+			"proprietes_ateliers": proprietes_ateliers,
+			"caisse_accessible": caisse_accessible,
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.
 			"affinites_detail": recrutement_util.affinites_detail_payload(character, get_doc),

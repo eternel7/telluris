@@ -4,7 +4,7 @@ Ce que la logique pure ne voit pas :
 1. **L'achat crée DEUX docs** — la propriété et sa connexion depuis la case d'achat — et
    n'est offert que sur une zone habitable du bon type.
 2. **Céder supprime la porte et reconduit dehors** : on ne reste pas dans un lieu sans porte.
-3. **Le vol** passe par `retirer` ; un gardien au poste le bloque.
+3. **Le vol** passe par le coffre (`coffre/transferer`) ou la caisse ; un gardien au poste le bloque.
 4. **La nuit chez soi est gratuite** et emprunte le flux de l'auberge (`_acces_nuit`).
 5. **Louer deux fois la même chambre la prolonge** au lieu d'en créer une seconde.
 
@@ -20,6 +20,8 @@ import pytest
 from fastapi import HTTPException
 
 from utils import characters as characters_util
+from utils.characters import item_ref_id
+from utils import marche
 from utils import proprietes
 
 
@@ -30,6 +32,17 @@ with open(os.path.join(os.path.dirname(__file__), "..", "jsons", "proprietes_a_i
 VILLE = {"_id": "lieu:ville", "type": "lieu", "categorie": "ville", "label": "Ville",
 		 "zone_influences": [{"x": 5, "y": 5, "w": 4, "h": 4, "rot": 0, "forme": "rectangle",
 							  "zone": "zone:habitable_maison"}]}
+# Une recette de laboratoire : l'alchimiste de test a l'usage de l'herbe et produit l'élixir.
+HERBE = {"_id": "item:herbe", "type": "item", "nom": "Herbe", "categorie": "composant",
+		 "sous_categorie": "herbe", "slots": [], "poids": 1.0, "rarete": "commun"}
+# Un CONSOMMABLE et non une matière : seul un produit fini entre au catalogue de commande.
+ELIXIR = {"_id": "item:elixir", "type": "item", "nom": "Élixir", "categorie": "consommable",
+		  "sous_categorie": "potion", "slots": [], "poids": 0.5, "rarete": "commun"}
+RECETTES = [{"_id": "recette:elixir", "type": "recette", "lieu_categorie": "laboratoire_d_alchimie",
+			 "objet_final": "elixir", "quantite_produite": 1,
+			 "matieres_premieres": [{"sous_categorie": "herbe", "quantite": 2}]}]
+MODELE_ALCHIMISTE = {"_id": "pnj:marchand_laboratoire_d_alchimie", "type": "pnj",
+					 "nom": "Maître Corvin", "race": "humain", "portrait": "humain_m_mage01.jpg"}
 AUBERGE = {"_id": "lieu:auberge", "type": "lieu", "categorie": "auberge", "label": "Auberge",
 		   "lieu_parent": "lieu:ville"}
 CARACTS = {"V": 5, "F": 40, "R": 40, "Ag": 40, "Vol": 40, "Int": 40, "Cha": 40, "Ch": 40}
@@ -53,7 +66,7 @@ def monde(monkeypatch):
 	from routers import auberge as ra
 	from utils import auberge
 
-	docs = {d["_id"]: json.loads(json.dumps(d)) for d in [*CATALOGUE_DOCS, VILLE, AUBERGE]}
+	docs = {d["_id"]: json.loads(json.dumps(d)) for d in [*CATALOGUE_DOCS, VILLE, AUBERGE, MODELE_ALCHIMISTE, HERBE, ELIXIR]}
 	supprimes = []
 
 	def get_doc_fn(doc_id):
@@ -72,12 +85,17 @@ def monde(monkeypatch):
 		return [d for d in list(docs.values())
 				if all(d.get(k) == v for k, v in (selector or {}).items())]
 
-	for mod in (rp, ra, auberge, characters_util, proprietes):
+	from routers import user as ru
+	for mod in (rp, ra, ru, auberge, characters_util, proprietes, marche):
 		monkeypatch.setattr(mod, "get_doc", get_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "save_doc", save_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "find_docs", find_docs_fn, raising=False)
 		monkeypatch.setattr(mod, "delete_doc", delete_doc_fn, raising=False)
-	return {"docs": docs, "supprimes": supprimes, "rp": rp, "ra": ra}
+	# Recettes en mémoire : aucune lecture de la vraie base par les index du marché.
+	monkeypatch.setattr(marche, "_all_recettes", lambda: RECETTES)
+	marche.reset_prix_cache()
+	yield {"docs": docs, "supprimes": supprimes, "rp": rp, "ra": ra, "ru": ru}
+	marche.reset_prix_cache()
 
 
 def _appel(monde, character, coro_fn, *args, module="rp"):
@@ -166,17 +184,19 @@ def test_vol_puis_gardien(monde):
 	prop = _entrer(monde, proprio)
 	prop["coffre"] = [{"item": "item:a", "poids": 1}, {"item": "item:b", "poids": 1}]
 	voleur = _perso(_id="character:b", lieu=prop["_id"])
-	data = _appel(monde, voleur, monde["rp"].retirer, None, {"idx": 0, "item_id": "item:a"})
+	data = _appel(monde, voleur, monde["rp"].coffre_transferer, None,
+				  {"sens": "vers_principal", "index": 0, "item_id": "item:a"})
 	assert data["vol"] is True and voleur["inventaire"] == [{"item": "item:a", "poids": 1}]
 
 	_appel(monde, proprio, monde["rp"].installer, None, {"amenagement": "loge_gardien"})
-	_appel(monde, proprio, monde["rp"].engager, None,
-		   {"metier": "gardien", "amenagement": "loge_gardien"})
+	_engager(monde, proprio, "gardien")
 	with pytest.raises(HTTPException) as e:
-		_appel(monde, voleur, monde["rp"].retirer, None, {"idx": 0, "item_id": "item:b"})
+		_appel(monde, voleur, monde["rp"].coffre_transferer, None,
+			   {"sens": "vers_principal", "index": 0, "item_id": "item:b"})
 	assert e.value.status_code == 403
-	vue = _appel(monde, voleur, monde["rp"].ici, None)
-	assert vue["role"] == "visiteur" and vue["gardien"] is True and vue["coffre"] == []
+	vue = _appel(monde, voleur, monde["rp"].coffre, None)
+	assert vue["role"] == "visiteur" and vue["gardien"] is True
+	assert vue["coffre"]["visible"] is False and vue["coffre"]["inventaire"] == []
 
 
 def test_visiteur_ne_gere_pas(monde):
@@ -205,9 +225,87 @@ def test_vendre_supprime_la_porte_et_reconduit_dehors(monde):
 def test_deposer_renvoie_le_sac(monde):
 	char = _perso(inventaire=[{"item": "item:a", "poids": 2}])
 	prop = _entrer(monde, char)
-	data = _appel(monde, char, monde["rp"].deposer, None, {"idx": 0, "item_id": "item:a"})
+	data = _appel(monde, char, monde["rp"].coffre_transferer, None,
+				  {"sens": "vers_coffre", "index": 0, "item_id": "item:a"})
 	assert prop["coffre"] == [{"item": "item:a", "poids": 2}]
-	assert "inventaire_payload" in data and data["capacites"]["stockage_utilise"] == 2
+	assert data["principal"]["inventaire"] == [] and data["coffre"]["charge"] == 2
+
+
+def test_visiteur_ne_depose_rien(monde):
+	prop = _entrer(monde, _perso())
+	visiteur = _perso(_id="character:b", lieu=prop["_id"], inventaire=[{"item": "item:a", "poids": 1}])
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, visiteur, monde["rp"].coffre_transferer, None,
+			   {"sens": "vers_coffre", "index": 0, "item_id": "item:a"})
+	assert e.value.status_code == 409
+
+
+# ── Embauche et marchands employés ────────────────────────────────────────────────
+
+def _engager(monde, proprio, metier):
+	"""Ouvre le tableau d'embauche et engage le premier candidat du métier voulu."""
+	board = _appel(monde, proprio, monde["rp"].embauche, None)
+	prop = monde["docs"][proprio["lieu"]]
+	cand = next(c for c in prop["candidats"] if c["metier"] == metier)
+	assert any(c["id"] == cand["id"] for c in board["candidats"])
+	data = _appel(monde, proprio, monde["rp"].engager, None, {"candidat_id": cand["id"]})
+	return data, next(e for e in prop["employes"] if monde["docs"][e]["metier"] == metier)
+
+
+def _marchand(monde, proprio):
+	"""Installe un petit laboratoire et y engage un alchimiste — le marchand de test."""
+	_appel(monde, proprio, monde["rp"].installer, None, {"amenagement": "petit_laboratoire"})
+	_, eid = _engager(monde, proprio, "alchimiste")
+	return monde["docs"][eid]
+
+
+def test_embaucher_un_marchand_reprend_la_fiche_du_modele(monde):
+	proprio = _perso()
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	modele = monde["docs"][proprietes.MODELE_PREFIXE + "laboratoire_d_alchimie"]
+	assert proprietes.est_atelier(e) and e["categorie"] == "laboratoire_d_alchimie"
+	assert e["portrait"] == modele["portrait"] and e["modele"] == modele["_id"]
+
+
+def test_choisir_un_marchand_commande_simple_pas_sur_mesure(monde):
+	proprio = _perso()
+	prop = _entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	visiteur = _perso(_id="character:b", lieu=prop["_id"])
+	vue = _appel(monde, visiteur, monde["rp"].atelier_choisir, None, {"employe_id": e["_id"]})
+	assert visiteur["atelier_courant"] == e["_id"]
+	assert vue["sur_mesure"] is False and vue["grande"] is False
+
+
+def test_donner_puis_caisse_relevee_ou_volee(monde):
+	proprio = _perso(inventaire=[{"item": "item:rien", "poids": 1}])
+	prop = _entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	with pytest.raises(HTTPException) as err:           # il n'a pas l'usage de cet objet
+		_appel(monde, proprio, monde["rp"].atelier_donner, None,
+			   {"employe_id": e["_id"], "index": 0, "item_id": "item:rien"})
+	assert err.value.status_code == 409
+
+	e["caisse_cuivre"] = 30
+	voleur = _perso(_id="character:b", lieu=prop["_id"])
+	avant = characters_util.money_to_cuivre(voleur)
+	data = _appel(monde, voleur, monde["rp"].caisse_relever, None)
+	assert data["vol"] is True and characters_util.money_to_cuivre(voleur) == avant + 30
+	assert e["caisse_cuivre"] == 0
+	with pytest.raises(HTTPException) as err:           # caisse vide
+		_appel(monde, proprio, monde["rp"].caisse_relever, None)
+	assert err.value.status_code == 409
+
+
+def test_ceder_refuse_tant_que_la_caisse_est_pleine(monde):
+	proprio = _perso()
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	e["caisse_cuivre"] = 5
+	with pytest.raises(HTTPException) as err:
+		_appel(monde, proprio, monde["rp"].vendre, None)
+	assert err.value.status_code == 409
 
 
 # ── Location ──────────────────────────────────────────────────────────────────────
@@ -248,3 +346,54 @@ def test_nuit_refusee_chez_autrui(monde):
 	with pytest.raises(HTTPException) as e:
 		_appel(monde, intrus, monde["ra"].passer_la_nuit, None, module="ra")
 	assert e.value.status_code == 403
+
+
+def test_visiteur_achete_au_marchand_le_prix_va_en_caisse(monde):
+	proprio = _perso()
+	prop = _entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	e["stock_vente"] = [{"item_id": "item:elixir", "qty": 3}]
+	client = _perso(_id="character:b", lieu=prop["_id"])
+	_appel(monde, client, monde["rp"].atelier_choisir, None, {"employe_id": e["_id"]})
+	avant = characters_util.money_to_cuivre(client)
+	_appel(monde, client, monde["ru"].buy_item, None, {"item_id": "item:elixir"}, module="ru")
+	paye = avant - characters_util.money_to_cuivre(client)
+	assert paye > 0 and e["caisse_cuivre"] >= paye           # + ventes auto éventuelles du tick
+	assert any(item_ref_id(r) == "item:elixir" for r in client["inventaire"])
+	assert "flux_marchand" not in monde["docs"]["lieu:ville"]   # jamais le flux de la ville
+
+
+def test_on_ne_vend_rien_au_marchand_employe(monde):
+	proprio = _perso()
+	prop = _entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	client = _perso(_id="character:b", lieu=prop["_id"], inventaire=[{"item": "item:herbe", "poids": 1}])
+	_appel(monde, client, monde["rp"].atelier_choisir, None, {"employe_id": e["_id"]})
+	with pytest.raises(HTTPException) as err:
+		_appel(monde, client, monde["ru"].sell_item, None, {"index": 0, "item_id": "item:herbe"}, module="ru")
+	assert err.value.status_code == 403
+
+
+def test_le_proprietaire_confie_une_matiere(monde):
+	proprio = _perso(inventaire=[{"item": "item:herbe", "poids": 1}])
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	data = _appel(monde, proprio, monde["rp"].atelier_donner, None,
+				  {"employe_id": e["_id"], "index": 0, "item_id": "item:herbe"})
+	assert proprio["inventaire"] == [] and e["stock_matieres"] == {"herbe": 1}
+	assert data["ateliers"][0]["matieres"] == [{"cle": "herbe", "qty": 1}]
+
+
+def test_comptoir_de_commande_adresse_le_marchand_choisi(monkeypatch, monde):
+	"""`routers/commande._acces` traite le marchand choisi comme l'artisan : commande simple
+	ouverte dès qu'il a un catalogue (ici l'élixir de sa recette)."""
+	from routers import commande as rc
+	monkeypatch.setattr(rc, "get_doc", monde["docs"].get)
+	proprio = _perso()
+	prop = _entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	client = _perso(_id="character:b", lieu=prop["_id"])
+	_appel(monde, client, monde["rp"].atelier_choisir, None, {"employe_id": e["_id"]})
+	monkeypatch.setattr(rc, "get_selected_character", lambda _u: client)
+	_, lieu = rc._acces(None)
+	assert lieu is e

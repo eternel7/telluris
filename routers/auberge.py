@@ -474,6 +474,26 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 			magasins += 1
 	persister_flux(flux, save_doc)
 
+	# 3 bis. Chez soi : les marchands employés travaillent la nuit comme les étals de la cité,
+	#    mais sur le flux de LA PROPRIÉTÉ (jamais celui de la ville) et sans approvisionnement
+	#    gratuit ; leurs ventes remplissent leur caisse. Le tableau d'embauche se renouvelle.
+	ateliers = 0
+	if (proprietes.est_propriete(lieu_doc)
+			and proprietes.role_de(character, lieu_doc) == proprietes.PROPRIETAIRE):
+		cat_prop = proprietes.catalogue(get_doc)
+		employes = proprietes.employes_effectifs(lieu_doc, get_doc)
+		flux_prop = proprietes.flux_propriete(lieu_doc)
+		for e in employes:
+			change, _gain = proprietes.produire(e, flux_prop, passes, cat_prop)
+			if change and save_doc(e) is not None:
+				ateliers += 1
+		proprietes.rafraichir_candidats(lieu_doc, cat_prop, employes, get_doc,
+										recrutement.portraits_disponibles(), force=True)
+		# Le flux se referme SUR le doc de la propriété : s'il n'a pas bougé, on sauve quand
+		# même le doc pour ses candidats renouvelés.
+		if not persister_flux(flux_prop, save_doc):
+			save_doc(lieu_doc)
+
 	# 4. Les recrues. ⚠️ On PÉRIME au lieu de supprimer : c'est ce qui fait traverser
 	#    `retirer_du_tableau`, le chokepoint qui sait qu'un ANCIEN COMPAGNON repasse `parti`
 	#    au lieu d'être détruit — son doc porte l'affinité mémorisée, le supprimer romprait
@@ -519,6 +539,7 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		"vitals": vitals,
 		"cout": cout,
 		"magasins": magasins,
+		"ateliers": ateliers,
 		"recrues": recrues,
 		"commandes": commandes,
 		"compagnons": len(compagnons),

@@ -229,7 +229,10 @@
             },
             "activite": {
               "metier": "cuisinier",
-              "label": "Cuisine"
+              "label": "Cuisine",
+              "categories": [
+                "cuisine"
+              ]
             }
           },
           {
@@ -337,7 +340,11 @@
             },
             "activite": {
               "metier": "cuisinier",
-              "label": "Cuisine"
+              "label": "Cuisine",
+              "categories": [
+                "cuisine",
+                "boulangerie"
+              ]
             }
           },
           {
@@ -456,7 +463,10 @@
             },
             "activite": {
               "metier": "alchimiste",
-              "label": "Alchimie"
+              "label": "Alchimie",
+              "categories": [
+                "laboratoire_d_alchimie"
+              ]
             }
           },
           {
@@ -475,7 +485,11 @@
             },
             "activite": {
               "metier": "artisan",
-              "label": "Artisanat"
+              "label": "Artisanat",
+              "categories": [
+                "atelier_d_artisan",
+                "tabletterie"
+              ]
             }
           },
           {
@@ -664,7 +678,11 @@
             },
             "activite": {
               "metier": "alchimiste",
-              "label": "Alchimie"
+              "label": "Alchimie",
+              "categories": [
+                "laboratoire_d_alchimie",
+                "grand_laboratoire_alchimique"
+              ]
             }
           },
           {
@@ -684,7 +702,12 @@
             },
             "activite": {
               "metier": "artisan",
-              "label": "Artisanat"
+              "label": "Artisanat",
+              "categories": [
+                "atelier_d_artisan",
+                "tabletterie",
+                "grande_maison_des_arts"
+              ]
             }
           },
           {
@@ -704,7 +727,10 @@
             },
             "activite": {
               "metier": "medecin",
-              "label": "Médecine"
+              "label": "Médecine",
+              "categories": [
+                "institut_medico_alchimique"
+              ]
             }
           },
           {
@@ -723,7 +749,10 @@
             },
             "activite": {
               "metier": "apothicaire",
-              "label": "Apothicairerie"
+              "label": "Apothicairerie",
+              "categories": [
+                "apothicairerie"
+              ]
             }
           },
           {
@@ -817,7 +846,10 @@
             },
             "activite": {
               "metier": "jardinier",
-              "label": "Jardinage"
+              "label": "Jardinage",
+              "categories": [
+                "jardinier"
+              ]
             }
           },
           {
@@ -974,7 +1006,11 @@
             },
             "activite": {
               "metier": "apothicaire",
-              "label": "Apothicairerie"
+              "label": "Apothicairerie",
+              "categories": [
+                "apothicairerie",
+                "grande_apothicairerie"
+              ]
             }
           },
           {
@@ -993,7 +1029,13 @@
             },
             "activite": {
               "metier": "artisan",
-              "label": "Artisanat spécialisé"
+              "label": "Artisanat spécialisé",
+              "categories": [
+                "atelier_d_artisan",
+                "tabletterie",
+                "savonnerie",
+                "grande_maison_des_arts"
+              ]
             }
           },
           {
@@ -1083,7 +1125,10 @@
             },
             "activite": {
               "metier": "jardinier",
-              "label": "Potager"
+              "label": "Potager",
+              "categories": [
+                "jardinier"
+              ]
             }
           },
           {
@@ -1102,7 +1147,10 @@
             },
             "activite": {
               "metier": "jardinier",
-              "label": "Verger"
+              "label": "Verger",
+              "categories": [
+                "jardinier"
+              ]
             }
           },
           {
@@ -1230,7 +1278,15 @@
             "label": "Palefrenier",
             "cout_embauche_cuivre": 300
           }
-        ]
+        ],
+        "reglages": {
+          "candidats_duree_s": 86400,
+          "vente_auto": {
+            "proba": 0.5,
+            "fraction": 0.34,
+            "reserve": 1
+          }
+        }
       }
     },
     {

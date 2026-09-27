@@ -55,4 +55,4 @@ Aucune dépendance (ni `package.json`, ni second écosystème), code 1 en échec
 | `test_lot_lieux_client` | lot de lieux | N boutiques ⇒ un seul `link:*` ⇒ boutiques sans porte |
 | `test_gestion_lieux_client` | `/admin/lieux` + contrat `LIEUX_HOTE` | globale d'éditeur lue par la part (ReferenceError au clic sur l'autre page) ; clé de contrat absente ; lignes affichées envoyées aux outils ; 📍 hors région principale ; 🧾 d'une connexion hors liste |
 | `test_dialogues_client` | `/admin/dialogues` | fusion doc/nœud/choix ; atteignabilité **avec** les nœuds de service |
-| `test_proprietes_client` | panneau 🏠 Propriétés (`play_town_telluris.html`) | nom saisi ou tiré non échappé ; sections exigées confondues (type, capacités, installés/disponibles, PNJ, activités, coffre) ; geste de gestion offert à un visiteur |
+| `test_proprietes_client` | panneaux 🏠 Propriétés et 📦 Coffre (`play_town_telluris.html`) | nom saisi ou tiré non échappé ; sections exigées confondues (type, capacités, installés/disponibles, PNJ, activités) ; geste de gestion offert à un visiteur ; dépôt/don non grisé pour un visiteur, vol présenté au bon rôle |
