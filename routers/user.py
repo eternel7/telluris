@@ -45,6 +45,7 @@ from utils import intro
 from utils import transport
 from utils import recrutement
 from utils import acces
+from utils import proprietes
 from utils import cadence
 from utils import courriel
 from utils import motdepasse
@@ -606,6 +607,15 @@ async def move_character(
 							ok, raison = acces.acces_autorise(character_to_update, lieu_doc, get_doc)
 							if not ok:
 								raise HTTPException(status_code=403, detail=raison)
+							# Propriété de joueur : garde PROPRE, hors du kill-switch des
+							# barrières de PNJ — une chambre louée reste inviolable même
+							# quand `ACCES_GARDIEN_ACTIF` est coupé. Location périmée au passage.
+							if proprietes.est_propriete(lieu_doc):
+								if proprietes.traiter_expiration_location(lieu_doc):
+									save_doc(lieu_doc)
+								ok, raison = proprietes.acces_propriete(character_to_update, lieu_doc)
+								if not ok:
+									raise HTTPException(status_code=403, detail=raison)
 						# Donjon à étages : la connexion ne DÉPLACE pas le personnage, elle ouvre
 						# la descente — un combat dont il ne sort que par un passage vers la
 						# surface. Son `lieu` reste celui d'où il est descendu.
@@ -627,7 +637,11 @@ async def move_character(
 						niveau_up = False
 						niveau_new = compute_character_level(character_to_update.get("xp_total", 0))
 						lieux_visites = character_to_update.get("lieux_visites", [])
-						if destination not in lieux_visites:
+						# Propriété de joueur : découvrir le bien d'AUTRUI rapporte l'XP d'un lieu
+						# (une fois, comme tout lieu) ; le sien, jamais — chaque achat en crée un.
+						if destination not in lieux_visites and not (
+								proprietes.est_propriete(lieu_doc)
+								and lieu_doc.get("proprietaire") == character_to_update.get("_id")):
 							lieux_visites.append(destination)
 							character_to_update["lieux_visites"] = lieux_visites
 							xp_gain = lieu_doc.get("xp_decouverte", character_stats.XP_DECOUVERTE_LIEU)
@@ -635,8 +649,10 @@ async def move_character(
 							info = grant_xp(character_to_update, xp_gain)
 							niveau_up = info["niveau_up"]
 							niveau_new = info["niveau_apres"]
-						# Changement de lieu : le sol (objets posés) est transitoire et perdu.
+						# Changement de lieu : le sol (objets posés) est transitoire et perdu, et le
+						# marchand choisi dans une propriété ne suit pas (champ transitoire).
 						character_to_update["objets_au_sol"] = []
+						character_to_update.pop("atelier_courant", None)
 						# Événement de zone résolu AVANT le save pour persister la ressource récoltable.
 						zone_event = None
 						if lieu_doc.get("zone_influences"):
@@ -1951,8 +1967,13 @@ async def couper_item(
 
 
 def _current_lieu_doc(character: dict) -> dict | None:
-	"""Doc du lieu où se trouve le personnage (repli sur sa cité)."""
-	return get_doc(character.get("lieu", character.get("cite")))
+	"""Doc du lieu où se trouve le personnage (repli sur sa cité).
+
+	⚠️ Dans une PROPRIÉTÉ, le « lieu » marchand est le PNJ employé choisi (champ transitoire
+	`atelier_courant`, cf. utils/proprietes.atelier_actif) : il a la forme d'une boutique, et
+	le marché, le marchandage et les commandes le traitent tel quel."""
+	lieu = get_doc(character.get("lieu", character.get("cite")))
+	return proprietes.atelier_actif(character, lieu, get_doc) or lieu
 
 
 def _find_ref(refs: list, idx, item_id):
@@ -2039,7 +2060,10 @@ def marchand_quotes(
 	porteurs = recrutement.porteurs_effectifs(character, get_doc)
 	return {
 		"lieu_label": lieu_label(lieu_doc),
-		"vendables": _marchand_vendables(character, lieu_doc, relation, porteurs),
+		# Un marchand employé n'ACHÈTE rien au visiteur : il ne travaille que ce que son
+		# propriétaire lui confie (utils/proprietes.donner).
+		"vendables": ([] if proprietes.est_atelier(lieu_doc)
+					  else _marchand_vendables(character, lieu_doc, relation, porteurs)),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"cha_marchand": merchant_cha(lieu_doc),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
@@ -2096,6 +2120,8 @@ async def sell_item(
 	porteur, principal = _acteur(current_user, body)
 
 	lieu_doc = _current_lieu_doc(principal)
+	if proprietes.est_atelier(lieu_doc):
+		raise HTTPException(status_code=403, detail="Ce marchand n'achète rien : il travaille pour son maître.")
 	relation = get_relation(principal, lieu_doc)
 	if relation_value(relation) <= 0:
 		raise HTTPException(status_code=403, detail="Ce marchand refuse de traiter avec vous.")
@@ -2193,15 +2219,27 @@ async def buy_item(
 	character.setdefault("inventaire", []).append(
 		{"item": item_id, "poids": poids} if pmax > pmin else item_id)
 
+	# Marchand employé d'une propriété : le prix va dans SA caisse (le propriétaire la relève).
+	atelier = proprietes.est_atelier(lieu_doc)
+	if atelier:
+		proprietes.encaisser(lieu_doc, prix)
+
 	if save_doc(character) is None:
 		raise HTTPException(status_code=409, detail="Conflit de sauvegarde — réessayez.")
-	# Tick marché à l'achat aussi (approvisionnement + production + écoulement PNJ), comme à la
-	# vente et à l'entrée du lieu — l'achat vient de retirer du stock à reconstituer. Un
-	# scriptorium y ajoute son petit lot de recettes virtuelles (sort/recette/carte).
-	cite_id = lieu_doc.get("lieu_parent")
-	flux = flux_cite(get_doc(cite_id) if cite_id else None)
-	tick_atelier(lieu_doc, scriptorium.recettes_effectives(lieu_doc, find_docs, get_doc, save_doc), flux)
-	save_doc(lieu_doc)  # best-effort : décrément du stock monde
+	if atelier:
+		# Tick d'atelier SANS approvisionnement gratuit, sur le flux de SA propriété — jamais
+		# celui de la ville (utils/proprietes.produire).
+		prop = get_doc(lieu_doc.get("propriete", "")) or {}
+		flux = proprietes.flux_propriete(prop) if prop else None
+		proprietes.produire(lieu_doc, flux, 1, proprietes.catalogue(get_doc))
+	else:
+		# Tick marché à l'achat aussi (approvisionnement + production + écoulement PNJ), comme à
+		# la vente et à l'entrée du lieu — l'achat vient de retirer du stock à reconstituer. Un
+		# scriptorium y ajoute son petit lot de recettes virtuelles (sort/recette/carte).
+		cite_id = lieu_doc.get("lieu_parent")
+		flux = flux_cite(get_doc(cite_id) if cite_id else None)
+		tick_atelier(lieu_doc, scriptorium.recettes_effectives(lieu_doc, find_docs, get_doc, save_doc), flux)
+	save_doc(lieu_doc)  # best-effort : décrément du stock monde (et caisse d'un atelier)
 	persister_flux(flux, save_doc)
 
 	payload = _inventory_payload(character)
@@ -2245,6 +2283,8 @@ async def marchander_item(
 	# Résoudre l'objet et sa fourchette de prix (vente : ref du sac du porteur ; achat : stock du lieu).
 	item_id = body.get("item_id")
 	if sens == "vente":
+		if proprietes.est_atelier(lieu_doc):
+			raise HTTPException(status_code=403, detail="Ce marchand n'achète rien : il travaille pour son maître.")
 		ref = _find_ref(porteur.get("inventaire", []), body.get("index"), item_id)
 		if ref is None:
 			raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")

@@ -27,6 +27,7 @@ from utils import recrutement
 from utils import montures
 from utils import scriptorium
 from utils import commande as commande_util
+from utils import proprietes
 # ⚠️ Sens d'import : `routers/auberge` → `routers/user`, jamais l'inverse (précédent :
 # `routers/recrutement`). `routers/user` importe `utils/auberge`, pas ce module.
 from routers.user import _inventory_payload
@@ -45,6 +46,24 @@ def _acces_auberge(current_user: dict) -> tuple[dict, dict]:
 	if not lieu_doc or not auberge.lieu_est_taverne(lieu_doc):
 		raise HTTPException(status_code=403, detail="Il n'y a pas de salle commune ici.")
 	return character, lieu_doc
+
+
+def _acces_nuit(current_user: dict) -> tuple[dict, dict, int]:
+	"""(personnage, lieu, coût) pour « Passer la nuit ». Une taverne au prix de la chambre ;
+	OU chez soi — propriété possédée ou chambre louée non expirée — GRATUITEMENT. Le flux de
+	la nuit (soins, étals de la cité, commandes) est le même : on ne le duplique pas."""
+	character = get_selected_character(current_user)
+	if not character:
+		raise HTTPException(status_code=404, detail="Personnage introuvable")
+	lieu_doc = get_doc(character.get("lieu", ""))
+	if lieu_doc and proprietes.est_propriete(lieu_doc):
+		proprietes.traiter_expiration_location(lieu_doc)
+		if not proprietes.peut_dormir(character, lieu_doc):
+			raise HTTPException(status_code=403, detail="Vous ne pouvez pas dormir ici.")
+		return character, lieu_doc, 0
+	if not lieu_doc or not auberge.lieu_est_taverne(lieu_doc):
+		raise HTTPException(status_code=403, detail="Il n'y a pas de salle commune ici.")
+	return character, lieu_doc, auberge.cout_nuit(lieu_doc)
 
 
 def _ecrivain(character: dict, body: dict) -> tuple[dict, list]:
@@ -412,10 +431,9 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 	parallélisme réel ouvrirait une fenêtre où deux joueurs approvisionnent le même étal.
 	⚠️ Aucune horloge n'avance : rien n'est partagé, rien n'est écrit sur le monde qu'un
 	autre joueur n'aurait pas pu déclencher en visitant les mêmes boutiques."""
-	character, lieu_doc = _acces_auberge(current_user)
+	character, lieu_doc, cout = _acces_nuit(current_user)
 
 	# 1. Le débit passe APRÈS toutes les gardes : on ne prend l'argent que si la nuit a lieu.
-	cout = auberge.cout_nuit(lieu_doc)
 	if cout and debit_character(character, cout) is None:
 		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer la chambre.")
 
@@ -455,6 +473,26 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		if change and save_doc(boutique) is not None:
 			magasins += 1
 	persister_flux(flux, save_doc)
+
+	# 3 bis. Chez soi : les marchands employés travaillent la nuit comme les étals de la cité,
+	#    mais sur le flux de LA PROPRIÉTÉ (jamais celui de la ville) et sans approvisionnement
+	#    gratuit ; leurs ventes remplissent leur caisse. Le tableau d'embauche se renouvelle.
+	ateliers = 0
+	if (proprietes.est_propriete(lieu_doc)
+			and proprietes.role_de(character, lieu_doc) == proprietes.PROPRIETAIRE):
+		cat_prop = proprietes.catalogue(get_doc)
+		employes = proprietes.employes_effectifs(lieu_doc, get_doc)
+		flux_prop = proprietes.flux_propriete(lieu_doc)
+		for e in employes:
+			change, _gain = proprietes.produire(e, flux_prop, passes, cat_prop)
+			if change and save_doc(e) is not None:
+				ateliers += 1
+		proprietes.rafraichir_candidats(lieu_doc, cat_prop, employes, get_doc,
+										recrutement.portraits_disponibles(), force=True)
+		# Le flux se referme SUR le doc de la propriété : s'il n'a pas bougé, on sauve quand
+		# même le doc pour ses candidats renouvelés.
+		if not persister_flux(flux_prop, save_doc):
+			save_doc(lieu_doc)
 
 	# 4. Les recrues. ⚠️ On PÉRIME au lieu de supprimer : c'est ce qui fait traverser
 	#    `retirer_du_tableau`, le chokepoint qui sait qu'un ANCIEN COMPAGNON repasse `parti`
@@ -501,6 +539,7 @@ async def passer_la_nuit(current_user: Annotated[dict, Depends(get_current_user)
 		"vitals": vitals,
 		"cout": cout,
 		"magasins": magasins,
+		"ateliers": ateliers,
 		"recrues": recrues,
 		"commandes": commandes,
 		"compagnons": len(compagnons),

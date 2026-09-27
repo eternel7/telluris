@@ -1,0 +1,1358 @@
+{
+  "docs": [
+    {
+      "_id": "rules:proprietes",
+      "type": "rules",
+      "value": {
+        "types": [
+          {
+            "id": "chambre",
+            "label": "Chambre",
+            "rang": 1,
+            "image": "auberge_europe_lutecia02.jpg",
+            "description": "Petite unité individuelle : repos, récupération, petit espace personnel et stockage très limité.",
+            "prix_cuivre": 5000,
+            "revente_facteur": 0.5,
+            "occupants_max": 1,
+            "personnel_max": 1,
+            "stockage_kg": 20,
+            "location": {
+              "prix_cuivre": 150,
+              "duree_s": 604800
+            }
+          },
+          {
+            "id": "logement",
+            "label": "Logement",
+            "rang": 2,
+            "image": "auberge_europe04.jpg",
+            "description": "Petit logement indépendant : un ou deux occupants, quelques espaces simples, un PNJ accueilli ponctuellement.",
+            "prix_cuivre": 20000,
+            "revente_facteur": 0.6,
+            "occupants_max": 2,
+            "personnel_max": 2,
+            "stockage_kg": 60
+          },
+          {
+            "id": "maison",
+            "label": "Maison",
+            "rang": 3,
+            "image": "auberge_europe06.jpg",
+            "description": "Habitation individuelle : plusieurs pièces, un véritable foyer, du personnel en nombre limité.",
+            "prix_cuivre": 80000,
+            "revente_facteur": 0.6,
+            "occupants_max": 5,
+            "personnel_max": 4,
+            "stockage_kg": 150
+          },
+          {
+            "id": "demeure",
+            "label": "Demeure",
+            "rang": 4,
+            "image": "grande_maison_des_arts_europe01.jpg",
+            "description": "Propriété importante : nombreuses pièces, personnel domestique, accueil d'invités.",
+            "prix_cuivre": 300000,
+            "revente_facteur": 0.6,
+            "occupants_max": 10,
+            "personnel_max": 10,
+            "stockage_kg": 400
+          },
+          {
+            "id": "domaine",
+            "label": "Domaine",
+            "rang": 5,
+            "image": "chemin_vers_les_collines_boisees01.png",
+            "description": "Propriété foncière : une demeure principale, des dépendances, des terrains privés et de nombreuses activités.",
+            "prix_cuivre": 1000000,
+            "revente_facteur": 0.6,
+            "occupants_max": 20,
+            "personnel_max": 25,
+            "stockage_kg": 1000
+          }
+        ],
+        "amenagements": [
+          {
+            "id": "loge_gardien",
+            "nom": "Loge du gardien",
+            "categorie": "defense",
+            "types_autorises": [
+              "chambre",
+              "logement",
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 1500,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "gardien": 1
+              }
+            },
+            "effets": {
+              "garde": true
+            },
+            "description": "Un gardien y veille : plus personne ne se sert dans le coffre."
+          },
+          {
+            "id": "lit_ameliore",
+            "nom": "Lit amélioré",
+            "categorie": "vie",
+            "types_autorises": [
+              "chambre",
+              "logement"
+            ],
+            "cout_cuivre": 400,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "petit_coffre",
+            "nom": "Petit coffre",
+            "categorie": "vie",
+            "types_autorises": [
+              "chambre",
+              "logement"
+            ],
+            "cout_cuivre": 300,
+            "prerequis": [],
+            "capacite": {
+              "stockage_kg": 15
+            }
+          },
+          {
+            "id": "rangement",
+            "nom": "Petit espace de rangement",
+            "categorie": "vie",
+            "types_autorises": [
+              "chambre"
+            ],
+            "cout_cuivre": 200,
+            "prerequis": [],
+            "capacite": {
+              "stockage_kg": 10
+            }
+          },
+          {
+            "id": "bureau",
+            "nom": "Table ou bureau",
+            "categorie": "gestion",
+            "types_autorises": [
+              "chambre",
+              "logement",
+              "maison",
+              "demeure"
+            ],
+            "cout_cuivre": 300,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "etagere",
+            "nom": "Étagère",
+            "categorie": "vie",
+            "types_autorises": [
+              "chambre"
+            ],
+            "cout_cuivre": 150,
+            "prerequis": [],
+            "capacite": {
+              "stockage_kg": 5
+            }
+          },
+          {
+            "id": "eclairage",
+            "nom": "Éclairage",
+            "categorie": "vie",
+            "types_autorises": [
+              "chambre",
+              "logement"
+            ],
+            "cout_cuivre": 100,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "decoration",
+            "nom": "Décoration",
+            "categorie": "vie",
+            "types_autorises": [
+              "chambre",
+              "logement",
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 200,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "chambre_amelioree",
+            "nom": "Chambre améliorée",
+            "categorie": "vie",
+            "types_autorises": [
+              "logement"
+            ],
+            "cout_cuivre": 1500,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "reserve",
+            "nom": "Coffre ou réserve",
+            "categorie": "vie",
+            "types_autorises": [
+              "logement",
+              "maison",
+              "demeure"
+            ],
+            "cout_cuivre": 1000,
+            "prerequis": [],
+            "capacite": {
+              "stockage_kg": 40
+            }
+          },
+          {
+            "id": "petite_cuisine",
+            "nom": "Petite cuisine",
+            "categorie": "service",
+            "types_autorises": [
+              "logement"
+            ],
+            "cout_cuivre": 1200,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "cuisinier": 1
+              }
+            },
+            "activite": {
+              "metier": "cuisinier",
+              "label": "Cuisine",
+              "categories": [
+                "cuisine"
+              ]
+            }
+          },
+          {
+            "id": "petite_salle_a_manger",
+            "nom": "Petite salle à manger",
+            "categorie": "vie",
+            "types_autorises": [
+              "logement"
+            ],
+            "cout_cuivre": 800,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "petite_bibliotheque",
+            "nom": "Petite bibliothèque",
+            "categorie": "gestion",
+            "types_autorises": [
+              "logement"
+            ],
+            "cout_cuivre": 1000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "espace_medical",
+            "nom": "Espace médical simple",
+            "categorie": "service",
+            "types_autorises": [
+              "logement"
+            ],
+            "cout_cuivre": 2000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "medecin": 1
+              }
+            },
+            "activite": {
+              "metier": "medecin",
+              "label": "Soins"
+            }
+          },
+          {
+            "id": "lit_supplementaire",
+            "nom": "Lit supplémentaire",
+            "categorie": "vie",
+            "types_autorises": [
+              "logement"
+            ],
+            "cout_cuivre": 500,
+            "prerequis": [],
+            "capacite": {
+              "occupants": 1
+            }
+          },
+          {
+            "id": "coin_resident",
+            "nom": "Petit espace pour un PNJ résident",
+            "categorie": "service",
+            "types_autorises": [
+              "logement"
+            ],
+            "cout_cuivre": 800,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "domestique": 1
+              }
+            },
+            "activite": {
+              "metier": "domestique",
+              "label": "Service domestique"
+            }
+          },
+          {
+            "id": "chambres_multiples",
+            "nom": "Chambres multiples",
+            "categorie": "vie",
+            "types_autorises": [
+              "maison",
+              "demeure"
+            ],
+            "cout_cuivre": 4000,
+            "prerequis": [],
+            "capacite": {
+              "occupants": 2
+            }
+          },
+          {
+            "id": "grande_cuisine",
+            "nom": "Grande cuisine",
+            "categorie": "service",
+            "types_autorises": [
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 5000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "cuisinier": 1
+              }
+            },
+            "activite": {
+              "metier": "cuisinier",
+              "label": "Cuisine",
+              "categories": [
+                "cuisine",
+                "boulangerie"
+              ]
+            }
+          },
+          {
+            "id": "salle_a_manger",
+            "nom": "Salle à manger",
+            "categorie": "vie",
+            "types_autorises": [
+              "maison",
+              "demeure"
+            ],
+            "cout_cuivre": 2500,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "salon",
+            "nom": "Salon",
+            "categorie": "vie",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 2000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "bibliotheque",
+            "nom": "Bibliothèque",
+            "categorie": "gestion",
+            "types_autorises": [
+              "maison",
+              "demeure"
+            ],
+            "cout_cuivre": 4000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "cave",
+            "nom": "Cave",
+            "categorie": "vie",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 2500,
+            "prerequis": [],
+            "capacite": {
+              "stockage_kg": 60
+            }
+          },
+          {
+            "id": "salle_de_soins",
+            "nom": "Salle de soins",
+            "categorie": "service",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 4000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "medecin": 1
+              }
+            },
+            "activite": {
+              "metier": "medecin",
+              "label": "Soins"
+            }
+          },
+          {
+            "id": "salle_etude",
+            "nom": "Salle d'étude",
+            "categorie": "service",
+            "types_autorises": [
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 3500,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "erudit": 1
+              }
+            },
+            "activite": {
+              "metier": "erudit",
+              "label": "Étude"
+            }
+          },
+          {
+            "id": "salle_entrainement",
+            "nom": "Salle d'entraînement",
+            "categorie": "defense",
+            "types_autorises": [
+              "maison",
+              "demeure"
+            ],
+            "cout_cuivre": 4500,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "petit_laboratoire",
+            "nom": "Petit laboratoire d'alchimie",
+            "categorie": "activite",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 6000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "alchimiste": 1
+              }
+            },
+            "activite": {
+              "metier": "alchimiste",
+              "label": "Alchimie",
+              "categories": [
+                "laboratoire_d_alchimie"
+              ]
+            }
+          },
+          {
+            "id": "petit_atelier",
+            "nom": "Petit atelier d'artisan",
+            "categorie": "activite",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 5000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "artisan": 1
+              }
+            },
+            "activite": {
+              "metier": "artisan",
+              "label": "Artisanat",
+              "categories": [
+                "atelier_d_artisan",
+                "tabletterie"
+              ]
+            }
+          },
+          {
+            "id": "bureau_professionnel",
+            "nom": "Bureau pour un PNJ professionnel",
+            "categorie": "activite",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 3000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "marchand": 1
+              }
+            },
+            "activite": {
+              "metier": "marchand",
+              "label": "Négoce"
+            }
+          },
+          {
+            "id": "chambre_domestique",
+            "nom": "Chambre de domestique",
+            "categorie": "service",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 2000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "domestique": 1
+              }
+            },
+            "activite": {
+              "metier": "domestique",
+              "label": "Service domestique"
+            }
+          },
+          {
+            "id": "cour_interieure",
+            "nom": "Cour intérieure",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 2500,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "petit_jardin",
+            "nom": "Petit jardin",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "maison"
+            ],
+            "cout_cuivre": 2000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "quartiers_personnel",
+            "nom": "Quartiers du personnel",
+            "categorie": "vie",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "domestique": 3
+              }
+            },
+            "activite": {
+              "metier": "domestique",
+              "label": "Service domestique"
+            }
+          },
+          {
+            "id": "appartement_invites",
+            "nom": "Appartement pour invités",
+            "categorie": "vie",
+            "types_autorises": [
+              "demeure"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {
+              "occupants": 2
+            }
+          },
+          {
+            "id": "salle_reunion",
+            "nom": "Salle de réunion",
+            "categorie": "gestion",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 4000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "archives",
+            "nom": "Salle d'archives",
+            "categorie": "gestion",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 4000,
+            "prerequis": [],
+            "capacite": {
+              "stockage_kg": 100
+            }
+          },
+          {
+            "id": "salon_reception",
+            "nom": "Salon de réception",
+            "categorie": "service",
+            "types_autorises": [
+              "demeure"
+            ],
+            "cout_cuivre": 6000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "salle_medicale",
+            "nom": "Salle médicale",
+            "categorie": "service",
+            "types_autorises": [
+              "demeure"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "medecin": 1
+              }
+            },
+            "activite": {
+              "metier": "medecin",
+              "label": "Soins"
+            }
+          },
+          {
+            "id": "infirmerie",
+            "nom": "Infirmerie",
+            "categorie": "service",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 9000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "medecin": 1
+              }
+            },
+            "activite": {
+              "metier": "medecin",
+              "label": "Soins"
+            }
+          },
+          {
+            "id": "laboratoire_alchimie",
+            "nom": "Laboratoire d'alchimie",
+            "categorie": "activite",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 12000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "alchimiste": 1
+              }
+            },
+            "activite": {
+              "metier": "alchimiste",
+              "label": "Alchimie",
+              "categories": [
+                "laboratoire_d_alchimie",
+                "grand_laboratoire_alchimique"
+              ]
+            }
+          },
+          {
+            "id": "atelier_artisan",
+            "nom": "Atelier d'artisan",
+            "categorie": "activite",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 10000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "artisan": 1
+              }
+            },
+            "activite": {
+              "metier": "artisan",
+              "label": "Artisanat",
+              "categories": [
+                "atelier_d_artisan",
+                "tabletterie",
+                "grande_maison_des_arts"
+              ]
+            }
+          },
+          {
+            "id": "cabinet_medecin",
+            "nom": "Cabinet de médecin",
+            "categorie": "activite",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 10000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "medecin": 1
+              }
+            },
+            "activite": {
+              "metier": "medecin",
+              "label": "Médecine",
+              "categories": [
+                "institut_medico_alchimique"
+              ]
+            }
+          },
+          {
+            "id": "cabinet_apothicaire",
+            "nom": "Cabinet d'apothicaire",
+            "categorie": "activite",
+            "types_autorises": [
+              "demeure"
+            ],
+            "cout_cuivre": 10000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "apothicaire": 1
+              }
+            },
+            "activite": {
+              "metier": "apothicaire",
+              "label": "Apothicairerie",
+              "categories": [
+                "apothicairerie"
+              ]
+            }
+          },
+          {
+            "id": "bureau_marchand",
+            "nom": "Bureau de marchand",
+            "categorie": "activite",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "marchand": 1
+              }
+            },
+            "activite": {
+              "metier": "marchand",
+              "label": "Négoce"
+            }
+          },
+          {
+            "id": "salle_recherche",
+            "nom": "Salle d'étude et de recherche",
+            "categorie": "activite",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [
+              "salle_etude"
+            ],
+            "capacite": {
+              "postes": {
+                "erudit": 1
+              }
+            },
+            "activite": {
+              "metier": "erudit",
+              "label": "Recherche"
+            }
+          },
+          {
+            "id": "salle_armes",
+            "nom": "Salle d'armes",
+            "categorie": "defense",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "cour_entrainement",
+            "nom": "Cour d'entraînement",
+            "categorie": "defense",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 6000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "garde": 1
+              }
+            },
+            "activite": {
+              "metier": "garde",
+              "label": "Entraînement des gardes"
+            }
+          },
+          {
+            "id": "jardin",
+            "nom": "Jardin",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 4000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "jardinier": 1
+              }
+            },
+            "activite": {
+              "metier": "jardinier",
+              "label": "Jardinage",
+              "categories": [
+                "jardinier"
+              ]
+            }
+          },
+          {
+            "id": "cour",
+            "nom": "Cour",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 3000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "ecurie_limitee",
+            "nom": "Écurie limitée",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "demeure"
+            ],
+            "cout_cuivre": 10000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "palefrenier": 1
+              }
+            },
+            "activite": {
+              "metier": "palefrenier",
+              "label": "Soins aux bêtes"
+            }
+          },
+          {
+            "id": "nombreuses_chambres",
+            "nom": "Nombreuses chambres",
+            "categorie": "vie",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 12000,
+            "prerequis": [],
+            "capacite": {
+              "occupants": 6
+            }
+          },
+          {
+            "id": "appartements_invites",
+            "nom": "Appartements pour invités",
+            "categorie": "vie",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 15000,
+            "prerequis": [],
+            "capacite": {
+              "occupants": 4
+            }
+          },
+          {
+            "id": "bureau_administratif",
+            "nom": "Bureau administratif",
+            "categorie": "gestion",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "intendant": 1
+              }
+            },
+            "activite": {
+              "metier": "intendant",
+              "label": "Administration"
+            }
+          },
+          {
+            "id": "grande_bibliotheque",
+            "nom": "Grande bibliothèque",
+            "categorie": "gestion",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 12000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "salle_gestion",
+            "nom": "Salle de gestion des ressources",
+            "categorie": "gestion",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [
+              "bureau_administratif"
+            ],
+            "capacite": {
+              "postes": {
+                "intendant": 1
+              }
+            },
+            "activite": {
+              "metier": "intendant",
+              "label": "Gestion des ressources"
+            }
+          },
+          {
+            "id": "grande_salle_a_manger",
+            "nom": "Grande salle à manger",
+            "categorie": "vie",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {}
+          },
+          {
+            "id": "buanderie",
+            "nom": "Buanderie",
+            "categorie": "service",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 5000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "domestique": 2
+              }
+            },
+            "activite": {
+              "metier": "domestique",
+              "label": "Blanchisserie"
+            }
+          },
+          {
+            "id": "apothicairerie",
+            "nom": "Apothicairerie",
+            "categorie": "activite",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 14000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "apothicaire": 2
+              }
+            },
+            "activite": {
+              "metier": "apothicaire",
+              "label": "Apothicairerie",
+              "categories": [
+                "apothicairerie",
+                "grande_apothicairerie"
+              ]
+            }
+          },
+          {
+            "id": "ateliers_specialises",
+            "nom": "Ateliers spécialisés",
+            "categorie": "activite",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 20000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "artisan": 3
+              }
+            },
+            "activite": {
+              "metier": "artisan",
+              "label": "Artisanat spécialisé",
+              "categories": [
+                "atelier_d_artisan",
+                "tabletterie",
+                "savonnerie",
+                "grande_maison_des_arts"
+              ]
+            }
+          },
+          {
+            "id": "cabinets_specialistes",
+            "nom": "Cabinets de spécialistes",
+            "categorie": "activite",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 15000,
+            "prerequis": [
+              "cabinet_medecin"
+            ],
+            "capacite": {
+              "postes": {
+                "erudit": 2
+              }
+            },
+            "activite": {
+              "metier": "erudit",
+              "label": "Consultations"
+            }
+          },
+          {
+            "id": "poste_de_garde",
+            "nom": "Poste de garde",
+            "categorie": "defense",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "garde": 2
+              }
+            },
+            "activite": {
+              "metier": "garde",
+              "label": "Garde du domaine"
+            }
+          },
+          {
+            "id": "quartiers_gardes",
+            "nom": "Quartiers des gardes",
+            "categorie": "defense",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 12000,
+            "prerequis": [
+              "poste_de_garde"
+            ],
+            "capacite": {
+              "postes": {
+                "garde": 4
+              }
+            }
+          },
+          {
+            "id": "dispositifs_defensifs",
+            "nom": "Dispositifs défensifs privés",
+            "categorie": "defense",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 15000,
+            "prerequis": [
+              "poste_de_garde"
+            ],
+            "capacite": {},
+            "description": "Compatibles avec les règlements de la ville."
+          },
+          {
+            "id": "potager",
+            "nom": "Potager",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 3000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "jardinier": 1
+              }
+            },
+            "activite": {
+              "metier": "jardinier",
+              "label": "Potager",
+              "categories": [
+                "jardinier"
+              ]
+            }
+          },
+          {
+            "id": "verger",
+            "nom": "Verger",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 5000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "jardinier": 1
+              }
+            },
+            "activite": {
+              "metier": "jardinier",
+              "label": "Verger",
+              "categories": [
+                "jardinier"
+              ]
+            }
+          },
+          {
+            "id": "ecuries",
+            "nom": "Écuries",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 15000,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "palefrenier": 2
+              }
+            },
+            "activite": {
+              "metier": "palefrenier",
+              "label": "Soins aux bêtes"
+            }
+          },
+          {
+            "id": "grange",
+            "nom": "Grange",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 8000,
+            "prerequis": [],
+            "capacite": {
+              "stockage_kg": 300
+            }
+          },
+          {
+            "id": "dependances",
+            "nom": "Dépendances",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 10000,
+            "prerequis": [],
+            "capacite": {
+              "stockage_kg": 200,
+              "occupants": 4
+            }
+          },
+          {
+            "id": "terrain_prive",
+            "nom": "Terrain privé",
+            "categorie": "exterieur",
+            "types_autorises": [
+              "domaine"
+            ],
+            "cout_cuivre": 6000,
+            "prerequis": [],
+            "capacite": {}
+          }
+        ],
+        "metiers": [
+          {
+            "id": "gardien",
+            "label": "Gardien",
+            "cout_embauche_cuivre": 600,
+            "description": "Veille sur les lieux : empêche le vol."
+          },
+          {
+            "id": "domestique",
+            "label": "Domestique",
+            "cout_embauche_cuivre": 300
+          },
+          {
+            "id": "cuisinier",
+            "label": "Cuisinier",
+            "cout_embauche_cuivre": 500
+          },
+          {
+            "id": "medecin",
+            "label": "Médecin",
+            "cout_embauche_cuivre": 2000
+          },
+          {
+            "id": "apothicaire",
+            "label": "Apothicaire",
+            "cout_embauche_cuivre": 1500
+          },
+          {
+            "id": "alchimiste",
+            "label": "Alchimiste",
+            "cout_embauche_cuivre": 2000
+          },
+          {
+            "id": "artisan",
+            "label": "Artisan",
+            "cout_embauche_cuivre": 1500
+          },
+          {
+            "id": "marchand",
+            "label": "Marchand",
+            "cout_embauche_cuivre": 1200
+          },
+          {
+            "id": "erudit",
+            "label": "Érudit",
+            "cout_embauche_cuivre": 1200
+          },
+          {
+            "id": "garde",
+            "label": "Garde",
+            "cout_embauche_cuivre": 800
+          },
+          {
+            "id": "intendant",
+            "label": "Intendant",
+            "cout_embauche_cuivre": 1500
+          },
+          {
+            "id": "jardinier",
+            "label": "Jardinier",
+            "cout_embauche_cuivre": 300
+          },
+          {
+            "id": "palefrenier",
+            "label": "Palefrenier",
+            "cout_embauche_cuivre": 300
+          }
+        ],
+        "reglages": {
+          "candidats_duree_s": 86400,
+          "vente_auto": {
+            "proba": 0.5,
+            "fraction": 0.34,
+            "reserve": 1
+          }
+        }
+      }
+    },
+    {
+      "_id": "zone:habitable_chambre",
+      "type": "zone_influence",
+      "nom": "Zone habitable — Chambre",
+      "type_propriete": "chambre",
+      "terrain_tags": [
+        "ville",
+        "urbain"
+      ],
+      "intensite_max": 0,
+      "table_evenements": [],
+      "modificateurs": {}
+    },
+    {
+      "_id": "zone:habitable_logement",
+      "type": "zone_influence",
+      "nom": "Zone habitable — Logement",
+      "type_propriete": "logement",
+      "terrain_tags": [
+        "ville",
+        "urbain"
+      ],
+      "intensite_max": 0,
+      "table_evenements": [],
+      "modificateurs": {}
+    },
+    {
+      "_id": "zone:habitable_maison",
+      "type": "zone_influence",
+      "nom": "Zone habitable — Maison",
+      "type_propriete": "maison",
+      "terrain_tags": [
+        "ville",
+        "urbain"
+      ],
+      "intensite_max": 0,
+      "table_evenements": [],
+      "modificateurs": {}
+    },
+    {
+      "_id": "zone:habitable_demeure",
+      "type": "zone_influence",
+      "nom": "Zone habitable — Demeure",
+      "type_propriete": "demeure",
+      "terrain_tags": [
+        "ville",
+        "urbain"
+      ],
+      "intensite_max": 0,
+      "table_evenements": [],
+      "modificateurs": {}
+    },
+    {
+      "_id": "zone:habitable_domaine",
+      "type": "zone_influence",
+      "nom": "Zone habitable — Domaine",
+      "type_propriete": "domaine",
+      "terrain_tags": [
+        "ville",
+        "urbain"
+      ],
+      "intensite_max": 0,
+      "table_evenements": [],
+      "modificateurs": {}
+    }
+  ]
+}

@@ -1672,7 +1672,7 @@
 				   déplacement et plein écran. ⚠️ Ce menu n'existe que sous la condition de cette
 				   ligne (`a_ligne_actions`) — hors d'elle, la pastille ⛶ flottante reste émise
 				   (bas de page), sans quoi le plein écran disparaîtrait de ces lieux. #}
-				{% set a_ligne_actions = dimensions or achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or pnjs_presents %}
+				{% set a_ligne_actions = dimensions or achat_sous_categories or est_guilde or est_recrutement or est_etable or est_auberge or est_scriptorium or est_propriete or proprietes_offre or pnjs_presents %}
 				{% if a_ligne_actions %}
 				<h3 id="sub-actions-title"><span>Actions</span>
 					<span class="affichage-wrap">
@@ -1714,6 +1714,29 @@
 					{% endif %}
 					{% if est_scriptorium %}
 					<li><button class="sub-loc-btn" onclick="openScriptorium()">🖋️ Écrire</button></li>
+					{% endif %}
+					{% if proprietes_offre %}
+					<li><button class="sub-loc-btn" onclick="openProprietesOffre()">🏠 Propriétés</button></li>
+					{% endif %}
+					{% if est_propriete %}
+					{# La propriété se présente comme un LIEU : ses PNJ marchands d'abord (une ligne
+					   chacun, comme les PNJ présents), puis le coffre, l'embauche, la caisse. L'id
+					   passe par data-id — jamais dans un onclick (Conventions §9). #}
+					{% for a in proprietes_ateliers %}
+					<li><button class="sub-loc-btn" data-id="{{ a.id }}" onclick="choisirAtelier(this)">🏷️ {{ a.nom }} — {{ a.metier }}{% if a.grande %} ✦{% endif %}</button></li>
+					{% endfor %}
+					<li><button class="sub-loc-btn" onclick="openCoffre()">📦 Coffre</button></li>
+					{% if role_propriete == 'proprietaire' %}
+					<li><button class="sub-loc-btn" onclick="openEmbauche()">🤝 Embaucher</button></li>
+					{% endif %}
+					{% if caisse_accessible %}
+					<li><button class="sub-loc-btn" onclick="releverCaisse()">💰 {% if role_propriete == 'proprietaire' %}Relever la caisse{% else %}Vider la caisse{% endif %}</button></li>
+					{% endif %}
+					<li><button class="sub-loc-btn" onclick="openPropriete()">🏠 {% if role_propriete == 'proprietaire' %}Gérer le logis{% else %}Visiter le logis{% endif %}</button></li>
+					{# Chez soi : même bouton, même flux que la nuit d'auberge — gratuit. #}
+					{% if auberge_nuit %}
+					<li><button class="sub-loc-btn" id="aub-nuit-btn" onclick="passerLaNuit()">🌙 Passer la nuit</button></li>
+					{% endif %}
 					{% endif %}
 					{# Les présences sont CUMULABLES : une ligne par PNJ présent, dans l'ordre du
 					   lieu. Pastille « ! »/« ? » de CHACUN : rendue en Jinja au chargement,
@@ -2348,6 +2371,59 @@
 		<h2 style="margin:1rem 0 0">🗒️ À vendre</h2>
 		<div id="mnt-offres-list" class="mnt-offres"></div>
 	</div><!-- /#montures-panel -->
+	{# Propriétés : UN panneau, deux vues — l'offre (acheter en zone habitable, louer à
+	   l'auberge) et le logis où l'on se tient. Type, capacités, aménagements installés /
+	   disponibles, occupants et PNJ, activités et coffre sont des sections DISTINCTES. #}
+	<div id="proprietes-panel" class="panel-hidden panel-frame board-panel" aria-label="Propriétés">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Propriétés">
+			<h2>🏠 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeProprietes()" role="button">✕ Fermer</button>
+		</div>
+		<div id="prop-contenu"></div>
+	</div><!-- /#proprietes-panel -->
+	{# Coffre du lieu : MÊME présentation que l'inventaire du groupe (#grp-inv-wrap) — votre
+	   sac à gauche, à droite le coffre ou l'atelier d'un marchand choisi au sélecteur. #}
+	<div id="prop-coffre-panel" class="panel-hidden panel-frame board-panel" aria-label="Coffre">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Coffre">
+			<h2>📦 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeCoffre()" role="button">✕ Fermer</button>
+		</div>
+		<p id="pcf-etat" class="q-desc"></p>
+		<div class="grp-inv-wrap">
+			<div class="grp-inv-col">
+				<div class="grp-inv-head">
+					<strong>Vous</strong>
+					<span class="sh-inv-poids" id="pcf-charge-principal"></span>
+				</div>
+				<div class="sh-inv-scroll sh-scroll"><div id="pcf-principal" class="sh-inv-box"></div></div>
+			</div>
+			<div class="grp-inv-col">
+				<div class="grp-inv-head">
+					<select id="pcf-select" onchange="onCoffreSelect(this.value)"></select>
+					<span class="sh-inv-poids" id="pcf-charge-droite"></span>
+				</div>
+				<div class="sh-inv-scroll sh-scroll"><div id="pcf-droite" class="sh-inv-box"></div></div>
+			</div>
+		</div>
+	</div><!-- /#prop-coffre-panel -->
+	{# Embauche : comme le tableau de recrues — des cartes de personnage, ici des PNJ
+	   marchands (portrait /pnj), sans vitaux ni clauses. #}
+	<div id="prop-embauche-panel" class="panel-hidden panel-frame board-panel" aria-label="Embauche">
+		<div class="sell-topbar">
+			<header class="location-desc" aria-label="Embauche">
+			<h2>🤝 {{title}}</h2>
+			</header>
+			<button class="sheet-tab-btn close-sheet-btn" onclick="closeEmbauche()" role="button">✕ Fermer</button>
+		</div>
+		<h2 style="margin:.6rem 0 0">👥 Votre personnel (<span id="pem-plafond"></span>)</h2>
+		<div id="pem-employes" class="cards-list"></div>
+		<h2 style="margin:1rem 0 0">🗒️ Candidats</h2>
+		<div id="pem-candidats" class="cards-list"></div>
+	</div><!-- /#prop-embauche-panel -->
 	<div id="auberge-panel" class="panel-hidden panel-frame board-panel" aria-label="Salle commune">
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Salle commune">
@@ -2511,6 +2587,16 @@
 		/* Les bêtes à vendre : une ligne par espèce (image, texte, bouton), pas une carte de
 		   personnage — on n'achète pas encore un individu, seulement une espèce. */
 		.mnt-offres { display: flex; flex-direction: column; gap: .5rem; }
+		/* Propriétés : sections distinctes, listes simples. */
+		.prop-section { margin: .8rem 0 0; }
+		.prop-section h3 { margin: 0 0 .35rem; }
+		.prop-liste { display: flex; flex-direction: column; gap: .35rem; }
+		.prop-ligne { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+			padding: .35rem .5rem; border: 1px solid rgba(120, 90, 50, .35); border-radius: 6px; }
+		.prop-ligne .prop-txt { flex: 1 1 12rem; display: flex; flex-direction: column; gap: .1rem; }
+		.prop-caps { display: flex; flex-wrap: wrap; gap: .4rem .9rem; }
+		.prop-etat-on { color: #3d7a2e; font-weight: bold; }
+		.prop-etat-off { opacity: .7; }
 		.mnt-offre {
 			display: flex; align-items: center; gap: .75rem; padding: .5rem;
 			border-radius: 6px;  background: rgba(255, 255, 255, 0.03);
@@ -4009,6 +4095,12 @@ document.addEventListener('keydown', e => {
 	if (groupe && !groupe.classList.contains('panel-hidden')) { closeGroupe(); return; }
 	const etable = document.getElementById('montures-panel');
 	if (etable && !etable.classList.contains('panel-hidden')) { closeEtable(); return; }
+	const propPanel = document.getElementById('proprietes-panel');
+	if (propPanel && !propPanel.classList.contains('panel-hidden')) { closeProprietes(); return; }
+	const coffrePanel = document.getElementById('prop-coffre-panel');
+	if (coffrePanel && !coffrePanel.classList.contains('panel-hidden')) { closeCoffre(); return; }
+	const embauchePanel = document.getElementById('prop-embauche-panel');
+	if (embauchePanel && !embauchePanel.classList.contains('panel-hidden')) { closeEmbauche(); return; }
 	// ⚠️ L'overlay de la nuit AVANT le panneau qui le porte : c'est lui qui est au premier
 	// plan. Il n'est fermable que quand la nuit est passée (son bouton est armé) — sortir
 	// pendant que le serveur écrit laisserait le joueur devant un état à moitié appliqué.
@@ -7077,8 +7169,10 @@ async function buyItem(itemId, btn) {
 // renvoie `commandes`, `catalogue`, `matieres`, `inventaire_payload`, `achetables`,
 // `vendables` et `purse`, et `_appliquerCommande` les repose tels quels. Le rayon peut
 // avoir bougé (matières achetées pour la commande), d'où les deux listes du marchand.
-const CMD_ACTIVE = {{ 'true' if est_commande else 'false' }};
-const CMD_SUR_MESURE = {{ 'true' if est_sur_mesure else 'false' }};
+// `let` et non `const` : dans une PROPRIÉTÉ, c'est le marchand choisi (`choisirAtelier`) qui
+// dit s'il prend des commandes (catalogue) et du sur-mesure (grande maison).
+let CMD_ACTIVE = {{ 'true' if est_commande else 'false' }};
+let CMD_SUR_MESURE = {{ 'true' if est_sur_mesure else 'false' }};
 let _cmdSort = _loadSort('telluris.play.cmd_sort');
 let _cmdTimer = null;
 function cycleCmdSort() {
@@ -8225,6 +8319,434 @@ async function relacherMonture(monture_id) {
 		}
 	} catch (err) { console.error('Erreur relâchement', err); }
 }
+
+// ── Propriétés ───────────────────────────────────────────────────────────────────
+// UN panneau, deux vues : `offre` (acheter sur une zone habitable, louer à l'auberge) et
+// `ici` (le logis où l'on se tient). Le serveur renvoie le bloc RECALCULÉ à chaque geste
+// (Convention §10) : on le re-rend tel quel, sans jamais reconstruire un état.
+// ⚠️ Libellés d'aménagements/métiers = contenu d'admin ; noms de personnes = saisis ou tirés :
+// tout passe par escapeHtml, et les boutons adressent par data-* (jamais `onclick="…('${x}')"`).
+let _propVue = null;
+
+function _propAfficher() {
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('proprietes-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function closeProprietes() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('proprietes-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function openProprietesOffre() {
+	const data = await _aubFetch('api/proprietes/offre');
+	if (!data) return;
+	_propVue = 'offre';
+	updatePurse(data.purse);
+	renderProprietesOffre(data);
+	_propAfficher();
+}
+
+async function openPropriete() {
+	const data = await _aubFetch('api/proprietes/ici');
+	if (!data) return;
+	_propVue = 'ici';
+	updatePurse(data.purse);
+	renderPropriete(data);
+	_propAfficher();
+}
+
+function _propCaps(c) {
+	const parts = [`👥 ${c.occupants !== undefined ? c.occupants + '/' : ''}${c.occupants_max} occupant(s)`,
+		`🧑‍🍳 ${c.personnel !== undefined ? c.personnel + '/' : ''}${c.personnel_max} employé(s)`,
+		`📦 ${c.stockage_utilise !== undefined ? c.stockage_utilise + '/' : ''}${c.stockage_kg} kg`];
+	return `<div class="prop-caps">${parts.map(p => `<span>${p}</span>`).join('')}</div>`;
+}
+
+function _propDate(epoch) {
+	if (!epoch) return '';
+	return new Date(epoch * 1000).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+const _PROP_STATUTS = { possedee: 'possédée', louee: 'louée', expiree: 'location expirée' };
+const _PROP_CATEGORIES = { vie: 'Vie quotidienne', service: 'Services', activite: 'Activité de PNJ', exterieur: 'Extérieur', defense: 'Défense', gestion: 'Gestion' };
+function _propCategorie(c) { return escapeHtml(_PROP_CATEGORIES[c] || c || ''); }
+
+function _propMesProprietes(liste) {
+	const lignes = (liste || []).map(p => `<div class="prop-ligne"><div class="prop-txt">
+		<strong>${p.residence ? '🏡 ' : ''}${escapeHtml(p.label)}</strong>
+		<span class="q-desc">${escapeHtml(p.type)} · ${_PROP_STATUTS[p.statut] || escapeHtml(p.statut || '')}${p.mode === 'location' && p.expire_at ? ' · jusqu\'au ' + _propDate(p.expire_at) : ''}${p.residence ? ' · résidence' : ''}</span>
+	</div></div>`).join('');
+	return `<section class="prop-section"><h3>🗝️ Mes propriétés</h3>
+		<div class="prop-liste">${lignes || '<div class="sell-empty">Vous ne possédez aucun bien.</div>'}</div>
+		<p class="q-desc">Un bien garde son type : pour passer à un logis plus grand, cédez celui-ci puis acquérez-en un autre. Ses aménagements restent attachés au bien cédé.</p>
+	</section>`;
+}
+
+function renderProprietesOffre(data) {
+	const bourse = _purseEnCuivre(data.purse);
+	let html = '';
+	if ((data.types || []).length) {
+		html += `<section class="prop-section"><h3>🏘️ À acquérir sur cette zone habitable</h3><div class="prop-liste">`
+			+ data.types.map(t => `<div class="prop-ligne"><div class="prop-txt">
+				<strong>${escapeHtml(t.label)}</strong>
+				<span class="q-desc">${escapeHtml(t.description || '')}</span>
+				${_propCaps(t.capacites)}
+				<span class="q-desc">Aménagements possibles : ${t.amenagements.map(escapeHtml).join(', ') || '—'}</span>
+				<span class="sell-prix">💰 ${_prixTexte(t.prix)}</span>
+			</div>
+			<button class="sh-drop-btn" data-type="${escapeHtml(t.id)}" ${t.prix > bourse ? 'disabled title="Vous n\'avez pas de quoi payer"' : ''}
+				onclick="propAcheter(this)">Acheter</button></div>`).join('') + `</div></section>`;
+	}
+	if (data.location) {
+		const l = data.location, ch = l.chambre;
+		const etat = !ch ? 'Aucune chambre louée ici.'
+			: ch.statut === 'louee' ? `Votre chambre est louée jusqu'au ${_propDate(ch.expire_at)}.`
+			: 'Votre location a expiré : vos affaires vous attendent, relouez pour y dormir.';
+		html += `<section class="prop-section"><h3>🛏️ Chambre à louer</h3><div class="prop-ligne"><div class="prop-txt">
+			<span class="q-desc">${escapeHtml(l.type.description || '')}</span>
+			<span class="q-desc">Durée : ${Math.round(l.duree_s / 86400 * 10) / 10} jour(s) · inviolable</span>
+			<span class="q-desc">${etat}</span>
+			<span class="sell-prix">💰 ${_prixTexte(l.prix)}</span>
+		</div><button class="sh-drop-btn" ${l.prix > bourse ? 'disabled' : ''} onclick="propLouer()">${ch ? 'Prolonger' : 'Louer'}</button></div></section>`;
+	}
+	html += _propMesProprietes(data.mes_proprietes);
+	document.getElementById('prop-contenu').innerHTML = html;
+}
+
+function renderPropriete(data) {
+	const p = data.propriete, t = data.type, gere = data.role === 'proprietaire';
+	const loc = p.mode === 'location';
+	let html = `<section class="prop-section"><h3>🏷️ Type : ${escapeHtml(t.label)}</h3>
+		<p class="q-desc">${escapeHtml(t.description || '')}</p>
+		<p class="q-desc">${loc ? 'Chambre louée' : 'Propriété'} de ${escapeHtml(p.proprietaire_nom)}${loc && p.expire_at ? ' · jusqu\'au ' + _propDate(p.expire_at) : ''}${p.statut === 'expiree' ? ' · location expirée' : ''}${p.residence ? ' · 🏡 votre résidence' : ''}</p>`;
+	if (gere) {
+		html += `<div class="prop-caps">
+			${p.residence ? '<button class="sh-drop-btn" onclick="propGeste(\'quitter\')">Quitter la résidence</button>'
+				: '<button class="sh-drop-btn" onclick="propGeste(\'occuper\')">Occuper (résidence)</button>'}
+			${data.revente.autorisee ? `<button class="sh-drop-btn" onclick="propCeder('vendre')">Vendre (${_prixTexte(data.revente.prix)})</button>`
+				: `<span class="q-desc">${escapeHtml(data.revente.raison || '')}</span>`}
+			<button class="sh-drop-btn" onclick="propCeder('abandonner')">Abandonner</button>
+		</div>`;
+	}
+	html += `</section>`;
+
+	html += `<section class="prop-section"><h3>📐 Capacités</h3>${_propCaps(data.capacites)}
+		<span class="q-desc">${data.gardien ? '🛡️ Un gardien veille sur les lieux.' : (loc ? '🔒 Chambre inviolable.' : '⚠️ Aucun gardien : un visiteur peut se servir dans le coffre.')}</span></section>`;
+
+	html += `<section class="prop-section"><h3>🛠️ Aménagements installés</h3><div class="prop-liste">`
+		+ (data.installes.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(a.nom)}</strong>
+			<span class="q-desc">${_propCategorie(a.categorie)}</span></div></div>`).join('')
+		|| '<div class="sell-empty">Aucun aménagement.</div>') + `</div></section>`;
+
+	if (gere) {
+		const bourse = _purseEnCuivre(data.purse);
+		html += `<section class="prop-section"><h3>🧰 Aménagements disponibles</h3><div class="prop-liste">`
+			+ (data.disponibles.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(a.nom)}</strong>
+				<span class="q-desc">${_propCategorie(a.categorie)}${a.description ? ' · ' + escapeHtml(a.description) : ''}</span>
+				<span class="sell-prix">💰 ${_prixTexte(a.cout)}</span></div>
+				<button class="sh-drop-btn" data-am="${escapeHtml(a.id)}" ${a.cout > bourse ? 'disabled' : ''} onclick="propInstaller(this)">Installer</button></div>`).join('')
+			|| '<div class="sell-empty">Rien de plus à installer dans ce type de bien.</div>') + `</div></section>`;
+	}
+
+	html += `<section class="prop-section"><h3>👥 Occupants et PNJ</h3><div class="prop-liste">`;
+	if (p.residence) html += `<div class="prop-ligne"><div class="prop-txt"><strong>Vous</strong><span class="q-desc">résident</span></div></div>`;
+	html += data.heberges.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(a.nom)}</strong>
+		<span class="q-desc">compagnon hébergé</span></div>
+		${gere ? `<button class="sh-drop-btn" data-av="${escapeHtml(a.id)}" onclick="propCompagnon(this, 'reprendre')">Reprendre</button>` : ''}</div>`).join('');
+	html += data.employes.map(e => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(e.nom)}</strong>
+		<span class="q-desc">${escapeHtml(e.metier_label)} · ${escapeHtml(e.poste_nom)}</span></div>
+		${gere ? `<button class="sh-drop-btn" data-emp="${escapeHtml(e.id)}" onclick="propRenvoyer(this)">Renvoyer</button>` : ''}</div>`).join('');
+	if (!p.residence && !data.heberges.length && !data.employes.length) html += '<div class="sell-empty">Personne ne vit ni ne travaille ici.</div>';
+	html += `</div>`;
+	if (gere && data.hebergeables.length) {
+		html += `<div class="prop-caps" style="margin-top:.4rem">` + data.hebergeables.map(a =>
+			`<button class="sh-drop-btn" data-av="${escapeHtml(a.id)}" onclick="propCompagnon(this, 'heberger')">Héberger ${escapeHtml(a.nom)}</button>`).join('') + `</div>`;
+	}
+	html += `</section>`;
+
+	html += `<section class="prop-section"><h3>⚒️ Activités</h3><div class="prop-liste">`
+		+ (data.activites.map(a => `<div class="prop-ligne"><div class="prop-txt"><strong>${escapeHtml(a.label)}</strong>
+			<span class="q-desc">${escapeHtml(a.nom)} · ${a.exercee ? `<span class="prop-etat-on">exercée par ${escapeHtml(a.employe)}</span>` : '<span class="prop-etat-off">inactive — il faut un(e) ' + escapeHtml(a.metier_label || a.metier) + '</span>'}</span></div></div>`).join('')
+		|| '<div class="sell-empty">Aucun espace d\'activité installé.</div>') + `</div></section>`;
+
+	html += _propMesProprietes(data.mes_proprietes);
+	document.getElementById('prop-contenu').innerHTML = html;
+}
+
+// Geste générique : POST, bourse et sac resynchronisés, puis re-rendu de la vue ouverte.
+async function _propPost(url, body) {
+	const data = await _aubFetch(url, body || {});
+	if (!data) return null;
+	if (data.purse) updatePurse(data.purse);
+	if (data.inventaire_payload) _applyInventoryPayload(data.inventaire_payload);
+	if (_propVue === 'offre') renderProprietesOffre(data); else renderPropriete(data);
+	return data;
+}
+
+async function propAcheter(btn) {
+	const data = await _propPost('api/proprietes/acheter', { type: btn.dataset.type });
+	if (data && data.achetee) {
+		showToast(`🏠 ${data.achetee.label} vous appartient.`, { major: true });
+		// Une porte vient de naître sur cette case : la liste des lieux doit la montrer.
+		setTimeout(() => window.location.reload(), 1200);
+	}
+}
+
+async function propLouer() {
+	const data = await _propPost('api/proprietes/louer', {});
+	if (data && data.louee) {
+		showToast(`🛏️ Chambre louée jusqu'au ${_propDate(data.louee.expire_at)}.`);
+		setTimeout(() => window.location.reload(), 1200);
+	}
+}
+
+function propGeste(geste) { return _propPost(`api/proprietes/${geste}`, {}); }
+
+async function propCeder(geste) {
+	const msg = geste === 'vendre' ? 'Vendre ce bien ? Ses aménagements restent avec lui.'
+		: 'Abandonner ce bien sans contrepartie ? Ses aménagements restent avec lui.';
+	if (!confirm(msg)) return;
+	const data = await _aubFetch(`api/proprietes/${geste}`, {});
+	if (!data) return;
+	showToast(geste === 'vendre' ? `💰 Bien vendu (${_prixTexte(data.gain)}).` : '🏚️ Bien abandonné.');
+	// On a été reconduit dehors, sur la case de la porte : recharger la page du lieu.
+	setTimeout(() => window.location.reload(), 1000);
+}
+
+async function propInstaller(btn) {
+	const data = await _propPost('api/proprietes/installer', { amenagement: btn.dataset.am });
+	if (data) showToast('🛠️ Aménagement installé.');
+}
+
+function propRenvoyer(btn) { return _propPost('api/proprietes/renvoyer', { employe_id: btn.dataset.emp }); }
+
+function propCompagnon(btn, geste) { return _propPost(`api/proprietes/${geste}`, { aventurier_id: btn.dataset.av }); }
+
+// ── Marchands employés : on leur parle comme aux marchands d'un lieu ─────────────
+// Le choix pose `atelier_courant` côté serveur (transitoire) : le panneau Achat-Vente et le
+// comptoir de commande s'adressent alors à CE marchand. Commande simple dès qu'il a un
+// catalogue, sur mesure pour une grande maison seulement.
+function _cmdSectionsVisibles(visible) {
+	['acc-head-commande', 'acc-head-mes-commandes'].forEach(id => {
+		const head = document.getElementById(id);
+		const section = head && head.closest('.acc-section');
+		if (section) section.style.display = visible ? '' : 'none';
+	});
+}
+
+async function choisirAtelier(btn) {
+	const data = await _aubFetch('api/proprietes/atelier/choisir', { employe_id: btn.dataset.id });
+	if (!data) return;
+	CMD_ACTIVE = !!data.commande;
+	CMD_SUR_MESURE = !!data.sur_mesure;
+	_cmdSectionsVisibles(CMD_ACTIVE);
+	openSellPanel();
+}
+
+// ── Coffre : l'inventaire du lieu, présenté comme celui du groupe ────────────────
+// À droite, le COFFRE ou l'atelier d'un marchand (matières confiées, rayon, caisse).
+let _pcfEtat = null;
+let _pcfSel = 'coffre';
+
+function _pcfAfficher() {
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('prop-coffre-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function closeCoffre() {
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('prop-coffre-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function openCoffre() {
+	const data = await _aubFetch('api/proprietes/coffre');
+	if (!data) return;
+	_pcfAppliquer(data);
+	_pcfAfficher();
+}
+
+function onCoffreSelect(v) { _pcfSel = v; renderCoffre(_pcfEtat); }
+
+function _pcfAppliquer(data) {
+	_pcfEtat = data;
+	if (data.purse) updatePurse(data.purse);
+	if (data.principal) _applyInventoryPayload(data.principal);
+	renderCoffre(data);
+}
+
+// Une ligne d'objet, mêmes classes que les sacs du groupe. `geste` = nom de la fonction
+// appelée au clic ; l'index et l'id passent par data-* (Conventions §9).
+function _pcfLigne(item, idx, fleche, geste, actif, titre, cote) {
+	const btn = `<button class="grp-move-btn" ${actif ? '' : 'disabled'} title="${escapeHtml(titre)}"
+		data-idx="${idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"
+		onclick="${geste}(this)">${fleche}</button>`;
+	const poids = item.poids !== undefined ? `${(+item.poids || 0).toFixed(1)} kg` : `× ${item.qty}`;
+	const row = `<span class="sh-inv-name">${item.icon || '📦'} ${escapeHtml(item.nom || '—')}</span>
+		<span class="sh-inv-poids">${poids}</span>`;
+	return `<div class="sh-inv-item">${cote === 'gauche' ? btn + row : row + btn}</div>`;
+}
+
+function renderCoffre(data) {
+	if (!data) return;
+	const ateliers = data.ateliers || [];
+	const sel = document.getElementById('pcf-select');
+	if (_pcfSel !== 'coffre' && !ateliers.some(a => a.id === _pcfSel)) _pcfSel = 'coffre';
+	if (sel) {
+		sel.innerHTML = `<option value="coffre">📦 Coffre</option>` + ateliers.map(a =>
+			`<option value="${escapeHtml(a.id)}">🏷️ ${escapeHtml(a.nom)} — ${escapeHtml(a.metier_label)}</option>`).join('');
+		sel.value = _pcfSel;
+	}
+	const etat = document.getElementById('pcf-etat');
+	if (etat) etat.textContent = data.gardien ? '🛡️ Un gardien veille sur les lieux.'
+		: (data.role === 'visiteur' ? '⚠️ Personne ne surveille : vous pouvez vous servir…' : '');
+
+	const moi = data.principal || { inventaire: [], charge: 0, charge_max: 0 };
+	_grpCharge('pcf-charge-principal', moi);
+	const inv = moi.inventaire || [];
+
+	if (_pcfSel === 'coffre') {
+		const c = data.coffre || {};
+		_grpCharge('pcf-charge-droite', c);
+		const libre = (+c.charge_max || 0) - (+c.charge || 0);
+		_grpRemplirSac('pcf-principal', inv, inv.length ? inv.map((it, i) =>
+			_pcfLigne(it, i, '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
+				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite')).join('')
+			: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
+		const items = c.inventaire || [];
+		_grpRemplirSac('pcf-droite', items, !c.visible
+			? '<div class="sh-empty"><span class="sh-empty-icon">🔒</span>Fermé à clé.</div>'
+			: items.length ? items.map(it => _pcfLigne(it, it.idx, '←', 'coffrePrendre', true,
+				data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche')).join('')
+			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Coffre vide</div>');
+		return;
+	}
+
+	const a = ateliers.find(x => x.id === _pcfSel) || {};
+	const gere = data.role === 'proprietaire';
+	const cd = document.getElementById('pcf-charge-droite');
+	if (cd) cd.textContent = a.caisse !== null && a.caisse !== undefined ? `💰 ${_prixTexte(a.caisse)}` : '';
+	_grpRemplirSac('pcf-principal', inv, inv.length ? inv.map((it, i) =>
+		_pcfLigne(it, i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite')).join('')
+		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
+	const produits = (a.produits || []).map(p => _pcfLigne(p, 0, '←', 'atelierReprendre', gere, 'Reprendre un exemplaire', 'gauche')).join('');
+	const matieres = (a.matieres || []).map(m => `<div class="sh-inv-item"><span class="sh-inv-name">🧺 ${escapeHtml(m.cle)}</span><span class="sh-inv-poids">× ${m.qty}</span></div>`).join('');
+	_grpRemplirSac('pcf-droite', (a.produits || []).concat(a.matieres || []),
+		`<div class="q-desc">${a.grande ? '✦ Grande maison — prend le sur-mesure' : 'Commandes simples'}</div>`
+		+ `<div class="grp-sous-titre">Au rayon</div>` + (produits || '<div class="sh-empty">Rien en rayon.</div>')
+		+ `<div class="grp-sous-titre">Matières confiées</div>` + (matieres || '<div class="sh-empty">Aucune matière.</div>'));
+}
+
+async function _pcfPost(url, body) {
+	const data = await _aubFetch(url, body);
+	if (data) _pcfAppliquer(data);
+	return data;
+}
+
+function coffreDeposer(btn) {
+	return _pcfPost('api/proprietes/coffre/transferer', { sens: 'vers_coffre', index: +btn.dataset.idx, item_id: btn.dataset.item || null });
+}
+
+async function coffrePrendre(btn) {
+	const data = await _pcfPost('api/proprietes/coffre/transferer', { sens: 'vers_principal', index: +btn.dataset.idx, item_id: btn.dataset.item || null });
+	if (data && data.vol) showToast('🫳 Vous vous êtes servi dans le coffre…');
+}
+
+function atelierDonner(btn) {
+	return _pcfPost('api/proprietes/atelier/donner', { employe_id: _pcfSel, index: +btn.dataset.idx, item_id: btn.dataset.item || null });
+}
+
+function atelierReprendre(btn) {
+	return _pcfPost('api/proprietes/atelier/reprendre', { employe_id: _pcfSel, item_id: btn.dataset.item });
+}
+
+async function releverCaisse() {
+	const data = await _aubFetch('api/proprietes/caisse/relever', {});
+	if (!data) return;
+	if (data.purse) updatePurse(data.purse);
+	showToast(data.vol ? `🫳 Vous avez vidé la caisse : ${_prixTexte(data.releve)}.`
+		: `💰 Caisse relevée : ${_prixTexte(data.releve)}.`);
+	if (!document.getElementById('prop-coffre-panel').classList.contains('panel-hidden')) _pcfAppliquer(data);
+}
+
+// ── Embauche : comme le tableau de recrues, avec des PNJ marchands ───────────────
+function _pemAfficher() {
+	document.getElementById('game-container').classList.add('panel-hidden');
+	document.getElementById('prop-embauche-panel').classList.remove('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// Un marchand embauché ou renvoyé change les lignes d'action de la barre latérale (rendues
+// par /play) : on recharge en refermant, plutôt que de reconstruire cette liste en JS.
+let _pemChange = false;
+
+function closeEmbauche() {
+	if (_pemChange) { window.location.reload(); return; }
+	document.getElementById('game-container').classList.remove('panel-hidden');
+	document.getElementById('prop-embauche-panel').classList.add('panel-hidden');
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function openEmbauche() {
+	const data = await _aubFetch('api/proprietes/embauche');
+	if (!data) return;
+	updatePurse(data.purse);
+	renderEmbauche(data);
+	_pemAfficher();
+}
+
+// Carte d'un PNJ (candidat ou employé) : la carte de personnage, sans vitaux ni niveaux —
+// un marchand n'a ni PV ni vocation de combat ; sa « classe » est son métier.
+function _carteMarchand(container, p, footer, actions) {
+	const card = renderCharacterCard(container, { id: p.id, prenom: p.prenom, nom: p.nom_famille || p.nom,
+		race: p.race || '', image: p.image, image_base: p.image_base }, { editable: false, footer, actions });
+	if (!card) return;
+	const classe = _q(card, 'classe');
+	if (classe) classe.textContent = `🏷️ ${p.metier_label || ''}${p.categorie_label ? ' · ' + p.categorie_label : ''}${p.grande ? ' ✦' : ''}`;
+	['pv-val', 'pm-val'].forEach(r => { const el = _q(card, r); if (el) el.hidden = true; });
+	['pv-bar', 'pm-bar'].forEach(r => { const el = _q(card, r); if (el && el.parentElement) el.parentElement.hidden = true; });
+}
+
+function renderEmbauche(data) {
+	const plaf = document.getElementById('pem-plafond');
+	if (plaf) plaf.textContent = `${data.personnel}/${data.personnel_max}`;
+	const emp = document.getElementById('pem-employes');
+	clearCharacterCards(emp);
+	(data.employes || []).forEach(e => _carteMarchand(emp, e,
+		`<span>${escapeHtml(e.poste_nom)}</span>`,
+		`<button class="sh-drop-btn" data-emp="${escapeHtml(e.id)}" onclick="pemRenvoyer(this)">Renvoyer</button>`));
+	if (emp && !(data.employes || []).length) emp.innerHTML = '<div class="sell-empty">Personne ne travaille ici.</div>';
+	const cand = document.getElementById('pem-candidats');
+	clearCharacterCards(cand);
+	const bourse = _purseEnCuivre(data.purse);
+	(data.candidats || []).forEach(c => _carteMarchand(cand, c,
+		`<span>${escapeHtml(c.poste_nom)}</span><span class="sell-prix">💰 ${_prixTexte(c.cout)}</span>`,
+		`<button class="sh-drop-btn" data-id="${escapeHtml(c.id)}" ${(data.complet || c.cout > bourse) ? 'disabled' : ''}
+			title="${data.complet ? 'Plus de place pour du personnel' : (c.cout > bourse ? 'Vous n\'avez pas de quoi payer' : 'Embaucher')}"
+			onclick="pemEngager(this)">Embaucher</button>`));
+	if (cand && !(data.candidats || []).length) cand.innerHTML = '<div class="sell-empty">Aucun poste libre : installez un aménagement qui en ouvre un.</div>';
+}
+
+async function pemEngager(btn) {
+	const data = await _aubFetch('api/proprietes/engager', { candidat_id: btn.dataset.id });
+	if (!data) return;
+	updatePurse(data.purse);
+	_pemChange = true;
+	renderEmbauche(data);
+	if (data.engage) showToast(`🤝 ${data.engage} prend son poste.`);
+}
+
+async function pemRenvoyer(btn) {
+	const data = await _aubFetch('api/proprietes/renvoyer', { employe_id: btn.dataset.emp });
+	if (!data) return;
+	_pemChange = true;
+	openEmbauche();
+}
+
 
 // ── Salle commune d'une taverne ──────────────────────────────────────────────────
 // Tables (chatrooms) + tableau d'information + la nuit.

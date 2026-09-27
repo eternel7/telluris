@@ -1560,7 +1560,14 @@ def flux_cite(cite_doc: dict | None) -> dict | None:
 	Même garde, pour la même raison, que celle de `quetes.lieux_solidaires`."""
 	if not cite_doc or (cite_doc or {}).get("categorie") != "ville":
 		return None
-	brut = cite_doc.get("flux_marchand")
+	return ouvrir_flux(cite_doc)
+
+
+def ouvrir_flux(doc: dict) -> dict:
+	"""Contexte de flux porté par N'IMPORTE QUEL doc (`flux_marchand`) — sans la garde de
+	cité de `flux_cite`. Sert au flux PROPRE d'une propriété de joueur (utils/proprietes.py) :
+	même pool, même fermeture par `persister_flux`, mais jamais celui de la ville."""
+	brut = doc.get("flux_marchand")
 	pool = {}
 	for cle, q in (brut.items() if isinstance(brut, dict) else ()):
 		try:
@@ -1569,7 +1576,7 @@ def flux_cite(cite_doc: dict | None) -> dict | None:
 			continue
 		if q > 0:
 			pool[cle] = q
-	return {"doc": cite_doc, "pool": pool, "change": False}
+	return {"doc": doc, "pool": pool, "change": False}
 
 
 def persister_flux(flux: dict | None, save_doc_fn) -> bool:
@@ -1768,13 +1775,26 @@ def tick_atelier(lieu_doc: dict, recettes: list | None = None, flux: dict | None
 	qu'ils n'ont pas pris.
 	⚠️ `flux=None` (lieu sans cité, fixture de test) ⇒ les trois greffes sont inertes et le tick
 	est **strictement** celui d'avant."""
+	return tick_detaille(lieu_doc, recettes, flux)[0]
+
+
+def tick_detaille(lieu_doc: dict, recettes: list | None = None, flux: dict | None = None,
+				  appro: bool = True, ecouler=None) -> tuple[bool, list]:
+	"""Cœur de `tick_atelier` : `(change, ecoules)`, les ventes PNJ en clair.
+
+	`appro=False` saute l'approvisionnement GRATUIT de la catégorie : c'est le tick d'un
+	marchand employé dans une propriété (utils/proprietes.produire), qui ne produit qu'à
+	partir de ce qu'on lui a confié et du flux de SON lieu — et dont les ventes deviennent la
+	caisse du propriétaire, d'où le besoin de les connaître. `ecouler` remplace la vente PNJ
+	de boutique (qui n'écoule que l'EXCÉDENT au-dessus d'une cible de 25 : un marchand à
+	domicile ne vendrait jamais rien) ; même contrat `lieu_doc -> [{item_id, qty}]`."""
 	puise = puiser_flux(lieu_doc, flux)
-	approvisionne = approvisionner(lieu_doc)
+	approvisionne = approvisionner(lieu_doc) if appro else False
 	produits = tenter_production(lieu_doc, recettes)
-	ecoules = ecouler_produits_pnj(lieu_doc)
+	ecoules = (ecouler or ecouler_produits_pnj)(lieu_doc)
 	_crediter_flux(flux, ecoules)
 	deverse = _deverser_surplus_flux(lieu_doc, flux)
-	return bool(puise or approvisionne or produits or ecoules or deverse)
+	return bool(puise or approvisionne or produits or ecoules or deverse), ecoules
 
 
 def convertir_apres_achat(lieu_doc: dict, item_doc: dict, flux: dict | None = None) -> bool:

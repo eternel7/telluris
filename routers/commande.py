@@ -31,6 +31,7 @@ from utils import commande as commande_util
 from utils import fabrication
 from utils import marche
 from utils import recrutement
+from utils import proprietes
 from utils.marche import (
 	debit_character, get_relation, relation_value, prix_range_cuivre,
 	prix_marche, stock_cible_pour, resolve_stock_vente,
@@ -49,6 +50,10 @@ def _acces(current_user: dict) -> tuple[dict, dict]:
 	if not character:
 		raise HTTPException(status_code=404, detail="Personnage introuvable")
 	lieu_doc = get_doc(character.get("lieu", ""))
+	# Dans une propriété, l'artisan est le PNJ marchand choisi (`atelier_courant`) : commande
+	# simple pour tous, sur mesure pour une grande maison — ce que les deux prédicats
+	# ci-dessous tranchent déjà sur le doc de l'employé.
+	lieu_doc = proprietes.atelier_actif(character, lieu_doc, get_doc) or lieu_doc
 	if not lieu_doc or not commande_util.lieu_prend_commandes(lieu_doc, get_doc):
 		raise HTTPException(status_code=403, detail="On ne prend pas de commande ici.")
 	return character, lieu_doc
@@ -441,6 +446,9 @@ async def passer_commande(
 	purse = debit_character(character, resolu["detail"]["total"])
 	if purse is None:
 		raise HTTPException(status_code=422, detail="Fonds insuffisants")
+	if proprietes.est_atelier(lieu_doc):
+		# Marchand employé : la commande se paie dans SA caisse (relevée par le propriétaire).
+		proprietes.encaisser(lieu_doc, resolu["detail"]["total"])
 
 	# ⚠️ Retrait en MÉMOIRE d'abord, sauvegarde ensuite (même séquence que le scriptorium) :
 	# un échec de save laisse les sacs intacts en base.
@@ -520,6 +528,9 @@ async def relancer_commande(
 	purse = debit_character(character, resolu["detail"]["total"])
 	if purse is None:
 		raise HTTPException(status_code=422, detail="Fonds insuffisants")
+	if proprietes.est_atelier(lieu_doc):
+		# Marchand employé : la commande se paie dans SA caisse (relevée par le propriétaire).
+		proprietes.encaisser(lieu_doc, resolu["detail"]["total"])
 
 	commande_util.retirer_fournitures(source["fournies"])
 	commande_util.retirer_du_rayon(lieu_doc, source["achetees"])

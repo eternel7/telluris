@@ -81,3 +81,43 @@ def test_filtrer_acces_false_rend_tout():
 	links = lieux_module.get_lieu_links(CURRENT_USER, filtrer_acces=False)
 	ids = {c["_id"] for c in links}
 	assert ids == {"link:ville_portail", "link:ville_place"}
+
+
+# ── Propriétés de joueur (utils/proprietes.py) ───────────────────────────────────
+# Une propriété ACHETÉE est visible de tous ; une chambre LOUÉE n'apparaît qu'à son
+# locataire — la garde 403 elle-même est dans move_character.
+
+PROPRIETES = {
+	"propriete:maison_1": {"_id": "propriete:maison_1", "type": "propriete", "mode": "achat",
+						   "statut": "possedee", "proprietaire": "character:autre"},
+	"propriete:chambre_1": {"_id": "propriete:chambre_1", "type": "propriete", "mode": "location",
+							"statut": "louee", "expire_at": 4_000_000_000,
+							"proprietaire": "character:autre"},
+}
+CONN_MAISON = {"_id": "link:maison_1", "type": "connection",
+			   "nodes": [{"lieu": "lieu:ville", "pos": [1, 1]},
+						 {"lieu": "propriete:maison_1", "pos": [0, 0]}]}
+CONN_CHAMBRE = {"_id": "link:chambre_1", "type": "connection",
+				"nodes": [{"lieu": "lieu:ville", "pos": [1, 1]},
+						  {"lieu": "propriete:chambre_1", "pos": [0, 0]}]}
+
+
+def _get_doc_proprietes(doc_id):
+	doc = PROPRIETES.get(doc_id) or DOCS.get(doc_id)
+	return dict(doc) if doc else None
+
+
+def test_chambre_louee_invisible_hors_locataire(monkeypatch):
+	monkeypatch.setattr(lieux_module, "db", _FakeDB([CONN_MAISON, CONN_CHAMBRE]))
+	monkeypatch.setattr(lieux_module, "get_doc", _get_doc_proprietes)
+	ids = {c["_id"] for c in lieux_module.get_lieu_links(CURRENT_USER)}
+	assert ids == {"link:maison_1"}
+
+
+def test_chambre_louee_visible_du_locataire(monkeypatch):
+	monkeypatch.setattr(lieux_module, "db", _FakeDB([CONN_MAISON, CONN_CHAMBRE]))
+	monkeypatch.setattr(lieux_module, "get_doc", _get_doc_proprietes)
+	monkeypatch.setattr(lieux_module, "get_selected_character",
+						lambda _u: dict(CHARACTER, _id="character:autre"))
+	ids = {c["_id"] for c in lieux_module.get_lieu_links(CURRENT_USER)}
+	assert ids == {"link:maison_1", "link:chambre_1"}
