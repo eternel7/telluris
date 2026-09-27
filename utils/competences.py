@@ -125,7 +125,8 @@ def est_active(comp: dict) -> bool:
 def est_aura(comp: dict) -> bool:
 	"""Une AURA = une passive qui porte une `zone`. Ancrée TOUJOURS sur son porteur
 	(`origine`/`cible` ignorés), elle ne vaut que pour ceux qu'elle couvre : positionnelle en
-	combat (`combat._recalculer_auras`), tout le groupe en exploration (`auras_recues`).
+	combat (`combat._recalculer_auras`), tout le groupe — montures comprises — en exploration
+	(`auras_recues`).
 	Elle sort donc du repli inconditionnel de `bonus_passifs`."""
 	return est_passive(comp) and bool((comp or {}).get("zone"))
 
@@ -294,14 +295,18 @@ def auras_du_groupe(membres: list) -> list:
 	return out
 
 
-def appliquer_auras_groupe(membres: list) -> list:
-	"""Pose `auras_recues` (origine « aura » de `consommables`) sur chaque membre du groupe.
-	Mute SANS sauver ; renvoie les membres dont le champ a changé — l'appelant ne réécrit
-	qu'eux. ⚠️ Jamais de monture : `expedition.membres` n'en contient pas (CLAUDE.md §7).
-	Champ absent ⇒ aucune aura reçue : un doc d'avant tourne comme avant."""
+def appliquer_auras_groupe(membres: list, montures: list | None = None) -> list:
+	"""Pose `auras_recues` (origine « aura » de `consommables`) sur chaque membre du groupe
+	ET sur ses `montures`. Mute SANS sauver ; renvoie les docs dont le champ a changé —
+	l'appelant ne réécrit qu'eux. Champ absent ⇒ aucune aura reçue : un doc d'avant tourne
+	comme avant.
+
+	ÉMETTEURS = `membres` seuls (`expedition.membres`, CLAUDE.md §7 : une monture n'a pas de
+	compétence). BÉNÉFICIAIRES = membres + montures : une aura se REÇOIT, elle ne demande
+	aucune action — et en combat `beneficiaires_de_zone` sert déjà les montures."""
 	auras = auras_du_groupe(membres)
 	changes = []
-	for m in membres or []:
+	for m in [*(membres or []), *(montures or [])]:
 		if m is None:
 			continue
 		if (m.get("auras_recues") or []) != auras:

@@ -107,6 +107,29 @@ def test_exploration_tout_le_groupe_recoit_l_aura():
 	assert appliquer_auras_groupe([pretre, compagnon]) == []
 
 
+def test_exploration_les_montures_recoivent_l_aura_sans_en_emettre():
+	"""Une aura se REÇOIT : la monture en profite (comme en combat, où
+	`beneficiaires_de_zone` la sert déjà), mais n'émet rien — elle n'a pas de compétence."""
+	pretre = _character(competences=[AURA_SAINTE["_id"]])
+	monture = {"_id": "monture:m1", "type": "monture", "nom": "Grison",
+			   "caracteristiques_current": {"V": 5, "F": 60, "R": 50, "Ag": 20,
+											"Vol": 10, "Int": 5, "Cha": 5, "Ch": 10}}
+	changes = appliquer_auras_groupe([pretre], [monture])
+	assert changes == [pretre, monture]
+	assert consommables.regen_bonus(monture) == (1, 0)
+	# Une monture ne rayonne rien : placée seule en bénéficiaire, pas d'aura émise.
+	assert auras_du_groupe([monture]) == []
+	# Idempotent : rejouer ne réécrit personne.
+	assert appliquer_auras_groupe([pretre], [monture]) == []
+
+
+def test_exploration_sans_montures_comme_avant():
+	pretre = _character(competences=[AURA_SAINTE["_id"]])
+	assert appliquer_auras_groupe([pretre]) == [pretre]
+	assert appliquer_auras_groupe([pretre], None) == []
+	assert consommables.regen_bonus(pretre) == (1, 0)
+
+
 def test_exploration_deux_auras_ne_se_cumulent_pas():
 	p1 = _character(competences=[AURA_SAINTE["_id"]])
 	p2 = _character(_id="aventurier:a2", nom="Soeur", competences=[AURA_SAINTE["_id"]])
