@@ -745,7 +745,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# AURAS hors combat : tout le groupe profite de celles de chacun (`auras_recues`),
 	# reposées paresseusement ici — un compagnon parti ou une aura apprise se voit au
 	# prochain rendu. Même motif que la purge ci-dessus : compagnons persistés à part.
-	for _m in competences_util.appliquer_auras_groupe([character, *_compagnons]):
+	_montures = montures_util.montures_effectives(character, get_doc)
+	for _m in competences_util.appliquer_auras_groupe([character, *_compagnons], _montures):
 		if _m is character:
 			change = True
 		elif _m not in _a_sauver:

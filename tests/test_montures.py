@@ -318,6 +318,17 @@ def test_relacher_retire_du_troupeau(monde):
 	assert "acquise_par" not in m
 
 
+def test_relacher_ou_tuer_retire_l_aura_de_groupe(monde):
+	"""Hors du troupeau, plus d'aura (miroir des compagnons congédiés)."""
+	for sortie in (montures.relacher, montures.tuer):
+		p = perso()
+		m = montures.creer_monture(ANE, ETABLE, p)
+		montures.acquerir(p, m)
+		m["auras_recues"] = [{"nom": "Aura sainte", "effets": {"regen_pv": 1}}]
+		sortie(p, m)
+		assert "auras_recues" not in m
+
+
 def test_relacher_refuse_si_chargee(monde):
 	"""La relâcher chargée ferait disparaître le butin sans que rien ne le signale."""
 	p = perso()

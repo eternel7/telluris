@@ -232,6 +232,7 @@ def relacher(character: dict, monture: dict) -> tuple[bool, str]:
 		return False, "Videz son sac avant de la relâcher."
 	monture["statut"] = "relachee"
 	monture.pop("acquise_par", None)
+	monture.pop("auras_recues", None)   # hors du troupeau, plus d'aura
 	character["montures"] = [
 		mid for mid in character.get("montures", []) or [] if mid != monture.get("_id")
 	]
@@ -247,6 +248,7 @@ def tuer(character: dict, monture: dict) -> list:
 	monture["statut"] = "morte"
 	monture["currentPV"] = 0
 	monture.pop("acquise_par", None)
+	monture.pop("auras_recues", None)   # hors du troupeau, plus d'aura
 	character["montures"] = [
 		mid for mid in character.get("montures", []) or [] if mid != monture.get("_id")
 	]

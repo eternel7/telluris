@@ -78,7 +78,7 @@ vit dans `competences_bonus["auras"]`.
 
 | où | ce que ça donne |
 |---|---|
-| exploration | **tout le groupe** en profite (`expedition.membres` — jamais une monture), reposé paresseusement au rendu et à chaque déplacement |
+| exploration | **tout le groupe, montures comprises** en profite (émetteurs : `expedition.membres` ; bénéficiaires : eux + `montures_effectives`), reposé paresseusement au rendu et à chaque déplacement |
 | combat | **positionnel** : seuls les alliés réellement couverts par la forme, terrain et ligne de vue compris ; recalculé après chaque action |
 
 ⚠️ **Non-cumul** : deux auras du même effet, ou une aura et une potion, ne s'additionnent pas —
