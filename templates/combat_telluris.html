@@ -2767,19 +2767,33 @@ function canConsume(data) {
 
 // ── Sorts (1 action + PM) ────────────────────────────────────────────
 // Portée EFFECTIVE d'une capacité + son caractère « à distance » — miroir mot pour mot de
-// combat._portee_competence. Une COMPÉTENCE `jet:"cc"` à dés est un coup porté AVEC l'arme :
-// elle en emprunte les dés (cf. compLabel, qui les préfixe d'un `+`) et donc son ALLONGE —
-// une hallebarde frappe à 2 cases, la compétence aussi, et EN MÊLÉE (`ranged` se mesure à
-// l'allonge, pas à `portee > 1`, sinon la case se griserait dès qu'un ennemi est au contact).
+// combat._portee_competence. Une COMPÉTENCE `jet:"cc"`/`"cd"` à dés est un coup porté AVEC
+// l'arme (profil emprunté : capaProfilEmprunte) : elle en emprunte les dés (cf. compLabel,
+// qui les préfixe d'un `+`) et donc sa PORTÉE — une hallebarde frappe à 2 cases, la
+// compétence aussi, et EN MÊLÉE (`ranged` se mesure à l'allonge, pas à `portee > 1`, sinon
+// la case se griserait dès qu'un ennemi est au contact) ; un tir porte aussi loin que l'arc
+// et reste un tir (`ranged` du profil).
 // ⚠️ Le discriminant est `competence_id` et non `jet` : capaCibles reçoit indifféremment un
 // sort ou une compétence, et le payload de sort ne publie même pas `jet` — s'appuyer sur un
 // champ absent ne marcherait que par accident. Un sort `cc` n'emprunte pas les dés de l'arme,
 // donc pas son allonge non plus.
 function capaPortee(c) {
-	const allonge = (c.competence_id && c.jet === 'cc' && (c.effets || {}).degats)
-		? Math.max(1, attackProfile('cac').portee || 1) : 1;
+	const profil = capaProfilEmprunte(c);
+	const allonge = profil ? Math.max(1, profil.portee || 1) : 1;
 	const portee = Math.max(allonge, Math.max(1, c.portee || 1));
-	return { portee, ranged: portee > allonge };
+	return { portee, ranged: portee > allonge || !!(profil && profil.ranged) };
+}
+// Profil d'arme emprunté par une compétence — miroir de combat._profil_emprunte. `cc` → la
+// mêlée (repli mains nues) ; `cd` → l'arc, sinon l'arme de lancer, STRICTEMENT (jamais le
+// repli `cac` d'attackProfile : on ne tire pas avec une épée) ; `magique` / sans dés → rien.
+function capaProfilEmprunte(c) {
+	if (!c.competence_id || !(c.effets || {}).degats) return null;
+	if (c.jet === 'cc') return attackProfile('cac');
+	if (c.jet === 'cd') {
+		const list = playerAttacks();
+		return list.find(a => a.mode === 'tir') || list.find(a => a.mode === 'jet') || null;
+	}
+	return null;
 }
 // Cibles valides d'un sort/compétence offensif : portée effective, et au-delà de l'allonge
 // mêmes règles que le tir — non engagé + ligne de vue (miroir serveur).
@@ -3441,10 +3455,11 @@ function activerSlot(slot) {
 // ── Utiliser une compétence active (1 action + PM éventuels) — miroir du 🔮 ──────
 function compLabel(c) {
 	const parts = [];
-	// Frappe de contact : ses dés S'AJOUTENT à ceux de l'arme (cf. combat._degats_competence),
-	// d'où le '+' — sans lui le joueur lirait le bonus comme un total.
+	// Frappe martiale : ses dés S'AJOUTENT à ceux de l'arme empruntée (cf.
+	// combat._degats_competence), d'où le '+' — sans lui le joueur lirait le bonus comme un
+	// total. Un tir sans arc ni arme de lancer n'emprunte rien : pas de '+'.
 	if (c.effets.degats) parts.push(
-		`${c.cible === 'ennemi' && c.jet === 'cc' ? '+' : ''}${c.effets.degats} dég.`);
+		`${c.cible === 'ennemi' && capaProfilEmprunte(c) ? '+' : ''}${c.effets.degats} dég.`);
 	if (c.effets.pv) parts.push(`+${c.effets.pv} PV`);
 	if (c.effets.pm) parts.push(`+${c.effets.pm} PM`);
 	if (c.effets.furtivite) parts.push('🥷 furtivité');

@@ -382,17 +382,42 @@ def test_competence_sans_degats_d_arme_au_snapshot(monkeypatch):
     assert res["dmg"] == 3
 
 
-@pytest.mark.parametrize("jet", ["cd", "magique"])
-def test_competence_cd_et_magique_ignorent_l_arme(monkeypatch, jet):
-    # Seul le corps à corps emprunte l'arme : un tir la tient déjà par son jet, et une frappe
-    # magique ne se négocie pas au poids de la hache.
+def test_competence_magique_ignore_l_arme(monkeypatch):
+    # Une frappe magique ne se négocie pas au poids de la hache — ni de l'arc.
     monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
-    combat = _combat(joueur_extra={"degats_cc": "2D6+5"},
+    combat = _combat(joueur_extra={"degats_cc": "2D6+5", "degats_cd": "2D6+5",
+                                   "attaque_profils": _PROFIL_EPEE + _PROFIL_ARC},
                      monstres=[_monstre("monstre_0", 3, 4, pa=0)])
     res = resolve_action(combat, "competence", cible_id="monstre_0",
                          competence=normaliser_competence(
-                             _comp(jet=jet, effets={"degats": "1D8+2"})))
+                             _comp(jet="magique", effets={"degats": "1D8+2"})))
     assert res["hit"] is True and res["dmg"] == 3   # "1D8+2" seul, l'arme n'entre pas
+
+
+def test_competence_cd_ajoute_les_degats_de_l_arc(monkeypatch):
+    # Un tir de compétence est un coup PORTÉ AVEC l'arc : ses dés s'ajoutent à `degats_cd`.
+    # Dés à 1 → "2D6+5" (7) + "1D8+2" (3) = 10, cible sans PA.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
+    combat = _combat(joueur_extra={"degats_cc": "1D4", "degats_cd": "2D6+5",
+                                   "attaque_profils": _PROFIL_EPEE + _PROFIL_ARC},
+                     monstres=[_monstre("monstre_0", 3, 2, pa=0)])
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(
+                             _comp(jet="cd", portee=4, effets={"degats": "1D8+2"})))
+    assert res["hit"] is True and res["dmg"] == 10
+
+
+def test_competence_cd_sans_arme_a_distance_garde_ses_des(monkeypatch):
+    # ⚠️ `degats_cd` somme les dés de TOUTES les armes équipées : sans arc ni arme de lancer,
+    # l'emprunter ferait tirer avec l'épée. Rien n'est emprunté.
+    monkeypatch.setattr(combat_mod.random, "randint", lambda a, b: 50 if b == 100 else 1)
+    combat = _combat(joueur_extra={"degats_cc": "2D6+5", "degats_cd": "2D6+5",
+                                   "attaque_profils": _PROFIL_EPEE},
+                     monstres=[_monstre("monstre_0", 3, 2, pa=0)])
+    res = resolve_action(combat, "competence", cible_id="monstre_0",
+                         competence=normaliser_competence(
+                             _comp(jet="cd", portee=4, effets={"degats": "1D8+2"})))
+    assert res["hit"] is True and res["dmg"] == 3
 
 
 def test_competence_debuff_pur_ne_gagne_pas_les_degats_d_arme(monkeypatch):
@@ -479,6 +504,10 @@ _PROFIL_HAST = [{"mode": "cac", "portee": 2, "ranged": False,
                  "toucher": "cc", "degats": "degats_cc"}]
 _PROFIL_EPEE = [{"mode": "cac", "portee": 1, "ranged": False,
                  "toucher": "cc", "degats": "degats_cc"}]
+_PROFIL_ARC = [{"mode": "tir", "portee": 10, "ranged": True,
+                "toucher": "cd", "degats": "degats_cd"}]
+_PROFIL_LANCER = [{"mode": "jet", "portee": 4, "ranged": True,
+                   "toucher": "cd", "degats": "degats_cc"}]
 
 
 def _combat_arme(profils=None, monstres=None, **joueur_extra):
@@ -508,10 +537,27 @@ def test_portee_competence_ne_rabaisse_jamais_une_portee_ecrite():
     assert _portee(_PROFIL_HAST, portee=3) == (3, True)
 
 
-def test_portee_competence_hors_frappe_cc_inchangee():
-    # cd / magique : allonge 1, donc la formule se réduit exactement à `portee > 1`.
+def test_portee_competence_cd_prend_la_portee_de_l_arme_a_distance():
+    # Arc (tir portée 10) : le tir de compétence porte aussi loin, et reste un tir.
+    assert _portee(_PROFIL_HAST + _PROFIL_ARC, jet="cd", portee=6) == (10, True)
+    # `max` : une portée écrite plus longue que l'arc n'est pas rabaissée.
+    assert _portee(_PROFIL_ARC, jet="cd", portee=12) == (12, True)
+    # Pas d'arc : l'arme de lancer. L'arc l'emporte quand les deux sont en main.
+    assert _portee(_PROFIL_LANCER, jet="cd", portee=2) == (4, True)
+    assert _portee(_PROFIL_LANCER + _PROFIL_ARC, jet="cd", portee=2) == (10, True)
+    # Même à portée écrite 1 : un tir à l'arc reste soumis aux règles à distance.
+    assert _portee(_PROFIL_ARC, jet="cd", portee=1) == (10, True)
+
+
+def test_portee_competence_hors_frappe_empruntee_inchangee():
+    # cd sans arme à distance (jamais le repli mêlée), magique : allonge 1, donc la formule
+    # se réduit exactement à `portee > 1`.
     assert _portee(_PROFIL_HAST, jet="cd", portee=6) == (6, True)
-    assert _portee(_PROFIL_HAST, jet="magique", portee=4) == (4, True)
+    assert _portee(_PROFIL_HAST, jet="cd", portee=1) == (1, False)
+    assert _portee(_PROFIL_HAST + _PROFIL_ARC, jet="magique", portee=4) == (4, True)
+    # Tir sans dés (poudre, marque) : ce n'est pas un coup porté avec l'arc.
+    assert _portee(_PROFIL_ARC, jet="cd", portee=3,
+                   effets={"buffs": {"V": -2}, "duree": 2}) == (3, True)
     # Prise sans dés (entrave, cri) : ce n'est pas un coup porté avec l'arme.
     assert _portee(_PROFIL_HAST, effets={"buffs": {"V": -2}, "duree": 2}) == (1, False)
     # ⚠️ normaliser_competence met jet:"cc" PAR DÉFAUT, y compris sur un soin : sans la
@@ -522,6 +568,20 @@ def test_portee_competence_hors_frappe_cc_inchangee():
 def test_portee_competence_sans_attaque_profils():
     # Combat déjà en base : repli mains nues, comportement d'avant. Aucune migration.
     assert _portee(None) == (1, False)
+    assert _portee(None, jet="cd", portee=6) == (6, True)
+
+
+def test_degats_competence_cd_emprunte_le_profil_a_distance():
+    comp = normaliser_competence(_comp(jet="cd", effets={"degats": "1D6"}))
+    snap = {"degats_cc": "1D8+2", "degats_cd": "1D6+1D8+3"}
+    # Arc → `degats_cd` ; arme de lancer seule → `degats_cc` (sa puissance suit la F).
+    assert combat_mod._degats_competence(dict(snap, attaque_profils=_PROFIL_ARC),
+                                         comp, comp["effets"]) == "1D6+1D8+3+1D6"
+    assert combat_mod._degats_competence(dict(snap, attaque_profils=_PROFIL_LANCER),
+                                         comp, comp["effets"]) == "1D8+2+1D6"
+    # Snapshot sans `degats_cd` (combat déjà en base) : dés seuls, aucune migration.
+    assert combat_mod._degats_competence({"attaque_profils": _PROFIL_ARC},
+                                         comp, comp["effets"]) == "1D6"
 
 
 def test_frappe_cc_atteint_une_cible_a_l_allonge_de_l_arme(monkeypatch):

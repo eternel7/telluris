@@ -567,9 +567,9 @@ TEXTES_COMPETENCE = {
 # en cinq lignes, rassemblées ici plutôt que dispersées dans deux branches jumelles.
 #
 # ⚠️ Deux différences ne sont PAS cosmétiques :
-#   - `notation` : une frappe de compétence en `cc` emprunte les dés de l'arme équipée
-#     (`_degats_competence`) ; un sort n'emprunte rien ;
-#   - `portee` : une compétence emprunte aussi l'ALLONGE de l'arme et en dérive son
+#   - `notation` : une frappe de compétence en `cc`/`cd` emprunte les dés de l'arme
+#     équipée — mêlée, arc ou arme de lancer (`_profil_emprunte`) ; un sort n'emprunte rien ;
+#   - `portee` : une compétence emprunte aussi la PORTÉE de cette arme et en dérive son
 #     drapeau `ranged` (une hallebarde frappe à 2 cases EN mêlée), là où un sort tient
 #     simplement `portee > 1` pour « à distance ».
 # Les trois autres (clé de résultat, textes de journal, verbe) sont de l'habillage.
@@ -3073,58 +3073,83 @@ def _defense_physique(defenseur: dict) -> int:
 	return int(defenseur.get("ag", 0) or 0) + int(defenseur.get("esquive", 0) or 0)
 
 
+def _profil_emprunte(joueur: dict, competence: dict) -> dict | None:
+	"""Profil d'attaque dont une compétence EMPRUNTE les dés et la portée — SOURCE UNIQUE
+	de `_degats_competence` et `_portee_competence`, pour qu'ils ne divergent jamais.
+
+	Une frappe MARTIALE à dés est un coup PORTÉ AVEC l'arme :
+	- `jet: "cc"` → le profil `cac` (repli mains nues de `_profil_attaque`) ;
+	- `jet: "cd"` → le profil `tir`, sinon `jet` (arme de lancer), pris STRICTEMENT dans
+	  `attaque_profils`. ⚠️ Jamais le repli `cac` : `degats_cd` somme les dés de TOUTES les
+	  armes équipées (`_format_damage`), un porteur d'épée sans arc tirerait avec l'épée.
+	  Aucune arme à distance ⇒ `None` : la compétence garde ses seuls dés.
+	⚠️ `magique` n'emprunte jamais rien : une frappe magique ne se négocie pas au poids de
+	la hache. Une compétence SANS dés (entrave, cri, soin `cible: "allie"` — que
+	`normaliser_competence` met en `cc` PAR DÉFAUT) non plus.
+	"""
+	comp = competence or {}
+	if not (comp.get("effets") or {}).get("degats"):
+		return None
+	jet = comp.get("jet", "cc")
+	if jet == "cc":
+		return _profil_attaque(joueur, "cac")
+	if jet == "cd":
+		attaques = joueur.get("attaque_profils") or []
+		for mode in ("tir", "jet"):
+			profil = next((a for a in attaques if a.get("mode") == mode), None)
+			if profil is not None:
+				return profil
+	return None
+
+
 def _degats_competence(joueur: dict, competence: dict, effets: dict) -> str:
 	"""Notation de dégâts d'une compétence — SOURCE UNIQUE.
 
-	Une frappe de CORPS À CORPS (`jet: "cc"`) est un coup PORTÉ AVEC l'arme, pas un effet à
-	côté : elle AJOUTE les dégâts d'arme du porteur (`degats_cc` du snapshot = dé de Force +
-	dés et bonus de l'arme équipée) à ses propres dés. Sans quoi une active coûtant 1 action
-	ET des PM frappait moins fort qu'une attaque ordinaire gratuite.
+	Une frappe MARTIALE (`jet: "cc"` ou `"cd"`) est un coup PORTÉ AVEC l'arme, pas un effet
+	à côté : elle AJOUTE les dégâts du profil emprunté (`_profil_emprunte`) à ses propres
+	dés — `degats_cc` au contact et pour une arme de lancer, `degats_cd` pour un arc. Sans
+	quoi une active coûtant 1 action ET des PM frappait moins fort qu'une attaque ordinaire
+	gratuite.
 
-	⚠️ `cd` et `magique` en sont EXCLUS : un tir emprunte déjà l'arc par son jet, et une
-	frappe magique ne se négocie pas au poids de la hache.
 	⚠️ Une compétence SANS dés (pur debuff : entrave, cri de guerre) reste sans dés — sinon
 	une prise qui ne blesse pas deviendrait une attaque.
-	⚠️ Snapshot sans `degats_cc` (combat déjà en base) ⇒ la compétence garde ses seuls dés :
-	aucune migration.
+	⚠️ Snapshot sans la clé de dégâts du profil (combat déjà en base) ⇒ la compétence garde
+	ses seuls dés : aucune migration.
 	"""
 	base = (effets or {}).get("degats", "")
-	if not base or (competence or {}).get("jet", "cc") != "cc":
+	profil = _profil_emprunte(joueur, dict(competence or {}, effets=effets))
+	if not base or profil is None:
 		return base
-	return concat_degats(joueur.get("degats_cc", ""), base)
+	return concat_degats(joueur.get(profil.get("degats", "degats_cc"), ""), base)
 
 
 def _portee_competence(joueur: dict, competence: dict) -> tuple:
 	"""Portée EFFECTIVE d'une compétence et son caractère « à distance » — SOURCE UNIQUE.
 
-	Même porte que `_degats_competence`, juste au-dessus, et pour la même raison : une frappe
-	de CORPS À CORPS (`jet: "cc"` avec des dés) est un coup PORTÉ AVEC l'arme. Elle en emprunte
-	les dés — et donc aussi l'ALLONGE : une arme d'hast frappe à 2 cases par `attaquer`, la
-	compétence portée par cette même hallebarde doit frapper à 2 cases elle aussi.
+	Même porte que `_degats_competence` (`_profil_emprunte`), et pour la même raison : une
+	frappe martiale à dés est un coup PORTÉ AVEC l'arme. Elle en emprunte les dés — et donc
+	aussi la PORTÉE : une arme d'hast frappe à 2 cases par `attaquer`, la compétence portée
+	par cette même hallebarde aussi ; un tir de compétence porte aussi loin que l'arc.
 
 	⚠️ `max` et NON un remplacement : une portée écrite par l'auteur n'est jamais rabaissée par
 	l'arme en main.
-	⚠️ Tout ce qui n'est pas une frappe `cc` à dés garde une allonge de 1 : un pur debuff de
-	contact (entrave, cri), un soin `cible: "allie"` — `normaliser_competence` met `jet: "cc"`
-	PAR DÉFAUT, on ne soigne pas au bout d'une hallebarde —, une compétence `cd` ou `magique`.
-	⚠️ **Le second membre est le vrai piège.** La branche `competence` déduisait « à distance »
-	de `portee > 1`, là où la branche `attaquer` lit le drapeau `ranged` du profil : hériter des
-	2 cases d'une hast aurait rendu la compétence INTERDITE en mêlée et soumise à la ligne de
-	vue, l'inverse même de ce qu'est une hast. `ranged` se mesure donc à l'allonge — on est « à
-	distance » quand on frappe AU-DELÀ de ce que l'arme atteint. À allonge 1 la formule se réduit
-	exactement à `portee > 1` : comportement d'avant à la lettre pour tout le reste.
-	⚠️ Snapshot sans `attaque_profils` (combat déjà en base) ⇒ `_profil_attaque` retombe sur les
-	mains nues, donc allonge 1 : aucune migration.
+	⚠️ Rien d'emprunté ⇒ allonge 1 : un pur debuff de contact, un soin `cible: "allie"`, une
+	compétence `magique`, une `cd` sans arme à distance.
+	⚠️ **Le drapeau `ranged` est le vrai piège.** Au contact, il se mesure à l'allonge — on
+	est « à distance » quand on frappe AU-DELÀ de ce que l'arme atteint : hériter des 2 cases
+	d'une hast ne doit pas rendre la compétence INTERDITE en mêlée. Emprunté à un arc ou à une
+	arme de lancer, il suit le profil (`ranged: True`) : un tir reste un tir, interdit engagé
+	et soumis à la ligne de vue, comme `attaquer` en mode tir. À allonge 1 la formule se
+	réduit exactement à `portee > 1` : comportement d'avant pour tout le reste.
+	⚠️ Snapshot sans `attaque_profils` (combat déjà en base) ⇒ mains nues au contact, rien à
+	distance : aucune migration.
 	"""
 	comp = competence or {}
 	portee = max(1, int(comp.get("portee", 1) or 1))
-	effets = comp.get("effets") or {}
-	if comp.get("jet", "cc") == "cc" and effets.get("degats"):
-		allonge = max(1, int(_profil_attaque(joueur, "cac").get("portee", 1) or 1))
-	else:
-		allonge = 1
+	profil = _profil_emprunte(joueur, comp)
+	allonge = max(1, int(profil.get("portee", 1) or 1)) if profil else 1
 	portee = max(portee, allonge)
-	return portee, portee > allonge
+	return portee, portee > allonge or bool(profil and profil.get("ranged"))
 
 
 def _magic_hit_threshold(toucher_magique: int, cible_pm_def: int) -> int:
