@@ -6047,9 +6047,13 @@ function _renderCompetences(list) {
 		let portee = '';
 		if (c.mode === 'active' && c.cible === 'ennemi') portee = ` · portée ${c.portee}`;
 		else if (c.mode === 'active' && c.cible === 'allie') portee = ' · 🤝 sur un allié';
-		// Frappe de contact : ses dés s'ajoutent à ceux de l'arme équipée.
-		const arme = c.mode === 'active' && c.cible === 'ennemi' && c.jet === 'cc' && c.effets && c.effets.degats;
-		const armeTitre = arme ? ' title="Ces dés s\'ajoutent aux dégâts de votre arme"' : '';
+		// Frappe martiale : ses dés s'ajoutent à ceux de l'arme équipée — de mêlée en `cc`,
+		// arc ou arme de lancer en `cd` (cf. combat._profil_emprunte).
+		const arme = c.mode === 'active' && c.cible === 'ennemi' && (c.jet === 'cc' || c.jet === 'cd')
+			&& c.effets && c.effets.degats;
+		const armeTitre = !arme ? ''
+			: c.jet === 'cd' ? ' title="Ces dés s\'ajoutent aux dégâts de votre arc ou arme de lancer"'
+			: ' title="Ces dés s\'ajoutent aux dégâts de votre arme"';
 		return `<div class="sh-skill">
 			<span class="sh-skill-icon">${c.icon || '⚡'}</span>
 			<div class="sh-skill-info">

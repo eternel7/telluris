@@ -1,0 +1,36 @@
+[
+  {
+    "_id": "competence:poudre_aveuglante",
+    "type": "competence",
+    "nom": "Poudre aveuglante",
+    "icon": "💨",
+    "description": "Une poignée de poudre à la figure, puis la dague.",
+    "vocation": "voleur",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 8,
+    "cible": "ennemi",
+    "jet": "cc",
+    "portee": 1,
+    "effets": {
+      "degats": "1D6"
+    }
+  },
+  {
+    "_id": "competence:tir_precis",
+    "type": "competence",
+    "nom": "Tir précis",
+    "icon": "🏹",
+    "description": "Il retient son souffle, laisse passer un battement de cœur, puis décoche.",
+    "vocation": "forestier",
+    "niveau": 0,
+    "mode": "active",
+    "cout_pm": 12,
+    "cible": "ennemi",
+    "jet": "cd",
+    "portee": 8,
+    "effets": {
+      "degats": "1D8+2"
+    }
+  }
+]
