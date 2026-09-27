@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from db.config import db, get_doc, save_doc, find_docs
 from utils.characters import get_selected_character
 from utils.auth import get_current_user
-from utils import acces, capacites, enseignes, pnj as pnj_util
+from utils import acces, capacites, enseignes, pnj as pnj_util, proprietes
 
 # Répertoires d'images servis par les mounts /towns et /pnj (cf. main.py).
 TOWNS_IMAGES_PATH = "templates/resources/towns"
@@ -49,6 +49,12 @@ def get_lieu_links(current_user: dict = Body(...), filtrer_acces: bool = True):
 			doc = get_doc(node["lieu"])
 			if (filtrer_acces and node["lieu"] != lieu
 					and not acces.acces_autorise(character, doc, get_doc)[0]):
+				ferme = True
+			# Propriété de joueur : une chambre LOUÉE n'apparaît qu'à son locataire (les
+			# propriétés achetées, elles, sont visibles de tous). Même idiome d'affichage,
+			# la garde 403 est dans move_character.
+			if (filtrer_acces and node["lieu"] != lieu and proprietes.est_propriete(doc)
+					and not proprietes.acces_propriete(character, doc)[0]):
 				ferme = True
 			doc.pop("cells",None)
 			doc.pop("_rev",None)

@@ -45,6 +45,7 @@ from utils import intro
 from utils import transport
 from utils import recrutement
 from utils import acces
+from utils import proprietes
 from utils import cadence
 from utils import courriel
 from utils import motdepasse
@@ -606,6 +607,15 @@ async def move_character(
 							ok, raison = acces.acces_autorise(character_to_update, lieu_doc, get_doc)
 							if not ok:
 								raise HTTPException(status_code=403, detail=raison)
+							# Propriété de joueur : garde PROPRE, hors du kill-switch des
+							# barrières de PNJ — une chambre louée reste inviolable même
+							# quand `ACCES_GARDIEN_ACTIF` est coupé. Location périmée au passage.
+							if proprietes.est_propriete(lieu_doc):
+								if proprietes.traiter_expiration_location(lieu_doc):
+									save_doc(lieu_doc)
+								ok, raison = proprietes.acces_propriete(character_to_update, lieu_doc)
+								if not ok:
+									raise HTTPException(status_code=403, detail=raison)
 						# Donjon à étages : la connexion ne DÉPLACE pas le personnage, elle ouvre
 						# la descente — un combat dont il ne sort que par un passage vers la
 						# surface. Son `lieu` reste celui d'où il est descendu.
@@ -627,7 +637,9 @@ async def move_character(
 						niveau_up = False
 						niveau_new = compute_character_level(character_to_update.get("xp_total", 0))
 						lieux_visites = character_to_update.get("lieux_visites", [])
-						if destination not in lieux_visites:
+						# ⚠️ Une propriété de joueur n'est pas une découverte : chaque achat en crée
+						# une, et visiter les logis d'autrui deviendrait une ferme à XP.
+						if destination not in lieux_visites and not proprietes.est_propriete(lieu_doc):
 							lieux_visites.append(destination)
 							character_to_update["lieux_visites"] = lieux_visites
 							xp_gain = lieu_doc.get("xp_decouverte", character_stats.XP_DECOUVERTE_LIEU)

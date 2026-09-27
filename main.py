@@ -18,6 +18,7 @@ from routers.quetes import quetes_router
 from routers.pnj import pnj_router, marque_pnj as pnj_router_marque_pnj
 from routers.recrutement import recrutement_router
 from routers.montures import montures_router
+from routers.proprietes import proprietes_router
 from routers.auberge import auberge_router
 from routers.scriptorium import scriptorium_router
 from routers.commande import commande_router
@@ -43,6 +44,7 @@ from utils import transport as transport_util
 from utils import chasse as chasse_util
 from utils import recrutement as recrutement_util
 from utils import montures as montures_util
+from utils import proprietes as proprietes_util
 from utils import auberge as auberge_util
 from utils import scriptorium as scriptorium_util
 from utils import commande as commande_util
@@ -144,6 +146,7 @@ app.include_router(quetes_router, prefix="/api")
 app.include_router(pnj_router, prefix="/api")
 app.include_router(recrutement_router, prefix="/api")
 app.include_router(montures_router, prefix="/api")
+app.include_router(proprietes_router, prefix="/api")
 app.include_router(auberge_router, prefix="/api")
 app.include_router(scriptorium_router, prefix="/api")
 app.include_router(commande_router, prefix="/api")
@@ -665,6 +668,20 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	race = next((r for r in races["value"] if r["id"] == character["race"]), None)
 	lieu = character.get("lieu",character["cite"])
 	grid_doc = get_doc(lieu)
+	# Propriété de joueur : location périmée PARESSEUSEMENT, et expulsion si l'on se trouve
+	# dans un bien qui ne nous admet plus (vendu/abandonné pendant qu'on y était, chambre
+	# d'autrui) — on ressort sur la case d'où part sa porte, qui n'existe peut-être plus.
+	if proprietes_util.est_propriete(grid_doc):
+		if proprietes_util.traiter_expiration_location(grid_doc):
+			save_doc(grid_doc)
+		if not proprietes_util.acces_propriete(character, grid_doc)[0]:
+			_origine = grid_doc.get("origine") or {}
+			_opos = _origine.get("pos") or [0, 0]
+			character["lieu"] = _origine.get("lieu") or character["cite"]
+			character["position"] = {"x": _opos[0], "y": _opos[1]}
+			save_doc(character)
+			lieu = character["lieu"]
+			grid_doc = get_doc(lieu)
 	# Atelier : chaque visite du lieu lance un tick marché (approvisionnement + production +
 	# écoulement PNJ des produits finis), comme à chaque vente. On ne déclenche que s'il y a de la
 	# matière/produits en stock OU un approvisionnement configuré pour la catégorie (sinon le lieu
@@ -892,10 +909,21 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 	# servie ici. Le log part avec — le client l'égrène PENDANT que le POST est en vol, et
 	# il ne l'aurait pas en main s'il fallait d'abord ouvrir la salle commune. Même raison
 	# que la `compagnie` : sinon l'information n'apparaîtrait qu'après ouverture du panneau.
+	# Propriétés : `est_propriete` ouvre le panneau « 🏠 » du bien où l'on se tient ;
+	# `proprietes_offre` ouvre celui d'acquisition (zone habitable peinte sur CETTE case
+	# d'une ville, ou chambre à louer dans une auberge). Chez soi, la nuit est GRATUITE et
+	# passe par le même flux que celle de l'auberge (`routers/auberge._acces_nuit`).
+	est_propriete = proprietes_util.est_propriete(grid_doc)
+	dort_chez_soi = est_propriete and proprietes_util.peut_dormir(character, grid_doc)
+	_cat_proprietes = proprietes_util.catalogue(get_doc)
+	proprietes_offre = bool(
+		[t for t in proprietes_util.types_achetables_ici(grid_doc, character.get("position"), get_doc)
+		 if proprietes_util.type_def(_cat_proprietes, t)]
+		or (est_auberge and any(proprietes_util.location_de(t) for t in _cat_proprietes["types"])))
 	auberge_nuit = ({
-		"cout": auberge_util.cout_nuit(grid_doc),
+		"cout": 0 if dort_chez_soi else auberge_util.cout_nuit(grid_doc),
 		"log": auberge_util.messages_nuit(grid_doc, auberge_util.NUIT_LOG_LIGNES),
-	} if est_auberge else None)
+	} if (est_auberge or dort_chez_soi) else None)
 
 	# Ressource récoltable (événement de zone « ressource ») : résolue pour l'affichage initial
 	# du bouton « Récolter » dans la sidebar (champ transitoire posé par move_character).
@@ -967,6 +995,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 			"est_commande": est_commande,
 			"est_sur_mesure": est_sur_mesure,
 			"auberge_nuit": auberge_nuit,
+			"est_propriete": est_propriete,
+			"proprietes_offre": proprietes_offre,
 			# Compagnons connus + affinités (onglet 🤝 section 👥, rendu client) — resynchronisé
 			# après embauche/congédiement/retour de combat.
 			"affinites_detail": recrutement_util.affinites_detail_payload(character, get_doc),
