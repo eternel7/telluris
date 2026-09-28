@@ -170,6 +170,16 @@ CATALOGUE = [
 			"régénération idempotente.",
 	},
 	{
+		"id": "gen_equipement_humanoides",
+		"label": "⚔️ Équipement des monstres humanoïdes",
+		"argv": _py("gen_equipement_humanoides.py"),
+		"ecrit": "Écrit jsons/equipement_humanoides_a_importer.json.",
+		"description": "Pose `items` (armes + armures tirées au combat, lâchées en butin) sur "
+			"les espèces `humanoide`. Table exhaustive : échoue si un humanoïde du dump n'y est "
+			"pas classé ou si une pièce dépasse les caracts minimales de l'espèce. Relit le dump "
+			"le plus récent et n'injecte que ce champ : régénération idempotente.",
+	},
+	{
 		"id": "gen_escorte_marchands",
 		"label": "🧵 Ouvrir l'escorte de progéniture chez les tenanciers",
 		"argv": _py("gen_escorte_marchands.py"),
