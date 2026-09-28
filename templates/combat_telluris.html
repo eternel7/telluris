@@ -188,6 +188,14 @@
 	border: 1px dashed rgba(240, 190, 80, 0.95);
 	box-shadow: inset 0 0 8px rgba(240, 190, 80, 0.5);
 }
+/* Zone PERSISTANTE (Mur de feu) : le feu qui reste sur la grille tant que le sort est
+   maintenu. Peinte sous les jetons, jamais cliquable. Orangé vif, pour ne se confondre ni
+   avec l'aperçu offensif (violet) ni avec un passage (doré, pointillé). */
+.zone-case.persistante {
+	background: rgba(255, 110, 30, 0.34);
+	border: 1px solid rgba(255, 140, 40, 0.95);
+	box-shadow: inset 0 0 10px rgba(255, 70, 0, 0.6);
+}
 /* Dans `.tour-header`, à DROITE du bandeau d'initiative, avant le 🔊. `margin-left: auto`
    pousse la rangée à droite ET cale le libellé et le bandeau à gauche : un bouton qui
    apparaît à son tour prend la marge libre sans décaler les badges (§17).
@@ -1271,6 +1279,8 @@ const SERVER_DATA = {
 	chasse_narration:     {{ (combat.chasse_narration or none) | tojson | safe }},
 	// Donjon à étages : {donjon, etage, passages[{id, pos, label, surface, franchissable}]}.
 	etages:               {{ (combat.etages or none) | tojson | safe }},
+	// Zones persistantes (Mur de feu) : [{id, nom, icon, cases: [[x, y]…], …}].
+	zones_persistantes:   {{ (combat.zones_persistantes or []) | tojson | safe }},
 };
 
 // Grille de combat : statique pour toute la durée du combat (cells appartient au
@@ -2035,6 +2045,26 @@ function peindrePassages(layer, j) {
 	});
 }
 
+// Zones PERSISTANTES (Mur de feu) : `state.zones_persistantes`, cases `[x, y]` figées au
+// lancement par le serveur. Repeintes à chaque rendu comme les passages (même calque, même
+// `_placerToken`), donc solidaires de la caméra. ⚠️ Suivent l'état FINAL (non gelées par le
+// journal) : le mur paraît et s'éteint avec la réponse, pas avec la ligne qui l'explique.
+const _casesPersistantes = [];
+function peindreZonesPersistantes(layer, j) {
+	while (_casesPersistantes.length) _casesPersistantes.pop().remove();
+	if (!j || !j.pos) return;
+	(state.zones_persistantes || []).forEach(z => {
+		(z.cases || []).forEach(c => {
+			const el = document.createElement('div');
+			el.className = 'zone-case persistante';
+			el.title = z.nom || '';
+			_placerToken(el, c[0] - j.pos.x, c[1] - j.pos.y);
+			layer.appendChild(el);
+			_casesPersistantes.push(el);
+		});
+	});
+}
+
 // Un bouton par passage EMPRUNTABLE maintenant — à son tour, le principal sur la case du
 // passage et le groupe en file derrière lui (`franchissable`, calculé par le serveur). Les
 // autres ne s'affichent pas : ils se lisent sur la carte (cases de passage). Libellé posé en
@@ -2093,6 +2123,7 @@ function renderTokens() {
 	// dès que quelqu'un bouge ou que la caméra pivote.
 	effacerApercuZone();
 	peindrePassages(layer, j);
+	peindreZonesPersistantes(layer, j);
 	// Ciblage de sort/compétence en attente : cibles violettes au lieu de l'attaque.
 	const casting = !!(pendingSort || pendingComp);
 	const capa = casting ? (pendingSort ? pendingSort.sort : pendingComp.comp) : null;
