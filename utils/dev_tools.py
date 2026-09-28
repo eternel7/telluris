@@ -850,3 +850,9 @@ def arreter() -> bool:
 		return True
 	except Exception:
 		return False
+
+
+def en_cours():
+	"""Libellé de l'outil qui tourne encore, sinon None — un redémarrage de FastAPI le tuerait."""
+	run = _RUN
+	return run["label"] if run is not None and not run["fini"] else None
