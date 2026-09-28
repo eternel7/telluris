@@ -8380,9 +8380,7 @@ function _propMesProprietes(liste) {
 		<span class="q-desc">${escapeHtml(p.type)} · ${_PROP_STATUTS[p.statut] || escapeHtml(p.statut || '')}${p.mode === 'location' && p.expire_at ? ' · jusqu\'au ' + _propDate(p.expire_at) : ''}${p.residence ? ' · résidence' : ''}</span>
 	</div></div>`).join('');
 	return `<section class="prop-section"><h3>🗝️ Mes propriétés</h3>
-		<div class="prop-liste">${lignes || '<div class="sell-empty">Vous ne possédez aucun bien.</div>'}</div>
-		<p class="q-desc">Un bien garde son type : pour passer à un logis plus grand, cédez celui-ci puis acquérez-en un autre. Ses aménagements restent attachés au bien cédé.</p>
-	</section>`;
+		<div class="prop-liste">${lignes || '<div class="sell-empty">Vous ne possédez aucun bien.</div>'}</div>	</section>`;
 }
 
 function renderProprietesOffre(data) {
@@ -8432,6 +8430,13 @@ function renderPropriete(data) {
 		</div>`;
 	}
 	html += `</section>`;
+
+	// Chambre louée : ni capacités, ni aménagements, ni occupants/PNJ/personnel, ni activités.
+	if (loc) {
+		html += _propMesProprietes(data.mes_proprietes);
+		document.getElementById('prop-contenu').innerHTML = html;
+		return;
+	}
 
 	html += `<section class="prop-section"><h3>📐 Capacités</h3>${_propCaps(data.capacites)}
 		<span class="q-desc">${data.gardien ? '🛡️ Un gardien veille sur les lieux.' : (loc ? '🔒 Chambre inviolable.' : '⚠️ Aucun gardien : un visiteur peut se servir dans le coffre.')}</span></section>`;
