@@ -139,6 +139,41 @@
 		.alerte summary { cursor: pointer; color: var(--accent); }
 		.alerte ul { margin: 8px 0 10px 18px; color: var(--muted); max-height: 200px; overflow-y: auto; }
 		.alerte a { color: var(--accent2); }
+
+		/* ── Carte Serveur ── */
+		.srv-etat { font-size: 0.8rem; line-height: 1.6; margin-bottom: 4px; overflow-wrap: anywhere; }
+		.srv-etat .k { color: var(--muted); }
+		.srv-etat .retard { color: var(--accent); }
+		.srv-etat .ajour { color: var(--success); }
+		.srv-etat details { margin-top: 6px; }
+		.srv-etat summary { cursor: pointer; color: var(--accent2); }
+		.srv-liste {
+			margin: 6px 0 0; padding: 8px 10px; list-style: none; max-height: 180px; overflow-y: auto;
+			background: #0d0f14; border: 1px solid var(--border); border-radius: 6px;
+			font-size: 0.75rem; color: var(--muted); overflow-wrap: anywhere;
+		}
+		.srv-liste li + li { margin-top: 2px; }
+		.btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+		.btn.danger { border-color: var(--danger); background: rgba(200,75,75,0.1); color: var(--danger); }
+		.btn.danger:hover:not(:disabled) { background: rgba(200,75,75,0.22); box-shadow: 0 0 12px rgba(200,75,75,0.25); }
+		.btn.conseille { animation: pulse 1.4s ease-in-out infinite; }
+		@keyframes pulse { 50% { box-shadow: 0 0 14px rgba(200,75,75,0.55); } }
+		.srv-log {
+			display: none; margin-top: 10px; padding: 10px; max-height: 240px; overflow-y: auto;
+			background: #0d0f14; border: 1px solid var(--border); border-radius: 6px;
+			font-family: inherit; font-size: 0.72rem; line-height: 1.5; color: var(--muted);
+			white-space: pre-wrap; overflow-wrap: anywhere;
+		}
+		.srv-log.active { display: block; }
+
+		/* Téléphone : gouttières de 16px, boutons pleine largeur et hauts de 44px (cible tactile). */
+		@media (max-width: 560px) {
+			header { padding: 14px 16px; }
+			header h1 { font-size: 1.05rem; }
+			.main { padding: 16px; }
+			.card { padding: 16px; }
+			.srv-card .btn-row .btn { flex: 1 1 100%; justify-content: center; min-height: 44px; }
+		}
 	</style>
 </head>
 <body>
@@ -151,6 +186,27 @@
 				<ul id="grimoires-liste"></ul>
 			</details>
 			<a href="/admin/dev-tools?outil=gen_grimoires">→ Générer leurs grimoires (📖 outils de développement)</a>
+		</div>
+
+		<div class="section-label">Serveur</div>
+		<div class="card srv-card">
+			<div class="card-title">🖥 Serveur — code &amp; redémarrage</div>
+			<div class="card-desc">
+				<strong>Mettre à jour</strong> avance la branche courante sur son amont
+				(<code>git fetch</code> + <code>merge --ff-only</code>). Les modifications locales
+				non commitées sont <strong>conservées</strong> : instantané de sécurité dans
+				<code>git stash list</code>, et refus sans rien toucher si la mise à jour modifie
+				un fichier changé localement. <strong>Redémarrer</strong> relance FastAPI dans le
+				même conteneur (quelques secondes) — nécessaire pour appliquer le nouveau code.
+			</div>
+			<div class="srv-etat" id="srv-etat">…</div>
+			<div class="btn-row">
+				<button class="btn secondary" id="srv-verifier">🔍 Vérifier</button>
+				<button class="btn" id="srv-maj">⬇ Mettre à jour</button>
+				<button class="btn danger" id="srv-restart">⟳ Redémarrer FastAPI</button>
+			</div>
+			<div class="status" id="srv-status"></div>
+			<pre class="srv-log" id="srv-log"></pre>
 		</div>
 
 		<div class="section-label">Editeurs</div>
@@ -821,6 +877,157 @@ async function chargerGrimoiresManquants() {
 		bloc.hidden = false;
 	} catch (e) { /* hors ligne : rien à signaler */ }
 }
+
+// ── Serveur : état du dépôt, mise à jour, redémarrage ─────────────
+// ⚠️ Tout ce qui vient de git (titres de commit, chemins) passe par `textContent`.
+const srvEtat    = document.getElementById('srv-etat');
+const srvStatus  = document.getElementById('srv-status');
+const srvLog     = document.getElementById('srv-log');
+const srvVerif   = document.getElementById('srv-verifier');
+const srvMaj     = document.getElementById('srv-maj');
+const srvRestart = document.getElementById('srv-restart');
+let srvDemarreA = null;
+let srvOccupe = false;
+let srvRetard = 0;   // « Mettre à jour » n'a de sens qu'avec des commits à récupérer
+
+function srvEl(tag, texte, cls) {
+	const e = document.createElement(tag);
+	if (texte != null) e.textContent = texte;
+	if (cls) e.className = cls;
+	return e;
+}
+function srvLigne(cle, valeur, cls) {
+	const d = srvEl('div');
+	d.appendChild(srvEl('span', cle + ' ', 'k'));
+	d.appendChild(srvEl('span', valeur, cls));
+	return d;
+}
+function srvListe(titre, items) {
+	const det = srvEl('details');
+	det.appendChild(srvEl('summary', titre));
+	const ul = srvEl('ul', null, 'srv-liste');
+	items.forEach(t => ul.appendChild(srvEl('li', t)));
+	det.appendChild(ul);
+	return det;
+}
+function srvBoutons(actif) {
+	srvOccupe = !actif;
+	[srvVerif, srvRestart].forEach(b => { b.disabled = !actif; });
+	srvMaj.disabled = !actif || !srvRetard;
+}
+function srvJournal(lignes) {
+	srvLog.textContent = lignes.filter(Boolean).join('\n');
+	srvLog.classList.toggle('active', !!srvLog.textContent);
+}
+
+function srvRendre(d) {
+	srvEtat.textContent = '';
+	srvRetard = d.retard || 0;
+	if (!d.git_ok) { srvEtat.appendChild(srvEl('div', d.git_erreur || 'git indisponible.', 'retard')); return; }
+	if (d.erreur) { srvEtat.appendChild(srvEl('div', 'git : ' + d.erreur, 'retard')); return; }
+	srvEtat.appendChild(srvLigne('Branche :', (d.branche || 'HEAD détaché') + (d.amont ? ' → ' + d.amont : ' (pas d\'amont)')));
+	if (d.head) srvEtat.appendChild(srvLigne('Commit :', d.head.hash + ' — ' + d.head.titre + ' (' + d.head.date + ')'));
+	if (d.fetch_ok === false) srvEtat.appendChild(srvLigne('Fetch :', 'échec — ' + d.fetch_erreur, 'retard'));
+	if (d.retard != null) {
+		const txt = d.retard ? d.retard + ' commit(s) à récupérer' : 'à jour';
+		srvEtat.appendChild(srvLigne('Amont :', txt + (d.avance ? ' · ' + d.avance + ' commit(s) local(aux) non poussé(s)' : ''),
+			d.retard ? 'retard' : 'ajour'));
+		if (d.commits_retard && d.commits_retard.length) srvEtat.appendChild(srvListe('Commits à récupérer', d.commits_retard));
+	}
+	const loc = d.locaux || [];
+	srvEtat.appendChild(srvLigne('Local :', loc.length ? loc.length + ' fichier(s) non commité(s) — conservé(s)' : 'aucune modification non commitée'));
+	if (loc.length) srvEtat.appendChild(srvListe('Fichiers non commités', loc.map(f => f.etat + '  ' + f.chemin)));
+	if (d.outil_en_cours) srvEtat.appendChild(srvLigne('Outil de dev/ en cours :', d.outil_en_cours, 'retard'));
+	srvMaj.disabled = srvOccupe || !srvRetard;
+}
+
+async function srvCharger(fetchAmont = true) {
+	const r = await fetch('/admin/serveur/etat?fetch=' + (fetchAmont ? 1 : 0));
+	const d = await r.json().catch(() => ({}));
+	if (!r.ok) throw new Error(d.detail || ('HTTP ' + r.status));
+	srvDemarreA = d.demarre_a;
+	srvRendre(d);
+	return d;
+}
+
+async function srvVerifier() {
+	srvBoutons(false);
+	setStatusOn(srvStatus, 'Interrogation de l\'amont…');
+	try {
+		await srvCharger(true);
+		setStatusOn(srvStatus, '');
+	} catch (e) {
+		setStatusOn(srvStatus, 'Échec : ' + e.message, 'err');
+	} finally {
+		srvBoutons(true);
+	}
+}
+
+srvVerif.addEventListener('click', srvVerifier);
+
+srvMaj.addEventListener('click', async () => {
+	if (!confirm('Mettre à jour le code du serveur ?\nLes modifications locales non commitées seront conservées.')) return;
+	srvBoutons(false);
+	setStatusOn(srvStatus, 'Mise à jour…');
+	srvJournal([]);
+	try {
+		const r = await fetch('/admin/serveur/mettre-a-jour', { method: 'POST' });
+		const d = await r.json().catch(() => ({}));
+		if (!r.ok) { setStatusOn(srvStatus, 'Refusé : ' + (d.detail || r.status), 'err'); return; }
+		if (d.a_jour) { setStatusOn(srvStatus, '✓ Déjà à jour.', 'ok'); return; }
+		setStatusOn(srvStatus, '✓ ' + d.avant.hash + ' → ' + d.apres.hash + ' · ' + (d.nb_fichiers || 0)
+			+ ' fichier(s) modifié(s).' + (d.redemarrage_conseille ? ' Redémarrer pour appliquer.' : ''), 'ok');
+		srvJournal([
+			(d.commits || []).length ? 'Commits :\n' + d.commits.join('\n') : '',
+			d.instantane ? '\nInstantané de sécurité des modifs locales : ' + d.instantane + ' (git stash list)' : '',
+			(d.fichiers || []).length ? '\nFichiers :\n' + d.fichiers.join('\n') : '',
+		]);
+		srvRestart.classList.toggle('conseille', !!d.redemarrage_conseille);
+	} catch (e) {
+		setStatusOn(srvStatus, 'Erreur réseau : ' + e.message, 'err');
+	} finally {
+		srvBoutons(true);
+		srvCharger(false).catch(() => {});
+	}
+});
+
+srvRestart.addEventListener('click', async () => {
+	if (!confirm('Redémarrer FastAPI ?\nLe jeu sera indisponible quelques secondes pour tous les joueurs.')) return;
+	srvBoutons(false);
+	setStatusOn(srvStatus, 'Demande de redémarrage…');
+	const ancien = srvDemarreA;
+	try {
+		const r = await fetch('/admin/serveur/redemarrer', { method: 'POST' });
+		const d = await r.json().catch(() => ({}));
+		if (!r.ok) { setStatusOn(srvStatus, 'Refusé : ' + (d.detail || r.status), 'err'); srvBoutons(true); return; }
+	} catch (e) {
+		setStatusOn(srvStatus, 'Erreur réseau : ' + e.message, 'err'); srvBoutons(true); return;
+	}
+	// Sondage jusqu'à ce qu'un process NEUF réponde (autre `demarre_a`).
+	const debut = Date.now();
+	const sonder = async () => {
+		const s = Math.round((Date.now() - debut) / 1000);
+		setStatusOn(srvStatus, 'Redémarrage en cours… ' + s + ' s');
+		try {
+			const d = await srvCharger(false);
+			if (d.demarre_a !== ancien) {
+				setStatusOn(srvStatus, '✓ FastAPI redémarré (' + s + ' s).', 'ok');
+				srvRestart.classList.remove('conseille');
+				srvBoutons(true);
+				return;
+			}
+		} catch (e) { /* serveur pas encore revenu */ }
+		if (Date.now() - debut > 90000) {
+			setStatusOn(srvStatus, 'Le serveur ne répond toujours pas après 90 s — vérifier les journaux du conteneur.', 'err');
+			srvBoutons(true);
+			return;
+		}
+		setTimeout(sonder, 1500);
+	};
+	setTimeout(sonder, 1500);
+});
+
+srvCharger(false).catch(e => setStatusOn(srvStatus, 'État indisponible : ' + e.message, 'err'));
 
 loadVariables();
 loadCodeDefaults();

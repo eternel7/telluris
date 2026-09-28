@@ -26,6 +26,14 @@ description: Admin tooling, content generators and tunable world variables — t
 ⚠️ **Deux entrées ne peuvent pas tourner dans le conteneur tel qu'il est** — elles restent au catalogue pour que la raison soit **lisible**, plutôt que d'être absentes sans explication : `node` n'est pas dans l'image (`check_js` / `test_slots_client` → **127**, `[introuvable]`). L'y ajouter suffit, sans une ligne de code — c'est ce qui a été fait pour **`pytest`, désormais dans le `pip install` du `docker-compose.yml`** (avec `Pillow`) : cette entrée-là tourne. ⚠️ L'entrée `pytest` porte `-p no:cacheprovider` (sans quoi elle écrirait `.pytest_cache`, et sa fiche « Lecture seule » mentirait) et `--color=no` (un `PY_COLORS` traînant cracherait des séquences ANSI dans un notepad qui écrit en `textContent`).
 
 
+### Carte « 🖥 Serveur » de `/admin` — `utils/serveur.py`
+
+Endpoints `GET /admin/serveur/etat` (`fetch=0` : sans réseau), `POST /admin/serveur/mettre-a-jour`, `POST /admin/serveur/redemarrer`. Verrouillé par `tests/test_serveur.py` (exécuteur factice + vrai dépôt git temporaire).
+
+- **Aucune perte de modif locale** : `fetch` → refus si divergence (commits locaux) → pré-contrôle (fichier local modifié/non suivi ∩ fichiers de l'amont ⇒ 409, rien touché) → instantané `stash create` + `stash store` (« admin-maj … » dans `git stash list`, l'arbre n'est PAS touché) → `merge --ff-only`. Jamais `pull`, `reset`, `checkout --`, `clean`, `stash pop`.
+- **Identité** : conteneur en root, dépôt monté appartenant à l'hôte → git lancé avec `user=/group=` du propriétaire de la racine (`HOME` = tmp), sinon « dubious ownership » et objets root dans `.git`.
+- **Redémarrage** = `os.execv(sys.executable, [sys.executable, *sys.argv])` ~1 s après la réponse : même PID, pas de réinstallation pip. Refusé si un outil de `dev/` tourne (`dev_tools.en_cours()`, 409) ou si une source ne compile pas (`verifier_code`, 422 — `compile()` en mémoire, un `import main` ouvrirait CouchDB). Le client sonde `etat?fetch=0` jusqu'à un `demarre_a` neuf. Suppose un uvicorn sans `--reload`/`--workers`.
+
 ### Générateurs de contenu — `dev/gen_*.py`
 Voie du contenu **authoré** : relire le dump (source unique), n'injecter que le champ ajouté, écrire `jsons/*_a_importer.json` → régénération **idempotente** (CLAUDE.md §11). Avant de livrer : absence de collision d'`_id`, rejeu contre un export récent. Catalogue (non exhaustif — `ls dev/gen_*.py`) :
 - `gen_marchands.py` — tenanciers génériques `pnj:marchand_*` (une catégorie à recettes = un tenancier).

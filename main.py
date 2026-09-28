@@ -58,6 +58,7 @@ from utils import journal as journal_util
 from utils import animations as animations_util
 from utils import lint_dialogues
 from utils import dev_tools
+from utils import serveur as serveur_util
 from utils import grimoires as grimoires_util
 from utils import simulateur as simulateur_util
 from utils import potentiel as potentiel_util
@@ -1401,6 +1402,65 @@ def admin_dev_tools(request: Request, current_user: Annotated[User, Depends(get_
 		name="admin_dev_tools.html",
 		context={"title": "Outils de développement", "outils": dev_tools.catalogue_payload()},
 	)
+
+
+# ── Serveur : mise à jour du code + redémarrage ──────────────────────────────
+# Carte « 🖥 Serveur » de /admin. Aucune entrée du client : les commandes git sont écrites
+# dans `utils/serveur` (ff-only, instantané + pré-contrôle : jamais de perte de modif locale).
+
+def _require_admin_api(current_user):
+	if (not current_user or "admin" not in current_user or current_user["admin"] != 1):
+		raise HTTPException(status_code=403, detail="Admin only")
+
+
+_GIT_ABSENT = "git n'est pas installé dans le conteneur : ajouter `git` à l'apt-get du docker-compose puis recréer le conteneur."
+
+
+@app.get("/admin/serveur/etat")
+def admin_serveur_etat(
+	current_user: Annotated[User, Depends(get_current_user)],
+	fetch: int = Query(1),
+):
+	"""État du dépôt (branche, amont, retard, fichiers locaux) + `demarre_a` du process.
+	`fetch=0` : sans `git fetch` — le sondage d'après redémarrage n'a besoin que de `demarre_a`."""
+	_require_admin_api(current_user)
+	try:
+		res = serveur_util.etat(fetch=bool(fetch))
+		res["git_ok"] = True
+	except serveur_util.GitAbsent:
+		res = {"git_ok": False, "git_erreur": _GIT_ABSENT}
+	res["demarre_a"] = serveur_util.DEMARRE_A
+	res["outil_en_cours"] = dev_tools.en_cours()
+	return res
+
+
+@app.post("/admin/serveur/mettre-a-jour")
+def admin_serveur_mettre_a_jour(current_user: Annotated[User, Depends(get_current_user)]):
+	"""Avance rapide sur l'amont de la branche courante. 409 = refus SANS rien modifier
+	(conflit avec une modif locale, divergence, déjà en cours)."""
+	_require_admin_api(current_user)
+	try:
+		res, erreur = serveur_util.mettre_a_jour()
+	except serveur_util.GitAbsent:
+		raise HTTPException(status_code=503, detail=_GIT_ABSENT)
+	if erreur:
+		raise HTTPException(status_code=erreur[0], detail=erreur[1])
+	return res
+
+
+@app.post("/admin/serveur/redemarrer")
+def admin_serveur_redemarrer(current_user: Annotated[User, Depends(get_current_user)]):
+	"""Re-exec d'uvicorn dans ~1 s. Refusé si un outil de dev/ tourne (il serait tué) ou si
+	une source Python ne compile pas (l'app ne repartirait pas)."""
+	_require_admin_api(current_user)
+	outil = dev_tools.en_cours()
+	if outil:
+		raise HTTPException(status_code=409, detail=f"« {outil} » tourne encore (outils de développement) : attendre sa fin ou l'arrêter.")
+	erreurs = serveur_util.verifier_code()
+	if erreurs:
+		raise HTTPException(status_code=422, detail="Redémarrage refusé, erreur de syntaxe : " + " · ".join(erreurs[:10]))
+	serveur_util.programmer_redemarrage()
+	return {"demarre_a": serveur_util.DEMARRE_A}
 
 
 @app.get("/admin/grimoires/manquants")
