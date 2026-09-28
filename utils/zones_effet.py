@@ -133,6 +133,10 @@ def normaliser_zone(raw) -> dict | None:
 		"largeur": _champ(raw, "largeur", 1, 1, LARGEUR_MAX),
 		"decalage": _champ(raw, "decalage", 0, 0, DECALAGE_MAX),
 		"angle": _champ(raw, "angle", ANGLE_DEFAUT, 1, 360),
+		# Zone qui RESTE sur la grille (Mur de feu) : n'a d'effet que sur une capacité
+		# offensive MAINTENUE — la concentration est sa durée de vie (cf. combat.py §
+		# zones persistantes). Opt-in strict : seul `true` l'active.
+		"persistante": raw.get("persistante") is True,
 	}
 
 

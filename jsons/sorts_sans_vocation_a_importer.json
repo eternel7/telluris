@@ -2443,7 +2443,8 @@
       "orientation": "cible",
       "longueur": 1,
       "largeur": 3,
-      "decalage": 0
+      "decalage": 0,
+      "persistante": true
     },
     "composants": [
       {
