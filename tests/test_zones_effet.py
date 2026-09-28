@@ -36,15 +36,6 @@ def test_normalisation_toutes_les_cles_presentes():
 	# Les clés des autres formes existent quand même : le client n'a aucun repli à gérer.
 	assert z["longueur"] == 1 and z["largeur"] == 1
 	assert z["decalage"] == 0 and z["angle"] == ANGLE_DEFAUT
-	assert z["persistante"] is False
-
-
-def test_persistante_est_un_opt_in_strict():
-	"""Seul `true` dresse un mur : une valeur approximative ne doit pas laisser du feu sur
-	la grille (miroir de dev/test_zones_effet_client.js)."""
-	assert normaliser_zone({"forme": "rectangle", "persistante": True})["persistante"] is True
-	assert normaliser_zone({"forme": "rectangle", "persistante": "oui"})["persistante"] is False
-	assert normaliser_zone({"forme": "rectangle", "persistante": 1})["persistante"] is False
 
 
 def test_normalisation_valeurs_hors_contrat():

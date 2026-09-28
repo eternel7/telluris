@@ -63,7 +63,6 @@ function normaliserZone(raw) {
 		largeur: _zoneBorne(raw.largeur, 1, 1, ZONE_LARGEUR_MAX),
 		decalage: _zoneBorne(raw.decalage, 0, 0, ZONE_DECALAGE_MAX),
 		angle: _zoneBorne(raw.angle, ZONE_ANGLE_DEFAUT, 1, 360),
-		persistante: raw.persistante === true,
 	};
 }
 

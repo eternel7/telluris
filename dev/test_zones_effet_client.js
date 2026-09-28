@@ -58,14 +58,8 @@ t('toutes les clés présentes, même celles des autres formes', () => {
 	const z = normaliserZone({ forme: 'CERCLE', rayon: 3 });
 	assert.deepStrictEqual(z, {
 		forme: 'cercle', origine: 'cible', orientation: 'cible',
-		rayon: 3, longueur: 1, largeur: 1, decalage: 0, angle: 90, persistante: false,
+		rayon: 3, longueur: 1, largeur: 1, decalage: 0, angle: 90,
 	});
-});
-
-t('persistante : opt-in strict, seul `true` l’active (miroir du pytest)', () => {
-	assert.strictEqual(normaliserZone({ forme: 'rectangle', persistante: true }).persistante, true);
-	assert.strictEqual(normaliserZone({ forme: 'rectangle', persistante: 'oui' }).persistante, false);
-	assert.strictEqual(normaliserZone({ forme: 'rectangle', persistante: 1 }).persistante, false);
 });
 
 t('valeurs hors contrat : défaut pour les énumérations, bornes pour les nombres', () => {

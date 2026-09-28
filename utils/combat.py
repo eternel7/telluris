@@ -1259,11 +1259,8 @@ def _reset_turn_budget(actor: dict, combat_doc: dict | None = None) -> None:
 	budget plein pour agir malgré la canalisation.
 	"""
 	if combat_doc is not None:
-		# ZONES PERSISTANTES : un nouveau tour, une nouvelle brûlure possible — puis celle
-		# de qui COMMENCE son tour dans le feu. ⚠️ L'acteur peut en mourir : l'appelant
-		# (`_run_monster_turn`) doit le relire avant de le faire agir.
-		if actor.get("zones_subies"):
-			actor["zones_subies"] = []
+		# ZONES PERSISTANTES : qui COMMENCE son tour dans le feu brûle. ⚠️ L'acteur peut en
+		# tomber : chaque appelant le relit avant de le faire agir.
 		_bruler_zones(combat_doc, actor)
 		# Auras remises à jour AVANT la régén du tour : elle lit la couverture du moment.
 		_recalculer_auras(combat_doc)
@@ -1435,35 +1432,44 @@ def _payer_maintiens(combat_doc: dict, acteur: dict) -> None:
 
 
 # ── Zones PERSISTANTES : le feu reste sur la grille ──────────────────────────────
-# Une capacité offensive MAINTENUE dont la zone porte `persistante: true` (Mur de feu) ne
-# frappe pas qu'au lancement : ses cases, FIGÉES à ce moment-là, restent en feu tant que la
-# concentration est payée. État de combat seul (jamais reversé sur un doc) :
+# Toute capacité OFFENSIVE (`cible: "ennemi"`) MAINTENUE et à ZONE (Mur de feu) ne frappe pas
+# qu'au lancement : ses cases, FIGÉES à ce moment-là, restent actives tant que la
+# concentration est payée. Aucun champ ne le déclare : c'est DÉRIVÉ du doc (zone + maintien),
+# à la lecture — donc aucun réimport. ⚠️ Limité à l'offensif : un soutien de zone maintenu
+# garde son comportement (buff posé sur les corps, pas sur les cases). État de combat seul :
 #
 #   combat_doc["zones_persistantes"] = [{id, sort_id, lanceur_id, nom, icon, cases,
-#                                        degats, jet, effets, source}]
+#                                        degats, jet, canal, effets, source}]
 #
-# Un MONSTRE brûle au plus UNE fois par zone et par tour qui lui est propre : en commençant
-# son tour dessus (`_reset_turn_budget`) ou en y entrant pendant qu'il marche (les fonctions
-# de pas des monstres). `zones_subies`, remis à zéro en début de tour, porte ce « déjà brûlé ».
-# ⚠️ **Aucun tir ami**, comme toute zone hostile (cf. `cibles_de_zone`) : un allié traverse le
-# mur sans dommage. ⚠️ Retirée par le chokepoint d'arrêt `_rompre_concentration` (défaut de
-# PM, concentration perdue, relâche) ; lanceur à terre ⇒ zone INERTE (son tour n'est plus
-# joué, il ne paie plus rien, mais sa concentration n'est pas rompue pour autant).
+# Brûle QUICONQUE s'y trouve — monstres, compagnons, montures, escortés, invocations et le
+# lanceur lui-même (le seul tir ami du jeu, assumé : c'est un mur, pas un ciblage) :
+#   • en COMMENÇANT son tour dessus (`_reset_turn_budget`), une fois par zone ;
+#   • à CHAQUE PAS qui le fait entrer ou rester dans la zone (pas de monstre ou d'invocation,
+#     `deplacer` du joueur, allié échangé) et à l'ARRIVÉE d'un saut.
+# Un allié présent au LANCEMENT n'est pas touché par l'impact (ciblage offensif = monstres) :
+# il brûle à son propre tour. ⚠️ Retirée par `_rompre_concentration` (défaut de PM,
+# concentration perdue, relâche) ; lanceur à terre ⇒ zone INERTE (non rompue).
 # ⚠️ Clé ABSENTE sur un combat déjà en base et au simulateur : tout lecteur sort en tête.
 
 def _zones_persistantes(combat_doc: dict) -> list:
 	return (combat_doc or {}).get("zones_persistantes") or []
 
 
+def _debout(acteur: dict) -> bool:
+	"""Monstre vivant ou acteur du camp du joueur à plus de 0 PV (une invocation ne porte
+	pas `vivant`, un joueur à terre le garde parfois à True : les deux tests sont requis)."""
+	return acteur.get("vivant", True) is not False and acteur.get("currentPV", 0) > 0
+
+
 def _poser_zone_persistante(combat_doc: dict, joueur: dict, monstre: dict, sdoc: dict,
 							effets: dict, notation: str, mode_jet: str, canal: str,
 							grid: dict) -> dict | None:
-	"""Inscrit la zone d'une capacité offensive maintenue et `persistante` ; None sinon.
+	"""Inscrit la zone d'une capacité offensive MAINTENUE à zone ; None sinon.
 
 	Cases figées AU LANCEMENT (le mur ne suit pas son lanceur). Relancer le même sort
 	remplace son mur précédent — même dé-duplication que les concentrations."""
-	zone = sdoc.get("zone") or {}
-	if not zone.get("persistante") or not est_maintenu(sdoc):
+	zone = sdoc.get("zone")
+	if not zone or not est_maintenu(sdoc):
 		return None
 	sort_id = str(sdoc.get("id") or "")
 	lanceur_id = str(joueur.get("id") or "")
@@ -1482,7 +1488,8 @@ def _poser_zone_persistante(combat_doc: dict, joueur: dict, monstre: dict, sdoc:
 		"canal": canal,
 		"effets": dict(effets or {}),
 		# De quoi rejouer `_appliquer_effet_sur_cible` sans le doc : même `source_id` que la
-		# pose initiale (une brûlure RAFRAÎCHIT le débuff), même `maintien` (entrée maintenue).
+		# pose initiale (une brûlure RAFRAÎCHIT le débuff), même `maintien` (entrée maintenue,
+		# balayée chez TOUS les acteurs par `_rompre_concentration`).
 		"source": {"id": sort_id, "nom": sdoc.get("nom", "Zone"),
 				   "icon": sdoc.get("icon", "🔥"),
 				   "maintien": _eff_int(sdoc.get("maintien"))},
@@ -1504,52 +1511,82 @@ def _retirer_zones_persistantes(combat_doc: dict, acteur: dict, sort_id: str) ->
 
 
 def _bruler_zones(combat_doc: dict, acteur: dict) -> None:
-	"""Un MONSTRE sur une zone persistante brûle — au plus une fois par zone et par tour.
+	"""L'acteur brûle dans chaque zone persistante que couvre son emprise.
 
-	CHOKEPOINT des deux déclencheurs : début de tour (`_reset_turn_budget`) et chaque pas
-	d'un monstre. Dégâts AUTOMATIQUES (ni jet de toucher, ni critique) : on ne rate pas la
-	flamme sur laquelle on se tient ; la magie ignore l'armure (`calculer_degats`)."""
-	zones = _zones_persistantes(combat_doc)
-	if not zones or not str(acteur.get("id") or "").startswith("monstre_"):
+	CHOKEPOINT de tous les déclencheurs : début de tour (`_reset_turn_budget`), chaque pas
+	(monstres, invocations, `deplacer`, allié échangé) et l'arrivée d'un saut. Ne tient AUCUN
+	compte de ce qui a déjà brûlé : chaque appel est une brûlure par zone couverte."""
+	if not _zones_persistantes(combat_doc) or not acteur.get("pos"):
 		return
-	subies = acteur.setdefault("zones_subies", [])
-	emprise = set(jetons.cases_emprise(acteur)) if acteur.get("pos") else set()
-	for zone in list(zones):
-		if not acteur.get("vivant") or combat_doc.get("status", "active") != "active":
+	emprise = set(jetons.cases_emprise(acteur))
+	for zone in list(_zones_persistantes(combat_doc)):
+		if not _debout(acteur) or combat_doc.get("status", "active") != "active":
 			return
-		if zone.get("id") in subies:
+		# Une brûlure précédente a pu rompre une concentration, donc éteindre un mur.
+		if zone not in _zones_persistantes(combat_doc):
 			continue
 		lanceur = _get_joueur(combat_doc, zone.get("lanceur_id"))
 		if lanceur is None or lanceur.get("currentPV", 0) <= 0:
 			continue   # zone inerte : plus personne ne la nourrit
 		if not any((x, y) in emprise for x, y in zone.get("cases") or []):
 			continue
-		subies.append(zone.get("id"))
-		notation = zone.get("degats") or ""
-		dmg = (calculer_degats(lanceur, acteur, notation, 1, zone.get("jet") or "magique")
-			   if notation else 0)
-		acteur["currentPV"] = max(0, acteur["currentPV"] - dmg)
-		mort = acteur["currentPV"] <= 0
-		if mort:
-			acteur["vivant"] = False
-		nom = acteur.get("nom", "?")
-		texte = (f"{zone.get('icon', '🔥')} {nom} périt dans {zone.get('nom', 'la zone')} !"
-				 if mort else
-				 f"{zone.get('icon', '🔥')} {nom} brûle dans {zone.get('nom', 'la zone')} : "
-				 f"{dmg} dégâts (PV : {acteur['currentPV']}/{acteur.get('pv_max', 0)}).")
-		if dmg:
-			combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
-				"tour": int(combat_doc.get("tour", 0) or 0),
-				"acteur": lanceur.get("nom", "?"),
-				"kind": "kill" if mort else "hit",
-				"texte": texte,
-			}, zone.get("canal") or "sort", acteur.get("id", ""), None,
-				lanceur.get("id", "")), acteur))
-		if mort:
+		_bruler(combat_doc, zone, lanceur, acteur)
+
+
+def _bruler(combat_doc: dict, zone: dict, lanceur: dict, victime: dict) -> None:
+	"""UNE brûlure : dégâts AUTOMATIQUES (ni jet de toucher, ni critique — on ne rate pas la
+	flamme sur laquelle on se tient), puis part durative rafraîchie.
+
+	Un MONSTRE tombe comme sous un sort (`vivant`, victoire, XP conservée). Un acteur du camp
+	du joueur passe par la MÊME cascade qu'un coup de monstre (`_do_attack_on`) : lien de vie,
+	test de concentration, `_traiter_ko` — le lanceur tenant lieu d'attaquant."""
+	tour = int(combat_doc.get("tour", 0) or 0)
+	icon, nom_zone, nom = zone.get("icon", "🔥"), zone.get("nom", "la zone"), victime.get("nom", "?")
+	notation = zone.get("degats") or ""
+	dmg = (calculer_degats(lanceur, victime, notation, 1, zone.get("jet") or "magique")
+		   if notation else 0)
+	canal = zone.get("canal") or "sort"
+
+	def _ligne(cible: dict, texte: str, kind: str = "hit") -> None:
+		combat_doc.setdefault("log", []).append(_avec_etat(_avec_vfx({
+			"tour": tour, "acteur": lanceur.get("nom", "?"), "kind": kind, "texte": texte,
+		}, canal, cible.get("id", ""), None, lanceur.get("id", "")), cible))
+
+	if str(victime.get("id") or "").startswith("monstre_"):
+		victime["currentPV"] = max(0, victime["currentPV"] - dmg)
+		if victime["currentPV"] <= 0:
+			victime["vivant"] = False
+			_ligne(victime, f"{icon} {nom} périt dans {nom_zone} !", "kill")
 			_check_victory(combat_doc)
 			return
-		_appliquer_effet_sur_cible(combat_doc, acteur, zone.get("source") or {},
-								   zone.get("effets") or {}, int(combat_doc.get("tour", 0) or 0))
+		if dmg:
+			_ligne(victime, f"{icon} {nom} brûle dans {nom_zone} : {dmg} dégâts "
+							f"(PV : {victime['currentPV']}/{victime.get('pv_max', 0)}).")
+	else:
+		# ⚠️ Les DEUX déductions avant tout `_traiter_ko` (même raison que `_do_attack_on`).
+		dmg_def, dmg_prot, protecteur = _rediriger_lien_vie(combat_doc, victime, dmg)
+		victime["currentPV"] = max(0, victime["currentPV"] - dmg_def)
+		if protecteur is not None:
+			protecteur["currentPV"] = max(0, protecteur["currentPV"] - dmg_prot)
+		if dmg:
+			_ligne(victime, f"{icon} {nom} brûle dans {nom_zone} : {dmg} dégâts "
+							f"(PV : {victime['currentPV']}/{victime.get('pv_max', 0)}).")
+		if protecteur is not None:
+			_ligne(protecteur, f"Le lien de vie détourne {dmg_prot} dégâts vers "
+							   f"{protecteur['nom']} ! "
+							   f"(PV : {protecteur['currentPV']}/{protecteur['pv_max']})")
+		if dmg_def > 0:
+			_tester_concentration(combat_doc, victime, lanceur, dmg_def)
+		if protecteur is not None and dmg_prot > 0:
+			_tester_concentration(combat_doc, protecteur, lanceur, dmg_prot)
+		if victime["currentPV"] <= 0:
+			_traiter_ko(combat_doc, victime, lanceur)
+		if protecteur is not None and protecteur["currentPV"] <= 0:
+			_traiter_ko(combat_doc, protecteur, lanceur)
+		if not _debout(victime):
+			return
+	_appliquer_effet_sur_cible(combat_doc, victime, zone.get("source") or {},
+							   zone.get("effets") or {}, tour)
 
 
 def _effets_a_reverser(snap: dict) -> list:
@@ -3679,6 +3716,8 @@ def _sauter(combat_doc: dict, lanceur: dict, sauteur: dict, effets: dict,
 		"kind": "move",
 		"texte": f"{sauteur.get('nom', '?')} disparaît et reparaît en [{nx},{ny}].",
 	}, "sort", sauteur.get("id", "")), sauteur))
+	# Atterrir dans une zone persistante brûle, comme y entrer à pied.
+	_bruler_zones(combat_doc, sauteur)
 	return {"saut": {"acteur_id": sauteur.get("id"), "de": ancienne,
 					 "vers": {"x": nx, "y": ny}}}
 
@@ -3696,8 +3735,8 @@ def _rediriger_lien_vie(combat_doc: dict, defenseur: dict, dmg: int) -> tuple:
 	⚠️ Lien SANS protecteur valide (mort, à terre, ou disparu du combat) ⇒ comportement
 	d'avant, à la lettre : le protégé encaisse tout. Un lien qui absorberait encore alors
 	que son porteur est au sol protégerait gratuitement.
-	⚠️ **Ce chokepoint n'est atteint que depuis `_do_attack_on`**, seul endroit où un acteur
-	du camp du joueur perd des PV sous un coup. `_resoudre_coup_capacite` et
+	⚠️ **Ce chokepoint n'est atteint que depuis `_do_attack_on` et `_bruler`** (zone
+	persistante), seuls endroits où un acteur du camp du joueur perd des PV sous un coup. `_resoudre_coup_capacite` et
 	`_frapper_monstre` ne frappent QUE des monstres, par construction — le jour où un
 	monstre lancera un sort offensif par le premier, le lien de vie cessera de fonctionner
 	en silence. Même angle mort au banc d'essai : `utils/simulateur` applique ses dégâts en
@@ -4153,7 +4192,7 @@ def _deplacement_ia(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 	steps = 0
 	safety = 0
 	if ranged and _cheby(monstre, cible) < portee:
-		while (combat_doc["status"] == "active" and monstre.get("vivant", True)
+		while (combat_doc["status"] == "active" and _debout(monstre)
 			   and monstre["actions_restantes"] > 0
 			   and _cheby(monstre, cible) < portee
 			   and monstre["cells_moved"] < monstre.get("deplacement", 1)
@@ -4164,8 +4203,8 @@ def _deplacement_ia(combat_doc: dict, monstre: dict, cible: dict, grid: dict,
 			steps += 1
 		return steps, "recule prudemment devant"
 	# `vivant` : un pas dans une zone persistante (Mur de feu) peut le tuer en chemin.
-	# ⚠️ `.get` : une INVOCATION emprunte cette fonction et ne porte pas la clé.
-	while (combat_doc["status"] == "active" and monstre.get("vivant", True)
+	# ⚠️ `_debout` : une INVOCATION emprunte cette fonction et ne porte pas `vivant`.
+	while (combat_doc["status"] == "active" and _debout(monstre)
 		   and monstre["actions_restantes"] > 0
 		   and _cheby(monstre, cible) > portee
 		   and monstre["cells_moved"] < monstre.get("deplacement", 1)
@@ -4505,6 +4544,9 @@ def _run_defenseur_turn(combat_doc: dict, joueur: dict) -> None:
 	gratuit. ⚠️ Elle reste `jouable: False` — sa survie n'empêche pas la défaite
 	(`_combattants_vivants`) : elle ne bouge pas, un groupe à terre ne gagnerait jamais."""
 	_reset_turn_budget(joueur, combat_doc)
+	if joueur.get("currentPV", 0) <= 0 or combat_doc["status"] != "active":
+		_avancer_tour(combat_doc)   # tombée dans une zone persistante en début de tour
+		return
 	profil = _profil_attaque(joueur, "cac")
 	portee = max(1, int(profil.get("portee", 1)))
 	safety = 0
@@ -4540,6 +4582,10 @@ def _run_invocation_turn(combat_doc: dict, invoc: dict, grid: dict) -> None:
 	DURÉE : décomptée à la FIN de son tour, de sorte qu'une créature appelée pour `duree`
 	tours agisse exactement `duree` fois — celui de son apparition compris."""
 	_reset_turn_budget(invoc, combat_doc)
+	# Tombée en commençant son tour dans une zone persistante : elle ne joue pas.
+	if not _debout(invoc) or combat_doc["status"] != "active":
+		_avancer_tour(combat_doc)
+		return
 	# `_profil_arme_monstre` : une invocation HUMANOÏDE garde son arme (cf.
 	# `build_invocation_snapshot`), les autres retombent sur le `cac` mains nues posé
 	# à sa création — même sélecteur que `_run_monster_turn`, camp inversé.
@@ -4554,7 +4600,7 @@ def _run_invocation_turn(combat_doc: dict, invoc: dict, grid: dict) -> None:
 		steps, verbe = _deplacement_ia(combat_doc, invoc, cible, grid, profil)
 		if verbe == "avance vers":
 			verbe = "bondit vers"   # même flair qu'avant pour l'approche
-	if steps > 0:
+	if steps > 0 and _debout(invoc):
 		combat_doc["log"].append(_avec_etat({
 			"tour": combat_doc["tour"],
 			"acteur": invoc["nom"],
@@ -4563,7 +4609,8 @@ def _run_invocation_turn(combat_doc: dict, invoc: dict, grid: dict) -> None:
 		}, invoc))
 
 	safety = 0
-	while (combat_doc["status"] == "active" and invoc["actions_restantes"] > 0 and safety < 100):
+	while (combat_doc["status"] == "active" and _debout(invoc)
+		   and invoc["actions_restantes"] > 0 and safety < 100):
 		safety += 1
 		if cible is None or not cible["vivant"]:
 			vivants = [m for m in combat_doc["monstres"] if m["vivant"]]
@@ -4641,6 +4688,11 @@ def _resolve_until_player(combat_doc: dict, grid: dict, start_at_current: bool =
 				# ET fait avancer une incantation longue : le budget qu'il rend peut donc
 				# être déjà entièrement mangé quand il revient.
 				_reset_turn_budget(joueur, combat_doc)
+				# Tombé en commençant son tour dans une zone persistante (Mur de feu) : il
+				# est à terre, son tour est sauté comme celui de tout joueur KO.
+				if joueur.get("currentPV", 0) <= 0:
+					_avancer_tour(combat_doc)
+					continue
 				if joueur["actions_restantes"] <= 0:
 					# CANALISATION : la main ne va PAS au client. Il n'aurait aucune action
 					# à jouer et `resolve_action` lui refuserait tout, `passer` compris —
@@ -5044,6 +5096,10 @@ def _resoudre_action_joueur(
 		# suivrait l'état final tout de suite pendant que celui du joueur attend la révélation
 		# du journal — les deux corps ne glisseraient pas ensemble. (`None` est ignoré.)
 		}, joueur, echange))
+		# ZONES PERSISTANTES : chaque pas dans le feu brûle — l'échangé aussi, il a bougé.
+		_bruler_zones(combat_doc, joueur)
+		if echange is not None:
+			_bruler_zones(combat_doc, echange)
 		result = {"moved": True, "pos": joueur["pos"]}
 
 	elif action_type == "tourner":
@@ -5419,7 +5475,9 @@ def _resoudre_action_joueur(
 	else:
 		return {"error": f"Action inconnue : {action_type}"}
 
-	if combat_doc["status"] == "active" and joueur["actions_restantes"] <= 0:
+	# À terre de son propre fait (un pas ou un saut dans une zone persistante) : la main passe.
+	if combat_doc["status"] == "active" and (joueur["actions_restantes"] <= 0
+											 or joueur.get("currentPV", 0) <= 0):
 		_advance_and_resolve(combat_doc, grid)
 
 	return result

@@ -35,7 +35,7 @@
     "jet": "magique",
     "portee": 5,
     "effets": { "degats": "2D6", "buffs": { "Ag": -10 }, "duree": 2 },
-    "zone": { "forme": "rectangle", "origine": "cible", "orientation": "cible", "longueur": 1, "largeur": 3, "decalage": 0, "persistante": true },
+    "zone": { "forme": "rectangle", "origine": "cible", "orientation": "cible", "longueur": 1, "largeur": 3, "decalage": 0 },
     "composants": []
   },
   {
