@@ -11,6 +11,7 @@
 #
 # ⚠️ Aucune route ne change `type_propriete` : il n'existe pas de conversion de type.
 
+import unicodedata
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Body
 
@@ -531,8 +532,12 @@ def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes:
 			"depot": role in (proprietes.PROPRIETAIRE, proprietes.LOCATAIRE),
 			"charge": proprietes.poids_coffre(prop),
 			"charge_max": proprietes.capacites(prop, cat)["stockage_kg"],
-			"inventaire": [dict(d, idx=i) for i, r in enumerate(prop.get("coffre") or [])
-						   if (d := resolve_item_ref(r))] if coffre_visible else [],
+			# Ordre alphabétique (sans accents ni casse) ; `idx` garde la position réelle dans le coffre.
+			"inventaire": sorted(
+				(dict(d, idx=i) for i, r in enumerate(prop.get("coffre") or [])
+				 if (d := resolve_item_ref(r))),
+				key=lambda d: unicodedata.normalize("NFD", str(d.get("nom") or "")).encode("ascii", "ignore").decode().lower(),
+			) if coffre_visible else [],
 		},
 		"ateliers": ateliers,
 		"caisse_totale": sum(int(e.get("caisse_cuivre") or 0) for e in employes),
