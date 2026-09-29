@@ -77,6 +77,10 @@ amenagements = [
 	am("lit_supplementaire", "Lit supplémentaire", "vie", [L], 500, {"occupants": 1}),
 	am("coin_resident", "Petit espace pour un PNJ résident", "service", [L], 800, poste("domestique"),
 	   {"metier": "domestique", "label": "Service domestique"}),
+	# Dès le Logement (la Chambre n'a qu'un poste : celui du gardien) — un boucher y dépèce et vend.
+	am("salle_depecage", "Salle de dépeçage", "activite", [L, M, D, Do], 2500, poste("boucher"),
+	   {"metier": "boucher", "label": "Dépeçage"},
+	   description="Crocs, billot et rigoles : un boucher y dépèce les carcasses de monstres rapportées de la chasse."),
 	# Maison
 	am("chambres_multiples", "Chambres multiples", "vie", [M, D], 4000, {"occupants": 2}),
 	am("grande_cuisine", "Grande cuisine", "service", [M, D, Do], 5000, poste("cuisinier"),
@@ -179,6 +183,7 @@ metiers = [
 	{"id": "intendant", "label": "Intendant", "cout_embauche_cuivre": 1500},
 	{"id": "jardinier", "label": "Jardinier", "cout_embauche_cuivre": 300},
 	{"id": "palefrenier", "label": "Palefrenier", "cout_embauche_cuivre": 300},
+	{"id": "boucher", "label": "Boucher", "cout_embauche_cuivre": 800},
 ]
 
 # Postes MARCHANDS : catégories de boutique qu'un employé peut y exercer. Les grandes maisons
@@ -194,6 +199,7 @@ CATEGORIES = {
 	"cabinet_medecin": ["institut_medico_alchimique"],
 	"cabinet_apothicaire": ["apothicairerie"],
 	"apothicairerie": ["apothicairerie", "grande_apothicairerie"],
+	"salle_depecage": ["boucherie"],
 	"jardin": ["jardinier"],
 	"potager": ["jardinier"],
 	"verger": ["jardinier"],

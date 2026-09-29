@@ -19,6 +19,7 @@ description: Player residential properties — merchant NPC workshops (productio
   - Marchand choisi = champ TRANSITOIRE `atelier_courant` (vidé au déplacement) ; `routers/user._current_lieu_doc` et `routers/commande._acces` le résolvent via `atelier_actif`. Achat : prix → caisse ; vente AU marchand refusée (403).
   - Commandes : simples pour tout atelier à catalogue, sur mesure pour une grande maison (`LIEU_CATEGORIES_FUSION`) — prédicats existants de `utils/commande.py`, aucune garde propre. Paiement → caisse.
   - Caisse : relevée par le propriétaire (ateliers sauvés AVANT le personnage : jamais de double relevé) ; pleine, elle bloque la cession et le renvoi.
+- **Boucher** : aménagement `salle_depecage` (« Salle de dépeçage » : carcasses de monstres) (Logement → Domaine ; la Chambre n'a que `personnel_max: 1`, pris par le gardien), poste `boucher`, catégorie marchande `boucherie` (modèle `pnj:marchand_boucherie`).
 - **Vol** : chez un propriétaire, un visiteur vide le coffre (`coffre/transferer` sens `vers_principal`) et la caisse tant qu'aucun `gardien` n'est au poste d'un aménagement `effets.garde` (`loge_gardien`, ouverte aux cinq types). Dépôt : propriétaire/locataire seulement, borné par `stockage_kg`.
 - **Découverte** : entrer dans le bien d'AUTRUI rapporte l'XP d'un lieu (une fois) ; le sien, jamais.
 - **Compagnons hébergés** : quittent `character.groupe`, prennent `loge_a` (statut `embauche` conservé ⇒ `groupe_effectif` les ignore sans code). `reprendre` respecte `places_occupees`. Borné par `occupants_max` (résident compris).

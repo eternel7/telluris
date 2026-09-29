@@ -309,6 +309,32 @@
             }
           },
           {
+            "id": "salle_depecage",
+            "nom": "Salle de dépeçage",
+            "categorie": "activite",
+            "types_autorises": [
+              "logement",
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 2500,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "boucher": 1
+              }
+            },
+            "activite": {
+              "metier": "boucher",
+              "label": "Dépeçage",
+              "categories": [
+                "boucherie"
+              ]
+            },
+            "description": "Crocs, billot et rigoles : un boucher y dépèce les carcasses de monstres rapportées de la chasse."
+          },
+          {
             "id": "chambres_multiples",
             "nom": "Chambres multiples",
             "categorie": "vie",
@@ -1277,6 +1303,11 @@
             "id": "palefrenier",
             "label": "Palefrenier",
             "cout_embauche_cuivre": 300
+          },
+          {
+            "id": "boucher",
+            "label": "Boucher",
+            "cout_embauche_cuivre": 800
           }
         ],
         "reglages": {
