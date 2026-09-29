@@ -422,6 +422,25 @@ def admin_export_couchdb_sans_users(request: Request, current_user: Annotated[Us
 		raise HTTPException(status_code=403, detail="Admin only")
 	return _telecharger_dump(avec_users=False)
 
+@app.post("/admin/exports/dump-pr")
+def admin_export_dump_pr(current_user: Annotated[User, Depends(get_current_user)]):
+	"""Dump committable (sans `user:*`) généré sur le serveur, commité sur une NOUVELLE branche
+	partant du `main` distant, poussé, puis PR vers `main` (`utils/serveur.publier_dump` :
+	arbre de travail et branche courante intacts)."""
+	_require_admin_api(current_user)
+	now = dump_util.maintenant()
+	payload = _dump_payload(now, avec_users=False)
+	if not payload["docs"]:
+		raise HTTPException(status_code=503, detail="Dump vide — CouchDB injoignable ?")
+	contenu = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+	try:
+		res, erreur = serveur_util.publier_dump(contenu, dump_util.nom_fichier(now), payload["doc_count"])
+	except serveur_util.GitAbsent:
+		raise HTTPException(status_code=503, detail=_GIT_ABSENT)
+	if erreur:
+		raise HTTPException(status_code=erreur[0], detail=erreur[1])
+	return res
+
 @app.get("/admin/exports/by-type")
 def admin_export_by_type(
 	request: Request,

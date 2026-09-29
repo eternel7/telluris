@@ -32,6 +32,7 @@ Endpoints `GET /admin/serveur/etat` (`fetch=0` : sans réseau), `POST /admin/ser
 
 - **Aucune perte de modif locale** : `fetch` → refus si divergence (commits locaux) → pré-contrôle (fichier local modifié/non suivi ∩ fichiers de l'amont ⇒ 409, rien touché) → instantané `stash create` + `stash store` (« admin-maj … » dans `git stash list`, l'arbre n'est PAS touché) → `merge --ff-only`. Jamais `pull`, `reset`, `checkout --`, `clean`, `stash pop`.
 - **Identité** : conteneur en root, dépôt monté appartenant à l'hôte → git lancé avec `user=/group=` du propriétaire de `.git/HEAD` (repli `.git`, puis racine — sur un NAS la racine peut appartenir à un autre compte que le git de l'hôte → `FETCH_HEAD: Permission denied`) (`HOME` = tmp), sinon « dubious ownership » et objets root dans `.git`.
+- **Dump → branche + PR** (`publier_dump`, bouton de `/admin/exports`) : même module, même verrou, même identité — détail `telluris-db`. Une empreinte rendue par git se lit sur la **dernière** ligne (`_empreinte`) : stderr est fusionné et un avertissement CRLF peut la précéder.
 - **Redémarrage** = `os.execv(sys.executable, [sys.executable, *sys.argv])` ~1 s après la réponse : même PID, pas de réinstallation pip. Refusé si un outil de `dev/` tourne (`dev_tools.en_cours()`, 409) ou si une source ne compile pas (`verifier_code`, 422 — `compile()` en mémoire, un `import main` ouvrirait CouchDB). Le client sonde `etat?fetch=0` jusqu'à un `demarre_a` neuf. Suppose un uvicorn sans `--reload`/`--workers`.
 
 ### Générateurs de contenu — `dev/gen_*.py`
