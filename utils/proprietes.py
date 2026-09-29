@@ -221,6 +221,15 @@ def types_achetables_ici(lieu_doc: dict, position: dict, get_doc_fn=None) -> lis
 	return out
 
 
+def offre_ici(lieu_doc: dict, position: dict, est_auberge: bool, cat: dict, get_doc_fn=None) -> bool:
+	"""Le bouton « 🏠 Propriétés » de la sidebar : un type achetable sur CETTE case, ou une
+	chambre à louer dans une auberge. Partagé par `/play` et le pas de `move_character` (un pas
+	ne recharge pas la page : sans ce recalcul, le bouton resterait celui de la case d'avant)."""
+	if [t for t in types_achetables_ici(lieu_doc, position, get_doc_fn) if type_def(cat, t)]:
+		return True
+	return bool(est_auberge and any(location_de(t) for t in cat["types"]))
+
+
 # ── Création, lien, rôles ────────────────────────────────────────────────────────
 
 def nom_personnage(character: dict) -> str:

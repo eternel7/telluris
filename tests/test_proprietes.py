@@ -362,6 +362,13 @@ def test_achetable_dans_la_zone_seulement():
 	assert proprietes.types_achetables_ici(pas_ville, {"x": 5, "y": 5}, lire) == []
 
 
+def test_offre_ici_suit_la_case():
+	"""Le bouton 🏠 suit la case : présent dans la zone, absent dehors (recalculé à chaque pas)."""
+	lire = ZONES.get
+	assert proprietes.offre_ici(VILLE, {"x": 5, "y": 5}, False, CAT, lire) is True
+	assert proprietes.offre_ici(VILLE, {"x": 30, "y": 30}, False, CAT, lire) is False
+
+
 # ── Le catalogue LIVRÉ ────────────────────────────────────────────────────────────
 
 CHEMIN_JSON = os.path.join(os.path.dirname(__file__), "..", "jsons", "proprietes_a_importer.json")

@@ -1715,9 +1715,9 @@
 					{% if est_scriptorium %}
 					<li><button class="sub-loc-btn" onclick="openScriptorium()">🖋️ Écrire</button></li>
 					{% endif %}
-					{% if proprietes_offre %}
-					<li><button class="sub-loc-btn" onclick="openProprietesOffre()">🏠 Propriétés</button></li>
-					{% endif %}
+					{# Toujours émis, masqué hors offre : un pas ne recharge pas la page, `_majProprietesOffre`
+					   le bascule d'après la réponse de `move_character`. #}
+					<li id="prop-offre-li"{% if not proprietes_offre %} hidden style="display:none"{% endif %}><button class="sub-loc-btn" onclick="openProprietesOffre()">🏠 Propriétés</button></li>
 					{% if est_propriete %}
 					{# La propriété se présente comme un LIEU : ses PNJ marchands d'abord (une ligne
 					   chacun, comme les PNJ présents), puis le coffre, l'embauche, la caisse. L'id
@@ -3187,6 +3187,12 @@
 			? `<h3>Récolte</h3><ul class="sub-locations-list"><li><button class="sub-loc-btn" onclick="recolterRessource()">${label}</button></li></ul>`
 			: '';
 	}
+	function _majProprietesOffre(offre) {
+		const li = document.getElementById('prop-offre-li');
+		if (!li) return;
+		li.hidden = !offre;
+		li.style.display = offre ? '' : 'none';
+	}
 	async function recolterRessource() {
 		try {
 			const res = await fetch('api/recolter', { method: 'POST', headers: {'Content-Type': 'application/json'} });
@@ -3401,6 +3407,7 @@
 				// Bouton « Récolter » de la sidebar (déplacement par lien = SPA, pas de reload).
 				_ressourceRecoltable = rep.ressource_recoltable || null;
 				_refreshRecolte();
+				_majProprietesOffre(rep.proprietes_offre);
 				// Effets actifs : décrémentés/expirés à chaque tour monde côté serveur.
 				_renderEffetsActifs(rep.effets_actifs);
 				_renderCaractsMod(rep.caracts_detail);
