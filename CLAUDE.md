@@ -14,7 +14,7 @@ docker compose up
 
 FastAPI sur `http://localhost:8000`, CouchDB sur `http://localhost:5984`. Le compose installe les dépendances Python au démarrage du conteneur (pas d'image pré-construite).
 
-`.env` — courriel sortant (réinitialisation du mot de passe) : `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · `SMTP_FROM` · `SMTP_SSL` · `SMTP_STARTTLS`, et `APP_BASE_URL` (origine des liens envoyés — à défaut l'en-tête `Host`, que le client choisit). Sans `SMTP_HOST`, le lien de réinitialisation est écrit dans le journal du serveur au lieu d'être posté.
+`.env` — courriel sortant (réinitialisation du mot de passe) : `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · `SMTP_FROM` · `SMTP_SSL` · `SMTP_STARTTLS`, et `APP_BASE_URL` (origine des liens envoyés — à défaut l'en-tête `Host`, que le client choisit). Sans `SMTP_HOST`, le lien de réinitialisation est écrit dans le journal du serveur au lieu d'être posté. `GITHUB_TOKEN` (contenu + pull requests en écriture) : PR du dump ouverte depuis `/admin/exports` — sans lui, push avec les identifiants git du conteneur et lien « compare » à ouvrir à la main.
 
 **Carte 🖥 Serveur de `/admin`** : ⬇ mise à jour de la branche courante sur son amont, ⟳ redémarrage de FastAPI (re-exec du process, même conteneur). Exige `git` dans l'image (ajouté à l'apt-get du compose : recréer le conteneur une fois) ; git tourne sous l'identité du **propriétaire du dépôt**, jamais root. ⚠️ Une NOUVELLE dépendance pip exige toujours de recréer le conteneur ; un dépôt privé, des identifiants git dans le conteneur. Détail : compétence **telluris-admin-tools**.
 

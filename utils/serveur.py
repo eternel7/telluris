@@ -95,10 +95,12 @@ def diagnostic_droits(racine=None) -> str:
 	return " · ".join(morceaux)
 
 
-def executer(argv, timeout=60):
+def executer(argv, timeout=60, entree=None, env_extra=None):
 	"""Exécuteur réel : `(code, sortie)` — stdout et stderr fusionnés, jamais d'exception
-	sur un code non nul. `GitAbsent` si l'exécutable manque."""
+	sur un code non nul. `GitAbsent` si l'exécutable manque. `entree` : octets sur stdin ;
+	`env_extra` : variables ajoutées (index temporaire, en-tête d'authentification)."""
 	env = dict(os.environ)
+	env.update(env_extra or {})
 	env["GIT_TERMINAL_PROMPT"] = "0"                       # jamais d'attente d'un mot de passe
 	env["GIT_SSH_COMMAND"] = "ssh -o BatchMode=yes"        # ni d'une clé d'hôte à accepter
 	kwargs = {}
@@ -109,8 +111,9 @@ def executer(argv, timeout=60):
 		env["HOME"] = tempfile.gettempdir()
 		env.pop("XDG_CONFIG_HOME", None)
 	try:
-		p = subprocess.run(argv, cwd=RACINE, env=env, stdout=subprocess.PIPE,
-						   stderr=subprocess.STDOUT, timeout=timeout, **kwargs)
+		p = subprocess.run(argv, cwd=RACINE, env=env, input=entree,
+						   stdin=None if entree is not None else subprocess.DEVNULL,
+						   stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout, **kwargs)
 	except FileNotFoundError as e:
 		raise GitAbsent(str(e)) from e
 	except subprocess.TimeoutExpired:
@@ -127,9 +130,16 @@ def _git(*args):
 	return ["git", "-c", f"safe.directory={RACINE}", "-c", "core.autocrlf=true", *args]
 
 
-def _ok(run_fn, *args, timeout=60):
-	code, out = run_fn(_git(*args), timeout=timeout)
+def _ok(run_fn, *args, timeout=60, **kw):
+	code, out = run_fn(_git(*args), timeout=timeout, **kw)
 	return code == 0, out
+
+
+def _empreinte(sortie: str) -> str:
+	"""Empreinte rendue par une commande git : la DERNIÈRE ligne — stderr est fusionné et un
+	avertissement (« LF will be replaced by CRLF… ») peut la précéder."""
+	lignes = [l.strip() for l in sortie.splitlines() if l.strip()]
+	return lignes[-1] if lignes else ""
 
 
 def _z(sortie: str) -> list:
@@ -265,7 +275,7 @@ def _mettre_a_jour(run_fn, maintenant):
 	instantane = None
 	if locaux:
 		ok, h = _ok(run_fn, *_IDENTITE_STASH, "stash", "create")
-		h = h.strip()
+		h = _empreinte(h) if ok else h.strip()
 		if ok and h:
 			stamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(maintenant()))
 			ok2, out = _ok(run_fn, *_IDENTITE_STASH, "stash", "store", "-m",
@@ -334,3 +344,162 @@ def programmer_redemarrage(exec_fn=os.execv, delai=1.0, sleep=time.sleep):
 	t = threading.Thread(target=_go, name="telluris-redemarrage", daemon=True)
 	t.start()
 	return t
+
+
+# ── Publication d'un dump : nouvelle branche + PR vers `main` ────────────────
+# Carte « Dump → branche + PR » de /admin/exports.
+#
+# ⚠️ **NI L'ARBRE DE TRAVAIL NI LA BRANCHE COURANTE NE BOUGENT.** Le commit est fabriqué par
+# plomberie (`hash-object` → index TEMPORAIRE `GIT_INDEX_FILE` → `write-tree` → `commit-tree`)
+# sur le `main` distant fraîchement relu : ni checkout, ni fichier écrit dans `jsons/`. Un dump
+# déposé non suivi dans `jsons/` ferait REFUSER la mise à jour ff-only suivante (le fichier
+# arrive par l'amont une fois la PR fusionnée : cf. le pré-contrôle de `_mettre_a_jour`).
+#
+# `GITHUB_TOKEN` (.env) : jeton autorisé en écriture sur le contenu et les pull requests.
+# Passé à git par l'ENVIRONNEMENT (`GIT_CONFIG_*`), jamais dans l'argv (visible dans `ps`).
+# Sans lui : push avec les identifiants git déjà présents, et lien « compare » au lieu d'une PR.
+
+BRANCHE_BASE = "main"
+DISTANT = "origin"
+_INDEX_TEMP = "telluris-admin-dump.index"
+_API_GITHUB = "https://api.github.com"
+
+
+def depot_github(url: str):
+	"""`(propriétaire, dépôt)` d'une URL de remote GitHub (https ou ssh), sinon None."""
+	import re
+	m = re.match(r"^(?:https?://(?:[^@/]+@)?github\.com/|git@github\.com:|ssh://git@github\.com/)"
+				 r"([^/]+)/([^/]+?)(?:\.git)?/?$", (url or "").strip())
+	return (m.group(1), m.group(2)) if m else None
+
+
+def nom_branche(nom_fichier: str) -> str:
+	"""`telluris-dump-20260929-101500.json` → `admin/dump-20260929-101500`."""
+	base = nom_fichier[:-5] if nom_fichier.endswith(".json") else nom_fichier
+	return "admin/" + base.replace("telluris-", "", 1)
+
+
+def _env_auth(token):
+	"""En-tête HTTP d'authentification pour github.com, par variables d'environnement."""
+	if not token:
+		return {}
+	import base64
+	cred = base64.b64encode(f"x-access-token:{token}".encode()).decode()
+	return {"GIT_CONFIG_COUNT": "1",
+			"GIT_CONFIG_KEY_0": "http.https://github.com/.extraheader",
+			"GIT_CONFIG_VALUE_0": f"AUTHORIZATION: basic {cred}"}
+
+
+def creer_pr(proprietaire, depot, tete, base, titre, corps, token, timeout=30) -> str:
+	"""POST /repos/{p}/{d}/pulls — rend l'URL de la PR ; `RuntimeError` lisible sinon."""
+	import json
+	import urllib.error
+	import urllib.request
+	req = urllib.request.Request(
+		f"{_API_GITHUB}/repos/{proprietaire}/{depot}/pulls",
+		data=json.dumps({"title": titre, "head": tete, "base": base, "body": corps}).encode("utf-8"),
+		method="POST",
+		headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
+				 "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "telluris-admin",
+				 "Content-Type": "application/json"})
+	try:
+		with urllib.request.urlopen(req, timeout=timeout) as r:
+			return json.loads(r.read().decode("utf-8"))["html_url"]
+	except urllib.error.HTTPError as e:
+		detail = e.read().decode("utf-8", "replace")[:400]
+		raise RuntimeError(f"GitHub a répondu {e.code} : {detail}") from e
+	except (urllib.error.URLError, OSError, ValueError, KeyError) as e:
+		raise RuntimeError(f"GitHub injoignable : {e}") from e
+
+
+def publier_dump(contenu: bytes, nom_fichier: str, doc_count: int, run_fn=executer,
+				 pr_fn=creer_pr, token=None) -> tuple:
+	"""Commit `jsons/<nom_fichier>` sur une NOUVELLE branche partant du `main` distant, la
+	pousse, ouvre la PR vers `main`. `(résultat, erreur)` — erreur = `(statut HTTP, message)`.
+	Partage le verrou de la mise à jour : les deux écrivent dans `.git`."""
+	if token is None:
+		token = os.getenv("GITHUB_TOKEN", "").strip()
+	if not _VERROU.acquire(blocking=False):
+		return None, (409, "Une opération git est déjà en cours.")
+	try:
+		return _publier_dump(contenu, nom_fichier, doc_count, run_fn, pr_fn, token)
+	finally:
+		_VERROU.release()
+
+
+def _publier_dump(contenu, nom_fichier, doc_count, run_fn, pr_fn, token):
+	ok, git_dir = _ok(run_fn, "rev-parse", "--absolute-git-dir")
+	if not ok:
+		return None, (500, "git ne peut pas lire le dépôt : " + git_dir.strip()[-800:])
+	auth = _env_auth(token)
+	chemin = "jsons/" + nom_fichier
+	branche = nom_branche(nom_fichier)
+
+	ok, out = _ok(run_fn, "rev-parse", "--verify", "--quiet", f"refs/heads/{branche}")
+	if ok:
+		return None, (409, f"La branche « {branche} » existe déjà.")
+
+	ok, out = _ok(run_fn, "fetch", "--quiet", DISTANT, BRANCHE_BASE, timeout=120, env_extra=auth)
+	if not ok:
+		return None, (502, f"git fetch {DISTANT} {BRANCHE_BASE} a échoué : " + out.strip()[-800:]
+						   + " — droits : " + diagnostic_droits())
+	ok, base = _ok(run_fn, "rev-parse", "--verify", "FETCH_HEAD^{commit}")
+	if not ok:
+		return None, (500, "Impossible de lire le commit de base : " + base.strip()[-400:])
+	base = _empreinte(base)
+
+	ok, blob = _ok(run_fn, "hash-object", "-w", "--stdin", f"--path={chemin}", entree=contenu)
+	if not ok:
+		return None, (500, "git hash-object a échoué : " + blob.strip()[-400:])
+	blob = _empreinte(blob)
+
+	index = {"GIT_INDEX_FILE": os.path.join(git_dir.strip(), _INDEX_TEMP)}
+	try:
+		for args in (("read-tree", base),
+					 ("update-index", "--add", "--cacheinfo", f"100644,{blob},{chemin}")):
+			ok, out = _ok(run_fn, *args, env_extra=index)
+			if not ok:
+				return None, (500, f"git {args[0]} a échoué : " + out.strip()[-400:])
+		ok, arbre = _ok(run_fn, "write-tree", env_extra=index)
+		if not ok:
+			return None, (500, "git write-tree a échoué : " + arbre.strip()[-400:])
+	finally:
+		try:
+			os.remove(index["GIT_INDEX_FILE"])
+		except OSError:
+			pass
+
+	titre = f"Dump CouchDB {nom_fichier[len('telluris-dump-'):-len('.json')]} ({doc_count} docs)"
+	corps = (f"Dump de la base `telluris` généré depuis `/admin/exports` : `{chemin}`, "
+			 f"{doc_count} documents, **sans `user:*`**.")
+	ok, commit = _ok(run_fn, *_IDENTITE_STASH, "commit-tree", _empreinte(arbre), "-p", base,
+					 "-m", titre, "-m", corps)
+	if not ok:
+		return None, (500, "git commit-tree a échoué : " + commit.strip()[-400:])
+	commit = _empreinte(commit)
+	ok, out = _ok(run_fn, "branch", branche, commit)
+	if not ok:
+		return None, (500, "Création de la branche impossible : " + out.strip()[-400:])
+
+	res = {"branche": branche, "fichier": chemin, "commit": commit[:12], "base": base[:12],
+		   "doc_count": doc_count, "pr_url": None, "compare_url": None, "pr_erreur": ""}
+	ok, out = _ok(run_fn, "push", "--quiet", DISTANT, f"refs/heads/{branche}:refs/heads/{branche}",
+				  timeout=180, env_extra=auth)
+	if not ok:
+		return None, (502, f"Commit {commit[:12]} créé sur la branche LOCALE « {branche} », mais "
+						   "git push a échoué : " + out.strip()[-800:])
+
+	ok, url = _ok(run_fn, "remote", "get-url", DISTANT)
+	gh = depot_github(url) if ok else None
+	if gh:
+		res["compare_url"] = f"https://github.com/{gh[0]}/{gh[1]}/compare/{BRANCHE_BASE}...{branche}?expand=1"
+	if not gh:
+		res["pr_erreur"] = f"Remote « {DISTANT} » hors GitHub : PR à ouvrir à la main."
+	elif not token:
+		res["pr_erreur"] = "GITHUB_TOKEN absent du .env : PR à ouvrir à la main (lien ci-dessous)."
+	else:
+		try:
+			res["pr_url"] = pr_fn(gh[0], gh[1], branche, BRANCHE_BASE, titre, corps, token)
+		except RuntimeError as e:
+			res["pr_erreur"] = str(e)
+	return res, None

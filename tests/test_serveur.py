@@ -257,3 +257,91 @@ def test_identite_repli_sur_la_racine_puis_root(monkeypatch):
 	assert srv._identite("depot") == (1024, 2024)
 	_stat_par_chemin(monkeypatch, {"depot": 1024, "HEAD": 0})
 	assert srv._identite("depot") is None
+
+
+# ── Publication d'un dump : branche + PR ─────────────────────────────────────
+
+def test_depot_github_https_et_ssh():
+	assert srv.depot_github("https://github.com/eternel7/telluris") == ("eternel7", "telluris")
+	assert srv.depot_github("https://x@github.com/eternel7/telluris.git") == ("eternel7", "telluris")
+	assert srv.depot_github("git@github.com:eternel7/telluris.git") == ("eternel7", "telluris")
+	assert srv.depot_github("/srv/amont.git") is None
+
+
+def test_nom_branche():
+	assert srv.nom_branche("telluris-dump-20260929-101500.json") == "admin/dump-20260929-101500"
+
+
+def test_jeton_passe_par_l_environnement_jamais_l_argv():
+	env = srv._env_auth("secret")
+	assert env["GIT_CONFIG_KEY_0"] == "http.https://github.com/.extraheader"
+	assert "secret" not in env["GIT_CONFIG_VALUE_0"]   # encodé base64
+	assert srv._env_auth("") == {}
+
+
+def _publier(serveur, pr_fn=None, token=""):
+	contenu = b'{"db": "telluris", "docs": []}'
+	return srv.publier_dump(contenu, "telluris-dump-20260929-101500.json", 0,
+							pr_fn=pr_fn or (lambda *a: pytest.fail("PR sans jeton")), token=token)
+
+
+def _sortie(cwd, *args):
+	return subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True).stdout
+
+
+@pytestmark_git
+def test_git_reel_dump_sur_nouvelle_branche_sans_toucher_l_arbre(depots, tmp_path):
+	auteur, serveur = depots
+	_pousser(auteur, "a.py", "a = 2\n")                     # le main distant a avancé
+	(serveur / "b.py").write_text("b = 'local'\n", encoding="utf-8")
+	head = _sortie(serveur, "rev-parse", "HEAD")
+
+	res, err = _publier(serveur)
+	assert err is None, err
+	assert res["branche"] == "admin/dump-20260929-101500" and res["pr_url"] is None
+	assert "hors GitHub" in res["pr_erreur"]
+	# Arbre de travail, index et branche courante intacts ; aucun dump déposé dans jsons/.
+	assert _sortie(serveur, "rev-parse", "HEAD") == head
+	assert (serveur / "b.py").read_text(encoding="utf-8") == "b = 'local'\n"
+	assert not (serveur / "jsons").exists()
+	assert _sortie(serveur, "status", "--porcelain") == " M b.py\n"
+	assert not any(p.name == srv._INDEX_TEMP for p in (serveur / ".git").iterdir())
+	# La branche distante = main distant + le seul dump.
+	amont = tmp_path / "amont.git"
+	assert _sortie(amont, "rev-parse", "admin/dump-20260929-101500~1") == _sortie(amont, "rev-parse", "main")
+	assert _sortie(amont, "diff", "--name-only", "main", "admin/dump-20260929-101500") \
+		== "jsons/telluris-dump-20260929-101500.json\n"
+	assert _sortie(amont, "show", "admin/dump-20260929-101500:jsons/telluris-dump-20260929-101500.json") \
+		== '{"db": "telluris", "docs": []}'
+
+	res, err = _publier(serveur)
+	assert res is None and err[0] == 409                   # la branche existe déjà
+
+
+@pytestmark_git
+def test_git_reel_pr_ouverte_vers_main(depots, monkeypatch):
+	auteur, serveur = depots
+	monkeypatch.setattr(srv, "depot_github", lambda url: ("o", "r"))
+	appels = []
+
+	def pr(proprio, depot, tete, base, titre, corps, token):
+		appels.append((proprio, depot, tete, base, token))
+		return "https://github.com/o/r/pull/7"
+
+	res, err = _publier(serveur, pr_fn=pr, token="jeton")
+	assert err is None, err
+	assert res["pr_url"] == "https://github.com/o/r/pull/7"
+	assert appels == [("o", "r", "admin/dump-20260929-101500", "main", "jeton")]
+
+
+@pytestmark_git
+def test_git_reel_echec_de_la_pr_n_annule_pas_le_push(depots, monkeypatch):
+	auteur, serveur = depots
+	monkeypatch.setattr(srv, "depot_github", lambda url: ("o", "r"))
+
+	def pr(*a):
+		raise RuntimeError("GitHub a répondu 403")
+
+	res, err = _publier(serveur, pr_fn=pr, token="jeton")
+	assert err is None and res["pr_url"] is None and "403" in res["pr_erreur"]
+	assert res["compare_url"].endswith("/compare/main...admin/dump-20260929-101500?expand=1")

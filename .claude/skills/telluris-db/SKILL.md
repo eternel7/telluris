@@ -9,6 +9,7 @@ Couche CouchDB (`db/config.py`) et outils d'admin qui lisent ou écrivent des do
 ### Lire les valeurs réelles
 CouchDB live distante, injoignable en local : lire **`telluris-dump-*.json`** à la racine (produit par `GET /admin/exports/couchdb` / `db.config.dump_all_docs()`). ⚠️ L'export téléchargé **inclut les `user:*`** (restauration à l'identique, `_dump_payload(avec_users=True)`) — les retirer avant de committer, ou prendre **`GET /admin/exports/couchdb-sans-users`** (carte « Dump committable »), qui rend le même dump que les outils de dev/ : format et filtrage dans **`utils/dump.py`** (`payload`, `ecrire_dump_frais`), source unique. ⚠️ Plusieurs dumps coexistent : prendre le plus récent, et recompter dessus avant d'annoncer un trou de données.
 
+- **Dump → branche + PR** : `POST /admin/exports/dump-pr` → `serveur.publier_dump` : dump sans `user:*` commité en `jsons/telluris-dump-*.json` sur une **nouvelle** branche `admin/dump-AAAAMMJJ-HHMMSS` partant du `main` distant (plomberie + index temporaire : ⚠️ ni checkout ni fichier écrit dans l'arbre — un dump non suivi dans `jsons/` ferait refuser la mise à jour ff-only suivante), push, PR vers `main` via l'API GitHub (`GITHUB_TOKEN`, passé à git par `GIT_CONFIG_*`, jamais l'argv). Échec de la PR ≠ échec : branche poussée + `compare_url`. Verrou partagé avec la mise à jour. Verrouillé par `tests/test_serveur.py`.
 - **Export d'un type** : `GET /admin/exports/by-type?type=<t>` (`find_docs({"type": t})`, sans `user:*`) → `<type>-AAAAMMJJ-HHMMSS.json` ; `/admin/exports` liste les types présents.
 
 

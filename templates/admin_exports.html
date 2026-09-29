@@ -54,6 +54,11 @@
 			font-family: inherit; font-size: 0.85rem; letter-spacing: 0.05em;
 		}
 		.type-input:focus { outline: none; border-color: var(--accent); }
+		.dl-btn:disabled { opacity: 0.5; cursor: wait; }
+		.pr-status { margin-top: 12px; font-size: 0.8rem; line-height: 1.6; color: var(--muted); white-space: pre-wrap; word-break: break-word; }
+		.pr-status.ok { color: #7fc97f; }
+		.pr-status.err { color: #e07a6a; }
+		.pr-status a { color: var(--accent); }
 	</style>
 </head>
 <body>
@@ -108,6 +113,19 @@
 			</div>
 			<a class="dl-btn" href="{{ url_for('admin_export_couchdb_sans_users') }}">⬇ Télécharger le dump committable (.json)</a>
 		</div>
+		<div class="card">
+			<div class="card-title">Dump → branche git + PR vers main</div>
+			<div class="card-desc">
+				Génère le dump committable (sans <code>user:*</code>) <strong>sur le serveur</strong>,
+				le commite dans <code>jsons/</code> sur une <strong>nouvelle branche</strong>
+				<code>admin/dump-AAAAMMJJ-HHMMSS</code> partant du <code>main</code> distant, la pousse
+				et ouvre une pull request vers <code>main</code>. L'arbre de travail et la branche
+				courante du serveur ne bougent pas. PR créée si <code>GITHUB_TOKEN</code> est défini
+				dans le <code>.env</code> ; sinon, lien pour l'ouvrir à la main.
+			</div>
+			<button id="dump-pr-btn" class="dl-btn" type="button" onclick="dumpPr()">⇪ Committer le dump + ouvrir la PR</button>
+			<div id="dump-pr-status" class="pr-status"></div>
+		</div>
 	</div>
 	<script>
 		const _byTypeUrl = "{{ url_for('admin_export_by_type') }}";
@@ -115,6 +133,37 @@
 			const t = document.getElementById('type-input').value.trim();
 			if (!t) { alert('Choisis ou saisis un type à exporter.'); return; }
 			window.location = _byTypeUrl + '?type=' + encodeURIComponent(t);
+		}
+		function _lien(parent, url, texte) {
+			const a = document.createElement('a');
+			a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = texte;
+			parent.appendChild(a);
+		}
+		async function dumpPr() {
+			if (!confirm('Générer un dump, le committer sur une nouvelle branche et ouvrir une PR vers main ?')) return;
+			const btn = document.getElementById('dump-pr-btn');
+			const st = document.getElementById('dump-pr-status');
+			btn.disabled = true;
+			st.className = 'pr-status';
+			st.textContent = 'Dump, commit et push en cours…';
+			try {
+				const r = await fetch("{{ url_for('admin_export_dump_pr') }}", { method: 'POST' });
+				const d = await r.json().catch(() => ({}));
+				if (!r.ok) { st.className = 'pr-status err'; st.textContent = 'Refusé : ' + (d.detail || r.status); return; }
+				st.className = 'pr-status ok';
+				st.textContent = '✓ ' + d.fichier + ' (' + d.doc_count + ' docs) commité en ' + d.commit
+					+ ' sur « ' + d.branche + ' » (base main ' + d.base + '), poussé.\n';
+				if (d.pr_url) { _lien(st, d.pr_url, '→ Pull request ouverte'); }
+				else {
+					st.appendChild(document.createTextNode('⚠ PR non créée : ' + d.pr_erreur + '\n'));
+					if (d.compare_url) _lien(st, d.compare_url, '→ Ouvrir la PR sur GitHub');
+				}
+			} catch (e) {
+				st.className = 'pr-status err';
+				st.textContent = 'Erreur réseau : ' + e.message;
+			} finally {
+				btn.disabled = false;
+			}
 		}
 	</script>
 </body>
