@@ -5276,6 +5276,10 @@ function openItemDetail(source, idx) {
 	// Sacs de l'onglet 🎒 Inventaire du groupe : fiche en mono, sans comparaison — l'équipement
 	// porté est celui du JOUEUR, comparer le sac d'un compagnon avec mentirait.
 	else if (source in _GRP_SENS) item = (_grpPorteurs(source).src.inventaire || [])[idx];
+	// Panneau coffre : fiche en lecture seule (mono, sans action — le transfert reste sur la flèche).
+	// 'pcf_sac' : idx = position dans le sac ; 'pcf_coffre' : idx = `idx` réel de l'objet du coffre.
+	else if (source === 'pcf_sac')    item = ((_pcfEtat && _pcfEtat.principal || {}).inventaire || [])[idx];
+	else if (source === 'pcf_coffre') item = ((_pcfEtat && _pcfEtat.coffre || {}).inventaire || []).find(x => x.idx === idx);
 	if (!item || typeof item !== 'object') return;
 
 	if (source === 'equip') {
@@ -8586,12 +8590,13 @@ function _pcfAppliquer(data) {
 
 // Une ligne d'objet, mêmes classes que les sacs du groupe. `geste` = nom de la fonction
 // appelée au clic ; l'index et l'id passent par data-* (Conventions §9).
-function _pcfLigne(item, idx, fleche, geste, actif, titre, cote) {
+function _pcfLigne(item, idx, fleche, geste, actif, titre, cote, source) {
 	const btn = `<button class="grp-move-btn" ${actif ? '' : 'disabled'} title="${escapeHtml(titre)}"
 		data-idx="${idx}" data-item="${escapeHtml(item.item || item._id || item.item_id || '')}"
 		onclick="${geste}(this)">${fleche}</button>`;
 	const poids = item.poids !== undefined ? `${(+item.poids || 0).toFixed(1)} kg` : `× ${item.qty}`;
-	const row = `<span class="sh-inv-name">${item.icon || '📦'} ${escapeHtml(item.nom || '—')}</span>
+	const ouvre = source ? ` sh-inv-open" onclick="openItemDetail('${source}',${+idx})" title="Voir la fiche` : '';
+	const row = `<span class="sh-inv-name${ouvre}">${item.icon || '📦'} ${escapeHtml(item.nom || '—')}</span>
 		<span class="sh-inv-poids">${poids}</span>`;
 	return `<div class="sh-inv-item">${cote === 'gauche' ? btn + row : row + btn}</div>`;
 }
@@ -8624,7 +8629,7 @@ function renderCoffre(data) {
 		_grpRemplirSac('pcf-principal', inv, inv.length ? ordInv.map(i => {
 			const it = inv[i];
 			return _pcfLigne(it, i, '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
-				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite');
+				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite', 'pcf_sac');
 		}).join('')
 			: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
 		const items = c.inventaire || [];
@@ -8632,7 +8637,7 @@ function renderCoffre(data) {
 		_grpRemplirSac('pcf-droite', items, !c.visible
 			? '<div class="sh-empty"><span class="sh-empty-icon">🔒</span>Fermé à clé.</div>'
 			: items.length ? ordCoffre.map(it => _pcfLigne(it, it.idx, '←', 'coffrePrendre', true,
-				data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche')).join('')
+				data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche', 'pcf_coffre')).join('')
 			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Coffre vide</div>');
 		return;
 	}
@@ -8642,7 +8647,7 @@ function renderCoffre(data) {
 	const cd = document.getElementById('pcf-charge-droite');
 	if (cd) cd.textContent = a.caisse !== null && a.caisse !== undefined ? `💰 ${_prixTexte(a.caisse)}` : '';
 	_grpRemplirSac('pcf-principal', inv, inv.length ? ordInv.map(i =>
-		_pcfLigne(inv[i], i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite')).join('')
+		_pcfLigne(inv[i], i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite', 'pcf_sac')).join('')
 		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
 	const prodsAtelier = a.produits || [];
 	const produits = _sortedOrder(prodsAtelier, 'asc').map(i => prodsAtelier[i]).map(p => _pcfLigne(p, 0, '←', 'atelierReprendre', gere, 'Reprendre un exemplaire', 'gauche')).join('');
