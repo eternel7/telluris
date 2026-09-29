@@ -220,3 +220,40 @@ def test_git_reel_conflit_refuse_et_rien_ne_bouge(depots):
 	assert res is None and err[0] == 409 and "a.py" in err[1]
 	assert (serveur / "a.py").read_text(encoding="utf-8") == "a = 'local'\n"
 	assert subprocess.run(["git", "rev-parse", "HEAD"], cwd=serveur, capture_output=True, text=True).stdout == head
+
+
+def test_git_aligne_les_fins_de_ligne_sur_git_for_windows():
+	# Sans autocrlf, le conteneur voit modifié tout fichier que l'hôte Windows a écrit en CRLF.
+	argv = srv._git("status")
+	i = argv.index("core.autocrlf=true")
+	assert argv[i - 1] == "-c" and i < argv.index("status")
+
+
+# ── Identité de git ──────────────────────────────────────────────────────────
+
+def _stat_par_chemin(monkeypatch, proprietaires):
+	"""Root simulé ; `os.stat` répond l'uid donné par nom de fichier, OSError s'il est absent."""
+	class St:
+		def __init__(self, uid):
+			self.st_uid, self.st_gid = uid, uid + 1000
+	def faux_stat(chemin):
+		cle = os.path.basename(chemin) or chemin
+		if cle not in proprietaires:
+			raise FileNotFoundError(chemin)
+		return St(proprietaires[cle])
+	monkeypatch.setattr(os, "geteuid", lambda: 0, raising=False)
+	monkeypatch.setattr(os, "stat", faux_stat)
+
+
+def test_identite_suit_le_git_de_l_hote_pas_la_racine(monkeypatch):
+	# Racine créée par un compte du NAS, dépôt manipulé par un autre : c'est ce dernier qui
+	# peut écrire `.git/FETCH_HEAD` (le cas « Permission denied » du fetch).
+	_stat_par_chemin(monkeypatch, {"depot": 1024, ".git": 1026, "HEAD": 1026})
+	assert srv._identite("depot") == (1026, 2026)
+
+
+def test_identite_repli_sur_la_racine_puis_root(monkeypatch):
+	_stat_par_chemin(monkeypatch, {"depot": 1024})
+	assert srv._identite("depot") == (1024, 2024)
+	_stat_par_chemin(monkeypatch, {"depot": 1024, "HEAD": 0})
+	assert srv._identite("depot") is None

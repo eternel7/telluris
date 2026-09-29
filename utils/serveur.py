@@ -17,7 +17,9 @@ de `reset`, de `checkout --`, de `clean` ni de `stash pop`. Avant de fusionner :
 ⚠️ **PROPRIÉTAIRE DU DÉPÔT.** Le conteneur tourne en root alors que le dépôt monté appartient
 à l'utilisateur de l'hôte : git y refuserait de travailler (« dubious ownership ») et, pire,
 écrirait dans `.git` des objets possédés par root qui casseraient ensuite le git de l'hôte.
-D'où git lancé SOUS L'IDENTITÉ du propriétaire de la racine (`_identite`).
+D'où git lancé SOUS L'IDENTITÉ du propriétaire de `.git/HEAD` (`_identite`) — pas de la racine :
+sur un partage réseau (NAS), le dossier a pu être créé par un autre compte que celui qui fait
+tourner git sur l'hôte, et `fetch` échouait alors sur `.git/FETCH_HEAD: Permission denied`.
 
 ⚠️ **REDÉMARRAGE = RE-EXEC DU PROCESS** (`os.execv` sur `sys.argv`) : uvicorn repart dans le
 même conteneur, sans repasser par l'apt-get + pip du compose. Une NOUVELLE dépendance pip
@@ -57,14 +59,40 @@ class GitAbsent(RuntimeError):
 
 
 def _identite(racine=None):
-	"""(uid, gid) sous lesquels lancer git : le propriétaire de la racine quand on est root
-	et qu'il ne l'est pas ; sinon None (on reste soi-même)."""
+	"""(uid, gid) sous lesquels lancer git : quand on est root, le propriétaire de ce qu'écrit
+	le git de l'hôte — `.git/HEAD`, à défaut `.git`, à défaut la racine — s'il n'est pas root ;
+	sinon None (on reste soi-même)."""
 	if not hasattr(os, "geteuid") or os.geteuid() != 0:
 		return None
-	st = os.stat(racine or RACINE)
+	racine = racine or RACINE
+	for chemin in (os.path.join(racine, ".git", "HEAD"), os.path.join(racine, ".git"), racine):
+		try:
+			st = os.stat(chemin)
+			break
+		except OSError:
+			continue
+	else:
+		return None
 	if st.st_uid == 0:
 		return None
 	return st.st_uid, st.st_gid
+
+
+def diagnostic_droits(racine=None) -> str:
+	"""Qui lance git et à qui appartiennent les fichiers qu'un fetch écrit — affiché sous un
+	fetch en échec, pour régler les droits du partage sans ouvrir de terminal."""
+	racine = racine or RACINE
+	euid = os.geteuid() if hasattr(os, "geteuid") else None
+	ident = _identite(racine)
+	morceaux = [f"process uid={euid}", f"git lancé en uid:gid={ident[0]}:{ident[1]}" if ident else "git lancé sans changer d'identité"]
+	for rel in ("", ".git", ".git/HEAD", ".git/FETCH_HEAD", ".git/objects", ".git/refs/remotes"):
+		chemin = os.path.join(racine, rel) if rel else racine
+		try:
+			st = os.stat(chemin)
+			morceaux.append(f"{rel or '/'} {st.st_uid}:{st.st_gid} {oct(st.st_mode & 0o7777)}")
+		except OSError as e:
+			morceaux.append(f"{rel or '/'} ? ({e.strerror})")
+	return " · ".join(morceaux)
 
 
 def executer(argv, timeout=60):
@@ -86,14 +114,17 @@ def executer(argv, timeout=60):
 	except FileNotFoundError as e:
 		raise GitAbsent(str(e)) from e
 	except subprocess.TimeoutExpired:
-		return 124, f"délai dépassé ({timeout} s) : {' '.join(argv[3:5])}"
+		return 124, f"délai dépassé ({timeout} s) : {' '.join(a for a in argv[1:] if a != '-c' and '=' not in a)[:80]}"
 	return p.returncode, p.stdout.decode("utf-8", "replace")
 
 
 def _git(*args):
 	"""argv git : `safe.directory` en ligne de commande (configuration « protégée », seule
-	que git écoute pour ce réglage) au cas où l'identité ne serait pas celle du propriétaire."""
-	return ["git", "-c", f"safe.directory={RACINE}", *args]
+	que git écoute pour ce réglage) au cas où l'identité ne serait pas celle du propriétaire.
+	`core.autocrlf=true` : l'arbre est partagé avec le Git for Windows de l'hôte, qui écrit en
+	CRLF un dépôt stocké en LF — sans ce réglage, le git du conteneur voit TOUT fichier modifié
+	(et un merge réécrirait en LF des fichiers que l'hôte attend en CRLF)."""
+	return ["git", "-c", f"safe.directory={RACINE}", "-c", "core.autocrlf=true", *args]
 
 
 def _ok(run_fn, *args, timeout=60):
@@ -150,7 +181,7 @@ def _fetch(run_fn):
 	return _ok(run_fn, "fetch", "--quiet", "--prune", timeout=120)
 
 
-def etat(run_fn=executer, fetch=True) -> dict:
+def etat(run_fn=executer, fetch=True, diag_fn=diagnostic_droits) -> dict:
 	"""État du dépôt pour la carte : branche, amont, HEAD, fichiers locaux, retard/avance.
 	`erreur` seule si git ne peut pas lire le dépôt (droits, pas de `.git` monté…)."""
 	ok, out = _ok(run_fn, "rev-parse", "--git-dir")
@@ -171,7 +202,7 @@ def etat(run_fn=executer, fetch=True) -> dict:
 		ok, out = _fetch(run_fn)
 		res["fetch_ok"] = ok
 		if not ok:
-			res["fetch_erreur"] = out.strip()[-800:]
+			res["fetch_erreur"] = out.strip()[-800:] + " — droits : " + diag_fn()
 	ok, out = _ok(run_fn, "rev-list", "--left-right", "--count", "HEAD...@{u}")
 	if ok and len(out.split()) == 2:
 		res["avance"], res["retard"] = (int(x) for x in out.split())
