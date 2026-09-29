@@ -8394,6 +8394,17 @@ function _propMesProprietes(liste) {
 		<div class="prop-liste">${lignes || '<div class="sell-empty">Vous ne possédez aucun bien.</div>'}</div>	</section>`;
 }
 
+// Pourquoi le prix dépasse la base : quartier marchand (boutiques, grandes maisons, guilde)
+// et biens déjà achetés sur cette case. Rien si le prix est celui de base.
+function _propMajoration(t) {
+	const m = t.majoration;
+	if (!m || !(t.prix > t.prix_base)) return '';
+	const parts = ['Base ' + _prixTexte(t.prix_base)];
+	if (m.voisinage_pct > 0) parts.push(`quartier marchand +${m.voisinage_pct} %`);
+	if (m.proprietes_case > 0) parts.push(`${m.proprietes_case} bien${m.proprietes_case > 1 ? 's' : ''} déjà ici ×${m.occupation_facteur}`);
+	return `<span class="q-desc">${parts.join(' · ')}</span>`;
+}
+
 function renderProprietesOffre(data) {
 	const bourse = _purseEnCuivre(data.purse);
 	let html = '';
@@ -8405,6 +8416,7 @@ function renderProprietesOffre(data) {
 				${_propCaps(t.capacites)}
 				<span class="q-desc">Aménagements possibles : ${t.amenagements.map(escapeHtml).join(', ') || '—'}</span>
 				<span class="sell-prix">💰 ${_prixTexte(t.prix)}</span>
+				${_propMajoration(t)}
 			</div>
 			<button class="sh-drop-btn" data-type="${escapeHtml(t.id)}" ${t.prix > bourse ? 'disabled title="Vous n\'avez pas de quoi payer"' : ''}
 				onclick="propAcheter(this)">Acheter</button></div>`).join('') + `</div></section>`;

@@ -1285,6 +1285,16 @@
             "proba": 0.5,
             "fraction": 0.34,
             "reserve": 1
+          },
+          "prix_achat": {
+            "rayon": 4,
+            "bonus": {
+              "marchand": 0.05,
+              "grand_marchand": 0.2,
+              "guilde": 0.2
+            },
+            "plafond_voisinage": 1.5,
+            "multiplicateur_occupation": 2
           }
         }
       }

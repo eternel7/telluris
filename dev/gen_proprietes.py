@@ -207,7 +207,12 @@ for a in amenagements:
 			assert set(a["types_autorises"]) <= {D, Do}, a["id"]
 
 reglages = {"candidats_duree_s": 86400,
-			"vente_auto": {"proba": 0.5, "fraction": 0.34, "reserve": 1}}
+			"vente_auto": {"proba": 0.5, "fraction": 0.34, "reserve": 1},
+			# Prix d'achat majoré : MIROIR de `utils.proprietes.PRIX_ACHAT_DEFAUT` (verrouillé par
+			# tests/test_proprietes.py) — l'éditer ici suffit à retoucher les valeurs en jeu.
+			"prix_achat": {"rayon": 4,
+						   "bonus": {"marchand": 0.05, "grand_marchand": 0.20, "guilde": 0.20},
+						   "plafond_voisinage": 1.5, "multiplicateur_occupation": 2}}
 
 # Cohérence interne : tout métier référencé existe, tout prérequis est installable sur au
 # moins les types de l'aménagement qui l'exige, aucun doublon d'id.

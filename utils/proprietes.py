@@ -230,6 +230,103 @@ def offre_ici(lieu_doc: dict, position: dict, est_auberge: bool, cat: dict, get_
 	return bool(est_auberge and any(location_de(t) for t in cat["types"]))
 
 
+# ── Prix d'achat : voisinage + occupation de la case ─────────────────────────────
+# prix = prix_cuivre × (1 + min(plafond, Σ bonus(genre) × (R+1−d)/(R+1))) × multiplicateur ** n
+#   d : distance de Chebyshev entre la case d'achat et l'entrée d'un lieu voisin (≤ R) ;
+#   n : propriétés ACHETÉES (possédées) déjà reliées à CETTE case.
+# Surchargeable par `rules:proprietes.reglages.prix_achat` (clé absente ⇒ défaut ci-dessous).
+# La location d'une chambre d'auberge n'est pas concernée.
+PRIX_ACHAT_DEFAUT = {
+	"rayon": 4,
+	"bonus": {"marchand": 0.05, "grand_marchand": 0.20, "guilde": 0.20},
+	"plafond_voisinage": 1.5,
+	"multiplicateur_occupation": 2,
+}
+
+MARCHAND = "marchand"
+GRAND_MARCHAND = "grand_marchand"
+GUILDE = "guilde"
+
+
+def reglages_prix(cat: dict) -> dict:
+	"""Défauts du module ← `reglages.prix_achat` (champ à champ, `bonus` genre à genre)."""
+	surcharge = (reglages(cat) or {}).get("prix_achat") or {}
+	out = {**PRIX_ACHAT_DEFAUT, "bonus": dict(PRIX_ACHAT_DEFAUT["bonus"])}
+	for k, v in surcharge.items():
+		if k == "bonus" and isinstance(v, dict):
+			out["bonus"].update(v)
+		elif k in out and k != "bonus":
+			out[k] = v
+	return out
+
+
+def genre_voisin(lieu_doc: dict) -> str | None:
+	"""Ce que ce lieu apporte au quartier ; le genre le plus fort gagne. Prédicats existants :
+	`recrutement.lieu_de_guilde`, table `LIEU_CATEGORIES_FUSION` (lue comme `grande_maison`),
+	et `marche.besoins_lieu` non vide — c'est `transport.est_magasin`, non importé ici
+	(transport → focalisation → lieux → proprietes : cycle)."""
+	if not lieu_doc or est_propriete(lieu_doc):
+		return None
+	if recrutement.lieu_de_guilde(lieu_doc):
+		return GUILDE
+	if grande_maison(lieu_doc):
+		return GRAND_MARCHAND
+	if marche.besoins_lieu(lieu_doc):
+		return MARCHAND
+	return None
+
+
+def voisinage(connexions: list, cite_id, x: int, y: int, rayon: int, get_doc_fn=None) -> dict:
+	"""{"voisins": [(genre, d)], "proprietes_case": n} autour de (x, y) dans `cite_id`.
+	`connexions` = docs bruts touchant la cité (`lieux.connexions_du_lieu`). Chaque destination
+	compte UNE fois, à sa plus courte distance ; seules celles du rayon sont relues."""
+	lire = get_doc_fn or get_doc
+	distances = {}
+	for conn in connexions or []:
+		nodes = [n for n in conn.get("nodes") or [] if isinstance(n, dict)]
+		ici = next((n for n in nodes if n.get("lieu") == cite_id), None)
+		autre = next((n for n in nodes if n.get("lieu") != cite_id), None)
+		if ici is None or autre is None or not autre.get("lieu"):
+			continue
+		pos = list(ici.get("pos") or [])[:2]
+		if len(pos) < 2:
+			continue
+		d = max(abs(_int(pos[0]) - x), abs(_int(pos[1]) - y))
+		if d <= rayon and d < distances.get(autre["lieu"], rayon + 1):
+			distances[autre["lieu"]] = d
+	voisins, n = [], 0
+	for lieu_id, d in distances.items():
+		doc = lire(lieu_id) or {}
+		if est_propriete(doc):
+			if d == 0 and doc.get("mode") == MODE_ACHAT and doc.get("statut") == POSSEDEE:
+				n += 1
+			continue
+		genre = genre_voisin(doc)
+		if genre:
+			voisins.append((genre, d))
+	return {"voisins": voisins, "proprietes_case": n}
+
+
+def prix_achat(tdef: dict, cat: dict, vois: dict) -> dict:
+	"""Prix majoré d'un type sur une case dont `vois` est le `voisinage`."""
+	regl = reglages_prix(cat)
+	rayon = max(0, _int(regl.get("rayon")))
+	bonus = regl.get("bonus") or {}
+	somme = sum(float(bonus.get(g) or 0) * (rayon + 1 - d) / (rayon + 1)
+				for g, d in (vois or {}).get("voisins") or [])
+	voisinage_facteur = 1 + min(float(regl.get("plafond_voisinage") or 0), somme)
+	n = _int((vois or {}).get("proprietes_case"))
+	occupation_facteur = float(regl.get("multiplicateur_occupation") or 1) ** n
+	base = _int((tdef or {}).get("prix_cuivre"))
+	return {
+		"prix": int(round(base * voisinage_facteur * occupation_facteur)),
+		"base": base,
+		"voisinage_pct": int(round((voisinage_facteur - 1) * 100)),
+		"occupation_facteur": occupation_facteur,
+		"proprietes_case": n,
+	}
+
+
 # ── Création, lien, rôles ────────────────────────────────────────────────────────
 
 def nom_personnage(character: dict) -> str:
@@ -390,10 +487,13 @@ def revente_autorisee(tdef: dict, cite_doc: dict | None) -> tuple[bool, str]:
 	return True, ""
 
 
-def prix_revente(tdef: dict) -> int:
-	"""Prix du TYPE × facteur. Les aménagements ne sont pas remboursés : ils restent
-	attachés au bien cédé."""
-	return int(round(_int(tdef.get("prix_cuivre")) * float(tdef.get("revente_facteur") or 0)))
+def prix_revente(tdef: dict, prop: dict) -> int:
+	"""Prix PAYÉ × facteur du type : un bien acheté cher (quartier marchand, case déjà
+	occupée — cf. `prix_achat`) se revend en proportion. `prix_paye` absent ou nul (bien
+	d'avant la majoration) ⇒ prix du type. Les aménagements ne sont pas remboursés : ils
+	restent attachés au bien cédé."""
+	base = _int((prop or {}).get("prix_paye")) or _int(tdef.get("prix_cuivre"))
+	return int(round(base * float(tdef.get("revente_facteur") or 0)))
 
 
 def ceder(character: dict, prop: dict, statut: str, employes: list) -> None:
