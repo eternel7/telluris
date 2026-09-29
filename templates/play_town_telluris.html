@@ -8613,19 +8613,25 @@ function renderCoffre(data) {
 	const moi = data.principal || { inventaire: [], charge: 0, charge_max: 0 };
 	_grpCharge('pcf-charge-principal', moi);
 	const inv = moi.inventaire || [];
+	// Aucun tri manuel dans ce panneau : le tri par nom est OBLIGATOIRE. Les index d'origine
+	// sont conservés pour l'adressage serveur (ordre d'affichage seulement).
+	const ordInv = _sortedOrder(inv, 'asc');
 
 	if (_pcfSel === 'coffre') {
 		const c = data.coffre || {};
 		_grpCharge('pcf-charge-droite', c);
 		const libre = (+c.charge_max || 0) - (+c.charge || 0);
-		_grpRemplirSac('pcf-principal', inv, inv.length ? inv.map((it, i) =>
-			_pcfLigne(it, i, '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
-				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite')).join('')
+		_grpRemplirSac('pcf-principal', inv, inv.length ? ordInv.map(i => {
+			const it = inv[i];
+			return _pcfLigne(it, i, '→', 'coffreDeposer', c.depot && (+it.poids || 0) <= libre + 1e-6,
+				c.depot ? 'Ranger dans le coffre' : 'Vous ne pouvez rien déposer ici', 'droite');
+		}).join('')
 			: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
 		const items = c.inventaire || [];
+		const ordCoffre = _sortedOrder(items, 'asc').map(i => items[i]);
 		_grpRemplirSac('pcf-droite', items, !c.visible
 			? '<div class="sh-empty"><span class="sh-empty-icon">🔒</span>Fermé à clé.</div>'
-			: items.length ? items.map(it => _pcfLigne(it, it.idx, '←', 'coffrePrendre', true,
+			: items.length ? ordCoffre.map(it => _pcfLigne(it, it.idx, '←', 'coffrePrendre', true,
 				data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche')).join('')
 			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Coffre vide</div>');
 		return;
@@ -8635,10 +8641,11 @@ function renderCoffre(data) {
 	const gere = data.role === 'proprietaire';
 	const cd = document.getElementById('pcf-charge-droite');
 	if (cd) cd.textContent = a.caisse !== null && a.caisse !== undefined ? `💰 ${_prixTexte(a.caisse)}` : '';
-	_grpRemplirSac('pcf-principal', inv, inv.length ? inv.map((it, i) =>
-		_pcfLigne(it, i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite')).join('')
+	_grpRemplirSac('pcf-principal', inv, inv.length ? ordInv.map(i =>
+		_pcfLigne(inv[i], i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite')).join('')
 		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
-	const produits = (a.produits || []).map(p => _pcfLigne(p, 0, '←', 'atelierReprendre', gere, 'Reprendre un exemplaire', 'gauche')).join('');
+	const prodsAtelier = a.produits || [];
+	const produits = _sortedOrder(prodsAtelier, 'asc').map(i => prodsAtelier[i]).map(p => _pcfLigne(p, 0, '←', 'atelierReprendre', gere, 'Reprendre un exemplaire', 'gauche')).join('');
 	const matieres = (a.matieres || []).map(m => `<div class="sh-inv-item"><span class="sh-inv-name">🧺 ${escapeHtml(m.cle)}</span><span class="sh-inv-poids">× ${m.qty}</span></div>`).join('');
 	_grpRemplirSac('pcf-droite', (a.produits || []).concat(a.matieres || []),
 		`<div class="q-desc">${a.grande ? '✦ Grande maison — prend le sur-mesure' : 'Commandes simples'}</div>`
