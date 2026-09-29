@@ -91,6 +91,10 @@ def monde(monkeypatch):
 		monkeypatch.setattr(mod, "save_doc", save_doc_fn, raising=False)
 		monkeypatch.setattr(mod, "find_docs", find_docs_fn, raising=False)
 		monkeypatch.setattr(mod, "delete_doc", delete_doc_fn, raising=False)
+	# Vue `reseau/liens_cases` en mémoire : connexions dont un nœud est sur le lieu.
+	monkeypatch.setattr(rp, "connexions_du_lieu", lambda lieu_id: [
+		d for d in list(docs.values()) if d.get("type") == "connection"
+		and any(n.get("lieu") == lieu_id for n in d.get("nodes") or [])])
 	# Recettes en mémoire : aucune lecture de la vraie base par les index du marché.
 	monkeypatch.setattr(marche, "_all_recettes", lambda: RECETTES)
 	marche.reset_prix_cache()
@@ -142,6 +146,31 @@ def test_achat_cree_propriete_et_connexion(monde):
 	prix = proprietes.type_def(_cat(monde), "maison")["prix_cuivre"]
 	assert characters_util.money_to_cuivre(char) == avant - prix
 	assert char["proprietes"] == [prop["_id"]]
+
+
+def test_achat_majore_par_les_biens_deja_sur_la_case(monde):
+	"""Le second acheteur de la même case paie le multiplicateur d'occupation, recalculé au
+	serveur ; l'offre l'annonce avec son prix de base."""
+	base = proprietes.type_def(_cat(monde), "maison")["prix_cuivre"]
+	m = proprietes.PRIX_ACHAT_DEFAUT["multiplicateur_occupation"]
+	_acheter_maison(monde, _perso())
+	second = _perso(_id="character:b", **{"or": 10 ** 6})
+	offre = _appel(monde, second, monde["rp"].offre, None)["types"][0]
+	assert offre["prix"] == base * m and offre["prix_base"] == base
+	assert offre["majoration"]["proprietes_case"] == 1
+	avant = characters_util.money_to_cuivre(second)
+	data = _acheter_maison(monde, second)
+	assert characters_util.money_to_cuivre(second) == avant - base * m
+	assert monde["docs"][data["achetee"]["id"]]["prix_paye"] == base * m
+
+
+def test_achat_majore_par_une_boutique_voisine(monde):
+	monde["docs"]["lieu:forge"] = {"_id": "lieu:forge", "type": "lieu", "categorie": "laboratoire_d_alchimie"}
+	monde["docs"]["link:forge"] = {"_id": "link:forge", "type": "connection",
+								   "nodes": [{"lieu": "lieu:ville", "pos": [6, 5]}, {"lieu": "lieu:forge", "pos": [0, 0]}]}
+	base = proprietes.type_def(_cat(monde), "maison")["prix_cuivre"]
+	offre = _appel(monde, _perso(), monde["rp"].offre, None)["types"][0]
+	assert offre["prix"] > base and offre["majoration"]["voisinage_pct"] > 0
 
 
 def test_achat_d_un_autre_type_refuse(monde):

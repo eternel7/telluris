@@ -62,7 +62,7 @@ vm.runInThisContext(extraireConst('_PROP_STATUTS'));
 vm.runInThisContext(extraireConst('_PROP_CATEGORIES'));
 vm.runInThisContext(extraireConst('INV_VISIBLE'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
-	'_propMesProprietes', 'renderProprietesOffre', 'renderPropriete',
+	'_propMesProprietes', '_propMajoration', 'renderProprietesOffre', 'renderPropriete',
 	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_pcfLigne', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
@@ -147,6 +147,17 @@ t('offre : types de la zone et chambre à louer', () => {
 	assert.ok(/data-type="maison" disabled/.test(h), 'achat hors budget non grisé');
 	assert.ok(h.includes('Louer') && h.includes('Mes propriétés'));
 	assert.ok(!h.includes(XSS));
+});
+
+t('offre : majoration expliquée seulement au-dessus de la base', () => {
+	const offre = t => renderProprietesOffre({ types: [Object.assign({ id: 'maison', label: 'Maison',
+		description: '', capacites: {}, amenagements: [] }, t)], location: null, mes_proprietes: [],
+		purse: { or: 0, argent: 0, cuivre: 0 } });
+	offre({ prix: 1000, prix_base: 1000, majoration: { voisinage_pct: 0, occupation_facteur: 1, proprietes_case: 0 } });
+	assert.ok(!cible.innerHTML.includes('Base '), 'ligne de majoration au prix de base');
+	offre({ prix: 2600, prix_base: 1000, majoration: { voisinage_pct: 30, occupation_facteur: 2, proprietes_case: 1 } });
+	const h = cible.innerHTML;
+	assert.ok(h.includes('quartier marchand +30 %') && h.includes('1 bien déjà ici ×2'), h);
 });
 
 // ── Coffre (présenté comme l'inventaire du groupe) ─────────────────────────────────

@@ -30,19 +30,25 @@ from utils import commande as commande_util
 # Sens d'import : `routers/proprietes` → `routers/user`, jamais l'inverse (précédent :
 # routers/auberge).
 from routers.user import _inventory_payload
+from utils.lieux import connexions_du_lieu
 
 proprietes_router = APIRouter()
 
 
 # ── Vues ─────────────────────────────────────────────────────────────────────────
 
-def _type_view(cat: dict, tdef: dict) -> dict:
+def _type_view(cat: dict, tdef: dict, prix: dict | None = None) -> dict:
+	"""`prix` : détail de `proprietes.prix_achat` (offre d'achat) ; absent ⇒ prix de base."""
+	base = int(tdef.get("prix_cuivre") or 0)
 	return {
 		"id": tdef.get("id", ""),
 		"label": tdef.get("label", ""),
 		"rang": tdef.get("rang", 0),
 		"description": tdef.get("description", ""),
-		"prix": int(tdef.get("prix_cuivre") or 0),
+		"prix": prix["prix"] if prix else base,
+		"prix_base": base,
+		"majoration": ({k: prix[k] for k in ("voisinage_pct", "occupation_facteur", "proprietes_case")}
+					   if prix else None),
 		"capacites": {
 			"occupants_max": int(tdef.get("occupants_max") or 0),
 			"personnel_max": int(tdef.get("personnel_max") or 0),
@@ -70,14 +76,27 @@ def _mes_proprietes(character: dict, cat: dict) -> list:
 	return [_resume(p, cat, character) for p in proprietes.proprietes_de(character, get_doc)]
 
 
+def _voisinage_ici(character: dict, lieu_doc: dict, cat: dict) -> dict:
+	"""Voisinage de la case du personnage (boutiques, guilde, biens déjà achetés ici)."""
+	pos = character.get("position") or {}
+	return proprietes.voisinage(
+		connexions_du_lieu(lieu_doc.get("_id")), lieu_doc.get("_id"),
+		int(pos.get("x", 0)), int(pos.get("y", 0)),
+		int(proprietes.reglages_prix(cat)["rayon"]), get_doc)
+
+
 def _payload_offre(character: dict, lieu_doc: dict, cat: dict) -> dict:
-	"""Ce qui s'acquiert ICI : types des zones habitables couvrant la case, et/ou une
-	chambre à louer si le lieu est une auberge."""
+	"""Ce qui s'acquiert ICI : types des zones habitables couvrant la case (prix MAJORÉ par
+	le voisinage et l'occupation de la case), et/ou une chambre à louer si le lieu est une
+	auberge (prix de base)."""
 	types = []
+	vois = None
 	for tid in proprietes.types_achetables_ici(lieu_doc, character.get("position"), get_doc):
 		tdef = proprietes.type_def(cat, tid)
 		if tdef:                                   # zone pointant un type absent : ignorée
-			types.append(_type_view(cat, tdef))
+			if vois is None:
+				vois = _voisinage_ici(character, lieu_doc, cat)
+			types.append(_type_view(cat, tdef, proprietes.prix_achat(tdef, cat, vois)))
 	location = None
 	if auberge.lieu_est_taverne(lieu_doc):
 		tdef = _type_location(cat)
@@ -243,7 +262,8 @@ async def acheter(current_user: Annotated[dict, Depends(get_current_user)], body
 	tdef = proprietes.type_def(cat, type_id)
 	if not tdef:
 		raise HTTPException(status_code=404, detail="Type de propriété inconnu.")
-	prix = int(tdef.get("prix_cuivre") or 0)
+	# Recalculé ici, jamais lu du client : voisinage marchand + biens déjà sur la case.
+	prix = proprietes.prix_achat(tdef, cat, _voisinage_ici(character, lieu_doc, cat))["prix"]
 	if money_to_cuivre(character) < prix:
 		raise HTTPException(status_code=409, detail="Vous n'avez pas de quoi payer ce bien.")
 

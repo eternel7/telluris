@@ -456,3 +456,112 @@ def test_livre_postes_marchands_exercables(livre):
 			if c in fusion:
 				assert set(a["types_autorises"]) <= {"demeure", "domaine"}, (a["id"], c)
 	assert vues, "aucun poste marchand dans le catalogue livré"
+
+
+# ── Prix d'achat : voisinage marchand + occupation de la case ─────────────────────
+# Coefficients RELUS depuis `PRIX_ACHAT_DEFAUT` : retoucher les défauts ne casse rien ici.
+
+DEF = proprietes.PRIX_ACHAT_DEFAUT
+R = DEF["rayon"]
+MAISON = proprietes.type_def(CAT, "maison")
+
+LIEUX_PRIX = {
+	"lieu:boutique": {"_id": "lieu:boutique", "type": "lieu", "categorie": "forge"},
+	"lieu:grande": {"_id": "lieu:grande", "type": "lieu", "categorie": "grand_arsenal"},
+	"lieu:guilde": {"_id": "lieu:guilde", "type": "lieu", "categorie": "guilde_aventurier"},
+	"lieu:ruelle": {"_id": "lieu:ruelle", "type": "lieu", "categorie": "maison_close"},
+}
+
+
+def _conn(dest, x, y, cite="lieu:ville"):
+	return {"_id": f"link:{dest}_{x}_{y}", "type": "connection",
+			"nodes": [{"lieu": cite, "pos": [x, y]}, {"lieu": dest, "pos": [0, 0]}]}
+
+
+def _prop_doc(pid, mode=proprietes.MODE_ACHAT, statut=proprietes.POSSEDEE):
+	return {"_id": pid, "type": proprietes.TYPE_DOC, "mode": mode, "statut": statut}
+
+
+@pytest.fixture
+def boutiques(monkeypatch):
+	"""`marche.besoins_lieu` : seule la forge (et la grande maison) a des recettes."""
+	from models import character_stats
+	monkeypatch.setitem(character_stats.LIEU_CATEGORIES_FUSION, "grand_arsenal", ["forge"])
+	monkeypatch.setattr(proprietes.marche, "besoins_lieu",
+						lambda d: {"fer"} if (d or {}).get("categorie") in ("forge", "grand_arsenal") else set())
+
+
+def _vois(conns, docs, x=10, y=10, rayon=R):
+	return proprietes.voisinage(conns, "lieu:ville", x, y, rayon, docs.get)
+
+
+def test_genre_voisin_le_plus_fort_gagne(boutiques):
+	assert proprietes.genre_voisin(LIEUX_PRIX["lieu:boutique"]) == proprietes.MARCHAND
+	assert proprietes.genre_voisin(LIEUX_PRIX["lieu:grande"]) == proprietes.GRAND_MARCHAND
+	assert proprietes.genre_voisin(LIEUX_PRIX["lieu:guilde"]) == proprietes.GUILDE
+	assert proprietes.genre_voisin(LIEUX_PRIX["lieu:ruelle"]) is None
+	assert proprietes.genre_voisin(_prop_doc("propriete:x")) is None
+
+
+def test_prix_de_base_sans_voisin():
+	v = _vois([], {})
+	assert proprietes.prix_achat(MAISON, CAT, v)["prix"] == MAISON["prix_cuivre"]
+
+
+def test_voisinage_degressif_et_borne_au_rayon(boutiques):
+	base = MAISON["prix_cuivre"]
+	b = DEF["bonus"]["marchand"]
+	for d, poids in ((0, 1.0), (R, 1 / (R + 1))):
+		v = _vois([_conn("lieu:boutique", 10 + d, 10)], LIEUX_PRIX)
+		assert proprietes.prix_achat(MAISON, CAT, v)["prix"] == round(base * (1 + b * poids))
+	hors = _vois([_conn("lieu:boutique", 10 + R + 1, 10 - R - 1)], LIEUX_PRIX)
+	assert hors["voisins"] == []
+
+
+def test_grande_maison_et_guilde_pesent_plus_qu_une_boutique(boutiques):
+	prix = {lid: proprietes.prix_achat(MAISON, CAT, _vois([_conn(lid, 11, 11)], LIEUX_PRIX))["prix"]
+			for lid in ("lieu:boutique", "lieu:grande", "lieu:guilde", "lieu:ruelle")}
+	assert prix["lieu:ruelle"] == MAISON["prix_cuivre"]
+	assert prix["lieu:boutique"] < prix["lieu:grande"]
+	assert prix["lieu:boutique"] < prix["lieu:guilde"]
+
+
+def test_destination_comptee_une_fois_a_sa_plus_courte_distance(boutiques):
+	v = _vois([_conn("lieu:boutique", 13, 10), _conn("lieu:boutique", 10, 10)], LIEUX_PRIX)
+	assert v["voisins"] == [(proprietes.MARCHAND, 0)]
+
+
+def test_voisinage_plafonne(boutiques):
+	docs = {f"lieu:g{i}": {"_id": f"lieu:g{i}", "categorie": "grand_arsenal"} for i in range(100)}
+	v = _vois([_conn(lid, 10, 10) for lid in docs], docs)
+	p = proprietes.prix_achat(MAISON, CAT, v)
+	assert p["prix"] == round(MAISON["prix_cuivre"] * (1 + DEF["plafond_voisinage"]))
+
+
+def test_occupation_multiplie_par_bien_deja_achete_sur_la_case():
+	m = DEF["multiplicateur_occupation"]
+	docs = {"propriete:a": _prop_doc("propriete:a"), "propriete:b": _prop_doc("propriete:b"),
+			"propriete:vendue": _prop_doc("propriete:vendue", statut=proprietes.VENDUE),
+			"propriete:louee": _prop_doc("propriete:louee", mode=proprietes.MODE_LOCATION,
+										 statut=proprietes.LOUEE),
+			"propriete:voisine": _prop_doc("propriete:voisine")}
+	conns = [_conn("propriete:a", 10, 10), _conn("propriete:b", 10, 10),
+			 _conn("propriete:vendue", 10, 10), _conn("propriete:louee", 10, 10),
+			 _conn("propriete:voisine", 11, 10)]
+	v = _vois(conns, docs)
+	assert v["proprietes_case"] == 2 and v["voisins"] == []
+	p = proprietes.prix_achat(MAISON, CAT, v)
+	assert p["prix"] == MAISON["prix_cuivre"] * m ** 2 and p["occupation_facteur"] == m ** 2
+
+
+def test_reglages_prix_surchargent_champ_a_champ():
+	cat = dict(CAT, reglages={"prix_achat": {"multiplicateur_occupation": 5, "bonus": {"guilde": 1}}})
+	regl = proprietes.reglages_prix(cat)
+	assert regl["multiplicateur_occupation"] == 5 and regl["rayon"] == R
+	assert regl["bonus"]["guilde"] == 1 and regl["bonus"]["marchand"] == DEF["bonus"]["marchand"]
+	assert proprietes.reglages_prix(CAT) == DEF
+
+
+def test_livre_prix_achat_miroir_des_defauts(livre):
+	cat, _ = livre
+	assert cat["reglages"]["prix_achat"] == DEF
