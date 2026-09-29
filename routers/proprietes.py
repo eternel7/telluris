@@ -166,7 +166,7 @@ def _payload_ici(character: dict, prop: dict, cat: dict, role: str, extra: dict 
 					  for a in proprietes.activites(prop, cat, employes)],
 		"gardien": gardien,
 		"revente": {"autorisee": gere and revente_ok and prop.get("mode") == proprietes.MODE_ACHAT,
-					"raison": revente_raison, "prix": proprietes.prix_revente(tdef)},
+					"raison": revente_raison, "prix": proprietes.prix_revente(tdef, prop)},
 		"mes_proprietes": _mes_proprietes(character, cat),
 		"purse": cuivre_to_purse(money_to_cuivre(character)),
 	}
@@ -365,7 +365,7 @@ def _ceder(current_user: dict, statut: str) -> dict:
 			tdef, get_doc(prop.get("lieu_parent")) if prop.get("lieu_parent") else None)
 		if not ok:
 			raise HTTPException(status_code=409, detail=raison)
-		gain = proprietes.prix_revente(tdef)
+		gain = proprietes.prix_revente(tdef, prop)
 		credit_character(character, gain)
 	proprietes.ceder(character, prop, statut, employes)
 	origine = prop.get("origine") or {}

@@ -162,6 +162,10 @@ def test_achat_majore_par_les_biens_deja_sur_la_case(monde):
 	data = _acheter_maison(monde, second)
 	assert characters_util.money_to_cuivre(second) == avant - base * m
 	assert monde["docs"][data["achetee"]["id"]]["prix_paye"] == base * m
+	# La revente suit le prix PAYÉ, pas le prix du type.
+	second["lieu"], second["position"] = data["achetee"]["id"], {"x": 0, "y": 0}
+	facteur = proprietes.type_def(_cat(monde), "maison")["revente_facteur"]
+	assert _appel(monde, second, monde["rp"].vendre, None)["gain"] == round(base * m * facteur)
 
 
 def test_achat_majore_par_une_boutique_voisine(monde):
@@ -243,7 +247,7 @@ def test_vendre_supprime_la_porte_et_reconduit_dehors(monde):
 	avant = characters_util.money_to_cuivre(char)
 	data = _appel(monde, char, monde["rp"].vendre, None)
 	tdef = proprietes.type_def(_cat(monde), "maison")
-	assert data["gain"] == proprietes.prix_revente(tdef)
+	assert data["gain"] == proprietes.prix_revente(tdef, prop)
 	assert characters_util.money_to_cuivre(char) == avant + data["gain"]
 	assert prop["lien"] in monde["supprimes"]
 	assert prop["amenagements"] == ["cave"] and prop["statut"] == proprietes.VENDUE

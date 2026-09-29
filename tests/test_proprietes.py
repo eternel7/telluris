@@ -313,8 +313,17 @@ def test_revente_type_et_cite():
 	assert proprietes.revente_autorisee(maison_def, VILLE)[0]
 	assert not proprietes.revente_autorisee(demeure_def, VILLE)[0]      # facteur 0
 	assert not proprietes.revente_autorisee(maison_def, {"proprietes": {"revente": False}})[0]
-	assert proprietes.prix_revente(maison_def) == round(
-		maison_def["prix_cuivre"] * maison_def["revente_facteur"])
+	# Bien d'avant la majoration (`prix_paye` absent ou nul) : prix du type.
+	for prop in ({}, {"prix_paye": 0}):
+		assert proprietes.prix_revente(maison_def, prop) == round(
+			maison_def["prix_cuivre"] * maison_def["revente_facteur"])
+
+
+def test_revente_suit_le_prix_paye():
+	maison_def = CAT["types"][1]
+	paye = maison_def["prix_cuivre"] * 4
+	assert proprietes.prix_revente(maison_def, {"prix_paye": paye}) == round(
+		paye * maison_def["revente_facteur"])
 
 
 def test_proprietes_de_preuve_d_appartenance():

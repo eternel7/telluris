@@ -487,10 +487,13 @@ def revente_autorisee(tdef: dict, cite_doc: dict | None) -> tuple[bool, str]:
 	return True, ""
 
 
-def prix_revente(tdef: dict) -> int:
-	"""Prix du TYPE × facteur. Les aménagements ne sont pas remboursés : ils restent
-	attachés au bien cédé."""
-	return int(round(_int(tdef.get("prix_cuivre")) * float(tdef.get("revente_facteur") or 0)))
+def prix_revente(tdef: dict, prop: dict) -> int:
+	"""Prix PAYÉ × facteur du type : un bien acheté cher (quartier marchand, case déjà
+	occupée — cf. `prix_achat`) se revend en proportion. `prix_paye` absent ou nul (bien
+	d'avant la majoration) ⇒ prix du type. Les aménagements ne sont pas remboursés : ils
+	restent attachés au bien cédé."""
+	base = _int((prop or {}).get("prix_paye")) or _int(tdef.get("prix_cuivre"))
+	return int(round(base * float(tdef.get("revente_facteur") or 0)))
 
 
 def ceder(character: dict, prop: dict, statut: str, employes: list) -> None:
