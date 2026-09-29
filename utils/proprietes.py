@@ -773,9 +773,13 @@ def generer_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None,
 	"""Un candidat par poste libre — et, pour un poste marchand, un par catégorie ouverte dont
 	le marchand générique `pnj:marchand_<cat>` existe : le candidat en reprend le portrait et
 	la race, mais porte un nom TIRÉ (deux joueurs n'embauchent pas le même Maître Fromond)."""
+	return _candidats_pour(postes_libres(prop, cat, employes), cat, get_doc_fn, portraits, rand)
+
+
+def _candidats_pour(postes: list, cat: dict, get_doc_fn, portraits, rand) -> list:
 	lire = get_doc_fn or get_doc
 	out = []
-	for p in postes_libres(prop, cat, employes):
+	for p in postes:
 		mdef = metier_def(cat, p["metier"])
 		if not mdef:
 			continue
@@ -795,13 +799,19 @@ def generer_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None,
 
 def rafraichir_candidats(prop: dict, cat: dict, employes: list, get_doc_fn=None, portraits=None,
 						 now: int | None = None, rand=random, force: bool = False) -> bool:
-	"""Péremption PARESSEUSE du tableau. Tableau valide : on retire seulement les candidats
-	dont le poste a été pourvu entre-temps. True si le doc a changé."""
+	"""Péremption PARESSEUSE du tableau. Tableau valide : on retire les candidats dont le
+	poste a été pourvu entre-temps, et on complète — sans re-tirer les autres — les postes
+	libres qui n'ont plus (poste pourvu en partie) ou pas encore (aménagement installé
+	après le tirage) de candidat. True si le doc a changé."""
 	now = now_epoch() if now is None else now
 	if not force and prop.get("candidats") is not None and _int(prop.get("candidats_expire_at")) > now:
-		libres = {(p["amenagement"], p["metier"]) for p in postes_libres(prop, cat, employes)}
+		postes = postes_libres(prop, cat, employes)
+		libres = {(p["amenagement"], p["metier"]) for p in postes}
 		gardes = [c for c in prop["candidats"] if (c.get("amenagement"), c.get("metier")) in libres]
-		if len(gardes) == len(prop["candidats"]):
+		couverts = {(c.get("amenagement"), c.get("metier")) for c in gardes}
+		gardes += _candidats_pour([p for p in postes if (p["amenagement"], p["metier"]) not in couverts],
+								  cat, get_doc_fn, portraits, rand)
+		if gardes == prop["candidats"]:
 			return False
 		prop["candidats"] = gardes
 		return True

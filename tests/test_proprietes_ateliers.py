@@ -233,3 +233,21 @@ def test_rafraichir_candidats_paresseux():
 	# Poste pourvu entre-temps : le candidat rival disparaît sans re-tirage.
 	assert proprietes.rafraichir_candidats(prop, CAT, [atelier("moulin_test")], DOCS.get, [], now=2)
 	assert prop["candidats"] == []
+
+
+def test_rafraichir_candidats_complete_un_poste_ouvert_apres_le_tirage():
+	# Tableau tiré AVANT toute installation : vide, mais encore valide.
+	prop = propriete(amenagements=[])
+	assert proprietes.rafraichir_candidats(prop, CAT, [], DOCS.get, [], now=0, rand=_Toujours())
+	assert prop["candidats"] == []
+	proprietes.installer(prop, "loge_gardien")
+	assert proprietes.rafraichir_candidats(prop, CAT, [], DOCS.get, [], now=1, rand=_Toujours())
+	assert [c["metier"] for c in prop["candidats"]] == ["gardien"]
+	premier = prop["candidats"][0]["id"]
+	proprietes.installer(prop, "moulin")
+	assert proprietes.rafraichir_candidats(prop, CAT, [], DOCS.get, [], now=2, rand=_Toujours())
+	assert prop["candidats"][0]["id"] == premier                   # l'existant n'est pas re-tiré
+	assert sorted(c["metier"] for c in prop["candidats"]) == ["gardien", "meunier"]
+	assert prop["candidats_expire_at"] == CAT["reglages"]["candidats_duree_s"]
+	# Tableau complet : plus rien ne bouge.
+	assert not proprietes.rafraichir_candidats(prop, CAT, [], DOCS.get, [], now=3, rand=_Toujours())
