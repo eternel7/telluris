@@ -942,10 +942,8 @@ async def get_playground(request: Request, current_user: Annotated[User, Depends
 		# La section « Commande » du panneau marchand doit exister : c'est le choix du
 		# marchand qui l'active ou non côté client (catalogue / grande maison).
 		est_commande = est_commande or bool(proprietes_ateliers)
-	proprietes_offre = bool(
-		[t for t in proprietes_util.types_achetables_ici(grid_doc, character.get("position"), get_doc)
-		 if proprietes_util.type_def(_cat_proprietes, t)]
-		or (est_auberge and any(proprietes_util.location_de(t) for t in _cat_proprietes["types"])))
+	proprietes_offre = proprietes_util.offre_ici(
+		grid_doc, character.get("position"), est_auberge, _cat_proprietes, get_doc)
 	auberge_nuit = ({
 		"cout": 0 if dort_chez_soi else auberge_util.cout_nuit(grid_doc),
 		"log": auberge_util.messages_nuit(grid_doc, auberge_util.NUIT_LOG_LIGNES),
