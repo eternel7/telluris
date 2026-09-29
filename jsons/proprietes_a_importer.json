@@ -309,8 +309,8 @@
             }
           },
           {
-            "id": "etal_boucher",
-            "nom": "Étal de boucher",
+            "id": "salle_depecage",
+            "nom": "Salle de dépeçage",
             "categorie": "activite",
             "types_autorises": [
               "logement",
@@ -327,11 +327,12 @@
             },
             "activite": {
               "metier": "boucher",
-              "label": "Boucherie",
+              "label": "Dépeçage",
               "categories": [
                 "boucherie"
               ]
-            }
+            },
+            "description": "Crocs, billot et rigoles : un boucher y dépèce les carcasses de monstres rapportées de la chasse."
           },
           {
             "id": "chambres_multiples",
