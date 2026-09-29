@@ -309,6 +309,31 @@
             }
           },
           {
+            "id": "etal_boucher",
+            "nom": "Étal de boucher",
+            "categorie": "activite",
+            "types_autorises": [
+              "logement",
+              "maison",
+              "demeure",
+              "domaine"
+            ],
+            "cout_cuivre": 2500,
+            "prerequis": [],
+            "capacite": {
+              "postes": {
+                "boucher": 1
+              }
+            },
+            "activite": {
+              "metier": "boucher",
+              "label": "Boucherie",
+              "categories": [
+                "boucherie"
+              ]
+            }
+          },
+          {
             "id": "chambres_multiples",
             "nom": "Chambres multiples",
             "categorie": "vie",
@@ -1277,6 +1302,11 @@
             "id": "palefrenier",
             "label": "Palefrenier",
             "cout_embauche_cuivre": 300
+          },
+          {
+            "id": "boucher",
+            "label": "Boucher",
+            "cout_embauche_cuivre": 800
           }
         ],
         "reglages": {
