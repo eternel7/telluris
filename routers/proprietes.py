@@ -466,7 +466,7 @@ async def engager(current_user: Annotated[dict, Depends(get_current_user)], body
 	proprietes.engager(prop, employe)
 	proprietes.retirer_candidat(prop, candidat["id"])
 	employes.append(employe)
-	proprietes.rafraichir_candidats(prop, cat, employes, get_doc)   # poste pourvu : candidats rivaux retirés
+	proprietes.rafraichir_candidats(prop, cat, employes, get_doc, recrutement.portraits_disponibles())   # poste pourvu : candidats rivaux retirés
 	_sauver(employe, prop, character)
 	mdef = proprietes.metier_def(cat, employe["metier"]) or {}
 	return _payload_embauche(character, prop, cat, employes,
