@@ -18,20 +18,20 @@ C, L, M, D, Do = "chambre", "logement", "maison", "demeure", "domaine"
 TOUS = [C, L, M, D, Do]
 
 types = [
-	{"id": C, "label": "Chambre", "rang": 1, "image": "auberge_europe_lutecia02.jpg",
+	{"id": C, "label": "Chambre", "rang": 1, "image": "chambre.jpg",
 	 "description": "Petite unité individuelle : repos, récupération, petit espace personnel et stockage très limité.",
 	 "prix_cuivre": 5000, "revente_facteur": 0.5, "occupants_max": 1, "personnel_max": 1, "stockage_kg": 20,
 	 "location": {"prix_cuivre": 150, "duree_s": 7 * 86400}},
-	{"id": L, "label": "Logement", "rang": 2, "image": "auberge_europe04.jpg",
+	{"id": L, "label": "Logement", "rang": 2, "image": "logement.jpg",
 	 "description": "Petit logement indépendant : un ou deux occupants, quelques espaces simples, un PNJ accueilli ponctuellement.",
 	 "prix_cuivre": 20000, "revente_facteur": 0.6, "occupants_max": 2, "personnel_max": 2, "stockage_kg": 60},
-	{"id": M, "label": "Maison", "rang": 3, "image": "auberge_europe06.jpg",
+	{"id": M, "label": "Maison", "rang": 3, "image": "maison.jpg",
 	 "description": "Habitation individuelle : plusieurs pièces, un véritable foyer, du personnel en nombre limité.",
 	 "prix_cuivre": 80000, "revente_facteur": 0.6, "occupants_max": 5, "personnel_max": 4, "stockage_kg": 150},
-	{"id": D, "label": "Demeure", "rang": 4, "image": "grande_maison_des_arts_europe01.jpg",
+	{"id": D, "label": "Demeure", "rang": 4, "image": "demeure.jpg",
 	 "description": "Propriété importante : nombreuses pièces, personnel domestique, accueil d'invités.",
 	 "prix_cuivre": 300000, "revente_facteur": 0.6, "occupants_max": 10, "personnel_max": 10, "stockage_kg": 400},
-	{"id": Do, "label": "Domaine", "rang": 5, "image": "chemin_vers_les_collines_boisees01.png",
+	{"id": Do, "label": "Domaine", "rang": 5, "image": "domaine.jpg",
 	 "description": "Propriété foncière : une demeure principale, des dépendances, des terrains privés et de nombreuses activités.",
 	 "prix_cuivre": 1000000, "revente_facteur": 0.6, "occupants_max": 20, "personnel_max": 25, "stockage_kg": 1000},
 ]
