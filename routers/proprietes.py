@@ -19,7 +19,7 @@ from db.config import get_doc, save_doc, delete_doc
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref,
-	credit_character, tirer_poids, poids_bounds, carried_weight, charge_max_of,
+	credit_character, tirer_poids, poids_bounds, carried_weight,
 )
 from utils.marche import debit_character
 from utils import auberge
@@ -648,11 +648,13 @@ def _atelier_de(prop: dict, employe_id) -> dict:
 @proprietes_router.post("/proprietes/atelier/donner")
 async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
 	"""Le propriétaire CONFIE un objet de son sac à un marchand (sans retour : il devient
-	matière d'atelier, ou marchandise du rayon s'il est de ceux qu'il produit)."""
+	matière d'atelier, ou marchandise du rayon s'il est de ceux qu'il produit). Depuis le
+	sac d'un porteur (compagnon ou monture) si le corps porte un `compagnon_id`."""
 	character, prop, cat, role = _ici(current_user)
 	_exiger(role, proprietes.PROPRIETAIRE)
 	atelier = _atelier_de(prop, body.get("employe_id"))
-	refs = character.get("inventaire") or []
+	porteur = _porteur(character, body.get("compagnon_id"))
+	refs = porteur.get("inventaire") or []
 	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
@@ -661,29 +663,33 @@ async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	refs.pop(pos)
-	character["inventaire"] = refs
-	_sauver(atelier, character)
+	porteur["inventaire"] = refs
+	_sauver(atelier, porteur)
 	return _payload_coffre(character, prop, cat, role)
 
 
 @proprietes_router.post("/proprietes/atelier/reprendre")
 async def atelier_reprendre(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
-	"""Le propriétaire reprend un exemplaire du rayon de son marchand (gratuit)."""
+	"""Le propriétaire reprend un exemplaire du rayon de son marchand (gratuit), dans son sac
+	ou celui d'un porteur (`compagnon_id`)."""
 	character, prop, cat, role = _ici(current_user)
 	_exiger(role, proprietes.PROPRIETAIRE)
 	atelier = _atelier_de(prop, body.get("employe_id"))
+	porteur = _porteur(character, body.get("compagnon_id"))
 	item_id = body.get("item_id")
 	item = resolve_item_ref(item_id) if item_id else None
 	if not item:
 		raise HTTPException(status_code=404, detail="Objet introuvable.")
 	poids = tirer_poids(item)
-	if carried_weight(character) + poids > charge_max_of(character):
-		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage.")
+	# `charge_max_porteur` : aiguille entre `charge_max_of` et la capacité d'une monture.
+	if carried_weight(porteur) + poids > montures.charge_max_porteur(porteur):
+		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage."
+							if porteur is character else "Ce porteur ne peut pas porter davantage.")
 	if not proprietes.reprendre_produit(atelier, item_id):
 		raise HTTPException(status_code=404, detail="Ce produit n'est plus en rayon.")
 	pmin, pmax = poids_bounds(item)
-	character.setdefault("inventaire", []).append({"item": item_id, "poids": poids} if pmax > pmin else item_id)
-	_sauver(atelier, character)
+	porteur.setdefault("inventaire", []).append({"item": item_id, "poids": poids} if pmax > pmin else item_id)
+	_sauver(atelier, porteur)
 	return _payload_coffre(character, prop, cat, role)
 
 

@@ -231,11 +231,12 @@ t('coffre : un porteur disparu retombe sur votre sac', () => {
 	assert.ok(noeuds['pcf-principal'].innerHTML.includes('Pomme'));
 });
 
-t('atelier : sélecteur de gauche figé sur votre sac', () => {
+t('atelier : on confie depuis le sac du compagnon choisi', () => {
 	globalThis._pcfSel = 'employe:x'; globalThis._pcfGauche = 'aventurier:x';
 	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS }));
-	assert.strictEqual(noeuds['pcf-select-gauche'].disabled, true);
-	assert.ok(noeuds['pcf-principal'].innerHTML.includes('Pomme'));
+	assert.strictEqual(noeuds['pcf-select-gauche'].disabled, false);
+	const g = noeuds['pcf-principal'].innerHTML;
+	assert.ok(g.includes('Corde') && !g.includes('Pomme') && g.includes('atelierDonner'));
 	globalThis._pcfGauche = '';
 });
 

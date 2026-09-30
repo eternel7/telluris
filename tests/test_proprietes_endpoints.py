@@ -487,6 +487,33 @@ def test_le_proprietaire_confie_une_matiere(monde):
 	assert data["ateliers"][0]["matieres"] == [{"cle": "herbe", "qty": 1}]
 
 
+def test_confier_et_reprendre_depuis_le_sac_d_un_compagnon(monde):
+	proprio = _perso()
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	av = _compagnon(monde, proprio, inventaire=[{"item": "item:herbe", "poids": 1}])
+	_appel(monde, proprio, monde["rp"].atelier_donner, None,
+		   {"employe_id": e["_id"], "index": 0, "item_id": "item:herbe", "compagnon_id": av["_id"]})
+	assert av["inventaire"] == [] and e["stock_matieres"] == {"herbe": 1}
+
+	e["stock_vente"] = [{"item_id": "item:elixir", "qty": 1}]
+	data = _appel(monde, proprio, monde["rp"].atelier_reprendre, None,
+				  {"employe_id": e["_id"], "item_id": "item:elixir", "compagnon_id": av["_id"]})
+	assert [item_ref_id(r) for r in av["inventaire"]] == ["item:elixir"] and proprio["inventaire"] == []
+	assert [d["nom"] for d in data["porteurs"][0]["inventaire"]] == ["Élixir"]
+
+
+def test_confier_refuse_le_compagnon_d_autrui(monde):
+	proprio = _perso()
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	_compagnon(monde, _perso(_id="character:b"), inventaire=[{"item": "item:herbe", "poids": 1}])
+	with pytest.raises(HTTPException) as err:
+		_appel(monde, proprio, monde["rp"].atelier_donner, None,
+			   {"employe_id": e["_id"], "index": 0, "item_id": "item:herbe", "compagnon_id": "aventurier:x"})
+	assert err.value.status_code == 403
+
+
 def test_comptoir_de_commande_adresse_le_marchand_choisi(monkeypatch, monde):
 	"""`routers/commande._acces` traite le marchand choisi comme l'artisan : commande simple
 	ouverte dès qu'il a un catalogue (ici l'élixir de sa recette)."""

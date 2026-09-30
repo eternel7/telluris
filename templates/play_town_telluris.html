@@ -8623,11 +8623,11 @@ async function openCoffre() {
 function onCoffreSelect(v) { _pcfSel = v; renderCoffre(_pcfEtat); }
 function onCoffreGauche(v) { _pcfGauche = v; renderCoffre(_pcfEtat); }
 
-// Le sac affiché à gauche. Seul le coffre s'ouvre aux porteurs : un atelier ne reçoit que
-// du propriétaire, depuis son propre sac.
+// Le sac affiché à gauche — coffre comme atelier : ce que l'on dépose, confie ou reprend
+// part de ce sac ou y arrive.
 function _pcfSacGauche(data) {
 	const moi = (data && data.principal) || { inventaire: [], charge: 0, charge_max: 0 };
-	if (_pcfSel !== 'coffre' || !_pcfGauche) return moi;
+	if (!_pcfGauche) return moi;
 	return ((data && data.porteurs) || []).find(p => p.id === _pcfGauche) || moi;
 }
 
@@ -8673,8 +8673,8 @@ function renderCoffre(data) {
 		const compagnons = porteurs.filter(p => !p.monture), montures = porteurs.filter(p => p.monture);
 		selG.innerHTML = `<option value="">Vous</option>` + compagnons.map(opt).join('')
 			+ (montures.length ? `<optgroup label="🐴 Montures">${montures.map(opt).join('')}</optgroup>` : '');
-		selG.disabled = !porteurs.length || _pcfSel !== 'coffre';
-		selG.value = _pcfSel === 'coffre' ? _pcfGauche : '';
+		selG.disabled = !porteurs.length;
+		selG.value = _pcfGauche;
 	}
 	const moi = _pcfSacGauche(data);
 	_grpCharge('pcf-charge-principal', moi);
@@ -8715,6 +8715,7 @@ function renderCoffre(data) {
 		_pcfLigne(inv[i], i, '→', 'atelierDonner', gere, gere ? 'Confier à ce marchand' : 'Seul le propriétaire confie des matières', 'droite', 'pcf_sac')).join('')
 		: '<div class="sh-empty"><span class="sh-empty-icon">🎒</span>Sac vide</div>');
 	const prodsAtelier = a.produits || [];
+	// Pas de poids d'instance au rayon : la flèche reste active, le serveur tranche (409).
 	const produits = _sortedOrder(prodsAtelier, 'asc').map(i => prodsAtelier[i]).map(p => _pcfLigne(p, 0, '←', 'atelierReprendre', gere, 'Reprendre un exemplaire', 'gauche')).join('');
 	const matieres = (a.matieres || []).map(m => `<div class="sh-inv-item"><span class="sh-inv-name">🧺 ${escapeHtml(m.cle)}</span><span class="sh-inv-poids">× ${m.qty}</span></div>`).join('');
 	_grpRemplirSac('pcf-droite', (a.produits || []).concat(a.matieres || []),
@@ -8746,11 +8747,15 @@ async function coffrePrendre(btn) {
 }
 
 function atelierDonner(btn) {
-	return _pcfPost('api/proprietes/atelier/donner', { employe_id: _pcfSel, index: +btn.dataset.idx, item_id: btn.dataset.item || null });
+	const corps = { employe_id: _pcfSel, index: +btn.dataset.idx, item_id: btn.dataset.item || null };
+	if (_pcfGauche) corps.compagnon_id = _pcfGauche;
+	return _pcfPost('api/proprietes/atelier/donner', corps);
 }
 
 function atelierReprendre(btn) {
-	return _pcfPost('api/proprietes/atelier/reprendre', { employe_id: _pcfSel, item_id: btn.dataset.item });
+	const corps = { employe_id: _pcfSel, item_id: btn.dataset.item };
+	if (_pcfGauche) corps.compagnon_id = _pcfGauche;
+	return _pcfPost('api/proprietes/atelier/reprendre', corps);
 }
 
 async function releverCaisse() {
