@@ -566,12 +566,21 @@ async def get_grille_proposee(
 	current_user: Annotated[User, Depends(get_current_user)],
 	lieu_id: str,
 	cols: int = 0,
-	rows: int = 0):
-	"""Propose une grille de terrain lue sur l'IMAGE du lieu (admin, éditeur de carte).
+	rows: int = 0,
+	profil: str = "",
+	passages: int = 1,
+	enceinte: int = -1):
+	"""Propose une grille de terrain ET ses murs `nav`, lus sur l'IMAGE du lieu (admin,
+	éditeur de carte).
 
 	⚠️ **N'ÉCRIT RIEN.** L'endpoint calcule et rend ; c'est au client d'en faire un aperçu.
 	Le seul chemin vers la base reste `update_cells` (le pinceau, ou ✔ Appliquer de l'éditeur
-	qui n'envoie que `cells`) et la carte d'import.
+	qui envoie `cells` et `nav`) et la carte d'import.
+
+	`profil` : `ville` / `foret` / `catacombes` (vide ⇒ lu sur les tags, `profil_de`).
+	`passages=0` : ancien comportement (classer + lisser, `nav` du doc rendu tel quel).
+	`enceinte` : -1 ce que dit le profil, 0 / 1 force. Le `nav` rendu est COMPLET : celui du
+	doc (jamais un bit retiré) plus les murs proposés.
 
 	⚠️ Import de Pillow PARESSEUX, dans le corps : `tests/` importe `utils/*` → `routers/*`,
 	et Pillow n'est pas dans les dépendances de collecte locale (CLAUDE.md § Running tests).
@@ -631,16 +640,29 @@ async def get_grille_proposee(
 	except Exception:
 		raise HTTPException(status_code=422, detail=f"Image illisible : {nom_image}")
 
-	cells = grille_image.lisser_majorite(
-		grille_image.grille_depuis_echantillons(couleurs, contours, cols, rows))
-
+	if profil and profil not in grille_image.PROFILS_GRILLE:
+		raise HTTPException(status_code=422, detail=f"Profil inconnu : {profil}")
+	profil = profil or grille_image.profil_de(lieu_doc)
+	# ⚠️ Le `nav` du doc n'est repris que si la grille proposée a SA taille : après un
+	# redimensionnement de proposition, ses clés désigneraient d'autres cases.
 	peinte = lieu_doc.get("cells")
+	meme_taille = bool(peinte) and len(peinte) == rows and all(len(l) == cols for l in peinte)
+	nav_doc = (lieu_doc.get("nav") or {}) if meme_taille else {}
+	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
+		profil=profil, passages=bool(passages),
+		enceinte=None if enceinte < 0 else bool(enceinte))
+	cells = proposition["cells"]
+
 	rapport = None
-	if peinte and len(peinte) == rows and all(len(ligne) == cols for ligne in peinte):
+	if meme_taille:
 		rapport = grille_image.concordance(cells, peinte)
 		rapport.pop("ecarts", None)   # la liste complète ne sert qu'au CLI ; inutile de la servir
 	return {
 		"cells": cells,
+		"nav": proposition["nav"],
+		"profil": proposition["profil"],
+		"profils": {k: v.get("libelle", k) for k, v in grille_image.PROFILS_GRILLE.items()},
+		"topologie": proposition["rapport"],
 		"dimensions": {"x": cols, "y": rows},
 		"image": nom_image,
 		"comptes": grille_image.comptes(cells),
