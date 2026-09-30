@@ -19,11 +19,12 @@ from db.config import get_doc, save_doc, delete_doc
 from utils.auth import get_current_user
 from utils.characters import (
 	get_selected_character, cuivre_to_purse, money_to_cuivre, resolve_item_ref,
-	credit_character, tirer_poids, poids_bounds, carried_weight, charge_max_of,
+	credit_character, tirer_poids, poids_bounds, carried_weight,
 )
 from utils.marche import debit_character
 from utils import auberge
 from utils import recrutement
+from utils import montures
 from utils import proprietes
 from utils import escorte
 from utils import commande as commande_util
@@ -526,8 +527,9 @@ async def reprendre(current_user: Annotated[dict, Depends(get_current_user)], bo
 
 def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes: list | None = None,
 					extra: dict | None = None) -> dict:
-	"""Deux colonnes, comme `GET /api/groupe` : le sac du personnage (`principal`) et, à
-	droite, le COFFRE puis chaque atelier (matières confiées, rayon, caisse)."""
+	"""Deux colonnes, comme `GET /api/groupe` : à gauche le sac du personnage (`principal`)
+	ou d'un de ses PORTEURS (`porteurs` : compagnons puis montures, mêmes sacs que
+	`/groupe`), à droite le COFFRE puis chaque atelier (matières confiées, rayon, caisse)."""
 	if employes is None:
 		employes = proprietes.employes_effectifs(prop, get_doc)
 	gardien = proprietes.gardien_present(prop, cat, employes)
@@ -547,6 +549,15 @@ def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes:
 		"role": role,
 		"gardien": gardien,
 		"principal": _inventory_payload(character),
+		# ⚠️ `charge_max_porteur` et non `charge_max_of` : une monture porte bien davantage,
+		# et le client recopie ce plafond pour griser ses flèches.
+		"porteurs": [
+			{"id": p["_id"], "prenom": p.get("prenom", ""), "nom": p.get("nom", ""),
+			 "monture": montures.est_monture(p),
+			 "charge": round(carried_weight(p), 2), "charge_max": montures.charge_max_porteur(p),
+			 "inventaire": [d for r in p.get("inventaire") or [] if (d := resolve_item_ref(r))]}
+			for p in recrutement.porteurs_effectifs(character, get_doc)
+		],
 		"coffre": {
 			"visible": coffre_visible,
 			"depot": role in (proprietes.PROPRIETAIRE, proprietes.LOCATAIRE),
@@ -570,6 +581,18 @@ def _payload_coffre(character: dict, prop: dict, cat: dict, role: str, employes:
 	return payload
 
 
+def _porteur(character: dict, compagnon_id) -> dict:
+	"""Le sac visé : le personnage, ou l'un de ses porteurs (compagnon OU monture). Un doc
+	`aventurier:*`/`monture:*` n'a pas de `user_id` : `porteurs_effectifs` (statut + lien vers
+	CE personnage) est la seule preuve d'appartenance — miroir de `routers/user._acteur`."""
+	if not compagnon_id or compagnon_id == character.get("_id"):
+		return character
+	p = next((x for x in recrutement.porteurs_effectifs(character, get_doc) if x.get("_id") == compagnon_id), None)
+	if p is None:
+		raise HTTPException(status_code=403, detail="Ce porteur ne fait pas partie de votre groupe.")
+	return p
+
+
 @proprietes_router.get("/proprietes/coffre")
 async def coffre(current_user: Annotated[dict, Depends(get_current_user)]):
 	character, prop, cat, role = _ici(current_user)
@@ -580,19 +603,21 @@ async def coffre(current_user: Annotated[dict, Depends(get_current_user)]):
 async def coffre_transferer(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
 	"""Sac ↔ coffre. `vers_coffre` : propriétaire ou locataire, borné par le stockage dérivé.
 	`vers_principal` : ses affaires, ou un VISITEUR chez un propriétaire sans gardien — le vol
-	(`vol: true`)."""
+	(`vol: true`). Le sac est celui du personnage, ou d'un de ses porteurs (compagnon ou
+	monture) si le corps porte un `compagnon_id` ; le RÔLE reste celui du personnage."""
 	character, prop, cat, role = _ici(current_user)
+	porteur = _porteur(character, body.get("compagnon_id"))
 	sens = body.get("sens")
 	if sens == "vers_coffre":
-		refs = character.get("inventaire") or []
+		refs = porteur.get("inventaire") or []
 		pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 		if pos is None:
 			raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
 		ok, raison = proprietes.peut_deposer(role, prop, cat, refs[pos])
 		if not ok:
 			raise HTTPException(status_code=409, detail=raison)
-		proprietes.deposer(character, prop, pos)
-		_sauver(prop, character)
+		proprietes.deposer(porteur, prop, pos)
+		_sauver(prop, porteur)
 		return _payload_coffre(character, prop, cat, role)
 	if sens != "vers_principal":
 		raise HTTPException(status_code=422, detail="Sens de transfert inconnu.")
@@ -604,10 +629,11 @@ async def coffre_transferer(current_user: Annotated[dict, Depends(get_current_us
 	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Cet objet n'est plus dans le coffre.")
-	if not recrutement.peut_porter(character, refs[pos]):
-		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage.")
-	proprietes.retirer(character, prop, pos)
-	_sauver(prop, character)
+	if not recrutement.peut_porter(porteur, refs[pos]):
+		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage."
+							if porteur is character else "Ce porteur ne peut pas porter davantage.")
+	proprietes.retirer(porteur, prop, pos)
+	_sauver(prop, porteur)
 	return _payload_coffre(character, prop, cat, role, employes, {"vol": role == proprietes.VISITEUR})
 
 
@@ -622,11 +648,13 @@ def _atelier_de(prop: dict, employe_id) -> dict:
 @proprietes_router.post("/proprietes/atelier/donner")
 async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
 	"""Le propriétaire CONFIE un objet de son sac à un marchand (sans retour : il devient
-	matière d'atelier, ou marchandise du rayon s'il est de ceux qu'il produit)."""
+	matière d'atelier, ou marchandise du rayon s'il est de ceux qu'il produit). Depuis le
+	sac d'un porteur (compagnon ou monture) si le corps porte un `compagnon_id`."""
 	character, prop, cat, role = _ici(current_user)
 	_exiger(role, proprietes.PROPRIETAIRE)
 	atelier = _atelier_de(prop, body.get("employe_id"))
-	refs = character.get("inventaire") or []
+	porteur = _porteur(character, body.get("compagnon_id"))
+	refs = porteur.get("inventaire") or []
 	pos = proprietes.localiser(refs, body.get("index"), body.get("item_id"))
 	if pos is None:
 		raise HTTPException(status_code=404, detail="Objet absent de l'inventaire.")
@@ -635,29 +663,33 @@ async def atelier_donner(current_user: Annotated[dict, Depends(get_current_user)
 	if not ok:
 		raise HTTPException(status_code=409, detail=raison)
 	refs.pop(pos)
-	character["inventaire"] = refs
-	_sauver(atelier, character)
+	porteur["inventaire"] = refs
+	_sauver(atelier, porteur)
 	return _payload_coffre(character, prop, cat, role)
 
 
 @proprietes_router.post("/proprietes/atelier/reprendre")
 async def atelier_reprendre(current_user: Annotated[dict, Depends(get_current_user)], body: dict = Body(...)):
-	"""Le propriétaire reprend un exemplaire du rayon de son marchand (gratuit)."""
+	"""Le propriétaire reprend un exemplaire du rayon de son marchand (gratuit), dans son sac
+	ou celui d'un porteur (`compagnon_id`)."""
 	character, prop, cat, role = _ici(current_user)
 	_exiger(role, proprietes.PROPRIETAIRE)
 	atelier = _atelier_de(prop, body.get("employe_id"))
+	porteur = _porteur(character, body.get("compagnon_id"))
 	item_id = body.get("item_id")
 	item = resolve_item_ref(item_id) if item_id else None
 	if not item:
 		raise HTTPException(status_code=404, detail="Objet introuvable.")
 	poids = tirer_poids(item)
-	if carried_weight(character) + poids > charge_max_of(character):
-		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage.")
+	# `charge_max_porteur` : aiguille entre `charge_max_of` et la capacité d'une monture.
+	if carried_weight(porteur) + poids > montures.charge_max_porteur(porteur):
+		raise HTTPException(status_code=409, detail="Vous ne pouvez pas porter davantage."
+							if porteur is character else "Ce porteur ne peut pas porter davantage.")
 	if not proprietes.reprendre_produit(atelier, item_id):
 		raise HTTPException(status_code=404, detail="Ce produit n'est plus en rayon.")
 	pmin, pmax = poids_bounds(item)
-	character.setdefault("inventaire", []).append({"item": item_id, "poids": poids} if pmax > pmin else item_id)
-	_sauver(atelier, character)
+	porteur.setdefault("inventaire", []).append({"item": item_id, "poids": poids} if pmax > pmin else item_id)
+	_sauver(atelier, porteur)
 	return _payload_coffre(character, prop, cat, role)
 
 

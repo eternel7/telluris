@@ -276,6 +276,46 @@ def test_deposer_renvoie_le_sac(monde):
 	assert data["principal"]["inventaire"] == [] and data["coffre"]["charge"] == 2
 
 
+def _compagnon(monde, char, av_id="aventurier:x", **champs):
+	av = {"_id": av_id, "type": "aventurier", "prenom": "Ulf", "nom": "", "statut": "embauche",
+		  "embauche_par": char["_id"], "inventaire": [], "slots": {},
+		  "caracteristiques_current": dict(CARACTS), **champs}
+	monde["docs"][av_id] = av
+	char["groupe"] = [*char.get("groupe", []), av_id]
+	return av
+
+
+def test_coffre_expose_et_sert_le_sac_d_un_compagnon(monde):
+	char = _perso()
+	prop = _entrer(monde, char)
+	av = _compagnon(monde, char, inventaire=[{"item": "item:herbe", "poids": 1.0}])
+	vue = _appel(monde, char, monde["rp"].coffre, None)
+	assert [p["id"] for p in vue["porteurs"]] == ["aventurier:x"]
+	assert vue["porteurs"][0]["monture"] is False
+	assert [d["nom"] for d in vue["porteurs"][0]["inventaire"]] == ["Herbe"]
+
+	data = _appel(monde, char, monde["rp"].coffre_transferer, None,
+				  {"sens": "vers_coffre", "index": 0, "item_id": "item:herbe", "compagnon_id": "aventurier:x"})
+	assert av["inventaire"] == [] and prop["coffre"] == [{"item": "item:herbe", "poids": 1.0}]
+	assert data["porteurs"][0]["inventaire"] == [] and data["coffre"]["charge"] == 1.0
+
+	_appel(monde, char, monde["rp"].coffre_transferer, None,
+		   {"sens": "vers_principal", "index": 0, "item_id": "item:herbe", "compagnon_id": "aventurier:x"})
+	assert av["inventaire"] == [{"item": "item:herbe", "poids": 1.0}] and prop["coffre"] == []
+	assert char["inventaire"] == []
+
+
+def test_coffre_refuse_le_compagnon_d_autrui(monde):
+	char = _perso()
+	_entrer(monde, char)
+	autre = _perso(_id="character:b")
+	_compagnon(monde, autre, inventaire=[{"item": "item:herbe", "poids": 1.0}])
+	with pytest.raises(HTTPException) as e:
+		_appel(monde, char, monde["rp"].coffre_transferer, None,
+			   {"sens": "vers_coffre", "index": 0, "item_id": "item:herbe", "compagnon_id": "aventurier:x"})
+	assert e.value.status_code == 403
+
+
 def test_visiteur_ne_depose_rien(monde):
 	prop = _entrer(monde, _perso())
 	visiteur = _perso(_id="character:b", lieu=prop["_id"], inventaire=[{"item": "item:a", "poids": 1}])
@@ -445,6 +485,33 @@ def test_le_proprietaire_confie_une_matiere(monde):
 				  {"employe_id": e["_id"], "index": 0, "item_id": "item:herbe"})
 	assert proprio["inventaire"] == [] and e["stock_matieres"] == {"herbe": 1}
 	assert data["ateliers"][0]["matieres"] == [{"cle": "herbe", "qty": 1}]
+
+
+def test_confier_et_reprendre_depuis_le_sac_d_un_compagnon(monde):
+	proprio = _perso()
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	av = _compagnon(monde, proprio, inventaire=[{"item": "item:herbe", "poids": 1}])
+	_appel(monde, proprio, monde["rp"].atelier_donner, None,
+		   {"employe_id": e["_id"], "index": 0, "item_id": "item:herbe", "compagnon_id": av["_id"]})
+	assert av["inventaire"] == [] and e["stock_matieres"] == {"herbe": 1}
+
+	e["stock_vente"] = [{"item_id": "item:elixir", "qty": 1}]
+	data = _appel(monde, proprio, monde["rp"].atelier_reprendre, None,
+				  {"employe_id": e["_id"], "item_id": "item:elixir", "compagnon_id": av["_id"]})
+	assert [item_ref_id(r) for r in av["inventaire"]] == ["item:elixir"] and proprio["inventaire"] == []
+	assert [d["nom"] for d in data["porteurs"][0]["inventaire"]] == ["Élixir"]
+
+
+def test_confier_refuse_le_compagnon_d_autrui(monde):
+	proprio = _perso()
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	_compagnon(monde, _perso(_id="character:b"), inventaire=[{"item": "item:herbe", "poids": 1}])
+	with pytest.raises(HTTPException) as err:
+		_appel(monde, proprio, monde["rp"].atelier_donner, None,
+			   {"employe_id": e["_id"], "index": 0, "item_id": "item:herbe", "compagnon_id": "aventurier:x"})
+	assert err.value.status_code == 403
 
 
 def test_comptoir_de_commande_adresse_le_marchand_choisi(monkeypatch, monde):
