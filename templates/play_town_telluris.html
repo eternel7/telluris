@@ -6915,14 +6915,27 @@ function toggleSellSection(id) {
 	_sellOmbres();
 }
 
+// Sections réellement offertes : présentes dans le markup ET non masquées (marchand
+// employé, cf. `_sellSectionsVisibles`).
+function _sellSectionsPresentes() {
+	return SELL_SECTIONS.filter(s => {
+		const head = document.getElementById('acc-head-' + s);
+		const section = head && head.closest('.acc-section');
+		return !!section && section.style.display !== 'none';
+	});
+}
+
 // ⚠️ La section mémorisée peut ne pas exister dans CE magasin : les deux sections de
-// commande n'apparaissent que si `est_commande`. Sans ce repli, le panneau d'un simple
-// revendeur s'ouvrirait entièrement replié. On ne réécrit PAS la mémoire pour autant — le
-// choix du joueur vaut toujours chez l'artisan d'à côté.
+// commande n'apparaissent que si `est_commande`, et un marchand employé masque Vente/Achat
+// à son maître. Sans ce repli (la première section offerte), le panneau s'ouvrirait
+// entièrement replié. On ne réécrit PAS la mémoire pour autant — le choix du joueur vaut
+// toujours chez l'artisan d'à côté.
 function _sellRestaurerSection() {
 	const memo = _accLsGet(SELL_SECTION_KEY);
-	if (memo && !document.getElementById('acc-head-' + memo)) _accAppliquer(SELL_SECTIONS, 'vente');
-	else _accRestaurer(SELL_SECTIONS, SELL_SECTION_KEY, 'vente');
+	const presentes = _sellSectionsPresentes();
+	const defaut = presentes[0] || 'vente';
+	if (memo && !presentes.includes(memo)) _accAppliquer(SELL_SECTIONS, defaut);
+	else _accRestaurer(SELL_SECTIONS, SELL_SECTION_KEY, defaut);
 	_sellOmbres();
 }
 
@@ -8556,13 +8569,15 @@ function propCompagnon(btn, geste) { return _propPost(`api/proprietes/${geste}`,
 // ── Marchands employés : on leur parle comme aux marchands d'un lieu ─────────────
 // Le choix pose `atelier_courant` côté serveur (transitoire) : le panneau Achat-Vente et le
 // comptoir de commande s'adressent alors à CE marchand. Commande simple dès qu'il a un
-// catalogue, sur mesure pour une grande maison seulement.
-function _cmdSectionsVisibles(visible) {
-	['acc-head-commande', 'acc-head-mes-commandes'].forEach(id => {
-		const head = document.getElementById(id);
+// catalogue, sur mesure pour une grande maison seulement. Vente/Achat (`echange`) pour un
+// visiteur seulement : le maître confie et reprend au 📦 Coffre.
+function _sellSectionsVisibles(vis) {
+	const ids = { vente: ['vente'], achat: ['achat'], commande: ['commande', 'mes-commandes'] };
+	Object.keys(ids).forEach(k => ids[k].forEach(s => {
+		const head = document.getElementById('acc-head-' + s);
 		const section = head && head.closest('.acc-section');
-		if (section) section.style.display = visible ? '' : 'none';
-	});
+		if (section) section.style.display = vis[k] ? '' : 'none';
+	}));
 }
 
 async function choisirAtelier(btn) {
@@ -8570,7 +8585,11 @@ async function choisirAtelier(btn) {
 	if (!data) return;
 	CMD_ACTIVE = !!data.commande;
 	CMD_SUR_MESURE = !!data.sur_mesure;
-	_cmdSectionsVisibles(CMD_ACTIVE);
+	_sellSectionsVisibles({ vente: !!data.echange, achat: !!data.echange, commande: CMD_ACTIVE });
+	if (!_sellSectionsPresentes().length) {
+		showToast('Rien à traiter ici : ses affaires se gèrent depuis 📦 Coffre.');
+		return;
+	}
 	openSellPanel();
 }
 

@@ -206,5 +206,59 @@ t('atelier : un visiteur ne confie rien', () => {
 	assert.ok(/disabled[\s\S]*atelierDonner/.test(noeuds['pcf-principal'].innerHTML), 'don non grisé');
 });
 
+// ── Panneau Achat-Vente d'un marchand employé : sections masquées au maître ──────────
+// Nœuds propres (DOM factice isolé) : chaque en-tête `acc-head-<s>` a une `.acc-section`
+// parente dont on lit `style.display` et la classe `open`.
+function sectionsMarchand() {
+	const dom = {};
+	for (const s of ['vente', 'achat', 'commande', 'mes-commandes']) {
+		const section = { style: { display: '' }, ouverte: false };
+		section.classList = { toggle(_c, on) { section.ouverte = !!on; } };
+		dom['acc-head-' + s] = { closest: () => section, parentElement: section };
+	}
+	return dom;
+}
+vm.runInThisContext(extraireConst('SELL_SECTIONS'));
+for (const f of ['_sellSectionsVisibles', '_sellSectionsPresentes', '_sellRestaurerSection',
+	'_accAppliquer', '_accRestaurer']) {
+	vm.runInThisContext(extraire(f));
+}
+
+function avecSections(memo, fn) {
+	const dom = sectionsMarchand();
+	const docAvant = globalThis.document;
+	globalThis.document = { getElementById: id => dom[id] || null };
+	globalThis._accLsGet = () => memo;
+	globalThis._sellOmbres = () => {};
+	globalThis.SELL_SECTION_KEY = 'k';
+	try { fn(dom); } finally { globalThis.document = docAvant; }
+}
+const ouverte = dom => Object.keys(dom).filter(k => dom[k].parentElement.ouverte).map(k => k.slice(9));
+
+t('marchand employé : le maître ne voit ni Vente ni Achat, les commandes s\'ouvrent', () => {
+	avecSections('vente', dom => {
+		_sellSectionsVisibles({ vente: false, achat: false, commande: true });
+		assert.deepStrictEqual(_sellSectionsPresentes(), ['commande', 'mes-commandes']);
+		_sellRestaurerSection();
+		assert.deepStrictEqual(ouverte(dom), ['commande'], 'section mémorisée masquée rouverte');
+	});
+});
+
+t('marchand employé : un visiteur garde Vente et Achat, et sa section mémorisée', () => {
+	avecSections('achat', dom => {
+		_sellSectionsVisibles({ vente: true, achat: true, commande: false });
+		assert.deepStrictEqual(_sellSectionsPresentes(), ['vente', 'achat']);
+		_sellRestaurerSection();
+		assert.deepStrictEqual(ouverte(dom), ['achat']);
+	});
+});
+
+t('marchand employé : rien d\'offert ⇒ aucune section présente', () => {
+	avecSections(null, () => {
+		_sellSectionsVisibles({ vente: false, achat: false, commande: false });
+		assert.deepStrictEqual(_sellSectionsPresentes(), []);
+	});
+});
+
 console.log(`\n${passes} OK, ${echecs} échec(s)`);
 process.exit(echecs ? 1 : 0);
