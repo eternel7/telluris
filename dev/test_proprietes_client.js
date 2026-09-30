@@ -57,13 +57,14 @@ const cible = el('prop-contenu');
 globalThis.document = { getElementById: el };
 globalThis._inventaire = [];
 globalThis._pcfSel = 'coffre';
+globalThis._pcfGauche = '';
 
 vm.runInThisContext(extraireConst('_PROP_STATUTS'));
 vm.runInThisContext(extraireConst('_PROP_CATEGORIES'));
 vm.runInThisContext(extraireConst('INV_VISIBLE'));
 for (const f of ['escapeHtml', '_propCategorie', '_purseEnCuivre', '_prixTexte', '_propCaps', '_propDate',
 	'_propMesProprietes', '_propMajoration', 'renderProprietesOffre', 'renderPropriete',
-	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_pcfLigne', 'renderCoffre']) {
+	'_sortedOrder', '_grpCharge', '_grpRemplirSac', '_grpRentre', '_pcfLigne', '_pcfSacGauche', 'renderCoffre']) {
 	vm.runInThisContext(extraire(f));
 }
 
@@ -189,6 +190,53 @@ t('coffre : le visiteur dérobe mais ne dépose pas', () => {
 	assert.ok(noeuds['pcf-droite'].innerHTML.includes('Dérober'));
 	assert.ok(/coffreDeposer/.test(noeuds['pcf-principal'].innerHTML));
 	assert.ok(/disabled[\s\S]*coffreDeposer/.test(noeuds['pcf-principal'].innerHTML), 'dépôt non grisé');
+});
+
+// Porteurs : un compagnon et une monture, sacs distincts du vôtre.
+const PORTEURS = [
+	{ id: 'aventurier:x', prenom: XSS, nom: '', monture: false, charge: 0, charge_max: 30,
+		inventaire: [{ _id: 'item:c', item: 'item:c', nom: 'Corde', poids: 1 }] },
+	{ id: 'monture:y', prenom: 'Brume', nom: '', monture: true, charge: 99, charge_max: 100,
+		inventaire: [] },
+];
+
+t('coffre : sélecteur de gauche — vous, compagnons, puis montures (échappés)', () => {
+	globalThis._pcfSel = 'coffre'; globalThis._pcfGauche = '';
+	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS }));
+	const h = noeuds['pcf-select-gauche'].innerHTML;
+	assert.ok(h.indexOf('Vous') < h.indexOf('aventurier:x') && h.indexOf('aventurier:x') < h.indexOf('🐴'));
+	assert.ok(!h.includes(XSS) && h.includes('&lt;img'));
+	assert.strictEqual(noeuds['pcf-select-gauche'].disabled, false);
+	assert.ok(noeuds['pcf-principal'].innerHTML.includes('Pomme'), 'sans choix : votre sac');
+});
+
+t('coffre : le sac du compagnon choisi remplace le vôtre', () => {
+	globalThis._pcfSel = 'coffre'; globalThis._pcfGauche = 'aventurier:x';
+	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS }));
+	const g = noeuds['pcf-principal'].innerHTML;
+	assert.ok(g.includes('Corde') && !g.includes('Pomme'));
+	assert.strictEqual(_pcfSacGauche(coffre('proprietaire', { porteurs: PORTEURS })).id, 'aventurier:x');
+});
+
+t('coffre : prise grisée si le porteur choisi est à sa charge max', () => {
+	globalThis._pcfSel = 'coffre'; globalThis._pcfGauche = 'monture:y';
+	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS }));
+	assert.ok(/disabled[\s\S]*coffrePrendre/.test(noeuds['pcf-droite'].innerHTML), 'prise non grisée');
+});
+
+t('coffre : un porteur disparu retombe sur votre sac', () => {
+	globalThis._pcfSel = 'coffre'; globalThis._pcfGauche = 'aventurier:parti';
+	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS }));
+	assert.strictEqual(_pcfGauche, '');
+	assert.ok(noeuds['pcf-principal'].innerHTML.includes('Pomme'));
+});
+
+t('atelier : sélecteur de gauche figé sur votre sac', () => {
+	globalThis._pcfSel = 'employe:x'; globalThis._pcfGauche = 'aventurier:x';
+	renderCoffre(coffre('proprietaire', { porteurs: PORTEURS }));
+	assert.strictEqual(noeuds['pcf-select-gauche'].disabled, true);
+	assert.ok(noeuds['pcf-principal'].innerHTML.includes('Pomme'));
+	globalThis._pcfGauche = '';
 });
 
 t('atelier : rayon repris, matières confiées, sur-mesure annoncé', () => {

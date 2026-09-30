@@ -2383,8 +2383,9 @@
 		</div>
 		<div id="prop-contenu"></div>
 	</div><!-- /#proprietes-panel -->
-	{# Coffre du lieu : MÊME présentation que l'inventaire du groupe (#grp-inv-wrap) — votre
-	   sac à gauche, à droite le coffre ou l'atelier d'un marchand choisi au sélecteur. #}
+	{# Coffre du lieu : MÊME présentation que l'inventaire du groupe (#grp-inv-wrap) — à gauche
+	   votre sac ou celui d'un compagnon / d'une monture, à droite le coffre ou l'atelier d'un
+	   marchand, chacun choisi à son sélecteur. #}
 	<div id="prop-coffre-panel" class="panel-hidden panel-frame board-panel" aria-label="Coffre">
 		<div class="sell-topbar">
 			<header class="location-desc" aria-label="Coffre">
@@ -2396,7 +2397,7 @@
 		<div class="grp-inv-wrap">
 			<div class="grp-inv-col">
 				<div class="grp-inv-head">
-					<strong>Vous</strong>
+					<select id="pcf-select-gauche" onchange="onCoffreGauche(this.value)"></select>
 					<span class="sh-inv-poids" id="pcf-charge-principal"></span>
 				</div>
 				<div class="sh-inv-scroll sh-scroll"><div id="pcf-principal" class="sh-inv-box"></div></div>
@@ -5284,8 +5285,8 @@ function openItemDetail(source, idx) {
 	// porté est celui du JOUEUR, comparer le sac d'un compagnon avec mentirait.
 	else if (source in _GRP_SENS) item = (_grpPorteurs(source).src.inventaire || [])[idx];
 	// Panneau coffre : fiche en lecture seule (mono, sans action — le transfert reste sur la flèche).
-	// 'pcf_sac' : idx = position dans le sac ; 'pcf_coffre' : idx = `idx` réel de l'objet du coffre.
-	else if (source === 'pcf_sac')    item = ((_pcfEtat && _pcfEtat.principal || {}).inventaire || [])[idx];
+	// 'pcf_sac' : idx = position dans le sac de gauche (vous ou un porteur) ; 'pcf_coffre' : idx = `idx` réel de l'objet du coffre.
+	else if (source === 'pcf_sac')    item = (_pcfSacGauche(_pcfEtat).inventaire || [])[idx];
 	else if (source === 'pcf_coffre') item = ((_pcfEtat && _pcfEtat.coffre || {}).inventaire || []).find(x => x.idx === idx);
 	if (!item || typeof item !== 'object') return;
 
@@ -8597,6 +8598,8 @@ async function choisirAtelier(btn) {
 // À droite, le COFFRE ou l'atelier d'un marchand (matières confiées, rayon, caisse).
 let _pcfEtat = null;
 let _pcfSel = 'coffre';
+// Sac de gauche : '' = le vôtre, sinon l'id d'un porteur (compagnon ou monture) du groupe.
+let _pcfGauche = '';
 
 function _pcfAfficher() {
 	document.getElementById('game-container').classList.add('panel-hidden');
@@ -8618,6 +8621,15 @@ async function openCoffre() {
 }
 
 function onCoffreSelect(v) { _pcfSel = v; renderCoffre(_pcfEtat); }
+function onCoffreGauche(v) { _pcfGauche = v; renderCoffre(_pcfEtat); }
+
+// Le sac affiché à gauche. Seul le coffre s'ouvre aux porteurs : un atelier ne reçoit que
+// du propriétaire, depuis son propre sac.
+function _pcfSacGauche(data) {
+	const moi = (data && data.principal) || { inventaire: [], charge: 0, charge_max: 0 };
+	if (_pcfSel !== 'coffre' || !_pcfGauche) return moi;
+	return ((data && data.porteurs) || []).find(p => p.id === _pcfGauche) || moi;
+}
 
 function _pcfAppliquer(data) {
 	_pcfEtat = data;
@@ -8653,7 +8665,18 @@ function renderCoffre(data) {
 	if (etat) etat.textContent = data.gardien ? '🛡️ Un gardien veille sur les lieux.'
 		: (data.role === 'visiteur' ? '⚠️ Personne ne surveille : vous pouvez vous servir…' : '');
 
-	const moi = data.principal || { inventaire: [], charge: 0, charge_max: 0 };
+	const porteurs = data.porteurs || [];
+	if (_pcfGauche && !porteurs.some(p => p.id === _pcfGauche)) _pcfGauche = '';
+	const selG = document.getElementById('pcf-select-gauche');
+	if (selG) {
+		const opt = p => `<option value="${escapeHtml(p.id)}">${escapeHtml(`${p.prenom || ''} ${p.nom || ''}`.trim() || '—')}</option>`;
+		const compagnons = porteurs.filter(p => !p.monture), montures = porteurs.filter(p => p.monture);
+		selG.innerHTML = `<option value="">Vous</option>` + compagnons.map(opt).join('')
+			+ (montures.length ? `<optgroup label="🐴 Montures">${montures.map(opt).join('')}</optgroup>` : '');
+		selG.disabled = !porteurs.length || _pcfSel !== 'coffre';
+		selG.value = _pcfSel === 'coffre' ? _pcfGauche : '';
+	}
+	const moi = _pcfSacGauche(data);
 	_grpCharge('pcf-charge-principal', moi);
 	const inv = moi.inventaire || [];
 	// Aucun tri manuel dans ce panneau : le tri par nom est OBLIGATOIRE. Les index d'origine
@@ -8674,8 +8697,12 @@ function renderCoffre(data) {
 		const ordCoffre = _sortedOrder(items, 'asc').map(i => items[i]);
 		_grpRemplirSac('pcf-droite', items, !c.visible
 			? '<div class="sh-empty"><span class="sh-empty-icon">🔒</span>Fermé à clé.</div>'
-			: items.length ? ordCoffre.map(it => _pcfLigne(it, it.idx, '←', 'coffrePrendre', true,
-				data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche', 'pcf_coffre')).join('')
+			: items.length ? ordCoffre.map(it => {
+				const rentre = _grpRentre(it, moi);
+				return _pcfLigne(it, it.idx, '←', 'coffrePrendre', rentre,
+					!rentre ? 'Trop lourd — le destinataire est à sa charge maximale'
+					: data.role === 'visiteur' ? 'Dérober' : 'Prendre', 'gauche', 'pcf_coffre');
+			}).join('')
 			: '<div class="sh-empty"><span class="sh-empty-icon">📦</span>Coffre vide</div>');
 		return;
 	}
@@ -8702,12 +8729,19 @@ async function _pcfPost(url, body) {
 	return data;
 }
 
+// `compagnon_id` : le sac de gauche (Conventions §1) — absent, c'est le vôtre.
+function _pcfCorps(sens, btn) {
+	const corps = { sens, index: +btn.dataset.idx, item_id: btn.dataset.item || null };
+	if (_pcfGauche) corps.compagnon_id = _pcfGauche;
+	return corps;
+}
+
 function coffreDeposer(btn) {
-	return _pcfPost('api/proprietes/coffre/transferer', { sens: 'vers_coffre', index: +btn.dataset.idx, item_id: btn.dataset.item || null });
+	return _pcfPost('api/proprietes/coffre/transferer', _pcfCorps('vers_coffre', btn));
 }
 
 async function coffrePrendre(btn) {
-	const data = await _pcfPost('api/proprietes/coffre/transferer', { sens: 'vers_principal', index: +btn.dataset.idx, item_id: btn.dataset.item || null });
+	const data = await _pcfPost('api/proprietes/coffre/transferer', _pcfCorps('vers_principal', btn));
 	if (data && data.vol) showToast('🫳 Vous vous êtes servi dans le coffre…');
 }
 
