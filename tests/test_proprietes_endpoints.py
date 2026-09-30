@@ -113,6 +113,18 @@ def _appel(monde, character, coro_fn, *args, module="rp"):
 		mod.get_selected_character = origine
 
 
+def _quotes(monde, character):
+	"""`marchand_quotes` est un `def` (threadpool), pas une coroutine : appel direct."""
+	ru = monde["ru"]
+	monde["docs"][character["_id"]] = character
+	origine = ru.get_selected_character
+	try:
+		ru.get_selected_character = lambda _u: character
+		return ru.marchand_quotes(None)
+	finally:
+		ru.get_selected_character = origine
+
+
 def _cat(monde):
 	return proprietes.catalogue(monde["docs"].get)
 
@@ -396,14 +408,32 @@ def test_visiteur_achete_au_marchand_le_prix_va_en_caisse(monde):
 	assert "flux_marchand" not in monde["docs"]["lieu:ville"]   # jamais le flux de la ville
 
 
-def test_on_ne_vend_rien_au_marchand_employe(monde):
+def test_visiteur_vend_au_marchand_employe_paye_comme_en_boutique(monde):
 	proprio = _perso()
 	prop = _entrer(monde, proprio)
 	e = _marchand(monde, proprio)
 	client = _perso(_id="character:b", lieu=prop["_id"], inventaire=[{"item": "item:herbe", "poids": 1}])
-	_appel(monde, client, monde["rp"].atelier_choisir, None, {"employe_id": e["_id"]})
+	vue = _appel(monde, client, monde["rp"].atelier_choisir, None, {"employe_id": e["_id"]})
+	assert vue["echange"] is True
+	quotes = _quotes(monde, client)
+	assert [v["item_id"] for v in quotes["vendables"]] == ["item:herbe"]
+	avant = characters_util.money_to_cuivre(client)
+	_appel(monde, client, monde["ru"].sell_item, None, {"index": 0, "item_id": "item:herbe"}, module="ru")
+	assert characters_util.money_to_cuivre(client) > avant
+	assert client["inventaire"] == []
+	assert not e.get("caisse_cuivre")                        # payé comme en boutique, caisse intacte
+	assert "flux_marchand" not in monde["docs"]["lieu:ville"]   # jamais le flux de la ville
+
+
+def test_le_proprietaire_ne_vend_ni_nachete_a_son_marchand(monde):
+	proprio = _perso(inventaire=[{"item": "item:herbe", "poids": 1}])
+	_entrer(monde, proprio)
+	e = _marchand(monde, proprio)
+	vue = _appel(monde, proprio, monde["rp"].atelier_choisir, None, {"employe_id": e["_id"]})
+	assert vue["echange"] is False
+	assert _quotes(monde, proprio)["vendables"] == []
 	with pytest.raises(HTTPException) as err:
-		_appel(monde, client, monde["ru"].sell_item, None, {"index": 0, "item_id": "item:herbe"}, module="ru")
+		_appel(monde, proprio, monde["ru"].sell_item, None, {"index": 0, "item_id": "item:herbe"}, module="ru")
 	assert err.value.status_code == 403
 
 

@@ -137,6 +137,23 @@ def test_donner_une_matiere_une_marchandise_ou_rien():
 	assert not ok and "usage" in raison
 
 
+def test_racheter_a_un_visiteur_absorbe_comme_un_objet_confie():
+	e = atelier("moulin_test")
+	assert proprietes.racheter(e, BLE)[0] and e["stock_matieres"] == {"ble": 1}
+	assert proprietes.racheter(e, FARINE)[0]
+	assert e["stock_vente"] == [{"item_id": "item:farine", "qty": 1}]
+	assert not proprietes.racheter(e, PAIN)[0]
+	assert not e["caisse_cuivre"]                               # le visiteur n'est pas payé d'ici
+
+
+def test_seul_le_maitre_traite_au_coffre():
+	e = atelier("moulin_test")
+	lire = {"propriete:maison_1": propriete()}.get
+	assert proprietes.vend_au_proprietaire({"_id": "character:a"}, e, lire)
+	assert not proprietes.vend_au_proprietaire({"_id": "character:b"}, e, lire)
+	assert not proprietes.vend_au_proprietaire({"_id": "character:a"}, VILLE, lire)   # pas un atelier
+
+
 def test_reprendre_un_produit():
 	e = atelier("moulin_test", stock_vente=[{"item_id": "item:farine", "qty": 1}])
 	assert proprietes.reprendre_produit(e, "item:farine") and e["stock_vente"] == []

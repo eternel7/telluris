@@ -2060,9 +2060,9 @@ def marchand_quotes(
 	porteurs = recrutement.porteurs_effectifs(character, get_doc)
 	return {
 		"lieu_label": lieu_label(lieu_doc),
-		# Un marchand employé n'ACHÈTE rien au visiteur : il ne travaille que ce que son
-		# propriétaire lui confie (utils/proprietes.donner).
-		"vendables": ([] if proprietes.est_atelier(lieu_doc)
+		# Un marchand employé n'achète rien à SON maître (il lui confie au 📦 Coffre) ; un
+		# visiteur, lui, lui vend comme à une boutique.
+		"vendables": ([] if proprietes.vend_au_proprietaire(character, lieu_doc, get_doc)
 					  else _marchand_vendables(character, lieu_doc, relation, porteurs)),
 		"achetables": resolve_stock_vente(lieu_doc, relation),
 		"cha_marchand": merchant_cha(lieu_doc),
@@ -2120,8 +2120,8 @@ async def sell_item(
 	porteur, principal = _acteur(current_user, body)
 
 	lieu_doc = _current_lieu_doc(principal)
-	if proprietes.est_atelier(lieu_doc):
-		raise HTTPException(status_code=403, detail="Ce marchand n'achète rien : il travaille pour son maître.")
+	if proprietes.vend_au_proprietaire(principal, lieu_doc, get_doc):
+		raise HTTPException(status_code=403, detail="Vos affaires avec lui se règlent au 📦 Coffre.")
 	relation = get_relation(principal, lieu_doc)
 	if relation_value(relation) <= 0:
 		raise HTTPException(status_code=403, detail="Ce marchand refuse de traiter avec vous.")
@@ -2145,12 +2145,21 @@ async def sell_item(
 	purse = credit_character(principal, prix)   # l'argent va au principal, l'objet quitte le porteur
 	porteur["inventaire"] = inventaire
 
-	# Le lieu absorbe l'objet acheté → matières → stock vendable (mute lieu_doc). Le flux de la
-	# cité voyage avec le tick : ce que les PNJ prennent au rayon repart chez les ateliers qui
-	# en ont l'usage (None hors d'une ville → comportement d'avant).
-	cite_id = lieu_doc.get("lieu_parent")
-	flux = flux_cite(get_doc(cite_id) if cite_id else None)
-	convertir_apres_achat(lieu_doc, item, flux)
+	if proprietes.est_atelier(lieu_doc):
+		# Marchand employé d'une propriété : l'objet entre comme un objet confié, puis un tick
+		# SANS approvisionnement sur le flux de SA propriété — jamais celui de la ville (même
+		# séquence que buy_item). Le visiteur est payé comme en boutique, caisse intacte.
+		proprietes.racheter(lieu_doc, item)
+		prop = get_doc(lieu_doc.get("propriete", "")) or {}
+		flux = proprietes.flux_propriete(prop) if prop else None
+		proprietes.produire(lieu_doc, flux, 1, proprietes.catalogue(get_doc))
+	else:
+		# Le lieu absorbe l'objet acheté → matières → stock vendable (mute lieu_doc). Le flux de
+		# la cité voyage avec le tick : ce que les PNJ prennent au rayon repart chez les ateliers
+		# qui en ont l'usage (None hors d'une ville → comportement d'avant).
+		cite_id = lieu_doc.get("lieu_parent")
+		flux = flux_cite(get_doc(cite_id) if cite_id else None)
+		convertir_apres_achat(lieu_doc, item, flux)
 
 	# Porteur d'abord (autoritatif : l'objet est retiré pour de bon → pas de double vente),
 	# puis le principal (monnaie, best-effort si compagnon). Même séquence bi-doc que drop.
@@ -2283,8 +2292,8 @@ async def marchander_item(
 	# Résoudre l'objet et sa fourchette de prix (vente : ref du sac du porteur ; achat : stock du lieu).
 	item_id = body.get("item_id")
 	if sens == "vente":
-		if proprietes.est_atelier(lieu_doc):
-			raise HTTPException(status_code=403, detail="Ce marchand n'achète rien : il travaille pour son maître.")
+		if proprietes.vend_au_proprietaire(character, lieu_doc, get_doc):
+			raise HTTPException(status_code=403, detail="Vos affaires avec lui se règlent au 📦 Coffre.")
 		ref = _find_ref(porteur.get("inventaire", []), body.get("index"), item_id)
 		if ref is None:
 			raise HTTPException(status_code=422, detail="Objet absent de l'inventaire")

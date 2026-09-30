@@ -673,6 +673,8 @@ async def atelier_choisir(current_user: Annotated[dict, Depends(get_current_user
 		**_employe_view(cat, atelier),
 		"commande": commande_util.lieu_prend_commandes(atelier, get_doc),
 		"sur_mesure": commande_util.lieu_fabrique_sur_mesure(atelier),
+		# Vente/Achat : pour un visiteur seulement — le maître confie et reprend au 📦 Coffre.
+		"echange": role != proprietes.PROPRIETAIRE,
 	}
 
 

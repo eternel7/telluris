@@ -848,6 +848,22 @@ def donner(employe: dict, item_doc: dict) -> tuple[bool, str]:
 	return True, ""
 
 
+def racheter(employe: dict, item_doc: dict) -> tuple[bool, str]:
+	"""Un VISITEUR vend un objet au marchand : l'atelier l'absorbe exactement comme un objet
+	confié (`donner`) — jamais `marche.convertir_apres_achat`, dont le tick approvisionne et
+	suit le flux de la cité. Le paiement (argent créé, comme en boutique) reste à l'appelant."""
+	return donner(employe, item_doc)
+
+
+def vend_au_proprietaire(character: dict, employe: dict, get_doc_fn=None) -> bool:
+	"""L'atelier travaille-t-il pour CE personnage ? Son maître ne lui vend ni ne lui achète
+	rien : il confie et reprend au 📦 Coffre."""
+	if not est_atelier(employe):
+		return False
+	prop = (get_doc_fn or get_doc)(employe.get("propriete", "")) or {}
+	return bool(prop.get("proprietaire")) and prop.get("proprietaire") == (character or {}).get("_id")
+
+
 def reprendre_produit(employe: dict, item_id) -> bool:
 	"""Le propriétaire reprend UN exemplaire du rayon (gratuit : c'est sa production)."""
 	rayon = employe.get("stock_vente") or []
