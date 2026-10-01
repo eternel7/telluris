@@ -59,6 +59,7 @@ def charger(ids, docs):
 		cols, rows = len(doc["cells"][0]), len(doc["cells"])
 		couleurs, contours, _ = gen.echantillonner(chemin, cols, rows)
 		sortie[lid] = {"doc": doc, "couleurs": couleurs, "contours": contours,
+			"fins": gen.echantillonner_fins(chemin, cols, rows),
 			"cols": cols, "rows": rows, "chemin": chemin}
 	return sortie
 
@@ -70,12 +71,14 @@ def noter(lieu, regles, topologie=False):
 	qu'on lui donne, et le rappel des murs peints serait de 100 % par construction."""
 	if topologie:
 		res = grille_image.proposer(lieu["couleurs"], lieu["contours"], lieu["cols"],
-			lieu["rows"], nav=None, regles=regles)
+			lieu["rows"], nav=None, regles=regles, fins=lieu["fins"])
 		cells = res["cells"]
 	else:
+		# Classification + lissage + rues : ce que la descente règle (la topologie, plus
+		# lente, ne change presque pas le score et n'a pas de paramètre de couleur).
 		res = None
-		cells = grille_image.lisser_majorite(grille_image.grille_depuis_echantillons(
-			lieu["couleurs"], lieu["contours"], lieu["cols"], lieu["rows"], regles))
+		cells = grille_image.proposer(lieu["couleurs"], lieu["contours"], lieu["cols"],
+			lieu["rows"], regles=regles, fins=lieu["fins"], passages=False)["cells"]
 	rapport = grille_image.concordance(cells, lieu["doc"]["cells"])
 	return rapport["f1_moyen"], rapport, res
 
@@ -85,12 +88,16 @@ def score_moyen(lieux, regles):
 
 
 def _reglages(regles):
-	"""Les boutons de la descente : poids des scores et décalages (et l'écart d'eau)."""
-	cles = [("obstacle", n) for n in grille_image.INDICES] + [("obstacle_decalage", None)]
+	"""Les boutons de la descente : poids des scores et décalages (et l'écart d'eau).
+	⚠️ Le poids des contours du bâti n'en est PAS : fixé à la main (cf. `PROFILS_GRILLE`)."""
+	cles = [("obstacle", n) for n in grille_image.INDICES if n != "contours"]
+	cles.append(("obstacle_decalage", None))
 	if regles.get("roche"):
 		cles += [("roche", n) for n in grille_image.INDICES] + [("roche_decalage", None)]
 	if regles.get("eau", True):
 		cles.append(("eau_ecart_froideur", None))
+	if regles.get("rues"):
+		cles += [("rues", "poids_saturation"), ("rues", "decalage")]
 	return cles
 
 
@@ -124,6 +131,18 @@ def imprimer(lid, lieu, regles):
 		for v, m in sorted(rapport["par_valeur"].items()))
 	r = res["rapport"]
 	print(f"  {lid:28} F1 {f1:.3f}   {valeurs}")
+	if regles.get("rues"):
+		# Rues retrouvées = cases peintes 1 que la classification SANS rues rendait bâties.
+		sans = grille_image.proposer(lieu["couleurs"], lieu["contours"], lieu["cols"],
+			lieu["rows"], regles=regles, passages=False)["cells"]
+		peinte = lieu["doc"]["cells"]
+		cibles = {(x, y) for y, ligne in enumerate(sans) for x, v in enumerate(ligne)
+			if v == grille_image.TERRAIN_INACCESSIBLE and peinte[y][x] == grille_image.TERRAIN_LIBRE}
+		ouvertes = {tuple(c) for c in r["rues"]}
+		justes = len(cibles & ouvertes)
+		print(f"  {'':28} rues : {len(ouvertes)} case(s) ouverte(s), {justes} peinte(s) 1"
+			f" (précision {justes / max(1, len(ouvertes)):.2f}) — rues peintes retrouvées"
+			f" {justes}/{len(cibles)} ({justes / max(1, len(cibles)):.2f})")
 	print(f"  {'':28} nav peint retrouvé {nav['retrouvees']}/{nav['peintes']}"
 		f"  · {len(r['passages'])} passage(s) · {r['zones']} zone(s) praticable(s)"
 		f" dont {len(r['zones_isolees'])} isolée(s) signalée(s)"
@@ -168,7 +187,8 @@ def main() -> int:
 			print(f"    {lid:28} entraîné {entraine:.3f}   testé {noter(lieu, apprises)[0]:.3f}")
 		print("  Jeu retenu (à recopier dans PROFILS_GRILLE) :")
 		print(json.dumps({k: meilleures[k] for k in ("obstacle", "obstacle_decalage", "roche",
-			"roche_decalage", "eau_ecart_froideur") if k in meilleures}, ensure_ascii=False, indent=2))
+			"roche_decalage", "eau_ecart_froideur", "rues") if k in meilleures},
+			ensure_ascii=False, indent=2))
 	return 0
 
 

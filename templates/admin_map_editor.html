@@ -845,13 +845,22 @@ body.mode-deplacement .main { grid-template-columns: 1fr; }
 				title="Ferme l'enceinte d'une ville par des murs nav, interdit les diagonales qui passent au-dessus de l'angle d'une maison, et creuse les passages (pont, ruelle) qui relient les zones séparées.">
 				<input type="checkbox" id="grille-passages" checked> Relier les zones (passages, coins, enceinte)
 			</label>
+			<label class="nav-info" style="display:block;margin-bottom:8px;"
+				title="Les rues d'une cité sont plus fines qu'une case : elles sont cherchées sur des sous-cases de 4 px (pavé clair et terne entre les toits) et ouvertes dans le bâti.">
+				<input type="checkbox" id="grille-rues" checked> Tracer les rues (villes)
+			</label>
+			<label class="nav-info" style="display:block;margin-bottom:8px;"
+				title="Murs nav : diagonales qui passent au-dessus de l'angle d'une maison, pourtour de l'enceinte. Décoché, aucun mur n'est proposé ; l'enceinte est fermée par le terrain (la porte dessinée passe à 0).">
+				<input type="checkbox" id="grille-murs-nav" checked> Proposer des murs nav
+			</label>
 			<button class="btn" id="grille-proposer-btn">🔍 Proposer une grille</button>
 			<div id="grille-attente" hidden>
 				<div class="dim-warn" id="grille-warn">⚠️ Aperçu seul : <b>rien n'est enregistré</b>.
 					Le pinceau continue d'écrire la grille réelle, pas celle-ci. Pour l'adopter,
-					<b>✔ Appliquer</b> — qui n'écrit que les champs <code>cells</code> et
-					<code>nav</code> (les murs nav déjà posés sont gardés). Passages creusés cerclés
-					de vert vif, pourtour de l'enceinte d'orange.</div>
+					<b>✔ Appliquer</b> — qui n'écrit que le champ <code>cells</code>, et
+					<code>nav</code> si des murs sont proposés (les murs nav déjà posés sont
+					gardés). Rues ouvertes cerclées de bleu clair, passages creusés de vert vif,
+					pourtour de l'enceinte d'orange.</div>
 				<div class="nav-info" id="grille-comptes" style="margin-bottom:8px;"></div>
 				<!-- Bloc-notes en LECTURE SEULE : se sélectionne et se copie à la main, y compris
 				     en HTTP sur une IP locale, où `navigator.clipboard` n'existe pas. -->
@@ -1940,9 +1949,10 @@ function renderGrid() {
 		}
 	}
 
-	// Topologie de la proposition : cases CREUSÉES par un passage (pont, ruelle) cerclées de
-	// vert vif, pourtour intérieur de l'enceinte d'orange — ce que l'auteur doit vérifier
-	// d'abord. Vert vif et pas jaune : le jaune est celui de la coupe minimale des voies.
+	// Topologie de la proposition : rues OUVERTES (sous-cases claires) cerclées de bleu clair,
+	// cases CREUSÉES par un passage (pont, ruelle) de vert vif, pourtour de l'enceinte d'orange
+	// — ce que l'auteur doit vérifier d'abord. Ni jaune (coupe minimale des voies) ni cyan
+	// (liseré de l'aperçu).
 	if (grilleProposee && grilleTopologie && showTerrain) {
 		const cadre = (cases, couleur, epaisseur) => {
 			ctx.strokeStyle = couleur;
@@ -1952,6 +1962,7 @@ function renderGrid() {
 			}
 		};
 		ctx.save();
+		cadre(grilleTopologie.rues, 'rgba(110,190,255,0.85)', 1.5);
 		cadre(grilleTopologie.rempart, 'rgba(255,150,30,0.9)', 1.5);
 		for (const p of grilleTopologie.passages || []) cadre(p.cases, 'rgba(170,255,60,1)', 2.5);
 		ctx.restore();
@@ -3964,6 +3975,8 @@ const grilleJsonEl	  = document.getElementById('grille-json');
 const grilleProposerBtn = document.getElementById('grille-proposer-btn');
 const grilleProfilEl	= document.getElementById('grille-profil');
 const grillePassagesEl	= document.getElementById('grille-passages');
+const grilleRuesEl		= document.getElementById('grille-rues');
+const grilleMursNavEl	= document.getElementById('grille-murs-nav');
 const voiesTracerBtn	= document.getElementById('voies-tracer-btn');
 const voiesAttenteEl	= document.getElementById('voies-attente');
 const voiesComptesEl	= document.getElementById('voies-comptes');
@@ -3998,7 +4011,12 @@ function _grilleTexteTopologie(data) {
 	const t = data.topologie || {};
 	const libelle = (data.profils || {})[data.profil] || data.profil || '?';
 	const parts = [`réglage ${libelle}`];
-	if (t.enceinte) parts.push('enceinte fermée par nav');
+	if ((t.rues || []).length) parts.push(`${t.rues.length} case(s) de rue ouverte(s)`);
+	if (t.enceinte) {
+		parts.push(t.murs_nav === false
+			? `enceinte fermée par le terrain (${(t.rempart || []).length} case(s) du pourtour passée(s) à 0)`
+			: 'enceinte fermée par nav');
+	}
 	parts.push(`${(t.passages || []).length} passage(s) creusé(s)`);
 	if (t.nav_ajoutes) parts.push(`${t.nav_ajoutes} mur(s) nav ajouté(s)`);
 	if (t.poches_effacees) parts.push(`${t.poches_effacees} case(s) de poche injoignable effacée(s)`);
@@ -4068,13 +4086,17 @@ async function proposerGrilleDepuisImage() {
 	try {
 		const params = new URLSearchParams({ cols, rows,
 			profil: grilleProfilEl ? grilleProfilEl.value : '',
-			passages: grillePassagesEl && !grillePassagesEl.checked ? 0 : 1 });
+			passages: grillePassagesEl && !grillePassagesEl.checked ? 0 : 1,
+			rues: grilleRuesEl && !grilleRuesEl.checked ? 0 : 1,
+			murs_nav: grilleMursNavEl && !grilleMursNavEl.checked ? 0 : 1 });
 		const res = await fetch(
 			`/api/lieu/${encodeURIComponent(currentLocId)}/grille_proposee?${params}`);
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
 		grilleProposee = data.cells;
-		navProposee = data.nav || {};
+		// Sans murs proposés, pas de `nav` d'aperçu : la carte, les voies et ✔ Appliquer
+		// retombent sur le `nav` réel, que rien ne touche.
+		navProposee = (data.topologie && data.topologie.murs_nav === false) ? null : (data.nav || {});
 		grilleTopologie = data.topologie || null;
 		const total = cols * rows;
 		const etiquettes = { 0: 'bâti', 1: 'libre', 3: 'falaise', 5: 'eau' };
@@ -4134,15 +4156,20 @@ async function appliquerGrilleProposee() {
 	if (!grilleProposee || !currentLocId || redimEnAttente) return;
 	const differentes = _grilleDifferences();
 	const navDifferents = _navDifferences();
+	// Murs nav non proposés (case décochée) : `navProposee` est null, seul `cells` part.
+	const avecNav = !!navProposee;
 	if (!confirm(`Remplacer la grille en base par la proposition ?\n\n`
-		+ `${differentes} case(s) sur ${cols * rows} et ${navDifferents} masque(s) nav changeront. `
-		+ `Seuls les champs cells et nav sont écrits ; les murs nav déjà posés sont gardés.`)) return;
+		+ (avecNav
+			? `${differentes} case(s) sur ${cols * rows} et ${navDifferents} masque(s) nav changeront. `
+				+ `Seuls les champs cells et nav sont écrits ; les murs nav déjà posés sont gardés.`
+			: `${differentes} case(s) sur ${cols * rows} changeront. Seul le champ cells est écrit.`))) return;
 	const lieuId = currentLocId;
 	const cellules = grilleProposee.map(l => l.slice());
 	// UNION bit à bit avec le `nav` courant : un mur posé au pinceau PENDANT l'aperçu (la
 	// proposition a été lue avant lui) n'est pas perdu.
 	const murs = Object.assign({}, nav);
 	for (const [k, v] of Object.entries(navProposee || {})) murs[k] = (Number(murs[k]) || 0) | (Number(v) || 0);
+	const corps = avecNav ? { _id: lieuId, cells: cellules, nav: murs } : { _id: lieuId, cells: cellules };
 	const ancienne = grid, ancienNav = nav;
 	// ⚠️ `grid` et `nav` sont remplacés AVANT l'envoi : un auto-envoi du pinceau encore en
 	// attente (800 ms) — `sendGrid` envoie les DEUX — qui partirait pendant la requête enverrait
@@ -4155,7 +4182,7 @@ async function appliquerGrilleProposee() {
 		const res = await fetch('/api/update_cells', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ _id: lieuId, cells: cellules, nav: murs }),
+			body: JSON.stringify(corps),
 		});
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));
@@ -4167,7 +4194,9 @@ async function appliquerGrilleProposee() {
 		currentRev = lieuData._rev;
 		fermerGrilleProposee();
 		updateLegend();
-		_grilleMsg(`✓ Grille appliquée — ${differentes} case(s) et ${navDifferents} masque(s) nav modifié(s).`, false);
+		_grilleMsg(avecNav
+			? `✓ Grille appliquée — ${differentes} case(s) et ${navDifferents} masque(s) nav modifié(s).`
+			: `✓ Grille appliquée — ${differentes} case(s) modifiée(s).`, false);
 		setStatus(`Lieu <span>${_escHtml(lieuId)}</span> : grille appliquée depuis l'image - ${currentRev}.`);
 	} catch (err) {
 		if (currentLocId !== lieuId) return;

@@ -6,14 +6,16 @@ PREMIÈRE PASSE que l'auteur retouche ensuite au pinceau dans l'éditeur de cart
 un oracle : une case de 16 px d'une carte de cité contient souvent un toit ET une ruelle, et
 la classification rend ce qui domine.
 
-Trois étages, dans cet ordre :
+Quatre étages, dans cet ordre :
   1. **classer** chaque case d'après sa couleur moyenne et sa densité de traits, selon un
      PROFIL (`PROFILS_GRILLE` : ville, forêt, catacombes) ;
   2. **lisser** (`lisser_majorite`) ;
-  3. **topologie** (`proposer`) : fermer l'ENCEINTE d'une ville par `nav`, interdire les
-     diagonales qui passent au-dessus de l'angle d'une maison (`fermer_coins`), puis RELIER
-     les zones praticables disjointes d'un même côté du rempart (`relier_zones` : pont,
-     ruelle, sentier, couloir).
+  3. **rues** (`tracer_rues`, villes) : rouvrir les rues plus fines qu'une case, lues sur
+     des sous-cases de 4 px (`fins`) ;
+  4. **topologie** (`proposer`) : fermer l'ENCEINTE d'une ville (par `nav`, ou par le
+     terrain si les murs nav ne sont pas proposés), interdire les diagonales qui passent
+     au-dessus de l'angle d'une maison (`fermer_coins`), puis RELIER les zones praticables
+     disjointes d'un même côté du rempart (`relier_zones` : pont, ruelle, sentier, couloir).
 
 ⚠️ **AUCUN import de Pillow ici.** `tests/` importe `utils/*` → `routers/*`, et Pillow n'est
 pas dans les dépendances de collecte locale (cf. CLAUDE.md § Running tests) : un import en
@@ -32,8 +34,9 @@ Vocabulaire produit : **0 / 1 / 3 / 5** (`templates/admin_map_editor.html:1258` 
 inaccessible, 1 libre, 3 falaise, 5 terrain très difficile). 3 n'est produit que par les
 profils qui le déclarent (roche en forêt, cristaux de la mine).
 
-**`nav` est produit, mais jamais retiré.** Le `nav` existant du doc est une ENTRÉE : ses bits
-sont conservés, on n'en ajoute que. Un mur nav peint à la main est une intention d'auteur.
+**`nav` est produit (sauf `murs_nav=False`), mais jamais retiré.** Le `nav` existant du doc
+est une ENTRÉE : ses bits sont conservés, on n'en ajoute que. Un mur nav peint à la main est
+une intention d'auteur.
 
 **Calibration** : `dev/calibrer_grille_image.py`, sur les onze lieux peints à la main (trois
 villes, quatre forêts, quatre souterrains), score = F1 moyen PAR VALEUR (jamais le taux
@@ -105,6 +108,22 @@ PROFILS_GRILLE = {
 		# retenue si elle couvre au moins `enceinte_part_min` de la carte.
 		"enceinte_rayon": 2,
 		"enceinte_part_min": 0.10,
+		# ── Rues (`tracer_rues`) ─────────────────────────────────────────────────────
+		# Une rue fait 6 à 10 px, la case 16 : la couleur MOYENNE la noie dans les toits.
+		# Elle reparaît à l'échelle de la sous-case (4 px) : sous les cases que l'auteur a
+		# peintes 1 dans la ville, la sous-case la plus claire vaut 182 de luminance à
+		# Auxerre contre 150 sous ses cases 0 (184 / 170 à Lutèce) — le pavé est clair et
+		# terne, le toit sombre et vif. Score = clarté de la `rang`-ième sous-case la plus
+		# claire − `poids_saturation` × sa vivacité, ramenés à l'image ; coupure Otsu +
+		# `decalage`. Un groupe de cases claires n'est ouvert que s'il touche une case libre
+		# ou fait au moins `longueur_min` cases (une cour éclairée isolée n'est pas une rue),
+		# et pas s'il longe le bord (`bord_max` : le cadre clair du parchemin de Reims).
+		# Mesuré (classification seule, F1 par valeur) : Auxerre 0,79 → 0,79, Lutèce
+		# 0,71 → 0,79, Reims 0,78 → 0,80 ; plateau large autour de ces valeurs.
+		# ⚠️ Écartés après mesure : l'ébarbage des impasses (retire plus de vraies rues que
+		# de bruit) et l'exigence de maisons de part et d'autre (aucun gain).
+		"rues": {"rang": 1, "poids_saturation": 1.0, "decalage": 0.75, "longueur_min": 3,
+			"bord_max": 0.2},
 	},
 	"foret": {
 		"libelle": "Forêt",
@@ -125,6 +144,7 @@ PROFILS_GRILLE = {
 			"verdeur": -0.5, "saturation": -1.0},
 		"roche_decalage": 0.625,
 		"otsu_bacs": 64,
+		"rues": None,
 		"enceinte": False,
 		"coins": True,
 		"passages": True,
@@ -151,6 +171,8 @@ PROFILS_GRILLE = {
 		"obstacle_decalage": 0.5,
 		"roche": None,
 		"otsu_bacs": 64,
+		# Sous terre, le couloir EST le sol clair : la classification le voit déjà.
+		"rues": None,
 		"enceinte": False,
 		"coins": True,
 		"passages": True,
@@ -489,6 +511,81 @@ def garder_composante_principale(cells) -> list:
 	return sortie
 
 
+# ── Rues ─────────────────────────────────────────────────────────────────────────────────
+# Sous-cases par côté de case pour les échantillons FINS (`fins`) : 4 → 4 px sur une case de
+# 16. ⚠️ Le module ne réduit rien lui-même : l'appelant (endpoint, CLI) réduit l'image à
+# `cols·k × rows·k` en `Image.BOX`, couleur seule.
+SOUS_CASES = 4
+
+
+def tracer_rues(cells, fins, k, regles):
+	"""Ouvre (passe à 1) les cases bâties que traverse une rue trop fine pour la case.
+
+	`fins` : couleurs à plat, ligne par ligne, d'une image réduite à `cols·k × rows·k`.
+	Post-traitement : à appeler APRÈS `lisser_majorite` (qui refermerait une rue d'une case)
+	et avant la topologie (les passages raccordent ensuite ce qui reste). Ne mute pas `cells`.
+	Rend `(cells, ouvertes)`, `ouvertes` = [[x, y], …] dans l'ordre de lecture.
+	"""
+	sortie = [list(ligne) for ligne in cells]
+	reglage = (regles or {}).get("rues")
+	H = len(sortie)
+	W = len(sortie[0]) if H else 0
+	k = int(k or 0)
+	if not reglage or not H or not W or k < 1 or len(fins or []) < W * k * H * k:
+		return sortie, []
+	largeur = W * k
+	rang = max(1, min(int(reglage.get("rang", 1)), k * k))
+	bati = [(x, y) for y in range(H) for x in range(W) if sortie[y][x] == TERRAIN_INACCESSIBLE]
+	if not bati:
+		return sortie, []
+	clarte, vivacite = {}, {}
+	for x, y in bati:
+		sous = sorted(((luminance(fins[(y * k + j) * largeur + x * k + i]),
+			saturation(fins[(y * k + j) * largeur + x * k + i]))
+			for j in range(k) for i in range(k)), reverse=True)
+		clarte[(x, y)], vivacite[(x, y)] = sous[rang - 1]
+	# Ramené aux cases bâties de CETTE image : rien d'absolu.
+	m_l, e_l = _quartiles(list(clarte.values()))
+	m_s, e_s = _quartiles(list(vivacite.values()))
+	poids = float(reglage.get("poids_saturation", 0.0))
+	score = {c: (clarte[c] - m_l) / e_l - poids * (vivacite[c] - m_s) / e_s for c in bati}
+	coupure = seuil_otsu(list(score.values()), regles.get("otsu_bacs", 64)) + float(reglage.get("decalage", 0.0))
+	candidates = {c for c in bati if score[c] >= coupure}
+
+	def libre(x, y):
+		return _dans(sortie, x, y) and sortie[y][x] == TERRAIN_LIBRE
+
+	def au_bord(x, y):
+		return x in (0, W - 1) or y in (0, H - 1)
+
+	bord_max = float(reglage.get("bord_max", 1.0))
+	longueur_min = int(reglage.get("longueur_min", 1))
+	ouvertes, vues = [], set()
+	for depart in sorted(candidates, key=lambda c: (c[1], c[0])):
+		if depart in vues:
+			continue
+		pile, groupe = [depart], []
+		vues.add(depart)
+		while pile:
+			cx, cy = pile.pop()
+			groupe.append((cx, cy))
+			for dx, dy in VOISINS:
+				voisine = (cx + dx, cy + dy)
+				if voisine in candidates and voisine not in vues:
+					vues.add(voisine)
+					pile.append(voisine)
+		# Le CADRE d'une carte sur parchemin (Reims) est une bande claire le long du bord :
+		# un groupe dont plus de `bord_max` des cases touchent le bord n'est pas une rue.
+		if sum(1 for c in groupe if au_bord(*c)) > bord_max * len(groupe):
+			continue
+		touche = any(libre(x + dx, y + dy) for x, y in groupe for dx, dy in VOISINS)
+		if touche or len(groupe) >= longueur_min:
+			ouvertes.extend(groupe)
+	for x, y in ouvertes:
+		sortie[y][x] = TERRAIN_LIBRE
+	return sortie, [[x, y] for x, y in sorted(ouvertes, key=lambda c: (c[1], c[0]))]
+
+
 # ── nav ──────────────────────────────────────────────────────────────────────────────────
 # [bit, dx, dy, bit opposé] — ⚠️ RECOPIE de `utils.lieux.VALID_MOVES` (miroir client :
 # `templates/scripts/nav.js`). Importer `utils.lieux` tirerait FastAPI et CouchDB dans un
@@ -684,6 +781,31 @@ def fermer_enceinte(cells, nav, masque) -> list:
 	return [[x, y] for x, y in sorted(touchees, key=lambda c: (c[1], c[0]))]
 
 
+def fermer_enceinte_terrain(cells, masque) -> list:
+	"""L'enceinte fermée SANS `nav` (murs nav non proposés) : les cases libres du dedans qui
+	touchent (8-voisinage) une case libre du dehors passent à 0 — la porte dessinée se ferme,
+	l'auteur la rouvre au pinceau en posant sa porte de rempart. Ne touche qu'au DEDANS : le
+	dehors garde ses chemins jusqu'au pied du mur.
+
+	Mute `cells` ; rend les cases fermées, [[x, y], …]."""
+	fermees = []
+	if not masque:
+		return fermees
+	for y in range(len(cells)):
+		for x in range(len(cells[y])):
+			if not masque[y][x] or cells[y][x] != TERRAIN_LIBRE:
+				continue
+			for dx, dy in VOISINS:
+				nx, ny = x + dx, y + dy
+				if (_dans(cells, nx, ny) and not masque[ny][nx]
+						and cells[ny][nx] == TERRAIN_LIBRE):
+					fermees.append([x, y])
+					break
+	for x, y in fermees:
+		cells[y][x] = TERRAIN_INACCESSIBLE
+	return fermees
+
+
 def cotes_de(masque) -> list:
 	"""`cotes[y][x]` : 0 dans l'enceinte, puis 1, 2… pour chaque morceau du DEHORS
 	(8-connexité, celle de la marche).
@@ -767,7 +889,7 @@ def _tas_tirer(tas):
 		k = m
 
 
-def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None):
+def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None, murs_nav=True):
 	"""Relie les zones praticables disjointes d'un même CÔTÉ en creusant des passages.
 
 	`cotes[y][x]` = côté de la case (`cotes_de` ; None = un seul côté). Pour
@@ -785,6 +907,10 @@ def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None):
 	Poches de moins de `poche_min` cases : passées à 0 avant tout (bruit — on n'invente pas de
 	ruelle vers une cour de deux cases). Passage plus long que `passage_longueur_max` : la zone
 	est laissée telle quelle et SIGNALÉE.
+
+	`murs_nav=False` : aucun bit n'est posé (ni coins, ni rescellement). Le rempart tient
+	alors par le TERRAIN (`fermer_enceinte_terrain`) : une case à creuser qui toucherait une
+	case libre de l'autre côté est refusée, elle rouvrirait la brèche.
 
 	Ne mute pas `cells` ni `nav` : rend `(cells, nav, rapport)`. Déterministe.
 	"""
@@ -833,7 +959,7 @@ def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None):
 		exclues = set()
 		while len(relie) + len(exclues) < len(ids):
 			chemin, cible = _plus_proche(cells, nav, zone, relie, exclues, c, cote,
-				marge, cout_creuser, cout_marge)
+				marge, cout_creuser, cout_marge, garde_terrain=bool(cotes) and not murs_nav)
 			if chemin is None:
 				# Plus rien d'atteignable de ce côté : les autres restent isolées.
 				for z in ids:
@@ -849,12 +975,13 @@ def relier_zones(cells, nav, marges=None, cotes=None, regles=None, profil=None):
 			traverse = sorted({cells[y][x] for x, y in a_creuser})
 			for x, y in a_creuser:
 				cells[y][x] = TERRAIN_LIBRE
-			if cotes:
+			if cotes and murs_nav:
 				# ⚠️ Le rempart n'a été scellé qu'entre cases foulables : une case creusée
 				# contre le mur ouvrirait une brèche vers l'autre côté.
 				rapport["nav_ajoutes"] += _sceller(cells, nav, cotes, a_creuser)
 			autour ={(x + dx, y + dy) for x, y in a_creuser for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
-			rapport["nav_ajoutes"] += fermer_coins(cells, nav, autour)
+			if murs_nav:
+				rapport["nav_ajoutes"] += fermer_coins(cells, nav, autour)
 			relie.add(cible)
 			# Les cases creusées rejoignent la zone principale.
 			for x, y in a_creuser:
@@ -912,11 +1039,18 @@ def _isoler(cells, zone, z, tailles, isolee_max, rapport):
 		rapport["poches_effacees"] += tailles[z]
 
 
-def _plus_proche(cells, nav, zone, relie, exclues, c, cote, marge, cout_creuser, cout_marge):
+def _plus_proche(cells, nav, zone, relie, exclues, c, cote, marge, cout_creuser, cout_marge,
+		garde_terrain=False):
 	"""Dijkstra multi-source depuis les zones RELIÉES du côté `c` jusqu'à la première case
 	d'une zone ni reliée ni exclue. `(chemin [(x, y)…] sans la source, zone atteinte)` ou
-	`(None, None)`. Départage des ex æquo par index de case : déterministe."""
+	`(None, None)`. Départage des ex æquo par index de case : déterministe.
+	`garde_terrain` : refuse de creuser une case voisine d'une case libre d'un autre côté."""
 	H, W = len(cells), len(cells[0])
+
+	def contre_le_mur(x, y):
+		return any(0 <= x + dx < W and 0 <= y + dy < H and cells[y + dy][x + dx] == TERRAIN_LIBRE
+			and cote(x + dx, y + dy) != c for dx, dy in VOISINS)
+
 	dist = {}
 	parent = {}
 	tas = []
@@ -954,6 +1088,8 @@ def _plus_proche(cells, nav, zone, relie, exclues, c, cote, marge, cout_creuser,
 					continue
 				pas = 0.0 if nz in relie else 1.0
 			else:
+				if garde_terrain and contre_le_mur(nx, ny):
+					continue
 				pas = 1.0 + float(cout_creuser.get(v, 2.0)) + cout_marge * max(0.0, marge(nx, ny))
 			nd = d + pas
 			if nd < dist.get((nx, ny), float("inf")):
@@ -965,13 +1101,18 @@ def _plus_proche(cells, nav, zone, relie, exclues, c, cote, marge, cout_creuser,
 
 # ── Point d'entrée ───────────────────────────────────────────────────────────────────────
 def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
-		passages=True, enceinte=None) -> dict:
+		passages=True, enceinte=None, fins=None, k=SOUS_CASES, rues=True,
+		murs_nav=True) -> dict:
 	"""La proposition complète : `{cells, nav, profil, rapport}`.
 
-	classer → lisser → enceinte (ville) → coins → passages. ⚠️ Le lissage vient AVANT la
-	topologie : il refermerait un pont d'une case. `passages=False` rend l'ancien comportement
-	(grille classée et lissée, `nav` rendu tel quel).
+	classer → lisser → rues → enceinte (ville) → coins → passages. ⚠️ Le lissage vient AVANT
+	les rues et la topologie : il refermerait une rue ou un pont d'une case.
+	`passages=False` : ni enceinte, ni coins, ni passages (`nav` rendu tel quel).
 	`enceinte` : None = ce que dit le profil ; True/False force.
+	`fins` (échantillons à `k×k` sous-cases par case) + `rues` : tracé des rues (`tracer_rues`),
+	seulement si le profil en déclare ; sans `fins`, rien à tracer.
+	`murs_nav=False` : AUCUN bit ajouté, `nav` rendu tel quel ; l'enceinte est alors fermée
+	par le terrain (`fermer_enceinte_terrain`), la porte dessinée passe à 0.
 	"""
 	regles = regles_de(profil, regles)
 	nom = profil if profil in PROFILS_GRILLE else PROFIL_DEFAUT
@@ -979,25 +1120,31 @@ def proposer(couleurs, contours, cols, rows, nav=None, profil=None, regles=None,
 	cells = lisser_majorite(analyse["cells"])
 	nav_sortie = dict(nav or {})
 	rapport = {"passages": [], "zones_isolees": [], "poches_effacees": 0, "nav_ajoutes": 0,
-		"enceinte": False, "rempart": [], "coins": 0}
+		"enceinte": False, "rempart": [], "coins": 0, "rues": [], "murs_nav": bool(murs_nav)}
+	if rues and fins:
+		cells, rapport["rues"] = tracer_rues(cells, fins, k, regles)
 	if not passages:
+		rapport["zones"] = len(zones(cells, nav_sortie)[1])
 		return {"cells": cells, "nav": nav_sortie, "profil": nom, "rapport": rapport}
 
 	masque = []
 	if regles.get("enceinte") if enceinte is None else enceinte:
 		masque = detecter_enceinte(cells, regles)
 	avant = _bits(nav_sortie)
+	coins = murs_nav and regles.get("coins", True)
 	if masque:
 		rapport["enceinte"] = True
-		rapport["rempart"] = fermer_enceinte(cells, nav_sortie, masque)
-	if regles.get("coins", True):
+		rapport["rempart"] = (fermer_enceinte(cells, nav_sortie, masque) if murs_nav
+			else fermer_enceinte_terrain(cells, masque))
+	if coins:
 		rapport["coins"] = fermer_coins(cells, nav_sortie)
 	if regles.get("passages", True):
 		cotes = cotes_de(masque) if masque else None
-		cells, nav_sortie, relie = relier_zones(cells, nav_sortie, analyse["marges"], cotes, regles)
+		cells, nav_sortie, relie = relier_zones(cells, nav_sortie, analyse["marges"], cotes, regles,
+			murs_nav=murs_nav)
 		for cle in ("passages", "zones_isolees", "poches_effacees"):
 			rapport[cle] = relie[cle]
-		if regles.get("coins", True):
+		if coins:
 			# Une poche effacée a pu laisser un angle neuf : repasse complète, idempotente.
 			rapport["coins"] += fermer_coins(cells, nav_sortie)
 	rapport["nav_ajoutes"] = _bits(nav_sortie) - avant

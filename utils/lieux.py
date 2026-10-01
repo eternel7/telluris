@@ -569,7 +569,9 @@ async def get_grille_proposee(
 	rows: int = 0,
 	profil: str = "",
 	passages: int = 1,
-	enceinte: int = -1):
+	enceinte: int = -1,
+	rues: int = 1,
+	murs_nav: int = 1):
 	"""Propose une grille de terrain ET ses murs `nav`, lus sur l'IMAGE du lieu (admin,
 	éditeur de carte).
 
@@ -581,6 +583,8 @@ async def get_grille_proposee(
 	`passages=0` : ancien comportement (classer + lisser, `nav` du doc rendu tel quel).
 	`enceinte` : -1 ce que dit le profil, 0 / 1 force. Le `nav` rendu est COMPLET : celui du
 	doc (jamais un bit retiré) plus les murs proposés.
+	`rues=0` : pas de tracé des rues (sous-cases). `murs_nav=0` : aucun mur nav proposé, le
+	`nav` du doc est rendu tel quel et l'enceinte est fermée par le terrain.
 
 	⚠️ Import de Pillow PARESSEUX, dans le corps : `tests/` importe `utils/*` → `routers/*`,
 	et Pillow n'est pas dans les dépendances de collecte locale (CLAUDE.md § Running tests).
@@ -635,6 +639,10 @@ async def get_grille_proposee(
 			couleurs = _pixels_a_plat(img.convert("RGB").resize((cols, rows), Image.BOX))
 			contours = _pixels_a_plat(img.convert("L").filter(ImageFilter.FIND_EDGES)
 				.resize((cols, rows), Image.BOX))
+			# Sous-cases pour le tracé des rues : une rue est plus fine qu'une case.
+			k = grille_image.SOUS_CASES
+			fins = (_pixels_a_plat(img.convert("RGB").resize((cols * k, rows * k), Image.BOX))
+				if rues else None)
 	except HTTPException:
 		raise
 	except Exception:
@@ -650,7 +658,8 @@ async def get_grille_proposee(
 	nav_doc = (lieu_doc.get("nav") or {}) if meme_taille else {}
 	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
 		profil=profil, passages=bool(passages),
-		enceinte=None if enceinte < 0 else bool(enceinte))
+		enceinte=None if enceinte < 0 else bool(enceinte),
+		fins=fins, k=grille_image.SOUS_CASES, rues=bool(rues), murs_nav=bool(murs_nav))
 	cells = proposition["cells"]
 
 	rapport = None

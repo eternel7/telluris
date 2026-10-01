@@ -621,3 +621,97 @@ def test_le_f1_moyen_resume_rappel_et_precision_par_valeur():
 def test_un_mur_nav_retrouve_a_une_case_pres_compte():
 	rapport = gi.concordance_nav({"3,3": 4}, {"2,3": 1, "9,9": 2})
 	assert rapport == {"peintes": 2, "proposees": 1, "retrouvees": 1, "rappel": 0.5}
+
+
+# ── Rues ─────────────────────────────────────────────────────────────────────────────────
+TOIT = (120, 70, 50)       # terracotta sombre et vif
+PAVE = (200, 190, 170)     # pavé clair et terne
+
+
+def _fins(cols, rows, k, claires):
+	"""Échantillons fins à plat : toit partout, PAVÉ sur les sous-cases de `claires`
+	(ensemble de (sx, sy) en coordonnées de sous-case)."""
+	return [PAVE if (sx, sy) in claires else TOIT
+		for sy in range(rows * k) for sx in range(cols * k)]
+
+
+def _quartier(cols=10, rows=7):
+	"""Bloc bâti, bordé d'une colonne libre à gauche et à droite (la ville autour)."""
+	return [[L if x in (0, cols - 1) else B for x in range(cols)] for _ in range(rows)]
+
+
+def test_une_rue_plus_fine_que_la_case_est_ouverte():
+	"""Une ligne de sous-cases claires traverse le bloc : la rangée devient praticable, le
+	reste du bloc reste bâti."""
+	k = gi.SOUS_CASES
+	cells = _quartier()
+	rue = {(sx, 3 * k + 1) for sx in range(k, 9 * k)}
+	sortie, ouvertes = gi.tracer_rues(cells, _fins(10, 7, k, rue), k, _regles())
+	assert [sortie[3][x] for x in range(10)] == [L] * 10
+	assert all(sortie[y][x] == B for y in (1, 5) for x in range(1, 9))
+	assert ouvertes == [[x, 3] for x in range(1, 9)]
+	assert cells[3][4] == B                       # la source n'est pas mutée
+
+
+def test_une_cour_claire_isolee_n_est_pas_une_rue():
+	"""Une seule case claire au cœur du bloc, sans case libre autour : moins de
+	`longueur_min` cases, rien n'est ouvert."""
+	k = gi.SOUS_CASES
+	assert gi.PROFILS_GRILLE["ville"]["rues"]["longueur_min"] > 1
+	cells = _quartier()
+	cour = {(5 * k + 1, 3 * k + 1)}
+	sortie, ouvertes = gi.tracer_rues(cells, _fins(10, 7, k, cour), k, _regles())
+	assert ouvertes == [] and sortie == cells
+
+
+def test_le_cadre_clair_d_une_carte_sur_parchemin_n_est_pas_une_rue():
+	"""Reims : une bande claire le long du bord de la carte, collée à une case libre."""
+	k = gi.SOUS_CASES
+	cells = _quartier()
+	cadre = {(sx, 1) for sx in range(10 * k)}
+	sortie, ouvertes = gi.tracer_rues(cells, _fins(10, 7, k, cadre), k, _regles())
+	assert ouvertes == []
+
+
+def test_sans_reglage_de_rues_ou_sans_echantillons_fins_rien_ne_change():
+	k = gi.SOUS_CASES
+	cells = _quartier()
+	rue = {(sx, 3 * k + 1) for sx in range(k, 9 * k)}
+	for profil in ("foret", "catacombes"):
+		assert gi.PROFILS_GRILLE[profil]["rues"] is None
+		assert gi.tracer_rues(cells, _fins(10, 7, k, rue), k, _regles(profil))[1] == []
+	assert gi.tracer_rues(cells, None, k, _regles())[1] == []
+	couleurs, contours = _echantillons(_scene(8))
+	sans = gi.proposer(couleurs, contours, 8, 8, enceinte=False)
+	avec_off = gi.proposer(couleurs, contours, 8, 8, enceinte=False,
+		fins=_fins(8, 8, k, set()), rues=False)
+	assert sans["cells"] == avec_off["cells"] and avec_off["rapport"]["rues"] == []
+
+
+# ── Murs nav optionnels ──────────────────────────────────────────────────────────────────
+def test_sans_murs_nav_le_nav_rendu_est_celui_recu():
+	couleurs, contours = _echantillons(_scene(8, foret=True))
+	res = gi.proposer(couleurs, contours, 8, 8, nav={"7,7": 1}, murs_nav=False)
+	assert res["nav"] == {"7,7": 1}
+	assert res["rapport"]["nav_ajoutes"] == 0 and res["rapport"]["coins"] == 0
+	assert res["rapport"]["murs_nav"] is False
+
+
+def test_sans_murs_nav_l_enceinte_est_fermee_par_le_terrain():
+	"""Choix de l'auteur : la porte dessinée passe à 0 (il la rouvre au pinceau), dedans et
+	dehors restent deux zones, et aucun passage ne rouvre le pourtour."""
+	cells = _ville_fortifiee()
+	masque = gi.detecter_enceinte(cells, _regles(enceinte_rayon=1, enceinte_part_min=0.1))
+	fermees = gi.fermer_enceinte_terrain(cells, masque)
+	assert fermees == [[6, 8]] and cells[8][6] == B   # la case de porte, dans le mur
+	cotes = gi.cotes_de(masque)
+	sortie, nav, rapport = gi.relier_zones(cells, {}, None, cotes,
+		regles=_regles(poche_min=0, poche_isolee_max=0), murs_nav=False)
+	assert nav == {}
+	zone, _ = gi.zones(sortie, nav)
+	assert zone[5][6] != -1 and zone[0][0] != -1
+	assert zone[5][6] != zone[0][0]
+	for passage in rapport["passages"]:
+		for x, y in passage["cases"]:
+			assert not any(gi._dans(sortie, x + dx, y + dy) and sortie[y + dy][x + dx] == L
+				and cotes[y + dy][x + dx] != cotes[y][x] for dx, dy in gi.VOISINS)

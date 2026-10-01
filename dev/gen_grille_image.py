@@ -21,7 +21,9 @@ Usage :
   python dev/gen_grille_image.py towns/paris_capital.png 88 48
   python dev/gen_grille_image.py lieu:auxerre 86 48 jsons/telluris-dump-….json
 Options : --profil=ville|foret|catacombes (défaut : lu sur les tags du lieu)
-          --sans-passages (ancien comportement : ni enceinte, ni coins, ni passages)
+          --sans-passages (ni enceinte, ni coins, ni passages)
+          --sans-rues (pas de tracé des rues intra-muros)
+          --sans-nav (aucun mur nav proposé ; l'enceinte est fermée par le terrain)
           --sans-enceinte · --connexite (efface les poches praticables enclavées)
           --sans-apercu
 
@@ -29,7 +31,8 @@ Sorties (dans jsons/) :
   <slug>_grille_a_importer.json   le doc lieu complet, prêt pour la carte d'import
   <slug>_grille.json              {dimensions, cells, nav} brut
   <slug>_grille_apercu.png        l'image avec la grille proposée en surimpression, les
-                                  murs nav (rouge), les passages (vert vif), le rempart (orange)
+                                  murs nav (rouge), les passages (vert vif), le rempart (orange),
+                                  les rues ouvertes (bleu clair)
 """
 
 import glob
@@ -106,6 +109,15 @@ def echantillonner(chemin: str, cols: int, rows: int):
 	return couleurs, contours, taille
 
 
+def echantillonner_fins(chemin: str, cols: int, rows: int, k: int = grille_image.SOUS_CASES):
+	"""Couleurs à `k×k` sous-cases par case (`cols·k × rows·k`, `Image.BOX`) : ce que lit le
+	tracé des rues, plus fines qu'une case."""
+	from PIL import Image
+	with Image.open(chemin) as img:
+		img.load()
+		return _pixels(img.convert("RGB").resize((cols * k, rows * k), Image.BOX))
+
+
 def _pixels(img) -> list:
 	"""Les pixels d'une image, à plat, ligne par ligne.
 
@@ -146,6 +158,9 @@ def ecrire_apercu(chemin_image: str, cells, cible: str, nav=None, rapport=None):
 	for x, y in rapport.get("rempart") or []:
 		dessin.rectangle([x * pas_x + 1, y * pas_y + 1, (x + 1) * pas_x - 2, (y + 1) * pas_y - 2],
 			outline=(255, 150, 30, 230), width=2)
+	for x, y in rapport.get("rues") or []:
+		dessin.rectangle([x * pas_x + 1, y * pas_y + 1, (x + 1) * pas_x - 2, (y + 1) * pas_y - 2],
+			outline=(110, 190, 255, 230), width=2)
 	for passage in rapport.get("passages") or []:
 		for x, y in passage["cases"]:
 			dessin.rectangle([x * pas_x + 1, y * pas_y + 1, (x + 1) * pas_x - 2, (y + 1) * pas_y - 2],
@@ -218,9 +233,12 @@ def main() -> int:
 	nav_doc = ((doc_lieu or {}).get("nav") or {}) if meme_taille else {}
 
 	couleurs, contours, taille = echantillonner(chemin, cols, rows)
+	rues = "--sans-rues" not in options
+	fins = echantillonner_fins(chemin, cols, rows) if rues else None
 	proposition = grille_image.proposer(couleurs, contours, cols, rows, nav=nav_doc,
 		profil=profil, passages="--sans-passages" not in options,
-		enceinte=False if "--sans-enceinte" in options else None)
+		enceinte=False if "--sans-enceinte" in options else None,
+		fins=fins, rues=rues, murs_nav="--sans-nav" not in options)
 	cells, nav = proposition["cells"], proposition["nav"]
 	if "--connexite" in options:
 		cells = grille_image.garder_composante_principale(cells)
@@ -235,7 +253,9 @@ def main() -> int:
 	for valeur, n in sorted(grille_image.comptes(cells).items()):
 		print(f"  {valeur} {etiquettes.get(valeur, '?'):22} {n:6}  ({n * 100 / total:5.1f} %)")
 	topo = proposition["rapport"]
-	print(f"  enceinte {'fermée' if topo['enceinte'] else 'aucune'} · {len(topo['passages'])}"
+	fermeture = "par nav" if topo["murs_nav"] else "par le terrain"
+	print(f"  {len(topo['rues'])} case(s) de rue ouverte(s) · enceinte "
+		f"{('fermée ' + fermeture) if topo['enceinte'] else 'aucune'} · {len(topo['passages'])}"
 		f" passage(s) creusé(s) · {topo['poches_effacees']} case(s) de poche effacée(s)"
 		f" · {topo['nav_ajoutes']} bit(s) nav ajouté(s)")
 	for zone in topo["zones_isolees"]:
