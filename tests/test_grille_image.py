@@ -34,19 +34,22 @@ def _echantillons(cases):
 	return couleurs, contours
 
 
-def _scene():
+def _scene(taille=6, foret=False, place=False):
 	"""Une scène minimale : une colonne d'eau, un bloc bâti dense, le reste en campagne.
-
-	Les valeurs de contours sont choisies de part et d'autre de la coupure qu'Otsu trouvera.
-	"""
+	`foret` ajoute un bosquet aussi dessiné que la ville (2×2, en bas à droite) ; `place`, une
+	rangée de cases couleur de toit mais LISSES (une place pavée) sous le bloc bâti."""
 	cases = []
-	for y in range(6):
+	for y in range(taille):
 		ligne = []
-		for x in range(6):
+		for x in range(taille):
 			if x == 0:
 				ligne.append((EAU, 10))
 			elif 2 <= x <= 4 and 1 <= y <= 4:
 				ligne.append((BATI, 200))
+			elif place and 2 <= x <= 4 and y == 5:
+				ligne.append((BATI, 20))
+			elif foret and taille - 3 <= x <= taille - 2 and taille - 3 <= y <= taille - 2:
+				ligne.append((CHAMP, 250))
 			else:
 				ligne.append((CHAMP, 20))
 		cases.append(ligne)
@@ -55,22 +58,22 @@ def _scene():
 
 # ── 1. La règle qui porte l'outil ────────────────────────────────────────────────────────
 def test_a_couleur_egale_la_densite_de_traits_separe_le_bati_du_champ():
-	"""L'invariant central : un pâté de maisons et un champ ont la même teinte beige, seule
-	la densité de traits (toits, murs, ombres) les distingue. Si ce test tombe, l'outil ne
-	sait plus rien faire d'autre que poser l'eau."""
-	couleurs, contours = _echantillons(_scene())
-	repere = gi.calibrer(couleurs, contours)
-	assert gi.classer_case(BATI, 200, repere) == gi.TERRAIN_INACCESSIBLE
-	assert gi.classer_case(BATI, 20, repere) == gi.TERRAIN_LIBRE
+	"""L'invariant central : à teinte ÉGALE, c'est la densité de traits (toits, murs,
+	ombres) qui fait le bâti — une place pavée couleur de toit reste libre. Le poids des
+	contours du profil ville est positif ; si ce test tombe, il a été annulé."""
+	assert gi.PROFILS_GRILLE["ville"]["obstacle"]["contours"] > 0
+	cells = gi.grille_depuis_echantillons(*_echantillons(_scene(8, place=True)), 8, 8)
+	assert cells[2][3] == gi.TERRAIN_INACCESSIBLE      # toits denses
+	assert cells[5][3] == gi.TERRAIN_LIBRE             # même teinte, lisse
 
 
 def test_la_foret_dense_reste_libre_malgre_ses_traits():
-	"""⚠️ La raison du ET plutôt que du OU. La forêt qui entoure Auxerre est aussi dessinée
-	qu'une ville ; c'est sa COULEUR qui la trahit. En OU, la précision sur le bâti tombait
-	de 0,55 à 0,39 — la moitié de la campagne passait pour des maisons."""
-	couleurs, contours = _echantillons(_scene())
-	repere = gi.calibrer(couleurs, contours)
-	assert gi.classer_case(CHAMP, 250, repere) == gi.TERRAIN_LIBRE
+	"""La forêt qui entoure Auxerre est aussi dessinée qu'une ville ; c'est sa COULEUR qui la
+	trahit (verte, pas rouge). En comptant les traits seuls, la moitié de la campagne passait
+	pour des maisons."""
+	cells = gi.grille_depuis_echantillons(*_echantillons(_scene(8, foret=True)), 8, 8)
+	assert cells[6][6] == gi.TERRAIN_LIBRE
+	assert cells[2][3] == gi.TERRAIN_INACCESSIBLE
 
 
 def test_l_eau_l_emporte_sur_le_bati():
@@ -237,3 +240,549 @@ def test_les_grilles_vides_ne_font_rien_lever():
 	assert gi.garder_composante_principale([]) == []
 	assert gi.comptes([]) == {}
 	assert gi.concordance([], [])["global"] == 0.0
+
+
+# ═════════════════════════════════════════════════════════════════════════════════════════
+# Profils, nav et topologie (passages, coins, enceinte)
+# ═════════════════════════════════════════════════════════════════════════════════════════
+import copy  # noqa: E402
+
+L, B, E = gi.TERRAIN_LIBRE, gi.TERRAIN_INACCESSIBLE, gi.TERRAIN_EAU
+
+
+def _regles(profil="ville", **surcharges):
+	regles = copy.deepcopy(gi.PROFILS_GRILLE[profil])
+	regles.update(surcharges)
+	return regles
+
+
+def _grille(texte):
+	"""'.' libre, '#' bâti, '~' eau, '^' falaise — une ligne par rangée."""
+	table = {".": L, "#": B, "~": E, "^": gi.TERRAIN_FALAISE}
+	return [[table[c] for c in ligne] for ligne in texte.strip().split("\n")]
+
+
+def _nb_zones(cells, nav):
+	return len(gi.zones(cells, nav)[1])
+
+
+# ── Profils ──────────────────────────────────────────────────────────────────────────────
+def test_trois_profils_et_un_repli_sur_la_ville():
+	assert set(gi.PROFILS_GRILLE) == {"ville", "foret", "catacombes"}
+	assert gi.regles_de("inconnu") is gi.PROFILS_GRILLE[gi.PROFIL_DEFAUT]
+	assert gi.REGLES_GRILLE is gi.PROFILS_GRILLE["ville"]
+
+
+def test_le_profil_se_lit_sur_les_tags_souterrain_avant_foret():
+	assert gi.profil_de({"categorie": "ville", "tags": []}) == "ville"
+	assert gi.profil_de({"tags": ["chemin", "foret", "bois"]}) == "foret"
+	assert gi.profil_de({"tags": ["sous-terrain", "catacombe", "donjon"]}) == "catacombes"
+	assert gi.profil_de({"tags": ["mine", "cristaux"]}) == "catacombes"
+	# ⚠️ Un tag de souterrain l'emporte sur la forêt qui l'entoure.
+	assert gi.profil_de({"tags": ["foret", "sous-terrain"]}) == "catacombes"
+	assert gi.profil_de(None) == gi.PROFIL_DEFAUT
+
+
+def test_chaque_profil_ne_produit_que_son_vocabulaire():
+	"""La valeur « froide » est l'eau en surface, la falaise sous terre (cristaux)."""
+	permis = {
+		"ville": {B, L, E},
+		"foret": {B, L, gi.TERRAIN_FALAISE, E},
+		"catacombes": {B, L, gi.TERRAIN_FALAISE},
+	}
+	couleurs, contours = _echantillons(_scene(8, foret=True, place=True))
+	for profil, valeurs in permis.items():
+		cells = gi.grille_depuis_echantillons(couleurs, contours, 8, 8, profil=profil)
+		assert set(gi.comptes(cells)) <= valeurs, profil
+	assert gi.PROFILS_GRILLE["catacombes"]["valeur_froide"] == gi.TERRAIN_FALAISE
+
+
+def test_la_luminance_seule_separe_sol_et_paroi_des_catacombes():
+	"""Sous terre, la paroi est SOMBRE (le vide noir, la roche) et le sol éclairé. Teintes
+	médianes mesurées sur `catacombes0001` sous les cases peintes 1 et 0."""
+	sol, paroi = (64, 56, 50), (32, 31, 29)
+	cases = [[(paroi if x in (0, 1, 6, 7) else sol, 30) for x in range(8)] for _ in range(6)]
+	cells = gi.grille_depuis_echantillons(*_echantillons(cases), 8, 6, profil="catacombes")
+	assert cells[3][0] == B and cells[3][4] == L
+
+
+# ── nav ──────────────────────────────────────────────────────────────────────────────────
+def test_la_recopie_de_valid_moves_suit_utils_lieux():
+	"""Recopie assumée (importer `utils.lieux` tirerait FastAPI) : verrouillée ici."""
+	from utils import lieux
+	assert gi.VALID_MOVES == lieux.VALID_MOVES
+	nav = {"2,2": 1 | 8, "2,1": 16, "3,3": 128, "1,2": 4}
+	for x in range(1, 4):
+		for y in range(1, 4):
+			masque = lieux.get_final_mask(nav, x, y)
+			for bit, dx, dy, _op in gi.VALID_MOVES:
+				assert gi.nav_autorise(nav, x, y, dx, dy) == bool(masque & bit)
+
+
+def test_interdire_pose_le_bit_des_deux_cotes_et_ne_retire_rien():
+	nav = {"1,1": 64}
+	assert gi.interdire(nav, 1, 1, 1, 0) == 2
+	assert nav == {"1,1": 64 | 4, "2,1": 64}
+	assert gi.interdire(nav, 1, 1, 1, 0) == 0
+	assert not gi.nav_autorise(nav, 2, 1, -1, 0)
+
+
+# ── Coins ────────────────────────────────────────────────────────────────────────────────
+def test_la_diagonale_qui_rase_l_angle_d_une_maison_est_fermee():
+	cells = _grille("""
+...
+.#.
+...
+""")
+	nav = {}
+	gi.fermer_coins(cells, nav)
+	assert not gi.nav_autorise(nav, 1, 0, 1, 1)       # (1,0)→(2,1) : angle (1,1)
+	assert not gi.nav_autorise(nav, 2, 1, -1, 1)      # (2,1)→(1,2) : angle (1,1)
+	assert gi.nav_autorise(nav, 0, 0, 1, 0)           # l'orthogonale reste ouverte
+	assert gi.pas_praticable(cells, nav, 0, 0, 1, 0)
+
+
+def test_les_coins_gardent_le_nav_existant_et_ne_posent_que_des_diagonales():
+	cells = _grille("""
+....
+.#..
+....
+""")
+	nav = {"3,0": 16}
+	gi.fermer_coins(cells, nav)
+	assert nav["3,0"] & 16
+	orthogonaux = 1 | 4 | 16 | 64
+	assert all((v & orthogonaux) == 0 for k, v in nav.items() if k != "3,0")
+
+
+def test_deux_cases_d_eau_ferment_la_diagonale_mais_une_berge_non():
+	cells = _grille("""
+.~
+~.
+""")
+	nav = {}
+	gi.fermer_coins(cells, nav)
+	assert not gi.nav_autorise(nav, 0, 0, 1, 1)
+	cells = _grille("""
+.~
+..
+""")
+	nav = {}
+	gi.fermer_coins(cells, nav)
+	assert gi.nav_autorise(nav, 0, 0, 1, 1)
+
+
+# ── Passages ─────────────────────────────────────────────────────────────────────────────
+def test_une_riviere_se_franchit_par_un_pont_orthogonal_au_plus_pres_de_l_image():
+	"""Deux rives, un seul pont : il passe par la case d'eau de MOINDRE marge (l'arche de
+	pierre dessinée sur l'eau), jamais en diagonale."""
+	cells = _grille("""
+...~~...
+...~~...
+...~~...
+...~~...
+...~~...
+""")
+	marges = [[0.0] * 8 for _ in range(5)]
+	for y in range(5):
+		marges[y][3] = marges[y][4] = 5.0
+	marges[3][3] = marges[3][4] = 0.1          # le pont dessiné
+	sortie, nav, rapport = gi.relier_zones(cells, {}, marges, regles=_regles())
+	assert _nb_zones(sortie, nav) == 1
+	assert len(rapport["passages"]) == 1
+	passage = rapport["passages"][0]
+	assert passage["cases"] == [[3, 3], [4, 3]]
+	assert passage["traverse"] == ["eau"]
+	assert sortie[3][3] == sortie[3][4] == L
+
+
+def test_deux_quartiers_sont_relies_par_la_rangee_de_toits_la_moins_marquee():
+	cells = _grille("""
+..#..
+..#..
+..#..
+""")
+	marges = [[0.0] * 5 for _ in range(3)]
+	marges[0][2], marges[1][2], marges[2][2] = 3.0, 0.2, 3.0
+	sortie, _, rapport = gi.relier_zones(cells, {}, marges, regles=_regles())
+	assert rapport["passages"][0]["cases"] == [[2, 1]]
+	assert rapport["passages"][0]["traverse"] == ["bati"]
+
+
+def test_le_bati_se_perce_avant_l_eau_a_longueur_egale():
+	"""`cout_creuser` : une rue manquée par la grille est plus probable qu'un pont."""
+	regles = _regles()
+	assert regles["cout_creuser"][B] < regles["cout_creuser"][E]
+	# Deux quartiers séparés par une colonne faite de toits et d'une case d'eau : un seul
+	# passage d'une case suffit, et c'est un toit qui cède.
+	cells = _grille("""
+..~..
+..#..
+..#..
+""")
+	sortie, nav, rapport = gi.relier_zones(cells, {}, None, regles=_regles(poche_min=0))
+	assert _nb_zones(sortie, nav) == 1
+	assert [p["traverse"] for p in rapport["passages"]] == [["bati"]]
+
+
+def test_un_passage_trop_long_n_est_pas_creuse_et_la_zone_est_signalee():
+	cells = _grille("""
+........
+########
+########
+########
+........
+""")
+	regles = _regles(passage_longueur_max=2, poche_isolee_max=0)
+	sortie, nav, rapport = gi.relier_zones(cells, {}, None, regles=regles)
+	assert rapport["passages"] == []
+	assert len(rapport["zones_isolees"]) == 1
+	assert rapport["zones_isolees"][0]["taille"] == 8
+	assert sortie == cells
+
+
+def test_une_petite_zone_injoignable_est_effacee_plutot_que_laissee_isolee():
+	cells = _grille("""
+......
+######
+######
+######
+...###
+""")
+	regles = _regles(passage_longueur_max=2, poche_isolee_max=3)
+	sortie, nav, rapport = gi.relier_zones(cells, {}, None, regles=regles)
+	assert sortie[4][:3] == [B, B, B]
+	assert rapport["zones_isolees"] == []
+	assert rapport["poches_effacees"] == 3
+
+
+def test_une_poche_minuscule_est_effacee_avant_tout():
+	cells = _grille("""
+.....
+.....
+###.#
+#####
+.####
+""")
+	sortie, _, rapport = gi.relier_zones(cells, {}, None, regles=_regles(poche_min=2))
+	assert sortie[4][0] == B
+	assert rapport["passages"] == []
+
+
+def test_un_mur_nav_peint_a_la_main_n_est_jamais_perce():
+	"""Un mur nav de l'auteur est une intention : le passage le contourne ou renonce."""
+	cells = _grille("""
+..#..
+..#..
+""")
+	nav = {"1,0": 4, "1,1": 4}          # interdit de sortir vers la droite depuis x = 1
+	sortie, nav_sortie, rapport = gi.relier_zones(cells, nav, None,
+		regles=_regles(poche_isolee_max=0))
+	assert rapport["passages"] == []
+	assert nav_sortie["1,0"] & 4 and nav_sortie["1,1"] & 4
+
+
+def test_relier_ne_mute_rien_et_est_idempotent_et_deterministe():
+	cells = _grille("""
+...~~...
+...~~...
+..#~~#..
+""")
+	nav = {"0,0": 2}
+	copie_cells, copie_nav = copy.deepcopy(cells), dict(nav)
+	a = gi.relier_zones(cells, nav, None, regles=_regles())
+	b = gi.relier_zones(cells, nav, None, regles=_regles())
+	assert cells == copie_cells and nav == copie_nav
+	assert a == b
+	c = gi.relier_zones(a[0], a[1], None, regles=_regles())
+	assert c[0] == a[0] and c[1] == a[1] and c[2]["passages"] == []
+
+
+# ── Enceinte ─────────────────────────────────────────────────────────────────────────────
+def _ville_fortifiee(porte=True):
+	"""Une ville de 7×7 au centre d'une carte 13×11 : un anneau de bâti, une porte dessinée
+	(une case libre dans l'anneau) si `porte`, des rues intérieures, une cour."""
+	lignes = [
+		".............",
+		".............",
+		"...#######...",
+		"...#.....#...",
+		"...#.###.#...",
+		"...#.#.#.#...",
+		"...#.###.#...",
+		"...#.....#...",
+		"...###.###...",
+		".............",
+		".............",
+	]
+	if not porte:
+		lignes[8] = "...#######..."
+	return _grille("\n".join(lignes))
+
+
+def test_l_enceinte_est_la_masse_batie_comblee():
+	cells = _ville_fortifiee()
+	masque = gi.detecter_enceinte(cells, _regles(enceinte_rayon=1, enceinte_part_min=0.1))
+	assert masque and masque[5][6] and masque[3][4]      # la cour et une rue sont dedans
+	assert not masque[0][0] and not masque[10][12]
+
+
+def test_une_petite_masse_n_est_pas_une_enceinte():
+	cells = _ville_fortifiee()
+	assert gi.detecter_enceinte(cells, _regles(enceinte_rayon=1, enceinte_part_min=0.9)) == []
+
+
+def test_la_porte_dessinee_est_fermee_par_nav_et_jamais_creusee():
+	"""L'auteur posera ses portes de rempart : dedans et dehors restent deux zones, la case de
+	porte reste LIBRE (désignable), aucun passage ne traverse le mur."""
+	cells = _ville_fortifiee()
+	masque = gi.detecter_enceinte(cells, _regles(enceinte_rayon=1, enceinte_part_min=0.1))
+	nav = {}
+	gi.fermer_enceinte(cells, nav, masque)
+	cotes = gi.cotes_de(masque)
+	sortie, nav, rapport = gi.relier_zones(cells, nav, None, cotes,
+		regles=_regles(poche_min=0, poche_isolee_max=0))
+	zone, _ = gi.zones(sortie, nav)
+	assert sortie[8][6] == L
+	assert zone[9][6] != zone[7][6]
+	for passage in rapport["passages"]:
+		assert len({cotes[y][x] for x, y in passage["cases"]}) == 1
+
+
+def test_la_cour_interieure_est_reliee_aux_rues_et_pas_au_dehors():
+	cells = _ville_fortifiee()
+	masque = gi.detecter_enceinte(cells, _regles(enceinte_rayon=1, enceinte_part_min=0.1))
+	nav = {}
+	gi.fermer_enceinte(cells, nav, masque)
+	sortie, nav, rapport = gi.relier_zones(cells, nav, None, gi.cotes_de(masque),
+		regles=_regles(poche_min=0))
+	zone, _ = gi.zones(sortie, nav)
+	assert zone[5][6] == zone[3][4]                  # cour ↔ rues
+	assert zone[5][6] != zone[0][0]                  # jamais le dehors
+	assert len(rapport["passages"]) == 1
+
+
+def test_une_ville_au_bord_coupe_le_dehors_en_plusieurs_cotes():
+	"""Lutèce touche le bord : ses rives nord et sud ne se rejoignent que par les portes."""
+	masque = [[x in (2, 3) for x in range(6)] for _ in range(3)]
+	cotes = gi.cotes_de(masque)
+	assert cotes[1][2] == cotes[1][3] == 0
+	assert cotes[1][0] != cotes[1][5] and 0 not in (cotes[1][0], cotes[1][5])
+
+
+def test_une_case_creusee_contre_le_rempart_ne_l_ouvre_pas():
+	"""Le scellement ne couvre que les paires foulables : une case CREUSÉE contre le mur doit
+	être rescellée, sinon elle ouvre une brèche vers l'autre côté."""
+	cells = _grille("""
+.#.
+.#.
+.#.
+""")
+	cotes = [[1, 1, 0], [1, 1, 0], [1, 1, 0]]
+	nav = {}
+	sortie, nav, _ = gi.relier_zones(cells, nav, None, cotes, regles=_regles(poche_min=0))
+	# À gauche, la case bâtie (1, y) est du même côté que la colonne 0 : on peut la creuser,
+	# mais jamais passer à la colonne 2.
+	zone, _ = gi.zones(sortie, nav)
+	assert all(zone[y][0] != zone[y][2] for y in range(3))
+
+
+# ── Point d'entrée ───────────────────────────────────────────────────────────────────────
+def test_proposer_sans_passages_rend_l_ancien_comportement():
+	couleurs, contours = _echantillons(_scene(8))
+	res = gi.proposer(couleurs, contours, 8, 8, nav={"1,1": 2}, passages=False)
+	attendu = gi.lisser_majorite(gi.grille_depuis_echantillons(couleurs, contours, 8, 8))
+	assert res["cells"] == attendu
+	assert res["nav"] == {"1,1": 2}
+	assert res["profil"] == "ville"
+
+
+def test_proposer_garde_le_nav_existant_et_rend_une_zone():
+	"""`enceinte=False` : sur 8×8, le bloc bâti de la scène couvre assez de carte pour passer
+	pour une ville fortifiée — ce n'est pas ce qu'on teste ici."""
+	couleurs, contours = _echantillons(_scene(8, foret=True))
+	res = gi.proposer(couleurs, contours, 8, 8, nav={"7,7": 1}, enceinte=False)
+	assert res["nav"]["7,7"] & 1
+	assert res["rapport"]["zones"] == 1
+	assert not res["rapport"]["enceinte"]
+	assert res["rapport"]["nav_ajoutes"] == gi._bits(res["nav"]) - 1
+
+
+# ── Notation ─────────────────────────────────────────────────────────────────────────────
+def test_le_f1_moyen_resume_rappel_et_precision_par_valeur():
+	reference = [[0, 1, 1, 1]]
+	proposee = [[0, 0, 0, 1]]
+	rapport = gi.concordance(proposee, reference)
+	f1_zero = 2 * 1.0 * (1 / 3) / (1.0 + 1 / 3)
+	f1_un = 2 * (1 / 3) * 1.0 / (1 / 3 + 1.0)
+	assert abs(rapport["f1_moyen"] - (f1_zero + f1_un) / 2) < 1e-9
+
+
+def test_un_mur_nav_retrouve_a_une_case_pres_compte():
+	rapport = gi.concordance_nav({"3,3": 4}, {"2,3": 1, "9,9": 2})
+	assert rapport == {"peintes": 2, "proposees": 1, "retrouvees": 1, "rappel": 0.5}
+
+
+# ── Rues ─────────────────────────────────────────────────────────────────────────────────
+TOIT = (120, 70, 50)       # terracotta sombre et vif
+PAVE = (200, 190, 170)     # pavé clair et terne
+
+
+def _fins(cols, rows, k, claires):
+	"""Échantillons fins à plat : toit partout, PAVÉ sur les sous-cases de `claires`
+	(ensemble de (sx, sy) en coordonnées de sous-case)."""
+	return [PAVE if (sx, sy) in claires else TOIT
+		for sy in range(rows * k) for sx in range(cols * k)]
+
+
+def _quartier(cols=10, rows=7):
+	"""Bloc bâti, bordé d'une colonne libre à gauche et à droite (la ville autour)."""
+	return [[L if x in (0, cols - 1) else B for x in range(cols)] for _ in range(rows)]
+
+
+def test_une_rue_plus_fine_que_la_case_est_ouverte():
+	"""Une ligne de sous-cases claires traverse le bloc : la rangée devient praticable, le
+	reste du bloc reste bâti."""
+	k = gi.SOUS_CASES
+	cells = _quartier()
+	rue = {(sx, 3 * k + 1) for sx in range(k, 9 * k)}
+	sortie, ouvertes = gi.tracer_rues(cells, _fins(10, 7, k, rue), k, _regles())
+	assert [sortie[3][x] for x in range(10)] == [L] * 10
+	assert all(sortie[y][x] == B for y in (1, 5) for x in range(1, 9))
+	assert ouvertes == [[x, 3] for x in range(1, 9)]
+	assert cells[3][4] == B                       # la source n'est pas mutée
+
+
+def test_une_cour_claire_isolee_n_est_pas_une_rue():
+	"""Une seule case claire au cœur du bloc, sans case libre autour : moins de
+	`longueur_min` cases, rien n'est ouvert."""
+	k = gi.SOUS_CASES
+	assert gi.PROFILS_GRILLE["ville"]["rues"]["longueur_min"] > 1
+	cells = _quartier()
+	cour = {(5 * k + 1, 3 * k + 1)}
+	sortie, ouvertes = gi.tracer_rues(cells, _fins(10, 7, k, cour), k, _regles())
+	assert ouvertes == [] and sortie == cells
+
+
+def test_le_cadre_clair_d_une_carte_sur_parchemin_n_est_pas_une_rue():
+	"""Reims : une bande claire le long du bord de la carte, collée à une case libre."""
+	k = gi.SOUS_CASES
+	cells = _quartier()
+	cadre = {(sx, 1) for sx in range(10 * k)}
+	sortie, ouvertes = gi.tracer_rues(cells, _fins(10, 7, k, cadre), k, _regles())
+	assert ouvertes == []
+
+
+def test_sans_reglage_de_rues_ou_sans_echantillons_fins_rien_ne_change():
+	k = gi.SOUS_CASES
+	cells = _quartier()
+	rue = {(sx, 3 * k + 1) for sx in range(k, 9 * k)}
+	for profil in ("foret", "catacombes"):
+		assert gi.PROFILS_GRILLE[profil]["rues"] is None
+		assert gi.tracer_rues(cells, _fins(10, 7, k, rue), k, _regles(profil))[1] == []
+	assert gi.tracer_rues(cells, None, k, _regles())[1] == []
+	couleurs, contours = _echantillons(_scene(8))
+	sans = gi.proposer(couleurs, contours, 8, 8, enceinte=False)
+	avec_off = gi.proposer(couleurs, contours, 8, 8, enceinte=False,
+		fins=_fins(8, 8, k, set()), rues=False)
+	assert sans["cells"] == avec_off["cells"] and avec_off["rapport"]["rues"] == []
+
+
+# ── Murs nav optionnels ──────────────────────────────────────────────────────────────────
+def test_sans_murs_nav_le_nav_rendu_est_celui_recu():
+	couleurs, contours = _echantillons(_scene(8, foret=True))
+	res = gi.proposer(couleurs, contours, 8, 8, nav={"7,7": 1}, murs_nav=False)
+	assert res["nav"] == {"7,7": 1}
+	assert res["rapport"]["nav_ajoutes"] == 0 and res["rapport"]["coins"] == 0
+	assert res["rapport"]["murs_nav"] is False
+
+
+def test_sans_murs_nav_l_enceinte_est_fermee_par_le_terrain():
+	"""Choix de l'auteur : la porte dessinée passe à 0 (il la rouvre au pinceau), dedans et
+	dehors restent deux zones, et aucun passage ne rouvre le pourtour."""
+	cells = _ville_fortifiee()
+	masque = gi.detecter_enceinte(cells, _regles(enceinte_rayon=1, enceinte_part_min=0.1))
+	fermees = gi.fermer_enceinte_terrain(cells, masque)
+	assert fermees == [[6, 8]] and cells[8][6] == B   # la case de porte, dans le mur
+	cotes = gi.cotes_de(masque)
+	sortie, nav, rapport = gi.relier_zones(cells, {}, None, cotes,
+		regles=_regles(poche_min=0, poche_isolee_max=0), murs_nav=False)
+	assert nav == {}
+	zone, _ = gi.zones(sortie, nav)
+	assert zone[5][6] != -1 and zone[0][0] != -1
+	assert zone[5][6] != zone[0][0]
+	for passage in rapport["passages"]:
+		for x, y in passage["cases"]:
+			assert not any(gi._dans(sortie, x + dx, y + dy) and sortie[y + dy][x + dx] == L
+				and cotes[y + dy][x + dx] != cotes[y][x] for dx, dy in gi.VOISINS)
+
+
+# ── Cadre de carte et rues hors les murs ─────────────────────────────────────────────────
+def _encadree():
+	"""La ville fortifiée, dans un cadre bâti d'une case tout autour (Reims)."""
+	cells = _ville_fortifiee()
+	H, W = len(cells), len(cells[0])
+	for y in range(H):
+		for x in range(W):
+			if x in (0, W - 1) or y in (0, H - 1):
+				cells[y][x] = B
+	return cells
+
+
+def test_un_cadre_de_parchemin_ne_fait_pas_de_la_carte_une_enceinte():
+	"""Reims : le cadre bâti se soudait à la ville, toute la carte devenait intra-muros et
+	ses villages n'avaient plus de dehors."""
+	cells = _encadree()
+	regles = _regles(enceinte_rayon=1, enceinte_part_min=0.1)
+	cadre = gi.masque_cadre(cells, regles)
+	assert cadre and cadre[0][0] and not cadre[5][6]
+	masque = gi.detecter_enceinte(cells, regles)
+	assert masque and masque[5][6] and not masque[1][1] and not masque[0][0]
+
+
+def test_un_anneau_exterieur_surtout_libre_n_est_pas_un_cadre():
+	assert gi.masque_cadre(_ville_fortifiee(), _regles()) == []
+
+
+def _cite_et_village(cols=20, rows=10):
+	"""À gauche la cité (toits terracotta, rue de pavé clair rangée 3) ; à droite un village
+	plus sombre (toits bruns, chemin de terre rangée 6, plus terne que le pavé de la cité)."""
+	k = gi.SOUS_CASES
+	cite = lambda sx: sx < (cols // 2) * k
+	# Choisies pour que le chemin du village soit à peine plus clair que les TOITS de la
+	# cité : au seuil commun il se confond avec eux.
+	toit_village, terre = (70, 50, 40), (95, 85, 75)
+	fins = []
+	for sy in range(rows * k):
+		for sx in range(cols * k):
+			if cite(sx):
+				fins.append(PAVE if sy == 3 * k + 1 else TOIT)
+			else:
+				fins.append(terre if sy == 6 * k + 1 else toit_village)
+	cells = [[L if x in (0, cols - 1) else B for x in range(cols)] for _ in range(rows)]
+	masque = [[x < cols // 2 for x in range(cols)] for _ in range(rows)]
+	return cells, fins, masque
+
+
+def test_le_chemin_d_un_village_hors_les_murs_a_son_propre_seuil():
+	"""Au seuil commun, la lumière de la cité écrase le chemin de terre du village ; réglé à
+	part hors les murs, il est ouvert."""
+	k = gi.SOUS_CASES
+	cells, fins, masque = _cite_et_village()
+	regles = _regles()
+	dehors = sum(1 for y, l in enumerate(cells) for x, v in enumerate(l) if v == B and not masque[y][x])
+	assert dehors >= regles["rues"]["cases_min"]
+	_, commun = gi.tracer_rues(cells, fins, k, regles)
+	_, par_cote = gi.tracer_rues(cells, fins, k, regles, masque)
+	village = [[x, 6] for x in range(10, 19)]
+	assert not any(c in commun for c in village)
+	assert all(c in par_cote for c in village)
+	assert all([x, 3] in par_cote for x in range(1, 10))          # la cité garde ses rues
+
+
+def test_un_cote_trop_petit_emprunte_le_seuil_commun():
+	k = gi.SOUS_CASES
+	cells, fins, masque = _cite_et_village()
+	regles = _regles()
+	regles["rues"] = dict(regles["rues"], cases_min=10 ** 6, decalage_dehors=regles["rues"]["decalage"])
+	assert gi.tracer_rues(cells, fins, k, regles, masque) == gi.tracer_rues(cells, fins, k, regles)

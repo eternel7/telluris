@@ -120,7 +120,10 @@ utils/
   focalisation.py        # 🧭 lieu (BFS) / 🎯 quête (biais probabiliste)
   enseignes.py           # noms d'enseigne (pur) : tournures par métier × toponymes de cité
   capacites.py           # capacités d'un lieu (pur) : catalogue taverne/étable/scriptorium/recrutement/guilde
-  grille_image.py        # grille de terrain depuis l'image d'une carte (pur) : indices auto-calibrés → 0/1/5
+  grille_image.py        # grille de terrain ET murs nav depuis l'image d'une carte (pur) : profils
+                         #   ville/forêt/catacombes (`dev/calibrer_grille_image.py`), rues lues sur
+                         #   sous-cases, enceinte fermée (nav, ou terrain sans murs nav), coins de
+                         #   maison, passages reliant les zones → 0/1/3/5
   bois.py                # découpe du bois (pur) : tier suivant par essence, conservation du poids, outil
   pnj.py                 # PNJ de lieu (pur) : tirage de présence, arbre de dialogue, services
   acces.py               # barrière d'accès à un lieu gardée par un PNJ (pur) : conditions, laissez-passer, cycle
@@ -162,6 +165,7 @@ templates/
 dev/
   gen_*.py               # générateurs de contenu → jsons/*_a_importer.json (catalogue : telluris-admin-tools)
   lint_dialogues.py · export_bestiaire.py · purge_quetes_acceptees.py · gen_grille_image.py
+  calibrer_grille_image.py
   check_js.js · test_*_client.js   # contrôle syntaxique + harnais d'exécution du JS client
 tests/                   # tests purs, un fichier par système
 ```

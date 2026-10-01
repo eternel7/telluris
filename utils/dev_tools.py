@@ -144,6 +144,16 @@ CATALOGUE = [
 			"sont ignorés : ce sont des archives d'états passés.",
 	},
 	{
+		"id": "calibrer_grille_image",
+		"label": "🔍 Calibration de la grille depuis l'image (villes, forêts, souterrains)",
+		"argv": _py("calibrer_grille_image.py"),
+		"ecrit": "Lecture seule (dump + images).",
+		"description": "Note chaque profil de utils/grille_image.PROFILS_GRILLE contre les "
+			"grilles peintes à la main : F1 par valeur, murs nav retrouvés, passages creusés, "
+			"zones isolées. Pour optimiser : python dev/calibrer_grille_image.py <profil> "
+			"--optimiser (en console).",
+	},
+	{
 		"id": "export_bestiaire",
 		"label": "🐉 Export bestiaire (.xlsx)",
 		"argv": _py("export_bestiaire.py"),
