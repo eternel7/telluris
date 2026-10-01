@@ -137,7 +137,7 @@ CREATIONS = {
 	"grand_arsenal": [
 		("Harnois_du_grand_arsenal", "Harnois du Grand Arsenal", "🛡️", "rare",
 		 "armure", "", 12.0, ["torse"],
-		 {"bonus_pa": 22, "bonus_malus_depl": -2, "restriction": {"F": 30}},
+		 {"bonus_pa": 32, "bonus_malus_depl": -2, "restriction": {"F": 30}},
 		 "Plates d'acier montées sur un harnais de bourrelier et doublées de cuir. Aucune "
 		 "forge seule ne sait tailler la sanglerie ; aucun bourrelier ne sait battre l'acier.",
 		 [("item:harnais", 1), ("acier", 4), ("item:armure_de_cuir", 1)], 1),
