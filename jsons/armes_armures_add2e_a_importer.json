@@ -1,0 +1,3856 @@
+[
+  {
+    "_id": "item:Stylet",
+    "type": "item",
+    "nom": "Stylet",
+    "description": "Lame fine à section carrée, sans tranchant : elle cherche le défaut de l'armure.",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.25,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 6,
+    "bonus_initiative": 3,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "recette:add2e_stylet",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Stylet",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Poignard",
+    "type": "item",
+    "nom": "Poignard",
+    "description": "Long poignard à double tranchant, l'arme de ceinture du soldat.",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.4,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 5,
+    "bonus_initiative": 2,
+    "bonus": {
+      "Ag": 2
+    }
+  },
+  {
+    "_id": "recette:add2e_poignard",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Poignard",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Couteau",
+    "type": "item",
+    "nom": "Couteau",
+    "description": "Couteau de tous les jours ; on le lance au besoin, sans grande précision.",
+    "icon": "🔪",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.2,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_cc": 4
+  },
+  {
+    "_id": "recette:add2e_couteau",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Couteau",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Kukri",
+    "type": "item",
+    "nom": "Kukri",
+    "description": "Lame recourbée vers l'avant, lourde du bout : elle tranche comme une hachette.",
+    "icon": "🔪",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 10
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "recette:add2e_kukri",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Kukri",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Katar",
+    "type": "item",
+    "nom": "Katar",
+    "description": "Dague à poignée transversale qui prolonge le poing ; on frappe en boxant.",
+    "icon": "🗡️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 10
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 4
+  },
+  {
+    "_id": "recette:add2e_katar",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Katar",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Drusus",
+    "type": "item",
+    "nom": "Drusus",
+    "description": "Épée courte d'un acier exceptionnel, à l'équilibre parfait.",
+    "icon": "⚔️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 10,
+      "Ag": 12
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "recette:add2e_drusus",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Drusus",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Faucille",
+    "type": "item",
+    "nom": "Faucille",
+    "description": "Outil de moisson devenu arme ; les druides la portent volontiers.",
+    "icon": "🌙",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 2
+  },
+  {
+    "_id": "recette:add2e_faucille",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Faucille",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Cimeterre",
+    "type": "item",
+    "nom": "Cimeterre",
+    "description": "Lame courbe qui taille en tirant ; l'arme des cavaliers du désert.",
+    "icon": "🌙",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.8,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8
+  },
+  {
+    "_id": "recette:add2e_cimeterre",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Cimeterre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Khopesh",
+    "type": "item",
+    "nom": "Khopesh",
+    "description": "Lame en croissant héritée des vieux royaumes : elle accroche le bouclier adverse.",
+    "icon": "🪝",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "recette:add2e_khopesh",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Khopesh",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "bronze",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Sabre",
+    "type": "item",
+    "nom": "Sabre",
+    "description": "Lame à un tranchant, légèrement courbe, garde enveloppante.",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.4,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 11
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3,
+    "bonus_initiative": 1
+  },
+  {
+    "_id": "recette:add2e_sabre",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Sabre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Coutelas",
+    "type": "item",
+    "nom": "Coutelas",
+    "description": "Sabre court et large des marins, fait pour les ponts encombrés.",
+    "icon": "🏴‍☠️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.6,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 11
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 2
+  },
+  {
+    "_id": "recette:add2e_coutelas",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Coutelas",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Fauchon",
+    "type": "item",
+    "nom": "Fauchon",
+    "description": "Lame lourde qui s'élargit vers la pointe : un couperet d'homme d'armes.",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.0,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "recette:add2e_fauchon",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Fauchon",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epee_large",
+    "type": "item",
+    "nom": "Épée large",
+    "description": "Large lame à deux tranchants, faite pour tailler plus que pour estoquer.",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.0,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "recette:add2e_epee_large",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epee_large",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Estoc",
+    "type": "item",
+    "nom": "Estoc",
+    "description": "Longue lame rigide sans fil, pensée pour passer entre les plates.",
+    "icon": "🤺",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 1.8,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "recette:add2e_estoc",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Estoc",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epee_batarde",
+    "type": "item",
+    "nom": "Épée bâtarde",
+    "description": "Épée « à une main et demie » : longue fusée, lame plus lourde que l'épée longue.",
+    "icon": "⚔️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.2,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "recette:add2e_epee_batarde",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epee_batarde",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Epee_a_deux_mains",
+    "type": "item",
+    "nom": "Épée à deux mains",
+    "description": "Lame immense maniée à deux mains ; elle fauche les rangs de piquiers.",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 17
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 10,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_epee_a_deux_mains",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Epee_a_deux_mains",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Claymore",
+    "type": "item",
+    "nom": "Claymore",
+    "description": "Grande épée des Highlands, quillons inclinés vers la pointe.",
+    "icon": "🗡️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 16
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_claymore",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Claymore",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Grand_cimeterre",
+    "type": "item",
+    "nom": "Grand cimeterre",
+    "description": "Cimeterre démesuré, manié à deux mains en larges arcs.",
+    "icon": "🌙",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 16
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_grand_cimeterre",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Grand_cimeterre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Hache_a_deux_mains",
+    "type": "item",
+    "nom": "Hache à deux mains",
+    "description": "Manche de 1,2 à 1,5 m et un fer très lourd : lente, mais rien ne lui résiste.",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.0,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 16
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 10,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_hache_a_deux_mains",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Hache_a_deux_mains",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Hachette",
+    "type": "item",
+    "nom": "Hachette",
+    "description": "Petite hache à une main, aussi utile au bivouac qu'en mêlée.",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 1
+  },
+  {
+    "_id": "recette:add2e_hachette",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Hachette",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Hache_de_jet",
+    "type": "item",
+    "nom": "Hache de jet",
+    "description": "Hache équilibrée pour être lancée avec précision.",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "tags": [
+      "jet",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 2
+  },
+  {
+    "_id": "recette:add2e_hache_de_jet",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Hache_de_jet",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Bardiche",
+    "type": "item",
+    "nom": "Bardiche",
+    "description": "Longue lame de hache de 60 à 80 cm montée sur une hampe de 1,5 à 2,4 m.",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_bardiche",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Bardiche",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Vouge",
+    "type": "item",
+    "nom": "Vouge",
+    "description": "Couperet de boucher fixé au bout d'une hampe ; l'arme des milices.",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_vouge",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Vouge",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Doloire",
+    "type": "item",
+    "nom": "Doloire",
+    "description": "Large hache de charpentier emmanchée long, détournée pour la guerre.",
+    "icon": "🪓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_doloire",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Doloire",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Glaive",
+    "type": "item",
+    "nom": "Glaive",
+    "description": "Lame de couteau d'une soixantaine de centimètres au bout d'une hampe.",
+    "icon": "🗡️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.4,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 1,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_glaive",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Glaive",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Glaive_guisarme",
+    "type": "item",
+    "nom": "Glaive-guisarme",
+    "description": "Glaive muni d'un crochet arrière pour désarçonner les cavaliers.",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.0,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_glaive_guisarme",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Glaive_guisarme",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Guisarme_vouge",
+    "type": "item",
+    "nom": "Guisarme-vouge",
+    "description": "Vouge doté d'un crochet et d'une pointe : trois armes en une, et lourde.",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 16
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_guisarme_vouge",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Guisarme_vouge",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "acier",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Partisane",
+    "type": "item",
+    "nom": "Partisane",
+    "description": "Large fer de lance à deux ailerons, apprécié des gardes de palais.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.4,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_partisane",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Partisane",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Fauchard_crochet",
+    "type": "item",
+    "nom": "Fauchard-crochet",
+    "description": "Fauchard au dos armé d'un crochet qui tire l'adversaire à terre.",
+    "icon": "🪝",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_fauchard_crochet",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Fauchard_crochet",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Fourche_fauchard",
+    "type": "item",
+    "nom": "Fourche-fauchard",
+    "description": "Lame de fauchard prolongée d'une longue dent de fourche.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac",
+      "hast",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_fourche_fauchard",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Fourche_fauchard",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Fourche_de_guerre",
+    "type": "item",
+    "nom": "Fourche de guerre",
+    "description": "Fourche de paysan redressée et ferrée : deux dents longues et solides.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.2,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_fourche_de_guerre",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Fourche_de_guerre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Esponton",
+    "type": "item",
+    "nom": "Esponton",
+    "description": "Pointe de lance flanquée de deux crocs (ranseur) : elle pique et désarme.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_esponton",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Esponton",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Corseque",
+    "type": "item",
+    "nom": "Corsèque",
+    "description": "Fer de lance à deux ailerons pointus (spetum) : il blesse en profondeur.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_corseque",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Corseque",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Marteau_de_lucerne",
+    "type": "item",
+    "nom": "Marteau de Lucerne",
+    "description": "Tête de marteau à trois becs sur longue hampe, coiffée d'une pointe.",
+    "icon": "🔨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.0,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 1,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_marteau_de_lucerne",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Marteau_de_lucerne",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Attrape_coquin",
+    "type": "item",
+    "nom": "Attrape-coquin",
+    "description": "Pince à ressort au bout d'une perche, garnie de pointes : on capture, on ne tue pas.",
+    "icon": "🪤",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 10
+    },
+    "bonus_degats_dice": 2,
+    "bonus_cc": 4,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_attrape_coquin",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Attrape_coquin",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Gourdin",
+    "type": "item",
+    "nom": "Gourdin",
+    "description": "Un bon bâton noueux, épais du bout. La plus vieille arme du monde.",
+    "icon": "🏏",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.2,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "recette:add2e_gourdin",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Gourdin",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Massue",
+    "type": "item",
+    "nom": "Massue",
+    "description": "Gourdin énorme qu'on manie à deux mains, souvent cerclé ou clouté.",
+    "icon": "🏏",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_massue",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Massue",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:Cabillot",
+    "type": "item",
+    "nom": "Cabillot",
+    "description": "Cheville de bois des gréements, toujours à portée de main sur un navire.",
+    "icon": "⚓",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_cc": 2
+  },
+  {
+    "_id": "recette:add2e_cabillot",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Cabillot",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Maillet_de_guerre",
+    "type": "item",
+    "nom": "Maillet de guerre",
+    "description": "Masse de fer au bout d'un long manche, maniée à deux mains.",
+    "icon": "🔨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 5.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 17
+    },
+    "bonus_degats": 5,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_maillet_de_guerre",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Maillet_de_guerre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Masse_de_cavalier",
+    "type": "item",
+    "nom": "Masse de cavalier",
+    "description": "Masse à ailettes, légère et courte, faite pour frapper de la selle.",
+    "icon": "🔨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6
+  },
+  {
+    "_id": "recette:add2e_masse_de_cavalier",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Masse_de_cavalier",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Masse_de_fantassin",
+    "type": "item",
+    "nom": "Masse de fantassin",
+    "description": "Masse d'armes lourde du piéton : elle bosselle le heaume et la tête dessous.",
+    "icon": "🔨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "recette:add2e_masse_de_fantassin",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Masse_de_fantassin",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Marteau_de_guerre",
+    "type": "item",
+    "nom": "Marteau de guerre",
+    "description": "Tête de marteau carrée, souvent prolongée d'un bec ; arme favorite des nains.",
+    "icon": "🔨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 2
+  },
+  {
+    "_id": "recette:add2e_marteau_de_guerre",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Marteau_de_guerre",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Tetsubo",
+    "type": "item",
+    "nom": "Tetsubo",
+    "description": "Long bâton dont l'extrémité est cerclée de bandes de fer cloutées.",
+    "icon": "🏏",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.5,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 15
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_tetsubo",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Tetsubo",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Macuahuitl",
+    "type": "item",
+    "nom": "Macuahuitl",
+    "description": "Épée de bois aux bords sertis d'éclats de pierre tranchants, collés à la poix.",
+    "icon": "🪵",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.0,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8
+  },
+  {
+    "_id": "recette:add2e_macuahuitl",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Macuahuitl",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Martinet",
+    "type": "item",
+    "nom": "Martinet",
+    "description": "Fléau à lanières lestées de plomb (scourge) : il lacère plus qu'il n'assomme.",
+    "icon": "🪢",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 2
+  },
+  {
+    "_id": "recette:add2e_martinet",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Martinet",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "plomb",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Chat_a_neuf_queues",
+    "type": "item",
+    "nom": "Chat à neuf queues",
+    "description": "Neuf cordelettes de cuir à nœuds de métal ; un instrument de châtiment.",
+    "icon": "🐈‍⬛",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "recette:add2e_chat_a_neuf_queues",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Chat_a_neuf_queues",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "plomb",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Fouet",
+    "type": "item",
+    "nom": "Fouet",
+    "description": "Long fouet de cuir tressé : inefficace contre l'armure, redoutable pour désarmer.",
+    "icon": "➰",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 12
+    },
+    "bonus_degats_dice": 2,
+    "bonus_cc": 4
+  },
+  {
+    "_id": "recette:add2e_fouet",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Fouet",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:Chaine_de_combat",
+    "type": "item",
+    "nom": "Chaîne de combat",
+    "description": "Chaîne lestée qu'on fait tournoyer ; elle entrave autant qu'elle frappe.",
+    "icon": "⛓️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "cac"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 14
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_chaine_de_combat",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Chaine_de_combat",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Kusarigama",
+    "type": "item",
+    "nom": "Kusarigama",
+    "description": "Faucille reliée à une chaîne lestée : on entrave d'une main, on tranche de l'autre.",
+    "icon": "⛓️",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 2,
+    "restriction": {
+      "Ag": 15
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_kusarigama",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Kusarigama",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Wakizashi",
+    "type": "item",
+    "nom": "Wakizashi",
+    "description": "Sabre court qui accompagne le katana, forgé de la même manière.",
+    "icon": "🌸",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.9,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 12
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_cc": 4,
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "recette:add2e_wakizashi",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Wakizashi",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:No_dachi",
+    "type": "item",
+    "nom": "No-dachi",
+    "description": "Très long sabre de champ de bataille, porté dans le dos.",
+    "icon": "🌸",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.5,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 14,
+      "Ag": 14
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 10,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_no_dachi",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "No_dachi",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Sai",
+    "type": "item",
+    "nom": "Sai",
+    "description": "Barre de métal à grande garde fourchue : elle bloque, pare et désarme.",
+    "icon": "🔱",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 12
+    },
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 5,
+    "bonus_pa": 2
+  },
+  {
+    "_id": "recette:add2e_sai",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Sai",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Jitte",
+    "type": "item",
+    "nom": "Jitte",
+    "description": "Matraque de fer à un seul croc, l'arme des gardes qui capturent.",
+    "icon": "🔱",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 4,
+    "bonus_pa": 1
+  },
+  {
+    "_id": "recette:add2e_jitte",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Jitte",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Kama",
+    "type": "item",
+    "nom": "Kama",
+    "description": "Faucille de riziculteur au manche de bois dur, souvent maniée par paire.",
+    "icon": "🌾",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "cac",
+      "tranchant"
+    ],
+    "portee": 1,
+    "restriction": {
+      "Ag": 12
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 3
+  },
+  {
+    "_id": "recette:add2e_kama",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Kama",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Lance",
+    "type": "item",
+    "nom": "Lance",
+    "description": "Fer de lance sur une hampe de deux mètres : l'arme de base du fantassin.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.0,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 10
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_lance",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Lance",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Lance_longue",
+    "type": "item",
+    "nom": "Lance longue",
+    "description": "Lance de plus de trois mètres, tenue en rangs serrés.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 13
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_lance_longue",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Lance_longue",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Trident",
+    "type": "item",
+    "nom": "Trident",
+    "description": "Fourche à trois dents droites, l'arme du pêcheur et du gladiateur.",
+    "icon": "🔱",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.5,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cc": 2,
+    "bonus_malus_depl": -1,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_trident",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Trident",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Harpon",
+    "type": "item",
+    "nom": "Harpon",
+    "description": "Fer barbelé sur une courte hampe, fait pour ne plus ressortir.",
+    "icon": "🎣",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.5,
+    "tags": [
+      "jet"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 2
+  },
+  {
+    "_id": "recette:add2e_harpon",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Harpon",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Javelot",
+    "type": "item",
+    "nom": "Javelot",
+    "description": "Lance courte et légère, faite pour être lancée.",
+    "icon": "🎯",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "tags": [
+      "jet"
+    ],
+    "portee": 4,
+    "restriction": {
+      "F": 10
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 3
+  },
+  {
+    "_id": "recette:add2e_javelot",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Javelot",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Javeline",
+    "type": "item",
+    "nom": "Javeline",
+    "description": "Trait de jet d'1,5 m à hampe fine et fer étroit.",
+    "icon": "🎯",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.8,
+    "tags": [
+      "jet"
+    ],
+    "portee": 4,
+    "restriction": {
+      "Ag": 12
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cd": 4
+  },
+  {
+    "_id": "recette:add2e_javeline",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Javeline",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Flechettes",
+    "type": "item",
+    "nom": "Fléchettes",
+    "description": "Une poignée de courtes fléchettes lestées, lancées d'un coup de poignet.",
+    "icon": "📌",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.1,
+    "tags": [
+      "jet"
+    ],
+    "portee": 3,
+    "restriction": {
+      "Ag": 12
+    },
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_cd": 6,
+    "bonus_initiative": 2
+  },
+  {
+    "_id": "recette:add2e_flechettes",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Flechettes",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Lance_de_cavalerie_legere",
+    "type": "item",
+    "nom": "Lance de cavalerie légère",
+    "description": "Lance d'environ 3 m pour cavaliers légers, maniable d'une main.",
+    "icon": "🐎",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 2.5,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 2,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_lance_de_cavalerie_legere",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Lance_de_cavalerie_legere",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Lance_de_cavalerie_moyenne",
+    "type": "item",
+    "nom": "Lance de cavalerie moyenne",
+    "description": "Lance d'environ 3,6 m, l'arme de charge des sergents montés.",
+    "icon": "🐎",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 4.5,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -2,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_lance_de_cavalerie_moyenne",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Lance_de_cavalerie_moyenne",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Lance_de_cavalerie_lourde",
+    "type": "item",
+    "nom": "Lance de cavalerie lourde",
+    "description": "Lance de chevalier d'environ 4,2 m, avec rondelle de garde.",
+    "icon": "🐎",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 7.0,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 17
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 8,
+    "bonus_malus_depl": -3,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_lance_de_cavalerie_lourde",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Lance_de_cavalerie_lourde",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "hampe",
+        "quantite": 3
+      }
+    ]
+  },
+  {
+    "_id": "item:Lance_de_joute",
+    "type": "item",
+    "nom": "Lance de joute",
+    "description": "Lance creuse à pointe émoussée, faite pour se briser sur l'écu en tournoi.",
+    "icon": "🏇",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 9.0,
+    "tags": [
+      "cac",
+      "hast"
+    ],
+    "portee": 3,
+    "restriction": {
+      "F": 16
+    },
+    "bonus_degats": 1,
+    "bonus_degats_dice": 3,
+    "bonus_malus_depl": -3,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_lance_de_joute",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Lance_de_joute",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "hampe",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Pic_de_cavalier",
+    "type": "item",
+    "nom": "Pic de cavalier",
+    "description": "Bec de fer pointu au bout d'un manche court, fait pour percer l'armure de la selle.",
+    "icon": "⛏️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 2.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 4,
+    "bonus_cc": 1
+  },
+  {
+    "_id": "recette:add2e_pic_de_cavalier",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Pic_de_cavalier",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Pic_de_fantassin",
+    "type": "item",
+    "nom": "Pic de fantassin",
+    "description": "Version plus longue et plus lourde du pic de cavalier.",
+    "icon": "⛏️",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite"
+    ],
+    "poids": 3.0,
+    "tags": [
+      "cac"
+    ],
+    "portee": 1,
+    "restriction": {
+      "F": 14
+    },
+    "bonus_degats": 4,
+    "bonus_degats_dice": 6,
+    "bonus_malus_depl": -1
+  },
+  {
+    "_id": "recette:add2e_pic_de_fantassin",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Pic_de_fantassin",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Arc_long_composite",
+    "type": "item",
+    "nom": "Arc long composite",
+    "description": "Arc long fait de bois, de corne et de nerf collés : plus puissant qu'un arc d'if.",
+    "icon": "🏹",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": [
+      1.4,
+      2.2
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 9,
+    "restriction": {
+      "Ag": 20,
+      "F": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 7,
+    "bonus": {
+      "Ag": 3
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_arc_long_composite",
+    "type": "recette",
+    "lieu_categorie": "fletcher",
+    "objet_final": "Arc_long_composite",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:add2e_arc_long_composite_atelier_de_l_empenneur",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_l_empenneur",
+    "objet_final": "Arc_long_composite",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Arc_court_composite",
+    "type": "item",
+    "nom": "Arc court composite",
+    "description": "Arc court recourbé des peuples cavaliers, tirable de la selle.",
+    "icon": "🏹",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": [
+      0.6,
+      1.0
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 7,
+    "restriction": {
+      "Ag": 14
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 4,
+    "bonus_cd": 6,
+    "bonus": {
+      "Ag": 2
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_arc_court_composite",
+    "type": "recette",
+    "lieu_categorie": "fletcher",
+    "objet_final": "Arc_court_composite",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:add2e_arc_court_composite_atelier_de_l_empenneur",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_l_empenneur",
+    "objet_final": "Arc_court_composite",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "poix",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Daikyu",
+    "type": "item",
+    "nom": "Daikyu",
+    "description": "Grand arc asymétrique, saisi au tiers inférieur.",
+    "icon": "🏹",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": [
+      1.5,
+      2.2
+    ],
+    "tags": [
+      "tir"
+    ],
+    "portee": 9,
+    "restriction": {
+      "Ag": 20
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 7,
+    "bonus": {
+      "Ag": 2
+    },
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_daikyu",
+    "type": "recette",
+    "lieu_categorie": "fletcher",
+    "objet_final": "Daikyu",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "recette:add2e_daikyu_atelier_de_l_empenneur",
+    "type": "recette",
+    "lieu_categorie": "atelier_de_l_empenneur",
+    "objet_final": "Daikyu",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "cordes_d_arc",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Fronde",
+    "type": "item",
+    "nom": "Fronde",
+    "description": "Deux lanières et une poche de cuir ; les billes de plomb vont plus loin que les cailloux.",
+    "icon": "🪨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.1,
+    "tags": [
+      "tir"
+    ],
+    "portee": 6,
+    "restriction": {
+      "Ag": 10
+    },
+    "bonus_degats": 1,
+    "bonus_degats_dice": 4,
+    "bonus_cd": 4
+  },
+  {
+    "_id": "recette:add2e_fronde",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Fronde",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Fustibale",
+    "type": "item",
+    "nom": "Fustibale",
+    "description": "Bâton de 90 cm à 1,2 m portant une fronde à son extrémité.",
+    "icon": "🪨",
+    "rarete": "commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 1.0,
+    "tags": [
+      "tir"
+    ],
+    "portee": 7,
+    "restriction": {
+      "F": 10,
+      "Ag": 12
+    },
+    "bonus_degats": 2,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 3,
+    "deux_mains": true
+  },
+  {
+    "_id": "recette:add2e_fustibale",
+    "type": "recette",
+    "lieu_categorie": "fletcher",
+    "objet_final": "Fustibale",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Atlatl",
+    "type": "item",
+    "nom": "Atlatl",
+    "description": "Propulseur de bois qui allonge le bras et double la portée d'un javelot.",
+    "icon": "🎯",
+    "rarete": "peu_commun",
+    "categorie": "arme",
+    "sous_categorie": "",
+    "slots": [
+      "main_droite",
+      "main_gauche"
+    ],
+    "poids": 0.6,
+    "tags": [
+      "jet"
+    ],
+    "portee": 5,
+    "restriction": {
+      "F": 10,
+      "Ag": 12
+    },
+    "bonus_degats": 3,
+    "bonus_degats_dice": 6,
+    "bonus_cd": 3
+  },
+  {
+    "_id": "recette:add2e_atlatl",
+    "type": "recette",
+    "lieu_categorie": "fletcher",
+    "objet_final": "Atlatl",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "manche",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_matelassee",
+    "type": "item",
+    "nom": "Armure matelassée",
+    "description": "Gambison de couches de tissu piquées ; chaud, encombrant, mais il amortit.",
+    "icon": "🧥",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      3,
+      5
+    ],
+    "tags": [],
+    "bonus_pa": 5,
+    "bonus": {
+      "Ag": -2
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_matelassee",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Armure_matelassee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "item": "item:Chiffon",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_de_cuir_cloutee",
+    "type": "item",
+    "nom": "Armure de cuir cloutée",
+    "description": "Cuir épais semé de rivets de métal (besantine).",
+    "icon": "🧥",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      4,
+      7
+    ],
+    "tags": [],
+    "bonus_pa": 9,
+    "bonus": {
+      "Ag": -3
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_de_cuir_cloutee",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Armure_de_cuir_cloutee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_annelee",
+    "type": "item",
+    "nom": "Armure annelée",
+    "description": "Broigne de cuir sur laquelle sont cousus des anneaux de fer.",
+    "icon": "⛓️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      6,
+      9
+    ],
+    "tags": [],
+    "bonus_pa": 9,
+    "bonus": {
+      "Ag": -3
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_annelee",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Armure_annelee",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_de_peau",
+    "type": "item",
+    "nom": "Armure de peau",
+    "description": "Peaux épaisses à peine tannées, superposées : chaude et raide.",
+    "icon": "🐻",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      6,
+      10
+    ],
+    "tags": [],
+    "bonus_pa": 11,
+    "bonus": {
+      "Ag": -5
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_de_peau",
+    "type": "recette",
+    "lieu_categorie": "maroquinerie",
+    "objet_final": "Armure_de_peau",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 5
+      }
+    ]
+  },
+  {
+    "_id": "item:Brigandine",
+    "type": "item",
+    "nom": "Brigandine",
+    "description": "Petites plaques d'acier rivées sous un pourpoint de toile ou de cuir.",
+    "icon": "🧥",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      7,
+      10
+    ],
+    "tags": [],
+    "bonus_pa": 12,
+    "restriction": {
+      "F": 14
+    },
+    "bonus": {
+      "Ag": -4
+    }
+  },
+  {
+    "_id": "recette:add2e_brigandine",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Brigandine",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "acier",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_d_ecailles",
+    "type": "item",
+    "nom": "Armure d'écailles",
+    "description": "Écailles de métal qui se chevauchent sur un justaucorps de cuir.",
+    "icon": "🐟",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      10,
+      14
+    ],
+    "tags": [],
+    "bonus_pa": 13,
+    "restriction": {
+      "F": 15
+    },
+    "bonus": {
+      "Ag": -5
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_d_ecailles",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Armure_d_ecailles",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 4
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Clibanion",
+    "type": "item",
+    "nom": "Clibanion",
+    "description": "Armure feuilletée : lamelles verticales de métal rivées sur cuir, sur mailles.",
+    "icon": "🛡️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      12,
+      17
+    ],
+    "tags": [],
+    "bonus_pa": 20,
+    "restriction": {
+      "F": 20
+    },
+    "bonus": {
+      "Ag": -6
+    }
+  },
+  {
+    "_id": "recette:add2e_clibanion",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Clibanion",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_a_bandes",
+    "type": "item",
+    "nom": "Armure à bandes",
+    "description": "Bandes horizontales de métal superposées sur mailles et cuir.",
+    "icon": "🛡️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      11,
+      15
+    ],
+    "tags": [],
+    "bonus_pa": 20,
+    "restriction": {
+      "F": 20
+    },
+    "bonus": {
+      "Ag": -6
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_a_bandes",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Armure_a_bandes",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 4
+      },
+      {
+        "sous_categorie": "acier",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_de_plates_en_bronze",
+    "type": "item",
+    "nom": "Armure de plates en bronze",
+    "description": "Cuirasse et pièces de bronze à l'antique : solide, mais lourde.",
+    "icon": "🟠",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      14,
+      20
+    ],
+    "tags": [],
+    "bonus_pa": 19,
+    "restriction": {
+      "F": 22
+    },
+    "bonus": {
+      "Ag": -7
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_de_plates_en_bronze",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Armure_de_plates_en_bronze",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "bronze",
+        "quantite": 5
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_de_plates",
+    "type": "item",
+    "nom": "Armure de plates",
+    "description": "Cuirasse d'acier sur cotte de mailles, avec les pièces de bras et de jambes.",
+    "icon": "⚜️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      12,
+      16
+    ],
+    "tags": [],
+    "bonus_pa": 25,
+    "restriction": {
+      "F": 26
+    },
+    "bonus": {
+      "Ag": -6
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_de_plates",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Armure_de_plates",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 4
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Armure_de_bataille",
+    "type": "item",
+    "nom": "Armure de bataille",
+    "description": "Plates articulées couvrant tout le corps, ajustées par un maître armurier.",
+    "icon": "⚜️",
+    "rarete": "peu_commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      14,
+      18
+    ],
+    "tags": [],
+    "bonus_pa": 28,
+    "restriction": {
+      "F": 30
+    },
+    "bonus": {
+      "Ag": -7
+    }
+  },
+  {
+    "_id": "recette:add2e_armure_de_bataille",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Armure_de_bataille",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 5
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Harnois_complet",
+    "type": "item",
+    "nom": "Harnois complet",
+    "description": "Harnois blanc fait sur mesure, sans un jour : le sommet de l'art de l'armurier.",
+    "icon": "🛡️",
+    "rarete": "rare",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "torse"
+    ],
+    "poids": [
+      18,
+      24
+    ],
+    "tags": [],
+    "bonus_pa": 30,
+    "restriction": {
+      "F": 34
+    },
+    "bonus": {
+      "Ag": -9
+    }
+  },
+  {
+    "_id": "recette:add2e_harnois_complet",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Harnois_complet",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 6
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 3
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 2
+      }
+    ]
+  },
+  {
+    "_id": "item:Bassinet",
+    "type": "item",
+    "nom": "Bassinet",
+    "description": "Casque arrondi et pointu, souvent complété d'un camail.",
+    "icon": "⛑️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "tete"
+    ],
+    "poids": 2.0,
+    "tags": [],
+    "bonus_pa": 4
+  },
+  {
+    "_id": "recette:add2e_bassinet",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Bassinet",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "fer",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  },
+  {
+    "_id": "item:Grand_heaume",
+    "type": "item",
+    "nom": "Grand heaume",
+    "description": "Heaume fermé en forme de seau : il protège tout, mais on y voit mal.",
+    "icon": "⛑️",
+    "rarete": "commun",
+    "categorie": "armure",
+    "sous_categorie": "",
+    "slots": [
+      "tete"
+    ],
+    "poids": 3.0,
+    "tags": [],
+    "bonus_pa": 6,
+    "bonus": {
+      "Ag": -1
+    }
+  },
+  {
+    "_id": "recette:add2e_grand_heaume",
+    "type": "recette",
+    "lieu_categorie": "armurerie",
+    "objet_final": "Grand_heaume",
+    "quantite_produite": 1,
+    "matieres_premieres": [
+      {
+        "sous_categorie": "acier",
+        "quantite": 2
+      },
+      {
+        "sous_categorie": "fer",
+        "quantite": 1
+      },
+      {
+        "sous_categorie": "peaux",
+        "quantite": 1
+      }
+    ]
+  }
+]
