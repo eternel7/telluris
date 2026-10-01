@@ -241,7 +241,7 @@
     ],
     "tags": [],
     "poids": 12.0,
-    "bonus_pa": 22,
+    "bonus_pa": 32,
     "bonus_malus_depl": -2,
     "restriction": {
       "F": 30
