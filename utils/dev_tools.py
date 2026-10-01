@@ -380,6 +380,15 @@ CATALOGUE = [
 			"puissent réellement les produire.",
 	},
 	{
+		"id": "gen_armes_armures_add2e",
+		"label": "⚔️ Générer les armes et armures d'AD&D 2e",
+		"argv": _py("gen_armes_armures_add2e.py"),
+		"ecrit": "Écrit jsons/armes_armures_add2e_a_importer.json.",
+		"description": "Armes et armures d'AD&D 2e (listes des Maraudeurs de Greyhawk) "
+			"absentes du jeu, avec leurs recettes. Docs NEUFS : échoue si un _id ou un nom "
+			"existe déjà dans le dump le plus récent, ou si une matière est une fausse feuille.",
+	},
+	{
 		"id": "gen_jardinerie",
 		"label": "🌱 Générer la filière végétale (jardinerie)",
 		"argv": _py("gen_jardinerie.py"),
