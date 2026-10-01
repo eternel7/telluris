@@ -521,6 +521,25 @@ CATALOGUE = [
 			"déjà pris ; sans carte orpheline, n'écrit aucun fichier. Requiert Pillow.",
 	},
 	{
+		"id": "gen_cartes_pays",
+		"label": "🗺 Créer les lieux des cartes de pays sans lieu (murs nav depuis l'image)",
+		# Dump frais, même raison que gen_villes_images : un pays créé depuis serait réémis et
+		# son import (PUT complet) effacerait les murs retouchés à la main.
+		"argv_fn": lambda v, f: _py("gen_cartes_pays.py", "--dump", f["dump"]),
+		"dump_frais": True,
+		"sortie": "jsons/cartes_pays_a_importer.json",
+		"ecrit": "Régénère un dump, écrit jsons/cartes_pays_a_importer.json (+ un aperçu PNG "
+			"par carte). Rien en base avant 📥 Importer.",
+		"description": "Pour chaque carte de pays de templates/resources/maps/ (liste blanche : "
+			"ni globes, ni hameau, ni fortifications) qu'aucun lieu ne cite : un `lieu:*` "
+			"minimal de catégorie pays et la grille du profil `pays` — `cells` toutes à 1, la "
+			"côte et les fleuves murés en nav, un gué là où un fleuve couperait une terre en "
+			"deux. Cases carrées de la taille de celles des pays en base. Première passe à "
+			"retoucher dans l'éditeur : îles et rives sans gué sont signalées. Refuse tout le "
+			"lot sur un `_id` déjà pris ; sans carte orpheline, n'écrit aucun fichier. "
+			"Requiert Pillow.",
+	},
+	{
 		"id": "gen_terrain_tags",
 		"label": "🌲 Générer les terrain_tags des zones d'influence",
 		"argv": _py("gen_terrain_tags.py"),

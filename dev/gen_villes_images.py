@@ -84,11 +84,12 @@ def images_citees(docs) -> set:
 		if str(d.get("_id", "")).startswith("lieu:") and d.get("image")}
 
 
-def cote_case(docs, taille_fn) -> int:
-	"""Côté en pixels des cases des villes déjà en base (médiane, arrondie)."""
+def cote_case(docs, taille_fn, categorie: str = "ville") -> int:
+	"""Côté en pixels des cases des lieux de `categorie` déjà en base (médiane, arrondie) —
+	les villes ici, les pays pour `gen_cartes_pays.py`."""
 	cotes = []
 	for d in docs:
-		if not str(d.get("_id", "")).startswith("lieu:") or d.get("categorie") != "ville":
+		if not str(d.get("_id", "")).startswith("lieu:") or d.get("categorie") != categorie:
 			continue
 		dim = d.get("dimensions") or {}
 		taille = taille_fn(d.get("image")) if d.get("image") else None

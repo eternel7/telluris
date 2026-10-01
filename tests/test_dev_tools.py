@@ -193,6 +193,23 @@ def test_villes_images_relancees_sur_dump_frais(monkeypatch):
 	assert vu["argv"][-3:] == [os.path.join("dev", "gen_villes_images.py"), "--dump", "jsons/d.json"]
 
 
+def test_cartes_pays_relancees_sur_dump_frais(monkeypatch):
+	"""gen_cartes_pays : même raison que gen_villes_images — un pays créé depuis serait réémis."""
+	outil = _outil("gen_cartes_pays")
+	assert outil["dump_frais"] and outil["sortie"] == "jsons/cartes_pays_a_importer.json"
+	monkeypatch.setattr(dt, "_RUN", None)
+	vu = {}
+
+	def faux_popen(argv, **kw):
+		vu["argv"] = argv
+		raise FileNotFoundError
+
+	monkeypatch.setattr(dt.subprocess, "Popen", faux_popen)
+	run, erreur = dt.lancer("gen_cartes_pays", None, preparer=lambda o, v: {"dump": "jsons/d.json"})
+	assert erreur is None
+	assert vu["argv"][-3:] == [os.path.join("dev", "gen_cartes_pays.py"), "--dump", "jsons/d.json"]
+
+
 def test_carcasses_relancees_sur_dump_frais(monkeypatch):
 	"""gen_carcasses_parties : plus de dump figé — relu sur celui que le serveur vient d'écrire,
 	et sa sortie est offerte à 📥 Importer."""
